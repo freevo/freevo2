@@ -1,0 +1,595 @@
+# Freevo Dutch translation by den_RDC
+# Copyright (C) 2003 den_RDC (donated to the freevo project)
+# den_rdc <den_rdc@users.sourceforge.net>, 2003.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2003-10-04 11:44+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: den_rdc <den_rdc@users.sourceforge.net>\n"
+"Language-Team: Dutch <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+#: audio/audiodiskitem.py:60
+msgid "Unknown CD Album"
+msgstr "Onbekend CD Album"
+
+#: audio/audiodiskitem.py:95 directory.py:371 image/plugins/gphoto.py:155
+msgid "Browse directory"
+msgstr "Verken deze folder"
+
+#: audio/xmms.py:156 games/game.py:99
+#, python-format
+msgid "File \"%s\" not found!"
+msgstr "Bestand \"%s\" niet gevonden"
+
+#: audio/plugins/cdbackup.py:207
+msgid "Rip the CD to the hard drive"
+msgstr "Neem een harde-schijf backup van deze CD"
+
+#: audio/plugins/cdbackup.py:208
+msgid "Get CDs available for ripping"
+msgstr "Toon CD's beschikbaar voor backup"
+
+#: audio/plugins/cdbackup.py:233
+msgid "Backup CD to hard drive in mp3 format"
+msgstr "Neem een harde-schijf backup van deze CD in mp3 formaat"
+
+#: audio/plugins/cdbackup.py:236
+msgid "Backup CD to hard drive in Ogg format"
+msgstr "Neem een harde-schijf backup van deze CD in Ogg formaat"
+
+#: audio/plugins/cdbackup.py:239
+msgid "Backup CD to hard drive in FLAC format"
+msgstr "Neem een harde-schijf backup van deze CD in FLAC formaat"
+
+#: audio/plugins/cdbackup.py:241
+msgid "Backup CD to hard drive in wav format"
+msgstr "Neem een harde-schijf backup van deze CD in WAV formaat"
+
+#: audio/plugins/cdbackup.py:244
+msgid "CD Backup"
+msgstr "CD Backup"
+
+#: audio/plugins/detach.py:63
+#, fuzzy
+msgid "Show player"
+msgstr "Toon Stderr"
+
+#: audio/plugins/mplayer.py:131
+#, fuzzy, python-format
+msgid ""
+"%s\n"
+"not found!"
+msgstr "Niet gevonden!"
+
+#: audio/plugins/mplayer.py:158
+msgid "Invalid audio file"
+msgstr "Ongeldig geluidsbestand"
+
+#: audio/plugins/vux.py:90
+msgid "[VUX] Start playing"
+msgstr "[VUX] Start het afspelen"
+
+#: audio/plugins/vux.py:91
+msgid "[VUX] Stop playing"
+msgstr "[VUX] Stop het afspelen"
+
+#: audio/plugins/vux.py:92
+msgid "[VUX] Next (rating down)"
+msgstr "[VUX] Volgende (minder waardering)"
+
+#: audio/plugins/vux.py:93
+msgid "[VUX] Next (rating intact)"
+msgstr "[VUX] Volgende (waardering intact)"
+
+#: audio/plugins/vux.py:94
+msgid "[VUX] Next (rating up)"
+msgstr "[VUX] Next (meer waardering)"
+
+#: audio/plugins/vux.py:95
+msgid "[VUX] Playing item rating up"
+msgstr "[VUX] Geef dit nummer meer waardering"
+
+#: audio/plugins/vux.py:96
+msgid "[VUX] Playing item rating down"
+msgstr "[VUX] Geef dit nummer minder waardering"
+
+#: audio/plugins/vux.py:97
+msgid "[VUX] a dir item do not select"
+msgstr "[VUX] een folder, niet selecteren"
+
+#: audio/plugins/vux.py:98
+msgid "[VUX] an audio item, do not select"
+msgstr "[VUX] een geluidsbestand, niet selecteren"
+
+#: directory.py:352
+#, python-format
+msgid "Directory on disc [%s]"
+msgstr "Folder op schijf [%s]"
+
+#: directory.py:353
+msgid "Directory"
+msgstr "Folder"
+
+#: directory.py:377
+msgid "Recursive random play all items"
+msgstr "Speel alle bestanden af"
+
+#: directory.py:378
+#, fuzzy
+msgid "Configure directory"
+msgstr "Verken deze folder"
+
+#: directory.py:401
+msgid "Enter Password"
+msgstr "Wechtwoord a.u.b"
+
+#: directory.py:426
+msgid "Password incorrect"
+msgstr "Wachtwoord incorrect"
+
+#: directory.py:468
+msgid "Scanning disc, be patient..."
+msgstr "Analyse schijf, even geduld a.u.b."
+
+#: directory.py:470
+msgid "Scanning directory, be patient..."
+msgstr "Analyse folder, even geduld a.u.b."
+
+#: menu.py:545
+msgid "No action defined for this choice!"
+msgstr "Geen actie gedefinieerd voor deze keuze"
+
+#: osd.py:398
+msgid "z = Toggle Fullscreen"
+msgstr "z = Fullscreen aan/uit"
+
+#: osd.py:399
+msgid "Arrow Keys = Move"
+msgstr "Pijltjestoetsen = Verplaats"
+
+#: osd.py:400
+#, fuzzy
+msgid "Spacebar = Select"
+msgstr "Spatie = Selecteer"
+
+#: osd.py:401
+msgid "Escape = Stop/Prev. Menu"
+msgstr "Escape = Stop / Vorig menu"
+
+#: osd.py:402
+msgid "h = Help"
+msgstr "h = Help"
+
+#: games/mame_cache.py:170
+msgid "Generating MAME cache, please wait."
+msgstr "Bezig met het opbouwen van MAME cache, even geduld"
+
+#: gui/AlertBox.py:161 gui/ConfirmBox.py:161 plugins/commands.py:171
+msgid "OK"
+msgstr "OK"
+
+#: gui/ConfirmBox.py:165
+msgid "CANCEL"
+msgstr "Annuleer"
+
+#: image/plugins/gphoto.py:119 image/imageitem.py:110
+msgid "View Image"
+msgstr "Toon afbeelding"
+
+#: image/viewer.py:118
+#, python-format
+msgid ""
+"Can't Open Image\n"
+"'%s'"
+msgstr ""
+"Kan de volgende afbeelding niet laden : Image\n"
+"'%s'"
+
+#: image/viewer.py:351
+msgid "Title: "
+msgstr "Titel: "
+
+#: image/viewer.py:352
+msgid "Description: "
+msgstr "Beschrijving: "
+
+#: image/viewer.py:386
+msgid "No information available"
+msgstr "Geen informatie beschikbaar"
+
+#: plugins/commands.py:156
+msgid "Command finished"
+msgstr "Commando volbracht"
+
+#: plugins/commands.py:172
+msgid "Show Stderr"
+msgstr "Toon Stderr"
+
+#: plugins/commands.py:173
+msgid "Show Stdout"
+msgstr "Toon Stdout"
+
+#: plugins/commands.py:187
+msgid "Stdout File"
+msgstr "Stdout bestand"
+
+#: plugins/commands.py:191
+msgid "Stderr File"
+msgstr "Stderr bestand"
+
+#: plugins/commands.py:245
+msgid "Run Command"
+msgstr "Start commando"
+
+#: plugins/commands.py:268
+msgid "Command Failed"
+msgstr "Commando mislukt"
+
+#: plugins/commands.py:271
+#, fuzzy
+msgid "Command Completed"
+msgstr "Commando mislukt"
+
+#: plugins/commands.py:296
+msgid "No Commands found"
+msgstr "Genn commandos gevonden"
+
+#: plugins/commands.py:297 plugins/commands.py:323
+msgid "Commands"
+msgstr "Commandos"
+
+#: plugins/df.py:70
+#, python-format
+msgid "%i of %i Mb free"
+msgstr "%i van de %i Mb vrij"
+
+#: plugins/idlebar.py:465
+#, python-format
+msgid "%iM"
+msgstr ""
+
+#: plugins/idlebar.py:490
+#, python-format
+msgid "%s%%"
+msgstr ""
+
+#: plugins/rom_drives.py:254
+#, python-format
+msgid "Drive %s (no disc)"
+msgstr "Lezer %s (geen schijf aangetroffen)"
+
+#: plugins/rom_drives.py:317
+#, python-format
+msgid "Ejecting disc in drive %s"
+msgstr "Open lezer %s"
+
+#: plugins/rom_drives.py:350
+#, python-format
+msgid "Reading disc in drive %s"
+msgstr "Bezig met de shijf in lezer %s te analyseren"
+
+#: plugins/base.py:68
+msgid "Shutdown Freevo"
+msgstr "Freevo afsluiten"
+
+#: plugins/base.py:69
+msgid "Shutdown system"
+msgstr "Systeem afsluiten"
+
+#: tv/record_schedule.py:98
+msgid "View Recording Schedule"
+msgstr "Toon opnamerooster"
+
+#: tv/record_schedule.py:100
+msgid "Delete Scheduled Item"
+msgstr "Wis gemarkeerd object"
+
+#: tv/record_schedule.py:102
+msgid "RECORDING SCHEDULE"
+msgstr "Opnamerooster"
+
+#: tv/record_schedule.py:175
+msgid "VIEW RECORDING SCHEDULE"
+msgstr "Toon Opnamerooster"
+
+#: tv/record_schedule.py:178
+msgid "DELETE SCHEDULED ITEM"
+msgstr "Wis gemarkeerd object"
+
+#: tv/record_schedule.py:182
+msgid "All Currently Recording Items Have Been Killed!"
+msgstr "Alle gemarkeerde objecten zijn gewist"
+
+#: tv/tvguide.py:73 tv/tvguide.py:490 tv/tvguide.py:492
+#: skins/main/tvlisting_area.py:363
+msgid "This channel has no data loaded"
+msgstr "Geen gegevens over dit kanaal beschikbaar"
+
+#: tv/tvguide.py:83
+msgid "Preparing the program guide"
+msgstr "Programmagids aan het voorbereiden..."
+
+#: tv/tvguide.py:87
+msgid "TV Guide is corrupt!"
+msgstr "De TV Gids is ongeldig!"
+
+#: tv/tvmenu.py:144 tv/tvmenu.py:152
+#, python-format
+msgid "Could not find TV channel %s"
+msgstr "Kon TV kanaal %s niet vinden"
+
+#: tv/tvmenu.py:177
+msgid "TV Guide"
+msgstr "TV Gids"
+
+#: tv/tvmenu.py:178
+msgid "Recorded Shows"
+msgstr "Opgenomen programmas"
+
+#: tv/tvmenu.py:180
+msgid "Scheduled Recordings"
+msgstr "Programmas om op te nemen"
+
+#: tv/tvmenu.py:182
+msgid "Search Guide"
+msgstr "Zoek in de TV Gids"
+
+#: tv/tvmenu.py:185
+msgid "TV Main Menu"
+msgstr "TV Hoofdmenu"
+
+#: tv/tvmenu.py:221
+msgid "The list of TV channels is invalid!\n"
+msgstr "De TV kanalenlijst is ongeldig!\n"
+
+#: tv/tvmenu.py:222
+msgid "Please check the config file."
+msgstr "Gelieve de configuratie na te kijken."
+
+#: video/plugins/imdb_info.py:72
+msgid "Show info for this file"
+msgstr "Toon meer informatie voor dit bestand"
+
+#: video/plugins/imdb_info.py:86
+msgid "There is no IMDB information for this file."
+msgstr "Er is geen IMDB informatie voor dit bestand."
+
+#: video/plugins/imdb.py:116 video/plugins/imdb.py:122
+#, python-format
+msgid "Search IMDB for [%s]"
+msgstr "Zoek op IMDB voor [%s]"
+
+#: video/plugins/imdb.py:133
+msgid "searching IMDB..."
+msgstr "Bezig met zoeken op IMDB..."
+
+#: video/plugins/imdb.py:157
+msgid "Unknown error while connecting to IMDB"
+msgstr "Onbekende fout tijdens het zoeken op IMDB"
+
+#: video/plugins/imdb.py:179
+msgid "No information available from IMDB"
+msgstr "Geen informatie beschikbaar op IMDB"
+
+#: video/plugins/imdb.py:218
+msgid "getting data..."
+msgstr "Binnenhalen van de data..."
+
+#: video/plugins/mover.py:64
+#, python-format
+msgid "Move to [%s]"
+msgstr "Verplaats naar [%s]"
+
+#: video/plugins/linkbrowser.py:159
+#, python-format
+msgid "Failed to download %s"
+msgstr ""
+
+#: video/configure.py:80
+msgid "AUDIO MENU"
+msgstr "Geluidsmenu"
+
+#: video/configure.py:99
+msgid "SUBTITLE MENU"
+msgstr "Ondertitels menu"
+
+#: video/configure.py:117
+msgid "CHAPTER MENU"
+msgstr "Hoofdstukken menu"
+
+#: video/configure.py:175
+msgid "CONFIG MENU"
+msgstr "Configuratiemenu"
+
+#: video/videoitem.py:291
+msgid "Play DVD"
+msgstr "Speel deze DVD af"
+
+#: video/videoitem.py:299
+msgid "Play VCD"
+msgstr "Speel deze VCD af"
+
+#: video/videoitem.py:303
+msgid "Play default track"
+msgstr "Speel standaardnummer"
+
+#: video/videoitem.py:308
+msgid "Play with maximum cache"
+msgstr ""
+
+#: video/videoitem.py:392
+msgid "Wait while detecting media..."
+msgstr "Een ogenblikje, bezig met media-analyse..."
+
+#: video/videoitem.py:414
+#, python-format
+msgid "Media not found for file \"%s\".\n"
+msgstr "Media niet gevonden voor bestand \"%s\".\n"
+
+#: video/videoitem.py:415
+msgid "Please insert the media."
+msgstr "Gelieve het medium in te voegen"
+
+#: video/videoitem.py:431
+#, python-format
+msgid "Media not found for %s track %s"
+msgstr "Media niet gevonden voor %s track %s"
+
+#: video/videoitem.py:551
+#, python-format
+msgid "Play Title %s"
+msgstr "Speel titel %s af"
+
+#: main.py:117
+msgid "shutting down..."
+msgstr "Bezig met afsluiten..."
+
+#: main.py:223
+msgid "Freevo Main Menu"
+msgstr "Freevo Hoofdmenu"
+
+#: skins/main/main.py:154
+msgid "TV GUIDE"
+msgstr "TV gids"
+
+#: skins/main/main.py:284
+msgid "Starting Freevo, please wait ..."
+msgstr "Freevo is aan het starten, even geduld..."
+
+#: skins/main/main.py:544 skins/main/main.py:612
+msgid "INTERNAL ERROR, NO MENU!"
+msgstr "INTERNE FOUT, GEEN MENU!"
+
+#: skins/main/listing_area.py:249
+msgid "This directory is empty"
+msgstr "Deze folder  is leeg"
+
+# Manualy added from fxd skin files
+msgid "TV"
+msgstr "TV"
+
+msgid "Movies"
+msgstr "Films"
+
+msgid "Music"
+msgstr "Muziek"
+
+msgid "Images"
+msgstr "Afbeeldingen"
+
+msgid "Games"
+msgstr "Spelletjes"
+
+msgid "Shutdown"
+msgstr "Afsluiten"
+
+msgid "Watch TV"
+msgstr "Kijk TV"
+
+msgid "Watch a Movie"
+msgstr "Bekijk een film"
+
+msgid "Listen to Music"
+msgstr "Luister naar muziek"
+
+msgid "Look at Pictures"
+msgstr "Kijk naar een afbeelding"
+
+msgid " of "
+msgstr " of "
+
+msgid " MB free"
+msgstr " MB vrij"
+
+msgid "Artist:"
+msgstr "Artiest:"
+
+msgid "Album:"
+msgstr "Album:"
+
+msgid " musics in this playlist."
+msgstr " nummers in de afspeellijst."
+
+msgid "Just one music in this playlist."
+msgstr "Slechts 1 nummer in de afspeellijst"
+
+msgid "This playlist is empty!"
+msgstr "Deze afspeellijst is leeg!"
+
+msgid " movies in this playlist."
+msgstr " films in deze afspeellijst."
+
+msgid "Just one movie in this playlist."
+msgstr "Slechts 1 film in deze afspeellijst."
+
+msgid "Year:"
+msgstr "Jaar:"
+
+msgid "Genre:"
+msgstr "Genre:"
+
+msgid "Rating:"
+msgstr "Waardering:"
+
+msgid "Runtime:"
+msgstr "Speelduur:"
+
+msgid "Type:"
+msgstr "Type:"
+
+msgid "Resolution:"
+msgstr "Resolutie:"
+
+msgid "Copyright:"
+msgstr "Copyright:"
+
+msgid "Geometry:"
+msgstr "Verhouding:"
+
+msgid "Date:"
+msgstr "Datum:"
+
+msgid " pictures in this slideshow."
+msgstr " afbeeldingen in deze diashow."
+
+msgid "Just one picture in this slideshow."
+msgstr "Slechts 1 afbeelding in deze diashow."
+
+msgid "This slideshow is empty!"
+msgstr "Deze diashow is leeg!"
+
+msgid "Track:"
+msgstr "Nummer:"
+
+msgid "Length:"
+msgstr "Speelduur:"
+
+msgid "Elapsed:"
+msgstr "Voorbij:"
+
+msgid " min. "
+msgstr " min. "
+
+msgid " Audiotracks, "
+msgstr " Geluidssporen, "
+
+msgid " Subtitles, "
+msgstr " Ondertitels, "
+
+msgid " Chapter"
+msgstr " Hoofdstuk"
+
+msgid "Size:"
+msgstr "Grootte:"
+
+msgid " items in this playlist"
+msgstr " elementen in de afspeellijst"
+
+#~ msgid "Show database information for this file"
+#~ msgstr "Toon de databaseinformatie voor dit bestand"
