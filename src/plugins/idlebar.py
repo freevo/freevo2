@@ -6,7 +6,7 @@
 # $Id$
 #
 # Notes:
-#   To activate the idle bar, put the following in your local_config.py. The
+#   To activate the idle bar, put the following in your local_conf.py. The
 #   plugins inside the idlebar are sorted based on the level (except the
 #   clock, it's always on the right side)
 #
@@ -41,6 +41,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2003/08/21 20:48:16  gsbarbieri
+# Corrected comment
+#
 # Revision 1.31  2003/08/16 13:12:29  dischi
 # move timeformat to plugin arg
 #
