@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/03/08 19:15:49  dischi
+# use our marmalade
+#
 # Revision 1.15  2004/03/05 20:49:11  rshortt
 # Add support for searching by movies only.  This uses the date field in xmltv
 # which is what tv_imdb uses and is really acurate.  I added a date property
@@ -67,8 +70,9 @@ import config
 
 import time, sys, socket, traceback, string
 import xmlrpclib
-from twisted.persisted import marmalade
 import epg_types
+
+from util.marmalade import jellyToXML, unjellyFromXML
 
 TRUE  = 1
 FALSE = 0
@@ -77,21 +81,6 @@ server_string = 'http://%s:%s/' % \
                 (config.TV_RECORD_SERVER_IP, config.TV_RECORD_SERVER_PORT)
 
 server = xmlrpclib.Server(server_string)
-
-def jellyToXML(object):
-    if isinstance(object, epg_types.TvProgram):
-        return marmalade.jellyToXML(object.decode())
-    elif isinstance(object, unicode):
-        return marmalade.jellyToXML(String(object))
-    return marmalade.jellyToXML(object)
-
-
-def unjellyFromXML(object):
-    object = marmalade.unjellyFromXML(object)
-    if isinstance(object, epg_types.TvProgram):
-        return object.encode()
-    return object
-
 
 def returnFromJelly(status, response):
     if status:

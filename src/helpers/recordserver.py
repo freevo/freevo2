@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2004/03/08 19:15:49  dischi
+# use our marmalade
+#
 # Revision 1.33  2004/03/05 20:49:11  rshortt
 # Add support for searching by movies only.  This uses the date field in xmltv
 # which is what tv_imdb uses and is really acurate.  I added a date property
@@ -174,10 +177,10 @@ import sys, string, random, time, os, re
 from twisted.web import xmlrpc, server
 from twisted.internet.app import Application
 from twisted.internet import reactor
-from twisted.persisted import marmalade
 from twisted.python import log
 
 import config #config must always be the first freeevo module imported
+from util.marmalade import jellyToXML, unjellyFromXML
 
 import rc
 rc_object = rc.get_singleton(use_pylirc=0, use_netremote=0)
@@ -218,7 +221,7 @@ class RecordServer(xmlrpc.XMLRPC):
             if DEBUG:
                 log.debug('GET: reading cached file (%s)' % config.TV_RECORD_SCHEDULE)
             f = open(config.TV_RECORD_SCHEDULE, 'r')
-            scheduledRecordings = marmalade.unjellyFromXML(f)
+            scheduledRecordings = unjellyFromXML(f)
             f.close()
             
             try:
@@ -239,7 +242,9 @@ class RecordServer(xmlrpc.XMLRPC):
             scheduledRecordings = ScheduledRecordings()
             self.saveScheduledRecordings(scheduledRecordings)
     
-        if DEBUG: log.debug('ScheduledRecordings has %s items.' % len(scheduledRecordings.programList))
+        if DEBUG:
+            log.debug('ScheduledRecordings has %s items.' % \
+                      len(scheduledRecordings.programList))
     
         return scheduledRecordings
     
@@ -259,7 +264,7 @@ class RecordServer(xmlrpc.XMLRPC):
             log.debug("SAVE: ScheduledRecordings has %s items." % \
                       len(scheduledRecordings.programList))
         f = open(config.TV_RECORD_SCHEDULE, 'w')
-        marmalade.jellyToXML(scheduledRecordings, f)
+        jellyToXML(scheduledRecordings, f)
         f.close()
         return TRUE
 
@@ -713,7 +718,7 @@ class RecordServer(xmlrpc.XMLRPC):
     #################################################################
 
     def xmlrpc_getScheduledRecordings(self):
-        return (TRUE, marmalade.jellyToXML(self.getScheduledRecordings()))
+        return (TRUE, jellyToXML(self.getScheduledRecordings()))
 
 
     def xmlrpc_saveScheduledRecordings(self, scheduledRecordings=None):
@@ -729,7 +734,7 @@ class RecordServer(xmlrpc.XMLRPC):
         if not prog:
             return (FALSE, 'RecordServer::scheduleRecording:  no prog')
 
-        prog = marmalade.unjellyFromXML(prog)
+        prog = unjellyFromXML(prog)
 
         (status, response) = self.scheduleRecording(prog)
 
@@ -740,7 +745,7 @@ class RecordServer(xmlrpc.XMLRPC):
         if not prog:
             return (FALSE, 'RecordServer::removeScheduledRecording:  no prog')
 
-        prog = marmalade.unjellyFromXML(prog)
+        prog = unjellyFromXML(prog)
 
         (status, response) = self.removeScheduledRecording(prog)
 
@@ -751,10 +756,10 @@ class RecordServer(xmlrpc.XMLRPC):
         if not prog:
             return (FALSE, 'removeScheduledRecording::failure:  no prog')
 
-        prog = marmalade.unjellyFromXML(prog)
+        prog = unjellyFromXML(prog)
 
         if schedule:
-            schedule = marmalade.unjellyFromXML(schedule)
+            schedule = unjellyFromXML(schedule)
 
         (status, response) = self.isProgScheduled(prog, schedule)
 
@@ -765,7 +770,7 @@ class RecordServer(xmlrpc.XMLRPC):
         (status, response) = self.findProg(chan, start)
 
         if status:
-            return (status, marmalade.jellyToXML(response))
+            return (status, jellyToXML(response))
         else:
             return (status, 'RecordServer::findProg: %s' % response)
 
@@ -774,7 +779,7 @@ class RecordServer(xmlrpc.XMLRPC):
         (status, response) = self.findMatches(find, movies_only)
 
         if status:
-            return (status, marmalade.jellyToXML(response))
+            return (status, jellyToXML(response))
         else:
             return (status, 'RecordServer::findMatches: %s' % response)
 
@@ -784,7 +789,7 @@ class RecordServer(xmlrpc.XMLRPC):
 
 
     def xmlrpc_addFavorite(self, name, prog, exactchan=FALSE, exactdow=FALSE, exacttod=FALSE):
-        prog = marmalade.unjellyFromXML(prog)
+        prog = unjellyFromXML(prog)
         (status, response) = self.addFavorite(name, prog, exactchan, exactdow, exacttod)
 
         return (status, 'RecordServer::addFavorite: %s' % response)
@@ -792,8 +797,8 @@ class RecordServer(xmlrpc.XMLRPC):
 
     def xmlrpc_addEditedFavorite(self, name, title, chan, dow, mod, priority):
         (status, response) = \
-            self.addEditedFavorite(marmalade.unjellyFromXML(name), \
-            marmalade.unjellyFromXML(title), chan, dow, mod, priority)
+            self.addEditedFavorite(unjellyFromXML(name), \
+            unjellyFromXML(title), chan, dow, mod, priority)
 
         return (status, 'RecordServer::addEditedFavorite: %s' % response)
 
@@ -811,14 +816,14 @@ class RecordServer(xmlrpc.XMLRPC):
 
 
     def xmlrpc_getFavorites(self):
-        return (TRUE, marmalade.jellyToXML(self.getScheduledRecordings().getFavorites()))
+        return (TRUE, jellyToXML(self.getScheduledRecordings().getFavorites()))
 
 
     def xmlrpc_getFavorite(self, name):
         (status, response) = self.getFavorite(name)
 
         if status:
-            return (status, marmalade.jellyToXML(response))
+            return (status, jellyToXML(response))
         else:
             return (status, 'RecordServer::getFavorite: %s' % response)
 
@@ -830,9 +835,9 @@ class RecordServer(xmlrpc.XMLRPC):
 
 
     def xmlrpc_isProgAFavorite(self, prog, favs=None):
-        prog = marmalade.unjellyFromXML(prog)
+        prog = unjellyFromXML(prog)
         if favs:
-            favs = marmalade.unjellyFromXML(favs)
+            favs = unjellyFromXML(favs)
 
         (status, response) = self.isProgAFavorite(prog, favs)
 
