@@ -5,13 +5,13 @@
 %define freevoname freevo
 %define sourceonly yes
 %define freevover 1.3.2
-%define freevorel CVS%{_cvsdate}
+%define freevorel pre3
 %define runtimever 4.01
 
 # Set default freevo parameters
 %define geometry 800x600
 %define display  x11
-%define _us_defaults 0
+%define _us_defaults 1
 ##########################################################################
 
 
@@ -73,6 +73,7 @@ BuildRoot:	%{_tmppath}/%{name}-%{version}-root-%(id -u -n)
 %define _cachedir /var/cache
 %define _logdir /var/log
 %define _optimize 0
+
 
 %description
 Freevo is a Linux application that turns a PC with a TV capture card
@@ -242,7 +243,7 @@ install -m 644 skins/main1/* %{buildroot}%{_prefix}/skins/main1
 install -m 644 skins/xml/type1/* %{buildroot}%{_prefix}/skins/xml/type1
 install -m 644 skins/xml/blue_round2/* %{buildroot}%{_prefix}/skins/xml/blue_round2
 install -m 644 skins/aubin1/* %{buildroot}%{_prefix}/skins/aubin1
-#install -m 644 skins/dischi1/* %{buildroot}%{_prefix}/skins/dischi1
+install -m 644 skins/dischi1/* %{buildroot}%{_prefix}/skins/dischi1
 
 #install -m 644 freevo.conf local_conf.py boot/boot_config %{buildroot}%{_sysconfdir}/freevo
 install -m 644 freevo.conf boot/boot_config %{buildroot}%{_sysconfdir}/freevo
