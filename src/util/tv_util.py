@@ -6,6 +6,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/06/22 01:03:25  rshortt
+# getProgFilename() now returns the entire filename (path) including
+# TV_RECORD_DIR and TV_RECORDFILE_SUFFIX.
+#
 # Revision 1.3  2004/06/20 13:56:54  dischi
 # remove -_ at the end of the filename
 #
@@ -69,7 +73,6 @@ def progname2filename(progname):
     return s
 
 
-
 def getKey(prog=None):
     if not prog:
         return 'ERROR: no prog'
@@ -77,27 +80,22 @@ def getKey(prog=None):
     return '%s:%s' % (prog.channel_id, prog.start)
 
   
-def progRunning(prog=None):
-    if not prog:
-        return 'ERROR: no prog'
-
+def progRunning(prog):
     now = time.time()
     if prog.start <= now and prog.stop >= now:
         return True
     return False
 
 
-def getProgFilename(prog=None):
-    if not prog:
-        return 'ERROR: no prog'
-    
-    mask = config.TV_RECORDFILE_MASK   # '%%m-%%d %%H:%%M %(progname)s - %(title)s'
+def getProgFilename(prog):
     filename_array = { 'progname': String(prog.title),
                        'title'   : String(prog.sub_title) }
 
-    filemask = mask % filename_array
+    filemask = config.TV_RECORDFILE_MASK % filename_array
     filemask = time.strftime(filemask, time.localtime(prog.start))
-    filename = progname2filename(filemask)
+    filename = os.path.join(config.TV_RECORD_DIR, 
+                            progname2filename(filemask) + 
+                            config.TV_RECORDFILE_SUFFIX)
     return filename.rstrip(' -_:')
 
 
