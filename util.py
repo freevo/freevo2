@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2002/11/13 14:34:21  krister
+# Fixed a bug in music playing (the file type was mistaken for video for songs without an absolute path) by changing the way file suffixes are handled. The format of suffixes in freevo_config.py changed, local_conf.py must be updated!
+#
 # Revision 1.43  2002/11/06 03:24:31  krister
 # Added fileheader
 #
@@ -121,40 +124,61 @@ def unique(s):
             u.append(x)
     return u
 
-#
-# Get all subdirectories in the given directory
-#
-#
-def getdirnames(dir):
-    files = glob.glob(dir + '/*')
-    dirnames = filter(lambda d: os.path.isdir(d), files)
+
+def getdirnames(dirname):
+    '''Get all subdirectories in the given directory.
+    Returns a list that is case insensitive sorted.'''
+    
+    dirnames = [ os.path.join(dirname, dname) for dname in os.listdir(dirname)
+                 if os.path.isdir(os.path.join(dirname, dname)) ]
+    
     dirnames.sort(lambda l, o: cmp(l.upper(), o.upper()))
+    
     return dirnames
 
 
-#
-# Find all files in a directory that matches a list of glob.glob() rules.
-# It returns a list that is case insensitive sorted.
-#
-def match_files(dir, suffix_list):
-    files = []
-    for suffix in suffix_list:
-        files += glob.glob(dir + suffix)
-    files.sort(lambda l, o: cmp(l.upper(), o.upper()))
-    return files
+def match_suffix(filename, suffixlist):
+    '''Check if a filename ends in a given suffix, case is ignored.'''
+
+    fsuffix = os.path.splitext(filename)[1].lower()[1:]
+
+    for suffix in suffixlist:
+        if fsuffix == suffix:
+            return 1
+
+    return 0
+
+
+def match_files(dirname, suffix_list):
+    '''Find all files in a directory that has matches a list of suffixes.
+    Returns a list that is case insensitive sorted.'''
+
+    files = [ os.path.join(dirname, fname) for fname in os.listdir(dirname) if
+              os.path.isfile(os.path.join(dirname, fname)) ]
+
+    matches = [ fname for fname in files if match_suffix(fname, suffix_list) ]
+        
+    matches.sort(lambda l, o: cmp(l.upper(), o.upper()))
     
-def match_files_recursively_helper(result, dirname,names):
+    return matches
+
+    
+def match_files_recursively_helper(result, dirname, names):
     for name in names:
-	fullpath = os.path.join(dirname,name)
+	fullpath = os.path.join(dirname, name)
 	result.append(fullpath)
     return result
 
+
 def match_files_recursively(dir, suffix_list):
-    files = []
-    os.path.walk(dir, match_files_recursively_helper,files)
-    files = unique(reduce(operator.add,[fnmatch.filter(files, s) for s in suffix_list]))
-    files.sort(lambda l, o: cmp(l.upper(), o.upper()))
-    return files
+    all_files = []
+    os.path.walk(dir, match_files_recursively_helper, all_files)
+
+    matches = unique([f for f in all_files if match_suffix(f, suffix_list) ])
+
+    matches.sort(lambda l, o: cmp(l.upper(), o.upper()))
+    
+    return matches
 
 
 # Helper function for the md5 routine; we don't want to

@@ -13,6 +13,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2002/11/13 14:34:21  krister
+# Fixed a bug in music playing (the file type was mistaken for video for songs without an absolute path) by changing the way file suffixes are handled. The format of suffixes in freevo_config.py changed, local_conf.py must be updated!
+#
 # Revision 1.28  2002/11/01 21:52:21  outlyer
 # Whoops. line.rfind returns '-1' on failure, not 0, so add a check for
 # rfind > 0, not just 'true'
@@ -399,13 +402,12 @@ def parse_entry(arg=None, menuw=None):
                                     eventhandler, None, 'list')]
             
 
-    for pl_type in config.SUFFIX_AUDIO_PLAYLISTS:
-        if fnmatch.fnmatchcase(mdir, pl_type):
-            files = read_playlist(mdir)
-            if mdir.find(config.FREEVO_CACHEDIR) == 0:
-                # this is a autoplaylist, start playing it right now
-                play(('audio', files[0], files))
-                return
+    if util.match_suffix(mdir, config.SUFFIX_AUDIO_PLAYLISTS):
+        files = read_playlist(mdir)
+        if mdir.find(config.FREEVO_CACHEDIR) == 0:
+            # this is a autoplaylist, start playing it right now
+            play(('audio', files[0], files))
+            return
             
     if files or os.path.isdir(mdir):
 
@@ -442,9 +444,8 @@ def parse_entry(arg=None, menuw=None):
                 title = os.path.splitext(os.path.basename(a.filename))[0]
 
             file_type = 'music'
-            for v_type in config.SUFFIX_MPLAYER_FILES:
-                if fnmatch.fnmatchcase(a.filename, v_type):
-                    file_type = 'movie'
+            if util.match_suffix(a.filename, config.SUFFIX_MPLAYER_FILES):
+                file_type = 'movie'
                     
             m = menu.MenuItem( title, play, (None, a.filename, files))
 
@@ -464,13 +465,12 @@ def parse_entry(arg=None, menuw=None):
         if DEBUG:
             print 'music: got file entry in main menu'
 
+        # Set up a FileInformation object if mplayer_opts was specified
+        if mplayer_opts:
+            fileinfo = datatypes.FileInformation('audio', mdir, mplayer_opts)
+            play(fileinfo=fileinfo)
         else:
-            # Set up a FileInformation object if mplayer_opts was specified
-            if mplayer_opts:
-                fileinfo = datatypes.FileInformation('audio', mdir, mplayer_opts)
-                play(fileinfo=fileinfo)
-            else:
-                play(arg=['audio', mdir, None], menuw=None)
+            play(arg=['audio', mdir, None], menuw=None)
 
         
 #

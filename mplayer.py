@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2002/11/13 14:34:21  krister
+# Fixed a bug in music playing (the file type was mistaken for video for songs without an absolute path) by changing the way file suffixes are handled. The format of suffixes in freevo_config.py changed, local_conf.py must be updated!
+#
 # Revision 1.46  2002/11/09 17:36:31  dischi
 # Some stuff to work with the changes in datatypes and movie_config.
 #
@@ -179,23 +182,24 @@ class MPlayer:
         else:
             mplayer_options = ''
 
-        # since we have mixed playlists don't believe
-        # the given mode
-        if not mode or mode == 'video' or mode == 'audio':
-            mode = 'video'
-            for a_type in config.SUFFIX_AUDIO_FILES:
-                if fnmatch.fnmatchcase(filename, a_type):
-                    mode = 'audio'
-            
-        self.mode = mode   # setting global var to mode.
-        self.repeat = repeat # Repeat playlist setting
-
         # Is the file streamed over the network?
         if filename.find('://') != -1:
+            # Yes, trust the given mode
             network_play = 1
         else:
             network_play = 0
             
+            # Since we have mixed playlists don't trust the given mode
+            if (not mode) or (mode == 'video') or (mode == 'audio'):
+                # Set to video if it doesn't match an audio suffix
+                if util.match_suffix(filename, config.SUFFIX_AUDIO_FILES):
+                    mode = 'audio'
+                else:
+                    mode = 'video'
+            
+        self.mode = mode   # setting global var to mode.
+        self.repeat = repeat # Repeat playlist setting
+
         if DEBUG:
             print 'MPlayer.play(): mode=%s, filename=%s' % (mode, filename)
 

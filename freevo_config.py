@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.89  2002/11/13 14:34:21  krister
+# Fixed a bug in music playing (the file type was mistaken for video for songs without an absolute path) by changing the way file suffixes are handled. The format of suffixes in freevo_config.py changed, local_conf.py must be updated!
+#
 # Revision 1.88  2002/11/12 06:20:39  krister
 # Removed the radio station from the audio list since it doesn't work dur to someones changes.
 #
@@ -168,25 +171,11 @@ TV_SHOW_IMAGES = "testfiles/tv-show-images/"
 
 #
 # The list of filename suffixes that are used to match the files that
-# are played wih MPlayer. They are used as the argument to glob.glob()
+# are played wih MPlayer.
 # 
-SUFFIX_MPLAYER_FILES = [ '/*.[aA][vV][iI]',
-                         '/*.[mM][pP][gG]',
-                         '/*.[mM][pP][eE][gG]',
-                         '/*.[wW][mM][vV]',
-                         '/*.[bB][iI][nN]',
-                         '/*.[rR][mM]',
-                         '/*.[dD][iI][vV][xX]',
-                         '/*.[oO][gG][mM]',
-                         '/*.[vV][oO][bB]',
-                         '/*.[aA][sS][fF]',
-                         '/*.[mM][2][vV]',
-                         '/*.[mM][2][pP]',
-                         '/*.[mM][pP][4]',
-                         '/*.[vV][iI][vV]',
-                         '/*.[nN][uU][vV]',
-                         '/*.[mM][oO][vV]']
-
+SUFFIX_MPLAYER_FILES = [ 'avi', 'mpg', 'mpeg', 'wmv', 'bin', 'rm',
+                         'divx', 'ogm', 'vob', 'asf', 'm2v', 'm2p',
+                         'mp4', 'viv', 'nuv', 'mov' ]
 
 # ======================================================================
 # Freevo audio settings:
@@ -207,12 +196,10 @@ DIR_AUDIO = [ ('Test Files', 'testfiles/Music') ]
 
 #
 # The list of filename suffixes that are used to match the files that
-# are played as audio. They are used as the argument to glob.glob()
+# are played as audio.
 # 
-SUFFIX_AUDIO_FILES     = [ '/*.[mM][pP]3',
-                           '/*.[oO][gG][gG]',
-                           '/*.[wW][aA][vV]' ]
-SUFFIX_AUDIO_PLAYLISTS = [ '/*.[mM]3[uU]' ]
+SUFFIX_AUDIO_FILES     = [ 'mp3', 'ogg', 'wav' ]
+SUFFIX_AUDIO_PLAYLISTS = [ 'm3u' ]
 
 
 # ======================================================================
@@ -226,9 +213,9 @@ DIR_IMAGES = [ ('Test Images', './testfiles/Images') ]
 
 #
 # The list of filename suffixes that are used to match the files that
-# are used for the image viewer. They are used as the argument to glob.glob()
+# are used for the image viewer.
 # 
-SUFFIX_IMAGE_FILES = [ '/*.[jJ][pP][gG]' ]
+SUFFIX_IMAGE_FILES = [ 'jpg' ]
 
 # ======================================================================
 # Freevo mame settings:
@@ -254,9 +241,9 @@ DIR_MAME = [ ('Test Games', './testfiles/Mame') ]
 
 #
 # The list of filename suffixes that are used to match the files that
-# are used for the image viewer. They are used as the argument to glob.glob()
+# are used for the Mame arcade emulator. 
 # 
-SUFFIX_MAME_FILES = [ '/*.[zZ][iI][pP]' ]
+SUFFIX_MAME_FILES = [ 'zip' ]
 
 MAME_CMD         = CONF.xmame_SDL
 
@@ -282,7 +269,7 @@ OSD_SKIN = 'skins/main1/skin_main1.py'
 #
 # XML file for the skin
 #
-SKIN_XML_FILE = 'skins/xml/type1/grey1_%s.xml' % CONF.geometry
+SKIN_XML_FILE = 'skins/xml/type1/blue_round1_%s.xml' % CONF.geometry
 
 # XXX The options to disable TV and Images have been removed. This must be
 # XXX done in the skin instead (visible="no").
@@ -306,7 +293,7 @@ OSD_SDL_EXEC_AFTER_STARTUP = ""
 # use the framebuffer and have a PAL tv may set this to
 # './matrox_g400/mga_pal_768x576.sh' OSD_SDL_EXEC_AFTER_STARTUP=''
 if CONF.display == 'mga':
-    OSD_SDL_EXEC_AFTER_STARTUP='./fbcon/mga_%s_%s.sh' % (CONF.tv, CONF.geometry)
+    OSD_SDL_EXEC_AFTER_STARTUP='cd fbcon ; ./mga_%s_%s.sh ; cd ..' % (CONF.tv, CONF.geometry)
 
 
 # ======================================================================
@@ -537,7 +524,7 @@ VIDREC_HQ = ''
 # Config for xml support in the movie browser
 # the regexp has to be with ([0-9]|[0-9][0-9]) so we can get the numbers
 #
-SUFFIX_FREEVO_FILES = [ '/*.[xX][mM][lL]' ]
+SUFFIX_FREEVO_FILES = [ 'xml' ]
 TV_SHOW_REGEXP = "s?([0-9]|[0-9][0-9])[xe]([0-9]|[0-9][0-9])[^0-9]"
 
 
