@@ -108,7 +108,7 @@ import plugin
 # is different, there will be only a warning
 
 FREEVO_CONF_VERSION = 1.0
-LOCAL_CONF_VERSION  = 3.2
+LOCAL_CONF_VERSION  = 3.3
 
 # Description of changes in each new version
 FREEVO_CONF_CHANGES = [] # None so far
@@ -138,7 +138,9 @@ LOCAL_CONF_CHANGES = [
     (3.2,
      '''Removed MPLAYER_ARGS_* and added a hash MPLAYER_ARGS to set args for
      all different kinds of files. Also added MPLAYER_SOFTWARE_SCALER to use
-     the software scaler for fast CPUs''')]
+     the software scaler for fast CPUs'''),
+    (3.3,
+     '''Added AUDIO_FORMAT_STRING to customize the audio item title generation''')]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -299,6 +301,17 @@ DIRECTORY_AUTOPLAY_SINGLE_ITEM = 1
 #
 FORCE_SKIN_LAYOUT = -1
 
+#
+# Formatstring for the audio item names, possible strings:
+# a = artist, n = tracknumber, t = title, y = year, f = filename
+#
+# This will show the title and the track number 
+# AUDIO_FORMAT_STRING = '%(n)s - %(t)s'
+# This is the default - track name only
+#
+AUDIO_FORMAT_STRING = '%(t)s'
+
+
 # ======================================================================
 # Freevo movie settings:
 # ======================================================================
@@ -363,11 +376,13 @@ DIR_AUDIO = [ ('Test Files', 'testfiles/Music') ]
 SUFFIX_AUDIO_FILES     = [ 'mp3', 'ogg', 'wav','m4a' ,'fxd']
 SUFFIX_AUDIO_PLAYLISTS = [ 'm3u' ]
 
+#
 # This regexp should recognize filenames which are likely to be covers
 # for an album. This example will match front.jpg and cover-f.jpg, but
 # not back.jpg nor cover-b.jpg
 #
 AUDIO_COVER_REGEXP = 'front|-f'
+
 
 # ======================================================================
 # Freevo image viewer settings:
