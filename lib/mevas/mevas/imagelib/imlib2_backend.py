@@ -235,3 +235,8 @@ def scale_preserve_aspect(image, size):
     image = copy.copy(image)
     image.scale_preserve_aspect(size)
     return image
+
+
+def thumbnail(src, dst, size):
+    return Image( Imlib2.thumbnail(src, dst, size) )
+
