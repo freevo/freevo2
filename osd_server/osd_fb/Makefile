@@ -11,6 +11,12 @@ osd_x11: main.c fs.c fs.h x11.c x11.h
 x11test: x11.c x11.h jpeg.c jpeg.h
 	gcc $(CFLAGS) -Wall -DTEST x11.c jpeg.c -o x11test -lm -L/usr/X11/lib -lX11 -ljpeg
 
+jpegtest: jpeg.c jpeg.h
+	gcc $(CFLAGS) -Wall -DJPEGTEST jpeg.c -o jpegtest -lm -ljpeg
+
+pngtest: readpng.c
+	gcc $(CFLAGS) -Wall -DPNGTEST readpng.c -o pngtest -lm -L. -lpng -lz
+
 fstest: fs.c
 	gcc $(CFLAGS) -Wall fs.c -o fstest -DTEST
 
