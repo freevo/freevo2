@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/08/23 15:16:02  dischi
+# removed some bad hack
+#
 # Revision 1.5  2004/08/23 15:12:24  dischi
 # wait for fade animation to finish
 #
@@ -348,8 +351,6 @@ class AreaHandler:
         the audio player
         """
         settings = self.settings
-        if not self.visible:
-            return
         
         if not self.screen.visible and self.visible:
             self.screen.show(self.canvas)
