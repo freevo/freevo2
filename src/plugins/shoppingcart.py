@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/01/31 13:15:14  dischi
+# only add the plugin if the parent is a dir
+#
 # Revision 1.4  2004/01/19 21:18:53  mikeruelle
 # missing self. that's positively freudian
 #
@@ -113,6 +116,10 @@ class PluginInterface(plugin.ItemPlugin):
     def actions(self, item):
         self.item = item
         myactions = []
+
+        if self.item.parent and self.item.parent.type != 'dir':
+            # only activate this for directory items
+            return []
 
         if item.type == 'dir':
             if len(self.cart) > 0:

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/01/31 13:15:14  dischi
+# only add the plugin if the parent is a dir
+#
 # Revision 1.16  2004/01/30 20:42:03  dischi
 # set item.image to parent when deleting it
 #
@@ -101,9 +104,14 @@ class PluginInterface(plugin.ItemPlugin):
         """
         create list of possible actions
         """
+        if not item.parent or not item.parent.type == 'dir':
+            # only activate this for directory listings
+            return []
+
         self.item = item
 
         items = []
+        
         if hasattr(item, 'files') and item.files:
             if item.files.delete_possible():
                 items.append((self.confirm_delete, _('Delete'), 'delete'))
