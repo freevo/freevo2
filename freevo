@@ -74,16 +74,16 @@ fi
 # the first parameter is the helper name. In both cases start the helper
 # (with runapp if present)
 if [ `basename $0` = "freevo" ]; then
-    script="`dirname $FREEVO_SCRIPT`/$helpers/$1.py"
+    script="$FREEVO_HELPERS/$1.py"
     if [ -e "$script" ]; then
 	shift
     fi
 else
-    script="`dirname $FREEVO_SCRIPT`/$helpers/`basename $0`.py"
+    script="$FREEVO_HELPERS/$0.py"
 fi
 
 if [ -e "$script" ]; then
-    $RUNAPP python "$FREEVO_SCRIPT" "$@"
+    $RUNAPP python "$script" "$@"
     exit 0
 fi
 
@@ -110,7 +110,7 @@ if [ "$1" = "--help" -o "$1" = "-" ] ; then
     echo "scripts to get more informations about options"
     echo
 
-    for i in $helpers/*.py; do
+    for i in $FREEVO_HELPERS/*.py; do
 	s=`echo $i | sed "s|^$helpers.\\(.*\\).py|\\1|"`
 	if [ "$s" != "__init__" ]; then
 	    echo $s
