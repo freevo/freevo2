@@ -21,6 +21,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/02/05 14:06:33  dischi
+# We don't need special handling for gentoo. Removed the gentoo stuff
+#
 # Revision 1.1  2003/02/05 06:10:02  krister
 # Script to start runapp, mplayer, etc with the freevo runtime loader+dll, or just execute them
 #
@@ -64,16 +67,6 @@ if [ "$STARTAPP" = "python" ] ; then
         # XXX Add checks for python2 for Red Hat etc
         STARTAPP=python
     fi
-fi
-
-if [ -e $BASEDIR/runtime/preloads ] ; then
-    # Gentoo has some preloads in runtime, but no complete environment
-    # We don't need to check the version, gentoo emerge will do this for us
-
-    # Prevent the linker from using other libraries than the ones
-    # in freevo_runtime. Only use this for freevo itself, there are some
-    # problems with the rc_client and the preloads
-    export FREEVO_LD_PRELOAD=`cat runtime/preloads`
 fi
 
 if [ -e $BASEDIR/runtime/dll/freevo_loader ] ; then
