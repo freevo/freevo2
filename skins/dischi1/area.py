@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/03/20 15:44:59  dischi
+# faster now
+#
 # Revision 1.26  2003/03/19 11:00:22  dischi
 # cache images inside the area and some bugfixes to speed up things
 #
@@ -384,14 +387,15 @@ class Skin_Area:
         bg_rect = [ osd.width, osd.height, 0, 0 ]
         c_rect  = [ osd.width, osd.height, 0, 0 ]
 
-        # FIXME: make this simpler:
-        
         for b in self.bg_objects:
-            if not b in self.last_bg_objects:
+            try:
+                self.last_bg_objects.remove(b)
+            except ValueError:
                 bg_rect[0] = min(bg_rect[0], b[1])
                 bg_rect[1] = min(bg_rect[1], b[2])
                 bg_rect[2] = max(bg_rect[2], b[1] + b[3])
                 bg_rect[3] = max(bg_rect[3], b[2] + b[4])
+                
         for b in self.last_bg_objects:
             if not b in self.bg_objects:
                 bg_rect[0] = min(bg_rect[0], b[1])
@@ -400,7 +404,9 @@ class Skin_Area:
                 bg_rect[3] = max(bg_rect[3], b[2] + b[4])
 
         for b in self.content_objects:
-            if not b in self.last_content_objects:
+            try:
+                self.last_content_objects.remove(b)
+            except ValueError:
                 if b[0] == 'rectangle':
                     bg_rect[0] = min(bg_rect[0], b[1])
                     bg_rect[1] = min(bg_rect[1], b[2])
