@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2002/10/17 04:16:16  krister
+# Changed the 'nice' command so that it is built into runapp instead. Made default prio -20.
+#
 # Revision 1.37  2002/10/16 02:49:33  krister
 # Changed to use config.MAX_VOLUME for when resetting the volume to max.
 #
@@ -69,7 +72,7 @@ import skin       # Cause audio handling needs skin functions.
 
 from datatypes import *
 
-DEBUG = 1
+DEBUG = 0
 TRUE  = 1
 FALSE = 0
 
@@ -127,8 +130,8 @@ class MPlayer:
             print 'MPlayer.play(): mode=%s, filename=%s' % (mode, filename)
             
 
-        if( (mode == 'video' or mode == 'audio') and
-            not os.path.isfile(filename) ):
+        if (((mode == 'video') or (mode == 'audio')) and
+            not os.path.isfile(filename)):
 	    skin.PopupBox('%s\nnot found!' % filename)
             time.sleep(2.0) 
             menuwidget.refresh()
@@ -136,16 +139,17 @@ class MPlayer:
             # XXX probably be put at start of the function.
             return 0
        
-        # build mplayer command
-        mpl = (config.NICE + " -" + config.MPLAYER_NICE + " " +
-               config.MPLAYER_CMD + ' ' + config.MPLAYER_ARGS_DEF + ' -ao ' )
+        # Build the MPlayer command
+        mpl = '--prio=%s %s %s' % (config.MPLAYER_NICE,
+                                   config.MPLAYER_CMD,
+                                   config.MPLAYER_ARGS_DEF)
 
         # XXX find a way to enable this for AVIs with ac3, too
         if (mode == 'dvdnav' or mode == 'dvd' or os.path.splitext(filename)[1] == '.vob')\
            and config.MPLAYER_AO_HWAC3_DEV:
-            mpl += (config.MPLAYER_AO_HWAC3_DEV + ' -ac hwac3')
+            mpl += ' -ao %s -ac hwac3' % config.MPLAYER_AO_HWAC3_DEV
         else:
-            mpl += (config.MPLAYER_AO_DEV)
+            mpl += ' -ao %s' % config.MPLAYER_AO_DEV
 
         if mode == 'video':
 
@@ -401,8 +405,13 @@ class MPlayer:
 class MPlayerApp(childapp.ChildApp):
         
     def kill(self):
+        # Use SIGINT instead of SIGKILL to make sure MPlayer shuts
+        # down properly and releases all resources before it gets
+        # reaped by childapp.kill().wait()
         childapp.ChildApp.kill(self, signal.SIGINT)
-        osd.update()
+
+        osd.update()  # XXX WTF? /Krister
+        
         # XXX Krister testcode for proper X11 video
         if DEBUG: print 'Killing mplayer'
         os.system('killall -9 freevo_xwin 2&> /dev/null')
@@ -497,7 +506,7 @@ def mplayerKey(rcCommand):
         'LEFT'           : '\x1bOD',
         'NONE'           : '',
         'NEXT'           : '>',
-        'OK'             : 'q',
+        'QUIT'           : 'q',
         'PAGEUP'         : '\x1b[5~',
         'PAGEDOWN'       : '\x1b[6~',
         'PAUSE'          : ' ',

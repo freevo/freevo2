@@ -17,8 +17,13 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <string.h>
+#include <sys/time.h>
+#include <sys/resource.h>
+#include <sched.h>
 
 extern int errno;
+
+static void runapp_setprio (int newprio, FILE *fp);
 
 
 int
@@ -32,6 +37,8 @@ main (int ac, char *av[])
   char logfile[256];
   char cmd_str[1000];
   char currdir[1000];
+  int newprio;
+  int first_arg;
   
   
   /* Does the logdir exist? */
@@ -68,17 +75,30 @@ main (int ac, char *av[])
   if (ac < 2) {
     return (0);
   }
-  
+
+  /* Is the first arg the priority setting? */
+  if (sscanf (av[1], "--prio=%d", &newprio) == 1) {
+    
+    /* Yes, set the process priority */
+    runapp_setprio (newprio, fp);
+
+    first_arg = 2;
+  } else {
+    first_arg = 1;
+  }
+    
   /* Copy the counted argv array to the NULL-terminated newav */
-  for (i = 1; i < ac; i++) {
-    newav[i-1] = av[i];
+  for (i = first_arg; i < ac; i++) {
+    newav[i-first_arg] = av[i];
   }
   
-  newav[ac-1] = NULL;
+  newav[ac-first_arg] = NULL;
   
   /* Set up signals (turn off blocking!) */
   sigemptyset (&set);
   sigprocmask (SIG_SETMASK, &set, (sigset_t *) NULL);
+
+  fflush (fp);
   
   /* Overlay the child application */
   execvp (newav[0], newav);
@@ -88,5 +108,66 @@ main (int ac, char *av[])
   fclose (fp);
 
   exit (0);
+  
+}
+
+
+static void
+runapp_setprio (int newprio, FILE *fp)
+{
+  int res;
+  int do_setprio = 0;
+
+  
+#if 0 /* Using the realtime scheduler can lock up the system... */
+  if (newprio <= -21) {
+    struct sched_param sp;
+
+    
+    fprintf (fp, "runapp: Trying to set realtime priority\n");
+    
+    /* Try to max out the priority */
+    sp.sched_priority = sched_get_priority_max(SCHED_FIFO);
+    
+    if (sched_setscheduler (0, SCHED_FIFO, &sp) != 0) {
+      sp.sched_priority = sched_get_priority_max (SCHED_RR);
+      if (sched_setscheduler (0, SCHED_RR, &sp) != 0) {
+        sp.sched_priority = sched_get_priority_max (SCHED_OTHER);
+        if (sched_setscheduler (0, SCHED_OTHER, &sp) != 0) {
+          fprintf (fp, "runapp: Could not get any realtime priority\n");
+          fprintf (fp, "runapp: This is not a serious problem, but capture quality under high\n");
+          fprintf (fp, "runapp: load could be improved by running as root.\n");
+          do_setprio = 1;
+        } else {
+          fprintf (fp, "runapp: Got other realtime scheduler (%d)\n", sp.sched_priority);
+        }
+      } else {
+        fprintf (fp, "runapp: Got Round Robin scheduler (%d)\n", sp.sched_priority);
+      }
+    } else {
+      fprintf (fp, "runapp: Got FIFO scheduler (%d)\n", sp.sched_priority);
+    }
+	
+  } else {
+    do_setprio = 1;
+  }
+#else
+  do_setprio = 1;
+#endif
+  
+  if (do_setprio) {
+    /* Use regular setpriority */
+    res = setpriority (PRIO_PROCESS, 0, newprio);
+    
+    if (res) {
+      fprintf (fp, "runapp: setprio() failed, errno=%d\n", errno);
+    } else {
+      fprintf (fp, "runapp: set new prio to %d\n", newprio);
+    }
+
+  }
+
+  /* Done */
+  return;
   
 }

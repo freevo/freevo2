@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.82  2002/10/17 04:16:16  krister
+# Changed the 'nice' command so that it is built into runapp instead. Made default prio -20.
+#
 # Revision 1.81  2002/10/16 18:04:28  krister
 # Made it easier to use epg_xmltv.py to generate the list of channels for freevo_config.py.
 #
@@ -236,11 +239,11 @@ SUFFIX_MAME_FILES = [ '/*.[zZ][iI][pP]' ]
 
 MAME_CMD         = CONF.xmame_SDL
 
-MAME_NICE        = '0'             # Priority of mplayer process. 0 is unchanged,
-                                      # <0 is higher prio, >0 lower prio. You must run
-                                      # freevo as root to use prio <0 !
+MAME_NICE        = -20           # Priority of mplayer process. 0 is unchanged,
+                                 # <0 is higher prio, >0 lower prio. 
+                                 # prio <0 has no effect unless run as root.
 
-# XXX Removed '-ef 1', doesn't work on my older version of mame...
+# XXX Removed '-ef 1', doesn't work on my older version of mame...  /Krister
 MAME_ARGS_DEF     = ('-nosound -fullscreen -modenumber 6 ')
 
 
@@ -303,10 +306,9 @@ MPLAYER_VO_DEV       = CONF.display    # e.g.: xv,x11,mga,fbdev, see mplayer doc
 
 DVD_LANG_PREF        = 'en,se,no'      # Order of preferred languages on DVD.
 DVD_SUBTITLE_PREF    = ''              # Order of preferred subtitles on DVD.
-NICE                 = CONF.nice       # Priority setting app
-MPLAYER_NICE         = '0'             # Priority of mplayer process. 0 is unchanged,
-                                       # <0 is higher prio, >0 lower prio. You must run
-                                       # freevo as root to use prio <0 !
+MPLAYER_NICE         = -20             # Priority of mplayer process. 0 is unchanged,
+                                       # <0 is higher prio, >0 lower prio.
+                                       # prio <0 has no effect unless run as root.
 
 MPLAYER_ARGS_DEF     = ('-nobps -framedrop -nolirc -screenw %s -screenh %s -fs' %
                         (CONF.width, CONF.height))
@@ -322,8 +324,10 @@ MPLAYER_USE_WID      = 1
 # XMMS section:
 # ======================================================================
 
-XMMS_NICE            = '0'
-XMMS_CMD             = 'xmms'
+XMMS_NICE            = -20
+XMMS_CMD             = 'xmms'   # Priority of the XMMS process. 0 is unchanged,
+                                # <0 is higher prio, >0 lower prio.
+                                # prio <0 has no effect unless run as root.
 
 
 # ======================================================================

@@ -70,8 +70,9 @@ class Mame:
        
         # build mame command
 
-        mpl = (config.NICE + " -" + config.MAME_NICE + " " +
-               config.MAME_CMD + ' ' + config.MAME_ARGS_DEF)
+        mpl = '--prio=%s %s %s' % (config.MAME_NICE,
+                                        config.MAME_CMD,
+                                        config.MAME_ARGS_DEF)
 
         if mode == 'mame':
 

@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2002/10/17 04:16:16  krister
+# Changed the 'nice' command so that it is built into runapp instead. Made default prio -20.
+#
 # Revision 1.19  2002/10/06 14:42:40  dischi
 # log message cleanup
 #
@@ -126,7 +129,6 @@ def main():
             conf.chanlist = a
 
     check_program(conf, "mplayer", "mplayer", 1)
-    check_program(conf, "nice", "nice", 1)
     check_program(conf, "jpegtran", "jpegtran", 0)
     check_program(conf, "xmame.SDL", "xmame_SDL", 0)
 

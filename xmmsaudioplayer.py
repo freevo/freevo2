@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2002/10/17 04:16:16  krister
+# Changed the 'nice' command so that it is built into runapp instead. Made default prio -20.
+#
 # Revision 1.2  2002/10/16 02:49:32  krister
 # Changed to use config.MAX_VOLUME for when resetting the volume to max.
 #
@@ -291,9 +294,14 @@ class AudioPlayer(AbstractAudioPlayer):
                     self.play( self.mode, filename, self.playlist, self.repeat)
         elif event == globals.rc.VOLUP:
             pass
+
         
     def build_play_command(self):
-        return (config.NICE + " -" + config.XMMS_NICE + " " + config.XMMS_CMD)
+        cmd = '--prio=%s %s' % (config.XMMS_NICE,
+                                config.XMMS_CMD)
+
+        return cmd
+    
         
     def play(self, mode, filename, playlist, repeat=1):
 
