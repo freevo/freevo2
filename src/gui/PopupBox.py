@@ -10,6 +10,15 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/09/05 15:59:20  outlyer
+# Use StringTypes instead of "StringType" since StringTypes includes unicode,
+# which TV listings are sometimes in (like mine)
+#
+# The change to the StringTypes tuple has existed since Python 2.2 (at least)
+# so it should be fine.
+#
+# This prevents massive explosions on mine.
+#
 # Revision 1.25  2003/09/03 21:02:44  outlyer
 # Left in a debug line
 #
@@ -133,7 +142,7 @@ class PopupBox(Container):
         if not self.top:
             self.top  = self.osd.height/2 - self.height/2
 
-        if type(text) is StringType:
+        if type(text) in StringTypes:
             self.label = Label(text, self, Align.CENTER, Align.CENTER)
         else:
             raise TypeError, text
@@ -192,7 +201,7 @@ class PopupBox(Container):
         
         Can either be a string with filename or a pygame Surface object.
         """
-        if type(image) is StringType:
+        if type(image) in StringTypes:
             self.icon = pygame.image.load(image).convert_alpha()
         else:
             self.icon = image

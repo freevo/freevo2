@@ -11,6 +11,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/09/05 15:59:20  outlyer
+# Use StringTypes instead of "StringType" since StringTypes includes unicode,
+# which TV listings are sometimes in (like mine)
+#
+# The change to the StringTypes tuple has existed since Python 2.2 (at least)
+# so it should be fine.
+#
+# This prevents massive explosions on mine.
+#
 # Revision 1.3  2003/05/02 01:09:02  rshortt
 # Changes in the way these objects draw.  They all maintain a self.surface
 # which they then blit onto their parent or in some cases the screen.  Label
@@ -53,7 +62,7 @@ DEBUG = config.DEBUG
 class Image(GUIObject):
 
     def __init__(self, image_file):
-        if type(image_file) is StringType:
+        if type(image_file) in StringTypes:
             self.surface = pygame.image.load(image_file).convert_alpha()
         else:
             self.surface = image_file

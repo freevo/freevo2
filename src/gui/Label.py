@@ -9,6 +9,15 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/09/05 15:59:20  outlyer
+# Use StringTypes instead of "StringType" since StringTypes includes unicode,
+# which TV listings are sometimes in (like mine)
+#
+# The change to the StringTypes tuple has existed since Python 2.2 (at least)
+# so it should be fine.
+#
+# This prevents massive explosions on mine.
+#
 # Revision 1.17  2003/07/07 17:10:46  dischi
 # small fix. Someone should clean up all the gui font stuff and use OSDFont for it
 #
@@ -187,7 +196,7 @@ class Label(GUIObject):
         """
         Sets text.
         """
-        if type(text) is StringType:
+        if type(text) in StringTypes:
             if self.surface: self.surface = None
             self.text = text
         else:
@@ -210,7 +219,7 @@ class Label(GUIObject):
         if DEBUG: print 'LABEL: font=%s' % font
         if DEBUG: print 'LABEL: size=%s' % size
 
-        if type(font) is StringType and type(size) is IntType:
+        if type(font) in StringTypes and type(size) is IntType:
             if self.surface: self.surface = None
             self.font = self.osd.getfont(font, size)
         else:

@@ -9,6 +9,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/09/05 15:59:20  outlyer
+# Use StringTypes instead of "StringType" since StringTypes includes unicode,
+# which TV listings are sometimes in (like mine)
+#
+# The change to the StringTypes tuple has existed since Python 2.2 (at least)
+# so it should be fine.
+#
+# This prevents massive explosions on mine.
+#
 # Revision 1.12  2003/06/25 02:27:39  rshortt
 # Allow 'frame' containers to grow verticly to hold all contents.  Also
 # better control of object's background images.
@@ -116,7 +125,7 @@ class Button(Container):
         self.v_margin          = 2
 
 
-        if type(text) is StringType:
+        if type(text) in StringTypes:
             if text: self.set_text(text)
         elif not text:
             self.text = None
@@ -180,7 +189,7 @@ class Button(Container):
     def set_text(self, text):
 
         if DEBUG: print "Button::set_text: text=%s" % text
-        if type(text) is StringType:
+        if type(text) in StringTypes:
             self.text = text
         else:
             raise TypeError, type(text)
