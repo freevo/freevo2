@@ -11,6 +11,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2002/09/06 05:25:18  krister
+# Fixed a syntax warning.
+#
 # Revision 1.26  2002/09/04 19:47:46  dischi
 # wrap (u)mount to get rid of the error messages
 #
@@ -136,13 +139,13 @@ def play_movie( arg=None, menuw=None ):
 #
 def eventhandler(event = None, menuw=None, arg=None):
 
+    global main_menu_selected
     if event == rc.IDENTIFY_MEDIA:
         if menuw.menustack[1] == menuw.menustack[-1]:
             main_menu_selected = menuw.all_items.index(menuw.menustack[1].selected)
 
         menuw.menustack[1].choices = main_menu_generate()
 
-        global main_menu_selected
         menuw.menustack[1].selected = menuw.menustack[1].choices[main_menu_selected]
 
         if menuw.menustack[1] == menuw.menustack[-1]:
