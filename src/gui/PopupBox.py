@@ -10,6 +10,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2003/09/13 20:41:34  outlyer
+# Fixed a crash.
+#
 # Revision 1.32  2003/09/13 10:32:56  dischi
 # fix a font problem and cleanup some unneeded stuff
 #
@@ -155,7 +158,8 @@ class PopupBox(Container):
                           config.OSD_DEFAULT_FONTSIZE)
                 
         if not width:
-            tw = self.font.font.stringsize(text) + self.h_margin*2
+            print text
+            tw = self.font.stringsize(text) + self.h_margin*2
             if tw < self.osd.width * 2 / 3:
                 self.width = max(self.osd.width / 2, tw)
             else:
