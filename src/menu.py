@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2002/12/07 15:23:46  dischi
+# small fix for non-item menus
+#
 # Revision 1.4  2002/12/07 13:30:21  dischi
 # Add plugin support
 #
@@ -283,6 +286,7 @@ class MenuWidget:
                     action( menuw=self )
 
         elif event == rc.K0:
+            try:
                 actions = menu.selected.actions()
                 if config.FREEVO_PLUGINS.has_key(menu.selected.type):
                     for a in config.FREEVO_PLUGINS[menu.selected.type]:
@@ -292,6 +296,8 @@ class MenuWidget:
                             traceback.print_exc()
                 if len(actions) > 1:
                     self.make_submenu(menu.selected.name, actions)
+            except:
+                pass
             
         elif event == rc.REFRESH_SCREEN:
             self.refresh()
