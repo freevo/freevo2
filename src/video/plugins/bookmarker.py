@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/10/04 18:37:29  dischi
+# i18n changes and True/False usage
+#
 # Revision 1.4  2003/09/20 09:50:07  dischi
 # cleanup
 #
@@ -93,12 +96,12 @@ class PluginInterface(plugin.ItemPlugin):
         items = []
         ab = self.__get_auto_bookmark__(item)
         if ab:
-            items.append((self.resume, 'Resume playback'))
+            items.append((self.resume, _('Resume playback')))
         if item.type == 'dir' or item.type == 'playlist':
             return items    
         if item.mode == 'file' and not item.variants and \
                not item.subitems and os.path.exists(util.get_bookmarkfile(item.filename)):
-            items.append(( self.bookmark_menu, 'Bookmarks'))
+            items.append(( self.bookmark_menu, _('Bookmarks')))
             
         return items
 
@@ -133,7 +136,7 @@ class PluginInterface(plugin.ItemPlugin):
             sec = int(sec%60)
             time = '%0.2d:%0.2d:%0.2d' % (hour,min,sec)
             # set a new title
-            file.name = 'Jump to %s' % (time)
+            file.name = _('Jump to %s') % (time)
             if hasattr(file, 'tv_show'):
                 del file.tv_show
             

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/10/04 18:37:29  dischi
+# i18n changes and True/False usage
+#
 # Revision 1.4  2003/09/14 20:09:37  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
@@ -59,18 +62,18 @@ class PluginInterface(plugin.DaemonPlugin):
         poll to check for devices
         """
 
-        changes = FALSE
+        changes = False
 
         current_devices = util.list_usb_devices()
         for d in current_devices:
             try:
                 self.devices.remove(d)
             except ValueError:
-                changes = TRUE
+                changes = True
                 print 'usb.py: new device %s' %d
 
         for d in self.devices:
-            changes = TRUE
+            changes = True
             print 'usb.py: removed device %s' % d
 
         if changes:

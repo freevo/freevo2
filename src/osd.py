@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.96  2003/10/04 18:37:28  dischi
+# i18n changes and True/False usage
+#
 # Revision 1.95  2003/10/03 16:46:13  dischi
 # moved the encoding type (latin-1) to the config file config.LOCALE
 #
@@ -550,13 +553,13 @@ class OSD:
         self.screen.fill(self._sdlcol(color))
         
     
-    def loadbitmap(self, filename, cache=FALSE):
+    def loadbitmap(self, filename, cache=False):
         """
         Loads a bitmap in the OSD without displaying it.
         """
         if not cache:
             return self._getbitmap(filename)
-        if cache == TRUE:
+        if cache == True:
             cache = self.bitmapcache
         s = cache[filename]
         if s:
@@ -575,7 +578,7 @@ class OSD:
         if not pygame.display.get_init():
             return None
         if not isinstance(image, pygame.Surface):
-            image = self.loadbitmap(image, TRUE)
+            image = self.loadbitmap(image, True)
         self.drawsurface(image, x, y, scaling, bbx, bby, bbw,
                          bbh, rotation, layer)
 
@@ -719,7 +722,7 @@ class OSD:
             ellipses = ''
 
         data = None
-        while(TRUE):
+        while(True):
             if width > max_width - ellipses_size and not data:
                 # save this, we will need it when we have not enough space
                 # but first try to fit the text without ellipses
@@ -1042,7 +1045,7 @@ class OSD:
         if not pygame.display.get_init():
             return None
 
-        thumbnail = FALSE
+        thumbnail = False
 
         try:
             image = pygame.image.fromstring(url.tostring(), url.size, url.mode)
@@ -1051,7 +1054,7 @@ class OSD:
 
             if url[:8] == 'thumb://':
                 filename = os.path.abspath(url[8:])
-                thumbnail = TRUE
+                thumbnail = True
             else:
                 filename = os.path.abspath(url)
             

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/10/04 18:37:29  dischi
+# i18n changes and True/False usage
+#
 # Revision 1.15  2003/09/13 10:08:23  dischi
 # i18n support
 #
@@ -77,7 +80,7 @@ def audio_selection_menu(arg=None, menuw=None):
         txt = '%s (channels=%s, codec=%s, id=%s)' % (a['language'], a['channels'],
                                                      a['codec'], a['id'])
         items.append(menu.MenuItem(txt, audio_selection, (arg, a['id'])))
-    moviemenu = menu.Menu(_('AUDIO MENU'), items, xml_file=current_xml_file)
+    moviemenu = menu.Menu(_('Audio Menu'), items, xml_file=current_xml_file)
     menuw.pushmenu(moviemenu)
         
 
@@ -93,10 +96,10 @@ def subtitle_selection_menu(arg=None, menuw=None):
     global current_xml_file
     items = []
 
-    items += [ menu.MenuItem("no subtitles", subtitle_selection, (arg, None)) ]
+    items += [ menu.MenuItem(_('no subtitles'), subtitle_selection, (arg, None)) ]
     for s in range(len(arg.info['subtitles'])):
         items.append(menu.MenuItem(arg.info['subtitles'][s], subtitle_selection, (arg, s)))
-    moviemenu = menu.Menu(_('SUBTITLE MENU'), items, xml_file=current_xml_file)
+    moviemenu = menu.Menu(_('Subtitle Menu'), items, xml_file=current_xml_file)
     menuw.pushmenu(moviemenu)
 
         
@@ -112,9 +115,9 @@ def chapter_selection_menu(arg=None, menuw=None):
     global current_xml_file
     items = []
     for c in range(1, arg.info['chapters']):
-        items += [ menu.MenuItem("play chapter %s" % c, chapter_selection,
+        items += [ menu.MenuItem(_('Play chapter %s') % c, chapter_selection,
                                  (arg, ' -chapter %s' % c)) ]
-    moviemenu = menu.Menu(_('CHAPTER MENU'), items, xml_file=current_xml_file)
+    moviemenu = menu.Menu(_('Chapter Menu'), items, xml_file=current_xml_file)
     menuw.pushmenu(moviemenu)
 
 
@@ -141,8 +144,8 @@ def toggle(arg=None, menuw=None):
 
 def add_toogle(name, item, var):
     if getattr(item, var):
-        return menu.MenuItem("Turn off %s" % name, toggle, (name, item, var))
-    return menu.MenuItem("Turn on %s" % name, toggle, (name, item, var))
+        return menu.MenuItem(_('Turn off %s') % name, toggle, (name, item, var))
+    return menu.MenuItem(_('Turn on %s') % name, toggle, (name, item, var))
 
     
 #
@@ -157,13 +160,14 @@ def get_items(item):
             item.mode == 'dvd' and plugin.getbyname(plugin.DVD_PLAYER)):
 
         if item.info.has_key('audio') and len(item.info['audio']) > 1:
-            items.append(menu.MenuItem("Audio selection", audio_selection_menu, item))
+            items.append(menu.MenuItem(_('Audio selection'), audio_selection_menu, item))
         if item.info.has_key('subtitles') and len(item.info['subtitles']) > 1:
-            items.append(menu.MenuItem("Subtitle selection", subtitle_selection_menu, item))
+            items.append(menu.MenuItem(_('Subtitle selection'),
+                                       subtitle_selection_menu, item))
         if item.info.has_key('chapters') and item.info['chapters'] > 1:
-            items.append(menu.MenuItem("Chapter selection", chapter_selection_menu, item))
+            items.append(menu.MenuItem(_('Chapter selection'), chapter_selection_menu, item))
 
-    items += [ add_toogle('deinterlacing', item, 'deinterlace') ]
+    items += [ add_toogle(_('deinterlacing'), item, 'deinterlace') ]
     return items
 
         
@@ -171,6 +175,6 @@ def get_menu(item, menuw, xml_file):
     global current_xml_file
     current_xml_file = xml_file
 
-    items = get_items(item) + [ menu.MenuItem("Play", play_movie, (item, '')) ]
-    return menu.Menu(_('CONFIG MENU'), items, xml_file=xml_file)
+    items = get_items(item) + [ menu.MenuItem(_('Play'), play_movie, (item, '')) ]
+    return menu.Menu(_('Config Menu'), items, xml_file=xml_file)
     

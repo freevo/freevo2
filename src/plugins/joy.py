@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/10/04 18:37:29  dischi
+# i18n changes and True/False usage
+#
 # Revision 1.9  2003/09/14 20:09:36  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
@@ -90,7 +93,7 @@ class PluginInterface(plugin.DaemonPlugin):
         print 'using joystick', config.JOY_DEV
     
         self.poll_interval = 1
-        self.poll_menu_only = FALSE
+        self.poll_menu_only = False
 
 
     def poll(self):

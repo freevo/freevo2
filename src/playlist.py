@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/10/04 18:37:29  dischi
+# i18n changes and True/False usage
+#
 # Revision 1.25  2003/09/19 22:07:15  dischi
 # TRUE/True/FALSE/False changes
 #
@@ -227,16 +230,16 @@ class Playlist(Item):
             element = random.choice(old)
             old.remove(element)
             self.playlist += [ element ]
-        self.name = 'Random Playlist'
+        self.name = _('Random Playlist')
 
         
     def actions(self):
         if self.autoplay:
-            return [ ( self.play, 'Play' ),
-                     ( self.browse, 'Browse Playlist' ) ]
+            return [ ( self.play, _('Play') ),
+                     ( self.browse, _('Browse Playlist') ) ]
 
-        return [ ( self.browse, 'Browse Playlist' ),
-                 ( self.play, 'Play' ) ]
+        return [ ( self.browse, _('Browse Playlist') ),
+                 ( self.play, _('Play') ) ]
 
 
     def browse(self, arg=None, menuw=None):
@@ -334,7 +337,7 @@ class RandomPlaylist(Playlist):
 
         
     def actions(self):
-        return [ ( self.play, 'Play' ) ]
+        return [ ( self.play, _('Play') ) ]
 
 
     def play_next(self, arg=None, menuw=None):

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/10/04 18:37:29  dischi
+# i18n changes and True/False usage
+#
 # Revision 1.3  2003/09/21 17:05:12  dischi
 # make it better :-)
 #
@@ -149,7 +152,7 @@ class Link(Item):
             'Accept-Language': 'en-us',
             }
         
-        popup = PopupBox(text='Downloading link list...')
+        popup = PopupBox(text=_('Downloading link list...'))
         popup.show()
         try:
             req = urllib2.Request(self.url, txdata, txheaders)

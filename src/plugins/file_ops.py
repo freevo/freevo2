@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/10/04 18:37:29  dischi
+# i18n changes and True/False usage
+#
 # Revision 1.6  2003/09/20 15:46:48  dischi
 # fxd and imdb patches from Eirik Meland
 #
@@ -70,20 +73,20 @@ class PluginInterface(plugin.ItemPlugin):
         if ((item.type == 'video' and item.mode == 'file') or \
             item.type in ( 'audio', 'image' )) and not item.media:
             self.item = item
-            items.append((self.confirm_delete, 'Delete file', 'delete'))
+            items.append((self.confirm_delete, _('Delete file'), 'delete'))
             if item.type == 'video' and hasattr(item, 'fxd_file'):
-                items.append((self.confirm_info_delete, 'Delete info', 'delete_info'))
+                items.append((self.confirm_info_delete, _('Delete info'), 'delete_info'))
         return items
 
 
     def confirm_delete(self, arg=None, menuw=None):
         self.menuw = menuw
-        ConfirmBox(text='Do you wish to delete\n \'%s\'?' % self.item.name,
+        ConfirmBox(text=_('Do you wish to delete\n \'%s\'?') % self.item.name,
                    handler=self.delete_file, default_choice=1).show()
         
     def confirm_info_delete(self, arg=None, menuw=None):
         self.menuw = menuw
-        ConfirmBox(text='Delete info about\n \'%s\'?' % self.item.name,
+        ConfirmBox(text=_('Delete info about\n \'%s\'?') % self.item.name,
                    handler=self.delete_info, default_choice=1).show()
 
     def safe_unlink(self, filename):

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.64  2003/10/04 18:37:28  dischi
+# i18n changes and True/False usage
+#
 # Revision 1.63  2003/09/21 13:16:35  dischi
 # small bugfix
 #
@@ -53,7 +56,9 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 
+import config
 import plugin
+
 from item import Item
 
 # Various utilities
@@ -217,7 +222,7 @@ class MenuWidget(GUIObject):
             menu = self.menustack[-1]
 
             if not isinstance(menu, Menu):
-                return TRUE
+                return True
             
             if menu.reload_func and allow_reload:
                 reload = menu.reload_func()
@@ -233,7 +238,7 @@ class MenuWidget(GUIObject):
 
             if not isinstance(menu, Menu):
                 menu.refresh()
-                return TRUE
+                return True
             
             if self.skin.GetDisplayStyle(menu) != menu.display_style:
                 self.rebuild_page()
@@ -358,7 +363,7 @@ class MenuWidget(GUIObject):
                 i.display_type = item.type
                 
         s = Menu(menu_name, items, xml_file=xml_file)
-        s.is_submenu = TRUE
+        s.is_submenu = True
         self.pushmenu(s)
             
         
@@ -409,7 +414,7 @@ class MenuWidget(GUIObject):
                 if p.eventhandler(event=event, menuw=self):
                     return
 
-            if DEBUG: print 'no eventhandler for event %s' % event
+            _debug_('no eventhandler for event %s' % event)
             return
 
         if event == MENU_UP:
@@ -553,10 +558,10 @@ class MenuWidget(GUIObject):
                 return
 
             actions = menu.selected.actions()
-            force   = FALSE
+            force   = False
             if not actions:
                 actions = []
-                force   = TRUE
+                force   = True
 
             plugins = plugin.get('item') + plugin.get('item_%s' % menu.selected.type)
 
@@ -578,7 +583,7 @@ class MenuWidget(GUIObject):
             
 
         elif event == MENU_CALL_ITEM_ACTION:
-            print 'calling action %s', event.arg
+            _debug_('calling action %s', event.arg)
 
             plugins = plugin.get('item') + plugin.get('item_%s' % menu.selected.type)
 
@@ -590,7 +595,7 @@ class MenuWidget(GUIObject):
                     if not isinstance(a, MenuItem) and len(a) > 2 and a[2] == event.arg:
                         a[0](arg=None, menuw=self)
                         return
-            print 'action %s not found' % event.arg
+            _debug_('action %s not found' % event.arg)
 
                     
         elif event == MENU_CHANGE_STYLE and len(self.menustack) > 1:
@@ -609,7 +614,7 @@ class MenuWidget(GUIObject):
             if p.eventhandler(event=event, menuw=self):
                 return
 
-        if DEBUG: print 'no eventhandler for event %s' % str(event)
+        _debug_('no eventhandler for event %s' % str(event))
         return 0
 
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2003/10/04 18:37:28  dischi
+# i18n changes and True/False usage
+#
 # Revision 1.28  2003/09/14 20:09:36  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
@@ -147,7 +150,7 @@ class Item:
 
         for p in self.eventhandler_plugins:
             if p(event, self, menuw):
-                return TRUE
+                return True
             
         # give the event to the next eventhandler in the list
         if self.parent:
@@ -159,9 +162,9 @@ class Item:
                     menuw.refresh()
                 else:
                     menuw.show()
-                return TRUE
+                return True
 
-        return FALSE
+        return False
 
     def plugin_eventhandler(self, event, menuw=None):
         if not hasattr(self, '__plugin_eventhandler__'):
@@ -171,8 +174,8 @@ class Item:
                     self.__plugin_eventhandler__.append(p.eventhandler)
         for e in self.__plugin_eventhandler__:
             if e(self, event, menuw):
-                return TRUE
-        return FALSE
+                return True
+        return False
     
         
     def getattr(self, attr):

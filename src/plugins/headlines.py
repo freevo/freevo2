@@ -15,6 +15,9 @@
 # for a full list of tested sites see Docs/plugins/headlines.txt
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/10/04 18:37:29  dischi
+# i18n changes and True/False usage
+#
 # Revision 1.7  2003/09/30 17:21:22  mikeruelle
 # add some default news sites
 #
@@ -108,7 +111,7 @@ class PluginInterface(plugin.MainMenuPlugin):
         menu_items = skin.settings.mainmenu.items
 
         item = HeadlinesMainMenuItem()
-        item.name = 'Headlines'
+        item.name = _('Headlines')
         if menu_items.has_key('headlines') and menu_items['headlines'].icon:
             item.icon = os.path.join(skin.settings.icon_dir, menu_items['headlines'].icon)
         if menu_items.has_key('headlines') and menu_items['headlines'].image:
@@ -124,8 +127,8 @@ class ShowHeadlineDetails(skin.BlankScreen):
     """
     def __init__(self, (item, menuw)):
         skin.BlankScreen.__init__(self)
-        skin.force_redraw = TRUE
-        menuw.visible = FALSE
+        skin.force_redraw = True
+        menuw.visible = False
         self.item = item
         self.menuw = menuw
 
@@ -174,9 +177,9 @@ class ShowHeadlineDetails(skin.BlankScreen):
         if event in ('MENU_SELECT', 'MENU_BACK_ONE_MENU'):
             rc.app(None)
             self.menuw.show()
-            return TRUE
+            return True
         
-        return FALSE
+        return False
 
         
 class HeadlinesSiteItem(Item):
@@ -197,7 +200,7 @@ class HeadlinesSiteItem(Item):
         """
         return a list of actions for this item
         """
-        items = [ ( self.getheadlines , 'See Sites Headlines' ) ]
+        items = [ ( self.getheadlines , _('Show Sites Headlines') ) ]
         return items
 
     
@@ -272,9 +275,9 @@ class HeadlinesSiteItem(Item):
             headlines.append(mi)
 
         if (len(headlines) == 0):
-            headlines += [menu.MenuItem('No Headlines found', menuw.goto_prev_page, 0)]
+            headlines += [menu.MenuItem(_('No Headlines found'), menuw.goto_prev_page, 0)]
 
-        headlines_menu = menu.Menu('Headlines', headlines)
+        headlines_menu = menu.Menu(_('Headlines'), headlines)
         rc.app(None)
         menuw.pushmenu(headlines_menu)
         menuw.refresh()
@@ -301,9 +304,9 @@ class HeadlinesMainMenuItem(Item):
             headlines_site_item.location_index = config.HEADLINES_LOCATIONS.index(location)
             headlines_sites += [ headlines_site_item ]
         if (len(headlines_sites) == 0):
-            headlines_sites += [menu.MenuItem('No Headlines Sites found',
+            headlines_sites += [menu.MenuItem(_('No Headlines Sites found'),
                                               menuw.goto_prev_page, 0)]
-        headlines_site_menu = menu.Menu('Headlines Sites', headlines_sites)
+        headlines_site_menu = menu.Menu(_('Headlines Sites'), headlines_sites)
         menuw.pushmenu(headlines_site_menu)
         menuw.refresh()
 

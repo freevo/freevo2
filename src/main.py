@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.77  2003/10/04 18:37:28  dischi
+# i18n changes and True/False usage
+#
 # Revision 1.76  2003/09/24 18:30:35  outlyer
 # Remove a scary looking, but innocuous message.
 #
@@ -201,7 +204,7 @@ class SkinSelectItem(Item):
         """
         Load the new skin and rebuild the main menu
         """
-        skin.settings = skin.LoadSettings(self.skin, copy_content = FALSE)
+        skin.settings = skin.LoadSettings(self.skin, copy_content = False)
         pos = menuw.menustack[0].choices.index(menuw.menustack[0].selected)
         menuw.menustack[0].choices = get_main_menu(self.parent)
         menuw.menustack[0].selected = menuw.menustack[0].choices[pos]
@@ -237,7 +240,7 @@ class MainMenu(Item):
                 items += [ SkinSelectItem(self, name, image, skinfile) ]
 
             menuwidget.pushmenu(menu.Menu('SKIN SELECTOR', items))
-            return TRUE
+            return True
 
         # give the event to the next eventhandler in the list
         return Item.eventhandler(self, event, menuw)

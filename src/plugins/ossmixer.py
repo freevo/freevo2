@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/10/04 18:37:29  dischi
+# i18n changes and True/False usage
+#
 # Revision 1.4  2003/09/23 13:52:10  outlyer
 # We probably don't need to see the volume controls for every media play.
 #
@@ -126,23 +129,23 @@ class PluginInterface(plugin.DaemonPlugin):
                 self.incMainVolume()
             elif( config.MAJOR_AUDIO_CTRL == 'PCM' ):
                 self.incPcmVolume()
-            return TRUE
+            return True
         
         elif event == em.MIXER_VOLDOWN:
             if( config.MAJOR_AUDIO_CTRL == 'VOL' ):
                 self.decMainVolume()
             elif( config.MAJOR_AUDIO_CTRL == 'PCM' ):
                 self.decPcmVolume()
-            return TRUE
+            return True
 
         elif event == em.MIXER_MUTE:
             if self.getMuted() == 1: self.setMuted(0)
             else: self.setMuted(1)
-            return TRUE
+            return True
 
-            return TRUE
+            return True
 
-        return FALSE
+        return False
 
 
 

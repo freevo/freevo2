@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.89  2003/10/04 18:37:29  dischi
+# i18n changes and True/False usage
+#
 # Revision 1.88  2003/09/20 17:31:00  dischi
 # add play with max cache for network streams
 #
@@ -284,22 +287,22 @@ class VideoItem(Item):
         """
         return a list of possible actions on this item.
         """
-        items = [ (self.play, 'Play'), ]
+        items = [ (self.play, _('Play')), ]
         if not self.filename or self.filename == '0':
             if self.mode == 'dvd':
                 if plugin.getbyname(plugin.DVD_PLAYER):
                     items = [ (self.play, _('Play DVD')),
-                              ( self.dvd_vcd_title_menu, 'DVD title list' ) ]
+                              ( self.dvd_vcd_title_menu, _('DVD title list') ) ]
                 else:
-                    items = [ ( self.dvd_vcd_title_menu, 'DVD title list' ),
-                              (self.play, 'Play default track') ]
+                    items = [ ( self.dvd_vcd_title_menu, _('DVD title list') ),
+                              (self.play, _('Play default track')) ]
                     
             elif self.mode == 'vcd':
                 if plugin.getbyname(plugin.VCD_PLAYER):
                     items = [ (self.play, _('Play VCD')),
-                              ( self.dvd_vcd_title_menu, 'VCD title list' ) ]
+                              ( self.dvd_vcd_title_menu, _('VCD title list') ) ]
                 else:
-                    items = [ ( self.dvd_vcd_title_menu, 'VCD title list' ),
+                    items = [ ( self.dvd_vcd_title_menu, _('VCD title list') ),
                               (self.play, _('Play default track')) ]
 
 
@@ -308,7 +311,7 @@ class VideoItem(Item):
             items.append((self.play_max_cache, _('Play with maximum cache')))
             
         if self.variants and len(self.variants) > 1:
-            items = [ (self.show_variants, 'Show variants') ] + items
+            items = [ (self.show_variants, _('Show variants')) ] + items
 
         return items
 
@@ -582,7 +585,7 @@ class VideoItem(Item):
                     pos = self.subitems.index(self.current_subitem)
                     if pos < len(self.subitems)-1:
                         self.current_subitem = self.subitems[pos+1]
-                        print "playing next item"
+                        _debug_('playing next item')
                         self.current_subitem.play(menuw=menuw)
                         return True
                 except:

@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/10/04 18:37:29  dischi
+# i18n changes and True/False usage
+#
 # Revision 1.2  2003/09/21 18:17:50  dischi
 # only update skin when something changes
 #
@@ -72,7 +75,7 @@ class PluginInterface(plugin.DaemonPlugin):
         self.poll_interval   = 200
         self.plugins = None
         plugin.register(self, 'osd')
-        self.visible = TRUE
+        self.visible = True
         self.message = ''
         # set to 2 == we have no idea right now if
         # we have an idlebar

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/10/04 18:37:29  dischi
+# i18n changes and True/False usage
+#
 # Revision 1.21  2003/09/21 13:19:13  dischi
 # make it possible to change between video, audio, image and games view
 #
@@ -180,22 +183,22 @@ class MediaMenu(Item):
         display the (IMAGE|VIDEO|AUDIO|GAMES) main menu
         """
         self.display_type, force_text_view = arg
-        title = 'MEDIA'
+        title = _('Media')
         dirs  = []
 
         self.menuw = menuw
         
         if self.display_type == 'video':
-            title = 'MOVIE'
+            title = _('Movie')
             dirs += config.DIR_MOVIES
         if self.display_type == 'audio':
-            title = 'AUDIO'
+            title = _('Audio')
             dirs += config.DIR_AUDIO
         if self.display_type == 'image':
-            title = 'IMAGE'
+            title = _('Image')
             dirs += config.DIR_IMAGES
         if self.display_type == 'games':
-            title = 'GAMES'
+            title = _('Games')
             dirs += config.DIR_GAMES
 
         self.normal_items = []
@@ -215,7 +218,7 @@ class MediaMenu(Item):
                 traceback.print_exc()
 
 
-        item_menu = menu_module.Menu('%s Main Menu' % title.capitalize(),
+        item_menu = menu_module.Menu(_('%s Main Menu') % title,
                                      self.main_menu_generate(),
                                      item_types = self.display_type, umount_all=1,
                                      reload_func = self.reload)
@@ -264,11 +267,11 @@ class MediaMenu(Item):
             if menu == menuw.menustack[-1] and not rc.app():
                 menuw.init_page()
                 menuw.refresh()
-            return TRUE
+            return True
 
         if event in (em.PLAY_END, em.USER_END, em.STOP) and event.context != 'menu':
             menuw.show()
-            return TRUE
+            return True
 
         # give the event to the next eventhandler in the list
         return Item.eventhandler(self, event, menuw)

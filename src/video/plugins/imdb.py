@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/10/04 18:37:29  dischi
+# i18n changes and True/False usage
+#
 # Revision 1.25  2003/09/23 21:13:50  dischi
 # make discs work again
 #
@@ -106,7 +109,7 @@ class PluginInterface(plugin.ItemPlugin):
         if item.type == 'video'  and not hasattr(item, 'fxd_file'):
             if item.mode == 'file':
                 self.disc_set = False
-                return [ ( self.imdb_search , 'Search IMDB for this file',
+                return [ ( self.imdb_search , _('Search IMDB for this file'),
                            'imdb_search_or_cover_search') ]
             
             if item.mode in ('dvd', 'vcd'):
@@ -172,7 +175,7 @@ class PluginInterface(plugin.ItemPlugin):
             return
 
         if items: 
-            moviemenu = menu.Menu('IMDB QUERY', items)
+            moviemenu = menu.Menu('IMDB Query', items)
             menuw.pushmenu(moviemenu)
             return
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/10/04 18:37:29  dischi
+# i18n changes and True/False usage
+#
 # Revision 1.6  2003/09/14 20:09:36  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
@@ -77,7 +80,7 @@ class ShutdownItem(Item):
         shutdown freevo, don't shutdown the system
         """
         import main
-        main.shutdown(menuw=menuw, arg=FALSE)
+        main.shutdown(menuw=menuw, arg=False)
 
         
     def shutdown_system(self, arg=None, menuw=None):
@@ -85,7 +88,7 @@ class ShutdownItem(Item):
         shutdown the complete system
         """
         import main
-        main.shutdown(menuw=menuw, arg=TRUE)
+        main.shutdown(menuw=menuw, arg=True)
     
 
 

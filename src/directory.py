@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2003/10/04 18:37:28  dischi
+# i18n changes and True/False usage
+#
 # Revision 1.41  2003/10/03 16:46:13  dischi
 # moved the encoding type (latin-1) to the config file config.LOCALE
 #
@@ -107,7 +110,7 @@ class DirItem(Playlist):
         # variables only for Playlist
         self.current_item = 0
         self.playlist = []
-        self.autoplay = FALSE
+        self.autoplay = False
 
         # variables only for DirItem
         self.dir          = os.path.abspath(directory)
@@ -778,14 +781,14 @@ class DirItem(Playlist):
             if arg == 'FORCE_SKIN_LAYOUT':
                 item.name += str(getattr(self, arg))
             elif getattr(self, arg):
-                item.name += 'on'
+                item.name += _('on')
             else:
-                item.name += 'off'
+                item.name += _('off')
         else:
             if arg == 'FORCE_SKIN_LAYOUT':
-                item.name += 'off'
+                item.name += _('off')
             else:
-                item.name += 'auto'
+                item.name += _('auto')
 
         # write folder.fxd
         if not self.write_fxd():
@@ -815,16 +818,16 @@ class DirItem(Playlist):
                 if i == 'FORCE_SKIN_LAYOUT':
                     name += str(getattr(self, i))
                 elif getattr(self, i):
-                    name += 'on'
+                    name += _('on')
                 else:
-                    name += 'off'
+                    name += _('off')
             else:
                 if i == 'FORCE_SKIN_LAYOUT':
-                    name += 'off'
+                    name += _('off')
                 else:
-                    name += 'auto'
+                    name += _('auto')
             items.append(menu_module.MenuItem(name, self.configure_set_var, i))
-        m = menu_module.Menu('Configure', items)
+        m = menu_module.Menu(_('Configure'), items)
         m.table = (80, 20)
         menuw.pushmenu(m)
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2003/10/04 18:37:29  dischi
+# i18n changes and True/False usage
+#
 # Revision 1.35  2003/09/25 09:48:42  dischi
 # handling if CDROM.py is missing
 #
@@ -199,7 +202,7 @@ class autostart(plugin.DaemonPlugin):
                 media.info.actions()[0][0](menuw=menuw)
             else:
                 menuw.refresh()
-            return TRUE
+            return True
 
         # Handle the EJECT key for the main menu
         elif event == em.EJECT and len(menuw.menustack) == 1:
@@ -209,7 +212,7 @@ class autostart(plugin.DaemonPlugin):
                 # The default is the first drive in the list
                 media = config.REMOVABLE_MEDIA[0]  
                 media.move_tray(dir='toggle')
-                return TRUE
+                return True
             
 
 
@@ -271,8 +274,8 @@ class rom_items(plugin.MainMenuPlugin):
         if event == em.EJECT and item.media and menuw and \
            menuw.menustack[1] == menuw.menustack[-1]:
             item.media.move_tray(dir='toggle')
-            return TRUE
-        return FALSE
+            return True
+        return False
     
 
 class RemovableMedia:
@@ -294,7 +297,7 @@ class RemovableMedia:
         self.info      = None
         self.videoinfo = None
         self.type      = 'empty_cdrom'
-        self.cached   = FALSE
+        self.cached   = False
 
     def is_tray_open(self):
         return self.tray_open
@@ -381,7 +384,7 @@ class RemovableMedia:
         """
 
         _debug_('Mounting disc in drive %s' % self.drivename,2)
-        util.mount(self.mountdir, force=TRUE)
+        util.mount(self.mountdir, force=True)
         return
 
     
@@ -443,7 +446,7 @@ class Identify_Thread(threading.Thread):
         media.type      = 'empty_cdrom'
         media.info      = None
         media.videoinfo = None
-        media.cached    = FALSE
+        media.cached    = False
 
         # Is there a disc present?
         if s != CDS_DISC_OK:
@@ -451,7 +454,7 @@ class Identify_Thread(threading.Thread):
             return
 
         # if there is a disc, the tray can't be open
-        media.tray_open = FALSE
+        media.tray_open = False
         data = mmpython.parse(media.devicename)
 
         if data and data.mime == 'audio/cd':
@@ -554,7 +557,7 @@ class Identify_Thread(threading.Thread):
             media.info.num_titles = len(data.tracks)
             # Hack to avoid rescan, remove this when mmpython is used
             # everytime
-            media.info.scanned = TRUE
+            media.info.scanned = True
             return
 
         if data.tracks:
@@ -570,11 +573,11 @@ class Identify_Thread(threading.Thread):
                         mp3_files.append(file)
                     if util.match_suffix(file, config.SUFFIX_IMAGE_FILES):
                         image_files.append(file)
-            media.cached = TRUE
+            media.cached = True
                 
         else:
             # Disc is data of some sort. Mount it to get the file info
-            util.mount(media.mountdir, force=TRUE)
+            util.mount(media.mountdir, force=True)
 
             # Check for movies/audio/images on the disc
             mplayer_files = util.match_files(media.mountdir, config.SUFFIX_VIDEO_FILES)
