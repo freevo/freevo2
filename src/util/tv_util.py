@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/10/23 14:31:59  rshortt
+# Move some EPG functionality into channels.py.
+#
 # Revision 1.10  2004/08/14 01:21:47  rshortt
 # Remove get_guide, fix get_chan_displayname, and use the chanlist/epg from the cache.
 #
@@ -59,7 +62,6 @@ import sys, string, re
 import time, os, string, traceback
 
 import util, config
-from tv.channels import get_channels
 
 DEBUG = 0
 
@@ -139,39 +141,4 @@ def descfsize(size):
     else:
         size = size / 1073741824.0
         return "%.3f GB" % size
-
-
-def get_chan_displayname(channel_id):
-
-    for vals in config.TV_CHANNELS:
-        tv_channel_id, tv_display_name, tv_tuner_id = vals[:3]
-        if tv_channel_id == channel_id:
-            return tv_display_name
-
-    for chan in get_channels().get_all():
-        if chan.id == channel_id:
-            return chan.name
-
-    # this shouldn't happen, but just in case
-    return 'Unknown'
-
-
-def when_listings_expire():
-
-    last = 0
-    left = 0
-
-    for ch in get_channels().get_all():
-        for prog in ch.epg.programs:
-            if prog.start > last: last = prog.start
-
-    if last > 0:
-        now = time.time()
-        if last > now:
-            left = int(last - now)
-            # convert to hours
-            left /= 3600
-
-    return left
-
 
