@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/02/14 13:05:03  dischi
+# do not call skin.get_singleton() anymore
+#
 # Revision 1.16  2004/02/08 17:40:53  dischi
 # only register to skin when we are main
 #
@@ -60,8 +63,6 @@ import skin
 import rc
 import plugin
 import event
-
-skin = skin.get_singleton()
 
 _player_ = None
 
@@ -206,5 +207,5 @@ class PlayerGUI(GUIObject):
         return
 
 
-if __freevo_app__ == 'main':
-    skin.register('player', ('screen', 'title', 'view', 'info', 'plugin'))
+# register player to the skin
+skin.register('player', ('screen', 'title', 'view', 'info', 'plugin'))

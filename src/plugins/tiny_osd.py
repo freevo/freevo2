@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/02/14 13:05:04  dischi
+# do not call skin.get_singleton() anymore
+#
 # Revision 1.9  2004/02/01 09:18:06  dischi
 # fix drawing for skin objects
 #
@@ -107,10 +110,7 @@ class PluginInterface(plugin.DaemonPlugin):
         try:
             font  = renderer.get_font('osd')
         except AttributeError:
-            try:
-                font  = skin.get_singleton().settings.font['osd']
-            except:
-                font  = skin.get_singleton().settings.font['default']
+            font  = skin.get_font('osd')
 
         w = font.stringsize(self.message)
 
@@ -143,7 +143,7 @@ class PluginInterface(plugin.DaemonPlugin):
             self.poll_counter = 1
             self.message = event.arg
             if not rc.app() or not skin.get_singleton().force_redraw:
-                skin.get_singleton().redraw()
+                skin.redraw()
             elif hasattr(rc.app(), 'im_self') and hasattr(rc.app().im_self, 'redraw'):
                 rc.app().im_self.redraw()
         return False
@@ -156,6 +156,6 @@ class PluginInterface(plugin.DaemonPlugin):
         if self.message:
             self.message = ''
             if not rc.app() or not skin.get_singleton().force_redraw:
-                skin.get_singleton().redraw()
+                skin.redraw()
             elif hasattr(rc.app(), 'im_self') and hasattr(rc.app().im_self, 'redraw'):
                 rc.app().im_self.redraw()

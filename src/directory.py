@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.116  2004/02/14 13:04:46  dischi
+# do not call skin.get_singleton() anymore
+#
 # Revision 1.115  2004/02/14 12:06:29  dischi
 # fix unicode crash
 #
@@ -133,8 +136,6 @@ from item import Item, FileInformation
 from playlist import Playlist
 from event import *
 from gui import PasswordInputBox, AlertBox, ProgressBox
-
-skin = skin.get_singleton()
 
 all_variables = [('DIRECTORY_SORT_BY_DATE', _('Directory Sort By Date'),
                   _('Sort directory by date and not by name.'), False),
@@ -855,10 +856,10 @@ class DirItem(Playlist):
 
         # for DIRECTORY_FORCE_SKIN_LAYOUT max = number of styles in the menu
         if arg == 'FORCE_SKIN_LAYOUT':
-            if self.display_type and skin.settings.menu.has_key(self.display_type):
-                area = skin.settings.menu[self.display_type]
+            if self.display_type and skin.get_settings().menu.has_key(self.display_type):
+                area = skin.get_settings().menu[self.display_type]
             else:
-                area = skin.settings.menu['default']
+                area = skin.get_settings().menu['default']
             max = len(area.style) - 1
 
         # switch from no settings to 0

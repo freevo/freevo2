@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.116  2004/02/14 13:05:03  dischi
+# do not call skin.get_singleton() anymore
+#
 # Revision 1.115  2004/02/12 17:16:35  dischi
 # again, fix watermark problem
 #
@@ -113,9 +116,6 @@ rc_object = rc.get_singleton()
 
 # Create the OSD object
 osd = osd.get_singleton()
-
-# Create the skin object
-skin = skin.get_singleton()
 
 
 class SkinSelectItem(Item):

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.68  2004/02/14 13:04:46  dischi
+# do not call skin.get_singleton() anymore
+#
 # Revision 1.67  2004/02/12 17:17:08  dischi
 # get image dir from skin
 #
@@ -250,7 +253,7 @@ class Item:
 
         if skin_type:
             import skin
-            settings  = skin.get_singleton().settings
+            settings  = skin.get_settings()
             skin_info = settings.mainmenu.items
             imagedir  = settings.mainmenu.imagedir
             if skin_info.has_key(skin_type):

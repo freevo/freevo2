@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2004/02/14 13:05:04  dischi
+# do not call skin.get_singleton() anymore
+#
 # Revision 1.27  2004/02/13 20:26:39  dischi
 # small bugfix
 #
@@ -213,6 +216,10 @@ class Cache:
         dirname  = filename[:filename.rfind('/')]
         filename = filename[filename.rfind('/')+1:]
 
+#         print dirname
+#         print dirname.__class__
+#         print self.current_cachedir
+#         print self.current_cachedir.__class__
         if dirname != self.current_cachedir:
             self.load_cache(dirname)
 

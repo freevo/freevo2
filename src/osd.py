@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.140  2004/02/14 13:05:03  dischi
+# do not call skin.get_singleton() anymore
+#
 # Revision 1.139  2004/02/12 12:37:14  dischi
 # fix alternative font loading
 #
@@ -393,7 +396,7 @@ class BusyIcon(threading.Thread):
                 import skin
                 self.lock.acquire()
                 osd = get_singleton()
-                icon = skin.get_singleton().get_icon('misc/osd_busy')
+                icon = skin.get_icon('misc/osd_busy')
                 if icon:
                     image  = osd.loadbitmap(icon)
                     width  = image.get_width()
