@@ -13,6 +13,9 @@
 #    3) Better (and more) LCD screens.
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/02/10 20:08:03  mikeruelle
+# fix some crashing
+#
 # Revision 1.14  2003/10/14 21:05:52  gsbarbieri
 # i18n
 #
@@ -772,6 +775,9 @@ class PluginInterface( plugin.DaemonPlugin ):
         else:
             sname = type
 
+        if not self.screens.has_key( sname ):
+	    sname = 'menu'
+
         if sname != self.last_screen:
             # recreate screen
             # This is used to handle cases where the previous screen was dirty
@@ -942,6 +948,8 @@ class PluginInterface( plugin.DaemonPlugin ):
 
 
     def generate_screen( self, s ):
+        if not self.screens.has_key( s ):
+	    s = 'menu'
         self.lcd.screen_add( s )
         widgets = self.screens[ s ]
         self.lcd.screen_set( s, "-heartbeat off" )
