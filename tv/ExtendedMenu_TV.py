@@ -65,7 +65,7 @@ class ExtendedMenu_TV(ExtendedMenu.ExtendedMenu):
             self.refresh()
         elif event == rc.REFRESH_SCREEN:
             self.refresh()
-        else:
+        elif event != rc.IDENTIFY_MEDIA:
             self.clear()
             t = self.listing.eventhandler(event)
             if t and len(t) == 2:
