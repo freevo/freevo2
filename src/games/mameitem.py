@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/09/05 20:48:35  mikeruelle
+# new game system
+#
 # Revision 1.12  2003/08/23 12:51:42  dischi
 # removed some old CVS log messages
 #
@@ -61,7 +64,7 @@ from item import Item
 
 
 class MameItem(Item):
-    def __init__(self, title, file, image = None, parent = None):
+    def __init__(self, title, file, image = None, cmd = None, args = None, imgpath = None, parent = None):
         Item.__init__(self)
         self.type  = 'mame'            # fix value
         self.mode  = 'file'            # file, dvd or vcd
@@ -71,19 +74,19 @@ class MameItem(Item):
 
         self.xml_file = None
         self.parent = parent
-        
+
         # find image for this file
         if image == None:
-	    shot = config.MAME_SHOTS + '/' + \
-	           os.path.splitext(os.path.basename(file))[0] + ".png"
+            shot = imgpath + '/' + \
+                os.path.splitext(os.path.basename(file))[0] + ".png"
             if os.path.isfile(shot):
                 self.image = shot
             elif os.path.isfile(os.path.splitext(file)[0] + ".png"):
                 self.image = os.path.splitext(file)[0] + ".png"
 
         command = '--prio=%s %s %s' % (config.GAMES_NICE,
-                                       config.MAME_CMD,
-                                       config.MAME_ARGS_DEF)
+                                       cmd,
+                                       args)
 
         # Some files needs special arguments to mame, they can be
         # put in a <file>.mame options file. The <file>
@@ -115,7 +118,7 @@ class MameItem(Item):
 
     def actions(self):
         return [ ( self.play, 'Play' ) ]
-    
+
 
     def play(self, arg=None, menuw=None):
         self.parent.current_item = self

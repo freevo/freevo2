@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/09/05 20:48:34  mikeruelle
+# new game system
+#
 # Revision 1.13  2003/08/23 12:51:42  dischi
 # removed some old CVS log messages
 #
@@ -42,7 +45,7 @@ import time, os, string
 # Classes to keep track of our roms
 import mame_types
 
-# Configuration file. 
+# Configuration file.
 import config
 
 # Various utilities
@@ -99,19 +102,19 @@ def saveMameRomList(mameRomList):
         mameRomList = mame_types.MameRomList()
 
     util.save_pickle(mameRomList, config.MAME_CACHE)
-    
+
 
 #
 # We should keep mameRomList up to date.
 # This function takes in a list of files and makes sure
 # the cache has any relevant information.
 #
-def updateMameRomList():
+def updateMameRomList(mame_cmd):
     # This method of running xmame --listinfo and parsing the output was
     # borrowed from pyrecade - http://pyrecade.sf.net.
 
     try:
-        listinfo = os.popen('./runapp ' + config.MAME_CMD + ' --listinfo', 'r')
+        listinfo = os.popen(mame_cmd + ' --listinfo', 'r')
     except:
         print 'Unable to get mame listinfo.'
 	return FALSE
@@ -150,19 +153,20 @@ def updateMameRomList():
 
 
 #
-# This will return a list of things relevant to MameItem based on 
+# This will return a list of things relevant to MameItem based on
 # which mame files we have cached.  It ignores files we don't.
 # Returns: title, filename, and image file for each mame_file.
 #
-def getMameItemInfoList(mame_files):
+def getMameItemInfoList(mame_files, mame_cmd):
     items = []
     rm_files = []
 
+    print "Call MAME command : %s" % mame_cmd
     # Only build the cache if it doesn't exis.
     if not os.path.isfile(config.MAME_CACHE):
         waitmsg = PopupBox(text='Generating MAME cache, please wait.')
 	waitmsg.show()
-        mame_ok = updateMameRomList()
+        mame_ok = updateMameRomList(mame_cmd)
 	waitmsg.destroy()
 
         if not mame_ok:
@@ -178,5 +182,5 @@ def getMameItemInfoList(mame_files):
             rom = roms[key]
             items += [(rom.description, romfile, None)]
             rm_files.append(romfile)
-    
+
     return (rm_files, items)
