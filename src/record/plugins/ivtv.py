@@ -79,7 +79,7 @@ class PluginInterface(generic.PluginInterface):
         else:
             filename = rec.url
 
-        duration = int(rec.stop - time.time())
+        duration = int(rec.stop + rec.stop_padding - time.time())
 
         try:
             vport = self.device.vdev[-1:]
