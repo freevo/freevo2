@@ -68,6 +68,7 @@ class Program:
 
 
     def __str__(self):
-        return '%8d %s (%s): %s-%s' % (self.id, self.title, self.channel.id,
+        return '%8d %s (%s): %s-%s' % (self.id, String(self.title),
+                                       String(self.channel.id),
                                        self.start, self.stop)
     
