@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2002/09/27 08:43:38  dischi
+# removed 2 debugs again, this makes no sense.
+#
 # Revision 1.30  2002/09/27 08:39:10  dischi
 # More debug for error location
 #
@@ -417,8 +420,6 @@ class Skin:
             text = choice.name
             font_w, font_h = osd.stringsize(text, font=obj.font, ptsize=obj.size)
 
-            if DEBUG: print 'Entry: >%s<' % text
-
             if not spacing:
                 spacing = font_h + PADDING
             
@@ -432,8 +433,6 @@ class Skin:
                 text = text[0:-4] + "..."
                 font_w, font_h = osd.stringsize(text, font=obj.font, ptsize=obj.size)
 
-
-            if DEBUG: print 'Entry (2): >%s<' % text
 
             # Try and center the text to the middle of the icon
             if valign:
