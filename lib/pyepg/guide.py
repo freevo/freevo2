@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/11/12 20:40:36  dischi
+# support program get from all channels
+#
 # Revision 1.5  2004/10/23 16:20:07  rshortt
 # Comment out a sometimes spammy debug.
 #
@@ -286,38 +289,39 @@ class EPGDB:
 
     def get_programs(self, channels, start=0, stop=-1):
         # print 'RLS: get_programs(%s,%d,%d)' % (channels, start, stop)
-        if type(channels) != ListType:
-            channels = [ channels, ]
-    
-        now = time.time()
         if not start:
-            start = now
+            start = time.time()
 
-        query = 'select * from programs where'
-        for c in channels:
-            query = '%s channel_id="%s"' % (query, c)
-            if channels.index(c) < len(channels)-1: 
-                query = '%s or' % query
+        if channels:
+            if type(channels) != ListType:
+                channels = [ channels, ]
 
+            query = 'select * from programs where'
+            for c in channels:
+                query = '%s channel_id="%s"' % (query, c)
+                if channels.index(c) < len(channels)-1: 
+                    query = '%s or' % query
+            query = '%s and' % query
+        else:
+            query = 'select * from programs where'
+            
         if stop == 0:
             # only get what's running at time start
-            query = '%s and start<=%d and stop>%d' % (query, start, start)
+            query = '%s start<=%d and stop>%d' % (query, start, start)
         elif stop == -1:
             # get everything from time start onwards
-            query = '%s and ((start<=%d and stop>%d) or start>%d)' % \
+            query = '%s ((start<=%d and stop>%d) or start>%d)' % \
                     (query, start, start, start)
         elif stop > 0:
             # get everything from time start to time stop
-            query = '%s and ((start<=%d and stop>%d) or \
+            query = '%s ((start<=%d and stop>%d) or \
                              (start>%d and stop<%d) or \
                              (start<%d and stop>=%d))' % \
                     (query, start, start, start, stop, stop, stop)
         else:
             return []
 
-        query = '%s order by start' % query
-        rows = self.execute(query)
-        return rows
+        return self.execute('%s order by start' % query)
 
 
     def remove_program(self, id):
