@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2004/01/27 17:24:43  outlyer
+# Use the tag title if available and DIRECTORY_USE_MEDIAID_TAG_NAMES is set.
+#
 # Revision 1.46  2004/01/25 11:20:09  dischi
 # make sure length is an int
 #
@@ -85,6 +88,9 @@ class AudioItem(Item):
 
         if name:
             self.name   = name
+
+        if self.info['title'] and config.DIRECTORY_USE_MEDIAID_TAG_NAMES:
+            self.name = self.info['title']
 
         self.start      = 0
         self.elapsed    = 0
