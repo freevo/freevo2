@@ -1,7 +1,7 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # player.py - the Freevo audio player
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
 # This module provides the audio player. It will use one of the registered
@@ -9,41 +9,13 @@
 #
 # You can access the player by calling audioplayer()
 #
-# Notes:
-# Todo:        
-#
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.32  2004/12/31 11:57:40  dischi
-# renamed SKIN_* and OSD_* variables to GUI_*
-#
-# Revision 1.31  2004/11/20 18:23:00  dischi
-# use python logger module for debug
-#
-# Revision 1.30  2004/09/14 20:04:33  dischi
-# fix typo
-#
-# Revision 1.29  2004/09/13 19:35:35  dischi
-# replace player.get_singleton() with audioplayer()
-#
-# Revision 1.28  2004/08/25 12:51:44  dischi
-# moved Application for eventhandler into extra dir for future templates
-#
-# Revision 1.27  2004/08/23 20:36:43  dischi
-# rework application handling
-#
-# Revision 1.26  2004/08/14 15:12:55  dischi
-# use new AreaHandler
-#
-# Revision 1.25  2004/08/05 17:33:30  dischi
-# fix skin imports
-#
-# Revision 1.24  2004/08/01 10:42:51  dischi
-# make the player an "Application"
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: ?
+# Maintainer:    ?
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -60,7 +32,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
 __all__ = [ 'audioplayer' ]
 
@@ -68,6 +40,7 @@ __all__ = [ 'audioplayer' ]
 import config
 import gui
 import plugin
+import eventhandler
 
 from event import *
 from application import Application
@@ -85,6 +58,11 @@ def audioplayer():
     if _singleton == None:
         _singleton = AudioPlayer()
     return _singleton
+
+
+# Visualization events
+AUDIO_VISUAL_SHOW = Event('AUDIO_VISUAL_SHOW')
+AUDIO_VISUAL_HIDE = Event('AUDIO_VISUAL_HIDE')
 
 
 class AudioPlayer(Application):
@@ -188,6 +166,9 @@ class AudioPlayer(Application):
         self.refresh()
         self.draw_engine.show(config.GUI_FADE_STEPS)
 
+        # post event for showing visualizations
+        eventhandler.post(AUDIO_VISUAL_SHOW)
+
 
     def hide(self):
         """
@@ -197,6 +178,9 @@ class AudioPlayer(Application):
         self.draw_engine.hide(config.GUI_FADE_STEPS)
         if self.running:
             self.bg_playing = True
+
+        # post event for hiding visualizations
+        eventhandler.post(AUDIO_VISUAL_HIDE)
             
 
     def refresh(self):

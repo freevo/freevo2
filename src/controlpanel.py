@@ -1,16 +1,22 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
-# controlpanel.py - Controlmanager
-# -----------------------------------------------------------------------
-# $Id:
+# -----------------------------------------------------------------------------
+# controlpanel.py - Freevo control management
+# -----------------------------------------------------------------------------
+# $Id$
 #
-# -----------------------------------------------------------------------
-# $Log:
+# This file contains a basic control manager. With this manager one can add
+# on-screen controls which is toggled by the TOGGLE_CONTROL event. Plugins
+# can add panels to this manager and therefore show it to the user.
+#  - See audio.plugins.detach and See audio.plugins.mplayervis for an examples
+#    on usage.
 #
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al.
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Viggo Fredriksen <viggo@katatonic.org>
+# Maintainer:    Viggo Fredriksen <viggo@katatonic.org>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -27,7 +33,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
 import gui
 import plugin
@@ -51,9 +57,12 @@ class ControlManager:
     A class for showing different controlpanels
     on the screen.
 
-    Use ControlPanel as basis for creating own panels.
+    Use ButtonPanel as basis for creating own panels.
     Register it to this manager with the register() and
-    unregister() methods.
+    unregister() methods. See audio.plugins.detach for
+    an example on usage.
+
+    TODO: Needs clean-up and nice graphics!
     """
     def __init__(self):
         self.plugins = []
@@ -64,18 +73,21 @@ class ControlManager:
         self.container.set_zindex(80)
 
         gui.get_display().add_child(self.container)
+
+        # listen for TOGGLE_CONTROL events
         eventhandler.register(self, TOGGLE_CONTROL)
 
 
     def register(self, controlbar):
         """
-        Register a controlbar
+        Register a control widget
         """
         self.plugins.append(controlbar)
 
+
     def unregister(self, controlbar):
         """
-        Unregister a controlbar
+        Unregister a control widget
         """
         if controlbar not in self.plugins:
             return
@@ -90,43 +102,54 @@ class ControlManager:
 
 
     def show(self):
-
+        """
+        Shows the currently selected control widget
+        """
         display = gui.get_display()
         control = self.plugins[self.p_ctrl]
 
+        # add controlmanager as a window
         eventhandler.add_window(self)
 
+        # clear the container and set it visible
         self.container.clear()
         self.container.show()
 
+
         # draw the control
-        w, h = control.draw()
+        w, h = control.draw((5, 5))
+        w += 10
+        h += 10
 
         # add a background
-        bg = gui.Rectangle((0,0), (w, h+5), (0,0,0,100), 1,
+        bg = gui.Rectangle((0, 0), (w, h), (0,0,0,100), 1,
                            (255,255,255,100), 4)
         bg.set_zindex(-1)
         self.container.add_child(bg)
 
 
+        # add objects from the control in the container
         for o in control.objects:
             self.container.add_child(o)
 
-        # TODO: support different placements
-        x = config.GUI_OVERSCAN_X + 10
+        # center the container at bottom
+        x = (display.width - 2*config.GUI_OVERSCAN_X - w) / 2
         y = display.height - config.GUI_OVERSCAN_Y - h
 
         self.container.set_pos((x,y))
 
-        fade = config.GUI_FADE_STEPS
-        if fade:
-            gui.animation.FadeAnimation([self.container],fade, 0, 255).start()
-
-        gui.get_display().update()
+        # update the display
+        display.update()
 
 
     def hide(self):
+        """
+        Hides the currently selected control widget
+        """
+        # remove controlmanager as a window
         eventhandler.remove_window(self)
+
+        # clear the objects and update the display
         self.container.hide()
         gui.get_display().update()
         self.container.clear()
@@ -134,6 +157,11 @@ class ControlManager:
 
 
     def eventhandler(self, event):
+        """
+        Catch events for the controlmanager and
+        its associated controls.
+        """
+
         # Focus logic
         if event == TOGGLE_CONTROL:
 
@@ -147,13 +175,8 @@ class ControlManager:
             if self.plugins[last].visible:
                 self.hide()
 
-                # if handler is run, stop here
-                if self.plugins[last].handler_run:
-                    self.p_ctrl = -1
-                    return True
-
-            # boundry check
             if next >= len(self.plugins):
+                # out of bounds
                 self.p_ctrl = -1
                 return True
 
@@ -164,18 +187,27 @@ class ControlManager:
 
             return True
 
-        # Pass event to control
         elif event.context == self.event_context:
-            if self.plugins[self.p_ctrl] and self.plugins[self.p_ctrl].visible:
+            # pass events to selected plugin
+            plugin = self.plugins[self.p_ctrl]
+
+            if plugin and plugin.visible:
+                # okay, visible -- check event
+
                 if event == INPUT_EXIT:
+                    # hide the plugin
                     self.hide()
+                    self.p_ctrl = -1
                     gui.get_display().update()
                     return True
-                elif self.plugins[self.p_ctrl].eventhandler(event):
+
+                # pass the event to the plugin
+                elif plugin.eventhandler(event):
                     gui.get_display().update()
                     return True
 
         return False
+
 
 
 
@@ -183,54 +215,72 @@ class ButtonPanel:
     """
     This is an example ControlBar widget, it simply shows
     a buttonpanel on the screen.
-
-    TODO: Add text describing each action
     """
-    def __init__(self, handlers=[], button_size=(32,32), button_spacing=2, default_action=0):
+    def __init__(self, name, handlers=[], button_size=(32,32),
+                 button_spacing=2, default_action=0,
+                 hide_when_run=False):
+
+        self.name          = name
         self.p_action      = default_action
         self.handlers      = handlers
         self.button_size   = button_size
         self.spacing       = button_spacing
+        self.hide_when_run = hide_when_run
 
         self.objects       = []
         self.buttons       = []
         self.visible       = False
-        self.handler_run   = False
+
 
 
     def eventhandler(self, event):
         """
-        The default eventhandler for a flat
-        controlbar
+        Handle events on the buttonpanel
         """
-        if event == INPUT_LEFT:
-            if self.p_action >= 1:
-                self.buttons[self.p_action].deselect()
+
+        if event in [INPUT_LEFT, INPUT_RIGHT]:
+            # move right or left on the panel
+            desel = -1
+            hlen = len(self.handlers) - 1
+
+            if event == INPUT_LEFT and self.p_action > 0:
+                # move left
+                desel = self.p_action
                 self.p_action -= 1
+
+            elif event == INPUT_RIGHT and self.p_action < hlen:
+                # move right
+                desel = self.p_action
+                self.p_action += 1
+
+            if desel != -1:
+                # change the selected button
+                self.buttons[desel].deselect()
                 self.buttons[self.p_action].select()
-                eventhandler.post(Event(OSD_MESSAGE, arg=self.handlers[self.p_action][0]))
+
+                # show what was selected
+                descr = self.handlers[self.p_action][0]
+                eventhandler.post(Event(OSD_MESSAGE, arg=descr))
+
             return True
 
-        elif event == INPUT_RIGHT:
-            if self.p_action < len(self.handlers)-1:
-                self.buttons[self.p_action].deselect()
-                self.p_action += 1
-                self.buttons[self.p_action].select()
-                eventhandler.post(Event(OSD_MESSAGE, arg=self.handlers[self.p_action][0]))
-            return True
 
         elif event == INPUT_ENTER:
+            # run the associated handle
             self.buttons[self.p_action].handle()
-            self.handler_run = True
+
+            if self.hide_when_run:
+                # hide the control if configured
+                eventhandler.post(TOGGLE_CONTROL)
+
             return True
 
         return False
 
 
-    def draw(self):
+    def draw(self, pos):
         """
-        Draws the controlbar
-
+        Draws the buttonpanel
         return the size of the bar
         """
         if self.visible:
@@ -239,19 +289,46 @@ class ButtonPanel:
         self.visible     = True
 
         w, h = self.button_size
-        x    = self.spacing
-        y    = self.spacing
+
+        # total width of the buttons
+        hl = len(self.handlers)
+        t_w = (w * hl) + (self.spacing * (hl-1))
+
+        # width of the description test
+        font = gui.get_font('small0')
+        txt_w = font.stringsize(self.name)
+
+        # final width of the bar
+        w = max(t_w, txt_w)
+
+        # calculate x, y for the buttons
+        x = (w - t_w) / 2 + pos[0]
+        y = pos[1]
+
+        
+        # add control description text (centered)
+        t_x = (w - txt_w) / 2 + pos[0]
+
+        descr = gui.Text(self.name, (t_x, y),
+                         (txt_w, font.height),
+                         font, dim=False)
+        descr.set_zindex(1)
+        self.objects.append(descr)
+
+        # add spacings
+        h += font.height + self.spacing
+        y += font.height + self.spacing
 
         # create the controlbuttons
         for (descr, icon, action, arg) in self.handlers:
-            i = ControlButton(icon, (action, arg), self.button_size, (x, y) )
-            x += self.spacing + w
+            i = ControlButton(icon, (action, arg), self.button_size, (x, y))
+            x += self.spacing + self.button_size[0]
             self.objects.append(i)
             self.buttons.append(i)
 
         self.buttons[self.p_action].select()
 
-        return (x, h+2*self.spacing)
+        return (w, h)
 
 
     def clear(self):
@@ -266,7 +343,6 @@ class ButtonPanel:
 
         self.objects     = []
         self.buttons     = []
-        self.handler_run = False
         self.visible     = False
 
 
@@ -300,14 +376,25 @@ class ControlButton(gui.Image):
             gui.Image.__init__(self, self.icon, self.pos, self.size)
 
         def select(self):
+            """
+            Select the button
+            """
             self.set_image(gui.Image(self.icon, self.sel_pos, self.sel_size))
             self.set_pos(self.sel_pos)
 
+
         def deselect(self):
+            """
+            Deselect the button
+            """
             self.set_image(gui.Image(self.icon, self.pos, self.size))
             self.set_pos(self.pos)
 
+
         def handle(self):
+            """
+            Run the callback associated with the button
+            """
             try:
                 # FIXME: what about handlers without arg?
                 #        Take a look at the rc.callback methods

@@ -1,44 +1,22 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # detach.py - Detach plugin for the audio player
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes:
-# Todo:
+# This file contains the audio detach plugin which makes it possible to detach
+# from the usual player view. This makes it possible to browse files while
+# still playing music. The plugin can optionally draw the current playing song
+# info to the idlebar. Furthermore, when detached -- it is possible to control
+# the player with the TOGGLE_CONTROL event.
 #
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.24  2005/02/06 16:59:11  dischi
-# small bugfixes from Viggo Fredriksen
-#
-# Revision 1.23  2004/10/12 11:31:57  dischi
-# make animation frame selection timer based
-#
-# Revision 1.22  2004/09/15 20:46:08  dischi
-# fix audio stop hide() bug
-#
-# Revision 1.21  2004/09/15 19:36:15  dischi
-# new detach plugin from Viggo
-#
-# Revision 1.20  2004/09/13 19:35:36  dischi
-# replace player.get_singleton() with audioplayer()
-#
-# Revision 1.19  2004/08/01 10:42:23  dischi
-# update to new application/eventhandler code
-#
-# Revision 1.18  2004/07/26 18:10:17  dischi
-# move global event handling to eventhandler.py
-#
-# Revision 1.17  2004/07/10 12:33:37  dischi
-# header cleanup
-#
-# Revision 1.16  2004/04/25 11:23:58  dischi
-# Added support for animations. Most of the code is from Viggo Fredriksen
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al.
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: ?
+# Maintainer:    Viggo Fredriksen <viggo@katatonic.org>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -55,10 +33,10 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
 # python modules
-import os
+import os.path
 import mevas.image
 
 # freevo modules
@@ -76,23 +54,21 @@ from event              import *
 
 DETACH_AUDIO_STOP = Event('DETACH_AUDIO_STOP')
 
+
 class PluginInterface(IdleBarPlugin):
     """
-    A detached audioplayer view for freevo
+    A detached audioplayer view for freevo.
     """
     def __init__(self, show_detachbar=True):
         """
         init the idlebar
         """
         IdleBarPlugin.__init__(self)
-        config.EVENTS['audio']['DISPLAY'] = Event(FUNCTION_CALL, arg=self.detach)
+        config.EVENTS['audio']['DISPLAY'] = Event(FUNCTION_CALL,
+                                                  arg=self.detach)
         plugin.register(self, 'audio.detach')
 
-        # XXX add support for theme changes?
-        # eventhandler.register(self, THEME_CHANGE)
-        # XXX that doesn't work, PLAY_END doesn't send the stopped item
-        # XXX as argument
-        # eventhandler.register(self, PLAY_END)
+        # register for events
         eventhandler.register(self, PLAY_START)
         eventhandler.register(self, DETACH_AUDIO_STOP)
 
@@ -167,21 +143,30 @@ class PluginInterface(IdleBarPlugin):
             return
 
         # set up a controlbar
-        # XXX FIXME: Add config-var for this
         a_handler = audioplayer().eventhandler
         path = os.path.join(config.ICON_DIR, 'misc','audio_')
 
-        handlers = [
-               (_('Prev'), '%sprev.png' % path, a_handler, PLAYLIST_PREV),
-               (_('Rew'), '%srew.png'  % path, a_handler, Event(SEEK, arg=-10)),
-               (_('Pause'), '%spause.png'% path, a_handler, PAUSE ),
-               (_('Play'), '%splay.png' % path, a_handler, PLAY ),
-               (_('Stop'), '%sstop.png' % path, self.eventhandler, STOP ),
-               (_('FFwd'), '%sffwd.png' % path, a_handler, Event(SEEK,arg=10)),
-               (_('Next'), '%snext.png' % path, a_handler, PLAYLIST_NEXT),
-               (_('Show Player'), '%sshow.png' % path,  self.detach, None) ]
+        handlers = [ ( _('Prev'), '%sprev.png' % path,
+                       a_handler, PLAYLIST_PREV),
+                     ( _('Rew'), '%srew.png'  % path,
+                       a_handler, Event(SEEK, arg=-10)),
+                     ( _('Pause'), '%spause.png'% path,
+                       a_handler, PAUSE ),
+                     ( _('Play'), '%splay.png' % path,
+                       a_handler, PLAY ),
+                     ( _('Stop'), '%sstop.png' % path,
+                       self.eventhandler, STOP ),
+                     ( _('FFwd'), '%sffwd.png' % path,
+                       a_handler, Event(SEEK,arg=10)),
+                     ( _('Next'), '%snext.png' % path,
+                       a_handler, PLAYLIST_NEXT),
+                     ( _('Show Player'), '%sshow.png' % path,
+                       self.detach, None) ]
 
-        self.controlbar = ButtonPanel(handlers, default_action=3)
+        self.controlbar = ButtonPanel( _('Audio Player'),
+                                       handlers,
+                                       default_action=3)
+
         controlpanel().register(self.controlbar)
 
         self.w       = self.max_width
@@ -251,11 +236,12 @@ class PluginInterface(IdleBarPlugin):
             return
 
         if self.controlbar:
+            # unregister the controlbar.
             controlpanel().unregister(self.controlbar)
             self.controlbar = None
 
-        # Stop the scroller
         if self.animation and self.animation.running():
+            # Stop the scroller
             self.animation.finish()
 
         self.clear()
@@ -279,7 +265,12 @@ class PluginInterface(IdleBarPlugin):
             # need to hide now, update the idlebar and than update the screen
             # to show an idlebar without us.
             self.hide()
-            plugin.getbyname('idlebar').update()
+
+            idlebar = plugin.getbyname('idlebar')
+            if idlebar:
+                # update the idlebar
+                idlebar.update()
+
             gui.get_display().update()
             return True
 
@@ -359,6 +350,7 @@ class DetachbarAnimation(BaseAnimation):
         update the animation
         """
         if not audioplayer().running:
+            # not running, stop
             eventhandler.post(DETACH_AUDIO_STOP)
 
         self.frame += 1
@@ -370,8 +362,9 @@ class DetachbarAnimation(BaseAnimation):
             if self.pobj == len(self.objects):
                 self.pobj = 0
 
-            self.max_frames = self.objects[self.pobj].get_size()[0] \
-                              + self.sleep_frames
+            # set animation frames boundries
+            f = self.objects[self.pobj].get_size()[0]
+            self.max_frames = f + self.sleep_frames
             self.frame = 0
 
         obj    = self.objects[self.pobj]
@@ -382,8 +375,6 @@ class DetachbarAnimation(BaseAnimation):
 
         # clear the current image and blit the textobject
         self.canvas.image.clear()
-        # XXX FIXME!! Causes "Fatal python error: Deallocating None"
-        #             after a while!
         self.canvas.draw_image(obj, src_pos=srcpos)
 
         # update the time elapsed
@@ -392,12 +383,11 @@ class DetachbarAnimation(BaseAnimation):
             elapsed = u'%02i:%02i' % (self.item.elapsed / 60,
                                       self.item.elapsed % 60)
 
-            size    = ( self.elapsed_font.stringsize(elapsed),
-                        self.elapsed_font.height)
+            size = ( self.elapsed_font.stringsize(elapsed),
+                     self.elapsed_font.height )
 
-            # XXX FIXME!! Causes "Fatal python error: Deallocating None"
-            #             after a while!
-            self.itemcanvas.set_image( gui.Text(elapsed,
-                                                (0, 0),
-                                                size,
-                                                self.elapsed_font) )
+            # create the text image
+            txt = gui.Text(elapsed, (0, 0), size, self.elapsed_font)
+
+            # blit text to the itemcanvas
+            self.itemcanvas.set_image(txt)
