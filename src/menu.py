@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.89  2004/02/23 21:45:09  dischi
+# refresh fix
+#
 # Revision 1.88  2004/02/22 20:33:47  dischi
 # some unicode fixes
 #
@@ -325,6 +328,10 @@ class MenuWidget(GUIObject):
         menu = self.menustack[-1]
 
         if not isinstance(menu, Menu):
+            # Do not draw if there are any children
+            if self.children:
+                return False
+            
             return skin.draw(menu.type, menu)
 
         if self.menustack[-1].umount_all == 1:
@@ -338,10 +345,6 @@ class MenuWidget(GUIObject):
             self.init_page()
 
         skin.draw('menu', self, self.menustack[-1])
-
-        # Draw any child UI objects
-        for child in self.children:
-            child.draw()
 
 
     def make_submenu(self, menu_name, actions, item):
