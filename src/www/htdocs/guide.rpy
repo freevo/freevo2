@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/05/29 23:06:56  rshortt
+# The ability to previous / next added by Mike Ruelle.  We'll make it pretty later.  Also some comment cleanup.
+#
 # Revision 1.5  2003/05/22 21:33:23  outlyer
 # Lots of cosmetic changes:
 #
@@ -86,6 +89,16 @@ class GuideResource(FreevoResource):
         INTERVAL = web.INTERVAL
         n_cols = web.n_cols
 
+        mfrguidestart = time.time()
+        mfrguideinput = fv.formValue(form, 'stime')
+        if mfrguideinput:
+            mfrguidestart = int(mfrguideinput)
+        now = int(mfrguidestart / INTERVAL) * INTERVAL
+        now2 = int(time.time() / INTERVAL) * INTERVAL
+        mfrnextguide = now + INTERVAL * n_cols
+        mfrprevguide = now - INTERVAL * n_cols
+        if mfrprevguide < now2:
+            mfrprevguide = 0
 
         guide = epg_xmltv.get_guide()
         (got_schedule, schedule) = ri.getScheduledRecordings()
@@ -94,31 +107,28 @@ class GuideResource(FreevoResource):
 
         fv.printHeader('TV Guide', web.STYLESHEET, web.JAVASCRIPT)
 
-        #fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
-        #fv.tableRowOpen('class="chanrow"')
-        #fv.tableCell('<img src="images/logo_200x100.png" />', 'align="left"')
-        #fv.tableCell('TV Guide', 'class="heading" align="left"')
-        #fv.tableRowClose()
-        #fv.tableClose()
-
         if not got_schedule:
             fv.res += '<h4>The recording server is down, recording information is unavailable.</h4>'
 
         pops = ''
         desc = ''
 
+        if mfrprevguide > 0:
+            fv.res += '<a href="guide.rpy?stime=%i">Prev</a>&nbsp;&nbsp;' % mfrprevguide
+        fv.res += '<a href="guide.rpy?stime=%i">Next</a><br />' % mfrnextguide
+
         fv.tableOpen('border="0" cellpadding="4" cellspacing="1"')
 
         fv.tableRowOpen('class="chanrow"')
         fv.tableCell(time.strftime('%b %d'), 'class="guidehead"')
-        now = int(time.time() / INTERVAL) * INTERVAL
+        now = int(mfrguidestart / INTERVAL) * INTERVAL
         for i in range(n_cols):
             fv.tableCell(time.strftime('%H:%M', time.localtime(now)), 'class="guidehead"')
             now += INTERVAL
         fv.tableRowClose()
 
         for chan in guide.chan_list:
-            now = time.time()
+            now = mfrguidestart
             fv.tableRowOpen('class="chanrow"')
             # chan.displayname = string.replace(chan.displayname, "&", "SUB")
             fv.tableCell(chan.displayname, 'class="channel"')
@@ -128,17 +138,12 @@ class GuideResource(FreevoResource):
                 fv.tableCell('&lt;&lt; NO DATA &gt;&gt;', 'class="program" colspan="%s"' % n_cols)
 
             for prog in chan.programs:
-                if prog.stop > time.time() and \
-                   prog.start < (time.time() + INTERVAL * n_cols) and \
+                if prog.stop > mfrguidestart and \
+                   prog.start < mfrnextguide and \
                    c_left > 0:
 
                     status = 'program'
 
-                    #if 0:
-                    # if prog.start < (time.time() + INTERVAL * n_cols) and \
-                    #    prog.stop > time.time():
-                    #     sys.stderr.write('Calling isProgScheduled: chan=%s prog=%s' % (chan.displayname,prog))        
-                    # sys.stderr.write('Calling isProgScheduled: chan=%s prog=%s' % (chan.displayname,prog))        
                     if got_schedule:
                         (result, message) = ri.isProgScheduled(prog, schedule)
                         if result:
@@ -195,6 +200,10 @@ class GuideResource(FreevoResource):
         fv.tableClose()
         
         fv.res += pops
+
+        if mfrprevguide > 0:
+            fv.res += '<a href="guide.rpy?stime=%i">Prev</a>&nbsp;&nbsp;' % mfrprevguide
+        fv.res += '<a href="guide.rpy?stime=%i">Next</a><br /><br />' % mfrnextguide
 
         fv.printSearchForm()
         fv.printLinks()
