@@ -109,6 +109,18 @@ class Listing:
         return ret
 
 
+    def match_type(self, type_list):
+        visible = self.visible
+        self.visible = []
+        ret = []
+        for v in visible:
+            if v.attr.has_key('type') and \
+                   v.attr['type'].lower() == type.lower():
+                ret.append(v)
+            else:
+                self.visible.append(v)
+        return ret
+        
 
 class FileListing(Listing):
     def __init__(self, files):
@@ -137,7 +149,7 @@ class FileListing(Listing):
         for cache, files in self.caches.values():
             cache.reduce(files)
             self.num_changes += cache.num_changes()
-
+            
         self.data = []
         if self.num_changes > 0:
             self.visible = []
@@ -158,5 +170,3 @@ class FileListing(Listing):
                     self.data.append(ItemInfo(basename, dirname, item, cache))
         self.num_changes = 0
         self.visible = self.data
-
-

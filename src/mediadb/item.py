@@ -54,7 +54,10 @@ class ItemInfo:
         self.dirname = dirname
         self.filename = self.dirname + '/' + self.basename
         self.cache = cache
-
+        if self.attr.has_key('url'):
+            self.url = self.attr['url']
+        else:
+            self.url = 'file://' + self.filename
 
     def __str__(self):
         return self.basename

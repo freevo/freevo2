@@ -48,6 +48,7 @@ import util.fxdparser
 import util.vfs as vfs
 import util.cache as cache
 from util.callback import *
+from listing import Listing
 
 log = logging.getLogger('mediainfo')
 

@@ -35,184 +35,22 @@ __all__ = [ 'Cache', 'FileCache', 'save', 'get' ]
 import time
 import os
 import stat
-import mmpython
-import pickle
-import cPickle
 import re
 import logging
 
 # freevo imports
 import config
-import util.fxdparser
 import util.vfs as vfs
 import util.cache as cache
 from util.callback import *
 
+# mediadb imports
+import parser
+
 # get logging object
 log = logging.getLogger('mediadb')
 
-VERSION = 1.6
-
-def _simplify(object):
-    """
-    mmpython has huge objects to cache, we don't need them.
-    This function simplifies them to be only string, integer, dict or
-    list of one of those above. This makes the caching much faster
-    """
-    ret = {}
-    for k in object.keys:
-        if not k in [ 'thumbnail', 'url' ] and getattr(object,k) != None:
-            value = getattr(object,k)
-            if isstring(value):
-                value = Unicode(value.replace('\0', '').lstrip().rstrip())
-            if value:
-                ret[k] = value
-
-    for k in  ( 'video', 'audio'):
-        # if it's an AVCORE object, also simplify video and audio
-        # lists to string and it
-        if hasattr(object, k) and getattr(object, k):
-            ret[k] = []
-            for o in getattr(object, k):
-                ret[k].append(_simplify(o))
-
-    if hasattr(object, 'tracks') and object.tracks:
-        # read track informations for dvd
-        ret['tracks'] = []
-        for o in object.tracks:
-            track = _simplify(o)
-            if not track.has_key('audio'):
-                track['audio'] = []
-            if not track.has_key('subtitles'):
-                track['subtitles'] = []
-            ret['tracks'].append(track)
-
-    for k in ('subtitles', 'chapters', 'mime', 'id' ):
-        if hasattr(object, k) and getattr(object, k):
-            ret[k] = getattr(object, k)
-
-    return ret
-
-def _parse_fxd_node(node):
-    children = []
-    for c in node.children:
-        children.append(_parse_fxd_node(c))
-    return (node.name, node.attrs, children, node.textof(), node.first_cdata,
-            node.following_cdata)
-
-
-def _parse_fxd(filename):
-    data = util.fxdparser.FXDtree(filename, False)
-    if data.tree.name != 'freevo':
-        return {}
-    is_skin_fxd = False
-    for node in data.tree.children:
-        if node.name == 'skin':
-            is_skin_fxd = True
-            break
-    tree = []
-    for node in data.tree.children:
-        tree.append(_parse_fxd_node(node))
-    return is_skin_fxd, tree
-
-
-def _cover_filter(x):
-    """
-    filter function to get valid cover names
-    """
-    return re.search(config.AUDIO_COVER_REGEXP, x, re.IGNORECASE)
-
-
-def _add_info(filename, object):
-    mminfo = None
-    if not object['ext'] in [ 'xml', 'fxd' ]:
-        mminfo = mmpython.parse(filename)
-    title = _getname(filename)
-    object['title:filename'] = title
-    if mminfo:
-        # store mmpython data as pickle for faster loading
-        object['mminfo'] = cPickle.dumps(_simplify(mminfo),
-                                         pickle.HIGHEST_PROTOCOL)
-        if mminfo.title:
-            object['title'] = mminfo.title
-        else:
-            object['title'] = title
-    elif object.has_key('mminfo'):
-        del object['mminfo']
-        object['title'] = title
-    else:
-        object['title'] = title
-
-    if filename.endswith('.fxd'):
-        # store fxd tree as pickle for faster loading
-        object['fxd'] = cPickle.dumps(_parse_fxd(filename),
-                                      pickle.HIGHEST_PROTOCOL)
-
-    if os.path.isdir(filename):
-        object['isdir'] = True
-        listing = vfs.listdir(filename, include_overlay=True)
-        # get directory cover
-        for l in listing:
-            if l.endswith('/cover.png') or l.endswith('/cover.jpg') or \
-                   l.endswith('/cover.gif'):
-                object['cover'] = l
-                break
-        else:
-            if object.has_key('cover'):
-                del object['cover']
-            if object.has_key('audiocover'):
-                del object['audiocover']
-            files = util.find_matches(listing, ('jpg', 'gif', 'png' ))
-            if len(files) == 1:
-                object['audiocover'] = files[0]
-            elif len(files) > 1 and len(files) < 10:
-                files = filter(_cover_filter, files)
-                if files:
-                    object['audiocover'] = files[0]
-
-        # save directory overlay mtime
-        overlay = vfs.getoverlay(filename)
-        if os.path.isdir(overlay):
-            mtime = os.stat(overlay)[stat.ST_MTIME]
-            object['overlay_mtime'] = mtime
-        else:
-            object['overlay_mtime'] = 0
-    else:
-        if object.has_key('isdir'):
-            del object['isdir']
-
-
-_FILENAME_REGEXP = re.compile("^(.*?)_(.)(.*)$")
-
-def _getname(file):
-    """
-    make a nicer display name from file
-    """
-    if len(file) < 2:
-        return Unicode(file)
-
-    # basename without ext
-    if file.rfind('/') < file.rfind('.'):
-        name = file[file.rfind('/')+1:file.rfind('.')]
-    else:
-        name = file[file.rfind('/')+1:]
-    if not name:
-        # Strange, it is a dot file, return the complete
-        # filename, I don't know what to do here. This should
-        # never happen
-        return Unicode(file)
-
-    name = name[0].upper() + name[1:]
-
-    while file.find('_') > 0 and _FILENAME_REGEXP.match(name):
-        m = _FILENAME_REGEXP.match(name)
-        if m:
-            name = m.group(1) + ' ' + m.group(2).upper() + m.group(3)
-    if name.endswith('_'):
-        name = name[:-1]
-    return Unicode(name)
-
-
+VERSION = 2.4
 
 class CacheList:
     def __init__(self):
@@ -383,7 +221,7 @@ class Cache:
         """
         if not self.changed:
             return
-        log.info('save %s' % self.file)
+        log.debug('save %s' % self.file)
         cache.save(self.file, self.data, VERSION)
         self.mtime = os.stat(self.file)[stat.ST_MTIME]
         self.changed = False
@@ -410,7 +248,7 @@ class Cache:
                      'mtime'    : os.stat(filename)[stat.ST_MTIME],
                      'mtime_dep': []
                      }
-            _add_info(filename, info)
+            parser.parse(filename, info)
 
             prefix = basename[:-len(ext)]
             if ext in ('png', 'jpg', 'gif'):
@@ -437,7 +275,7 @@ class Cache:
         for basename, filename, info in self.__changed:
             # check changed files
             log.debug('changed: %s' % filename)
-            _add_info(filename, info)
+            parser.parse(filename, info)
             log.debug(info['mtime_dep'])
             for key in info['mtime_dep']:
                 del info[key]
@@ -472,7 +310,7 @@ class Cache:
                 if len(cover) == 1:
                     self.data['audiocover'] = cover[0]
                 else:
-                    cover = filter(_cover_filter, cover)
+                    cover = filter(parser.cover_filter, cover)
                     if cover:
                         self.data['audiocover'] = cover[0]
 
@@ -498,7 +336,7 @@ class Cache:
         Return the number of changes in the directory. If the number is
         greater than zero, parse _must_ be called.
         """
-        if self.check_time + 2 < time.time():
+        if self.reduce_files or self.check_time + 2 < time.time():
             self.check()
         changes = len(self.__added) + len(self.__changed)
         if self.__check_global:
@@ -507,6 +345,14 @@ class Cache:
             self.reduce_files = []
         return changes
 
+
+    def __str__(self):
+        """
+        Return string for debugging.
+        """
+        return 'mediadb.db.Cache for %s' % self.dirname
+
+        
 class FileCache:
     """
     Cache for one file
@@ -530,7 +376,7 @@ class FileCache:
             # process and to avoid directory changes just because the cache
             # is saved to a new file.
             self.changed = True
-            _add_info(filename, self.data)
+            parser.parse(filename, self.data)
             self.save()
 
 

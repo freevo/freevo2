@@ -96,11 +96,6 @@ def set(filename, key, value):
     log.error('set not defined anymore')
 
 
-def cache_recursive(dirlist, verbose=False):
-    # used by cache.py
-    log.error('cache_recursive not defined anymore')
-
-
 def cache_dir(dirname, callback=None):
     # used by cache.py, extendedmeta.py
     log.error('cache_dir not defined anymore')
