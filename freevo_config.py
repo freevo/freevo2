@@ -151,6 +151,14 @@ MAIN_MENU_ITEMS = [
 
 # You can change all this variables in the skin.xml on a per folder
 # basis
+#
+# Example:
+# <freevo>
+#   <variables>
+#     <directory_autoplay_single_item>0</directory_autoplay_single_item>
+#   </variables>
+# </freevo>
+# 
 
 #
 # Should playlists be available for movies, and all movies in a directory
