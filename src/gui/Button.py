@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/09/13 10:32:55  dischi
+# fix a font problem and cleanup some unneeded stuff
+#
 # Revision 1.14  2003/09/06 13:59:19  gsbarbieri
 # Now buttons try to get height from font if no value was given as argument.
 #
@@ -86,7 +89,6 @@ from Color      import *
 from Border     import *
 from Label      import * 
 from types      import * 
-from osd import Font
 
 DEBUG = 0
 
@@ -123,16 +125,20 @@ class Button(Container):
                            fg_color, selected_bg_color, selected_fg_color,
                            border, bd_color, bd_width)
 
+        self.h_margin          = 2
+        self.v_margin          = 2
+
         if not height:
             if self.skin_info_widget.font:
-                nf = OSDFont( self.skin_info_widget.font.name, self.skin_info_widget.font.size )
+                nf = OSDFont( self.skin_info_widget.font.name,
+                              self.skin_info_widget.font.size )
                 height = nf.height
 
             if self.skin_info_widget_selected.font:
                 sf = OSDFont( self.skin_info_widget_selected.font.name, \
                               self.skin_info_widget_selected.font.size )
                 if height:
-                    height = max( height, sf.height )
+                    height = max( height, sf.height)
                 else:
                     height = sf.height
                 
@@ -142,9 +148,6 @@ class Button(Container):
             self.height = height
 
         self.handler           = handler
-        self.h_margin          = 2
-        self.v_margin          = 2
-
 
         if type(text) in StringTypes:
             if text: self.set_text(text)
@@ -178,6 +181,9 @@ class Button(Container):
             self.set_font(self.selected_label,
                           config.OSD_DEFAULT_FONTNAME,
                           config.OSD_DEFAULT_FONTSIZE)
+
+        # now check the height, maybe the font is too large
+        self.height = max(self.height, self.label.font.height + 2 * self.v_margin)
 
         self.set_v_align(Align.BOTTOM)
         self.set_h_align(Align.CENTER)
@@ -233,7 +239,7 @@ class Button(Container):
         """
         Does not return OSD.Font object, but the filename and size as list.
         """
-        return (self.label.font.filename, self.label.font.ptsize)
+        return (self.label.font.name, self.label.font.ptsize)
 
 
     def set_font(self, label, state, file, size, color):

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/09/13 10:32:56  dischi
+# fix a font problem and cleanup some unneeded stuff
+#
 # Revision 1.11  2003/09/07 11:17:02  dischi
 # use normal button height as item height
 #
@@ -82,7 +85,6 @@ from Border    import *
 from Button    import *
 from Label     import * 
 from types     import * 
-from osd import Font
 
 DEBUG = 0
 

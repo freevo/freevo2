@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/09/13 10:32:56  dischi
+# fix a font problem and cleanup some unneeded stuff
+#
 # Revision 1.3  2003/05/02 01:09:02  rshortt
 # Changes in the way these objects draw.  They all maintain a self.surface
 # which they then blit onto their parent or in some cases the screen.  Label
@@ -55,7 +58,6 @@ from Border     import *
 from Label      import * 
 from LetterBox  import * 
 from types      import * 
-from osd import Font
 
 DEBUG = 0
 

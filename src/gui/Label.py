@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/09/13 10:32:55  dischi
+# fix a font problem and cleanup some unneeded stuff
+#
 # Revision 1.20  2003/09/06 17:12:50  rshortt
 # For Label use parent's text_prop if available before resorting to defaults.
 #
@@ -137,7 +140,6 @@
 import pygame
 
 from GUIObject import *
-from osd import Font
 
 DEBUG = 0
 

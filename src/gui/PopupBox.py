@@ -10,6 +10,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2003/09/13 10:32:56  dischi
+# fix a font problem and cleanup some unneeded stuff
+#
 # Revision 1.31  2003/09/11 19:34:18  outlyer
 # Revert this change; I forgot that get_size returns a tuple.
 #
@@ -152,8 +155,7 @@ class PopupBox(Container):
                           config.OSD_DEFAULT_FONTSIZE)
                 
         if not width:
-            tw = self.osd.getfont(self.font.filename, self.font.size).stringsize(text) + \
-                 self.h_margin*2
+            tw = self.font.font.stringsize(text) + self.h_margin*2
             if tw < self.osd.width * 2 / 3:
                 self.width = max(self.osd.width / 2, tw)
             else:
@@ -191,7 +193,7 @@ class PopupBox(Container):
         """
         Does not return OSD.Font object, but the filename and size as list.
         """
-        return ('normal', self.font.filename, int(self.font.size), self.font.color)
+        return ('normal', self.font.name, int(self.font.size), self.font.color)
 
 
     def set_font(self, file, size, color):
@@ -201,9 +203,8 @@ class PopupBox(Container):
         Just hands the info down to the label. Might raise an exception.
         """
         if not self.font:
-            self.font = Font()
+            self.font = self.osd.getfont(file, size)
 
-        self.font.filename = file
         self.font.size = size
         self.font.color = color
 

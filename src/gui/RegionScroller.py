@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/09/13 10:32:56  dischi
+# fix a font problem and cleanup some unneeded stuff
+#
 # Revision 1.17  2003/09/05 02:55:55  rshortt
 # I have to back out the python 2.3 warning fix because it breaks RegionScroller.  I will have a closer look at why when I have a moment.
 #
@@ -108,7 +111,6 @@ from Color     import *
 from Border    import *
 from Label     import * 
 from types     import * 
-from osd import Font
 
 import event as em
 

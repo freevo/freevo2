@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/09/13 10:32:56  dischi
+# fix a font problem and cleanup some unneeded stuff
+#
 # Revision 1.10  2003/06/25 02:27:39  rshortt
 # Allow 'frame' containers to grow verticly to hold all contents.  Also
 # better control of object's background images.
@@ -80,7 +83,6 @@ from Color     import *
 from Border    import *
 from Label     import * 
 from types     import * 
-from osd import Font
 
 DEBUG = 0
 

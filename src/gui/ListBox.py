@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/09/13 10:32:55  dischi
+# fix a font problem and cleanup some unneeded stuff
+#
 # Revision 1.17  2003/09/07 11:17:02  dischi
 # use normal button height as item height
 #
@@ -99,7 +102,6 @@ from Button         import *
 from Label          import * 
 from ListItem       import * 
 from types          import * 
-from osd import     Font
 import pygame
 
 DEBUG = 0

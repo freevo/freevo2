@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/09/13 10:32:56  dischi
+# fix a font problem and cleanup some unneeded stuff
+#
 # Revision 1.1  2003/09/01 18:52:55  dischi
 # Add progressbar and box with progressbar
 #
@@ -45,7 +48,6 @@ from Color      import *
 from Border     import *
 from Label      import * 
 from types      import * 
-from osd import Font
 
 DEBUG = 0
 
