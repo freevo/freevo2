@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/01/04 17:19:57  dischi
+# store image as .raw file if no filename is given
+#
 # Revision 1.2  2004/01/04 13:07:14  dischi
 # make image max 300x300
 #
@@ -42,19 +45,26 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import sys, os, mmpython, glob
+import sys, os, mmpython, glob, shutil
 from stat import *
-import shutil
 
-import config
-import popen3
-import Image
-
-def snapshot(videofile, imagefile, pos=None):
+def snapshot(videofile, imagefile=None, pos=None, update=True):
     """
     make a snapshot of the videofile at position pos to imagefile
     """
-    args = [ videofile, imagefile ]
+    import config
+    import popen3
+    import Image
+    import util
+    
+    if not imagefile:
+        imagefile = vfs.getoverlay(videofile + '.raw')
+
+    if not update and os.path.isfile(imagefile) and \
+           os.stat(videofile)[ST_MTIME] <= os.stat(imagefile)[ST_MTIME]:
+        return
+
+    args = [ config.MPLAYER_CMD, videofile, imagefile ]
     if pos != None:
         args.append(str(pos))
 
@@ -70,25 +80,32 @@ def snapshot(videofile, imagefile, pos=None):
             if image.mode == 'P':
                 image = image.convert('RGB')
             image = image.crop((5, 0, image.size[0]-10, image.size[1]))
-            image.save(imagefile)
-        except:
+            if imagefile.endswith('.raw'):
+                data = (image.tostring(), image.size, image.mode)
+                util.save_pickle(data, imagefile)
+            else:
+                image.save(imagefile)
+        except OSError:
             pass
 
 
 #
 # main function, will be called when this file is executed, not imported
-# args: videofile, imagefile, [ pos ]
+# args: mplayer, videofile, imagefile, [ pos ]
 #
 
 if __name__ == "__main__":
-    filename  = os.path.abspath(sys.argv[1])
-    imagefile = os.path.abspath(sys.argv[2])
+    import popen2
+    
+    mplayer   = os.path.abspath(sys.argv[1])
+    filename  = os.path.abspath(sys.argv[2])
+    imagefile = os.path.abspath(sys.argv[3])
 
     try:
-        position = sys.argv[3]
+        position = sys.argv[4]
     except IndexError:
         try:
-            position = str(mmpython.parse(filename).video[0].length / 2.0)
+            position = str(int(mmpython.parse(filename).video[0].length / 2.0))
         except:
             # else arbitrary consider that file is 1Mbps and grab position at 10%
             position = os.stat(filename)[ST_SIZE]/1024/1024/10.0
@@ -97,9 +114,19 @@ if __name__ == "__main__":
             else:
                 position = str(int(position))
 
-    popen3.stdout((config.MPLAYER_CMD, '-nosound', '-vo', 'png', '-frames', '8',
-                   '-ss', position, filename))
+    # call mplayer to get the image
+    child = popen2.Popen3((mplayer, '-nosound', '-vo', 'png', '-frames', '8',
+                           '-ss', position, filename), 1, 100)
+    while(1):
+        data = child.fromchild.readline()
+        if not data:
+            break
+    child.wait()
+    child.fromchild.close()
+    child.childerr.close()
+    child.tochild.close()
 
+    # store the correct thumbnail
     captures = glob.glob('000000??.png')
     if captures:
         capture = captures[-1:][0]
