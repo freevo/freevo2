@@ -20,11 +20,11 @@
       <item pos="2" name="Music"    action="music.main_menu" arg="" 
 	visible="yes" icon="icons/64x64/mp3.png"  />
       <item pos="3" name="Images"   action="imenu.main_menu" arg="" 
-	visible="no" icon="icons/64x64/images.png"  />
+	visible="yes" icon="icons/64x64/images.png"  />
       <item pos="4" name="Video Games" action="videogame.main_menu" arg="" 
 	visible="no" icon="icons/mame.png"  />
       <item pos="5" name="Shutdown" action="shutdown" arg="" 
-	visible="no" icon="icons/64x64/shutdown.png"  />
+	visible="yes" icon="icons/64x64/shutdown.png"  />
     </main>
     
     <!-- Settings for a normal menu -->
