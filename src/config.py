@@ -22,6 +22,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.75  2003/11/27 03:12:40  rshortt
+# Add the property group_type to the VideoGroup class to easier handle special
+# capture cards like those based on ivtv chipsets and dvb cards.
+#
 # Revision 1.74  2003/11/25 01:08:11  rshortt
 # Added a input_num property to the VideoGroup class because it can vary
 # between OS and cards.  We default to 0 which is common for the tv tuner in
@@ -193,12 +197,15 @@ class VideoGroup:
                  what channel it needs to be to get the signal, usually 3 or 4.
     recordable:  True or False.  Can you record from this VideoGroup.
     desc:        A nice description for this VideoGroup.
+    group_type:  Special variable to identify devices like dvb or ivtv.  This
+                 can be left as default, 'normal', or set to 'ivtv' or 'dvb'.
     """
 
     def __init__(self, vdev='/dev/video', adev='/dev/dsp', input_type='tuner',
                  input_num=0, tuner_norm='NTSC', tuner_chanlist='us-cable', 
                  tuner_type='internal', tuner_chan=None,
-                 recordable=True, desc='Freevo default VideoGroup'):
+                 recordable=True, desc='Freevo default VideoGroup',
+                 group_type='normal'):
 
         # XXX: Put checks in here for supplied values.
         self.vdev = vdev
@@ -211,6 +218,7 @@ class VideoGroup:
         self.tuner_chan = tuner_chan
         self.recordable = recordable
         self.desc = desc
+        self.group_type = group_type
         self.in_use = FALSE
         self.tuner = None
 
