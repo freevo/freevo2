@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/07/05 09:10:23  dischi
+# revert some changes to work with the new drawstringframed
+#
 # Revision 1.14  2003/07/02 20:11:43  dischi
 # use now the calc part of drawstringframed
 #
@@ -238,12 +241,12 @@ class Label(GUIObject):
 
     def get_rendered_size(self):
         (return_x0,return_y0, return_x1, return_y1) = \
-                              self.osd.dsf_calc(self.text, 0, 0, self.width,
-                                                self.height, fgcolor=None,
-                                                bgcolor=None, font=self.font_name,
-                                                ptsize=self.font_size,
-                                                align_h='left', align_v='top',
-                                                mode='hard')[2]
+                              self.osd.drawstringframed(self.text, 0, 0, self.width,
+                                                        self.height, fgcolor=None,
+                                                        bgcolor=None, font=self.font_name,
+                                                        ptsize=self.font_size,
+                                                        align_h='left', align_v='top',
+                                                        mode='hard', layer='')[1]
 
         # LABEL: ,71,17,294,43
         self.width = return_x1 - return_x0
