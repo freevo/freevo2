@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/02/22 23:28:12  gsbarbieri
+# Better unicode handling, better (i18n) messages.
+# Still no unicode with non-ascii names in Favorite(), marmelade problems.
+#
 # Revision 1.13  2004/02/22 21:41:21  rshortt
 # Check result instead.
 #
@@ -122,10 +126,15 @@ class EditFavoriteResource(FreevoResource):
 
             return String( fv.res )
 
-        chan = fv.formValue(form, 'chan')
+        chan = Unicode(fv.formValue(form, 'chan'))
+        if isinstance( chan, str ):
+            chan = Unicode( chan, 'latin-1' )
+        
         start = fv.formValue(form, 'start')
         action = fv.formValue(form, 'action')
-        name = fv.formValue(form, 'name')
+        name = Unicode(fv.formValue(form, 'name'))
+        if isinstance( name, str ):
+            name = Unicode( name, 'latin-1' )
 
         (result, favs) = ri.getFavorites()
         num_favorites = len(favs)
@@ -135,11 +144,25 @@ class EditFavoriteResource(FreevoResource):
 
 	    if not result:
                 fv.printHeader('Edit Favorite', 'styles/main.css')
-                fv.res += '<h4>ERROR: no program found on % at %</h4>' % (chan, start)
+                fv.res += "<h4>"+_("Messages")+":</h4>\n"
+                fv.res += "<ul>\n"
+
+                fv.res += '\t<li>' + \
+                          _('ERROR') + ': ' + \
+                          ( _('no program found on <b>%s</b> at <b>%s</b>. (%s)')%\
+                            (chan,
+                             time.strftime('%x %X', time.localtime(int(start))),
+                             prog
+                             )
+                           )+\
+                           '</li>\n'
+                
+                fv.res += "</ul>\n"
+
                 fv.printSearchForm()
                 fv.printLinks()
                 fv.printFooter()
-                return fv.res
+                return String(fv.res)
 
             if prog:
                 print 'PROG: %s' % prog
@@ -151,6 +174,25 @@ class EditFavoriteResource(FreevoResource):
             (result, fav) = ri.getFavorite(name)
         else:
             pass
+
+        if not result:
+            fv.printHeader('Edit Favorite', 'styles/main.css')
+            fv.res += "<h4>"+_("Messages")+":</h4>\n"
+            fv.res += "<ul>\n"
+
+            fv.res += '\t<li>' + \
+                      _('ERROR') + ': ' + \
+                      ( _('Favorite <b>%s</b> doesn\'t exists. (%s)') % \
+                        (name, fav)
+                        )+\
+                        '</li>\n'
+            
+            fv.res += "</ul>\n"
+            
+            fv.printSearchForm()
+            fv.printLinks()
+            fv.printFooter()
+            return String(fv.res)
 
 
         guide = tv.epg_xmltv.get_guide()
