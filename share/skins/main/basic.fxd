@@ -504,6 +504,11 @@
 			y="-5" width="max+10" height="max+10"/>
 		</item>
 		
+		<item type="conflict" font="tv">
+		    <rectangle bgcolor="0xba1405" size="1" color="0x000000" x="-5"
+			y="-5" width="max+10" height="max+10"/>
+		</item>
+		
 	    </content>
 	</layout>
 
