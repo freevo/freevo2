@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.52  2004/07/11 10:39:45  dischi
+# replaced AlertBox with normal warning on screen
+#
 # Revision 1.51  2004/07/10 12:33:39  dischi
 # header cleanup
 #
@@ -52,7 +55,7 @@ import plugin
 import util
 import rc
 
-from gui import GUIObject, AlertBox
+from gui import GUIObject
 from event import *
 
 import time
@@ -84,7 +87,6 @@ class ImageViewer(GUIObject):
                            str(IMAGE_ZOOM_GRID8):8, str(IMAGE_ZOOM_GRID9):9 }
 
         self.slideshow   = True  # currently in slideshow mode
-        self.alertbox    = None  # AlertBox active
         self.app_mode    = 'image'
         self.last_image  = (None, None)
         self.osd         = osd.get_singleton()
@@ -128,10 +130,16 @@ class ImageViewer(GUIObject):
 
         if not image:
             self.osd.clearscreen(color=self.osd.COL_BLACK)
+            self.osd.drawstringframed(_('Can\'t Open Image\n\'%s\'') % (filename),
+                                      config.OSD_OVERSCAN_X + 20,
+                                      config.OSD_OVERSCAN_Y + 20,
+                                      self.osd.width - 2 * config.OSD_OVERSCAN_X - 40,
+                                      self.osd.height - 2 * config.OSD_OVERSCAN_Y - 40,
+                                      self.osd.getfont(config.OSD_DEFAULT_FONTNAME,
+                                                       config.OSD_DEFAULT_FONTSIZE),
+                                      fgcolor=self.osd.COL_ORANGE,
+                                      align_h='center', align_v='center', mode='soft')
             self.osd.update()
-            self.alertbox = AlertBox(parent=self,
-                                     text=_("Can't Open Image\n'%s'") % (filename))
-            self.alertbox.show()
             return
         
 	width, height = image.get_size()
@@ -324,11 +332,6 @@ class ImageViewer(GUIObject):
 
 
     def eventhandler(self, event, menuw=None):
-        #if event == rc.SELECT and self.alertbox:
-        #    self.alertbox.destroy()
-        #    self.alertbox = None
-        #    return True
-
         if event == PAUSE or event == PLAY:
             if self.slideshow:
                 rc.post_event(Event(OSD_MESSAGE, arg=_('pause')))
