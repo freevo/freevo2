@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2003/05/05 21:11:15  dischi
+# save video width and height
+#
 # Revision 1.36  2003/05/05 15:14:55  outlyer
 # Fixed a crash in the bookmarks submenu, and fixed the long standing bug
 # where times greater than 999 seconds (16m39s) wouldn't be recorded, because
@@ -498,6 +501,8 @@ class MPlayerParser:
         self.RE_EXIT = re.compile("^Exiting\.\.\. \((.*)\)$").match
         self.RE_START = re.compile("^Starting playback\.\.\.").match
 
+        self.RE_SIZE = re.compile("^VIDEO:.* ([0-9]+)x([0-9]+) ").match
+
         self.parse_additional_data = not (self.item.available_audio_tracks or \
                                           self.item.available_subtitles )
 
@@ -518,6 +523,11 @@ class MPlayerParser:
 
             m = self.RE_VOBSUB(line)
             if m: self.item.available_subtitles += [ (m.group(1), m.group(2)) ]
+
+            m = self.RE_SIZE(line)
+            if m:
+                self.item.video_width = m.group(1)
+                self.item.video_height = m.group(2)
 
             if self.RE_START(line):
                 print 'data parsing done'

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.50  2003/05/05 21:11:15  dischi
+# save video width and height
+#
 # Revision 1.49  2003/05/05 15:14:55  outlyer
 # Fixed a crash in the bookmarks submenu, and fixed the long standing bug
 # where times greater than 999 seconds (16m39s) wouldn't be recorded, because
@@ -220,6 +223,8 @@ class VideoItem(Item):
         self.available_audio_tracks = []
         self.available_subtitles    = []
         self.available_chapters     = 0
+        self.video_width  = 0
+        self.video_height = 0
 
         self.selected_subtitle = None
         self.selected_audio    = None
