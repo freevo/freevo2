@@ -8,12 +8,13 @@ import re
 import httplib
 import sys
 
-
 try:
     imdb_number = sys.argv[1]
     filename = sys.argv[2]
 except IndexError:
-    print "to view args"
+    print "Usage: imdb.py [IMDB-NUMBER] [OUTPUT_FILE] [MOVIEFILE(S)]"
+    print "Generate XML data that stores extra IMDB information for use"
+    print "in the movie browser."
     sys.exit(1)
 
 # connect to imdb 
