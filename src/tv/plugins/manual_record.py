@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2005/01/06 18:49:05  dischi
+# remove old tv_util
+#
 # Revision 1.9  2004/08/05 17:27:16  dischi
 # Major (unfinished) tv update:
 # o the epg is now taken from pyepg in lib
@@ -63,7 +66,6 @@ from time import gmtime, strftime
 
 import plugin, config, menu
 
-import util.tv_util as tv_util
 import tv.record_client as record_client
 import event as em
 

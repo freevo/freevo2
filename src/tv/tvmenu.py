@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2005/01/06 18:49:04  dischi
+# remove old tv_util
+#
 # Revision 1.22  2004/12/04 01:23:55  rshortt
 # Update comment.
 #
@@ -79,25 +82,6 @@ import tvguide
 from directory import DirItem
 from gui import AlertBox
 
-
-# def get_tunerid(channel_id):
-#     tuner_id = None
-#     for vals in config.TV_CHANNELS:
-#         tv_channel_id, tv_display_name, tv_tuner_id = vals[:3]
-#         if tv_channel_id == channel_id:
-#             return tv_tuner_id
-
-#     AlertBox(text=_('Could not find TV channel %s') % channel_id).show()
-#     return None
-
-
-# def get_friendly_channel(channel_id):
-#     channel_name = tv_util.get_chan_displayname(channel_id)
-
-#     if not channel_name: 
-#         AlertBox(text=_('Could not find TV channel %s') % channel_id).show()
-
-#     return channel_name
 
 
 class TVMenu(Item):

@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2005/01/06 18:49:04  dischi
+# remove old tv_util
+#
 # Revision 1.1  2004/12/28 00:38:45  rshortt
 # Reactivating web guide and scheduling recordings, this is still a major work
 # in progress and there are still missing pieces.
@@ -107,7 +110,6 @@ import logging
 
 from www.base import HTMLResource, FreevoResource
 
-import util.tv_util as tv_util
 import util
 import config 
 import record.client
