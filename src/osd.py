@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.66  2003/07/12 14:30:14  outlyer
+# Changed to Vera for default font.
+#
 # Revision 1.65  2003/07/11 20:35:58  dischi
 # fixed some height problems in drawstringframed
 #
@@ -1096,7 +1099,7 @@ class OSD:
                 cmd = line[8:]
                 
                 print '"%s" "%s" %s %s' % (ks, cmd, x, y)
-                fname = 'skins/fonts/bluehigh.ttf'
+                fname = 'skins/fonts/Vera.ttf'
                 if ks: self.drawstring(ks, x, y, font=fname, ptsize=14)
                 if cmd: self.drawstring(cmd, x+80, y, font=fname, ptsize=14)
                 row += 1
