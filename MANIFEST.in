@@ -8,7 +8,7 @@ recursive-include i18n *.pot
 recursive-include i18n *.po
 recursive-include i18n *.mo
 
-include BUGS local_conf.py.example setup.py COPYING FAQ README freevo share INSTALL TODO
+include local_conf.py.example setup.py COPYING FAQ README freevo share INSTALL
 include ChangeLog  MANIFEST freevo_config.py
 
 
