@@ -70,6 +70,7 @@ MISSED    = 'missed'
 SAVED     = 'saved'
 DELETED   = 'deleted'
 
+config.detect('tvcards')
 
 class RecordServer(RPCServer):
     """
