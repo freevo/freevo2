@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.52  2003/12/22 13:27:34  dischi
+# patch for better support of fxd files with more discs from Matthieu Weber
+#
 # Revision 1.51  2003/12/15 03:45:29  outlyer
 # Added onscreen notification of bookmark being added via mplayer's
 # osd_show_text... older versions of mplayer will ignore the command so
@@ -119,7 +122,9 @@ class PluginInterface(plugin.Plugin):
                         config.MPLAYER_VERSION = 0.9
                     elif data[ 0 : 7 ] == "dev-CVS":
                         config.MPLAYER_VERSION = 9999
-                    _debug_("MPlayer version set to: %s" % config.MPLAYER_VERSION)
+                else:
+                    config.MPLAYER_VERSION = None
+                _debug_("MPlayer version set to: %s" % config.MPLAYER_VERSION)
             child.wait()
 
         # register mplayer as the object to play video
@@ -184,7 +189,10 @@ class MPlayer:
                     c_len = item.info.tracks[i].length
                     url = item.url + str(i+1)
             
-        _debug_('MPlayer.play(): mode=%s, url=%s' % (mode, url))
+        try:
+            _debug_('MPlayer.play(): mode=%s, url=%s' % (mode, url))
+        except UnicodeError:
+            _debug_('MPlayer.play(): [non-ASCII data]')
 
         if mode == 'file' and not os.path.isfile(url) and not network_play:
             # This event allows the videoitem which contains subitems to
@@ -193,12 +201,11 @@ class MPlayer:
        
 
         # Build the MPlayer command
-        mpl = '--prio=%s %s %s -slave -ao %s' % (config.MPLAYER_NICE,
-                                                 config.MPLAYER_CMD,
-                                                 config.MPLAYER_ARGS_DEF,
-                                                 config.MPLAYER_AO_DEV)
+        mpl = [ '--prio=%s' % config.MPLAYER_NICE, config.MPLAYER_CMD ]
+        mpl += config.MPLAYER_ARGS_DEF.split(' ')
+        mpl += [ '-slave', '-ao', config.MPLAYER_AO_DEV ]
 
-        additional_args = ''
+        additional_args = []
 
         if mode == 'dvd':
             if config.DVD_LANG_PREF:
@@ -209,43 +216,44 @@ class MPlayer:
                 if hasattr(item, 'mplayer_audio_broken') and item.mplayer_audio_broken:
                     print '*** dvd audio broken, try without alang ***'
                 else:
-                    additional_args = '-alang %s' % config.DVD_LANG_PREF
+                    additional_args += [ '-alang', config.DVD_LANG_PREF ]
 
             if config.DVD_SUBTITLE_PREF:
                 # Only use if defined since it will always turn on subtitles
                 # if defined
-                additional_args += ' -slang %s' % config.DVD_SUBTITLE_PREF
+                additional_args += [ '-slang', config.DVD_SUBTITLE_PREF ]
 
-            additional_args += ' -dvd-device %s' % item.media.devicename
+            additional_args += [ '-dvd-device', item.media.devicename ]
 
         if item.media:
-            additional_args += ' -cdrom-device %s ' % item.media.devicename
+            additional_args += [ '-cdrom-device', item.media.devicename ]
 
         if item.selected_subtitle == -1:
-            additional_args += ' -noautosub'
+            additional_args += [ '-noautosub' ]
 
         elif item.selected_subtitle and item.mode == 'file':
-            additional_args += ' -vobsubid %s' % item.selected_subtitle
+            additional_args += [ '-vobsubid', item.selected_subtitle ]
 
         elif item.selected_subtitle:
-            additional_args += ' -sid %s' % item.selected_subtitle
+            additional_args += [ '-sid', item.selected_subtitle ]
             
         if item.selected_audio:
-            additional_args += ' -aid %s' % item.selected_audio
+            additional_args += [ '-aid', item.selected_audio ]
 
         if item.deinterlace:
-            additional_args += ' -vop pp=fd'
+            additional_args += [ '-vop', 'pp=fd' ]
 
         mode = item.mime_type
         if not config.MPLAYER_ARGS.has_key(mode):
             mode = 'default'
 
         # Mplayer command and standard arguments
-        mpl += (' -v -vo ' + config.MPLAYER_VO_DEV + config.MPLAYER_VO_DEV_OPTS + \
-                ' ' + config.MPLAYER_ARGS[mode])
+        mpl += [ '-v', '-vo', config.MPLAYER_VO_DEV +
+                 config.MPLAYER_VO_DEV_OPTS ]
+        mpl += config.MPLAYER_ARGS[mode].split(' ')
 
         # make the options a list
-        mpl = mpl.split(' ') + additional_args.split(' ')
+        mpl += additional_args
 
         if hasattr(item, 'is_playlist') and item.is_playlist:
             mpl.append('-playlist')
@@ -254,7 +262,7 @@ class MPlayer:
         mpl.append(url)
 
         if options:
-            mpl += options.split(' ')
+            mpl += options
 
         # use software scaler?
         if '-nosws' in mpl:
@@ -266,8 +274,8 @@ class MPlayer:
         # correct avi delay based on mmpython settings
         if config.MPLAYER_SET_AUDIO_DELAY and item.info.has_key('delay') and \
                item.info['delay'] > 0:
-            mpl += ('-mc', str(int(item.info['delay'])+1), '-delay',
-                    '-' + str(item.info['delay']))
+            mpl += [ '-mc', str(int(item.info['delay'])+1), '-delay',
+                    '-' + str(item.info['delay']) ]
 
         command = mpl
 

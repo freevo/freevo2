@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.102  2003/12/22 13:27:34  dischi
+# patch for better support of fxd files with more discs from Matthieu Weber
+#
 # Revision 1.101  2003/12/09 19:43:01  dischi
 # patch from Matthieu Weber
 #
@@ -391,13 +394,59 @@ class VideoItem(Item):
     def play_max_cache(self, arg=None, menuw=None):
         self.play(menuw=menuw, arg='-cache 65536')
 
-    
+
+    def set_next_available_subitem(self):
+        """
+        select the next available subitem. Loops on each subitem and checks if
+        the needed media is really there.
+        If the media is there, sets self.current_subitem to the given subitem
+        and returns 1.
+        If no media has been found, we set self.current_subitem to None.
+          If the search for the next available subitem did start from the
+            beginning of the list, then we consider that no media at all was
+            available for any subitem: we return 0.
+          If the search for the next available subitem did not start from the
+            beginning of the list, then we consider that at least one media
+            had been found in the past: we return 1.
+        """
+        cont = 1
+        from_start = 0
+        si = self.current_subitem
+        while cont:
+            if not si:
+                # No subitem selected yet: take the first one
+                si = self.subitems[0]
+                from_start = 1
+            else:
+                pos = self.subitems.index(si)
+                # Else take the next one
+                if pos < len(self.subitems)-1:
+                    # Let's get the next subitem
+                    si = self.subitems[pos+1]
+                else:
+                    # No next subitem
+                    si = None
+                    cont = 0
+            if si:
+                if (si.media_id or si.media):
+                    # If the file is on a removeable media
+                    if util.check_media(si.media_id):
+                        self.current_subitem = si
+                        return 1
+                else:
+                    # if not, it is always available
+                    self.current_subitem = si
+                    return 1
+        self.current_subitem = None
+        return not from_start
+
+
     def play(self, arg=None, menuw=None):
         """
         play the item.
         """
         self.scan()
-
+        
         self.player_rating, self.player = self.possible_player[0]
         self.parent.current_item = self
 
@@ -410,35 +459,49 @@ class VideoItem(Item):
             return
 
         # if we have subitems (a movie with more than one file),
-        # we start playing the first
+        # we start playing the first that is physically available
         if self.subitems:
-            self.current_subitem = self.subitems[0]
-            # Pass along the options, without loosing the subitem's own
-            # options
-            if self.current_subitem.mplayer_options:
-                if self.mplayer_options:
-                    self.current_subitem.mplayer_options += ' ' + self.mplayer_options
-            else:
-                self.current_subitem.mplayer_options = self.mplayer_options
-            # When playing a subitem, the menu must be hidden. If it is not,
-            # the playing will stop after the first subitem, since the
-            # PLAY_END/USER_END event is not forwarded to the parent
-            # videoitem.
-            # And besides, we don't need the menu between two subitems.
-            self.menuw.hide()
-            self.current_subitem.play(arg, self.menuw)
+            self.error_in_subitem = 0
+            self.last_error_msg = ''
+            result = self.set_next_available_subitem()
+            if self.current_subitem: # 'result' is always 1 in this case
+                # The media is available now for playing
+                # Pass along the options, without loosing the subitem's own
+                # options
+                if self.current_subitem.mplayer_options:
+                    if self.mplayer_options:
+                        self.current_subitem.mplayer_options += ' ' + self.mplayer_options
+                else:
+                    self.current_subitem.mplayer_options = self.mplayer_options
+                # When playing a subitem, the menu must be hidden. If it is not,
+                # the playing will stop after the first subitem, since the
+                # PLAY_END/USER_END event is not forwarded to the parent
+                # videoitem.
+                # And besides, we don't need the menu between two subitems.
+                self.menuw.hide()
+                self.last_error_msg = self.current_subitem.play(arg, self.menuw)
+                if self.last_error_msg:
+                    self.error_in_subitem = 1
+                    # Go to the next playable subitem, using the loop in
+                    # eventhandler()
+                    self.eventhandler(PLAY_END)
+                    
+            elif not result:
+                # No media at all was found: error
+                ConfirmBox(text=(_('No media found for "%s".\n')+
+                                 _('Please insert the media.')) %
+                                 self.name, handler=self.play ).show()
             return
-
 
         # normal plackback of one file
         if self.mode == "file":
             file = self.filename
-        
             if self.media_id:
                 mountdir, file = util.resolve_media_mountdir(self.media_id,file)
                 if mountdir:
                     util.mount(mountdir)
                 else:
+                    self.menuw.show()
                     ConfirmBox(text=(_('Media not found for file "%s".\n')+
                                      _('Please insert the media.')) % file,
                                handler=self.play ).show()
@@ -453,6 +516,7 @@ class VideoItem(Item):
                 if media:
                     self.media = media
                 else:
+                    self.menuw.show()
                     ConfirmBox(text=(_('Media not not found for "%s".\n')+
                                      _('Please insert the media.')) % self.url,
                                handler=self.play).show()
@@ -462,23 +526,28 @@ class VideoItem(Item):
             AlertBox(text=_('No player for this item found')).show()
             return
         
-        mplayer_options = self.mplayer_options
+        mplayer_options = self.mplayer_options.split(' ')
         if not mplayer_options:
-            mplayer_options = ""
+            mplayer_options = []
 
         if arg:
-            mplayer_options += ' %s' % arg
+            mplayer_options += arg.split[' ']
 
         if self.menuw.visible:
             self.menuw.hide()
 
         self.plugin_eventhandler(PLAY, menuw)
-
+        
         error = self.player.play(mplayer_options, self)
 
         if error:
-            AlertBox(text=error).show()
-            rc.post_event(PLAY_END)
+            # If we are a subitem we don't show any error message before
+            # having tried all the subitems
+            if self.parent.subitems:
+                return error
+            else:
+                AlertBox(text=error).show()
+                rc.post_event(PLAY_END)
 
 
     def stop(self, arg=None, menuw=None):
@@ -540,18 +609,25 @@ class VideoItem(Item):
         if self.plugin_eventhandler(event, menuw):
             return True
 
-        # PLAY_END: do have have to play another file?
+        # PLAY_END: do we have to play another file?
         if self.subitems:
             if event == PLAY_END:
-                try:
-                    pos = self.subitems.index(self.current_subitem)
-                    if pos < len(self.subitems)-1:
-                        self.current_subitem = self.subitems[pos+1]
-                        _debug_('playing next item')
-                        self.current_subitem.play(menuw=menuw)
+                self.set_next_available_subitem()
+                # Loop untli we find a subitem which plays without error
+                while self.current_subitem: 
+                    _debug_('playing next item')
+                    error = self.current_subitem.play(menuw=menuw)
+                    if error:
+                        self.last_error_msg = error
+                        self.error_in_subitem = 1
+                        self.set_next_available_subitem()
+                    else:
                         return True
-                except:
-                    pass
+                if self.error_in_subitem:
+                    # No more subitems to play, and an error occured
+                    self.menuw.show()
+                    AlertBox(text=self.last_error_msg).show()
+                    
             elif event == USER_END:
                 pass
 

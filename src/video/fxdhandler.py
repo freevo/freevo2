@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/12/22 13:27:34  dischi
+# patch for better support of fxd files with more discs from Matthieu Weber
+#
 # Revision 1.6  2003/12/09 19:43:01  dischi
 # patch from Matthieu Weber
 #
@@ -61,12 +64,13 @@ def parse_movie(fxd, node):
             <dvd|vcd|file id name media_id mplayer_options>file</>+
         <variants>
             <variant>
-                <part ref mplayer_options/>
-                <subtitle media_id>file</subtitle>
-                <audio media_id>file</audio>
-            </variant>
+                <part ref mplayer_options>
+                    <subtitle media_id>file</subtitle>
+                    <audio media_id>file</audio>
+                </part>+
+            </variant>+
         </variants>  
-        <info>
+        <info/>
     </movie>
     """
 
@@ -76,8 +80,6 @@ def parse_movie(fxd, node):
         """
         filename   = fxd.gettext(node)
         media_id   = fxd.getattr(node, 'media-id')
-        if media_id == '':
-            filename = vfs.join(dirname, filename)
         mode       = node.name
         id         = fxd.getattr(node, 'id')
         options    = fxd.getattr(node, 'mplayer-options')
@@ -90,7 +92,8 @@ def parse_movie(fxd, node):
         duplicates = fxd.getattr(None, 'duplicate_check', [])
 
         if mode == 'file':
-            filename   = vfs.join(dirname, filename)
+            if not media_id:
+                filename = vfs.join(dirname, filename)
 
             # mark the files we include in the fxd in _fxd_covered_
             if not hasattr(item, '_fxd_covered_'):
@@ -152,7 +155,7 @@ def parse_movie(fxd, node):
                 if audio:
                     audio = { 'media_id': fxd.getattr(audio[0], 'media-id'),
                               'file'    : fxd.gettext(audio[0]) }
-                    if audio['media_id'] == '':
+                    if not audio['media_id']:
                         audio['file'] = vfs.join(dirname, audio['file'])
                 else:
                     audio = {}
@@ -162,7 +165,7 @@ def parse_movie(fxd, node):
                 if subtitle:
                     subtitle = { 'media_id': fxd.getattr(subtitle[0], 'media-id'),
                                  'file'    : fxd.gettext(subtitle[0]) }
-                    if subtitle['media_id'] == '':
+                    if not subtitle['media_id']:
                         subtitle['file'] = vfs.join(dirname, subtitle['file'])
                 else:
                     subtitle = {}
@@ -182,7 +185,7 @@ def parse_movie(fxd, node):
                     if audio:
                         audio = { 'media_id': fxd.getattr(audio[0], 'media-id'),
                                   'file'    : fxd.gettext(audio[0]) }
-                        if audio['media_id'] == '':
+                        if not audio['media_id']:
                             audio['file'] = vfs.join(dirname, audio['file'])
                     else:
                         audio = {}
@@ -190,7 +193,7 @@ def parse_movie(fxd, node):
                     if subtitle:
                         subtitle = { 'media_id': fxd.getattr(subtitle[0], 'media-id'),
                                      'file'    : fxd.gettext(subtitle[0]) }
-                        if subtitle['media_id'] == '':
+                        if not subtitle['media_id']:
                             subtitle['file'] = vfs.join(dirname, subtitle['file'])
                     else:
                         subtitle = {}
