@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/02/26 01:16:43  rshortt
+# Added manualrecord.cgi to the links.  We may soon need to think of a better layout for the links as the interface grows.
+#
 # Revision 1.3  2003/02/20 21:52:26  rshortt
 # Added a link 'Video Library' to library.cgi which was contributed by Mike Ruelle.
 #
@@ -128,6 +131,7 @@ def printLinks(fp=sys.stdout):
     <td class="tablelink" onClick="document.location=\'record.cgi\'">Scheduled Recordings</td>
     <td class="tablelink" onClick="document.location=\'favorites.cgi\'">Favorites</td>
     <td class="tablelink" onClick="document.location=\'library.cgi\'">Video Library</td>
+    <td class="tablelink" onClick="document.location=\'manualrecord.cgi\'">Manually Record</td>
   </tr>
 </table>
 </center>
