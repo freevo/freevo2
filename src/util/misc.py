@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2004/07/11 19:33:35  dischi
+# make mass storage only storage to cover all forms
+#
 # Revision 1.43  2004/07/11 18:43:52  dischi
 # fix usb storage detection
 #
@@ -280,10 +283,7 @@ def list_usb_devices():
 def is_usb_storage_device():
     fd = open('/proc/bus/usb/devices', 'r')
     for line in fd.readlines():
-           if line.lower().find('mass-storage') != -1:
-               fd.close()
-               return 0
-           if line.lower().find('mass storage') != -1:
+           if line.lower().find('storage') != -1:
                fd.close()
                return 0
     fd.close()
