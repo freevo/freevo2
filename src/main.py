@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.139  2004/08/22 20:16:22  dischi
+# move splashscreen to new mevas based gui code
+#
 # Revision 1.138  2004/08/14 15:09:54  dischi
 # use new AreaHandler
 #
@@ -283,10 +286,10 @@ class Splashscreen(Area):
         clear all content objects
         """
         for c in self.content:
-            self.screen.remove(c)
+            c.unparent()
         self.content = []
         if self.bar:
-            self.screen.remove(self.bar)
+            self.bar.unparent()
             self.bar = None
             
         
@@ -308,7 +311,7 @@ class Splashscreen(Area):
         if self.pos:
             pos = round(float((x1 - x0 - 4)) / (float(100) / self.pos))
         if self.bar:
-            self.screen.remove(self.bar)
+            self.bar.unparent()
         self.bar = self.drawbox(x0+2, y+2, pos, 16, self.bar_position)
         
 
