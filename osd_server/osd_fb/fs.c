@@ -18,6 +18,10 @@
 #include "osd.h"
 #endif
 
+#ifdef TEST
+static void osd_setpixel (uint16 x, uint16 y, uint32 color);
+#endif
+
 #include "helvB18-L1.h"
 
 
@@ -25,74 +29,6 @@ static const unsigned fs_masktab[] = {
     (1 << 7), (1 << 6), (1 << 5), (1 << 4),
     (1 << 3), (1 << 2), (1 << 1), (1 << 0),
 };
-
-
-#ifdef TEST
-
-#define BITMAP_WIDTH 300
-#define BITMAP_HEIGHT 30
-
-static char bitmap[BITMAP_WIDTH][BITMAP_HEIGHT];
-
-static void
-osd_setpixel (uint16 x, uint16 y, uint32 color)
-{
-   int i, j;
-   static int init = 0;
-
-
-   if (!init) {
-      for (i = 0; i < BITMAP_WIDTH; i++) {
-         for (j = 0; j < BITMAP_HEIGHT; j++) {
-            bitmap[i][j] = 'U';
-         }
-      }
-
-      init = 1;
-         
-   }
-
-   if ((x >= BITMAP_WIDTH) || (y >= BITMAP_HEIGHT)) {
-      return;
-   }
-      
-   if (color == 0) {
-      bitmap[x][y] = '.';
-   } else {
-      bitmap[x][y] = 'X';
-   }
-   
-}
-
-
-int
-main (int ac, char *av[])
-{
-   font_t *f;
-   int i, j, w;
-   char str[] = "abhijkp";
-   char *p_str = str;
-   
-
-   if (ac == 2) {
-      p_str = av[1];
-   }
-
-   f = fs_open (NULL);
-
-   w = fs_puts (f, 0, 0, 0xffffff, 0, p_str);
-
-   for (i = 0; i < BITMAP_HEIGHT; i++) {
-      for (j = 0; j < w; j++) {
-         printf ("%c", bitmap[j][i]);
-      }
-      printf ("\n");
-   }
-
-   exit (0);
-
-}
-#endif /* TEST */
 
 
 font_t *
@@ -182,3 +118,71 @@ fs_puts (font_t *f, int x, int y, uint32 fgcol, uint32 bgcol,
 
     return (cell_left);
 }
+
+
+#ifdef TEST
+
+#define BITMAP_WIDTH 300
+#define BITMAP_HEIGHT 30
+
+static char bitmap[BITMAP_WIDTH][BITMAP_HEIGHT];
+
+static void
+osd_setpixel (uint16 x, uint16 y, uint32 color)
+{
+   int i, j;
+   static int init = 0;
+
+
+   if (!init) {
+      for (i = 0; i < BITMAP_WIDTH; i++) {
+         for (j = 0; j < BITMAP_HEIGHT; j++) {
+            bitmap[i][j] = 'U';
+         }
+      }
+
+      init = 1;
+         
+   }
+
+   if ((x >= BITMAP_WIDTH) || (y >= BITMAP_HEIGHT)) {
+      return;
+   }
+      
+   if (color == 0) {
+      bitmap[x][y] = '.';
+   } else {
+      bitmap[x][y] = 'X';
+   }
+   
+}
+
+
+int
+main (int ac, char *av[])
+{
+   font_t *f;
+   int i, j, w;
+   char str[] = "abhijkp";
+   char *p_str = str;
+   
+
+   if (ac == 2) {
+      p_str = av[1];
+   }
+
+   f = fs_open (NULL);
+
+   w = fs_puts (f, 0, 0, 0xffffff, 0, p_str);
+
+   for (i = 0; i < BITMAP_HEIGHT; i++) {
+      for (j = 0; j < w; j++) {
+         printf ("%c", bitmap[j][i]);
+      }
+      printf ("\n");
+   }
+
+   exit (0);
+
+}
+#endif /* TEST */
