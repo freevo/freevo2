@@ -206,7 +206,7 @@ LOCAL_CONF_CHANGES = [
      will speed up entering the dir'''),
     (5.07,
      '''Add MENU_ARROW_NAVIGATION to change navigation style. New one is default
-     now.''') ]
+     now. Also added OSD_EXTRA_FONT_PATH to search for fonts''') ]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -768,6 +768,11 @@ SKIN_MEDIAMENU_FORCE_TEXTVIEW = 0
 #
 OSD_DEFAULT_FONTNAME = 'Vera.ttf'
 OSD_DEFAULT_FONTSIZE = 18
+
+#
+# Sytem Path were to search for fonts not in the Freevo distribution
+#
+OSD_EXTRA_FONT_PATH  = [ '/usr/X11R6/lib/X11/fonts/truetype/' ]
 
 # Font aliases, all names must be lowercase!
 # All alternate fonts must be in './share/fonts/'
