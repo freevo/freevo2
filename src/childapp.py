@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.71  2004/12/12 18:02:39  dischi
+# wait longer on exit
+#
 # Revision 1.70  2004/12/05 13:01:10  dischi
 # delete old tv variables, rename some and fix detection
 #
@@ -235,7 +238,7 @@ class Instance:
     def isAlive( self ):
         if not self.ready: # return true if constructor has not finished yet
             return True
-        return not self.outfile.closed and not self.errfile.closed
+        return not self.outfile.closed or not self.errfile.closed
         
 
     def stop( self, cmd = '' ):
@@ -253,7 +256,7 @@ class Instance:
                 log.info('sending exit command to app')
                 self.write(cmd)
                 cb = notifier.Callback( self._kill, 15 )
-                self.__kill_timer = notifier.addTimer( 1000, cb )
+                self.__kill_timer = notifier.addTimer( 3000, cb )
             else:
                 cb = notifier.Callback( self._kill, 15 )
                 self.__kill_timer = notifier.addTimer( 0, cb )
@@ -283,7 +286,7 @@ class Instance:
         else:
             cb = notifier.Callback( self._killall, 15 )
             
-        self.__kill_timer = notifier.addTimer( 1000, cb )
+        self.__kill_timer = notifier.addTimer( 3000, cb )
         
         return False
 
@@ -300,7 +303,7 @@ class Instance:
         log.info('kill -%d %s' % ( signal, self.binary ))
         if signal == 15:
             cb = notifier.Callback( self._killall, 9 )
-            self.__kill_timer = notifier.addTimer( 1000, cb )
+            self.__kill_timer = notifier.addTimer( 2000, cb )
         else:
             log.critical('PANIC %s' % self.binary)
             
