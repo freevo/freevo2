@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/09/12 20:33:18  dischi
+# add html output
+#
 # Revision 1.2  2003/09/09 20:26:35  dischi
 # add short description for -l
 #
@@ -49,7 +52,6 @@ import re
 import os
 import sys
 
-
 def parse_plugins():
     start = re.compile('^class *(.*)\((.*Plugin).:')
     stop  = re.compile('^[\t ]*def.*:')
@@ -68,6 +70,7 @@ def parse_plugins():
         if file.find('plugin.py') > 0:
             continue
         parse_status = 0
+        whitespaces  = 0
         for line in util.readfile(file):
             if (comment.match(line) and parse_status == 2) or \
                    (stop.match(line) and parse_status == 1):
@@ -77,11 +80,15 @@ def parse_plugins():
             if parse_status == 2:
                 if desc:
                     desc += '\n'
-                desc += line.lstrip().rstrip()
+                if not whitespaces:
+                    tmp = line.lstrip()
+                    whitespaces = line.find(tmp)
+                desc += line[whitespaces:].rstrip()
 
             if comment.match(line) and parse_status == 1:
                 parse_status = 2
-
+                whitespaces  = 0
+                
             if start.match(line):
                 fname = re.sub('^src.', '', file)
                 fname = re.sub('^%s.' % os.environ['FREEVO_PYTHON'], '', fname)
@@ -131,6 +138,73 @@ def print_info(plugin_name, all_plugins):
                 print 'The plugin is not activated in the current setting'
 
 
+def iscode(line):
+    return (len(line) > 2 and line[:2].upper() == line[:2] and \
+            line.find('=') > 0) or \
+            (line and line[0] in ('#',' ', '[', '(')) or (line.find('plugin.') == 0)
+
+
+def info_html(plugin_name, all_plugins):
+    ret = ''
+    for name, file, type, status, desc in all_plugins:
+        if name == plugin_name:
+            ret += '<h2>%s</h2>' % name
+            ret += '<b>Type: %s</b><br>' % type
+            ret += '<b>File: %s</b><br><br><br>' % file
+            ret += '\n'
+            ret += '<b>Description</b>:'
+            ret += '<p>'
+            tmp  = desc
+            desc = []
+            for block in tmp.split('\n\n'):
+                for line in block.split('\n'):
+                    desc.append(line)
+                desc.append('')
+
+            code = 0
+            for i in range(len(desc)):
+                line = desc[i]
+                if iscode(line):
+                    if not code:
+                        ret += '<br><pre class="code">\n'
+                    ret += line+'\n'
+                    code = 1
+
+                    try:
+                        if (desc[i+1] and not iscode(desc[i+1])) or \
+                               (desc[i+2] and not iscode(desc[i+2])):
+                            ret += '</pre>'
+                            code = 0
+                    except IndexError:
+                        ret += '</pre>'
+                        code = 0
+                elif line:
+                    ret += line
+                elif code:
+                    ret += '\n'
+                else:
+                    ret += '<br>'
+
+            if code:
+                ret += '</pre>'
+                code = 0
+            ret += '</p>'
+            ret += '\n'
+
+            if status == 'active':
+                ret += '<p>The plugin is loaded with the following settings:<br>'
+                for p in plugin.__all_plugins__:
+                    if p[0] == name:
+                        type = p[1]
+                        if not type:
+                            type = 'default'
+                        ret += 'type=%s, level=%s, args=%s' % (type, p[2], p[3])
+                ret += '</p><br>'
+            else:
+                ret += '<p>The plugin is not activated in the current setting</p>'
+
+    return ret
+    
 
 
 # show a list of all plugins
@@ -171,6 +245,29 @@ elif len(sys.argv)>1 and sys.argv[1] == '-a':
         if p != all_plugins[0] and p != all_plugins[-1]:
             print '\n********************************\n'
         print_info(p[0], [p])
+
+# show infos about all plugins as html
+elif len(sys.argv)>1 and sys.argv[1] == '-html':
+    all_plugins = parse_plugins()
+
+    print '<html><head>\
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html;charset=iso-8859-1">\
+<title>Freevo Plugins</title>\
+<link rel="stylesheet" type="text/css" href="freevowiki.css">\
+</head>\
+<body>\
+<font class="headline" size="+3">Freevo Plugin List</font>\
+<p><b>Index</b><ol>'
+
+    for p in all_plugins:
+        print '<li><a href="#%s">%s</a></li>' % (p[0], p[0])
+    print '</ol> '
+
+    for p in all_plugins:
+        print '<a name="%s"></a>' % p[0]
+        print info_html(p[0], [p])
+
+    print '</body>'
 
 else:
     print 'This helper shows the list of all plugins included in Freevo and'
