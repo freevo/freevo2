@@ -5,39 +5,25 @@
 #
 
 CC = gcc
-XLIBS = -L/usr/X11R6/lib -lX11
+CFLAGS = -O2 -Wall 
 
-# XXX plugins/cddb breaks the compile on my (Krister) machine 
-# XXX since it cannot find Python.h. We should have some way of 
-# XXX autogenerating a config.mak or something during ./configure
-#SUBDIRS = matrox_g400 rc_client osd_server plugins/cddb
+# Just look everywhere for X11 stuff...
+XLIBS = -L/usr/X11R6/lib -L/usr/X11/lib -L/usr/lib32 -L/usr/openwin/lib \
+        -L/usr/X11R6/lib64 -lX11
+XINC = -I/usr/X11R6/include -I/usr/X11/include -I/usr/openwin/include
 
-SUBDIRS = matrox_g400 rc_client osd_server
+SUBDIRS = fbcon
 
-all: subdirs runapp freevo_xwin
-
-x11: all osds_x11
-
-sdl: all osds_sdl
-
-dxr3: all osds_dxr3
 
 .PHONY: all subdirs x11 osd_x1 $(SUBDIRS) clean release install
 
-osds_x11:
-	cd osd_server ; $(MAKE) osds_x11
-
-osds_sdl:
-	cd osd_server ; $(MAKE) osds_sdl
-
-osds_dxr3:
-	cd osd_server ; $(MAKE) osds_dxr3
+all: subdirs runapp freevo_xwin
 
 runapp: runapp.c
-	$(CC) -o runapp runapp.c -DRUNAPP_LOGDIR=\"/var/log/freevo\"
+	$(CC) $(CFLAGS) -o runapp runapp.c -DRUNAPP_LOGDIR=\"/var/log/freevo\"
 
 freevo_xwin: freevo_xwin.c
-	$(CC) -o freevo_xwin freevo_xwin.c $(XLIBS)
+	$(CC) $(CFLAGS) -o freevo_xwin freevo_xwin.c $(XINC) $(XLIBS)
 
 subdirs: $(SUBDIRS)
 
@@ -46,15 +32,13 @@ $(SUBDIRS):
 
 clean:
 	-rm -f *.pyc */*.pyc */*/*.pyc */*/*/*.pyc *.o log_main_out 
-	-rm -f log_main_err log.txt runapp cdrom.so cdrommodule.o
-	cd matrox_g400 ; make clean
-	cd rc_client ; make clean
-	cd osd_server ; make clean
+	-rm -f log_main_err log.txt runapp freevo_xwin
+	cd fbcon ; make clean
 
 # Remove all compiled python files
 distclean:
 	find . -name "*.pyc*" -exec rm -f {} \;
-
+	make -C fbcon distclean
 
 # XXX Real simple install procedure for now, but freevo is so small it doesn't really
 # XXX matter

@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2002/08/21 05:07:59  krister
+# Moved Makefile.in to Makefile.
+#
 # Revision 1.11  2002/08/21 04:58:26  krister
 # Massive changes! Obsoleted all osd_server stuff. Moved vtrelease and matrox stuff to a new dir fbcon. Updated source to use only the SDL OSD which was moved to osd.py. Changed the default TV viewing app to mplayer_tv.py. Changed configure/setup_build.py/config.py/freevo_config.py to generate and use a plain-text config file called freevo.conf. Updated docs. Changed mplayer to use -vo null when playing music. Fixed a bug in music playing when the top dir was empty.
 #
@@ -68,6 +71,7 @@ Configure Freevo for your specific environment.
 
    --help                       display this help and exit
 
+The default is "--geometry=800x600 --display=x11 --tv=ntsc --chanlist=us-cable"
 Please report bugs to <freevo-users@lists.sourceforge.net>.
 """
 
