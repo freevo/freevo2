@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.53  2004/07/11 12:25:44  dischi
+# fix bad German titles
+#
 # Revision 1.52  2004/07/10 12:33:41  dischi
 # header cleanup
 #
@@ -282,9 +285,24 @@ def load_guide(verbose=True, XMLTV_FILE=None):
                     prog.stop = timestr2secs_utc(p['stop'])
                 except:
                     # Fudging end time
-                    prog.stop = timestr2secs_utc(p['start'][0:8] + '235900' + p['start'][14:18])
+                    prog.stop = timestr2secs_utc(p['start'][0:8] + '235900' + \
+                                                 p['start'][14:18])
             except EPG_TIME_EXC:
                 continue
+            # fix bad German titles to make favorites working
+            if prog.title.endswith('. Teil'):
+                prog.title = prog.title[:-6]
+                if prog.title.rfind(' ') > 0:
+                    try:
+                        part = int(prog.title[prog.title.rfind(' ')+1:])
+                        prog.title = prog.title[:prog.title.rfind(' ')].rstrip()
+                        if prog.sub_title:
+                            prog.sub_title = u'Teil %s: %s' % (part, prog.sub_title)
+                        else:
+                            prog.sub_title = u'Teil %s' % part
+                    except Exception, e:
+                        print e
+
             guide.AddProgram(prog)
         except:
             traceback.print_exc()
