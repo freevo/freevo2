@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2002/11/24 07:29:01  krister
+# Cleanup.
+#
 # Revision 1.8  2002/11/24 07:20:19  krister
 # Clean. Started working on a simple TV recording menu.
 #
@@ -117,23 +120,7 @@ class ExtendedMenu_TV(ExtendedMenu.ExtendedMenu):
         elif event == rc.REFRESH_SCREEN:
             self.refresh()
         elif event == rc.REC:
-            print self.listing.last_to_listing[3]
             prog = self.listing.last_to_listing[3]
-            s = 'Recording program %s\n' % prog.title
-            s += 'Stop %s\n' % time.ctime(prog.stop)
-            s += 'Tuner channel %s' % tv.get_tunerid(prog.channel_id)
-            skin.PopupBox(s)
-            time.sleep(0.5)
-            self.refresh()
-
-            cmd = (('/home/krister/proj/freevo/apps/test/C500/' +
-                    'nvrec_20020821a/nuvrec -F 300000 -norm NTSC ' +
-                    '-input Television -w 320 -h 240 -vq 100 -d ' +
-                    '/dev/dsp2 -mixsrc /dev/mixer2:line1 -o /home/' +
-                    'krister/Movies/%s.avi &> /dev/null &') %
-                   time.ctime().replace(' ', '_'))
-            #os.system(cmd)
-            #print 'Started cmd "%s"' % cmd
             record_video.main_menu(prog)
         elif event != rc.IDENTIFY_MEDIA:
             self.clear()
