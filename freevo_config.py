@@ -1302,9 +1302,8 @@ FREQUENCY_TABLE = {
 # If auto-detection doesn't work or you want to edit the list, run
 # freevo tv_grab -query.
 #
-# Setting this variable to [] will deactivate the tv guide. If you don't have
-# a tv card, you may also want to add plugin.remove('tv') to remove the whole
-# tv menu.
+# If you don't have a tv card, you may also want to add plugin.remove('tv') to
+# remove the whole tv menu.
 #
 # All channels listed here will be displayed on the TV menu, even if they're
 # not present in the XMLTV listing.
@@ -1334,7 +1333,7 @@ FREQUENCY_TABLE = {
 # 03:00 to 06:00 it won't be displayed at all.
 #
 
-TV_CHANNELS = None
+TV_CHANNELS = []
 
 
 # Sometimes we can't control the contents of our XMLTV file and it may contain
