@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/08/13 16:17:33  rshortt
+# More work on tv settings, configuration of v4l2 devices based on TV_SETTINGS.
+#
 # Revision 1.17  2004/08/12 16:52:49  rshortt
 # Work on autodetecting tv cards.
 #
@@ -142,11 +145,25 @@ NORMS = { 'NTSC'  : 0x3000,
 
 
 class Videodev:
-    def __init__(self, device):
-        self.chanlist = None
-        self.device = os.open (device, os.O_TRUNC)
-        if self.device < 0:
-            sys.exit("Error: %d\n" %self.device)
+    def __init__(self, which=None, device=None):
+        self.devfd = None
+        self.settings = None
+
+        if not which:
+            if not device:
+                device = '/dev/video'
+
+            self.basic_info(device)
+
+        else:
+            self.settings = config.TV_SETTINGS.get(which)
+            self.init_settings()
+
+
+    def basic_info(self, device):
+        self.devfd = os.open(device, os.O_TRUNC)
+        if self.devfd < 0:
+            sys.exit("Error: %d\n" %self.devfd)
         else:
             if DEBUG: print "Video Opened at %s" % device
 
@@ -159,7 +176,7 @@ class Videodev:
     
 
     def close(self):
-        os.close(self.device)
+        os.close(self.devfd)
 
 
     def setchanlist(self, chanlist):
@@ -169,7 +186,7 @@ class Videodev:
     def getfreq(self):
         val = struct.pack( FREQUENCY_ST, 0,0,0 )
         try:
-            r = fcntl.ioctl(self.device, long(GETFREQ_NO), val)
+            r = fcntl.ioctl(self.devfd, long(GETFREQ_NO), val)
             (junk,junk, freq, ) = struct.unpack(FREQUENCY_ST, r)
             return freq
         except IOError:
@@ -206,56 +223,56 @@ class Videodev:
 
     def setfreq_old(self, freq):
         val = struct.pack( "L", freq)
-        r = fcntl.ioctl(self.device, long(SETFREQ_NO_V4L), val)        
+        r = fcntl.ioctl(self.devfd, long(SETFREQ_NO_V4L), val)        
 
 
     def setfreq(self, freq):
         val = struct.pack( FREQUENCY_ST, long(0), long(0), freq)
-        r = fcntl.ioctl(self.device, long(SETFREQ_NO), val)
+        r = fcntl.ioctl(self.devfd, long(SETFREQ_NO), val)
 
 
     def getinput(self):
-        r = fcntl.ioctl(self.device, GETINPUT_NO, struct.pack(INPUT_ST,0))
+        r = fcntl.ioctl(self.devfd, GETINPUT_NO, struct.pack(INPUT_ST,0))
         return struct.unpack(INPUT_ST,r)[0]
   
 
     def setinput(self,value):
-        r = fcntl.ioctl(self.device, SETINPUT_NO, struct.pack(INPUT_ST,value))
+        r = fcntl.ioctl(self.devfd, SETINPUT_NO, struct.pack(INPUT_ST,value))
 
 
     def querycap(self):
         val = struct.pack( QUERYCAP_ST, "", "", "", 0, 0 )
-        r = fcntl.ioctl(self.device, long(QUERYCAP_NO), val)
+        r = fcntl.ioctl(self.devfd, long(QUERYCAP_NO), val)
         return struct.unpack( QUERYCAP_ST, r )
 
 
     def enumstd(self, no):
         val = struct.pack( ENUMSTD_ST, no, 0, "", 0, 0, 0)
-        r = fcntl.ioctl(self.device,ENUMSTD_NO,val)
+        r = fcntl.ioctl(self.devfd,ENUMSTD_NO,val)
         return struct.unpack( ENUMSTD_ST, r )
 
 
     def getstd(self):
         val = struct.pack( STANDARD_ST, 0 )
-        r = fcntl.ioctl(self.device,GETSTD_NO, val)
+        r = fcntl.ioctl(self.devfd,GETSTD_NO, val)
         return struct.unpack( STANDARD_ST, r )[0]
 
 
     def setstd(self, value):
         val = struct.pack( STANDARD_ST, value )
-        r = fcntl.ioctl(self.device,SETSTD_NO, val)
+        r = fcntl.ioctl(self.devfd,SETSTD_NO, val)
 
 
     def enuminput(self,index):
         val = struct.pack( ENUMINPUT_ST, index, "", 0,0,0,0,0)
-        r = fcntl.ioctl(self.device,ENUMINPUT_NO,val)
+        r = fcntl.ioctl(self.devfd,ENUMINPUT_NO,val)
         return struct.unpack( ENUMINPUT_ST, r )
 
 
     def getfmt(self):  
         val = struct.pack( FMT_ST, 0,0,0,0,0,0,0,0)
         try:
-            r = fcntl.ioctl(self.device,GET_FMT_NO,val)
+            r = fcntl.ioctl(self.devfd,GET_FMT_NO,val)
             return struct.unpack( FMT_ST, r )
         except IOError:
             print "Failed to get format, not supported by device?" 
@@ -264,39 +281,40 @@ class Videodev:
 
     def setfmt(self, width, height):
         val = struct.pack( FMT_ST, 1L, width, height, 0L, 4L, 0L, 131072L, 0L)
-        r = fcntl.ioctl(self.device,SET_FMT_NO,val)
+        r = fcntl.ioctl(self.devfd,SET_FMT_NO,val)
 
 
     def gettuner(self,index):
         val = struct.pack( TUNER_ST, index, "", 0,0,0,0,0,0,0,0)
-        r = fcntl.ioctl(self.device,GET_TUNER_NO,val)
+        r = fcntl.ioctl(self.devfd,GET_TUNER_NO,val)
         return struct.unpack( TUNER_ST, r )
 
 
     def settuner(self,index,audmode):
         val = struct.pack( TUNER_ST, index, "", 0,0,0,0,0,audmode,0,0)
-        r = fcntl.ioctl(self.device,SET_TUNER_NO,val)
+        r = fcntl.ioctl(self.devfd,SET_TUNER_NO,val)
 
 
     def getaudio(self,index):
         val = struct.pack( AUDIO_ST, index, "", 0,0)
-        r = fcntl.ioctl(self.device,GET_AUDIO_NO,val)
+        r = fcntl.ioctl(self.devfd,GET_AUDIO_NO,val)
         return struct.unpack( AUDIO_ST, r )
 
 
     def setaudio(self,index,mode):
         val = struct.pack( AUDIO_ST, index, "", mode, 0)
-        r = fcntl.ioctl(self.device,SET_AUDIO_NO,val)
+        r = fcntl.ioctl(self.devfd,SET_AUDIO_NO,val)
 
 
-    def init_settings(self, which):
-        card = config.TV_SETTINGS.get(which)
-        if not card:
-            # XXX: print a clever error
+    def init_settings(self):
+        if not self.settings:
+            # XXX: clever error here
             return
 
-        self.setstd(NORMS.get(card.norm))
-        self.setchanlist(card.chanlist)
+        self.basic_info(self.settings.vdev)
+
+        self.setstd(NORMS.get(self.settings.norm))
+        self.setchanlist(self.settings.chanlist)
 
         # XXX TODO: make a good way of setting the input
         # self.setinput(....)

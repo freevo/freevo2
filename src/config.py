@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.118  2004/08/13 16:17:33  rshortt
+# More work on tv settings, configuration of v4l2 devices based on TV_SETTINGS.
+#
 # Revision 1.117  2004/08/13 02:05:39  rshortt
 # Remove VideoGroup class and add TV_DEFAULT_SETTINGS which will allow users
 # to leave out dvb0: or tv0: from their tuner_id portion of TV_CHANNELS.
@@ -371,10 +374,12 @@ for i in range(10):
     vdev = '/dev/video%s' % i
     if os.path.exists(vdev):
         type = 'tv'
+        driver = None
         try:
             import tv.v4l2
-            v = tv.v4l2.Videodev(vdev)
-            if string.find(v.driver, 'ivtv') != -1:
+            v = tv.v4l2.Videodev(device=vdev)
+            driver = v.driver
+            if string.find(driver, 'ivtv') != -1:
                 type = 'ivtv'
             v.close()
             del v
@@ -384,20 +389,22 @@ for i in range(10):
         except: 
             traceback.print_exc()
             
-        if type == 'tv':
-            key = '%s%s' % (type,tvn)
-            TV_SETTINGS[key]  = TVCard
-            if tvn != i:
-                TV_SETTINGS[key].vdev = vdev
-            tvn = tvn + 1
-
-        elif type == 'ivtv':
+        if type == 'ivtv':
             key = '%s%s' % (type,ivtvn)
             TV_SETTINGS[key]  = IVTVCard
             if ivtvn != i:
                 TV_SETTINGS[key].vdev = vdev
             ivtvn = ivtvn + 1
 
+        else:
+            # Default to 'tv' type as set above.
+            key = '%s%s' % (type,tvn)
+            TV_SETTINGS[key]  = TVCard
+            if tvn != i:
+                TV_SETTINGS[key].vdev = vdev
+            tvn = tvn + 1
+
+        TV_SETTINGS[key].driver = driver
 
 
 # TESTCODE FOR freevo_config.py:

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/08/13 16:17:33  rshortt
+# More work on tv settings, configuration of v4l2 devices based on TV_SETTINGS.
+#
 # Revision 1.1  2004/08/12 16:58:58  rshortt
 # Run this helper to see how freevo autodetected your tv/dvb cards.  This will be changing slightly and will be a good tool to get debug information from users.
 #
@@ -48,19 +51,19 @@ def main():
         v4l2 = None
 
         if isinstance(card, config.IVTVCard):
-            v4l2 = tv.ivtv.IVTV(card.vdev)
-            print 'vdev: %s' % card.vdev
+            v4l2 = tv.ivtv.IVTV(key)
+            print 'vdev: %s' % v4l2.settings.vdev
 
         elif isinstance(card, config.TVCard):
-            v4l2 = tv.v4l2.Videodev(card.vdev)
-            print 'vdev: %s' % card.vdev
+            v4l2 = tv.v4l2.Videodev(key)
+            print 'vdev: %s' % v4l2.settings.vdev
 
         elif isinstance(card, config.DVBCard):
             print 'adapter: %s' % card.adapter
 
 
         if v4l2:
-            v4l2.init_settings(key)
+            v4l2.init_settings()
             v4l2.print_settings()
             v4l2.close()
     

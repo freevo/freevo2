@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/08/13 16:17:33  rshortt
+# More work on tv settings, configuration of v4l2 devices based on TV_SETTINGS.
+#
 # Revision 1.15  2004/08/13 15:25:28  rshortt
 # Remove TV_IVTV_OPTIONS in favour of new TV_SETTINGS.
 #
@@ -70,8 +73,8 @@ MSP_MATRIX_ST = '2i'
 
 class IVTV(tv.v4l2.Videodev):
 
-    def __init__(self, device):
-        tv.v4l2.Videodev.__init__(self, device)
+    def __init__(self, which=None, device=None):
+        tv.v4l2.Videodev.__init__(self, which, device)
 
 
     def setCodecInfo(self, codec):
@@ -91,12 +94,12 @@ class IVTV(tv.v4l2.Videodev):
                            codec.gop_closure,
                            codec.pulldown,
                            codec.stream_type)
-        r = fcntl.ioctl(self.device, IVTV_IOC_S_CODEC, val)
+        r = fcntl.ioctl(self.devfd, IVTV_IOC_S_CODEC, val)
 
 
     def getCodecInfo(self):
         val = struct.pack( CODEC_ST, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 )
-        r = fcntl.ioctl(self.device, IVTV_IOC_G_CODEC, val)
+        r = fcntl.ioctl(self.devfd, IVTV_IOC_G_CODEC, val)
         codec_list = struct.unpack(CODEC_ST, r)
         return IVTVCodec(codec_list)
 
@@ -106,37 +109,36 @@ class IVTV(tv.v4l2.Videodev):
         if not output: output = 1
 
         val = struct.pack(MSP_MATRIX_ST, input, output)
-        r = fcntl.ioctl(self.device, MSP_SET_MATRIX, val)
+        r = fcntl.ioctl(self.devfd, MSP_SET_MATRIX, val)
 
 
-    def init_settings(self, which):
-        tv.v4l2.Videodev.init_settings(self, which)
+    def init_settings(self):
+        tv.v4l2.Videodev.init_settings(self)
 
-        settings = config.TV_SETTINGS.get(which)
-        if not settings:
+        if not self.settings:
             return
 
 
-        (width, height) = string.split(settings.resolution, 'x')
+        (width, height) = string.split(self.settings.resolution, 'x')
         self.setfmt(int(width), int(height))
 
         codec = self.getCodecInfo()
 
-        codec.aspect        = settings.aspect
-        codec.audio_bitmask = settings.audio_bitmask
-        codec.bframes       = settings.bframes
-        codec.bitrate_mode  = settings.bitrate_mode
-        codec.bitrate       = settings.bitrate
-        codec.bitrate_peak  = settings.bitrate_peak
-        codec.dnr_mode      = settings.dnr_mode
-        codec.dnr_spatial   = settings.dnr_spatial
-        codec.dnr_temporal  = settings.dnr_temporal
-        codec.dnr_type      = settings.dnr_type
-        codec.framerate     = settings.framerate
-        codec.framespergop  = settings.framespergop
-        codec.gop_closure   = settings.gop_closure
-        codec.pulldown      = settings.pulldown
-        codec.stream_type   = settings.stream_type
+        codec.aspect        = self.settings.aspect
+        codec.audio_bitmask = self.settings.audio_bitmask
+        codec.bframes       = self.settings.bframes
+        codec.bitrate_mode  = self.settings.bitrate_mode
+        codec.bitrate       = self.settings.bitrate
+        codec.bitrate_peak  = self.settings.bitrate_peak
+        codec.dnr_mode      = self.settings.dnr_mode
+        codec.dnr_spatial   = self.settings.dnr_spatial
+        codec.dnr_temporal  = self.settings.dnr_temporal
+        codec.dnr_type      = self.settings.dnr_type
+        codec.framerate     = self.settings.framerate
+        codec.framespergop  = self.settings.framespergop
+        codec.gop_closure   = self.settings.gop_closure
+        codec.pulldown      = self.settings.pulldown
+        codec.stream_type   = self.settings.stream_type
 
         self.setCodecInfo(codec)
 
