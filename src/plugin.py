@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2003/09/19 18:57:43  dischi
+# fixed TRUE/FALSE problems
+#
 # Revision 1.41  2003/09/14 20:09:36  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
@@ -17,39 +20,6 @@
 #
 # Revision 1.39  2003/09/10 18:13:48  dischi
 # support for plugins to add defaults to config
-#
-# Revision 1.38  2003/09/09 18:36:11  dischi
-# add a plugin helper to get more informations about the plugins
-#
-# Revision 1.37  2003/09/05 16:29:28  dischi
-# make special function to init only one specific plugin
-#
-# Revision 1.36  2003/09/03 20:10:13  dischi
-# Make sure a plugin is only loaded once with the same args and type
-#
-# Revision 1.35  2003/09/01 18:45:28  dischi
-# update doc
-#
-# Revision 1.34  2003/08/31 17:15:00  dischi
-# default level is 10 now to make it possible to set items before default ones
-#
-# Revision 1.33  2003/08/31 14:18:31  dischi
-# added support for a progress callback (0-100)
-#
-# Revision 1.32  2003/08/30 17:03:02  dischi
-# support for eventhandler in ItemPlugins
-#
-# Revision 1.31  2003/08/30 07:58:57  dischi
-# Fix item plugin handling
-#
-# Revision 1.30  2003/08/27 15:25:47  mikeruelle
-# Start of Radio Support
-#
-# Revision 1.29  2003/08/23 12:51:41  dischi
-# removed some old CVS log messages
-#
-# Revision 1.28  2003/08/22 17:51:29  dischi
-# Some changes to make freevo work when installed into the system
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -74,12 +44,15 @@
 #endif
 
 
-import os
+import os, sys
 import traceback
 from event import Event
 
 DEBUG = 0
 
+if float(sys.version[0:3]) < 2.3:
+    True  = 1
+    False = 0
 
 #
 # Some basic plugins known to Freevo.
@@ -125,7 +98,7 @@ class ItemPlugin(Plugin):
     The plugin can also have an eventhandler. All events passed to the item
     will also be passed to this plugin. This works only for VideoItems right
     now (each item type must support it directly). If the function returns
-    TRUE, the event won't be passed to other eventhandlers and also not to
+    True, the event won't be passed to other eventhandlers and also not to
     the item itself.
     
     def eventhandler(self, item, event, menuw=None):
@@ -154,7 +127,7 @@ class DaemonPlugin(Plugin):
         this function will be called to update the screen
     def eventhandler(self, event, menuw=None):
         events no one else wants will be passed to this functions, when
-        you also set the variable event_listener to TRUE, the object will
+        you also set the variable event_listener to True, the object will
         get all events
     def shutdown(self):
         this function may be called to shutdown the plugin and will
@@ -164,8 +137,8 @@ class DaemonPlugin(Plugin):
         Plugin.__init__(self)
         self.poll_counter   = 0         # poll counter, don't change this
         self.poll_interval  = 1         # poll every x*0.1 seconds
-        self.poll_menu_only = TRUE      # poll only when menu is active
-        self.event_listener = FALSE     # process all events
+        self.poll_menu_only = True      # poll only when menu is active
+        self.event_listener = False     # process all events
 
 #
 # Some plugin names to avoid typos
@@ -247,7 +220,7 @@ def init(callback = None):
     global __initialized__
     global __plugin_basedir__
     
-    __initialized__ = TRUE
+    __initialized__ = True
     __plugin_basedir__ = os.environ['FREEVO_PYTHON']
 
     current = 0
@@ -350,7 +323,7 @@ def isevent(event):
 # internal stuff
 #
 
-__initialized__        = FALSE
+__initialized__        = False
 __all_plugins__        = []
 __plugin_number__      = 0
 __plugin_type_list__   = {}

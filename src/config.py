@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.51  2003/09/19 18:57:43  dischi
+# fixed TRUE/FALSE problems
+#
 # Revision 1.50  2003/09/14 20:47:48  outlyer
 # * TRUE/FALSE wasn't working in Python 2.3...
 # * Wrapped the tagging function in a try: except because it failed on a data
@@ -180,10 +183,15 @@ DEBUG_STDOUT = 1
 #
 DEBUG = 0
 
-# add TRUE and FALSE to __builtin__ for older python versions
-if float(sys.version[0:3]) < 2.4:
-    __builtin__.__dict__['TRUE']  = 1
-    __builtin__.__dict__['FALSE'] = 0
+# add True and False to __builtin__ for older python versions
+if float(sys.version[0:3]) < 2.3:
+    __builtin__.__dict__['True']  = 1
+    __builtin__.__dict__['False'] = 0
+
+# temp solution until this is fixed to True and False
+# in all freevo modules
+__builtin__.__dict__['TRUE']  = 1
+__builtin__.__dict__['FALSE'] = 0
 
 #
 # find the log directory
