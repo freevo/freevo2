@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/05/12 23:33:50  rshortt
+# Cleanup.
+#
 # Revision 1.6  2003/05/12 16:46:18  rshortt
 # The webserver now binds to a particular host address, localhost is the default
 # so if left unchanged you will only be able to access it from the same machine (unless maybe someone does some DNS tricks).
@@ -50,7 +53,7 @@ import sys, os
 import config
 
 from twisted.internet import app
-from twisted.web import static, server, vhost, twcgi, script, trp
+from twisted.web import static, server, vhost, script
 from twisted.python import log
 
 DEBUG = 1
@@ -64,11 +67,7 @@ log.startLogging(open(logfile, 'a'))
 docRoot = './src/www/htdocs'
 
 root = static.File(docRoot)
-root.processors = {
-            '.cgi': twcgi.CGIScript,
-            '.epy': script.PythonScript,
-            '.rpy': script.ResourceScript,
-}
+root.processors = { '.rpy': script.ResourceScript, }
 
 default = static.Data('text/html', '')
 default.putChild('vhost', vhost.VHostMonsterResource())
