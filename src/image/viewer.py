@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2004/05/09 10:00:37  dischi
+# update selected item in the menu when showing an image
+#
 # Revision 1.45  2004/05/07 17:46:53  dischi
 # Make it possible to choose the image viewer blend effect
 #
@@ -259,6 +262,15 @@ class ImageViewer(GUIObject):
 
         self.last_image  = (item, (image, x, y, scale, bbx, bby, bbw, bbh,
                                    self.rotation))
+
+
+        # XXX Hack to move the selected item to the current showing image
+        # XXX TODO: find a way to add it to directory.py or playlist.py
+        if item.parent and hasattr(item.parent, 'menu') and \
+               item in item.parent.menu.choices:
+            item.parent.menu.selected = item
+            item.menuw.force_page_rebuild = True
+
         return None
 
 
