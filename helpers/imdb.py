@@ -59,11 +59,10 @@ def add_id(drive, xml_file):
     x.close()
 
     content = string.replace(content, "</title>", "</title>\n    <id>%s</id>" % id)
-    x = open(sys.argv[3], 'w')
+    x = open(xml_file, 'w')
     x.write(content)
     x.close()
     os.system('touch /tmp/freevo-rebuild-database')
-    sys.exit(0)
 
 
 def search(name):
@@ -245,14 +244,14 @@ def download_image(url, filename):
         return None
     
 
-def write_xml(filename, id, image_url, type, files, imdb_data):
+def write_xml(imdb_number, filename, id, image_url, type, files, imdb_data):
     """
     write the infos to the xml file
     """
 
     title, year, genre, tagline, plot, rating, None, runtime = imdb_data
     
-    i = codecs.open(filename + ".xml", 'w', encoding='utf-8')
+    i = codecs.open('%s.xml' % filename, 'w', encoding='utf-8')
     i.write("<?xml version=\"1.0\" ?>\n<freevo>\n")
     i.write("  <copyright>\n" +
             "    The information in this file are from the Internet Movie Database (IMDb).\n" +
@@ -264,9 +263,9 @@ def write_xml(filename, id, image_url, type, files, imdb_data):
     if id:
         i.write("    <id type=\"timestamp\">%s</id>\n" % id)
 
-    image = filename + ".jpg"
+    image = '%s.jpg' % filename
     if os.path.exists(image):
-        image = re.compile('^.*/').sub("", filename) + '.jpg'
+        image = re.compile('^.*/').sub("", str(filename)) + '.jpg'
 
     if image_url:
         i.write("    <cover source=\"%s\">%s</cover>\n" % (str2XML(image_url),
@@ -315,7 +314,7 @@ def write_xml(filename, id, image_url, type, files, imdb_data):
 
 
 
-def get_data_and_write_xml(imdb_number, filename, id, files):
+def get_data_and_write_xml(imdb_number, filename, id, type, files):
     """
     get imdb data and store it into the xml database
     """
@@ -327,7 +326,7 @@ def get_data_and_write_xml(imdb_number, filename, id, files):
 
     (title, year, genre, tagline, plot, rating, image_url_list, runtime) = imdb_data
 
-    image_file = filename + ".jpg"
+    image_file = '%s.jpg' % filename
     image_url = None
     
     if not os.path.exists(image_file):
@@ -350,7 +349,7 @@ def get_data_and_write_xml(imdb_number, filename, id, files):
         print "use of this image"
 
     # Now write the output file
-    write_xml(filename, id, image_url, type, files, imdb_data)
+    write_xml(imdb_number, filename, id, image_url, type, files, imdb_data)
     return 1
 
 
@@ -401,6 +400,7 @@ if __name__ == "__main__":
         # add ID tag to exiting XML file
         if sys.argv[1] == '--add-id':
             add_id(sys.argv[2], sys.argv[3])
+            sys.exit(0)
 
         # Search IMDb for a title
         if sys.argv[1] == '-s':
@@ -452,4 +452,4 @@ if __name__ == "__main__":
         except IndexError:
             pass
 
-    get_data_and_write_xml(imdb_number, filename, id, files)
+    get_data_and_write_xml(imdb_number, filename, id, type, files)
