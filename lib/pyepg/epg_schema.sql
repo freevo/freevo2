@@ -25,17 +25,17 @@ insert into channel_types (id, name) values (3, "radio");
 drop table programs;
 create table programs (
     id integer primary key,
-    channel_id unicode not null,
-    title unicode not null,
-    subtitle unicode,
-    description unicode,
-    episode unicode,
+    channel_id unicode(16) not null,
     start int not null,
     stop int not null,
+    title unicode(256) not null,
+    episode unicode(256),
+    subtitle unicode(256),
+    description unicode(4096),
     rating int,
-    original_airdate int,
-    stars int
+    original_airdate int
 );
+
 create index programs_channel on programs (channel_id);
 create unique index programs_channel_start on programs (channel_id, start);
 create unique index programs_channel_start_stop on programs (channel_id, start, stop);

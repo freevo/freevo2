@@ -273,6 +273,19 @@ class Guide:
         # If we got this far all we need to do now is insert a new
         # program row.
         #
+        if len(title) > 255:
+            log.error('title to long %s' % title)
+            title = title[:255]
+        if len(subtitle) > 255:
+            subtitle = subtitle[:255]
+            log.error('subtitle to long %s' % subtitle)
+        if len(episode) > 255:
+            episode = episode[:255]
+            log.error('episode to long %s' % episode)
+        if len(description) > 4095:
+            episode = episode[:4095]
+            log.error('description to long %s' % description)
+            
         query = 'insert into programs (channel_id, title, start, stop, \
                                        subtitle, episode, description) \
                  values ("%s", "%s", %s, %s, "%s", "%s", "%s")' % \
@@ -465,6 +478,13 @@ class Guide:
         self.selected_index = (cpos + pos) % len(self.channel_list)
         return self.channel_list[self.selected_index]
 
+
+    def get_channel_by_id(self, id):
+        """
+        Return the channel object based on the given id
+        """
+        return self.channel_dict[id]
+    
 
     def search(self, searchstr, by_chan=None, search_title=True,
                search_subtitle=True, search_description=True):
