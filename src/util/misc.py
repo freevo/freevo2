@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2004/02/07 13:24:21  dischi
+# better directory name building
+#
 # Revision 1.25  2004/02/07 13:07:55  dischi
 # fix unicode/encoding problem with sqlite
 #
@@ -226,7 +229,10 @@ def getname(file):
     make a nicer display name from file
     """
     # basename without ext
-    name = file[file.rfind('/')+1:file.rfind('.')]
+    if file.rfind('/') < file.rfind('.'):
+        name = file[file.rfind('/')+1:file.rfind('.')]
+    else:
+        name = file[file.rfind('/')+1:]
     name = name[0].upper() + name[1:]
     
     while file.find('_') > 0 and FILENAME_REGEXP.match(name):

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.111  2004/02/07 13:24:21  dischi
+# better directory name building
+#
 # Revision 1.110  2004/02/05 19:55:24  dischi
 # make name a unicode object
 #
@@ -173,14 +176,16 @@ class DirItem(Playlist):
             self.files.read_only = True
         self.files.append(directory)
         
-        if name:
-            self.name = Unicode(name)
-        else:
-            self.name = Unicode(os.path.basename(directory))
-            
         self.dir  = os.path.abspath(directory)
         self.info = mediainfo.get_dir(directory)
         
+        if name:
+            self.name = Unicode(name)
+        elif self.info['title:filename']:
+            self.name = self.info['title:filename']
+        else:
+            self.name = Unicode(util.getname(directory))
+            
         if add_args == None and hasattr(parent, 'add_args'): 
             add_args = parent.add_args
 
