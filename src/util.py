@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/02/04 16:28:37  outlyer
+# Replaced proc_mount with os.ismount to be somewhat cross-platform.
+#
 # Revision 1.6  2003/01/31 19:24:41  outlyer
 # Replaced proc_mount with python version from 'os' module. Currently
 # commented out... can someone try it and make sure it works? I don't
@@ -330,36 +333,14 @@ def recursefolders(root, recurse=0, pattern='*', return_folders=0):
         return result
 
 
-PROC_MOUNT_REGEXP = re.compile("^([^ ]*) ([^ ]*) .*$").match
-
-def proc_mount(dir):
-    f = open('/proc/mounts')
-    l = f.readline()
-    while(l):
-        m = PROC_MOUNT_REGEXP(l)
-        if m:
-            if m.group(2) == dir and m.group(1).encode() != 'none':
-                f.close()
-                return m.group(1).encode()
-        l = f.readline()
-    f.close()
-    return None
-
-
 def umount(dir):
-    if proc_mount(dir):
+    if os.path.ismount(dir):
         os.system("umount %s" % dir)
-    # Platform independent version
-    # if os.path.ismount(dir):
-    #     os.system("umount %s" % dir)
 
 
 def mount(dir):
-    if not proc_mount(dir):
+    if os.path.ismount(dir):
         os.system("mount %s 2>/dev/null" % dir)
-    # Platform independent version
-    # if os.path.ismount(dir):
-    #    os.system("mount %s 2>/dev/null" % dir)
 
 def gzopen(file):
     import gzip
