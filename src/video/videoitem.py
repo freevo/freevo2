@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.130  2004/03/19 22:10:26  dischi
+# fix dead menu for missing videos
+#
 # Revision 1.129  2004/02/27 20:15:03  dischi
 # more unicode fixes
 #
@@ -537,8 +540,16 @@ class VideoItem(Item):
             if hasattr(self.parent, 'subitems') and self.parent.subitems:
                 return error
             else:
-                AlertBox(text=error).show()
-                rc.post_event(PLAY_END)
+                AlertBox(text=error, handler=self.error_handler).show()
+
+
+    def error_handler(self):
+        """
+        error handler if play doesn't work to send the end event and stop
+        the player
+        """
+        rc.post_event(PLAY_END)
+        self.stop()
 
 
     def stop(self, arg=None, menuw=None):
