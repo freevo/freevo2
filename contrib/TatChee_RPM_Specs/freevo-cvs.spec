@@ -2,7 +2,7 @@
 %define display  x11
 %define tv_norm  pal
 %define chanlist europe-west
-%define _cvsdate 20021129
+%define _cvsdate 20021209
 Summary:	Freevo
 Name:		freevo
 Version:	1.3.1
@@ -36,7 +36,7 @@ make clean; make
 pushd plugins/cddb
 	make
 popd
-pushd rominfosrc
+pushd src/games/rominfo
 	make
 popd
 
@@ -64,8 +64,8 @@ Test files that came with freevo. Placed in %{_cachedir}/freevo
 rm -rf $RPM_BUILD_ROOT
 mkdir -p %{buildroot}%{_prefix}
 mkdir -p %{buildroot}%{_prefix}/fbcon/matroxset
-mkdir -p %{buildroot}%{_prefix}/{boot,gui,helpers,rc_client,rominfosrc}
-mkdir -p %{buildroot}%{_prefix}/src/{audio/eyed3,games,image,tv,video}
+mkdir -p %{buildroot}%{_prefix}/{boot,helpers,rc_client}
+mkdir -p %{buildroot}%{_prefix}/src/{audio/eyed3,games/rominfo,gui,image,tv,video/plugins}
 mkdir -p %{buildroot}%{_prefix}/icons/{64x64,gnome}
 mkdir -p %{buildroot}%{_prefix}/plugins/{cddb,weather/icons}
 mkdir -p %{buildroot}%{_prefix}/skins/{fonts,images,main1,xml/type1}
@@ -74,12 +74,12 @@ mkdir -p %{buildroot}%{_sysconfdir}/freevo
 mkdir -p %{buildroot}%{_sysconfdir}/rc.d/init.d
 mkdir -p %{buildroot}%{_cachedir}/freevo/testfiles/{Images/Show,Images/Bins,Mame,Movies/skin.xml_Test,Music,tv-show-images}
 
-install -m 755 freevo freevo_xwin runapp makelogos.py %{buildroot}%{_prefix}
+install -m 755 freevo freevo_xwin runapp %{buildroot}%{_prefix}
 install -m 644 fbcon/fbset.db %{buildroot}%{_prefix}/fbcon
 install -m 755 fbcon/vtrelease fbcon/*.sh %{buildroot}%{_prefix}/fbcon
 install -m 755 fbcon/matroxset/matroxset %{buildroot}%{_prefix}/fbcon/matroxset
-install -m 644 gui/* %{buildroot}%{_prefix}/gui
-install -m 644 helpers/* %{buildroot}%{_prefix}/helpers
+install -m 755 helpers/blanking %{buildroot}%{_prefix}/helpers
+install -m 644 helpers/*.py %{buildroot}%{_prefix}/helpers
 install -m 644 icons/*.png %{buildroot}%{_prefix}/icons
 install -m 644 icons/64x64/* %{buildroot}%{_prefix}/icons/64x64
 install -m 644 icons/gnome/* %{buildroot}%{_prefix}/icons/gnome
@@ -87,15 +87,17 @@ install -m 755 plugins/cddb/*.py plugins/cddb/cdrom.so %{buildroot}%{_prefix}/pl
 install -m 644 plugins/weather/*.py plugins/weather/librarydoc.txt %{buildroot}%{_prefix}/plugins/weather
 install -m 644 plugins/weather/icons/* %{buildroot}%{_prefix}/plugins/weather/icons
 install -m 644 rc_client/* %{buildroot}%{_prefix}/rc_client
-install -m 644 rominfosrc/rominfo* %{buildroot}%{_prefix}/rominfosrc
 
 install -m 644 src/*.py %{buildroot}%{_prefix}/src
 install -m 644 src/audio/*.py %{buildroot}%{_prefix}/src/audio
 install -m 644 src/audio/eyed3/*.py %{buildroot}%{_prefix}/src/audio/eyed3
 install -m 644 src/games/*.py %{buildroot}%{_prefix}/src/games
+install -m 644 src/games/rominfo/rominfo* %{buildroot}%{_prefix}/src/games/rominfo
+install -m 644 src/gui/*.py %{buildroot}%{_prefix}/src/gui
 install -m 644 src/image/*.py %{buildroot}%{_prefix}/src/image
 install -m 644 src/tv/*.py %{buildroot}%{_prefix}/src/tv
 install -m 644 src/video/*.py %{buildroot}%{_prefix}/src/video
+install -m 644 src/video/plugins/*.py %{buildroot}%{_prefix}/src/video/plugins
 
 install -m 644 skins/fonts/* %{buildroot}%{_prefix}/skins/fonts
 install -m 644 skins/images/* %{buildroot}%{_prefix}/skins/images
