@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2003/03/23 19:57:11  dischi
+# Moved skin xml files to skins/xml/type1 and all stuff for blue_round2 to
+# skins/xml/blue_round2
+#
 # Revision 1.40  2003/03/22 22:21:41  dischi
 # DISPLAY can now toggle between more than two styles. The video menu
 # has a 3rd style, all infos. Press DISPLAY two times on a video item
@@ -282,7 +286,6 @@ class Skin:
     """
     
     def __init__(self):
-        self.XML_SKIN_DIRECTORY = 'skins/dischi1'
         self.display_style = 0
         self.force_redraw = TRUE
         self.last_draw = None
@@ -301,7 +304,7 @@ class Skin:
         # try to find the skin xml file
         if not self.settings.load(config.SKIN_XML_FILE):
             print "skin not found, using fallback skin"
-            self.settings.load("%s/blue1_big.xml" % self.XML_SKIN_DIRECTORY)
+            self.settings.load("skins/xml/type1/blue1_big.fxd")
         
         for dir in config.cfgfilepath:
             local_skin = '%s/local_skin.fxd' % dir
@@ -337,9 +340,15 @@ class Skin:
         return a list of all possible skins with name, image and filename
         """
         ret = []
-        for skin in util.match_files(self.XML_SKIN_DIRECTORY, ['xml']):
+        skin_files = util.match_files('skins/xml/type1', ['fxd'])
+        for d in util.getdirnames('skins/xml'):
+            skin = os.path.join(d, os.path.basename(d)+'.fxd')
+            if os.path.isfile(skin):
+                skin_files += [ skin ]
+                
+        for skin in skin_files:
             name  = os.path.splitext(os.path.basename(skin))[0]
-            if '%s.png' % os.path.splitext(skin)[0]:
+            if os.path.isfile('%s.png' % os.path.splitext(skin)[0]):
                 image = '%s.png' % os.path.splitext(skin)[0]
             else:
                 image = None

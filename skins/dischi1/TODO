@@ -13,3 +13,5 @@ No "this directory is empty" handling yet (you only see nothing)
 blue1_round will get an image listing, too
 
 Finish integration of Robs new gui stuff
+
+Add force-to-style and begin-with style in some way

@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2003/03/23 19:57:11  dischi
+# Moved skin xml files to skins/xml/type1 and all stuff for blue_round2 to
+# skins/xml/blue_round2
+#
 # Revision 1.28  2003/03/22 20:08:31  dischi
 # Lots of changes:
 # o blue2_big and blue2_small are gone, it's only blue2 now
@@ -213,6 +217,32 @@ def attr_font(node, attr, default):
     return default
 
 
+def search_file(file, search_dirs):
+    for s_dir in search_dirs:
+        dfile=os.path.join(s_dir, file)
+
+        if os.path.isfile(dfile):
+            return dfile
+        if os.path.isfile("%s_%sx%s.png" % (dfile, config.CONF.width,
+                                            config.CONF.height)):
+            return "%s_%sx%s.png" % (dfile, config.CONF.width, config.CONF.height)
+        if os.path.isfile("%s_%sx%s.jpg" % (dfile, config.CONF.width,
+                                            config.CONF.height)):
+            return "%s_%sx%s.jpg" % (dfile, config.CONF.width, config.CONF.height)
+        if config.CONF.width == 720 and os.path.isfile("%s_768x576.png" % dfile):
+            return "%s_768x576.png" % dfile
+        if config.CONF.width == 720 and os.path.isfile("%s_768x576.jpg" % dfile):
+            return "%s_768x576.jpg" % dfile
+        if os.path.isfile("%s.png" % dfile):
+            return "%s.png" % dfile
+        if os.path.isfile("%s.jpg" % dfile):
+            return "%s.jpg" % dfile
+
+    print 'can\'t find image %s' % file
+    return ''
+
+
+
 # ======================================================================
 
 #
@@ -235,6 +265,10 @@ class XML_mainmenuitem:
         self.icon  = attr_str(node, "icon",  self.icon)
         self.image = attr_str(node, "image", self.image)
 
+    def prepaire(self, search_dirs):
+        if self.image:
+            self.image = search_file(self.image, search_dirs)
+            
 
 # ======================================================================
 
@@ -249,6 +283,9 @@ class XML_mainmenu:
                 item.parse(node, scale, c_dir)
                 self.items[item.label] = item                
 
+    def prepare(self, search_dirs):
+        for i in self.items:
+            self.items[i].prepaire(search_dirs)
     
 # ======================================================================
 # ======================================================================
@@ -527,35 +564,12 @@ class XML_image(XML_data):
     def __init__(self):
         XML_data.__init__(self, ('x', 'y', 'width', 'height', 'filename', 'label'))
 
-    def search_file(self, file, search_dirs):
-        for s_dir in search_dirs:
-            dfile=os.path.join(s_dir, file)
-
-            if os.path.isfile(dfile):
-                return dfile
-            if os.path.isfile("%s_%sx%s.png" % (dfile, config.CONF.width,
-                                                config.CONF.height)):
-                return "%s_%sx%s.png" % (dfile, config.CONF.width, config.CONF.height)
-            if os.path.isfile("%s_%sx%s.jpg" % (dfile, config.CONF.width,
-                                                config.CONF.height)):
-                return "%s_%sx%s.jpg" % (dfile, config.CONF.width, config.CONF.height)
-            if config.CONF.width == 720 and os.path.isfile("%s_768x576.png" % dfile):
-                return "%s_768x576.png" % dfile
-            if config.CONF.width == 720 and os.path.isfile("%s_768x576.jpg" % dfile):
-                return "%s_768x576.jpg" % dfile
-            if os.path.isfile("%s.png" % dfile):
-                return "%s.png" % dfile
-            if os.path.isfile("%s.jpg" % dfile):
-                return "%s.jpg" % dfile
-
-        print 'can\'t find image %s' % file
-        return ''
-    
     def prepare(self, color, search_dirs):
         """
         try to guess the image localtion
         """
-        self.filename = self.search_file(self.filename, search_dirs)
+        if self.filename:
+            self.filename = search_file(self.filename, search_dirs)
     
 
 
@@ -669,15 +683,15 @@ class XMLSkin:
         self._popup = ''
         self._player = XML_player()
         self._tv = XML_tv()
-        
-        self.mainmenu = XML_mainmenu()
+        self._mainmenu = XML_mainmenu()
+
         self.icon_dir = ""
 
         
     def parse(self, freevo_type, scale, c_dir, copy_content):
         for node in freevo_type.children:
             if node.name == u'main':
-                self.mainmenu.parse(node, scale, c_dir)
+                self._mainmenu.parse(node, scale, c_dir)
 
             if node.name == u'menu':
                 type = attr_str(node, 'type', 'default')
@@ -744,12 +758,14 @@ class XMLSkin:
         """
 
         if not os.path.isfile(file):
-            if os.path.isfile(file+".xml"):
-                file += ".xml"
+            if os.path.isfile(file+".fxd"):
+                file += ".fxd"
+            elif os.path.isfile('skins/xml/%s/%s.fxd' % (file, file)):
+                file = 'skins/xml/%s/%s.fxd' % (file, file)
             else:
-                file = "skins/dischi1/%s" % file
-                if os.path.isfile(file+".xml"):
-                    file += ".xml"
+                file = "skins/xml/type1/%s" % file
+                if os.path.isfile(file+".fxd"):
+                    file += ".fxd"
 
         if not os.path.isfile(file):
             return 0
@@ -773,15 +789,7 @@ class XMLSkin:
 
                     include  = attr_str(freevo_type, 'include', '')
 
-                    if include and not os.path.isfile(include):
-                        include += '.xml'
-
-                    if include and not os.path.isfile(include):
-                        include = os.path.join(os.path.dirname(file), include)
-                        if not os.path.isfile(include):
-                            print 'can find include %s' % include
-                            
-                    if include and os.path.isfile(include):
+                    if include:
                         self.load(include, copy_content, prepare = FALSE)
 
                     self.parse(freevo_type, scale, os.path.dirname(file), copy_content)
@@ -796,7 +804,7 @@ class XMLSkin:
             font        = copy.deepcopy(self._font)
             layout      = copy.deepcopy(self._layout)
 
-            search_dirs = (os.path.dirname(file), 'skins/images', self.icon_dir)
+            search_dirs = (os.path.dirname(file), 'skins/images', self.icon_dir, '.')
             for f in font:
                 font[f].prepare(self._color)
                 
@@ -820,6 +828,9 @@ class XMLSkin:
                 self.tv.listing.images[image].prepare(None, search_dirs)
 
             self.popup = layout[self._popup]
+
+            self.mainmenu = copy.deepcopy(self._mainmenu)
+            self.mainmenu.prepare(search_dirs)
             return 1
 
         except:
