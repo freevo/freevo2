@@ -135,23 +135,83 @@ SUFFIX_MPG123_PLAYLISTS = [ '/*.[mM]3[uU]' ]
 #
 TV_SETTINGS = 'ntsc television us-cable'
 VCR_SETTINGS = 'ntsc composite1 us-cable'
-TV_CHANNELS = ['2', '4', '5', '6', '8', '9', '10', '11', '13', 
-               '16', '17', '18', '19', '20', '21', '22', '23', '24',
-               '25', '26', '27', '28', '29', '31', '32', '33', '34',
-               '35', '36', '37', '38', '41', '42', '43', '44', '45', '46', '50',
-               '53', '56', '57', '58', '59', '60', '61',
-               '62', '64', '65', '66', '67', '69', 
-               '70', '71', '72', '73', '74',
-               '75', '99']
-WATCH_TV_APP = './matrox_g400/v4l1_to_mga'
 
+#
+# TV Channels. This list contains a mapping from the displayed channel name
+# to the actual channel name as used by the TV watching application.
+# The display name is taken from the XMLTV names, and the TV application
+# names can be found in matrox_g400/frequencies.c
+#
+# The TV menu is supposed to be supported by the XMLTV application for
+# up to date listings, but can be used without it to just display
+# the available channels.
+#
+# This list also determines the order in which the channels are displayed!
+# N.B.: You must delete the XMLTV cache file (e.g. /tmp/TV.xml.pickled)
+#       if you make changes here and restart!
+#
+# Format: [('xmltv channel id', 'freevo display name', 'tv channel name'), ...]
+#
+# Use "TV_CHANNELS = None" to get all channels when running epg_xmltv.py standalone!
+#
+# All channels listed here will be displayed on the TV menu, even if they're
+# not present in the XMLTV listing.
 # 
-# TV Guide
-#
-# Choose an application to get TV listings
-# Currently 'yahoo' or 'xmltv'
-#
-TV_GUIDE_METHOD = 'yahoo'
+TV_CHANNELS = [('2 KTVI', 'KTVI', '2'),
+               ('4 KMOV', 'KMOV', '4'),
+               ('5 KSDK', 'KSDK', '5'),
+               ('6 TBS', 'TBS', '6'),
+               ('8 KDNL', 'KDNL', '8'),
+               ('9 KETC', 'KETC', '9'),
+               ('10 KNLC', 'KNLC', '10'),
+               ('11 KPLR', 'KPLR', '11'),
+               ('13 GOAC013', 'GOAC013', '13'),
+               ('16 WGNSAT', 'WGNSAT', '16'),
+               ('17 FNC', 'FNC', '17'),
+               ('18 LIFE', 'LIFE', '18'),
+               ('20 DSC', 'DSC', '20'),
+               ('21 FX', 'FX', '21'),
+               ('22 FAM', 'FAM', '22'),
+               ('23 AMC', 'AMC', '23'),
+               ('24 HALMRK', 'HALMRK', '24'),
+               ('25 USA', 'USA', '25'),
+               ('26 TNN', 'TNN', '26'),
+               ('27 ESPN2', 'ESPN2', '27'),
+               ('28 ESPN', 'ESPN', '28'),
+               ('29 ARTS', 'ARTS', '29'),
+               ('31 TECHTV', 'TECHTV', '31'),
+               ('32 TWC', 'TWC', '32'),
+               ('33 TNT', 'TNT', '33'),
+               ('34 NIK', 'NIK', '34'),
+               ('35 CNN', 'CNN', '35'),
+               ('36 CNBC', 'CNBC', '36'),
+               ('37 TLC', 'TLC', '37'),
+               ('38 DISN', 'DISN', '38'),
+               ('41 ETV', 'ETV', '41'),
+               ('42 FSM', 'FSM', '42'),
+               ('43 HISTORY', 'HISTORY', '43'),
+               ('44 COMEDY', 'COMEDY', '44'),
+               ('45 VH1', 'VH1', '45'),
+               ('46 TVGOS', 'TVGOS', '46'),
+               ('50 CNNH', 'CNNH', '50'),
+               ('53 EWTN', 'EWTN', '53'),
+               ('', 'MSNBC 1', '56'),
+               ('58 LOOR058', 'LOOR058', '58'),
+               ('61 WPXS', 'WPXS', '61'),
+               ('64 MSNBC', 'MSNBC 2', '64'),
+               ('65 OXYGEN', 'OXYGEN', '65'),
+               ('66 LOOR066', 'LOOR066', '66'),
+               ('67 MTV', 'MTV', '67'),
+               ('69 HGTV', 'HGTV', '69'),
+               ('70 TVLAND', 'TVLAND', '70'),
+               ('71 ESPNCL', 'ESPNCL', '71'),
+               ('72 OLN', 'OLN', '72'),
+               ('73 SCIFI', 'SCIFI', '73'),
+               ('74 BRAVO', 'BRAVO', '74'),
+               ('75 TOOND', 'TOOND', '75'),
+               ('99', 'TEST', '99')]
+
+WATCH_TV_APP = './matrox_g400/v4l1_to_mga'
 
 #
 # Where the MP3 files can be found.
@@ -169,15 +229,6 @@ DIR_MOVIES = [ ('Test Movies', './testfiles/Movies') ]
 # This is where recorded video is written.
 #
 DIR_RECORD = './testfiles/Movies/Recorded'
-
-
-#
-# Electronic Program Guide (EPG) settings
-#
-# This setting will download TV listings for Charter Cable in St Charles, MO
-# from yahoo.com. It will not work outside the US as of now.
-# 
-EPG_URL = 'http://tv.yahoo.com/grid?.intl=us&zip=63303&.done=&lineup=us_MO24526&dur=6'
 
 #
 # XMLTV File

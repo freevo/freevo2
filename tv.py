@@ -33,10 +33,7 @@ import rc
 import v4l1tv
 
 # The Electronic Program Guide
-if config.TV_GUIDE_METHOD == 'xmltv':
-	import epg_xmltv as epg
-else:
-	import epg_yahoo as epg
+import epg_xmltv as epg
 
 # Set to 1 for debug output
 DEBUG = 1
@@ -87,22 +84,30 @@ def main_menu(arg, menuw):
     items += [menu.MenuItem('Last Channel', start_tv, ('tv', None))]
     items += [menu.MenuItem('VCR', start_tv, ('vcr', None))]
 
-    for channel in guide.programs:
-        # Get the channel number and name from the first entry
-        p = channel[0]
-       	menu_str = '%3d %-7s ' % (p[0], p[1])
-
-	channel_logo = config.TV_LOGOS + string.strip(menu_str) + '.png'
+    # Get all programs that are currently running
+    now = time.time()
+    channels = guide.GetPrograms(now, now)
+    
+    for channel in channels:
+        # Channel display name
+        menu_str = '%-10s ' % channel.displayname
+        # Logo
+	channel_logo = config.TV_LOGOS + '/' + channel.id + '.png'
 	if not os.path.isfile(channel_logo):
-		channel_logo = None
-        for p in channel[0:2]:
-            hh = time.localtime(p[3])[3]
-            mm = time.localtime(p[3])[4]
-	    try:
-            	menu_str += '%2d.%02d   %-20.20s    ' % (hh, mm, p[2])
-	    except ValueError:
-	   	menu_str = ''
-        items += [menu.MenuItem(menu_str, start_tv, ('tv', str(p[0])),channel_logo)]
+            if DEBUG: print 'TV: Cannot find logo "%s"' % channel_logo
+            channel_logo = None
+
+        # Add the program to the menu item
+        if channel.programs:
+            p = channel.programs[0]
+            hh = time.localtime(p.start)[3]
+            mm = time.localtime(p.start)[4]
+            menu_str += '%2d.%02d   %-20.20s    ' % (hh, mm, p.title)
+        else:
+            menu_str += 'NO DATA'
+            
+        items += [menu.MenuItem(menu_str, start_tv,
+                                ('tv', channel.tunerid), channel_logo)]
     
     hh = time.localtime(time.time())[3]
     mm = time.localtime(time.time())[4]
