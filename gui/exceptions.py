@@ -8,6 +8,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/08/18 22:16:21  tfmalt
+# o Added another exception for object handling
+#
 # Revision 1.1  2002/08/15 22:45:42  tfmalt
 # o Inital commit of Freevo GUI library. Files are put in directory 'gui'
 #   under Freevo.
@@ -65,3 +68,11 @@ class LabelException(StandardError):
     def __init__(self, value):
         StandardError.__init__(self, value)
 
+
+class ParentException(StandardError):
+    """
+    An exception which is raised if no parent is present when a parent
+    should be.
+    """
+    def __init__(self, value):
+        StandardError.__init__(self, 'No parent is present: ' + str(value))
