@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/02/19 17:20:21  outlyer
+# Added 'rc.func' to video; probably should add one to the image viewer
+# too so we don't draw over it. Just remember if you set it, you have to
+# set it back so the idletool restarts.
+#
 # Revision 1.19  2003/02/11 06:10:03  krister
 # Display an error if the DVD is protected and cannot be played.
 #
@@ -321,6 +326,7 @@ class MPlayer:
         self.thread.command = command
         self.thread.mode_flag.set()
         rc.app = self.eventhandler
+        rc.func = 'video'
 
 
     def stop(self):
@@ -330,6 +336,7 @@ class MPlayer:
         self.thread.mode = 'stop'
         self.thread.mode_flag.set()
         rc.app = None
+        rc.func = None
         while self.thread.mode == 'stop':
             time.sleep(0.3)
             
