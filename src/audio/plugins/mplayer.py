@@ -9,6 +9,16 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2004/10/17 02:45:19  outlyer
+# Small changes...
+#
+# * Support AC3 raw audio
+# * Sync mplayervbr with mplayer plugins...
+#
+# Note that recent mplayer versions do not have the bug in hr-mp3-seek that
+# requires the 'seek -1' at the beginning of execution, but I'll leave it in
+# here at least till it's in a released version of mplayer.
+#
 # Revision 1.42  2004/10/06 19:01:33  dischi
 # use new childapp interface
 #
@@ -99,6 +109,8 @@ class MPlayer:
             return "-demuxer " + str(DEMUXER_MP3)
         if extension.lower() == '.ogg':
             return "-demuxer " + str(DEMUXER_OGG)
+        if extension.lower() == '.ac3':
+            return "-ac hwac3 -rawaudio on:format=0x2000"
         else:
             return ''
 

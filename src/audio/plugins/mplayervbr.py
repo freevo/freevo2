@@ -4,45 +4,33 @@
 # -----------------------------------------------------------------------
 # $Id$
 #
-# Notes: This plugin uses the enhanced mplayer seeking mechanism for VBR
-#        files. If you have a lot of VBR files, you may want to try it
-#        to get more accurate seeking. It also works around a problem with
-#        the mplayer VBR support which is why it's more than just a change
-#        to the command-line.
-#
-# Usage: Add this to your local_conf.py
-#        plugin.remove('audio.mplayer')
-#        plugin.activate('audio.mplayervbr')
-#
-# Todo:        
+# This contains plugin, control and childapp classes for using mplayer as
+# audio player; this separate plugin (mplayervbr) uses a workaround to give
+# perfect seeking on VBR mp3s via mplayer.
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.5  2004/10/06 19:01:33  dischi
+# Revision 1.6  2004/10/17 02:45:19  outlyer
+# Small changes...
+#
+# * Support AC3 raw audio
+# * Sync mplayervbr with mplayer plugins...
+#
+# Note that recent mplayer versions do not have the bug in hr-mp3-seek that
+# requires the 'seek -1' at the beginning of execution, but I'll leave it in
+# here at least till it's in a released version of mplayer.
+#
+# Revision 1.42  2004/10/06 19:01:33  dischi
 # use new childapp interface
 #
-# Revision 1.4  2004/08/01 10:41:03  dischi
-# deactivate plugin
+# Revision 1.41  2004/09/29 18:58:17  dischi
+# cleanup
 #
-# Revision 1.3  2004/07/10 12:33:38  dischi
-# header cleanup
+# Revision 1.40  2004/08/01 10:42:23  dischi
+# update to new application/eventhandler code
 #
-# Revision 1.2  2004/07/09 04:08:50  outlyer
-# Fixed webradio support for shoutcast streams using the 'pls' extension. Most
-# use m3u, but some (including ones in the webradio.fxd file) use pls.
-#
-# Revision 1.1  2004/06/10 00:47:38  outlyer
-# This plugin uses the enhanced mplayer seeking mechanism for VBR
-# files. If you have a lot of VBR files, you may want to try it
-# to get more accurate seeking. It also works around a problem with
-# the mplayer VBR support which is why it's more than just a change
-# to the command-line.
-#
-# I've found it is far more accurate (pretty much 100%) when seeking through
-# VBR files. (i.e. the counter actually matches the position in the file)
-#
-# Revision 1.4  2004/05/17 04:21:51  outlyer
-# Updated the plugin to match current Freevo CVS
+# Revision 1.39  2004/07/26 18:10:17  dischi
+# move global event handling to eventhandler.py
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -65,27 +53,22 @@
 #
 # ----------------------------------------------------------------------- */
 
-
+# python imports
 import os
 import re
 
-import config     # Configuration handler. reads config file.
-import childapp   # Handle child applications
-
+# freevo imports
+import config
+import childapp
 import plugin
-
 from event import *
 
 
 class PluginInterface(plugin.Plugin):
     """
-    Mplayer plugin for the audio player. Use mplayer to play all audio
-    files.
+    Mplayer plugin for the audio player.
     """
     def __init__(self):
-        self.reason = config.REDESIGN_FIXME
-        return
-
         # create the mplayer object
         plugin.Plugin.__init__(self)
 
@@ -95,13 +78,11 @@ class PluginInterface(plugin.Plugin):
 
 class MPlayer:
     """
-    the main class to control mplayer
+    The main class to control mplayer for audio playback
     """
-    
     def __init__(self):
-        self.name     = 'mplayer'
-        self.app_mode = 'audio'
-        self.app      = None
+        self.name = 'mplayer'
+        self.app  = None
 
 
     def rate(self, item):
@@ -119,6 +100,9 @@ class MPlayer:
 
         
     def get_demuxer(self, filename):
+        """
+        get the correct demuxer for mp3 or ogg
+        """
         DEMUXER_MP3 = 17
         DEMUXER_OGG = 18
         rest, extension     = os.path.splitext(filename)
@@ -126,6 +110,8 @@ class MPlayer:
             return "-hr-mp3-seek -demuxer " + str(DEMUXER_MP3)
         if extension.lower() == '.ogg':
             return "-demuxer " + str(DEMUXER_OGG)
+        if extension.lower() == '.ac3':
+            return "-ac hwac3 -rawaudio on:format=0x2000"
         else:
             return ''
 
@@ -134,11 +120,10 @@ class MPlayer:
         """
         play a audioitem with mplayer
         """
-        self.playerGUI = playerGUI
         filename       = item.filename
 
         if filename and not os.path.isfile(filename):
-            return _('%s\nnot found!') % item.url
+            return _('%s\nnot found!') % Unicode(item.url)
             
         if not filename:
             filename = item.url
@@ -157,8 +142,9 @@ class MPlayer:
         is_playlist = False
         if hasattr(item, 'is_playlist') and item.is_playlist:
             is_playlist = True
-            
-        if item.network_play and ( str(filename).endswith('m3u') or str(filename).endswith('pls')):
+        
+        if item.network_play and ( str(filename).endswith('m3u') or \
+                                   str(filename).endswith('pls')):
             is_playlist = True
 
         if item.network_play:
@@ -166,43 +152,32 @@ class MPlayer:
 
         if hasattr(item, 'reconnect') and item.reconnect:
             extra_opts += ' -loop 0'
-            
-        command = '%s -vo null -ao %s %s %s' % ( mpl, config.MPLAYER_AO_DEV,
-                                                 demux, extra_opts )
 
+        # build the mplayer command
+        command = '%s -vo null -ao %s %s %s' % \
+                  (mpl, config.MPLAYER_AO_DEV, demux, extra_opts)
         if command.find('-playlist') > 0:
             command = command.replace('-playlist', '')
-            
         command = command.replace('\n', '').split(' ')
 
         if is_playlist:
             command.append('-playlist')
-            
         command.append(filename)
 
-        self.plugins = plugin.get('mplayer_audio')
-        for p in self.plugins:
+        for p in plugin.get('mplayer_audio'):
             command = p.play(command, self)
             
-        if plugin.getbyname('MIXER'):
-            plugin.getbyname('MIXER').reset()
-
         self.item = item
-
-        _debug_('MPlayer.play(): Starting cmd=%s' % command)
-            
-        self.app = MPlayerApp( command, self )
+        self.app  = MPlayerApp(command, playerGUI )
         self.app.write('seek -1\n');
-        return None
-    
 
+    
     def stop(self):
         """
         Stop mplayer
         """
         self.app.stop('quit\n')
-
-        for p in self.plugins:
+        for p in plugin.get('mplayer_audio'):
             command = p.stop()
 
 
@@ -210,49 +185,34 @@ class MPlayer:
         return self.app.isAlive()
 
 
-    def refresh(self):
-        self.playerGUI.refresh()
-        
-
     def eventhandler(self, event, menuw=None):
         """
         eventhandler for mplayer control. If an event is not bound in this
         function it will be passed over to the items eventhandler
         """
 
-        for p in self.plugins:
+        for p in plugin.get('mplayer_audio'):
             if p.eventhandler(event):
                 return True
 
-        if event == PLAY_END and event.arg:
-            self.stop()
-            if self.playerGUI.try_next_player():
-                return True
-            
         if event == AUDIO_SEND_MPLAYER_CMD:
             self.app.write('%s\n' % event.arg)
             return True
 
-        if event in ( STOP, PLAY_END, USER_END ):
-            self.playerGUI.stop()
-            return self.item.eventhandler(event)
-
-        elif event == PAUSE or event == PLAY:
+        if event == PAUSE or event == PLAY:
             self.app.write('pause\n')
             return True
 
-        elif event == SEEK:
+        if event == SEEK:
             self.app.write('seek %s\n' % event.arg)
             return True
 
-        else:
-            # everything else: give event to the items eventhandler
-            return self.item.eventhandler(event)
+        return False
             
             
 # ======================================================================
 
-class MPlayerApp(childapp.Instance):
+class MPlayerApp( childapp.Instance ):
     """
     class controlling the in and output from the mplayer process
     """
@@ -260,7 +220,7 @@ class MPlayerApp(childapp.Instance):
         self.item        = player.item
         self.player      = player
         self.elapsed     = 0
-        self.stop_reason = 0 # 0 = ok, 1 = error
+        self.stop_reason = ''
         self.RE_TIME     = re.compile("^A: *([0-9]+)").match
 	self.RE_TIME_NEW = re.compile("^A: *([0-9]+):([0-9]+)").match
 
@@ -277,14 +237,15 @@ class MPlayerApp(childapp.Instance):
 
 
     def stop_event(self):
-        return Event(PLAY_END, self.stop_reason, handler=self.player.eventhandler)
+        return Event(PLAY_END, self.stop_reason,
+                     handler=self.player.eventhandler)
 
         
     def stdout_cb(self, line):
         if line.startswith("A:"):         # get current time
             m = self.RE_TIME_NEW(line)
             if m:
-                self.stop_reason = 0
+                self.stop_reason = ''
 		timestrs = m.group().split(":")
 		if len(timestrs) == 5:
 		    # playing for days!
@@ -306,6 +267,7 @@ class MPlayerApp(childapp.Instance):
             else:
                 m = self.RE_TIME(line) # Convert decimal 
                 if m:
+                    self.stop_reason  = ''
                     self.item.elapsed = int(m.group(1))
 
             if self.item.elapsed != self.elapsed:
@@ -320,10 +282,8 @@ class MPlayerApp(childapp.Instance):
                 p.stdout(line)
                 
 
-
-
     def stderr_cb(self, line):
         if line.startswith('Failed to open'):
-            self.stop_reason = 1
+            self.stop_reason = line
         for p in self.stdout_plugins:
             p.stdout(line)
