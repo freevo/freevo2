@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/04/24 11:51:46  dischi
+# removed debug
+#
 # Revision 1.1  2003/04/22 19:34:16  dischi
 # mplayer and tvtime are now plugins
 #
@@ -82,7 +85,7 @@ class MPlayer:
         self.thread.setDaemon(1)
         self.thread.start()
         self.tuner_chidx = 0    # Current channel, index into config.TV_CHANNELS
-        print '***********************'
+
 
     def TunerSetChannel(self, tuner_channel):
         for pos in range(len(config.TV_CHANNELS)):
