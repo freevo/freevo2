@@ -7,6 +7,9 @@
 # Todo: o Make a get_thickness set_thickness function pair.
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/10/12 14:07:06  dischi
+# Oops
+#
 # Revision 1.8  2003/10/12 10:56:19  dischi
 # change debug to use _debug_ and set level to 2
 #
@@ -178,7 +181,7 @@ class Border(GUIObject):
         Todo: Implement what to do for other borders than flat.
         """
         _debug_("  Inside Border.draw...", 2)
-        _debug_("  Border type: ", self.style, 2)
+        _debug_("  Border type: %s" % self.style, 2)
 
         # XXX Hack to make border draw inside the areas we expect.
         if self.style == self.BORDER_FLAT:
