@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2003/02/07 17:08:22  dischi
+# store the version in freevo.conf
+#
 # Revision 1.29  2003/02/05 15:22:51  krister
 # Updated build stuff, Changelog
 #
@@ -30,33 +33,6 @@
 #
 # Revision 1.24  2003/01/24 07:25:23  krister
 # Added check for apps in the runtime/apps dir.
-#
-# Revision 1.23  2002/12/21 17:26:52  dischi
-# Added dfbmga support. This includes configure option, some special
-# settings for mplayer and extra overscan variables
-#
-# Revision 1.22  2002/12/09 14:23:53  dischi
-# Added games patch from Rob Shortt to use the interface.py and snes support
-#
-# Revision 1.21  2002/10/24 03:16:18  krister
-# Added DXR3 support.
-#
-# Revision 1.20  2002/10/17 04:16:16  krister
-# Changed the 'nice' command so that it is built into runapp instead. Made default prio -20.
-#
-# Revision 1.19  2002/10/06 14:42:40  dischi
-# log message cleanup
-#
-# Revision 1.18  2002/09/23 18:02:38  dischi
-# Added check if the new configure was started
-#
-# Revision 1.17  2002/09/23 16:53:33  dischi
-# check mplayer, nice, jpegtrans and xmame.SDL in configure
-#
-# Revision 1.16  2002/09/06 05:18:52  krister
-# Added a 640x480 mode. Have not adapted the skin yet.
-#
-# Revision 1.2  2002/08/14 04:33:54  krister
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -85,6 +61,7 @@ import os
 import getopt
 import string
 
+CONFIG_VERSION = 1.0
 
 # Help text
 usage = '''\
@@ -141,6 +118,7 @@ def main():
     conf.display = 'x11'
     conf.tv = 'ntsc'
     conf.chanlist = 'us-cable'
+    conf.version = CONFIG_VERSION
     
     # Parse commandline options
     try:
