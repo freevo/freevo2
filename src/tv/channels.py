@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2004/10/09 09:11:56  dischi
+# wrap epg scanning in a thread
+#
 # Revision 1.25  2004/08/23 01:23:31  rshortt
 # -Add functions for lockfile handling based on the device used.
 # -Convenience functions to retrieve settings based on channel id or name.
@@ -83,6 +86,7 @@ import config
 import tv.freq, tv.v4l2
 import util
 import plugin
+import util.fthread as fthread
 
 # The Electronic Program Guide
 import pyepg
@@ -295,7 +299,7 @@ class ChannelList:
         source = config.XMLTV_FILE
         pickle = os.path.join(config.FREEVO_CACHEDIR, 'epg')
 
-        epg = pyepg.load(source, pickle)
+        epg = fthread.call(pyepg.load, source, pickle)
         self.load_time = time.time()
 
         for c in config.TV_CHANNELS:
