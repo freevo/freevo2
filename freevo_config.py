@@ -218,7 +218,7 @@ for type in ('video', 'audio', 'image', 'games'):
 
 
 # Items in the main menu.
-plugin_tv       = plugin.activate('tv.tv', level=10)
+plugin_tv       = plugin.activate('tv', level=10)
 plugin_video    = plugin.activate('mediamenu', level=20, args=('video', ))
 plugin_audio    = plugin.activate('mediamenu', level=30, args=('audio', ))
 plugin_image    = plugin.activate('mediamenu', level=40, args=('image', ))

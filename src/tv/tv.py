@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/04/21 18:20:44  dischi
+# make tv itself and not tv.tv the plugin (using __init__.py)
+#
 # Revision 1.9  2003/04/20 12:43:34  dischi
 # make the rc events global in rc.py to avoid get_singleton. There is now
 # a function app() to get/set the app. Also the events should be passed to
@@ -19,30 +22,8 @@
 # mixer is now a plugin, too
 #
 # Revision 1.7  2003/04/17 04:44:11  krister
-# Added a quick hack to support tvtime. It uses stdin on tvtime for commands, this is not supported in tvtime yet.
-#
-# Revision 1.6  2003/04/15 20:02:06  dischi
-# use the plugin interface
-#
-# Revision 1.5  2003/04/06 21:12:58  dischi
-# o Switched to the new main skin
-# o some cleanups (removed unneeded inports)
-#
-# Revision 1.4  2003/03/30 16:27:05  dischi
-# fixed a bug when changing skin at runtime
-#
-# Revision 1.3  2003/03/29 21:49:54  dischi
-# Added new tv main menu for the new skin. This includes the tv guide
-# (file is now called tvguide and not tvmenu) and DIR_RECORD. This
-# directory is sort by date and can have a different menu style in the skin.
-# See blue_round2 as example: there is a tv watermark, no view area and
-# the listing area is larger.
-#
-# Revision 1.2  2003/03/08 17:40:42  dischi
-# integration of the tv guide
-#
-# Revision 1.1  2002/11/24 13:58:45  dischi
-# code cleanup
+# Added a quick hack to support tvtime. It uses stdin on tvtime for commands,
+# this is not supported in tvtime yet.
 #
 #
 # -----------------------------------------------------------------------
@@ -69,9 +50,6 @@
 
 
 import time
-import os
-
-from plugin import MainMenuPlugin
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
@@ -110,27 +88,6 @@ if 1:
     tvapp = mplayer.get_singleton()
 else:
     tvapp = tvtime.get_singleton()
-
-
-
-#
-# Plugin interface to integrate the tv module into Freevo
-#
-class PluginInterface(MainMenuPlugin):
-
-    def items(self, parent):
-        import skin
-
-        skin = skin.get_singleton()
-        menu_items = skin.settings.mainmenu.items
-
-        icon = ""
-        if menu_items['tv'].icon:
-            icon = os.path.join(skin.settings.icon_dir, menu_items['tv'].icon)
-        return ( menu.MenuItem(menu_items['tv'].name, icon=icon,
-                               action=TVMenu().main_menu, type='main',
-                               image=menu_items['tv'].image, parent=parent), )
-
 
 
 def get_tunerid(channel_id):
@@ -214,6 +171,3 @@ class TVMenu(Item):
                 break
 
         TVGuide(start_time, stop_time, guide.chan_list[0].id, prg, start_tv, menuw)
-
-
-
