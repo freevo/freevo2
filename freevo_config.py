@@ -73,6 +73,16 @@ SUFFIX_MPLAYER_FILES = [ '/*.[aA][vV][iI]',
 			 '/*.[rR][mM]' ]
 
 #
+# Config for xml support in the movie browser
+# the regexp has to be with ([0-9]|[0-9][0-9]) so we can get the numbers
+#
+
+SUFFIX_FREEVO_FILES = [ '/*.[xX][mM][lL]' ]
+TV_SHOW_REGEXP = "s?([0-9]|[0-9][0-9])[xe]([0-9]|[0-9][0-9])[^0-9]"
+TV_SHOW_IMAGES = "tv-show-images/"
+
+
+#
 # Skin file that contains the actual skin code. This is imported
 # from skin.py
 #

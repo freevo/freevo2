@@ -71,6 +71,10 @@ class Skin(skin_test1.Skin):
         if self.bgbitmap[0]:
             apply(osd.drawbitmap, self.bgbitmap)
         
+        if menu.background != None:
+            osd.drawbitmap(util.resize(menu.background, 768, 405), 0, 85)
+            #osd.drawbitmap(util.resize(menu.background, 768, 576), 0, 0)
+            
         # Menu heading
         osd.drawstring(menu.heading, 160, 50,
                        font=self.OSD_FONTNAME_HDR,
@@ -91,6 +95,10 @@ class Skin(skin_test1.Skin):
             spacing = selection_height / menuw.items_per_page
         else:
             spacing = selection_height / max(len(menuw.menu_items),1)
+
+        # image to display
+        image = None
+        
         for choice in menuw.menu_items:
             if len(menuw.menustack) == 1:
                 ptscale = 2.0
@@ -115,6 +123,10 @@ class Skin(skin_test1.Skin):
 	    if menu.selected == choice:
                 osd.drawbox(x0 - 8 + w, y0 - 3, 705, y0 + fontsize*1.5, width=-1,
                             color=((160 << 24) | osd.COL_BLUE))
+
+                if choice.image != None:
+                    image = util.resize(choice.image, 200, 280)
+
 		if choice.icon != None and choice.popup:
 			(w, h) = util.pngsize(choice.icon)
 			# Calculate best image placement
@@ -125,6 +137,12 @@ class Skin(skin_test1.Skin):
 			osd.drawbitmap(choice.icon, logox, 100)
 
             y0 += spacing
+
+        # draw the image
+        if image != None:
+            (w, h) = util.pngsize(image)
+            logox = int(osd.width) - int(w) - 30
+            osd.drawbitmap(image, logox, 100)
 
         # Draw the menu choices for the meta selection
         x0 = 40

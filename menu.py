@@ -50,8 +50,12 @@ class MenuItem:
 	self.icon = icon
 	self.scale = scale
 	self.popup = popup
+	self.image = None
 	print popup
 
+    def setImage(self, image):
+        self.image = image
+    
     def select(self):
         self.action(self.arg)
 
@@ -64,7 +68,11 @@ class Menu:
         self.choices = choices          # List of MenuItem:s
         self.page_start = 0
         self.packrows = packrows
-        
+        self.background = None
+
+    def setBackgroundImage(self, background):
+        self.background = background
+
 
 #
 # The MenuWidget handles a stack of Menu:s
