@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/03/15 10:19:34  dischi
+# use extra audio cache dir
+#
 # Revision 1.4  2003/01/12 17:10:37  dischi
 # Add cache for the id tags to avoid reloading known mp3/ogg tags. This will
 # speed up displaying a directory.
@@ -59,9 +62,8 @@ def cwd(parent, files):
     items = []
 
     if parent and parent.type == 'dir':
-        cache_file = '%s/audio-%s-%s' % (config.FREEVO_CACHEDIR,
-                                         util.hexify(md5.new(parent.dir).digest()),
-                                         os.getuid())
+        cache_file = '%s/audio/%s' % (config.FREEVO_CACHEDIR,
+                                      util.hexify(md5.new(parent.dir).digest()))
     else:
         cache_file = None
         
