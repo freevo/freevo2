@@ -70,6 +70,9 @@ def get_singleton():
 
 class V4L1TV:
 
+    __muted    = 0
+    __igainvol = 0
+    
     def __init__(self):
         self.thread = V4L1TV_Thread()
         self.thread.start()
@@ -120,11 +123,18 @@ class V4L1TV:
             command = (config.VIDREC_MQ % outfile)
 
         self.mode = mode
-        
-        mixer.setPcmVolume(0)
-        mixer.setLineinVolume(0)
-        mixer.setMicVolume(0)
 
+        # XXX Mixer manipulation code.
+        if config.MAJOR_AUDIO_CTRL == 'VOL':
+            mixer.setPcmVolume( 0 )
+        elif config.MAJOR_AUDIO_CTRL == 'PCM':
+            mixer.setMainVolume( 0 )
+        if config.CONTROL_ALL_AUDIO:
+            mixer.setLineinVolume( 0 )
+            mixer.setIgainVolume( 0 )
+            mixer.setMicVolume( 0 )
+
+        # XXX Should be moved out in appropriate functions.
         osd.clearscreen(color=osd.COL_BLACK)
         osd.drawstring('Running the "%s" application' % mode, 30, 280,
                        fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
@@ -136,17 +146,24 @@ class V4L1TV:
 
         # Suppress annoying audio clicks
         time.sleep(0.5)
+        # XXX Hm.. This is hardcoded and very unflexible.
         if mode == 'vcr':
-            mixer.setMicVolume(90)
+            mixer.setMicVolume( config.VCR_IN_VOLUME )
         else:
-            mixer.setLineinVolume(90)
+            mixer.setLineinVolume( config.TV_IN_VOLUME )
+            mixer.setIgainVolume( config.TV_IN_VOLUME )
+            
         print 'started %s app' % self.mode
         
         
     def Stop(self):
-        mixer.setPcmVolume(100)
-        mixer.setLineinVolume(0)
-        mixer.setMicVolume(0)
+        if config.MAJOR_AUDIO_CTRL == 'VOL':
+            mixer.setPcmVolume( config.MAX_VOLUME )
+        elif config.MAJOR_AUDIO_CTRL == 'PCM':
+            mixer.setMainVolume( config.MAX_VOLUME )
+        mixer.setLineinVolume( 0 )
+        mixer.setMicVolume( 0 )
+        mixer.setIgainVolume( 0 ) # Input on emu10k cards.
 
         self.thread.mode = 'stop'
         self.thread.mode_flag.set()
@@ -154,6 +171,22 @@ class V4L1TV:
             time.sleep(0.3)
         print 'stopped %s app' % self.mode
 
+
+    def channel_change_do_stuff( self ):
+        """This is a helper function for channel up and down events"""
+        linein_vol = mixer.getLineinVolume()
+        igain_vol  = mixer.getIgainVolume()
+        
+        mixer.setLineinVolume( 0 )
+        mixer.setIgainVolume( 0 ) # Input from TV om emu10k1 cards.
+
+        tuner_channel = self.TunerGetChannel()
+        self.thread.app.write( config.TV_SETTINGS + ' ' +
+                               tuner_channel + '\n' )
+        time.sleep(0.1)
+        mixer.setLineinVolume( linein_vol )
+        mixer.setIgainVolume( igain_vol )
+        
 
     def EventHandler(self, event):
         print '%s app got %s event' % (self.mode, event)
@@ -166,39 +199,56 @@ class V4L1TV:
                 return
             # Go to the next channel in the list
             self.TunerNextChannel()
-            tuner_channel = self.TunerGetChannel()
-            mixer.setLineinVolume(0)
-            self.thread.app.write(config.TV_SETTINGS + ' ' + tuner_channel + '\n')
-            time.sleep(0.1)
-            mixer.setLineinVolume(90)
+            self.channel_change_do_stuff()
+            
         elif event == rc.CHDOWN:
             if self.mode == 'vcr':
                 return
             # Go to the previous channel in the list
             self.TunerPrevChannel()
-            mixer.setLineinVolume(0)
-            tuner_channel = self.TunerGetChannel()
-            self.thread.app.write(config.TV_SETTINGS + ' ' + tuner_channel + '\n')
-            time.sleep(0.1)
-            mixer.setLineinVolume(90)
+            self.channel_change_do_stuff()
+            
         elif event == rc.LEFT:
             if self.mode == 'vcr':
                 return
             # Finetune minus
-            mixer.setLineinVolume(0)
-            self.thread.app.write(config.TV_SETTINGS + ' ' + 'fine_minus' + '\n')
+            mixer.setLineinVolume( 0 )
+            mixer.setIgainVolume( 0 )
+            self.thread.app.write( config.TV_SETTINGS + ' ' +
+                                   'fine_minus' + '\n' )
             time.sleep(0.1)
-            mixer.setLineinVolume(90)
+            mixer.setLineinVolume( config.TV_IN_VOLUME )
+            mixer.setIgainVolume( config.TV_IN_VOLUME )
+            
         elif event == rc.RIGHT:
             if self.mode == 'vcr':
                 return
             # Finetune minus
-            mixer.setLineinVolume(0)
-            self.thread.app.write(config.TV_SETTINGS + ' ' + 'fine_plus' + '\n')
+            mixer.setLineinVolume( 0 )
+            mixer.setIgainVolume( 0 )
+            self.thread.app.write( config.TV_SETTINGS + ' ' +
+                                   'fine_plus' + '\n' )
             time.sleep(0.1)
-            mixer.setLineinVolume(90)
-            
+            mixer.setLineinVolume( config.TV_IN_VOLUME )
+            mixer.setIgainVolume( config.TV_IN_VOLUME )
 
+        elif event == rc.VOLUP:
+            mixer.incIgainVolume()
+
+        elif event == rc.VOLDOWN:
+            mixer.decIgainVolume()
+
+        elif event == rc.MUTE:
+            if self.__muted:
+                mixer.setIgainVolume( self.__igainvol )
+                self.__muted = 0
+            else:
+                self.__igainvol = mixer.getIgainVolume()
+                mixer.setIgainVolume( 0 )
+                self.__muted = 1
+                
+                
+            
 
 class V4L1TV_Thread(threading.Thread):
 
