@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.59  2004/12/18 13:37:27  dischi
+# adjustments to new childapp
+#
 # Revision 1.58  2004/12/07 16:05:16  dischi
 # fix event context setting
 #
@@ -133,8 +136,7 @@ class Xine(Application):
         self.xine_type = type
         self.version   = version
         self.app       = None
-        self.command   = [ '--prio=%s' % config.MPLAYER_NICE ] + \
-                         config.XINE_COMMAND.split(' ') + \
+        self.command   = config.XINE_COMMAND.split(' ') + \
                          [ '--stdctl', '-V', config.XINE_VO_DEV,
                            '-A', config.XINE_AO_DEV ] + \
                            config.XINE_ARGS_DEF.split(' ')
@@ -228,7 +230,7 @@ class Xine(Application):
         log.info('Xine.play(): Starting cmd=%s' % command)
 
         self.show()
-        self.app = childapp.Instance( command )
+        self.app = childapp.Instance( command, prio = config.MPLAYER_NICE )
         return None
     
 
@@ -239,7 +241,7 @@ class Xine(Application):
         Application.stop(self)
         if self.app:
             self.app.stop('quit\n')
-            
+            self.app = None
 
     def eventhandler(self, event, menuw=None):
         """
