@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.76  2003/08/05 17:25:34  dischi
+# better error handling for missing SDL_VIDEODRIVER
+#
 # Revision 1.75  2003/08/04 19:46:35  dischi
 # force sdl to x11 when using x11. Sometimes detection fails
 #
@@ -330,8 +333,11 @@ class OSD:
             os.environ['SDL_VIDEODRIVER'] = 'directfb'
 
         # sometimes this fails
-        if config.CONF.display == 'x11':
-            os.environ['SDL_VIDEODRIVER'] = 'x11'
+        if not os.environ.has_key('SDL_VIDEODRIVER'):
+            if config.CONF.display == 'x11':
+                os.environ['SDL_VIDEODRIVER'] = 'x11'
+            if not os.environ.has_key('DISPLAY'):
+                os.environ['SDL_VIDEODRIVER'] = 'fb'
 
         # Initialize the PyGame modules.
         pygame.display.init()
