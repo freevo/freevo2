@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/08/20 22:45:15  gsbarbieri
+# Capitalize (MOVIE|IMAGE|VIDEO|...). UPPERCASE IS UGLY!
+#
 # Revision 1.9  2003/08/20 22:29:37  gsbarbieri
 # UPPER CASE TEXT IS UGLY! :)
 #
@@ -174,7 +177,7 @@ class MediaMenu(Item):
                 traceback.print_exc()
 
 
-        item_menu = menu_module.Menu('%s Main Menu' % title, self.main_menu_generate(),
+        item_menu = menu_module.Menu('%s Main Menu' % title.capitalize(), self.main_menu_generate(),
                                      item_types = self.display_type, umount_all=1,
                                      reload_func = self.reload)
         item_menu._skin_force_text_view = force_text_view
