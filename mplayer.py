@@ -9,6 +9,16 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2002/11/09 17:36:31  dischi
+# Some stuff to work with the changes in datatypes and movie_config.
+#
+# Also there is a seek to position code. Since the -ss flag from mplayer
+# is way to bad (seek to position 20:00 jumps to 35:xxx), I implemented
+# a small work around. Freevo moves forward in the video until we are
+# ahead for the start_position. Than we go backwards until it fits. This
+# is a bad hack (TM) and should be removed when seek to position works in
+# mplayer.
+#
 # Revision 1.45  2002/11/08 21:28:20  dischi
 # Added support for a movie config dialog. Only usable for dvd right now.
 # See mplayer-devel list for details.
@@ -110,6 +120,9 @@ import audioinfo  # This just for ID3 functions and stuff.
 import skin       # Cause audio handling needs skin functions.
 import fnmatch
 
+# RegExp
+import re
+
 import movie_config
 from datatypes import *
 
@@ -159,12 +172,8 @@ class MPlayer:
     def play(self, mode, file, playlist, repeat=0, start_time = 0):
 
         filename = file
-        mplayer_config = None
         if isinstance(filename, FileInformation):
             mplayer_options = file.mplayer_options
-            if file.mplayer_config:
-                mplayer_config = file.mplayer_config
-                mplayer_options += mplayer_config.to_string()
             mode = file.mode
             filename = filename.file
         else:
@@ -204,9 +213,6 @@ class MPlayer:
                                    config.MPLAYER_CMD,
                                    config.MPLAYER_ARGS_DEF)
 
-        if start_time:
-            mpl += ' -ss %s' % start_time
-            
         # XXX find a way to enable this for AVIs with ac3, too
         if (mode == 'dvdnav' or mode == 'dvd' or os.path.splitext(filename)[1] == '.vob')\
            and config.MPLAYER_AO_HWAC3_DEV:
@@ -278,8 +284,14 @@ class MPlayer:
 
         # Add special arguments
         if mplayer_options:
-            command += ' ' + mplayer_options
-
+            if mplayer_options[0]:
+                command += ' ' + mplayer_options[0]
+            if mplayer_options[1]:
+                command += ' ' + mplayer_options[1].to_string()
+            if mplayer_options[2]:
+                command += ' ' + mplayer_options[2]
+                mplayer_options[2] = ""
+                
         self.file = file
         self.playlist = playlist
 
@@ -319,7 +331,11 @@ class MPlayer:
             print 'MPlayer.play(): Starting thread, cmd=%s' % command
             
         self.thread.mode    = 'play'
-        self.thread.mplayer_config = mplayer_config
+        if mplayer_options:
+            self.thread.mplayer_config = mplayer_options[1]
+        else:
+            self.thread.mplayer_config = None
+        self.thread.start_time = start_time
         self.thread.command = command
         self.thread.mode_flag.set()
         if(mode == 'audio'):
@@ -495,6 +511,8 @@ class MPlayerApp(childapp.ChildApp):
             self.mpinfo = mpinfo
         else:
             self.mpinfo = movie_config.MplayerMovieInfo()
+        self.start_time = 0
+        self.seek_mode = "forward"
         childapp.ChildApp.__init__(self, app)
 
     def kill(self):
@@ -512,7 +530,34 @@ class MPlayerApp(childapp.ChildApp):
 
     def stdout_cb(self, str):
         if str.find("A:") == 0:
-            self.mpinfo.time = str
+            # seek for the right position on startup
+            #
+            # XXX HACK: seek 10, 1 minute or 10 seconds until we
+            # XXX reached to needed position. Than go back 10 seconds
+            # XXX until we are _behind_ the start_time
+            if self.start_time:
+                m = re.compile("^A[: -]*([0-9]+)\.").match(str)
+
+                if m and self.seek_mode == "forward":
+                    if int(m.group(1)) + 60 <= self.start_time:
+                        str = mplayerKey('UP')
+                        self.write(str)
+                    elif int(m.group(1)) + 10 <= self.start_time:
+                        str = mplayerKey('RIGHT')
+                        self.write(str)
+                    else:
+                        self.seek_mode = "backward"
+                        
+                if m and self.seek_mode == "backward":
+                    if int(m.group(1)) > self.start_time:
+                        str = mplayerKey('LEFT')
+                        self.write(str)
+                    else:
+                        self.seek_mode = "forward"
+                        self.start_time = 0
+
+            else:
+                self.mpinfo.time = str
 
         # this is the first start of the movie, parse infos
         elif not self.mpinfo.time:
@@ -530,6 +575,7 @@ class MPlayer_Thread(threading.Thread):
         self.app       = None
         self.audioinfo = None              # Added to enable update of GUI
         self.mplayer_config = None
+        self.start_time = 0
         
     def run(self):
         while 1:
@@ -549,6 +595,10 @@ class MPlayer_Thread(threading.Thread):
                     
                 self.app = MPlayerApp(self.command, self.mplayer_config)
 
+                # XXX Bad hack: store the value to seek to in the childapp
+                # XXX to seek forward to this position
+                self.app.start_time = self.start_time
+                self.start_time = 0
                 while self.mode == 'play' and self.app.isAlive():
                     # if DEBUG: print "Still running..."
                     if self.audioinfo: 
