@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.56  2002/10/28 21:32:42  dischi
+# Oops
+#
 # Revision 1.55  2002/10/26 12:27:45  dischi
 # Keep the aspect ratio for image thumbnails, also show thumbnails for
 # images smaller 1100x800. Maybe these values are too high, for larger
@@ -419,6 +422,8 @@ class Skin:
                             i_file = util.resize(image, val.cover_movie.width,
                                                  h*scale)
 
+                            i_val = copy.deepcopy(val.cover_movie)
+
                             # check all round masks if they are around the image
                             # and shorten the width of those who are to fit
                             # the new size
@@ -429,7 +434,6 @@ class Skin:
                                        m.height >= i_val.height:
                                         m.height -= val.cover_movie.height-h*scale
                                 
-                            i_val = copy.deepcopy(val.cover_movie)
                             i_val.height = h*scale
 
 
