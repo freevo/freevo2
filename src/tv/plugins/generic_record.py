@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/10/12 09:54:27  dischi
+# BSD patches from Lars
+#
 # Revision 1.9  2003/09/06 15:12:04  rshortt
 # recordserver's name changed.
 #
@@ -152,6 +155,13 @@ class Record_Thread(threading.Thread):
                 
             elif self.mode == 'record':
                 print('Record_Thread::run: cmd=%s' % self.command)
+
+		# The FreeBSD bsdbt848 driver does not support the adevice
+		# setting, so we must switch the mixer to the correct record
+		# source before starting mencoder. I'm not sure how to do
+		# this with Python, so just call the mixer command directly.
+                if os.uname()[0] == 'FreeBSD':
+                    os.system('mixer =rec line rec 100 > /dev/null 2>&1')
 
                 tv_lock_file = config.FREEVO_CACHEDIR + '/record'
                 open(tv_lock_file, 'w').close()

@@ -900,6 +900,10 @@ else:
     TV_DEVICE = '/dev/video0'
     TV_INPUT = 0
 
+# Additional options to pass to mplayer in TV mode.
+# For example, TV_OPTS = '-vop pp=ci' would turn on deinterlacing.
+TV_OPTS = ''
+
 TV_SETTINGS = '%s television %s %s' % (CONF.tv, CONF.chanlist, TV_DEVICE)
 
 # This is the size (in MB) of the timeshift buffer, ie: how long you can
@@ -953,22 +957,45 @@ RECORD_SCHEDULE = '%s/record_schedule.xml' % FREEVO_CACHEDIR
 RECORD_SERVER_IP = 'localhost'
 RECORD_SERVER_PORT = 18001
 
+if os.uname()[0] == 'FreeBSD':
+  # FreeBSD's bsdbt848 TV driver doesn't support audio settings?
+  VCR_AUDIO = ''
+else:
+  VCR_AUDIO = (':adevice=%s' % AUDIO_DEVICE +
+               ':audiorate=32000' +         # 44100 for better sound
+               ':forceaudio:forcechan=1:' + # Forced mono for bug in my driver
+               'buffersize=64')             # 64MB capture buffer, change?
+
+# TV capture size for viewing and recording. Max 768x480 for NTSC,
+# 768x576 for PAL. Set lower if you have a slow computer!
 #
+# For the 'tvtime' TV viewing application, only the horizontal size is used.
+# Set the horizontal size to 400 or 480 if you have a slow (~500MHz) computer,
+# it still looks OK, and the picture will not be as jerky.
+# The vertical size is always either fullscreen or 480/576 (NTSC/PAL)
+# for tvtime.
+TV_VIEW_SIZE = (640, 480)
+TV_REC_SIZE = (320, 240)   # Default for slower computers
+
+# Input formats for viewing and recording. The format affect viewing
+# and recording performance. It is specific to your hardware, so read
+# the MPlayer docs and experiment with mplayer to see which one fits
+# your computer best.
+TV_VIEW_OUTFMT = 'yuy2'   # Better quality, slower on pure FB/X11
+TV_REC_OUTFMT = 'yuy2'
+
 # XXX Please see the mencoder docs for more info about the settings
 # XXX below. Some stuff must be changed (adevice), others probably
 # XXX should be ("Change"), or could be in some cases ("change?")
-VCR_CMD = ('/usr/local/bin/mencoder ' +    # Change. Absolute path to the runtime
+VCR_CMD = (CONF.mencoder + ' ' +
            '-tv on:driver=%s:input=%d' % (TV_DRIVER, TV_INPUT) +
            ':norm=%s' % CONF.tv +
            ':channel=%(channel)s' +        # Filled in by Freevo
            ':chanlist=%s' % CONF.chanlist +
-           ':width=320:height=240' +       # Change if needed
-           ':outfmt=yv12' +                # Prob. ok, yuy2 might be faster
+           ':width=%d:height=%d' % (TV_REC_SIZE[0], TV_REC_SIZE[1]) +
+           ':outfmt=%s' % TV_REC_OUTFMT +
            ':device=%s' % TV_DEVICE +
-           ':adevice=%s' % AUDIO_DEVICE +
-           ':audiorate=32000' +            # 44100 for better sound
-           ':forceaudio:forcechan=1:' +    # Forced mono for bug in my driver
-           'buffersize=64' +               # 64 Megabyte capture buffer, change?
+           VCR_AUDIO +                     # set above
            ' -ovc lavc -lavcopts ' +       # Mencoder lavcodec video codec
            'vcodec=mpeg4' +                # lavcodec mpeg-4
            ':vbitrate=1200:' +             # Change lower/higher, bitrate
@@ -981,27 +1008,6 @@ VCR_CMD = ('/usr/local/bin/mencoder ' +    # Change. Absolute path to the runtim
 
 # XXX Not used yet
 VCR_SETTINGS = '%s composite1 %s %s' % (CONF.tv, CONF.chanlist, TV_DEVICE)
-
-# TV capture size for viewing and recording. Max 768x480 for NTSC,
-# 768x576 for PAL. Set lower if you have a slow computer!
-#
-# For the 'tvtime' TV viewing application, only the horizontal size is used.
-# Set the horizontal size to 400 or 480 if you have a slow (~500MHz) computer,
-# it still looks OK, and the picture will not be as jerky.
-# The vertical size is always either fullscreen or 480/576 (NTSC/PAL)
-# for tvtime.
-TV_VIEW_SIZE = (640, 480)
-
-# XXX Not used yet
-TV_REC_SIZE = (320, 240)   # Default for slower computers
-
-# Input formats for viewing and recording. The format affect viewing
-# and recording performance. It is specific to your hardware, so read
-# the MPlayer docs and experiment with mplayer to see which one fits
-# your computer best.
-TV_VIEW_OUTFMT = 'yuy2'   # Better quality, slower on pure FB/X11
-# XXX Not used yet
-TV_REC_OUTFMT = 'yuy2'
 
 
 #

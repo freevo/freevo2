@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/10/12 09:54:27  dischi
+# BSD patches from Lars
+#
 # Revision 1.20  2003/09/14 01:38:59  outlyer
 # More FreeBSD support from Lars
 #
@@ -173,8 +176,8 @@ class MPlayer:
             outfmt = 'outfmt=%s' % config.TV_VIEW_OUTFMT
 
             tvcmd = ('tv://%s -tv driver=%s:%s:%s:%s:'
-                     '%s:width=%s:height=%s:%s' %
-                     (tuner_channel, config.TV_DRIVER, device, input, norm, chanlist, w, h, outfmt))
+                     '%s:width=%s:height=%s:%s %s' %
+                     (tuner_channel, config.TV_DRIVER, device, input, norm, chanlist, w, h, outfmt, config.TV_OPTS))
             
             # Build the MPlayer command
             args = (config.MPLAYER_NICE, config.MPLAYER_CMD, config.MPLAYER_VO_DEV,
@@ -205,8 +208,8 @@ class MPlayer:
             outfmt = 'outfmt=%s' % config.TV_VIEW_OUTFMT
             
             tvcmd = ('-tv on:driver=%s:%s:%s:%s:'
-                     '%s:width=%s:height=%s:%s' %
-                     (config.TV_DRIVER, device, input, norm, chanlist, w, h, outfmt))
+                     '%s:width=%s:height=%s:%s %s' %
+                     (config.TV_DRIVER, device, input, norm, chanlist, w, h, outfmt, config.TV_OPTS))
 
             args = (config.MPLAYER_CMD, config.MPLAYER_VO_DEV,
                     config.MPLAYER_VO_DEV_OPTS, tvcmd,

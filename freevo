@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.88  2003/10/12 09:54:27  dischi
+# BSD patches from Lars
+#
 # Revision 1.87  2003/10/11 12:49:25  dischi
 # check for valid parameter
 #
@@ -206,7 +209,9 @@ if [ -e "$script" ]; then
     if [ "$1" = "start" ]; then
 	$RUNAPP $PYTHON "$script" &
 	echo $! > $PID_FILE
-	disown
+	if [ `uname -s` != "FreeBSD" ]; then
+	    disown
+	fi
     elif [ "$1" = "stop" ]; then
 	if [ -e $PIDFILE ]; then
 	    kill -KILL `cat $PID_FILE` > /dev/null 2>&1
@@ -378,7 +383,9 @@ if [ "$1" = "start" ]; then
     $RUNAPP $PYTHON $OPTIMZE $FREEVO_PYTHON/main.py $@ > /dev/null 2>&1 &
     
     echo $! > $PID_FILE
-    disown
+    if [ `uname -s` != "FreeBSD" ]; then
+        disown
+    fi
     exit 0
 fi
 

@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/10/12 09:54:27  dischi
+# BSD patches from Lars
+#
 # Revision 1.9  2003/08/26 18:03:32  outlyer
 # Adding FLAC support for the cdbackup plugin
 #
@@ -67,6 +70,7 @@ import string
 CONFIG_VERSION = 2.1
 
 EXTERNAL_PROGRAMS = (("mplayer", "mplayer", 1),
+                     ("mencoder", "mencoder", 0),
                      ("tvtime", "tvtime", 0),
                      ("xine", "xine", 0),
                      ("fbxine", "fbxine", 0),
