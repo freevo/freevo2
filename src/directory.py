@@ -9,17 +9,23 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.93  2004/01/11 03:22:30  outlyer
-# First try at the "Coming Up" page. It only shows up when a directory in the
-# TV menu is selected, but I'm working on a way to have it show up for the
-# rest of the TV menu.
+# Revision 1.94  2004/01/11 04:04:37  outlyer
+# Ok,  now it shows the "Coming Up" list anywhere in the TV menu. I think
+# it fits, though it looks fairly ugly right now. I'm going to make it more
+# flexible after I get some listings for 'tomorrow' since mine expire tonight.
 #
-# TODO:
-# o Cache the coming up list for an hour at a time (misc.py)
-# o Cleanup the 'comingup()' function, it's currently just executable pseudo-code (misc.py)
-# o Show the Coming Up list for all items (skin)
+# I like this as a feature, but I'm wondering if someone has an idea on a
+# cleaner way to implement this. This is a little hackish, since "Coming Up"
+# isn't really a item "property" so it doesn't exactly fit in the object
+# model.
 #
-# If you don't use 'blurr2.fxd' this will have no effect on you whatsoever.
+# I did remove it from directory.py, so that's at least more logical.
+#
+# Maybe we should have a general function in item.py to call extra
+# functions, or a way to embed python in the skin which isn't so nice.
+#
+# Ideally, we need a different way to have "default" information in an info
+# area, as opposed to putting it in the item.
 #
 # Revision 1.92  2004/01/10 13:19:05  dischi
 # split usage of xml_file to folder_fxd and skin_fxd
@@ -298,9 +304,6 @@ class DirItem(Playlist):
                 space='%s,%s' % (space / 1000, space % 1000)
             return space
       
-        if attr in ('comingup'):
-            return util.comingup(None)
-
         return Item.getattr(self, attr)
 
 

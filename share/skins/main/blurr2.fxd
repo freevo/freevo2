@@ -275,6 +275,9 @@
 
     <layout label="tv extended info">
       <content x="0" y="0" type="text" spacing="20" font="default">
+        <item type="default">
+            <text font="info tagline" width="max" height="max" expression="comingup" mode="soft"/>
+        </item>
 	<item type="video">
           <goto_pos x="250" mode="relative"/>
 	  <if expression="tv_show_name">
@@ -322,7 +325,7 @@
 
 	<item type="dir">
           <text font="info tagline" width="max" height="max" expression="comingup" mode="soft"/>
-	  <if expression="tagline">
+        <if expression="tagline">
 	    <text font="info tagline" width="max" expression="tagline"/>
 	    <newline/>
 	    <goto_pos y="10" mode="relative"/>
@@ -354,7 +357,7 @@
           </if>
         </item>
 
-      </content>
+        </content>
     </layout>
 
 

@@ -9,6 +9,24 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.48  2004/01/11 04:04:37  outlyer
+# Ok,  now it shows the "Coming Up" list anywhere in the TV menu. I think
+# it fits, though it looks fairly ugly right now. I'm going to make it more
+# flexible after I get some listings for 'tomorrow' since mine expire tonight.
+#
+# I like this as a feature, but I'm wondering if someone has an idea on a
+# cleaner way to implement this. This is a little hackish, since "Coming Up"
+# isn't really a item "property" so it doesn't exactly fit in the object
+# model.
+#
+# I did remove it from directory.py, so that's at least more logical.
+#
+# Maybe we should have a general function in item.py to call extra
+# functions, or a way to embed python in the skin which isn't so nice.
+#
+# Ideally, we need a different way to have "default" information in an info
+# area, as opposed to putting it in the item.
+#
 # Revision 1.47  2004/01/10 16:49:37  dischi
 # add long to possible length
 #
@@ -407,6 +425,10 @@ class Item:
                 return '%d:%02d:%02d' % ( length / 3600, (length % 3600) / 60, length % 60)
             else:
                 return '%d:%02d' % (length / 60, length % 60)
+
+        if attr in ('comingup'):
+                    return util.comingup(None)
+
 
         if attr[:4] == 'len(' and attr[-1] == ')':
             r = None
