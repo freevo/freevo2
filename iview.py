@@ -64,6 +64,12 @@ def get_singleton():
 
 
 class ImageViewer:
+    osd = 1    # Draw file info on the image
+    zoom = 0   # Image zoom
+    zoom_btns = { rc.K0:0, rc.K1:1, rc.K2:2, rc.K3:3, rc.K4:4,
+                  rc.K5:5, rc.K6:6, rc.K7:7, rc.K8:8, rc.K9:9 }
+
+   
     def cache_file(self, filename, cachename):
         image = Image.open(filename)
         width, height = image.size
@@ -80,13 +86,12 @@ class ImageViewer:
         im_res.save(cachename,'PNG')
 
         
-    def view(self, filename, number, playlist):
+    def view(self, filename, number, playlist, zoom=0, loadnextimage=1):
 
         self.filename = filename
         self.playlist = playlist
         self.number = number
         self.rotation = 0
-        self.osd = 0
 
         
         rc.app = self.eventhandler
@@ -95,17 +100,43 @@ class ImageViewer:
         # XXX Alternative version of the code below, use "if 1" to enable
         # XXX This version uses the OSD server JPEG support and bitmap scaling
 
-        if 0:
+        if 1:
+            osd.clearscreen(color=osd.COL_BLACK)
+           
             osd.drawstring('please wait...', osd.width/2 - 60, osd.height/2 - 10,
                            fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
             osd.update()
 
+            osd.loadbitmap(filename)
+
             image = Image.open(filename)
             width, height = image.size
 
-            scale_x = scale_y = 1.0
-            if width > osd.width: scale_x = float(osd.width) / width
-            if height > osd.height: scale_y = float(osd.height) / height
+            # Bounding box default values
+            bbx = bby = bbw = bbh = 0
+            if zoom:
+                width = width / 3
+                height = height / 3
+
+                # Translate the 9-element grid to bounding boxes
+                bb = { 1:(0,0), 2:(1,0), 3:(2,0),
+                       4:(0,1), 5:(1,1), 6:(2,1),
+                       7:(0,2), 8:(1,2), 9:(2,2) }
+                h, v = bb[zoom]
+
+                # Bounding box (x;y) position
+                bbx = [0, width, 2*width][h]
+                bby = [0, height, 2*height][v]
+
+                # Get one 1/3 of the image
+                bbw = width
+                bbh = height
+                
+            # scale_x = scale_y = 1.0
+            # if width > osd.width: scale_x = float(osd.width) / width
+            # if height > osd.height: scale_y = float(osd.height) / height
+            scale_x = float(osd.width) / width
+            scale_y = float(osd.height) / height
 
             scale = min(scale_x, scale_y)
 
@@ -116,10 +147,29 @@ class ImageViewer:
 
             print width, height, scale, new_w, new_h, x, y
 
-            osd.drawbitmap(filename, x, y, scale)
-            osd.drawstring(os.path.basename(filename), 10, osd.height - 30, \
-                           fgcolor=osd.COL_ORANGE)
+            osd.drawbitmap(filename, x, y, scale, bbx, bby, bbw, bbh)
+            self.drawosd()
             osd.update()
+
+            # cache the next image (most likely we need this)
+            # XXX use a separate function like above...
+            if loadnextimage and self.playlist != []:
+                pos = self.playlist.index(self.filename)
+                pos = (pos+1) % len(self.playlist)
+                filename = self.playlist[pos]
+
+                image = Image.open(filename)
+                width, height = image.size
+
+                scale_x = scale_y = 1.0
+                if width > osd.width: scale_x = float(osd.width) / width
+                if height > osd.height: scale_y = float(osd.height) / height
+
+                scale = min(scale_x, scale_y)
+
+                # This will both load the next image into the load cache,
+                # zoom it into the zoom cache.
+                osd.zoombitmap(filename, scale)
 
             return
 
@@ -154,8 +204,6 @@ class ImageViewer:
                 self.cache_file(filename, image_file)
 
 
-
-    
     def eventhandler(self, event):
 
         if event == rc.STOP or event == rc.EXIT:
@@ -183,7 +231,6 @@ class ImageViewer:
                 pos = (pos+1) % len(self.playlist)
                 filename = self.playlist[pos]
                 self.view(filename, pos, self.playlist)
-
 
         # rotate image
         if event == rc.LEFT or event == rc.RIGHT:
@@ -218,28 +265,60 @@ class ImageViewer:
 
             osd.drawbitmap(image_file, (osd.width - new_w) / 2, (osd.height - new_h) / 2)
             osd.update()
-            
 
         # print image information
         if event == rc.DISPLAY:
+            self.osd = {0:1, 1:0}[self.osd] # Toggle on/off
+            
             if self.osd:
-                osd.clearscreen(color=osd.COL_BLACK)
-                self.view(self.filename, self.playlist.index(self.filename), self.playlist)
-                self.osd = 0
+                self.drawosd()
+                osd.update()
             else:
-                f=open(self.filename, 'rb')
-                tags=exif.process_file(f)
+                # Redraw without the OSD
+                self.view(self.filename, self.playlist.index(self.filename),
+                          self.playlist)
 
-                pos = 30
-
-                if tags.has_key('Image DateTime'):
-                    osd.drawstring('%s' % tags['Image DateTime'], 10, osd.height - 30, \
-                                   fgcolor=osd.COL_ORANGE)
-                    pos = 60
-                    
-                osd.drawstring(os.path.basename(self.filename), 10, osd.height - pos, \
-                               fgcolor=osd.COL_ORANGE)
-                self.osd = 1
+        # XXX Test, zoom to one third of the image
+        # XXX 1 is upper left, 9 is lower right, 0 zoom off
+        if event in self.zoom_btns:
+            self.zoom = self.zoom_btns[event]
                 
-            osd.update()
+            if self.zoom:
+                # Zoom one third of the image, don't load the next
+                # image in the list
+                self.view(self.filename, self.playlist.index(self.filename),
+                          self.playlist, zoom=self.zoom, loadnextimage=0)
+            else:
+                # Display entire picture, don't load next image in case
+                # the user wants to zoom around some more.
+                self.view(self.filename, self.playlist.index(self.filename),
+                          self.playlist, zoom=0, loadnextimage=0)
+                
+
+    def drawosd(self):
+
+        if not self.osd: return
+        
+        f = open(self.filename, 'r')
+        tags = exif.process_file(f)
+
+        # Make the background darker for the OSD info
+        osd.drawbox(0, osd.height - 70, 300, osd.height, width=-1,
+                    color=((60 << 24) | osd.COL_BLACK))
+        
+        pos = 30
+
+        if tags.has_key('Image DateTime'):
+            osd.drawstring('%s' % tags['Image DateTime'], 10, osd.height - pos, 
+                           fgcolor=osd.COL_ORANGE)
+            pos += 30
+            
+        osd.drawstring(os.path.basename(self.filename), 10, osd.height - pos, 
+                       fgcolor=osd.COL_ORANGE)
+
+        pos += 30
+            
+        if self.zoom:
+            osd.drawstring('Zoom = %s' % self.zoom, 10, osd.height - pos, 
+                           fgcolor=osd.COL_ORANGE)
             
