@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/03/30 14:10:15  dischi
+# Added left/right icons and set the label width to the fixed value specified
+# in the xml file. The channel icons will be scaled to fill that space.
+#
 # Revision 1.18  2003/03/29 21:43:39  dischi
 # small bugfix
 #
@@ -125,6 +129,9 @@ class Listing_Area(Skin_Area):
         backup = ( self.area_val, self.layout)
 
         self.display_style = display_style
+        if menu.force_skin_layout != -1:
+            self.display_style = menu.force_skin_layout
+
         self.init_vars(settings, menu.item_types)
 
         content   = self.calc_geometry(self.layout.content, copy_object=TRUE)
