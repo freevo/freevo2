@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/04/21 18:16:46  dischi
+# return TRUE if event is handled
+#
 # Revision 1.19  2003/04/20 12:43:33  dischi
 # make the rc events global in rc.py to avoid get_singleton. There is now
 # a function app() to get/set the app. Also the events should be passed to
@@ -254,11 +257,13 @@ class ImageViewer:
             else:
                 self.slideshow = TRUE
                 signal.alarm(1)
-
+            return TRUE
+        
         elif event == rc.STOP or event == rc.EXIT:
             rc.app(rc_app_bkp)
             signal.alarm(0)
             self.fileitem.eventhandler(event)
+            return TRUE
 
         # up and down will stop the slideshow and pass the
         # event to the playlist
@@ -266,6 +271,7 @@ class ImageViewer:
             self.slideshow = FALSE
             signal.alarm(0)
             self.fileitem.eventhandler(event)
+            return TRUE
             
         # rotate image
         elif event == rc.LEFT or event == rc.RIGHT:
@@ -300,12 +306,14 @@ class ImageViewer:
             if self.osd_mode:
                 self.drawosd()
             osd.update()
+            return TRUE
 
         # print image information
         elif event == rc.DISPLAY:
             self.osd_mode = {0:1, 1:2, 2:0}[self.osd_mode] # Toggle on/off
             # Redraw
             self.view(self.fileitem, zoom=self.zoom, rotation = self.rotation)
+            return TRUE
 
         # zoom to one third of the image
         # 1 is upper left, 9 is lower right, 0 zoom off
@@ -320,7 +328,8 @@ class ImageViewer:
                 # Display entire picture, don't load next image in case
                 # the user wants to zoom around some more.
                 self.view(self.fileitem, zoom=0, rotation = self.rotation)
-                
+            return TRUE                
+
         # save the image with the current rotation
         elif event == rc.REC:
             if self.rotation and os.path.splitext(self.filename)[1] == ".jpg":
@@ -330,9 +339,11 @@ class ImageViewer:
                 os.system('mv /tmp/freevo-iview %s' % self.filename)
                 self.rotation = 0
                 osd.bitmapcache.__delitem__(self.filename)
+                return TRUE                
 
         else:
-            self.fileitem.eventhandler(event)
+            return self.fileitem.eventhandler(event)
+
             
     def drawosd(self):
 
