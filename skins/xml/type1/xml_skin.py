@@ -9,6 +9,16 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2002/10/19 15:09:19  dischi
+# Added support for roundboxes. The file extreme_round_768x576.xml is an
+# example of round box usage. blue2_768x576.xml also looks a little bit
+# different now, all other skins should still look like before.
+#
+# You can now add <mask>-tags. All these masks and the selection are drawn
+# on the same layer. With that it is possible to undo the alpha changes in
+# a selection. So the alpha values in colors are changes to the background
+# image, not the current background (image+alpha mask)
+#
 # Revision 1.13  2002/10/16 19:38:56  dischi
 # o Removed older xml files
 # o changed to structure in the xml files. In listings is now a section
@@ -158,11 +168,11 @@ class XML_data:
         self.width = 0
         self.size = 0
         self.length = 0
-        self.visible = 1
+        self.visible = 'yes'
         self.text = None
         self.font = OSD_DEFAULT_FONT
         self.mode=''
-        self.shadow_visible = 0
+        self.shadow_visible = ''
         self.shadow_color = 0
         self.shadow_pad_x = 1
         self.shadow_pad_y = 1
@@ -172,7 +182,55 @@ class XML_data:
         self.valign = 'top'
         self.image = ''
         self.mask = ''
-    
+        self.radius = 0
+        self.spacing = 10
+        
+        
+    def parse(self, node, scale = 0.0, c_dir=''):
+        self.x = attr_int(node, "x", self.x, scale)
+        self.y = attr_int(node, "y", self.y, scale)
+        self.height = attr_int(node, "height", self.height, scale)
+        self.width = attr_int(node, "width", self.width, scale)
+        self.length = attr_int(node, "length", self.length, scale)
+        self.radius = attr_int(node, "radius", self.radius, scale)
+        self.spacing = attr_int(node, "spacing", self.spacing, scale)
+
+        self.visible = attr_visible(node, "visible", self.visible)
+        self.bgcolor = attr_hex(node, "bgcolor", self.bgcolor)
+        self.color = attr_hex(node, "color", self.color) # will be overrided by font
+        self.border_color = attr_hex(node, "border_color", self.border_color)
+        self.border_size = attr_int(node, "border_size", self.border_size)
+        self.image = attr_file(node, "image", self.image, c_dir)
+        self.mask = attr_file(node, "mask", self.mask, c_dir)
+
+        for subnode in node.children:
+            if subnode.name == u'font':
+                self.color = attr_hex(subnode, "color", self.color)
+                self.size = attr_int(subnode, "size", self.size, scale)
+                self.font = attr_font(subnode, "name", self.font)
+                self.align = attr_str(subnode, "align", self.align)
+                self.valign = attr_str(subnode, "valign", self.valign)
+            if subnode.name == u'selection':
+                self.selection.parse(subnode, scale)
+            if subnode.name == u'text':
+                self.text = subnode.textof()
+            if subnode.name == u'shadow':
+                self.shadow_visible = attr_visible(subnode, "visible", self.shadow_visible)
+                self.shadow_color = attr_hex(subnode, "color", self.shadow_color)
+                self.shadow_pad_x = attr_int(subnode, "x", self.shadow_pad_x)
+                self.shadow_pad_y = attr_int(subnode, "y", self.shadow_pad_y)
+            if subnode.name == u'background':
+                self.bgcolor = attr_hex(subnode, "color", self.bgcolor)                
+                self.radius = attr_int(subnode, "radius", self.radius)                
+            if subnode.name == u'geometry':
+                self.x = attr_int(subnode, "x", self.x, scale)
+                self.y = attr_int(subnode, "y", self.y, scale)
+                self.width = attr_int(subnode, "width", self.width, scale)
+                self.height = attr_int(subnode, "height", self.height, scale)
+
+
+
+
 class XML_menuitem(XML_data):
     def __init__(self):
         XML_data.__init__(self)
@@ -184,25 +242,42 @@ class XML_menuitems:
         self.default = XML_menuitem()
         self.dir = XML_menuitem()
         self.pl = XML_menuitem()
-    
+
+
+class XML_cover(XML_data):
+    def __init__(self):
+        XML_data.__init__(self)
+        self.mask = None
+
+    def parse(self, node, scale = 0.0, c_dir=''):
+        XML_data.parse(self, node, scale, c_dir)
+        for subnode in node.children:
+            if subnode.name == u'mask':
+                self.mask = []
+                for masknode in subnode.children:
+                    if masknode.name == u'rectangle':
+                        rect = XML_data()
+                        rect.parse(masknode, scale)
+                        self.mask += [ rect ]
+        
 class XML_menu:
     def __init__(self):
-        self.background = XML_data()
+        self.background = XML_background()
         self.logo = XML_data()
         self.title = XML_data()
         self.items = XML_menuitems()
-        self.cover_movie = XML_data()
-        self.cover_music = XML_data()
-        self.cover_image = XML_data()
+        self.cover_movie = XML_cover()
+        self.cover_music = XML_cover()
+        self.cover_image = XML_cover()
         self.submenu = XML_menuitem()
 
     
 class XML_mp3:
     def __init__(self):
-        self.background = XML_data()
+        self.background = XML_background()
         self.progressbar = XML_data()
         self.title = XML_data()    
-        self.cover = XML_data()    
+        self.cover = XML_cover()    
         self.info  = XML_data()
         self.logo  = XML_data()
 
@@ -216,7 +291,7 @@ class XML_popup(XML_data):
 class XML_mainmenuitem:
     def __init__(self):
         self.name = ''
-        self.visible = 1
+        self.visible = 'yes'
         self.icon = ''
         self.pos = 0
         self.action = None
@@ -239,9 +314,10 @@ class XML_listingmenuitem(XML_menuitem):
         self.up_arrow = None
         self.down_arrow = None
 
+
 class XML_extendedmenu:
     def __init__(self):
-        self.background = XML_data()
+        self.background = XML_background()
         self.logo = XML_data()
         self.header = XML_data()
         self.view = XML_data()
@@ -249,6 +325,28 @@ class XML_extendedmenu:
         self.listing = XML_listingmenuitem()
 
 
+
+
+class XML_background:
+    def __init__(self):
+        self.image     = ''
+        self.mask      = None
+
+    def parse(self, node, scale = 0.0, c_dir=''):
+        self.image = attr_file(node, "image", self.image, c_dir)
+        tmp = attr_file(node, "mask", None, c_dir)
+        if not tmp == None:
+            self.mask = tmp
+        for subnode in node.children:
+            if subnode.name == u'mask':
+                for masknode in subnode.children:
+                    if masknode.name == u'rectangle':
+                        rect = XML_data()
+                        rect.parse(masknode, scale)
+                        try:
+                            self.mask += [ rect ]
+                        except TypeError:
+                            self.mask = [ rect ]
 
 
 # ======================================================================
@@ -283,12 +381,11 @@ def attr_hex(node, attr, default):
         pass
     return default
 
-def attr_bool(node, attr, default):
+def attr_visible(node, attr, default):
     if node.attrs.has_key(('', attr)):
-        if node.attrs[('', attr)] == "yes":
-            return 1
-        elif node.attrs[('', attr)] == "no":
-            return 0
+        if node.attrs[('', attr)] == "no":
+            return ''
+        return node.attrs[('', attr)].encode('latin-1')
     return default
 
 def attr_str(node, attr, default):
@@ -344,50 +441,6 @@ class XMLSkin:
 
         
     #
-    # parse one node
-    #
-    def parse_node(self, node, data, c_dir=''):
-        data.x = attr_int(node, "x", data.x, self.scale)
-        data.y = attr_int(node, "y", data.y, self.scale)
-        data.height = attr_int(node, "height", data.height, self.scale)
-        data.width = attr_int(node, "width", data.width, self.scale)
-        data.length = attr_int(node, "length", data.length, self.scale)
-
-        data.visible = attr_bool(node, "visible", data.visible)
-        data.bgcolor = attr_hex(node, "bgcolor", data.bgcolor)
-        data.color = attr_hex(node, "color", data.color) # will be overrided by font
-        data.border_color = attr_hex(node, "border_color", data.border_color)
-        data.border_size = attr_int(node, "border_size", data.border_size)
-        data.image = attr_file(node, "image", data.image, c_dir)
-        data.mask = attr_file(node, "mask", data.mask, c_dir)
-
-        for subnode in node.children:
-            if subnode.name == u'font':
-                data.color = attr_hex(subnode, "color", data.color)
-                data.size = attr_int(subnode, "size", data.size, self.scale)
-                data.font = attr_font(subnode, "name", data.font)
-                data.align = attr_str(subnode, "align", data.align)
-                data.valign = attr_str(subnode, "valign", data.valign)
-            if subnode.name == u'selection':
-                data.selection = copy.copy(data.selection)
-                self.parse_node(subnode, data.selection)
-            if subnode.name == u'text':
-                data.text = subnode.textof()
-            if subnode.name == u'shadow':
-                data.shadow_visible = attr_bool(subnode, "visible", data.shadow_visible)
-                data.shadow_color = attr_hex(subnode, "color", data.shadow_color)
-                data.shadow_pad_x = attr_int(subnode, "x", data.shadow_pad_x)
-                data.shadow_pad_y = attr_int(subnode, "y", data.shadow_pad_y)
-            if subnode.name == u'background':
-                data.bgcolor = attr_hex(subnode, "color", data.bgcolor)                
-            if subnode.name == u'geometry':
-                data.x = attr_int(subnode, "x", data.x, self.scale)
-                data.y = attr_int(subnode, "y", data.y, self.scale)
-                data.width = attr_int(subnode, "width", data.width, self.scale)
-                data.height = attr_int(subnode, "height", data.height, self.scale)
-                
-
-    #
     # parse <items>
     #
     def parseItems(self, node, data):
@@ -402,15 +455,15 @@ class XMLSkin:
 
                 if type == "all":
                     # default content, override all settings for pl and dir:
-                    self.parse_node(subnode, data.default)
-                    self.parse_node(subnode, data.dir)
-                    self.parse_node(subnode, data.pl)
+                    data.default.parse(subnode, self.scale)
+                    data.dir.parse(subnode, self.scale)
+                    data.pl.parse(subnode, self.scale)
 
                 elif type == 'dir':
-                    self.parse_node(subnode, data.dir)
+                    data.dir.parse(subnode, self.scale)
 
                 elif type == 'playlist':
-                    self.parse_node(subnode, data.pl)
+                    data.pl.parse(subnode, self.scale)
         
 
     #
@@ -419,13 +472,13 @@ class XMLSkin:
     def read_menu(self, file, menu_node, menu):
         for node in menu_node.children:
             if node.name == u'background':
-                self.parse_node(node, menu.background, os.path.dirname(file))
+                menu.background.parse(node, self.scale, os.path.dirname(file))
 
             if node.name == u'logo':
-                self.parse_node(node, menu.logo, os.path.dirname(file))
+                menu.logo.parse(node, self.scale, os.path.dirname(file))
 
             elif node.name == u'title':
-                self.parse_node(node, menu.title)
+                menu.title.parse(node, self.scale)
 
             elif node.name == u'items':
                 self.parseItems(node, menu.items)
@@ -435,19 +488,19 @@ class XMLSkin:
                     type = attr_str(subnode, "type", "")
 
                     if type == u'all':
-                        self.parse_node(subnode, menu.cover_movie)
-                        self.parse_node(subnode, menu.cover_music)
-                        self.parse_node(subnode, menu.cover_image)
+                        menu.cover_movie.parse(subnode, self.scale)
+                        menu.cover_music.parse(subnode, self.scale)
+                        menu.cover_image.parse(subnode, self.scale)
 
                     if type == u'movie':
-                        self.parse_node(subnode, menu.cover_movie)
+                        menu.cover_movie.parse(subnode, self.scale)
                     if type == u'music':
-                        self.parse_node(subnode, menu.cover_music)
+                        menu.cover_music.parse(subnode, self.scale)
                     if type == u'image':
-                        self.parse_node(subnode, menu.cover_image)
+                        menu.cover_image.parse(subnode, self.scale)
 
             elif node.name == u'submenu':
-                self.parse_node(node, menu.submenu)
+                menu.submenu.parse(node, self.scale)
 
 
     #
@@ -458,33 +511,33 @@ class XMLSkin:
 
         for node in menu_node.children:
             if node.name == u'background':
-                self.parse_node(node, self.mp3.background, os.path.dirname(file))
+                self.mp3.background.parse(node, self.scale, os.path.dirname(file))
 
             elif node.name == u'title':
-                self.parse_node(node, self.mp3.title)
+                self.mp3.title.parse(node, self.scale)
 
             elif node.name == u'cover':
-                self.parse_node(node, self.mp3.cover)
+                self.mp3.cover.parse(node, self.scale)
 
             elif node.name == u'progressbar':
-                self.parse_node(node, self.mp3.progressbar)
+                self.mp3.progressbar.parse(node, self.scale)
 
             elif node.name == u'fileinfo':
-                self.parse_node(node, self.mp3.info)
+                self.mp3.info.parse(node, self.scale)
 
             elif node.name == u'logo':
-                self.parse_node(node, self.mp3.logo, os.path.dirname(file))
+                self.mp3.logo.parse(node, self.scale, os.path.dirname(file))
 
     #
     # read the skin informations for a popup
     #
     def read_popup(self, file, popup_node, copy_content):
         if copy_content: self.popup = copy.deepcopy(self.popup)
-        self.parse_node(popup_node, self.popup, os.path.dirname(file))
+        self.popup.parse(popup_node, self.scale, os.path.dirname(file))
 
         for node in popup_node.children:
             if node.name == u'message':
-                self.parse_node(node, self.popup.message)
+                self.popup.message.parse(node, self.scale)
 
 
     #
@@ -492,7 +545,7 @@ class XMLSkin:
     #
     def parse_mainmenunode(self, node, data):
         data.name = attr_str(node, "name", data.name)
-        data.visible = attr_bool(node, "visible", data.visible)
+        data.visible = attr_visible(node, "visible", data.visible)
         data.icon = attr_str(node, "icon", data.icon)
         data.pos = attr_int(node, "pos", data.pos)
         data.action = attr_str(node,"action", data.action)
@@ -509,7 +562,7 @@ class XMLSkin:
                 self.mainmenu.items[item.pos] = item                
 
     def parse_listingnode_content(self, node, data):
-        self.parse_node(node, data)
+        data.parse(node, self.scale)
         for subnode in node.children:
             if subnode.name == u'indicator':
                 type = attr_str(subnode, 'type', 'None')
@@ -525,17 +578,18 @@ class XMLSkin:
 
     # parse listing conf from extendedmenu
     def parse_listingnode(self, node, data):
-        self.parse_node(node, data)
+        data.parse(node, self.scale)
         for subnode in node.children:
             if subnode.name == u'expand':
-                self.parse_node(subnode, data.expand)
+                data.expand.parse(subnode, self.scale)
 
             elif subnode.name == u'table':
                 data.spacing = attr_int(subnode,'spacing', data.spacing, self.scale)
-                self.parse_node(subnode, data)
+                data.parse(subnode, self.scale)
+
                 for subsubnode in subnode.children:
                     if subsubnode.name == u'label':
-                        self.parse_node(subsubnode, data.label)
+                        data.label.parse(subsubnode, self.scale)
                     elif subsubnode.name == u'content':
                         self.parse_listingnode_content(subsubnode, data)
 
@@ -552,19 +606,19 @@ class XMLSkin:
         if not 'tv' in self.e_menu:
             self.e_menu[emn] = XML_extendedmenu() 
         else:
-            if copy_content: self.e_menu = copy.deepcopy(self.e_menu)
+            if copy_content: self.e_menu[emn] = copy.deepcopy(self.e_menu[emn])
 
         for node in menu_node.children:
             if node.name == u'background':
-                self.parse_node(node, self.e_menu[emn].background, os.path.dirname(file))
+                self.e_menu[emn].background.parse(node, self.scale, os.path.dirname(file))
             elif node.name == u'logo':
-                self.parse_node(node, self.e_menu[emn].logo, os.path.dirname(file))
+                self.e_menu[emn].logo.parse(node, self.scale, os.path.dirname(file))
             elif node.name == u'header':
-                self.parse_node(node, self.e_menu[emn].header)
+                self.e_menu[emn].header.parse(node, self.scale)
             elif node.name == u'view':
-                self.parse_node(node, self.e_menu[emn].view)
+                self.e_menu[emn].view.parse(node, self.scale)
             elif node.name == u'info':
-                self.parse_node(node, self.e_menu[emn].info)
+                self.e_menu[emn].info.parse(node, self.scale)
             elif node.name == u'listing':
                 self.parse_listingnode(node, self.e_menu[emn].listing)
 
