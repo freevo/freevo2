@@ -53,9 +53,12 @@ src_install() {
 	install -m 644 freevo.conf local_conf.py ${D}/etc/freevo
 
 	mydocs="BUGS COPYING ChangeLog FAQ INSTALL README TODO VERSION"
-	mydocs="$mydocs Docs/CREDITS Docs/NOTES"
+	mydocs="$mydocs Docs/CREDITS Docs/NOTES Docs/html/"
 	dodoc $mydocs
 
+        dodir /usr/share/doc/${PF}/html
+        mv Docs/html/* ${D}/usr/share/doc/${PF}/html/
+	
 	make PREFIX=$FREEVO_INSTALL_DIR \
 	    LOGDIR=${D}/var/log/freevo \
 	    CACHEDIR=${D}/var/cache/freevo install

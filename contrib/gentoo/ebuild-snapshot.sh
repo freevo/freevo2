@@ -53,6 +53,7 @@ function pack {
     sudo rm -rf /tmp/freevo-$version
     echo copy directory to /tmp
     cp -r freevo /tmp/freevo-$version
+    cp -r  ~/src/wiki/freevo.sourceforge.net/cgi-bin/moin.cgi/ /tmp/freevo-$version/Docs/html
     cleanup_and_pack
 }
 
