@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/01/19 15:56:31  dischi
+# New option ROM_SPEED to set the drive speed. Default is 0 (don't set
+# speed), a good value seems to be 8.
+#
 # Revision 1.7  2003/01/14 20:29:26  dischi
 # small bugfix
 #
@@ -80,6 +84,7 @@ CDSL_CURRENT=( (int ) ( ~ 0 >> 1 ) )
 CDS_DISC_OK=4
 CDROM_DISC_STATUS=0x5327
 CDS_AUDIO=100
+CDROM_SELECT_SPEED=0x5322
 
 
 class Identify_Thread(threading.Thread):
@@ -125,6 +130,13 @@ class Identify_Thread(threading.Thread):
             media.info = None
             return
 
+        # try to set the speed
+        if config.ROM_SPEED:
+            try:
+                ioctl(fd, CDROM_SELECT_SPEED, config.ROM_SPEED)
+            except:
+                pass
+            
         mediatypes = [('VCD', '/mpegav/', 'vcd'), ('SVCD','/SVCD/', 'vcd'), 
                       ('SVCD','/svcd/', 'vcd'), ('DVD', '/video_ts/', 'dvd') ]
 

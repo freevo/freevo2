@@ -15,6 +15,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.108  2003/01/19 15:56:30  dischi
+# New option ROM_SPEED to set the drive speed. Default is 0 (don't set
+# speed), a good value seems to be 8.
+#
 # Revision 1.107  2003/01/12 17:57:52  dischi
 # Renamed SUFFIX_MPLAYER_FILES to SUFFIX_VIDEO_FILES because we also play
 # audio files with mplayer. Also renamed SUFFIX_FREEVO_FILES to
@@ -112,6 +116,11 @@ START_FULLSCREEN_X  = 0               # Start in fullscreen mode if using x11 or
 #
 ROM_DRIVES = [ ('/mnt/cdrom', '/dev/cdrom', 'CD-1'),
                ('/mnt/dvd', '/dev/dvd', 'CD-2') ]
+
+
+ROM_SPEED = 0                         # try to set the drive speed of the rom drive
+                                      # a good value for playing movies with a silent
+                                      # drive is 8
 
 
 SHUTDOWN_SYS_CMD = 'shutdown -h now'  # set this to 'sudo shutdown -h now' if you
