@@ -110,10 +110,12 @@ def getcmd():
                 muted = 1
         elif event == rc.EJECT:
             if tray_open:
+                if DEBUG: print 'Inserting %s' % config.CD_MOUNT_POINT
                 os.system('eject -t %s' % config.CD_MOUNT_POINT)
                 os.system('mount %s' % config.CD_MOUNT_POINT)
                 tray_open = 0
             else:
+                if DEBUG: print 'Ejecting %s' % config.CD_MOUNT_POINT
                 os.system('eject %s' % config.CD_MOUNT_POINT)
                 tray_open = 1
 
