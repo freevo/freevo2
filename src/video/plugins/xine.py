@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/11/09 12:01:00  dischi
+# add subtitle selection and osd info support for xine (needs current xine-ui cvs
+#
 # Revision 1.19  2003/11/01 19:54:18  dischi
 # port to new xine-lib
 #
@@ -185,7 +188,8 @@ class Xine:
 
         command = self.command
 
-        if item.deinterlace:
+        if item.deinterlace or \
+           (hasattr(config, 'XINE_ALWAYS_DEINTERLACE') and config.XINE_ALWAYS_DEINTERLACE):
             if (config.XINE_VO_DEV == 'vidix' or self.xine_type == 'fb') and \
                    self.xine_version > 921:
                 command = '%s --post tvtime' % command
@@ -195,9 +199,15 @@ class Xine:
         self.max_audio = 0
         self.current_audio = -1
 
+        self.max_subtitle = 0
+        self.current_subtitle = -1
+
         if item.mode == 'dvd':
             for track in item.info['tracks']:
                 self.max_audio = max(self.max_audio, len(track['audio']))
+
+            for track in item.info['tracks']:
+                self.max_subtitle = max(self.max_subtitle, len(track['subtitles']))
 
         if item.mode == 'dvd':
             command = '%s dvd://' % command
@@ -293,6 +303,10 @@ class Xine:
             self.thread.app.write('EventPrior\n')
             return True
 
+        if event == TOGGLE_OSD:
+            self.thread.app.write('OSDStreamInfos\n')
+            return True
+
 
         # VCD NAVIGATION
         if event in INPUT_ALL_NUMBERS:
@@ -321,6 +335,23 @@ class Xine:
                     self.thread.app.write('AudioChannelPrior\n')
                     time.sleep(0.1)
                 self.current_audio = -1
+            return True
+            
+        if event == VIDEO_NEXT_SUBTITLE and self.max_subtitle:
+            if self.current_subtitle < self.max_subtitle - 1:
+                self.thread.app.write('SpuNext\n')
+                self.current_subtitle += 1
+                # wait until the stream is changed
+                time.sleep(0.1)
+            else:
+                # bad hack to warp around
+                if self.xine_type == 'fb':
+                    self.thread.app.write('SpuDefault\n')
+                    time.sleep(0.1)
+                for i in range(self.max_subtitle):
+                    self.thread.app.write('SpuPrior\n')
+                    time.sleep(0.1)
+                self.current_subtitle = -1
             return True
             
         # nothing found? Try the eventhandler of the object who called us
