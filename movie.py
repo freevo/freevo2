@@ -11,6 +11,10 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2002/09/13 16:30:45  dischi
+# Fix DVD title scanning, added -cdrom-device for title search and DVD play,
+# menu title is DVD title, added DVD image for all items
+#
 # Revision 1.31  2002/09/13 08:01:23  dischi
 # fix -cdrom-device for (S)VCD
 #
@@ -177,9 +181,11 @@ def dvd_menu_generate(media, menuw):
     osd.update()
     os.system('rm /tmp/mplayer_dvd.log /tmp/mplayer_dvd_done')
     # XXX Add an option for DVD device to use in case theres more than one!
-    cmd = ('%s -ao null -nolirc -vo null -frames 0 -dvd 1 ' +
-           '1> /dev/null 2> /tmp/mplayer_dvd.log')
-    os.system((cmd % config.MPLAYER_CMD) + ' ; touch /tmp/mplayer_dvd_done')
+    cmd = ('%s -ao null -nolirc -vo null -frames 0 -dvd 1 -cdrom-device %s ' +
+           '1 2>&1 > /tmp/mplayer_dvd.log')
+    print cmd % (config.MPLAYER_CMD, media.devicename)
+    os.system((cmd % (config.MPLAYER_CMD, media.devicename)) +
+              ' ; touch /tmp/mplayer_dvd_done')
     timeout = time.time() + 20.0
     done = 0
     while 1:
@@ -203,16 +209,17 @@ def dvd_menu_generate(media, menuw):
 
     if not done or not found:
         num_titles = 100 # XXX Kludge
-    
+
     items = []
     for title in range(1,num_titles+1):
-        m = menu.MenuItem('Play Title %s' % title, play_dvd, title,
+        m = menu.MenuItem('Play Title %s' % title, play_dvd,
+                          '%s -cdrom-device %s' % (title, media.devicename), 
                           dvd_menu_eventhandler, media)
+        m.setImage(('movie', media.info[2]))
         items += [m]
 
-    label = media.info[2]
-    moviemenu = menu.Menu('DVD Titles for disc %s' % label, items,
-                          umount_all = 1)
+    label = media.info[1]
+    moviemenu = menu.Menu(label, items, umount_all = 1)
     menuw.pushmenu(moviemenu)
 
     return
