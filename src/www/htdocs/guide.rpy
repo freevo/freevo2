@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/05/14 12:28:00  rshortt
+# Forgot to comment out a 'SUB'.
+#
 # Revision 1.3  2003/05/14 00:04:54  rshortt
 # Better error handling.
 #
@@ -110,7 +113,7 @@ class GuideResource(FreevoResource):
         for chan in guide.chan_list:
             now = time.time()
             fv.tableRowOpen('class="chanrow"')
-            chan.displayname = string.replace(chan.displayname, "&", "SUB")
+            # chan.displayname = string.replace(chan.displayname, "&", "SUB")
             fv.tableCell(chan.displayname, 'class="channel"')
             c_left = n_cols
 
