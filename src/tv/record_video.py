@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/07/30 21:33:06  outlyer
+# Done.
+#
 # Revision 1.23  2003/07/12 06:23:44  outlyer
 # Fix the gap for consecutive recordings. Only "timecode" formats were getting
 # the buffer time before, now both timecode and seconds type recording get the
@@ -333,7 +336,7 @@ def set_schedule(arg=None, menuw=None):
     # Recording filename
     rec_name = recinfo.program_name.selected
     start_time_f = start_time_s
-    if (time.localtime()[8]==1):
+    if (time.localtime()[8]==1) and (float(sys.version[0:3]) < 2.3):
             start_time_f = start_time_f - 3600
 
     ts_ch = time.strftime('%m-%d_%I:%M_-', time.localtime(start_time_f))
