@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2004/11/07 16:38:53  dischi
+# adjustments to recordserver, needs much cleanup
+#
 # Revision 1.45  2004/11/04 19:55:48  dischi
 # make it possible to schedule recordings for testing
 #
@@ -251,14 +254,9 @@ class ProgramItem(Item):
 
 
     def add_favorite(self, arg=None, menuw=None):
-        msg = 'WORK IN PROGRESS'
-        AlertBox(text=_('Scheduling Failed')+(': %s' % msg)).show()
-        return
-
-        # FIXME: combine Favorite and FavoriteItem
-        # fav = Favorite(self.prog.title, self.prog, True, True, True, -1)
-        # fav_item = FavoriteItem(self, fav, fav_action='add')
-        # fav_item.display_favorite(menuw=menuw)
+        fav = Favorite(self.name, self)
+        fav_item = FavoriteItem(self, fav, fav_action='add')
+        fav_item.display_favorite(menuw=menuw)
 
 
     def rem_favorite(self, arg=None, menuw=None):
@@ -334,6 +332,27 @@ class ProgramItem(Item):
 
 
 
+
+class Favorite:
+
+
+    def __init__(self, name, prog):
+        self.name = name
+        self.priority = 0
+
+        if prog:
+            self.title = prog.title
+            self.channel = 'ANY'
+            self.dow = 'ANY'
+            self.mod = 'ANY'
+
+        else:
+            self.title = 'NONE'
+            self.channel = 'NONE'
+            self.dow = 'NONE'
+            self.mod = 'NONE'
+
+
 class FavoriteItem(Item):
     def __init__(self, parent, fav, fav_action='edit'):
         Item.__init__(self, parent, skin_type='video')
@@ -342,7 +361,8 @@ class FavoriteItem(Item):
         self.title = fav.title
         self.fav_action = fav_action
 
-        self.week_days = (_('Mon'), _('Tue'), _('Wed'), _('Thu'), _('Fri'), _('Sat'), _('Sun'))
+        self.week_days = (_('Mon'), _('Tue'), _('Wed'), _('Thu'), _('Fri'),
+                          _('Sat'), _('Sun'))
 
         if fav.channel == 'ANY':
             self.channel = _('ANY CHANNEL')
@@ -356,9 +376,6 @@ class FavoriteItem(Item):
             self.mod = _('ANY TIME')
         else:
             self.mod = strftime(config.TV_TIMEFORMAT, gmtime(float(fav.mod * 60)))
-
-        # needed by the inputbox handler
-        self.menuw = None
 
 
     def actions(self):
@@ -400,7 +417,6 @@ class FavoriteItem(Item):
     def alter_name(self, name):
         if name:
             self.name = self.fav.name = name
-
         self.menuw.refresh()
 
 
@@ -492,27 +508,33 @@ class FavoriteItem(Item):
 
 
     def save_changes(self, arg=None, menuw=None):
-        if self.fav_action == 'edit':
-            (result, msg) = record_client.removeFavorite(self.origname)
-        else:
-            result = True
-
+        (result, msg) = recordings.add_favorite(self.fav)
         if result:
-            (result, msg) = record_client.addEditedFavorite(self.fav.name, 
-                                                            self.fav.title, 
-                                                            self.fav.channel, 
-                                                            self.fav.dow, 
-                                                            self.fav.mod, 
-                                                            self.fav.priority)
-            if not result:
-                AlertBox(text=_('Save Failed, favorite was lost')+(': %s' % msg)).show()
-            else:
-                self.fav_action = 'edit'
-                if menuw:  
-                    menuw.back_one_menu(arg='reload')
-
+            AlertBox(text=_('"%s" has been scheduled as favorite') % \
+                     self.title).show()
         else:
-            AlertBox(text=_('Save Failed')+(': %s' % msg)).show()
+            AlertBox(text=_('Scheduling Failed')+(': %s' % msg)).show()
+#         if self.fav_action == 'edit':
+#             (result, msg) = record_client.removeFavorite(self.origname)
+#         else:
+#             result = True
+
+#         if result:
+#             (result, msg) = record_client.addEditedFavorite(self.fav.name, 
+#                                                             self.fav.title, 
+#                                                             self.fav.channel, 
+#                                                             self.fav.dow, 
+#                                                             self.fav.mod, 
+#                                                             self.fav.priority)
+#             if not result:
+#                 AlertBox(text=_('Save Failed, favorite was lost')+(': %s' % msg)).show()
+#             else:
+#                 self.fav_action = 'edit'
+#                 if menuw:  
+#                     menuw.back_one_menu(arg='reload')
+
+#         else:
+#             AlertBox(text=_('Save Failed')+(': %s' % msg)).show()
 
 
     def rem_favorite(self, arg=None, menuw=None):
