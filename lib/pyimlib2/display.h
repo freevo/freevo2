@@ -11,7 +11,8 @@ typedef struct {
 	Colormap cmap;
 	int      depth;
 
-  PyObject * callback;
+  PyObject * input_callback;
+  PyObject * expose_callback;
   
 } Display_PyObject;
 

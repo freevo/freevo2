@@ -491,14 +491,15 @@ class Display:
 		return self._display.render(image._image, dst_pos, src_pos, src_size,  dither, blend)
 
 	def __setattr__( self, key, value ):
-		if key == 'callback':
+		if key in ( 'input_callback', 'expose_callback' ):
 			return setattr( self.__dict__[ '_display' ],
 					key, value )
 		else:
 			self.__dict__[ key ] = value
 
 	def __getattr__( self, key ):
-		if key in ( 'callback', 'socket', 'update', 'flush' ):
+		if key in ( 'input_callback', 'expose_callback', 'socket',
+			    'update', 'flush' ):
 			return getattr( self.__dict__[ '_display' ], key )
 		else:
 			return self.__dict__[ key ]

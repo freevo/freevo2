@@ -76,11 +76,16 @@ PyObject *Display_PyObject__update( Display_PyObject *self, PyObject *args )
   do {
     XNextEvent( self->display, &ev );
 
-    if ( ( ev.type == KeyPress ) && PyCallable_Check( self->callback ) ) {
-      PyEval_CallObject( self->callback, 
+    if ( ( ev.type == KeyPress ) &&
+	 PyCallable_Check( self->input_callback ) ) {
+      PyEval_CallObject( self->input_callback, 
 			 Py_BuildValue( "(i)", ev.xkey.keycode ) );
-    } else if ( ev.type == Expose ) {
-      /* do something */
+    } else if ( ( ev.type == Expose ) &&
+		PyCallable_Check( self->expose_callback ) ) {
+      PyEval_CallObject( self->expose_callback,
+			 Py_BuildValue( "((ii)(ii))",
+					ev.xexpose.x, ev.xexpose.y,
+					ev.xexpose.width, ev.xexpose.height ) );
     }
   } while ( XPending( self->display ) );
   
@@ -98,8 +103,10 @@ PyObject *Display_PyObject__getattr(Display_PyObject *self, char *name)
 {
   if ( ! strcmp( name, "socket" ) )
     return Py_BuildValue( "i", ConnectionNumber( self->display ) );
-  if ( ! strcmp(name,  "callback" ) )
-    return Py_BuildValue( "O", self->callback );
+  if ( ! strcmp(name,  "input_callback" ) )
+    return Py_BuildValue( "O", self->input_callback );
+  if ( ! strcmp(name,  "expose_callback" ) )
+    return Py_BuildValue( "O", self->expose_callback );
 
   return Py_FindMethod(Display_PyObject_methods, (PyObject *)self, name);
 }
@@ -107,15 +114,28 @@ PyObject *Display_PyObject__getattr(Display_PyObject *self, char *name)
 int Display_PyObject__setattr( Display_PyObject *self, char *name,
 			       PyObject * value )
 {
-  if ( ! strcmp(name,  "callback" ) ) {
+  if ( ! strcmp(name,  "input_callback" ) ) {
     if ( ! PyCallable_Check( value ) ) {
-      PyErr_SetString( PyExc_TypeError, "callback must be callable" );
+      PyErr_SetString( PyExc_TypeError,
+		       "value is not a callable object" );
       return -1;
     }
       
-    Py_DECREF( self->callback );
-    self->callback = value;
-    Py_INCREF( self->callback );
+    Py_DECREF( self->input_callback );
+    self->input_callback = value;
+    Py_INCREF( self->input_callback );
+
+    return 0;
+  } else if ( ! strcmp(name,  "expose_callback" ) ) {
+    if ( ! PyCallable_Check( value ) ) {
+      PyErr_SetString( PyExc_TypeError,
+		       "value is not a callable object" );
+      return -1;
+    }
+      
+    Py_DECREF( self->expose_callback );
+    self->expose_callback = value;
+    Py_INCREF( self->expose_callback );
 
     return 0;
   }
@@ -144,7 +164,9 @@ PyObject *display_new(int w, int h)
 			DefaultRootWindow(o->display),
 			0, 0, w, h, 0, 0, 0);
 	Py_INCREF(Py_None);
-	o->callback = Py_None;
+	o->input_callback = Py_None;
+	Py_INCREF(Py_None);
+	o->expose_callback = Py_None;
 	
 	XSelectInput( o->display, o->window, ExposureMask | KeyPressMask );
 	XMapWindow(o->display, o->window);

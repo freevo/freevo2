@@ -59,7 +59,7 @@ class PluginInterface(plugin.InputPlugin):
                              config.KEYBOARD_MAP[ key ]
             else:
                 _debug_('Error: unable to find key code for %s' % key, 0)
-        gui.get_display()._display.callback = self.handle
+        gui.get_display()._display.input_callback = self.handle
         notifier.addSocket( gui.get_display()._display.socket,
                             gui.get_display()._display.update )
  

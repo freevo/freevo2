@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/10/07 16:05:27  dischi
+# add X11 expose event to imlib2
+#
 # Revision 1.4  2004/10/06 19:20:57  dischi
 # add keyboard input plugin
 #
@@ -52,6 +55,11 @@ class Display(Imlib2Canvas):
         Imlib2Canvas.__init__(self, size)
         self.animation_possible = True
         plugin.activate( 'input.x11' )
+
+        self._display.expose_callback = self.__expose
+
+    def __expose( self, pos, size ):
+        self._display.render( self._backing_store._image, pos, pos, size )
 
     def hide(self):
         pass
