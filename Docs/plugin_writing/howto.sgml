@@ -1,5 +1,8 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook V3.1//EN" [
 <!ENTITY doc SYSTEM "code/doc.py" CDATA linespecific>
+<!ENTITY parameter SYSTEM "code/parameter.py" CDATA linespecific>
+<!ENTITY config SYSTEM "code/config.py" CDATA linespecific>
+<!ENTITY i18n SYSTEM "code/i18n.py" CDATA linespecific>
 <!ENTITY daemon SYSTEM "code/daemon.py" CDATA linespecific>
 <!ENTITY daemonpoll SYSTEM "code/daemon_poll.py" CDATA linespecific>
 <!ENTITY daemonaction SYSTEM "code/daemon_action.py" CDATA linespecific>
@@ -135,72 +138,19 @@
     <title>The Different Types of Plugins</title>
 
     <sect1>
-      <title>General</title>
-      <para>
-	It's possible to add or remove a plugin in the
-	<filename>local_conf.py</filename>. Freevo will search the plugins the
-	main plugin directory, the source directory and (based on the plugin
-	name) in the media subdirectories like video or audio.
-      </para>
-      <para>
-	You should place your plugin into the main plugin directory if it
-	doesn't depend on the media type. If it only works for e.g. video, you
-	should place it in the video plugin directory. By doing that, the
-	string <emphasis>video</emphasis> fill be part of the plugin name.
-      </para>
-      <para>
-	Everything inside Freevo is some sort of plugin. Without plugin, the
-	main menu will be empty and Freevo couldn't play a file at all. So it's
-	possible to change (mostly) everything in Freevo by writing a plugin.
-      </para>
-      <sect2>
-	<title>Documenting the Plugin</title>
-	<para>
-	  You should not forget to document the plugin. Freevo can scan all
-	  available plugins by calling the plugins helper:
-	  <screen>
-<prompt>-> </prompt><command>freevo plugins -l</command>
-&lt;list of plugins&gt;
-
-<prompt>-> </prompt><command>freevo plugins -i audio.playlist</command>
-Name: audio.playlist
-Type: ItemPlugin
-File: src/audio/plugins/playlist.py
-
-Description:
-&lt;...&gt;
-	  </screen>
-	  This documentation comes directly from the python source code. Use
-	  the Python docstring to document the plugin class. The first line
-	  will be used to show the short information for <command>-l</command>,
-	  the hole text will be used for <command>-i</command>.
-	</para>
-	<para>
-	  Example:
-	  <programlisting><inlinegraphic entityref="doc"></inlinegraphic>
-	  </programlisting>
-	</para>
-      </sect2>
-
-      <sect2>
-	<title>Which files to Import</title>
-	<para><emphasis>not written yet</emphasis></para>
-      </sect2>
-
-      <sect2>
-	<title>User Configuartion</title>
-	<para><emphasis>not written yet</emphasis></para>
-      </sect2>
-
-      <sect2>
-	<title>i18n support</title>
-	<para><emphasis>not written yet</emphasis></para>
-      </sect2>
-    </sect1>
-
-    <sect1>
       <title>Basic Plugin</title>
-      <para><emphasis>not written yet</emphasis></para>
+      <para>
+	It's possible to inherit directly from the class Plugin. But by doing
+	that, the only thing happens is that the object is created, nothing
+	more. You may need this to create a thread in the background an connect
+	it to the plugin interface. Other plugins may now use this thread.
+      </para>
+      <para>
+	This is done for the media plugins. The mplayer video plugin only
+	starts the mplayer thread and register it to the plugin interface as
+	<varname>VIDEO_PLAYER</varname>. The video item asks the plugin
+	interface to give him the <varname>VIDEO_PLAYER</varname>.
+      </para>
     </sect1>
 
     <sect1>
@@ -338,8 +288,181 @@ Description:
 
 
   <chapter> 
+    <title>Notes for writing a plugin</title>
+    <sect1>
+      <title>General</title>
+      <para>
+	It's possible to add or remove a plugin in the
+	<filename>local_conf.py</filename>. Freevo will search the plugins the
+	main plugin directory, the source directory and (based on the plugin
+	name) in the media subdirectories like video or audio.
+      </para>
+      <para>
+	You should place your plugin into the main plugin directory if it
+	doesn't depend on the media type. If it only works for e.g. video, you
+	should place it in the video plugin directory. By doing that, the
+	string <emphasis>video</emphasis> fill be part of the plugin name.
+      </para>
+      <para>
+	Everything inside Freevo is some sort of plugin. Without plugin, the
+	main menu will be empty and Freevo couldn't play a file at all. So it's
+	possible to change (mostly) everything in Freevo by writing a plugin.
+      </para>
+    </sect1>
+    <sect1>
+      <title>Documenting the Plugin</title>
+      <para>
+	You should not forget to document the plugin. Freevo can scan all
+	available plugins by calling the plugins helper:
+	<screen>
+<prompt>-> </prompt><command>freevo plugins -l</command>
+&lt;list of plugins&gt;
+
+<prompt>-> </prompt><command>freevo plugins -i audio.playlist</command>
+Name: audio.playlist
+Type: ItemPlugin
+File: src/audio/plugins/playlist.py
+
+Description:
+&lt;...&gt;
+	</screen>
+	This documentation comes directly from the python source code. Use
+	the Python docstring to document the plugin class. The first line
+	will be used to show the short information for <command>-l</command>,
+	the hole text will be used for <command>-i</command>.
+      </para>
+      <para>
+	Example:
+	<programlisting><inlinegraphic entityref="doc"></inlinegraphic>
+	</programlisting>
+      </para>
+    </sect1>
+
+    <sect1>
+      <title>Which files to Import</title>
+      <para>
+	You will need to import other parts of Freevo do make your plugin
+	work. Most common are the following modules:
+      </para>
+      <para>
+	<table>
+	  <title>Module list</title>
+	  <tgroup cols="2">
+	    <tbody>
+	      <row>
+		<entry>config</entry>
+		<entry>Basic configuration of Freevo. This also contains the
+		  settings from <filename>local_conf.py</filename>.</entry>
+	      </row>
+	      <row>
+		<entry>plugin</entry>
+		<entry>This contains all basic classes and functions for the
+		  plugin interface.</entry>
+	      </row>
+	      <row>
+		<entry>event</entry>
+		<entry>Some pre-defined events and the class
+		  <varname>Event</varname>to build your own events.</entry>
+	      </row>
+	      <row>
+		<entry>menu</entry>
+		<entry>Contains the class <function>Menu</function> to create
+		  menus for the plugin. This module also conatins
+		  <function>MenuItem</function>, a pre-defined item to put in
+		  a menu</entry>
+	      </row>
+	      <row>
+		<entry>item</entry>
+		<entry>This module contains the basic
+		  <function>Item</function> class to put into a menu.</entry>
+	      </row>
+	      <row>
+		<entry>rc</entry>
+		<entry>Functions for putting an event into the event queue</entry>
+	      </row>
+	    </tbody>
+	  </tgroup>
+	</table>
+      </para>
+    </sect1>
+
+    <sect1>
+      <title>User Configuartion</title>
+      <para>
+	A plugin may require some special configuration. There are two
+	possible ways:
+      </para>
+      <sect2>
+	<title>Adding parameter to the constructor</title>
+	<para>
+	  A plugin may add more than the <varname>self</varname> to the
+	  <function>__init__</function> function. The user has to add the
+	  values when the plugin is loaded. This makes it possible to load a
+	  plugin more than once with different settings.
+	</para>
+	<para>
+	  The following example adds two parameter. The first one has no
+	  default value and has to be added when activating the plugin. The
+	  second is optional.
+	  <programlisting><inlinegraphic entityref="parameter"></inlinegraphic>
+	  </programlisting>
+	</para>
+      </sect2>
+      <sect2>
+	<title>Using local_conf.py</title>
+	<para>
+	  The second way is to use the <filename>local_conf.py</filename> to
+	  let the user set the variables. Since a plugin should be self
+	  contained, it should not add something to
+	  <filename>freevo_config.py</filename>. A better way is to use the
+	  memeber function <function>config</function> to return a list of
+	  variables for this plugin. If the user doesn't define the variable
+	  the default values will be added to the <function>config</function>
+	  module. Warning: the <function>config</function> function will be
+	  called in the <function>__init__</function> function of the base
+	  plugin class, do not try to use the variables before that. 
+	</para>
+	<para>Example: the plugin needs <varname>FOO_NAME</varname> and
+	  <varname>FOO_FUNCTION</varname> to be set. It defines the default
+	  values and a small description (not used at the moment)
+	  <programlisting><inlinegraphic entityref="config"></inlinegraphic>
+	  </programlisting>
+	</para>
+      </sect2>
+    </sect1>
+
+    <sect1>
+      <title>i18n support</title>
+      <para>
+	Please keep in mind that Freevo has i18n support, meaning that the
+	plugin can be translated into different languages. To support that,
+	please add <function>_()</function> to each visible text string. 
+      </para>
+      <para>
+	If your plugin is an external plugin and not distributed with Freevo,
+	please use <function>self._()</function> for the translation and set
+	the module for the translation with the function
+	<function>translation</function>. This function exists for items and
+	plugins. A item will inherit the translation settings from it's
+	parent, so you only need to load it once.
+	<programlisting><inlinegraphic entityref="i18n"></inlinegraphic>
+	</programlisting>
+      </para>
+      <para>
+	To update the translation you need to call the script
+	<filename>update.py</filename> in the i18n directory of Freevo or
+	when you have an external plugin, call <filename>setup.py</filename>
+	(see <link linkend="external">Plugin Distribution</link> for details).
+      </para>
+    </sect1>
+  </chapter>
+
+
+  <chapter> 
     <title>Plugin Distribution</title>
-    <para><emphasis>not written yet</emphasis></para>
+    <para><emphasis>not written yet</emphasis>
+      <anchor id="external">
+      </para>
   </chapter>
 
 </book>
