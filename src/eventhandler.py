@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/08/27 14:25:48  dischi
+# small typo bugfix
+#
 # Revision 1.7  2004/08/26 15:28:51  dischi
 # smaller fixes in application/focus handling
 #
@@ -194,7 +197,7 @@ class Eventhandler:
         if not self.popups:
             self.context = app._evt_context
         else:
-            self.context = self.popups[-1]._evt_context
+            self.context = self.popups[-1].event_context
 
         fade = app._animated
         if previous:
