@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/07/03 22:23:16  outlyer
+# Prevent a crash I was having.
+#
 # Revision 1.18  2003/07/02 22:05:16  dischi
 # better cache handling
 #
@@ -600,7 +603,8 @@ class DirItem(Playlist):
                     
         # reload the menu, use an event to avoid problems because this function
         # was called by a thread
-        del self.menu.skin_force_text_view
+        if hasattr(self.menu,'skin_force_text_view'):
+            del self.menu.skin_force_text_view
         rc.post_event('MENU_REBUILD')
 
 
