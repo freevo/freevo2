@@ -56,7 +56,7 @@
                                     <title visible="no"/>
 
             <image x="765" y="544" width="32" height="32" label="downarrow" 
-                filename="down.png"/>
+                filename="blurr-down.png"/>
             <image width="16" height="16" label="leftarrow" filename="left.png"/>
             <image width="16" height="16" label="rightarrow" filename="right.png"/>
             </listing>
