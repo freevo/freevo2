@@ -39,11 +39,11 @@
 #  |   
 #  |   # now start the python magic
 #  |   setup (name = "nice_plugin",
-#  |          version = 0.1,
+#  |          version = '0.1',
 #  |          description = "My first plugin",
 #  |          author = "me",
 #  |          author_email = "my@mail.address",
-#  |          url = "http://i-also-have-web.address",
+#  |          url = "http://i-also-have-a-web.address",
 #  |   
 #  |          package_dir = freevo.util.distutils.package_dir,
 #  |          packages = freevo.util.distutils.packages,
@@ -66,6 +66,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/10/18 15:37:14  dischi
+# doc fix
+#
 # Revision 1.2  2003/10/18 13:32:05  dischi
 # Update example
 #
