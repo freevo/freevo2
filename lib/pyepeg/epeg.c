@@ -13,11 +13,11 @@ static PyObject *epeg_jpeg_thumbnail(PyObject *self, PyObject *args) {
   Epeg_Image *im;
 
   if (!PyArg_ParseTuple(args, "ssii", &source, &dest, &dest_w, &dest_h))
-    PyErr_SetString(PyExc_ValueError, "parameter error"), (PyObject*)NULL;
+    return PyErr_SetString(PyExc_ValueError, "parameter error"), (PyObject*)NULL;
 
   im = epeg_file_open(source);
   if (!im)
-    PyErr_SetString(PyExc_ValueError, "image error"), (PyObject*)NULL;
+    return PyErr_SetString(PyExc_ValueError, "image error"), (PyObject*)NULL;
 
   epeg_size_get(im, &w, &h);
   
