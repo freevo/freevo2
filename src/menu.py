@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.103  2004/08/22 20:14:58  dischi
+# remove test code
+#
 # Revision 1.102  2004/08/14 15:09:54  dischi
 # use new AreaHandler
 #
@@ -324,7 +327,6 @@ class MenuWidget(Application):
 
     
     def pushmenu(self, menu):
-        gui.get_screen().prepare_for_move(1)
         if len(self.menustack) > 0 and not isinstance(self.menustack[-1], Menu):
             _debug_('menu auto-hide %s' % self.menustack[-1])
             self.menustack[-1].hide()
