@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2003/07/01 19:44:59  outlyer
+# A simple function to add tags to MP3s.
+#
 # Revision 1.33  2003/06/30 22:35:04  outlyer
 # Move escape(sql) into escape, and use it now.
 #
@@ -568,6 +571,26 @@ def totalspace(path):
     s = os.statvfs(path)
     return s[statvfs.F_BLOCKS] * long(s[statvfs.F_BSIZE])
         
+
+def tagmp3 (filename, title=None, artist=None, album=None, track=None, tracktotal=None, year=None):
+    """
+    use eyeD3 directly from inside mmpython to
+    set the tag. We default to 2.3 since even
+    though 2.4 is the accepted standard now, more
+    players support 2.3
+    """
+    import mmpython.audio.eyeD3 as eyeD3   # Until mmpython has an interface for this.
+
+    tag = eyeD3.Tag(filename)
+    tag.header.setVersion(eyeD3.ID3_V2_3)
+    if artist: tag.setArtist(artist)
+    if album:  tag.setAlbum(album)
+    if title:  tag.setTitle(title)
+    if track:  tag.setTrackNum((track,tracktotal))   # eyed3 accepts None for tracktotal
+    if year:   tag.setDate(year) 
+    tag.update()
+    return
+
 
 #
 # synchronized objects and methods.
