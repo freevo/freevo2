@@ -761,9 +761,10 @@ def check_cache_status():
 # setup mmpython
 #
 
-if config.DEBUG > 2:
-    mmpython.mediainfo.DEBUG = config.DEBUG
-    mmpython.factory.DEBUG   = config.DEBUG
+if 0:
+    # FIXME: prt mmpython to logging
+    mmpython.mediainfo.DEBUG = 1
+    mmpython.factory.DEBUG   = 1
 else:
     mmpython.mediainfo.DEBUG = 0
     mmpython.factory.DEBUG   = 0

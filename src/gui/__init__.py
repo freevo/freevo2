@@ -96,9 +96,8 @@ def remove_display(name):
     animation.create(display)
     return display
 
-import config as _config
 
-if not _config.HELPER:
+if __freevo_app__ == 'main':
     # create default display and set gui width and height
     # in case some part of Freevo needs this
     display = get_display()

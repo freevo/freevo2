@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2005/01/08 15:40:51  dischi
+# remove TRUE, FALSE, DEBUG and HELPER
+#
 # Revision 1.6  2004/07/10 12:33:38  dischi
 # header cleanup
 #
@@ -51,13 +54,6 @@ import config
 # The file format version number. It must be updated when incompatible
 # changes are made to the file format.
 TYPES_VERSION = 2
-
-# Set to 1 for debug output
-DEBUG = config.DEBUG
-
-TRUE = 1
-FALSE = 0
-
 
 class MameRom:
 

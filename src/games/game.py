@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2005/01/08 15:40:51  dischi
+# remove TRUE, FALSE, DEBUG and HELPER
+#
 # Revision 1.19  2004/10/06 19:19:13  dischi
 # use new childapp interface
 #
@@ -60,10 +63,6 @@ import rc         # The RemoteControl class.
 import plugin
 import event as em
 
-DEBUG = config.DEBUG
-
-TRUE  = 1
-FALSE = 0
 
 # Module variable that contains an initialized Game() object
 _singleton = None
@@ -102,9 +101,6 @@ class Game:
         if plugin.getbyname('MIXER'):
             plugin.getbyname('MIXER').reset()
 
-        if DEBUG:
-            print 'Game.play(): Starting thread, cmd=%s' % self.command
-        
 	self.app=GameApp(self.command, stop_osd=1)
         self.prev_app = rc.app()
         rc.app(self)

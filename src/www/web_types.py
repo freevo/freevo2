@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2005/01/08 15:40:55  dischi
+# remove TRUE, FALSE, DEBUG and HELPER
+#
 # Revision 1.25  2004/07/10 12:33:43  dischi
 # header cleanup
 #
@@ -51,10 +54,6 @@ import config
 from twisted.web.woven import page
 from twisted.web.resource import Resource
 
-DEBUG = config.DEBUG
-TRUE = 1
-FALSE = 0
-
 
 class FreevoPage(page.Page):
     
@@ -91,9 +90,9 @@ class FreevoResource(Resource):
     def auth_user(self, username, password):
         realpass = config.WWW_USERS.get(username)
         if password == realpass:
-            return TRUE
+            return True
         else:
-            return FALSE
+            return False
 
 
 class HTMLResource:

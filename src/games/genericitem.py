@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2005/01/08 15:40:51  dischi
+# remove TRUE, FALSE, DEBUG and HELPER
+#
 # Revision 1.8  2004/07/10 12:33:38  dischi
 # header cleanup
 #
@@ -42,12 +45,6 @@ import os
 
 import config
 import game
-
-# Set to 1 for debug output
-DEBUG = config.DEBUG
-
-TRUE  = 1
-FALSE = 0
 
 import rc
 import time

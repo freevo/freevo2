@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2005/01/08 15:40:53  dischi
+# remove TRUE, FALSE, DEBUG and HELPER
+#
 # Revision 1.26  2004/12/05 13:01:12  dischi
 # delete old tv variables, rename some and fix detection
 #
@@ -78,8 +81,6 @@ import struct
 import sys
 from util.ioctl import ioctl, IOR, IOW, IOWR
 import config
-
-DEBUG = config.DEBUG
 
 
 FREQUENCY_ST = "III32x"

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2005/01/08 15:40:51  dischi
+# remove TRUE, FALSE, DEBUG and HELPER
+#
 # Revision 1.21  2005/01/08 15:09:25  dischi
 # replace read_pickle and save_pickle with util.cache functions
 #
@@ -61,13 +64,6 @@ import re
 
 from gui import PopupBox
 
-# Set to 1 for debug output
-DEBUG = config.DEBUG
-
-TRUE = 1
-FALSE = 0
-
-
 #
 # Lets get a MameRomList if one is available from disk.  If not 
 # then we shall return an empty one.
@@ -88,8 +84,7 @@ def getMameRomList():
             print (('MameRomList version number %s is stale (new is %s), must ' +
                     'be reloaded') % (file_ver, mame_types.TYPES_VERSION))
         else:
-            if DEBUG:
-                print 'Got MameRomList (version %s).' % file_ver
+            print 'Got MameRomList (version %s).' % file_ver
 
     if mameRomList == None:
         mameRomList = mame_types.MameRomList()
@@ -122,7 +117,7 @@ def updateMameRomList(mame_cmd):
         listinfo = os.popen(mame_cmd + ' --listinfo', 'r')
     except:
         print 'Unable to get mame listinfo.'
-	return FALSE
+	return False
 
     newRom = mame_types.MameRom()
     cache = {}
@@ -154,7 +149,7 @@ def updateMameRomList(mame_cmd):
     mameRomList.setMameRoms(cache)
     saveMameRomList(mameRomList)
 
-    return TRUE
+    return True
 
 
 #

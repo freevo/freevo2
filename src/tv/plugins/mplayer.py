@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2005/01/08 15:40:54  dischi
+# remove TRUE, FALSE, DEBUG and HELPER
+#
 # Revision 1.44  2004/10/28 19:43:52  dischi
 # remove broken imports
 #
@@ -68,12 +71,6 @@ import plugin
 import eventhandler
 
 from tv.player import TVPlayer
-
-# Set to 1 for debug output
-DEBUG = config.DEBUG
-
-TRUE = 1
-FALSE = 0
 
 
 class PluginInterface(plugin.Plugin):
@@ -207,8 +204,6 @@ class MPlayer(TVPlayer):
         elif mixer and config.MAJOR_AUDIO_CTRL == 'PCM':
             mixer.setPcmVolume(mixer_vol)
 
-        if DEBUG: print '%s: started %s app' % (time.time(), self.mode)
-
 
 
     def Stop(self, channel_change=0):
@@ -234,7 +229,7 @@ class MPlayer(TVPlayer):
         if event == em.STOP or event == em.PLAY_END:
             self.Stop()
             eventhandler.post(em.PLAY_END)
-            return TRUE
+            return True
 
         elif event in [ em.TV_CHANNEL_UP, em.TV_CHANNEL_DOWN] or s_event.startswith('INPUT_'):
             if event == em.TV_CHANNEL_UP:
@@ -250,15 +245,15 @@ class MPlayer(TVPlayer):
             if self.current_vg != nextvg:
                 self.Stop(channel_change=1)
                 self.Play('tv', nextchan)
-                return TRUE
+                return True
 
             if self.mode == 'vcr':
-                return
+                return True
             
             elif self.current_vg.group_type == 'dvb':
                 self.Stop(channel_change=1)
                 self.Play('tv', nextchan)
-                return TRUE
+                return True
 
             elif self.current_vg.group_type == 'ivtv':
                 self.fc.chanSet(nextchan)
@@ -277,7 +272,7 @@ class MPlayer(TVPlayer):
             msg = '%s %s (%s): %s' % (now, chan_name, tuner_id, prog_info)
             cmd = 'osd_show_text "%s"\n' % msg
             self.app.write(cmd)
-            return TRUE
+            return True
 
         elif event == em.TOGGLE_OSD:
             # Display the channel info message
@@ -286,7 +281,7 @@ class MPlayer(TVPlayer):
             msg = '%s %s (%s): %s' % (now, chan_name, tuner_id, prog_info)
             cmd = 'osd_show_text "%s"\n' % msg
             self.app.write(cmd)
-            return FALSE
+            return True
             
-        return FALSE
+        return False
     

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2005/01/08 15:40:53  dischi
+# remove TRUE, FALSE, DEBUG and HELPER
+#
 # Revision 1.11  2005/01/08 10:27:17  dischi
 # remove unneeded skin_type parameter
 #
@@ -86,7 +89,6 @@ if float(sys.version[0:3]) < 2.3:
 else:
     import _strptime as strptime
 
-DEBUG = config.DEBUG
 
 
 class ManualRecordItem(Item):

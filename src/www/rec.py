@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2005/01/08 15:40:55  dischi
+# remove TRUE, FALSE, DEBUG and HELPER
+#
 # Revision 1.1  2004/12/28 00:38:45  rshortt
 # Reactivating web guide and scheduling recordings, this is still a major work
 # in progress and there are still missing pieces.
@@ -217,7 +220,7 @@ class RecordResource(FreevoResource):
             #if isFav:
             #    status = 'favorite'
             #try:
-            #    if prog.isRecording == TRUE:
+            #    if prog.isRecording == True:
             #        status = 'recording'
             #except:
             #    # sorry, have to pass without doing anything.

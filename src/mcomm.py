@@ -489,6 +489,6 @@ if not os.path.isfile(mbus_config):
     os.chmod(mbus_config, 0600)
 
 
-if config.HELPER and not notifier.loop:
+if __freevo_app__ != 'main' and not notifier.loop:
     # init the notifier (not done yet)
     notifier.init( notifier.GENERIC )

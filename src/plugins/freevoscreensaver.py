@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2005/01/08 15:40:52  dischi
+# remove TRUE, FALSE, DEBUG and HELPER
+#
 # Revision 1.5  2004/11/20 18:23:03  dischi
 # use python logger module for debug
 #
@@ -58,12 +61,6 @@ import fxditem
 import logging
 log = logging.getLogger()
 
-# Set to 1 for debug output
-DEBUG = config.DEBUG
-
-TRUE = 1
-FALSE = 0
-
 class PluginInterface(plugin.DaemonPlugin):
     """
     A plugin to start a screensaver when freevo has been inactive in a menu
@@ -97,10 +94,10 @@ class PluginInterface(plugin.DaemonPlugin):
     def __init__(self, sstype, ssarg1, ssarg2=None):
         plugin.DaemonPlugin.__init__(self)
         self.plugin_name = 'SCREENSAVER'
-        self.event_listener = TRUE
-	self.poll_menu_only = TRUE
+        self.event_listener = True
+	self.poll_menu_only = True
 	self.last_event = 0
-        self.screensaver_showing = FALSE
+        self.screensaver_showing = False
 	self.vitem = None
 	self.pl = None
 	self.menuw = None
@@ -125,15 +122,15 @@ class PluginInterface(plugin.DaemonPlugin):
 
         if event.name == 'SCREENSAVER_START':
 	    self.start_saver()
-	    return FALSE
+	    return False
 
         if event.name == 'SCREENSAVER_STOP' and self.screensaver_showing :
 	    self.stop_saver()
-	    return FALSE
+	    return False
 
         # gotta ignore these or video screensavers shutoff before they begin
 	if event.name == 'VIDEO_START' or event.name == 'PLAY_START' or event.name == 'VIDEO_END' or event.name == 'PLAY_END':
-	    return FALSE
+	    return False
 
         if self.screensaver_showing :
 	    self.stop_saver()
@@ -141,7 +138,7 @@ class PluginInterface(plugin.DaemonPlugin):
 	if not event.name == 'IDENTIFY_MEDIA':
 	    self.last_event = time.time()
 
-        return FALSE
+        return False
 
     def poll(self):
         log.info("Saver got polled %f" % time.time())
@@ -150,7 +147,7 @@ class PluginInterface(plugin.DaemonPlugin):
 
     def start_saver (self):
         log.info("start screensaver")
-        self.screensaver_showing = TRUE
+        self.screensaver_showing = True
         if self.saver_type == 'xscreensaver':
             os.system('%s -no-splash &' % self.arg1)
             os.system('sleep 5 ; %s -activate' % self.arg2)
@@ -177,7 +174,7 @@ class PluginInterface(plugin.DaemonPlugin):
     
     def stop_saver (self):
         log.info("stop screensaver")
-        self.screensaver_showing = FALSE
+        self.screensaver_showing = False
         if self.saver_type == 'xscreensaver':
             os.system('%s -exit' % self.arg2)
         elif self.saver_type == 'script':

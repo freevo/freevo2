@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2005/01/08 15:40:54  dischi
+# remove TRUE, FALSE, DEBUG and HELPER
+#
 # Revision 1.43  2004/11/20 18:23:04  dischi
 # use python logger module for debug
 #
@@ -86,8 +89,6 @@ import eventhandler
 import logging
 log = logging.getLogger('tv')
 
-# Set to 1 for debug output
-DEBUG = config.DEBUG
 
 class PluginInterface(plugin.Plugin):
     """
@@ -498,7 +499,7 @@ class TVTime:
         elif mixer and config.MAJOR_AUDIO_CTRL == 'PCM':
             mixer.setPcmVolume(mixer_vol)
 
-        if DEBUG: print '%s: started %s app' % (time.time(), self.mode)
+        log.info('%s: started %s app' % (time.time(), self.mode))
         
         
     def Stop(self, channel_change=0):
@@ -536,7 +537,7 @@ class TVTime:
             #if self.current_vg != nextvg:
             #    self.Stop(channel_change=1)
             #    self.Play('tv', nextchan)
-            #    return TRUE
+            #    return True
 
 	    self.fc.chanSet(nextchan, app=self.app)
 	    #self.current_vg = self.fc.getVideoGroup(self.fc.getChannel())
@@ -605,12 +606,12 @@ class TVTimeApp( childapp.Instance ):
                    'F3' : em.MIXER_MUTE,
                    's' : em.STOP }
 
-        if DEBUG: print 'TVTIME 1 KEY EVENT: "%s"' % str(list(line))
+        log.info('TVTIME 1 KEY EVENT: "%s"' % str(list(line)))
         if line == 'F10':
-            if DEBUG: print 'TVTIME screenshot!'
+            log.info('TVTIME screenshot!')
             self.write('screenshot\n')
         elif line == 'z':
-            if DEBUG: print 'TVTIME fullscreen toggle!'
+            log.info('TVTIME fullscreen toggle!')
             self.write('toggle_fullscreen\n')
             # FIXME: osd is gone now
             # osd.toggle_fullscreen()
@@ -618,7 +619,7 @@ class TVTimeApp( childapp.Instance ):
             event = events.get(line, None)
             if event is not None:
                 eventhandler.post(event)
-                if DEBUG: print 'posted translated tvtime event "%s"' % event
+                log.info('posted translated tvtime event "%s"' % event)
             else:
-                if DEBUG: print 'tvtime cmd "%s" not found!' % line
+                log.info('tvtime cmd "%s" not found!' % line)
    

@@ -88,20 +88,7 @@ __builtin__.__dict__['__freevo_app__'] = app
 # XXX Please do NOT use this varaibles anymore and fix code were it
 # XXX is used.
 
-# use True/False
-__builtin__.__dict__['TRUE']  = 1
-__builtin__.__dict__['FALSE'] = 0
-
-# use __freevo_app__
-HELPER = 0
-if sys.argv[0].find('main.py') == -1:
-    HELPER=1
-
-# use logger
-DEBUG = 0
-
 # use sysconfig code
-LOGDIR = sysconfig.CONF.logdir
 FREEVO_CACHEDIR = sysconfig.CONF.cachedir
 
 # use special logger
@@ -172,7 +159,7 @@ for program, valname, needed in setup_freevo.EXTERNAL_PROGRAMS:
 # fall back to x11 if display is mga or fb and DISPLAY ist set
 # or switch to fbdev if we have no DISPLAY and x11 or dga is used
 #
-if not HELPER:
+if __freevo_app__ == 'main':
     if os.environ.has_key('DISPLAY') and os.environ['DISPLAY']:
         if CONF.display in ('mga', 'fbdev'):
             print
@@ -248,7 +235,7 @@ for type in ('video', 'audio', 'image', 'games'):
             x.append(('Home', os.environ['HOME']))
         x.append(('Root', '/'))
         exec('%s = x' % n)
-        if not HELPER and plugin.is_active('mediamenu', type):
+        if __freevo_app__ == 'main' and plugin.is_active('mediamenu', type):
             log.warning('%s not set, set it to Home directory' % n)
         if type == 'video':
             VIDEO_ONLY_SCAN_DATADIR = True
@@ -299,10 +286,10 @@ if not TV_RECORD_DIR:
            '  Please set TV_RECORD_DIR to the directory, where recordings\n' +
            '  should be stored or remove the tv plugin. Autoset variable\n' +
            '  to %s.') % TV_RECORD_DIR
-    if not HELPER and plugin.is_active('tv'):
+    if __freevo_app__ == 'main' and plugin.is_active('tv'):
         log.warning(msg)
         
-if not VIDEO_SHOW_DATA_DIR and not HELPER:
+if not VIDEO_SHOW_DATA_DIR and __freevo_app__ == 'main':
     log.warning('VIDEO_SHOW_DATA_DIR not found')
     
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2005/01/08 15:40:51  dischi
+# remove TRUE, FALSE, DEBUG and HELPER
+#
 # Revision 1.21  2004/07/10 12:33:38  dischi
 # header cleanup
 #
@@ -45,12 +48,6 @@ import config
 import util
 import game
 import rc
-
-# Set to 1 for debug output
-DEBUG = config.DEBUG
-
-TRUE  = 1
-FALSE = 0
 
 import menu
 import event as em
@@ -90,7 +87,7 @@ class MameItem(Item):
         if os.path.isfile(file + '.mame'):
 	    addargs = open(filename + '.mame').read().strip()
             command.extend(addargs.split())
-            if DEBUG: print 'Read additional options = "%s"' % addargs
+            print 'Read additional options = "%s"' % addargs
 
         command.append(file)
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2005/01/08 15:40:51  dischi
+# remove TRUE, FALSE, DEBUG and HELPER
+#
 # Revision 1.8  2004/08/05 17:33:31  dischi
 # fix skin imports
 #
@@ -59,7 +62,6 @@ import util
 import os
 import time
 
-DEBUG = config.DEBUG
 
 class PluginInterface(plugin.DaemonPlugin):
     def __init__(self):

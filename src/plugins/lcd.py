@@ -13,6 +13,9 @@
 #    3) Better (and more) LCD screens.
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2005/01/08 15:40:53  dischi
+# remove TRUE, FALSE, DEBUG and HELPER
+#
 # Revision 1.22  2004/11/27 19:11:29  dischi
 # fix bad log statement
 #
@@ -693,11 +696,11 @@ class PluginInterface( plugin.DaemonPlugin ):
             self.disable = 1
             return
         
-        if config.DEBUG > 0:
-            print String(_( "Connecting to LCD: %s" )) % cm
-            print String(_( "Info as know by the LCD module:" ))
-            self.lcd.getinfo()
-            print ""
+        # if 1:
+        #     print String(_( "Connecting to LCD: %s" )) % cm
+        #     print String(_( "Info as know by the LCD module:" ))
+        #     self.lcd.getinfo()
+        #     print ""
             
         self.poll_interval = 10
         self.poll_menu_only = 0

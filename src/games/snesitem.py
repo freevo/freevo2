@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2005/01/08 15:40:51  dischi
+# remove TRUE, FALSE, DEBUG and HELPER
+#
 # Revision 1.20  2004/07/10 12:33:38  dischi
 # header cleanup
 #
@@ -42,12 +45,6 @@ import os
 
 import config
 import game
-
-# Set to 1 for debug output
-DEBUG = config.DEBUG
-
-TRUE  = 1
-FALSE = 0
 
 import rc
 import time
@@ -230,7 +227,7 @@ class SnesItem(Item):
 		break
             # Break now if CHECKSUM is OK
             if (romICHK | romCHK) == 0xFFFF:
-                if DEBUG:
+                if 1:
                     print 'SNES rom header detected at offset : %d!!!!' % offset
                 break
         else:
@@ -246,14 +243,14 @@ class SnesItem(Item):
 		    break
                 # Some times, the ROM is OK, but the checksum is incorrect, so we do a very dummy ASCII detection
                 if match('[a-zA-Z0-9 ]{4}', romName[0:4]) != None:
-                    if DEBUG:
+                    if 1:
                         print 'SNES rom header detected by ASCII name : %d!!!!' % offset
                     break
         snesFile.close()
         if unzipped:
             os.unlink(unzipped)
 
-        if DEBUG:
+        if 1:
             print 'SNES rom name : %s - %s -> %s' % (ord(romCountry),os.path.basename(file), romName)
 
         # Allocate the name according to the country by checking the rom name againts ASCII codes

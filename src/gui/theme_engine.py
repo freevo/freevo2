@@ -45,7 +45,6 @@ __all__ = [ 'get_theme', 'set_theme', 'get_font', 'get_image', 'get_icon' ]
 import os
 import copy
 import re
-import traceback
 
 # freevo imports
 import config
@@ -103,8 +102,7 @@ def set_theme(new):
             theme.load(new)
             theme.prepare()
         except:
-            log.error('XML file corrupt:')
-            traceback.print_exc()
+            log.exception('XML file corrupt:')
             theme = copy.copy(current_theme)
         theme.filename = new
         current_theme = theme
@@ -188,7 +186,7 @@ def attr_int(node, attr, default, scale=0.0):
                                                 '-font_h' ):
                         new_val += val[:pos].lower()
                     else:
-                        print 'WARNING: unsupported value %s' % val[:pos]
+                        log.error('unsupported value %s' % val[:pos])
                 val = val[pos:]
 
             try:
@@ -261,12 +259,10 @@ def search_file(file, search_dirs):
         if vfs.isfile("%s.jpg" % dfile):
             return vfs.abspath("%s.jpg" % dfile)
 
-    print 'skin error: can\'t find image %s' % file
-    if config.DEBUG:
-        print 'image search path is:'
-        for s in search_dirs:
-            print s
-    print
+    log.error('skin error: can\'t find image %s' % file)
+    log.info('image search path is:')
+    for s in search_dirs:
+        log.info(s)
     return ''
 
 
@@ -785,7 +781,7 @@ class FormatText(XML_data):
             if font.has_key(self.font):
                 self.font = font[self.font]
             else:
-                print 'skin error: can\'t find font %s' % self.font
+                log.error('skin error: can\'t find font %s' % self.font)
                 self.font = font['default']
         else:
             self.font = font['default']
@@ -894,8 +890,8 @@ class Image(XML_data):
             if image_names.has_key(self.image):
                 self.filename = image_names[self.image]
             else:
-                print 'skin error: can\'t find image definition %s' % \
-                      self.image
+                log.error('skin error: can\'t find image definition %s' % \
+                          self.image)
 
         if self.filename:
             self.filename = search_file(self.filename, search_dirs)
@@ -1364,8 +1360,7 @@ def set_base_fxd(name):
         # something went wrong, print trace and load the
         # default skin (basic.fxd). This skin works
         # (if not, Freevo is broken)
-        traceback.print_exc()
-        log.error('XML file %s corrupt, using default skin' % name)
+        log.exception('XML file %s corrupt, using default skin' % name)
         settings = FXDSettings('basic.fxd')
 
     # search for personal skin settings additions

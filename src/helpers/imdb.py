@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2005/01/08 15:40:52  dischi
+# remove TRUE, FALSE, DEBUG and HELPER
+#
 # Revision 1.7  2004/07/10 12:33:39  dischi
 # header cleanup
 #
@@ -91,7 +94,7 @@ if __name__ == "__main__":
     import getopt
 
     drive = '/dev/cdrom'
-    driveset = FALSE
+    driveset = False
 
     task = ''
     search_arg = ''
@@ -124,7 +127,7 @@ if __name__ == "__main__":
 
         if o == '--rom-drive':
             drive=a
-            driveset = TRUE
+            driveset = True
 
     fxd = FxdImdb()        
             
@@ -132,15 +135,15 @@ if __name__ == "__main__":
         if len(args) == 2:
             usage()
         fxd.setFxdFile(arg[0])
-        if fxd.isDiscset() == TRUE:
+        if fxd.isDiscset() == True:
             fxd.setDiscset(drive, None)
-        elif fxd.isDiscset() == FALSE:
+        elif fxd.isDiscset() == False:
             type = 'file'
             if arg[1].find('[dvd]') != -1: type = 'dvd'
             if arg[1].find('[vcd]') != -1: type = 'vcd'
             
             id = abs( Random() * 100 )
-            if driveset == TRUE:
+            if driveset == True:
                 video = makeVideo(type, 'f' + str(id), arg[1], device=drive)
             else : video = makeVideo(type, 'f' + str(id), arg[1])
             fxd.setVideo(video)
@@ -195,7 +198,7 @@ if __name__ == "__main__":
         type = 'file'
         if file.find('[dvd]') != -1: type = 'dvd'
         if file.find('[vcd]') != -1: type = 'vcd'
-        if driveset == TRUE: video = makeVideo(type, 'f' + str(x) , file, device=drive)
+        if driveset == True: video = makeVideo(type, 'f' + str(x) , file, device=drive)
         else: video = makeVideo(type, 'f' + str(x), file)
         fxd.setVideo(video)
         x = x+1

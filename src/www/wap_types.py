@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2005/01/08 15:40:55  dischi
+# remove TRUE, FALSE, DEBUG and HELPER
+#
 # Revision 1.4  2004/07/10 12:33:43  dischi
 # header cleanup
 #
@@ -42,10 +45,6 @@ import os, sys, time
 import config
 
 from twisted.web.resource import Resource
-
-DEBUG = config.DEBUG
-TRUE = 1
-FALSE = 0
 
 class FreevoWapResource(Resource):
 
