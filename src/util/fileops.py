@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/06/13 18:47:46  dischi
+# expect errors when loading image
+#
 # Revision 1.19  2004/06/09 20:09:10  dischi
 # cleanup
 #
@@ -469,34 +472,34 @@ def read_thumbnail(filename):
     return data
 
 
-def cache_image(filename, thumbnail=None, use_exif=False):
+def create_thumbnail(filename, thumbnail=None):
     """
-    cache image for faster access, return cached image
+    cache image for faster access
     """
     thumb = vfs.getoverlay(filename + '.raw')
-    try:
-        if os.stat(thumb)[stat.ST_MTIME] > os.stat(filename)[stat.ST_MTIME]:
-            data = read_thumbnail(thumb)
-            if data:
-                return data
-    except OSError:
-        pass
-
     image = None
+
     if thumbnail:
         try:
             image = Image.open(cStringIO.StringIO(thumbnail))
-        except:
-            pass
+        except Exception, e:
+            print 'Invalid thumbnail for %s' % filename
+            if config.DEBUG:
+                print e
 
     if not image:
-        if use_exif:
+        if __freevo_app__ == 'main':
             f=open(filename, 'rb')
             tags=exif.process_file(f)
             f.close()
             
             if tags.has_key('JPEGThumbnail'):
-                image = Image.open(cStringIO.StringIO(tags['JPEGThumbnail']))
+                try:
+                    image = Image.open(cStringIO.StringIO(tags['JPEGThumbnail']))
+                except Exception, e:
+                    print 'Error loading thumbnail %s' % filename
+                    if config.DEBUG:
+                        print e
 
         if not image or image.size[0] < 100 or image.size[1] < 100:
             try:
@@ -519,5 +522,21 @@ def cache_image(filename, thumbnail=None, use_exif=False):
     f.write('FRI%s%s%5s' % (chr(image.size[0]), chr(image.size[1]), image.mode))
     f.write(data[0])
     f.close()
-
     return data
+
+
+def cache_image(filename, thumbnail=None, use_exif=False):
+    """
+    cache image for faster access, return cached image
+    """
+    thumb = vfs.getoverlay(filename + '.raw')
+    try:
+        if os.stat(thumb)[stat.ST_MTIME] > os.stat(filename)[stat.ST_MTIME]:
+            data = read_thumbnail(thumb)
+            if data:
+                return data
+    except OSError:
+        pass
+
+    return create_thumbnail(filename, thumbnail)
+
