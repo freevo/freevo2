@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2003/03/05 20:08:18  dischi
+# More speed enhancements. It's now faster than the keyboard control :-)
+#
 # Revision 1.30  2003/03/05 19:20:47  dischi
 # cleanip
 #
@@ -256,17 +259,6 @@ class Skin:
                 break
         
 
-    # This function is called from the rc module and other places
-    def HandleEvent(self, ev):
-        # Handle event (remote control, timer, msg display...)
-        # Some events are handled directly (volume control),
-        # RC cmds are handled using the menu lib, and events
-        # might be passed directly to a foreground application
-        # that handles its' own graphics
-        pass
-
-
-
     # Parse XML files with additional settings
     # TODO: parse also parent directories
     def LoadSettings(self, dir, copy_content = 1):
@@ -412,13 +404,19 @@ class Skin:
         
 
     def Clear(self):
+        """
+        clean the screen
+        """
         self.force_redraw = TRUE
         osd.clearscreen(osd.COL_BLACK)
         osd.update()
 
-    # Called from the MenuWidget class to draw a menu page on the
-    # screen
+
     def DrawMenu(self, menuw):
+        """
+        Called from the MenuWidget class to draw a menu page on the
+        screen
+        """
         if not menuw.visible:
             return
 
@@ -449,7 +447,7 @@ class Skin:
 
         for a in self.area_names:
             area = eval('self.%s_area' % a)
-            area.draw(settings, menuw, self.force_redraw)
+            area.draw(settings, menuw)
 
         self.screen.show(self.force_redraw)
 
@@ -459,6 +457,32 @@ class Skin:
 
     def DrawMP3(self, info):
         osd.update()
+
+    # TV Guide:
+
+    def DrawTVGuide(self):
+        pass
+    
+    def DrawTVGuide_Clear(self):
+        pass
+
+    def DrawTVGuide_getExpand(self):
+        pass
+
+    def DrawTVGuide_setExpand(self, expand):
+        pass
+
+    def DrawTVGuide_View(self, to_view):
+        pass
+
+    def DrawTVGuide_Info(self, to_info):
+        pass
+                         
+    def DrawTVGuide_ItemsPerPage(self):
+        return (2,3)
+
+    def DrawTVGuide_Listing(self, to_listing):
+        pass
 
     def format_track (self, array):
         """ Return a formatted string for use in music.py """

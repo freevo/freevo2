@@ -9,11 +9,6 @@
 #
 # This is the main class for all area.
 #
-# My first draft was an area which redraws only the needed parts and
-# blits it onto the surface.. But there are some problems with that,
-# which makes this a little bit difficult. This version redraws too
-# much, but blits only the needed parts on the screen.
-#
 # If you want to create a new Skin_Area, please keep my problems in mind:
 #
 #
@@ -30,12 +25,11 @@
 #
 # For more informations contact me (dmeyer@tzi.de)
 #
-#
-# Todo: make it faster -- DONE
-#       code cleanup
-#
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/03/05 20:08:17  dischi
+# More speed enhancements. It's now faster than the keyboard control :-)
+#
 # Revision 1.13  2003/03/05 19:20:45  dischi
 # cleanip
 #
@@ -132,21 +126,17 @@ TRUE = 1
 FALSE = 0
 
 
-background = None
-alpha = None
-
-
 class Screen:
     """
     this call is a set of surfaces for the area to do it's job
     """
 
     def __init__(self):
-        self.surface_background  = pygame.Surface((osd.width, osd.height), 1, 32)
-        self.surface_alpha       = self.surface_background.convert_alpha()
-        self.surface_alpha_bg    = self.surface_background.convert()
+        self.s_bg       = pygame.Surface((osd.width, osd.height), 1, 32)
+        self.s_alpha    = self.s_bg.convert_alpha()
+        self.s_content  = self.s_bg.convert()
 
-        self.surface_alpha.fill((0,0,0,0))
+        self.s_alpha.fill((0,0,0,0))
 
         self.updatelist = {}
         self.updatelist['background'] = []
@@ -160,6 +150,7 @@ class Screen:
     def clear(self):
         self.updatelist['background'] = []
         self.updatelist['content']    = []
+
         self.drawlist['background'] = []
         self.drawlist['content']    = []
 
@@ -170,58 +161,67 @@ class Screen:
 
     def update(self, layer, rect):
         self.updatelist[layer] += [ rect ]
-        
+
+
+    def in_update(self, x1, y1, x2, y2, update_area):
+        for u in update_area:
+            if not (x2 < u[0] or y2 < u[1] or x1 > u[2] or y1 > u[3]):
+                return TRUE
+        return FALSE
+
 
     def show(self, force_redraw=FALSE):
+        """
+        the main drawing function
+        """
+
         if force_redraw:
             self.updatelist['background'] = [ (0,0,osd.width, osd.height) ]
-            self.updatelist['content'] = []
+            self.updatelist['content']    = []
 
-            
         # if the background has some changes ...
         if self.updatelist['background']:
             # ... clear it ...
-            self.surface_alpha.fill((0,0,0,0))
+            self.s_alpha.fill((0,0,0,0))
 
             # and redraw all items
-            for obj in self.drawlist['background']:
-                if obj[0] == 'image':
+            for o in self.drawlist['background']:
+                if o[0] == 'image':
                     # redraw only the changed parts of the image
                     for x0, y0, x1, y1 in self.updatelist['background']:
-                        self.surface_background.blit(obj[1], (x0, y0),
-                                                     (x0-obj[2], y0-obj[3], x1-x0, y1-y0))
+                        self.s_bg.blit(o[1], (x0, y0), (x0-o[2], y0-o[3], x1-x0, y1-y0))
 
-                elif obj[0] == 'rectangle':
-                    x, y, width, height, color, border_size, border_color, radius = obj[1:]
-                    osd.drawroundbox(x, y, width, height, color=color,
-                                     border_size=border_size, border_color=border_color,
-                                     radius=radius, layer=self.surface_alpha)
+                elif o[0] == 'rectangle':
+                    x1, y1, x2, y2, color, border_size, border_color, radius = o[1:]
+                    # only redraw if necessary
+                    if self.in_update(x1, y1, x2, y2, self.updatelist['background']):
+                        osd.drawroundbox(x1, y1, x2, y2, color=color,
+                                         border_size=border_size, border_color=border_color,
+                                         radius=radius, layer=self.s_alpha)
 
             # and than blit only the changed parts of the screen
             for x0, y0, x1, y1 in self.updatelist['background']:
-                self.surface_alpha_bg.blit(self.surface_background, (x0, y0),
-                                           (x0, y0, x1-x0, y1-y0))
-                self.surface_alpha_bg.blit(self.surface_alpha, (x0, y0),
-                                           (x0, y0, x1-x0, y1-y0))
-                osd.screen.blit(self.surface_alpha_bg, (x0, y0), (x0, y0, x1-x0, y1-y0))
-
+                self.s_content.blit(self.s_bg, (x0, y0), (x0, y0, x1-x0, y1-y0))
+                self.s_content.blit(self.s_alpha, (x0, y0), (x0, y0, x1-x0, y1-y0))
+                osd.screen.blit(self.s_content, (x0, y0), (x0, y0, x1-x0, y1-y0))
 
 
         # if the content has changed ...
         if self.updatelist['content']:
             # ... blit back the alphabg surface
             for x0, y0, x1, y1 in self.updatelist['content']:
-                osd.screen.blit(self.surface_alpha_bg, (x0, y0), (x0, y0, x1-x0, y1-y0))
+                osd.screen.blit(self.s_content, (x0, y0), (x0, y0, x1-x0, y1-y0))
+
 
         # if something changed redraw all content objects
         if self.updatelist['background'] or self.updatelist['content']:
-            for obj in self.drawlist['content']:
-                if obj[0] == 'image':
-                    osd.screen.blit(obj[1], obj[2:])
+            for o in self.drawlist['content']:
+                if o[0] == 'image':
+                    osd.screen.blit(o[1], o[2:])
 
-                elif obj[0] == 'text':
+                elif o[0] == 'text':
                     ( text, font, x, y, width, height, align_h, align_v,
-                      mode, ellipses ) = obj[1:]
+                      mode, ellipses ) = o[1:]
                     if font.shadow.visible:
                         osd.drawstringframed(text, x+font.shadow.x, y+font.shadow.y,
                                              width, height, font.shadow.color, None,
@@ -247,24 +247,22 @@ class Skin_Area:
         self.area_name = name
         self.area_val  = None
         self.redraw    = TRUE
-        self.depends   = ()
         self.layout    = None
         self.name      = name
-        
-        # new test stuff:
-        self.background_cache = []
-        self.last_background_cache = []
-        self.content_cache    = []
-        self.last_content_cache    = []
         self.screen = screen
+        
+        self.bg_objects           = []
+        self.last_bg_objects      = []
+        self.content_objects      = []
+        self.last_content_objects = []
         
         self.imagecache = objectcache.ObjectCache(5, desc='%s_image' % self.name)
 
 
-    def draw(self, settings, menuw, force_redraw):
+    def draw(self, settings, menuw):
         """
-        this is the first part of main draw function. This function draws the
-        background, checks if redraws are needed and calls the two update functions
+        this is the main draw function. This function draws the background,
+        checks if redraws are needed and calls the two update functions
         for the different types of areas
         """
         
@@ -272,10 +270,10 @@ class Skin_Area:
 
         self.menu = menu
 
-        self.background_cache = []
-        self.content_cache = []
+        self.bg_objects = []
+        self.content_objects = []
         
-        self.redraw = force_redraw
+        self.redraw = FALSE
         self.mode = 0                   # start draw
         
         area = self.area_val
@@ -299,8 +297,8 @@ class Skin_Area:
             self.screen.update('background', (old_area.x, old_area.y,
                                               old_area.x + old_area.width,
                                               old_area.y + old_area.height))
-            self.last_background_cache = self.background_cache
-            self.last_content_cache = self.content_cache
+            self.last_bg_objects      = []
+            self.last_content_objects = []
 
         if not area.visible:
             return
@@ -311,10 +309,10 @@ class Skin_Area:
         if not self.redraw:
             # no update needed: return
             if not self.update_content_needed(settings, menuw):
-                self.content_cache = self.last_content_cache
+                self.content_objects = self.last_content_objects
                 return
 
-        self.mode = 1                   # draw alpha stuff
+        self.mode = 1 # content
         self.update_content(settings, menuw)
 
         bg_rect = [ osd.width, osd.height, 0, 0 ]
@@ -322,21 +320,21 @@ class Skin_Area:
 
         # FIXME: make this simpler:
         
-        for b in self.background_cache:
-            if not b in self.last_background_cache:
+        for b in self.bg_objects:
+            if not b in self.last_bg_objects:
                 bg_rect[0] = min(bg_rect[0], b[1])
                 bg_rect[1] = min(bg_rect[1], b[2])
                 bg_rect[2] = max(bg_rect[2], b[1] + b[3])
                 bg_rect[3] = max(bg_rect[3], b[2] + b[4])
-        for b in self.last_background_cache:
-            if not b in self.background_cache:
+        for b in self.last_bg_objects:
+            if not b in self.bg_objects:
                 bg_rect[0] = min(bg_rect[0], b[1])
                 bg_rect[1] = min(bg_rect[1], b[2])
                 bg_rect[2] = max(bg_rect[2], b[1] + b[3])
                 bg_rect[3] = max(bg_rect[3], b[2] + b[4])
 
-        for b in self.content_cache:
-            if not b in self.last_content_cache:
+        for b in self.content_objects:
+            if not b in self.last_content_objects:
                 if b[0] == 'rectangle':
                     bg_rect[0] = min(bg_rect[0], b[1])
                     bg_rect[1] = min(bg_rect[1], b[2])
@@ -348,8 +346,8 @@ class Skin_Area:
                     c_rect[2] = max(c_rect[2], b[1] + b[3])
                     c_rect[3] = max(c_rect[3], b[2] + b[4])
 
-        for b in self.last_content_cache:
-            if not b in self.content_cache:
+        for b in self.last_content_objects:
+            if not b in self.content_objects:
                 if b[0] == 'rectangle':
                     bg_rect[0] = min(bg_rect[0], b[1])
                     bg_rect[1] = min(bg_rect[1], b[2])
@@ -366,8 +364,8 @@ class Skin_Area:
         if c_rect[0] < c_rect[2]:
             self.screen.update('content', c_rect)
         
-        self.last_background_cache = self.background_cache
-        self.last_content_cache = self.content_cache
+        self.last_bg_objects = self.bg_objects
+        self.last_content_objects = self.content_objects
 
 
 
@@ -508,7 +506,7 @@ class Skin_Area:
                     bg.label = 'background'
                     
                 if imagefile:
-                    self.background_cache += [ ( 'image', bg.x, bg.y, bg.width, bg.height,
+                    self.bg_objects += [ ( 'image', bg.x, bg.y, bg.width, bg.height,
                                                  imagefile ) ]
                     cname = '%s-%s-%s' % (imagefile, bg.width, bg.height)
                     image = self.imagecache[cname]
@@ -522,7 +520,7 @@ class Skin_Area:
                             
             elif isinstance(bg, xml_skin.XML_rectangle):
                 self.calc_geometry(bg)
-                self.background_cache += [ ( 'rectangle', bg.x, bg.y, bg.width,
+                self.bg_objects += [ ( 'rectangle', bg.x, bg.y, bg.width,
                                              bg.height, bg.bgcolor, bg.size, bg.color,
                                              bg.radius ) ]
                 self.drawroundbox(bg.x, bg.y, bg.width, bg.height, bg, redraw=self.redraw)
@@ -534,10 +532,11 @@ class Skin_Area:
 
     def drawroundbox(self, x, y, width, height, rect, redraw=TRUE):
         """
-        draw a round box
+        draw a round box ... or better stores the information about this call
+        in a variable. The real drawing is done inside draw()
         """
         if self.mode == 1:
-            self.content_cache += [ ( 'rectangle', x, y, width,
+            self.content_objects += [ ( 'rectangle', x, y, width,
                                       height, rect.bgcolor, rect.size, rect.color,
                                       rect.radius ) ]
             
@@ -578,7 +577,7 @@ class Skin_Area:
         if height2 == -1:
             height2 = osd.stringsize('Arj', font=font.name, ptsize=font.size)[1] + 10
 
-        self.content_cache += [ ( 'text', x, y, width, height2, height, text, font, align_h,
+        self.content_objects += [ ( 'text', x, y, width, height2, height, text, font, align_h,
                                   align_v, mode, ellipses ) ]
 
 
@@ -590,7 +589,7 @@ class Skin_Area:
         """
         if isinstance(val, tuple):
             self.screen.draw('content', ('image', image, val[0], val[1]))
-            self.content_cache += [ ( 'image', val[0], val[1], image.get_width(),
+            self.content_objects += [ ( 'image', val[0], val[1], image.get_width(),
                                       image.get_height(), image ) ]
             
         elif hasattr(val, 'label') and val.label == 'background':
