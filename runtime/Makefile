@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/02/07 05:06:32  krister
+# Added execute flag for pygphoto.so
+#
 # Revision 1.5  2003/02/05 15:22:52  krister
 # Updated build stuff, Changelog
 #
@@ -173,4 +176,4 @@ lame_copy:
 pygphoto_copy:
 	@echo Copying pygphoto
 	cp -a src/pygphoto.so lib/python2.2/site-packages/
-
+	chmod ugo+x lib/python2.2/site-packages/pygphoto.so
