@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2002/12/03 14:32:03  dischi
+# stop slideshow when moving up/down the playlist
+#
 # Revision 1.5  2002/12/03 13:11:47  dischi
 # New osd patch from John M Cooper and some cleanups by displaying it
 # from me
@@ -235,6 +238,13 @@ class ImageViewer:
             rc.app = None
             signal.alarm(0)
             menuwidget.refresh()
+
+        # up and down will stop the slideshow and pass the
+        # event to the playlist
+        elif event == rc.UP or event == rc.DOWN:
+            self.slideshow = FALSE
+            signal.alarm(0)
+            self.fileitem.eventhandler(event)
             
         # rotate image
         elif event == rc.LEFT or event == rc.RIGHT:
