@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/03/02 19:31:35  dischi
+# split the draw function in two parts
+#
 # Revision 1.26  2003/03/02 15:18:48  dischi
 # Don't redraw if a child is visble
 #
@@ -424,7 +427,11 @@ class Skin:
         self.screen.clear()
         for a in self.area_names:
             area = eval('self.%s_area' % a)
-            area.draw(settings, menuw, self.force_redraw)
+            area.prepare(settings, menuw, self.force_redraw)
+
+        for a in self.area_names:
+            area = eval('self.%s_area' % a)
+            area.draw()
 
         osd.update()
         self.force_redraw = FALSE

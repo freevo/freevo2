@@ -37,6 +37,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/03/02 19:31:35  dischi
+# split the draw function in two parts
+#
 # Revision 1.7  2003/03/02 15:04:08  dischi
 # Added forced_redraw after Clear()
 #
@@ -161,11 +164,11 @@ class Skin_Area:
 
         self.imagecache = objectcache.ObjectCache(5, desc='%s_image' % self.name)
 
-    def draw(self, settings, menuw, force_redraw):
+    def prepare(self, settings, menuw, force_redraw):
         """
-        this is the main draw function. This function draws the background,
-        checks if redraws are needed and calls the two update functions for
-        the different types of areas
+        this is the first part of main draw function. This function draws the
+        background, checks if redraws are needed and calls the two update functions
+        for the different types of areas
         """
         
         menu = menuw.menustack[-1]
@@ -252,6 +255,12 @@ class Skin_Area:
         osd.screen.blit(self.alpha_bg, area.pos(self.name), area.rect(self.name))
 
         
+    def draw(self):
+        """
+        this is the second part of main draw function. This function draws the
+        content (text and images)
+        """
+
         for t in self._write_text:
             ( text, font, x, y, width, height, align_h, align_v, mode, ellipses ) = t
             if font.shadow.visible:
