@@ -146,11 +146,11 @@ def optimize_for_rendering(list):
 			# If the union of these two rectangles has an area at most 20%
 			# larger than the two rectangles separately, then take the
 			# union instead.
-			# TODO: test empirically if 20% is a good figure.
+			# TODO: test empirically if 50% is a good figure.
 			if not merged:
 				r3 = union(r1, r2)
 				area_r3 = r3[1][0] * r3[1][1]
-				if area_r3 < (area_r1 + area_r2) * 1.2:
+				if area_r3 < (area_r1 + area_r2) * 1.5:
 					list.remove(r2)
 					new_list.append(r3)
 					merged = True
