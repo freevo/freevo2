@@ -176,18 +176,22 @@ class MPlayer:
                 self.thread.app.write('H')
             else:
                 self.stop()
-                pos = self.playlist.index(self.filename)
-                last_file = (pos == len(self.playlist)-1)
-
-                # Don't continue if at the end of the list
-                if self.playlist == [] or (last_file and not self.repeat):
+                if self.playlist == []:
                     rc.app = None
                     menuwidget.refresh()
                 else:
-                    # Go to the next song in the list
-                    pos = (pos+1) % len(self.playlist)
-                    filename = self.playlist[pos]
-                    self.play(self.mode, filename, self.playlist)
+                    pos = self.playlist.index(self.filename)
+                    last_file = (pos == len(self.playlist)-1)
+                
+                    # Don't continue if at the end of the list
+                    if self.playlist == [] or (last_file and not self.repeat):
+                        rc.app = None
+                        menuwidget.refresh()
+                    else:
+                        # Go to the next song in the list
+                        pos = (pos+1) % len(self.playlist)
+                        filename = self.playlist[pos]
+                        self.play(self.mode, filename, self.playlist)
             
 
 class MPlayerApp(childapp.ChildApp):
