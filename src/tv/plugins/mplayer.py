@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2004/02/05 14:23:50  outlyer
+# Patch from Viggo Fredriksen
+#
+# o Move to ChildApp2 for mplayer TV plugin
+# o Channel changing via the number pad on the remote
+#
 # Revision 1.31  2004/02/04 14:11:19  outlyer
 # Cleanup and fixup:
 #
@@ -52,8 +58,6 @@
 import config
 
 import time, os
-import threading
-import signal
 
 import util    # Various utilities
 import osd     # The OSD class, used to communicate with the OSD daemon
@@ -63,7 +67,6 @@ import childapp # Handle child applications
 import tv.epg_xmltv as epg # The Electronic Program Guide
 from tv.channels import FreevoChannels
 import tv.ivtv as ivtv
-import time 
 import plugin
 
 # Set to 1 for debug output
@@ -93,8 +96,6 @@ class MPlayer:
     __igainvol = 0
     
     def __init__(self):
-        self.thread = childapp.ChildThread()
-        self.thread.stop_osd = True
         self.tuner_chidx = 0    # Current channel, index into config.TV_CHANNELS
         self.app_mode = 'tv'
         self.fc = FreevoChannels()
@@ -188,7 +189,8 @@ class MPlayer:
             mixer.setPcmVolume(0)
 
         # Start up the TV task
-        self.thread.start(MPlayerApp, (command))        
+        self.app = MPlayerApp(command)
+        self.app.stop_osd = True
         
         self.prev_app = rc.app()
         rc.app(self)
@@ -212,8 +214,8 @@ class MPlayer:
 
         if DEBUG: print '%s: started %s app' % (time.time(), self.mode)
 
-        
-        
+
+
     def Stop(self, channel_change=0):
         mixer = plugin.getbyname('MIXER')
         if mixer and not channel_change:
@@ -221,7 +223,7 @@ class MPlayer:
             mixer.setMicVolume(0)
             mixer.setIgainVolume(0) # Input on emu10k cards.
 
-        self.thread.stop('quit\n')
+        self.app.stop('quit\n')
 
         rc.app(self.prev_app)
         if osd.focused_app() and not channel_change:
@@ -231,17 +233,21 @@ class MPlayer:
 
 
     def eventhandler(self, event, menuw=None):
+        s_event = '%s' % event
+
         if event == em.STOP or event == em.PLAY_END:
             self.Stop()
             rc.post_event(em.PLAY_END)
             return TRUE
-        
-        elif event == em.TV_CHANNEL_UP or event == em.TV_CHANNEL_DOWN:
 
+        elif event in [ em.TV_CHANNEL_UP, em.TV_CHANNEL_DOWN] or s_event.startswith('INPUT_'):
             if event == em.TV_CHANNEL_UP:
                 nextchan = self.fc.getNextChannel()
-            else:
+            elif event == em.TV_CHANNEL_DOWN:
                 nextchan = self.fc.getPrevChannel()
+            else:
+                chan = int( s_event[6] )
+                nextchan = self.fc.getManChannel(chan)
 
             nextvg = self.fc.getVideoGroup(nextchan)
 
@@ -255,12 +261,12 @@ class MPlayer:
             
             elif self.current_vg.group_type == 'ivtv':
                 self.fc.chanSet(nextchan)
-                self.thread.app.write('seek 999999 0\n')
+                self.app.write('seek 999999 0\n')
 
             else:
-                freq_khz = self.fc.chanSet(nextchan, app=self.thread.app)
+                freq_khz = self.fc.chanSet(nextchan, app=self.app)
                 new_freq = '%1.3f' % (freq_khz / 1000.0)
-                self.thread.app.write('tv_set_freq %s\n' % new_freq)
+                self.app.write('tv_set_freq %s\n' % new_freq)
 
             self.current_vg = self.fc.getVideoGroup(self.fc.getChannel())
 
@@ -269,39 +275,39 @@ class MPlayer:
             now = time.strftime('%H:%M')
             msg = '%s %s (%s): %s' % (now, chan_name, tuner_id, prog_info)
             cmd = 'osd_show_text "%s"\n' % msg
-            self.thread.app.write(cmd)
+            self.app.write(cmd)
             return TRUE
-            
+
         elif event == em.TOGGLE_OSD:
             # Display the channel info message
             tuner_id, chan_name, prog_info = self.fc.getChannelInfo()
             now = time.strftime('%H:%M')
             msg = '%s %s (%s): %s' % (now, chan_name, tuner_id, prog_info)
             cmd = 'osd_show_text "%s"\n' % msg
-            self.thread.app.write(cmd)
+            self.app.write(cmd)
             return FALSE
             
         return FALSE
     
 
 # ======================================================================
-class MPlayerApp(childapp.ChildApp):
+class MPlayerApp(childapp.ChildApp2):
     """
     class controlling the in and output from the mplayer process
     """
-
     def __init__(self, app):
-        childapp.ChildApp.__init__(self, app)
-        
-
-    def kill(self):
-        # Use SIGINT instead of SIGKILL to make sure MPlayer shuts
-        # down properly and releases all resources before it gets
-        # reaped by childapp.kill().wait()
-        self.write('quit')
-        childapp.ChildApp.kill(self, signal.SIGINT)
-
-        # XXX Krister testcode for proper X11 video
-        if DEBUG: print 'Killing mplayer'
-
-
+        # init the child (== start the threads)
+        childapp.ChildApp2.__init__(self, app)
+                
+    def stop_event(self):
+        """
+        return the stop event send through the eventhandler
+        """
+        if self.exit_type == "End of file":
+            return PLAY_END
+        elif self.exit_type == "Quit":
+            return USER_END
+        else:
+            print _( 'ERROR' ) + ': ' + str(self.exit_type) + \
+                  _( 'unknow error while playing file' )
+            return PLAY_END

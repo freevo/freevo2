@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/02/05 14:23:50  outlyer
+# Patch from Viggo Fredriksen
+#
+# o Move to ChildApp2 for mplayer TV plugin
+# o Channel changing via the number pad on the remote
+#
 # Revision 1.12  2004/02/04 14:11:19  outlyer
 # Cleanup and fixup:
 #
@@ -193,6 +199,8 @@ class FreevoChannels:
     def getChannel(self):
         return config.TV_CHANNELS[self.chan_index][2]
 
+    def getManChannel(self,channel=0):
+        return config.TV_CHANNELS[(channel-1) % len(config.TV_CHANNELS)][2]
 
     def getNextChannel(self):
         return config.TV_CHANNELS[(self.chan_index+1) % len(config.TV_CHANNELS)][2]

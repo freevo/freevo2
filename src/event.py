@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2004/02/05 14:23:49  outlyer
+# Patch from Viggo Fredriksen
+#
+# o Move to ChildApp2 for mplayer TV plugin
+# o Channel changing via the number pad on the remote
+#
 # Revision 1.37  2004/01/15 21:15:28  outlyer
 # Fixed to use proper audio context buttons.
 #
@@ -350,7 +356,16 @@ TV_EVENTS = {
     'DISPLAY'   : TOGGLE_OSD,
     'VOL+'      : MIXER_VOLUP,
     'VOL-'      : MIXER_VOLDOWN,
-    'MUTE'      : MIXER_MUTE
+    'MUTE'      : MIXER_MUTE,
+    '1'         : INPUT_1,
+    '2'         : INPUT_2,
+    '3'         : INPUT_3,
+    '4'         : INPUT_4,
+    '5'         : INPUT_5,
+    '6'         : INPUT_6,
+    '7'         : INPUT_7,
+    '8'         : INPUT_8,
+    '9'         : INPUT_9,
     }
 
 VIDEO_EVENTS = {
