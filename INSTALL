@@ -8,7 +8,21 @@ WARNING: The framebuffer code can render the console unusuable if set up
          incorrectly! Do not attempt if you cannot login from another
          computer on the network!
 
+Quickstart (X11 version)
+------------------------
+o Download Freevo, preferably from CVS
+o Download and install the following dependencies (see below for details):
+  o freetype2, libpng, libz, Python >=2.1, PyXML, PIL, Python Checksum lib
+o Update freevo_config.py to suit your system (optional)
+o This will check the dependencies and make the X11 version:
+  o python install.py x11
+o Run Freevo:
+  o ./freevo
+  o You must use the remote control xterm window for keyboard input!
 
+
+Detailed instructions
+---------------------
 o Recompile the Linux kernel (>=2.4.13). It is assumed that all options 
   are compiled in statically. If they're compiled as modules instead you
   have to make sure that they're loaded before Freevo.
@@ -46,7 +60,7 @@ o Compile Freevo
       o cd PyXML-0.7.1
       o python setup.py build
       o (as root): python setup.py install
-  o Python Imaging Library (Tested with 1.1.3)
+  o PIL, Python Imaging Library (Tested with 1.1.3)
     o http://www.pythonware.com/downloads/Imaging-1.1.3.tar.gz
       o Installation should use the following method, not from the BUILDME:
       o tar xvzf Imaging-1.1.3.tar.gz
