@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.86  2003/10/27 20:38:30  dischi
+# cleaner shutdown
+#
 # Revision 1.85  2003/10/23 17:58:14  dischi
 # kill/stop threads before exit
 #
@@ -124,10 +127,16 @@ osd = osd.get_singleton()
 menuwidget = menu.get_singleton()
 
 
-def shutdown(menuw=None, arg=None, allow_sys_shutdown=1):
+def shutdown(menuw=None, arg=None, allow_sys_shutdown=True, exit=False):
     """
     function to shut down freevo or the whole system
     """
+
+    if not osd.active:
+        # this function is called from the signal handler, but
+        # we are dead already.
+        sys.exit(0)
+
     import plugin
     import childapp
     osd.clearscreen(color=osd.COL_BLACK)
@@ -178,15 +187,9 @@ def shutdown(menuw=None, arg=None, allow_sys_shutdown=1):
     osd.clearscreen(color=osd.COL_BLACK)
     osd.shutdown()
 
-    for t in traceback.extract_stack():
-        if t[2].find('signal_handler') == 0:
-            import threading
-            for th in threading.enumerate():
-                if hasattr(th, 'kill'):
-                    th.kill()
-                elif th.getName() != 'MainThread' and hasattr(th, '_Thread__stop'):
-                    th._Thread__stop()
-            sys.exit(0)
+    if exit:
+        # realy exit, we are called by the signal handler
+        sys.exit(0)
 
     os.system('%s stop' % os.environ['FREEVO_SCRIPT'])
 
@@ -272,9 +275,8 @@ class MainMenu(Item):
     
 
 def signal_handler(sig, frame):
-    import plugin
     if sig in (signal.SIGTERM, signal.SIGINT):
-        shutdown(allow_sys_shutdown=0)
+        shutdown(allow_sys_shutdown=0, exit=True)
 
 #
 # Main init
