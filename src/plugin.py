@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.67  2004/06/24 14:56:19  dischi
+# make it possible to put a subplugin into main
+#
 # Revision 1.66  2004/06/07 16:10:45  rshortt
 # Change 'RECORD' to plugin.RECORD.
 #
@@ -643,7 +646,9 @@ def __load_plugin__(name, type, level, args, number):
         if type:
             special = type
 
-        if special:
+        if special == 'main':
+            special = ''
+        elif special:
             special = '_%s' % special
         else:
             special = ''
