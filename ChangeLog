@@ -11,6 +11,7 @@ Release 1.3.2 (TBD):
   * detach plugin to listen to music in the background
   * IMDB search and XML generation plugin
   * Album cover search plugin
+  * IMDB Info plugin
  * New skin engine
  * Reactivated and fixed GUI code
  * Bugfixes
@@ -22,6 +23,11 @@ Release 1.3.2 (TBD):
  * Daylight Saving Time fixes
  * Shout/Icecast playback/bookmarks
  * Preliminary TV Recording schedule editor
+ * Major cleanup of old files in the source tree
+  * Converted some very large PNG files into high quality JPEGs
+  * Removed obsolete data
+
+
 	
 
 Release 1.3.2-pre2
