@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.87  2004/12/30 11:31:51  dischi
+# rename id to __id__
+#
 # Revision 1.86  2004/12/28 18:09:58  dischi
 # add extra Action class for item actions
 #
@@ -286,7 +289,7 @@ class Item:
             log.warning('unable to delete info for that kind of item')
 
         
-    def id(self):
+    def __id__(self):
         """
         Return a unique id of the item. This id should be the same when the
         item is rebuild later with the same informations

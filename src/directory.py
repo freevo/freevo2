@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.146  2004/12/30 11:31:51  dischi
+# rename id to __id__
+#
 # Revision 1.145  2004/11/20 18:22:59  dischi
 # use python logger module for debug
 #
@@ -571,7 +574,7 @@ class DirItem(Playlist):
                 selected_pos = -1
             else:
                 # store the current selected item
-                selected_id  = self.menu.selected.id()
+                selected_id  = self.menu.selected.__id__()
                 selected_pos = self.menu.choices.index(self.menu.selected)
             if hasattr(self.menu, 'skin_default_has_description'):
                 del self.menu.skin_default_has_description
@@ -744,7 +747,7 @@ class DirItem(Playlist):
             if selected_pos != -1:
                 # we had a selection before, try to find it again
                 for i in items:
-                    if Unicode(i.id()) == Unicode(selected_id):
+                    if Unicode(i.__id__()) == Unicode(selected_id):
                         self.menu.set_selection(i)
                         break
                 else:
