@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/11/15 17:24:31  dischi
+# i18n patches from Davin Sagnol
+#
 # Revision 1.21  2003/10/22 02:45:02  rshortt
 # Fix a crash when no recordserver is available.
 #
@@ -151,19 +154,19 @@ class ProgramDisplay(PopupBox):
             desc.set_font(font=self.font.name, size=self.font.size -2,
                           color=self.font.color)
 
-        chan = Label('Channel:  %s' % \
+        chan = Label(_('Channel:  %s') % \
                       tv_util.get_chan_displayname(self.prog.channel_id), 
                                                    self, Align.LEFT)
         chan.set_font(font=self.font.name, size=self.font.size -2,
                       color=self.font.color)
 
-        start = Label('Start:  %s' % time.strftime(config.TV_DATETIMEFORMAT, 
+        start = Label(_('Start:  %s') % time.strftime(config.TV_DATETIMEFORMAT, 
                                       time.localtime(self.prog.start)),
                                       self, Align.LEFT)
         start.set_font(font=self.font.name, size=self.font.size -2,
                        color=self.font.color)
 
-        stop = Label('Stop:  %s' % time.strftime(config.TV_DATETIMEFORMAT, 
+        stop = Label(_('Stop:  %s') % time.strftime(config.TV_DATETIMEFORMAT, 
                                      time.localtime(self.prog.stop)), 
                                      self, Align.LEFT)
         stop.set_font(font=self.font.name, size=self.font.size -2,
@@ -173,17 +176,17 @@ class ProgramDisplay(PopupBox):
                        (4 *self.v_spacing)
 
         if self.context == 'guide':
-            self.b0 = Button('Record', width=(width-60)/2)
+            self.b0 = Button(_('Record'), width=(width-60)/2)
             # self.options.add_item(text='Search for more of this program', value=2)
             # self.options.add_item(text='Add "%s" to favorites' % prog.title, value=3)
         else:
-            self.b0 = Button('Remove', width=(width-60)/2)
+            self.b0 = Button(_('Remove'), width=(width-60)/2)
 
         self.b0.set_h_align(Align.CENTER)
         self.add_child(self.b0)
         self.b0.toggle_selected()
         
-        self.b1 = Button('CANCEL', width=(width-60)/2)
+        self.b1 = Button(_('CANCEL'), width=(width-60)/2)
         self.b1.set_h_align(Align.CENTER)
         self.add_child(self.b1)
 
@@ -203,7 +206,7 @@ class ProgramDisplay(PopupBox):
             self.top  = self.osd.height/2 - self.height/2
 
     def eventhandler(self, event, menuw=None):
-        if DEBUG: print 'ProgramDisplay: event = %s' % event
+        if DEBUG: print _('ProgramDisplay: event = %s') % event
 
         trapped = em.MENU_EVENTS.values()
 
@@ -233,11 +236,11 @@ class ProgramDisplay(PopupBox):
                 (result, msg) = record_client.scheduleRecording(self.prog)
                 if result:
                     AlertBox(parent=self, 
-                             text='"%s" has been scheduled for recording' % \
+                             text=_('"%s" has been scheduled for recording') % \
                               self.prog.title, handler=self.destroy).show()
                 else:
                     AlertBox(parent=self, 
-                             text='Scheduling Failed: %s' % msg).show()
+                             text=_('Scheduling Failed: %s') % msg).show()
 
             # XXX: search for other programs like this
             elif 0:
@@ -280,7 +283,7 @@ class ProgramDisplay(PopupBox):
 
                 else:
                     AlertBox(parent=self, 
-                             text='Remove Failed: %s' % msg).show()
+                             text=_('Remove Failed: %s') % msg).show()
 
             elif self.b1.selected:
                 self.destroy()
@@ -315,7 +318,7 @@ class ScheduledRecordings(PopupBox):
                  bd_width=None, vertical_expansion=1):
 
         if not text:
-            text = 'Scheduled Recordings'
+            text = _('Scheduled Recordings')
         
         PopupBox.__init__(self, parent, text, handler, left, top, width, height, 
                           bg_color, fg_color, icon, border, bd_color, bd_width,
@@ -325,7 +328,7 @@ class ScheduledRecordings(PopupBox):
 
         (self.server_available, msg) = record_client.connectionTest()
         if not self.server_available:
-            errormsg = Label('Record server unavailable: %s' % msg,
+            errormsg = Label(_('Record server unavailable: %s') % msg,
                              self, Align.CENTER)
             return
 
@@ -350,7 +353,7 @@ class ScheduledRecordings(PopupBox):
         if self.result:
             progs = recordings.getProgramList()
         else:
-            errormsg = Label('Get recordings failed: %s' % recordings, 
+            errormsg = Label(_('Get recordings failed: %s') % recordings, 
                              self, Align.CENTER)
             return 
 
