@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2003/12/07 19:40:30  dischi
+# convert OVERSCAN variable names
+#
 # Revision 1.45  2003/12/06 16:25:45  dischi
 # support for type=url and <playlist> and <player>
 #
@@ -490,8 +493,8 @@ class MPlayerApp(childapp.ChildApp):
                 if line.find('Connecting to server') == 0:
                     line = 'Connecting to server'
                 self.osd.clearscreen(self.osd.COL_BLACK)
-                self.osd.drawstringframed(line, config.OVERSCAN_X+10, config.OVERSCAN_Y+10,
-                                          self.osd.width - 2 * (config.OVERSCAN_X+10), -1,
+                self.osd.drawstringframed(line, config.OSD_OVERSCAN_X+10, config.OSD_OVERSCAN_Y+10,
+                                          self.osd.width - 2 * (config.OSD_OVERSCAN_X+10), -1,
                                           self.osdfont, self.osd.COL_WHITE)
                 self.osd.update()
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/12/07 19:40:30  dischi
+# convert OVERSCAN variable names
+#
 # Revision 1.5  2003/12/03 21:52:08  dischi
 # rename some skin function calls
 #
@@ -146,7 +149,7 @@ class PluginInterface(plugin.Plugin):
         """
         _debug_('show osd')
 
-        height = config.OSD_OVERSCAN_Y + 60
+        height = config.OSD_OSD_OVERSCAN_Y + 60
         if not skin.get_singleton().settings.images.has_key('background'):
             _debug_('no background')
             return
@@ -163,17 +166,17 @@ class PluginInterface(plugin.Plugin):
         clock_font  = skin.get_singleton().get_font('clock')
         clock_width = clock_font.font.stringsize(clock)
         
-        self.bmovl.drawstringframed(clock, self.bmovl.width-config.OVERSCAN_X-10-clock_width,
-                                    config.OVERSCAN_Y+10, clock_width, -1,
+        self.bmovl.drawstringframed(clock, self.bmovl.width-config.OSD_OVERSCAN_X-10-clock_width,
+                                    config.OSD_OVERSCAN_Y+10, clock_width, -1,
                                     clock_font.font, clock_font.color)
 
         self.bmovl.update((0, 0, self.bmovl.width, height))
 
         # bar at the bottom
         height += 40
-        x0      = config.OVERSCAN_X+10
+        x0      = config.OSD_OVERSCAN_X+10
         y0      = self.bmovl.height + 5 - height
-        width   = self.bmovl.width - 2 * config.OSD_OVERSCAN_X
+        width   = self.bmovl.width - 2 * config.OSD_OSD_OVERSCAN_X
         
         self.bmovl.drawbox(0, self.bmovl.height + 1 - height, self.bmovl.width,
                            self.bmovl.height + 1 - height, width=1, color=0x000000)

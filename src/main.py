@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.98  2003/12/07 19:40:30  dischi
+# convert OVERSCAN variable names
+#
 # Revision 1.97  2003/12/07 15:42:20  dischi
 # cleanup
 #
@@ -417,7 +420,7 @@ def main_func():
                                               'could cause more errors until you restart '\
                                               'Freevo.\n\nLogfile: %s\n\n') % \
                                        (event, sys.stdout.logfile),
-                                       width=osd.width-2*config.OVERSCAN_X-50)
+                                       width=osd.width-2*config.OSD_OVERSCAN_X-50)
                         pop.show()
                     else:
                         raise 

@@ -132,7 +132,7 @@ LOCAL_CONF_CHANGES = [
      '''Added MPLAYER_ARGS_AUDIOCD for audio cd playback settings.'''),
     (3.0,
      '''New skin engine. The new engine has no automatic TV overscan support,
-     you need to set OVERSCAN_X and OVERSCAN_Y. There are also new variables
+     you need to set OSD_OVERSCAN_X and OSD_OVERSCAN_Y. There are also new variables
      for this engine: MAIN_MENU_ITEMS and FORCE_SKIN_LAYOUT. The games menu
      will be activated automaticly if setup.py found mame or snes'''),
     (3.1,
