@@ -1,18 +1,18 @@
-# ----------------------------------------------------------------------
+#if 0
+# -----------------------------------------------------------------------
 # mplayer.py - the Freevo MPlayer module. 
-# ----------------------------------------------------------------------
+# -----------------------------------------------------------------------
 # $Id$
 #
-# Authors:     Krister Lagerstrom <krister@kmlager.com>
-#              Aubin Paul <aubin@punknews.org>
-#              Dirk Meyer <dischi@tzi.de>
-#              Thomas Malt <thomas@malt.no>
-# Notes:
-# Todo:        * Add support for Ogg-Vorbis
-#              * Start using mplayer as audio player.
+# Notes:    
+# Todo:     
 #
-# ----------------------------------------------------------------------
+# -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2002/08/03 18:15:22  dischi
+# o added the patch from Thomas Malt for better audio control
+# o added support for the new freevo_config.py file
+#
 # Revision 1.17  2002/07/31 08:13:22  dischi
 # make screen black before mplayer starts in case mplayer doesn't cover
 # the hole screen
@@ -27,9 +27,11 @@
 # o This change includes Ogg Support, but that requires the ogg.vorbis
 #   module. If you don't want it, just don't install ogg.vorbis :)
 #
-# ----------------------------------------------------------------------
-# 
-# Copyright (C) 2002 Krister Lagerstrom
+#
+# -----------------------------------------------------------------------
+# Freevo - A Home Theater PC framework
+# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -45,8 +47,9 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------
-#
+# -----------------------------------------------------------------------
+#endif
+
 
 import sys
 import random
@@ -110,10 +113,14 @@ class MPlayer:
             # XXX probably be put at start of the function.
             return 0
         
+        # build mplayer comand
+        mpl = config.MPLAYER_CMD + ' -vo ' + config.MPLAYER_VO_DEV + ' -ao ' + \
+              config.MPLAYER_AO_DEV + ' ' + config.MPLAYER_ARGS_DEF
+
         if mode == 'video':
 
             # Mplayer command and standard arguments
-            mpl = config.MPLAYER_CMD + ' ' + config.MPLAYER_ARGS_MPG
+            mpl += (' ' + config.MPLAYER_ARGS_MPG)
             
             # Add special arguments for the hole playlist from the
             # XML file
@@ -132,29 +139,46 @@ class MPlayer:
                 
             command = mpl + ' "' + filename + '"'
             
+
         elif mode == 'dvdnav':
-            command = config.MPLAYER_CMD + ' ' + config.MPLAYER_ARGS_DVDNAV
+            mpl += (' ' + config.MPLAYER_ARGS_DVDNAV)
+            command = mpl
+
 
         elif mode == 'vcd':
-            mpl = config.MPLAYER_CMD + ' ' + config.MPLAYER_ARGS_VCD
+            mpl += (' ' + config.MPLAYER_ARGS_VCD + ' -alang ' + config.DVD_LANG_PREF)
+            if config.DVD_SUBTITLE_PREF:
+                mpl += (' -slang ' + config.DVD_SUBTITLE_PREF)
             command = mpl % filename  # Filename is VCD chapter
 
-        # XXX Code to make mplayer play our audio aswell.
+
         elif mode == 'audio':
-            mpl = config.MPLAYER_CMD 
             command = mpl + ' "' + filename + '"'
 
+
         else:
-            mpl = config.MPLAYER_CMD + ' ' + config.MPLAYER_ARGS_DVD
+            mpl += (' ' + config.MPLAYER_ARGS_DVD + ' -alang ' + config.DVD_LANG_PREF)
+            if config.DVD_SUBTITLE_PREF:
+                mpl += (' -slang ' + config.DVD_SUBTITLE_PREF)
             command = mpl % filename  # Filename is DVD chapter
             
+
+
         self.filename = filename
         self.playlist = playlist
 
-        # XXX Remember to do stuff for selecting major audio device.
-        mixer.setPcmVolume(100)
-        mixer.setLineinVolume(0)
-        mixer.setMicVolume(0)
+        # XXX A better place for the major part of this code would be
+        # XXX mixer.py
+        if config.CONTROL_ALL_AUDIO:
+            mixer.setLineinVolume( 0 )
+            mixer.setMicVolume( 0 )
+            if( config.MAJOR_AUDIO_CTRL == 'VOL' ):
+                mixer.setPcmVolume( 100 )
+            elif( config.MAJOR_AUDIO_CTRL == 'PCM' ):
+                mixer.setMainVolume( 100 )
+                
+        mixer.setIgainVolume( 0 ) # SB Live input from TV Card.
+        # This should _really_ be set to zero when playing other audio.
 
         if mode == 'audio':
             self.thread.audioinfo = audioinfo.AudioInfo( filename, 1 )
@@ -175,6 +199,7 @@ class MPlayer:
         rc.app = self.eventhandler
         
     def stop(self):
+        # self.thread.audioinfo = None
         self.thread.mode = 'stop'
         self.thread.mode_flag.set()
         while self.thread.mode == 'stop':
@@ -305,8 +330,8 @@ class MPlayer_Thread(threading.Thread):
                 while self.mode == 'play' and self.app.isAlive():
                     # if DEBUG: print "Still running..."
                     if self.audioinfo: 
-                        # if DEBUG: print "Got Audioinfo"
-                        self.audioinfo.draw()        
+                        if not self.audioinfo.pause:
+                            self.audioinfo.draw()        
                     time.sleep(0.1)
 
                 self.app.kill()
