@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2003/08/21 15:27:17  outlyer
+# Sorry! Left this commented out... was part of my testing.
+#
 # Revision 1.41  2003/08/21 02:45:49  outlyer
 # Another pure Python version of a system call. Soon all the os.system calls
 # (except the user-specified ones) will be gone, I hope.
@@ -88,7 +91,7 @@ import copy
 import cPickle, pickle # pickle because sometimes cPickle doesn't work
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
-#import config
+import config
 
 # http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/52560
 def unique(s):
