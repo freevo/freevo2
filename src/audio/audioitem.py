@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/02/20 02:39:11  krister
+# Do not scan for cover images if the file is on URL form (e.g. for CDDA tracks)
+#
 # Revision 1.14  2003/02/19 07:16:11  krister
 # Matthieu Weber's patch for smart music cover search, modified the logic slightly.
 #
@@ -189,7 +192,7 @@ class AudioItem(Item):
 
         # Let's try to find if there is any image in the current directory
         # that could be used as a cover
-        if not self.image:
+        if not self.image and not file.find('://') != -1:
             images = ()
             covers = ()
             files =()
