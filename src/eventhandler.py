@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/10/06 19:18:34  dischi
+# doc update
+#
 # Revision 1.13  2004/09/29 18:27:30  dischi
 # turn off some debug
 #
@@ -352,22 +355,25 @@ class Eventhandler:
         try:
             used = False
             if str(event) in self.registered:
-                # event is in the list of registered events. This events are special
-                # and should go to the callbacks registered. If at least one of them
-                # uses the event (returns True), do not send this event in the event
-                # queue (e.g. the detach plugin needs PLAY_END, but will only use
-                # it for the audio end and this should not go to the video player)
+                # event is in the list of registered events. This
+                # events are special and should go to the callbacks
+                # registered. If at least one of them uses the event
+                # (returns True), do not send this event in the event
+                # queue (e.g. the detach plugin needs PLAY_END, but
+                # will only use it for the audio end and this should
+                # not go to the video player)
                 for c in self.registered[str(event)]:
                     used = c.eventhandler(event=event) or used
 
             if event == FUNCTION_CALL:
-                # event is a direct function call, call it and do not pass it
-                # on the the normal handling
+                # event is a direct function call, call it and do not
+                # pass it on the the normal handling
                 event.arg()
 
             elif event.handler:
-                # event has it's own handler function, call this function and do
-                # not pass it on the the normal handling
+                # event has it's own handler function, call this
+                # function and do not pass it on the the normal
+                # handling
                 event.handler(event=event)
 
             elif used:
@@ -381,7 +387,8 @@ class Eventhandler:
             elif not self.applications[-1].eventhandler(event=event):
                 # pass event to the current application
                 for p in self.eventhandler_plugins:
-                    # pass it to all plugins when the application didn't use it
+                    # pass it to all plugins when the application
+                    # didn't use it
                     if p.eventhandler(event=event):
                         break
                 else:
@@ -395,9 +402,9 @@ class Eventhandler:
                 self.set_focus()
             elif self.applications[-1]._evt_stopped or \
                      not self.applications[-1].visible:
-                # the current application wants to be removed, either because
-                # stop() is called or the hide() function was called from the
-                # event handling
+                # the current application wants to be removed, either
+                # because stop() is called or the hide() function was
+                # called from the event handling
                 previous, current = self.applications[-2:]
                 self.applications.remove(current)
                 self.stack_change = current, previous
