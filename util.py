@@ -9,7 +9,7 @@ import sys
 import socket, glob
 import random
 import termios, tty, time, os
-import string, popen2, fcntl, select, struct, fnmatch
+import string, popen2, fcntl, select, struct, fnmatch,re
 import time
 import threading
 import fcntl
@@ -156,33 +156,57 @@ def recursefolders(root, recurse=0, pattern='*', return_folders=0):
 	return result
 
 
+PROC_MOUNT_REGEXP = re.compile("^([^ ]*) ([^ ]*) .*$").match
+def proc_mount(dir):
+    f = open('/proc/mounts')
+    l = f.readline()
+    while(l):
+        m = PROC_MOUNT_REGEXP(l)
+        if m:
+            if m.group(2) == dir:
+                f.close()
+                return m.group(1).encode()
+        l = f.readline()
+    f.close()
+    return None
 
+LABEL_REGEXP = re.compile("^(.*[^ ]) *$").match
 
+def identifymedia(dir):
+    mediatypes = [('VCD','/mpegav/'), ('SVCD','/SVCD/'), ('DVD','/video_ts/') ]
 
-def identifymedia(device):
-	default_image = 'icons/dvd.png'
-	mediatypes = [('VCD','/mpegav/','icons/dvd.png'),
-                      ('SVCD','/SVCD/','icons/dvd.png'),
-                      ('DVD','/video_ts/','icons/dvd.png') ]
+    device = proc_mount(dir)
+    if device:
+        img = open(device)
+        img.seek(0x0000832d)
+        id = img.read(16)
+        img.seek(32808, 0)
+        label = img.read(32)
+        m = LABEL_REGEXP(label)
+        if m:
+            label = m.group(1)
+        img.close()
+    else:
+        return None, None, None
+    
+    for media in mediatypes:
+        if os.path.exists(dir + media[1]):
+                return media[0],id,label
 
-	for media in mediatypes:
-            if os.path.exists(device + media[1]): return media[0],media[2]
+    mplayer_files = match_files(dir, config.SUFFIX_MPLAYER_FILES)
+    mp3_files = match_files(dir, config.SUFFIX_MPG123_FILES)
+    image_files = match_files(dir, config.SUFFIX_IMAGE_FILES)
+    
+    if mplayer_files and not mp3_files:
+        return "DIVX", id, label
+    if not mplayer_files and mp3_files:
+        return "MP3" , id, label
+    if not mplayer_files and not mp3_files and image_files:
+        return "IMAGE", id, label
+    
+    if mplayer_files or image_files or mp3_files:
+        return "DATA", id, label
 
-	mplayer_files = match_files(device, config.SUFFIX_MPLAYER_FILES)
-	mp3_files = match_files(device, config.SUFFIX_MPG123_FILES)
-	image_files = match_files(device, config.SUFFIX_IMAGE_FILES)
-
-        # XXX maybe also return the cd label
-	if mplayer_files and not mp3_files:
-            return "DivX CD", default_image
-	if not mplayer_files and mp3_files:
-            return "MP3 CD" , default_image
-	if not mplayer_files and not mp3_files and image_files:
-            return "Image Library", default_image
-
-        if mplayer_files or image_files or mp3_files:
-            return "Data CD", default_image
-
-        return "No CD", default_image
+    return "AUDIO", id, label
 
 
