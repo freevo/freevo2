@@ -9,11 +9,17 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/02/04 18:37:14  dischi
+# Major skin bugfix. The rectange calc was wrong. Before this cahnge you
+# needed to draw from -3 to max+6 for a 3 pixel border around the item.
+# This is stupid, max is the item width/height. So now it's max+3, same
+# value as on the other side. This changes fix some problems when
+# an item doesn't fit in it's own height anymore.
+# Changed is the complete skin code and all skins. But some skins may
+# depend on that error, so maybe they need more fixes in the future.
+#
 # Revision 1.4  2003/12/06 13:43:03  dischi
 # more cleanup
-#
-# Revision 1.3  2003/09/14 20:09:37  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -94,7 +100,7 @@ class View_Area(Skin_Area):
 
         
         if val.rectangle:
-            x, y, r = self.get_item_rectangle(val.rectangle, width, height)
+            r = self.get_item_rectangle(val.rectangle, width, height)[2]
 
             if r.x < 0:
                 x0 -= r.x

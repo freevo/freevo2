@@ -27,6 +27,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2004/02/04 18:37:14  dischi
+# Major skin bugfix. The rectange calc was wrong. Before this cahnge you
+# needed to draw from -3 to max+6 for a 3 pixel border around the item.
+# This is stupid, max is the item width/height. So now it's max+3, same
+# value as on the other side. This changes fix some problems when
+# an item doesn't fit in it's own height anymore.
+# Changed is the complete skin code and all skins. But some skins may
+# depend on that error, so maybe they need more fixes in the future.
+#
 # Revision 1.28  2004/02/01 17:03:57  dischi
 # speedup
 #
@@ -44,46 +53,6 @@
 #
 # Revision 1.23  2004/01/01 12:25:48  dischi
 # use pickle to cache the large background images
-#
-# Revision 1.22  2003/12/14 17:39:52  dischi
-# Change TRUE and FALSE to True and False; vfs fixes
-#
-# Revision 1.21  2003/12/14 17:04:40  dischi
-# move SkinObjects to screen.py
-#
-# Revision 1.20  2003/12/06 13:43:02  dischi
-# more cleanup
-#
-# Revision 1.19  2003/12/05 18:07:55  dischi
-# renaming of XML_xxx variables to Xxx
-#
-# Revision 1.18  2003/12/05 17:30:17  dischi
-# some cleanup
-#
-# Revision 1.17  2003/12/04 21:49:18  dischi
-# o remove BlankScreen and the Splashscreen
-# o make it possible to register objects as areas
-#
-# Revision 1.16  2003/12/03 21:50:44  dischi
-# rework of the loading/selecting
-# o all objects that need a skin need to register what they areas they need
-# o remove all 'player' and 'tv' stuff to make it more generic
-# o renamed some skin function names
-#
-# Revision 1.15  2003/11/29 11:27:41  dischi
-# move objectcache to util
-#
-# Revision 1.14  2003/11/28 20:08:58  dischi
-# renamed some config variables
-#
-# Revision 1.13  2003/11/22 12:02:12  dischi
-# make the skin blankscreen a real plugin area
-#
-# Revision 1.12  2003/10/28 17:54:12  dischi
-# take icons from theme if available
-#
-# Revision 1.11  2003/10/17 18:51:33  dischi
-# check for default with description area
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -446,56 +415,42 @@ class Skin_Area:
         return object
 
         
-    def get_item_rectangle(self, rectangle, item_w, item_h, font_h=0):
+    def get_item_rectangle(self, rectangle, item_w, item_h):
         """
-        calculates the values for a rectangle inside the item tag
+        calculates the values for a rectangle to fit item_w and item_h
+        inside it.
         """
         r = copy.copy(rectangle)
 
+        # get the x and y value, based on MAX
+        if isinstance(r.x, str):
+            r.x = int(eval(r.x, {'MAX':item_w}))
+        if isinstance(r.y, str):
+            r.y = int(eval(r.y, {'MAX':item_h}))
+
+        # correct item_w and item_h to fit the rect for negative values
+        if r.x < 0:
+            item_w -= r.x
+        if r.y < 0:
+            item_h -= r.y
+
+        # set rect width and height to something
         if not r.width:
             r.width = item_w
 
         if not r.height:
             r.height = item_h
 
-        if isinstance(r.x, str):
-            r.x = int(eval(r.x, {'MAX':item_w}))
+        # calc width and height based on MAX settings
         if isinstance(r.width, str):
             r.width = int(eval(r.width, {'MAX':item_w}))
-            
-        if isinstance(r.y, str):
-            r.y = int(eval(r.y, {'MAX':item_h}))
+
         if isinstance(r.height, str):
             r.height = int(eval(r.height, {'MAX':item_h}))
-            
-        if r.x < 0:
-            item_w -= r.x
 
-        if r.y < 0:
-            item_h -= r.y
-
+        # return needed width and height to fit original width and height
+        # and the rectangle attributes
         return max(item_w, r.width), max(item_h, r.height), r
-    
-
-    def fit_item_in_rectangle(self, rectangle, width, height):
-        """
-        calculates the rectangle geometry and fits it into the area
-        """
-        x = 0
-        y = 0
-        r = self.get_item_rectangle(rectangle, width, height)[2]
-        if r.width > width:
-            r.width, width = width, width - (r.width - width)
-        if r.height > height:
-            r.height, height = height, height - (r.height - height)
-        if r.x < 0:
-            r.x, x = 0, -r.x
-            width -= x
-        if r.y < 0:
-            r.y, y = 0, -r.y
-            height -= y
-
-        return Geometry(x, y, width, height), r
     
 
     def init_vars(self, settings, display_type, widget_type = 'menu'):

@@ -9,6 +9,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2004/02/04 18:37:14  dischi
+# Major skin bugfix. The rectange calc was wrong. Before this cahnge you
+# needed to draw from -3 to max+6 for a 3 pixel border around the item.
+# This is stupid, max is the item width/height. So now it's max+3, same
+# value as on the other side. This changes fix some problems when
+# an item doesn't fit in it's own height anymore.
+# Changed is the complete skin code and all skins. But some skins may
+# depend on that error, so maybe they need more fixes in the future.
+#
 # Revision 1.22  2004/02/01 17:03:58  dischi
 # speedup
 #
@@ -23,36 +32,6 @@
 #
 # Revision 1.18  2004/01/10 13:20:21  dischi
 # fix stringsize for tv shows and blurr2
-#
-# Revision 1.17  2004/01/04 18:17:24  dischi
-# fix tv show listing
-#
-# Revision 1.16  2004/01/01 17:41:05  dischi
-# add border support for Font
-#
-# Revision 1.15  2003/12/14 17:39:52  dischi
-# Change TRUE and FALSE to True and False; vfs fixes
-#
-# Revision 1.14  2003/12/06 13:43:02  dischi
-# more cleanup
-#
-# Revision 1.13  2003/10/22 18:45:12  dischi
-# scan for the images without fxd info
-#
-# Revision 1.12  2003/10/22 18:26:09  dischi
-# Changes in the table code of menu items:
-# o use percentage again, pixel sizes are bad because they don't scale
-# o add special handling to avoid hardcoding texts in the skin file
-# o new function for the skin: text_or_icon for this handling
-#
-# Format for this texts inside a table:
-# ICON_<ORIENTATION>_<IMAGE_NAME>_<TEXT IF NO IMAGE IS THERE>
-#
-# Revision 1.11  2003/10/22 03:00:12  gsbarbieri
-# Support icons instead of labels "on", "off" and "auto"
-#
-# Revision 1.10  2003/10/01 18:55:47  dischi
-# add table option to the menu
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -171,7 +150,8 @@ class Listing_Area(Skin_Area):
                 if ct.rectangle:
                     if content.type == 'image+text':
                         rw, rh, r = self.get_item_rectangle(ct.rectangle, ct.width,
-                                                            ct.height, int(ct.font.h * 1.1))
+                                                            max(ct.height,
+                                                                int(ct.font.h * 1.1)))
                     else:
                         rw, rh, r = self.get_item_rectangle(ct.rectangle, ct.width,
                                                             ct.height)
@@ -459,8 +439,8 @@ class Listing_Area(Skin_Area):
 
                 if val.rectangle:
                     if content.type == 'image+text':
-                        r = self.get_item_rectangle(val.rectangle, val.width, rec_h,
-                                                    int(val.font.h * 1.1))[2]
+                        r = self.get_item_rectangle(val.rectangle, val.width,
+                                                    max(rec_h, int(val.font.h * 1.1)))[2]
                     else:
                         r = self.get_item_rectangle(val.rectangle, val.width, rec_h)[2]
                     self.drawroundbox(x0 + r.x, y0 + r.y, r.width, r.height, r)

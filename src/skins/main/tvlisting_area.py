@@ -9,6 +9,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/02/04 18:37:14  dischi
+# Major skin bugfix. The rectange calc was wrong. Before this cahnge you
+# needed to draw from -3 to max+6 for a 3 pixel border around the item.
+# This is stupid, max is the item width/height. So now it's max+3, same
+# value as on the other side. This changes fix some problems when
+# an item doesn't fit in it's own height anymore.
+# Changed is the complete skin code and all skins. But some skins may
+# depend on that error, so maybe they need more fixes in the future.
+#
 # Revision 1.14  2003/12/14 17:39:52  dischi
 # Change TRUE and FALSE to True and False; vfs fixes
 #
@@ -144,6 +153,28 @@ class TVListing_Area(Skin_Area):
         return self.last_items_geometry
     
         
+
+    def fit_item_in_rectangle(self, rectangle, width, height):
+        """
+        calculates the rectangle geometry and fits it into the area
+        """
+        x = 0
+        y = 0
+        r = self.get_item_rectangle(rectangle, width, height)[2]
+        if r.width > width:
+            r.width, width = width, width - (r.width - width)
+        if r.height > height:
+            r.height, height = height, height - (r.height - height)
+        if r.x < 0:
+            r.x, x = 0, -r.x
+            width -= x
+        if r.y < 0:
+            r.y, y = 0, -r.y
+            height -= y
+
+        return Geometry(x, y, width, height), r
+    
+
     def update_content(self):
         """
         update the listing area
@@ -157,10 +188,9 @@ class TVListing_Area(Skin_Area):
         content   = self.calc_geometry(layout.content, copy_object=True)
 
         recordingshows = self.check_schedule()
-        recnow = 0
-        to_listing = menu.table
+        to_listing     = menu.table
 
-        n_cols = len(to_listing[0])-1
+        n_cols   = len(to_listing[0])-1
         col_time = 30
 
         font_h, label_width, label_txt_width, y0, num_rows, item_h, head_h = \
@@ -168,15 +198,14 @@ class TVListing_Area(Skin_Area):
 
         label_val, head_val, selected_val, default_val, scheduled_val = self.all_vals
 
-
-        leftarraw = None
+        leftarrow = None
         if area.images['leftarrow']:
             i = area.images['leftarrow']
             leftarrow = self.loadimage(i.filename, i)
             if leftarrow:
                 leftarrow_size = (leftarrow.get_width(), leftarrow.get_height())
 
-        rightarraw = None
+        rightarrow = None
         if area.images['rightarrow']:
             i = area.images['rightarrow']
             rightarrow = self.loadimage(i.filename, i)
@@ -349,29 +378,35 @@ class TVListing_Area(Skin_Area):
 
                     if x0 > x1:
                         break
-                    
+
+                    # text positions
                     tx0 = x0
                     tx1 = x1
                     ty0 = y0
 
+                    # calc the geometry values
                     ig = Geometry(0, 0, tx1-tx0+1, item_h)
                     if val.rectangle:
                         ig, r = self.fit_item_in_rectangle(val.rectangle, tx1-tx0+1, item_h)
                         self.drawroundbox(tx0+r.x, ty0+r.y, r.width, item_h, r)
-                        
+
+                    # draw left flag and reduce width and add to x0
                     if flag_left:
-                        tx0 += leftarrow_size[0]
+                        tx0      += leftarrow_size[0]
                         ig.width -= leftarrow_size[0]
                         if tx0 < tx1:
                             self.drawimage(leftarrow, (tx0-leftarrow_size[0], ty0 +\
-                                                        (item_h-leftarrow_size[1])/2))
+                                                       (item_h-leftarrow_size[1])/2))
+
+                    # draw right flag and reduce width and x1
                     if flag_right:
-                        tx1 -= rightarrow_size[0]
+                        tx1      -= rightarrow_size[0]
                         ig.width -= rightarrow_size[0]
                         if tx0 < tx1:
-                            self.drawimage(rightarrow, (tx1, ty0 + \
-                                                         (item_h-rightarrow_size[1])/2))
+                            self.drawimage(rightarrow,
+                                           (tx1, ty0 + (item_h-rightarrow_size[1])/2))
 
+                    # draw the text
                     if tx0 < tx1:
                         self.drawstring(prg.title, font, content, x=tx0+ig.x,
                                         y=ty0+ig.y, width=ig.width,
@@ -388,8 +423,7 @@ class TVListing_Area(Skin_Area):
         if menuw.display_down_arrow and area.images['downarrow']:
             if isinstance(area.images['downarrow'].y, str):
                 v = copy.copy(area.images['downarrow'])
-                MAX=y0
-                v.y = eval(v.y)
+                v.y = eval(v.y, {'MAX' : y0})
             else:
                 v = area.images['downarrow']
             self.drawimage(area.images['downarrow'].filename, v)

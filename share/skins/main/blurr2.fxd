@@ -337,7 +337,7 @@
           align="center" valign="center">
 	  <shadow x="5" y="5" color="0xaa000000" visible="yes"/>
           <rectangle color="0x00ffffff" bgcolor="0xffffffffff" size="2" x="-8"
-	    y="-8" width="max+16" height="max+16"/>
+	    y="-8" width="max+8" height="max+8"/>
         </item>
       </content>
     </layout>
@@ -348,7 +348,7 @@
 	<item type="default" font="main"/>
 	<item type="selected" font="main selected">
 	  <rectangle bgcolor="selection" size="0" y="-5" x="-10"
-	    width="max+20" height="max+10" radius="15"/>
+	    width="max+10" height="max+5" radius="15"/>
 	</item>
       </content>
     </layout>
@@ -357,7 +357,7 @@
       <background>
         <rectangle size="0" radius="10" bgcolor="0xaa000000"/>
       </background>
-      <content x="10" y="10" type="text" height="max-20" width="max-20"
+      <content x="10" y="10" type="text" height="max-10" width="max-10"
 	spacing="20" font="default">
         <item type="dir">
         <!-- DES -->
@@ -406,7 +406,7 @@
       <content align="center" valign="middle">
         <item type="default">
 	  <rectangle size="0" bgcolor="0x80000000" radius="8" x="-10" y="-10"
-	    width="max+20" height="max+20"/>
+	    width="max+10" height="max+10"/>
         </item>
       </content>
     </layout>
@@ -417,8 +417,8 @@
       <content type="text" spacing="2">
 	<item type="default" font="grey"/>
 	<item type="selected" font="white">
-	  <rectangle bgcolor="0xaa000000" size="0" x="-10" y="-3" width="max+20"
-	    height="max+6" radius="15"/>
+	  <rectangle bgcolor="0xaa000000" size="0" x="-10" y="-3" width="max+10"
+	    height="max+3" radius="15"/>
 	</item>
       </content>
     </layout>
@@ -430,7 +430,7 @@
 	<item type="default" font="grey big" align="center"/>
 	<item type="selected" font="white big" align="center">
 	  <rectangle bgcolor="0xaa000000" size="0" x="-3" y="-3"
-	    width="max+6" height="max+6" radius="15"/>
+	    width="max+3" height="max+3" radius="15"/>
 	</item>
       </content>
     </layout>
@@ -441,7 +441,7 @@
      <background>
         <rectangle size="0" bgcolor="0x80000000" radius="10" width="max"/>
       </background>
-      <content x="10" y="10" height="max-20" width="max-20" type="text"
+      <content x="10" y="10" height="max-10" width="max-10" type="text"
         spacing="10" font="tv">
         <item type="default">
           <if expression="title">
