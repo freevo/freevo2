@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.67  2002/11/28 04:57:19  gsbarbieri
+# Now do not draw the "selected box" under the icon in DrawMenu_Selection
+#
 # Revision 1.66  2002/11/28 03:45:42  gsbarbieri
 # Changed DrawMenu_Selection to fix a bug and add icon support to items via xml image filed.
 #
@@ -401,6 +404,7 @@ class Skin:
             if menu.selected == choice:
                 image = choice.image
 
+
             # Pick the settings for this kind of item
             valign = 0 # Vertical aligment to the icon
             if choice.type:
@@ -434,17 +438,7 @@ class Skin:
             else:
                 top = y0
 
-            # Draw the selection bar for selected items
-            if menu.selected == choice and obj.visible:
-                drawroundbox(x0 - obj.spacing, top - 2, x0 + obj.spacing + width,
-                                 top + font_h + 2, color = obj.bgcolor,
-                                 radius=obj.radius)
-
-            if not text:
-                print "no text to display ... strange. Use default"
-                text = "unknown"
-
-            # draw icon
+            # icon or image?
             if choice.icon != None:
                 icon = choice.icon
             else:
@@ -452,6 +446,21 @@ class Skin:
             icon_present = 0
             if icon != None and icon != '':
                 icon_present = 1
+
+
+
+            # Draw the selection bar for selected items
+            if menu.selected == choice and obj.visible:
+                drawroundbox(x0 - obj.spacing + icon_present * icon_size * 1.2, top - 2, x0 + obj.spacing + width,
+                                 top + font_h + 2, color = obj.bgcolor,
+                                 radius=obj.radius)
+
+            if not text:
+                print "no text to display ... strange. Use default"
+                text = "unknown"
+
+            # Draw icon
+            if icon_present==1:
                 icon_x = x0
                 icon_y = y0 - (icon_size - font_h) / 2
                 osd.drawbitmap(util.resize(icon, icon_size, icon_size), icon_x,
