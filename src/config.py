@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.103  2004/03/21 10:01:18  dischi
+# FREEVO_LOCALE is used somewhere else
+#
 # Revision 1.102  2004/03/18 15:38:18  dischi
 # Automouter patch to check for hosts in mediamenu from Soenke Schwardt.
 # See doc of VIDEO_ITEMS for details
@@ -880,15 +883,12 @@ if HELPER:
     
 encoding = None
 try:
-    encoding = os.environ[ 'FREEVO_LOCALE' ].split( '.' )[ 1 ]
+    encoding = os.environ[ 'LANG' ].split( '.' )[ 1 ]
 except:
     try:
-        encoding = os.environ[ 'LANG' ].split( '.' )[ 1 ]
+        encoding = os.environ[ 'LC_ALL' ].split( '.' )[ 1 ]
     except:
-        try:
-            encoding = os.environ[ 'LC_ALL' ].split( '.' )[ 1 ]
-        except:
-            encoding = LOCALE
+        encoding = LOCALE
 
 if not encoding:
     encoding = LOCALE
