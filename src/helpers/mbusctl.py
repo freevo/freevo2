@@ -28,8 +28,8 @@ if not freevo:
 
 try:
     if cmd == '-p':
-        print freevo.play(arg)
+        print freevo.call('play', None, arg)
     if cmd == '-s':
-        print freevo.stop()
+        print freevo.stop('stop', None)
 except mcomm.MException, e:
     print e

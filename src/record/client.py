@@ -78,6 +78,21 @@ class Recording:
         return String(self.__unicode__())
 
 
+    def __getitem__(self, key):
+        if hasattr(self, key) and key != 'description':
+            return getattr(self, key)
+        if self.description.has_key(key):
+            return self.description[key]
+        raise AttributeError('no attribute %s in Recording' % key)
+
+
+    def has_key(self, key):
+        if hasattr(self, key) and key != 'description':
+            return True
+        return self.description.has_key(key)
+        
+
+
 class Recordings:
     """
     Handling of recordings from the recordserver. The object will auto sync
@@ -104,23 +119,19 @@ class Recordings:
                entity.matches(mcomm.get_address('recordserver')):
             log.info('recordserver found')
             self.server = entity
-            self.server.recording_list(callback=self.__list_callback)
+            self.server.call('recording.list', self.__list_callback)
 
 
     def __list_callback(self, result):
         if not self.server:
             return
-        try:
-            status, listing = result[0][1:]
-        except ValueError:
+        if result.appResult != 'OK' or not result.appStatus:
+            log.error(str(result.appDescription))
             return
-        if status[0] == 'FAILED' or status[1] != 'OK':
-            log.error(str(status))
-            return
-
+            
         self.last_update = time.time()
         self.__recordings = {}
-        for l in listing:
+        for l in result.arguments:
             self.__recordings['%s-%s-%s' % (l[1], l[3], l[4])] = Recording(*l)
         log.info('got recording list')
         self.__request_description()
@@ -141,13 +152,10 @@ class Recordings:
 
 
     def __describe_callback(self, result):
-        try:
-            status, rec = result[0][1:]
-        except ValueError:
+        if result.appResult != 'OK' or not result.appStatus:
+            log.error(str(result.appDescription))
             return
-        if status[0] == 'FAILED' or status[1] != 'OK':
-            log.error(str(status))
-            return
+        rec = result.arguments
         self.last_update = time.time()
         description = {}
         description['title'] = Unicode(rec[1], 'UTF-8')
@@ -166,8 +174,8 @@ class Recordings:
         for key in self.__recordings:
             if not self.__recordings[key].description:
                 cb = self.__describe_callback
-                self.server.recording_describe(self.__recordings[key].id,
-                                               callback=cb)
+                self.server.call('recording.describe', cb,
+                                 self.__recordings[key].id)
                 return
         log.info('got all recording descriptions')
 
@@ -205,8 +213,9 @@ class Recordings:
         if prog.subtitle:
             info['subtitle'] = prog.subtitle
         try:
-            return self.server.recording_add(prog.title, prog.channel.id, 1000,
-                                             prog.start, prog.stop, info)
+            return self.server.call('recording.add', None, prog.title,
+                                    prog.channel.id, 1000, prog.start,
+                                    prog.stop, info)
         except mcomm.MException, e:
             log.error(e)
             return False, 'Internal server error'
@@ -219,7 +228,7 @@ class Recordings:
         if not self.server:
             return False, 'Recordserver unavailable'
         try:
-            return self.server.recording_remove(id)
+            return self.server.call('recording.remove', None, id)
         except mcomm.MException, e:
             log.error(e)
             return False, 'Internal server error'
@@ -272,23 +281,19 @@ class Favorites:
         if entity.present and \
                entity.matches(mcomm.get_address('recordserver')):
             self.server = entity
-            self.server.favorite_list(callback=self.__list_callback)
+            self.server.call('favorite.list', self.__list_callback)
 
 
     def __list_callback(self, result):
         if not self.server:
             return
-        try:
-            status, listing = result[0][1:]
-        except ValueError:
-            return
-        if status[0] == 'FAILED' or status[1] != 'OK':
-            log.error(str(status))
+        if result.appResult != 'OK' or not result.appStatus:
+            log.error(str(result.appDescription))
             return
 
         self.last_update = time.time()
         self.__favorites = []
-        for l in listing:
+        for l in result.arguments:
             self.__favorites.append(Favorite(*l))
         log.info('got favorite list')
 
@@ -310,8 +315,8 @@ class Favorites:
             else:
                 days = [ 0, 1, 2, 3, 4, 5, 6 ]
 
-            return self.server.favorite_add(prog.title, channel, 50, days,
-                                            [ '00:00-23:59' ], False)
+            return self.server.call('favorite.add', None, prog.title, channel,
+                                    50, days, [ '00:00-23:59' ], False)
         except mcomm.MException, e:
             log.error(e)
             return False, 'Internal server error'

@@ -152,7 +152,7 @@ def main():
         print 'recordserver not running'
         sys.exit(0)
     print 'update favorites'
-    rs.favorite_update()
+    rs.call('favorite.update', None)
 
 
 if __name__ == '__main__':

@@ -173,47 +173,26 @@ class RemoteEntity:
         return mbus.isAddressedTo(addr, self.addr)
 
 
-    def __getattr__(self, attr):
-        """
-        Wrapper function to make it possible to call functions from
-        the remote entity.
-        """
-        if attr in ('has_key', ) or attr.startswith('__'):
-            return getattr(self.addr, attr)
-        self.cmd  = attr.replace('_', '.')
-        return self.__call
-
-
-    def __callback(self, return_list, data = None):
+    def __callback(self, result):
         """
         Internal callback when the function should return the resuls.
         """
-        self.result = return_list
+        self.result = result
 
 
-    def __call(self, *args, **kargs):
+    def call(self, cmd, callback, *args):
         """
-        Internal function to do the real RPC call.
+        Run RPC call with callback
         """
-        if args and callable(args[-1]):
-            callback    = args[-1]
-            cmdargs     = args[:-1]
-            self.result = True
-        elif kargs.has_key('callback'):
-            callback    = kargs['callback']
-            cmdargs     = args
-            self.result = True
-        else:
+        if not callback:
             callback    = self.__callback
-            cmdargs     = args
-            wait        = True
             self.result = None
-        self.mbus_instance.sendRPC(self.addr, 'home-theatre.' + self.cmd,
-                                   _build_args(cmdargs), callback)
-
-        if self.result == True:
+        self.mbus_instance.sendRPC(self.addr, 'home-theatre.' + cmd,
+                                   _build_args(args), callback)
+        if callback != self.__callback:
+            # external callback
             return True
-
+        
         # wait for return
         while not self.result:
             notifier.step(True, False)
@@ -222,18 +201,13 @@ class RemoteEntity:
         if isinstance(self.result, mbus.types.MError):
             raise MException(str(self.result))
 
-        status, args = self.result[0][1:]
-        r = self.result[0][1:]
-        if status[0] == 'FAILED':
-            if status[1] in ('TypeError', ):
-                raise eval(status[1])(status[2])
-            else:
-                raise MException('%s: %s' % (status[1], status[2]))
+        # check for errors / exceptions and raise them
+        if not self.result.appStatus:
+            raise MException(str(self.result.appDescription))
 
         # normal return handling
-        if status[1] == 'OK':
-            return True, args
-        return False, status[2]
+        status = self.result.appResult == 'OK'
+        return status, self.result.arguments
 
 
     def __eq__(self, obj):
@@ -245,6 +219,12 @@ class RemoteEntity:
         return self.addr == obj
 
 
+    def __str__(self):
+        """
+        String function for debug.
+        """
+        return '%s present:%s' % (self.addr, self.present)
+    
 
 class RPCServer:
     """

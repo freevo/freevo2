@@ -232,7 +232,7 @@ class Shutdown:
         for entity in mcomm.instance().entities:
             # ask entity status
             log.info('send status rpc to %s' % entity)
-            entity.status(callback=self.rpcreturn)
+            entity.call('status', self.rpcreturn)
         # set timer for shutdown in 5 seconds
         self.timer = notifier.addTimer(5000, self.check_shutdown)
         return False

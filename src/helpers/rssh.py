@@ -53,7 +53,7 @@ def user_input( socket ):
         print 'record commands:'
         print '  recording.list()'
         print '  recording.describe(id)'
-        print '  recording.add(name, channel, priority, start, stop, optionals)'
+        print '  recording.add(name, channel, priority, start, stop, optional)'
         print '  recording.add(dbid, priority, optionals)'
         print '  recording.remove(id)'
         print
@@ -81,20 +81,15 @@ def user_input( socket ):
             print 
         except Exception, e:
             print e
-    elif input.startswith('recording.'):
-        print '\rcalling rpc'
+    elif input.startswith('recording.') or input.startswith('favorite.'):
         try:
-            status, result = eval('server.recording_%s' % input[10:])
-            if not status:
-                print 'failed'
-            else:
-                print_result(result)
-        except Exception, e:
-            print e
-    elif input.startswith('favorite.'):
-        print '\rcalling rpc'
-        try:
-            status, result = eval('server.favorite_%s' % input[9:])
+            cmd = input[:input.find('(')]
+            arg = eval(input[input.find('('):])
+            if not isinstance(arg, tuple):
+                arg = (arg, )
+            print arg
+            print '\rcalling rpc %s' % cmd
+            status, result = server.call(cmd, None, *arg)
             if not status:
                 print 'failed'
             else:
