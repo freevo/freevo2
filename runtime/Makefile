@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/04/19 19:54:42  rshortt
+# Modifications for a runtime build system.  Still WIP but almost done.
+#
 # Revision 1.11  2003/03/04 05:44:36  krister
 # Added fchksum
 #
@@ -66,6 +69,25 @@
 # ----------------------------------------------------------------------- */
 #endif
 
+include package_list.mk
+
+# If you built the runtime using this Makefile you will most likely wish to
+# change COPY_BASE to the abolute path of this directory.
+COPY_BASE=/usr/local
+
+EXT=
+PACKAGE=
+PACKAGE_GET=
+TAR1="tar zxvf"
+TAR2="tar jxvf"
+
+PREFIX=$(COPY_BASE)/build
+
+CFGFLAGS="--prefix=$(PREFIX)"
+
+PYBIN=$(PREFIX)/bin/python
+LIRCLIB=/opt/lirc/lib
+LIRCINC=/opt/lirc/include
 
 .PHONY: copy build clean src copy_libdeps
 
@@ -82,7 +104,7 @@ all:
 # Python programs in lib/ have their execute flag removed since
 # RPM building chokes on them.
 copy: 	python_copy mplayer_copy mplayer_fonts_copy cdparanoia_copy \
-	lame_copy pygphoto_copy jpegtran_copy build_copy copy_libdeps
+	lame_copy jpegtran_copy copy_libdeps
 	find lib -name "*.so" -exec strip {} \;
 	find dll -name "*.so*" -exec strip {} \;
 	find apps -perm +111 -type f -exec strip {} \;
@@ -125,23 +147,24 @@ copy_libdeps:
 python_copy:
 	@echo Copying python
 	-rm -rf lib
+	-rm -rf tmp
 	-mkdir -p lib
 	-mkdir -p apps
-	cp -a /usr/local/lib/python2.2 lib
+	cp -a $(COPY_BASE)/lib/python2.2 lib
 	find . -name "*.pyo" -exec rm {} \;
 	find . -name "*.pyc" -exec rm {} \;
 	rm -rf lib/python2.2/config
 	rm -rf lib/python2.2/lib-tk
 	rm -rf lib/python2.2/lib-old
 	rm -rf lib/python2.2/test
-	mkdir tmp
+	-mkdir -p tmp
 	cp -a lib/python2.2/site-packages/{CDDB.py,DiscID.py,Numeric,Numeric.pth} tmp
-	cp -a lib/python2.2/site-packages/{PIL,PIL.pth,_xmlplus,_xmms.so,aomodule.so} tmp
-	cp -a lib/python2.2/site-packages/{cdrom.so,mx,ogg,psyco,pygame} tmp
-	cp -a lib/python2.2/site-packages/{xmms.py,pylircmodule.so,fchksum.so} tmp
+	cp -a lib/python2.2/site-packages/{PIL,PIL.pth,_xmlplus,aomodule.so} tmp
+	cp -a lib/python2.2/site-packages/{cdrom.so,mx,ogg,pygame} tmp
+	cp -a lib/python2.2/site-packages/{pylircmodule.so,fchksum.so} tmp
 	rm -rf lib/python2.2/site-packages
 	mv tmp lib/python2.2/site-packages
-	cp -a /usr/local/bin/python2.2 apps/freevo_python
+	cp -a $(COPY_BASE)/bin/python2.2 apps/freevo_python
 
 
 ################################################################################
@@ -152,9 +175,9 @@ python_copy:
 mplayer_copy:
 	@echo Copying mplayer/mencoder
 	-mkdir -p apps/mplayer
-	cp build/mplayer/{mplayer,mencoder} ./apps/mplayer/
-	cp build/mplayer/README ./apps/mplayer/README.mplayer
-	cp build/mplayer/etc/{codecs.conf,input.conf} ./apps/mplayer/
+	cp $(COPY_BASE)/MPlayer/bin/{mplayer,mencoder} ./apps/mplayer/
+	# cp $(COPY_BASE)/MPlayer/bin/README ./apps/mplayer/README.mplayer
+	# cp $(COPY_BASE)/MPlayer/bin/etc/{codecs.conf,input.conf} ./apps/mplayer/
 
 
 ################################################################################
@@ -165,8 +188,8 @@ mplayer_copy:
 mplayer_fonts_copy:
 	@echo Copying mplayer fonts
 	-mkdir -p apps/mplayer/font
-	cp build/mplayer_fonts/font-arial-18-iso-8859-1/* apps/mplayer/font
-	rm apps/mplayer/font/runme
+	# cp $(COPY_BASE)/MPlayer/mplayer_fonts/font-arial-18-iso-8859-1/* apps/mplayer/font
+	# rm apps/mplayer/font/runme
 
 
 ################################################################################
@@ -176,7 +199,7 @@ mplayer_fonts_copy:
 ################################################################################
 cdparanoia_copy:
 	@echo Copying cdparanoia
-	cp -a /usr/local/bin/cdparanoia apps/
+	cp -a $(COPY_BASE)/bin/cdparanoia apps/
 
 
 ################################################################################
@@ -186,18 +209,7 @@ cdparanoia_copy:
 ################################################################################
 lame_copy:
 	@echo Copying lame
-	cp -a /usr/local/bin/lame apps/
-
-
-################################################################################
-#
-# pygphoto. Depends on libgphoto2
-#
-################################################################################
-pygphoto_copy:
-	@echo Copying pygphoto
-	cp -a src/pygphoto.so lib/python2.2/site-packages/
-	chmod ugo+x lib/python2.2/site-packages/pygphoto.so
+	cp -a $(COPY_BASE)/bin/lame apps/
 
 
 ################################################################################
@@ -207,4 +219,505 @@ pygphoto_copy:
 ################################################################################
 jpegtran_copy:
 	@echo Copying jpegtran
-	cp -a /usr/local/bin/jpegtran apps/
+	cp -a $(COPY_BASE)/bin/jpegtran apps/
+
+
+build_all_pkg: get_packageconfig build_libusb build_python build_sdl build_alsa build_aumix build_cddb build_cdparanoia build_egenix build_expat build_freetype build_jpeg build_lame build_libao build_libexif build_libgphoto build_libogg build_libvorbis build_png build_pyogg build_pyvorbis build_pyao build_pyfchksum build_pyimaging build_pylirc build_pynumeric build_pyxml build_pyxmms build_sdlimage build_sdlttf build_smpeg build_sdlmixer build_pygame build_swig build_pygphoto build_vorbistools build_zlib build_mp1e
+
+
+
+build_python: PACKAGE=$(PYTHON)
+build_python: PACKAGE_GET=$(PYTHON_GET)
+build_python: EXT=tgz
+build_python: TAR=$(TAR1)
+build_python: BUILDCMDS=
+build_python: CFG=$(CFGFLAGS)
+build_python:  
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+build_expat: PACKAGE=$(EXPAT)
+build_expat: PACKAGE_GET=$(EXPAT_GET)
+build_expat: EXT=tar.gz
+build_expat: TAR=$(TAR1)
+build_expat: BUILDCMDS=
+build_expat: CFG=$(CFGFLAGS)
+build_expat: 
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+build_mp1e: PACKAGE=$(MP1E)
+build_mp1e: PACKAGE_GET=$(MP1E_GET)
+build_mp1e: EXT=tar.gz
+build_mp1e: TAR=$(TAR1)
+build_mp1e: BUILDCMDS=
+build_mp1e: CFG=$(CFGFLAGS)
+build_mp1e: 
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+build_pyxml: PACKAGE=$(PYXML)
+build_pyxml: PACKAGE_GET=$(PYXML_GET)
+build_pyxml: EXT=tar.gz
+build_pyxml: TAR=$(TAR1)
+build_pyxml: BUILDCMDS="$(PYBIN) setup.py build; $(PYBIN) setup.py install"
+build_pyxml: CFG=$(CFGFLAGS)
+build_pyxml:  
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+build_alsa: PACKAGE=$(ALSA)
+build_alsa: PACKAGE_GET=$(ALSA_GET)
+build_alsa: EXT=tar.bz2
+build_alsa: TAR=$(TAR2)
+build_alsa: BUILDCMDS=
+build_alsa: CFG=$(CFGFLAGS)
+build_alsa: 
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+build_aumix: PACKAGE=$(AUMIX)
+build_aumix: PACKAGE_GET=$(AUMIX_GET)
+build_aumix: EXT=tar.bz2
+build_aumix: TAR=$(TAR2)
+build_aumix: BUILDCMDS=
+build_aumix: CFG="$(CFGFLAGS) --without-ncurses --without-gpm --without-sysmouse --without-gtk --without-gtk1 --disable-nls --with-alsa"
+build_aumix: 
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                aumix-2.8 $(CFG) $(BUILDCMDS)
+
+
+build_cddb: PACKAGE=$(CDDB)
+build_cddb: PACKAGE_GET=$(CDDB_GET)
+build_cddb: EXT=tar.gz
+build_cddb: TAR=$(TAR1)
+build_cddb: BUILDCMDS="$(PYBIN) setup.py build; $(PYBIN) setup.py install"
+build_cddb: CFG=$(CFGFLAGS)
+build_cddb:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                CDDB-1.3 $(CFG) $(BUILDCMDS)
+
+
+build_cdparanoia: PACKAGE=$(CDPARANOIA)
+build_cdparanoia: PACKAGE_GET=$(CDPARANOIA_GET)
+build_cdparanoia: EXT=src.tgz
+build_cdparanoia: TAR=$(TAR1)
+build_cdparanoia: BUILDCMDS=
+build_cdparanoia: CFG=$(CFGFLAGS)
+build_cdparanoia:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+build_egenix: PACKAGE=$(EGENIX)
+build_egenix: PACKAGE_GET=$(EGENIX_GET)
+build_egenix: EXT=tar.gz
+build_egenix: TAR=$(TAR1)
+build_egenix: BUILDCMDS="$(PYBIN) setup.py build; $(PYBIN) setup.py install"
+build_egenix: CFG=$(CFGFLAGS)
+build_egenix:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+build_freetype: PACKAGE=$(FREETYPE)
+build_freetype: PACKAGE_GET=$(FREETYPE_GET)
+build_freetype: EXT=tar.gz
+build_freetype: TAR=$(TAR1)
+build_freetype: BUILDCMDS=
+build_freetype: CFG=$(CFGFLAGS)
+build_freetype:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+build_jpeg: PACKAGE=$(JPEG)
+build_jpeg: PACKAGE_GET=$(JPEG_GET)
+build_jpeg: EXT=tar.gz
+build_jpeg: TAR=$(TAR1)
+build_jpeg: BUILDCMDS=
+build_jpeg: CFG="$(CFGFLAGS) --enable-shared"
+build_jpeg:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                jpeg-6b $(CFG) $(BUILDCMDS)
+
+
+build_lame: PACKAGE=$(LAME)
+build_lame: PACKAGE_GET=$(LAME_GET)
+build_lame: EXT=tar.gz
+build_lame: TAR=$(TAR1)
+build_lame: BUILDCMDS=
+build_lame: CFG=$(CFGFLAGS)
+build_lame:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+build_libao: PACKAGE=$(LIBAO)
+build_libao: PACKAGE_GET=$(LIBAO_GET)
+build_libao: EXT=tar.gz
+build_libao: TAR=$(TAR1)
+build_libao: BUILDCMDS=
+build_libao: CFG=$(CFGFLAGS)
+build_libao:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+build_libexif: PACKAGE=$(LIBEXIF)
+build_libexif: PACKAGE_GET=$(LIBEXIF_GET)
+build_libexif: EXT=tar.gz
+build_libexif: TAR=$(TAR1)
+build_libexif: BUILDCMDS=
+build_libexif: CFG=$(CFGFLAGS)
+build_libexif:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+build_libgphoto: PACKAGE=$(LIBGPHOTO)
+build_libgphoto: PACKAGE_GET=$(LIBGPHOTO_GET)
+build_libgphoto: EXT=tar.gz
+build_libgphoto: TAR=$(TAR1)
+build_libgphoto: BUILDCMDS=
+build_libgphoto: CFG=$(CFGFLAGS)
+build_libgphoto:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+build_libogg: PACKAGE=$(LIBOGG)
+build_libogg: PACKAGE_GET=$(LIBOGG_GET)
+build_libogg: EXT=tar.gz
+build_libogg: TAR=$(TAR1)
+build_libogg: BUILDCMDS=
+build_libogg: CFG=$(CFGFLAGS)
+build_libogg:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+build_libusb: PACKAGE=$(LIBUSB)
+build_libusb: PACKAGE_GET=$(LIBUSB_GET)
+build_libusb: EXT=tar.gz
+build_libusb: TAR=$(TAR1)
+build_libusb: BUILDCMDS=
+build_libusb: CFG=$(CFGFLAGS)
+build_libusb:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+build_libvorbis: PACKAGE=$(LIBVORBIS)
+build_libvorbis: PACKAGE_GET=$(LIBVORBIS_GET)
+build_libvorbis: EXT=tar.gz
+build_libvorbis: TAR=$(TAR1)
+build_libvorbis: BUILDCMDS=
+build_libvorbis: CFG=$(CFGFLAGS)
+build_libvorbis:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+get_packageconfig: PACKAGE=$(PKGCONFIG)
+get_packageconfig: PACKAGE_GET=$(PKGCONFIG_GET)
+get_packageconfig: EXT=tar.gz
+get_packageconfig: TAR=$(TAR1)
+get_packageconfig: BUILDCMDS=
+get_packageconfig: CFG=$(CFGFLAGS)
+get_packageconfig:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+build_png: PACKAGE=$(PNG)
+build_png: PACKAGE_GET=$(PNG_GET)
+build_png: EXT=tar.gz
+build_png: TAR=$(TAR1)
+build_png: BUILDCMDS="cp scripts/makefile.linux Makefile; make prefix=$(PREFIX); make install prefix=$(PREFIX)"
+build_png: CFG=$(CFGFLAGS)
+build_png:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+build_pyao: PACKAGE=$(PYAO)
+build_pyao: PACKAGE_GET=$(PYAO_GET)
+build_pyao: EXT=tar.gz
+build_pyao: TAR=$(TAR1)
+build_pyao: BUILDCMDS="$(PYBIN) config_unix.py; $(PYBIN) setup.py build; $(PYBIN) setup.py install" 
+build_pyao: CFG=$(CFGFLAGS)
+build_pyao:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+build_pyfchksum: PACKAGE=$(PYFCHKSUM)
+build_pyfchksum: PACKAGE_GET=$(PYFCHKSUM_GET)
+build_pyfchksum: EXT=tar.gz
+build_pyfchksum: TAR=$(TAR1)
+build_pyfchksum: BUILDCMDS="$(PYBIN) setup.py build; $(PYBIN) setup.py install" 
+build_pyfchksum: CFG=$(CFGFLAGS)
+build_pyfchksum:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+build_pygame: PACKAGE=$(PYGAME)
+build_pygame: PACKAGE_GET=$(PYGAME_GET)
+build_pygame: EXT=tar.gz
+build_pygame: TAR=$(TAR1)
+build_pygame: BUILDCMDS=
+build_pygame: BUILDCMDS="$(PYBIN) setup.py build; $(PYBIN) setup.py install" 
+build_pygame: CFG=$(CFGFLAGS)
+build_pygame:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+build_pyimaging: PACKAGE=$(PYIMAGING)
+build_pyimaging: PACKAGE_GET=$(PYIMAGING_GET)
+build_pyimaging: EXT=tar.gz
+build_pyimaging: TAR=$(TAR1)
+build_pyimaging: BUILDCMDS="./configure --prefix=$(PREFIX); make; cd ..; $(PYBIN) setup.py build; $(PYBIN) setup.py install;"
+build_pyimaging: CFG=$(CFGFLAGS)
+build_pyimaging:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE)/libImaging $(CFG) $(BUILDCMDS)
+
+
+build_pylirc: PACKAGE=$(PYLIRC)
+build_pylirc: PACKAGE_GET=$(PYLIRC_GET)
+build_pylirc: EXT=tar.gz
+build_pylirc: TAR=$(TAR1)
+build_pylirc: BUILDCMDS="ln -s $(LIRCINC)/lirc .; $(PYBIN) setup.py install; gcc -shared build/temp.linux-i686-2.2/pylircmodule.o -I$(LIRCINC) -L$(LIRCLIB) -llirc_client -o build/lib.linux-i686-2.2/pylircmodule.so; $(PYBIN) setup.py install"
+build_pylirc: CFG=$(CFGFLAGS)
+build_pylirc:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+build_pynumeric: PACKAGE=$(PYNUMERIC)
+build_pynumeric: PACKAGE_GET=$(PYNUMERIC_GET)
+build_pynumeric: EXT=tar.gz
+build_pynumeric: TAR=$(TAR1)
+build_pynumeric: BUILDCMDS="$(PYBIN) setup.py build; $(PYBIN) setup.py install" 
+build_pynumeric: CFG=$(CFGFLAGS)
+build_pynumeric:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+build_pyogg: PACKAGE=$(PYOGG)
+build_pyogg: PACKAGE_GET=$(PYOGG_GET)
+build_pyogg: EXT=tar.gz
+build_pyogg: TAR=$(TAR1)
+build_pyogg: BUILDCMDS="$(PYBIN) config_unix.py; $(PYBIN) setup.py build; $(PYBIN) setup.py install" 
+build_pyogg: CFG=$(CFGFLAGS)
+build_pyogg:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+build_pyvorbis: PACKAGE=$(PYVORBIS)
+build_pyvorbis: PACKAGE_GET=$(PYVORBIS_GET)
+build_pyvorbis: EXT=tar.gz
+build_pyvorbis: TAR=$(TAR1)
+build_pyvorbis: BUILDCMDS="$(PYBIN) config_unix.py; $(PYBIN) setup.py build; $(PYBIN) setup.py install" 
+build_pyvorbis: CFG=$(CFGFLAGS)
+build_pyvorbis:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+build_pyxmms: PACKAGE=$(PYXMMS)
+build_pyxmms: PACKAGE_GET=$(PYXMMS_GET)
+build_pyxmms: EXT=tar.gz
+build_pyxmms: TAR=$(TAR1)
+build_pyxmms: BUILDCMDS="echo XMMS support is broken."
+build_pyxmms: CFG=$(CFGFLAGS)
+build_pyxmms:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+build_sdl: PACKAGE=$(SDL)
+build_sdl: PACKAGE_GET=$(SDL_GET)
+build_sdl: EXT=tar.gz
+build_sdl: TAR=$(TAR1)
+build_sdl: BUILDCMDS=
+build_sdl: CFG=$(CFGFLAGS)
+build_sdl:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+build_sdlimage: PACKAGE=$(SDLIMAGE)
+build_sdlimage: PACKAGE_GET=$(SDLIMAGE_GET)
+build_sdlimage: EXT=tgz
+build_sdlimage: TAR=$(TAR1)
+build_sdlimage: BUILDCMDS=
+build_sdlimage: CFG=$(CFGFLAGS)
+build_sdlimage:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+build_sdlmixer: PACKAGE=$(SDLMIXER)
+build_sdlmixer: PACKAGE_GET=$(SDLMIXER_GET)
+build_sdlmixer: EXT=tar.gz
+build_sdlmixer: TAR=$(TAR1)
+build_sdlmixer: BUILDCMDS=
+build_sdlmixer: CFG=$(CFGFLAGS)
+build_sdlmixer:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+build_sdlttf: PACKAGE=$(SDLTTF)
+build_sdlttf: PACKAGE_GET=$(SDLTTF_GET)
+build_sdlttf: EXT=tar.gz
+build_sdlttf: TAR=$(TAR1)
+build_sdlttf: BUILDCMDS=
+build_sdlttf: CFG=$(CFGFLAGS)
+build_sdlttf:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+build_smpeg: PACKAGE=$(SMPEG)
+build_smpeg: PACKAGE_GET=$(SMPEG_GET)
+build_smpeg: EXT=tar.gz
+build_smpeg: TAR=$(TAR1)
+build_smpeg: BUILDCMDS=
+build_smpeg: CFG=$(CFGFLAGS)
+build_smpeg:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+build_swig: PACKAGE=$(SWIG)
+build_swig: PACKAGE_GET=$(SWIG_GET)
+build_swig: EXT=tar.gz
+build_swig: TAR=$(TAR1)
+build_swig: BUILDCMDS=
+build_swig: CFG="$(CFGFLAGS) --with-python=$(PREFIX)/bin/python"
+build_swig:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                SWIG-1.3.17 $(CFG) $(BUILDCMDS)
+
+
+build_pygphoto: PACKAGE=$(PYGPHOTO)
+build_pygphoto: PACKAGE_GET=$(PYGPHOTO_GET)
+build_pygphoto: EXT=tar.gz
+build_pygphoto: TAR=$(TAR1)
+build_pygphoto: BUILDCMDS="make COPY_BASE=$(PREFIX); cp pygphoto.so $(PREFIX)/lib/python2.2/site-packages/"
+build_pygphoto: CFG=$(CFGFLAGS)
+build_pygphoto:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+build_vorbistools: PACKAGE=$(VORBISTOOLS)
+build_vorbistools: PACKAGE_GET=$(VORBISTOOLS_GET)
+build_vorbistools: EXT=tar.gz
+build_vorbistools: TAR=$(TAR1)
+build_vorbistools: BUILDCMDS=
+build_vorbistools: CFG=$(CFGFLAGS)
+build_vorbistools:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+build_zlib: PACKAGE=$(ZLIB)
+build_zlib: PACKAGE_GET=$(ZLIB_GET)
+build_zlib: EXT=tar.gz
+build_zlib: TAR=$(TAR1)
+build_zlib: BUILDCMDS=
+build_zlib: CFG="$(CFGFLAGS) --shared"
+build_zlib:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
