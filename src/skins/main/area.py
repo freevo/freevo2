@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/12/05 17:30:17  dischi
+# some cleanup
+#
 # Revision 1.17  2003/12/04 21:49:18  dischi
 # o remove BlankScreen and the Splashscreen
 # o make it possible to register objects as areas
@@ -321,10 +324,10 @@ class Skin_Area:
             self.menuw    = obj
             self.menu     = obj
             item_type     = None
-            if hasattr(obj, 'selected'):
+            try:
                 self.viewitem = obj.selected
                 self.infoitem = obj.selected
-            else:
+            except AttributeError:
                 self.viewitem = obj
                 self.infoitem = obj
 
@@ -334,7 +337,7 @@ class Skin_Area:
         if area:
             visible = area.visible
         else:
-            visible = FALSE
+            visible = False
 
         self.redraw = self.init_vars(settings, item_type, widget_type)
             
@@ -362,15 +365,15 @@ class Skin_Area:
         else:
             self.tmp_objects = SkinObjects()
             
-        # dependencies haven't changed
-        if not self.redraw:
-            # no update needed: return
-            if not self.update_content_needed():
-                self.screen.draw(self.objects)
-                return
+        # dependencies haven't changed, if no update needed: return
+        if not self.redraw and not self.update_content_needed():
+            self.screen.draw(self.objects)
+            return
 
         self.update_content()
 
+
+        # check which parts need an update
         bg_rect = ( osd.width, osd.height, 0, 0 )
         a_rect  = ( osd.width, osd.height, 0, 0 )
         c_rect  = ( osd.width, osd.height, 0, 0 )
@@ -428,6 +431,7 @@ class Skin_Area:
 
 
 
+        # send the update information to the screen object
         if bg_rect[0] < bg_rect[2]:
             self.screen.update('background', bg_rect)
 
@@ -441,7 +445,7 @@ class Skin_Area:
         elif c_rect[0] < c_rect[2]:
             self.screen.update('content', c_rect)
 
-
+        # save and exit
         self.objects = self.tmp_objects
         self.screen.draw(self.objects)
 
@@ -485,8 +489,8 @@ class Skin_Area:
         if len(menu.choices) < 6:
             try:
                 if menu.choices[0].info_type == 'track':
-                    menu.skin_force_text_view = TRUE
-                    self.use_text_view = TRUE
+                    menu.skin_force_text_view = True
+                    self.use_text_view = True
                     return
             except:
                 pass
@@ -499,13 +503,13 @@ class Skin_Area:
                     return
                     
                 if image and i.image != image:
-                    menu.skin_force_text_view = FALSE
-                    self.use_text_view = FALSE
+                    menu.skin_force_text_view = False
+                    self.use_text_view = False
                     return
                 image = i.image
 
-            menu.skin_force_text_view = TRUE
-            self.use_text_view = TRUE
+            menu.skin_force_text_view = True
+            self.use_text_view = True
             return
 
         for i in menu.choices:
@@ -513,16 +517,16 @@ class Skin_Area:
                 folder += 1
                 # directory with mostly folder:
                 if config.SKIN_FORCE_TEXTVIEW_STYLE == 1 and folder > 3 and not i.media:
-                    self.use_text_view = FALSE
+                    self.use_text_view = False
                     return
                     
             if image and i.image != image:
-                menu.skin_force_text_view = FALSE
-                self.use_text_view = FALSE
+                menu.skin_force_text_view = False
+                self.use_text_view = False
                 return
             image = i.image
-        menu.skin_force_text_view = TRUE
-        self.use_text_view = TRUE
+        menu.skin_force_text_view = True
+        self.use_text_view = True
 
     
     def calc_geometry(self, object, copy_object=0):
@@ -674,7 +678,7 @@ class Skin_Area:
                 self.area_val = xml_skin.XML_area(self.area_name)
                 self.area_val.visible = TRUE
                 self.area_val.r = (0, 0, osd.width, osd.height)
-            return TRUE
+            return True
         else:
             try:
                 area = getattr(area, self.area_name)
@@ -684,11 +688,11 @@ class Skin_Area:
                 except (KeyError, AttributeError):
                     print 'no skin information for %s:%s' % (widget_type, self.area_name)
                     area = xml_skin.XML_area(self.area_name)
-                    area.visible = FALSE
+                    area.visible = False
 
         if (not self.area_val) or area != self.area_val:
             self.area_val = area
-            redraw = TRUE
+            redraw = True
             
         if not area.layout:
             return redraw
@@ -697,7 +701,7 @@ class Skin_Area:
         self.layout = area.layout
 
         if old_layout and old_layout != self.layout:
-            redraw = TRUE
+            redraw = True
 
         area.r = (area.x, area.y, area.width, area.height)
 
@@ -720,7 +724,7 @@ class Skin_Area:
                 try:
                     if self.menu.selected.image != self.watermark:
                         self.watermark = None
-                        self.redraw = TRUE
+                        self.redraw = True
                 except:
                     pass
         except:
@@ -743,7 +747,7 @@ class Skin_Area:
                 if bg.label == 'watermark' and self.menu.selected.image:
                     imagefile = self.menu.selected.image
                     if last_watermark != imagefile:
-                        self.redraw = TRUE
+                        self.redraw = True
                     self.watermark = imagefile
                 else:
                     imagefile = bg.filename
@@ -779,8 +783,9 @@ class Skin_Area:
         except AttributeError:
             self.tmp_objects.rectangles.append(( x, y, x + width, y + height, rect[0],
                                                  rect[1], rect[2], rect[3] ))
+
+
             
-    # Draws a text inside a frame based on the settings in the XML file
     def write_text(self, text, font, content, x=-1, y=-1, width=None, height=None,
                    align_h = None, align_v = None, mode='hard', ellipses='...'):
         """
@@ -790,9 +795,12 @@ class Skin_Area:
 
         if not text:
             return (0,0,0,0)
-        
-        if x == -1: x = content.x
-        if y == -1: y = content.y
+
+        # set default values from 'content'
+        if x == -1:
+            x = content.x
+        if y == -1:
+            y = content.y
 
         if width == None:
             width  = content.width

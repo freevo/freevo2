@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/12/05 17:30:18  dischi
+# some cleanup
+#
 # Revision 1.23  2003/12/04 21:49:18  dischi
 # o remove BlankScreen and the Splashscreen
 # o make it possible to register objects as areas
@@ -246,7 +249,6 @@ class Skin:
             self.areas[a] = eval('%s%s_Area(self, self.screen)' % \
                                  (a[0].upper(), a[1:]))
         self.areas['tvlisting'] = TVListing_Area(self, self.screen)
-
 
         # load the fxd file
         self.settings = xml_skin.XMLSkin()
@@ -519,7 +521,6 @@ class Skin:
         object may be a menu widget, a table for the tv menu are an audio item for
         the audio player
         """
-
         if isinstance(object, GUIObject):
             # handling for gui objects: are they visible? what about children?
             if not object.visible:
@@ -555,19 +556,14 @@ class Skin:
 
         if self.last_draw[0] != type:
             self.force_redraw = True
-
+            self.all_areas    = getattr(self, '%s_areas' % type)
+            
         self.last_draw = type, object
 
         self.screen.clear()
-
-        all_areas = getattr(self, '%s_areas' % type)
-        for a in all_areas:
+        for a in self.all_areas:
             a.draw(settings, object, style, type, self.force_redraw)
-            
         self.screen.show(self.force_redraw)
 
         osd.update()
         self.force_redraw = False
-
-
-
