@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/09/27 23:43:50  rshortt
+# A few fixes but it still needs some keymap / post_key work.
+#
 # Revision 1.1  2004/09/27 23:10:53  rshortt
 # Move the joystick plugin into the input plugins directory and renamed it
 # to joystick.  plugin.activate('input.joystick')
@@ -62,9 +65,11 @@ import rc
 
 rc = rc.get_singleton()
 
-class PluginInterface(plugin.DaemonPlugin):
+class PluginInterface(plugin.InputPlugin):
 
     def __init__(self):
+        plugin.InputPlugin.__init__(self)
+
         self.reason = config.REDESIGN_FIXME
         return
 
@@ -93,16 +98,12 @@ class PluginInterface(plugin.DaemonPlugin):
                 self.reason = 'unable to open device'
                 return
 
-        # ok, joystick is working
-        plugin.DaemonPlugin.__init__(self)
-        
         print 'using joystick', config.JOY_DEV
         
-        self.poll_interval  = 1
-        self.poll_menu_only = False
+        rc.register(self.handle, True, 1)
 
 
-    def poll(self):
+    def handle(self):
         command = ''    
         _debug_('self.joyfd = %s' % self.joyfd, level=3)
         (r, w, e) = select.select([self.joyfd], [], [], 0)
