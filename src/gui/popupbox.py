@@ -1,7 +1,7 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
-# popups - pop up boxes for Freevo
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# popups.py - popup boxes for Freevo
+# -----------------------------------------------------------------------------
 # $Id$
 #
 # This file defines some simple popup boxes used in Freevo. The boxes are
@@ -25,24 +25,17 @@
 # A box showing a progress bar. There is no wait for the user to close the
 # box, this has to be done from the outside.
 #
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.2  2004/10/06 19:24:00  dischi
-# switch from rc.py to pyNotifier
 #
-# Revision 1.1  2004/10/05 19:50:54  dischi
-# Cleanup gui/widgets:
-# o remove unneeded widgets
-# o move window and boxes to the gui main level
-# o merge all popup boxes into one file
-# o rename popup boxes
+# TODO: o make InputBox waork again
+#       o rename PopupBox->WaitBox and AlertBox->MessageBox
 #
-#
-# -----------------------------------------------------------------------
-#
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
 #
-# Copyright (C) 2002 Krister Lagerstrom, et al.
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -58,7 +51,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 __all__ = [ 'WaitBox', 'MessageBox', 'ConfirmBox', 'ProgressBox', 'InputBox',
             'PopupBox', 'AlertBox' ]
@@ -281,9 +274,10 @@ class ProgressBox(WaitBox):
         h = 25
         y = self.add_row(h)
         x = self.get_content_pos()[0]
-        
+        style = self.widget_normal.rectangle
         self.bar = Progressbar((x, y), (self.get_content_size()[0], h),
-                               full, self.widget_normal)
+                               2, style.color, style.bgcolor, 0, None,
+                               self.widget_selected.rectangle.bgcolor, 0, full)
         self.add_child(self.bar)
 
 
