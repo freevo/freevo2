@@ -1,5 +1,0 @@
-export FREEVO_STARTDIR="/opt/freevo"
-
-export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-
-export PYTHONPATH=$FREEVO_STARTDIR/runtime/lib/python2.2/site-packages:$FREEVO_STARTDIR/runtime/lib/python2.2/site-packages/PIL:$FREEVO_STARTDIR/runtime/lib/python2.2:$FREEVO_STARTDIR/src:$FREEVO_STARTDIR/src/tv:$FREEVO_STARTDIR/src/www
