@@ -7,6 +7,8 @@ $Id$
 Short-term
 ----------
 o Make DVD/CD easier to use.
+o Better movie XML file mplayer options
+o Remove the .mplayer stuff
 o TV live pause
 o Play audio CD-roms
   o Use MPlayer, it has CDDA/CDDB support
