@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/10/26 17:57:26  dischi
+# do not use tmp as default
+#
 # Revision 1.2  2003/10/14 17:03:38  dischi
 # add smartsort patch from Eirik Meland
 #
@@ -302,18 +305,19 @@ def tagmp3 (filename, title=None, artist=None, album=None, track=None, tracktota
 
 
 def getdatadir(item):
+    base = config.MOVIE_DATA_DIR
     if not config.MOVIE_DATA_DIR:
-        return '/tmp'
+        base = '/tmp/freevo-movie-data-dir'
     directory = item.dir
     if item.media:
         directory = directory[len(item.media.mountdir):]
         if len(directory) and directory[0] == '/':
             directory = directory[1:]
-        return os.path.join(config.MOVIE_DATA_DIR, 'disc', item.media.id, directory)
+        return os.path.join(base, 'disc', item.media.id, directory)
     else:
         if len(directory) and directory[0] == '/':
             directory = directory[1:]
-        return os.path.join(config.MOVIE_DATA_DIR, directory)
+        return os.path.join(base, directory)
 
 def encode(str, code):
     try:
