@@ -1,9 +1,45 @@
-import sys
+# -*- coding: iso-8859-1 -*-
+# -----------------------------------------------------------------------------
+# imagelib.py - Freevo imagelib
+# -----------------------------------------------------------------------------
+# $Id$
+#
+#
+# -----------------------------------------------------------------------------
+# Freevo - A Home Theater PC framework
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# -----------------------------------------------------------------------------
+
+# python imports
 import os
 import stat
-import traceback
-import Image     # PIL
+import logging
 
+# python imagelib (PIL)
+# please remove this dependency
+import Image
+
+# mevas imagelib
 import mevas
 
 import config
@@ -11,10 +47,16 @@ import util
 import util.thumbnail
 import theme_engine
 
-import logging
+# get logging object
 log = logging.getLogger('gui')
 
-def resizebitmap(image, width=None, height=None):
+# internal imagecache
+_item_imagecache = util.objectcache.ObjectCache(30, desc='item_image')
+
+def _resize(image, width=None, height=None):
+    """
+    Resize an image (internal use)
+    """
     image_w, image_h = image.width, image.height
     if width == None:
         # calculate width
@@ -26,10 +68,16 @@ def resizebitmap(image, width=None, height=None):
 
 
 def rotate(*arg1, **arg2):
+    """
+    Rotate an image
+    """
     return mevas.imagelib.rotate(*arg1, **arg2)
 
 
 def scale(*arg1, **arg2):
+    """
+    Scale an image
+    """
     return mevas.imagelib.scale(*arg1, **arg2)
 
 
@@ -45,19 +93,19 @@ def load(url, size=None, cache=False, vfs_save=False):
         width, height = None, None
     else:
         width, height = size
-        
+
     try:
         # maybe the image is an image object from PIL
         image = mevas.imagelib.new(url.size, url.tostring(), url.mode)
 
         # scale the image if needed
         if width != None or height != None:
-            image = resizebitmap(image, width, height)
+            image = _resize(image, width, height)
         return image
     except:
         # no, it is not
         pass
-    
+
     if url.find('/') == -1 and url.find('.') == -1:
         # this looks like a 'theme' image
         surl = theme_engine.get_theme().get_image(url)
@@ -70,7 +118,7 @@ def load(url, size=None, cache=False, vfs_save=False):
         else:
             key = url
         key += str(os.stat(url)[stat.ST_MTIME])
-        
+
         s = cache[key]
         if s:
             return s
@@ -116,7 +164,7 @@ def load(url, size=None, cache=False, vfs_save=False):
 
     # scale the image if needed
     if width != None or height != None:
-        image = resizebitmap(image, width, height)
+        image = _resize(image, width, height)
 
     if vfs_save:
         f = vfs.open(vfs_save, 'w')
@@ -129,16 +177,14 @@ def load(url, size=None, cache=False, vfs_save=False):
 
 
 
-item_imagecache = util.objectcache.ObjectCache(30, desc='item_image')
-
 def item_image(item, size, icon_dir, force=False, cache=True):
     """
     Return the image for an item. This function uses internal caches and
     can also return a mimetype image if no image is found and force is True
     """
     if cache == True:
-        cache = item_imagecache
-        
+        cache = _item_imagecache
+
     width, height = size
     try:
         type = item.display_type
@@ -152,13 +198,13 @@ def item_image(item, size, icon_dir, force=False, cache=True):
         key = '%s-%s-%s-%s-%s-%s-%s-%s' \
               % (icon_dir, item.image, type, item.type, width, height, force,
                  os.stat(item.image)[stat.ST_MTIME])
-                
+
         if item['rotation']:
             key = '%s-%s' % (key, item['rotation'])
-            
+
         if item.media and item.media.item == item:
             key = '%s-%s' % (key, item.media)
-        
+
         image = cache[key]
 
         if image:
@@ -166,7 +212,7 @@ def item_image(item, size, icon_dir, force=False, cache=True):
 
     image     = None
     imagefile = None
-    
+
     if item.image:
         try:
             # load the thumbnail
@@ -182,10 +228,12 @@ def item_image(item, size, icon_dir, force=False, cache=True):
         if not force:
             return None
 
-        if hasattr(item, 'media') and item.media and item.media.item == item and \
-           os.path.isfile('%s/mimetypes/%s.png' % (icon_dir, item.media.type)):
+        if hasattr(item, 'media') and item.media and \
+               item.media.item == item and \
+               os.path.isfile('%s/mimetypes/%s.png' % \
+                              (icon_dir, item.media.type)):
             imagefile = '%s/mimetypes/%s.png' % (icon_dir, item.media.type)
-            
+
 
         elif item.type == 'dir':
             if os.path.isfile('%s/mimetypes/folder_%s.png' % \
@@ -194,10 +242,11 @@ def item_image(item, size, icon_dir, force=False, cache=True):
                             (icon_dir, item.display_type)
             else:
                 imagefile = '%s/mimetypes/folder.png' % icon_dir
-    
+
         elif item.type == 'playlist':
-            if item.parent and os.path.isfile('%s/mimetypes/playlist_%s.png' % \
-                                              (icon_dir, item.parent.display_type)):
+            if item.parent and \
+                   os.path.isfile('%s/mimetypes/playlist_%s.png' % \
+                                  (icon_dir, item.parent.display_type)):
                 imagefile = '%s/mimetypes/playlist_%s.png' % \
                             (icon_dir, item.parent.display_type)
             else:
@@ -211,19 +260,19 @@ def item_image(item, size, icon_dir, force=False, cache=True):
 
         elif os.path.isfile('%s/mimetypes/unknown.png' % icon_dir):
             imagefile = '%s/mimetypes/unknown.png' % icon_dir
-            
+
         if not imagefile:
             return None
 
         # load the thumbnail
         image = util.thumbnail.load(imagefile)
-            
+
         if not image:
             return None
 
     if type and len(type) > 4:
         type = type[:5]
-        
+
     i_w = image.width
     i_h = image.height
     aspect = float(i_h)/i_w
@@ -233,12 +282,12 @@ def item_image(item, size, icon_dir, force=False, cache=True):
         m = min(height, width)
         i_w = m
         i_h = m
-        
+
     elif type == 'video' and aspect > 1.3 and aspect < 1.6:
         # video cover, set aspect 7:5
         i_w = 5
         i_h = 7
-        
+
     if int(float(width * i_h) / i_w) > height:
         width = int(float(height * i_w) / i_h)
     else:

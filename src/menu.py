@@ -1,46 +1,17 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # menu.py - freevo menu handling system
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes:
-# Todo:        
 #
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.114  2005/01/08 11:54:15  dischi
-# remove skin_type attribute
-#
-# Revision 1.113  2004/12/31 11:57:39  dischi
-# renamed SKIN_* and OSD_* variables to GUI_*
-#
-# Revision 1.112  2004/12/28 18:09:58  dischi
-# add extra Action class for item actions
-#
-# Revision 1.111  2004/11/20 18:22:59  dischi
-# use python logger module for debug
-#
-# Revision 1.110  2004/11/01 20:14:14  dischi
-# fix debug
-#
-# Revision 1.109  2004/10/08 20:20:17  dischi
-# remove unneeded eventhandler calls
-#
-# Revision 1.108  2004/08/26 15:31:15  dischi
-# improve menu/menuapplication handling
-#
-# Revision 1.107  2004/08/25 12:51:20  dischi
-# moved Application for eventhandler into extra dir for future templates
-#
-# Revision 1.106  2004/08/24 16:42:39  dischi
-# Made the fxdsettings in gui the theme engine and made a better
-# integration for it. There is also an event now to let the plugins
-# know that the theme is changed.
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First edition: Krister Lagerstrom <krister-freevo@kmlager.com>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -57,12 +28,15 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
+__all__ [ 'MenuItem', 'Menu', 'MenuWidget' ]
 
+# python imports
 import copy
-import traceback
+import logging
 
+# freevo imports
 import config
 import plugin
 import util
@@ -72,8 +46,9 @@ from event import *
 from item import Item, Action
 from application import Application
 
-import logging
+# get logging object
 log = logging.getLogger()
+
 
 class MenuItem(Item):
     """
@@ -93,7 +68,7 @@ class MenuItem(Item):
         self.arg      = arg
         self.type     = type
 
-            
+
     def actions(self):
         """
         return the default action
@@ -121,7 +96,8 @@ class Menu:
     a Menu with Items for the MenuWidget
     """
     def __init__(self, heading, choices=[], theme=None, umount_all = 0,
-                 reload_func = None, item_types = None, force_skin_layout = -1):
+                 reload_func = None, item_types = None,
+                 force_skin_layout = -1):
 
         self.heading = heading          # name of the menu
         self.choices = choices          # List of MenuItem:s
@@ -131,7 +107,7 @@ class Menu:
         else:
             self.selected     = None
             self.selected_pos = -1
-            
+
         self.umount_all = umount_all    # umount all ROM drives on display?
         self.theme = None               # skin theme for this menu
         if theme:
@@ -144,7 +120,7 @@ class Menu:
 
         # Called when a child menu returns. This function returns a new menu
         # or None and the old menu will be reused
-        self.reload_func       = reload_func  
+        self.reload_func       = reload_func
         self.item_types        = item_types
         self.force_skin_layout = force_skin_layout
 
@@ -156,12 +132,13 @@ class Menu:
         self.cols = 1
         self.rows = 1
 
-        
+
     def change_selection(self, rel):
         """
         select a new item relative to current selected
         """
-        self.selected_pos = min(max(0, self.selected_pos + rel), len(self.choices) - 1)
+        self.selected_pos = min(max(0, self.selected_pos + rel),
+                                len(self.choices) - 1)
         self.selected = self.choices[self.selected_pos]
 
 
@@ -196,8 +173,8 @@ class MenuWidget(Application):
         Application.__init__(self, 'menu widget', 'menu', False, True)
         self.menustack = []
         if not engine:
-            engine = gui.AreaHandler('menu', ('screen', 'title', 'subtitle', 'view',
-                                              'listing', 'info'))
+            engine = gui.AreaHandler('menu', ('screen', 'title', 'subtitle',
+                                              'view', 'listing', 'info'))
         self.engine = engine
         self.inside_menu = False
 
@@ -223,7 +200,7 @@ class MenuWidget(Application):
         else:
             self.engine.show(config.GUI_FADE_STEPS)
 
-                
+
     def hide(self, clear=True):
         """
         hide the menu
@@ -234,8 +211,8 @@ class MenuWidget(Application):
             self.inside_menu = False
         else:
             self.engine.hide(config.GUI_FADE_STEPS)
-        
-        
+
+
     def delete_menu(self, arg=None, menuw=None, allow_reload=True):
         """
         delete last menu from the stack, no redraw
@@ -248,7 +225,7 @@ class MenuWidget(Application):
 
             if not isinstance(menu, Menu):
                 return True
-            
+
             if menu.reload_func and allow_reload:
                 reload = menu.reload_func()
                 if reload:
@@ -261,7 +238,8 @@ class MenuWidget(Application):
         new menu if the attributes are set to True. If osd_message is set,
         this message will be send if the current menu is no submenu
         """
-        if len(self.menustack) > 1 and hasattr(self.menustack[-1], 'is_submenu') and \
+        if len(self.menustack) > 1 and \
+               hasattr(self.menustack[-1], 'is_submenu') and \
                self.menustack[-1].is_submenu:
             if refresh and reload:
                 self.back_one_menu(arg='reload')
@@ -272,7 +250,7 @@ class MenuWidget(Application):
         elif len(self.menustack) > 1 and osd_message:
             self.post_event(Event(OSD_MESSAGE, arg=osd_message))
 
-            
+
     def back_one_menu(self, arg=None, menuw=None):
         """
         Go back on menu. Or if the current menu has a variable called
@@ -326,7 +304,7 @@ class MenuWidget(Application):
             self.refresh(reload=1)
         else:
             self.refresh()
-                
+
 
     def goto_main_menu(self, arg=None, menuw=None):
         """
@@ -337,7 +315,7 @@ class MenuWidget(Application):
         gui.set_theme(menu.theme)
         self.refresh()
 
-    
+
     def pushmenu(self, menu):
         """
         Add a new Menu to the stack and show it
@@ -393,10 +371,10 @@ class MenuWidget(Application):
             if self.visible:
                 menu.show()
             return
-        
+
         if self.menustack[-1].umount_all == 1:
             util.umount_all()
-                    
+
         if reload and menu.reload_func:
             new_menu = menu.reload_func()
             if new_menu:
@@ -432,12 +410,12 @@ class MenuWidget(Application):
                 i.display_type = item.display_type
             elif hasattr(item, 'type'):
                 i.display_type = item.type
-                
+
         s = Menu(menu_name, items, theme=theme)
         s.is_submenu = True
         self.pushmenu(s)
-            
-        
+
+
     def eventhandler(self, event):
         """
         Eventhandler for menu controll
@@ -450,17 +428,17 @@ class MenuWidget(Application):
                     event = MENU_BACK_ONE_MENU
                 elif event == MENU_RIGHT:
                     event = MENU_SELECT
-            
+
             else:
                 if event == MENU_LEFT:
                     event = MENU_PAGEUP
                 elif event == MENU_RIGHT:
                     event = MENU_PAGEDOWN
-            
+
         if event == MENU_GOTO_MAINMENU:
             self.goto_main_menu()
             return True
-        
+
         if event == MENU_BACK_ONE_MENU:
             self.back_one_menu()
             return True
@@ -468,7 +446,7 @@ class MenuWidget(Application):
         if event == 'MENU_REFRESH':
             self.refresh()
             return True
-        
+
         if event == 'MENU_REBUILD':
             self.refresh()
             return True
@@ -479,7 +457,8 @@ class MenuWidget(Application):
                 self.back_one_menu()
                 return True
             menu = self.menustack[-2]
-            if hasattr(menu.selected, 'eventhandler') and menu.selected.eventhandler:
+            if hasattr(menu.selected, 'eventhandler') and \
+                   menu.selected.eventhandler:
                 if menu.selected.eventhandler(event = event, menuw=self):
                     return True
             return False
@@ -516,7 +495,7 @@ class MenuWidget(Application):
             menu.change_selection(-1)
             self.refresh()
             return True
-        
+
 
         if event == MENU_RIGHT:
             menu.change_selection(1)
@@ -529,11 +508,12 @@ class MenuWidget(Application):
             self.refresh()
             return True
 
-        
+
         if event == MENU_SELECT or event == MENU_PLAY_ITEM:
             actions = menu.selected.actions()
             if not actions:
-                gui.AlertBox(text=_('No action defined for this choice!')).show()
+                msg = _('No action defined for this choice!')
+                gui.AlertBox(text=msg).show()
             else:
                 if not isinstance(actions[0], (Item, Action)):
                     actions[0][0](menuw=self)
@@ -552,13 +532,14 @@ class MenuWidget(Application):
                 actions = []
                 force   = True
 
-            plugins = plugin.get('item') + plugin.get('item_%s' % menu.selected.type)
+            plugins = plugin.get('item') + \
+                      plugin.get('item_%s' % menu.selected.type)
 
             if hasattr(menu.selected, 'display_type'):
                 plugins += plugin.get('item_%s' % menu.selected.display_type)
 
             plugins.sort(lambda l, o: cmp(l._level, o._level))
-            
+
             for p in plugins:
                 for a in p.actions(menu.selected):
                     if isinstance(a, (MenuItem, Action)):
@@ -568,11 +549,11 @@ class MenuWidget(Application):
                         if len(a) == 3 and a[2] == 'MENU_SUBMENU':
                             a[0](menuw=self)
                             return
-                        
+
             if actions and (len(actions) > 1 or force):
                 self.make_submenu(menu.selected.name, actions, menu.selected)
             return True
-            
+
 
         if event == MENU_CALL_ITEM_ACTION:
             log.info('calling action %s' % event.arg)
@@ -585,8 +566,9 @@ class MenuWidget(Application):
                        a[2] == event.arg:
                     a[0](arg=None, menuw=self)
                     return True
-                
-            plugins = plugin.get('item') + plugin.get('item_%s' % menu.selected.type)
+
+            plugins = plugin.get('item') + \
+                      plugin.get('item_%s' % menu.selected.type)
 
             if hasattr(menu.selected, 'display_type'):
                 plugins += plugin.get('item_%s' % menu.selected.display_type)
@@ -602,16 +584,15 @@ class MenuWidget(Application):
                         return True
             log.info('action %s not found' % event.arg)
 
-                    
+
         if event == MENU_CHANGE_STYLE and len(self.menustack) > 1:
             # did the menu change?
             self.engine.toggle_display_style(menu)
             self.refresh()
-                
-        if hasattr(menu.selected, 'eventhandler') and menu.selected.eventhandler:
+
+        if hasattr(menu.selected, 'eventhandler') and \
+               menu.selected.eventhandler:
             if menu.selected.eventhandler(event = event, menuw=self):
                 return True
-            
+
         return False
-
-

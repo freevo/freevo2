@@ -1,10 +1,8 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # fxditem.py - Create items out of fxd files
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
-#
-# Notes:
 #
 # If you want to expand the fxd file with a new tag below <freevo>, you
 # can register a callback here. Create a class based on FXDItem (same
@@ -21,26 +19,13 @@
 # a) add the fxd file as 'fxd_file' memeber variable to the new item
 # b) add the files as list _fxd_covered_ to the item
 #
-#
-# Todo:        
-#
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.16  2004/11/20 18:22:59  dischi
-# use python logger module for debug
-#
-# Revision 1.15  2004/11/01 20:14:14  dischi
-# fix debug
-#
-# Revision 1.14  2004/07/10 12:33:36  dischi
-# header cleanup
-#
-# Revision 1.13  2004/02/14 19:28:07  dischi
-# store display_type in Container to build nicer menu
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -57,21 +42,21 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
 
+# python imports
 import copy
-import traceback
+import logging
 
-import config
 import util
 import item
 import plugin
 import os
-import stat
 
-import logging
+# get logging object
 log = logging.getLogger()
+
 
 class Mimetype(plugin.MimetypePlugin):
     """
@@ -90,7 +75,7 @@ class Mimetype(plugin.MimetypePlugin):
                 files.remove(f)
             except:
                 pass
-            
+
         # check of directories with a fxd covering it
         for d in copy.copy(files):
             if os.path.isdir(d):
@@ -112,14 +97,14 @@ class Mimetype(plugin.MimetypePlugin):
         """
         return [ 'fxd' ]
 
-    
+
     def count(self, parent, files):
         """
         return how many items will be build on files
         """
         return len(self.get(parent, files))
 
-    
+
     def parse(self, parent, fxd_files, duplicate_check=[], display_type=None):
         """
         return a list of items that belong to a fxd files
@@ -154,13 +139,12 @@ class Mimetype(plugin.MimetypePlugin):
                 items += parser.getattr(None, 'items')
 
             except:
-                log.error("fxd file %s corrupt" % fxd_file)
-                traceback.print_exc()
+                log.exception("fxd file %s corrupt" % fxd_file)
         return items
 
 
 
-# -------------------------------------------------------------------------------------
+
 
 class Container(item.Item):
     """
@@ -174,7 +158,7 @@ class Container(item.Item):
         self.name     = fxd.getattr(node, 'title', 'no title')
         self.type     = fxd.getattr(node, 'type', '')
         self.fxd_file = fxd_file
-        
+
         self.image    = fxd.childcontent(node, 'cover-img')
         if self.image:
             self.image = vfs.join(vfs.dirname(fxd_file), self.image)
@@ -190,8 +174,8 @@ class Container(item.Item):
 
         for child in node.children:
             for types, tag, handler in callbacks:
-                if (not display_type or not types or display_type in types) and \
-                       child.name == tag:
+                if (not display_type or not types or display_type in types) \
+                       and child.name == tag:
                     handler(fxd, child)
                     break
 
@@ -202,7 +186,7 @@ class Container(item.Item):
         fxd.setattr(None, 'items', parent_items)
 
         self.display_type = display_type
-        
+
 
     def sort(self, mode=None):
         """
@@ -212,7 +196,7 @@ class Container(item.Item):
             return '%s%s' % (os.stat(self.fxd_file).st_ctime, self.fxd_file)
         return self.name
 
-        
+
     def actions(self):
         """
         actions for this item
@@ -225,10 +209,11 @@ class Container(item.Item):
         show all items
         """
         import menu
-        moviemenu = menu.Menu(self.name, self.items, item_types=self.display_type)
+        moviemenu = menu.Menu(self.name, self.items,
+                              item_types=self.display_type)
         menuw.pushmenu(moviemenu)
 
-        
+
 
 def container_callback(fxd, node):
     """
@@ -238,12 +223,11 @@ def container_callback(fxd, node):
     c = Container(fxd, node)
     if c.items:
         fxd.getattr(None, 'items', []).append(c)
-    
 
 
-# -------------------------------------------------------------------------------------
 
+
+# register the plugin as mimetype for fxd files
 plugin.register_callback('fxditem', None, 'container', container_callback)
 mimetype = Mimetype()
 plugin.activate(mimetype, level=0)
-
