@@ -210,7 +210,7 @@ class XMLSkin:
 class Skin:
 
     # OSD XML specifiaction
-    OSD_XML_DEFINITIONS = 'skins/krister1/768x576.xml'
+    OSD_XML_DEFINITIONS = config.SKIN_XML_FILE
 
     settings = XMLSkin()
     settings.load(OSD_XML_DEFINITIONS)
