@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2004/06/05 18:15:46  dischi
+# cleanup
+#
 # Revision 1.29  2004/03/19 21:03:40  dischi
 # fix tvguide context bug
 #
@@ -31,46 +34,6 @@
 # Patch from James A. Laska to make the TV Guide behave intuitively when
 # clicking on a future program. As you would expect, it now pops up the record
 # dialog.
-#
-# Revision 1.23  2004/02/06 20:55:28  dischi
-# move debug to 2
-#
-# Revision 1.22  2004/01/09 02:10:00  rshortt
-# Patch from Matthieu Weber to revive add/edit favorites support from the
-# TV interface.
-#
-# Revision 1.21  2003/12/04 21:48:11  dischi
-# also add the plugin area
-#
-# Revision 1.20  2003/12/03 21:51:31  dischi
-# register to the skin and rename some skin function calls
-#
-# Revision 1.19  2003/11/16 17:38:48  dischi
-# i18n patch from David Sagnol
-#
-# Revision 1.18  2003/10/21 15:16:17  outlyer
-# A workaround for the problem wherein Twisted Python cannot serialize
-# boolean types.
-#
-# Revision 1.17  2003/10/18 09:34:37  dischi
-# show the current recodings in the guide, RECORD toggles record and remove
-#
-# Revision 1.16  2003/09/13 10:08:23  dischi
-# i18n support
-#
-# Revision 1.15  2003/09/07 15:44:29  dischi
-# add em.MENU_CHANGE_STYLE to toggle styles
-#
-# Revision 1.14  2003/09/05 02:59:09  rshortt
-# Merging in the changes from the new_record branch.  The tvguide now uses
-# record_client.py to talk to record_server and no longer uses freevo_record.lst
-# and record_daemon.py.  I will attic unused files at a later date.
-#
-# Revision 1.8.2.4  2003/09/05 02:04:26  rshortt
-# Some fixes from the head and add the tv namespace.
-#
-# Revision 1.8.2.3  2003/08/11 19:45:00  rshortt
-# Adding changes form the main branch, perparing to merge.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -144,9 +107,10 @@ class TVGuide(Item):
         self.type = 'tv'
         self.menuw = menuw
         self.visible = True
-
-        self.update_schedules(force=True)
+        self.select_time = start_time
         
+        self.update_schedules(force=True)
+
         self.rebuild(start_time, stop_time, guide.chan_list[0].id, selected)
         self.event_context = 'tvmenu'
         menuw.pushmenu(self)
@@ -207,27 +171,28 @@ class TVGuide(Item):
                 self.menuw.refresh()
             
         if event == em.MENU_UP:
-            self.event_UP()
+            self.event_change_channel(-1)
             self.menuw.refresh()
 
         elif event == em.MENU_DOWN:
-            self.event_DOWN()
+            self.event_change_channel(1)
             self.menuw.refresh()
 
         elif event == em.MENU_LEFT:
-            self.event_LEFT()
+            self.event_change_program(-1)
             self.menuw.refresh()
 
         elif event == em.MENU_RIGHT:
-            self.event_RIGHT()
+            self.event_change_program(1)
             self.menuw.refresh()
 
         elif event == em.MENU_PAGEUP:
+            self.event_change_channel(-self.n_items)
             self.event_PageUp()
             self.menuw.refresh()
 
         elif event == em.MENU_PAGEDOWN:
-            self.event_PageDown()
+            self.event_change_channel(self.n_items)
             self.menuw.refresh()
 
         elif event == em.MENU_SUBMENU:
@@ -383,7 +348,7 @@ class TVGuide(Item):
         pi.display_program(menuw=self.menuw)
 
 
-    def event_RIGHT(self):
+    def event_change_program(self, value):
         start_time    = self.start_time
         stop_time     = self.stop_time
         start_channel = self.start_channel
@@ -392,6 +357,10 @@ class TVGuide(Item):
         if last_prg.stop >= stop_time:
             start_time += (self.col_time * 60)
             stop_time += (self.col_time * 60)
+
+        elif last_prg.start <= start_time:
+            start_time -= (self.col_time * 60)
+            stop_time -= (self.col_time * 60)
             
         channel = self.guide.chan_dict[last_prg.channel_id]
         all_programs = self.guide.GetPrograms(start_time+1, stop_time-1, [ channel.id ])
@@ -407,15 +376,20 @@ class TVGuide(Item):
                     break
 
             prg = None
-            if i < len(programs) - 1:
-                prg = programs[i+1]
+            if value > 0:
+                if i + value < len(programs):
+                    prg = programs[i+value]
+                else:
+                    prg = programs[-1]
             else:
-                prg = programs[i]
+                prg = programs[max(0, i+value)]
+
             if prg.sub_title:
                 procdesc = '"' + prg.sub_title + '"\n' + prg.desc
             else:
                 procdesc = prg.desc
             to_info = (prg.title, procdesc)
+            self.select_time = prg.start
         else:
             prg = epg_types.TvProgram()
             prg.channel_id = channel.id            
@@ -425,79 +399,37 @@ class TVGuide(Item):
             prg.desc = ''
             to_info = CHAN_NO_DATA
 
-        self.rebuild(start_time, stop_time, start_channel, prg)
-
-
-    def event_LEFT(self):
-        start_time    = self.start_time
-        stop_time     = self.stop_time
-        start_channel = self.start_channel
-        last_prg      = self.selected
-
-        if last_prg.start <= start_time:
-            start_time -= (self.col_time * 60)
-            stop_time -= (self.col_time * 60)
-            
-        channel = self.guide.chan_dict[last_prg.channel_id]
-        programs = self.guide.GetPrograms(start_time+1, stop_time-1, [ channel.id ])
-        programs = programs[0].programs        
-        if programs:
-            for i in range(len(programs)):
-                if programs[i].title == last_prg.title and \
-                   programs[i].start == last_prg.start and \
-                   programs[i].stop == last_prg.stop and \
-                   programs[i].channel_id == last_prg.channel_id:
-                    break
-
-            prg = None
-            if i > 0:
-                prg = programs[i-1]
-            else:
-                prg = programs[i]
-            if prg.sub_title:
-                procdesc = '"' + prg.sub_title + '"\n' + prg.desc
-            else:
-                procdesc = prg.desc
-            to_info = (prg.title, procdesc)
-        else:
-            prg = epg_types.TvProgram()
-            prg.channel_id = channel.id            
-            prg.start = 0
-            prg.stop = 2147483647   # Year 2038
-            prg.title = CHAN_NO_DATA
-            prg.desc = ''
-            to_info = CHAN_NO_DATA
-            
         self.rebuild(start_time, stop_time, start_channel, prg)
 
         
-    def event_DOWN(self):
+    def event_change_channel(self, value):
         start_time    = self.start_time
         stop_time     = self.stop_time
         start_channel = self.start_channel
         last_prg      = self.selected
 
-        n = 1
-        flag_start_channel = 0
         for i in range(len(self.guide.chan_list)):
             if self.guide.chan_list[i].id == start_channel:
-                flag_start_channel = 1                                        
+                start_pos = i                                        
+                end_pos   = i + self.n_items
             if self.guide.chan_list[i].id == last_prg.channel_id:
                 break
-            if flag_start_channel == 1:
-                n += 1
 
-        if n >= self.n_items and (i-self.n_items+2) < len(self.guide.chan_list):
-            start_channel = self.guide.chan_list[i-self.n_items+2].id
-        else:
-            channel = self.guide.chan_list[i]
+        channel_pos = min(len(self.guide.chan_list)-2, max(0, i+value))
 
-        channel = None
-        if i < len(self.guide.chan_list) - 1:
-            channel = self.guide.chan_list[i+1]
-        else:
-            channel = self.guide.chan_list[i]
+        # calc real changed value
+        value = channel_pos - i
+        
+        if value < 0 and channel_pos and channel_pos <= start_pos:
+            # move start channel up
+            start_channel = self.guide.chan_list[start_pos + value].id
 
+        if value > 0 and channel_pos < len(self.guide.chan_list)-2 and \
+               channel_pos + 1 >= end_pos:
+            # move start channel down
+            start_channel = self.guide.chan_list[start_pos + value].id
+            
+        channel = self.guide.chan_list[channel_pos]
 
         programs = self.guide.GetPrograms(start_time+1, stop_time-1, [ channel.id ])
         programs = programs[0].programs
@@ -506,7 +438,7 @@ class TVGuide(Item):
         prg = None
         if programs and len(programs) > 0:
             for i in range(len(programs)):
-                if programs[i].stop > last_prg.start and programs[i].stop > start_time:
+                if programs[i].stop > self.select_time and programs[i].stop > start_time:
                     break
 
                 
@@ -517,174 +449,6 @@ class TVGuide(Item):
                 procdesc = prg.desc
             
             to_info = (prg.title, procdesc)
-        else:
-            prg = epg_types.TvProgram()
-            prg.channel_id = channel.id            
-            prg.start = 0
-            prg.stop = 2147483647   # Year 2038
-            prg.title = CHAN_NO_DATA
-            prg.desc = ''
-            to_info = CHAN_NO_DATA
-
-        self.rebuild(start_time, stop_time, start_channel, prg)
-
-
-
-
-
-    def event_UP(self):
-        start_time    = self.start_time
-        stop_time     = self.stop_time
-        start_channel = self.start_channel
-        last_prg      = self.selected
-
-        if last_prg == None:
-            last_prg = epg_types.TvProgram()
-
-        n = 0
-        flag_start_channel = 0
-        for i in range(len(self.guide.chan_list)):
-            if self.guide.chan_list[i].id == start_channel:
-                flag_start_channel = 1
-            if self.guide.chan_list[i].id == last_prg.channel_id:
-                break
-            if flag_start_channel == 1:
-                n += 1
-
-
-        channel = None
-        if i > 0:
-            channel = self.guide.chan_list[i-1]
-            if n == 0:
-                start_channel = self.guide.chan_list[i-1].id
-                
-        else:
-            channel = self.guide.chan_list[i]
-
-
-        programs = self.guide.GetPrograms(start_time+1, stop_time-1, [ channel.id ])
-        programs = programs[0].programs
-
-        if programs and len(programs) > 0:
-            for i in range(len(programs)):
-                if programs[i].stop > last_prg.start and programs[i].stop > start_time:
-                    break
-
-            prg = programs[i]
-            if prg.sub_title:
-                procdesc = '"' + prg.sub_title + '"\n' + prg.desc
-            else:
-                procdesc = prg.desc
-            
-            to_info = (prg.title, procdesc)
-        else:
-            prg = epg_types.TvProgram()
-            prg.channel_id = channel.id            
-            prg.start = 0
-            prg.stop = 2147483647   # Year 2038
-            prg.title = _('This channel has no data loaded')
-            prg.desc = ''
-            to_info = _('This channel has no data loaded')
-
-            
-        self.rebuild(start_time, stop_time, start_channel, prg)
-
-
-    def event_PageUp(self):
-        start_time    = self.start_time
-        stop_time     = self.stop_time
-        start_channel = self.start_channel
-        last_prg      = self.selected
-
-        for i in range(len(self.guide.chan_list)):
-            if self.guide.chan_list[i].id == last_prg.channel_id:
-                break
-
-
-        channel = None
-        if i-self.n_items > 0:
-            channel = self.guide.chan_list[i-self.n_items]
-            start_channel = self.guide.chan_list[i-self.n_items].id
-        else:
-            channel = self.guide.chan_list[0]
-            start_channel = self.guide.chan_list[0].id
-
-
-        programs = self.guide.GetPrograms(start_time+1, stop_time-1, [ channel.id ])
-        programs = programs[0].programs
-
-
-        prg = None
-        if programs and len(programs) > 0:
-            for i in range(len(programs)):
-                if programs[i].stop > last_prg.start and programs[i].stop > start_time:
-                    break
-
-                
-            prg = programs[i]
-            if prg.sub_title:
-                procdesc = '"' + prg.sub_title + '"\n' + prg.desc
-            else:
-                procdesc = prg.desc
-            
-            to_info = (prg.title, procdesc)
-        else:
-            prg = epg_types.TvProgram()
-            prg.channel_id = channel.id            
-            prg.start = 0
-            prg.stop = 2147483647   # Year 2038
-            prg.title = CHAN_NO_DATA
-            prg.desc = ''
-            to_info = CHAN_NO_DATA
-
-        self.rebuild(start_time, stop_time, start_channel, prg)
-
-
-
-
-
-    def event_PageDown(self):
-        start_time    = self.start_time
-        stop_time     = self.stop_time
-        start_channel = self.start_channel
-        last_prg      = self.selected
-
-        n = 1
-        flag_start_channel = 0
-        for i in range(len(self.guide.chan_list)):
-            if self.guide.chan_list[i].id == start_channel:
-                flag_start_channel = 1                                        
-            if self.guide.chan_list[i].id == last_prg.channel_id:
-                break
-            if flag_start_channel == 1:
-                n += 1
-
-        channel = None
-        if i+self.n_items < len(self.guide.chan_list):
-            channel = self.guide.chan_list[i+self.n_items]
-            start_channel = self.guide.chan_list[i+self.n_items].id
-        else:
-            channel = self.guide.chan_list[i]
-            start_channel = self.guide.chan_list[i].id
-
-
-        programs = self.guide.GetPrograms(start_time+1, stop_time-1, [ channel.id ])
-        programs = programs[0].programs
-
-        prg = None
-        if programs and len(programs) > 0:
-            for i in range(len(programs)):
-                if programs[i].stop > last_prg.start and programs[i].stop > start_time:
-                    break
-
-            prg = programs[i]
-            if prg.sub_title:
-                procdesc = '"' + prg.sub_title + '"\n' + prg.desc
-            else:
-                procdesc = prg.desc
-            
-            to_info = (prg.title, procdesc)
-
         else:
             prg = epg_types.TvProgram()
             prg.channel_id = channel.id            
