@@ -189,14 +189,19 @@ SHUTDOWN_SYS_CMD = 'shutdown -h now'  # set this to 'sudo shutdown -h now' if
 
 # Items in the main menu.
 
-plugin.activate('tv.tv',         'mainmenu', 10, None)
-plugin.activate('mediamenu',     'mainmenu', 20, ('video', ))
-plugin.activate('mediamenu',     'mainmenu', 30, ('audio', ))
-plugin.activate('mediamenu',     'mainmenu', 40, ('image', ))
-plugin.activate('base.shutdown', 'mainmenu', 50, None)
+# e.g. to remove the tv module, put plugin.remove(plugin_tv) in
+# your local_conf.py
+
+plugin_tv       = plugin.activate('tv.tv', level=10)
+plugin_video    = plugin.activate('mediamenu', level=20, args=('video', ))
+plugin_audio    = plugin.activate('mediamenu', level=30, args=('audio', ))
+plugin_image    = plugin.activate('mediamenu', level=40, args=('image', ))
+plugin_shutdown = plugin.activate('base.shutdown', level=50)
 
 if CONF.xmame_SDL or CONF.snes:
-    plugin.activate('mediamenu', 'mainmenu', 45, ('games', ))
+    plugin_games = plugin.activate('mediamenu', level=45, args=('games', ))
+
+
 
 # ======================================================================
 # Freevo directory settings:

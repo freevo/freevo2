@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.91  2003/04/18 10:22:08  dischi
+# You can now remove plugins from the list and plugins know the list
+# they belong to (can be overwritten). level and args are optional.
+#
 # Revision 1.90  2003/04/17 21:25:59  dischi
 # check for plugins with osd update
 #
@@ -415,10 +419,7 @@ class Skin:
         """
 
         if self.plugin_refresh == None:
-            self.plugin_refresh = []
-            for p in plugin.get('daemon'):        
-                if p.osd:
-                    self.plugin_refresh.append(p)
+            self.plugin_refresh = plugin.get('daemon')
 
         if type == 'menu':
             menuw = object
@@ -477,8 +478,10 @@ class Skin:
         if type == 'tv':
             self.listing_area = l
 
+
         for p in self.plugin_refresh:
             p.refresh()
+
             
         osd.update()
         self.force_redraw = FALSE

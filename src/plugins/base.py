@@ -50,9 +50,6 @@ class ShutdownItem(Item):
 #
 
 class shutdown(MainMenuPlugin):
-    def __init__(self):
-        pass
-
     def desc(self):
         return 'the shutdown plugin'
 

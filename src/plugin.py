@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/04/18 10:22:07  dischi
+# You can now remove plugins from the list and plugins know the list
+# they belong to (can be overwritten). level and args are optional.
+#
 # Revision 1.3  2003/04/17 21:21:57  dischi
 # Moved the idle bar to plugins and changed the plugin interface
 #
@@ -44,24 +48,66 @@
 
 import os
 
-class Plugin:
-    def __init__(self):
-        pass
+TRUE  = 1
+FALSE = 0
 
+class Plugin:
+    """
+    Basic plugin class. All plugins should inherit from this
+    class
+    """
+    def __init__(self):
+        self._type   = None
+        self._level  = 0
+        self._number = 0
 
 class MainMenuPlugin(Plugin):
+    """
+    Plugin class for plugins to add something to the main menu
+    """
     def __init__(self):
-        pass
+        Plugin.__init__(self)
+        self._type = 'mainmenu'
 
     def items(self, parent):
+        """
+        return the list of items for the main menu
+        """
         return []
 
-class DaemonPlugin(Plugin):
-    def __init__(self):
-        self.poll    = None
-        self.refresh = None
-        self.osd     = 0
 
+class DaemonPlugin(Plugin):
+    """
+    Plugin class for daemon objects who will be activae in the
+    background while Freevo is running
+    """
+    def __init__(self):
+        Plugin.__init__(self)
+        self._type   = 'daemon'
+
+    def poll(self):
+        """
+        This function will be called every 0.1 seconds
+        """
+        pass
+
+    def refresh(self):
+        """
+        This function will be called after a screen redraw from skin
+        """
+        pass
+    
+
+
+
+
+initialized = FALSE
+
+#
+# the plugin list
+#
+all_plugins = []
+plugin_number = 0
 
 #
 # the plugin dictionary
@@ -71,64 +117,95 @@ ptl = {}
 #
 # activate a plugin
 #
-def activate(name, type, level, args):
-    global ptl
+def activate(name, type=None, level=0, args=None):
+    global plugin_number
+    global all_plugins
+    global initialized
 
-    if not ptl.has_key(type):
-        ptl[type] = []
-    type = ptl[type]
-    for i in range(len(type)):
-        if type[i][1] > level:
-            type.insert(i, (name, level, args ))
+    if initialized:
+        return 0
+    
+    plugin_number += 1
+    all_plugins.append((name, type, level, args, plugin_number))
+    return plugin_number
+
+
+#
+# remove a plugin from the list
+#
+def remove(number):
+    global all_plugins
+    global initialized
+
+    if initialized:
+        return
+
+    for p in all_plugins:
+        if p[4] == number:
+            all_plugins.remove(p)
             return
-    type.append(( name, level, args))
-
-
+        
 #
 # load and init all the plugins
 #
 def init():
     global ptl
-    for type in ptl:
-        l = ptl[type]
-        remove = []
-        for i in range(len(l)):
-            module = l[i][0][:l[i][0].rfind('.')]
+    global all_plugins
+    global initialized
+
+    initialized = TRUE
+
+    for name, type, level, args, number in all_plugins:
+        module = name[:name.rfind('.')]
             
-            if os.path.isfile('src/plugins/%s.py' % module):
-                module = 'plugins.%s' % module
-                object = 'plugins.%s' % l[i][0]
+        if os.path.isfile('src/plugins/%s.py' % module):
+            module = 'plugins.%s' % module
+            object = 'plugins.%s' % name
+        else:
+            module = name
+            object = '%s.PluginInterface' % module
+
+        try:
+            exec('import %s' % module)
+            if args:
+                p = eval('%s%s' % (object, str(args)))
             else:
-                module = l[i][0]
-                object = '%s.PluginInterface' % module
+                p = eval('%s()' % object)
 
-            try:
-                exec('import %s' % module)
-                if l[i][2]:
-                    l[i] = eval('%s%s' % (object, str(l[i][2])))
-                else:
-                    l[i] = eval('%s()' % object)
+            p._number = number
+            if type:
+                p._type  = type
+            if level:
+                p._level = level
 
-            except ImportError:
-                print 'failed to import plugin %s' % l[i][0]
-                remove.append(i-len(remove))
+            if not ptl.has_key(p._type):
+                ptl[p._type] = []
+            type = ptl[p._type]
+            
+            for i in range(len(type)):
+                if type[i]._level > p._level:
+                    type.insert(i, p)
+                    break
+            else:
+                type.append(p)
 
-            except AttributeError:
-                print 'failed to load plugin %s' % l[i][0]
-                remove.append(i-len(remove))
+        except ImportError:
+            print 'failed to import plugin %s' % name
+            
+        except AttributeError:
+            print 'failed to load plugin %s' % name
 
-            except TypeError:
-                print 'wrong number of parameter for %s' % l[i][0]
-                remove.append(i-len(remove))
-                
-        for i in remove:
-            l.remove(l[i])
+        except TypeError:
+            print 'wrong number of parameter for %s' % name
 
 
+#                
+# get the plugin list 'type'
+#
 def get(type):
     global ptl
 
     if not ptl.has_key(type):
-        return []
+        ptl[type] = []
+
     return ptl[type]
-    

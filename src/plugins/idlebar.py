@@ -21,6 +21,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/04/18 10:22:07  dischi
+# You can now remove plugins from the list and plugins know the list
+# they belong to (can be overwritten). level and args are optional.
+#
 # Revision 1.1  2003/04/17 21:21:57  dischi
 # Moved the idle bar to plugins and changed the plugin interface
 #
@@ -70,17 +74,20 @@ FALSE = 0
 
 class interface(plugin.DaemonPlugin):
     def __init__(self):
+        plugin.DaemonPlugin.__init__(self)
         self.idlecount = 0
         self.interval = 300
         self.toolbar_surface = None
-        self.plugins = plugin.get('idlebar')
-        self.osd = 1
+        self.plugins = None
 
         
     def refresh(self):
         if not self.toolbar_surface:
             osd.drawbox(0,0,osd.width,75,color=0x80000000,width=-1)
             self.toolbar_surface = osd.getsurface(0,0,osd.width,75)
+        if not self.plugins:
+            self.plugins = plugin.get('idlebar')
+
         osd.putsurface(self.toolbar_surface,0,0)
         for p in self.plugins:
             p.draw()
@@ -98,12 +105,17 @@ class interface(plugin.DaemonPlugin):
 
 
 class IdleBarPlugin(plugin.Plugin):
+    def __init__(self):
+        plugin.Plugin.__init__(self)
+        self._type = 'idlebar'
+        
     def draw(self):
         return
 
 
 class clock(IdleBarPlugin):
     def __init__(self):
+        IdleBarPlugin.__init__(self)
         self.CLOCKFONT = 'skins/fonts/Trebuchet_MS.ttf'
         if not os.path.isfile(self.CLOCKFONT):
             # XXX Get this from the skin, but for now this will allow it to work
@@ -118,6 +130,7 @@ class clock(IdleBarPlugin):
     
 class mail(IdleBarPlugin):
     def __init__(self, mailbox):
+        IdleBarPlugin.__init__(self)
         self.NO_MAILIMAGE = 'skins/images/status/newmail_dimmed.png'
         self.MAILIMAGE = 'skins/images/status/newmail_active.png'
         self.MAILBOX = mailbox
@@ -147,6 +160,7 @@ class mail(IdleBarPlugin):
 
 class tv(IdleBarPlugin):
     def __init__(self):
+        IdleBarPlugin.__init__(self)
         self.tvlockfile = '/var/cache/freevo/record'
         self.TVLOCKED = 'skins/images/status/television_active.png'
         self.TVFREE = 'skins/images/status/television_inactive.png'
@@ -166,6 +180,7 @@ class tv(IdleBarPlugin):
 
 class weather(IdleBarPlugin):
     def __init__(self):
+        IdleBarPlugin.__init__(self)
         self.METARCODE = 'CYYZ'
         self.WEATHERCACHE = '/var/cache/freevo/weather'
         self.CLOCKFONT = 'skins/fonts/Trebuchet_MS.ttf'

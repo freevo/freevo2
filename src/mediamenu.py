@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.49  2003/04/18 10:22:06  dischi
+# You can now remove plugins from the list and plugins know the list
+# they belong to (can be overwritten). level and args are optional.
+#
 # Revision 1.48  2003/04/15 20:02:04  dischi
 # use the plugin interface
 #
@@ -139,6 +143,7 @@ from plugin import MainMenuPlugin
 #
 class PluginInterface(MainMenuPlugin):
     def __init__(self, type=None):
+        MainMenuPlugin.__init__(self)
         self.type = type
 
     def items(self, parent):
