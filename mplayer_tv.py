@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/08/17 18:33:36  krister
+# Changed format from yv12 to yuy2 (12->16 bpp). Added cache. Still a little jerky sometimes, mplayer will hopefully be fixed soon.
+#
 # Revision 1.1  2002/08/17 06:15:14  krister
 # Mplayer TV module. Requires a patched mplayer, will be in their CVS before september (?). Set MPLAYER_TV = 1 in freevo_config.py to use. Is hardcoded for NTSC, etc right now. This file will merge into mplayer.py later.
 #
@@ -145,8 +148,8 @@ class MPlayer:
         if mode == 'tv':
             tuner_channel = self.TunerGetChannel()
             tvcmd = ('-tv on:driver=v4l:input=0:norm=NTSC:channel=%s:'
-                     'chanlist=us-cable:width=640:height=480' % tuner_channel)
-            command = ('../apps/mplayer -vo %s -fs %s' %
+                     'chanlist=us-cable:width=640:height=480:outfmt=yuy2' % tuner_channel)
+            command = ('../apps/mplayer -vo %s -fs %s -cache 3000' %
                        (config.MPLAYER_VO_DEV, tvcmd))
         elif mode == 'vcr':
             raise 'Not implemented'
