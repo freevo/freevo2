@@ -1,48 +1,25 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # listing_area.py - A listing area for the Freevo skin
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes:
-# Todo:        
+# This module include the ListingArea used in the area code for drawing the
+# listing areas for menus. It inherits from Area (area.py) and the update
+# function will be called to update this area.
 #
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.10  2004/10/03 10:16:48  dischi
-# remove old code we do not need anymore
+# The helper class ItemImage is used here as widget because it supports shadow
+# and rectangle support, functions that are missing in the normal image widget.
 #
-# Revision 1.9  2004/09/07 18:45:17  dischi
-# some design improvements, needs still much works
+# TODO: o maybe move shadow and rectangle to the normal image widget
+#       o fix icon code which is deactivated right now
 #
-# Revision 1.8  2004/08/24 16:42:41  dischi
-# Made the fxdsettings in gui the theme engine and made a better
-# integration for it. There is also an event now to let the plugins
-# know that the theme is changed.
-#
-# Revision 1.7  2004/08/22 20:06:18  dischi
-# Switch to mevas as backend for all drawing operations. The mevas
-# package can be found in lib/mevas. This is the first version using
-# mevas, there are some problems left, some popup boxes and the tv
-# listing isn't working yet.
-#
-# Revision 1.6  2004/08/14 15:07:34  dischi
-# New area handling to prepare the code for mevas
-# o each area deletes it's content and only updates what's needed
-# o work around for info and tvlisting still working like before
-# o AreaHandler is no singleton anymore, each type (menu, tv, player)
-#   has it's own instance
-# o clean up old, not needed functions/attributes
-#
-# Revision 1.5  2004/08/05 17:30:24  dischi
-# cleanup
-#
-# Revision 1.4  2004/07/27 18:52:30  dischi
-# support more layer (see README.txt in backends for details
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -59,11 +36,22 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
+__all__ = [ 'ListingArea' ]
 
+# python imports
 import copy
+
+# external modules
+import notifier
 from mevas.image import CanvasImage
+
+# freevo imports
+import util
+from util.objectcache import ObjectCache
+
+# area import
 from area import Area
 
 
@@ -73,12 +61,17 @@ class ItemImage(CanvasImage):
     and a normal object is that it also has a parameter for shadow values.
     """
     def __init__(self, image, pos, shadow):
+        """
+        Create the CanvasImage and draw image, shadow and border
+        """
         if shadow and shadow.visible and not image.has_alpha:
             # there are shadow informations and the image has no alpha
             # values, so draw a shadow. Bug: this only works for shadow.x
             # and shadow.y both greater 0
-            CanvasImage.__init__(self, (image.width + shadow.x, image.height + shadow.y))
-            self.draw_rectangle((shadow.x, shadow.y), (image.width, image.height),
+            CanvasImage.__init__(self, (image.width + shadow.x,
+                                        image.height + shadow.y))
+            self.draw_rectangle((shadow.x, shadow.y),
+                                (image.width, image.height),
                                 shadow.color, 1)
             self.draw_image(image)
         else:
@@ -88,13 +81,16 @@ class ItemImage(CanvasImage):
         self.set_pos(pos)
 
 
-    
-class Listing_Area(Area):
-    """
-    this call defines the listing area
-    """
 
+class ListingArea(Area):
+    """
+    This class defines the ListingArea to draw menu listings for the area
+    part of the gui code.
+    """
     def __init__(self):
+        """
+        Create the Area and define some needed variables
+        """
         Area.__init__(self, 'listing')
         self.content           = []
         self.last_listing      = []
@@ -104,11 +100,14 @@ class Listing_Area(Area):
         self.last_max_len      = -1
         self.empty_listing     = None
         self.arrows            = []
+        self.imagecache        = ObjectCache(100, desc='item_image')
+        self.__default_val     = None
 
 
     def clear(self, keep_settings=False):
         """
-        clear the listing area
+        Clear the listing area. All objects are removed from the screen and
+        the list of used objects is resetted.
         """
         # delete the listing
         for c in self.last_listing:
@@ -129,9 +128,13 @@ class Listing_Area(Area):
         if self.empty_listing:
             self.empty_listing.unparent()
             self.empty_listing = None
-        
-        
-    def text_or_icon(self, string, x, width, font):
+
+
+    def __text_or_icon(self, string, x, width, font):
+        """
+        Helper function for the table-mode. This function will check if there
+        is an image for this string and will return it.
+        """
         l = string.split('_')
         if len(l) != 4:
             return string
@@ -139,7 +142,7 @@ class Listing_Area(Area):
             height = font.height
             image = os.path.join(self.settings.icon_dir, l[2].lower())
             if os.path.isfile(image + '.jpg'):
-                image += '.jpg' 
+                image += '.jpg'
             if os.path.isfile(image + '.png'):
                 image += '.png'
             else:
@@ -168,9 +171,9 @@ class Listing_Area(Area):
         return 0, l[3]
 
 
-    def get_items_geometry(self, settings, menu, area_settings):
+    def __get_items_geometry(self, settings, menu, area_settings):
         """
-        get the geometry of the items. How many items per row/col, spaces
+        Get the geometry of the items. How many items per row/col, spaces
         between each item, etc
         """
         # ok, we use settings + area_settings as key
@@ -181,7 +184,7 @@ class Listing_Area(Area):
             return menu.listing_area_dict[key]
         except (KeyError, AttributeError):
             pass
-        
+
         content = self.calc_geometry(self.layout.content, copy_object=True)
 
         if content.type == 'text':
@@ -217,7 +220,8 @@ class Listing_Area(Area):
                 rh = 0
                 rw = 0
                 if ct.rectangle:
-                    rw, rh, r = self.get_item_rectangle(ct.rectangle, content.width,
+                    rw, rh, r = self.get_item_rectangle(ct.rectangle,
+                                                        content.width,
                                                         ct.font.height)
                     hskip = min(hskip, r.x)
                     vskip = min(vskip, r.y)
@@ -232,11 +236,12 @@ class Listing_Area(Area):
                 rw = 0
                 if ct.rectangle:
                     if content.type == 'image+text':
-                        rw, rh, r = self.get_item_rectangle(ct.rectangle, ct.width,
-                                                            max(ct.height,
-                                                                int(ct.font.height * 1.1)))
+                        max_h = max(ct.height, int(ct.font.height * 1.1))
+                        rw, rh, r = self.get_item_rectangle(ct.rectangle,
+                                                            ct.width, max_h)
                     else:
-                        rw, rh, r = self.get_item_rectangle(ct.rectangle, ct.width,
+                        rw, rh, r = self.get_item_rectangle(ct.rectangle,
+                                                            ct.width,
                                                             ct.height)
                     hskip = min(hskip, r.x)
                     vskip = min(vskip, r.y)
@@ -244,7 +249,7 @@ class Listing_Area(Area):
                 addh = 0
                 if content.type == 'image+text':
                     addh = int(ct.font.height * 1.1)
-                    
+
                 items_w = max(items_w, ct.width, rw)
                 items_h = max(items_h, ct.height + addh, rh + addh)
 
@@ -252,12 +257,12 @@ class Listing_Area(Area):
         else:
             _debug_('unknown content type %s' % content.type, 0)
             return None
-        
+
         # shrink width for text menus
         width = content.width
 
         if items_w > width:
-            width, items_w = width - (items_w - width), width 
+            width, items_w = width - (items_w - width), width
 
         cols = 0
         rows = 0
@@ -273,15 +278,294 @@ class Listing_Area(Area):
         if not hasattr(menu, 'listing_area_dict'):
             menu.listing_area_dict = {}
 
-        info = cols, rows, items_w + content.spacing, items_h + content.spacing, \
-               -hskip, -vskip, width
+        info = cols, rows, items_w + content.spacing, items_h + \
+               content.spacing, -hskip, -vskip, width
         menu.listing_area_dict[key] = info
         return info
 
 
+    def __draw_text_listing_item(self, choice, (x,y), content, val, hspace,
+                                 vspace, gui_objects, width, hskip, vskip):
+        """
+        Draw an item for the text menu. This function is called from update
+        and is only used once to split the huge update function into smaller
+        once.
+        """
+        icon_x = 0
+        icon   = None
+        align  = val.align or content.align
+        menu   = self.menu
+        x_icon = 0
+
+        icon_type = None
+        if hasattr(val, 'icon'):
+            icon_type = val.icon
+
+        text = choice.name
+        if not text:
+            text = "unknown"
+
+        if not choice.icon and not icon_type:
+            if choice.type == 'playlist':
+                text = 'PL: %s' % text
+
+            if choice.type == 'dir' and choice.parent and \
+               choice.parent.type != 'mediamenu':
+                text = '[%s]' % text
+
+        # FIXME: there is no self.loadimage anymore
+        # if choice != menu.selected and hasattr( choice, 'outicon' ) and \
+        #        choice.outicon:
+        #     icon = self.loadimage(choice.outicon, (vspace-content.spacing,
+        #                                             vspace-content.spacing))
+        # elif choice.icon:
+        #     icon = self.loadimage(choice.icon, (vspace-content.spacing,
+        #                                          vspace-content.spacing))
+        # if not icon and icon_type:
+        #     icon = self.loadimage(settings.icon_dir + '/' + icon_type,
+        #           (vspace-content.spacing, vspace-content.spacing))
+
+        #
+        # display an icon for the item
+        #
+        # x_icon = 0
+        # if icon:
+        #     mx = x
+        #     icon_x = vspace
+        #     x_icon = icon_x
+        #     if align == 'right':
+        #         # know how many pixels to offset (dammed negative and max+X
+        #         # values in (x,y,width) from skin!)
+        #         r1 = r2 = None
+        #         if s_val.rectangle:
+        #             r1 = self.get_item_rectangle(s_val.rectangle,
+        #                                          width, s_val.font.height)[2]
+        #         if n_val.rectangle:
+        #             r2 = self.get_item_rectangle(n_val.rectangle,
+        #                                          width, n_val.font.height)[2]
+        #         min_rx = 0
+        #         max_rw = width
+        #         if r1:
+        #             min_rx = min( min_rx, r1.x )
+        #             max_rw = max( max_rw, r1.width )
+        #         if r2:
+        #             min_rx = min( min_rx, r2.x )
+        #             max_rw = max( max_rw, r2.width )
+        #
+        #         mx = x + width + hskip + ( max_rw + min_rx - width ) - \
+        #              icon_x
+        #         x_icon = 0
+        #     gui_objects.append(self.drawimage(icon, (mx, y)))
+
+        #
+        # draw the rectangle below the item
+        #
+        if val.rectangle:
+            r = self.get_item_rectangle(val.rectangle, width,
+                                        val.font.height)[2]
+            b = self.drawbox(x + hskip + r.x + x_icon - \
+                             self.settings.box_under_icon * x_icon,
+                             y + vskip + r.y,
+                             r.width - icon_x + \
+                             self.settings.box_under_icon * icon_x,
+                             r.height, r)
+            gui_objects.append(b)
+
+        #
+        # special handling for tv shows
+        #
+        if choice.type == 'video' and hasattr(choice,'tv_show') and \
+           choice.tv_show and (val.align=='left' or val.align=='') and \
+           (content.align=='left' or content.align==''):
+            sn = choice.show_name
+
+            if self.last_tvs[0] == sn[0]:
+                tvs_w = self.last_tvs[1]
+            else:
+                season  = 0
+                episode = 0
+                for c in menu.choices:
+                    if c.type == 'video' and hasattr(c,'tv_show') and \
+                       c.tv_show and c.show_name[0] == sn[0]:
+                        # do not use val.font.stringsize because this will
+                        # add shadow and outline values we add later for the
+                        # normal text again. So just use
+                        # val.font.font.stringsize
+                        stringsize = val.font.font.stringsize
+                        season  = max(season, stringsize(c.show_name[1]))
+                        episode = max(episode, stringsize(c.show_name[2]))
+                        if self.tvs_shortname and not c.image:
+                            self.tvs_shortname = False
+                    else:
+                        self.all_tvs = False
+
+                if self.all_tvs and not self.tvs_shortname and \
+                       len(menu.choices) > 5:
+                    self.tvs_shortname = True
+
+                if self.all_tvs and self.tvs_shortname:
+                    tvs_w = val.font.stringsize('x') + season + episode
+                else:
+                    tvs_w = val.font.stringsize('%s x' % sn[0]) + \
+                            season + episode
+                self.last_tvs = (sn[0], tvs_w)
+
+            s = self.drawstring(' - %s' % sn[3], val.font, content,
+                                x=x + hskip + icon_x + tvs_w,
+                                y=y + vskip, width=width-icon_x-tvs_w,
+                                height=-1, align_h='left', dim=False,
+                                mode='hard')
+            gui_objects.append(s)
+            s = self.drawstring(sn[2], val.font, content,
+                                x=x + hskip + icon_x + tvs_w - 100,
+                                y=y + vskip, width=100, height=-1,
+                                align_h='right', dim=False, mode='hard')
+            gui_objects.append(s)
+            if self.all_tvs and self.tvs_shortname:
+                text = '%sx' % sn[1]
+            else:
+                text = '%s %sx' % (sn[0], sn[1])
+
+        #
+        # if the menu has an attr table, the menu is a table. Each
+        # item _must_ have that many tabs as the table needs!!!
+        #
+        if hasattr(menu, 'table'):
+            table_x = x + hskip + x_icon
+            table_text = text.split('\t')
+            for i in range(len(menu.table)):
+                table_w = ((width-icon_x-len(table_text)*5)*\
+                           menu.table[i]) / 100
+                if i != len(menu.table) - 1:
+                    table_w += 5
+                x_mod = 0
+                if table_text[i].find('ICON_') == 0:
+                    toi = self.__text_or_icon(table_text[i], table_x,
+                                              table_w, val.font)
+                    x_mod, table_text[i] = toi
+                    if not isstring(table_text[i]):
+                        i = self.drawimage(table_text[i],
+                                           (table_x + x_mod, y + vskip))
+                        gui_objects.append(i)
+                        table_text[i] = ''
+
+                if table_text[i]:
+                    s = self.drawstring(table_text[i], val.font, content,
+                                        x=table_x + x_mod, y=y + vskip,
+                                        width=table_w, height=-1,
+                                        align_h=val.align, mode='hard',
+                                        dim=False)
+                    gui_objects.append(s)
+                table_x += table_w + 5
+
+        else:
+            #
+            # draw the text
+            #
+            s = self.drawstring(text, val.font, content, x=x + hskip + x_icon,
+                                y=y + vskip, width=width-icon_x, height=-1,
+                                align_h=val.align, mode='hard', dim=True)
+            gui_objects.append(s)
+
+
+    def __draw_image_listing_item(self, choice, (x, y), content, val, hspace,
+                                  vspace, gui_objects):
+        """
+        Draw an item for the image menu. This function is called from update
+        and is only used once to split the huge update function into smaller
+        once.
+        """
+        height = val.height
+        if content.type == 'image+text':
+            height += int(1.1 * val.font.height)
+
+        if val.align == 'center':
+            x += (hspace - val.width) / 2
+        else:
+            x += hskip
+
+        if val.valign == 'center':
+            y += (vspace - height) / 2
+        else:
+            y += vskip
+
+        if val.rectangle:
+            if content.type == 'image+text':
+                max_h = max(height, int(val.font.height * 1.1))
+                r = self.get_item_rectangle(val.rectangle, val.width,
+                                            max_h)[2]
+            else:
+                r = self.get_item_rectangle(val.rectangle, val.width,
+                                            height)[2]
+            b = self.drawbox(x + r.x, y + r.y, r.width, r.height, r)
+            gui_objects.append(b)
+
+        image = self.imagelib.item_image(choice, (val.width, val.height),
+                                         self.settings.icon_dir, force=True,
+                                         cache=self.imagecache)
+        if image:
+            i_w, i_h = image.width, image.height
+
+            addx = 0
+            addy = 0
+            if val.align == 'center' and i_w < val.width:
+                addx = (val.width - i_w) / 2
+
+            if val.align == 'right' and i_w < val.width:
+                addx = val.width - i_w
+
+            if val.valign == 'center' and i_h < val.height:
+                addy = (val.height - i_h) / 2
+
+            if val.valign == 'bottom' and i_h < val.height:
+                addy = val.height - i_h
+
+            i = ItemImage(image, (x + addx, y + addy), val.shadow)
+            self.layer.add_child(i)
+            gui_objects.append(i)
+
+        if content.type == 'image+text':
+            s = self.drawstring(choice.name, val.font, content, x=x,
+                                y=y + val.height, width=val.width, height=-1,
+                                align_h=val.align, mode='hard',
+                                ellipses='', dim=False)
+            gui_objects.append(s)
+
+
+
+
+    def __cache_next_image(self):
+        """
+        Cache the next images used in image view so they are in memory when
+        the user scrolls down. This function gets called by the notifier
+        and will only cache one image and than return. By that we make sure
+        we won't use needed cpu time.
+        """
+        if not self.__cache_listing:
+            return False
+
+        # Load the image. It will be stored in the cache. Since we don't use
+        # the image at this point, we just drop it.
+        self.imagelib.item_image(self.__cache_listing[0],
+                                 (self.__default_val.width,
+                                  self.__default_val.height),
+                                 self.settings, force=False,
+                                 cache=self.imagecache)
+        if len(self.__cache_listing) == 1:
+            # Nothing more to cache, return False to stop this callback
+            self.__cache_listing = []
+            return False
+        # Remove current item from the list and return True so that this
+        # function gets called again.
+        self.__cache_listing = self.__cache_listing[1:]
+        return True
+
+
+
     def update(self):
         """
-        update the listing area
+        Update the listing area. This function will be called from Area to
+        do the real update.
         """
         menu      = self.menu
         settings  = self.settings
@@ -291,44 +575,48 @@ class Listing_Area(Area):
         if not len(menu.choices):
             if not self.empty_listing:
                 self.clear()
-                self.empty_listing = self.drawstring(_('This directory is empty'),
-                                                     content.font, content)
+                t = _('This directory is empty')
+                self.empty_listing = self.drawstring(t, content.font, content)
             return
-        
+
         # delete 'empty listing' message
         if self.empty_listing:
             self.empty_listing.unparent()
             self.empty_listing = None
 
         cols, rows, hspace, vspace, hskip, vskip, width = \
-              self.get_items_geometry(settings, menu, area)
+              self.__get_items_geometry(settings, menu, area)
 
         menu.rows = rows
         menu.cols = cols
-        
+
         if content.align == 'center':
-            item_x0 = content.x + (content.width - cols * hspace) / 2
+            x = content.x + (content.width - cols * hspace) / 2
         else:
-            item_x0 = content.x
+            x = content.x
 
         if content.valign == 'center':
-            item_y0 = content.y + (content.height - rows * vspace) / 2
+            y = content.y + (content.height - rows * vspace) / 2
         else:
-            item_y0 = content.y
+            y = content.y
 
         current_col = 1
-        
+
         if content.type == 'image':
             width  = hspace - content.spacing
             height = vspace - content.spacing
-            
-        last_tvs      = ('', 0)
-        all_tvs       = True
-        tvs_shortname = True
+
+        self.last_tvs      = ('', 0)
+        self.all_tvs       = True
+        self.tvs_shortname = True
 
         start   = (menu.selected_pos / (cols * rows)) * (cols * rows)
         end     = start + cols * rows
         listing = menu.choices[start:end]
+        self.__cache_listing = []
+        if content.type != 'text' and end < len(menu.choices):
+            self.__cache_listing = menu.choices[end:end + cols * rows]
+            notifier.addTimer(0, notifier.Callback(self.__cache_next_image))
 
         # do some checking if we have to redraw everything
         # or only update because the selection changed
@@ -341,7 +629,7 @@ class Listing_Area(Area):
             redraw = True
         else:
             redraw = False
-            
+
         if redraw:
             # delete all current gui objects
             self.clear(keep_settings=True)
@@ -362,7 +650,8 @@ class Listing_Area(Area):
                     for o in self.last_listing[index][2]:
                         o.unparent()
                     gui_objects = []
-                    self.last_listing[index] = choice.name, choice.image, gui_objects
+                    self.last_listing[index] = choice.name, choice.image, \
+                                               gui_objects
                 elif choice == self.last_selection or choice == menu.selected:
                     gui_objects = self.last_listing[index][2]
                     while len(gui_objects):
@@ -389,249 +678,36 @@ class Listing_Area(Area):
                     val = s_val
                 else:
                     val = n_val
+                    self.__default_val = val
 
             #
-            # text listing --------------------------------------------------------
+            # text listing
             #
             if draw_this_item and content.type == 'text':
-                x0     = item_x0
-                y0     = item_y0
-                icon_x = 0
-                icon   = None
-                align   = val.align or content.align
-                
-                icon_type = None
-                if hasattr(val, 'icon'):
-                    icon_type = val.icon
-
-                text = choice.name
-                if not text:
-                    text = "unknown"
-
-                if not choice.icon and not icon_type:
-                    if choice.type == 'playlist':
-                        text = 'PL: %s' % text
-
-                    if choice.type == 'dir' and choice.parent and \
-                       choice.parent.type != 'mediamenu':
-                        text = '[%s]' % text
-
-                # FIXME: there is no self.loadimage anymore
-                # if choice != menu.selected and hasattr( choice, 'outicon' ) and \
-                #        choice.outicon:
-                #     icon = self.loadimage(choice.outicon, (vspace-content.spacing,
-                #                                             vspace-content.spacing))
-                # elif choice.icon:
-                #     icon = self.loadimage(choice.icon, (vspace-content.spacing,
-                #                                          vspace-content.spacing))
-                # if not icon and icon_type:
-                #     icon = self.loadimage(settings.icon_dir + '/' + icon_type,
-                #                           (vspace-content.spacing, vspace-content.spacing))
-
-                #
-                # display an icon for the item
-                #
-                x_icon = 0
-                if icon:
-                    mx = x0
-                    icon_x = vspace
-                    x_icon = icon_x
-                    if align == 'right':
-                        # know how many pixels to offset (dammed negative and max+X
-                        # values in (x,y,width) from skin!)
-                        r1 = r2 = None
-                        if s_val.rectangle:
-                            r1 = self.get_item_rectangle(s_val.rectangle,
-                                                         width, s_val.font.height)[2]
-                        if n_val.rectangle:
-                            r2 = self.get_item_rectangle(n_val.rectangle,
-                                                         width, n_val.font.height)[2]
-                        min_rx = 0
-                        max_rw = width
-                        if r1:
-                            min_rx = min( min_rx, r1.x )
-                            max_rw = max( max_rw, r1.width )
-                        if r2:
-                            min_rx = min( min_rx, r2.x )
-                            max_rw = max( max_rw, r2.width )
-
-                        mx = x0 + width + hskip + ( max_rw + min_rx - width ) - icon_x 
-                        x_icon = 0
-                    gui_objects.append(self.drawimage(icon, (mx, y0)))
-
-                #
-                # draw the rectangle below the item
-                #
-                if val.rectangle:
-                    r = self.get_item_rectangle(val.rectangle, width, val.font.height)[2]
-                    b = self.drawbox(x0 + hskip + r.x + x_icon - \
-                                     self.settings.box_under_icon * x_icon,
-                                     y0 + vskip + r.y,
-                                     r.width - icon_x + self.settings.box_under_icon * icon_x,
-                                     r.height, r)
-                    gui_objects.append(b)
-
-                #
-                # special handling for tv shows
-                #
-                if choice.type == 'video' and hasattr(choice,'tv_show') and \
-                   choice.tv_show and (val.align=='left' or val.align=='') and \
-                   (content.align=='left' or content.align==''):
-                    sn = choice.show_name
-
-                    if last_tvs[0] == sn[0]:
-                        tvs_w = last_tvs[1]
-                    else:
-                        season  = 0
-                        episode = 0
-                        for c in menu.choices:
-                            if c.type == 'video' and hasattr(c,'tv_show') and \
-                               c.tv_show and c.show_name[0] == sn[0]:
-                                # do not use val.font.stringsize because this will
-                                # add shadow and outline values we add later for the
-                                # normal text again. So just use val.font.font.stringsize
-                                stringsize = val.font.font.stringsize
-                                season  = max(season, stringsize(c.show_name[1]))
-                                episode = max(episode, stringsize(c.show_name[2]))
-                                if tvs_shortname and not c.image:
-                                    tvs_shortname = False
-                            else:
-                                all_tvs = False
-
-                        if all_tvs and not tvs_shortname and len(menu.choices) > 5:
-                            tvs_shortname = True
-                            
-                        if all_tvs and tvs_shortname:
-                            tvs_w = val.font.stringsize('x') + season + episode
-                        else:
-                            tvs_w = val.font.stringsize('%s x' % sn[0]) + season + episode
-                        last_tvs = (sn[0], tvs_w)
-                        
-                    s = self.drawstring(' - %s' % sn[3], val.font, content,
-                                        x=x0 + hskip + icon_x + tvs_w,
-                                        y=y0 + vskip, width=width-icon_x-tvs_w, height=-1,
-                                        align_h='left', dim=False, mode='hard')
-                    gui_objects.append(s)
-                    s = self.drawstring(sn[2], val.font, content,
-                                        x=x0 + hskip + icon_x + tvs_w - 100,
-                                        y=y0 + vskip, width=100, height=-1,
-                                        align_h='right', dim=False, mode='hard')
-                    gui_objects.append(s)
-                    if all_tvs and tvs_shortname:
-                        text = '%sx' % sn[1]
-                    else:
-                        text = '%s %sx' % (sn[0], sn[1])
-
-                #
-                # if the menu has an attr table, the menu is a table. Each
-                # item _must_ have that many tabs as the table needs!!!
-                #
-                if hasattr(menu, 'table'):
-                    table_x = x0 + hskip + x_icon
-                    table_text = text.split('\t')
-                    for i in range(len(menu.table)):
-                        table_w = ((width-icon_x-len(table_text)*5)*menu.table[i]) / 100
-                        if i != len(menu.table) - 1:
-                            table_w += 5
-                        x_mod = 0
-                        if table_text[i].find('ICON_') == 0:
-                            toi = self.text_or_icon(table_text[i], table_x, table_w, val.font)
-                            x_mod, table_text[i] = toi
-                            if not isstring(table_text[i]):
-                                i = self.drawimage(table_text[i],
-                                                   (table_x + x_mod, y0 + vskip))
-                                gui_objects.append(i)
-                                table_text[i] = ''
-                                
-                        if table_text[i]:
-                            s = self.drawstring(table_text[i], val.font, content,
-                                                x=table_x + x_mod,
-                                                y=y0 + vskip, width=table_w, height=-1,
-                                                align_h=val.align, mode='hard', dim=False)
-                            gui_objects.append(s)
-                        table_x += table_w + 5
-
-                else:
-                    #
-                    # draw the text
-                    #
-                    s = self.drawstring(text, val.font, content, x=x0 + hskip + x_icon,
-                                        y=y0 + vskip, width=width-icon_x, height=-1,
-                                        align_h=val.align, mode='hard', dim=True)
-                    gui_objects.append(s)
-
+                self.__draw_text_listing_item(choice, (x,y), content, val,
+                                              hspace, vspace, gui_objects,
+                                              width, hskip, vskip)
 
             #
-            # image listing --------------------------------------------------------
+            # image listing
             #
-            if draw_this_item and content.type == 'image' or content.type == 'image+text':
-                rec_h = val.height
-                if content.type == 'image+text':
-                    rec_h += int(1.1 * val.font.height)
-
-                if val.align == 'center':
-                    x0 = item_x0 + (hspace - val.width) / 2
-                else:
-                    x0 = item_x0 + hskip
-
-                if val.valign == 'center':
-                    y0 = item_y0 + (vspace - rec_h) / 2
-                else:
-                    y0 = item_y0 + vskip
-
-                if val.rectangle:
-                    if content.type == 'image+text':
-                        r = self.get_item_rectangle(val.rectangle, val.width,
-                                                    max(rec_h, int(val.font.height * 1.1)))[2]
-                    else:
-                        r = self.get_item_rectangle(val.rectangle, val.width, rec_h)[2]
-                    b = self.drawbox(x0 + r.x, y0 + r.y, r.width, r.height, r)
-                    gui_objects.append(b)
-
-                image = self.imagelib.item_image(choice, (val.width, val.height),
-                                                 settings.icon_dir, force=True)
-                if image:
-                    i_w, i_h = image.width, image.height
-
-                    addx = 0
-                    addy = 0
-                    if val.align == 'center' and i_w < val.width:
-                        addx = (val.width - i_w) / 2
-
-                    if val.align == 'right' and i_w < val.width:
-                        addx = val.width - i_w
-            
-                    if val.valign == 'center' and i_h < val.height:
-                        addy = (val.height - i_h) / 2
-                        
-                    if val.valign == 'bottom' and i_h < val.height:
-                        addy = val.height - i_h
-
-                    i = ItemImage(image, (x0 + addx, y0 + addy), val.shadow)
-                    self.layer.add_child(i)
-                    gui_objects.append(i)
-                        
-                if content.type == 'image+text':
-                    s = self.drawstring(choice.name, val.font, content, x=x0,
-                                        y=y0 + val.height, width=val.width, height=-1,
-                                        align_h=val.align, mode='hard',
-                                        ellipses='', dim=False)
-                    gui_objects.append(s)
-                    
-
+            if draw_this_item and content.type == 'image' or \
+                   content.type == 'image+text':
+                self.__draw_image_listing_item(choice, (x,y), content, val,
+                                               hspace, vspace, gui_objects)
 
             #
-            # calculate next item position ----------------------------------------
+            # calculate next item position
             #
             if current_col == cols:
                 if content.align == 'center':
-                    item_x0 = content.x + (content.width - cols * hspace) / 2
+                    x = content.x + (content.width - cols * hspace) / 2
                 else:
-                    item_x0 = content.x
-                item_y0 += vspace
+                    x = content.x
+                y += vspace
                 current_col = 1
             else:
-                item_x0 += hspace
+                x += hspace
                 current_col += 1
 
 
@@ -642,15 +718,16 @@ class Listing_Area(Area):
             # draw the arrows
             try:
                 if start > 0 and area.images['uparrow']:
-                    self.arrows.append(self.drawimage(area.images['uparrow'].filename,
-                                                      area.images['uparrow']))
+                    i = self.drawimage(area.images['uparrow'].filename,
+                                       area.images['uparrow'])
+                    self.arrows.append(i)
                 if end < len(menu.choices):
                     if isinstance(area.images['downarrow'].y, str):
                         v = copy.copy(area.images['downarrow'])
-                        v.y = eval(v.y, {'MAX':(item_y0-vskip)})
+                        v.y = eval(v.y, {'MAX':(y-vskip)})
                     else:
                         v = area.images['downarrow']
-                    self.arrows.append(self.drawimage(area.images['downarrow'].filename, v))
+                    i = self.drawimage(area.images['downarrow'].filename, v)
+                    self.arrows.append(i)
             except Exception, e:
                 _debug_(e, 0)
-          

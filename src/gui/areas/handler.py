@@ -1,37 +1,26 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
-# handler.py - area handler
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# handler.py - Handling the different used areas
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes:
-# Todo:        
+# The AreaHandler can be used to draw application on the screen. It uses
+# different areas also defined in this directory for the real drawing.
 #
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.14  2004/10/03 10:16:48  dischi
-# remove old code we do not need anymore
+# The handler itself checks the theme and calls the draw function of the areas
 #
-# Revision 1.13  2004/10/03 09:53:33  dischi
-# use only two layer for speed improvement
+# TODO: o more documentation how to use the AreaHandler
+#       o remove CanvasContainer definition in this file
+#       o do not add various stuff to the item object, use a specific dict
+#         for that
+#       o cleanup and internal documentation
 #
-# Revision 1.12  2004/09/07 18:47:10  dischi
-# each area has it's own layer (CanvasContainer) now
-#
-# Revision 1.11  2004/08/27 14:16:58  dischi
-# switch to new animation names
-#
-# Revision 1.10  2004/08/26 15:29:18  dischi
-# make the tv guide work again (but very slow)
-#
-# Revision 1.9  2004/08/24 16:42:41  dischi
-# Made the fxdsettings in gui the theme engine and made a better
-# integration for it. There is also an event now to let the plugins
-# know that the theme is changed.
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -48,20 +37,37 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
+__all__ = [ 'AreaHandler' ]
 
+# python imports
 import os
 import traceback
 import time
+
+# external imports
 import mevas
 
+# freevo imports
 import config
+
+# gui imports
 import util
 import gui.animation as animation 
 
+# default areas
+from listing_area   import ListingArea
+from tvlisting_area import TVListingArea as TvlistingArea
+from view_area      import ViewArea
+from info_area      import InfoArea
+from default_areas  import ScreenArea, TitleArea, SubtitleArea
+
 
 class CanvasContainer(mevas.CanvasContainer):
+    """
+    Dummy class to add 'name' for debug to a CanvasContainer
+    """
     def __init__(self, name):
         self.name = name
         mevas.CanvasContainer.__init__(self)
@@ -72,12 +78,11 @@ class CanvasContainer(mevas.CanvasContainer):
     
 class AreaHandler:
     """
-    main skin class
+    Handler for the areas used to draw an application on the screen.
     """
-    
     def __init__(self, type, areas, get_theme, screen, imagelib):
         """
-        init the skin engine
+        Init the handler by laoding all areas
         """
         self.type          = type
         self.get_theme     = get_theme
@@ -99,23 +104,17 @@ class AreaHandler:
         self.width     = self.canvas.width
         self.height    = self.canvas.height
 
-        # load default areas
-        from listing_area   import Listing_Area
-        from tvlisting_area import TVListing_Area as Tvlisting_Area
-        from view_area      import View_Area
-        from info_area      import Info_Area
-        from default_areas  import Screen_Area, Title_Area, Subtitle_Area
-
         for a in areas:
             if isinstance(a, str):
-                self.areas.append(eval('%s_Area()' % a.capitalize()))
+                self.areas.append(eval('%sArea()' % a.capitalize()))
             else:
                 self.areas.append(a)
 
         for a in self.areas:
             a.set_screen(self, self.layer[0], self.layer[1])
             
-        self.storage_file = os.path.join(config.FREEVO_CACHEDIR, 'skin-%s' % os.getuid())
+        self.storage_file = os.path.join(config.FREEVO_CACHEDIR,
+                                         'skin-%s' % os.getuid())
         self.storage = util.read_pickle(self.storage_file)
         if self.storage and self.storage.has_key(config.SKIN_XML_FILE):
             self.display_style['menu'] = self.storage[config.SKIN_XML_FILE]
@@ -159,7 +158,8 @@ class AreaHandler:
 
         if self.display_style['menu'] >=  len(area.style):
             self.display_style['menu'] = 0
-        self.display_style['menu'] = (self.display_style['menu'] + 1) % len(area.style)
+        self.display_style['menu'] = (self.display_style['menu'] + 1) % \
+                                     len(area.style)
 
         self.storage[config.SKIN_XML_FILE] = self.display_style['menu']
         util.save_pickle(self.storage, self.storage_file)
@@ -201,7 +201,8 @@ class AreaHandler:
                 # have have a description if description is an attribute
                 # or when the item has a type (special skin handling here)
                 menu.skin_default_has_description = True
-            if menu.skin_default_has_images and menu.skin_default_has_description:
+            if menu.skin_default_has_images and \
+                   menu.skin_default_has_description:
                 break
             
         self.use_images      = menu.skin_default_has_images
@@ -237,7 +238,8 @@ class AreaHandler:
             if i.type == 'dir':
                 folder += 1
                 # directory with mostly folder:
-                if config.SKIN_FORCE_TEXTVIEW_STYLE == 1 and folder > 3 and not i.media:
+                if config.SKIN_FORCE_TEXTVIEW_STYLE == 1 and folder > 3 \
+                       and not i.media:
                     self.use_text_view = False
                     return
                     
@@ -314,7 +316,8 @@ class AreaHandler:
                 style = object.force_skin_layout
 
             # get the correct <menu>
-            if object.item_types and theme.special_menu.has_key(object.item_types):
+            if object.item_types and \
+                   theme.special_menu.has_key(object.item_types):
                 area_definitions = theme.special_menu[object.item_types]
             else:
                 self.__scan_for_text_view__(object)
@@ -372,10 +375,10 @@ class AreaHandler:
             _debug_('time debug: %s %s' % (t2-t1, t3-t2), 2)
 
         except UnicodeError, e:
-            print '******************************************************************'
+            print '***********************************************************'
             print 'Unicode Error: %s' % e
-            print 'Please report the following lines to the freevo mailing list'
-            print 'or with the subject \'[Freevo-Bugreport\] Unicode\' to'
+            print 'Please report the following lines to the freevo mailing'
+            print 'list or with the subject \'[Freevo-Bugreport\] Unicode\' to'
             print 'freevo@dischi-home.de.'
             print
             print traceback.print_exc()

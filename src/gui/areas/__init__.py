@@ -1,26 +1,19 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
-# __init__.py - Area handling module
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# area/__init__.py - Area handling module
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes:
-# Todo:        
+# This file is the interface to the area handling code in Freevo. Please
+# see the documentation for AreaHandler in handler.py how to use this and
+# Area in area.py how to define your own area.
 #
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.8  2004/08/14 15:07:34  dischi
-# New area handling to prepare the code for mevas
-# o each area deletes it's content and only updates what's needed
-# o work around for info and tvlisting still working like before
-# o AreaHandler is no singleton anymore, each type (menu, tv, player)
-#   has it's own instance
-# o clean up old, not needed functions/attributes
-#
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -37,8 +30,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# -----------------------------------------------------------------------
-
+# -----------------------------------------------------------------------------
 
 from handler import AreaHandler
 from area import Area

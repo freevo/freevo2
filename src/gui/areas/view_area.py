@@ -1,37 +1,21 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # view_area.py - A view area for the Freevo skin
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes:
-# Todo:        
+# The file defines the ViewArea used to show an image for the current item.
+# If no image is found, this area will be blank.
 #
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.6  2004/09/14 20:08:34  dischi
-# draw rectangle before image
+# TODO: o check if everything here is really needed and clean up if not
+#       o when ItemImage from the listing area is moved to a widget use it
 #
-# Revision 1.5  2004/08/22 20:06:18  dischi
-# Switch to mevas as backend for all drawing operations. The mevas
-# package can be found in lib/mevas. This is the first version using
-# mevas, there are some problems left, some popup boxes and the tv
-# listing isn't working yet.
-#
-# Revision 1.4  2004/08/14 15:07:34  dischi
-# New area handling to prepare the code for mevas
-# o each area deletes it's content and only updates what's needed
-# o work around for info and tvlisting still working like before
-# o AreaHandler is no singleton anymore, each type (menu, tv, player)
-#   has it's own instance
-# o clean up old, not needed functions/attributes
-#
-# Revision 1.3  2004/07/24 17:49:05  dischi
-# interface cleanup
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -48,15 +32,17 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
+__all__ = [ 'ViewArea' ]
+
+# area imports
 from area import Area
 
-class View_Area(Area):
+class ViewArea(Area):
     """
-    this call defines the view area
+    This class defines the view area.
     """
-
     def __init__(self):
         Area.__init__(self, 'view')
         self.info    = (None, None, None, None)
@@ -65,17 +51,18 @@ class View_Area(Area):
 
     def clear(self):
         """
-        delete the shown image from screen
+        Delete the shown image from screen
         """
         self.info  = (None, None, None, None)
         for c in self.content:
             c.unparent()
         self.content = []
 
-        
+
     def update(self):
         """
-        update the view area
+        Update the view area by loading a new image or do nothing if the image
+        is still the same.
         """
         item  = self.viewitem
         image = None
@@ -115,11 +102,11 @@ class View_Area(Area):
             if r.x < 0:
                 x0 -= r.x
                 r.x = 0
-            
+
             if r.y < 0:
                 y0 -= r.y
                 r.y = 0
-            
+
             if r.x + r.width > x0 + width:
                 r.width, width = width, width - (r.width - width)
 
@@ -129,19 +116,21 @@ class View_Area(Area):
         addx = content.x + content.spacing
         addy = content.y + content.spacing
 
-        image = self.imagelib.item_image(item, (width, height), self.settings.icon_dir)
+        # FIXME: use cache here.
+        image = self.imagelib.item_image(item, (width, height),
+                                         self.settings.icon_dir)
 
         if not image:
             return
 
         i_w, i_h = image.width, image.height
-        
+
         if content.align == 'center' and i_w < width:
             addx += (width - i_w) / 2
 
         if content.align == 'right' and i_w < width:
             addx += width - i_w
-            
+
         if content.valign == 'center' and i_h < height:
             addy += (height - i_h) / 2
 
@@ -154,7 +143,8 @@ class View_Area(Area):
         if val.rectangle:
             r.width  -= width  - i_w
             r.height -= height - i_h
-            self.content.append(self.drawbox(r.x + addx, r.y + addy, r.width, r.height, r))
+            self.content.append(self.drawbox(r.x + addx, r.y + addy,
+                                             r.width, r.height, r))
 
         self.content.append(self.drawimage(image, (x0, y0)))
 

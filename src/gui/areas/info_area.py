@@ -4,46 +4,17 @@
 # -----------------------------------------------------------------------
 # $Id$
 #
-# Notes:
-# Todo:
+# This module include the InfoArea used in the area code for showing additional
+# information on the screen. Most of the work is done in the InfoText widget in
+# src/gui/widget/infotext.py.
 #
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.6  2004/09/07 18:47:10  dischi
-# each area has it's own layer (CanvasContainer) now
-#
-# Revision 1.5  2004/08/23 15:11:50  dischi
-# avoid redraw when not needed
-#
-# Revision 1.4  2004/08/22 20:06:18  dischi
-# Switch to mevas as backend for all drawing operations. The mevas
-# package can be found in lib/mevas. This is the first version using
-# mevas, there are some problems left, some popup boxes and the tv
-# listing isn't working yet.
-#
-# Revision 1.3  2004/08/14 15:07:34  dischi
-# New area handling to prepare the code for mevas
-# o each area deletes it's content and only updates what's needed
-# o work around for info and tvlisting still working like before
-# o AreaHandler is no singleton anymore, each type (menu, tv, player)
-#   has it's own instance
-# o clean up old, not needed functions/attributes
-#
-# Revision 1.2  2004/07/24 12:21:31  dischi
-# use new renderer and screen features
-#
-# Revision 1.1  2004/07/22 21:13:39  dischi
-# move skin code to gui, update to new interface started
-#
-# Revision 1.24  2004/07/10 12:33:41  dischi
-# header cleanup
-#
-# Revision 1.23  2004/06/02 19:04:35  dischi
-# translation updates
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al.
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Gustavo Sverzut Barbieri <gsbarbieri@yahoo.com.br>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -60,22 +31,25 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
+__all__ = [ 'InfoArea' ]
 
+# freevo imports
 import util
 
+# gui imports
 from area import Area
 from gui import InfoText
 
 # function calls to get more info from the skin
 function_calls = { 'comingup': util.comingup }
 
-class Info_Area(Area):
+class InfoArea(Area):
     """
-    this call defines the view area
+    This area draws additional information on the screen. The information what
+    to draw and were to put it is defined in the skin fxd file.
     """
-
     def __init__(self):
         Area.__init__(self, 'info')
         self.last_item = None
@@ -88,27 +62,29 @@ class Info_Area(Area):
 
     def clear(self):
         """
-        delete the shown image from screen
+        Delete the information widget
         """
         if self.canvas:
             self.canvas.unparent()
         self.canvas = None
         self.last_item = None
 
-        
+
     def update(self):
-        # init some stuff
+        """
+        Update the information area.
+        """
         self.set_list(self.set_content())
 
         if self.canvas and self.infoitem == self.last_item and \
            self.content == self.last_content:
             self.canvas.rebuild()
             return
-        
+
         t = InfoText((self.content.x, self.content.y),
                      (self.content.width, self.content.height),
                      self.infoitem, self.list, function_calls)
-        
+
         if self.canvas:
             self.canvas.unparent()
         self.canvas = t
@@ -119,8 +95,8 @@ class Info_Area(Area):
 
     def set_content( self ):
         """
-        set self.content and self.layout_content if they need to be set (return 1)
-        or does nothing (return 0)
+        Set self.content and self.layout_content if they need to be set
+        (return 1) or does nothing (return 0)
         """
         update=0
         if self.content and self.area_values and \
@@ -132,7 +108,8 @@ class Info_Area(Area):
 
         if self.layout_content is not self.layout.content or update:
             types = self.layout.content.types
-            self.content = self.calc_geometry( self.layout.content, copy_object=True )
+            self.content = self.calc_geometry(self.layout.content,
+                                              copy_object=True)
             # backup types, which have the previously calculated fcontent
             self.content.types = types
             self.layout_content = self.layout.content
@@ -142,7 +119,7 @@ class Info_Area(Area):
 
     def set_list( self, force = 0 ):
         """
-        set self.list if need (return 1) or does nothing (return 0)
+        Set self.list if need (return 1) or does nothing (return 0)
         """
         if force or self.infoitem is self.infoitem != self.last_item:
             key = 'default'

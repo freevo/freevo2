@@ -1,58 +1,34 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
-# area.py - An area for the Freevo skin
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# area.py - An area template for the Freevo skin
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes:
+# This file includes a template for an area used in the area code to draw
+# images, info text, listing or something different. The areas itself are
+# called by the AreaHandler defined in handler.py
 #
+# All areas used somewere in Freevo inherit from Area and only need to define
+# an update function. The settings (theme) used in all areas are selected by
+# the handler based on the current theme fxd file.
 #
-# This is the main class for all area.
+# The Area also defines helper drawing functions:
+# drawbox(self, x, y, width, height, rect)
+# drawimage(self, image, val, background=False)
+# drawstring(self, text, font, content, x=-1, y=-1, width=None, height=None,
+#            align_h = None, align_v = None, mode='hard', ellipses='...',
+#            dim=True)
 #
-# If you want to create a new Area, please keep my problems in mind:
+# TODO: o more cleanup here and in all areas used
+#       o maybe make an area a widget
+#       o do not import theme.py here
 #
-#
-# 1. Not all areas are visible at the same time, some areas may change
-#    the settings and others don't
-# 2. The listing and the view area can overlap, at the next item the image
-#    may be gone
-# 3. alpha layers are slow to blit on a non alpha surface.
-# 4. the blue_round1 draws two alpha masks, one for the listing, one
-#    for the view area. They overlap, but the overlapping area
-#    shouldn't be an addition of the transparent value
-# 5. If you drop an alpha layer on the screen, you can't get the original
-#    background back by making a reverse alpha layer.
-#
-# For more informations contact me (dmeyer@tzi.de)
-#
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.16  2004/10/03 10:16:48  dischi
-# remove old code we do not need anymore
-#
-# Revision 1.15  2004/10/03 09:53:33  dischi
-# use only two layer for speed improvement
-#
-# Revision 1.14  2004/09/07 18:47:10  dischi
-# each area has it's own layer (CanvasContainer) now
-#
-# Revision 1.13  2004/08/27 14:17:15  dischi
-# remove old plugin code
-#
-# Revision 1.12  2004/08/26 18:13:18  dischi
-# always use Text not Textbox
-#
-# Revision 1.11  2004/08/26 15:29:18  dischi
-# make the tv guide work again (but very slow)
-#
-# Revision 1.10  2004/08/24 16:42:41  dischi
-# Made the fxdsettings in gui the theme engine and made a better
-# integration for it. There is also an event now to let the plugins
-# know that the theme is changed.
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -69,28 +45,36 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
+__all__ = [ 'Area' ]
 
+# python imports
 import copy
 import os
 
+# external modules
 import mevas
 
+# freevo imports
 import config
 import util
 
-# FIXME: this is really bad, correct this so fxdparser a.k.a theme
-# is not needed anymore
+# gui imports
 from gui import theme_engine as fxdparser
 from gui import Rectangle, Text, Textbox, Image
 
 
 class Area:
     """
-    the base call for all areas. Each child needs two functions:
+    The base call for all areas. Each class inheriting from Area needs
+    to define the update and the clear function.
     """
     def __init__(self, name):
+        """
+        Create an area. The area needs to have a 'name' to find the current
+        settings in the theme definition.
+        """
         self.area_name   = name
         self.area_values = None
         self.layout      = None
@@ -102,7 +86,7 @@ class Area:
 
     def set_screen(self, screen, bg_layer, content_layer):
         """
-        move this area to a new screen object
+        Move this area to a new screen object.
         """
         if self.screen:
             self.clear_all()
@@ -110,23 +94,26 @@ class Area:
         self.imagelib = screen.imagelib
         self.bg_layer = bg_layer
         self.content_layer = content_layer
-        
+
 
     def update(self):
         """
-        there is no content in this area
+        Update this area. The template has no content to draw.
         """
         pass
-    
+
 
     def clear(self):
         """
-        clear the content objects
+        Clear the content objects.
         """
         pass
 
 
     def clear_all(self):
+        """
+        Clear the complete area. This clears the content and the background.
+        """
         if not self.screen:
             _debug_('ERROR in area %s: no screen defined' % self.name)
             return
@@ -135,13 +122,13 @@ class Area:
             b.unparent()
         self.__background__ = []
         self.clear()
-            
+
 
     def draw(self, settings, obj, viewitem, infoitem, area_definitions):
         """
-        this is the main draw function. This function draws the background,
-        checks if redraws are needed and calls the two update functions
-        for the different types of areas
+        This is the main draw function. This function draws the background
+        and calls the update function for the different types of areas.
+        This function will be called by the AreaHandler.
         """
         if not self.screen:
             return
@@ -149,15 +136,15 @@ class Area:
         self.menu     = obj
         self.viewitem = viewitem
         self.infoitem = infoitem
-            
-        self.init_vars(settings, area_definitions)
+
+        self.__init_vars(settings, area_definitions)
 
         if not self.area_values.visible or not self.layout:
             self.clear_all()
             return
 
         self.layer = self.bg_layer
-        self.__draw_background__()
+        self.__draw_background()
         self.layer = self.content_layer
         self.update()
 
@@ -165,8 +152,8 @@ class Area:
 
     def calc_geometry(self, object, copy_object=0):
         """
-        calculate the real values of the object (e.g. content) based
-        on the geometry of the area
+        Calculate the real values of the object (e.g. content) based
+        on the geometry of the area.
         """
         if copy_object:
             object = copy.copy(object)
@@ -174,10 +161,12 @@ class Area:
         font_h=0
 
         if isinstance(object.width, str):
-            object.width = int(eval(object.width, {'MAX':self.area_values.width}))
+            object.width = int(eval(object.width,
+                                    {'MAX': self.area_values.width}))
 
         if isinstance(object.height, str):
-            object.height = int(eval(object.height, {'MAX':self.area_values.height}))
+            object.height = int(eval(object.height,
+                                     {'MAX': self.area_values.height}))
 
         if isinstance(object.x, str):
             object.x = int(eval(object.x, {'MAX':self.area_values.height}))
@@ -187,25 +176,28 @@ class Area:
 
         object.x += self.area_values.x
         object.y += self.area_values.y
-        
+
         if not object.width:
             object.width = self.area_values.width
 
         if not object.height:
             object.height = self.area_values.height
 
-        if object.width + object.x > self.area_values.width + self.area_values.x:
+        if object.width + object.x > self.area_values.width + \
+               self.area_values.x:
             object.width = self.area_values.width - object.x
 
-        if object.height + object.y > self.area_values.height + self.area_values.y:
-            object.height = self.area_values.height + self.area_values.y - object.y
+        if object.height + object.y > self.area_values.height + \
+               self.area_values.y:
+            object.height = self.area_values.height + self.area_values.y - \
+                            object.y
 
         return object
 
-        
+
     def get_item_rectangle(self, rectangle, item_w, item_h):
         """
-        calculates the values for a rectangle to fit item_w and item_h
+        Calculates the values for a rectangle to fit item_w and item_h
         inside it.
         """
         r = copy.copy(rectangle)
@@ -241,12 +233,12 @@ class Area:
         # return needed width and height to fit original width and height
         # and the rectangle attributes
         return max(item_w, r.width), max(item_h, r.height), r
-    
 
 
-    def init_vars(self, settings, area):
+
+    def __init_vars(self, settings, area):
         """
-        check which layout is used and set variables for the object
+        Check which layout is used and set variables for the object
         """
         self.settings = settings
 
@@ -266,23 +258,23 @@ class Area:
 
         self.layout = area.layout
         return
-        
 
-    def __draw_background__(self):
+
+    def __draw_background(self):
         """
-        draw the <background> of the area
+        Draw the <background> of the area.
         """
         area   = self.area_values
 
         background_image = []
         background_rect  = []
-        
+
         for bg in self.layout.background:
             bg = copy.copy(bg)
             if isinstance(bg, fxdparser.Image) and bg.visible:
                 self.calc_geometry(bg)
                 imagefile = ''
-                
+
                 # if this is the real background image, ignore the
                 # OVERSCAN to fill the whole screen
                 if bg.label == 'background':
@@ -305,8 +297,9 @@ class Area:
 
             elif isinstance(bg, fxdparser.Rectangle):
                 self.calc_geometry(bg)
-                background_rect.append((bg.x, bg.y, bg.width, bg.height, bg.bgcolor,
-                                        bg.size, bg.color, bg.radius))
+                background_rect.append((bg.x, bg.y, bg.width, bg.height,
+                                        bg.bgcolor, bg.size, bg.color,
+                                        bg.radius))
 
 
         for b in copy.copy(self.__background__):
@@ -321,48 +314,44 @@ class Area:
 
         for rec in background_rect:
             x, y, width, height, bgcolor, size, color, radius = rec
-            box = self.drawbox(x, y, width, height, (bgcolor, size, color, radius))
+            box = self.drawbox(x, y, width, height, (bgcolor, size, color,
+                                                     radius))
             self.__background__.append(box)
             box.info = rec
             box.set_zindex(-1)
-            
+
         for image in background_image:
             imagefile, x, y, width, height = image
-            i = self.drawimage(imagefile, (x, y, width, height), background=True)
+            i = self.drawimage(imagefile, (x, y, width, height),
+                               background=True)
             if i:
                 self.__background__.append(i)
                 i.info = image
                 i.set_zindex(-1)
-            
 
 
-    # functions for the area to draw stuff on the screen
-    #
-    # drawbox
-    # drawimage
-    # drawstring
 
     def drawbox(self, x, y, width, height, rect):
         """
-        draw a round box ... or better stores the information about this call
-        in a variable. The real drawing is done inside draw()
+        Create a rectangle (gui.widgets.rectangle) and add it to the correct
+        layer for drawing.
         """
         try:
             r = Rectangle((x, y), (width, height), rect.bgcolor, rect.size,
                           rect.color, rect.radius )
         except AttributeError, e:
-            r = Rectangle((x, y), (width, height), rect[0], rect[1], rect[2], rect[3])
-
+            r = Rectangle((x, y), (width, height), rect[0], rect[1], rect[2],
+                          rect[3])
         self.layer.add_child(r)
         return r
-    
-            
-    def drawstring(self, text, font, content, x=-1, y=-1, width=None, height=None,
-                   align_h = None, align_v = None, mode='hard', ellipses='...',
-                   dim=True):
+
+
+    def drawstring(self, text, font, content, x=-1, y=-1, width=None,
+                   height=None, align_h = None, align_v = None, mode='hard',
+                   ellipses='...', dim=True):
         """
-        writes a text ... or better stores the information about this call
-        in a variable. The real drawing is done inside draw()
+        Creates a text object (gui.widgets.text) and add it to the correct
+        layer for drawing.
         """
         if not text:
             return None
@@ -382,7 +371,7 @@ class Area:
             align_h = content.align
         if not align_h:
             align_h = 'left'
-                
+
         if not align_v and content:
             align_v = content.valign
         if not align_v:
@@ -391,16 +380,17 @@ class Area:
         if height == -1:
             height = font.height
 
-        t = Text(text, (x, y), (width, height), font, align_h, align_v, mode, ellipses, dim)
+        t = Text(text, (x, y), (width, height), font, align_h, align_v, mode,
+                 ellipses, dim)
         self.layer.add_child(t)
         return t
 
-    
+
 
     def drawimage(self, image, val, background=False):
         """
-        draws an image ... or better stores the information about this call
-        in a variable. The real drawing is done inside draw()
+        Create an image object (gui.widgets.image) and add it to the correct
+        layer for drawing.
         """
         if not image:
             return None
@@ -409,10 +399,10 @@ class Area:
         # if isstring(image) and image.find(config.ICON_DIR) == 0 and \
         #        image.find(self.settings.icon_dir) == -1:
         #     # replace the icon
-        #     new_image = os.path.join(self.settings.icon_dir, image[len(config.ICON_DIR)+1:])
+        #     new_image = os.path.join(self.settings.icon_dir,
+        #                 image[len(config.ICON_DIR)+1:])
         #     if os.path.isfile(new_image):
         #         image = new_image
-
         if isinstance(val, tuple):
             if len(val) == 2:
                 x, y, w, h = val[0], val[1], image.width, image.height
@@ -425,8 +415,10 @@ class Area:
             if not (x == 0 and y == 0 and w == self.screen.width and \
                     h == self.screen.height) and \
                     self.area_values.x == x and self.area_values.y == y and \
-                    self.area_values.width == w and self.area_values.height == h:
-                i = Image(image, (0, 0), (self.screen.width, self.screen.height))
+                    self.area_values.width == w and \
+                    self.area_values.height == h:
+                i = Image(image, (0, 0), (self.screen.width,
+                                          self.screen.height))
                 i.crop((x,y), (w,h))
                 i.set_pos((x,y))
             else:
