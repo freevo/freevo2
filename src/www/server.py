@@ -258,7 +258,10 @@ class Server:
         self.htdocs    = htdocs
         self.scripts   = scripts
         self.resources = {}
-        self.socket    = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+        try:
+            self.socket = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+        except:
+            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.setblocking(0)
 
         # try to re-use a server port if possible
