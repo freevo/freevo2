@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/02/01 17:50:43  dischi
+# fix, it deleted all infos on caching :-)
+#
 # Revision 1.16  2004/01/19 20:25:53  dischi
 # sync metainfo before stopping
 #
@@ -126,7 +129,7 @@ def delete_old_files_2():
     for filename in util.recursefolders(config.OVERLAY_DIR,1,'freevo.cache',1):
         if filename.startswith(config.OVERLAY_DIR + '/disc'):
             continue
-        dirname = os.path.dirname(filename)
+        dirname = os.path.dirname(filename)[len(config.OVERLAY_DIR):]
         data    = util.read_pickle(filename)
         for key in copy.copy(data):
             if not os.path.exists(dirname + '/' + key):
