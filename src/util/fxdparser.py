@@ -140,7 +140,7 @@ class FXDtree(qp_xml.Parser):
         f.write('<' + elem.name)
         for (ns, name), value in elem.attrs.items():
             f.write(u' ' + Unicode(name) + u'="' + Unicode(value) + '"')
-        if elem.children or elem.first_cdata:
+        if elem.children != [] or elem.first_cdata != None:
             if elem.first_cdata == None:
                 f.write('>\n  ')
                 for i in range(depth):
@@ -360,6 +360,11 @@ class FXD:
             else:
                 nodes = []
 
+        # create a new dict to avoid messing up with default parameter
+        # for items
+        if not object.info:
+            object.info = {}
+
         for node in nodes:
             for child in node.children:
                 txt = child.textof()
@@ -374,4 +379,6 @@ class FXD:
         """
         add an element to the tree
         """
+        if not isinstance(node, XMLnode):
+            node = node.__fxd__(self)
         self.tree.add(node, parent, pos)
