@@ -96,7 +96,7 @@ TV_SHOW_IMAGES = "tv-show-images/"
 # Skin file that contains the actual skin code. This is imported
 # from skin.py
 #
-OSD_SKIN = 'skins/test2/skin_test2.py'
+OSD_SKIN = 'skins/main1/skin_main1.py'
 
 # OSD default font. It is only used for debug/error stuff, not regular
 # skinning.
