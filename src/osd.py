@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.123  2004/01/12 19:10:35  dischi
+# support spaces inside a string after a \n
+#
 # Revision 1.122  2004/01/11 20:23:31  dischi
 # move skin font handling to osd to avoid duplicate code
 #
@@ -715,7 +718,9 @@ class OSD:
     def __drawstringframed_line__(self, string, max_width, font, hard,
                                   ellipses, word_splitter):
         """
-        calculate _one_ line for drawstringframed
+        calculate _one_ line for drawstringframed. Returns a list:
+        width used, string to draw, rest that didn't fit and True if this
+        function stopped because of a \n.
         """
         c = 0                           # num of chars fitting
         width = 0                       # width needed
@@ -733,12 +738,12 @@ class OSD:
                 width = font.stringsize(string)
                 if width <= max_width:
                     # ok, text fits
-                    return (width, string, '')
+                    return (width, string, '', False)
                 # ok, only draw the ellipses, shorten them first
                 while(ellipses_size > max_width):
                     ellipses = ellipses[:-1]
                     ellipses_size = font.stringsize(ellipses)
-                return (ellipses_size, ellipses, string)
+                return (ellipses_size, ellipses, string, False)
         else:
             ellipses_size = 0
             ellipses = ''
@@ -754,10 +759,10 @@ class OSD:
                 break
             if ls == c:
                 # everything fits
-                return (width, string, '')
+                return (width, string, '', False)
             if string[c] == '\n':
                 # linebreak, we have to stop
-                return (width, string[:c], string[c+1:])
+                return (width, string[:c], string[c+1:], True)
             if not hard and string[c] in word_splitter:
                 # rememeber the last space for mode == 'soft' (not hard)
                 space = c
@@ -784,7 +789,7 @@ class OSD:
             width -= last_word_size
 
         # calc the matching and rest string and return all this
-        return (width+ellipses_size, string[:c]+ellipses, string[c:])
+        return (width+ellipses_size, string[:c]+ellipses, string[c:], False)
 
             
 
@@ -798,7 +803,8 @@ class OSD:
         This is a wrapper to drawstringframedsoft() and -hard()
 
         Parameters:
-        - string: the string to be drawn. Supports '\n' and '\t' too.
+        - string: the string to be drawn, supports also '\n'. \t is not supported
+          by pygame, you need to replace it first
         - x,y: the posistion
         - width, height: the frame dimensions,
           height == -1 defaults to the font height size
@@ -809,6 +815,10 @@ class OSD:
         - align_v: vertical align. Can be top, bottom, center or middle
         - mode: the way we should break lines/truncate. Can be 'hard'(based on chars)
           or 'soft' (based on words)
+
+        font can also be a skin font object. If so, this functions also supports
+        shadow and border. fgcolor and bgcolor will also be taken from the skin
+        font if set to None when calling this function.
         """
         if not string:
             return '', (x,y,x,y)
@@ -865,24 +875,35 @@ class OSD:
             # calc each line and put the rest into the next
             if num_lines_left == 1:
                 current_ellipses = ellipses
-            (w, s, r) = self.__drawstringframed_line__(string, width, font, hard,
-                                                       current_ellipses, ' ')
+            #
+            # __drawstringframed_line__ returns a list:
+            # width of the text drawn (w), string which is drawn (s),
+            # rest that does not fit (r) and True if the breaking was because
+            # of a \n (n)
+            #
+            (w, s, r, n) = self.__drawstringframed_line__(string, width, font, hard,
+                                                          current_ellipses, ' ')
             if s == '' and not hard:
                 # nothing fits? Try to break words at ' -_' and no ellipses
-                (w, s, r) = self.__drawstringframed_line__(string, width, font, hard,
-                                                           None, ' -_')
+                (w, s, r, n) = self.__drawstringframed_line__(string, width, font, hard,
+                                                              None, ' -_')
                 if s == '':
                     # still nothing? Use the 'hard' way
-                    (w, s, r) = self.__drawstringframed_line__(string, width, font,
-                                                               'hard', None, ' ')
+                    (w, s, r, n) = self.__drawstringframed_line__(string, width, font,
+                                                                  'hard', None, ' ')
 
             lines.append((w, s))
             while r and r[0] == '\n':
                 lines.append((0, ' '))
                 num_lines_left -= 1
                 r = r[1:]
+                n = True
 
-            string = r.strip()
+            if n:
+                string = r
+            else:
+                string = r.strip()
+
             num_lines_left -= 1
 
             if not r:
