@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.76  2004/10/08 20:18:17  dischi
+# new eventhandler <-> plugin interface
+#
 # Revision 1.75  2004/10/06 19:16:29  dischi
 # o rename __variable__ to _variable
 # o notifier support
@@ -50,6 +53,7 @@ import copy
 import cleanup
 from event import Event
 
+import config
 import eventhandler
 import notifier
 
@@ -69,7 +73,6 @@ class Plugin:
     class
     """
     def __init__(self):
-        import config
         self._type   = None
         self._level  = 10
         self._number = 0
@@ -100,7 +103,14 @@ class Plugin:
         except:
             self._ = lambda m: m
 
-        
+
+    def shutdown(self):
+        """
+        Execute on plugin shutdown (== system shutdown)
+        """
+        pass
+
+    
 class MainMenuPlugin(Plugin):
     """
     Plugin class for plugins to add something to the main menu
@@ -148,23 +158,18 @@ class DaemonPlugin(Plugin):
     A DaemonPlugin can have the following functions:
     def poll(self):
         this function will be called every poll_interval milliseconds
-    def draw(self(type, object), osd):
-        this function will be called to update the screen
     def eventhandler(self, event, menuw=None):
         events no one else wants will be passed to this functions, when
         you also set the variable event_listener to True, the object will
-        get all events
-    def shutdown(self):
-        this function may be called to shutdown the plugin and will
-        be called on freevo shutdown
+        get all events. Setting self.events to a list of event names will]
+        register only that events to the eventhandler.
     """
     def __init__(self):
         Plugin.__init__(self)
-        self.poll_counter   = 0         # poll counter, don't change this
         self.poll_interval  = 100       # poll every x milliseconds
         self.poll_menu_only = True      # poll only when menu is active
         self.event_listener = False     # process all events
-
+        self.events         = []        # events to register to ([] == all)
 
     def _poll(self):
         """
@@ -230,11 +235,6 @@ class InputPlugin(Plugin):
     """
     def __init__(self):
         Plugin.__init__(self)
-        # FIXME: this is ugly -- very ugly
-        # But we can't import at the beginning of the file because this
-        # file is imported from config
-        import config
-        import eventhandler
         self._eventhandler = eventhandler.get_singleton()
         self.config = config
 
@@ -416,18 +416,6 @@ def init_special_plugin(id):
     
 
 
-def shutdown(plugin_name=None):
-    """
-    called to shutdown one or all daemon plugins
-    """
-    for key in _plugin_type_list:
-        for p in _plugin_type_list[key]:
-            if (not plugin_name or p.plugin_name == plugin_name) and \
-                   hasattr(p, 'shutdown'):
-                _debug_('shutdown plugin %s' % p.plugin_name, 2)
-                p.shutdown()
-
- 
 def get(type):
     """
     get the plugin list 'type'
@@ -438,6 +426,17 @@ def get(type):
         _plugin_type_list[type] = []
 
     return _plugin_type_list[type]
+
+
+def getall():
+    """
+    return a list of all plugins
+    """
+    global _all_plugins
+    ret = []
+    for t in _all_plugins:
+        ret.append(t[0])
+    return ret
 
 
 def mimetype(display_type):
@@ -454,17 +453,6 @@ def mimetype(display_type):
     return ret
 
         
-def getall():
-    """
-    return a list of all plugins
-    """
-    global _all_plugins
-    ret = []
-    for t in _all_plugins:
-        ret.append(t[0])
-    return ret
-
-
 def getbyname(name, multiple_choises=0):
     """
     get a plugin by it's name
@@ -673,18 +661,23 @@ def _load_plugin(name, type, level, args, number):
 
         else: 
             if isinstance(p, DaemonPlugin):
-                _add_to_ptl('daemon', p)
-                for type in ('poll', 'draw', 'eventhandler', 'shutdown' ):
-                    if hasattr(p, type):
-                        _add_to_ptl('daemon_%s' % type, p)
                 if hasattr(p, 'poll'):
                     notifier.addTimer( p.poll_interval,
                                        notifier.Callback( p._poll ) )
+                if hasattr(p, 'eventhandler'):
+                    if p.events:
+                        for e in p.events:
+                            eventhandler.register(p, e)
+                    else:
+                        if p.event_listener:
+                            eventhandler.register(p, eventhandler.GENERIC_HANDLER)
+                        else:
+                            eventhandler.register(p, eventhandler.EVENT_LISTENER)
 
             if isinstance(p, MainMenuPlugin):
                 _add_to_ptl('mainmenu%s' % special, p)
                 if hasattr(p, 'eventhandler'):
-                    _add_to_ptl('daemon_eventhandler', p)
+                    eventhandler.register(p, eventhandler.GENERIC_HANDLER)
 
             if isinstance(p, ItemPlugin):
                 _add_to_ptl('item%s' % special, p)
@@ -692,9 +685,8 @@ def _load_plugin(name, type, level, args, number):
             if isinstance(p, MimetypePlugin):
                 _add_to_ptl('mimetype', p)
 
-            if hasattr(p, 'shutdown'):
-                # register shutdown handler
-                cleanup.register( p.shutdown )
+        # register shutdown handler
+        cleanup.register( p.shutdown )
                 
         if p.plugin_name:
             _named_plugins[p.plugin_name] = p

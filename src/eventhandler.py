@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/10/08 20:18:17  dischi
+# new eventhandler <-> plugin interface
+#
 # Revision 1.14  2004/10/06 19:18:34  dischi
 # doc update
 #
@@ -89,6 +92,8 @@ import plugin
 
 from event import *
 
+GENERIC_HANDLER = 'GENERIC_HANDLER'
+EVENT_LISTENER  = 'EVENT_LISTENER'
 
 _singleton = None
 
@@ -183,7 +188,7 @@ class Eventhandler:
         
         self.eventhandler_plugins = None
         self.queue = []
-        self.registered = {}
+        self.registered = { EVENT_LISTENER : [], GENERIC_HANDLER : []}
         self.stack_change = None
         
 
@@ -335,18 +340,7 @@ class Eventhandler:
         
         _debug_('handling event %s' % str(event), 2)
         
-        if self.eventhandler_plugins == None:
-            _debug_('init', 1)
-            self.eventhandler_plugins  = []
-            self.eventlistener_plugins = []
-
-            for p in plugin.get('daemon_eventhandler'):
-                if hasattr(p, 'event_listener') and p.event_listener:
-                    self.eventlistener_plugins.append(p)
-                else:
-                    self.eventhandler_plugins.append(p)
-            
-        for p in self.eventlistener_plugins:
+        for p in self.registered[EVENT_LISTENER]:
             p.eventhandler(event=event)
 
         if config.TIME_DEBUG:
@@ -386,7 +380,7 @@ class Eventhandler:
                 
             elif not self.applications[-1].eventhandler(event=event):
                 # pass event to the current application
-                for p in self.eventhandler_plugins:
+                for p in self.registered[GENERIC_HANDLER]:
                     # pass it to all plugins when the application
                     # didn't use it
                     if p.eventhandler(event=event):
