@@ -1,187 +1,627 @@
-# Norwegian strings in freevo 
+# translation of freevo.po to Norwegian
+# Norwegian strings in freevo
 # Copyright (C) 2003
-# Eirik Meland <eirikm@ifi.uio.no>, 2003
+# Eirik Meland <eirikm@ifi.uio.no>, 2003.
+# Viggo Fredriksen <viggo@katatonic.org>, 2004.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-10-31 17:37+0100\n"
-"PO-Revision-Date:  Fri Sep 12 23:05:21 2003\n"
-"Last-Translator: Eirik Meland <eirikm@ifi.uio.no>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"Project-Id-Version: freevo\n"
+"POT-Creation-Date: 2004-05-26 21:02+0200\n"
+"PO-Revision-Date: 2004-05-28 17:10+0200\n"
+"Last-Translator: Viggo Fredriksen <viggo@katatonic.org>\n"
+"Language-Team: Norwegian <no@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=ISO-8859-1\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Report-Msgid-Bugs-To: \n"
 "Generated-By: pygettext.py 1.5\n"
+"X-Generator: KBabel 1.3\n"
+"Plural-Forms:  nplurals=2; plural=(n != 1);\n"
 
-#: audio/audiodiskitem.py:60 audio/plugins/cdbackup.py:478
-msgid "Unknown CD Album"
-msgstr "Ukjent CD"
-
-#: audio/audiodiskitem.py:95 directory.py:457 image/plugins/gphoto.py:155
-msgid "Browse directory"
-msgstr "Vis katalog"
-
-#: audio/xmms.py:156 games/game.py:105
+#: childapp.py:334
 #, python-format
-msgid "File \"%s\" not found!"
-msgstr "Finner ikke filen \"%s\"!"
+msgid "logging child to \"%s\""
+msgstr ""
 
-#: audio/plugins/cdbackup.py:225
-msgid "Show CD ripping status"
-msgstr "Vis CD-sikkerhetskopierings status"
-
-#: audio/plugins/cdbackup.py:230
-msgid "Rip the CD to the hard drive"
-msgstr "Sikkerhetskopier CD til harddisk"
-
-#: audio/plugins/cdbackup.py:231
-msgid "Get CDs available for ripping"
-msgstr "Vis tilgjengelige CD'er"
-
-#: audio/plugins/cdbackup.py:233 audio/plugins/cdbackup.py:543
-#: audio/plugins/mplayer.py:237 audio/plugins/xine.py:77
-#: audio/plugins/xine.py:101 plugins/lcd.py:716 plugins/lcd.py:913
-#: plugins/lcd.py:924 plugins/lcd.py:935 skins/main/info_area.py:135
-#: video/plugins/mplayer.py:586 video/plugins/mplayer.py:640
-#: video/plugins/xine.py:100 video/plugins/xine.py:131
+#: childapp.py:337 audio/plugins/cdbackup.py:259 audio/plugins/cdbackup.py:576
+#: audio/plugins/xine.py:88 audio/plugins/xine.py:107 plugins/lcd.py:110
+#: plugins/lcd.py:731 plugins/lcd.py:933 plugins/lcd.py:944 plugins/lcd.py:955
+#: skins/main/info_area.py:155 tv/channels.py:149 tv/channels.py:186
+#: tv/channels.py:189 tv/record_client.py:133 video/plugins/xine.py:110
+#: video/plugins/xine.py:134 www/htdocs/help/howto.rpy:132
+#: www/htdocs/help/doc.rpy:108 www/htdocs/edit_favorite.rpy:133
+#: www/htdocs/edit_favorite.rpy:157 www/htdocs/edit_favorite.rpy:181
+#: www/htdocs/favorites.rpy:130 www/htdocs/genre.rpy:118
+#: www/htdocs/guide.rpy:201 www/htdocs/library.rpy:257
+#: www/htdocs/library.rpy:267 www/htdocs/library.rpy:269
+#: www/htdocs/manualrecord.rpy:70 www/htdocs/record.rpy:139
+#: www/htdocs/record.rpy:160 www/htdocs/search.rpy:145
 msgid "ERROR"
 msgstr "FEIL"
 
-#: audio/plugins/cdbackup.py:233
-msgid "Item is not an Audio CD"
+#: childapp.py:338
+#, python-format
+msgid "Cannot open \"%s\" for logging!"
+msgstr "Kan ikke åpne filen \"%s\" for logging!"
+
+#: childapp.py:339
+msgid "Set CHILDAPP_DEBUG=0 in local_conf.py, "
+msgstr "Sett CHILDAPP_DEBUG=0 i local_conf.py, "
+
+#: childapp.py:340
+#, python-format
+msgid "or make %s writable!"
+msgstr "eller gjør %s skrivbar!"
+
+#: directory.py:68
+msgid "Directory Sort By Date"
+msgstr "Katalog Sorter etter dato"
+
+#: directory.py:69
+msgid "Sort directory by date and not by name."
+msgstr "Sorter katalogen etter dato."
+
+#: directory.py:71
+msgid "Directory Autoplay Single Item"
+msgstr "Katalog Automatisk Avspilling"
+
+#: directory.py:72
+msgid "Don't show directory if only one item exists and auto-select the item."
+msgstr "Ikke vis katalogen hvis det kun finnes en fil og autovelg filen."
+
+#: directory.py:75
+msgid "Force Skin Layout"
+msgstr "Tving Skin Utseende"
+
+#: directory.py:76
+msgid ""
+"Force skin to a specific layout. This option doesn't work with all skins and "
+"the result may differ based on the skin."
+msgstr "Tving skinet til en bestemt layout. Dette valget virker ikke med alle skin og resultatet kan variere fra skin til skin."
+
+#: directory.py:79
+msgid "Directory Smart Sort"
+msgstr "Katalog Smart Sortering"
+
+#: directory.py:80
+msgid "Use a smarter way to sort the items."
+msgstr "Benytt en smartere metode for sortering."
+
+#: directory.py:82
+msgid "Use MediaID Tag Names"
+msgstr "Bruk MediaID Tag navn"
+
+#: directory.py:83
+msgid "Use the names from the media files tags as display name."
+msgstr "Bruk navn fra Media-tagger til visning."
+
+#: directory.py:85
+msgid "Directory Reverse Sort"
+msgstr "Katalog Motsatt Sortering"
+
+#: directory.py:86
+msgid "Show the items in the list in reverse order."
+msgstr "Vis filene i motsatt rekkefølge."
+
+#: directory.py:90
+msgid "Directory Create Playlist"
+msgstr "Katalog Lag Spilleliste"
+
+#: directory.py:91
+msgid ""
+"Handle the directory as playlist. After one file is played, the next one "
+"will be started."
+msgstr "Behandle katalogen som en spilleliste. Etter en fil er avspilt vil den neste bli startet."
+
+#: directory.py:94
+msgid "Directory Add Playlist Files"
+msgstr "Katalog Vis Spillelister"
+
+#: directory.py:95
+msgid "Add playlist files to the list of items"
+msgstr "Legg spillelistefiler til katalogen."
+
+#: directory.py:97
+msgid "Directory Add Random Playlist"
+msgstr "Katalog Vis tilfeldig Spilleliste"
+
+#: directory.py:98
+msgid "Add an item for a random playlist"
+msgstr "Legger til et valg for tilfeldig spilleliste i katalogen"
+
+#: directory.py:100
+msgid "Directory Autoplay Items"
+msgstr "Katalog Automatisk Avspillning"
+
+#: directory.py:101
+msgid ""
+"Autoplay the whole directory (as playlist) when it contains only files and "
+"no directories"
+msgstr "Spill av hele katalogen automatisk (som en spilleliste) når den kun inneholder filer"
+
+#: directory.py:293
+#, python-format
+msgid "Directory on disc [%s]"
+msgstr "Katalog på disk [%s]"
+
+#: directory.py:294
+msgid "Directory"
+msgstr "Katalog"
+
+#: directory.py:423 image/plugins/gphoto.py:142
+msgid "Browse directory"
+msgstr "Utforsk katalog"
+
+#: directory.py:426
+msgid "Play all files in directory"
+msgstr "Spill alle filer"
+
+#: directory.py:432 playlist.py:308
+msgid "Random play all items"
+msgstr "Spill alle filer i tilfeldig rekkefølge"
+
+#: directory.py:434
+msgid "Recursive random play all items"
+msgstr "Spill alle filer rekursivt og tilfeldig"
+
+#: directory.py:435
+msgid "Recursive play all items"
+msgstr "Spill alle filer rekursivt"
+
+#: directory.py:437
+msgid "Configure directory"
+msgstr "Konfigurer katalogen"
+
+#: directory.py:504
+msgid "Enter Password"
+msgstr "Tast inn passord"
+
+#: directory.py:529
+msgid "Password incorrect"
+msgstr "Passordet er ugyldig"
+
+#: directory.py:589
+msgid "Scanning disc, be patient..."
+msgstr "Leser disk, vennligst vent..."
+
+#: directory.py:591
+msgid "Scanning directory, be patient..."
+msgstr "Leser katalog, vennligst vent..."
+
+#: directory.py:687 audio/audiodiskitem.py:138
+msgid "Random playlist"
+msgstr "Tilfeldig spilleliste"
+
+#: directory.py:787 directory.py:877 directory.py:911
+msgid "on"
+msgstr "på"
+
+#: directory.py:789 directory.py:792 directory.py:881 directory.py:909
+msgid "off"
+msgstr "av"
+
+#: directory.py:794
+msgid "auto"
+msgstr "auto"
+
+#: directory.py:913
+msgid "Show all kinds of items"
+msgstr "Vis alle filtyper"
+
+#: directory.py:915
+msgid "Show video, audio and image items in this directory"
+msgstr "Vis både video, lyd og bildefiler i denne katalogen "
+
+#: directory.py:918
+#, fuzzy
+msgid "Configure"
+msgstr "Konfigurer"
+
+#: fxditem.py:248
+msgid "Browse list"
+msgstr "Utforsk listen"
+
+#: main.py:198
+msgid "Freevo Main Menu"
+msgstr "Freevo Hovedmeny"
+
+#: main.py:214
+msgid "Skin Selector"
+msgstr "Skin Velger"
+
+#: main.py:366
+msgid "Starting Freevo, please wait ..."
+msgstr "Starter Freevo, vennligst vent..."
+
+#: main.py:386
+msgid "Reading cache, please wait ..."
+msgstr "Genererer hurtigbuffer, vennligst vent ..."
+
+#: main.py:474
+#, python-format
+msgid ""
+"Event '%s' crashed\n"
+"\n"
+"Please take a look at the logfile and report the bug to the Freevo mailing "
+"list. The state of Freevo may be corrupt now and this error could cause more "
+"errors until you restart Freevo.\n"
+"\n"
+"Logfile: %s\n"
+"\n"
+msgstr ""
+"Vennligst ta en kikk på loggfilen og rapporter feilen til freevos mail-liste\n"
+"Freevo kan ha kommet i en korruptert tilstand, og feilen kan forårsake "
+"fler feil til du restarter freevo.\n"
+"\n"
+"Handling: %s "
+"\n"
+"Logfil: %s "
+"\n"
+
+#: main.py:510
+msgid "Freevo crashed!"
+msgstr "Freevo krasjet!"
+
+#: main.py:511
+#, python-format
+msgid "Filename: %s"
+msgstr "Filnavn: %s"
+
+#: main.py:512
+#, python-format
+msgid "Lineno: %s"
+msgstr "Linjenr: %s"
+
+#: main.py:513
+#, python-format
+msgid "Function: %s"
+msgstr "Metode: %s"
+
+#: main.py:514
+#, python-format
+msgid "Text: %s"
+msgstr "Tekst: %s"
+
+#: main.py:516
+msgid "Please see the logfiles for more info"
+msgstr "Vennligs se logfilene for mer informasjon"
+
+#: main.py:518
+#, python-format
+msgid "Exit in %s seconds"
+msgstr "Avslutter om %s sekunder"
+
+#: menu.py:588
+msgid "No action defined for this choice!"
+msgstr "Ingen handling definert for dette valget!"
+
+#: osd.py:392
+msgid "z = Toggle Fullscreen"
+msgstr "z = Fullskjerm av/på"
+
+#: osd.py:393
+msgid "Arrow Keys = Move"
+msgstr "Piltaster = Flytt"
+
+#: osd.py:394
+msgid "Spacebar = Select"
+msgstr "Mellomrom = Velg"
+
+#: osd.py:395
+msgid "Escape = Stop/Prev. Menu"
+msgstr "Escape = Stop/Forrige meny"
+
+#: osd.py:396
+msgid "h = Help"
+msgstr "h = Hjelp"
+
+#: playlist.py:146 playlist.py:186
+#, python-format
+msgid "Cannot open file \"%s\""
+msgstr "Kan ikke åpne filen \"%s\""
+
+#: playlist.py:298
+msgid "Browse Playlist"
+msgstr "Utforsk Spilleliste"
+
+#: playlist.py:300 video/configure.py:217 video/videoitem.py:291
+msgid "Play"
+msgstr "Spill"
+
+#: playlist.py:354
+#, fuzzy
+msgid "empty playlist"
+msgstr "tom spilleliste"
+
+#: playlist.py:450
+msgid "playlist repeat on"
+msgstr "spilleliste - gjentakelse på"
+
+#: playlist.py:452
+msgid "playlist repeat off"
+msgstr "spilleliste - gjentakelse av"
+
+#: playlist.py:466
+msgid "no next item in playlist"
+msgstr "ingen neste fil i spillelisten"
+
+#: playlist.py:493
+msgid "no previous item in playlist"
+msgstr "dette er første fil i spillelisten"
+
+#: setup_freevo.py:123
+msgid ""
+"Usage: ./freevo setup [OPTION]...\n"
+"Set up Freevo for your specific environment.\n"
+"\n"
+"   --geometry=WIDTHxHEIGHT      set the display size\n"
+"                                  WIDTHxHEIGHT can be 800x600, 768x576 or "
+"640x480\n"
+"\n"
+"   --display=DISP               set the display\n"
+"                                  DISP can be x11, fbdev, dxr3, mga, \n"
+"                                  dfbmga or dga\n"
+"                                  \n"
+"   --tv=NORM                    set the TV standard\n"
+"                                  NORM can be ntsc, pal or secam\n"
+"\n"
+"   --chanlist=LIST              set the channel list\n"
+"                                  LIST can be us-bcast, us-cable, us-cable-"
+"hrc,\n"
+"                                  japan-bcast, japan-cable, europe-west,\n"
+"                                  europe-east, italy, newzealand, "
+"australia,\n"
+"                                  ireland, france, china-bcast, "
+"southafrica,\n"
+"                                  argentina, canada-cable\n"
+"\n"
+"   --help                       display this help and exit\n"
+"\n"
+"The default is \"--geometry=800x600 --display=x11 --tv=ntsc --chanlist=us-"
+"cable\"\n"
+"Please report bugs to <freevo-users@lists.sourceforge.net>.\n"
+msgstr ""
+"Anvendelse: ./freevo setup [VALG]...\n"
+"Klargjør Freevo for ditt spesifike miljø.\n"
+"\n"
+"   --geometry=BREDDExHØYDE      sett display størrelse\n"
+"                                  BREDDExHØYDE kan være 800x600, 768x576 eller "
+"640x480\n"
+"\n"
+"   --display=DISP               sett display\n"
+"                                  DISP kan være x11, fbdev, dxr3, mga, \n"
+"                                  dfbmga eller dga\n"
+"                                  \n"
+"   --tv=NORM                    sett TV standard\n"
+"                                  NORM kan være ntsc, pal eller secam\n"
+"\n"
+"   --chanlist=LIST              sett kanalliste\n"
+"                                  LIST kan være us-bcast, us-cable, us-cable-"
+"hrc,\n"
+"                                  japan-bcast, japan-cable, europe-west,\n"
+"                                  europe-east, italy, newzealand, "
+"australia,\n"
+"                                  ireland, france, china-bcast, "
+"southafrica,\n"
+"                                  argentina, canada-cable\n"
+"\n"
+"   --help                       vis denne hjelpen og avslutt\n"
+"\n"
+"Standard er \"--geometry=800x600 --display=x11 --tv=ntsc --chanlist=us-"
+"cable\"\n"
+"Vennligst rapporter feil til <freevo-users@lists.sourceforge.net>.\n"
+
+#: setup_freevo.py:227
+#, python-format
+msgid "checking for %-13s"
+msgstr "sjekker etter %-13s"
+
+#: setup_freevo.py:240
+#, python-format
+msgid "ERROR: can't find %s"
+msgstr "FEIL: kan ikke finne %s"
+
+#: setup_freevo.py:241
+msgid "Please install the application respectively put it in your path."
+msgstr "Vennligst installer programmet i path."
+
+#: setup_freevo.py:242
+msgid "Freevo won't work without it."
+msgstr "Freevo vil ikke fungere uten dette."
+
+#: setup_freevo.py:248
+msgid "not found (deactivated)"
+msgstr "ikke funnet (deaktivert)"
+
+#: setup_freevo.py:311
+#, python-format
+msgid "System path first=%s"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:240
+#: setup_freevo.py:311
+msgid "No"
+msgstr "Nei"
+
+#: setup_freevo.py:311
+msgid "Yes"
+msgstr "Ja"
+
+#: setup_freevo.py:327
+msgid "Settings:"
+msgstr "Innstillinger:"
+
+#: audio/audiodiskitem.py:83 audio/plugins/cdbackup.py:507
+msgid "Unknown CD Album"
+msgstr "Ukjent CD Album"
+
+#: audio/audiodiskitem.py:100
+msgid "Browse disc"
+msgstr "Utforsk disk"
+
+#: audio/audiodiskitem.py:146
+msgid "Data files on disc"
+msgstr "Datafiler på disk"
+
+#: audio/plugins/cdbackup.py:251
+msgid "Show CD ripping status"
+msgstr "Vis status for CD-kopiering"
+
+#: audio/plugins/cdbackup.py:256
+msgid "Rip the CD to the hard drive"
+msgstr "Kopier CD til harddisk"
+
+#: audio/plugins/cdbackup.py:257
+msgid "Get CDs available for ripping"
+msgstr "Vis tilgjengelige CD'er"
+
+#: audio/plugins/cdbackup.py:259
+msgid "Item is not an Audio CD"
+msgstr "Dette er ikke en Lyd CD"
+
+#: audio/plugins/cdbackup.py:266
 #, python-format
 msgid ""
 "Ripping in progress\n"
 "Track %d of %d"
-msgstr "Sikkerhetskopiering pågår\nSpor %d av %d"
+msgstr ""
+"Kopiering pågår\n"
+"Spor %d av %d"
 
-#: audio/plugins/cdbackup.py:255
+#: audio/plugins/cdbackup.py:281
 msgid "Backup CD to hard drive in mp3 format"
-msgstr "Sikkerhetskopier CD til harddisk som mp3-filer"
+msgstr "Kopier CD til harddisk i mp3-format"
 
-#: audio/plugins/cdbackup.py:258
+#: audio/plugins/cdbackup.py:284
 msgid "Backup CD to hard drive in Ogg format"
-msgstr "Sikkerhetskopier CD til harddisk som ogg-filer"
+msgstr "Kopier CD til harddisk i ogg-format"
 
-#: audio/plugins/cdbackup.py:261
+#: audio/plugins/cdbackup.py:287
 msgid "Backup CD to hard drive in FLAC format"
-msgstr "Sikkerhetskopier CD til harddisk som FLAC-filer"
+msgstr "Kopier CD til harddisk i FLAC-format"
 
-#: audio/plugins/cdbackup.py:263
+#: audio/plugins/cdbackup.py:289
 msgid "Backup CD to hard drive in wav format"
-msgstr "Sikkerhetskopier CD til harddisk som wav-filer"
+msgstr "Kopier CD til harddisk i wav-format"
 
-#: audio/plugins/cdbackup.py:266
+#: audio/plugins/cdbackup.py:292
 msgid "CD Backup"
-msgstr "Sikkerhetskopier CD"
+msgstr "Kopier CD"
 
-#: audio/plugins/cdbackup.py:274
+#: audio/plugins/cdbackup.py:300
 msgid "Ripping started"
-msgstr "Sikkerhetskopiering startet"
+msgstr "Kopiering startet"
 
-#: audio/plugins/cdbackup.py:341
-#, fuzzy, python-format
+#: audio/plugins/cdbackup.py:368
+#, python-format
 msgid "Directory %s already exists"
-msgstr "Katalog %s eksisterer allerede"
+msgstr "Katalogen %s eksisterer allerede"
 
-#: audio/plugins/cdbackup.py:474 audio/plugins/coversearch.py:176
-#: audio/plugins/coversearch.py:184 audio/plugins/coversearch.py:192
-#: plugins/lcd.py:910 plugins/lcd.py:921 plugins/lcd.py:934
-#: video/plugins/xine.py:134
+#: audio/plugins/cdbackup.py:490
+msgid "Ripping complete"
+msgstr "Kopiering fullført"
+
+#: audio/plugins/cdbackup.py:503 audio/plugins/coversearch.py:200
+#: audio/plugins/coversearch.py:209 audio/plugins/coversearch.py:218
+#: plugins/lcd.py:930 plugins/lcd.py:941 plugins/lcd.py:954
 msgid "WARNING"
 msgstr "ADVARSEL"
 
-#: audio/plugins/cdbackup.py:474
+#: audio/plugins/cdbackup.py:503
 msgid "No CDDB data available to mmpython"
 msgstr "Ingen CDDB data tilgjengelig for mmpython"
 
-#: audio/plugins/cdbackup.py:477
+#: audio/plugins/cdbackup.py:506
 msgid "Unknown Artist"
-msgstr "Ukjent artist"
+msgstr "Ukjent Artist"
 
-#: audio/plugins/cdbackup.py:477 audio/plugins/cdbackup.py:478
+#: audio/plugins/cdbackup.py:506 audio/plugins/cdbackup.py:507
 msgid "RENAME"
 msgstr "ENDRE NAVN"
 
-#: audio/plugins/cdbackup.py:479
+#: audio/plugins/cdbackup.py:508
 msgid "Other"
 msgstr "Andre"
 
-#: audio/plugins/cdbackup.py:482
+#: audio/plugins/cdbackup.py:511
 msgid ""
 "CD info not found!\n"
 "Must manually rename files\n"
 "when finished ripping"
-msgstr "CD info ikke funnet!\nEndre navn på filene manuelt\nnår sikkerhetskopieringen er ferdig"
-
-#: audio/plugins/cdbackup.py:543
-msgid "Problem trying to call:"
 msgstr ""
+"CD info ikke funnet!\n"
+"Du må endre navn på filene manuelt\n"
+"når kopieringen er ferdig"
 
-#: audio/plugins/coversearch.py:146
+#: audio/plugins/cdbackup.py:576
+msgid "Problem trying to call:"
+msgstr "Problem under kall:"
+
+#: audio/plugins/coversearch.py:160
 msgid ""
 "To search for covers you need an Amazon.com Web Services\n"
 "license key. You can get yours from:\n"
-msgstr "For å søke etter cover trenger du en Amazon.com Web Service\nlisens nøkkel. Du kan få den fra:\n"
+msgstr ""
+"For å søke etter omslag trenger du en Amazon.com Web Service\n"
+"lisens nøkkel. Du kan få den fra:\n"
 
-#: audio/plugins/coversearch.py:172
+#: audio/plugins/coversearch.py:196
 msgid "Find a cover for this music"
-msgstr "Finn cover"
+msgstr "Finn omslag til denne sangen"
 
-#: audio/plugins/coversearch.py:176 audio/plugins/coversearch.py:184
+#: audio/plugins/coversearch.py:201 audio/plugins/coversearch.py:210
 #, python-format
 msgid ""
 "Plugin 'coversearch' was disabled for this item! 'coversearch' needs an item "
 "with Artist and Album (if it's a mp3 or ogg) or Title (if it's a cd track) "
 "to be able to search. So you need a file with a ID3 tag (mp3) or an Ogg "
 "Info. Maybe you must fix this file (%s) tag?"
-msgstr "Plugin'en 'coversearch' var skrudd av for denne gjenstanden! 'coversearch' trenger en gjenstand\nmed artist og album(hvis det er en mp3 eller ogg) eller tittel (hvis det er et cd-spor) \nfor å kunne søke. Så du trenger en fil med ID3-tag (mp3) eller en Ogg Info. Kanskje du må fikse denne filens tag (%s)?"
+msgstr ""
+"Pluginen 'coversearch' ble skrudd av for denne gjenstanden! 'coversearch' "
+"trenger en gjenstand\n"
+"med artist og album(hvis det er en mp3 eller ogg) eller tittel (hvis det er "
+"et cd-spor) \n"
+"for å kunne søke. Så du trenger en fil med ID3-tag (mp3) eller en Ogg Info. "
+"Kanskje du må fikse denne filens tag (%s)?"
 
-#: audio/plugins/coversearch.py:192
+#: audio/plugins/coversearch.py:219
 msgid "Unknown CD, cover searching is disabled"
-msgstr "Ukjent CD, søking etter cover er skrudd av"
+msgstr "Ukjent CD, søking etter omslag er skrudd av"
 
-#: audio/plugins/coversearch.py:200
-#, fuzzy
+#: audio/plugins/coversearch.py:227
 msgid "searching Amazon..."
-msgstr "Søker på Amazon..."
+msgstr "søker på Amazon..."
 
-#: audio/plugins/coversearch.py:217
+#: audio/plugins/coversearch.py:242
 #, python-format
 msgid "No matches for %(artist)s - %(album)s"
-msgstr "Ingen treff for %(artist)s - %(album)s"
+msgstr "Ingen treff på %(artist)s - %(album)s"
 
-#: audio/plugins/coversearch.py:225
-msgid "The cover provider returned bad information."
-msgstr "Cover tilbyderen returnerte feil informasjon."
+#: audio/plugins/coversearch.py:250
+msgid "Unknown error while searching."
+msgstr "Ukjent feil under søking."
 
-#: audio/plugins/coversearch.py:262 audio/plugins/coversearch.py:272
+#: audio/plugins/coversearch.py:287 audio/plugins/coversearch.py:299
 msgid "small"
 msgstr "liten"
 
-#: audio/plugins/coversearch.py:281
+#: audio/plugins/coversearch.py:310
 msgid "Cover Search Results"
-msgstr "Cover søkeresultater"
+msgstr "Omslag Søkeresultater"
 
-#: audio/plugins/coversearch.py:285
-#, fuzzy
+#: audio/plugins/coversearch.py:314
 msgid "No covers available from Amazon"
-msgstr "Ingen cover tilgjengelig fra Amazon"
+msgstr "Ingen omslag tilgjengelig fra Amazon"
 
-#: audio/plugins/coversearch.py:298 video/plugins/imdb.py:224
+#: audio/plugins/coversearch.py:327 video/plugins/imdb.py:215
 msgid "getting data..."
 msgstr "henter data..."
 
-#: audio/plugins/detach.py:63
+#: audio/plugins/detach.py:83
 msgid "Show player"
 msgstr "Vis spiller"
 
-#: audio/plugins/mplayer.py:141
+#: audio/plugins/fxmms.py:209 audio/plugins/mplayer.py:149
 #, python-format
 msgid ""
 "%s\n"
@@ -190,42 +630,45 @@ msgstr ""
 "%s\n"
 " ikke funnet!"
 
-#: audio/plugins/mplayer.py:168
-msgid "Invalid audio file"
-msgstr "Ugyldig lyd-fil"
+#: audio/plugins/playlist.py:88
+msgid "Playlists"
+msgstr "Spillelister"
 
-#: audio/plugins/mplayer.py:237 video/plugins/mplayer.py:586
-#, python-format
-msgid "Cannot open \"%s\" and \"%s\" for MPlayer logging!"
-msgstr "Kan ikke åpne \"%s\" og \"%s\" for MPlayer logging!"
+#: audio/plugins/playlist.py:104
+msgid "Enqueue this Music in Playlist"
+msgstr "Legg sporet til Spillelisten"
 
-#: audio/plugins/mplayer.py:240
-msgid ""
-"Please set MPLAYER_DEBUG=0 in local_conf.py, or start Freevo from a "
-"directory that is writeable!"
-msgstr "Vennligst set MPLAYER_DEBUG=0 i local_conf.py, eller start Freevo fra en\nkatalog som er skrivbar!"
+#: audio/plugins/playlist.py:106
+msgid "Make a new Audio Playlist"
+msgstr "Lag en ny Spilleliste"
 
-#: audio/plugins/mplayer.py:244 video/plugins/mplayer.py:583
-#, python-format
-msgid "MPlayer logging to \"%s\" and \"%s\""
-msgstr "MPlayer logger til \"%s\" og \"%s\""
+#: audio/plugins/playlist.py:124
+msgid "Queued Directory"
+msgstr "La Katalog til Spillelisten"
 
-#: audio/plugins/radio.py:73
+#: audio/plugins/playlist.py:126
+msgid "Queued Track"
+msgstr "La spor til Spillelisten"
+
+#: audio/plugins/playlist.py:134
+msgid "Added New Playlist"
+msgstr "La til ny Spilleliste"
+
+#: audio/plugins/radio.py:84
 msgid "Listen to Radio Station"
-msgstr "Hør på radiostasjon"
+msgstr "Hør på Radiostasjon"
 
-#: audio/plugins/radio.py:123
-#, fuzzy
-msgid "No Radio Stations found"
-msgstr "Ingen radiostasjoner funnet"
-
-#: audio/plugins/radio.py:124
-msgid "Radio Stations"
-msgstr "Radiostasjoner"
-
-#: audio/plugins/radio.py:154
+#: audio/plugins/radio.py:119
 msgid "Radio"
 msgstr "Radio"
+
+#: audio/plugins/radio.py:144
+msgid "No Radio Stations found"
+msgstr "Ingen Radiostasjoner funnet"
+
+#: audio/plugins/radio.py:146
+msgid "Radio Stations"
+msgstr "Radiostasjoner"
 
 #: audio/plugins/vux.py:90
 msgid "[VUX] Start playing"
@@ -257,914 +700,1737 @@ msgstr "[VUX] Senk rating på sporet som spilles av"
 
 #: audio/plugins/vux.py:97
 msgid "[VUX] a dir item do not select"
-msgstr ""
+msgstr "[VUX] katalog, ikke velg"
 
 #: audio/plugins/vux.py:98
 msgid "[VUX] an audio item, do not select"
-msgstr ""
+msgstr "[VUX] en lydenhet, ikke velg"
 
-#: audio/plugins/webradio.py:68
-#, fuzzy
-msgid "Browse entries"
-msgstr "Vis katalog"
-
-#: audio/plugins/webradio.py:88
-msgid "Webradio"
-msgstr "Webradio"
-
-#: audio/plugins/webradio.py:93
-#, fuzzy
-msgid "Browse genre list"
-msgstr "Vis genreliste"
-
-#: audio/plugins/webradio.py:102
-msgid "Webradio Genre List"
-msgstr "Webradio genreliste"
-
-#: audio/plugins/xine.py:77
+#: audio/plugins/xine.py:89
 msgid "'fbxine' not found, plugin 'xine' deactivated"
-msgstr "'fbxine' ikke funnet, 'xine'-plugin'en er nå skrudd av"
+msgstr "'fbxine' ikke funnet, 'xine er nå skrudd av"
 
-#: audio/plugins/xine.py:101 video/plugins/xine.py:131
+#: audio/plugins/xine.py:108
 msgid "'fbxine' version too old, plugin 'xine' deactivated"
-msgstr "'fbxine' versjonen er for gammel, 'xine'-plugin'en er nå skrudd av"
+msgstr "'fbxine' versjonen er for gammel, xine er nå skrudd av"
 
-#: audio/plugins/xine.py:102 video/plugins/xine.py:132
+#: audio/plugins/xine.py:109 video/plugins/xine.py:136
 #, python-format
 msgid "You need software %s"
-msgstr "Du trenger program %s"
+msgstr "Du trenger programmet %s"
 
-#: audio/plugins/playlist.py:90
-msgid "Enqueue this Music in Playlist"
-msgstr "Legg dette sporet i spillelisten"
+#: games/__init__.py:106
+msgid "please update GAMES_ITEMS in local_conf.py"
+msgstr "vennligst oppdater  GAMES_ITEMS i local_conf.py"
 
-#: audio/plugins/playlist.py:92
-#, fuzzy
-msgid "Make a new Audio Playlist"
-msgstr "Lage en ny spilleliste."
-
-#: directory.py:139
-msgid "Movie Playlists"
-msgstr "Film-spilleliste"
-
-#: directory.py:140
-msgid "Use automatic playlist for movie items."
-msgstr ""
-
-#: directory.py:142
-msgid "Directory Sort By Date"
-msgstr "Sorter kataloger etter dato"
-
-#: directory.py:143
-msgid "Sort directory by date and not by name."
-msgstr "Sorter kataloger etter dato og ikke etter navn."
-
-#: directory.py:145
-msgid "Directory Autoplay Single Item"
-msgstr ""
-
-#: directory.py:146
-msgid "Don't show directory if only one item exists and auto-select the item."
-msgstr ""
-
-#: directory.py:149
-msgid "Audio Random Playlist"
-msgstr ""
-
-#: directory.py:150
-msgid "Show radom playlist item for audio menus."
-msgstr ""
-
-#: directory.py:152
-msgid "Force Skin Layout"
-msgstr "Tving skin-layout"
-
-#: directory.py:153
-msgid ""
-"Force skin to a specific layout. This option doesn't work with all skins and "
-"the result may differ based on the skin."
-msgstr "Tving skin til en bestemte layout. Dette valget virker ikke med alle skin\nog resultatet kan variere fra skin til skin"
-
-#: directory.py:156
-#, fuzzy
-msgid "Directory Smart Sort"
-msgstr "Smart-sorter katalog"
-
-#: directory.py:157
-msgid "Use a smarter way to sort the items."
-msgstr "Bruk en smartere måte å sortere ting."
-
-#: directory.py:159
-msgid "Use MediaID Tag Names"
-msgstr "Bruk MediaID Tag navn"
-
-#: directory.py:160
-msgid "Use the names from the media files tags as display name."
-msgstr ""
-
-#: directory.py:162
-msgid "Directory Reverse Sort"
-msgstr "Sorter katalogen synkende"
-
-#: directory.py:163
-msgid "Show the items in the list in reverse order."
-msgstr ""
-
-#: directory.py:432
+#: games/game.py:108
 #, python-format
-msgid "Directory on disc [%s]"
-msgstr "Katalog på disk [%s]"
+msgid "File \"%s\" not found!"
+msgstr "Filen \"%s\" ikke funnet!"
 
-#: directory.py:433
-msgid "Directory"
-msgstr "Katalog"
-
-#: directory.py:460
-#, fuzzy
-msgid "Random play all items"
-msgstr ""
-
-#: directory.py:462
-msgid "Recursive random play all items"
-msgstr "Spill av rekursivt utvalgte filer tilfeldig"
-
-#: directory.py:464
-#, fuzzy
-msgid "Recursive play all items"
-msgstr "Spill av rekursivt utvalgte filer"
-
-#: directory.py:466
-#, fuzzy
-msgid "Configure directory"
-msgstr "Konfigurer katalog"
-
-#: directory.py:489
-msgid "Enter Password"
-msgstr "Tast inn passord"
-
-#: directory.py:514
-msgid "Password incorrect"
-msgstr "Passord ugyldig"
-
-#: directory.py:558
-msgid "Scanning disc, be patient..."
-msgstr "Skanner disk, vennligst vent..."
-
-#: directory.py:560
-msgid "Scanning directory, be patient..."
-msgstr "Skanner katalog, vennligst vent..."
-
-#: directory.py:878 directory.py:916
-msgid "on"
-msgstr "på"
-
-#: directory.py:880 directory.py:883 directory.py:918 directory.py:921
-msgid "off"
-msgstr "av"
-
-#: directory.py:885 directory.py:923
-msgid "auto"
-msgstr "auto"
-
-#: directory.py:927
-#, fuzzy
-msgid "Configure"
-msgstr "Konfigurer"
-
-#: main.py:151
-msgid "shutting down..."
-msgstr "avslutter..."
-
-#: main.py:261
-msgid "Freevo Main Menu"
-msgstr "Freevo hovedmeny"
-
-#: main.py:375
-#, python-format
-msgid ""
-"Event '%s' crashed\n"
-"\n"
-"Please take a look at the logfile and report the bug to the Freevo mailing "
-"list. The state of Freevo may be corrupt now and this error could cause more "
-"errors until you restart Freevo.\n"
-"\n"
-"Logfile: %s\n"
-"\n"
-msgstr "Vennligst ta en kikk på logg-filen og reporter feilen til freevo@lists.sf.net\nFreevo kan ha kommet i en ugunstig tilstand, og denne feilen kan forårsake flere feil\nhelt til du restarter freevo.\n"
-
-#: menu.py:565
-msgid "No action defined for this choice!"
-msgstr "Ingen handling definert for dette valget!"
-
-#: osd.py:423
-msgid "z = Toggle Fullscreen"
-msgstr "z = fullskjerm av/på"
-
-#: osd.py:424
-msgid "Arrow Keys = Move"
-msgstr "Piltaster = Flytt"
-
-#: osd.py:425
-msgid "Spacebar = Select"
-msgstr "Mellomrom = Velg"
-
-#: osd.py:426
-msgid "Escape = Stop/Prev. Menu"
-msgstr "Escape = Stop/Forrige meny"
-
-#: osd.py:427
-msgid "h = Help"
-msgstr "h = Hjelp"
-
-#: playlist.py:121 playlist.py:163
-#, fuzzy, python-format
-msgid "Cannot open file \"%s\""
-msgstr "Media ikke funnet for filen \"%s\".\n"
-
-#: playlist.py:250
-msgid "Random Playlist"
-msgstr ""
-
-#: playlist.py:255 playlist.py:259 playlist.py:367 video/configure.py:178
-#: video/videoitem.py:290
-#, fuzzy
-msgid "Play"
-msgstr "Spill av VCD"
-
-#: playlist.py:256 playlist.py:258
-msgid "Browse Playlist"
-msgstr "Vis spilleliste"
-
-#: playlist.py:274
-#, fuzzy
-msgid "empty playlist"
-msgstr "tom spilleliste"
-
-#: games/mame_cache.py:170
+#: games/mame_cache.py:179
 msgid "Generating MAME cache, please wait."
-msgstr "Genererer MAME-cache, vennligst vent..."
+msgstr "Genererer MAME-hurtigbuffer, vennligst vent..."
 
-#: gui/AlertBox.py:162 gui/ConfirmBox.py:162 plugins/commands.py:177
+#: gui/AlertBox.py:87 gui/ConfirmBox.py:100 plugins/command.py:177
 msgid "OK"
 msgstr "OK"
 
-#: gui/ConfirmBox.py:166
+#: gui/ConfirmBox.py:104 tv/edit_favorite.py:221
 msgid "CANCEL"
 msgstr "Avbryt"
 
-#: image/plugins/gphoto.py:119 image/imageitem.py:110
-msgid "View Image"
-msgstr "Vis bilde"
+#: image/plugins/apod.py:61 image/plugins/apod.py:62
+msgid "APOD"
+msgstr ""
 
-#: image/viewer.py:118
+#: image/plugins/apod.py:72
+msgid "Current Picture"
+msgstr "Nåværende Bilde"
+
+#: image/plugins/apod.py:73
+msgid "Previous Pictures"
+msgstr "Tidligere Bilder"
+
+#: image/plugins/apod.py:74 image/plugins/apod.py:89
+msgid "Apod Pictures"
+msgstr "Apod Bilder"
+
+#: image/plugins/apod.py:87
+msgid "No Images found"
+msgstr "Ingen Bilder funnet"
+
+#: image/plugins/apod.py:117
+msgid "Need a directory to store APOD pictures."
+msgstr "Trenger en katalog for å lagre APOD bilder."
+
+#: image/plugins/apod.py:121
+#, python-format
+msgid "directory %s does not exist."
+msgstr "katalogen %s eksisterer ikke."
+
+#: image/plugins/gphoto.py:115 image/imageitem.py:127
+msgid "View Image"
+msgstr "Vis Bilde"
+
+#: image/viewer.py:146
 #, python-format
 msgid ""
 "Can't Open Image\n"
 "'%s'"
 msgstr ""
-"Kan ikke åpne bildet\n"
+"Kan ikke åpne Bildet\n"
 " '%s'"
 
+#: image/viewer.py:347
+msgid "pause"
+msgstr ""
+
 #: image/viewer.py:351
-msgid "Title: "
-msgstr "Tittel: "
+msgid "play"
+msgstr "spill"
 
-#: image/viewer.py:352
-msgid "Description: "
-msgstr "Beskrivelse: "
+#: image/viewer.py:438 image/viewer.py:449 tv/edit_favorite.py:143
+#: www/htdocs/manualrecord.rpy:222 www/htdocs/record.rpy:191
+#: www/htdocs/search.rpy:184
+msgid "Title"
+msgstr "Tittel"
 
-#: image/viewer.py:386
+#: image/viewer.py:439 plugins/lcd.py:150 plugins/lcd.py:152
+#: plugins/lcd.py:329
+msgid "Description"
+msgstr "Beskrivelse"
+
+#: image/viewer.py:440
+msgid "Author"
+msgstr "Forfatter"
+
+#: image/viewer.py:450 plugins/lcd.py:149
+msgid "Date"
+msgstr "Dato"
+
+#: image/viewer.py:453
+msgid "Model"
+msgstr "Modell"
+
+#: image/viewer.py:454
+msgid "Software"
+msgstr "Program"
+
+#: image/viewer.py:475
 msgid "No information available"
 msgstr "Ingen informasjon tilgjengelig"
 
-#: plugins/file_ops.py:102
-#, python-format
-msgid ""
-"Do you wish to delete\n"
-" '%s'?"
-msgstr "Ønsker du å slette\n '%s'?"
-
-#: plugins/file_ops.py:107
-#, python-format
-msgid ""
-"Delete info about\n"
-" '%s'?"
-msgstr "Slett informasjon om\n '%s'?"
-
-#: plugins/base.py:81 plugins/base.py:84
-msgid "Shutdown Freevo"
-msgstr "Avslutt Freevo"
-
-#: plugins/base.py:82 plugins/base.py:85
-msgid "Shutdown system"
-msgstr "Skru av maskin"
-
-#: plugins/base.py:96
-msgid "Do you really want to shut down Freevo?"
-msgstr "Ønsker du virkelig å avslutte Freevo?"
-
-#: plugins/base.py:105
-msgid "Do you really want to shut down the system?"
-msgstr "Ønsker du virkelig å skru av maskinen?"
-
-#: plugins/commands.py:162
-msgid "Command finished"
-msgstr "Kommando fullført"
-
-#: plugins/commands.py:178
-msgid "Show Stderr"
-msgstr "Vis stderr"
-
-#: plugins/commands.py:179
-msgid "Show Stdout"
-msgstr "Vis stdout"
-
-#: plugins/commands.py:193
-msgid "Stdout File"
-msgstr "Stdout fil"
-
-#: plugins/commands.py:197
-msgid "Stderr File"
-msgstr "Stderr fil"
-
-#: plugins/commands.py:251
-msgid "Run Command"
-msgstr "Kjør kommando"
-
-#: plugins/commands.py:260
-#, fuzzy
-msgid "Running Command..."
-msgstr "Kjør kommando"
-
-#: plugins/commands.py:274
-msgid "Command Failed"
-msgstr "Kommando feilet"
-
-#: plugins/commands.py:277
-msgid "Command Completed"
-msgstr "Kommando fullført"
-
-#: plugins/commands.py:302
-msgid "No Commands found"
-msgstr "Ingen kommandoer funnet"
-
-#: plugins/commands.py:303 plugins/commands.py:329
-msgid "Commands"
-msgstr "Kommandoer"
-
-#: plugins/df.py:73
-#, fuzzy, python-format
-msgid "%i free of %i Mb total"
-msgstr "%i av %i Mb ledig"
-
-#: plugins/headlines.py:131 plugins/headlines.py:316
-msgid "Headlines"
-msgstr "Overskrifter"
-
-#: plugins/headlines.py:237
-msgid "Show Sites Headlines"
-msgstr ""
-
-#: plugins/headlines.py:314
-#, fuzzy
-msgid "No Headlines found"
-msgstr "Ingen kommandoer funnet"
-
-#: plugins/headlines.py:340
-#, fuzzy
-msgid "Fetching news icons, be patient..."
-msgstr "Skanner disk, vennligst vent..."
-
-#: plugins/headlines.py:463
-msgid "No Headlines Sites found"
-msgstr ""
-
-#: plugins/headlines.py:465
-msgid "Headlines Sites"
-msgstr ""
-
-#: plugins/icecastchanger.py:77
-#, fuzzy
-msgid "Set as icecast playlist"
-msgstr ""
-
-#: plugins/idlebar/system.py:110
+#: plugins/idlebar/system.py:137
 #, python-format
 msgid "%iM"
 msgstr "%iM"
 
-#: plugins/idlebar/system.py:135
+#: plugins/idlebar/system.py:162
 #, python-format
 msgid "%s%%"
 msgstr "%s%%"
 
-#: plugins/lcd.py:118 plugins/lcd.py:126
-#, fuzzy, python-format
-msgid "Length: %s"
-msgstr "Lengde: %s"
+#: plugins/command.py:163
+msgid "Command finished"
+msgstr "Kommando fullført"
 
-#: plugins/lcd.py:119 plugins/lcd.py:123
-#, fuzzy, python-format
-msgid "Artist: %s"
-msgstr "Artist: %s"
+#: plugins/command.py:179
+msgid "Show Stderr"
+msgstr "Vis stderr"
 
-#: plugins/lcd.py:120 plugins/lcd.py:124
-#, fuzzy, python-format
-msgid "Album: %s"
-msgstr "Album: %s"
+#: plugins/command.py:181
+msgid "Show Stdout"
+msgstr "Vis stdout"
 
-#: plugins/lcd.py:121 plugins/lcd.py:125
-#, fuzzy, python-format
-msgid "Year: %s"
-msgstr "År: %s"
+#: plugins/command.py:199
+msgid "Stdout File"
+msgstr "Stdout fil"
 
-#: plugins/lcd.py:122
-#, fuzzy, python-format
-msgid "Tracks: %s"
-msgstr "Spor: %s"
+#: plugins/command.py:203
+msgid "Stderr File"
+msgstr "Stderr fil"
 
-#: plugins/lcd.py:127
-#, fuzzy, python-format
-msgid "Resolution: %s"
-msgstr "Oppløsning: %s"
+#: plugins/command.py:236
+msgid "Run Command"
+msgstr "Kjør kommando"
 
-#: plugins/lcd.py:128
+#: plugins/command.py:247
+msgid "Running Command..."
+msgstr "Kjører Kommando..."
+
+#: plugins/command.py:267
+msgid "Command Failed"
+msgstr "Kommando Feilet"
+
+#: plugins/command.py:269
+msgid "Command Completed"
+msgstr "Kommando Fullført"
+
+#: plugins/command.py:302 plugins/command.py:340
+msgid "Commands"
+msgstr "Kommandoer"
+
+#: plugins/df.py:73
 #, python-format
-msgid "Aspect: %s"
+msgid "%i free of %i Mb total"
+msgstr "%i ledig av totalt %i Mb"
+
+#: plugins/file_ops.py:84 www/htdocs/library.rpy:449
+msgid "Delete"
+msgstr "Slett"
+
+#: plugins/file_ops.py:86
+msgid "Delete info"
+msgstr "Slett informasjon"
+
+#: plugins/file_ops.py:88
+msgid "Delete image"
+msgstr "Slett bilde"
+
+#: plugins/file_ops.py:94
+#, python-format
+msgid ""
+"Do you wish to delete\n"
+" '%s'?"
+msgstr ""
+"Ønsker du å slette\n"
+" '%s'?"
+
+#: plugins/file_ops.py:96
+msgid "Deleting..."
+msgstr "Sletter..."
+
+#: plugins/file_ops.py:100
+#, python-format
+msgid ""
+"Delete info about\n"
+" '%s'?"
+msgstr ""
+"Slett informasjon om\n"
+" '%s'?"
+
+#: plugins/file_ops.py:105
+#, python-format
+msgid ""
+"Delete image about\n"
+" '%s'?"
+msgstr ""
+"Slett bilde til\n"
+" '%s'?"
+
+#: plugins/headlines.py:182
+msgid "Show Sites Headlines"
+msgstr "Vis steder i Overskrifter"
+
+#: plugins/headlines.py:204
+msgid "Fetching headlines..."
+msgstr "Henter Overskrifter..."
+
+#: plugins/headlines.py:267
+msgid "No Headlines found"
+msgstr "Ingen Overskrifter funnet"
+
+#: plugins/headlines.py:269 plugins/headlines.py:282
+msgid "Headlines"
+msgstr "Overskrifter"
+
+#: plugins/headlines.py:288 plugins/headlines.py:302
+msgid "Headlines Sites"
+msgstr "Overskrifter steder"
+
+#: plugins/headlines.py:300
+msgid "No Headlines Sites found"
+msgstr "Ingen Overskriftssteder funnet"
+
+#: plugins/icecast.py:182
+msgid "Set as icecast playlist"
+msgstr "Sett som Icecast spilleliste"
+
+#: plugins/lcd.py:110
+msgid "You need pylcd to run \"lcd\" plugin."
+msgstr "Du trenger pylcd for å kjøre lcd pluginen."
+
+#: plugins/lcd.py:133 plugins/lcd.py:141
+msgid "Length"
+msgstr "Lengde"
+
+#: plugins/lcd.py:134 plugins/lcd.py:138 plugins/lcd.py:249
+msgid "Artist"
+msgstr "Artist"
+
+#: plugins/lcd.py:135 plugins/lcd.py:139 plugins/lcd.py:246
+msgid "Album"
+msgstr "Album"
+
+#: plugins/lcd.py:136 plugins/lcd.py:140
+msgid "Year"
+msgstr "År"
+
+#: plugins/lcd.py:137
+msgid "Tracks"
+msgstr "Spor"
+
+#: plugins/lcd.py:142
+msgid "Resolution"
+msgstr "Oppløsning"
+
+#: plugins/lcd.py:143
+msgid "Aspect"
+msgstr "Aspekt"
+
+#: plugins/lcd.py:144 plugins/lcd.py:147 plugins/lcd.py:284
+msgid "Tagline"
 msgstr ""
 
-#: plugins/lcd.py:129 plugins/lcd.py:132
-#, python-format
-msgid "Tagline: %s"
-msgstr ""
+#: plugins/lcd.py:145 plugins/lcd.py:146
+msgid "Plot"
+msgstr "Handling"
 
-#: plugins/lcd.py:130 plugins/lcd.py:131
-#, python-format
-msgid "Plot: %s"
-msgstr ""
+#: plugins/lcd.py:148
+msgid "Geometry"
+msgstr "Geometri"
 
-#: plugins/lcd.py:133
-#, fuzzy, python-format
-msgid "Geometry: %s"
-msgstr "Geometri: %s"
-
-#: plugins/lcd.py:134
-#, fuzzy, python-format
-msgid "Date: %s"
-msgstr "Dato: %s"
-
-#: plugins/lcd.py:135 plugins/lcd.py:137
-#, fuzzy, python-format
-msgid "Description: %s"
-msgstr "Beskrivelse: %s"
-
-#: plugins/lcd.py:136
+#: plugins/lcd.py:151
 #, python-format
 msgid "%s items"
-msgstr ""
+msgstr "%s enheter"
 
-#: plugins/lcd.py:191 plugins/lcd.py:339
+#: plugins/lcd.py:206 plugins/lcd.py:354
 #, python-format
 msgid "Today is %s."
-msgstr ""
+msgstr "Idag er %s."
 
-#: plugins/lcd.py:201 plugins/lcd.py:560
-msgid "MENU"
-msgstr "MENY"
+#: plugins/lcd.py:216 plugins/lcd.py:575
+msgid "Menu"
+msgstr "Meny"
 
-#: plugins/lcd.py:204 plugins/lcd.py:563
-msgid "ITEM"
-msgstr ""
+#: plugins/lcd.py:219 plugins/lcd.py:578
+msgid "Item"
+msgstr "Enhet"
 
-#: plugins/lcd.py:207
-msgid "TYPE"
-msgstr "TYPE"
+#: plugins/lcd.py:222
+msgid "Type"
+msgstr "Type"
 
-#: plugins/lcd.py:210
-msgid "INFO"
-msgstr "INFO"
+#: plugins/lcd.py:225
+msgid "Information"
+msgstr "Informasjon"
 
-#: plugins/lcd.py:228
-msgid " MUSIC"
-msgstr " MUSIKK"
+#: plugins/lcd.py:243 plugins/lcd.py:590 www/htdocs/library.rpy:309
+msgid "Music"
+msgstr "Musikk"
 
-#: plugins/lcd.py:231
-msgid " ALBUM"
-msgstr " ALBUM"
+#: plugins/lcd.py:281 plugins/lcd.py:617
+msgid "Video"
+msgstr "Video"
 
-#: plugins/lcd.py:234
-msgid "ARTIST"
-msgstr "ARTIST"
+#: plugins/lcd.py:287
+msgid "Genre"
+msgstr "Genre"
 
-#: plugins/lcd.py:266 plugins/lcd.py:602
-#, fuzzy
-msgid "VIDEO"
-msgstr "VIDEO"
+#: plugins/lcd.py:320 plugins/lcd.py:645 tv/edit_favorite.py:145
+#: www/htdocs/edit_favorite.rpy:207 www/htdocs/favorites.rpy:177
+#: www/htdocs/manualrecord.rpy:219 www/htdocs/record.rpy:190
+#: www/htdocs/search.rpy:183
+msgid "Channel"
+msgstr "Kanal"
 
-#: plugins/lcd.py:269
-msgid "  TAG"
-msgstr ""
+#: plugins/lcd.py:323 plugins/lcd.py:648 www/htdocs/edit_favorite.rpy:206
+#: www/htdocs/favorites.rpy:176
+msgid "Program"
+msgstr "Program"
 
-#: plugins/lcd.py:272
-msgid "GENRE"
-msgstr "GENRE"
+#: plugins/lcd.py:326 www/htdocs/guide.rpy:209
+msgid "Time"
+msgstr "Tid"
 
-#: plugins/lcd.py:305 plugins/lcd.py:630
-msgid "CHAN"
-msgstr "KANAL"
+#: plugins/lcd.py:731
+msgid "LCD plugin will not load! Maybe you don't have LCDd (lcdproc daemon) running?"
+msgstr "LCD plugin'en vil ikke starte! Kanskje ikke LCDd (lcdproc daemon) kjører?"
 
-#: plugins/lcd.py:308 plugins/lcd.py:633
-msgid "PROG"
-msgstr ""
-
-#: plugins/lcd.py:311
-msgid "TIME"
-msgstr "TID"
-
-#: plugins/lcd.py:314
-msgid "DESC"
-msgstr ""
-
-#: plugins/lcd.py:575
-msgid "MUSIC"
-msgstr "MUSIKK"
-
-#: plugins/lcd.py:716
-msgid ""
-"LCD plugin will not load! Maybe you don't have LCDd (lcdproc daemon) running?"
-msgstr "LCD plugin'en vil ikke starte! Kanskje LCDd (lcdproc daemon) kjører?"
-
-#: plugins/lcd.py:721
+#: plugins/lcd.py:736
 #, python-format
 msgid "Connecting to LCD: %s"
-msgstr ""
+msgstr "Kobler til LCD: %s"
 
-#: plugins/lcd.py:722
+#: plugins/lcd.py:737
 msgid "Info as know by the LCD module:"
-msgstr ""
+msgstr "Informasjon som kjent fra LCD modulen:"
 
-#: plugins/lcd.py:910
+#: plugins/lcd.py:930
 #, python-format
 msgid "Could not find screens for %d lines LCD!"
 msgstr "Fant ingen LCD-skjerm for %d linjer!"
 
-#: plugins/lcd.py:913 plugins/lcd.py:924 plugins/lcd.py:935
+#: plugins/lcd.py:933 plugins/lcd.py:944 plugins/lcd.py:955
 #, fuzzy, python-format
 msgid "No screens found for this LCD (%dx%d)!"
 msgstr "Ingen skjermer funnet for LCD (%dx%d)!"
 
-#: plugins/lcd.py:921 plugins/lcd.py:934
+#: plugins/lcd.py:941 plugins/lcd.py:954
 #, python-format
 msgid "Could not find screens for %d lines and %d columns LCD!"
 msgstr "Fant ingen LCD-skjerm for %d linjer og %d kolonner!"
 
-#: plugins/mediamenu.py:190
+#: plugins/mediamenu.py:176
 msgid "Media"
 msgstr "Media"
 
-#: plugins/mediamenu.py:196
-#, fuzzy
+#: plugins/mediamenu.py:181
 msgid "Movie"
-msgstr "Filmer"
+msgstr "Film"
 
-#: plugins/mediamenu.py:199
+#: plugins/mediamenu.py:183
 msgid "Audio"
-msgstr "Audio"
+msgstr "Lyd"
 
-#: plugins/mediamenu.py:202
-#, fuzzy
+#: plugins/mediamenu.py:185
 msgid "Image"
-msgstr "Bilder"
+msgstr "Bilde"
 
-#: plugins/mediamenu.py:205
+#: plugins/mediamenu.py:187
 msgid "Games"
 msgstr "Spill"
 
-#: plugins/mediamenu.py:225
-#, fuzzy, python-format
+#: plugins/mediamenu.py:189
+#, python-format
 msgid "%s Main Menu"
-msgstr "TV Hovedmeny"
+msgstr "%s Hovedmeny"
 
-#: plugins/rom_drives.py:260
+#: plugins/mixer.py:146 plugins/mixer.py:149 plugins/mixer.py:155
+#: plugins/mixer.py:158 plugins/mixer.py:163 plugins/ossmixer.py:136
+#: plugins/ossmixer.py:139 plugins/ossmixer.py:145 plugins/ossmixer.py:148
+#: plugins/ossmixer.py:153
+#, python-format
+msgid "Volume: %s%%"
+msgstr "Volum: %s%%"
+
+#: plugins/mixer.py:166 plugins/ossmixer.py:156
+msgid "Mute"
+msgstr "Stille"
+
+#: plugins/rom_drives.py:279
 #, python-format
 msgid "Drive %s (no disc)"
 msgstr "Stasjon %s (ingen disk)"
 
-#: plugins/rom_drives.py:323
+#: plugins/rom_drives.py:345
 #, python-format
 msgid "Ejecting disc in drive %s"
 msgstr "Utløser CD fra stasjon %s"
 
-#: plugins/rom_drives.py:356
+#: plugins/rom_drives.py:378
 #, python-format
 msgid "Reading disc in drive %s"
 msgstr "Leser disk i stasjon %s"
 
-#: skins/main/listing_area.py:264
-msgid "This directory is empty"
-msgstr "Denne katalogen er tom"
+#: plugins/shoppingcart.py:84
+msgid "Moving files..."
+msgstr "Flytter filer..."
 
-#: skins/main/main.py:160
+#: plugins/shoppingcart.py:94
+msgid "Copying files..."
+msgstr "Kopierer filer..."
+
+#: plugins/shoppingcart.py:108
+msgid "Added to Cart"
+msgstr "Lagt til Handlevogn"
+
+#: plugins/shoppingcart.py:130
+msgid "Cart: Move Files Here"
+msgstr "Handlevogn: Flytt filer her"
+
+#: plugins/shoppingcart.py:131
+msgid "Cart: Copy Files Here"
+msgstr "Handlevogn: Kopier filer her"
+
+#: plugins/shoppingcart.py:134
+msgid "Add Directory to Cart"
+msgstr "Legg katalog i Handlevogn"
+
+#: plugins/shoppingcart.py:138
+msgid "Add File to Cart"
+msgstr "Legg fil til Handlevogn"
+
+#: plugins/shoppingcart.py:141
+msgid "Delete Cart"
+msgstr "Slett Handlevogn"
+
+#: plugins/shutdown.py:79
+msgid "shutting down..."
+msgstr "avslutter..."
+
+#: plugins/shutdown.py:149 plugins/shutdown.py:153 plugins/shutdown.py:158
+msgid "Shutdown Freevo"
+msgstr "Avslutt Freevo"
+
+#: plugins/shutdown.py:150 plugins/shutdown.py:154 plugins/shutdown.py:157
+msgid "Shutdown system"
+msgstr "Skru av systemet"
+
+#: plugins/shutdown.py:151 plugins/shutdown.py:155 plugins/shutdown.py:159
+msgid "Restart system"
+msgstr "Omstart av systemet"
+
+#: plugins/shutdown.py:169
+msgid "Do you really want to shut down Freevo?"
+msgstr "Ønsker du virkelig å avslutte Freevo?"
+
+#: plugins/shutdown.py:178
+msgid "Do you really want to shut down the system?"
+msgstr "Ønsker du virkelig å skru av systemet?"
+
+#: plugins/shutdown.py:186
+msgid "Do you really want to restart the system?"
+msgstr "Ønsker du virkelig å omstarte systemet?"
+
+#: plugins/yac.py:70
+#, python-format
+msgid "Call: %s"
+msgstr "Ring: %s"
+
+#: plugins/yac.py:72
+#, python-format
+msgid "Message: %s"
+msgstr "Melding: %s"
+
+#: skins/main/default_areas.py:128
 msgid "TV GUIDE"
-msgstr "TV-guide"
+msgstr "TV Guide"
 
-#: skins/main/main.py:290
-msgid "Starting Freevo, please wait ..."
-msgstr "Starter Freevo, vennligst vent..."
-
-#: skins/main/main.py:554 skins/main/main.py:626
-msgid "INTERNAL ERROR, NO MENU!"
-msgstr "INTERN FEIL, INGEN MENY!"
-
-#: skins/main/tvlisting_area.py:367 tv/tvguide.py:77 tv/tvguide.py:525
-#: tv/tvguide.py:527
-msgid "This channel has no data loaded"
-msgstr "Ingen data om denne kanalen"
-
-#: tv/record_schedule.py:98
-msgid "View Recording Schedule"
-msgstr "Vis programmerte opptak"
-
-#: tv/record_schedule.py:100
-msgid "Delete Scheduled Item"
-msgstr "Slett programmert opptak"
-
-#: tv/record_schedule.py:102
-msgid "RECORDING SCHEDULE"
-msgstr "Programmerte opptak"
-
-#: tv/record_schedule.py:175
-msgid "VIEW RECORDING SCHEDULE"
-msgstr "Vis programmerte opptak"
-
-#: tv/record_schedule.py:178
-msgid "DELETE SCHEDULED ITEM"
-msgstr "Slett programmert opptak"
-
-#: tv/record_schedule.py:182
-msgid "All Currently Recording Items Have Been Killed!"
+#: skins/main/info_area.py:155
+msgid "missing 'src' attribute in skin tag!"
 msgstr ""
 
-#: tv/tvguide.py:87
+#: skins/main/listing_area.py:225
+msgid "This directory is empty"
+msgstr "Katalogen er tom"
+
+#: skins/main/tvlisting_area.py:364 tv/tvguide.py:119 tv/tvguide.py:585
+#: tv/tvguide.py:587 www/htdocs/guide.rpy:251
+msgid "This channel has no data loaded"
+msgstr "Ingen informasjon for kanalen"
+
+#: tv/plugins/manual_record.py:71 www/htdocs/manualrecord.rpy:68
+#: www/htdocs/manualrecord.rpy:202
+msgid "Manual Record"
+msgstr "Manuelt opptak"
+
+#: tv/plugins/manual_record.py:81 www/htdocs/manualrecord.rpy:145
+msgid "Jan"
+msgstr "Jan"
+
+#: tv/plugins/manual_record.py:81 www/htdocs/manualrecord.rpy:145
+msgid "Feb"
+msgstr "Feb"
+
+#: tv/plugins/manual_record.py:81 www/htdocs/manualrecord.rpy:145
+msgid "Mar"
+msgstr "Mar"
+
+#: tv/plugins/manual_record.py:81 www/htdocs/manualrecord.rpy:145
+msgid "Apr"
+msgstr "Apr"
+
+#: tv/plugins/manual_record.py:81 www/htdocs/manualrecord.rpy:145
+msgid "May"
+msgstr "Mai"
+
+#: tv/plugins/manual_record.py:81 www/htdocs/manualrecord.rpy:145
+msgid "Jun"
+msgstr "Jun"
+
+#: tv/plugins/manual_record.py:81 www/htdocs/manualrecord.rpy:145
+msgid "Jul"
+msgstr "Jul"
+
+#: tv/plugins/manual_record.py:81 www/htdocs/manualrecord.rpy:145
+msgid "Aug"
+msgstr "Aug"
+
+#: tv/plugins/manual_record.py:81 www/htdocs/manualrecord.rpy:145
+msgid "Sep"
+msgstr "Sep"
+
+#: tv/plugins/manual_record.py:81 www/htdocs/manualrecord.rpy:145
+msgid "Oct"
+msgstr "Okt"
+
+#: tv/plugins/manual_record.py:81 www/htdocs/manualrecord.rpy:145
+msgid "Nov"
+msgstr "Nov"
+
+#: tv/plugins/manual_record.py:81 www/htdocs/manualrecord.rpy:145
+msgid "Dec"
+msgstr "Des"
+
+#: tv/plugins/manual_record.py:114
+msgid "Display record item"
+msgstr "Vis opptak"
+
+#: tv/plugins/manual_record.py:122 tv/program_display.py:267
+msgid "Modify name"
+msgstr "Endre navn"
+
+#: tv/plugins/manual_record.py:123 tv/program_display.py:268
+msgid "Modify channel"
+msgstr "Endre kanal"
+
+#: tv/plugins/manual_record.py:124
+msgid "Modify start month"
+msgstr "Endre start måned"
+
+#: tv/plugins/manual_record.py:125
+msgid "Modify start day"
+msgstr "Endre start dag"
+
+#: tv/plugins/manual_record.py:126
+msgid "Modify start time"
+msgstr "Endre start tid"
+
+#: tv/plugins/manual_record.py:127
+msgid "Modify stop month"
+msgstr "Endre stop måned"
+
+#: tv/plugins/manual_record.py:128
+msgid "Modify stop day"
+msgstr "Endre stop dag"
+
+#: tv/plugins/manual_record.py:129
+msgid "Modify stop time"
+msgstr "Endre stop tid"
+
+#: tv/plugins/manual_record.py:130 tv/edit_favorite.py:214
+#: www/htdocs/edit_favorite.rpy:313
+msgid "Save"
+msgstr "Lagre"
+
+#: tv/plugins/manual_record.py:132
+msgid "Record Item Menu"
+msgstr "Opptaksmeny"
+
+#: tv/plugins/manual_record.py:141 tv/program_display.py:291
+msgid "Alter Name"
+msgstr "Endre Navn"
+
+#: tv/plugins/manual_record.py:151 tv/program_display.py:313
+msgid "Modify Channel"
+msgstr "Endre Kanal"
+
+#: tv/plugins/manual_record.py:167 tv/plugins/manual_record.py:183
+#: tv/plugins/manual_record.py:216 tv/plugins/manual_record.py:232
+#: tv/program_display.py:363
+msgid "Modify Day"
+msgstr "Endre Dag"
+
+#: tv/plugins/manual_record.py:200 tv/plugins/manual_record.py:249
+#: tv/program_display.py:383
+msgid "Modify Time"
+msgstr "Endre Tid"
+
+#: tv/plugins/manual_record.py:306 tv/plugins/manual_record.py:335
+#: tv/plugins/manual_record.py:339 tv/plugins/manual_record.py:344
+#: tv/plugins/manual_record.py:348
+msgid "Save Failed, recording was lost"
+msgstr "Lagring feilet, opptaket tapt"
+
+#: tv/plugins/manual_record.py:334 www/htdocs/manualrecord.rpy:129
+#, python-format
+msgid "Program would record for more than %d days!"
+msgstr "Programmet ville spilt inn i mer enn %d dager!"
+
+#: tv/plugins/manual_record.py:338 www/htdocs/manualrecord.rpy:131
+msgid "Program would record for more than 1 day!"
+msgstr "Programmet ville spilt inn i mer enn 1 dag!"
+
+#: tv/plugins/manual_record.py:343 www/htdocs/manualrecord.rpy:126
+msgid "start time is not before stop time."
+msgstr "stop tid er før start tid."
+
+#: tv/plugins/manual_record.py:347
+msgid ""
+"Sorry, the stop time does not give enough time for scheduler to pickup the "
+"change.  Please set it to record for a few minutes longer."
+msgstr "Beklager, stop tiden gir ikke nok tid til planleggeren for å registrere endringen. Vennligst spill inn noen minutter lengre."
+
+#: tv/plugins/scheduled_recordings.py:71 tv/plugins/scheduled_recordings.py:85
+#: www/web_types.py:180 www/htdocs/record.rpy:182
+msgid "Scheduled Recordings"
+msgstr "Programmerte Opptak"
+
+#: tv/plugins/scheduled_recordings.py:76
+msgid "Display Scheduled Recordings"
+msgstr "Vis Programmerte Opptak"
+
+#: tv/plugins/scheduled_recordings.py:82
+msgid "Nothing scheduled."
+msgstr "Ingenting programmert"
+
+#: tv/plugins/scheduled_recordings.py:117 tv/plugins/view_favorites.py:106
+#: tv/program_search.py:99 www/htdocs/edit_favorite.rpy:133
+#: www/htdocs/favorites.rpy:130 www/htdocs/genre.rpy:118
+#: www/htdocs/guide.rpy:201 www/htdocs/manualrecord.rpy:70
+#: www/htdocs/record.rpy:139
+msgid "Recording server is unavailable."
+msgstr "Opptakstjeneren er utilgjengelig."
+
+#: tv/plugins/scheduled_recordings.py:130
+msgid "Get recordings failed"
+msgstr ""
+
+#: tv/plugins/view_favorites.py:60 tv/plugins/view_favorites.py:65
+#: tv/plugins/view_favorites.py:74 www/web_types.py:181
+msgid "View Favorites"
+msgstr "Vis Favoritter"
+
+#: tv/plugins/view_favorites.py:71
+msgid "No favorites."
+msgstr "Ingen Favoritter."
+
+#: tv/plugins/view_favorites.py:118
+msgid "Get favorites failed"
+msgstr ""
+
+#: tv/plugins/view_line_in.py:55
+msgid "View VCR Input"
+msgstr "Vis VCR Input"
+
+#: tv/channels.py:150
+#, python-format
+msgid "Cannot find tuner channel \"%s\" in the TV channel listing"
+msgstr "Kan ikke finne tuner kanal \"%s\" i tvlisten"
+
+#: tv/channels.py:186
+#, python-format
+msgid "Unable to get channel list for %s."
+msgstr "Klarte ikke å hente kanalliste for %s."
+
+#: tv/channels.py:189
+#, python-format
+msgid "Unable to get frequency for channel %s."
+msgstr "Klarte ikke å hente frekvensen for kanalen %s."
+
+#: tv/channels.py:219
+#, python-format
+msgid "Failed to set freq for channel %s."
+msgstr "Klarte ikke å sette frekvens for kanalen %s."
+
+#: tv/edit_favorite.py:123 www/htdocs/edit_favorite.rpy:131
+#: www/htdocs/edit_favorite.rpy:192 www/htdocs/edit_favorite.rpy:197
+msgid "Edit Favorite"
+msgstr "Endre Favoritt"
+
+#: tv/edit_favorite.py:137
+msgid "Name"
+msgstr "Navn"
+
+#: tv/edit_favorite.py:149 www/htdocs/favorites.rpy:190
+#: www/htdocs/favorites.rpy:202 www/htdocs/favorites.rpy:208
+msgid "ANY"
+msgstr ""
+
+#: tv/edit_favorite.py:168
+msgid "Day of Week"
+msgstr "Ukedag"
+
+#: tv/edit_favorite.py:172 tv/program_display.py:248
+#: www/htdocs/edit_favorite.rpy:238
+msgid "ANY DAY"
+msgstr "ALLE DAGER"
+
+#: tv/edit_favorite.py:176 tv/program_display.py:241
+#: www/htdocs/edit_favorite.rpy:239
+msgid "Mon"
+msgstr "Man"
+
+#: tv/edit_favorite.py:176 tv/program_display.py:241
+#: www/htdocs/edit_favorite.rpy:240
+msgid "Tue"
+msgstr "Tir"
+
+#: tv/edit_favorite.py:176 tv/program_display.py:241
+#: www/htdocs/edit_favorite.rpy:241
+msgid "Wed"
+msgstr "Ons"
+
+#: tv/edit_favorite.py:176 tv/program_display.py:241
+#: www/htdocs/edit_favorite.rpy:242
+msgid "Thu"
+msgstr "Tor"
+
+#: tv/edit_favorite.py:176 tv/program_display.py:241
+#: www/htdocs/edit_favorite.rpy:243
+msgid "Fri"
+msgstr "Fre"
+
+#: tv/edit_favorite.py:176 tv/program_display.py:241
+#: www/htdocs/edit_favorite.rpy:244
+msgid "Sat"
+msgstr "Lør"
+
+#: tv/edit_favorite.py:176 tv/program_display.py:241
+#: www/htdocs/edit_favorite.rpy:245
+msgid "Sun"
+msgstr "Søn"
+
+#: tv/edit_favorite.py:189
+msgid "Time of Day"
+msgstr "Tid på dagen"
+
+#: tv/edit_favorite.py:192 tv/program_display.py:252
+#: www/htdocs/edit_favorite.rpy:251
+msgid "ANY TIME"
+msgstr ""
+
+#: tv/edit_favorite.py:217 www/htdocs/favorites.rpy:214
+#: www/htdocs/record.rpy:235 www/htdocs/search.rpy:230
+msgid "Remove"
+msgstr "Slett"
+
+#: tv/edit_favorite.py:241 tv/program_display.py:229 tv/program_display.py:428
+msgid "Remove Failed"
+msgstr "Slett feilet"
+
+#: tv/edit_favorite.py:351
+#, python-format
+msgid "Favorite %s has been saved"
+msgstr "Favoritten %s lagret"
+
+#: tv/edit_favorite.py:353
+#, python-format
+msgid "Failed: %s"
+msgstr "Feilet: %s"
+
+#: tv/edit_favorite.py:373
+#, python-format
+msgid "Do you want to remove %s?"
+msgstr "Ønsker du å slette '%s'?"
+
+#: tv/epg_xmltv.py:94
+msgid "Time conversion error"
+msgstr "Feil ved konvertering av tid"
+
+#: tv/epg_xmltv.py:172
+msgid "Couldn't load the TV Guide, got an exception!"
+msgstr "Kunne ikke laste TV Guiden, et unntak oppstod!"
+
+#: tv/epg_xmltv.py:263
+#, python-format
+msgid "REPLACE WITH TUNERID FOR %s"
+msgstr ""
+
+#: tv/program_display.py:119
+msgid "Display program"
+msgstr "Vis program"
+
+#: tv/program_display.py:133
+msgid "Remove from schedule"
+msgstr "Slett fra Opptaksliste"
+
+#: tv/program_display.py:136
+msgid "Schedule for recording"
+msgstr "Programmer for opptak"
+
+#: tv/program_display.py:140
+msgid "Search for more of this program"
+msgstr "Søk for mer av dette programmet"
+
+#: tv/program_display.py:150
+msgid "Remove from favorites"
+msgstr "Slett fra favoritter"
+
+#: tv/program_display.py:153
+msgid "Add to favorites"
+msgstr "Legg til i favoritter"
+
+#: tv/program_display.py:156
+msgid "Program Menu"
+msgstr "Programmeny"
+
+#: tv/program_display.py:178 tv/program_search.py:129
+msgid "Searching, please wait..."
+msgstr "Søker, vennligst vent..."
+
+#: tv/program_display.py:194
+#, python-format
+msgid "No matches found for %s"
+msgstr "Ingen treff på %s"
+
+#: tv/program_display.py:196
+#, python-format
+msgid "findMatches failed: %s"
+msgstr ""
+
+#: tv/program_display.py:199 www/htdocs/search.rpy:144
+msgid "Search Results"
+msgstr "Søkeresultater"
+
+#: tv/program_display.py:208
+#, python-format
+msgid "\"%s\" has been scheduled for recording"
+msgstr "\"%s\" ble programmert for opptak"
+
+#: tv/program_display.py:213
+msgid "Scheduling Failed"
+msgstr "Programmering feilet"
+
+#: tv/program_display.py:244 www/htdocs/edit_favorite.rpy:225
+msgid "ANY CHANNEL"
+msgstr ""
+
+#: tv/program_display.py:261
+msgid "Display favorite"
+msgstr "Vis favoritt"
+
+#: tv/program_display.py:269
+msgid "Modify day of week"
+msgstr "Endre ukedag"
+
+#: tv/program_display.py:270
+msgid "Modify time of day"
+msgstr "Endre tid"
+
+#: tv/program_display.py:276
+msgid "Modify priority"
+msgstr "Endre prioritet"
+
+#: tv/program_display.py:279
+msgid "Save changes"
+msgstr "Lagre endringer"
+
+#: tv/program_display.py:280
+msgid "Remove favorite"
+msgstr "Slett favoritt"
+
+#: tv/program_display.py:282
+msgid "Favorite Menu"
+msgstr "Favoritt Meny"
+
+#: tv/program_display.py:404
+msgid "Save Failed, favorite was lost"
+msgstr "Lagring feilet, favoritten gikk tapt"
+
+#: tv/program_display.py:411
+msgid "Save Failed"
+msgstr "Lagring Feilet"
+
+#: tv/program_display.py:416
+msgid "Favorite not added yet."
+msgstr "Favoritt ikke lagt til enda."
+
+#: tv/program_search.py:92
+msgid "Program Search"
+msgstr "Programsøk"
+
+#: tv/program_search.py:101
+msgid "Feel free to implement this function inside the main guide."
+msgstr ""
+
+#: tv/record_client.py:103 tv/record_client.py:112 tv/record_client.py:123
+#: tv/record_client.py:139 tv/record_client.py:151 tv/record_client.py:160
+#: tv/record_client.py:179 tv/record_client.py:188 tv/record_client.py:200
+#: tv/record_client.py:209 tv/record_client.py:222 tv/record_client.py:231
+#: tv/record_client.py:240 tv/record_client.py:249 tv/record_client.py:259
+#: tv/record_client.py:269 tv/record_client.py:278 tv/record_client.py:287
+#: tv/record_client.py:296 tv/record_client.py:305
+msgid "connection error"
+msgstr ""
+
+#: tv/record_client.py:130 tv/record_client.py:146
+msgid "no program"
+msgstr ""
+
+#: tv/record_client.py:133
+msgid "cannot record it if it is over"
+msgstr ""
+
+#: tv/record_client.py:168 tv/record_client.py:174
+msgid "program not scheduled"
+msgstr ""
+
+#: tv/record_client.py:172
+msgid "program is scheduled"
+msgstr ""
+
+#: tv/tvguide.py:128
 msgid "Preparing the program guide"
-msgstr "Klargjør TV-guide"
+msgstr "Klargjør TV Guiden"
 
-#: tv/tvguide.py:91
+#: tv/tvguide.py:131
 msgid "TV Guide is corrupt!"
-msgstr "TV-guiden er korrupt!"
+msgstr "TV Guiden er korrupt!"
 
-#: tv/tvmenu.py:147 tv/tvmenu.py:155
+#: tv/tvguide.py:254
+msgid "Sorry, you cannot watch TV while recording. "
+msgstr "Beklager, du kan ikke se på TV mens opptak pågår."
+
+#: tv/tvguide.py:255
+msgid "If this is not true then remove "
+msgstr "Slett hvis dette ikke er sant "
+
+#: tv/tvmenu.py:103 tv/tvmenu.py:111
 #, python-format
 msgid "Could not find TV channel %s"
-msgstr "Kunne ikke finne tv-kanalen %s"
+msgstr "Kunne ikke finne kanalen %s"
 
-#: tv/tvmenu.py:180
+#: tv/tvmenu.py:135 www/web_types.py:179 www/htdocs/guide.rpy:196
 msgid "TV Guide"
-msgstr "TV-guide"
+msgstr "TV Guide"
 
-#: tv/tvmenu.py:181
+#: tv/tvmenu.py:137
 msgid "Recorded Shows"
-msgstr "Opptak"
+msgstr "Lagrede Opptak"
 
-#: tv/tvmenu.py:183
-msgid "Scheduled Recordings"
-msgstr "Programmerte opptak"
-
-#: tv/tvmenu.py:185
-msgid "Search Guide"
-msgstr "Søk i TV-guide"
-
-#: tv/tvmenu.py:188
+#: tv/tvmenu.py:147
 msgid "TV Main Menu"
 msgstr "TV Hovedmeny"
 
-#: tv/tvmenu.py:224
+#: tv/tvmenu.py:173
 msgid "The list of TV channels is invalid!\n"
 msgstr "Listen over tv-kanaler er ugyldig!\n"
 
-#: tv/tvmenu.py:225
+#: tv/tvmenu.py:174
 msgid "Please check the config file."
-msgstr "Vennligst sjekk konfigurasjons-filen."
+msgstr "Vennligst sjekk konfigurasjonsfil."
 
-#: video/plugins/bookmarker.py:99
+#: util/misc.py:441
+msgid "The recordserver is down"
+msgstr "Opptakstjeneren er nede"
+
+#: util/misc.py:463
+msgid "Today"
+msgstr "Idag"
+
+#: util/misc.py:473
+msgid "Tomorrow"
+msgstr "Imorgen"
+
+#: util/misc.py:483
+msgid "This Week"
+msgstr "Denne uken"
+
+#: util/misc.py:493
+msgid "No recordings are scheduled"
+msgstr "Ingen opptak programmert"
+
+#: video/plugins/bookmarker.py:79
 msgid "Resume playback"
 msgstr "Fortsett avspilling"
 
-#: video/plugins/bookmarker.py:104
+#: video/plugins/bookmarker.py:84
 msgid "Bookmarks"
 msgstr "Bokmerker"
 
-#: video/plugins/bookmarker.py:139
+#: video/plugins/bookmarker.py:120
 #, python-format
 msgid "Jump to %s"
 msgstr "Hopp til %s"
 
-#: video/plugins/imdb.py:115
-#, fuzzy
-msgid "Search IMDB for this file"
-msgstr "Søk i IMDB etter [%s]"
+#: video/plugins/details.py:64
+msgid "Show details for this item"
+msgstr "Vis detaljer for enheten"
 
-#: video/plugins/imdb.py:122 video/plugins/imdb.py:128
+#: video/plugins/details.py:94
+msgid "Details"
+msgstr "Detaljer"
+
+#: video/plugins/imdb.py:105
+msgid "Search IMDB for this file"
+msgstr "Søk på IMDB etter filen"
+
+#: video/plugins/imdb.py:112 video/plugins/imdb.py:119
 #, python-format
 msgid "Search IMDB for [%s]"
-msgstr "Søk i IMDB etter [%s]"
+msgstr "Søk på IMDB etter [%s]"
 
-#: video/plugins/imdb.py:139
+#: video/plugins/imdb.py:130
 msgid "searching IMDB..."
-msgstr "Søker i IMDB..."
+msgstr "Søker på IMDB..."
 
-#: video/plugins/imdb.py:163
+#: video/plugins/imdb.py:154
 msgid "Unknown error while connecting to IMDB"
 msgstr "Ukjent feil under opprettelse av forbindelse mot IMDB"
 
-#: video/plugins/imdb.py:181
+#: video/plugins/imdb.py:172
 msgid "IMDB Query"
-msgstr "IMDB søk"
+msgstr "IMDB Søk"
 
-#: video/plugins/imdb.py:185
+#: video/plugins/imdb.py:176
 msgid "No information available from IMDB"
 msgstr "Ingen informasjon tilgjengelig fra IMDB"
 
-#: video/plugins/imdb_info.py:72
-msgid "Show info for this file"
-msgstr "Vis informasjon om denne filen"
+#: video/plugins/linkbrowser.py:90
+msgid "Browse links (autoplay)"
+msgstr "Utforsk lenker (automatisk)"
 
-#: video/plugins/imdb_info.py:86
-msgid "There is no IMDB information for this file."
-msgstr "Det finnes ingen IMDB-informasjon om denne filen."
+#: video/plugins/linkbrowser.py:91
+msgid "Browse links (autoplay, maximum caching)"
+msgstr "Uforsk lenker (automatisk, maks cache)"
 
-#: video/plugins/mover.py:114
+#: video/plugins/linkbrowser.py:92
+msgid "Browse links"
+msgstr "Utforsk lenker"
+
+#: video/plugins/linkbrowser.py:161
+msgid "Downloading link list..."
+msgstr "Laster ned lenker..."
+
+#: video/plugins/linkbrowser.py:168
+#, python-format
+msgid "Failed to download %s"
+msgstr "Feilet nedlastning av %s"
+
+#: video/plugins/mover.py:123
 #, python-format
 msgid "Move to [%s]"
 msgstr "Flytt til [%s]"
 
-#: video/plugins/mplayer.py:640
-#, fuzzy
-msgid "unknow error while playing file"
-msgstr "Ukjent feil under opprettelse av forbindelse mot IMDB"
+#: video/plugins/mplayer.py:473
+msgid "Seeking not possible"
+msgstr "Soeking umulig"
 
-#: video/plugins/xine.py:100
-msgid "'XINE_COMMAND' not defined, plugin 'xine' deactivated"
+#: video/plugins/xine.py:111
+#, fuzzy
+msgid ""
+"'XINE_COMMAND' not defined, plugin 'xine' deactivated.\n"
+"please check the xine section in freevo_config.py"
 msgstr "'XINE_COMMAND' er ikke definert, 'xine'-plugin'en er nå skrudd av"
 
-#: video/plugins/xine.py:101
-#, fuzzy
-msgid "please check the xine section in freevo_config.py"
-msgstr "Vennligst sjekk xine-avsnitett i freevo_config.py"
-
-#: video/plugins/xine.py:134
-msgid "'xine' version too old, plugin in fallback mode"
-msgstr ""
-
 #: video/plugins/xine.py:135
-#, python-format
-msgid "You need %s to use all features of the '%s' plugin"
-msgstr ""
-
-#: video/plugins/linkbrowser.py:158
-msgid "Downloading link list..."
-msgstr "Laster ned link-liste..."
-
-#: video/plugins/linkbrowser.py:165
-#, python-format
-msgid "Failed to download %s"
-msgstr "Klarte ikke laste ned %s"
-
-#: video/configure.py:83
 #, fuzzy
-msgid "Audio Menu"
-msgstr "Lyd-meny"
+msgid "'xine-ui' version too old, plugin 'xine' deactivated"
+msgstr "'fbxine' versjonen er for gammel, 'xine'-plugin'en er nå skrudd av"
 
-#: video/configure.py:99
-msgid "no subtitles"
+#: video/__init__.py:181
+msgid "Directory Autobuild Thumbnails "
+msgstr "Katalog Lag Miniatyrbilder Automatisk"
+
+#: video/__init__.py:182
+msgid "Build video thumbnails for all items (may take a while when entering)."
+msgstr "Lag video miniatyrbilder automatisk for alle filer (kan ta litt tid)."
+
+#: video/configure.py:108
+#, python-format
+msgid "Stream %s"
 msgstr ""
 
-#: video/configure.py:102
+#: video/configure.py:114
+msgid "Unknown"
+msgstr "Ukjent"
+
+#: video/configure.py:119
+msgid "Audio Menu"
+msgstr "Lyd Meny"
+
+#: video/configure.py:135
+msgid "no subtitles"
+msgstr "ingen undertekster"
+
+#: video/configure.py:138
 #, fuzzy
 msgid "Subtitle Menu"
 msgstr "Undertekstingsmeny"
 
-#: video/configure.py:118
-#, fuzzy, python-format
+#: video/configure.py:154
+#, python-format
 msgid "Play chapter %s"
-msgstr "Spille av tittel %s"
+msgstr "Spill kapittel %s"
 
-#: video/configure.py:120
-#, fuzzy
+#: video/configure.py:156
 msgid "Chapter Menu"
-msgstr "Kapittel-meny"
+msgstr "Kapittelmeny"
 
-#: video/configure.py:147
+#: video/configure.py:185
 #, python-format
 msgid "Turn off %s"
 msgstr "Skru av %s"
 
-#: video/configure.py:148
+#: video/configure.py:186
 #, python-format
 msgid "Turn on %s"
 msgstr "Skru på %s"
 
-#: video/configure.py:163
+#: video/configure.py:199
 msgid "Audio selection"
-msgstr ""
+msgstr "Lydvalg"
 
-#: video/configure.py:165
+#: video/configure.py:201
 msgid "Subtitle selection"
-msgstr ""
+msgstr "Undertekstvalg"
 
-#: video/configure.py:168
+#: video/configure.py:204
 msgid "Chapter selection"
-msgstr ""
+msgstr "Kapittelvalg"
 
-#: video/configure.py:170
+#: video/configure.py:209
 msgid "deinterlacing"
 msgstr ""
 
-#: video/configure.py:179
-#, fuzzy
+#: video/configure.py:218
 msgid "Config Menu"
-msgstr "Konfigurasjons-meny"
+msgstr "Konfigurasjonsmeny"
 
-#: video/videoitem.py:294
+#: video/videoitem.py:277
 msgid "Play DVD"
 msgstr "Spill av DVD"
 
-#: video/videoitem.py:295 video/videoitem.py:297
+#: video/videoitem.py:278 video/videoitem.py:280
 msgid "DVD title list"
-msgstr "DVD tittel-liste"
+msgstr "DVD tittel liste"
 
-#: video/videoitem.py:298 video/videoitem.py:306
+#: video/videoitem.py:281 video/videoitem.py:289
 msgid "Play default track"
-msgstr ""
+msgstr "Spill standard spor"
 
-#: video/videoitem.py:302
+#: video/videoitem.py:285
 msgid "Play VCD"
-msgstr "Spill av VCD"
+msgstr "Spill VCD"
 
-#: video/videoitem.py:303 video/videoitem.py:305
+#: video/videoitem.py:286 video/videoitem.py:288
 msgid "VCD title list"
-msgstr "VCD tittel-liste"
+msgstr "VCD tittel liste"
 
-#: video/videoitem.py:311
+#: video/videoitem.py:293
+msgid "Play with alternate player"
+msgstr "Spill med alternativ avspiller"
+
+#: video/videoitem.py:296
 msgid "Play with maximum cache"
-msgstr "Spill av med max cache"
+msgstr "Spill med maks hurtigbuffer"
 
-#: video/videoitem.py:314
+#: video/videoitem.py:301
 msgid "Show variants"
 msgstr "Vis varianter"
 
-#: video/videoitem.py:395
-msgid "Wait while detecting media..."
-msgstr "Detekterer media. Vennligst vent..."
+#: video/videoitem.py:304
+msgid "Create Thumbnail"
+msgstr "Lag Miniatyrbilde"
 
-#: video/videoitem.py:417
+#: video/videoitem.py:325
+msgid "Please wait...."
+msgstr "Vennligs vent...."
+
+#: video/videoitem.py:456
+#, python-format
+msgid "No media found for \"%s\".\n"
+msgstr "Media ikke funnet for \"%s\".\n"
+
+#: video/videoitem.py:457 video/videoitem.py:471 video/videoitem.py:485
+msgid "Please insert the media."
+msgstr "Vennlist sett inn mediet."
+
+#: video/videoitem.py:470
 #, python-format
 msgid "Media not found for file \"%s\".\n"
 msgstr "Media ikke funnet for filen \"%s\".\n"
 
-#: video/videoitem.py:418
-msgid "Please insert the media."
-msgstr "Vennlist sett inn media."
-
-#: video/videoitem.py:434
+#: video/videoitem.py:484
 #, python-format
-msgid "Media not found for %s track %s"
-msgstr "Media ikke funnet for %s, spor %s"
+msgid "Media not found for \"%s\".\n"
+msgstr "Media ikke funnet for \"%s\".\n"
 
-#: video/videoitem.py:554
+#: video/videoitem.py:490
+msgid "No player for this item found"
+msgstr "Ingen avspiller for denne filtypen"
+
+#: video/videoitem.py:565
 #, python-format
 msgid "Play Title %s"
-msgstr "Spille av tittel %s"
+msgstr "Spill Tittel %s"
+
+#: www/web_types.py:178 www/htdocs/index.rpy:107
+msgid "Home"
+msgstr "Hjem"
+
+#: www/web_types.py:179
+msgid "View TV Listings"
+msgstr "Vis TV Guide"
+
+#: www/web_types.py:180
+msgid "View Scheduled Recordings"
+msgstr "Vis Programmerte Opptak"
+
+#: www/web_types.py:181 www/htdocs/favorites.rpy:128
+#: www/htdocs/favorites.rpy:171
+msgid "Favorites"
+msgstr "Favoritter"
+
+#: www/web_types.py:182 www/htdocs/library.rpy:277
+msgid "Media Library"
+msgstr "Media Bibliotek"
+
+#: www/web_types.py:182
+msgid "View Media Library"
+msgstr "Vis Media Bibliotek"
+
+#: www/web_types.py:183 www/htdocs/manualrecord.rpy:202
+msgid "Manual Recording"
+msgstr "Manuelt Opptak"
+
+#: www/web_types.py:183
+msgid "Schedule a Manual Recording"
+msgstr "Programmer et Manuelt Opptak"
+
+#: www/web_types.py:184 www/web_types.py:282 www/web_types.py:289
+#: www/htdocs/search.rpy:144 www/htdocs/search.rpy:168
+msgid "Search"
+msgstr "Søk"
+
+#: www/web_types.py:184
+msgid "Advanced Search Page"
+msgstr "Avansert Søkeside"
+
+#: www/web_types.py:185
+msgid "Help"
+msgstr "Hjelp"
+
+#: www/web_types.py:185
+msgid "View Online Help and Documentation"
+msgstr "Vis Online Hjelp og Dokumentasjon (engelsk)"
+
+#: www/web_types.py:189
+msgid "Icecast List"
+msgstr "Icecast Liste"
+
+#: www/web_types.py:189
+msgid "Change Icecast List"
+msgstr "Endre Icecast Liste"
+
+#: www/web_types.py:290
+msgid "Movies only"
+msgstr "Kun filmer"
+
+#: www/web_types.py:291
+msgid "Go!"
+msgstr "Sett igang!"
+
+#: www/web_types.py:297 www/htdocs/library.rpy:288
+msgid "Messages"
+msgstr "Meldinger"
+
+#: www/htdocs/help/howto.rpy:93 www/htdocs/help/howto.rpy:94
+msgid "Freevo Installation HOWTO"
+msgstr ""
+
+#: www/htdocs/help/howto.rpy:94
+msgid "Build your own media box with Freevo and Linux"
+msgstr ""
+
+#: www/htdocs/help/howto.rpy:96 www/htdocs/help/howto.rpy:97
+msgid "Freevo Plugin Writing HOWTO"
+msgstr ""
+
+#: www/htdocs/help/howto.rpy:97
+msgid "Writing your own plugins for Freevo"
+msgstr ""
+
+#: www/htdocs/help/howto.rpy:132
+msgid "unable to load html files"
+msgstr ""
+
+#: www/htdocs/help/howto.rpy:133 www/htdocs/help/doc.rpy:109
+msgid "If you use a CVS version of Freevo, run <b>autogen.sh</b>."
+msgstr ""
+
+#: www/htdocs/help/howto.rpy:134
+msgid "The files are searched in the following locations:"
+msgstr ""
+
+#: www/htdocs/help/doc.rpy:106 www/htdocs/help/doc.rpy:117
+msgid "Freevo Documentation"
+msgstr ""
+
+#: www/htdocs/help/doc.rpy:108
+#, fuzzy, python-format
+msgid "unable to load %s.html"
+msgstr "Klarte ikke laste ned %s"
+
+#: www/htdocs/help/doc.rpy:126
+#, python-format
+msgid ""
+"This page is generated from the Freevo WiKi. The current Version can be "
+"found <a href=\"%s\">here</a>."
+msgstr ""
+
+#: www/htdocs/help/index.rpy:82
+msgid "Freevo Help"
+msgstr ""
+
+#: www/htdocs/help/index.rpy:85
+msgid ""
+"This is the internal Freevo documentation. The documents         are in an "
+"early stage of development, if you like to help, please         contact the "
+"developers. You find more informations like         the <a href=\"http://"
+"freevo.sourceforge.net/cgi-bin/moin.cgi/FrontPage\">        WiKi (online "
+"manual)</a> and mailing lists on the         <a href=\"http://www.freevo.org"
+"\">Freevo Homepage</a>.        Everyone can edit the WiKi (and we can revert "
+"them if someone deletes         informations), feel free to add informations "
+"there."
+msgstr ""
+
+#: www/htdocs/help/index.rpy:94
+msgid "Index"
+msgstr ""
+
+#: www/htdocs/help/index.rpy:96
+msgid "Freevo Installation Howto"
+msgstr ""
+
+#: www/htdocs/help/index.rpy:97
+msgid "Frequently Asked Questions"
+msgstr ""
+
+#: www/htdocs/help/index.rpy:98
+msgid "Recording Information"
+msgstr ""
+
+#: www/htdocs/help/index.rpy:99
+msgid "Plugin List"
+msgstr ""
+
+#: www/htdocs/help/index.rpy:100
+msgid "FXD files"
+msgstr ""
+
+#: www/htdocs/help/index.rpy:101
+msgid "Skinning Informations"
+msgstr ""
+
+#: www/htdocs/help/index.rpy:102
+msgid "Plugin Writing Howto"
+msgstr ""
+
+#: www/htdocs/help/plugins.rpy:109 www/htdocs/help/plugins.rpy:128
+msgid "Freevo Plugin List"
+msgstr ""
+
+#: www/htdocs/help/plugins.rpy:138 www/htdocs/help/plugins.rpy:145
+msgid "top"
+msgstr ""
+
+#: www/htdocs/help/plugins.rpy:139 www/htdocs/help/plugins.rpy:146
+msgid "index"
+msgstr ""
+
+#: www/htdocs/edit_favorite.rpy:158 www/htdocs/record.rpy:161
+#, python-format
+msgid "No program found on %s at %s."
+msgstr "Program ikke funnet %s i %s"
+
+#: www/htdocs/edit_favorite.rpy:182
+#, python-format
+msgid "Favorite %s doesn't exists."
+msgstr "Favoritten %s eksisterer ikke."
+
+#: www/htdocs/edit_favorite.rpy:205
+msgid "Name of favorite"
+msgstr "Favorittens navn"
+
+#: www/htdocs/edit_favorite.rpy:208 www/htdocs/favorites.rpy:178
+msgid "Day of week"
+msgstr "Ukedag"
+
+#: www/htdocs/edit_favorite.rpy:209 www/htdocs/favorites.rpy:179
+msgid "Time of day"
+msgstr "Tid"
+
+#: www/htdocs/edit_favorite.rpy:210
+msgid "Action"
+msgstr "Handling"
+
+#: www/htdocs/favorites.rpy:162
+msgid "Monday"
+msgstr "Mandag"
+
+#: www/htdocs/favorites.rpy:163
+msgid "Tuesday"
+msgstr "Tirsdag"
+
+#: www/htdocs/favorites.rpy:164
+msgid "Wednesday"
+msgstr "Onsdag"
+
+#: www/htdocs/favorites.rpy:165
+msgid "Thursday"
+msgstr "Torsdag"
+
+#: www/htdocs/favorites.rpy:166
+msgid "Friday"
+msgstr "Fredag"
+
+#: www/htdocs/favorites.rpy:167
+msgid "Saturday"
+msgstr "Lørdag"
+
+#: www/htdocs/favorites.rpy:168
+msgid "Sunday"
+msgstr "Søndag"
+
+#: www/htdocs/favorites.rpy:175
+msgid "Favorite Name"
+msgstr "Favoritt Navn"
+
+#: www/htdocs/favorites.rpy:180 www/htdocs/record.rpy:194
+#: www/htdocs/search.rpy:187
+msgid "Actions"
+msgstr "Handlinger"
+
+#: www/htdocs/favorites.rpy:181
+msgid "Priority"
+msgstr "Prioritet"
+
+#: www/htdocs/favorites.rpy:213
+msgid "Edit"
+msgstr "Endre"
+
+#: www/htdocs/favorites.rpy:221
+msgid "Higher"
+msgstr "Høyere"
+
+#: www/htdocs/favorites.rpy:228
+msgid "Lower"
+msgstr "Lavere"
+
+#: www/htdocs/genre.rpy:114
+#, python-format
+msgid "TV Genre for %s"
+msgstr ""
+
+#: www/htdocs/genre.rpy:144 www/htdocs/guide.rpy:212
+msgid "Show"
+msgstr "Vis"
+
+#: www/htdocs/genre.rpy:144 www/htdocs/guide.rpy:212
+msgid "Category"
+msgstr "Kategori"
+
+#: www/htdocs/genre.rpy:144 www/htdocs/guide.rpy:212
+msgid "Change"
+msgstr "Endre"
+
+#: www/htdocs/genre.rpy:194 www/htdocs/guide.rpy:290 www/htdocs/record.rpy:230
+#: www/htdocs/search.rpy:224
+#, python-format
+msgid "Sorry, the program description for %s is unavailable."
+msgstr "Beklager, ingen programinformasjon for %s."
+
+#: www/htdocs/genre.rpy:219 www/htdocs/guide.rpy:325
+msgid "Start"
+msgstr ""
+
+#: www/htdocs/genre.rpy:220 www/htdocs/guide.rpy:326
+msgid "Stop"
+msgstr ""
+
+#: www/htdocs/genre.rpy:221 www/htdocs/guide.rpy:327
+msgid "Runtime"
+msgstr "Spilletid"
+
+#: www/htdocs/genre.rpy:236 www/htdocs/guide.rpy:338 www/htdocs/search.rpy:232
+#: www/htdocs/search.rpy:234
+#, fuzzy
+msgid "Record"
+msgstr "Opptak"
+
+#: www/htdocs/genre.rpy:239 www/htdocs/guide.rpy:341
+msgid "Add to Favorites"
+msgstr "Legg til i Favoritter"
+
+#: www/htdocs/genre.rpy:242 www/htdocs/guide.rpy:344
+msgid "Close Window"
+msgstr "Lukk vindu"
+
+#: www/htdocs/genre.rpy:270
+msgid "NO SHOWS MATCHING CATEGORY"
+msgstr "INGEN PROGRAM I KATEGORIEN"
+
+#: www/htdocs/guide.rpy:209
+msgid "View"
+msgstr "Vis"
+
+#: www/htdocs/index.rpy:107
+msgid "Welcome"
+msgstr "Velkommen"
+
+#: www/htdocs/index.rpy:110
+#, python-format
+msgid "Freevo Web Status as of %s"
+msgstr "Freevo Web Status %s"
+
+#: www/htdocs/index.rpy:115 www/htdocs/index.rpy:121 www/htdocs/index.rpy:123
+msgid "Notice"
+msgstr "Notis"
+
+#: www/htdocs/index.rpy:115
+msgid "The recording server is down."
+msgstr "Opptakstjeneren er nede."
+
+#: www/htdocs/index.rpy:117
+msgid "The recording server is up and running."
+msgstr "Opptakstjeneren er oppe og går."
+
+#: www/htdocs/index.rpy:121
+msgid "Your listings expire in 1 hour."
+msgstr "TV Guiden utgår om en time."
+
+#: www/htdocs/index.rpy:123
+#, python-format
+msgid "Your listings expire in %s hours."
+msgstr "TV Guiden utgår om %s timer."
+
+#: www/htdocs/index.rpy:125
+msgid "Your listings are up to date."
+msgstr "TV Guiden er oppdatert."
+
+#: www/htdocs/index.rpy:135
+#, python-format
+msgid "Now Recording %s."
+msgstr "Nåværende opptak: %s."
+
+#: www/htdocs/index.rpy:141
+msgid "One program scheduled to record."
+msgstr "Ett program lagt til i opptaksplanleggeren."
+
+#: www/htdocs/index.rpy:143
+#, python-format
+msgid "%i programs scheduled to record."
+msgstr "%i programmer planlagt for opptak."
+
+#: www/htdocs/index.rpy:145 www/htdocs/index.rpy:147
+msgid "No programs scheduled to record."
+msgstr "Ingen programmer planlagt for opptak."
+
+#: www/htdocs/index.rpy:149
+#, python-format
+msgid "%i of %i Mb free in %s"
+msgstr "%i av %i Mb ledig i %s"
+
+#: www/htdocs/library.rpy:252
+#, python-format
+msgid "%s already exists! File not renamed."
+msgstr "%s eksisterer allerede! Filnavn ikke endret."
+
+#: www/htdocs/library.rpy:254
+#, python-format
+msgid "Rename %s to %s."
+msgstr "Endre filnavn fra %s til %s"
+
+#: www/htdocs/library.rpy:257
+msgid "No new file specified."
+msgstr "Ingen ny fil spesifisert."
+
+#: www/htdocs/library.rpy:259
+#, python-format
+msgid "Delete %s."
+msgstr "Slette %s."
+
+#: www/htdocs/library.rpy:267
+#, python-format
+msgid "%s does not exist. No action taken."
+msgstr "%s eksisterer ikke. Ingen handling utført."
+
+#: www/htdocs/library.rpy:269
+#, python-format
+msgid "I do not process names (%s) with slashes for security reasons."
+msgstr "Jeg prosesserer ikke navn (%s) med skråstrek av sikkerhetsgrunner."
+
+#: www/htdocs/library.rpy:301
+#, fuzzy
+msgid "Movies"
+msgstr "Filmer"
+
+#: www/htdocs/library.rpy:305
+msgid "Recorded TV"
+msgstr "TV Opptak"
+
+#: www/htdocs/library.rpy:313
+#, fuzzy
+msgid "Images"
+msgstr "Bilder"
+
+#: www/htdocs/library.rpy:325
+msgid "Choose a Directory"
+msgstr "Velg en Katalog"
+
+#: www/htdocs/library.rpy:328 www/htdocs/library.rpy:400
+#: www/htdocs/library.rpy:402 www/htdocs/library.rpy:405
+msgid "Back"
+msgstr "Tilbake"
+
+#: www/htdocs/library.rpy:447
+msgid "Download"
+msgstr "Last ned"
+
+#: www/htdocs/library.rpy:450
+msgid "Rename"
+msgstr "Nytt navn"
+
+#: www/htdocs/manualrecord.rpy:117
+msgid "Manual Recorded"
+msgstr "Manuelle Opptak"
+
+#: www/htdocs/manualrecord.rpy:208
+msgid "Error Message"
+msgstr "Feilmelding"
+
+#: www/htdocs/manualrecord.rpy:220 www/htdocs/record.rpy:188
+#: www/htdocs/search.rpy:181
+msgid "Start Time"
+msgstr "Start Tid"
+
+#: www/htdocs/manualrecord.rpy:221 www/htdocs/record.rpy:189
+#: www/htdocs/search.rpy:182
+msgid "Stop Time"
+msgstr "Stop Tid"
+
+#: www/htdocs/manualrecord.rpy:223 www/htdocs/record.rpy:193
+#: www/htdocs/search.rpy:186
+msgid "Program Description"
+msgstr "Programbeskrivelse"
+
+#: www/htdocs/manualrecord.rpy:234
+msgid "Add to Recording Schedule"
+msgstr "Legg til i opptaksliste"
+
+#: www/htdocs/record.rpy:192 www/htdocs/search.rpy:185
+msgid "Episode"
+msgstr ""
+
+#: www/htdocs/record.rpy:218
+msgid "UNKNOWN"
+msgstr "UKJENT"
+
+#: www/htdocs/search.rpy:145
+msgid "recording server is unavailable"
+msgstr "opptakstjeneren er utilgjengelig"
+
+#: www/htdocs/search.rpy:175
+msgid "No matches"
+msgstr "Ingen treff"
+
+#: www/htdocs/search.rpy:236
+msgid "New favorite"
+msgstr "Ny favoritt"
 
 # Manualy added from fxd skin files
 msgid "TV"
 msgstr "TV"
 
-#, fuzzy
-msgid "Movies"
-msgstr "Filmer"
-
-msgid "Music"
-msgstr "Musikk"
-
-#, fuzzy
-msgid "Images"
-msgstr "Bilder"
-
 msgid "Shutdown"
 msgstr "Avslutt"
 
 msgid "Watch TV"
-msgstr "Se på tv"
+msgstr "Se på TV"
 
 msgid "Watch a Movie"
-msgstr "Se en film"
+msgstr "Se en Film"
 
 msgid "Listen to Music"
-msgstr "Hør på musikk"
+msgstr "Hør på Musikk"
 
 msgid "Look at Pictures"
-msgstr "Se på bilder"
+msgstr "Se på Bilder"
 
 msgid " of "
 msgstr " av "
@@ -1179,25 +2445,25 @@ msgid "Album:"
 msgstr "Album:"
 
 msgid " musics in this playlist."
-msgstr " spor i denne spillelisten."
+msgstr " spor i spillelisten."
 
 msgid "Just one music in this playlist."
-msgstr "Bare et spor i denne spillelisten."
+msgstr "Bare ett spor i spillelisten."
 
 msgid "This playlist is empty!"
-msgstr "Denne spillelisten er tom!"
+msgstr "Spillelisten er tom!"
 
 msgid " movies in this playlist."
-msgstr " filmer i denne spillelisten."
+msgstr " filmer i spillelisten."
 
 msgid "Just one movie in this playlist."
-msgstr "Bare en film i denne spillelisten."
+msgstr "Kun en film i spillelisten."
 
 msgid "Year:"
 msgstr "År:"
 
 msgid "Genre:"
-msgstr "Sjanger:"
+msgstr "Genre:"
 
 msgid "Rating:"
 msgstr "Rating:"
@@ -1212,7 +2478,7 @@ msgid "Resolution:"
 msgstr "Oppløsning:"
 
 msgid "Copyright:"
-msgstr "Copyright:"
+msgstr "Opphavsrett:"
 
 msgid "Geometry:"
 msgstr "Geometri:"
@@ -1221,13 +2487,13 @@ msgid "Date:"
 msgstr "Dato:"
 
 msgid " pictures in this slideshow."
-msgstr " bilder i denne bildeserien."
+msgstr " bilder i bildeserien."
 
 msgid "Just one picture in this slideshow."
-msgstr "Bare ett bilde i denne bildeserien."
+msgstr "Bare ett bilde i bildeserien."
 
 msgid "This slideshow is empty!"
-msgstr "Denne bildeserien er tom!"
+msgstr "Bildeserien er tom!"
 
 msgid "Track:"
 msgstr "Spor:"
@@ -1236,25 +2502,23 @@ msgid "Length:"
 msgstr "Lengde:"
 
 msgid "Elapsed:"
-msgstr "Spilt av:"
+msgstr "Avspilt:"
 
 msgid " min. "
 msgstr " min. "
 
 msgid " Audiotracks, "
-msgstr " lyd-spor, "
+msgstr " Lydspor, "
 
 msgid " Subtitles, "
-msgstr " undertekster, "
+msgstr " Undertekster, "
 
 msgid " Chapter"
-msgstr " kapittel"
+msgstr " Kapittel"
 
 msgid "Size:"
 msgstr "Størrelse:"
 
 msgid " items in this playlist"
-msgstr " elementer i denne spillelisten"
+msgstr " elementer i spillelisten"
 
-#~ msgid "Show database information for this file"
-#~ msgstr "Vis database-informasjon om denne filen"
