@@ -20,7 +20,7 @@ import sys, os, time, re
 import movie_xml
 
 
-DEBUG = 0
+DEBUG_STDOUT = 0
 
 
 if os.path.isdir('/var/log/freevo'):
@@ -52,7 +52,9 @@ class Logger:
         
         
     def write(self, msg):
-        sys.__stdout__.write(msg)
+        global DEBUG_STDOUT
+        if DEBUG_STDOUT:
+            sys.__stdout__.write(msg)
         self.fp.write(msg)
         self.fp.flush()
 
@@ -83,9 +85,6 @@ class Logger:
 # Redirect stdout and stderr to stdout and /tmp/freevo.log
 #
 
-if DEBUG:
-    print 'In config.py. sys.argv[] = %s' % sys.argv
-    
 sys.stdout = Logger(sys.argv[0] + ':stdin')
 sys.stderr = Logger(sys.argv[0] + ':stderr')
 
