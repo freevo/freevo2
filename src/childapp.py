@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/05/28 17:24:23  dischi
+# fixed bug when child is dead
+#
 # Revision 1.9  2003/04/24 19:55:44  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -156,6 +159,8 @@ class Read_Thread(threading.Thread):
         try:
             self._handle_input()
         except IOError:
+            pass
+        except ValueError:
             pass
 
 
