@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.88  2004/02/22 20:33:47  dischi
+# some unicode fixes
+#
 # Revision 1.87  2004/02/14 19:29:07  dischi
 # send osd message when not using a submenu
 #
@@ -93,7 +96,7 @@ class MenuItem(Item):
                   icon=None, parent=None, skin_type=None):
         Item.__init__(self, parent, skin_type = skin_type)
         if name:
-            self.name  = name
+            self.name  = Unicode(name)
         if icon:
             self.icon  = icon
         if image:

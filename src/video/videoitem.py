@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.128  2004/02/22 20:33:48  dischi
+# some unicode fixes
+#
 # Revision 1.127  2004/02/20 18:53:23  dischi
 # add parent in dvd menu
 #
@@ -152,8 +155,8 @@ class VideoItem(Item):
 
             show_name = config.VIDEO_SHOW_REGEXP_SPLIT(self.name)
             if show_name[0] and show_name[1] and show_name[2] and show_name[3]:
-                self.name = show_name[0] + " " + show_name[1] + "x" + show_name[2] +\
-                            " - " + show_name[3]
+                self.name = show_name[0] + u" " + show_name[1] + u"x" + show_name[2] +\
+                            u" - " + show_name[3]
                 self.image = util.getimage((config.VIDEO_SHOW_DATA_DIR + \
                                             show_name[0].lower()), self.image)
 
@@ -271,7 +274,7 @@ class VideoItem(Item):
         if mode == 'date' and self.mode == 'file' and os.path.isfile(self.filename):
             return '%s%s' % (os.stat(self.filename).st_ctime, self.filename)
 
-        if self.name.find("The ") == 0:
+        if self.name.find(u"The ") == 0:
             return self.name[4:]
         return self.name
 
@@ -574,7 +577,7 @@ class VideoItem(Item):
             i.info_type       = 'track'
             i.possible_player = []
             i.files           = None
-            i.name            = _('Play Title %s') % (title+1)
+            i.name            = Unicode(_('Play Title %s')) % (title+1)
             items.append(i)
 
         moviemenu = menu.Menu(self.name, items, umount_all = 1, fxd_file=self.skin_fxd)

@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/02/22 20:33:48  dischi
+# some unicode fixes
+#
 # Revision 1.10  2004/02/11 20:12:29  dischi
 # use new mmpython mpeg seek feature
 #
@@ -114,7 +117,7 @@ class PluginInterface(plugin.ItemPlugin):
             sec = int(sec%60)
             time = '%0.2d:%0.2d:%0.2d' % (hour,min,sec)
             # set a new title
-            file.name = _('Jump to %s') % (time)
+            file.name = Unicode(_('Jump to %s') % (time))
             if hasattr(file, 'tv_show'):
                 del file.tv_show
             
