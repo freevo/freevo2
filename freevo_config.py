@@ -16,31 +16,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2002/08/13 08:39:58  dischi
+# Sorted the config file into several groups. Now it's easier to find
+# something. Also added RESOLUTION to set the OSD resolution for OSD_SDL
+#
 # Revision 1.45  2002/08/12 07:12:33  dischi
 # moved xml to subdir type1
 #
 # Revision 1.44  2002/08/11 08:13:00  dischi
 # New variable SKIN_XML_FILE, where to find the xml file for the skin
-#
-# Revision 1.43  2002/08/10 17:44:20  dischi
-# Added OSD_SDL_EXEC_AFTER_STARTUP. The script in this variable will
-# be executed after the SDL interface is started. You can use this to
-# correct the fbset settings on framebuffer
-#
-# Revision 1.42  2002/08/08 06:05:32  outlyer
-# Small changes:
-#  o Made Images menu a config file option "ENABLE_IMAGES"
-#  o Removed the redundant fbset 640x480-60 which doesn't even exist in the
-#    fbset.db (?)
-#
-# Revision 1.41  2002/08/07 04:53:01  krister
-# Changed shutdown to just exit freevo. A new config variable can be set to shutdown the entire machine.
-#
-# Revision 1.40  2002/08/05 00:43:10  tfmalt
-# o Changed DIR_MP3 to DIR_AUDIO
-#
-# Revision 1.39  2002/08/03 20:20:54  krister
-# Nice cannot be used as non-root to raise the prio! Set to 0 as default. Changed mplayer settings from dsp0+mga to dsp+xv which is better for newbie desktop users (mplayer cannot play mp3s if -vo is set wrong!) Fixed speling errors.
 #
 # Revision 1.38  2002/08/03 18:55:44  outlyer
 # Last change to config file :)
@@ -50,14 +34,6 @@
 # 	path to 'nice' and the actual numeric priority where '-10' is the
 # 	default (high priority) set it to 0 for normal priority or +10 for
 # 	low priority.
-#
-# Revision 1.37  2002/08/03 18:14:16  dischi
-# Lots of changes:
-# o added the patch from Thomas Malt with the new audio control
-# o removed the ConfigInit stuff, you can have two version of freevo on
-#   one disc if you need to videotools
-# o added all the options to MPLAYER_ARGS_*
-# o added DVD_SUBTITLE_PREF
 #
 # If you want to change some things for your personal setup, please
 # write this in a file called local_conf.py in the same directory.
@@ -88,6 +64,11 @@
 
 
 
+
+# ======================================================================
+# General freevo settings:
+# ======================================================================
+
 AUDIO_DEVICE        = '/dev/dsp'      # e.g.: /dev/dsp0, /dev/audio, /dev/alsa/??
 MAJOR_AUDIO_CTRL    = 'PCM'           # Freevo takes control over one audio ctrl
                                       # 'VOL', 'PCM' 'OGAIN' etc.
@@ -96,54 +77,43 @@ MAX_VOLUME          = 100             # Set what you want maximum volume level t
 DEFAULT_VOLUME      = 40              # Set default volume level.
 TV_IN_VOLUME        = 60              # Set this to your preferred level 0-100.
 VCR_IN_VOLUME       = 90              # If you use different input from TV
+DEV_MIXER           = '/dev/mixer'    # mixer device 
                     
-MPLAYER_CMD         = 'mplayer'       # A complete path may be nice.
-MPLAYER_AO_DEV      = 'oss:/dev/dsp'  # e.g.: oss,sdl,alsa, see mplayer docs
-MPLAYER_VO_DEV      = 'xv'            # e.g.: xv,x11,mga, see mplayer docs
-DVD_LANG_PREF       = 'en,se,no'      # Order of preferred languages on DVD.
-DVD_SUBTITLE_PREF   = ''              # Order of preferred subtitles on DVD.
-NICE		    = '/usr/bin/nice' # Priority setting app
-MPLAYER_NICE	    = '0'	      # Priority of mplayer process. 0 is unchanged,
-                                      # <0 is higher prio, >0 lower prio. You must run
-                                      # freevo as root to use prio <0 !
+#
+# Physical ROM drives, multiple ones can be specified
+# by adding comma-seperated and quoted entries.
+#
+ROM_DRIVES = [ ('/mnt/cdrom', 'CD'),
+               ('/mnt/dvd', 'DVD') ]
 
 
-#---- You should really _NOT_ need to change these settings  ----
-MPLAYER_ARGS_DEF     = '-nobps -framedrop -nolirc -screenw 768 -screenh 576 -fs'
-MPLAYER_ARGS_DVD     = '-cache 8192 -dvd %s'
-MPLAYER_ARGS_VCD     = '-cache 4096 -vcd %s'
-MPLAYER_ARGS_MPG     = '-cache 5000 -idx'
-MPLAYER_ARGS_DVDNAV  = ''
-#---- End of settings you really _NOT_ should need to change ----
-
-
-VIDREC_MQ_TV = ('DIVX4rec -F 300000 -norm NTSC ' +
-                '-input Television -m -r 22050 -w 320 -h 240 ' +
-                '-ab 80 -vg 100 -vb 800 -H 50 -o %s')
-
-# Under development
-VIDREC_MQ_VCR = ('DIVX4rec -F 300000 -norm NTSC ' +
-                 '-input Composite1 -m -r 22050 -w 320 -h 240 ' +
-                 ' -ab 80 -vg 100 -vb 1000 -H 50 -o %s')
-
-# Under development
-VIDREC_MQ_NUVTV = ('-F 10000 -norm NTSC -input Television -m ' +
-                   '-r 44100 -w 320 -h 240 -vg 100 -vq 90 -H 50 ' +
-                   '-mixsrc /dev/dsp:line -mixvol /dev/dsp:line:80 -o %s')
-
-VIDREC_MQ = VIDREC_MQ_TV
-VIDREC_HQ = ''
+# ======================================================================
+# Freevo movie settings:
+# ======================================================================
 
 #
-# General settings
-# 
-# XXX Move to a file ("autoconf.py"?) that is create during "./configure"
-# from the parameters to it.
+# Where the movie files can be found.
 #
-ENABLE_TV = 1            # Disable this if you don't have a tv card
-ENABLE_SHUTDOWN = 1      # Enable main menu choice for Linux shutdown. Exits Freevo.
-ENABLE_SHUTDOWN_SYS = 0  # Performs a whole system shutdown! For standalone boxes.
-ENABLE_IMAGES = 1	 # Disable this if you don't want/use the Image Browser
+DIR_MOVIES = [ ('Test Movies', 'testfiles/Movies') ]
+
+#
+# This is where recorded video is written.
+#
+DIR_RECORD = './testfiles/Movies/Recorded'
+
+#
+# Directory for XML definitions for DVDs and VCDs. Items in this
+# directory won't be in the MOVIE MAIN MENU, but will be used to find
+# titles and images for the current DVD/VCD
+#
+MOVIE_DATA_DIR = 'movie-data/'
+
+#
+# Directory containing images for tv shows. A tv show maches the regular
+# expression TV_SHOW_REGEXP, e.g. "Name 3x10 - Title". If an image name.(png|jpg)
+# (lowercase) is in this directory, it will be taken as cover image
+#
+TV_SHOW_IMAGES = "tv-show-images/"
 
 #
 # The list of filename suffixes that are used to match the files that
@@ -160,68 +130,16 @@ SUFFIX_MPLAYER_FILES = [ '/*.[aA][vV][iI]',
 			 '/*.[vV][oO][bB]',
 			 '/*.[aA][sS][fF]' ]
 
-#
-# Config for xml support in the movie browser
-# the regexp has to be with ([0-9]|[0-9][0-9]) so we can get the numbers
-#
 
-SUFFIX_FREEVO_FILES = [ '/*.[xX][mM][lL]' ]
-TV_SHOW_REGEXP = "s?([0-9]|[0-9][0-9])[xe]([0-9]|[0-9][0-9])[^0-9]"
-TV_SHOW_IMAGES = "tv-show-images/"
+# ======================================================================
+# Freevo audio settings:
+# ======================================================================
 
 #
-# Directory for XML definitions for DVDs and VCDs. Items in this
-# directory won't be in the MOVIE MAIN MENU, but will be used to find
-# titles and images for the current DVD/VCD
+# Where the Audio (mp3, ogg) files can be found.
+# Format: [ ('Title1', 'directory1'), ('Title2', 'directory2'), ... ]
 #
-MOVIE_DATA_DIR = 'movie-data/'
-
-#
-# Skin file that contains the actual skin code. This is imported
-# from skin.py
-#
-OSD_SKIN = 'skins/main1/skin_main1.py'
-SKIN_XML_FILE = 'skins/xml/type1/768x576.xml'
-
-# OSD default font. It is only used for debug/error stuff, not regular
-# skinning.
-OSD_DEFAULT_FONTNAME = 'skins/fonts/Cultstup.ttf'
-OSD_DEFAULT_FONTSIZE = 14
-
-#
-# OSD server, standalone application in osd_server/
-#
-OSD_HOST = '127.0.0.1'      # The remote host
-OSD_PORT = 16480            # The daemon port, osd_server/osd_fb/main.c has
-                            # to be changed manually!
-
-#
-# Remote control daemon. The server is in the Freevo main application,
-# and the client is a standalone application in rc_client/
-#
-REMOTE_CONTROL_HOST = '127.0.0.1'
-REMOTE_CONTROL_PORT = 16310
-
-# Cache for Freevo data
-
-if os.path.isdir('/var/cache/freevo'):
-    FREEVO_CACHEDIR = '/var/cache/freevo'
-else:
-    if not os.path.isdir('/tmp/freevo/cache'):
-        os.makedirs('/tmp/freevo/cache')
-    FREEVO_CACHEDIR = '/tmp/freevo/cache'
-
-#
-# Mixer device
-#
-DEV_MIXER = '/dev/mixer'
-
-#
-# Physical ROM drives, multiple ones can be specified
-# by adding comma-seperated and quoted entries.
-
-ROM_DRIVES = [ ('/mnt/cdrom', 'CD'),
-               ('/mnt/dvd', 'DVD') ]
+DIR_AUDIO = [ ('Test Files', 'testfiles/Music') ]
 
 #
 # The list of filename suffixes that are used to match the files that
@@ -232,12 +150,99 @@ SUFFIX_AUDIO_FILES     = [ '/*.[mM][pP]3',
 SUFFIX_AUDIO_PLAYLISTS = [ '/*.[mM]3[uU]' ]
 
 
+# ======================================================================
+# Freevo image viewer settings:
+# ======================================================================
+
+#
+# Where the image files can be found.
+#
+DIR_IMAGES = [ ('Test Images', './testfiles/Images') ]
+
 #
 # The list of filename suffixes that are used to match the files that
 # are used for the image viewer. They are used as the argument to glob.glob()
 # 
 SUFFIX_IMAGE_FILES = [ '/*.[jJ][pP][gG]' ]
 
+
+
+# ======================================================================
+# freevo OSD section:
+# ======================================================================
+
+
+#
+# Uncomment OSD_SDL = 1 if you want to use the Python SDL OSD
+#
+# OSD_SDL = 1
+
+
+#
+# supported resolutions right now are 800x600 and 768x576. This only works
+# with OSD_SDL = 1. Please change SKIN_XML_FILE to a XML file matching the
+# resolution.
+#
+RESOLUTION          = "800x600"       
+
+#
+# Skin file that contains the actual skin code. This is imported
+# from skin.py
+#
+OSD_SKIN = 'skins/main1/skin_main1.py'
+SKIN_XML_FILE = 'skins/xml/type1/800x600.xml'
+
+
+ENABLE_TV = 1            # Disable this if you don't have a tv card
+ENABLE_SHUTDOWN = 1      # Enable main menu choice for Linux shutdown. Exits Freevo.
+ENABLE_SHUTDOWN_SYS = 0  # Performs a whole system shutdown! For standalone boxes.
+ENABLE_IMAGES = 1	 # Disable this if you don't want/use the Image Browser
+
+#
+# OSD default font. It is only used for debug/error stuff, not regular
+# skinning.
+#
+OSD_DEFAULT_FONTNAME = 'skins/fonts/Cultstup.ttf'
+OSD_DEFAULT_FONTSIZE = 14
+
+
+#
+# Exec a script after the osd startup. This only works with the OSD_SDL
+# osd server. Matrox G400 users who wants to use the framebuffer and have
+# a PAL tv may set this to './matrox_g400/mga_pal_768x576.sh'
+#
+OSD_SDL_EXEC_AFTER_STARTUP=""
+
+
+
+
+# ======================================================================
+# mplayer section:
+# ======================================================================
+
+
+MPLAYER_CMD         = 'mplayer'       # A complete path may be nice.
+MPLAYER_AO_DEV      = 'oss:/dev/dsp'  # e.g.: oss,sdl,alsa, see mplayer docs
+MPLAYER_VO_DEV      = 'xv'            # e.g.: xv,x11,mga, see mplayer docs
+DVD_LANG_PREF       = 'en,se,no'      # Order of preferred languages on DVD.
+DVD_SUBTITLE_PREF   = ''              # Order of preferred subtitles on DVD.
+NICE		    = '/usr/bin/nice' # Priority setting app
+MPLAYER_NICE	    = '0'	      # Priority of mplayer process. 0 is unchanged,
+                                      # <0 is higher prio, >0 lower prio. You must run
+                                      # freevo as root to use prio <0 !
+
+
+MPLAYER_ARGS_DEF     = '-nobps -framedrop -nolirc -screenw 768 -screenh 576 -fs'
+MPLAYER_ARGS_DVD     = '-cache 8192 -dvd %s'
+MPLAYER_ARGS_VCD     = '-cache 4096 -vcd %s'
+MPLAYER_ARGS_MPG     = '-cache 5000 -idx'
+MPLAYER_ARGS_DVDNAV  = ''
+
+
+
+# ======================================================================
+# TV:
+# ======================================================================
 
 #
 # Watching TV
@@ -325,27 +330,60 @@ TV_CHANNELS = [('2 KTVI', 'KTVI', '2'),
 
 WATCH_TV_APP = './matrox_g400/v4l1_to_mga'
 
-#
-# Where the Audio (mp3, ogg) files can be found.
-#
-# Format: [ ('Title1', 'directory1'), ('Title2', 'directory2'), ... ]
-#
-DIR_AUDIO = [ ('Test Files', 'testfiles/Music') ]
+
+
+# ======================================================================
+# Internal stuff, you shouldn't change anything here unless you know
+# what you are doing
+# ======================================================================
+
+VIDREC_MQ_TV = ('DIVX4rec -F 300000 -norm NTSC ' +
+                '-input Television -m -r 22050 -w 320 -h 240 ' +
+                '-ab 80 -vg 100 -vb 800 -H 50 -o %s')
+
+# Under development
+VIDREC_MQ_VCR = ('DIVX4rec -F 300000 -norm NTSC ' +
+                 '-input Composite1 -m -r 22050 -w 320 -h 240 ' +
+                 ' -ab 80 -vg 100 -vb 1000 -H 50 -o %s')
+
+# Under development
+VIDREC_MQ_NUVTV = ('-F 10000 -norm NTSC -input Television -m ' +
+                   '-r 44100 -w 320 -h 240 -vg 100 -vq 90 -H 50 ' +
+                   '-mixsrc /dev/dsp:line -mixvol /dev/dsp:line:80 -o %s')
+
+VIDREC_MQ = VIDREC_MQ_TV
+VIDREC_HQ = ''
 
 #
-# Where the movie files can be found.
+# Config for xml support in the movie browser
+# the regexp has to be with ([0-9]|[0-9][0-9]) so we can get the numbers
 #
-DIR_MOVIES = [ ('Test Movies', 'testfiles/Movies') ]
+SUFFIX_FREEVO_FILES = [ '/*.[xX][mM][lL]' ]
+TV_SHOW_REGEXP = "s?([0-9]|[0-9][0-9])[xe]([0-9]|[0-9][0-9])[^0-9]"
+
 
 #
-# Where the image files can be found.
+# OSD server, standalone application in osd_server/
 #
-DIR_IMAGES = [ ('Test Images', './testfiles/Images') ]
+OSD_HOST = '127.0.0.1'      # The remote host
+OSD_PORT = 16480            # The daemon port, osd_server/osd_fb/main.c has
+                            # to be changed manually!
 
 #
-# This is where recorded video is written.
+# Remote control daemon. The server is in the Freevo main application,
+# and the client is a standalone application in rc_client/
 #
-DIR_RECORD = './testfiles/Movies/Recorded'
+REMOTE_CONTROL_HOST = '127.0.0.1'
+REMOTE_CONTROL_PORT = 16310
+
+# Cache for Freevo data
+
+if os.path.isdir('/var/cache/freevo'):
+    FREEVO_CACHEDIR = '/var/cache/freevo'
+else:
+    if not os.path.isdir('/tmp/freevo/cache'):
+        os.makedirs('/tmp/freevo/cache')
+    FREEVO_CACHEDIR = '/tmp/freevo/cache'
 
 #
 # XMLTV File
@@ -419,8 +457,3 @@ RC_CMDS = {
 
 
 
-# Exec a script after the osd startup. This only works with the OSD_SDL
-# osd server. Matrox G400 users who wants to use the framebuffer and have
-# a PAL tv may set this to './matrox_g400/mga_pal_768x576.sh'
-
-OSD_SDL_EXEC_AFTER_STARTUP=""
