@@ -10,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.75  2003/09/23 13:46:16  outlyer
+# I don't even know why this debug line is useful, but moving to higher
+# debug level.
+#
 # Revision 1.74  2003/09/21 10:50:37  dischi
 # shutdown children, too
 #
@@ -270,7 +274,7 @@ def main_func():
             eventhandler_plugins.append(p)
     
     # Kick off the main menu loop
-    _debug_('Main loop starting...')
+    _debug_('Main loop starting...',2)
 
     while 1:
 
