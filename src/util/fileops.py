@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/11/04 11:26:07  dischi
+# fix runtime install -- arg
+#
 # Revision 1.4  2003/11/03 18:25:36  dischi
 # fix
 #
@@ -60,13 +63,10 @@ if float(sys.version[0:3]) < 2.3:
 else:
     PICKLE_PROTOCOL = pickle.HIGHEST_PROTOCOL
 
-for t in traceback.extract_stack():
-    if t[0][0].find('install.py') > 0:
-        break
-else:
+if traceback.extract_stack()[0][0].find('install.py') == -1:
     # Configuration file. Determines where to look for AVI/MP3 files, etc
     import config
-
+    
     # import stuff from util.misc
     import misc
 
