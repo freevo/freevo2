@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2003/08/02 19:04:59  dischi
+# webradio fix
+#
 # Revision 1.31  2003/07/19 19:40:47  dischi
 # handling for mp3 files without length information
 #
@@ -192,6 +195,8 @@ class AudioItem(Item):
                     image = os.path.join(os.path.dirname(file), covers[0])
             self.image = image
 
+        if os.path.splitext(file)[1] == '.fxd':
+            self.set_info_radio(file)
 
     def copy(self, obj):
         """
