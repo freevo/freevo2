@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/06/29 20:38:58  dischi
+# switch to the new info area
+#
 # Revision 1.6  2003/06/22 11:34:46  dischi
 # use null layer
 #
@@ -229,6 +232,7 @@ class Screen:
                 if self.in_update(x1, y1, x2, y2, update_area):
                     width = x2 - x1
                     if font.shadow.visible:
+                        width -= font.shadow.x
                         osd.drawstringframed(text, x1+font.shadow.x, y1+font.shadow.y,
                                              width, height, font.shadow.color, None,
                                              font=font.name, ptsize=font.size,
@@ -443,22 +447,30 @@ class Skin_Area:
         must be greater 5. With that the skin will fall back to text view for
         e.g. mp3s inside a folder with cover file
         """
-        if hasattr(menu, '_skin_force_text_view'):
-            self.use_text_view = menu._skin_force_text_view
+        if hasattr(menu, 'skin_force_text_view'):
+            self.use_text_view = menu.skin_force_text_view
             return
-        image = None
+        image  = None
+        folder = 0
         if len(menu.choices) < 5:
-            menu._skin_force_text_view = FALSE
+            menu.skin_force_text_view = FALSE
             self.use_text_view = FALSE
             return
         for i in menu.choices:
+            if i.type == 'dir':
+                folder += 1
+                # directory with mostly folder:
+                if folder > 3:
+                    self.use_text_view = FALSE
+                    return
+                    
             if image and i.image != image:
-                menu._skin_force_text_view = FALSE
+                menu.skin_force_text_view = FALSE
                 self.use_text_view = FALSE
                 return
             image = i.image
-        menu._skin_force_text_view = image
-        self.use_text_view = image
+        menu.skin_force_text_view = TRUE
+        self.use_text_view = TRUE
 
     
     def calc_geometry(self, object, copy_object=0):
@@ -711,8 +723,8 @@ class Skin_Area:
                                        align_h = align_h, align_v = align_v,
                                        mode=mode, ellipses=ellipses, layer=osd.null_layer)
 
-        self.tmp_objects.text.append((x, y, x+width, y+height2, text, font, height,
-                                            align_h, align_v, mode, ellipses ))
+        self.tmp_objects.text.append((x, y, x+width+font.shadow.x, y+height2+font.shadow.y,
+                                      text, font, height, align_h, align_v, mode, ellipses ))
 
         if return_area:
             return ret[1]

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/06/29 20:38:58  dischi
+# switch to the new info area
+#
 # Revision 1.5  2003/05/24 04:29:54  gsbarbieri
 # Now we have support to use "type images" in front of items in text listing.
 # I.E.: you can have a playlist icon in front of playlists, a folder icon in
@@ -80,7 +83,8 @@ class Listing_Area(Skin_Area):
         if not len(menu.choices):
             return self.last_get_items_geometry[1]
 
-        if self.last_get_items_geometry[0] == ( menu, settings, display_style ):
+        if self.last_get_items_geometry[0] == ( menu, settings, display_style ) and \
+               hasattr(menu, 'skin_force_text_view'):
             return self.last_get_items_geometry[1]
         
         # store the old values in case we are called by ItemsPerMenuPage

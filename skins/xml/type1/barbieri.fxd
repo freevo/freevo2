@@ -54,7 +54,7 @@
     </menu>
       
     <menu type="audio">
-      <style image="audio list with cover view" />
+      <style text="audio" image="audio list with cover view" />
       <style text="audio"/>
     </menu>
       
@@ -566,6 +566,7 @@
 		   expression="artist" />
 	     <newline />
 	  </if>
+	  <goto_pos y="15" mode="relative" />
 	  <if expression="album">
   	     <text height="line_height" width="100"
 	           align="right" font="info value" 
@@ -574,23 +575,23 @@
   	     <text height="line_height"
 	           align="left" font="info value" 
 		   mode="hard" expression="album" />
-	     <if expression="year">
+	     <if expression="date">
 	         <text font="info value"> (</text>
                  <text height="line_height"
 	               align="left" font="info value" 
-		       mode="hard" expression="year" />
+		       mode="hard" expression="date" />
 	         <text font="info value">)</text>
              </if>
    	     <newline />	  
 	  </if>
-	  <if expression="track">
+	  <if expression="trackno">
   	     <text height="line_height" width="100"
 	           align="right" font="info value" 
 		   mode="hard">Track:</text>
 	     <goto_pos x="10" mode="relative" />		   
   	     <text height="line_height"
 	           align="left" font="info value" 
-		   mode="hard" expression="track" />
+		   mode="hard" expression="trackno" />
    	     <newline />	  
 	  </if>
 	  <goto_pos y="15" mode="relative" />

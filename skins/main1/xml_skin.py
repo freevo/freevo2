@@ -9,19 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.6  2003/05/24 04:29:54  gsbarbieri
-# Now we have support to use "type images" in front of items in text listing.
-# I.E.: you can have a playlist icon in front of playlists, a folder icon in
-# front of folders, and goes...
+# Revision 1.7  2003/06/29 20:38:58  dischi
+# switch to the new info area
 #
-# Revision 1.5  2003/05/04 16:45:10  dischi
-# added font scale
-#
-# Revision 1.4  2003/04/24 19:57:54  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.3  2003/04/06 21:19:44  dischi
-# Switched to new main1 skin
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -487,7 +477,22 @@ class XML_content(XML_data):
                         if rnode.name == u'rectangle':
                             self.types[type].rectangle = XML_rectangle()
                             self.types[type].rectangle.parse(rnode, scale, current_dir)
+                        elif rnode.name in ( u'if', u'text', u'newline', u'goto_pos' ):
+                            if not hasattr( self.types[ type ], 'fcontent' ):
+                                self.types[ type ].fcontent = [ ]
+                            child = None
+                            if rnode.name == u'if':
+                                child = XML_FormatIf()
+                            elif rnode.name == u'text':
+                                child = XML_FormatText()
+                            elif rnode.name == u'newline':
+                                child = XML_FormatNewline()
+                            elif rnode.name == u'goto_pos':
+                                child = XML_FormatGotopos()
 
+                            self.types[ type ].fcontent += [ child ]
+                            self.types[ type ].fcontent[ -1 ].parse( rnode, scale, current_dir )
+                            
         if not self.types.has_key('default'):
             self.types['default'] = XML_data(('font',))
             self.types['default'].rectangle = None
@@ -515,7 +520,109 @@ class XML_content(XML_data):
                 self.types[type].font = None
             if self.types[type].rectangle:
                 self.types[type].rectangle.prepare(color)
+
+            if hasattr( self.types[type], 'fcontent' ):
+                for i in self.types[type].fcontent:
+                    i.prepare( font, color )
+
+
+
+# ======================================================================
+# Formating
+class XML_FormatText(XML_data):
+    def __init__( self ):
+        XML_data.__init__( self, ( 'align', 'valign', 'font', 'width', 'height' ) )
+        self.mode = 'hard'
+        self.text = ''
+        self.expression = None
+        self.expression_analized = 0
+        self.x = 0
+        self.y = 0
         
+    def __str__( self ):
+        str = "XML_FormatText( Text: '%s', Expression: '%s', Expression Analized: %s, Mode: %s, Font: %s, Width: %s, Height: %s, x: %s, y: %s ) " % ( self.text, self.expression, self.expression_analized, self.mode, self.font, self.width, self.height, self.x, self.y )
+        return str
+
+    def parse( self, node, scale, c_dir = '' ):
+        XML_data.parse( self, node, scale, c_dir )
+        self.text = node.textof()
+        self.mode = attr_str( node, 'mode', self.mode )
+        if self.mode != 'hard' and self.mode != 'soft':
+            self.mode = 'hard'
+        self.expression = attr_str( node, 'expression', self.expression )
+        if self.expression: self.expression = self.expression.strip()
+
+    def prepare(self, font, color):
+        if self.font:
+            try:
+                self.font = font[self.font]
+            except:
+                print 'can\'t find font %s' % self.font
+                print font
+                self.font = font['default']
+        else:
+            self.font = font['default']
+
+    
+
+        
+class XML_FormatGotopos(XML_data):
+    def __init__( self ):
+        XML_data.__init__( self, ( 'x', 'y' ) )
+        self.mode = 'relative'
+        self.x = None
+        self.y = None
+        
+    def parse( self, node, scale, c_dir = '' ):
+        XML_data.parse( self, node, scale, c_dir )
+        self.mode = attr_str( node, 'mode', self.mode )
+        if self.mode != 'relative' and self.mode != 'absolute':
+            self.mode = 'relative'
+        
+    def prepare(self, font, color):
+        pass
+    
+class XML_FormatNewline:
+    def __init__( self ):
+        pass
+
+    def parse( self, node, scale, c_dir = '' ):
+        pass
+
+    def prepare(self, font, color):
+        pass
+
+
+class XML_FormatIf:
+    def __init__( self ):
+        self.expression = ''
+        self.content = [ ]
+        self.expression_analized = 0
+        
+    def parse( self, node, scale, c_dir = '' ):
+        self.expression = attr_str( node, 'expression', self.expression )
+        for subnode in node.children:
+            if subnode.name == u'if':
+                child = XML_FormatIf()
+            elif subnode.name == u'text':
+                child = XML_FormatText()
+            elif subnode.name == u'newline':
+                child = XML_FormatNewline()
+            elif subnode.name == u'goto_pos':
+                child = XML_FormatGotopos()
+            
+            child.parse( subnode, scale, c_dir )
+            self.content += [ child ]
+
+    def prepare(self, font, color):
+        for i in self.content:
+            i.prepare( font, color )
+
+                              
+
+
+
+
 # ======================================================================
 
 class XML_image(XML_data):

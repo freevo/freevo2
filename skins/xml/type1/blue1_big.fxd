@@ -244,16 +244,73 @@
       <content x="55" y="10" height="max-20" width="max-90" type="text"
 	spacing="10" font="player">
 	<item type="default">
-	  Title:   \t@title@
-	  Artist:  \t@artist@
-	  Album:   \t@album@ (@year@)
-	  Track:   \t@track@
-	  
-	  Length:  \t@length@
-	  Elapsed: \t@elapsed@
+	  <if expression="title">
+	     <text font="info title" 
+	           width="max" height="line_height"
+	           mode="hard" align="left"
+		   expression="title" />
+             <newline />
+	  </if>
+	  <if expression="artist">
+	     <text font="info tagline"
+	           width="max" height="line_height"
+		   mode="hard" align="left" 
+		   expression="artist" />
+	     <newline />
+	  </if>
+	  <goto_pos y="15" mode="relative" />
+	  <if expression="album">
+  	     <text height="line_height" width="100"
+	           align="right" font="info value" 
+		   mode="hard">Album:</text>
+	     <goto_pos x="10" mode="relative" />		   
+  	     <text height="line_height"
+	           align="left" font="info value" 
+		   mode="hard" expression="album" />
+	     <if expression="date">
+	         <text font="info value"> (</text>
+                 <text height="line_height"
+	               align="left" font="info value" 
+		       mode="hard" expression="date" />
+	         <text font="info value">)</text>
+             </if>
+   	     <newline />	  
+	  </if>
+	  <if expression="trackno">
+  	     <text height="line_height" width="100"
+	           align="right" font="info value" 
+		   mode="hard">Track:</text>
+	     <goto_pos x="10" mode="relative" />		   
+  	     <text height="line_height"
+	           align="left" font="info value" 
+		   mode="hard" expression="trackno" />
+   	     <newline />	  
+	  </if>
+	  <goto_pos y="15" mode="relative" />
+	  <if expression="length">
+  	     <text height="line_height" width="100"
+	           align="right" font="info value" 
+		   mode="hard">Length:</text>
+	     <goto_pos x="10" mode="relative" />		   
+  	     <text height="line_height"
+	           align="left" font="info value" 
+		   mode="hard" expression="length" />
+   	     <newline />
+	  </if>
+	  <if expression="elapsed">
+  	     <text height="line_height" width="100"
+	           align="right" font="info value" 
+		   mode="hard">Elapsed:</text>
+	     <goto_pos x="10" mode="relative" />		   
+  	     <text height="line_height"
+	           align="left" font="info value" 
+		   mode="hard" expression="elapsed" />
+   	     <newline />	  
+	  </if>
 	</item>
       </content>
     </layout>
+
 
 
     <!--
@@ -322,14 +379,52 @@
       <content x="10" y="10" height="max-20" width="max-20" type="text"
 	spacing="10" font="tv">
 	<item type="default">
-	  @title@
-          @sub_title@
-	  @start@ - @stop@
-
-	  @desc@
+	  <if expression="title">
+	     <text font="info title" 
+	           width="630" height="line_height"
+	           mode="hard" align="left"
+		   expression="title" />
+	  </if>
+          <text font="info value"
+	        width="max" height="line_height"
+	        mode="hard" align="left" valign="center"
+	        expression="start" />
+          <text font="info value"
+	        width="max" height="line_height"
+	        mode="hard" align="left" valign="center">-</text>
+          <text font="info value"
+	        width="max" height="line_height"
+	        mode="hard" align="left" valign="center"
+	        expression="stop" />
+	  <newline />
+	  <if expression="sub_title">
+	     <text font="info tagline"
+	           width="max" height="line_height"
+	           mode="hard" align="left"
+		   expression="sub_title" />
+             <newline />
+	  </if>
+	  <if expression="desc">
+             <text font="info plot"
+	           width="max" height="line_height"
+	           mode="hard" align="left"
+	          expression="desc" />	  
+             <newline />
+	  </if>
 	</item>
       </content>
     </layout>
+
+
+    <font label="info title"       name="impact" size="24" color="0xffffff">
+       <shadow x="2" y="2" color="0x000000" visible="yes" />
+    </font>
+    <font label="info plot"        name="timesbd" size="16" color="0xffffff" />
+    <font label="info tagline"     name="Arial_Bold" size="16" color="0xffffff" />
+    <font label="info description" name="Arial_Bold" size="14" color="0xffffaa" />
+    <font label="info label"       name="Arial_Bold" size="14" color="0xffffff" />
+    <font label="info value"       name="Arial_Bold" size="14" color="0xffffaa" />
+    
 
   </skin>
 </freevo>

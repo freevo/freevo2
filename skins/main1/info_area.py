@@ -9,17 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.4  2003/06/20 18:47:37  dischi
-# support for info_type to display, not normal item.type
+# Revision 1.5  2003/06/29 20:38:58  dischi
+# switch to the new info area
 #
-# Revision 1.3  2003/04/24 19:57:52  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.2  2003/04/20 17:13:55  dischi
-# respect the height
-#
-# Revision 1.1  2003/04/06 21:19:44  dischi
-# Switched to new main1 skin
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -45,113 +37,339 @@
 
 from area import Skin_Area
 from skin_utils import *
+import xml_skin
+import copy
+from area import Geometry
 
-import re
+import traceback
 
 TRUE  = 1
 FALSE = 0
+
 
 class Info_Area(Skin_Area):
     """
     this call defines the view area
     """
 
-    def __init__(self, parent, screen):
+    def __init__( self, parent, screen ):
         Skin_Area.__init__(self, 'info', screen)
-        self.re_space    = re.compile('^\t *(.*)')
-        self.re_var      = re.compile('@[a-z_]*@')
-        self.re_table    = re.compile('^(.*)\\\\t(.*)')
+        self.last_item = None
+        self.content = None
+        self.layout_content = None
+        self.list = None
+        self.updated = 0
+        self.sellist = None
 
-        self.last_item   = None
-        self.auto_update = []
-        self.table       = []
-
-    def update_content_needed(self):
+        
+    def update_content_needed( self ):
         """
         check if the content needs an update
         """
-        return self.auto_update or (self.last_item != self.infoitem)
-        
+        update = 0
+    
+        if self.layout_content is not self.layout.content:
+            return TRUE
 
-    def update_content(self):
+        update += self.set_content()    # set self.content
+        update += self.set_list(update) # set self.list
+
+        list = self.eval_expressions( self.list )
+        if self.sellist  != list:
+            self.sellist = list
+            update += 1
+
+        if update:
+            self.updated = 1
+        return update
+    
+
+    def update_content( self ):
         """
         update the info area
         """
 
-        content   = self.calc_geometry(self.layout.content, copy_object=TRUE)
-        item      = self.infoitem
+        if not self.updated: # entered a menu for the first time
+            self.set_list(self.set_content())
+            self.sellist = self.eval_expressions( self.list )
 
-        if hasattr(item, 'info_type') and content.types.has_key(item.info_type):
-            val = content.types[item.info_type]
-        elif hasattr(item, 'type') and content.types.has_key(item.type):
-            val = content.types[item.type]
-        else:
-            val = content.types['default']
+        if not self.list: # nothing to draw
+            self.updated = 0
+            return
 
-        table = [ [], [] ]
-        self.auto_update = []
+        # get items to be draw
+        list = self.return_formatedtext( self.sellist )
 
-        for line in val.cdata.encode('Latin-1').split('\n'):
-            m = self.re_space.match(line)
-            if m:
-                line = m.groups(1)[0]
-
-            has_vars       = FALSE 
-            autoupdate     = ''
-            vars_exists    = FALSE
-
-            for m in self.re_var.findall(line):
-                has_vars = TRUE
-                if m[1:-1] == 'elapsed':
-                    autoupdate = 'elapsed'
-
-                a = item.getattr(m[1:-1])
-                if a:
-                    line = re.sub(m, a, line)
-                    vars_exists = TRUE
-                else:
-                    line = re.sub(m, '', line)
-
-            if ((not has_vars) or vars_exists) and (line or table[0]):
-                m = self.re_table.match(line)
-                if m:
-                    table[0] += [ m.groups(1)[0] ]
-                    table[1] += [ m.groups(2)[1] ]
-                    if autoupdate:
-                        self.auto_update += [ ( autoupdate, len(table[0]) - 1) ]
-                else:
-                    table[0] += [ line ]
-                    table[1] += [ '' ]
-
-        x0 = content.x
-
-        font = content.font
-        y_spacing = font.h * 1.1
-            
-        w = 0
-        for i in range(0,len(table[0])):
-            if table[1][i]:
-                w = max(w, osd.stringsize(table[0][i], font=font.name, ptsize=font.size)[0])
-                if x0 + w > content.x + content.width:
-                    w = content.x + content.width - x0
-
-        y0 = content.y
-        for i in range(0,len(table[0])):
-            if table[0][i] and not table[1][i]:
-                rec = self.write_text(table[0][i], font, content, x=x0, y=y0,
-                                      width=content.width,
-                                      height=content.height + content.y - y0, mode='soft',
-                                      return_area = TRUE)
-                y0 += rec[3]-rec[1]
-            elif content.height + content.y - y0 > font.h:
-                if table[0][i]:
-                    self.write_text(table[0][i], font, content, x=x0, y=y0, width=w,
-                                    height=-1, mode='hard')
-                if table[1][i]:
-                    self.write_text(table[1][i], font, content, x=x0+w+content.spacing, y=y0,
-                                    width=content.width - w - content.spacing,
-                                    height=-1, mode='hard')
-                y0 += y_spacing
-
+        for i in list:
+            if i.y + i.height > self.content.height:
+                break
+            self.write_text( i.text,
+                             i.font, self.content,
+                             ( self.content.x + i.x), ( self.content.y + i.y ),
+                             i.width , i.height,
+                             align_v = i.valign, align_h = i.align,
+                             mode = i.mode )    
         self.last_item = self.infoitem
-        self.table = table
+
+        # always set this to 0 because we don't call update_content
+        # when everything changes
+        self.updated = 0
+
+
+    def set_content( self ):
+        """
+        set self.content and self.layout_content if they need to be set (return 1)
+        or does nothing (return 0)
+        """        
+        if self.layout_content is not self.layout.content:
+            types = self.layout.content.types
+            self.content = self.calc_geometry( self.layout.content, copy_object=TRUE )
+            # backup types, which have the previously calculated fcontent
+            self.content.types = types 
+            self.layout_content = self.layout.content
+            return 1
+        return 0
+
+
+    def set_list( self, force = 0 ):
+        """
+        set self.list if need (return 1) or does nothing (return 0)
+        """
+        if force or self.infoitem is not self.last_item or self.infoitem != self.last_item:
+            key = 'default'
+            if hasattr( self.infoitem, 'info_type'):
+                key = self.infoitem.info_type or key
+            
+            elif hasattr( self.infoitem, 'type' ):
+                key = self.infoitem.type or key
+
+            try:
+                val = self.content.types[ key ]
+            except:
+                val = self.content.types[ 'default' ]
+
+            if not hasattr( val, 'fcontent' ):
+                self.list = None
+                return 1
+
+            self.list = val.fcontent
+            return 1
+        
+        return 0
+
+
+
+    def get_expression( self, expression ):
+        """
+        create the python expression
+        """        
+        exp = ''                
+        for b in expression.split( ' ' ):
+            if b in ( 'and', 'or', 'not' ):
+                # valid operator
+                exp += ' %s' % ( b )
+                
+            elif b[ :4 ] == 'len(' and b.find( ')' ) > 0 and \
+                     len(b) - b.find(')') < 5:
+                # lenght of something
+                exp += ' item.getattr("%s") %s' % ( b[ : ( b.find(')') + 1 ) ],
+                                                    b[ ( b.find(')') + 1 ) : ])
+            else:
+                # an attribute
+                exp += ' item.getattr("%s")' % b
+                
+        return exp.strip()
+
+
+
+
+    def eval_expressions( self, list, index = [ ] ):
+        """
+        travesse the list evaluating the expressions,
+        return a flat list with valid elements indexes only
+        (false 'if' expressions eliminated). Also, text elements
+        are in the list too in a tuple:
+           ( index, 'text value' )
+        so you can check if it changed just comparing two lists
+        (useful in music player, to update 'elapsed')
+        """        
+        item = self.infoitem
+        ret_list = [ ]
+
+        if not list:
+            return
+        
+        rg = range( len( list ) )
+        for i in rg:
+            if isinstance( list[ i ], xml_skin.XML_FormatIf ):
+                if list[ i ].expression_analized == 0:
+                    list[ i ].expression_analized = 1
+                    exp = self.get_expression( list[ i ].expression )
+                    list[ i ].expression = exp
+                else:
+                    exp = list[ i ].expression
+
+                # Evaluate the expression:
+                try:
+                    if exp and eval( exp ):
+                        # It's true, we should recurse into children
+                        ret_list += self.eval_expressions( list[ i ].content, index + [ i ] )
+                except:
+                    print "ERROR: Could not evaluate 'if' condition in info_area"
+                    print "expression was: 'if %s:', Item was: %s" % ( exp, item.type )
+                    traceback.print_exc()
+                    
+                continue
+            
+            elif isinstance( list[ i ], xml_skin.XML_FormatText ):
+                exp = None
+                if list[ i ].expression:
+                    if list[ i ].expression_analized == 0:
+                        list[ i ].expression_analized = 1
+                        exp = self.get_expression( list[ i ].expression )
+                        list[ i ].expression = exp
+                    else:
+                        exp = list[ i ].expression
+                    try:
+                        # evaluate the expression:
+                        if exp:
+                            exp = eval( exp )
+                            if exp:
+                                list[ i ].text = exp
+                    except:
+                        print "ERROR: Parsing XML in info_area:"
+                        print "could not evaluate: '%s'" % ( exp )
+                        traceback.print_exc()
+                # I add a tuple here to be able to compare lists and know if we need to
+                # update, this is useful in the mp3 player
+                ret_list += [ index + [ ( i, list[ i ].text ) ] ]
+            else:   
+                ret_list += [ index + [ i ] ]
+
+        return ret_list
+
+
+
+
+
+    def return_formatedtext( self, sel_list ):
+        """
+        receives a list of indexex of elements to be used and
+        returns a array with XML_FormatText ready to print (with its elements
+        x, y, width and height already calculated)
+        """
+        x, y = 0, 0
+        
+        item = self.infoitem
+
+        list = self.list
+        ret_list = [ ]        
+        last_newline = 0 # index of the last line
+        for i in sel_list:
+            newline = 0
+
+            # find the element
+            element = self.list
+            for j in range( len( i ) - 1 ):
+                element = element[ i[ j ] ].content
+            if isinstance( i[ -1 ], tuple ):
+                element = element[ i[ -1 ][ 0 ] ]
+            else:
+                element = element[ i[ -1 ] ]
+            
+            #
+            # Tag: <goto_pos>
+            #
+            if isinstance( element, xml_skin.XML_FormatGotopos ):
+                # move to pos
+                if element.mode == 'absolute':
+                    if element.x != None:
+                        x = element.x
+                    if element.y != None:
+                        y = element.y
+                else: # relative
+                    if element.x != None:
+                        x += element.x
+                    if element.y != None:
+                        y = y + element.y
+
+            #
+            # Tag: <newline>
+            # 
+            elif isinstance( element, xml_skin.XML_FormatNewline ):
+                newline = 1 # newline height will be added later
+                x = 0
+                
+            #
+            # Tag: <text>
+            #
+            elif isinstance( element, xml_skin.XML_FormatText ):
+                element = copy.deepcopy( element )
+                # text position is the current position:
+                element.x = x
+                element.y = y
+
+
+                # Calculate the geometry
+                r = Geometry( x, y, element.width, element.height)
+                r = self.get_item_rectangle( r,
+                                             self.content.width - x,
+                                             self.content.height - y )[ 2 ]
+                size = osd.drawstringframed( element.text, 0, 0,
+                                             r.width-element.font.shadow.x, r.height,
+                                             None, None,
+                                             element.font.name, element.font.size,
+                                             element.align, element.valign,
+                                             element.mode, layer=osd.null_layer )[ 1 ]
+                m_width  = size[ 2 ] - size[ 0 ]
+                m_height = size[ 3 ] - size[ 1 ]
+
+                if isinstance( element.width, int ):
+                    if element.width <= 0:
+                        element.width = min( m_width, r.width )
+                else:
+                    element.width = min( m_width, r.width )
+
+                if isinstance( element.height, int ) or element.height == 'line_height':
+                    if element.height <= 0 or element.height == 'line_height':
+                        element.height = osd.stringsize( element.text,
+                                                         element.font.name,
+                                                         element.font.size)[ 1 ]
+                else:
+                    element.height = min( m_height, r.height )
+
+
+                x += element.width
+
+                ret_list += [ element ]
+
+
+            # We should shrink the width and go next line (overflow)
+            if x > self.content.width:
+                x = 0
+                newline = 1
+                element.width = self.content.width - element.x
+
+            # Need to recalculate line height?
+            if newline and ret_list:
+                newline_height = 0
+                # find the tallest string
+                new_last_newline = len( ret_list )
+                last_line = ret_list[ last_newline : new_last_newline ]
+                for j in last_line:
+                    font = j.font
+                    if j.text and j.height > newline_height:
+                        newline_height = j.height
+                y = y + newline_height
+                last_newline = new_last_newline
+                # update the height of the elements in this line,
+                # so vertical alignment will be respected
+                for j in last_line:
+                    j.height = newline_height
+                
+
+        return ret_list
+
+
+
+

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.101  2003/06/29 20:38:58  dischi
+# switch to the new info area
+#
 # Revision 1.100  2003/06/24 21:37:06  outlyer
 # Allow skins screenshots for SkinSelector to be jpeg. The PNG files bloat the
 # size of the download dramatically.
@@ -342,7 +345,10 @@ class Skin:
         if menu:            
             if  menu.force_skin_layout != -1:
                 return menu.force_skin_layout
-            elif menu.choices:
+
+
+            # XXX don't change the global display_style
+            elif 0 and menu.choices:
                 different = 0
                 last = menu.choices[ 0 ].image
                 for i in menu.choices:
