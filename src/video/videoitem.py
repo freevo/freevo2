@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.87  2003/09/20 17:02:09  dischi
+# make it possible to deactivate mmpython for an item
+#
 # Revision 1.86  2003/09/20 15:08:26  dischi
 # some adjustments to the missing testfiles
 #
@@ -92,13 +95,19 @@ from event import *
 
 
 class VideoItem(Item):
-    def __init__(self, filename, parent, info=None):
+    def __init__(self, filename, parent, info=None, parse=True):
         if parent and parent.media:
             url = 'cd://%s:%s:%s' % (parent.media.devicename, parent.media.mountdir,
                                      filename[len(parent.media.mountdir)+1:])
         else:
             url = filename
-        Item.__init__(self, parent, mmpython.parse(url))
+
+        if parse:
+            info = mmpython.parse(url)
+        else:
+            info = None
+
+        Item.__init__(self, parent, info)
 
         # fix values
         self.type  = 'video'
