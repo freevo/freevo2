@@ -4,7 +4,7 @@ Installation instructions for Freevo
 $Id$
 
 
-Detailed help is in the Freevo WiKi at
+Detailed help is in the Freevo Wiki at
 http://freevo.sourceforge.net/cgi-bin/moin.cgi/DocumentationPage
 
 
@@ -14,8 +14,8 @@ Short description:
 1. Using the runtime package:
 
    If you only want to test Freevo, you can download the runtime
-   package, containing all Python modules needed to run Freevo. You
-   only need to install the extra applications like mplayer.
+   package, which contains all Python modules needed to run Freevo. You
+   only need some extra applications like MPlayer.
 
    You can download the runtime from the Freevo download page at
    http://sourceforge.net/project/showfiles.php?group_id=46652&release_id=194955
@@ -27,7 +27,7 @@ Short description:
 2. Installing Freevo into the system:
 
    To install Freevo, run 'python setup.py install' as root. If you
-   don't want to install freevo, you can also start freevo directly in
+   don't want to install Freevo, you can also start Freevo directly in
    the unpacked tarball. 
 
    You need to have all dependencies installed.
@@ -53,7 +53,7 @@ o Gentoo:
 
   You need to update your portage tree with some missing packages. Get
   rsync-freevo at http://freevo.sourceforge.net/gentoo/rsync-freevo
-  and start it. You should get a freevo ebuild. Now you can run
+  and start it. You should get a Freevo ebuild. Now you can run
   'emerge freevo' to install Freevo.
 
 
@@ -69,13 +69,13 @@ o Debian:
 
   (The second source provides mplayer and other multimedia packages)
 
-  Then, simply run apt-get update && apt-get install freevo to fetch
-  all the dependencies you'll require to run Freevo.
+  Then, simply run apt-get update && apt-get install Freevo to fetch
+  all the dependencies you'll need to run Freevo.
 
 
 
-o If you want to install Freevo on a different distributions, here is
-  a list of all dependencies (some have also dependencies, check the
+o If you want to install Freevo on a different distribution, here is
+  a list of all dependencies (some have other dependencies in turn, check the
   website for details)
 
   Python 2.2.2 or higher	http://www.python.org/
@@ -86,9 +86,9 @@ o If you want to install Freevo on a different distributions, here is
   pylirc (optional)             http://pylirc.sourceforge.net/
 
 
-  External programs (except mplayer optional)
+  External programs (all are optional except MPlayer)
 
-  Mplayer                       http://www.mplayerhq.hu/
+  MPlayer                       http://www.mplayerhq.hu/
   Xine                          http://www.xinehq.de/
   XMLTV				http://membled.com/work/apps/xmltv/  
   tvtime                        http://tvtime.sourceforge.net/
