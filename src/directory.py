@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/07/05 15:53:25  outlyer
+# Quiet some debugging stuff.
+#
 # Revision 1.19  2003/07/03 22:23:16  outlyer
 # Prevent a crash I was having.
 #
@@ -93,6 +96,7 @@ from mmpython.image import bins
 
 TRUE  = 1
 FALSE = 0
+DEBUG = config.DEBUG
 
 skin = skin.get_singleton()
 
@@ -666,7 +670,7 @@ class DirwatcherThread(threading.Thread):
                 del_files += [ f ]
 
         if new_files or del_files:
-            print 'directory has changed'
+            if DEBUG: print 'directory has changed'
             self.item.update(new_files, del_files, files)
                     
         self.files = files

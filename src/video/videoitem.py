@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.60  2003/07/05 15:53:25  outlyer
+# Quiet some debugging stuff.
+#
 # Revision 1.59  2003/07/02 20:08:36  dischi
 # make variants the default action
 #
@@ -342,7 +345,7 @@ class VideoItem(Item):
 
 
     def delete_file(self):
-        print 'Deleting %s' % self.filename
+        if DEBUG: print 'Deleting %s' % self.filename
         base = os.path.splitext(self.filename)[0] + '.'
         if os.path.isfile(base + 'jpg'):
             os.remove(base + 'jpg')
