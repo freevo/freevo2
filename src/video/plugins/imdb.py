@@ -15,6 +15,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/06/26 13:23:21  dischi
+# remove 'the' and 'a' from the imdb search string (add more in local_conf.py
+# if you like) because they mess up the results. Also fixed the filename
+# included in the fxd
+#
 # Revision 1.10  2003/06/24 18:39:42  dischi
 # some small fixes
 #
@@ -67,7 +72,6 @@ def point_maker(matching):
     return '%s.%s' % (matching.groups()[0], matching.groups()[1])
 
 
-remove_from_label = ('season[\._ -][0-9]+', 'disc[\._ -][0-9]+')
 
 class PluginInterface(plugin.ItemPlugin):
     def imdb_get_disc_searchstring(self, item):
@@ -78,7 +82,7 @@ class PluginInterface(plugin.ItemPlugin):
         name  = re.sub('([a-zA-Z])([0-9])', point_maker, name)
         name  = re.sub('([0-9])([a-zA-Z])', point_maker, name.lower())
 
-        for r in remove_from_label:
+        for r in config.IMDB_REMOVE_FROM_LABEL:
             name  = re.sub(r, '', name)
 
         parts = re.split('[\._ -]', name)
@@ -178,8 +182,9 @@ class PluginInterface(plugin.ItemPlugin):
         
         name = ''
         for p in parts:
-            name += '%s ' % p
-        
+            if not p.lower() in config.IMDB_REMOVE_FROM_SEARCHSTRING:
+                name += '%s ' % p
+
         items = []
         for id,name,year,type in helpers.imdb.search(name):
             items += [ menu.MenuItem('%s (%s, %s)' % (name, year, type),
@@ -214,7 +219,7 @@ class PluginInterface(plugin.ItemPlugin):
         
         filename = os.path.splitext(self.item.filename)[0]
         helpers.imdb.get_data_and_write_fxd(arg[0], filename, None, None,
-                                            (self.item.filename, ), None)
+                                            (os.path.basename(self.item.filename), ), None)
 
         # check if we have to go one menu back (called directly) or
         # two (called from the item menu)
