@@ -4,6 +4,11 @@ Freevo Changelog
 $Id$
 
 
+Release 1.2.2 (2002-05-XX):
+---------------------------
+o 
+
+
 Release 1.2.1 (2002-05-17):
 ---------------------------
 o Changed the config scripts to look for the file config_freevo.py
