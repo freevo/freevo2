@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2003/06/30 05:07:09  outlyer
+# Optionally use fchksum for md5's for a increase in speed.
+#
 # Revision 1.30  2003/06/14 00:09:40  outlyer
 # The "Smartsort" code. You can enable it in local_conf, it's disabled
 # by default. I fixed the smartsort cmpfunc to work a little more
@@ -263,17 +266,23 @@ def hexify(str):
 # Python's bundled MD5 class only acts on strings, so
 # we have to calculate it in this loop
 def md5file(filename):
-        m = md5.new()
+        # Try and use fchksum if installed
         try:
-            f = open(filename, 'r')
-        except IOError:
-            print 'Cannot find file "%s"!' % filename
-            return ''
-        for line in f.readlines():
-                m.update(line)
-        f.close()
-        return hexify(m.digest())
-    
+            import fchksum
+            if config.DEBUG: print "Using Optimized MD5 Routines from fchksum"
+            return fchksum.fmd5t(filename)[0]
+        except ImportError:
+            if config.DEBUG: print "Falling back to Python MD5 routines"
+            m = md5.new()
+            try:
+                f = open(filename, 'r')
+            except IOError:
+                print 'Cannot find file "%s"!' % filename
+                return ''
+            for line in f.readlines():
+                    m.update(line)
+            f.close()
+            return hexify(m.digest())
 
 def resize(filename, x0=25, y0=25):
 
