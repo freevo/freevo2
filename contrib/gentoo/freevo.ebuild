@@ -1,8 +1,7 @@
 DESCRIPTION="Digital video jukebox (PVR, DVR)."
 HOMEPAGE="http://www.freevo.org/"
 
-PV2=`echo $PV | sed 's/_//'`
-SRC_URI="mirror://sourceforge/${PN}/${PN}-${PV2}.tar.gz"
+SRC_URI="mirror://sourceforge/${PN}/${P}.tar.gz"
 
 LICENSE="GPL-2"
 SLOT="0"
@@ -27,9 +26,28 @@ DEPEND=">=dev-python/pygame-1.5.6
 	X? ( virtual/x11 )"
 
 
-src_unpack() {
-	unpack freevo-${PV2}.tar.gz
-	ln -s freevo-${PV2} freevo-${PV}
+src_compile() {
+        local myconf
+
+        if [ "`use matrox`" ] ; then
+                myconf="--geometry=768x576 --display=mga"
+        elif [ "`use X`" ] ; then
+                myconf="--geometry=800x600 --display=x11"
+        else
+                myconf="--geometry=800x600 --display=fbdev"
+        fi
+
+        if [ "`/bin/ls -l /etc/localtime | grep Europe`" ] ; then
+                myconf="$myconf --tv=pal"
+        fi
+
+        sed -e "s:/etc/freevo/freevo.conf:${T}/freevo.conf:" \
+                -i "${S}/src/setup_freevo.py" || die "sed failed"
+
+        "${S}/freevo" setup ${myconf} || die "configure problem"
+
+        sed -e "s:${T}/freevo.conf:/etc/freevo/freevo.conf:" \
+                -i "${S}/src/setup_freevo.py" || die "sed failed"
 }
 
 src_install() {
@@ -46,55 +64,26 @@ src_install() {
 }
 
 pkg_postinst() {
-	local myconf="--geometry=800x600 --display=x11"
-	use matrox && myconf="--geometry=768x576 --display=mga"
+        einfo "If you want to schedule programs, emerge xmltv now."
+        echo
 
-	/bin/ls -l /etc/localtime | grep Europe >/dev/null 2>/dev/null && \
-	    myconf="$myconf --tv=pal"
+        einfo "Please check /etc/freevo/freevo.conf and"
+        einfo "/etc/freevo/local_conf.py before starting Freevo."
+        einfo "To rebuild freevo.conf with different parameters,"
+        einfo "please run:"
+        einfo "    freevo setup"
+        echo
 
-	einfo "Running freevo setup"
-
-	/usr/bin/freevo setup ${myconf} || die
-
-	einfo
-	einfo "Please check /etc/freevo/freevo.conf and /etc/freevo/local_conf.py and"
-	einfo "before starting freevo. To rebuild freevo.conf with different parameters"
-        einfo "run /opt/freevo/freevo setup"
-	einfo
-
-        if [ -e /opt/freevo/runtime/preloads ]; then
-                ewarn "This version of freevo doesn't need the runtime anymore"
-                ewarn "Please unmerge freevo_runtime"
-                echo -ne "\a" ; sleep 0.1 &>/dev/null ; sleep 0,1 &>/dev/null
-                echo -ne "\a" ; sleep 1
-                echo -ne "\a" ; sleep 0.1 &>/dev/null ; sleep 0,1 &>/dev/null
-                echo -ne "\a" ; sleep 1
-                echo -ne "\a" ; sleep 0.1 &>/dev/null ; sleep 0,1 &>/dev/null
-                echo -ne "\a" ; sleep 1
-                echo -ne "\a" ; sleep 0.1 &>/dev/null ; sleep 0,1 &>/dev/null
-                echo -ne "\a" ; sleep 1
-                echo -ne "\a" ; sleep 0.1 &>/dev/null ; sleep 0,1 &>/dev/null
-                echo -ne "\a" ; sleep 1
-                sleep 5
+        if [ -e "/opt/freevo" ] ; then
+                ewarn "Please remove /opt/freevo because it is no longer used."
         fi
-        
-        if [ -e /opt/freevo ]; then
-                ewarn "There is something left in /opt/freevo, please delete it"
-                ewarn "manually"
-	fi
-
-	if [ -e /etc/freevo/freevo_config.py ]; then
-		ewarn "Please remove /etc/freevo/freevo_config.py"
-		sleep 5
-	fi
-
-	if [ -e /etc/init.d/freevo-webserver ]; then
-		ewarn "Please remove /etc/init.d/freevo-webserver and"
-		ewarn "/etc/init.d/freevo-recordserver."
-		sleep 5
-	fi
-
-	einfo
-	einfo "You may also want to emerge tvtime or xmltv"
-	einfo
+        if [ -e "/etc/freevo/freevo_config.py" ] ; then
+                ewarn "Please remove /etc/freevo/freevo_config.py."
+        fi
+        if [ -e "/etc/init.d/freevo-record" ] ; then
+                ewarn "Please remove /etc/init.d/freevo-record"
+        fi
+        if [ -e "/etc/init.d/freevo-web" ] ; then
+                ewarn "Please remove /etc/init.d/freevo-web"
+        fi
 }
