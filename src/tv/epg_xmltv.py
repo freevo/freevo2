@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/01/05 12:47:35  dischi
+# The pickled file now has the uid in the name to avoid conflicts when you
+# start freevo with different users
+#
 # Revision 1.4  2002/12/09 07:17:58  krister
 # Quick fix for a bug where XML crashes on 8-bit chars. Need a proper fix!
 #
@@ -97,7 +101,8 @@ def get_guide():
          cached_guide.timestamp != os.path.getmtime(config.XMLTV_FILE))):
 
         # No, is there a pickled version ("file cache") in a file?
-        pname = config.XMLTV_FILE + '.pickled'
+        pname = '%s-%s.pickled' % (config.XMLTV_FILE, os.getuid())
+        
         got_cached_guide = FALSE
         if (os.path.isfile(config.XMLTV_FILE) and
             os.path.isfile(pname) and (os.path.getmtime(pname) >
@@ -282,8 +287,8 @@ def timestr2secs_utc(str):
 if __name__ == '__main__':
     # Remove a pickled file (if any) if we're trying to list all channels
     if not config.TV_CHANNELS:
-        if os.path.isfile('/tmp/TV.xml.pickled'):
-            os.remove('/tmp/TV.xml.pickled')
+        if os.path.isfile('%s-%s.pickled' % (config.XMLTV_FILE, os.getuid())):
+            os.remove('%s-%s.pickled' % (config.XMLTV_FILE, os.getuid()))
 
     print
     print 'Getting the TV Guide, this can take a couple of minutes...'
