@@ -16,6 +16,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/08/22 20:06:17  dischi
+# Switch to mevas as backend for all drawing operations. The mevas
+# package can be found in lib/mevas. This is the first version using
+# mevas, there are some problems left, some popup boxes and the tv
+# listing isn't working yet.
+#
 # Revision 1.2  2004/07/27 18:52:30  dischi
 # support more layer (see README.txt in backends for details
 #
@@ -58,11 +64,8 @@ import config, util, rc
 import gui
 
 
-# pygame modules
-import pygame.time
-
 # python modules
-from time import sleep, time
+import time
 import copy
 
 _singleton = None
@@ -103,7 +106,7 @@ class Render:
 
     def __init__(self):
         # set the update handler to wait for osd
-        self.screen = gui.get_screen()
+        self.display = gui.get_display()
 
 
     def update(self):
@@ -115,8 +118,8 @@ class Render:
         remove  = self.animations.remove
         i = 0
 
-        timer   = pygame.time.get_ticks()
-
+        timer = time.time()
+        
         update_screen = False
         for a in copy.copy(self.animations):
             # XXX something should be done to clean up the mess
@@ -130,12 +133,13 @@ class Render:
             if a.active:
                 update_screen = a.poll(timer) or update_screen
 
+
             # XXX something might be done to handle stopped animations
             else:
                 pass
 
         if update_screen:
-            self.screen.update()
+            self.display.update()
 
 
     def kill(self, anim_object):

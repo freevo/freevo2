@@ -6,6 +6,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/08/22 20:06:21  dischi
+# Switch to mevas as backend for all drawing operations. The mevas
+# package can be found in lib/mevas. This is the first version using
+# mevas, there are some problems left, some popup boxes and the tv
+# listing isn't working yet.
+#
 # Revision 1.1  2004/07/25 18:14:05  dischi
 # make some widgets and boxes work with the new gui interface
 #
@@ -39,7 +45,7 @@ class Label(Text):
     """
     """
     
-    def __init__(self, x1, y1, x2, y2, text, style, align_h=None, align_v=None, 
+    def __init__(self, text, pos, size, style, align_h=None, align_v=None, 
                  width=-1, height=-1, text_prop=None):
 
         self.text_prop = text_prop or { 'align_h': 'left',
@@ -54,34 +60,5 @@ class Label(Text):
 
         mode = self.text_prop.setdefault( 'mode', 'hard' )
 
-        Text.__init__(self, x1, y1, x2, y2, text, style.font,
-                      y2 - y1, align_h, align_v, mode)
-
-        rect = self.calculate()[1]
-
-        self.x1 = rect[0]
-        self.y1 = rect[1]
-        self.x2 = rect[2]
-        self.y2 = rect[3]
-
-        self.height = self.y2 - self.y1
-        self.width  = self.x2 - self.x1
-
-
-    def set_style(self, style):
-        self.style = style
-        self.font  = style.font
-        self.modified()
-        
-
-    def set_text(self, text):
-        self.text = text
-        self.modified()
-        
-
-    def set_position(self, x1, y1, x2, y2):
-        """
-        change the position (will be done by the layer)
-        """
-        Text.set_position(self, x1, y1, x2, y2)
-        self.modified()
+        Text.__init__(self, text, pos, size, style.font,
+                      align_h, align_v, mode)

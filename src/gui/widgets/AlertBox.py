@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/08/22 20:06:21  dischi
+# Switch to mevas as backend for all drawing operations. The mevas
+# package can be found in lib/mevas. This is the first version using
+# mevas, there are some problems left, some popup boxes and the tv
+# listing isn't working yet.
+#
 # Revision 1.2  2004/07/25 18:14:04  dischi
 # make some widgets and boxes work with the new gui interface
 #
@@ -51,25 +57,14 @@ class AlertBox(PopupBox):
         PopupBox.__init__(self, text, handler, x, y, width, height,
                           icon, vertical_expansion, text_prop)
 
-        self.button = Button(self.x1, self.y1, self.x2, self.y2, _('OK'),
-                             self.button_selected)
-        self.add(self.button)
-
         # FIXME: that can't be correct
-        space = self.content_layout.spacing * 2
+        space = self.content_layout.spacing
 
-        # get height of the button and set it to set bottom
-        ydiff = self.button.y2 - (self.y2 - space)
-        bx1   = min(self.x1 + space, self.button.x1)
-        bx2   = max(self.x2 - space, self.button.x2)
-
-        self.button.set_position(bx1, self.button.y1 - ydiff, bx2, self.button.y2 - ydiff)
-
-        # resize label to fill the rest of the box
-        self.label.set_position(self.x1 + space, self.y1 + space, self.x2 - space,
-                                self.y2 - space + ydiff - space)
+        w, h = self.get_size()
+        self.button = Button(_('OK'), (space,h-2*space), w-2*space, self.button_selected)
+        self.add_child(self.button)
+        self.set_size((w, h + self.button.get_size()[1]))
         
-
         
     def eventhandler(self, event):
         if event in (INPUT_ENTER, INPUT_EXIT):

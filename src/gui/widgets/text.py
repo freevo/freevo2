@@ -6,15 +6,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/08/22 20:06:21  dischi
+# Switch to mevas as backend for all drawing operations. The mevas
+# package can be found in lib/mevas. This is the first version using
+# mevas, there are some problems left, some popup boxes and the tv
+# listing isn't working yet.
+#
 # Revision 1.3  2004/08/01 10:37:08  dischi
 # smaller changes to stuff I need
-#
-# Revision 1.2  2004/07/27 18:52:31  dischi
-# support more layer (see README.txt in backends for details
-#
-# Revision 1.1  2004/07/25 18:14:05  dischi
-# make some widgets and boxes work with the new gui interface
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -37,377 +36,191 @@
 #
 # -----------------------------------------------------------------------
 
+import os
 import traceback
+
+import mevas
+from mevas.image import CanvasImage
+
 import config
 
-from base import GUIObject
 
-class Text(GUIObject):
+dim_image = None
+
+class Text(CanvasImage):
     """
     A text object that can be drawn onto a layer
     """
-    def __init__(self, x1, y1, x2, y2, text, font, height=0, align_h='left',
+    def __init__(self, text, (x, y), (width, height), font, align_h='left',
                  align_v='top', mode='hard', ellipses = '...', dim=True,
                  fgcolor=None, bgcolor=None):
-        GUIObject.__init__(self, x1, y1, x2, y2)
-        self.text     = text
-        self.font     = font
-        if height:
-            self.height = height
-        else:
-            self.height = x2 - x1
-        self.align_h  = align_h
-        self.align_v  = align_v
-        self.mode     = mode
-        self.ellipses = ellipses
-        self.dim      = dim
-        self.fgcolor  = fgcolor
-        self.bgcolor  = bgcolor
 
-        self.render_information = None
+        if not text or height < font.height:
+            CanvasImage.__init__(self, (1, 1))
+            return
 
-
-    def __drawstringframed_line__(self, string, max_width, font, hard,
-                                  ellipses, word_splitter):
-        """
-        calculate _one_ line for drawstringframed. Returns a list:
-        width used, string to draw, rest that didn't fit and True if this
-        function stopped because of a \n.
-        """
-        c = 0                           # num of chars fitting
-        width = 0                       # width needed
-        ls = len(string)
-        space = 0                       # position of last space
-        last_char_size = 0              # width of the last char
-        last_word_size = 0              # width of the last word
-
-        if ellipses:
-            # check the width of the ellipses
-            ellipses_size = font.stringsize(ellipses)
-            if ellipses_size > max_width:
-                # if not even the ellipses fit, we have not enough space
-                # until the text is shorter than the ellipses
-                width = font.stringsize(string)
-                if width <= max_width:
-                    # ok, text fits
-                    return (width, string, '', False)
-                # ok, only draw the ellipses, shorten them first
-                while(ellipses_size > max_width):
-                    ellipses = ellipses[:-1]
-                    ellipses_size = font.stringsize(ellipses)
-                return (ellipses_size, ellipses, string, False)
-        else:
-            ellipses_size = 0
+        if dim:
             ellipses = ''
+            mode = 'hard'
+            
+        self.font  = font
+        stringsize = font.stringsize(text)
+        if stringsize > width:
+            if mode == 'hard':
+                text = self._cut_string(text, width, '', ellipses)[0]
+            else:
+                t = self._cut_string(text, width, ' ', ellipses)[0]
+                if not t:
+                    # nothing fits? Try to break words at ' -_'
+                    t = self._cut_string(text, width, '-_ ', ellipses)[0]
+                    if not t:
+                        # still nothing? Try the 'hard' way:
+                        t = self._cut_string(text, width, '', ellipses)[0]
+                text = t
+            stringsize = font.stringsize(text)
+        else:
+            dim = False
+            
+        if align_h == 'center':
+            x += (width - stringsize) / 2
+        if align_h == 'right':
+            x += width - stringsize
+        if align_v == 'center':
+            y += (height - font.height) / 2
+        if align_v == 'bottom':
+            y += height - font.height
 
-        data = None
+        self.dim     = dim
+        self.fgcolor = fgcolor
+        self.bgcolor = bgcolor
+        
+        try:
+            self._calculate_vars()
+        except Exception, e:
+            _debug_(e, 0)
+        CanvasImage.__init__(self, (stringsize, font.height))
+
+        if self.bgcolor:
+            self.draw_rectangle((0, 0), (stringsize, font.height), self.bgcolor, 1)
+
+        try:
+            self._render(text, (0, 0), (stringsize, font.height))
+        except Exception, e:
+            _debug_(e, 0)
+
+        if dim:
+            global dim_image
+            if not dim_image:
+                f = os.path.join(config.IMAGE_DIR, 'blend.png')
+                dim_image = mevas.imagelib.open(f)
+                dim_image.scale((25, font.height))
+            self.image.draw_mask(dim_image, (stringsize - 25, 0))
+
+        self.set_pos((x, y))
+
+        
+
+    def _cut_string(self, text, max_width, word_splitter, ellipses):
+        """
+        Cut the string and return both halfs of it. 
+        Only call this function when the string doesn't fit!
+        """
+        c      = 1                      # num of chars fitting
+        space  = 0                      # position of last space
+        width  = 0                      # current used width
+
+        ellipses_c     = 0
+        ellipses_space = 0
+        ellipses_width = 0
+
         while(True):
-            if width > max_width - ellipses_size and not data:
-                # save this, we will need it when we have not enough space
-                # but first try to fit the text without ellipses
-                data = c, space, width, last_char_size, last_word_size
+            if ellipses and ellipses_c == 0 and ellipses_width > max_width:
+                # if we use ellipses, this is the max position
+                ellipses_c = c
             if width > max_width:
                 # ok, that's it. We don't have any space left
                 break
-            if ls == c:
-                # everything fits
-                return (width, string, '', False)
-            if string[c] == '\n':
-                # linebreak, we have to stop
-                return (width, string[:c], string[c+1:], True)
-            if not hard and string[c] in word_splitter:
+            if word_splitter and text[c] in word_splitter:
                 # rememeber the last space for mode == 'soft' (not hard)
                 space = c
-                last_word_size = 0
-
-            # add a char
-            last_char_size = font.charsize(string[c])
-            width += last_char_size
-            last_word_size += last_char_size
+                if ellipses_c == 0:
+                    ellipses_space = c
+            # add a character to the string
+            width = self.font.stringsize(text[:c])
+            if ellipses:
+                ellipses_width = self.font.stringsize(text[:c] + ellipses)
             c += 1
-
-        # restore to the pos when the width was one char to big and
-        # incl. ellipses_size
-        c, space, width, last_char_size, last_word_size = data
-
-        if hard:
-            # remove the last char, than it fits
-            c -= 1
-            width -= last_char_size
-
+        # now we a have string that is too long, shorten it again
+        if ellipses:
+            if not word_splitter:
+                return text[:ellipses_c-1] + ellipses, text[ellipses_c-1:]
+            else:
+                return text[:ellipses_space] + ellipses, text[ellipses_space:]
+        if not word_splitter:
+            return text[:c-1], text[c-1:]
         else:
-            # go one word back, than it fits
-            c = space
-            width -= last_word_size
-
-        # calc the matching and rest string and return all this
-        return (width+ellipses_size, string[:c]+ellipses, string[c:], False)
+            return text[:space], text[space:]
 
 
+    def _calculate_vars(self):
+        """
+        calculate some variables for drawing the string
+        """
+        self.shadow_x      = 0
+        self.shadow_y      = 0
+        self.border_color  = None
+        self.border_radius = 0
+        self.shadow_color  = None
 
-    def calculate(self):
-        x = self.x1
-        y = self.y1
-
-        height = self.height
-        width  = self.x2 - self.x1
-        font   = self.font
-        
-        if not self.text:
-            return
-
-        shadow_x      = 0
-        shadow_y      = 0
-        border_color  = None
-        border_radius = 0
-        shadow_color  = None
-        
-        dim = config.OSD_DIM_TEXT and self.dim
-        # XXX pixels to dim, this should probably be tweaked
-        dim_size = 25
-
-        fgcolor = self.fgcolor
-        bgcolor = self.bgcolor
-        if hasattr(font, 'shadow'):
-            # skin font
-            if font.shadow.visible:
-                if font.shadow.border:
-                    border_color  = font.shadow.color
-                    border_radius = int(font.font.ptsize/10)
+        if hasattr(self.font, 'shadow'):
+            # This font object is a skin font object, based on
+            # fxd file settings
+            if self.font.shadow.visible:
+                if self.font.shadow.border:
+                    self.border_color  = self._mevascol(self.font.shadow.color)
+                    self.border_radius = int(self.font.font.ptsize/10)
                 else:
-                    shadow_x     = font.shadow.y
-                    shadow_y     = font.shadow.x
-                    shadow_color = font.shadow.color
-            if not fgcolor:
-                fgcolor = font.color
-            if not bgcolor:
-                bgcolor = font.bgcolor
-            font    = font.font
+                    self.shadow_x     = self.font.shadow.y
+                    self.shadow_y     = self.font.shadow.x
+                    self.shadow_color = self._mevascol(self.font.shadow.color)
+            if not self.fgcolor:
+                self.fgcolor = self.font.color
+            if not self.bgcolor:
+                self.bgcolor = self.font.bgcolor
+            self.font = self.font.font
 
-        if height == -1:
-            height = font.height
-        elif border_color != None:
-            height -= border_radius * 2
-        else:
-            height -= abs(shadow_y)
-
-        width = width - (abs(shadow_x) + border_radius * 2)
-        if shadow_x < 0:
-            x -= shadow_x
-        if shadow_y < 0:
-            y -= shadow_y
-        x += border_radius
-        y += border_radius
-
-        line_height = font.height * 1.1
-        if int(line_height) < line_height:
-            line_height = int(line_height) + 1
-
-        if width <= 0 or height < font.height:
-            return
-            
-        num_lines_left   = int((height+line_height-font.height) / line_height)
-        lines            = []
-        current_ellipses = ''
-        mode = self.mode
-        ellipses = self.ellipses
-        hard = mode == 'hard'
-
-        if num_lines_left == 1 and dim:
-            ellipses = ''
-            mode = hard = 'hard'
-        else:
-            dim = False
-
-        string = self.text
-        while(num_lines_left):
-            # calc each line and put the rest into the next
-            if num_lines_left == 1:
-                current_ellipses = ellipses
-            #
-            # __drawstringframed_line__ returns a list:
-            # width of the text drawn (w), string which is drawn (s),
-            # rest that does not fit (r) and True if the breaking was because
-            # of a \n (n)
-            #
-            (w, s, r, n) = self.__drawstringframed_line__(string, width, font, hard,
-                                                          current_ellipses, ' ')
-            if s == '' and not hard:
-                # nothing fits? Try to break words at ' -_' and no ellipses
-                (w, s, r, n) = self.__drawstringframed_line__(string, width, font, hard,
-                                                              None, ' -_')
-                if s == '':
-                    # still nothing? Use the 'hard' way
-                    (w, s, r, n) = self.__drawstringframed_line__(string, width, font,
-                                                                  'hard', None, ' ')
-            lines.append((w, s))
-            while r and r[0] == '\n':
-                lines.append((0, ' '))
-                num_lines_left -= 1
-                r = r[1:]
-                n = True
-
-            if n:
-                string = r
-            else:
-                string = r.strip()
-
-            num_lines_left -= 1
-
-            if not r:
-                # finished, everything fits
-                break
-
-        if len(r) == 0 and dim:
-            dim = False
-
-        # calc the height we want to draw (based on different align_v)
-        height_needed = (len(lines) - 1) * line_height + font.height
-        if self.align_v == 'bottom':
-            y += (height - height_needed)
-        elif self.align_v == 'center':
-            y += int((height - height_needed)/2)
-
-        if dim:
-            dim = dim_size
-
-        # calculate the position
-        y0    = y
-        min_x = 10000
-        max_x = 0
-
-        for w, l in lines:
-            if not l:
-                continue
-            x0 = x
-            if self.align_h == 'right':
-                x0 = x + width - w
-            elif self.align_h == 'center':
-                x0 = x + int((width - w) / 2)
-            if x0 < min_x:
-                min_x = x0
-            if x0 + w > max_x:
-                max_x = x0 + w
-            y0 += line_height
-
-        # change max_x, min_x, y and height_needed to reflect the
-        # changes from shadow
-        if shadow_x:
-            if shadow_x < 0:
-                min_x += shadow_x
-            else:
-                max_x += shadow_x
-
-        if shadow_y:
-            if shadow_y < 0:
-                y += shadow_y
-                height_needed -= shadow_y
-            else:
-                height_needed += shadow_y
-
-        # add border radius for each line
-        if border_color != None:
-            max_x += border_radius
-            min_x -= border_radius
-            y     -= border_radius
-            height_needed += border_radius * 2
-
-        self.render_information = x, y, lines, line_height, shadow_x, shadow_y, \
-                                  border_color, border_radius, r, height_needed, dim, \
-                                  font, fgcolor, bgcolor, width, shadow_color
-        # return rest text and used space
-        self.return_value = r, (min_x, y, max_x, y+height_needed)
-        return self.return_value
+        # save the new values
+        self.font = self.font.font
+        self.fgcolor = self._mevascol(self.fgcolor)
+        if self.bgcolor:
+            self.bgcolor = self._mevascol(self.bgcolor)
 
 
-    def __render__(self):
-        if not self.render_information:
-            self.calculate()
-
-        if not self.render_information:
-            return self.text, (self.x1, self.y1, self.x1, self.y1)
-
-        x, y, lines, line_height, shadow_x, shadow_y, border_color, border_radius, \
-           rest, height_needed, dim, font, fgcolor, bgcolor, width, \
-           shadow_color = self.render_information
-
-        y0    = y
-        min_x = 10000
-        max_x = 0
-
-        for w, l in lines:
-            if not l:
-                continue
-
-            x0 = x
-            if self.screen:
-                try:
-                    # render the string. Ignore all the helper functions for that
-                    # in here, it's faster because he have more information
-                    # in here. But we don't use the cache, but since the skin only
-                    # redraws changed areas, it doesn't matter and saves the time
-                    # when searching the cache
-                    render = font.render(l, fgcolor, bgcolor, border_color,
-                                         border_radius, dim)
-
-                    # calc x/y positions based on align
-                    if self.align_h == 'right':
-                        x0 = x + width - render.get_size()[0]
-                    elif self.align_h == 'center':
-                        x0 = x + int((width - render.get_size()[0]) / 2)
-
-                    if shadow_x or shadow_y:
-                        shadow = font.render(l, shadow_color, dim=dim)
-                        self.screen.blit(shadow, (x0+shadow_x, y0+shadow_y))
-
-                    self.screen.blit(render, (x0, y0))
-
-                except Exception, e:
-                    print 'Render failed, skipping \'%s\'...' % l
-                    print e
-                    if config.DEBUG:
-                        traceback.print_exc()
-                    
-            if x0 < min_x:
-                min_x = x0
-            if x0 + w > max_x:
-                max_x = x0 + w
-            y0 += line_height
-
-        return self.return_value
+    def _render(self, text, (x, y), (w, h)):
+        if self.border_color and self.border_radius:
+            x += self.border_radius
+            y += self.border_radius
+            border = CanvasImage((w, h))
+            border.draw_text(text, (0, 0), font=self.font, color=self.border_color)
+            for bx in range(-self.border_radius, self.border_radius+1):
+                for by in range(-self.border_radius, self.border_radius+1):
+                    if bx or by:
+                        self.draw_image(border, (x+bx, y+by))
+        if self.shadow_color and (self.shadow_x or self.shadow_y):
+            self.draw_text(text, (x+self.shadow_x, y+self.shadow_y),
+                           font=self.font, color=self.shadow_color)
+        self.draw_text(text, (x, y), font=self.font, color=self.fgcolor)
 
 
-            
-    def draw(self, rect=None):
-        if not self.screen:
-            raise TypeError, 'no screen defined for %s' % self
-        self.__render__()
-
-        
-    def __cmp__(self, o):
-        try:
-            return self.x1 != o.x1 or self.y1 != o.y1 or self.x2 != o.x2 or \
-                   self.y2 != o.y2 or self.text != o.text or self.font != o.font or \
-                   self.height != o.height or self.align_h != o.align_h or \
-                   self.align_v != o.align_v or self.mode != o.mode or \
-                   self.ellipses != o.ellipses or self.dim != o.dim
-        
-        except:
-            return 1
-        
-
-    def modified(self):
+    def _mevascol(self, col):
         """
-        call this function to notify the layer that this object
-        needs a redraw
+        Convert a 32-bit TRGB color to a 4 element tuple
         """
-        self.render_information = None
-        GUIObject.modified(self)
-
-
-    def set_position(self, x1, y1, x2, y2):
-        """
-        change the position (will be done by the layer)
-        """
-        self.render_information = None
-        GUIObject.set_position(self, x1, y1, x2, y2)
+        if col == None:
+            return (0,0,0,255)
+        a = 255 - ((col >> 24) & 0xff)
+        r = (col >> 16) & 0xff
+        g = (col >> 8) & 0xff
+        b = (col >> 0) & 0xff
+        c = (r, g, b, a)
+        return c

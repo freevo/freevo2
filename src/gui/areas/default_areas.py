@@ -11,6 +11,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/08/22 20:06:18  dischi
+# Switch to mevas as backend for all drawing operations. The mevas
+# package can be found in lib/mevas. This is the first version using
+# mevas, there are some problems left, some popup boxes and the tv
+# listing isn't working yet.
+#
 # Revision 1.4  2004/08/14 15:07:34  dischi
 # New area handling to prepare the code for mevas
 # o each area deletes it's content and only updates what's needed
@@ -71,7 +77,7 @@ class Title_Area(Area):
         delete the title
         """
         if self.gui_object:
-            self.screen.remove(self.gui_object)
+            self.gui_object.unparent()
             self.gui_object = None
         self.text = (None, None, None)
 
@@ -129,7 +135,8 @@ class Title_Area(Area):
         
         self.clear()
         self.text = text, content.font, content
-        self.gui_object = self.drawstring(text, content.font, content, mode='hard')
+        self.gui_object = self.drawstring(text, content.font, content,
+                                          height=-1, mode='hard')
         
 
 

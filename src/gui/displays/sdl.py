@@ -2,21 +2,29 @@ import time
 import pygame
 from pygame.locals import *
 
+from mevas.displays.pygamecanvas import PygameCanvas
+
+import rc
 import config
 
-
-class Keyboard:
-    def __init__(self):
+class Display(PygameCanvas):
+    def __init__(self, size, default=False):
+        PygameCanvas.__init__(self, size)
         self.mousehidetime = time.time()
+        rc.get_singleton().inputs.append(rc.Keyboard(self.poll))
+            
+    def hide(self):
+        _debug_('hide SDL')
+        pass
 
-        
+    def show(self):
+        _debug_('show SDL')
+        pass
+
     def poll(self, map=True):
         """
-        callback for SDL event (not Freevo events)
+        callback for SDL event
         """
-        if not pygame.display.get_init():
-            return None
-
         # Check if mouse should be visible or hidden
         mouserel = pygame.mouse.get_rel()
         mousedist = (mouserel[0]**2 + mouserel[1]**2) ** 0.5
@@ -37,6 +45,7 @@ class Keyboard:
                 return
             
             if event.type == KEYDOWN:
+                # FIXME: map support not integrated yet
                 if not map and event.key > 30:
                     try:
                         if event.unicode != u'':
@@ -45,7 +54,7 @@ class Keyboard:
                         pass
                     
                 if event.key in config.KEYMAP.keys():
-                    # Turn off the helpscreen if it was on
+                    # FIXME: Turn off the helpscreen if it was on
                     return config.KEYMAP[event.key]
 
                 elif event.key == K_h:
@@ -65,3 +74,5 @@ class Keyboard:
                             return event.unicode
                     except:
                         return None
+        
+

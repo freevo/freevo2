@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/08/22 20:06:18  dischi
+# Switch to mevas as backend for all drawing operations. The mevas
+# package can be found in lib/mevas. This is the first version using
+# mevas, there are some problems left, some popup boxes and the tv
+# listing isn't working yet.
+#
 # Revision 1.5  2004/08/14 15:07:34  dischi
 # New area handling to prepare the code for mevas
 # o each area deletes it's content and only updates what's needed
@@ -63,7 +69,6 @@ import time
 import config
 import math
 from area import Area, Geometry
-from skin_utils import *
 
 
 class TVListing_Area(Area):
@@ -375,7 +380,6 @@ class TVListing_Area(Area):
                         val.align='center'
                     
                     if x0 > x1:
-                        print 'skip', x0, x1
                         continue
 
                     # text positions
@@ -413,8 +417,7 @@ class TVListing_Area(Area):
                                         align_v='center', align_h = val.align)
 
             except Exception, e:
-                print 'ERROR', e
-                print start_time, stop_time, channel.name
+                _debug_(e)
             y0 += item_h - 1
 
 

@@ -7,24 +7,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/08/22 20:06:21  dischi
+# Switch to mevas as backend for all drawing operations. The mevas
+# package can be found in lib/mevas. This is the first version using
+# mevas, there are some problems left, some popup boxes and the tv
+# listing isn't working yet.
+#
 # Revision 1.9  2004/08/05 17:29:14  dischi
 # improved screen and eventhandler
-#
-# Revision 1.8  2004/08/01 10:37:08  dischi
-# smaller changes to stuff I need
-#
-# Revision 1.7  2004/07/27 18:52:31  dischi
-# support more layer (see README.txt in backends for details
-#
-# Revision 1.6  2004/07/26 18:10:17  dischi
-# move global event handling to eventhandler.py
-#
-# Revision 1.5  2004/07/25 19:47:38  dischi
-# use application and not rc.app
-#
-# Revision 1.4  2004/07/25 18:14:05  dischi
-# make some widgets and boxes work with the new gui interface
-#
 #
 # -----------------------------------------------------------------------
 #
@@ -50,69 +40,55 @@
 
 import copy
 
-import gui
+from mevas.container import CanvasContainer
+
 import eventhandler
+import gui
 
-from base import GUIObject
-
-class Window(GUIObject):
+class Window(CanvasContainer):
     """
     """
-    def __init__(self, x1=None, y1=None, width=None, height=None):
-        self.screen_width  = gui.get_screen().width
-        self.screen_height = gui.get_screen().height
+    def __init__(self, x=None, y=None, width=None, height=None):
+        CanvasContainer.__init__(self)
+        self.set_zindex(100)
+        
+        self._display_width  = gui.get_display().width
+        self._display_height = gui.get_display().height
         self.evt_context   = 'input'
 
         self.center_on_screen = False
 
         if width == None:
-            width  = self.screen_width / 2
+            width  = self._display_width / 2
 
         if height == None:
-            height = self.screen_height / 4
+            height = self._display_height / 4
 
-        if x1 == None:
-            x1 = self.screen_width/2 - width/2
+        if x == None:
+            x = self._display_width/2 - width/2
 
-        if y1 == None:
-            y1  = self.screen_height/2 - height/2
+        if y == None:
+            y  = self._display_height/2 - height/2
             self.center_on_screen = True
-
-        GUIObject.__init__(self, x1, y1, x1 + width, y1 + height)
-
-        self.width  = width
-        self.height = height
 
         self.__set_popupbox_style__()
 
+        self.set_size((width, height))
+        self.set_pos((x, y))
+        
         self.widget_normal   = self.content_layout.types['widget']
         self.widget_selected = self.content_layout.types['selected']
         self.button_normal   = self.content_layout.types['button']
         self.button_selected = self.content_layout.types['button selected']
 
-        self.objects = []
-        self.screen  = None
-        self.add(self)
-
-        
-    def add(self, object):
-        object.layer = 100
-        self.objects.append(object)
-        if self.screen:
-            self.screen.add(object)
-            
-
-    def remove(self, object):
-        self.objects.remove(object)
-        if self.screen:
-            self.screen.remove(object)
+        self._display  = None
 
 
-    def draw(self, rect=None):
+    def _create_background(self, screen):
         """
         The draw function.
         """
-        _debug_('Window::_draw %s' % self, 2)
+        _debug_('Window::_create_background %s' % self, 1)
         
         for o in self.background_layout:
             if o[0] == 'rectangle':
@@ -129,33 +105,31 @@ class Window(GUIObject):
                 if r.y + r.height > self.height:
                     r.height = self.height - r.y
 
-            self.screen.drawbox(r.x + self.x1, r.y + self.y1,
-                                r.x + r.width + self.x1,
-                                r.y + r.height + self.y1,
-                                r.bgcolor, r.size, r.color, r.radius)
+            r = gui.Rectangle((r.x, r.y), (r.width, r.height),
+                              r.bgcolor, r.size, r.color, r.radius)
+            r.set_zindex(-1)
+            self.add_child(r)
 
+            
     def show(self):
-        if self.screen:
+        if self._display:
             return
-        self.parent = eventhandler.get()
-        self.parent_handler = self.parent.eventhandler
+        self.parent_handler = eventhandler.get().eventhandler
         eventhandler.append(self)
 
-        self.screen = gui.get_screen()
+        self._display = gui.get_display()
+        self._create_background(self._display)
+        self._display.add_child(self)
+        self._display.update()
 
-        for o in self.objects:
-            self.screen.add(o)
-        self.screen.update()
-        
 
     def destroy(self):
         eventhandler.remove(self)
-        if not self.screen:
+        if not self._display:
             return
-        for o in self.objects:
-            o.screen.remove(o)
-        gui.get_screen().update()
-        self.screen = None
+        self._display.remove_child(self)
+        self._display.update()
+        self._display = None
         
 
     def __find_current_menu__(self, widget):
@@ -186,7 +160,6 @@ class Window(GUIObject):
         attributes: name, size, color, shadow
         shadow attributes: visible, color, x, y
         """
-        import gui
         from gui import fxdparser
         menu = self.__find_current_menu__(widget)
 

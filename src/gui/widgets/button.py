@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/08/22 20:06:21  dischi
+# Switch to mevas as backend for all drawing operations. The mevas
+# package can be found in lib/mevas. This is the first version using
+# mevas, there are some problems left, some popup boxes and the tv
+# listing isn't working yet.
+#
 # Revision 1.2  2004/07/27 18:52:31  dischi
 # support more layer (see README.txt in backends for details
 #
@@ -39,26 +45,21 @@
 
 
 from label import Label
+from rectangle import Rectangle
+from mevas.image import CanvasImage
 
-class Button(Label):
+class Button(CanvasImage):
     """
     """
-    def __init__(self, x1, y1, x2, y2, text, style):
-        Label.__init__(self, x1, y1, x2, y2, text, style, 'center', 'center')
+    def __init__(self, text, pos, width, style):
+        label = Label(text, (0,0), (width - 20, style.font.height), style, 'center', 'center')
+        CanvasImage.__init__(self, (width, style.font.height+4))
 
-        # enhance the space for the button to fit the border
-        self.x1 -= 10
-        self.y1 -= 2
-        self.x2 += 10
-        self.y2 += 2
-        self.height += 4
-        self.width  += 10
-        
-
-    def draw(self, rect=None):
-        self.screen.drawbox(self.x1, self.y1, self.x2, self.y2,
-                            color=self.style.rectangle.bgcolor,
-                            border_size=self.style.rectangle.size,
-                            border_color=self.style.rectangle.color,
-                            radius=self.style.rectangle.radius)
-        Label.draw(self, rect)
+        r = Rectangle((0,0), self.get_size(),
+                      style.rectangle.bgcolor,
+                      style.rectangle.size,
+                      style.rectangle.color,
+                      style.rectangle.radius)
+        self.draw_image(r, (0, 0))
+        self.draw_image(label, ((width - label.get_size()[0]) / 2, 2))
+        self.set_pos(pos)

@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/08/22 20:06:17  dischi
+# Switch to mevas as backend for all drawing operations. The mevas
+# package can be found in lib/mevas. This is the first version using
+# mevas, there are some problems left, some popup boxes and the tv
+# listing isn't working yet.
+#
 # Revision 1.4  2004/08/01 10:39:05  dischi
 # remove some visible code for testing
 #
@@ -52,6 +58,7 @@ import config
 import util
 
 import plugin
+import font
 
 # XML support
 from xml.utils import qp_xml
@@ -165,6 +172,7 @@ def attr_font(node, attr, default):
     return the attribute as font (with full path)
     """
     if node.attrs.has_key(('', attr)):
+        return os.path.splitext(node.attrs[('', attr)])[0]
         fontext = os.path.splitext(node.attrs[('', attr)])[1]
         if fontext:
             # There is an extension (e.g. '.pfb'), use the full name
@@ -213,6 +221,32 @@ def search_file(file, search_dirs):
     return ''
 
 
+def get_expression(expression):
+    """
+    create the python expression
+    """
+    exp = ''
+    for b in expression.split(' '):
+        if b in ( 'and', 'or', 'not', '==', '!=' ):
+            # valid operator
+            exp += ' %s' % ( b )
+
+        elif b.startswith('\'') and b.endswith('\''):
+            # string
+            exp += ' %s' % ( b )
+
+        elif b.startswith('function:'):
+            exp += ' %s()' % b[9:]
+
+        elif b[ :4 ] == 'len(' and b.find( ')' ) > 0 and \
+                 len(b) - b.find(')') < 5:
+            # lenght of something
+            exp += ' attr("%s") %s' % ( b[ : ( b.find(')') + 1 ) ],
+                                                b[ ( b.find(')') + 1 ) : ])
+        else:
+            # an attribute
+            exp += ' attr("%s")' % b
+    return exp.strip()
 
 # ======================================================================
 
@@ -602,6 +636,9 @@ class Content(XML_data):
 
 # ======================================================================
 # Formating
+
+i18n_re = re.compile('^( ?)(.*?)([:,]?)( ?)$')
+
 class FormatText(XML_data):
     def __init__( self ):
         XML_data.__init__( self, ( 'align', 'valign', 'font', 'width', 'height',
@@ -613,15 +650,15 @@ class FormatText(XML_data):
         self.height   = -1
         self.text     = ''
         self.expression = None
-        self.expression_analized = 0
         self.x = 0
         self.y = 0
+        self.type = 'text'
         
     def __str__( self ):
         str = "FormatText( Text: '%s', Expression: '%s', "+\
-              "Expression Analized: %s, Mode: %s, Font: %s, Width: %s, "+\
+              "Mode: %s, Font: %s, Width: %s, "+\
               "Height: %s, x: %s, y: %s ) "
-        str = str % ( self.text, self.expression, self.expression_analized,
+        str = str % ( self.text, self.expression, 
                       self.mode, self.font, self.width, self.height, self.x, self.y )
         return str
 
@@ -629,11 +666,17 @@ class FormatText(XML_data):
     def parse( self, node, scale, c_dir = '' ):
         XML_data.parse( self, node, scale, c_dir )
         self.text = node.textof()
+        if self.text:
+            m = i18n_re.match(self.text).groups()
+            # translate
+            self.text = m[0] + _(m[1]) + m[2] + m[3]
         self.mode = attr_str( node, 'mode', self.mode )
         if self.mode != 'hard' and self.mode != 'soft':
             self.mode = 'hard'
         self.expression = attr_str( node, 'expression', self.expression )
-        if self.expression: self.expression = self.expression.strip()
+        if self.expression:
+            self.expression = get_expression(self.expression.strip())
+            
 
 
     def prepare(self, font, color, search_dirs):
@@ -646,7 +689,6 @@ class FormatText(XML_data):
         else:
             self.font = font['default']
 
-    
 
         
 class FormatGotopos(XML_data):
@@ -655,6 +697,7 @@ class FormatGotopos(XML_data):
         self.mode = 'relative'
         self.x = None
         self.y = None
+        self.type = 'goto'
         
     def parse( self, node, scale, c_dir = '' ):
         XML_data.parse( self, node, scale, c_dir )
@@ -668,6 +711,7 @@ class FormatGotopos(XML_data):
     
 class FormatNewline:
     def __init__( self ):
+        self.type = 'newline'
         pass
 
     def parse( self, node, scale, c_dir = '' ):
@@ -684,6 +728,7 @@ class FormatImg( XML_data ):
         self.width = None
         self.height = None
         self.src = ''
+        self.type = 'image'
         
     def parse( self, node, scale, c_dir = '' ):
         XML_data.parse( self, node, scale, c_dir )
@@ -698,10 +743,13 @@ class FormatIf:
     def __init__( self ):
         self.expression = ''
         self.content = [ ]
-        self.expression_analized = 0
+        self.type = 'if'
         
     def parse( self, node, scale, c_dir = '' ):
         self.expression = attr_str( node, 'expression', self.expression )
+        if self.expression:
+            self.expression = get_expression(self.expression)
+            
         for subnode in node.children:
             if subnode.name == u'if':
                 child = FormatIf()
@@ -720,9 +768,6 @@ class FormatIf:
     def prepare(self, font, color, search_dirs):
         for i in self.content:
             i.prepare( font, color, search_dirs )
-
-                              
-
 
 
 
@@ -802,13 +847,14 @@ class Font(XML_data):
             else:
                 return size + abs(self.shadow.x)
         return size
-    
+
+
     def prepare(self, color, search_dirs=None, image_names=None, scale=1.0):
         if color.has_key(self.color):
             self.color = color[self.color]
         self.size   = int(float(self.size) * scale)
         import gui
-        self.font   = gui.get_renderer().getfont(self.name, self.size)
+        self.font   = font.get(self.name, self.size)
         self.h      = self.font.height
         if self.shadow.visible:
             if color.has_key(self.shadow.color):

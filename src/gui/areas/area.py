@@ -27,6 +27,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/08/22 20:06:18  dischi
+# Switch to mevas as backend for all drawing operations. The mevas
+# package can be found in lib/mevas. This is the first version using
+# mevas, there are some problems left, some popup boxes and the tv
+# listing isn't working yet.
+#
 # Revision 1.7  2004/08/14 15:07:34  dischi
 # New area handling to prepare the code for mevas
 # o each area deletes it's content and only updates what's needed
@@ -131,6 +137,7 @@ class Area:
         self.layout      = None
         self.name        = name
         self.screen      = None
+        self.imagelib    = None
         self.objects     = SkinObjects()
         self.NEW_STYLE   = True
 
@@ -148,7 +155,8 @@ class Area:
         """
         if self.screen:
             self.clear_all()
-        self.screen = screen
+        self.screen   = screen
+        self.imagelib = screen.imagelib
 
         
     def update_content_needed(self):
@@ -180,27 +188,17 @@ class Area:
 
 
     def clear_all(self):
+        if not self.NEW_STYLE:
+            return
+
         if not self.screen:
             _debug_('ERROR in area %s: no screen defined' % self.name)
             return
-        if self.NEW_STYLE:
-            for b in self.__background__:
-                self.screen.remove(b)
-            self.__background__ = []
-            self.clear()
-        else:
-            try:
-                for o in self.objects.bgimages:
-                    self.screen.remove(o)
-                for o in self.objects.rectangles:
-                    self.screen.remove(o)
-                for o in self.objects.images:
-                    self.screen.remove(o)
-                for o in self.objects.text:
-                    self.screen.remove(o)
-            except Exception, e:
-                print e
-            self.objects = SkinObjects()
+
+        for b in self.__background__:
+            b.unparent()
+        self.__background__ = []
+        self.clear()
             
 
     def draw(self, settings, obj, viewitem, infoitem, area_definitions):
@@ -231,62 +229,10 @@ class Area:
             self.clear_all()
             return
 
-        if self.NEW_STYLE:
-            self.__draw_background__()
-            self.update()
-            return
 
-        
-        self.tmp_objects = SkinObjects()
-        redraw = self.__draw_background__() or redraw
+        self.__draw_background__()
+        self.update()
 
-        # dependencies haven't changed, if no update needed: return
-        if not redraw and not self.update_content_needed():
-            return
-
-        self.update_content()
-
-        for b in self.tmp_objects.bgimages:
-            try:
-                self.objects.bgimages.remove(b)
-            except:
-                self.screen.add(b)
-
-        for b in self.objects.bgimages:
-            self.screen.remove(b)
-
-
-        for b in self.tmp_objects.rectangles:
-            try:
-                self.objects.rectangles.remove(b)
-            except:
-                self.screen.add(b)
-
-        for b in self.objects.rectangles:
-            self.screen.remove(b)
-
-
-        for b in self.tmp_objects.images:
-            try:
-                self.objects.images.remove(b)
-            except:
-                self.screen.add(b)
-
-        for b in self.objects.images:
-            self.screen.remove(b)
-
-
-        for b in self.tmp_objects.text:
-            try:
-                self.objects.text.remove(b)
-            except Exception, e:
-                self.screen.add(b)
-
-        for b in self.objects.text:
-            self.screen.remove(b)
-
-        # save and exit
-        self.objects = self.tmp_objects
 
 
     def calc_geometry(self, object, copy_object=0):
@@ -416,6 +362,8 @@ class Area:
         background_image = []
         background_rect  = []
         
+        if hasattr(config, 'BMOVL_OSD_VIDEO'):
+            return
         for bg in self.layout.background:
             bg = copy.copy(bg)
             if isinstance(bg, fxdparser.Image) and bg.visible:
@@ -448,46 +396,30 @@ class Area:
                 background_rect.append((bg.x, bg.y, bg.width, bg.height, bg.bgcolor,
                                         bg.size, bg.color, bg.radius))
 
-        if self.NEW_STYLE:
-            for b in copy.copy(self.__background__):
+
+        for b in copy.copy(self.__background__):
+            try:
+                background_rect.remove(b.info)
+            except ValueError:
                 try:
-                    background_rect.remove(b.info)
+                    background_image.remove(b.info)
                 except ValueError:
-                    try:
-                        background_image.remove(b.info)
-                    except ValueError:
-                        self.__background__.remove(b)
-                        self.screen.remove(b)
-                    
-            for rec in background_rect:
-                x, y, width, height, bgcolor, size, color, radius = rec
-                box = self.drawbox(x, y, width, height, (bgcolor, size, color, radius))
-                self.__background__.append(box)
-                box.info = rec
+                    self.__background__.remove(b)
+                    b.unparent()
+
+        for rec in background_rect:
+            x, y, width, height, bgcolor, size, color, radius = rec
+            box = self.drawbox(x, y, width, height, (bgcolor, size, color, radius))
+            self.__background__.append(box)
+            box.info = rec
 
                 
-            for image in background_image:
-                imagefile, x, y, width, height = image
-                i = self.screen.renderer.loadbitmap(imagefile, self.imagecache,
-                                                    width, height, True)
-                if i:
-                    i = self.drawimage(i, (x, y, width, height), background=True)
-                    self.__background__.append(i)
-                    i.info = image
-                    
-
-
-        else:
-            for x, y, width, height, bgcolor, size, color, radius in background_rect:
-                self.drawbox(x, y, width, height, (bgcolor, size, color, radius))
-
-            for imagefile, x, y, width, height in background_image:
-                i = self.screen.renderer.loadbitmap(imagefile, self.imagecache,
-                                                    width, height, True)
-                if i:
-                    self.drawimage(i, (x, y, width, height), background=True)
-                            
-        return redraw
+        for image in background_image:
+            imagefile, x, y, width, height = image
+            i = self.drawimage(imagefile, (x, y, width, height), background=True)
+            if i:
+                self.__background__.append(i)
+                i.info = image
             
 
 
@@ -503,16 +435,12 @@ class Area:
         in a variable. The real drawing is done inside draw()
         """
         try:
-            r = Rectangle(x, y, x + width, y + height, rect.bgcolor, rect.size,
+            r = Rectangle((x, y), (width, height), rect.bgcolor, rect.size,
                           rect.color, rect.radius )
-        except AttributeError:
-            r = Rectangle(x, y, x + width, y + height, rect[0], rect[1], rect[2], rect[3])
+        except AttributeError, e:
+            r = Rectangle((x, y), (width, height), rect[0], rect[1], rect[2], rect[3])
 
-        r.layer = -3
-        if self.NEW_STYLE:
-            self.screen.add(r)
-        else: 
-            self.tmp_objects.rectangles.append(r)
+        self.screen.layer[1].add_child(r)
         return r
     
             
@@ -523,7 +451,6 @@ class Area:
         writes a text ... or better stores the information about this call
         in a variable. The real drawing is done inside draw()
         """
-
         if not text:
             return None
 
@@ -552,13 +479,14 @@ class Area:
         if height2 == -1:
             height2 = font.h + 2
 
-        t = Text(x, y, x+width, y+height2, text, font, height,
-                 align_h, align_v, mode, ellipses, dim)
-
-        if self.NEW_STYLE:
-            self.screen.add(t)
-        else: 
-            self.tmp_objects.text.append(t)
+        if height == -1:
+            t = Text(text, (x, y), (width, height2), font, align_h, align_v,
+                     mode, ellipses, dim)
+        else:
+            print 'Warning: TextBox not supported yet', text
+            t = Text(text, (x, y), (width, height2), font, align_h, align_v,
+                     mode, ellipses, dim)
+        self.screen.layer[2].add_child(t)
         return t
 
     
@@ -567,6 +495,7 @@ class Area:
         """
         load an image (use self.imagecache)
         """
+        return None
         if image.find(config.ICON_DIR) == 0 and image.find(self.settings.icon_dir) == -1:
             new_image = os.path.join(self.settings.icon_dir, image[len(config.ICON_DIR)+1:])
             if os.path.isfile(new_image):
@@ -587,7 +516,7 @@ class Area:
         if h == None and w == None:
             return None
 
-        return self.screen.renderer.loadbitmap(image, self.imagecache, w, h)
+        return self.imagelib.load(image, (w, h), self.imagecache)
 
         
     def drawimage(self, image, val, background=False):
@@ -598,36 +527,24 @@ class Area:
         if not image:
             return None
 
-        if isstring(image):
-            if isinstance(val, tuple):
-                image = self.loadimage(String(image), val[2:])
-            else:
-                image = self.loadimage(String(image), val)
+        # FIXME: that doesn't belong here
+        if isstring(image) and image.find(config.ICON_DIR) == 0 and \
+               image.find(self.settings.icon_dir) == -1:
+            # replace the icon
+            new_image = os.path.join(self.settings.icon_dir, image[len(config.ICON_DIR)+1:])
+            if os.path.isfile(new_image):
+                image = new_image
 
-        if not image:
-            return None
-        
         if isinstance(val, tuple):
-            i = Image(val[0], val[1], val[0] + image.get_width(),
-                      val[1] + image.get_height(), image)
-            if self.NEW_STYLE:
-                if background:
-                    i.layer = -5
-                self.screen.add(i)
-                return i
-
-            if background:
-                i.layer = -5
-                self.tmp_objects.bgimages.append(i)
+            if len(val) == 2:
+                i = Image(image, (val[0], val[1]), (image.width, image.height))
             else:
-                self.tmp_objects.images.append(i)
-            return i
-
-        i = Image(val.x, val.y, val.x + val.width, val.y + val.height, image)
-        if self.NEW_STYLE:
-            self.screen.add(i)
+                i = Image(image, (val[0], val[1]), (val[2], val[3]))
         else:
-            self.tmp_objects.images.append(i)
-        return i
-        
+            i = Image(image, (val.x, val.y), (val.width, val.height))
 
+        if background:
+            self.screen.layer[0].add_child(i)
+        else:
+            self.screen.layer[2].add_child(i)
+        return i

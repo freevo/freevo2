@@ -10,6 +10,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/08/22 20:06:17  dischi
+# Switch to mevas as backend for all drawing operations. The mevas
+# package can be found in lib/mevas. This is the first version using
+# mevas, there are some problems left, some popup boxes and the tv
+# listing isn't working yet.
+#
 # Revision 1.2  2004/07/27 18:52:30  dischi
 # support more layer (see README.txt in backends for details
 #
@@ -49,4 +55,6 @@
 # from marquee    import *
 # from transition import *
 
-from move import Move
+from transition import *
+from render import get_singleton as render
+

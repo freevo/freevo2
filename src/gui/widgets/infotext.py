@@ -1,0 +1,203 @@
+# -*- coding: iso-8859-1 -*-
+# -----------------------------------------------------------------------
+# infotext.py - A text canvas
+# -----------------------------------------------------------------------
+# $Id$
+#
+# -----------------------------------------------------------------------
+# $Log$
+# Revision 1.1  2004/08/22 20:06:21  dischi
+# Switch to mevas as backend for all drawing operations. The mevas
+# package can be found in lib/mevas. This is the first version using
+# mevas, there are some problems left, some popup boxes and the tv
+# listing isn't working yet.
+#
+#
+# -----------------------------------------------------------------------
+# Freevo - A Home Theater PC framework
+# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# -----------------------------------------------------------------------
+
+import config
+
+from mevas.container import CanvasContainer
+from text import Text
+from textbox import Textbox
+
+class InfoText(CanvasContainer):
+    """
+    A CanvasContainer for formated text layout. It needs an item and
+    and fxd settings parsed expression list to be used on the items attributes.
+    """
+    def __init__(self, pos, size, item, expression_list, function_calls):
+        CanvasContainer.__init__(self)
+        self.size = size
+        self.item = item
+        self.expression_list = expression_list
+        self.function_calls  = function_calls
+        self.rebuild()
+        self.set_pos(pos)
+
+
+    def rebuild(self):
+        """
+        Update the container items to attribute changes
+        FIXME: right now, this is a complete redraw
+        """
+        self.clear()
+        exp_list = self._eval_expression(self.item, self.expression_list,
+                                         self.function_calls)
+        if exp_list:
+            self._format(self.size, self.item, exp_list)
+
+        
+    def _eval_expression(self, item, expression_list, function_calls):
+        """
+        travesse the list evaluating the expressions,
+        """
+        ret_list = []
+
+        if not expression_list:
+            return
+
+        for i in range(len(expression_list)):
+            if expression_list[i].type == 'if':
+                exp = expression_list[i].expression
+                # Evaluate the expression:
+                try:
+                    if exp and eval(exp, {'attr': item.getattr}, function_calls):
+                        # It's true, we should recurse into children
+                        ret_list += self._eval_expression(item, expression_list[i].content,
+                                                          function_calls)
+                except Exception, e:
+                    print 'infotext eval error: %s', e
+                    print 'expression:', exp
+                    print 'item:      ', item
+                    
+            elif expression_list[i].type == 'text':
+                if expression_list[i].expression:
+                    # evaluate the expression:
+                    exp = eval(expression_list[i].expression,
+                               {'attr': item.getattr}, function_calls)
+                    if not isstring(exp):
+                        exp = str(exp)
+                    if exp:
+                        ret_list.append((expression_list[i], exp))
+                else:
+                    ret_list.append((expression_list[i], expression_list[i].text))
+            else:
+                ret_list.append((expression_list[i], None))
+
+        return ret_list
+
+
+
+    def _format(self, size, item, exp_list):
+        """
+        Use the 'eval'ed list with the expressions to add all needed
+        childs to this conatiner
+        """
+        x = 0
+        y = 0
+
+        line_height = 0
+        
+        for element, text in exp_list:
+            newline = 0
+
+            #
+            # Tag: <goto_pos>
+            #
+            if element.type == 'goto':
+                # move to pos
+                if element.mode == 'absolute':
+                    if element.x != None:
+                        x = element.x
+                    if element.y != None:
+                        y = element.y
+                else: # relative
+                    if element.x != None:
+                        x += element.x
+                    if element.y != None:
+                        y = y + element.y
+            #
+            # Tag: <img>
+            #
+            elif element.type == 'image':
+                _debug_('FIXME: image tag not supported by infotext')
+
+            #
+            # Tag: <newline>
+            #
+            elif element.type == 'newline':
+                x = 0
+                y = y + line_height
+                line_height = 0
+
+            #
+            # Tag: <text>
+            #
+            elif element.type == 'text':
+                font = element.font
+                if element.height == -1:
+                    # simple text
+                    w = element.width
+                    if isinstance(w, str):
+                        w = int(eval(w, {'MAX': size[0]}))
+                    elif w == 0:
+                        # use the complete free space
+                        w = size[0] - x
+                    if w > 0:
+                        t = Text(text, (x,y), (w, font.height), font,
+                                 element.align, element.valign,
+                                 element.mode, element.ellipses, element.dim)
+                        self.add_child(t)
+                        line_height = max(line_height, t.get_size()[1])
+                        if element.width == 0:
+                            # flow text
+                            x += t.get_size()[0]
+                        else:
+                            x += w
+                    else:
+                        if config.DEBUG > 2:
+                            print 'infotext warning: drawing text on negative'
+                            print 'position width=%s' % w
+                            print 'text:', text
+                            print 'elem:', element.width
+                else:
+                    # text box
+                    w = element.width
+                    h = element.height
+                    if isinstance(w, str):
+                        w = int(eval(w, {'MAX': size[0]}))
+                    elif w == 0:
+                        # use the complete free space
+                        w = size[0] - x
+                    if isinstance(h, str):
+                        h = int(eval(h, {'MAX': size[1]}))
+                    elif h == 0:
+                        # use the complete free space
+                        h = size[1] - y
+                    t = Textbox(text, (x,y), (w, h), font,
+                                element.align, element.valign,
+                                element.mode, element.ellipses)
+                    self.add_child(t)
+                    line_height = max(line_height, t.get_size()[1])
+                    x += t.get_size()[0]
+                    y += t.get_size()[1] - line_height

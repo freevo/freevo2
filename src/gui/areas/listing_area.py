@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/08/22 20:06:18  dischi
+# Switch to mevas as backend for all drawing operations. The mevas
+# package can be found in lib/mevas. This is the first version using
+# mevas, there are some problems left, some popup boxes and the tv
+# listing isn't working yet.
+#
 # Revision 1.6  2004/08/14 15:07:34  dischi
 # New area handling to prepare the code for mevas
 # o each area deletes it's content and only updates what's needed
@@ -46,10 +52,7 @@
 
 
 import copy
-
 from area import Area
-from skin_utils import *
-import config
 
 class Listing_Area(Area):
     """
@@ -75,11 +78,11 @@ class Listing_Area(Area):
         # delete the listing
         for c in self.last_listing:
             for o in c[2]:
-                self.screen.remove(o)
+                o.unparent()
         self.last_listing = []
         # delete the arrows
         for a in self.arrows:
-            self.screen.remove(a)
+            a.unparent()
         self.arrows = []
         # reset variables
         if not keep_settings:
@@ -89,10 +92,47 @@ class Listing_Area(Area):
             self.last_max_len      = -1
         # delete 'empty listing' message
         if self.empty_listing:
-            self.screen.remove(self.empty_listing)
+            self.empty_listing.unparent()
             self.empty_listing = None
         
         
+    def text_or_icon(self, string, x, width, font):
+        l = string.split('_')
+        if len(l) != 4:
+            return string
+        try:
+            height = font.h
+            image = os.path.join(self.settings.icon_dir, l[2].lower())
+            if os.path.isfile(image + '.jpg'):
+                image += '.jpg' 
+            if os.path.isfile(image + '.png'):
+                image += '.png'
+            else:
+                image = None
+            if image:
+                image = self.imagelib.load(image, (None, height))
+
+                x_mod = 0
+                if l[1] == 'CENTER':
+                    x_mod = (width - image.width) / 2
+                if l[1] == 'RIGHT':
+                    x_mod = width - image.width
+                return x_mod, image
+
+        except KeyError:
+            _debug_('no image %s' % l[2])
+            pass
+
+        mod_x = width - font.stringsize(l[3])
+        if mod_x < 0:
+            mod_x = 0
+        if l[1] == 'CENTER':
+            return mod_x / 2, l[3]
+        if l[1] == 'RIGHT':
+            return mod_x, l[3]
+        return 0, l[3]
+
+
     def get_items_geometry(self, settings, menu, area_settings):
         """
         get the geometry of the items. How many items per row/col, spaces
@@ -175,7 +215,7 @@ class Listing_Area(Area):
 
 
         else:
-            print 'unknown content type %s' % content.type
+            _debug_('unknown content type %s' % content.type, 0)
             return None
         
         # shrink width for text menus
@@ -215,10 +255,16 @@ class Listing_Area(Area):
 
         if not len(menu.choices):
             if not self.empty_listing:
+                self.clear()
                 self.empty_listing = self.drawstring(_('This directory is empty'),
                                                      content.font, content)
             return
         
+        # delete 'empty listing' message
+        if self.empty_listing:
+            self.empty_listing.unparent()
+            self.empty_listing = None
+
         cols, rows, hspace, vspace, hskip, vskip, width = \
               self.get_items_geometry(settings, menu, area)
 
@@ -279,14 +325,14 @@ class Listing_Area(Area):
                 # check if the item is still the same
                 if self.last_listing[index][:2] != (choice.name, choice.image):
                     for o in self.last_listing[index][2]:
-                        self.screen.remove(o)
+                        o.unparent()
                     gui_objects = []
                     self.last_listing[index] = choice.name, choice.image, gui_objects
                 elif choice == self.last_selection or choice == menu.selected:
                     gui_objects = self.last_listing[index][2]
                     while len(gui_objects):
                         o = gui_objects.pop()
-                        self.screen.remove(o)
+                        o.unparent()
                 else:
                     draw_this_item = False
 
@@ -453,9 +499,8 @@ class Listing_Area(Area):
                             table_w += 5
                         x_mod = 0
                         if table_text[i].find('ICON_') == 0:
-                            x_mod, table_text[i] = text_or_icon(settings, table_text[i],
-                                                                table_x, table_w, val.font,
-                                                                self.screen.renderer)
+                            toi = self.text_or_icon(table_text[i], table_x, table_w, val.font)
+                            x_mod, table_text[i] = toi
                             if not isstring(table_text[i]):
                                 i = self.drawimage(table_text[i],
                                                    (table_x + x_mod, y0 + vskip))
@@ -507,9 +552,11 @@ class Listing_Area(Area):
                     b = self.drawbox(x0 + r.x, y0 + r.y, r.width, r.height, r)
                     gui_objects.append(b)
 
-                image, i_w, i_h = format_image(self.screen.renderer, settings,
-                                               choice, val.width, val.height, force=True)
+                image = self.imagelib.item_image(choice, (val.width, val.height),
+                                                 settings.icon_dir, force=True)
                 if image:
+                    i_w, i_h = image.width, image.height
+
                     addx = 0
                     addy = 0
                     if val.align == 'center' and i_w < val.width:
@@ -524,10 +571,10 @@ class Listing_Area(Area):
                     if val.valign == 'bottom' and i_h < val.height:
                         addy = val.height - i_h
 
-                    if val.shadow and val.shadow.visible and image.get_alpha() == None:
+                    if val.shadow and val.shadow.visible and not image.has_alpha:
                         box = self.drawbox(x0 + addx + val.shadow.x,
                                            y0 + addy + val.shadow.y,
-                                           image.get_width(), image.get_height(),
+                                           image.width, image.height,
                                            (val.shadow.color, 0, 0, 0))
                         box.layer = -1
                         gui_objects.append(box)
@@ -576,5 +623,5 @@ class Listing_Area(Area):
                         v = area.images['downarrow']
                     self.arrows.append(self.drawimage(area.images['downarrow'].filename, v))
             except Exception, e:
-                print e
+                _debug_(e, 0)
           

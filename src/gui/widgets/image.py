@@ -6,6 +6,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/08/22 20:06:21  dischi
+# Switch to mevas as backend for all drawing operations. The mevas
+# package can be found in lib/mevas. This is the first version using
+# mevas, there are some problems left, some popup boxes and the tv
+# listing isn't working yet.
+#
 # Revision 1.2  2004/07/27 18:52:31  dischi
 # support more layer (see README.txt in backends for details
 #
@@ -36,34 +42,28 @@
 # ----------------------------------------------------------------------
 
 
-from base import GUIObject
+from mevas.image import CanvasImage
 
-class Image(GUIObject):
+class Image(CanvasImage):
     """
     An image object that can be drawn onto a layer
     """
-    def __init__(self, x1, y1, x2, y2, image):
-        GUIObject.__init__(self, x1, y1, x2, y2)
-        self.image = image
+    def __init__(self, image, (x, y), size=None):
+        if not image:
+            return None
 
+        CanvasImage.__init__(self, image)
 
-    def draw(self, rect=None):
-        if not self.screen:
-            raise TypeError, 'no screen defined for %s' % self
-        if not rect:
-            _debug_('full update')
-            self.screen.blit(self.image, (self.x1, self.y1))
-        else:
-            x1, y1, x2, y2 = rect
-            if not (self.x2 < x1 or self.y2 < y1 or self.x1 > x2 or self.y1 > y2):
-                self.screen.blit(self.image, rect[:2],
-                                 (x1-self.x1, y1-self.y1, x2-x1, y2-y1))
+        if size:
+            width, height = size
+            # check width and height for scaling
+            if width == None or width == -1:
+                # calculate width
+                width = (height * float(image_w)) / float(image_h)
+            if height == None or height == -1:
+                # calculate width
+                height = (width * float(image_h)) / float(image_w)
+            if width != self.image.width or height != self.image.height:
+                self.image.scale((width, height))
+        self.set_pos((x, y))
 
-
-    def __cmp__(self, o):
-        try:
-            return self.x1 != o.x1 or self.y1 != o.y1 or self.x2 != o.x2 or \
-                   self.y2 != o.y2 or self.image != o.image
-        except Exception, e:
-            print e
-            return 1

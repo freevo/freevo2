@@ -6,6 +6,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/08/22 20:06:21  dischi
+# Switch to mevas as backend for all drawing operations. The mevas
+# package can be found in lib/mevas. This is the first version using
+# mevas, there are some problems left, some popup boxes and the tv
+# listing isn't working yet.
+#
 # Revision 1.2  2004/07/25 18:14:05  dischi
 # make some widgets and boxes work with the new gui interface
 #
@@ -54,15 +60,13 @@ class PopupBox(Window):
                                         'mode'   : 'soft',
                                         'hfill'  : True }
 
-        self.label = Label(self.x1, self.y1, self.x2, self.y2, text,
+        # FIXME: that can't be correct
+        space = self.content_layout.spacing
+        w, h = self.get_size()
+        self.label = Label(text, (space,space), (w-2*space, h-2*space),
                            self.widget_normal, 'center', 'center',
                            text_prop=self.text_prop)
-        self.add(self.label)
-
-        # resize label to fill the whole box
-        space = self.content_layout.spacing
-        self.label.set_position(self.x1 + space, self.y1 + space,
-                                self.x2 - space, self.y2 - space)
+        self.add_child(self.label)
         
 
     def eventhandler(self, event):

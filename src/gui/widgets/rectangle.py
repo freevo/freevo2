@@ -6,6 +6,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/08/22 20:06:21  dischi
+# Switch to mevas as backend for all drawing operations. The mevas
+# package can be found in lib/mevas. This is the first version using
+# mevas, there are some problems left, some popup boxes and the tv
+# listing isn't working yet.
+#
 # Revision 1.3  2004/08/01 10:37:08  dischi
 # smaller changes to stuff I need
 #
@@ -39,33 +45,77 @@
 # ----------------------------------------------------------------------
 
 
-from base import GUIObject
+from mevas.image import CanvasImage
 
-class Rectangle(GUIObject):
+class Rectangle(CanvasImage):
     """
     A rectangle object that can be drawn onto a layer
     """
-    def __init__(self, x1, y1, x2, y2, bgcolor, size, color, radius):
-        GUIObject.__init__(self, x1, y1, x2, y2)
-        self.bgcolor = bgcolor
-        self.size    = size
-        self.color   = color
-        self.radius  = radius
+    def __init__(self, (x, y), (w, h), bgcolor, size=0, color=0, radius=0):
+        CanvasImage.__init__(self, ((w, h)))
 
-
-    def draw(self, rect=None):
-        if not self.screen:
-            raise TypeError, 'no screen defined for %s' % self
-        self.screen.drawbox(self.x1, self.y1, self.x2, self.y2, color=self.bgcolor,
-                            border_size=self.size, border_color=self.color,
-                            radius=self.radius, force_alpha=self.layer>= 0)
-
-            
-    def __cmp__(self, o):
         try:
-            return self.x1 != o.x1 or self.y1 != o.y1 or self.x2 != o.x2 or \
-                   self.y2 != o.y2 or self.bgcolor != o.bgcolor or \
-                   self.size != o.size or self.color != o.color or self.radius != o.radius
-        except:
-            return 1
-    
+            color = self._mevascol(color)
+            bgcolor = self._mevascol(bgcolor)
+        except TypeError:
+            pass
+        
+        # make sure the radius fits the box
+        radius = min(radius, h / 2, w / 2)
+
+        if not radius:
+            # Simple case: rectangle without radius.
+            # Drawing border + filling is very easy because there are
+            # no overlapping draw areas
+            if size:
+                for i in range(size):
+                    self.draw_rectangle((i, i), (w-2*i, h-2*i), color, 0)
+            self.draw_rectangle((size, size), (w-2*size, h-2*size), bgcolor, 1)
+        else:
+            # Round rectangle. Simple again, if there is no alpha
+            # value and no border. Else, we need do do some tricks by
+            # calling this recursive
+            if size:
+                if bgcolor[3] == 255:
+                    r, g, b, a = color
+                    r = Rectangle((0,0), (w,h), (r,g,b,255), 0, color, radius)
+                    self.draw_image(r, alpha=a)
+                else:
+                    _debug_('FIXME: round rectangle with border missing')
+            r, g, b, a = bgcolor
+            if a == 255:
+                # no alpha, just draw
+                # first set some variables, this part needs some tuning because
+                # it doesn't look right to me
+                w -= 2 * size
+                h -= 2 * size
+                amplitude = (radius, radius)
+                radius += 1
+                self.draw_ellipse((radius+size, radius+size), amplitude, (r,g,b), 1)
+                self.draw_ellipse((size+w-radius, radius+size), amplitude, (r,g,b), 1)
+                self.draw_ellipse((radius+size, size+h-radius), amplitude, (r,g,b), 1)
+                self.draw_ellipse((size+w-radius, size+h-radius), amplitude, (r,g,b), 1)
+                self.draw_rectangle((radius+size, size), (w-2*radius, h), (r,g,b), 1)
+                self.draw_rectangle((size, radius+size), (w, h-2*radius), (r,g,b), 1)
+            else:
+                # alpha value :-(
+                r = Rectangle((size,size), (w-2*size, h-2*size), (r,g,b,255), 0, 0, radius)
+                self.draw_image(r, alpha=a)
+
+        if x or y:
+            self.set_pos((x, y))
+
+
+    def _mevascol(self, col):
+        """
+        Convert a 32-bit TRGB color to a 4 element tuple
+        """
+        if col == None:
+            return (0,0,0,255)
+        a = 255 - ((col >> 24) & 0xff)
+        r = (col >> 16) & 0xff
+        g = (col >> 8) & 0xff
+        b = (col >> 0) & 0xff
+        c = (r, g, b, a)
+        return c
+

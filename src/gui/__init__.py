@@ -6,26 +6,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2004/08/22 20:06:16  dischi
+# Switch to mevas as backend for all drawing operations. The mevas
+# package can be found in lib/mevas. This is the first version using
+# mevas, there are some problems left, some popup boxes and the tv
+# listing isn't working yet.
+#
 # Revision 1.22  2004/08/14 15:08:21  dischi
 # new area handling code
-#
-# Revision 1.21  2004/08/01 10:38:14  dischi
-# better access to various submodules
-#
-# Revision 1.20  2004/07/27 11:15:52  dischi
-# do not start the gui for helpers
-#
-# Revision 1.19  2004/07/25 18:17:09  dischi
-# interface update
-#
-# Revision 1.18  2004/07/24 12:21:05  dischi
-# move renderer into backend subdir
-#
-# Revision 1.17  2004/07/23 19:43:30  dischi
-# move most of the settings code out of the skin engine
-#
-# Revision 1.16  2004/07/22 21:16:01  dischi
-# add first draft of new gui code
 #
 # -----------------------------------------------------------------------
 #
@@ -50,68 +38,97 @@
 # ----------------------------------------------------------------------
 
 import copy
-
 import config
-import event
-import eventhandler
 
 # basic objects
 from widgets.image import Image
 from widgets.text import Text
+from widgets.textbox import Textbox
+from widgets.infotext import InfoText
 from widgets.rectangle import Rectangle
 
-_screen   = None
+from mevas import CanvasContainer
+
+_display  = []
 _skin     = None
 _renderer = None
 _keyboard = None
 
-if hasattr(config, 'BMOVL_OSD_VIDEO'):
-    import backends.bmovl
-    backend = backends.bmovl
-    default = 'bmovl'
-else:
-    import backends.sdl
-    backend = backends.sdl
-    default = 'sdl'
-
-    
 def get_keyboard():
     """
     return the screen object
     """
     global _keyboard
     if not _keyboard:
-        _keyboard = backend.Keyboard()
+        import backends.sdl
+        _keyboard = backends.sdl.Keyboard()
         print _keyboard
     return _keyboard
 
 
-def get_renderer():
+import displays
+
+def get_display():
     """
     return the screen object
     """
-    global _renderer
-    if not _renderer:
-        _renderer = backend.get_renderer()
-    return _renderer
+    if not _display:
+        _display.append(displays.default())
+    return _display[-1]
 
 
-def get_screen():
+def set_display(display, size):
     """
-    return the screen object
+    set a new screen
     """
-    global _screen
-    if not _screen:
-        _screen = backend.get_screen(get_renderer())
-    return _screen
+    old = _display[-1]
+
+    # remove all children add update old display
+    children = copy.copy(old.children)
+    for c in children:
+        old.remove_child(c)
+    old.update()
+    old.hide()
+
+    # create a new display
+    new = displays.new(display, size)
+    _display.append(new)
+
+    # move all children to new display
+    for c in children:
+        new.add_child(c)
+    new.update()
+    return _display[-1]
 
 
+def remove_display(screen):
+    """
+    remove screen
+    """
+    global _display
+    if screen != _display[-1]:
+        _debug_('FIXME: removing screen not on top')
+        return
+
+    _display = _display[:-1]
+    # move all active children to new display
+    for c in copy.copy(screen.children):
+        screen.remove_child(c)
+        _display[-1].add_child(c)
+
+    # stop old display, reactivate new one
+    # warning: no update() is called
+    screen.stop()
+    _display[-1].show()
+    
+    
 def AreaHandler(type, area_list):
     """
     return the area object
     """
     import areas
-    return areas.AreaHandler(type, area_list, get_settings(), get_screen())
+    import imagelib
+    return areas.AreaHandler(type, area_list, get_settings(), get_display(), imagelib)
 
     
 def get_settings():
@@ -120,36 +137,6 @@ def get_settings():
     """
     return settings.settings
 
-
-def set_screen(name):
-    """
-    set a new screen backend
-    """
-    if name == 'default':
-        global default
-        name = default
-        
-    global _screen
-    global _renderer
-    global backend
-    old_screen = get_screen()
-
-    # import new backend
-    module = 'backends.%s' % name
-    exec('import %s' % module)
-    backend = eval(module)
-
-    _screen    = None
-    _renderer  = None
-    new_screen = get_screen()
-
-    if old_screen != new_screen:
-        _debug_('move all objects to new backend')
-        for o in copy.copy(old_screen.get_objects()):
-            print 'move %s (%s)' % (o, o.layer)
-            old_screen.remove(o)
-            new_screen.add(o)
-        old_screen.update()
 
 
 

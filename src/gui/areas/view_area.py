@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/08/22 20:06:18  dischi
+# Switch to mevas as backend for all drawing operations. The mevas
+# package can be found in lib/mevas. This is the first version using
+# mevas, there are some problems left, some popup boxes and the tv
+# listing isn't working yet.
+#
 # Revision 1.4  2004/08/14 15:07:34  dischi
 # New area handling to prepare the code for mevas
 # o each area deletes it's content and only updates what's needed
@@ -41,10 +47,7 @@
 #
 # -----------------------------------------------------------------------
 
-
 from area import Area
-from skin_utils import *
-
 
 class View_Area(Area):
     """
@@ -63,7 +66,7 @@ class View_Area(Area):
         """
         self.info  = (None, None, None, None)
         for c in self.content:
-            self.screen.remove(c)
+            c.unparent()
         self.content = []
 
         
@@ -123,11 +126,12 @@ class View_Area(Area):
         addx = content.x + content.spacing
         addy = content.y + content.spacing
 
-        image, i_w, i_h = format_image(self.screen.renderer, self.settings, item,
-                                       width, height)
+        image = self.imagelib.item_image(item, (width, height), self.settings.icon_dir)
 
         if not image:
             return
+
+        i_w, i_h = image.width, image.height
         
         if content.align == 'center' and i_w < width:
             addx += (width - i_w) / 2

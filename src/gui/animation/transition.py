@@ -1,26 +1,8 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
-# transition.py - A transition animation, intended use: imageviewer
-# Author: Viggo Fredriksen <viggo@katatonic.org>
+# transition.py - transition animations
 # -----------------------------------------------------------------------
 # $Id$
-#
-# Notes:
-# Todo:        
-#
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.1  2004/07/22 21:11:52  dischi
-# move the animation into gui, code needs update later
-#
-# Revision 1.3  2004/07/11 14:44:25  dischi
-# removed memory leak
-#
-# Revision 1.2  2004/07/10 12:33:36  dischi
-# header cleanup
-#
-# Revision 1.1  2004/04/25 11:23:58  dischi
-# Added support for animations. Most of the code is from Viggo Fredriksen
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -43,186 +25,166 @@
 #
 # ----------------------------------------------------------------------- */
 
-import config
+import random
 from base import BaseAnimation
 
-import pygame, random
+VERTICAL = 'VERTICAL'
+HORIZONAL = 'HORIZONAL'
 
-class Transition(BaseAnimation):
+RANDOM = -1
+ALPHA_BLENDING = 0
+VERTICAL_WIPE = 1
+HORIZONAL_WIPE = 2
+ALPHA_VERTICAL_WIPE = 3
+ALPHA_HORIZONAL_WIPE = 4
+
+
+class Move(BaseAnimation):
     """
-    This class blends two surfaces.
-
-    Targeted to be finished within 1 second
+    Animation class to move 'objects' with the given pixel value
+    and the given framerate on the screen
     """
-    image        = None
-    finished     = False  # flag for finished animation
-    
-    surf_blend1  = None
-    surf_blend2  = None
+    def __init__(self, objects, orientation, frames, pixel, fps=25):
+        BaseAnimation.__init__(self, fps)
+        self.objects     = objects
+        self.orientation = orientation
+        self.pixel       = pixel
+        self.max_frames  = frames
+        self.frame       = 0
+        self.pos         = 0
 
-
-    def __init__(self, surf1, surf2, mode=-1, direction='vertical', fps=25):
+        
+    def update(self):
         """
-        @surf1: Surface to blend with
-        @surf2: New surface
-        @mode: effect to use
-        @direction: vertical/horizontal
+        update the animation
         """
-        BaseAnimation.__init__(self, surf1.get_rect(), fps, bg_update=False)
+        new_pos = int(self.frame * (float(self.pixel) / self.max_frames))
+        move = new_pos - self.pos
 
-        self.steps     = fps
-        self.mode      = mode
-        self.direction = direction
-
-        # WARNING: self.drawfuncs should not contain links to it's member
-        # functions because this results in circular dependencies and the
-        # Python garbage collector won't work
-        self.drawfuncs = { 0: 'draw_blend_alpha',
-                           1: 'draw_wipe',
-                           2: 'draw_wipe_alpha' }
-
-        self.surf_blend1 = surf1.convert()
-        self.surf_blend2 = surf2.convert()
-
-        self.prepare()
-
-
-    def prepare(self):
-
-        # random effect
-        if self.mode == -1:
-            start = self.drawfuncs.keys()[0]
-            stop  = self.drawfuncs.keys()[(len(self.drawfuncs.keys())-1)]
-            self.mode = random.randrange(start, stop, 1)
-
-            self.direction = random.choice( ['vertical', 'horizontal'] )
-            self.prepare()
-
-        # blend alpha effect
-        elif self.mode == 0:
-            step_size = 255.0 / self.steps
-            self.index_alpha  = 0
-            self.blend_alphas = [int(x*step_size) for x in range(1, self.steps+1)]
-            self.blend_alphas.append(255) # The last step must be 255
-
-        # plain wipe effect
-        elif self.mode == 1:
-            self.offset_x = 0
-            self.offset_y = 0
-
-            self.surface.blit(self.surf_blend1, (0, 0))
-
-            if self.direction == 'vertical':
-                step = self.rect.height / self.steps
-                self.step_x = 0
-                self.step_y = step
+        for o in self.objects:
+            x, y = o.get_pos()
+            if self.orientation == VERTICAL:
+                o.set_pos((x, y + move))
             else:
-                step = self.rect.width / self.steps
-                self.step_x = step
-                self.step_y = 0
+                o.set_pos((x + move, y))
+            
+        self.pos = new_pos
+        if self.frame == self.max_frames:
+            self.remove()
 
-        # alpha wipe effect
-        elif self.mode == 2:
-            self.line = 0
-            self.size = self.surf_blend1.get_size()
-            self.surf_blend2 = self.surf_blend2.convert_alpha()
-            self.fade_rows = 10
-            self.fade_factor = int(256/self.fade_rows)
+        self.frame += 1
 
 
-    def draw(self):
-        if self.finished:
-            return
+class Fade(BaseAnimation):
+    """
+    Animation class to fade objects in or out. The alpha value of each
+    object is set to 'start' and than moved to 'stop' with the given
+    framerate.
+    """
+    def __init__(self, objects, frames, start, stop, fps=25):
+        BaseAnimation.__init__(self, fps)
+        self.objects     = objects
+        self.max_frames  = frames
+        self.frame       = 0
+        self.diff        = stop - start
+        self.start_alpha = start
+        for o in objects:
+            o.set_alpha(start)
+            
 
-        getattr(self, self.drawfuncs[self.mode])()
-
-
-    def draw_wipe(self):
+    def update(self):
         """
-        Plain wipe
+        update the animation
         """
-        if self.offset_x > self.rect.width:
-            self.offset_x = self.rect.width
-            self.finished = True
-
-        if self.offset_y > self.rect.height:
-            self.offset_y = self.rect.height
-            self.finished = True
-
-
-        x = self.offset_x
-        y = self.offset_y
-        w = self.step_x
-        h = self.step_y
-
-        if w == 0:  w = self.rect.width
-        if h == 0:  h = self.rect.height
-
-        self.surface.blit(self.surf_blend2, (x, y), (x, y, w, h))
-
-        self.offset_x += self.step_x
-        self.offset_y += self.step_y
+        alpha = self.start_alpha + int(self.frame * (float(self.diff) / self.max_frames))
+        for o in self.objects:
+            o.set_alpha(alpha)
+        if self.frame == self.max_frames:
+            self.remove()
+        self.frame += 1
 
 
-    def draw_wipe_alpha(self):
+class Transition:
+    """
+    Class that contains different animations for full screen transition
+    effects. It has the same functions like an animation class from the
+    caller point of view.
+    """
+    def __init__(self, old_objects, new_objects, frames, (width, height),
+                 mode = RANDOM, fps=25):
+
+        self.animations = []
+        if mode == RANDOM:
+            # random mode: set a new mode based on all possible choices
+            mode = random.choice([ALPHA_BLENDING, VERTICAL_WIPE, HORIZONAL_WIPE,
+                                  ALPHA_VERTICAL_WIPE, ALPHA_HORIZONAL_WIPE])
+
+        if mode == ALPHA_BLENDING:
+            # alpha blending: fade out the old objects and fade in the new
+            self.animations.append(Fade(old_objects, frames, 255, 0, fps))
+            self.animations.append(Fade(new_objects, frames, 0, 255, fps))
+
+        elif mode == VERTICAL_WIPE:
+            # vertical wipe: move out the old objects and move in the new
+            for o in new_objects:
+                x, y = o.get_pos()
+                o.set_pos((x, y-height))
+            self.animations.append(Move(old_objects + new_objects, VERTICAL,
+                                        frames, height, fps))
+
+        elif mode == HORIZONAL_WIPE:
+            # horizontal wipe: move out the old objects and move in the new
+            for o in new_objects:
+                x, y = o.get_pos()
+                o.set_pos((x-width, y))
+            self.animations.append(Move(old_objects + new_objects, HORIZONAL,
+                                        frames, width, fps))
+
+        elif mode == ALPHA_VERTICAL_WIPE:
+            # alpha vertical wipe: fade out the old objects and move in the new
+            for o in new_objects:
+                x, y = o.get_pos()
+                o.set_pos((x, y-height))
+            self.animations.append(Fade(old_objects, frames, 255, 0))
+            self.animations.append(Move(new_objects, VERTICAL,
+                                        frames, height, fps))
+
+        elif mode == ALPHA_HORIZONAL_WIPE:
+            # alpha horizontal wipe: fade out the old objects and move in the new
+            for o in new_objects:
+                x, y = o.get_pos()
+                o.set_pos((x-width, y))
+            self.animations.append(Fade(old_objects, frames, 255, 0))
+            self.animations.append(Move(new_objects, HORIZONAL,
+                                        frames, width, fps))
+
+        else:
+            _debug_('Error: unsupported transition mode %s' % mode, 0)
+
+
+    def start(self):
         """
-        Alpha transition wipe
-
-        This is _very_ slow atm.
-
-        XXX not working!
+        Start all internal animations.
         """
+        for a in self.animations:
+            a.start()
 
-        if self.line > self.size[0] - 1:
-            self.finished = True
+            
+    def stop(self):
+        """
+        Stop all internal animations.
+        """
+        for a in self.animations:
+            a.stop()
 
-        for i in range(0, (self.line + self.fade_rows)):
-            # array with alphavals
-            arr = pygame.surfarray.pixels_alpha(self.surf_blend2)
-
-            #if (arr[i] <= self.fade_factor):
-            #    arr[i] = 0
-            #else:
-            #arr[i] -= self.fade_factor
-
-            #for j in range(0, (self.size[0]-1)):
-            #    if (arr[j][i] <= self.fade_factor):
-            #        arr[j][i] = 0
-            #    else:
-            #        arr[j][i] -= self.fade_factor
-            """
-            for i in range(0, self.fade_rows):
-
-                # Bounds check...
-                if((offset - i) < 0):
-                    break
-                if((offset - i) > self.size[1] - 1):
-                    continue
-                else:
-                    for j in range(0, (self.size[0]-1)):
-                        if (arr[j][offset-i] <= self.fade_factor):
-                            arr[j][offset-i]=0
-                        else:
-                            arr[j][offset-i] -= self.fade_factor
-            """
-        del arr
-
-        self.line += self.fade_rows
-
-        self.surface.blit(self.surf_blend1, (0, 0))
-        self.surface.blit(self.surf_blend2, (0, 0))
-
-
-    def draw_blend_alpha(self):
-
-        alpha = self.blend_alphas[self.index_alpha]
-
-        self.surf_blend2.set_alpha(alpha)
-        self.surface.blit(self.surf_blend1, (0, 0))
-        self.surface.blit(self.surf_blend2, (0, 0))
-
-        self.index_alpha += 1
-
-        if self.index_alpha > len(self.blend_alphas) - 1:
-            self.finished = True
-
+            
+    def running(self):
+        """
+        Check all internal animations if they are still running. Return True
+        if at least one animation is still active.
+        """
+        for a in self.animations:
+            if a.running():
+                return True
+        return False
+    

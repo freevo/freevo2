@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/08/22 20:06:18  dischi
+# Switch to mevas as backend for all drawing operations. The mevas
+# package can be found in lib/mevas. This is the first version using
+# mevas, there are some problems left, some popup boxes and the tv
+# listing isn't working yet.
+#
 # Revision 1.1  2004/08/14 15:07:34  dischi
 # New area handling to prepare the code for mevas
 # o each area deletes it's content and only updates what's needed
@@ -42,25 +48,68 @@
 
 import os
 import traceback
+import mevas
 
 import config
 import util
 
 
+class AreaScreen:
+    def __init__(self, imagelib):
+        self.layer = []
+        # add 3 layer for drawing (based on how ofter they change):
+        for i in range(3):
+            c = mevas.CanvasContainer()
+            self.layer.append(c)
+        self.imagelib = imagelib
+        self.visible  = False
+
+
+    def show(self, canvas):
+        for l in self.layer:
+            canvas.add_child(l)
+        self.visible = True
+        self.canvas  = canvas
+
+
+    def hide(self):
+        for l in self.layer:
+            l.unparent()
+        self.visible = False
+        self.canvas  = None
+
+
+    def fade_out(self):
+        if not self.visible:
+            return
+        while self.layer[0].alpha:
+            for l in self.layer:
+                l.set_alpha(max(min(255, l.get_alpha() - 80), 0))
+            self.canvas.update()
+        for l in self.layer:
+            l.set_alpha(255)
+            l.unparent()
+        self.canvas  = None
+        self.visible = False
+
+        
 class AreaHandler:
     """
     main skin class
     """
     
-    def __init__(self, type, areas, settings, screen):
+    def __init__(self, type, areas, settings, screen, imagelib):
         """
         init the skin engine
         """
         self.type          = type
         self.settings      = settings
         self.display_style = { 'menu' : 0 }
-        self.screen        = screen
         self.areas         = []
+
+        self.canvas = screen
+        self.screen = AreaScreen(imagelib)
+        self.screen.show(self.canvas)
         
         # load default areas
         from listing_area   import Listing_Area
@@ -76,7 +125,7 @@ class AreaHandler:
                 self.areas.append(a)
 
         for a in self.areas:
-            a.set_screen(screen)
+            a.set_screen(self.screen)
 
         self.storage_file = os.path.join(config.FREEVO_CACHEDIR, 'skin-%s' % os.getuid())
         self.storage = util.read_pickle(self.storage_file)
@@ -94,8 +143,10 @@ class AreaHandler:
         while self.areas:
             self.areas[0].clear_all()
             del self.areas[0]
+        self.screen.hide()
+        self.container = None
 
-
+        
     def toggle_display_style(self, menu):
         """
         Toggle display style
@@ -235,9 +286,8 @@ class AreaHandler:
         clean the screen
         """
         _debug_('clear skin (%s)' % self.type)
-        for a in self.areas:
-            a.clear_all()
-
+        #self.screen.hide()
+        self.screen.fade_out()
 
 
     def draw(self, object):
@@ -246,10 +296,9 @@ class AreaHandler:
         object may be a menu, a table for the tv menu are an audio item for
         the audio player
         """
-        if not self.screen:
-            return
-        
         settings = self.settings
+        if not self.screen.visible:
+            self.screen.show(self.canvas)
             
         if self.type == 'menu':
             if object.skin_settings:
@@ -279,7 +328,7 @@ class AreaHandler:
                 try:
                     area_definitions = area_definitions.style[0]
                 except IndexError:
-                    print 'index error for %s %s' % (style, 'menu')
+                    _debug_('index error for %s %s' % (style, 'menu'), 0)
                     raise
 
             if area_definitions[0] and area_definitions[1]:
@@ -314,7 +363,7 @@ class AreaHandler:
         try:
             for a in self.areas:
                 a.draw(settings, object, viewitem, infoitem, area_definitions)
-            self.screen.update()
+            self.canvas.update()
 
         except UnicodeError, e:
             print '******************************************************************'
@@ -326,8 +375,8 @@ class AreaHandler:
             print traceback.print_exc()
             print
             print self.type, object
-            if hasattr(object, 'choices'):
-                for i in object.choices:
-                    print i
+#             if hasattr(object, 'choices'):
+#                 for i in object.choices:
+#                     print i
             print
             raise UnicodeError, e

@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/08/22 20:06:21  dischi
+# Switch to mevas as backend for all drawing operations. The mevas
+# package can be found in lib/mevas. This is the first version using
+# mevas, there are some problems left, some popup boxes and the tv
+# listing isn't working yet.
+#
 # Revision 1.2  2004/07/25 18:14:05  dischi
 # make some widgets and boxes work with the new gui interface
 #
@@ -44,6 +50,11 @@ class ProgressBox(PopupBox):
                  icon=None, vertical_expansion=1, text_prop=None,
                  full=0):
 
+        PopupBox.__init__(self, 'ProgressBox is broken...just wait :-)',
+                          None, x, y, width, height, icon, vertical_expansion,
+                          text_prop)
+        return
+
         PopupBox.__init__(self, text, None, x, y, width, height,
                           icon, vertical_expansion, text_prop)
 
@@ -61,5 +72,7 @@ class ProgressBox(PopupBox):
 
 
     def tick(self):
+        return
+    
         self.bar.tick()
         self.screen.update()

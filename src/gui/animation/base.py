@@ -10,6 +10,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/08/22 20:06:17  dischi
+# Switch to mevas as backend for all drawing operations. The mevas
+# package can be found in lib/mevas. This is the first version using
+# mevas, there are some problems left, some popup boxes and the tv
+# listing isn't working yet.
+#
 # Revision 1.2  2004/07/27 18:52:30  dischi
 # support more layer (see README.txt in backends for details
 #
@@ -75,7 +81,7 @@ class BaseAnimation:
         """
         Sets the desired fps
         """
-        self.interval  = int(1000.0/float(fps))
+        self.interval  = 1.0/float(fps)
 
 
     def start(self):
@@ -93,6 +99,13 @@ class BaseAnimation:
         self.active = False
 
 
+    def running(self):
+        """
+        Return status if the animation is still running
+        """
+        return self.active
+
+    
     def remove(self):
         """
         Flags the animation to be removed from the animation list
@@ -102,14 +115,16 @@ class BaseAnimation:
 
 
     def poll(self, current_time):
+        if 0:
+            self.next_update = 0
         if self.next_update < current_time:
             self.next_update = current_time + self.interval
-            self.draw()
+            self.update()
             return True
         return False
 
     
-    def draw(self):
+    def update(self):
         """
         Overload to do stuff with the surface
         """
