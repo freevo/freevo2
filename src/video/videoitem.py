@@ -9,6 +9,12 @@
 # if the video is splitted into several files. DVD and VCD are also
 # VideoItems.
 #
+# TODO: o maybe split this file into file/vcd/dvd or
+#         move subitem and variant handling to extra file
+#       o create better 'arg' handling in play
+#       o maybe xine options?
+#       o merge tv shows and episode/subtitle info in tv recordings
+#
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
@@ -49,7 +55,7 @@ import util.videothumb
 import util.mediainfo
 
 from gui   import PopupBox, AlertBox, ConfirmBox
-from item  import MediaItem, FileInformation
+from item  import MediaItem, FileInformation, Action
 from event import *
 
 # video imports
@@ -231,7 +237,7 @@ class VideoItem(MediaItem):
         return self.name
 
 
-    def _set_next_available_subitem(self):
+    def __set_next_available_subitem(self):
         """
         select the next available subitem. Loops on each subitem and checks if
         the needed media is really there.
@@ -325,27 +331,29 @@ class VideoItem(MediaItem):
         if self.url.startswith('dvd://') and self.url[-1] == '/':
             if self.player_rating >= 20:
                 items = [ (self.play, _('Play DVD')),
-                          ( self.dvd_vcd_title_menu, _('DVD title list') ) ]
+                          (self.dvd_vcd_title_menu, _('DVD title list')) ]
             else:
-                items = [ ( self.dvd_vcd_title_menu, _('DVD title list') ),
+                items = [ (self.dvd_vcd_title_menu, _('DVD title list')),
                           (self.play, _('Play default track')) ]
 
         elif self.url == 'vcd://':
             if self.player_rating >= 20:
                 items = [ (self.play, _('Play VCD')),
-                          ( self.dvd_vcd_title_menu, _('VCD title list') ) ]
+                          (self.dvd_vcd_title_menu, _('VCD title list')) ]
             else:
-                items = [ ( self.dvd_vcd_title_menu, _('VCD title list') ),
+                items = [ (self.dvd_vcd_title_menu, _('VCD title list')),
                           (self.play, _('Play default track')) ]
         else:
-            items = [ (self.play, _('Play')) ]
-            if len(self.possible_player) > 1:
-                items.append((self.play_alternate,
-                              _('Play with alternate player')))
+            items = []
+            # Add all possible players to the action list
+            for r, player in self.possible_player:
+                items.append(Action(_('Play with %s') % player.name,
+                                    self.play, player))
 
         # Network play can get a larger cache
         if self.network_play:
-            items.append((self.play_max_cache, _('Play with maximum cache')))
+            items.append(Action(_('Play with maximum cache'),
+                                self.play, '-cache 65536'))
 
         # Add the configure stuff (e.g. set audio language)
         items += configure.get_items(self)
@@ -415,23 +423,10 @@ class VideoItem(MediaItem):
             menuw.back_one_menu()
 
 
-    def play_max_cache(self, arg=None, menuw=None):
+    def play(self, arg=None, menuw=None):
         """
-        play and use maximum cache with mplayer
-        """
-        self.play(menuw=menuw, arg='-cache 65536')
-
-
-    def play_alternate(self, arg=None, menuw=None):
-        """
-        play and use maximum cache with mplayer
-        """
-        self.play(menuw=menuw, arg=arg, alternateplayer=True)
-
-
-    def play(self, arg=None, menuw=None, alternateplayer=False):
-        """
-        play the item.
+        Play the item. The argument 'arg' can either be a player or
+        extra mplayer arguments.
         """
         # set the current_item of the parent to this one
         # to make playlists possible
@@ -458,7 +453,7 @@ class VideoItem(MediaItem):
             self.last_error_msg   = ''
             self.current_subitem  = None
 
-            result = self._set_next_available_subitem()
+            result = self.__set_next_available_subitem()
             if self.current_subitem: # 'result' is always 1 in this case
                 # The media is available now for playing
                 # Pass along the options, without loosing the subitem's own
@@ -532,22 +527,26 @@ class VideoItem(MediaItem):
         if not self.possible_player:
             self.possible_player = self._get_possible_player()
 
-        if alternateplayer:
-            self.possible_player.reverse()
-
         if not self.possible_player:
             return
 
-        self.player_rating, self.player = self.possible_player[0]
-        if self.player_rating < 10:
-            AlertBox(text=_('No player for this item found')).show()
-            return
+        if not self.player:
+            # get the best possible player
+            self.player_rating, self.player = self.possible_player[0]
+            if self.player_rating < 10:
+                AlertBox(text=_('No player for this item found')).show()
+                return
 
         # put together the mplayer options for this file
         mplayer_options = self.mplayer_options.split(' ')
         if not mplayer_options:
             mplayer_options = []
-        if arg:
+
+        if hasattr(arg, 'play'):
+            # arg is a player, use it
+            self.player = arg
+        elif arg:
+            # arg is mplayer options
             mplayer_options += arg.split(' ')
 
         # call all our plugins to let them know we will play
@@ -592,7 +591,7 @@ class VideoItem(MediaItem):
         # PLAY_END: do we have to play another file?
         if self.subitems and not self.variants:
             if event == PLAY_END:
-                self._set_next_available_subitem()
+                self.__set_next_available_subitem()
                 # Loop until we find a subitem which plays without error
                 while self.current_subitem:
                     log.info('playing next item')
@@ -600,7 +599,7 @@ class VideoItem(MediaItem):
                     if error:
                         self.last_error_msg = error
                         self.error_in_subitem = 1
-                        self._set_next_available_subitem()
+                        self.__set_next_available_subitem()
                     else:
                         return True
                 if self.error_in_subitem:
