@@ -26,6 +26,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/02/14 19:28:07  dischi
+# store display_type in Container to build nicer menu
+#
 # Revision 1.12  2004/02/08 17:39:11  dischi
 # add count to Mimetype
 #
@@ -226,6 +229,8 @@ class Container(item.Item):
         fxd.setattr(None, 'parent', self.parent)
         fxd.setattr(None, 'items', parent_items)
 
+        self.display_type = display_type
+        
 
     def sort(self, mode=None):
         """
@@ -248,7 +253,7 @@ class Container(item.Item):
         show all items
         """
         import menu
-        moviemenu = menu.Menu(self.name, self.items)
+        moviemenu = menu.Menu(self.name, self.items, item_types=self.display_type)
         menuw.pushmenu(moviemenu)
 
         
