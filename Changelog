@@ -4,7 +4,7 @@ Freevo Changelog
 $Id$
 
 
-Release 1.2.3 (2002-XX-XX):
+Release 1.2.3 (2002-06-01):
 ---------------------------
 o Fixed a big memory leak in the OSD server
 o Made the mp3 progress info more efficient
