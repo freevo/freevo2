@@ -20,28 +20,73 @@
 	visible="yes" icon="skins/icons/AquaFusion/shutdown.png"  />
     </main>
     
-    <!--
-    First we have to define the menu: a background and the four areas
-    with their dimensions. We point to a layout with the details
+    <!-- First we have to define the menu: a background and the five areas with -->
+    <!-- their dimensions. We point to a layout with the details -->
+    <menu type="all">
+
+      <!-- 1. screen: the complete background area -->
+      <screen layout="screen0" visible="yes">
+	<area x="0" y="0" width="800" height="600"/>
+      </screen>
+
+      <!-- 2. title: the area where the title of the menu (e.g. directory name -->
+      <!-- will be displayed -->
+      <title layout="title0" visible="yes">
+	<area x="10" y="10" width="780" height="60"/> 
+      </title>
+
+      <!-- 3. view area: the cover image for audio/video, a thumbnail for image -->
+      <view layout="view0" visible="yes">
+	<area x="580" y="110" width="200" height="300"/> 
+      </view>
+
+      <!-- 4. listing area: the list of all items -->
+      <listing layout="list0" visible="yes">
+	<area x="20" y="110" width="540" height="450"/>
+      </listing>
+
+      <!-- 5. info area: additional info. This area is invisible in the default -->
+      <!-- menu, it's only visible in the extended menus -->
+      <info visible="no"/>
+    </menu>
+
+
+    <!-- 
+
+    Before the layouts are defined, there are other types of menus. The
+    skin supports 'audio', 'video', 'image', 'games' for the specific
+    sections, 'main' for the main menu and extended versions of the
+    sections (e.g. 'extended audio'). If nothing matches, the type 'default'
+    will be used. The type 'all' will change all types. If a skin inherits from
+    this skin and redefines type 'default', all special types will be deleted 
+
+    Based on the default screen, the extended menu for audio will override
+    some settings, others like screen will be identical, they are
+    unchanged. 
     -->
-    <menu type="default">
+
+    <menu type="extended audio">
       <screen layout="screen0" visible="yes">
 	<area x="0" y="0" width="800" height="600"/>
       </screen>
       <title layout="title0" visible="yes">
 	<area x="10" y="10" width="780" height="60"/> 
       </title>
-      <view layout="view0" visible="no">
-	<area x="560" y="115" width="200" height="300"/> 
+      <view layout="view0" visible="yes">
+	<area x="580" y="110" width="200" height="300"/> 
       </view>
       <listing layout="list0" visible="yes">
-	<area x="20" y="110" width="760" height="450"/>
+	<area x="20" y="110" width="540" height="250"/>
       </listing>
-      <info visible="no"/>
+      <info visible="yes" layout="info">
+	<area x="20" y="390" width="760" height="190"/>
+      </info>
     </menu>
 
+    <!-- Now some small changes for the main menu -->
     <menu type="main">
-      <!-- definition of the main menu -->
+      <!-- disables view and title area. The info area is disabled because it's -->
+      <!-- disabled by type='default' -->
       <view visible="no"/>
       <title visible="no"/>
       <listing layout="list_main" visible="yes">
@@ -49,13 +94,25 @@
       </listing>
     </menu>
 
-    <!-- ********************************************** -->
-    <!-- LAYOUT DEFINITIONS -->
+
+    <!--
+    **********************************************
+    LAYOUT DEFINITIONS 
+    **********************************************
+
+    The menus defined a layout to use. Now here are the definitions of the 
+    layouts. Based on the type of area, some attributes have no effect
+    (e.g. the background has no content
+
+    -->
 
 
-    <!-- background -->
+    <!-- The background for the screen. By redefining layout label=screen0 you -->
+    <!-- can change only the background image -->
     <layout label="screen0">
       <background>
+	<!-- an image with the label background will ignore OVERSCAN settings -->
+	<!-- in freevo to make sure the complete screen is filled -->
 	<image filename="../images/aubin_bg2" x="0" y="0" label="background"/>
 	<image filename="../images/logo.png" x="10" y="0" width="200" height="98"/>
       </background>
@@ -77,6 +134,37 @@
       </content>
     </layout>
 
+    <!-- default view area -->
+    <layout label="view0">
+      <content align="center" valign="top">
+	<item type="default">
+	  <rectangle size="1" bgcolor="0xff000000" x="-1" y="-1"
+	    width="max+2" height="max+2"/>
+	</item>
+      </content>
+    </layout>
+
+
+    <!-- extended info areas -->
+    <layout label="info">
+      <background>
+	<rectangle bgcolor="0x000000" height="2"/>
+      </background>
+      <content x="5" y="15" width="max-10" height="max-10" type="text"
+	spacing="20" font="grey">
+	<item type="audio">
+	  Title:   \t@title@
+	  Artist:  \t@artist@
+	  Album:   \t@album@ (@year@)
+	  Track:   \t@track@
+	</item>
+	<item type="dir">
+	  Directory: \t@name@
+	</item>
+      </content>
+    </layout>
+
+
     <!-- main menu listing area -->
     <layout label="list_main">
       <content type="text" spacing="10">
@@ -88,8 +176,17 @@
       </content>
     </layout>
 
-    <!-- ********************************************** -->
-    <!-- FONT DEFINITIONS -->
+
+    <!--
+    **********************************************
+    FONT DEFINITIONS 
+    **********************************************
+
+    Now the font definitions. Inherited skins like blue1_small only redefines
+    the fonts and the rest will be untouched. It's easy to change the fonts a
+    skin uses without changing anything in the layout
+
+    -->
 
     <font label="grey">
       <definition name="Arial_Bold" size="20" color="0xdddddd"/>
@@ -113,8 +210,13 @@
 
 
 
-    <!-- ********************************************** -->
-    <!-- POPUP DEFINITIONS -->
+    <!--
+    **********************************************
+    POPUP DEFINITIONS 
+    
+    A popup definition is only a link to a specific layout, like menu areas
+
+    -->
 
     <popup type="default" layout="popup"/>
 
@@ -132,8 +234,17 @@
       </content>
     </layout>
 
-    <!-- ********************************************** -->
-    <!-- AUDIO PLAYER DEFINITIONS -->
+
+
+    <!--
+    **********************************************
+    AUDIO PLAYER DEFINITIONS
+
+    The audio player is very similar to the menu. It has four areas (screen,
+    title, view and info), each area has a layout. The only difference is, that
+    there is no listing area and no types (it's always type audio)
+
+    -->
     
     <player>
       <screen layout="player screen" visible="yes">
@@ -169,13 +280,15 @@
       </background>
       <content x="55" y="10" height="max-20" width="max-75" type="text"
 	spacing="10" font="white">
-	Title:   \t@title@
-	Artist:  \t@artist@
-	Album:   \t@album@ (@year@)
-	Track:   \t@track@
-
-	Length:  \t@length@
-	Elapsed: \t@elapsed@
+	<item type="default">
+	  Title:   \t@title@
+	  Artist:  \t@artist@
+	  Album:   \t@album@ (@year@)
+	  Track:   \t@track@
+	  
+	  Length:  \t@length@
+	  Elapsed: \t@elapsed@
+	</item>
       </content>
     </layout>
 
