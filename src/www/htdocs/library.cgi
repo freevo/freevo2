@@ -13,6 +13,9 @@
 #   human readable size rather than bytes from os
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/02/20 22:12:26  rshortt
+# Added a check in case the user doesn't input anything or clicks cancel.
+#
 # Revision 1.1  2003/02/20 21:48:13  rshortt
 # New cgi contributed by Mike Ruelle.  This lets you view files inside
 # config.DIR_RECORD and let you rename or delete them.
@@ -94,6 +97,7 @@ fv.printHeader('Video Library', 'styles/main.css')
 print '<script language="JavaScript"><!--'
 print 'function renameFile(file) {'
 print '   newfile=window.prompt("New name please.");'
+print '   if(newfile == "" || newfile == null) return;'
 print '   document.location="library.cgi?action=rename&file=" + escape(file) + "&newfile=" + escape(newfile);'
 print '}'
 print '//--></script>'
