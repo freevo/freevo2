@@ -21,7 +21,6 @@
 #
 # TODO: o more cleanup here and in all areas used
 #       o maybe make an area a widget
-#       o do not import theme.py here
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -61,7 +60,6 @@ import config
 import util
 
 # gui imports
-from gui import theme_engine as fxdparser
 from gui import Rectangle, Text, Textbox, Image
 
 
@@ -75,13 +73,13 @@ class Area:
         Create an area. The area needs to have a 'name' to find the current
         settings in the theme definition.
         """
-        self.area_name   = name
-        self.area_values = None
-        self.layout      = None
-        self.name        = name
-        self.screen      = None
-        self.imagelib    = None
-        self.__background__ = []
+        self.area_name    = name
+        self.area_values  = None
+        self.layout       = None
+        self.name         = name
+        self.screen       = None
+        self.imagelib     = None
+        self.__background = []
 
 
     def set_screen(self, screen, bg_layer, content_layer):
@@ -118,9 +116,9 @@ class Area:
             _debug_('ERROR in area %s: no screen defined' % self.name)
             return
 
-        for b in self.__background__:
+        for b in self.__background:
             b.unparent()
-        self.__background__ = []
+        self.__background = []
         self.clear()
 
 
@@ -137,7 +135,8 @@ class Area:
         self.viewitem = viewitem
         self.infoitem = infoitem
 
-        self.__init_vars(settings, area_definitions)
+        if not self.__init_vars(settings, area_definitions):
+            return
 
         if not self.area_values.visible or not self.layout:
             self.clear_all()
@@ -150,89 +149,87 @@ class Area:
 
 
 
-    def calc_geometry(self, object, copy_object=0):
+    def calc_geometry(self, obj, copy_object=0):
         """
-        Calculate the real values of the object (e.g. content) based
+        Calculate the real values of the obj (e.g. content) based
         on the geometry of the area.
         """
         if copy_object:
-            object = copy.copy(object)
+            obj = copy.copy(obj)
 
         font_h=0
 
-        if isinstance(object.width, str):
-            object.width = int(eval(object.width,
-                                    {'MAX': self.area_values.width}))
+        if isinstance(obj.width, str):
+            obj.width = int(eval(obj.width, {'MAX': self.area_values.width}))
 
-        if isinstance(object.height, str):
-            object.height = int(eval(object.height,
-                                     {'MAX': self.area_values.height}))
+        if isinstance(obj.height, str):
+            obj.height = int(eval(obj.height,{'MAX': self.area_values.height}))
 
-        if isinstance(object.x, str):
-            object.x = int(eval(object.x, {'MAX':self.area_values.height}))
+        if isinstance(obj.x, str):
+            obj.x = int(eval(obj.x, {'MAX':self.area_values.height}))
 
-        if isinstance(object.y, str):
-            object.y = int(eval(object.y, {'MAX':self.area_values.height}))
+        if isinstance(obj.y, str):
+            obj.y = int(eval(obj.y, {'MAX':self.area_values.height}))
 
-        object.x += self.area_values.x
-        object.y += self.area_values.y
+        obj.x += self.area_values.x
+        obj.y += self.area_values.y
 
-        if not object.width:
-            object.width = self.area_values.width
+        if not obj.width:
+            obj.width = self.area_values.width
 
-        if not object.height:
-            object.height = self.area_values.height
+        if not obj.height:
+            obj.height = self.area_values.height
 
-        if object.width + object.x > self.area_values.width + \
+        if obj.width + obj.x > self.area_values.width + \
                self.area_values.x:
-            object.width = self.area_values.width - object.x
+            obj.width = self.area_values.width - obj.x
 
-        if object.height + object.y > self.area_values.height + \
+        if obj.height + obj.y > self.area_values.height + \
                self.area_values.y:
-            object.height = self.area_values.height + self.area_values.y - \
-                            object.y
+            obj.height = self.area_values.height + self.area_values.y - \
+                            obj.y
 
-        return object
+        return obj
 
 
-    def get_item_rectangle(self, rectangle, item_w, item_h):
+    def calc_rectangle(self, rectangle, width, height):
         """
-        Calculates the values for a rectangle to fit item_w and item_h
+        Calculates the values for a rectangle to fit width and height
         inside it.
         """
         r = copy.copy(rectangle)
 
         # get the x and y value, based on MAX
         if isinstance(r.x, str):
-            r.x = int(eval(r.x, {'MAX':item_w}))
+            r.x = int(eval(r.x, {'MAX':width}))
         if isinstance(r.y, str):
-            r.y = int(eval(r.y, {'MAX':item_h}))
+            r.y = int(eval(r.y, {'MAX':height}))
 
         # set rect width and height to something
         if not r.width:
-            r.width = item_w
+            r.width = width
 
         if not r.height:
-            r.height = item_h
+            r.height = height
 
         # calc width and height based on MAX settings
         if isinstance(r.width, str):
-            r.width = int(eval(r.width, {'MAX':item_w}))
+            r.width = int(eval(r.width, {'MAX':width}))
 
         if isinstance(r.height, str):
-            r.height = int(eval(r.height, {'MAX':item_h}))
+            r.height = int(eval(r.height, {'MAX':height}))
 
-        # correct item_w and item_h to fit the rect
-        item_w = max(item_w, r.width)
-        item_h = max(item_h, r.height)
+        # correct width and height to fit the rect
+        width = max(width, r.width)
+        height = max(height, r.height)
         if r.x < 0:
-            item_w -= r.x
+            width -= r.x
         if r.y < 0:
-            item_h -= r.y
+            height -= r.y
 
         # return needed width and height to fit original width and height
         # and the rectangle attributes
-        return max(item_w, r.width), max(item_h, r.height), r
+        return max(width, r.width), max(height, r.height), r
 
 
 
@@ -249,32 +246,26 @@ class Area:
                 area = area.areas[self.area_name]
             except (KeyError, AttributeError):
                 _debug_('no skin information for %s' % (self.area_name), )
-                area = fxdparser.Area(self.area_name)
-                area.visible = False
+                return False
 
         if (not self.area_values) or area != self.area_values:
             area.r = (area.x, area.y, area.width, area.height)
             self.area_values = area
 
         self.layout = area.layout
-        return
+        return True
 
 
     def __draw_background(self):
         """
         Draw the <background> of the area.
         """
-        area   = self.area_values
-
         background_image = []
         background_rect  = []
 
         for bg in self.layout.background:
-            bg = copy.copy(bg)
-            if isinstance(bg, fxdparser.Image) and bg.visible:
-                self.calc_geometry(bg)
-                imagefile = ''
-
+            bg = self.calc_geometry(bg, copy_object=True)
+            if bg.type == 'image' and bg.visible:
                 # if this is the real background image, ignore the
                 # OVERSCAN to fill the whole screen
                 if bg.label == 'background':
@@ -295,28 +286,27 @@ class Area:
                     background_image.append((imagefile, bg.x, bg.y, bg.width,
                                              bg.height))
 
-            elif isinstance(bg, fxdparser.Rectangle):
-                self.calc_geometry(bg)
+            elif bg.type == 'rectangle':
                 background_rect.append((bg.x, bg.y, bg.width, bg.height,
                                         bg.bgcolor, bg.size, bg.color,
                                         bg.radius))
 
 
-        for b in copy.copy(self.__background__):
+        for b in copy.copy(self.__background):
             try:
                 background_rect.remove(b.info)
             except ValueError:
                 try:
                     background_image.remove(b.info)
                 except ValueError:
-                    self.__background__.remove(b)
+                    self.__background.remove(b)
                     b.unparent()
 
         for rec in background_rect:
             x, y, width, height, bgcolor, size, color, radius = rec
             box = self.drawbox(x, y, width, height, (bgcolor, size, color,
                                                      radius))
-            self.__background__.append(box)
+            self.__background.append(box)
             box.info = rec
             box.set_zindex(-1)
 
@@ -325,7 +315,7 @@ class Area:
             i = self.drawimage(imagefile, (x, y, width, height),
                                background=True)
             if i:
-                self.__background__.append(i)
+                self.__background.append(i)
                 i.info = image
                 i.set_zindex(-1)
 
@@ -395,14 +385,6 @@ class Area:
         if not image:
             return None
 
-        # FIXME: that doesn't belong here
-        # if isstring(image) and image.find(config.ICON_DIR) == 0 and \
-        #        image.find(self.settings.icon_dir) == -1:
-        #     # replace the icon
-        #     new_image = os.path.join(self.settings.icon_dir,
-        #                 image[len(config.ICON_DIR)+1:])
-        #     if os.path.isfile(new_image):
-        #         image = new_image
         if isinstance(val, tuple):
             if len(val) == 2:
                 x, y, w, h = val[0], val[1], image.width, image.height
@@ -423,10 +405,9 @@ class Area:
                 i.set_pos((x,y))
             else:
                 i = Image(image, (x, y), (w, h))
-            self.layer.add_child(i)
         else:
             i = Image(image, (x, y), (w, h))
-            self.layer.add_child(i)
+        self.layer.add_child(i)
         return i
 
 

@@ -97,7 +97,7 @@ class ViewArea(Area):
             val = content.types['default']
 
         if val.rectangle:
-            r = self.get_item_rectangle(val.rectangle, width, height)[2]
+            r = self.calc_rectangle(val.rectangle, width, height)[2]
 
             if r.x < 0:
                 x0 -= r.x

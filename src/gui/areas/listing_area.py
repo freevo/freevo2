@@ -8,11 +8,7 @@
 # listing areas for menus. It inherits from Area (area.py) and the update
 # function will be called to update this area.
 #
-# The helper class ItemImage is used here as widget because it supports shadow
-# and rectangle support, functions that are missing in the normal image widget.
-#
-# TODO: o maybe move shadow and rectangle to the normal image widget
-#       o fix icon code which is deactivated right now
+# TODO: o fix icon code which is deactivated right now
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -45,42 +41,14 @@ import copy
 
 # external modules
 import notifier
-from mevas.image import CanvasImage
 
 # freevo imports
 import util
 from util.objectcache import ObjectCache
 
-# area import
+# gui import
 from area import Area
-
-
-class ItemImage(CanvasImage):
-    """
-    An image object that can be drawn onto a layer. The difference between this
-    and a normal object is that it also has a parameter for shadow values.
-    """
-    def __init__(self, image, pos, shadow):
-        """
-        Create the CanvasImage and draw image, shadow and border
-        """
-        if shadow and shadow.visible and not image.has_alpha:
-            # there are shadow informations and the image has no alpha
-            # values, so draw a shadow. Bug: this only works for shadow.x
-            # and shadow.y both greater 0
-            CanvasImage.__init__(self, (image.width + shadow.x,
-                                        image.height + shadow.y))
-            self.draw_rectangle((shadow.x, shadow.y),
-                                (image.width, image.height),
-                                shadow.color, 1)
-            self.draw_image(image)
-        else:
-            # normal image
-            CanvasImage.__init__(self, image)
-        # set position of the object
-        self.set_pos(pos)
-
-
+from gui import Image
 
 class ListingArea(Area):
     """
@@ -220,9 +188,9 @@ class ListingArea(Area):
                 rh = 0
                 rw = 0
                 if ct.rectangle:
-                    rw, rh, r = self.get_item_rectangle(ct.rectangle,
-                                                        content.width,
-                                                        ct.font.height)
+                    rw, rh, r = self.calc_rectangle(ct.rectangle,
+                                                    content.width,
+                                                    ct.font.height)
                     hskip = min(hskip, r.x)
                     vskip = min(vskip, r.y)
                     items_w = max(items_w, r.width)
@@ -236,13 +204,10 @@ class ListingArea(Area):
                 rw = 0
                 if ct.rectangle:
                     if content.type == 'image+text':
-                        max_h = max(ct.height, int(ct.font.height * 1.1))
-                        rw, rh, r = self.get_item_rectangle(ct.rectangle,
-                                                            ct.width, max_h)
+                        mh = max(ct.height, int(ct.font.height * 1.1))
                     else:
-                        rw, rh, r = self.get_item_rectangle(ct.rectangle,
-                                                            ct.width,
-                                                            ct.height)
+                        mh = ct.height
+                    rw, rh, r = self.calc_rectangle(ct.rectangle, ct.width, mh)
                     hskip = min(hskip, r.x)
                     vskip = min(vskip, r.y)
 
@@ -338,10 +303,10 @@ class ListingArea(Area):
         #         # values in (x,y,width) from skin!)
         #         r1 = r2 = None
         #         if s_val.rectangle:
-        #             r1 = self.get_item_rectangle(s_val.rectangle,
+        #             r1 = self.calc_rectangle(s_val.rectangle,
         #                                          width, s_val.font.height)[2]
         #         if n_val.rectangle:
-        #             r2 = self.get_item_rectangle(n_val.rectangle,
+        #             r2 = self.calc_rectangle(n_val.rectangle,
         #                                          width, n_val.font.height)[2]
         #         min_rx = 0
         #         max_rw = width
@@ -361,8 +326,7 @@ class ListingArea(Area):
         # draw the rectangle below the item
         #
         if val.rectangle:
-            r = self.get_item_rectangle(val.rectangle, width,
-                                        val.font.height)[2]
+            r = self.calc_rectangle(val.rectangle, width, val.font.height)[2]
             b = self.drawbox(x + hskip + r.x + x_icon - \
                              self.settings.box_under_icon * x_icon,
                              y + vskip + r.y,
@@ -492,11 +456,9 @@ class ListingArea(Area):
         if val.rectangle:
             if content.type == 'image+text':
                 max_h = max(height, int(val.font.height * 1.1))
-                r = self.get_item_rectangle(val.rectangle, val.width,
-                                            max_h)[2]
+                r = self.calc_rectangle(val.rectangle, val.width, max_h)[2]
             else:
-                r = self.get_item_rectangle(val.rectangle, val.width,
-                                            height)[2]
+                r = self.calc_rectangle(val.rectangle, val.width, height)[2]
             b = self.drawbox(x + r.x, y + r.y, r.width, r.height, r)
             gui_objects.append(b)
 
@@ -520,7 +482,12 @@ class ListingArea(Area):
             if val.valign == 'bottom' and i_h < val.height:
                 addy = val.height - i_h
 
-            i = ItemImage(image, (x + addx, y + addy), val.shadow)
+            if val.shadow and val.shadow.visible and not image.has_alpha:
+                i = Image(image, (x + addx, y + addy),
+                          shadow=(val.shadow.x, val.shadow.y,
+                                  val.shadow.color))
+            else:
+                i = Image(image, (x + addx, y + addy))
             self.layer.add_child(i)
             gui_objects.append(i)
 
@@ -568,8 +535,6 @@ class ListingArea(Area):
         do the real update.
         """
         menu      = self.menu
-        settings  = self.settings
-        area      = self.area_values
         content   = self.calc_geometry(self.layout.content, copy_object=True)
 
         if not len(menu.choices):
@@ -585,7 +550,7 @@ class ListingArea(Area):
             self.empty_listing = None
 
         cols, rows, hspace, vspace, hskip, vskip, width = \
-              self.__get_items_geometry(settings, menu, area)
+              self.__get_items_geometry(self.settings, menu, self.area_values)
 
         menu.rows = rows
         menu.cols = cols
@@ -673,33 +638,27 @@ class ListingArea(Area):
                 else:
                     n_val = content.types['default']
 
-
                 if choice == menu.selected:
                     val = s_val
                 else:
                     val = n_val
                     self.__default_val = val
 
-            #
-            # text listing
-            #
             if draw_this_item and content.type == 'text':
+                # draw item for text listing
                 self.__draw_text_listing_item(choice, (x,y), content, val,
                                               hspace, vspace, gui_objects,
                                               width, hskip, vskip)
 
-            #
-            # image listing
-            #
             if draw_this_item and content.type == 'image' or \
                    content.type == 'image+text':
+                # draw item for image listing
                 self.__draw_image_listing_item(choice, (x,y), content, val,
                                                hspace, vspace, gui_objects)
 
-            #
             # calculate next item position
-            #
             if current_col == cols:
+                # max number of cols reached, skip to next row
                 if content.align == 'center':
                     x = content.x + (content.width - cols * hspace) / 2
                 else:
@@ -707,6 +666,7 @@ class ListingArea(Area):
                 y += vspace
                 current_col = 1
             else:
+                # set x to fill the next item in the row
                 x += hspace
                 current_col += 1
 
@@ -717,17 +677,18 @@ class ListingArea(Area):
         if redraw:
             # draw the arrows
             try:
-                if start > 0 and area.images['uparrow']:
-                    i = self.drawimage(area.images['uparrow'].filename,
-                                       area.images['uparrow'])
+                if start > 0 and self.area_values.images['uparrow']:
+                    i = self.area_values.images['uparrow'].filename
+                    i = self.drawimage(i, self.area_values.images['uparrow'])
                     self.arrows.append(i)
                 if end < len(menu.choices):
-                    if isinstance(area.images['downarrow'].y, str):
-                        v = copy.copy(area.images['downarrow'])
+                    if isinstance(self.area_values.images['downarrow'].y, str):
+                        v = copy.copy(self.area_values.images['downarrow'])
                         v.y = eval(v.y, {'MAX':(y-vskip)})
                     else:
-                        v = area.images['downarrow']
-                    i = self.drawimage(area.images['downarrow'].filename, v)
+                        v = self.area_values.images['downarrow']
+                    i = self.area_values.images['downarrow'].filename
+                    i = self.drawimage(i, v)
                     self.arrows.append(i)
             except Exception, e:
                 _debug_(e, 0)

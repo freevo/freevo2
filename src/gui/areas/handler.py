@@ -46,15 +46,13 @@ import os
 import traceback
 import time
 
-# external imports
-import mevas
-
 # freevo imports
 import config
 
 # gui imports
 import util
 import gui.animation as animation 
+from gui.widgets import Container
 
 # default areas
 from listing_area   import ListingArea
@@ -64,18 +62,6 @@ from info_area      import InfoArea
 from default_areas  import ScreenArea, TitleArea, SubtitleArea
 
 
-class CanvasContainer(mevas.CanvasContainer):
-    """
-    Dummy class to add 'name' for debug to a CanvasContainer
-    """
-    def __init__(self, name):
-        self.name = name
-        mevas.CanvasContainer.__init__(self)
-
-    def __str__(self):
-        return 'AreaContainer %s' % self.name
-
-    
 class AreaHandler:
     """
     Handler for the areas used to draw an application on the screen.
@@ -92,7 +78,8 @@ class AreaHandler:
 
         self.canvas = screen
         
-        self.layer = (CanvasContainer('bg'), CanvasContainer('content'))
+        self.layer = (Container('AreaHandler: Background'),
+                      Container('AreaHandler: Content'))
         self.layer[0].set_zindex(-10)
 
         for c in self.layer:

@@ -102,16 +102,16 @@ class TVListingArea(Area):
         label_txt_width = label_width
 
         if label_val.rectangle:
-            r = self.get_item_rectangle(label_val.rectangle, label_width,
-                                        label_val.font.height)[2]
+            r = self.calc_rectangle(label_val.rectangle, label_width,
+                                    label_val.font.height)[2]
             label_width = r.width
         else:
             label_width += content.spacing
 
         # get head height
         if head_val.rectangle:
-            r = self.get_item_rectangle(head_val.rectangle, 20,
-                                        head_val.font.height)[2]
+            r = self.calc_rectangle(head_val.rectangle, 20,
+                                    head_val.font.height)[2]
             content_y = content.y + r.height + content.spacing
         else:
             content_y = content.y + head_val.font.height + content.spacing
@@ -121,22 +121,22 @@ class TVListingArea(Area):
         item_h = font_h
 
         if label_val.rectangle:
-            r = self.get_item_rectangle(label_val.rectangle, 20,
-                                        label_val.font.height)[2]
+            r = self.calc_rectangle(label_val.rectangle, 20,
+                                    label_val.font.height)[2]
             item_h = max(item_h, r.height + content.spacing)
         if default_val.rectangle:
-            r = self.get_item_rectangle(default_val.rectangle, 20,
-                                        default_val.font.height)[2]
+            r = self.calc_rectangle(default_val.rectangle, 20,
+                                    default_val.font.height)[2]
             item_h = max(item_h, r.height + content.spacing)
         if selected_val.rectangle:
-            r = self.get_item_rectangle(selected_val.rectangle, 20,
-                                        selected_val.font.height)[2]
+            r = self.calc_rectangle(selected_val.rectangle, 20,
+                                    selected_val.font.height)[2]
             item_h = max(item_h, r.height + content.spacing)
 
         head_h = head_val.font.height
         if head_val.rectangle:
-            r = self.get_item_rectangle(head_val.rectangle, 20,
-                                        head_val.font.height)[2]
+            r = self.calc_rectangle(head_val.rectangle, 20,
+                                    head_val.font.height)[2]
             head_h = max(head_h, r.height + content.spacing)
 
         content_h = content.height + content.y - content_y
@@ -154,7 +154,7 @@ class TVListingArea(Area):
         """
         x = 0
         y = 0
-        r = self.get_item_rectangle(rectangle, width, font_h)[2]
+        r = self.calc_rectangle(rectangle, width, font_h)[2]
         if r.width > width:
             r.width, width = width, width - (r.width - width)
         if r.height > height:
@@ -236,8 +236,8 @@ class TVListingArea(Area):
 
         r = Geometry( 0, 0, label_width, font_h )
         if label_val.rectangle:
-            r = self.get_item_rectangle( label_val.rectangle, label_width,
-                                         head_h )[ 2 ]
+            r = self.calc_rectangle( label_val.rectangle, label_width,
+                                     head_h )[ 2 ]
             pad_x = 0
             pad_y = 0
             if r.x < 0: pad_x = -1 * r.x
@@ -325,8 +325,8 @@ class TVListingArea(Area):
             logo_geo = [ tx0, ty0, label_width, font_h ]
 
             if label_val.rectangle:
-                r = self.get_item_rectangle(label_val.rectangle, label_width,
-                                            item_h)[2]
+                r = self.calc_rectangle(label_val.rectangle, label_width,
+                                        item_h)[2]
                 if r.x < 0:
                     tx0 -= r.x
                 if r.y < 0:
