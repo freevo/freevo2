@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/10/08 03:14:17  outlyer
+# Filter out annoying warnings in Python >= 2.3
+#
 # Revision 1.10  2003/09/25 03:00:45  outlyer
 # Rollback...
 #
@@ -49,8 +52,11 @@ import freq
 import os
 import struct
 import fcntl
-# import warnings
-# warnings.filterwarnings("ignore", category=FutureWarning, module=__name__)
+import sys
+
+if float(sys.version[0:3]) >= 2.3:
+    import warnings
+    warnings.filterwarnings("ignore", category=FutureWarning, module=__name__)
 
 
 import config
