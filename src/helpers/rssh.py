@@ -27,32 +27,47 @@ def notification(entity):
         print '> ',
         sys.__stdout__.flush()
 
+def print_result(result):
+    # FIXME: doesn't work for epg results
+    if isinstance(result, (list, tuple)) and len(result) > 0 and \
+           isinstance(result[0], (list, tuple)):
+        for r in result:
+            print r
+    else:
+        print result
+
+        
 def user_input( socket ):
     input = socket.readline().strip()
     if input == 'help':
         print '\rpossible commands:'
         print
-        print 'help'
-        print 'exit'
-        print 'time(YYYY.MM.DD.HH:MM)'
+        print 'rssh commands:'
+        print '  help                       print this help'
+        print '  exit                       exit rssh'
+        print '  time(YYYY.MM.DD.HH:MM)     convert into seconds'
         print
-        print 'epg.search_programs(name)'
-        print 'epg.get_programs(channels, start, stop)'
+        print 'epg commands:'
+        print '  epg.search_programs(name)'
+        print '  epg.get_programs(channels, start, stop)'
         print
-        print 'recording.list()'
-        print 'recording.describe(id)'
-        print 'recording.add(name, channel, priority, start, stop, optionals)'
-        print 'recording.remove(id)'
+        print 'record commands:'
+        print '  recording.list()'
+        print '  recording.describe(id)'
+        print '  recording.add(name, channel, priority, start, stop, optionals)'
+        print '  recording.add(dbid, priority, optionals)'
+        print '  recording.remove(id)'
         print
-        print 'favorite.update()'
-        print 'favorite.list()'
-        print 'favorite.add(name, channels, priority, days, times, once)'
+        print 'favorite commands:'
+        print '  favorite.update()'
+        print '  favorite.list()'
+        print '  favorite.add(name, channels, priority, days, times, once)'
         print
         print 'See src/record/server.py for an updated list of commands.'
         print 'A better documentation of possible mbus commands will follow'
         print 'Notice: the code will \'eval\'ed by python so you need to put'
-        print 'parameter strings in quotes when calling epg, recording or favorite'
-        print 'calls.'
+        print 'parameter strings in quotes when calling epg, recording or'
+        print 'favorite calls.'
         
     elif input == 'exit':
         print
@@ -72,7 +87,7 @@ def user_input( socket ):
             if not status:
                 print 'failed'
             else:
-                print result
+                print_result(result)
         except Exception, e:
             print e
     elif input.startswith('favorite.'):
@@ -82,14 +97,14 @@ def user_input( socket ):
             if not status:
                 print 'failed'
             else:
-                print result
+                print_result(result)
         except Exception, e:
             print e
     elif input.startswith('epg.'):
         print '\rcalling epg command'
         try:
             result = eval(input)
-            print result
+            print_result(result)
         except Exception, e:
             print e
     else:
@@ -103,5 +118,8 @@ def user_input( socket ):
 mcomm.register_entity_notification(notification)
 notifier.addSocket( sys.stdin, user_input )
 
+print 'rssh - recordserver shell'
+print '-------------------------'
+print
 print 'waiting for recordserver'
 notifier.loop()
