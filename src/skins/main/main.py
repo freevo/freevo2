@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2004/01/09 20:04:18  dischi
+# add overscan to cache name
+#
 # Revision 1.29  2004/01/05 18:03:43  dischi
 # support for extra fxd files for plugins
 #
@@ -133,12 +136,20 @@ class Skin:
                 break
 
 
+    def cachename(self, filename):
+        """
+        create cache name
+        """
+        return vfs.getoverlay('%s.skin-%sx%s-%s-%s' % (filename, osd.width, osd.height,
+                                                       config.OSD_OVERSCAN_X,
+                                                       config.OSD_OVERSCAN_Y))
+        
     def save_cache(self, settings, filename):
         """
         cache the fxd skin settings in 'settings' to the OVERLAY_DIR cachfile
         for filename and this resolution
         """
-        cache = vfs.getoverlay('%s.skin-%sx%s' % (filename, osd.width, osd.height))
+        cache = self.cachename(filename)
         if cache:
             # delete font object, because it can't be pickled
             for f in settings.font:
@@ -155,7 +166,7 @@ class Skin:
         """
         load a skin cache file
         """
-        cache = vfs.getoverlay('%s.skin-%sx%s' % (filename, osd.width, osd.height))
+        cache = self.cachename(filename)
         if not cache:
             return None
 
