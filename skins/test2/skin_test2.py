@@ -100,17 +100,22 @@ class Skin(skin_test1.Skin):
 	    w = 0
 	    h = 0
 	    if choice.icon != None: 
- 		w,h = util.pngsize(util.thumb(choice.icon))
-		osd.drawbitmap(util.thumb(choice.icon), x0, y0)
+ 		if choice.scale == 1:
+			w,h = util.pngsize(util.thumb(choice.icon))
+			osd.drawbitmap(util.thumb(choice.icon), x0, y0)
+		else:
+			w,h = util.pngsize(choice.icon)	
+			osd.drawbitmap(choice.icon,x0,y0)
 		# Align the logo based on image size
-		
+	
+
             osd.drawstring(choice.name, (x0+w+10), y0,
                            font=self.OSD_FONTNAME_ITEMS,
                            ptsize=fontsize)
 	    if menu.selected == choice:
-                osd.drawbox(x0 - 8, y0 - 3, 705, y0 + fontsize*1.5, width=-1,
+                osd.drawbox(x0 - 8 + w, y0 - 3, 705, y0 + fontsize*1.5, width=-1,
                             color=((160 << 24) | osd.COL_BLUE))
-		if choice.icon != None:
+		if choice.icon != None and choice.popup:
 			(w, h) = util.pngsize(choice.icon)
 			# Calculate best image placement
 			logox = int(osd.width) - int(w) - 55

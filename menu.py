@@ -43,11 +43,14 @@ def get_singleton():
 
 class MenuItem:
 
-    def __init__(self, name, action=None, arg=None, icon=None):
+    def __init__(self, name, action=None, arg=None, icon=None, scale=1,popup=0):
         self.name = name
         self.action = action
         self.arg = arg
 	self.icon = icon
+	self.scale = scale
+	self.popup = popup
+	print popup
 
     def select(self):
         self.action(self.arg)

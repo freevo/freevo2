@@ -72,7 +72,7 @@ def cwd(arg=None, menuw=None):
     for dirname in dirnames:
         title = '[' + os.path.basename(dirname) + ']'
         if os.path.isfile(dirname+'/cover.png'): 
-        	items += [menu.MenuItem(title, cwd, dirname,(dirname+'/cover.png'))]
+        	items += [menu.MenuItem(title, cwd, dirname,(dirname+'/cover.png'),1,1)]
 	else:
 		items += [menu.MenuItem(title, cwd, dirname)]
     
