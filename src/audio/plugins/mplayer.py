@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/12/06 13:43:35  dischi
+# expand the <audio> parsing in fxd files
+#
 # Revision 1.26  2003/11/22 15:30:55  dischi
 # support more than one player
 #
@@ -144,17 +147,31 @@ class MPlayer:
             demux = ''
 
         extra_opts = item.mplayer_options
-        if network_play and filename.endswith('m3u') and \
-               extra_opts.find('-playlist') == -1:
-            extra_opts += ' -playlist'
+
+        is_playlist = False
+        if hasattr(item, 'is_playlist') and item.is_playlist:
+            is_playlist = True
+            
+        if network_play and filename.endswith('m3u'):
+            is_playlist = True
 
         if network_play:
             extra_opts += ' -cache 100'
 
+        if hasattr(item, 'reconnect') and item.reconnect:
+            extra_opts += ' -loop 0'
+            
         command = '%s -vo null -ao %s %s %s' % (mpl, config.MPLAYER_AO_DEV, demux,
                                                 extra_opts)
-        
+
+        if command.find('-playlist') > 0:
+            command = command.replace('-playlist', '')
+            
         command = command.replace('\n', '').split(' ')
+
+        if is_playlist:
+            command.append('-playlist')
+            
         command.append(filename)
         
         if plugin.getbyname('MIXER'):

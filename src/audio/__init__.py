@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/12/06 13:43:34  dischi
+# expand the <audio> parsing in fxd files
+#
 # Revision 1.12  2003/11/30 14:41:10  dischi
 # use new Mimetype plugin interface
 #
@@ -51,6 +54,8 @@
 #
 # ----------------------------------------------------------------------- */
 #endif
+
+import re
 
 import config
 import util
@@ -112,33 +117,83 @@ class PluginInterface(plugin.MimetypePlugin):
 
 
 
+    def dirinfo(self, diritem):
+        """
+        set informations for a diritem based on the content, etc.
+        """
+        if not diritem.image:
+            images = ()
+            covers = ()
+            files =()
+
+            def image_filter(x):
+                return re.match('.*(jpg|png)$', x, re.IGNORECASE)
+            def cover_filter(x):
+                return re.search(config.AUDIO_COVER_REGEXP, x, re.IGNORECASE)
+
+            # Pick an image if it is the only image in this dir, or it matches
+            # the configurable regexp
+            try:
+                files = vfs.listdir(diritem.dir)
+            except OSError:
+                print "oops, os.listdir() error"
+                traceback.print_exc()
+            images = filter(image_filter, files)
+            image  = None
+            if len(images) == 1:
+                image = vfs.join(diritem.dir, images[0])
+            elif len(images) > 1:
+                covers = filter(cover_filter, images)
+                if covers:
+                    image = vfs.join(diritem.dir, covers[0])
+            diritem.image = image
+
+            
+
     def fxdhandler(self, fxd, node):
         """
         parse audio specific stuff from fxd files
 
         <?xml version="1.0" ?>
         <freevo>
-            <audio title="Smoothjazz">
-                <cover-img>foo.jpg</cover-img>
-                <mplayer_options></mplayer_options>
-                <url>http://64.236.34.141:80/stream/1005</url>
+          <audio title="Smoothjazz">
+            <cover-img>foo.jpg</cover-img>
+            <mplayer_options></mplayer_options>
+            <player>xine</player>
+            <playlist/>
+            <reconnect/>
+            <url>http://64.236.34.141:80/stream/1005</url>
 
-                <info>
-                    <genre>JAZZ</genre>
-                    <description>A nice description</description>
-                </info>
+            <info>
+              <genre>JAZZ</genre>
+              <description>A nice description</description>
+            </info>
 
-            </audio>
+          </audio>
         </freevo>
+
+        Everything except title and url is optional. If <player> is set,
+        this player will be used (possible xine or mplayer). The tag
+        <playlist/> signals that this url is a playlist (mplayer needs that).
+        <reconnect/> sihnals that the player should reconnect when the
+        connection stopps.
         """
         a = AudioItem('', fxd.getattr(None, 'parent', None), scan=False)
+
         a.name     = fxd.getattr(node, 'title', a.name)
         a.xml_file = fxd.getattr(None, 'filename', '')
         a.image    = fxd.childcontent(node, 'cover-img')
+        a.url      = fxd.childcontent(node, 'url')
         if a.image:
             a.image = vfs.join(vfs.dirname(a.xml_file), a.image)
 
-        a.mplayer_options = fxd.childcontent(node, 'mplayer_options')
-        a.url = fxd.childcontent(node, 'url')
+        a.mplayer_options  = fxd.childcontent(node, 'mplayer_options')
+        if fxd.get_children(node, 'player'):
+            a.force_player = fxd.childcontent(node, 'player')
+        if fxd.get_children(node, 'playlist'):
+            a.is_playlist  = True
+        if fxd.get_children(node, 'reconnect'):
+            a.reconnect    = True
+            
         fxd.parse_info(fxd.get_children(node, 'info', 1), a)
         fxd.getattr(None, 'items', []).append(a)

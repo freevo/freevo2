@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/12/06 13:43:34  dischi
+# expand the <audio> parsing in fxd files
+#
 # Revision 1.12  2003/12/04 21:48:11  dischi
 # also add the plugin area
 #
@@ -17,34 +20,6 @@
 #
 # Revision 1.10  2003/11/22 15:30:55  dischi
 # support more than one player
-#
-# Revision 1.9  2003/11/08 13:19:06  dischi
-# add AUDIOCD as plugin type
-#
-# Revision 1.8  2003/10/12 11:01:19  dischi
-# Don't show black screen between selecting and playing an audio file
-#
-# Revision 1.7  2003/09/20 09:44:23  dischi
-# cleanup
-#
-# Revision 1.6  2003/09/15 20:06:02  dischi
-# error handling when mplayer does not start
-#
-# Revision 1.5  2003/08/27 15:27:08  mikeruelle
-# Start of Radio Support
-#
-# Revision 1.4  2003/04/24 19:56:01  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.3  2003/04/22 11:56:45  dischi
-# fixed bug that shows the player again after stopping it
-#
-# Revision 1.2  2003/04/21 18:40:32  dischi
-# use plugin name structure to find the real player
-#
-# Revision 1.1  2003/04/21 13:27:48  dischi
-# o make it possible to hide() the audio player
-# o mplayer is now a plugin, controlled by the PlayerGUI
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -77,8 +52,7 @@ import plugin
 import event
 
 skin = skin.get_singleton()
-
-skin.register('player', ('screen', 'title', 'subtitle', 'view', 'info', 'plugin'))
+skin.register('player', ('screen', 'title', 'view', 'info', 'plugin'))
 
 
 class PlayerGUI(GUIObject):
@@ -100,15 +74,20 @@ class PlayerGUI(GUIObject):
 
         if self.player and self.player.is_playing():
             self.stop()
-            
+
         if player:
             self.player = player
+
         else:
             self.possible_player = []
             for p in plugin.getbyname(plugin.AUDIO_PLAYER, True):
                 rating = p.rate(self.item) * 10
                 if config.AUDIO_PREFERED_PLAYER == p.name:
                     rating += 1
+
+                if hasattr(self.item, 'force_player') and p.name == self.item.force_player:
+                    rating += 100
+                
                 self.possible_player.append((rating, p))
             self.possible_player.sort(lambda l, o: -cmp(l[0], o[0]))
             self.player = self.possible_player[0][1]
@@ -184,5 +163,5 @@ class PlayerGUI(GUIObject):
             self.item.remain = 0
         else:
             self.item.remain = self.item.length - self.item.elapsed
-        skin.draw(('player', self.item))
+        skin.draw('player', self.item)
         return
