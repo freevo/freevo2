@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/09/15 19:38:20  dischi
+# make it possible that the current applications hides
+#
 # Revision 1.8  2004/08/27 14:25:48  dischi
 # small typo bugfix
 #
@@ -363,40 +366,55 @@ class Eventhandler:
         for p in self.eventlistener_plugins:
             p.eventhandler(event=event)
 
-        if event == FUNCTION_CALL:
-            return event.arg()
-
-        if event.handler:
-            return event.handler(event=event)
-
         if config.TIME_DEBUG:
             t1 = time.clock()
 
         try:
-            if str(event) in self.registered:
+            if event == FUNCTION_CALL:
+                # event is a direct function call, call it and do not pass it
+                # on the the normal handling
+                event.arg()
+
+            elif event.handler:
+                # event has it's own handler function, call this function and do
+                # not pass it on the the normal handling
+                event.handler(event=event)
+
+            elif str(event) in self.registered:
+                # event is in the list of registered events. This events are special
+                # and should only go to the callbacks registered
                 for c in self.registered[str(event)]:
                     c.eventhandler(event=event)
+
             elif len(self.popups) and self.popups[-1].eventhandler(event=event):
+                # handled by the current popup
                 pass
                 
             elif not self.applications[-1].eventhandler(event=event):
+                # pass event to the current application
                 for p in self.eventhandler_plugins:
+                    # pass it to all plugins when the application didn't use it
                     if p.eventhandler(event=event):
                         break
                 else:
+                    # nothing found for this event
                     _debug_('no eventhandler for event %s (app: %s)' \
                             % (event, self.applications[-1]), 2)
 
+            # now do some checking if the focus needs to be changed
             if self.stack_change:
                 # our stack has changed, reset the focus
                 self.set_focus()
-            elif self.applications[-1]._evt_stopped:
-                # the current application wants to be removed
+            elif self.applications[-1]._evt_stopped or \
+                     not self.applications[-1].visible:
+                # the current application wants to be removed, either because
+                # stop() is called or the hide() function was called from the
+                # event handling
                 previous, current = self.applications[-2:]
                 self.applications.remove(current)
                 self.stack_change = current, previous
                 self.set_focus()
-                
+
             if config.TIME_DEBUG:
                 print time.clock() - t1
             return True
