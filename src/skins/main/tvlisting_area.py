@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/03/14 11:17:38  dischi
+# remove old stuff
+#
 # Revision 1.19  2004/02/21 20:03:45  dischi
 # unicode fix (again)
 #
@@ -198,7 +201,6 @@ class TVListing_Area(Skin_Area):
         area      = self.area_val
         content   = self.calc_geometry(layout.content, copy_object=True)
 
-        recordingshows = self.check_schedule()
         to_listing     = menu.table
 
         n_cols   = len(to_listing[0])-1
@@ -373,19 +375,6 @@ class TVListing_Area(Skin_Area):
 
                     font = val.font
 
-                    # Not at all elegant.
-                    # TODO:
-                    #    * This is going to be SLOW for large schedules
-                    #    * We should have a skin setting for recording
-                    #      background color
-                    #    * I dunno what else.
-                    #   I will work on this soon, but think of this as a
-                    #   proof of concept.
-                    if recordingshows:
-                        for recprogs in recordingshows:
-                            if (prg.channel_id, prg.start, prg.stop) == recprogs:
-                                val = selected_val
-
                     try:
                         if prg.title == _('This channel has no data loaded'):
                             val = copy.copy(val)
@@ -445,33 +434,3 @@ class TVListing_Area(Skin_Area):
                 v = area.images['downarrow']
             self.drawimage(area.images['downarrow'].filename, v)
 
-        
-    def check_schedule (self):
-
-        SCHEDULE = config.REC_SCHEDULE_FILE
-        if not os.path.isfile(SCHEDULE):
-            return None
-        fd = open(SCHEDULE, 'r')
-        schedule = fd.readlines()
-        fd.close()
-        recordingshows = []
-
-        for s in schedule[1:]:
-            if s[0] == '#':
-                continue
-
-            vals = s.strip().split(',')
-
-            try:
-                start_time = time.mktime(time.strptime(vals[0], '%Y-%m-%d %H:%M:%S'))
-            except ValueError:
-                continue
-            stop_time = start_time+int(vals[1])
-            if (time.localtime()[8]==1): # IF daylight savings time in effect
-                start_time = start_time-3600
-                stop_time = stop_time-3600
-
-            channel_id = vals[3]
-            recordingshows.append((channel_id,start_time,stop_time))
-        
-        return recordingshows
