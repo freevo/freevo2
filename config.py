@@ -22,6 +22,9 @@ import sys, os, time, re
 DEBUG_STDOUT = 1
 
 # Debug all modules?
+# 0 = Debug output off
+# 1 = Some debug output
+# A higher number will generate more detailed output from some modules.
 DEBUG = 1
 
 

@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.49  2002/11/17 02:29:49  krister
+# Added more debug stuff.
+#
 # Revision 1.48  2002/11/15 02:11:38  krister
 # Applied Bob Pauwes latest image slideshow patches.
 #
@@ -126,6 +129,7 @@ import time
 import sys
 import os
 import re
+import traceback
 from types import *
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
@@ -1282,7 +1286,10 @@ class OSD:
             font = pygame.font.Font(filename, ptsize)
         except RuntimeError:
             print 'Couldnt load font "%s"' % filename
-
+            if DEBUG >= 2:
+                print 'Call stack:'
+                traceback.print_stack()
+                
             # Are there any alternate fonts defined?
             if not 'OSD_FONT_ALIASES' in dir(config):
                 print 'No font aliases defined!'
