@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/05/14 00:04:54  rshortt
+# Better error handling.
+#
 # Revision 1.4  2003/05/13 16:13:23  rshortt
 # Added updateFavoritesSchedule to the interface and make it accessable through
 # the command-line of record_client.py.
@@ -609,7 +612,7 @@ class RecordServer(xmlrpc.XMLRPC):
 
 
     def xmlrpc_echotest(self, blah):
-        return 'RecordServer::echotest: %s' % blah
+        return (TRUE, 'RecordServer::echotest: %s' % blah)
 
 
     def xmlrpc_addFavorite(self, name, prog, exactchan=FALSE, exactdow=FALSE, exacttod=FALSE):

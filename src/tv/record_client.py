@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/05/14 00:04:54  rshortt
+# Better error handling.
+#
 # Revision 1.4  2003/05/13 16:13:24  rshortt
 # Added updateFavoritesSchedule to the interface and make it accessable through
 # the command-line of record_client.py.
@@ -62,7 +65,7 @@
 
 import config
 
-import time, sys
+import time, sys, socket
 import xmlrpclib
 from twisted.persisted import marmalade
 
@@ -76,7 +79,6 @@ server = xmlrpclib.Server(server_string)
 
 
 def returnFromJelly(status, response):
-    # print 'DEBUG::response: %s' % response
     if status:
         return (status, marmalade.unjellyFromXML(response))
     else:
@@ -84,17 +86,30 @@ def returnFromJelly(status, response):
    
 
 def getScheduledRecordings():
-    (status, message) = server.getScheduledRecordings()
+    try: 
+        (status, message) = server.getScheduledRecordings()
+    except:
+        return (FALSE, 'record_client: connection error')
+
     return returnFromJelly(status, message)
 
 
 def saveScheduledRecordings(scheduledRecordings):
-    (status, message) = server.saveScheduledRecordings(scheduledRecordings)
+    try:
+        (status, message) = server.saveScheduledRecordings(scheduledRecordings)
+    except:
+        return (FALSE, 'record_client: connection error')
+
     return (status, message)
 
 
-def echotest(teststr):
-    return server.echotest('blah blah blah')
+def connectionTest(teststr):
+    try:
+        (status, message) = server.echotest(teststr)
+    except:
+        return (FALSE, 'record_client: connection error')
+
+    return (status, message)
 
 
 def scheduleRecording(prog=None):
@@ -106,7 +121,11 @@ def scheduleRecording(prog=None):
         print 'ERROR: cannot record it if it is over'
         return
         
-    (status, message) = server.scheduleRecording(marmalade.jellyToXML(prog))
+    try:
+        (status, message) = server.scheduleRecording(marmalade.jellyToXML(prog))
+    except:
+        return (FALSE, 'record_client: connection error')
+
     return (status, message)
 
 
@@ -114,12 +133,20 @@ def removeScheduledRecording(prog=None):
     if not prog:
         return (FLASE, 'no prog')
 
-    (status, message) = server.removeScheduledRecording(marmalade.jellyToXML(prog))
+    try:
+        (status, message) = server.removeScheduledRecording(marmalade.jellyToXML(prog))
+    except:
+        return (FALSE, 'record_client: connection error')
+
     return (status, message)
 
 
 def cleanScheduledRecordings():
-    (status, message) = server.cleanScheduledRecordings()
+    try:
+        (status, message) = server.cleanScheduledRecordings()
+    except:
+        return (FALSE, 'record_client: connection error')
+
     return (status, message)
 
 
@@ -134,80 +161,134 @@ def isProgScheduled(prog, schedule=None):
 
         return (FALSE, 'prog not scheduled')
     else:
-        (status, message) = server.isProgScheduled(marmalade.jellyToXML(prog), 
-                                                   schedule)
+        try:
+            (status, message) = server.isProgScheduled(marmalade.jellyToXML(prog), 
+                                                       schedule)
+        except:
+            return (FALSE, 'record_client: connection error')
+
         return (status, message) 
     
 
 def findProg(chan, start):
-    (status, response) = server.findProg(chan, start)
+    try:
+        (status, response) = server.findProg(chan, start)
+    except:
+        return (FALSE, 'record_client: connection error')
+
 
     return returnFromJelly(status, response)
     
 
 def findMatches(find=None):
-    (status, response) = server.findMatches(find)
+    try:
+        (status, response) = server.findMatches(find)
+    except:
+        return (FALSE, 'record_client: connection error')
+
 
     return returnFromJelly(status, response)
 
 
 def addFavorite(name, prog, exactchan, exactdow, exacttod):
-    (status, message) = server.addFavorite(name, prog, exactchan, exactdow, exacttod)
+    try:
+        (status, message) = server.addFavorite(name, prog, exactchan, exactdow, exacttod)
+    except:
+        return (FALSE, 'record_client: connection error')
+
     return (status, message) 
 
 
 def addEditedFavorite(name, title, chan, dow, mod, priority):
-    (status, message) = server.addEditedFavorite(name, title, chan, dow, mod, priority)
+    try:
+        (status, message) = server.addEditedFavorite(name, title, chan, dow, mod, priority)
+    except:
+        return (FALSE, 'record_client: connection error')
+
     return (status, message) 
 
 
 def removeFavorite(name):
-    print 'CLIENT REMOVE FAVORITE: %s' % name
-    (status, message) = server.removeFavorite(name)
+    try:
+        (status, message) = server.removeFavorite(name)
+    except:
+        return (FALSE, 'record_client: connection error')
+
     return (status, message) 
 
 
 def clearFavorites():
-    (status, message) = server.clearFavorites()
+    try:
+        (status, message) = server.clearFavorites()
+    except:
+        return (FALSE, 'record_client: connection error')
+
     return (status, message) 
 
 
 def getFavorites():
-    (status, response) = server.getFavorites()
+    try:
+        (status, response) = server.getFavorites()
+    except:
+        return (FALSE, 'record_client: connection error')
+
 
     return returnFromJelly(status, response)
 
 
 def getFavorite(name):
-    print 'RCLIENT wants fav %s' % name
-    (status, response) = server.getFavorite(name)
+    try:
+        (status, response) = server.getFavorite(name)
+    except:
+        return (FALSE, 'record_client: connection error')
+
 
     return returnFromJelly(status, response)
 
 
 def adjustPriority(favname, mod):
-    (status, message) = server.adjustPriority(favname, mod)
+    try:
+        (status, message) = server.adjustPriority(favname, mod)
+    except:
+        return (FALSE, 'record_client: connection error')
+
     return (status, message) 
 
 
 def isProgAFavorite(prog, favs):
-    (status, message) = server.isProgAFavorite(marmalade.jellyToXML(prog), 
-                                               marmalade.jellyToXML(favs))
+    try:
+        (status, message) = server.isProgAFavorite(marmalade.jellyToXML(prog), 
+                                                   marmalade.jellyToXML(favs))
+    except:
+        return (FALSE, 'record_client: connection error')
+
     return (status, message) 
 
 
 def removeFavoriteFromSchedule(fav):
-    (status, message) = server.removeFavoriteFromSchedule(fav)
+    try:
+        (status, message) = server.removeFavoriteFromSchedule(fav)
+    except:
+        return (FALSE, 'record_client: connection error')
+
     return (status, message) 
 
 
 def addFavoriteToSchedule(fav):
-    (status, message) = server.addFavoriteToSchedule(fav)
+    try:
+        (status, message) = server.addFavoriteToSchedule(fav)
+    except:
+        return (FALSE, 'record_client: connection error')
+
     return (status, message) 
 
 
 def updateFavoritesSchedule():
-    (status, message) = server.updateFavoritesSchedule()
+    try:
+        (status, message) = server.updateFavoritesSchedule()
+    except:
+        return (FALSE, 'record_client: connection error')
+
     return (status, message) 
 
 
@@ -221,5 +302,10 @@ if __name__ == '__main__':
     if function == "updateFavoritesSchedule":
         (result, response) = updateFavoritesSchedule()
         print response
+
+
+    if function == "test":
+        (result, response) = connectionTest('connection test')
+        print 'result: %s, response: %s ' % (result, response)
 
 

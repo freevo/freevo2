@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/05/14 00:04:54  rshortt
+# Better error handling.
+#
 # Revision 1.2  2003/05/12 23:02:41  rshortt
 # Adding HTTP BASIC Authentication.  In order to use you must override WWW_USERS
 # in local_conf.py.  This does not work for directories yet.
@@ -72,10 +75,11 @@ class GuideResource(FreevoResource):
         INTERVAL = web.INTERVAL
         n_cols = web.n_cols
 
+
         guide = epg_xmltv.get_guide()
-        (result, schedule) = ri.getScheduledRecordings()
-        schedule = schedule.getProgramList()
-        (result, favs) = ri.getFavorites()
+        (got_schedule, schedule) = ri.getScheduledRecordings()
+        if got_schedule:
+            schedule = schedule.getProgramList()
 
         fv.printHeader('Freevo TV Guide', web.STYLESHEET, web.JAVASCRIPT)
 
@@ -86,6 +90,8 @@ class GuideResource(FreevoResource):
         fv.tableRowClose()
         fv.tableClose()
 
+        if not got_schedule:
+            fv.res += '<hr /><h2>The recording server is down, recording information is unavailable.</h2>'
         fv.res += '<hr />'
 
         pops = ''
@@ -123,14 +129,15 @@ class GuideResource(FreevoResource):
                     #    prog.stop > time.time():
                     #     sys.stderr.write('Calling isProgScheduled: chan=%s prog=%s' % (chan.displayname,prog))        
                     # sys.stderr.write('Calling isProgScheduled: chan=%s prog=%s' % (chan.displayname,prog))        
-                    (result, message) = ri.isProgScheduled(prog, schedule)
-                    if result:
-                        status = 'scheduled'
-                        really_now = time.time()
-                        if prog.start <= really_now and prog.stop >= really_now:
-                            # in the future we should REALLY see if it is 
-                            # recording instead of just guessing
-                            status = 'recording'
+                    if got_schedule:
+                        (result, message) = ri.isProgScheduled(prog, schedule)
+                        if result:
+                            status = 'scheduled'
+                            really_now = time.time()
+                            if prog.start <= really_now and prog.stop >= really_now:
+                                # in the future we should REALLY see if it is 
+                                # recording instead of just guessing
+                                status = 'recording'
 
                     if prog.start <= now and prog.stop >= now:
                         cell = ""
@@ -141,8 +148,8 @@ class GuideResource(FreevoResource):
                         showtime_left = int(prog.stop - now)
                         intervals = showtime_left / INTERVAL
                         colspan = intervals + 1
-                        prog.title = string.replace(prog.title, "&", "SUB")
-                        prog.desc = string.replace(prog.desc, "&", "SUB")
+                        # prog.title = string.replace(prog.title, "&", "SUB")
+                        # prog.desc = string.replace(prog.desc, "&", "SUB")
                         cell += '%s' % prog.title
                         if colspan > c_left:
                             # show extends past visible range,
@@ -173,21 +180,17 @@ class GuideResource(FreevoResource):
                         fv.tableCell(cell, 'class="'+status+'" onclick="showPop(\'%s\', this)" colspan="%s"' % (popid, colspan))
                         now += INTERVAL*colspan
                         c_left -= colspan
+
             fv.tableRowClose()
         fv.tableClose()
         
         fv.res += pops
 
         fv.printSearchForm()
-
         fv.printLinks()
-
         fv.printFooter()
 
         return fv.res
 
-# fd = open('/tmp/blah', 'a')
-# fd.write(fv.res)
-# fd.close()
 
 resource = GuideResource()
