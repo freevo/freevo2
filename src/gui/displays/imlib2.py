@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/10/06 19:20:57  dischi
+# add keyboard input plugin
+#
 # Revision 1.3  2004/08/23 14:29:46  dischi
 # displays have information about animation support now
 #
@@ -37,6 +40,8 @@
 #
 # ----------------------------------------------------------------------
 
+import plugin
+
 # mevas imports
 import mevas
 from mevas.displays.imlib2canvas import Imlib2Canvas
@@ -46,6 +51,7 @@ class Display(Imlib2Canvas):
     def __init__(self, size, default=False):
         Imlib2Canvas.__init__(self, size)
         self.animation_possible = True
+        plugin.activate( 'input.x11' )
 
     def hide(self):
         pass
