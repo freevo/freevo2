@@ -9,9 +9,11 @@ Release 1.x.x (200x-xx-xx):
 * New fxd parser and better fxd item handling
 * Rename most config variables (!)
 * Add blending in the image viewer
-* fxd file support for <playlist> and <slideshow> (see share/fxd/examples)
-* replaced webradio plugin with a fxd file (share/fxd)
-
+* Fxd file support for <playlist> and <slideshow> (see share/fxd/examples)
+* Replaced webradio plugin with a fxd file (share/fxd)
+* New, reworked bluetooth plugin for controlling Freevo
+* detachbar plugin to see what Freevo is playing when detaching the audio player
+	
 	
 Release 1.4.0 (2003-11-20):
 -------------------------------
