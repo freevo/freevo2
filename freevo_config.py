@@ -978,6 +978,7 @@ OSD_DISPLAY = 'SDL'
 OSD_BACKGROUND_VIDEO = ''
 MPLAYER_BMOVL2_POSSIBLE = 0
 
+OSD_FADE_STEPS = 3
 
 # ======================================================================
 # Freevo remote control settings:
