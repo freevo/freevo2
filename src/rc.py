@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/07/11 02:01:11  rshortt
+# Stop freevo from getting double events in some cases.
+#
 # Revision 1.17  2003/05/30 14:47:32  outlyer
 # This wasn't working because you can do:
 #
@@ -177,7 +180,8 @@ class RemoteControl:
     def post_event(self, e):
         if not isinstance(e, Event):
             self.queue += [ Event(e, context=self.context) ]
-        self.queue += [ e ]
+        else:
+            self.queue += [ e ]
 
     def key_event_mapper(self, key):
         if not key:
