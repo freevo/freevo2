@@ -130,7 +130,9 @@ def main_func():
     # XXX change, we don't want to kill any mpg123 that is not started by Freevo :-)
     os.system('killall -9 mpg123 2&> /dev/null') # XXX hardcoded, fix!
 
-   # Kick off the main menu loop
+    time.sleep(1.5)
+    
+    # Kick off the main menu loop
     print 'Main loop starting...'
     getcmd()
 
