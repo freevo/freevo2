@@ -73,7 +73,7 @@ def main_menu(arg, menuw):
         start_tv(None, ('record', None))
         return
     
-    skin.PopupBox('Preparing the program guide')
+    skin.PopupBox('Preparing the program guide', icon='icons/clock.png')
 
     guide = epg.get_guide()
 
