@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2004/02/05 19:48:49  dischi
+# handle directory stuff as strings
+#
 # Revision 1.32  2004/01/31 13:15:56  dischi
 # do not use eval
 #
@@ -194,7 +197,8 @@ class MediaMenu(Item):
                         add_args = item[2:]
 
                 if vfs.isdir(filename):
-                    item = directory.DirItem(filename, self, display_type=self.display_type,
+                    item = directory.DirItem(String(filename), self,
+                                             display_type=self.display_type,
                                              add_args=add_args)
                     if title:
                         item.name = title
@@ -207,7 +211,7 @@ class MediaMenu(Item):
                         filename = vfs.join(config.SHARE_DIR, filename)
                     # normal file
                     for p in plugin.mimetype(self.display_type):
-                        items = p.get(self, [ filename ])
+                        items = p.get(self, [ String(filename) ])
                         if title:
                             for i in items:
                                 i.name = title
