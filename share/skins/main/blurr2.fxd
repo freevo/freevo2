@@ -500,6 +500,10 @@
 	    <style text="text with favorite info style"/>
         </menu>
 
+        <menu type="tv manual record menu">
+	    <style text="text with manual record info style"/>
+        </menu>
+
         <menuset label="tv menu">
             <screen layout="screen" x="0" y="0" width="800" height="600"/>
             <title visible="no"/>
@@ -542,6 +546,12 @@
         <menuset label="text with favorite info style" inherits="text with info style">
             <screen layout="tv screen" visible="yes"/>
             <info layout="tv favorite info" x="50" y="100" width="700" height="100"/>
+            <view visible="no"/>
+        </menuset>
+
+        <menuset label="text with manual record info style" inherits="text with info style">
+            <screen layout="tv screen" visible="yes"/>
+            <info layout="tv manual record info" x="50" y="100" width="700" height="100"/>
             <view visible="no"/>
         </menuset>
 
@@ -633,6 +643,34 @@
                     <if expression="mod">
 	                <text font="info value" mode="soft">Time: </text>
                         <text font="info value" expression="mod" mode="soft" />
+                        <newline/>
+                    </if>
+                </item>
+            </content>
+        </layout>
+
+        <!-- mfr work -->
+        <layout label="tv manual record info">
+            <content x="0" y="0" type="text" spacing="20" font="default">
+                <item type="default">
+                    <if expression="disp_title">
+	                <text font="info value" mode="soft">Program: </text>
+                        <text font="info value" expression="disp_title" mode="soft" />
+                        <newline/>
+                    </if>
+                    <if expression="disp_channel">
+	                <text font="info value" mode="soft">Channel: </text>
+                        <text font="info value" expression="disp_channel" mode="soft" />
+                        <newline/>
+                    </if>
+                    <if expression="disp_starttime">
+	                <text font="info value" mode="soft">Start: </text>
+                        <text font="info value" expression="disp_starttime" mode="soft" />
+                        <newline/>
+                    </if>
+                    <if expression="disp_stoptime">
+	                <text font="info value" mode="soft">Stop: </text>
+                        <text font="info value" expression="disp_stoptime" mode="soft" />
                         <newline/>
                     </if>
                 </item>
