@@ -21,7 +21,8 @@ fi
 
 cd /tmp
 rm rsync-ChangeLog $file 2>/dev/null
-wget http://freevo.sourceforge.net/gentoo/ChangeLog -O rsync-ChangeLog
+echo downloading version information
+wget -q http://freevo.sourceforge.net/gentoo/ChangeLog -O rsync-ChangeLog
 
 if [ '!' -e rsync-ChangeLog ]; then
     echo download failed
@@ -37,7 +38,8 @@ if ! head -n 1 rsync-ChangeLog | grep "$VERSION" >/dev/null; then
     exit 1
 fi
 
-wget http://freevo.sourceforge.net/gentoo/$file
+echo downloading ebuilds
+wget -q http://freevo.sourceforge.net/gentoo/$file
 
 if [ '!' -e $file ]; then
     echo download failed
@@ -52,7 +54,8 @@ rm -rf app-misc/freevo_runtime app-misc/freevo_snapshot \
     media-video/freevo-snapshot dev-python/mmpython dev-python/mmpython-snapshot \
     dev-python/pylirc media-tv/freevo-snapshots media-tv/freevo
 
-tar -zxvf /tmp/$file
+echo unpack ebuilds
+tar -zxvf /tmp/$file  2>&1 | grep ebuild
 rm /tmp/$file /tmp/rsync-ChangeLog
 
 cd /usr/portage
