@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/01/29 17:10:48  outlyer
+# Fixed spelling
+#
 # Revision 1.1  2002/11/24 13:58:44  dischi
 # code cleanup
 #
@@ -74,7 +77,7 @@ class Mixer:
         try:
             self.mixfd        = open(config.DEV_MIXER, 'r')
         except IOError:
-            print 'Couldnt open mixer %s!' % config.DEV_MIXER
+            print 'Couldn\'t open mixer %s' % config.DEV_MIXER
             self.mixfd = None
             return
         
