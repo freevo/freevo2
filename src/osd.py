@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.162  2004/06/13 18:40:37  dischi
+# fix crash
+#
 # Revision 1.161  2004/06/10 10:01:31  dischi
 # cleanup
 #
@@ -644,7 +647,7 @@ class OSD:
                 print 'Unknown Problem while loading image %s' % String(url)
                 if config.DEBUG:
                     traceback.print_exc()
-                    return None
+                return None
 
         # convert the surface to speed up blitting later
         if image and image.get_alpha():
