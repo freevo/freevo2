@@ -158,7 +158,7 @@ class MenuWidget:
             curr_selected = min(curr_selected+1, len(self.all_items)-1)
             menu.selected = self.all_items[curr_selected]
             self.refresh()
-        elif event == rc.CHUP:
+        elif event == rc.LEFT:
             # Do nothing for an empty file list
             if not len(self.menu_items):
                 return
@@ -173,7 +173,7 @@ class MenuWidget:
                 curr_selected = 0
                 menu.selected = self.all_items[curr_selected]
                 self.refresh()
-        elif event == rc.CHDOWN:
+        elif event == rc.RIGHT:
             # Do nothing for an empty file list
             if not len(self.menu_items):
                 return
@@ -196,10 +196,7 @@ class MenuWidget:
         elif event == rc.SELECT or event == rc.PLAY:
             action = menu.selected.action
             if action == None:
-                osd.clearscreen()
-                osd.drawstring('No action defined', 230, 280)
                 print 'No action.. '
-                time.sleep(2.0)
                 self.refresh()
             else:
                 action_str = str(action)
