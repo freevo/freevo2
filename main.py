@@ -4,6 +4,9 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.59  2002/08/31 18:22:47  dischi
+# changed pgrep regexp to kill freevo
+#
 # Revision 1.58  2002/08/31 18:09:33  krister
 # Removed old code for shutting down from startup.py which is not used anymore.
 #
@@ -174,7 +177,7 @@ def shutdown(menuw=None, arg=None):
     os.system('killall -9 freevo_rt 2&> /dev/null') 
     os.system('killall -9 freevo_xwin 2&> /dev/null')  # X11 helper app
     # XXX Kludge to shutdown if started with "python main.py"
-    os.system('kill -9 `pgrep -f "python*main.py" -d" "` 2&> /dev/null') 
+    os.system('kill -9 `pgrep -f "python.*main.py" -d" "` 2&> /dev/null') 
 
     # Just wait until we're dead. SDL cannot be polled here anyway.
     while 1:
