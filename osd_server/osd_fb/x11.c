@@ -5,7 +5,7 @@
 #include <assert.h>
 
 #include "x11.h"
-#include "jpeg.h"
+#include "readpng.h"
 
 static Display *dpy;
 static Window w;
@@ -18,14 +18,13 @@ static int xres, yres;
 int
 main (int ac, char *av[])
 {
-   FILE *fp;
-   uint8 *pBitmap;
+   uint32 *pBitmap;
    uint16 w, h;
+   int i;
    
    
    printf ("open()\n");
    x11_open (768, 576);
-   sleep (1);
 
 #if 0
    printf ("clearscreen()\n");
@@ -44,13 +43,22 @@ main (int ac, char *av[])
    x11_setpixel (10, yres - 10, 0xff0000);
    sleep (1);
 #endif
-   
-   printf ("read jpeg\n");
-   fp = fopen (av[1], "r");
-   pBitmap = jpeg_readbitmap (fp, &w, &h);
-   sleep (1);
 
- 
+   for (i = 1; i < ac; i++) {
+      printf ("read png %s\n", av[i]);
+      read_png (av[i], &pBitmap, &w, &h);
+
+      x11_drawbitmap (10, 10, w, h, (uint32 *) pBitmap);
+
+      x11_flush ();
+
+      free (pBitmap);
+   }
+   
+   printf ("\nPress a <CR> to exit!\n");
+   
+   getchar ();
+   
    x11_close ();
 
    return (0);
@@ -149,6 +157,48 @@ x11_setpixel (int x, int y, uint32 color)
 {
    XSetForeground (dpy, gc, color);
    XDrawPoint (dpy, w, gc, x, y);
+}
+
+
+void
+x11_drawbitmap (int x, int y, int width, int height, uint32 *pBitmap)
+{
+   int i, j;
+   uint32 color;
+
+   
+   printf ("Got ptr = %p\n", pBitmap);
+   
+   for (i = 0; i < height; i++) {
+      for (j = 0; j < width; j++) {
+         color = *pBitmap++;
+
+         if (color & 0xff000000) {
+            int r, g, b;
+            float alpha = 1.0 - (float) ((color & 0xff000000 >> 24) / 255.0);
+
+            
+            b = (color & 0xff0000) >> 16;
+            g = (color & 0xff00) >> 8;
+            r = color & 0xff;
+            r *= alpha;
+            g *= alpha;
+            b *= alpha; 
+            color = ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff);
+#if 0
+            printf ("%3d %3d   %3d  %3d  %3d\n",
+                    j, i, color & 0xff0000 >> 16,
+                    color & 0xff00 >> 8, color & 0xff);
+#endif
+            XSetForeground (dpy, gc, color);
+            XDrawPoint (dpy, w, gc, x+j, y+i);
+         }
+      }
+
+      printf ("\n");
+      
+   }
+   
 }
 
 
