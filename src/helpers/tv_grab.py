@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/10/20 12:33:01  rshortt
+# Put epg loading inside xmltv results check.
+#
 # Revision 1.11  2004/10/19 19:05:23  dischi
 # add data to db even if not sorted
 #
@@ -95,10 +98,10 @@ def grab():
         else:
             print 'Not configured to use tv_sort, skipping.'
 
-    print 'Loading data into epgdb, this may take a while'
+        print 'Loading data into epgdb, this may take a while'
 
-    shutil.move(xmltvtmp, config.XMLTV_FILE)
-    epg.add_data_xmltv(config.XMLTV_FILE)
+        shutil.move(xmltvtmp, config.XMLTV_FILE)
+        epg.add_data_xmltv(config.XMLTV_FILE)
 
 
 if __name__ == '__main__':
