@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.56  2003/10/27 17:36:56  dischi
+# NOOOOOOOOOOOOOOOOOO, stupid!!!!!! (sorry, I mean bugfix)
+#
 # Revision 1.55  2003/10/22 18:26:08  dischi
 # Changes in the table code of menu items:
 # o use percentage again, pixel sizes are bad because they don't scale
@@ -948,7 +951,7 @@ class DirItem(Playlist):
             except (IndexError, ValueError):
                 pass
         
-        Playlist.eventhandler(self, event, menuw)
+        return Playlist.eventhandler(self, event, menuw)
         
 
 # ======================================================================
