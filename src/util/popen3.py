@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/05/28 20:22:32  dischi
+# add run function as better os.system
+#
 # Revision 1.9  2004/01/04 13:07:32  dischi
 # close file handlers
 #
@@ -188,3 +191,31 @@ def stdout(app):
     child.childerr.close()
     child.tochild.close()
     return ret
+
+
+def run(app, object, signal=15):
+    """
+    run a child until object.abort is True. Than kill the child with
+    the given signal
+    """
+    if isinstance(app, str) or isinstance(app, unicode):
+        print 'WARNING: popen.run with string as app'
+        print 'This may cause some problems with threads'
+        
+    child = popen2.Popen3(app, 1, 100)
+    child.childerr.close()
+    child.fromchild.close()
+    while(1):
+        time.sleep(0.1)
+        if object.abort:
+            os.kill(child.pid, signal)
+
+        try:
+            pid = os.waitpid(child.pid, os.WNOHANG)[0]
+        except OSError:
+            break
+        
+        if pid:
+            break
+        
+    child.tochild.close()
