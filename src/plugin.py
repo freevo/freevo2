@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.49  2003/11/21 11:43:00  dischi
+# don't try to 'load' plugins that are already a python object
+#
+# Revision 1.1  2003/11/16 09:57:23  dischi
+# bugfix and make the DirwatcherThread a plugin
+#
 # Revision 1.48  2003/11/08 13:18:48  dischi
 # add AUDIOCD as plugin type
 #
@@ -204,7 +210,7 @@ def activate(name, type=None, level=10, args=None):
     __plugin_number__ += 1
 
     for p in __all_plugins__:
-        if p[0] == name and p[1] == type and p[3] == args:
+        if not isinstance(name, Plugin) and p[0] == name and p[1] == type and p[3] == args:
             print 'WARNING: duplicate plugin activation, ignoring:'
             print '<%s %s %s>' % (name, type, args)
             print
@@ -448,46 +454,50 @@ def __load_plugin__(name, type, level, args, number):
     # locate the plugin:
     files = []
 
-    module, special = __find_plugin_file__(name.replace('.', '/'))
-    if module:
-        object = module + '.PluginInterface'
-    elif name.find('.') > 0:
-        module, special = __find_plugin_file__(name[:name.rfind('.')].replace('.', '/'))
+    if not isinstance(name, Plugin):
+        module, special = __find_plugin_file__(name.replace('.', '/'))
         if module:
-            object = module + '.%s' % name[name.rfind('.')+1:]
+            object = module + '.PluginInterface'
+        elif name.find('.') > 0:
+            module, special = __find_plugin_file__(name[:name.rfind('.')].replace('.', '/'))
+            if module:
+                object = module + '.%s' % name[name.rfind('.')+1:]
+            else:
+                print 'can\'t locate plugin %s' % name
+                print 'start \'freevo plugins -l\' to get a list of plugins'
+                return
         else:
             print 'can\'t locate plugin %s' % name
             print 'start \'freevo plugins -l\' to get a list of plugins'
             return
-    else:
-        print 'can\'t locate plugin %s' % name
-        print 'start \'freevo plugins -l\' to get a list of plugins'
-        return
         
     try:
-        if DEBUG:
-            print 'loading %s as plugin %s' % (module, object)
-            
-        exec('import %s' % module)
-        if not args:
-            p = eval(object)()
-        elif isinstance(args, list) or isinstance(args, tuple):
-            paramlist = 'args[0]'
-            for i in range(1, len(args)):
-                paramlist += ',args[%s]' % i
-            p = eval('%s(%s)' % (object, paramlist))
-        else:
-            p = eval(object)(args)
+        if not isinstance(name, Plugin):
+            if DEBUG:
+                print 'loading %s as plugin %s' % (module, object)
 
-        if not hasattr(p, '_type'):
-            if hasattr(p, 'reason'):
-                reason = p.reason
+            exec('import %s' % module)
+            if not args:
+                p = eval(object)()
+            elif isinstance(args, list) or isinstance(args, tuple):
+                paramlist = 'args[0]'
+                for i in range(1, len(args)):
+                    paramlist += ',args[%s]' % i
+                p = eval('%s(%s)' % (object, paramlist))
             else:
-                reason = 'unknown\nThe plugin neither called __init__ nor set a '\
-                         'reason why\nPlease contact the plugin author or the freevo list'
-            print 'plugin %s deactivated, reason: %s' % (name, reason)
-            return
-        
+                p = eval(object)(args)
+
+            if not hasattr(p, '_type'):
+                if hasattr(p, 'reason'):
+                    reason = p.reason
+                else:
+                    reason = 'unknown\nThe plugin neither called __init__ nor set a '\
+                             'reason why\nPlease contact the plugin author or the freevo list'
+                print 'plugin %s deactivated, reason: %s' % (name, reason)
+                return
+        else:
+            p = name
+            
         p._number = number
         p._level = level
 
