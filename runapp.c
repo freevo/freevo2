@@ -57,7 +57,6 @@ main (int ac, char *av[])
   int newprio;
   int got_runtime;
   int use_preloads = 0;         /* Full runtime preloads */
-  int use_preloads_gentoo = 0;  /* Tiny runtime preloads for Gentoo */
   
 
   /* Set the umask to be ugo+rwx XXX security implications? */
@@ -88,9 +87,6 @@ main (int ac, char *av[])
   got_runtime = check_runtime ();
   LOG ("runtime %s", got_runtime ? "FOUND" : "NOT FOUND");
   
-  /* Add check for Gentoo too, different handling from the runtime */
-  /* XXX */
-
   /* Got a valid commandstring? */
   if (ac < 2) {
     return (0);
@@ -142,7 +138,7 @@ main (int ac, char *av[])
       /* Check if the python target is src/main.py, in which case
        * Gentoo preloads are used if present */
       if ((ac_idx < ac) && (strstr (av[ac_idx], "src/main.py") != (char *) NULL)) {
-        use_preloads_gentoo = 1;
+        use_preloads = 1;
       }
     }
 
@@ -170,19 +166,6 @@ main (int ac, char *av[])
     
     pPreloads = get_preload_str ("./runtime/preloads");
     LOG ("Setting LD_PRELOAD = '%s'", pPreloads);
-
-    setenv ("LD_PRELOAD", pPreloads, 1);
-    
-  }
-  
-  /* Check if LD_PRELOAD needs to be set to the tiny runtime preloads (Gentoo).
-   * This will do nothing if there is no runtime stuff whatsoever. */
-  if (use_preloads_gentoo) {
-    char *pPreloads;
-
-    
-    pPreloads = get_preload_str ("./runtime/preloads_gentoo");
-    LOG ("Setting Gentoo LD_PRELOAD = '%s'", pPreloads);
 
     setenv ("LD_PRELOAD", pPreloads, 1);
     
