@@ -7,18 +7,6 @@
 
 
 
-# begin configuration
-
-helpers=src/helpers
-src=src
-
-export FREEVO_SHARE=share
-
-# end configuration
-
-
-
-
 # get information about freevo dir and the name we called with
 if stat $0 | head -n 1 | grep "' -> \`" > /dev/null ; then
     script=`stat $0 | head -n 1 | sed "s/.*' -> .\\(.*\\)./\\1/"`
@@ -32,9 +20,6 @@ export FREEVO_SCRIPT=$script
 
 # Keep track of where we started. This env var is used inside Freevo.
 export FREEVO_STARTDIR=$PWD
-
-# Set this globaly, everything here should have access to these modules.
-export PYTHONPATH=$FREEVO_HOME:$FREEVO_HOME/$src:$FREEVO_HOME/$src/www:$FREEVO_HOME/$src/tv
 
 # Is runapp present? If not it needs to be compiled
 if [ ! -e "$FREEVO_HOME/runapp" ]; then
@@ -51,6 +36,32 @@ if [ ! -e "$FREEVO_HOME/runapp" ]; then
     exit 1
 fi
 
+# find out where all the needed files are
+if [ -e "$FREEVO_HOME/src/plugins" ]; then
+    # starting from src
+    helpers=src/helpers
+    $FREEVO_PYTHON=$FREEVO_HOME/src
+    export FREEVO_SHARE=share
+
+elif [ -e "$FREEVO_HOME/../share/freevo" ]; then
+    export FREEVO_HOME=$FREEVO_HOME/../share/freevo
+
+    # find the freevo libs
+    python -c 'import freevo' || exit 1
+    export FREEVO_PYTHON=`python -c 'import freevo; print freevo.__path__' | \
+                   sed 's/..\(.*\)../\1/'`
+    # installed version
+    helpers=$FREEVO_PYTHON/helpers
+    export FREEVO_SHARE=$FREEVO_HOME
+
+else
+    echo "can't find freevo data files"
+    exit 1
+fi
+
+# Set this globaly, everything here should have access to these modules.
+export PYTHONPATH=$FREEVO_HOME:$FREEVO_PYTHON:$FREEVO_PYTHON/www:$FREEVO_PYTHON/tv
+
 # call new x session if needed
 if [ "$call" = "freevo" -a "$1" = "-fs" ]; then
     servernum=0
@@ -62,6 +73,7 @@ if [ "$call" = "freevo" -a "$1" = "-fs" ]; then
 
     exec xinit $0 --force-fs -- :$servernum
 fi
+
 
 # call helper if the script is called as wrapper
 if [ "$call" = "freevo" ]; then
@@ -85,11 +97,6 @@ else
     PID_DIR=/tmp
 fi
 
-# cd to the freevo directory if necessary
-if [ ! -e src/identifymedia.py ]; then
-    cd $FREEVO_HOME
-    unset FREEVO_HOME
-fi
 
 if [ "$1" = "update" ] ; then
     if [ "$2" = "" ]; then
@@ -140,7 +147,7 @@ fi
 # Create the config file.
 if [ "$1" = "setup" ] ; then
     shift 1
-    ./runapp python src/setup_freevo.py $@
+    ./runapp python $FREEVO_PYTHON/setup_freevo.py $@
     exit 0
 fi
 
@@ -240,7 +247,8 @@ fi
 trap './freevo stop' 1 2 15
 
 # Start the main freevo application
-./runapp python -OO src/main.py $@ &
+./runapp python -OO $FREEVO_PYTHON/main.py $@ &
+
 echo $! > $PID_FILE
 wait `cat $PID_FILE`
 
