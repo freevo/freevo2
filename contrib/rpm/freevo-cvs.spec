@@ -231,7 +231,13 @@ cp -av testfiles/* %{buildroot}%{_cachedir}/freevo/testfiles
 rm -rf $RPM_BUILD_ROOT
 
 %post
-cd %{_prefix}; ./freevo setup --compile=%{_optimize},%{_prefix}
+#cd %{_prefix}; ./freevo setup --compile=%{_optimize},%{_prefix}
+cd %{_prefix}
+if [ -x /usr/bin/python2 ]; then
+/usr/bin/python2 src/setup_freevo.py --compile=%{_optimize},%{_prefix}
+else
+/usr/bin/python src/setup_freevo.py --compile=%{_optimize},%{_prefix}
+fi
 mkdir -p %{_cachedir}/freevo
 mkdir -p %{_cachedir}/freevo/{thumbnails,audio}
 mkdir -p %{_cachedir}/xmltv/logos
@@ -301,18 +307,21 @@ find %{_prefix}/runtime -name "*.pyo" |xargs rm -f
 %defattr(644,root,root,755)
 %{_cachedir}/freevo/testfiles
 
-%post boot
-if [ -x /sbin/chkconfig ]; then
-  chkconfig --add freevo
-fi
-depmod -a
-
-%preun boot
-if [ "$1" = 0 ] ; then
-  if [ -x /sbin/chkconfig ]; then
-    chkconfig --del freevo
-  fi
-fi
+#
+# The boot scripts were not chkconfig enabled
+#
+#%post boot
+#if [ -x /sbin/chkconfig ]; then
+#  chkconfig --add freevo
+#fi
+#depmod -a
+#
+#%preun boot
+#if [ "$1" = 0 ] ; then
+#  if [ -x /sbin/chkconfig ]; then
+#    chkconfig --del freevo
+#  fi
+#fi
 
 %post testfiles
 mkdir -p %{_cachedir}/freevo/testfiles/Movies/Recorded
@@ -322,12 +331,15 @@ ln -sf %{_cachedir}/freevo/testfiles %{_prefix}
 rm -f %{_prefix}/testfiles
 
 %changelog
+* Wed Aug  6 2003 TC Wan <tcwan@cs.usm.my>
+- Fixed python compile error on RH systems, disabled chkconfig for freevo-boot
+
 * Mon Aug  4 2003 TC Wan <tcwan@cs.usm.my>
 - 1.3.4 release cleanup
 
 * Mon Jun 30 2003 TC Wan <tcwan@cs.usm.my>
 - 1.3.2 release cleanup
-                                                                                
+
 * Tue Jun 24 2003 TC Wan <tcwan@cs.usm.my>
 - 1.3.2-preX and runtime v.7 cleanup
 
