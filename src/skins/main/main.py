@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/09/23 13:42:01  outlyer
+# Removed more chatter.
+#
 # Revision 1.12  2003/09/14 20:09:37  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
@@ -336,7 +339,7 @@ class Skin:
                 self.tvlisting = o
             self.tv_areas.append(o)
         
-        _debug_('Skin: Loading XML file %s' % config.SKIN_XML_FILE)
+        _debug_('Skin: Loading XML file %s' % config.SKIN_XML_FILE,2)
     
         self.settings = xml_skin.XMLSkin()
         
@@ -348,7 +351,7 @@ class Skin:
         for dir in config.cfgfilepath:
             local_skin = '%s/local_skin.fxd' % dir
             if os.path.isfile(local_skin):
-                _debug_('Skin: Add local config %s to skin' % local_skin)
+                _debug_('Skin: Add local config %s to skin' % local_skin,2)
                 self.settings.load(local_skin)
                 break
 
