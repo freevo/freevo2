@@ -60,7 +60,8 @@ rm /tmp/$file /tmp/rsync-ChangeLog
 
 cd /usr/portage
 
-for idir in media-tv/freevo dev-python/mmpython dev-python/pylirc; do
+for idir in media-tv/freevo dev-python/mmpython dev-python/pylirc \
+    media-libs/xine-lib media-video/xine-ui; do
     echo changing mask $idir
     for i in $idir/*.ebuild; do
 	cache=`echo $i | sed 's/\/.*\//\//' | sed 's/\.ebuild$//'`
