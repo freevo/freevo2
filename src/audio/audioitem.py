@@ -9,6 +9,24 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.54  2004/06/25 23:11:43  outlyer
+# Fix the advanced sort. Since 'trackno' is a number, but the sort is alphabetical,
+# we pad the numbers with 0's to make it sort properly. Fixed my problem with
+# '9' showing up at the end of the list.
+#
+# For some reason, it's still returning
+# 01
+# 02
+# 03
+# 04
+# 05
+# 06
+# 07
+# 08
+# 9
+# 10
+# 11
+#
 # Revision 1.53  2004/06/09 20:16:16  dischi
 # fix crash
 #
@@ -135,7 +153,7 @@ class AudioItem(Item):
                 return '%s%s' % (os.stat(self.filename).st_ctime, self.filename)
         if mode == 'advanced':
             # sort by track number
-            return '%s-%s' % (String(self['trackno']), String(self.url))
+            return '%0.3i-%s' % (int(self['trackno']), String(self.url))
         return self.url
 
 
