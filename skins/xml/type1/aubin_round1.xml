@@ -44,10 +44,10 @@
       <covers>
 	<cover type="movie" visible="yes" x="50" y="95" width="200"
           height="280" border_color="0x000000" border_size="1">
-        <mask>
+        <!-- mask>
           <rectangle x="40" y="85" width="220" height="300" 
             color="0x80000000" radius="10"/>
-          </mask>
+          </mask -->
         </cover>
 
 	<cover type="music" visible="yes" x="50" y="115" width="200"
@@ -60,8 +60,8 @@
       </covers>
 
 
-      <submenu x="30" y="530" visible="no">
-	<font name="Arial_Bold" size="20" color="0xffffff"/>
+      <submenu x="30" y="500" visible="no">
+	<font name="Arial_Bold" size="16" color="0xffffff"/>
 	<selection length="154" bgcolor="0x80000000" radius="10">
            <font name="Arial_Bold" size="20" color="0xffffff"/>
            <shadow visible="no" color="0x000000" x="2" y="2"/>
