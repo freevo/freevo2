@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/04/27 17:43:30  dischi
+# secure RemoteControl against different threads
+#
 # Revision 1.13  2003/04/27 15:28:24  rshortt
 # Adding back support for using a network remote.  If ENABLE_NETWORK_REMOTE is
 # set to 1 in local_conf.py then rc.py will also listen for commands over UDP.
@@ -66,7 +69,7 @@
 
 import socket
 import config
-
+import util
 
 PYLIRC = 1
 try:
@@ -90,7 +93,7 @@ def get_singleton():
 
     # One-time init
     if _singleton == None:
-        _singleton = RemoteControl()
+        _singleton = util.SynchronizedObject(RemoteControl())
         
     return _singleton
 
