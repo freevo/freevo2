@@ -9,85 +9,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.35  2003/03/30 19:21:16  dischi
-# remember all skin paths for image searching
-#
-# Revision 1.34  2003/03/30 17:00:34  dischi
-# typo
-#
-# Revision 1.33  2003/03/30 16:15:30  dischi
-# make it possible to define image filenames extra
-#
-# Revision 1.32  2003/03/27 20:10:08  dischi
-# fix missing font definition (default must be defined)
-#
-# Revision 1.31  2003/03/23 21:40:32  dischi
-# small bugfixes for loading a new skin
-#
-# Revision 1.30  2003/03/23 20:50:07  dischi
-# bugfix
-#
-# Revision 1.29  2003/03/23 19:57:11  dischi
-# Moved skin xml files to skins/xml/type1 and all stuff for blue_round2 to
-# skins/xml/blue_round2
-#
-# Revision 1.28  2003/03/22 20:08:31  dischi
-# Lots of changes:
-# o blue2_big and blue2_small are gone, it's only blue2 now
-# o Support for up/down arrows in the listing area
-# o a sutitle area for additional title information (see video menu in
-#   blue2 for an example)
-# o some layout changes in blue2 (experimenting with the skin)
-# o the skin searches for images in current dir, skins/images and icon dir
-# o bugfixes
-#
-# Revision 1.27  2003/03/21 19:50:54  dischi
-# moved some main menu settings from skin to freevo_config.py
-#
-# Revision 1.26  2003/03/16 19:32:05  dischi
-# function prepaire to resolve all the references
-# color can be a reference to a <color> tag
-#
-# Revision 1.25  2003/03/14 19:38:03  dischi
-# Support the new <menu> and <menuset> structure. See the blue2 skins
-# for example
-#
-# Revision 1.24  2003/03/13 21:01:15  dischi
-# docs update
-#
-# Revision 1.23  2003/03/08 17:36:47  dischi
-# integration of the tv guide
-#
-# Revision 1.22  2003/03/07 22:54:12  dischi
-# First version of the extended menu with image support. Try the music menu
-# and press DISPLAY
-#
-# Revision 1.21  2003/03/07 17:28:40  dischi
-# added support for extended menus
-#
-# Revision 1.20  2003/03/06 21:42:57  dischi
-# Added text as content
-#
-# Revision 1.19  2003/03/05 21:57:15  dischi
-# Added audio player. The info area is empty right now, but this skin
-# can player audio files
-#
-# Revision 1.18  2003/03/02 21:48:34  dischi
-# Support for skin changing in the main menu
-#
-# Revision 1.17  2003/03/02 11:46:32  dischi
-# Added GetPopupBoxStyle to return popup box styles to the gui
-#
-# Revision 1.16  2003/03/01 00:12:20  dischi
-# Some bug fixes, some speed-ups. blue_round2 has a correct main menu,
-# but on the main menu the idle bar still flickers (stupid watermarks),
-# on other menus it's ok.
-#
-# Revision 1.15  2003/02/27 22:39:50  dischi
-# The view area is working, still no extended menu/info area. The
-# blue_round1 skin looks like with the old skin, blue_round2 is the
-# beginning of recreating aubin_round1. tv and music player aren't
-# implemented yet.
+# Revision 1.36  2003/04/02 14:14:14  dischi
+# small cleanups
 #
 #
 # -----------------------------------------------------------------------
@@ -115,10 +38,6 @@
 
 
 # some python stuff
-import sys
-import socket
-import random
-import time
 import os
 import copy
 import re
@@ -136,7 +55,6 @@ FALSE = 0
 osd = osd.get_singleton()
 
 # XXX Shouldn't this be moved to the config file?
-
 OSD_FONT_DIR = 'skins/fonts/'
 
 geometry = (config.CONF.width, config.CONF.height)

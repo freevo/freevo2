@@ -9,126 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.48  2003/04/02 14:14:13  dischi
+# small cleanups
+#
 # Revision 1.47  2003/03/31 20:38:07  dischi
 # added xml skin cache
-#
-# Revision 1.46  2003/03/30 18:05:25  dischi
-# give correct skin information to the gui object
-#
-# Revision 1.45  2003/03/30 17:42:03  dischi
-# image.fxd is no real skin
-#
-# Revision 1.44  2003/03/30 14:13:23  dischi
-# (listing.py from prev. checkin has the wrong log message)
-# o tvlisting now has left/right items and the label width is taken from the
-#   skin xml file. The channel logos are scaled to fit that space
-# o add image load function to area
-# o add some few lines here and there to make it possible to force the
-#   skin to a specific layout
-# o initial display style is set to config.SKIN_START_LAYOUT
-#
-# Revision 1.43  2003/03/27 20:11:00  dischi
-# Fix endless loop on empty directories (and added a messages)
-#
-# Revision 1.42  2003/03/23 21:40:31  dischi
-# small bugfixes for loading a new skin
-#
-# Revision 1.41  2003/03/23 19:57:11  dischi
-# Moved skin xml files to skins/xml/type1 and all stuff for blue_round2 to
-# skins/xml/blue_round2
-#
-# Revision 1.40  2003/03/22 22:21:41  dischi
-# DISPLAY can now toggle between more than two styles. The video menu
-# has a 3rd style, all infos. Press DISPLAY two times on a video item
-# (should be a fxd file to see everything)
-#
-# Revision 1.39  2003/03/22 20:08:30  dischi
-# Lots of changes:
-# o blue2_big and blue2_small are gone, it's only blue2 now
-# o Support for up/down arrows in the listing area
-# o a sutitle area for additional title information (see video menu in
-#   blue2 for an example)
-# o some layout changes in blue2 (experimenting with the skin)
-# o the skin searches for images in current dir, skins/images and icon dir
-# o bugfixes
-#
-# Revision 1.38  2003/03/16 19:36:06  dischi
-# Adjustments to the new xml_parser, added listing type 'image+text' to
-# the listing area and blue2, added grey skin. It only looks like grey1
-# in the menu. The skin inherits from blue1 and only redefines the colors
-# and the fonts. blue2 now has an image view for the image menu.
-#
-# Revision 1.37  2003/03/15 17:20:07  dischi
-# renamed skin.xml to folder.fxd
-#
-# Revision 1.36  2003/03/13 21:02:05  dischi
-# misc cleanups
-#
-# Revision 1.35  2003/03/13 19:57:08  dischi
-# add font height information to font
-#
-# Revision 1.34  2003/03/08 17:36:47  dischi
-# integration of the tv guide
-#
-# Revision 1.33  2003/03/07 17:27:48  dischi
-# added support for extended menus
-#
-# Revision 1.32  2003/03/05 21:57:11  dischi
-# Added audio player. The info area is empty right now, but this skin
-# can player audio files
-#
-# Revision 1.31  2003/03/05 20:08:18  dischi
-# More speed enhancements. It's now faster than the keyboard control :-)
-#
-# Revision 1.30  2003/03/05 19:20:47  dischi
-# cleanip
-#
-# Revision 1.29  2003/03/04 22:46:33  dischi
-# VERY fast now (IMHO as fast as we can get it). There are some cleanups
-# necessary, but it's working. area.py only blits the parts of the screen
-# that changed, Aubins idle bar won't blink at all anymore (except you change
-# the background below it)
-#
-# Revision 1.28  2003/03/02 21:48:34  dischi
-# Support for skin changing in the main menu
-#
-# Revision 1.27  2003/03/02 19:31:35  dischi
-# split the draw function in two parts
-#
-# Revision 1.26  2003/03/02 15:18:48  dischi
-# Don't redraw if a child is visble
-#
-# Revision 1.25  2003/03/02 15:04:08  dischi
-# Added forced_redraw after Clear()
-#
-# Revision 1.24  2003/03/02 14:35:11  dischi
-# Added clear function
-#
-# Revision 1.23  2003/03/02 11:46:32  dischi
-# Added GetPopupBoxStyle to return popup box styles to the gui
-#
-# Revision 1.22  2003/02/27 22:39:50  dischi
-# The view area is working, still no extended menu/info area. The
-# blue_round1 skin looks like with the old skin, blue_round2 is the
-# beginning of recreating aubin_round1. tv and music player aren't
-# implemented yet.
-#
-# Revision 1.21  2003/02/26 21:21:11  dischi
-# blue_round1.xml working
-#
-# Revision 1.20  2003/02/26 19:59:26  dischi
-# title area in area visible=(yes|no) is working
-#
-# Revision 1.19  2003/02/25 22:56:00  dischi
-# New version of the new skin. It still looks the same (except that icons
-# are working now), but the internal structure has changed. Now it will
-# be easier to do the next steps.
-#
-# Revision 1.18  2003/02/23 18:42:20  dischi
-# Current status of my skin redesign. Currently only the background and
-# the listing area is working, the listing without icons. Let me know what
-# you thing before I spend more time with it
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -159,20 +44,13 @@
 import config
 
 import sys, socket, random, time, os, copy, re
-import pygame
 
 # Various utilities
 import util
 
-# The mixer class, controls the volumes for playback and recording
-import mixer
-
 # The OSD class, used to communicate with the OSD daemon
 import osd
 
-# The gui class
-import gui
-    
 # The RemoteControl class, sets up a UDP daemon that the remote control client
 # sends commands to
 import rc
@@ -196,17 +74,11 @@ TRUE = 1
 FALSE = 0
 
 
-# Set up the mixer
-mixer = mixer.get_singleton()
-
 # Create the remote control object
 rc = rc.get_singleton()
 
 
-
-
-from area import Skin_Area
-from area import Screen
+from area import Skin_Area, Screen
 
 from listing_area import Listing_Area
 from tvlisting_area import TVListing_Area
@@ -445,6 +317,7 @@ class Skin:
             return self.FindCurrentMenu(widget.parent)
         return widget.menustack[-1]
         
+
     def GetPopupBoxStyle(self, widget=None):
         """
         This function returns style information for drawing a popup box.

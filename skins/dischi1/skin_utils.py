@@ -9,34 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/04/02 14:14:14  dischi
+# small cleanups
+#
 # Revision 1.8  2003/04/02 11:53:30  dischi
 # small enhancements
-#
-# Revision 1.7  2003/03/19 11:00:29  dischi
-# cache images inside the area and some bugfixes to speed up things
-#
-# Revision 1.6  2003/03/15 17:25:24  dischi
-# don't scale forced images
-#
-# Revision 1.5  2003/03/15 17:13:57  dischi
-# use rom drive images for rom drive items
-#
-# Revision 1.4  2003/03/14 19:36:57  dischi
-# some improvements for image loading
-#
-# Revision 1.3  2003/03/07 22:54:12  dischi
-# First version of the extended menu with image support. Try the music menu
-# and press DISPLAY
-#
-# Revision 1.2  2003/03/02 11:46:32  dischi
-# Added GetPopupBoxStyle to return popup box styles to the gui
-#
-# Revision 1.1  2003/02/27 22:39:50  dischi
-# The view area is working, still no extended menu/info area. The
-# blue_round1 skin looks like with the old skin, blue_round2 is the
-# beginning of recreating aubin_round1. tv and music player aren't
-# implemented yet.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -68,20 +45,24 @@ import objectcache
 
 osd = osd.get_singleton()
 
-format_imagecache = objectcache.ObjectCache(20, desc='fomat_image')
+format_imagecache = objectcache.ObjectCache(20, desc='format_image')
+
 
 def format_image(settings, item, width, height, force=0):
-    cname = '%s-%s-%s-%s' % (item, width, height, force)
-    cimage = format_imagecache[cname]
-
-    if cimage:
-        return cimage
-    
     if hasattr(item, 'display_type'):
         type = item.display_type
     else:
         type = item.type
 
+    cname = '%s-%s-%s-%s-%s' % (item.image, type, width, height, force)
+    if hasattr(item, 'media'):
+        cname = '%s-%s' % (cname, item.media)
+        
+    cimage = format_imagecache[cname]
+
+    if cimage:
+        return cimage
+    
     image = None
     if item.image:
         image = osd.loadbitmap('thumb://%s' % item.image)

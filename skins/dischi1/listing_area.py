@@ -9,63 +9,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/04/02 14:14:13  dischi
+# small cleanups
+#
 # Revision 1.20  2003/04/02 11:53:30  dischi
 # small enhancements
 #
 # Revision 1.19  2003/03/30 14:10:15  dischi
 # Added left/right icons and set the label width to the fixed value specified
 # in the xml file. The channel icons will be scaled to fill that space.
-#
-# Revision 1.18  2003/03/29 21:43:39  dischi
-# small bugfix
-#
-# Revision 1.17  2003/03/27 20:10:59  dischi
-# Fix endless loop on empty directories (and added a messages)
-#
-# Revision 1.16  2003/03/23 21:40:31  dischi
-# small bugfixes for loading a new skin
-#
-# Revision 1.15  2003/03/23 11:38:49  dischi
-# fixed some alignments
-#
-# Revision 1.14  2003/03/22 22:20:22  dischi
-# fixed a redraw bug
-#
-# Revision 1.13  2003/03/22 20:08:30  dischi
-# Lots of changes:
-# o blue2_big and blue2_small are gone, it's only blue2 now
-# o Support for up/down arrows in the listing area
-# o a sutitle area for additional title information (see video menu in
-#   blue2 for an example)
-# o some layout changes in blue2 (experimenting with the skin)
-# o the skin searches for images in current dir, skins/images and icon dir
-# o bugfixes
-#
-# Revision 1.12  2003/03/21 19:32:51  dischi
-# small bugfix
-#
-# Revision 1.11  2003/03/19 11:00:24  dischi
-# cache images inside the area and some bugfixes to speed up things
-#
-# Revision 1.10  2003/03/16 19:36:05  dischi
-# Adjustments to the new xml_parser, added listing type 'image+text' to
-# the listing area and blue2, added grey skin. It only looks like grey1
-# in the menu. The skin inherits from blue1 and only redefines the colors
-# and the fonts. blue2 now has an image view for the image menu.
-#
-# Revision 1.9  2003/03/14 19:38:50  dischi
-# some cosmetic fixes
-#
-# Revision 1.8  2003/03/13 21:03:51  dischi
-# only load it when necessary
-#
-# Revision 1.7  2003/03/13 21:02:05  dischi
-# misc cleanups
-#
-# Revision 1.6  2003/03/07 22:54:11  dischi
-# First version of the extended menu with image support. Try the music menu
-# and press DISPLAY
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -92,19 +44,11 @@
 
 import copy
 
-import osd
-import pygame
-
-osd = osd.get_singleton()
-
 from area import Skin_Area
 from skin_utils import *
 
 
-# Set to 1 for debug output
-DEBUG = 1
-
-TRUE = 1
+TRUE  = 1
 FALSE = 0
 
 
@@ -117,6 +61,7 @@ class Listing_Area(Skin_Area):
         Skin_Area.__init__(self, 'listing', screen)
         self.last_choices = ( None, None )
         self.last_get_items_geometry = [ None, None ]
+
         
     def get_items_geometry(self, settings, menu, display_style):
         """
@@ -319,15 +264,8 @@ class Listing_Area(Skin_Area):
                 y0 = item_y0
                 icon_x = 0
                 if choice.icon:
-                    cname = '%s-%s-%s' % (choice.icon, vspace-content.spacing,
-                                          vspace-content.spacing)
-                    image = self.imagecache[cname]
-                    if not image:
-                        image = osd.loadbitmap(choice.icon)
-                        if image:
-                            image = pygame.transform.scale(image, (vspace-content.spacing,
-                                                                   vspace-content.spacing))
-                            self.imagecache[cname] = image
+                    image = self.load_image(choice.icon, (vspace-content.spacing,
+                                                          vspace-content.spacing))
                     if image:
                         self.draw_image(image, (x0, y0))
                         icon_x = vspace

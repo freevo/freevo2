@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/04/02 14:14:14  dischi
+# small cleanups
+#
 # Revision 1.10  2003/03/30 14:13:23  dischi
 # (listing.py from prev. checkin has the wrong log message)
 # o tvlisting now has left/right items and the label width is taken from the
@@ -27,33 +30,6 @@
 # o some layout changes in blue2 (experimenting with the skin)
 # o the skin searches for images in current dir, skins/images and icon dir
 # o bugfixes
-#
-# Revision 1.8  2003/03/20 18:55:46  dischi
-# Correct the rectangle drawing
-#
-# Revision 1.7  2003/03/19 11:00:31  dischi
-# cache images inside the area and some bugfixes to speed up things
-#
-# Revision 1.6  2003/03/16 19:36:07  dischi
-# Adjustments to the new xml_parser, added listing type 'image+text' to
-# the listing area and blue2, added grey skin. It only looks like grey1
-# in the menu. The skin inherits from blue1 and only redefines the colors
-# and the fonts. blue2 now has an image view for the image menu.
-#
-# Revision 1.5  2003/03/15 11:08:40  dischi
-# added channel logos
-#
-# Revision 1.4  2003/03/14 19:29:07  dischi
-# some position fixes
-#
-# Revision 1.3  2003/03/13 21:02:08  dischi
-# misc cleanups
-#
-# Revision 1.2  2003/03/08 19:54:41  dischi
-# make it look nicer
-#
-# Revision 1.1  2003/03/08 17:36:15  dischi
-# A listing area for the tv listing
 #
 #
 # -----------------------------------------------------------------------
@@ -81,19 +57,12 @@
 
 import copy
 
-import osd
-import pygame
 import time
 import config
-
-osd = osd.get_singleton()
 
 from area import Skin_Area, Geometry
 from skin_utils import *
 
-
-# Set to 1 for debug output
-DEBUG = 1
 
 TRUE = 1
 FALSE = 0
@@ -143,11 +112,6 @@ class TVListing_Area(Skin_Area):
 
         # get the max width needed for the longest channel name
         label_width = label_val.width
-
-        #for channel in menuw.all_channels:
-        #    label_width = max(label_width, osd.stringsize(channel.displayname,
-        #                                                  label_val.font.name,
-        #                                                  label_val.font.size)[0])
 
         label_txt_width = label_width
 

@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2003/04/02 14:14:13  dischi
+# small cleanups
+#
 # Revision 1.37  2003/04/02 11:54:35  dischi
 # And speedups again. Background images are only loaded when necessary
 #
@@ -292,7 +295,7 @@ class Skin_Area:
         
         self.imagecache = objectcache.ObjectCache(imagecachesize,
                                                   desc='%s_image' % self.name)
-        self.dummy_layer = pygame.Surface((osd.width, osd.height), 1, 32)
+        self.dummy_layer = pygame.Surface((osd.width, osd.height))
 
 
     def draw(self, settings, obj, display_style=0, widget_type='menu', force_redraw=FALSE):

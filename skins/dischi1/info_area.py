@@ -9,48 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/04/02 14:14:13  dischi
+# small cleanups
+#
 # Revision 1.11  2003/04/02 11:53:30  dischi
 # small enhancements
 #
 # Revision 1.10  2003/03/22 22:20:06  dischi
 # fixed table handling
-#
-# Revision 1.9  2003/03/18 09:37:00  dischi
-# Added viewitem and infoitem to the menu to set an item which image/info
-# to take (only for the new skin)
-#
-# Revision 1.8  2003/03/16 19:36:04  dischi
-# Adjustments to the new xml_parser, added listing type 'image+text' to
-# the listing area and blue2, added grey skin. It only looks like grey1
-# in the menu. The skin inherits from blue1 and only redefines the colors
-# and the fonts. blue2 now has an image view for the image menu.
-#
-# Revision 1.7  2003/03/14 19:38:48  dischi
-# some cosmetic fixes
-#
-# Revision 1.6  2003/03/13 21:02:04  dischi
-# misc cleanups
-#
-# Revision 1.5  2003/03/11 20:38:48  dischi
-# some speed ups
-#
-# Revision 1.4  2003/03/11 20:26:48  dischi
-# Added tv info area. After that day of work, I needed to do something
-# that has a result
-#
-# Revision 1.3  2003/03/07 17:28:18  dischi
-# small fixes
-#
-# Revision 1.2  2003/03/06 21:45:24  dischi
-# Added mp3 player view area. You can set the infos you want to see in the
-# skin. @VAR@ means insert a variable from the item object here, \t means
-# next col (currently only two cols are supported). I don't like the
-# delimiter @@ and \t, but I don't have a better idea (&var; doesn't work
-# because pyXML want's to replace it)
-#
-# Revision 1.1  2003/03/05 21:55:21  dischi
-# empty info area
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
