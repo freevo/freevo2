@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2002/10/24 19:51:39  dischi
+# Integrated patch from Wan Tat Chee to reset zoom/rotation
+#
 # Revision 1.16  2002/10/21 02:31:38  krister
 # Set DEBUG = config.DEBUG.
 #
@@ -232,6 +235,8 @@ class ImageViewer:
             menuwidget.refresh()
 
         if event == rc.UP:
+	    self.zoom = 0
+	    self.rotation = 0
             if self.playlist == []:
                 rc.app = None
                 menuwidget.refresh()
@@ -240,9 +245,11 @@ class ImageViewer:
                 pos = self.playlist.index(self.filename)
                 pos = (pos-1) % len(self.playlist)
                 filename = self.playlist[pos]
-                self.view(filename, pos, self.playlist)
+                self.view(filename, pos, self.playlist, zoom=self.zoom, rotation=self.rotation)
 
         if event == rc.DOWN:
+	    self.zoom = 0
+	    self.rotation = 0
             if self.playlist == []:
                 rc.app = None
                 menuwidget.refresh()
@@ -251,7 +258,7 @@ class ImageViewer:
                 pos = self.playlist.index(self.filename)
                 pos = (pos+1) % len(self.playlist)
                 filename = self.playlist[pos]
-                self.view(filename, pos, self.playlist)
+                self.view(filename, pos, self.playlist, zoom=self.zoom, rotation=self.rotation)
 
         # rotate image
         if event == rc.LEFT or event == rc.RIGHT:
@@ -277,6 +284,8 @@ class ImageViewer:
             scale = min(scale_x, scale_y)
 
             new_w, new_h = int(scale*width), int(scale*height)
+
+	    self.zoom = 0
 
             osd.drawbitmap(self.filename, (osd.width-new_w) / 2, (osd.height-new_h) / 2,
                            scaling=scale, rotation=self.rotation)
