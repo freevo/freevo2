@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2005/01/09 16:42:36  dischi
+# add some debug for find a timing problem
+#
 # Revision 1.24  2005/01/07 20:41:03  dischi
 # fix coming up and other parts of the tv menu
 #
@@ -86,6 +89,8 @@ from record.client import recordings
 from directory import DirItem
 from gui import AlertBox
 
+import logging
+log = logging.getLogger('tv')
 
 class Info(Item):
     def __getitem__(self, key):
@@ -130,6 +135,9 @@ class TVMenu(Item):
 
     def start_tvguide(self, arg, menuw):
 
+        # FIXME: debug, remove me
+        t1 = time.time()
+
         # Should we check the validity of the guide here or remove this?
         if False:
             msg  = _('The list of TV channels is invalid!\n')
@@ -144,4 +152,8 @@ class TVMenu(Item):
         if guide.start(self):
             menuw.pushmenu(guide)
             menuw.refresh()
+        
+        # FIXME: debug, remove me
+        t2 = time.time()
+        log.info('complete tv menu update: %s' % (t2-t1))
         

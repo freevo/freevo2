@@ -380,6 +380,10 @@ class TvlistingArea(Area):
                                      item_h, font_h)
         self.last_channels = channel_list
 
+        # FIXME: debug, remove me
+        if self.__ONE_TIME_DEBUG:
+            t2 = time.time()
+
         for channel in channel_list:
             try:
                 for prg in channel[start_time:stop_time]:
@@ -485,6 +489,7 @@ class TvlistingArea(Area):
 
         # FIXME: debug, remove me
         if self.__ONE_TIME_DEBUG:
-            t2 = time.time()
-            log.info('tv listing debug time: %s' % (t2-t1))
+            t3 = time.time()
+            log.info('tv listing debug times:\n%s\n%s\n%s' % \
+                     (t2-t1, t3-t2, t3-t1))
             self.__ONE_TIME_DEBUG = False
