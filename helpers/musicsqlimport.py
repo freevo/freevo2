@@ -24,15 +24,6 @@ def inti(a):
     else:
         return 0
 
-def escape(sql):
-    if sql:
-        sql = sql.replace('\'','\'\'')
-        return sql
-    return 'null'
-
-# Only call once... how do we check if the tables exist?
-
-
 def check_db():
     # verify the database exists
     if not os.path.exists(DATABASE):
@@ -74,8 +65,8 @@ def make_query(filename,dirtitle):
             trackof = inti(a['trackno'].split('/')[1])
 
     VALUES = "(null,\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',%i,%i,%i,\'%s\',%f,%i,\'%s\',\'%s\',%i,\'%s\')" \
-        % (escape(dirtitle),md5,escape(os.path.dirname(filename)),escape(os.path.basename(filename)), \
-           'mp3',escape(a['artist']),escape(a['title']),escape(a['album']),inti(a['date']),trackno, \
+        % (util.escape(dirtitle),md5,util.escape(os.path.dirname(filename)),util.escape(os.path.basename(filename)), \
+           'mp3',util.escape(a['artist']),util.escape(a['title']),util.escape(a['album']),inti(a['date']),trackno, \
            trackof, 100,0,0,'0','262',0,'null')
 
     SQL = 'INSERT OR IGNORE INTO music VALUES ' + VALUES

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2003/06/30 22:35:04  outlyer
+# Move escape(sql) into escape, and use it now.
+#
 # Revision 1.32  2003/06/30 20:05:35  outlyer
 # Don't print stuff for every call of md5.
 #
@@ -333,6 +336,16 @@ def getExifThumbnail(file, x0=0, y0=0):
 
     return None
 
+
+def escape(sql):
+    """
+    Escape a SQL query in a manner suitable for sqlite
+    """
+    if sql:
+        sql = sql.replace('\'','\'\'')
+        return sql
+    else:
+        return 'null'
     
 def recursefolders(root, recurse=0, pattern='*', return_folders=0):
         # Before anyone asks why I didn't use os.path.walk; it's simple, 

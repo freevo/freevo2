@@ -20,7 +20,7 @@ import config
 import plugin
 import re
 import time
-import sqlite
+import sqlite,util
 
 from gui.AlertBox import AlertBox
 
@@ -45,9 +45,12 @@ class PluginInterface(plugin.ItemPlugin):
         db = sqlite.connect('%s/freevo.sqlite' % (config.FREEVO_CACHEDIR))
         cursor = db.cursor() 
 
+
+
         sql = 'SELECT md5, last_play,play_count,rating FROM music' + \
-               ' WHERE path = \'%s\' and filename = \'%s\'' % (os.path.dirname(file), 
-               os.path.basename(file))
+               ' WHERE path = \'%s\' and filename = \'%s\'' % (util.escape(os.path.dirname(file)), 
+               util.escape(os.path.basename(file)))
+         
         cursor.execute(sql)
         md5,last_play,play_count,rating = cursor.fetchone()
        
