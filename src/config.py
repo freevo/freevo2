@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/02/25 04:37:29  krister
+# Updated local_conf version to 2.0 to make it clear that the remote control stuff changed. Added automatic information about what has changed in the config files since the user's version.
+#
 # Revision 1.17  2003/02/22 22:32:12  krister
 # Init FREEVO_STARTDIR if not set.
 #
@@ -185,7 +188,6 @@ class Logger:
     def close():
         pass
     
-            
 
 #
 # Redirect stdout and stderr to stdout and /tmp/freevo.log
@@ -207,6 +209,7 @@ class Struct:
     pass
 
 # Default settings
+# These will be overwritten by the contents of 'freevo.conf'
 CONF = Struct()
 CONF.geometry = '800x600'
 CONF.width, CONF.height = 800, 600
@@ -219,6 +222,25 @@ CONF.mplayer = ''
 CONF.snes = ''
 CONF.version = 0
 
+def print_config_changes(conf_version, file_version, changelist):
+    ver_old = float(file_version)
+    ver_new = float(conf_version)
+    if ver_old == ver_new:
+        return
+    print
+    print 'You are using version %s, changes since then:' % file_version
+    changed = [(cv, cd) for (cv, cd) in changelist if cv > ver_old]
+    if not changed:
+        print 'The changelist has not been updated, please notify the developers!'
+    else:
+        for change_ver, change_desc in changed:
+            print 'Version %s:' % change_ver
+            for line in change_desc.split('\n'):
+                print '    ', line.strip()
+            print
+    print
+            
+    
 def read_config(filename, conf):
     if DEBUG: print 'Reading config file %s' % filename
     
@@ -281,15 +303,19 @@ for dirname in cfgfilepath:
 
         if int(str(CONFIG_VERSION).split('.')[0]) != \
            int(str(LOCAL_CONF_VERSION).split('.')[0]):
-            print '\nERROR: The version informations in freevo_config.py doesn\'t'
+            print '\nERROR: The version information in freevo_config.py doesn\'t'
             print 'match the version in your local_config.py.'
             print 'Please check freevo_config.py for changes and set CONFIG_VERSION'
             print 'in %s to %s' % (overridefile, LOCAL_CONF_VERSION)
+            print_config_changes(LOCAL_CONF_VERSION, CONFIG_VERSION,
+                                 LOCAL_CONF_CHANGES)
             sys.exit(1)
 
         if int(str(CONFIG_VERSION).split('.')[1]) != \
            int(str(LOCAL_CONF_VERSION).split('.')[1]):
             print 'WARNING: freevo_config.py was changed, please check local_config.py'
+            print_config_changes(LOCAL_CONF_VERSION, CONFIG_VERSION, 
+                                 LOCAL_CONF_CHANGES)
         break
 
 else:

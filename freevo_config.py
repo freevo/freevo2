@@ -60,21 +60,39 @@
 # is different, there will be only a warning
 
 FREEVO_CONF_VERSION = 1.0
-LOCAL_CONF_VERSION  = 1.1
+LOCAL_CONF_VERSION  = 2.0
+
+# Description of changes in each new version
+FREEVO_CONF_CHANGES = [] # None yet
+LOCAL_CONF_CHANGES = [
+    (1.1,
+     '''ROM_DRIVES are autodetected if left empty.
+    Added AUDIO_RANDOM_PLAYLIST (default on).
+    Added COVER_DIR for covers for files on CDs etc.
+    Added AUDIO_COVER_REGEXP for selection of covers for music files.
+    Changed MPlayer default args.
+    Changed TV_SETTINGS to /dev/video0.'''),
+    (2.0,
+     '''Remote control config has changed from Freevo Python files to the
+     standard Lirc program config files, see freevo_config.py for
+     more info.''')]
+
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
 # steps
 
 if int(str(CONF.version).split('.')[0]) != \
    int(str(FREEVO_CONF_VERSION).split('.')[0]):
-    print '\nERROR: The version informations in freevo_config.py doesn\'t'
+    print "\nERROR: The version information in freevo_config.py does't"
     print 'match the version in %s.' % freevoconf
-    print 'please rerun configure to generate a new freevo.conf'
+    print 'please rerun "freevo setup" to generate a new freevo.conf'
+    print_config_changes(FREEVO_CONF_VERSION, CONF.version, FREEVO_CONF_CHANGES)
     sys.exit(1)
 
 if int(str(CONF.version).split('.')[1]) != \
    int(str(FREEVO_CONF_VERSION).split('.')[1]):
-    print 'WARNING: freevo_config.py was changed, please rerun ./configure'
+    print 'WARNING: freevo_config.py was changed, please rerun "freevo setup"'
+    print_config_changes(FREEVO_CONF_VERSION, CONF.version, FREEVO_CONF_CHANGES)
     
 
 # ======================================================================
@@ -354,6 +372,7 @@ if CONF.display == 'dfbmga' or CONF.display == 'dxr3':
 #
 # Check contrib/lirc for examples and helpers/freevo2lirc.pl for a converter
 # script.
+#
 
 LIRCRC = '/etc/freevo/lircrc'
 

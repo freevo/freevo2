@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/02/25 04:37:29  krister
+# Updated local_conf version to 2.0 to make it clear that the remote control stuff changed. Added automatic information about what has changed in the config files since the user's version.
+#
 # Revision 1.3  2003/02/17 05:58:43  krister
 # Updated mplayer video settings.
 #
@@ -39,7 +42,7 @@
 # of the config file doesn't match, Freevo won't start. If the minor version
 # is different, there will be only a warning
 
-CONFIG_VERSION = 1.0
+CONFIG_VERSION = 2.0
 
 # How Freevo finds the config files (freevo.conf, local_conf.py, local_skin.xml)
 # ==============================================================================
