@@ -31,6 +31,7 @@ test -f /etc/freevo/boot_config || exit 0
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin
 
-$FREEVO_HOME/freevo execute $FREEVO_HOME/src/www/webserver.py 2>&1 > /dev/null
+cd $FREEVO_HOME
+$FREEVO_HOME/freevo execute $FREEVO_HOME/src/helpers/webserver.py 2>&1 > /dev/null
 
 sleep 6
