@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/06/06 07:32:02  dischi
+# fix crash
+#
 # Revision 1.1  2003/09/08 19:41:55  rshortt
 # A helper to schedule your favorites for recording.
 #
@@ -39,6 +42,7 @@
 # ----------------------------------------------------------------------- */
 #endif
 
+import config
 import tv.record_client as rc
 
 (result, response) = rc.updateFavoritesSchedule()
