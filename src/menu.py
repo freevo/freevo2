@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.55  2003/08/02 10:08:46  dischi
+# make it possible to return MenuItems in the list of actions()
+#
 # Revision 1.54  2003/07/18 19:46:54  dischi
 # better error handling
 #
@@ -325,12 +328,23 @@ class MenuWidget(GUIObject):
 
     def make_submenu(self, menu_name, actions, item):
         items = []
-        for function, title in actions:
-            items += [ MenuItem(title, function) ]
+        for a in actions:
+            if isinstance(a, MenuItem):
+                items.append(a)
+            else:
+                items.append(MenuItem(a[1], a[0]))
         xml_file = None
         if hasattr(item, 'xml_file'):
             xml_file = item.xml_file
 
+        for i in items:
+            if not i.image:
+                i.image = item.image
+            if hasattr(item, 'display_type'):
+                i.display_type = item.display_type
+            elif hasattr(item, 'type'):
+                i.display_type = item.type
+                
         s = Menu(menu_name, items, xml_file=xml_file)
         self.pushmenu(s)
             
@@ -489,19 +503,24 @@ class MenuWidget(GUIObject):
             menu.selected.play(menuw=self)
             
         elif event == MENU_SELECT or event == MENU_PLAY_ITEM:
+            action = None
+            arg    = None
             try:
                 action = menu.selected.action
             except AttributeError:
                 if menu.selected.actions():
-                    action = menu.selected.actions()[0][0]
-                else:
-                    action = None
+                    action = menu.selected.actions()[0]
+                    if isinstance(action, MenuItem):
+                        action = action.function
+                        arg = action.arg
+                    else:
+                        action = action[0]
                     
             if action == None:
                 print 'No action.. '
                 AlertBox(text='No action defined for this choice!').show()
             else:
-                action( menuw=self )
+                action( arg=arg, menuw=self )
             return
 
 
@@ -518,7 +537,10 @@ class MenuWidget(GUIObject):
             
             for p in plugin.get('item%s' % actions_plugins):
                 for a in p.actions(menu.selected):
-                    actions.append(a[:2])
+                    if isinstance(a, MenuItem):
+                        actions.append(a)
+                    else:
+                        actions.append(a[:2])
 
             if actions and len(actions) > 1:
                 self.make_submenu(menu.selected.name, actions, menu.selected)
@@ -537,7 +559,7 @@ class MenuWidget(GUIObject):
             
             for p in plugin.get('item%s' % actions_plugins):
                 for a in p.actions(menu.selected):
-                    if len(a) > 2 and a[2] == event.arg:
+                    if not isinstance(a, MenuItem) and len(a) > 2 and a[2] == event.arg:
                         a[0](arg=None, menuw=self)
                         return
             print 'action %s not found' % event.arg
