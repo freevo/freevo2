@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2003/07/04 16:51:39  outlyer
+# Added a 'title_case' case normalizing function to use with data returned
+# from CDDB. Not used anywhere yet.
+#
 # Revision 1.36  2003/07/02 20:06:49  dischi
 # removed exif support, it is now in osd.py
 #
@@ -410,6 +414,26 @@ def killall(appname, sig=9):
                 break # Done with this process, go on to the next one
 
     return
+
+
+def title_case(phrase):
+    """
+    Return a text string (i.e. from CDDB) with 
+    the case normalized into title case.
+    This is because people frequently put in ugly
+    information, and we can avoid it here'
+    """
+
+    s = ''
+    for letter in phrase:
+        if s and s[-1] == ' ' or s == '':
+            s += string.upper(letter)
+        elif letter == '_':
+                s += ' '
+        else:
+            s += string.lower(letter)
+    return s
+
 
 
  
