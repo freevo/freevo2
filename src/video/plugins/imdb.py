@@ -15,45 +15,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2004/01/03 17:43:15  dischi
+# OVERLAY_DIR is always used
+#
 # Revision 1.30  2003/12/29 22:08:54  dischi
 # move to new Item attributes
-#
-# Revision 1.29  2003/12/07 19:44:14  dischi
-# bugfix
-#
-# Revision 1.28  2003/12/01 20:02:15  dischi
-# only show when needed
-#
-# Revision 1.27  2003/10/21 21:17:42  gsbarbieri
-# Some more i18n improvements.
-#
-# Revision 1.26  2003/10/04 18:37:29  dischi
-# i18n changes and True/False usage
-#
-# Revision 1.25  2003/09/23 21:13:50  dischi
-# make discs work again
-#
-# Revision 1.24  2003/09/23 20:05:29  dischi
-# imdb patch from Eirik Meland
-#
-# Revision 1.23  2003/09/20 15:46:48  dischi
-# fxd and imdb patches from Eirik Meland
-#
-# Revision 1.22  2003/09/20 09:50:07  dischi
-# cleanup
-#
-# Revision 1.21  2003/09/14 20:09:37  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.20  2003/09/13 10:08:23  dischi
-# i18n support
-#
-# Revision 1.19  2003/09/10 19:30:08  dischi
-# add deactivation when something is wrong
-#
-# Revision 1.18  2003/08/23 12:51:43  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -220,8 +186,8 @@ class PluginInterface(plugin.ItemPlugin):
             back = 0
             
         # update the directory
-        if directory.dirwatcher_thread:
-            directory.dirwatcher_thread.scan()
+        if directory.dirwatcher:
+            directory.dirwatcher.scan()
 
         # go back in menustack
         for i in range(back):

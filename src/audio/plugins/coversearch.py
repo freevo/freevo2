@@ -13,27 +13,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2004/01/03 17:43:15  dischi
+# OVERLAY_DIR is always used
+#
 # Revision 1.23  2003/12/29 22:09:19  dischi
 # move to new Item attributes
-#
-# Revision 1.22  2003/10/28 18:16:26  dischi
-# move amazon.py to util
-#
-# Revision 1.21  2003/10/21 21:17:41  gsbarbieri
-# Some more i18n improvements.
 #
 # Revision 1.20  2003/10/20 14:23:08  outlyer
 # Tolerate 404 errors from Amazon without crashing. Sorry this is so ugly,
 # this whole algorithm needs to be cleaned up.
-#
-# Revision 1.19  2003/09/10 19:30:08  dischi
-# add deactivation when something is wrong
-#
-# Revision 1.18  2003/09/09 18:54:59  dischi
-# Add some doc
-#
-# Revision 1.17  2003/08/23 12:51:42  dischi
-# removed some old CVS log messages
 #
 # Revision 1.3  2003/06/12 16:47:04  outlyer
 # Tried to make the Amazon search more intelligent.
@@ -338,8 +326,8 @@ class PluginInterface(plugin.ItemPlugin):
             back = 0
             
         # update the directory
-        if directory.dirwatcher_thread:
-            directory.dirwatcher_thread.scan()
+        if directory.dirwatcher:
+            directory.dirwatcher.scan()
 
         # go back in menustack
         for i in range(back):

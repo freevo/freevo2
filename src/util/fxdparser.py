@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/01/03 17:43:15  dischi
+# OVERLAY_DIR is always used
+#
 # Revision 1.5  2004/01/01 12:24:18  dischi
 # cache fxd files with pickle
 #
@@ -91,16 +94,15 @@ class FXDtree(qp_xml.Parser):
             self.tree = XMLnode('freevo')
         else:
             self.tree = None
-            if config.OVERLAY_DIR:
-                cache = vfs.getoverlay(filename + '.raw')
-                if os.path.isfile(cache) and \
-                       os.stat(cache)[stat.ST_MTIME] > os.stat(filename)[stat.ST_MTIME]:
-                    self.tree = util.read_pickle(cache)
+            cache = vfs.getoverlay(filename + '.raw')
+            if os.path.isfile(cache) and \
+                   os.stat(cache)[stat.ST_MTIME] > os.stat(filename)[stat.ST_MTIME]:
+                self.tree = util.read_pickle(cache)
             if not self.tree:
                 f = vfs.open(filename)
                 self.tree = self.parse(f)
                 f.close()
-                if config.OVERLAY_DIR and self.tree:
+                if self.tree:
                     util.save_pickle(self.tree, cache)
                 
 

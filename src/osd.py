@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.117  2004/01/03 17:43:14  dischi
+# OVERLAY_DIR is always used
+#
 # Revision 1.116  2004/01/02 14:29:20  dischi
 # correct font outline drawing
 #
@@ -18,12 +21,6 @@
 #
 # Revision 1.114  2004/01/01 15:53:18  dischi
 # move the shadow code into osd.py
-#
-# Revision 1.113  2003/12/31 16:41:43  dischi
-# cache all thumbnails when config.OVERLAY_DIR_STORE_THUMBNAILS
-#
-# Revision 1.112  2003/12/30 15:29:04  dischi
-# support for OVERLAY_DIR_STORE_THUMBNAILS
 #
 # Revision 1.111  2003/12/07 14:48:49  dischi
 # clean up the busy icon
@@ -1224,50 +1221,40 @@ class OSD:
 
             if thumbnail:
                 sinfo = os.stat(filename)
-                if config.OVERLAY_DIR_STORE_THUMBNAILS or sinfo[stat.ST_SIZE] > 10000:
-                    if config.OVERLAY_DIR_STORE_THUMBNAILS:
-                        thumb = vfs.getoverlay(filename + '.raw')
-                    else:
-                        thumb = os.path.join('%s/thumbnails/%s.raw' % \
-                                             (config.FREEVO_CACHEDIR,
-                                              util.hexify(md5.new(filename).digest())))
-                    data = None
+                thumb = vfs.getoverlay(filename + '.raw')
+                data = None
 
-                    try:
-                        if os.stat(thumb)[stat.ST_MTIME] > sinfo[stat.ST_MTIME]:
-                            data = util.read_pickle(thumb)
-                    except OSError:
-                        pass
-                    
-                    if not data:
-                        f=open(filename, 'rb')
-                        tags=exif.process_file(f)
-                        f.close()
+                try:
+                    if os.stat(thumb)[stat.ST_MTIME] > sinfo[stat.ST_MTIME]:
+                        data = util.read_pickle(thumb)
+                except OSError:
+                    pass
 
-                        if tags.has_key('JPEGThumbnail'):
-                            image = Image.open(cStringIO.StringIO(tags['JPEGThumbnail']))
-                        else:
-                            # convert with Imaging, pygame doesn't work
-                            image = Image.open(filename)
+                if not data:
+                    f=open(filename, 'rb')
+                    tags=exif.process_file(f)
+                    f.close()
 
-                        if image.size[0] > 300 and image.size[1] > 300:
-                            image.thumbnail((300,300))
+                    image = None
+                    if tags.has_key('JPEGThumbnail'):
+                        image = Image.open(cStringIO.StringIO(tags['JPEGThumbnail']))
 
-                        if image.mode == 'P':
-                            image = image.convert('RGB')
+                    if not image or image.size[0] < 100 or image.size[1] < 100:
+                        # convert with Imaging, pygame doesn't work
+                        image = Image.open(filename)
 
-                        # save for future use
-                        if config.OVERLAY_DIR_STORE_THUMBNAILS:
-                            data = (image.tostring(), image.size, image.mode)
-                            util.save_pickle(data, thumb)
-                        else:
-                            data = (filename, image.tostring(), image.size, image.mode)
-                            util.save_pickle(data, thumb)
+                    if image.size[0] > 300 and image.size[1] > 300:
+                        image.thumbnail((300,300), Image.ANTIALIAS)
+
+                    if image.mode == 'P':
+                        image = image.convert('RGB')
+
+                    # save for future use
+                    data = (image.tostring(), image.size, image.mode)
+                    util.save_pickle(data, thumb)
                             
-                    if not config.OVERLAY_DIR_STORE_THUMBNAILS:
-                        data = data[1:]
-                    # convert to pygame image
-                    image = pygame.image.fromstring(data[0], data[1], data[2])
+                # convert to pygame image
+                image = pygame.image.fromstring(data[0], data[1], data[2])
 
             try:
                 if not image:

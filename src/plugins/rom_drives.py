@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.49  2004/01/03 17:43:15  dischi
+# OVERLAY_DIR is always used
+#
 # Revision 1.48  2003/12/30 15:30:56  dischi
 # IDENTIFY_MEDIA now sends the media as arg
 #
@@ -482,9 +485,8 @@ class Identify_Thread(threading.Thread):
                 media.info = copy.copy(movie_info)
             else:
                 media.info = VideoItem('', None)
-                if config.OVERLAY_DIR:
-                    media.info.image = util.getimage(os.path.join(config.OVERLAY_DIR,
-                                                                  'disc-set', media.id))
+                media.info.image = util.getimage(os.path.join(config.OVERLAY_DIR,
+                                                              'disc-set', media.id))
             media.info.name  = title
             media.info.set_url(data.mime[6:] + '://')
             media.info.media = media

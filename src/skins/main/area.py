@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2004/01/03 17:43:15  dischi
+# OVERLAY_DIR is always used
+#
 # Revision 1.24  2004/01/01 16:03:53  dischi
 # use vfs.open because it creates the needed dirs
 #
@@ -631,7 +634,7 @@ class Skin_Area:
                 if imagefile:
                     cname = '%s-%s-%s' % (imagefile, bg.width, bg.height)
                     image = self.imagecache[cname]
-                    if not image and config.OVERLAY_DIR:
+                    if not image:
                         cache = vfs.getoverlay('%s.raw-%sx%s' % (imagefile, bg.width,
                                                                  bg.height))
                         if os.path.isfile(cache) and \
@@ -646,7 +649,6 @@ class Skin_Area:
                         image = osd.loadbitmap(imagefile)
                         if image:
                             image = pygame.transform.scale(image,(bg.width,bg.height))
-                        if image and config.OVERLAY_DIR:
                             f = vfs.open(cache, 'w')
                             f.write(pygame.image.tostring(image, 'RGBA'))
                             f.close()

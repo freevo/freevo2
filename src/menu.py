@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.75  2004/01/03 17:43:14  dischi
+# OVERLAY_DIR is always used
+#
 # Revision 1.74  2003/12/29 22:07:14  dischi
 # renamed xml_file to fxd_file
 #
@@ -410,7 +413,7 @@ class MenuWidget(GUIObject):
                 if p.eventhandler(event=event, menuw=self):
                     return
 
-            _debug_('no eventhandler for event %s' % event)
+            _debug_('no eventhandler for event %s' % event, 2)
             return
 
         if event == MENU_UP:
@@ -611,7 +614,7 @@ class MenuWidget(GUIObject):
             if p.eventhandler(event=event, menuw=self):
                 return
 
-        _debug_('no eventhandler for event %s' % str(event))
+        _debug_('no eventhandler for event %s' % str(event), 2)
         return 0
 
 

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.102  2004/01/03 17:43:14  dischi
+# OVERLAY_DIR is always used
+#
 # Revision 1.101  2004/01/01 12:27:38  dischi
 # bugfix and add config.TIME_DEBUG to trace the needed time
 #
@@ -344,8 +347,7 @@ if not os.path.isfile(os.path.join(mmcache, 'VERSION')):
     print 'up usage of freevo'
     print
 
-if config.OVERLAY_DIR_STORE_MMPYTHON_DATA and mmpython.object_cache and \
-       hasattr(mmpython.object_cache, 'md5_cachedir'):
+if mmpython.object_cache and hasattr(mmpython.object_cache, 'md5_cachedir'):
     _debug_('use OVERLAY_DIR for mmpython cache')
     mmpython.object_cache.md5_cachedir = False
     mmpython.object_cache.cachedir     = config.OVERLAY_DIR
@@ -440,7 +442,7 @@ try:
                     if p.eventhandler(event=event):
                         break
                 else:
-                    _debug_('no eventhandler for event %s' % event,2)
+                    _debug_('no eventhandler for event %s' % event, 2)
 
         else:
             app = osd.focused_app()

@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2004/01/03 17:43:15  dischi
+# OVERLAY_DIR is always used
+#
 # Revision 1.22  2003/11/24 19:24:59  dischi
 # move the handler for fxd from xml_parser to fxdhandler
 #
@@ -262,7 +265,7 @@ class FxdImdb:
         else:
             if self.isdiscset == True:
                 self.fxdfile = vfs.join(config.OVERLAY_DIR, 'disc-set',
-                                            self.getmedia_id(self.device))
+                                        self.getmedia_id(self.device))
             else:
                 self.fxdfile = vfs.splitext(file)[0]
         
