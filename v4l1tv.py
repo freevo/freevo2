@@ -207,9 +207,6 @@ class V4L1TV_Thread(threading.Thread):
                 while self.app.isAlive():
                     time.sleep(0.1)
 
-                # Turn off the MGA back end scaler
-                os.system('./matrox_g400/mga_bes_off')
-                    
                 if self.mode == 'play':
                     rc.post_event(rc.PLAY_END)
                 self.mode = 'idle'

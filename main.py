@@ -131,9 +131,6 @@ def main_func():
     # Run-time configuration settings
     config.ConfigInit(videotools = video)
     
-    # Turn off the MGA back-end scaler, it will clobber the framebuffer otherwise
-    os.system('./matrox_g400/mga_bes_off 2&> /dev/null') # XXX hardcoded, fix!
-
     # Make sure there's no mpg123 process lying around.
     # XXX change, we don't want to kill any mpg123 that is not started by Freevo :-)
     os.system('killall -9 mpg123 2&> /dev/null') # XXX hardcoded, fix!

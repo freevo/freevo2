@@ -177,9 +177,6 @@ class MPlayerApp(childapp.ChildApp):
         
         childapp.ChildApp.kill(self, signal.SIGINT)
         
-        # Turn off the MGA back end scaler
-        os.system('./matrox_g400/mga_bes_off')
-                    
         
         
 class MPlayer_Thread(threading.Thread):

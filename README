@@ -46,7 +46,6 @@ startup.py              Background task that keeps the three
                           o rc_client - sends remote control cmds to main
 main.py                 Main Freevo application
                           o Uses matrox_g400/v4l1_to_mga for watching TV
-                          o Uses matrox_g400/mga_bes_off to turn off the BES
                           o Errors are logged in log_main_err
                           o Debug output is logged in log_main_out
                           o Uses the rc, osd, mixer and util modules
