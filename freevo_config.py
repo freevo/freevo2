@@ -193,9 +193,7 @@ LOCAL_CONF_CHANGES = [
      '''Add XINE_ARGS_DEF to set xine arguments and OSD_BUSYICON_TIMER to show
      a busy icon when the menu takes too much time building'''),
     (5.03,
-     '''Add OVERLAY_DIR_STORE_THUMBNAILS and OVERLAY_DIR_STORE_MMPYTHON_DATA
-     to make it possible to store these metadata in the OVERLAY_DIR. To
-     better support multi user using the same OVERLAY_DIR, set UMASK''' ) ]
+     '''Add UMASK to set umask for files in vfs''' ) ]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -307,19 +305,10 @@ CHILDAPP_DEBUG = 0
 # old MOVIE_DATA_DIR if you have one. It needs to be set to a directory
 # freevo can write to.
 #
-# TODO: add a default value, right now the vfs is deactived (value == '')
-#
-OVERLAY_DIR = ''
-
-#
-# use OVERLAY_DIR for storing the thumbnails
-#
-OVERLAY_DIR_STORE_THUMBNAILS = False
-
-#
-# use OVERLAY_DIR for storing mmpython meta data
-#
-OVERLAY_DIR_STORE_MMPYTHON_DATA = True
+if os.environ.has_key('HOME') and os.environ['HOME']:
+    OVERLAY_DIR = os.path.join(os.environ['HOME'], '.freevo/vfs')
+else:
+    OVERLAY_DIR = os.path.join(FREEVO_CACHEDIR, 'vfs')
 
 #
 # umask for all files

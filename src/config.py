@@ -22,6 +22,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.86  2004/01/03 17:38:17  dischi
+# Freevo now needs the vfs active. OVERLAY_DIR is set to ~/.freevo/vfs as
+# default value.
+#
 # Revision 1.85  2004/01/01 12:27:05  dischi
 # make absolute pathnames
 #
@@ -610,6 +614,8 @@ for p in plugin.getall():
             
 #
 # set data dirs
+# if not set, set it to root and home dir
+# if set, make all path names absolute
 #
 for type in ('video', 'audio', 'image', 'games'):
     n = '%s_ITEMS' % type.upper()
@@ -626,8 +632,17 @@ for type in ('video', 'audio', 'image', 'games'):
             print
         if type == 'video':
             VIDEO_ONLY_SCAN_DATADIR = True
+    else:
+        abs = []
+        for d in x:
+            if isinstance(d, str):
+                abs.append(os.path.abspath(d))
+            else:
+                abs.append((d[0], os.path.abspath(d[1])))
+        exec ('%s = abs' % n)
+            
 
-
+        
 if not TV_RECORD_DIR:
     TV_RECORD_DIR = VIDEO_ITEMS[0][1]
     if not HELPER and plugin.is_active('tv'):
@@ -867,19 +882,9 @@ VIDEO_SHOW_REGEXP_SPLIT = re.compile("[\.\- ]*" + VIDEO_SHOW_REGEXP + "[\.\- ]*"
 # create cache subdirs
 #
 
-if not os.path.isdir('%s/thumbnails/' % FREEVO_CACHEDIR):
-    import stat
-    os.mkdir('%s/thumbnails/' % FREEVO_CACHEDIR,
-             stat.S_IMODE(os.stat(FREEVO_CACHEDIR)[stat.ST_MODE]))
-
-if OVERLAY_DIR_STORE_THUMBNAILS and not OVERLAY_DIR:
-    print 'OVERLAY_DIR not set, use normal caching'
-    OVERLAY_DIR_STORE_THUMBNAILS = False
-
-if OVERLAY_DIR_STORE_MMPYTHON_DATA and not OVERLAY_DIR:
-    print 'OVERLAY_DIR not set, use normal mmpython cache'
-    OVERLAY_DIR_STORE_MMPYTHON_DATA = False
-
+if not os.path.isdir(OVERLAY_DIR):
+    os.mkdir(OVERLAY_DIR)
+    
 # Make sure OVERLAY_DIR doesn't ends with a slash
 # With that, we don't need to use os.path.join, normal string
 # concat is much faster

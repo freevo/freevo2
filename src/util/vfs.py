@@ -16,6 +16,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/01/03 17:38:17  dischi
+# Freevo now needs the vfs active. OVERLAY_DIR is set to ~/.freevo/vfs as
+# default value.
+#
 # Revision 1.7  2003/12/31 16:43:49  dischi
 # major speed enhancements
 #
@@ -68,8 +72,6 @@ import codecs
 import config
 
 def getoverlay(directory):
-    if not config.OVERLAY_DIR:
-        return ''
     if not directory.startswith('/'):
         directory = os.path.abspath(directory)
     if directory.startswith(config.OVERLAY_DIR):
@@ -195,8 +197,6 @@ def isoverlay(name):
     """
     return if the name is in the overlay dir
     """
-    if not config.OVERLAY_DIR:
-        return False
     return name.startswith(config.OVERLAY_DIR)
 
 
@@ -230,8 +230,4 @@ exists   = os.path.exists
 isdir    = os.path.isdir
 islink   = os.path.islink
 
-if not config.OVERLAY_DIR:
-    _debug_('OVERLAY_DIR not set, virtual filesystem won\'t work',1)
-else:
-    _debug_('Virtual filesystem activated',1)
     
