@@ -10,11 +10,17 @@
 # from plugin.mimetype(). It will also register an fxd handler for the
 # <slideshow> tag.
 #
+# Image plugins are also allowed to use ImageItem to create a new ImageItem
+# and imageviewer, a function to return the viewer application
+#
 # Notes:
 # Todo:
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2004/09/13 19:32:46  dischi
+# move the fxdhandler into an extra file
+#
 # Revision 1.22  2004/09/13 18:00:49  dischi
 # last cleanups for the image module in Freevo
 #
@@ -41,3 +47,7 @@
 # ----------------------------------------------------------------------- */
 
 from interface import *
+
+# used by image plugins
+from imageitem import ImageItem
+from viewer import imageviewer
