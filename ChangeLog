@@ -13,7 +13,10 @@ Release 1.3.2 (TBD):
  * New skin engine
  * Reactivated and fixed GUI code
  * Bugfixes
-
+ * Added support for tvtime (>= 0.9.8) for TV viewing. tvtime supports
+   Xvideo (sorry, no FG/G400 yet), with good deinterlacing, smoother
+   picture and better audio sync than MPlayer TV viewing.
+	
 
 Release 1.3.2-pre2
 ---------------------------
