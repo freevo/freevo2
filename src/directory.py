@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2003/09/01 18:55:02  dischi
+# use progressbar when scanning
+#
 # Revision 1.31  2003/08/30 12:19:00  dischi
 # new mmpython cache call to only scan the needed directory
 #
@@ -83,7 +86,7 @@ from item import Item
 
 import gui.PasswordInputBox as PasswordInputBox
 import gui.AlertBox as AlertBox
-from gui.PopupBox import PopupBox
+from gui.ProgressBox import ProgressBox
 
 # XML support
 from xml.utils import qp_xml
@@ -422,15 +425,17 @@ class DirItem(Playlist):
             num_changes = mmpython.check_cache(mmpython_dir)
             
         pop = None
+        callback=None
         if (num_changes > 10) or (num_changes and self.media):
             if self.media and dir_on_disc == '':
-                pop = PopupBox(text='Scanning disc, be patient...')
+                pop = ProgressBox(text='Scanning disc, be patient...', full=num_changes)
             else:
-                pop = PopupBox(text='Scanning directory, be patient...')
+                pop = ProgressBox(text='Scanning directory, be patient...', full=num_changes)
             pop.show()
+            callback=pop.tick
 
         if num_changes > 0:
-            mmpython.cache_dir(mmpython_dir)
+            mmpython.cache_dir(mmpython_dir, callback=callback)
             if self.media:
                 self.media.cached = TRUE
 
