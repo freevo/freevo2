@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2003/04/03 09:11:40  dischi
+# lock the surface if necessary and reduce the bitmap cache size to 3 if
+# we use the new skin.
+#
 # Revision 1.28  2003/04/02 14:00:33  dischi
 # let pygame choose the video mode
 #
@@ -316,7 +320,10 @@ class OSD:
 
         self.fontcache = objectcache.ObjectCache(300, desc='font')
         self.stringcache = objectcache.ObjectCache(100, desc='string')
-        self.bitmapcache = objectcache.ObjectCache(30, desc='bitmap')
+        if config.NEW_SKIN:
+            self.bitmapcache = objectcache.ObjectCache(3, desc='bitmap')
+        else
+            self.bitmapcache = objectcache.ObjectCache(30, desc='bitmap')
         
         self.default_fg_color = self.COL_BLACK
         self.default_bg_color = self.COL_WHITE
@@ -340,6 +347,8 @@ class OSD:
         self.screen = pygame.display.set_mode((self.width, self.height), self.hw,
                                               self.depth)
 
+        self.must_lock = self.screen.mustlock()
+        
         if config.CONF.display == 'x11' and config.START_FULLSCREEN_X == 1:
             pygame.display.toggle_fullscreen()
 

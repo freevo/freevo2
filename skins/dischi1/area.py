@@ -27,6 +27,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2003/04/03 09:11:43  dischi
+# lock the surface if necessary and reduce the bitmap cache size to 3 if
+# we use the new skin.
+#
 # Revision 1.38  2003/04/02 14:14:13  dischi
 # small cleanups
 #
@@ -186,6 +190,12 @@ class Screen:
         the main drawing function
         """
 
+        if osd.must_lock:
+            self.s_bg.lock()
+            self.s_alpha.lock()
+            self.s_content.lock()
+            osd.screen.lock()
+        
         objects = SkinObjects()
         for area in self.drawlist:
             objects.bgimages   += area.bgimages
@@ -264,6 +274,11 @@ class Screen:
                                          align_h = align_h, align_v = align_v,
                                          mode=mode, ellipses=ellipses)
 
+        if osd.must_lock:
+            self.s_bg.unlock()
+            self.s_alpha.unlock()
+            self.s_content.unlock()
+            osd.screen.unlock()
 
 
 
