@@ -63,7 +63,7 @@ import conflict
 log = logging.getLogger('record')
 
 # FIXME: move to config file
-EPGDB = os.path.join(config.FREEVO_CACHEDIR, 'epgdb')
+EPGDB = sysconfig.datafile('epgdb')
 
 
 CONFLICT  = 'conflict'
@@ -73,7 +73,6 @@ MISSED    = 'missed'
 SAVED     = 'saved'
 DELETED   = 'deleted'
 
-config.detect('tvcards')
 
 class RecordServer(RPCServer):
     """
@@ -83,6 +82,7 @@ class RecordServer(RPCServer):
     """
     def __init__(self):
         RPCServer.__init__(self, 'recordserver')
+        config.detect('tvcards', 'channels')
         plugin.init(exclusive = [ 'record' ])
         # db access to match favorites
         self.epgdb = pyepg.get_epg(EPGDB)

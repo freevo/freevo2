@@ -7,6 +7,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.71  2004/12/04 01:22:18  rshortt
+# Detect channels too and move the detect call into the RecordServer object
+# to call after we're an mbus instance.
+#
 # Revision 1.70  2004/12/01 15:08:07  dischi
 # set logging level to INFO as default
 #
@@ -107,7 +111,6 @@ import childapp
 import notifier
 import record.server
 
-config.detect('tvcards')
 
 while 1:
     try:
