@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/07/19 19:14:26  dischi
+# new menu type: default no image
+#
 # Revision 1.19  2003/07/18 19:44:54  dischi
 # special text_view_fallback for directories on rom drives
 #
@@ -56,35 +59,6 @@
 #
 # Revision 1.10  2003/07/05 09:11:58  dischi
 # cleanup old stuff and fixed text view fallback for tracks
-#
-# Revision 1.9  2003/07/03 21:29:27  dischi
-# Reversed the changes I made to speed up things when I split
-# drawstringframed into a calc and draw function. The new dsf doesn't need
-# that and now vertical alignment in the info area works again
-#
-# Revision 1.8  2003/07/02 20:13:30  dischi
-# use now the two parts of drawstringframed
-#
-# Revision 1.7  2003/06/29 20:38:58  dischi
-# switch to the new info area
-#
-# Revision 1.6  2003/06/22 11:34:46  dischi
-# use null layer
-#
-# Revision 1.5  2003/04/24 19:57:52  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.4  2003/04/20 19:33:43  dischi
-# use a different layer to draw. It is slower but avoids ugly texts
-#
-# Revision 1.3  2003/04/20 15:02:07  dischi
-# fall back to text view
-#
-# Revision 1.2  2003/04/19 21:25:38  dischi
-# don't load buggy skins
-#
-# Revision 1.1  2003/04/06 21:19:44  dischi
-# Switched to new main1 skin
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -480,11 +454,21 @@ class Skin_Area:
         """
         try:
             self.use_text_view = menu.skin_force_text_view
+            self.use_images    = menu.skin_default_no_images
             return
         except:
             pass
         image  = None
         folder = 0
+
+        menu.skin_default_no_images = FALSE
+        for i in menu.choices:
+            if i.image:
+                menu.skin_default_no_images = TRUE
+                break
+            
+        self.use_images = menu.skin_default_no_images
+
         if len(menu.choices) < 5:
             try:
                 if menu.choices[0].info_type == 'track':
@@ -641,7 +625,13 @@ class Skin_Area:
             try:
                 area = settings.menu[display_type]
             except:
-                area = settings.menu['default']
+                if not self.use_images:
+                    try:
+                        area = settings.menu['default no image']
+                    except:
+                        area = settings.menu['default']
+                else:
+                    area = settings.menu['default']
 
             # get the correct style based on display_style
             if len(area.style) > self.display_style:
