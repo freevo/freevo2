@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2003/10/03 16:46:13  dischi
+# moved the encoding type (latin-1) to the config file config.LOCALE
+#
 # Revision 1.40  2003/10/02 18:47:18  dischi
 # use new util class to write the fxd file
 #
@@ -242,19 +245,19 @@ class DirItem(Playlist):
         # read attributes
         if set_all:
             try:
-                self.name = node.attrs[('', 'title')].encode('latin-1')
+                self.name = node.attrs[('', 'title')].encode(config.LOCALE)
             except KeyError:
                 pass
 
             try:
-                image = node.attrs[('', 'cover-img')].encode('latin-1')
+                image = node.attrs[('', 'cover-img')].encode(config.LOCALE)
                 if image and os.path.isfile(os.path.join(self.dir, image)):
                     self.image = os.path.join(self.dir, image)
             except KeyError:
                 pass
 
             try:
-                import_xml = node.attrs[('', 'import')].encode('latin-1')
+                import_xml = node.attrs[('', 'import')].encode(config.LOCALE)
                 if os.path.isfile(os.path.join(self.dir, import_xml + '.fxd')):
                     info = parseMovieFile(os.path.join(self.dir, import_xml + '.fxd'),
                                           self, [])
@@ -283,7 +286,7 @@ class DirItem(Playlist):
                 for info in child.children:
                     if info.name == 'content':
                         self.info['content'] = util.format_text(info.textof().\
-                                                                encode('latin-1'))
+                                                                encode(config.LOCALE))
 
         
     def write_fxd(self):

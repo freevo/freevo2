@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2003/10/03 16:46:13  dischi
+# moved the encoding type (latin-1) to the config file config.LOCALE
+#
 # Revision 1.39  2003/10/01 18:56:25  dischi
 # bugfix if no MOVIE_DATA_DIR is set
 #
@@ -135,7 +138,7 @@ def xml_parseVideo(video_node):
         except KeyError:
             pass
 
-        i['data'] = util.format_text(node.textof().encode('latin-1'))
+        i['data'] = util.format_text(node.textof().encode(config.LOCALE))
             
         video['items'][id] = i
         video['items-list'] += [ id ]
@@ -179,7 +182,7 @@ def xml_parseVariants(variants_node):
         if variants_child.name == u'variant':
             v = {}
             try:
-                v['name'] = variants_child.attrs[('',"name")].encode('latin-1')
+                v['name'] = variants_child.attrs[('',"name")].encode(config.LOCALE)
             except KeyError:
                 # The name attribute is required. If not there, the variant is useless
                 continue
@@ -214,7 +217,7 @@ def xml_parseVariants(variants_node):
                                 p['subtitle']['media-id'] = part_child.attrs[('',"media-id")].encode('ascii')
                             except KeyError:
                                 pass
-                            p['subtitle']['file'] = part_child.textof().encode('latin-1')
+                            p['subtitle']['file'] = part_child.textof().encode(config.LOCALE)
                         elif part_child.name == u'audio':
                             p['audio']['media-id'] = None
                             try:
@@ -234,21 +237,21 @@ def xml_parseInfo(info_node):
     i = {}
     for node in info_node.children:
         if node.name == u'copyright':
-            i['copyright'] = node.textof().encode('latin-1')
+            i['copyright'] = node.textof().encode(config.LOCALE)
         elif node.name == u'url':
-            i['url'] = node.textof().encode('latin-1')
+            i['url'] = node.textof().encode(config.LOCALE)
         elif node.name == u'genre':
-            i['genre'] = node.textof().encode('latin-1')
+            i['genre'] = node.textof().encode(config.LOCALE)
         elif node.name == u'runtime':
-            i['length'] = node.textof().encode('latin-1')
+            i['length'] = node.textof().encode(config.LOCALE)
         elif node.name == u'tagline':
-            i['tagline'] = util.format_text(node.textof().encode('latin-1'))
+            i['tagline'] = util.format_text(node.textof().encode(config.LOCALE))
         elif node.name == u'plot':
-            i['plot'] = util.format_text(node.textof().encode('latin-1'))
+            i['plot'] = util.format_text(node.textof().encode(config.LOCALE))
         elif node.name == u'year':
-            i['year'] = node.textof().encode('latin-1')
+            i['year'] = node.textof().encode(config.LOCALE)
         elif node.name == u'rating':
-            i['rating'] = node.textof().encode('latin-1')
+            i['rating'] = node.textof().encode(config.LOCALE)
     return i
 
 def make_videoitem(video, variant, parent):
@@ -384,7 +387,7 @@ def parse_disc_set(node, file, parent, duplicate_check):
     movies = []
 
     try:
-        disc_set['title'] = node.attrs[('', "title")].encode('latin-1')
+        disc_set['title'] = node.attrs[('', "title")].encode(config.LOCALE)
     except KeyError:
         pass
 
@@ -437,7 +440,7 @@ def parse_disc_set(node, file, parent, duplicate_check):
                         except KeyError:
                             continue
 
-                    fo['name'] = disc_child.textof().encode('latin-1')
+                    fo['name'] = disc_child.textof().encode(config.LOCALE)
                     fo['file-id'] = fo['media-id']
                     if fo['name']:
                         fo['file-id'] += fo['name']
@@ -522,7 +525,7 @@ def parse_movie(node, file, parent, duplicate_check):
 
     title = None
     try:
-        title = node.attrs[('', "title")].encode('latin-1')
+        title = node.attrs[('', "title")].encode(config.LOCALE)
     except KeyError:
         pass
 

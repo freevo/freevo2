@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/10/03 16:46:13  dischi
+# moved the encoding type (latin-1) to the config file config.LOCALE
+#
 # Revision 1.7  2003/09/26 11:28:59  dischi
 # add rebuild option
 #
@@ -48,10 +51,11 @@ import os
 
 import config
 import util
-
+import stat
+import time
 
 def delete_old_files():
-    print 'deleting old cache files from older freevo version'
+    print 'deleting old cache files from older freevo version...'
     del_list = []
     for file in ('image-viewer-thumb.jpg', 'thumbnails/image-viewer-thumb.jpg'):
         file = os.path.join(config.FREEVO_CACHEDIR, file)
@@ -69,13 +73,51 @@ def delete_old_files():
             util.rmrf(f)
         else:
             os.unlink(f)
+    print '  deleted %s file(s)' % len(del_list)
+    print
 
 
+def delete_old_thumbails():
+    print 'deleting thumbnails not accessed in the last 60 days...'
+    num = 0
+    for file in util.match_files(os.path.join(config.FREEVO_CACHEDIR,
+                                              'thumbnails'), ['raw',]):
+        sinfo = os.stat(file)
+        last = max(sinfo[stat.ST_ATIME], sinfo[stat.ST_MTIME])
+        diff = int(time.time()) - last
+        days = diff / (60 * 60 * 24)
+        if days > 60:                   # older than 2 month
+            os.unlink(file)
+            num += 1
+    print '  deleted %s file(s)' % num
+    print
+
+
+def delete_old_mmpython_cache():
+    print 'deleting cache for directories not existing anymore...'
+    mmcache = '%s/mmpython' % config.FREEVO_CACHEDIR
+    if not os.path.isdir(mmcache):
+        return
+    
+    files = ([ os.path.join(mmcache, fname) for fname in os.listdir(mmcache) ])
+    for f in files:
+        data = util.read_pickle(f)
+        if data and data[1] and data[1].keys():
+            key = data[1].keys()[0]
+            if key.find('/') > 0:
+                d = os.path.dirname(key[key.find('/'):])
+                if not os.path.isdir(d):
+                    print '  deleting cachefile for %s' % d
+                    os.unlink(f)
+    print
+
+    
 def cache_helper(result, dirname, names):
     if not dirname in result and not \
            os.path.basename(dirname) in ('.xvpics', '.thumbnails', 'CVS'):
         result.append(dirname)
     return result
+
 
 def cache_directories(rebuild=True):
     import mmpython
@@ -97,7 +139,10 @@ def cache_directories(rebuild=True):
     for n, d in config.DIR_MOVIES + config.DIR_AUDIO + config.DIR_IMAGES:
         os.path.walk(d, cache_helper, all_dirs)
     for d in all_dirs:
-        print '%4d/%-4d %s' % (all_dirs.index(d)+1, len(all_dirs), d)
+        dname = d
+        if len(dname) > 65:
+            dname = dname[:20] + ' [...] ' + dname[-40:]
+        print '  %4d/%-4d %s' % (all_dirs.index(d)+1, len(all_dirs), dname)
         mmpython.cache_dir(d)
         
     util.touch('%s/VERSION' % mmcache)
@@ -113,11 +158,12 @@ if __name__ == "__main__":
         print 'to rebuild the cache from start. Caches from discs won\'t be affected'
         print
         sys.exit(0)
-        
+
     delete_old_files()
+    delete_old_thumbails()
 
     if len(sys.argv)>1 and sys.argv[1] == '--rebuild':
         cache_directories(1)
     else:
+        delete_old_mmpython_cache()
         cache_directories(0)
-    

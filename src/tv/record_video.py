@@ -34,6 +34,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2003/10/03 16:46:13  dischi
+# moved the encoding type (latin-1) to the config file config.LOCALE
+#
 # Revision 1.28  2003/09/10 19:32:22  dischi
 # remove not needed imports
 #
@@ -299,7 +302,7 @@ def set_schedule(arg=None, menuw=None):
 
 
     s = 'Scheduled recording:\n'
-    s += 'Channel %s\n' % tunername.encode('Latin-1')
+    s += 'Channel %s\n' % tunername.encode(config.LOCALE)
     s += '%s %s %s min' % (recinfo.start_date.selected, recinfo.start_time.selected,
                            recinfo.length.selected)
 

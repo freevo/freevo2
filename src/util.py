@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.56  2003/10/03 16:46:13  dischi
+# moved the encoding type (latin-1) to the config file config.LOCALE
+#
 # Revision 1.55  2003/10/02 18:45:57  dischi
 # add a helper class to read/write fxd files
 #
@@ -528,6 +531,10 @@ def read_pickle(file):
         except:
             data = pickle.load(f)
         f.close()
+        try:
+            os.utime(file, None)
+        except OSError:
+            _debug_('can change access time for %s' % file)
         return data
     except:
         return None
@@ -683,7 +690,7 @@ def htmlenties2txt(string):
     e['lsquo'] = "`";
     e['hellip'] = '...'
 
-    string = string.encode('Latin-1', 'ignore').replace("&#039", "'").\
+    string = string.encode(config.LOCALE, 'ignore').replace("&#039", "'").\
              replace("&#146;", "'")
 
     i = 0
@@ -707,7 +714,7 @@ def htmlenties2txt(string):
             except KeyError:
                 continue
         string = string.replace(entity, replacement)
-    #string = string.encode('Latin-1', 'ignore')
+    #string = string.encode(config.LOCALE, 'ignore')
     return string
 
 

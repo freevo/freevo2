@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/10/03 16:46:13  dischi
+# moved the encoding type (latin-1) to the config file config.LOCALE
+#
 # Revision 1.13  2003/09/14 20:09:37  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
@@ -166,7 +169,7 @@ def attr_col(node, attr, default):
             if node.attrs[('', attr)][:2] == '0x':
                 return long(node.attrs[('', attr)], 16)
             else:
-                return node.attrs[('', attr)].encode('latin-1')
+                return node.attrs[('', attr)].encode(config.LOCALE)
     except ValueError:
         pass
     return default
@@ -179,7 +182,7 @@ def attr_visible(node, attr, default):
     if node.attrs.has_key(('', attr)):
         if node.attrs[('', attr)] == "no":
             return ''
-        return node.attrs[('', attr)].encode('latin-1')
+        return node.attrs[('', attr)].encode(config.LOCALE)
     return default
 
 
@@ -188,7 +191,7 @@ def attr_str(node, attr, default):
     return the attribute as string
     """
     if node.attrs.has_key(('', attr)):
-        return node.attrs[('', attr)].encode('latin-1')
+        return node.attrs[('', attr)].encode(config.LOCALE)
     return default
 
 
@@ -201,14 +204,14 @@ def attr_font(node, attr, default):
         if fontext:
             # There is an extension (e.g. '.pfb'), use the full name
             font = os.path.join(config.FONT_DIR,
-                                node.attrs[('', attr)]).encode('latin-1')
+                                node.attrs[('', attr)]).encode(config.LOCALE)
         else:
             # '.ttf' is the default extension
             font = os.path.join(config.FONT_DIR, node.attrs[('', attr)] +
-                                '.ttf').encode('latin-1')
+                                '.ttf').encode(config.LOCALE)
             if not os.path.isfile(font):
                 font = os.path.join(config.FONT_DIR, node.attrs[('', attr)] +
-                                    '.TTF').encode('latin-1')
+                                    '.TTF').encode(config.LOCALE)
         if not font:
             print "can find font >%s<" % font
             font = config.OSD_DEFAULT_FONTNAME
@@ -339,7 +342,7 @@ class XML_data:
         parse the node
         """
         for attr in node.attrs:
-            c = attr[1].encode('latin-1')
+            c = attr[1].encode(config.LOCALE)
 
             if c in self.content:
                 this_scale = 0

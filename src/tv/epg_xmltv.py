@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2003/10/03 16:46:13  dischi
+# moved the encoding type (latin-1) to the config file config.LOCALE
+#
 # Revision 1.36  2003/09/23 13:31:24  outlyer
 # More FreeBSD patches from Lars
 #
@@ -294,7 +297,7 @@ def load_guide():
             return None     # No
         
         for chan in xmltv_channels:
-            id = chan['id'].encode('Latin-1', 'ignore')
+            id = chan['id'].encode(config.LOCALE, 'ignore')
             c = epg_types.TvChannel()
             c.id = id
             if ' ' in id:
@@ -331,17 +334,17 @@ def load_guide():
         print 'creating guide for %s' % needed_ids
 
     for p in xmltv_programs:
-        if not p['channel'].encode('Latin-1', 'ignore') in needed_ids:
+        if not p['channel'].encode(config.LOCALE, 'ignore') in needed_ids:
             continue
         prog = epg_types.TvProgram()
-        prog.channel_id = p['channel'].encode('Latin-1', 'ignore')
-        prog.title = p['title'][0][0].encode('Latin-1', 'ignore')
+        prog.channel_id = p['channel'].encode(config.LOCALE, 'ignore')
+        prog.title = p['title'][0][0].encode(config.LOCALE, 'ignore')
         if p.has_key('category'):
-             prog.categories = [ cat[0].encode('Latin-1', 'ignore') for cat in p['category'] ]
+             prog.categories = [ cat[0].encode(config.LOCALE, 'ignore') for cat in p['category'] ]
         if p.has_key('desc'):
-            prog.desc = util.format_text(p['desc'][0][0].encode('Latin-1', 'ignore'))
+            prog.desc = util.format_text(p['desc'][0][0].encode(config.LOCALE, 'ignore'))
         if p.has_key('sub-title'):
-            prog.sub_title = p['sub-title'][0][0].encode('Latin-1', 'ignore')
+            prog.sub_title = p['sub-title'][0][0].encode(config.LOCALE, 'ignore')
         try:
             prog.start = timestr2secs_utc(p['start'])
             try:

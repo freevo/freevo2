@@ -1169,3 +1169,5 @@ else:
         os.makedirs('/tmp/freevo/xmltv/logos')
     TV_LOGOS = '/tmp/freevo/xmltv/logos'
 
+
+LOCALE='latin-1'

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.95  2003/10/03 16:46:13  dischi
+# moved the encoding type (latin-1) to the config file config.LOCALE
+#
 # Revision 1.94  2003/09/24 18:28:32  outlyer
 # Remove excessive chatter from osd, and fix bit shift in v4l2
 #
@@ -1116,6 +1119,8 @@ class OSD:
                     
         except:
             print 'Unknown Problem while loading image'
+            if config.DEBUG:
+                traceback.print_exc()
             return None
 
         return image

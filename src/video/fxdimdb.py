@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/10/03 16:46:13  dischi
+# moved the encoding type (latin-1) to the config file config.LOCALE
+#
 # Revision 1.18  2003/09/23 21:13:00  dischi
 # adjust to mmpython change
 #
@@ -809,7 +812,7 @@ class FxdImdb:
     def str2XML(self, line):
         """return a valid XML string"""
         try:
-            s = unicode(line, 'latin-1')
+            s = unicode(line, config.LOCALE)
             while s[-1] == ' ':
                 s = s[:-1]
             if s[:4] == '&#34':

@@ -35,11 +35,12 @@
 # o change encode to use 'ignore' as error:
 #   string.encode(locale) -> string.encode(locale, 'ignore')
 # o add except AttributeError: for unhandled elements (line 250ff)
-
+# o import config and change locale = config.LOCALE
 
 from xml.utils import qp_xml
 from xml.sax import saxutils
 import string, types, re
+import config
 
 # The Python-XMLTV version
 VERSION = "0.5.15"
@@ -59,7 +60,7 @@ XML_BADCHARS = re.compile(u'[^\x09\x0A\x0D\x20-\uD7FF\uE000-\uFFFD\u10000-\u10FF
 
 # The locale for dictionary keys. Leaving them in Unicode screws up the
 # XMLRPC marshaller
-locale = 'Latin-1'
+locale = config.LOCALE
 
 
 
