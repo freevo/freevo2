@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/08/01 10:41:03  dischi
+# deactivate plugin
+#
 # Revision 1.4  2004/07/26 18:10:17  dischi
 # move global event handling to eventhandler.py
 #
@@ -50,6 +53,8 @@ DEBUG = config.DEBUG
 
 class PluginInterface(plugin.DaemonPlugin):
     def __init__(self):
+        self.reason = config.REDESIGN_UNKNOWN
+        return
         plugin.DaemonPlugin.__init__(self)
         self.plugin_name = 'audio.logger'
         plugin.register(self, self.plugin_name)

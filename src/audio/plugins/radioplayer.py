@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/08/01 10:41:52  dischi
+# deactivate plugin
+#
 # Revision 1.10  2004/07/10 12:33:38  dischi
 # header cleanup
 #
@@ -58,6 +61,8 @@ class PluginInterface(plugin.Plugin):
 
     """
     def __init__(self):
+        self.reason = config.REDESIGN_UNKNOWN
+        return
         plugin.Plugin.__init__(self)
 
         # register it as the object to play audio

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/08/01 10:41:03  dischi
+# deactivate plugin
+#
 # Revision 1.11  2004/07/24 17:49:48  dischi
 # rename or deactivate some stuff for gui update
 #
@@ -49,6 +52,7 @@ import time
 import rc
 
 # freevo specific
+import config
 import skin
 import audio.player
 import plugin
@@ -70,7 +74,7 @@ class PluginInterface(plugin.DaemonPlugin):
     screen.
     """
     def __init__(self):
-        self.reason = 'not working while gui rebuild'
+        self.reason = config.REDESIGN_BROKEN
         return
         plugin.DaemonPlugin.__init__(self)
         self.plugin_name = 'audio.detachbar'

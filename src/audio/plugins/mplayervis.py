@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/08/01 10:41:03  dischi
+# deactivate plugin
+#
 # Revision 1.8  2004/07/24 12:23:38  dischi
 # deactivate plugin
 #
@@ -234,7 +237,7 @@ class PluginInterface(plugin.Plugin):
     detached = False
 
     def __init__(self):
-        self.reason = 'not working while gui rebuild'
+        self.reason = config.REDESIGN_BROKEN
         return
 
         plugin.Plugin.__init__(self)

@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/08/01 10:43:13  dischi
+# deactivate plugin
+#
 # Revision 1.6  2004/07/22 21:21:49  dischi
 # small fixes to fit the new gui code
 #
@@ -57,6 +60,9 @@ class ApodMainMenuItem(Item):
     of commands in a submenu.
     """
     def __init__(self, parent, apoddir):
+        self.reason = config.REDESIGN_UNKNOWN
+        return
+
         Item.__init__(self, parent, skin_type='image')
         self.name = _( 'APOD' )
         self.title = _( 'APOD' )

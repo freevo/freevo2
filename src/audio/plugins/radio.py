@@ -18,6 +18,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/08/01 10:41:52  dischi
+# deactivate plugin
+#
 # Revision 1.9  2004/07/26 18:10:17  dischi
 # move global event handling to eventhandler.py
 #
@@ -54,7 +57,7 @@ import os, popen2, fcntl, select, time
 
 #freevo modules
 import config, menu, plugin, util
-from audio.player import PlayerGUI
+import audio.player
 from item import Item
 import eventhandler
 from event import *
@@ -81,7 +84,7 @@ class RadioItem(Item):
         if not self.menuw:
             self.menuw = menuw
 
-        self.player = PlayerGUI(self, menuw)
+        self.player = audio.player.get_singleton()
         error = self.player.play()
 
         if error and menuw:
@@ -157,6 +160,12 @@ class PluginInterface(plugin.MainMenuPlugin):
                        ('Magic 106', '106.7') ]
 
     """
+    # XXX remove the __init__ function after checking if the plugin still
+    # XXX works.
+    def __init__(self):
+        self.reason = config.REDESIGN_UNKNOWN
+        return
+
     def items(self, parent):
         return [ RadioMainMenuItem(parent) ]
 

@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2004/08/01 10:41:03  dischi
+# deactivate plugin
+#
 # Revision 1.34  2004/07/22 21:21:47  dischi
 # small fixes to fit the new gui code
 #
@@ -99,6 +102,8 @@ class PluginInterface(plugin.ItemPlugin):
     plugin.activate( 'audio.coversearch', args=('YOUR_KEY',) ) 
     """
     def __init__(self, license=None):
+        self.reason = config.REDESIGN_UNKNOWN
+        return
         if not config.USE_NETWORK:
             self.reason = 'no network'
             return

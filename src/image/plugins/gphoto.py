@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/08/01 10:43:14  dischi
+# deactivate plugin
+#
 # Revision 1.7  2004/07/10 12:33:40  dischi
 # header cleanup
 #
@@ -52,6 +55,12 @@ import plugin
 
 class PluginInterface(plugin.MainMenuPlugin):
 
+    # XXX remove the __init__ function after checking if the plugin still
+    # XXX works.
+    def __init__(self):
+        self.reason = config.REDESIGN_UNKNOWN
+        return
+    
     def detectCameras(self):
         gplist = pygphoto.gp_detectcameras( ) 
         count = pygphoto.gp_list_count( gplist )

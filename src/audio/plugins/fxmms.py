@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/08/01 10:41:03  dischi
+# deactivate plugin
+#
 # Revision 1.5  2004/07/26 18:10:17  dischi
 # move global event handling to eventhandler.py
 #
@@ -109,6 +112,8 @@ class FXMMS:
     """
     
     def __init__(self):
+        self.reason = config.REDESIGN_FIXME
+        return
         self.name     = 'fxmms'
         self.app_mode = 'audio'
         self.app      = None

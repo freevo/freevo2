@@ -34,6 +34,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/08/01 10:41:52  dischi
+# deactivate plugin
+#
 # Revision 1.4  2004/07/10 12:33:38  dischi
 # header cleanup
 #
@@ -85,6 +88,8 @@ class PluginInterface(plugin.ItemPlugin):
     """
     
     def __init__(self):
+        self.reason = config.REDESIGN_UNKNOWN
+        return
 		
         plugin.ItemPlugin.__init__(self)
 

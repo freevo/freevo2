@@ -18,6 +18,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/08/01 10:41:03  dischi
+# deactivate plugin
+#
 # Revision 1.3  2004/07/10 12:33:38  dischi
 # header cleanup
 #
@@ -78,6 +81,9 @@ class PluginInterface(plugin.Plugin):
     files.
     """
     def __init__(self):
+        self.reason = config.REDESIGN_FIXME
+        return
+
         # create the mplayer object
         plugin.Plugin.__init__(self)
 

@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2004/08/01 10:41:03  dischi
+# deactivate plugin
+#
 # Revision 1.35  2004/07/26 18:10:16  dischi
 # move global event handling to eventhandler.py
 #
@@ -160,6 +163,8 @@ class PluginInterface(plugin.ItemPlugin):
     """
 
     def __init__(self):
+        self.reason = config.REDESIGN_UNKNOWN
+        return
         plugin.ItemPlugin.__init__(self)
         self.artist = ''
         self.album = ''
