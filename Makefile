@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/02/07 06:15:36  krister
+# Added a realclean target, removes freevo.conf
+#
 # Revision 1.21  2003/02/06 09:54:01  krister
 # Changed the runtime handling to use runapp to start programs with the supplied dlls
 #
@@ -68,7 +71,7 @@ LOGDIR   = /var/log/freevo
 CACHEDIR = /var/cache/freevo
 
 
-.PHONY: all subdirs x11 osd_x1 $(SUBDIRS) clean release install
+.PHONY: all subdirs x11 osd_x1 $(SUBDIRS) clean realclean release install
 
 all: subdirs runapp freevo_xwin python_compile
 
@@ -93,6 +96,9 @@ clean:
 	-rm -f *.o log_main_out 
 	-rm -f log_main_err log.txt runapp freevo_xwin mplayer_std*.log
 	cd fbcon ; $(MAKE) clean
+
+realclean: clean
+	-rm -f freevo.conf
 
 # Remove all compiled python files
 distclean:
