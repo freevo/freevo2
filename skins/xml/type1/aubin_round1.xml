@@ -48,25 +48,24 @@
       </items>
 
       <covers>
-	<cover type="movie" y="100">
-	  <mask>
-	    <rectangle x="545" y="85" width="230" height="310" 
-	      color="0x80000000" radius="10"/>
-	  </mask>
-	</cover>
-	<cover type="music" y="100">
-	  <mask>
-	    <rectangle x="545" y="85" width="230" height="230" 
-	      color="0x80000000" radius="10"/>
-	  </mask>
-	</cover>
-	<cover type="image" y="100">
-	  <mask>
-	    <rectangle x="545" y="85" width="230" height="330" 
-	      color="0x80000000" radius="10"/>
-	  </mask>
-	</cover>
+	<cover type="movie" visible="yes" x="450" y="315" width="200"
+          height="280" border_color="0x000000" border_size="1">
+        <mask>
+          <rectangle x="545" y="85" width="230" height="310" 
+            color="0x80000000" radius="10"/>
+          </mask>
+        </cover>
+
+	<cover type="music" visible="yes" x="450" y="215" width="200"
+          height="200" border_color="0x000000" border_size="1">
+        <mask>
+          <rectangle x="440" y="205" width="220" height="220" 
+            color="0x80000000" radius="10"/>
+          </mask>
+        </cover>
+
       </covers>
+
 
       <submenu x="30" y="530" visible="no">
 	<font name="Arial_Bold" size="20" color="0xffffff"/>
