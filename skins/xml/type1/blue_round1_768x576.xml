@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <freevo>
   
-  <skin include="extreme_round_800x600" scale="0.96">
+  <skin include="blue_round1_800x600" scale="0.96">
     
     <!-- Settings for a normal menu -->
     <menu type="all">

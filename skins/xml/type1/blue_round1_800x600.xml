@@ -44,7 +44,7 @@
 	</cover>
 	<cover type="image" y="100">
 	  <mask>
-	    <rectangle x="545" y="85" width="230" height="190" 
+	    <rectangle x="545" y="85" width="230" height="330" 
 	      color="0x80000000" radius="10"/>
 	  </mask>
 	</cover>
