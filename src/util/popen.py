@@ -61,7 +61,7 @@ class Process:
     """
     Base class for started child processes
     """
-    def __init__( self, app, debugname = None):
+    def __init__( self, app, debugname = None, callback = None ):
         """
         Init the child process 'app'. This can either be a string or a list
         of arguments (similar to popen2). If debugname is given, the stdout
@@ -85,6 +85,7 @@ class Process:
         self.__kill_timer = None
         self.stopping = False
         self.dead = False
+        self.callback = callback
         self.child = popen2.Popen3( start_str, True, 100 )
 
         log.info('running %s (pid=%s)' % ( self.binary, self.child.pid ) )
@@ -208,6 +209,7 @@ class Process:
 
         return False
 
+
     def __child_died( self ):
         """
         Callback from watcher when the child died.
@@ -219,6 +221,8 @@ class Process:
         if self.__kill_timer:
             notifier.removeTimer( self.__kill_timer )
         self.finished()
+        if self.callback:
+            self.callback(self)
 
 
     def finished(self):
