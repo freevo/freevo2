@@ -330,16 +330,34 @@
       </content>
     </layout>
 
-    <!-- tv listing area -->
+    <!-- tv info area -->
     <layout label="tv info">
-      <background>
-	<rectangle size="0" bgcolor="0x80000000" radius="10" width="max"/>
+     <background>
+        <rectangle size="0" bgcolor="0x80000000" radius="10" width="max"/>
       </background>
       <content x="10" y="10" height="max-20" width="max-20" type="text"
-	spacing="10" font="tv">
+        spacing="10" font="tv">
+        <item type="default">
+          <if expression="title">
+            <text font="tv title" width="550" expression="title"/>
+          </if>
+          <text font="tv time" valign="right" expression="start"/>
+          <text font="tv time" valign="right">-</text>
+          <text font="tv time" valign="right" expression="stop"/>
+          <newline/>
+         <if expression="sub_title">
+            <text font="info tagline">"</text>
+            <text font="info tagline" expression="sub_title"/>
+            <text font="info tagline">"</text>
+            <newline/>
+          </if>
+          <if expression="desc">
+            <text font="info plot" height="max" mode="soft" expression="desc"/>
+            <newline/>
+          </if>
+       </item>
       </content>
-    </layout> 
-
+    </layout>
 
     <!-- ********************************************** -->
     <!-- FONT DEFINITIONS -->
