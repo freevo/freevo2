@@ -9,6 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/02/17 03:27:10  outlyer
+# Added Thomas' CDDB support patch. I don't have a CD-rom drive in my machine,
+# so I can't verify it works; code looks good though.
+#
+# I only had to make one change from the original submitted patch, which was
+# to make sure we don't crash in audiodiskitem if the system lacks CDDB, the
+# check was already performed in identifymedia.
+#
 # Revision 1.13  2003/02/15 04:03:02  krister
 # Joakim Berglunds patch for finding music/movie cover pics.
 #
@@ -88,6 +96,15 @@ import rc
 import string
 import copy
 
+from audio.audiodiskitem import AudioDiskItem
+
+# CDDB Stuff
+try:
+    import DiscID, CDDB
+except:
+    print "CDDB not installed."
+    pass
+
 from video import xml_parser, videoitem
 from mediamenu import DirItem
 
@@ -124,7 +141,6 @@ class Identify_Thread(threading.Thread):
             except:
                 pass
             media.drive_status = None
-            media.info = None
             return
 
         # Same as last time? If so we're done
@@ -147,8 +163,25 @@ class Identify_Thread(threading.Thread):
         s = ioctl(fd, CDROM_DISC_STATUS)
         if s == CDS_AUDIO:
             os.close(fd)
-            # XXX add cddb informations here
-            media.info = None
+            try:
+                cdrom = DiscID.open(media.devicename)
+                disc_id = DiscID.disc_id(cdrom)
+                media.info = AudioDiskItem(disc_id,None,'nix')
+                (query_stat, query_info) = CDDB.query(disc_id)
+
+                if query_stat == 200:
+                    media.info.title = query_info['title']
+
+                elif query_stat == 210 or query_stat == 211:
+                    print "multiple matches found! Matches are:"
+                    for i in query_info:
+                        print "ID: %s Category: %s Title: %s" % \
+                              (i['disc_id'], i['category'], i['title'])
+                else:
+                    print "failure getting disc info, status %i" % query_stat
+                    media.info = None
+            except:
+                pass
             return
 
         # try to set the speed
@@ -286,19 +319,19 @@ class Identify_Thread(threading.Thread):
 
         # XXX add more intelligence to cds with audio files
         if (not mplayer_files) and mp3_files:
-            titel = "AUDIO" , '%s [%s]' % (media.drivename, label)
+            title = "AUDIO" , '%s [%s]' % (media.drivename, label)
 
         # XXX add more intelligence to cds with image files
         elif (not mplayer_files) and (not mp3_files) and image_files:
-            titel = "IMAGES" , '%s [%s]' % (media.drivename, label)
+            title = "IMAGES" , '%s [%s]' % (media.drivename, label)
 
         # Mixed media?
         elif mplayer_files or image_files or mp3_files:
-            titel = "DATA" , '%s [%s]' % (media.drivename, label)
+            title = "DATA" , '%s [%s]' % (media.drivename, label)
         
         # Strange, no useable files
         else:
-            titel = "DATA" , '%s [%s]' % (media.drivename, label)
+            title = "DATA" , '%s [%s]' % (media.drivename, label)
 
         media.info = DirItem(media.mountdir, None)
         

@@ -9,6 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/02/17 03:27:11  outlyer
+# Added Thomas' CDDB support patch. I don't have a CD-rom drive in my machine,
+# so I can't verify it works; code looks good though.
+#
+# I only had to make one change from the original submitted patch, which was
+# to make sure we don't crash in audiodiskitem if the system lacks CDDB, the
+# check was already performed in identifymedia.
+#
 # Revision 1.11  2003/02/15 04:03:02  krister
 # Joakim Berglunds patch for finding music/movie cover pics.
 #
@@ -100,11 +108,15 @@ class AudioItem(Item):
     This is the common class to get information about audiofiles.
     """
     
-    def __init__(self, file, parent, cache = None):
+    def __init__(self, file, parent, cache = None, name = None):
+        print "__init__"
         Item.__init__(self, parent)
         self.drawall    = 1
-        self.filename   = file
-        self.name       = util.getname(self.filename)
+        self.filename   = file[:]
+        if name:
+            self.name   = name
+        else:
+            self.name   = util.getname(file)
         self.type       = 'audio'
         
         # variables only for AudioItem
