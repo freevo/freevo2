@@ -7,6 +7,9 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/04/06 21:09:16  dischi
+# Some focus enhancements
+#
 # Revision 1.15  2003/03/30 20:50:00  rshortt
 # Improvements in how we get skin properties.
 #
@@ -170,8 +173,13 @@ class GUIObject:
         self.icon           = None
         self.bg_surface     = None
         self.bg_image       = None
+
         if not hasattr(self, 'parent'):
-            self.parent         = None
+            self.parent = None
+
+        elif self.parent == 'osd':
+            self.parent = self.osd.focused_app
+            
         self.children       = []
         self.enabled        = 1
         self.selected       = 0
@@ -189,22 +197,13 @@ class GUIObject:
 
         # XXX: skin settings
         # This if/else should be removed when the new skin is in place.
-        if config.NEW_SKIN:
-            self.skin_info                 = self.skin.GetPopupBoxStyle(self)
-            self.skin_info_background      = self.skin_info[0]
-            self.skin_info_spacing         = self.skin_info[1]
-            self.skin_info_color           = self.skin_info[2]
-            self.skin_info_font            = self.skin_info[3]
-            self.skin_info_widget          = self.skin_info[4]
-            self.skin_info_widget_selected = self.skin_info[5]
-
-        else:
-            skin_spacing = None
-            if not self.bg_color:
-                self.bg_color = Color(self.osd.default_bg_color)
-            if not self.fg_color:
-                self.fg_color = Color(self.osd.default_fg_color)
-
+        self.skin_info                 = self.skin.GetPopupBoxStyle(self)
+        self.skin_info_background      = self.skin_info[0]
+        self.skin_info_spacing         = self.skin_info[1]
+        self.skin_info_color           = self.skin_info[2]
+        self.skin_info_font            = self.skin_info[3]
+        self.skin_info_widget          = self.skin_info[4]
+        self.skin_info_widget_selected = self.skin_info[5]
 
         if self.skin_info_spacing:
             self.h_margin = self.skin_info_spacing
@@ -232,7 +231,11 @@ class GUIObject:
         self.set_v_align(Align.NONE)
         self.set_h_align(Align.NONE)
 
-                
+        if self.parent:
+            self.parent.add_child(self)
+            if DEBUG: print 'set focus to %s' % self
+            self.osd.focused_app = self
+
 
     def get_rect(self):
         """
@@ -462,20 +465,27 @@ class GUIObject:
                 pygame.image.save( self.bg_image, iname )
 
         if DEBUG: print 'GUIObject.destroy(): %s' % self
+
+        if self.children:
+            while self.children:
+                child = self.children[0]
+                child.destroy() # the child will remove itself from children
+                
+        if DEBUG: print 'parent: %s' % self.parent
         if self.parent:
-            # self.parent.children.remove(self)
+            self.parent.children.remove(self)
             if self.osd.focused_app == self:
                 if DEBUG: print 'GUIObject.destroy(): focused_app=%s' % \
                                  self.osd.focused_app
                 self.osd.focused_app = self.parent
                 if DEBUG: print 'GUIObject.destroy(): focused_app=%s' % \
                                  self.osd.focused_app
+            else:
+                if DEBUG: print 'focus has %s not %s' % (self.osd.focused_app, self)
+                
             # We shouldn't need to call this if we replace the bg right
             # self.parent.refresh()
-        if self.children:
-            for child in self.children:
-                child.destroy()
-            self.children = []
+
         self.hide()
         self.set_parent(None)
 
