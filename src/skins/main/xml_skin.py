@@ -9,31 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.14  2003/07/12 17:16:30  dischi
-# created a special area for plugins to draw
-#
-# Revision 1.13  2003/07/11 19:44:18  dischi
-# close file after parsing
-#
-# Revision 1.12  2003/07/07 20:16:59  dischi
-# remove __cmp__ functions to speed up the drawing
-#
-# Revision 1.11  2003/07/07 16:25:10  dischi
-# changes to work with the new drawstringframed
-#
-# Revision 1.10  2003/07/05 15:00:30  dischi
-# the global prepare is now an extra function. visible can now be 'yes',
-# 'no' and '<pluginname>' and 'not <pluginname'>. With that it is possible
-# to make things invisible when the idlebar is loaded.
-#
-# Revision 1.9  2003/07/05 09:25:00  dischi
-# use new osd font class for stringsize
-#
-# Revision 1.8  2003/07/03 22:05:37  dischi
-# set line_height to -1
-#
-# Revision 1.7  2003/06/29 20:38:58  dischi
-# switch to the new info area
+# Revision 1.1  2003/08/05 18:59:22  dischi
+# Directory cleanup, part 1:
+# move skins/main1/* to src/skins/main
 #
 #
 # -----------------------------------------------------------------------

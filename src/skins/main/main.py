@@ -9,71 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.108  2003/07/22 11:07:52  dischi
-# Fixed PluginArea when calling the plugins draw() function
+# Revision 1.1  2003/08/05 18:59:22  dischi
+# Directory cleanup, part 1:
+# move skins/main1/* to src/skins/main
 #
-# Revision 1.107  2003/07/12 17:29:33  dischi
-# added redraw() to force a redraw (plugins may need this)
-#
-# Revision 1.106  2003/07/12 17:16:30  dischi
-# created a special area for plugins to draw
-#
-# Revision 1.105  2003/07/10 20:01:11  dischi
-# small bugfix for blue_round1
-#
-# Revision 1.104  2003/07/07 20:17:52  dischi
-# removed some evals and make a nice list (maybe faster)
-#
-# Revision 1.103  2003/07/05 15:01:49  dischi
-# support for title area in tv mode and prepare the skin if needed
-#
-# Revision 1.102  2003/06/30 20:28:44  outlyer
-# Respect the global DEBUG definition; to enable debugging, you should only
-# need to change DEBUG=1 in config.py
-#
-# Revision 1.101  2003/06/29 20:38:58  dischi
-# switch to the new info area
-#
-# Revision 1.100  2003/06/24 21:37:06  outlyer
-# Allow skins screenshots for SkinSelector to be jpeg. The PNG files bloat the
-# size of the download dramatically.
-#
-# Revision 1.99  2003/06/22 10:15:16  gsbarbieri
-# Fixes some bugs introduced in the last commit (Sorry, but as I don't use TV, sometimes I forgot to test :( )
-#
-# Revision 1.98  2003/06/22 09:57:13  gsbarbieri
-# Feature to change display_style to a text one when all images are equal.
-#
-# Revision 1.97  2003/05/04 16:44:45  dischi
-# height=-1 for text in title area
-#
-# Revision 1.96  2003/05/01 12:53:25  dischi
-# added more information to plugin draw()
-#
-# Revision 1.95  2003/04/24 19:57:52  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.94  2003/04/21 17:35:41  dischi
-# only shorten name if we have an image
-#
-# Revision 1.93  2003/04/21 13:31:04  dischi
-# moved audio name parser to audioitem until the skin has better support for it
-#
-# Revision 1.92  2003/04/19 21:24:59  dischi
-# small changes at the plugin interface
-#
-# Revision 1.91  2003/04/18 10:22:08  dischi
-# You can now remove plugins from the list and plugins know the list
-# they belong to (can be overwritten). level and args are optional.
-#
-# Revision 1.90  2003/04/17 21:25:59  dischi
-# check for plugins with osd update
-#
-# Revision 1.89  2003/04/13 10:35:40  dischi
-# cleanup of unneeded stuff in menu.py
-#
-# Revision 1.88  2003/04/06 21:19:44  dischi
-# Switched to new main1 skin
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

@@ -4,36 +4,15 @@
 # -----------------------------------------------------------------------
 # $Id$
 #
-# Notes: WIP
+# Notes:
 # Todo:        
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.8  2003/07/07 20:18:56  dischi
-# bugfix
+# Revision 1.1  2003/08/05 18:59:22  dischi
+# Directory cleanup, part 1:
+# move skins/main1/* to src/skins/main
 #
-# Revision 1.7  2003/07/05 09:25:00  dischi
-# use new osd font class for stringsize
-#
-# Revision 1.6  2003/06/29 20:38:58  dischi
-# switch to the new info area
-#
-# Revision 1.5  2003/05/24 04:29:54  gsbarbieri
-# Now we have support to use "type images" in front of items in text listing.
-# I.E.: you can have a playlist icon in front of playlists, a folder icon in
-# front of folders, and goes...
-#
-# Revision 1.4  2003/04/24 19:57:52  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.3  2003/04/20 15:02:07  dischi
-# fall back to text view
-#
-# Revision 1.2  2003/04/20 13:49:00  dischi
-# some special tv show handling
-#
-# Revision 1.1  2003/04/06 21:19:44  dischi
-# Switched to new main1 skin
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

@@ -538,7 +538,7 @@ SNES_ARGS_DEF     = ("-m -r 3 -k 100 -1 3 -2 3 -cs -t")
 # Skin file that contains the actual skin code. This is imported
 # from skin.py
 #
-OSD_SKIN = 'skins/main1/skin_main1.py'
+OSD_SKIN = 'main'
 
 #
 # XML file for the skin

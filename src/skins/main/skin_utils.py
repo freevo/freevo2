@@ -9,35 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.10  2003/07/19 19:13:47  dischi
-# support for item.image that is no filename but a Imaging object
+# Revision 1.1  2003/08/05 18:59:22  dischi
+# Directory cleanup, part 1:
+# move skins/main1/* to src/skins/main
 #
-# Revision 1.9  2003/07/13 13:44:06  dischi
-# small bugfix
-#
-# Revision 1.8  2003/07/10 20:01:31  dischi
-# support for mmpython mime types
-#
-# Revision 1.7  2003/07/05 09:24:32  dischi
-# fixed cname cache
-#
-# Revision 1.6  2003/07/03 21:30:00  dischi
-# minor speed changes
-#
-# Revision 1.5  2003/04/24 19:57:53  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.4  2003/04/21 13:25:28  dischi
-# use "unknown" icon to always have an icon
-#
-# Revision 1.3  2003/04/20 15:01:08  dischi
-# small fix
-#
-# Revision 1.2  2003/04/12 19:58:09  dischi
-# small bugfix
-#
-# Revision 1.1  2003/04/06 21:19:44  dischi
-# Switched to new main1 skin
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

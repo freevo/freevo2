@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/08/05 18:59:21  dischi
+# Directory cleanup, part 1:
+# move skins/main1/* to src/skins/main
+#
 # Revision 1.3  2003/07/12 10:08:11  dischi
 # load skin only when needed
 #
@@ -73,9 +77,7 @@ def get_singleton():
     global _singleton
     if _singleton == None:
         # Loads the skin implementation defined in freevo_config.py
-        sys.path += [os.path.dirname(config.OSD_SKIN)]
-        modname   = os.path.basename(config.OSD_SKIN)[:-3]
-        exec('import ' + modname  + ' as skinimpl')
+        exec('import skins.' + config.OSD_SKIN  + '.' + config.OSD_SKIN  + ' as skinimpl')
 
         if DEBUG: print 'Imported skin %s' % config.OSD_SKIN
     

@@ -9,31 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.7  2003/06/22 08:42:55  gsbarbieri
-# fixed problem rendering text outside space when using arrow {left,right} indicators
+# Revision 1.1  2003/08/05 18:59:22  dischi
+# Directory cleanup, part 1:
+# move skins/main1/* to src/skins/main
 #
-# Revision 1.6  2003/06/21 10:19:03  dischi
-# small osd fix
-#
-# Revision 1.5  2003/06/18 20:50:09  outlyer
-# Highlight shows that are scheduled. This code isn't done yet, but it works.
-# There are some areas where it could be slow for large lists (like it does a
-# scan through a list every button push) but it's acceptable on my system
-# with 25 or so items in the schedule.
-#
-# Revision 1.4  2003/06/18 18:29:13  outlyer
-# Made the timeformat in Freevo's TV Guide configurable, just like the date
-# format. I don't like Military time :)
-#
-# Revision 1.3  2003/06/12 00:11:39  gsbarbieri
-# Fixed the TV Guide.
-# Added the date to the Guide, it's at left-top corner of the listing
-#
-# Revision 1.2  2003/04/24 19:57:53  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.1  2003/04/06 21:19:44  dischi
-# Switched to new main1 skin
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

@@ -9,28 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.11  2003/07/09 20:31:34  gsbarbieri
-# Fixed a problem with item.getattr( len(attr) )
-#
-# Revision 1.10  2003/07/09 07:26:38  gsbarbieri
-# Fixed a small bug when updating the info_area contents
-#
-# Revision 1.9  2003/07/07 16:25:10  dischi
-# changes to work with the new drawstringframed
-#
-# Revision 1.8  2003/07/04 00:04:15  gsbarbieri
-# Fixed some bugs
-#
-# Revision 1.7  2003/07/03 21:29:27  dischi
-# Reversed the changes I made to speed up things when I split
-# drawstringframed into a calc and draw function. The new dsf doesn't need
-# that and now vertical alignment in the info area works again
-#
-# Revision 1.6  2003/07/02 20:13:30  dischi
-# use now the two parts of drawstringframed
-#
-# Revision 1.5  2003/06/29 20:38:58  dischi
-# switch to the new info area
+# Revision 1.1  2003/08/05 18:59:22  dischi
+# Directory cleanup, part 1:
+# move skins/main1/* to src/skins/main
 #
 #
 # -----------------------------------------------------------------------

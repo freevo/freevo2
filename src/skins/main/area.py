@@ -27,41 +27,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.21  2003/07/22 11:07:52  dischi
-# Fixed PluginArea when calling the plugins draw() function
+# Revision 1.1  2003/08/05 18:59:22  dischi
+# Directory cleanup, part 1:
+# move skins/main1/* to src/skins/main
 #
-# Revision 1.20  2003/07/19 19:14:26  dischi
-# new menu type: default no image
-#
-# Revision 1.19  2003/07/18 19:44:54  dischi
-# special text_view_fallback for directories on rom drives
-#
-# Revision 1.18  2003/07/13 12:46:45  dischi
-# bugfix: max-x was calculated as max+x (again at a different place)
-#
-# Revision 1.17  2003/07/13 12:45:53  dischi
-# bugfix: max-x was calculated as max+x
-#
-# Revision 1.16  2003/07/12 21:25:54  dischi
-# better skin_force_text_view
-#
-# Revision 1.15  2003/07/12 17:16:30  dischi
-# created a special area for plugins to draw
-#
-# Revision 1.14  2003/07/10 20:01:11  dischi
-# small bugfix for blue_round1
-#
-# Revision 1.13  2003/07/07 20:19:52  dischi
-# some small speed enhancements
-#
-# Revision 1.12  2003/07/07 16:25:10  dischi
-# changes to work with the new drawstringframed
-#
-# Revision 1.11  2003/07/05 15:01:01  dischi
-# respect visible for images
-#
-# Revision 1.10  2003/07/05 09:11:58  dischi
-# cleanup old stuff and fixed text view fallback for tracks
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
