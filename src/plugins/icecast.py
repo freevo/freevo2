@@ -55,7 +55,7 @@ class PluginInterface(plugin.DaemonPlugin):
                 olddir = os.getcwd()
                 newdir = os.path.dirname(newm3ufile)
                 os.chdir(newdir)
-                self.pid = os.spawnv(os.P_NOWAIT, config.ICES_CMD, args)
+                self.ices_pid = os.spawnv(os.P_NOWAIT, config.ICES_CMD, args)
                 os.chdir(olddir)
             except:
                 print 'Crash!'
