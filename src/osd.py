@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/02/15 20:48:41  dischi
+# drawbitmap can now draw surfaces, too
+#
 # Revision 1.12  2003/02/12 10:38:51  dischi
 # Added a patch to make the current menu system work with the new
 # main1_image.py to have an extended menu for images
@@ -456,11 +459,12 @@ class OSD:
     # Draw a bitmap on the OSD. It is automatically loaded into the cache
     # if not already there. The loadbitmap()/zoombitmap() functions can
     # be used to "pipeline" bitmap loading/drawing.
-    def drawbitmap(self, filename, x=0, y=0, scaling=None,
+    def drawbitmap(self, image, x=0, y=0, scaling=None,
                    bbx=0, bby=0, bbw=0, bbh=0, rotation = 0, layer=None):
         if not pygame.display.get_init():
             return None
-        image = self._getbitmap(filename)
+        if not isinstance(image, pygame.Surface):
+            image = self._getbitmap(image)
         self.drawsurface(image, x, y, scaling, bbx, bby, bbw,
                          bbh, rotation, layer)
 
