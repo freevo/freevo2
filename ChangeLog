@@ -14,6 +14,7 @@ Release 1.4.0-rc2 (2003-10-22):
      set tvtime xml parameters if you have 0.9.10 or newer
      added support for custom tuned channels using FREQUENCY_TABLE
  * Additional translations: da, de, fi, it
+ * Changed the Shutdown function to ask for confirmation first
 
 	
 Release 1.4.0-rc1 (2003-10-05):
