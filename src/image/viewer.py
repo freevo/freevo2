@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2004/01/19 20:26:41  dischi
+# free image viewer cache on menuw.show()
+#
 # Revision 1.39  2003/12/15 04:12:54  outlyer
 # Fix a crash...
 #
@@ -102,16 +105,29 @@ class ImageViewer(GUIObject):
         self.slideshow   = True  # currently in slideshow mode
         self.alertbox    = None  # AlertBox active
         self.app_mode    = 'image'
-        self.bitmapcache = util.objectcache.ObjectCache(3, desc='viewer')
         self.last_image  = (None, None)
         self.osd         = osd.get_singleton()
 
+        self.free_cache()
 
+
+    def free_cache(self):
+        """
+        free the current cache to save memory
+        """
+        self.bitmapcache = util.objectcache.ObjectCache(3, desc='viewer')
+        if self.parent and self.free_cache in self.parent.show_callbacks: 
+            self.parent.show_callbacks.remove(self.free_cache)
+
+        
     def view(self, item, zoom=0, rotation=0):
         filename = item.filename
 
         self.fileitem = item
         self.parent   = item.menuw
+
+        if not self.free_cache in item.menuw.show_callbacks: 
+            item.menuw.show_callbacks.append(self.free_cache)
         
         self.filename = filename
         self.rotation = rotation

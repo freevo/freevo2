@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.80  2004/01/19 20:26:41  dischi
+# free image viewer cache on menuw.show()
+#
 # Revision 1.79  2004/01/10 13:15:25  dischi
 # use new skin_fxd attribute in item to load skin updates
 #
@@ -20,39 +23,6 @@
 #
 # Revision 1.76  2004/01/04 13:06:02  dischi
 # MENU_CALL_ITEM_ACTION also checks the item itself
-#
-# Revision 1.75  2004/01/03 17:43:14  dischi
-# OVERLAY_DIR is always used
-#
-# Revision 1.74  2003/12/29 22:07:14  dischi
-# renamed xml_file to fxd_file
-#
-# Revision 1.73  2003/12/14 17:13:15  dischi
-# call actions() only once
-#
-# Revision 1.72  2003/12/06 13:46:11  dischi
-# changes to the new draw function in skin
-#
-# Revision 1.71  2003/12/04 21:48:10  dischi
-# also add the plugin area
-#
-# Revision 1.70  2003/12/03 21:51:31  dischi
-# register to the skin and rename some skin function calls
-#
-# Revision 1.69  2003/12/01 19:09:10  dischi
-# accept all items in submenus
-#
-# Revision 1.68  2003/11/30 14:35:02  dischi
-# but the skin parsing (e.g. outicon) in Item to avoid duplicate code
-#
-# Revision 1.67  2003/11/29 11:40:24  dischi
-# remove singleton(), menuw is passed to all objects
-#
-# Revision 1.66  2003/10/12 11:01:19  dischi
-# Don't show black screen between selecting and playing an audio file
-#
-# Revision 1.65  2003/10/12 09:49:46  dischi
-# make option how much "one menu" is and go back 2 for configure directory
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -76,6 +46,8 @@
 # ----------------------------------------------------------------------- */
 #endif
 
+
+import copy
 
 import config
 import plugin
@@ -107,12 +79,9 @@ class MenuItem(Item):
         self.type     = type
 
             
-    def setImage(self, image):
-        self.type  = image[0]
-        self.image = image[1]
-
     def actions(self):
         return [ ( self.select, self.name ) ]
+
 
     def select(self, arg=None, menuw=None):
         if self.function:
@@ -206,14 +175,16 @@ class MenuWidget(GUIObject):
         self.cols = 0
         self.visible = 1
         self.eventhandler_plugins = None
-        self.event_context = 'menu'
-
+        self.event_context  = 'menu'
+        self.show_callbacks = []
         
     def show(self):
         if not self.visible:
             self.visible = 1
             self.refresh(reload=1)
-            
+            for callback in copy.copy(self.show_callbacks):
+                callback()
+                
     def hide(self, clear=True):
         if self.visible:
             self.visible = 0
