@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/02/10 03:03:21  rshortt
+# Bugifx from a bad merge of osd changes or this could also be a bug in osd.py.
+#
 # Revision 1.1  2004/02/10 00:33:56  rshortt
 # Testing of PyUI on a branch tag (pyui_test).  The OSD object is part of the
 # renderer here and the main loop is modified to use pyui.
@@ -1093,6 +1096,7 @@ class Pygame(pyui.rendererBase.RendererBase):
         if not layer and layer != '':
             layer = self.screen
 
+        if layer:
             fgcolor  = self._sdlcol(fgcolor)
             if border_color != None:
                 border_color = self._sdlcol(border_color)
