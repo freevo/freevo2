@@ -23,6 +23,10 @@ o Removed need for a seperate audio player; we use mplayer for both audio
 o Moved the DVD and VCD start item to the movie menu. Pressing EJECT will
   eject/mount the medium in the drive, XML support for DVD/VCD/CD.
 o CDROM_MOUNT_POINT is deprecated now, use ROM_DRIVES to define all your drives
+o Added support for shutdown of Freevo from the main menu. This can also 
+  be configured to shutdown the entire system for standalone boxes, but it
+  is disabled by default.
+o XXX document all changes!
 	
 Internal:
 o Changed v4l1_to_mga to use /dev/video instead of /dev/video0. Also
