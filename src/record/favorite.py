@@ -162,8 +162,8 @@ class Favorite:
         for v in self.times:
             s += '%02d:%02d-%02d:%02d ' % (v[0] / 100, v[0] % 100,
                                            v[1] / 100, v[1] % 100)
-            subnode = fxdparser.XMLnode('times', [], s[:-1])
-            fxd.add(subnode, node)
+        subnode = fxdparser.XMLnode('times', [], s[:-1])
+        fxd.add(subnode, node)
         if self.once:
             subnode = fxdparser.XMLnode('once')
             fxd.add(subnode, node)
