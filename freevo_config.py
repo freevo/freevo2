@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.78  2002/10/09 12:52:40  dischi
+# made infor(mation) complete
+#
 # Revision 1.77  2002/10/08 12:19:27  krister
 # Added more remote control info
 #
@@ -538,7 +541,7 @@ else:
 # Programmed to code TV "0150". (VCR needs to be programmed too?)
 #
 # There is a config file for lirc for this remote in freevo/boot/URC-7201B00.
-# Please see the Freevo website for infor about buying or building a remote
+# Please see the Freevo website for information about buying or building a remote
 # control receiver.
 #
 RC_CMDS = {
