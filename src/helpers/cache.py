@@ -52,7 +52,7 @@ def cache_directories():
         print d
         mmpython.cache_dir(d)
         
-    os.system('touch %s/VERSION' % mmcache)
+    util.touch('%s/VERSION' % mmcache)
 
 
 if __name__ == "__main__":
