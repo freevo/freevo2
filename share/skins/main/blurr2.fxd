@@ -655,10 +655,10 @@
         <layout label="popup">
             <background>
                 <rectangle x="5" y="5" size="0" bgcolor="0xa0000000" radius="5"/>
-                <rectangle width="max-5" height="max-5" color="0x000000" size="1" 
+                <rectangle width="max-5" height="max-5" color="0x000000" size="2" 
                     bgcolor="0xffffff" radius="5"/>
-                <rectangle x="3" y="3" width="max-11" height="max-11" color="0x000000" 
-	            size="1" bgcolor="widget background" radius="5"/>
+                <rectangle x="5" y="5" width="max-15" height="max-15" color="0x000000" 
+	            size="2" bgcolor="widget background" radius="5"/>
             </background>
             <content x="8" y="8" width="max-21" height="max-21">
 	        <!-- special button settings -->

@@ -275,16 +275,16 @@
 
     <layout label="popup">
       <background>
-        <rectangle color="0x000000" size="1" bgcolor="widget background"/>
+        <rectangle color="0x000000" size="2" bgcolor="widget background"/>
       </background>
       <content type="text" spacing="10" color="widget text" font="widget">
 	<!-- basic widget information -->
         <item type="widget" font="widget">
-          <rectangle color="0xffffff" bgcolor="widget item background"/>
+          <rectangle color="0xffffff" bgcolor="widget item background" size="2"/>
 	</item>
 	<!-- selected widgets -->
         <item type="selected" font="selected widget">
-          <rectangle color="0x000000" bgcolor="widget selected background"/>
+          <rectangle color="0x000000" bgcolor="widget selected background" size="2"/>
 	</item>
 	<!-- special button settings -->
         <item type="button" font="widget">
