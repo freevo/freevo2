@@ -133,15 +133,44 @@ def load_guide():
         prog.title = p['title'][0][0].encode('Latin-1')
         if p.has_key('desc'):
             prog.desc = p['desc'][0][0].encode('Latin-1')
-        prog.start = time.mktime(strptime.strptime(p['start'], xmltv.date_format))
-        prog.stop = time.mktime(strptime.strptime(p['stop'], xmltv.date_format))
+        prog.start = timestr2secs_utc(p['start'])
+        prog.stop = timestr2secs_utc(p['stop'])
         guide.AddProgram(prog)
 
     guide.Sort()  # Sort the programs in time order
     
     return guide
-    
-    
+
+
+#    
+# Convert a timestring to UTC (=GMT) seconds.
+#
+# The format is either one of these two:
+# '20020702100000 CDT'
+# '200209080000 +0100'
+def timestr2secs_utc(str):
+    # This is either something like 'EDT', or '+1'
+    tval, tz = str.split()
+
+    # Is it the '+1' format?
+    if tz[0] == '+' or tz[0] == '-':
+        secs = time.mktime(strptime.strptime(tval, xmltv.date_format_notz))
+        adj_neg = int(tz) >= 0
+        adj_secs = int(tz[1:3])*3600+ int(tz[3:5])*60
+        if adj_neg:
+            #print 'timestr2secs_utc(%s): secs = %s - %s' % (str, secs, adj_secs)
+            secs -= adj_secs
+        else:
+            #print 'timestr2secs_utc(%s): secs = %s + %s' % (str, secs, adj_secs)
+            secs += adj_secs
+    else:
+        # No, use the regular conversion
+        secs = time.mktime(strptime.strptime(str, xmltv.date_format_tz))
+        #print 'timestr2secs_utc(%s): secs = %s' % (str, secs)
+
+    return secs
+
+
 if __name__ == '__main__':
     guide = get_guide()
 
