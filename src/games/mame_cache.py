@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/07/22 21:21:48  dischi
+# small fixes to fit the new gui code
+#
 # Revision 1.19  2004/07/10 12:33:38  dischi
 # header cleanup
 #
@@ -53,7 +56,7 @@ import util
 # RegExp
 import re
 
-from gui.PopupBox import PopupBox
+from gui import PopupBox
 
 # Set to 1 for debug output
 DEBUG = config.DEBUG

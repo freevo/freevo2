@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/07/22 21:21:49  dischi
+# small fixes to fit the new gui code
+#
 # Revision 1.6  2004/07/10 12:33:40  dischi
 # header cleanup
 #
@@ -48,7 +51,7 @@ import plugin
 import config
 import shutil
 import util
-from gui.PopupBox import PopupBox
+from gui import PopupBox
 import rc
 import event as em
 import menu

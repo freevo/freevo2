@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/07/22 21:21:50  dischi
+# small fixes to fit the new gui code
+#
 # Revision 1.5  2004/07/10 12:33:42  dischi
 # header cleanup
 #
@@ -46,7 +49,7 @@ import tv.record_client as record_client
 
 from item import Item
 from tv.program_display import FavoriteItem
-from gui.AlertBox import AlertBox
+from gui import AlertBox
 
 
 class ViewFavoritesItem(Item):

@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2004/07/22 21:21:50  dischi
+# small fixes to fit the new gui code
+#
 # Revision 1.36  2004/07/10 12:33:43  dischi
 # header cleanup
 #
@@ -52,7 +55,7 @@ import re
 import time
 from util.fxdimdb import FxdImdb, makeVideo, makePart, point_maker
 
-from gui.PopupBox import PopupBox
+from gui import PopupBox
 from util import htmlenties2txt
 
 class PluginInterface(plugin.ItemPlugin):

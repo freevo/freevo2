@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.53  2004/07/22 21:21:48  dischi
+# small fixes to fit the new gui code
+#
 # Revision 1.52  2004/07/11 10:39:45  dischi
 # replaced AlertBox with normal warning on screen
 #
@@ -59,7 +62,7 @@ from gui import GUIObject
 from event import *
 
 import time
-from animation import render, Transition
+from gui.animation import render, Transition
 
 # Module variable that contains an initialized ImageViewer() object
 _singleton = None

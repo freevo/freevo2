@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/07/22 21:21:48  dischi
+# small fixes to fit the new gui code
+#
 # Revision 1.19  2004/07/10 12:33:38  dischi
 # header cleanup
 #
@@ -50,7 +53,7 @@ from mameitem import MameItem
 from snesitem import SnesItem, snesromExtensions
 from genesisitem import GenesisItem, genesisromExtensions
 from genericitem import GenericItem
-from gui.AlertBox import PopupBox
+from gui import PopupBox
 
 
 class PluginInterface(plugin.MimetypePlugin):

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2004/07/22 21:21:49  dischi
+# small fixes to fit the new gui code
+#
 # Revision 1.37  2004/07/11 13:53:52  dischi
 # do not change menu start/stop times for CHAN_NO_DATA
 #
@@ -59,8 +62,8 @@ import config
 import rc
 import util
 
-from gui.PopupBox import PopupBox
-from gui.AlertBox import AlertBox
+from gui import PopupBox
+from gui import AlertBox
 
 import skin
 from event import *

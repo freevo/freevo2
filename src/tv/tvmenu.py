@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/07/22 21:21:49  dischi
+# small fixes to fit the new gui code
+#
 # Revision 1.17  2004/07/10 12:33:41  dischi
 # header cleanup
 #
@@ -64,8 +67,8 @@ from item import Item
 from tv.tvguide import TVGuide
 from directory import DirItem
 
-from gui.AlertBox import AlertBox
-from gui.PopupBox import PopupBox
+from gui import AlertBox
+from gui import PopupBox
 
 import tv.program_display
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/07/22 21:21:46  dischi
+# small fixes to fit the new gui code
+#
 # Revision 1.19  2004/07/10 12:33:37  dischi
 # header cleanup
 #
@@ -37,7 +40,7 @@
 # ----------------------------------------------------------------------- */
 
 
-from gui.GUIObject import GUIObject
+from gui import GUIObject
 
 import config
 import skin

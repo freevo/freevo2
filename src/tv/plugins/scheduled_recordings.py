@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/07/22 21:21:50  dischi
+# small fixes to fit the new gui code
+#
 # Revision 1.7  2004/07/10 12:33:42  dischi
 # header cleanup
 #
@@ -45,7 +48,7 @@ import os
 import config, plugin, menu, rc
 import tv.record_client as record_client
 
-from gui.AlertBox import AlertBox
+from gui import AlertBox
 from item import Item
 from tv.program_display import ProgramItem
 

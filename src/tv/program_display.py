@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2004/07/22 21:21:49  dischi
+# small fixes to fit the new gui code
+#
 # Revision 1.40  2004/07/11 14:02:01  dischi
 # prevent crash
 #
@@ -59,8 +62,8 @@ import tv.record_client as record_client
 import event as em
 
 from item import Item
-from gui.AlertBox import AlertBox
-from gui.InputBox import InputBox
+from gui import AlertBox
+from gui import InputBox
 from tv.record_types import Favorite
 
 DEBUG = config.DEBUG

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/07/22 21:21:49  dischi
+# small fixes to fit the new gui code
+#
 # Revision 1.13  2004/07/10 12:33:41  dischi
 # header cleanup
 #
@@ -48,13 +51,7 @@ from record_types import Favorite
 from epg_types import TvProgram
 from view_favorites import ViewFavorites
 
-from gui.GUIObject      import *
-from gui.Border         import *
-from gui.Label          import *
-from gui.AlertBox       import *
-from gui.OptionBox      import *
-from gui.LetterBoxGroup import *
-from gui.ConfirmBox     import ConfirmBox
+from gui      import *
 
 DEBUG = config.DEBUG
 TRUE = 1

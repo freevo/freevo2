@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/07/22 21:21:49  dischi
+# small fixes to fit the new gui code
+#
 # Revision 1.13  2004/07/10 12:33:40  dischi
 # header cleanup
 #
@@ -61,9 +64,9 @@ import rc
 
 from event import *
 from item import Item
-from gui.ListBox import ListBox
-from gui.RegionScroller import RegionScroller
-from gui.PopupBox import PopupBox
+from gui import ListBox
+from gui import RegionScroller
+from gui import PopupBox
 
 def islog(name):
     f = open(os.path.join(config.LOGDIR,'command-std%s.log' % name))

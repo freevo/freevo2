@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/07/22 21:21:49  dischi
+# small fixes to fit the new gui code
+#
 # Revision 1.15  2004/07/10 12:33:41  dischi
 # header cleanup
 #
@@ -49,13 +52,7 @@ import util.tv_util as tv_util
 import tv.record_client as record_client
 import event as em
 
-from gui.GUIObject      import *
-from gui.PopupBox       import *
-from gui.Border         import *
-from gui.Label          import *
-from gui.LetterBoxGroup import *
-from gui.ListBox        import *
-from gui.Button         import *
+from gui      import *
 
 DEBUG = 0
 

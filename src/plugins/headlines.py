@@ -15,6 +15,9 @@
 # for a full list of tested sites see Docs/plugins/headlines.txt
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/07/22 21:21:49  dischi
+# small fixes to fit the new gui code
+#
 # Revision 1.17  2004/07/10 12:33:40  dischi
 # header cleanup
 #
@@ -55,7 +58,7 @@ import urllib
 
 #freevo modules
 import config, menu, rc, plugin, skin, osd, util
-from gui.PopupBox import PopupBox
+from gui import PopupBox
 from item import Item
 
 

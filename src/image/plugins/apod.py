@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/07/22 21:21:49  dischi
+# small fixes to fit the new gui code
+#
 # Revision 1.5  2004/07/10 12:33:40  dischi
 # header cleanup
 #
@@ -46,7 +49,7 @@ import re
 
 from item import Item
 from image.imageitem import ImageItem
-from gui.AlertBox import AlertBox
+from gui import AlertBox
 
 class ApodMainMenuItem(Item):
     """

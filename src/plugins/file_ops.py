@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/07/22 21:21:49  dischi
+# small fixes to fit the new gui code
+#
 # Revision 1.20  2004/07/10 12:33:40  dischi
 # header cleanup
 #
@@ -42,7 +45,7 @@ import config
 import plugin
 import util
 
-from gui.ConfirmBox import ConfirmBox
+from gui import ConfirmBox
 
 class PluginInterface(plugin.ItemPlugin):
     """

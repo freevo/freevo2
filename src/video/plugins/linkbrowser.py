@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/07/22 21:21:50  dischi
+# small fixes to fit the new gui code
+#
 # Revision 1.7  2004/07/10 12:33:43  dischi
 # header cleanup
 #
@@ -51,8 +54,8 @@ import util
 
 from item import Item
 from video.videoitem import VideoItem
-from gui.AlertBox import AlertBox
-from gui.PopupBox import PopupBox
+from gui import AlertBox
+from gui import PopupBox
 
 class Link(Item):
     """

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/07/22 21:21:47  dischi
+# small fixes to fit the new gui code
+#
 # Revision 1.6  2004/07/10 12:33:38  dischi
 # header cleanup
 #
@@ -49,7 +52,7 @@ from pygame import Rect, image, transform, Surface
 import plugin, config, rc, skin, osd, time
 
 from event          import *
-from animation      import render, BaseAnimation
+from gui.animation      import render, BaseAnimation
 
 mmap_file = '/tmp/mpav'
 skin = skin.get_singleton()

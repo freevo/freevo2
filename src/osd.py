@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.166  2004/07/22 21:21:46  dischi
+# small fixes to fit the new gui code
+#
 # Revision 1.165  2004/07/10 12:33:36  dischi
 # header cleanup
 #
@@ -76,11 +79,6 @@ if __freevo_app__ == 'main':
     # The PyGame Python SDL interface.
     import pygame
     from pygame.locals import *
-
-    # import animations
-    import animation
-
-        
 
 
 help_text = """\
@@ -436,9 +434,7 @@ class OSD:
         self.Surface = pygame.Surface
         self.polygon = pygame.draw.polygon
 
-        # starts the render and it's thread
-        self.render = animation.render.get_singleton()
-
+        self.render = None
         pygame.time.delay(10)   # pygame.time.get_ticks don't seem to
                                 # work otherwise
 
@@ -788,8 +784,13 @@ class OSD:
             w, h = source.get_size()
             ret = self.screen.blit(source, destpos)
 
-        if self.render:
-            self.render.damage( [(destpos[0], destpos[1], w, h)] )
+
+        if not self.render:
+            # starts the render
+            import gui.animation
+            self.render = gui.animation.render.get_singleton()
+
+        self.render.damage( [(destpos[0], destpos[1], w, h)] )
 
         return ret
 
