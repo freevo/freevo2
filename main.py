@@ -83,7 +83,7 @@ def shutdown(menuw=None, arg=None):
 
 def autostart():
     if config.ROM_DRIVES != None: 
-        media,id,label = util.identifymedia(config.ROM_DRIVES[0][0])
+        media,label,image = util.identifymedia(config.ROM_DRIVES[0][0])
         if media == 'DVD':
             mplayer.play('dvd', '1', [])
         elif media == 'VCD' or media == 'SVCD':
