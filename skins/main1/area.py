@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/07/05 15:01:01  dischi
+# respect visible for images
+#
 # Revision 1.10  2003/07/05 09:11:58  dischi
 # cleanup old stuff and fixed text view fallback for tracks
 #
@@ -126,7 +129,7 @@ class Screen:
         self.update_content = []
 
         self.drawlist = []
-
+        self.avoid_list = []
         
     def clear(self):
         self.update_bg      = None
@@ -243,6 +246,7 @@ class Screen:
                 if self.in_update(x1, y1, x2, y2, update_area):
                     width = x2 - x1
                     if font.shadow.visible:
+                        width -= font.shadow.x
                         osd.drawstringframed(text, x1+font.shadow.x, y1+font.shadow.y,
                                              width, height, font.shadow.color, None,
                                              font=font.name, ptsize=font.size,
@@ -650,7 +654,7 @@ class Skin_Area:
                 self.redraw = TRUE
             
         for bg in copy.deepcopy(self.layout.background):
-            if isinstance(bg, xml_skin.XML_image):
+            if isinstance(bg, xml_skin.XML_image) and bg.visible:
                 self.calc_geometry(bg)
                 imagefile = ''
                 
@@ -732,9 +736,6 @@ class Skin_Area:
         height2 = height
         if height2 == -1:
             height2 = font.h + 2
-
-        if font.shadow.visible:
-            width -= font.shadow.x
 
         self.tmp_objects.text.append((x, y, x+width, y+height2, text, font, height,
                                             align_h, align_v, mode, ellipses))
