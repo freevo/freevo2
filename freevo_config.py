@@ -559,7 +559,7 @@ SUFFIX_IMAGE_SSHOW = [ 'ssr' ]
 #    ('SUPER NINTENDO', '/home/media/games/snes/roms',      ('SNES', '/usr/local/bin/zsnes',     '-m -r 3 -k 100 -cs -u', '', None )),
 #    ('MEGADRIVE',      '/home/media/games/megadrive/roms', ('GENESIS', '/usr/local/bin/generator-svgalib', '', '', '' )) ]
  
-DIR_GAMES = [ ('Test MAME Games',       './testfiles/Mame',     ('MAME', conf.XMAME, '-nosound -fullscreen -modenumber 6', './testfiles/Mame', None) ) ]
+DIR_GAMES = [ ('Test MAME Games',       './testfiles/Mame',     ('MAME', CONF.xmame, '-nosound -fullscreen -modenumber 6', './testfiles/Mame', None) ) ]
 
 # are used for the Mame arcade emulator.
 #
