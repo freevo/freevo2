@@ -7,3 +7,9 @@ clean DTD for all our xml files.
 blue1_round will get an image listing, too
 
 Finish integration of Robs new gui stuff
+
+integrate the idle bar (position, colors, visible=yes/no)
+
+better handling of tv shows (strip show name if all items are from 
+the same show)
+
