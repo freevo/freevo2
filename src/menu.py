@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/02/21 21:18:52  outlyer
+# Added a surface thing; it's cleared for each new menu, but fixes the flicker
+# issue. Only skin_aubin uses it, it's otherwise ignored.
+#
 # Revision 1.15  2003/02/18 23:08:25  rshortt
 # Hooking up the code in src/gui.  Added osd.focused_app to keep track of
 # what should first receive the events.  In main this is set to be the
@@ -170,6 +174,7 @@ class Menu:
         self.previous_page_start.append(0)
         self.packrows = packrows
         self.umount_all = umount_all    # umount all ROM drives on display?
+        self.surface = None
         if xml_file:
             self.skin_settings = skin.LoadSettings(xml_file)
         else:
