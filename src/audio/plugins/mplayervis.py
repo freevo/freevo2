@@ -115,8 +115,8 @@ class mpv_Goom(BaseAnimation):
         if self.coverfile:
             self.coversurf = transform.scale(image.load(self.coverfile),
                                              (self.rect.width, self.rect.height))
-        self.max_blend = 250
 
+        self.max_blend = 250
         self.c_timer = time.time()
 
         if clear:
@@ -136,7 +136,7 @@ class mpv_Goom(BaseAnimation):
         override to get extra performance
         """
 
-        if self.next_update < current_time:# and not self.wait:
+        if self.next_update < current_time:
 
             self.next_update = current_time + self.interval
             gooms = pygoom.get_surface()
@@ -216,7 +216,7 @@ class PluginInterface(plugin.Plugin):
         """
         eventhandler to simulate hide/show of mpav
         """
-        if self.visual and self.player and self.player.playerGUI.visible:
+        if self.visual:
             if event == TOGGLE_OSD and self.view in [0, 1]:
                 if self.view == 1:
                     self.dock()
@@ -270,12 +270,25 @@ class PluginInterface(plugin.Plugin):
             rc.app(self.player)
 
         # get the rect from skin
+        #  XXX someone with better knowlegde of the
+        #      skin code should take a look at this
         imgarea = skin.areas['view']
         c = imgarea.calc_geometry(imgarea.layout.content, copy_object=True)
-        w = c.width  - 2*c.spacing
-        h = c.height - 2*c.spacing
-        x = c.x - c.spacing
-        y = c.y - c.spacing
+        w = c.width   - 2*c.spacing
+        h = c.height  - 2*c.spacing
+        x = c.x + c.spacing
+        y = c.y + c.spacing
+
+        # check if the view-area has a rectangle
+        try:
+            r = c.types['default'].rectangle
+            x -= r.x
+            y -= r.y
+            w += 2*r.x
+            h += 2*r.y
+        except:
+            pass
+
 
         if self.view == 1:
             self.player.playerGUI.show()
