@@ -11,7 +11,8 @@
 #   
 #   plugin.activate('idlebar.mail',    level=10, args=('/var/spool/mail/dmeyer', ))
 #   plugin.activate('idlebar.tv',      level=20)
-#   plugin.activate('idlebar.weather', level=30, args=('timezone', ))
+#   plugin.activate('idlebar.weather', level=30, args=('4-letter code', ))
+#   For weather station codes see: http://www.nws.noaa.gov/tg/siteloc.shtml
 #   plugin.activate('idlebar.clock',   level=50)
 #   
 #
@@ -21,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/06/04 23:36:35  rshortt
+# Use the real cache dir and add a note about weather codes.
+#
 # Revision 1.9  2003/05/28 18:12:39  dischi
 # pass object to draw to all sub-plugins
 #
@@ -175,7 +179,7 @@ class mail(IdleBarPlugin):
 class tv(IdleBarPlugin):
     def __init__(self):
         IdleBarPlugin.__init__(self)
-        self.tvlockfile = '/var/cache/freevo/record'
+        self.tvlockfile = config.FREEVO_CACHEDIR + '/record'
         self.TVLOCKED = 'skins/images/status/television_active.png'
         self.TVFREE = 'skins/images/status/television_inactive.png'
         
@@ -196,7 +200,7 @@ class weather(IdleBarPlugin):
     def __init__(self, zone='CYYZ'):
         IdleBarPlugin.__init__(self)
         self.METARCODE = zone
-        self.WEATHERCACHE = '/var/cache/freevo/weather'
+        self.WEATHERCACHE = config.FREEVO_CACHEDIR + '/weather'
         self.CLOCKFONT = 'skins/fonts/Trebuchet_MS.ttf'
         if not os.path.isfile(self.CLOCKFONT):
             # XXX Get this from the skin, but for now this will allow it to work
