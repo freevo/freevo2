@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.113  2004/06/08 19:34:12  dischi
+# fix bad freevo_script for installed version
+#
 # Revision 1.112  2004/06/08 19:11:56  dischi
 # support direct start without execute
 #
@@ -312,6 +315,10 @@ else:
     #
     # installed version of freevo, get best python + freevo path
     #
+    if not os.path.isfile(freevo_script):
+        for path in os.environ['PATH'].split(':'):
+            if os.path.isfile(os.path.join(path, freevo_script)):
+                freevo_script = os.path.join(path, freevo_script)
     python, freevo_python = get_python(1)
     if not python:
         print 'can\'t find python version with installed freevo'
