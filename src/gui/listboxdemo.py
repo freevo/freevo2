@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/02/24 12:14:57  rshortt
+# Removed more unneeded self.parent.refresh() calls.
+#
 # Revision 1.1  2003/02/23 18:24:04  rshortt
 # New classes.  ListBox is a subclass of RegionScroller so that it can scroll though a list of ListItems which are drawn to a surface.  Also included is a listboxdemo to demonstrate and test everything.
 #
@@ -129,7 +132,6 @@ class listboxdemo(PopupBox):
         if scrolldirs.count(event) > 0:
             return self.pb.eventhandler(event)
         elif event == self.rc.ENTER or event == self.rc.SELECT or event == self.rc.EXIT:
-            self.parent.refresh()
             self.destroy()
         else:
             return self.parent.eventhandler(event)

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/02/24 12:14:57  rshortt
+# Removed more unneeded self.parent.refresh() calls.
+#
 # Revision 1.1  2003/02/19 00:58:18  rshortt
 # Added scrolldemo.py for a better demonstration.  Use my audioitem.py
 # to test.
@@ -124,7 +127,6 @@ class scrolldemo(PopupBox):
         if scrolldirs.count(event) > 0:
             return self.pb.eventhandler(event)
         elif event == self.rc.ENTER or event == self.rc.SELECT or event == self.rc.EXIT:
-            self.parent.refresh()
             self.destroy()
         else:
             return self.parent.eventhandler(event)

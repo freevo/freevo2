@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/02/24 12:14:57  rshortt
+# Removed more unneeded self.parent.refresh() calls.
+#
 # Revision 1.1  2003/02/18 13:40:52  rshortt
 # Reviving the src/gui code, allso adding some new GUI objects.  Event
 # handling will not work untill I make some minor modifications to main.py,
@@ -129,7 +132,6 @@ class AlertBox(PopupBox):
             return
         elif event == self.rc.ENTER or event == self.rc.SELECT:
             print 'HIT OK'
-            self.parent.refresh()
             self.destroy()
         else:
             return self.parent.eventhandler(event)
