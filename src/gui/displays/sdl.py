@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/08/23 14:29:46  dischi
+# displays have information about animation support now
+#
 # Revision 1.2  2004/08/23 12:36:50  dischi
 # cleanup, add doc
 #
@@ -54,6 +57,7 @@ class Display(PygameCanvas):
         self.mousehidetime = time.time()
         rc.get_singleton().inputs.append(rc.Keyboard(self.poll))
         self.running = True
+        self.animation_possible = True
 
         
     def hide(self):

@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/08/23 14:29:46  dischi
+# displays have information about animation support now
+#
 # Revision 1.4  2004/08/23 12:36:50  dischi
 # cleanup, add doc
 #
@@ -51,6 +54,7 @@ class Display(MPlayerCanvas):
     """
     def __init__(self, size, default=False):
         self.start_video = default
+        self.animation_possible = True
         MPlayerCanvas.__init__(self, size)
         if default:
             print
@@ -75,7 +79,7 @@ class Display(MPlayerCanvas):
         _debug_('restart bmovl2')
         if self.start_video and not self.child:
             import childapp
-            arg = ['/local/install/mplayer-cvs/mplayer'] + self.mplayer_args.split(' ') + \
+            arg = [config.MPLAYER_CMD] + self.mplayer_args.split(' ') + \
                   [config.OSD_BACKGROUND_VIDEO]
             self.child = childapp.ChildApp2(arg)
             time.sleep(2)

@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/08/23 14:29:46  dischi
+# displays have information about animation support now
+#
 # Revision 1.2  2004/08/23 12:36:50  dischi
 # cleanup, add doc
 #
@@ -42,6 +45,7 @@ from mevas.displays.imlib2canvas import Imlib2Canvas
 class Display(Imlib2Canvas):
     def __init__(self, size, default=False):
         Imlib2Canvas.__init__(self, size)
+        self.animation_possible = True
 
     def hide(self):
         pass

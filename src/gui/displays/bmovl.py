@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/08/23 14:29:46  dischi
+# displays have information about animation support now
+#
 # Revision 1.2  2004/08/23 12:36:50  dischi
 # cleanup, add doc
 #
@@ -45,6 +48,7 @@ class Display(BmovlCanvas):
     Display class for bmovl output over mplayer
     """
     def __init__(self, size, default=False):
+        self.animation_possible = False
         self.start_video = default
         if default:
             print
