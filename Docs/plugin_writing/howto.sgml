@@ -39,15 +39,26 @@
       </para>
     </legalnotice>
 
-    <author>
-      <firstname>Dirk</firstname>
-      <surname>Meyer</surname>
-      <authorblurb>
-	<para>
-	  <email>dmeyer@tzi.de</email>
-	</para>
-      </authorblurb>
-    </author>
+    <authorgroup>
+      <author>
+        <firstname>Dirk</firstname>
+        <surname>Meyer</surname>
+        <authorblurb>
+	  <para>
+	    <email>dmeyer@tzi.de</email>
+	  </para>
+        </authorblurb>
+      </author>
+      <author>
+        <firstname>Mike</firstname>
+        <surname>Ruelle</surname>
+        <authorblurb>
+	  <para>
+	    <email>mikeruelle@comcast.net</email>
+	  </para>
+        </authorblurb>
+      </author>
+    </authorgroup>
 
     <abstract>
       <para>
