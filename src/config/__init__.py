@@ -148,6 +148,16 @@ TV_SETTINGS = TVSettings()
 
 TV_DEFAULT_SETTINGS = None
 
+
+# Internal list of all channels Freevo cares about.  This is a ChannelList
+# object that contains information from the EPGDB and TV_CHANNELS and is 
+# used internaly only, not modified (directly) by the user.  This is used
+# by the tvguide, recordserver, webserver, and other helpers and is the
+# definative list of channels that Freevo cares about.
+
+TV_ALL_CHANNELS = None
+
+
 #
 # Read the environment set by the start script
 #
