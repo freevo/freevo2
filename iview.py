@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2002/08/12 19:46:51  dischi
+# iview now gets the image size from the osd.py or osd_sdl.py.
+# Deactivated the use of osd.zoombitmap for osd_sdl, it doesn't speed up
+# anything.
+#
 # Revision 1.9  2002/08/12 07:18:08  dischi
 # Exit image viewer also on MENU event
 #
@@ -117,14 +122,10 @@ class ImageViewer:
         self.number = number
         self.rotation = rotation
 
-        
         rc.app = self.eventhandler
 
 
-        osd.loadbitmap(filename)
-
-        image = Image.open(filename)
-        width, height = image.size
+        width, height = osd.bitmapsize(filename)
 
         # Bounding box default values
         bbx = bby = bbw = bbh = 0
@@ -192,7 +193,7 @@ class ImageViewer:
 
         else:
             if 'OSD_SDL' in dir(config) and self.rotation % 180:  
-                height, width = image.size
+                height, width = width, height
                 
             # scale_x = scale_y = 1.0
             # if width > osd.width: scale_x = float(osd.width) / width
@@ -230,18 +231,20 @@ class ImageViewer:
             pos = (pos+1) % len(self.playlist)
             filename = self.playlist[pos]
             
-            image = Image.open(filename)
-            width, height = image.size
+            width, height = osd.bitmapsize(filename)
             
-            scale_x = scale_y = 1.0
-            if width > osd.width: scale_x = float(osd.width) / width
-            if height > osd.height: scale_y = float(osd.height) / height
+            # osd.bitmapsize caches the image. Because zoombitmap has no
+            # caching function right now, we don't need this with OSD_SDL
+            if not 'OSD_SDL' in dir(config):
+                scale_x = scale_y = 1.0
+                if width > osd.width: scale_x = float(osd.width) / width
+                if height > osd.height: scale_y = float(osd.height) / height
             
-            scale = min(scale_x, scale_y)
+                scale = min(scale_x, scale_y)
 
-            # This will both load the next image into the load cache,
-            # zoom it into the zoom cache.
-            osd.zoombitmap(filename, scale)
+                # This will both load the next image into the load cache,
+                # zoom it into the zoom cache.
+                osd.zoombitmap(filename, scale)
 
 
     def eventhandler(self, event):
