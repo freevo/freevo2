@@ -6,7 +6,7 @@
 %define _cvsdate %(date +%Y%m%d)
 Summary:	Freevo
 Name:		freevo
-Version:	1.3.1
+Version:	1.3.2
 Release:	CVS%{_cvsdate}
 License:	GPL
 Group:		Applications/Multimedia
@@ -43,14 +43,14 @@ find . -name CVS | xargs rm -rf
 mv runtime runtime-src
 ln -s %{_prefix}/runtime .
 make clean; make
-pushd plugins/cddb
-	make
-popd
+#pushd plugins/cddb
+#	make
+#popd
 pushd src/games/rominfo
 	make
 popd
 
-./configure --geometry=%{geometry} --display=%{display} \
+./freevo setup --geometry=%{geometry} --display=%{display} \
 	--tv=%{tv_norm} --chanlist=%{chanlist}
 
 #%package runtime
@@ -112,8 +112,8 @@ mkdir -p %{buildroot}%{_prefix}/fbcon/matroxset
 mkdir -p %{buildroot}%{_prefix}/{boot,helpers,rc_client}
 #mkdir -p %{buildroot}%{_prefix}/{runtime/apps,runtime/dll,runtime/lib}
 mkdir -p %{buildroot}%{_prefix}/src/{audio/eyed3,games/rominfo,gui,image,tv,video/plugins,www/bin,www/htdocs/images,www/htdocs/scripts,www/htdocs/styles}
-mkdir -p %{buildroot}%{_prefix}/plugins/{cddb,weather/icons}
-mkdir -p %{buildroot}%{_prefix}/skins/{fonts,icons,images,main1,xml/type1}
+mkdir -p %{buildroot}%{_prefix}/plugins/weather/icons
+mkdir -p %{buildroot}%{_prefix}/skins/{fonts,icons,images/aubin,main1,xml/type1}
 mkdir -p %{buildroot}%{_prefix}/skins/{aubin1,barbieri,dischi1,krister1,malt1}
 mkdir -p %{buildroot}%{_prefix}/skins/icons/{AquaFusion,gnome,misc,old}
 mkdir -p %{buildroot}%{_sysconfdir}/freevo
@@ -121,14 +121,14 @@ mkdir -p %{buildroot}%{_sysconfdir}/rc.d/init.d
 mkdir -p %{buildroot}%{_cachedir}/freevo/testfiles/{Images/Show,Images/Bins,Mame,Movies/skin.xml_Test,Music,tv-show-images}
 
 install -m 755 freevo freevo_xwin runapp %{buildroot}%{_prefix}
-install -m 644 freevo_config.py setup_build.py %{buildroot}%{_prefix}
+install -m 644 freevo_config.py setup_freevo.py %{buildroot}%{_prefix}
 install -m 644 fbcon/fbset.db %{buildroot}%{_prefix}/fbcon
 install -m 755 fbcon/vtrelease fbcon/*.sh %{buildroot}%{_prefix}/fbcon
 install -m 755 fbcon/matroxset/matroxset %{buildroot}%{_prefix}/fbcon/matroxset
 install -m 755 helpers/blanking %{buildroot}%{_prefix}/helpers
 install -m 755 helpers/*.pl %{buildroot}%{_prefix}/helpers
 install -m 755 helpers/*.py %{buildroot}%{_prefix}/helpers
-install -m 755 plugins/cddb/*.py plugins/cddb/cdrom.so %{buildroot}%{_prefix}/plugins/cddb
+#install -m 755 plugins/cddb/*.py plugins/cddb/cdrom.so %{buildroot}%{_prefix}/plugins/cddb
 install -m 644 plugins/weather/*.py plugins/weather/librarydoc.txt %{buildroot}%{_prefix}/plugins/weather
 install -m 644 plugins/weather/icons/*.png %{buildroot}%{_prefix}/plugins/weather/icons
 install -m 644 rc_client/*.py %{buildroot}%{_prefix}/rc_client
@@ -164,7 +164,8 @@ install -m 644 skins/icons/AquaFusion/* %{buildroot}%{_prefix}/skins/icons/AquaF
 install -m 644 skins/icons/misc/* %{buildroot}%{_prefix}/skins/icons/misc
 install -m 644 skins/icons/gnome/* %{buildroot}%{_prefix}/skins/icons/gnome
 install -m 644 skins/icons/old/* %{buildroot}%{_prefix}/skins/icons/old
-install -m 644 skins/images/* %{buildroot}%{_prefix}/skins/images
+install -m 644 skins/images/*.png skins/images/*.jpg %{buildroot}%{_prefix}/skins/images
+install -m 644 skins/images/aubin/* %{buildroot}%{_prefix}/skins/images/aubin
 install -m 644 skins/main1/* %{buildroot}%{_prefix}/skins/main1
 install -m 644 skins/xml/type1/* %{buildroot}%{_prefix}/skins/xml/type1
 install -m 644 skins/aubin1/* %{buildroot}%{_prefix}/skins/aubin1
@@ -182,15 +183,16 @@ install -m 644 testfiles/Images/*.ssr %{buildroot}%{_cachedir}/freevo/testfiles/
 install -m 644 testfiles/Images/Show/* %{buildroot}%{_cachedir}/freevo/testfiles/Images/Show
 install -m 644 testfiles/Images/Bins/* %{buildroot}%{_cachedir}/freevo/testfiles/Images/Bins
 install -m 644 testfiles/Mame/* %{buildroot}%{_cachedir}/freevo/testfiles/Mame
-install -m 644 testfiles/Movies/*.avi testfiles/Movies/*.jpg testfiles/Movies/*.xml %{buildroot}%{_cachedir}/freevo/testfiles/Movies
+install -m 644 testfiles/Movies/*.avi testfiles/Movies/*.jpg testfiles/Movies/*.fxd %{buildroot}%{_cachedir}/freevo/testfiles/Movies
 install -m 644 testfiles/Movies/skin.xml_Test/* %{buildroot}%{_cachedir}/freevo/testfiles/Movies/skin.xml_Test
 install -m 644 testfiles/Music/*.mp3 %{buildroot}%{_cachedir}/freevo/testfiles/Music
+install -m 644 testfiles/Music/*.png %{buildroot}%{_cachedir}/freevo/testfiles/Music
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %post
-cd %{_prefix}; ./runapp python setup_build.py --compile=%{_optimize},%{_prefix}
+cd %{_prefix}; ./freevo setup --compile=%{_optimize},%{_prefix}
 mkdir -p %{_cachedir}/freevo
 mkdir -p %{_cachedir}/xmltv/logos
 mkdir -p %{_logdir}/freevo
@@ -266,6 +268,9 @@ ln -sf %{_cachedir}/freevo/testfiles %{_prefix}
 rm -f %{_prefix}/testfiles
 
 %changelog
+* Tue Feb 18 2003 TC Wan <tcwan@cs.usm.my>
+- Updated for 1.3.2 cvs build
+
 * Thu Feb 13 2003 TC Wan <tcwan@cs.usm.my>
 - Updated for 1.3.1 cvs build
 - Requires freevo-runtime for build as setup_build.py needs it
