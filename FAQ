@@ -20,3 +20,29 @@ A: It is not supported yet.
    Support is planned for a future relase.
 ----------------------------------------------------------------------
 
+Q: I have an old computer with a processor less than 400 Mhz, will it work?
+
+A: Most likely not. 400 Mhz probably won't even be enough when we get
+   simultaneous recording and playback working. I'd recommend
+   something over 1 Ghz if you want to use that feature when it comes
+   out (based on the hardware needs of mythtv). If you only want video
+   playback, less than 400 Mhz may be enough, please check the mplayer
+   doc about this (http://www.mplayerhq.hu/DOCS/).
+----------------------------------------------------------------------
+
+Q: I have a board other than a matrox G400 will that work with freevo?
+
+A: Not in framebuffer mode. If the card works with linux in tv-out
+   mode you can most likely use it with freevo in X11 mode (nvidia
+   cards should work (add more here as people test them).
+----------------------------------------------------------------------
+
+Q: I'm using distribution X will that work with freevo?
+
+A: Most any distribution should work with freevo. As long as the the
+   requirements are met (listed on the main page) and you have a
+   compiler that is either 2.95 or 3.xx (redhat 7.3 and lower and
+   mandrake 8.2 and lower come with 2.96 which doesn't seem to work
+   very well, but gcc3 is included in redhat >= 7.2 as extra rpm) it
+   should work fine (if freevo ever gets to the point where it is
+   distributed as rpms or debs you can ignore the compiler part).
