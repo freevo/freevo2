@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.119  2004/09/25 04:13:50  rshortt
+# Fix PYTHONPATH to get libs in site-packages dir.
+#
 # Revision 1.118  2004/09/15 21:07:02  dischi
 # better build handling
 #
@@ -307,7 +310,7 @@ if os.path.isdir(os.path.join(os.path.dirname(freevo_script), 'src/plugins')):
     if os.environ.has_key('PYTHONPATH'):
         os.environ['PYTHONPATH'] = '%s/site-packages:%s' % (dname, os.environ['PYTHONPATH'])
     else:
-        os.environ['PYTHONPATH'] = freevo_python
+        os.environ['PYTHONPATH'] = '%s/site-packages' % dname
 
     if os.path.isfile(os.path.join(dname, 'runtime/runapp')):
         #
