@@ -7,6 +7,9 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2004/03/07 18:25:49  dischi
+# more debug
+#
 # Revision 1.33  2004/02/22 20:53:12  dischi
 # add bugreport text
 #
@@ -348,10 +351,20 @@ class GUIObject:
             print '******************************************************************'
             print 'Exception: %s' % e
             print 'Please report the following lines to the freevo mailing list'
-            print 'or with the subject \'[Freevo-Bugreport\] GUI\' to'
+            print 'or with the subject \'[Freevo-Bugreport] GUI\' to'
             print 'freevo@dischi-home.de.'
             print
-            print 'wanted %s for %s' % (self.get_rect(), self.parent.surface)
+            if not self.parent:
+                print 'object has no parent:'
+                print self
+            elif not hasattr(self.parent, 'surface'):
+                print 'parent has no surface:'
+                print self, self.parent
+            elif not self.parent.surface:
+                print 'parent surface is None:'
+                print self, self.parent
+            else:
+                print 'wanted %s for %s' % (self.get_rect(), self.parent.surface)
             print traceback.print_exc()
             print
             print 'GUIObject stack:'
