@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.59  2004/03/02 21:01:52  dischi
+# better typoe detection, autostart
+#
 # Revision 1.58  2004/02/27 20:07:28  dischi
 # add function to check if a media is mounted
 #
@@ -200,7 +203,20 @@ class autostart(plugin.DaemonPlugin):
             if media.item:
                 media.item.parent = menuw.menustack[0].selected
             if media.item and media.item.actions():
-                media.item.actions()[0][0](menuw=menuw)
+                if media.type == 'audio':
+                    # disc marked as audio, play everything
+                    if media.item.type == 'dir':
+                        media.item.play_recursive(menuw=menuw)
+                    elif media.item.type == 'audiocd':
+                        media.item.play(menuw=menuw)
+                    else:
+                        media.item.actions()[0][0](menuw=menuw)
+                elif media.videoitem:
+                    # disc has one video file, play it
+                    media.videoitem.actions()[0][0](menuw=menuw)
+                else:
+                    # ok, do whatever this item has to offer
+                    media.item.actions()[0][0](menuw=menuw)
             else:
                 menuw.refresh()
             return True
@@ -242,6 +258,7 @@ class rom_items(plugin.MainMenuPlugin):
             if media.item:
                 if parent.display_type == 'video' and media.videoitem:
                     m = media.videoitem
+                    # FIXME: how to play video is maybe subdirs?
                     
                 else:
                     if media.item.type == 'dir':
@@ -558,21 +575,24 @@ class Identify_Thread(threading.Thread):
         # Disc is data of some sort. Mount it to get the file info
         util.mount(media.mountdir, force=True)
         
+
         # Check for movies/audio/images on the disc
-        mplayer_files = util.match_files(media.mountdir, config.VIDEO_SUFFIX)
-        mp3_files = util.match_files(media.mountdir, config.AUDIO_SUFFIX)
-        image_files = util.match_files(media.mountdir, config.IMAGE_SUFFIX)
+        num_video = disc_info['disc_num_video']
+        num_audio = disc_info['disc_num_audio']
+        num_image = disc_info['disc_num_image']
+
+        video_files = util.match_files(media.mountdir, config.VIDEO_SUFFIX)
         
-        _debug_('identifymedia: mplayer = "%s"' % mplayer_files, level = 2)
-        _debug_('identifymedia: mp3="%s"' % mp3_files, level = 2)
-        _debug_('identifymedia: image="%s"' % image_files, level = 2)
+        _debug_('identifymedia: mplayer = "%s"' % video_files, level = 2)
             
         media.item = DirItem(media.mountdir, None, create_metainfo=False)
         media.item.info = disc_info
         util.umount(media.mountdir)
         
-        # Is this a movie disc?
-        if mplayer_files and not mp3_files:
+        # if there is a video file on the root dir of the disc, we guess
+        # it's a video disc. There may also be audio files and images, but
+        # they only belong to the movie
+        if video_files:
             media.type = 'video'
 
             # try to find out if it is a series cd
@@ -583,9 +603,9 @@ class Identify_Thread(threading.Thread):
                 start_ep  = 0
                 end_ep    = 0
 
-                mplayer_files.sort(lambda l, o: cmp(l.upper(), o.upper()))
+                video_files.sort(lambda l, o: cmp(l.upper(), o.upper()))
 
-                for movie in mplayer_files:
+                for movie in video_files:
                     if config.VIDEO_SHOW_REGEXP_MATCH(movie):
                         show = config.VIDEO_SHOW_REGEXP_SPLIT(os.path.basename(movie))
 
@@ -624,8 +644,8 @@ class Identify_Thread(threading.Thread):
                         if not fxd_file:
                             fxd_file = tvinfo[3]
                         
-                elif (not show_name) and len(mplayer_files) == 1:
-                    movie = mplayer_files[0]
+                elif (not show_name) and len(video_files) == 1:
+                    movie = video_files[0]
                     title = os.path.splitext(os.path.basename(movie))[0]
 
             # nothing found, give up: return the label
@@ -633,18 +653,19 @@ class Identify_Thread(threading.Thread):
                 title = label
 
 
-        # XXX add more intelligence to cds with audio files
-        elif (not mplayer_files) and mp3_files:
+        # If there are no videos and only audio files (and maybe images)
+        # it is an audio disc (autostart will auto play everything)
+        elif not num_video and num_audio:
             media.type = 'audio'
             title = '%s [%s]' % (media.drivename, label)
 
-        # XXX add more intelligence to cds with image files
-        elif (not mplayer_files) and (not mp3_files) and image_files:
+        # Only images? OK than, make it an image disc
+        elif not num_video and not num_audio and num_image:
             media.type = 'image'
             title = '%s [%s]' % (media.drivename, label)
 
         # Mixed media?
-        elif mplayer_files or image_files or mp3_files:
+        elif num_video or num_audio or num_image:
             media.type = None
             title = '%s [%s]' % (media.drivename, label)
         
@@ -654,31 +675,43 @@ class Identify_Thread(threading.Thread):
             title = '%s [%s]' % (media.drivename, label)
 
 
+        # set the infos we have now
         if title:
             media.item.name = title
+
         if image:
             media.item.image = image
+
         if more_info:
             media.item.info.set_variables(more_info)
+
         if fxd_file and not media.item.fxd_file:
             media.item.set_fxd_file(fxd_file)
-            
-        if len(mplayer_files) == 1:
+
+
+        # One video in the root dir. This sounds like a disc with one
+        # movie on it. Save the information about it and autostart will
+        # play this.
+        if len(video_files) == 1:
             util.mount(media.mountdir)
             if movie_info:
                 media.videoitem = copy.deepcopy(movie_info)
             else:
-                media.videoitem = VideoItem(mplayer_files[0], None)
+                media.videoitem = VideoItem(video_files[0], None)
             util.umount(media.mountdir)
             media.videoitem.media    = media
             media.videoitem.media_id = media.id
             
+            # set the infos we have
             if title:
                 media.videoitem.name = title
+
             if image:
                 media.videoitem.image = image
+
             if more_info:
                 media.videoitem.set_variables(more_info)
+
             if fxd_file:
                 media.videoitem.fxd_file = fxd_file
                 
