@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/01/03 17:40:27  dischi
+# remove update function
+#
 # Revision 1.13  2003/12/29 22:09:19  dischi
 # move to new Item attributes
 #
@@ -32,12 +35,6 @@
 #
 # Revision 1.6  2003/12/06 13:44:12  dischi
 # move more info to the Mimetype
-#
-# Revision 1.5  2003/11/30 14:41:10  dischi
-# use new Mimetype plugin interface
-#
-# Revision 1.4  2003/11/28 19:26:37  dischi
-# renamed some config variables
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -104,20 +101,6 @@ class PluginInterface(plugin.MimetypePlugin):
             items.append(ImageItem(file, parent))
             files.remove(file)
         return items
-
-
-    def update(self, parent, new_files, del_files, new_items, del_items, current_items):
-        """
-        update a directory. Add items to del_items if they had to be removed based on
-        del_files or add them to new_items based on new_files
-        """
-        for item in current_items:
-            for file in util.find_matches(del_files, config.IMAGE_SUFFIX):
-                if item.type == 'image' and item.filename == file:
-                    del_items += [ item ]
-                    del_files.remove(file)
-
-        new_items += self.get(parent, new_files)
 
 
     def dirinfo(self, diritem):

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/01/03 17:40:27  dischi
+# remove update function
+#
 # Revision 1.16  2003/12/31 16:42:40  dischi
 # changes, related to item.py changes
 #
@@ -29,18 +32,6 @@
 #
 # Revision 1.10  2003/11/25 19:00:52  dischi
 # make fxd item parser _much_ simpler
-#
-# Revision 1.9  2003/11/24 19:25:46  dischi
-# use new fxditem
-#
-# Revision 1.8  2003/11/23 17:03:43  dischi
-# Removed fxd handling from AudioItem and created a new FXDHandler class
-# in __init__.py to let the directory handle the fxd files. The format
-# of audio fxd files changed a bit to match the video fxd format. See
-# __init__.py for details.
-#
-# Revision 1.7  2003/09/21 13:15:56  dischi
-# handle audio fxd files correctly
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -114,21 +105,6 @@ class PluginInterface(plugin.MimetypePlugin):
                 files.remove(file)
 
         return items
-
-
-    def update(self, parent, new_files, del_files, new_items, del_items, current_items):
-        """
-        update a directory. Add items to del_items if they had to be removed based on
-        del_files or add them to new_items based on new_files
-        """
-        for item in current_items:
-            for file in util.find_matches(del_files, config.AUDIO_SUFFIX):
-                if item.type == 'audio' and item.filename == file:
-                    del_items += [ item ]
-                    del_files.remove(file)
-
-        new_items += self.get(parent, new_files)
-
 
 
     def dirinfo(self, diritem):

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.50  2004/01/03 17:40:27  dischi
+# remove update function
+#
 # Revision 1.49  2004/01/02 11:18:39  dischi
 # call correct build function
 #
@@ -525,25 +528,6 @@ class Mimetype(plugin.MimetypePlugin):
             files.remove(filename)
 
         return items
-
-
-    def update(self, parent, new_files, del_files, new_items, del_items, current_items):
-        """
-        update a directory. Add items to del_items if they had to be removed based on
-        del_files or add them to new_items based on new_files
-        """
-        for item in current_items:
-            # remove 'normal' files
-            for file in util.find_matches(del_files, self.suffix()):
-                if item.type == 'playlist' and item.filename == file and not \
-                   item in del_items:
-                    del_items += [ item ]
-                    del_files.remove(file)
-
-        # add new 'normal' files
-        for file in util.find_matches(new_files, self.suffix()):
-            new_items.append(Playlist(file, parent))
-            new_files.remove(file)
 
 
     def fxdhandler(self, fxd, node):

@@ -26,6 +26,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/01/03 17:40:27  dischi
+# remove update function
+#
 # Revision 1.8  2003/12/31 16:40:25  dischi
 # small speed enhancements
 #
@@ -125,42 +128,6 @@ class Mimetype(plugin.MimetypePlugin):
             return self.parse(parent, fxd_files, files)
         else:
             return []
-
-
-    def update(self, parent, new_files, del_files, new_items, del_items, current_items):
-        """
-        update a directory. Add items to del_items if they had to be removed based on
-        del_files or add them to new_items based on new_files
-        """
-        if parent.type != 'dir':
-            # don't know what to do here
-            return
-
-        # a fxd files may be removed, 'free' covered files
-        for fxd_file in util.find_matches(del_files, ['fxd']):
-            for i in current_items:
-                if i.fxd_file == fxd_file and hasattr(i, '_fxd_covered_'):
-                    for covered in i._fxd_covered_:
-                        if not covered in del_files:
-                            new_files.append(covered)
-                    del_items.append(i)
-                    del_files.remove(fxd_file)
-
-
-        # a new fxd file may cover items
-        fxd_files = util.find_matches(new_files, ['fxd'])
-        if fxd_files:
-            for f in fxd_files:
-                new_files.remove(f)
-            copy_all = copy.copy(parent.all_files)
-            new_items += self.parse(parent, fxd_files, copy_all)
-            for f in parent.all_files:
-                if not f in copy_all:
-                    # covered by fxd now
-                    if not f in new_files:
-                        del_files.append(f)
-                    else:
-                        new_files.remove(f)
 
 
     def parse(self, parent, fxd_files, duplicate_check=[], display_type=None):

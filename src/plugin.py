@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.59  2004/01/03 17:40:27  dischi
+# remove update function
+#
 # Revision 1.58  2003/12/31 16:39:43  dischi
 # flag if the mimetype returns something else than play files
 #
@@ -212,14 +215,6 @@ class MimetypePlugin(Plugin):
         return a list of items based on the files
         """
         return []
-
-
-    def update(self, parent, new_files, del_files, new_items, del_items, current_items):
-        """
-        update a directory. Add items to del_items if they had to be removed based on
-        del_files or add them to new_items based on new_files
-        """
-        pass
 
 
     def dirinfo(self, diritem):

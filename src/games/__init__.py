@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/01/03 17:40:27  dischi
+# remove update function
+#
 # Revision 1.14  2003/12/08 15:57:32  mikeruelle
 # change cwd to get
 #
@@ -26,22 +29,6 @@
 #
 # Revision 1.9  2003/11/16 17:41:04  dischi
 # i18n patch from David Sagnol
-#
-# Revision 1.8  2003/09/21 13:20:03  dischi
-# destroy the popup after some time
-#
-# Revision 1.7  2003/09/16 20:45:02  mikeruelle
-# warn user about old GAMES_ITEMS entry
-#
-# Revision 1.6  2003/09/12 22:25:00  dischi
-# prevent a possible crash
-#
-# Revision 1.5  2003/09/05 20:48:34  mikeruelle
-# new game system
-#
-# Revision 1.4  2003/08/23 12:51:42  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -136,39 +123,3 @@ class PluginInterface(plugin.MimetypePlugin):
                 files.remove(file)
 
         return items
-
-
-    def update(self, parent, new_files, del_files, new_items, del_items, current_items):
-        """
-        update a directory. Add items to del_items if they had to be removed based on
-        del_files or add them to new_items based on new_files
-        """
-
-        (gtype, cmd, args, shots, suffixlist) = parent.add_args[0]
-        if gtype == 'MAME':
-            for item in current_items:
-                for file in util.find_matches(del_files, [ 'zip' ] ):
-                    if item.type == 'mame' and item.filename == file:
-                        # In the future will add code to remove the mame rom
-                        # from the cache.
-                        del_items += [ item ]
-                        del_files.remove(file)
-        elif gtype == 'SNES':
-            for file in util.find_matches(del_files, [ 'smc', 'fig' ]):
-                if item.type == 'snes' and item.filename == file:
-                    del_items += [ item ]
-                    del_files.remove(file)
-        elif gtype == 'GENESIS':
-            for file in util.find_matches(del_files, suffixlist):
-                if item.type == 'genesis' and item.filename == file:
-                    del_items += [ item ]
-                    del_files.remove(file)
-        elif gtype == 'GENERIC':
-            for file in util.find_matches(del_files, suffixlist):
-                if item.type == 'generic' and item.filename == file:
-                    del_items += [ item ]
-                    del_files.remove(file)
-
-        new_items += self.get(parent, new_files)
-
-

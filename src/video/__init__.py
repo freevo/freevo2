@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/01/03 17:40:27  dischi
+# remove update function
+#
 # Revision 1.20  2003/12/29 22:08:54  dischi
 # move to new Item attributes
 #
@@ -20,27 +23,6 @@
 #
 # Revision 1.17  2003/11/30 14:41:10  dischi
 # use new Mimetype plugin interface
-#
-# Revision 1.16  2003/11/28 20:08:58  dischi
-# renamed some config variables
-#
-# Revision 1.15  2003/11/28 19:26:37  dischi
-# renamed some config variables
-#
-# Revision 1.14  2003/11/25 19:13:19  dischi
-# fix xml file location
-#
-# Revision 1.13  2003/11/24 19:24:58  dischi
-# move the handler for fxd from xml_parser to fxdhandler
-#
-# Revision 1.12  2003/11/23 17:01:34  dischi
-# remove fxd stuff, it's handled by directory.py and FXDHandler now
-#
-# Revision 1.11  2003/10/04 09:31:39  dischi
-# copy loop first
-#
-# Revision 1.10  2003/10/03 17:49:23  dischi
-# add support for directory with one movie
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -129,27 +111,6 @@ class PluginInterface(plugin.MimetypePlugin):
         return items
 
 
-
-    def update(self, parent, new_files, del_files, new_items, del_items, current_items):
-        """
-        update a directory. Add items to del_items if they had to be removed based on
-        del_files or add them to new_items based on new_files
-        """
-        for item in current_items:
-
-            # remove 'normal' files
-            for file in util.find_matches(del_files, config.VIDEO_SUFFIX):
-                if item.type == 'video' and item.filename == file and not \
-                   item in del_items:
-                    del_items += [ item ]
-                    del_files.remove(file)
-
-        # add new 'normal' files
-        for file in util.find_matches(new_files, config.VIDEO_SUFFIX):
-            new_items += [ VideoItem(file, parent) ]
-            new_files.remove(file)
-
-
     def dirinfo(self, diritem):
         """
         set informations for a diritem based on the content, etc.
@@ -166,6 +127,7 @@ class PluginInterface(plugin.MimetypePlugin):
                 diritem.image = tvinfo[0]
             if not diritem.fxd_file:
                 diritem.fxd_file = tvinfo[3]
+
 
 def hash_fxd_movie_database():
     """
@@ -202,9 +164,9 @@ def hash_fxd_movie_database():
     if not config.VIDEO_ONLY_SCAN_DATADIR:
         for name,dir in config.VIDEO_ITEMS:
             files += util.recursefolders(dir,1,'*.fxd',1)
-    if config.OVERLAY_DIR:
-        for subdir in ('disc', 'disc-set'):
-            files += util.recursefolders(vfs.join(config.OVERLAY_DIR, subdir), 1, '*.fxd', 1)
+
+    for subdir in ('disc', 'disc-set'):
+        files += util.recursefolders(vfs.join(config.OVERLAY_DIR, subdir), 1, '*.fxd', 1)
 
     for info in fxditem.mimetype.parse(None, files, display_type='video'):
         if hasattr(info, '__fxd_rom_info__'):
