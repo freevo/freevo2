@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/03/13 18:32:29  rshortt
+# Make sure the dow key is a str.
+#
 # Revision 1.14  2004/02/23 08:33:21  gsbarbieri
 # i18n: help translators job.
 #
@@ -190,14 +193,12 @@ class FavoritesResource(FreevoResource):
             fv.tableCell(fchan, 'class="'+status+'" colspan="1"')
 
             if fav.dow != 'ANY':
-                # cell = time.strftime('%b %d %H:%M', time.localtime(fav.start))
-                cell = '%s' % days[fav.dow]
+                cell = '%s' % days[str(fav.dow)]
             else:
                 cell = _('ANY')
             fv.tableCell(cell, 'class="'+status+'" colspan="1"')
 
             if fav.mod != 'ANY':
-                # cell = time.strftime('%b %d %H:%M', time.localtime(fav.start))
                 cell = '%s' % tv_util.minToTOD(fav.mod)
             else:
                 cell = _('ANY')
