@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.151  2004/10/22 18:43:54  dischi
+# make sure aspect is a string
+#
 # Revision 1.150  2004/09/14 20:07:04  dischi
 # restructure and add docs
 #
@@ -206,7 +209,7 @@ class VideoItem(MediaItem):
             return '%sx%s' % (self.info['width'], self.info['height'])
 
         if key == 'aspect' and self.info['aspect']:
-            aspect = self.info['aspect']
+            aspect = str(self.info['aspect'])
             return aspect[:aspect.find(' ')].replace('/', ':')
             
         if key == 'runtime':
