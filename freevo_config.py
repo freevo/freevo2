@@ -468,6 +468,15 @@ plugin_record = plugin.activate('tv.generic_record')
 # plugin.remove('tv.generic_record')
 # plugin_record = plugin.activate('tv.ivtv_record')
 
+# TV menu plugin to view scheduled recordings
+plugin.activate('tv.scheduled_recordings')
+
+# TV menu plugin to view and edit favorites
+plugin.activate('tv.view_favorites')
+
+# TV menu plugin to manually schedule recordings
+plugin.activate('tv.manual_record')
+
 # For joystick support:
 # plugin.activate('joy')
 
