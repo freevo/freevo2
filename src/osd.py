@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.51  2003/06/28 01:51:38  gsbarbieri
+# Some code reformating, removed some bloat code and fixed drawstringframedsoft(align='justified')
+# to render justified code properly.
+#
 # Revision 1.50  2003/06/27 18:55:40  gsbarbieri
 # Fixed some bugs in osd.drawstringframed*()
 #
@@ -736,13 +740,15 @@ class OSD:
         for word_number in range(len_words):
             if words[word_number] == '\n' and len(lines[line_number]) > 0:
                 line_number += 1
-                lines.append([])
-                lines_size.append(0)
+                lines.append( [] )
+                lines_size.append( 0 )
                 occupied_size = 0
                 occupied_height += line_height
+                
             else:
                 if words[word_number] == '\t':
                     words[word_number] = plain_tab
+                    
                 word_size, word_height = self.stringsize(words[word_number], font,ptsize)
                 # This word fit in this line?                
                 if (occupied_size + word_size) <= width and ( occupied_height ) <= height:
@@ -751,14 +757,26 @@ class OSD:
                     occupied_size += word_size
                     lines_size[line_number] = occupied_size
                     if word_number+1 < len_words:
-                        next_word_size , next_word_height = self.stringsize(words[word_number+1], font,ptsize)
+                        next_word_size , next_word_height = self.stringsize( words[word_number+1], font,ptsize)
+                        
                     occupied_size += MINIMUM_SPACE_BETWEEN_WORDS
+                    
                 elif ( occupied_height + line_height ) <= height:
                     # No, but we can add another line
                     # Is this word larger than the width?
+                    if word_size <= width:
+                        # No, just add it to the line
+                        line_number += 1
+                        lines.append([])
+                        lines[line_number].append(words[word_number])
+                        lines_size.append(word_size)
+                        occupied_size = word_size + MINIMUM_SPACE_BETWEEN_WORDS
+                        occupied_height += line_height
+                        
                     if word_size > width:
                         tmp_occupied_size = 0
                         tmp_size, tmp_height = self.stringsize('-',font,ptsize)
+                        
                         # Yes, break it
                         tmp_pieces = words[word_number]
                         # The chars where we can split words (making it less ugly to read)
@@ -768,35 +786,52 @@ class OSD:
                         tmp_pieces = re.sub(r'(^[ ])','',tmp_pieces)
                         pieces = []
                         tmp_pieces = tmp_pieces.split(' ')
+                        
                         # check if any pieces still is larger than the width
+                        cache_wt = width - tmp_size
                         for i in range(len(tmp_pieces)):
                             next_word_size, next_word_height = self.stringsize(tmp_pieces[i],font,ptsize)
-                            if next_word_size > (width - tmp_size):                                
-                                for j in range(next_word_size / (width-tmp_size)):
-                                    pieces.append(tmp_pieces[i][(j-1)*(width-tmp_size):j*(width-tmp_size)])
+                            if next_word_size > cache_wt:
+                                cache_rg = range(next_word_size / cache_wt)
+                                for j in cache_rg:
+                                    cache_jwt = ( j - 1 ) * cache_wt
+                                    pieces.append( tmp_pieces[i][ cache_jwt : cache_jwt + cache_wt ] )
+                                                   
                             else:
                                 pieces.append(tmp_pieces[i])
+                                
                         line_number += 1
                         occupied_height += line_height
-                        lines.append([])                        
+                        lines.append([])
                         lines[line_number].append('')
                         lines_size.append(0)
+
                         for i in range(len(pieces)):
                             next_word_size, next_word_height = self.stringsize(pieces[i],font,ptsize)
-                            if (next_word_size + tmp_occupied_size) < (width - tmp_size) and occupied_height <= height:
+                            if (next_word_size + tmp_occupied_size) < cache_wt:
+                                # this piece fits this line
                                 lines[line_number][0] += pieces[i]
                                 tmp_occupied_size += next_word_size                                
                                 lines_size[line_number] = tmp_occupied_size
+                                
                             elif (occupied_height + line_height) <= height:
                                 # we can add another line
+                                while lines_size[ line_number ] + tmp_size > width:
+                                    char = lines[ line_number ][ -1 ][ -1 ]
+                                    char = osd.charsize( char, font, size )[ 0 ]
+                                    lines_size[ line_number ] -= char
+                                    lines[ line_number ][ -1 ] = lines[ line_number ][ -1 ][ : -1 ]
+                                    
                                 lines[line_number][0] += '-'
-                                lines_size[line_number] += tmp_size + MINIMUM_SPACE_BETWEEN_WORDS
-                                lines.append([])
+                                lines_size[line_number] += tmp_size
+                                
+                                lines.append( [] )
                                 line_number += 1
                                 lines[line_number].append(pieces[i])
                                 lines_size.append(tmp_occupied_size)
                                 tmp_occupied_size = next_word_size
                                 occupied_height += line_height
+                                
                             else:
                                 # No, and we cannot add another line, truncate this text
                                 # and save text that does not fit
@@ -806,12 +841,13 @@ class OSD:
                                     # No, just add it
                                     lines[line_number][0] += '-'
                                     lines_size[line_number] += next_word_size
+                                    
                                 else:
                                     # Yes, put '-' in the last piece place
                                     lines[line_number][0][0:len(lines[line_number][0])-4] += '-'                           
                                     tmp_word_size , tmp_word_height = self.stringsize(lines[line_number][0], font,ptsize)
                                     lines_size[line_number] = tmp_word_size  + MINIMUM_SPACE_BETWEEN_WORDS
-                                    # save the text that does not fit.
+                                # save the text that does not fit.
                                 for tmp in range(word_number, len(pieces)):
                                     try:
                                         rest_words += words[tmp]
@@ -821,14 +857,7 @@ class OSD:
                                     # quit the loop
                                 break
                         occupied_size = lines_size[line_number]
-                    else:
-                        # No, just add it
-                        line_number += 1
-                        lines.append([])
-                        lines[line_number].append(words[word_number])
-                        lines_size.append(word_size)
-                        occupied_size = word_size + MINIMUM_SPACE_BETWEEN_WORDS
-                        occupied_height += line_height
+                        
                 else:
                     # No, and we cannot add another line, truncate this text
                     # and save text that does not fit
@@ -839,10 +868,12 @@ class OSD:
                             # No, just add it
                             lines[line_number].append(ellipses)
                             lines_size[line_number] += next_word_size + MINIMUM_SPACE_BETWEEN_WORDS
+                            
                         else:
                             # Yes, put '...' in the last word place
                             if len(lines[line_number]) > 0:
                                 lines[line_number][len(lines[line_number])-1] = '...'
+                                
                             else:
                                 lines[line_number].append('...')
 
@@ -878,19 +909,21 @@ class OSD:
             x0 = x
             #print "WORDS: %s" % lines[line_number]
             spacing = MINIMUM_SPACE_BETWEEN_WORDS
+            
             if align_h == 'justified':
                 # Calculate the space between words:
                 ## Disconsider the minimum space
-                if len(lines[line_number]) > 1:
+                if len(lines[line_number]) > 1 and line_number + 1 < len( lines ):
                     lines_size[line_number] -= MINIMUM_SPACE_BETWEEN_WORDS * \
                                                (len(lines[line_number]) -1 )
                     
                     spacing = (width - lines_size[line_number]) / \
                               ( len(lines[line_number]) -1 )
                     
-                elif len( lines ) == 0:
+                elif len( lines ) == 0: # only one line
                     spacing = (width - lines_size[line_number]) / 2
                     x0 += spacing
+                
                     
                 for word in lines[line_number]:
                     if word:
@@ -905,7 +938,6 @@ class OSD:
                 if return_x0 > x0:
                     return_x0 = x0
                     
-                spacing = MINIMUM_SPACE_BETWEEN_WORDS                
                 for word in lines[line_number]:
                     if word:
                         word_size, word_height = self.stringsize(word, font,ptsize)
@@ -921,7 +953,6 @@ class OSD:
                 
                 
             elif align_h == 'left':
-                spacing = MINIMUM_SPACE_BETWEEN_WORDS
                 for word in lines[line_number]:
                     if word:
                         word_size, word_height = self.stringsize(word, font,ptsize)
@@ -939,9 +970,10 @@ class OSD:
                 x0 = x + width
                 if return_x0 > x0:
                     return_x0 = x0
-                spacing = MINIMUM_SPACE_BETWEEN_WORDS
+
                 line_len = len(lines[line_number])
-                for word_number in range(len(lines[line_number])):
+                rg_line = range( line_len )
+                for word_number in rg_line:
                     if lines[line_number][word_number]:
                         pos = line_len - word_number -1
                         word_size, word_height = \
@@ -949,12 +981,13 @@ class OSD:
                         if layer != self.null_layer:
                             self.drawstring(lines[line_number][pos], x0, y0, fgcolor, \
                                             None, font, ptsize, 'right', layer=layer)
-                        x0 -= spacing
-                        x0 -= word_size
+                            
+                        x0 -= spacing - word_size
         
             y0 += line_height
-            return_y1 = y0
-        # end for
+            
+        # end for            
+        return_y1 = y0
 
         if align_h == 'justified':
             return_x0 = x
@@ -1061,11 +1094,13 @@ class OSD:
                     if char == '\n':
                         # Linebreak due to CR
                         occupied_size = 0
+                        
                     else:
                         # Linebreak due to the last character didn't fit,
                         # put it on the next line
                         occupied_size = char_size
                         lines[line_number] = char
+                        
                 else:
                     # we can NOT add more lines :(
                     # add the ellipses indicating we did truncate
@@ -1079,15 +1114,18 @@ class OSD:
                         char_size = self.charsize(lines[line_number][len_line-j-1],
                                                   font, ptsize)[0]
                         occupied_size -= char_size
+                        
                     lines[line_number] = lines[line_number][0:len_line-j]
                     i -= j + 1
                     occupied_size = self.stringsize( lines[line_number], font, ptsize )[0]
+                    
                     if ellipses:
                         while ellipses and \
                                   (occupied_size + \
                                    self.stringsize(ellipses, font, ptsize)[0]) > width:
                             ellipses = ellipses[:-1]
                         lines[line_number] += ellipses
+                        
                     break
 
         rest_words = string[i+1:len(string)]
@@ -1098,6 +1136,7 @@ class OSD:
         y0 = y
         if align_v == 'center' or align_v == 'middle':
             y0 = y + (height - (line_number+1) * word_height)/ 2
+            
         elif align_v == 'bottom':
             y0 = y + (height - (line_number+1) * word_height)
 
@@ -1109,13 +1148,17 @@ class OSD:
             line_size, line_heigth = self.stringsize(line, font, ptsize)
             if align_h == 'center' or align_h == 'justified':
                 x0 = x + (width - line_size) / 2
+                
             elif align_h == 'right':
                 x0 = x + (width - line_size)
+                
             if layer != self.null_layer:
                 self.drawstring(line, x0, y0, fgcolor, None, font, ptsize, layer=layer)
+                
             y0 += word_height
             if x0 > return_x0:
                 return_x0 = x0
+                
             if line_size > return_x1:
                 return_x1 = line_size
 
