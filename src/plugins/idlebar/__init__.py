@@ -18,6 +18,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/02/12 16:58:49  dischi
+# smaller logo, keep aspect
+#
 # Revision 1.12  2004/02/12 16:31:32  dischi
 # use skin logo as default
 #
@@ -489,4 +492,4 @@ class logo(IdleBarPlugin):
             image = osd.settings.images['logo']
         else:
             image = os.path.join(config.IMAGE_DIR, self.image)
-        return osd.draw_image(image, (x, osd.y + 5, 163, 80))[0]
+        return osd.draw_image(image, (x, osd.y + 5, -1, 75))[0]
