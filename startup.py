@@ -9,6 +9,9 @@
 
 import sys, os, time, signal
 
+# Configuration file. Determines where to look for AVI/MP3 files, etc
+import config
+
 # Set DEBUG to 1 to get more printouts
 DEBUG = 0
 
