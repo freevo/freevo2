@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2002/10/11 12:55:01  gsbarbieri
+# Fixed bug in osd.drawstringframed(). Now Gustavo's new TV Guide works.
+#
 # Revision 1.32  2002/10/09 22:25:55  gsbarbieri
 # Bug fixes to osd.drawstringframed()
 #
@@ -584,12 +587,12 @@ class OSD:
                         # Yes, break it
                         tmp_pieces = words[word_number]
                         # The chars where we can split words (making it less ugly to read)
-                        tmp_pieces = re.sub(r'(?P<str>[aeiou!@#$%\*\(\)\\/\-~`\'"\?\.,\[\]]+)',' \g<str> ',tmp_pieces)
+                        tmp_pieces = re.sub(r'(?P<str>[aeiouAEIOU·ÈÌÛ˙¡…Õ”⁄‡ËÏÚ˘¿»Ã“Ÿ„ı√’‰ÎÔˆ¸ƒÀœ÷‹‚ÍÓÙ˚¬ Œ‘€!@#$%\*\(\)\\/\-~`\'"\?\.,\[\]]+)',' \g<str> ',tmp_pieces)
                         tmp_pieces = tmp_pieces.replace('  ',' ')                     
-                        tmp_pieces = tmp_pieces.split(' ')
                         tmp_pieces = re.sub(r'([ ]$)','',tmp_pieces)
                         tmp_pieces = re.sub(r'(^[ ])','',tmp_pieces)
                         pieces = []
+                        tmp_pieces = tmp_pieces.split(' ')
                         # check if any pieces still is larger than the width
                         for i in range(len(tmp_pieces)):
                             next_word_size, next_word_height = self.stringsize(tmp_pieces[i],font,ptsize)
@@ -699,37 +702,41 @@ class OSD:
                     spacing = (width - lines_size[line_number]) / 2
                     x0 += spacing
                 for word in lines[line_number]:
-                    word_size, word_height = self.stringsize(word, font,ptsize)
-                    self.drawstring(word, x0, y0, fgcolor, None, font, ptsize)
-                    x0 += spacing
-                    x0 += word_size
+                    if word:
+                        word_size, word_height = self.stringsize(word, font,ptsize)
+                        self.drawstring(word, x0, y0, fgcolor, None, font, ptsize)
+                        x0 += spacing
+                        x0 += word_size
                     
             elif align_h == 'center':
                 x0 = x + (width - lines_size[line_number]) / 2
                 spacing = MINIMUM_SPACE_BETWEEN_WORDS                
                 for word in lines[line_number]:
-                    word_size, word_height = self.stringsize(word, font,ptsize)
-                    self.drawstring(word, x0, y0, fgcolor, None, font, ptsize)
-                    x0 += spacing
-                    x0 += word_size
+                    if word:
+                        word_size, word_height = self.stringsize(word, font,ptsize)
+                        self.drawstring(word, x0, y0, fgcolor, None, font, ptsize)
+                        x0 += spacing
+                        x0 += word_size
             elif align_h == 'left':
                 x0 = x
                 spacing = MINIMUM_SPACE_BETWEEN_WORDS
                 for word in lines[line_number]:
-                    word_size, word_height = self.stringsize(word, font,ptsize)
-                    self.drawstring(word, x0, y0, fgcolor, None, font, ptsize)
-                    x0 += spacing
-                    x0 += word_size
+                    if word:
+                        word_size, word_height = self.stringsize(word, font,ptsize)
+                        self.drawstring(word, x0, y0, fgcolor, None, font, ptsize)
+                        x0 += spacing
+                        x0 += word_size
             elif align_h == 'right':
                 x0 = x + width
                 spacing = MINIMUM_SPACE_BETWEEN_WORDS
                 line_len = len(lines[line_number])
                 for word_number in range(len(lines[line_number])):
-                    pos = line_len - word_number -1
-                    word_size, word_height = self.stringsize(lines[line_number][pos], font,ptsize)
-                    self.drawstring(lines[line_number][pos], x0, y0, fgcolor, None, font, ptsize, 'right')
-                    x0 -= spacing
-                    x0 -= word_size
+                    if word:
+                        pos = line_len - word_number -1
+                        word_size, word_height = self.stringsize(lines[line_number][pos], font,ptsize)
+                        self.drawstring(lines[line_number][pos], x0, y0, fgcolor, None, font, ptsize, 'right')
+                        x0 -= spacing
+                        x0 -= word_size
             # end if 
             # go down one line
             y0 += line_height
