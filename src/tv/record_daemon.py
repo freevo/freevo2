@@ -86,16 +86,8 @@ def main():
     log('=' * 80)
     log('started at %s' % time.ctime())
 
-    # Is the schedule file present?
-    if not os.path.isfile(SCHEDULE):
-        log('no schedule, exiting')
-        fd = open(SCHEDULE, 'w')
-        fd.write('#TIMESTAMP ')
-        fd.write(time.strftime('%Y-%m-%d %H:%M:%S'))
-        fd.write('\n')
-        fd.close()
-        sys.exit()
-
+    schedule_init()
+    
     fd = open(SCHEDULE, 'r')
     schedule = fd.readlines()
     fd.close()
@@ -139,7 +131,20 @@ def main():
     fd.close()
     
     log('Done, exiting')
+
+
+def schedule_init():
+    """Create the schedule file if it doesn't exist"""
     
+    # Is the schedule file present?
+    if not os.path.isfile(SCHEDULE):
+        log('no schedule, creating it')
+        fd = open(SCHEDULE, 'w')
+        fd.write('#TIMESTAMP ')
+        fd.write(time.strftime('%Y-%m-%d %H:%M:%S'))
+        fd.write('\n')
+        fd.close()
+
 
 def schedule_recording(start_time_s, length_secs, cmd):
     '''Schedule a new recording. The start time is a unix timestamp.'''
@@ -147,6 +152,8 @@ def schedule_recording(start_time_s, length_secs, cmd):
     ts = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time_s))
     s = '%s,%s,%s\n' % (ts, length_secs, cmd)
 
+    schedule_init()
+    
     # Append to the schedule file
     fd = open(SCHEDULE, 'a')
     fd.write(s)
