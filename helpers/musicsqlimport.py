@@ -14,7 +14,9 @@ import config, util
 
 CACHEDIR = config.FREEVO_CACHEDIR
 DBFILE  ='freevo.sqlite'
-DATABASE = CACHEDIR +"/" + DBFILE
+
+DATABASE = os.path.join(config.FREEVO_CACHEDIR, DBFILE)
+mmpython.use_cache('%s/mmpython' % (config.FREEVO_CACHEDIR))
 
 # Utility functions
 
@@ -49,7 +51,9 @@ def make_query(filename,dirtitle):
     if not os.path.exists(filename):
         print "File %s does not exist" % (filename)
         return None
-    
+
+    mmpython.cache_dir(os.path.dirname(filename))
+
     a = mmpython.parse(filename)
 
     md5 = util.md5file(filename)
@@ -92,7 +96,7 @@ if __name__ == '__main__':
         print "Creating data file..."
         create_db()
 
-    if sys.argv[1]:
+    if len(sys.argv) > 1:
         print "Adding %s to %s..." % (sys.argv[1],config.DIR_AUDIO[0][0])
         mainloop(sys.argv[1],config.DIR_AUDIO[0][0])
     else:
