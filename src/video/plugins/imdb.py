@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/07/08 20:02:27  dischi
+# small bugfix
+#
 # Revision 1.14  2003/07/05 17:04:57  dischi
 # catch exceptions
 #
@@ -85,9 +88,7 @@ def point_maker(matching):
 
 class PluginInterface(plugin.ItemPlugin):
     def imdb_get_disc_searchstring(self, item):
-        name = self.item.filename
-        
-        name  = item.label
+        name  = item.media.label
         name  = re.sub('([a-z])([A-Z])', point_maker, name)
         name  = re.sub('([a-zA-Z])([0-9])', point_maker, name)
         name  = re.sub('([0-9])([a-zA-Z])', point_maker, name.lower())
@@ -109,13 +110,14 @@ class PluginInterface(plugin.ItemPlugin):
         
     def actions(self, item):
         self.item = item
-
         if item.type == 'video'  and not hasattr(item, 'fxd_file'):
+            print item.mode
             if item.mode == 'file':
                 return [ ( self.imdb_search_file, 'Search IMDB for this file',
                            'imdb_search_or_cover_search') ]
             if item.mode in ('dvd', 'vcd'):
                 s = self.imdb_get_disc_searchstring(self.item)
+                print s
                 if s:
                     return [ ( self.imdb_search_disc, 'Search IMDB for [%s]' % s,
                                'imdb_search_or_cover_search') ]
