@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2004/10/23 15:19:32  rshortt
+# Stub off some functions with Alerts.
+#
 # Revision 1.43  2004/10/23 14:38:13  rshortt
 # Combine ProgramItem with what I had in channels.py, remove import of
 # Favorite because it will be combined with FavoriteItem, added comments.
@@ -113,6 +116,10 @@ class ProgramItem(Item):
         #        scheduled for recording
         self.scheduled  = False
 
+        # FIXME: figure out if we want to keep this kind of close reference
+        #        to individual programs matching a favorite.
+        self.favorite = False
+
         # FIXME: fix tv_util.get_chan_displayname() or do it another way
         # self.info['channel'] = tv_util.get_chan_displayname(channel_id)
 
@@ -165,6 +172,11 @@ class ProgramItem(Item):
         """
         if not other:
             return 1
+        
+        for attr in ['title', 'start', 'stop']:
+            if not hasattr(other, attr):
+                return 1
+
         return self.title != other.title or \
                self.start != other.start or \
                self.stop  != other.stop or \
@@ -234,7 +246,9 @@ class ProgramItem(Item):
 
 
     def add_favorite(self, arg=None, menuw=None):
-        pass
+        msg = 'WORK IN PROGRESS'
+        AlertBox(text=_('Scheduling Failed')+(': %s' % msg)).show()
+        return
 
         # FIXME: combine Favorite and FavoriteItem
         # fav = Favorite(self.prog.title, self.prog, True, True, True, -1)
@@ -247,6 +261,10 @@ class ProgramItem(Item):
 
 
     def find_more(self, arg=None, menuw=None):
+        msg = 'WORK IN PROGRESS'
+        AlertBox(text=_('Scheduling Failed')+(': %s' % msg)).show()
+        return
+
         # XXX: The searching part of this function could probably be moved
 	#      into a util module or record_client itself.
         _debug_(String('searching for: %s' % self.prog.title))
@@ -279,6 +297,10 @@ class ProgramItem(Item):
 
 
     def schedule_program(self, arg=None, menuw=None):
+        msg = 'WORK IN PROGRESS'
+        AlertBox(text=_('Scheduling Failed')+(': %s' % msg)).show()
+        return
+
         (result, msg) = record_client.scheduleRecording(self.prog)
         if result:
             if menuw:
@@ -295,6 +317,10 @@ class ProgramItem(Item):
 
 
     def remove_program(self, arg=None, menuw=None):
+        msg = 'WORK IN PROGRESS'
+        AlertBox(text=_('Scheduling Failed')+(': %s' % msg)).show()
+        return
+
         (result, msg) = record_client.removeScheduledRecording(self.prog)
         if result:
             # then menu back one which should show an updated list if we
