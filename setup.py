@@ -108,11 +108,11 @@ class Runtime(core.Command):
 
     
 # check if everything is in place
-if (not os.path.isdir('./Docs/installation/html')) and \
-   (len(sys.argv) < 2 or sys.argv[1].lower() not in ('i18n', '--help', '--help-commands')):
-    print 'Docs/howto not found. Looks like you are using the CVS version'
-    print 'of Freevo. Please run ./autogen.sh first'
-    sys.exit(0)
+# if (not os.path.isdir('./Docs/installation/html')) and \
+#   (len(sys.argv) < 2 or sys.argv[1].lower() not in ('i18n', '--help', '--help-commands')):
+#    print 'Docs/howto not found. Looks like you are using the CVS version'
+#    print 'of Freevo. Please run ./autogen.sh first'
+#    sys.exit(0)
 
 # only add files not in share and src
 
