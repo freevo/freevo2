@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/11/14 18:09:06  dischi
+# use new videothumb interface
+#
 # Revision 1.6  2004/09/14 20:05:19  dischi
 # split __init__ into interface.py and database.py
 #
@@ -104,7 +107,7 @@ class PluginInterface(plugin.MimetypePlugin):
             if parent and parent.type == 'dir' and \
                    hasattr(parent,'VIDEO_DIRECTORY_AUTOBUILD_THUMBNAILS') and \
                    parent.VIDEO_DIRECTORY_AUTOBUILD_THUMBNAILS:
-                util.videothumb.snapshot(file, update=False, popup=True)
+                util.videothumb.snapshot(file, update=False)
 
             if file in hidden_files:
                 files.remove(file)
