@@ -4,6 +4,9 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.80  2002/11/24 13:35:48  dischi
+# removed the code cleanup stuff, it will go into the subdir src
+#
 # Revision 1.79  2002/11/23 19:47:16  dischi
 # Small fix in case you make a cleanup :-)
 #
@@ -97,21 +100,14 @@ import tv      # The TV module
 import identifymedia
 import signal
 
-# new stuff from code cleanup
-from mediamenu import MediaMenu
+import imenu
+import movie
+import music
+import mplayer
+import videogame
+import mame
 
-# old stuff
-try:
-    import imenu
-    import movie
-    import music
-    import mplayer
-    import videogame
-    import mame
-
-    mplayer = mplayer.get_singleton() # Create the mplayer object
-except:
-    pass
+mplayer = mplayer.get_singleton() # Create the mplayer object
 
 DEBUG = config.DEBUG
 
