@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/11/16 17:04:13  mikeruelle
+# remove stupid found it message
+#
 # Revision 1.21  2003/11/08 13:23:56  dischi
 # use os.path.join for configcmd
 #
@@ -241,7 +244,6 @@ class PluginInterface(plugin.Plugin):
         for station in mystations:
             myparent = station.parentNode
             if myparent.getAttribute('norm') == tvnorm and myparent.getAttribute('frequencies') == 'freevo':
-                print 'found it'
                 myparent.removeChild(station)
                 freevonode = myparent
                 gotlist=1
