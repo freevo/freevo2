@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.61  2004/01/31 13:18:35  dischi
+# fix string->object building
+#
 # Revision 1.60  2004/01/20 20:24:19  dischi
 # bugfix
 #
@@ -360,20 +363,17 @@ class Playlist(Item):
         show the playlist in the menu
         """
         self.build()
+        items = []
         for item in self.playlist:
             if not callable(item):
-                # element is a string, make a correct item
-                play_items = []
-
                 # get a real item
                 for p in self.get_plugins:
-                    for i in p.get(self, [ item ]):
-                        play_items.append(i)
+                    items += p.get(self, [ item ])
+            else:
+                items.append(item)
 
-                if play_items:
-                    pos = self.playlist.index(item)
-                    self.playlist[pos] = play_items[0]
-
+        self.playlist = items
+        
         if self.random:
             self.randomize()
 
@@ -402,7 +402,6 @@ class Playlist(Item):
             print _('empty playlist')
             return False
         
-
         if not arg or arg != 'next':
             # first start
             Playlist.build(self)
