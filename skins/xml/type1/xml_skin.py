@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/02/18 09:55:20  dischi
+# Bugfix for folder xml files
+#
 # Revision 1.24  2003/02/17 19:41:44  dischi
 # make it possible to have special 'video', 'audio' ... sections in the
 # xml file.
@@ -682,8 +685,7 @@ class XMLSkin:
                 type = attr_str(node, "type", "all")
                 if type == "all":
                     if copy_content:
-                        for t in self.menu_types:
-                            self.menu[t] = copy.deepcopy(self.menu[t])
+                        self.menu = copy.deepcopy(self.menu)
                     for t in self.menu_types:
                         self.menu[t].parse(node, scale, c_dir)
 
