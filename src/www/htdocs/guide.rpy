@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/08/11 19:58:39  rshortt
+# Patch from Mike Ruelle to add a row with the time in it every so many rows.
+# Something like this could also be done using style sheets.
+#
 # Revision 1.7  2003/05/30 18:26:52  rshortt
 # More mods from Mike including bugfixes and pretty(er) arrows.
 #
@@ -120,27 +124,32 @@ class GuideResource(FreevoResource):
 
         fv.tableOpen('border="0" cellpadding="4" cellspacing="1"')
 
-        fv.tableRowOpen('class="chanrow"')
-        fv.tableCell(time.strftime('%b %d'), 'class="guidehead"')
-        now = int(mfrguidestart / INTERVAL) * INTERVAL
-        for i in range(n_cols):
-            if i == n_cols-1 or i == 0:
-                dacell = ''
-                datime = time.strftime('%H:%M', time.localtime(now))
-                if i == n_cols-1:
-                   dacell = datime + '&nbsp;&nbsp;<a href="guide.rpy?stime=%i"><img src="images/RightArrow.png" border="0"></a>' % mfrnextguide
-                else:
-                   if mfrprevguide > 0:
-                       dacell = '<a href="guide.rpy?stime=%i"><img src="images/LeftArrow.png" border="0"></a>&nbsp;&nbsp;' % mfrprevguide + datime
-                   else:
-                       dacell = datime
-                fv.tableCell(dacell, 'class="guidehead"')
-            else:
-                fv.tableCell(time.strftime('%H:%M', time.localtime(now)), 'class="guidehead"')
-            now += INTERVAL
-        fv.tableRowClose()
 
+        showheader = 0
         for chan in guide.chan_list:
+            #put guidehead every X rows
+            if showheader % 15 == 0:
+                fv.tableRowOpen('class="chanrow"')
+                fv.tableCell(time.strftime('%b %d'), 'class="guidehead"')
+                headerstart = int(mfrguidestart / INTERVAL) * INTERVAL
+                for i in range(n_cols):
+                    if i == n_cols-1 or i == 0:
+                        dacell = ''
+                        datime = time.strftime('%H:%M', time.localtime(headerstart))
+                        if i == n_cols-1:
+                            dacell = datime + '&nbsp;&nbsp;<a href="guide.rpy?stime=%i"><img src="images/RightArrow.png" border="0"></a>' % mfrnextguide
+                        else:
+                            if mfrprevguide > 0:
+                                dacell = '<a href="guide.rpy?stime=%i"><img src="images/LeftArrow.png" border="0"></a>&nbsp;&nbsp;' % mfrprevguide + datime
+                            else:
+                                dacell = datime
+                        fv.tableCell(dacell, 'class="guidehead"')
+                    else:
+                        fv.tableCell(time.strftime('%H:%M', time.localtime(headerstart)), 'class="guidehead"')
+                    headerstart += INTERVAL
+                fv.tableRowClose()
+            showheader+= 1
+                
             now = mfrguidestart
             fv.tableRowOpen('class="chanrow"')
             # chan.displayname = string.replace(chan.displayname, "&", "SUB")
