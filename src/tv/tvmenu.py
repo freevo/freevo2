@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/10/18 01:17:32  rshortt
+# Changes to allow people to have unset TV_CHANNELS since we're heading
+# towards autodetecting everything we can.
+#
 # Revision 1.20  2004/08/05 17:27:16  dischi
 # Major (unfinished) tv update:
 # o the epg is now taken from pyepg in lib
@@ -106,7 +110,8 @@ class TVMenu(Item):
 
     def main_menu(self, arg, menuw):
         items = []
-        if config.TV_CHANNELS:
+        if True:
+            # FIXME: change the tvguide into a plugin
             items.append(menu.MenuItem(_('TV Guide'), action=self.start_tvguide))
 
         items.append(DirItem(config.TV_RECORD_DIR, None, name = _('Recorded Shows'),
@@ -124,8 +129,10 @@ class TVMenu(Item):
 
     def start_tvguide(self, arg, menuw):
 
-        # Check that the TV channel list is not None
-        if not config.TV_CHANNELS:
+        # FIXME: we should be able to run without TV_CHANNELS set because
+        #        we're trying to autodetect everything.
+        # if not config.TV_CHANNELS:
+        if False:
             msg  = _('The list of TV channels is invalid!\n')
             msg += _('Please check the config file.')
             AlertBox(text=msg).show()
