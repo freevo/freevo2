@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2005/01/13 17:02:16  rshortt
+# Reactivate authentication.
+# TODO:
+#  - SSL
+#  - encrypted passwords
+#
 # Revision 1.3  2004/12/28 00:38:45  rshortt
 # Reactivating web guide and scheduling recordings, this is still a major work
 # in progress and there are still missing pieces.
@@ -69,7 +75,7 @@ class FreevoResource(Resource):
         if auth and auth.startswith('Basic '):
             auth = base64.decodestring(auth[6:])
 
-        if 0 and not self.__auth_user(auth):
+        if not self.__auth_user(auth):
             request.send_response(401, ' Authorization Required')
             request.send_header("Content-type", 'text/html')
             request.send_header("WWW-Authenticate", 'Basic realm="Freevo')
@@ -97,8 +103,7 @@ class FreevoResource(Resource):
 
     
     def __auth_user(self, auth):
-        auth_list = [ ('dmeyer', 'foo') ]
-        for username, password in auth_list:
+        for username, password in config.WWW_USERS.items():
             if '%s:%s' % (username, password) == auth:
                 return True
         return False
