@@ -13,6 +13,9 @@
 #    3) Better (and more) LCD screens.
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/09/01 16:55:42  gsbarbieri
+# Better support for broken MP3 tags
+#
 # Revision 1.7  2003/08/27 13:02:31  gsbarbieri
 # 2x20 and 2x40 screens.
 # Also, fixed some crashes
@@ -213,11 +216,15 @@ layouts = { 4 : # 4 lines display
                   "artist_v"  : ( "scroller",
                                   "9 3 %d 3 h 2 \"%s\"",
                                   "( self.width, player.getattr('artist') )" ),
-                  "time_v"    : ( "string",
-                                  "2 4 '% 2d:%02d/% 2d:%02d ( %2d%%)'",
-                                  "( int(player.length / 60), int(player.length % 60)," +
-                                  " int(player.elapsed / 60), int(player.elapsed % 60)," +
-                                  " int(player.elapsed * 100 / player.length) )" ),
+                  "time_v1"   : ( "string",
+                                  "2 4 '% 2d:%02d/'",
+                                  "( int(player.length / 60), int(player.length % 60) )" ),
+                  "time_v2"   : ( "string",
+                                  "8 4 '% 2d:%02d'",
+                                  "( int(player.elapsed / 60), int(player.elapsed % 60) )" ),
+                  "time_v3"   : ( "string",
+                                  "14 4 '( %2d%%)'",
+                                  "( int(player.elapsed * 100 / player.length) )" ),
                   "timebar1_v": ( "string", "21 4 '['", None),
                   "timebar2_v": ( "string", "40 4 ']'", None),
                   "timebar3_v": ( "hbar",
@@ -297,11 +304,15 @@ layouts = { 4 : # 4 lines display
                   "artist_v"  : ( "scroller",
                                   "1 3 %d 3 h 2 \"%s\"",
                                   "( self.width, player.getattr('artist') )" ),
-                  "time_v"    : ( "string",
-                                  "2 4 '% 2d:%02d/% 2d:%02d ( %2d%%)'",
-                                  "( int(player.length / 60), int(player.length % 60)," +
-                                  " int(player.elapsed / 60), int(player.elapsed % 60)," +
-                                  " int(player.elapsed * 100 / player.length) )" ),
+                  "time_v1"   : ( "string",
+                                  "2 4 '% 2d:%02d/'",
+                                  "( int(player.length / 60), int(player.length % 60) )" ),
+                  "time_v2"   : ( "string",
+                                  "8 4 '% 2d:%02d'",
+                                  "( int(player.elapsed / 60), int(player.elapsed % 60) )" ),
+                  "time_v3"   : ( "string",
+                                  "14 4 '( %2d%%)'",
+                                  "( int(player.elapsed * 100 / player.length) )" ),
                   # animation at the begining of the time line
                   "animation_v": ( "string", "1 4 '%s'",
                                    "animation_audioplayer_chars[player.elapsed % len(animation_audioplayer_chars)]")
@@ -347,10 +358,16 @@ layouts = { 4 : # 4 lines display
                  { "music_v"   : ( "scroller",
                                    "1 1 %d 1 h 2 \"%s\"",
                                    "( self.width, title )" ),
-                   "time_v"    : ( "string",
-                                   "1 2 '  % 2d:%02d/% 2d:%02d'",
-                                   "( int(player.length / 60), int(player.length % 60)," +
-                                   " int(player.elapsed / 60), int(player.elapsed % 60))" )
+                  "time_v1"   : ( "string",
+                                  "2 2 '% 2d:%02d/'",
+                                  "( int(player.length / 60), int(player.length % 60) )" ),
+                  "time_v2"   : ( "string",
+                                  "8 2 '% 2d:%02d'",
+                                  "( int(player.elapsed / 60), int(player.elapsed % 60) )" ),
+                  # animation at the begining of the time line
+                  "animation_v": ( "string", "1 2 '%s'",
+                                   "animation_audioplayer_chars[" +
+                                   " player.elapsed % len(animation_audioplayer_chars)]")
                    },
 
                  "tv"            :
@@ -384,10 +401,19 @@ layouts = { 4 : # 4 lines display
                  { "music_v"   : ( "scroller",
                                    "1 1 %d 1 h 2 \"%s\"",
                                    "( self.width, title )" ),
-                   "time_v"    : ( "string",
-                                   "1 2 '  % 2d:%02d/% 2d:%02d'",
-                                   "( int(player.length / 60), int(player.length % 60)," +
-                                   " int(player.elapsed / 60), int(player.elapsed % 60))" )
+                  "time_v1"   : ( "string",
+                                  "2 2 '% 2d:%02d/'",
+                                  "( int(player.length / 60), int(player.length % 60) )" ),
+                  "time_v2"   : ( "string",
+                                  "8 2 '% 2d:%02d'",
+                                  "( int(player.elapsed / 60), int(player.elapsed % 60) )" ),
+                  "time_v3"   : ( "string",
+                                  "14 2 '( %2d%%)'",
+                                  "( int(player.elapsed * 100 / player.length) )" ),
+                  # animation at the begining of the time line
+                  "animation_v": ( "string", "1 2 '%s'",
+                                   "animation_audioplayer_chars[" +
+                                   " player.elapsed % len(animation_audioplayer_chars)]")
                    },
 
                  "tv":
@@ -430,11 +456,15 @@ layouts = { 4 : # 4 lines display
                   "music_v"   : ( "scroller",
                                   "8 1 %d 1 h 2 \"%s\"",
                                 "( self.width, title )" ),
-                  "time_v"    : ( "string",
-                                  "2 2 '% 2d:%02d/% 2d:%02d ( %2d%%)'",
-                                  "( int(player.length / 60), int(player.length % 60)," +
-                                  " int(player.elapsed / 60), int(player.elapsed % 60)," +
-                                  " int(player.elapsed * 100 / player.length) )" ),
+                  "time_v1"   : ( "string",
+                                  "2 2 '% 2d:%02d/'",
+                                  "( int(player.length / 60), int(player.length % 60) )" ),
+                  "time_v2"   : ( "string",
+                                  "8 2 '% 2d:%02d'",
+                                  "( int(player.elapsed / 60), int(player.elapsed % 60) )" ),
+                  "time_v3"   : ( "string",
+                                  "14 2 '( %2d%%)'",
+                                  "( int(player.elapsed * 100 / player.length) )" ),
                   "timebar1_v": ( "string", "21 2 '['", None),
                   "timebar2_v": ( "string", "40 2 ']'", None),
                   "timebar3_v": ( "hbar",
@@ -539,7 +569,7 @@ class PluginInterface( plugin.DaemonPlugin ):
                 
         self.lcd.screen_set( "welcome", "-priority 192 -duration 2 -heartbeat off" )
         self.last_screen = "welcome"
-
+        
         self.lsv = { } # will hold last screen value (lsv)
 
     def close( self ):
@@ -555,7 +585,20 @@ class PluginInterface( plugin.DaemonPlugin ):
         """
         if self.disable: return
 
-        sname = type
+        if type == 'player':
+            sname = "%s_%s" % ( object.type, type )
+        else:
+            sname = type
+
+        if sname != self.last_screen:
+            # recreate screen
+            # This is used to handle cases where the previous screen was dirty
+            # ie: played music with info and now play music without, the previous
+            #     info will still be there
+            self.lcd.screen_del( sname )
+            self.generate_screen( sname )
+            self.lsv = { } # reset last changed values
+
         if type == 'menu':   
             menu  = object.menustack[ -1 ]
             title = menu.selected.name
@@ -576,15 +619,18 @@ class PluginInterface( plugin.DaemonPlugin ):
             # specific things related with item type
             if menu.selected.type == 'audio':
                 title = menu.selected.getattr( 'title' )
+                if not title:
+                    title = menu.selected.getattr( 'name' )
                 if menu.selected.getattr( 'trackno' ):
                     title = "%s - %s" % ( menu.selected.getattr( 'trackno' ), title )
                     
         elif type == 'player':
             player = object
             title  = player.getattr( 'title' )
+            if not title:
+                title = player.getattr( 'name' )
             if player.getattr( 'trackno' ):
                 title = "%s - %s" % ( player.getattr( 'trackno' ), title )                
-            sname  = "%s_%s" % ( player.type, type )
 
             
         elif type == 'tv':
@@ -607,7 +653,8 @@ class PluginInterface( plugin.DaemonPlugin ):
             try:
                 if val: param = param % eval( val )
             except:
-                pass
+                param = None
+
             k = '%s %s' % ( sname, w )
             try:
                 if self.lsv[ k ] == param:
@@ -616,11 +663,13 @@ class PluginInterface( plugin.DaemonPlugin ):
                 pass
 
             self.lsv[ k ] = param
-            try:
-                self.lcd.widget_set( sname, w, param.encode( 'latin1' ) )
-            except UnicodeError:
-                self.lcd.widget_set( sname, w, param )
-
+            if param:
+                try:
+                    self.lcd.widget_set( sname, w, param.encode( 'latin1' ) )
+                except UnicodeError:
+                    self.lcd.widget_set( sname, w, param )
+                
+                                     
         if self.last_screen != sname:
             self.lcd.screen_set( self.last_screen, "-priority 128" )
             self.lcd.screen_set( sname, "-priority 64" )
@@ -691,11 +740,16 @@ class PluginInterface( plugin.DaemonPlugin ):
             return
         
         for s in screens:
-            self.lcd.screen_add( s )
-            widgets = screens[ s ]
-            self.lcd.screen_set( s, "-heartbeat off" )
+            self.generate_screen( s )
 
-            for w in widgets:
-                type, param, val = screens[ s ][ w ]
-                self.lcd.widget_add( s, w, type )
+
+
+    def generate_screen( self, s ):
+        self.lcd.screen_add( s )
+        widgets = self.screens[ s ]
+        self.lcd.screen_set( s, "-heartbeat off" )
+
+        for w in widgets:
+            type, param, val = self.screens[ s ][ w ]
+            self.lcd.widget_add( s, w, type )
         
