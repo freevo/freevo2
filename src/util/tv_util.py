@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/06/20 13:56:54  dischi
+# remove -_ at the end of the filename
+#
 # Revision 1.2  2004/04/28 21:19:19  rshortt
 # String / Unicode fix.
 #
@@ -95,7 +98,7 @@ def getProgFilename(prog=None):
     filemask = mask % filename_array
     filemask = time.strftime(filemask, time.localtime(prog.start))
     filename = progname2filename(filemask)
-    return filename
+    return filename.rstrip(' -_:')
 
 
 def minToTOD(min):
