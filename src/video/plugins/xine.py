@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2004/01/02 11:17:35  dischi
+# cleanup
+#
 # Revision 1.33  2003/12/29 22:08:55  dischi
 # move to new Item attributes
 #
@@ -61,7 +64,7 @@ import copy
 import config     # Configuration handler. reads config file.
 import childapp   # Handle child applications
 import rc         # The RemoteControl class.
-import util.popen3
+import util
 
 from event import *
 import plugin
@@ -101,15 +104,10 @@ class PluginInterface(plugin.Plugin):
             _debug_('detect xine version %s' % config.XINE_VERSION)
             
         if config.XINE_VERSION < 922:
-            if type == 'fb':
-                print _( 'ERROR' ) + ': ' + \
-                      _( "'fbxine' version too old, plugin 'xine' deactivated" )
-                print _( 'You need software %s' ) % 'xine-ui > 0.9.21'
-                return
-            print _( 'WARNING' ) + ': ' + \
-                  _( "'xine' version too old, plugin in fallback mode" )
-            print _( "You need %s to use all features of the '%s' plugin" ) % \
-                  ( 'xine-ui > 0.9.21', 'xine' )
+            print _( 'ERROR' ) + ': ' + \
+                  _( "'xine-ui' version too old, plugin 'xine' deactivated" )
+            print _( 'You need software %s' ) % 'xine-ui > 0.9.21'
+            return
             
         # register xine as the object to play
         plugin.register(Xine(type, config.XINE_VERSION), plugin.VIDEO_PLAYER, True)
@@ -120,19 +118,18 @@ class Xine:
     """
     the main class to control xine
     """
-    
     def __init__(self, type, version):
-        self.name = 'xine'
+        self.name      = 'xine'
 
-        self.mode         = None
-        self.app_mode     = ''
-        self.xine_type    = type
-        self.xine_version = version
-        self.app          = None
+        self.app_mode  = ''
+        self.xine_type = type
+        self.version   = version
+        self.app       = None
 
         self.command = [ '--prio=%s' % config.MPLAYER_NICE ] + \
                        config.XINE_COMMAND.split(' ') + \
-                       [ '--stdctl', '-V', config.XINE_VO_DEV, '-A', config.XINE_AO_DEV ] +\
+                       [ '--stdctl', '-V', config.XINE_VO_DEV,
+                         '-A', config.XINE_AO_DEV ] + \
                        config.XINE_ARGS_DEF.split(' ')
 
 
@@ -146,7 +143,7 @@ class Xine:
         if item.url.startswith('dvd://'):
             return 2
         if item.url.startswith('vcd://'):
-            if self.xine_version > 922 and item.url == 'vcd://':
+            if self.version > 922 and item.url == 'vcd://':
                 return 2
             return 0
 
@@ -163,6 +160,7 @@ class Xine:
         """
         self.item     = item
         self.app_mode = item.mode
+
         if item.mode in ('file', 'url'):
              self.app_mode = 'video'
 
@@ -171,13 +169,13 @@ class Xine:
 
         command = copy.copy(self.command)
 
-        if item.deinterlace and (self.xine_type == 'X' or self.xine_version > 922):
+        if item.deinterlace and (self.xine_type == 'X' or self.version > 922):
             command.append('-D')
 
         if not rc.PYLIRC and '--no-lirc' in command:
             command.remove('--no-lirc')
 
-        if self.xine_version < 922:
+        if self.version < 923:
             for arg in command:
                 if arg.startswith('--post'):
                     command.remove(arg)
@@ -188,7 +186,7 @@ class Xine:
         self.max_subtitle     = 0
         self.current_subtitle = -1
 
-        if item.mode == 'dvd' and item.url == 'dvd://':
+        if item.url == 'dvd://':
             for track in item.info['tracks']:
                 self.max_audio = max(self.max_audio, len(track['audio']))
 
@@ -197,11 +195,7 @@ class Xine:
 
         if item.mode == 'dvd':
             # dvd:///dev/dvd/2
-            if not item.filename or item.filename == '0':
-                track = ''
-            else:
-                track = item.filename
-            command.append('dvd://%s/%s' % (item.media.devicename, track))
+            command.append('dvd://%s/%s' % (item.media.devicename, item.url[6:]))
 
         elif item.mode == 'vcd':
             # vcd:///dev/cdrom -- NO track support (?)
@@ -225,8 +219,9 @@ class Xine:
         """
         Stop xine
         """
-        self.app.stop('quit\n')
-        rc.app(None)
+        if self.app:
+            self.app.stop('quit\n')
+            rc.app(None)
             
 
     def eventhandler(self, event, menuw=None):
@@ -234,14 +229,13 @@ class Xine:
         eventhandler for xine control. If an event is not bound in this
         function it will be passed over to the items eventhandler
         """
+        if not self.app:
+            return self.item.eventhandler(event)
+            
         if event in ( PLAY_END, USER_END ):
             self.stop()
             return self.item.eventhandler(event)
 
-        # fallback for older versions of xine
-        if self.xine_version < 922:
-            return True
-        
         if event == PAUSE or event == PLAY:
             self.app.write('pause\n')
             return True

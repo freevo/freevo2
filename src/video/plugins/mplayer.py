@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.56  2004/01/02 11:17:35  dischi
+# cleanup
+#
 # Revision 1.55  2004/01/01 19:37:31  dischi
 # dvd and interlace fixes
 #
@@ -31,43 +34,6 @@
 #
 # Revision 1.49  2003/12/10 19:06:06  dischi
 # move to new ChildApp2 and remove the internal thread
-#
-# Revision 1.48  2003/12/09 20:40:13  dischi
-# fixed copy paste error
-#
-# Revision 1.47  2003/12/09 19:43:22  dischi
-# subtitle file and audio file support
-#
-# Revision 1.46  2003/12/07 19:40:30  dischi
-# convert OVERSCAN variable names
-#
-# Revision 1.45  2003/12/06 16:25:45  dischi
-# support for type=url and <playlist> and <player>
-#
-# Revision 1.44  2003/11/29 18:37:30  dischi
-# build config.VIDEO_SUFFIX in config on startup
-#
-# Revision 1.43  2003/11/28 20:08:59  dischi
-# renamed some config variables
-#
-# Revision 1.42  2003/11/28 19:26:37  dischi
-# renamed some config variables
-#
-# Revision 1.41  2003/11/22 15:57:47  dischi
-# cleanup
-#
-# Revision 1.40  2003/11/21 18:04:27  dischi
-# remove debug
-#
-# Revision 1.39  2003/11/21 17:56:50  dischi
-# Plugins now 'rate' if and how good they can play an item. Based on that
-# a good player will be choosen.
-#
-# Revision 1.38  2003/11/04 17:53:23  dischi
-# Removed the unstable bmovl part from mplayer.py and made it a plugin.
-# Even if we are in a code freeze, this is a major cleanup to put the
-# unstable stuff in a plugin to prevent mplayer from crashing because of
-# bmovl.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -92,17 +58,17 @@
 #endif
 
 
-import time, os, re
-import threading, signal
-import traceback, popen2
+import os, re
+import threading
+import popen2
 
 import config     # Configuration handler. reads config file.
 import util       # Various utilities
 import childapp   # Handle child applications
 import rc         # The RemoteControl class.
+import plugin
 
 from event import *
-import plugin
 
 
 class PluginInterface(plugin.Plugin):
@@ -114,9 +80,9 @@ class PluginInterface(plugin.Plugin):
     """
     def __init__(self):
         mplayer_version = 0
-        # create the mplayer object
-        plugin.Plugin.__init__(self)
 
+        # Detect version of mplayer. Possible values are
+        # 0.9 (for 0.9.x series), 1.0 (for 1.0preX series) and 9999 for cvs
         if not hasattr(config, 'MPLAYER_VERSION'):
             child = popen2.Popen3( "%s -v" % config.MPLAYER_CMD, 1, 100)
             data = child.fromchild.readline() # Just need the first line
@@ -136,8 +102,18 @@ class PluginInterface(plugin.Plugin):
                 _debug_("MPlayer version set to: %s" % config.MPLAYER_VERSION)
             child.wait()
 
+        if not config.MPLAYER_VERSION:
+            self.reason = 'failed to detect mplayer version'
+            return
+        
+        # create plugin structure
+        plugin.Plugin.__init__(self)
+
         # register mplayer as the object to play video
         plugin.register(MPlayer(config.MPLAYER_VERSION), plugin.VIDEO_PLAYER, True)
+
+
+
 
 
 class MPlayer:
@@ -145,14 +121,16 @@ class MPlayer:
     the main class to control mplayer
     """
     def __init__(self, version):
-        self.name = 'mplayer'
+        """
+        init the mplayer object
+        """
+        self.name       = 'mplayer'
 
-        self.mode = None
-        self.app_mode = 'video'
-        self.version = version
-        self.seek = 0
+        self.app_mode   = 'video'
+        self.version    = version
+        self.seek       = 0
         self.seek_timer = threading.Timer(0, self.reset_seek)
-        self.app = None
+        self.app        = None
 
 
     def rate(self, item):
@@ -177,12 +155,11 @@ class MPlayer:
         """
         play a videoitem with mplayer
         """
-        self.parameter = (options, item)
+        self.options = options
+        self.item    = item
         
         mode         = item.mode
-        network_play = item.network_play
         url          = item.url
-        self.item    = item
 
         if mode == 'file':
             url = item.url[6:]
@@ -209,9 +186,9 @@ class MPlayer:
        
 
         # Build the MPlayer command
-        mpl = [ '--prio=%s' % config.MPLAYER_NICE, config.MPLAYER_CMD ]
-        mpl += config.MPLAYER_ARGS_DEF.split(' ')
-        mpl += [ '-slave', '-ao', config.MPLAYER_AO_DEV ]
+        command = [ '--prio=%s' % config.MPLAYER_NICE, config.MPLAYER_CMD ] + \
+                  config.MPLAYER_ARGS_DEF.split(' ') + \
+                  [ '-slave', '-ao', config.MPLAYER_AO_DEV ]
 
         additional_args = []
 
@@ -260,36 +237,36 @@ class MPlayer:
             mode = 'default'
 
         # Mplayer command and standard arguments
-        mpl += [ '-v', '-vo', config.MPLAYER_VO_DEV +
-                 config.MPLAYER_VO_DEV_OPTS ]
-        mpl += config.MPLAYER_ARGS[mode].split(' ')
+        command += [ '-v', '-vo', config.MPLAYER_VO_DEV +
+                     config.MPLAYER_VO_DEV_OPTS ]
+
+        # mode specific args
+        command += config.MPLAYER_ARGS[mode].split(' ')
 
         # make the options a list
-        mpl += additional_args
+        command += additional_args
 
         if hasattr(item, 'is_playlist') and item.is_playlist:
-            mpl.append('-playlist')
+            command.append('-playlist')
 
         # add the file to play
-        mpl.append(url)
+        command.append(url)
 
         if options:
-            mpl += options
+            command += options
 
         # use software scaler?
-        if '-nosws' in mpl:
-            mpl.remove('-nosws')
+        if '-nosws' in command:
+            command.remove('-nosws')
 
-        elif not '-framedrop' in mpl:
-            mpl += config.MPLAYER_SOFTWARE_SCALER.split(' ')
+        elif not '-framedrop' in command:
+            command += config.MPLAYER_SOFTWARE_SCALER.split(' ')
 
         # correct avi delay based on mmpython settings
         if config.MPLAYER_SET_AUDIO_DELAY and item.info.has_key('delay') and \
                item.info['delay'] > 0:
-            mpl += [ '-mc', str(int(item.info['delay'])+1), '-delay',
-                    '-' + str(item.info['delay']) ]
-
-        command = mpl
+            command += [ '-mc', str(int(item.info['delay'])+1), '-delay',
+                         '-' + str(item.info['delay']) ]
 
         while '' in command:
             command.remove('')
@@ -300,7 +277,7 @@ class MPlayer:
             (x1, y1, x2, y2) = (1000, 1000, 0, 0)
             crop_cmd = command[1:] + ['-ao', 'null', '-vo', 'null', '-ss', '60',
                                       '-frames', '20', '-vop', 'cropdetect' ]
-            child = popen2.Popen3(self.vop_append(crop_cmd), 1, 100)
+            child = popen2.Popen3(self.sort_filter(crop_cmd), 1, 100)
             exp = re.compile('^.*-vop crop=([0-9]*):([0-9]*):([0-9]*):([0-9]*).*')
             while(1):
                 data = child.fromchild.readline()
@@ -333,21 +310,24 @@ class MPlayer:
         for p in self.plugins:
             command = p.play(command, self)
 
-        command=self.vop_append(command)
+        command=self.sort_filter(command)
 
         if plugin.getbyname('MIXER'):
             plugin.getbyname('MIXER').reset()
 
         rc.app(self)
 
-        self.app = MPlayerApp(command, self, item, network_play)
+        self.app = MPlayerApp(command, self)
         return None
     
 
     def stop(self):
         """
-        Stop mplayer and set thread to idle
+        Stop mplayer
         """
+        if not self.app:
+            return
+        
         self.app.stop('quit\n')
         rc.app(None)
         self.app = None
@@ -361,6 +341,8 @@ class MPlayer:
         eventhandler for mplayer control. If an event is not bound in this
         function it will be passed over to the items eventhandler
         """
+        if not self.app:
+            return self.item.eventhandler(event)
 
         for p in self.plugins:
             if p.eventhandler(event):
@@ -399,39 +381,33 @@ class MPlayer:
 
         if event == 'AUDIO_ERROR_START_AGAIN':
             self.stop()
-            self.play(self.parameter[0], self.parameter[1])
+            self.play(self.options, self.item)
             return True
         
         if event in ( PLAY_END, USER_END ):
             self.stop()
             return self.item.eventhandler(event)
 
-        try:
-            if event == VIDEO_SEND_MPLAYER_CMD:
-                self.app.write('%s\n' % event.arg)
-                return True
-
-            if event == TOGGLE_OSD:
-                self.app.write('osd\n')
-                return True
-
-            if event == PAUSE or event == PLAY:
-                self.app.write('pause\n')
-                return True
-
-            if event == SEEK:
-                self.app.write('seek %s\n' % event.arg)
-                return True
-
-            if event == OSD_MESSAGE:
-                self.app.write('osd_show_text "%s"\n' % event.arg);
-                return TRUE
-
-        except:
-            print 'Exception while sending command to mplayer:'
-            traceback.print_exc()
+        if event == VIDEO_SEND_MPLAYER_CMD:
+            self.app.write('%s\n' % event.arg)
             return True
-        
+
+        if event == TOGGLE_OSD:
+            self.app.write('osd\n')
+            return True
+
+        if event == PAUSE or event == PLAY:
+            self.app.write('pause\n')
+            return True
+
+        if event == SEEK:
+            self.app.write('seek %s\n' % event.arg)
+            return True
+
+        if event == OSD_MESSAGE:
+            self.app.write('osd_show_text "%s"\n' % event.arg);
+            return True
+
         # nothing found? Try the eventhandler of the object who called us
         return self.item.eventhandler(event)
 
@@ -448,7 +424,7 @@ class MPlayer:
         self.seek_timer.start()
 
         
-    def vop_append(self, command):
+    def sort_filter(self, command):
         """
         Change a mplayer command to support more than one -vop
         parameter. This function will grep all -vop parameter from
@@ -483,26 +459,25 @@ class MPlayerApp(childapp.ChildApp2):
     class controlling the in and output from the mplayer process
     """
 
-    def __init__(self, app, mplayer, item, network_play):
+    def __init__(self, app, mplayer):
+        self.RE_TIME   = re.compile("^A: *([0-9]+)").match
+        self.RE_START  = re.compile("^Starting playback\.\.\.").match
+        self.RE_EXIT   = re.compile("^Exiting\.\.\. \((.*)\)$").match
+        self.item      = mplayer.item
+        self.mplayer   = mplayer
+        self.exit_type = None
+                       
         # DVD items also store mplayer_audio_broken to check if you can
         # start them with -alang or not
-        if hasattr(item, 'mplayer_audio_broken') or item.mode != 'dvd':
+        if hasattr(self.item, 'mplayer_audio_broken') or self.item.mode != 'dvd':
             self.check_audio = 0
         else:
             self.check_audio = 1
 
-        self.network_play = network_play
-        self.RE_TIME      = re.compile("^A: *([0-9]+)").match
-        self.RE_START     = re.compile("^Starting playback\.\.\.").match
-        self.RE_EXIT      = re.compile("^Exiting\.\.\. \((.*)\)$").match
-        self.item         = item
-        self.mplayer      = mplayer
-        self.exit_type    = None
-
-        import osd
-        self.osd          = osd.get_singleton()
-        self.osdfont      = self.osd.getfont(config.OSD_DEFAULT_FONTNAME,
-                                             config.OSD_DEFAULT_FONTSIZE)
+        import osd     
+        self.osd       = osd.get_singleton()
+        self.osdfont   = self.osd.getfont(config.OSD_DEFAULT_FONTNAME,
+                                          config.OSD_DEFAULT_FONTSIZE)
 
         # check for mplayer plugins
         self.stdout_plugins  = []
@@ -519,12 +494,16 @@ class MPlayerApp(childapp.ChildApp2):
 
                 
     def stop_event(self):
+        """
+        return the stop event send through the eventhandler
+        """
         if self.exit_type == "End of file":
             return PLAY_END
         elif self.exit_type == "Quit":
             return USER_END
         else:
-            print _( 'ERROR' ) + ': ' + _( 'unknow error while playing file' )
+            print _( 'ERROR' ) + ': ' + self.exit_type + \
+                  _( 'unknow error while playing file' )
             return PLAY_END
                         
 
@@ -533,20 +512,22 @@ class MPlayerApp(childapp.ChildApp2):
         parse the stdout of the mplayer process
         """
         # show connection status for network play
-        if self.network_play:
+        if self.item.network_play:
             if line.find('Opening audio decoder') == 0:
                 self.osd.clearscreen(self.osd.COL_BLACK)
                 self.osd.update()
-            elif (line.find('Resolving ') == 0 or line.find('Connecting to server') == 0 or \
-                  line.find('Cache fill:') == 0) and \
+            elif (line.startswith('Resolving ') or \
+                  line.startswith('Connecting to server') or \
+                  line.startswith('Cache fill:')) and \
                   line.find('Resolving reference to') == -1:
-                if line.find('Connecting to server') == 0:
+
+                if line.startswith('Connecting to server'):
                     line = 'Connecting to server'
                 self.osd.clearscreen(self.osd.COL_BLACK)
                 self.osd.drawstringframed(line, config.OSD_OVERSCAN_X+10,
                                           config.OSD_OVERSCAN_Y+10,
-                                          self.osd.width - 2 * (config.OSD_OVERSCAN_X+10), -1,
-                                          self.osdfont, self.osd.COL_WHITE)
+                                          self.osd.width - 2 * (config.OSD_OVERSCAN_X+10),
+                                          -1, self.osdfont, self.osd.COL_WHITE)
                 self.osd.update()
 
 
