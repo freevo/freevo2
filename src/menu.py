@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/03/02 14:41:37  dischi
+# menuw is visible as default
+#
 # Revision 1.18  2003/03/02 14:34:40  dischi
 # Added functions to show and hide the menuwidget
 #
@@ -233,7 +236,6 @@ class MenuWidget(GUIObject):
 
     def __init__(self):
         GUIObject.__init__(self)
-
         self.menustack = []
         self.prev_page = MenuItem('Prev Page', self.goto_prev_page)
         self.next_page = MenuItem('Next Page', self.goto_next_page)
@@ -241,6 +243,7 @@ class MenuWidget(GUIObject):
         self.main_menu = MenuItem('Main', self.goto_main_menu)
         self.rows = 0
         self.cols = 0
+        self.visible = 1
 
 
     def show(self):
