@@ -229,9 +229,11 @@
 	    <text font="info value" expression="artist"/>
 	    <newline/>
 	  </if>
-	  <text font="info value" expression="len(tracks)"/>
-          <text width="130" font="info label"> Tracks:</text>
-	  <newline/>
+	  <if expression="len(tracks)">
+	    <text font="info value" expression="len(tracks)"/>
+	    <text width="130" font="info label"> Tracks</text>
+	    <newline/>
+	  </if>
  	</item>
       </content>
     </layout>
