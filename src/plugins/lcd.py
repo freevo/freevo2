@@ -13,6 +13,9 @@
 #    3) Better (and more) LCD screens.
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2004/11/27 19:11:29  dischi
+# fix bad log statement
+#
 # Revision 1.21  2004/11/20 18:23:03  dischi
 # use python logger module for debug
 #
@@ -912,7 +915,7 @@ class PluginInterface( plugin.DaemonPlugin ):
         try:
             self.screens = screens = layouts[ l ][ c ]
         except KeyError:
-            log.warning('Could not find screens for %d lines and %d columns LCD!' ) % ( self.height, self.width ))
+            log.warning('Could not find screens for %d lines and %d columns LCD!' % ( self.height, self.width ))
             print String(_( "ERROR" )) + ": " + String(_( "No screens found for this LCD (%dx%d)!" )) % ( self.height, self.width )
             self.disable = 1
             return
