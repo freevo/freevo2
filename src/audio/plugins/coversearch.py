@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2004/05/15 18:01:13  outlyer
+# Trap a potential crash if the "guessed" filename doesn't exist.
+#
 # Revision 1.30  2004/02/19 04:57:56  gsbarbieri
 # Support Web Interface i18n.
 # To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
@@ -288,12 +291,16 @@ class PluginInterface(plugin.ItemPlugin):
                     if n: n.close()
                     # maybe the url is wrong, try to change '.01.' to '.03.'
                     cover[i].ImageUrlLarge = cover[i].ImageUrlLarge.replace('.01.', '.03.')
-                    n = urllib2.urlopen(cover[i].ImageUrlLarge)
-                    if not (n.info()['Content-Length'] == '807'):
-                        image = Image.open(cStringIO.StringIO(n.read()))
-                        items += [ menu.MenuItem( ('%s [' + _( 'small' ) + ']' ) % cover[i].ProductName,
-                                                 self.cover_create, cover[i].ImageUrlLarge) ]
-                    n.close()
+                    try:
+                        n = urllib2.urlopen(cover[i].ImageUrlLarge)
+
+                        if not (n.info()['Content-Length'] == '807'):
+                            image = Image.open(cStringIO.StringIO(n.read()))
+                            items += [ menu.MenuItem( ('%s [' + _( 'small' ) + ']' ) % cover[i].ProductName,
+                                                     self.cover_create, cover[i].ImageUrlLarge) ]
+                        n.close()
+                    except urllib2.HTTPError:
+                        pass
 
         box.destroy()
         if len(items) == 1:
