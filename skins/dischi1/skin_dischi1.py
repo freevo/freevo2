@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/03/02 15:04:08  dischi
+# Added forced_redraw after Clear()
+#
 # Revision 1.24  2003/03/02 14:35:11  dischi
 # Added clear function
 #
@@ -226,9 +229,8 @@ class Skin:
             settings.load(local_skin)
             break
         
-    hold = 0
-
     def __init__(self):
+        self.force_redraw = TRUE
         self.screen = Screen()
         self.area_names = ( 'screen', 'title', 'listing', 'view')
         for a in self.area_names:
@@ -383,16 +385,16 @@ class Skin:
         
 
     def Clear(self):
+        self.force_redraw = TRUE
         osd.clearscreen(osd.COL_BLACK)
         osd.update()
 
     # Called from the MenuWidget class to draw a menu page on the
     # screen
     def DrawMenu(self, menuw):
-        if self.hold:
-            print 'skin.drawmenu() hold!'
+        if not menuw.visible:
             return
-       
+        
         menu = menuw.menustack[-1]
 
         if not menu:
@@ -411,9 +413,10 @@ class Skin:
         self.screen.clear()
         for a in self.area_names:
             area = eval('self.%s_area' % a)
-            area.draw(settings, menuw)
+            area.draw(settings, menuw, self.force_redraw)
 
         osd.update()
+        self.force_redraw = FALSE
         
 
     def DrawMP3(self, info):

@@ -37,6 +37,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/03/02 15:04:08  dischi
+# Added forced_redraw after Clear()
+#
 # Revision 1.6  2003/03/01 00:12:17  dischi
 # Some bug fixes, some speed-ups. blue_round2 has a correct main menu,
 # but on the main menu the idle bar still flickers (stupid watermarks),
@@ -158,7 +161,7 @@ class Skin_Area:
 
         self.imagecache = objectcache.ObjectCache(5, desc='%s_image' % self.name)
 
-    def draw(self, settings, menuw):
+    def draw(self, settings, menuw, force_redraw):
         """
         this is the main draw function. This function draws the background,
         checks if redraws are needed and calls the two update functions for
@@ -169,7 +172,7 @@ class Skin_Area:
 
         self.menu = menu
         
-        self.redraw = FALSE
+        self.redraw = force_redraw
         self.mode = 0                   # start draw
         
         area = self.area_val
