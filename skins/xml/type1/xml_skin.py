@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/02/19 14:51:12  dischi
+# removed debug
+#
 # Revision 1.26  2003/02/19 14:38:44  dischi
 # Some small cleanups. The extended menu for images and video is no table
 # and the icon names are gone. We know have iconset to define an icon
@@ -635,10 +638,7 @@ class XML_listingmenuitem(XML_menuitem):
                     elif subsubnode.name == u'content':
                         self.parse_content(subsubnode, scale)
 
-        if type == 'table':
-            print 'no'
-        else:
-            print 'do it'
+        if type != 'table':
             self.parse_content(node, scale, 0)
         
 
