@@ -5,11 +5,15 @@
 # -----------------------------------------------------------------------
 # $Id$
 #
-# Notes:
+# Notes: do not use the OSD object inside a thread
+#
 # Todo:        
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.155  2004/05/09 14:17:44  dischi
+# do use a SynchronizedObject for the osd
+#
 # Revision 1.154  2004/05/02 11:46:12  dischi
 # make it possible to turn off image caching
 #
@@ -18,48 +22,6 @@
 #
 # Revision 1.152  2004/04/25 11:23:57  dischi
 # Added support for animations. Most of the code is from Viggo Fredriksen
-#
-# Revision 1.151  2004/03/19 21:03:39  dischi
-# fix tvguide context bug
-#
-# Revision 1.150  2004/03/14 17:46:24  dischi
-# fix update for some cards
-#
-# Revision 1.149  2004/03/14 17:22:43  dischi
-# seperate ellipses and dim in drawstringframed
-#
-# Revision 1.148  2004/03/14 13:10:41  dischi
-# more dim/ellipse fixes
-#
-# Revision 1.147  2004/03/14 12:59:34  dischi
-# fix crash
-#
-# Revision 1.146  2004/03/14 12:55:11  dischi
-# dim support for texts
-#
-# Revision 1.145  2004/03/12 18:33:56  dischi
-# text input patch from Viggo Frederiksen
-#
-# Revision 1.144  2004/03/10 20:13:52  dischi
-# set keyboard repeat
-#
-# Revision 1.143  2004/02/27 20:12:16  dischi
-# reworked rc.py to make several classes
-#
-# Revision 1.141  2004/02/18 21:55:44  dischi
-# Some osd updates for new gui code
-#
-# Revision 1.140  2004/02/14 13:05:03  dischi
-# do not call skin.get_singleton() anymore
-#
-# Revision 1.139  2004/02/12 12:37:14  dischi
-# fix alternative font loading
-#
-# Revision 1.138  2004/02/12 03:32:41  outlyer
-# Fixes for OSD_EXTRA_FONT:
-#
-# o Filesystems are case sensitive; we can't arbitrarily set them to lower.
-# o If we're using the extra font path for osd.py, we need to use it in xml_skin
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -170,7 +132,7 @@ def get_singleton():
     
     # One-time init
     if _singleton == None:
-        _singleton = util.SynchronizedObject(OSD())
+        _singleton = OSD()
         
     return _singleton
 
