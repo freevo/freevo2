@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/10/04 18:40:48  dischi
+# try except before trying to kill the child
+#
 # Revision 1.24  2003/10/02 16:20:55  dischi
 # add lock() to make it thread save
 #
@@ -211,9 +214,12 @@ class ChildApp:
         except OSError:
             pass
         
-        if signal:
-            _debug_('childapp: killing pid %s signal %s' % (self.child.pid, signal))
-            os.kill(self.child.pid, signal)
+        try:
+            if signal:
+                _debug_('childapp: killing pid %s signal %s' % (self.child.pid, signal))
+                os.kill(self.child.pid, signal)
+        except OSError:
+            pass
             
         # Wait for the child to exit
         try:
