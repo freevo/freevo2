@@ -473,6 +473,13 @@ MPLAYER_USE_WID      = 1
 #
 MPLAYER_DVD_PROTECTION = 1
 
+# Number of seconds before seek value times out. This is used when
+# seeking to a specified number of minutes into a movie. If you make
+# a mistake or change your mind, the seek value will timeout after
+# this many seconds
+#
+MPLAYER_SEEK_TIMEOUT = 8
+
 # ======================================================================
 # XMMS section:
 # ======================================================================

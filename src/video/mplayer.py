@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/03/17 15:47:16  outlyer
+# Merged patch from Angel <angel@knight-industries.com> for "Jump to"
+# functionality.
+#
 # Revision 1.24  2003/03/02 14:58:23  dischi
 # Removed osd.clearscreen and if we have the NEW_SKIN deactivate
 # skin.popupbox, refresh, etc. Use menuw.show and menuw.hide to do this.
@@ -363,7 +367,7 @@ class MPlayer:
         function it will be passed over to the items eventhandler
         """
 
-        if event == rc.STOP or event == rc.SELECT:
+        if (event == rc.STOP or event == rc.SELECT) and not self.seek:
             if self.mode == 'dvdnav':
                 self.thread.app.write('dvdnav 6\n')
                 return TRUE
@@ -451,12 +455,78 @@ class MPlayer:
             else:
                 self.thread.app.write('seek 60\n')
             return TRUE
-
+        
+        if event == rc.SELECT:
+            self.seek_timer.cancel()
+            self.seek *= 60
+            self.thread.app.write('seek ' + str(self.seek) + ' 2\n')
+            self.seek = 0
+            return TRUE
+        
+        if event == rc.K0:
+            self.reset_seek_timeout()
+            self.seek *= 10;
+            return TRUE
+        
+        if event == rc.K1:
+            self.reset_seek_timeout()
+            self.seek += self.seek * 10 + 1
+            return TRUE
+            
+        elif event == rc.K2:
+                self.reset_seek_timeout()
+                self.seek += self.seek * 10 + 2
+                return TRUE
+        
+        elif event == rc.K3:
+                self.reset_seek_timeout()
+                self.seek += self.seek * 10 + 3
+                return TRUE
+                
+        elif event == rc.K4:
+                self.reset_seek_timeout()
+                self.seek += self.seek * 10 + 4
+                return TRUE
+                
+        elif event == rc.K5:
+                self.reset_seek_timeout()
+                self.seek += self.seek * 10 + 5
+                return TRUE
+                
+        elif event == rc.K6:
+                self.reset_seek_timeout()
+                self.seek += self.seek * 10 + 6
+                return TRUE
+                
+        elif event == rc.K7:
+                self.reset_seek_timeout()
+                self.seek += self.seek * 10 + 7
+                return TRUE
+                
+        elif event == rc.K8:
+                self.reset_seek_timeout()
+                self.seek += self.seek * 10 + 8
+                return TRUE
+                
+        elif event == rc.K9:
+                self.reset_seek_timeout()
+                self.seek += self.seek * 10 + 9
+                return TRUE
 
         # nothing found? Try the eventhandler of the object who called us
         return self.item.eventhandler(event)
+    
+    def reset_seek(self):
+        self.seek = 0
+        
+    def reset_seek_timeout(self):
+        self.seek_timer.cancel()
+        self.seek_timer = threading.Timer(config.MPLAYER_SEEK_TIMEOUT, self.reset_seek)
+        self.seek_timer.start()
+        
+    seek = 0
+    seek_timer = threading.Timer(0, reset_seek)
 
-            
 # ======================================================================
 
 class MPlayerParser:
