@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/12/07 19:09:24  dischi
+# add <slideshow> fxd support with background music
+#
 # Revision 1.15  2003/12/07 11:12:56  dischi
 # small bugfix
 #
@@ -45,6 +48,7 @@ import viewer
 import mmpython
 
 from item import Item
+from event import *
 
 
 class ImageItem(Item):
@@ -136,3 +140,12 @@ class ImageItem(Item):
             self.parent.cache_next()
 
 
+    def eventhandler(self, event, menuw=None):
+        """
+        pass background music event to the correct handler
+        """
+        if event == AUDIO_PLAY_END and hasattr(self.parent, 'background_playlist') \
+           and self.parent.background_playlist:
+            self.parent.background_playlist.eventhandler(PLAY_END)
+        Item.eventhandler(self, event, menuw)
+        

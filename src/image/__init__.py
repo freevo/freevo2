@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/12/07 19:09:24  dischi
+# add <slideshow> fxd support with background music
+#
 # Revision 1.7  2003/12/07 11:13:53  dischi
 # small bugfix
 #
@@ -51,6 +54,7 @@ import util
 import plugin
 
 from imageitem import ImageItem
+from playlist import Playlist, RandomPlaylist
 
 class PluginInterface(plugin.MimetypePlugin):
     """
@@ -59,6 +63,9 @@ class PluginInterface(plugin.MimetypePlugin):
     def __init__(self):
         plugin.MimetypePlugin.__init__(self)
         self.display_type = [ 'image' ]
+
+        # register the callbacks
+        plugin.register_callback('fxditem', ['image'], 'slideshow', self.fxdhandler)
 
         # activate the mediamenu for image
         plugin.activate('mediamenu', level=plugin.is_active('image')[2], args='image')
@@ -114,3 +121,97 @@ class PluginInterface(plugin.MimetypePlugin):
 
             if info.has_key('title') and info['title']:
                 diritem.name = info['title']
+
+
+    def fxdhandler(self, fxd, node):
+        """
+        parse image specific stuff from fxd files
+
+        <?xml version="1.0" ?>
+        <freevo>
+          <slideshow title="foo" random="1|0">
+            <cover-img>foo.jpg</cover-img>
+            <background-music random="1|0">
+              <directory recursive="1|0">path</directory>
+              <file>filename</file>
+            </background-music>
+            <files>
+              <directory recursive="1|0" duration="10">path</directory>
+              <file duration="0">filename</file>
+            </files>
+            <info>
+              <description>A nice description</description>
+            </info>
+          </playlist>
+        </freevo>
+        """
+        items = []
+        children = fxd.get_children(node, 'files')
+        if children:
+            children = children[0].children
+
+        for child in children:
+            try:
+                citems = []
+                if child.name == 'directory':
+                    if fxd.getattr(child, 'recursive', 0):
+                        f = util.match_files_recursively(fxd.gettext(child), self.suffix())
+                    else:
+                        f = util.match_files(fxd.gettext(child), self.suffix())
+                    citems = self.get(None, f)
+
+                elif child.name == 'file':
+                    citems = self.get(None, [ fxd.gettext(child) ])
+
+                duration = fxd.getattr(child, 'duration', 0)
+                if duration:
+                    for i in citems:
+                        i.duration = duration
+                items += citems
+                
+            except OSError, e:
+                print 'slideshow error:'
+                print e
+
+        pl = Playlist(items, fxd.getattr(None, 'parent', None))
+        if fxd.getattr(node, 'random', 0):
+            pl.randomize()
+        pl.autoplay = True
+
+        pl.name     = fxd.getattr(node, 'title')
+        pl.xml_file = fxd.getattr(None, 'filename', '')
+        pl.image    = fxd.childcontent(node, 'cover-img')
+        if pl.image:
+            pl.image = vfs.join(vfs.dirname(pl.xml_file), pl.image)
+
+
+        # background music
+        children = fxd.get_children(node, 'background-music')
+        if children:
+            random   = fxd.getattr(children[0], 'random', 0)
+            children = children[0].children
+
+        files  = []
+        suffix = []
+        for p in plugin.mimetype('audio'):
+            suffix += p.suffix()
+
+        for child in children:
+            try:
+                if child.name == 'directory':
+                    if fxd.getattr(child, 'recursive', 0):
+                        files += util.match_files_recursively(fxd.gettext(child), suffix)
+                    else:
+                        files += util.match_files(fxd.gettext(child), suffix)
+                elif child.name == 'file':
+                    files.append(fxd.gettext(child))
+            except OSError, e:
+                print 'playlist error:'
+                print e
+
+        if files:
+            pl.background_playlist = RandomPlaylist('', files, None, random = random)
+
+        # add item to list
+        fxd.parse_info(fxd.get_children(node, 'info', 1), pl)
+        fxd.getattr(None, 'items', []).append(pl)
