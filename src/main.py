@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2003/03/15 17:13:22  dischi
+# store rom drive type in media
+#
 # Revision 1.28  2003/03/15 16:45:47  dischi
 # make the shutdown look nicer for mga video
 #
@@ -389,7 +392,7 @@ class RemovableMedia:
         self.id    = ''
         self.label = ''
         self.info  = None
-        
+        self.type  = 'empty_cdrom'
 
     def is_tray_open(self):
         return self.tray_open

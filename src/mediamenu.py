@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2003/03/15 17:13:22  dischi
+# store rom drive type in media
+#
 # Revision 1.39  2003/03/02 19:01:16  dischi
 # removed [] from the directory name
 #
@@ -231,6 +234,7 @@ class MediaMenu(Item):
                 m = Item(self)
                 m.name = 'Drive %s (no disc)' % media.drivename
                 m.media = media
+                media.info = m
                 items += [ m ]
 
         return items

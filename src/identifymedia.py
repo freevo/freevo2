@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/03/15 17:13:22  dischi
+# store rom drive type in media
+#
 # Revision 1.20  2003/03/11 19:40:33  dischi
 # bugfix
 #
@@ -171,6 +174,7 @@ class Identify_Thread(threading.Thread):
 
         media.id    = ''
         media.label = ''
+        media.type  = 'empty_cdrom'
 
         # Is there a disc present?
         if s != CDS_DISC_OK:
@@ -182,6 +186,7 @@ class Identify_Thread(threading.Thread):
         s = ioctl(fd, CDROM_DISC_STATUS)
         if s == CDS_AUDIO:
             os.close(fd)
+            media.type  = 'audiocd'
             try:
                 cdrom = DiscID.open(media.devicename)
                 disc_id = DiscID.disc_id(cdrom)
@@ -238,6 +243,7 @@ class Identify_Thread(threading.Thread):
 
         media.id    = id
         media.label = ''
+        media.type  = 'cdrom'
         
         # is the id in the database?
         if id in config.MOVIE_INFORMATIONS_ID:
@@ -287,6 +293,8 @@ class Identify_Thread(threading.Thread):
                 media.info.name = title
                 media.info.mode = mediatype[2]
                 media.info.media = media
+
+                media.type  = mediatype[2]
 
                 if os.path.isfile(config.COVER_DIR+label+'.jpg'):
                     media.info.image = config.COVER_DIR+label+'.jpg'
