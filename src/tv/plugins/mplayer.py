@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2004/06/28 17:12:22  dischi
+# reduce cache for dvb
+#
 # Revision 1.34  2004/06/25 20:03:33  dischi
 # basic dvb support
 #
@@ -150,7 +153,7 @@ class MPlayer:
             elif vg.group_type == 'dvb':
                 self.fc.chanSet(tuner_channel, app='mplayer')
                 tvcmd = ''
-                args += ('"dvb://%s" -vf pp=de/fd' % tuner_channel,)
+                args += ('"dvb://%s" -vf pp=de/fd -cache 1024' % tuner_channel,)
 
             else:
                 freq_khz = self.fc.chanSet(tuner_channel, app='mplayer')
