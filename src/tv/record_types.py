@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/01/09 19:39:31  outlyer
+# Oops, we don't use config here.
+#
 # Revision 1.8  2004/01/09 19:35:49  outlyer
 # Inherit DEBUG parameter from config, move some prints into DEBUG
 #
@@ -56,7 +59,7 @@ import util.tv_util as tv_util
 TYPES_VERSION = 2
 
 # Set to 1 for debug output
-DEBUG = config.DEBUG
+DEBUG = 0
 
 TRUE = 1
 FALSE = 0
