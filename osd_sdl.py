@@ -158,8 +158,7 @@ class OSD:
     COL_DARK_GREEN = 0x038D11
 
 
-    # XXX width, height from config.OSD_WIDTH etc
-    def __init__(self, width=768, height=576):
+    def __init__(self):
 
         self.fontcache = []
         self.stringcache = []
@@ -167,8 +166,9 @@ class OSD:
         
         self.default_fg_color = self.COL_BLACK
         self.default_bg_color = self.COL_WHITE
-        self.width = width
-        self.height = height
+
+        self.width = int(config.RESOLUTION[0:3])
+        self.height = int(config.RESOLUTION[4:7])
 
         # Initialize the PyGame modules.
         pygame.init()
@@ -180,7 +180,7 @@ class OSD:
         except NotImplementedError, MissingPygameModule:
             pass # Ok, we didn't have the mixer module anyways
 
-        self.screen = pygame.display.set_mode((width, height), 0, 32)
+        self.screen = pygame.display.set_mode((self.width, self.height), 0, 32)
 
         pygame.display.set_caption('Freevo      z = Toggle Fullscreen'
                                    '      Arrow Keys = Move      Return = Select')
@@ -197,7 +197,7 @@ class OSD:
         
         self._started = 1
         self._help = 0  # Is the helpscreen displayed or not
-        self._help_saved = pygame.Surface((width, height), 0, 32)
+        self._help_saved = pygame.Surface((self.width, self.height), 0, 32)
         self._help_last = 0
         
 
