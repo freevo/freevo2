@@ -34,7 +34,6 @@ help_text = """\
 h       HELP
 z       Toggle Fullscreen
 F1      SLEEP
-F1      SLEEP
 HOME    MENU
 g       GUIDE
 ESCAPE  EXIT
@@ -43,6 +42,7 @@ DOWN    DOWN
 LEFT    LEFT
 RIGHT   RIGHT
 SPACE   SELECT
+RETURN  SELECT
 F2      POWER
 F3      MUTE
 PLUS    VOL+
@@ -86,6 +86,7 @@ cmds_sdl = {
     K_LEFT        : 'LEFT',
     K_RIGHT       : 'RIGHT',
     K_SPACE       : 'SELECT',
+    K_RETURN      : 'SELECT',
     K_F2          : 'POWER',
     K_F3          : 'MUTE',
     K_PLUS        : 'VOL+',
