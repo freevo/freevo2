@@ -225,6 +225,10 @@ class PluginInterface(Plugin):
         # schedule next recording
         self.schedule(self.recordings)
 
+        if self.server:
+            # FIXME: find a better way to notify the server
+            self.server.send_update()
+
         return False
     
 
@@ -262,6 +266,9 @@ class PluginInterface(Plugin):
             self.item.status = 'done'
         log.info('%s.stopped: recording finished, new status' % self.name)
         log.info(str(self.item))
+        if self.server:
+            # FIXME: find a better way to notify the server
+            self.server.send_update()
         self.server.save()
         self.item.recorder = None
         self.item = None
