@@ -10,6 +10,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2002/08/18 04:24:17  krister
+# Redirected stdout+stderr to /dev/null when running aumix to get rid of all the annoying error messages. Please test this since I don't use Alsa.
+#
 # Revision 1.7  2002/08/11 09:12:57  krister
 # Added a check that the mixer device could be opened, continue anyway if it cannot.
 #
@@ -160,7 +163,7 @@ class Mixer:
         if volume > 100: volume = 100 
         elif volume < 0: volume = 0
         self.igainVolume = volume
-        os.system('aumix -i%s' % volume)
+        os.system('aumix -i%s &> /dev/null &' % volume)
 
     def getIgainVolume(self):
         return self.igainVolume
@@ -168,19 +171,19 @@ class Mixer:
     def decIgainVolume(self):
         self.igainVolume -= 5
         if self.igainVolume < 0: self.igainVolume = 0
-        os.system('aumix -i-5')
+        os.system('aumix -i-5 &> /dev/null &')
         
     def incIgainVolume(self):
         self.igainVolume += 5
         if self.igainVolume > 100: self.igainVolume = 100
-        os.system('aumix -i+5')
+        os.system('aumix -i+5 &> /dev/null &')
         
     def setOgainVolume(self, volume):
         """For Ogain on SB Live Cards"""
         if volume > 100: volume = 100 
         elif volume < 0: volume = 0
         self.ogainVolume = volume
-        os.system('aumix -o%s' % volume)
+        os.system('aumix -o%s &> /dev/null &' % volume)
 
 
 # Simple test...
