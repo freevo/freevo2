@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2004/05/28 15:50:27  dischi
+# configure menu items cleanup
+# support chapters as ChapterInfo in mmpython (e.g. ogm files)
+#
 # Revision 1.25  2004/05/06 18:12:17  dischi
 # fix crash
 #
@@ -77,8 +81,6 @@ import plugin
 import re
 
 
-current_fxd_file = None
-
 #
 # Dummy for playing the movie
 #
@@ -98,25 +100,23 @@ def audio_selection(arg=None, menuw=None):
     menuw.back_one_menu()
 
 def audio_selection_menu(arg=None, menuw=None):
-    global current_fxd_file
-    items = []
-    for a in arg.info['audio']:
+    item       = arg
+    menu_items = []
+
+    for a in item.info['audio']:
         if not a.has_key('id') or a['id'] in ('', None):
-            a['id'] = arg.info['audio'].index(a) + 1
+            a['id'] = item.info['audio'].index(a) + 1
         
-        if not a.has_key('language') or not not a['language']:
+        if not a.has_key('language') or not a['language']:
             a['language'] = _('Stream %s') % a['id']
 
-        if not a.has_key('channels') or not not a['channels']:
+        if not a.has_key('channels') or not a['channels']:
             a['channels'] = 2 # wild guess :-)
 
-        if not a.has_key('codec') or not not a['codec']:
-            a['codec'] = _('Unknown')
+        txt = '%s (channels=%s)' % (a['language'], a['channels'])
+        menu_items.append(menu.MenuItem(txt, audio_selection, (item, a['id'])))
 
-        txt = '%s (channels=%s, codec=%s, id=%s)' % (a['language'], a['channels'],
-                                                     a['codec'], a['id'])
-        items.append(menu.MenuItem(txt, audio_selection, (arg, a['id'])))
-    moviemenu = menu.Menu(_('Audio Menu'), items, fxd_file=current_fxd_file)
+    moviemenu = menu.Menu(_('Audio Menu'), menu_items, fxd_file=item.skin_fxd)
     menuw.pushmenu(moviemenu)
         
 
@@ -129,13 +129,13 @@ def subtitle_selection(arg=None, menuw=None):
     menuw.back_one_menu()
 
 def subtitle_selection_menu(arg=None, menuw=None):
-    global current_fxd_file
-    items = []
+    item       = arg
 
-    items += [ menu.MenuItem(_('no subtitles'), subtitle_selection, (arg, -1)) ]
-    for s in range(len(arg.info['subtitles'])):
-        items.append(menu.MenuItem(arg.info['subtitles'][s], subtitle_selection, (arg, s)))
-    moviemenu = menu.Menu(_('Subtitle Menu'), items, fxd_file=current_fxd_file)
+    menu_items = [ menu.MenuItem(_('no subtitles'), subtitle_selection, (item, -1)) ]
+    for s in range(len(item.info['subtitles'])):
+        menu_items.append(menu.MenuItem(item.info['subtitles'][s],
+                                        subtitle_selection, (item, s)))
+    moviemenu = menu.Menu(_('Subtitle Menu'), menu_items, fxd_file=item.skin_fxd)
     menuw.pushmenu(moviemenu)
 
         
@@ -148,12 +148,18 @@ def chapter_selection(menuw=None, arg=None):
     play_movie(menuw=menuw, arg=arg)
     
 def chapter_selection_menu(arg=None, menuw=None):
-    global current_fxd_file
-    items = []
-    for c in range(1, arg.info['chapters']):
-        items += [ menu.MenuItem(_('Play chapter %s') % c, chapter_selection,
-                                 (arg, ' -chapter %s' % c)) ]
-    moviemenu = menu.Menu(_('Chapter Menu'), items, fxd_file=current_fxd_file)
+    item  = arg
+    menu_items = []
+    if isinstance(arg.info['chapters'], int):
+        for c in range(1, arg.info['chapters']):
+            menu_items += [ menu.MenuItem(_('Play chapter %s') % c, chapter_selection,
+                                          (arg, ' -chapter %s' % c)) ]
+    elif arg.info['chapters']:
+        for c in arg.info['chapters']:
+            menu_items += [ menu.MenuItem(c.name, chapter_selection,
+                                          (arg, ' -ss %s' % c.pos)) ]
+        
+    moviemenu = menu.Menu(_('Chapter Menu'), menu_items, fxd_file=item.skin_fxd)
     menuw.pushmenu(moviemenu)
 
 
@@ -210,10 +216,7 @@ def get_items(item):
     return items
 
         
-def get_menu(item, menuw, fxd_file):
-    global current_fxd_file
-    current_fxd_file = fxd_file
-
+def get_menu(item, menuw):
     items = get_items(item) + [ menu.MenuItem(_('Play'), play_movie, (item, '')) ]
-    return menu.Menu(_('Config Menu'), items, fxd_file=fxd_file)
+    return menu.Menu(_('Config Menu'), items, fxd_file=item.skin_fxd)
     

@@ -10,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.136  2004/05/28 15:50:28  dischi
+# configure menu items cleanup
+# support chapters as ChapterInfo in mmpython (e.g. ogm files)
+#
 # Revision 1.135  2004/05/13 13:49:24  outlyer
 # The much appreciated 'alternate player' patch from den_RDC. Allows you to
 # switch between your default player and an alternate without restarting
@@ -576,7 +580,7 @@ class VideoItem(Item):
         """
         if not self.menuw:
             self.menuw = menuw
-        confmenu = configure.get_menu(self, self.menuw, self.skin_fxd)
+        confmenu = configure.get_menu(self, self.menuw)
         self.menuw.pushmenu(confmenu)
         
 
