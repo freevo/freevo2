@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/09/02 00:05:26  rshortt
+# *** empty log message ***
+#
 # Revision 1.1  2004/09/01 23:39:53  rshortt
 # Initial support for using IvtvCanvas which will display over the ivtv osd
 # interface.  This is called ivtv_osd because it is also possible to display
@@ -54,6 +57,7 @@ class Display(IvtvCanvas):
     def __init__(self, size, default=False):
         IvtvCanvas.__init__(self, size)
         self.running = True
+        # TODO: someone please see if we can do animations here.
         self.animation_possible = False
 
         
@@ -61,7 +65,7 @@ class Display(IvtvCanvas):
         """
         Hide the output display. In most cases this does nothing since
         a simple window doesn't matter. If OSD_STOP_WHEN_PLAYING the
-        ygame display will be shut down.
+        display will be shut down.
         """
         if config.OSD_STOP_WHEN_PLAYING:
             self.stop()
