@@ -17,7 +17,6 @@
 #
 
 import sys, os, time, re
-import movie_xml
 
 # Send debug to stdout as well as to the logfile?
 DEBUG_STDOUT = 1
