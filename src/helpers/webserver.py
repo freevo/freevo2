@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/12/21 15:06:53  dischi
+# catch exceptions on normal exit
+#
 # Revision 1.17  2004/12/19 16:39:39  dischi
 # adjust to new record.client module
 #
@@ -74,9 +77,14 @@ htdocs  = [ os.path.join(cgi_dir, 'htdocs'),
             os.path.join(config.SHARE_DIR, 'htdocs'),
             os.path.join(config.DOC_DIR, 'html') ]
 
-# launch the server on port 8080
-Server('', config.WWW_PORT, RequestHandler, [ cgi_dir, 'www' ], htdocs)
-log.info("HTTPServer running on port %s" % str(config.WWW_PORT))
-
-# loop
-notifier.loop()
+try:
+    # launch the server on port 8080
+    Server('', config.WWW_PORT, RequestHandler, [ cgi_dir, 'www' ], htdocs)
+    log.info("HTTPServer running on port %s" % str(config.WWW_PORT))
+    
+    # loop
+    notifier.loop()
+except KeyboardInterrupt:
+    pass
+except:
+    log.exception('webserver crash')
