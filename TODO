@@ -35,6 +35,7 @@ o Installation instructions, clean up config stuff
 
    4) Lots of hard coded things within the application root that probably
      don't need to be there (fbset, matroxset)
+o Add page numbers to the menus, i.e. "Page 3/14"
 o Per-file mplayer options:
   o Paul Aubin: What about a movie_name.mplayer file that could override the
                 default command-line? Just a text file with the
