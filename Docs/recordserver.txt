@@ -1,0 +1,178 @@
+Freevo Recordserver
+-------------------
+
+The new recordserver can handle favorites and recordings similar to
+the old one, but it has a conflict detection, better priority settings
+and supports more than one tv card. This file explains who the server
+works and how the recording config file looks like. The new server has
+some powerfull settings, too powerfull to be set by Freevo, but the
+webserver may be able to edit them all in the future. 
+
+The file containing all recordings is located in the 'data' dir based
+on sysconfig. This is /var/lib/freevo if the user has write
+permissions to that directory or ~/.freevo/lib if not. You can also
+set datadir in your freevo.conf to set a completly different
+directory. The filename is recordserver.fxd. You can edit this file
+only when the server is not running. The epg database should move to
+that dir, too.
+
+Let's start with the favorites because they create recordings. Here a
+small example:
+
+<freevo>
+  <favorite id="0">
+    <name>Tagesschau</name>
+    <priority>50</priority>
+    <url>file:/home/dmeyer/video/tagesschau</url>
+    <channels>ard.de</channels>
+    <days>0 1 2 3 4 5 6</days>
+    <times>20:00-20:00</times>
+    <padding start="60" stop="300"/>
+  </favorite>
+  <favorite id="1">
+    <name>Bravo Bernd</name>
+    <priority>40</priority>
+    <url>file:Bravo Bernd/Bravo Bernd - %(year).%(month).%(day)</url>
+    <channels>kika.de</channels>
+    <days>0 1 2 3 4 5 6</days>
+    <times>00:00-23:59</times>
+    <padding start="60" stop="60"/>
+  </favorite>
+  <favorite id="2">
+    <name>Genial daneben - Die Comedy-Arena</name>
+    <priority>50</priority>
+    <url></url>
+    <channels>rtl.de sat1.de prosieben.de</channels>
+    <days>5 6</days>
+    <times>20:15-20:15 21:00-23:45</times>
+    <padding start="120" stop="300"/>
+  </favorite>
+</freevo>
+
+This is my recordings.fxd file. It only contains favorites. Each
+favorite has a priority, a list of channels, days and times. And
+optional informations are url and padding and once (missing in the
+example).
+
+The priority is the priority of the recording created from the
+favorite. Freevo will use 50 as default priority for favorites and
+1000 for scheduled recordings. By choosing thios values a normal
+recording will always win against favorites in case of a conflict
+(only if it is possible to schedule 20 favorites or one normal
+recording, the server may choose the favorites). If a favorite is
+very important, you can change this, even to values higher than 1000. 
+
+The url is the url were the recording should go (without
+suffix). Right now, only file: is supported. In the example
+'Tagesschau' has an url without variables. This means that each
+recording will go to the same file. The 'Tagesschau' is a news
+program, I don't need older once so they can override themself. The
+second favorite has an url with %(year), %(month) and %(day) in it
+(notice that this is no python expression, it is %(...) not
+%(...)s). It is a relative path with a directory. So the recordings
+all go into "TV_RECORD_DIR/Bravo Bernd" with the given filename. The
+last favorite has no url, so the default settings will be taken,
+similar to the old recordserver. 
+
+The channels tag is a list of channels. The last favorite has three
+channels. This is similar to ANY from the old server, only that you
+can specify every channel you like, ANY itself is not supported.
+
+Next is days, it is a list of days (0=sunday, 6=saturday) when the
+favorite should match. The first two favorites are daily once, the
+last only friday and saturday. 
+
+To set the start time you can use times. It is a list of start time
+ranges. The first favorite starts at 20:00, the second any time on the
+day, the last either on 20:15 or between 21:00 and 23:45.
+
+Padding defines start start and stop padding of the final recording.
+The server will try to record start seconds before the recording
+starts and stop seconds later. If this is not possible, the padding
+will be ignored. 
+
+Missing in the example is <once/>. When given, the favorite will only
+match once and than deleted. If you missed a movie, you can use that
+to record the movie when it's repeated some day.
+
+
+
+Using this favorites the server will create recordings on startup and
+when the database changes. Here a list of recordings than would result
+from the favorites:
+
+  <recording id="10">
+    <name>Tagesschau</name>
+    <channel>ard.de</channel>
+    <priority>50</priority>
+    <url>file:/home/dmeyer/video/tagesschau.suffix</url>
+    <status>scheduled</status>
+    <subtitle></subtitle>
+    <timer start="20041119.20:00" stop="20041119.20:15"/>
+    <padding start="60" stop="300"/>
+    <info/>
+  </recording>
+  <recording id="11">
+    <name>Genial daneben - Die Comedy-Arena</name>
+    <channel>sat1.de</channel>
+    <priority>50</priority>
+    <url></url>
+    <status>scheduled</status>
+    <subtitle></subtitle>
+    <timer start="20041119.20:15" stop="20041119.21:15"/>
+    <padding start="120" stop="300"/>
+    <info/>
+  </recording>
+  <recording id="12">
+    <name>Bravo Bernd</name>
+    <channel>kika.de</channel>
+    <priority>40</priority>
+    <url>file:Bravo Bernd/Bravo Bernd - 2004.11.19.suffix</url>
+    <status>scheduled</status>
+    <subtitle></subtitle>
+    <timer start="20041119.20:55" stop="20041119.21:00"/>
+    <padding start="60" stop="60"/>
+    <info/>
+  </recording>
+
+Most tags are similar to the favorites. New is the timer setting start
+and stop time of the recording. It is YearMonthDay.Hour:Minute. The
+info tag can contain additional data like a description used in the
+fxd file. The creation of fxd files and thumbnails is not implemented
+yet. The url contains a dummy suffix, the real suffix will be added
+later by the recorder since the server doesn't know now if it will be
+a mpeg from the dvb card or an avi from an analog one. 
+
+Let's now see what happens when this recordings are scheduled and you
+only have one tv card. The debug messages will show the following
+output: 
+
+found conflict:
+    5     ard.de "Tagesschau"                50 1119.20:00-20:15
+   14    sat1.de "Genial daneben - Die..."   50 1119.20:15-21:15
+   12    kika.de "Bravo Bernd"               40 1119.20:55-21:00
+solved by setting
+    5     ard.de "Tagesschau"                50 1119.20:00-20:15 dvb0
+   14    sat1.de "Genial daneben - Die..."   50 1119.20:15-21:15 dvb0
+   12    kika.de "Bravo Bernd"               40 1119.20:55-21:00 conflict
+
+The three recordings overlapp. You notice that 'Tagesschau' isn't a
+real conflict, because it stops at 20:25 and 'Genial daneben' starts
+at 20:15. But the conflict in the padding. When resolving the
+conflict, both get scheduled. Only 'Bravo Bernd' gets lost, it
+conflicts with 'Genial daneben'.
+
+If you have two cards, the scheduling will look like this:
+
+found conflict:
+   10     ard.de "Tagesschau"                50 1119.20:00-20:15
+   11    sat1.de "Genial daneben - Die..."   50 1119.20:15-21:15
+   12    kika.de "Bravo Bernd"               40 1119.20:55-21:00
+solved by setting
+   10     ard.de "Tagesschau"                50 1119.20:00-20:15 dvb0
+   11    sat1.de "Genial daneben - Die..."   50 1119.20:15-21:15 dvb1
+   12    kika.de "Bravo Bernd"               40 1119.20:55-21:00 dvb0
+
+You see that the server will choose diferent cards for the first two
+to make it possible to respect the padding. 
+
