@@ -6,6 +6,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/07/06 19:27:02  rshortt
+# Add a function to get the display name of a program's channel.  Using this
+# helps with recent xmltv changes.
+#
 # Revision 1.1  2003/05/11 22:40:49  rshortt
 # Helpers for tv and recording apps.
 #
@@ -36,14 +40,11 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import sys, string
+import sys, string, re
 import time, os, string
 
-# Various utilities
 import util
-
-# RegExp
-import re
+import epg_xmltv
 
 DEBUG = 0
 
@@ -106,4 +107,9 @@ def descfsize(size):
     else:
         size = size / 1073741824.0
         return "%.3f GB" % size
+
+
+def get_chan_displayname(prog):
+    guide = epg_xmltv.get_guide()
+    return guide.chan_dict.get(prog.channel_id).displayname
 
