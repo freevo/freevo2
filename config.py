@@ -115,6 +115,7 @@ CONF.tv = 'ntsc'
 CONF.chanlist = 'us-cable'
 CONF.xmame_SDL = ''
 CONF.jpegtran = ''
+CONF.mplayer = ''
 
 def read_config(filename, conf):
     if DEBUG: print 'Reading config file %s' % filename
@@ -144,6 +145,10 @@ for dir in cfgfilepath:
         if os.path.isfile(freevoconf):
             print 'Loading configure settings: %s' % freevoconf
             read_config(freevoconf, CONF)
+            if not CONF.mplayer:
+                print
+                print "please re-run configure, it has changed"
+                sys.exit(1)
 
         print 'Loading cfg: %s' % cfgfilename
         execfile(cfgfilename, globals(), locals())

@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2002/09/23 18:02:38  dischi
+# Added check if the new configure was started
+#
 # Revision 1.17  2002/09/23 16:53:33  dischi
 # check mplayer, nice, jpegtrans and xmame.SDL in configure
 #
@@ -214,7 +217,6 @@ def check_program(conf, name, variable, necessary):
             conf.__dict__[variable] = os.path.join(dir,name)
             break
     else:
-        conf.__dict__[variable] = ""
         if necessary:
             print "********************************************************************"
             print "ERROR: can't find %s" % name
