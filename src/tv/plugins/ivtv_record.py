@@ -10,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/01/09 19:25:21  outlyer
+# Since the recordserver has been stable for some time, we can remove some
+# of the original DEBUG messages...
+#
 # Revision 1.17  2003/12/31 16:09:32  rshortt
 # Use the VideoGroup for this channel to change to the correct input on the
 # v4l device.
@@ -113,7 +117,7 @@ class Recorder:
         self.thread.prog = rec_prog
         self.thread.mode_flag.set()
         
-        print('Recorder::Record: %s' % rec_prog)
+        if DEBUG: print('Recorder::Record: %s' % rec_prog)
         
         
     def Stop(self):
@@ -134,16 +138,16 @@ class Record_Thread(threading.Thread):
 
     def run(self):
         while 1:
-            print('Record_Thread::run: mode=%s' % self.mode)
+            if DEBUG: print('Record_Thread::run: mode=%s' % self.mode)
             if self.mode == 'idle':
                 self.mode_flag.wait()
                 self.mode_flag.clear()
                 
             elif self.mode == 'record':
-                print 'Record_Thread::run: started recording'
+                if DEBUG: print 'Record_Thread::run: started recording'
 
                 fc = FreevoChannels()
-                print 'CHAN: %s' % fc.getChannel()
+                if DEBUG: print 'CHAN: %s' % fc.getChannel()
 
                 tv_lock_file = config.FREEVO_CACHEDIR + '/record'
                 open(tv_lock_file, 'w').close()
@@ -159,10 +163,10 @@ class Record_Thread(threading.Thread):
                 v.init_settings()
                 vg = fc.getVideoGroup(self.prog.tunerid)
 
-                print 'Setting Input to %s' % vg.input_num
+                if DEBUG: print 'Setting Input to %s' % vg.input_num
                 v.setinput(vg.input_num)
 
-                print 'Setting Channel to %s' % self.prog.tunerid
+                if DEBUG: print 'Setting Channel to %s' % self.prog.tunerid
                 fc.chanSet(str(self.prog.tunerid))
 
                 if DEBUG: v.print_settings()
@@ -188,7 +192,7 @@ class Record_Thread(threading.Thread):
 
                 os.remove(tv_lock_file)
 
-                print('Record_Thread::run: finished recording')
+                if DEBUG: print('Record_Thread::run: finished recording')
 
                 self.mode = 'idle'
                 
