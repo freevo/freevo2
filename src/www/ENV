@@ -1,0 +1,2 @@
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+export PYTHONPATH=/opt/freevo_runtime3/lib/python2.2/site-packages:/opt/freevo_runtime3/lib/python2.2:/opt/freevo/src:/opt/freevo/src/tv:/opt/freevo/www
