@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/08/24 10:27:54  dischi
+# o Don't add [] or PL: if we have an icon for the text
+# o Only re-align tv shows if we align left
+#
 # Revision 1.3  2003/08/24 10:04:05  dischi
 # added font_h as variable for y and height settings
 #
@@ -259,17 +263,18 @@ class Listing_Area(Skin_Area):
             if not text:
                 text = "unknown"
 
-            if choice.type == 'playlist':
-                text = 'PL: %s' % text
-
-            if choice.type == 'dir' and choice.parent and \
-               choice.parent.type != 'mediamenu':
-                text = '[%s]' % text
-
             type_image = None
             if hasattr( val, 'image' ):
                 type_image = val.image
                 
+            if not choice.icon and not type_image:
+                if choice.type == 'playlist':
+                    text = 'PL: %s' % text
+
+                if choice.type == 'dir' and choice.parent and \
+                   choice.parent.type != 'mediamenu':
+                    text = '[%s]' % text
+
             if content.type == 'text':
                 x0 = item_x0
                 y0 = item_y0
@@ -293,7 +298,8 @@ class Listing_Area(Skin_Area):
 
                 # special handling for tv shows
                 if choice.type == 'video' and hasattr(choice,'tv_show') and \
-                   choice.tv_show and (val.align=='left' or val.align==''):
+                   choice.tv_show and (val.align=='left' or val.align=='') and \
+                   (content.align=='left' or content.align==''):
                     sn = choice.show_name
 
                     if last_tvs[0] == sn[0]:
