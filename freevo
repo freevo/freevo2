@@ -11,11 +11,6 @@ if ! test -a runapp ; then
     exit
 fi
 
-#
-# Only version 2 is supported now, it fixes bugs in loading modules, stringsizes
-# etc...
-#
-
 # Required runtime version
 RUNTIME_VERSION=3
 
