@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/12/10 19:47:12  dischi
+# remove unneeded imports
+#
 # Revision 1.6  2003/11/23 16:57:36  dischi
 # move xml help stuff to new fxdparser
 #
@@ -45,10 +48,9 @@
 import glob
 import os, sys
 import string, re
-import Image # PIL
 import copy
 import htmlentitydefs
-from xml.utils import qp_xml
+
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
