@@ -367,7 +367,6 @@ class Instance(mbus.Guides):
         addr['app'] = 'freevo'
 
         # init the mbus interface
-        print '************ create mbus entity', addr
         mbus.Guides.__init__( self, addr )
 
         # set callbacks
@@ -433,9 +432,8 @@ class Instance(mbus.Guides):
         """
         Send an event to the given addr.
         """
-        self.send(addr, 'home-theatre.' + cmdname, _build_args(cmdargs))
-        # self.sendReliable(addr, 'home-theatre.' + cmdname,
-        #                   _build_args(cmdargs))
+        self.sendReliable(addr, 'home-theatre.' + cmdname,
+                          _build_args(cmdargs))
 
         
     def new_entity(self, maddr):
