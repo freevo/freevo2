@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2003-10-04 11:44+0200\n"
+"POT-Creation-Date: 2003-10-04 17:22+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: den_rdc <den_rdc@users.sourceforge.net>\n"
 "Language-Team: Dutch <LL@li.org>\n"
@@ -127,7 +127,7 @@ msgstr "Verken deze folder"
 
 #: directory.py:401
 msgid "Enter Password"
-msgstr "Wechtwoord a.u.b"
+msgstr "Wachtwoord a.u.b"
 
 #: directory.py:426
 msgid "Password incorrect"
@@ -238,7 +238,7 @@ msgstr "Commando mislukt"
 
 #: plugins/commands.py:296
 msgid "No Commands found"
-msgstr "Genn commandos gevonden"
+msgstr "Geen commandos gevonden"
 
 #: plugins/commands.py:297 plugins/commands.py:323
 msgid "Commands"
