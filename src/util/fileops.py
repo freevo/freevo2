@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/01/05 17:19:10  dischi
+# change some vfs to os.path
+#
 # Revision 1.11  2004/01/03 17:41:01  dischi
 # add helper to get all subdirs recursive
 #
@@ -100,8 +103,8 @@ def getdirnames(dirname):
     """
 
     try:
-        dirnames = [ vfs.join(dirname, dname) for dname in os.listdir(dirname)
-                     if vfs.isdir(vfs.join(dirname, dname)) ]
+        dirnames = [ os.path.join(dirname, dname) for dname in os.listdir(dirname)
+                     if os.path.isdir(os.path.join(dirname, dname)) ]
     except OSError:
         return []
     
@@ -174,8 +177,8 @@ def rmrf_helper(result, dirname, names):
     help function for rm -rf
     """
     for name in names:
-        fullpath = vfs.join(dirname, name)
-        if vfs.isfile(fullpath):
+        fullpath = os.path.join(dirname, name)
+        if os.path.isfile(fullpath):
             result[0].append(fullpath)
     result[1] = [dirname] + result[1]
     return result
@@ -196,8 +199,8 @@ def rmrf(top=None):
         for d in files[1]:
             try:
                 os.rmdir(d)
-            except IOError:
-                pass
+            except (IOError, OSError), e:
+                print e
 
 
 #
