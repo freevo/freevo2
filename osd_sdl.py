@@ -351,6 +351,10 @@ class OSD:
 
 
     def drawbox(self, x0, y0, x1, y1, width=None, color=None, fill=0):
+
+        # Make sure the order is top left, bottom right
+        x0, x1 = min(x0, x1), max(x0, x1)
+        y0, y1 = min(y0, y1), max(y0, y1)
         
         if color == None:
             color = self.default_fg_color
