@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/07/07 01:59:06  rshortt
+# Updating for current ivtv CVS, added bitrate_mode and use constant bitrate
+# by default.
+#
 # Revision 1.1  2003/06/01 16:05:40  rshortt
 # Further suport for ivtv based cards.  Now you can set the bitrate to encode at or the stream type to use.
 #
@@ -54,7 +58,7 @@ IVTV_STREAM_PES_A  = 7
 IVTV_STREAM_DVD    = 10
 
 # structs
-CODEC_ST = '14I'
+CODEC_ST = '15I'
 
 
 class IVTV(v4l2.Videodev):
@@ -66,8 +70,9 @@ class IVTV(v4l2.Videodev):
     def setCodecInfo(self, codec):
         val = struct.pack( CODEC_ST, 
                            codec.aspect,
-                           codec.audio,
+                           codec.audio_bitmask,
                            codec.bframes,
+                           codec.bitrate_mode,
                            codec.bitrate,
                            codec.bitrate_peak,
                            codec.dnr_mode,
@@ -83,7 +88,7 @@ class IVTV(v4l2.Videodev):
 
 
     def getCodecInfo(self):
-        val = struct.pack( CODEC_ST, 0,0,0,0,0,0,0,0,0,0,0,0,0,0 )
+        val = struct.pack( CODEC_ST, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 )
         r = fcntl.ioctl(self.device, IVTV_IOC_G_CODEC, val)
         codec_list = struct.unpack(CODEC_ST, r)
         return IVTVCodec(codec_list)
@@ -91,23 +96,20 @@ class IVTV(v4l2.Videodev):
 
 class IVTVCodec:
     def __init__(self, args):
-        self.aspect       = args[0]
-        self.audio        = args[1]
-        self.bframes      = args[2]
-        self.bitrate      = args[3]
-        self.bitrate_peak = args[4]
-        self.dnr_mode     = args[5]
-        self.dnr_spatial  = args[6]
-        self.dnr_temporal = args[7]
-        self.dnr_type     = args[8]
-        self.framerate    = args[9]
-        self.framespergop = args[10]
-        self.gop_closure  = args[11]
-        self.pulldown     = args[12]
-        self.stream_type  = args[13]
-
-
-
-
+        self.aspect        = args[0]
+        self.audio_bitmask = args[1]
+        self.bframes       = args[2]
+        self.bitrate_mode  = args[3]
+        self.bitrate       = args[4]
+        self.bitrate_peak  = args[5]
+        self.dnr_mode      = args[6]
+        self.dnr_spatial   = args[7]
+        self.dnr_temporal  = args[8]
+        self.dnr_type      = args[9]
+        self.framerate     = args[10]
+        self.framespergop  = args[11]
+        self.gop_closure   = args[12]
+        self.pulldown      = args[13]
+        self.stream_type   = args[14]
 
 

@@ -10,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/07/07 01:59:06  rshortt
+# Updating for current ivtv CVS, added bitrate_mode and use constant bitrate
+# by default.
+#
 # Revision 1.5  2003/06/08 17:01:50  rshortt
 # A workaround for a strange audio problem and print more codec info.
 #
@@ -181,9 +185,9 @@ class Record_Thread(threading.Thread):
 
                 codec = v.getCodecInfo()
 
+                codec.bitrate_mode = 1
                 codec.bitrate = config.IVTV_BITRATE
                 codec.bitrate_peak = config.IVTV_BITRATE
-                # codec.bitrate_peak = config.IVTV_BITRATE + 1
                 codec.stream_type = config.IVTV_STREAM_TYPE
                 codec.gop_closure = 1
 
@@ -191,8 +195,9 @@ class Record_Thread(threading.Thread):
                 codec = v.getCodecInfo()
 
                 print 'CODEC::aspect: %s' % codec.aspect
-                print 'CODEC::audio: %s' % codec.audio
+                print 'CODEC::audio_bitmask: %s' % codec.audio_bitmask
                 print 'CODEC::bfrmes: %s' % codec.bframes
+                print 'CODEC::bitrate_mode: %s' % codec.bitrate_mode
                 print 'CODEC::bitrate: %s' % codec.bitrate
                 print 'CODEC::bitrate_peak: %s' % codec.bitrate_peak
                 print 'CODEC::dnr_mode: %s' % codec.dnr_mode
