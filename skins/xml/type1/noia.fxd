@@ -34,9 +34,11 @@
       <shadow x="1" y="1" color="0x000000" visible="yes"/>
     </font>
 
-    <color label="widget background" value="0xffdc71"/>
+    <color label="widget background" value="0xefb744"/>
     <font label="widget" name="VeraBd.ttf" size="16" color="0x000000"/>
     <color label="widget text" value="0x000000"/>
+    <color label="widget item background" value="0xefb744"/>
+    <color label="widget selected background" value="0xfffe8d"/>
 
     <font label="default" name="Vera" size="18" color="0xffffff"/>
 
