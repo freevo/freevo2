@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/10/28 16:08:14  mikeruelle
+# convert to new thread system
+#
 # Revision 1.21  2003/10/12 09:54:27  dischi
 # BSD patches from Lars
 #
@@ -95,12 +98,10 @@ class MPlayer:
     __igainvol = 0
     
     def __init__(self):
-        self.thread = MPlayer_Thread()
-        self.thread.setDaemon(1)
-        self.thread.start()
+        self.thread = childapp.ChildThread()
+        self.thread.stop_osd = True
         self.tuner_chidx = 0    # Current channel, index into config.TV_CHANNELS
         self.app_mode = 'tv'
-
 
     def TunerSetChannel(self, tuner_channel):
         for pos in range(len(config.TV_CHANNELS)):
@@ -238,9 +239,7 @@ class MPlayer:
             mixer.setPcmVolume(0)
 
         # Start up the TV task
-        self.thread.mode = 'play'
-        self.thread.command = command
-        self.thread.mode_flag.set()
+        self.thread.start(MPlayerApp, (command))        
         
         self.prev_app = rc.app()
         rc.app(self)
@@ -273,15 +272,12 @@ class MPlayer:
             mixer.setMicVolume(0)
             mixer.setIgainVolume(0) # Input on emu10k cards.
 
-        self.thread.mode = 'stop'
-        self.thread.mode_flag.set()
+        self.thread.stop('quit\n')
 
         rc.app(self.prev_app)
         if osd.focused_app():
             osd.focused_app().show()
 
-        while self.thread.mode == 'stop':
-            time.sleep(0.05)
         print 'stopped %s app' % self.mode
         if os.path.exists('/tmp/freevo.wid'): os.unlink('/tmp/freevo.wid')
 
@@ -384,54 +380,3 @@ class MPlayerApp(childapp.ChildApp):
                 self.log_stderr.write(line + '\n')
             except ValueError:
                 pass # File closed
-
-
-# ======================================================================
-class MPlayer_Thread(threading.Thread):
-
-    def __init__(self):
-        threading.Thread.__init__(self)
-        
-        self.mode      = 'idle'
-        self.mode_flag = threading.Event()
-        self.command   = ''
-        self.app       = None
-        self.audioinfo = None              # Added to enable update of GUI
-
-    def run(self):
-        while 1:
-            if self.mode == 'idle':
-                self.mode_flag.wait()
-                self.mode_flag.clear()
-                
-            elif self.mode == 'play':
-                if config.STOP_OSD_WHEN_PLAYING:
-                    osd.stopdisplay()			
-
-                if DEBUG:
-                    print 'MPlayer_Thread.run(): Started, cmd=%s' % self.command
-                    
-                self.app = MPlayerApp(self.command)
-                
-                while self.mode == 'play' and self.app.isAlive():
-                    if self.audioinfo: 
-                        if not self.audioinfo.pause:
-                            self.audioinfo.draw()        
-                    time.sleep(0.1)
-
-                self.app.kill()
-
-                # Ok, we can use the OSD again.
-                if config.STOP_OSD_WHEN_PLAYING:
-                    osd.restartdisplay()
-                    osd.update()
-
-                if self.mode == 'play':
-                    if DEBUG: print 'posting play_end'
-                    rc.post_event(em.PLAY_END)
-
-                self.mode = 'idle'
-                
-            else:
-                self.mode = 'idle'
-
