@@ -220,7 +220,7 @@ o Upload the tar file to Sourceforge
 o Make a new release
   o Goto http://sourceforge.net/project/admin/qrs.php?package_id=&group_id=46652 
   o Select "Package ID" = Freevo
-  o Type in "Release Name", e.g. 1.2.0
+  o Type in "Release Name", e.g. 1.2.0 for Freevo, and "Rev 2" for runtime/apps
   o Select freevo-XXX.tar.gz in the "File Name" menu (it is the file uploaded using FTP)
   o "File Type" = "Source .gz"
   o "Processor Type" = "i386"
