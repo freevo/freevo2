@@ -73,6 +73,13 @@ def get_guide():
             if epg_ver != epg_types.EPG_VERSION:
                 print (('EPG version number %s is stale (new is %s), must ' +
                         'be reloaded') % (epg_ver, epg_types.EPG_VERSION))
+
+            elif cached_guide.timestamp != os.path.getmtime(config.XMLTV_FILE):
+                # Hmmm, weird, there is a pickled file newer than the TV.xml
+                # file, but the timestamp in it does not match the TV.xml
+                # timestamp. We need to reload!
+                print 'EPG: Pickled file timestamp mismatch, reloading!'
+                
             else:
                 if DEBUG:
                     print 'XMLTV, got cached guide (version %s).' % epg_ver

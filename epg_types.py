@@ -13,11 +13,17 @@ import config
 # changes are made to the file format.
 EPG_VERSION = 2
 
-# Set to 1 for debug output
-DEBUG = config.DEBUG
-
 TRUE = 1
 FALSE = 0
+
+
+# Cache variables for last GetPrograms()
+cache_last_start = None
+cache_last_stop = None
+cache_last_chanids = None
+cache_last_result = None
+cache_last_time = 0
+
 
 
 class TvProgram:
@@ -83,7 +89,7 @@ class TvGuide:
         self.chan_list = []   # Channels, ordered
         self.EPG_VERSION = EPG_VERSION
 
-        
+
     def AddChannel(self, channel):
         if not self.chan_dict.has_key(channel.id):
             # Add the channel to both the dictionary and the list. This works
@@ -113,6 +119,17 @@ class TvGuide:
         if stop == None:
             stop = 2147483647   # Year 2038
 
+        # Return a cached version?
+        global cache_last_start, cache_last_stop, cache_last_chanids
+        global cache_last_time, cache_last_result
+        if (cache_last_start == start and cache_last_stop == stop and
+            cache_last_chanids == chanids and
+            time.time() < cache_last_time):
+            if config.DEBUG > 1:
+                a = cache_last_time - time.time()
+                print 'epg: Returning cached results, valid for %1.1f secs.' % a
+            return cache_last_result[:]  # Return a copy
+        
         channels = []
         for chan in self.chan_list:
             if chanids and (not chan.id in chanids):
@@ -131,6 +148,18 @@ class TvGuide:
 
             channels.append(c)
 
+        # Update cache variables
+        cache_last_start = start
+        cache_last_stop = stop
+        if chanids:
+            cache_last_chanids = chanids[:]
+        else:
+            cache_last_chanids = None
+        cache_last_timeout = time.time() + 20
+        cache_last_result = channels[:] # Make a copy in case the caller modifies it
+        if config.DEBUG > 1:
+            print 'epg: Returning new results'
+            
         return channels
             
             
