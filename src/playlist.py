@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.53  2004/01/06 19:17:28  dischi
+# autostart ssr slideshows and fix display_type bug
+#
 # Revision 1.52  2004/01/04 10:20:05  dischi
 # fix missing DIRECTORY_USE_MEDIAID_TAG_NAMES for all kinds of parents
 #
@@ -234,6 +237,7 @@ class Playlist(Item):
                             i.duration = int(ss_delay[0])
                             self.playlist.append(i)
                             break
+        self.autoplay = True
 
 
     def build(self):
@@ -529,9 +533,14 @@ class Mimetype(plugin.MimetypePlugin):
         return a list of items based on the files
         """
         items = []
-
+        if parent and hasattr(parent, 'display_type'):
+            display_type = parent.display_type
+        else:
+            display_type = None
+            
         for filename in util.find_matches(files, self.suffix()):
-            items.append(Playlist(playlist=filename, parent=parent, build=True))
+            items.append(Playlist(playlist=filename, parent=parent,
+                                  display_type=display_type, build=True))
             files.remove(filename)
 
         return items
