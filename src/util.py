@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.48  2003/09/03 21:02:46  dischi
+# make sure we can save the data
+#
 # Revision 1.47  2003/09/01 14:01:20  outlyer
 # Added automatic XMLTV channel list code; the idea is that you can avoid
 # editing the TV_CHANNELS thing yourself, if your xmltv grabber outputs
@@ -505,9 +508,14 @@ def read_pickle(file):
         return None
 
 def save_pickle(data, file):
-    f = open(file, 'w')
-    cPickle.dump(data, f, PICKLE_PROTOCOL)
-    f.close()
+    try:
+        if os.path.isfile(file):
+            os.unlink(file)
+        f = open(file, 'w')
+        cPickle.dump(data, f, PICKLE_PROTOCOL)
+        f.close()
+    except IOError:
+        print 'unable to save to cachefile %s' % file
 
 
 def readfile(filename):
@@ -592,8 +600,11 @@ def getdatadir(item):
         return os.path.join(config.MOVIE_DATA_DIR, directory)
 
 def touch(file):
-    fd = open(file,'w+')
-    fd.close()
+    try:
+        fd = open(file,'w+')
+        fd.close()
+    except IOError:
+        pass
     return 0
 
 def rmrf(top=None):
@@ -676,8 +687,6 @@ def sortchannels(list, key):
 def getXMLTVChannels(file):
     import xmltv
     import sys,os
-    import cPickle as pickle
-
 
     path = config.FREEVO_CACHEDIR
     pfile = 'xmltv_channels.pickle'
@@ -707,8 +716,7 @@ def getXMLTVChannels(file):
 
         chanlist += [(id,display_name,int(tunerid))]
 
-    pickle.dump(chanlist, open(pname,'w'),PICKLE_PROTOCOL)
-
+    save_pickle(chanlist, pname)
     return chanlist
          
 
