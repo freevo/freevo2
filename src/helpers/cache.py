@@ -11,14 +11,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2004/02/27 20:27:45  dischi
+# increase cache version
+#
 # Revision 1.26  2004/02/27 20:15:02  dischi
 # more unicode fixes
 #
 # Revision 1.25  2004/02/14 19:31:31  dischi
 # also cache playlist dir
-#
-# Revision 1.24  2004/02/13 17:34:18  dischi
-# small fix
 #
 # Revision 1.23  2004/02/12 12:22:03  dischi
 # update cache to new directory metainfo
@@ -31,41 +31,6 @@
 # o playlist metainfo
 # o directory metainfo (e.g. number of items)
 # cleanup
-#
-# Revision 1.20  2004/02/07 20:46:21  dischi
-# more old files to remove
-#
-# Revision 1.19  2004/02/07 13:08:41  dischi
-# also remove covers in vfs if directory is gone
-#
-# Revision 1.18  2004/02/05 20:39:11  dischi
-# check mmpython cache version
-#
-# Revision 1.17  2004/02/01 17:50:43  dischi
-# fix, it deleted all infos on caching :-)
-#
-# Revision 1.16  2004/01/19 20:25:53  dischi
-# sync metainfo before stopping
-#
-# Revision 1.15  2004/01/18 16:48:29  dischi
-# expand caching (including extendedadd.py)
-#
-# Revision 1.14  2004/01/17 20:30:18  dischi
-# use new metainfo
-#
-# Revision 1.13  2004/01/04 17:20:44  dischi
-# support for generating video thumbnails
-#
-# Revision 1.12  2004/01/03 17:42:03  dischi
-# o OVERLAY_DIR is now used everytime
-# o added support to delete old cachefile in the overlay dir
-# o remove unneeded subdirs in the overlay dir
-#
-# Revision 1.11  2003/12/31 16:43:28  dischi
-# also cache thumbnails for config.OVERLAY_DIR_STORE_THUMBNAILS:
-#
-# Revision 1.10  2003/12/30 15:36:42  dischi
-# support OVERLAY_DIR_STORE_MMPYTHON_DATA
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -107,7 +72,7 @@ import fxditem
 
 # use this number to keep track of changes in
 # this helper. Check this against util/mediainfo
-VERSION = 2
+VERSION = 3
 
 def delete_old_files_1():
     """
