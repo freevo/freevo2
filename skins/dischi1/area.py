@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2003/03/23 19:44:04  dischi
+# added debug
+#
 # Revision 1.32  2003/03/22 22:26:46  dischi
 # added some exception handling
 #
@@ -584,8 +587,14 @@ class Skin_Area:
             if len(area.style) > self.display_style:
                 area = area.style[self.display_style]
             else:
-                area = area.style[0]
-
+                try:
+                    area = area.style[0]
+                except IndexError:
+                    print 'index error for %s %s' % (display_style, widget_type)
+                    print area
+                    print area.style
+                    raise
+                
             # get image or text view
             # FIXME: select text if necessary
             if area[0]:
