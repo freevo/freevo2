@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/12/01 20:01:21  dischi
+# fix crash for missing infos
+#
 # Revision 1.12  2003/11/24 19:21:04  dischi
 # do not depend on xml_parser, the item has all infos in it
 #
@@ -70,13 +73,9 @@ class PluginInterface(plugin.ItemPlugin):
         """
         show info for this item
         """
-        if not self.item.xml_file:
-            box = AlertBox(text=_('There is no IMDB information for this file.'))
-            box.show()
-            return
-
-        info = self.item
-
-        box = AlertBox(icon=info.image, width=550, height=400, text=_('%s\n \n \n  %s\n \n \n----\n Year: %s\n Genre: %s\n Rating: %s\n Runtime: %s') % (info.name,info.info['plot'],info.info['year'],info.info['genre'],info.info['rating'],info.info['length']))
-        box.show()
-
+        text='%s\n \n \n  %s\n \n \n----\n' % (self.item.name, self.item.getattr('plot'))
+        text += _(' Year: %s\n Genre: %s\n Rating: %s\n Runtime: %s') % \
+                (self.item.getattr('year'), self.item.getattr('genre'),
+                 self.item.getattr('rating'),self.item.getattr('length'))
+        
+        AlertBox(icon=self.item.image, width=550, height=400, text=text).show()
