@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2004/02/23 17:56:39  mikeruelle
+# add stop_osd=1 for vcr viewing to work. make vcr viewing work. add some commented out ch+/ch- video group handling. it is broken when you use numeric channel changing.
+#
 # Revision 1.31  2004/02/20 17:41:36  mikeruelle
 # initial videogroups support.
 #
@@ -464,12 +467,13 @@ class TVTime:
             tuner_channel = self.fc.getChannel()
         vg = self.current_vg = self.fc.getVideoGroup(tuner_channel)
 
+        if not vg.group_type == 'normal':
+            print 'Tvtime only supports normal. "%s" is not implemented' % vg.group_type
+            return
 
-#        if mode == 'tv' or mode == 'vcr':
-        if mode == 'tv':
+        if mode == 'tv' or mode == 'vcr':
             
             w, h = config.TV_VIEW_SIZE
-            #cf_norm, cf_input, cf_clist, cf_device = config.TV_SETTINGS.split()
 	    cf_norm = vg.tuner_norm
 	    cf_input = vg.input_num
 	    cf_device = vg.vdev
@@ -483,6 +487,11 @@ class TVTime:
                 outputplugin = 'mga'
             if config.CONF.display == 'dfbmga':
                 outputplugin = 'directfb'
+
+            if mode == 'vcr':
+	        cf_input = '1'
+		if hasattr(config, "TV_VCR_INPUT_NUM") and config.TV_VCR_INPUT_NUM:
+		    cf_input = config.TV_VCR_INPUT_NUM
 
             command = '%s -D %s -k -I %s -n %s -d %s -f %s -c %s -i %s' % (config.TVTIME_CMD,
                                                                    outputplugin,
@@ -498,10 +507,6 @@ class TVTime:
             else:
                 command += ' -M'
 
-#            if mode == 'vcr':
-#	        command += ' -i 1'
-#            else:
-#	        command += ' -i 0'
 
         else:
             print 'Mode "%s" is not implemented' % mode  # BUG ui.message()
@@ -545,9 +550,9 @@ class TVTime:
         if DEBUG: print '%s: started %s app' % (time.time(), self.mode)
         
         
-    def Stop(self):
+    def Stop(self, channel_change=0):
         mixer = plugin.getbyname('MIXER')
-        if mixer:
+        if mixer and not channel_change:
             mixer.setLineinVolume(0)
             mixer.setMicVolume(0)
             mixer.setIgainVolume(0) # Input on emu10k cards.
@@ -565,7 +570,22 @@ class TVTime:
         elif event == em.TV_CHANNEL_UP or event == em.TV_CHANNEL_DOWN:
             if self.mode == 'vcr':
                 return
-            
+             
+	    # XXX hazardous to your health. don't use tvtime with anything
+	    # other than one normal video_group.
+	    # we lose track of the channel index at some points and
+	    # chaos ensues
+            #if event == em.TV_CHANNEL_UP:
+            #    nextchan = self.fc.getNextChannel()
+            #elif event == em.TV_CHANNEL_DOWN:
+            #    nextchan = self.fc.getPrevChannel()
+            #nextvg = self.fc.getVideoGroup(nextchan)
+                                                                                
+            #if self.current_vg != nextvg:
+            #    self.Stop(channel_change=1)
+            #    self.Play('tv', nextchan)
+            #    return TRUE
+
             # Go to the prev/next channel in the list
             if event == em.TV_CHANNEL_UP:
                 self.TunerPrevChannel()
@@ -573,6 +593,9 @@ class TVTime:
             else:
                 self.TunerNextChannel()
                 self.app.setchannel('DOWN')
+	    
+	    #self.fc.chanSet(nextchan, app=self.app)
+	    #self.current_vg = self.fc.getVideoGroup(self.fc.getChannel())
 
             return True
             
@@ -581,7 +604,7 @@ class TVTime:
             return True
         
         elif event == em.OSD_MESSAGE:
-	    #this doesn't work
+	    # XXX this doesn't work
             #self.app.write('display_message %s\n' % event.arg)
 	    #this does
             os.system('tvtime-command display_message \'%s\'' % event.arg)
@@ -623,7 +646,7 @@ class TVTimeApp(childapp.ChildApp2):
             else:
                 print 'TVTime logging to "%s" and "%s"' % (fname_out, fname_err)
 
-        childapp.ChildApp2.__init__(self, app)
+        childapp.ChildApp2.__init__(self, app, stop_osd=1)
         
 
     def kill(self):
