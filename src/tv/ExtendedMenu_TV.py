@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/02/27 03:40:40  outlyer
+# Turns out I needed to add the sub-title thing to each of the different
+# direction events or it would only show up when I was going left.
+#
 # Revision 1.3  2003/02/27 03:29:08  outlyer
 # Show the episode title in the description of a TV show if it's available.
 #
@@ -361,8 +365,11 @@ class ExtendedMenuListing_TV(ExtendedMenu.ExtendedMenuListing):
                 prg = programs[i-1]
             else:
                 prg = programs[i]
-
-            to_info = (prg.title, prg.desc)
+            if prg.sub_title:
+                procdesc = '"' + prg.sub_title + '"\n' + prg.desc
+            else:
+                procdesc = prg.desc
+            to_info = (prg.title, procdesc)
         else:
             prg = epg_types.TvProgram()
             prg.channel_id = channel.id            
@@ -420,7 +427,12 @@ class ExtendedMenuListing_TV(ExtendedMenu.ExtendedMenuListing):
 
                 
             prg = programs[i]
-            to_info = (prg.title, prg.desc)
+            if prg.sub_title:
+                procdesc = '"' + prg.sub_title + '"\n' + prg.desc
+            else:
+                procdesc = prg.desc
+            
+            to_info = (prg.title, procdesc)
         else:
             prg = epg_types.TvProgram()
             prg.channel_id = channel.id            
@@ -481,7 +493,12 @@ class ExtendedMenuListing_TV(ExtendedMenu.ExtendedMenuListing):
                     break
 
             prg = programs[i]
-            to_info = (prg.title, prg.desc)
+            if prg.sub_title:
+                procdesc = '"' + prg.sub_title + '"\n' + prg.desc
+            else:
+                procdesc = prg.desc
+            
+            to_info = (prg.title, procdesc)
         else:
             prg = epg_types.TvProgram()
             prg.channel_id = channel.id            
@@ -532,7 +549,12 @@ class ExtendedMenuListing_TV(ExtendedMenu.ExtendedMenuListing):
 
                 
             prg = programs[i]
-            to_info = (prg.title, prg.desc)
+            if prg.sub_title:
+                procdesc = '"' + prg.sub_title + '"\n' + prg.desc
+            else:
+                procdesc = prg.desc
+            
+            to_info = (prg.title, procdesc)
         else:
             prg = epg_types.TvProgram()
             prg.channel_id = channel.id            
@@ -595,7 +617,12 @@ class ExtendedMenuListing_TV(ExtendedMenu.ExtendedMenuListing):
 
                 
             prg = programs[i]
-            to_info = (prg.title, prg.desc)
+            if prg.sub_title:
+                procdesc = '"' + prg.sub_title + '"\n' + prg.desc
+            else:
+                procdesc = prg.desc
+            
+            to_info = (prg.title, procdesc)
         else:
             prg = epg_types.TvProgram()
             prg.channel_id = channel.id            
