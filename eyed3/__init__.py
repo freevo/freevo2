@@ -103,7 +103,6 @@ class TagHeader:
          raise TagException("ID3 v" + str(major) + "." + str(minor) +\
                             " is not supported.");
 
-
       # The first 3 bits of the next byte are flags.
       (self.unsync,
        self.extended,
@@ -381,8 +380,12 @@ class Tag:
 
       TRACE_MSG("Linking File: " + self.fileName);
       self.frames.clear();
-      if self.__loadV2Tag(f) or self.__loadV1Tag(f):
-         return 1;
+      try: 
+          if self.__loadV2Tag(f):
+              return 1
+      except TagException:
+          if self.__loadV1Tag(f):
+	      return 1
       return 0;
 
    #######################################################################
@@ -470,7 +473,7 @@ class Tag:
          # Header is definitely there so at least one frame *must* follow.
          self.paddingSize = self.frames.parse(fp, self.header);
       except TagException:
-         f.close();
+         #f.close();
          raise;
 
       if closeFile:
