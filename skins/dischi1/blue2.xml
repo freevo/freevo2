@@ -16,6 +16,7 @@
     <menu type="video">
       <style image="video menu with info"/>
       <style text="normal text style"/>
+      <style image="video details"/>
     </menu>
 
     <menu type="image">
@@ -61,6 +62,22 @@
       <info y="480" height="110"/>
     </menuset>
 
+    <!-- Now the "video details" (DISPLAY 3 for video)-->
+    <menuset label="video details">
+      <screen layout="screen0" x="0" y="0" width="800" height="600"/>
+      <title layout="title1" x="10" y="100" width="780" height="60"/>
+
+      <listing layout="video list" x="500" y="430" width="290" height="160">
+	<image label="uparrow" x="755" y="150" width="32" height="32"  
+	  filename="../icons/AquaFusion/up.png"/>
+	<image label="downarrow" x="755" y="378" width="32" height="32"
+	  filename="../icons/AquaFusion/down.png"/>
+      </listing>
+
+      <view layout="view0" x="545" y="150" width="200" height="300"/>
+      <info layout="video info" x="10" y="160" width="480" height="490"/>
+    </menuset>
+
     <layout label="title1">
       <content type="short item" font="title small" align="left"/>
     </layout>
@@ -87,6 +104,24 @@
 	  Date:     \t@date@
 
 	  @description@
+	</item>
+	<item type="dir">
+	  Directory: \t@name@
+	</item>
+      </content>
+    </layout>
+
+    <!-- info area -->
+    <layout label="video info">
+      <content x="0" y="0" type="text" spacing="20" font="default">
+	<item type="video">
+	  @tagline@
+
+	  @plot@
+
+	  Genre:   \t@genre@
+	  Rating:  \t@rating@
+	  Runtime: \t@runtime@
 	</item>
 	<item type="dir">
 	  Directory: \t@name@

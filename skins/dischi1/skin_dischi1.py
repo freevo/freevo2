@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2003/03/22 22:21:41  dischi
+# DISPLAY can now toggle between more than two styles. The video menu
+# has a 3rd style, all infos. Press DISPLAY two times on a video item
+# (should be a fxd file to see everything)
+#
 # Revision 1.39  2003/03/22 20:08:30  dischi
 # Lots of changes:
 # o blue2_big and blue2_small are gone, it's only blue2 now
@@ -346,7 +351,20 @@ class Skin:
         """
         Toggle display style
         """
-        self.display_style = not self.display_style
+        if menu and menu.skin_settings:
+            settings = menu.skin_settings
+        else:
+            settings = self.settings
+
+        # get the correct <menu>
+        if settings.menu.has_key(menu.item_types):
+            area = settings.menu[menu.item_types]
+        else:
+            area = settings.menu['default']
+
+        if self.display_style >=  len(area.style):
+            self.display_style = 0
+        self.display_style = (self.display_style + 1) % len(area.style)
         return 1
 
 

@@ -1,7 +1,5 @@
 add indicators for tv items
 
-DISPLAY should toggle between more than two styles
-
 fallback to text view if all images are the same
 
 Some tag names are the same as in the movie definitions. I will
