@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/10/18 09:33:34  dischi
+# fix some parent handling and remove the PopupBox
+#
 # Revision 1.17  2003/10/14 17:06:02  dischi
 # add datetimeformat patch from patch from Eirik Meland
 #
@@ -112,8 +115,9 @@ class ProgramDisplay(PopupBox):
         else:
             self.context = 'guide'
 
-        PopupBox.__init__(self, text=self.prog.title, left=left, top=top, width=width, 
-                          height=height, vertical_expansion=vertical_expansion)
+        PopupBox.__init__(self, parent=parent, text=self.prog.title, left=left,
+                          top=top, width=width, height=height,
+                          vertical_expansion=vertical_expansion)
 
         if not height:
             self.height  = self.osd.height - (2 * config.OVERSCAN_Y) - 100
@@ -187,7 +191,7 @@ class ProgramDisplay(PopupBox):
             self.height = self.layout_manager.needed_space + 2 * self.v_margin
         if not top:
             self.top  = self.osd.height/2 - self.height/2
-
+        print self.parent
 
     def eventhandler(self, event, menuw=None):
         if DEBUG: print 'ProgramDisplay: event = %s' % event
@@ -240,12 +244,15 @@ class ProgramDisplay(PopupBox):
             elif self.b0.selected:
                 (result, msg) = record_client.removeScheduledRecording(self.prog)
                 if result:
-                    pop = PopupBox(parent=self, 
-                                   text='"%s" has been removed' % \
-                                   self.prog.title)
-                    pop.show()
-                    time.sleep(2)
-                    pop.destroy()
+                    # This is confusing, I wanted to click but it's no
+                    # Alertbox
+                    #
+                    # pop = PopupBox(parent=self, 
+                    #                text='"%s" has been removed' % \
+                    #                self.prog.title)
+                    # pop.show()
+                    # time.sleep(2)
+                    # pop.destroy()
 
                     searcher = None
  
@@ -255,9 +262,10 @@ class ProgramDisplay(PopupBox):
                                 searcher = child
                                 break
 
-                    self.destroy()
                     if searcher:
                         searcher.refreshList()
+                    self.destroy()
+                    if searcher:
                         searcher.draw()
                         self.osd.update()
 
@@ -309,7 +317,6 @@ class ScheduledRecordings(PopupBox):
             errormsg = Label('Record server unavailable: %s' % msg,
                              self, Align.CENTER)
             return
-
 
         self.internal_h_align = Align.CENTER
 
