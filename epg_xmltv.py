@@ -82,8 +82,11 @@ def get_guide():
             # Need to reload the guide
             if DEBUG:
                 print 'XMLTV, trying to read raw file (%s)' % config.XMLTV_FILE
-                
-            cached_guide = load_guide()
+            try:    
+                cached_guide = load_guide()
+	    except:
+	    	# Don't violently crash on a incomplete or empty TV.xml please.
+	    	cached_guide = None
 
             # Dump a pickled version for later reads
             pickle.dump(cached_guide, open(pname, 'w'))

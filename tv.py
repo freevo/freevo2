@@ -144,7 +144,7 @@ def main_menu(arg, menuw):
         start_tv(None, ('record', None))
         return
 
-    rc.app = eventhandler
+    #rc.app = eventhandler
 
     skin.PopupBox('Preparing the program guide') 
 
@@ -154,6 +154,13 @@ def main_menu(arg, menuw):
     stop_time = get_start_time() + 2 * 60 * 60
 
     channels = guide.GetPrograms(start=start_time+1, stop=stop_time-1)
+
+    if not channels:
+        menuwidget.refresh()
+        skin.PopupBox('TV Guide is corrupt!')
+	time.sleep(3.0)
+	menuwidget.refresh()
+	return
 
     prg = None
     for chan in channels:
