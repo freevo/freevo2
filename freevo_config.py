@@ -179,9 +179,6 @@ if int(str(CONF.version).split('.')[1]) != \
     print 'WARNING: freevo_config.py was changed, please rerun "freevo setup"'
     print_config_changes(FREEVO_CONF_VERSION, CONF.version, FREEVO_CONF_CHANGES)
     
-TRUE  = 1
-FALSE = 0
-
 
 # ======================================================================
 # General freevo settings:
@@ -288,7 +285,7 @@ for type in ('video', 'audio', 'image', 'games'):
 plugin_tv       = plugin.activate('tv', level=10)
 plugin_video    = plugin.activate('mediamenu', level=20, args=('video', ))
 plugin_audio    = plugin.activate('mediamenu', level=30, args=('audio', ))
-plugin_image    = plugin.activate('mediamenu', level=40, args=('image', TRUE))
+plugin_image    = plugin.activate('mediamenu', level=40, args=('image', True))
 plugin_shutdown = plugin.activate('base.shutdown', level=50)
 
 if CONF.xmame or CONF.snes:
