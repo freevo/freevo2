@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/07/26 17:15:15  rshortt
+# Some changes from Mike Ruelle that let you know if your xmltv data is out
+# of date and also tell you if something is recording (and what it is).
+#
 # Revision 1.5  2003/05/29 11:40:42  rshortt
 # Applied a patch by Mike Ruelle that adds info about disk free, scheduled recordings, and shows the time.
 #
@@ -60,6 +64,7 @@ import sys, time
 import record_client 
 from web_types import HTMLResource, FreevoResource
 import util
+import tv_util
 import config
 
 TRUE = 1
@@ -80,9 +85,27 @@ class IndexResource(FreevoResource):
         else:
             fv.res += '<p><font color="white" >The recording server is up and running.</font></p>'
 
+        listexpire = tv_util.when_listings_expire()
+        if listexpire == 1:
+            fv.res += '<p><font color="red" >Notice: Your listings expire in 1 hour.</font></p>'
+        elif listexpire < 12:
+            fv.res += '<p><font color="red" >Notice: Your listings expire in %s hours.</font></p>' % listexpire 
+        else:
+            fv.res += '<p><font color="white" >Your listings are up to date.</font></p>'
+
         (got_schedule, recordings) = record_client.getScheduledRecordings()
         if got_schedule:
-            num_sched_progs = len(recordings.getProgramList().values())
+            progl = recordings.getProgramList().values()
+            f = lambda a, b: cmp(a.start, b.start)
+            progl.sort(f)
+            for prog in progl:
+                try:
+                    if prog.isRecording == TRUE:
+                        fv.res += '<p><font color="red" >Now Recording %s.</font></p>' % prog.title
+	                break
+                except:
+                    pass
+            num_sched_progs = len(progl)
             if num_sched_progs == 1:
                 fv.res += '<p><font color="white" >One program scheduled to record.</font></p>'
             elif num_sched_progs > 0:
