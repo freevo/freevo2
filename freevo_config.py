@@ -138,15 +138,10 @@ MPG123_APP = 'mpg123'
 DEV_MIXER = '/dev/mixer'
 
 #
-# CD mount point
-#
-CD_MOUNT_POINT = '/mnt/cdrom'
-
-#
 # Physical ROM drives, multiple ones can be specified
 # by adding comma-seperated and quoted entries.
 
-ROM_DRIVES = [('/mnt/cdrom')]
+ROM_DRIVES = [('/mnt/cdrom', 'CD DRIVE')]
 
 #
 # The list of filename suffixes that are used to match the files that

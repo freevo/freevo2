@@ -63,7 +63,18 @@ def main_menu(arg=None, menuw=None):
 
     for (title, dir) in config.DIR_MOVIES:
         items += [menu.MenuItem('[%s]' % title, cwd, dir)]
-    
+
+
+    # XXX identifymedia needed here to do something clever
+    # XXX problems: how to eject a specific drive and regenerate
+    # XXX this menu (new cd/dvd = new items)
+    if config.ROM_DRIVES != None: 
+        for (dir, name) in config.ROM_DRIVES:
+            items += [menu.MenuItem('[%s]' % name, cwd, dir)]
+            
+        items += [menu.MenuItem('DVD', play_movie, ('dvd', 1, []))]
+        items += [menu.MenuItem('VCD', play_movie, ('vcd', 1, []))]
+
     moviemenu = menu.Menu('MOVIE MAIN MENU', items)
     menuw.pushmenu(moviemenu)
 

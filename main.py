@@ -82,28 +82,18 @@ def shutdown(menuw=None, arg=None):
     
 
 def autostart():
-    if os.path.exists(config.CD_MOUNT_POINT + "/mpegav/"):
-        if DEBUG: print 'Autstart VCD'
-        mplayer.play('vcd', '1', [])
-    elif os.path.exists(config.CD_MOUNT_POINT + "/video_ts/"):
-        if DEBUG: print 'Autstart DVD'
-        mplayer.play('dvd', '1', [])
-    else:
-        mplayer_files = util.match_files(config.CD_MOUNT_POINT, \
-                                         config.SUFFIX_MPLAYER_FILES)
-        mp3_files = util.match_files(config.CD_MOUNT_POINT, \
-                                     config.SUFFIX_MPG123_FILES)
-        image_files = util.match_files(config.CD_MOUNT_POINT, \
-                                       config.SUFFIX_IMAGE_FILES)
-        if mplayer_files and not mp3_files and not image_files:
-            if DEBUG: print 'Autstart movie cd'
-            movie.cwd(config.CD_MOUNT_POINT, menuwidget)
-        elif not mplayer_files and mp3_files and not image_files:
-            if DEBUG: print 'Autstart mp3 cd'
-            mp3.cwd(config.CD_MOUNT_POINT, menuwidget)
-        elif not mplayer_files and not mp3_files and image_files:
-            if DEBUG: print 'Autstart image cd'
-            imenu.cwd(config.CD_MOUNT_POINT, menuwidget)
+    if config.ROM_DRIVES != None: 
+        media,icon = util.identifymedia(config.ROM_DRIVES[0][0])
+        if media == 'DVD':
+            mplayer.play('dvd', '1', [])
+        elif media == 'VCD' or media == 'SVCD':
+            mplayer.play('vcd', '1', [])
+        elif media == 'DivX CD':
+            movie.cwd(config.ROM_DRIVES[0][0], menuwidget)
+        elif media == 'MP3 CD':
+            mp3.cwd(config.ROM_DRIVES[0][0], menuwidget)
+        elif media == 'Image Library':
+            imenu.cwd(config.ROM_DRIVES[0][0], menuwidget)
 
     
 #
@@ -114,8 +104,8 @@ def getcmd():
     items += [menu.MenuItem('TV', tv.main_menu, 'tv','icons/tv.png',0)]  # XXX Move icons into skin
     items += [menu.MenuItem('MOVIES', movie.main_menu,'','icons/movies.png',0)]
     items += [menu.MenuItem('MUSIC', mp3.main_menu,'','icons/mp3.png',0)]
-    items += [menu.MenuItem('DVD/CD', movie.play_movie, ('dvd', '1', []),'icons/dvd.png',0)]  # XXX Add DVD title handling
-    items += [menu.MenuItem('VCD', movie.play_movie, ('vcd', '1', []))]
+    #items += [menu.MenuItem('DVD/CD', movie.play_movie, ('dvd', '1', []),'icons/dvd.png',0)]  # XXX Add DVD title handling
+    #items += [menu.MenuItem('VCD', movie.play_movie, ('vcd', '1', []))]
     #items += [menu.MenuItem('RECORD MOVIE', tv.main_menu, 'record')]
 
     items += [menu.MenuItem('IMAGES', imenu.main_menu,'','icons/images.png',0)]
@@ -123,7 +113,7 @@ def getcmd():
 
     mainmenu = menu.Menu('FREEVO MAIN MENU', items, packrows=0)
     menuwidget.pushmenu(mainmenu)
-    
+
     muted = 0
     mainVolume = 0
     tray_open = 0
@@ -158,30 +148,30 @@ def getcmd():
                 mixer.setMainVolume(0)
                 muted = 1
         elif event == rc.EJECT:
-            if tray_open:
-                if DEBUG: print 'Inserting %s' % config.CD_MOUNT_POINT
+            if tray_open and config.ROM_DRIVES:
+                if DEBUG: print 'Inserting %s' % config.ROM_DRIVES[0][0]
 
                 # XXX FIXME: this doesn't look very good, we need
                 # XXX some sort of a pop-up widget
                 osd.drawbox(osd.width/2 - 180, osd.height/2 - 30, osd.width/2 + 180,\
                             osd.height/2+30, width=-1,
                             color=((60 << 24) | osd.COL_BLACK))
-                osd.drawstring('mounting %s' % config.CD_MOUNT_POINT, \
+                osd.drawstring('mounting %s' % config.ROM_DRIVES[0][0], \
                                osd.width/2 - 160, osd.height/2 - 10,
                                fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
                 osd.update()
 
                 # close the tray and mount the cd
-                os.system('eject -t %s' % config.CD_MOUNT_POINT)
-                os.system('mount %s' % config.CD_MOUNT_POINT)
+                os.system('eject -t %s' % config.ROM_DRIVES[0][0])
+                os.system('mount %s' % config.ROM_DRIVES[0][0])
                 menuwidget.refresh()
                 tray_open = 0
                 if len(menuwidget.menustack) == 1:
                     autostart()
 
-            else:
-                if DEBUG: print 'Ejecting %s' % config.CD_MOUNT_POINT
-                os.system('eject %s' % config.CD_MOUNT_POINT)
+            elif config.ROM_DRIVES:
+                if DEBUG: print 'Ejecting %s' % config.ROM_DRIVES[0][0]
+                os.system('eject %s' % config.ROM_DRIVES[0][0])
                 tray_open = 1
 
             
