@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/10/17 17:29:03  dischi
+# do not include games in playlist
+#
 # Revision 1.26  2003/10/04 18:37:29  dischi
 # i18n changes and True/False usage
 #
@@ -54,7 +57,6 @@ from item import Item
 import video
 import audio
 import image
-import games
 
 from audio import AudioItem
 from video import VideoItem
@@ -347,7 +349,7 @@ class RandomPlaylist(Playlist):
             # try to get the item for this file
             files = [ element, ]
             play_items = []
-            for t in ( 'video', 'audio', 'image', 'games' ):
+            for t in ( 'video', 'audio', 'image' ):
                 play_items += eval(t + '.cwd(self, files)')
 
             if not play_items:
