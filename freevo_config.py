@@ -149,7 +149,8 @@ LOCAL_CONF_CHANGES = [
      events'''),
     (3.5,
      '''Added xine support (see xine section in freevo_config.py),
-     MPLAYER_AUTOCROP for 16:9 tv sets and ONLY_SCAN_DATADIR''')]
+     MPLAYER_AUTOCROP for 16:9 tv sets, ONLY_SCAN_DATADIR to make freevo start
+     faster and TVGUIDE_HOURS_PER_PAGE customize the tv guide''')]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -809,6 +810,13 @@ TV_CHANNEL_PROG = './chchan %(channel)s %(norm)s %(freqtable)s'
 
 TV_DATEFORMAT = '%e-%b' # Day-Month: 11-Jun
 TV_TIMEFORMAT = '%H:%M' # Hour-Minute 14:05
+
+
+#
+# Number of hours displayed in the tv guide
+# Set this value to 1, 2 or 3. 4 and greater doesn't look good
+#
+TVGUIDE_HOURS_PER_PAGE = 2
 
 
 #

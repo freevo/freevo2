@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/08/03 11:10:26  dischi
+# Added TVGUIDE_HOURS_PER_PAGE
+#
 # Revision 1.15  2003/07/13 19:46:21  rshortt
 # Move the work portion of get_friendly_channel() into tv_util.
 #
@@ -182,7 +185,7 @@ class TVMenu(Item):
         guide = epg.get_guide(PopupBox(text='Preparing the program guide'))
 
         start_time = self.get_start_time()
-        stop_time = self.get_start_time() + 2 * 60 * 60
+        stop_time = self.get_start_time() + config.TVGUIDE_HOURS_PER_PAGE * 60 * 60
 
         channels = guide.GetPrograms(start=start_time+1, stop=stop_time-1)
 

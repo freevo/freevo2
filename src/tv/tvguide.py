@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/08/03 11:10:26  dischi
+# Added TVGUIDE_HOURS_PER_PAGE
+#
 # Revision 1.8  2003/05/30 03:40:39  outlyer
 # CVS has very weird merging behaviour. Both Rob and I made the same bugfix
 # and it appeared to add both. I'm removing the dupe code since it's quite
@@ -79,8 +82,8 @@ CHAN_NO_DATA = 'This channel has no data loaded'
 class TVGuide(gui.GUIObject):
     def __init__(self, start_time, stop_time, start_channel, selected, player, menuw):
         gui.GUIObject.__init__(self)
-        self.n_cols  = 4
         self.col_time = 30 # each col represents 30 minutes 
+        self.n_cols  = (stop_time - start_time) / 60 / self.col_time
         self.player = player
 
         self.n_items = skin.items_per_page(('tv', self))
