@@ -9,6 +9,21 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/02/27 03:29:08  outlyer
+# Show the episode title in the description of a TV show if it's available.
+#
+# Example:
+#
+# ---
+# The Simpsons
+# "The Parent Rap"   <-- the sub-title
+# Bart goes before a tough judge for stealing a police car.
+# ---
+#
+# Shows without a title (called a sub-title in xmltv) are shown as they were
+# before. Maybe we should use this when naming the Recorded files? It would
+# be an inexpensive way of making sure we don't re-record the same episodes.
+#
 # Revision 1.2  2002/11/25 01:56:03  krister
 # Updated from old src tree.
 #
@@ -299,7 +314,11 @@ class ExtendedMenuListing_TV(ExtendedMenu.ExtendedMenuListing):
                 prg = programs[i+1]
             else:
                 prg = programs[i]
-            to_info = (prg.title, prg.desc)
+            if prg.sub_title:
+                procdesc = '"' + prg.sub_title + '"\n' + prg.desc
+            else:
+                procdesc = prg.desc
+            to_info = (prg.title, procdesc)
         else:
             prg = epg_types.TvProgram()
             prg.channel_id = channel.id            
