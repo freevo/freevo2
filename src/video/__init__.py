@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/04/26 16:38:57  dischi
+# added patch from Matthieu Weber for mplayer options in disc
+#
 # Revision 1.2  2003/04/21 18:17:49  dischi
 # Moved the code from interface.py for video/audio/image/games to __init__.py
 #
@@ -57,7 +60,14 @@ def cwd(parent, files):
             items += x
 
     for file in util.find_matches(files, config.SUFFIX_VIDEO_FILES):
-        items += [ VideoItem(file, parent) ]
+        x = VideoItem(file, parent)
+        if parent.media:
+            file_id = parent.media.id + file[len(os.path.join(parent.media.mountdir,"")):]
+            try:
+                x.mplayer_options = config.DISC_SET_INFORMATIONS_ID[file_id]
+            except KeyError:
+                pass
+        items += [ x ]
         files.remove(file)
 
     return items

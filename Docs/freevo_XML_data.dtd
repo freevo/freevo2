@@ -35,7 +35,7 @@
                                                    displaying the filenames
                                                    NOT IMPLEMENTED IN PARSER --
 >
-<!ELEMENT disc EMPTY                            -- disc definition --
+<!ELEMENT disc (file-opt*)                      -- disc definition --
   -- This element allows to associate the given cover-img with all the files
      on the disc. It is a shortcut, that replaces defining movie elements for
      each file on the disc
@@ -44,14 +44,30 @@
                 media-id CDATA #IMPLIED         -- identifies the media --
                 label-regexp   CDATA #IMPLIED   -- regular expression for
                                                    matching the media's label --
-  -- One of those two attributes is mandatory. This constraint cannot be
-     expressed with DTD symtax, AFAIK :( 
+                mplayer-options CDATA #IMPLIED  -- global mplayer options,
+                                                   applied to all "file"
+                                                   subelements --
+  -- One of media-id or label-regexp is mandatory. This constraint cannot be
+     expressed with DTD syntax, AFAIK :( 
 
      Another solution would be:
-       identifier-type ( media-id | regexp-label ) #REQUIRED
+       identifier-type ( media-id | label-regexp ) #REQUIRED
        identifier-data CDATA #REQUIRED
   --
 >
+
+<!ELEMENT file-opt (#PCDATA)                    -- filename               -- >
+  -- This element allows to specify options to mplayer when playing a specific
+     file from a specific disc. The file-opt element is almost like the file
+     element declared below, except that it has no mandatory id attribute. The
+     parser in freevo wouldn't care about re-using the file element in here,
+     but it wouldn't be consistent to do so.
+  --
+<!ATTLIST file-opt 
+               media-id         CDATA #IMPLIED  -- media ID               --
+               mplayer-options  CDATA #IMPLIED  -- file-specific opts     --
+>
+
                                                       
 <!-- *** movie declaration *** -->
 

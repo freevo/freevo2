@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2003/04/26 16:38:57  dischi
+# added patch from Matthieu Weber for mplayer options in disc
+#
 # Revision 1.45  2003/04/24 19:56:43  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -131,6 +134,9 @@ class VideoItem(Item):
 
         self.mode  = 'file'             # file, dvd or vcd
         self.media_id = ''              # if media == vcd or dvd
+
+        self.files_options = []         # options for specific files of a
+                                        # disc in a disc-set
 
         self.variants = []              # if this item has variants
         self.subitems = []              # if this item has more than one file/track to play

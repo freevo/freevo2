@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/04/26 16:38:57  dischi
+# added patch from Matthieu Weber for mplayer options in disc
+#
 # Revision 1.17  2003/04/24 19:56:45  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -381,10 +384,16 @@ def parseMovieFile(file, parent, duplicate_check):
                                      +- [l_re]
                                      +- [cover]
                                      +- info -+- ...
+                                     +- file -+- 1...
+                                              +- 2...
+                                              +- 3 -+- file-id
+                                                    +- mplayer_options
+
             Data types:
               disc-set: dictionary
               info:     dictionary
               disc:     list of dictionaries
+              file:     list of dictionaries
               others:   string
             """
             # freevo_child == /freevo/disc-set
@@ -405,19 +414,52 @@ def parseMovieFile(file, parent, duplicate_check):
                     disc = {}
                     label_required = 0 
                     disc['media-id'] = None
+                    disc['mplayer-options'] = None
+                    disc['files-options'] = []
                     # One of the media-id or label-regexp attributes is mandatory.
                     # If not there, the disc is useless
                     try:
                         disc['media-id'] = disc_set_child.attrs[('', "media-id")]
                     except KeyError:
                         label_required = 1
-                    
+
                     disc['l_re'] = None
                     try:
                         disc['l_re'] = disc_set_child.attrs[('', "label-regexp")]
                     except KeyError:
                         if label_required == 1:
                             continue
+                    try:
+                        disc['mplayer-options'] = disc_set_child.attrs[('', "mplayer-options")]
+                    except KeyError:
+                        pass
+
+                    for disc_child in disc_set_child.children:
+                        if disc_child.name == 'file-opt':
+                            fo = {}
+                            fo['media-id'] = disc['media-id']
+                            fo['mplayer-options'] = disc['mplayer-options']
+                            fo['name'] = None
+                            fo['file-id'] = None
+                            try:
+                                if fo['mplayer-options']:
+                                    fo['mplayer-options'] += " " + disc_child.attrs[('', "mplayer-options")]
+                                else:
+                                    fo['mplayer-options'] = disc_child.attrs[('', "mplayer-options")]
+                            except KeyError:
+                                pass
+                            if not fo['media-id']:
+                                try:
+                                    fo['media-id'] = disc_child.attrs[('', "media-id")]
+                                except KeyError:
+                                    continue
+
+                            fo['name'] = disc_child.textof().encode('latin-1')
+                            fo['file-id'] = fo['media-id']
+                            if fo['name']:
+                                fo['file-id'] += fo['name']
+
+                            disc['files-options'] += [ fo ]
 
                     disc_set['disc'] += [ disc ]
                     
@@ -443,6 +485,9 @@ def parseMovieFile(file, parent, duplicate_check):
                 for disc in disc_set['disc']:
                     if disc['media-id']:
                         dsitem.rom_id += [ disc['media-id'] ]
+                    if disc['files-options']:
+                        for fo in disc['files-options']:
+                            dsitem.files_options += [ fo ]
                 movies += [ dsitem ]
 
         elif freevo_child.name == 'movie':
@@ -531,6 +576,7 @@ def hash_xml_database():
     config.MOVIE_INFORMATIONS       = []
     config.MOVIE_INFORMATIONS_ID    = {}
     config.MOVIE_INFORMATIONS_LABEL = []
+    config.DISC_SET_INFORMATIONS_ID = {}
     config.TV_SHOW_INFORMATIONS     = {}
     
     if os.path.exists("/tmp/freevo-rebuild-database"):
@@ -562,6 +608,9 @@ def hash_xml_database():
                 for l in info.rom_label:
                     l_re = re.compile(l)
                     config.MOVIE_INFORMATIONS_LABEL += [(l_re, info)]
+            if info.files_options:
+                for fo in info.files_options:
+                    config.DISC_SET_INFORMATIONS_ID[fo['file-id']] = fo['mplayer-options']
 
     for file in util.recursefolders(config.TV_SHOW_DATA_DIR,1,
                                     '*'+config.SUFFIX_VIDEO_DEF_FILES[0],1):
