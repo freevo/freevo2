@@ -257,6 +257,8 @@
 	  filename="up.png"/>
 	<image x="765" y="544" width="32" height="32" label="downarrow" 
 	  filename="down.png"/>
+	<image width="16" height="16" label="leftarrow" filename="left.png"/>
+	<image width="16" height="16" label="rightarrow" filename="right.png"/>
       </listing>
       <title visible="no"/>
     </tv>
@@ -276,7 +278,7 @@
     <layout label="tv listing">
       <content type="text" spacing="0">
 
-	<item type="label" font="tv" width="100">
+	<item type="label" font="tv" width="60">
 	  <rectangle bgcolor="0x88000066" size="1" color="0x000000" x="-5" y="-5"
 	    width="max+10" height="max+10"/>
 	</item>
