@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/03/15 10:26:48  dischi
+# moved pickled file to cache dir
+#
 # Revision 1.12  2003/03/14 16:34:23  dischi
 # Added patch from Erland Lewin to fix a timezone problem
 #
@@ -153,7 +156,7 @@ def get_guide():
          cached_guide.timestamp != os.path.getmtime(config.XMLTV_FILE))):
 
         # No, is there a pickled version ("file cache") in a file?
-        pname = '%s-%s.pickled' % (config.XMLTV_FILE, os.getuid())
+        pname = '%s/TV.xml-%s.pickled' % (config.FREEVO_CACHEDIR, os.getuid())
         
         got_cached_guide = FALSE
         if (os.path.isfile(config.XMLTV_FILE) and
@@ -376,8 +379,8 @@ def find_favorites():
 if __name__ == '__main__':
     # Remove a pickled file (if any) if we're trying to list all channels
     if not config.TV_CHANNELS:
-        if os.path.isfile('%s-%s.pickled' % (config.XMLTV_FILE, os.getuid())):
-            os.remove('%s-%s.pickled' % (config.XMLTV_FILE, os.getuid()))
+        if os.path.isfile('%s/TV.xml-%s.pickled' % (config.FREEVO_CACHEDIR, os.getuid())):
+            os.remove('%s/TV.xml-%s.pickled' % (config.FREEVO_CACHEDIR, os.getuid()))
 
     print
     print 'Getting the TV Guide, this can take a couple of minutes...'
