@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/09/19 22:07:57  dischi
+# add unified PlayerThread function to avoid duplicate code
+#
 # Revision 1.12  2003/08/23 12:51:41  dischi
 # removed some old CVS log messages
 #
@@ -43,18 +46,17 @@ import os
 import popen2
 import threading
 import signal
+
 import config
-
-
-DEBUG = config.DEBUG
-
+import osd
+import rc
+from event import *
 
 class ChildApp:
 
     def __init__(self, app):
         # Start the child app through 'runapp' which will unblock signals and
         # sets the priority.
-
         prio = 0
         if app.find('--prio=') == 0 and not config.RUNAPP:
             try:
@@ -64,7 +66,7 @@ class ChildApp:
             app = app[app.find(' ')+1:]
 
         start_str = '%s %s' % (config.RUNAPP, app)
-        
+
         self.child = popen2.Popen3(start_str, 1, 100) 
         self.outfile = self.child.fromchild 
         self.errfile = self.child.childerr
@@ -82,7 +84,7 @@ class ChildApp:
             os.system('%s %s -p %s 2>/dev/null >/dev/null' % \
                       (config.CONF.renice, prio, self.child.pid))
             
-        if DEBUG:
+        if config.DEBUG:
             print 'self.t1.isAlive()=%s, self.t2.isAlive()=%s' % (self.t1.isAlive(),
                                                                   self.t2.isAlive())
             time.sleep(0.1)
@@ -116,39 +118,52 @@ class ChildApp:
 
     
     def kill(self, signal=9):
+        # killed already
+        if not self.child:
+            return
 
-        try:
-            if signal:
-                if DEBUG: print 'childapp: killing pid %s signal %s' % \
-                   (self.child.pid, signal)
-                os.kill(self.child.pid, signal)
+        import traceback
+        traceback.print_exc()
+        
+        # maybe child is dead and only waiting?
+        if os.waitpid(self.child.pid, os.WNOHANG)[0] == self.child.pid:
+            self.outfile.close()
+            self.errfile.close()
+            self.infile.close()
+            self.child = None
+            return
+        
+        if signal:
+            _debug_('childapp: killing pid %s signal %s' % (self.child.pid, signal))
+            os.kill(self.child.pid, signal)
             
-            # Wait for the child to exit
-            try:
-                if DEBUG: print 'childapp: Before wait(%s)' % self.child.pid
-                for i in range(20):
-                    if os.waitpid(self.child.pid, os.WNOHANG)[0] == self.child.pid:
-                        break
-                    time.sleep(0.1)
-                else:
-                    print 'force killing with signal 9'
-                    os.kill(self.child.pid, 9)
-                    self.child.wait()
-                if DEBUG: print 'childapp: After wait()'
-            except:
-                pass
+        # Wait for the child to exit
+        try:
+            _debug_('childapp: Before wait(%s)' % self.child.pid)
+            for i in range(20):
+                if os.waitpid(self.child.pid, os.WNOHANG)[0] == self.child.pid:
+                    break
+                time.sleep(0.1)
+            else:
+                print 'force killing with signal 9'
+                os.kill(self.child.pid, 9)
+                self.child.wait()
+            _debug_('childapp: After wait()')
 
         except OSError:
-            # Already dead
             pass
-
+        
         try:
+            # this may cause some problems with threads
+            # in the child because not everything died :-(
             self.outfile.close()
             self.errfile.close()
             self.infile.close()
         except:
             print 'error closing filehandler'
             pass
+        self.child = None
+
 
         
 class Read_Thread(threading.Thread):
@@ -177,8 +192,7 @@ class Read_Thread(threading.Thread):
             # XXX There should be a C helper app that converts CR to LF.
             data = self.fp.readline(300)
             if not data:
-                if DEBUG:
-                    print '%s: No data, stopping (pid %s)!' % (self.name, os.getpid())
+                _debug_('%s: No data, stopping (pid %s)!' % (self.name, os.getpid()))
                 break
             else:
                 data = data.replace('\r', '\n')
@@ -207,31 +221,92 @@ class Read_Thread(threading.Thread):
                         
 
 
-class Test_Thread(threading.Thread):
-
-    def __init__(self, cmd):
-        threading.Thread.__init__(self)
-        self.app = Rec(cmd)
+class DummyApp:
+    def __init__(self, name=None, parameter=None):
+        self.app_name  = name
+        self.parameter = parameter
         
+    def write(self, string):
+        pass
 
+        
+class ChildThread(threading.Thread):
+
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self.mode        = 'idle'
+        self.mode_flag   = threading.Event()
+        self.stop_osd    = False
+        self.app         = DummyApp()
+        self.manual_stop = False
+        
+        self.setDaemon(1)
+        threading.Thread.start(self)
+
+
+    def start(self, app, param):
+        """
+        set thread to play mode
+        """
+        self.app         = DummyApp(app, param)
+        self.mode        = 'play'
+        self.manual_stop = False
+        self.mode_flag.set()
+
+
+    def stop(self, cmd=None):
+        if self.mode != 'play':
+            return
+        
+        if cmd:
+            self.manual_stop = True
+            _debug_('sending exit command to app')
+            self.app.write(cmd)
+            # wait for the app to terminate itself
+            for i in range(20):
+                if self.mode != 'play':
+                    break
+                time.sleep(0.1)
+
+        self.mode = 'stop'
+        self.mode_flag.set()
+        while self.mode == 'stop':
+            time.sleep(0.3)
+
+        
     def run(self):
         while 1:
-            s = raw_input('Cmd>')
-            if s.strip() == '':
-                print 'Alive = %s' % self.app.isAlive()
-            elif s.strip() == 'k':
-                self.app.kill(signal.SIGINT)
-                print 'Sent INT'
-            elif s.strip() == 'q':
-                sys.exit(0)
+            if self.mode == 'idle':
+                self.mode_flag.wait()
+                self.mode_flag.clear()
 
+            elif self.mode == 'play':
 
-            
-class Rec(ChildApp):
+                if self.stop_osd and config.STOP_OSD_WHEN_PLAYING:
+                    osd.stop()
 
-    def stdout_cb(self, line):
-        print 'stdout data: "%s"' % line
+                self.app = self.app.app_name(self.app.parameter)
+                
+                if hasattr(self.app, 'item'):
+                    rc.post_event(Event(PLAY_START, arg=self.app.item))
+                
+                while self.mode == 'play' and self.app.isAlive():
+                    time.sleep(0.1)
 
+                if self.mode == 'play' and not self.manual_stop:
+                    if hasattr(self.app, 'stopped'): 
+                        self.app.stopped()
+                    else:
+                        _debug_('app has no stopped function, send PLAY_END')
+                        rc.post_event(PLAY_END)
+                        
+                self.app.kill()
 
-    def stderr_cb(self, line):
-        print 'stderr data: "%s"' % line
+                # Ok, we can use the OSD again.
+                if self.stop_osd and config.STOP_OSD_WHEN_PLAYING:
+                    osd.restart()
+                
+                self.mode = 'idle'
+                
+            else:
+                self.mode = 'idle'
