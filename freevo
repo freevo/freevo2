@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.120  2004/09/27 18:57:49  dischi
+# add make hint on startup
+#
 # Revision 1.119  2004/09/25 04:13:50  rshortt
 # Fix PYTHONPATH to get libs in site-packages dir.
 #
@@ -496,4 +499,7 @@ if getpid(name, python + proc)[1] and check:
 if python[0].find('python') != -1:
     python = [ python[0] , '-OO' ] + python[1:]
 
+if not os.path.isfile(proc[0]):
+    print 'Error: please run \'make\' first'
+    sys.exit(0)
 start(name, python + proc , bg, check)
