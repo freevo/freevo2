@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2003/08/30 07:58:57  dischi
+# Fix item plugin handling
+#
 # Revision 1.30  2003/08/27 15:25:47  mikeruelle
 # Start of Radio Support
 #
@@ -365,9 +368,6 @@ def __load_plugin__(name, type, level, args, number):
 
             if isinstance(p, ItemPlugin):
                 __add_to_ptl__('item%s' % special, p)
-                if not special:
-                    for mtype in ( '_video', '_audio', '_image', '_games' ):
-                        __add_to_ptl__('item%s' % mtype, p)
 
         if p.plugin_name:
             __named_plugins__[p.plugin_name] = p

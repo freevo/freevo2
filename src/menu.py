@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.61  2003/08/30 07:58:57  dischi
+# Fix item plugin handling
+#
 # Revision 1.60  2003/08/24 06:58:18  gsbarbieri
 # Partial support for "out" icons in main menu.
 # The missing part is in listing_area, which have other changes to
@@ -95,7 +98,7 @@ class MenuItem(Item):
         self.image = image[1]
 
     def actions(self):
-        return [ ( self.select, '' ) ]
+        return [ ( self.select, self.name ) ]
 
     def select(self, arg=None, menuw=None):
         if self.function:
@@ -349,6 +352,7 @@ class MenuWidget(GUIObject):
                 i.display_type = item.type
                 
         s = Menu(menu_name, items, xml_file=xml_file)
+        s.is_submenu = TRUE
         self.pushmenu(s)
             
         
@@ -528,39 +532,43 @@ class MenuWidget(GUIObject):
 
 
         elif event == MENU_SUBMENU:
+            if hasattr(menu, 'is_submenu'):
+                return
+
             actions = menu.selected.actions()
+            force   = FALSE
+            if not actions:
+                actions = []
+                force   = TRUE
+
+            plugins = plugin.get('item') + plugin.get('item_%s' % menu.selected.type)
 
             if hasattr(menu.selected, 'display_type'):
-                if menu.selected.display_type:
-                    actions_plugins = '_%s' % menu.selected.display_type
-                else:
-                    actions_plugins = ''
-            else:
-                actions_plugins = '_%s' % menu.selected.type
+                plugins += plugin.get('item_%s' % menu.selected.display_type)
+
+            plugins.sort(lambda l, o: cmp(l._level, o._level))
             
-            for p in plugin.get('item%s' % actions_plugins):
+            for p in plugins:
                 for a in p.actions(menu.selected):
                     if isinstance(a, MenuItem):
                         actions.append(a)
                     else:
                         actions.append(a[:2])
 
-            if actions and len(actions) > 1:
+            if actions and (len(actions) > 1 or force):
                 self.make_submenu(menu.selected.name, actions, menu.selected)
             return
             
 
         elif event == MENU_CALL_ITEM_ACTION:
             print 'calling action %s', event.arg
+
+            plugins = plugin.get('item') + plugin.get('item_%s' % menu.selected.type)
+
             if hasattr(menu.selected, 'display_type'):
-                if menu.selected.display_type:
-                    actions_plugins = '_%s' % menu.selected.display_type
-                else:
-                    actions_plugins = ''
-            else:
-                actions_plugins = '_%s' % menu.selected.type
-            
-            for p in plugin.get('item%s' % actions_plugins):
+                plugins += plugin.get('item_%s' % menu.selected.display_type)
+
+            for p in plugins:
                 for a in p.actions(menu.selected):
                     if not isinstance(a, MenuItem) and len(a) > 2 and a[2] == event.arg:
                         a[0](arg=None, menuw=self)
