@@ -19,6 +19,7 @@ o Removed osd_server/osd_fb, moved files to osd_server
 o Added loading a local_conf.py file where directory 
   defs etc can be put so that it is easier to update
   freevo_config.py
+o Renamed osd_XXX servers osds_XXX
 
 
 Release 1.2.1 (2002-05-17):
