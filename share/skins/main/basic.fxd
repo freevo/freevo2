@@ -741,7 +741,7 @@
                         <text font="bmovl text">"</text>
                         <newline/>
                     </if>
-		    <goto_pos y="80" x="0" mode="absolute"/>
+		    <goto_pos y="75" x="0" mode="absolute"/>
                     <text font="bmovl clock" width="max" height="max" align="right"
 			expression="function:time" mode="soft"/>
 		</item>
