@@ -76,19 +76,27 @@ class IdleTool:
         #
         if (os.path.isfile(self.WEATHERCACHE) == 0 or (abs(time.time() - os.path.getmtime(self.WEATHERCACHE)) > 3600)):
             weather = pymetar.MetarReport()
-            weather.fetchMetarReport(self.METARCODE)
-            if (weather.getTemperatureCelsius()):
-                temperature = '%2d' % weather.getTemperatureCelsius()
-            else:
-                temperature = '0'  # Make it a string to match above.
-            if weather.getPixmap():
-                icon = weather.getPixmap() + '.png'
-            else:
-                icon = 'sun.png'
-            cachefile = open(self.WEATHERCACHE,'w+')
-            cachefile.write(temperature + '\n')
-            cachefile.write(icon + '\n')
-            cachefile.close()
+            try:
+                weather.fetchMetarReport(self.METARCODE)
+                if (weather.getTemperatureCelsius()):
+                    temperature = '%2d' % weather.getTemperatureCelsius()
+                else:
+                    temperature = '0'  # Make it a string to match above.
+                if weather.getPixmap():
+                    icon = weather.getPixmap() + '.png'
+                else:
+                    icon = 'sun.png'
+                cachefile = open(self.WEATHERCACHE,'w+')
+                cachefile.write(temperature + '\n')
+                cachefile.write(icon + '\n')
+                cachefile.close()
+            except:
+                # HTTP Problems, use cache. Wait till next try.
+                cachefile = open(self.WEATHERCACHE,'r')
+                newlist = map(string.rstrip, cachefile.readlines())
+                temperature,icon = newlist
+                cachefile.close()
+
         else:
             cachefile = open(self.WEATHERCACHE,'r')
             newlist = map(string.rstrip, cachefile.readlines())
