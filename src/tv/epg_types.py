@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/02/22 06:18:20  gsbarbieri
+# Better unicode support.
+#
 # Revision 1.12  2003/10/18 09:32:40  dischi
 # add var scheduled to TvProgram
 #
@@ -116,13 +119,13 @@ class TvProgram:
         return the specific attribute as string or an empty string
         """
         if attr == 'start':
-            return time.strftime(config.TV_TIMEFORMAT, time.localtime(self.start))
+            return Unicode(time.strftime(config.TV_TIMEFORMAT, time.localtime(self.start)))
         if attr == 'stop':
-            return time.strftime(config.TV_TIMEFORMAT, time.localtime(self.stop))
+            return Unicode(time.strftime(config.TV_TIMEFORMAT, time.localtime(self.stop)))
         if attr == 'date':
-            return time.strftime(config.TV_DATEFORMAT, time.localtime(self.start))
+            return Unicode(time.strftime(config.TV_DATEFORMAT, time.localtime(self.start)))
         if hasattr(self, attr):
-            return str(getattr(self,attr))
+            return getattr(self,attr)
         return ''
 
 
@@ -152,7 +155,7 @@ class TvChannel:
         if self.programs:
             s += '\n'
             for program in self.programs:
-                s += '   ' + str(program) + '\n'
+                s += '   ' + String(program) + '\n'
         else:
             s += '     NO DATA\n'
 
@@ -268,7 +271,7 @@ class TvGuide:
         s = 'XML TV Guide\n'
 
         for chan in self.chan_list:
-            s += str(chan)
+            s += String(chan)
 
         return s
         
