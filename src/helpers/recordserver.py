@@ -7,6 +7,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.60  2004/07/24 00:24:30  rshortt
+# Upgrade the twisted reactor to something not depricated and move print to
+# debug.
+#
 # Revision 1.59  2004/07/16 19:39:57  dischi
 # store recording timestamp
 #
@@ -78,7 +82,7 @@
 # ----------------------------------------------------------------------- */
 
 
-import sys, string, random, time, os, re, pwd, stat
+import sys, string, random, time, os, re, pwd, traceback, stat
 import config
 from util import vfs
 
@@ -94,7 +98,6 @@ if __name__ == '__main__':
         print e
 
 from twisted.web import xmlrpc, server
-from twisted.internet.app import Application
 from twisted.internet import reactor
 from twisted.python import log
 
@@ -891,14 +894,14 @@ class RecordServer(xmlrpc.XMLRPC):
 
 
     def eventNotice(self):
-        #print 'RECORDSERVER GOT EVENT NOTICE'
+        _debug_('RECORDSERVER GOT EVENT NOTICE')
         # Use callLater so that handleEvents will get called the next time
         # through the main loop.
         reactor.callLater(0, self.handleEvents) 
 
 
     def handleEvents(self):
-        #print 'RECORDSERVER HANDLING EVENT'
+        _debug_('RECORDSERVER HANDLING EVENT')
         event = rc_object.get_event()
 
         if event:
@@ -958,7 +961,7 @@ class RecordServer(xmlrpc.XMLRPC):
                 print 'recorderver: After wait()'
 
             elif event == RECORD_START:
-                #print 'Handling event RECORD_START'
+                _debug_('Handling event RECORD_START')
                 prog = event.arg
                 open(tv_lock_file, 'w').close()
                 self.create_fxd(prog)
@@ -966,7 +969,7 @@ class RecordServer(xmlrpc.XMLRPC):
                     util.popen3.Popen3(config.VCR_PRE_REC)
 
             elif event == RECORD_STOP:
-                #print 'Handling event RECORD_STOP'
+                _debug_('Handling event RECORD_STOP')
                 os.remove(tv_lock_file)
                 prog = event.arg
                 try:
@@ -976,7 +979,7 @@ class RecordServer(xmlrpc.XMLRPC):
                     # the file is accessed instead. 
                     os.rename(vfs.getoverlay(prog.filename + '.raw.tmp'),
                               vfs.getoverlay(os.path.splitext(prog.filename)[0] + '.png'))
-                    pass
+
                 if config.VCR_POST_REC:
                     util.popen3.Popen3(config.VCR_POST_REC)
 
@@ -988,19 +991,19 @@ class RecordServer(xmlrpc.XMLRPC):
 
 
 def main():
-    app = Application("RecordServer")
     rs = RecordServer()
+
     if (config.DEBUG == 0):
-        app.listenTCP(config.TV_RECORD_SERVER_PORT, server.Site(rs, logPath='/dev/null'))
+        reactor.listenTCP(config.TV_RECORD_SERVER_PORT, server.Site(rs, logPath='/dev/null'))
     else:
-        app.listenTCP(config.TV_RECORD_SERVER_PORT, server.Site(rs))
+        reactor.listenTCP(config.TV_RECORD_SERVER_PORT, server.Site(rs))
+
     rs.startMinuteCheck()
     rc_object.subscribe(rs.eventNotice)
-    app.run(save=0)
+    reactor.run()
     
 
 if __name__ == '__main__':
-    import traceback
     import time
 
     while 1:
