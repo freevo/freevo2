@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/02/12 10:29:55  dischi
+# deactivated it because imdb.py in helpers isn't ready for the new xml
+# file format
+#
 # Revision 1.5  2003/01/14 20:35:10  dischi
 # small bugfix
 #
@@ -61,6 +65,7 @@ osd  = osd.get_singleton()
 def actions(item):
     if (not item.type == 'video') or item.mode == 'file' or item.rom_id or item.rom_label:
         return []
+    return []
     return [ (imdb_search_disc, 'Search IMDB for [%s]' % item.label),
              (imdb_add_disc_menu, 'Add disc to existing entry in database') ]
 
