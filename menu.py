@@ -68,12 +68,13 @@ class MenuItem:
         
 class Menu:
 
-    def __init__(self, heading, choices, dir=None, packrows=1):
+    def __init__(self, heading, choices, dir=None, packrows=1, umount_all = 0):
         # XXX Add a list of eventhandlers?
         self.heading = heading
         self.choices = choices          # List of MenuItem:s
         self.page_start = 0
         self.packrows = packrows
+        self.umount_all = umount_all    # umount all ROM drives on display?
         if dir:
             self.skin_settings = skin.LoadSettings(dir)
         else:
@@ -101,7 +102,6 @@ class MenuWidget:
             self.init_page()
             self.refresh()
 
-    
     def goto_main_menu(self, arg=None, menuw=None):
         self.menustack = [self.menustack[0]]
         menu = self.menustack[0]
@@ -136,6 +136,11 @@ class MenuWidget:
 
 
     def refresh(self):
+        if self.menustack[-1].umount_all == 1:
+            if config.ROM_DRIVES:
+                for rom in config.ROM_DRIVES:
+                    os.system('umount %s' % rom[0])
+    
         skin.DrawMenu(self)
         
         
@@ -214,6 +219,7 @@ class MenuWidget:
 
 
     def init_page(self):
+
         menu = self.menustack[-1]
        
         if not menu:

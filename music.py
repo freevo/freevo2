@@ -14,6 +14,11 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2002/09/04 19:32:31  dischi
+# Added a new identifymedia. Freevo now polls the rom drives for media
+# change and won't mount the drive unless you want to play a file from cd or
+# you browse it.
+#
 # Revision 1.6  2002/09/01 09:43:01  dischi
 # Fixes for the new "type" parameter in MenuItem
 #
@@ -133,14 +138,15 @@ def main_menu(arg=None, menuw=None):
                                   None, None, None ) ]
                                   
     for (drive) in config.ROM_DRIVES:
-        dir = drive[0]
-        (media,label,image,play_options) = util.identifymedia(dir)
-        print("What is identify: " + str(media) + ',' + str(label) +
-              ',' + str(image) + ',' + str(play_options))
+        dir, device, name, ejected, last_code, info = drive
+        if info:
+            (media,label,image,play_options) = info
+            print("What is identify: " + str(media) + ',' + str(label) +
+                  ',' + str(image) + ',' + str(play_options))
 
-        if media == 'AUDIO':
-            items += [menu.MenuItem(dir, parse_entry, (label,dir),
-                                    handle_config, ('dir', dir), 'dir')]
+            if media == 'AUDIO':
+                items += [menu.MenuItem(dir, parse_entry, (label,dir),
+                                        handle_config, ('dir', dir), 'dir')]
             
     mp3menu = menu.Menu('MUSIC MAIN MENU', items)
     menuw.pushmenu(mp3menu)

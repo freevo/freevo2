@@ -81,7 +81,7 @@ class RemoteControl:
     
     # Application generated codes
     PLAY_END = 'PLAY_END'     # Reached end of song, movie, etc
-
+    IDENTIFY_MEDIA = 'IDENTIFY_MEDIA'
 
     def __init__(self, port=config.REMOTE_CONTROL_PORT):
         self.port = port

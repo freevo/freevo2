@@ -11,6 +11,11 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2002/09/04 19:32:31  dischi
+# Added a new identifymedia. Freevo now polls the rom drives for media
+# change and won't mount the drive unless you want to play a file from cd or
+# you browse it.
+#
 # Revision 1.24  2002/09/01 09:43:45  dischi
 # Added type = 'dir' for directories in MenuItem so that the skin can
 # use the correct style
@@ -59,7 +64,7 @@
 
 import sys
 import random
-import time, os
+import time, os, string
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
@@ -101,6 +106,8 @@ FALSE = 0
 # Create the mplayer object
 mplayer = mplayer.get_singleton()
 
+# remember the position of the selected item in the main menu
+main_menu_selected = -1
 
 #
 # mplayer dummy
@@ -112,6 +119,12 @@ def play_movie( arg=None, menuw=None ):
     mplayer_options = ""
     if len(arg) > 3:
         mplayer_options = arg[3]
+
+    if config.ROM_DRIVES:
+        for rom in config.ROM_DRIVES:
+            if string.find(filename, rom[0]) == 0:
+                os.system('mount %s' % rom[0])
+                
     mplayer.play(mode, filename, playlist, 0, mplayer_options)
 
 
@@ -119,15 +132,33 @@ def play_movie( arg=None, menuw=None ):
 # EJECT handling
 #
 def eventhandler(event = None, menuw=None, arg=None):
-    rom = arg[0]
+
+    if event == rc.IDENTIFY_MEDIA:
+        if menuw.menustack[1] == menuw.menustack[-1]:
+            main_menu_selected = menuw.all_items.index(menuw.menustack[1].selected)
+
+        menuw.menustack[1].choices = main_menu_generate()
+
+        global main_menu_selected
+        menuw.menustack[1].selected = menuw.menustack[1].choices[main_menu_selected]
+
+        if menuw.menustack[1] == menuw.menustack[-1]:
+            menuw.init_page()
+            menuw.refresh()
+
+            
     if event == rc.EJECT:
+
+        rom = arg[0]
+        if not rom:
+            return
 
         # find the drive
         pos = 0
-        for (dir, name, tray) in config.ROM_DRIVES:
+        for (dir, device, name, tray, lastcode, info) in config.ROM_DRIVES:
             if rom == dir:
                 tray_open = tray
-                config.ROM_DRIVES[pos] = (dir, name, (tray + 1) % 2)
+                config.ROM_DRIVES[pos] = (dir, device, name, (tray + 1) % 2, lastcode, info)
                 break
             pos += 1
 
@@ -136,35 +167,12 @@ def eventhandler(event = None, menuw=None, arg=None):
             osd.popup_box( 'mounting %s' % rom )
             osd.update()
             
-            # close the tray and mount the cd
+            # close the tray, identifymedia does the rest
             os.system('eject -t %s' % rom)
-            os.system('mount %s' % rom)
-            
-            item = menuw.all_items[menuw.all_items.index(menuw.menustack[-1].selected)]
-            
-            (type, label, image, play_options) = util.identifymedia(rom)
-            if play_options:
-                item.name = label
-                item.action = play_movie
-                item.arg = play_options
-            elif type != None:
-                item.name = label
-                item.action = cwd
-                item.arg = rom
-            else:
-                item.name = '%s (no disc)' % name
-
-            item.image = ('movie', image)
-            menuw.refresh()
 
         else:
             if DEBUG: print 'Ejecting %s' % rom
             os.system('eject %s' % rom)
-            item = menuw.all_items[menuw.all_items.index(menuw.menustack[-1].selected)]
-            item.name = '%s (no disc)' % name
-            item.image = None
-            
-            menuw.refresh()
         
 
 
@@ -174,27 +182,30 @@ def eventhandler(event = None, menuw=None, arg=None):
 #
 # The Movie module main menu
 #
-def main_menu(arg=None, menuw=None):
-
+def main_menu_generate():
     items = []
 
     for (title, dir) in config.DIR_MOVIES:
-        items += [menu.MenuItem(title, cwd, dir, type = 'dir')]
-
+        items += [menu.MenuItem(title, cwd, dir, eventhandler, type = 'dir')]
 
     if config.ROM_DRIVES != None: 
-        for (dir, name, tray) in config.ROM_DRIVES:
-            (type, label, image, play_options ) = util.identifymedia(dir)
-            if play_options:
-                m = menu.MenuItem(label, play_movie, play_options, eventhandler, (dir,))
-            elif type != None:
-                m = menu.MenuItem(label, cwd, dir, eventhandler, (dir,))
+        for (dir, device, name, tray, lastcode, info) in config.ROM_DRIVES:
+            if info:
+                (type, label, image, play_options ) = info
+                if play_options:
+                    m = menu.MenuItem(label, play_movie, play_options, eventhandler, (dir,))
+                elif type != None:
+                    m = menu.MenuItem(label, cwd, dir, eventhandler, (dir,))
+                m.setImage(('movie', image))
             else:
                 m = menu.MenuItem('%s (no disc)' % name, None, None, eventhandler, (dir,))
-            m.setImage(('movie', image))
             items += [m]
             
-    moviemenu = menu.Menu('MOVIE MAIN MENU', items)
+    return items
+
+
+def main_menu(arg=None, menuw=None):
+    moviemenu = menu.Menu('MOVIE MAIN MENU', main_menu_generate(), umount_all = 1)
     menuw.pushmenu(moviemenu)
 
 
@@ -205,6 +216,11 @@ def main_menu(arg=None, menuw=None):
 def cwd(arg=None, menuw=None):
     dir = arg
 
+    if config.ROM_DRIVES:
+        for rom in config.ROM_DRIVES:
+            if rom[0] == dir:
+                os.system('mount %s' % rom[0])
+                
     dirnames = util.getdirnames(dir)
     mplayer_files = util.match_files(dir, config.SUFFIX_MPLAYER_FILES)
 
@@ -212,7 +228,7 @@ def cwd(arg=None, menuw=None):
 
     for dirname in dirnames:
         title = '[' + os.path.basename(dirname) + ']'
-        m = menu.MenuItem(title, cwd, dirname, type = 'dir')
+        m = menu.MenuItem(title, cwd, dirname, type = 'dir', eventhandler = eventhandler)
         if os.path.isfile(dirname+'/cover.png'): 
             m.setImage(('movie', (dirname+'/cover.png')))
         if os.path.isfile(dirname+'/cover.jpg'): 
@@ -264,9 +280,16 @@ def cwd(arg=None, menuw=None):
 
     # add everything to the menu
     for (title, mode, file, playlist, mplayer_options, image) in files:
-        m = menu.MenuItem(title, play_movie, (mode, file, playlist, mplayer_options))
+        m = menu.MenuItem(title, play_movie, (mode, file, playlist, mplayer_options),
+                          eventhandler = eventhandler)
         m.setImage(('movie', image))
         items += [m]
     
     moviemenu = menu.Menu('MOVIE MENU', items, dir=dir)
+
+    if len(menuw.menustack) > 1:
+        if menuw.menustack[1] == menuw.menustack[-1]:
+            global main_menu_selected
+            main_menu_selected = menuw.all_items.index(menuw.menustack[1].selected)
+        
     menuw.pushmenu(moviemenu)

@@ -4,6 +4,11 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.61  2002/09/04 19:32:31  dischi
+# Added a new identifymedia. Freevo now polls the rom drives for media
+# change and won't mount the drive unless you want to play a file from cd or
+# you browse it.
+#
 # Revision 1.60  2002/09/01 09:43:01  dischi
 # Fixes for the new "type" parameter in MenuItem
 #
@@ -114,6 +119,7 @@ import tv      # The TV module
 import imenu   # The Image viewer module
 import mplayer
 
+import identifymedia
 
 DEBUG = 1 # Set to 1 for debug output
 TRUE  = 1
@@ -187,19 +193,33 @@ def shutdown(menuw=None, arg=None):
         time.sleep(1)
         
 
-def autostart():
-    if config.ROM_DRIVES != None: 
-        media,label,image,play_options = util.identifymedia(config.ROM_DRIVES[0][0])
-        if play_options:
-            movie.play_movie(None, play_options)
-        elif media == 'DIVX':
-            movie.cwd(config.ROM_DRIVES[0][0], menuwidget)
-        elif media == 'AUDIO':
-            music.parse_entry([config.ROM_DRIVES[0][0],
-                               config.ROM_DRIVES[0][0]],
-                              menuwidget)
-        elif media == 'IMAGE':
-            imenu.cwd(config.ROM_DRIVES[0][0], menuwidget)
+def eventhandler(event = None, menuw=None, arg=None):
+
+    if event == rc.IDENTIFY_MEDIA:
+        dir, device, name, tray, lastcode, info = config.ROM_DRIVES[0]
+        if info:
+            (media, label, image, play_options ) = info
+            if play_options:
+                os.system('mount %s' % config.ROM_DRIVES[0][0])
+                movie.play_movie(menuw=None, arg=play_options)
+
+            elif media == 'AUDIO-CD':
+                print "play the audio cd -- not implemented yet"
+
+            elif media == 'DIVX':
+                os.system('mount %s' % config.ROM_DRIVES[0][0])
+                movie.cwd(config.ROM_DRIVES[0][0], menuwidget)
+
+            elif media == 'AUDIO':
+                os.system('mount %s' % config.ROM_DRIVES[0][0])
+                music.parse_entry([config.ROM_DRIVES[0][0],
+                                   config.ROM_DRIVES[0][0]],
+                                  menuwidget)
+
+            elif media == 'IMAGE':
+                os.system('mount %s' % config.ROM_DRIVES[0][0])
+                imenu.cwd(config.ROM_DRIVES[0][0], menuwidget)
+
 
     
 #
@@ -212,10 +232,10 @@ def getcmd():
     menu_items = skin.settings.mainmenu.items
     for i in menu_items:
         if i.visible:
-            items += [menu.MenuItem(i.name,eval(i.action), i.arg, None, None,
-                                    'main', i.icon)]
+            items += [menu.MenuItem(i.name,eval(i.action), i.arg, eventhandler,
+                                    None, 'main', i.icon)]
             
-    mainmenu = menu.Menu('FREEVO MAIN MENU', items, packrows=0)
+    mainmenu = menu.Menu('FREEVO MAIN MENU', items, packrows=0, umount_all = 1)
     menuwidget.pushmenu(mainmenu)
 
     muted = 0
@@ -274,9 +294,7 @@ def getcmd():
 
                 # close the tray and mount the cd
                 os.system('eject -t %s' % rom_dir)
-                os.system('mount %s' % rom_dir)
                 menuwidget.refresh()
-                autostart()
 
             else:
                 if DEBUG: print 'Ejecting %s' % rom_dir
@@ -299,8 +317,8 @@ def main_func():
     # add tray status to ROM_DRIVES
     if config.ROM_DRIVES != None: 
         pos = 0
-        for (dir, name) in config.ROM_DRIVES:
-            config.ROM_DRIVES[pos] = (dir, name, 0)
+        for (dir, device, name) in config.ROM_DRIVES:
+            config.ROM_DRIVES[pos] = (dir, device, name, 0)
             pos += 1
 
     # Make sure there's no mplayer process lying around.
@@ -312,6 +330,10 @@ def main_func():
                                                   # If I'm the only one, add this:
                                                   # ...-9 %s... ' % config.MPLAYER_CMD)
 
+    # Start identifymedia thread
+    im = identifymedia.Identify_Thread()
+    im.start()
+    
     # Kick off the main menu loop
     print 'Main loop starting...'
     getcmd()
