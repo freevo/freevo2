@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/08/02 12:56:41  rshortt
+# Increase the sleep time because 0.3 was too short for some people.
+#
 # Revision 1.7  2003/07/30 23:04:01  rshortt
 # Work around an msp3400 bug where it will lose sound when doing a few things,
 # one of which is setting the video standard.  Right now it calls the newly added
@@ -115,7 +118,7 @@ class IVTV(v4l2.Videodev):
 
     def setstd(self, value):
         v4l2.Videodev.setstd(self, value)
-        time.sleep(0.3)
+        time.sleep(1)
         self.mspSetMatrix()
 
 
