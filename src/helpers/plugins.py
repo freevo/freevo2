@@ -13,6 +13,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/11/21 11:48:49  dischi
+# Show config(), too
+#
+# Revision 1.1  2003/11/15 20:16:12  dischi
+# show config() return on command line, too
+#
 # Revision 1.7  2003/10/27 20:12:10  dischi
 # adjust length
 #
@@ -69,7 +75,9 @@ def parse_plugins():
     start = re.compile('^class *(.*)\((.*Plugin\s*).:')
     stop  = re.compile('^[\t ]*def.*:')
     comment = re.compile('^[\t ]*"""')
-
+    config_start = re.compile('^[ \t]+def +config *\( *self *\) *:')
+    config_end   = re.compile(' *(class|def)')
+    
     print_line = 0
     ptypes = {}
     
@@ -84,11 +92,24 @@ def parse_plugins():
             continue
         parse_status = 0
         whitespaces  = 0
+        scan_config  = 0
         for line in util.readfile(file):
+            if config_end.match(line) and scan_config:
+                scan_config = 0
+                all_plugins[-1][-1] = config
+                
+            if scan_config:
+                config += line+'\n'
+
+            if config_start.match(line):
+                config      = 'def return_config():\n'
+                scan_config = line.find('def')
+
+
             if (comment.match(line) and parse_status == 2) or \
                    (stop.match(line) and parse_status == 1):
                 parse_status = 0
-                all_plugins[-1][-1] = desc
+                all_plugins[-1][-2] = desc
 
             if parse_status == 2:
                 if desc:
@@ -125,20 +146,34 @@ def parse_plugins():
                 parse_status = 1
                 desc = ''
                 if not name in ('idlebar.IdleBarPlugin', ):
-                    all_plugins.append([name, file, type, status, ''])
+                    all_plugins.append([name, file, type, status, '', ''])
     return all_plugins
 
 
 def print_info(plugin_name, all_plugins):
-    for name, file, type, status, desc in all_plugins:
+    for name, file, type, status, desc, config_string in all_plugins:
         if name == plugin_name:
             print 'Name: %s' % name
             print 'Type: %s' % type
             print 'File: %s' % file
             print
             print 'Description:'
+            print '------------'
             print desc
             print
+
+            exec(config_string)
+            config_list = return_config()
+
+            if config_list:
+                print
+                print 'Plugin configuration variables:'
+                print '-------------------------------'
+                for v in config_list:
+                    print '%s: %s' % (v[0], v[2])
+                    print 'Default: %s' % v[1]
+                    print
+                print
             if status == 'active':
                 print 'The plugin is loaded with the following settings:'
                 for p in plugin.__all_plugins__:
@@ -150,7 +185,6 @@ def print_info(plugin_name, all_plugins):
             else:
                 print 'The plugin is not activated in the current setting'
 
-
 def iscode(line):
     return (len(line) > 2 and line[:2].upper() == line[:2] and \
             line.find('=') > 0) or \
@@ -159,7 +193,7 @@ def iscode(line):
 
 def info_html(plugin_name, all_plugins):
     ret = ''
-    for name, file, type, status, desc in all_plugins:
+    for name, file, type, status, desc, config_string in all_plugins:
         if name == plugin_name:
             ret += '<h2>%s</h2>' % name
             ret += '<b>Type: %s</b><br>' % type
@@ -240,7 +274,7 @@ if len(sys.argv)>1 and sys.argv[1] == '-l':
         for i in range(len(t)):
             underline += '-'
         print underline
-        for name, file, type, status, desc in all_plugins:
+        for name, file, type, status, desc, config in all_plugins:
             if type == t:
                 if desc.find('\n') > 0 and desc.find('\n\n') == desc.find('\n'):
                     smalldesc = desc[:desc.find('\n')]
