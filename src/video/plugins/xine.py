@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2004/07/21 11:35:19  dischi
+# xine can play iso files
+#
 # Revision 1.44  2004/07/10 12:33:43  dischi
 # header cleanup
 #
@@ -148,9 +151,6 @@ class Xine:
         0 = unplayable
         """
         if item.url.startswith('dvd://'):
-            if hasattr(item, 'filename') and item.filename and \
-                   item.filename.endswith('.iso'):
-                return 0
             return 2
         if item.url.startswith('vcd://'):
             if self.version > 922 and item.url == 'vcd://':
@@ -203,9 +203,15 @@ class Xine:
             for track in item.info['tracks']:
                 self.max_subtitle = max(self.max_subtitle, len(track['subtitles']))
 
-        if item.mode == 'dvd' and hasattr(item.media, 'devicename'):
+        if item.mode == 'dvd' and hasattr(item, 'filename') and item.filename and \
+               item.filename.endswith('.iso'):
+            # dvd:///full/path/to/image.iso/
+            command.append('dvd://%s/' % item.filename)
+
+        elif item.mode == 'dvd' and hasattr(item.media, 'devicename'):
             # dvd:///dev/dvd/2
             command.append('dvd://%s/%s' % (item.media.devicename, item.url[6:]))
+
         elif item.mode == 'dvd': # no devicename? Probably a mirror image on the HD
             command.append(item.url)
 
