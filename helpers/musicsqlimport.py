@@ -84,16 +84,18 @@ def mainloop(path='/media/Music',dirtitle='',type='*.mp3'):
 
     songs = util.recursefolders(path,1,type,1)
 
-    # TODO
-    # Check the database and generate a list and then use
-    # songs.remove(os.path.join(path,filename)) 
-    # to remove it so # we can speed up the whole process. We just 
-    # need a function that returns a list of files with full paths
-    # from the database.
-    #
-    # It's not a necessity, but it'll make large directories less 
-    # time consuming to do.
-
+    cursor.execute('SELECT path, filename FROM music')
+    count = 0
+    for row in cursor.fetchall():
+        try:
+            songs.remove(os.path.join(row['path'],row['filename']))
+            count = count + 1
+        except ValueError:
+            # Why doesn't it just give a return code
+            pass
+  
+    if count > 0:
+        print "Skipped %i songs already in the database..." % (count)
 
     tempvar = ''
     for song in songs:
