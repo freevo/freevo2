@@ -18,6 +18,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/01/28 20:11:47  outlyer
+# Added 'dvd' and renamed audio -> audiocd since that's what it reports now.
+#
 # Revision 1.7  2004/01/18 16:51:05  dischi
 # (re)move unneeded variables
 #
@@ -201,10 +204,11 @@ class cdstatus(IdleBarPlugin):
         IdleBarPlugin.__init__(self)
         icondir = os.path.join(config.ICON_DIR, 'status')
         self.cdimages ={}
-        self.cdimages ['audio']       = os.path.join(icondir, 'cd_audio.png')
+        self.cdimages ['audiocd']       = os.path.join(icondir, 'cd_audio.png')
         self.cdimages ['empty_cdrom'] = os.path.join(icondir, 'cd_inactive.png')
         self.cdimages ['images']      = os.path.join(icondir, 'cd_photo.png')
         self.cdimages ['video']       = os.path.join(icondir, 'cd_video.png')
+        self.cdimages ['dvd']         = os.path.join(icondir, 'cd_video.png')
         self.cdimages ['burn']        = os.path.join(icondir, 'cd_burn.png')
         self.cdimages ['cdrip']       = os.path.join(icondir, 'cd_rip.png')
         self.cdimages ['mixed']       = os.path.join(icondir, 'cd_mixed.png')
