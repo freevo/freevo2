@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.89  2004/01/07 18:18:59  dischi
+# remove update info on build
+#
 # Revision 1.88  2004/01/06 19:27:03  dischi
 # use new mtime function to avoid crash
 #
@@ -490,6 +493,9 @@ class DirItem(Playlist):
         self.dir_items  = []
         self.pl_items   = []
 
+        if hasattr(self, '__dirwatcher_last_time__'):
+            del self.__dirwatcher_last_time__
+            
         if arg == 'update':
             if not self.menu.choices:
                 selected_pos = -1
