@@ -11,7 +11,7 @@
         visible="yes" icon="skins/icons/AquaFusion/movies.png"  />
       <item pos="2" name="Music"   action="MediaMenu().main_menu" arg="audio" 
         visible="yes" icon="skins/icons/AquaFusion/mp3.png"  />
-      <item pos="3" name="Images"   action="image.image.main_menu" arg="" 
+      <item pos="3" name="Images"   action="MediaMenu().main_menu" arg="image" 
         visible="yes" icon="skins/icons/AquaFusion/images.png"  />
       <item pos="4" name="Games"   action="MediaMenu().main_menu" arg="games" 
         visible="no" icon="skins/icons/AquaFusion/package_games.png"  />
