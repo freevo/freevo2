@@ -23,6 +23,7 @@ o Compile and install all the programs in apps/
       o Start the daemon
 
 o Compile Freevo
+  o Requires freetype 2.x, libpng
   o Requires Python >= version 2.1 (1.5 OK?)
   o Test the remote using the lirc application irw, and using the 
     remote_control_lirc.py Freevo application
