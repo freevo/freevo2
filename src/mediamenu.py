@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2003/02/21 05:00:23  krister
+# Don't display .pics folders
+#
 # Revision 1.32  2003/02/19 13:04:32  dischi
 # Only active the new auto-cover for audio
 #
@@ -447,7 +450,9 @@ class DirItem(Playlist):
         # build items for sub-directories
         dir_items = []
         for filename in files:
-            if os.path.isdir(filename) and os.path.basename(filename) != '.xvpics':
+            if (os.path.isdir(filename) and
+                os.path.basename(filename) != '.xvpics' and
+                os.path.basename(filename) != '.pics'):
                 dir_items += [ DirItem(filename, self, display_type =
                                        self.display_type) ]
 
@@ -579,7 +584,9 @@ class DirItem(Playlist):
         # add new dir items to the menu
         new_dir_items = []
         for dir in new_files:
-            if os.path.isdir(dir) and os.path.basename(dir) != '.xvpics':
+            if (os.path.isdir(dir) and
+                os.path.basename(dir) != '.xvpics' and
+                os.path.basename(dir) != '.pics'):
                 new_dir_items += [ DirItem(dir, self,
                                            display_type = self.display_type) ]
 
