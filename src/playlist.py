@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/01/11 10:38:31  dischi
+# store filename in playlist item
+#
 # Revision 1.6  2003/01/05 13:05:26  dischi
 # fix DOWN for random recursive playlists
 #
@@ -205,12 +208,14 @@ class Playlist(Item):
         self.autoplay = FALSE
 
         if isinstance(file, list):      # file is a playlist
+            self.filename = ''
             for i in file:
                 element = copy.copy(i)
                 element.parent = self
                 self.playlist += [ element ]
             self.name = 'Playlist'
         else:
+            self.filename = file
             self.name    = os.path.splitext(os.path.basename(file))[0]
         
             (curdir, playlistname) = os.path.split(file)
