@@ -83,11 +83,9 @@ def shutdown(menuw=None, arg=None):
 
 def autostart():
     if config.ROM_DRIVES != None: 
-        media,label,image = util.identifymedia(config.ROM_DRIVES[0][0])
-        if media == 'DVD':
-            mplayer.play('dvd', '1', [])
-        elif media == 'VCD' or media == 'SVCD':
-            mplayer.play('vcd', '1', [])
+        media,label,image,play_options = util.identifymedia(config.ROM_DRIVES[0][0])
+        if play_options:
+            movie.play(None, play_options)
         elif media == 'DIVX':
             movie.cwd(config.ROM_DRIVES[0][0], menuwidget)
         elif media == 'MP3':

@@ -103,19 +103,11 @@ def eventhandler(event = None, menuw=None, arg=None):
             
             item = menuw.all_items[menuw.all_items.index(menuw.menustack[-1].selected)]
             
-            (type, label, image) = util.identifymedia(rom)
-            if type == 'DVD':
+            (type, label, image, play_options) = util.identifymedia(rom)
+            if play_options:
                 item.name = label
                 item.action = play_movie
-                item.arg = ('dvd', 1, [])
-            elif type == 'VCD':
-                item.name = label
-                item.action = play_movie
-                item.arg = ('vcd', 1, [])
-            elif type == 'SVCD':
-                item.name = label
-                item.action = play_movie
-                item.arg = ('vcd', 1, [])
+                item.arg = play_options
             elif type != None:
                 item.name = 'CD [%s]' % label
                 item.action = cwd
@@ -149,13 +141,9 @@ def main_menu(arg=None, menuw=None):
 
     if config.ROM_DRIVES != None: 
         for (dir, name, tray) in config.ROM_DRIVES:
-            (type, label, image ) = util.identifymedia(dir)
-            if type == 'DVD':
-                m = menu.MenuItem(label, play_movie, ('dvd', 1, []), eventhandler, (dir,))
-            elif type == 'VCD':
-                m = menu.MenuItem(label, play_movie, ('vcd', 1, []), eventhandler, (dir,))
-            elif type == 'SVCD':
-                m = menu.MenuItem(label, play_movie, ('vcd', 1, []), eventhandler, (dir,))
+            (type, label, image, play_options ) = util.identifymedia(dir)
+            if play_options:
+                m = menu.MenuItem(label, play_movie, play_options, eventhandler, (dir,))
             elif type != None:
                 m = menu.MenuItem('CD [%s]' % label, cwd, dir, eventhandler, (dir,))
             else:
