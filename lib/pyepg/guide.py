@@ -69,7 +69,6 @@ class Guide:
         self.db = Database(*args)
 
 
-
     def load(self, TV_CHANNELS=[], TV_CHANNELS_EXCLUDE=[]):
         """
         Load channel listing from the database
@@ -309,7 +308,7 @@ class Guide:
                     query = '%s or' % query
             query = '%s and' % query
         else:
-            query = 'select * from programs where'
+            query = 'SELECT * FROM programs WHERE'
 
         if stop == 0:
             # only get what's running at time start
@@ -320,10 +319,8 @@ class Guide:
                     (query, start, start, start)
         elif stop > 0:
             # get everything from time start to time stop
-            query = '%s ((start<=%d and stop>%d) or \
-                             (start>%d and stop<%d) or \
-                             (start<%d and stop>=%d))' % \
-                    (query, start, start, start, stop, stop, stop)
+            query = '%s start <= %s AND stop >= %s' % \
+                    (query, stop, start)
         else:
             return []
 
@@ -454,7 +451,7 @@ class Guide:
         Get a channel relative to the given channel 'start'. The function
         will start from the beginning of the list if the index is greater
         as the channel list length and wrap to the end if lower zero.
-        If start is not given it will return the channel based on the 
+        If start is not given it will return the channel based on the
         selected_index, which is also updated every method call.
         """
         if type(start) in StringTypes:
