@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/09/25 23:38:15  mikeruelle
+# more missing imports
+#
 # Revision 1.1  2004/09/25 04:39:07  rshortt
 # An input plugin for lirc: plugin.activate('input.lirc') - untested.
 #
@@ -36,7 +39,10 @@
 # ----------------------------------------------------------------------- */
 
 import config
+import plugin
 import eventhandler
+import time
+import os
 import rc
 rc = rc.get_singleton()
 
