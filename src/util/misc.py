@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/01/11 05:46:31  outlyer
+# Remove debug
+#
 # Revision 1.14  2004/01/11 05:45:38  outlyer
 # Ouch! We definitely need a cache sooner than later. Without the cache
 # the  CPU usage on my Athlon 2000 was going to 40% (sorting, most likely
@@ -386,7 +389,6 @@ def comingup(items):
     result = ''
 
     cachefile = '%s/upsoon' % (config.FREEVO_CACHEDIR)
-    print cachefile
     if (os.path.exists(cachefile) and \
         (abs(time.time() - os.path.getmtime(cachefile)) < 3600)):
         cache = open(cachefile,'r')
