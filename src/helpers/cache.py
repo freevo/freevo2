@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2004/02/13 17:34:18  dischi
+# small fix
+#
 # Revision 1.23  2004/02/12 12:22:03  dischi
 # update cache to new directory metainfo
 #
@@ -466,16 +469,16 @@ if __name__ == "__main__":
             plugin.init_special_plugin(type)
             activate_plugins.append(type)
             
-    delete_old_files_1()
-    delete_old_files_2()
-
     for type in 'VIDEO', 'AUDIO', 'IMAGE':
         for d in copy.copy(getattr(config, '%s_ITEMS' % type)):
-            if not isinstance(d, str):
+            if not (isinstance(d, str) or isinstance(d, unicode)):
                 d = d[1]
             if d == '/':
-                print '%s_ITEMS contains root directory, skipped.' % type
+                print 'ERROR: %s_ITEMS contains root directory, skipped.' % type
                 setattr(config, '%s_ITEMS' % type, [])
+
+    delete_old_files_1()
+    delete_old_files_2()
 
     cache_directories(rebuild)
     cache_thumbnails()
