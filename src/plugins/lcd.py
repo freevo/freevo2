@@ -13,6 +13,10 @@
 #    3) Better (and more) LCD screens.
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/08/27 13:02:31  gsbarbieri
+# 2x20 and 2x40 screens.
+# Also, fixed some crashes
+#
 # Revision 1.6  2003/08/24 19:42:25  gsbarbieri
 # Support 2x16 displays
 #
@@ -249,7 +253,7 @@ layouts = { 4 : # 4 lines display
                   "desc_v"   : ( "scroller",
                                  "7 4 %d 4 h 2 \"%s\"",
                                  "( self.width, tv.desc )" )
-                  }              
+                  }
                 },              
 
               20 : # 20 chars per line
@@ -357,8 +361,109 @@ layouts = { 4 : # 4 lines display
                                   "1 2 %d 2 h 2 \"%s\"",
                                   "( self.width, tv.title )" )
                    }
-                 } # screens
-              } # chars per line            
+                },
+              
+              20 : # 20 chars per line
+              # Welcome screen
+              { "welcome":
+                { "title"    : ( "title",
+                                 "1 1 Freevo",
+                                 None )
+                  },
+
+                 "menu"    :
+                 { "title_v"  : ( "scroller",
+                                  "1 1 %d 1 h 2 \"%s\"",
+                                  "( self.width, menu.heading )" ),
+                   "item_v"   : ( "scroller",
+                                  "1 2 %d 2 h 2 \"%s\"",
+                                  "( self.width, title )" )
+                   },
+
+                 "audio_player":
+                 { "music_v"   : ( "scroller",
+                                   "1 1 %d 1 h 2 \"%s\"",
+                                   "( self.width, title )" ),
+                   "time_v"    : ( "string",
+                                   "1 2 '  % 2d:%02d/% 2d:%02d'",
+                                   "( int(player.length / 60), int(player.length % 60)," +
+                                   " int(player.elapsed / 60), int(player.elapsed % 60))" )
+                   },
+
+                 "tv":
+                 { "chan_v"   : ( "scroller",
+                                  "1 1 %d 1 h 2 \"%s\"",
+                                  "( self.width, tv.display_name) )" ),
+                   "prog_v"   : ( "scroller",
+                                  "1 2 %d 2 h 2 \"%s\"",
+                                  "( self.width, tv.title )" )
+                   }
+                 },
+              
+              40 : # 40 chars per line
+              # Welcome screen
+              { "welcome":
+                { "title"    : ( "title",
+                                 "1 1 Freevo",
+                                 None )
+                  },
+
+                 "menu":
+                 { "title_l"  : ( "string",
+                                 "1 1 'MENU: '",
+                                 None ),
+                  "item_l"   : ( "string",
+                                 "1 2 'ITEM: '",
+                                 None ),
+                   "title_v"  : ( "scroller",
+                                  "7 1 %d 1 h 2 \"%s\"",
+                                  "( self.width, menu.heading )" ),
+                   "item_v"   : ( "scroller",
+                                  "7 2 %d 2 h 2 \"%s\"",
+                                  "( self.width, title )" )
+                   },
+
+                 "audio_player":
+                 { "music_l"   : ( "string",
+                                  "1 1 'MUSIC: '",
+                                  None ),
+                  "music_v"   : ( "scroller",
+                                  "8 1 %d 1 h 2 \"%s\"",
+                                "( self.width, title )" ),
+                  "time_v"    : ( "string",
+                                  "2 2 '% 2d:%02d/% 2d:%02d ( %2d%%)'",
+                                  "( int(player.length / 60), int(player.length % 60)," +
+                                  " int(player.elapsed / 60), int(player.elapsed % 60)," +
+                                  " int(player.elapsed * 100 / player.length) )" ),
+                  "timebar1_v": ( "string", "21 2 '['", None),
+                  "timebar2_v": ( "string", "40 2 ']'", None),
+                  "timebar3_v": ( "hbar",
+                                  "22 2 '%d'","(int(player.elapsed *90 / player.length))"),
+                  # animation at the begining of the time line
+                  "animation_v": ( "string", "1 2 '%s'",
+                                   "animation_audioplayer_chars[" +
+                                   " player.elapsed % len(animation_audioplayer_chars)]")
+                  },
+
+                "tv":
+                { "chan_l"   : ( "string",
+                                 "1 1 'CHAN: '",
+                                 None ),
+                  "prog_l"   : ( "string",
+                                 "1 2 'PROG: '",
+                                 None ),
+                  "chan_v"   : ( "scroller",
+                                 "7 1 %d 1 h 2 \"%s\"",
+                                 "( self.width, tv.channel_id )" ),
+                  "prog_v"   : ( "scroller",
+                                 "7 2 %d 2 h 2 \"%s\"",
+                                 "( self.width, tv.title )" ),
+                  "time_v"   : ( "scroller",
+                                 "%d 1 %d 3 h 2 \"[%s-%s]\"",
+                                 "( self.width - 13, 13, tv.start, tv.stop )" ),
+                  }
+                } # screens
+              } # chars per line
             } # lines per display
              
 # poll_widgets: widgets that should be refreshed during the pool
@@ -419,7 +524,9 @@ class PluginInterface( plugin.DaemonPlugin ):
         self.height = self.lcd.d_height
         self.width  = self.lcd.d_width
         self.generate_screens()
-
+        if self.disable:
+            return
+        
         # Show welcome screen:
         for w in self.screens[ "welcome" ]:
             type, param, val = self.screens[ "welcome" ][ w ]            
@@ -574,7 +681,15 @@ class PluginInterface( plugin.DaemonPlugin ):
         
         self.lines = l
         self.columns = c
-        self.screens = screens = layouts[ l ][ c ]
+        try:
+            self.screens = screens = layouts[ l ][ c ]
+        except KeyError:
+            if DEBUG > 0:
+                print "WARNING: Could not find screens for %d lines and %d columns LCD!" % ( self.height, self.width )                
+            print "ERROR: No screens found!"
+            self.disable = 1
+            return
+        
         for s in screens:
             self.lcd.screen_add( s )
             widgets = screens[ s ]
