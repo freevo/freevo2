@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.48  2004/01/31 11:20:15  dischi
+# cdda is not network play
+#
 # Revision 1.47  2004/01/27 17:24:43  outlyer
 # Use the tag title if available and DIRECTORY_USE_MEDIAID_TAG_NAMES is set.
 #
@@ -147,6 +150,18 @@ class AudioItem(Item):
         return self.url
 
 
+    def set_url(self, url, info=True):
+        """
+        Sets a new url to the item. Always use this function and not set 'url'
+        directly because this functions also changes other attributes, like
+        filename, mode and network_play
+        """
+        Item.set_url(self, url, info)
+        if url.startswith('cdda://'):
+            self.network_play = False
+            self.mimetype = 'cdda'
+
+
     def __getitem__(self, key):
         """
         return the specific attribute as string or an empty string
@@ -176,6 +191,7 @@ class AudioItem(Item):
         """
         Start playing the item
         """
+        print self.network_play
         self.parent.current_item = self
         self.elapsed = 0
 
