@@ -1,0 +1,51 @@
+XMLTV
+-----
+
+Abstract:
+==
+
+Freevo can now use the XMLTV format (http://xmltv.sourceforge.net/)
+for TV listings. XMLTV downloads listings from a number of different
+countries and regions into a standard XML based format. This is the
+only way to get TV listings for Canada, and Europe, for use in Freevo
+currently.
+
+Installation:
+==
+
+To install XMLTV, a number of modules are required, for convenience,
+here are some places to get the modules, "precompiled"
+
+RPMS:
+http://www.doc.ic.ac.uk/~epa98/work/apps/xmltv/prerequisites/rpm/
+http://www.funktronics.ca/openpvr/xmltvrpms/
+
+Debian Packages:
+deb http://freevo.sourceforge.net/debian unstable main
+
+Grabbings listings:
+==
+
+Configure xmltv via the xmltv documented installation instructions.
+For automatic downloading, you can add a line like this to your
+crontab:
+-
+0 3 * * * /usr/bin/tv_grab_na --days=2 > /var/cache/xmltv/TV.xml
+-
+
+Use in Freevo:
+==
+
+Since XMLTV allows you to select the channels to grab at fetch-time,
+the TV_CHANNELS directive in the config file is ignored.  To use the 
+listings in freevo, set the following options in freevo_config
+
+TV_GUIDE_METHOD = 'xmltv'
+...
+XMLTV_FILE = '/path/to/TV.xml'
+
+Thanks
+==
+Much thanks to James Oakley of the openpvr project, who wrote the
+Python XMLTV parsing module which is used extensively for XMLTV
+support in Freevo.
