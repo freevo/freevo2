@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2004/02/06 18:24:39  dischi
+# make to possible to override busy icon with skin
+#
 # Revision 1.37  2004/02/02 23:06:03  outlyer
 # This probably isn't neccessary to show every startup.
 #
@@ -432,6 +435,17 @@ class Skin:
             return self.settings.font[name]
         except:
             return self.settings.font['default']
+
+        
+    def get_icon(self, name):
+        """
+        Get the icon object 'name'. Return the icon in the theme dir if it
+        exists, else try the normal image dir. If not found, return ''
+        """
+        icon = util.getimage(os.path.join(self.settings.icon_dir, name))
+        if icon:
+            return icon
+        return util.getimage(os.path.join(config.ICON_DIR, name), '')
 
         
     def items_per_page(self, (type, object)):

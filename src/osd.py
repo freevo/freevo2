@@ -10,17 +10,24 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.134  2004/02/06 18:24:39  dischi
+# make to possible to override busy icon with skin
+#
 # Revision 1.133  2004/02/05 19:26:41  dischi
 # fix unicode handling
 #
 # Revision 1.132  2004/02/05 02:52:25  gsbarbieri
 # Handle filenames internally as unicode objects.
 #
-# This does *NOT* affect filenames that have only ASCII chars, since the translation ASCII -> Unicode is painless. However this *DOES* affect files with accents, like é (e acute, \xe9) and others.
+# This does *NOT* affect filenames that have only ASCII chars, since the
+# translation ASCII -> Unicode is painless. However this *DOES* affect files
+# with accents
 #
-# I tested with Video, Images and Music modules, but *NOT* with Games, so if you have the games modules, give it a try.
+# I tested with Video, Images and Music modules, but *NOT* with Games, so if you
+# have the games modules, give it a try.
 #
-# It determines the encoding based on (in order) FREEVO_LOCALE, LANG and LC_ALL, which may have the form: "LANGUAGE_CODE.ENCODING", like "pt_BR.UTF-8", and others.
+# It determines the encoding based on (in order) FREEVO_LOCALE, LANG and LC_ALL,
+# which may have the form: "LANGUAGE_CODE.ENCODING", like "pt_BR.UTF-8", and others.
 #
 # Revision 1.131  2004/02/04 17:32:35  dischi
 # fix crash for deactivated osd and fix busy icon redraw
@@ -327,7 +334,6 @@ class BusyIcon(threading.Thread):
         threading.Thread.start(self)
         self.timer  = 0
         self.active = False
-        self.icon   = os.path.join(config.SHARE_DIR, 'icons/popup/popup_wait.png')
         self.lock   = thread.allocate_lock()
         self.rect   = None
         
@@ -351,24 +357,27 @@ class BusyIcon(threading.Thread):
                 self.timer -= 0.01
                 time.sleep(0.01)
             if self.active:
+                import skin
                 self.lock.acquire()
                 osd = get_singleton()
-                image  = osd.loadbitmap(self.icon)
-                width  = image.get_width()
-                height = image.get_height()
-                x = osd.width  - config.OSD_OVERSCAN_X - 20 - width
-                y = osd.height - config.OSD_OVERSCAN_Y - 20 - height
+                icon = skin.get_singleton().get_icon('misc/osd_busy')
+                if icon:
+                    image  = osd.loadbitmap(icon)
+                    width  = image.get_width()
+                    height = image.get_height()
+                    x = osd.width  - config.OSD_OVERSCAN_X - 20 - width
+                    y = osd.height - config.OSD_OVERSCAN_Y - 20 - height
 
-                self.rect = (x,y,width,height)
-                # backup the screen
-                screen = pygame.Surface((width,height))
-                screen.blit(osd.screen, (0,0), self.rect)
-                # draw the icon
-                osd.drawbitmap(image, x, y)
-                osd.update(rect=self.rect, stop_busyicon=False)
+                    self.rect = (x,y,width,height)
+                    # backup the screen
+                    screen = pygame.Surface((width,height))
+                    screen.blit(osd.screen, (0,0), self.rect)
+                    # draw the icon
+                    osd.drawbitmap(image, x, y)
+                    osd.update(rect=self.rect, stop_busyicon=False)
 
-                # restore the screen
-                osd.screen.blit(screen, (x,y))
+                    # restore the screen
+                    osd.screen.blit(screen, (x,y))
                 self.lock.release()
                 
             while self.active:
