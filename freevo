@@ -45,7 +45,7 @@ if test -a $RT_DIR/freevo_python ; then
     echo "Using the Freevo runtime ($RT_DIR)"
     
     # Support for using just Python
-    if [ $1 = prompt ] ; then
+    if [[ $1 = prompt ]] ; then
         $RT_DIR/freevo_python 
         exit 0
     fi
