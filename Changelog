@@ -4,7 +4,7 @@ Freevo Changelog
 $Id$
 
 
-Release 1.2.1 (2002-05-XX):
+Release 1.2.1 (2002-05-17):
 ---------------------------
 o Changed the config scripts to look for the file config_freevo.py
   in /etc/freevo, ~/freevo and the current dir. This makes it easier
