@@ -114,15 +114,12 @@ class RecordServer(RPCServer):
 
     def send_update(self):
         # send and updated list to the clients
-        try:
-            ret = []
-            for r in self.recordings:
-                ret.append(r.short_list())
-            for c in self.clients:
-                print 'send update', c
-                self.mbus_instance.send_event(c, 'record.list.update', ret)
-        except:
-            log.exception('send_update')
+        ret = []
+        for r in self.recordings:
+            ret.append(r.short_list())
+        for c in self.clients:
+            print 'send update', c
+            self.mbus_instance.send_event(c, 'record.list.update', ret)
 
         
     def check_recordings(self):
@@ -317,7 +314,7 @@ class RecordServer(RPCServer):
     def __entity_update(self, entity):
         if not entity.present and entity in self.clients:
             log.info('lost client %s' % entity)
-            self.client.remove(entity)
+            self.clients.remove(entity)
 
             
     #
