@@ -22,6 +22,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.102  2004/03/18 15:38:18  dischi
+# Automouter patch to check for hosts in mediamenu from Soenke Schwardt.
+# See doc of VIDEO_ITEMS for details
+#
 # Revision 1.101  2004/03/12 22:01:18  rshortt
 # Fix some assumptions with channel detection.  Also channel id's are strings,
 # not ints.  I discovered some problems when using an xmltv file generated from
@@ -582,9 +586,23 @@ for type in ('video', 'audio', 'image', 'games'):
         abs = []
         for d in x:
             if isstring(d):
-                abs.append(os.path.abspath(d))
+                pos = d.find(':')
+                if pos == -1:
+                    abs.append(os.path.abspath(d))
+                else:
+                    if pos > d.find('/'):                        
+                        abs.append(os.path.abspath(d))
+                    else:
+                        abs.append(d[0:pos+1] + os.path.abspath(d[pos+1:]))
             else:
-                abs.append((d[0], os.path.abspath(d[1])))
+                pos = d[1].find(':')
+                if pos == -1:
+                    abs.append((d[0], os.path.abspath(d[1])))
+                else:
+                    if pos > d[1].find('/'):                        
+                        abs.append((d[0], os.path.abspath(d[1])))
+                    else:
+                        abs.append((d[0], d[1][0:pos+1] + os.path.abspath(d[1][pos+1:])))
         exec ('%s = abs' % n)
             
 

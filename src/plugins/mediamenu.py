@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2004/03/18 15:38:18  dischi
+# Automouter patch to check for hosts in mediamenu from Soenke Schwardt.
+# See doc of VIDEO_ITEMS for details
+#
 # Revision 1.35  2004/02/27 20:15:02  dischi
 # more unicode fixes
 #
@@ -202,28 +206,40 @@ class MediaMenu(Item):
                     if len(item) > 2:
                         add_args = item[2:]
 
-                if vfs.isdir(filename):
-                    item = directory.DirItem(String(filename), self,
-                                             display_type=self.display_type,
-                                             add_args=add_args)
-                    if title:
-                        item.name = title
-                    self.normal_items.append(item)
-                else:
-                    if not vfs.isfile(filename):
-                        filename = filename[len(os.getcwd()):]
-                        if filename[0] == '/':
-                            filename = filename[1:]
-                        filename = vfs.join(config.SHARE_DIR, filename)
-                    # normal file
-                    for p in plugin.mimetype(self.display_type):
-                        items = p.get(self, [ String(filename) ])
+                reachable = 1
+                pos = filename.find(':/')
+                if pos > 0:
+                    if filename.find(':/') < filename.find('/'):                        
+                        hostname = filename[0:pos]
+                        filename = filename[pos+1:]
+                        try:
+                            if os.system( config.HOST_ALIVE_CHECK % hostname ) != 0:
+                                reachable = 0
+                        except:
+                            traceback.print_exc()
+                       
+                if reachable:
+                    if vfs.isdir(filename):
+                        item = directory.DirItem(String(filename), self,
+                                                 display_type=self.display_type,
+                                                 add_args=add_args)
                         if title:
-                            for i in items:
-                                i.name = title
-                        self.normal_items += items
-                        
-
+                            item.name = title
+                        self.normal_items.append(item)
+                    else:
+                        if not vfs.isfile(filename):
+                            filename = filename[len(os.getcwd()):]
+                            if filename[0] == '/':
+                                filename = filename[1:]
+                            filename = vfs.join(config.SHARE_DIR, filename)
+                        # normal file
+                        for p in plugin.mimetype(self.display_type):
+                            items = p.get(self, [ String(filename) ])
+                            if title:
+                                for i in items:
+                                    i.name = title
+                            self.normal_items += items
+                            
             except:
                 traceback.print_exc()
 

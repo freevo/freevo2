@@ -317,6 +317,12 @@ KEYMAP = DEFAULT_KEYMAP
 USE_NETWORK = 1
 
 #
+# HOST_ALIVE_CHECK tests if the given host is online.
+# Will be used to avoid extremely long automounter timeouts.
+#
+HOST_ALIVE_CHECK = 'ping -c 1 -W 1 %s > /dev/null 2>&1'
+
+#
 # store output of started processes for debug
 #
 CHILDAPP_DEBUG = 0
@@ -584,6 +590,15 @@ DIRECTORY_AUTOPLAY_ITEMS       = [ ]
 # Where the movie files can be found.
 # This is a list of items (e.g. directories, fxd files). The items itself
 # can also be a list of (title, file)
+#
+# Example: VIDEO_ITEMS = [ ('action movies', '/files/movies/action'),
+#                          ('funny stuff', '/files/movies/comedy') ]
+#
+# Some people have movies on different maschines using an automounter.
+# To avoid timeouts, you can specify the machine name in the directory
+# to check if the machine is alive first
+# Directory myserver:/files/server-stuff will show the item for the
+# directory /files/server-stuff if the computer myserver is alive.
 #
 VIDEO_ITEMS = None
 

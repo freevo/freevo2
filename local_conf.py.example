@@ -274,16 +274,15 @@ CONFIG_VERSION = 5.08
 # This is a list of items (e.g. directories, fxd files). The items itself
 # can also be a list of (title, file)
 #
-# VIDEO_ITEMS = [ ('My new files', '/files/new'), 
-#                 ('All files', '/files/') ]
-
+# VIDEO_ITEMS = [ ('action movies', '/files/movies/action'),
+#                 ('funny stuff', '/files/movies/comedy') ]
 #
-# Directory containing images for tv shows. A tv show maches the regular
-# expression VIDEO_SHOW_REGEXP, e.g. "Name 3x10 - Title". If an image
-# name.(png|jpg) (lowercase) is in this directory, it will be taken as cover
-# image
+# Some people have movies on different maschines using an automounter.
+# To avoid timeouts, you can specify the machine name in the directory
+# to check if the machine is alive first
+# Directory myserver:/files/server-stuff will show the item for the
+# directory /files/server-stuff if the computer myserver is alive.
 #
-VIDEO_SHOW_DATA_DIR = None
 
 #
 # The list of filename suffixes that are used to match the files that
