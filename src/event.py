@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/06/05 02:21:40  rshortt
+# Forgot PAUSE for TV.
+#
 # Revision 1.9  2003/06/04 23:00:42  rshortt
 # Add some new TV_EVENTS.
 #
@@ -292,6 +295,7 @@ TV_EVENTS = {
     'MENU'      : STOP,
     'EXIT'      : STOP,
     'SELECT'    : STOP,
+    'PAUSE'     : PAUSE,
     'CH+'       : TV_CHANNEL_UP,
     'CH-'       : TV_CHANNEL_DOWN,
     'LEFT'      : Event(SEEK, arg=-60),
