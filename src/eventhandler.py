@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/09/15 20:47:07  dischi
+# better handling of registered events
+#
 # Revision 1.9  2004/09/15 19:38:20  dischi
 # make it possible that the current applications hides
 #
@@ -350,8 +353,8 @@ class Eventhandler:
             event = self.queue[0]
             del self.queue[0]
         
-        _debug_('handling event %s' % str(event), 2)
-
+        _debug_('handling event %s' % str(event), 1)
+        
         if self.eventhandler_plugins == None:
             _debug_('init', 1)
             self.eventhandler_plugins  = []
@@ -370,6 +373,16 @@ class Eventhandler:
             t1 = time.clock()
 
         try:
+            used = False
+            if str(event) in self.registered:
+                # event is in the list of registered events. This events are special
+                # and should go to the callbacks registered. If at least one of them
+                # uses the event (returns True), do not send this event in the event
+                # queue (e.g. the detach plugin needs PLAY_END, but will only use
+                # it for the audio end and this should not go to the video player)
+                for c in self.registered[str(event)]:
+                    used = c.eventhandler(event=event) or used
+
             if event == FUNCTION_CALL:
                 # event is a direct function call, call it and do not pass it
                 # on the the normal handling
@@ -380,12 +393,10 @@ class Eventhandler:
                 # not pass it on the the normal handling
                 event.handler(event=event)
 
-            elif str(event) in self.registered:
-                # event is in the list of registered events. This events are special
-                # and should only go to the callbacks registered
-                for c in self.registered[str(event)]:
-                    c.eventhandler(event=event)
-
+            elif used:
+                # used by registered plugin
+                pass
+            
             elif len(self.popups) and self.popups[-1].eventhandler(event=event):
                 # handled by the current popup
                 pass
