@@ -833,14 +833,32 @@ TV_REC_OUTFMT = 'yuy2'
 #
 # Settings for ivtv based cards such as the WinTV PVR-250/350.
 #
-
+# XXX TODO: Add descriptions and valid settings for each option.
 # bitrate in bps
-IVTV_BITRATE = 4000000
-
 # stream type
 # Options are: 0 (mpeg2_ps), 1 (mpeg2_ts), 2 (mpeg1), 3 (mpeg2_pes_av),
 #              5 (mpeg2_pes_v), 7 (mpeg2_pes_a), 10 (dvd)
-IVTV_STREAM_TYPE = 0
+
+IVTV_OPTIONS = {
+    'input'         : 4,
+    'resolution'    : '720x480',
+    'aspect'        : 2,
+    'audio_bitmask' : 233,
+    'bframes'       : 3,
+    'bitrate_mode'  : 1,
+    'bitrate'       : 4000000,
+    'bitrate_peak'  : 4000000,
+    'dnr_mode'      : 0,
+    'dnr_spatial'   : 0,
+    'dnr_temporal'  : 0,
+    'dnr_type'      : 0,
+    'framerate'     : 0,
+    'framespergop'  : 15,
+    'gop_closure'   : 1,
+    'pulldown'      : 0,
+    'stream_type'   : 10,
+}
+
 
 
 #
