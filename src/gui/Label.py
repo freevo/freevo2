@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/05/04 23:12:35  rshortt
+# Dumb typo.
+#
 # Revision 1.7  2003/05/04 22:50:12  rshortt
 # Fix for some crashes with text wrapping.
 #
@@ -230,12 +233,8 @@ class Label(GUIObject):
         if dummy_surface:
             self.surface = pygame.Surface((pw, ph), 0, 32)
         else:
-            if DEBUG: print '       par surf: %s' % self.parent.surface
-            if DEBUG: print '       self.width: %s' % self.width
-            if DEBUG: print '       self.height: %s' % self.height
             if self.width > pw: self.width = pw
-            if self.height > ph: self.width = ph
-
+            if self.height > ph: self.height = ph
             self.surface = self.parent.surface.subsurface((0, 0, self.width, self.height))
             if DEBUG: print '      surfaceXX=%s' % self.surface
 
