@@ -27,6 +27,10 @@
 # Albums with more than one Artist aren't handled very well.
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/07/01 19:56:29  outlyer
+# Use util.tagmp3() function by default, since we can choose the tag version.
+# Well, it's not in the configuration yet, but soon enough.
+#
 # Revision 1.6  2003/07/01 14:33:26  outlyer
 # Fixed a double escape of single quotes.
 #
@@ -273,28 +277,9 @@ class main_backup_thread(threading.Thread):
             # Build the cdparanoia command to be run if mp3 format is selected
             if DEBUG: print 'rip_format = %s' %rip_format
             if rip_format=='mp3' or rip_format== 'MP3':
-                artist_quoted = '\"' + artist + '\"'
-                album_quoted = '\"' + album + '\"'
-                genre_quoted = '\"' + genre + '\"'
-                song_name_quoted = '\"' + song_names[i] + '\"'
-
-                user_rip_path_prefs_quoted = {  'artist'  : artist_quoted,
-                                                                'album': album_quoted,
-                                                                'genre' : genre_quoted,
-                                                                'song'  : song_name_quoted,
-                                                                'track'  : track }                                
-                
-                                
-                id3_tag_opts = ' '
-                id3_tag_opts_temp = config.CD_RIP_ID3_TAG_OPTS
-                id3_tag_opts  += id3_tag_opts_temp % user_rip_path_prefs_quoted
-                id3_tag_opts += ' '
-                
-                if DEBUG: print 'The id3_tag_opts = %s' %id3_tag_opts
             
                 lame_command =  config.LAME_CMD + ' --nohist -h ' \
                                           + config.CD_RIP_LAME_OPTS \
-                                          + id3_tag_opts \
                                           + ' \"' \
                                           + pathname_cdparanoia \
                                           + path_tail_cdparanoia \
@@ -306,7 +291,10 @@ class main_backup_thread(threading.Thread):
                                           
                 if DEBUG: 'lame:= %s' %lame_command                          
                 os.system(lame_command)
-                
+               
+                util.tagmp3(pathname+path_tail+'.mp3', title=song_names[i], artist=artist, album=album, track=track, 
+                    tracktotal=len(song_names))
+                    
                 # Remove the .wav file.
                 rm_command = '%s%s.wav' % (pathname_cdparanoia, path_tail_cdparanoia)
                 if DEBUG: print 'rm_command = os.unlink(%s)' % rm_command
