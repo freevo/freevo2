@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/02/08 17:37:15  dischi
+# add playlist parser
+#
 # Revision 1.6  2004/01/19 17:56:30  outlyer
 # Write cover images to the overlay directory, not the current one.
 #
@@ -84,6 +87,7 @@ import os,string,fnmatch,sys,md5,stat
 import config, util
 import util.fxdparser
 import mediainfo
+import plugin
 
 try:
     from util.dbutil import *
@@ -116,7 +120,8 @@ def make_query(filename,dirtitle):
     SQL = 'INSERT OR IGNORE INTO music VALUES ' + VALUES
     return SQL
 
-def addPathDB(path='/media/Music',dirtitle=config.AUDIO_ITEMS[0][0],type='*.mp3'):
+def addPathDB(path='/media/Music',dirtitle=config.AUDIO_ITEMS[0][0],type='*.mp3',
+              verbose=True):
 
     # Get some stuff ready
     count = 0
@@ -134,7 +139,7 @@ def addPathDB(path='/media/Music',dirtitle=config.AUDIO_ITEMS[0][0],type='*.mp3'
             # Why doesn't it just give a return code
             pass
   
-    if count > 0:
+    if count > 0 and verbose:
         print "  Skipped %i songs already in the database..." % (count)
 
     for song in songs:
@@ -220,22 +225,6 @@ class AudioParser:
             if getattr(self, type):
                 mediainfo.set(dirname, type, getattr(self, type))
 
-        if config.DEBUG > 1:
-            print dirname
-            if self.artist:
-                print self.artist
-            if self.album:
-                print self.album
-            if self.year:
-                print self.year
-            if self.length > 3600:
-                print '%i:%0.2i:%0.2i' % (int(self.length/3600),
-                                          int((self.length%3600)/60),
-                                          int(self.length%60))
-            else:
-                print '%i:%0.2i' % (int(self.length/60), int(self.length%60))
-            print
-
         data    = mediainfo.get(dirname)
         modtime = os.stat(dirname)[stat.ST_MTIME]
         if not data['coverscan'] or data['coverscan'] != modtime:
@@ -293,3 +282,40 @@ class AudioParser:
                         f.flush()
                         f.close()
      
+
+class PlaylistParser(AudioParser):
+    def __init__(self, item, rescan=False):
+
+        self.artist  = ''
+        self.album   = ''
+        self.year    = ''
+        self.length  = 0
+
+        item.build()
+        songs = []
+        for i in item.playlist:
+            if not callable(i):
+                for p in plugin.mimetype('audio'):
+                    songs += p.get(None, [ i ])
+            else:
+                songs.append(i)
+
+        for song in songs:
+            if not hasattr(song, 'filename'):
+                continue
+            try:
+                data = mediainfo.get(song.filename)
+                for type in ('artist', 'album'):
+                    setattr(self, type, self.strcmp(getattr(self, type), data[type]))
+                self.year = self.strcmp(self.year, data['date'])
+                if data['length']:
+                    self.length += int(data['length'])
+            except OSError:
+                pass
+
+        if not self.length:
+            return
+
+        for type in ('artist', 'album', 'year', 'length'):
+            if getattr(self, type):
+                mediainfo.set(item.filename, type, getattr(self, type))
