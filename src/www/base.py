@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2005/02/13 18:42:59  dischi
+# rename recordings page
+#
 # Revision 1.8  2005/02/03 16:05:38  rshortt
 # Minor cosmetics fix.
 #
@@ -121,7 +124,7 @@ class HTMLResource:
      
         items = [(_('Home'),_('Home'),'%sindex' % str(strprefix)),
                  (_('TV Guide'),_('View TV Listings'),'%sguide' % str(strprefix)),
-                 (_('Scheduled Recordings'),_('View Scheduled Recordings'),'%srec' % str(strprefix)),
+                 (_('Scheduled Recordings'),_('View Scheduled Recordings'),'%srecordings' % str(strprefix)),
 #                  (_('Favorites'),_('View Favorites'),'%sfavorites.rpy' % str(strprefix)),
 #                  (_('Media Library'),_('View Media Library'),'%slibrary.rpy' % str(strprefix)),
 #                  (_('Manual Recording'),_('Schedule a Manual Recording'),'%smanualrecord.rpy' % str(strprefix)),
