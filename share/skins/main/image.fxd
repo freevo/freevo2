@@ -54,7 +54,7 @@
 
    -->
 
-  <skin include="blue" geometry="800x600">
+  <skin include="basic" geometry="800x600">
 
     <menu type="all">
       <style text="bgimage style"/>
