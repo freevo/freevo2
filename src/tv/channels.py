@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/11/23 20:47:13  rshortt
+# Another typo!
+#
 # Revision 1.4  2003/11/23 20:46:07  rshortt
 # Dumb typo.
 #
@@ -179,7 +182,7 @@ class FreevoChannels:
         freq *= 16
         freq /= 1000
 
-        if app 
+        if app:
             if app_cmd:
                 self.appSend(app, app_cmd)
             else:
