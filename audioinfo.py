@@ -16,6 +16,10 @@
 #          * Add support for Ogg-Vorbis
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2002/10/13 14:06:50  dischi
+# Accept jpg as cover images, too, and when there is no title, return
+# the filename as title
+#
 # Revision 1.12  2002/09/07 06:13:53  krister
 # Added check for divide by zero. Cleanups.
 #
@@ -168,17 +172,21 @@ class AudioInfo:
                 print "Oops.. Got UnicodeError.. doing nothing.. :)"
 
     def get_cover_image( self, filename ):
-        cover_logo = os.path.dirname(filename)
-        cover_logo += '/cover.png'
-        print cover_logo
+        cover_logo = os.path.dirname(filename)+'/cover.'
+
         # Only draw the cover if the file exists. We'll
         # use the standard imghdr function to check if
         # it's a real png, and not a lying one :)
-        if os.path.isfile(cover_logo) and imghdr.what(cover_logo):
-            self.image = cover_logo
+        if os.path.isfile(cover_logo+'png') and imghdr.what(cover_logo+'png'):
+            self.image = cover_logo+'png'
+        elif os.path.isfile(cover_logo+'jpg') and imghdr.what(cover_logo+'jpg'):
+            self.image = cover_logo+'jpg'
+            
         # Allow per mp3 covers. As per Chris' request ;)
         if os.path.isfile(os.path.splitext(filename)[0] + '.png'):
             self.image = os.path.splitext(filename)[0] + '.png'
+        elif os.path.isfile(os.path.splitext(filename)[0] + '.jpg'):
+            self.image = os.path.splitext(filename)[0] + '.jpg'
         return self.image
 
     def set_cover_image( self, str ):
@@ -225,7 +233,7 @@ class AudioInfo:
             if 'TITLE' in vc.keys():
                 self.title  = str(vc['TITLE'][0])
             else:
-                self.title  = ''
+                self.title = os.path.splitext(os.path.basename(file))[0]
                 
             if 'TRACK' in vc.keys():
                 self.track  = str(vc['TRACK'][0])
@@ -260,7 +268,7 @@ class AudioInfo:
         self.length = s
         self.title  = id3.title
         if not self.title:
-            self.title = ''
+            self.title = os.path.splitext(os.path.basename(file))[0]
         self.track  = id3.track
         if not self.track:
             self.track = ''
