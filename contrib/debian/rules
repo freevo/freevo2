@@ -65,7 +65,6 @@ binary-arch: build install
 	dh_testdir
 	dh_testroot
 	dh_install --autodest --sourcedir=debian/tmp
-	mkdir $(CURDIR)/debian/freevo-media/usr/share/freevo/fonts/
 	dh_installdocs $(doclist)
 	dh_installmenu
 	dh_installchangelogs 

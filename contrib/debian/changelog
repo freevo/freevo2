@@ -1,8 +1,6 @@
 freevo (1.5.0-0pre1) unstable; urgency=low
 
   * New upstream release
-  * Removed the Vera Truetype fonts from the packages since they are
-    available in Debian
   * Reduced the dependencies to allow alternates
   * Add the HTML documentation
 
