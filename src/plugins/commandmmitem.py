@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/02/14 17:35:39  mikeruelle
+# make compatible with dischi's changes
+#
 # Revision 1.1  2004/01/29 19:42:52  mikeruelle
 # allow a use to add an fxd command file to the main menu. kinda like mediamenu. add you www, email or news app
 #
@@ -41,7 +44,8 @@
 import config
 import plugin
 from item import Item
-from command import CommandItem
+from command import CommandItem, fxdparser
+import util
 
 class CommandMainMenuItem(Item):
     """
@@ -50,9 +54,13 @@ class CommandMainMenuItem(Item):
     """
     def __init__(self, parent, myxmlfile):
         Item.__init__(self, parent, skin_type='commands')
-        self.cmd_item = CommandItem(xmlfile=myxmlfile)
+        command_items = []
+        parser = util.fxdparser.FXD(myxmlfile)
+        parser.setattr(None, 'items', command_items)
+        parser.set_handler('command', fxdparser)
+        parser.parse()
+        self.cmd_item = command_items[0]
         self.name = self.cmd_item.name
-
         
     def actions(self):
         """
