@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2004/01/09 18:57:06  dischi
+# stop on normal exit
+#
 # Revision 1.24  2004/01/09 06:30:49  outlyer
 # Two fixes:
 #
@@ -935,6 +938,7 @@ if __name__ == '__main__':
         try:
             start = time.time()
             main()
+            break
         except:
             traceback.print_exc()
             if start + 10 > time.time():

@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/01/09 18:57:06  dischi
+# stop on normal exit
+#
 # Revision 1.8  2003/10/18 08:33:36  dischi
 # do not restart if the server crashed in 10 secs
 #
@@ -104,7 +107,7 @@ def main():
     application.listenTCP(config.WWW_PORT, site)
     application.run(save=0)
 
-
+    
 if __name__ == '__main__':
     import traceback
     import time
@@ -112,6 +115,7 @@ if __name__ == '__main__':
         try:
             start = time.time()
             main()
+            break
         except:
             traceback.print_exc()
             if start + 10 > time.time():
