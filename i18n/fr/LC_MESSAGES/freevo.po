@@ -20,7 +20,7 @@ msgstr "Album CD inconnu"
 
 #: audio/audiodiskitem.py:96 directory.py:331 image/plugins/gphoto.py:152
 msgid "Browse directory"
-msgstr "Parcours du répertoir"
+msgstr "Parcours du répertoire"
 
 #: audio/plugins/cdbackup.py:377
 msgid "Get CDs available for ripping"
@@ -32,19 +32,19 @@ msgstr "Extraction d'un CD vers le disque dur"
 
 #: audio/plugins/cdbackup.py:391
 msgid "Backup CD to hard drive in mp3 format"
-msgstr "Sauvegarde d'un CD en format MP3"
+msgstr "Sauvegarde d'un CD en MP3"
 
 #: audio/plugins/cdbackup.py:394
 msgid "Backup CD to hard drive in Ogg format"
-msgstr "Sauvegarde d'un CD en format Ogg"
+msgstr "Sauvegarde d'un CD en Ogg"
 
 #: audio/plugins/cdbackup.py:397
 msgid "Backup CD to hard drive in FLAC format"
-msgstr "Sauvegarde d'un CD en format FLAC"
+msgstr "Sauvegarde d'un CD en FLAC"
 
 #: audio/plugins/cdbackup.py:399
 msgid "Backup CD to hard drive in wav format"
-msgstr "Sauvegarde d'un CD en format Wav"
+msgstr "Sauvegarde d'un CD en Wav"
 
 #: audio/plugins/cdbackup.py:402
 msgid "CD Backup"
@@ -52,7 +52,7 @@ msgstr "Sauvegarde de CD"
 
 #: audio/plugins/detach.py:57
 msgid "Show player"
-msgstr "Afficher le diffuseur"
+msgstr "Afficher le player"
 
 #: audio/plugins/mplayer.py:127
 msgid ""
@@ -98,7 +98,7 @@ msgstr "[VUX] Jouer un morceau rating down"
 
 #: audio/plugins/vux.py:45
 msgid "[VUX] a dir item do not select"
-msgstr "[VUX] a dir item do not select"
+msgstr "[VUX] Répertoire, ne pas selectionner"
 
 #: audio/plugins/vux.py:46
 msgid "[VUX] an audio item, do not select"
@@ -118,7 +118,7 @@ msgstr "Répertoire"
 
 #: directory.py:344
 msgid "Recursive random play all items"
-msgstr "Fonction aléatoire jouant tous les morceaux"
+msgstr "Jouer tous les morceaux aléatoirement"
 
 #: directory.py:367
 msgid "Enter Password"
@@ -130,11 +130,11 @@ msgstr "Mot de passe incorrect"
 
 #: directory.py:435
 msgid "Scanning disc, be patient..."
-msgstr "Etude du disque, soyez patient..."
+msgstr "Analyse du disque, soyez patient..."
 
 #: directory.py:437
 msgid "Scanning directory, be patient..."
-msgstr "Etude du répertoire, soyez patient..."
+msgstr "Analyse du répertoire, soyez patient..."
 
 #: games/mame_cache.py:163
 msgid "Generating MAME cache, please wait."
@@ -150,7 +150,7 @@ msgstr "ABANDONNER"
 
 #: image/imageitem.py:107 image/plugins/gphoto.py:116
 msgid "View Image"
-msgstr "Voir une Image"
+msgstr "Voir une image"
 
 #: image/viewer.py:118
 msgid ""
@@ -268,11 +268,11 @@ msgstr "Lecture du disque dans le lecteur %s"
 
 #: skins/main/listing_area.py:243
 msgid "This directory is empty"
-msgstr "Ce répertoire est vide"
+msgstr "Répertoire vide"
 
 #: skins/main/main.py:161
 msgid "TV GUIDE"
-msgstr "Programme Télé"
+msgstr "Programme télé"
 
 #: skins/main/main.py:288
 msgid "Starting Freevo, please wait ..."
@@ -285,7 +285,7 @@ msgstr "ERREUR INTERNE, AUCUN MENU !"
 #: skins/main/tvlisting_area.py:351 tv/tvguide.py:67 tv/tvguide.py:447
 #: tv/tvguide.py:449
 msgid "This channel has no data loaded"
-msgstr "Cette chaîne n'a aucune donnée chargée"
+msgstr "Cette chaîne n'a pas de guide"
 
 #: tv/record_schedule.py:95
 msgid "View Recording Schedule"
@@ -313,11 +313,11 @@ msgstr "Tous les enregistrements planifiés ont été détruits"
 
 #: tv/tvguide.py:77
 msgid "Preparing the program guide"
-msgstr "Programme TV en préparation"
+msgstr "Programme TV en construction"
 
 #: tv/tvguide.py:81
 msgid "TV Guide is corrupt!"
-msgstr "Le programme TV est corrompu"
+msgstr "Le programme TV est erroné"
 
 #: tv/tvmenu.py:141 tv/tvmenu.py:149
 msgid "Could not find TV channel %s"
@@ -386,7 +386,7 @@ msgstr "Aucune information disponible dans IMDB"
 
 #: video/plugins/imdb.py:188
 msgid "getting data..."
-msgstr "récupération des données..."
+msgstr "Récupération des données..."
 
 #: video/plugins/imdb_info.py:64
 msgid "Show info for this file"
@@ -402,15 +402,15 @@ msgstr "Déplacer vers [%s]"
 
 #: video/videoitem.py:267
 msgid "Play DVD"
-msgstr "Jouer un DVD"
+msgstr "Lire un DVD"
 
 #: video/videoitem.py:275
 msgid "Play VCD"
-msgstr "Jouer un VCD"
+msgstr "Lire un VCD"
 
 #: video/videoitem.py:279
 msgid "Play default track"
-msgstr "Jouer la piste par défaut"
+msgstr "Lire la piste par défaut"
 
 #: video/videoitem.py:359
 msgid "Wait while detecting media..."
@@ -431,7 +431,7 @@ msgstr "Média non trouvée pour %s, piste %s"
 
 #: video/videoitem.py:518
 msgid "Play Title %s"
-msgstr "Jouer le Titre %s"
+msgstr "Lire le Titre %s"
 
 # Manualy added from fxd skin files
 msgid "TV"
