@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2004/08/01 10:44:20  dischi
+# remove menuw hiding
+#
 # Revision 1.25  2004/07/17 08:18:56  dischi
 # unicode fixes
 #
@@ -46,7 +49,6 @@
 import util
 import os
 import time
-import mmpython
 
 import config
 import viewer
@@ -122,9 +124,6 @@ class ImageItem(Item):
         if not self.menuw:
             self.menuw = menuw
         self.parent.current_item = self
-
-        if self.menuw.visible:
-            self.menuw.hide()
 
         viewer.get_singleton().view(self, rotation=self['rotation'])
 
