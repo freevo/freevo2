@@ -221,6 +221,11 @@
 	    <newline/>
 	    <goto_pos y="10" mode="relative"/>
 	  </if>
+	  <if expression="not plot and description">
+	    <text font="info tagline" expression="description"/>
+	    <newline/>
+	    <goto_pos y="10" mode="relative"/>
+	  </if>
 	  <if expression="plot">
 	    <text height="max" font="info plot" mode="soft" expression="plot"/>
 	    <newline/>
