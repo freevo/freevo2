@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/07/12 14:43:29  outlyer
+# Remove some debugging information.
+#
 # Revision 1.16  2004/04/11 06:51:17  dischi
 # unicode patch
 #
@@ -170,8 +173,8 @@ class RecordResource(FreevoResource):
                 return String(fv.res)
 
             
-            print 'RESULT: %s' % status
-            print 'PROG: %s' % String(prog)
+            #print 'RESULT: %s' % status
+            #print 'PROG: %s' % String(prog)
             ri.scheduleRecording(prog)
 
 
