@@ -96,6 +96,8 @@
 #endif
 
 
+import plugin
+
 ########################################################################
 # If you want to change some things for your personal setup, please
 # write this in a file called local_conf.py, see that file for more info.
@@ -186,20 +188,15 @@ SHUTDOWN_SYS_CMD = 'shutdown -h now'  # set this to 'sudo shutdown -h now' if
                                       # shutdown
 
 # Items in the main menu.
-# MainMenuItem('games', 'MediaMenu().main_menu', 'games')
 
-MAIN_MENU_ITEMS = [
-    MainMenuItem('tv', 'TVMenu().main_menu', ''),
-    MainMenuItem('video', 'MediaMenu().main_menu', 'video'),
-    MainMenuItem('audio', 'MediaMenu().main_menu', 'audio'),
-    MainMenuItem('image', 'MediaMenu().main_menu', 'image'),
-    MainMenuItem('shutdown', 'ShutdownItem', '')
-    ]
+plugin.activate('tv.tv', plugin.mainmenu, 10, None)
+plugin.activate('mediamenu', plugin.mainmenu, 30, ('audio', ))
+plugin.activate('mediamenu', plugin.mainmenu, 20, ('video', ))
+plugin.activate('mediamenu', plugin.mainmenu, 40, ('image', ))
+plugin.activate('base.shutdown', plugin.mainmenu, 50, None)
 
 if CONF.xmame_SDL or CONF.snes:
-    MAIN_MENU_ITEMS = MAIN_MENU_ITEMS[:-2] + \
-                      [ MainMenuItem('games', 'MediaMenu().main_menu', 'games') ] + \
-                      MAIN_MENU_ITEMS[-1:]
+    plugin.activate('mainmenu.media', plugin.mainmenu, 45, ('games', ))
 
 # ======================================================================
 # Freevo directory settings:
