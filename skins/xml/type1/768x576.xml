@@ -62,11 +62,14 @@
 	</item>
       </items>
 
-      <cover>
-	<movie visible="yes" x="538" y="100" width="200" height="280"/>
-	<music visible="yes" x="538" y="100" width="200" height="200"/>
-	<image visible="yes" x="538" y="100" width="200" height="160"/>
-      </cover>
+      <covers>
+	<cover type="movie" visible="yes" x="538" y="100" width="200"
+	  height="280" border_color="0x000000" border_size="1"/>
+	<cover type="music" visible="yes" x="538" y="100" width="200"
+	  height="200" border_color="0x000000" border_size="1"/> 
+	<cover type="image" visible="yes" x="538" y="100" width="200" 
+	  height="160" border_color="0x000000" border_size="1"/>
+      </covers>
 
       <submenu x="40" y="500">
 	<font name="interpla" size="20" color="0x000000"/>

@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2002/09/25 18:54:32  dischi
+# Changed the <cover> style to <covers> and <cover type=""/>. Added
+# border_size and border_color to cover
+#
 # Revision 1.9  2002/09/23 18:59:00  dischi
 # Added alignment to font, some cleanups in xml_skin.py
 #
@@ -297,17 +301,19 @@ class XMLSkin:
                 if copy_content: self.menu.items = copy.copy(self.menu.items)
                 self.parseItems(node, self.menu.items, copy_content)
                 
-            elif node.name == u'cover':
+            elif node.name == u'covers':
                 for subnode in node.children:
-                    if subnode.name == u'movie':
+                    type = self.attr_str(subnode, "type", "")
+
+                    if type == u'movie':
                         if copy_content:
                             self.menu.cover_movie = copy.copy(self.menu.cover_movie)
                         self.parse_node(subnode, self.menu.cover_movie)
-                    if subnode.name == u'music':
+                    if type == u'music':
                         if copy_content:
                             self.menu.cover_music = copy.copy(self.menu.cover_music)
                         self.parse_node(subnode, self.menu.cover_music)
-                    if subnode.name == u'image':
+                    if type == u'image':
                         if copy_content:
                             self.menu.cover_image = copy.copy(self.menu.cover_image)
                         self.parse_node(subnode, self.menu.cover_image)
