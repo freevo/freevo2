@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/10/19 12:41:13  rshortt
+# in waitpid handle recordserver like main.
+#
 # Revision 1.4  2003/10/19 09:08:14  dischi
 # support for changing the working directory before exec, some cleanup changes
 #
@@ -97,6 +100,7 @@ def Popen3(cmd, cwd = None):
         return Popen4(cmd, cwd=cwd)
 
     # do not use this for the main thread
+    print 'DEBUG: %s' % traceback.extract_stack()
     if traceback.extract_stack()[0][0].find('thread') == -1:
         return Popen4(cmd, cwd=cwd)
         
@@ -133,12 +137,8 @@ def waitpid(pid=0):
             wait_lock.release()
         return
     
-    if config.IS_RECORDSERVER:
-        # add handling for recordserver here
-        return os.waitpid(pid, os.WNOHANG)[0] == pid
-
     # do not use this for helpers
-    if config.HELPER:
+    if config.HELPER and not config.IS_RECORDSERVER:
         return os.waitpid(pid, os.WNOHANG)[0] == pid
 
     # do not use this for the main thread
