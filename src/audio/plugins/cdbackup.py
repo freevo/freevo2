@@ -27,6 +27,12 @@
 # Albums with more than one Artist aren't handled very well.
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/07/01 06:34:31  outlyer
+# Forgot to commit this stuff.
+#
+# 1. Fix filenames so songs with ' work
+# 2. Show time taken to encode in the popup box.
+#
 # Revision 1.4  2003/07/01 06:10:52  gsbarbieri
 # Destination dir is now configurable via AUDIO_BACKUP_DIR
 # We have to add this option and others that came with this plugin to
@@ -209,6 +215,11 @@ class main_backup_thread(threading.Thread):
         for i in range (0, len(song_names)):
             # Keep track of track# 
             track = i +1        
+            
+            # store start time
+
+            begin = time.time()
+
             # CD_RIP_PATH = '%(artist)s/%(album)/%(song)s'
 
             # Add the song and track key back into user_rip_path_prefs to be used in the song name
@@ -230,7 +241,7 @@ class main_backup_thread(threading.Thread):
             # If rip_format is mp3, then copy the file to /temp/track_being_ripped.wav
             if rip_format=='mp3' or rip_format== 'MP3':
                 pathname_cdparanoia = '/tmp'
-                path_tail_cdparanoia   = '/track_being_rippped'
+                path_tail_cdparanoia   = '/track_being_ripped'
             # Otherwise if it's going to be a .wav  just use the the users preferred directory and filename.
             # i.e. don't bother putting into /tmp directory, just use directory and filename of final destination.    
             else: 
@@ -246,7 +257,7 @@ class main_backup_thread(threading.Thread):
                                                 + path_tail_cdparanoia \
                                                 + '.wav"' \
 
-            if DEBUG: print 'After Command = %s' %cdparanoia_command
+            if DEBUG: print 'cdparanoia:  %s' %cdparanoia_command
     
             # Have the OS execute the CD Paranoia rip command            
             os.system(cdparanoia_command)
@@ -276,16 +287,16 @@ class main_backup_thread(threading.Thread):
                 lame_command =  config.LAME_CMD + ' -h ' \
                                           + config.CD_RIP_LAME_OPTS \
                                           + id3_tag_opts \
-                                          + ' \'' \
+                                          + ' \"' \
                                           + pathname_cdparanoia \
                                           + path_tail_cdparanoia \
-                                          + '.wav\'' \
-                                          + ' \''  \
+                                          + '.wav\"' \
+                                          + ' \"'  \
                                           + pathname \
                                           + path_tail \
-                                          + '.mp3\'' \
+                                          + '.mp3\"' \
                                           
-                if DEBUG: print 'lame_command = %s' %lame_command                          
+                if DEBUG: 'lame:= %s' %lame_command                          
                 os.system(lame_command)
                 
                 # Remove the .wav file.
@@ -294,11 +305,12 @@ class main_backup_thread(threading.Thread):
                 os.unlink(rm_command)
         
         # Flash a popup window indicating copying is done
-        popup_string="Finished Copying CD"
-        pop = PopupBox(text=popup_string)
+        time_taken = time.time() - begin + 300
+        min = int(time_taken/60)
+        sec = int(time_taken%60)
+        popup_string="Finished Copying CD in %im%is" % (min,sec)
+        pop = AlertBox(text=popup_string)
         pop.show()
-        time.sleep(4)
-        pop.destroy()
 
     def get_formatted_cd_info(self, device):
         cd_info = mmpython.parse(device)
@@ -419,7 +431,7 @@ MUSICCORE = ['trackno', 'trackof', 'album', 'genre']
     # This list of special_chars probably contains some characters that are okay.            
     def replace_special_char(self, string, repl='-'):
         # Regular Expression Special Chars =  . ^ $ * + ? { [ ] \ | ( )
-        special_chars = [ '\"',  '\`', '\\\\', '/' ]
+        special_chars = [ '\"',  '\`', '\\\\', '/','\'' ]
         
         """
         special_chars = [ '~', '!', '@', '\\$', '%', \
@@ -441,7 +453,7 @@ MUSICCORE = ['trackno', 'trackof', 'album', 'genre']
                 # A few of the special characters get automatically converted to a different char,
                 # rather than what is passed in as repl
                 if (pattern == '\''):
-                    (new_string, num) = re.subn(pattern, '', new_string, count=0)
+                    (new_string, num) = re.subn(pattern, '\\\'', new_string, count=0)
                 elif (pattern == '/'):
                     (new_string, num) = re.subn(pattern, '\\\\', new_string, count=0)                    
                 else:
