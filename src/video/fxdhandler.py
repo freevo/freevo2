@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2004/07/11 11:47:02  dischi
+# fix image file lookup
+#
 # Revision 1.22  2004/07/11 10:43:22  dischi
 # fix unicode error
 #
@@ -105,7 +108,7 @@ def parse_movie(fxd, node):
     item.name  = title
     item.image = fxd.childcontent(node, 'cover-img')
     if item.image:
-        item.image = os.path.join(dirname, item.image)
+        item.image = vfs.abspath(os.path.join(dirname, item.image))
         image = item.image
         
     fxd.parse_info(node, item, {'runtime': 'length'})
@@ -278,7 +281,7 @@ def parse_disc_set(fxd, node):
     item.name  = fxd.getattr(node, 'title')
     item.image = fxd.childcontent(node, 'cover-img')
     if item.image:
-        item.image = os.path.join(dirname, item.image)
+        item.image = vfs.abspath(os.path.join(dirname, item.image))
 
     fxd.parse_info(node, item, {'runtime': 'length'})
     item.__fxd_rom_info__      = True
