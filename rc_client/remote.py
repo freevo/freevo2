@@ -75,13 +75,18 @@ class RemoteLirc:
         self.lirc = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 
         # Read directly from the remote control daemon, no translation
+        warnflag = 0
         while 1:
             try:
                 self.lirc.connect('/dev/lircd')
                 break
             except:
-                print "Couldn't open /dev/lircd, trying again in 10 seconds..."
+                if not warnflag:
+                    print "Couldn't open /dev/lircd, will keep trying every 10 seconds..."
+                    warnflag = 1
                 time.sleep(10)
+
+        if DEBUG: print 'Opened /dev/lircd'
             
         self.cmds = config.RC_CMDS
 
