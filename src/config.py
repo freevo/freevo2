@@ -22,6 +22,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/01/19 16:03:36  dischi
+# reverse the path for searching for the config file. First try to find the
+# files in . (maybe you have more than one version of Freevo installed), after
+# that the user directory and last the etc directory. All installations (RPM
+# and ebuild in the near future) should _move_ the config files to /etc/freevo
+# to make it possible to have a user configuration.
+#
 # Revision 1.7  2003/01/18 16:54:19  dischi
 # Search the config file for the remote in different directories:
 # ~/freevo, /etc/freevo and ./rc_client
@@ -159,9 +166,9 @@ sys.stderr = Logger(sys.argv[0] + ':stderr')
 #
 # Config file handling
 #
-cfgfilepath = [ '/etc/freevo',
+cfgfilepath = [ '.',
                 os.path.expanduser('~/.freevo'),
-                '.'
+                '/etc/freevo'
                 ]
 
 class Struct:
