@@ -148,7 +148,7 @@ def schedule_init():
 def schedule_recording(start_time_s, length_secs, cmd, channel_id=''):
     '''Schedule a new recording. The start time is a unix timestamp.'''
 
-    if (time.localtime()[8]==1):
+    if (time.localtime()[8]==1) and (float(sys.version[0:3]) < 2.3):
         start_time_s = start_time_s - 3600
 
     ts = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time_s))
