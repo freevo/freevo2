@@ -240,7 +240,10 @@ def search(search_type, keyword, product_line, type="heavy", page=None,
     proxies = getProxies(http_proxy)
     u = urllib.FancyURLopener(proxies)
     usock = u.open(url)
-    xmldoc = minidom.parse(usock)
+    try:
+        xmldoc = minidom.parse(usock)
+    except:
+        raise ParseError
 
 #     from xml.dom.ext import PrettyPrint
 #     PrettyPrint(xmldoc)

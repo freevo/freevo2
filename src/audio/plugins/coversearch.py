@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/06/20 20:51:42  outlyer
+# Trap ParserErrors if Amazon sends bad xml
+#
 # Revision 1.5  2003/06/12 23:41:11  outlyer
 # Don't crash if no matches are found...
 # notify user and return.
@@ -125,6 +128,13 @@ class PluginInterface(plugin.ItemPlugin):
         except amazon.AmazonError:
             box.destroy() 
             box = PopupBox(text='No matches for %s - %s' % (str(artist),str(album)))
+            box.show()
+            time.sleep(2)
+            box.destroy()
+            return
+        except amazon.ParseError:
+            box.destroy()
+            box = PopupBox(text='The cover provider returned bad information.')
             box.show()
             time.sleep(2)
             box.destroy()
