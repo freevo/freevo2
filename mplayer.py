@@ -9,6 +9,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2002/08/03 18:55:44  outlyer
+# Last change to config file :)
+#
+# o You can now set the priority of the mplayer process via a nice setting
+# o This involves two lines in the config file: NICE and MPLAYER_NICE for the
+# 	path to 'nice' and the actual numeric priority where '-10' is the
+# 	default (high priority) set it to 0 for normal priority or +10 for
+# 	low priority.
+#
 # Revision 1.18  2002/08/03 18:15:22  dischi
 # o added the patch from Thomas Malt for better audio control
 # o added support for the new freevo_config.py file
@@ -114,8 +123,9 @@ class MPlayer:
             return 0
         
         # build mplayer comand
-        mpl = config.MPLAYER_CMD + ' -vo ' + config.MPLAYER_VO_DEV + ' -ao ' + \
-              config.MPLAYER_AO_DEV + ' ' + config.MPLAYER_ARGS_DEF
+        mpl = config.NICE + " -" + config.MPLAYER_NICE + " " + config.MPLAYER_CMD + ' -vo ' + config.MPLAYER_VO_DEV + \
+	      ' -ao ' +  config.MPLAYER_AO_DEV + ' ' + config.MPLAYER_ARGS_DEF
+	print mpl
 
         if mode == 'video':
 

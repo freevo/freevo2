@@ -16,6 +16,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2002/08/03 18:55:44  outlyer
+# Last change to config file :)
+#
+# o You can now set the priority of the mplayer process via a nice setting
+# o This involves two lines in the config file: NICE and MPLAYER_NICE for the
+# 	path to 'nice' and the actual numeric priority where '-10' is the
+# 	default (high priority) set it to 0 for normal priority or +10 for
+# 	low priority.
+#
 # Revision 1.37  2002/08/03 18:14:16  dischi
 # Lots of changes:
 # o added the patch from Thomas Malt with the new audio control
@@ -67,6 +76,8 @@ MPLAYER_AO_DEV      = 'oss:/dev/dsp0' # oss sdl alsa whatchawant?
 MPLAYER_VO_DEV      = 'mga'           # If you use X 'xv' is a good alternative.
 DVD_LANG_PREF       = 'en,se,no'      # Order of preffered languages on DVD.
 DVD_SUBTITLE_PREF   = ''              # Order of preffered subtitles on DVD.
+NICE		    = '/usr/bin/nice' # Priority setting app
+MPLAYER_NICE	    = '-10'	      # Priority of mplayer process
 
 
 
