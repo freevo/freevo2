@@ -6,8 +6,7 @@
 #
 # This file defines some helper functions for creating thumbnails for faster
 # image access. The thumbnails are stored in the vfs and have a max size
-# of 255x255 pixel. It uses mevas and optional pyepeg to create the
-# thumbnails.
+# of 255x255 pixel. 
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -45,14 +44,6 @@ log = logging.getLogger('util')
 
 # mevas for imlib2 support
 import mevas
-
-try:
-    # pyepeg for fast jpg thumbnails
-    import epeg
-    USE_EPEG = True
-except ImportError:
-    log.warning('thumbnail: pyepeg not found')
-    USE_EPEG = False
 
 # freevo utils
 import fileops
@@ -126,14 +117,10 @@ def create(filename):
     """
     if not os.path.isdir(os.path.dirname(vfs.getoverlay(filename))):
         os.makedirs(os.path.dirname(vfs.getoverlay(filename)))
-    if USE_EPEG and filename.endswith('.jpg'):
+    if filename.endswith('.jpg'):
         thumb = vfs.getoverlay(filename[:-3] + 'thumb.jpg')
-        try:
-            # epeg support for fast jpg thumbnailing
-            epeg.jpg_thumbnail(filename, thumb, 255, 255)
-            return mevas.imagelib.open(thumb)
-        except Exception, e:
-            pass
+        # epeg support for fast jpg thumbnailing
+        return mevas.imagelib.thumbnail(filename, thumb, (255, 255))
 
     thumb = vfs.getoverlay(filename + '.raw')
     try:
