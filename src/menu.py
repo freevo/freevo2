@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.49  2003/06/07 04:36:18  outlyer
+# Prevent a crash.
+#
 # Revision 1.48  2003/05/30 00:53:19  rshortt
 # Various event bugfixes.
 #
@@ -545,7 +548,7 @@ class MenuWidget(GUIObject):
             for p in plugin.get('item%s' % actions_plugins):
                 actions += p.actions(menu.selected)
 
-            if len(actions) > 1:
+            if actions and len(actions) > 1:
                 self.make_submenu(menu.selected.name, actions, menu.selected)
             return
             
