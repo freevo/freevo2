@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/01/05 17:39:22  dischi
+# make overlay abspath before getting the dirname
+#
 # Revision 1.8  2004/01/03 17:38:17  dischi
 # Freevo now needs the vfs active. OVERLAY_DIR is set to ~/.freevo/vfs as
 # default value.
@@ -128,7 +131,7 @@ def open(name, mode='r'):
     try:
         return file(name, mode)
     except:
-        overlay = getoverlay(name)
+        overlay = os.path.abspath(getoverlay(name))
         if not overlay:
             raise OSError
         try:
@@ -151,7 +154,7 @@ def codecs_open(name, mode, encoding):
     try:
         return codecs.open(name, mode, encoding=encoding)
     except:
-        overlay = getoverlay(name)
+        overlay = os.path.abspath(getoverlay(name))
         if not overlay:
             raise OSError
         try:
