@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.68  2004/09/14 20:09:07  dischi
+# adjust to video changes
+#
 # Revision 1.67  2004/09/13 19:36:47  dischi
 # adjust to new audio interface
 #
@@ -749,7 +752,7 @@ class Identify_Thread(threading.Thread):
             # Check if we need to update the database
             # This is a simple way for external apps to signal changes
             if os.path.exists(rebuild_file):
-                if video.hash_fxd_movie_database() == 0:
+                if video.create_movie_database() == 0:
                     # something is wrong, deactivate this feature
                     rebuild_file = '/this/file/should/not/exist'
                     
