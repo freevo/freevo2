@@ -25,9 +25,6 @@ import menu
 # The Freevo image viewer
 import iview
 
-# EXIF parser
-import exif
-
 # Set to 1 for debug output
 DEBUG = 1
 
@@ -46,6 +43,12 @@ iview = iview.get_singleton()
 # view the image
 #
 def view_image(menuw=None, arg=None):
+    osd.clearscreen(color=osd.COL_BLACK)
+           
+    osd.drawstring('please wait...', osd.width/2 - 60, osd.height/2 - 10,
+                   fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
+    osd.update()
+
     file = arg[0]
     number = arg[1]
     playlist = arg[2]
@@ -73,12 +76,14 @@ def main_menu(arg=None, menuw=None):
 def cwd(arg=None, menuw=None):
     dir = arg
 
-    # This could take some time...
-    osd.clearscreen(color=osd.COL_BLACK)
-    osd.drawstring('please wait...', osd.width/2 - 60, osd.height/2 - 10,
-                   fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
-    osd.update()
-    
+    # XXX Now we generate the thumbnails in the skin
+    if 0:
+        # This could take some time...
+        osd.clearscreen(color=osd.COL_BLACK)
+        osd.drawstring('please wait...', osd.width/2 - 60, osd.height/2 - 10,
+                       fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
+        osd.update()
+        
     # remove old cache and thumbnail files
     for file in util.match_files(config.FREEVO_CACHEDIR, [ '/image-viewer-[0-9]*' ]):
         os.remove(file)
@@ -93,20 +98,13 @@ def cwd(arg=None, menuw=None):
         items += [menu.MenuItem(title, cwd, dirname)]
     
     number = 0
+    print files
     for file in files:
+        print file
         title = os.path.splitext(os.path.basename(file))[0]
         m = menu.MenuItem(title, view_image, (file, number, files))
 
-        f=open(file, 'rb')
-        tags=exif.process_file(f)
-
-        if tags.has_key('JPEGThumbnail'):
-            thumb_name='%s/image-viewer-%s-thumb.jpg' % (config.FREEVO_CACHEDIR, number)
-            open(thumb_name, 'wb').write(tags['JPEGThumbnail'])
-            m.setImage(thumb_name)
-
-        if tags.has_key('TIFFThumbnail'):
-            print "TIFF thumbnail not supported yet"
+        m.setImage(('photo', file))
 
         items += [m]
 
