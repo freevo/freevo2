@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/06/20 03:28:03  rshortt
+# Added a mention of pyrecade.
+#
 # Revision 1.8  2003/06/20 02:02:34  rshortt
 # Bugfix.
 #
@@ -140,6 +143,8 @@ def saveMameRomList(mameRomList):
 # the cache has any relevant information.
 #
 def updateMameRomList():
+    # This method of running xmame --listinfo and parsing the output was
+    # borrowed from pyrecade - http://pyrecade.sf.net.
 
     try:
         listinfo = os.popen(config.MAME_CMD + ' --listinfo', 'r')
