@@ -34,7 +34,7 @@ CLASSES
      |  from http://weather.noaa.gov/
      |  
      |  In order to find the report relevant for you, find the closest station at
-     |  http://www.nws.noaa.gov/oso/siteloc.shtml and feed its 4-letter station
+     |  http://www.nws.noaa.gov/tg/siteloc.shtml and feed its 4-letter station
      |  code to fetchMetarReport(), case does not matter.
      |  
      |  All methods return metric values, no matter what the station provides. The
