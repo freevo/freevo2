@@ -57,10 +57,14 @@ case "$1" in
         gen_i18n
         wiki
         ;;
+    howto)
+        howto
+        ;;
     help)
         echo -n "Usage:   "
         echo $0
         echo "          nodocs     -  Just generate translations"
+        echo "          howto      -  Just generate the docbook howto"
         echo "          nodocbook  -  Fetch Wiki but do not make howto"
         echo "          <default>  -  Generate translations, fetch wiki and generate Howto"
         ;;
