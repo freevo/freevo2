@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2003/12/10 18:58:44  dischi
+# Added ChildApp2 which is a ChildApp including the code in ChildThread to
+# avoid threads when they are not needed to prevert crashes because of bad
+# thread timing. ALL plugins using ChildThread should convert the code and
+# ChildThread should be removed after that.
+#
 # Revision 1.44  2003/12/06 17:50:52  mikeruelle
 # a small change. gonna use childapp in command.py soon. allows me to change filenames to ones command.py looks for
 #
@@ -39,32 +45,6 @@
 #
 # Revision 1.35  2003/10/22 17:22:36  dischi
 # better stop() exception handling
-#
-# Revision 1.34  2003/10/20 13:46:41  outlyer
-# A small change to fix a frequent source of crashes. I don't know why,
-# but it happens on occaison, so it's better to silently skip over than
-# to crash horribly.
-#
-# Revision 1.33  2003/10/19 09:51:10  dischi
-# better debug
-#
-# Revision 1.32  2003/10/19 09:07:33  dischi
-# support for a list and no string as app to start
-#
-# Revision 1.31  2003/10/18 17:56:58  dischi
-# more childapp fixes
-#
-# Revision 1.30  2003/10/18 16:51:34  outlyer
-# Fix a crash when skipping through tracks.
-#
-# Revision 1.29  2003/10/18 10:46:37  dischi
-# use util popen3 for child control
-#
-# Revision 1.28  2003/10/14 17:57:32  dischi
-# more debug
-#
-# Revision 1.27  2003/10/11 11:21:14  dischi
-# use util killall function
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -548,3 +528,64 @@ class ChildThread(threading.Thread):
 
             else:
                 self.mode = 'idle'
+
+
+
+running_children = []
+
+class ChildApp2(ChildApp):
+    def __init__(self, app, debugname=None, doeslogging=0, stop_osd=2):
+        global running_children
+        running_children.append(self)
+
+        if stop_osd == 2:
+            stop_osd = config.OSD_STOP_WHEN_PLAYING
+
+        self.stop_osd = stop_osd
+        if self.stop_osd:
+            rc.post_event(Event(VIDEO_START))
+            osd.stop()
+        
+        if hasattr(self, 'item'):
+            rc.post_event(Event(PLAY_START, arg=self.item))
+
+        # start the child
+        ChildApp.__init__(self, app, debugname, doeslogging)
+
+
+    def stop_event(self):
+        return PLAY_END
+
+
+    def stop(self, cmd=''):
+        try:
+            global running_children
+            running_children.remove(self)
+        except ValueError:
+            return
+        
+        if cmd and self.isAlive():
+            _debug_('sending exit command to app')
+            self.write(cmd)
+            # wait for the app to terminate itself
+            for i in range(20):
+                if not self.isAlive():
+                    break
+                time.sleep(0.1)
+
+        # kill the app
+        self.kill()
+
+        # Ok, we can use the OSD again.
+        if self.stop_osd:
+            osd.restart()
+
+        if self.stop_osd:       # Implies a video file
+            rc.post_event(Event(VIDEO_END))
+
+        
+    def poll(self):
+        if not self.isAlive():
+            rc.post_event(self.stop_event())
+            self.stop()
+            
