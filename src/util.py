@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/04/26 15:23:33  dischi
+# make usb listing more like lsusb
+#
 # Revision 1.24  2003/04/26 15:08:51  dischi
 # o better mount/umount, also for directories who are no rom drive.
 # o added list_usb_devices to util
@@ -484,7 +487,7 @@ def list_usb_devices():
     lines = readfile('/proc/bus/usb/devices')
     for line in lines:
         if line[:2] == 'P:':
-            devices.append(line[11:15]+line[23:27])
+            devices.append('%s:%s' % (line[11:15], line[23:27]))
     return devices
 
 
