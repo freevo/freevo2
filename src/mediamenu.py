@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2003/02/24 05:17:18  krister
+# Fixed a bug in the update function.
+#
 # Revision 1.36  2003/02/23 09:24:31  dischi
 # Activate extended menu in the (VIDEO|AUDIO|IMAGE|GAMES) menu, too
 #
@@ -635,7 +638,7 @@ class DirItem(Playlist):
 
             # some files changed, rebuild playlist
             if new_items or del_items:
-                pl = Playlist(play_items, self)
+                pl = Playlist(self.play_items, self)
                 pl.randomize()
                 pl.autoplay = TRUE
                 items += [ pl ]
