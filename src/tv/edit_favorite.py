@@ -9,6 +9,20 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/08/05 17:27:16  dischi
+# Major (unfinished) tv update:
+# o the epg is now taken from pyepg in lib
+# o all player should inherit from player.py
+# o VideoGroups are replaced by channels.py
+# o the recordserver plugins are in an extra dir
+#
+# Bugs:
+# o The listing area in the tv guide is blank right now, some code
+#   needs to be moved to gui but it's not done yet.
+# o The only player working right now is xine with dvb
+# o channels.py needs much work to support something else than dvb
+# o recording looks broken, too
+#
 # Revision 1.14  2004/07/22 21:21:49  dischi
 # small fixes to fit the new gui code
 #
@@ -43,12 +57,12 @@
 
 from time import gmtime, strftime
 
-import config, epg_xmltv
+import config
 import record_client
 import event as em
 
 from record_types import Favorite
-from epg_types import TvProgram
+# from epg_types import TvProgram
 from view_favorites import ViewFavorites
 
 from gui      import *
@@ -104,7 +118,8 @@ class EditFavorite(PopupBox):
         if not self.left:     self.left   = self.osd.width/2 - self.width/2
         if not self.top:      self.top    = self.osd.height/2 - self.height/2
 
-        guide = epg_xmltv.get_guide()
+        # FIXME!!!!!!!!!!!!!!!!!!
+        # guide = epg_xmltv.get_guide()
 
         name = Label(_('Name')+':', self, Align.LEFT)
         self.name_input = LetterBoxGroup(text=self.fav.name)

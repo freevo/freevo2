@@ -9,6 +9,20 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/08/05 17:27:16  dischi
+# Major (unfinished) tv update:
+# o the epg is now taken from pyepg in lib
+# o all player should inherit from player.py
+# o VideoGroups are replaced by channels.py
+# o the recordserver plugins are in an extra dir
+#
+# Bugs:
+# o The listing area in the tv guide is blank right now, some code
+#   needs to be moved to gui but it's not done yet.
+# o The only player working right now is xine with dvb
+# o channels.py needs much work to support something else than dvb
+# o recording looks broken, too
+#
 # Revision 1.10  2004/07/10 12:33:41  dischi
 # header cleanup
 #
@@ -39,16 +53,15 @@
 
 import plugin
 
-#
-# Plugin interface to integrate the tv module into Freevo
-#
 class PluginInterface(plugin.MainMenuPlugin):
-
+    """
+    Plugin interface to integrate the tv module into Freevo
+    """
     def items(self, parent):
+        """
+        return the tv menu
+        """
         import tvmenu
         import menu
         return [ menu.MenuItem('', action=tvmenu.TVMenu().main_menu,
                                type='main', parent=parent, skin_type='tv') ]
-
-
-

@@ -9,6 +9,20 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/08/05 17:27:16  dischi
+# Major (unfinished) tv update:
+# o the epg is now taken from pyepg in lib
+# o all player should inherit from player.py
+# o VideoGroups are replaced by channels.py
+# o the recordserver plugins are in an extra dir
+#
+# Bugs:
+# o The listing area in the tv guide is blank right now, some code
+#   needs to be moved to gui but it's not done yet.
+# o The only player working right now is xine with dvb
+# o channels.py needs much work to support something else than dvb
+# o recording looks broken, too
+#
 # Revision 1.20  2004/07/19 16:24:47  rshortt
 # Attempt to solve scheduled recordings upgrade problem.
 #
@@ -47,7 +61,6 @@ import config
 
 import time, sys, socket, traceback, string
 import xmlrpclib
-import epg_types
 
 from util.marmalade import jellyToXML, unjellyFromXML
 

@@ -9,6 +9,20 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/08/05 17:27:16  dischi
+# Major (unfinished) tv update:
+# o the epg is now taken from pyepg in lib
+# o all player should inherit from player.py
+# o VideoGroups are replaced by channels.py
+# o the recordserver plugins are in an extra dir
+#
+# Bugs:
+# o The listing area in the tv guide is blank right now, some code
+#   needs to be moved to gui but it's not done yet.
+# o The only player working right now is xine with dvb
+# o channels.py needs much work to support something else than dvb
+# o recording looks broken, too
+#
 # Revision 1.8  2004/07/22 21:21:49  dischi
 # small fixes to fit the new gui code
 #
@@ -57,7 +71,7 @@ from item import Item
 from gui import AlertBox
 from gui import InputBox
 from tv.record_types import Favorite
-from tv.epg_types import TvProgram
+# from tv.epg_types import TvProgram
 
 # Use the alternate strptime module which seems to handle time zones
 #

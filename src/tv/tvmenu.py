@@ -9,6 +9,20 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/08/05 17:27:16  dischi
+# Major (unfinished) tv update:
+# o the epg is now taken from pyepg in lib
+# o all player should inherit from player.py
+# o VideoGroups are replaced by channels.py
+# o the recordserver plugins are in an extra dir
+#
+# Bugs:
+# o The listing area in the tv guide is blank right now, some code
+#   needs to be moved to gui but it's not done yet.
+# o The only player working right now is xine with dvb
+# o channels.py needs much work to support something else than dvb
+# o recording looks broken, too
+#
 # Revision 1.19  2004/07/26 18:10:18  dischi
 # move global event handling to eventhandler.py
 #
@@ -48,66 +62,43 @@
 
 import time
 
-# Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
-
-# The menu widget class
 import menu
-
 import plugin
-
-import util.tv_util as tv_util
-
-# The Electronic Program Guide
-import tv.epg_xmltv
 
 from item import Item
 
-from tv.tvguide import TVGuide
+import tvguide
 from directory import DirItem
-
 from gui import AlertBox
-from gui import PopupBox
-
-import tv.program_display
-
-DEBUG = config.DEBUG
-
-TRUE = 1
-FALSE = 0
 
 
-def get_tunerid(channel_id):
-    tuner_id = None
-    for vals in config.TV_CHANNELS:
-        tv_channel_id, tv_display_name, tv_tuner_id = vals[:3]
-        if tv_channel_id == channel_id:
-            return tv_tuner_id
+# def get_tunerid(channel_id):
+#     tuner_id = None
+#     for vals in config.TV_CHANNELS:
+#         tv_channel_id, tv_display_name, tv_tuner_id = vals[:3]
+#         if tv_channel_id == channel_id:
+#             return tv_tuner_id
 
-    AlertBox(text=_('Could not find TV channel %s') % channel_id).show()
-    return None
-
-
-def get_friendly_channel(channel_id):
-    channel_name = tv_util.get_chan_displayname(channel_id)
-
-    if not channel_name: 
-        AlertBox(text=_('Could not find TV channel %s') % channel_id).show()
-
-    return channel_name
+#     AlertBox(text=_('Could not find TV channel %s') % channel_id).show()
+#     return None
 
 
-def start_tv(mode=None, channel_id=None):
-    tuner_id = get_tunerid(channel_id)
-    plugin.getbyname(plugin.TV).Play(mode, tuner_id)
+# def get_friendly_channel(channel_id):
+#     channel_name = tv_util.get_chan_displayname(channel_id)
+
+#     if not channel_name: 
+#         AlertBox(text=_('Could not find TV channel %s') % channel_id).show()
+
+#     return channel_name
 
 
-
-#
-# The TV menu
-#
 class TVMenu(Item):
-    
+    """
+    The tv main menu
+    It shows the TV guide, the directory for recorded shows and all
+    mainmenu_tv plugins.
+    """
     def __init__(self):
         Item.__init__(self)
         self.type = 'tv'
@@ -131,40 +122,20 @@ class TVMenu(Item):
         menuw.pushmenu(menu.Menu(_('TV Main Menu'), items, item_types = 'tv main menu'))
 
 
-    def show_search(self, arg, menuw):
-        tv.program_search.ProgramSearch().show()
-        return
-
-
-    def get_start_time(self):
-        ttime = time.localtime()
-        stime = [ ]
-        for i in ttime:
-            stime += [i]
-        stime[5] = 0 # zero seconds
-        if stime[4] >= 30:
-            stime[4] = 30
-        else:
-            stime[4] = 0
-
-        return time.mktime(stime)
-
-
     def start_tvguide(self, arg, menuw):
 
         # Check that the TV channel list is not None
         if not config.TV_CHANNELS:
-            msg = _('The list of TV channels is invalid!\n')
+            msg  = _('The list of TV channels is invalid!\n')
             msg += _('Please check the config file.')
             AlertBox(text=msg).show()
             return
 
-        if arg == 'record':
-            start_tv(None, ('record', None))
-            return
-
         guide = plugin.getbyname('tvguide')
-        if guide:
-            guide.start(self.get_start_time(), start_tv, menuw)
-        else:
-            TVGuide(self.get_start_time(), start_tv, menuw)
+        if not guide:
+            guide = tvguide.get_singleton()
+            
+        if guide.start(self):
+            menuw.pushmenu(guide)
+            menuw.refresh()
+        

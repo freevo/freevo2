@@ -9,6 +9,20 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/08/05 17:27:16  dischi
+# Major (unfinished) tv update:
+# o the epg is now taken from pyepg in lib
+# o all player should inherit from player.py
+# o VideoGroups are replaced by channels.py
+# o the recordserver plugins are in an extra dir
+#
+# Bugs:
+# o The listing area in the tv guide is blank right now, some code
+#   needs to be moved to gui but it's not done yet.
+# o The only player working right now is xine with dvb
+# o channels.py needs much work to support something else than dvb
+# o recording looks broken, too
+#
 # Revision 1.19  2004/07/11 12:33:29  dischi
 # no tuner id is ok for dvb
 #
@@ -42,214 +56,91 @@
 
 import config, plugin
 import tv.freq, tv.v4l2
-import epg_xmltv
 import time
-
-DEBUG = config.DEBUG
-
-# Sample from local_conf.py:
-#VIDEO_GROUPS = [
-#    VideoGroup(vdev='/dev/video0',
-#               adev=None,
-#               input_type='tuner',
-#               tuner_type='external',
-#               tuner_chan='3',
-#               desc='Bell ExpressVu',
-#               recordable=True),
-#    VideoGroup(vdev='/dev/video1',
-#               adev='/dev/dsp1',
-#               input_type='tuner',
-#               desc='ATI TV-Wonder',
-#               recordable=True),
-#    VideoGroup(vdev='/dev/video2',
-#               adev=None,
-#               input_type='webcam',
-#               desc='Logitech Quickcam',
-#               recordable=False),
-#]
-
-class FreevoChannels:
-
-    def __init__(self):
-        self.chan_index = 0
-
-        if config.plugin_external_tuner: 
-            plugin.init_special_plugin(config.plugin_external_tuner)
+import plugin
 
 
-    def getVideoGroup(self, chan):
-        """
-        Gets the VideoGroup object used by this Freevo channel.
-        """
-        group = 0
-
-        for i in range(len(config.TV_CHANNELS)):
-            chan_info = config.TV_CHANNELS[i]
-            if chan_info[2] == chan:
-                try:
-                    group = int(chan_info[4])
-                except:
-                    # XXX: put a better exception here
-                    group = 0
-
-        return config.VIDEO_GROUPS[group]
-
-
-    def chanUp(self, app=None, app_cmd=None):
-        """
-        Using this method will not support custom frequencies.
-        """
-        return self.chanSet(self.getNextChannel(), app, app_cmd)
-
-
-    def chanDown(self, app=None, app_cmd=None):
-        """
-        Using this method will not support custom frequencies.
-        """
-        return self.chanSet(self.getPrevChannel(), app, app_cmd)
-
-
-    def chanSet(self, chan, app=None, app_cmd=None):
-        new_chan = None
-
-        for pos in range(len(config.TV_CHANNELS)):
-            chan_cfg = config.TV_CHANNELS[pos]
-            if chan_cfg[2] == chan:
-                new_chan = chan
-                self.chan_index = pos
-
-        if not new_chan:
-            print String(_('ERROR')+': '+\
-                         (_('Cannot find tuner channel "%s" in the TV channel listing') % chan))
-            return
-
-        vg = self.getVideoGroup(new_chan)
-
-        if vg.tuner_type == 'external':
-            tuner = plugin.getbyname('EXTERNAL_TUNER')
-            if tuner:
-                tuner.setChannel(new_chan)
-
-            if vg.input_type == 'tuner' and vg.tuner_chan:
-                freq = self.tunerSetFreq(vg.tuner_chan, app, app_cmd)
-                return freq
-
-            return 0
-
+class Channel:
+    """
+    information about one specific channel, also containing
+    epg informations
+    """
+    def __init__(self, name, freq, epg):
+        self.name = name
+        self.freq = []
+        self.epg  = epg
+        if isinstance(freq, list) or isinstance(freq, tuple):
+            for f in freq:
+                self.__add_freq__(f)
         else:
-            return self.tunerSetFreq(chan, app, app_cmd)
+            self.__add_freq__(freq)
+        
 
-        return 0
-
-
-    def tunerSetFreq(self, chan, app=None, app_cmd=None):
-        chan = str(chan)
-        vg = self.getVideoGroup(chan)
-
-        freq = config.FREQUENCY_TABLE.get(chan)
-        if freq:
-            if DEBUG:
-                print String('USING CUSTOM FREQUENCY: chan="%s", freq="%s"'% \
-                      (chan, freq))
-        else:
-            clist = tv.freq.CHANLIST.get(vg.tuner_chanlist)
-            if clist:
-                freq = clist.get(chan)
-            else:
-                if vg.group_type != 'dvb':
-                    print String(_('ERROR')+': ' + \
-                                 (_('Unable to get channel list for %s.') % \
-                                  vg.tuner_chanlist))
-                return 0
-            if not freq:
-                if vg.group_type != 'dvb':
-                    print String(_('ERROR')+': ' + \
-                                 (_('Unable to get channel list for %s.') % \
-                                  vg.tuner_chanlist))
-                return 0
-            if DEBUG:
-                print String('USING STANDARD FREQUENCY: chan="%s", freq="%s"' % \
-                      (chan, freq))
-
-        if app:
-            if app_cmd:
-                self.appSend(app, app_cmd)
-            else:
-                # If we have app and not app_cmd we return the frequency so
-                # the caller (ie: mplayer/tvtime/mencoder plugin) can set it
-                # or provide it on the command line.
-                return freq
-        else:
-            # XXX: add code here for TUNER_LOW capability, the last time that I
-            #      half-heartedly tried this it din't work as expected.
-            # XXX Moved here by Krister, only return actual values
-            freq *= 16
-            freq /= 1000
-
-            # Lets set the freq ourselves using the V4L device.
-            try:
-                vd = tv.v4l2.Videodev(vg.vdev)
-                try:
-                    vd.setfreq(freq)
-                except:
-                    vd.setfreq_old(freq)
-                vd.close()
-            except:
-                print String(_('Failed to set freq for channel %s.') % chan)
-
-        return 0
+    def __add_freq__(self, freq):
+        """
+        add a frequence to the internal list where to find that channel
+        """
+        if freq.find(':') == -1:
+            # FIXME: but this into the config file
+            freq = 'dvb:%s' % freq
+        self.freq.append(freq)
 
 
-    def getChannel(self):
-        return config.TV_CHANNELS[self.chan_index][2]
+    def player(self):
+        """
+        return player object for playing this channel
+        """
+        for f in self.freq:
+            device, freq = f.split(':')
+            print device, freq
+            # try all internal frequencies
+            for p in plugin.getbyname(plugin.TV, True):
+                # FIXME: better handling for rate == 1 or 2
+                if p.rate(self, device, freq):
+                    return p, device, freq
+        return None
 
-    def getManChannel(self,channel=0):
-        return config.TV_CHANNELS[(channel-1) % len(config.TV_CHANNELS)][2]
+                    
+class ChannelList:
 
-    def getNextChannel(self):
-        return config.TV_CHANNELS[(self.chan_index+1) % len(config.TV_CHANNELS)][2]
+    def __init__(self, epg):
+        self.selected = 0
+        self.channels = []
+        for c in config.TV_CHANNELS:
+            self.channels.append(Channel(c[1], c[2], epg.get(c[0])))
+        
 
-
-    def getPrevChannel(self):
-        return config.TV_CHANNELS[(self.chan_index-1) % len(config.TV_CHANNELS)][2]
-
-
-    def setChanlist(self, chanlist):
-        self.chanlist = freq.CHANLIST[chanlist]
-
-
-    def appSend(self, app, app_cmd):
-        if not app or not app_cmd:
-            return
-
-        app.write(app_cmd)
-
-
-    def getChannelInfo(self):
-        '''Get program info for the current channel'''
-
-        tuner_id = self.getChannel()
-        chan_name = config.TV_CHANNELS[self.chan_index][1]
-        chan_id = config.TV_CHANNELS[self.chan_index][0]
-
-        channels = epg_xmltv.get_guide().GetPrograms(start=time.time(),
-                                               stop=time.time(), chanids=[chan_id])
-
-        if channels and channels[0] and channels[0].programs:
-            start_s = time.strftime('%H:%M', time.localtime(channels[0].programs[0].start))
-            stop_s = time.strftime('%H:%M', time.localtime(channels[0].programs[0].stop))
-            ts = '(%s-%s)' % (start_s, stop_s)
-            prog_info = '%s %s' % (ts, channels[0].programs[0].title)
-        else:
-            prog_info = 'No info'
-
-        return tuner_id, chan_name, prog_info
+    def up(self):
+        """
+        go one channel up
+        """
+        self.selected = (self.selected + 1) % len(self.channels)
 
 
+    def down(self):
+        """
+        go one channel down
+        """
+        self.selected = (self.selected + len(self.channels) - 1) % len(self.channels)
 
 
+    def set(self, pos):
+        """
+        set channel
+        """
+        self.selected = pos
+        
 
-# fc = FreevoChannels()
-# print 'CHAN: %s' % fc.getChannel()
-# fc.chanSet('780')
-# print 'CHAN: %s' % fc.getChannel()
+    def get(self):
+        """
+        return selected channel information
+        """
+        return self.channels[self.selected]
+
+
+    def get_all(self):
+        """
+        return all channels
+        """
+        return self.channels
+    

@@ -13,17 +13,22 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/08/05 17:27:17  dischi
+# Major (unfinished) tv update:
+# o the epg is now taken from pyepg in lib
+# o all player should inherit from player.py
+# o VideoGroups are replaced by channels.py
+# o the recordserver plugins are in an extra dir
+#
+# Bugs:
+# o The listing area in the tv guide is blank right now, some code
+#   needs to be moved to gui but it's not done yet.
+# o The only player working right now is xine with dvb
+# o channels.py needs much work to support something else than dvb
+# o recording looks broken, too
+#
 # Revision 1.4  2004/07/26 18:10:19  dischi
 # move global event handling to eventhandler.py
-#
-# Revision 1.3  2004/07/25 19:47:40  dischi
-# use application and not rc.app
-#
-# Revision 1.2  2004/07/10 12:33:42  dischi
-# header cleanup
-#
-# Revision 1.1  2004/06/20 12:01:19  dischi
-# basic xine dvb plugin
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -54,13 +59,11 @@ import config     # Configuration handler. reads config file.
 import childapp   # Handle child applications
 import rc         # The RemoteControl class.
 import util
-import osd
-import eventhandler
-
-from tv.channels import FreevoChannels
+import plugin
 
 from event import *
-import plugin
+from tv.player import TVPlayer
+
 
 
 class PluginInterface(plugin.Plugin):
@@ -122,24 +125,19 @@ class PluginInterface(plugin.Plugin):
             return
             
         # register xine as the object to play
-        plugin.register(Xine(type, config.XINE_VERSION), plugin.TV, False)
+        plugin.register(Xine(type, config.XINE_VERSION), plugin.TV, True)
 
 
 
-class Xine:
+class Xine(TVPlayer):
     """
     the main class to control xine
     """
     def __init__(self, type, version):
-        self.name      = 'xine'
-
-        self.app_mode  = 'tv'
+        TVPlayer.__init__(self, 'xine')
         self.xine_type = type
         self.version   = version
         self.app       = None
-
-        self.fc = FreevoChannels()
-
         self.command = [ '--prio=%s' % config.MPLAYER_NICE ] + \
                        config.XINE_COMMAND.split(' ') + \
                        [ '--stdctl', '-V', config.XINE_VO_DEV,
@@ -147,13 +145,19 @@ class Xine:
                        config.XINE_ARGS_DEF.split(' ')
 
 
-    def Play(self, mode, tuner_channel=None):
+    def rate(self, channel, device, freq):
+        """
+        xine can only play dvb
+        """
+        if device.startswith('dvb'):
+            return 2
+        return 0
+
+    
+    def play(self, channel, device, freq):
         """
         play with xine
         """
-        if not tuner_channel:
-            tuner_channel = self.fc.getChannel()
-
         if plugin.getbyname('MIXER'):
             plugin.getbyname('MIXER').reset()
 
@@ -162,14 +166,12 @@ class Xine:
         if not rc.PYLIRC and '--no-lirc' in command:
             command.remove('--no-lirc')
 
-        command.append('dvb://' + tuner_channel)
+        command.append('dvb://' + freq)
             
         _debug_('Xine.play(): Starting cmd=%s' % command)
 
-        eventhandler.append(self)
-
+        self.show()
         self.app = childapp.ChildApp2(command)
-        return None
     
 
     def stop(self, channel_change=0):
@@ -178,37 +180,19 @@ class Xine:
         """
         if self.app:
             self.app.stop('quit\n')
-            eventhandler.remove(self)
-
-            if not channel_change:
-                pass
-            
+        self.destroy()
+        
 
     def eventhandler(self, event, menuw=None):
         """
         eventhandler for xine control. If an event is not bound in this
         function it will be passed over to the items eventhandler
         """
-        if event in ( PLAY_END, USER_END, STOP ):
-            self.stop()
-            eventhandler.post(PLAY_END)
+        if TVPlayer.eventhandler(self, event, menuw):
             return True
-
+        
         if event == PAUSE or event == PLAY:
             self.app.write('pause\n')
-            return True
-
-        elif event in [ TV_CHANNEL_UP, TV_CHANNEL_DOWN] or str(event).startswith('INPUT_'):
-            if event == TV_CHANNEL_UP:
-                nextchan = self.fc.getNextChannel()
-            elif event == TV_CHANNEL_DOWN:
-                nextchan = self.fc.getPrevChannel()
-            else:
-                nextchan = self.fc.getManChannel(int(event.arg))
-
-            self.stop(channel_change=1)
-            self.fc.chanSet(nextchan)
-            self.Play('tv', nextchan)
             return True
 
         if event == TOGGLE_OSD:

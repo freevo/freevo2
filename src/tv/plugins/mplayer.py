@@ -9,38 +9,22 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2004/08/05 17:27:16  dischi
+# Major (unfinished) tv update:
+# o the epg is now taken from pyepg in lib
+# o all player should inherit from player.py
+# o VideoGroups are replaced by channels.py
+# o the recordserver plugins are in an extra dir
+#
+# Bugs:
+# o The listing area in the tv guide is blank right now, some code
+#   needs to be moved to gui but it's not done yet.
+# o The only player working right now is xine with dvb
+# o channels.py needs much work to support something else than dvb
+# o recording looks broken, too
+#
 # Revision 1.41  2004/07/26 18:10:19  dischi
 # move global event handling to eventhandler.py
-#
-# Revision 1.40  2004/07/25 19:47:40  dischi
-# use application and not rc.app
-#
-# Revision 1.39  2004/07/24 12:24:03  dischi
-# reflect gui changes
-#
-# Revision 1.38  2004/07/11 11:32:47  dischi
-# move mplayer dvb args to config
-#
-# Revision 1.37  2004/07/10 12:33:42  dischi
-# header cleanup
-#
-# Revision 1.36  2004/07/04 08:15:29  dischi
-# add config.MPLAYER_ARGS_DEF (why was that missing?)
-#
-# Revision 1.35  2004/06/28 17:12:22  dischi
-# reduce cache for dvb
-#
-# Revision 1.34  2004/06/25 20:03:33  dischi
-# basic dvb support
-#
-# Revision 1.33  2004/02/13 17:36:54  dischi
-# fixed crash on stop
-#
-# Revision 1.32  2004/02/05 14:23:50  outlyer
-# Patch from Viggo Fredriksen
-#
-# o Move to ChildApp2 for mplayer TV plugin
-# o Channel changing via the number pad on the remote
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -70,8 +54,7 @@ import config
 import time, os
 
 import util    # Various utilities
-import osd     # The OSD class, used to communicate with the OSD daemon
-      # The RemoteControl class.
+
 import event as em
 import childapp # Handle child applications
 import tv.epg_xmltv as epg # The Electronic Program Guide
@@ -80,15 +63,14 @@ import tv.ivtv as ivtv
 import plugin
 import eventhandler
 
+from tv.player import TVPlayer
+
 # Set to 1 for debug output
 DEBUG = config.DEBUG
 
 TRUE = 1
 FALSE = 0
 
-
-# Create the OSD object
-osd = osd.get_singleton()
 
 class PluginInterface(plugin.Plugin):
     """
@@ -101,18 +83,15 @@ class PluginInterface(plugin.Plugin):
         plugin.register(MPlayer(), plugin.TV)
 
 
-class MPlayer:
+class MPlayer(TVPlayer):
 
-    __muted    = 0
-    __igainvol = 0
-    
     def __init__(self):
-        self.tuner_chidx = 0    # Current channel, index into config.TV_CHANNELS
-        self.app_mode = 'tv'
-        self.fc = FreevoChannels()
-        self.current_vg = None
+        TVPlayer.__init__('mplayer')
+        
 
-
+    def rate(self):
+        pass
+    
     def Play(self, mode, tuner_channel=None):
 
         if not tuner_channel:
