@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/02/21 20:03:45  dischi
+# unicode fix (again)
+#
 # Revision 1.18  2004/02/21 19:50:39  dischi
 # unicode fix
 #
@@ -383,10 +386,13 @@ class TVListing_Area(Skin_Area):
                             if (prg.channel_id, prg.start, prg.stop) == recprogs:
                                 val = selected_val
 
-                    if prg.title == Unicode(_('This channel has no data loaded')):
-                        val = copy.copy(val)
-                        val.align='center'
-
+                    try:
+                        if prg.title == _('This channel has no data loaded'):
+                            val = copy.copy(val)
+                            val.align='center'
+                    except UnicodeError:
+                        pass
+                    
                     if x0 > x1:
                         break
 
