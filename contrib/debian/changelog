@@ -1,3 +1,14 @@
+freevo (1.4.1cvs20030108-1) unstable; urgency=low
+
+  * New snapshot
+  * Replaced `pwd` with $(CURDIR)
+  * Fixed postinst
+  * Removed spurious warnings from BSD support
+  * Remove non-standard mixer, favour ossmixer instead
+  * Use dh_install instead of copying by hand.
+
+ -- Aubin Paul <debian@outlyer.org>  Thu,  8 Jan 2004 11:03:45 -0500
+
 freevo (1.4rc3-2) unstable; urgency=low
 
   * Don't run makelircrc unless an lircd.conf exists. 

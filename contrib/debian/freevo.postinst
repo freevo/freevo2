@@ -41,4 +41,14 @@ case "$1" in
         db_get freevo/start_on_boot
         if [ "$RET" = "true" ]; then update-rc.d freevo defaults 99; fi
     ;;
+    *)
+    PYTHON=python2.3
+    if which $PYTHON >/dev/null 2>&1; then
+            DIRLIST="/usr/lib/python2.3/site-packages/freevo"
+            for i in $DIRLIST ; do
+                    $PYTHON -O /usr/lib/$PYTHON/compileall.py -q $i
+                    $PYTHON /usr/lib/$PYTHON/compileall.py -q $i
+            done
+    fi
+    ;;
 esac
