@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/12/30 21:24:08  dischi
+# prevent crash because True is no dict
+#
 # Revision 1.19  2003/12/30 15:35:16  dischi
 # remove unneeded copy function
 #
@@ -62,7 +65,7 @@ from event import *
 
 class ImageItem(Item):
     def __init__(self, url, parent, name = None, duration = 0):
-        Item.__init__(self, parent, True)
+        Item.__init__(self, parent)
 
         self.type     = 'image'
         self.set_url(url)
