@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/04/21 18:17:46  dischi
+# Moved the code from interface.py for video/audio/image/games to __init__.py
+#
 # Revision 1.5  2003/04/21 13:01:15  dischi
 # remove osd dependency
 #
@@ -68,10 +71,10 @@ import skin
 from item import Item
 from playlist import Playlist, RandomPlaylist
 
-import video.interface
-import audio.interface
-import image.interface
-import games.interface
+import video
+import audio
+import image
+import games
 
 from item import Item
 
@@ -320,10 +323,10 @@ class DirItem(Playlist):
         play_items = []
         for t in ( 'video', 'audio', 'image', 'games' ):
             if not self.display_type or self.display_type == t:
-                play_items += eval(t + '.interface.cwd(self, files)')
+                play_items += eval(t + '.cwd(self, files)')
 
         if self.display_type == 'tv':
-            play_items += video.interface.cwd(self, files)
+            play_items += video.cwd(self, files)
             
         if self.DIRECTORY_SORT_BY_DATE:
             play_items.sort(lambda l, o: cmp(l.sort('date').upper(),
@@ -442,12 +445,12 @@ class DirItem(Playlist):
         # check modules if they know something about the deleted/new files
         for t in ( 'video', 'audio', 'image', 'games' ):
             if not self.display_type or self.display_type == t:
-                eval(t + '.interface.update')(self, new_files, del_files, \
+                eval(t + '.update')(self, new_files, del_files, \
                                               new_items, del_items, \
                                               self.play_items)
                 
         if self.display_type == 'tv':
-            video.interface.update(self, new_files, del_files, 
+            video.update(self, new_files, del_files, 
                                    new_items, del_items, self.play_items)
 
         # delete play items from the menu
@@ -533,8 +536,7 @@ class DirItem(Playlist):
 
             # reuse old playlist
             else:
-                items += self.menu.choices[0]
-
+                items += [ self.menu.choices[0] ]
 
         # build a list of all items
         items += self.dir_items + self.pl_items + self.play_items

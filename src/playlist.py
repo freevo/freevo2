@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/04/21 18:17:46  dischi
+# Moved the code from interface.py for video/audio/image/games to __init__.py
+#
 # Revision 1.15  2003/04/21 13:01:48  dischi
 # handle events without eventhandler
 #
@@ -69,15 +72,14 @@ import config
 
 from item import Item
 
-import video.interface
-import audio.interface
-import image.interface
-import games.interface
+import video
+import audio
+import image
+import games
 
-# FIXME: remove this and use the interface.py
-from audio.audioitem import AudioItem
-from video.videoitem import VideoItem
-from image.imageitem import ImageItem
+from audio import AudioItem
+from video import VideoItem
+from image import ImageItem
 
 import rc
 
