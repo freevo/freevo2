@@ -28,6 +28,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/10/28 02:37:32  outlyer
+# A bugfix for the issue where multiple CDs couldn't be ripped concurrently.
+# The problem is that the main_backup_thread class does not have access to
+# change rip_thread to None, so we have to use what we CAN access to do it.
+#
 # Revision 1.24  2003/10/22 18:37:41  mikeruelle
 # if we have the coverart might as well copy it over
 #
@@ -216,7 +221,7 @@ class PluginInterface(plugin.ItemPlugin):
         
         try:
             if (self.item.type == 'audiocd'):
-                if self.rip_thread:
+                if self.rip_thread and self.rip_thread.current_track != -1:
                     return [ ( self.show_status, _( 'Show CD ripping status' ) ) ]
                 else:
                     self.device = self.item.devicename
@@ -231,7 +236,7 @@ class PluginInterface(plugin.ItemPlugin):
 
     def show_status(self, arg=None, menuw=None):
         t = self.rip_thread
-        if t:
+        if t.current_track != -1:
             pop = AlertBox(text=_( 'Ripping in progress\nTrack %d of %d' ) % \
                            (t.current_track, t.max_track))
             pop.show()
@@ -454,7 +459,7 @@ class main_backup_thread(threading.Thread):
             media.info.handle_type = 'audio'
 
         # done
-        self.rip_thread = None
+        self.current_track = -1
 
 
         
