@@ -10,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.50  2003/09/05 20:08:32  dischi
+# o Move getXMLTVChannels to config.py
+# o add encode function to handle non ascii chars
+#
 # Revision 1.49  2003/09/05 18:29:58  dischi
 # fix walk
 #
@@ -622,6 +626,20 @@ def rmrf(top=None):
                 os.rmdir(os.path.join(root, name))
         os.rmdir(top)
 
+
+def encode(str, code):
+    try:
+        return str.encode(code)
+    except UnicodeError:
+        result = ''
+        for ch in str:
+            try:
+                result += ch.encode(code)
+            except UnicodeError:
+                pass
+        return result
+    
+
 #
 # synchronized objects and methods.
 # By André Bjärby
@@ -677,49 +695,4 @@ class SynchronizedObject:
             return self.__methods[name]
         except KeyError:
             return getattr(self.__obj, name)
-
-def sortchannels(list, key):
-    # This should be more generic, but I couldn't get it
-    # to sort properly without specifying the nested array
-    # index for the tunerid and forcing 'int'
-    nlist = map(lambda x, key=key: (int(x[key][1][0]), x), list)
-    nlist.sort()
-    return map(lambda (key, x): x, nlist)
-
-
-def getXMLTVChannels(file):
-    import xmltv
-    import sys,os
-
-    path = config.FREEVO_CACHEDIR
-    pfile = 'xmltv_channels.pickle'
-
-    pname = os.path.join(path,pfile)
-
-    if os.path.isfile(pname) and (os.path.getmtime(pname) >
-                                    os.path.getmtime(file)):
-        fd = open(pname,'r')
-        chanlist = pickle.load(fd)
-        return chanlist
-
-    xmltv_channels = xmltv.read_channels(open(file))
-    xmltv_channels = sortchannels(xmltv_channels,'display-name')
-
-
-    chanlist = []
-
-    for a in xmltv_channels:
-        if (a['display-name'][1][0][0].isdigit()):
-            display_name = a['display-name'][0][0]
-            tunerid = a['display-name'][1][0]
-        else:
-            display_name = a['display-name'][1][0]
-            tunerid = a['display-name'][0][0]
-        id = a['id']
-
-        chanlist += [(id,display_name,int(tunerid))]
-
-    save_pickle(chanlist, pname)
-    return chanlist
-         
 
