@@ -8,6 +8,17 @@ to keep the code more consistent (while not being too fascist).
                 / Krister
 
 
+o Always use 4 spaces four indentation. Do not use tabs as 
+  that can lead to errors if tabs and spaces are mixed in Python!
+
+o Use tabnanny.py in the python lib to check for potential tab problems.
+  Also use freevo/helpers/chktab.py!
+
+o Use 'python -t -Wall::PendingDeprecationWarning main.py' to 
+  check for potential problems.
+
+o PyChecker TBD
+
 o Strings: Use single-quotes in general (less visual clutter IMHO):
     'Some "doublequoted" text inside a string'
   Use double-quote if you want to use single-quotes inside:
@@ -33,3 +44,8 @@ o The builtin function "print" is very similar to printf() in C.
   It has all the regular %s, %d, %f etc, but usually only %s is
   needed since it will print any kind of variable after converting
   it to a string.
+
+
+Links to interesting stuff:
+
+Threads, XML: http://europython.zope.nl/sessions/presentations/all
