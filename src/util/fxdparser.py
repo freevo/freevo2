@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/01/14 21:20:36  dischi
+# fix writing
+#
 # Revision 1.10  2004/01/14 18:49:37  dischi
 # >= is better
 #
@@ -148,7 +151,11 @@ class FXDtree(qp_xml.Parser):
         f.write('\n')
         f.close()
 
-        util.save_pickle(self.tree, vfs.getoverlay(filename + '.raw'))
+        f = vfs.open(filename)
+        self.tree = self.parse(f)
+        f.close()
+        if self.tree:
+            util.save_pickle(self.tree, vfs.getoverlay(filename + '.raw'))
 
         
     def _dump_recurse(self, f, elem, depth=0):
