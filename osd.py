@@ -12,6 +12,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2002/10/20 15:54:16  outlyer
+# Added a layer parameter to "drawstringframed()" We don't do anything with
+# it right now, but it keeps skin_main1 from breaking. This is a temporary
+# measure to make sure CVS checkouts still work.
+#
 # Revision 1.42  2002/10/19 15:05:34  dischi
 # Added support to draw on a given surface (layer). This is needed for the
 # changed main1 skin.
@@ -545,7 +550,7 @@ class OSD:
     #  - Debug it
     #  - Improve it
     def drawstringframed(self, string, x, y, width, height, fgcolor=None, bgcolor=None,
-                         font=None, ptsize=0, align_h='left', align_v='top', mode='hard'):
+                         font=None, ptsize=0, align_h='left', align_v='top', mode='hard',layer=None):
         if mode == 'hard':
             return self.drawstringframedhard(string,x,y,width, height, fgcolor,
                                              bgcolor, font, ptsize, align_h, align_v)
