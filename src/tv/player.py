@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/09/15 20:45:31  dischi
+# remove unneeded events functions
+#
 # Revision 1.3  2004/08/25 12:51:45  dischi
 # moved Application for eventhandler into extra dir for future templates
 #
@@ -87,17 +90,6 @@ class TVPlayer(Application):
         raise Exception('not implemented in template')
 
 
-    def hide(self):
-        Application.hide(self)
-
-
-    def stop(self, channel_change=0):
-        """
-        stop playing
-        """
-        raise Exception('not implemented in template')
-
-
     def set_channel(self, channel):
         """
         tune to a new channel
@@ -111,7 +103,6 @@ class TVPlayer(Application):
         """
         if event == STOP or event == PLAY_END:
             self.stop()
-            self.post_event(PLAY_END)
             return True
 
         if event in [ TV_CHANNEL_UP, TV_CHANNEL_DOWN] or str(event).startswith('INPUT_'):
