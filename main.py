@@ -1,47 +1,52 @@
-#
-# main.py
-#
-# This is the Freevo main application code.
-#
+# ----------------------------------------------------------------------
+# main.py - This is the Freevo main application code
+# ----------------------------------------------------------------------
 # $Id$
+# ----------------------------------------------------------------------
+# $Log$
+# Revision 1.39  2002/08/04 22:17:44  tfmalt
+# o Fixed autostart so that it handles CD's of type AUDIO properly again.
+#
+# ----------------------------------------------------------------------
+#
+# Freevo - A Home Theater PC framework
+# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# -----------------------------------------------------------------------
 
-# Configuration file. Determines where to look for AVI/MP3 files, etc
-# Logging is initialized here, so it should be imported first
 import config
-
 import sys, socket, random, time, os
 import traceback
 
-# Various utilities
-import util
 
-# The menu widget class
-import menu
-
-# The skin class
-import skin
-
-# The mixer class, controls the volumes for playback and recording
-import mixer
-
-# The OSD class, used to communicate with the OSD daemon
-import osd
+import util  # Various utilities
+import menu  # The menu widget class
+import skin  # The skin class
+import mixer # The mixer class
+import osd   # The OSD class, used to communicate with the OSD daemon
 
 # The RemoteControl class, sets up a UDP daemon that the remote control client
 # sends commands to
 import rc
-
-# The Music module
-import music
-
-# The Movie module
-import movie
-
-# The TV module
-import tv
-
-# The Image viewer module
-import imenu
+import music # The Music module
+import movie # The Movie module
+import tv    # The TV module
+import imenu # The Image viewer module
 
 # Set to 1 for debug output
 DEBUG = 1
@@ -103,11 +108,13 @@ def autostart():
     if config.ROM_DRIVES != None: 
         media,label,image,play_options = util.identifymedia(config.ROM_DRIVES[0][0])
         if play_options:
-            movie.play(None, play_options)
+            movie.play_movie(None, play_options)
         elif media == 'DIVX':
             movie.cwd(config.ROM_DRIVES[0][0], menuwidget)
-        elif media == 'MP3':
-            mp3.cwd(config.ROM_DRIVES[0][0], menuwidget)
+        elif media == 'AUDIO':
+            music.parse_entry([config.ROM_DRIVES[0][0],
+                               config.ROM_DRIVES[0][0]],
+                              menuwidget)
         elif media == 'IMAGE':
             imenu.cwd(config.ROM_DRIVES[0][0], menuwidget)
 
