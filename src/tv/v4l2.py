@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/07/30 22:59:06  rshortt
+# Fix a set standard bug and add the begining of vidio groups.
+#
 # Revision 1.4  2003/07/18 16:40:02  rshortt
 # Added support for a custom frequency table, config.FREQUENCY_TABLE.  See
 # freevo_config.py or local_conf.py for details.
@@ -138,9 +141,9 @@ V4L2_TUNER_CAP_SAP    = 0x0020
 V4L2_TUNER_CAP_LANG1  = 0x0040
 
 
-NORMS = { 'NTSC'  : 0,
-          'PAL' : 1,
-          'SECAM' : 2  }
+NORMS = { 'NTSC'  : 0x3000,
+          'PAL'   : 0xff,
+          'SECAM' : 0x7f0000  }
 
 
 class Videodev:
@@ -288,7 +291,7 @@ class Videodev:
     def init_settings(self):
         (v_norm, v_input, v_clist, v_dev) = config.TV_SETTINGS.split()
         v_norm = string.upper(v_norm)
-        self.setinput(NORMS.get(v_norm))
+        self.setstd(NORMS.get(v_norm))
 
         self.setchanlist(v_clist)
 
@@ -328,5 +331,24 @@ class Videodev:
         print "Width: %i, Height: %i" % (width,height)
 
         print "Read Frequency: %i" % self.getfreq()
+
+
+class V4LGroup:
+    def __init__(self):
+        # Types:
+        #   tv-v4l1 - video capture card with a tv tuner using v4l1
+        #   tv-v4l2 - video capture card with a tv tuner using v4l2
+        #   video   - video capture card (v4l1 or v4l2) using an external video
+        #             source such as sattelite, digital cable box, video or
+        #             security camera.
+        #   webcam  - such as a USB webcam, these are handled a bit differently
+        #             than most other v4l devices.
+
+        self.type = type
+        self.vdev = vdev
+        self.vinput = vinput
+        self.adev = adev
+        self.desc = desc
+        self.inuse = FALSE
 
 
