@@ -30,7 +30,10 @@
 #
 # ----------------------------------------------------------------------- */
 
-import glob, os, sys
+import os
+import sys
+import glob
+
 from distutils.core import setup, Extension
 
 # sources
@@ -43,13 +46,18 @@ includes = [ '/usr/include/' ]
 library_dirs=['/usr/lib/']
 
 for i in ('/usr', '/usr/local'):
-    if os.path.isdir(os.path.join(i, 'include/libvisual')) and \
-           os.path.isdir(os.path.join(i, 'lib/libvisual')):
-        print 'found libvisual with prefix', i
+    if os.path.isdir(os.path.join(i, 'include/libvisual')):
+        print 'found libvisual include with prefix', i
         includes.append(os.path.join(i, 'include/libvisual'))
-        library_dirs.append(os.path.join(i, 'lib'))
-        library_dirs.append(os.path.join(i, 'lib/libvisual'))
-        break
+        if os.path.isdir(os.path.join(i, 'lib/libvisual')):
+            library_dirs.append(os.path.join(i, 'lib'))
+            library_dirs.append(os.path.join(i, 'lib/libvisual'))
+            print 'found libvisual libs in', i
+            break
+        elif glob.glob(os.path.join(i, 'lib/libvisual*')):
+            print 'found libvisual libs in %s/lib' % (i)
+            break
+        # Else, keep looking!
 else:
     print 'libvisual not found, unable to build pylibvisual'
     sys.exit(1)
