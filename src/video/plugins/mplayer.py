@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.98  2005/01/02 13:08:01  dischi
+# make it possible to set video filter for mplayer
+#
 # Revision 1.97  2005/01/01 18:48:53  dischi
 # remove debug
 #
@@ -227,10 +230,10 @@ class MPlayer(Application):
         if item.selected_audio != None:
             additional_args += [ '-aid', str(item.selected_audio) ]
 
-        if item['deinterlace']:
-            additional_args += [ '-vf-pre',  'pp=de/fd' ]
-        else:
-            additional_args += [ '-vf',  'pp=de' ]
+        if item['deinterlace'] and config.MPLAYER_VF_INTERLACED:
+            additional_args += [ '-vf-pre',  config.MPLAYER_VF_INTERLACED ]
+        elif not item['deinterlace'] and config.MPLAYER_VF_PROGRESSIVE:
+            additional_args += [ '-vf-pre',  config.MPLAYER_VF_PROGRESSIVE ]
                 
         mode = item.mimetype
         if not config.MPLAYER_ARGS.has_key(mode):

@@ -1073,6 +1073,18 @@ MPLAYER_SET_AUDIO_DELAY = 0
 #
 MPLAYER_RESAMPLE_AUDIO = 0
 
+#
+# Mplayer video filter for interlaced or progressive videos. If you have
+# a slow pc, do not use post processing
+# MPLAYER_VF_INTERLACED  = ''
+# MPLAYER_VF_PROGRESSIVE = 'pp=fd'
+# For pal and dvb-t recordings, the following looks good
+# MPLAYER_VF_INTERLACED  = 'pp=md/de,phase=U'
+#
+MPLAYER_VF_INTERLACED  = 'pp=de/fd'
+MPLAYER_VF_PROGRESSIVE = 'pp=de'
+
+
 # ======================================================================
 # Xine settings:
 # ======================================================================
