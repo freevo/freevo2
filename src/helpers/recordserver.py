@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.54  2004/07/09 21:05:46  rshortt
+# Add warnings in case the recording plugin isn't there.
+#
 # Revision 1.53  2004/07/09 16:20:54  outlyer
 # Remove the request logging for 0-level debug. Exceptions will still be
 # logged, but standard requests will not.
@@ -141,6 +144,20 @@ plugin.init_special_plugin(config.plugin_record)
 tv_lock_file = config.FREEVO_CACHEDIR + '/record'
 
 
+def print_plugin_warning():
+    print '*************************************************'
+    print '**  Warning: No recording plugin registered.  **'
+    print '**           Check your local_conf.py for a   **'
+    print '**           bad "plugin_record =" line or    **'
+    print '**           this log for a plugin failure.   **'
+    print '**           Recordings will fail!            **'
+    print '*************************************************'
+
+
+if not plugin.getbyname('RECORD'):
+    print_plugin_warning()
+
+
 class RecordServer(xmlrpc.XMLRPC):
 
     # note: add locking and r/rw options to get/save funs
@@ -254,7 +271,9 @@ class RecordServer(xmlrpc.XMLRPC):
         # if prog.start <= now and prog.stop >= now and recording:
         if recording:
             print 'stopping current recording'
-            plugin.getbyname('RECORD').Stop()
+            rec_plugin = plugin.getbyname('RECORD')
+            if rec_plugin:
+                rec_plugin.Stop()
        
         return (TRUE, 'recording removed')
    
@@ -444,6 +463,13 @@ class RecordServer(xmlrpc.XMLRPC):
         if rec_prog:
             _debug_('start recording')
             self.record_app = plugin.getbyname('RECORD')
+
+            if not self.record_app:
+                print_plugin_warning()
+                print 'ERROR:  Recording %s failed.' % String(rec_prog.title)
+                self.removeScheduledRecording(rec_prog)
+                return
+
             self.record_app.Record(rec_prog)
 
 
