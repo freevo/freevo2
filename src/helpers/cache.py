@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2004/02/27 20:41:38  dischi
+# better rebuild
+#
 # Revision 1.27  2004/02/27 20:27:45  dischi
 # increase cache version
 #
@@ -159,7 +162,6 @@ def cache_directories(rebuild):
         if rebuild == 2:
             for f in util.match_files(config.OVERLAY_DIR + '/disc/metadata', ['mmpython']):
                 os.unlink(f)
-                print f
         print 'done'
 
     all_dirs = []
@@ -397,6 +399,12 @@ if __name__ == "__main__":
         sys.exit(0)
 
 
+    print 'Freevo cache'
+    print
+    print 'Freevo will now generate a metadata cache for all your files and'
+    print 'create thumbnails from images for faster access.'
+    print
+
     # check for current cache informations
     if (len(sys.argv)>1 and sys.argv[1] == '--rebuild'):
         rebuild = 1
@@ -412,10 +420,21 @@ if __name__ == "__main__":
         if not info:
             print
             print 'Unable to detect last complete rebuild, forcing rebuild'
-            rebuild         = 2
+            rebuild = 2
             complete_update = int(time.time())
         else:
-            complete_update = info[-1]
+            if len(info) == 3:
+                mmchanged, part_update, complete_update = info
+                freevo_changed = 0
+            else:
+                mmchanged, freevo_changed, part_update, complete_update = info
+
+            # let's warn about some updates
+            if freevo_changed < VERSION:
+                print 'Cache too old, forcing rebuild'
+                rebuild = 2
+                complete_update = int(time.time())
+                
     except ImportError:
         print
         print 'Error: unable to read mmpython version information'
@@ -426,11 +445,6 @@ if __name__ == "__main__":
         print
         print
 
-    print 'Freevo cache'
-    print
-    print 'Freevo will now generate a metadata cache for all your files and'
-    print 'create thumbnails from images for faster access.'
-    print
     start = time.clock()
     
     activate_plugins = []
