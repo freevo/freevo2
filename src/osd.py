@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.128  2004/01/25 13:09:04  dischi
+# unicode support for filenames
+#
 # Revision 1.127  2004/01/19 20:29:11  dischi
 # cleanup, reduce cache size
 #
@@ -1280,10 +1283,10 @@ class OSD:
             thumb = None
             _debug_('Trying to load file "%s"' % filename, level=3)
 
-            if isinstance(filename, str) and filename.endswith('.raw'):
+            if (isinstance(filename, str) or isinstance(filename, unicode)) \
+                   and filename.endswith('.raw'):
                 data  = util.read_pickle(filename)
                 image = pygame.image.fromstring(data[0], data[1], data[2])
-
             elif thumbnail:
                 sinfo = os.stat(filename)
                 thumb = vfs.getoverlay(filename + '.raw')
