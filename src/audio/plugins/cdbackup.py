@@ -28,6 +28,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/10/08 02:57:41  outlyer
+# Get rid of the global variables; keep the thread inside the class.
+#
+# I still don't know why ripping CDs breaks audio playback, but I'm hoping
+# these changes will help.
+#
 # Revision 1.20  2003/10/08 02:06:18  outlyer
 # Just some cleanup of commented out or disabled code.
 #
@@ -95,8 +101,6 @@ from gui.AlertBox import AlertBox
 
 # Included to be able to access the info for Audio CDs
 import mmpython
-
-rip_thread = None
 
 class PluginInterface(plugin.ItemPlugin):
     """
@@ -178,6 +182,7 @@ class PluginInterface(plugin.ItemPlugin):
         self.album = ''
         self.song_names = []
         self.device = ''
+        self.rip_thread = None
 
         
     def config(self):
@@ -196,12 +201,11 @@ class PluginInterface(plugin.ItemPlugin):
                 ('FLAC_OPTS', '-8', '8==Best, but slowest compression'))
 
     def actions(self, item):
-        global rip_thread
         self.item = item
         
         try:
             if (self.item.type == 'audiocd'):
-                if rip_thread:
+                if self.rip_thread:
                     return [ ( self.show_status, 'Show CD ripping status') ]
                 else:
                     self.device = self.item.devicename
@@ -215,8 +219,7 @@ class PluginInterface(plugin.ItemPlugin):
 
 
     def show_status(self, arg=None, menuw=None):
-        global rip_thread
-        t = rip_thread
+        t = self.rip_thread
         if t:
             pop = AlertBox(text='Ripping in progress\nTrack %s of %s' % \
                            (t.current_track, t.max_track))
@@ -249,10 +252,9 @@ class PluginInterface(plugin.ItemPlugin):
         
 
     def cd_backup(self, arg,  menuw=None):            
-        global rip_thread
         device, type = arg
-        rip_thread = main_backup_thread(device=device, rip_format=type)        
-        rip_thread.start()
+        self.rip_thread = main_backup_thread(device=device, rip_format=type)        
+        self.rip_thread.start()
         AlertBox(text='Ripping started').show()
         menuw.delete_menu()
         menuw.back_one_menu()
@@ -434,8 +436,7 @@ class main_backup_thread(threading.Thread):
             media.info.handle_type = 'audio'
 
         # done
-        global rip_thread
-        rip_thread = None
+        self.rip_thread = None
 
 
         
