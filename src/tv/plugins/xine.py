@@ -13,6 +13,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/12/28 00:35:19  rshortt
+# Further vdr-xine for DVB and df_xine tweaks, still planning on smoothing things
+# over and also add ivtv (input_pvr) support.
+#
 # Revision 1.9  2004/11/20 18:23:04  dischi
 # use python logger module for debug
 #
@@ -68,12 +72,15 @@ import time, os, re
 import copy
 
 import config     # Configuration handler. reads config file.
-import childapp   # Handle child applications
+from util.popen import Process
 import util
 import plugin
 
 from event import *
 from tv.player import TVPlayer
+
+import pyepg
+from vdr.vdr import VDR
 
 import logging
 log = logging.getLogger('tv')
@@ -114,6 +121,8 @@ class PluginInterface(plugin.Plugin):
                    config.FBXINE_VERSION < '0.9.23':
                 self.reason = "'fbxine' version too old"
                 return
+        elif config.XINE_COMMAND.find('df_xine') >= 0:
+            type = 'df'
         else:
             type = 'X'
             if config.XINE_VERSION < '0.99.1' and \
@@ -137,25 +146,42 @@ class Xine(TVPlayer):
         self.xine_type = type
         self.version   = version
         self.app       = None
+        self.device    = None
         self.command = config.XINE_COMMAND.split(' ') + \
                        [ '--stdctl', '-V', config.XINE_VO_DEV,
                          '-A', config.XINE_AO_DEV ] + \
                        config.XINE_ARGS_DEF.split(' ')
 
+        if config.XINE_USE_VDR:
+            self.vdr = VDR(host=config.VDR_HOST, 
+                           port=config.VDR_PORT, 
+                           videopath=config.VDR_DIR, 
+                           channelsfile=config.VDR_CHANNELS, 
+                           epgfile=config.VDR_EPG,
+                           close_connection=1)
+            self.vdr.getsvdrp()
 
-    def rate(self, channel, device, freq):
+
+    def rate(self, channel, device, uri):
         """
         xine can only play dvb
         """
+        log.debug('xine tv asked to rate: %s %s %s' % (channel, device, uri))
         if device.startswith('dvb'):
             return 2
+        elif device.startswith('ivtv'):
+            return 2
+
         return 0
 
     
-    def play(self, channel, device, freq):
+    def play(self, channel, device, uri):
         """
         play with xine
         """
+        self.channel = channel
+        self.device  = device
+
         if plugin.getbyname('MIXER'):
             plugin.getbyname('MIXER').reset()
 
@@ -169,12 +195,20 @@ class Xine(TVPlayer):
                config.FBXINE_USE_LIRC:
             command.append('--no-lirc')
 
-        command.append('dvb://' + freq)
+        if device.startswith('dvb'):
+            if config.XINE_USE_VDR:
+                command.append('vdr://tmp/vdr-xine/stream#demux:mpeg_pes')
+                log.debug('want to play %s' % uri)
+                self.vdr.svdrp.chan(String(uri))
+            else:
+                command.append('dvb://' + uri)
+        elif device.startswith('ivtv'):
+            command.append('pvr://' + uri)
             
         log.info('Xine.play(): Starting cmd=%s' % command)
 
         self.show()
-        self.app = childapp.Instance( command, prio = config.MPLAYER_NICE )
+        self.app = Process( command )
     
 
     def stop(self, channel_change=0):
@@ -194,6 +228,12 @@ class Xine(TVPlayer):
         if TVPlayer.eventhandler(self, event, menuw):
             return True
         
+        # OSD_MESSAGE to vdr-xine is hanging VDR on me, investigating
+        #if event == OSD_MESSAGE:
+        #    if config.XINE_USE_VDR:
+        #        self.vdr.svdrp.osd_message(String(event.arg))
+        #        return True
+        
         if event == PAUSE or event == PLAY:
             self.app.write('pause\n')
             return True
@@ -205,6 +245,25 @@ class Xine(TVPlayer):
         if event == VIDEO_TOGGLE_INTERLACE:
             self.app.write('ToggleInterleave\n')
             return True
+
+        if event == TV_CHANNEL_UP:
+            if config.XINE_USE_VDR:
+                self.channel = pyepg.get_channel(self.channel, 1)
+                uri = self.channel.get_uri(self.channel, self.device)
+                self.vdr.svdrp.chan(String(uri))
+                return True
+
+        if event == TV_CHANNEL_DOWN:
+            if config.XINE_USE_VDR:
+                self.channel = pyepg.get_channel(self.channel, -1)
+                uri = self.channel.get_uri(self.channel, self.device)
+                self.vdr.svdrp.chan(String(uri))
+                return True
+
+        if event in INPUT_ALL_NUMBERS:
+            digit = str(event).split('_')[1]
+            self.vdr.svdrp.hitk(digit)
+            log.debug('xine: user pressed digit %s' % digit)
 
         # nothing found
         return False
