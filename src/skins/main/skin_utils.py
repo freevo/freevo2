@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/01/01 17:41:05  dischi
+# add border support for Font
+#
 # Revision 1.9  2003/11/29 11:27:41  dischi
 # move objectcache to util
 #
@@ -225,7 +228,7 @@ def text_or_icon(settings, string, x, width, font):
         _debug_('no image %s' % l[2])
         pass
 
-    mod_x = width - font.font.stringsize(l[3])
+    mod_x = width - font.stringsize(l[3])
     if mod_x < 0:
         mod_x = 0
     if l[1] == 'CENTER':

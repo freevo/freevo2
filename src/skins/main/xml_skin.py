@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2004/01/01 17:41:05  dischi
+# add border support for Font
+#
 # Revision 1.23  2004/01/01 12:25:07  dischi
 # store version information and list of depending files
 #
@@ -302,6 +305,7 @@ XML_types = {
     'image'    : ('str', 0),    
     'name'     : ('font',  0),
     'visible'  : ('visible', 0),
+    'border'   : ('visible', 0),
     'icon'     : ('str', 0),    
 }
 
@@ -784,10 +788,11 @@ class Font(XML_data):
     font tag
     """
     def __init__(self, label):
-        XML_data.__init__(self, ('name', 'size', 'color'))
+        XML_data.__init__(self, ('name', 'size', 'color', 'bgcolor'))
         self.label  = label
-        self.shadow = XML_data(('visible', 'color', 'x', 'y'))
+        self.shadow = XML_data(('visible', 'color', 'x', 'y', 'border'))
         self.shadow.visible = False
+        self.shadow.border  = False
         
     def parse(self, node, scale, current_dir):
         XML_data.parse(self, node, scale, current_dir)
@@ -795,6 +800,15 @@ class Font(XML_data):
             if subnode.name == u'shadow':
                 self.shadow.parse(subnode, scale, current_dir)
 
+    def stringsize(self, text):
+        size = self.font.stringsize(text)
+        if self.shadow.visible:
+            if self.shadow.border:
+                return size + (self.size / 10) * 2
+            else:
+                return size + abs(self.shadow.x)
+        return size
+    
     def prepare(self, color, search_dirs=None, image_names=None, scale=1.0):
         if color.has_key(self.color):
             self.color = color[self.color]

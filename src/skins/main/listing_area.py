@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/01/01 17:41:05  dischi
+# add border support for Font
+#
 # Revision 1.15  2003/12/14 17:39:52  dischi
 # Change TRUE and FALSE to True and False; vfs fixes
 #
@@ -355,19 +358,20 @@ class Listing_Area(Skin_Area):
                     else:
                         season  = 0
                         episode = 0
-                        font = val.font.font
                         for c in menuw.menu_items:
                             if c.type == 'video' and hasattr(c,'tv_show') and \
                                c.tv_show and c.show_name[0] == sn[0]:
-                                season  = max(season, font.stringsize(c.show_name[1]))
-                                episode = max(episode, font.stringsize(c.show_name[2]))
+                                season  = max(season,
+                                              val.font.stringsize(c.show_name[1]))
+                                episode = max(episode,
+                                              val.font.stringsize(c.show_name[2]))
                             else:
                                 all_tvs = False
 
                         if all_tvs and choice.image:
-                            tvs_w = font.stringsize('x') + season + episode
+                            tvs_w = val.font.stringsize('x') + season + episode
                         else:
-                            tvs_w = font.stringsize('%s x' % sn[0]) + season + episode
+                            tvs_w = val.font.stringsize('%s x' % sn[0]) + season + episode
                         last_tvs = (sn[0], tvs_w)
                         
                     self.drawstring(' - %s' % sn[3], val.font, content,
