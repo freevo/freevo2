@@ -10,6 +10,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2003/10/20 19:31:06  dischi
+# center popup box on screen as default
+#
 # Revision 1.35  2003/10/12 10:56:19  dischi
 # change debug to use _debug_ and set level to 2
 #
@@ -175,7 +178,8 @@ class PopupBox(Container):
             self.left = self.osd.width/2 - self.width/2
         if not self.top:
             self.top  = self.osd.height/2 - self.height/2
-
+            self.center_on_screen = True
+            
         if type(text) in StringTypes:
             self.label = Label(text, self, Align.CENTER, Align.CENTER,
                                text_prop=self.text_prop )
