@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/07/04 00:04:15  gsbarbieri
+# Fixed some bugs
+#
 # Revision 1.7  2003/07/03 21:29:27  dischi
 # Reversed the changes I made to speed up things when I split
 # drawstringframed into a calc and draw function. The new dsf doesn't need
@@ -320,10 +323,16 @@ class Info_Area(Skin_Area):
                 element.x = x
                 element.y = y
 
+                shadow_x, shadow_y = 0, 0
+                if element.font.shadow.visible == 'yes':
+                    shadow_x = element.font.shadow.x
+                    shadow_y = element.font.shadow.y
+                    
+
                 # Calculate the geometry
                 r = Geometry( x, y, element.width, element.height)
-                r = self.get_item_rectangle(r, self.content.width - x,
-                                            self.content.height - y )[ 2 ]
+                r = self.get_item_rectangle(r, self.content.width - x - shadow_x,
+                                            self.content.height - y - shadow_y )[ 2 ]
 
                 if element.height > 0:
                     height = min(r.height, element.height)
@@ -336,9 +345,12 @@ class Info_Area(Skin_Area):
                                              element.font.name, element.font.size,
                                              element.align, element.valign,
                                              element.mode, layer='' )[ 1 ]
-
-                m_width  = size[ 2 ] - size[ 0 ]
-                m_height = size[ 3 ] - size[ 1 ]
+                try:
+                    m_width  = size[ 2 ] - size[ 0 ]
+                    m_height = size[ 3 ] - size[ 1 ]
+                except:
+                    m_width = r.width
+                    m_height = r.height
 
                 if isinstance( element.width, int ):
                     if element.width <= 0:
@@ -351,6 +363,9 @@ class Info_Area(Skin_Area):
                         element.height = m_height
                 else:
                     element.height = min( m_height, r.height )
+
+                element.width += shadow_x
+                element.height += shadow_y
 
                 x += element.width
                 ret_list += [ element ]
