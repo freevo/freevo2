@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.153  2004/05/02 09:20:55  dischi
+# better support for time==0
+#
 # Revision 1.152  2004/04/25 11:23:57  dischi
 # Added support for animations. Most of the code is from Viggo Fredriksen
 #
@@ -1301,7 +1304,7 @@ class OSD:
         
 
     def sleep(self, sleep_time):
-        if self.render.realtime:
+        if self.render.realtime and sleep_time:
             tick  = pygame.time.get_ticks()
             start = tick
             while tick - start < sleep_time * 100:
@@ -1309,8 +1312,9 @@ class OSD:
                 tick = pygame.time.get_ticks()
         else:
             self.render.update(pygame.time.get_ticks())
-            time.sleep(sleep_time)
-            
+            if sleep_time:
+                time.sleep(sleep_time)
+
         
     def _getbitmap(self, url):
         """
