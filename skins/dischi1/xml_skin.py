@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/03/06 21:42:57  dischi
+# Added text as content
+#
 # Revision 1.19  2003/03/05 21:57:15  dischi
 # Added audio player. The info area is empty right now, but this skin
 # can player audio files
@@ -366,17 +369,21 @@ class XML_content(XML_data):
         XML_data.__init__(self, ('type', 'spacing', 'x', 'y', 'width',
                                  'height', 'font', 'align', 'valign', 'color'))
         self.types = {}
+        self.cdata = ''
         
     def parse(self, node, scale, current_dir):
         XML_data.parse(self, node, scale, current_dir)
+        self.cdata = node.textof()
         for subnode in node.children:
             if subnode.name == u'item':
                 type = attr_str(subnode, "type", '')
                 if type and not self.types.has_key(type):
                     self.types[type] = XML_data(('font', 'align', 'valign'))
                     self.types[type].rectangle = None
+                    self.types[type].cdata = ''
                 if type:
                     self.types[type].parse(subnode, scale, current_dir)
+                    self.types[type].cdata = subnode.textof()
                     for rnode in subnode.children:
                         if rnode.name == u'rectangle':
                             self.types[type].rectangle = XML_rectangle()
@@ -385,6 +392,7 @@ class XML_content(XML_data):
         if not self.types.has_key('default'):
             self.types['default'] = XML_data(('font',))
             self.types['default'].rectangle = None
+            self.types['default'].cdata = ''
         
 
         
