@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/06/24 22:51:23  outlyer
+# Reflect new path to weather icons.
+#
 # Revision 1.12  2003/06/24 22:48:50  outlyer
 # Not sure why this was in /plugins... should be here, in src/plugins
 #
@@ -254,6 +257,6 @@ class weather(IdleBarPlugin):
 
     def draw(self, (type, object)):
         temp,icon = self.checkweather()
-        osd.drawbitmap('plugins/weather/icons/' + icon,160,30)
+        osd.drawbitmap('skins/icons/weather/' + icon,160,30)
         osd.drawstring(temp,175,50,fgcolor=0xbbbbbb,font=self.CLOCKFONT,ptsize=14)
         osd.drawstring('o',192,47,fgcolor=0xbbbbbb,font=self.CLOCKFONT,ptsize=10)
