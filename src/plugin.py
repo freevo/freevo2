@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.79  2004/12/18 13:41:28  dischi
+# call notifier.step() on init
+#
 # Revision 1.78  2004/11/21 11:12:06  dischi
 # some logging updates
 #
@@ -54,6 +57,8 @@
 import os, sys
 import gettext
 import copy
+
+import notifier
 
 import cleanup
 from event import Event
@@ -371,6 +376,8 @@ def init(callback = None, reject=['record', 'www'], exclusive=[]):
 
     current = 0
     for name, type, level, args, number in _all_plugins:
+        if notifier.step:
+            notifier.step(False, False)
         current += 1
         if callback:
             callback()
