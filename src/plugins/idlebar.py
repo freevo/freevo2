@@ -41,6 +41,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2003/08/16 13:12:29  dischi
+# move timeformat to plugin arg
+#
 # Revision 1.30  2003/08/16 12:57:55  outlyer
 # Added encoding
 #
@@ -218,11 +221,12 @@ class clock(IdleBarPlugin):
     """
     show the current time
     """
-    def __init__(self):
+    def __init__(self, format='%a %I:%M %P'):
         IdleBarPlugin.__init__(self)
-    
+        self.timeformat = format
+        
     def draw(self, (type, object), x, osd):
-        clock = time.strftime('%a %I:%M %P')
+        clock = time.strftime(self.timeformat)
         font  = osd.get_font('clock')
         osd.write_text(clock, font, None, osd.x + osd.width-200, osd.y + 10, 190,
                        40, 'right', 'center')
