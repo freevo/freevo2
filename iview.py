@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2002/08/12 07:18:08  dischi
+# Exit image viewer also on MENU event
+#
 # Revision 1.8  2002/08/11 13:42:35  dischi
 # o Fixed the zoom and rotate handling. If the OSD_SDL is enabled you
 #   can zoom (1-9) an rotated image. Without OSD_SDL you zoom the normal
@@ -243,7 +246,7 @@ class ImageViewer:
 
     def eventhandler(self, event):
 
-        if event == rc.STOP or event == rc.EXIT:
+        if event == rc.STOP or event == rc.EXIT or event == rc.MENU:
             rc.app = None
             menuwidget.refresh()
 
