@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/12/07 12:28:25  dischi
+# bugfix
+#
 # Revision 1.4  2003/12/06 16:25:45  dischi
 # support for type=url and <playlist> and <player>
 #
@@ -148,7 +151,11 @@ def parse_movie(fxd, node):
                 # a variant with one file
                 ref = fxd.getattr(parts[0] ,'ref')
                 v = VideoItem(id[ref][1], parent=item, parse=False)
-                v.mode, v.media_id, v.mplayer_options = id[ref][2:]
+                v.mode, v.media_id, v.mplayer_options, player, is_playlist = id[ref][2:]
+                if player:
+                    v.force_player = player
+                if is_playlist:
+                    v.is_playlist  = True
 
                 v.subtitle_file = subtitle
                 v.audio_file    = audio
