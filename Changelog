@@ -15,6 +15,7 @@ o Added <movie>.wmv file type to MPlayer
 o Fixed a bug in runapp.c
 o Updated the boot-scripts
 o Swapped MPlayer next/prev keys
+o Removed osd_server/osd_fb, moved files to osd_server
 
 
 Release 1.2.1 (2002-05-17):
