@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/07/20 14:57:50  rshortt
+# Set poll_interval to 0 until we pass some checks.
+#
 # Revision 1.5  2003/07/20 14:37:25  rshortt
 # Patch from Dan Eriksen that:
 # - crash when plugin is activated, but no device is specified in config
@@ -77,6 +80,9 @@ class PluginInterface(plugin.DaemonPlugin):
 
         self.plugin_name = 'JOY'
         self.device_name = ''
+        # If we make it to the end of __init__ successfully then
+        # poll_interval is set to run ok.
+        self.poll_interval = 0
      
         if config.JOY_DEV == 0:
             print 'Joystick input module disabled, exiting'
