@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2003/04/14 07:11:06  tcwan
+# Changed tgz filename for 'make release' to be freevo-src-YYYYMMDD.tar.gz
+# to distinguish between source only and full binary releases
+#
 # Revision 1.30  2003/04/06 21:16:28  dischi
 # add cache directories
 #
@@ -137,7 +141,7 @@ distclean:
 	$(MAKE) -C fbcon distclean
 
 release: clean
-	cd ..; tar czvf freevo-`cat freevo/VERSION`-`date +%Y%m%d`.tar.gz \
+	cd ..; tar czvf freevo-src-`cat freevo/VERSION`-`date +%Y%m%d`.tar.gz \
 	  --exclude CVS freevo
 
 
