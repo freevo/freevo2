@@ -8,6 +8,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/08/01 10:53:54  dischi
+# o Add class for an Application. This class works together with the
+#   eventhandler itself and can show/hide/destry itself.
+# o Respect the difference between a popup and an application in the
+#   eventhandler focus setting
+# o Make it possible to switch screen backends for an application
+# o Make it possible to register to an event
+# o Notify registered eventhandlers for application change
+#
 # Revision 1.1  2004/07/26 18:10:16  dischi
 # move global event handling to eventhandler.py
 #
@@ -36,8 +45,11 @@
 
 import time
 import thread
+import traceback
 
 import config
+import gui
+
 from event import *
 
 
@@ -70,6 +82,20 @@ def remove(application):
     return get_singleton().remove(application)
 
 
+def register(application, event):
+    """
+    Register for a specific event
+    """
+    return get_singleton().register(application, event)
+
+    
+def unregister(application, event):
+    """
+    Register for a specific event
+    """
+    return get_singleton().unregister(application, event)
+
+    
 def get():
     """
     Return the application which has the focus
@@ -109,6 +135,44 @@ def post_key(key):
 
 # --------------------------------------------------------------------------------
 
+class Application:
+    """
+    A basic application
+    """
+    def __init__(self, name, event_context, fullscreen, backend='default'):
+        self.evt_name       = name
+        self.evt_context    = event_context
+        self.evt_fullscreen = fullscreen
+        self.evt_handler    = get_singleton()
+        self.evt_backend    = backend
+        self.post_event     = self.evt_handler.post
+        self.visible        = False
+        
+    def eventhandler(self, event, menuw=None):
+        print 'Error, no eventhandler defined for %s' % self.application
+
+
+    def show(self):
+        self.visible = True
+        self.evt_handler.append(self)
+        if traceback.extract_stack(limit = 2)[0][3] != 'Application.show(self)':
+            gui.get_screen().update()
+            
+        
+    def hide(self):
+        if self.evt_handler.applications[-1] == self:
+            _debug_('WARNING: hiding focused application')
+            self.evt_handler.remove(self)
+        self.visible = False
+
+
+    def destroy(self):
+        self.evt_handler.remove(self)
+        self.visible = False
+        
+
+APPEND = 'append'
+REMOVE = 'remove'
 
 class Eventhandler:
     """
@@ -116,52 +180,112 @@ class Eventhandler:
     with an event handler and the event mapping.
     """
     def __init__(self):
-        self.focus   = []
-        self.context = None
-
+        self.popups       = []
+        self.applications = []
+        self.context      = None
+        
         self.eventhandler_plugins = None
         self.queue = []
+        self.registered = {}
+        self.focus_change = None
+        self.backend = 'default'
+        
+
+    def set_focus(self):
+        app = self.applications[-1]
+        if not self.popups:
+            self.context = app.evt_context
+        else:
+            self.context = self.popups[-1].evt_context
+            
+        if str(SCREEN_CONTENT_CHANGE) in self.registered:
+            for c in self.registered[str(SCREEN_CONTENT_CHANGE)]:
+                arg = app, app.evt_fullscreen
+                c.eventhandler(Event(SCREEN_CONTENT_CHANGE, arg=arg))
+        if self.backend != 'default' or app.evt_backend != 'default':
+            _debug_('**** backend switch: %s ****' % app.evt_backend)
+            gui.set_screen(app.evt_backend)
+            self.backend = app.evt_backend
+        if self.focus_change == REMOVE:
+            _debug_('show hidden application')
+            app.show()
+        self.focus_change = None
+        
 
     def append(self, app):
         """
         Add app the list of applications and set the focus
         """
-        if app in self.focus:
-            return
-        if hasattr(app, 'app_mode'):
-            self.context = app.app_mode
+        if isinstance(app, Application):
+            if app in self.applications:
+                return
+
+            self.applications.append(app)
+            if len(self.applications) > 1:
+                self.applications[-2].hide()
+            self.context = app.evt_context
+            self.set_focus()
         else:
-            self.context = app.event_context
-        self.focus.append(app)
+            self.popups.append(app)
+            self.context = app.evt_context
 
 
     def remove(self, app):
         """
         Remove app the list of applications and set the focus
         """
-        try:
-            self.focus.remove(app)
-        except Exception, e:
-            print e
-        app = self.focus[-1]
-        if hasattr(app, 'app_mode'):
-            self.context = app.app_mode
+        if isinstance(app, Application):
+            if not app in self.applications:
+                return
+            if self.applications[-1] == app:
+                self.focus_change = REMOVE
+            self.applications.remove(app)
+                
         else:
-            self.context = app.event_context
+            if not app in self.popups:
+                return
+            if not self.popups[-1] == app:
+                self.popups.remove(app)
+                return
+            self.popups.remove(app)
+            if self.popups:
+                self.context = self.popups[-1].evt_context
+            else:
+                self.context = self.applications[-1].evt_context
+                
 
+    def register(self, application, event):
+        """
+        Register for a specific event
+        """
+        event = str(event)
+        if not event in self.registered:
+            self.registered[event] = []
+        if not application in self.registered[event]:
+            self.registered[event].append(application)
 
+    
+    def unregister(self, application, event):
+        """
+        Register for a specific event
+        """
+        self.registered[str(event)].remove(application)
+
+    
     def get(self):
         """
         Return the application which has the focus
         """
-        return self.focus[-1]
+        if len(self.popups):
+            return self.popups[-1]
+        return self.applications[-1]
 
     
     def is_menu(self):
         """
         Return true if the focused appliaction is the menu
         """
-        return len(self.focus) == 1
+        return len(self.applications) == 1
     
 
     def set_context(self, context):
@@ -205,16 +329,17 @@ class Eventhandler:
 
 
 
-    def handle(self):
+    def handle(self, event=None):
         """
         event handling function
         """
         # search for events in the queue
-        if not len(self.queue):
+        if not event and not len(self.queue):
             return
 
-        event = self.queue[0]
-        del self.queue[0]
+        if not event:
+            event = self.queue[0]
+            del self.queue[0]
         
         _debug_('handling event %s' % str(event), 2)
 
@@ -243,14 +368,24 @@ class Eventhandler:
             t1 = time.clock()
 
         try:
-            if not self.focus[-1].eventhandler(event=event):
+            if str(event) in self.registered:
+                for c in self.registered[str(event)]:
+                    c.eventhandler(event=event)
+
+            elif len(self.popups) and self.popups[-1].eventhandler(event=event):
+                pass
+                
+            elif not self.applications[-1].eventhandler(event=event):
                 for p in self.eventhandler_plugins:
                     if p.eventhandler(event=event):
                         break
                 else:
                     _debug_('no eventhandler for event %s (app: %s)' \
-                            % (event, self.focus[-1]), 2)
+                            % (event, self.applications[-1]), 2)
 
+            if self.focus_change:
+                self.set_focus()
+                
             if config.TIME_DEBUG:
                 print time.clock() - t1
             return True
