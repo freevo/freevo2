@@ -5,23 +5,27 @@
 # $Id$
 #
 # Notes:
-#   To activate the idle bar, put the following in your local_config.py
+#   To activate the idle bar, put the following in your local_config.py. The
+#   plugins inside the idlebar are sorted based on the level (except the
+#   clock, it's always on the right side)
 #
-#   plugin.activate('idlebar.interface')
+#   plugin.activate('idlebar')
 #   
 #   plugin.activate('idlebar.mail',    level=10, args=('/var/spool/mail/dmeyer', ))
 #   plugin.activate('idlebar.tv',      level=20)
 #   plugin.activate('idlebar.weather', level=30, args=('4-letter code', ))
 #   For weather station codes see: http://www.nws.noaa.gov/tg/siteloc.shtml
-#   plugin.activate('idlebar.clock',   level=50)
+#   plugin.activate('idlebar.cdstatus', level=30)
+#   plugin.activate('idlebar.clock',    level=50)
 #   
-#
-#
-# Todo:        
-#   Make it cleaner, right now coordinates and fonts are inside the skin
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/07/15 17:08:21  dischi
+# o Add/update some docs
+# o show all rom drives in the bar
+# o update the bar on event IDENTIFY_MEDIA
+#
 # Revision 1.21  2003/07/12 18:52:22  dischi
 # fixed overscan bug
 #
@@ -54,46 +58,6 @@
 #
 #     o Only the 'last' drive is shown (last from ROM_DRIVES)
 #     o The way that cdbackup tells us we are ripping isn't so nice
-#
-# Revision 1.13  2003/06/24 22:51:23  outlyer
-# Reflect new path to weather icons.
-#
-# Revision 1.12  2003/06/24 22:48:50  outlyer
-# Not sure why this was in /plugins... should be here, in src/plugins
-#
-# Revision 1.11  2003/06/22 16:53:32  rshortt
-# A fix for trying to read the cache when it hasn't been created yet.
-#
-# Revision 1.10  2003/06/04 23:36:35  rshortt
-# Use the real cache dir and add a note about weather codes.
-#
-# Revision 1.9  2003/05/28 18:12:39  dischi
-# pass object to draw to all sub-plugins
-#
-# Revision 1.8  2003/05/28 17:36:27  dischi
-# make the weather zone a parameter
-#
-# Revision 1.7  2003/05/02 05:50:31  outlyer
-# Stopgap to workaround a crash...
-#
-# Revision 1.6  2003/05/01 12:53:27  dischi
-# added more information to plugin draw()
-#
-# Revision 1.5  2003/04/27 17:59:41  dischi
-# use new poll interface
-#
-# Revision 1.4  2003/04/24 19:56:35  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.3  2003/04/19 21:25:00  dischi
-# small changes at the plugin interface
-#
-# Revision 1.2  2003/04/18 10:22:07  dischi
-# You can now remove plugins from the list and plugins know the list
-# they belong to (can be overwritten). level and args are optional.
-#
-# Revision 1.1  2003/04/17 21:21:57  dischi
-# Moved the idle bar to plugins and changed the plugin interface
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -135,7 +99,13 @@ FALSE = 0
 
 
 class interface(plugin.DaemonPlugin):
+    """
+    global idlebar plugin.
+    """
     def __init__(self):
+        """
+        init the idlebar
+        """
         plugin.DaemonPlugin.__init__(self)
         self.poll_interval   = 300
         self.plugins = None
@@ -143,6 +113,9 @@ class interface(plugin.DaemonPlugin):
         self.visible = TRUE
         
     def draw(self, (type, object), osd):
+        """
+        draw a background and all idlebar plugins
+        """
         osd.drawroundbox(0, 0, osd.width + 2 * osd.x, osd.y + 60, (0x80000000, 0, 0, 0))
         if not self.plugins:
             self.plugins = plugin.get('idlebar')
@@ -152,12 +125,28 @@ class interface(plugin.DaemonPlugin):
             if add_x:
                 x += add_x + 20
 
-
+    def eventhandler(self, event, menuw):
+        """
+        catch the IDENTIFY_MEDIA event to redraw the skin (maybe the cd status
+        plugin wants to redraw)
+        """
+        if plugin.isevent(event) == 'IDENTIFY_MEDIA':
+            skin.get_singleton().redraw()
+        return FALSE
+    
     def poll(self):
+        """
+        update the idlebar every 30 secs even if nothing happens
+        """
         skin.get_singleton().redraw()
         
 
+
+
 class IdleBarPlugin(plugin.Plugin):
+    """
+    parent for all idlebar plugins
+    """
     def __init__(self):
         plugin.Plugin.__init__(self)
         self._type = 'idlebar'
@@ -167,6 +156,9 @@ class IdleBarPlugin(plugin.Plugin):
 
 
 class clock(IdleBarPlugin):
+    """
+    show the current time
+    """
     def __init__(self):
         IdleBarPlugin.__init__(self)
     
@@ -179,6 +171,9 @@ class clock(IdleBarPlugin):
     
 
 class cdstatus(IdleBarPlugin):
+    """
+    show the status of all rom drives
+    """
     def __init__(self):
         IdleBarPlugin.__init__(self)
         self.cdimages ={}
@@ -192,16 +187,24 @@ class cdstatus(IdleBarPlugin):
 
     def draw(self, (type, object), x, osd):
         image = self.cdimages['empty_cdrom']
+        width = 0
         for media in config.REMOVABLE_MEDIA:
+            image = self.cdimages['empty_cdrom']
             if hasattr(media.info,'type') and hasattr(media.info,'handle_type'):
                 if not media.info.handle_type and media.info.type:
                     image = self.cdimages['mixed']
                 elif media.info.handle_type: 
                     image = self.cdimages[media.info.handle_type]
-        return osd.draw_image(image, (x, osd.y + 15, -1, -1))[0]
+            width += osd.draw_image(image, (x+width, osd.y + 10, -1, -1))[0] + 10
+        if width:
+            width -= 10
+        return width
 
 
 class mail(IdleBarPlugin):
+    """
+    show if new mail is in the mailbox
+    """
     def __init__(self, mailbox):
         IdleBarPlugin.__init__(self)
         self.NO_MAILIMAGE = 'skins/images/status/newmail_dimmed.png'
@@ -232,6 +235,9 @@ class mail(IdleBarPlugin):
 
 
 class tv(IdleBarPlugin):
+    """
+    show if the tv is locked or not
+    """
     def __init__(self):
         IdleBarPlugin.__init__(self)
         self.tvlockfile = config.FREEVO_CACHEDIR + '/record'
@@ -252,6 +258,9 @@ class tv(IdleBarPlugin):
 
 
 class weather(IdleBarPlugin):
+    """
+    show the current weather
+    """
     def __init__(self, zone='CYYZ'):
         IdleBarPlugin.__init__(self)
         self.METARCODE = zone
@@ -312,13 +321,12 @@ class weather(IdleBarPlugin):
                        'left', 'top')
         return width + 15
         
-# This class checks if the current date is a holiday and will
-# display a user specified icon for that holiday.    
-# To activate use the following: 
-# plugin.activate('idlebar.holidays', level=40)        
-# I am centering Icon over the clock, w x h = 70 x 40 pixels works well,
-# with drawbitmap drawing at x,y= 580, 2
+
 class holidays(IdleBarPlugin):
+    """
+    This class checks if the current date is a holiday and will
+    display a user specified icon for that holiday.    
+    """
     def __init__(self):
         IdleBarPlugin.__init__(self)
    
