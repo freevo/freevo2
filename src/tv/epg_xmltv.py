@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/05/05 01:33:24  outlyer
+# Show a popup when reading the cached guide too, for visual feedback on slower
+# machines.
+#
 # Revision 1.16  2003/04/24 19:56:41  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -144,7 +148,11 @@ def get_guide(popup=None):
             os.path.isfile(pname) and (os.path.getmtime(pname) >
                                        os.path.getmtime(config.XMLTV_FILE))):
             if DEBUG: print 'XMLTV, reading cached file (%s)' % pname
+            if popup:
+                popup.show()
             cached_guide = pickle.load(open(pname, 'r'))
+            if popup:
+                popup.destroy()
 
             epg_ver = None
             try:
