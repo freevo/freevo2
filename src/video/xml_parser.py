@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/03/24 19:42:23  dischi
+# fixed cd id search
+#
 # Revision 1.10  2003/03/23 20:00:26  dischi
 # Added patch from Matthieu Weber for better mplayer_options and subitem
 # handling
@@ -549,8 +552,6 @@ def hash_xml_database():
             for info in infolist:
                 if info.rom_id:
                     for i in info.rom_id:
-                        if len(i) > 16:
-                            i = i[0:16]
                         config.MOVIE_INFORMATIONS_ID[i] = info
                 if info.rom_label:
                     for l in info.rom_label:
@@ -564,8 +565,6 @@ def hash_xml_database():
             config.MOVIE_INFORMATIONS += [ info ]
             if info.rom_id:
                 for i in info.rom_id:
-                    if len(i) > 16:
-                        i = i[0:16]
                     config.MOVIE_INFORMATIONS_ID[i] = info
             if info.rom_label:
                 for l in info.rom_label:

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/03/24 19:42:20  dischi
+# fixed cd id search
+#
 # Revision 1.21  2003/03/15 17:13:22  dischi
 # store rom drive type in media
 #
@@ -241,13 +244,13 @@ class Identify_Thread(threading.Thread):
             print 'I/O error on disc %s' % media.devicename
             return
 
-        media.id    = id
+        media.id    = id+label
         media.label = ''
         media.type  = 'cdrom'
         
         # is the id in the database?
-        if id in config.MOVIE_INFORMATIONS_ID:
-            movie_info = config.MOVIE_INFORMATIONS_ID[id]
+        if id+label in config.MOVIE_INFORMATIONS_ID:
+            movie_info = config.MOVIE_INFORMATIONS_ID[id+label]
             if movie_info:
                 title = movie_info.name
             
