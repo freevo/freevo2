@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.160  2004/06/09 19:50:17  dischi
+# change thumbnail caching format to be much faster: do not use pickle and
+# also reduce the image size from max 300x300 to 255x255
+#
 # Revision 1.159  2004/06/06 16:13:27  dischi
 # handle missing surfarray (Python Numeric)
 #
@@ -81,7 +85,6 @@ if __freevo_app__ == 'main':
     # import animations
     import animation
 
-from mmpython.image import EXIF as exif
 import cStringIO
         
 
@@ -1293,94 +1296,54 @@ class OSD:
         if not pygame.display.get_init():
             return None
 
-        thumbnail = False
-        filename  = url
-        
         try:
             image = pygame.image.fromstring(url.tostring(), url.size, url.mode)
         except:
-            image = None
 
             if url[:8] == 'thumb://':
                 filename = os.path.abspath(url[8:])
                 thumbnail = True
             else:
                 filename = os.path.abspath(url)
+                thumbnail = False
             
             if not os.path.isfile(filename):
                 filename = os.path.join(config.IMAGE_DIR, url[8:])
+
             if not os.path.isfile(filename):
                 print 'osd.py: Bitmap file "%s" doesnt exist!' % filename
                 return None
             
-        try:
-            thumb = None
-            _debug_('Trying to load file "%s"' % filename, level=3)
-
-            if isstring(filename) and filename.endswith('.raw'):
-                data  = util.read_pickle(filename)
-                image = pygame.image.fromstring(data[0], data[1], data[2])
-            elif thumbnail:
-                sinfo = os.stat(filename)
-                thumb = vfs.getoverlay(filename + '.raw')
-                data = None
-
-                try:
-                    if os.stat(thumb)[stat.ST_MTIME] > sinfo[stat.ST_MTIME]:
-                        data = util.read_pickle(thumb)
-                except OSError:
-                    pass
-
-                if not data:
-                    f=open(filename, 'rb')
-                    tags=exif.process_file(f)
-                    f.close()
-
-                    image = None
-                    if tags.has_key('JPEGThumbnail'):
-                        image = Image.open(cStringIO.StringIO(tags['JPEGThumbnail']))
-
-                    if not image or image.size[0] < 100 or image.size[1] < 100:
-                        # convert with Imaging, pygame doesn't work
-                        image = Image.open(filename)
-
-                    if image.size[0] > 300 and image.size[1] > 300:
-                        image.thumbnail((300,300), Image.ANTIALIAS)
-
-                    if image.mode == 'P':
-                        image = image.convert('RGB')
-
-                    # save for future use
-                    data = (image.tostring(), image.size, image.mode)
-                    if config.CACHE_IMAGES:
-                        util.save_pickle(data, thumb)
-                    
-                # convert to pygame image
-                image = pygame.image.fromstring(data[0], data[1], data[2])
-
             try:
-                if not image:
-                    image = pygame.image.load(filename)
-            except pygame.error, e:
-                print 'SDL image load problem: %s - trying Imaging' % e
-                i = Image.open(filename)
-                s = i.tostring()
-                image = pygame.image.fromstring(s, i.size, i.mode)
+                if isstring(filename) and filename.endswith('.raw'):
+                    # load cache
+                    data  = util.read_thumbnail(filename)
+                    # convert to pygame image
+                    image = pygame.image.fromstring(data[0], data[1], data[2])
+
+                elif thumbnail:
+                    # load cache or create it
+                    data = util.cache_image(filename, use_exif=True)
+                    # convert to pygame image
+                    image = pygame.image.fromstring(data[0], data[1], data[2])
+
+                else:
+                    try:
+                        image = pygame.image.load(filename)
+                    except pygame.error, e:
+                        print 'SDL image load problem: %s - trying Imaging' % e
+                        i = Image.open(filename)
+                        image = pygame.image.fromstring(i.tostring(), i.size, i.mode)
             
-            # convert the surface to speed up blitting later
-            if image.get_alpha():
-                image.set_alpha(image.get_alpha(), RLEACCEL)
-            else:
-                if image.get_bitsize() != self.depth:
-                    i = pygame.Surface((image.get_width(), image.get_height()))
-                    i.blit(image, (0,0))
-                    image = i
-                    
-        except:
-            print 'Unknown Problem while loading image %s' % String(url)
-            if config.DEBUG:
-                traceback.print_exc()
-            return None
+            except:
+                print 'Unknown Problem while loading image %s' % String(url)
+                if config.DEBUG:
+                    traceback.print_exc()
+                    return None
+
+        # convert the surface to speed up blitting later
+        if image and image.get_alpha():
+            image.set_alpha(image.get_alpha(), RLEACCEL)
 
         return image
 

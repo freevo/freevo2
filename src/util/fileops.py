@@ -10,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/06/09 19:50:32  dischi
+# change thumbnail caching format to be much faster: do not use pickle and
+# also reduce the image size from max 300x300 to 255x255
+#
 # Revision 1.17  2004/03/22 11:04:51  dischi
 # improve caching
 #
@@ -62,8 +66,14 @@ import copy
 import cPickle, pickle # pickle because sometimes cPickle doesn't work
 import fnmatch
 import traceback
-import Image
-import cStringIO
+
+
+if sys.argv[0].find('setup.py') == -1 and sys.argv[0].find('install.py') == -1:
+    # don't try to import these when Freevo isn't installed (yet)
+    import Image
+    import cStringIO
+    from mmpython.image import EXIF as exif
+
 
 if float(sys.version[0:3]) < 2.3:
     PICKLE_PROTOCOL = 1
@@ -461,42 +471,68 @@ def save_pickle(data, file):
 # cache utils
 #
 
-def cache_image(filename, thumbnail=None):
+def read_thumbnail(filename):
     """
-    cache image for faster access
+    return image cached inside filename
     """
-    sinfo = os.stat(filename)
+    f = open(filename)
+    header = f.read(10)
+    if not header[:3] == 'FRI':
+        return read_pickle(filename)
+    data = f.read(), (ord(header[3]), ord(header[4])), header[5:].strip(' ')
+    f.close()
+    return data
+
+
+def cache_image(filename, thumbnail=None, use_exif=False):
+    """
+    cache image for faster access, return cached image
+    """
     thumb = vfs.getoverlay(filename + '.raw')
     try:
-        if os.stat(thumb)[stat.ST_MTIME] > sinfo[stat.ST_MTIME]:
-            return
+        if os.stat(thumb)[stat.ST_MTIME] > os.stat(filename)[stat.ST_MTIME]:
+            data = read_thumbnail(thumb)
+            if data:
+                return data
     except OSError:
         pass
 
+    image = None
     if thumbnail:
-        image = Image.open(cStringIO.StringIO(thumbnail))
-    else:
         try:
-            image = Image.open(filename)
+            image = Image.open(cStringIO.StringIO(thumbnail))
         except:
-            return
+            pass
 
     if not image:
-        return
+        if use_exif:
+            f=open(filename, 'rb')
+            tags=exif.process_file(f)
+            f.close()
+            
+            if tags.has_key('JPEGThumbnail'):
+                image = Image.open(cStringIO.StringIO(tags['JPEGThumbnail']))
 
-    try:
-        if image.size[0] > 300 and image.size[1] > 300:
-            image.thumbnail((300,300), Image.ANTIALIAS)
-
-        if image.mode == 'P':
-            image = image.convert('RGB')
-
-        # save for future use
-        data = (image.tostring(), image.size, image.mode)
-        save_pickle(data, thumb)
-    except Exception, e:
-        print 'error caching image %s' % filename
-        if config.DEBUG:
-            print e
+        if not image or image.size[0] < 100 or image.size[1] < 100:
+            try:
+                image = Image.open(filename)
+            except Exception, e:
+                print 'error caching image %s' % filename
+                if config.DEBUG:
+                    print e
+                return None
         
-    
+    if image.size[0] > 255 or image.size[1] > 255:
+        image.thumbnail((255,255), Image.ANTIALIAS)
+
+    if image.mode == 'P':
+        image = image.convert('RGB')
+
+    data = (image.tostring(), image.size, image.mode)
+
+    f = open(thumb, 'w')
+    f.write('FRI%s%s%5s' % (chr(image.size[0]), chr(image.size[1]), image.mode))
+    f.write(data[0])
+    f.close()
+
+    return data
