@@ -9,6 +9,12 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/08/18 21:54:12  tfmalt
+# o Added support for vertical and horizontal alignment of text.
+# o Added handling of vertical and horizontal margins to parent object.
+# o Rewrote the render function. Labels can now both be separate and
+#   child objects.
+#
 # Revision 1.1  2002/08/15 22:45:42  tfmalt
 # o Inital commit of Freevo GUI library. Files are put in directory 'gui'
 #   under Freevo.
@@ -41,6 +47,8 @@
 # ----------------------------------------------------------------------
 """
 A class for text labels
+
+Label can only be used as part of containers.
 """
 __date__    = "$Date$"
 __version__ = "$Revision$" 
@@ -51,11 +59,15 @@ import pygame
 
 from GUIObject import *
 
+DEBUG = 0
+
 class Label(GUIObject):
     """
-    text   String, text to display
-    align  Integer, alignment of text. Label.CENTER, Label.RIGHT, Label, LEFT
-
+    text    String, text to display
+    align   Integer, h_align of text. Label.CENTER, Label.RIGHT,
+            Label, LEFT
+    parent  GUIObject, Reference to object containing this label.
+    
     Displays a single line of text. Really it maintains a surface with a
     rendered text. If text is updated text is rerendered and reblitted to
     the screen.
@@ -67,24 +79,151 @@ class Label(GUIObject):
     CENTER = 1001
     LEFT   = 1002
     RIGHT  = 1003
+    TOP    = 1004
+    BOTTOM = 1005
+    MIDDLE = 1006
     
-    def __init__(self, text=None, align=None):
-        self.alignment = self.LEFT
-        self.text      = None
-        self.font      = None # This is a OSD.Font object not pygame.
-        self.surface   = None
-
+    def __init__(self, text=None, h_align=None, v_align=None, parent=None):
+        self.h_align  = self.LEFT
+        self.v_align  = self.MIDDLE
+        self.text     = None
+        self.font     = None # This is a OSD.Font object not pygame.
+        self.surface  = None
+        self.parent   = None
+        self.v_margin = 0
+        self.h_margin = 0
+        
         GUIObject.__init__(self)
 
-        if align: self.set_alignment(align)
-        if text:  self.set_text(text)
+        if h_align: self.set_h_align(align)
+        if v_align: self.set_v_align(align)
+        if text:    self.set_text(text)
+
         self.set_foreground_color(Color( (0,0,0,255) ))
+
+
+    def calc_position(self):
+        """
+        Private function to calculate correct positon of label.
+        """
+        if not self.parent: raise ParentException
+        if not self.font:   raise TypeError, 'No font'
+
+        # Render the surface if we don't have it to get correct size.
+        if not self.surface: self.render()
         
-    def get_alignment(self):
+        lx          = 0
+        ly          = 0
+        bx,by,bw,bh = self.parent.get_rect()
+        lw,lh       = self.get_size()
+        va          = self.v_align
+        ha          = self.h_align
+        hm          = self.h_margin
+        vm          = self.v_margin
+        
+        if ha == Label.LEFT:
+            if self.parent.icon:
+                iw = self.parent.icon.get_width()
+                pm = hm
+                lx = bx+iw+(pm*2)
+            else:
+                lx = bx+hm
+        elif ha == Label.CENTER:
+            lx = bx+((bw-lw)/2)
+        elif ha == label.RIGHT:
+            lx = bx+bw-lw-hm
+        else:
+            raise TypeError, 'Wrong h_align'
+
+        if va == Label.TOP:
+            ly = by+vm
+        elif va == Label.BOTTOM:
+            ly = by+bh-lh-vm
+        elif va == Label.MIDDLE:
+            ly = by+((bh-lh)/2)
+        else:
+            raise TypeError, 'Wrong v_align'
+            
+        return (lx,ly)
+
+        
+    def get_h_align(self):
         """
-        Returns alignment of text.
+        Returns horisontal align of text.
         """
-        return self.alignment
+        return self.h_align
+
+
+    def get_v_align(self):
+        """
+        returns vertical alignment of text
+        """
+        return self.v_align
+
+    
+    def set_h_align(self, align):
+        """
+        Sets horizontal alignment of text.
+        """
+        if type(align) is IntType and align > 1000 and align < 1004:
+                self.h_align = align
+        else:
+            raise TypeError, align
+
+
+    def set_v_align(self, align):
+        """
+        Sets vertical alignment of text.
+        """
+        if type(align) is IntType and align > 1003 and align < 1007:
+            self.v_align = align
+        else:
+            raise TypeError, align
+
+
+    def get_v_margin(self):
+        """
+        Returns the margin for objects drawing directly on the osd.
+        """
+        return self.v_margin
+
+
+    def get_h_margin(self):
+        """
+        Returns the margin for objects drawing directly on the osd.
+
+        This is not optimal and I'll probably remove this function soon.
+        """
+        return self.h_margin
+
+
+    def set_v_margin(self, marg):
+        """
+        Sets the vertical margin.
+        """
+        self.v_margin = marg
+
+
+    def set_h_margin(self, marg):
+        """
+        Sets the horisontal margin
+        """
+        self.h_margin = marg
+
+
+    def get_parent(self):
+        """
+        Return reference to parent object (if any)
+        """
+        return self.parent
+
+    def set_parent(self, parent):
+        """
+        Set reference to parent object.
+        """
+        # XXX Do some typechecking.
+        self.parent = parent
+        
 
     def get_text(self):
         """
@@ -92,23 +231,17 @@ class Label(GUIObject):
         """
         return self.text
 
-    def set_alignment(self, align):
-        """
-        Sets alignment of text.
-        """
-        if type(align) is IntType and align > 1000 and align < 1004:
-                self.alignment = align
-        else:
-            raise TypeError, align
 
     def set_text(self, text):
         """
         Sets text.
         """
         if type(text) is StringType:
+            if self.surface: self.surface = None
             self.text = text
         else:
-            raise TypeError, text
+            raise TypeError, type(text)
+
 
     def set_font(self, font=None, size=None):
         """
@@ -119,6 +252,7 @@ class Label(GUIObject):
         Uses _getfont in osd, and the fontcache in osd.
         """
         if type(font) is StringType and type(size) is IntType:
+            if self.surface: self.surface = None
             self.font = self._get_osd_font(font, size)
         else:
             raise TypeError, 'font'
@@ -154,26 +288,37 @@ class Label(GUIObject):
 
         osd.fontcache.append(f)
         return f
-    
+
+
+    def render(self):
+        """
+        Mainly an internal function. Frontend to the fonts own render
+        function.
+        """
+        if not self.font: raise TypeError, 'Oops, no font.'
+        if not self.text: raise TypeError, 'Oops, no text.'
+        fgc = self.fg_color.get_color_sdl()
+        self.surface = self.font.font.render(self.text, 1, fgc)
+        self.set_size(self.surface.get_size())
+        self.set_position(self.calc_position())
+        
     def _draw(self):
         """
         Our default _draw function.
+
+        Add handling to check if font, size or text has changed.
         """
-        f   = self.font
-        t   = self.text
-        fgc = self.fg_color.get_color_sdl()
-            
-        if not f:
-            # XXX Make more extensive tests and exceptions later.
-            raise TypeError, f
-        if not t:
-            # XXX Make more extensive tests and exceptions later.
-            raise TypeError, t
+        if not self.surface:
+            # XXX Currently we don't use background color since that
+            # XXX Should be transparent
+            self.render()
 
-        # XXX Currently we don't use background color since that 
-        self.surface = f.font.render(t, 1, fgc)
-        return self.surface
-
+        
+        # XXX Fix h_align and stuff.
+        osd.screen.blit(self.surface, self.get_position())
+        
     def _erase(self):
-        pass
+        # XXX Currently erasing is handled by the parent object.
+        osd.screen.blit(self.bg_image, self.get_position(), self.get_rect())
+        
         
