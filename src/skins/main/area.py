@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/08/24 10:04:05  dischi
+# added font_h as variable for y and height settings
+#
 # Revision 1.3  2003/08/23 12:51:42  dischi
 # removed some old CVS log messages
 #
@@ -491,15 +494,15 @@ class Skin_Area:
         if copy_object:
             object = copy.copy(object)
 
-        try:
-            object.width = self.area_val.width + int(object.width[3:])
-        except TypeError:
-            pass
+        font_h=0
 
-        try:
-            object.height = self.area_val.height + int(object.height[3:])
-        except TypeError:
-            pass
+        MAX=self.area_val.width
+        if isinstance(object.width, str):
+            object.width = int(eval(object.width))
+
+        MAX=self.area_val.height
+        if isinstance(object.height, str):
+            object.height = int(eval(object.height))
 
         object.x += self.area_val.x
         object.y += self.area_val.y
@@ -519,37 +522,29 @@ class Skin_Area:
         return object
 
         
-    def get_item_rectangle(self, rectangle, item_w, item_h):
+    def get_item_rectangle(self, rectangle, item_w, item_h, font_h=0):
         """
         calculates the values for a rectangle inside the item tag
         """
         r = copy.copy(rectangle)
-        
+
         if not r.width:
             r.width = item_w
 
         if not r.height:
             r.height = item_h
 
-        try:
-            r.x = item_w + int(r.x[3:])
-        except TypeError:
-            pass
+        MAX=item_w
+        if isinstance(r.x, str):
+            r.x = int(eval(r.x))
+        if isinstance(r.width, str):
+            r.width = int(eval(r.width))
             
-        try:
-            r.width = item_w + int(r.width[3:])
-        except TypeError:
-            pass
-            
-        try:
-            r.y = item_h + int(r.y[3:])
-        except TypeError:
-            pass
-
-        try:
-            r.height = item_h + int(r.height[3:])
-        except TypeError:
-            pass
+        MAX=item_h
+        if isinstance(r.y, str):
+            r.y = int(eval(r.y))
+        if isinstance(r.height, str):
+            r.height = int(eval(r.height))
             
         if r.x < 0:
             item_w -= r.x

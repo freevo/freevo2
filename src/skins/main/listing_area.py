@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/08/24 10:04:05  dischi
+# added font_h as variable for y and height settings
+#
 # Revision 1.2  2003/08/23 12:51:42  dischi
 # removed some old CVS log messages
 #
@@ -132,7 +135,12 @@ class Listing_Area(Skin_Area):
                 rh = 0
                 rw = 0
                 if ct.rectangle:
-                    rw, rh, r = self.get_item_rectangle(ct.rectangle, ct.width, ct.height)
+                    if content.type == 'image+text':
+                        rw, rh, r = self.get_item_rectangle(ct.rectangle, ct.width,
+                                                            ct.height, int(ct.font.h * 1.1))
+                    else:
+                        rw, rh, r = self.get_item_rectangle(ct.rectangle, ct.width,
+                                                            ct.height)
                     hskip = min(hskip, r.x)
                     vskip = min(vskip, r.y)
 
@@ -342,7 +350,11 @@ class Listing_Area(Skin_Area):
                     y0 = item_y0 + vskip
 
                 if val.rectangle:
-                    r = self.get_item_rectangle(val.rectangle, val.width, rec_h)[2]
+                    if content.type == 'image+text':
+                        r = self.get_item_rectangle(val.rectangle, val.width, rec_h,
+                                                    int(val.font.h * 1.1))[2]
+                    else:
+                        r = self.get_item_rectangle(val.rectangle, val.width, rec_h)[2]
                     self.drawroundbox(x0 + r.x, y0 + r.y, r.width, r.height, r)
 
                 image, i_w, i_h = format_image(settings, choice, val.width,

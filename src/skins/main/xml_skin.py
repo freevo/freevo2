@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/08/24 10:04:05  dischi
+# added font_h as variable for y and height settings
+#
 # Revision 1.4  2003/08/24 06:58:18  gsbarbieri
 # Partial support for "out" icons in main menu.
 # The missing part is in listing_area, which have other changes to
@@ -75,26 +78,40 @@ def attr_int(node, attr, default, scale=0.0):
     """
     try:
         if node.attrs.has_key(('', attr)):
-            max = FALSE
             val = node.attrs[('', attr)]
             if val == 'line_height':
                 return -1
-            if val[:3] == 'max':
-                max = TRUE
-                val = val[3:]
-            if not val:
-                val = 0
-            
-            # scale, but not small values, they may be 0 after scaling
-            if scale and int(val) > 4:
-                val = scale*int(val)
-            if max:
-                if int(val) < 0:
-                    return 'MAX%d' % int(val)
+            new_val = ''
+
+            while val:
+                ppos = val[1:].find('+') + 1
+                mpos = val[1:].find('-') + 1
+                if ppos and mpos:
+                    pos = min(ppos, mpos)
+                elif ppos or mpos:
+                    pos = max(ppos, mpos)
                 else:
-                    return 'MAX+%d' % int(val)
-            else:
-                return int(val)
+                    pos = len(val)
+
+                try:
+                    i = int(int(scale*int(val[:pos])))
+                    if i < 0:
+                        new_val += str(i)
+                    else:
+                        new_val += '+' + str(i)
+                except ValueError:
+                    if val[:pos].upper() in ( '+MAX', 'MAX', '-MAX' ):
+                        new_val += val[:pos].upper()
+                    elif val[:pos].lower() in ( '+font_h', 'font_h', '-font_h' ):
+                        new_val += val[:pos].lower()
+                    else:
+                        print 'WARNING: unsupported value %s' % val[:pos]
+                val = val[pos:]
+
+            try:
+                return int(new_val)
+            except ValueError:
+                return str(new_val)
 
     except ValueError:
         pass
