@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.80  2004/08/27 14:25:03  dischi
+# create extra item type for media items
+#
 # Revision 1.79  2004/08/26 15:26:49  dischi
 # add code to do some memory debugging
 #
@@ -137,19 +140,20 @@ class FileInformation:
 
 class Item:
     """
-    Item class. This is the base class for all items in the menu. It's a template
-    for MenuItem and for other info items like VideoItem, AudioItem and ImageItem
+    Item class. This is the base class for all items in the menu.
+    It's a template for MenuItem and for other info items like
+    VideoItem, AudioItem and ImageItem
     """
     def __init__(self, parent=None, info=None, skin_type=None):
         """
-        Init the item. Sets all needed variables, if parent is given also inherit
-        some settings from there. Set self.info to info if given.
+        Init the item. Sets all needed variables, if parent is given also
+        inherit some settings from there. Set self.info to info if given.
         """
         if not hasattr(self, 'type'):
             self.type     = None            # e.g. video, audio, dir, playlist
 
         self.name         = u''             # name in menu
-        self.parent       = parent          # parent item to pass unmapped event
+        self.parent       = parent          # parent item
         self.icon         = None
         if info and isinstance(info, mediainfo.Info):
             self.info     = copy.copy(info)
@@ -163,8 +167,10 @@ class Item:
         if not hasattr(self, 'autovars'):
             self.autovars = []
 
-        if info and parent and hasattr(parent, 'DIRECTORY_USE_MEDIAID_TAG_NAMES') and \
-               parent.DIRECTORY_USE_MEDIAID_TAG_NAMES and self.info.has_key('title'):
+        if info and parent and \
+               hasattr(parent, 'DIRECTORY_USE_MEDIAID_TAG_NAMES') and \
+               parent.DIRECTORY_USE_MEDIAID_TAG_NAMES and \
+               self.info.has_key('title'):
             self.name = self.info['title']
         
         if parent:
@@ -194,68 +200,12 @@ class Item:
                 if skin_info.icon:
                     self.icon = os.path.join(theme.icon_dir, skin_info.icon)
                 if skin_info.outicon:
-                    self.outicon = os.path.join(theme.icon_dir, skin_info.outicon)
+                    self.outicon = os.path.join(theme.icon_dir,
+                                                skin_info.outicon)
             if not self.image and imagedir:
                 self.image = util.getimage(os.path.join(imagedir, skin_type))
         
 
-    def set_url(self, url, info=True, search_image=True):
-        """
-        Set a new url to the item and adjust all attributes depending
-        on the url.
-        """
-        self.url              = url     # the url itself
-
-        if not url:
-            self.network_play = True    # network url, like http
-            self.filename     = ''      # filename if it's a file:// url
-            self.mode         = ''      # the type of the url (file, http, dvd...)
-            self.files        = None    # FileInformation
-            self.mimetype     = ''      # extention or mode
-            return
-        
-        if url.find('://') == -1:
-            self.url = 'file://' + url
-        
-        self.files = FileInformation()
-        if self.media:
-            self.files.read_only = True
-
-        self.mode = self.url[:self.url.find('://')]
-
-        if self.mode == 'file':
-            self.network_play = False
-            self.filename     = self.url[7:]
-            self.files.append(self.filename)
-            if search_image:
-                image = util.getimage(self.filename[:self.filename.rfind('.')])
-                if image:
-                    self.image = image
-                    self.files.image = image
-                elif self.parent and self.parent.type != 'dir':
-                    self.image = util.getimage(os.path.dirname(self.filename)+\
-                                               '/cover', self.image)
-            self.mimetype = self.filename[self.filename.rfind('.')+1:].lower()
-            if info:
-                self.info = mediainfo.get(self.filename)
-                try:
-                    if self.parent.DIRECTORY_USE_MEDIAID_TAG_NAMES:
-                        self.name = self.info['title'] or self.name
-                except:
-                    pass
-                if not self.name:
-                    self.name = self.info['title:filename']
-            if not self.name:
-                self.name = util.getname(self.filename)
-
-        else:
-            self.network_play = True
-            self.filename     = ''
-            self.mimetype     = self.type
-            if not self.name:
-                self.name     = Unicode(self.url)
-
-            
     def __setitem__(self, key, value):
         """
         set the value of 'key' to 'val'
@@ -264,7 +214,8 @@ class Item:
             if key == var:
                 if val == value:
                     if not self.delete_info(key):
-                        _debug_(u'unable to store info for \'%s\'' % self.name, 0)
+                        _debug_(u'unable to store info for \'%s\'' % \
+                                self.name, 0)
                 else:
                     self.store_info(key, value)
                 return
@@ -279,7 +230,7 @@ class Item:
             if not self.info.store(key, value):
                 _debug_(u'unable to store info for \'%s\'' % self.name, 0)
         else:
-            _debug_(u'unable to store info for that kind of item \'%s\'' % self.name, 0)
+            _debug_(u'unable to store info for item \'%s\'' % self.name, 0)
 
 
     def delete_info(self, key):
@@ -317,7 +268,8 @@ class Item:
         of the global _().
         """
         try:
-            self._ = gettext.translation(application, os.environ['FREEVO_LOCALE'],
+            self._ = gettext.translation(application,
+                                         os.environ['FREEVO_LOCALE'],
                                          fallback=1).gettext
         except:
             self._ = lambda m: m
@@ -390,7 +342,8 @@ class Item:
             if length == 0:
                 return ''
             if length / 3600:
-                return '%d:%02d:%02d' % ( length / 3600, (length % 3600) / 60, length % 60)
+                return '%d:%02d:%02d' % ( length / 3600, (length % 3600) / 60,
+                                          length % 60)
             else:
                 return '%d:%02d' % (length / 60, length % 60)
 
@@ -462,3 +415,82 @@ class Item:
         delete function of memory debugging
         """
         _mem_debug_('item', self.name)
+
+
+
+
+class MediaItem(Item):
+    """
+    This item is for a media. It's only a template for image, video
+    or audio items
+    """
+    def __init__(self, type, parent):
+        self.type = type
+        Item.__init__(self, parent)
+        
+
+    def set_url(self, url, info=True, search_image=True):
+        """
+        Set a new url to the item and adjust all attributes depending
+        on the url. Each MediaItem has to call this function. If info
+        is True, search for additional information in mediainfo.
+        """
+        self.url = url                  # the url itself
+
+        if not url:
+            self.network_play = True    # network url, like http
+            self.filename     = ''      # filename if it's a file:// url
+            self.mode         = ''      # the type (file, http, dvd...)
+            self.files        = None    # FileInformation
+            self.mimetype     = ''      # extention or mode
+            return
+        
+        if url.find('://') == -1:
+            self.url = 'file://' + url
+        
+        self.files = FileInformation()
+        if self.media:
+            self.files.read_only = True
+
+        self.mode = self.url[:self.url.find('://')]
+
+        if self.mode == 'file':
+            # The url is based on a file. We can search for images
+            # and extra attributes here
+            self.network_play = False
+            self.filename     = self.url[7:]
+            self.files.append(self.filename)
+            if search_image:
+                image = util.getimage(self.filename[:self.filename.rfind('.')])
+                if image:
+                    # there is an image with the same filename except
+                    # the suffix is an image
+                    self.image = image
+                    self.files.image = image
+                elif self.parent and self.parent.type != 'dir':
+                    # search for cover.[png|jpg] the the current dir
+                    cover = os.path.dirname(self.filename) + '/cover'
+                    self.image = util.getimage(cover, self.image)
+            # set the suffix of the file as mimetype
+            self.mimetype = self.filename[self.filename.rfind('.')+1:].lower()
+            if info:
+                self.info = mediainfo.get(self.filename)
+                try:
+                    if self.parent.DIRECTORY_USE_MEDIAID_TAG_NAMES:
+                        self.name = self.info['title'] or self.name
+                except:
+                    pass
+                if not self.name:
+                    self.name = self.info['title:filename']
+            # Set a name for the item based on the filename
+            if not self.name:
+                self.name = util.getname(self.filename)
+
+        else:
+            # Mode is not file, it has to be a network url. Other
+            # types like dvd are handled inside the derivated class
+            self.network_play = True
+            self.filename     = ''
+            self.mimetype     = self.type
+            if not self.name:
+                self.name     = Unicode(self.url)
