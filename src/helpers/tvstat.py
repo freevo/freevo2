@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/11/28 17:32:08  dischi
+# use config.detect
+#
 # Revision 1.4  2004/11/19 02:18:22  rshortt
 # Changes for moving TV cards autodetection into system.
 #
@@ -48,13 +51,12 @@
 import time, string, sys
 
 import config
-import system
 import tv.v4l2
 import tv.ivtv
 
-from system.tvcards import TVCard, IVTVCard, DVBCard
+from config.tvcards import TVCard, IVTVCard, DVBCard
 
-system.detect('tvcards')
+config.detect('tvcards')
 
 
 def main():

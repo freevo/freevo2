@@ -7,6 +7,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.69  2004/11/28 17:32:05  dischi
+# use config.detect
+#
 # Revision 1.68  2004/11/21 13:29:13  dischi
 # fix config import
 #
@@ -89,13 +92,12 @@ try:
 except Exception, e:
     print e
 
-import system
 import plugin
 import childapp
 import notifier
 import record.server
 
-system.detect('tvcards')
+config.detect('tvcards')
 
 
 while 1:
