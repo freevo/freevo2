@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2003/06/12 00:09:43  gsbarbieri
+# Fixed some bugs
+#
 # Revision 1.40  2003/05/27 17:53:33  dischi
 # Added new event handler module
 #
@@ -641,6 +644,7 @@ class OSD:
         return_y0 = 0
         return_x1 = 0
         return_y1 = 0
+        plain_tab = '   '
 
         if DEBUG >= 3:
             print 'drawstringframed (%d;%d; w=%d; h=%d) "%s"' % (x, y,
@@ -704,7 +708,7 @@ class OSD:
                 occupied_height += line_height
             else:
                 if words[word_number] == '\t':
-                    words[word_number] = '   '
+                    words[word_number] = plain_tab
                 word_size, word_height = self.stringsize(words[word_number], font,ptsize)
                 # This word fit in this line?                
                 if (occupied_size + word_size) <= width and ( occupied_height ) <= height:
@@ -988,15 +992,15 @@ class OSD:
             else:
                 char = string[i]
 
-            char_size, char_height = self.charsize(char, font, ptsize)
+            char_size, char_height = self.stringsize(char, font, ptsize)
 
-            if ((occupied_size + char_size) <= width) and (char != '\n'):
+            if ((occupied_size + char_size) < width) and (char != '\n'):
 
                 occupied_size += char_size
                 lines[line_number] += char
                 
             else:
-                if (occupied_height + char_height) <= height:
+                if (occupied_height + char_height) < height:
                     # we can add one more line
                     occupied_height += word_height                    
                     line_number += 1
@@ -1015,17 +1019,20 @@ class OSD:
                     j = 1
                     len_line = len(lines[line_number])
                     for j in range(len_line):
-                        if (occupied_size + ellipses_size) <= width:
+                        if (occupied_size + ellipses_size) < width:
                             break
                         char_size = self.charsize(lines[line_number][len_line-j-1],
                                                   font, ptsize)[0]
                         occupied_size -= char_size
                     lines[line_number] = lines[line_number][0:len_line-j]
+                    occupied_size = self.stringsize( lines[line_number], font, ptsize )[0]
                     if ellipses:
-                        while ellipses and ellipses_size >= width:
-                            ellipses = ellipses[:-1]
-                            ellipses_size = self.stringsize(ellipses, font, ptsize)[0]
+                        while ellipses and \
+                                  (occupied_size + self.stringsize(ellipses, font, ptsize)[0]) \
+                                  >= width:
+                              ellipses = ellipses[:-1]
                         lines[line_number] += ellipses
+
                     break
         rest_words = string[i:len(string)]
 
@@ -1040,11 +1047,6 @@ class OSD:
 
         
         for line in lines:
-            # FIXME:
-            # shorten line, maybe it's too long. It may be ellipses, but
-            # sometimes it also too long, don't know why.
-            #while line and self.stringsize(line, font, ptsize)[0] > width:
-            #    line = line[:-1]
             if align_h == 'left':
                 x0 = x
             elif align_h == 'center' or align_h == 'justified':
