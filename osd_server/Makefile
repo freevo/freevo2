@@ -37,8 +37,8 @@ osds_sdl: main.c ft.c ft.h sdl.c sdl.h readpng.c readpng.h readjpeg.c readjpeg.h
 	gcc -DOSD_SDL $(CFLAGS) $(SDLFLAGS) -o osds_sdl main.c ft.c sdl.c \
 	readpng.c readjpeg.c $(SDLLIBS) $(LIBS)
 
-osds_dxr3: main.c ft.c ft.h dxr3.c dxr3.h readpng.c readpng.h readjpeg.c readjpeg.h rgb2yuv.c rgb2yuv.h
-	gcc -DOSD_DXR3 $(CFLAGS) -o osds_dxr3 main.c ft.c dxr3.c readpng.c readjpeg.c rgb2yuv.c \
+osds_dxr3: main.c ft.c ft.h dxr3.c dxr3.h readpng.c readpng.h readjpeg.c readjpeg.h 
+	gcc -DOSD_DXR3 $(CFLAGS) -o osds_dxr3 main.c ft.c dxr3.c readpng.c readjpeg.c \
 	$(LIBS) -lfame -pg
 
 x11test: x11.c x11.h readpng.c readpng.h readjpeg.c readjpeg.h
