@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/07/05 09:09:47  dischi
+# fixed eject problems
+#
 # Revision 1.13  2003/07/02 22:05:50  dischi
 # o better cache handling
 # o shorter label for tv show discs
@@ -46,6 +49,7 @@ import time, os
 from fcntl import ioctl
 import re
 import threading
+import thread
 import string
 import copy
 
@@ -238,10 +242,8 @@ class RemovableMedia:
         self.cached   = FALSE
 
     def is_tray_open(self):
-        if self.tray_open and self.info:
-            # if we have an info, the tray can't be open
-            self.tray_open = FALSE
         return self.tray_open
+
 
     def move_tray(self, dir='toggle', notify=1):
         """Move the tray. dir can be toggle/open/close
@@ -274,6 +276,9 @@ class RemovableMedia:
             # including refresh screen
             os.system('eject -t %s' % self.devicename)
             self.tray_open = 0
+            global im_thread
+            if im_thread:
+                im_thread.check_all()
             if notify:
                 pop.destroy()
 
@@ -341,6 +346,8 @@ class Identify_Thread(threading.Thread):
             os.close(fd)
             return
 
+        # if there is a disc, the tray can't be open
+        media.tray_open = FALSE
         data = mmpython.parse(media.devicename)
 
         if data and data.mime == 'audio/cd':
@@ -350,6 +357,7 @@ class Identify_Thread(threading.Thread):
                                        devicename=media.devicename,
                                        display_type='audio')
             media.info.handle_type = 'audio'
+            media.info.media = media
             if data.title:
                 media.info.name = data.title
             media.info.info = data
@@ -361,14 +369,14 @@ class Identify_Thread(threading.Thread):
                 ioctl(fd, CDROM_SELECT_SPEED, config.ROM_SPEED)
             except:
                 pass
-            os.close(fd)
-            
+
+        os.close(fd)
         image = title = movie_info = more_info = xml_file = None
 
         if not data:
             # this should never happen
             return
-        
+
         media.id    = data.id
         media.label = data.label
         media.type  = 'cdrom'
@@ -406,7 +414,7 @@ class Identify_Thread(threading.Thread):
 
         # DVD/VCD/SVCD:
         # There is data from mmpython for these three types
-        if data.mime in ('video/cd', 'video/dvd'):
+        if data.mime in ('video/vcd', 'video/dvd'):
             if not title:
                 title = '%s [%s]' % (data.mime[6:].upper(), media.label)
 
@@ -597,6 +605,7 @@ class Identify_Thread(threading.Thread):
 
 
     def check_all(self):
+        self.lock.acquire()
         for media in config.REMOVABLE_MEDIA:
             last_status = media.drive_status
             self.identify(media)
@@ -611,11 +620,13 @@ class Identify_Thread(threading.Thread):
             else:
                 if DEBUG > 1:
                     print 'MEDIA: Status=%s' % media.drive_status
+        self.lock.release()
 
                 
     def __init__(self):
         threading.Thread.__init__(self)
         self.last_media = None          # last changed media
+        self.lock = thread.allocate_lock()
 
         
     def run(self):
