@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.48  2002/11/14 03:47:49  krister
+# Added Thomas Shueppel's SDL/DXR3 patch.
+#
 # Revision 1.47  2002/11/13 14:34:21  krister
 # Fixed a bug in music playing (the file type was mistaken for video for songs without an absolute path) by changing the way file suffixes are handled. The format of suffixes in freevo_config.py changed, local_conf.py must be updated!
 #
@@ -330,7 +333,8 @@ class MPlayer:
             osd.clearscreen(color=osd.COL_BLACK)
             osd.update()
 
-            
+        self.thread.play_mode = self.mode
+
         if DEBUG:
             print 'MPlayer.play(): Starting thread, cmd=%s' % command
             
@@ -519,18 +523,18 @@ class MPlayerApp(childapp.ChildApp):
         self.seek_mode = "forward"
         childapp.ChildApp.__init__(self, app)
 
+
     def kill(self):
         # Use SIGINT instead of SIGKILL to make sure MPlayer shuts
         # down properly and releases all resources before it gets
         # reaped by childapp.kill().wait()
         childapp.ChildApp.kill(self, signal.SIGINT)
 
-        osd.update()  # XXX WTF? /Krister
-        
         # XXX Krister testcode for proper X11 video
         if DEBUG: print 'Killing mplayer'
         os.system('killall -9 freevo_xwin 2&> /dev/null')
         os.system('rm -f /tmp/freevo.wid')
+
 
     def stdout_cb(self, str):
         if str.find("A:") == 0:
@@ -573,6 +577,7 @@ class MPlayer_Thread(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
         
+        self.play_mode = ''
         self.mode      = 'idle'
         self.mode_flag = threading.Event()
         self.command   = ''
@@ -587,13 +592,15 @@ class MPlayer_Thread(threading.Thread):
                 self.mode_flag.wait()
                 self.mode_flag.clear()
 
-                # The DXR3 device cannot be shared between our SDL session
-                # and MPlayer.
-                if osd.sdl_driver == 'dxr3':
-                    osd.stopdisplay()
-                
             elif self.mode == 'play':
 
+                # The DXR3 device cannot be shared between our SDL session
+                # and MPlayer.
+                if (osd.sdl_driver == 'dxr3' and self.play_mode == 'video'):
+                    if DEBUG:
+		        print "Stopping Display for Video Playback on DXR3"
+                    osd.stopdisplay()
+                
                 if DEBUG:
                     print 'MPlayer_Thread.run(): Started, cmd=%s' % self.command
                     
@@ -610,11 +617,13 @@ class MPlayer_Thread(threading.Thread):
                             self.audioinfo.draw()        
                     time.sleep(0.1)
 
-                # Ok, we can use the OSD again.
-                if osd.sdl_driver == 'dxr3':
-                    osd.restartdisplay()
-                
                 self.app.kill()
+
+                # Ok, we can use the OSD again.
+                if osd.sdl_driver == 'dxr3' and self.play_mode == 'video':
+                    osd.restartdisplay()
+		    osd.update()
+		    print "Display back online"
 
                 if self.mode == 'play':
                     rc.post_event(rc.PLAY_END)
