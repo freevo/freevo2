@@ -41,6 +41,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2003/08/24 10:16:26  dischi
+# do not use osd.OSDFont, xml_font has the font as font.font in it
+#
 # Revision 1.34  2003/08/23 12:51:42  dischi
 # removed some old CVS log messages
 #
@@ -162,10 +165,8 @@ class clock(IdleBarPlugin):
         pad_x = 10
         idlebar_height = 60
         
-        import osd as _osd
-        f = _osd.OSDFont( font.name, font.size )
-        w = f.stringsize( clock )
-        h = f.height
+        w = font.font.stringsize( clock )
+        h = font.font.height
         if h > idlebar_height:
             h = idlebar_height
         osd.write_text( clock, font, None,
