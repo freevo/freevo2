@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/01/12 13:51:51  dischi
+# Added the feature to remove items for videos, too. For that the interface
+# was modified (update instead of remove).
+#
 # Revision 1.18  2003/01/11 20:09:41  dischi
 # Added the self.playlist option to the directory again. This was lost
 # during my adding of the last feature, sorry.
@@ -405,9 +409,9 @@ class DirItem(Playlist):
         # check modules if they know something about the deleted/new files
         for t in ( 'video', 'audio', 'image', 'games' ):
             if not self.display_type or self.display_type == t:
-                del_items += eval(t + '.interface.remove(del_files, self.menu.choices)')
-                new_items += eval(t + '.interface.cwd(self, new_files)')
-
+                eval(t + '.interface.update')(self, new_files, del_files, \
+                                              new_items, del_items, self.play_items)
+                
         # delete play items from the menu
         for i in del_items:
             self.menu.delete_item(i)

@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/01/12 13:51:51  dischi
+# Added the feature to remove items for videos, too. For that the interface
+# was modified (update instead of remove).
+#
 # Revision 1.3  2003/01/12 10:58:31  dischi
 # Changed the multiple file handling. If a videoitem has more than one file,
 # the videoitem gets the filename '' and subitems for each file. With that
@@ -182,6 +186,8 @@ def parseMovieFile(file, parent, duplicate_check):
                         xml_parseInfo(node, mitem)
                         
                 mitem.xml_file = file
+                for subitem in mitem.subitems:
+                    subitem.xml_file = file
                 movies += [ mitem ]
 
     return movies
