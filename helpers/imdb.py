@@ -48,7 +48,7 @@ if imdb_number == '-s':
     conn.request("POST", "/Find", params, headers)
     response = conn.getresponse()
 
-    regexp_title   = re.compile('<LI><A HREF="/Title\?([0-9]*)">(.*)</A></LI>')
+    regexp_title   = re.compile('.*<LI><A HREF="/Title\?([0-9]*)">(.*)</A></LI>')
     for line in response.read().split("\n"):
         m = regexp_title.match(line)
         if m:
