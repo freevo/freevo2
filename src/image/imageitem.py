@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/12/30 15:35:16  dischi
+# remove unneeded copy function
+#
 # Revision 1.18  2003/12/29 22:09:19  dischi
 # move to new Item attributes
 #
@@ -88,16 +91,6 @@ class ImageItem(Item):
             
         return Item.__getitem__(self, key)
         
-
-    def copy(self, obj):
-        """
-        Special copy value
-        """
-        Item.copy(self, obj)
-        if obj.type == 'image':
-            self.duration = obj.duration
-            self.rotation = obj.rotation
-            
 
     def sort(self, mode=None):
         """

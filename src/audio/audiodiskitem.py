@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/12/30 15:34:42  dischi
+# remove unneeded copy function
+#
 # Revision 1.26  2003/12/18 21:13:20  outlyer
 # Crash Fix: The self. variable didn't exist, but the config one did. It would
 # crash when I put in a CD.
@@ -88,16 +91,6 @@ class AudioDiskItem(Playlist):
         cover = '%s/mmpython/disc/%s.jpg' % (config.FREEVO_CACHEDIR, disc_id)
         if os.path.isfile(cover):
             self.image = cover
-            
-
-    def copy(self, obj):
-        """
-        Special copy value DirItem
-        """
-        Playlist.copy(self, obj)
-        if obj.type == 'audiocd':
-            self.dir          = obj.dir
-            self.display_type = obj.display_type
             
 
     def actions(self):

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2003/12/30 15:34:42  dischi
+# remove unneeded copy function
+#
 # Revision 1.43  2003/12/29 22:09:18  dischi
 # move to new Item attributes
 #
@@ -118,25 +121,6 @@ class AudioItem(Item):
                 if covers:
                     image = os.path.join(self.dirname, covers[0])
             self.image = image
-
-
-    def copy(self, obj):
-        """
-        Special copy value AudioItem
-        """
-        Item.copy(self, obj)
-        if obj.type == 'audio':
-            self.title      = obj.title
-            self.start      = obj.start
-            self.length     = obj.length
-            self.elapsed    = obj.elapsed
-            self.remain     = obj.remain
-            self.done       = obj.done
-            self.pause      = obj.pause
-            self.valid	    = obj.valid
-
-            self.mplayer_options = obj.mplayer_options
-
 
 
     def sort(self, mode=None):

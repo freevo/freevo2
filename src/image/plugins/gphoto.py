@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/12/30 15:35:16  dischi
+# remove unneeded copy function
+#
 # Revision 1.5  2003/11/09 16:36:46  rshortt
 # Some pygphoto and gphoto plugin fixes.
 #
@@ -105,16 +108,6 @@ class CameraFile( Item ):
         tmp = pygame.image.load(file)  # XXX Cannot load everything
         return tmp.convert_alpha()  # XXX Cannot load everything
 
-    def copy(self, obj):
-        """
-        Special copy value DirItem
-        """
-        Item.copy(self,obj)
-        self.gCamera = obj.gCamera
-        self.path = obj.path
-        self.name = obj.name
-        self.image_viewer = obj.image_viewer
-
     def actions(self):
         """
         Retrieve and Show the Image
@@ -144,15 +137,6 @@ class CameraFolder( Item ):
         self.path = path
         self.name = name
 	self.type = 'folder'
-
-    def copy(self, obj):
-        """
-        Special copy value DirItem
-        """
-        Item.copy(self,obj)
-        self.gCamera = obj.gCamera
-        self.path = obj.path
-        self.name = obj.name
 
     def actions(self):
         items = [ ( self.cwd, _('Browse directory') ) ]
