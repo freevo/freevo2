@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/08/01 10:39:05  dischi
+# remove some visible code for testing
+#
 # Revision 1.3  2004/07/24 12:22:15  dischi
 # gui update
 #
@@ -339,8 +342,8 @@ class XML_data:
                     p = plugin.getbyname(self.visible[4:])
                 else:
                     p = plugin.getbyname(self.visible)
-                if hasattr(p, 'visible'):
-                    p = p.visible
+#                 if hasattr(p, 'visible'):
+#                     p = p.visible
                 if len(self.visible) > 4 and self.visible[:4] == 'not ':
                     self.visible = not p
                 else:
