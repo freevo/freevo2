@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/08/20 03:51:48  rshortt
+# Patch from Mike so that the option boxes default to the day and time as
+# displayed in the guide.
+#
 # Revision 1.9  2003/08/18 01:20:10  rshortt
 # Another patch from Mike, this one adds the option to select the time you
 # would like to view in the guide.
@@ -93,35 +97,48 @@ FALSE = 0
 
 class GuideResource(FreevoResource):
 
-    def maketimejumpboxday(self):
-        retval='<select name="day">' + "\n"
+    def maketimejumpboxday(self, gstart):
+        retval='<select name="day">\n'
         myt = time.time()
-        myt_t=time.localtime(myt)
-        myt=time.mktime((myt_t[0], myt_t[1], myt_t[2], 0, 0, 5, myt_t[6], myt_t[7], -1))
+        myt_t = time.localtime(myt)
+        gstart_t = time.localtime(gstart)
+        myt = time.mktime((myt_t[0], myt_t[1], myt_t[2], 0, 0, 5, 
+                           myt_t[6], myt_t[7], -1))
         listh = tv_util.when_listings_expire()
         if listh == 0:
-            return retval + "</select>\n"
+            return retval + '</select>\n'
         listd = int((listh/24)+2)
-        for i in range(1,listd):
-            retval+='<option value="' + str(myt) + '">' + time.strftime('%a %b %d', time.localtime(myt)) + "\n"
-            myt+=60*60*24
-        retval+="</select>\n"
+        for i in range(1, listd):
+            retval += '<option value="' + str(myt) + '"'
+            myt_t = time.localtime(myt)
+            if (myt_t[0] == gstart_t[0] and \
+                myt_t[1] == gstart_t[1] and \
+                myt_t[2] == gstart_t[2]):
+                retval += ' SELECTED '
+            retval += '>' + time.strftime('%a %b %d', myt_t) + '\n'
+            myt += 60*60*24
+        retval += '</select>\n'
         return retval
 
 
-    def maketimejumpboxoffset(self):
-        retval='<select name="offset">' + "\n"
-        myt = time.time()
-        myt_t=time.localtime(myt)
-        hrstart=time.mktime((myt_t[0], myt_t[1], myt_t[2], 0, 0, 5, myt_t[6], myt_t[7], -1))
-        hrinc=hrstart
-        hrstop=hrstart + (60*60*24)
+    def maketimejumpboxoffset(self, gstart):
+        retval = '<select name="offset">\n'
+        myt = gstart
+        myt_t = time.localtime(myt)
+        hrstart = time.mktime((myt_t[0], myt_t[1], myt_t[2], 0, 0, 5, 
+                               myt_t[6], myt_t[7], -1))
+        hrinc = hrstart
+        hrstop = hrstart + (60*60*24)
         while (hrinc < hrstop):
-            myoff=hrinc-hrstart
-            retval+='<option value="' + str(myoff) + '">' + time.strftime('%H:%M', time.localtime(hrinc)) + "\n"
-            hrinc+=web.INTERVAL
-        retval+="</select>\n"
+            myoff = hrinc - hrstart
+            retval += '<option value="' + str(myoff) + '"'
+            if (abs(gstart - hrinc) < 60):
+                retval += ' SELECTED '
+            retval += '>' + time.strftime('%H:%M', time.localtime(hrinc)) + '\n'
+            hrinc += web.INTERVAL
+        retval += '</select>\n'
         return retval
+
 
     def _render(self, request):
         fv = HTMLResource()
@@ -162,7 +179,7 @@ class GuideResource(FreevoResource):
 
         fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
         fv.tableRowOpen('class="chanrow"')
-        fv.tableCell('<form>Jump&nbsp;to:&nbsp;' + self.maketimejumpboxday() + self.maketimejumpboxoffset() + '<input type=submit value="Change"></form>', 'class="guidehead"')
+        fv.tableCell('<form>Jump&nbsp;to:&nbsp;' + self.maketimejumpboxday(now) + self.maketimejumpboxoffset(now) + '<input type=submit value="Change"></form>', 'class="guidehead"')
         fv.tableRowClose()
         fv.tableClose()
 
