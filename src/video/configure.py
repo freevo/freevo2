@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2004/08/28 17:17:35  dischi
+# use chapter selection to select file for multi file videos
+#
 # Revision 1.28  2004/08/24 16:42:44  dischi
 # Made the fxdsettings in gui the theme engine and made a better
 # integration for it. There is also an event now to let the plugins
@@ -140,6 +143,29 @@ def chapter_selection_menu(arg=None, menuw=None):
 
 
 #
+# Chapter selection
+#
+
+def subitem_selection(menuw=None, arg=None):
+    item, pos = arg
+    item.conf_select_this_item = item.subitems[pos]
+    menuw.delete_menu()
+    play_movie(menuw=menuw, arg=(item, None))
+    
+
+def subitem_selection_menu(arg=None, menuw=None):
+    item  = arg
+    menu_items = []
+
+    for pos in range(len(item.subitems)):
+        menu_items += [ menu.MenuItem(_('Play chapter %s') % (pos+1),
+                                      subitem_selection, (arg, pos)) ]
+        
+    moviemenu = menu.Menu(_('Chapter Menu'), menu_items, fxd_file=item.skin_fxd)
+    menuw.pushmenu(moviemenu)
+
+
+#
 # De-interlacer
 #
 
@@ -176,6 +202,7 @@ def get_items(item):
     next_start = 0
     items = []
 
+    print item.subitems
     if item.filename or (item.mode in ('dvd', 'vcd') and item.player_rating >= 20):
         if item.info.has_key('audio') and len(item.info['audio']) > 1:
             items.append(menu.MenuItem(_('Audio selection'), audio_selection_menu, item))
@@ -183,8 +210,13 @@ def get_items(item):
             items.append(menu.MenuItem(_('Subtitle selection'),
                                        subtitle_selection_menu, item))
         if item.info.has_key('chapters') and item.info['chapters'] > 1:
-            items.append(menu.MenuItem(_('Chapter selection'), chapter_selection_menu, item))
-
+            items.append(menu.MenuItem(_('Chapter selection'),
+                                       chapter_selection_menu, item))
+    if item.subitems:
+        # show subitems as chapter
+        items.append(menu.MenuItem(_('Chapter selection'),
+                                   subitem_selection_menu, item))
+        
     if item.mode in ('dvd', 'vcd') or \
            (item.filename and item.info.has_key('type') and \
             item.info['type'] and item.info['type'].lower().find('mpeg') != -1):
