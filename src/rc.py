@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/04/27 15:28:24  rshortt
+# Adding back support for using a network remote.  If ENABLE_NETWORK_REMOTE is
+# set to 1 in local_conf.py then rc.py will also listen for commands over UDP.
+#
 # Revision 1.12  2003/04/24 19:55:54  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -60,6 +64,7 @@
 # ----------------------------------------------------------------------- */
 #endif
 
+import socket
 import config
 
 
@@ -177,6 +182,13 @@ class RemoteControl:
             except IOError:
                 print 'WARNING: %s not found!' % config.LIRCRC
                 self.pylirc = 0
+        if config.ENABLE_NETWORK_REMOTE:
+            self.port = port
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.sock.setblocking(0)
+            self.sock.bind(('', self.port))
+
         self.app = None
         self.func = None
         self.queue = []
@@ -192,10 +204,20 @@ class RemoteControl:
             return ret
         if self.pylirc:
             list = pylirc.nextcode()
-            if list == None:
-                return None
-            for code in list:
-                data = code
-                return data
-        else:
-            return None
+            if list:
+                for code in list:
+                    data = code
+                    return data
+        if config.ENABLE_NETWORK_REMOTE:
+            try:
+                data = self.sock.recv(100)
+                if data == '':
+                    print 'Lost the connection'
+                    self.conn.close()
+                else:
+                    return data
+            except:
+                # No data available
+                pass
+
+        return None

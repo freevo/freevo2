@@ -904,6 +904,7 @@ TV_SHOW_REGEXP = "s?([0-9]|[0-9][0-9])[xe]([0-9]|[0-9][0-9])[^0-9]"
 # Remote control daemon. The server is in the Freevo main application,
 # and the client is a standalone application in rc_client/
 #
+ENABLE_NETWORK_REMOTE = 1
 REMOTE_CONTROL_HOST = '127.0.0.1'
 REMOTE_CONTROL_PORT = 16310
 
