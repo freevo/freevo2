@@ -30,6 +30,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/08/04 04:25:09  gsbarbieri
+# changed interface -> PluginInterface to conform with the plugin usage.
+#
 # Revision 1.25  2003/07/24 00:01:19  rshortt
 # Extending the idlebar.tv plugin with the help (and idea) of Mike Ruelle.
 # Now you may add args=(number,) to the plugin.activate for this plugin and
@@ -126,7 +129,7 @@ TRUE  = 1
 FALSE = 0
 
 
-class interface(plugin.DaemonPlugin):
+class PluginInterface(plugin.DaemonPlugin):
     """
     global idlebar plugin.
     """
