@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.78  2004/01/09 21:06:17  dischi
+# better skin_settings support. All the item variables need a cleanup/sort
+#
 # Revision 1.77  2004/01/09 19:49:53  dischi
 # only add to skin when not helper
 #
@@ -351,8 +354,11 @@ class MenuWidget(GUIObject):
             else:
                 items.append(MenuItem(a[1], a[0]))
         fxd_file = None
+
         if hasattr(item, 'fxd_file'):
             fxd_file = item.fxd_file
+            if hasattr(item, 'skin_settings') and item.skin_settings:
+                fxd_file = item.skin_settings
 
         for i in items:
             try:

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.91  2004/01/09 21:06:10  dischi
+# better skin_settings support. All the item variables need a cleanup/sort
+#
 # Revision 1.90  2004/01/09 19:04:11  dischi
 # new vfs.listdir parameter
 #
@@ -177,7 +180,7 @@ class DirItem(Playlist):
         self.display_type  = display_type
         self.info          = {}
         self.mountpoint    = None
-        self.skin_settings = False
+        self.skin_settings = ''
         
         if add_args == None and hasattr(parent, 'add_args'): 
             add_args = parent.add_args
@@ -247,7 +250,7 @@ class DirItem(Playlist):
         '''
 
         if node.name == 'skin':
-            self.skin_settings = True
+            self.skin_settings = self.fxd_file
             return
         
         global all_variables
@@ -600,8 +603,10 @@ class DirItem(Playlist):
         # normal DirItems
         for filename in files:
             if vfs.isdir(filename):
-                self.dir_items.append(DirItem(filename, self, display_type =
-                                              self.display_type))
+                d = DirItem(filename, self, display_type = self.display_type)
+                if not d.skin_settings:
+                    d.skin_settings = self.skin_settings
+                self.dir_items.append(d)
 
         #
         # sort all items
@@ -706,7 +711,7 @@ class DirItem(Playlist):
                                   force_skin_layout = self.DIRECTORY_FORCE_SKIN_LAYOUT)
 
             if self.skin_settings:
-                item_menu.skin_settings = skin.load(self.fxd_file)
+                item_menu.skin_settings = skin.load(self.skin_settings)
 
             if menuw:
                 menuw.pushmenu(item_menu)
