@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2002/10/24 04:33:25  gsbarbieri
+# Modified to handle <head> from XML file.
+#
 # Revision 1.6  2002/10/21 20:30:50  dischi
 # The new alpha layer support slows the system down. For that, the skin
 # now saves the last background/alpha layer combination and can reuse it.
@@ -165,6 +168,7 @@ class Skin_TV:
         col_time = 30
 
         str_w_label, str_h_label = osd.stringsize('Ajg', val.label.font, val.label.size)
+        str_w_head, str_h_head = osd.stringsize('Ajg', val.head.font, val.head.size)
         str_w_selection, str_h_selection = \
                          osd.stringsize('Ajg', val.selection.font, val.selection.size)
         str_w_normal, str_h_normal = osd.stringsize('Ajg', val.font, val.size)
@@ -185,21 +189,27 @@ class Skin_TV:
         x = conf_x
         y = conf_y
         # Display the Channel on top
-        drawroundbox(x, y, x+val.label.width, y+str_h_label + 2 * val.spacing,
-                     val.label.bgcolor, 1, val.border_color)
-        DrawTextFramed(time.strftime("%m/%d",time.localtime(to_listing[0][1])), \
-                       val.label, x + val.spacing, y + val.spacing, \
-                       val.label.width - 2 * val.spacing, str_h_label)
+        drawroundbox(x, y, x+val.label.width, y+str_h_head + 2 * val.spacing,
+                     val.head.bgcolor, 1, val.border_color, radius=val.head.radius)
+        settings2 = copy.copy(val.head)
+        # first head column is date, should be aligned like 'label'
+        settings2.align=val.label.align
+        settings2.valign=val.label.valign
+        DrawTextFramed(time.strftime("%m/%d",time.localtime(to_listing[0][1])),
+                       settings2, x + val.spacing, y + val.spacing,
+                       val.label.width - 2 * val.spacing, str_h_head)
 
-
+        # other head columns should be aligned like specified in xml
+        settings2.align=val.head.align
+        settings2.valign=val.head.valign
         for i in range(n_cols):
             x0 = int(x_contents + (float(w_contents) / n_cols) * i)
             x1 = int(x_contents + (float(w_contents) / n_cols) * (i+1))
             
-            drawroundbox(x0, y, x1, y+ str_h_label + 2 * val.spacing,
-                         val.label.bgcolor, 1, val.border_color)   
-            DrawText(time.strftime("%H:%M",time.localtime(to_listing[0][i+1])),
-                     val.label, x0 + val.spacing, y + val.spacing, align='left')
+            drawroundbox(x0, y, x1, y+ str_h_head + 2 * val.spacing,
+                         val.head.bgcolor, 1, val.border_color, radius=val.head.radius)   
+            DrawTextFramed(time.strftime("%H:%M",time.localtime(to_listing[0][i+1])),
+                           settings2, x0 + val.spacing, y + val.spacing, x1-x0, str_h_head)
 
         # define start and stop time
         date = time.strftime("%x", time.localtime())
@@ -228,8 +238,8 @@ class Skin_TV:
             # draw the channel name/logo/id
 
             # Background color
-            osd.drawbox(conf_x, y0, conf_x+val.label.width, y1,
-                        width=-1, color=val.label.bgcolor)
+            drawroundbox(conf_x, y0, conf_x+val.label.width, y1,
+                         color=val.label.bgcolor, radius=val.label.radius)
 
             # Logo
             channel_logo = config.TV_LOGOS + '/' + to_listing[i].id + '.png'
@@ -249,8 +259,8 @@ class Skin_TV:
                            val.label.width - 2 * val.spacing - padding, str_h)
 
             # Border is drawn afterwards to delineate the icons
-            osd.drawbox(conf_x, y0, conf_x+val.label.width, y1, width=1,
-                        color=val.border_color)
+            drawroundbox(conf_x, y0, conf_x+val.label.width, y1, border_size=1,
+                         color=val.border_color, radius=val.label.radius)
 
             if to_listing[i].programs:
                 for prg in to_listing[i].programs:
@@ -295,8 +305,8 @@ class Skin_TV:
                        prg.stop == selected_prog.stop:
 
                         cur_val = val2.selection
-                        
-                    drawroundbox(x0, y0, x1, y1, cur_val.bgcolor, 1, val2.border_color)
+
+                    drawroundbox(x0, y0, x1, y1, cur_val.bgcolor, 1, val2.border_color, radius=val2.radius)
 
                     tx0 = min(x1, x0+(flag_left+1)*spacing+flag_left*left_arrow_size[0])
                     tx1 = max(x0, x1-(flag_right+1)*spacing-flag_right*right_arrow_size[0])
@@ -312,7 +322,7 @@ class Skin_TV:
 
             else:
                 drawroundbox(x_contents, y0, x_contents+w_contents, y1,
-                             val2.bgcolor, 1, val2.border_color)
+                             val2.bgcolor, 1, val2.border_color, radius=val2.radius)
                 DrawTextFramed('-[ NO DATA ]-', val, x_contents+val.spacing,
                                y0+val.spacing, w_contents - 2 * val2.spacing, h)
 
