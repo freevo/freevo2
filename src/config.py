@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2003/09/03 20:03:34  dischi
+# toggle between x11 and fbdev based on $DISPLAY
+#
 # Revision 1.44  2003/08/25 12:08:20  outlyer
 # Additional compatibility patches for FreeBSD from Lars Eggert
 #
@@ -249,12 +252,21 @@ for program, valname, needed in setup_freevo.EXTERNAL_PROGRAMS:
         setattr(CONF, valname, '')
 
 # fall back to x11 if display is mga or fb and DISPLAY ist set
-if CONF.display in ('mga', 'fbcon') and os.environ.has_key('DISPLAY') and \
-   os.environ['DISPLAY']:
-   print 'Warning: display is set to %s, but the environment has DISPLAY set' % CONF.display
-   print 'this could mess up your X display, setting display to x11.'
-   print 'If you really want to do this, start \'DISPLAY="" freevo\''
-   CONF.display='x11'
+# or switch to fbdev if we have no DISPLAY and x11 or dga is used
+if not HELPER:
+    if os.environ.has_key('DISPLAY') and os.environ['DISPLAY']:
+        if CONF.display in ('mga', 'fbdev'):
+            print 'Warning: display is set to %s, but the environment ' % CONF.display + \
+                  'has DISPLAY=%s.' % os.environ['DISPLAY']
+            print 'this could mess up your X display, setting display to x11.'
+            print 'If you really want to do this, start \'DISPLAY="" freevo\''
+            CONF.display='x11'
+    else:
+        if CONF.display == 'x11':
+            print 'Warning: display is set to %s, but the environment ' % CONF.display + \
+                  'has no DISPLAY set.'
+            print 'Setting display to fbdev.'
+            CONF.display='fbdev'
    
 # Load freevo_config.py:
 if os.path.isfile(os.environ['FREEVO_CONFIG']):
