@@ -5,9 +5,10 @@
 #
 # This plugin requires the "encoder" utility that comes with the CK series of
 # ivtv drivers found at http://67.18.1.101/~ckennedy/ivtv/.  You neeed at least
-# version 0.2.0-rc2s from the stable branch or 0.3.1o from the unstable branch
-# because we rely on a paramerter for passing the channel frequency that was
-# introduced in those versions.
+# version 0.2.0-rc2w from the stable branch or 0.3.1t from the unstable branch
+# because we rely on a paramerter for passing the channel frequency as well as
+# support for multiple cards and PAL settings that were introduced in those 
+# versions.
 #
 # -----------------------------------------------------------------------------
 # $Id$
@@ -82,7 +83,15 @@ class PluginInterface(generic.PluginInterface):
 
         duration = int(rec.stop - time.time())
 
+        try:
+            vport = self.device.vdev[-1:]
+        except:
+            vport = 0
+
         return [ config.IVTV_ENCODER, 
+                 '-vport',    String(vport),
+                 '-frate',    String(self.device.framerate),
+                 '-fpgop',    String(self.device.framespergop),
                  '-bmode',    String(self.device.bitrate_mode),
                  '-brate',    String(self.device.bitrate),
                  '-bpeak',    String(self.device.bitrate_peak),
