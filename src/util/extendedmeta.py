@@ -10,6 +10,19 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/01/16 17:15:29  dischi
+# Many improvements to AudioParser
+# o try to detect if we should overwrite an existing fxd file
+# o Various is not included anymore, the value is not set in the fxd
+#   Aubin: the skin now doesn't need to check for 'Various', it needs
+#   to write 'Various' if Album/Artist is not set
+# o make it much faster by comparing timestamps to avoid rechecking
+#
+# Warning: I made the changes to mp3info which was removed while I was
+# working. I hope I didn't forgot something to copy
+#
+# Also made the db optional
+#
 # Revision 1.2  2004/01/16 14:40:33  outlyer
 # (Don't you love it when your neighbours make enough noise to wake you up
 # early on your day off)
@@ -56,17 +69,22 @@
 #endif
 
 # The basics
-import os,string,fnmatch,sys,md5
-
-# The DB stuff
-import sqlite
+import os,string,fnmatch,sys,md5,stat
 
 # Metadata tools
 import mmpython
 import config, util
 import util.fxdparser
 
-from util.dbutil import *
+try:
+    # The DB stuff
+    import sqlite
+
+    from util.dbutil import *
+    has_db = True
+except ImportError:
+    has_db = False
+    
 from mmpython.audio import eyeD3
 from util import recursefolders
 
@@ -168,73 +186,96 @@ def extract_image(path):
 
 ##### Audio Folder Information
 
+various = '__various__'
+
 class AudioParser:
-    def __init__(self, dirname):
+
+    def __init__(self, dirname, force=False):
+
+        self.artist  = ''
+        self.album   = ''
+        self.year    = ''
+        self.length  = 0
+        self.changed = False
+        self.force   = force
+        
+        fxdfile      = os.path.join(dirname, 'folder.fxd')
+        fname        = vfs.abspath(fxdfile)
+        if fname:
+            fxdfile  = fname
+        subdirs      = util.getdirnames(dirname, softlinks=False)
+        filelist     = None
+
+        for subdir in subdirs:
+            d = AudioParser(subdir)
+            if d.changed:
+                break
+
+        else:
+            # no changes in all subdirs, looks good
+            if fname:
+                if os.stat(dirname)[stat.ST_MTIME] <= os.stat(fname)[stat.ST_MTIME]:
+                    # and no changes in here. Do not parse everything again
+                    if force:
+                        # forces? We need to load our current values
+                        fxd = util.fxdparser.FXD(fxdfile)
+                        fxd.set_handler('folder', self.fxd_read)
+                        fxd.parse()
+                        if self.length:
+                            # set the stuff to various if not set
+                            for type in ('artist', 'album', 'year'):
+                                if not getattr(self, type):
+                                    setattr(self, type, various)
+                    return
+            else:
+                filelist = util.match_files(dirname, config.AUDIO_SUFFIX)
+                if not filelist:
+                    # no files in here, great
+                    return
+
+        if not filelist:
+            filelist = util.match_files(dirname, config.AUDIO_SUFFIX)
+            
+        # ok, something changed here, too bad :-(
+        self.changed = True
+        self.force   = False
+
+        # scan all subdirs
+        for subdir in subdirs:
+            d = AudioParser(subdir, force=True)
+            for type in ('artist', 'album', 'year'):
+                setattr(self, type, self.strcmp(getattr(self, type), getattr(d, type)))
+            self.length += d.length
 
         # cache dir first
         mmpython.cache_dir(dirname)
 
-        self.artist = ''
-        self.album  = ''
-        self.year   = ''
-        self.length = 0
-        for subdir in util.getdirnames(dirname):
-            d = AudioParser(subdir)
-            if d.artist:
-                if self.artist and d.artist != self.artist:
-                    self.artist = 'Various'
-                elif not self.artist:
-                    self.artist = d.artist
-            if d.album:
-                if self.album and d.album != self.album:
-                    self.album = 'Various'
-                elif not self.album:
-                    self.album = d.album
-            if d.year:
-                if self.year and d.year != self.year:
-                    self.year = 'Various'
-                elif not self.year:
-                    self.year = d.year
-            self.length += d.length
-
-        for song in util.match_files(dirname, config.AUDIO_SUFFIX):
+        for song in filelist:
             try:
                 data = mmpython.parse(song)
-                myartist = data['artist']
-                myalbum  = data['album']
-                myyear   = data['date']
-                if myartist:
-                    if myartist != self.artist and self.artist:
-                        self.artist = 'Various'
-                    else:
-                        self.artist = myartist
-
-                if myyear:
-                    if myyear != self.year and self.year:
-                        self.year = 'Various'
-                    else:
-                        self.year = myyear
-
-
-                if myalbum:
-                    if myalbum != self.album and self.album:
-                        self.album = 'Various'
-                    else:
-                        self.album = myalbum
-
-                self.length += data['length']
+                for type in ('artist', 'album'):
+                    setattr(self, type, self.strcmp(getattr(self, type), data[type]))
+                self.year = self.strcmp(self.year, data['date'])
+                if data['length']:
+                    self.length += int(data['length'])
             except:
                 pass
 
         if not self.length:
             return
         
+        fxd = util.fxdparser.FXD(fxdfile)
+        fxd.set_handler('folder', self.fxd_read)
+        fxd.parse()
+
         if config.DEBUG:
             print dirname
             if self.artist:
                 print self.artist
             if self.album:
                 print self.album
+            if self.year:
+                print self.year
             if self.length > 3600:
                 print '%i:%0.2i:%0.2i' % (int(self.length/3600),
                                           int((self.length%3600)/60),
@@ -243,28 +284,64 @@ class AudioParser:
                 print '%i:%0.2i' % (int(self.length/60), int(self.length%60))
             print
 
-        fxd = util.fxdparser.FXD(os.path.join(dirname, 'folder.fxd'))
         fxd.set_handler('folder', self.fxd_callback, mode='w', force=True)
         try:
             fxd.save()
-        except IOError:
-            # New file
-            print "IOError:"
-            pass
+        except IOError, e:
+            print e
 
+
+    def strcmp(self, s1, s2):
+        if not s1 or not s2:
+            return s1 or s2
+        if s1 == various or s2 == various:
+            return various
+        # print 'cmp: %s %s ' % ( s1, s2)
+        if s1.replace(' ', '').lower() == s2.replace(' ', '').lower():
+            return s1
+        return various
+
+
+    def fxd_read(self, fxd, node):
+        info = []
+        for child in fxd.get_children(node, 'info'):
+            info += child.children
+
+        overwrite = True
+        for child in info:
+            if child.name == 'length':
+                if self.force:
+                    # in force mode
+                    self.length = int(fxd.gettext(child))
+                elif str(fxd.gettext(child)) == str(self.length):
+                    overwrite = False
+
+        for child in info:
+            if child.name in ('artist', 'album', 'year'):
+                var = fxd.gettext(child)
+                # if the var is not set, continue
+                if not var:
+                    continue
+                # fxd value is set, let's see what we have here now:
+                # 1. not overwrite, return fxd value
+                # 2. current value is various, return various
+                # 3. current value is nothing, return fxd value
+                # 4. current and fxd value are something, return fxd value
+                if not (overwrite and getattr(self, child.name) == various):
+                    setattr(self, child.name, var)
 
 
     def fxd_callback(self, fxd, node):
-        # FIXME: fxd.setattr(node, 'title', 'foo')
         info = fxd.get_or_create_child(node, 'info')
 
         for var in ('artist', 'album', 'length', 'year'):
-            if getattr(self, var):
-                try:
-                    x = str(getattr(self, var)).encode(config.LOCALE, 'ignore')
-                    fxd.get_or_create_child(info, var).first_cdata = x
-                except UnicodeDecodeError, IOError:
-                    pass
+            if getattr(self, var) and str(getattr(self, var)) != various:
+                fxd.get_or_create_child(info, var).first_cdata = str(getattr(self, var))
+            else:
+                for child in info.children:
+                    if child.name == var:
+                        info.children.remove(child)
+
     
 
 ##### Helper to do all of them
@@ -272,9 +349,5 @@ class AudioParser:
 def AddExtendedMeta(path):
     AudioParser(path)
     extract_image(path)
-    addPathDB(path)
-
-
-
-
-
+    if has_db:
+        addPathDB(path)
