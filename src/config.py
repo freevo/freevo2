@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.67  2003/11/09 17:08:24  dischi
+# add /usr/local/etc/freevo as search path
+#
 # Revision 1.66  2003/11/01 16:28:43  dischi
 # encode program names to avoid a crash in the web guide
 #
@@ -311,7 +314,8 @@ __builtin__.__dict__['_debug_']= _debug_function_
 #
 # Config file handling
 #
-cfgfilepath = [ '.', os.path.expanduser('~/.freevo'), '/etc/freevo' ]
+cfgfilepath = [ '.', os.path.expanduser('~/.freevo'), '/etc/freevo',
+                '/usr/local/etc/freevo' ]
 
 
 #
@@ -342,7 +346,7 @@ RUNAPP = os.environ['RUNAPP']
 #
 # Check that freevo_config.py is not found in the config file dirs
 #
-for dirname in [os.path.expanduser('~/.freevo'), '/etc/freevo']:
+for dirname in cfgfilepath[1:]:
     freevoconf = dirname + '/freevo_config.py'
     if os.path.isfile(freevoconf):
         print (('\nERROR: freevo_config.py found in %s, please remove it ' +
