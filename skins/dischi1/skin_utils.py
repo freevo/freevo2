@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/03/15 17:25:24  dischi
+# don't scale forced images
+#
 # Revision 1.5  2003/03/15 17:13:57  dischi
 # use rom drive images for rom drive items
 #
@@ -98,7 +101,7 @@ def format_image(settings, item, width, height, force=0):
     else:
         force = 0
 
-    if type == 'audio':
+    if type == 'audio' and not force:
         m = min(height, width)
         height = m
         width  = m
