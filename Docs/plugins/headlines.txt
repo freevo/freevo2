@@ -4,6 +4,7 @@ Please attempt to test yourself and note your success or lack thereof
 in your email to the list.
 
 HEADLINES_LOCATIONS = [ ("Advogato", "http://advogato.org/rss/articles.xml"),
+("BBC Front Page News","http://news.bbc.co.uk/rss/newsonline_world_edition/front_page/rss091.xml")
 ("Dictionary.com Word of the Day", "http://www.dictionary.com/wordoftheday/wotd.rss"),
 ("DVD Review", "http://www.dvdreview.com/rss/newschannel.rss"),
 ("Footnotes - GNOME News", "http://www.gnomedesktop.org/backend.php"),
