@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/07/17 08:56:12  dischi
+# fix typo in variable
+#
 # Revision 1.15  2004/07/16 19:39:00  dischi
 # smaller cleanups, still alpha
 #
@@ -243,7 +246,7 @@ class PluginInterface(plugin.Plugin):
         try:
             self.length = int(self.item.info['length'])
         except:
-            self.lebgth = 0
+            self.length = 0
         if self.player.item_info:
             length = int(self.player.item_info.length)
             if hasattr(self.player.item_info, 'start'):
