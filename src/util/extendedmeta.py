@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/01/19 17:56:30  outlyer
+# Write cover images to the overlay directory, not the current one.
+#
 # Revision 1.5  2004/01/18 16:47:35  dischi
 # cleanup
 #
@@ -268,7 +271,7 @@ class AudioParser:
                 id3 = eyeD3.Mp3AudioFile( i )
             except:
                 continue
-            myname = os.path.join(path, 'cover.jpg')
+            myname = vfs.getoverlay(os.path.join(path, 'cover.jpg'))
             if id3.tag:
                 images = id3.tag.getImages();
                 for img in images:
@@ -284,7 +287,7 @@ class AudioParser:
                     else:
                         # image exists, but sums are different, write a unique cover
                         iname = os.path.splitext(os.path.basename(i))[0]+'.jpg'
-                        myname = os.path.join(path, iname)
+                        myname = vfs.getoverlay(os.path.join(path, iname))
                         f = vfs.open(myname, "wb")
                         f.write(img.imageData)
                         f.flush()
