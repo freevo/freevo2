@@ -249,7 +249,7 @@ plugin.activate('rom_drives.autostart')
 rom_plugins = {}
 for type in ('video', 'audio', 'image', 'games'):
     rom_plugins[type] = plugin.activate('rom_drives.rom_items',
-                                        type='mainmenu_%s' % type, level=50)
+                                        type=type, level=50)
 
 
 
