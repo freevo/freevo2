@@ -20,39 +20,37 @@
     
     <!-- Redefine of the type default -->
     <menu type="default">
-      <!-- screen0 is already defined in blue1_big -->
       <screen layout="screen0" visible="yes"/>
 
       <!-- 
       title0 is already defined in blue1_big, but there will
       is a new definition of the font from the layout (white big)
       -->
-      <title layout="title0" visible="yes">
-	<area x="10" y="10" width="780" height="60"/> 
-      </title>
+      <title visible="no"/>
 
       <view layout="view0" visible="yes">
-	<area x="545" y="90" width="245" height="450"/> 
+	<area x="20" y="100" width="300" height="300"/> 
       </view>
 
-      <listing layout="transparent listing" visible="yes">
-	<area x="10" y="130" width="550" height="450"/>
+      <listing layout="listing" visible="yes">
+	<area x="330" y="110" width="460" height="450"/>
       </listing>
       <info visible="no"/>
     </menu>
 
 
-
+    <!-- definition of the main menu -->
     <menu type="main">
-      <!-- definition of the main menu -->
       <screen layout="screen watermark" visible="yes">
 	<area x="0" y="0" width="800" height="600"/>
       </screen>
-      <listing layout="list_main" visible="yes">
+      <listing layout="main listing" visible="yes">
 	<area x="230" y="180" width="360" height="240"/> 
       </listing>
     </menu>
 
+    <!-- definition of video/audio/image menu. The same as default, but with a -->
+    <!-- different background -->
     <menu type="video">
       <screen layout="video screen"/>
     </menu>
@@ -61,10 +59,11 @@
       <screen layout="audio screen"/>
     </menu>
       
-    <!-- 
-    the main menu isn't redefined, the area is the same.
-    But there is a new define of list_main later 
-    -->
+    <menu type="image">
+      <screen layout="image screen"/>
+    </menu>
+      
+
 
     <!-- ********************************************** -->
     <!-- LAYOUT DEFINITIONS -->
@@ -74,7 +73,6 @@
     <layout label="screen0">
       <background>
 	<image filename="../images/aubin/blurr.jpg" x="0" y="0" label="background"/>
-	<image filename="../images/logo.png" x="10" y="0" width="200" height="98"/>
       </background>
     </layout>
 
@@ -88,51 +86,58 @@
     <layout label="video screen">
       <background>
 	<image filename="../images/aubin/blurr.jpg" x="0" y="0" label="background"/>
-	<image filename="../images/logo.png" x="10" y="0" width="200" height="98"/>
-	<image filename="movie_watermark.png" x="500" y="300" width="300"
-	  height="300"/>
+	<image filename="movie_watermark.png" x="435" y="230" width="370"
+	  height="380"/>
       </background>
     </layout>
 
     <layout label="audio screen">
       <background>
 	<image filename="../images/aubin/blurr.jpg" x="0" y="0" label="background"/>
-	<image filename="../images/logo.png" x="10" y="0" width="200" height="98"/>
-	<image filename="music_watermark.png" x="500" y="300" width="300"
-	  height="300"/>
+	<image filename="music_watermark.png" x="435" y="230" width="370"
+	  height="380"/>
       </background>
     </layout>
 
+    <layout label="image screen">
+      <background>
+	<image filename="../images/aubin/blurr.jpg" x="0" y="0" label="background"/>
+	<image filename="image_watermark.png" x="435" y="230" width="370"
+	  height="380"/>
+      </background>
+    </layout>
+
+
+
+    <!-- default view area -->
     <layout label="view0">
-      <content align="left" valign="top">
+      <content align="center" valign="center">
 	<item type="default">
-	  <rectangle size="0" bgcolor="0x80000000" radius="10" x="-15" y="-15"
-	    width="max+30" height="max+30"/>
+	  <rectangle size="0" bgcolor="0x80000000" radius="8" x="-10" y="-10"
+	    width="max+20" height="max+20"/>
 	</item>
       </content>
     </layout>
     
+
     <!-- default listing area -->
-    <layout label="transparent listing">
-      <background>
-	<rectangle size="0" bgcolor="0x80000000" radius="10" width="max"/>
-      </background>
-      <content x="20" y="20" width="max-40" height="max-40" type="text"
-	spacing="2">
-	<item type="default" font="white shadow1"/>
-	<item type="selected" font="white shadow1">
-	  <rectangle bgcolor="0xff000000" size="0" x="-5" y="-3" width="max+10"
-	    height="max+6" radius="5"/>
+    <layout label="listing">
+      <background/>
+      <content type="text" spacing="2">
+	<item type="default" font="grey"/>
+	<item type="selected" font="white">
+	  <rectangle bgcolor="0xaa000000" size="0" x="-10" y="-3" width="max+20"
+	    height="max+6" radius="15"/>
 	</item>
       </content>
     </layout>
 
 
     <!-- redefine the main menu listing area -->
-    <layout label="list_main">
+    <layout label="main listing">
       <content type="text" spacing="10">
-	<item type="default" font="main menu font" align="center"/>
-	<item type="selected" font="main menu font" align="center">
+	<item type="default" font="grey big" align="center"/>
+	<item type="selected" font="white big" align="center">
 	  <rectangle bgcolor="0xaa000000" size="0" x="-3" y="-3"
 	    width="max+6" height="max+6" radius="8"/>
 	</item>
@@ -143,32 +148,24 @@
     <!-- FONT DEFINITIONS -->
 
 
-    <font label="main menu font">
-      <definition name="Arial_Bold" color="0xffffff" size="18"/>
+    <font label="grey">
+      <definition name="Arial_Bold" size="16" color="0xdddddd"/>
       <shadow visible="no"/>
     </font>
 
-
-
-    <font label="white shadow1">
-      <definition name="bluehigh" color="0xffffff" size="20"/>
-      <shadow visible="yes" color="0x00000000" x="1" y="1"/>
+    <font label="white">
+      <definition name="Arial_Bold" size="16" color="0xffffff"/>
+      <shadow visible="no"/>
     </font>
 
-    <font label="white shadow1 big">
-      <definition name="bluehigh" size="44" color="0xffffff"/>
-      <shadow visible="yes" color="0xaa000000" x="1" y="1"/>
+    <font label="grey big">
+      <definition name="Arial_Bold" size="18" color="0xdddddd"/>
+      <shadow visible="no"/>
     </font>
 
-    <font label="white shadow3 big">
-      <definition name="bluehigh" size="44" color="0xffffff"/>
-      <shadow visible="yes" color="0x000000" x="3" y="3"/>
-    </font>
-
-    <!-- this font is used by the title -->
     <font label="white big">
-      <definition name="oliversb" size="29" color="0xffffff"/>
-      <shadow visible="yes" color="0x80000000" x="3" y="3"/>
+      <definition name="Arial_Bold" size="18" color="0xffffff"/>
+      <shadow visible="no"/>
     </font>
 
   </skin>
