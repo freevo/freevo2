@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.92  2003/09/19 22:06:50  dischi
+# add stop and restart as global osd functions
+#
 # Revision 1.91  2003/09/14 20:09:36  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
@@ -197,7 +200,23 @@ def get_singleton():
         
     return _singleton
 
-        
+
+def stop():
+    """
+    stop the osd because only one program can use the
+    device, e.g. for DXR3 and dfbmga output,
+    """
+    get_singleton().stopdisplay()
+    
+
+def restart():
+    """
+    restart a stopped osd
+    """
+    get_singleton().restartdisplay()
+    get_singleton().update()
+    
+
 def stringproxy(str):
     """
     Return a unicode representation of a String or Unicode object
