@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/06/23 18:44:23  the_krow
+# Does not need Prebuffering with the new timeshifted mplayer.
+#
 # Revision 1.3  2003/06/05 02:24:00  rshortt
 # Use TV_EVENTS now, improved channel changing, add PAUSE and SEEK.
 #
@@ -68,7 +71,6 @@ FALSE = 0
 (v_norm, v_input, v_clist, v_dev) = config.TV_SETTINGS.split()
 # v_norm = string.upper(v_norm)
 
-TIMESHIFT_READAHEAD = 4			# Amount (in MB) of Data read before shifting is started 
 TIMESHIFT_INPUT = v_dev 		# File to read from
 TIMESHIFT_CHUNKSIZE = 65536 		# Amount to read repeatedly (in Bytes)
 
@@ -430,17 +432,14 @@ class MPlayer_Thread(threading.Thread):
                 self.tsinput = os.popen(config.TIMESHIFT_ENCODE_CMD,'r')
                 self.timeshift = pyshift.pyshift_init(config.TIMESHIFT_BUFFER,
                                        config.TIMESHIFT_BUFFER_SIZE * 1024*1024)
-                pyshift.pyshift_write(self.timeshift,
-                              self.tsinput.read(1024*1024* TIMESHIFT_READAHEAD))
                 self.app = MPlayerApp(self.command)
                 
                 while self.mode == 'play' and self.app.isAlive():
                     pyshift.pyshift_write(self.timeshift,self.tsinput.read(TIMESHIFT_CHUNKSIZE))
-                    # ???
+                    # XXX: What is Audioinfo used for in TV Code?
                     if self.audioinfo: 
                         if not self.audioinfo.pause:
                             self.audioinfo.draw()
-                    #time.sleep(0.1)
 
                 self.app.kill()
                 # Shutdown Timeshifting and close devices
