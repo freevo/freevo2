@@ -208,7 +208,7 @@ CONFIG_VERSION = 3.1
 #VCR_CMD = ('/usr/local/bin/mencoder ' +    # Change. Absolute path to the runtime
 #            '-tv on:driver=v4l:input=0' +   # Input 0 = Comp. V. in
 #            ':norm=NTSC' +                  # Change
-#            ':channel=%s' +                 # Filled in by Freevo
+#            ':channel=%(channel)s' +        # Filled in by Freevo
 #            ':chanlist=us-cable' +          # Change
 #            ':width=320:height=240' +       # Change if needed
 #            ':outfmt=yv12' +                # Prob. ok, yuy2 might be faster
@@ -224,7 +224,7 @@ CONFIG_VERSION = 3.1
 #            '-oac mp3lame -lameopts ' +     # Use Lame for MP3 encoding
 #            'br=128:cbr:mode=3 ' +          # MP3 const. bitrate, 128 kbit/s
 #            '-ffourcc divx '                # Force 'divx' ident, better compat.
-#            '-o %s.avi ')                   # Filled in by Freevo
+#            '-o %(filename)s.avi ')         # Filled in by Freevo
 
 # TV capture size for viewing and recording. Max 768x480 for NTSC,
 # 768x576 for PAL. Set lower if you have a slow computer!
