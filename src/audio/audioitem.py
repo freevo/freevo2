@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/01/12 17:06:25  dischi
+# Add possibility to extract the id tags from the AudioItem (dump) and to
+# init an AudioItem with that informations. If you create an AudioItem
+# with that informations, the id tags won't be loaded from file.
+#
 # Revision 1.7  2003/01/10 21:05:42  dischi
 # set the type (like all the other items do)
 #
@@ -86,7 +91,7 @@ class AudioItem(Item):
     This is the common class to get information about audiofiles.
     """
     
-    def __init__(self, file, parent):
+    def __init__(self, file, parent, cache = None):
         Item.__init__(self, parent)
         self.drawall    = 1
         self.filename   = file
@@ -108,19 +113,24 @@ class AudioItem(Item):
         self.pause      = 0
 	self.valid	= 1
 
-        # XXX This is really not a very smart way to do it. We should be
-        # XXX able to handle files with messed up extentions.
 
-        if re.match('.*[oO][gG]{2}$', self.filename):
-            if DEBUG > 1: print "Got ogg..."
-            self.set_info_ogg(self.filename)
-
-        elif re.match('.*[mM][pP]3$', self.filename):
-            if DEBUG > 1: print "Got mp3..."
-            self.set_info_mp3(self.filename)
+        if cache:
+            self.restore(cache)
 
         else:
-            if DEBUG > 1: print "Got something else..."
+            # XXX This is really not a very smart way to do it. We should be
+            # XXX able to handle files with messed up extentions.
+
+            if re.match('.*[oO][gG]{2}$', self.filename):
+                if DEBUG > 1: print "Got ogg..."
+                self.set_info_ogg(self.filename)
+
+            elif re.match('.*[mM][pP]3$', self.filename):
+                if DEBUG > 1: print "Got mp3..."
+                self.set_info_mp3(self.filename)
+
+            else:
+                if DEBUG > 1: print "Got something else..."
 
         if self.title:
             self.name = skin.format_track(self)
@@ -179,6 +189,14 @@ class AudioItem(Item):
             self.pause      = obj.pause
             self.valid	    = obj.valid
 
+
+    def dump(self):
+        return ( self.title, self.album, self.artist, self.length,
+                 self.track, self.trackof, self.year )
+
+    def restore(self, data):
+        self.title, self.album, self.artist, self.length, self.track, \
+                    self.trackof, self.year = data
 
     def sort(self, mode=None):
         """
