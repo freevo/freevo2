@@ -16,6 +16,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.65  2002/09/14 16:49:19  dischi
+# Add support for hwac3. If MPLAYER_AO_HWAC3_DEV is set hwac3 will be
+# enabled for DVDs and VOB files
+#
 # Revision 1.64  2002/09/08 18:26:03  krister
 # Applied Andrew Drummond's MAME patch. It seems to work OK on X11, but still needs some work before it is ready for prime-time...
 #
@@ -325,15 +329,17 @@ else:
     MPLAYER_CMD         = 'mplayer'       # Lets hope it is in the path
     print 'Using system MPlayer'
     
-MPLAYER_AO_DEV      = 'oss:/dev/dsp'  # e.g.: oss,sdl,alsa, see mplayer docs
-MPLAYER_VO_DEV      = CONF.display    # e.g.: xv,x11,mga,fbdev, see mplayer docs
+MPLAYER_AO_DEV       = 'oss:/dev/dsp'  # e.g.: oss,sdl,alsa, see mplayer docs
+MPLAYER_AO_HWAC3_DEV = ''              # set this to an audio device which is
+                                       # capable of hwac3
+MPLAYER_VO_DEV       = CONF.display    # e.g.: xv,x11,mga,fbdev, see mplayer docs
 
-DVD_LANG_PREF       = 'en,se,no'      # Order of preferred languages on DVD.
-DVD_SUBTITLE_PREF   = ''              # Order of preferred subtitles on DVD.
-NICE                = '/usr/bin/nice' # Priority setting app
-MPLAYER_NICE        = '0'             # Priority of mplayer process. 0 is unchanged,
-                                      # <0 is higher prio, >0 lower prio. You must run
-                                      # freevo as root to use prio <0 !
+DVD_LANG_PREF        = 'en,se,no'      # Order of preferred languages on DVD.
+DVD_SUBTITLE_PREF    = ''              # Order of preferred subtitles on DVD.
+NICE                 = '/usr/bin/nice' # Priority setting app
+MPLAYER_NICE         = '0'             # Priority of mplayer process. 0 is unchanged,
+                                       # <0 is higher prio, >0 lower prio. You must run
+                                       # freevo as root to use prio <0 !
 
 MPLAYER_ARGS_DEF     = ('-nobps -framedrop -nolirc -screenw %s -screenh %s -fs' %
                         (CONF.width, CONF.height))

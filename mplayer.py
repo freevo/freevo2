@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2002/09/14 16:49:20  dischi
+# Add support for hwac3. If MPLAYER_AO_HWAC3_DEV is set hwac3 will be
+# enabled for DVDs and VOB files
+#
 # Revision 1.32  2002/09/13 08:01:24  dischi
 # fix -cdrom-device for (S)VCD
 #
@@ -191,8 +195,14 @@ class MPlayer:
        
         # build mplayer command
         mpl = (config.NICE + " -" + config.MPLAYER_NICE + " " +
-               config.MPLAYER_CMD + ' -ao ' +  config.MPLAYER_AO_DEV + ' ' +
-               config.MPLAYER_ARGS_DEF)
+               config.MPLAYER_CMD + ' ' + config.MPLAYER_ARGS_DEF + ' -ao ' )
+
+        # XXX find a way to enable this for AVIs with ac3, too
+        if (mode == 'dvdnav' or mode == 'dvd' or os.path.splitext(filename)[1] == '.vob')\
+           and config.MPLAYER_AO_HWAC3_DEV:
+            mpl += (config.MPLAYER_AO_HWAC3_DEV + ' -ac hwac3')
+        else:
+            mpl += (config.MPLAYER_AO_DEV)
 
         if mode == 'video':
 
