@@ -42,11 +42,16 @@ class PluginInterface(plugin.ItemPlugin):
         """
 
         file = self.item.xml_file
+        
+        if not file:
+            box = AlertBox(text='There is no IMDB information for this file.')
+            box.show()
+            return
+
         infolist = xml_parser.save_parseMovieFile(file, os.path.dirname(file),[])
         for info in infolist:
             print info.image
             box = AlertBox(icon=info.image, width=550, height=400, text=' %s\n \n %s\n \n Year: %s\n Genre: %s\n Rating: %s\n Runtime: %s' % (info.name,info.info['plot'],info.info['year'],info.info['genre'],info.info['rating'],info.info['runtime']))
             box.show()
-#            time.sleep(3)
-#            box.destroy()
+        return
 
