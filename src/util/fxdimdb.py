@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/02/28 21:11:20  dischi
+# more unicode fixes
+#
 # Revision 1.4  2004/01/24 19:53:41  dischi
 # better search
 #
@@ -440,7 +443,7 @@ class FxdImdb:
         """Write a <disc-set> to a fresh file"""        
     
         try:
-            i = vfs.codecs_open( (self.fxdfile + '.fxd') , 'w', encoding='utf-8')
+            i = vfs.codecs_open( (self.fxdfile + '.fxd') , 'wb', encoding='utf-8')
         except IOError, error:
             raise FxdImdb_IO_Error("Writing FXD file failed : " + str(error))
             return 
@@ -804,21 +807,22 @@ class FxdImdb:
     def str2XML(self, line):
         """return a valid XML string"""
         try:
-            s = unicode(line, config.LOCALE)
-            while s[-1] == ' ':
+            s = Unicode(line)
+            while s[-1] == u' ':
                 s = s[:-1]
-            if s[:4] == '&#34':
+            if s[:4] == u'&#34':
                 s = s[5:]
-            if s[-4:] == '#34;':
+            if s[-4:] == u'#34;':
                 s = s[:-5]
             # replace all & to &amp; ...
-            s = s.replace("&", "&amp;")
+            s = s.replace(u"&", u"&amp;")
 
             # ... but this may be wrong for &#
-            s = s.replace("&amp;#", "&#")
+            s = s.replace(u"&amp;#", u"&#")
             return s
         except:
-            return line
+            return Unicode(line)
+        
     
     def getmedia_id(self, drive):
         """drive (device string)
@@ -826,16 +830,18 @@ class FxdImdb:
 
         if not vfs.exists(drive): return drive
         return cdrom_disc_id(drive)[1]
+
         
     def print_info(self):
         """return info part for FXD writing""" 
-        ret = ''
+        ret = u''
         if self.info:
-            ret = '    <info>\n'
+            ret = u'    <info>\n'
             for k in self.info.keys():
-                ret += '      <%s>%s</%s>\n' % (k, self.info[k], k)
-            ret += '    </info>\n'
+                ret += u'      <%s>' % k + Unicode(self.info[k]) + '</%s>\n' % k
+            ret += u'    </info>\n'
         return ret
+
         
     def print_video(self):
         """return info part for FXD writing""" 
@@ -850,6 +856,7 @@ class FxdImdb:
             ret += '%s' % self.str2XML(fname)
             ret += '</%s>\n' % self.str2XML(type)
         return ret
+
         
     def print_variant(self):
         """return info part for FXD writing""" 
