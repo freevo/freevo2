@@ -85,7 +85,7 @@
       
     <menuset label="audio" inherits="normal text style">
       <screen layout="audio screen"/>
-      <view layout="view0" x="10" y="90" width="280" height="250" align="left"/>
+      <view layout="view" x="10" y="90" width="280" height="250" align="left"/>
     </menuset>
       
     <menuset label="image" inherits="normal text style">
@@ -104,7 +104,7 @@
     <menuset label="text with info style" inherits="normal text style">
       <!-- 4. listing area: the list of all items -->
       <screen layout="video screen" visible="yes"/>
-      <view layout="view0" x="10" y="90" width="280" height="250" align="left"/>
+      <view layout="view" x="10" y="90" width="280" height="250" align="left"/>
       <listing x="30" y="350" width="700" height="230">
         <image filename="blurr-up.png" label="uparrow" x="730" y="350"/>
         <image filename="blurr-down.png" label="downarrow" x="730" y="max-32"/>
@@ -276,7 +276,7 @@
 
 
     <!-- default view area -->
-    <layout label="view0">
+    <layout label="view">
       <content align="center" valign="center">
         <item type="default">
 	  <rectangle size="0" bgcolor="0x80000000" radius="8" x="-10" y="-10"
