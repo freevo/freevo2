@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2004/11/28 15:46:24  dischi
+# fix poll intervall
+#
 # Revision 1.33  2004/11/20 18:23:03  dischi
 # use python logger module for debug
 #
@@ -116,7 +119,7 @@ class PluginInterface(plugin.DaemonPlugin):
         plugin.register(self, 'idlebar')
         eventhandler.register(self, SCREEN_CONTENT_CHANGE)
         eventhandler.register(self, THEME_CHANGE)
-        self.poll_interval  = 300
+        self.poll_interval  = 3000
         self.poll_menu_only = False
         self.plugins        = None
         self.visible        = False
