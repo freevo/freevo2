@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/07/07 20:16:59  dischi
+# remove __cmp__ functions to speed up the drawing
+#
 # Revision 1.11  2003/07/07 16:25:10  dischi
 # changes to work with the new drawstringframed
 #
@@ -338,14 +341,6 @@ class XML_data:
         except (TypeError, AttributeError):
             pass
             
-    def __cmp__(self, other):
-        """
-        compare function, return 0 if the objects are identical, 1 otherwise
-        """
-        for c in self.content:
-            if eval("self.%s != other.%s" % (c, c)):
-                return 1
-        return 0
     
 
 # ======================================================================
@@ -484,8 +479,6 @@ class XML_layout:
         for b in self.background:
             b.prepare(color, search_dirs, image_names)
             
-    def __cmp__(self, other):
-        return not (self.background == other.background and self.content == other.content)
 
 
 class XML_content(XML_data):
@@ -739,8 +732,6 @@ class XML_font(XML_data):
                 self.shadow.color = color[self.shadow.color]
             self.h += self.shadow.y
         
-    def __cmp__(self, other):
-        return not (not XML_data.__cmp__(self, other) and self.shadow == other.shadow)
 
     
 # ======================================================================
