@@ -26,6 +26,7 @@ class TvProgram:
     desc = ''
     start = 0.0
     stop = 0.0
+    selected = 0
 
 
     def __str__(self):
