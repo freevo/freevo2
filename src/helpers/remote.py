@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/10/22 23:05:43  mikeruelle
+# well it really does have two options
+#
 # Revision 1.1  2003/08/23 09:09:18  dischi
 # moved some helpers to src/helpers
 #
@@ -44,7 +47,15 @@ def usage():
         print 'a small tkinter example remote program'
         print 'You need to set ENABLE_NETWORK_REMOTE = 1 in you local_conf.py'
         print
-        print 'this script has no options (yet)'
+        print 'It takes two optional arguments:'
+	print '    - the first is host which defaults to localhost'
+	print '    - the second is port which defaults to 16130'
+	print 
+	print 'when run with no args it connects to the localhost on port 16130'
+	print 'freevo remote'
+	print 
+	print 'when run with one arg it connects to the given host on port 16130'
+	print 'freevo remote myfreevo.local'
         print
         sys.exit(0)
 
