@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.1  2003/11/24 17:12:03  dischi
+# rename commands.py to command.py to avoid name problems with the global python commands.py
+#
 # Revision 1.10  2003/11/03 18:08:14  dischi
 # oops
 #
