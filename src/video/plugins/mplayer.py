@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2003/10/14 16:58:48  dischi
+# fix mode detection, MPLAYER_ARGS never worked
+#
 # Revision 1.31  2003/10/08 02:04:04  outlyer
 # BUGFIX: For some reason, I was seeing a lot of 'killing with signal 9' in
 # my log files when I played certain video files. Adding the 'double' quit here
@@ -237,6 +240,7 @@ class MPlayer:
         if mode == 'file':
             try:
                 mode = os.path.splitext(filename)[1]
+                mode = mode[1:]
             except:
                 pass
 
