@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/06/01 18:32:08  rshortt
+# INPUT_EXIT was the same as INPUT_ENTER
+#
 # Revision 1.6  2003/05/30 00:53:19  rshortt
 # Various event bugfixes.
 #
@@ -201,7 +204,7 @@ GAMES_SNAPSHOT         = Event('GAMES_SNAPSHOT')
 #
 
 INPUT_EXIT             = Event('INPUT_EXIT')
-INPUT_ENTER            = Event('INPUT_EXIT')
+INPUT_ENTER            = Event('INPUT_ENTER')
 INPUT_LEFT             = Event('INPUT_LEFT')
 INPUT_RIGHT            = Event('INPUT_RIGHT')
 INPUT_UP               = Event('INPUT_UP')
