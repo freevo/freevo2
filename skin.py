@@ -9,6 +9,9 @@
 # ----------------------------------------------------------------------
 #
 # $Log$
+# Revision 1.9  2002/10/21 02:31:38  krister
+# Set DEBUG = config.DEBUG.
+#
 # Revision 1.8  2002/08/19 05:51:02  krister
 # Added debug output.
 #
@@ -65,7 +68,7 @@ import config # Freevo configuration.
 import sys
 import os.path
 
-DEBUG = 1
+DEBUG = config.DEBUG
 
 # Loads the skin implementation defined in freevo_config.py
 sys.path += [os.path.dirname(config.OSD_SKIN)]

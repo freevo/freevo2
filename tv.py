@@ -44,10 +44,8 @@ import ExtendedMenu
 sys.path.append('tv/')
 import ExtendedMenu_TV
 
-
-
 # Set to 1 for debug output
-DEBUG = 1
+DEBUG = config.DEBUG
 
 TRUE = 1
 FALSE = 0

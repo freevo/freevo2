@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2002/10/21 02:31:38  krister
+# Set DEBUG = config.DEBUG.
+#
 # Revision 1.38  2002/10/17 04:16:16  krister
 # Changed the 'nice' command so that it is built into runapp instead. Made default prio -20.
 #
@@ -72,7 +75,8 @@ import skin       # Cause audio handling needs skin functions.
 
 from datatypes import *
 
-DEBUG = 0
+DEBUG = config.DEBUG
+
 TRUE  = 1
 FALSE = 0
 

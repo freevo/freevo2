@@ -7,13 +7,14 @@
 
 import sys
 import time, os, string
+import config
 
 # The file format version number. It must be updated when incompatible
 # changes are made to the file format.
 EPG_VERSION = 2
 
 # Set to 1 for debug output
-DEBUG = 1
+DEBUG = config.DEBUG
 
 TRUE = 1
 FALSE = 0

@@ -26,7 +26,7 @@ import menu
 import iview
 
 # Set to 1 for debug output
-DEBUG = 1
+DEBUG = config.DEBUG
 
 TRUE = 1
 FALSE = 0

@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2002/10/21 02:31:38  krister
+# Set DEBUG = config.DEBUG.
+#
 # Revision 1.44  2002/10/20 17:20:10  dischi
 # Added layer to drawstringframed. Forgot check in
 #
@@ -122,8 +125,9 @@ import config
 import pygame
 from pygame.locals import *
 
-# Set to 1 for debug output
-DEBUG = 0
+# Set to 1 for debug output. A lot of the debug statements are only
+# printed if set to 3 or higher.
+DEBUG = config.DEBUG
 
 help_text = """\
 h       HELP
@@ -597,7 +601,11 @@ class OSD:
         return_x1 = 0
         return_y1 = 0
 
-        if DEBUG: print 'drawstringframed (%d;%d; w=%d; h=%d) "%s"' % (x, y, w, h, s)
+        if DEBUG >= 3:
+            print 'drawstringframed (%d;%d; w=%d; h=%d) "%s"' % (x, y,
+                                                                 width,
+                                                                 height,
+                                                                 string)
         
         if fgcolor == None:
             fgcolor = self.default_fg_color
@@ -608,7 +616,8 @@ class OSD:
             ptsize = config.OSD_DEFAULT_FONTSIZE
 
 
-        if DEBUG: print 'FONT: %s %s' % (font, ptsize)        
+        if DEBUG >= 3:
+            print 'FONT: %s %s' % (font, ptsize)        
 
         #
         # calculate words per line
@@ -893,7 +902,9 @@ class OSD:
         return_x1 = 0
         return_y1 = 0
 
-        if DEBUG: print 'drawstringframedhard (%d;%d; w=%d; h=%d) "%s"' % (x, y, width, height, string)
+        if DEBUG >= 3:
+            print 'drawstringframedhard (%d;%d; w=%d; h=%d) "%s"' % (x, y, width,
+                                                                     height, string)
 
         if fgcolor == None:
             fgcolor = self.default_fg_color
@@ -904,7 +915,8 @@ class OSD:
             ptsize = config.OSD_DEFAULT_FONTSIZE
 
 
-        if DEBUG: print 'FONT: %s %s' % (font, ptsize)        
+        if DEBUG >= 3:
+            print 'FONT: %s %s' % (font, ptsize)        
 
         occupied_size = 0
         occupied_height = 0
@@ -991,7 +1003,8 @@ class OSD:
         # XXX replaced with spaces
         s = string.replace('\t', '   ')  
 
-        if DEBUG: print 'drawstring (%d;%d) "%s"' % (x, y, s)
+        if DEBUG >= 3:
+            print 'drawstring (%d;%d) "%s"' % (x, y, s)
         
         if fgcolor == None:
             fgcolor = self.default_fg_color
@@ -1003,7 +1016,8 @@ class OSD:
 
         ptsize = int(ptsize / 0.7)  # XXX pygame multiplies by 0.7 for some reason
 
-        if DEBUG: print 'FONT: %s %s' % (font, ptsize)
+        if DEBUG >= 3:
+            print 'FONT: %s %s' % (font, ptsize)
         
         ren = self._renderstring(s, font, ptsize, fgcolor, bgcolor)
         
@@ -1245,7 +1259,8 @@ class OSD:
             if font.filename == filename and font.ptsize == ptsize:
                 return font.font
 
-        if DEBUG: print 'OSD: Loading font "%s"' % filename
+        if DEBUG >= 3:
+            print 'OSD: Loading font "%s"' % filename
         try:
             font = pygame.font.Font(filename, ptsize)
         except RuntimeError:
@@ -1296,7 +1311,8 @@ class OSD:
                 return image
 
         try:
-            if DEBUG: print 'Trying to load file "%s"' % filename
+            if DEBUG >= 3:
+                print 'Trying to load file "%s"' % filename
             tmp = pygame.image.load(filename)  # XXX Cannot load everything
             image = tmp.convert_alpha()  # XXX Cannot load everything
         except:

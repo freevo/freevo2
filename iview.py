@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2002/10/21 02:31:38  krister
+# Set DEBUG = config.DEBUG.
+#
 # Revision 1.15  2002/10/19 17:54:49  dischi
 # Added patch from Wan Tat Chee to display more exif header informations
 # in the osd
@@ -78,7 +81,7 @@ import osd    # The OSD class, used to communicate with the OSD daemon
 import rc     # The RemoteControl class.
 import exif
 
-DEBUG = 1  # Set to 1 for debug output
+DEBUG = config.DEBUG
 
 
 osd        = osd.get_singleton()  # Create the OSD object

@@ -14,6 +14,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2002/10/21 02:31:38  krister
+# Set DEBUG = config.DEBUG.
+#
 # Revision 1.18  2002/10/20 18:07:40  dischi
 # Added all rom drives with identify media support to the main menu. You
 # can't browse DVD, VCD and SVCD and AUDIO-CD support is still missing,
@@ -81,7 +84,7 @@ import osd     # Yes.. we use the GUI for printing stuff.
 import skin    # The skin class
 
 # Set to 1 for debug output
-DEBUG = 0
+DEBUG = config.DEBUG
 
 TRUE = 1
 FALSE = 0

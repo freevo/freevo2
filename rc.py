@@ -7,9 +7,10 @@
 # $Id$
 
 import socket, time, sys
+import config
 
 # Set to 1 for debug output
-DEBUG = 0
+DEBUG = config.DEBUG
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2002/10/21 02:31:38  krister
+# Set DEBUG = config.DEBUG.
+#
 # Revision 1.10  2002/10/21 02:04:41  krister
 # Added video input device selection.
 #
@@ -92,7 +95,7 @@ rc = rc.get_singleton()
 
 
 # Set to 1 for debug output
-DEBUG = 1
+DEBUG = config.DEBUG
 
 TRUE = 1
 FALSE = 0

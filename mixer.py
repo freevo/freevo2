@@ -10,6 +10,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2002/10/21 02:31:38  krister
+# Set DEBUG = config.DEBUG.
+#
 # Revision 1.10  2002/10/01 02:32:52  krister
 # Tabs -> spaces.
 #
@@ -60,7 +63,7 @@ import config
 import os     # system() is used to manipulate the mixer for SB Live cards.
 
 # Set to 1 for debug output
-DEBUG = 0
+DEBUG = config.DEBUG
 
 # Module variable that contains an initialized Mixer() object
 _singleton = None

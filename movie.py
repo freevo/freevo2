@@ -11,6 +11,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2002/10/21 02:31:38  krister
+# Set DEBUG = config.DEBUG.
+#
 # Revision 1.43  2002/10/08 15:49:41  dischi
 # Bugfix. Bad idea to give to variables the same name...
 #
@@ -143,7 +146,7 @@ skin = skin.get_singleton()
 from datatypes import *
 
 # Set to 1 for debug output
-DEBUG = 1
+DEBUG = config.DEBUG
 
 TRUE = 1
 FALSE = 0

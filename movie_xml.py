@@ -9,6 +9,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2002/10/21 02:31:38  krister
+# Set DEBUG = config.DEBUG.
+#
 # Revision 1.12  2002/10/16 18:22:28  dischi
 # Added runtime information (a long time ago, I forgot to check in)
 #
@@ -79,7 +82,7 @@ from xml.utils import qp_xml
 from datatypes import *
 
 # Set to 1 for debug output
-DEBUG = 1
+DEBUG = config.DEBUG
 
 
 #

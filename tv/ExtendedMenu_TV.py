@@ -25,6 +25,8 @@ import ExtendedMenu
 # sends commands to
 import rc
 
+import config
+
 # The Electronic Program Guide
 import epg_xmltv as epg, epg_types
 
@@ -32,6 +34,8 @@ rc   = rc.get_singleton()   # Create the remote control object
 osd  = osd.get_singleton()  # Create the OSD object
 skin = skin.get_singleton() # Create the Skin object
 
+
+DEBUG = config.DEBUG
 
 CHAN_NO_DATA = 'This channel has no data loaded'
 
@@ -87,7 +91,7 @@ class ExtendedMenu_TV(ExtendedMenu.ExtendedMenu):
                     '/dev/dsp2 -mixsrc /dev/mixer2:line1 -o /home/' +
                     'krister/Movies/%s.avi &> /dev/null &') %
                    time.ctime().replace(' ', '_'))
-            #os.system(cmd)
+            os.system(cmd)
             print 'Started cmd "%s"' % cmd
         elif event != rc.IDENTIFY_MEDIA:
             self.clear()

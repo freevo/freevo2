@@ -32,7 +32,6 @@
 # ----------------------------------------------------------------------
 #
 
-
 import sys
 import random
 import time, os, string
@@ -69,7 +68,7 @@ import skin    # The skin class
 skin = skin.get_singleton()
 
 # Set to 1 for debug output
-DEBUG = 1
+DEBUG = config.DEBUG
 
 TRUE = 1
 FALSE = 0

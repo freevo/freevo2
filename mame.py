@@ -21,7 +21,8 @@ import rc         # The RemoteControl class.
 import audioinfo  # This just for ID3 functions and stuff.
 import skin       # Cause audio handling needs skin functions.
 
-DEBUG = 1
+DEBUG = config.DEBUG
+
 TRUE  = 1
 FALSE = 0
 

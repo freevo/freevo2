@@ -4,6 +4,9 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.76  2002/10/21 02:31:38  krister
+# Set DEBUG = config.DEBUG.
+#
 # Revision 1.75  2002/10/16 02:48:49  krister
 # Cosmetic changes.
 #
@@ -93,7 +96,8 @@ import signal
 # Some datatypes we need
 from datatypes import *
 
-DEBUG = 1 # Set to 1 for debug output
+DEBUG = config.DEBUG
+
 TRUE  = 1
 FALSE = 0
 

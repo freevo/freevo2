@@ -21,10 +21,7 @@ import sys, os, time, re
 # Send debug to stdout as well as to the logfile?
 DEBUG_STDOUT = 1
 
-# Automatically turn on all DEBUG flags in all modules?
-DEBUG_ALL = 1
-
-# Debug this module?
+# Debug all modules?
 DEBUG = 1
 
 

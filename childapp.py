@@ -13,8 +13,9 @@ import time, os, glob
 import string, popen2, fcntl, select, struct
 import threading
 import signal
+import config
 
-DEBUG = 0
+DEBUG = config.DEBUG
 
 
 class ChildApp:

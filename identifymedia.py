@@ -10,6 +10,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2002/10/21 02:31:38  krister
+# Set DEBUG = config.DEBUG.
+#
 # Revision 1.17  2002/10/20 18:08:29  dischi
 # nothing important
 #
@@ -72,7 +75,7 @@ import movie_xml
 # Some datatypes we need
 from datatypes import *
 
-DEBUG = 1   # 1 = regular debug, 2 = more verbose
+DEBUG = config.DEBUG   # 1 = regular debug, 2 = more verbose
 
 LABEL_REGEXP = re.compile("^(.*[^ ]) *$").match
 
