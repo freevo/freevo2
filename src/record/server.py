@@ -82,10 +82,14 @@ class RecordServer(RPCServer):
     """
     def __init__(self):
         RPCServer.__init__(self, 'recordserver')
+        self.clients = []
         config.detect('tvcards', 'channels')
-        plugin.init(exclusive = [ 'record' ])
         # file to load / save the recordings and favorites
         self.fxdfile = sysconfig.datafile('recordserver.fxd')
+        # load the recordings file
+        self.load(True)
+        # init the recorder
+        plugin.init(exclusive = [ 'record' ])
         # get list of best recorder for each channel
         self.best_recorder = {}
         for p in recorder.plugins:
@@ -102,10 +106,25 @@ class RecordServer(RPCServer):
         self.check_timer = None
         self.check_running = False
         self.check_needed = False
-        # load the recordings file
-        self.load(True)
+        # add notify callback
+        self.mbus_instance.register_entity_notification(self.__entity_update)
+        # check everything
+        self.check_favorites()
 
 
+    def send_update(self):
+        # send and updated list to the clients
+        try:
+            ret = []
+            for r in self.recordings:
+                ret.append(r.short_list())
+            for c in self.clients:
+                print 'send update', c
+                self.mbus_instance.send_event(c, 'record.list.update', ret)
+        except:
+            log.exception('send_update')
+
+        
     def check_recordings(self):
         """
         Wrapper for __check_recordings to avoid recursive calling
@@ -163,7 +182,8 @@ class RecordServer(RPCServer):
         for f in self.favorites:
             info += '%s\n' % f
         log.info(info)
-        log.info('next ids: record=%s favorite=%s' % (self.rec_id, self.fav_id))
+        log.info('next ids: record=%s favorite=%s' % \
+                 (self.rec_id, self.fav_id))
         
         # save status
         self.save()
@@ -176,11 +196,15 @@ class RecordServer(RPCServer):
         log.info('checking took %s seconds' % \
                  (float(int((time.time() - ctime) * 100)) / 100))
 
+        # send update
+        self.send_update()
+        
         # check if something requested a new check while this function was
         # running. If so, call the check_recordings functions again
         self.check_running = False
         if self.check_needed:
             self.check_recordings()
+
         return False
 
 
@@ -266,23 +290,36 @@ class RecordServer(RPCServer):
                 r.id = self.recordings.index(r)
             for f in self.favorites:
                 f.id = self.favorites.index(f)
-        self.check_favorites()
 
 
     def save(self):
         """
         save the fxd file
         """
-        if os.path.isfile(self.fxdfile):
-            os.unlink(self.fxdfile)
-        fxd = util.fxdparser.FXD(self.fxdfile)
-        for r in self.recordings:
-            fxd.add(r)
-        for r in self.favorites:
-            fxd.add(r)
-        fxd.save()
+        if not len(self.recordings) and not len(self.favorites):
+            # do not save here, it is a bug I havn't found yet
+            log.info('do not save fxd file')
+            return
+        try:
+            log.info('save fxd file')
+            if os.path.isfile(self.fxdfile):
+                os.unlink(self.fxdfile)
+            fxd = util.fxdparser.FXD(self.fxdfile)
+            for r in self.recordings:
+                fxd.add(r)
+            for r in self.favorites:
+                fxd.add(r)
+            fxd.save()
+        except:
+            log.exception('lost the recordings.fxd, send me the trace')
 
+            
+    def __entity_update(self, entity):
+        if not entity.present and entity in self.clients:
+            log.info('lost client %s' % entity)
+            self.client.remove(entity)
 
+            
     #
     # home.theatre.recording rpc commands
     #
@@ -292,6 +329,9 @@ class RecordServer(RPCServer):
         list the current recordins in a short form.
         result: [ ( id channel priority start stop status ) (...) ]
         """
+        if not addr in self.clients:
+            log.info('add client %s' % addr)
+            self.clients.append(addr)
         self.parse_parameter(val, () )
         ret = []
         for r in self.recordings:
@@ -431,6 +471,9 @@ class RecordServer(RPCServer):
     def __rpc_favorite_list__(self, addr, val):
         """
         """
+        if not addr in self.clients:
+            log.info('add client %s' % addr)
+            self.clients.append(addr)
         self.parse_parameter(val, () )
         ret = []
         for f in self.favorites:
