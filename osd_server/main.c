@@ -57,6 +57,8 @@
 #define COL_BLACK   0x000000
 #define COL_WHITE   0xffffff
 
+#define CACHE_SIZE  10
+
 static uint8 framebuffer[SCREEN_HEIGHT][SCREEN_WIDTH][4]; /* BGR0 */
 
 void osd_close (void);
@@ -480,7 +482,7 @@ osd_loadbitmap (char *filename, uint8 **ppBitmap,
 
 
     /* prevent a memory leek */
-    if (cache_length++ == 10) {
+    if (cache_length++ == CACHE_SIZE) {
       if (cache->pBitmapCache)
 	free (cache->pBitmapCache);
       if (cache->next)
@@ -636,7 +638,7 @@ osd_zoombitmap (char *filename, uint16 bbx, uint16 bby, uint16 bbw, uint16 bbh,
     }
     
     /* prevent a memory leek */
-    if (cache_length++ == 10) {
+    if (cache_length++ == CACHE_SIZE) {
       if (cache->pBitmapCache)
 	free (cache->pBitmapCache);
       if (cache->next)
@@ -648,21 +650,22 @@ osd_zoombitmap (char *filename, uint16 bbx, uint16 bby, uint16 bbw, uint16 bbh,
   }
 
 
-  DBG ("Creating new zoomed bitmap");
-
-  /* build new cache struct */
-  cache = (struct cache_data*) malloc(sizeof(struct cache_data));
-  cache->pBitmapCache = NULL;
-  cache->bitmapFilename[0] = 0;
-  if (start)
-    start->prev = cache;
-  cache->next = start;
-  cache->prev = NULL;
-  start = cache;
-
   /* Does the bitmap actually need to be zoomed? */
-  if (bbw || bbh || (scalefactor != 1000)) {
+  if (bbw!=width || bbh!=height || (scalefactor != 1000)) {
     double zoom = (double) scalefactor / 1000.0;
+
+    DBG ("Creating new zoomed bitmap");
+
+    /* build new cache struct */
+    cache = (struct cache_data*) malloc(sizeof(struct cache_data));
+    cache->pBitmapCache = NULL;
+    cache->bitmapFilename[0] = 0;
+    if (start)
+      start->prev = cache;
+    cache->next = start;
+    cache->prev = NULL;
+    start = cache;
+
     
 
     /* Yes, perform the zoom operation */
@@ -705,8 +708,7 @@ osd_zoombitmap (char *filename, uint16 bbx, uint16 bby, uint16 bbw, uint16 bbh,
     if (pScaledWidth) *pScaledWidth = width;
     if (pScaledHeight) *pScaledHeight = height;
     
-    DBG ("Non-zoomed data. 0x%08x, %dx%d", (uint32) (cache->pBitmapCache),
-         cache->bitmapWidth, cache->bitmapHeight);
+    DBG ("Non-zoomed data. 0x%08x, %dx%d", (uint32) (pBM), width, height);
     
     /* Done */
     return;
