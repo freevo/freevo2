@@ -503,8 +503,8 @@
 	    <item type="selected" width="128" height="177" font="selected small"
 	          align="center" valign="center">
 	       <rectangle bgcolor="list selection bg" color="list selection fg" 
-	                   size="1" x="-10" y="-10" 
-	                  width="max+20" height="max+20" radius="20"/>
+	                   size="1" x="-10" y="max-font_h-10" 
+	                  width="max+20" height="font_h+20" radius="20"/>
 	    </item>
          </content>
       </layout>
