@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.98  2004/02/22 21:01:39  rshortt
+# Make sure input_num is actually an int.
+#
 # Revision 1.97  2004/02/19 04:57:55  gsbarbieri
 # Support Web Interface i18n.
 # To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
@@ -182,7 +185,7 @@ class VideoGroup:
         self.vdev = vdev
         self.adev = adev
         self.input_type = input_type
-        self.input_num  = input_num
+        self.input_num  = int(input_num)
         self.tuner_type = tuner_type
         self.tuner_norm = string.upper(tuner_norm)
         self.tuner_chanlist = tuner_chanlist
