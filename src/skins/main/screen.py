@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/12/14 17:05:23  dischi
+# speed up drawing when drawing over images (splashscreen is 120% faster)
+#
 # Revision 1.3  2003/12/09 20:34:36  dischi
 # this code will never used for helpers
 #
@@ -52,35 +55,47 @@ def get_singleton():
     return singleton
 
 
+class SkinObjects:
+    """
+    object which stores the different types of objects
+    an area wants to draw
+    """
+    def __init__(self):
+        self.bgimages   = []
+        self.rectangles = []
+        self.images     = []
+        self.text       = []
+
+
 class Screen:
     """
     this call is a set of surfaces for the area to do it's job
     """
-
     def __init__(self):
-        self.s_content  = osd.screen.convert()
-        self.s_alpha    = self.s_content.convert_alpha()
-        self.s_bg       = self.s_content.convert()
-
-        self.s_alpha.fill((0,0,0,0))
-
+        self.s_content      = osd.screen.convert()
+        self.s_alpha        = self.s_content.convert_alpha()
+        self.s_bg           = self.s_content.convert()
         self.update_bg      = None
         self.update_alpha   = []
         self.update_content = []
+        self.drawlist       = SkinObjects()
 
-        self.drawlist = []
-        self.avoid_list = []
+        self.s_alpha.fill((0,0,0,0))
+
 
         
     def clear(self):
         self.update_bg      = None
         self.update_alpha   = []
         self.update_content = []
-        self.drawlist = []
+        self.drawlist       = SkinObjects()
 
 
     def draw(self, obj):
-        self.drawlist.append(obj)
+        self.drawlist.bgimages   += obj.bgimages
+        self.drawlist.rectangles += obj.rectangles
+        self.drawlist.images     += obj.images
+        self.drawlist.text       += obj.text
 
 
     def update(self, layer, rect):
@@ -98,20 +113,20 @@ class Screen:
                 self.update_bg = rect
 
             
-    def in_update(self, x1, y1, x2, y2, update_area, full=FALSE):
+    def in_update(self, x1, y1, x2, y2, update_area, full=False):
         if full:
             for ux1, uy1, ux2, uy2 in update_area:
                 # if the area is not complete inside the area but is inside on
                 # some pixels, return FALSE
                 if (not (ux1 >= x1 and uy1 >= y1 and ux2 <= x2 and uy2 <= y2)) and \
                    (not (x2 < ux1 or y2 < uy1 or x1 > ux2 or y1 > uy2)):
-                    return FALSE
-            return TRUE
+                    return False
+            return True
         
         for ux1, uy1, ux2, uy2 in update_area:
             if not (x2 < ux1 or y2 < uy1 or x1 > ux2 or y1 > uy2):
-                return TRUE
-        return FALSE
+                return True
+        return False
 
 
     def show(self, force_redraw=FALSE):
@@ -119,10 +134,9 @@ class Screen:
         the main drawing function
         """
         if osd.must_lock:
-            self.s_bg.lock()
+            # only lock s_alpha layer, because only there
+            # are pixel operations (round rectangle)
             self.s_alpha.lock()
-            self.s_content.lock()
-            osd.screen.lock()
 
         if force_redraw:
             _debug_('show, force update', 2)
@@ -135,69 +149,66 @@ class Screen:
         # if the background has some changes ...
         if self.update_bg:
             ux1, uy1, ux2, uy2 = self.update_bg 
-            for area in self.drawlist:
-                for x1, y1, x2, y2, image in area.bgimages:
-                    if not (x2 < ux1 or y2 < uy1 or x1 > ux2 or y1 > uy2):
-                        self.s_bg.blit(image, (ux1, uy1), (ux1-x1, uy1-y1, ux2-ux1, uy2-uy1))
-
+            for x1, y1, x2, y2, image in self.drawlist.bgimages:
+                if not (x2 < ux1 or y2 < uy1 or x1 > ux2 or y1 > uy2):
+                    self.s_bg.blit(image, (ux1, uy1), (ux1-x1, uy1-y1, ux2-ux1, uy2-uy1))
             update_area.append(self.update_bg)
-            
-        if update_area:
-            # clear it
-            self.s_alpha.fill((0,0,0,0))
 
-            for area in self.drawlist:
-                for x1, y1, x2, y2, bgcolor, size, color, radius in area.rectangles:
-                    # only redraw if necessary
-                    if self.in_update(x1, y1, x2, y2, update_area):
-                        # if the radius and the border is not inside the update area,
-                        # use drawbox, it's faster
-                        if self.in_update(x1+size+radius, y1+size+radius, x2-size-radius,
-                                          y2-size-radius, update_area, full=TRUE):
-                            osd.drawroundbox(x1, y1, x2, y2, color=bgcolor,
-                                             layer=self.s_alpha)
-                        else:
-                            osd.drawroundbox(x1, y1, x2, y2, color=bgcolor,
-                                             border_size=size, border_color=color,
-                                             radius=radius, layer=self.s_alpha)
+        # rectangles
+        if update_area:
+            self.s_alpha.fill((0,0,0,0))
+            for x1, y1, x2, y2, bgcolor, size, color, radius in self.drawlist.rectangles:
+                # only redraw if necessary
+                if self.in_update(x1, y1, x2, y2, update_area):
+                    # if the radius and the border is not inside the update area,
+                    # use drawbox, it's faster
+                    if self.in_update(x1+size+radius, y1+size+radius, x2-size-radius,
+                                      y2-size-radius, update_area, full=TRUE):
+                        osd.drawroundbox(x1, y1, x2, y2, color=bgcolor,
+                                         layer=self.s_alpha)
+                    else:
+                        osd.drawroundbox(x1, y1, x2, y2, color=bgcolor,
+                                         border_size=size, border_color=color,
+                                         radius=radius, layer=self.s_alpha)
             # and than blit only the changed parts of the screen
             for x0, y0, x1, y1 in update_area:
                 self.s_content.blit(self.s_bg, (x0, y0), (x0, y0, x1-x0, y1-y0))
                 self.s_content.blit(self.s_alpha, (x0, y0), (x0, y0, x1-x0, y1-y0))
+
 
         layer = self.s_content.convert()
         update_area += self.update_content
 
         # if something changed redraw all content objects
         if update_area:
-            for area in self.drawlist:
-                for x1, y1, x2, y2, image in area.images:
-                    if self.in_update(x1, y1, x2, y2, update_area):
-                        layer.blit(image, (x1, y1))
+            ux1, uy1, ux2, uy2 = osd.width, osd.height, 0, 0
+            for a in update_area:
+                ux1 = min(ux1, a[0])
+                uy1 = min(uy1, a[1])
+                ux2 = max(ux2, a[2])
+                uy2 = max(uy2, a[3])
+                
+            for x1, y1, x2, y2, image in self.drawlist.images:
+                if self.in_update(x1, y1, x2, y2, update_area):
+                    layer.blit(image, (ux1, uy1), (ux1-x1, uy1-y1, ux2-ux1, uy2-uy1))
 
-                for x1, y1, x2, y2, text, font, height, align_h, align_v, mode, \
-                        ellipses in area.text:
-                    if self.in_update(x1, y1, x2, y2, update_area):
-                        width = x2 - x1
-                        if font.shadow.visible:
-                            width -= font.shadow.x
-                            osd.drawstringframed(text, x1+font.shadow.x, y1+font.shadow.y,
-                                                 width, height, font.font, font.shadow.color,
-                                                 None, align_h = align_h, align_v = align_v,
-                                                 mode=mode, ellipses=ellipses, layer=layer)
-                        osd.drawstringframed(text, x1, y1, width, height, font.font,
-                                             font.color, None, align_h = align_h,
-                                             align_v = align_v, mode=mode,
-                                             ellipses=ellipses, layer=layer)
+            for x1, y1, x2, y2, text, font, height, align_h, align_v, mode, \
+                    ellipses in self.drawlist.text:
+                if self.in_update(x1, y1, x2, y2, update_area):
+                    width = x2 - x1
+                    if font.shadow.visible:
+                        width -= font.shadow.x
+                        osd.drawstringframed(text, x1+font.shadow.x, y1+font.shadow.y,
+                                             width, height, font.font, font.shadow.color,
+                                             None, align_h = align_h, align_v = align_v,
+                                             mode=mode, ellipses=ellipses, layer=layer)
+                    osd.drawstringframed(text, x1, y1, width, height, font.font,
+                                         font.color, None, align_h = align_h,
+                                         align_v = align_v, mode=mode,
+                                         ellipses=ellipses, layer=layer)
 
         for x0, y0, x1, y1 in update_area:
             osd.screen.blit(layer, (x0, y0), (x0, y0, x1-x0, y1-y0))
 
         if osd.must_lock:
-            self.s_bg.unlock()
             self.s_alpha.unlock()
-            self.s_content.unlock()
-            osd.screen.unlock()
-
-
-
