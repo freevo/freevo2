@@ -132,7 +132,7 @@ fi
 trap './freevo stop' 1 2 15
 
 # Start the main freevo application
-./runapp python src/main.py $@ &
+./runapp python -O src/main.py $@ &
 echo $! > $PID_FILE
 wait `cat $PID_FILE`
 
