@@ -77,7 +77,10 @@
       
     <menuset label="tv" inherits="normal text style">
       <view visible="no"/>
-      <listing x="100" width="680"/>
+      <listing x="100" width="680">
+	<image label="uparrow" x="290" y="110"/>
+	<image label="downarrow" x="290" y="520"/>
+      </listing>
       <screen layout="tv menu screen"/>
     </menuset>
       
