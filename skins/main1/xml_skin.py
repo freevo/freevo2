@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/07/11 19:44:18  dischi
+# close file after parsing
+#
 # Revision 1.12  2003/07/07 20:16:59  dischi
 # remove __cmp__ functions to speed up the drawing
 #
@@ -60,6 +63,7 @@ import copy
 import re
 import traceback
 import config
+import util
 
 import osd
 import plugin
@@ -936,7 +940,9 @@ class XMLSkin:
         
         try:
             parser = qp_xml.Parser()
-            box = parser.parse(open(file).read())
+            f = open(file)
+            box = parser.parse(f.read())
+            f.close()
             for freevo_type in box.children:
                 if freevo_type.name == 'skin':
 

@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/07/11 19:47:08  dischi
+# close file after parsing
+#
 # Revision 1.4  2003/07/06 20:21:10  outlyer
 # Removed more debug statements and extraneous log messages.
 #
@@ -348,7 +351,9 @@ class MPlayer:
             if os.path.isfile('/tmp/freevo.wid'):
                 if DEBUG: print 'Got freevo.wid'
                 try:
-                    wid = int(open('/tmp/freevo.wid').read().strip(), 16)
+                    f = open('/tmp/freevo.wid')
+                    wid = int(f.read().strip(), 16)
+                    f.close()
                     mpl += ' -wid 0x%08x -xy %s -monitoraspect 4:3' % \
                            (wid, osd.width)
                     if DEBUG: print 'Got WID = 0x%08x' % wid

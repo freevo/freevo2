@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/07/11 19:47:09  dischi
+# close file after parsing
+#
 # Revision 1.10  2003/07/01 21:47:35  outlyer
 # Made a check to see if file exists before unlinking.
 #
@@ -246,7 +249,9 @@ class MPlayer:
             while 1:
                 if os.path.isfile('/tmp/freevo.wid'):
                     # Check if the whole line has been written yet
-                    val = open('/tmp/freevo.wid').read()
+                    f = open('/tmp/freevo.wid')
+                    val = f.read()
+                    f.close()
                     if len(val) > 5 and val[-1] == '\n':
                         break
                 time.sleep(delay_ms / 1000.0)
@@ -257,7 +262,9 @@ class MPlayer:
 
             if DEBUG: print 'Got freevo.wid'
             try:
-                wid = int(open('/tmp/freevo.wid').read().strip(), 16)
+                f = open('/tmp/freevo.wid')
+                wid = int(f.read().strip(), 16)
+                f.close()
                 mpl += ' -wid 0x%08x -xy %s -monitoraspect 4:3' % (wid, osd.width)
                 if DEBUG: print 'Got WID = 0x%08x' % wid
             except:

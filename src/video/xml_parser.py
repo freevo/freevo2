@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/07/11 19:44:18  dischi
+# close file after parsing
+#
 # Revision 1.24  2003/07/07 21:51:44  dischi
 # add mmpython info to VideoItems with subitems (take infos from first item)
 #
@@ -393,8 +396,10 @@ def parseMovieFile(file, parent, duplicate_check):
     
     parser = qp_xml.Parser()
     # Let's name node variables after their XML names
-    freevo = parser.parse(open(file).read())
-
+    f = open(file)
+    freevo = parser.parse(f.read())
+    f.close()
+    
     for freevo_child in freevo.children:
         if freevo_child.name == 'disc-set':
             """

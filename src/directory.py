@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/07/11 19:44:18  dischi
+# close file after parsing
+#
 # Revision 1.20  2003/07/05 15:53:25  outlyer
 # Quiet some debugging stuff.
 #
@@ -211,8 +214,9 @@ class DirItem(Playlist):
         if self.xml_file and os.path.isfile(self.xml_file):
             try:
                 parser = qp_xml.Parser()
-                var_def = parser.parse(open(self.xml_file).read())
-
+                f = open(self.xml_file)
+                var_def = parser.parse(f.read())
+                f.close()
                 for top in var_def.children:
                     if top.name == 'folder':
                         for node in top.children:
