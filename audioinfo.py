@@ -16,6 +16,9 @@
 #          * Add support for Ogg-Vorbis
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2002/10/24 05:47:43  krister
+# Added exception checking for errors in the mp3id module. Fixed the elapsed timer so it is still updated even if the song length is not known.
+#
 # Revision 1.16  2002/10/24 05:27:10  outlyer
 # Updated audioinfo to use new ID3v2, ID3v1 support. Much cleaner, and uses
 # the eyed3 library included. Notable changes:
@@ -139,6 +142,7 @@ import re
 import eyed3
 import skin
 import imghdr
+import traceback
 
 DEBUG=1
 
@@ -173,15 +177,15 @@ class AudioInfo:
         # XXX able to handle files with messed up extentions.
         if self.is_ogg():
             if DEBUG: print "Got ogg..."
-            self.set_info_ogg( self.filename )
+            self.set_info_ogg(self.filename)
 
         elif self.is_mp3():
             if DEBUG: print "Got mp3..."
-            self.set_info_mp3( self.filename )
+            self.set_info_mp3(self.filename)
         else:
             if DEBUG: print "Got something else..."
 
-        temp = self.get_cover_image ( self.filename )
+        temp = self.get_cover_image(self.filename)
         if DEBUG:
             try:
                 print "DEBUG:"
@@ -195,7 +199,7 @@ class AudioInfo:
             except UnicodeError:
                 print "Oops.. Got UnicodeError.. doing nothing.. :)"
 
-    def get_cover_image( self, filename ):
+    def get_cover_image(self, filename):
         cover_logo = os.path.dirname(filename)+'/cover.'
 
         # Only draw the cover if the file exists. We'll
@@ -213,10 +217,10 @@ class AudioInfo:
             self.image = os.path.splitext(filename)[0] + '.jpg'
         return self.image
 
-    def set_cover_image( self, str ):
+    def set_cover_image(self, str):
         self.image = str
 
-    def toggle_pause( self ):
+    def toggle_pause(self):
         if self.pause:
             self.pause = 0
             self.start = self.start + (time.time()-self.__pause_timer)
@@ -225,7 +229,7 @@ class AudioInfo:
             self.pause = 1
             self.__pause_timer = time.time()
             
-    def set_info_ogg( self, file ):
+    def set_info_ogg(self, file):
         """
         Sets all the info variables with useful info from the oggfile.
 
@@ -237,7 +241,7 @@ class AudioInfo:
         except ImportError:
             return None
         try: 
-            vf = ogg.vorbis.VorbisFile( file )
+            vf = ogg.vorbis.VorbisFile(file)
             vc = vf.comment()
         except ogg.vorbis.VorbisError:
             if DEBUG: print "Got VorbisError.. not an ogg file."
@@ -277,47 +281,58 @@ class AudioInfo:
         self.length = vf.time_total( -1 )
         return 1
 
-    def set_info_mp3( self, file ):
+    def set_info_mp3(self, filename):
         """
         Sets the info variables with info from the mp3
 
         Arguments: filename
           Returns: 1 if success
         """
+
+        id3 = None
 	try:
-	    id3 = eyed3.Mp3AudioFile( file )
+	    id3 = eyed3.Mp3AudioFile(filename)
 	except eyed3.TagException:
-	    id3 = eyed3.Mp3AudioFile( file, 1)
+	    id3 = eyed3.Mp3AudioFile(filename, 1)
 	except eyed3.InvalidAudioFormatException:
 	    # File is not an MP3
 	    self.valid = 0
 	    return 0
+        except:
+            # The MP3 tag decoder crashed, assume the file is still
+            # MP3 and try to play it anyway
+            print 'music: oops, mp3 tag parsing failed!'
+            print 'music: filename = "%s"' % filename
+            traceback.print_exc()
+            
 
-	if id3.tag:
-	    self.album  = id3.tag.getAlbum()
-            self.artist = id3.tag.getArtist()
-            self.title  = id3.tag.getTitle()
-     	    self.track,self.trackof  = id3.tag.getTrackNum()
-	    self.year   = id3.tag.getYear()
-
-	self.length = id3.getPlayTime()
+	if id3:
+            if id3.tag:
+                self.album  = id3.tag.getAlbum()
+                self.artist = id3.tag.getArtist()
+                self.title  = id3.tag.getTitle()
+                self.track,self.trackof  = id3.tag.getTrackNum()
+                self.year   = id3.tag.getYear()
+            self.length = id3.getPlayTime()
+        else:
+            self.album = 'Broken MP3 tag!'
 
         if not self.title:
-            self.title = os.path.splitext(os.path.basename(file))[0]
+            self.title = os.path.splitext(os.path.basename(filename))[0]
         if not self.track:
             self.track = ''
         return 1
 
-    def yes( self ):
+    def yes(self):
         return 1
 
-    def is_ogg( self ):
-        if re.match( '.*[oO][gG]{2}$', self.filename ):
+    def is_ogg(self):
+        if re.match('.*[oO][gG]{2}$', self.filename):
             return 1        
         return 0
 
     def is_mp3(self):
-        if re.match( '.*[mM][pP]3$', self.filename ):
+        if re.match('.*[mM][pP]3$', self.filename):
             return 1
         return 0
             
@@ -327,7 +342,10 @@ class AudioInfo:
         return (time.time() - self.start)
 
     def get_remain(self):
-        if( self.elapsed > self.length ):
+        if not self.length:
+            return 0
+        
+        if self.elapsed > self.length:
             self.elapsed = self.length
         return (self.length - self.elapsed)
 
@@ -360,7 +378,7 @@ class AudioInfo:
             self.remain  = self.get_remain()
             self.done    = self.get_done()
             self.__lastupdate = time.time()
-            skin.DrawMP3( self )
+            skin.DrawMP3(self)
 
         return
 
