@@ -22,6 +22,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/07/04 20:14:04  outlyer
+# Fixed some confusing logic. It's still confusing, but it works now. Probably
+# need to clean this up.
+#
 # Revision 1.16  2003/07/04 19:48:18  outlyer
 # Whoops, fix path.
 #
@@ -184,11 +188,10 @@ class cdstatus(IdleBarPlugin):
     def draw(self, (type, object)):
         image = self.cdimages['empty_cdrom']
         for media in config.REMOVABLE_MEDIA:
-            if hasattr(media.info,'handle_type'):
-                if not media.info.handle_type:
-                    # mixed CD
+            if hasattr(media.info,'type') and hasattr(media.info,'handle_type'):
+                if not media.info.handle_type and media.info.type:
                     image = self.cdimages['mixed']
-                else: 
+                elif media.info.handle_type: 
                     image = self.cdimages[media.info.handle_type]
         osd.drawbitmap(image,220,30)
 
