@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/06/08 17:01:50  rshortt
+# A workaround for a strange audio problem and print more codec info.
+#
 # Revision 1.4  2003/06/05 00:04:46  rshortt
 # Create the tv lock file so the idlebar plugin will know. :)
 #
@@ -131,6 +134,14 @@ class Record_Thread(threading.Thread):
                 (v_norm, v_input, v_clist, v_dev) = config.TV_SETTINGS.split()
                 v_norm = string.upper(v_norm)
 
+                # A temporary workaround to fix a problem where the first
+                # capture after loading the modules has the correct audio
+                # properties but is silent.  Capture a chunk and close.
+                v_in  = open(v_dev, 'r')
+                buf = v_in.read(2*1024*1024)
+                v_in.close()
+                time.sleep(3)
+
                 v = ivtv.IVTV(v_dev)
 
                 print 'Setting chanlist to %s' % v_clist
@@ -171,18 +182,34 @@ class Record_Thread(threading.Thread):
                 codec = v.getCodecInfo()
 
                 codec.bitrate = config.IVTV_BITRATE
-                codec.bitrate_peak = config.IVTV_BITRATE 
+                codec.bitrate_peak = config.IVTV_BITRATE
+                # codec.bitrate_peak = config.IVTV_BITRATE + 1
                 codec.stream_type = config.IVTV_STREAM_TYPE
+                codec.gop_closure = 1
 
                 v.setCodecInfo(codec)
                 codec = v.getCodecInfo()
 
+                print 'CODEC::aspect: %s' % codec.aspect
+                print 'CODEC::audio: %s' % codec.audio
+                print 'CODEC::bfrmes: %s' % codec.bframes
                 print 'CODEC::bitrate: %s' % codec.bitrate
                 print 'CODEC::bitrate_peak: %s' % codec.bitrate_peak
-                print 'CODEC::stream_type: %s' % codec.stream_type
+                print 'CODEC::dnr_mode: %s' % codec.dnr_mode
+                print 'CODEC::dnr_spatial: %s' % codec.dnr_spatial
+                print 'CODEC::dnr_temporal: %s' % codec.dnr_temporal
+                print 'CODEC::dnr_type: %s' % codec.dnr_type   
+                print 'CODEC::framerate: %s' % codec.framerate 
+                print 'CODEC::framespergop: %s' % codec.framespergop 
+                print 'CODEC::gop_closure: %s' % codec.gop_closure  
+                print 'CODEC::pulldown: %s' % codec.pulldown     
+                print 'CODEC::stream_type: %s' % codec.stream_type  
+
 
                 now = time.time()
                 stop = now + self.prog.rec_duration
+
+                time.sleep(2)
 
                 v_in  = open(v_dev, 'r')
                 v_out = open(video_save_file, 'w')
