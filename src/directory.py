@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/07/02 22:05:16  dischi
+# better cache handling
+#
 # Revision 1.17  2003/07/02 20:07:49  dischi
 # use bins support from mmpython
 #
@@ -320,7 +323,7 @@ class DirItem(Playlist):
 
         mmpython_dir = self.dir
         if self.media:
-            if self.dir != self.media.mountdir:
+            if self.media.cached:
                 mmpython_dir = None
                 num_changes = 0
             else:
@@ -339,7 +342,9 @@ class DirItem(Playlist):
 
         if num_changes > 0:
             mmpython.cache_dir(mmpython_dir)
-            
+            if self.media:
+                self.media.cached = TRUE
+
         play_items = []
         for t in ( 'video', 'audio', 'image', 'games' ):
             if not self.display_type or self.display_type == t:
