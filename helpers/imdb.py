@@ -41,6 +41,10 @@ def str2XML(line):
         s = unicode(line, 'latin-1')
         while s[-1] == ' ':
             s = s[:-1]
+        if s[:4] == '&#34':
+            s = s[5:]
+        if s[-4:] == '#34;':
+            s = s[:-5]
         return s
     except:
         return line
@@ -79,13 +83,30 @@ def search(name):
     conn.request("GET", '/Tsearch?%s' % params, params, headers)
     response = conn.getresponse()
 
+    if response.status == 302 and response.getheader('Location', ''):
+        m = re.compile('^.*Title\?([0-9]*)').match(response.getheader('Location'))
+        if not m:
+            print response.status
+            print response.reason
+            print response.msg
+            return results
+        (title, year, genre, tagline, plot, rating, \
+         image_urls, runtime) = get_data(m.group(1))
+        return [ ( m.group(1), title, year, '' ) ]
+
+    if response.status != 200:
+        print response.status
+        print response.reason
+        print response.msg
+        return results
+        
     regexp_title = re.compile('.*<LI><A HREF="/Title\?([0-9]*)">(.*) '+
                                '\(([12][0-9][0-9][0-9].*)\)</A>')
 
     regexp_type  = re.compile('<H2><A NAME=.*>(.*)</A></H2>')
     
     type = ''
-    
+
     for line in response.read().split("\n"):
         m = regexp_type.match(line)
         if m:
@@ -416,7 +437,10 @@ if __name__ == "__main__":
             filename = sys.argv[2]
             print "searching " + filename
             for result in search(filename):
-                print '%s   %s (%s, %s)' % result
+                if result[3]:
+                    print '%s   %s (%s, %s)' % result
+                else:
+                    print '%s   %s (%s)' % (result[0], result[1], result[2])
             sys.exit(0)
 
         # normal usage
