@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2003/04/20 15:54:32  dischi
+# do not stop on select
+#
 # Revision 1.33  2003/04/20 12:43:34  dischi
 # make the rc events global in rc.py to avoid get_singleton. There is now
 # a function app() to get/set the app. Also the events should be passed to
@@ -293,7 +296,7 @@ class MPlayer:
         function it will be passed over to the items eventhandler
         """
 
-        if (event == rc.STOP or event == rc.SELECT) and not self.seek:
+        if event == rc.STOP and not self.seek:
             if self.mode == 'dvdnav':
                 self.thread.app.write('dvdnav 6\n')
                 return TRUE
