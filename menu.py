@@ -43,10 +43,13 @@ def get_singleton():
 
 class MenuItem:
 
-    def __init__(self, name, action=None, arg=None, icon=None, scale=1,popup=0):
+    def __init__(self, name, action=None, arg=None, eventhandler = None, \
+                 eventhandler_args = None, icon=None, scale=1,popup=0):
         self.name = name
         self.action = action
         self.arg = arg
+        self.eventhandler = eventhandler
+        self.eventhandler_args = eventhandler_args
 	self.icon = icon
 	self.scale = scale
 	self.popup = popup
@@ -57,6 +60,9 @@ class MenuItem:
     
     def select(self):
         self.action(self.arg)
+
+    def eventhandler(self):
+        self.eventhandler(self.eventhandler_args)
 
         
 class Menu:
@@ -194,6 +200,13 @@ class MenuWidget:
                 osd.drawstring('Args: %s' % arg_str, 50, 280)
                 print 'Calling action "%s"' % str(action)
                 action(arg=menu.selected.arg, menuw=self)
+        else:
+            action = menu.selected.eventhandler
+            if action != None:
+                action_str = str(action)
+                arg_str = str(menu.selected.eventhandler_args)[0:40]
+                print 'Calling action "%s"' % str(action)
+                action(event = event, arg=menu.selected.eventhandler_args, menuw=self)
 
 
     def init_page(self):
