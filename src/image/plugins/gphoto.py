@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/07/14 18:25:17  rshortt
+# Minor updates.
+#
 # Revision 1.1  2003/04/26 15:14:58  dischi
 # renamed to gphoto
 #
@@ -51,7 +54,7 @@ import util
 import config
 from item import Item
 import pygame
-import pygphoto
+import _pygphoto as pygphoto
 import cStringIO
 import image.viewer
 
@@ -98,6 +101,7 @@ class CameraFile( Item ):
         self.filename = None
         self.image_viewer = image.viewer.get_singleton()
         self.duration = duration
+	self.binsexif = {}
 
     def loadimage(self):
         cfile = pygphoto.gp_getfile( self.gCamera, self.path, self.name )
