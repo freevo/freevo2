@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/01/16 16:23:29  dischi
+# add softlink checking
+#
 # Revision 1.12  2004/01/05 17:19:10  dischi
 # change some vfs to os.path
 #
@@ -96,20 +99,22 @@ if traceback.extract_stack()[0][0].find('install.py') == -1:
 #
 #
 
-def getdirnames(dirname):
+def getdirnames(dirname, softlinks=True, sort=True):
     """
     Get all subdirectories in the given directory.
     Returns a list that is case insensitive sorted.
     """
+    if not dirname.endswith('/'):
+        dirname += '/'
 
     try:
-        dirnames = [ os.path.join(dirname, dname) for dname in os.listdir(dirname)
-                     if os.path.isdir(os.path.join(dirname, dname)) ]
+        dirnames = [ dirname + dname for dname in os.listdir(dirname) if \
+                     os.path.isdir(dirname + dname) and \
+                     (softlinks or not os.path.islink(dirname + dname))]
     except OSError:
         return []
-    
+
     dirnames.sort(lambda l, o: cmp(l.upper(), o.upper()))
-    
     return dirnames
 
 
