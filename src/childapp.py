@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/09/27 00:36:21  outlyer
+# Dischi was right, this probably doesn't do anything... the problem still
+# exists, though it's fairly intermittent. Reversing this change.
+#
 # Revision 1.22  2003/09/25 20:46:26  outlyer
 # It's still killing processes if they don't respond immmediately. I've
 # realized that this mostly happens with high-bitrate MP3s, of which I have
@@ -282,12 +286,9 @@ class Read_Thread(threading.Thread):
 
             data = self.fp.readline(300)
             if not data:
-                time.sleep(1)   # Wait longer and try again
-                data = self.fp.readline(300)
-                if not data:
-                    _debug_('%s: No data, stopping (pid %s)!' % (self.name, os.getpid()),2)
-                    self.fp.close()
-                    break
+                _debug_('%s: No data, stopping (pid %s)!' % (self.name, os.getpid()),2)
+                self.fp.close()
+                break
             else:
                 data = data.replace('\r', '\n')
                 lines = data.split('\n')
