@@ -268,6 +268,9 @@ class PluginInterface(Plugin):
         """
         if self.stop_timer:
             notifier.removeTimer(self.stop_timer)
+        if not self.item:
+            # this shouldn't happen ... but does
+            return
         if self.item.url.startswith('file:'):
             filename = self.item.url[5:]
             if os.path.isfile(filename):
