@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/09/08 08:33:13  dischi
+# patch from Viggo Fredriksen to reactivate the plugins
+#
 # Revision 1.6  2004/08/01 10:48:47  dischi
 # deactivate plugin because of interface change
 #
@@ -19,7 +22,7 @@
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002 Krister Lagerstrom, et al.
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -45,6 +48,7 @@ import poplib
 import mailbox
 import threading
 import time
+import gui
 
 from plugins.idlebar import IdleBarPlugin
 
@@ -52,45 +56,54 @@ from plugins.idlebar import IdleBarPlugin
 class MultiMail(IdleBarPlugin):
     """
     Displays an icon in the idlebar representing the number of emails for a specified account. In the case of IMAP, it only lists unread messages
-    
+
     Activate with:
     plugin.activate('idlebar.MultiMail.Imap',    level=10, args=('username', 'password', 'host', 'port', 'folder')) (port and folder are optional)
     plugin.activate('idlebar.MultiMail.Pop3',    level=10, args=('username', 'password', 'host', 'port')) (port is optional)
-    plugin.activate('idlebar.MultiMail.Mbox',    level=10, args=('path to mailbox file')    
-    
+    plugin.activate('idlebar.MultiMail.Mbox',    level=10, args=('path to mailbox file')
+
     """
     def __init__(self):
-        self.reason = 'draw() function needs update to work with new interface'
-        return
 
         IdleBarPlugin.__init__(self)
-        self.NO_MAILIMAGE = os.path.join(config.ICON_DIR, 'status/newmail_dimmed.png')
-        self.MAILIMAGE = os.path.join(config.ICON_DIR, 'status/newmail_active_small.png')
+        self.NO_MAILIMAGE = os.path.join(config.ICON_DIR, 'status', 'newmail_dimmed.png')
+        self.MAILIMAGE = os.path.join(config.ICON_DIR, 'status', 'newmail_active_small.png')
         self.FREQUENCY = 20 # seconds between checks
         self.unread = 0
+        self.last_unread = -1
         self.bg_thread = threading.Thread(target=self._bg_function, name='MultiMail Thread')
         self.bg_thread.setDaemon(1)
         self.bg_thread.start() # Run self._bg_function() in a separate thread
-        
+
     def _bg_function(self):
         while 1:
             self.unread = self.checkmail()
             time.sleep(self.FREQUENCY)
-        
+
     def checkmail(self):
         return 0
 
-    def draw(self, (type, object), x, osd):
+    def draw(self, width, height):
+        if self.last_unread == self.unread:
+            return self.NO_CHANGE
+
+        self.clear()
+        self.last_unread = self.unread
+
         if self.unread > 0:
-            image_width = osd.drawimage(self.MAILIMAGE, (x, osd.y + 2, -1, -1))[0]
-            font  = osd.get_font('weather')
-            unread_str = '%3s' % self.unread
-            text_width = font.stringsize(unread_str)
-            osd.drawstring(unread_str, font, None, x, osd.y + 55 - font.h, text_width, font.h, 'left', 'top')
-            display_width = max(image_width, text_width)
-        else:
-            display_width = osd.drawimage(self.NO_MAILIMAGE, (x, osd.y + 10, -1, -1))[0] 
-        return display_width
+            i = gui.imagelib.load(self.MAILIMAGE, (None, None))
+            self.objects.append(gui.Image(i, (0, 2)))
+            font  = gui.get_font('weather')
+            str_unread = '%3s' % self.unread
+            text_width = font.stringsize(str_unread)
+            t = gui.Text(str_unread, (0, 55-font.height), (text_width, font.height),
+                         font, 'left', 'top')
+            self.objects.append(t)
+            return max(i.width, t.width)
+
+        i = gui.imagelib.load(self.NO_MAILIMAGE, (None, None))
+        self.objects.append(gui.Image(i, (0, 10)))
+        return i.width
 
 class Imap(MultiMail):
     def __init__(self, username, password, host, port=143, folder="INBOX"):
@@ -100,26 +113,26 @@ class Imap(MultiMail):
         self.PORT = port
         self.FOLDER = folder
         MultiMail.__init__(self)
-        
+
     def checkmail(self):
         try:
             imap = imaplib.IMAP4(self.HOST)
             imap.login(self.USERNAME,self.PASSWORD)
             imap.select(self.FOLDER)
             unread = len(imap.search(None,"(UNSEEN)")[1][0].split())
-            imap.logout
-            return unread            
+            imap.logout()
+            return unread
         except:
             _debug_('IMAP exception')
             return 0
-        
-class Pop3(MultiMail):        
+
+class Pop3(MultiMail):
     def __init__(self, username, password, host, port=110):
         self.USERNAME = username
         self.PASSWORD = password
         self.HOST = host
         self.PORT = port
-        MultiMail.__init__(self)    
+        MultiMail.__init__(self)
 
     def checkmail(self):
         try:
@@ -127,15 +140,15 @@ class Pop3(MultiMail):
             pop.user(self.USERNAME)
             pop.pass_(self.PASSWORD)
             unread = len(pop.list()[1])
-            pop.quit
+            pop.quit()
             return unread
         except:
             return 0
-      
+
 class Mbox(MultiMail):
     def __init__(self, mailbox):
         self.MAILBOX = mailbox
-        MultiMail.__init__(self)    
+        MultiMail.__init__(self)
 
     def checkmail(self):
         if os.path.isfile(self.MAILBOX):
@@ -148,4 +161,4 @@ class Mbox(MultiMail):
             return count
         else:
             return 0
-        
+

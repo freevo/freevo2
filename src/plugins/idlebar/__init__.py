@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2004/09/08 08:33:13  dischi
+# patch from Viggo Fredriksen to reactivate the plugins
+#
 # Revision 1.28  2004/08/27 14:27:54  dischi
 # change to new animation class name
 #
@@ -128,7 +131,7 @@ class PluginInterface(plugin.DaemonPlugin):
         self.container      = gui.CanvasContainer()
         self.container.set_zindex(10)
         gui.display.add_child(self.container)
-        
+
         # Getting current LOCALE
         try:
             locale.resetlocale()
@@ -145,6 +148,7 @@ class PluginInterface(plugin.DaemonPlugin):
 
         w = screen.width
         h = config.OSD_OVERSCAN_Y + 60
+
         f = gui.get_image('idlebar')
 
         if self.barfile != f:
@@ -187,7 +191,7 @@ class PluginInterface(plugin.DaemonPlugin):
             changed = True
 
         return changed
-            
+
 
     def show(self, update=True, fade=0):
         if self.visible:
@@ -206,7 +210,7 @@ class PluginInterface(plugin.DaemonPlugin):
         self.visible = False
         if update:
             gui.get_display().update()
-        
+
 
     def add_background(self):
         """
@@ -225,8 +229,8 @@ class PluginInterface(plugin.DaemonPlugin):
                 self.container.add_child(self.background)
         else:
             self.background.show()
-            
-                                                  
+
+
     def remove_background(self):
         """
         remove the background behind the bar
@@ -234,7 +238,7 @@ class PluginInterface(plugin.DaemonPlugin):
         if self.background:
             self.background.hide()
 
-            
+
     def eventhandler(self, event, menuw=None):
         """
         catch the IDENTIFY_MEDIA event to redraw the skin (maybe the cd status
@@ -264,7 +268,7 @@ class PluginInterface(plugin.DaemonPlugin):
                     self.hide(False, fade=fade)
                 self.update()
             return
-        
+
         if not self.visible:
             return False
 
@@ -295,7 +299,7 @@ class IdleBarPlugin(plugin.Plugin):
         self.NO_CHANGE = -1
         self.align     = 'left'
 
-        
+
     def draw(self, width, height):
         return self.NO_CHANGE
 
@@ -304,8 +308,8 @@ class IdleBarPlugin(plugin.Plugin):
         for o in self.objects:
             o.unparent()
         self.objects = []
-        
-            
+
+
 
 
 class clock(IdleBarPlugin):
@@ -357,8 +361,6 @@ class cdstatus(IdleBarPlugin):
     plugin.activate('idlebar.cdstatus')
     """
     def __init__(self):
-        self.reason = 'draw() function needs update to work with new interface'
-        return
 
         IdleBarPlugin.__init__(self)
         icondir = os.path.join(config.ICON_DIR, 'status')
@@ -372,9 +374,12 @@ class cdstatus(IdleBarPlugin):
         self.cdimages ['cdrip']       = os.path.join(icondir, 'cd_rip.png')
         self.cdimages ['mixed']       = os.path.join(icondir, 'cd_mixed.png')
 
-    def draw(self, (type, object), x, osd):
+    def draw(self, width, height):
         image = self.cdimages['empty_cdrom']
-        width = 0
+
+        self.clear()
+
+        w = 0
         for media in config.REMOVABLE_MEDIA:
             image = self.cdimages['empty_cdrom']
             if media.type == 'empty_cdrom':
@@ -383,11 +388,16 @@ class cdstatus(IdleBarPlugin):
                 image = self.cdimages[media.type]
             else:
                 image = self.cdimages['mixed']
+            i = gui.imagelib.load(image, (None, None))
 
-            width += osd.drawimage(image, (x+width, osd.y + 10, -1, -1))[0] + 10
-        if width:
-            width -= 10
-        return width
+            w += i.width + 10
+
+            self.objects.append(gui.Image(i, (w, (height-i.height)/2)))
+
+
+        if w:
+            w -= 10
+        return w
 
 
 class mail(IdleBarPlugin):
@@ -399,10 +409,8 @@ class mail(IdleBarPlugin):
 
     """
     def __init__(self, mailbox):
-        self.reason = 'draw() function needs update to work with new interface'
-        return
-
         IdleBarPlugin.__init__(self)
+        self.mails = -1
         self.NO_MAILIMAGE = os.path.join(config.ICON_DIR, 'status/newmail_dimmed.png')
         self.MAILIMAGE = os.path.join(config.ICON_DIR, 'status/newmail_active.png')
         self.MAILBOX = mailbox
@@ -421,11 +429,23 @@ class mail(IdleBarPlugin):
         else:
             return 0
 
-    def draw(self, (type, object), x, osd):
-        if self.checkmail() > 0:
-            return osd.drawimage(self.MAILIMAGE, (x, osd.y + 10, -1, -1))[0]
+    def draw(self, width, height):
+        mails = self.checkmail()
+
+        if self.mails == mails:
+            return self.NO_CHANGE
+
+        self.mails = mails
+        self.clear()
+
+        if mails > 0:
+            m = gui.imagelib.load(self.MAILIMAGE, (None, None))
         else:
-            return osd.drawimage(self.NO_MAILIMAGE, (x, osd.y + 10, -1, -1))[0]
+            m = gui.imagelib.load(self.NO_MAILIMAGE, (None, None))
+
+        self.objects.append(gui.Image(m, (0, (height-m.height)/2)))
+
+        return m.width
 
 
 
@@ -443,8 +463,6 @@ class tv(IdleBarPlugin):
     given.
     """
     def __init__(self, listings_threshold=-1):
-        self.reason = 'draw() function needs update to work with new interface'
-        return
         IdleBarPlugin.__init__(self)
 
         self.listings_threshold = listings_threshold
@@ -452,7 +470,7 @@ class tv(IdleBarPlugin):
         self.listings_expire    = 0
         self.tvlockfile         = config.FREEVO_CACHEDIR + '/record'
         self.status             = None
-        
+
         self.TVLOCKED     = 'television_active.png'
         self.TVFREE       = 'television_inactive.png'
         self.NEAR_EXPIRED = 'television_near_expired.png'
@@ -463,7 +481,7 @@ class tv(IdleBarPlugin):
         IdleBarPlugin.clear(self)
         self.status = None
 
-        
+
     def checktv(self):
         if os.path.exists(self.tvlockfile):
             return 1
@@ -494,12 +512,12 @@ class tv(IdleBarPlugin):
 
         self.clear()
         self.status = status
-        i = gui.get_icon('status/television_%s' % status)
-        i = gui.get_display().renderer.load(i, (None, height))
-        
-        w,h  = i.get_size()
-        self.objects.append(gui.Image(0, 0, w, h, i))
-        return w
+        icon = gui.get_icon('status/television_%s' % status)
+        i = gui.imagelib.load(icon, (None, None))
+
+
+        self.objects.append(gui.Image(i, (0, (height-i.height)/2)))
+        return i.width
 
 
 
@@ -514,8 +532,7 @@ class weather(IdleBarPlugin):
     You can also set the unit as second parameter in args ('C', 'F', or 'K')
     """
     def __init__(self, zone='CYYZ', units='C'):
-        self.reason = 'draw() function needs update to work with new interface'
-        return
+        self.current = None, None
 
         IdleBarPlugin.__init__(self)
         self.TEMPUNITS = units
@@ -586,15 +603,27 @@ class weather(IdleBarPlugin):
             cachefile.close()
         return temperature, icon
 
-    def draw(self, (type, object), x, osd):
+    def draw(self, width, height):
+        t, ic = self.current
         temp,icon = self.checkweather()
-        font  = osd.get_font('small0')
-        osd.drawimage(os.path.join(config.ICON_DIR, 'weather/' + icon),
-                        (x, osd.y + 15, -1, -1))
+
+        if temp == t and ic == icon:
+            return self.NO_CHANGE
+
+        self.clear()
+        self.current = temp, icon
+
+        icon = os.path.join(config.ICON_DIR, 'weather', icon)
+        font  = gui.get_font('small0')
+        i = gui.imagelib.load(icon, (None, None))
+        self.objects.append(gui.Image(i, (0, 15)))
+
         temp = u'%s\xb0' % temp
         width = font.stringsize(temp)
-        osd.drawstring(temp, font, None, x + 15, osd.y + 55 - font.height, width, font.height,
-                       'left', 'top')
+
+        self.objects.append(gui.Text(temp, (15, 55-font.height), (width, font.height),
+                                     font, 'left', 'top'))
+
         return width + 15
 
 
@@ -621,9 +650,8 @@ class holidays(IdleBarPlugin):
       ('12-25',  'christmas.png')]
     """
     def __init__(self):
-        self.reason = 'draw() function needs update to work with new interface'
-        return
         IdleBarPlugin.__init__(self)
+        self.icon = ''
 
     def config(self):
         return [ ('HOLIDAYS', [ ('01-01',  'newyear.png'),
@@ -646,10 +674,22 @@ class holidays(IdleBarPlugin):
             if todays_date == holiday:
                 return os.path.join(config.ICON_DIR, 'holidays', icon)
 
-    def draw(self, (type, object), x, osd):
+
+    def draw(self, width, height):
         icon = self.get_holiday_icon()
+
+        if icon == self.icon:
+            return self.NO_CHANGE
+
         if icon:
-            return osd.drawimage(icon, (x, osd.y + 10, -1, -1))[0]
+            self.icon = icon
+            self.clear()
+            i = gui.imagelib.load(icon, (None, None))
+            self.objects.append(gui.Image(i, (0, (height-i.height)/2)))
+
+            return i.width
+
+        return 0
 
 
 
@@ -675,11 +715,11 @@ class logo(IdleBarPlugin):
 
         self.file = image
         self.clear()
-            
+
         i = gui.imagelib.load(image, (None, height + 10))
         if not i:
             return 0
 
         self.objects.append(gui.Image(i, (0, 0)))
-        print 'add', self.objects
+
         return i.width
