@@ -36,6 +36,7 @@ import os
 import re
 import string
 import logging
+import traceback
 
 import config
 import util.ioctl as ioctl
@@ -174,30 +175,9 @@ for i in range(10):
 
         config.TV_SETTINGS[key].driver = driver
 
-for type in ['dvb0', 'tv0', 'ivtv0']:
-    if type in config.TV_SETTINGS.keys():
-        config.TV_DEFAULT_SETTINGS = type
-        break
+if not config.TV_DEFAULT_SETTINGS:
+    for type in ['dvb0', 'tv0', 'ivtv0']:
+        if type in config.TV_SETTINGS.keys():
+            config.TV_DEFAULT_SETTINGS = type
+            break
 
-device_re = re.compile('^((dvb|tv|ivtv)([0-9])?:)?(.*)')
-
-# add all possible channels to the cards
-for card in config.TV_SETTINGS:
-    channels = {}
-    for c in config.TV_CHANNELS:
-        for freq in c[2:]:
-            device, type, number, freq = device_re.match(String(freq)).groups()
-            if number and device[:-1] != card:
-                continue
-            if type and not card.startswith(type):
-                continue
-            try:
-                freq = int(freq)
-                if card.startswith('dvb'):
-                    continue
-            except ValueError:
-                if not card.startswith('dvb'):
-                    continue
-            channels[c[0]] = freq
-
-    config.TV_SETTINGS[card].channels = channels
