@@ -55,3 +55,16 @@ class Program:
         self.categories = ''
         # TODO: add ratings support (from epgdb)
         self.ratings = ''
+
+
+    def __cmp__(self, other):
+        """
+        compare function, return 0 if the objects are identical, 1 otherwise
+        """
+        try:
+            return self.title != other.title or \
+                   self.start != other.start or \
+                   self.stop  != other.stop or \
+                   self.channel != other.channel
+        except AttributeError:
+            return 1
