@@ -9,12 +9,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.11  2002/10/09 18:25:01  dischi
-# A small idea I would like to have Aubins skin. It's identical except
-# the movie info box is missing (because it's not ready now) and that
-# the tv alpha layer is enabled for normale menus as well. The xml file
-# is a mixture between Aubins and the old one. It should be possible to
-# enable / disable the tv alpha layer for normal menus in the xml file
+# Revision 1.12  2002/10/12 18:45:25  dischi
+# New skin, Work in progress
 #
 # Revision 1.3  2002/10/08 20:37:30  outlyer
 # Updated to use my fancy popup box; since I updated the TV code to use
@@ -156,7 +152,7 @@ else:
 import rc
 
 # XML parser for skin informations
-sys.path.append('skins/xml/type1')
+sys.path.append('.')
 import xml_skin
 
 
@@ -239,11 +235,12 @@ class Skin:
         if not menu.packrows:
             return 5
         
-        # get the settings
+        # find the correct structures, I hope we don't need this
+        # for the main menu ...
         if menu.skin_settings:
-            val = menu.skin_settings.menu
+            val = menu.skin_settings.menu_default
         else:
-            val = self.settings.menu
+            val = self.settings.menu_default
 
         used_height = 0
         n_items     = 0
@@ -254,8 +251,6 @@ class Skin:
                     pref_item = val.items.dir
                 elif item.type == 'list':
                     pref_item = val.items.pl
-                elif item.type == 'main':
-                    pref_item = val.item_main
                 else:
                     pref_item = val.items.default;
             else:
@@ -344,9 +339,7 @@ class Skin:
                         osd.drawbitmap(util.resize(image, val.cover_movie.width, \
                                                    val.cover_movie.height),\
                                        val.cover_movie.x, val.cover_movie.y)
-                        # we need space for this and we don't have
-                        # more info only if there is an image
-			# osd.drawbitmap('skins/images/moviebox.png',-1,-1)
+			osd.drawbitmap('skins/images/moviebox.png',-1,-1)
                         i_val = val.cover_movie
 
                 elif type == 'music' and val.cover_music.visible:
@@ -373,7 +366,6 @@ class Skin:
         val = settings
         menu = menuw.menustack[-1]
 
-
         if menu.packrows:
             spacing = 0                 # calculate this later
             icon_size = 28
@@ -395,15 +387,6 @@ class Skin:
                     item = val.items.dir
                 elif choice.type == 'list':
                     item = val.items.pl
-
-                # XXX BAD HACK (tm)
-                # overwrite settings for main
-                elif choice.type == 'main':
-                    item = val.item_main
-                    valign = 1
-                    x0 = val.item_main.x
-                    width = val.item_main.width
-                    
                 else:
                     item = val.items.default
             else:
@@ -489,7 +472,7 @@ class Skin:
 
             # draw icon
             if choice.icon != None:
-                icon_x = item.x - icon_size - 15
+                icon_x = x0 - icon_size - 15
                 osd.drawbitmap(util.resize(choice.icon, icon_size, icon_size), icon_x, y0)
 
             y0 += spacing
@@ -510,22 +493,26 @@ class Skin:
             osd.drawstring('INTERNAL ERROR, NO MENU!', 100, osd.height/2)
             return
 
-        # XXX Kludge to draw the TV Guide using the old code. 
-        if menu.heading.find('TV MENU') != -1:
-            self._DrawTVGuide(menuw)
-            return
-            
-        # get the settings
+        # find the correct structures:
         if menu.skin_settings:
-            val = menu.skin_settings.menu
+            val = menu.skin_settings
         else:
-            val = self.settings.menu
+            val = self.settings
 
-        if val.bgbitmap[0]:
-            apply(osd.drawbitmap, (val.bgbitmap, -1, -1))
-       
-        if menu.packrows:
-            osd.drawbitmap('skins/images/tvmask.png',-1,-1)
+        # now find the correct menu:
+        if len(menuw.menustack) == 1:
+            val = val.menu_main
+        elif menu.heading.find('TV MENU') != -1:
+            val = val.menu_tv
+        else:
+            val = val.menu_default
+            
+
+        if val.background.image:
+            apply(osd.drawbitmap, (val.background.image, -1, -1))
+
+        if val.background.mask:
+            osd.drawbitmap(val.background.mask,-1,-1)
 
         # Menu heading
         if val.title.visible:
@@ -533,8 +520,15 @@ class Skin:
                 menu.heading = val.title.text
 
             self.DrawText(menu.heading, val.title)
+
+        if val.logo.image and val.logo.visible:
+            osd.drawbitmap(val.logo.image, val.logo.x, val.logo.y)
+
+        # XXX Kludge to draw the TV Guide using the old code. 
+        if menu.heading.find('TV MENU') != -1:
+            self._DrawTVGuide(menuw)
+            return
             
-	osd.drawbitmap('skins/images/logo.png',10,10)
         # Draw the menu choices for the main selection
         y0 = val.items.y
 
@@ -586,8 +580,6 @@ class Skin:
 
         if DEBUG: print 'Skin.drawmenu()'
         
-        osd.clearscreen(osd.COL_WHITE)
-
         menu = menuw.menustack[-1]
 
         if not menu:
@@ -596,20 +588,9 @@ class Skin:
 
         # get the settings
         if menu.skin_settings:
-            val = menu.skin_settings.menu
+            val = menu.skin_settings.menu_tv
         else:
-            val = self.settings.menu
-
-        if val.bgbitmap[0]:
-            apply(osd.drawbitmap, (val.bgbitmap, -1, -1))
-        
-        # Menu heading
-        if val.title.visible:
-            if val.title.text:
-                menu.heading = val.title.text
-            osd.drawstring(menu.heading, val.title.x, val.title.y,
-                           val.title.color, font=val.title.font,
-                           ptsize=val.title.size, align=val.title.align)
+            val = self.settings.menu_tv
 
         # Sub menus
         icon_size = 25
@@ -619,9 +600,6 @@ class Skin:
         height = val.items.height
 
         fontsize = val.items.default.size
-
-
-	osd.drawbitmap('skins/images/tvmask.png',-1,-1)
 
         if menu.packrows:
             w, h = osd.stringsize('Ajg', font=val.items.default.font,
@@ -739,10 +717,11 @@ class Skin:
         if info.drawall:
             osd.clearscreen()
 
-            if val.bgbitmap[0]:
-                apply(osd.drawbitmap, (val.bgbitmap, -1, -1))
-        
-	    osd.drawbitmap('skins/images/highlight.png',-1,-1)
+            if val.background.image:
+                apply(osd.drawbitmap, (val.background.image, -1, -1))
+
+            if val.background.mask:
+                osd.drawbitmap(val.background.mask,-1,-1)
 
             #Display the cover image file if it is present
             if info.image:
@@ -778,8 +757,8 @@ class Skin:
                 
         else:
             # Erase the portion that will be redrawn
-            if val.bgbitmap[0]:
-                osd.drawbitmap( val.bgbitmap, left, 250, None, left,
+            if val.background.image:
+                osd.drawbitmap( val.background.image, left, 250, None, left,
                                 250, 100, 30 )
 	        #osd.drawbitmap('skins/images/highlight.png', left, 250, None, left,
 		#		250, 100, 30)
