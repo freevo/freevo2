@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/01/01 12:24:18  dischi
+# cache fxd files with pickle
+#
 # Revision 1.4  2003/12/29 22:32:15  dischi
 # small speed improvements
 #
@@ -43,6 +46,9 @@
 # ----------------------------------------------------------------------- */
 #endif
 
+import os
+import stat
+import traceback
 
 # XML support
 from xml.utils import qp_xml
@@ -84,10 +90,19 @@ class FXDtree(qp_xml.Parser):
         if not vfs.isfile(filename):
             self.tree = XMLnode('freevo')
         else:
-            f = vfs.open(filename)
-            self.tree = self.parse(f)
-            f.close()
-
+            self.tree = None
+            if config.OVERLAY_DIR:
+                cache = vfs.getoverlay(filename + '.raw')
+                if os.path.isfile(cache) and \
+                       os.stat(cache)[stat.ST_MTIME] > os.stat(filename)[stat.ST_MTIME]:
+                    self.tree = util.read_pickle(cache)
+            if not self.tree:
+                f = vfs.open(filename)
+                self.tree = self.parse(f)
+                f.close()
+                if config.OVERLAY_DIR and self.tree:
+                    util.save_pickle(self.tree, cache)
+                
 
     def add(self, node, parent=None, pos=None):
         """
@@ -122,6 +137,8 @@ class FXDtree(qp_xml.Parser):
         """
         Help function to dump all elements
         """
+        if not elem:
+            return
         f.write('<' + elem.name)
         for (ns, name), value in elem.attrs.items():
             f.write(' %s="%s"' % (name, value))
@@ -131,7 +148,7 @@ class FXDtree(qp_xml.Parser):
                 for i in range(depth):
                     f.write('  ')
             else:
-                f.write('>' + elem.first_cdata)
+                f.write('>' + elem.first_cdata.replace('&', '&amp;'))
 
             for child in elem.children:
                 self._dump_recurse(f, child, depth=depth+1)
@@ -143,7 +160,7 @@ class FXDtree(qp_xml.Parser):
                     for i in range(depth):
                         f.write('  ')
                 else:
-                    f.write(child.following_cdata)
+                    f.write(child.following_cdata.replace('&', '&amp;'))
             f.write('</%s>' % elem.name)
         else:
             f.write('/>')
