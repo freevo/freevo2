@@ -623,7 +623,6 @@ TVTIME_CMD = CONF.tvtime
 MPLAYER_DEBUG = 0
 
 MPLAYER_CMD = CONF.mplayer
-print 'Using MPlayer: %s' % MPLAYER_CMD
     
 MPLAYER_AO_DEV       = 'oss:/dev/dsp'  # e.g.: oss,sdl,alsa, see mplayer docs
 

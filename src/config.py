@@ -22,6 +22,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2003/06/30 20:26:18  outlyer
+# Make freevo a lot less noisy; by default, print warnings and errors;
+# if DEBUG is enabled, THEN we print more.
+#
 # Revision 1.29  2003/06/27 15:24:39  dischi
 # small fix
 #
@@ -88,7 +92,7 @@ DEBUG_STDOUT = 1
 # 0 = Debug output off
 # 1 = Some debug output
 # A higher number will generate more detailed output from some modules.
-DEBUG = 1
+DEBUG = 0
 
 
 if os.path.isdir('/var/log/freevo'):
@@ -109,14 +113,14 @@ class Logger:
             appname = os.path.splitext(os.path.basename(sys.argv[0]))[0]
             logfile = '%s/internal-%s-%s.log' % (LOGDIR, appname, os.getuid())
             self.fp = open(logfile, 'a')
-            print 'Logging info in %s' % logfile
+            if DEBUG: print 'Logging info in %s' % logfile
         except IOError:
             print 'Could not open logfile: %s' % logfile
             self.fp = open('/dev/null','a')
         self.softspace = 0
         ts = time.asctime(time.localtime(time.time()))
-        self.write('-' * 79 + '\n')
-        self.write('Starting %s at %s\n' % (logtype, ts))
+        if DEBUG: self.write('-' * 79 + '\n')
+        if DEBUG: self.write('Starting %s at %s\n' % (logtype, ts))
         
         
     def write(self, msg):
@@ -239,14 +243,14 @@ for dirname in [os.path.expanduser('~/.freevo'), '/etc/freevo']:
 for dir in cfgfilepath:
     freevoconf = dir + '/freevo.conf'
     if os.path.isfile(freevoconf):
-        print 'Loading configure settings: %s' % freevoconf
+        if DEBUG: print 'Loading configure settings: %s' % freevoconf
         read_config(freevoconf, CONF)
         break
     
 # Load freevo_config.py:
 cfgfilename = './freevo_config.py'
 if os.path.isfile(cfgfilename):
-    print 'Loading cfg: %s' % cfgfilename
+    if DEBUG: print 'Loading cfg: %s' % cfgfilename
     execfile(cfgfilename, globals(), locals())
 
 else:
@@ -258,7 +262,7 @@ else:
 for dirname in cfgfilepath:
     overridefile = dirname + '/local_conf.py'
     if os.path.isfile(overridefile):
-        print 'Loading cfg overrides: %s' % overridefile
+        if DEBUG: print 'Loading cfg overrides: %s' % overridefile
         execfile(overridefile, globals(), locals())
 
         try:
