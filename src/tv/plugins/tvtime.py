@@ -9,6 +9,18 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/10/15 20:17:07  mikeruelle
+# new in this release:
+# -use new childthread
+# -writes tvtime.xml and stationlist.xml files to keep in sync
+#  with freevo channels
+# -merges stationlist.xml and tvtime.xml if they exist already
+# -set tvtime xml parameters if you have 0.9.10 or newer
+# -added support for custom tuned channels using FREQUENCY_TABLE
+#
+# Revision 1.12  2003/10/15 19:00:41  mikeruelle
+# ok it should be ready for merge.
+#
 # Revision 1.17  2003/09/03 17:54:38  dischi
 # Put logfiles into LOGDIR not $FREEVO_STARTDIR because this variable
 # doesn't exist anymore.
@@ -50,9 +62,15 @@ import time, os
 import string
 import threading
 import signal
+import cgi
+import re
+import popen2
+from xml.dom.ext.reader import Sax2
+from xml.dom.ext import PrettyPrint
+from cStringIO import StringIO
 
 import util    # Various utilities
-import osd     # The OSD class, used to communicate with the OSD daemon
+import osd
 import rc      # The RemoteControl class.
 import childapp # Handle child applications
 import tv.epg_xmltv as epg # The Electronic Program Guide
@@ -62,10 +80,6 @@ import plugin
 
 # Set to 1 for debug output
 DEBUG = config.DEBUG or 3
-
-TRUE = 1
-FALSE = 0
-
 
 # Create the OSD object
 osd = osd.get_singleton()
@@ -77,9 +91,266 @@ class PluginInterface(plugin.Plugin):
     def __init__(self):
         plugin.Plugin.__init__(self)
 
+        # get config locations and mod times so we can check if we need
+        # to regen xml config files (because they changed)
+        self.mylocalconf = self.findLocalConf()
+        self.myfconfig = os.environ['FREEVO_CONFIG']
+        self.tvtimecache = os.path.join(config.FREEVO_CACHEDIR, 'tvtimecache')
+        self.mylocalconf_t = os.path.getmtime(self.mylocalconf)
+        self.myfconfig_t = os.path.getmtime(self.myfconfig)
+
+        self.xmltv_supported = self.isXmltvSupported()
+
+        #check/create the stationlist.xml and tvtime.xml
+	self.createTVTimeConfig()
+
         # create the tvtime object and register it
         plugin.register(TVTime(), plugin.TV)
 
+    def isXmltvSupported(self):
+        helpcmd = '%s --help' %  config.TVTIME_CMD
+        has_xmltv=False
+        child = popen2.Popen3( helpcmd, 1, 100)
+        data = child.childerr.readline() # Just need the first line
+        if data:
+            data = re.search( "^tvtime: Running tvtime (?P<major>\d+).(?P<minor>\d+).(?P<version>\d+).", data )
+            if data:
+                _debug_("major is: %s" % data.group( "major" ))
+                _debug_("minor is: %s" % data.group( "minor" ))
+                _debug_("version is: %s" % data.group( "version" ))
+                major = int(data.group( "major" ))
+                minor = int(data.group( "minor" ))
+                ver = int(data.group( "version" ))
+                if major > 0:
+                    has_xmltv=True
+                elif major == 0 and minor == 9 and ver >= 10:
+                    has_xmltv=True
+        child.wait()
+        return has_xmltv
+
+    def findLocalConf(self):
+        cfgfilepath = [ '.', os.path.expanduser('~/.freevo'), '/etc/freevo' ]
+        mylocalconf = ''
+        for dir in cfgfilepath:
+            mylocalconf = os.path.join(dir,'local_conf.py')
+            if os.path.isfile(mylocalconf):
+                break
+        return mylocalconf
+
+    def createTVTimeConfig(self):
+        tvtimedir = os.path.join(os.environ['HOME'], '.tvtime')
+        if not os.path.isdir(tvtimedir):
+            os.mkdir(tvtimedir)
+        if self.needNewConfigs():
+            self.writeStationListXML()
+            self.writeTvtimeXML()
+            self.writeMtimeCache()
+
+    def needNewConfigs(self):
+        tvtimedir = os.path.join(os.environ['HOME'], '.tvtime')
+        if not os.path.isfile(os.path.join(tvtimedir, 'stationlist.xml')):
+            return 1
+
+        if not os.path.isfile(os.path.join(tvtimedir, 'tvtime.xml')):
+            return 1
+
+        if not os.path.isfile(self.tvtimecache):
+            _debug_('no cache file')
+            return 1
+
+        (cachelconf, cachelconf_t, cachefconf_t) = self.readMtimeCache()
+
+        cachelconf = cachelconf.rstrip()
+        cachelconf_t = cachelconf_t.rstrip()
+        cachefconf_t = cachefconf_t.rstrip()
+
+        if not (cachelconf == self.mylocalconf): 
+            _debug_('local_conf changed places')
+            return 1
+
+        if (long(self.mylocalconf_t) > long(cachelconf_t)):
+            _debug_('local_conf modified')
+            return 1
+
+        if (long(self.myfconfig_t) > long(cachefconf_t)):
+            _debug_('fconfig modified')
+            return 1
+
+	return 0
+
+    def readMtimeCache(self):
+	return file(self.tvtimecache, 'rb').readlines()
+
+    def writeMtimeCache(self):
+	fp = open(self.tvtimecache, 'wb')
+        fp.write(self.mylocalconf)
+	fp.write('\n')
+        fp.write(str(self.mylocalconf_t))
+	fp.write('\n')
+        fp.write(str(self.myfconfig_t))
+	fp.write('\n')
+	fp.close()
+
+    def writeTvtimeXML(self):
+        tvtimexml = os.path.join(os.environ['HOME'], '.tvtime', 'tvtime.xml')
+	configcmd = os.path.dirname(config.TVTIME_CMD)
+        configcmd += "tvtime-configure"
+        cf_norm, cf_input, cf_clist, cf_device = config.TV_SETTINGS.split()
+        s_norm = cf_norm.upper()
+	daoptions = ''
+        if os.path.isfile(tvtimexml):
+	    daoptions = ' -F ' + tvtimexml
+        if self.xmltv_supported:
+            daoptions += ' -d %s -n %s -t %s' % (cf_device, s_norm, config.XMLTV_FILE)
+        else:
+            daoptions += ' -d %s -n %s' % (cf_device, s_norm)
+        os.system(configcmd+daoptions)
+
+    def writeStationListXML(self):
+	self.createChannelsLookupTables()
+        norm='freevo'
+        tvnorm = config.CONF.tv
+        tvnorm = tvnorm.upper()
+        tvtimefile = os.path.join(os.environ['HOME'], '.tvtime', 'stationlist.xml')
+        if os.path.isfile(tvtimefile):
+            self.mergeStationListXML(tvtimefile, tvnorm, norm)
+        else:
+            self.writeNewStationListXML(tvtimefile, tvnorm, norm)
+
+    def mergeStationListXML(self, tvtimefile, tvnorm, norm):
+        _debug_("merging stationlist.xml")
+        try:
+            os.rename(tvtimefile,tvtimefile+'.bak')
+        except OSError:
+            return
+
+        reader = Sax2.Reader()
+        doc = reader.fromStream(tvtimefile+'.bak')
+        mystations = doc.getElementsByTagName('station')
+        gotlist = 0
+        freevonode = None
+        for station in mystations:
+            myparent = station.parentNode
+            if myparent.getAttribute('norm') == tvnorm and myparent.getAttribute('frequencies') == 'freevo':
+                print 'found it'
+                myparent.removeChild(station)
+                freevonode = myparent
+                gotlist=1
+        if not gotlist:
+            child = doc.createElement('list')
+            freevonode = child
+            child.setAttribute('norm', tvnorm)
+            child.setAttribute('frequencies', 'freevo')
+            doc.documentElement.appendChild(child)
+        #put in the new children
+        c = 0
+        for m in config.TV_CHANNELS:
+            mychan = m[2]
+	    myband = self.lookupChannelBand(mychan)
+            if myband == "Custom":
+                mychan = config.FREQUENCY_TABLE.get(mychan)
+                mychan = float(mychan)
+                mychan = mychan / 1000.0
+                mychan = "%.2fMHz" % mychan
+            fchild =  doc.createElement('station')
+            fchild.setAttribute('channel',mychan)
+            fchild.setAttribute('band',myband)
+            fchild.setAttribute('name',cgi.escape(m[1]))
+            fchild.setAttribute('active','1')
+            fchild.setAttribute('position',str(c))
+            if self.xmltv_supported:
+                fchild.setAttribute('xmltvid',m[0])
+            freevonode.appendChild(fchild)
+            c = c + 1
+	# YUCK:
+        # PrettyPrint the results to stationlistxml unfortuneately it
+	# adds a bunch of stuff in comments at the end of the file
+	# that causes the document not to load if we merge again later
+	# so I print to a string buffer and then remove the offending
+	# comments by truncating the output.
+	strIO = StringIO()
+        PrettyPrint(doc, strIO)
+	mystr = strIO.getvalue()
+	myindex = mystr.find('</stationlist>')
+	mystr = mystr[:myindex+15]
+        fp = open(tvtimefile,'wb')
+	fp.write(mystr)
+        fp.close()
+
+
+    def writeNewStationListXML(self, tvtimefile, tvnorm, norm):
+        _debug_("writing new stationlist.xml")
+        fp = open(tvtimefile,'wb')
+        fp.write('<?xml version="1.0"?>\n')
+        fp.write('<!DOCTYPE stationlist PUBLIC "-//tvtime//DTD stationlist 1.0//EN" "http://tvtime.sourceforge.net/DTD/stationlist1.dtd">\n')
+        fp.write('<stationlist xmlns="http://tvtime.sourceforge.net/DTD/">\n')
+        fp.write('  <list norm="%s" frequencies="%s">\n' % (tvnorm, norm))
+
+        c = 0
+        for m in config.TV_CHANNELS:
+            mychan = m[2]
+	    myband = self.lookupChannelBand(mychan)
+            if myband == "Custom":
+                mychan = config.FREQUENCY_TABLE.get(mychan)
+                mychan = float(mychan)
+                mychan = mychan / 1000.0
+                mychan = "%.2fMHz" % mychan
+            if self.xmltv_supported:
+                fp.write('    <station name="%s" xmltvid="%s" active="1" position="%s" band="%s" channel="%s"/>\n' % (cgi.escape(m[1]), m[0], c, myband, mychan))
+            else:
+                fp.write('    <station name="%s" active="1" position="%s" band="%s" channel="%s"/>\n' % (cgi.escape(m[1]),c,myband,mychan))
+            c = c + 1
+
+        fp.write('  </list>\n')
+        fp.write('</stationlist>\n')
+        fp.close()
+
+    def lookupChannelBand(self, channel):
+        # check if we have custom
+       
+	#Aubin's auto detection code works only for numeric channels and
+	#forces them to int.
+	channel = str(channel)
+       
+        if config.FREQUENCY_TABLE.has_key(channel):
+            _debug_("have a custom")
+            return "Custom"
+        elif (re.search('^\d+$', channel)):
+            _debug_("have number")
+	    if self.chanlists.has_key(config.CONF.chanlist):
+                _debug_("found chanlist in our list")
+	        return self.chanlists[config.CONF.chanlist]
+	elif self.chans2band.has_key(channel):
+            _debug_("We know this channels band.")
+            return self.chans2band[channel]
+        _debug_("defaulting to USCABLE")
+        return "US Cable"
+
+    def createChannelsLookupTables(self):
+        chanlisttmp = [ ('us-bcast', 'US Broadcast'), ('us-cable', 'US Cable'), ('us-cable-hrc', 'US Cable'), ('japan-cable', 'Japan Cable'), ('japan-bcast', 'Japan Broadcast'), ('china-bcast', 'China Broadcast') ]
+        self.chanlists = dict(chanlisttmp)
+        chans_list = [('T' + str(x), 'US Two-Way') for x in range(7, 15)]
+        chans_list += [('A' + str(x), 'China Broadcast') for x in range(1, 8)]
+        chans_list += [('B' + str(x), 'China Broadcast') for x in range(1, 32)]
+        chans_list += [('C' + str(x), 'China Broadcast') for x in range(1, 6)]
+        chans_list += [('E' + str(x), 'VHF E2-E12') for x in range(1, 13)]
+        chans_list += [('S' + str(x), 'VHF S1-S41') for x in range(1, 42)]
+        chans_list += [('Z+1', 'VHF Misc'), ('Z+2', 'VHF Misc')]
+        chans_list += [(chr(x), 'VHF Misc') for x in range(88, 91)]
+        chans_list += [('K%0.2i' % x, 'VHF France') for x in range(1, 11)]
+        chans_list += [('H%0.2i' % x, 'VHF France') for x in range(1, 20)]
+        chans_list += [('K' + chr(x), 'VHF France') for x in range(66, 82)]
+        chans_list += [('SR' + str(x), 'VHF Russia') for x in range(1, 20)]
+        chans_list += [('R' + str(x), 'VHF Russia') for x in range(1, 13)]
+        chans_list += [('AS5A', 'VHF Australia'), ('AS9A', 'VHF Australia')]
+        chans_list += [('AS' + str(x), 'VHF Australia') for x in range(1, 13)]
+        chans_list += [('H1', 'VHF Italy'), ('H2', 'VHF Italy')]
+        chans_list += [(chr(x), 'VHF Italy') for x in range(65, 73)]
+        chans_list += [('I' + str(x), 'VHF Ireland') for x in range(1, 10)]
+        chans_list += [('U' + str(x), 'UHF') for x in range(21, 70)]
+        chans_list += [('AU' + str(x), 'UHF Australia') for x in range(28, 70)]
+        chans_list += [('O' + str(x), 'Australia Optus') for x in range(1, 58)]
+	self.chans2band=dict(chans_list)
 
 
 class TVTime:
@@ -88,9 +359,8 @@ class TVTime:
     __igainvol = 0
     
     def __init__(self):
-        self.thread = TVTime_Thread()
-        self.thread.setDaemon(1)
-        self.thread.start()
+        self.thread = childapp.ChildThread()
+        self.thread.stop_osd = True
         self.tuner_chidx = 0    # Current channel, index into config.TV_CHANNELS
         self.app_mode = 'tv'
         
@@ -155,29 +425,6 @@ class TVTime:
             cf_norm, cf_input, cf_clist, cf_device = config.TV_SETTINGS.split()
 
             s_norm = cf_norm.upper()
-            # XXX I'm just guessing for some of these, fix later...
-            clist_conv = { 'us-bcast' : 'us-broadcast',
-                           'us-cable' : 'us-cable',
-                           'us-cable-hrc' : 'us-cable',
-                           'japan-bcast' : 'japan-broadcast',
-                           'japan-cable' : 'japan-cable',
-                           'europe-west' : 'europe',
-                           'europe-east' : 'europe',
-                           'italy' : 'europe',
-                           'newzealand' : 'newzealand',
-                           'australia' : 'australia',
-                           'ireland' : 'europe',
-                           'france' : 'france',
-                           'china-bcast' : 'europe',
-                           'southafrica' : 'europe',
-                           'argentina' : 'europe',
-                           'canada-cable' : 'us-cable'}
-            s_clist = clist_conv.get(cf_clist, 'us-cable')
-            if DEBUG:
-                print 'TVTIME, using chanlist "%s" for given choice "%s"' % (cf_clist, s_clist)
-                
-            # XXX cf_norm, cf_clist doesn't fully correspond to MPlayer!
-            # Most of these options are only available in tvtime ver >= 0.9.8
 
             outputplugin = config.CONF.display
             if config.CONF.display == 'x11':
@@ -192,22 +439,25 @@ class TVTime:
                                                                    w,
                                                                    s_norm,
                                                                    cf_device,
-                                                                   s_clist,
-                                                                   tuner_channel)
+                                                                   'freevo',
+                                                                   self.tuner_chidx)
+
             if osd.get_fullscreen() == 1:
                 command += ' -m'
             else:
                 command += ' -M'
+					     
+
 
         else:
-            print 'Mode "%s" is not implemented' % mode  # XXX ui.message()
+            print 'Mode "%s" is not implemented' % mode  # BUG ui.message()
             return
 
         self.mode = mode
 
         mixer = plugin.getbyname('MIXER')
 
-        # XXX Mixer manipulation code.
+        # BUG Mixer manipulation code.
         # TV is on line in
         # VCR is mic in
         # btaudio (different dsp device) will be added later
@@ -219,19 +469,14 @@ class TVTime:
             mixer.setPcmVolume(0)
 
         # Start up the TV task
-        self.thread.mode = 'play'
-        self.thread.command = command
-        self.thread.mode_flag.set()
-        
-        self.prev_app = rc.app()
-        rc.app(self)
+        self.thread.start(TVTimeApp, (command))        
 
-        if osd.focused_app():
-            osd.focused_app().hide()
+        self.prev_app = rc.app() # ???
+        rc.app(self)
 
         # Suppress annoying audio clicks
         time.sleep(0.4)
-        # XXX Hm.. This is hardcoded and very unflexible.
+        # BUG Hm.. This is hardcoded and very unflexible.
         if mixer and mode == 'vcr':
             mixer.setMicVolume(config.VCR_IN_VOLUME)
         elif mixer:
@@ -253,24 +498,15 @@ class TVTime:
             mixer.setMicVolume(0)
             mixer.setIgainVolume(0) # Input on emu10k cards.
 
-        self.thread.mode = 'stop'
-        self.thread.mode_flag.set()
-
+        self.thread.stop('quit\n')
         rc.app(self.prev_app)
-        if osd.focused_app():
-            osd.focused_app().show()
-
-        while self.thread.mode == 'stop':
-            time.sleep(0.05)
-        print 'stopped %s app' % self.mode
-
 
     def eventhandler(self, event, menuw=None):
-        print '%s: %s app got %s event' % (time.time(), self.mode, event)
+        _debug_('%s: %s app got %s event' % (time.time(), self.mode, event))
         if event == em.STOP or event == em.PLAY_END:
             self.Stop()
             rc.post_event(em.PLAY_END)
-            return TRUE
+            return True
         
         elif event == em.TV_CHANNEL_UP or event == em.TV_CHANNEL_DOWN:
             if self.mode == 'vcr':
@@ -279,18 +515,18 @@ class TVTime:
             # Go to the prev/next channel in the list
             if event == em.TV_CHANNEL_UP:
                 self.TunerPrevChannel()
+                self.thread.app.setchannel('UP')
             else:
                 self.TunerNextChannel()
+                self.thread.app.setchannel('DOWN')
 
-            new_channel = self.TunerGetChannel()
-            self.thread.app.setchannel(new_channel)
-            return TRUE
+            return True
             
         elif event == em.TOGGLE_OSD:
             self.thread.app.write('DISPLAY_INFO\n')
-            return TRUE
+            return True
         
-        return FALSE
+        return False
         
             
 
@@ -300,7 +536,7 @@ class TVTimeApp(childapp.ChildApp):
     class controlling the in and output from the tvtime process
     """
 
-    def __init__(self, app):
+    def __init__(self, (app)):
         if config.MPLAYER_DEBUG:
             fname_out = os.path.join(config.LOGDIR, 'tvtime_stdout.log')
             fname_err = os.path.join(config.LOGDIR, 'tvtime_stderr.log')
@@ -326,8 +562,6 @@ class TVTimeApp(childapp.ChildApp):
         # reaped by childapp.kill().wait()
         self.write('quit\n')
         childapp.ChildApp.kill(self, signal.SIGINT)
-
-        # XXX Krister testcode for proper X11 video
         if DEBUG: print 'Killing tvtime'
         if config.MPLAYER_DEBUG:
             self.log_stdout.close()
@@ -335,42 +569,6 @@ class TVTimeApp(childapp.ChildApp):
 
 
     def stdout_cb(self, line):
-        # XXX FIXME to the new event handling
-        events = { 'n' : em.MIXER_VOLDOWN,
-                   'm' : em.MIXER_VOLUP,
-                   'c' : em.TV_CHANNEL_UP,
-                   'v' : em.TV_CHANNEL_DOWN,
-                   'Escape' : em.STOP,
-
-                   # 'Up' : rc.UP,
-                   # 'Down' : rc.DOWN,
-                   # 'Left' : rc.LEFT,
-                   # 'Right' : rc.RIGHT,
-                   # ' ' : rc.SELECT,
-                   # 'Enter' : rc.SELECT,
-
-                   'F3' : em.MIXER_MUTE,
-                   # 'e' : rc.ENTER,
-                   # 'd' : rc.DISPLAY,
-                   's' : em.STOP }
-        
-        print 'TVTIME 1 KEY EVENT: "%s"' % str(list(line)) # XXX TEST
-
-        if line == 'F10':
-            print 'TVTIME screenshot!'
-            self.write('screenshot\n')
-        elif line == 'z':
-            print 'TVTIME fullscreen toggle!'
-            self.write('toggle_fullscreen\n')
-            osd.toggle_fullscreen()
-        else:
-            event = events.get(line, None)
-            if event is not None:
-                rc.post_event(event)
-                if DEBUG: print 'posted translated tvtime event "%s"' % event
-            else:
-                if DEBUG: print 'tvtime cmd "%s" not found!' % line
-        
         if config.MPLAYER_DEBUG:
             try:
                 self.log_stdout.write(line + '\n')
@@ -386,64 +584,6 @@ class TVTimeApp(childapp.ChildApp):
                 pass # File closed
 
     def setchannel(self, channelno):
-        ch_digits = list(str(channelno))   # XXX Only works for numerical channels!
-        for digit in ch_digits:
-            cmd = 'CHANNEL_%s\n' % digit
-            self.write(cmd)
+        cmd = 'CHANNEL_%s\n' % channelno
+        self.write(cmd)
         self.write('enter\n')
-
-        
-# ======================================================================
-class TVTime_Thread(threading.Thread):
-
-    def __init__(self):
-        threading.Thread.__init__(self)
-        
-        self.mode = 'idle'
-        self.mode_flag = threading.Event()
-        self.command  = ''
-        self.app = None
-        self.fifo = None
-        self.audioinfo = None              # Added to enable update of GUI
-
-    def run(self):
-        while 1:
-            if self.mode == 'idle':
-                self.mode_flag.wait()
-                self.mode_flag.clear()
-                
-            elif self.mode == 'play':
-                # X11 cannot handle two fullscreen windows, so shut down the window.
-                if config.CONF.display == 'x11': 
-                    if DEBUG:
-                        print "Stopping Display for tvtime/x11"
-                    osd.stopdisplay()			
-                if DEBUG:
-                    print 'TVTime_Thread.run(): Started, cmd=%s' % self.command
-                    
-                self.app = TVTimeApp(self.command)
-                
-                while self.mode == 'play' and self.app.isAlive():
-                    if self.audioinfo: 
-                        if not self.audioinfo.pause:
-                            self.audioinfo.draw()        
-                    time.sleep(0.1)
-
-                self.app.kill()
-
-                # Ok, we can use the OSD again.
-                if config.CONF.display == 'x11':
-                    if DEBUG:
-                        print "Display now back online"
-                    osd.restartdisplay()
-                osd.update()
-
-                if self.mode == 'play':
-                    if DEBUG: print 'posting play_end'
-                    rc.post_event(em.PLAY_END)
-
-                self.mode = 'idle'
-                
-            else:
-                self.mode = 'idle'
-
