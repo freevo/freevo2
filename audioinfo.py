@@ -16,6 +16,9 @@
 #          * Add support for Ogg-Vorbis
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2002/08/03 11:19:21  krister
+# Made MP3 track string= if None.
+#
 # Revision 1.7  2002/08/02 15:32:18  outlyer
 # Small changes to fix the badly broken VBR parser that was in audioinfo.py
 #  o Moved class into mp3_id3.py since audioinfo.py is/should be a wrapper
@@ -237,6 +240,8 @@ class AudioInfo:
         if not self.title:
             self.title = ''
         self.track  = id3.track
+        if not self.track:
+            self.track = ''
         self.year   = id3.year
         return 1
 
