@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.144  2004/07/21 11:34:59  dischi
+# disable one track auto-play for dvd
+#
 # Revision 1.143  2004/07/17 08:18:56  dischi
 # unicode fixes
 #
@@ -564,14 +567,15 @@ class VideoItem(Item):
         # delete the submenu that got us here
         self.menuw.delete_submenu(False)
         
-        # only one track, play it
-        if len(self.info['tracks']) == 1:
-            i=copy.copy(self)
-            i.parent = self
-            i.possible_player = []
-            i.set_url(self.url + '1', False)
-            i.play(menuw = self.menuw)
-            return
+        # XXX only one track, play it
+        # XXX disabled, it makes it impossible to set languages
+        # if len(self.info['tracks']) == 1:
+        #     i=copy.copy(self)
+        #     i.parent = self
+        #     i.possible_player = []
+        #     i.set_url(self.url + '1', False)
+        #     i.play(menuw = self.menuw)
+        #     return
 
         # build a menu
         items = []
