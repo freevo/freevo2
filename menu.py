@@ -21,6 +21,8 @@ import osd
 # sends commands to
 import rc
 
+TRUE  = 1
+FALSE = 0
 
 rc   = rc.get_singleton()   # Create the remote control object
 osd  = osd.get_singleton()  # Create the OSD object
@@ -82,7 +84,15 @@ class Info(MenuItem):
         self.icon  = None
         self.action = None
         self.action_arg = None
+        self.calling_info = None
+        
+    def eventhandler(self, event, menuw=None):
+        # give the event to the next eventhandler in the list
+        if self.calling_info:
+            return self.calling_info.eventhandler(event, menuw)
 
+        print "no eventhandler for event %s menuw %s" % (event, menuw)
+        return FALSE
 
         
 class Menu:
@@ -240,8 +250,11 @@ class MenuWidget:
                 #action_str = str(action)
                 #arg_str = str(menu.selected.eventhandler_args)[0:40]
                 print 'Calling action "%s"' % str(action)
-                action(event = event, arg=menu.selected.eventhandler_args,
-                       menuw=self)
+                if hasattr(menu.selected, 'eventhandler_args'):
+                    action(event = event, arg=menu.selected.eventhandler_args,
+                           menuw=self)
+                else:
+                    action(event = event, menuw=self)
         return 0
 
 
