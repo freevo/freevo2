@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/10/03 15:55:25  dischi
+# adjust to new popup code
+#
 # Revision 1.9  2004/07/26 18:10:18  dischi
 # move global event handling to eventhandler.py
 #
@@ -90,7 +93,7 @@ class PluginInterface(plugin.DaemonPlugin):
                 print 'usb.py: new device %s' %d
                 for device, message, action in config.USB_HOTPLUG:
                     if d == device:
-                        pop = PopupBox(text=message)
+                        pop = PopupBox(message)
                         pop.show()
                         os.system(action)
                         pop.destroy()

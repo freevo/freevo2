@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.53  2004/10/03 15:55:25  dischi
+# adjust to new popup code
+#
 # Revision 1.52  2004/08/26 18:59:14  dischi
 # bugfix
 #
@@ -325,9 +328,9 @@ class TVGuide(MenuApplication):
             elif os.path.exists(tvlockfile):
                 # XXX: In the future add the options to watch what we are
                 #      recording or cancel it and watch TV.
-                gui.AlertBox(text=_('Sorry, you cannot watch TV while recording. ')+ \
+                gui.AlertBox(_('Sorry, you cannot watch TV while recording. ')+ \
                              _('If this is not true then remove ') + \
-                             tvlockfile + '.', height=200).show()
+                             tvlockfile + '.').show()
                 return True
             else:
                 self.start_tv()

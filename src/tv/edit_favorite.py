@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/10/03 15:55:25  dischi
+# adjust to new popup code
+#
 # Revision 1.16  2004/08/14 16:54:23  rshortt
 # Use cached channel list.
 #
@@ -110,8 +113,7 @@ class EditFavorite(PopupBox):
             
 
 
-        PopupBox.__init__(self, text=_('Edit Favorite'), x=left, y=top, width=width, 
-                          height=height)
+        PopupBox.__init__(self, text=_('Edit Favorite'))
 
         self.v_spacing = 15
         self.h_margin = 20

@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/10/03 15:55:26  dischi
+# adjust to new popup code
+#
 # Revision 1.16  2004/08/22 20:13:44  dischi
 # renamed get_screen to get_display
 #
@@ -81,9 +84,8 @@ def snapshot(videofile, imagefile=None, pos=None, update=True, popup=None):
         imagefile += '.tmp'
         
     if popup:
-        pop = gui.PopupBox(text='Creating thumbnail for \'%s\'...' % \
-                           os.path.basename(videofile),
-                           width=gui.get_display().width-config.OSD_OVERSCAN_X*2-80)
+        pop = gui.PopupBox('Creating thumbnail for \'%s\'...' % \
+                           os.path.basename(videofile))
         pop.show()
         
     args = [ config.MPLAYER_CMD, videofile, imagefile ]
