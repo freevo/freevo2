@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/04/12 19:58:09  dischi
+# small bugfix
+#
 # Revision 1.1  2003/04/06 21:19:44  dischi
 # Switched to new main1 skin
 #
@@ -56,7 +59,7 @@ def format_image(settings, item, width, height, force=0):
     else:
         type = item.type
 
-    cname = '%s-%s-%s-%s-%s' % (item.image, type, width, height, force)
+    cname = '%s-%s-%s-%s-%s-%s' % (item.image, type, item.type, width, height, force)
     if hasattr(item, 'media'):
         cname = '%s-%s' % (cname, item.media)
         
