@@ -24,6 +24,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/02/21 19:33:24  dischi
+# enhance input box, merge password and normal input
+#
 # Revision 1.12  2004/02/18 21:52:04  dischi
 # Major GUI update:
 # o started converting left/right to x/y
@@ -69,13 +72,10 @@ from AlertBox          import *
 from ConfirmBox        import *
 from Label             import *
 from Button            import *
-from LetterBox         import *
-from PasswordLetterBox import *
 from LetterBoxGroup    import *
 from RegionScroller    import *
 from Scrollbar         import *
 from InputBox          import *
-from PasswordInputBox  import *
 from LayoutManagers    import *
 from exceptions        import *
 from ProgressBox       import *

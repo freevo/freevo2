@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/02/21 19:33:24  dischi
+# enhance input box, merge password and normal input
+#
 # Revision 1.14  2004/02/18 21:52:04  dischi
 # Major GUI update:
 # o started converting left/right to x/y
@@ -65,6 +68,7 @@ class InputBox(PopupBox):
     width     Integer
     height    Integer
     text      String to print.
+    type      'normal' or 'password'
     icon      icon
     text_prop A dict of 3 elements composing text proprieties:
               { 'align_h' : align_h, 'align_v' : align_v, 'mode' : mode }
@@ -73,46 +77,29 @@ class InputBox(PopupBox):
                  mode    = hard (break at chars); soft (break at words)
     """
 
-    def __init__(self, text, handler=None, x=None, y=None, width=0, height=0,
+    def __init__(self, text, handler=None, type='text', x=None, y=None, width=0, height=0,
                  icon=None, vertical_expansion=1, text_prop=None, parent='osd'):
 
         PopupBox.__init__(self, text, handler, x, y, width, height,
                           icon, vertical_expansion, text_prop, parent)
 
-        self.lbg = LetterBoxGroup()
+        self.lbg = LetterBoxGroup(type=type)
         self.add_child(self.lbg)
-
+        
 
     def eventhandler(self, event):
+        if self.lbg.eventhandler(event):
+            self.draw()
+            return True
         
-        if event == INPUT_LEFT:
-            self.lbg.change_selected_box('left')
-            self.draw(update=True)
-
-        elif event == INPUT_RIGHT:
-            self.lbg.change_selected_box('right')
-            self.draw(update=True)
-
-        elif event == INPUT_ENTER:
+        if event == INPUT_ENTER:
             self.destroy()
-            if self.handler: self.handler(self.lbg.get_word())
+            if self.handler:
+                self.handler(self.lbg.get_word())
+            return True
 
-        elif event == INPUT_EXIT:
+        if event == INPUT_EXIT:
             self.destroy()
+            return True
 
-        elif event == INPUT_UP:
-            self.lbg.get_selected_box().charUp()
-            self.draw(update=True)
-
-        elif event == INPUT_DOWN:
-            self.lbg.get_selected_box().charDown()
-            self.draw(update=True)
-
-        elif event in (INPUT_0, INPUT_1, INPUT_2, INPUT_3,
-                       INPUT_4, INPUT_5, INPUT_6, INPUT_7,
-                       INPUT_8, INPUT_9, INPUT_0 ):
-            self.lbg.get_selected_box().cycle_phone_char(event.arg)
-            self.draw(update=True)
-        else:
-            return self.parent.eventhandler(event)
-
+        return self.parent.eventhandler(event)
