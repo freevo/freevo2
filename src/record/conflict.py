@@ -4,25 +4,6 @@
 # -----------------------------------------------------------------------------
 # $Id$
 #
-# FIXME: this is a bug, paddings are calculated wrong:
-# 2004-11-29 20:04:36,094 INFO     [conflict] conflict.py 215: found conflict:
-#  23     vox.de "Hör mal, wer da hämm..."   60 1203.19:15-19:45
-#  24     vox.de "Hör mal, wer da hämm..."   60 1203.19:45-20:15
-#  25     ard.de "Tagesschau"                50 1203.20:00-20:15
-#  26    sat1.de "Genial daneben - Die..."   50 1203.20:15-21:15
-#  27    kika.de "Bravo Bernd"               50 1203.20:55-21:00
-# 
-# 2004-11-29 20:04:36,095 INFO     [conflict] conflict.py 219: solved by setting:
-#  23     vox.de "Hör mal, wer da hämm..."   60 1203.19:15-19:45 dvb0
-#  24     vox.de "Hör mal, wer da hämm..."   60 1203.19:45-20:15 dvb0
-#  25     ard.de "Tagesschau"                50 1203.20:00-20:15 dvb1
-#  26    sat1.de "Genial daneben - Die..."   50 1203.20:15-21:15 dvb0
-#  27    kika.de "Bravo Bernd"               50 1203.20:55-21:00 dvb1
-#
-# First of all, why not use dvb1 for 23, that looks much better
-# Second: missing feature, 24 has a higher priority than 25 and should not
-# conflict in padding with 26.
-#
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
@@ -165,13 +146,36 @@ def scan(recordings, include_padding):
     return conflicts
 
 
+def rate_conflict(clist):
+    """
+    Rate a conflict list created by 'scan'. Result is a negative value
+    about the conflict lists.
+    """
+    ret  = 0
+    prio = 0
+    for c in clist:
+        # Every item in a conflict list gives 5 minus points
+        ret -= 5 * len(c)
+        # Remeber the priorities of the involved recordings
+        for r in c:
+            prio += r.priority
+    # return the result - the involved priorities
+    return ret - (float(prio) / 100)
+
+
 def rate(devices, best_rating):
+    """
+    Rate device/recording settings. If the rating is better then best_rating,
+    store the choosen recorder in the recording item.
+    """
     rating = 0
     for d in devices[:-1]:
         for r in d.rec:
             rating += r.priority * d.rating
         # overlapping padding gives minus points
-        rating -= 5 * (len(scan(d.rec, True)) - len(scan(d.rec, False)))
+        rating += rate_conflict(scan(d.rec, True)) - \
+                  rate_conflict(scan(d.rec, False))
+
     if rating > best_rating:
         # remember
         best_rating = rating
@@ -188,6 +192,10 @@ def rate(devices, best_rating):
 
 
 def check(devices, fixed, to_check, best_rating):
+    """
+    Check all possible combinations from the recordings in to_check on all
+    devives. Call recursive again.
+    """
     if not to_check:
         return rate(devices, best_rating)
 
@@ -209,6 +217,9 @@ def check(devices, fixed, to_check, best_rating):
 # interface
 
 def resolve(recordings):
+    """
+    Find and resolve conflicts in recordings.
+    """
     # sort by start time
     recordings.sort(lambda l, o: cmp(l.start,o.start))
 
