@@ -666,6 +666,12 @@ VIDEO_PREFERED_PLAYER = 'mplayer'
 #
 VIDEO_ONLY_SCAN_DATADIR = 1
 
+#
+# try to detect a movie with more than one file and join them as one
+# item
+#
+VIDEO_AUTOJOIN = 1
+
 
 # ======================================================================
 # Freevo audio settings:

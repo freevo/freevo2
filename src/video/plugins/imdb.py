@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2004/06/02 21:36:50  dischi
+# auto detect movies with more than one file
+#
 # Revision 1.34  2004/02/03 20:51:12  dischi
 # fix/enhance dvd on disc
 #
@@ -126,7 +129,7 @@ class PluginInterface(plugin.ItemPlugin):
         search imdb for this item
         """
         fxd = FxdImdb()
-        
+
         box = PopupBox(text=_('searching IMDB...'))
         box.show()
 
@@ -226,9 +229,16 @@ class PluginInterface(plugin.ItemPlugin):
         if self.disc_set:
             fxd.setDiscset(devicename, None)
         else:
-            video = makeVideo('file', 'f1', os.path.basename(self.item.filename),
-                              device=devicename)
-            fxd.setVideo(video)
+            if self.item.subitems:
+                for i in range(len(self.item.subitems)):
+                    video = makeVideo('file', 'f%s' % i,
+                                      os.path.basename(self.item.subitems[i].filename),
+                                      device=devicename)
+                    fxd.setVideo(video)
+            else:
+                video = makeVideo('file', 'f1', os.path.basename(self.item.filename),
+                                  device=devicename)
+                fxd.setVideo(video)
             fxd.setFxdFile(os.path.splitext(self.item.filename)[0])
 
         fxd.writeFxd()

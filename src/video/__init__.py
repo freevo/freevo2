@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2004/06/02 21:36:49  dischi
+# auto detect movies with more than one file
+#
 # Revision 1.30  2004/03/27 00:46:23  outlyer
 # Fixed a crash. It occured when I used the "Configure Directory" option to
 # show "all types" in a music directory.
@@ -89,7 +92,7 @@ import util
 import util.videothumb
 import plugin
 
-from videoitem import VideoItem
+from videoitem import VideoItem, FileInformation
 
 # variables for the hashing function
 fxd_database         = {}
@@ -130,12 +133,52 @@ class PluginInterface(plugin.MimetypePlugin):
         """
         items = []
 
-        for file in util.find_matches(files, config.VIDEO_SUFFIX):
-            if parent and parent.type == 'dir' and hasattr(parent,'VIDEO_DIRECTORY_AUTOBUILD_THUMBNAILS') and \
+        all_files    = util.find_matches(files, config.VIDEO_SUFFIX)
+        hidden_files = []
+
+        for file in all_files:
+            if parent and parent.type == 'dir' and \
+                   hasattr(parent,'VIDEO_DIRECTORY_AUTOBUILD_THUMBNAILS') and \
                    parent.VIDEO_DIRECTORY_AUTOBUILD_THUMBNAILS:
                 util.videothumb.snapshot(file, update=False, popup=True)
 
+            if file in hidden_files:
+                files.remove(file)
+                continue
+            
             x = VideoItem(file, parent)
+
+            # join video files
+            if config.VIDEO_AUTOJOIN and file.find('1') > 0:
+                pos = 0
+                for count in range(file.count('1')):
+                    add_file = []
+                    missing  = 0
+                    for i in range(2, 6):
+                        current = file[:pos] + file[pos:].replace('1', str(i), 1)
+                        if current in all_files:
+                            add_file.append(current)
+                            end = i
+                        elif not missing:
+                            # one file missing, stop searching
+                            missing = i
+                        
+                    if add_file and missing > end:
+                        if len(add_file) > 3:
+                            # more than 4 files, I don't belive it
+                            break
+                        # create new name
+                        name = file[:pos] + file[pos:].replace('1', '1-%s' % end, 1)
+                        x = VideoItem(name, parent)
+                        x.files = FileInformation()
+                        for f in [ file ] + add_file:
+                            x.files.append(f)
+                            x.subitems.append(VideoItem(f, x))
+                            hidden_files.append(f)
+                        break
+                    else:
+                        pos += file[pos:].find('1') + 1
+                        
             if parent.media:
                 file_id = parent.media.id + \
                           file[len(os.path.join(parent.media.mountdir,"")):]
@@ -143,7 +186,7 @@ class PluginInterface(plugin.MimetypePlugin):
                     x.mplayer_options = discset_informations[file_id]
                 except KeyError:
                     pass
-            items += [ x ]
+            items.append(x)
             files.remove(file)
 
         for i in copy.copy(files):
