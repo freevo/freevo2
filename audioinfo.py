@@ -4,10 +4,10 @@
 # $Id$
 #
 # Authors: Thomas Malt <thomas@malt.no>
+#	   Aubin Paul <aubin@debian.org>
 #          Scott Hassan (afaik)
 # Notes:   - Lot of code taken from an mp3 module by Scott Hassan
-#          - From now on we also need to add ogg.vorbis python bindings
-#            to requirements (probably should be optional)
+#          - From now on ogg.vorbis is an optional dependency.
 #          - The code for calculating elapsed time and stuff is not 
 #            really accurate. We don't get any info from mplayer about
 #            how far we've really gotten, we just hope the timeskew
@@ -16,6 +16,10 @@
 #          * Add support for Ogg-Vorbis
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2002/07/29 06:25:29  outlyer
+# Added imghdr.what() call back to verify the image is actually an image
+# and not lying via the extension. That of course, would make for a crash.
+#
 # Revision 1.2  2002/07/29 06:21:27  outlyer
 # Fixed a minor regression. Added code to get the cover image, as per
 # previous behaviour. I've noticed that the mplayer mp3 player takes remarkably
@@ -61,6 +65,7 @@ import time
 import re
 import mp3_id3
 import skin
+import imghdr
 
 DEBUG=1
 
@@ -114,7 +119,7 @@ class AudioInfo:
 	# Only draw the cover if the file exists. We'll
 	# use the standard imghdr function to check if
 	# it's a real png, and not a lying one :)
-	if os.path.isfile(cover_logo):
+	if os.path.isfile(cover_logo) and imghdr.what(cover_logo):
 		self.image = cover_logo
 	# Allow per mp3 covers. As per Chris' request ;)
 	if os.path.isfile(os.path.splitext(filename)[0] + '.png'):
