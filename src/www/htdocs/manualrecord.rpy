@@ -56,6 +56,22 @@ class ManualRecordResource(FreevoResource):
         fv = HTMLResource()
         form = request.args
 
+        (server_available, message) = ri.connectionTest()
+        if not server_available:
+            fv.printHeader('Manual Record', 'styles/main.css')
+            fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
+            fv.tableRowOpen('class="chanrow"')
+            fv.tableCell('<img src="images/logo_200x100.png" />', 'align="left"')
+            fv.tableCell('Manual Record', 'class="heading" align="left"')
+            fv.tableRowClose()
+            fv.tableClose()
+            fv.res += '<hr /><h2>ERROR: recording server is unavailable</h2><hr />'
+            fv.printSearchForm()
+            fv.printLinks()
+            fv.printFooter()
+
+            return fv.res
+
         curtime_epoch = time.time()
         curtime = time.localtime(curtime_epoch)
         chan = fv.formValue(form, 'chan')

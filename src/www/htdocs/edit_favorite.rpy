@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/05/14 01:11:19  rshortt
+# More error handling and notice if the record server is down.
+#
 # Revision 1.4  2003/05/13 01:20:23  rshortt
 # Bugfixes.
 #
@@ -66,6 +69,22 @@ class EditFavoriteResource(FreevoResource):
     def _render(self, request):
         fv = HTMLResource()
         form = request.args
+
+        (server_available, message) = ri.connectionTest()
+        if not server_available:
+            fv.printHeader('Edit Favorite', 'styles/main.css')
+            fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
+            fv.tableRowOpen('class="chanrow"')
+            fv.tableCell('<img src="images/logo_200x100.png" />', 'align="left"')
+            fv.tableCell('Edit Favorite', 'class="heading" align="left"')
+            fv.tableRowClose()
+            fv.tableClose()
+            fv.res += '<hr /><h2>ERROR: recording server is unavailable</h2><hr />'
+            fv.printSearchForm()
+            fv.printLinks()
+            fv.printFooter()
+
+            return fv.res
 
         chan = fv.formValue(form, 'chan')
         start = fv.formValue(form, 'start')

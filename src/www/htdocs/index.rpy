@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/05/14 01:11:20  rshortt
+# More error handling and notice if the record server is down.
+#
 # Revision 1.1  2003/05/12 23:27:11  rshortt
 # The start of an index page.
 #
@@ -40,6 +43,7 @@
 
 import sys, time
 
+import record_client
 from web_types import HTMLResource, FreevoResource
 
 TRUE = 1
@@ -55,10 +59,12 @@ class IndexResource(FreevoResource):
         fv.res += '<h2>Someone please design a nice index page. :)</h2>'
         fv.res += '<hr />'
     
+        (server_available, schedule) = record_client.connectionTest()
+        if not server_available:
+            fv.res += '<h4>Notice: The recording server is down.</h4><hr />'
+
         fv.printSearchForm()
-
         fv.printLinks()
-
         fv.printFooter()
 
         return fv.res

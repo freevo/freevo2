@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/05/14 01:11:20  rshortt
+# More error handling and notice if the record server is down.
+#
 # Revision 1.3  2003/05/14 00:18:56  rshortt
 # Better error handling.
 #
@@ -163,4 +166,3 @@ class RecordResource(FreevoResource):
         return fv.res
     
 resource = RecordResource()
-# resource = FreevoPage(template=fv.res)

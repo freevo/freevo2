@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/05/14 01:11:20  rshortt
+# More error handling and notice if the record server is down.
+#
 # Revision 1.3  2003/05/12 23:02:41  rshortt
 # Adding HTTP BASIC Authentication.  In order to use you must override WWW_USERS
 # in local_conf.py.  This does not work for directories yet.
@@ -62,6 +65,22 @@ class FavoritesResource(FreevoResource):
     def _render(self, request):
         fv = HTMLResource()
         form = request.args
+
+        (server_available, message) = ri.connectionTest()
+        if not server_available:
+            fv.printHeader('Favorites', 'styles/main.css')
+            fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
+            fv.tableRowOpen('class="chanrow"')
+            fv.tableCell('<img src="images/logo_200x100.png" />', 'align="left"')
+            fv.tableCell('Favorites', 'class="heading" align="left"')
+            fv.tableRowClose()
+            fv.tableClose()
+            fv.res += '<hr /><h2>ERROR: recording server is unavailable</h2><hr />'
+            fv.printSearchForm()
+            fv.printLinks()
+            fv.printFooter()
+
+            return fv.res
 
         action = fv.formValue(form, 'action')
         oldname = fv.formValue(form, 'oldname')

@@ -13,6 +13,9 @@
 #   human readable size rather than bytes from os
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/05/14 01:11:20  rshortt
+# More error handling and notice if the record server is down.
+#
 # Revision 1.4  2003/05/13 00:29:46  rshortt
 # Renaming works again.  It will choke on filenames with single quotes though.
 #
@@ -144,24 +147,33 @@ class LibraryResource(FreevoResource):
 
         # find out if anything is recording
         recordingprogram = ''
-        (result, recordings) = ri.getScheduledRecordings()
-        progs = recordings.getProgramList()
-        f = lambda a, b: cmp(a.start, b.start)
-        progl = progs.values()
-        progl.sort(f)
-        for prog in progl:
-            try:
-                if prog.isRecording == TRUE:
-                    recordingprogram = tv_util.getProgFilename(prog)
-                    break
-            except:
-                # sorry, have to pass without doing anything.
-                pass
+
+        (got_schedule, recordings) = ri.getScheduledRecordings()
+        if got_schedule:
+            progs = recordings.getProgramList()
+            f = lambda a, b: cmp(a.start, b.start)
+            progl = progs.values()
+            progl.sort(f)
+            for prog in progl:
+                try:
+                    if prog.isRecording == TRUE:
+                        recordingprogram = tv_util.getProgFilename(prog)
+                        break
+                except:
+                    # sorry, have to pass without doing anything.
+                    pass
+        else:
+            fv.res += '<hr /><h2>The recording server is down, recording information is unavailable.</h2><hr />'
+            
 
         #generate our favorites regular expression
         favre = ''
         (result, favorites) = ri.getFavorites()
-        favs = favorites.values()
+        if result:
+            favs = favorites.values()
+        else:
+            favs = []
+
         if favs:
             favtitles = [ fav.title for fav in favs ]
             favre = string.join(favtitles, '|') # no I am not a packers fan
@@ -195,9 +207,7 @@ class LibraryResource(FreevoResource):
         fv.tableClose()
 
         fv.printSearchForm()
-
         fv.printLinks()
-
         fv.printFooter()
 
         return fv.res
