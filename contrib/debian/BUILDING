@@ -1,0 +1,11 @@
+If you want to build your own package, you need to move this 'debian/' 
+folder into the root of the freevo source package. There, you can run
+debbuild as usual.
+
+Currently, there are some things missing:
+
+1. No configuration is placed anywhere; you'll need to make /etc/freevo
+and put stuff there.
+2. No init.d script, though the one in the boot/ directory works nicely
+on my system
+3. ???
