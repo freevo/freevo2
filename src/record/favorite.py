@@ -126,7 +126,7 @@ class Favorite:
         """
         Return True if name, channel and start match this favorite.
         """
-        if name.lower() != self.name.lower() and not self.substring:
+        if Unicode(name.lower()) != self.name.lower() and not self.substring:
             return False
         if name.lower().find(self.name.lower()) == -1:
             return False
