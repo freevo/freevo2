@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/10/21 15:16:17  outlyer
+# A workaround for the problem wherein Twisted Python cannot serialize
+# boolean types.
+#
 # Revision 1.17  2003/10/18 09:34:37  dischi
 # show the current recodings in the guide, RECORD toggles record and remove
 #
@@ -309,9 +313,12 @@ class TVGuide(gui.GUIObject):
             try:
                 for p in t.programs:
                     if p in self.scheduled_programs:
-                        p.scheduled = True
+                        p.scheduled = TRUE # DO NOT change this to 'True' Twisted
+                                           # does not support boolean objects and 
+                                           # it will break under Python 2.3
                     else:
-                        p.scheduled = False
+                        p.scheduled = FALSE # Same as above; leave as 'FALSE' until
+                                            # Twisted includes Boolean
             except:
                 pass
 
