@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/03/30 14:17:06  dischi
+# added force_skin_layout for the new skin
+#
 # Revision 1.24  2003/03/27 20:07:06  dischi
 # Fix for adding/deleting the only item in the directory for the new skin
 #
@@ -191,7 +194,7 @@ class MenuItem:
 class Menu:
 
     def __init__(self, heading, choices, xml_file=None, packrows=1, umount_all = 0,
-                 reload_func = None, item_types = None):
+                 reload_func = None, item_types = None, force_skin_layout = -1):
         # XXX Add a list of eventhandlers?
         self.heading = heading
         self.choices = choices          # List of MenuItem:s
@@ -219,8 +222,9 @@ class Menu:
         # or None and the old menu will be reused
         self.reload_func = reload_func  
         self.item_types = item_types
-        self.display_style = skin.GetDisplayStyle()
-        
+        self.force_skin_layout = force_skin_layout
+        self.display_style = skin.GetDisplayStyle(self)
+
 
     def delete_item(self, item):
         pos = self.choices.index(item)
@@ -295,7 +299,7 @@ class MenuWidget(GUIObject):
             self.menustack = self.menustack[:-1]
             menu = self.menustack[-1]
 
-            if skin.GetDisplayStyle() != menu.display_style:
+            if skin.GetDisplayStyle(menu) != menu.display_style:
                 self.rebuild_page()
                 
             if menu.reload_func:
@@ -579,7 +583,7 @@ class MenuWidget(GUIObject):
 
         menu.selected = current
         self.init_page()
-        menu.display_style = skin.GetDisplayStyle()
+        menu.display_style = skin.GetDisplayStyle(menu)
         
 
     def init_page(self):
