@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.60  2003/08/15 19:23:20  dischi
+# support --force-fs for freevo -fs
+#
 # Revision 1.59  2003/08/12 19:39:06  dischi
 # Added event_lister to get all events
 #
@@ -401,6 +404,9 @@ if __name__ == "__main__":
 
         return tracefunc
 
+    if len(sys.argv) >= 2 and sys.argv[1] == '--force-fs':
+        config.START_FULLSCREEN_X = 1
+        
     if len(sys.argv) >= 2 and sys.argv[1] == '--trace':
         tracefd = open(os.path.join(os.environ['FREEVO_STARTDIR'],
                                     'trace.txt'), 'w')
