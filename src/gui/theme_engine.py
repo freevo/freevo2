@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/08/27 14:20:19  dischi
+# support custom areas
+#
 # Revision 1.3  2004/08/25 12:51:44  dischi
 # moved Application for eventhandler into extra dir for future templates
 #
@@ -525,20 +528,21 @@ class MenuSet:
     the complete menu with the areas screen, title, subtitle, view, listing and info in it
     """
     def __init__(self):
-        self.content = ( 'screen', 'title', 'subtitle', 'view', 'listing', 'info' )
-        for c in self.content:
+        self.areas = [ 'screen', 'title', 'subtitle', 'view', 'listing', 'info' ]
+        for c in self.areas:
             setattr(self, c, Area(c))
 
 
     def parse(self, node, scale, current_dir):
         for subnode in node.children:
-            for c in self.content:
-                if subnode.name == c:
-                    getattr(self, c).parse(subnode, scale, current_dir)
+            if not hasattr(self, subnode.name):
+                setattr(self, subnode.name, Area(subnode.name))
+                self.areas.append(subnode.name)
+            getattr(self, subnode.name).parse(subnode, scale, current_dir)
 
 
     def prepare(self, layout):
-        for c in self.content:
+        for c in self.areas:
             getattr(self, c).prepare(layout)
 
 
