@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/05/25 21:40:53  outlyer
+# Round edges for the toolbar.
+#
 # Revision 1.6  2003/05/23 01:09:24  rshortt
 # Removing border from the freevo image/link in the header.
 #
@@ -198,14 +201,16 @@ class HTMLResource:
     def printLinks(self):
         self.res += """
     <center>
-    <table border="0" cellpadding="4" cellspacing="1">
+    <table border="0" cellpadding="0" cellspacing="0">
       <tr>
-        <td class="tablelink" onClick="document.location=\'index.rpy\'">Home</td>
-        <td class="tablelink" onClick="document.location=\'guide.rpy\'">TV Guide</td>
-        <td class="tablelink" onClick="document.location=\'record.rpy\'">Scheduled Recordings</td>
-        <td class="tablelink" onClick="document.location=\'favorites.rpy\'">Favorites</td>
-        <td class="tablelink" onClick="document.location=\'library.rpy\'">Video Library</td>
-        <td class="tablelink" onClick="document.location=\'manualrecord.rpy\'">Manually Record</td>
+        <td height="24" width="11" background="images/round_left.png">&nbsp;</td>
+        <td class="tablelink" onClick="document.location=\'index.rpy\'">&nbsp;&nbsp;Home&nbsp;&nbsp;</td>
+        <td class="tablelink" onClick="document.location=\'guide.rpy\'">&nbsp;&nbsp;TV Guide&nbsp;&nbsp;</td>
+        <td class="tablelink" onClick="document.location=\'record.rpy\'">&nbsp;&nbsp;Scheduled Recordings&nbsp;&nbsp;</td>
+        <td class="tablelink" onClick="document.location=\'favorites.rpy\'">&nbsp;&nbsp;Favorites&nbsp;&nbsp;</td>
+        <td class="tablelink" onClick="document.location=\'library.rpy\'">&nbsp;&nbsp;Video Library&nbsp;&nbsp;</td>
+        <td class="tablelink" onClick="document.location=\'manualrecord.rpy\'">&nbsp;&nbsp;Manually Record&nbsp;&nbsp;</td>
+	<td height="24" width="11" background="images/round_right.png" cellpadding=0 cellspacing=0>&nbsp;</td>
       </tr>
     </table>
     </center>
