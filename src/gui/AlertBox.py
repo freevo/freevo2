@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/03/23 23:11:10  rshortt
+# Better default height now.
+#
 # Revision 1.5  2003/03/09 21:37:06  rshortt
 # Improved drawing.  draw() should now be called instead of _draw(). draw()
 # will check to see if the object is visible as well as replace its bg_surface
@@ -91,7 +94,7 @@ class AlertBox(PopupBox):
     bd_width  Border width Integer
     """
 
-    def __init__(self, text=" ", left=None, top=None, width=300, height=160, 
+    def __init__(self, text=" ", left=None, top=None, width=300, height=110, 
                  bg_color=None, fg_color=None, icon=None, border=None, 
                  bd_color=None, bd_width=None):
 

@@ -10,6 +10,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/03/23 23:11:10  rshortt
+# Better default height now.
+#
 # Revision 1.7  2003/03/09 21:37:06  rshortt
 # Improved drawing.  draw() should now be called instead of _draw(). draw()
 # will check to see if the object is visible as well as replace its bg_surface
@@ -123,7 +126,7 @@ class PopupBox(GUIObject):
     Trying to make a standard popup/dialog box for various usages.
     """
     
-    def __init__(self, text=" ", left=None, top=None, width=None, height=None,
+    def __init__(self, text=" ", left=None, top=None, width=360, height=60,
                  bg_color=None, fg_color=None, icon=None, border=None, 
                  bd_color=None, bd_width=None):
 
@@ -141,10 +144,6 @@ class PopupBox(GUIObject):
         # XXX: skin settings
         ((bg_type, skin_bg), BLAH, BLAH, skin_font, BLAH, BLAH) = \
          self.skin.GetPopupBoxStyle()
-
-
-        if not self.width:    self.width  = 360
-        if not self.height:   self.height = 60
 
         if not self.left:     self.left   = self.osd.width/2 - self.width/2
         if not self.top:      self.top    = self.osd.height/2 - self.height/2
