@@ -11,6 +11,9 @@
 #       -stream tv, video and music somehow
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/09/05 15:23:02  mikeruelle
+# fearless leader missed a import change
+#
 # Revision 1.13  2003/09/05 02:48:13  rshortt
 # Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
 #
@@ -104,7 +107,7 @@ import config, util
 import tv.tv_util
 import tv.record_client as ri
 
-from web_types import HTMLResource, FreevoResource
+from www.web_types import HTMLResource, FreevoResource
 from twisted.web import static
 
 TRUE = 1
