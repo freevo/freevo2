@@ -35,7 +35,7 @@ FALSE = 0
 CHAN_NO_DATA = 'This channel has no data loaded'
 
 
-class TVmenu:
+class TVGuide:
     def __init__(self):
         self.n_cols  = 4
         self.col_time = 30 # each col represents 30 minutes 

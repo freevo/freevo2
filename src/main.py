@@ -9,6 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2003/03/29 21:49:54  dischi
+# Added new tv main menu for the new skin. This includes the tv guide
+# (file is now called tvguide and not tvmenu) and DIR_RECORD. This
+# directory is sort by date and can have a different menu style in the skin.
+# See blue_round2 as example: there is a tv watermark, no view area and
+# the listing area is larger.
+#
 # Revision 1.30  2003/03/21 19:51:35  dischi
 # moved some main menu settings from skin to freevo_config.py (new skin only)
 #
@@ -116,7 +123,6 @@ import menu    # The menu widget class
 import skin    # The skin class
 import mixer   # The mixer class
 import rc      # The RemoteControl class.
-import tv.tv   # The TV module
 
 import identifymedia
 import signal
@@ -126,6 +132,11 @@ import idle
 from mediamenu import MediaMenu
 from item import Item
 
+if config.NEW_SKIN:
+    from tv.tv import TVMenu
+else:
+    import tv.tv
+    
 DEBUG = config.DEBUG
 
 TRUE  = 1

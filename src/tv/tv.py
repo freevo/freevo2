@@ -9,6 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/03/29 21:49:54  dischi
+# Added new tv main menu for the new skin. This includes the tv guide
+# (file is now called tvguide and not tvmenu) and DIR_RECORD. This
+# directory is sort by date and can have a different menu style in the skin.
+# See blue_round2 as example: there is a tv watermark, no view area and
+# the listing area is larger.
+#
 # Revision 1.2  2003/03/08 17:40:42  dischi
 # integration of the tv guide
 #
@@ -70,6 +77,8 @@ import mplayer
 # The Electronic Program Guide
 import epg_xmltv as epg
 
+from item import Item
+
 # The Skin
 import skin
 
@@ -78,7 +87,8 @@ if not config.NEW_SKIN:
     import ExtendedMenu
     import ExtendedMenu_TV
 else:
-    from tvmenu import TVmenu
+    from tvguide import TVGuide
+    from mediamenu import DirItem
     
 # Set to 1 for debug output
 DEBUG = config.DEBUG
@@ -103,14 +113,31 @@ menuwidget = menu.get_singleton()
 skin = skin.get_singleton()
 
 
+class TVMenu(Item):
+    
+    def __init__(self):
+        Item.__init__(self)
+        self.type = 'tv'
+
+    def main_menu(self, arg, menuw):
+        items = [ menu.MenuItem('TV Guide', action=start_tvguide),
+                  DirItem(config.DIR_RECORD, None, name = 'Recorded Shows',
+                          display_type='tv') ]
+
+        menuw.pushmenu(menu.Menu('TV MAIN MENU', items, item_types = 'tv'))
+
+
+
+
+
 # Set up the extended menu
 if not config.NEW_SKIN:
     view = ExtendedMenu_TV.ExtendedMenuView_TV()
     info = ExtendedMenu_TV.ExtendedMenuInfo_TV()
     listing = ExtendedMenu_TV.ExtendedMenuListing_TV()
-    em = ExtendedMenu_TV.ExtendedMenu_TV(view, info, listing)
+    tvguide = ExtendedMenu_TV.ExtendedMenu_TV(view, info, listing)
 else:
-    tvmenu = TVmenu()
+    tvguide = TVGuide()
 
 def get_start_time():
     ttime = time.localtime()
@@ -124,10 +151,6 @@ def get_start_time():
         stime[4] = 0
     
     return time.mktime(stime)
-
-# Set up some global variables
-start_time = get_start_time()
-stop_time = get_start_time()
 
 
 def start_tv(mode=None, channel_id=None):
@@ -160,22 +183,21 @@ def eventhandler(event):
     elif event == rc.SELECT or event == rc.PLAY:
         skin.Clear()
         if not config.NEW_SKIN:
-            start_tv('tv', em.listing.last_to_listing[3].channel_id)
+            start_tv('tv', tvguide.listing.last_to_listing[3].channel_id)
         else:
-            start_tv('tv', tvmenu.selected.channel_id)
+            start_tv('tv', tvguide.selected.channel_id)
     else:
-        if not config.NEW_SKIN:
-            em.eventhandler(event)
-        else:
-            tvmenu.eventhandler(event)
+        tvguide.eventhandler(event)
 
 def refresh():
-    if not config.NEW_SKIN:
-        em.refresh()
-    else:
-        tvmenu.refresh()
+    tvguide.refresh()
+
 
 def main_menu(arg, menuw):
+    start_tvguide(arg, menuw)
+
+
+def start_tvguide(arg, menuw):
 
     # Check that the TV channel list is not None
     if not config.TV_CHANNELS:
@@ -216,8 +238,8 @@ def main_menu(arg, menuw):
         
     if not config.NEW_SKIN:
         listing.ToListing([start_time, stop_time, guide.chan_list[0].id, prg])
-        em.eventhandler(rc.UP)
-        em.refresh()
+        tvguide.eventhandler(rc.UP)
+        tvguide.refresh()
     else:
-        tvmenu.rebuild(start_time, stop_time, guide.chan_list[0].id, prg)
-        tvmenu.refresh()
+        tvguide.rebuild(start_time, stop_time, guide.chan_list[0].id, prg)
+        tvguide.refresh()
