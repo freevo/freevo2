@@ -7,6 +7,9 @@
 # Todo: o Add move function 
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/07/24 12:22:16  dischi
+# gui update
+#
 # Revision 1.2  2004/07/23 19:43:31  dischi
 # move most of the settings code out of the skin engine
 #
@@ -335,7 +338,7 @@ class GUIObject:
                 object.blit_parent(restore=False)
             object = object.parent
 
-        self.osd.app_list[-1].blit_parent()
+        rc.app_list[-1].blit_parent()
         self.osd.update()
 
         
@@ -351,7 +354,7 @@ class GUIObject:
         """
         blit self.surface to the parent.surface
         """
-        if self.osd.app_list.count(self):
+        if rc.app_list.count(self):
             p = False
         elif self.parent.surface:
             p = True
@@ -477,7 +480,7 @@ class GUIObject:
         if self.parent:
             self.parent.children.remove(self)
 
-        self.osd.remove_app(self)
+        rc.remove_app(self)
                 
         self.hide()
         if self.parent:

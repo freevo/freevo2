@@ -1,0 +1,17 @@
+o make sure all parts respect the guidelines:
+  o no part of freevo is allowed to import osd or skin
+  o no part outside the gui code should use the renderer
+  o never call screen.clear or osd.clear, everyone cleans up it's own mess
+
+o make it possible to switch backends
+
+o better integration of the settings code
+
+o make animation work again
+
+o clean up the code in widgets
+
+o split sdl keyboard into keyboard and sdl poll loop for redraw
+
+o define interface for renderer and it's objects
+

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/07/24 12:22:15  dischi
+# gui update
+#
 # Revision 1.2  2004/07/23 19:43:30  dischi
 # move most of the settings code out of the skin engine
 #
@@ -45,13 +48,10 @@ import traceback
 import config
 import util
 
-import osd
 import plugin
 
 # XML support
 from xml.utils import qp_xml
-
-osd = osd.get_singleton()
 
 geometry = (config.CONF.width, config.CONF.height)
 
@@ -804,7 +804,8 @@ class Font(XML_data):
         if color.has_key(self.color):
             self.color = color[self.color]
         self.size   = int(float(self.size) * scale)
-        self.font   = osd.getfont(self.name, self.size)
+        import gui
+        self.font   = gui.get_renderer().getfont(self.name, self.size)
         self.h      = self.font.height
         if self.shadow.visible:
             if color.has_key(self.shadow.color):

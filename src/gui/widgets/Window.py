@@ -7,6 +7,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/07/24 12:22:16  dischi
+# gui update
+#
 # Revision 1.1  2004/07/22 21:12:35  dischi
 # move all widget into subdir, code needs update later
 #
@@ -74,11 +77,11 @@ class Window(GUIObject):
         GUIObject.__init__(self, x, y, width, height)
 
         if not parent or parent == 'osd':
-            parent = self.osd.app_list[0]
+            parent = rc.app_list[0]
 
         parent.add_child(self)
         
-        self.osd.add_app(self)
+        rc.add_app(self)
 
         self.event_context = 'input'
         rc.set_context(self.event_context) 
