@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.108  2003/12/01 19:19:37  dischi
+# first grep the keymap
+#
 # Revision 1.107  2003/11/29 11:27:40  dischi
 # move objectcache to util
 #
@@ -400,7 +403,12 @@ class OSD:
                 return None
 
             if event.type == KEYDOWN:
-                if event.key == K_h:
+                if event.key in config.KEYMAP.keys():
+                    # Turn off the helpscreen if it was on
+                    if self._help:
+                        self._helpscreen()
+                    return config.KEYMAP[event.key]
+                elif event.key == K_h:
                     self._helpscreen()
                 elif event.key == K_z:
                     self.toggle_fullscreen()
@@ -409,11 +417,6 @@ class OSD:
                     pygame.image.save(self.screen,
                                       '/tmp/freevo_ss%s.bmp' % self._screenshotnum)
                     self._screenshotnum += 1
-                elif event.key in config.KEYMAP.keys():
-                    # Turn off the helpscreen if it was on
-                    if self._help:
-                        self._helpscreen()
-                    return config.KEYMAP[event.key]
 
     
     def shutdown(self):
