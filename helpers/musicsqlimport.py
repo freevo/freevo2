@@ -39,7 +39,7 @@ def check_db():
 def create_db():
     db = sqlite.connect(DATABASE)
     cursor = db.cursor()
-    cursor.execute("CREATE TABLE music (id INTEGER PRIMARY KEY, dirtitle VARCHAR(255), md5 VARCHAR(32) UNIQUE, path VARCHAR(255), filename VARCHAR(255), type VARCHAR(3), artist VARCHAR(255), title VARCHAR(255), album VARCHAR(255), year VARCHAR(255), track NUMERIC(3), track_total NUMERIC(3), bpm NUMERIC(3), last_play float, play_count NUMERIC, start_time VARCHAR, end_time VARCHAR, rating NUMERIC, eq  VARCHAR)")
+    cursor.execute("CREATE TABLE music (id INTEGER PRIMARY KEY, dirtitle VARCHAR(255), md5 VARCHAR(32) UNIQUE, path VARCHAR(255), filename VARCHAR(255), type VARCHAR(3), artist VARCHAR(255), title VARCHAR(255), album VARCHAR(255), year VARCHAR(255), track NUMERIC(3), track_total NUMERIC(3), bpm NUMERIC(3), last_play float, play_count NUMERIC, start_time NUMERIC, end_time NUMERIC, rating NUMERIC, eq  VARCHAR)")
     db.commit()
     db.close()
 
@@ -67,7 +67,7 @@ def make_query(filename,dirtitle):
     VALUES = "(null,\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',%i,%i,%i,\'%s\',%f,%i,\'%s\',\'%s\',%i,\'%s\')" \
         % (util.escape(dirtitle),md5,util.escape(os.path.dirname(filename)),util.escape(os.path.basename(filename)), \
            'mp3',util.escape(a['artist']),util.escape(a['title']),util.escape(a['album']),inti(a['date']),trackno, \
-           trackof, 100,0,0,'0','262',0,'null')
+           trackof, 100,0,0,'0',inti(a['length']),0,'null')
 
     SQL = 'INSERT OR IGNORE INTO music VALUES ' + VALUES
 
