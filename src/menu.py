@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/03/02 21:33:55  dischi
+# Don't act on DISPLAY for the main menu
+#
 # Revision 1.19  2003/03/02 14:41:37  dischi
 # menuw is visible as default
 #
@@ -157,7 +160,8 @@ class MenuItem:
         self.scale             = scale
         self.popup             = popup
         self.image             = None
-
+        self.parent            = None
+        
     def setImage(self, image):
         self.type  = image[0]
         self.image = image[1]
@@ -499,7 +503,7 @@ class MenuWidget(GUIObject):
             except:
                 pass
             
-        elif event == rc.DISPLAY:
+        elif event == rc.DISPLAY and len(self.menustack) > 1:
             # did the menu change?
             if skin.ToggleDisplayStyle(menu):
                 self.rebuild_page()
