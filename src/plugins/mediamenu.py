@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2004/01/31 13:15:56  dischi
+# do not use eval
+#
 # Revision 1.31  2004/01/25 11:40:56  dischi
 # fix handling of share filenames
 #
@@ -173,8 +176,10 @@ class MediaMenu(Item):
         menutitle = _('%s Main Menu') % title
         
         if self.display_type:
-            items = eval('config.%s_ITEMS' % self.display_type.upper())
-            
+            items = getattr(config, '%s_ITEMS' % self.display_type.upper())
+        else:
+            items = []
+
         self.normal_items = []
 
         # add default items
