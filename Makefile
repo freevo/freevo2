@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/02/05 06:08:58  krister
+# Delete all .pyc and .pyo when doing a make clean
+#
 # Revision 1.17  2003/02/04 13:07:16  dischi
 # setip_build can now compile python files. This is used by the Makefile
 # (make all). The Makefile now also has the directories as variables.
@@ -75,8 +78,9 @@ $(SUBDIRS):
 	$(MAKE) -C $@
 
 clean:
-	-rm -f *.pyo */*.pyo */*/*.pyo */*/*/*.pyo
-	-rm -f *.pyc */*.pyc */*/*.pyc */*/*/*.pyc *.o log_main_out 
+	find . -name "*.pyo" -exec rm {} \;
+	find . -name "*.pyc" -exec rm {} \;
+	-rm -f *.o log_main_out 
 	-rm -f log_main_err log.txt runapp freevo_xwin mplayer_std*.log
 	cd fbcon ; $(MAKE) clean
 
