@@ -26,7 +26,7 @@ Patch1:		%{name}-%{version}-Makefile.patch
 URL:		http://freevo.sourceforge.net/
 Requires:	freevo-runtime >= %{runtimever}
 Requires:	freevo-apps
-Requires:	libjpeg
+#Requires:	libjpeg
 BuildRoot:	%{_tmppath}/%{name}-%{version}-root-%(id -u -n)
 
 %define _prefix /usr/local/freevo
