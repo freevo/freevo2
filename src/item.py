@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.81  2004/09/13 19:39:25  dischi
+# every meddiaitem has play/stop functions
+#
 # Revision 1.80  2004/08/27 14:25:03  dischi
 # create extra item type for media items
 #
@@ -494,3 +497,17 @@ class MediaItem(Item):
             self.mimetype     = self.type
             if not self.name:
                 self.name     = Unicode(self.url)
+
+
+    def play(self, arg=None, menuw=None):
+        """
+        play the item
+        """
+        pass
+
+
+    def stop(self, arg=None, menuw=None):
+        """
+        stop playing
+        """
+        pass
