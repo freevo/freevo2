@@ -229,7 +229,7 @@ class OSD:
 
     
     def shutdown(self):
-        pass
+        pygame.quit()
 
 
     def clearscreen(self, color=None):

@@ -32,7 +32,7 @@ if test -a ../runtime/freevo_rt ; then
 
     # Freevo exited, make sure all children are killed
     sleep 1
-    killall -9 ../runtime/freevo_rt 2&> /dev/null
+    killall -9 freevo_rt 2&> /dev/null
     exit
 fi
 

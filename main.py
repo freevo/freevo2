@@ -4,6 +4,9 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.50  2002/08/14 04:33:00  krister
+# Bugfixes in shutdown.
+#
 # Revision 1.49  2002/08/14 02:40:28  krister
 # Moved the runtime dir freevo_rt to ../runtime.
 #
@@ -130,6 +133,9 @@ def shutdown(menuw=None, arg=None):
                    fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
     osd.update()
 
+    time.sleep(0.5)
+    osd.shutdown()
+    
     # XXX temporary kludge so it won't break on old config files
     if 'ENABLE_SHUTDOWN_SYS' in dir(config):  
         if config.ENABLE_SHUTDOWN_SYS:
@@ -142,10 +148,8 @@ def shutdown(menuw=None, arg=None):
     
     # XXX kludge to signal startup.py to abort
     os.system('touch /tmp/freevo-shutdown') 
-    # XXX kludge to shutdown the runtime version (linker)
-    os.system('killall -9 ../runtime/ld-linux.so.2 2&> /dev/null') 
     # XXX kludge to shutdown the runtime version (no linker)
-    os.system('killall -9 ../runtime/freevo_rt 2&> /dev/null') 
+    os.system('killall -9 freevo_rt 2&> /dev/null') 
     # XXX Kludge to shutdown if started with "python main.py"
     os.system('kill -9 `pgrep -f "python main.py" -d" "` 2&> /dev/null') 
 
