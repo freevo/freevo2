@@ -1,5 +1,12 @@
 #!/usr/local/bin/python
 
+#
+# remote.py  -  Freevo remote control handling.
+#
+# This is a standalone application that reads commands from either the
+# lirc daemon or the keyboard, and sends UDP commands to the freevo main app.
+#
+# $Id$
 
 import sys
 import socket
