@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2004/01/02 14:17:42  dischi
+# bugfix to reflect latest changes
+#
 # Revision 1.27  2003/12/30 15:34:42  dischi
 # remove unneeded copy function
 #
@@ -81,12 +84,6 @@ class AudioDiskItem(Playlist):
 
         # variables only for DirItem
         self.display_type = display_type
-
-        # set directory variables to default
-        all_variables = ('DIRECTORY_AUTOPLAY_SINGLE_ITEM',
-                         'AUDIO_RANDOM_PLAYLIST')
-        for v in all_variables:
-            setattr(self, v, eval('config.%s' % v))
 
         cover = '%s/mmpython/disc/%s.jpg' % (config.FREEVO_CACHEDIR, disc_id)
         if os.path.isfile(cover):
