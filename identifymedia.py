@@ -67,18 +67,19 @@ class Identify_Thread(threading.Thread):
 
         if id in config.MOVIE_INFORMATIONS:
             title, image, xml_filename = config.MOVIE_INFORMATIONS[id]
-            
+
         # Disc is data of some sort. Mount it to get the file info
         util.mount(media.mountdir)
 
         for mediatype in mediatypes:
             if os.path.exists(media.mountdir + mediatype[1]):
                 util.umount(media.mountdir)
+
+                if not title:
+                    title = '%s [%s]' % (mediatype[0], label)
+
                 # XXX Add Dischis -cdrom-device fix!
-                media.info = (mediatype[0],
-                              'Drive %s [%s %s]' % (media.drivename,
-                                                    mediatype[0], label),
-                              image, (mediatype[2], media.mountdir, []))
+                media.info = (mediatype[0], title, image, (mediatype[2], media.mountdir, []))
                 return
                 
         mplayer_files = util.match_files(media.mountdir, config.SUFFIX_MPLAYER_FILES)
@@ -138,24 +139,26 @@ class Identify_Thread(threading.Thread):
 
             else:
                 # nothing found, return the label
-                info = "DIVX", 'CD [%s]' % label, None, None
+                info = "DIVX", label, None, None
             media.info = info
             return
 
+        # XXX add more intelligence to cds with audio files
         if (not mplayer_files) and mp3_files:
-            info = "AUDIO" , 'CD [%s]' % label, None, None
+            info = "AUDIO" , '%s [%s]' % (media.drivename, label), None, None
 
+        # XXX add more intelligence to cds with image files
         elif (not mplayer_files) and (not mp3_files) and image_files:
-            info = "IMAGE", 'CD [%s]' % label, None, None
+            info = "IMAGE", '%s [%s]' % (media.drivename, label), None, None
 
         elif mplayer_files or image_files or mp3_files:
             if title:
                 info = 'DATA', title, image, None
             else:
-                info = "DATA", 'CD [%s]' % label, None, None
+                info = "DATA", '%s [%s]' % (media.drivename, label), None, None
 
         else:
-            info = "DATA" , 'CD [%s]' % label, None, None
+            info = "DATA" , '%s [%s]' % (media.drivename, label), None, None
 
         media.info = info
 
