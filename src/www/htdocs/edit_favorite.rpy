@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/05/13 01:20:23  rshortt
+# Bugfixes.
+#
 # Revision 1.3  2003/05/12 23:27:54  rshortt
 # Use record_types now.
 #
@@ -69,19 +72,20 @@ class EditFavoriteResource(FreevoResource):
         action = fv.formValue(form, 'action')
         name = fv.formValue(form, 'name')
 
-        (status, prog) = ri.findProg(chan, start)
-
-        if prog:
-            print 'PROG: %s' % prog
-
-        (status, favs) = ri.getFavorites()
+        (result, favs) = ri.getFavorites()
         num_favorites = len(favs)
 
-        if action == 'add':
+        if action == 'add' and chan and start:
+            (result, prog) = ri.findProg(chan, start)
+
+            if prog:
+                print 'PROG: %s' % prog
+
             priority = num_favorites + 1
+
             fav = Favorite(prog.title, prog, TRUE, TRUE, TRUE, priority)
-        elif action == 'edit':
-            (status, fav) = ri.getFavorite(name)
+        elif action == 'edit' and name:
+            (result, fav) = ri.getFavorite(name)
         else:
             pass
 

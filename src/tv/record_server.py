@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/05/13 01:20:22  rshortt
+# Bugfixes.
+#
 # Revision 1.2  2003/05/12 11:21:51  rshortt
 # bugfixes
 #
@@ -318,7 +321,8 @@ class RecordServer(xmlrpc.XMLRPC):
         if not name:
             return (FALSE, 'no name')
     
-        priority = len(self.getFavorites()) + 1
+        (status, favs) = self.getFavorites()
+        priority = len(favs) + 1
         fav = record_types.Favorite(name, prog, exactchan, exactdow, exacttod, priority)
     
         scheduledRecordings = self.getScheduledRecordings()
@@ -351,7 +355,8 @@ class RecordServer(xmlrpc.XMLRPC):
         if not name:
             return (FALSE, 'no name')
        
-        self.removeFavoriteFromSchedule(self.getFavorite(name))
+        (status, fav) = self.getFavorite(name)
+        self.removeFavoriteFromSchedule(fav)
         scheduledRecordings = self.getScheduledRecordings()
         scheduledRecordings.removeFavorite(name)
         self.saveScheduledRecordings(scheduledRecordings)
@@ -372,7 +377,7 @@ class RecordServer(xmlrpc.XMLRPC):
     
     
     def getFavorite(self, name):
-        favs = self.getFavorites()
+        (status, favs) = self.getFavorites()
     
         if favs.has_key(name):
             fav = favs[name] 
@@ -384,7 +389,7 @@ class RecordServer(xmlrpc.XMLRPC):
     def adjustPriority(self, favname, mod=0):
         save = []
         mod = int(mod)
-        me = getFavorite(favname)
+        (status, me) = getFavorite(favname)
         oldprio = int(me.priority)
         newprio = oldprio + mod
     
@@ -499,7 +504,7 @@ class RecordServer(xmlrpc.XMLRPC):
     
         scheduledRecordings = self.getScheduledRecordings()
     
-        favs = self.getFavorites()
+        (status, favs) = self.getFavorites()
     
         # Then remove all scheduled favorites in that timeframe to
         # make up for schedule changes.
@@ -613,7 +618,6 @@ class RecordServer(xmlrpc.XMLRPC):
 
 
     def xmlrpc_removeFavorite(self, name=None):
-        print 'REMOVE FAVORITE %s' % name
         (status, response) = self.removeFavorite(name)
 
         return (status, 'RecordServer::removeFavorite: %s' % response)

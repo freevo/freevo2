@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/05/13 01:20:22  rshortt
+# Bugfixes.
+#
 # Revision 1.2  2003/05/12 11:21:51  rshortt
 # bugfixes
 #
@@ -172,6 +175,7 @@ def getFavorites():
 
 
 def getFavorite(name):
+    print 'RCLIENT wants fav %s' % name
     (status, response) = server.getFavorite(name)
 
     return returnFromJelly(status, response)
