@@ -81,7 +81,8 @@ class Plugin(plugin.Plugin):
                 fxd.info[i] = fxd.str2XML(rec.info[i])
                 
         fxd.info['runtime'] = '%s min.' % int((rec.stop - rec.start) / 60)
-        fxd.info['time'] = str(rec.start)
+        fxd.info['record-start'] = str(int(time.time()))
+        fxd.info['record-stop'] = str(rec.stop + rec.stop_padding)
         fxd.info['year'] = time.strftime('%m-%d %H:%M',
                                          time.localtime(rec.start))
         if rec.fxdname:
