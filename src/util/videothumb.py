@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/07/21 11:34:31  dischi
+# only import config/vfs when needed
+#
 # Revision 1.13  2004/07/10 12:33:42  dischi
 # header cleanup
 #
@@ -131,9 +134,7 @@ def snapshot(videofile, imagefile=None, pos=None, update=True, popup=None):
 #
 
 if __name__ == "__main__":
-    import config
     import popen2
-    import vfs
     
     mplayer   = os.path.abspath(sys.argv[1])
     filename  = os.path.abspath(sys.argv[2])
@@ -177,7 +178,12 @@ if __name__ == "__main__":
         try:
             shutil.copy(capture, imagefile)
         except:
-            shutil.copy(capture, vfs.getoverlay(imagefile[1:]))
+            try:
+                import config
+                import vfs
+                shutil.copy(capture, vfs.getoverlay(imagefile[1:]))
+            except:
+                print 'unable to write file'
     else:
         print "error creating capture for %s" % filename
 
