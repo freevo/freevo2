@@ -51,11 +51,12 @@ uint32_t num_frames;
 #define MGA_VID_SET_LUMA _IOR('J', 6, int)
 
 /* The following ioctl was added so that the _physical_ address of the
- * BES buffer can be obtained. This is needed when doing overlays from
- * a Video4Linux1 video capture card such as WinTV.
- * krister-freevo@kmlager.com
+ *  BES buffer can be obtained. This is needed when doing overlays from
+ *  a Video4Linux1 video capture card such as WinTV.
+ *   krister-freevo@kmlager.com
  */
 #define MGA_VID_GET_BESADDR _IOR('J', 42, int)
+
 
 #define MGA_G200 0x1234
 #define MGA_G400 0x5678

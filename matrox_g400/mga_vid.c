@@ -133,7 +133,9 @@ static unsigned long simple_strtoul(const char *cp,char **endp,unsigned int base
                 *endp = (char *)cp;
         return result;
 }
+#endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,4,0) || LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,5)
 static long simple_strtol(const char *cp,char **endp,unsigned int base)
 {
         if(*cp=='-')
@@ -765,10 +767,8 @@ switch(config->format){
 	//Enable contrast and brightness control
 	regs.besglobctl |= (1<<5) + (1<<7);
 	
-	// brightness ; default is 0x7f;
-	regs.beslumactl = (mga_brightness << 16);
-	// contrast:
-	regs.beslumactl|= ((mga_contrast+0x80)<<0);
+	// brightness (-128..127) && contrast (0..255)
+	regs.beslumactl = (mga_brightness << 16) | ((mga_contrast+0x80)&0xFFFF);
 
 	//Setup destination window boundaries
 	besleft = x > 0 ? x : 0;
@@ -1261,7 +1261,10 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 		break;
 
 		case MGA_VID_GET_LUMA:
-			tmp = regs.beslumactl - 0x80;
+			//tmp = regs.beslumactl;
+			//tmp = (tmp&0xFFFF0000) | (((tmp&0xFFFF) - 0x80)&0xFFFF);
+			tmp = (mga_brightness << 16) | (mga_contrast&0xFFFF);
+
 			if (copy_to_user((uint32_t *) arg, &tmp, sizeof(uint32_t)))
 			{
 				printk(KERN_ERR "mga_vid: failed copy %p to userspace %p\n",
@@ -1272,33 +1275,35 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 			
 		case MGA_VID_SET_LUMA:
 			tmp = arg;
-			regs.beslumactl = tmp + 0x80;
+			mga_brightness=tmp>>16; mga_contrast=tmp&0xFFFF;
+			//regs.beslumactl = (tmp&0xFFFF0000) | ((tmp + 0x80)&0xFFFF);
+			regs.beslumactl = (mga_brightness << 16) | ((mga_contrast+0x80)&0xFFFF);
 			mga_vid_write_regs(0);
 		break;
-			
-                /* The following ioctl was added so that the _physical_ address of the
+		
+		/* The following ioctl was added so that the _physical_ address of the
                  * BES buffer can be obtained. This is needed when doing overlays from
                  * a Video4Linux1 video capture card such as WinTV.
                  * krister-freevo@kmlager.com
                  */
-		case MGA_VID_GET_BESADDR:
+                case MGA_VID_GET_BESADDR:
                         if (!mga_src_base) {
-				printk(KERN_ERR "mga_vid: MGA_VID_GET_BESADDR "
+                                printk(KERN_ERR "mga_vid: MGA_VID_GET_BESADDR "
                                        "BES not setup!\n");
-				return(-EFAULT);
+                                return(-EFAULT);
                         }
                         
                         tmp = mga_mem_base + mga_src_base;
 
-			if (copy_to_user((uint32_t *) arg, &tmp, sizeof(uint32_t)))
-			{
-				printk(KERN_ERR "mga_vid: MGA_VID_GET_BESADDR "
+                        if (copy_to_user((uint32_t *) arg, &tmp, sizeof(uint32_t)))
+                        {
+                                printk(KERN_ERR "mga_vid: MGA_VID_GET_BESADDR "
                                        "failed copy %p to userspace %p\n",
-					   &tmp, (uint32_t *) arg);
-				return(-EFAULT);
-			}
-		break;
-			
+                                           &tmp, (uint32_t *) arg);
+                                return(-EFAULT);
+                        }
+                break;		
+
 	        default:
 			printk(KERN_ERR "mga_vid: Invalid ioctl\n");
 			return (-EINVAL);
@@ -1495,8 +1500,13 @@ static int mga_vid_mmap(struct file *file, struct vm_area_struct *vma)
 #ifdef MP_DEBUG
 	printk(KERN_DEBUG "mga_vid: mapping video memory into userspace\n");
 #endif	
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,3)
+	if(remap_page_range(vma, vma->vm_start, mga_mem_base + mga_src_base,
+		 vma->vm_end - vma->vm_start, vma->vm_page_prot)) 
+#else
 	if(remap_page_range(vma->vm_start, mga_mem_base + mga_src_base,
 		 vma->vm_end - vma->vm_start, vma->vm_page_prot)) 
+#endif
 	{
 		printk(KERN_ERR "mga_vid: error mapping video memory\n");
 		return(-EAGAIN);
@@ -1530,7 +1540,11 @@ static long long mga_vid_lseek(struct file *file, long long offset, int origin)
 
 static int mga_vid_open(struct inode *inode, struct file *file)
 {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,2)
+	int minor = MINOR(inode->i_rdev.value);
+#else
 	int minor = MINOR(inode->i_rdev);
+#endif
 
 	if(minor != 0)
 	 return(-ENXIO);
@@ -1603,8 +1617,8 @@ extern devfs_handle_t devfs_register (devfs_handle_t dir, const char *name,
 					S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IFCHR,
 					&mga_vid_fops, NULL)) == NULL)
 	{
-		printk(KERN_ERR "mga_vid: unable to get major: %d (devfs)\n", MGA_VID_MAJOR);
-		return -EIO;
+		printk(KERN_ERR "mga_vid: unable to get major: %d (devfs) => fallback to non-devfs mode\n", MGA_VID_MAJOR);
+//		return -EIO;
 	}
 #endif		
 	if(register_chrdev(MGA_VID_MAJOR, "mga_vid", &mga_vid_fops))
@@ -1617,7 +1631,7 @@ extern devfs_handle_t devfs_register (devfs_handle_t dir, const char *name,
 	{
 		printk(KERN_ERR "mga_vid: no supported devices found\n");
 #ifdef CONFIG_DEVFS_FS
-		devfs_unregister(dev_handle);
+		if(dev_handle) devfs_unregister(dev_handle);
 #endif
 		unregister_chrdev(MGA_VID_MAJOR, "mga_vid");
 		return -EINVAL;
@@ -1649,8 +1663,9 @@ void cleanup_module(void)
 	//FIXME turn off BES
 	printk(KERN_INFO "mga_vid: Cleaning up module\n");
 #ifdef CONFIG_DEVFS_FS
-	devfs_unregister(dev_handle);
+	if(dev_handle) devfs_unregister(dev_handle);
 #endif
 	unregister_chrdev(MGA_VID_MAJOR, "mga_vid");
 }
+
 
