@@ -36,17 +36,22 @@ import time
 import config
 import util.fxdparser as fxdparser
 
+# internal regexp for time format
 _time_re = re.compile('([0-9]*):([0-9]*)-([0-9]*):([0-9]*)')
 
 class Favorite:
+    """
+    Base class for a favorite.
+    """
     def __init__(self, id = -1, name = 'unknown', channels = [],
-                 priority = 0, days = [], times = []):
-        self.id = id
-        self.name = name
+                 priority = 0, days = [], times = [], once = False):
+        self.id       = id
+        self.name     = name
         self.channels = channels
         self.priority = priority
-        self.days = days
-        self.times = []
+        self.days     = days
+        self.times    = []
+        self.once     = once
         for t in times:
             m = _time_re.match(t).groups()
             start = int(m[0])*100 + int(m[1])
@@ -54,18 +59,31 @@ class Favorite:
             self.times.append((start, stop))
 
     def short_list(self):
+        """
+        Return a short list with informations about the favorite.
+        """
         return self.id, self.name, self.priority
 
+
     def long_list(self):
+        """
+        Return a long list with every information about the favorite.
+        """
         return self.id, self.name, self.channels, self.priority, self.days, \
-               self.times
+               self.times, self.once
+
 
     def parse_fxd(self, parser, node):
+        """
+        Parse informations from a fxd node and set the internal variables.
+        """
         self.id = int(parser.getattr(node, 'id'))
         for child in node.children:
             for var in ('name', 'channel'):
                 if child.name == var:
                     setattr(self, var, parser.gettext(child))
+            if child.name == 'once':
+                self.once = True
             if child.name == 'channels':
                 self.channels = []
                 for v in parser.gettext(child).split(' '):
@@ -85,6 +103,9 @@ class Favorite:
                 setattr(self, 'priority', int(parser.gettext(child)))
 
     def match(self, name, channel, start):
+        """
+        Return True if name, channel and start match this favorite.
+        """
         if name != self.name:
             return False
         # FIXME: correct channel in db
@@ -105,10 +126,26 @@ class Favorite:
 
 
     def __str__(self):
-        return String(self.short_list())
+        """
+        A simple string representation for a favorite for debugging in the
+        recordserver.
+        """
+        name = self.name
+        if len(name) > 45:
+            name = name[:45] + u'...'
+        name = u'"' + name + u'"'
+        if self.once:
+            once = '(schedule once)'
+        else:
+            once = ''
+        return '%3d %-45s %4d %s' % \
+               (self.id, String(name), self.priority, once)
 
 
     def __fxd__(self, fxd):
+        """
+        Dump informations about the favorite in a fxd file node.
+        """
         node = fxdparser.XMLnode('favorite', [ ('id', self.id ) ] )
         for var in ('name', 'priority'):
             subnode = fxdparser.XMLnode(var, [], getattr(self, var) )
@@ -125,9 +162,15 @@ class Favorite:
                                            v[1] / 100, v[1] % 100)
             subnode = fxdparser.XMLnode('times', [], s[:-1])
             fxd.add(subnode, node)
+        if self.once:
+            subnode = fxdparser.XMLnode('once')
+            fxd.add(subnode, node)
         return node
 
     def __cmp__(self, obj):
+        """
+        Compare basic informations between Favorite objects
+        """
         if not isinstance(obj, Favorite):
             return True
         return self.name != obj.name or self.channels != obj.channels or \
