@@ -1,17 +1,27 @@
-#
+# ----------------------------------------------------------------------
 # startup.py
-#
-# This application starts all the sub-applications that are part of the Freevo
-# package, i.e. the main Freevo application, the remote control daemon and the 
-# OSD daemon. It then respawns any application that exits until the user
-# presses CTRL-C in this terminal.
-#
+# ----------------------------------------------------------------------
 # $Id$
+#
+# This application starts all the sub-applications that are part of
+# the Freevo package, i.e. the main Freevo application, the remote
+# control daemon and the OSD daemon. It then respawns any application
+# that exits until the user presses CTRL-C in this terminal.
+# ----------------------------------------------------------------------
+# $Log$
+# Revision 1.21  2002/08/18 21:43:53  tfmalt
+# o Small code cleanup and commenting. Hard to spot the difference. :)
+#
+# ----------------------------------------------------------------------
+#
 
-import sys, os, time, signal
+import sys
+import os
+import time
+import signal
 
-# Configuration file. Determines where to look for AVI/MP3 files, etc
-import config
+
+import config # Configuration file
 
 # Set DEBUG to 1 to get more printouts
 DEBUG = 0
@@ -225,10 +235,10 @@ if __name__ == "__main__":
             usage(sys.argv[0])
 
     # XXX TEST CODE BY KRISTER! This code fragment will load the
-    # experimental OSD SDL module if the symbol OSD_SDL is in the
-    # config module namespace, but will work fine if it is not.  This
-    # is used to load my new version of the OSD module without messing
-    # around in the source too much...
+    # experimental OSD SDL module if the symbol OSD_SDL is in the config
+    # module namespace, but will work fine if it is not. This is used to
+    # load my new version of the OSD module without messing around in the
+    # source too much... 
 
     if 'OSD_SDL' in dir(config):
         # Do not use the regular remote control app and OSD server,
@@ -259,8 +269,10 @@ if __name__ == "__main__":
             task.respawn()
             
         time.sleep(POLL_DELAY)
-
-        if os.path.isfile('/tmp/freevo-shutdown'): # XXX kludge to signal startup.py to abort
+        
+        # XXX kludge to signal startup.py to abort
+        if os.path.isfile('/tmp/freevo-shutdown'):
+            
             # Shutdown
             print 'Freevo shutdown selected! Shutting down...'
 
