@@ -15,7 +15,8 @@ Freevo:
     ffmpeg (copy into src tree)
     libdvdnav
   NVrec-20020510-freevo
-    ./configure --without-avifile --without-rte --without-divx4linux --without-quicktime --without-sdl --without-mad --without--ffmpeg
+    ./configure --without-avifile --without-rte --without-divx4linux \
+      --without-quicktime --without-sdl --without-mad --without--ffmpeg
       make NUVrec
 
     (xvid_20020412 
@@ -62,14 +63,20 @@ rm -rf ffmpeg
 cp /usr/local/include/dvdnav/* /usr/local/include
 
 Latest config (20020505)
-./configure --enable-largefiles --with-csslibdir=/usr/local/lib --with-cssincdir=/usr/local/include --with-extraincdir=/usr/local/include --with-extralibdir=/usr/local/lib
+./configure --enable-largefiles --with-csslibdir=/usr/local/lib \
+  --with-cssincdir=/usr/local/include --with-extraincdir=/usr/local/include \
+  --with-extralibdir=/usr/local/lib
 
 mga_vid driver:
 mknod /dev/mga_vid c 178 0
 
-To make it load/unload automatically when needed, insert the following line at the end of /etc/modules.conf:
+To make it load/unload automatically when needed, insert the following 
+line at the end of /etc/modules.conf:
+
     alias char-major-178 mga_vid
+
 Then run
+
     depmod -a
 
 
@@ -79,7 +86,8 @@ NVREC:
 
 cd ..
 ./bootstrap
-./configure --without-avifile --without-rte --with-divx4linux --without-quicktime  --without-sdl --without-mad
+./configure --without-avifile --without-rte --with-divx4linux \
+  --without-quicktime  --without-sdl --without-mad
 make
 
 ----------------------------------------------------------------------
@@ -94,14 +102,20 @@ Aspect ratio resolutions:
 1.78  688x384
 
 XviD encoder for DVDs:
-/usr/local/bin/mencoder -ovc divx4 -divx4opts br=800:key=300:q=5 -oac mp3lame -lameopts br=80:cbr -sws 2 -vop scale=576:432 -o moviename.avi -dvd 1 -alang en
+/usr/local/bin/mencoder -ovc divx4 -divx4opts br=800:key=300:q=5 \
+  -oac mp3lame -lameopts br=80:cbr -sws 2 -vop scale=576:432 \
+  -o moviename.avi -dvd 1 -alang en
 
 
 FFMPEG encoder for DVDs
-/usr/local/bin/mencoder -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=800:keyint=300:vhq -oac mp3lame -lameopts br=80:cbr -sws 2 -vop scale=576:432 -o tst.avi -dvd 1 -ffourcc divx -alang en
+/usr/local/bin/mencoder -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=800:keyint=300:vhq \
+  -oac mp3lame -lameopts br=80:cbr -sws 2 -vop scale=576:432 -o tst.avi -dvd 1 \
+  -ffourcc divx -alang en
 
 Scale and crop a 2.35:1 DVD
-usr/local/bin/mencoder -ovc divx4 -divx4opts br=800:key=300:q=5 -oac mp3lame -lameopts br=80:cbr -sws 2 -vop scale=848:336,crop=720:336:0:72 -o tst.avi -dvd 1 -alang en
+usr/local/bin/mencoder -ovc divx4 -divx4opts br=800:key=300:q=5 \
+  -oac mp3lame -lameopts br=80:cbr -sws 2 -vop scale=848:336,crop=720:336:0:72 \
+   -o tst.avi -dvd 1 -alang en
 
 ----------------------------------------------------------------------
 
@@ -119,49 +133,52 @@ o Generate a public key using ssh-keygen and upload it to Sourceforge
   typing your password for each operation.
 
 o Checkout the entire module:
-cvs -z3 -d:ext:SF_USERNAME@cvs.freevo.sourceforge.net:/cvsroot/freevo co freevo
+  cvs -z3 -d:ext:SF_USERNAME@cvs.freevo.sourceforge.net:/cvsroot/freevo co freevo
 
 o Check for your local changes compared to the CVS server:
-cvs -z3 -d:ext:SF_USERNAME@cvs.freevo.sourceforge.net:/cvsroot/freevo diff
+  cvs -z3 -d:ext:SF_USERNAME@cvs.freevo.sourceforge.net:/cvsroot/freevo diff
 
 o Sync with CVS server:
-cvs -z3 -d:ext:SF_USERNAME@cvs.freevo.sourceforge.net:/cvsroot/freevo update
+  cvs -z3 -d:ext:SF_USERNAME@cvs.freevo.sourceforge.net:/cvsroot/freevo update
 
 o Update Changelog, BUGS, README!
 
 o Commit changes to the CVS server:
-cvs -z3 -d:ext:SF_USERNAME@cvs.freevo.sourceforge.net:/cvsroot/freevo commit -m "Comment... " [file...]
+  cvs -z3 -d:ext:SF_USERNAME@cvs.freevo.sourceforge.net:/cvsroot/freevo \
+    commit -m "Comment... " [file...]
 
   Try to commit as small changes as possible. If you fixed two different bugs,
   make sure to commit them separately so that the change comment is correct for
   each file.
 
 o Test CVS latest version using anonymous export
-cvs -d:pserver:anonymous@cvs.freevo.sourceforge.net:/cvsroot/freevo login
-cvs -z3 -d:pserver:anonymous@cvs.freevo.sourceforge.net:/cvsroot/freevo export -r HEAD freevo
-cd freevo
-make
-./freevo
+  cvs -d:pserver:anonymous@cvs.freevo.sourceforge.net:/cvsroot/freevo login
+  cvs -z3 -d:pserver:anonymous@cvs.freevo.sourceforge.net:/cvsroot/freevo \
+    export -r HEAD freevo
+  cd freevo
+  make
+  ./freevo
 
 o Tag a release/checkpoint:
-cvs -z3 -d:ext:SF_USERNAME@cvs.freevo.sourceforge.net:/cvsroot/freevo tag REL-1_2_0
+  cvs -z3 -d:ext:SF_USERNAME@cvs.freevo.sourceforge.net:/cvsroot/freevo tag REL-1_2_0
 
 o Make a .tar.gz file from the tagged version using anonymous export
-cvs -d:pserver:anonymous@cvs.freevo.sourceforge.net:/cvsroot/freevo login
-cvs -z3 -d:pserver:anonymous@cvs.freevo.sourceforge.net:/cvsroot/freevo export -r REL-1_2_0 freevo
-mv freevo freevo-1.2.0
-tar cvzf freevo-1.2.0.tar.gz freevo-1.2.0
+  cvs -d:pserver:anonymous@cvs.freevo.sourceforge.net:/cvsroot/freevo login
+  cvs -z3 -d:pserver:anonymous@cvs.freevo.sourceforge.net:/cvsroot/freevo export \
+    -r HEAD freevo
+  mv freevo freevo-1.2.0
+  tar cvzf freevo-1.2.0.tar.gz freevo-1.2.0
 
 o Upload the tar file to Sourceforge
-ftp upload.sourceforge.net
-bin
-cd /incoming
-put freevo-1.2.0.tar.gz
-quit
+  ftp upload.sourceforge.net
+  bin
+  cd /incoming
+  put freevo-1.2.0.tar.gz
+  quit
 
-OR, using curl:
+  OR, using curl:
 
-curl -T freevo-1.2.1.tar.gz ftp://anonymous:freevo_sf.net@upload.sourceforge.net/incoming/
+  curl -T freevo-1.2.1.tar.gz ftp://anonymous:freevo_sf.net@upload.sourceforge.net/incoming/
 
 o Make a new release
   o Goto http://sourceforge.net/project/admin/qrs.php?package_id=&group_id=46652 
@@ -190,7 +207,8 @@ o Use CVS as described above
 o Export to a temporary directory
 
 cvs -d:pserver:anonymous@cvs.freevo.sourceforge.net:/cvsroot/freevo login
-cvs -z3 -d:pserver:anonymous@cvs.freevo.sourceforge.net:/cvsroot/freevo export -kv -r HEAD website
+cvs -z3 -d:pserver:anonymous@cvs.freevo.sourceforge.net:/cvsroot/freevo \
+   export -kv -r HEAD website
 
 o Upload to the tentative directory
 scp *html *.gif *jpg *ico *css krister@freevo.sf.net:/home/groups/f/fr/freevo/htdocs/tentative
