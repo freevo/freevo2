@@ -141,12 +141,12 @@
     </layout>
 
     <!-- font and colors used in this layouts -->
-    <font label="title" name="kimberly_alt" size="30" color="0xffffff"/>
-    <font label="item" name="kimberly_alt" size="16" color="0xdddddd"/>
-    <font label="selected" name="kimberly_alt" size="16" color="0xffffff"/>
-    <font label="main" name="kimberly_alt" size="30" color="0xdddddd"/>
-    <font label="main selected" name="kimberly_alt" size="30" color="0xffffff"/>
-    <font label="default" name="kimberly_alt" size="16" color="0xffffff"/>
+    <font label="title" name="VeraBD.ttf" size="30" color="0xffffff"/>
+    <font label="item" name="VeraBD.ttf" size="16" color="0xdddddd"/>
+    <font label="selected" name="VeraBD.ttf" size="16" color="0xffffff"/>
+    <font label="main" name="VeraBD.ttf" size="30" color="0xdddddd"/>
+    <font label="main selected" name="VeraBD.ttf" size="30" color="0xffffff"/>
+    <font label="default" name="VeraBD.ttf" size="16" color="0xffffff"/>
 
     <color label="selection" value="0xa0000000"/>
 
@@ -291,10 +291,10 @@
     </layout>
 
     <!-- font used in the info area -->
-    <font label="info plot"    name="kimberly_alt" size="16" color="0xffffff"/>
-    <font label="info tagline" name="kimberly_alt" size="18" color="0xffffff"/>
-    <font label="info label"   name="kimberly_alt" size="14" color="0xffffff"/>
-    <font label="info value"   name="kimberly_alt" size="14" color="0xffffaa"/>
+    <font label="info plot"    name="VeraBD.ttf" size="16" color="0xffffff"/>
+    <font label="info tagline" name="VeraBD.ttf" size="18" color="0xffffff"/>
+    <font label="info label"   name="VeraBD.ttf" size="14" color="0xffffff"/>
+    <font label="info value"   name="VeraBD.ttf" size="14" color="0xffffaa"/>
 
 
 
@@ -319,8 +319,8 @@
       </content>
     </layout>
 
-    <font label="widget" name="kimberly_alt" size="16" color="0xffffff"/>
-    <font label="selected widget" name="kimberly_alt" size="16" color="0x164668"/>
+    <font label="widget" name="VeraBD.ttf" size="16" color="0xffffff"/>
+    <font label="selected widget" name="VeraBD.ttf" size="16" color="0x164668"/>
 
     <color label="widget text" value="0xffffff"/>
     <color label="widget background" value="0x001F4A95"/>
@@ -404,11 +404,11 @@
       </content>
     </layout>
 
-    <font label="player title" name="kimberly_alt" size="24" color="0xffffff">
+    <font label="player title" name="VeraBD.ttf" size="24" color="0xffffff">
       <shadow x="2" y="2" color="0x000000" visible="yes"/>
     </font>
-    <font label="player artist" name="kimberly_alt" size="18" color="0xffffff"/>
-    <font label="player info"   name="kimberly_alt" size="14" color="0xffffaa"/>
+    <font label="player artist" name="VeraBD.ttf" size="18" color="0xffffff"/>
+    <font label="player info"   name="VeraBD.ttf" size="14" color="0xffffaa"/>
 
     <color label="player mask" value="0x80000000"/>
 
@@ -485,12 +485,12 @@
     </layout>
 
 
-    <font label="tv" name="kimberly_alt" size="16" color="0xffffff"/>
-    <font label="tv selected" name="kimberly_alt" size="16" color="0xffff66">
+    <font label="tv" name="VeraBD.ttf" size="16" color="0xffffff"/>
+    <font label="tv selected" name="VeraBD.ttf" size="16" color="0xffff66">
       <shadow visible="yes" color="0x000000" x="1" y="1"/>
     </font>
-    <font label="tv time" name="kimberly_alt" size="14" color="0xffffaa"/>
-    <font label="tv title" name="kimberly_alt" size="24" color="0xffffff">
+    <font label="tv time" name="VeraBD.ttf" size="14" color="0xffffaa"/>
+    <font label="tv title" name="VeraBD.ttf" size="24" color="0xffffff">
       <shadow x="2" y="2" color="0x000000" visible="yes"/>
     </font>
 

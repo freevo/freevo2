@@ -547,12 +547,12 @@ ENABLE_SHUTDOWN_SYS = 0  # Performs a whole system shutdown at SHUTDOWN!
 #
 # OSD default font. It is only used for debug/error stuff, not regular skinning.
 #
-OSD_DEFAULT_FONTNAME = 'skins/fonts/bluehigh.ttf'
+OSD_DEFAULT_FONTNAME = 'skins/fonts/Vera.ttf'
 OSD_DEFAULT_FONTSIZE = 18
 
 # Font aliases, all names must be lowercase!
 # All alternate fonts must be in './skins/fonts/'
-OSD_FONT_ALIASES = { 'arial_bold.ttf' : 'kimberly_alt.ttf' }
+OSD_FONT_ALIASES = { 'arial_bold.ttf' : 'VeraBd.ttf' }
 
 OSD_SDL_EXEC_AFTER_STARTUP = ""
 OVERSCAN_X = 0

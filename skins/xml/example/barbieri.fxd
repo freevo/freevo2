@@ -668,18 +668,18 @@
     <!-- FONT DEFINITIONS -->
 
 
-    <font label="grey" name="Arial_Bold" size="16" color="0xdddddd"/>
-    <font label="white" name="Arial_Bold" size="16" color="0xffffff"/>
-    <font label="grey big" name="Arial_Bold" size="18" color="0xdddddd"/>
-    <font label="white big" name="Arial_Bold" size="18" color="0xffffff"/>
+    <font label="grey" name="VeraBd" size="16" color="0xdddddd"/>
+    <font label="white" name="VeraBd" size="16" color="0xffffff"/>
+    <font label="grey big" name="VeraBd" size="18" color="0xdddddd"/>
+    <font label="white big" name="VeraBd" size="18" color="0xffffff"/>
 
-    <font label="info title"       name="impact" size="24" color="0xffffff">
+    <font label="info title"       name="VeraBd" size="24" color="0xffffff">
        <shadow x="2" y="2" color="0x000000" visible="yes" />
     </font>
-    <font label="info plot"        name="timesbd" size="16" color="0xffffff" />
-    <font label="info tagline"     name="Arial_Bold" size="16" color="0xffffff" />
-    <font label="info description" name="Arial_Bold" size="14" color="0xffffaa" />
-    <font label="info label"       name="Arial_Bold" size="14" color="0xffffff" />
-    <font label="info value"       name="Arial_Bold" size="14" color="0xffffaa" />
+    <font label="info plot"        name="VeraSeBd" size="16" color="0xffffff" />
+    <font label="info tagline"     name="VeraBd" size="16" color="0xffffff" />
+    <font label="info description" name="VeraBd" size="14" color="0xffffaa" />
+    <font label="info label"       name="VeraBd" size="14" color="0xffffff" />
+    <font label="info value"       name="VeraBd" size="14" color="0xffffaa" />
   </skin>
 </freevo>

@@ -279,7 +279,7 @@
     <font label="title">
       <shadow x="2" y="2" color="0x000000" visible="yes"/>
     </font>
-    <font label="title small" name="kimberly_alt" size="22" color="0xffffff">
+    <font label="title small" name="VeraBD.ttf" size="22" color="0xffffff">
       <shadow visible="yes" color="0x000000" x="1" y="1"/>
     </font>
     <font label="info tagline">

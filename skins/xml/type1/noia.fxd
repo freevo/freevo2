@@ -6,7 +6,7 @@
 
     <image label="background" filename="blurr_naxos"/>
     
-    <font label="title" name="oliversb" size="29" color="0xffdc71">
+    <font label="title" name="VeraSeBd" size="29" color="0xffdc71">
       <shadow visible="yes" color="0x80000000" x="3" y="3"/>
     </font>
 
@@ -33,10 +33,10 @@
     </font>
 
     <color label="widget background" value="0xffdc71"/>
-    <font label="widget" name="kimberly_alt" size="16" color="0x000000"/>
+    <font label="widget" name="VeraBD.ttf" size="16" color="0x000000"/>
     <color label="widget text" value="0x000000"/>
 
-    <font label="default" name="bluehigh" size="18" color="0xffffff"/>
+    <font label="default" name="Vera" size="18" color="0xffffff"/>
 
   </skin>
 </freevo>

@@ -77,20 +77,20 @@
     <!-- ********************************************** -->
     <!-- FONT DEFINITIONS -->
 
-    <font label="white shadow1" name="bluehigh" color="0xffffff" size="20">
+    <font label="white shadow1" name="Vera" color="0xffffff" size="20">
       <shadow visible="yes" color="0x00000000" x="1" y="1"/>
     </font>
 
-    <font label="white shadow1 big" name="bluehigh" size="44" color="0xffffff">
+    <font label="white shadow1 big" name="Vera" size="44" color="0xffffff">
       <shadow visible="yes" color="0xaa000000" x="1" y="1"/>
     </font>
 
-    <font label="white shadow3 big" name="bluehigh" size="44" color="0xffffff">
+    <font label="white shadow3 big" name="Vera" size="44" color="0xffffff">
       <shadow visible="yes" color="0x000000" x="3" y="3"/>
     </font>
 
     <!-- this font is used by the title -->
-    <font label="title" name="oliversb" size="29" color="0xffffff">
+    <font label="title" name="VeraSeBd" size="29" color="0xffffff">
       <shadow visible="yes" color="0x80000000" x="3" y="3"/>
     </font>
 

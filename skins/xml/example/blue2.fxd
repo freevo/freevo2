@@ -101,7 +101,7 @@
       <content type="short item" font="title small" align="left"/>
     </layout>
 
-    <font label="title small" name="Arial_Bold" size="22" color="0xffffff"/>
+    <font label="title small" name="VeraBd" size="22" color="0xffffff"/>
 
     <!-- listing area for audio with images -->
     <layout label="audio list">
