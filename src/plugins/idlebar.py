@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/06/22 16:53:32  rshortt
+# A fix for trying to read the cache when it hasn't been created yet.
+#
 # Revision 1.10  2003/06/04 23:36:35  rshortt
 # Use the real cache dir and add a note about weather codes.
 #
@@ -231,10 +234,14 @@ class weather(IdleBarPlugin):
                 cachefile.close()
             except:
                 # HTTP Problems, use cache. Wait till next try.
-                cachefile = open(self.WEATHERCACHE,'r')
-                newlist = map(string.rstrip, cachefile.readlines())
-                temperature,icon = newlist
-                cachefile.close()
+                try:
+                    cachefile = open(self.WEATHERCACHE,'r')
+                    newlist = map(string.rstrip, cachefile.readlines())
+                    temperature,icon = newlist
+                    cachefile.close()
+                except IOError:
+                    print 'WEATHER: error reading cache. Using fake weather.'
+                    return '0', 'sun.png'
 
         else:
             cachefile = open(self.WEATHERCACHE,'r')
