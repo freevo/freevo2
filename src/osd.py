@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.56  2003/07/03 23:07:51  dischi
+# convert 8 bit images (e.g. gif) to rgb, pygame cannot handle 8 bit
+#
 # Revision 1.55  2003/07/03 22:44:52  dischi
 # Oops
 #
@@ -963,6 +966,9 @@ class OSD:
                             image = Image.open(filename)
 
                         image.thumbnail((300,300))
+
+                        if image.mode == 'P':
+                            image = image.convert('RGB')
 
                         # save for future use
                         data = (filename, image.tostring(), image.size, image.mode)
