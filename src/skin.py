@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/07/22 21:18:37  dischi
+# replaced code with dummy pointing into gui
+#
 # Revision 1.14  2004/07/10 12:33:36  dischi
 # header cleanup
 #
@@ -74,15 +77,9 @@ def get_singleton():
         # we don't need this for helpers
         if config.HELPER:
             return None
-    
-        # Loads the skin implementation defined in freevo_config.py
-        exec('import skins.' + config.SKIN_MODULE  + '.' + config.SKIN_MODULE  + \
-             ' as skinimpl')
 
-        _debug_('Imported skin %s' % config.SKIN_MODULE,2)
-    
-        _singleton = skinimpl.Skin()
-
+        import gui
+        _singleton = gui.get_skin()
     return _singleton
 
 
