@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2003/04/11 21:50:53  dischi
+# autodetection has strange results for the G400
+#
 # Revision 1.32  2003/04/06 21:12:55  dischi
 # o Switched to the new main skin
 # o some cleanups (removed unneeded inports)
@@ -297,8 +300,11 @@ class OSD:
         pygame.display.init()
         pygame.font.init()
 
-        self.depth = pygame.display.mode_ok((self.width, self.height), 1)
-        self.hw    = pygame.display.Info().hw
+        #self.depth = pygame.display.mode_ok((self.width, self.height), 1)
+        #self.hw    = pygame.display.Info().hw
+
+	self.depth = 32
+	self.hw = 0
 
         if config.CONF.display == 'dxr3':
             self.depth = 32
