@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/06/24 11:58:21  outlyer
+# Setup the output plugin by default to fix Wan Tat Chee's crash.
+#
 # Revision 1.8  2003/06/11 05:04:31  outlyer
 # Added OSD toggle; uses the standard 'display' button on the remote; also
 # removed the stuff that is being done by tvtime internally now.
@@ -205,6 +208,7 @@ class TVTime:
             # XXX cf_norm, cf_clist doesn't fully correspond to MPlayer!
             # Most of these options are only available in tvtime ver >= 0.9.8
 
+            outputplugin = config.CONF.display
             if config.CONF.display == 'x11':
                 outputplugin = 'Xv'
             if config.CONF.display == 'mga':
