@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/11/03 18:25:36  dischi
+# fix
+#
 # Revision 1.3  2003/11/02 09:24:35  dischi
 # Check for libs and make it possible to install runtime from within
 # freevo
@@ -58,7 +61,7 @@ else:
     PICKLE_PROTOCOL = pickle.HIGHEST_PROTOCOL
 
 for t in traceback.extract_stack():
-    if t[0][0].find('install.py'):
+    if t[0][0].find('install.py') > 0:
         break
 else:
     # Configuration file. Determines where to look for AVI/MP3 files, etc
