@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.134  2004/07/24 12:24:02  dischi
+# reflect gui changes
+#
 # Revision 1.133  2004/07/23 19:43:59  dischi
 # move most of the settings code out of the skin engine
 #
@@ -54,7 +57,6 @@ import util
 import menu
 import skin
 import plugin
-import osd
 import fxditem
 
 from item import Item, FileInformation
@@ -582,8 +584,8 @@ class DirItem(Playlist):
                          display_type=display_type, random=True).play(menuw=menuw)
             return
         
-        if config.OSD_BUSYICON_TIMER:
-            osd.get_singleton().busyicon.wait(config.OSD_BUSYICON_TIMER[0])
+#         if config.OSD_BUSYICON_TIMER:
+#             osd.get_singleton().busyicon.wait(config.OSD_BUSYICON_TIMER[0])
         
         files       = vfs.listdir(self.dir, include_overlay=True)
         num_changes = mediainfo.check_cache(self.dir)
@@ -600,9 +602,9 @@ class DirItem(Playlist):
             callback=pop.tick
 
 
-        elif config.OSD_BUSYICON_TIMER and len(files) > config.OSD_BUSYICON_TIMER[1]:
-            # many files, just show the busy icon now
-            osd.get_singleton().busyicon.wait(0)
+#         elif config.OSD_BUSYICON_TIMER and len(files) > config.OSD_BUSYICON_TIMER[1]:
+#             # many files, just show the busy icon now
+#             osd.get_singleton().busyicon.wait(0)
         
 
         if num_changes > 0:
@@ -706,11 +708,11 @@ class DirItem(Playlist):
             if self.media:
                 self.media.mount()
 
-        if config.OSD_BUSYICON_TIMER:
-            # stop the timer. If the icons is drawn, it will stay there
-            # until the osd is redrawn, if not, we don't need it to pop
-            # up the next milliseconds
-            osd.get_singleton().busyicon.stop()
+#         if config.OSD_BUSYICON_TIMER:
+#             # stop the timer. If the icons is drawn, it will stay there
+#             # until the osd is redrawn, if not, we don't need it to pop
+#             # up the next milliseconds
+#             osd.get_singleton().busyicon.stop()
 
 
         #

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.131  2004/07/24 12:24:02  dischi
+# reflect gui changes
+#
 # Revision 1.130  2004/07/23 19:44:00  dischi
 # move most of the settings code out of the skin engine
 #
@@ -128,9 +131,9 @@ except ImportError:
     print 'Please update mmpython to version 0.4.3 or higher'
     print
     sys.exit(0)
-    
+
+import gui
 import util    # Various utilities
-import osd     # The OSD class, used to communicate with the OSD daemon
 import menu    # The menu widget class
 import skin    # The skin class
 import rc      # The RemoteControl class.
@@ -141,6 +144,7 @@ from plugins.shutdown import shutdown
 
 
 # Create the OSD object
+import osd     # The OSD class, used to communicate with the OSD daemon
 osd = osd.get_singleton()
 
 
@@ -197,7 +201,7 @@ class MainMenu(Item):
 
         mainmenu = menu.Menu(_('Freevo Main Menu'), items, item_types='main', umount_all = 1)
         menuw.pushmenu(mainmenu)
-        osd.add_app(menuw)
+        rc.add_app(menuw)
 
 
     def get_skins(self):
@@ -333,7 +337,7 @@ class MainTread:
                     _debug_('no eventhandler for event %s' % event, 2)
 
         else:
-            app = osd.focused_app()
+            app = rc.focused_app()
             if app:
                 try:
                     if config.TIME_DEBUG:
@@ -537,19 +541,19 @@ except:
             secs = 5
         else:
             secs = 1
-        for i in range(secs, 0, -1):
-            osd.clearscreen(color=osd.COL_BLACK)
-            osd.drawstring(_('Freevo crashed!'), 70, 70, fgcolor=osd.COL_ORANGE)
-            osd.drawstring(_('Filename: %s') % fname, 70, 130, fgcolor=osd.COL_ORANGE)
-            osd.drawstring(_('Lineno: %s') % lineno, 70, 160, fgcolor=osd.COL_ORANGE)
-            osd.drawstring(_('Function: %s') % funcname, 70, 190, fgcolor=osd.COL_ORANGE)
-            osd.drawstring(_('Text: %s') % text, 70, 220, fgcolor=osd.COL_ORANGE)
-            osd.drawstring(str(sys.exc_info()[1]), 70, 280, fgcolor=osd.COL_ORANGE)
-            osd.drawstring(_('Please see the logfiles for more info'), 70, 350,
-                           fgcolor=osd.COL_ORANGE)
-            osd.drawstring(_('Exit in %s seconds') % i, 70, 410, fgcolor=osd.COL_ORANGE)
-            osd.update()
-            time.sleep(1)
+#         for i in range(secs, 0, -1):
+#             osd.clearscreen(color=osd.COL_BLACK)
+#             osd.drawstring(_('Freevo crashed!'), 70, 70, fgcolor=osd.COL_ORANGE)
+#             osd.drawstring(_('Filename: %s') % fname, 70, 130, fgcolor=osd.COL_ORANGE)
+#             osd.drawstring(_('Lineno: %s') % lineno, 70, 160, fgcolor=osd.COL_ORANGE)
+#             osd.drawstring(_('Function: %s') % funcname, 70, 190, fgcolor=osd.COL_ORANGE)
+#             osd.drawstring(_('Text: %s') % text, 70, 220, fgcolor=osd.COL_ORANGE)
+#             osd.drawstring(str(sys.exc_info()[1]), 70, 280, fgcolor=osd.COL_ORANGE)
+#             osd.drawstring(_('Please see the logfiles for more info'), 70, 350,
+#                            fgcolor=osd.COL_ORANGE)
+#             osd.drawstring(_('Exit in %s seconds') % i, 70, 410, fgcolor=osd.COL_ORANGE)
+#             osd.update()
+#             time.sleep(1)
 
     except:
         pass

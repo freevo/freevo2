@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/07/24 12:24:02  dischi
+# reflect gui changes
+#
 # Revision 1.16  2004/07/10 12:33:38  dischi
 # header cleanup
 #
@@ -87,10 +90,10 @@ class Game:
         self.menuw = menuw
         
         if not os.path.isfile(self.filename):
-            osd.clearscreen()
-            osd.drawstring(_('File "%s" not found!') % self.filename, 30, 280)
-            osd.update()
-            time.sleep(2.0) 
+#             osd.clearscreen()
+#             osd.drawstring(_('File "%s" not found!') % self.filename, 30, 280)
+#             osd.update()
+#             time.sleep(2.0) 
             self.menuw.refresh()
             return 0
 

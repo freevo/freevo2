@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2004/07/24 12:24:03  dischi
+# reflect gui changes
+#
 # Revision 1.38  2004/07/11 11:32:47  dischi
 # move mplayer dvb args to config
 #
@@ -200,8 +203,8 @@ class MPlayer:
         self.prev_app = rc.app()
         rc.app(self)
 
-        if osd.focused_app():
-            osd.focused_app().hide()
+        if rc.focused_app():
+            rc.focused_app().hide()
 
         # Suppress annoying audio clicks
         time.sleep(0.4)
@@ -231,8 +234,8 @@ class MPlayer:
         self.app.stop('quit\n')
 
         rc.app(self.prev_app)
-        if osd.focused_app() and not channel_change:
-            osd.focused_app().show()
+        if rc.focused_app() and not channel_change:
+            rc.focused_app().show()
 
         if os.path.exists('/tmp/freevo.wid'): os.unlink('/tmp/freevo.wid')
 

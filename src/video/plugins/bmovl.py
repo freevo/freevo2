@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/07/24 12:24:03  dischi
+# reflect gui changes
+#
 # Revision 1.17  2004/07/23 19:44:00  dischi
 # move most of the settings code out of the skin engine
 #
@@ -76,135 +79,135 @@ import skin
 import pygame
 import time
 
-from osd import OSD
-from event import *
+# from osd import OSD
+# from event import *
 
-osd = osd.get_singleton()
+# osd = osd.get_singleton()
 
-class Surface:
-    def __init__(self, x, y, width, height):
-        self.screen = pygame.Surface((width, height), pygame.SRCALPHA)
-        self.pos    = x, y
-        self.width  = width
-        self.height = height
+# class Surface:
+#     def __init__(self, x, y, width, height):
+#         self.screen = pygame.Surface((width, height), pygame.SRCALPHA)
+#         self.pos    = x, y
+#         self.width  = width
+#         self.height = height
 
         
-    def blit(self, *arg1, **arg2):
-        self.screen.blit(*arg1, **arg2)
+#     def blit(self, *arg1, **arg2):
+#         self.screen.blit(*arg1, **arg2)
 
 
-class OSDbmovl(OSD):
-    """
-    an OSD class for bmovl
-    """
-    def __init__(self, width, height):
-        self.width  = width
-        self.height = height
-        self.depth  = 32
-        print 'new bmovl interface: %s, %s' % (width, height)
-        self.screen = pygame.Surface((width, height), pygame.SRCALPHA)
+# class OSDbmovl(OSD):
+#     """
+#     an OSD class for bmovl
+#     """
+#     def __init__(self, width, height):
+#         self.width  = width
+#         self.height = height
+#         self.depth  = 32
+#         print 'new bmovl interface: %s, %s' % (width, height)
+#         self.screen = pygame.Surface((width, height), pygame.SRCALPHA)
 
-        # clear surface
-        self.screen.fill((0,0,0,0))
+#         # clear surface
+#         self.screen.fill((0,0,0,0))
 
-        self.bmovl  = os.open('/tmp/bmovl', os.O_WRONLY)
-        self.x0, self.y0, self.x1, self.y1 = self.width, self.height, 0, 0
-
-
-    def load_scaled_image(self, filename, width, height):
-        i = self.loadbitmap(filename)
-        if not i:
-            return None
-        scale = max(float(i.get_width()) / width, float(i.get_height()) / height)
-        return pygame.transform.scale(i, (int(i.get_width() / scale),
-                                          int(i.get_height() / scale)))
+#         self.bmovl  = os.open('/tmp/bmovl', os.O_WRONLY)
+#         self.x0, self.y0, self.x1, self.y1 = self.width, self.height, 0, 0
 
 
-
-    def calc_update_area(self, x0, y0, x1, y1):
-        self.x0 = min(x0, self.x0)
-        self.y0 = min(y0, self.y0)
-        self.x1 = max(x1, self.x1)
-        self.y1 = max(y1, self.y1)
-
-
-    def screenblit(self, source, destpos, sourcerect=None):
-        if sourcerect:
-            w = sourcerect[2]
-            h = sourcerect[3]
-            ret = self.screen.blit(source, destpos, sourcerect)
-        else:
-            w, h = source.get_size()
-            ret = self.screen.blit(source, destpos)
-        self.calc_update_area(destpos[0], destpos[1], destpos[0] + w, destpos[1] + h)
-        return ret
+#     def load_scaled_image(self, filename, width, height):
+#         i = self.loadbitmap(filename)
+#         if not i:
+#             return None
+#         scale = max(float(i.get_width()) / width, float(i.get_height()) / height)
+#         return pygame.transform.scale(i, (int(i.get_width() / scale),
+#                                           int(i.get_height() / scale)))
 
 
-    def drawbox(self, x0, y0, x1, y1, width=None, color=None, fill=0, layer=None):
-        if layer == None:
-            self.calc_update_area(x0, y0, x1, y1)
-            return OSD.drawbox(self, x0, y0, x1, y1, width, color, fill, layer)
-        return OSD.drawbox(self, x0, y0, x1, y1, width, color, fill, layer.screen)
+
+#     def calc_update_area(self, x0, y0, x1, y1):
+#         self.x0 = min(x0, self.x0)
+#         self.y0 = min(y0, self.y0)
+#         self.x1 = max(x1, self.x1)
+#         self.y1 = max(y1, self.y1)
 
 
-    def drawstringframed(self, string, x, y, width, height, font, fgcolor=None,
-                         bgcolor=None, align_h='left', align_v='top', mode='hard',
-                         layer=None, ellipses='...', dim=True):
-        if layer:
-            layer = layer.screen
-        ret = OSD.drawstringframed(self, string, x, y, width, height, font, fgcolor,
-                                   bgcolor, align_h, align_v, mode, layer, ellipses, dim)
-        if not layer:
-            self.calc_update_area(ret[1][0], ret[1][1], ret[1][2], ret[1][3])
-        return ret
+#     def screenblit(self, source, destpos, sourcerect=None):
+#         if sourcerect:
+#             w = sourcerect[2]
+#             h = sourcerect[3]
+#             ret = self.screen.blit(source, destpos, sourcerect)
+#         else:
+#             w, h = source.get_size()
+#             ret = self.screen.blit(source, destpos)
+#         self.calc_update_area(destpos[0], destpos[1], destpos[0] + w, destpos[1] + h)
+#         return ret
+
+
+#     def drawbox(self, x0, y0, x1, y1, width=None, color=None, fill=0, layer=None):
+#         if layer == None:
+#             self.calc_update_area(x0, y0, x1, y1)
+#             return OSD.drawbox(self, x0, y0, x1, y1, width, color, fill, layer)
+#         return OSD.drawbox(self, x0, y0, x1, y1, width, color, fill, layer.screen)
+
+
+#     def drawstringframed(self, string, x, y, width, height, font, fgcolor=None,
+#                          bgcolor=None, align_h='left', align_v='top', mode='hard',
+#                          layer=None, ellipses='...', dim=True):
+#         if layer:
+#             layer = layer.screen
+#         ret = OSD.drawstringframed(self, string, x, y, width, height, font, fgcolor,
+#                                    bgcolor, align_h, align_v, mode, layer, ellipses, dim)
+#         if not layer:
+#             self.calc_update_area(ret[1][0], ret[1][1], ret[1][2], ret[1][3])
+#         return ret
     
         
-    def close(self):
-        print 'close'
-        os.close(self.bmovl)
+#     def close(self):
+#         print 'close'
+#         os.close(self.bmovl)
 
         
-    def show(self):
-        try:
-            os.write(self.bmovl, 'SHOW\n')
-        except OSError:
-            pass
+#     def show(self):
+#         try:
+#             os.write(self.bmovl, 'SHOW\n')
+#         except OSError:
+#             pass
 
-    def hide(self):
-        try:
-            os.write(self.bmovl, 'HIDE\n')
-        except OSError:
-            pass
+#     def hide(self):
+#         try:
+#             os.write(self.bmovl, 'HIDE\n')
+#         except OSError:
+#             pass
         
 
-    def clearscreen(self, color=None):
-        self.screen.fill((0,0,0,0))
-        try:
-            os.write(self.bmovl, 'CLEAR %s %s %s %s' % (self.width, self.height, 0, 0))
-        except OSError:
-            pass
+#     def clearscreen(self, color=None):
+#         self.screen.fill((0,0,0,0))
+#         try:
+#             os.write(self.bmovl, 'CLEAR %s %s %s %s' % (self.width, self.height, 0, 0))
+#         except OSError:
+#             pass
 
         
-    def update(self, rect=None):
-        if not rect:
-            if self.x0 > self.x1:
-                return
-            rect = self.x0, self.y0, self.x1 - self.x0, self.y1 - self.y0
-            self.x0, self.y0, self.x1, self.y1 = self.width, self.height, 0, 0
+#     def update(self, rect=None):
+#         if not rect:
+#             if self.x0 > self.x1:
+#                 return
+#             rect = self.x0, self.y0, self.x1 - self.x0, self.y1 - self.y0
+#             self.x0, self.y0, self.x1, self.y1 = self.width, self.height, 0, 0
         
-        try:
-            update = self.screen.subsurface(rect)
-        except Exception, e:
-            print e
-            print rect, self.screen
-            return
+#         try:
+#             update = self.screen.subsurface(rect)
+#         except Exception, e:
+#             print e
+#             print rect, self.screen
+#             return
         
-        try:
-            os.write(self.bmovl, 'RGBA32 %d %d %d %d %d %d\n' % \
-                     (update.get_width(), update.get_height(), rect[0], rect[1], 0, 0))
-            os.write(self.bmovl, pygame.image.tostring(update, 'RGBA'))
-        except OSError:
-            pass
+#         try:
+#             os.write(self.bmovl, 'RGBA32 %d %d %d %d %d %d\n' % \
+#                      (update.get_width(), update.get_height(), rect[0], rect[1], 0, 0))
+#             os.write(self.bmovl, pygame.image.tostring(update, 'RGBA'))
+#         except OSError:
+#             pass
 
 
 
