@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/10/18 01:04:01  rshortt
+# Rework pyepg to use an sqlite database instead of an object pickle.
+# The EPGDB class is the primary interface to the databse, wrapping database
+# queries in method calls.
+#
 # Revision 1.2  2004/08/10 19:35:45  dischi
 # o better index generation
 # o split into different files
@@ -38,6 +43,7 @@
 # ----------------------------------------------------------------------- */
 
 
+import re
 import time
 import os
 import traceback
@@ -48,17 +54,27 @@ import _strptime as strptime
 # The XMLTV handler from openpvr.sourceforge.net
 import xmltv_parser as xmltv
 
-from program import TvProgram
-from channel import TvChannel
-
 
 EPG_TIME_EXC = _('Time conversion error')
 
 
+def format_text(text):
+    while len(text) and text[0] in (u' ', u'\t', u'\n'):
+        text = text[1:]
+    text = re.sub(u'\n[\t *]', u' ', text)
+    while len(text) and text[-1] in (u' ', u'\t', u'\n'):
+        text = text[:-1]
+    return text
+
+
 def load_guide(guide, XMLTV_FILE, TV_CHANNELS=None, verbose=True):
     """
-    Load a guide from the raw XMLTV file using the xmltv.py support lib.
-    Returns a TvGuide or None if an error occurred
+    Load guide data from a raw XMLTV file into the database, parsing using 
+    the XMLTV using the xmltv.py support lib.
+
+    Returns:  -1 = failed to load any data
+               0 = loaded channels and programs
+               1 = loaded channel data only
     """
     # Is there a file to read from?
     if os.path.isfile(XMLTV_FILE):
@@ -68,30 +84,34 @@ def load_guide(guide, XMLTV_FILE, TV_CHANNELS=None, verbose=True):
         print 'XMLTV file (%s) missing!' % XMLTV_FILE
         gotfile = 0
 
+    #
     # Add the channels that are in the config list, or all if the
     # list is empty
+    # XXX: I would like to change TV_CHANNELS here to another 'include list'
+    #      like XMLTV_INCLUDE_ONLY so we can easily have a few user defined
+    #      channels in our config.TV_CHANNELS and add them to the database
+    #      elsewhere.  - Rob
+    #
     if TV_CHANNELS:
         if verbose:
-            print 'epg_xmltv.py: Only adding channels in list'
+            print 'xmltv.py: Only adding channels in list'
 
         for data in TV_CHANNELS:
-            (id, disp, tunerid) = data[:3]
-            c = TvChannel()
-            c.id          = id
-            c.displayname = disp
-            c.tunerid     = tunerid
+            (id, displayname, tunerid) = data[:3]
  
+            # XXX: FIXME
             # Handle the optional time-dependent station info
-            c.times = []
-            if len(data) > 3 and len(data[3:4]) == 3:
-                for (days, start_time, stop_time) in data[3:4]:
-                    c.times.append((days, int(start_time), int(stop_time)))
-            guide.add_channel(c)
+            # c.times = []
+            # if len(data) > 3 and len(data[3:4]) == 3:
+            #     for (days, start_time, stop_time) in data[3:4]:
+            #         c.times.append((days, int(start_time), int(stop_time)))
+
+            guide.add_channel(id, displayname, tunerid)
 
 
     else: # Add all channels in the XMLTV file
         if verbose:
-            print 'epg_xmltv.py: Adding all channels'
+            print 'xmltv.py: Adding all channels'
         xmltv_channels = None
         if gotfile:
             f = open(XMLTV_FILE)
@@ -100,26 +120,26 @@ def load_guide(guide, XMLTV_FILE, TV_CHANNELS=None, verbose=True):
         
         # Was the guide read successfully?
         if not xmltv_channels:
-            return None     # No
+            return -1   # No
         
         for chan in xmltv_channels:
             id   = chan['id'].encode('latin-1', 'ignore')
-            c    = TvChannel()
-            c.id = id
+            displayname = ''
+            tunerid = ''
+
             if ' ' in id:
                 # Assume the format is "TUNERID CHANNELNAME"
-                c.displayname = id.split()[1]   # XXX Educated guess
-                c.tunerid = id.split()[0]       # XXX Educated guess
+                tunerid     = id.split()[0]   # XXX Educated guess
+                displayname = id.split()[1]   # XXX Educated guess
             else:
                 displayname = chan['display-name'][0][0]
                 if ' ' in displayname:
-                    c.displayname = displayname.split()[1]
-                    c.tunerid = displayname.split()[0]
+                    tunerid     = displayname.split()[0]
+                    displayname = displayname.split()[1]
                 else:
-                    c.displayname = displayname
-                    c.tunerid = _('REPLACE WITH TUNERID FOR %s') % displayname
+                    tunerid = _('REPLACE WITH TUNERID FOR %s') % displayname
 
-            guide.add_channel(c)
+            guide.add_channel(id, displayname, tunerid)
 
     xmltv_programs = None
     if gotfile:
@@ -131,12 +151,10 @@ def load_guide(guide, XMLTV_FILE, TV_CHANNELS=None, verbose=True):
         
     # Was the guide read successfully?
     if not xmltv_programs:
-        return guide    # Return the guide, it has the channels at least...
+        return 1    # Return the guide, it has the channels at least...
 
 
-    needed_ids = []
-    for chan in guide.chan_dict:
-        needed_ids.append(chan)
+    needed_ids = guide.get_channel_ids()
 
     if verbose:
         print 'creating guide for %s' % needed_ids
@@ -145,52 +163,64 @@ def load_guide(guide, XMLTV_FILE, TV_CHANNELS=None, verbose=True):
         if not p['channel'] in needed_ids:
             continue
         try:
-            prog = TvProgram()
-            prog.channel_id = p['channel']
-            prog.title = Unicode(p['title'][0][0])
+            channel_id = p['channel']
+            title = Unicode(p['title'][0][0])
+            sub_title = ''
+            desc = ''
+            start = 0
+            stop = 0
+            date = None
+            ratings = {}
+            categories = []
+            advisories = []
+
             if p.has_key('date'):
-                prog.date = Unicode(p['date'][0][0])
+                date = Unicode(p['date'][0][0])
             if p.has_key('category'):
-                prog.categories = [ cat[0] for cat in p['category'] ]
+                categories = [ cat[0] for cat in p['category'] ]
             if p.has_key('rating'):
                 for r in p['rating']:
                     if r.get('system') == 'advisory':
-                        prog.advisories.append(String(r.get('value')))
+                        advisories.append(String(r.get('value')))
                         continue
-                    prog.ratings[String(r.get('system'))] = String(r.get('value'))
+                    ratings[String(r.get('system'))] = String(r.get('value'))
             if p.has_key('desc'):
-                # prog.desc = Unicode(util.format_text(p['desc'][0][0]))
-                pass
+                desc = Unicode(format_text(p['desc'][0][0]))
             if p.has_key('sub-title'):
-                prog.sub_title = p['sub-title'][0][0]
+                sub_title = p['sub-title'][0][0]
             try:
-                prog.start = timestr2secs_utc(p['start'])
+                start = timestr2secs_utc(p['start'])
                 try:
-                    prog.stop = timestr2secs_utc(p['stop'])
+                    stop = timestr2secs_utc(p['stop'])
                 except:
                     # Fudging end time
-                    prog.stop = timestr2secs_utc(p['start'][0:8] + '235900' + \
-                                                 p['start'][14:18])
+                    stop = timestr2secs_utc(p['start'][0:8] + '235900' + \
+                                            p['start'][14:18])
             except EPG_TIME_EXC:
                 continue
             # fix bad German titles to make favorites working
-            if prog.title.endswith('. Teil'):
-                prog.title = prog.title[:-6]
-                if prog.title.rfind(' ') > 0:
+            if title.endswith('. Teil'):
+                title = title[:-6]
+                if title.rfind(' ') > 0:
                     try:
-                        part = int(prog.title[prog.title.rfind(' ')+1:])
-                        prog.title = prog.title[:prog.title.rfind(' ')].rstrip()
-                        if prog.sub_title:
-                            prog.sub_title = u'Teil %s: %s' % (part, prog.sub_title)
+                        part = int(title[title.rfind(' ')+1:])
+                        title = title[:title.rfind(' ')].rstrip()
+                        if sub_title:
+                            sub_title = u'Teil %s: %s' % (part, sub_title)
                         else:
-                            prog.sub_title = u'Teil %s' % part
+                            sub_title = u'Teil %s' % part
                     except Exception, e:
                         print e
 
-            guide.add_program(prog)
+            guide.add_program(channel_id, title, start, stop, 
+                              subtitle=sub_title, description=desc)
+
         except:
             traceback.print_exc()
             print 'Error in tv guide, skipping'
+
+    return 0
+        
 
 
 

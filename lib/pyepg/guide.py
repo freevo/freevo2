@@ -1,19 +1,19 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
-# guide.py - basic guide class
+# guide.py - This contains EPGDB which is the pyepg interface to the 
+#            database.
 # -----------------------------------------------------------------------
-# $Id$
+# $Id: #
 #
 # Notes:
 # Todo:        
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.1  2004/08/10 19:35:45  dischi
-# o better index generation
-# o split into different files
-# o support for other parsers than xmltv
-# o internal caching
+# Revision 1.2  2004/10/18 01:04:01  rshortt
+# Rework pyepg to use an sqlite database instead of an object pickle.
+# The EPGDB class is the primary interface to the databse, wrapping database
+# queries in method calls.
 #
 #
 # -----------------------------------------------------------------------
@@ -38,138 +38,324 @@
 # ----------------------------------------------------------------------- */
 
 import os
-import sys
-import stat
-import cPickle
-import pickle
+import traceback
+import time
+from types import *
 
 import config
 
-if float(sys.version[0:3]) < 2.3:
-    PICKLE_PROTOCOL = 1
-else:
-    PICKLE_PROTOCOL = pickle.HIGHEST_PROTOCOL
 
-# Internal version number for caching
-EPG_VERSION = 0.1
-
-
-
-class TvGuide:
+def escape_query(sql):
     """
-    The complete TV guide with all channels
+    Escape a SQL query in a manner suitable for sqlite
     """
-    def __init__(self, datafile, cachefile, parser, verbose):
-        # These two types map to the same channel objects
-        self.chan_dict   = {}   # Channels mapped using the id
-        self.chan_list   = []   # Channels, ordered
+    if not type(sql) in StringTypes:
+        return sql
 
-        try:
-            if os.stat(cachefile)[stat.ST_MTIME] < os.stat(datafile)[stat.ST_MTIME]:
-                raise IOError
-            f = open(cachefile)
-            try:
-                data = cPickle.load(f)
-            except:
-                data = pickle.load(f)
-            f.close()
-            if data[0] != EPG_VERSION:
-                raise IOError
-            _debug_('using epg cachefile %s' % cachefile)
-            self.chan_list = data[1]
-            for c in self.chan_list:
-                self.chan_dict[c.id] = c
-            
-        except Exception, e:
-            exec('import %s' % parser)
-            getattr(eval(parser), 'load_guide')(self, datafile, verbose=verbose)
-            self.sort()
-            self.create_index()
+    sql = sql.replace('\'','\'\'')
+    return sql
 
-        if cachefile:
-            try:
-                if os.path.isfile(cachefile):
-                    os.unlink(cachefile)
-                f = open(cachefile, 'w')
-                cPickle.dump((EPG_VERSION, self.chan_list), f, PICKLE_PROTOCOL)
-                f.close()
-            except IOError:
-                print 'unable to save to cachefile %s' % file
-            
 
-    def add_channel(self, channel):
-        """
-        add a channel to the list
-        """
-        if not self.chan_dict.has_key(channel.id):
-            # Add the channel to both the dictionary and the list. This works
-            # well in Python since they will both point to the same object!
-            self.chan_dict[channel.id] = channel
-            self.chan_list.append(channel)
+def escape_value(val):
+    """
+    Escape a SQL value in a manner to be quoted inside a query
+    """ 
+    # print 'RLS: val1 - %s' % val
+    if not type(val) in StringTypes:
+        # print 'RLS: val not StringType'
+        return val
 
+    val = val.replace('"', '')
+    # print 'RLS: val2 - %s' % val
+    return val
+
+
+def inti(a):
+    ret = 0
+    if a:
+	try: 
+	    ret = int(a)
+	except ValueError:
+	    traceback.print_exc()
+	    ret = 0
+
+    return ret
+
+
+try:
+    import sqlite
+except:
+    print "Python SQLite not installed!"
+
+
+class EPGDB:
+    """ 
+    Class for working with the EPG database 
+    """
+
+    def __init__(self, dbpath):
+        self.db = sqlite.connect(dbpath, client_encoding=config.LOCALE)
+        self.cursor = self.db.cursor()
+
+
+    def execute(self, query, close=False):
+        query = escape_query(query)
+
+	try:
+            self.cursor.execute(query)
+        except TypeError:
+            traceback.print_exc()
+            return False
+
+        if close:
+            # run a single query then close
+            result = self.cursor.fetchall()
+            self.db.commit()           
+            self.db.close()
+            return result
+        else:
+            return self.cursor.fetchall()
         
-    def add_program(self, program):
-        """
-        add a program
-        the channel must be present, or the program is silently dropped
-        """
-        if self.chan_dict.has_key(program.channel_id):
-            p = self.chan_dict[program.channel_id].programs
-            if len(p) and p[-1].start < program.stop and p[-1].stop > program.start:
-                # the tv guide is corrupt, the last entry has a stop time higher than
-                # the next start time. Correct that by reducing the stop time of
-                # the last entry
-                if config.DEBUG > 1:
-                    print 'wrong stop time: %s' % \
-                          String(self.chan_dict[program.channel_id].programs[-1])
-                self.chan_dict[program.channel_id].programs[-1].stop = program.start
+
+    def close(self):
+        self.db.commit()
+        self.db.close()
+
+
+    def commit(self):
+        self.db.commit()
+
+
+    def checkTable(self,table=None):
+        if not table:
+            return False
+        # verify the table exists
+        self.cursor.execute('select name from sqlite_master where \
+                             name="%s" and type="table"' % table)
+        if not self.cursor.fetchone():
+            return None
+        return table
+
+
+    def add_channel(self, id, call_sign, tuner_id):
+        query = 'insert or replace into channels (id, call_sign, tuner_id) \
+                 values ("%s", "%s", "%s")' % (id, call_sign, tuner_id)
+
+        self.execute(query)
+        self.commit()
                 
-            if len(p) and p[-1].start == p[-1].stop:
-                # Oops, something is broken here
-                self.chan_dict[program.channel_id].programs = p[:-1]
 
-            self.chan_dict[program.channel_id].programs.append(program)
+    def get_channel(self, id):
+        query = 'select * from channels where id="%s' % id
 
-
-            
-    def sort(self):
-        """
-        Sort all channel programs in time order
-        """
-        for chan in self.chan_list:
-            chan.sort()
-        
-
-    def __unicode__(self):
-        """
-        return as unicode for debug
-        """
-        s = u'XML TV Guide\n'
-        for chan in self.chan_list:
-            s += String(chan)
-        return s
+        channel = self.execute(query)
+        if len(channel):
+            return channel[0]
 
 
-    def __str__(self):
-        """
-        return as string for debug
-        """
-        return String(self.__unicode__())
+    def get_channels(self):
+        query = 'select * from channels'
 
+        rows = self.execute(query)
+        return rows
+
+
+    def remove_channel(self, id):
+        query = 'delete from channels where id="%s' % id
+
+        self.execute(query)
+        self.commit()
+
+
+    def get_channel_ids(self):
+        id_list = []
+        query = 'select id from channels'
+
+        rows = self.execute(query)
+        for row in rows: 
+            id_list.append(row.id)
+
+        return id_list
+
+
+    def add_program(self, channel_id, title, start, stop, subtitle='', 
+                    description='', episode=''):
+        title = escape_value(title)
+        subtitle = escape_value(subtitle)
+        description = escape_value(description)
+        # print 'DESC: %s' % description
+        episode = escape_value(episode)
+
+        old_prog = None
+
+        del_list = []
+
+        rows = self.execute('select * from programs where channel_id="%s" \
+                            and start=%s' % (channel_id, start))
+
+        if len(rows) > 1:
+            # Bad. We should only have one program for each chanid:start
+            # Lets end this right here.
+            rows = self.execute('select id from programs where channel_id="%s" \
+                                 and start=%s' % (channel_id, start))
+            for row in rows:
+                del_list.append(row.id)
+
+            self.remove_programs(del_list)
+            del_list = []
+
+        elif len(rows) == 1:
+            old_prog = rows[0]
+
+        else:
+            # we got no results
+            pass
+
+
+        if old_prog and old_prog.title == title:
+            # program timeslot is unchanged, see if there's anything
+            # that we should update
+            if old_prog.subtitle != subtitle:
+                self.execute('update programs set subtitle="%s" \
+                              where id="%s"' % (subtitle, old_prog.id))
+                self.commit()
+            if old_prog.description != description:
+                self.execute('update programs set description="%s" \
+                              where id="%s"' % (description, old_prog.id))
+                self.commit()
+            if old_prog.episode != episode:
+                self.execute('update programs set episode="%s" \
+                              where id="%s"' % (episode, old_prog.id))
+                self.commit()
+
+            return
+
+        #
+        # If we made it here there's no identical program in the table 
+        # to modify.
+        #
+
+        #for row in res:
+        #    del_list.append(row[0])
+
+        # TODO:
+        # Delete any entries of the same program title on the same channel 
+        # within 10 minues of the start time to somewhat compensate for
+        # shifting times.
+#        self.execute('delete from programs where channel_id="%s" and \
+#                            title="%s" and abs(%s-start)<=600' % \
+#                           (channel_id, title, start))
+        #for row in res:
+        #    if del_list.index(row[0]) >= 0: continue
+        #    del_list.append(row[0])
+
+        #self.remove_programs(del_list)
+
+
+        #
+        # If we got this far all we need to do now is insert a new
+        # program row.
+        #
+
+        query = 'insert into programs (channel_id, title, start, stop, \
+                                       subtitle, episode, description) \
+                 values ("%s", "%s", %s, %s, "%s", "%s", "%s")' % \
+                        (channel_id, title, start, stop, 
+                         subtitle, episode, description)
+
+        # print 'QUERY: "%s"' % query
+        self.execute(query)
+        self.commit()
+                
+
+    def get_programs(self, channels, start=0, stop=-1):
+        if type(channels) != ListType:
+            channels = [ channels, ]
     
-    def create_index(self):
-        """
-        create an index for faster access
-        """
-        for chan in self.chan_list:
-            chan.create_index()
+        now = time.time()
+        if not start:
+            start = now
 
-            
-    def get(self, id):
-        """
-        return channel with given id
-        """
+        query = 'select * from programs where'
+        for c in channels:
+            query = '%s channel_id="%s"' % (query, c)
+            if channels.index(c) < len(channels)-1: 
+                query = '%s or' % query
+
+        if stop == 0:
+            # only get what's running at time start
+            query = '%s and start<=%d and stop>%d' % (query, start, start)
+        elif stop == -1:
+            # get everything from time start onwards
+            query = '%s and ((start<=%d and stop>%d) or start>%d)' % \
+                    (query, start, start, start)
+        elif stop > now:
+            # get everything from time start to time stop
+            query = '%s and ((start<=%d and stop>%d) or \
+                             (start>%d and stop<%d) or \
+                             (start<%d and stop>=%d))' % \
+                    (query, start, start, start, stop, stop, stop)
+        else:
+            return []
+
+        rows = self.execute(query)
+        return rows
+
+
+    def remove_program(self, id):
+        query = 'delete from programs where id="%s' % id
+
+        self.execute(query)
+        self.commit()
+
+
+    def remove_programs(self, ids):
+        query = 'delete from programs where'
+        for id in ids:
+            query = '%s id="%s"' % (query, id)
+            if ids.index(id) < len(ids)-1: 
+                query = '%s and' % query
+
+        self.execute(query)
+        self.commit()
+
+
+    def search_programs(self, subs, by_chan=None):
+        now = time.time()
+        clause = 'where stop > %d' % now
+        if by_chan:
+            clause = '%s and channel_id="%s"' % (clause, by_chan)
+
+        clause = '%s and title like "%%%s%%"' % (clause, subs)
+
+        query = 'select * from programs %s order by channel_id, start' % clause
+        # print 'QUERY: %s' % query
+        rows = self.execute(query)
+
+        return rows
+
+
+    # XXX: Should we add a generic load() with a parser argument like before?
+
+    def add_data_xmltv(self, xmltv_file, verbose=1):
+        import xmltv
+        xmltv.load_guide(self, xmltv_file, verbose=verbose)
+
+        return True
+
+
+    def add_data_dd(self, dd_file):
+        return False
+
+
+    def add_data_vdr(self, vdr_epg_file):
         try:
-            return self.chan_dict[id]
-        except IndexError:
-            None
+            import vdrpylib
+        except:
+            print 'vdrpylib not installed'
+
+        return False
+
+
+
+

@@ -1,11 +1,7 @@
 import compat
-import guide
-import stat
-import os
+from guide import EPGDB
 
-def load(datafile, cachefile=None, parser='xmltv'):
-    return guide.TvGuide(datafile, cachefile, parser, verbose=True)
-    
-def timestamp(data = '/tmp/TV.xml'):
-    return 0
+
+def get_epg(dbfile = '/tmp/epgdb'):
+    return EPGDB(dbfile)
 
