@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/11/23 17:03:43  dischi
+# Removed fxd handling from AudioItem and created a new FXDHandler class
+# in __init__.py to let the directory handle the fxd files. The format
+# of audio fxd files changed a bit to match the video fxd format. See
+# __init__.py for details.
+#
 # Revision 1.7  2003/09/21 13:15:56  dischi
 # handle audio fxd files correctly
 #
@@ -50,7 +56,7 @@ def cwd(parent, files):
     """
     items = []
 
-    for file in util.find_matches(files, config.SUFFIX_AUDIO_FILES + [ 'fxd' ]):
+    for file in util.find_matches(files, config.SUFFIX_AUDIO_FILES):
         a = AudioItem(file, parent)
         if a.valid:
             items.append(a)
@@ -72,3 +78,47 @@ def update(parent, new_files, del_files, new_items, del_items, current_items):
                 del_files.remove(file)
 
     new_items += cwd(parent, new_files)
+
+
+class FXDHandler:
+    """
+    parse audio specific stuff from fxd files
+
+    <?xml version="1.0" ?>
+    <freevo>
+      <audio title="Smoothjazz">
+        <cover-img>foo.jpg</cover-img>
+        <mplayer_options></mplayer_options>
+        <url>http://64.236.34.141:80/stream/1005</url>
+    
+        <info>
+          <genre>JAZZ</genre>
+          <description>A nice description</description>
+        </info>
+    
+      </audio>
+    </freevo>
+    """
+    def __init__(self, parser, filename, parent, duplicate_check):
+        self.items   = []
+        self.parent  = parent
+        self.dirname = vfs.dirname(vfs.normalize(filename))
+        self.name    = vfs.splitext(vfs.basename(filename))[0]
+        parser.set_handler('audio', self.parse)
+
+
+    def parse(self, fxd, node):
+        """
+        Callback from the fxd parser. Create an AudioItem
+        """
+        a = AudioItem('', self.parent, scan=False)
+        a.name = fxd.getattr(node, 'title', self.name)
+        a.image = fxd.childcontent(node, 'cover-img')
+        if a.image:
+            a.image = vfs.join(self.dirname, a.image)
+
+        a.mplayer_options = fxd.childcontent(node, 'mplayer_options')
+        a.url = fxd.childcontent(node, 'url')
+
+        fxd.parse_info(fxd.get_children(node, 'info', 1), a)
+        self.items.append(a)

@@ -9,26 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2003/11/23 17:03:43  dischi
+# Removed fxd handling from AudioItem and created a new FXDHandler class
+# in __init__.py to let the directory handle the fxd files. The format
+# of audio fxd files changed a bit to match the video fxd format. See
+# __init__.py for details.
+#
 # Revision 1.39  2003/11/22 20:36:34  dischi
 # use new vfs
-#
-# Revision 1.38  2003/09/21 13:15:56  dischi
-# handle audio fxd files correctly
-#
-# Revision 1.37  2003/09/20 15:08:26  dischi
-# some adjustments to the missing testfiles
-#
-# Revision 1.36  2003/09/20 09:44:23  dischi
-# cleanup
-#
-# Revision 1.35  2003/09/10 19:35:49  dischi
-# fix length during runtime
-#
-# Revision 1.34  2003/08/23 12:51:41  dischi
-# removed some old CVS log messages
-#
-# Revision 1.33  2003/08/22 13:19:46  outlyer
-# Patch to allow mplayer-options in Web "Radio" FXD files.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -124,7 +112,7 @@ class AudioItem(Item):
 
         # Let's try to find if there is any image in the current directory
         # that could be used as a cover
-        if not self.image and not file.find('://') != -1:
+        if file and not self.image and not file.find('://') != -1:
             images = ()
             covers = ()
             files =()
@@ -149,11 +137,6 @@ class AudioItem(Item):
                 if covers:
                     image = os.path.join(os.path.dirname(file), covers[0])
             self.image = image
-
-        if os.path.splitext(file)[1] == '.fxd':
-            self.set_info_radio(file)
-            if not self.url:
-                self.valid = 0
 
 
     def copy(self, obj):
@@ -198,53 +181,6 @@ class AudioItem(Item):
             
         return Item.getattr(self, attr)
 
-    def set_info_radio(self, filename):
-        """
-        Sets the info variables with info from the fxd
-
-        Arguments: filename
-          Returns: 1 if success
-        """
-        import xmllib
-        import xml
-        from xml.parsers import expat
-        sourcexml = open(filename, 'r')
-        xmlpp = sourcexml.read()
-
-        def s_el(name, attrs):
-            global glob_name
-            glob_name = name
-        def e_el(name):
-            pass
-        def c_data(data):
-            global glob_name
-            global glob_val
-            global glob_url
-            if data:
-                if glob_name == 'title':
-                    self.title = data
-                    glob_name = 0
-                if glob_name == 'genre':
-                    self.album = data
-                    glob_name = 0
-                if glob_name == 'desc':
-                    self.artist = data
-                    glob_name = 0
-                if glob_name == 'url':
-                    self.url = data
-                    glob_name = 0
-                if glob_name == 'mplayer_options':
-                    self.mplayer_options = data
-                    glob_name = 0
-        prs = xml.parsers.expat.ParserCreate()
-        prs.StartElementHandler = s_el
-        prs.EndElementHandler = e_el
-        prs.CharacterDataHandler = c_data
-        prs.returns_unicode = 0
-        prs.Parse(xmlpp)
-        return 1
-
-
    
     # ----------------------------------------------------------------------------
 
@@ -278,6 +214,7 @@ class AudioItem(Item):
         Stop the current playing
         """
         self.player.stop()
+
 
     def format_track(self):
         """ Return a formatted string for use in music.py """
