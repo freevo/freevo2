@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2002/08/22 04:45:13  krister
+# Changed the test-mplayer to the main one.
+#
 # Revision 1.5  2002/08/21 04:58:26  krister
 # Massive changes! Obsoleted all osd_server stuff. Moved vtrelease and matrox stuff to a new dir fbcon. Updated source to use only the SDL OSD which was moved to osd.py. Changed the default TV viewing app to mplayer_tv.py. Changed configure/setup_build.py/config.py/freevo_config.py to generate and use a plain-text config file called freevo.conf. Updated docs. Changed mplayer to use -vo null when playing music. Fixed a bug in music playing when the top dir was empty.
 #
@@ -166,8 +169,8 @@ class MPlayer:
                      '%s:width=%s:height=%s:%s' %
                      (input, norm, tuner_channel, chanlist, w, h, outfmt))
             
-            mpl = ('../apps/mplayer -vo %s -fs %s %s' %
-                   (config.MPLAYER_VO_DEV, tvcmd,
+            mpl = ('%s -vo %s -fs %s %s' %
+                   (config.MPLAYER_CMD, config.MPLAYER_VO_DEV, tvcmd,
                     config.MPLAYER_ARGS_TVVIEW))
 
         elif mode == 'vcr':
@@ -185,8 +188,8 @@ class MPlayer:
                      'chanlist=us-cable:width=%s:height=%s:%s' %
                      (input, norm, w, h, outfmt))
             
-            mpl = ('../apps/mplayer -vo %s -fs %s %s' %
-                   (config.MPLAYER_VO_DEV, tvcmd,
+            mpl = ('%s -vo %s -fs %s %s' %
+                   (config.MPLAYER_CMD, config.MPLAYER_VO_DEV, tvcmd,
                     config.MPLAYER_ARGS_TVVIEW))
 
         else:
