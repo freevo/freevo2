@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.50  2004/06/03 18:23:31  dischi
+# put image viewer osd into config
+#
 # Revision 1.49  2004/05/31 10:45:27  dischi
 # update to new callback handling in rc
 #
@@ -383,7 +386,7 @@ class ImageViewer(GUIObject):
 
         # print image information
         elif event == TOGGLE_OSD:
-            self.osd_mode = {0:1, 1:2, 2:0}[self.osd_mode] # Toggle on/off
+            self.osd_mode = (self.osd_mode + 1) % (len(config.IMAGEVIEWER_OSD) + 1)
             # Redraw
             self.view(self.fileitem, zoom=self.zoom, rotation = self.rotation)
             return True
@@ -429,46 +432,12 @@ class ImageViewer(GUIObject):
             
     def drawosd(self, layer=None):
 
-        if not self.osd_mode: return
+        if not self.osd_mode:
+            return
 
-        elif self.osd_mode == 1:
-	    # This is where we add a caption.  Only if playlist is empty
-            # May need to check the caption too?
-            osdstring = []
+        osdstring = []
 
-	    # Here we set up the tags that we want to put in the display
-	    # Using the following fields
-            tags_check = [[_('Title')+': ',      'name'],
-                          [_('Description')+': ','description'],
-                          [_('Author')+': ',     'author']
-                          ]
-
-
-
-        elif self.osd_mode == 2:    
-           # This is where we add a caption.  Only if playlist is empty
-	   # create an array with Exif tags as above
-	   osdstring = []
-           tags_check = [ [_('Title')+': ',    'name'],
-                          [_('Date')+': ' ,    'date'],
-	                  ['W:',               'width'],
-			  ['H:',               'height'],
-			  [_('Model')+': ',    'hardware'],
-			  [_('Software')+': ', 'software']
-			 ]
-
-           # FIXME: add this informations to mmpython:
-           
-           # ['Exp:','EXIF ExposureTime','ExposureTime','EXIF'],
-           # ['F/','EXIF FNumber','FNumber','EXIF'],
-           # ['FL:','EXIF FocalLength','FocalLength','EXIF'],
-           # ['ISO:','EXIF ISOSpeedRatings','ISOSpeedRatings','EXIF'],
-           # ['Meter:','EXIF MeteringMode','MeteringMode','EXIF'],
-           # ['Light:','EXIF LightSource','LightSource','EXIF'],
-           # ['Flash:','EXIF Flash','Flash','EXIF'],
-           # ['Make:','Image Make','Make','EXIF'],
-
-        for strtag in tags_check:
+        for strtag in config.IMAGEVIEWER_OSD[self.osd_mode-1]:
             i = self.fileitem.getattr(strtag[1])
             if i:
                 osdstring.append('%s %s' % (strtag[0], i))

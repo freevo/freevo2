@@ -109,7 +109,7 @@ from event import *
 # of the config file doesn't match, Freevo won't start. If the minor version
 # is different, there will be only a warning
 
-LOCAL_CONF_VERSION  = 5.09
+LOCAL_CONF_VERSION  = 5.11
 
 # Description of changes in each new version
 FREEVO_CONF_CHANGES = [
@@ -210,7 +210,10 @@ LOCAL_CONF_CHANGES = [
      skin. Also added RESTART_SYS_CMD, OSD_DIM_TEXT and OSD_UPDATE_COMPLETE_REDRAW.'''),
     (5.09,
      '''Add CACHE_IMAGES to turn off image caching. A new variable is
-     IMAGEVIEWER_BLEND_MODE to control the blending effect in the image viewer''') ]
+     IMAGEVIEWER_BLEND_MODE to control the blending effect in the image viewer'''),
+    (5.11,
+     '''Add IMAGEVIEWER_OSD to customize the osd and VIDEO_AUTOJOIN to auto join
+     movies with more than one file''') ]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -746,10 +749,35 @@ IMAGE_SSHOW_SUFFIX = [ 'ssr' ]
 IMAGEVIEWER_BLEND_MODE = -1
     
 #
+# What information to display by pressing DISPLAY.
+# You can add as many lists as you want and the viewer will toggle
+# between no osd and the lists.
+#
+# Warning: this list may change in future versions of Freevo to support
+# nice stuff like line breaks.
+#
+IMAGEVIEWER_OSD = [
+    # First OSD info
+    [ (_('Title')+': ',      'name'),
+      (_('Description')+': ','description'),
+      (_('Author')+': ',     'author') ],
+
+    # Second OSD info
+    [ (_('Title')+': ',    'name'),
+      (_('Date')+': ' ,    'date'),
+      ('W:',               'width'),
+      ('H:',               'height'),
+      (_('Model')+': ',    'hardware'),
+      (_('Software')+': ', 'software') ]
+    ]
+    
+
+#
 # use exif thumbnail your thumbnail review. The quality is lower but
 # it's much faster
 #
 IMAGE_USE_EXIF_THUMBNAIL = 1
+
 
 # ======================================================================
 # Freevo games settings:
