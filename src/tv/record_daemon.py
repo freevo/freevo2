@@ -26,9 +26,10 @@ SCHEDULE = config.REC_SCHEDULE_FILE
 LOG_FILE = config.LOGDIR + '/freevo_record.log'
 
 def log(s=''):
-    fd = open(LOG_FILE, 'a')
-    fd.write(s + '\n')
-    fd.close()
+    if config.DEBUG:
+        fd = open(LOG_FILE, 'a')
+        fd.write(s + '\n')
+        fd.close()
     
 
 class ScheduleItem:
