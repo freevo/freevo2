@@ -9,6 +9,10 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2004/03/13 20:14:12  rshortt
+# Add 'add to favorites' capabilities.  This needs more work and error handling still.
+# 'remove from favorites' isn't implimented yet either.
+#
 # Revision 1.33  2004/03/13 03:28:06  rshortt
 # More favorites support... almost there!
 #
@@ -68,6 +72,7 @@ import event as em
 from item import Item
 from gui.AlertBox import AlertBox
 from gui.InputBox import InputBox
+from tv.record_types import Favorite
 
 DEBUG = config.DEBUG
 
@@ -152,7 +157,9 @@ class ProgramItem(Item):
 
 
     def add_favorite(self, arg=None, menuw=None):
-        pass
+        fav = Favorite(self.prog.title, self.prog, True, True, True, -1)
+        fav_item = FavoriteItem(self, fav, fav_action='add')
+        fav_item.display_favorite(menuw=menuw)
 
 
     def rem_favorite(self, arg=None, menuw=None):
@@ -220,11 +227,12 @@ class ProgramItem(Item):
 
 
 class FavoriteItem(Item):
-    def __init__(self, parent, fav):
+    def __init__(self, parent, fav, fav_action='edit'):
         Item.__init__(self, parent, skin_type='video')
         self.fav   = fav
         self.name  = self.origname = fav.name
         self.title = fav.title
+        self.fav_action = fav_action
 
         self.week_days = (_('Mon'), _('Tue'), _('Wed'), _('Thu'), _('Fri'), _('Sat'), _('Sun'))
 
@@ -305,8 +313,6 @@ class FavoriteItem(Item):
 
     def alter_prop(self, arg=(None,None), menuw=None):
         (prop, val) = arg
-        print 'FAV: prop=%s' % prop
-        print 'FAV: val=%s' % val
 
         if prop == 'channel':
             if val == 'ANY':
@@ -376,7 +382,11 @@ class FavoriteItem(Item):
 
 
     def save_changes(self, arg=None, menuw=None):
-        (result, msg) = record_client.removeFavorite(self.origname)
+        if self.fav_action == 'edit':
+            (result, msg) = record_client.removeFavorite(self.origname)
+        else:
+            result = True
+
         if result:
             (result, msg) = record_client.addEditedFavorite(self.fav.name, 
                                                             self.fav.title, 
@@ -386,14 +396,20 @@ class FavoriteItem(Item):
                                                             self.fav.priority)
             if not result:
                 AlertBox(text=_('Save Failed, favorite was lost')+(': %s' % msg)).show()
-            elif menuw:  
-                menuw.back_one_menu(arg='reload')
+            else:
+                self.fav_action = 'edit'
+                if menuw:  
+                    menuw.back_one_menu(arg='reload')
 
         else:
             AlertBox(text=_('Save Failed')+(': %s' % msg)).show()
 
 
     def rem_favorite(self, arg=None, menuw=None):
+        if self.fav_action == 'add':
+            AlertBox(text=_('Favorite not added yet.')).show()
+            return
+       
         (result, msg) = record_client.removeFavorite(self.origname)
         if result:
             # then menu back one which should show an updated list if we
