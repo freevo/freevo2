@@ -34,7 +34,7 @@
 	<item type="all">
 	  <font name="Arial_Bold" size="19" color="0xdddddd"/>
 	  <shadow visible="no" color="0x000000" x="1" y="1"/> 
-	  <selection visible="yes" color="0xffffff" bgcolor="0xa0000000">
+	  <selection visible="yes" color="0xffffff" bgcolor="0xa0000000" radius="0">
 	    <font name="Arial_Bold" size="19" color="0xffffff"/>
 	    <shadow visible="no" color="0x000000" x="1" y="1"/>
 	  </selection>
@@ -55,7 +55,7 @@
       
       <submenu x="40" y="520">
 	<font name="Arial_Bold" size="15" color="0xdddddd"/>
-	<selection length="154" bgcolor="0xa008171c">
+	<selection length="154" bgcolor="0xa008171c" radius="0">
 	  <font name="Arial_Bold" size="15" color="0xffffff"/>
 	  <shadow visible="no" color="0x000000" x="2" y="2"/>
         </selection>

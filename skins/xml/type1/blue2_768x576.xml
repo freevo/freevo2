@@ -13,7 +13,7 @@
 	<shadow visible="yes" color="0xaa000000" x="3" y="3"/>
       </title>
 
-      <items x="60" y="105" height="370" width="620">
+      <items x="60" y="115" height="360" width="620">
 	<item type="all">
 	  <font name="bluehigh" size="18" color="0x000000"/>
 	  <shadow visible="no" color="0x000000" x="1" y="1"/> 
