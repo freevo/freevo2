@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.53  2004/07/09 14:34:52  dischi
+# inverse the rc.app() call. One line, two bugs :-(
+#
 # Revision 1.52  2004/07/09 14:33:05  dischi
 # bugfix: rc.app is always true, it is rc.app() we want
 #
@@ -703,7 +706,7 @@ def check_cache_status():
     check if cache got updated with helper while freevo is running
     """
     global __last_status_check__
-    if not rc.app():
+    if rc.app():
         return
     try:
         cachefile = os.path.join(config.FREEVO_CACHEDIR, 'mediainfo')
