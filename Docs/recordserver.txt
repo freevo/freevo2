@@ -16,8 +16,35 @@ directory. The filename is recordserver.fxd. You can edit this file
 only when the server is not running. The epg database should move to
 that dir, too.
 
-Let's start with the favorites because they create recordings. Here a
-small example:
+Before explaining the server and the file format, something on
+plugins. You need to load recorder plugins. Without recorder nothing
+will get recorded. Right now only the dvb plugin works. So if you have
+a dvb card, put plugin.activate('record.dvb') in your
+local_conf.py. This plugin can only handle one card, so if you have
+more, activate the plugin for each card:
+
+plugin.activate('record.dvb', args='dvb0')
+plugin.activate('record.dvb', args='dvb1')
+
+The server also needs a valid TV_CHANNELS listing. It doesn't work
+without it. Here a small example. 
+
+TV_CHANNELS = [
+   ( 'ard.de', 'ARD', 'dvb0:Das Erste RB', 'dvb1:Das Erste' ), 
+   ( 'ndr.de', 'NDR', 'NDR RB', 19 ), 
+   ( 'kika.de', 'Kika', 'Doku KiKa' ) ]
+
+The first entry is the unique identifier from the database, in most
+cases the xmltv id. The recordserver will use this id internaly. The
+second the display name, the server doesn't need it. After than comes
+a list were to find the channel. The first can be found on two dvb
+cards, but with different names, the second on a dvb card and analog
+on the tuner id (frequency?) 19. The last only on dvb with the given
+id. Freevo guesses that all integer values can be found on analog tv
+cards (tv or ivtv), strings on dvb cards. 
+
+But back to the recordserver and the file format.Let's start with the
+favorites because they create recordings. Here a small example:
 
 <freevo>
   <favorite id="0">
