@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2004/09/15 20:46:08  dischi
+# fix audio stop hide() bug
+#
 # Revision 1.21  2004/09/15 19:36:15  dischi
 # new detach plugin from Viggo
 #
@@ -65,6 +68,8 @@ from audio.audioitem    import AudioItem
 from controlpanel       import *
 from event              import *
 
+DETACH_AUDIO_STOP = Event('DETACH_AUDIO_STOP')
+
 class PluginInterface(IdleBarPlugin):
     """
     A detached audioplayer view for freevo
@@ -78,10 +83,13 @@ class PluginInterface(IdleBarPlugin):
         plugin.register(self, 'audio.detach')
 
         # XXX add support for theme changes?
-        #eventhandler.register(self, THEME_CHANGE)
-        eventhandler.register(self, PLAY_END)
+        # eventhandler.register(self, THEME_CHANGE)
+        # XXX that doesn't work, PLAY_END doesn't send the stopped item
+        # XXX as argument
+        # eventhandler.register(self, PLAY_END)
         eventhandler.register(self, PLAY_START)
-
+        eventhandler.register(self, DETACH_AUDIO_STOP)
+        
         self.visible    = False
         self.detached   = False
         self.animation  = None
@@ -235,20 +243,28 @@ class PluginInterface(IdleBarPlugin):
         """
 
         if event == STOP and self.detached:
-            self.hide()
+            # this event STOP has nothing to do with the normal stop because
+            # this eventhandler is only called for the registered events
+            # PLAY_START and PLAY_END
             return audioplayer().eventhandler(STOP)
 
-        if not event.arg:
-            return False
-
-        if event == PLAY_END and event.arg == self.item:
+        if event == DETACH_AUDIO_STOP:
+            # The audio stopped, we got an event from the animation. So we
+            # need to hide now, update the idlebar and than update the screen
+            # to show an idlebar without us.
             self.hide()
+            plugin.getbyname('idlebar').update()
+            gui.get_display().update()
+            return True
+        
         elif event == PLAY_START and isinstance(event.arg, AudioItem) and self.detached:
+            # An audio item has started playing and we are in detached mode. This is our
+            # item and we should show ourself
             self.hide()
             self.show()
-
+            return True
+        
         return False
-
 
 
     def format_info(self):
@@ -313,6 +329,9 @@ class DetachbarAnimation(BaseAnimation):
         """
         update the animation
         """
+        if not audioplayer().running:
+            eventhandler.post(DETACH_AUDIO_STOP)
+            
         self.frame += 1
 
         # goto next text object
