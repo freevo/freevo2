@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2002/10/13 05:41:17  outlyer
+# Fixed another drawstring call that should be skin.PopupBox()
+#
 # Revision 1.35  2002/10/06 14:58:51  dischi
 # Lots of changes:
 # o removed some old cvs log messages
@@ -123,9 +126,7 @@ class MPlayer:
 
         if( (mode == 'video' or mode == 'audio') and
             not os.path.isfile(filename) ):
-            osd.clearscreen()
-            osd.drawstring('File "%s" not found!' % filename, 30, 280)
-            osd.update()
+	    skin.PopupBox('%s\nnot found!' % filename)
             time.sleep(2.0) 
             menuwidget.refresh()
             # XXX We should really use return more. And this escape should
