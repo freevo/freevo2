@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.60  2005/04/01 18:04:14  rshortt
+# Add support for df_xine.
+#
 # Revision 1.59  2004/12/18 13:37:27  dischi
 # adjustments to new childapp
 #
@@ -111,6 +114,8 @@ class PluginInterface(plugin.Plugin):
                    config.FBXINE_VERSION < '0.9.23':
                 self.reason = "'fbxine' version too old"
                 return
+        elif config.XINE_COMMAND.find('df_xine') >= 0:
+           type = 'df' 
         else:
             type = 'X'
             if config.XINE_VERSION < '0.99.1' and \
