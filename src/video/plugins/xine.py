@@ -5,10 +5,34 @@
 # $Id$
 #
 # Notes:
+#
+# This is a bad hack to make it work. Freevo has _no_ control over
+# Xine, the remote or keyboard events are the one from Xine, not
+# Freevo. Because of that, this plugin only works for playing a
+# DVD. For other files or when you select a specific title, mplayer
+# will be taken.
+#
+# To activate this plugin write plugin.activate('video.xine') in your
+# local_conf.py and set XINE_COMMAND to the command line how to start
+# xine. For X11 this may be 'xine -V xv -g -f'. Make sure you have
+# configured xine correctly. For frambuffer use this is more
+# complicated. First set XINE_COMMAND to 'fbxine -V vidixfb' and than
+# you have to patch fbxine. fbxine tries to open the keyboard from the
+# calling tty, but Freevo called xine, there is no tty. Delete the
+# keyboard init in /src/fb/main.c, function fbxine_init. It may also
+# be usefull to add '-A <audiosettings> to XINE_COMMAND.
+#
+#
 # Todo:        
+#
+# Again: this is a bad hack. Someone should enhance pyxine or build
+# something else above xine-lib to have complete control over xine.
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/07/20 21:03:58  dischi
+# add doc
+#
 # Revision 1.2  2003/07/20 19:56:25  dischi
 # small fixes
 #
@@ -85,6 +109,7 @@ class PluginInterface(plugin.Plugin):
             print 'local_config.py. Possible good values are'
             print '"xine -V xv -g -f" for using xine while running X'
             print '"fbxine -V vidix"  for using xine on the framebuffer'
+            print 'Please read the notes in src/video/plugins/xine.py'
             print '***********************************************************'
             return
         
