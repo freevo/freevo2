@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <linux/kd.h>
+#include <stdlib.h>
 
 static void
 tty_enable (void)
