@@ -37,8 +37,10 @@ def getCDID(drive):
 #
 
 def str2XML(line):
-    return unicode(string.replace(line, "&", "&amp;"), 'latin-1')
-    
+    s = unicode(string.replace(line, "&", "&amp;"), 'latin-1')
+    while s[-1] == ' ':
+        s = s[:-1]
+    return s
 
 try:
     imdb_number = sys.argv[1]
@@ -100,7 +102,7 @@ if imdb_number == '--add-id':
 # Some init stuff
 #
     
-title = year = genre = tagline = plot = rating = image = ""
+title = year = genre = tagline = plot = rating = image = runtime = ""
 
 regexp_title   = re.compile('.*STRONG CLASS="title">(.*?)<', re.I)
 regexp_year    = re.compile('.*<A HREF="/Sections/Years/.*?([0-9]*)<', re.I)
@@ -109,6 +111,7 @@ regexp_tagline = re.compile('.*<B CLASS="ch">Tagline.*?</B>(.*?)<', re.I)
 regexp_plot    = re.compile('.*<B CLASS="ch">Plot Outline.*?</B>(.*?)<', re.I)
 regexp_rating  = re.compile('.*<B>([0-9\.]*)/10</B> (.[0-9,]* votes.?)', re.I)
 regexp_image   = re.compile('.*ALT="cover".*src="(http://.*?)"', re.I)
+regexp_runtime = re.compile('.*<b class="ch">Runtime', re.I)
 
 
 # Old stuff (before IMDb has updated there site):
@@ -169,8 +172,18 @@ if r.status != 200:
     print r.status
     print r.reason
     sys.exit(1)
-    
+
+next_line_is = None
+
 for line in r.read().split("\n"):
+    if next_line_is == 'runtime':
+        next_line_is = None
+        runtime = str2XML(line)
+
+    if regexp_runtime.match(line):
+        next_line_is = 'runtime'
+        continue
+    
     m = regexp_title.match(line)
     if m: title = str2XML(m.group(1))
 
@@ -301,13 +314,22 @@ if index > 0:
 i.write("\
     </video>\n\
     <info>\n\
-      <url>http://us.imdb.com/Title?"+imdb_number+"</url>\n\
-      <genre>"+genre+"</genre>\n\
-      <year>"+year+"</year>\n\
-      <tagline>"+tagline+"</tagline>\n\
-      <plot>"+plot+"</plot>\n\
-      <rating>"+rating+"</rating>\n\
-    </info>\n\
+      <url>http://us.imdb.com/Title?"+imdb_number+"</url>\n")
+
+if genre:
+    i.write("      <genre>"+genre+"</genre>\n")
+if year:
+    i.write("      <year>"+year+"</year>\n")
+if runtime:
+    i.write("      <runtime>"+runtime+"</runtime>\n")
+if tagline:
+    i.write("      <tagline>"+tagline+"</tagline>\n")
+if plot:
+    i.write("      <plot>"+plot+"</plot>\n")
+if rating:
+    i.write("      <rating>"+rating+"</rating>\n")
+
+i.write("    </info>\n\
   </movie>\n\
 </freevo>\n")
 
