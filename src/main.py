@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.127  2004/06/20 15:52:14  dischi
+# set umask as early as possible
+#
 # Revision 1.126  2004/06/06 10:31:42  dischi
 # make it possible to shut down freevo on crash
 #
@@ -447,9 +450,6 @@ if len(sys.argv) >= 2:
 
 
 try:
-    # set the umask
-    os.umask(config.UMASK)
-
     # signal handler
     signal.signal(signal.SIGTERM, signal_handler)
     signal.signal(signal.SIGINT, signal_handler)

@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.107  2004/06/20 15:52:14  dischi
+# set umask as early as possible
+#
 # Revision 1.106  2004/06/09 17:08:45  rshortt
 # Attempt to sort channels properly (numericly, if possible).
 #
@@ -539,6 +542,10 @@ else:
     print 'Since it\'s highly unlikly you want to start Freevo without further'
     print 'configuration, Freevo will exit now.'
     sys.exit(0)
+
+
+# set the umask
+os.umask(config.UMASK)
 
 
 if not HELPER:
