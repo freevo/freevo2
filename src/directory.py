@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.76  2003/12/12 19:59:33  dischi
+# some speed enhancements
+#
 # Revision 1.75  2003/12/10 13:14:24  rshortt
 # Fix a typo.
 #
@@ -166,16 +169,17 @@ class DirItem(Playlist):
         self.type = 'dir'
         self.menuw = None
         self.menu  = None
-        self.name  = vfs.basename(directory)
+        self.name  = os.path.basename(directory)
 
         if name:
             self.name = name
         
         # variables only for DirItem
-        self.dir          = os.path.abspath(directory)
-        self.display_type = display_type
-        self.info         = {}
-        self.mountpoint   = None
+        self.dir           = os.path.abspath(directory)
+        self.display_type  = display_type
+        self.info          = {}
+        self.mountpoint    = None
+        self.skin_settings = False
 
         if add_args == None and hasattr(parent, 'add_args'): 
             add_args = parent.add_args
@@ -189,7 +193,7 @@ class DirItem(Playlist):
         self.modified_vars = []
 
         # Check for a cover in current dir
-        image = util.getimage(vfs.join(directory, 'cover'))
+        image = util.getimage(os.path.join(directory, 'cover'))
         if image:
             self.image       = image
             self.handle_type = self.display_type
@@ -218,6 +222,7 @@ class DirItem(Playlist):
             try:
                 parser = util.fxdparser.FXD(self.xml_file)
                 parser.set_handler('folder', self.read_folder_fxd)
+                parser.set_handler('skin', self.read_folder_fxd)
                 parser.parse()
             except:
                 print "fxd file %s corrupt" % self.xml_file
@@ -240,6 +245,10 @@ class DirItem(Playlist):
 	</freevo>
         '''
 
+        if node.name == 'skin':
+            self.skin_settings = True
+            return
+        
         global all_variables
         set_all = self.xml_file == self.dir+'/folder.fxd'
 
@@ -248,8 +257,8 @@ class DirItem(Playlist):
             self.name = fxd.getattr(node, 'title', self.name)
 
             image = fxd.childcontent(node, 'cover-img')
-            if image and vfs.isfile(vfs.join(self.dir, image)):
-                self.image = vfs.join(self.dir, image)
+            if image and vfs.isfile(os.path.join(self.dir, image)):
+                self.image = os.path.join(self.dir, image)
 
             # parse <info> tag
             fxd.parse_info(fxd.get_children(node, 'info', 1), self,
@@ -271,7 +280,8 @@ class DirItem(Playlist):
                             setattr(self, v, child.attrs[('', 'val')])
                     self.modified_vars.append(v)
 
-    
+
+
     def write_folder_fxd(self, fxd, node):
         """
         callback to save the modified fxd file
@@ -299,9 +309,10 @@ class DirItem(Playlist):
         """
         Playlist.copy(self, obj)
         if obj.type == 'dir':
-            self.dir          = obj.dir
-            self.display_type = obj.display_type
-            self.info         = obj.info
+            self.dir           = obj.dir
+            self.display_type  = obj.display_type
+            self.info          = obj.info
+            self.skin_settings = obj.skin_settings
             
 
     def getattr(self, attr):
@@ -374,11 +385,11 @@ class DirItem(Playlist):
         has_files = False
         has_dirs  = False
 
-        for f in vfs.listdir(self.dir):
-            if vfs.isfile(f):
+        for f in os.listdir(self.dir):
+            if os.path.isfile(f):
                 has_files = True
-            if vfs.isdir(f) and not (f.endswith('CVS') or f.endswith('.xvpics') or \
-                                     f.endswith('.thumbnails') or f.endswith('.pics')):
+            if os.path.isdir(f) and not (f.endswith('CVS') or f.endswith('.xvpics') or \
+                                         f.endswith('.thumbnails') or f.endswith('.pics')):
                 has_dirs = True
             if has_dirs and has_files:
                 break
@@ -558,7 +569,6 @@ class DirItem(Playlist):
             if self.media and dir_on_disc == '':
                 pop = ProgressBox(text=_('Scanning disc, be patient...'), full=num_changes)
             else:
-                print ProgressBox
                 pop = ProgressBox(text=_('Scanning directory, be patient...'),
                                   full=num_changes)
             pop.show()
@@ -583,7 +593,6 @@ class DirItem(Playlist):
             if self.media:
                 self.media.cached = True
 
-
         # build play_items, pl_items and dir_items
         for p in plugin.mimetype(display_type):
             for i in p.get(self, files):
@@ -593,7 +602,7 @@ class DirItem(Playlist):
                     self.dir_items.append(i)
                 else:
                     self.play_items.append(i)
-                        
+            
         # normal DirItems
         for filename in files:
             if vfs.isdir(filename):
@@ -601,7 +610,6 @@ class DirItem(Playlist):
                                               self.display_type))
 
         items = self.sort_items()
-        title = self.name
 
         if pop:
             pop.destroy()
@@ -626,18 +634,17 @@ class DirItem(Playlist):
             Playlist.play(self, menuw=menuw)
             
         else:
-            item_menu = menu.Menu(title, items, reload_func=self.reload,
+            item_menu = menu.Menu(self.name, items, reload_func=self.reload,
                                   item_types = self.display_type,
                                   force_skin_layout = self.DIRECTORY_FORCE_SKIN_LAYOUT)
 
-            if self.xml_file:
+            if self.skin_settings:
                 item_menu.skin_settings = skin.load(self.xml_file)
 
             if menuw:
                 menuw.pushmenu(item_menu)
 
-            plugin.getbyname('Dirwatcher').cwd(menuw, self, item_menu, self.dir,
-                                               self.all_files)
+            dirwatcher.cwd(menuw, self, item_menu, self.dir, self.all_files)
             self.menu  = item_menu
             self.menuw = menuw
         return items
@@ -647,9 +654,8 @@ class DirItem(Playlist):
         """
         called when we return to this menu
         """
-        plugin.getbyname('Dirwatcher').cwd(self.menuw, self, self.menu, self.dir,
-                                           self.all_files)
-        plugin.getbyname('Dirwatcher').scan(force=True)
+        dirwatcher.cwd(self.menuw, self, self.menu, self.dir, self.all_files)
+        dirwatcher.scan(force=True)
 
         # we changed the menu, don't build a new one
         return None
@@ -815,7 +821,7 @@ class DirItem(Playlist):
         item.name = item.name[:item.name.find('\t') + 1] + self.configure_set_name(arg)
 
         # write folder.fxd
-        self.xml_file = vfs.join(self.dir, 'folder.fxd')
+        self.xml_file = os.path.join(self.dir, 'folder.fxd')
 
         try:
             parser = util.fxdparser.FXD(self.xml_file)
@@ -919,4 +925,5 @@ class Dirwatcher(plugin.DaemonPlugin):
 
 # and activate that DaemonPlugin
 dirwatcher_thread = Dirwatcher()
+dirwatcher        = dirwatcher_thread
 plugin.activate(dirwatcher_thread)
