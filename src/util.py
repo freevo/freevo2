@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.53  2003/09/21 16:45:47  dischi
+# add function to convert a string with html entities
+#
 # Revision 1.52  2003/09/20 15:08:25  dischi
 # some adjustments to the missing testfiles
 #
@@ -95,6 +98,7 @@ import md5
 import Image # PIL
 import copy
 import cPickle, pickle # pickle because sometimes cPickle doesn't work
+import htmlentitydefs
 
 if float(sys.version[0:3]) < 2.3:
     PICKLE_PROTOCOL = 1
@@ -662,7 +666,44 @@ def encode(str, code):
             except UnicodeError:
                 pass
         return result
-    
+
+def htmlenties2txt(string):
+    e = copy.deepcopy(htmlentitydefs.entitydefs)
+    e['ndash'] = "-";
+    e['bull'] = "-";
+    e['rsquo'] = "'";
+    e['lsquo'] = "`";
+    e['hellip'] = '...'
+
+    string = string.encode('Latin-1', 'ignore').replace("&#039", "'").\
+             replace("&#146;", "'")
+
+    i = 0
+    while i < len(string):
+        amp = string.find("&", i) # find & as start of entity
+        if amp == -1: # not found
+            break
+        i = amp + 1
+
+        semicolon = string.find(";", amp) # find ; as end of entity
+        if string[amp + 1] == "#": # numerical entity like "&#039;"
+            entity = string[amp:semicolon+1]
+            replacement = str(chr(int(entity[2:-1])))
+        else:
+            entity = string[amp:semicolon + 1]
+            if semicolon - amp > 7:
+                continue
+            try:
+                # the array has mappings like "Uuml" -> "ü"
+                replacement = e[entity[1:-1]]
+            except KeyError:
+                continue
+        string = string.replace(entity, replacement)
+    string = string.encode('Latin-1', 'ignore')
+    return string
+
+
+
 
 #
 # synchronized objects and methods.
