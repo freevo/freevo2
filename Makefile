@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/02/25 06:34:08  krister
+# Quick fix for the TV recording menu problem. Added makefile target for CVS update.
+#
 # Revision 1.27  2003/02/24 05:45:50  krister
 # Improved cleaning
 #
@@ -86,7 +89,7 @@ LOGDIR   = /var/log/freevo
 CACHEDIR = /var/cache/freevo
 
 
-.PHONY: all subdirs x11 osd_x1 $(SUBDIRS) clean realclean release install
+.PHONY: all subdirs x11 osd_x1 $(SUBDIRS) clean realclean release install cvsup
 
 all: subdirs runapp freevo_xwin
 
@@ -104,6 +107,10 @@ subdirs: $(SUBDIRS)
 
 $(SUBDIRS):
 	$(MAKE) -C $@
+
+
+cvsup:
+	cvs update -r LATEST_ALPHA
 
 clean:
 	find . -name "*.pyo" -exec rm {} \;

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/02/25 06:34:08  krister
+# Quick fix for the TV recording menu problem. Added makefile target for CVS update.
+#
 # Revision 1.16  2003/02/21 21:18:52  outlyer
 # Added a surface thing; it's cleared for each new menu, but fixes the flicker
 # issue. Only skin_aubin uses it, it's otherwise ignored.
@@ -169,6 +172,10 @@ class Menu:
         # XXX Add a list of eventhandlers?
         self.heading = heading
         self.choices = choices          # List of MenuItem:s
+        if len(self.choices):
+            self.selected = self.choices[0]
+        else:
+            self.selected = None
         self.page_start = 0
         self.previous_page_start = []
         self.previous_page_start.append(0)
