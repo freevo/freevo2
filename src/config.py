@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/03/21 19:51:34  dischi
+# moved some main menu settings from skin to freevo_config.py (new skin only)
+#
 # Revision 1.20  2003/03/15 10:03:40  dischi
 # create subdirs in the cache directory
 #
@@ -227,6 +230,13 @@ CONF.jpegtran = ''
 CONF.mplayer = ''
 CONF.snes = ''
 CONF.version = 0
+
+class MainMenuItem:
+    def __init__(self, label, action, arg):
+        self.label = label
+        self.action = action
+        self.arg = arg
+        
 
 def print_config_changes(conf_version, file_version, changelist):
     ver_old = float(file_version)

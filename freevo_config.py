@@ -133,6 +133,18 @@ SHUTDOWN_SYS_CMD = 'shutdown -h now'  # set this to 'sudo shutdown -h now' if
                                       # you don't have the permissions to
                                       # shutdown
 
+# Items in the main menu. This variable has only affect for the new
+# skin (dischi1). To activate games, just add
+# MainMenuItem('games', 'MediaMenu().main_menu', 'games')
+
+MAIN_MENU_ITEMS = [
+    MainMenuItem('tv', 'tv.tv.main_menu', ''),
+    MainMenuItem('video', 'MediaMenu().main_menu', 'video'),
+    MainMenuItem('audio', 'MediaMenu().main_menu', 'audio'),
+    MainMenuItem('image', 'MediaMenu().main_menu', 'image'),
+    MainMenuItem('shutdown', 'ShutdownItem', '')
+    ]
+
 # ======================================================================
 # Freevo directory settings:
 # ======================================================================

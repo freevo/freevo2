@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2003/03/21 19:51:35  dischi
+# moved some main menu settings from skin to freevo_config.py (new skin only)
+#
 # Revision 1.29  2003/03/15 17:13:22  dischi
 # store rom drive type in media
 #
@@ -232,25 +235,48 @@ def get_main_menu(parent):
     items = []
     menu_items = skin.settings.mainmenu.items
 
-    for i in menu_items:
-        if menu_items[i].visible:
-
+    if config.NEW_SKIN:
+        icon_dir = skin.settings.icon_dir
+        for i in config.MAIN_MENU_ITEMS:
             # if it's has actions() it is an item already
-            if hasattr(eval(menu_items[i].action), 'actions'):
-                item = eval(menu_items[i].action)(None)
-                if menu_items[i].icon:
-                    item.icon = menu_items[i].icon
-                if menu_items[i].name:
-                    item.name = menu_items[i].name
+            if hasattr(eval(i.action), 'actions'):
+                item = eval(i.action)(None)
+                item.name = menu_items[i.label].name
+                if menu_items[i.label].icon:
+                    item.icon = os.path.join(icon_dir, menu_items[i.label].icon)
+                if menu_items[i.label].image:
+                    item.image = menu_items[i.label].image
                 item.parent = parent
                 items += [ item ]
 
             else:
-                items += [ MainMenuItem(parent, menu_items[i].name,
-                                        menu_items[i].icon,
-                                        menu_items[i].image,
-                                        eval(menu_items[i].action),
-                                        menu_items[i].arg) ]
+                icon = ""
+                if menu_items[i.label].icon:
+                    icon = os.path.join(icon_dir, menu_items[i.label].icon)
+                items += [ MainMenuItem(parent, menu_items[i.label].name, icon,
+                                        menu_items[i.label].image,
+                                        eval(i.action), i.arg) ]
+            
+    else:
+        for i in menu_items:
+            if menu_items[i].visible:
+
+                # if it's has actions() it is an item already
+                if hasattr(eval(menu_items[i].action), 'actions'):
+                    item = eval(menu_items[i].action)(None)
+                    if menu_items[i].icon:
+                        item.icon = menu_items[i].icon
+                    if menu_items[i].name:
+                        item.name = menu_items[i].name
+                    item.parent = parent
+                    items += [ item ]
+
+                else:
+                    items += [ MainMenuItem(parent, menu_items[i].name,
+                                            menu_items[i].icon,
+                                            menu_items[i].image,
+                                            eval(menu_items[i].action),
+                                            menu_items[i].arg) ]
     return items
     
 
