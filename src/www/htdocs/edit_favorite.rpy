@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/05/12 23:27:54  rshortt
+# Use record_types now.
+#
 # Revision 1.2  2003/05/12 23:02:41  rshortt
 # Adding HTTP BASIC Authentication.  In order to use you must override WWW_USERS
 # in local_conf.py.  This does not work for directories yet.
@@ -45,7 +48,7 @@
 
 import sys, time
 
-import rec_types
+from record_types import Favorite
 import epg_xmltv
 import record_client as ri
 
@@ -76,7 +79,7 @@ class EditFavoriteResource(FreevoResource):
 
         if action == 'add':
             priority = num_favorites + 1
-            fav = rec_types.Favorite(prog.title, prog, TRUE, TRUE, TRUE, priority)
+            fav = Favorite(prog.title, prog, TRUE, TRUE, TRUE, priority)
         elif action == 'edit':
             (status, fav) = ri.getFavorite(name)
         else:
