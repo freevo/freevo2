@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.94  2003/10/28 19:44:25  dischi
+# add install command
+#
 # Revision 1.93  2003/10/27 20:39:47  dischi
 # kill helpers with -KILL until it works better with twisted
 #
@@ -176,6 +179,21 @@ export PYTHONPATH=$FREEVO_PYTHON:$PYTHONPATH
 # expand PATH to stuff that should be in it
 export PATH=$PATH:/bin:/usr/bin:/sbin:/usr/sbin:/usr/X11R6/bin
 
+if [ "$1" == "install" ]; then
+    if [ -e "$2" ]; then
+	mkdir /tmp/$$
+	tar -zxf "$2" -C /tmp/$$
+	cd /tmp/$$/*
+	$PYTHON setup.py install
+	cd /
+	rm -rf /tmp/$$
+    else
+	echo "usage freevo install tgz"
+	echo "Install an external plugin or theme into Freevo"
+    fi
+    exit 0
+fi
+
 # option -fs
 # This will start a new X session and start Freevo as windowmanager
 # to work around all the fullscreen bugs of the different wm
@@ -262,6 +280,7 @@ help() {
     echo "  setup          run freevo setup to scan your environment"
     echo "  start          start freevo as daemon in background"
     echo "  stop           stop the current freevo process"
+    echo "  install <tgz>  Install an external plugin or theme"
     echo
     echo "freevo can start the following scripts, use --help on these"
     echo "scripts to get more informations about options."
