@@ -86,6 +86,11 @@ class OSD:
         self._send('setpixel;' + args)
 
         
+    def drawbitmap(self, filename, x, y):
+        args = filename + ';' + str(x) + ';' + str(y)
+        self._send('drawbitmap;' + args)
+
+        
     def drawline(self, x0, y0, x1, y1, width=None, color=None):
         if width == None:
             width = 1
@@ -114,23 +119,16 @@ class OSD:
         if fgcolor == None:
             fgcolor = self.default_fg_color
         if bgcolor == None:
-            bgcolor = self.default_bg_color
+            bgcolor = 0xff000000   # Transparent background
         args1 = '0;' + string + ';' + str(x) + ';' + str(y) + ';'
         args2 = str(fgcolor) + ';' + str(bgcolor)
         self._send('drawstring;' + args1 + args2)
 
 
-    def drawmenu(self, items, selected, spacing=1.0):
-        line_spacing = int(spacing * 30)
-        for i in range(len(items)):
-            fgcol = self.default_fg_color
-            bgcol = self.default_bg_color
-            x0 = 50
-            y0 = i * line_spacing + 100
-            self.drawstring('xxx', items[i], x0, y0, fgcol, bgcol)
-            if i == selected:
-                self.drawbox(x0 - 4, y0 - 3, 730, y0 + 24, width=3,
-                             color=self.COL_ORANGE)
+    def update(self):
+        self._send('update')
+
+
 
 
 #
