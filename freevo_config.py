@@ -108,8 +108,7 @@ from event import *
 # of the config file doesn't match, Freevo won't start. If the minor version
 # is different, there will be only a warning
 
-FREEVO_CONF_VERSION = 2.0
-LOCAL_CONF_VERSION  = 3.4
+LOCAL_CONF_VERSION  = 3.5
 
 # Description of changes in each new version
 FREEVO_CONF_CHANGES = [
@@ -147,11 +146,15 @@ LOCAL_CONF_CHANGES = [
     (3.4,
      '''Removed RC_MPLAYER_CMDS for video and audio. Set special handling (and
      other key mappings with the variable EVENTS. See event.py for possible
-     events''')]
+     events'''),
+    (3.5,
+     '''Added xine support (see xine section in freevo_config.py''')]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
 # steps
+
+FREEVO_CONF_VERSION = setup_freevo.CONFIG_VERSION
 
 if int(str(CONF.version).split('.')[0]) != \
    int(str(FREEVO_CONF_VERSION).split('.')[0]):
@@ -724,6 +727,31 @@ MPLAYER_DVD_PROTECTION = 1
 # this many seconds
 #
 MPLAYER_SEEK_TIMEOUT = 8
+
+# ======================================================================
+# Xine section:
+# ======================================================================
+
+# You need xine-ui version greater 0.9.21 to use the xine plugin
+
+if CONF.display == 'mga' and CONF.fbxine:
+    XINE_VO_DEV  = 'vidixfb'
+    XINE_COMMAND = CONF.fbxine
+    
+if CONF.display == 'dxr3' and CONF.fbxine:
+    XINE_VO_DEV  = 'dxr3'
+    XINE_COMMAND = CONF.fbxine
+    
+if CONF.display == 'x11' and CONF.xine:
+    XINE_VO_DEV  = 'xv'
+    XINE_COMMAND = '%s -g --no-splash -B --geometry %sx%s+0+0' % \
+                   (CONF.xine, CONF.width, CONF.height)
+
+XINE_AO_DEV = 'oss'                     # alsa or oss
+XINE_USE_VCDNAV = 0                     # use xine for VCD nav playback
+
+# plugin.activate('video.xine')
+
 
 # ======================================================================
 # TV:

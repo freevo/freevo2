@@ -22,6 +22,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2003/08/01 17:54:05  dischi
+# xine support and cleanups.
+# o xine support and configuration in freevo_config.py
+# o cleanup in setup_freevo: use one variable to store all needed
+#   programs
+# o config.py uses setup_freevo to search for missing programs at startup
+#
 # Revision 1.33  2003/07/30 14:04:38  outlyer
 # I don't think we use $CACHEDIR/audio anymore... if anyone needs it, I'll
 # uncomment it, else I'll delete it.
@@ -88,14 +95,12 @@
 
 
 import sys, os, time, re
+import setup_freevo
 
 if not 'FREEVO_STARTDIR' in os.environ:
     print 'WARNING: FREEVO_STARTDIR is not set!'
     os.environ['FREEVO_STARTDIR'] = os.environ['PWD']
     
-# XXX Fallback for a new option, remove later.
-MOVIE_PLAYLISTS = 0
-
 # Send debug to stdout as well as to the logfile?
 DEBUG_STDOUT = 1
 
@@ -190,22 +195,7 @@ CONF.width, CONF.height = 800, 600
 CONF.display = 'x11'
 CONF.tv = 'ntsc'
 CONF.chanlist = 'us-cable'
-CONF.xmame = ''
-CONF.jpegtran = ''
-CONF.mplayer = ''
-CONF.snes = ''
 CONF.version = 0
-CONF.tvtime = ''
-CONF.lame = ''
-CONF.oggenc = ''
-CONF.cdparanoia = ''
-
-class MainMenuItem:
-    def __init__(self, label, action, arg):
-        self.label = label
-        self.action = action
-        self.arg = arg
-        
 
 def print_config_changes(conf_version, file_version, changelist):
     ver_old = float(file_version)
@@ -260,7 +250,14 @@ for dir in cfgfilepath:
         if DEBUG: print 'Loading configure settings: %s' % freevoconf
         read_config(freevoconf, CONF)
         break
-    
+
+# search missing programs at runtime
+for program, valname, needed in setup_freevo.EXTERNAL_PROGRAMS:
+    if not hasattr(CONF, valname) or not getattr(CONF, valname):
+        setup_freevo.check_program(CONF, program, valname, needed, verbose=0)
+    if not hasattr(CONF, valname) or not getattr(CONF, valname):
+        setattr(CONF, valname, '')
+
 # Load freevo_config.py:
 cfgfilename = './freevo_config.py'
 if os.path.isfile(cfgfilename):
@@ -412,9 +409,3 @@ if not os.path.isdir('%s/thumbnails/' % FREEVO_CACHEDIR):
     import stat
     os.mkdir('%s/thumbnails/' % FREEVO_CACHEDIR,
              stat.S_IMODE(os.stat(FREEVO_CACHEDIR)[stat.ST_MODE]))
-
-#if not os.path.isdir('%s/audio/' % FREEVO_CACHEDIR):
-#    import stat
-#    os.mkdir('%s/audio/' % FREEVO_CACHEDIR,
-#             stat.S_IMODE(os.stat(FREEVO_CACHEDIR)[stat.ST_MODE]))
-
