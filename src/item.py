@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.69  2004/02/14 15:06:25  dischi
+# add basic sort function
+#
 # Revision 1.68  2004/02/14 13:04:46  dischi
 # do not call skin.get_singleton() anymore
 #
@@ -369,6 +372,13 @@ class Item:
         if hasattr(self, 'url'):
             return self.url
         return self.name
+
+    
+    def sort(self, mode=None):
+        """
+        Returns the string how to sort this item
+        """
+        return '0%s' % self.name
 
     
     def translation(self, application):
