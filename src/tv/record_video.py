@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/01/30 02:44:37  krister
+# Moved settings to freevo_config
+#
 # Revision 1.6  2003/01/29 05:36:27  krister
 # WIP
 #
@@ -232,23 +235,6 @@ def set_selection(arg=None, menuw=None):
     menuw.back_one_menu()
 
 
-
-# XXX TEST!  Change to use config.NNN settings instead!
-import socket
-if socket.gethostname() == 'linux':
-    cmd = ('/usr/local/bin/mencoder -tv on:driver=v4l:input=0:norm=NTSC:channel=%s:chanlist=us-cable:' +
-           'width=320:height=240:outfmt=yv12:adevice=/dev/dsp2:audiorate=32000:' +
-           'forceaudio:forcechan=1:buffersize=64 -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=1200:' +
-           'keyint=30 -oac mp3lame -lameopts br=128:cbr:mode=3 -ffourcc divx -o %s.avi ')
-else:
-    # XXX Testing? Change norm, chanlist, adevice! this assumes a BT878 WinTV
-    # board that has a builtin DSP device (/dev/dsp3 here).
-    cmd = ('/usr/local/bin/mencoder -tv on:driver=v4l:input=0:norm=NTSC:channel=%s:chanlist=us-cable:' +
-           'width=320:height=240:outfmt=yv12:adevice=/dev/dsp4:audiorate=32000:' +
-           'forceaudio:forcechan=1:buffersize=64 -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=1200:' +
-           'keyint=30 -oac mp3lame -lameopts br=128:cbr:mode=3 -ffourcc divx -o %s.avi ')
-
-
 def progname2filename(progname):
     '''Translate a program name to something that can be used as a filename.'''
 
@@ -291,7 +277,7 @@ def set_schedule(arg=None, menuw=None):
     rec_name = os.path.join(config.DIR_RECORD, rec_name)
 
     # Build the commandline. The -frames option is added later by the daemon.
-    sch_cmd = cmd % (tunerid, rec_name)
+    sch_cmd = config.VCR_CMD % (tunerid, rec_name)
     print 'SCHEDULE: %s, %s, %s' % (tunerid, time.ctime(start_time_s), rec_name)
     print 'SCHEDULE: %s' % sch_cmd
     
