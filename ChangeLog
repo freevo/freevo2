@@ -4,6 +4,11 @@ Freevo Changelog
 $Id$
 
 
+Release 1.5.0-rc2 (2004-05-11):
+-------------------------------
+ * Remove a race condition to fix mp3 playback
+
+
 Release 1.5.0-rc1 (2004-05-07):
 -------------------------------
  * Add new animation classes
