@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.158  2004/06/06 06:32:33  dischi
+# check osd init before drawstringframed
+#
 # Revision 1.157  2004/05/31 10:41:44  dischi
 # remove sleep function, not needed anymore
 #
@@ -67,15 +70,17 @@ from fcntl import ioctl
 import config, rc
 import plugin
 
-# The PyGame Python SDL interface.
-import pygame
-from pygame.locals import *
+if __freevo_app__ == 'main':
+    # The PyGame Python SDL interface.
+    import pygame
+    from pygame.locals import *
+
+    # import animations
+    import animation
 
 from mmpython.image import EXIF as exif
 import cStringIO
         
-# import animations
-import animation
 
 
 help_text = """\
@@ -874,6 +879,9 @@ class OSD:
         shadow and border. fgcolor and bgcolor will also be taken from the skin
         font if set to None when calling this function.
         """
+        if not pygame.display.get_init():
+            return '', (x,y,x,y)
+
         if not string:
             return '', (x,y,x,y)
 
