@@ -92,7 +92,7 @@ class Recording:
                 self.stop_padding = int(info[i])
             else:
                 self.info[i] = Unicode(info[i])
-        self.recorder = None
+        self.recorder = None, None
 
 
     def short_list(self):
@@ -162,7 +162,7 @@ class Recording:
             name = name[:20] + u'...'
         name = u'"' + name + u'"'
         status = self.status
-        if status == 'scheduled' and self.recorder:
+        if status == 'scheduled' and self.recorder[1]:
             status = self.recorder[0].name
         return '%3d %10s %-25s %4d %s-%s %s' % \
                (self.id, String(channel), String(name),
