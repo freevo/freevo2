@@ -659,7 +659,8 @@ VIDEO_MPLAYER_SUFFIX = [ 'avi', 'mpg', 'mpeg', 'wmv', 'bin', 'rm',
 # are played wih Xine.
 # 
 VIDEO_XINE_SUFFIX = [ 'avi', 'mpg', 'mpeg', 'rm', 'divx', 'ogm',
-                      'asf', 'm2v', 'm2p', 'mp4', 'mov', 'cue', 'ts' ]
+                      'asf', 'm2v', 'm2p', 'mp4', 'mov', 'cue',
+                      'ts', 'iso', 'vob' ]
 
 #
 # Preferred video player
