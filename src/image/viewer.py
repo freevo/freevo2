@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.69  2004/09/12 21:19:36  mikeruelle
+# for those of us without idlebars
+#
 # Revision 1.68  2004/09/07 18:57:43  dischi
 # image viwer auto slideshow
 #
@@ -416,7 +419,8 @@ class ImageViewer(Application):
                 self.osd_box.unparent()
                 self.osd_box = None
             # also hide the idlebar to get 'fullscreen' back
-            plugin.getbyname('idlebar').hide()
+            if plugin.getbyname('idlebar'):
+                plugin.getbyname('idlebar').hide()
             return
 
         # create the osdstring to write
