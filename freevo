@@ -11,6 +11,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.115  2004/08/11 20:52:30  rshortt
+# Bugfix.  Freevo was giving an invalid sys.argv[1] (from the helper's point of
+# view) when there were only two args when running a helper (freevo script and
+# helper name).
+#
 # Revision 1.114  2004/08/05 17:40:56  dischi
 # add lib to python path
 #
@@ -430,12 +435,12 @@ elif arg and name == 'freevo' and not arg.startswith('-'):
     # the helpers directory
     name     = arg
     proc     = [ os.path.join(freevo_python, 'helpers', name + '.py') ]
-    if len(sys.argv) > 2:
-        if sys.argv[2] == 'stop':
+    if len(sys.argv) >= 2:
+        if len(sys.argv) > 2 and sys.argv[2] == 'stop':
             if not stop(name, python + proc):
                 print '%s not running' % name
             sys.exit(0)
-        if sys.argv[2] == 'start':
+        if len(sys.argv) > 2 and sys.argv[2] == 'start':
             bg = 1
             sys.argv = [ sys.argv[0] ]
         else:
