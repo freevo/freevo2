@@ -21,6 +21,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/05/28 18:12:39  dischi
+# pass object to draw to all sub-plugins
+#
 # Revision 1.8  2003/05/28 17:36:27  dischi
 # make the weather zone a parameter
 #
@@ -105,7 +108,7 @@ class interface(plugin.DaemonPlugin):
 
         osd.putsurface(self.toolbar_surface,0,0)
         for p in self.plugins:
-            p.draw()
+            p.draw((type, object))
         rect = (0,0,osd.width,75)
         osd.update(rect)
 
@@ -120,7 +123,7 @@ class IdleBarPlugin(plugin.Plugin):
         plugin.Plugin.__init__(self)
         self._type = 'idlebar'
         
-    def draw(self):
+    def draw(self, (type, object)):
         return
 
 
@@ -132,7 +135,7 @@ class clock(IdleBarPlugin):
             # XXX Get this from the skin, but for now this will allow it to work
             self.CLOCKFONT = config.OSD_DEFAULT_FONTNAME
     
-    def draw(self):
+    def draw(self, (type, object)):
         clock = time.strftime('%a %I:%M %P')
         osd.drawstring(clock,580,40,fgcolor=0xffffff,font=self.CLOCKFONT,ptsize=12)
 
@@ -160,7 +163,7 @@ class mail(IdleBarPlugin):
         else:
             return 0
 
-    def draw(self):
+    def draw(self, (type, object)):
         if self.checkmail() > 0:
             osd.drawbitmap(self.MAILIMAGE,25,25)
         else:
@@ -181,7 +184,7 @@ class tv(IdleBarPlugin):
             return 1
         return 0
 
-    def draw(self):
+    def draw(self, (type, object)):
         if self.checktv() == 1:
             osd.drawbitmap(self.TVLOCKED,100,25)
         else:
@@ -236,7 +239,7 @@ class weather(IdleBarPlugin):
             cachefile.close()
         return temperature, icon
 
-    def draw(self):
+    def draw(self, (type, object)):
         temp,icon = self.checkweather()
         osd.drawbitmap('plugins/weather/icons/' + icon,160,30)
         osd.drawstring(temp,175,50,fgcolor=0xbbbbbb,font=self.CLOCKFONT,ptsize=14)
