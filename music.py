@@ -14,6 +14,11 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/07/31 18:31:29  outlyer
+# Cleaned up mpg123 references. 1.2.5 should only use mplayer, so let's
+# not be confusing. Note: The RPM spec files still contain mpg123, but
+# since they're for 1.2.4, it's ok for now.
+#
 # Revision 1.1  2002/07/29 05:24:35  outlyer
 # Lots and lots of changes for new mplayer-based audio playing code.
 # o You'll need to modify your config file, as well as setup the new mplayer
@@ -74,8 +79,8 @@ def play( arg=None, menuw=None ):
     calls the play function of mplayer to play audio.
 
     old comment:
-    Play an MP3 file using the slave mode interface in the
-    mpg123 application. The argument is a tuple containing the file to
+    Play an MP3 file using the slave mode interface.
+    The argument is a tuple containing the file to
     be played and a list of the entire playlist so that the player can
     start on the next one.
 

@@ -202,10 +202,14 @@ def main_func():
     # Run-time configuration settings
     config.ConfigInit(videotools = video)
     
-    # Make sure there's no mpg123 process lying around.
-    # XXX change, we don't want to kill any mpg123 that is not started by Freevo :-)
-    os.system('killall -9 mpg123 2&> /dev/null') # XXX hardcoded, fix!
-    os.system('killall -9 mplayer 2&> /dev/null') # ditto
+    # Make sure there's no mplayer process lying around.
+    os.system('killall -9 mplayer 2&> /dev/null') # XXX This is hardcoded, because
+    						  # my mplayer command is actually
+						  # nice --10 mplayer, to run mplayer
+						  # with higher priority, but won't be
+						  # killed by this. 
+						  # If I'm the only one, add this:
+						  # ...-9 %s... ' % config.MPLAYER_CMD)
 
     time.sleep(1.5)
     

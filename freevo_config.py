@@ -168,7 +168,7 @@ ROM_DRIVES = [ ('/mnt/cdrom', 'CD'),
 
 #
 # The list of filename suffixes that are used to match the files that
-# are played wih mpg123. They are used as the argument to glob.glob()
+# are played as audio. They are used as the argument to glob.glob()
 # 
 SUFFIX_AUDIO_FILES     = [ '/*.[mM][pP]3',
                            '/*.[oO][gG][gG]' ]

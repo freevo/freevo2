@@ -245,7 +245,7 @@ displayed when selecting channels.
 
 * View movies/DVDs using MPlayer (a separate application which is not included).
 
-* Play MP3 using mpg321/mpg123 (a separate application which is not included).
+* Play MP3 using mplayer (a separate application which is not included).
 
 
 There is _not_ any support as of now (but it is planned) for:
