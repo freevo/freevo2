@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/03/21 19:32:51  dischi
+# small bugfix
+#
 # Revision 1.11  2003/03/19 11:00:24  dischi
 # cache images inside the area and some bugfixes to speed up things
 #
@@ -256,6 +259,7 @@ class Listing_Area(Skin_Area):
                 text = '[%s]' % text
 
             if content.type == 'text':
+                icon_x = 0
                 if choice.icon:
                     cname = '%s-%s-%s' % (choice.icon, vspace-content.spacing,
                                           vspace-content.spacing)
@@ -269,8 +273,6 @@ class Listing_Area(Skin_Area):
                     if image:
                         self.draw_image(image, (x0, y0))
                         icon_x = vspace
-                else:
-                    icon_x = 0
 
                 if val.rectangle:
                     r = self.get_item_rectangle(val.rectangle, width, val.font.h)[2]
