@@ -9,6 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/03/07 00:19:58  rshortt
+# Just a quick fix to take care of redrawing when changing the letter and still
+# seeing the previous letter though the alpha.  I will have to come up with
+# a better solution (probably using a bg_surface or something) when I hook
+# this object up to the skin properties because if the non-selected bg_color
+# has a transparency it will still be broken.
+#
 # Revision 1.2  2003/03/05 03:53:34  rshortt
 # More work hooking skin properties into the GUI objects, and also making
 # better use of OOP.
@@ -191,16 +198,20 @@ class LetterBox(GUIObject):
         if not self.width or not self.height or not self.text:
             raise TypeError, 'Not all needed variables set.'
 
-        if self.selected:
-            c = self.selected_color.get_color_sdl()
-            a = self.selected_color.get_alpha()
-        else:
-            c = self.bg_color.get_color_sdl()
-            a = self.bg_color.get_alpha()
-
         box = pygame.Surface(self.get_size(), 0, 32)
+        c = self.bg_color.get_color_sdl()
+        a = self.bg_color.get_alpha()
         box.fill(c)
         box.set_alpha(a)
+
+        if self.selected:
+            sel_box = pygame.Surface(self.get_size(), 0, 32)
+            c = self.selected_color.get_color_sdl()
+            a = self.selected_color.get_alpha()
+            sel_box.fill(c)
+            sel_box.set_alpha(a)
+            box.blit(sel_box, (0,0))
+
 
         self.osd.screen.blit(box, self.get_position())
 
