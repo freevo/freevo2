@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/11/10 01:14:09  rshortt
+# Only remove the parts of the runtime that we ship so we don't overwrite any
+# files that are part of any particular release.
+#
 # Revision 1.5  2003/11/09 22:42:34  rshortt
 # Fix for when the user has older than python 2.3 and no runtime since we
 # could be installing it.
@@ -92,7 +96,11 @@ if len(sys.argv) == 2 and os.path.isfile(sys.argv[1]):
             print 'of freevo.'
         else:
             print 'installing new runtime'
-            util.fileops.rmrf('runtime')
+            util.fileops.rmrf('runtime/dll')
+            util.fileops.rmrf('runtime/lib')
+            util.fileops.rmrf('runtime/apps')
+            util.fileops.rmrf('runtime/preloads')
+            util.fileops.rmrf('runtime/runapp')
             os.system('tar -zxf %s' % tgz)
         sys.exit(0)
         
