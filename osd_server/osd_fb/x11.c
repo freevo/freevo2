@@ -7,6 +7,9 @@
 
 #include "x11.h"
 
+#define X_OFFSET  4
+#define Y_OFFSET  5
+
 static Display *dpy;
 static Window w;
 static GC gc;
@@ -122,7 +125,8 @@ x11_update (uint8 *pFB)
       }
    }
 
-   XPutImage (dpy, w, gc, pImage, 0, 0, 0, 0, xres, yres);
+   XPutImage (dpy, w, gc, pImage, 0, 0,
+              X_OFFSET, Y_OFFSET, xres, yres);
    
    XFlush (dpy);
 }
