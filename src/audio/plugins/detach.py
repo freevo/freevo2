@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/09/19 22:10:11  dischi
+# check self.player before using it
+#
 # Revision 1.6  2003/09/13 10:08:22  dischi
 # i18n support
 #
@@ -97,7 +100,7 @@ class PluginInterface(plugin.MainMenuPlugin):
 
 
     def eventhandler(self, event, menuw=None):
-        if event == em.AUDIO_PLAY_END:
+        if self.player and event == em.AUDIO_PLAY_END:
             self.player.eventhandler(event=event)
             return TRUE
         return FALSE
