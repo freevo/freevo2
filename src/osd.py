@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.49  2003/06/26 01:41:15  rshortt
+# Fixed a bug wit drawstringframed hard.  Its return coords were always 0's
+# which made it impossible to judge the size.
+#
 # Revision 1.48  2003/06/24 22:48:08  outlyer
 # Updated to reflect moved icon.
 #
@@ -1073,9 +1077,6 @@ class OSD:
 
         rest_words = string[i+1:len(string)]
             
-        if layer == self.null_layer:
-            return (rest_words, (return_x0,return_y0, return_x1, return_y1))
-
         if bgcolor != None:
             self.drawbox(x,y, x+width, y+height, width=-1, color=bgcolor, layer=layer)
 
@@ -1085,17 +1086,25 @@ class OSD:
         elif align_v == 'bottom':
             y0 = y + (height - (line_number+1) * word_height)
 
+        return_y0 = y0
+        return_x0 = return_x1 = x
         
         for line in lines:
             x0 = x
+            line_size, line_heigth = self.stringsize(line, font, ptsize)
             if align_h == 'center' or align_h == 'justified':
-                line_size, line_heigth = self.stringsize(line, font, ptsize)
                 x0 = x + (width - line_size) / 2
             elif align_h == 'right':
-                line_size, line_heigth = self.stringsize(line, font, ptsize)
                 x0 = x + (width - line_size)
-            self.drawstring(line, x0, y0, fgcolor, None, font, ptsize, layer=layer)
+            if layer != self.null_layer:
+                self.drawstring(line, x0, y0, fgcolor, None, font, ptsize, layer=layer)
             y0 += word_height
+            if x0 > return_x0:
+                return_x0 = x0
+            if line_size > return_x1:
+                return_x1 = line_size
+
+        return_y1 = y0
 
         return (rest_words, (return_x0,return_y0, return_x1, return_y1))
 

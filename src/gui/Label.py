@@ -9,6 +9,10 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/06/26 01:41:16  rshortt
+# Fixed a bug wit drawstringframed hard.  Its return coords were always 0's
+# which made it impossible to judge the size.
+#
 # Revision 1.11  2003/06/25 02:27:39  rshortt
 # Allow 'frame' containers to grow verticly to hold all contents.  Also
 # better control of object's background images.
@@ -103,7 +107,7 @@ import pygame
 from GUIObject import *
 from osd import Font
 
-DEBUG = 0
+DEBUG = 1
 
 
 class Label(GUIObject):
@@ -225,7 +229,36 @@ class Label(GUIObject):
         return self.font
 
 
-    def render(self, dummy_surface=None):
+    def get_rendered_size(self):
+        (rest_words, (return_x0,return_y0, return_x1, return_y1)) = \
+        self.osd.drawstringframed(self.text,
+                                  0,
+                                  0,
+                                  self.width,
+                                  self.height,
+                                  fgcolor=None,
+                                  bgcolor=None,
+                                  font=self.font_name,
+                                  ptsize=self.font_size,
+                                  align_h='left',
+                                  align_v='top',
+                                  mode='hard',
+                                  layer='null layer')
+
+        if DEBUG: print '       %s,%s,%s,%s,%s' % (rest_words,return_x0,return_y0,return_x1,return_y1)
+        # LABEL: ,71,17,294,43
+        self.width = return_x1 - return_x0
+        # self.width = return_x1
+        # self.width = self.surface.get_width()
+        self.height = return_y1 - return_y0
+        # self.height = self.surface.get_height()
+        # self.height = return_y1
+
+        return self.width, self.height
+
+
+
+    def render(self):
         if DEBUG: print 'Label::_draw %s' % self
         if DEBUG: print '       text=%s' % self.text
 
@@ -250,13 +283,10 @@ class Label(GUIObject):
         if DEBUG: print '       fgc=%s' % fgc
 
         (pw, ph) = self.parent.get_size()
-        if dummy_surface:
-            self.surface = pygame.Surface((pw, ph), 0, 32)
-        else:
-            if self.width > pw: self.width = pw
-            if self.height > ph: self.height = ph
-            self.surface = self.parent.surface.subsurface((self.left, self.top, self.width, self.height))
-            if DEBUG: print '       surface=%s' % self.surface
+        if self.width > pw: self.width = pw
+        if self.height > ph: self.height = ph
+        self.surface = self.parent.surface.subsurface((self.left, self.top, self.width, self.height))
+        if DEBUG: print '       surface=%s' % self.surface
 
         (rest_words, (return_x0,return_y0, return_x1, return_y1)) = \
         self.osd.drawstringframed(self.text,
@@ -270,13 +300,13 @@ class Label(GUIObject):
                                   ptsize=size, 
                                   align_h='left',
                                   align_v='top',
-                                  mode='soft',
+                                  mode='hard',
                                   layer=self.surface)
 
         if DEBUG: print '       %s,%s,%s,%s,%s' % (rest_words,return_x0,return_y0,return_x1,return_y1)
         # LABEL: ,71,17,294,43
-        # self.width = return_x1 - return_x0
-        self.width = return_x1
+        self.width = return_x1 - return_x0
+        # self.width = return_x1
         # self.width = self.surface.get_width()
         self.height = return_y1 - return_y0
         # self.height = self.surface.get_height()

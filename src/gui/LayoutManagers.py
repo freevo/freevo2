@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/06/26 01:41:16  rshortt
+# Fixed a bug wit drawstringframed hard.  Its return coords were always 0's
+# which made it impossible to judge the size.
+#
 # Revision 1.8  2003/06/25 02:27:39  rshortt
 # Allow 'frame' containers to grow verticly to hold all contents.  Also
 # better control of object's background images.
@@ -68,7 +72,7 @@ from Scrollbar import *
 from GUIObject import *
 from Label     import *
 
-DEBUG = 0
+DEBUG = 1
 
 
 class LayoutManager:
@@ -149,10 +153,13 @@ class FlowLayout(LayoutManager):
 
 
             if child.height == -1 and isinstance(child, Label):
-                child.height = self.container.height - \
-                               self.container.v_margin - y
+                if self.container.vertical_expansion:
+                    child.height = config.CONF.height - 20
+                else:
+                    child.height = self.container.height - \
+                                   self.container.v_margin - y
                 if DEBUG: print '            child was %sx%s' % (child.width,child.height)
-                child.render('dummy')
+                child.get_rendered_size()
                 if DEBUG: print '            child now %sx%s' % (child.width,child.height)
         
             end = x + child.width + self.container.h_margin 
