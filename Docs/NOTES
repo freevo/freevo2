@@ -159,6 +159,10 @@ cd /incoming
 put freevo-1.2.0.tar.gz
 quit
 
+OR, using curl:
+
+curl -T freevo-1.2.1.tar.gz ftp://anonymous:freevo_sf.net@upload.sourceforge.net/incoming/
+
 o Make a new release
   o Goto http://sourceforge.net/project/admin/qrs.php?package_id=&group_id=46652 
   o Select "Package ID" = Freevo
