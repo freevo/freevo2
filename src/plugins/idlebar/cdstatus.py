@@ -1,16 +1,16 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # cdstatus.py - IdleBarPlugin for showing cd status
-# -----------------------------------------------------------------------
-# $Id:
+# -----------------------------------------------------------------------------
+# $Id$
 #
-# -----------------------------------------------------------------------
-# $Log:
-#
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al.
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: ? <?@?>
+# Maintainer:    Viggo Fredriksen <viggo@katatonic.org>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -27,12 +27,12 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
 import os
-
 import gui
 import config
+
 from plugins.idlebar import IdleBarPlugin
 
 class PluginInterface(IdleBarPlugin):
@@ -41,13 +41,19 @@ class PluginInterface(IdleBarPlugin):
 
     Activate with:
     plugin.activate('idlebar.cdstatus')
+     or
+    plugin.activate('idlebar.cdstatus', args=(draw_empty_rom,)
+
+    Where draw_empty_rom is either of
+     True   : draw empty cdroms.   (default)
+     False  : do not draw empty cdroms.
     """
-    def __init__(self):
+    def __init__(self, args=(True,)):
 
         IdleBarPlugin.__init__(self)
         icondir = os.path.join(config.ICON_DIR, 'status')
         self.cdimages ={}
-        self.cdimages ['audiocd']       = os.path.join(icondir, 'cd_audio.png')
+        self.cdimages ['audiocd']     = os.path.join(icondir, 'cd_audio.png')
         self.cdimages ['empty_cdrom'] = os.path.join(icondir, 'cd_inactive.png')
         self.cdimages ['images']      = os.path.join(icondir, 'cd_photo.png')
         self.cdimages ['video']       = os.path.join(icondir, 'cd_video.png')
@@ -56,27 +62,61 @@ class PluginInterface(IdleBarPlugin):
         self.cdimages ['cdrip']       = os.path.join(icondir, 'cd_rip.png')
         self.cdimages ['mixed']       = os.path.join(icondir, 'cd_mixed.png')
 
-    def draw(self, width, height):
-        image = self.cdimages['empty_cdrom']
+        self.draw_empty = args
+        self.init       = True
+        self.rem_media  = []
 
+        # collect all the media types
+        for media in config.REMOVABLE_MEDIA:
+            self.rem_media.append(media.type)
+
+    def draw(self, width, height):
+        """
+        Draws the removable media.
+        """
+
+        changed = False
+        i       = 0
+
+        for media in config.REMOVABLE_MEDIA:
+            # check if there has been any changes
+            if media.type != self.rem_media[i] or self.init:
+                self.rem_media[i] = media.type
+                changed           = True
+            i += 1
+
+        if not changed:
+            # no changes registered
+            return self.NO_CHANGE
+
+        # clear previous images
         self.clear()
 
-        w = 0
+        self.init = False
+        w         = 0
+        x0        = 5
+
+        # iterate through the removable medias
         for media in config.REMOVABLE_MEDIA:
-            image = self.cdimages['empty_cdrom']
-            if media.type == 'empty_cdrom':
-                image = self.cdimages['empty_cdrom']
+
+            if media.type == 'empty_cdrom' and not self.draw_empty:
+                # don't draw empty if configured
+                continue
+
             if media.type and self.cdimages.has_key(media.type):
-                image = self.cdimages[media.type]
+                # search for a specific media type
+                image = gui.imagelib.load(self.cdimages[media.type],(None,None))
             else:
-                image = self.cdimages['mixed']
-            i = gui.imagelib.load(image, (None, None))
+                # no specific type, use mixed icon
+                image = gui.imagelib.load(self.cdimages['mixed'], (None, None))
 
-            w += i.width + 10
+            y0 = int((height-image.height)/2)
+            self.objects.append(gui.Image(image, (x0, y0)))
 
-            self.objects.append(gui.Image(i, (w, (height-i.height)/2)))
+            w  += image.width + 10
+            x0 += image.width + 5
 
-
-        if w:
+        if w >= 10:
             w -= 10
+
         return w

@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2005/02/06 16:59:12  dischi
+# small bugfixes from Viggo Fredriksen
+#
 # Revision 1.35  2004/12/31 11:57:44  dischi
 # renamed SKIN_* and OSD_* variables to GUI_*
 #
@@ -173,9 +176,9 @@ class PluginInterface(plugin.DaemonPlugin):
                         p.set_pos((x1, y1))
                     x1 = x1 + p.width
                 else:
-                    if changed:
-                        p.set_pos((x2 - width, y1))
                     x2 = x2 - p.width
+                    if changed:
+                        p.set_pos((x2, y1))
                 continue
 
             if width > x2 - x1:
@@ -306,8 +309,8 @@ class IdleBarPlugin(plugin.Plugin):
         self.__x       = 0
         self.__y       = 0
         self.width     = 0
-        
-        
+
+
     def draw(self, width, height):
         return self.NO_CHANGE
 

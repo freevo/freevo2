@@ -113,11 +113,8 @@ class ControlManager:
             self.container.add_child(o)
 
         # TODO: support different placements
-        tw = display.width  - 2*config.GUI_OVERSCAN_X
-        th = display.height - 2*config.GUI_OVERSCAN_Y
-
-        x = int(tw/2) - int(w/2)
-        y = th - h
+        x = config.GUI_OVERSCAN_X + 10
+        y = display.height - config.GUI_OVERSCAN_Y - h
 
         self.container.set_pos((x,y))
 

@@ -44,6 +44,7 @@ KEYBOARD_MAP = {
     'PERIOD'      : 'EJECT',
     'L'           : 'SUBTITLE',
     'A'           : 'LANG',
+    'T'           : 'TOGGLE_CONTROL'
 }
 
 REMOTE_MAP = {

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2005/02/06 16:59:11  dischi
+# small bugfixes from Viggo Fredriksen
+#
 # Revision 1.23  2004/10/12 11:31:57  dischi
 # make animation frame selection timer based
 #
@@ -92,7 +95,7 @@ class PluginInterface(IdleBarPlugin):
         # eventhandler.register(self, PLAY_END)
         eventhandler.register(self, PLAY_START)
         eventhandler.register(self, DETACH_AUDIO_STOP)
-        
+
         self.visible    = False
         self.detached   = False
         self.animation  = None
@@ -108,7 +111,7 @@ class PluginInterface(IdleBarPlugin):
     def draw(self, width, height):
         """
         Dummy method for the idlebar, only sets
-        our boundries for now
+        boundries for the detached bar to draw to.
         """
         if self.max_width > width:
             self.max_width = width
@@ -127,19 +130,27 @@ class PluginInterface(IdleBarPlugin):
 
 
     def detach(self,a=None):
+        """
+        Shows or hides the detached view
+        according to its current status.
+        """
+
         p = audioplayer()
-        # hide the detached player show the player
+
         if self.visible:
+            # hide the detached player show the player
             self.hide()
             p.show()
             self.detached = False
 
-            #p.item.parent.menuw.show()
-
-        # hide the audioplayer and show the itemmenu
         else:
+            # hide the audioplayer and show the itemmenu
             p.hide()
-            #p.item.parent.menuw.show()
+
+            # hack to make it work properly with overscan
+            # resets the self.__x and self.__y variables
+            self.clear()
+
             self.detached = True
 
             # show the detachbar
@@ -148,23 +159,27 @@ class PluginInterface(IdleBarPlugin):
 
 
     def show(self):
+        """
+        Shows the detached view.
+        """
 
         if self.visible:
             return
 
-
         # set up a controlbar
         # XXX FIXME: Add config-var for this
+        a_handler = audioplayer().eventhandler
         path = os.path.join(config.ICON_DIR, 'misc','audio_')
-        handlers = [('Prev',  '%sprev.png' % path,  audioplayer().eventhandler, PLAYLIST_PREV),
-                    ('Rew',   '%srew.png'  % path,  audioplayer().eventhandler, Event(SEEK, arg=-10)),
-                    ('Pause', '%spause.png'% path,  audioplayer().eventhandler, PAUSE ),
-                    ('Play',  '%splay.png' % path,  audioplayer().eventhandler, PLAY ),
-                    ('Stop',  '%sstop.png' % path,  self.eventhandler, STOP ),
-                    ('FFwd',  '%sffwd.png' % path,  audioplayer().eventhandler, Event(SEEK, arg=10)),
-                    ('Next',  '%snext.png' % path,  audioplayer().eventhandler, PLAYLIST_NEXT),
-                    ('Show Player',  '%sshow.png' % path,  self.detach, None) ]
 
+        handlers = [
+               (_('Prev'), '%sprev.png' % path, a_handler, PLAYLIST_PREV),
+               (_('Rew'), '%srew.png'  % path, a_handler, Event(SEEK, arg=-10)),
+               (_('Pause'), '%spause.png'% path, a_handler, PAUSE ),
+               (_('Play'), '%splay.png' % path, a_handler, PLAY ),
+               (_('Stop'), '%sstop.png' % path, self.eventhandler, STOP ),
+               (_('FFwd'), '%sffwd.png' % path, a_handler, Event(SEEK,arg=10)),
+               (_('Next'), '%snext.png' % path, a_handler, PLAYLIST_NEXT),
+               (_('Show Player'), '%sshow.png' % path,  self.detach, None) ]
 
         self.controlbar = ButtonPanel(handlers, default_action=3)
         controlpanel().register(self.controlbar)
@@ -176,11 +191,11 @@ class PluginInterface(IdleBarPlugin):
         if not self.show_detachbar:
             return
 
-        width  = self.max_width  - 4
-        height = self.max_height - 4
+        width  = self.max_width  - 10
+        height = self.max_height - 10
 
         y1 = self.y1
-        x1 = 2
+        x1 = 5
 
         textinfo, image, item = self.format_info()
 
@@ -193,28 +208,32 @@ class PluginInterface(IdleBarPlugin):
         # FIXME: Find a more suitable default image?
         if not image:
             image = os.path.join(config.IMAGE_DIR, 'gant', 'music.png')
+
         cover = gui.Image(gui.imagelib.load(image, (None, height)),(x1, y1))
         iw,ih = cover.get_size()
         self.objects.append(cover)
 
         # create a marquee for showing item info
-        info = mevas.image.CanvasImage((width-iw-6, fih))
-        info.set_pos((x1+iw+4, y1+ih-fih-2))
+        info = mevas.image.CanvasImage( (width - iw - 6, fih) )
+        info.set_pos( (x1 + iw + 4, y1 + ih - fih - 2) )
 
         # create text objects to be shown as
         # iteminfo on the detachbar
         tobjs = []
         for string in textinfo:
-            tobjs.append(gui.Text(string, (0,0),
-                                    (fi.stringsize(string), fih),
-                                    fi, align_v='top', align_h='left'))
+            tobjs.append(gui.Text(string,
+                                  (0, 0),
+                                  (fi.stringsize(string), fih),
+                                  fi,
+                                  align_v='top',
+                                  align_h='left') )
 
         self.objects.append(info)
 
         # create canvas for showing elapsed time
-        w = ft.stringsize('00:00')
+        w = ft.stringsize(u'00:00')
         elapsed = mevas.image.CanvasImage((w, fth))
-        elapsed.set_pos((x1+width-w, y1))
+        elapsed.set_pos( (x1 + width - w, y1) )
         self.objects.append(elapsed)
 
         self.animation = DetachbarAnimation(tobjs, info, item, elapsed, ft)
@@ -224,6 +243,10 @@ class PluginInterface(IdleBarPlugin):
 
 
     def hide(self):
+        """
+        Hides the detached view.
+        """
+
         if not self.visible:
             return
 
@@ -259,14 +282,15 @@ class PluginInterface(IdleBarPlugin):
             plugin.getbyname('idlebar').update()
             gui.get_display().update()
             return True
-        
-        elif event == PLAY_START and isinstance(event.arg, AudioItem) and self.detached:
-            # An audio item has started playing and we are in detached mode. This is our
-            # item and we should show ourself
+
+        elif event == PLAY_START and isinstance(event.arg, AudioItem) and \
+          self.detached:
+            # An audio item has started playing and we are in detached mode.
+            # This is our item and we should show ourself
             self.hide()
             self.show()
             return True
-        
+
         return False
 
 
@@ -284,22 +308,23 @@ class PluginInterface(IdleBarPlugin):
 
         # trackno - title
         if info['trackno'] and info['title']:
-            textinfo.append( 'Title: %s - %s' % (info['trackno'], info['title'] ) )
+            textinfo.append( _('Title: %s - %s') % (info['trackno'],
+                                                    info['title']) )
         elif info['title']:
-            textinfo.append( 'Title: %s' % info['title'] )
+            textinfo.append( _('Title: %s') % info['title'] )
         else:
-            textinfo.append( 'Title: %s' % item.name)
+            textinfo.append( _('Title: %s') % item.name)
 
 
         # artist : album
         if info['artist']:
-            textinfo.append( 'Artist: %s' % info['artist'] )
+            textinfo.append( _('Artist: %s') % info['artist'] )
         if info['album']:
-            textinfo.append( 'Album: %s' % info['album'] )
+            textinfo.append( _('Album: %s') % info['album'] )
 
 
-        textinfo.append('Duration: %02i:%02i' % (item.length/60, item.length%60) )
-
+        textinfo.append(_('Duration: %02i:%02i') % (item.length / 60,
+                                                    item.length % 60) )
         self.item = item
 
         return textinfo, image, item
@@ -310,9 +335,10 @@ class DetachbarAnimation(BaseAnimation):
     """
     Animation intended for the text on the detached audioplayer
     """
-    def __init__(self, textobjects, textcanvas, item, itemcanvas, el_font, fps=15):
-        BaseAnimation.__init__(self, fps)
+    def __init__(self, textobjects, textcanvas, item,
+                       itemcanvas, el_font, fps=15):
 
+        BaseAnimation.__init__(self, fps)
 
         self.fps          = fps
         self.pobj         = -1
@@ -334,7 +360,7 @@ class DetachbarAnimation(BaseAnimation):
         """
         if not audioplayer().running:
             eventhandler.post(DETACH_AUDIO_STOP)
-            
+
         self.frame += 1
 
         # goto next text object
@@ -344,7 +370,8 @@ class DetachbarAnimation(BaseAnimation):
             if self.pobj == len(self.objects):
                 self.pobj = 0
 
-            self.max_frames = self.objects[self.pobj].get_size()[0] + self.sleep_frames
+            self.max_frames = self.objects[self.pobj].get_size()[0] \
+                              + self.sleep_frames
             self.frame = 0
 
         obj    = self.objects[self.pobj]
@@ -362,10 +389,15 @@ class DetachbarAnimation(BaseAnimation):
         # update the time elapsed
         if self.item.elapsed != self.last_elapsed:
             self.last_elapsed = self.item.elapsed
-            elapsed = '%02i:%02i' % (self.item.elapsed / 60, self.item.elapsed % 60)
-            size    = (self.elapsed_font.stringsize(elapsed), self.elapsed_font.height)
+            elapsed = u'%02i:%02i' % (self.item.elapsed / 60,
+                                      self.item.elapsed % 60)
+
+            size    = ( self.elapsed_font.stringsize(elapsed),
+                        self.elapsed_font.height)
 
             # XXX FIXME!! Causes "Fatal python error: Deallocating None"
             #             after a while!
-            self.itemcanvas.set_image(gui.Text(elapsed, (0,0), size, self.elapsed_font))
-
+            self.itemcanvas.set_image( gui.Text(elapsed,
+                                                (0, 0),
+                                                size,
+                                                self.elapsed_font) )

@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2005/02/06 16:59:12  dischi
+# small bugfixes from Viggo Fredriksen
+#
 # Revision 1.18  2004/12/31 11:57:44  dischi
 # renamed SKIN_* and OSD_* variables to GUI_*
 #
@@ -37,7 +40,7 @@
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002 Krister Lagerstrom, et al.
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -88,7 +91,7 @@ class PluginInterface(plugin.DaemonPlugin):
         self.gui_object = None
         self._timer_id  = None
 
-        
+
     def update(self):
         """
         update the display
@@ -108,12 +111,19 @@ class PluginInterface(plugin.DaemonPlugin):
         # get the osd from from the settings
         font = gui.get_font('osd')
 
+        over_x = config.GUI_OVERSCAN_X
+        over_y = config.GUI_OVERSCAN_Y
+
         # create the text object
-        # FIXME: do respect the idlebar if active
+        y = over_y + 10
+        if plugin.getbyname('idlebar') != None:
+            y += 60
+
+
         self.gui_object = gui.Text(self.message,
-                                   (config.GUI_OVERSCAN_X, config.GUI_OVERSCAN_Y + 10),
-                                   (display.width - 10 - 2 * config.GUI_OVERSCAN_X,
-                                    config.GUI_OVERSCAN_Y + 10 + font.height), 
+                                   (over_x, y),
+                                   (display.width - 10 - 2 * over_x,
+                                    over_y + 10 + font.height),
                                    font, align_h='right')
 
         # make sure the object is on top of everything else
