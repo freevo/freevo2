@@ -144,7 +144,7 @@ to update the txt version as well
     <p>
       German users don't need XMLTV, just start
       <pre>
-wget http://yasd.cc/xmltv/tv_`date +%Y%m%d`.xml.gz --output-document=- | gzip -d &lt; /tmp/TV.xml</pre>
+wget http://yasd.cc/xmltv/tv_`date +%Y%m%d`.xml.gz --output-document=- | gzip -d &gt; /tmp/TV.xml</pre>
       to get the listing for today and set <tt>TV_CHANNELS</tt> in
       <tt>local_conf.py</tt> to the station you have.
     </p>
