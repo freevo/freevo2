@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.72  2003/12/06 13:46:11  dischi
+# changes to the new draw function in skin
+#
 # Revision 1.71  2003/12/04 21:48:10  dischi
 # also add the plugin area
 #
@@ -308,7 +311,7 @@ class MenuWidget(GUIObject):
         menu = self.menustack[-1]
 
         if not isinstance(menu, Menu):
-            return skin.draw((menu.type, menu))
+            return skin.draw(menu.type, menu)
 
         if self.menustack[-1].umount_all == 1:
             util.umount_all()
@@ -320,7 +323,7 @@ class MenuWidget(GUIObject):
                     self.menustack[-1] = reload
             self.init_page()
 
-        skin.draw(('menu', self))
+        skin.draw('menu', self, self.menustack[-1])
 
         # Draw any child UI objects
         for child in self.children:

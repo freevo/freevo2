@@ -15,6 +15,9 @@
 # for a full list of tested sites see Docs/plugins/headlines.txt
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/12/06 13:47:28  dischi
+# changes to the new draw function in skin
+#
 # Revision 1.14  2003/12/04 21:49:53  dischi
 # change to new plugin code
 #
@@ -143,7 +146,7 @@ class ShowHeadlineDetails:
         self.menuw = menuw
         self.menuw.hide(clear=False)
         rc.app(self)
-        skin.draw(('headlines', item))
+        skin.draw('headlines', item)
 
 
     def eventhandler(self, event, menuw=None):

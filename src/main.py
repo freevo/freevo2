@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.96  2003/12/06 13:46:11  dischi
+# changes to the new draw function in skin
+#
 # Revision 1.95  2003/12/04 21:50:20  dischi
 # include Splashscreen here
 #
@@ -326,7 +329,7 @@ class Splashscreen(skin.Area):
         set the progress position and refresh the screen
         """
         self.pos = pos
-        skin.draw(('splashscreen', None))
+        skin.draw('splashscreen', None)
 
 
 
