@@ -3,23 +3,9 @@ DXR3
 
 DXR3 from Creative Labs and the Hollywood Plus from Sigma Designs use the
 em8300 chip and are possible to decode MPEG-1 and MPEG-2 streams and
-generate video on the TV-out. There is ver good Linux support for those to
-cards, have a look at:
-http://dxr3.sourceforge.net/
-With this card and the fame libs it is possible to make a multimedia station
-out of your PC.
-lib fame can be found at:
-http://fame.sourceforge.net/
-It encodes the image the freevo system produces to a MPEG-1 stream and sends
-it to the DXR3, which displays it on the TV.
+generate video on the TV-out. 
 
-Build
------
-Just install the dxr3 and libfame and do a
-./configure --osd=dxr3
-in the freevo path.
-
-ToDo
-----
-- find a way to get rid of the flickering
-- speed up the rgb2yuv part
+There used to be support for the DXR3 board in Freevo, but unfortunately that
+had to be dropped since the design was changed to use SDL only. SDL supports
+a lot of different output methods (X11, Framebuffer, SVGA, etc), but it
+doesn't support the DXR3 yet. This might change in the future.
