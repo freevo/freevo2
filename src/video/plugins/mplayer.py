@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2003/10/19 09:51:41  dischi
+# move from str command to list, resort some stuff
+#
 # Revision 1.33  2003/10/17 21:30:02  rshortt
 # We need self.osdfont set before calling childapp's init.  This was crashing
 # for me on network play.
@@ -282,32 +285,39 @@ class MPlayer:
             mode = 'default'
 
         # Mplayer command and standard arguments
-        mpl += (' ' + config.MPLAYER_ARGS[mode] + ' ' + additional_args + \
-                ' -v -vo ' + config.MPLAYER_VO_DEV + config.MPLAYER_VO_DEV_OPTS)
+        mpl += (' -v -vo ' + config.MPLAYER_VO_DEV + config.MPLAYER_VO_DEV_OPTS + \
+                ' ' + config.MPLAYER_ARGS[mode])
+
+        mpl = mpl.split(' ') + [ filename ] + additional_args.split(' ')
 
         if options:
-            mpl += (' ' + options)
+            mpl += options.split(' ')
 
         # use software scaler?
-        if mpl.find(' -nosws ') > 0:
-            mpl = (mpl[:mpl.find(' -nosws ')] + mpl[mpl.find(' -nosws ')+7:])
-        elif mpl.find(' -framedrop ') == -1 and mpl.find(' -framedrop ') == -1:
-            mpl += (' ' + config.MPLAYER_SOFTWARE_SCALER )
+        if '-nosws' in mpl:
+            mpl.remove('-nosws')
+        elif not '-framedrop' in mpl:
+            mpl += config.MPLAYER_SOFTWARE_SCALER.split(' ')
             
         if os.path.exists('/tmp/bmovl') and config.MPLAYER_SOFTWARE_SCALER:
-            mpl += ' -vf bmovl=1:0:/tmp/bmovl'
+            mpl += ('-vf', 'bmovl=1:0:/tmp/bmovl')
 
         if config.MPLAYER_SET_AUDIO_DELAY and item.info.has_key('delay') and \
                item.info['delay'] > 0:
-            mpl += ' -mc %s -delay -%s' % (int(item.info['delay'])+1, item.info['delay'])
+            mpl += ('-mc', str(int(item.info['delay'])+1), '-delay',
+                    str(item.info['delay']))
 
-        command = mpl + ' "' + filename + '"'
+        command = mpl
 
-        if config.MPLAYER_AUTOCROP and command.find('crop=') == -1:
+        while '' in command:
+            command.remove('')
+
+        if config.MPLAYER_AUTOCROP and str(' ').join(command).find('crop=') == -1:
+            _debug_('starting autocrop')
             (x1, y1, x2, y2) = (1000, 1000, 0, 0)
-            child = popen2.Popen3(self.vop_append('%s -ao null -vo null ' \
-                                                  '-ss 60 -frames 20 -vop cropdetect' % \
-                                                  command), 1, 100)
+            crop_cmd = command[1:] + ['-ao', 'null', '-vo', 'null', '-ss', '60',
+                                      '-frames', '20', '-vop', 'cropdetect' ]
+            child = popen2.Popen3(self.vop_append(crop_cmd), 1, 100)
             exp = re.compile('^.*-vop crop=([0-9]*):([0-9]*):([0-9]*):([0-9]*).*')
             while(1):
                 data = child.fromchild.readline()
@@ -319,12 +329,11 @@ class MPlayer:
                     y1 = min(y1, int(m.group(4)))
                     x2 = max(x2, int(m.group(1)) + int(m.group(3)))
                     y2 = max(y2, int(m.group(2)) + int(m.group(4)))
-
+        
             if x1 < 1000 and x2 < 1000:
-                command = '%s -vop crop=%s:%s:%s:%s' % (command, x2-x1, y2-y1, x1, y1)
+                command = command + [ '-vop' , 'crop=%s:%s:%s:%s' % (x2-x1, y2-y1, x1, y1) ]
             
             child.wait()
-
 
         command=self.vop_append(command)
 
@@ -531,23 +540,23 @@ class MPlayer:
         parameter. This function will grep all -vop parameter from
         the command and add it at the end as one vop argument
         """
-        ret = ''
+        ret = []
         vop = ''
         next_is_vop = False
     
-        for arg in command.split(' '):
+        for arg in command:
             if next_is_vop:
                 vop += ',%s' % arg
                 next_is_vop = False
             elif (arg == '-vop' or arg == '-vf'):
                 next_is_vop=True
             else:
-                ret += '%s ' % arg
+                ret += [ arg ]
 
         if vop:
             if self.version >= 1:
-                return '%s -vf %s' % (ret,vop[1:])
-            return '%s -vop %s' % (ret,vop[1:])
+                return ret + [ '-vf', vop[1:] ]
+            return ret + [ '-vop', vop[1:] ]
         return ret
 
 
@@ -594,7 +603,12 @@ class MPlayerApp(childapp.ChildApp):
         self.exit_type = None
 
         self.use_bmovl = False
-        if app.find('/tmp/bmovl') > 0:
+        pos = 0
+        if '-vop' in app:
+            pos = app.index('-vop')
+        if '-vf' in app:
+            pos = app.index('-vf')
+        if pos and app[pos+1].find('/tmp/bmovl') > 0:
             print 'Found /tmp/bmovl, activating experimental bmovl support'
             self.use_bmovl = True
 
