@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.49  2004/01/02 11:18:39  dischi
+# call correct build function
+#
 # Revision 1.48  2003/12/31 16:39:43  dischi
 # flag if the mimetype returns something else than play files
 #
@@ -234,7 +237,7 @@ class Playlist(Item):
 
         playlist      = self.playlist
         self.playlist = []
-       
+
         for p in plugin.mimetype(self.display_type):
             #if self.display_type in p.display_type:
             # XXX self.display_type seems to be set to None
@@ -367,7 +370,7 @@ class Playlist(Item):
 
         if not arg or arg != 'next':
             # first start
-            self.build()
+            Playlist.build(self)
             if self.random:
                 self.randomize()
 
