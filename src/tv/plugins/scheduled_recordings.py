@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/03/13 20:13:02  rshortt
+# Fix return.
+#
 # Revision 1.5  2004/03/13 18:33:17  rshortt
 # Handle an empty list better (still needs improving).
 #
@@ -112,7 +115,7 @@ class ScheduledRecordingsItem(Item):
         (server_available, msg) = record_client.connectionTest()
         if not server_available:
             AlertBox(_('Recording server is unavailable.')+(': %s' % msg)).show()
-            return None
+            return []
 
         (result, recordings) = record_client.getScheduledRecordings()
         if result:
@@ -125,7 +128,7 @@ class ScheduledRecordingsItem(Item):
                 items.append(ProgramItem(self, prog, context='schedule'))
         else:
             AlertBox(_('Get recordings failed')+(': %s' % recordings)).show()
-            return None
+            return []
 
         return items
 
