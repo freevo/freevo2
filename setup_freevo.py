@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/07/14 17:02:54  rshortt
+# Add xv to the list of allowed display values.
+#
 # Revision 1.8  2003/07/03 04:19:30  outlyer
 # Updated cdbackup with Rich's new Ogg patch; also changed some variables,
 # and added oggenc to setup and configuration.
@@ -71,7 +74,8 @@ Set up Freevo for your specific environment.
                                   WIDTHxHEIGHT can be 800x600, 768x576 or 640x480
 
    --display=DISP               set the display
-                                  DISP can be x11, fbdev, dxr3, mga, dfbmga or sdl
+                                  DISP can be xv, x11, fbdev, dxr3, mga, 
+                                  dfbmga or sdl
                                   
    --tv=NORM                    set the TV standard
                                   NORM can be ntsc, pal or secam
@@ -215,7 +219,7 @@ def main():
     sys.exit()
 
 vals_geometry = ['800x600', '768x576', '640x480']
-vals_display = ['x11', 'fbdev', 'dfbmga', 'mga', 'dxr3', 'sdl']
+vals_display = ['xv', 'x11', 'fbdev', 'dfbmga', 'mga', 'dxr3', 'sdl']
 vals_tv = ['ntsc', 'pal', 'secam']
 vals_chanlist = ['us-bcast', 'us-cable', 'us-cable-hrc',
                  'japan-bcast', 'japan-cable', 'europe-west',
