@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2004/01/25 11:20:09  dischi
+# make sure length is an int
+#
 # Revision 1.45  2003/12/31 16:42:40  dischi
 # changes, related to item.py changes
 #
@@ -93,7 +96,7 @@ class AudioItem(Item):
         self.mplayer_options = ''
             
         try:
-            self.length = self.info['length']
+            self.length = int(self.info['length'])
         except:
             self.length = 0
             
