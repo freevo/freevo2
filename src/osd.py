@@ -10,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.93  2003/09/23 13:37:51  outlyer
+# Move some informational debug messages into a higher level so they are not
+# shown by default.
+#
 # Revision 1.92  2003/09/19 22:06:50  dischi
 # add stop and restart as global osd functions
 #
@@ -266,7 +270,7 @@ class OSDFont:
     def __getfont__(self, filename, ptsize):
         ptsize = int(ptsize / 0.7)  # XXX pygame multiplies by 0.7 for some reason
 
-        _debug_('Loading font "%s"' % filename)
+        _debug_('Loading font "%s"' % filename,2)
         try:
             font = pygame.font.Font(filename, ptsize)
         except (RuntimeError, IOError):
@@ -403,7 +407,7 @@ class OSD:
             os.system(config.OSD_SDL_EXEC_AFTER_STARTUP)
 
         self.sdl_driver = pygame.display.get_driver()
-        _debug_(self.sdl_driver)
+        _debug_('SDL Driver: %s' % (str(self.sdl_driver)),2)
 
         pygame.mouse.set_visible(0)
         self.mousehidetime = time.time()
