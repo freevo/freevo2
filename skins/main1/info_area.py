@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/07/07 16:25:10  dischi
+# changes to work with the new drawstringframed
+#
 # Revision 1.8  2003/07/04 00:04:15  gsbarbieri
 # Fixed some bugs
 #
@@ -318,7 +321,7 @@ class Info_Area(Skin_Area):
             # Tag: <text>
             #
             elif isinstance( element, xml_skin.XML_FormatText ):
-                element = copy.deepcopy( element )
+                element = copy.copy( element )
                 # text position is the current position:
                 element.x = x
                 element.y = y
@@ -341,8 +344,7 @@ class Info_Area(Skin_Area):
                     
                 size = osd.drawstringframed( element.text, 0, 0,
                                              r.width, r.height,
-                                             None, None,
-                                             element.font.name, element.font.size,
+                                             element.font.font, None, None,
                                              element.align, element.valign,
                                              element.mode, layer='' )[ 1 ]
                 try:

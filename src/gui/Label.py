@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/07/07 16:24:55  dischi
+# changes to work with the new drawstringframed
+#
 # Revision 1.15  2003/07/05 09:10:23  dischi
 # revert some changes to work with the new drawstringframed
 #
@@ -240,21 +243,21 @@ class Label(GUIObject):
 
 
     def get_rendered_size(self):
-        (return_x0,return_y0, return_x1, return_y1) = \
-                              self.osd.drawstringframed(self.text, 0, 0, self.width,
-                                                        self.height, fgcolor=None,
-                                                        bgcolor=None, font=self.font_name,
-                                                        ptsize=self.font_size,
-                                                        align_h='left', align_v='top',
-                                                        mode='hard', layer='')[1]
+        data = self.osd.drawstringframed(self.text, 0, 0, self.width, self.height,
+                                         self.osd.getfont(self.font_name, self.font_size),
+                                         fgcolor=None, bgcolor=None, align_h='left',
+                                         align_v='top', mode='hard', layer='')[1]
+
+
+        (ret_x0,ret_y0, ret_x1, ret_y1) = data
 
         # LABEL: ,71,17,294,43
-        self.width = return_x1 - return_x0
-        # self.width = return_x1
+        self.width = ret_x1 - ret_x0
+        # self.width = ret_x1
         # self.width = self.surface.get_width()
-        self.height = return_y1 - return_y0
+        self.height = ret_y1 - ret_y0
         # self.height = self.surface.get_height()
-        # self.height = return_y1
+        # self.height = ret_y1
 
         return self.width, self.height
 
@@ -291,21 +294,14 @@ class Label(GUIObject):
         if DEBUG: print '       surface=%s' % self.surface
 
         (rest_words, (return_x0,return_y0, return_x1, return_y1)) = \
-        self.osd.drawstringframed(self.text,
-                                  0,
-                                  0,
-                                  self.width,
-                                  self.height,
-                                  fgcolor=fgc,
-                                  bgcolor=None,
-                                  font=font, 
-                                  ptsize=size, 
-                                  align_h='left',
-                                  align_v='top',
-                                  mode='hard',
-                                  layer=self.surface)
+                     self.osd.drawstringframed(self.text, 0, 0, self.width, self.height,
+                                               self.osd.getfont(font, size), fgcolor=fgc,
+                                               bgcolor=None, align_h='left',
+                                               align_v='top', mode='hard',
+                                               layer=self.surface)
 
-        if DEBUG: print '       %s,%s,%s,%s,%s' % (rest_words,return_x0,return_y0,return_x1,return_y1)
+        if DEBUG: print '       %s,%s,%s,%s,%s' % (rest_words,return_x0,return_y0,
+                                                   return_x1,return_y1)
         # LABEL: ,71,17,294,43
         self.width = return_x1 - return_x0
         # self.width = return_x1

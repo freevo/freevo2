@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/07/07 16:25:10  dischi
+# changes to work with the new drawstringframed
+#
 # Revision 1.11  2003/07/05 15:01:01  dischi
 # respect visible for images
 #
@@ -248,13 +251,11 @@ class Screen:
                     if font.shadow.visible:
                         width -= font.shadow.x
                         osd.drawstringframed(text, x1+font.shadow.x, y1+font.shadow.y,
-                                             width, height, font.shadow.color, None,
-                                             font=font.name, ptsize=font.size,
-                                             align_h = align_h, align_v = align_v,
+                                             width, height, font.font, font.shadow.color,
+                                             None, align_h = align_h, align_v = align_v,
                                              mode=mode, ellipses=ellipses, layer=layer)
-                    osd.drawstringframed(text, x1, y1, width, height, font.color, None,
-                                         font=font.name, ptsize=font.size,
-                                         align_h = align_h, align_v = align_v,
+                    osd.drawstringframed(text, x1, y1, width, height, font.font, font.color,
+                                         None, align_h = align_h, align_v = align_v,
                                          mode=mode, ellipses=ellipses, layer=layer)
 
         for x0, y0, x1, y1 in update_area:
@@ -500,7 +501,7 @@ class Skin_Area:
         on the geometry of the area
         """
         if copy_object:
-            object = copy.deepcopy(object)
+            object = copy.copy(object)
 
         MAX = self.area_val.width
         object.width = eval('%s' % object.width)

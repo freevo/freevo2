@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/07/07 16:25:10  dischi
+# changes to work with the new drawstringframed
+#
 # Revision 1.10  2003/07/05 15:00:30  dischi
 # the global prepare is now an extra function. visible can now be 'yes',
 # 'no' and '<pluginname>' and 'not <pluginname'>. With that it is possible
@@ -729,8 +732,8 @@ class XML_font(XML_data):
         if color.has_key(self.color):
             self.color = color[self.color]
         self.size = int(float(self.size) * scale)
-        self.h = osd.getFontInfo(self.name, self.size).height
-
+        self.font = osd.getfont(self.name, self.size)
+        self.h = self.font.height
         if self.shadow.visible:
             if color.has_key(self.shadow.color):
                 self.shadow.color = color[self.shadow.color]
