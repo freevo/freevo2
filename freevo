@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.98  2003/11/20 18:06:10  dischi
+# check for stat
+#
 # Revision 1.97  2003/11/09 13:29:34  rshortt
 # Bugfix for the new runtime.
 #
@@ -119,6 +122,14 @@
 # ----------------------------------------------------------------------- */
 #endif
 
+
+# check for stat, we need it
+which stat >/dev/null 2>/dev/null || \
+    ( 
+    echo "'stat' not found"
+    echo Freevo needs it to start, please install it
+    exit 1
+    ) || exit 1
 
 
 # get information about freevo dir and the name we called with
