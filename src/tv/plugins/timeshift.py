@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/06/02 03:33:53  rshortt
+# Some bugfixes and make it (almost) work with new events.
+#
 # Revision 1.1  2003/05/28 23:31:52  rshortt
 # Timeshift plugin by Thomas Schueppel.  Still WIP.
 #
@@ -44,7 +47,8 @@ import signal
 
 import util    # Various utilities
 import osd     # The OSD class, used to communicate with the OSD daemon
-import rc      # The RemoteControl class.
+import event as em
+import rc
 import childapp # Handle child applications
 import tv.epg_xmltv as epg # The Electronic Program Guide
 
@@ -58,8 +62,11 @@ DEBUG = config.DEBUG
 TRUE = 1
 FALSE = 0
 
+(v_norm, v_input, v_clist, v_dev) = config.TV_SETTINGS.split()
+# v_norm = string.upper(v_norm)
+
 TIMESHIFT_READAHEAD = 4			# Amount (in MB) of Data read before shifting is started 
-TIMESHIFT_INPUT = '/dev/video0'		# File to read from
+TIMESHIFT_INPUT = v_dev 		# File to read from
 TIMESHIFT_CHUNKSIZE = 65536 		# Amount to read repeatedly (in Bytes)
 
 # Create the OSD object
@@ -139,6 +146,8 @@ class MPlayer:
                 pass
 
         if mode == 'tv':
+            # rc.set_context('tv')
+
             tuner_channel = self.TunerGetChannel()
 
             cf_norm, cf_input, cf_clist, cf_device = config.TV_SETTINGS.split()            
@@ -262,32 +271,37 @@ class MPlayer:
 
     def eventhandler(self, event):
         print '%s: %s app got %s event' % (time.time(), self.mode, event)
-        if (event == rc.MENU or event == rc.STOP or event == rc.EXIT or
-            event == rc.SELECT or event == rc.PLAY_END):
+        if event in (em.MENU_GOTO_MAINMENU, em.STOP, em.INPUT_EXIT,
+                     em.MENU_SELECT, em.PLAY_END):
             self.Stop()
-            rc.post_event(rc.PLAY_END)
+            rc.post_event(em.PLAY_END)
             return TRUE
         
-        elif event == rc.CHUP or event == rc.CHDOWN:
+        # elif event == em.TV_CHANNEL_UP or event == em.TV_CHANNEL_DOWN:
+        elif event == em.MENU_PAGEUP or event == em.MENU_PAGEDOWN:
             if self.mode == 'vcr':
                 return
             
             # Go to the prev/next channel in the list
-            if event == rc.CHUP:
-                self.TunerPrevChannel()
-            else:
+            # if event == em.TV_CHANNEL_UP:
+            if event == em.MENU_PAGEUP:
                 self.TunerNextChannel()
+            else:
+                self.TunerPrevChannel()
             
             #pause mplayer
-#            self.thread.app.write('pause')
+            self.thread.app.write('pause\n')
 
             new_channel = self.TunerGetChannel()
             print "setting channel %s" % new_channel
             self.videodev.setchannel(new_channel)
             # TODO: Set MPlayer to start of timeshift
 
-#            self.thread.app.write('seek 0 0')
-#            self.thread.app.write('pause')
+            self.thread.app.write('seek 0 0\n')
+            self.thread.app.write('pause\n')
+            # self.thread.app.write('seek 0 type=2\n')
+            # self.thread.app.write('seek 98 type=1\n')
+
 
             # Display a channel changed message
 #            tuner_id, chan_name, prog_info = self.TunerGetChannelInfo()
@@ -297,7 +311,7 @@ class MPlayer:
 #            self.thread.app.write(cmd)
             return TRUE
             
-        elif event == rc.DISPLAY:
+        elif event == em.TOGGLE_OSD:
             return FALSE
         
             # Display the channel info message
@@ -402,8 +416,10 @@ class MPlayer_Thread(threading.Thread):
                     print 'MPlayer_Thread.run(): Started, cmd=%s' % self.command
                
                 self.tsinput = os.popen(config.TIMESHIFT_ENCODE_CMD,'r')
-                self.timeshift = pyshift.pyshift_init(config.TIMESHIFT_BUFFER,config.TIMESHIFT_BUFFER_SIZE * 1024*1024)
-                pyshift.pyshift_write(self.timeshift,self.tsinput.read(1024*1024* TIMESHIFT_READAHEAD))
+                self.timeshift = pyshift.pyshift_init(config.TIMESHIFT_BUFFER,
+                                       config.TIMESHIFT_BUFFER_SIZE * 1024*1024)
+                pyshift.pyshift_write(self.timeshift,
+                              self.tsinput.read(1024*1024* TIMESHIFT_READAHEAD))
                 self.app = MPlayerApp(self.command)
                 
                 while self.mode == 'play' and self.app.isAlive():
@@ -429,7 +445,7 @@ class MPlayer_Thread(threading.Thread):
 
                 if self.mode == 'play':
                     if DEBUG: print 'posting play_end'
-                    rc.post_event(rc.PLAY_END)
+                    rc.post_event(em.PLAY_END)
 
                 self.mode = 'idle'
                 
