@@ -18,8 +18,15 @@ howto() {
     echo generating freevo_howto html files
 
     cd Docs
-    docbook2html -o howto freevo_howto.sgml 2>&1 | grep -v jade
-    cd ..
+    docbook2html -o howto freevo_howto.sgml
+
+    echo
+    echo
+    echo generating plugin writing howto html files
+    cd plugin_writing
+    docbook2html -o html howto.sgml
+
+    cd ../..
 }
 
 wiki() {
