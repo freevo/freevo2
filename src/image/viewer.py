@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/04/27 17:37:26  dischi
+# handle image loading failures
+#
 # Revision 1.21  2003/04/24 19:56:34  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -47,6 +50,10 @@ import osd    # The OSD class, used to communicate with the OSD daemon
 import rc
 import exif
 
+from gui.GUIObject import GUIObject
+from gui.AlertBox import AlertBox
+
+
 DEBUG = config.DEBUG
 
 TRUE  = 1
@@ -70,20 +77,26 @@ def get_singleton():
     return _singleton
 
 
-class ImageViewer:
-    osd_mode = 0    # Draw file info on the image
-    zoom = 0   # Image zoom
-    zoom_btns = { rc.K0:0, rc.K1:1, rc.K2:2, rc.K3:3, rc.K4:4,
-                  rc.K5:5, rc.K6:6, rc.K7:7, rc.K8:8, rc.K9:9 }
+class ImageViewer(GUIObject):
 
-    slideshow = TRUE                    # currently in slideshow mode
+    def __init__(self):
+        GUIObject.__init__(self)
+        self.osd_mode = 0    # Draw file info on the image
+        self.zoom = 0   # Image zoom
+        self.zoom_btns = { rc.K0:0, rc.K1:1, rc.K2:2, rc.K3:3, rc.K4:4,
+                           rc.K5:5, rc.K6:6, rc.K7:7, rc.K8:8, rc.K9:9 }
 
+        self.slideshow = TRUE  # currently in slideshow mode
+        self.alertbox  = None  # AlertBox active
+
+        
     def view(self, item, zoom=0, rotation=0):
         global rc_app_bkp
         filename = item.filename
 
         self.fileitem = item
-
+        self.parent   = item.menuw
+        
         self.filename = filename
         self.rotation = rotation
         if not rotation and 'Orientation' in item.binsexif:
@@ -97,19 +110,22 @@ class ImageViewer:
             elif i_orientation == 'left_bottom':
                 self.rotation=-270.0
 
-        if rc.app() != self.eventhandler:
-            rc_app_bkp = rc.app()
-        rc.app(self)
-
         if filename and len(filename) > 0:
             image = osd.loadbitmap(filename)
         else:
             # Using Container-Image
             image = item.loadimage( )
 
-        if not image:
-            return "Can't Open Image\n'%s'" % (filename)
+        if rc.app() != self.eventhandler:
+            rc_app_bkp = rc.app()
+        rc.app(self)
 
+        if not image:
+            osd.clearscreen(color=osd.COL_BLACK)
+            osd.update()
+            self.alertbox = AlertBox(parent=self, text="Can't Open Image\n'%s'" % (filename))
+            self.alertbox.show()
+            return
         
 	width, height = image.get_size()
             
@@ -229,7 +245,11 @@ class ImageViewer:
 
 
     def eventhandler(self, event):
-
+        if event == rc.SELECT and self.alertbox:
+            self.alertbox.destroy()
+            self.alertbox = None
+            return TRUE
+        
         if event == rc.PAUSE or event == rc.PLAY:
             if self.slideshow:
                 self.slideshow = FALSE
