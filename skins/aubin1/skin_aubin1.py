@@ -9,6 +9,17 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/02/17 20:52:14  outlyer
+# Updated to show context-aware background images, based on which function
+# you're using. For example, if you go into movie mode, it'll show the
+# film strip watermark thing, etc.
+#
+# Thanks to Dischi for making this possible :)
+#
+# Revision 1.81  2003/02/17 19:41:11  dischi
+# make it possible to have special 'video', 'audio' ... sections in the
+# xml file.
+#
 # Revision 1.5  2003/02/17 18:03:44  outlyer
 # This should be a diff against main1, but it'll be a diff against my
 # ancient skin. It's probably going to be a lot of stuff that I didn't change.
@@ -253,9 +264,14 @@ class Skin:
         # find the correct structures, I hope we don't need this
         # for the main menu ...
         if menu.skin_settings:
-            val = menu.skin_settings.menu_default
+            val = menu.skin_settings
         else:
-            val = self.settings.menu_default
+            val = self.settings
+
+        if menu.item_types and menu.item_types in val.menu:
+            val = val.menu[menu.item_types]
+        else:
+            val = val.menu["default"]
 
         used_height = 0
         n_items     = 0
@@ -279,8 +295,8 @@ class Skin:
                                               ptsize=pref_item.selection.size)
 
             item_icon_size_x = item_icon_size_y = 0
-            if item.icon != None:
-                item_icon_size_x, item_icon_size_y = osd.bitmapsize(item.icon)
+            #if item.icon != None:
+            #    item_icon_size_x, item_icon_size_y = osd.bitmapsize(item.icon)
             
             # add the size used
             used_height += max(ns_str_h, s_str_h, item_icon_size_y) + PADDING + \
@@ -302,10 +318,18 @@ class Skin:
 
         # find the correct structures, I hope we don't need this
         # for the main menu ...
+
         if menu.skin_settings:
-            return menu.skin_settings.menu_default.submenu.visible
+            val = menu.skin_settings
         else:
-            return self.settings.menu_default.submenu.visible
+            val = self.settings
+
+        if menu.item_types and menu.item_types in val.menu:
+            val = val.menu[menu.item_types]
+        else:
+            val = val.menu["default"]
+        
+        return val.submenu.visible
 
 
     def PopupBox(self, text=None, icon=None):
@@ -622,9 +646,11 @@ class Skin:
 
         # now find the correct menu:
         if len(menuw.menustack) == 1:
-            val = val.menu_main
+            val = val.menu["main"]
+        elif menu.item_types and menu.item_types in val.menu:
+            val = val.menu[menu.item_types]
         else:
-            val = val.menu_default
+            val = val.menu["default"]
 
 
         image_object, image_x, image_val = self.DrawMenu_Cover(menuw, val)
@@ -672,8 +698,8 @@ class Skin:
         # if there is an image and the selection will be cover the image
         # shorten the selection
 
-        if image_x and val.items.x + val.items.width > image_x:
-            selection_length = image_x - val.items.x
+        #if image_x and val.items.x + val.items.width > image_x:
+        #    selection_length = image_x - val.items.x
 
         self.DrawMenu_Selection(menuw, val, val.items.x, val.items.y, selection_length, \
                                 val.items.height)

@@ -21,21 +21,15 @@
 
     <menu type="all">
       <background image="skins/images/aubin/blurr.png"/>
-      <background mask="skins/images/aubin/music_watermark.png"/>
       
       <logo visible="no"/>
-      <!-- <background>
-	<mask>
-	  <rectangle x="30" y="60" width="530" height="475" color="0x80000000" radius="10"/>
-	</mask>
-	</background> -->
 
       <title visible="no" x="600" y="225" width="600">
 	<font name="Arial_Bold" size="36" color="0x80000000" align="center"/>
 	<shadow visible="yes" color="0x80000000" x="3" y="3"/>
       </title>
 
-      <items x="60" y="90" height="450" width="470">
+      <items x="340" y="90" height="450" width="400">
 	<item type="all">
 	<logo visible="no"/>
 	  <font name="Arial_Bold" size="16"/>
@@ -56,10 +50,10 @@
           </mask>
         </cover>
 
-	<cover type="music" visible="yes" x="450" y="215" width="200"
+	<cover type="music" visible="yes" x="50" y="215" width="200"
           height="200" border_color="0x000000" border_size="1">
         <mask>
-          <rectangle x="440" y="205" width="220" height="220" 
+          <rectangle x="40" y="205" width="220" height="220" 
             color="0x80000000" radius="10"/>
           </mask>
         </cover>
@@ -76,6 +70,17 @@
       </submenu>
 
     </menu>
+
+    <menu type="video">
+        <background mask="skins/images/aubin/movie_watermark.png"/>
+    </menu>
+    <menu type="audio">
+        <background mask="skins/images/aubin/music_watermark.png"/>
+    </menu>
+    <menu type="image">
+        <background mask="skins/images/aubin/image_watermark.png"/>
+    </menu>
+
 
     <!-- Override some settings for the main menu -->
     <menu type="main">
