@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/11/06 19:57:54  mikeruelle
+# remove hard links so we can run when proxied
+#
 # Revision 1.3  2003/10/31 18:56:15  dischi
 # Add framework for plugin writing howto
 #
@@ -74,7 +77,7 @@ class HelpResource(FreevoResource):
         fv.res += '<li><a href="howto.rpy?type=plugin">Plugin Writing Howto</a></li>'
 
         fv.res += '<br><br>'
-        fv.printLinks()
+        fv.printLinks(request.path.count('/')-1)
         fv.printFooter()
         fv.res+=('</ul>')
         return fv.res

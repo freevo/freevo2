@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/11/06 19:56:14  mikeruelle
+# remove hard links so we can run when proxied
+#
 # Revision 1.1  2003/09/23 18:24:07  dischi
 # moved help to a new directory and add more docs
 #
@@ -108,7 +111,7 @@ class WikiResource(FreevoResource):
                 if line.find('<hr>') != -1 and pos == 0:
                     pos = 1
         fv.res += '<br><br>'
-        fv.printLinks()
+        fv.printLinks(request.path.count('/')-1)
         fv.printFooter()
         fv.res+=('</ul>')
         return fv.res

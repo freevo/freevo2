@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/11/06 19:56:45  mikeruelle
+# remove hard links so we can run when proxied
+#
 # Revision 1.4  2003/11/01 15:20:38  dischi
 # better howto support
 #
@@ -145,7 +148,7 @@ class HowtoResource(FreevoResource):
                     else:
                         fv.res += line
         fv.res += '<br><br>'
-        fv.printLinks()
+        fv.printLinks(request.path.count('/')-1)
         fv.printFooter()
         fv.res+=('</ul>')
         return fv.res
