@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.75  2004/08/01 10:56:00  dischi
+# do not hide/show the menu, it can do that itself
+#
 # Revision 1.74  2004/07/10 12:33:36  dischi
 # header cleanup
 #
@@ -337,14 +340,6 @@ class Item:
         # give the event to the next eventhandler in the list
         if self.parent:
             return self.parent.eventhandler(event, menuw)
-
-        else:
-            if event in (STOP, PLAY_END, USER_END) and menuw:
-                if menuw.visible:
-                    menuw.refresh()
-                else:
-                    menuw.show()
-                return True
 
         return False
 
