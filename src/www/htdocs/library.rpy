@@ -13,6 +13,9 @@
 #   human readable size rather than bytes from os
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/05/13 00:18:07  rshortt
+# Bugfix, but rename still doesn't work!
+#
 # Revision 1.2  2003/05/12 23:02:41  rshortt
 # Adding HTTP BASIC Authentication.  In order to use you must override WWW_USERS
 # in local_conf.py.  This does not work for directories yet.
@@ -103,24 +106,24 @@ class LibraryResource(FreevoResource):
                             print 'rename %s to %s' % (file_loc, newfile_loc)
                             os.rename(file_loc, newfile_loc)
                     else:
-                        print 'Error: no newfile specified.'
+                        fv.res += 'Error: no newfile specified.'
                 elif action == 'delete':
                     print 'delete %s' % file_loc
                     os.unlink(file_loc)
             else:
-                print '%s does not exist. no action taken.' % file_loc
+                fv.res += '%s does not exist. no action taken.' % file_loc
         else:
             print 'I do not process names(%s) with slashes for security reasons.' % action_file
 
         fv.printHeader('Video Library', 'styles/main.css')
 
-        print '<script language="JavaScript"><!--'
-        print 'function renameFile(file) {'
-        print '   newfile=window.prompt("New name please.");'
-        print '   if(newfile == "" || newfile == null) return;'
-        print '   document.location="library.rpy?action=rename&file=" + escape(file) + "&newfile=" + escape(newfile);'
-        print '}'
-        print '//--></script>'
+        fv.res += '<script language="JavaScript"><!--'
+        fv.res += 'function renameFile(file) {'
+        fv.res += '   newfile=window.prompt("New name please.");'
+        fv.res += '   if(newfile == "" || newfile == null) return;'
+        fv.res += '   document.location="library.rpy?action=rename&file=" + escape(file) + "&newfile=" + escape(newfile);'
+        fv.res += '}'
+        fv.res += '//--></script>'
 
         fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
         fv.tableRowOpen('class="chanrow"')
@@ -138,7 +141,7 @@ class LibraryResource(FreevoResource):
 
         # find out if anything is recording
         recordingprogram = ''
-        (status, recordings) = ri.getScheduledRecordings()
+        (result, recordings) = ri.getScheduledRecordings()
         progs = recordings.getProgramList()
         f = lambda a, b: cmp(a.start, b.start)
         progl = progs.values()
@@ -154,7 +157,7 @@ class LibraryResource(FreevoResource):
 
         #generate our favorites regular expression
         favre = ''
-        (status, favorites) = ri.getFavorites()
+        (result, favorites) = ri.getFavorites()
         favs = favorites.values()
         if favs:
             favtitles = [ fav.title for fav in favs ]
