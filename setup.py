@@ -15,6 +15,9 @@ import distutils.command.install
 import os
 import sys
 
+sys.path.append('./src')
+import version
+
 libs = ( ('mmpython', 'http://www.sf.net/projects/mmpython' ),
          ('pygame', 'http://www.pygame.org'),
          ('Image', 'http://www.pythonware.com/products/pil/'),
@@ -41,22 +44,35 @@ def data_finder(result, dirname, names):
                        replace('./src/www', 'share/freevo').\
                        replace('./i18n', 'share/locale').\
                        replace('./contrib', 'share/freevo/contrib').\
+                       replace('./Docs', 'share/doc/freevo-%s' % version.__version__).\
                        replace('./helpers', 'share/freevo/helpers'), files))
     return result
 
+# check if everything is in place
+if not os.path.isdir('./Docs/howto'):
+    print 'Docs/howto not found. Looks like you are using the CVS version'
+    print 'of Freevo. Please run ./autogen.sh first'
+    sys.exit(0)
 
+# create list of source files
 package_dir = {}
 os.path.walk('./src', package_finder, package_dir)
 packages = []
 for p in package_dir:
     packages.append(p)
 
+# create list of data files (share)
 data_files = []
 os.path.walk('./share', data_finder, data_files)
 os.path.walk('./contrib/fbcon', data_finder, data_files)
 os.path.walk('./contrib/xmltv', data_finder, data_files)
 os.path.walk('./src/www/htdocs', data_finder, data_files)
 os.path.walk('./i18n', data_finder, data_files)
+os.path.walk('./Docs/howto', data_finder, data_files)
+
+for f in ('BUGS', 'COPYING', 'ChangeLog', 'INSTALL', 'README'):
+    data_files.append(('share/doc/freevo-%s' % version.__version__, ['%s' % f ]))
+data_files.append(('share/doc/freevo-%s' % version.__version__, ['Docs/CREDITS' ]))
 
 # copy freevo_config.py to share/freevo. It's the best place to put it
 # for now, but the location should be changed
@@ -80,11 +96,9 @@ if len(sys.argv) > 1 and sys.argv[1].lower() == 'install':
             sys.exit(1)
             
 
-version = open('VERSION').read()[:-1]
-
 # now start the python magic
 setup (name = "freevo",
-       version = version,
+       version = version.__version__,
        description = "Freevo",
        author = "Krister Lagerstrom, et al.",
        author_email = "",
