@@ -12,6 +12,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2002/10/19 15:05:34  dischi
+# Added support to draw on a given surface (layer). This is needed for the
+# changed main1 skin.
+#
 # Revision 1.41  2002/10/18 18:33:28  dischi
 # Added drawroundbox for boxes with round edges (funny combination for
 # these words). Also added support to get a new layer and to put it on
@@ -440,12 +444,15 @@ class OSD:
     # if not already there. The loadbitmap()/zoombitmap() functions can
     # be used to "pipeline" bitmap loading/drawing.
     def drawbitmap(self, filename, x=0, y=0, scaling=None,
-                   bbx=0, bby=0, bbw=0, bbh=0, rotation = 0):
+                   bbx=0, bby=0, bbw=0, bbh=0, rotation = 0, layer=None):
         if not pygame.display.get_init():
             return None
         image = self.zoombitmap(filename, scaling, bbx, bby, bbw, bbh, rotation)
         if not image: return
-        self.screen.blit(image, (x, y))
+        if layer:
+            layer.blit(image, (x, y))
+        else:
+            self.screen.blit(image, (x, y))
 
 
     def bitmapsize(self, filename):
@@ -470,7 +477,7 @@ class OSD:
         self._send('drawline;' + args1 + args2)
 
 
-    def drawbox(self, x0, y0, x1, y1, width=None, color=None, fill=0):
+    def drawbox(self, x0, y0, x1, y1, width=None, color=None, fill=0, layer=None):
         if not pygame.display.get_init():
             return None
 
@@ -491,11 +498,17 @@ class OSD:
             box = pygame.Surface((w, h), 0, 32)
             box.fill((r,g,b))
             box.set_alpha(a)
-            self.screen.blit(box, (x0, y0))
+            if layer:
+                layer.blit(box, (x0, y0))
+            else:
+                self.screen.blit(box, (x0, y0))
         else:
             r = (x0, y0, x1-x0, y1-y0)
             c = self._sdlcol(color)
-            pygame.draw.rect(self.screen, c, r, width)
+            if layer:
+                pygame.draw.rect(layer, c, r, width)
+            else:
+                pygame.draw.rect(self.screen, c, r, width)
 
     def getsurface(self, x, y, width, height):
         s = pygame.Surface((width, height))
@@ -959,7 +972,7 @@ class OSD:
                     
 
     def drawstring(self, string, x, y, fgcolor=None, bgcolor=None,
-                   font=None, ptsize=0, align='left'):
+                   font=None, ptsize=0, align='left', layer=None):
 
         if not pygame.display.get_init():
             return None
@@ -993,7 +1006,10 @@ class OSD:
         elif align == 'right':
             tx = x - w
             
-        self.screen.blit(ren, (tx, y))
+        if layer:
+            layer.blit(ren, (tx, y))
+        else:
+            self.screen.blit(ren, (tx, y))
 
 
     # Render a string to an SDL surface. Uses a cache for speedup.
@@ -1104,9 +1120,10 @@ class OSD:
     # help functions to save and restore a pixel
     # for drawcircle
     def _savepixel(self, x, y, s):
-        if x>=0 and x<self.width and y>=0 and y<self.height:
+        try:
             return (x, y, s.get_at((x,y)))
-        return None
+        except:
+            return None
             
     def _restorepixel(self, save, s):
         if save:
@@ -1135,7 +1152,7 @@ class OSD:
         
         
     def drawroundbox(self, x0, y0, x1, y1, color=None, border_size=0, border_color=None,
-                     radius=0, surface=None):
+                     radius=0, layer=None):
 
         if not pygame.display.get_init():
             return None
@@ -1149,7 +1166,7 @@ class OSD:
         if border_color == None:
             border_color = self.default_fg_color
 
-        if surface:
+        if layer:
             x = x0
             y = y0
         else:
@@ -1165,13 +1182,13 @@ class OSD:
         # make sure the radius fits the box
         radius = min(radius, h / 2, w / 2)
         
-        if not surface:
+        if not layer:
             box = pygame.Surface((w, h), SRCALPHA, 32)
 
             # clear surface
             box.fill((0,0,0,0))
         else:
-            box = surface
+            box = layer
             
         r,g,b,a = self._sdlcol(color)
         
@@ -1198,7 +1215,7 @@ class OSD:
         pygame.draw.rect(box, c, (x+radius, y, w-2*radius, h))
         pygame.draw.rect(box, c, (x, y+radius, w, h-2*radius))
         
-        if not surface:
+        if not layer:
             self.screen.blit(box, (x0, y0))
 
 
