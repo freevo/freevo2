@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.62  2003/07/06 19:27:53  dischi
+# remove some old stuff
+#
 # Revision 1.61  2003/07/06 19:26:24  dischi
 # small bugfix
 #
@@ -1159,91 +1162,3 @@ class OSD:
         b = (col >> 0) & 0xff
         c = (r, g, b, a)
         return c
-            
-
-
-
-    class Object:
-        """
-        object used by drawstringframed
-        """
-        def __cmp__(self, other):
-            """
-            basic conpare function
-            """
-            try:
-                sv = vars(self)
-                ov = vars(other)
-                for k in sv:
-                    if sv[k] != ov[k]:
-                        return 1
-                return 0
-            except:
-                return 1
-
-    
-    class BoxObject(Object):
-        """
-        BoxObject used by drawstringframed
-        """
-        def __init__(x0, y0, x1, y1, width=None, color=None, fill=0):
-            self.x0 = x0
-            self.y0 = y0
-            self.x1 = x1
-            self.y1 = y1
-            self.width = width
-            self.color = color
-            self.fill  = fill
-
-        def draw(self, layer=None):
-            get_singleton().drawbox(self.x0, self.y0, self.x1, self.y1, self.width,
-                                    self.color, self.fill, layer)
-
-
-    class TextObject(Object):
-        """
-        TextObject used by drawstringframed
-        """
-        def __init__(self, string, x, y, fgcolor=None, bgcolor=None,
-                     font=None, ptsize=0, align='left'):
-            self.string = string
-            self.x = x
-            self.y = y
-            self.fgcolor = fgcolor
-            self.bgcolor = bgcolor
-            self.font = font
-            self.ptsize = ptsize
-            self.align = align
-
-
-        def draw(self, layer=None):
-            osd = get_singleton()
-            try:
-                ren = osd._renderstring(stringproxy(self.string),
-                                        self.font, self.ptsize,
-                                        self.fgcolor, self.bgcolor)
-            except:
-                print "Render failed, skipping..."    
-                return None
-        
-            # Handle horizontal alignment
-            if 0:
-                w, h = ren.get_size()
-                tx = self.x
-                if self.align == 'center':
-                    tx = self.x - w/2
-                elif self.align == 'right':
-                    tx = self.x - w
-            else:
-                tx = self.x
-                
-            if layer:
-                layer.blit(ren, (tx, self.y))
-            else:
-                osd.screen.blit(ren, (tx, self.y))
-
-
-
-    # NEW drawstringframed stuff
-
-
