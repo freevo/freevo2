@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/09/24 18:01:56  outlyer
+# A workaround for the problems with playback being aborted for every
+# 2nd song when played in sequence.
+#
 # Revision 1.17  2003/09/21 10:49:58  dischi
 # add shutdown to kill all running children
 #
@@ -259,9 +263,16 @@ class Read_Thread(threading.Thread):
 
             data = self.fp.readline(300)
             if not data:
-                _debug_('%s: No data, stopping (pid %s)!' % (self.name, os.getpid()))
-                self.fp.close()
-                break
+                # FIXME: This shouldn't be necessary, but it keeps
+                # killing the playback when switching songs, perhaps
+                # because playing songs in sequence leads to a slightly
+                # longer load or something?
+                time.sleep(1)   # Wait one second, in case.
+                data = self.fp.readline(300)
+                if not data:
+                    _debug_('%s: No data, stopping (pid %s)!' % (self.name, os.getpid()))
+                    self.fp.close()
+                    break
             else:
                 data = data.replace('\r', '\n')
                 lines = data.split('\n')
