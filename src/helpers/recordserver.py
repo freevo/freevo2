@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/09/18 00:36:06  mikeruelle
+# need to import config before any other freevo module
+#
 # Revision 1.8  2003/09/14 20:09:36  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
@@ -80,10 +83,10 @@ from twisted.internet import reactor
 from twisted.persisted import marmalade
 from twisted.python import log
 
+import config #config must always be the first freeevo module imported
 from tv.record_types import TYPES_VERSION
 from tv.record_types import ScheduledRecordings
 
-import config
 import tv.record_types
 import tv.epg_xmltv
 import tv.tv_util
