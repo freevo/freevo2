@@ -84,9 +84,9 @@ def main_menu(arg, menuw):
     items += [menu.MenuItem('Last Channel', start_tv, ('tv', None))]
     items += [menu.MenuItem('VCR', start_tv, ('vcr', None))]
 
-    # Get all programs that are currently running
+    # Get all programs from now until the end of the guide
     now = time.time()
-    channels = guide.GetPrograms(now, now)
+    channels = guide.GetPrograms(start=now, stop=None)
     
     for channel in channels:
         # Channel display name
@@ -97,12 +97,12 @@ def main_menu(arg, menuw):
             if DEBUG: print 'TV: Cannot find logo "%s"' % channel_logo
             channel_logo = None
 
-        # Add the program to the menu item
+        # Add the first two programs to the menu item
         if channel.programs:
-            p = channel.programs[0]
-            hh = time.localtime(p.start)[3]
-            mm = time.localtime(p.start)[4]
-            menu_str += '%2d.%02d   %-20.20s    ' % (hh, mm, p.title)
+            for p in channel.programs[:2]:
+                hh = time.localtime(p.start)[3]
+                mm = time.localtime(p.start)[4]
+                menu_str += '%2d.%02d   %-20.20s    ' % (hh, mm, p.title)
         else:
             menu_str += 'NO DATA'
             
