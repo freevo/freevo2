@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.113  2004/02/12 12:20:11  dischi
+# fix item counter for different display_types
+#
 # Revision 1.112  2004/02/08 17:40:09  dischi
 # remember number of items, calc when needed
 #
@@ -168,15 +171,9 @@ class DirItem(Playlist):
     """
     class for handling directories
     """
-    def __init__(self, directory, parent, name = '', display_type = None, add_args = None):
-        dt = display_type
-        if display_type == 'tv':
-            dt = 'video'
-        elif not dt:
-            dt = 'all'
-        self.autovars = [ ('num_dir_items', 0), ('num_timestamp', 0),
-                          ('num_%s_items' % dt, 0)]
-
+    def __init__(self, directory, parent, name = '', display_type = None,
+                 add_args = None, create_metainfo=True):
+        self.autovars = [ ('num_dir_items', 0) ]
         Playlist.__init__(self, parent=parent, display_type=display_type)
         self.type = 'dir'
         self.menu  = None
@@ -242,7 +239,9 @@ class DirItem(Playlist):
             self.DIRECTORY_SORT_BY_DATE = 0
 
         # create some extra info
-        self.create_metainfo()
+        if create_metainfo:
+            self.create_metainfo()
+
 
 
     def set_fxd_file(self, file):
@@ -350,7 +349,7 @@ class DirItem(Playlist):
             return _('Directory')
 
         if key == 'num_items':
-            display_type = self.display_type
+            display_type = self.display_type or 'all'
             if self.display_type == 'tv':
                 display_type = 'video'
             return self['num_%s_items' % display_type] + self['num_dir_items']
@@ -412,17 +411,30 @@ class DirItem(Playlist):
         """
         create some metainfo for the directory
         """
-        timestamp     = os.stat(self.dir)[stat.ST_MTIME]
-        num_timestamp = self.info['num_timestamp']
+        display_type   = self.display_type
 
-        if num_timestamp != timestamp:
+        if self.display_type == 'tv':
+            display_type = 'video'
+
+        name = display_type or 'all'
+
+        # check autovars
+        for var, val in self.autovars:
+            if var == 'num_%s_timestamp' % name:
+                break
+        else:
+            self.autovars += [ ( 'num_%s_timestamp' % name, 0 ),
+                               ( 'num_%s_items' % name, 0 ) ]
+            
+        timestamp     = os.stat(self.dir)[stat.ST_MTIME]
+        num_timestamp = self.info['num_%s_timestamp' % name]
+
+        if not num_timestamp or num_timestamp < timestamp:
+            if self.media:
+                self.media.mount()
             num_dir_items  = 0
             num_play_items = 0
             files          = vfs.listdir(self.dir, include_overlay=True)
-            display_type   = self.display_type
-
-            if self.display_type == 'tv':
-                display_type = 'video'
 
             # play items and playlists
             for p in plugin.mimetype(display_type):
@@ -434,15 +446,13 @@ class DirItem(Playlist):
                     num_dir_items += 1
 
             # store info
-            if self.display_type:
-                if num_play_items != self['num_%s_items' % display_type]:
-                    self['num_%s_items' % display_type] = num_play_items
-            else:
-                if num_play_items != self['num_all_items']:
-                    self['num_all_items'] = num_play_items
+            if num_play_items != self['num_%s_items' % name]:
+                self['num_%s_items' % name] = num_play_items
             if self['num_dir_items'] != num_dir_items:
                 self['num_dir_items'] = num_dir_items
-            self['num_timestamp'] = timestamp
+            self['num_%s_timestamp' % name] = timestamp
+            if self.media:
+                self.media.umount()
 
         
     # ======================================================================
