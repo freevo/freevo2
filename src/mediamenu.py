@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2003/04/12 18:27:29  dischi
+# special video item handling
+#
 # Revision 1.46  2003/04/06 21:12:55  dischi
 # o Switched to the new main skin
 # o some cleanups (removed unneeded inports)
@@ -182,6 +185,11 @@ class MediaMenu(Item):
                     m.copy(media.info)
                     m.media = media
                     items += [ m ]
+
+                elif self.display_type == 'video' and media.videoinfo:
+                    media.videoinfo.parent = self
+                    items += [ media.videoinfo ]
+                    
                 else:
                     media.info.parent = self
                     if media.info.type == 'dir':

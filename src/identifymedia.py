@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/04/12 18:27:29  dischi
+# special video item handling
+#
 # Revision 1.23  2003/04/06 21:12:54  dischi
 # o Switched to the new main skin
 # o some cleanups (removed unneeded inports)
@@ -83,6 +86,7 @@ import string
 import copy
 
 from audio.audiodiskitem import AudioDiskItem
+from video.videoitem import VideoItem
 
 # CDDB Stuff
 try:
@@ -136,14 +140,15 @@ class Identify_Thread(threading.Thread):
 
         media.drive_status = s
 
-        media.id    = ''
-        media.label = ''
-        media.type  = 'empty_cdrom'
+        media.id        = ''
+        media.label     = ''
+        media.type      = 'empty_cdrom'
+        media.info      = None
+        media.videoinfo = None
 
         # Is there a disc present?
         if s != CDS_DISC_OK:
             os.close(fd)
-            media.info = None
             return
 
         # Check media type (data, audio)
@@ -344,6 +349,18 @@ class Identify_Thread(threading.Thread):
             media.info.name = title
         if image:
             media.info.image = image
+
+        if len(mplayer_files) == 1:
+            media.videoinfo = VideoItem(mplayer_files[0], None)
+            media.videoinfo.media = media
+            
+            if movie_info:
+                media.videoinfo.copy(movie_info)
+            if title:
+                media.videoinfo.name = title
+            if image:
+                media.videoinfo.image = image
+            
         media.info.media = media
         return
 

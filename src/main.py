@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2003/04/12 18:27:29  dischi
+# special video item handling
+#
 # Revision 1.32  2003/04/06 21:12:55  dischi
 # o Switched to the new main skin
 # o some cleanups (removed unneeded inports)
@@ -371,10 +374,11 @@ class RemovableMedia:
         self.tray_open = 0
         self.drive_status = None  # return code from ioctl for DRIVE_STATUS
 
-        self.id    = ''
-        self.label = ''
-        self.info  = None
-        self.type  = 'empty_cdrom'
+        self.id        = ''
+        self.label     = ''
+        self.info      = None
+        self.videoinfo = None
+        self.type      = 'empty_cdrom'
 
     def is_tray_open(self):
         return self.tray_open
