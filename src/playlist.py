@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.71  2004/06/28 15:51:21  dischi
+# catch IOError
+#
 # Revision 1.70  2004/05/09 16:44:13  dischi
 # fix crash in m3u parsing
 #
@@ -248,7 +251,7 @@ class Playlist(Item):
                     self.read_ssr(playlist)
                 else:
                     self.read_m3u(playlist)
-            except OSError, e:
+            except (OSError, IOError), e:
                 print 'playlist error: %s' % e
             self.set_url(playlist)
 
