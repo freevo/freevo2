@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2003/10/22 17:22:36  dischi
+# better stop() exception handling
+#
 # Revision 1.31  2003/10/21 21:17:41  gsbarbieri
 # Some more i18n improvements.
 #
@@ -420,7 +423,11 @@ class RandomPlaylist(Playlist):
             if self.current_item:
                 self.current_item.parent = self.parent
                 if hasattr(self.current_item, 'stop'):
-                    self.current_item.stop()
+                    try:
+                        self.current_item.stop()
+                    except OSError:
+                        _debug_('ignore playlist event', 1)
+                        return True
             return self.play_next(menuw=menuw)
         
         # end and no next item

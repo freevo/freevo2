@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2003/10/22 17:22:36  dischi
+# better stop() exception handling
+#
 # Revision 1.34  2003/10/20 13:46:41  outlyer
 # A small change to fix a frequent source of crashes. I don't know why,
 # but it happens on occaison, so it's better to silently skip over than
@@ -376,10 +379,16 @@ class ChildThread(threading.Thread):
 
     def stop(self, cmd=None):
         if not hasattr(self.app, 'child'):
-            _debug_('child still starting, ignoring stop', 1)
-            _debug_('slow down or buy a faster machine :-)', 1)
-            raise OSError
-        
+            for t in traceback.extract_stack():
+                if t[0].find('playlist'):
+                    raise OSError
+
+            print 'Tried to stop child when no child is running right now'
+            print 'Please send a bug report with the following trace to the'
+            print 'Freevo developers'
+            traceback.print_stack()
+            return
+
         if config.DEBUG > 1:
             _debug_('got stop command')
             traceback.print_stack()
