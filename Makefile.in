@@ -27,7 +27,7 @@ osds_x11:
 osds_sdl:
 	cd osd_server ; $(MAKE) osds_sdl
 
-runapp:
+runapp: runapp.c
 	$(CC) -o runapp runapp.c -DRUNAPP_LOGDIR=\"/var/log/freevo\"
 
 subdirs: $(SUBDIRS)
