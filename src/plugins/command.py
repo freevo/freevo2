@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/02/15 03:09:28  mikeruelle
+# make things a little more xml like
+#
 # Revision 1.8  2004/02/14 19:47:27  mikeruelle
 # set the skin type
 #
@@ -213,8 +216,9 @@ class CommandItem(Item):
     """
     def __init__(self, command=None, directory=None):
         Item.__init__(self, skin_type='commands')
-	self.stoposd = 0
-	self.use_wm  = None
+	self.display_type = 'commands'
+	self.stoposd = False
+	self.use_wm  = False
 	self.spawnwm = config.COMMAND_SPAWN_WM
 	self.killwm  = config.COMMAND_KILL_WM
         self.stdout  = True
@@ -275,13 +279,12 @@ def fxdparser(fxd, node):
     item.name    = fxd.getattr(node, 'title')
     item.cmd     = fxd.childcontent(node, 'cmd')
     item.image   = util.getimage(item.cmd)
-    item.stoposd = fxd.childcontent(node, 'stoposd')
-    item.use_wm  = fxd.childcontent(node, 'spawnwm')
-    try:
-        if fxd.childcontent(node, 'stdout'):
-            item.stdout = int(fxd.childcontent(node, 'stdout'))
-    except Exception, e:
-        print e
+    if fxd.get_children(node, 'stoposd'):
+        item.stoposd = True
+    if fxd.get_children(node, 'spawnwm'):
+        item.use_wm  = True
+    if fxd.get_children(node, 'nostdout'):
+        item.stdout =  False
     
     # parse <info> tag
     fxd.parse_info(fxd.get_children(node, 'info', 1), item)
@@ -387,9 +390,9 @@ class fxdhandler(plugin.Plugin):
     <freevo>
       <command title="Mozilla">
         <cmd>/usr/local/bin/mozilla</cmd>
-        <stoposd>1</stoposd> <!-- stop osd before starting -->
-        <spawnwm>1</spawnwm> <!-- start windowmanager -->
-        <stdout>0</stdout>   <!-- do not show stdout on exit -->
+        <stoposd />  <!-- stop osd before starting -->
+        <spawnwm />  <!-- start windowmanager -->
+        <nostdout /> <!-- do not show stdout on exit -->
         <info>
           <description>Unleash mozilla on the www</description>
         </info>
