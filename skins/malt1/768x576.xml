@@ -6,7 +6,7 @@
     <menu>
       <bgbitmap>../images/aubin_bg1.png</bgbitmap>
       <title visible="yes" x="160" y="50">
-	<font name="Cultstup" size="22" color="0x000000"/>
+	<font name="Cultstup" size="30" color="0x000000"/>
       </title>
       <items x="60" y="100" height="390">
 	<font name="SF Arborcrest Medium" size="15" color="0x000000"/>
