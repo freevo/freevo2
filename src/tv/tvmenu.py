@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/12/31 16:10:30  rshortt
+# Make it possible to have a tv mainmenu plugin.
+#
 # Revision 1.9  2003/11/28 19:26:37  dischi
 # renamed some config variables
 #
@@ -192,6 +195,10 @@ class TVMenu(Item):
                                    action=self.view_schedule))
         items.append(menu.MenuItem(_('Search Guide'), action=self.show_search))
         # items.append(menu.MenuItem('View Favorites', action=self.show_favorites))
+
+        plugins_list = plugin.get('mainmenu_tv')
+        for p in plugins_list:
+            items += p.items(self)
 
         menuw.pushmenu(menu.Menu(_('TV Main Menu'), items, item_types = 'tv'))
 
