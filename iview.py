@@ -8,6 +8,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2002/10/19 17:54:49  dischi
+# Added patch from Wan Tat Chee to display more exif header informations
+# in the osd
+#
 # Revision 1.14  2002/08/31 17:20:18  dischi
 # button REC now stores the image with current rotation. This only works
 # with jpg and all additional informations (EXIF header from carmeras)
@@ -274,6 +278,8 @@ class ImageViewer:
             osd.drawbitmap(self.filename, (osd.width-new_w) / 2, (osd.height-new_h) / 2,
                            scaling=scale, rotation=self.rotation)
 
+            if self.osd:
+                self.drawosd()
             osd.update()
 
         # print image information
@@ -286,7 +292,7 @@ class ImageViewer:
             else:
                 # Redraw without the OSD
                 self.view(self.filename, self.playlist.index(self.filename),
-                          self.playlist)
+                          self.playlist, zoom=self.zoom, rotation = self.rotation)
 
         # zoom to one third of the image
         # 1 is upper left, 9 is lower right, 0 zoom off
@@ -322,20 +328,40 @@ class ImageViewer:
         tags = exif.process_file(f)
 
         # Make the background darker for the OSD info
-        osd.drawbox(0, osd.height - 90, 350, osd.height, width=-1,
+        osd.drawbox(0, osd.height - 110, osd.width, osd.height, width=-1,
                     color=((60 << 24) | osd.COL_BLACK))
         
         pos = 50
 
-        if tags.has_key('Image DateTime'):
-            osd.drawstring('%s' % tags['Image DateTime'], 20, osd.height - pos, 
-                           fgcolor=osd.COL_ORANGE)
-            pos += 30
-            
-        osd.drawstring(os.path.basename(self.filename), 20, osd.height - pos, 
-                       fgcolor=osd.COL_ORANGE)
+        if tags.has_key('Image DateTime') and \
+		tags.has_key('EXIF ExifImageWidth') and tags.has_key('EXIF ExifImageLength'):
+            osd.drawstring('%s (%s x %s) @ %s' % \
+		(os.path.basename(self.filename), 
+		 tags['EXIF ExifImageWidth'], tags['EXIF ExifImageLength'], \
+		 tags['Image DateTime']), \
+			 20, osd.height - pos, fgcolor=osd.COL_ORANGE)
+	else:
+            osd.drawstring('%s' % (os.path.basename(self.filename)), \
+			 20, osd.height - pos, fgcolor=osd.COL_ORANGE)
 
         pos += 30
+            
+	if tags.has_key('EXIF ExposureTime') and tags.has_key('EXIF FNumber') and \
+		tags.has_key('EXIF FocalLength') and tags.has_key('EXIF ISOSpeedRatings') and \
+		tags.has_key('EXIF ExposureProgram') and tags.has_key('EXIF MeteringMode') and \
+		tags.has_key('EXIF LightSource') and tags.has_key('EXIF Flash'):
+            osd.drawstring('%s sec F/%s, L=%s mm, ISO %s, %s (%s Mtr), %s (Fls %s)' % \
+			 (tags['EXIF ExposureTime'], tags['EXIF FNumber'], 
+			  tags['EXIF FocalLength'], tags['EXIF ISOSpeedRatings'],
+			  tags['EXIF ExposureProgram'], tags['EXIF MeteringMode'], 
+			  tags['EXIF LightSource'], tags['EXIF Flash']), 
+			 20, osd.height - pos, fgcolor=osd.COL_ORANGE)
+            pos += 30
+            
+        if tags.has_key('Image Make') and tags.has_key('Image Model') and tags.has_key('Image Software'):
+            osd.drawstring('%s %s (%s)' % (tags['Image Make'], tags['Image Model'], tags['Image Software']), 
+			20, osd.height - pos, fgcolor=osd.COL_ORANGE)
+            pos += 30
             
         if self.zoom:
             osd.drawstring('Zoom = %s' % self.zoom, 20, osd.height - pos, 
