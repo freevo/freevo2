@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/01/14 20:36:16  mikeruelle
+# they guys do not play radio
+#
 # Revision 1.13  2003/12/29 22:09:19  dischi
 # move to new Item attributes
 #
@@ -129,6 +132,8 @@ class Xine:
         1 = possible, but not good
         0 = unplayable
         """
+        if item.url.startswith('radio://'):
+            return 0
         return 2
 
 

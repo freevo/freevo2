@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2004/01/14 20:36:16  mikeruelle
+# they guys do not play radio
+#
 # Revision 1.32  2003/12/29 22:33:30  dischi
 # Oops
 #
@@ -109,6 +112,8 @@ class MPlayer:
         1 = possible, but not good
         0 = unplayable
         """
+        if item.url.startswith('radio://'):
+            return 0
         if item.url.startswith('cdda://'):
             return 1
         return 2
