@@ -9,16 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/04/06 21:12:55  dischi
+# o Switched to the new main skin
+# o some cleanups (removed unneeded inports)
+#
 # Revision 1.3  2003/02/19 17:11:21  outlyer
 # Don't try to open the mixer if we're not using it. I don't imagine it's a
 # useful way to spend startup time. Also, remove the duplicate "CDDB not
 # installed" as the user probably only needs to be told once :)
-#
-# Revision 1.2  2003/01/29 17:10:48  outlyer
-# Fixed spelling
-#
-# Revision 1.1  2002/11/24 13:58:44  dischi
-# code cleanup
 #
 #
 # -----------------------------------------------------------------------

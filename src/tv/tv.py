@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/04/06 21:12:58  dischi
+# o Switched to the new main skin
+# o some cleanups (removed unneeded inports)
+#
 # Revision 1.4  2003/03/30 16:27:05  dischi
 # fixed a bug when changing skin at runtime
 #
@@ -49,26 +53,13 @@
 #endif
 
 
-import sys
-#import random
-import time, math
-#, os, glob
-#import string, popen2, fcntl, select, struct
+import time
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
 
-# Various utilities
-import util
-
 # The menu widget class
 import menu
-
-# The mixer class, controls the volumes for playback and recording
-import mixer
-
-# The OSD class, used to communicate with the OSD daemon
-import osd
 
 # The RemoteControl class, sets up a UDP daemon that the remote control client
 # sends commands to
@@ -82,87 +73,24 @@ import epg_xmltv as epg
 
 from item import Item
 
-# The Skin
-import skin
+from tvguide import TVGuide
+from mediamenu import DirItem
 
-if not config.NEW_SKIN:
-    # Extended Menu
-    import ExtendedMenu
-    import ExtendedMenu_TV
-else:
-    from tvguide import TVGuide
-    from mediamenu import DirItem
-    
+from gui.AlertBox import AlertBox
+from gui.PopupBox import PopupBox
+
 # Set to 1 for debug output
 DEBUG = config.DEBUG
 
 TRUE = 1
 FALSE = 0
 
-# Create the OSD object
-osd = osd.get_singleton()
-
 # Create the remote control object
 rc = rc.get_singleton()
-
-# Set up the mixer
-mixer = mixer.get_singleton()
 
 # Set up the TV application
 tvapp = mplayer.get_singleton()
 
-menuwidget = menu.get_singleton()
-
-skin = skin.get_singleton()
-
-
-class TVMenu(Item):
-    
-    def __init__(self):
-        Item.__init__(self)
-        self.type = 'tv'
-
-    def main_menu(self, arg, menuw):
-        items = [ menu.MenuItem('TV Guide', action=start_tvguide),
-                  DirItem(config.DIR_RECORD, None, name = 'Recorded Shows',
-                          display_type='tv') ]
-
-        menuw.pushmenu(menu.Menu('TV MAIN MENU', items, item_types = 'tv'))
-
-
-
-
-
-# Set up the extended menu
-if not config.NEW_SKIN:
-    view = ExtendedMenu_TV.ExtendedMenuView_TV()
-    info = ExtendedMenu_TV.ExtendedMenuInfo_TV()
-    listing = ExtendedMenu_TV.ExtendedMenuListing_TV()
-    tvguide = ExtendedMenu_TV.ExtendedMenu_TV(view, info, listing)
-else:
-    tvguide = TVGuide()
-
-def get_start_time():
-    ttime = time.localtime()
-    stime = [ ]
-    for i in ttime:
-        stime += [i]
-    stime[5] = 0 # zero seconds
-    if stime[4] >= 30:
-        stime[4] = 30
-    else:
-        stime[4] = 0
-    
-    return time.mktime(stime)
-
-
-def start_tv(mode=None, channel_id=None):
-
-    tuner_id = get_tunerid(channel_id)
-    
-    print 'mode=%s    channel=%s  tuner=%s' % (mode, channel_id, tuner_id)
-    
-    tvapp.Play(mode, tuner_id)
 
 
 def get_tunerid(channel_id):
@@ -172,77 +100,80 @@ def get_tunerid(channel_id):
         if tv_channel_id == channel_id:
             return tv_tuner_id
 
-    skin.PopupBox('Could not find TV channel %s' % channel_id)
-    time.sleep(2)
+    AlertBox(text='Could not find TV channel %s' % channel_id).show()
     return None
-    
-   
-def eventhandler(event):
-    
-    if event == rc.EXIT or event == rc.MENU:
-        rc.app = None
-        menuwidget.refresh()
 
-    elif event == rc.SELECT or event == rc.PLAY:
-        skin.Clear()
-        if not config.NEW_SKIN:
-            start_tv('tv', tvguide.listing.last_to_listing[3].channel_id)
+
+def start_tv(mode=None, channel_id=None):
+    tuner_id = get_tunerid(channel_id)
+    print 'mode=%s    channel=%s  tuner=%s' % (mode, channel_id, tuner_id)
+    tvapp.Play(mode, tuner_id)
+
+
+
+
+
+class TVMenu(Item):
+    
+    def __init__(self):
+        Item.__init__(self)
+        self.type = 'tv'
+
+
+    def main_menu(self, arg, menuw):
+        items = [ menu.MenuItem('TV Guide', action=self.start_tvguide),
+                  DirItem(config.DIR_RECORD, None, name = 'Recorded Shows',
+                          display_type='tv') ]
+
+        menuw.pushmenu(menu.Menu('TV MAIN MENU', items, item_types = 'tv'))
+
+
+    def get_start_time(self):
+        ttime = time.localtime()
+        stime = [ ]
+        for i in ttime:
+            stime += [i]
+        stime[5] = 0 # zero seconds
+        if stime[4] >= 30:
+            stime[4] = 30
         else:
-            start_tv('tv', tvguide.selected.channel_id)
-    else:
-        tvguide.eventhandler(event)
+            stime[4] = 0
 
-def refresh():
-    tvguide.refresh()
+        return time.mktime(stime)
 
 
-def main_menu(arg, menuw):
-    start_tvguide(arg, menuw)
+    def start_tvguide(self, arg, menuw):
+
+        # Check that the TV channel list is not None
+        if not config.TV_CHANNELS:
+            msg = 'The list of TV channels is invalid!\n'
+            msg += 'Please check the config file.'
+            AlertBox(text=msg).show()
+            return
+
+        if arg == 'record':
+            start_tv(None, ('record', None))
+            return
+
+        guide = epg.get_guide(PopupBox(text='Preparing the program guide'))
+
+        start_time = self.get_start_time()
+        stop_time = self.get_start_time() + 2 * 60 * 60
+
+        channels = guide.GetPrograms(start=start_time+1, stop=stop_time-1)
+
+        if not channels:
+            AlertBox(text='TV Guide is corrupt!').show()
+            return
+
+        prg = None
+        for chan in channels:
+            if chan.programs:
+                prg = chan.programs[0]
+                break
+
+        TVGuide(start_time, stop_time, guide.chan_list[0].id, prg, start_tv, menuw)
 
 
-def start_tvguide(arg, menuw):
+   
 
-    # Check that the TV channel list is not None
-    if not config.TV_CHANNELS:
-        msg = 'The list of TV channels is invalid!\n'
-        msg += 'Please check the config file.'
-        skin.PopupBox(msg)
-        time.sleep(3.0)
-        menuwidget.refresh()
-        return
-    
-    if arg == 'record':
-        start_tv(None, ('record', None))
-        return
-
-    skin.PopupBox('Preparing the program guide') 
-
-    guide = epg.get_guide()
-    
-    start_time = get_start_time()
-    stop_time = get_start_time() + 2 * 60 * 60
-
-    channels = guide.GetPrograms(start=start_time+1, stop=stop_time-1)
-
-    if not channels:
-        menuwidget.refresh()
-        skin.PopupBox('TV Guide is corrupt!')
-	time.sleep(3.0)
-	menuwidget.refresh()
-	return
-
-    rc.app = eventhandler
-
-    prg = None
-    for chan in channels:
-        if chan.programs:
-            prg = chan.programs[0]
-            break
-        
-    if not config.NEW_SKIN:
-        listing.ToListing([start_time, stop_time, guide.chan_list[0].id, prg])
-        tvguide.eventhandler(rc.UP)
-        tvguide.refresh()
-    else:
-        tvguide.start(start_time, stop_time, guide.chan_list[0].id, prg)
-        tvguide.refresh()

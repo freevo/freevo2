@@ -22,6 +22,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/04/06 21:12:54  dischi
+# o Switched to the new main skin
+# o some cleanups (removed unneeded inports)
+#
 # Revision 1.21  2003/03/21 19:51:34  dischi
 # moved some main menu settings from skin to freevo_config.py (new skin only)
 #
@@ -52,51 +56,6 @@
 # Revision 1.12  2003/02/11 06:07:59  krister
 # Improved CV/DVD autodetection. Use mad for mp3 playing, fixes a decoding bug.
 #
-# Revision 1.11  2003/02/11 04:37:29  krister
-# Added an empty local_conf.py template for new users. It is now an error if freevo_config.py is found in /etc/freevo etc. Changed DVD protection to use a flag. MPlayer stores debug logs in FREEVO_STARTDIR, and stops with an error if they cannot be written.
-#
-# Revision 1.10  2003/02/07 19:26:56  dischi
-# check freevo.conf version _before_ parsing freevo_config.py and REMOTE ist
-# searched using cfgfilepath
-#
-# Revision 1.9  2003/02/07 17:09:19  dischi
-# Changed the config file loading based on the guidelines from Krister.
-#
-# Revision 1.8  2003/01/19 16:03:36  dischi
-# reverse the path for searching for the config file. First try to find the
-# files in . (maybe you have more than one version of Freevo installed), after
-# that the user directory and last the etc directory. All installations (RPM
-# and ebuild in the near future) should _move_ the config files to /etc/freevo
-# to make it possible to have a user configuration.
-#
-# Revision 1.7  2003/01/18 16:54:19  dischi
-# Search the config file for the remote in different directories:
-# ~/freevo, /etc/freevo and ./rc_client
-#
-# Revision 1.6  2003/01/09 05:04:06  krister
-# Added an option to play all movies in a dir, and generate random playlists for them.
-#
-# Revision 1.5  2003/01/04 16:39:47  dischi
-# Added uid to the name of the logfile to avoid conflicts when running
-# freevo with different users
-#
-# Revision 1.4  2002/12/30 15:07:40  dischi
-# Small but important changes to the remote control. There is a new variable
-# RC_MPLAYER_CMDS to specify mplayer commands for a remote. You can also set
-# the variable REMOTE to a file in rc_clients to contain settings for a
-# remote. The only one right now is realmagic, feel free to add more.
-# RC_MPLAYER_CMDS uses the slave commands from mplayer, src/video/mplayer.py
-# now uses -slave and not the key bindings.
-#
-# Revision 1.3  2002/12/09 14:25:58  dischi
-# Added default for snes
-#
-# Revision 1.2  2002/12/07 13:29:49  dischi
-# Make a new database with all movies, even without id and label
-#
-# Revision 1.1  2002/11/24 13:58:44  dischi
-# code cleanup
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -122,7 +81,6 @@
 
 
 import sys, os, time, re
-import traceback
 
 if not 'FREEVO_STARTDIR' in os.environ:
     print 'WARNING: FREEVO_STARTDIR is not set!'
@@ -455,4 +413,3 @@ if not os.path.isdir('%s/audio/' % FREEVO_CACHEDIR):
     os.mkdir('%s/audio/' % FREEVO_CACHEDIR,
              stat.S_IMODE(os.stat(FREEVO_CACHEDIR)[stat.ST_MODE]))
 
-NEW_SKIN = (OSD_SKIN == 'skins/dischi1/skin_dischi1.py')

@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2003/04/06 21:12:55  dischi
+# o Switched to the new main skin
+# o some cleanups (removed unneeded inports)
+#
 # Revision 1.45  2003/03/30 21:21:25  rshortt
 # Fix for people not using the new skin (skins/dischi1/skin_dischi1.py).
 #
@@ -48,77 +52,6 @@
 #
 # Revision 1.33  2003/02/21 05:00:23  krister
 # Don't display .pics folders
-#
-# Revision 1.32  2003/02/19 13:04:32  dischi
-# Only active the new auto-cover for audio
-#
-# Revision 1.31  2003/02/19 07:16:11  krister
-# Matthieu Weber's patch for smart music cover search, modified the logic slightly.
-#
-# Revision 1.30  2003/02/18 05:51:21  gsbarbieri
-# now we add '[' and ']' to dirname ([dirname]) only if the menu is in the old display mode. (But you must toggle the extended menu mode *before* enter the desired dir)
-#
-# Revision 1.29  2003/02/15 04:03:02  krister
-# Joakim Berglunds patch for finding music/movie cover pics.
-#
-# Revision 1.28  2003/02/15 03:31:59  krister
-# Joakim Berglunds patch for disabling audio random playlists.
-#
-# Revision 1.27  2003/02/12 10:38:51  dischi
-# Added a patch to make the current menu system work with the new
-# main1_image.py to have an extended menu for images
-#
-# Revision 1.26  2003/02/12 06:33:21  krister
-# Cosmetic changes.
-#
-# Revision 1.25  2003/02/11 06:53:01  krister
-# Fixed small bugs.
-#
-# Revision 1.24  2003/02/08 23:31:37  gsbarbieri
-# hanged the Image menu to ExtendedMenu.
-#
-# OBS:
-#    main1_tv: modified to handle the <indicator/> as a dict
-#    xml_skin: modified to handle <indicator/> as dict and the new tag, <img/>
-#    main: modified to use the ExtendedMenu
-#    mediamenu: DirItem.cmd() now return items, so we can use it without a menu
-#
-# Revision 1.23  2003/02/04 13:14:12  dischi
-# o fixed some problems with the eventhandler (and cleaned up that part)
-# o DirectoryItem now reads skin.xml to get personal settings for the
-#   variables MOVIE_PLAYLISTS, DIRECTORY_SORT_BY_DATE and
-#   DIRECTORY_AUTOPLAY_SINGLE_ITEM
-# o reformat to 80 chars/line
-#
-# Revision 1.22  2003/01/21 14:16:53  dischi
-# Fix to avoid a crash if bins fails (xml parser broken or invalid xml file)
-#
-# Revision 1.21  2003/01/18 10:27:45  dischi
-# Go up one menu when freevo can't read the current directory anymore. Since
-# it may be inside a thread or it happens when freevo rebuilds the menu, scan
-# sends rc.EXIT to go back instead of going back one menu itself.
-#
-# Revision 1.20  2003/01/14 18:54:26  dischi
-# Added gphoto support from Thomas Schüppel. You need gphoto and the
-# Python bindings to get this working. I added try-except to integrate
-# this without breaking anything.
-#
-# Revision 1.19  2003/01/12 13:51:51  dischi
-# Added the feature to remove items for videos, too. For that the interface
-# was modified (update instead of remove).
-#
-# Revision 1.18  2003/01/11 20:09:41  dischi
-# Added the self.playlist option to the directory again. This was lost
-# during my adding of the last feature, sorry.
-#
-# Revision 1.17  2003/01/11 10:45:55  dischi
-# Add a thread to watch the directory. When something changes, the update
-# function will be called. The DirItem update function will add remove
-# items based on the directory cahnges.
-#
-# Revision 1.16  2003/01/09 05:04:06  krister
-# Added an option to play all movies in a dir, and generate random playlists
-# for them.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -282,6 +215,7 @@ class MediaMenu(Item):
             title = 'MEDIA'
         item_menu = menu_module.Menu('%s MAIN MENU' % title, self.main_menu_generate(),
                                      item_types = self.display_type, umount_all=1)
+        self.menuw = menuw
         menuw.pushmenu(item_menu)
 
 
@@ -306,6 +240,10 @@ class MediaMenu(Item):
                 menuw.refresh()
             return TRUE
 
+        if event in (rc.PLAY_END, rc.USER_END, rc.EXIT, rc.STOP):
+            self.menuw.show()
+            return TRUE
+
         # give the event to the next eventhandler in the list
         return Item.eventhandler(self, event, menuw)
 
@@ -321,6 +259,7 @@ class DirItem(Playlist):
         Item.__init__(self, parent)
         self.type = 'dir'
         self.media = None
+        self.menuw = None
         
         # variables only for Playlist
         self.current_item = 0
@@ -394,12 +333,8 @@ class DirItem(Playlist):
                     image = os.path.join(dir, covers[0])
             self.image = image
 
-        if config.NEW_SKIN:
-            if os.path.isfile(dir+'/folder.fxd'): 
-                self.xml_file = dir+'/folder.fxd'
-        else:
-            if os.path.isfile(dir+'/skin.xml'): 
-                self.xml_file = dir+'/skin.xml'
+        if os.path.isfile(dir+'/folder.fxd'): 
+            self.xml_file = dir+'/folder.fxd'
 
         # set variables to values in xml file
         if self.xml_file and os.path.isfile(self.xml_file):
@@ -408,12 +343,6 @@ class DirItem(Playlist):
                 var_def = parser.parse(open(self.xml_file).read())
 
                 for top in var_def.children:
-                    if top.name == 'variables' and not config.NEW_SKIN:
-                        for var_names in top.children:
-                            for v in all_variables:
-                                if var_names.name.upper() == v.upper():
-                                    setattr(self, v, int(var_names.textof()))
-
                     if top.name == 'folder':
                         for node in top.children:
                             if node.name == 'setvar':
@@ -467,20 +396,22 @@ class DirItem(Playlist):
         make a menu item for each file in the directory
         """
         
+        if not self.menuw:
+            self.menuw = menuw
+
         # are we on a ROM_DRIVE and have to mount it first?
         for media in config.REMOVABLE_MEDIA:
             if string.find(self.dir, media.mountdir) == 0:
                 util.mount(self.dir)
                 self.media = media
 
-	if os.path.isfile(self.dir + '/.password') and config.NEW_SKIN:
+	if os.path.isfile(self.dir + '/.password'):
 	    print 'password protected dir'
 	    pb = PasswordInputBox(osd.focused_app, 'Enter Password', 
                                   self.pass_cmp_cb)
 	    pb.show()
 	    # save these so the InputBox callback can pass them to do_cwd
 	    self.arg = arg
-	    self.menuw = menuw
 	    self.foo = "bar"
 	else:
 	    self.do_cwd(arg, menuw)
@@ -551,6 +482,7 @@ class DirItem(Playlist):
             if (os.path.isdir(filename) and
                 os.path.basename(filename) != 'CVS' and
                 os.path.basename(filename) != '.xvpics' and
+                os.path.basename(filename) != '.thumbnails' and
                 os.path.basename(filename) != '.pics'):
                 dir_items += [ DirItem(filename, self, display_type =
                                        self.display_type) ]
@@ -691,6 +623,7 @@ class DirItem(Playlist):
             if (os.path.isdir(dir) and
                 os.path.basename(dir) != 'CVS' and
                 os.path.basename(dir) != '.xvpics' and
+                os.path.basename(dir) != '.thumbnails' and
                 os.path.basename(dir) != '.pics'):
                 new_dir_items += [ DirItem(dir, self,
                                            display_type = self.display_type) ]

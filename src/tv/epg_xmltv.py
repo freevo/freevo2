@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/04/06 21:12:58  dischi
+# o Switched to the new main skin
+# o some cleanups (removed unneeded inports)
+#
 # Revision 1.14  2003/03/20 15:44:09  dischi
 # use the new text format function for desc
 #
@@ -150,7 +154,7 @@ def myversion():
 # Get a TV guide from memory cache, file cache or raw XMLTV file.
 # Tries to return at least the channels from the config file if there
 # is no other data
-def get_guide():
+def get_guide(popup=None):
     global cached_guide
 
     # Can we use the cached version (if same as the file)?
@@ -192,6 +196,10 @@ def get_guide():
 
         if not got_cached_guide:
             # Need to reload the guide
+
+            if popup:
+                popup.show()
+                
             if DEBUG:
                 print 'XMLTV, trying to read raw file (%s)' % config.XMLTV_FILE
             try:    
@@ -206,10 +214,14 @@ def get_guide():
                 # Dump a pickled version for later reads
                 pickle.dump(cached_guide, open(pname, 'w'))
 
+
     if not cached_guide:
         # An error occurred, return an empty guide
         cached_guide = epg_types.TvGuide()
         
+    if popup:
+        popup.destroy()
+
     return cached_guide
 
 

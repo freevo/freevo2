@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/04/06 21:12:54  dischi
+# o Switched to the new main skin
+# o some cleanups (removed unneeded inports)
+#
 # Revision 1.22  2003/03/24 19:42:20  dischi
 # fixed cd id search
 #
@@ -45,49 +49,6 @@
 # Revision 1.13  2003/02/15 04:03:02  krister
 # Joakim Berglunds patch for finding music/movie cover pics.
 #
-# Revision 1.12  2003/02/12 10:28:28  dischi
-# Added new xml file support. The old xml files won't work, you need to
-# convert them.
-#
-# Revision 1.11  2003/01/28 11:34:28  dischi
-# Reversed the bugfix in identifymedia and fixed it in videoitem. Track 1
-# should play track 1, track 0 should be dvdnav (in the future, right now
-# it's also track 1).
-#
-# Revision 1.10  2003/01/28 01:59:31  krister
-# Fix for DVD playing bug.
-#
-# Revision 1.9  2003/01/19 16:16:18  dischi
-# small bugfix
-#
-# Revision 1.8  2003/01/19 15:56:31  dischi
-# New option ROM_SPEED to set the drive speed. Default is 0 (don't set
-# speed), a good value seems to be 8.
-#
-# Revision 1.7  2003/01/14 20:29:26  dischi
-# small bugfix
-#
-# Revision 1.6  2003/01/12 17:57:52  dischi
-# Renamed SUFFIX_MPLAYER_FILES to SUFFIX_VIDEO_FILES because we also play
-# audio files with mplayer. Also renamed SUFFIX_FREEVO_FILES to
-# SUFFIX_VIDEO_DEF_FILES because we use this for movie xml files.
-#
-# Revision 1.5  2003/01/09 18:56:18  dischi
-# Make the autostart work again. If you close a cd tray while you are at the
-# main menu, the disc will be autostart (show dir or play dvd)
-#
-# Revision 1.4  2002/12/30 15:56:11  dischi
-# store label in the videoitem
-#
-# Revision 1.3  2002/12/07 13:28:19  dischi
-# rescan disc after database change
-#
-# Revision 1.2  2002/12/03 18:46:08  dischi
-# fix to avoid crashes when you have a bad cd (e.g. empty disc)
-#
-# Revision 1.1  2002/11/24 13:58:44  dischi
-# code cleanup
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -111,9 +72,9 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import sys, socket, random, time, os
+import time, os
 from fcntl import ioctl
-import struct,re
+import re
 import threading
 import config
 import util

@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/04/06 21:12:56  dischi
+# o Switched to the new main skin
+# o some cleanups (removed unneeded inports)
+#
 # Revision 1.17  2003/03/20 15:42:21  dischi
 # Added function to remove whitespaces and other yunk from the beginning
 # of a text. Usefull for cdata from xml files
@@ -31,55 +35,6 @@
 # Note that the get_bookmarkfile thing should be replaced with something less
 # flaky than the path+filename of the movie, but this is good for a initial
 # go.
-#
-# Revision 1.14  2003/02/20 06:56:07  krister
-# Bugfix for dot-files
-#
-# Revision 1.13  2003/02/17 21:00:24  dischi
-# catch an error
-#
-# Revision 1.12  2003/02/13 07:47:25  krister
-# Bugfixes for image errors.
-#
-# Revision 1.11  2003/02/12 10:38:51  dischi
-# Added a patch to make the current menu system work with the new
-# main1_image.py to have an extended menu for images
-#
-# Revision 1.10  2003/02/12 10:28:28  dischi
-# Added new xml file support. The old xml files won't work, you need to
-# convert them.
-#
-# Revision 1.9  2003/02/07 20:11:32  dischi
-# bugfix
-#
-# Revision 1.8  2003/02/06 09:22:06  krister
-# Added a python killall() function instead of the shell call.
-#
-# Revision 1.7  2003/02/04 16:28:37  outlyer
-# Replaced proc_mount with os.ismount to be somewhat cross-platform.
-#
-# Revision 1.6  2003/01/31 19:24:41  outlyer
-# Replaced proc_mount with python version from 'os' module. Currently
-# commented out... can someone try it and make sure it works? I don't
-# have a CDRom drive so I can't test it, but I can't imagine it not
-# working.
-#
-# Revision 1.5  2002/12/07 11:32:59  dischi
-# Added interface.py into video/audio/image/games. The file contains a
-# function cwd to return the items for the list of files. games support
-# is still missing
-#
-# Revision 1.4  2002/11/28 19:55:42  dischi
-# add function to make a nice name from a filename
-#
-# Revision 1.3  2002/11/25 02:17:54  krister
-# Minor bugfixes. Synced to changes made in the main tree.
-#
-# Revision 1.2  2002/11/24 17:00:15  dischi
-# Copied the new transparent gif support to the code cleanup tree
-#
-# Revision 1.1  2002/11/24 13:58:44  dischi
-# code cleanup
 #
 #
 # -----------------------------------------------------------------------
@@ -105,16 +60,10 @@
 #endif
 
 
-import sys
-import socket, glob
-import random
-import termios, tty, time, os
-import string, popen2, fcntl, select, struct, fnmatch,re, operator
-import time
-import threading
-import fcntl
+import glob
+import os
+import string, fnmatch, re
 import md5
-import commands
 import Image # PIL
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
@@ -283,21 +232,6 @@ def md5file(filename):
         f.close()
         return hexify(m.digest())
     
-
-# Simple Python Imaging routine to return image size
-# and return a default if and error occurs.
-def pngsize(filename):
-    if not os.path.isfile(filename):
-        return (200, 200)
-
-    try:
-        image = Image.open(filename)
-        width, height = image.size
-        return (width, height)
-    except IOError:
-        print 'Cannot open image file "%s"' % filename
-        return (200, 200)
-
 
 def resize(filename, x0=25, y0=25):
 

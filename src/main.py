@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2003/04/06 21:12:55  dischi
+# o Switched to the new main skin
+# o some cleanups (removed unneeded inports)
+#
 # Revision 1.31  2003/03/29 21:49:54  dischi
 # Added new tv main menu for the new skin. This includes the tv guide
 # (file is now called tvguide and not tvmenu) and DIR_RECORD. This
@@ -40,44 +44,6 @@
 # Revision 1.24  2003/02/24 04:03:25  krister
 # Added a --trace option to see all function calls in freevo.
 #
-# Revision 1.23  2003/02/22 22:32:27  krister
-# Removed debug code, cleanup
-#
-# Revision 1.22  2003/02/22 07:13:19  krister
-# Set all sub threads to daemons so that they die automatically if the main thread dies.
-#
-# Revision 1.21  2003/02/21 18:43:50  outlyer
-# Fixed the spelling from Enablind to Enabled :) Also commented out the
-# code Krister added to prove a point. Consider it proven...
-#
-# I should mention that the idle tool does work fine on other skins, especially
-# since it has no configuration information elsewhere.
-#
-# Revision 1.20  2003/02/21 16:25:10  dischi
-# main items can have images
-#
-# Revision 1.19  2003/02/21 06:51:15  krister
-# XXX Debug the event loop, remove later.
-#
-# Revision 1.18  2003/02/21 05:26:59  krister
-# Enable the IdleTool if Aubins skin is used.
-#
-# Revision 1.17  2003/02/20 20:14:44  dischi
-# needed for a new gentoo runtime with pylirc
-#
-# Revision 1.16  2003/02/19 08:08:30  krister
-# Applied Aubins new pylirc code after testing it (seems to work with keyboard at least), and adding the pylircmodule to the runtime build environment (not required for keyboard operation).
-#
-# Revision 1.5  2003/02/18 23:47:56  outlyer
-# Synced pylirc version of main to Rob's latest changes, added some
-# error handling to weather checker.
-#
-# Revision 1.15  2003/02/18 23:08:25  rshortt
-# Hooking up the code in src/gui.  Added osd.focused_app to keep track of
-# what should first receive the events.  In main this is set to be the
-# menuwidget which is the parent UI object.  I also made MenuWidget into
-# a subclass of GUIObject so that it can closely take advantage of the
-# parent / child relationship therein.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -106,7 +72,7 @@
 import os
 os.environ['LD_PRELOAD'] = ''
 
-import sys, socket, random, time
+import sys, time
 import traceback
 
 sys.path.append('.')
@@ -124,6 +90,10 @@ import skin    # The skin class
 import mixer   # The mixer class
 import rc      # The RemoteControl class.
 
+from tv.tv import TVMenu
+
+from gui.PopupBox import PopupBox
+
 import identifymedia
 import signal
 
@@ -132,17 +102,14 @@ import idle
 from mediamenu import MediaMenu
 from item import Item
 
-if config.NEW_SKIN:
-    from tv.tv import TVMenu
-else:
-    import tv.tv
-    
+
+skin    = skin.get_singleton()
+
+
 DEBUG = config.DEBUG
 
 TRUE  = 1
 FALSE = 0
-
-skin    = skin.get_singleton()
 
 
 # Set up the mixer
@@ -246,48 +213,26 @@ def get_main_menu(parent):
     items = []
     menu_items = skin.settings.mainmenu.items
 
-    if config.NEW_SKIN:
-        icon_dir = skin.settings.icon_dir
-        for i in config.MAIN_MENU_ITEMS:
-            # if it's has actions() it is an item already
-            if hasattr(eval(i.action), 'actions'):
-                item = eval(i.action)(None)
-                item.name = menu_items[i.label].name
-                if menu_items[i.label].icon:
-                    item.icon = os.path.join(icon_dir, menu_items[i.label].icon)
-                if menu_items[i.label].image:
-                    item.image = menu_items[i.label].image
-                item.parent = parent
-                items += [ item ]
+    icon_dir = skin.settings.icon_dir
+    for i in config.MAIN_MENU_ITEMS:
+        # if it's has actions() it is an item already
+        if hasattr(eval(i.action), 'actions'):
+            item = eval(i.action)(None)
+            item.name = menu_items[i.label].name
+            if menu_items[i.label].icon:
+                item.icon = os.path.join(icon_dir, menu_items[i.label].icon)
+            if menu_items[i.label].image:
+                item.image = menu_items[i.label].image
+            item.parent = parent
+            items += [ item ]
 
-            else:
-                icon = ""
-                if menu_items[i.label].icon:
-                    icon = os.path.join(icon_dir, menu_items[i.label].icon)
-                items += [ MainMenuItem(parent, menu_items[i.label].name, icon,
-                                        menu_items[i.label].image,
-                                        eval(i.action), i.arg) ]
-            
-    else:
-        for i in menu_items:
-            if menu_items[i].visible:
-
-                # if it's has actions() it is an item already
-                if hasattr(eval(menu_items[i].action), 'actions'):
-                    item = eval(menu_items[i].action)(None)
-                    if menu_items[i].icon:
-                        item.icon = menu_items[i].icon
-                    if menu_items[i].name:
-                        item.name = menu_items[i].name
-                    item.parent = parent
-                    items += [ item ]
-
-                else:
-                    items += [ MainMenuItem(parent, menu_items[i].name,
-                                            menu_items[i].icon,
-                                            menu_items[i].image,
-                                            eval(menu_items[i].action),
-                                            menu_items[i].arg) ]
+        else:
+            icon = ""
+            if menu_items[i.label].icon:
+                icon = os.path.join(icon_dir, menu_items[i.label].icon)
+            items += [ MainMenuItem(parent, menu_items[i.label].name, icon,
+                                    menu_items[i.label].image,
+                                    eval(i.action), i.arg) ]
     return items
     
 
@@ -342,7 +287,7 @@ class MainMenuItem(Item):
 
 class SkinSelectItem(Item):
     """
-    Icon for the skin selector
+    Item for the skin selector
     """
     def __init__(self, parent, name, image, skin):
         Item.__init__(self, parent)
@@ -404,7 +349,7 @@ class MainMenu(Item):
 
         # pressing DISPLAY on the main menu will open a skin selector
         # (only for the new skin code)
-        if event == rc.DISPLAY and config.NEW_SKIN:
+        if event == rc.DISPLAY:
             items = []
             for name, image, skinfile in skin.GetSkins():
                 items += [ SkinSelectItem(self, name, image, skinfile) ]
@@ -447,30 +392,33 @@ class RemovableMedia:
         if dir == 'open':
             if DEBUG: print 'Ejecting disc in drive %s' % self.drivename
             if notify:
-                skin.PopupBox('Ejecting disc in drive %s' % self.drivename)
-                osd.update()
+                pop = PopupBox(text='Ejecting disc in drive %s' % self.drivename) 
+                pop.show()
             os.system('eject %s' % self.devicename)
             self.tray_open = 1
-            rc.post_event(rc.REFRESH_SCREEN)
+            if notify:
+                pop.destroy()
+
         
         elif dir == 'close':
             if DEBUG: print 'Inserting %s' % self.drivename
             if notify:
-                skin.PopupBox('Reading disc in drive %s' % self.drivename)
-                osd.update()
+                pop = PopupBox(text='Reading disc in drive %s' % self.drivename)
+                pop.show()
 
             # close the tray, identifymedia does the rest,
             # including refresh screen
             os.system('eject -t %s' % self.devicename)
             self.tray_open = 0
+            if notify:
+                pop.destroy()
+
     
     def mount(self):
         """Mount the media
         """
 
         if DEBUG: print 'Mounting disc in drive %s' % self.drivename
-        skin.PopupBox('Locking disc in drive %s' % self.drivename)
-        osd.update()
         util.mount(self.mountdir)
         return
 
@@ -480,8 +428,6 @@ class RemovableMedia:
         """
 
         if DEBUG: print 'Unmounting disc in drive %s' % self.drivename
-        skin.PopupBox('Releasing disc in drive %s' % self.drivename)
-        osd.update()
         util.umount(self.mountdir)
         return
     

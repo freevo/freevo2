@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/04/06 21:13:07  dischi
+# o Switched to the new main skin
+# o some cleanups (removed unneeded inports)
+#
 # Revision 1.12  2003/03/30 16:50:20  dischi
 # pass xml_file definition to submenus
 #
@@ -87,6 +91,7 @@ from videoitem import VideoItem
 
 # Set to 1 for debug output
 DEBUG = config.DEBUG
+
 TRUE = 1
 FALSE = 0
 

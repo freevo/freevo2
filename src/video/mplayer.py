@@ -5,17 +5,33 @@
 # $Id$
 #
 # Notes:
+# Perhaps we should move the filetype specific stuff (like the one for vob)
+# into the config files...
+#
+# i.e.
+#
+# MP_CUSTOM = {
+#     '.vob' = '-ac hwac3 ...',
+#     '.rm'  = '-forceidx',
+#     ...
+#     }
+#
 # Todo:        
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2003/04/06 21:13:04  dischi
+# o Switched to the new main skin
+# o some cleanups (removed unneeded inports)
+#
 # Revision 1.29  2003/03/23 20:00:26  dischi
 # Added patch from Matthieu Weber for better mplayer_options and subitem
 # handling
 #
 # Revision 1.28  2003/03/23 15:19:39  gsbarbieri
 # Fixed a bug when ESC was pressed while watching a movie. Freevo used to crash.
-# Fixed key conflict, rc.SELECT was used to exit and seek to a specifc position, now rc.ENTER (e) is used to seek.
+# Fixed key conflict, rc.SELECT was used to exit and seek to a specifc position,
+# now rc.ENTER (e) is used to seek.
 #
 # Revision 1.27  2003/03/17 18:54:44  outlyer
 # Some changes for the bookmarks
@@ -37,107 +53,6 @@
 # Revision 1.25  2003/03/17 15:47:16  outlyer
 # Merged patch from Angel <angel@knight-industries.com> for "Jump to"
 # functionality.
-#
-# Revision 1.24  2003/03/02 14:58:23  dischi
-# Removed osd.clearscreen and if we have the NEW_SKIN deactivate
-# skin.popupbox, refresh, etc. Use menuw.show and menuw.hide to do this.
-#
-# Revision 1.23  2003/02/24 21:13:18  dischi
-# Moved RC_MPLAYER_CMDS higher in the eventhandler
-#
-# Revision 1.22  2003/02/24 04:21:40  krister
-# Mathieu Weber's bugfix for multipart movies
-#
-# Revision 1.21  2003/02/22 07:13:19  krister
-# Set all sub threads to daemons so that they die automatically if the main thread dies.
-#
-# Revision 1.20  2003/02/19 17:20:21  outlyer
-# Added 'rc.func' to video; probably should add one to the image viewer
-# too so we don't draw over it. Just remember if you set it, you have to
-# set it back so the idletool restarts.
-#
-# Revision 1.19  2003/02/11 06:10:03  krister
-# Display an error if the DVD is protected and cannot be played.
-#
-# Revision 1.18  2003/02/11 04:37:29  krister
-# Added an empty local_conf.py template for new users. It is now an error if freevo_config.py is found in /etc/freevo etc. Changed DVD protection to use a flag. MPlayer stores debug logs in FREEVO_STARTDIR, and stops with an error if they cannot be written.
-#
-# Revision 1.17  2003/02/06 09:52:26  krister
-# Changed the runtime handling to use runapp to start programs with the supplied dlls
-#
-# Revision 1.16  2003/02/04 13:11:00  dischi
-# remove the AC3 config stuff and reformat some lines to 80 chars/line
-#
-# Revision 1.15  2003/01/29 17:20:25  outlyer
-# According to the mplayer documentation, -forceidx is required for RealPlayer
-# files...
-#
-# Perhaps we should move the filetype specific stuff (like the one for vob)
-# into the config files...
-#
-# i.e.
-#
-# MP_CUSTOM = {
-#     '.vob' = '-ac hwac3 ...',
-#     '.rm'  = '-forceidx',
-#     ...
-#     }
-#
-# Revision 1.14  2003/01/22 01:49:30  krister
-# Fixed typo.
-#
-# Revision 1.13  2003/01/18 15:51:07  dischi
-# Add the function vop_append to support more than one -vop argument for
-# mplayer (from different mplayer_options sources). All -vop args will
-# be appended at the end of the command as one argument.
-#
-# Revision 1.12  2003/01/11 10:55:57  dischi
-# Call refresh with reload=1 when the menu was disabled during playback
-#
-# Revision 1.11  2002/12/30 15:07:42  dischi
-# Small but important changes to the remote control. There is a new variable
-# RC_MPLAYER_CMDS to specify mplayer commands for a remote. You can also set
-# the variable REMOTE to a file in rc_clients to contain settings for a
-# remote. The only one right now is realmagic, feel free to add more.
-# RC_MPLAYER_CMDS uses the slave commands from mplayer, src/video/mplayer.py
-# now uses -slave and not the key bindings.
-#
-# Revision 1.10  2002/12/29 19:24:26  dischi
-# Integrated two small fixes from Jens Axboe to support overscan for DXR3
-# and to set MPLAYER_VO_OPTS
-#
-# Revision 1.9  2002/12/22 12:23:30  dischi
-# Added deinterlacing in the config menu
-#
-# Revision 1.8  2002/12/21 17:26:52  dischi
-# Added dfbmga support. This includes configure option, some special
-# settings for mplayer and extra overscan variables
-#
-# Revision 1.7  2002/12/18 05:00:31  krister
-# DVD language config re-added.
-#
-# Revision 1.6  2002/12/11 20:46:43  dischi
-# mplayer can check the mov by itself now (0.90-rc1)
-#
-# Revision 1.5  2002/12/03 20:01:53  dischi
-# improved dvdnav support
-#
-# Revision 1.4  2002/12/01 20:53:03  dischi
-# Added better support for mov files. This _only_ works with the mplayer
-# CVS for now
-#
-# Revision 1.3  2002/11/26 22:02:10  dischi
-# Added key to enable/disable subtitles. This works only with mplayer pre10
-# (maybe pre9). Keyboard: l (for language) or remote SUBTITLE
-#
-# Revision 1.2  2002/11/26 20:58:44  dischi
-# o Fixed bug that not only the first character of mplayer_options is used
-# o added the configure stuff again (without play from stopped position
-#   because the mplayer -ss option is _very_ broken)
-# o Various fixes in DVD playpack
-#
-# Revision 1.1  2002/11/24 13:58:45  dischi
-# code cleanup
 #
 #
 # -----------------------------------------------------------------------
@@ -163,10 +78,7 @@
 #endif
 
 
-import sys
-import random
-import time, os, glob
-import string, popen2, fcntl, select, struct
+import time, os
 import threading, signal
 
 import config     # Configuration handler. reads config file.
@@ -175,15 +87,6 @@ import childapp   # Handle child applications
 import mixer      # Controls the volumes for playback and recording
 import osd        # The OSD class, used to communicate with the OSD daemon
 import rc         # The RemoteControl class.
-import fnmatch
-
-if not config.NEW_SKIN:
-    import menu
-    import skin
-
-    menuwidget = menu.get_singleton()
-    skin       = skin.get_singleton()
-
 
 # RegExp
 import re
@@ -271,15 +174,9 @@ class MPlayer:
             print 'MPlayer.play(): mode=%s, filename=%s' % (mode, filename)
 
         if mode == 'file' and not os.path.isfile(filename) and not network_play:
-            if not config.NEW_SKIN:
-                skin.PopupBox('%s\nnot found!' % os.path.basename(filename))
-                time.sleep(2.0) 
-
             # This event allows the videoitem which contains subitems to
             # try to play the next subitem
-            rc.post_event(rc.PLAY_END)
-            # XXX We should really use return more.
-            return 0
+            return '%s\nnot found' % os.path.basename(filename)
        
 
         # Build the MPlayer command
@@ -313,7 +210,7 @@ class MPlayer:
             print "What is:      " + str(filename)
             print "What is mode: " + mode
             print "What is:      " + mpl
-            return
+            return 'Unknown media: %s' % os.path.basename(filename)
 
         # Mplayer command and standard arguments
         mpl += (' ' + default_args + ' -v -vo ' + config.MPLAYER_VO_DEV + \
@@ -377,7 +274,8 @@ class MPlayer:
         self.thread.mode_flag.set()
         rc.app = self.eventhandler
         rc.func = 'video'
-
+        return None
+    
 
     def stop(self):
         """
@@ -385,6 +283,7 @@ class MPlayer:
         """
         self.thread.mode = 'stop'
         self.thread.mode_flag.set()
+        self.thread.item = None
         rc.app = None
         rc.func = None
         while self.thread.mode == 'stop':
@@ -403,8 +302,6 @@ class MPlayer:
                 return TRUE
             else:
                 self.stop()
-                self.thread.item = None
-                rc.app = None
                 return self.item.eventhandler(event)
 
         if event == rc.REC:
@@ -419,31 +316,10 @@ class MPlayer:
             handle.write('\n')
             handle.close()
             print "Added bookmark at position " + str(self.item.elapsed)
-            return self.item.eventhandler(event)
+            return TRUE
 
-        if event == rc.EXIT:
+        if event in ( rc.EXIT, rc.PLAY_END, rc.USER_END, rc.DVD_PROTECTED ):
             self.stop()
-            self.thread.item = None
-            rc.app = None
-            return self.item.eventhandler(event)
-        
-        if event == rc.PLAY_END or event == rc.USER_END:
-            self.stop()
-            rc.app = None
-            print self.item
-            return self.item.eventhandler(event)
-
-        if event == rc.DVD_PROTECTED:
-            self.stop()
-            rc.app = None
-
-            if not config.NEW_SKIN:
-                skin.PopupBox('The DVD is protected, see the docs for more info!')
-                osd.update()
-                time.sleep(5.0)
-
-            # Forward the event as if it was a regular end of item
-            event = rc.PLAY_END
             return self.item.eventhandler(event)
 
         # try to find the event in RC_MPLAYER_CMDS 

@@ -9,32 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/04/06 21:12:57  dischi
+# o Switched to the new main skin
+# o some cleanups (removed unneeded inports)
+#
 # Revision 1.8  2003/03/16 19:28:04  dischi
 # Item has a function getattr to get the attribute as string
-#
-# Revision 1.7  2003/01/21 14:16:54  dischi
-# Fix to avoid a crash if bins fails (xml parser broken or invalid xml file)
-#
-# Revision 1.6  2002/12/22 12:59:34  dischi
-# Added function sort() to (audio|video|games|image) item to set the sort
-# mode. Default is alphabetical based on the name. For mp3s and images
-# it's based on the filename. Sort by date is in the code but deactivated
-# (see mediamenu.py how to enable it)
-#
-# Revision 1.5  2002/12/02 18:25:27  dischi
-# Added bins/exif patch from John M Cooper
-#
-# Revision 1.4  2002/11/28 19:56:12  dischi
-# Added copy function
-#
-# Revision 1.3  2002/11/27 20:25:17  dischi
-# small "name" fix
-#
-# Revision 1.2  2002/11/26 16:28:10  dischi
-# added patch for better bin support
-#
-# Revision 1.1  2002/11/24 13:58:45  dischi
-# code cleanup
 #
 #
 # -----------------------------------------------------------------------
@@ -59,7 +39,6 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import config
 import util
 import os
 
@@ -150,7 +129,13 @@ class ImageItem(Item):
         """
         view the image
         """
+        if not self.menuw:
+            self.menuw = menuw
         self.parent.current_item = self
+
+        if self.menuw.visible:
+            self.menuw.hide()
+
         self.image_viewer.view(self)
 
         if self.parent and hasattr(self.parent, 'cache_next'):

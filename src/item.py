@@ -9,31 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/04/06 21:12:55  dischi
+# o Switched to the new main skin
+# o some cleanups (removed unneeded inports)
+#
 # Revision 1.8  2003/03/16 19:28:03  dischi
 # Item has a function getattr to get the attribute as string
-#
-# Revision 1.7  2003/02/24 04:21:39  krister
-# Mathieu Weber's bugfix for multipart movies
-#
-# Revision 1.6  2003/02/12 06:33:21  krister
-# Cosmetic changes.
-#
-# Revision 1.5  2002/12/11 16:04:32  dischi
-# make an item callable (actions()[0][0])
-#
-# Revision 1.4  2002/11/27 20:22:19  dischi
-# Fixed some playlist problems. Sometimes the playlist stopped playing
-# after one item is finished. By playling a playlist again, it will start
-# with the first item again.
-#
-# Revision 1.3  2002/11/26 20:57:04  dischi
-# Moved video specific stuff to videoitem
-#
-# Revision 1.2  2002/11/24 15:15:31  dischi
-# skin.xml support re-added
-#
-# Revision 1.1  2002/11/24 13:58:44  dischi
-# code cleanup
 #
 #
 # -----------------------------------------------------------------------
@@ -62,9 +43,8 @@
 from menu import MenuItem
 
 import rc
-import menu
 
-rc         = rc.get_singleton()
+rc = rc.get_singleton()
 
 TRUE  = 1
 FALSE = 0
@@ -83,7 +63,8 @@ class Item(MenuItem):
         self.icon     = None
         self.parent   = parent          # parent item to pass unmapped event
         self.xml_file = None            # skin informationes etc.
-
+        self.menuw    = None
+        
         # possible variables for an item.
         # some or only needed for video or image or audio
         # these variables are copied by the copy function
@@ -161,9 +142,11 @@ class Item(MenuItem):
             return self.parent.eventhandler(event, menuw)
 
         else:
-            if event == rc.PLAY_END or event == rc.USER_END:
-                menuwidget = menu.get_singleton()
-                menuwidget.refresh()
+            if event == rc.PLAY_END or event == rc.USER_END and self.menuw:
+                if self.menuw.visible:
+                    menuw.refresh()
+                else:
+                    self.menuw.show()
                 return TRUE
 
         print 'no eventhandler for event %s menuw %s' % (event, menuw)

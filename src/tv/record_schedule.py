@@ -15,6 +15,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/04/06 21:12:58  dischi
+# o Switched to the new main skin
+# o some cleanups (removed unneeded inports)
+#
 # Revision 1.1  2003/03/15 05:01:30  outlyer
 # Merged Kyle Weston's Schedule Viewer/Editor patch.
 #
@@ -47,7 +51,6 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import sys
 import os
 import time
 import string
@@ -55,17 +58,8 @@ import string
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
 
-# Various utilities
-import util
-
-# The OSD class
-import osd
-
 # The menu widget class
 import menu
-
-# The mixer class, controls the volumes for playback and recording
-import mixer
 
 # The RemoteControl class, sets up a UDP daemon that the remote control client
 # sends commands to
@@ -74,12 +68,11 @@ import rc
 # The TV application
 import tv
 
-# The Skin
-import skin
-
 # Recording daemon
 import record_daemon
 import record_video
+
+from gui.AlertBox import AlertBox
 
 # Set to 1 for debug output
 DEBUG = config.DEBUG
@@ -87,18 +80,10 @@ DEBUG = config.DEBUG
 TRUE = 1
 FALSE = 0
 
-# Create the OSD object
-osd = osd.get_singleton()
-
 # Create the remote control object
 rc = rc.get_singleton()
 
-# Set up the mixer
-mixer = mixer.get_singleton()
-
 menuwidget = menu.get_singleton()
-
-skin = skin.get_singleton()
 
 killflag = 0
 
@@ -199,9 +184,7 @@ def view_schedule(arg=None, menuw=None):
                              reload_func=view_schedule)
     menuwidget.pushmenu(submenu)
     if killflag and arg == 1:
-        skin.PopupBox('All Currently Recording Items Have Been Killed!')
-	time.sleep(2)
-	menuwidget.refresh()
+        AlertBox(text='All Currently Recording Items Have Been Killed!').show()
 	killflag = 0
 
 

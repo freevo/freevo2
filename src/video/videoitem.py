@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2003/04/06 21:13:06  dischi
+# o Switched to the new main skin
+# o some cleanups (removed unneeded inports)
+#
 # Revision 1.31  2003/03/31 20:44:53  dischi
 # shorten time between pop.destroy and menu drawing
 #
@@ -88,33 +92,6 @@
 # Removed osd.clearscreen and if we have the NEW_SKIN deactivate
 # skin.popupbox, refresh, etc. Use menuw.show and menuw.hide to do this.
 #
-# Revision 1.16  2003/02/24 04:21:40  krister
-# Mathieu Weber's bugfix for multipart movies
-#
-# Revision 1.15  2003/02/17 18:32:24  dischi
-# Added the infos from the xml file to VideoItem
-#
-# Revision 1.14  2003/02/15 04:03:03  krister
-# Joakim Berglunds patch for finding music/movie cover pics.
-#
-# Revision 1.13  2003/02/12 10:28:28  dischi
-# Added new xml file support. The old xml files won't work, you need to
-# convert them.
-#
-# Revision 1.12  2003/02/11 18:40:09  dischi
-# Fixed bug when the title list wasn't allowed in the item menu
-#
-# Revision 1.11  2003/01/28 11:34:28  dischi
-# Reversed the bugfix in identifymedia and fixed it in videoitem. Track 1
-# should play track 1, track 0 should be dvdnav (in the future, right now
-# it's also track 1).
-#
-# Revision 1.10  2003/01/12 10:58:31  dischi
-# Changed the multiple file handling. If a videoitem has more than one file,
-# the videoitem gets the filename '' and subitems for each file. With that
-# change it is possible to spit a movie that part one is a VCD, part two a
-# file on the harddisc.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -156,18 +133,14 @@ import menu
 import time
 import copy
 
-rc         = rc.get_singleton()
-
-if not config.NEW_SKIN:
-    import skin
-    import osd
-    skin = skin.get_singleton()
-    osd  = osd.get_singleton()
-
+rc = rc.get_singleton()
 
 from gui.PopupBox import PopupBox
+from gui.AlertBox import AlertBox
 from gui.ConfirmBox import ConfirmBox
+
 from item import Item
+
 import configure
 
 
@@ -255,6 +228,8 @@ class VideoItem(Item):
             self.selected_audio    = obj.selected_audio
             self.num_titles        = obj.num_titles
             self.label             = obj.label
+            self.tv_show           = onj.tv_show
+
 
     def sort(self, mode=None):
         """
@@ -286,9 +261,8 @@ class VideoItem(Item):
         return a list of possible actions on this item.
         """
         items = [ (self.play, 'Play'), (self.settings, 'Change play settings') ]
-        if config.NEW_SKIN:
-            if self.filename:
-                items += [ (self.confirm_delete, 'Delete file') ]
+        if self.filename and self.mode == 'file':
+            items += [ (self.confirm_delete, 'Delete file') ]
         if self.variants:
             items += [ (self.show_variants, 'Show variants') ]
 
@@ -302,11 +276,13 @@ class VideoItem(Item):
                 items += [( self.dvd_vcd_title_menu, 'VCD title list' )]
             for m in self.subitems:
                 # Allow user to watch one of the subitems instead of always both
-                #items += [( self.play, 'Play %s' % (os.path.basename(m.filename)))]  # XXX Doesn't work
+                # XXX Doesn't work
+                #items += [( self.play, 'Play %s' % (os.path.basename(m.filename)))] 
                 if os.path.exists(util.get_bookmarkfile(m.filename)):
                     myfilename = util.get_bookmarkfile(m.filename)
                     self.bookmarkfile = myfilename
-                    items += [( self.bookmark_menu, 'Bookmarks')]   # % (os.path.basename(m.filename)))]
+                    items += [( self.bookmark_menu, 'Bookmarks')]
+                    # % (os.path.basename(m.filename)))]
         else:
             if os.path.exists(util.get_bookmarkfile(self.filename)):
                 self.bookmarkfile = util.get_bookmarkfile(self.filename) 
@@ -316,11 +292,10 @@ class VideoItem(Item):
 
 
     def confirm_delete(self, arg=None, menuw=None):
-        confirm = ConfirmBox(menuw,
-                             'Do you wish to delete %s?' % self.name,
-                             self.delete_file, default_choice=1)
-        confirm.show()
-        self.menuw = menuw
+        if not self.menuw:
+            self.menuw = menuw
+        ConfirmBox(text='Do you wish to delete %s?' % self.name,
+                   handler=self.delete_file, default_choice=1).show()
 
 
     def delete_file(self):
@@ -330,8 +305,11 @@ class VideoItem(Item):
 
 
     def show_variants(self, arg=None, menuw=None):
+        if not self.menuw:
+            self.menuw = menuw
         m = menu.Menu(self.name, self.variants, reload_func=None, xml_file=self.xml_file)
-        menuw.pushmenu(m)
+        self.menuw.pushmenu(m)
+
 
     def play(self, arg=None, menuw=None):
         """
@@ -339,8 +317,8 @@ class VideoItem(Item):
         """
         self.parent.current_item = self
         
-        self.menuw = menuw
-        self.menuw_visible = menuw.visible
+        if not self.menuw:
+            self.menuw = menuw
 
         if self.subitems:
             self.current_subitem = self.subitems[0]
@@ -356,9 +334,9 @@ class VideoItem(Item):
             # PLAY_END/USER_END event is not forwarded to the parent
             # videoitem.
             # And besides, we don't need the menu between two subitems.
-            menuw.hide()
+            self.menuw.hide()
 
-            self.current_subitem.play(arg, menuw)
+            self.current_subitem.play(arg, self.menuw)
             return
 
         file = self.filename
@@ -369,23 +347,19 @@ class VideoItem(Item):
                     util.mount(mountdir)
                 else:
                     # TODO: prompt for the right media
-                    if not config.NEW_SKIN:
-                        skin.PopupBox('Media not found for file %s' % (file))
-                        time.sleep(2.0)
-                        rc.post_event(rc.PLAY_END)
-                        menuw.refresh()
+                    AlertBox(text = 'Media not found for file %s' % (file)).show()
+                    rc.post_event(rc.PLAY_END)
                     return
+
         elif self.mode == 'dvd' or self.mode == 'vcd':
             if not self.media:
                 media = util.check_media(self.media_id)
                 if media:
                     self.media = media
                 else:
-                    if not config.NEW_SKIN:
-                        skin.PopupBox('Media not found for %s track %s' % (self.mode, file))
-                        time.sleep(2.0)
-                        rc.post_event(rc.PLAY_END)
-                        menuw.refresh()
+                    AlertBox(text='Media not found for %s track %s' % \
+                             (self.mode, file)).show()
+                    rc.post_event(rc.PLAY_END)
                     return
 
         if (not self.filename or self.filename == '0') and \
@@ -407,13 +381,15 @@ class VideoItem(Item):
             mplayer_options += ' -aid %s' % self.selected_audio
 
         if self.subtitle_file:
-            d, f = util.resolve_media_mountdir(self.subtitle_file['media-id'],self.subtitle_file['file'])
+            d, f = util.resolve_media_mountdir(self.subtitle_file['media-id'],
+                                               self.subtitle_file['file'])
             if d:
                 util.mount(d)
             mplayer_options += ' -sub %s' % f
 
         if self.audio_file:
-            d, f = util.resolve_media_mountdir(self.audio_file['media-id'],self.audio_file['file'])
+            d, f = util.resolve_media_mountdir(self.audio_file['media-id'],
+                                               self.audio_file['file'])
             if d:
                 util.mount(d)
             mplayer_options += ' -audiofile %s' % f
@@ -425,9 +401,15 @@ class VideoItem(Item):
             mplayer_options += ' -vop pp=fd'
 
 
-        if menuw.visible:
-            menuw.hide()
-        self.video_player.play(file, mplayer_options, self)
+        if self.menuw.visible:
+            self.menuw.hide()
+
+        error = self.video_player.play(file, mplayer_options, self)
+
+        if error:
+            self.menuw.show()
+            AlertBox(text=error).show()
+            rc.post_event(rc.PLAY_END)
 
 
     def stop(self, arg=None, menuw=None):
@@ -435,8 +417,6 @@ class VideoItem(Item):
         stop playing
         """
         self.video_player.stop()
-        if self.menuw_visible:
-            menuw.show()
 
 
     def dvdnav(self, arg=None, menuw=None):
@@ -458,12 +438,20 @@ class VideoItem(Item):
         if arg:
             mplayer_options += ' %s' % arg
 
-        self.menuw = menuw
-        self.menuw_visible = menuw.visible
+        if not self.menuw:
+            self.menuw = menuw
 
-        if menuw.visible:
-            menuw.hide()
-        self.video_player.play('', mplayer_options, self, 'dvdnav')
+        if self.menuw.visible:
+            self.menuw.hide()
+
+        error = self.video_player.play('', mplayer_options, self, 'dvdnav')
+
+        if error:
+            self.menuw.show()
+            info = AlertBox(self.menuw, 'error')
+            info.show()
+            #info.destroy()
+            rc.post_event(rc.PLAY_END)
 
     def bookmark_menu(self,arg=None, menuw=None):
         """
@@ -484,7 +472,7 @@ class VideoItem(Item):
             items += [file]
         
         moviemenu = menu.Menu(self.name, items, xml_file=self.xml_file)
-        menuw.pushmenu(moviemenu)
+        self.menuw.pushmenu(moviemenu)
 
         return
 
@@ -503,14 +491,9 @@ class VideoItem(Item):
             uid = os.getuid()
 
             # Figure out the number of titles on this disc
-            if not config.NEW_SKIN:
-                skin.PopupBox('Scanning disc, be patient...',
-                              icon='skins/icons/misc/cdrom_mount.png')
-                osd.update()
-            else:
-                pop = PopupBox(menuw, 'Scanning disc, be patient...',
-                               icon='skins/icons/misc/cdrom_mount.png')
-                pop.show()
+            pop = PopupBox(text='Scanning disc, be patient...',
+                           icon='skins/icons/misc/cdrom_mount.png')
+            pop.show()
 
                 
             os.system('rm -f /tmp/mplayer_dvd_%s.log /tmp/mplayer_dvd_done_%s' % (uid, uid))
@@ -580,9 +563,9 @@ class VideoItem(Item):
         if self.num_titles == 1:
             file = copy.copy(self)
             file.filename = '1'
-            if pop and config.NEW_SKIN:
+            if pop:
                 pop.destroy()
-            file.play(menuw = menuw)
+            file.play(menuw = self.menuw)
             return
 
         # build a menu
@@ -595,31 +578,27 @@ class VideoItem(Item):
 
         moviemenu = menu.Menu(self.name, items, umount_all = 1, xml_file=self.xml_file)
 
-        if pop and config.NEW_SKIN:
+        if pop:
             pop.destroy()
 
-        menuw.pushmenu(moviemenu)
+        self.menuw.pushmenu(moviemenu)
         return
 
 
     def settings(self, arg=None, menuw=None):
+        if not self.menuw:
+            self.menuw = menuw
         pop = None
         if (self.mode == 'dvd' or self.mode == 'vcd') and not self.available_audio_tracks:
             
             # Use the uid to make a user-unique filename
             uid = os.getuid()
 
-            if not config.NEW_SKIN:
-                skin.PopupBox('Scanning disc, be patient...',
-                              icon='skins/icons/misc/cdrom_mount.png')
-                osd.update()
-            else:
-                pop = PopupBox(menuw, 'Scanning disc, be patient...',
-                               icon='skins/icons/misc/cdrom_mount.png')
-                pop.show()
+            pop = PopupBox(text='Scanning disc, be patient...',
+                           icon='skins/icons/misc/cdrom_mount.png')
+            pop.show()
 
 
-                
             os.system('rm -f /tmp/mplayer_dvd_%s.log /tmp/mplayer_dvd_done_%s' % (uid, uid))
 
             file = self.filename
@@ -650,10 +629,10 @@ class VideoItem(Item):
                 p.parse(line)
 
             
-        confmenu = configure.get_main_menu(self, menuw, self.xml_file)
+        confmenu = configure.get_main_menu(self, self.menuw, self.xml_file)
         if pop:
             pop.destroy()
-        menuw.pushmenu(confmenu)
+        self.menuw.pushmenu(confmenu)
         
 
     def eventhandler(self, event, menuw=None):
@@ -665,6 +644,11 @@ class VideoItem(Item):
         if not menuw:
             menuw = self.menuw
 
+        # DVD protected
+        if event == rc.DVD_PROTECTED:
+            AlertBox(text='The DVD is protected, see the docs for more info!').show()
+            event = rc.PLAY_END
+
         # PLAY_END: do have have to play another file?
         if self.subitems:
             if event == rc.PLAY_END:
@@ -673,24 +657,19 @@ class VideoItem(Item):
                     if pos < len(self.subitems)-1:
                         self.current_subitem = self.subitems[pos+1]
                         print "playing next item"
-                        self.current_subitem.play(menuw=menuw)
+                        self.current_subitem.play(menuw=self.menuw)
                         return TRUE
                 except:
                     pass
             elif event == rc.USER_END:
                 pass
 
-        if event in ( rc.STOP, rc.SELECT, rc.EXIT, rc.PLAY_END, rc.USER_END ) and \
-           self.menuw_visible:
-            menuw.show()
-            return TRUE
-        
         # show configure menu
         if event == rc.MENU:
             self.video_player.stop()
-            self.settings(menuw=menuw)
-            menuw.show()
+            self.settings(menuw=self.menuw)
+            self.menuw.show()
             return TRUE
         
         # give the event to the next eventhandler in the list
-        return Item.eventhandler(self, event, menuw)
+        return Item.eventhandler(self, event, self.menuw)

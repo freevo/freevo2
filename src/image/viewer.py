@@ -9,67 +9,19 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/04/06 21:12:57  dischi
+# o Switched to the new main skin
+# o some cleanups (removed unneeded inports)
+#
 # Revision 1.17  2003/03/16 19:28:04  dischi
 # Item has a function getattr to get the attribute as string
 #
 # Revision 1.16  2003/03/11 03:21:19  gsbarbieri
-# Fix a bug when comming back from image viewer. Now all the screen is restored (force_redraw=TRUE)
+# Fix a bug when comming back from image viewer. Now all the screen is restored
+# (force_redraw=TRUE)
 #
 # Revision 1.15  2003/02/17 06:38:26  krister
 # Cleaned up, need a better background for the image not loadable warning.
-#
-# Revision 1.14  2003/02/17 06:19:32  outlyer
-# Replaced orange on black screen error message with skin.Popup to match
-# behaviour elsewhere.
-#
-# Revision 1.13  2003/02/15 20:44:48  dischi
-# Bugfix: the osd uses objectcache for a long time now. We should write more
-# docs, nobody noticed this bug.
-#
-# Revision 1.12  2003/02/13 07:47:25  krister
-# Bugfixes for image errors.
-#
-# Revision 1.11  2003/02/08 23:31:40  gsbarbieri
-# hanged the Image menu to ExtendedMenu.
-#
-# OBS:
-#    main1_tv: modified to handle the <indicator/> as a dict
-#    xml_skin: modified to handle <indicator/> as dict and the new tag, <img/>
-#    main: modified to use the ExtendedMenu
-#    mediamenu: DirItem.cmd() now return items, so we can use it without a menu
-#
-# Revision 1.10  2003/01/31 03:27:53  krister
-# Committed Jens Axboe's image viewer overscan fix.
-#
-# Revision 1.9  2003/01/14 18:54:38  dischi
-# Added gphoto support from Thomas Schüppel. You need gphoto and the
-# Python bindings to get this working. I added try-except to integrate
-# this without breaking anything.
-#
-# Revision 1.8  2003/01/11 10:55:56  dischi
-# Call refresh with reload=1 when the menu was disabled during playback
-#
-# Revision 1.7  2002/12/29 00:06:54  krister
-# Bugfixes, variable names were mismatched.
-#
-# Revision 1.6  2002/12/03 14:32:03  dischi
-# stop slideshow when moving up/down the playlist
-#
-# Revision 1.5  2002/12/03 13:11:47  dischi
-# New osd patch from John M Cooper and some cleanups by displaying it
-# from me
-#
-# Revision 1.4  2002/12/02 18:25:33  dischi
-# Added bins/exif patch from John M Cooper
-#
-# Revision 1.3  2002/11/27 20:26:39  dischi
-# Added slideshow timer and made some playlist and cosmetic fixes
-#
-# Revision 1.2  2002/11/27 15:07:36  dischi
-# added basic bins support to the osd
-#
-# Revision 1.1  2002/11/24 13:58:45  dischi
-# code cleanup
 #
 #
 # -----------------------------------------------------------------------
@@ -99,12 +51,9 @@ import os.path
 import Image
 import signal
 import os
-import fcntl
 import time
 
 import config # Configuration file. 
-import menu   # The menu widget class
-import skin   # The skin class
 import osd    # The OSD class, used to communicate with the OSD daemon
 import rc as rc_class # The RemoteControl class.
 import exif
@@ -117,8 +66,6 @@ FALSE = 0
 
 osd        = osd.get_singleton()  # Create the OSD object
 rc         = rc_class.get_singleton()   # Create the remote control object
-#menuwidget = menu.get_singleton() # Create the MenuWidget object
-skin       = skin.get_singleton() # The skin object.
 
 rc_app_bkp = None
 
@@ -177,10 +124,8 @@ class ImageViewer:
             image = item.loadimage( )
 
         if not image:
-            osd.clearscreen(color=osd.COL_BLACK)
-            osd.update()
-            skin.PopupBox("Can't Open Image\n'%s'" % (filename))
-            return
+            return "Can't Open Image\n'%s'" % (filename)
+
         
 	width, height = image.get_size()
             
@@ -284,7 +229,10 @@ class ImageViewer:
             signal.signal(signal.SIGALRM, self.signalhandler)
             signal.alarm(self.fileitem.duration)
 
+        return None
 
+
+    
     def cache(self, fileitem):
         # cache the next image (most likely we need this)
         osd.bitmapsize(fileitem.filename)
@@ -309,8 +257,7 @@ class ImageViewer:
         elif event == rc.STOP or event == rc.EXIT:
             rc.app = rc_app_bkp
             signal.alarm(0)
-            skin.force_redraw = TRUE
-            rc.post_event(rc.REFRESH_SCREEN)
+            self.fileitem.eventhandler(event)
 
         # up and down will stop the slideshow and pass the
         # event to the playlist
@@ -501,9 +448,10 @@ class ImageViewer:
                     prt_line[line] += '   ' + textstr
 
         # Create a black box for text
-        osd.drawbox(config.OVERSCAN_X, osd.height - (config.OVERSCAN_X + 25 + (len(prt_line) * 30)),
-                osd.width, osd.height, width=-1, 
-                color=((60 << 24) | osd.COL_BLACK))
+        osd.drawbox(config.OVERSCAN_X,
+                    osd.height - (config.OVERSCAN_X + 25 + (len(prt_line) * 30)),
+                    osd.width, osd.height, width=-1, 
+                    color=((60 << 24) | osd.COL_BLACK))
 
 	# Now print the Text
         for line in range(len(prt_line)):

@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/04/06 21:12:58  dischi
+# o Switched to the new main skin
+# o some cleanups (removed unneeded inports)
+#
 # Revision 1.10  2003/03/15 05:01:31  outlyer
 # Merged Kyle Weston's Schedule Viewer/Editor patch.
 #
@@ -111,9 +115,6 @@ import osd
 # The menu widget class
 import menu
 
-# The mixer class, controls the volumes for playback and recording
-import mixer
-
 # The RemoteControl class, sets up a UDP daemon that the remote control client
 # sends commands to
 import rc
@@ -121,15 +122,13 @@ import rc
 # The TV application
 import tv
 
-# The Skin
-import skin
-
 # Recording daemon
 import record_daemon
 
 # Schedule editor
 import record_schedule
 
+from gui.PopupBox import PopupBox
 
 # Set to 1 for debug output
 DEBUG = config.DEBUG
@@ -143,12 +142,7 @@ osd = osd.get_singleton()
 # Create the remote control object
 rc = rc.get_singleton()
 
-# Set up the mixer
-mixer = mixer.get_singleton()
-
 menuwidget = menu.get_singleton()
-
-skin = skin.get_singleton()
 
 
 class Setting:
@@ -346,9 +340,11 @@ def set_schedule(arg=None, menuw=None):
                            recinfo.length.selected)
     print '"%s"' % s
 
-    skin.PopupBox(s)
+    pop = PopupBox(text=s)
+    pop.show()
     time.sleep(2)
-    menuw.refresh()
+    pop.destroy()
+
 
 def eventhandler( event):
     print 'using record_video event handler'

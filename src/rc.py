@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/04/06 21:12:56  dischi
+# o Switched to the new main skin
+# o some cleanups (removed unneeded inports)
+#
 # Revision 1.8  2003/02/24 04:21:40  krister
 # Mathieu Weber's bugfix for multipart movies
 #
@@ -23,33 +27,6 @@
 # The rc.func will contain the function being used (i.e. 'video' 'audio' etc.)
 #
 # Currently, this does nothing, so ignore it.
-#
-# Revision 1.5  2003/02/19 08:08:30  krister
-# Applied Aubins new pylirc code after testing it (seems to work with keyboard at least), and adding the pylircmodule to the runtime build environment (not required for keyboard operation).
-#
-# Revision 1.4  2003/01/29 19:21:55  outlyer
-# Changed to use config.LIRCRC directive in freevo_config
-#
-# Revision 1.2  2003/01/29 05:53:33  outlyer
-# Ok, I'm compromising until I can figure out an elegant way to do this.
-#
-# o This now works, movies play, etc.
-# o We are non-blocking, so we still use time.sleep, need to fix that.
-# o No UDP daemon, and we use an lircrc file, hardcoded to /etc/freevo for now.
-#
-# As it stands, this works the same as the old code, except keyboard support
-# is missing. I don't have a keyboard on my Freevo machine so I can't implement
-# the keyboard stuff just yet.
-#
-# Revision 1.3  2003/01/11 10:37:48  dischi
-# added event to reload a menu
-#
-# Revision 1.2  2002/11/26 22:02:10  dischi
-# Added key to enable/disable subtitles. This works only with mplayer pre10
-# (maybe pre9). Keyboard: l (for language) or remote SUBTITLE
-#
-# Revision 1.1  2002/11/24 13:58:44  dischi
-# code cleanup
 #
 #
 # -----------------------------------------------------------------------
@@ -74,7 +51,6 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import socket, time, sys
 import config
 
 
@@ -88,8 +64,6 @@ except ImportError:
 # Set to 1 for debug output
 DEBUG = config.DEBUG
 
-# Configuration file. Determines where to look for AVI/MP3 files, etc
-import config
 
 TRUE = 1
 FALSE = 0

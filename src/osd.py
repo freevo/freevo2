@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2003/04/06 21:12:55  dischi
+# o Switched to the new main skin
+# o some cleanups (removed unneeded inports)
+#
 # Revision 1.31  2003/04/03 10:23:16  dischi
 # dxr3 fix
 #
@@ -70,57 +74,8 @@
 #
 # Revision 1.15  2003/02/18 07:27:23  gsbarbieri
 # Corrected the misspelled 'elipses' -> 'ellipses'
-# Now, main1_video uses osd.drawtext(mode='soft') to render text, so it should be better displayed
-#
-# Revision 1.14  2003/02/18 05:48:55  gsbarbieri
-# osd.drawstring*() now has the elipses param, which will be used when the text doesn't fit.
-# You can set it to None, so it doesn't show anything when the text doesn't fit.
-# The default is '...'
-#
-# Revision 1.13  2003/02/15 20:48:41  dischi
-# drawbitmap can now draw surfaces, too
-#
-# Revision 1.12  2003/02/12 10:38:51  dischi
-# Added a patch to make the current menu system work with the new
-# main1_image.py to have an extended menu for images
-#
-# Revision 1.11  2003/02/03 04:38:35  krister
-# Made pygame init explicit to avoid mixer problems.
-#
-# Revision 1.10  2003/02/03 03:05:23  outlyer
-# We raise an exception in _renderstring, but we don't seem to do anything
-# with it, which of course equals horrifying crash. I'm trapping it, printing
-# an error to the logs and skipping... it only seemed to happen with a few
-# mp3s I have, but a crash is a crash...
-#
-# Revision 1.9  2003/01/31 02:09:00  krister
-# Changed the X11 display option to automatically select between xv,x11,etc.
-#
-# Revision 1.8  2003/01/24 04:48:59  krister
-# Changed keyboard volume +/- keys
-#
-# Revision 1.7  2003/01/17 03:50:21  krister
-# Doh! The X11 menus were slow because of stupid SDL event handling, fixed!
-#
-# Revision 1.6  2003/01/13 00:34:20  krister
-# Applied Thomas Schuppels patch for improved bitmap handling.
-#
-# Revision 1.5  2003/01/07 07:17:07  krister
-# Added Thomas Schüppels objectcache layer for the OSD objects.
-#
-# Revision 1.4  2002/12/21 17:26:52  dischi
-# Added dfbmga support. This includes configure option, some special
-# settings for mplayer and extra overscan variables
-#
-# Revision 1.3  2002/12/12 11:45:02  dischi
-# Moved all icons to skins/icons
-#
-# Revision 1.2  2002/11/26 22:02:10  dischi
-# Added key to enable/disable subtitles. This works only with mplayer pre10
-# (maybe pre9). Keyboard: l (for language) or remote SUBTITLE
-#
-# Revision 1.1  2002/11/24 13:58:44  dischi
-# code cleanup
+# Now, main1_video uses osd.drawtext(mode='soft') to render text, so it should be
+# better displayed
 #
 #
 # -----------------------------------------------------------------------
@@ -145,9 +100,7 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import socket
 import time
-import sys
 import os
 import stat
 import Image
@@ -326,10 +279,7 @@ class OSD:
 
         self.fontcache = objectcache.ObjectCache(300, desc='font')
         self.stringcache = objectcache.ObjectCache(100, desc='string')
-        if config.NEW_SKIN:
-            self.bitmapcache = objectcache.ObjectCache(3, desc='bitmap')
-        else:
-            self.bitmapcache = objectcache.ObjectCache(30, desc='bitmap')
+        self.bitmapcache = objectcache.ObjectCache(3, desc='bitmap')
         
         self.default_fg_color = self.COL_BLACK
         self.default_bg_color = self.COL_WHITE

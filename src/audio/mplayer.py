@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/04/06 21:12:56  dischi
+# o Switched to the new main skin
+# o some cleanups (removed unneeded inports)
+#
 # Revision 1.8  2003/02/22 07:13:19  krister
 # Set all sub threads to daemons so that they die automatically if the main thread dies.
 #
@@ -17,21 +21,6 @@
 #
 # Revision 1.6  2003/02/14 02:51:50  krister
 # Added fix for decimal point vs. comma.
-#
-# Revision 1.5  2003/02/11 04:37:29  krister
-# Added an empty local_conf.py template for new users. It is now an error if freevo_config.py is found in /etc/freevo etc. Changed DVD protection to use a flag. MPlayer stores debug logs in FREEVO_STARTDIR, and stops with an error if they cannot be written.
-#
-# Revision 1.4  2003/01/31 03:09:11  krister
-# Fixed the mplayer audio time display bug.
-#
-# Revision 1.3  2003/01/18 15:51:57  dischi
-# Add ao device to mplayer options (like video/mplayer.py does)
-#
-# Revision 1.2  2003/01/11 10:55:56  dischi
-# Call refresh with reload=1 when the menu was disabled during playback
-#
-# Revision 1.1  2002/11/24 13:58:44  dischi
-# code cleanup
 #
 #
 # -----------------------------------------------------------------------
@@ -56,10 +45,8 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import sys
-import random
-import time, os, glob
-import string, popen2, fcntl, select, struct
+import time, os
+import string
 import threading, signal
 
 import config     # Configuration handler. reads config file.
@@ -69,7 +56,6 @@ import menu       # The menu widget class
 import mixer      # Controls the volumes for playback and recording
 import osd        # The OSD class, used to communicate with the OSD daemon
 import rc         # The RemoteControl class.
-import skin       # Cause audio handling needs skin functions.
 import fnmatch
 
 # RegExp
@@ -85,7 +71,6 @@ osd        = osd.get_singleton()
 rc         = rc.get_singleton()
 menuwidget = menu.get_singleton()
 mixer      = mixer.get_singleton()
-skin       = skin.get_singleton()
 
 # Module variable that contains an initialized MPlayer() object
 _singleton = None
@@ -137,12 +122,7 @@ class MPlayer:
             network_play = 0
 
         if not os.path.isfile(filename) and not network_play:
-	    skin.PopupBox('%s\nnot found!' % os.path.basename(filename))
-            time.sleep(2.0) 
-            menuwidget.refresh()
-            # XXX We should really use return more. And this escape should
-            # XXX probably be put at start of the function.
-            return 0
+	    return '%s\nnot found!' % os.path.basename(filename)
        
         # Build the MPlayer command
         mpl = '--prio=%s %s %s' % (config.MPLAYER_NICE,
@@ -178,14 +158,11 @@ class MPlayer:
 
         if self.thread.item.valid:
             item.drawall = 1
-            skin.DrawMP3(self.item) 
-            self.item.drawall = 0
+            item.draw()
+            item.drawall = 0
         else:
             # Invalid file, show an error and survive.
-            skin.PopupBox('Invalid audio file')
-            time.sleep(3.0)
-            menuwidget.refresh()
-            return
+            return 'Invalid audio file'
 
         self.thread.play_mode = self.mode
 
@@ -196,7 +173,8 @@ class MPlayer:
         self.thread.command = command
         self.thread.mode_flag.set()
         rc.app = self.eventhandler
-
+        return None
+    
 
     def stop(self):
         """
@@ -219,7 +197,7 @@ class MPlayer:
             self.thread.item = None
             self.stop ()
             rc.app = None
-            menuwidget.refresh(reload=1)
+            return self.item.eventhandler(event)
 
         elif event == rc.PAUSE:
             self.thread.cmd('pause')

@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/04/06 21:12:56  dischi
+# o Switched to the new main skin
+# o some cleanups (removed unneeded inports)
+#
 # Revision 1.16  2003/03/16 19:28:04  dischi
 # Item has a function getattr to get the attribute as string
 #
@@ -17,59 +21,6 @@
 #
 # Revision 1.14  2003/02/19 07:16:11  krister
 # Matthieu Weber's patch for smart music cover search, modified the logic slightly.
-#
-# Revision 1.13  2003/02/18 06:16:48  krister
-# Added parts of Thomas Schuppels CDDB updates.
-#
-# Revision 1.12  2003/02/17 03:27:11  outlyer
-# Added Thomas' CDDB support patch. I don't have a CD-rom drive in my machine,
-# so I can't verify it works; code looks good though.
-#
-# I only had to make one change from the original submitted patch, which was
-# to make sure we don't crash in audiodiskitem if the system lacks CDDB, the
-# check was already performed in identifymedia.
-#
-# Revision 1.11  2003/02/15 04:03:02  krister
-# Joakim Berglunds patch for finding music/movie cover pics.
-#
-# Revision 1.10  2003/02/10 16:29:03  dischi
-# small bugfix
-#
-# Revision 1.9  2003/02/10 15:42:32  dischi
-# small bugfix
-#
-# Revision 1.8  2003/01/12 17:06:25  dischi
-# Add possibility to extract the id tags from the AudioItem (dump) and to
-# init an AudioItem with that informations. If you create an AudioItem
-# with that informations, the id tags won't be loaded from file.
-#
-# Revision 1.7  2003/01/10 21:05:42  dischi
-# set the type (like all the other items do)
-#
-# Revision 1.6  2003/01/10 11:43:32  dischi
-# Added patch from Matthieu Weber for Ogg/Vorbis files which contains an
-# artist/title/album text which is not pure ASCII (7 bits).
-#
-# Revision 1.5  2002/12/22 12:59:34  dischi
-# Added function sort() to (audio|video|games|image) item to set the sort
-# mode. Default is alphabetical based on the name. For mp3s and images
-# it's based on the filename. Sort by date is in the code but deactivated
-# (see mediamenu.py how to enable it)
-#
-# Revision 1.4  2002/12/03 19:15:18  dischi
-# Give all menu callback functions the parameter arg
-#
-# Revision 1.3  2002/11/28 19:56:12  dischi
-# Added copy function
-#
-# Revision 1.2  2002/11/25 04:55:29  outlyer
-# Two small changes:
-#  o Removed some 'print sys.path' lines I left in my last commit
-#  o Re-enabled the skin.format_track() function so the display style of MP3
-#    titles can be customized.
-#
-# Revision 1.1  2002/11/24 13:58:44  dischi
-# code cleanup
 #
 #
 # -----------------------------------------------------------------------
@@ -96,7 +47,6 @@
 
 
 import os
-import sys
 import string
 import time
 import re
@@ -107,13 +57,18 @@ import traceback
 import config
 import mplayer
 import util
+import rc
 
 from item import Item
 
 
 DEBUG = config.DEBUG
 
+TRUE  = 1
+FALSE = 0
+
 skin = skin.get_singleton()
+rc   = rc.get_singleton()
 
 class AudioItem(Item):
     """
@@ -144,7 +99,6 @@ class AudioItem(Item):
         self.done       = 0.0
         self.pause      = 0
 	self.valid	= 1
-
 
         if cache:
             self.restore(cache)
@@ -417,7 +371,18 @@ class AudioItem(Item):
         """
         self.parent.current_item = self
         self.elapsed = 0
-        self.audio_player.play(self)
+
+        if not self.menuw:
+            self.menuw = menuw
+
+        if self.menuw.visible:
+            menuw.hide()
+
+        error = self.audio_player.play(self)
+
+        if error:
+            AlertBox(text=error).show()
+            rc.post_event(rc.PLAY_END)
 
 
     def stop(self, arg=None, menuw=None):
@@ -436,6 +401,5 @@ class AudioItem(Item):
             self.remain = 0
         else:
             self.remain = self.length - self.elapsed
-        skin.DrawMP3(self)
+        skin.draw(('player', self))
         return
-

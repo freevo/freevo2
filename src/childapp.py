@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/04/06 21:12:54  dischi
+# o Switched to the new main skin
+# o some cleanups (removed unneeded inports)
+#
 # Revision 1.6  2003/02/20 06:57:15  krister
 # Made the threads daemons, should make them less likely to live after the parent dies.
 #
@@ -17,16 +21,6 @@
 #
 # Revision 1.4  2003/02/05 06:10:46  krister
 # Changed the start scripts and childapp.py to use startprog to start all programs.
-#
-# Revision 1.3  2003/01/31 03:09:10  krister
-# Fixed the mplayer audio time display bug.
-#
-# Revision 1.2  2002/12/21 18:31:10  dischi
-# Sometimes mplayer won't die. Now childapp will kill -9 the child after
-# it refuses 2 seconds to die.
-#
-# Revision 1.1  2002/11/24 13:58:44  dischi
-# code cleanup
 #
 #
 # -----------------------------------------------------------------------
@@ -52,19 +46,13 @@
 #endif
 
 import sys
-import random
 import time
 import os
-import glob
-import string
 import popen2
-import fcntl
-import select
-import struct
 import threading
 import signal
 import config
-import re
+
 
 DEBUG = config.DEBUG
 

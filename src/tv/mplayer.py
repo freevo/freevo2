@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/04/06 21:12:58  dischi
+# o Switched to the new main skin
+# o some cleanups (removed unneeded inports)
+#
 # Revision 1.8  2003/03/08 17:39:02  dischi
 # mplayer doesn't clear the screen, tv.py does
 #
@@ -61,20 +65,15 @@
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
 
-import sys
-import random
-import time, os, glob
-import string, popen2, fcntl, select, struct
+import time, os
+import string
 import threading
 import signal
 
 import util    # Various utilities
-import menu    # The menu widget class
-import skin    # The skin class
 import mixer   # The mixer class
 import osd     # The OSD class, used to communicate with the OSD daemon
 import rc      # The RemoteControl class.
-import tv      # The TV module
 import childapp # Handle child applications
 import epg_xmltv as epg # The Electronic Program Guide
 
@@ -89,11 +88,9 @@ DEBUG = config.DEBUG
 TRUE = 1
 FALSE = 0
 
+
 # Create the OSD object
 osd = osd.get_singleton()
-
-# Create the MenuWidget object
-menuwidget = menu.get_singleton()
 
 # Set up the mixer
 mixer = mixer.get_singleton()
@@ -225,8 +222,6 @@ class MPlayer:
 
         else:
             print 'Mode "%s" is not implemented' % mode  # XXX ui.message()
-            rc.app = None
-            menuwidget.refresh()
             return
 
         # Support for X11, getting the keyboard events
@@ -282,7 +277,11 @@ class MPlayer:
         self.thread.command = command
         self.thread.mode_flag.set()
         
+        self.parent_eventhandler = rc.app
         rc.app = self.EventHandler
+
+        if osd.focused_app:
+            osd.focused_app.hide()
 
         # Suppress annoying audio clicks
         time.sleep(0.4)
@@ -300,7 +299,6 @@ class MPlayer:
 
         if DEBUG: print '%s: started %s app' % (time.time(), self.mode)
 
-        skin.hold = TRUE  # Prevent the skin from drawing stuff while TV is on
         
         
     def Stop(self):
@@ -310,6 +308,11 @@ class MPlayer:
 
         self.thread.mode = 'stop'
         self.thread.mode_flag.set()
+
+        rc.app = self.parent_eventhandler
+        if osd.focused_app:
+            osd.focused_app.show()
+
         while self.thread.mode == 'stop':
             time.sleep(0.05)
         print 'stopped %s app' % self.mode
@@ -321,9 +324,7 @@ class MPlayer:
         if (event == rc.MENU or event == rc.STOP or event == rc.EXIT or
             event == rc.SELECT or event == rc.PLAY_END):
             self.Stop()
-            skin.hold = FALSE  # Allow drawing again
-            rc.app = tv.eventhandler
-            tv.refresh()
+            rc.post_event(rc.PLAY_END)
 
         elif event == rc.CHUP or event == rc.CHDOWN:
             if self.mode == 'vcr':

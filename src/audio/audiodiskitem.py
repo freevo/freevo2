@@ -24,28 +24,12 @@
 #endif
 
 
-import os
-import traceback
-
-import util
 import config
-import menu as menu_module
-import copy
-import rc
-import string
-import skin
+import menu
 
 from item import Item
 from audioitem import AudioItem
 from playlist import Playlist, RandomPlaylist
-
-import video.interface
-import audio.interface
-import image.interface
-import games.interface
-
-# XML support
-from xml.utils import qp_xml
 
 # CDDB Stuff
 try:
@@ -113,14 +97,17 @@ class AudioDiskItem(Playlist):
         make a menu item for each file in the directory
         """
         # Problems with disc id:
-        # [2114541066, 10, 150, 17220, 36170, 54412, 68800, 91162, 112110, 129230, 141320, 165100, 2392]
+        # [2114541066, 10, 150, 17220, 36170, 54412, 68800, 91162, 112110, 129230,
+        #  141320, 165100, 2392]
         # Returns multiple results
         print self.disc_id
         (query_stat, query_info) = CDDB.query(self.disc_id)
         
         if query_stat == 200:
-            print ("success!\nQuerying CDDB for track info of `%s'... " % query_info['title']),
-            (read_stat, read_info) = CDDB.read(query_info['category'], query_info['disc_id'])
+            print ("success!\nQuerying CDDB for track info of `%s'... " % \
+                   query_info['title']),
+            (read_stat, read_info) = CDDB.read(query_info['category'],
+                                               query_info['disc_id'])
             if read_stat != 210:
                 print "failure getting track info, status: %i" % read_stat
         elif query_stat == 210 or query_stat == 211:
@@ -130,7 +117,8 @@ class AudioDiskItem(Playlist):
                        (i['disc_id'], i['category'], i['title'])
             # We just pick the first one
             query_info = query_info[0]
-            (read_stat, read_info) = CDDB.read(query_info['category'], query_info['disc_id'])
+            (read_stat, read_info) = CDDB.read(query_info['category'],
+                                               query_info['disc_id'])
             query_stat = 200 # Good data, used below
             if read_stat != 210:
                 print "failure getting track info, status: %i" % read_stat
@@ -172,32 +160,8 @@ class AudioDiskItem(Playlist):
         if title[0] == '[' and title[-1] == ']':
             title = self.name[1:-1]
 
-        # autoplay
-        if len(items) == 1 and items[0].actions() and \
-           self.DIRECTORY_AUTOPLAY_SINGLE_ITEM:
-            items[0].actions()[0][0](menuw=menuw)
-        else:
-            item_menu = menu_module.Menu(title, items, reload_func=self.reload,
-                                         item_types = self.display_type)
-            if menuw:
-                menuw.pushmenu(item_menu)
-
+        item_menu = menu.Menu(title, items, item_types = self.display_type)
+        if menuw:
+            menuw.pushmenu(item_menu)
 
         return items
-
-    def reload(self):
-        """
-        called when we return to this menu
-        """
-        # we changed the menu, don't build a new one
-        return None
-
-        
-    def update(self, new_files, del_files, all_files):
-        """
-        update the current item set. Maybe this function can share some code
-        with cwd in the future, but it's easier now the way it is
-        """
-
-
-

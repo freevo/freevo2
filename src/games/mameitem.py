@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/04/06 21:12:57  dischi
+# o Switched to the new main skin
+# o some cleanups (removed unneeded inports)
+#
 # Revision 1.4  2003/01/11 10:55:56  dischi
 # Call refresh with reload=1 when the menu was disabled during playback
 #
@@ -64,14 +68,11 @@ FALSE = 0
 
 import menu
 import rc
-import skin
-import osd
 import time
 import copy
 
-rc         = rc.get_singleton()
-skin       = skin.get_singleton()
-osd        = osd.get_singleton()
+rc = rc.get_singleton()
+
 
 from item import Item
 

@@ -1,20 +1,44 @@
-# Configuration file. Determines where to look for AVI/MP3 files, etc
-# Logging is initialized here, so it should be imported first
-import config
+#if 0 /*
+# -----------------------------------------------------------------------
+# tvguide.py - This is the Freevo TV Guide module. 
+# -----------------------------------------------------------------------
+# $Id$
+#
+# Notes:
+# Todo:        
+#
+# -----------------------------------------------------------------------
+# $Log$
+# Revision 1.3  2003/04/06 21:12:59  dischi
+# o Switched to the new main skin
+# o some cleanups (removed unneeded inports)
+#
+#
+# -----------------------------------------------------------------------
+# Freevo - A Home Theater PC framework
+# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# ----------------------------------------------------------------------- */
+#endif
 
-import sys
-import os
-import time
-import copy
 
-# Various utilities
-import util
-
-import gui
+import gui.GUIObject
 import skin
-
-# The RemoteControl class, sets up a UDP daemon that the remote control client
-# sends commands to
 import rc
 
 # The Electronic Program Guide
@@ -22,48 +46,76 @@ import epg_xmltv as epg, epg_types
 
 import record_video
 
+
 rc   = rc.get_singleton()   # Create the remote control object
 skin = skin.get_singleton() # Create the Skin object
 
 
-
-DEBUG = config.DEBUG
-
 TRUE = 1
 FALSE = 0
+
 
 CHAN_NO_DATA = 'This channel has no data loaded'
 
 
-class TVGuide:
-    def __init__(self):
+class TVGuide(gui.GUIObject):
+    def __init__(self, start_time, stop_time, start_channel, selected, player, menuw):
+        gui.GUIObject.__init__(self)
         self.n_cols  = 4
         self.col_time = 30 # each col represents 30 minutes 
-        self.all_channels = epg.get_guide().chan_list
+        self.player = player
 
-    def start(self, start_time, stop_time, start_channel, selected):
-        self.n_items = skin.DrawTVGuide_ItemsPerPage(self)
+        self.n_items = skin.items_per_page(('tv', self))
+        self.type = 'tv'
+        self.menuw = menuw
+
         self.rebuild(start_time, stop_time, start_channel, selected)
-        
+        menuw.pushmenu(self)
+
 
     def eventhandler(self, event):
         if hasattr(self, 'event_%s' % event):
             eval('self.event_%s()' % event)
+            self.menuw.refresh()
+            
         elif event == rc.CHUP:
             self.event_PageUp()
+            self.menuw.refresh()
+
         elif event == rc.CHDOWN:
             self.event_PageDown()
+            self.menuw.refresh()
 
         elif event == rc.REC:
             record_video.main_menu(self.selected)
 
-        else:
-            print 'No action defined to event: "%s"' % (event)
-            return None
+        elif event == rc.SELECT or event == rc.PLAY:
+            self.hide()
+            self.player('tv', self.selected.channel_id)
 
+        elif event == rc.PLAY_END:
+            self.show()
+
+        else:
+            return FALSE
+
+        return TRUE
+
+
+    def show(self):
+        if not self.visible:
+            self.visible = 1
+            self.menuw.refresh()
+
+            
+    def hide(self):
+        if self.visible:
+            self.visible = 0
+            skin.clear()
+        
 
     def refresh(self):
-        skin.DrawTVGuide(self)
+        self.menuw.refresh()
 
 
     def rebuild(self, start_time, stop_time, start_channel, selected):
@@ -140,7 +192,6 @@ class TVGuide:
                                 break
 
         self.table = table
-        skin.DrawTVGuide(self)
 
 
 

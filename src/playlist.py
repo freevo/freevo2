@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/04/06 21:12:55  dischi
+# o Switched to the new main skin
+# o some cleanups (removed unneeded inports)
+#
 # Revision 1.12  2003/02/27 05:29:42  krister
 # Only change backslashes to slashes if it is an MSDOS file
 #
@@ -22,35 +26,6 @@
 # Renamed SUFFIX_MPLAYER_FILES to SUFFIX_VIDEO_FILES because we also play
 # audio files with mplayer. Also renamed SUFFIX_FREEVO_FILES to
 # SUFFIX_VIDEO_DEF_FILES because we use this for movie xml files.
-#
-# Revision 1.8  2003/01/11 10:55:56  dischi
-# Call refresh with reload=1 when the menu was disabled during playback
-#
-# Revision 1.7  2003/01/11 10:38:31  dischi
-# store filename in playlist item
-#
-# Revision 1.6  2003/01/05 13:05:26  dischi
-# fix DOWN for random recursive playlists
-#
-# Revision 1.5  2002/12/11 16:06:54  dischi
-# First version of a RandomPlaylist. You can access the random playlist
-# from the item menu of the directory. The non-recursive random playlist
-# should be added there, too, but there are some problems, so it's still
-# inside the directory.
-#
-# Revision 1.4  2002/12/03 19:15:17  dischi
-# Give all menu callback functions the parameter arg
-#
-# Revision 1.3  2002/11/28 19:56:12  dischi
-# Added copy function
-#
-# Revision 1.2  2002/11/27 20:22:19  dischi
-# Fixed some playlist problems. Sometimes the playlist stopped playing
-# after one item is finished. By playling a playlist again, it will start
-# with the first item again.
-#
-# Revision 1.1  2002/11/24 13:58:44  dischi
-# code cleanup
 #
 #
 # -----------------------------------------------------------------------
@@ -75,17 +50,10 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import sys
 import random
-import time, os
-import string
-import popen2
-import fcntl
-import select
-import struct
+import os
 import re
 import copy
-import random
 import menu
 import util
 import config
@@ -221,6 +189,7 @@ class Playlist(Item):
     def __init__(self, file, parent):
         Item.__init__(self, parent)
         self.type     = 'playlist'
+        self.menuw    = None
 
         # variables only for Playlist
         self.current_item = None
@@ -290,6 +259,9 @@ class Playlist(Item):
         
         
     def play(self, arg=None, menuw=None):
+        if not self.menuw:
+            self.menuw = menuw
+
         if not self.playlist:
             print 'empty playlist'
             return FALSE
@@ -310,7 +282,7 @@ class Playlist(Item):
                 self.current_item = None
             return TRUE
 
-        self.current_item.actions()[0][0](menuw)
+        self.current_item.actions()[0][0](menuw=menuw)
         
 
     def cache_next(self):
@@ -321,6 +293,9 @@ class Playlist(Item):
 
 
     def eventhandler(self, event, menuw=None):
+        if not menuw:
+            menuw = self.menuw
+            
         if (event == rc.DOWN or event == rc.PLAY_END or event == rc.USER_END) \
            and self.current_item and self.playlist:
             pos = self.playlist.index(self.current_item)
@@ -334,10 +309,9 @@ class Playlist(Item):
                 return TRUE
 
         # end and no next item
-        if event == rc.PLAY_END or event == rc.USER_END:
+        if event in (rc.PLAY_END, rc.USER_END, rc.EXIT, rc.STOP):
             self.current_item = None
-            menuwidget = menu.get_singleton()
-            menuwidget.refresh(reload=1)
+            menuw.show()
             return TRUE
             
 
