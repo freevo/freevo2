@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2003/08/03 14:14:16  dischi
+# fix
+#
 # Revision 1.35  2003/08/01 18:38:00  dischi
 # set optimize to 2 (== -OO)
 #
@@ -121,7 +124,7 @@ CACHEDIR = /var/cache/freevo
 all: subdirs runapp freevo_xwin
 
 python_compile: runapp
-	./runapp python setup_freevo.py --compile=$(OPTIMIZE),$(PREFIX)
+	./runapp python src/setup_freevo.py --compile=$(OPTIMIZE),$(PREFIX)
 
 runapp: runapp.c
 	$(CC) $(CFLAGS) -static -o runapp runapp.c -DRUNAPP_LOGDIR=\"$(LOGDIR)\" -DDEBUG
