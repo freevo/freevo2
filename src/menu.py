@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/03/27 20:07:06  dischi
+# Fix for adding/deleting the only item in the directory for the new skin
+#
 # Revision 1.23  2003/03/23 21:39:03  dischi
 # Added better up/down handling for text menus in the new skin
 #
@@ -617,6 +620,9 @@ class MenuWidget(GUIObject):
         self.nav_items = nav_items
 
         self.all_items = self.menu_items + self.nav_items
+
+        if not menu.selected in self.all_items:
+            menu.selected = self.all_items[0]
 
         if not menu.choices:
             menu.selected = self.all_items[0]
