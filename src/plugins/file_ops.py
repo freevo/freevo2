@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/10/23 23:05:24  outlyer
+# Remove some debug.
+#
 # Revision 1.9  2003/10/21 21:17:42  gsbarbieri
 # Some more i18n improvements.
 #
@@ -91,7 +94,6 @@ class PluginInterface(plugin.ItemPlugin):
 
     def confirm_delete(self, arg=None, menuw=None):
         self.menuw = menuw
-        print "self.item.name=%s" % self.item.name
         ConfirmBox(text=_('Do you wish to delete\n \'%s\'?') % self.item.name,
                    handler=self.delete_file, default_choice=1).show()
         
