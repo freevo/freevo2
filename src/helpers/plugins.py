@@ -13,6 +13,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/09/22 20:16:57  gsbarbieri
+# Now handle my coding practices (a lot of spaces!)
+# So "class PluginInterface( plugin.DaemonPlugin )" is now parsed.
+#
 # Revision 1.5  2003/09/12 20:56:03  dischi
 # again small cosmetic changes
 #
@@ -59,7 +63,7 @@ import os
 import sys
 
 def parse_plugins():
-    start = re.compile('^class *(.*)\((.*Plugin).:')
+    start = re.compile('^class *(.*)\((.*Plugin\s*).:')
     stop  = re.compile('^[\t ]*def.*:')
     comment = re.compile('^[\t ]*"""')
 
@@ -102,7 +106,7 @@ def parse_plugins():
                 fname = re.sub('plugins.', '', fname)
                 fname = re.sub('.__init__', '', fname)
 
-                type = start.match(line).group(2)
+                type = start.match(line).group(2).strip()
                 if re.match('^plugin.(.*)', type):
                     type = re.match('^plugin.(.*)', type).group(1)
                 if start.match(line).group(1) == 'PluginInterface':
