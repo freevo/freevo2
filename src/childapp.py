@@ -9,6 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/09/25 20:46:26  outlyer
+# It's still killing processes if they don't respond immmediately. I've
+# realized that this mostly happens with high-bitrate MP3s, of which I have
+# many.
+#
+# The extra second if no data usually solves the problem. This appears to
+# be seperate from Dischi's earlier fix.
+#
 # Revision 1.21  2003/09/25 14:08:03  outlyer
 # Bump the priority of this message down.
 #
@@ -274,9 +282,12 @@ class Read_Thread(threading.Thread):
 
             data = self.fp.readline(300)
             if not data:
-                _debug_('%s: No data, stopping (pid %s)!' % (self.name, os.getpid()),2)
-                self.fp.close()
-                break
+                time.sleep(1)   # Wait longer and try again
+                data = self.fp.readline(300)
+                if not data:
+                    _debug_('%s: No data, stopping (pid %s)!' % (self.name, os.getpid()),2)
+                    self.fp.close()
+                    break
             else:
                 data = data.replace('\r', '\n')
                 lines = data.split('\n')
