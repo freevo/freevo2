@@ -8,6 +8,7 @@ Short-term
 ----------
 o Check that the applications exist in startup.py, now it will
   just loop forever trying to start them
+o Add a freevo exit command
 o Add rcs id to all files!
 o Channel guide layout
 o A switch to turn off the EPG altogether if no listings are available.
