@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/12/04 01:48:50  rshortt
+# Comment some debug, too noisy.
+#
 # Revision 1.5  2004/11/04 17:40:18  dischi
 # change to new notifier interface
 #
@@ -176,7 +179,7 @@ class PluginInterface(plugin.InputPlugin):
         code = data[3]
         value = data[4]
 
-        print '  time: %d type=%04x code=%04x value=%08x' % (now, type, code, value)
+        #print '  time: %d type=%04x code=%04x value=%08x' % (now, type, code, value)
 
         # was it a reset?  if so, ignore
         if type == 0 :
@@ -194,7 +197,7 @@ class PluginInterface(plugin.InputPlugin):
             self.m_ignoreTill = now + self.m_ignore
         elif value == 2 :
             if now < self.m_ignoreTill :
-                print '  ignoring repeat until %d' % self.m_ignoreTill
+                #print '  ignoring repeat until %d' % self.m_ignoreTill
                 return True
             else:
                 # we let this one through, but set when we want to start
@@ -212,7 +215,7 @@ class PluginInterface(plugin.InputPlugin):
         else:
             pass
 
-        print '  sending off event %s' % key
+        #print '  sending off event %s' % key
         self.post_key(key)
 
         return True
