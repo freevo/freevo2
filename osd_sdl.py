@@ -200,6 +200,9 @@ class OSD:
             os.system(config.OSD_SDL_EXEC_AFTER_STARTUP)
 
         self.sdl_driver = pygame.display.get_driver()
+
+        pygame.mouse.set_visible(0)
+        self.mousehidetime = time.time()
         
         self._started = 1
         self._help = 0  # Is the helpscreen displayed or not
@@ -208,6 +211,18 @@ class OSD:
         
 
     def _cb(self):
+
+        # Check if mouse should be visible or hidden
+        mouserel = pygame.mouse.get_rel()
+        mousedist = (mouserel[0]**2 + mouserel[1]**2) ** 0.5
+
+        if mousedist > 4.0:
+            pygame.mouse.set_visible(1)
+            self.mousehidetime = time.time() + 1.0  # Hide the mouse in 2s
+        else:
+            if time.time() > self.mousehidetime:
+                pygame.mouse.set_visible(0)
+        
         event = pygame.event.poll()
         if event.type == NOEVENT:
             return None
