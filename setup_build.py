@@ -87,12 +87,6 @@ if __name__ == '__main__':
         print_usage()
         sys.exit()
 
-    check_deps()
-    
-    # Build everything
-    # XXX add more config flags, creating config files for python and C, etc.
-    # XXX use getopt for interpreting the command line args
-    # XXX add --help
     if len(sys.argv) > 1:
         if sys.argv[1] == '--osd=x11':
             buildops = 'x11'
@@ -124,6 +118,12 @@ if __name__ == '__main__':
         buildops = ''
         settings = ''
 
+    check_deps()
+    
+    # Build everything
+    # XXX add more config flags, creating config files for python and C, etc.
+    # XXX use getopt for interpreting the command line args
+    # XXX add --help
     create_makefile(buildops)
     create_config(settings)
     
