@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.115  2004/02/12 17:16:35  dischi
+# again, fix watermark problem
+#
 # Revision 1.114  2004/02/12 16:26:57  dischi
 # fix watermark problem once and for all
 #
@@ -24,27 +27,6 @@
 #
 # Revision 1.110  2004/01/25 14:54:31  dischi
 # save parent after skin change
-#
-# Revision 1.109  2004/01/24 18:53:54  dischi
-# add mmpython md5 disc id support
-#
-# Revision 1.108  2004/01/19 20:29:11  dischi
-# cleanup, reduce cache size
-#
-# Revision 1.107  2004/01/18 16:49:39  dischi
-# check cache on startup
-#
-# Revision 1.106  2004/01/17 20:30:18  dischi
-# use new metainfo
-#
-# Revision 1.105  2004/01/10 14:56:45  dischi
-# better shutdown handling
-#
-# Revision 1.104  2004/01/10 13:19:52  dischi
-# use new skin.set_base_fxd function
-#
-# Revision 1.103  2004/01/07 18:15:41  dischi
-# add mmpython warning
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -161,6 +143,9 @@ class SkinSelectItem(Item):
         menuw.menustack[0].choices = []
         for p in plugin.get('mainmenu'):
             menuw.menustack[0].choices += p.items(parent)
+
+        for i in menuw.menustack[0].choices:
+            i.is_mainmenu_item = True
 
         menuw.menustack[0].selected = menuw.menustack[0].choices[pos]
         menuw.back_one_menu()
@@ -344,21 +329,6 @@ else:
 
 mmpython.USE_NETWORK = config.USE_NETWORK
 mmpython.disc.discinfo.CREATE_MD5_ID = config.MMPYTHON_CREATE_MD5_ID
-
-# if not os.path.isfile(os.path.join(config.OVERLAY_DIR, 'cachetime')):
-#     print '\nWARNING: no pre-cached data'
-#     print 'Freevo will cache each directory when you first enter it. This can'
-#     print 'be slow. Start "./freevo cache" to pre-cache all directories to speed'
-#     print 'up usage of freevo'
-#     print
-# else:
-#     f = open(os.path.join(config.OVERLAY_DIR, 'cachetime'))
-#     if long(time.time()) - long(f.readline()) > 604800:
-#         print '\nWARNING: cache files older than 7 days'
-#         print 'Please rerun "./freevo cache" to speed up freevo'
-#         print
-#     f.close()
-    
 
 os.umask(config.UMASK)
 
