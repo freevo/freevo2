@@ -6,11 +6,11 @@
     <!-- Settings for the main menu (will change soon) -->
     <main x="180" width="320">        
       <font name="neuropol" size="32" color="0x38474c"/>
-      <shadow visible="yes" mode="solid" color="0x000000" x="1" y="1"/>
+      <shadow visible="yes" color="0x000000" x="1" y="1"/>
       
       <selection color="0xffffff" bgcolor="0x38474c">
 	<font name="neuropol" size="32" color="0xffffff"/>
-	<shadow visible="yes" mode="solid" color="0x000000" x="3" y="3"/>
+	<shadow visible="yes" color="0x000000" x="3" y="3"/>
       </selection>
 
       <item pos="0" name="TV"       action="tv.main_menu"  arg="" 
@@ -39,19 +39,17 @@
       <items x="40" y="85" height="320" width="560">
 	<item type="all">
 	  <font name="bluehigh" size="16" color="0x000000"/>
-	  <!-- shadow mode= solid | translucent -->
-	  <shadow visible="no" mode="solid" color="0x000000" x="1" y="1"/> 
-
+	  <shadow visible="no" color="0x000000" x="1" y="1"/> 
 	  <selection visible="yes" color="0xffffff" bgcolor="0x000000">
 	    <font name="bluehigh" size="16" color="0xffffff"/>
-	    <shadow visible="yes" mode="solid" color="0x000000" x="1" y="1"/>
+	    <shadow visible="yes" color="0x000000" x="1" y="1"/>
 	  </selection>
 	</item>
 
 	<item type="dir">
 	  <font color="0x38474c"/>
 	  <selection bgcolor="0x38474c"/>
-	  <shadow visible="yes" mode="solid" color="0x000000" x="1" y="1"/>
+	  <shadow visible="yes" color="0x000000" x="1" y="1"/>
 	</item>
 
 	<item type="playlist">
@@ -74,7 +72,7 @@
 	<font name="interpla" size="16" color="0x000000"/>
 	<selection length="100" bgcolor="0x08171c" color="0xffffff">
            <font name="interpla" size="16" color="0xffffff"/>
-           <shadow visible="yes" mode="solid" color="0x000000" x="2" y="2"/>
+           <shadow visible="yes" color="0x000000" x="2" y="2"/>
         </selection>
       </submenu>
 
@@ -87,7 +85,7 @@
       </title>
       <bgbitmap>../../images/aubin_bg1.png</bgbitmap>
       <font name="neuropol" size="18" color="0x58677c"/>
-      <shadow visible="yes" mode="solid" color="0x000000" x="1" y="1"/>
+      <shadow visible="yes" color="0x000000" x="1" y="1"/>
       <progressbar visible="yes" x="0" y="490" width="768" height="5"      
 	color="0x58677c" bgcolor="0xffffff" 
 	border_color="0x000000" border_size="1"/>

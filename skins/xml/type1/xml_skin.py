@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2002/09/23 18:18:52  dischi
+# remove shadow_mode stuff
+#
 # Revision 1.7  2002/09/22 11:49:18  dischi
 # Bugfix
 #
@@ -102,7 +105,6 @@ class XML_data:
     text = None
     font = OSD_DEFAULT_FONT
     mode=''
-    shadow_mode = ''
     shadow_visible = 0
     shadow_color = 0
     shadow_pad_x = shadow_pad_y = 1
@@ -166,8 +168,11 @@ class XMLSkin:
         return default
 
     def attr_hex(self, node, attr, default):
-        if node.attrs.has_key(('', attr)):
-            return int(node.attrs[('', attr)], 16)
+        try:
+            if node.attrs.has_key(('', attr)):
+                return long(node.attrs[('', attr)], 16)
+        except ValueError:
+            pass
         return default
 
     def attr_bool(self, node, attr, default):
@@ -229,7 +234,6 @@ class XMLSkin:
             if subnode.name == u'shadow':
                 data.shadow_visible = self.attr_bool(subnode, "visible", data.shadow_visible)
                 data.shadow_color = self.attr_hex(subnode, "color", data.shadow_color)
-                data.shadow_mode = self.attr_str(subnode, "mode", data.shadow_mode)
                 data.shadow_pad_x = self.attr_int(subnode, "x", data.shadow_pad_x)
                 data.shadow_pad_y = self.attr_int(subnode, "y", data.shadow_pad_y)
                 
@@ -379,7 +383,6 @@ class XMLSkin:
     #
     def load(self, file, copy_content = 0):
         try:
-            print "********** LOAD %s" % file
             parser = qp_xml.Parser()
             box = parser.parse(open(file).read())
             for freevo_type in box.children:
