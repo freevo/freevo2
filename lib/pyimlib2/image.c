@@ -90,9 +90,7 @@ PyObject *Image_PyObject__scale(PyObject *self, PyObject *args)
 		return NULL;
 
 	imlib_context_set_image(((Image_PyObject *)self)->image);
-	imlib_context_set_blend(0);
 	image = imlib_create_cropped_scaled_image(x, y, src_w, src_h, dst_w, dst_h);
-	imlib_context_set_blend(1);
 	if (!image) {
 		PyErr_Format(PyExc_RuntimeError, "Failed scaling image (%d, %d)", dst_w, dst_h);
 		return NULL;
@@ -137,6 +135,36 @@ PyObject *Image_PyObject__rotate(PyObject *self, PyObject *args)
 	return (PyObject *)o;
 }
 
+PyObject *Image_PyObject__orientate(PyObject *self, PyObject *args)
+{ 
+	Image_PyObject *o;
+	int orientation;
+
+	if (!PyArg_ParseTuple(args, "i", &orientation))
+		return NULL;
+
+	imlib_context_set_image(((Image_PyObject *)self)->image);
+	imlib_image_orientate(orientation);
+	Py_INCREF(Py_None);
+	return Py_None;
+}
+
+PyObject *Image_PyObject__flip(PyObject *self, PyObject *args)
+{ 
+	Image_PyObject *o;
+	int horiz, vert, diag;
+
+	if (!PyArg_ParseTuple(args, "iii", &horiz, &vert, &diag))
+		return NULL;
+
+	imlib_context_set_image(((Image_PyObject *)self)->image);
+	if (horiz) imlib_image_flip_horizontal();
+	if (vert)  imlib_image_flip_vertical();
+	if (diag)  imlib_image_flip_diagonal();
+
+	Py_INCREF(Py_None);
+	return Py_None;
+}
 PyObject *Image_PyObject__clone(PyObject *self, PyObject *args)
 { 
 	int dst_w, dst_h, src_w, src_h;
@@ -403,6 +431,8 @@ PyMethodDef Image_PyObject_methods[] = {
 	{ "clone", Image_PyObject__clone, METH_VARARGS },
 	{ "scale", Image_PyObject__scale, METH_VARARGS },
 	{ "rotate", Image_PyObject__rotate, METH_VARARGS },
+	{ "orientate", Image_PyObject__orientate, METH_VARARGS },
+	{ "flip", Image_PyObject__flip, METH_VARARGS },
 	{ "blend", Image_PyObject__blend, METH_VARARGS },
 	{ "move_to_shmem", Image_PyObject__move_to_shmem, METH_VARARGS },
 	{ "get_bytes", Image_PyObject__get_bytes, METH_VARARGS },
@@ -417,6 +447,10 @@ PyObject *Image_PyObject__getattr(Image_PyObject *self, char *name)
 		return Py_BuildValue("l", imlib_image_get_width());
 	else if (!strcmp(name, "height"))
 		return Py_BuildValue("l", imlib_image_get_height());
+	else if (!strcmp(name, "has_alpha"))
+		return Py_BuildValue("l", imlib_image_has_alpha());
+	else if (!strcmp(name, "rowstride"))
+		return Py_BuildValue("l", imlib_image_get_width() * 4);
 	else if (!strcmp(name, "format"))
 		return Py_BuildValue("s", imlib_image_format());
 	else if (!strcmp(name, "mode"))

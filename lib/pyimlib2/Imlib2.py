@@ -55,18 +55,14 @@ class Image:
 		    format: format of the image if loaded from file (e.g. PNG, JPEG)
 		  filename: filename if loaded from file
 		"""
-		if attr == "width": 
-			return self._image.width
-		elif attr == "height": 
-			return self._image.height
+		if attr in ("width", "height", "format", "mode", "filename",
+		            "rowstride"):
+			return getattr(self._image, attr)
 		elif attr == "size": 
 			return (self._image.width, self._image.height)
-		elif attr == "format": 
-			return self._image.format
-		elif attr == "mode": 
-			return self._image.mode
-		elif attr == "filename": 
-			return self._image.filename
+		elif attr == "has_alpha":
+			if self._image.has_alpha: return True
+			return False
 
 		if attr not in self.__dict__:
 			raise AttributeError, attr
@@ -151,6 +147,17 @@ class Image:
 		"""
 		return Image(self._image.rotate(angle * math.pi / 180))
 		
+	def orientate(self, orientation):
+		self._image.orientate(orientation)
+
+	def flip_horizontal(self):
+		self._image.flip(True, False, False)
+
+	def flip_vertical(self):
+		self._image.flip(False, True, False)
+
+	def flip_diagonal(self):
+		self._image.flip(False, False, True)
 
 	def scale_preserve_aspect(self, (w, h)):
 		"""

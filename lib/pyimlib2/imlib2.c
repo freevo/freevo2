@@ -33,7 +33,8 @@ PyObject *imlib2_create(PyObject *self, PyObject *args)
 			free(bytes);
 		}
 		imlib_context_set_image(image);
-		imlib_image_set_has_alpha(1);
+		if (strlen(from_format) == 4)
+			imlib_image_set_has_alpha(1);
 	} else {
 		image = imlib_create_image(w, h);
 		imlib_context_set_image(image);
@@ -67,7 +68,7 @@ PyObject *imlib2_open(PyObject *self, PyObject *args)
 		return NULL;
 	}
 	imlib_context_set_image(image);
-	imlib_image_set_has_alpha(1);
+	//imlib_image_set_has_alpha(1);
 	imlib_image_get_data_for_reading_only();
 	o = PyObject_NEW(Image_PyObject, &Image_PyObject_Type);
 	o->image = image;
