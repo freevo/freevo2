@@ -290,6 +290,8 @@ IMDB_REMOVE_FROM_LABEL = ('season[\._ -][0-9]+', 'disc[\._ -][0-9]+',
 # list of words to ignore when searching based on a filename
 IMDB_REMOVE_FROM_SEARCHSTRING = ('the', 'a')
 
+# delete file in menu
+plugin.activate('file_ops', level=20)
 
 # use mplayer for video playpack
 plugin.activate('video.mplayer')
@@ -308,7 +310,7 @@ plugin.activate('tv.mplayer')
 
 # support for settings bookmarks (key RECORD) while playing. Also
 # auto bookmarking when playback is stopped
-plugin.activate('video.bookmarker')
+plugin.activate('video.bookmarker', level=0)
 
 # For recording tv
 #
