@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/03/11 19:40:33  dischi
+# bugfix
+#
 # Revision 1.19  2003/03/10 07:09:48  outlyer
 # Added an uppercase /VIDEO_TS/ for DVDs in identifymedia. I couldn't verify
 # this works since I lack a cdrom drive.
@@ -211,7 +214,7 @@ class Identify_Thread(threading.Thread):
                 pass
             
         mediatypes = [('VCD', '/mpegav/', 'vcd'), ('SVCD','/SVCD/', 'vcd'), 
-                      ('SVCD','/svcd/', 'vcd'), ('DVD', '/video_ts/', 'dvd') 
+                      ('SVCD','/svcd/', 'vcd'), ('DVD', '/video_ts/', 'dvd'),
 		      ('DVD','/VIDEO_TS/','dvd')]
 
         image = title = movie_info = None
