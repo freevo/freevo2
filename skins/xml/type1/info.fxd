@@ -62,7 +62,7 @@
     ** MENU
     ******************************************************* -->
 
-    <menu type="default">
+    <menu type="default no image">
       <style text="plain text style"/>
     </menu>
 
