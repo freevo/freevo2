@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/09/05 18:16:43  dischi
+# parse all named images into self.images
+#
 # Revision 1.10  2003/09/02 19:13:05  dischi
 # move box_under_icon as variable into the skin fxd file
 #
@@ -961,9 +964,13 @@ class XMLSkin:
             self.tv.listing.images[image].prepare(None, search_dirs, self._images)
 
         self.popup = layout[self._popup]
-
+        
         self.mainmenu = copy.deepcopy(self._mainmenu)
         self.mainmenu.prepare(search_dirs, self._images)
+
+        self.images = {}
+        for name in self._images:
+            self.images[name] = search_file(self._images[name], search_dirs)
         return 1
 
         
