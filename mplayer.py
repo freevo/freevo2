@@ -95,6 +95,9 @@ class MPlayer:
             command = mpl + ' "' + filename + '"'
         elif mode == 'dvdnav':
             command = config.MPLAYER_CMD + ' ' + config.MPLAYER_ARGS_DVDNAV
+        elif mode == 'vcd':
+            mpl = config.MPLAYER_CMD + ' ' + config.MPLAYER_ARGS_VCD
+            command = mpl % filename  # Filename is VCD chapter
         else:
             mpl = config.MPLAYER_CMD + ' ' + config.MPLAYER_ARGS_DVD
             command = mpl % filename  # Filename is DVD chapter

@@ -17,7 +17,7 @@ VIDREC_HQ = ''
 def ConfigInit(videotools = 'sim'):
     print 'VIDEOTOOLS = %s' % videotools
 
-    global MPLAYER_CMD, MPLAYER_ARGS_MPG, MPLAYER_ARGS_DVD
+    global MPLAYER_CMD, MPLAYER_ARGS_MPG, MPLAYER_ARGS_DVD, MPLAYER_ARGS_VCD
     global MPLAYER_ARGS_DVDNAV, VIDREC_MQ, VIDREC_HQ
 
     #
@@ -31,6 +31,9 @@ def ConfigInit(videotools = 'sim'):
                             ' -ao oss:/dev/dsp0')
         MPLAYER_ARGS_DVD = ('-nolirc -nobps -framedrop -cache 5000 -vo mga ' +
                             '-ao oss:/dev/dsp0 -dvd %s -alang en,se  ' +      
+                            '-screenw 768 -screenh 576 -fs ')
+        MPLAYER_ARGS_VCD = ('-nolirc -nobps -framedrop -cache 5000 -vo mga ' +
+                            '-ao oss:/dev/dsp0 -vcd %s -alang en,se  ' +      
                             '-screenw 768 -screenh 576 -fs ')
         VIDREC_MQ_TV = ('DIVX4rec -F 300000 -norm NTSC ' +
                         '-input Television -m -r 22050 -w 320 -h 240 ' +
@@ -50,6 +53,9 @@ def ConfigInit(videotools = 'sim'):
                             ' -screenw 768 -screenh 576 -fs -ao oss:/dev/dsp0')
         MPLAYER_ARGS_DVD = ('-nobps -framedrop -cache 4096 -vo xv ' +
                             '-ao oss:/dev/dsp0 -dvd %s -alang en,se ' +
+                            '  -screenw 768 -screenh 576 -fs ')
+        MPLAYER_ARGS_VCD = ('-nobps -framedrop -cache 4096 -vo xv ' +
+                            '-ao oss:/dev/dsp0 -vcd %s -alang en,se ' +
                             '  -screenw 768 -screenh 576 -fs ')
         VIDREC_MQ = ('DIVX4rec -F 300000 -norm NTSC ' +
                      '-input Composite1 -m -r 22050 -w 320 -h 240 -ab 80 ' +
