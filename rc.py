@@ -32,6 +32,11 @@ def get_singleton():
 
 class RemoteControl:
 
+    # Remote control buttons. This is taken from a universal remote
+    # that has a large (but not ridiculous) number of buttons.
+    # Try to use a common subset for the common operations, and
+    # don't add buttons that only exist on a specific remote since
+    # no-one else will be able to use it.
     NONE     = ''
     SLEEP    = 'SLEEP'
     MENU     = 'MENU'
@@ -46,18 +51,18 @@ class RemoteControl:
     MUTE     = 'MUTE'
     VOLUP    = 'VOL+'
     VOLDOWN  = 'VOL-'
-    CHUP      = 'CH+'
-    CHDOWN      = 'CH-'
-    K1        = '1'
-    K2        = '2'
-    K3        = '3'
-    K4        = '4'
-    K5        = '5'
-    K6        = '6'
-    K7        = '7'
-    K8        = '8'
-    K9        = '9'
-    K0        = '0'
+    CHUP     = 'CH+'
+    CHDOWN   = 'CH-'
+    K1       = '1'
+    K2       = '2'
+    K3       = '3'
+    K4       = '4'
+    K5       = '5'
+    K6       = '6'
+    K7       = '7'
+    K8       = '8'
+    K9       = '9'
+    K0       = '0'
     DISPLAY  = 'DISPLAY'
     ENTER    = 'ENTER'
     PREV_CH  = 'PREV_CH'
