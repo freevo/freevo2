@@ -21,8 +21,8 @@
     <menuset label="normal text style">
       <view x="20" y="100" width="300" height="300"/> 
       <listing layout="listing" x="330" y="110" width="440" height="430">
-	<image filename="blurr-up.png" label="uparrow" x="770" y="110"/>
-	<image filename="blurr-down.png" label="downarrow" x="770" y="max-32"/>
+	<image filename="up.png" label="uparrow" x="770" y="110"/>
+	<image filename="down.png" label="downarrow" x="770" y="max-32"/>
       </listing>
     </menuset>
 
@@ -49,9 +49,9 @@
       <info layout="tv info" x="10" y="80" width="760" height="115"/>
       <listing layout="tv listing" x="10" y="220" width="750" height="320">
 	<image x="765" y="220" width="32" height="32" label="uparrow"
-	  filename="blurr-up.png"/>
+	  filename="up.png"/>
 	<image x="765" y="max-32" width="32" height="32" label="downarrow" 
-	  filename="blurr-down.png"/>
+	  filename="down.png"/>
 	<image width="16" height="16" label="leftarrow" filename="left.png"/>
 	<image width="16" height="16" label="rightarrow" filename="right.png"/>
       </listing>
@@ -110,8 +110,8 @@
       <screen layout="video screen" visible="yes"/>
       <view layout="view" x="10" y="90" width="280" height="250" align="left"/>
       <listing x="30" y="350" width="700" height="230">
-        <image filename="blurr-up.png" label="uparrow" x="730" y="350"/>
-        <image filename="blurr-down.png" label="downarrow" x="730" y="max-32"/>
+        <image filename="up.png" label="uparrow" x="730" y="350"/>
+        <image filename="down.png" label="downarrow" x="730" y="max-32"/>
       </listing>
       <info layout="video info" x="300" y="100" width="450" height="300"/>
     </menuset>
@@ -331,11 +331,11 @@
       <content type="image" spacing="10">
         <item type="default" width="140" height="115" align="center"
           valign="center">
-	  <shadow x="5" y="5" color="0xaa333333" visible="yes"/>
+	  <shadow x="5" y="5" color="0xaa000000" visible="yes"/>
         </item>
         <item type="selected" width="140" height="115"
           align="center" valign="center">
-	  <shadow x="5" y="5" color="0xaa333333" visible="yes"/>
+	  <shadow x="5" y="5" color="0xaa000000" visible="yes"/>
           <rectangle color="0x00ffffff" bgcolor="0xffffffffff" size="2" x="-6"
 	    y="-6" width="max+12" height="max+12"/>
         </item>
