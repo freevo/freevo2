@@ -70,7 +70,7 @@
     </menu>
 
     <menu type="audio">
-        <style text="audio"/>
+      <style text="audio"/>
     </menu>
       
     <menu type="image">
@@ -91,7 +91,7 @@
       
     <menuset label="audio" inherits="normal text style">
       <screen layout="audio screen"/>
-      <view layout="view" x="15" y="90" width="280" height="300" align="center"/>
+      <view layout="view" x="15" y="90" width="280" height="270"/>
       <info layout="audio info" x="28" y="370" width="273" height="190"/>
     </menuset>
       
@@ -189,24 +189,37 @@
    <layout label="audio info">
       <content x="0" y="0" type="text" spacing="20" font="default">
           <!-- audio dir -->
-          <item type="default">
+	<item type="default">
           <if expression="display_type == 'audio' and artist">
             <text font="info tagline" expression="artist"/>
             <newline/>
           </if>
           <if expression="display_type == 'audio' and album">
-            <text font="info value" height="max" expression="album" mode="soft" />
+            <text font="info value" expression="album" mode="soft" />
             <newline/>
           </if>
+          <if expression="not album and not artist">
+            <text font="info tagline" expression="name" mode="soft" />
+            <newline/>
+	  </if>	  
           <if expression="display_type == 'audio' and year">
-            <text font="info value" expression="year"/>
-            <newline/>
-          </if>
+	    <if expression="album or artist">
+	      <text font="info value" expression="year"/>
+	      <newline/>
+	    </if>
+	  </if>
           <if expression="display_type == 'audio' and length">
             <text font="info value" expression="length"/>
+	    <newline/>
           </if>
-          </item>
-          <item type="audio">
+	  <if expression="type == 'playlist'">
+	    <text font="info value" width="max" expression="len(playlist)"/>
+	    <text font="info value"> Items</text>
+	    <newline/>
+	  </if>
+	</item>
+
+	<item type="audio">
           <if expression="artist">
             <text font="info tagline" expression="artist"/>
             <newline/>
@@ -215,9 +228,16 @@
             <text font="info value" expression="album"/>
             <newline/>
           </if>
+          <if expression="not album and not artist">
+            <text font="info tagline" expression="name" mode="soft" />
+            <newline/>
+	    <if expression="description"> <!-- e.g. webradio -->
+	      <text font="info value" expression="description" height="max" mode="soft"/>
+	    </if>
+	  </if>	  
           <if expression="date">
-              <text font="info value" expression="date"/>
-              <newline/>
+	    <text font="info value" expression="date"/>
+	    <newline/>
           </if>
           <if expression="length">
             <text font="info value" expression="length"/>
@@ -225,8 +245,8 @@
           </if>
         </item>
         
-       <item type="audiocd">
-         <if expression="title">
+	<item type="audiocd">
+	  <if expression="title">
 	    <text font="info tagline" expression="title"/>
 	    <newline/>
 	  </if>
@@ -413,7 +433,7 @@
 
     <!-- default view area -->
     <layout label="view">
-      <content align="center" valign="middle">
+      <content align="center" valign="center">
         <item type="default">
 	  <rectangle size="0" bgcolor="0x80000000" radius="8" x="-10" y="-10"
 	    width="max+20" height="max+20"/>
@@ -499,8 +519,8 @@
 
     <player>
       <screen layout="player screen" x="0" y="0" width="800" height="600"/>
-      <info layout="player info blurr" x="350" y="110" width="550" height="360"/>
-      <view layout="player blurr" x="20" y="120" width="420" height="340"/>
+      <info layout="player info blurr" x="400" y="140" width="375" height="330"/>
+      <view layout="player blurr" x="30" y="120" width="360" height="350"/>
       <title visible="no"/>
     </player>
 
@@ -514,14 +534,11 @@
     </layout>
 
     <layout label="player blurr">
-      <content type="text" spacing="10">
-        <item type="default" align="right">
-        </item>
-      </content>
+      <content align="center" valign="center"/>
     </layout>
 
     <layout label="player info blurr">
-      <content x="70" y="30" height="max" width="max-130" type="text" spacing="10">
+      <content>
         <item type="default">
           <if expression="title">
             <text font="player title" expression="title"/>
