@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/01/10 18:45:00  dischi
+# check for type first
+#
 # Revision 1.20  2003/12/29 22:08:54  dischi
 # move to new Item attributes
 #
@@ -182,7 +185,7 @@ def get_items(item):
 
     if item.mode in ('dvd', 'vcd') or \
            (item.filename and item.info.has_key('type') and \
-            item.info['type'].lower().find('mpeg') != -1):
+            item.info['type'] and item.info['type'].lower().find('mpeg') != -1):
         items += [ add_toogle(_('deinterlacing'), item, 'deinterlace') ]
     return items
 
