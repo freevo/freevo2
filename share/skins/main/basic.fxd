@@ -159,7 +159,7 @@
 
     <!-- subtitle -->
     <layout label="subtitle">
-      <content x="170" y="0" type="menu" font="subtitle" align="center"
+      <content x="0" y="0" type="short item" font="subtitle" align="left"
 	valign="center"/>
     </layout>
 
@@ -246,6 +246,10 @@
     <font label="large0"  name="VeraBd.ttf" size="20" color="default0"/>
     <font label="large1"  name="VeraBd.ttf" size="20" color="default1"/>
     <font label="large2"  name="VeraBd.ttf" size="20" color="default2"/>
+
+    <font label="huge0"  name="VeraBd.ttf" size="28" color="default0"/>
+    <font label="huge1"  name="VeraBd.ttf" size="28" color="default1"/>
+    <font label="huge2"  name="VeraBd.ttf" size="28" color="default2"/>
 
     <color label="default0" value="0xffffff"/>
     <color label="default1" value="0xffffaa"/>
