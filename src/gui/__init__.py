@@ -1,34 +1,14 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
-# gui - First attempt at a freevo gui library
+# gui - Interface to all gui functions and objects
 # -----------------------------------------------------------------------
 # $Id$
 #
-# The goal is to make a OO GUI library for use with freevo. The main
-# idea is that skins can use or inherit from this class and override
-# when needed.
-#
-# A Object Oriented GUI Widget library for Freevo
-# 
-# This is aimed at being a general library for GUI programming with Freevo.
-# It is built directly on top of SDL with pygame, and it's aimed at being
-# fairly fast.
-# 
-# Event though the library is built from the ground the design is heavy
-# influenced by other GUI toolkits, such as Java JDK and QT.
-# 
-# Currently not many classes are in place, but hopefully we will add more
-# in time.
-#
-# Initial version: Thomas Malt <thomas@malt.no>
-#
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.15  2004/07/10 12:33:39  dischi
-# header cleanup
+# Revision 1.16  2004/07/22 21:16:01  dischi
+# add first draft of new gui code
 #
-# Revision 1.14  2004/02/23 19:15:46  dischi
-# remove import of debug
 #
 # -----------------------------------------------------------------------
 #
@@ -52,20 +32,54 @@
 #
 # ----------------------------------------------------------------------
 
-from Border            import *
-from Color             import *
-from GUIObject         import *
-from Container         import *
-from PopupBox          import *
-from AlertBox          import *
-from ConfirmBox        import *
-from Label             import *
-from Button            import *
-from LetterBoxGroup    import *
-from RegionScroller    import *
-from Scrollbar         import *
-from InputBox          import *
-from LayoutManagers    import *
-from exceptions        import *
-from ProgressBox       import *
+# include all the widgets
+from widgets.Border            import *
+from widgets.Color             import *
+from widgets.GUIObject         import *
+from widgets.Container         import *
+from widgets.PopupBox          import *
+from widgets.AlertBox          import *
+from widgets.ConfirmBox        import *
+from widgets.Label             import *
+from widgets.Button            import *
+from widgets.LetterBoxGroup    import *
+from widgets.RegionScroller    import *
+from widgets.Scrollbar         import *
+from widgets.InputBox          import *
+from widgets.LayoutManagers    import *
+from widgets.exceptions        import *
+from widgets.ProgressBox       import *
+from widgets.ListBox           import *
 
+# the objects that can be drawn
+from base import Image, Rectangle, Text
+
+_screen = None
+_skin   = None
+
+def get_screen():
+    """
+    return the screen object
+    """
+    global _screen
+    if not _screen:
+        # some test code here
+        if hasattr(config, 'BMOVL_OSD_VIDEO'):
+            import bmovl_renderer
+            _screen = bmovl_renderer.Screen()
+        else:
+            import pygame_renderer
+            _screen = pygame_renderer.Screen()
+    return _screen
+
+def get_skin():
+    """
+    return the skin object
+    """
+    global _skin
+    if not _skin:
+        import areas
+        _skin = areas.Skin()
+        _skin.set_screen(get_screen())
+    return _skin
+    
