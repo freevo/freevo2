@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/08/20 21:51:34  outlyer
+# Use Python 'touch' rather than system call
+#
 # Revision 1.17  2003/07/20 16:09:53  dischi
 # bugfix
 #
@@ -645,7 +648,7 @@ class Identify_Thread(threading.Thread):
 
         rebuild_file = '/tmp/freevo-rebuild-database'
         # Make sure the movie database is rebuilt at startup
-        os.system('touch %s' % rebuild_file)
+        util.touch(rebuild_file)
         while 1:
             # Check if we need to update the database
             # This is a simple way for external apps to signal changes
