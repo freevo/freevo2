@@ -26,6 +26,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/11/25 19:00:52  dischi
+# make fxd item parser _much_ simpler
+#
 # Revision 1.1  2003/11/24 19:22:01  dischi
 # a module with callbacks to create items out of an fxd file
 #
@@ -64,25 +67,12 @@ import util
 _callbacks_ = []
 
 
-class FXDItem:
-    """
-    parent class for handlers to register
-    """
-    def __init__(self, parser, filename, parent, duplicate_check):
-        # fill self.items with the parsed items
-        self.items    = []
-        
-    
-def register(types, handler):
+def register(types, tag, handler):
     """
     register handler classes for types to the list of callbacks
     """
-    if not issubclass(handler, FXDItem):
-        _debug_('INTERNAL ERROR: handler has to be a subclass of FXDItem')
-        return
-
     global _callbacks_
-    _callbacks_.append((types, handler))
+    _callbacks_.append((types, tag, handler))
 
 
 
@@ -101,22 +91,22 @@ def getitems(parent, fxd_files, duplicate_check=[], display_type=None):
             # create a basic fxd parser
             parser = util.fxdparser.FXD(fxd_file)
 
-            # create an object that can parse the special infos
-            # from the fxd
-            current_handler = []
+            # create items attr for return values
+            parser.setattr(None, 'items', [])
+            parser.setattr(None, 'parent', parent)
+            parser.setattr(None, 'filename', fxd_file)
+            parser.setattr(None, 'duplicate_check', duplicate_check)
 
-            for types, handler in _callbacks_:
+            for types, tag, handler in _callbacks_:
                 if not display_type or display_type in types:
-                    h = handler(parser, fxd_file, parent, duplicate_check)
-                    current_handler.append(h)
+                    parser.set_handler(tag, handler)
 
             # start the parsing
             parser.parse()
 
-            # get this informations back
-            for h in current_handler:
-                items += h.items
-
+            # return the items
+            items += parser.getattr(None, 'items')
+        
         except:
             print "fxd file %s corrupt" % fxd_file
             traceback.print_exc()

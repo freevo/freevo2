@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/11/25 19:00:52  dischi
+# make fxd item parser _much_ simpler
+#
 # Revision 1.9  2003/11/24 19:25:46  dischi
 # use new fxditem
 #
@@ -47,7 +50,6 @@ import config
 import util
 
 from audioitem import AudioItem
-import fxditem
 
 
 def cwd(parent, files):
@@ -82,7 +84,7 @@ def update(parent, new_files, del_files, new_items, del_items, current_items):
 
 
 
-class FXDHandler(fxditem.FXDItem):
+def audio_handler(fxd, node):
     """
     parse audio specific stuff from fxd files
 
@@ -101,30 +103,19 @@ class FXDHandler(fxditem.FXDItem):
       </audio>
     </freevo>
     """
-    def __init__(self, parser, filename, parent, duplicate_check):
-        self.items   = []
-        self.parent  = parent
-        self.dirname = vfs.dirname(vfs.normalize(filename))
-        self.name    = vfs.splitext(vfs.basename(filename))[0]
-        parser.set_handler('audio', self.parse)
+    a = AudioItem('', fxd.getattr(None, 'parent', None), scan=False)
+    a.name     = fxd.getattr(node, 'title', a.name)
+    a.xml_file = fxd.getattr(None, 'filename', '')
+    a.image    = fxd.childcontent(node, 'cover-img')
+    if a.image:
+        a.image = vfs.join(vfs.dirname(a.xml_file), a.image)
 
-
-    def parse(self, fxd, node):
-        """
-        Callback from the fxd parser. Create an AudioItem
-        """
-        a = AudioItem('', self.parent, scan=False)
-        a.name = fxd.getattr(node, 'title', self.name)
-        a.image = fxd.childcontent(node, 'cover-img')
-        if a.image:
-            a.image = vfs.join(self.dirname, a.image)
-
-        a.mplayer_options = fxd.childcontent(node, 'mplayer_options')
-        a.url = fxd.childcontent(node, 'url')
-
-        fxd.parse_info(fxd.get_children(node, 'info', 1), a)
-        self.items.append(a)
+    a.mplayer_options = fxd.childcontent(node, 'mplayer_options')
+    a.url = fxd.childcontent(node, 'url')
+    fxd.parse_info(fxd.get_children(node, 'info', 1), a)
+    fxd.getattr(None, 'items', []).append(a)
 
 
 # register the audio fxd parser as parser to build items
-fxditem.register(['audio'], FXDHandler)
+import fxditem
+fxditem.register(['audio'], 'audio', audio_handler)
