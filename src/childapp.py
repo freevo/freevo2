@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2003/11/22 15:30:33  dischi
+# childapp can now log. Please remove the MPLAYER_DEBUG from the players
+#
 # Revision 1.41  2003/11/11 17:59:03  dischi
 # remove empty vals from app list
 #
@@ -149,7 +152,7 @@ class ChildApp:
                 self.binary = app.lstrip()
                 
             start_str = '%s %s' % (config.RUNAPP, app)
-
+            debug_name = app[:app.find(' ')]
 
         else:
             # app is a list
@@ -170,16 +173,24 @@ class ChildApp:
             else:
                 start_str = app
             
+            debug_name = app[0]
+
+        
+        if debug_name.rfind('/') > 0:
+            debug_name = debug_name[debug_name.rfind('/')+1:]
+        else:
+            debug_name = debug_name
+
         self.child   = util.popen3.Popen3(start_str)
         self.outfile = self.child.fromchild 
         self.errfile = self.child.childerr
         self.infile  = self.child.tochild
         
-        self.t1 = Read_Thread('stdout', self.outfile, self.stdout_cb)
+        self.t1 = Read_Thread('stdout', self.outfile, self.stdout_cb, debug_name)
         self.t1.setDaemon(1)
         self.t1.start()
         
-        self.t2 = Read_Thread('stderr', self.errfile, self.stderr_cb)
+        self.t2 = Read_Thread('stderr', self.errfile, self.stderr_cb, debug_name)
         self.t2.setDaemon(1)
         self.t2.start()
 
@@ -316,12 +327,28 @@ class ChildApp:
         
 class Read_Thread(threading.Thread):
 
-    def __init__(self, name, fp, callback):
+    def __init__(self, name, fp, callback, logger=None):
         threading.Thread.__init__(self)
         self.name = name
         self.fp = fp
         self.callback = callback
-
+        self.logger = None
+        if logger and config.CHILDAPP_DEBUG:
+            logger = os.path.join(config.LOGDIR, '%s-%s.log' % (logger, name))
+            try:
+                try:
+                    os.unlink(logger)
+                except:
+                    pass
+                self.logger = open(logger, 'w')
+                print _( 'logging child to "%s"' ) % logger
+            except IOError:
+                print
+                print _('ERROR') + ': ' + _( 'Cannot open "%s" for logging!') % logger
+                print _('Set CHILDAPP_DEBUG=0 in local_conf.py, or make %s writable!' ) % \
+                      config.LOGDIR
+                print
+            
         
     def run(self):
         try:
@@ -341,6 +368,8 @@ class Read_Thread(threading.Thread):
             if not data:
                 _debug_('%s: No data, stopping (pid %s)!' % (self.name, os.getpid()),2)
                 self.fp.close()
+                if self.logger:
+                    self.logger.close()
                 break
             else:
                 data = data.replace('\r', '\n')
@@ -351,6 +380,8 @@ class Read_Thread(threading.Thread):
                     saved += data
                 else:
                     # Combine saved data and first line, send to app
+                    if self.logger:
+                        self.logger.write(saved + lines[0]+'\n')
                     self.callback(saved + lines[0])
                     saved = ''
 
@@ -361,10 +392,14 @@ class Read_Thread(threading.Thread):
 
                         # Send all lines except the last partial line to the app
                         for line in lines[1:-1]:
+                            if self.logger:
+                                self.logger.write(line+'\n')
                             self.callback(line)
                     else:
                         # Send all lines to the app
                         for line in lines[1:]:
+                            if self.logger:
+                                self.logger.write(line+'\n')
                             self.callback(line)
                         
 
