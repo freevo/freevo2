@@ -169,6 +169,11 @@ class OSD:
         
     def drawstring(self, string, x, y, fgcolor=None, bgcolor=None,
                    font=None, ptsize=0):
+        # XXX Krister: Workaround for new feature that is only possible in the new
+        # XXX SDL ODS, line up columns delimited by tabs. Here the tabs are just
+        # XXX replaced with spaces
+        s = string.replace('\t', '   ')  
+                                  
         if fgcolor == None:
             fgcolor = self.default_fg_color
         if bgcolor == None:
@@ -177,7 +182,7 @@ class OSD:
             font = config.OSD_DEFAULT_FONTNAME
             ptsize = config.OSD_DEFAULT_FONTSIZE
         # Args: fontfilename;pointsize;string;x;y;fgcol
-        args1 = font + ';' + str(ptsize) + ';' + string + ';'
+        args1 = font + ';' + str(ptsize) + ';' + s + ';'
         args2 = str(x) + ';' + str(y) + ';' + str(fgcolor)
         self._send('drawstring;' + args1 + args2)
 
