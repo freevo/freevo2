@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/08/16 13:10:03  dischi
+# bugfix in DEBUG
+#
 # Revision 1.8  2003/08/13 17:23:23  dischi
 # fix when no lirc device is detected
 #
@@ -197,12 +200,13 @@ class Xine:
         self.item = item
         self.thread.item = item
         
-        if DEBUG:
-            print 'Xine.play(): Starting thread, cmd=%s' % command
         rc.app(self)
 
         command = self.command
         
+        if DEBUG:
+            print 'Xine.play(): Starting thread, cmd=%s' % command
+
         if item.deinterlace:
             if (config.XINE_VO_DEV == 'vidix' or self.xine_type == 'fb') and \
                    self.xine_version > 921:
