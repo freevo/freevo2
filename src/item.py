@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2002/11/27 20:22:19  dischi
+# Fixed some playlist problems. Sometimes the playlist stopped playing
+# after one item is finished. By playling a playlist again, it will start
+# with the first item again.
+#
 # Revision 1.3  2002/11/26 20:57:04  dischi
 # Moved video specific stuff to videoitem
 #
@@ -135,14 +140,15 @@ class Item(MenuItem):
             self.media.move_tray(dir='toggle')
             return TRUE
 
-        if event == rc.PLAY_END:
-            menuwidget = menu.get_singleton()
-            menuwidget.refresh()
-            return TRUE
-
         # give the event to the next eventhandler in the list
         if self.parent:
             return self.parent.eventhandler(event, menuw)
+
+        else:
+            if event == rc.PLAY_END:
+                menuwidget = menu.get_singleton()
+                menuwidget.refresh()
+                return TRUE
 
         print 'no eventhandler for event %s menuw %s' % (event, menuw)
         return FALSE

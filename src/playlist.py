@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/11/27 20:22:19  dischi
+# Fixed some playlist problems. Sometimes the playlist stopped playing
+# after one item is finished. By playling a playlist again, it will start
+# with the first item again.
+#
 # Revision 1.1  2002/11/24 13:58:44  dischi
 # code cleanup
 #
@@ -224,11 +229,12 @@ class Playlist(Item):
         menuw.pushmenu(moviemenu)
         
         
-    def play(self, menuw=None):
+    def play(self, arg=None, menuw=None):
         if not self.playlist:
             print 'empty playlist'
-
-        if not self.current_item:
+            return FALSE
+        
+        if not arg or arg != 'next':
             self.current_item = self.playlist[0]
             
         if not self.current_item.actions():
@@ -238,7 +244,7 @@ class Playlist(Item):
 
             if pos:
                 self.current_item = self.playlist[pos]
-                self.play(menuw)
+                self.play(menuw=menuw, arg='next')
             else:
                 # no repeat
                 self.current_item = None
@@ -264,8 +270,16 @@ class Playlist(Item):
                 if hasattr(self.current_item, 'stop'):
                     self.current_item.stop()
                 self.current_item = self.playlist[pos]
-                self.play(menuw)
+                self.play(menuw=menuw, arg='next')
+                return TRUE
+
+        # end and no next item
+        if event == rc.PLAY_END:
+            self.current_item = None
+            menuwidget = menu.get_singleton()
+            menuwidget.refresh()
             return TRUE
+            
 
         if event == rc.UP and self.current_item and self.playlist:
             pos = self.playlist.index(self.current_item)
@@ -274,8 +288,8 @@ class Playlist(Item):
                     self.current_item.stop()
                 pos = (pos-1) % len(self.playlist)
                 self.current_item = self.playlist[pos]
-                self.play(menuw)
-            return TRUE
+                self.play(menuw=menuw, arg='next')
+                return TRUE
 
         # give the event to the next eventhandler in the list
         return Item.eventhandler(self, event, menuw)
