@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/11/26 20:58:44  dischi
+# o Fixed bug that not only the first character of mplayer_options is used
+# o added the configure stuff again (without play from stopped position
+#   because the mplayer -ss option is _very_ broken)
+# o Various fixes in DVD playpack
+#
 # Revision 1.1  2002/11/24 13:58:45  dischi
 # code cleanup
 #
@@ -60,7 +66,7 @@ skin       = skin.get_singleton()
 osd        = osd.get_singleton()
 
 from item import Item
-
+import configure
 
 class VideoItem(Item):
     def __init__(self, files, parent):
@@ -104,7 +110,29 @@ class VideoItem(Item):
 
         self.video_player = mplayer.get_singleton()
 
-        
+        self.available_audio_tracks = []
+        self.available_subtitles    = []
+        self.available_chapters     = 0
+
+        self.selected_subtitle = None
+        self.selected_audio    = None
+        self.num_titles        = 0
+
+
+    def copy(self, obj):
+        """
+        Special copy value videoitems
+        """
+        Item.copy(self, obj)
+        if obj.type == 'video':
+            self.available_audio_tracks = obj.available_audio_tracks
+            self.available_subtitles    = obj.available_subtitles
+            self.available_chapters     = obj.available_chapters
+
+            self.selected_subtitle = obj.selected_subtitle
+            self.selected_audio    = obj.selected_audio
+            self.num_titles        = obj.num_titles
+
 
     # ------------------------------------------------------------------------
     # help function
@@ -114,90 +142,90 @@ class VideoItem(Item):
     #
     def dvd_vcd_handler(self, menuw):
 
-        # Use the uid to make a user-unique filename
-        uid = os.getuid()
+        if not self.num_titles:
+            # Use the uid to make a user-unique filename
+            uid = os.getuid()
 
-        # Figure out the number of titles on this disc
-        skin.PopupBox('Scanning disc, be patient...', icon='icons/cdrom_mount.png')
-        osd.update()
-        os.system('rm -f /tmp/mplayer_dvd_%s.log /tmp/mplayer_dvd_done_%s' % (uid, uid))
+            # Figure out the number of titles on this disc
+            skin.PopupBox('Scanning disc, be patient...', icon='icons/cdrom_mount.png')
+            osd.update()
+            os.system('rm -f /tmp/mplayer_dvd_%s.log /tmp/mplayer_dvd_done_%s' % (uid, uid))
 
-        if self.mode == 'dvd':
-            # Get the number of titles on the DVD
-            probe_file = '-dvd 1'
-        else:
-            # play track 99 which isn't there (very sure!), scan mplayers list
-            # of found tracks to get the total number of tracks
-            probe_file = '-vcd 99'
+            if self.mode == 'dvd':
+                # Get the number of titles on the DVD
+                probe_file = '-dvd 1'
+            else:
+                # play track 99 which isn't there (very sure!), scan mplayers list
+                # of found tracks to get the total number of tracks
+                probe_file = '-vcd 99'
 
-        cmd = config.MPLAYER_CMD + ' -ao null -nolirc -vo null -frames 0 '
-        cmd += ' %s 2> /dev/null > /tmp/mplayer_dvd_%s.log' % (probe_file, uid)
+            cmd = config.MPLAYER_CMD + ' -ao null -nolirc -vo null -frames 0 '
+            cmd += ' -cdrom-device %s -dvd-device %s' % \
+                   (self.media.devicename, self.media.devicename)
+            cmd += ' %s 2> /dev/null > /tmp/mplayer_dvd_%s.log' % (probe_file, uid)
 
-        os.system(cmd + (' ; touch /tmp/mplayer_dvd_done_%s' % uid))
+            os.system(cmd + (' ; touch /tmp/mplayer_dvd_done_%s' % uid))
 
-        timeout = time.time() + 20.0
-        done = 0
-        while 1:
-            if time.time() >= timeout:
-                print 'DVD/VCD disc read failed!'
-                break
-
-            if os.path.isfile('/tmp/mplayer_dvd_done_%s' % uid):
-                done = 1
-                break
-
-        found = 0
-        num_files = 0
-
-        if done and self.mode == 'dvd':
-            # Look for 'There are NNN titles on this DVD'
-            lines = open('/tmp/mplayer_dvd_%s.log' % uid).readlines()
-            for line in lines:
-                if line.find('titles on this DVD') != -1:
-                    num_titles = int(line.split()[2])
-                    print 'Got num_titles = %s from str "%s"' % (num_titles, line)
-                    found = 1
+            timeout = time.time() + 20.0
+            done = 0
+            while 1:
+                if time.time() >= timeout:
+                    print 'DVD/VCD disc read failed!'
                     break
 
-        elif done:
-            # Look for 'track NN'
-            lines = open('/tmp/mplayer_dvd_%s.log' % uid).readlines()
-            for line in lines:
-                if line.find('track ') == 0:
-                    num_titles = int(line[6:8])
-                    found = 1
+                if os.path.isfile('/tmp/mplayer_dvd_done_%s' % uid):
+                    done = 1
+                    break
 
-            # Count the files on the VCD
-            util.mount(self.media.mountdir)
-            for dirname in ('/mpegav/', '/MPEG2/', '/mpeg2/'):
-                num_files += len(util.match_files(self.media.mountdir + dirname,
-                                                  [ 'mpg', 'dat' ]))
-            util.umount(self.media.mountdir)
+            found = 0
+            num_files = 0
 
-        if not done or not found:
-            num_titles = 100 # XXX Kludge
+            if done and self.mode == 'dvd':
+                # Look for 'There are NNN titles on this DVD'
+                lines = open('/tmp/mplayer_dvd_%s.log' % uid).readlines()
+                for line in lines:
+                    if line.find('titles on this DVD') != -1:
+                        self.num_titles = int(line.split()[2])
+                        print 'Got num_titles = %s from str "%s"' % (self.num_titles, line)
+                        found = 1
+                        break
+
+            elif done:
+                # Look for 'track NN'
+                lines = open('/tmp/mplayer_dvd_%s.log' % uid).readlines()
+                for line in lines:
+                    if line.find('track ') == 0:
+                        self.num_titles = int(line[6:8])
+                        found = 1
+
+                # Count the files on the VCD
+                util.mount(self.media.mountdir)
+                for dirname in ('/mpegav/', '/MPEG2/', '/mpeg2/'):
+                    num_files += len(util.match_files(self.media.mountdir + dirname,
+                                                      [ 'mpg', 'dat' ]))
+                util.umount(self.media.mountdir)
+
+            if not done or not found:
+                self.num_titles = 100 # XXX Kludge
 
         #
         # Done scanning the disc, set up the menu.
         #
 
-        self.mplayer_options += ' -cdrom-device %s -dvd-device %s' % \
-                                (self.media.devicename, self.media.devicename)
-
         # Now let's see what we can do now:
         # only one track, play it
-        if num_titles == 1:
+        if self.num_titles == 1:
             file = copy.copy(self)
-            file.files = ('1', )
+            file.files = [ '1', ]
             file.play(menuw = menuw)
             return
 
         # build a menu
         items = []
-        for title in range(1,num_titles+1):
+        for title in range(1,self.num_titles+1):
             file = copy.copy(self)
-            file.files = ('%s' % title, )
-            file.name = 'Play Title %s' % (title - 1)
+            file.files = ['%s' % title, ]
+            file.name = 'Play Title %s' % title
             items += [file]
 
         moviemenu = menu.Menu(self.name, items, umount_all = 1)
@@ -215,7 +243,7 @@ class VideoItem(Item):
         return [ ( self.play, 'Play' ) ]
     
 
-    def play(self, menuw=None):
+    def play(self, arg=None, menuw=None):
         self.parent.current_item = self
         if not self.files[0] and (self.mode == 'dvd' or self.mode == 'vcd'):
             self.dvd_vcd_handler(menuw)
@@ -228,6 +256,15 @@ class VideoItem(Item):
                 mplayer_options += '-cdrom-device %s -dvd-device %s' % \
                                    (self.media.devicename, self.media.devicename)
 
+            if self.selected_subtitle:
+                mplayer_options += ' -sid %s' % self.selected_subtitle
+                
+            if self.selected_audio:
+                mplayer_options += ' -aid %s' % self.selected_audio
+                
+            if arg:
+                mplayer_options += arg
+                
             self.video_player.play(self.current_file, mplayer_options, self)
 
 
@@ -246,5 +283,9 @@ class VideoItem(Item):
                 self.video_player.play(self.current_file, self.mplayer_options, self)
                 return TRUE
 
+        if event == rc.MENU:
+            self.video_player.stop()
+            configure.main_menu(self)
+            
         # give the event to the next eventhandler in the list
         return Item.eventhandler(self, event, menuw)

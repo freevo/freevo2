@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/11/26 20:58:44  dischi
+# o Fixed bug that not only the first character of mplayer_options is used
+# o added the configure stuff again (without play from stopped position
+#   because the mplayer -ss option is _very_ broken)
+# o Various fixes in DVD playpack
+#
 # Revision 1.1  2002/11/24 13:58:45  dischi
 # code cleanup
 #
@@ -176,7 +182,8 @@ class MPlayer:
             command = mpl
 
         if options:
-            command += ' ' + options[0]
+            print options
+            command += ' ' + options
                 
         self.file = item
 
@@ -217,9 +224,10 @@ class MPlayer:
         """
         self.thread.mode = 'stop'
         self.thread.mode_flag.set()
+        rc.app = None
         while self.thread.mode == 'stop':
             time.sleep(0.3)
-
+            
 
     def eventhandler(self, event):
         """
