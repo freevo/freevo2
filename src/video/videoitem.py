@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2003/04/20 13:07:38  dischi
+# bugfix
+#
 # Revision 1.37  2003/04/20 12:43:34  dischi
 # make the rc events global in rc.py to avoid get_singleton. There is now
 # a function app() to get/set the app. Also the events should be passed to
@@ -507,6 +510,9 @@ class VideoItem(Item):
         Generate special menu for DVD/VCD/SVCD content
         """
         pop = None
+
+        if not self.menuw:
+            self.menuw = menuw
 
         if not self.num_titles:
             # Use the uid to make a user-unique filename
