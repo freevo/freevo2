@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/02/23 18:30:45  rshortt
+# Fixed a really annoying bug where items got reused and appended to.  I have about a zillion lines of debug print statements to remove. :)  Thanks to Krister for the help nailing it.
+#
 # Revision 1.1  2003/02/23 18:24:04  rshortt
 # New classes.  ListBox is a subclass of RegionScroller so that it can scroll though a list of ListItems which are drawn to a surface.  Also included is a listboxdemo to demonstrate and test everything.
 #
@@ -71,13 +74,14 @@ class ListBox(RegionScroller):
     """
 
     
-    def __init__(self, items=[], left=None, top=None, width=None, height=None, 
+    def __init__(self, items=None, left=None, top=None, width=None, height=None, 
                  bg_color=None, fg_color=None, selected_bg_color=None,
                  selected_fg_color=None, border=None, bd_color=None, 
                  bd_width=None, show_h_scrollbar=None, show_v_scrollbar=None):
 
 
         self.border         = border
+        self.items          = items
         self.h_margin       = 2
         self.v_margin       = 2
         self.bg_color       = bg_color
@@ -95,6 +99,7 @@ class ListBox(RegionScroller):
 
         if not self.width:    self.width  = 100
         if not self.height:   self.height = 200
+        if not self.items:    self.items  = []
 
         if self.show_h_scrollbar != 0 and not self.show_h_scrollbar:
             self.show_h_scrollbar = 0
@@ -113,7 +118,7 @@ class ListBox(RegionScroller):
         if not self.selected_fg_color: self.selected_fg_color = self.fg_color
         if not self.selected_bg_color: self.selected_bg_color = Color((0,255,0,128))
 
-        self.set_items(items)
+        if self.items: self.set_items(self.items)
 
         self.x_scroll_interval = 25
         self.y_scroll_interval = 25
