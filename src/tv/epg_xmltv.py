@@ -9,6 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2003/09/03 21:07:50  dischi
+# Make sure the user can write the file. It may happen that the user has
+# no permission at all (try except is protecting us here), but maybe he
+# has write access to the directory, but not the file itself. So remove
+# it first and than write. Please check other parts of Freevo for that
+# problem!
+#
 # Revision 1.28  2003/08/28 18:11:36  dischi
 # use util.py pickle function now and remove the uid from filename
 #
@@ -221,9 +228,14 @@ def load_guide():
             data_7bit = data_8bit.translate(table)
 
             # Write to the file
-            fd = open(config.XMLTV_FILE, 'w')
-            fd.write(data_7bit)
-            fd.close()
+            try:
+                if os.path.isfile(config.XMLTV_FILE):
+                    os.unlink(config.XMLTV_FILE)
+                fd = open(config.XMLTV_FILE, 'w')
+                fd.write(data_7bit)
+                fd.close()
+            except IOError:
+                print 'unable to save %s' % config.XMLTV_FILE
         
         guide.timestamp = os.path.getmtime(config.XMLTV_FILE)
     else:
