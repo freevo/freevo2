@@ -7,6 +7,9 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2004/07/10 10:43:57  dischi
+# use screenblit
+#
 # Revision 1.37  2004/03/19 21:03:40  dischi
 # fix tvguide context bug
 #
@@ -233,7 +236,7 @@ class GUIObject:
         """
         self.visible = 0
         if self.parent and self.parent.visible and self.bg_surface:
-            self.osd.screen.blit(self.bg_surface, self.get_position())
+            self.osd.screenblit(self.bg_surface, self.get_position())
             self.osd.update(self.get_rect())
                 
 
@@ -322,11 +325,11 @@ class GUIObject:
         blit self.surface to the parent.surface
         """
         if self.osd.app_list.count(self):
-            p = self.osd.screen
+            p = False
         elif self.parent.surface:
-            p = self.parent.surface
+            p = True
         else:
-            p = self.osd.screen
+            p = False
 
         if self.surface != self.surface.get_abs_parent():
             print '******************************************************************'
@@ -349,12 +352,20 @@ class GUIObject:
         
         if not self.bg_surface:
             self.bg_surface = self.osd.Surface((int(self.width), int(self.height)))
-            self.bg_surface.blit(p, (0,0), self.get_rect())
+            if p:
+                self.bg_surface.blit(self.parent.surface, (0,0), self.get_rect())
+            else:
+                self.bg_surface.blit(self.osd.screen, (0,0), self.get_rect())
         elif restore:
-            p.blit(self.bg_surface, (self.left, self.top))
+            if p:
+                self.parent.surface.blit(self.bg_surface, (self.left, self.top))
+            else:
+                self.osd.screenblit(self.bg_surface, (self.left, self.top))
 
-        p.blit(self.surface, self.get_position())
-        if p == self.osd.screen:
+        if p:
+            self.parent.surface.blit(self.surface, self.get_position())
+        else:
+            self.osd.screenblit(self.surface, self.get_position())
             self.osd.update(self.get_rect())
 
             
