@@ -546,6 +546,7 @@ class Area(XML_data):
         self.x = -1
         self.y = -1
         self.visible = False
+        self.images = {}
 
     def parse(self, node, scale, current_dir):
         if self.x == -1:
@@ -639,6 +640,18 @@ class Layout:
             b.prepare(color, search_dirs, image_names)
 
 
+class ContentItem(XML_data):
+    """
+    class for <item> inside content
+    """
+    def __init__(self):
+        XML_data.__init__(self, ('font', 'align', 'valign', 'height',
+                                 'width', 'icon'))
+        self.rectangle = None
+        self.shadow    = None
+        self.cdata     = ''
+        self.fcontent  = []
+        
 
 class Content(XML_data):
     """
@@ -659,11 +672,7 @@ class Content(XML_data):
             if subnode.name == u'item':
                 type = attr_str(subnode, "type", '')
                 if type and not self.types.has_key(type):
-                    self.types[type] = XML_data(('font', 'align', 'valign',
-                                                 'height', 'width', 'icon' ))
-                    self.types[type].rectangle = None
-                    self.types[type].shadow    = None
-                    self.types[type].cdata     = ''
+                    self.types[type] = ContentItem()
                 if type:
                     self.types[type].parse(subnode, scale, current_dir)
                     self.types[type].cdata = subnode.textof()
@@ -682,8 +691,7 @@ class Content(XML_data):
 
                         elif rnode.name in ( u'if', u'text', u'newline',
                                              u'goto_pos', u'img' ):
-                            if (not hasattr(self.types[type], 'fcontent')) or \
-                                   delete_fcontent:
+                            if delete_fcontent:
                                 self.types[ type ].fcontent = [ ]
                             delete_fcontent = False
                             child = None
@@ -703,10 +711,7 @@ class Content(XML_data):
                                                                   current_dir)
 
         if not self.types.has_key('default'):
-            self.types['default'] = XML_data(('font',))
-            self.types['default'].rectangle = None
-            self.types['default'].shadow    = None
-            self.types['default'].cdata     = ''
+            self.types['default'] = ContentItem()
 
 
     def prepare(self, font, color, search_dirs):
@@ -720,9 +725,8 @@ class Content(XML_data):
                 self.types[type].rectangle.prepare(color)
             if self.types[type].shadow:
                 self.types[type].shadow.prepare(None, color)
-            if hasattr( self.types[type], 'fcontent' ):
-                for i in self.types[type].fcontent:
-                    i.prepare( font, color, search_dirs )
+            for i in self.types[type].fcontent:
+                i.prepare( font, color, search_dirs )
 
 
 
@@ -909,12 +913,56 @@ class Rectangle(XML_data):
         if not radius == None:
             self.radius = radius
 
+
     def prepare(self, color, search_dirs=None, image_names=None):
         XML_data.prepare(self, None, color)
+
+
+    def calculate(self, width, height):
+        """
+        Calculates the values for the rectangle to fit width and height
+        inside it.
+        """
+        r = copy.copy(self)
+
+        # get the x and y value, based on MAX
+        if isinstance(r.x, str):
+            r.x = int(eval(r.x, {'MAX':width}))
+        if isinstance(r.y, str):
+            r.y = int(eval(r.y, {'MAX':height}))
+
+        # set rect width and height to something
+        if not r.width:
+            r.width = width
+
+        if not r.height:
+            r.height = height
+
+        # calc width and height based on MAX settings
+        if isinstance(r.width, str):
+            r.width = int(eval(r.width, {'MAX':width}))
+
+        if isinstance(r.height, str):
+            r.height = int(eval(r.height, {'MAX':height}))
+
+        # correct width and height to fit the rect
+        width = max(width, r.width)
+        height = max(height, r.height)
+        if r.x < 0:
+            width -= r.x
+        if r.y < 0:
+            height -= r.y
+
+        # return needed width and height to fit original width and height
+        # and the rectangle attributes
+        return max(width, r.width), max(height, r.height), r
+
 
     def __str__(self):
         return 'theme.Rectangle at %s,%s %sx%s' % \
                (self.x, self.y, self.width, self.height)
+
+
 
 class Font(XML_data):
     """
