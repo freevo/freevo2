@@ -11,6 +11,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/02/12 14:04:37  outlyer
+# fixes for some issues Dischi pointed out:
+#
+# o Fix invisible link underlines
+# o Change background of "pre" to light gray and add padding
+# o Fix CSS so it validates with jigsaw.w3.org
+# o Replace #content with content as it should be
+#
 # Revision 1.4  2004/02/09 21:23:42  outlyer
 # New web interface...
 #
@@ -94,7 +102,7 @@ class PluginResource(FreevoResource):
             plugin_link = '<li><a href="plugins.rpy?type=%s#%s">%s</a></li>'
             page_link = '<li><a href="plugins.rpy?type=%s">%s plugins</a></li>\n<ol>'
 
-            fv.printHeader('Freevo Plugin List', '/styles/main.css')
+            fv.printHeader('Freevo Plugin List', '/styles/main.css',prefix=request.path.count('/')-1)
             fv.res += '<div id="content">\n'
             fv.res += '<p><b>Index</b><ol>'
 
@@ -114,8 +122,8 @@ class PluginResource(FreevoResource):
 
         else:
             fv.printHeader('Freevo Plugin List - %s Plugins' % type.capitalize(),
-                           '/styles/main.css')
-            fv.res += '<div id="#content">\n'
+                           '/styles/main.css',prefix=request.path.count('/')-1)
+            fv.res += '<div id="content">\n'
             fv.res += '<a name="top"></a>'
 
             if type == 'global':
