@@ -6,14 +6,6 @@ $Id$
 This file contains random notes that are useful when dealing with Freevo
 
 ----------------------------------------------------------------------
-CVS on Sourceforge:
-
-o Generate a public key using ssh-keygen and upload it to Sourceforge
-  using your account page. This allows you to use CVS without 
-  typing your password for each operation.
-
-
-----------------------------------------------------------------------
 
 Mixed stuff:
 
@@ -71,3 +63,98 @@ make
 Video4Linux1 API docs:
 
 http://www.linuxhq.com/kernel/v2.4/doc/video4linux/API.html
+
+----------------------------------------------------------------------
+CVS and releases on Sourceforge:
+
+o Generate a public key using ssh-keygen and upload it to Sourceforge
+  using your account page. This allows you to use CVS without 
+  typing your password for each operation.
+
+o Checkout the entire module:
+cvs -z3 -d:ext:SF_USERNAME@cvs.freevo.sourceforge.net:/cvsroot/freevo co freevo
+
+o Check for your local changes compared to the CVS server:
+cvs -z3 -d:ext:SF_USERNAME@cvs.freevo.sourceforge.net:/cvsroot/freevo diff
+
+o Sync with CVS server:
+cvs -z3 -d:ext:SF_USERNAME@cvs.freevo.sourceforge.net:/cvsroot/freevo update
+
+o Update Changelog, BUGS, README!
+
+o Commit changes to the CVS server:
+cvs -z3 -d:ext:SF_USERNAME@cvs.freevo.sourceforge.net:/cvsroot/freevo commit -m "Comment... " [file...]
+
+  Try to commit as small changes as possible. If you fixed two different bugs,
+  make sure to commit them separately so that the change comment is correct for
+  each file.
+
+o Test CVS latest version using anonymous checkout
+cvs -d:pserver:anonymous@cvs.freevo.sourceforge.net:/cvsroot/freevo login
+cvs -z3 -d:pserver:anonymous@cvs.freevo.sourceforge.net:/cvsroot/freevo co freevo
+cd freevo
+make
+./freevo
+
+o Tag a release/checkpoint:
+cvs -z3 -d:ext:SF_USERNAME@cvs.freevo.sourceforge.net:/cvsroot/freevo tag -r REL-1_2_0
+
+o Make a .tar.gz file from the tagged version using anonymous checkout
+cvs -d:pserver:anonymous@cvs.freevo.sourceforge.net:/cvsroot/freevo login
+cvs -z3 -d:pserver:anonymous@cvs.freevo.sourceforge.net:/cvsroot/freevo co -r REL-1_2_0 freevo
+mv freevo freevo-1.2.0
+tar cvzf freevo-1.2.0.tar.gz freevo-1.2.0
+
+o Upload the tar file to Sourceforge
+ftp upload.sourceforge.net
+bin
+cd /incoming
+put freevo-1.2.0.tar.gz
+quit
+
+o Make a new release
+  o Goto http://sourceforge.net/project/admin/qrs.php?package_id=&group_id=46652 
+  o Select "Package ID" = Freevo
+  o Type in "Release Name", e.g. 1.2.0
+  o Select freevo-XXX.tar.gz in the "File Name" menu (it is the file uploaded using FTP)
+  o "File Type" = "Source .gz"
+  o "Processor Type" = "i386"
+  o Paste in the "File Release Notes" from below
+  o Paste in the "Changes" for this version from the Changelog file
+
+----------------------------------------------------------------------
+File release notes:
+
+
+Quick test (using only X11): tar xvzf freevo-XXX.tgz ; cd freevo-XXX ; make ; freevo
+
+
+This release has the following features:
+
+* Works with Linux on a computer with a Matrox G400 
+graphics board in framebuffer mode, WinTV video capture 
+board, and a regular soundcard.
+
+* View TV using the tuner on a Video4Linux1 video capture 
+device. A TV program guide is automatically downloaded and 
+displayed when selecting channels.
+
+* View movies/DVDs using MPlayer (a separate application which is not included).
+
+* Play MP3 using mpg123 (a separate application which is not included).
+
+* Record TV to DivX using NVrec (a separate application which is not included).
+
+
+There is _not_ any support as of now (but it is planned) for:
+
+* "Live pause" of TV recording.
+
+* DVD backups.
+
+* Scheduled recording.
+
+etc.
+
+
+
