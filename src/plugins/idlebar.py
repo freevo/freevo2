@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/07/04 19:46:51  outlyer
+# Added Rich C's "holidays" plugin for the idlebar.
+#
 # Revision 1.14  2003/07/04 15:17:56  outlyer
 # New cdstatus plugin. Only tested on my machine so use with caution.
 #
@@ -292,3 +295,31 @@ class weather(IdleBarPlugin):
         osd.drawbitmap('skins/icons/weather/' + icon,160,30)
         osd.drawstring(temp,175,50,fgcolor=0xbbbbbb,font=self.CLOCKFONT,ptsize=14)
         osd.drawstring('o',192,47,fgcolor=0xbbbbbb,font=self.CLOCKFONT,ptsize=10)
+
+        
+# This class checks if the current date is a holiday and will
+# display a user specified icon for that holiday.    
+# To activate use the following: 
+# plugin.activate('idlebar.holidays', level=40)        
+# I am centering Icon over the clock, w x h = 70 x 40 pixels works well,
+# with drawbitmap drawing at x,y= 580, 2
+class holidays(IdleBarPlugin):
+    def __init__(self):
+        IdleBarPlugin.__init__(self)
+   
+    def get_holiday_icon(self):
+        if not config.HOLIDAYS:
+            return 0    
+        else:
+           # Creates a string which looks like "07-04" meaning July 04
+            todays_date = time.strftime('%m-%d')
+            
+            for i in config.HOLIDAYS:                        
+                holiday, icon = i
+                if todays_date == holiday:
+                    return icon
+
+    def draw(self, (type, object)):
+        icon = self.get_holiday_icon()
+        if icon:
+            osd.drawbitmap( 'skins/icons/holidays/' + icon, 580, 2)        
