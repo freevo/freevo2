@@ -20,7 +20,7 @@ import sys, os, time, re
 import movie_xml
 
 
-DEBUG_STDOUT = 1
+DEBUG_STDOUT = 0
 
 
 if os.path.isdir('/var/log/freevo'):
