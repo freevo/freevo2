@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/12/06 16:45:13  dischi
+# do not create a screen for helpers
+#
 # Revision 1.1  2003/12/06 16:41:45  dischi
 # move some classes into extra files
 #
@@ -32,7 +35,7 @@
 # -----------------------------------------------------------------------
 #endif
 
-
+import config
 import osd
 osd = osd.get_singleton()
 
@@ -40,6 +43,10 @@ osd = osd.get_singleton()
 singleton = None
 
 def get_singleton():
+    # we don't need this for helpers
+    if config.HELPER:
+        return
+    
     global singleton
     if not singleton:
         singleton = Screen()
