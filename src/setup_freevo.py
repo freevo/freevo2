@@ -12,43 +12,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.1  2003/08/03 09:56:15  dischi
+# moved setup_freevo into src
+#
 # Revision 1.12  2003/08/01 17:54:05  dischi
 # xine support and cleanups.
 # o xine support and configuration in freevo_config.py
 # o cleanup in setup_freevo: use one variable to store all needed
 #   programs
 # o config.py uses setup_freevo to search for missing programs at startup
-#
-# Revision 1.11  2003/07/18 16:51:03  rshortt
-# Removing xv and dga from the valid display types.  x11 should cover all
-# X related -vo options for mplayer.
-#
-# Revision 1.10  2003/07/14 19:34:07  rshortt
-# Adding dgs to the list of supported display types.
-#
-# Revision 1.9  2003/07/14 17:02:54  rshortt
-# Add xv to the list of allowed display values.
-#
-# Revision 1.8  2003/07/03 04:19:30  outlyer
-# Updated cdbackup with Rich's new Ogg patch; also changed some variables,
-# and added oggenc to setup and configuration.
-#
-# Revision 1.7  2003/07/01 02:46:33  outlyer
-# Added lame and cdparanoia
-#
-# Revision 1.6  2003/06/27 10:58:06  rshortt
-# MOved tvtime command into the config.
-#
-# Revision 1.5  2003/06/20 18:18:23  dischi
-# add comment about the xmame change to force the user to rerun setup
-#
-# Revision 1.4  2003/06/20 01:50:14  rshortt
-# Look for xmame.x11 as well, but override with xmame.SDL.  Changed xmame_SDL
-# to just xmame.
-#
-# Revision 1.3  2003/04/24 19:58:20  dischi
-# comment cleanup for 1.3.2-pre4
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

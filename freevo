@@ -52,10 +52,23 @@ if ! [ -e runapp ]; then
     exit 1
 fi
 
+# Help
+if [ "$1" = "--help" ] || [ "$1" = "-" ] ; then
+    echo "freevo [ options]"
+    echo "options:"
+    echo "  setup          run freevo setup to scan your environment"
+    echo "  execute [file] execute a script inside the freevo environment"
+    echo "  stop           stop the current freevo process"
+    echo
+    echo "Before running freevo the first time, you need to run 'freevo setup'"
+    echo "After that, you can run freevo without parameter."
+    exit 0
+fi
+
 # Create the config file.
 if [ "$1" = "setup" ] ; then
     shift 1
-    ./runapp python setup_freevo.py $@
+    ./runapp python src/setup_freevo.py $@
     exit 0
 fi
 
