@@ -3,7 +3,7 @@ Freevo Changelog
 
 $Id$
 
-Release 1.3.X (???):
+Release 1.3.3 (2003-08-02):
 --------------------
  * Moved all metadata parsing into mmpython
  * Added CD->MP3 or CD->OGG Backup plugin from Rich C.
