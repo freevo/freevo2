@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.79  2002/10/15 21:44:31  krister
+# Added a font alias list, substitute missing non-free fonts with free alternates.
+#
 # Revision 1.78  2002/10/09 12:52:40  dischi
 # made infor(mation) complete
 #
@@ -262,6 +265,10 @@ ENABLE_SHUTDOWN_SYS = 0  # Performs a whole system shutdown! For standalone boxe
 #
 OSD_DEFAULT_FONTNAME = 'skins/fonts/bluehigh.ttf'
 OSD_DEFAULT_FONTSIZE = 18
+
+# Font aliases, all names must be lowercase!
+# All alternate fonts must be in './skins/fonts/'
+OSD_FONT_ALIASES = { 'arial_bold.ttf' : 'kimberly_alt.ttf' }
 
 OSD_SDL_EXEC_AFTER_STARTUP = ""
 

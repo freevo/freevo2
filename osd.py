@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2002/10/15 21:44:32  krister
+# Added a font alias list, substitute missing non-free fonts with free alternates.
+#
 # Revision 1.39  2002/10/15 19:43:00  krister
 # Fixed a bug in drawstringframedhard(), it broke the lines incorrectly.
 #
@@ -1125,7 +1128,25 @@ class OSD:
             font = pygame.font.Font(filename, ptsize)
         except RuntimeError:
             print 'Couldnt load font "%s"' % filename
-            raise
+
+            # Are there any alternate fonts defined?
+            if not 'OSD_FONT_ALIASES' in dir(config):
+                print 'No font aliases defined!'
+                raise # Nope
+                
+            # Ok, see if there is an alternate font to use
+            fontname = os.path.basename(filename).lower()
+            if fontname in config.OSD_FONT_ALIASES:
+                alt_fname = './skins/fonts/' + config.OSD_FONT_ALIASES[fontname]
+                print 'trying alternate: %s' % alt_fname
+                try:
+                    font = pygame.font.Font(alt_fname, ptsize)
+                except RuntimeError:
+                    print 'Couldnt load alternate font "%s"' % alt_fname
+                    raise
+            else:
+                print 'No alternate found in the alias list!'
+                raise
         f = Font()
         f.filename = filename
         f.ptsize = ptsize
