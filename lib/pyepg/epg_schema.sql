@@ -36,6 +36,7 @@ create table programs (
     original_airdate int,
     stars int
 );
+create unique index programs_channel_start on programs (channel_id, start);
 
 drop table categories;
 create table categories (
