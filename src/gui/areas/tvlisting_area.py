@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/08/10 19:38:02  dischi
+# better channels.py support
+#
 # Revision 1.3  2004/08/05 17:30:24  dischi
 # cleanup
 #
@@ -65,6 +68,7 @@ class TVListing_Area(Skin_Area):
         self.last_choices = ( None, None )
         self.last_settings = None
         self.last_items_geometry = None
+        self.last_start_time = 0
         
 
     def update_content_needed(self):
@@ -169,23 +173,23 @@ class TVListing_Area(Skin_Area):
         """
         update the listing area
         """
-
-        return
-    
         menu      = self.menu
         settings  = self.settings
         layout    = self.layout
         area      = self.area_val
         content   = self.calc_geometry(layout.content, copy_object=True)
 
-        to_listing     = menu.table
+#         to_listing     = menu.table
 
-        n_cols   = len(to_listing[0])-1
+#         n_cols   = len(to_listing[0])-1
+
+        n_cols = 4
         col_time = 30
 
         font_h, label_width, label_txt_width, y0, num_rows, item_h, head_h = \
                 self.get_items_geometry(settings, menu)[:-1]
 
+        
         label_val, head_val, selected_val, default_val, scheduled_val = self.all_vals
 
         leftarrow = None
@@ -244,16 +248,30 @@ class TVListing_Area(Skin_Area):
         self.drawbox( x_contents - r.width, y_contents - r.height,
                       r.width+1, head_h+1, r )
 
+    
         # use label padding for x; head padding for y
-        self.drawstring( time.strftime( dateformat, time.localtime( to_listing[ 0 ][ 1 ] ) ),
-                         head_val.font, content,
-                         x=( x_contents  - r.width + pad_x ),
-                         y=( y_contents - r.height + ig.y ),
-                         width=( r.width - 2 * pad_x ), height=-1,
-                         align_v='center', align_h=head_val.align )
+#         self.drawstring( time.strftime( dateformat, time.localtime( to_listing[ 0 ][ 1 ] ) ),
+#                          head_val.font, content,
+#                          x=( x_contents  - r.width + pad_x ),
+#                          y=( y_contents - r.height + ig.y ),
+#                          width=( r.width - 2 * pad_x ), height=-1,
+#                          align_v='center', align_h=head_val.align )
 
 
+        start_time = self.last_start_time
+        if menu.selected.start == 0:
+            start_time = self.last_start_time - 60 * col_time
+            
+        elif menu.selected.start < self.last_start_time:
+            if menu.selected.stop < self.last_start_time + (n_cols - 2) * col_time * 60:
+                start_time = menu.selected.start / (60 * col_time) * (60 * col_time)
 
+        elif menu.selected.start > self.last_start_time + (n_cols - 2) * col_time * 60:
+            start_time = menu.selected.start / (60 * col_time) * (60 * col_time)
+
+        self.last_start_time = start_time
+        stop_time  = start_time + col_time * n_cols * 60
+        
         # Print the time at the table's top
         x0 = x_contents
         ty0 = y_contents - r.height
@@ -263,23 +281,21 @@ class TVListing_Area(Skin_Area):
                           head_h + 1, r2 )
 
             self.drawstring( time.strftime( timeformat,
-                                            time.localtime( to_listing[ 0 ][ i + 1 ] ) ),
+                                            time.localtime(start_time + col_time*i*60 ) ),
                              head_val.font, content,
                              x=( x0 + ig.x ), y=( ty0 + ig.y ),
                              width=ig.width, height=-1,
                              align_v='center', align_h=head_val.align)
             x0 += col_size
 
-        # define start and stop time
-        date = time.strftime("%x", time.localtime())
-        start_time = to_listing[0][1]
-        stop_time = to_listing[0][-1]
-        stop_time += (col_time*60)
 
         # selected program:
-        selected_prog = to_listing[1]
+        selected_prog = menu.selected
+        all_channels = menu.channel_list.get_all()
 
-        for i in range(2,len(to_listing)):
+        start_channel = all_channels.index(menu.channel) / num_rows * num_rows
+        
+        for channel in all_channels[start_channel:start_channel+num_rows]:
             ty0 = y0
             tx0 = content.x
 
@@ -299,7 +315,7 @@ class TVListing_Area(Skin_Area):
                             r.height-2*r.size ]
                     
 
-            channel_logo = config.TV_LOGOS + '/' + to_listing[i].id + '.png'
+            channel_logo = config.TV_LOGOS + '/' + channel.id + '.png'
             if os.path.isfile(channel_logo):
                 channel_logo = self.loadimage(channel_logo, (r.width+1-2*r.size,
                                                               item_h-2*r.size))
@@ -312,18 +328,18 @@ class TVListing_Area(Skin_Area):
 
 
             else:
-                self.drawstring(to_listing[i].displayname, label_val.font, content,
+                self.drawstring(channel.name, label_val.font, content,
                                 x=tx0, y=ty0, width=r.width+2*r.x, height=item_h)
 
             self.drawbox(tx0 + r.x, ty0 + r.y, r.width+1, item_h, r)
-
-            if to_listing[i].programs:
-                for prg in to_listing[i].programs:
+            try:
+                for prg in channel.get(start_time, stop_time):
                     flag_left   = 0
                     flag_right  = 0
 
                     if prg.start < start_time:
-                        flag_left = 1
+                        if prg.valid:
+                            flag_left = 1
                         x0 = x_contents
                         t_start = start_time
                     else:
@@ -331,20 +347,16 @@ class TVListing_Area(Skin_Area):
                         t_start = prg.start
 
                     if prg.stop > stop_time:
-                        flag_right = 1
+                        if prg.valid:
+                            flag_right = 1
                         w = w_contents + x_contents - x0                        
                         x1 = x_contents + w_contents
                     else:
                         w =  int( float(prg.stop - t_start) * prop_1sec )
                         x1 = x_contents + int(float(prg.stop-start_time) * prop_1sec)
 
-                    if prg.title == selected_prog.title and \
-                       prg.channel_id == selected_prog.channel_id and \
-                       prg.start == selected_prog.start and \
-                       prg.stop == selected_prog.stop:
-
+                    if prg == selected_prog:
                         val = selected_val
-
                     elif prg.scheduled:
                         val = scheduled_val
                     else:
@@ -352,15 +364,13 @@ class TVListing_Area(Skin_Area):
 
                     font = val.font
 
-                    try:
-                        if prg.title == _('This channel has no data loaded'):
-                            val = copy.copy(val)
-                            val.align='center'
-                    except UnicodeError:
-                        pass
+                    if not prg.valid:
+                        val = copy.copy(val)
+                        val.align='center'
                     
                     if x0 > x1:
-                        break
+                        print 'skip', x0, x1
+                        continue
 
                     # text positions
                     tx0 = x0
@@ -396,14 +406,16 @@ class TVListing_Area(Skin_Area):
                                         y=ty0+ig.y, width=ig.width, height=ig.height,
                                         align_v='center', align_h = val.align)
 
-            i += 1
+            except Exception, e:
+                print 'ERROR', e
+                print start_time, stop_time, channel.name
             y0 += item_h - 1
 
 
         # print arrow:
-        if menu.display_up_arrow and area.images['uparrow']:
+        if start_channel > 0 and area.images['uparrow']:
             self.drawimage(area.images['uparrow'].filename, area.images['uparrow'])
-        if menu.display_down_arrow and area.images['downarrow']:
+        if len(all_channels) >= start_channel+num_rows and area.images['downarrow']:
             if isinstance(area.images['downarrow'].y, str):
                 v = copy.copy(area.images['downarrow'])
                 v.y = eval(v.y, {'MAX' : y0})
