@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/06/30 15:30:54  dischi
+# some checking to avoid endless scanning
+#
 # Revision 1.11  2003/06/29 20:44:21  dischi
 # mmpython support
 #
@@ -593,13 +596,18 @@ class Identify_Thread(threading.Thread):
 
         
     def run(self):
+
+        rebuild_file = '/tmp/freevo-rebuild-database'
         # Make sure the movie database is rebuilt at startup
-        os.system('touch /tmp/freevo-rebuild-database')
+        os.system('touch %s' % rebuild_file)
         while 1:
             # Check if we need to update the database
             # This is a simple way for external apps to signal changes
-            if os.path.exists("/tmp/freevo-rebuild-database"):
-                xml_parser.hash_xml_database()
+            if os.path.exists(rebuild_file):
+                if xml_parser.hash_xml_database() == 0:
+                    # something is wrong, deactivate this feature
+                    rebuild_file = '/this/file/should/not/exist'
+                    
                 for media in config.REMOVABLE_MEDIA:
                     media.drive_status = None
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/06/30 15:30:54  dischi
+# some checking to avoid endless scanning
+#
 # Revision 1.22  2003/06/29 21:31:56  gsbarbieri
 # subtitle and audio now use the path to files and are quoted.
 #
@@ -616,7 +619,17 @@ def hash_xml_database():
     config.TV_SHOW_INFORMATIONS     = {}
     
     if os.path.exists("/tmp/freevo-rebuild-database"):
-        os.system('rm -f /tmp/freevo-rebuild-database')
+        try:
+            os.remove('/tmp/freevo-rebuild-database')
+        except OSError:
+            print '*********************************************************'
+            print
+            print '*********************************************************'
+            print 'ERROR: unable to remove /tmp/freevo-rebuild-database'
+            print 'please fix permissions'
+            print '*********************************************************'
+            print
+            return 0
 
     if DEBUG: print "Building the xml hash database...",
 
@@ -657,3 +670,4 @@ def hash_xml_database():
                                               file)
             
     if DEBUG: print 'done'
+    return 1
