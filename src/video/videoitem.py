@@ -10,9 +10,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.127  2004/02/20 18:53:23  dischi
+# add parent in dvd menu
+#
 # Revision 1.126  2004/02/19 04:57:58  gsbarbieri
-# Support Web Interface i18n.
-# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
+# Support i18n.
 #
 # Revision 1.125  2004/02/15 15:22:42  dischi
 # better dvd disc support
@@ -554,6 +556,7 @@ class VideoItem(Item):
         # only one track, play it
         if len(self.info['tracks']) == 1:
             i=copy.copy(self)
+            i.parent = self
             i.possible_player = []
             i.set_url(self.url + '1', False)
             i.play(menuw = self.menuw)
