@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/07/10 18:14:26  outlyer
+# Skip files that are in the playlist but cannot be found on the disk to avoid
+# crashing.
+#
 # Revision 1.20  2003/05/27 17:53:33  dischi
 # Added new event handler module
 #
@@ -119,10 +123,12 @@ class Playlist(Item):
         for line in playlist_lines:
             if line.endswith('\r\n'):
                 line = line.replace('\\', '/') # Fix MSDOS slashes
-            if util.match_suffix(line, config.SUFFIX_AUDIO_FILES):
-                self.playlist += [ AudioItem(os.path.join(curdir, line), self) ]
-            elif util.match_suffix(line, config.SUFFIX_VIDEO_FILES):
-                self.playlist += [ VideoItem(os.path.join(curdir, line), self) ]
+            if os.path.exists(os.path.join(curdir,line)):
+                # skip files that don't exist
+                if util.match_suffix(line, config.SUFFIX_AUDIO_FILES):
+                    self.playlist += [ AudioItem(os.path.join(curdir, line), self) ]
+                elif util.match_suffix(line, config.SUFFIX_VIDEO_FILES):
+                    self.playlist += [ VideoItem(os.path.join(curdir, line), self) ]
             
 
     def read_pls(self, plsname):
