@@ -210,7 +210,8 @@ class Recorder(Plugin):
                 filename = self.get_url(rec.rec)
                 filename = filename.replace('file:/', 'file-mpeg:///')
                 self.entity.call('vdr.record', self.__vdr_record, device,
-                                 channel, rec.rec.start, rec.rec.stop,
+                                 channel, rec.rec.start - rec.rec.start_padding,
+                                 rec.rec.stop + rec.rec.stop_padding,
                                  filename, 0, ())
                 rec.id = IN_PROGRESS
                 break
