@@ -1,0 +1,36 @@
+This document describes how to setup mbus.
+
+1. Configuration file
+
+   All known mbus implementations read the config file ~/.mbus or if
+   the environment variable MBUS set, the file to which this variable
+   points. When you first start freevo or a helper application a mbus
+   configuration file is created. Please check the variables later. If
+   you have mbus applications on different hosts, you need to change
+   SCOPE=HOSTLOCAL to SCOPE=LINKLOCAL.
+
+   All applications on the same bus must share most of the values in
+   the config file. If ADDRESS or PORT don't match, the applications
+   simply won't find each other, if HASHKEY is different, pymbus won't
+   deliver the messages. Do not activate ENCRYPTIONKEY, pyMbus doesn't
+   support encryption yet.
+
+
+2. Multicast setup
+
+   Mbus communicates over multicast. Most Linux distributions enable
+   multicast in their default kernel. If you build your own kernel,
+   make sure multicast is enabled.
+
+   If no special route is given, the multicast traffic will be routed
+   through the default route. This may not what you want. E.g. eth0 is
+   the uplink and eth1 the private network, eth0 has the default route
+   but eth1 should be used for link local mbus communication. A second
+   problem may be that the firewall is blocking the communication and
+   not even host local communication is possible.
+
+   To set the default route for mbus for 224.255.222.240 (default)
+   type 'route add 224.255.222.240 <interface>' is root. For host
+   local usage use 'lo' as <interface>.
+
+
