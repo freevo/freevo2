@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.64  2003/07/07 16:24:16  dischi
+# More cleanups:
+# o drawstringframed now needs an OSDFont object as font info. This
+#   avoids searching the cache.
+# o drawstring now uses drawstringframed, removed all the older stuff
+#
 # Revision 1.63  2003/07/06 19:39:40  dischi
 # Return the max_y, int() rounds down
 #
@@ -245,9 +251,9 @@ class Font:
         self.font     = font
 
 
-class FontInfo:
-    def __init__(self, font):
-        self.font   = font
+class OSDFont:
+    def __init__(self, name, ptsize):
+        self.font   = self.__getfont__(name, ptsize)
         self.height = max(self.font.size('A')[1], self.font.size('j')[1])
         self.chars  = {}
 
@@ -265,6 +271,41 @@ class FontInfo:
             w += self.charsize(c)
         return w
 
+    def __getfont__(self, filename, ptsize):
+        ptsize = int(ptsize / 0.7)  # XXX pygame multiplies by 0.7 for some reason
+
+        if DEBUG >= 3:
+            print 'OSD: Loading font "%s"' % filename
+        try:
+            font = pygame.font.Font(filename, ptsize)
+        except (RuntimeError, IOError):
+            print 'Couldnt load font "%s"' % filename
+            if DEBUG >= 2:
+                print 'Call stack:'
+                traceback.print_stack()
+                
+            # Are there any alternate fonts defined?
+            if not 'OSD_FONT_ALIASES' in dir(config):
+                print 'No font aliases defined!'
+                raise # Nope
+                
+            # Ok, see if there is an alternate font to use
+            fontname = os.path.basename(filename).lower()
+            if fontname in config.OSD_FONT_ALIASES:
+                alt_fname = './skins/fonts/' + config.OSD_FONT_ALIASES[fontname]
+                print 'trying alternate: %s' % alt_fname
+                try:
+                    font = pygame.font.Font(alt_fname, ptsize)
+                except (RuntimeError, IOError):
+                    print 'Couldnt load alternate font "%s"' % alt_fname
+                    raise
+            else:
+                print 'No alternate found in the alias list!'
+                raise
+        f = Font(filename, ptsize, font)
+        return f.font
+
+        
     
 
 class OSD:
@@ -290,8 +331,6 @@ class OSD:
         self.fullscreen = 0 # Keep track of fullscreen state
         self.focused_app = None
 
-        self.fontcache = objectcache.ObjectCache(300, desc='font')
-        self.stringcache = objectcache.ObjectCache(100, desc='string')
         self.bitmapcache = objectcache.ObjectCache(10, desc='bitmap')
         self.font_info_cache = {}
         
@@ -300,6 +339,7 @@ class OSD:
 
         self.width = config.CONF.width
         self.height = config.CONF.height
+
         if config.CONF.display== 'dxr3':
             os.environ['SDL_VIDEODRIVER'] = 'dxr3'
 
@@ -310,11 +350,8 @@ class OSD:
         pygame.display.init()
         pygame.font.init()
 
-        #self.depth = pygame.display.mode_ok((self.width, self.height), 1)
-        #self.hw    = pygame.display.Info().hw
-
 	self.depth = 32
-	self.hw = 0
+	self.hw    = 0
 
         if config.CONF.display == 'dxr3':
             self.depth = 32
@@ -590,15 +627,15 @@ class OSD:
         self.screen.blit(surface, (x, y))
 
 
-    def getFontInfo(self, font, ptsize):
+    def getfont(self, font, ptsize):
         """
-        return cached font info
+        return cached font
         """
         key = (font, ptsize)
         try:
             return self.font_info_cache[key]
         except:
-            fi = FontInfo(self._getfont(font, ptsize))
+            fi = OSDFont(font, ptsize)
             self.font_info_cache[key] = fi
             return fi
 
@@ -678,8 +715,8 @@ class OSD:
 
             
 
-    def drawstringframed(self, string, x, y, width, height, fgcolor=None, bgcolor=None,
-                         font=None, ptsize=0, align_h='left', align_v='top', mode='hard',
+    def drawstringframed(self, string, x, y, width, height, font, fgcolor=None,
+                         bgcolor=None, align_h='left', align_v='top', mode='hard',
                          layer=None, ellipses='...'):
         """
         draws a string (text) in a frame. This tries to fit the
@@ -703,12 +740,6 @@ class OSD:
         if not string:
             return '', (0,0,0,0)
 
-        if font == None:
-            font = config.OSD_DEFAULT_FONTNAME
-        if not ptsize:
-            ptsize = config.OSD_DEFAULT_FONTSIZE
-
-        font = self.getFontInfo(font, ptsize)
         line_height = font.height * 1.1
 
         if height == -1:
@@ -797,7 +828,7 @@ class OSD:
     def drawstring(self, string, x, y, fgcolor=None, bgcolor=None,
                    font=None, ptsize=0, align='left', layer=None):
         """
-        draw a string
+        draw a string. This function is obsolete, please use drawstringframed
         """
         if not pygame.display.get_init():
             return None
@@ -814,58 +845,17 @@ class OSD:
         if not ptsize:
             ptsize = config.OSD_DEFAULT_FONTSIZE
 
-        if DEBUG >= 3:
-            print 'FONT: %s %s' % (font, ptsize)
+        tx = x
+        width = self.width - tx
 
-        try:        
-            ren = self._renderstring(stringproxy(string), font, ptsize, fgcolor, bgcolor)
-        except:
-            print "Render failed, skipping..."    
-            return None
-        
-        # Handle horizontal alignment
-        w, h = ren.get_size()
-        tx = x # Left align is default
         if align == 'center':
-            tx = x - w/2
+            tx -= width/2
         elif align == 'right':
-            tx = x - w
+            tx -= width
             
-        if layer:
-            layer.blit(ren, (tx, y))
-        else:
-            self.screen.blit(ren, (tx, y))
-
-
-    def _renderstring(self, string, font, ptsize, fgcolor, bgcolor):
-        """
-        Render a string to an SDL surface. Uses a cache for speedup.
-        """
-        key = (string, font, ptsize, fgcolor, bgcolor)
-        surf = self.stringcache[key]
-        if surf:
-            return surf
-
-        f = self._getfont(font, ptsize)
-
-        if not f:
-            print 'Couldnt get font: "%s", size: %s' % (font, ptsize)
-            return
-
-        # Render string with anti-aliasing
-        if bgcolor == None:
-            try:
-                surf = f.render(string, 1, self._sdlcol(fgcolor))
-            except:
-                print 'FAILED: str="%s" col="%s"' % (string, fgcolor)
-                raise
-        else:
-            surf = f.render(string, 1, self._sdlcol(fgcolor), self._sdlcol(bgcolor))
-
-        # Store the surface in the FIFO, Even if it's None?
-        self.stringcache[key] = surf
-        
-        return surf
+        self.drawstringframed(string, x, y, width, -1, self.getfont(font, ptsize),
+                              fgcolor, bgcolor, align_h = align, layer=layer,
+                              ellipses='')
 
 
     def _savepixel(self, x, y, s):
@@ -997,48 +987,6 @@ class OSD:
             pygame.display.flip()
 
 
-    def _getfont(self, filename, ptsize):
-        ptsize = int(ptsize / 0.7)  # XXX pygame multiplies by 0.7 for some reason
-
-        key = filename+str(ptsize)
-        f = self.fontcache[key]
-        if f:
-            return f.font
-
-        if DEBUG >= 3:
-            print 'OSD: Loading font "%s"' % filename
-        try:
-            font = pygame.font.Font(filename, ptsize)
-        except (RuntimeError, IOError):
-            print 'Couldnt load font "%s"' % filename
-            if DEBUG >= 2:
-                print 'Call stack:'
-                traceback.print_stack()
-                
-            # Are there any alternate fonts defined?
-            if not 'OSD_FONT_ALIASES' in dir(config):
-                print 'No font aliases defined!'
-                raise # Nope
-                
-            # Ok, see if there is an alternate font to use
-            fontname = os.path.basename(filename).lower()
-            if fontname in config.OSD_FONT_ALIASES:
-                alt_fname = './skins/fonts/' + config.OSD_FONT_ALIASES[fontname]
-                print 'trying alternate: %s' % alt_fname
-                try:
-                    font = pygame.font.Font(alt_fname, ptsize)
-                except (RuntimeError, IOError):
-                    print 'Couldnt load alternate font "%s"' % alt_fname
-                    raise
-            else:
-                print 'No alternate found in the alias list!'
-                raise
-        f = Font(filename, ptsize, font)
-        self.fontcache[key] = f
-
-        return f.font
-
-        
     def _getbitmap(self, url):
         """
         load the bitmap or thumbnail
