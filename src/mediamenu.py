@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2003/03/30 14:18:16  dischi
+# Added FORCE_SKIN_LAYOUT and changed to layout of folder.fxd (see
+# freevo_config.py for details)
+#
 # Revision 1.42  2003/03/29 21:45:26  dischi
 # added display_type tv for the new skin
 #
@@ -316,7 +320,7 @@ class DirItem(Playlist):
         # set directory variables to default
 	all_variables = ('MOVIE_PLAYLISTS', 'DIRECTORY_SORT_BY_DATE',
                          'DIRECTORY_AUTOPLAY_SINGLE_ITEM', 'COVER_DIR',
-                         'AUDIO_RANDOM_PLAYLIST')
+                         'AUDIO_RANDOM_PLAYLIST', 'FORCE_SKIN_LAYOUT')
         for v in all_variables:
             setattr(self, v, eval('config.%s' % v))
 
@@ -388,18 +392,26 @@ class DirItem(Playlist):
             try:
                 parser = qp_xml.Parser()
                 var_def = parser.parse(open(self.xml_file).read())
+
+                for top in var_def.children:
+                    if top.name == 'variables' and not config.NEW_SKIN:
+                        for var_names in top.children:
+                            for v in all_variables:
+                                if var_names.name.upper() == v.upper():
+                                    setattr(self, v, int(var_names.textof()))
+
+                    if top.name == 'folder':
+                        for node in top.children:
+                            if node.name == 'setvar':
+                                for v in all_variables:
+                                    if node.attrs[('', 'name')].upper() == v.upper():
+                                        setattr(self, v, int(node.attrs[('', 'val')]))
+
+
             except:
                 print "Skin XML file %s corrupt" % self.xml_file
                 traceback.print_exc()
                 return
-
-            for top in var_def.children:
-                if top.name == 'variables':
-                    for var_names in top.children:
-                        for v in all_variables:
-                            if var_names.name.upper() == v.upper():
-                                setattr(self, v, int(var_names.textof()))
-
 
         if self.DIRECTORY_SORT_BY_DATE == 2 and self.display_type != 'tv':
             self.DIRECTORY_SORT_BY_DATE = 0
@@ -539,7 +551,9 @@ class DirItem(Playlist):
             items[0].actions()[0][0](menuw=menuw)
         else:
             item_menu = menu_module.Menu(title, items, reload_func=self.reload,
-                                         item_types = self.display_type)
+                                         item_types = self.display_type,
+                                         force_skin_layout = self.FORCE_SKIN_LAYOUT)
+
             if self.xml_file:
                 item_menu.skin_settings = skin.LoadSettings(self.xml_file)
 
