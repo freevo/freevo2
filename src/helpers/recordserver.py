@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/10/18 21:33:33  rshortt
+# Subscribe to events and poll them from a callback method.
+#
 # Revision 1.12  2003/10/18 08:33:36  dischi
 # do not restart if the server crashed in 10 secs
 #
@@ -90,7 +93,7 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import sys, string, random, time, os, re
+import sys, string, random, time, os, re, popen2
 
 from twisted.web import xmlrpc, server
 from twisted.internet.app import Application
@@ -99,6 +102,10 @@ from twisted.persisted import marmalade
 from twisted.python import log
 
 import config #config must always be the first freeevo module imported
+
+import rc
+rc_object = rc.get_singleton(use_pylirc=0, use_netremote=0)
+
 from tv.record_types import TYPES_VERSION
 from tv.record_types import ScheduledRecordings
 
@@ -106,6 +113,8 @@ import tv.record_types
 import tv.epg_xmltv
 import tv.tv_util
 import plugin
+
+from event import *
 
 # We won't be needing LD_PRELOAD.
 os.environ['LD_PRELOAD'] = ''
@@ -721,11 +730,25 @@ class RecordServer(xmlrpc.XMLRPC):
             self.record_app.Record(rec_prog)
             
 
+    def eventNotice(self):
+        print 'RECORDSERVER GOT EVENT NOTICE'
+
+        event, event_repeat_count = rc_object.poll()
+
+        if event and event == OS_EVENT_POPEN2:
+            print 'popen2 %s' % event.arg[1]
+            event.arg[0].child = popen2.Popen3(event.arg[1], 1, 100)
+        else:
+            print 'not handling event %s' % str(event)
+            return
+
+
 def main():
     app = Application("RecordServer")
     rs = RecordServer()
     app.listenTCP(config.RECORD_SERVER_PORT, server.Site(rs))
     rs.startMinuteCheck()
+    rc_object.subscribe(rs.eventNotice)
     app.run(save=0)
     
 
