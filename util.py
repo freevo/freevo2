@@ -181,9 +181,11 @@ def proc_mount(dir):
     f.close()
     return None
 
+
 def umount(dir):
     if proc_mount(dir):
         os.system("umount %s" % dir)
+
 
 def mount(dir):
     if not proc_mount(dir):

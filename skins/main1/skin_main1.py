@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2002/09/08 23:19:06  krister
+# Cleaned up.
+#
 # Revision 1.19  2002/09/01 09:41:03  dischi
 # switched from eventhandler_args to type by choosing which item
 # style. Please don't abuse the eventhandler_args for something that has
@@ -388,8 +391,6 @@ class Skin:
             print 'skin.drawmenu() hold!'
             return
 
-        if DEBUG: print 'Skin.drawmenu()'
-        
         osd.clearscreen(osd.COL_WHITE)
 
         menu = menuw.menustack[-1]
