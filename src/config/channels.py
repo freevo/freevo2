@@ -80,7 +80,6 @@ def add_uri(channel, uri):
                 if s.find(uri[:uri.find(':')]) == 0:
                     add_uri(channel, '%s:%s' % (s, uri[uri.find(':')+1:]))
             return
-        print uri
         channel.access_id = uri.split(':')[1]
         channel.uri.append(uri)
 
