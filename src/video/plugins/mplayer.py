@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/08/02 16:21:40  dischi
+# add MPLAYER_AUTOCROP
+#
 # Revision 1.6  2003/07/27 17:12:37  dischi
 # exception handling
 #
@@ -172,7 +175,7 @@
 
 import time, os
 import threading, signal
-import traceback
+import traceback, popen2
 
 import config     # Configuration handler. reads config file.
 import util       # Various utilities
@@ -367,8 +370,31 @@ class MPlayer:
 
         command = mpl + ' "' + filename + '"'
 
+        if config.MPLAYER_AUTOCROP and command.find('crop=') == -1:
+            (x1, y1, x2, y2) = (1000, 1000, 0, 0)
+            child = popen2.Popen3(vop_append('./runapp %s -ao null -vo null ' \
+                                             '-ss 60 -frames 20 -vop cropdetect' % \
+                                             command), 1, 100)
+            exp = re.compile('^.*-vop crop=([0-9]*):([0-9]*):([0-9]*):([0-9]*).*')
+            while(1):
+                data = child.fromchild.readline()
+                if not data:
+                    break
+                m = exp.match(data)
+                if m:
+                    x1 = min(x1, int(m.group(3)))
+                    y1 = min(y1, int(m.group(4)))
+                    x2 = max(x2, int(m.group(1)) + int(m.group(3)))
+                    y2 = max(y2, int(m.group(2)) + int(m.group(4)))
+
+            if x1 < 1000 and x2 < 1000:
+                command = '%s -vop crop=%s:%s:%s:%s' % (command, x2-x1, y2-y1, x1, y1)
+            
+            child.wait()
+
+
         command=vop_append(command)
-        
+
         if plugin.getbyname('MIXER'):
             plugin.getbyname('MIXER').reset()
 

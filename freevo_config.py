@@ -148,7 +148,8 @@ LOCAL_CONF_CHANGES = [
      other key mappings with the variable EVENTS. See event.py for possible
      events'''),
     (3.5,
-     '''Added xine support (see xine section in freevo_config.py''')]
+     '''Added xine support (see xine section in freevo_config.py) and
+     MPLAYER_AUTOCROP for 16:9 tv sets''')]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -727,6 +728,12 @@ MPLAYER_DVD_PROTECTION = 1
 # this many seconds
 #
 MPLAYER_SEEK_TIMEOUT = 8
+
+# Autocrop files when playing. This is usefull for files in 4:3 with black
+# bars on a 16:9 tv
+#
+MPLAYER_AUTOCROP = 0
+
 
 # ======================================================================
 # Xine section:
