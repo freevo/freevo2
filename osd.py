@@ -12,6 +12,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2002/11/08 21:23:58  dischi
+# I don't understand, but sometimes out of nowhere it crashes. So try
+# and except should prevent that.
+#
 # Revision 1.46  2002/10/24 03:16:18  krister
 # Added DXR3 support.
 #
@@ -240,8 +244,11 @@ def get_singleton():
 #
 def stringproxy(str):
     result = str
-    if type(str) == StringType:
-        result = unicode(str, 'unicode-escape')
+    try:
+        if type(str) == StringType:
+            result = unicode(str, 'unicode-escape')
+    except:
+        pass
     return result
 
 
