@@ -3,6 +3,14 @@ Freevo Changelog
 
 $Id$
 
+Release 1.x.x (200x-xx-xx):
+-------------------------------
+* Add MimetypePlugin
+* New fxd parser and better fxd item handling
+* Rename most config variables (!)
+* Add blending in the image viewer
+
+
 Release 1.4.0 (2003-11-20):
 -------------------------------
 * some small bugfixes
