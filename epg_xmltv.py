@@ -97,6 +97,7 @@ def load_guide():
     # Add the channels that are in the config list, or all if the
     # list is empty
     if config.TV_CHANNELS:
+        if DEBUG: print 'epg_xmltv.py: Only adding channels in list'
         for (id, disp, tunerid) in config.TV_CHANNELS:
             c = epg_types.TvChannel()
             c.id = id
@@ -104,6 +105,7 @@ def load_guide():
             c.tunerid = tunerid
             guide.AddChannel(c)
     else: # Add all channels in the XMLTV file
+        if DEBUG: print 'epg_xmltv.py: Adding all channels'
         xmltv_channels = None
         if gotfile:
             # Don't read the channel info unless we have to, takes a long time!
