@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2002/10/24 03:16:18  krister
+# Added DXR3 support.
+#
 # Revision 1.20  2002/10/17 04:16:16  krister
 # Changed the 'nice' command so that it is built into runapp instead. Made default prio -20.
 #
@@ -66,7 +69,7 @@ Configure Freevo for your specific environment.
                                   WIDTHxHEIGHT can be 800x600, 768x576 or 640x480
 
    --display=DISP               set the display
-                                  DISP can be xv, x11, fbdev, mga or sdl
+                                  DISP can be xv, x11, fbdev, dxr3, mga or sdl
                                   
    --tv=NORM                    set the TV standard
                                   NORM can be ntsc, pal or secam
@@ -155,7 +158,7 @@ def main():
     sys.exit()
 
 vals_geometry = ['800x600', '768x576', '640x480']
-vals_display = ['xv', 'x11', 'fbdev', 'mga', 'sdl']
+vals_display = ['xv', 'x11', 'fbdev', 'mga', 'dxr3', 'sdl']
 vals_tv = ['ntsc', 'pal', 'secam']
 vals_chanlist = ['us-bcast', 'us-cable', 'us-cable-hrc',
                  'japan-bcast', 'japan-cable', 'europe-west',

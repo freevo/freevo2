@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2002/10/24 03:16:18  krister
+# Added DXR3 support.
+#
 # Revision 1.45  2002/10/21 02:31:38  krister
 # Set DEBUG = config.DEBUG.
 #
@@ -282,6 +285,9 @@ class OSD:
 
         self.width = config.CONF.width
         self.height = config.CONF.height
+
+        if config.CONF.display== 'dxr3':
+            os.environ['SDL_VIDEODRIVER'] = 'dxr3'
 
         # Initialize the PyGame modules.
         pygame.init()
