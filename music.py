@@ -13,6 +13,10 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2002/11/01 21:52:21  outlyer
+# Whoops. line.rfind returns '-1' on failure, not 0, so add a check for
+# rfind > 0, not just 'true'
+#
 # Revision 1.27  2002/11/01 21:48:29  outlyer
 # Crash fix: Remove playlist entries that point to non-existant files, URLs
 # excepted.
@@ -412,7 +416,7 @@ def parse_entry(arg=None, menuw=None):
         for fname in files:
             if DEBUG > 1:
                 print 'music: getting info for "%s"' % fname
-	    if os.path.exists(fname) or fname.find("://"):
+	    if os.path.exists(fname) or (fname.find("://") > 0):
                 a = AudioInfo(fname)
                 if a.artist and artist == None:
                     artist = a.artist
