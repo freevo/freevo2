@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2002/09/01 04:15:52  krister
+# Fixed skin crashes by returning regular strings instead of Unicode from the XML parsing. I do not know why this matters so much.
+#
 # Revision 1.2  2002/08/19 05:52:08  krister
 # Changed to Gustavos new XML code for more settings in the skin. Uses columns for the TV guide.
 #
@@ -156,7 +159,7 @@ class XMLSkin:
 
     def attr_str(self, node, attr, default):
         if node.attrs.has_key(('', attr)):
-            return node.attrs[('', attr)]
+            return node.attrs[('', attr)].encode()
         return default
 
     def attr_font(self, node, attr, default):
@@ -169,7 +172,7 @@ class XMLSkin:
                 # '.ttf' is the default extension
                 font = os.path.join(OSD_FONT_DIR, node.attrs[('', attr)] + '.ttf').encode()
                 if not os.path.isfile(font):
-                    font = os.path.join(OSD_FONT_DIR, node.attrs[('', attr)] + '.TTF')
+                    font = os.path.join(OSD_FONT_DIR, node.attrs[('', attr)] + '.TTF').encode()
             if not font:
                 print "can find font >%s<" % font
                 font = OSD_DEFAULT_FONT
