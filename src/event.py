@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/09/01 16:40:53  dischi
+# add PLAY_START
+#
 # Revision 1.18  2003/08/28 03:46:13  outlyer
 # Support for Chapter-by-chapter navigation in DVDs using the CH+ and CH- keys.
 #
@@ -140,7 +143,6 @@ PLAY                   = Event('PLAY')
 PAUSE                  = Event('PAUSE')
 STOP                   = Event('STOP')
 TOGGLE_OSD             = Event('TOGGLE_OSD')
-
 
 #
 # Video module
@@ -432,3 +434,5 @@ PLAY_END        = Event('PLAY_END')
 USER_END        = Event('USER_END')
 DVD_PROTECTED   = Event('DVD_PROTECTED')
 AUDIO_PLAY_END  = Event('AUDIO_PLAY_END')
+PLAY_START      = Event('PLAY_START')
+
