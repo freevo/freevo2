@@ -5,7 +5,7 @@
 # To run this from init you may edit /etc/inittab and add a line with the 
 # syntax:  1-4 letter identifyer:runlevels to run at:respawn:command
 #
-# FV1:2345:respawn:/usr/local/freevo/boot/record_server_init
+# FV1:2345:respawn:/usr/local/freevo/boot/recordserver_init
 #
 # Typing 'init q' will tell init to reread inittab so it can start this 
 # for you.
