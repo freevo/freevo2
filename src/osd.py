@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/04/02 14:00:33  dischi
+# let pygame choose the video mode
+#
 # Revision 1.27  2003/04/02 11:52:38  dischi
 # - use hardware layer (it will be deactivated if not possible by pygame)
 # - don't convert images to alpha layers. If the image format supports that
@@ -331,7 +334,11 @@ class OSD:
         pygame.display.init()
         pygame.font.init()
 
-        self.screen = pygame.display.set_mode((self.width, self.height), 1, 32)
+        self.depth = pygame.display.mode_ok((self.width, self.height), 1)
+        self.hw    = pygame.display.Info().hw
+
+        self.screen = pygame.display.set_mode((self.width, self.height), self.hw,
+                                              self.depth)
 
         if config.CONF.display == 'x11' and config.START_FULLSCREEN_X == 1:
             pygame.display.toggle_fullscreen()
@@ -362,7 +369,7 @@ class OSD:
         
         self._started = 1
         self._help = 0  # Is the helpscreen displayed or not
-        self._help_saved = pygame.Surface((self.width, self.height), 0, 32)
+        self._help_saved = pygame.Surface((self.width, self.height))
         self._help_last = 0
 
         # Remove old screenshots
@@ -423,8 +430,9 @@ class OSD:
         pygame.display.init()
         self.width = config.CONF.width
         self.height = config.CONF.height
-        self.screen = pygame.display.set_mode((self.width, self.height), 1, 32)
-
+        self.screen = pygame.display.set_mode((self.width, self.height), self.hw,
+                                              self.depth)
+        
     def stopdisplay(self):
         pygame.display.quit()
 
@@ -472,7 +480,7 @@ class OSD:
             return None
         
         if bbx or bby or bbw or bbh:
-            imbb = pygame.Surface((bbw, bbh), 0, 32)
+            imbb = pygame.Surface((bbw, bbh))
             imbb.blit(image, (0, 0), (bbx, bby, bbw, bbh))
             image = imbb
 
@@ -571,7 +579,7 @@ class OSD:
             r,g,b,a = self._sdlcol(color)
             w = x1 - x0
             h = y1 - y0
-            box = pygame.Surface((w, h), 0, 32)
+            box = pygame.Surface((w, h))
             box.fill((r,g,b))
             box.set_alpha(a)
             if layer:
@@ -1230,7 +1238,7 @@ class OSD:
         if not width: width = self.width
         if not height: height = self.height
         
-        l = pygame.Surface((width, height), SRCALPHA, 32)
+        l = pygame.Surface((width, height), SRCALPHA)
         l.fill((0,0,0,0))
         return l
 
@@ -1306,7 +1314,7 @@ class OSD:
         radius = min(radius, h / 2, w / 2)
         
         if not layer:
-            box = pygame.Surface((w, h), SRCALPHA, 32)
+            box = pygame.Surface((w, h), SRCALPHA)
 
             # clear surface
             box.fill((0,0,0,0))
@@ -1458,8 +1466,9 @@ class OSD:
                         filename = thumb
 
                             
-            image = pygame.image.load(filename)  # XXX Cannot load everything
-            #image = tmp.convert_alpha()  # XXX Cannot load everything
+            image = pygame.image.load(filename)
+            image.set_alpha(image.get_alpha(), RLEACCEL)
+
 
         except pygame.error, e:
             print 'SDL image load problem: %s' % e
