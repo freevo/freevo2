@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/01/29 05:36:27  krister
+# WIP
+#
 # Revision 1.5  2002/12/13 04:28:19  krister
 # Minor changes.
 #
@@ -241,7 +244,7 @@ else:
     # XXX Testing? Change norm, chanlist, adevice! this assumes a BT878 WinTV
     # board that has a builtin DSP device (/dev/dsp3 here).
     cmd = ('/usr/local/bin/mencoder -tv on:driver=v4l:input=0:norm=NTSC:channel=%s:chanlist=us-cable:' +
-           'width=320:height=240:outfmt=yv12:adevice=/dev/dsp3:audiorate=32000:' +
+           'width=320:height=240:outfmt=yv12:adevice=/dev/dsp4:audiorate=32000:' +
            'forceaudio:forcechan=1:buffersize=64 -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=1200:' +
            'keyint=30 -oac mp3lame -lameopts br=128:cbr:mode=3 -ffourcc divx -o %s.avi ')
 
