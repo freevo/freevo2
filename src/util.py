@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/02/07 20:11:32  dischi
+# bugfix
+#
 # Revision 1.8  2003/02/06 09:22:06  krister
 # Added a python killall() function instead of the shell call.
 #
@@ -344,7 +347,7 @@ def umount(dir):
 
 
 def mount(dir):
-    if os.path.ismount(dir):
+    if not os.path.ismount(dir):
         os.system("mount %s 2>/dev/null" % dir)
 
 def gzopen(file):
