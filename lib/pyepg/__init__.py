@@ -1,9 +1,11 @@
 import compat
 import epg_xmltv
+import stat
+import os
 
-def list_channels(data = 'tmp/TV.xml'):
-    return epg_xmltv.list_channels(data, verbose=True)
-    
-def load(data = 'tmp/TV.xml'):
+def load(data = '/tmp/TV.xml'):
     return epg_xmltv.load_guide(data, verbose=True)
     
+def timestamp(data = '/tmp/TV.xml'):
+    return 0
+

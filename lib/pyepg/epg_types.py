@@ -10,8 +10,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.1  2004/07/26 12:45:56  dischi
-# first draft of pyepg (not integrated in Freevo)
+# Revision 1.2  2004/08/05 17:16:05  dischi
+# misc enhancements
 #
 # Revision 1.20  2004/07/10 12:33:41  dischi
 # header cleanup
@@ -78,22 +78,26 @@ class TvProgram:
         self.advisories = []
         self.categories = []
         self.date       = None
-
+        self.pos        = None
+        
         # Due to problems with Twisted's marmalade this should not be changed
         # to a boolean type. 
         self.scheduled  = 0
 
 
-    def __str__(self):
+    def __unicode__(self):
         bt = time.localtime(self.start)   # Beginning time tuple
         et = time.localtime(self.stop)    # End time tuple
         begins = '%s-%02d-%02d %02d:%02d' % (bt[0], bt[1], bt[2], bt[3], bt[4])
         ends   = '%s-%02d-%02d %02d:%02d' % (et[0], et[1], et[2], et[3], et[4])
+        return u'%s to %s  %3s ' % (begins, ends, self.channel_id) + \
+                   self.title + u' (%s)' % self.pos
 
-        s = '%s to %s  %3s %s' % (begins, ends, self.channel_id, self.title)
-        return s
 
+    def __str__(self):
+        return String(self.__unicode__())
 
+    
     def __cmp__(self, other):
         """
         compare function, return 0 if the objects are identical, 1 otherwise
@@ -132,27 +136,105 @@ class TvChannel:
         self.logo        = ''
         self.programs    = []
         self.times       = None
-
+        self.index       = {}
+        self.index_start = 0
+        self.index_end   = 0
         
-    def Sort(self):
+    def sort(self):
         # Sort the programs so that the earliest is first in the list
         f = lambda a, b: cmp(a.start, b.start)
         self.programs.sort(f)
         
 
-    def __str__(self):
-        s = 'CHANNEL ID   %-20s' % self.id
+    def __unicode__(self):
+        s = u'CHANNEL ID   %-20s' % self.id
         
         if self.programs:
-            s += '\n'
+            s += u'\n'
             for program in self.programs:
-                s += '   ' + String(program) + '\n'
+                s += u'   ' + unicode(program) + u'\n'
         else:
-            s += '     NO DATA\n'
-
+            s += u'     NO DATA\n'
         return s
+
+
+    def __str__(self):
+        return String(self.__unicode__())
     
+
+    def get_key(self, t):
+        return int('%04d%02d%02d' % time.localtime(t)[:3])
+
         
+    def create_index(self):
+        """
+        create index for faster access
+        """
+        if not self.programs:
+            return
+        last  = -1
+        index = -1
+        for p in self.programs:
+            index += 1
+            key = self.get_key(p.start)
+            if not self.index_start:
+                self.index_start = key
+            self.index_end = key
+            if not self.index.has_key(key):
+                self.index[key] = []
+            pos = time.localtime(p.start)[3:5]
+            pos = pos[0] * 2 + ((pos[1] + 29) / 30)
+            p.pos = pos
+            
+            if len(self.index[key]) >= pos + 1:
+                last = index
+                continue
+            while len(self.index[key]) < pos:
+                self.index[key].append(last)
+            self.index[key].append(index)
+            last = index
+        while len(self.index[key]) < 48:
+            self.index[key].append(index)
+            
+
+    def get_pos(self, start, stop):
+        """
+        get internal positions for programs between start and stop
+        """
+        key = self.get_key(start)
+        if key < self.index_start:
+            key = self.index_start
+        pos   = time.localtime(start)[3:5]
+        pos   = max(pos[0] * 2 + (pos[1] / 30), 0)
+        start = self.index[key][pos]
+        
+        key = self.get_key(stop)
+        if key > self.index_end:
+            key = self.index_end
+        pos  = time.localtime(stop)[3:5]
+        pos  = max(pos[0] * 2 + ((pos[1] + 29) / 30), 0)
+        stop = self.index[key][pos] + 1
+
+        return start, stop
+
+        
+    def get(self, start, stop=0):
+        """
+        get programs between start and stop time or if stop=0, get
+        the program running at 'start'
+        """
+        if stop:
+            start, stop = self.get_pos(start, stop)
+            return self.programs[start:stop]
+        else:
+            start_p, stop_p = self.get_pos(start, start)
+            f = lambda p, a=start, b=start: not (p.start > b or p.stop < a)
+            try:
+                return filter(f, self.programs[start_p:stop_p])[0]
+            except Exception, e:
+                return None
+
+
 class TvGuide:
     def __init__(self):
         # These two types map to the same channel objects
@@ -160,8 +242,6 @@ class TvGuide:
         self.chan_list   = []   # Channels, ordered
         self.EPG_VERSION = config.EPG_VERSION
         self.timestamp   = 0.0
-
-
 
 
     def AddChannel(self, channel):
@@ -189,78 +269,41 @@ class TvGuide:
             if len(p) and p[-1].start == p[-1].stop:
                 # Oops, something is broken here
                 self.chan_dict[program.channel_id].programs = p[:-1]
-            self.chan_dict[program.channel_id].programs += [program]
+            program.index = len(self.chan_dict[program.channel_id].programs)
+            self.chan_dict[program.channel_id].programs.append(program)
 
 
-    # Get all programs that occur at least partially between
-    # the start and stop timeframe.
-    # If start is None, get all programs from the start.
-    # If stop is None, get all programs until the end.
-    # The chanids can be used to select only certain channel id's,
-    # all channels are returned otherwise
-    #
-    # The return value is a list of channels (TvChannel)
-    def GetPrograms(self, start = None, stop = None, chanids = None):
-        if start == None:
-            start = 0
-        if stop == None:
-            stop = 2147483647   # Year 2038
-
-        # Return a cached version?
-        global cache_last_start, cache_last_stop, cache_last_chanids
-        global cache_last_time, cache_last_result
-        if (cache_last_start == start and cache_last_stop == stop and
-            cache_last_chanids == chanids and
-            time.time() < cache_last_time):
-            if config.DEBUG > 1:
-                a = cache_last_time - time.time()
-                print 'epg: Returning cached results, valid for %1.1f secs.' % a
-            return cache_last_result[:]  # Return a copy
-        
-        channels = []
-        for chan in self.chan_list:
-            if chanids and (not chan.id in chanids):
-                continue
-
-            # Copy the channel info
-            c = TvChannel()
-            c.id = chan.id
-            c.displayname = chan.displayname
-            c.tunerid = chan.tunerid
-            c.logo = chan.logo
-            c.times = chan.times
-            # Copy the programs that are inside the indicated time bracket
-            f = lambda p, a=start, b=stop: not (p.start > b or p.stop < a)
-            c.programs = filter(f, chan.programs)
-
-            channels.append(c)
-
-        # Update cache variables
-        cache_last_start = start
-        cache_last_stop = stop
-        if chanids:
-            cache_last_chanids = chanids[:]
-        else:
-            cache_last_chanids = None
-        cache_last_timeout = time.time() + 20
-        cache_last_result = channels[:] # Make a copy in case the caller modifies it
-        if config.DEBUG > 1:
-            print 'epg: Returning new results'
             
-        return channels
-            
-            
-    def Sort(self):
+    def sort(self):
         # Sort all channel programs in time order
         for chan in self.chan_list:
-            chan.Sort()
+            chan.sort()
         
 
-    def __str__(self):
-        s = 'XML TV Guide\n'
-
+    def __unicode__(self):
+        s = u'XML TV Guide\n'
         for chan in self.chan_list:
             s += String(chan)
-
         return s
-        
+
+
+    def __str__(self):
+        return String(self.__unicode__())
+
+    
+    def create_index(self):
+        """
+        create an index for faster access
+        """
+        for chan in self.chan_list:
+            chan.create_index()
+            
+    def get(self, id):
+        """
+        return channel with given id
+        """
+        for chan in self.chan_list:
+            if chan.id == id:
+                return chan
+        return None
+    

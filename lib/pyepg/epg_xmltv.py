@@ -9,8 +9,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.1  2004/07/26 12:45:56  dischi
-# first draft of pyepg (not integrated in Freevo)
+# Revision 1.2  2004/08/05 17:16:05  dischi
+# misc enhancements
 #
 # Revision 1.53  2004/07/11 12:25:44  dischi
 # fix bad German titles
@@ -68,47 +68,6 @@ EPG_TIME_EXC = _('Time conversion error')
 
 cached_guide = None
 
-def list_channels(XMLTV_FILE, TV_CHANNELS=None, verbose=True):
-    if TV_CHANNELS:
-        return TV_CHANNELS
-    if not os.path.isfile(XMLTV_FILE):
-        return []
-
-    if verbose:
-        print 'epg_xmltv.py: Adding all channels'
-    xmltv_channels = None
-
-    f = open(XMLTV_FILE)
-    xmltv_channels = xmltv.read_channels(f)
-    f.close()
-        
-    # Was the guide read successfully?
-    if not xmltv_channels:
-        return []
-
-    TV_CHANNELS = []
-    for chan in xmltv_channels:
-
-        id   = chan['id'].encode('latin-1', 'ignore')
-        c    = epg_types.TvChannel()
-        c.id = id
-        if ' ' in id:
-            # Assume the format is "TUNERID CHANNELNAME"
-            c.displayname = id.split()[1]   # XXX Educated guess
-            c.tunerid     = id.split()[0]   # XXX Educated guess
-        else:
-            displayname = chan['display-name'][0][0]
-            if ' ' in displayname:
-                c.displayname = displayname.split()[1]
-                c.tunerid     = displayname.split()[0]
-            else:
-                c.displayname = displayname
-                c.tunerid     = _('REPLACE WITH TUNERID FOR %s') % displayname
-        TV_CHANNELS.append((c.displayname, c.id, c.tunerid))
-    return TV_CHANNELS
-
-
-    
 def load_guide(XMLTV_FILE, TV_CHANNELS=None, verbose=True):
     """
     Load a guide from the raw XMLTV file using the xmltv.py support lib.
@@ -125,33 +84,58 @@ def load_guide(XMLTV_FILE, TV_CHANNELS=None, verbose=True):
         print 'XMLTV file (%s) missing!' % XMLTV_FILE
         gotfile = 0
 
-    if not TV_CHANNELS:
-        # get channel listing
-        TV_CHANNELS = list_channels(XMLTV_FILE, verbose=True)
-        
-    if not TV_CHANNELS:
-        # still no listing?
-        return None
-    
     # Add the channels that are in the config list, or all if the
     # list is empty
-    if verbose:
-        print 'epg_xmltv.py: Only adding channels in list'
+    if TV_CHANNELS:
+        if verbose:
+            print 'epg_xmltv.py: Only adding channels in list'
 
-    for data in TV_CHANNELS:
-        (id, disp, tunerid) = data[:3]
-        c = epg_types.TvChannel()
-        c.id          = id
-        c.displayname = disp
-        c.tunerid     = tunerid
+        for data in TV_CHANNELS:
+            (id, disp, tunerid) = data[:3]
+            c = epg_types.TvChannel()
+            c.id          = id
+            c.displayname = disp
+            c.tunerid     = tunerid
+ 
+            # Handle the optional time-dependent station info
+            c.times = []
+            if len(data) > 3 and len(data[3:4]) == 3:
+                for (days, start_time, stop_time) in data[3:4]:
+                    c.times.append((days, int(start_time), int(stop_time)))
+            guide.AddChannel(c)
+
+
+    else: # Add all channels in the XMLTV file
+        if verbose:
+            print 'epg_xmltv.py: Adding all channels'
+        xmltv_channels = None
+        if gotfile:
+            f = open(XMLTV_FILE)
+            xmltv_channels = xmltv.read_channels(f)
+            f.close()
         
-        # Handle the optional time-dependent station info
-        c.times = []
-        if len(data) > 3 and len(data[3:4]) == 3:
-            for (days, start_time, stop_time) in data[3:4]:
-                c.times.append((days, int(start_time), int(stop_time)))
-        guide.AddChannel(c)
+        # Was the guide read successfully?
+        if not xmltv_channels:
+            return None     # No
+        
+        for chan in xmltv_channels:
+            id   = chan['id'].encode('latin-1', 'ignore')
+            c    = epg_types.TvChannel()
+            c.id = id
+            if ' ' in id:
+                # Assume the format is "TUNERID CHANNELNAME"
+                c.displayname = id.split()[1]   # XXX Educated guess
+                c.tunerid = id.split()[0]       # XXX Educated guess
+            else:
+                displayname = chan['display-name'][0][0]
+                if ' ' in displayname:
+                    c.displayname = displayname.split()[1]
+                    c.tunerid = displayname.split()[0]
+                else:
+                    c.displayname = displayname
+                    c.tunerid = _('REPLACE WITH TUNERID FOR %s') % displayname
 
+            guide.AddChannel(c)
 
     xmltv_programs = None
     if gotfile:
@@ -224,7 +208,8 @@ def load_guide(XMLTV_FILE, TV_CHANNELS=None, verbose=True):
             traceback.print_exc()
             print 'Error in tv guide, skipping'
             
-    guide.Sort()
+    guide.sort()
+    guide.create_index()
     return guide
 
 
