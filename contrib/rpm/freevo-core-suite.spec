@@ -1,6 +1,6 @@
 %define freevoname freevo
 %define freevover 1.5
-%define freevorel 3_freevo
+%define freevorel 5_freevo
 ##############################################################################
 Summary: Meta-package for Freevo core functionality
 Name: freevo-core-suite
@@ -12,7 +12,7 @@ URL:            http://freevo.sourceforge.net/
 Requires: SDL >= 1.2.6, SDL_image >= 1.2.3, SDL_ttf >= 2.0.6, SDL_mixer >= 1.2.5
 Requires: smpeg >= 0.4.4, freetype >= 2.1.4, util-linux
 Requires: python >= 2.2, python-game >= 1.5.6, python-imaging >= 1.1.4, PyXML
-Requires: mmpython >= 0.4.3, mx >= 2.0.5, python-numeric >= 23.1,
+Requires: mmpython >= 0.4.5, mx >= 2.0.5, python-numeric >= 23.1,
 Requires: aumix >= 2.8, libjpeg >= 6b, libexif >= 0.5.10
 Requires: python-Twisted >= 1.1.0
 Requires: lsdvd
