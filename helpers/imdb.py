@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/06/24 18:12:45  dischi
+# fixed string translation with urllib (not urllib2)
+#
 # Revision 1.22  2003/06/24 16:15:07  dischi
 # o updated by den_RDC - changed code to urllib2 - exceptions are handled by
 #   urllib2, including 302 redirection -- proxy servers ,including transparant
@@ -42,7 +45,7 @@
 #endif
 
 import re
-import urllib2, urlparse
+import urllib, urllib2, urlparse
 import sys
 import string
 import codecs
@@ -111,7 +114,7 @@ def search(name):
 
     results = []
 
-    url = 'http://us.imdb.com/Tsearch?title=%s&restrict=Movies+and+TV' % name
+    url = 'http://us.imdb.com/Tsearch?title=%s&restrict=Movies+and+TV' % urllib.quote(name)
     req = urllib2.Request(url, txdata, txheaders)
 
     try:
