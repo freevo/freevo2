@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/07/06 20:08:05  rshortt
+# Search now uses tv_util.get_chan_displayname(prog) for the display also.
+#
 # Revision 1.8  2003/05/30 19:17:27  rshortt
 # Removing the old header, it was being printed too.
 #
@@ -69,6 +72,7 @@
 #endif
 
 import sys, time
+import tv_util
 
 import record_client as ri
 from web_types import HTMLResource, FreevoResource
@@ -139,7 +143,11 @@ class SearchResource(FreevoResource):
                 fv.tableRowOpen('class="chanrow"')
                 fv.tableCell(time.strftime('%b %d %H:%M', time.localtime(prog.start)), 'class="'+status+'" align="left" colspan="1"')
                 fv.tableCell(time.strftime('%b %d %H:%M', time.localtime(prog.stop)), 'class="'+status+'" align="left" colspan="1"')
-                fv.tableCell(prog.channel_id, 'class="'+status+'" align="left" colspan="1"')
+
+                chan = tv_util.get_chan_displayname(prog)
+                if not chan: chan = 'UNKNOWN'
+                fv.tableCell(chan, 'class="'+status+'" align="left" colspan="1"')
+
                 fv.tableCell(prog.title, 'class="'+status+'" align="left" colspan="1"')
     
                 if prog.desc == '':
