@@ -6,6 +6,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/09/25 05:17:59  rshortt
+# This was broken because I removed rc.Keyboard.  Here I add Keyboard class
+# to this module and also the default keymap.  All of this stuff should actually
+# go away tomorrow or so.
+#
 # Revision 1.6  2004/08/27 14:17:55  dischi
 # support holding a key pressed
 #
@@ -59,6 +64,74 @@ import config
 import rc
 
 
+DEFAULT_KEYMAP = {
+    K_F1          : 'SLEEP',
+    K_HOME        : 'MENU',
+    K_g           : 'GUIDE',
+    K_ESCAPE      : 'EXIT',
+    K_UP          : 'UP',
+    K_DOWN        : 'DOWN',
+    K_LEFT        : 'LEFT',
+    K_RIGHT       : 'RIGHT',
+    K_SPACE       : 'SELECT',
+    K_RETURN      : 'SELECT',
+    K_F2          : 'POWER',
+    K_F3          : 'MUTE',
+    K_KP_MINUS    : 'VOL-',
+    K_n           : 'VOL-',
+    K_KP_PLUS     : 'VOL+',
+    K_m           : 'VOL+',
+    K_c           : 'CH+',
+    K_v           : 'CH-',
+    K_1           : '1',
+    K_2           : '2',
+    K_3           : '3',
+    K_4           : '4',
+    K_5           : '5',
+    K_6           : '6',
+    K_7           : '7',
+    K_8           : '8',
+    K_9           : '9',
+    K_0           : '0',
+    K_d           : 'DISPLAY',
+    K_e           : 'ENTER',
+    K_UNDERSCORE  : 'PREV_CH',
+    K_o           : 'PIP_ONOFF',
+    K_w           : 'PIP_SWAP',
+    K_i           : 'PIP_MOVE',
+    K_F4          : 'TV_VCR',
+    K_r           : 'REW',
+    K_p           : 'PLAY',
+    K_f           : 'FFWD',
+    K_u           : 'PAUSE',
+    K_s           : 'STOP',
+    K_F6          : 'REC',
+    K_PERIOD      : 'EJECT',
+    K_l           : 'SUBTITLE',
+    K_a           : 'LANG'
+    }
+
+class Keyboard:
+    """
+    Class to handle keyboard input
+    """
+    def __init__(self, callback):
+        """
+        init the keyboard event handler
+        """
+        self.callback = callback
+
+
+    def poll(self):
+        """
+        return next event
+        """
+        e = self.callback()
+        if e:
+            eventhandler.post_key(e)
+
+
+
 class Display(PygameCanvas):
     """
     Display class for SDL output
@@ -66,7 +139,7 @@ class Display(PygameCanvas):
     def __init__(self, size, default=False):
         PygameCanvas.__init__(self, size)
         self.mousehidetime = time.time()
-        rc.get_singleton().inputs.append(rc.Keyboard(self.poll))
+        rc.get_singleton().inputs.append(Keyboard(self.poll))
         self.running = True
         self.animation_possible = True
         pygame.key.set_repeat(500, 30)
@@ -145,9 +218,9 @@ class Display(PygameCanvas):
                     except:
                         pass
                     
-                if event.key in config.KEYMAP.keys():
+                if event.key in DEFAULT_KEYMAP.keys():
                     # FIXME: Turn off the helpscreen if it was on
-                    return config.KEYMAP[event.key]
+                    return DEFAULT_KEYMAP[event.key]
 
                 elif event.key == K_h:
                     print 'FIXME: add help'
