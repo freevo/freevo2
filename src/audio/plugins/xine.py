@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/09/29 18:48:41  dischi
+# fix xine lirc handling
+#
 # Revision 1.18  2004/09/29 18:47:36  dischi
 # fix xine lirc handling
 #
@@ -103,7 +106,7 @@ class Xine:
         self.app_mode     = 'audio'
         self.app          = None
         self.command = '%s -V none -A %s --stdctl' % (config.CONF.fbxine, config.XINE_AO_DEV)
-        if conf.FBXINE_USE_LIRC:
+        if config.FBXINE_USE_LIRC:
             self.command = '%s --no-lirc' % self.command
 
         
