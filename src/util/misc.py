@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/12/30 22:30:50  dischi
+# major speedup in vfs using
+#
 # Revision 1.9  2003/12/29 22:31:56  dischi
 # no need to check image
 #
@@ -60,6 +63,7 @@ import htmlentitydefs
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
+from vfs import abspath as vfs_abspath
 
 # http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/52560
 def unique(s):
@@ -166,8 +170,8 @@ def getimage(base, default=None):
     If not return the default
     """
     for suffix in ('png', 'jpg', 'gif'):
-        if vfs.abspath(base+'.'+suffix):
-            return vfs.abspath(base+'.'+suffix)
+        if vfs_abspath(base+'.'+suffix):
+            return vfs_abspath(base+'.'+suffix)
     return default
 
 
@@ -175,15 +179,12 @@ def getname(file):
     """
     make a nicer display name from file
     """
-    if not vfs.exists(file):
+    if not os.path.exists(file):
         return file
-    name = vfs.splitext(vfs.basename(file))[0]
-
-    if not name:
-        # Bugfix for empty stem
-        return vfs.basename(file)
     
-    name = name[0].upper() + name[1:]
+    name = os.path.basename(file)
+    name = name[:name.rfind('.'):].capitalize()
+    
     while FILENAME_REGEXP.match(name):
         m = FILENAME_REGEXP.match(name)
         if m:
@@ -272,13 +273,14 @@ def list_usb_devices():
     fd.close()
     return devices
 
+
 def smartsort(x,y): # A compare function for use in list.sort()
     """
     Compares strings after stripping off 'The' and 'A' to be 'smarter'
     Also obviously ignores the full path when looking for 'The' and 'A' 
     """
-    m = vfs.basename(x)
-    n = vfs.basename(y)
+    m = os.path.basename(x)
+    n = os.path.basename(y)
     
     for word in ('The', 'A'):
         word += ' '

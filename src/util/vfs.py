@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/12/30 22:30:50  dischi
+# major speedup in vfs using
+#
 # Revision 1.5  2003/12/30 15:28:48  dischi
 # remove old code
 #
@@ -61,18 +64,18 @@ import codecs
 
 import config
 
-def getoverlay(item):
+def getoverlay(directory):
     if not config.OVERLAY_DIR:
         return ''
-
-    directory = os.path.abspath(item)
+    if not directory.startswith('/'):
+        directory = os.path.abspath(directory)
     if directory.startswith(config.OVERLAY_DIR):
         return directory
     for media in config.REMOVABLE_MEDIA:
         if directory.startswith(media.mountdir):
             directory = directory[len(media.mountdir):]
-            return os.path.join(config.OVERLAY_DIR, 'disc', media.id + directory)
-    return os.path.join(config.OVERLAY_DIR, directory[1:])
+            return '%s/disc/%s%s' % (config.OVERLAY_DIR, media.id, directory)
+    return config.OVERLAY_DIR + directory
 
 
 def abspath(name):
@@ -91,7 +94,10 @@ def isfile(name):
     """
     return if the given name is a file
     """
-    return os.path.isfile(abspath(name))
+    if os.path.isfile(name):
+        return True
+    overlay = getoverlay(name)
+    return overlay and os.path.isfile(overlay)
 
 
 def unlink(name):
