@@ -10,6 +10,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2003/09/11 14:13:55  outlyer
+# Another warning fix.
+#
 # Revision 1.29  2003/09/07 11:17:21  dischi
 # add basic refresh function
 #
@@ -251,7 +254,7 @@ class PopupBox(Container):
         if not self.width or not self.height:
             raise TypeError, 'Not all needed variables set.'
 
-        self.surface = pygame.Surface(self.get_size(), 0, 32)
+        self.surface = pygame.Surface(int(self.get_size()), 0, 32)
 
         c   = self.bg_color.get_color_sdl()
         a   = self.bg_color.get_alpha()
