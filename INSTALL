@@ -93,13 +93,15 @@ o Compile Freevo
     remote_control_lirc.py Freevo application (optional)
   o Test the X11 OSD test driver
   o Test the MGA G400 OSD framebuffer driver (optional)
+    Before you start freevo with the OSD driver change the framebuffer 
+    resolution to 768x576.
 
 o Test matrox_g400/v4l1_to_mga  (Video4Linux1 -> Framebuffer, optional)
   o It _must_ be used with the matrox_g400/mga_vid.o module,
     not the one from MPlayer.
   o Check out the source for how to set the input, norm, channel
 
-o Update the settings in config.py!
+o Update the settings in freevo_config.py!
   o TV_SETTINGS, VCR_SETTINGS, TV_CHANNELS depending on where you live.
   o DIR_MP3, DIR_MOVIES, DIR_RECORD for where your files are
 
