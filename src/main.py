@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.68  2003/09/02 18:39:30  dischi
+# turn of x blanking
+#
 # Revision 1.67  2003/08/31 14:19:11  dischi
 # show splashscreen on startup
 #
@@ -368,6 +371,7 @@ if __name__ == "__main__":
         return tracefunc
 
     if len(sys.argv) >= 2 and sys.argv[1] == '--force-fs':
+        system('xset s off')
         config.START_FULLSCREEN_X = 1
         
     if len(sys.argv) >= 2 and sys.argv[1] == '--trace':
