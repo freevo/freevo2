@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2004/02/13 17:36:54  dischi
+# fixed crash on stop
+#
 # Revision 1.32  2004/02/05 14:23:50  outlyer
 # Patch from Viggo Fredriksen
 #
@@ -189,8 +192,7 @@ class MPlayer:
             mixer.setPcmVolume(0)
 
         # Start up the TV task
-        self.app = MPlayerApp(command)
-        self.app.stop_osd = True
+        self.app = childapp.ChildApp2(command)
         
         self.prev_app = rc.app()
         rc.app(self)
@@ -289,25 +291,3 @@ class MPlayer:
             
         return FALSE
     
-
-# ======================================================================
-class MPlayerApp(childapp.ChildApp2):
-    """
-    class controlling the in and output from the mplayer process
-    """
-    def __init__(self, app):
-        # init the child (== start the threads)
-        childapp.ChildApp2.__init__(self, app)
-                
-    def stop_event(self):
-        """
-        return the stop event send through the eventhandler
-        """
-        if self.exit_type == "End of file":
-            return PLAY_END
-        elif self.exit_type == "Quit":
-            return USER_END
-        else:
-            print _( 'ERROR' ) + ': ' + str(self.exit_type) + \
-                  _( 'unknow error while playing file' )
-            return PLAY_END
