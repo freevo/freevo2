@@ -141,6 +141,7 @@ class ImageViewer:
 
             print width, height, scale, new_w, new_h, x, y
 
+            osd.clearscreen(color=osd.COL_BLACK)
             osd.drawbitmap(filename, x, y, scale, bbx, bby, bbw, bbh)
             self.drawosd()
             osd.update()
