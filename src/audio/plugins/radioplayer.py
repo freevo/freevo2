@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/01/10 21:27:37  mikeruelle
+# forgot the little  q in the arg. really need to get a card with radio to test
+#
 # Revision 1.5  2003/12/10 19:10:35  dischi
 # AUDIO_PLAY_END is not needed anymore
 #
@@ -101,7 +104,7 @@ class PluginInterface(plugin.Plugin):
         mixer.setLineinVolume(0)
         mixer.setIgainVolume(0)
         mixer.setMicVolume(0)
-        os.system('%s -m' % config.RADIO_CMD)
+        os.system('%s -qm' % config.RADIO_CMD)
 
 
     def is_playing(self):
