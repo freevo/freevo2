@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/10/03 10:55:10  dischi
+# i18n fix
+#
 # Revision 1.3  2003/09/14 20:09:37  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
@@ -336,7 +339,7 @@ class Info_Area(Skin_Area):
                 else:
                     height = -1
                     
-                size = osd.drawstringframed( element.text, 0, 0,
+                size = osd.drawstringframed( _(element.text), 0, 0,
                                              r.width, r.height,
                                              element.font.font, None, None,
                                              element.align, element.valign,
