@@ -232,7 +232,7 @@ class RecordServer(RPCServer):
         for r in self.recordings:
             if r.status == SCHEDULED:
                 secs = max(0, int(r.start - time.time()))
-                print 'recordserver.check_recordings: next in %s sec' % timer
+                print 'recordserver.check_recordings: next in %s sec' % secs
                 self.rec_timer = notifier.addTimer(secs * 1000, self.record)
                 break
 
@@ -311,7 +311,7 @@ class RecordServer(RPCServer):
         for next in self.recordings:
             if next.status == SCHEDULED:
                 secs = max(0, int(next.start - time.time()))
-                print 'recordserver.record: next in %s sec' % timer
+                print 'recordserver.record: next in %s sec' % secs
                 self.rec_timer = notifier.addTimer(secs * 1000, self.record)
                 break
 
