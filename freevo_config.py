@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2002/08/05 00:43:10  tfmalt
+# o Changed DIR_MP3 to DIR_AUDIO
+#
 # Revision 1.39  2002/08/03 20:20:54  krister
 # Nice cannot be used as non-root to raise the prio! Set to 0 as default. Changed mplayer settings from dsp0+mga to dsp+xv which is better for newbie desktop users (mplayer cannot play mp3s if -vo is set wrong!) Fixed speling errors.
 #
@@ -300,11 +303,11 @@ TV_CHANNELS = [('2 KTVI', 'KTVI', '2'),
 WATCH_TV_APP = './matrox_g400/v4l1_to_mga'
 
 #
-# Where the MP3 files can be found.
+# Where the Audio (mp3, ogg) files can be found.
 #
 # Format: [ ('Title1', 'directory1'), ('Title2', 'directory2'), ... ]
 #
-DIR_MP3 = [ ('Test Files', 'testfiles/Music') ]
+DIR_AUDIO = [ ('Test Files', 'testfiles/Music') ]
 
 #
 # Where the movie files can be found.
