@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.87  2002/10/25 20:03:32  dischi
+# Added *.m2p as video filetype
+#
 # Revision 1.86  2002/10/21 18:34:16  dischi
 # TV_SHOW_IMAGES points to the new example dir
 #
@@ -175,6 +178,7 @@ SUFFIX_MPLAYER_FILES = [ '/*.[aA][vV][iI]',
                          '/*.[vV][oO][bB]',
                          '/*.[aA][sS][fF]',
                          '/*.[mM][2][vV]',
+                         '/*.[mM][2][pP]',
                          '/*.[mM][pP][4]',
                          '/*.[vV][iI][vV]',
                          '/*.[nN][uU][vV]',
