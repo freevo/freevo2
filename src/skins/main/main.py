@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2004/02/22 20:46:09  dischi
+# add Unicode error warning
+#
 # Revision 1.40  2004/02/18 21:54:03  dischi
 # small update needed for the new gui code
 #
@@ -77,6 +80,7 @@
 
 import os, copy
 import stat
+import traceback
 
 import config
 import util
@@ -541,11 +545,31 @@ class Skin:
             self.force_redraw = True
             self.all_areas    = getattr(self, '%s_areas' % type)
             
+
         self.last_draw = type, object, menu
 
-        self.screen.clear()
-        for a in self.all_areas:
-            a.draw(settings, object, menu, style, type, self.force_redraw)
-
-        osd.update([self.screen.show(self.force_redraw)])
-        self.force_redraw = False
+        try:
+            self.screen.clear()
+            for a in self.all_areas:
+                a.draw(settings, object, menu, style, type, self.force_redraw)
+            if type == 'menu':
+                x = 'ä'
+                if x == u'ä':
+                    pass
+            osd.update([self.screen.show(self.force_redraw)])
+            self.force_redraw = False
+        except UnicodeError, e:
+            print '******************************************************************'
+            print 'Unicode Error: %s' % e
+            print 'Please report the following lines to the freevo mailing list'
+            print 'or with the subject \'[Freevo-Bugreport\] Unicode\' to'
+            print 'freevo@dischi-home.de.'
+            print
+            print traceback.print_exc()
+            print
+            print type, object
+            if type == 'menu':
+                for i in object.menustack[-1].choices:
+                    print i
+            print
+            raise UnicodeError, e
