@@ -11,6 +11,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2002/09/18 18:42:19  dischi
+# Some small changes here and there, nothing important
+#
 # Revision 1.36  2002/09/15 12:44:31  dischi
 # skin support for DVD/VCD/SVCD was missing
 #
@@ -155,24 +158,27 @@ def play_vcd(arg=None, menuw=None):
     mplayer.play('vcd', titlenum, [], 0, '')
 
 
-#mplayer -ao null -nolirc -vo null -frames 0 -dvd 1 2> &1 > /tmp/mplayer_dvd.log
-#mplayer -ao null -nolirc -vo null -frames 0 -vcd 99 2> &1 > /tmp/mplayer_dvd.log
+#
+# Generate special menu for DVD/VCD/SVCD content
+#
 def dvd_vcd_menu_generate(media, type, menuw):
 
     # Figure out the number of titles on this disc
     osd.popup_box('Scanning disc, be patient...')
     osd.update()
     os.system('rm /tmp/mplayer_dvd.log /tmp/mplayer_dvd_done')
-    # XXX Add an option for DVD device to use in case theres more than one!
+
     cmd = ('%s -ao null -nolirc -vo null -frames 0 %s -cdrom-device %s ' +
            '1 2>&1 > /tmp/mplayer_dvd.log')
 
     if type == 'dvd':
+        #mplayer -ao null -nolirc -vo null -frames 0 -dvd 1 2> &1 > /tmp/mplayer_dvd.log
         cmd = cmd % (config.MPLAYER_CMD, '-dvd 1', media.devicename)
         play_function = play_dvd
     else:
         # play track 99 which isn't there (very sure!), scan mplayers list
         # of found tracks to get the total number of tracks
+        #mplayer -ao null -nolirc -vo null -frames 0 -vcd 99 2> &1 > /tmp/mplayer_dvd.log
         cmd = cmd % (config.MPLAYER_CMD, '-vcd 99', media.devicename)
         play_function = play_vcd
 
@@ -200,7 +206,7 @@ def dvd_vcd_menu_generate(media, type, menuw):
                 break
 
     elif done:
-        # Look for 'There are NNN titles on this VCD'
+        # Look for 'track NN'
         lines = open('/tmp/mplayer_dvd.log').readlines()
         for line in lines:
             if line.find('track ') == 0:

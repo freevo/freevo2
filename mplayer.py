@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2002/09/18 18:42:19  dischi
+# Some small changes here and there, nothing important
+#
 # Revision 1.33  2002/09/14 16:49:20  dischi
 # Add support for hwac3. If MPLAYER_AO_HWAC3_DEV is set hwac3 will be
 # enabled for DVDs and VOB files
@@ -214,16 +217,6 @@ class MPlayer:
             if mplayer_options:
                 mpl += (' ' + mplayer_options)
                 if DEBUG: print 'options, mpl = "%s"' % mpl
-
-            # Some files needs special arguments to mplayer, they can be
-            # put in a <filename>.mplayer options file. The <filename>
-            # includes the suffix (.avi, etc)!
-            # The arguments in the options file are added at the end of the
-            # regular mplayer arguments.
-            if os.path.isfile(filename + '.mplayer'):
-                mpl += (' ' + open(filename + '.mplayer').read().strip())
-                if DEBUG: print 'Read options, mpl = "%s"' % mpl
-
 
             # XXX Some testcode by Krister:
             if os.path.isfile('./freevo_xwin') and osd.sdl_driver == 'x11':

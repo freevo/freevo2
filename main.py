@@ -4,6 +4,9 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.67  2002/09/18 18:42:19  dischi
+# Some small changes here and there, nothing important
+#
 # Revision 1.66  2002/09/15 11:53:41  dischi
 # Make info in RemovableMedia a class (RemovableMediaInfo)
 #
@@ -333,6 +336,9 @@ def getcmd():
             # Menu events
             menuwidget.eventhandler(event)
         
+
+
+# XXX does this belong to main.py?
 
 class RemovableMediaInfo:
 

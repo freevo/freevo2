@@ -19,6 +19,9 @@ o DVD/VCD/SVCD title selecting
 o mplayer hwac3 support
 o Added Andrew Drummond's Mame code. Kinda works, but not done yet.
 o Updated the XMLTV handling to deal with the new German format as well.
+o removed .mplayer feature for movie files. Please use <mplayer_options>
+  in the movie xml files instead.
+o Movie xml files can now contain skin informations as well.
 	
 	
 Release 1.2.5 (2002-08-21):

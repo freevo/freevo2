@@ -1,3 +1,41 @@
+# ----------------------------------------------------------------------
+# identifymedia.py - the Freevo identifymedia/automount module
+# ----------------------------------------------------------------------
+# $Id$
+#
+# Authors:     Krister Lagerstrom <krister@kmlager.com>
+#              Dirk Meyer <dischi@tzi.de>
+# Notes:
+# Todo:        
+#
+# ----------------------------------------------------------------------
+# $Log$
+# Revision 1.12  2002/09/18 18:42:19  dischi
+# Some small changes here and there, nothing important
+#
+#
+# ----------------------------------------------------------------------
+# 
+# Copyright (C) 2002 Krister Lagerstrom
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# ----------------------------------------------------------------------
+#
+
+
 import sys, socket, random, time, os
 from fcntl import ioctl
 import cdrom
@@ -18,6 +56,9 @@ LABEL_REGEXP = re.compile("^(.*[^ ]) *$").match
 
 class Identify_Thread(threading.Thread):
 
+    # magic!
+    # Try to find out as much as possible about the disc in the
+    # rom drive: title, image, play options, ...
     def identify(self, media):
 
         # Check drive status (tray pos, disc ready)
@@ -90,6 +131,7 @@ class Identify_Thread(threading.Thread):
         # Disc is data of some sort. Mount it to get the file info
         util.mount(media.mountdir)
 
+        # Check for DVD/VCD/SVCD
         for mediatype in mediatypes:
             if os.path.exists(media.mountdir + mediatype[1]):
                 util.umount(media.mountdir)
@@ -101,7 +143,8 @@ class Identify_Thread(threading.Thread):
                                                 (mediatype[2], media.mountdir, []),\
                                                 xml_file = xml_filename)
                 return
-                
+
+        # Check for movies/audio/images on the disc
         mplayer_files = util.match_files(media.mountdir, config.SUFFIX_MPLAYER_FILES)
         mp3_files = util.match_files(media.mountdir, config.SUFFIX_AUDIO_FILES)
         image_files = util.match_files(media.mountdir, config.SUFFIX_IMAGE_FILES)
@@ -115,6 +158,8 @@ class Identify_Thread(threading.Thread):
             
         info = None
 
+
+        # Is this a movie disc?
         if mplayer_files and not mp3_files:
 
             # return the title and action is play
@@ -134,7 +179,7 @@ class Identify_Thread(threading.Thread):
                 info = RemovableMediaInfo('DIVX', title, image, \
                                           ('video', mplayer_files[0], []))
 
-            # We're done if it was 
+            # We're done if we have 'info' 
             if info:
                 media.info = info
                 return
@@ -161,25 +206,34 @@ class Identify_Thread(threading.Thread):
                                           xml_file = xml_filename)
 
             else:
-                # nothing found, return the label
+                # nothing found, give up: return the label
                 info = RemovableMediaInfo("DIVX", label)
+
             media.info = info
             return
+
+
 
         # XXX add more intelligence to cds with audio files
         if (not mplayer_files) and mp3_files:
             info = RemovableMediaInfo("AUDIO" , '%s [%s]' % (media.drivename, label))
 
+
+
         # XXX add more intelligence to cds with image files
         elif (not mplayer_files) and (not mp3_files) and image_files:
             info = RemovableMediaInfo("IMAGE", '%s [%s]' % (media.drivename, label))
 
+
+        # Mixed media?
         elif mplayer_files or image_files or mp3_files:
+            # Do we have title informations?
             if title:
                 info = RemovableMediaInfo('DATA', title, image, xml_file = xml_filename)
             else:
                 info = RemovableMediaInfo("DATA", '%s [%s]' % (media.drivename, label))
 
+        # Strange, no useable files
         else:
             info = RemovableMediaInfo("DATA" , '%s [%s]' % (media.drivename, label))
 
@@ -213,11 +267,11 @@ class Identify_Thread(threading.Thread):
         # Make sure the movie database is rebuilt at startup
         os.system('touch /tmp/freevo-rebuild-database')
         while 1:
-            time.sleep(2)
-
             # Check if we need to update the database
             # This is a simple way for external apps to signal changes
             if os.path.exists("/tmp/freevo-rebuild-database"):
                 movie_xml.hash_xml_database()
 
             self.check_all()
+            time.sleep(2)
+

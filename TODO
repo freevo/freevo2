@@ -7,7 +7,6 @@ $Id$
 Short-term
 ----------
 o Better movie XML file mplayer options
-o Remove the .mplayer stuff
 o TV live pause
 o Play audio CD-roms
   o Use MPlayer, it has CDDA/CDDB support
@@ -77,6 +76,9 @@ o Traffic report (realtime congestion map download/display, text info).
 o Weather report (animated radar map, text info).
 o Add a startup screen with the GPL info and a button to display 
   the non-warranty as suggested by FSF
+o Add helper applications:
+  o Configuration GUI to write local_conf.py
+  o GUI to edit the xml files (integrate imdb.py)
 
 
 Long-term
