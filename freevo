@@ -14,23 +14,34 @@ if ! [ -e src/identifymedia.py ]; then
     cd `dirname $0`
 fi
 
+# Is runapp present? If not it needs to be compiled
+if ! [ -e runapp ]; then
+    echo
+    echo "Please use the binary release of Freevo!"
+    echo
+    echo "Freevo not compiled (runapp executable not found)"
+    exit 1
+fi
+
+# Create the config file.
+if [ "$1" = "setup" ] ; then
+    export PYTHONPATH=./src
+    shift 1
+    ./runapp python setup_freevo.py $@
+    exit 0
+fi
+
 # Is freevo.conf present? If not, ./configure is needed
 # Check the possible locations in prio order
 if ! [ -e $FREEVO_STARTDIR/freevo.conf ]; then
     if ! [ -e $HOME/.freevo/freevo.conf ]; then
         if ! [ -e /etc/freevo/freevo.conf ]; then
             if ! [ -e ./freevo.conf ]; then
-                echo "Please run ./configure first (freevo.conf not found)"
+                echo "Please run 'freevo setup' first (freevo.conf not found)"
                 exit 1
             fi
         fi
     fi
-fi
-
-# Is runapp present? If not it needs to be compiled
-if ! [ -e runapp ]; then
-    echo "Please compile freevo (runapp executable not found)"
-    exit 1
 fi
 
 # Support for using just Python

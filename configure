@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/02/14 04:20:54  krister
+# ./configure is now deprecated for setup, use freevo setup instead!
+#
 # Revision 1.16  2003/02/14 03:57:48  krister
 # Can't run configure from CVS unless --force is used.
 #
@@ -45,38 +48,19 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-# cd to the freevo directory if necessary
-if ! [ -e src/identifymedia.py ]; then
-    cd `dirname $0`
-fi
+echo
+echo "ERROR: Please use 'freevo setup' to set up Freevo instead."
+echo
+echo "This script is deprecated for now, it will be changed later"
+echo "to act as a regular ./configure script (lib paths, etc)"
+echo
+echo "*************************************************************"
+echo "* Please note that there is a standalone binary release     *"
+echo "* of Freevo with all dependencies included. Use that unless *"
+echo "* you are really capable of installing Freevo from source   *"
+echo "* without assistance from the mailing lists or irc!         *"
+echo "*************************************************************"
+echo
 
-# Is runapp present? If not, the user must have a good python installation
-if ! [ -e runapp ]; then
-    echo
-    echo
-    echo "WARNING: ./runapp not found."
-    echo
-    echo "Please make sure you have the most recent version of Freevo,"
-    echo "and *please* use the full binary version that includes all"
-    echo "dependencies including ./runapp unless you're an experienced user."
-    echo "Experienced == no help needed from the mailing lists."
-    echo 
-    echo "Trying to start the configure program..."
-    echo
-    echo
 
-    if [ "$1" = "--force" ] ; then
-        shift 1
-        # XXX Check for python2 etc?
-        python setup_build.py $@
-        exit 0
-    else
-        echo "Use './configure --force <options>' to start anyway"
-        exit 1
-    fi
-fi
-
-# ./runapp will figure out which python to use
-./runapp python setup_build.py $@
-
-exit 0
+exit 1
