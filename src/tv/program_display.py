@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/09/06 17:31:17  rshortt
+# Removed 'Description: ' and added a close button.
+#
 # Revision 1.10  2003/09/05 02:48:12  rshortt
 # Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
 #
@@ -93,7 +96,8 @@ class ProgramDisplay(PopupBox):
             subtitle_txt = 'Subtitle:  %s' % self.prog.sub_title
             subtitle = Label(subtitle_txt, self, Align.LEFT)
 
-        desc = Label('Description:  %s' % self.prog.desc, self, Align.LEFT)
+        # desc = Label('Description:  %s' % self.prog.desc, self, Align.LEFT)
+        desc = Label(self.prog.desc, self, Align.LEFT)
 
         chan = Label('Channel:  %s' % \
                       tv.tv_util.get_chan_displayname(self.prog.channel_id), 
@@ -110,9 +114,9 @@ class ProgramDisplay(PopupBox):
 
         if self.context == 'guide':
             # num_items = 3
-            num_items = 1
+            num_items = 2
         else:
-            num_items = 1
+            num_items = 2
 
         self.options = ListBox(width=(self.width-2*self.h_margin), 
                                height=items_height*num_items, 
@@ -125,6 +129,8 @@ class ProgramDisplay(PopupBox):
             # self.options.add_item(text='Add "%s" to favorites' % prog.title, value=3)
         else:
             self.options.add_item(text='Remove from scheduled recordings', value=4)
+
+        self.options.add_item(text='Close', value=-1)
 
         self.options.set_h_align(Align.CENTER)
         self.options.toggle_selected_index(0)
@@ -143,7 +149,9 @@ class ProgramDisplay(PopupBox):
             return self.options.eventhandler(event)
 
         elif event == em.INPUT_ENTER:
-            if self.options.get_selected_item().value == 1:
+            if self.options.get_selected_item().value == -1:
+                self.destroy()
+            elif self.options.get_selected_item().value == 1:
                 (result, msg) = record_client.scheduleRecording(self.prog)
                 if result:
                     AlertBox(parent=self, 
