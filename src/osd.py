@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.113  2003/12/31 16:41:43  dischi
+# cache all thumbnails when config.OVERLAY_DIR_STORE_THUMBNAILS
+#
 # Revision 1.112  2003/12/30 15:29:04  dischi
 # support for OVERLAY_DIR_STORE_THUMBNAILS
 #
@@ -1141,7 +1144,7 @@ class OSD:
 
             if thumbnail:
                 sinfo = os.stat(filename)
-                if sinfo[stat.ST_SIZE] > 10000:
+                if config.OVERLAY_DIR_STORE_THUMBNAILS or sinfo[stat.ST_SIZE] > 10000:
                     if config.OVERLAY_DIR_STORE_THUMBNAILS:
                         thumb = vfs.getoverlay(filename + '.raw')
                     else:
@@ -1149,10 +1152,13 @@ class OSD:
                                              (config.FREEVO_CACHEDIR,
                                               util.hexify(md5.new(filename).digest())))
                     data = None
-                    if os.path.isfile(thumb) and \
-                           os.stat(thumb)[stat.ST_MTIME] > sinfo[stat.ST_MTIME]:
-                        data = util.read_pickle(thumb)
-                            
+
+                    try:
+                        if os.stat(thumb)[stat.ST_MTIME] > sinfo[stat.ST_MTIME]:
+                            data = util.read_pickle(thumb)
+                    except OSError:
+                        pass
+                    
                     if not data:
                         f=open(filename, 'rb')
                         tags=exif.process_file(f)
