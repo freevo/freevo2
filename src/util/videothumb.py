@@ -42,19 +42,24 @@ import mmpython
 import glob
 import popen2
 import mevas
+import tempfile
+import logging
 
 from stat import *
 
-_runqueue = []
+# freevo imports
+import vfs
 
-import logging
+# get logging object
 log = logging.getLogger()
+
+# internal thumbnail queue
+_runqueue = []
 
 # do not import freevo stuff when running this file
 if __name__ != "__main__":
     from util.popen import Process
     import config
-    import vfs
 
     class MplayerThumbnail(Process):
         """
@@ -64,17 +69,29 @@ if __name__ != "__main__":
             self.imagefile = imagefile
             Process.__init__(self, app)
 
+
         def stdout_cb(self, line):
+            """
+            print debug from child as warning
+            """
             line.strip(' \t\n')
             if line:
-                log.info('>> %s' % line)
+                log.warning('>> %s' % line)
+
 
         def stderr_cb(self, line):
+            """
+            print debug from child as warning
+            """
             line.strip(' \t\n')
             if line:
-                log.info('>> %s' % line)
+                log.warning('>> %s' % line)
+
 
         def finished(self):
+            """
+            Job finished, run next if there is more
+            """
             global _runqueue
             _runqueue = _runqueue[1:]
 
@@ -85,39 +102,33 @@ if __name__ != "__main__":
             
 
 
+    def snapshot(videofile, imagefile=None, pos=None, update=True):
+        """
+        make a snapshot of the videofile at position pos to imagefile
+        """
+        global _runqueue
+        if not imagefile:
+            imagefile = os.path.splitext(videofile)[0] + '.jpg'
 
-def snapshot(videofile, imagefile=None, pos=None, update=True):
-    """
-    make a snapshot of the videofile at position pos to imagefile
-    """
-    global _runqueue
-    if not imagefile:
-        imagefile = os.path.splitext(videofile)[0] + '.jpg'
-
-    if not update and os.path.isfile(imagefile) and \
-           os.stat(videofile)[ST_MTIME] <= os.stat(imagefile)[ST_MTIME]:
-        return
-
-    if imagefile.endswith('.raw'):
-        imagefile += '.tmp'
-
-    for r, r_image in _runqueue:
-        if r_image == imagefile:
+        if not update and os.path.isfile(imagefile) and \
+               os.stat(videofile)[ST_MTIME] <= os.stat(imagefile)[ST_MTIME]:
             return
-    
-    log.info('generate %s' % imagefile)
-    args = [ config.MPLAYER_CMD, videofile, imagefile ]
 
-    if pos != None:
-        args.append(str(pos))
+        for r, r_image in _runqueue:
+            if r_image == imagefile:
+                return
 
-    job = (([os.environ['FREEVO_SCRIPT'], 'execute',
-             os.path.abspath(__file__) ] + args), imagefile)
-    _runqueue.append(job)
-    if len(_runqueue) == 1:
-        MplayerThumbnail(*_runqueue[0])
+        log.info('generate %s' % imagefile)
+        args = [ config.MPLAYER_CMD, videofile, imagefile ]
 
+        if pos != None:
+            args.append(str(pos))
 
+        job = (([os.environ['FREEVO_SCRIPT'], 'execute',
+                 os.path.abspath(__file__) ] + args), imagefile)
+        _runqueue.append(job)
+        if len(_runqueue) == 1:
+            MplayerThumbnail(*_runqueue[0])
 
         
 #
@@ -149,15 +160,21 @@ if __name__ == "__main__":
                 position = str(int(position))
 
     # chdir to tmp so we have write access
-    os.chdir('/tmp')
+    tmpdir = tempfile.mkdtemp('tmp', 'videothumb', '/tmp/')
+    os.chdir(tmpdir)
 
     # call mplayer to get the image
     child = popen2.Popen3((mplayer, '-nosound', '-vo', 'png', '-frames', '8',
                            '-ss', position, '-zoom', filename), 1, 100)
+    child_output = ''
     while(1):
         data = child.fromchild.readline()
         if not data:
             break
+        child_output += data
+    for line in child.childerr.readlines():
+        child_output += line
+
     child.wait()
     child.fromchild.close()
     child.childerr.close()
@@ -166,7 +183,11 @@ if __name__ == "__main__":
     # store the correct thumbnail
     captures = glob.glob('000000??.png')
     if not captures:
+        # strange, print debug to find the problem
         print "error creating capture for %s" % filename
+        print child_output
+        os.chdir('/')
+        os.rmdir(tmpdir)
         sys.exit(1)
     
     capture = captures[-1]
@@ -188,20 +209,27 @@ if __name__ == "__main__":
         try:
             image.save(imagefile)
         except:
+            # unable to save image, try vfs dir
+            imagefile = vfs.getoverlay(imagefile)
             try:
-                import config
-                import vfs
                 if not os.path.isdir(os.path.dirname(imagefile)):
                     os.makedirs(os.path.dirname(imagefile))
                 image.save(imagefile)
             except Exception, e:
+                # strange, print debug to find the problem
                 print 'unable to write file %s: %s' % \
                       (vfs.getoverlay(imagefile), e)
+
     except (OSError, IOError), e:
-        print 'saving image', e
+        # strange, print debug to find the problem
+        print 'error saving image %s: %s' % (imagefile, e)
 
     for capture in captures:
         try:
             os.remove(capture)
         except:
             print "error removing temporary captures for %s" % filename
+
+    os.chdir('/')
+    os.rmdir(tmpdir)
+    sys.exit(0)
