@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2002/09/27 08:39:10  dischi
+# More debug for error location
+#
 # Revision 1.29  2002/09/26 09:20:58  dischi
 # Fixed (?) bug when using freevo_runtime. Krister, can you take a look
 # at that?
@@ -374,6 +377,8 @@ class Skin:
             icon_size = 64
 
 
+        if DEBUG: print 'DrawMenu_Selection()'
+
         for choice in menuw.menu_items:
             
             if menu.selected == choice:
@@ -412,6 +417,8 @@ class Skin:
             text = choice.name
             font_w, font_h = osd.stringsize(text, font=obj.font, ptsize=obj.size)
 
+            if DEBUG: print 'Entry: >%s<' % text
+
             if not spacing:
                 spacing = font_h + PADDING
             
@@ -426,6 +433,8 @@ class Skin:
                 font_w, font_h = osd.stringsize(text, font=obj.font, ptsize=obj.size)
 
 
+            if DEBUG: print 'Entry (2): >%s<' % text
+
             # Try and center the text to the middle of the icon
             if valign:
                 top = y0 + (icon_size - font_h) / 2
@@ -436,6 +445,10 @@ class Skin:
             if menu.selected == choice and obj.visible:
                 osd.drawbox(x0 - 8, top - 2, x0 - 8 + width, top + font_h + 2,
                             width = -1, color = ((160 << 24) | obj.bgcolor))
+
+            if not text:
+                print "no text to display ... strange. Use default"
+                text = "unknown"
 
             show_name = (None, None, None, None)
             if config.TV_SHOW_REGEXP_MATCH(text):
