@@ -7,7 +7,7 @@ import os,string,fnmatch,sys
 import sqlite
 
 # Metadata tools
-import mmpython,fchksum
+import mmpython
 
 sys.path.append('./src/')
 import config, util
