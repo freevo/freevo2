@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/09/11 14:16:21  outlyer
+# Filter out the warnings about the ioctl's. We can't do much with it just yet.
+#
 # Revision 1.6  2003/08/23 12:51:43  dischi
 # removed some old CVS log messages
 #
@@ -40,6 +43,9 @@ import freq
 import os
 import struct
 import fcntl
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning, module=__name__)
+
 
 import config
 
