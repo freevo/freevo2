@@ -10,6 +10,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/06/20 01:33:56  rshortt
+# Removing the need for the rominfo program.  Now we parse the output of
+# xmame --listinfo directly and build a list of all supported MAME roms.
+# This should only need to be updated when you upgrade xmame and you should
+# remove your existing romlist-n.pickled.
+#
 # Revision 1.3  2003/04/24 19:56:12  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -49,7 +55,7 @@ import config
 
 # The file format version number. It must be updated when incompatible
 # changes are made to the file format.
-TYPES_VERSION = 1
+TYPES_VERSION = 2
 
 # Set to 1 for debug output
 DEBUG = config.DEBUG
@@ -60,13 +66,16 @@ FALSE = 0
 
 class MameRom:
 
-    filename = ''
-    dirname = ''
-    title = ''
-    imageFile = ''
-    partial = 0
-    matched = 0
-    trashme = 0
+    def __init__(self):
+        self.filename = ''
+        self.title = ''
+        self.name = ''
+        self.description = ''
+        self.year = ''
+        self.manufacturer = ''
+        self.cloneof = ''
+        self.romof = ''
+
 
     def getFilename(self):
         return self.filename
