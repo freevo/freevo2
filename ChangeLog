@@ -25,6 +25,8 @@ Release 1.x.x (200x-xx-xx):
  * storage of item variables of Freevo sessions
  * VirtualFileSystem to store metadata
  * Skin enhancements
+ * Support for DVD Mirrors (full lossless versions of DVDs played from the
+   hard drive)
 	
 	
 Release 1.4.0 (2003-11-20):
