@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/03/11 20:38:48  dischi
+# some speed ups
+#
 # Revision 1.4  2003/03/11 20:26:48  dischi
 # Added tv info area. After that day of work, I needed to do something
 # that has a result
@@ -165,7 +168,8 @@ class Info_Area(Skin_Area):
         for i in range(0,len(table[0])):
             if table[0][i] and not table[1][i]:
                 rec = self.write_text(table[0][i], font, content, x=x0, y=y0, width=w,
-                                      height=content.height + content.y - y0, mode='soft')
+                                      height=content.height + content.y - y0, mode='soft',
+                                      return_area = TRUE)
                 y0 += rec[3]-rec[1]
             else:
                 if table[0][i]:

@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/03/11 20:38:47  dischi
+# some speed ups
+#
 # Revision 1.19  2003/03/11 20:25:59  dischi
 # Small fixes
 #
@@ -238,16 +241,20 @@ class Screen:
                 elif o[0] == 'text':
                     ( text, font, x, y, width, height, align_h, align_v,
                       mode, ellipses ) = o[1:]
-                    if font.shadow.visible:
-                        osd.drawstringframed(text, x+font.shadow.x, y+font.shadow.y,
-                                             width, height, font.shadow.color, None,
+                    ### FIXME: font calc height
+                    if self.in_update(x, y, x+width+10, osd.height,
+                                      self.updatelist['background'] + \
+                                      self.updatelist['content']):
+                        if font.shadow.visible:
+                            osd.drawstringframed(text, x+font.shadow.x, y+font.shadow.y,
+                                                 width, height, font.shadow.color, None,
+                                                 font=font.name, ptsize=font.size,
+                                                 align_h = align_h, align_v = align_v,
+                                                 mode=mode, ellipses=ellipses)
+                        osd.drawstringframed(text, x, y, width, height, font.color, None,
                                              font=font.name, ptsize=font.size,
                                              align_h = align_h, align_v = align_v,
                                              mode=mode, ellipses=ellipses)
-                    osd.drawstringframed(text, x, y, width, height, font.color, None,
-                                         font=font.name, ptsize=font.size,
-                                         align_h = align_h, align_v = align_v,
-                                         mode=mode, ellipses=ellipses)
 
 
             
@@ -587,7 +594,8 @@ class Skin_Area:
             
     # Draws a text inside a frame based on the settings in the XML file
     def write_text(self, text, font, content, x=-1, y=-1, width=None, height=None,
-                   align_h = None, align_v = None, mode='hard', ellipses='...'):
+                   align_h = None, align_v = None, mode='hard', ellipses='...',
+                   return_area=FALSE):
         """
         writes a text ... or better stores the information about this call
         in a variable. The real drawing is done inside draw()
@@ -613,11 +621,11 @@ class Skin_Area:
         self.screen.draw('content', ('text', text, font, x, y, width, height, align_h,
                                      align_v, mode, ellipses ))
 
-        ret = osd.drawstringframed(text, x, y, width, height, None, None,
-                                   font=font.name, ptsize=font.size,
-                                   align_h = align_h, align_v = align_v,
-                                   mode=mode, ellipses=ellipses, layer=self.dummy_layer)
-        
+        if return_area:
+            ret = osd.drawstringframed(text, x, y, width, height, None, None,
+                                       font=font.name, ptsize=font.size,
+                                       align_h = align_h, align_v = align_v,
+                                       mode=mode, ellipses=ellipses, layer=self.dummy_layer)
         height2 = height
         if height2 == -1:
             height2 = osd.stringsize('Arj', font=font.name, ptsize=font.size)[1] + 10
@@ -625,7 +633,8 @@ class Skin_Area:
         self.content_objects += [ ( 'text', x, y, width, height2, height, text, font, align_h,
                                   align_v, mode, ellipses ) ]
 
-        return ret[1]
+        if return_area:
+            return ret[1]
     
 
     def draw_image(self, image, val, redraw=TRUE):
