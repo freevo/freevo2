@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/05/11 18:08:06  dischi
+# added AUDIO_FORMAT_STRING to format the audio items
+#
 # Revision 1.22  2003/05/08 14:17:36  outlyer
 # Initial version of Paul's FXD radio station support. I made some changes from
 # the original patch, in that I added an URL field to the audioitem class instead of
@@ -439,11 +442,6 @@ class AudioItem(Item):
 
     def format_track(self):
         """ Return a formatted string for use in music.py """
-	# This is the default - track name only
-	formatstr = '%(t)s'
-       	# This will show the track number as well 
-	#formatstr = '%(n)s - %(t)s'
-
 	# Since we can't specify the length of the integer in the
 	# format string (Python doesn't seem to recognize it) we
 	# strip it out first, when we see the only thing that can be
@@ -464,6 +462,10 @@ class AudioItem(Item):
        	               'l'  : self.album,
     	               'n'  : mytrack,
     	               't'  : self.title,
-    	               'y'  : self.year }
-   
-        return formatstr % song_info
+    	               'y'  : self.year,
+    	               'f'  : self.name }
+
+        if self.parent and hasattr(self.parent, 'AUDIO_FORMAT_STRING'):
+            return self.parent.AUDIO_FORMAT_STRING % song_info
+        return config.AUDIO_FORMAT_STRING % song_info
+        

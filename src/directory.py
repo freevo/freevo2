@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/05/11 18:08:06  dischi
+# added AUDIO_FORMAT_STRING to format the audio items
+#
 # Revision 1.9  2003/04/26 15:08:51  dischi
 # o better mount/umount, also for directories who are no rom drive.
 # o added list_usb_devices to util
@@ -128,7 +131,8 @@ class DirItem(Playlist):
         # set directory variables to default
 	all_variables = ('MOVIE_PLAYLISTS', 'DIRECTORY_SORT_BY_DATE',
                          'DIRECTORY_AUTOPLAY_SINGLE_ITEM', 'COVER_DIR',
-                         'AUDIO_RANDOM_PLAYLIST', 'FORCE_SKIN_LAYOUT')
+                         'AUDIO_RANDOM_PLAYLIST', 'FORCE_SKIN_LAYOUT',
+                         'AUDIO_FORMAT_STRING')
         for v in all_variables:
             setattr(self, v, eval('config.%s' % v))
 
@@ -218,8 +222,10 @@ class DirItem(Playlist):
                             if node.name == 'setvar':
                                 for v in all_variables:
                                     if node.attrs[('', 'name')].upper() == v.upper():
-                                        setattr(self, v, int(node.attrs[('', 'val')]))
-
+                                        try:
+                                            setattr(self, v, int(node.attrs[('', 'val')]))
+                                        except ValueError:
+                                            setattr(self, v, node.attrs[('', 'val')])
 
             except:
                 print "Skin XML file %s corrupt" % self.xml_file
