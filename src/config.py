@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.53  2003/09/20 14:10:17  dischi
+# move version info into a python file
+#
 # Revision 1.52  2003/09/20 12:58:11  dischi
 # add VERSION
 #
@@ -70,12 +73,13 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-VERSION = '1.4-rc1-CVS'
-
 import sys, os, time, re
 import setup_freevo
 import traceback
 import __builtin__
+import version
+
+VERSION = version.__version__
 
 class Logger:
     """
