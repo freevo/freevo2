@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/02/26 21:21:11  dischi
+# blue_round1.xml working
+#
 # Revision 1.20  2003/02/26 19:59:26  dischi
 # title area in area visible=(yes|no) is working
 #
@@ -157,8 +160,7 @@ class Skin_Title(Skin_Area):
             print '*** font <%s> not found' % content.font
             return
 
-        self.write_text(text, settings.font[content.font], content, height=-1,
-                        mode='hard')
+        self.write_text(text, settings.font[content.font], content, mode='hard')
 
 ###############################################################################
 

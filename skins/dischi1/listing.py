@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/02/26 21:21:11  dischi
+# blue_round1.xml working
+#
 # Revision 1.4  2003/02/26 19:59:26  dischi
 # title area in area visible=(yes|no) is working
 #
@@ -109,7 +112,7 @@ class Skin_Listing(Skin_Area):
         area      = self.area_val
         content   = self.calc_geometry(layout.content, copy_object=TRUE)
 
-        items_w = area.width - content.spacing
+        items_w = content.width
         items_h = 0
 
         possible_types = {}
@@ -154,12 +157,23 @@ class Skin_Listing(Skin_Area):
         # restore
         self.area_val, self.layout = backup
 
-        items_w += content.spacing
-        items_h += content.spacing
+        items_w
+        items_h
+
+        cols = 0
+        rows = 0
+
+        while (cols + 1) * (items_w + content.spacing) - \
+              content.spacing <= content.width:
+            cols += 1
+
+        while (rows + 1) * (items_h + content.spacing) - \
+              content.spacing <= content.height:
+            rows += 1
 
         # return cols, rows, item_w, item_h
-        return (content.width/items_w, content.height/items_h,
-                items_w, items_h, -hskip, -vskip)
+        return (cols, rows, items_w + content.spacing,
+                items_h + content.spacing, -hskip, -vskip)
 
 
     def update_content_needed(self, settings, menuw):
@@ -183,10 +197,10 @@ class Skin_Listing(Skin_Area):
         cols, rows, hspace, vspace, hskip, vskip = \
               self.get_items_geometry(settings, menu)
 
-        x0 = area.x + content.spacing
-        y0 = area.y + content.spacing
+        x0 = content.x
+        y0 = content.y
 
-        width  = content.width - 2 * content.spacing
+        width  = content.width
 
         for choice in menuw.menu_items:
             if choice == menu.selected:

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/02/26 21:21:12  dischi
+# blue_round1.xml working
+#
 # Revision 1.13  2003/02/26 19:59:27  dischi
 # title area in area visible=(yes|no) is working
 #
@@ -95,7 +98,8 @@ def attr_int(node, attr, default, scale=0.0):
             if not val:
                 val = 0
             
-            if scale:
+            # scale, but not small values, they may be 0 after scaling
+            if scale and int(val) > 4:
                 val = scale*int(val)
             if max:
                 if int(val) < 0:
@@ -382,7 +386,7 @@ class XML_font(XML_data):
             if subnode.name == u'definition':
                 XML_data.parse(self, subnode, scale, current_dir)
             if subnode.name == u'shadow':
-                self.shadow.parse(node, scale, current_dir)
+                self.shadow.parse(subnode, scale, current_dir)
 
     def __cmp__(self, other):
         return not (not XML_data.__cmp__(self, other) and self.shadow == other.shadow)
@@ -397,10 +401,7 @@ class XML_font(XML_data):
 class XMLSkin:
     def __init__(self):
         self.menu = {}
-        
-        self.menu_types = ( 'default', 'main', 'video', 'audio', 'image' )
-        for t in self.menu_types:
-            self.menu[t] = [ XML_menu(), ] 
+        self.menu['default'] = [ XML_menu(), ]
 
         self.layout = {}
         self.font = {}
@@ -415,17 +416,13 @@ class XMLSkin:
                 self.mainmenu.parse(node, scale, c_dir)
 
             if node.name == u'menu':
-                type = attr_str(node, "type", "all")
-                if type == "all":
-                    if copy_content:
-                        self.menu = copy.deepcopy(self.menu)
-                    for t in self.menu_types:
-                        for e in self.menu[t]:
-                            e.parse(node, scale, c_dir)
+                type = attr_str(node, "type", "default")
 
-                if type in self.menu:
-                    display = attr_int(node, 'display', 0)
-                    self.menu[type][display].parse(node, scale, c_dir)
+                if not type in self.menu:
+                    self.menu[type] = copy.deepcopy(self.menu['default'])
+
+                display = attr_int(node, 'display', 0)
+                self.menu[type][display].parse(node, scale, c_dir)
 
             if node.name == u'layout':
                 label = attr_str(node, 'label', '')

@@ -13,19 +13,19 @@
     blue1_big defines, that's it
     -->
 
-    <font label="list">
+    <font label="grey">
       <definition size="16"/>
     </font>
 
-    <font label="list selected">
+    <font label="white">
       <definition size="16"/>
     </font>
 
-    <font label="main">
+    <font label="grey big">
       <definition size="30"/>
     </font>
 
-    <font label="main selected">
+    <font label="white big">
       <definition size="30"/>
     </font>
 

@@ -24,12 +24,12 @@
     First we have to define the menu: a background and the four areas
     with their dimensions. We point to a layout with the details
     -->
-    <menu type="all">
+    <menu type="default">
       <screen layout="screen0" visible="yes">
 	<area x="0" y="0" width="800" height="600"/>
       </screen>
       <title layout="title0" visible="yes">
-	<area x="10" y="10" width="780" height="50"/> 
+	<area x="10" y="10" width="780" height="60"/> 
       </title>
       <view layout="view0" visible="yes">
 	<area x="560" y="115" width="200" height="300"/> 
@@ -65,14 +65,14 @@
 
     <!-- title -->
     <layout label="title0">
-      <content x="210" type="menu" font="main" align="center"/>
+      <content x="210" type="menu" font="white big" align="center"/>
     </layout>
 
     <!-- default listing area -->
     <layout label="list0">
       <content type="text" spacing="2">
-	<item type="default" font="list"/>
-	<item type="selected" font="list selected">
+	<item type="default" font="grey"/>
+	<item type="selected" font="white">
 	  <rectangle bgcolor="0xa0000000" size="0" x="-5" y="-3" width="max+10"
 	    height="max+6"/>
 	</item>
@@ -82,8 +82,8 @@
     <!-- main menu listing area -->
     <layout label="list_main">
       <content type="text" spacing="10">
-	<item type="default" font="main"/>
-	<item type="selected" font="main selected">
+	<item type="default" font="grey big"/>
+	<item type="selected" font="white big">
 	  <rectangle bgcolor="0xa0000000" size="0" y="-5" x="-10"
 	    width="max+20" height="max+10"/>
 	</item>
@@ -95,22 +95,22 @@
     <!-- ********************************************** -->
     <!-- FONT DEFINITIONS -->
 
-    <font label="list">
+    <font label="grey">
       <definition name="Arial_Bold" size="20" color="0xdddddd"/>
       <shadow visible="no"/>
     </font>
 
-    <font label="list selected">
+    <font label="white">
       <definition name="Arial_Bold" size="20" color="0xffffff"/>
       <shadow visible="no"/>
     </font>
 
-    <font label="main">
+    <font label="grey big">
       <definition name="Arial_Bold" size="35" color="0xdddddd"/>
       <shadow visible="no"/>
     </font>
 
-    <font label="main selected">
+    <font label="white big">
       <definition name="Arial_Bold" size="35" color="0xffffff"/>
       <shadow visible="no"/>
     </font>
