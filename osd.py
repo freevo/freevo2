@@ -115,13 +115,18 @@ class OSD:
         self._send('drawbox;' + args1 + args2)
 
         
-    def drawstring(self, font, string, x, y, fgcolor=None, bgcolor=None):
+    def drawstring(self, string, x, y, fgcolor=None, bgcolor=None,
+                   font=None, ptsize=0):
         if fgcolor == None:
             fgcolor = self.default_fg_color
         if bgcolor == None:
             bgcolor = 0xff000000   # Transparent background
-        args1 = '0;' + string + ';' + str(x) + ';' + str(y) + ';'
-        args2 = str(fgcolor) + ';' + str(bgcolor)
+        if font == None:
+            font = config.OSD_FONTNAME
+            ptsize = config.OSD_FONTSIZE
+        # Args: fontfilename;pointsize;string;x;y;fgcol
+        args1 = font + ';' + str(ptsize) + ';' + string + ';'
+        args2 = str(x) + ';' + str(y) + ';' + str(fgcolor)
         self._send('drawstring;' + args1 + args2)
 
 

@@ -69,13 +69,13 @@ def main_menu(arg, menuw):
         return
     
     osd.clearscreen(color=osd.COL_BLACK)
-    osd.drawstring('xxx', 'Getting the program guide', 30, 280,
+    osd.drawstring('Getting the program guide', 30, 280,
                    fgcolor=osd.COL_ORANGE, bgcolor=0xff000000)
     osd.update()
     
     guide = epg.get_guide()
 
-    osd.drawstring('xxx', 'Done!', 30, 320,
+    osd.drawstring('Done!', 30, 320,
                    fgcolor=osd.COL_ORANGE, bgcolor=0xff000000)
     osd.update()
     

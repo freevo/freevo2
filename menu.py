@@ -121,14 +121,16 @@ class MenuWidget:
         menu = self.menustack[-1]
 
         if not menu:
-            osd.drawstring('xxx', 'INTERNAL ERROR, NO MENU!', 100, osd.height/2)
+            osd.drawstring('INTERNAL ERROR, NO MENU!', 100, osd.height/2)
             return
 
         if menu.bgbitmap[0]:
             apply(self.osd.drawbitmap, menu.bgbitmap)
             
         # Menu heading
-        self.osd.drawstring('xxx', menu.heading, 230, 55)
+        self.osd.drawstring(menu.heading, 160, 50,
+                            font=config.OSD_FONTNAME_HDR,
+                            ptsize=config.OSD_FONTSIZE_HDR)
         
         # Draw a box around the selection area
         self.osd.drawbox(40, 85, 720, 490, width=3,
@@ -143,7 +145,9 @@ class MenuWidget:
         else:
             spacing = selection_height / max(len(self.menu_items),1)
         for choice in self.menu_items:
-            self.osd.drawstring('xxx', choice.name, x0, y0)
+            self.osd.drawstring(choice.name, x0, y0,
+                            font=config.OSD_FONTNAME_ITEMS,
+                            ptsize=config.OSD_FONTSIZE_ITEMS)
             if menu.selected == choice:
                 self.osd.drawbox(x0 - 4, y0 - 3, 700, y0 + 24, width=3,
                              color=self.osd.COL_ORANGE)
@@ -153,9 +157,11 @@ class MenuWidget:
         x0 = 40
         y0 = 505
         for item in self.nav_items:
-            self.osd.drawstring('xxx', item.name, x0, y0)
+            self.osd.drawstring(item.name, x0, y0,
+                            font=config.OSD_FONTNAME_BTNS,
+                            ptsize=config.OSD_FONTSIZE_BTNS)
             if menu.selected == item:
-                self.osd.drawbox(x0 - 4, y0 - 3, x0 + 120, y0 + 24, width=3,
+                self.osd.drawbox(x0 - 4, y0 - 3, x0 + 150, y0 + 24, width=3,
                              color=self.osd.COL_ORANGE)
             x0 += 190
 
@@ -213,15 +219,15 @@ class MenuWidget:
             action = menu.selected.action
             if action == None:
                 self.osd.clearscreen()
-                self.osd.drawstring('xxx', 'No action defined', 230, 280)
+                self.osd.drawstring('No action defined', 230, 280)
                 time.sleep(2.0)
                 self.refresh()
             else:
                 action_str = str(action)
                 arg_str = str(menu.selected.arg)[0:40]
                 self.osd.clearscreen()
-                self.osd.drawstring('xxx', 'Action: %s' % action_str, 50, 240)
-                self.osd.drawstring('xxx', 'Args: %s' % arg_str, 50, 280)
+                self.osd.drawstring('Action: %s' % action_str, 50, 240)
+                self.osd.drawstring('Args: %s' % arg_str, 50, 280)
                 print 'Calling action "%s"' % str(action)
                 action(arg=menu.selected.arg, menuw=self)
 

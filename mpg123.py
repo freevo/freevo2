@@ -80,12 +80,12 @@ class MPG123:
         
         if not os.path.isfile(filename):
             osd.clearscreen()
-            osd.drawstring('xxx', 'File "%s" not found!' % filename, 30, 280)
+            osd.drawstring('File "%s" not found!' % filename, 30, 280)
             time.sleep(2.0)
             menuwidget.refresh()
         else:
             osd.clearscreen()
-            osd.drawstring('xxx', 'mpg123 "%s"' % filename, 30, 490)
+            osd.drawstring('mpg123 "%s"' % filename, 30, 490)
             self.thread.mode = 'play'
             self.thread.filename = filename
             self.thread.mode_flag.set()
@@ -93,10 +93,10 @@ class MPG123:
 
             id = ID3(filename)
 
-            osd.drawstring('xxx', 'Title: %s' % id.title, 30, 80)
-            osd.drawstring('xxx', 'Artist: %s' % id.artist, 30, 110)
-            osd.drawstring('xxx', 'Album: %s' % id.album, 30, 140)
-            osd.drawstring('xxx', 'Year: %s' % id.year, 30, 170)
+            osd.drawstring('Title: %s' % id.title, 30, 80)
+            osd.drawstring('Artist: %s' % id.artist, 30, 110)
+            osd.drawstring('Album: %s' % id.album, 30, 140)
+            osd.drawstring('Year: %s' % id.year, 30, 170)
         osd.update()
         
         
@@ -213,9 +213,18 @@ def mpg123_eof(out):
             old_done = done
             el = int(round((float(elapsed))))
             rem = int(round((float(remain))))
-            osd.drawstring('xxx', 'Elapsed: %s   ' % el, 30, 250, osd.default_fg_color, osd.default_bg_color)
-            osd.drawstring('xxx', 'Remain: %s   ' % rem, 30, 290, osd.default_fg_color, osd.default_bg_color)
-            osd.drawstring('xxx', 'Done: %5.1f%%   ' % (done / 10.0), 30, 330, osd.default_fg_color, osd.default_bg_color)
+            osd.drawbox(33, 240, 250, 241, width = 30,
+                        color = osd.default_bg_color)
+            osd.drawbox(33, 280, 250, 281, width = 30,
+                        color = osd.default_bg_color)
+            osd.drawbox(33, 320, 250, 321, width = 30,
+                        color = osd.default_bg_color)
+            osd.drawstring('Elapsed: %s   ' % el, 30, 250,
+                           osd.default_fg_color)
+            osd.drawstring('Remain: %s   ' % rem, 30, 290,
+                           osd.default_fg_color)
+            osd.drawstring('Done: %5.1f%%   ' % (done / 10.0), 30, 330,
+                           osd.default_fg_color)
             osd.drawbox(33, 370, 635, 390, width = 3)
             osd.drawbox(43, 380, 625, 380, width = 9, color = osd.default_bg_color)
             pixels = int(round((done / 10.0) * 6.0))

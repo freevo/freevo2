@@ -72,6 +72,16 @@ OSD_HOST = '127.0.0.1'      # The remote host
 OSD_PORT = 16480            # The daemon port, osd_server/osd_fb/main.c has
                             # to be changed manually!
 
+OSD_FONTNAME = 'osd_server/osd_fb/fonts/Cultstup.ttf'
+OSD_FONTSIZE = 14
+OSD_FONTNAME_HDR = 'osd_server/osd_fb/fonts/Cultstup.ttf'
+OSD_FONTSIZE_HDR = 22
+OSD_FONTNAME_ITEMS = 'osd_server/osd_fb/fonts/SF Arborcrest Medium.ttf'
+#OSD_FONTNAME_ITEMS = 'osd_server/osd_fb/fonts/AsseenonTV.ttf'steelfib.ttf
+OSD_FONTSIZE_ITEMS = 15
+OSD_FONTNAME_BTNS = 'osd_server/osd_fb/fonts/RUBTTS__.TTF'
+OSD_FONTSIZE_BTNS = 18
+
 #
 # Remote control daemon. The server is in the Freevo main application,
 # and the client is a standalone application in rc_client/

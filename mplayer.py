@@ -105,7 +105,7 @@ class MPlayer:
         
         if mode == 'video' and not os.path.isfile(filename):
             osd.clearscreen()
-            osd.drawstring('xxx', 'File "%s" not found!' % filename, 30, 280)
+            osd.drawstring('File "%s" not found!' % filename, 30, 280)
             osd.update()
             time.sleep(2.0)
             menuwidget.refresh()
@@ -115,7 +115,7 @@ class MPlayer:
             mixer.setMicVolume(0)
 
             osd.clearscreen(color=osd.COL_BLACK)
-            osd.drawstring('xxx', 'mplayer %s "%s"' % (mode, filename), 30, 280,
+            osd.drawstring('mplayer %s "%s"' % (mode, filename), 30, 280,
                            fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
             osd.update()
             self.thread.mode = 'play'

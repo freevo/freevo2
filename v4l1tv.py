@@ -103,7 +103,7 @@ class V4L1TV:
         mixer.setMicVolume(0)
 
         osd.clearscreen(color=osd.COL_BLACK)
-        osd.drawstring('xxx', 'Running the "%s" application' % mode, 30, 280,
+        osd.drawstring('Running the "%s" application' % mode, 30, 280,
                        fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
         self.thread.mode = 'play'
         self.thread.command = command
