@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/11/08 21:28:38  dischi
+# fix to use pyepg (maybe move this in pyepg?)
+#
 # Revision 1.3  2004/07/10 12:33:39  dischi
 # header cleanup
 #
@@ -45,7 +48,7 @@ import cStringIO
 import Image
 
 import config
-from tv import xmltv
+from pyepg import xmltv_parser as xmltv
 
 # Check if the logos directory exists, if not, make it before
 # proceeding
@@ -55,6 +58,7 @@ if not os.path.isdir(config.TV_LOGOS):
         print "Creating: %s\n" % (config.TV_LOGOS)
         os.mkdir(config.TV_LOGOS)
 
+print "Downloading logos to %s\n" % (config.TV_LOGOS)
 x = xmltv.read_channels(open(config.XMLTV_FILE))
 
 for i in x:
@@ -65,12 +69,15 @@ for i in x:
         channel = i['id']
         #print '%s - %s' % (imgsrc,channel)
         if imgsrc != None:
+		print ' ', imgsrc
                 # Get the file into a fp
                 fp = urllib2.urlopen(str(imgsrc))
                 # Make a seekable file object
                 img = cStringIO.StringIO(fp.read())
                 # Convert the image into a PNG and save to logos directory
                 output_file = config.TV_LOGOS + '/' + channel + '.png'
-                try: Image.open(img).save(output_file)
-                except IOError: pass
+                try:
+			Image.open(img).save(output_file)
+                except IOError, e:
+			print e
 
