@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.130  2004/11/16 14:47:17  rshortt
+# Fix bug where ivtvX would not be detected if device nodes are available for dvbX but no driver loaded.  Also add some informational statements.
+#
 # Revision 1.129  2004/11/15 03:11:27  rshortt
 # Fixed crash for when DVB device nodes exist but no card of driver is attached.
 #
@@ -436,15 +439,17 @@ for i in range(10):
             TV_SETTINGS[key].vdev = '/dev/bktr%s' % i
             TV_SETTINGS[key].driver = 'bsdbt848'
             TV_SETTINGS[key].input = 1
+            print 'BSD TV card detected as %s' % key
 
         continue
 
     if os.path.isdir('/dev/dvb/adapter%s' % i):
         try:
             TV_SETTINGS['dvb%s' % i] = DVBCard
+            print 'DVB card detected as dvb%s' % i
         except OSError: 
             # likely no device attached
-            continue
+            pass
         except: 
             traceback.print_exc()
 
@@ -471,6 +476,7 @@ for i in range(10):
             
         if type == 'ivtv':
             key = '%s%s' % (type,ivtvn)
+            print 'IVTV card detected as %s' % key
             TV_SETTINGS[key]  = IVTVCard
             if ivtvn != i:
                 TV_SETTINGS[key].vdev = vdev
@@ -479,6 +485,7 @@ for i in range(10):
         else:
             # Default to 'tv' type as set above.
             key = '%s%s' % (type,tvn)
+            print 'TV card detected as %s' % key
             TV_SETTINGS[key]  = TVCard
             if tvn != i:
                 TV_SETTINGS[key].vdev = vdev
