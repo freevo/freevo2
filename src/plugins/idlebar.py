@@ -11,7 +11,7 @@
 #   
 #   plugin.activate('idlebar.mail',    level=10, args=('/var/spool/mail/dmeyer', ))
 #   plugin.activate('idlebar.tv',      level=20)
-#   plugin.activate('idlebar.weather', level=30)
+#   plugin.activate('idlebar.weather', level=30, args=('timezone', ))
 #   plugin.activate('idlebar.clock',   level=50)
 #   
 #
@@ -21,6 +21,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/05/28 17:36:27  dischi
+# make the weather zone a parameter
+#
 # Revision 1.7  2003/05/02 05:50:31  outlyer
 # Stopgap to workaround a crash...
 #
@@ -187,9 +190,9 @@ class tv(IdleBarPlugin):
 
 
 class weather(IdleBarPlugin):
-    def __init__(self):
+    def __init__(self, zone='CYYZ'):
         IdleBarPlugin.__init__(self)
-        self.METARCODE = 'CYYZ'
+        self.METARCODE = zone
         self.WEATHERCACHE = '/var/cache/freevo/weather'
         self.CLOCKFONT = 'skins/fonts/Trebuchet_MS.ttf'
         if not os.path.isfile(self.CLOCKFONT):
