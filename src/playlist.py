@@ -9,6 +9,20 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2003/12/18 17:07:52  outlyer
+# Two bugfixes for the previously broken playlist stuff:
+#
+# * Don't iterate over the playlist if it is a string, since it just splits
+#     the string into characters
+# * self.display_type seems to be set to None, so the playlist.Mimetype plugin
+#     is never loaded
+#
+# Playlists are working again! Woohoo!
+#
+# TODO:
+#     Figure out why display_type is always none; shouldn't it be the menu type
+#     or something?
+#
 # Revision 1.43  2003/12/13 18:16:34  dischi
 # allow fxd playlists with relative path
 #
@@ -236,14 +250,17 @@ class Playlist(Item):
         if self.suffixlist:
             # we called this function before
             return
-        
+
         playlist      = self.playlist
         self.playlist = []
-        
+       
         for p in plugin.mimetype(self.display_type):
-            if self.display_type in p.display_type:
-                self.suffixlist += p.suffix()
-                self.get_plugins.append(p)
+            #if self.display_type in p.display_type:
+            # XXX self.display_type seems to be set to None
+            # XXX Which prevents the str->Item from occuring
+            # XXX This is a short-term fix I guess
+            self.suffixlist += p.suffix()
+            self.get_plugins.append(p)
                 
         if isinstance(playlist, str) or isinstance(playlist, unicode):
             # it's a filename with a playlist
@@ -262,26 +279,28 @@ class Playlist(Item):
 
 
         # self.playlist is a list of Items or strings (filenames)
-        for i in playlist:
-            if isinstance(i, Item):
-                # Item object, correct parent
-                i = copy.copy(i)
-                i.parent = self
-                self.playlist.append(i)
+        if not isinstance(playlist, str):
+            for i in playlist:
+                if isinstance(i, Item):
+                    # Item object, correct parent
+                    i = copy.copy(i)
+                    i.parent = self
+                    self.playlist.append(i)
 
-            elif isinstance(i, list) or isinstance(i, tuple) and \
-                 len(i) == 2 and vfs.isdir(i[0]):
-                # (directory, recursive=True|False)
-                if i[1]:
-                    self.playlist += util.match_files_recursively(i[0], self.suffixlist)
+                elif isinstance(i, list) or isinstance(i, tuple) and \
+                     len(i) == 2 and vfs.isdir(i[0]):
+                    # (directory, recursive=True|False)
+                    if i[1]:
+                        self.playlist += util.match_files_recursively(i[0], self.suffixlist)
+                    else:
+                        self.playlist += util.match_files(i[0], self.suffixlist)
+                    # set autoplay to True on such big lists
+                    self.autoplay = True
+
                 else:
-                    self.playlist += util.match_files(i[0], self.suffixlist)
-                # set autoplay to True on such big lists
-                self.autoplay = True
+                    # filename
+                    self.playlist.append(i)
 
-            else:
-                # filename
-                self.playlist.append(i)
         self.__build__ = True
                 
 
