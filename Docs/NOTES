@@ -193,3 +193,6 @@ cp -dpR /dev/null dev
 cp -dpR /dev/ram0 dev
 cp -dpR /dev/hd* dev
 cp -dpR /dev/fd* dev
+
+
+test
