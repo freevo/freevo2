@@ -91,6 +91,10 @@
           <style text="text with program info style"/>
         </menu>
 
+        <menu type="tv favorite menu">
+          <style text="text with favorite info style"/>
+        </menu>
+
         <menuset label="video" inherits="normal text style">
             <screen layout="video screen"/>
         </menuset>
@@ -141,6 +145,12 @@
         <menuset label="text with program info style" inherits="text with info style">
             <screen layout="tv screen" visible="yes"/>
             <info layout="tv program info" x="50" y="100" width="700" height="230"/>
+            <view visible="no"/>
+        </menuset>
+
+        <menuset label="text with favorite info style" inherits="text with info style">
+            <screen layout="tv screen" visible="yes"/>
+            <info layout="tv favorite info" x="50" y="100" width="700" height="100"/>
             <view visible="no"/>
         </menuset>
 
@@ -440,6 +450,23 @@
                     <if expression="ratings">
 	                <text font="info value" mode="soft">Ratings: </text>
                         <text font="info value" expression="ratings" mode="soft" />
+                        <newline/>
+                    </if>
+                </item>
+            </content>
+        </layout>
+
+        <layout label="tv favorite info">
+            <content x="0" y="0" type="text" spacing="20" font="default">
+                <item type="default">
+                    <if expression="name">
+	                <text font="info value" mode="soft">Name: </text>
+                        <text font="info value" expression="name" mode="soft" />
+                        <newline/>
+                    </if>
+                    <if expression="title">
+	                <text font="info value" mode="soft">Program: </text>
+                        <text font="info value" expression="title" mode="soft" />
                         <newline/>
                     </if>
                 </item>
