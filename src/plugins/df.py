@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/05/28 17:58:48  dischi
+# moved freespace and totalspace from df.py to util.py
+#
 # Revision 1.1  2003/05/28 17:51:28  dischi
 # added df item plugin for directories from den_RDC
 #
@@ -37,11 +40,8 @@
 #endif
 
 
-import os
-import sys
-import config
-import statvfs
 import plugin
+import util
 
 class PluginInterface(plugin.ItemPlugin):
 
@@ -51,27 +51,13 @@ class PluginInterface(plugin.ItemPlugin):
     def actions(self, item): 
         if item.type == 'dir':
             diskfree = '%i of %i Mb free'  % \
-                       ( (( self.freespace(item.dir) / 1024) / 1024),
-                         ((self.totalspace(item.dir) /1024) /1024))
+                       ( (( util.freespace(item.dir) / 1024) / 1024),
+                         ((util.totalspace(item.dir) /1024) /1024))
             return  [ ( self.dud, diskfree) ]
         else:
             print item.type
             return []
 
-    def freespace(self, path):
-        """ freespace(path) -> integer
-        Return the number of bytes available to the user on the file system
-        pointed to by path."""
-        s = os.statvfs(path)
-        return s[statvfs.F_BAVAIL] * long(s[statvfs.F_BSIZE])
-        
-        
-    def totalspace(self, path):
-        """ totalspace(path) -> integer
-        Return the number of total bytes available on the file system
-        pointed to by path."""
-        s = os.statvfs(path)
-        return s[statvfs.F_BLOCKS] * long(s[statvfs.F_BSIZE])
-        
+
     def dud(self, arg=None, menuw=None):
         pass

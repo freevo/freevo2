@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/05/28 17:58:47  dischi
+# moved freespace and totalspace from df.py to util.py
+#
 # Revision 1.26  2003/05/11 16:21:31  dischi
 # delete whitespaces at the end in format_text
 #
@@ -86,6 +89,7 @@
 
 import glob
 import os
+import statvfs
 import string, fnmatch, re
 import md5
 import Image # PIL
@@ -495,6 +499,25 @@ def list_usb_devices():
             devices.append('%s:%s' % (line[11:15], line[23:27]))
     return devices
 
+def freespace(path):
+    """
+    freespace(path) -> integer
+    Return the number of bytes available to the user on the file system
+    pointed to by path.
+    """
+    s = os.statvfs(path)
+    return s[statvfs.F_BAVAIL] * long(s[statvfs.F_BSIZE])
+        
+        
+def totalspace(path):
+    """
+    totalspace(path) -> integer
+    Return the number of total bytes available on the file system
+    pointed to by path.
+    """
+    s = os.statvfs(path)
+    return s[statvfs.F_BLOCKS] * long(s[statvfs.F_BSIZE])
+        
 
 #
 # synchronized objects and methods.
