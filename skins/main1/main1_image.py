@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/02/15 20:46:49  dischi
+# getFormatedImage now returns height and width, too. Also removed
+# the rotate-by-guessing "feature", it's a bug.
+#
 # Revision 1.3  2003/02/12 10:38:51  dischi
 # Added a patch to make the current menu system work with the new
 # main1_image.py to have an extended menu for images
@@ -93,15 +97,15 @@ class Skin_Image:
         image = osd.loadbitmap('thumb://%s' % filename)
 
         if not image:
-            return None
+            return None, 0, 0
         
         i_w, i_h = image.get_size()
 
         # rotate:
-        if h > w:
-            orientation='vertical'
-        else:
-            orientation='horizontal'
+        # if h > w:
+        #    orientation='vertical'
+        # else:
+        #    orientation='horizontal'
 
         rotation = 0
         if i_orientation:
@@ -113,14 +117,14 @@ class Skin_Image:
                 rotation=0
             elif i_orientation == 'left_bottom':
                 rotation=-270.0
-        else:
-            if i_h > i_w:
-                i_orientation='vertical'
-            else:
-                i_orientation='horizontal'
-
-            if orientation != i_orientation:
-                rotation=90.0
+        # else:
+        #     if i_h > i_w:
+        #         i_orientation='vertical'
+        #     else:
+        #         i_orientation='horizontal'
+        # 
+        #     if orientation != i_orientation:
+        #         rotation=90.0
 
         if rotation != 0:
             image = osd.zoomsurface(image,rotation=rotation)
@@ -133,8 +137,7 @@ class Skin_Image:
         scale = min(scale_x, scale_y)
         
         image = osd.zoomsurface(image,scale)
-    
-        return image
+        return image, int(i_w*scale), int(i_h*scale)
 
 
     def getExpand(self, settings):
@@ -162,7 +165,7 @@ class Skin_Image:
             
             preview = self.getFormatedImage(filename, val.width - 2*val.spacing,
                                             val.height - 2*val.spacing,
-                                            orientation)
+                                            orientation)[0]
             if not preview:
                 return
             
@@ -273,9 +276,9 @@ class Skin_Image:
         image_height = 100
 
         dir_preview = self.getFormatedImage(val.img['dir'],
-                                                      image_width, image_height)
+                                                      image_width, image_height)[0]
         pl_preview = self.getFormatedImage(val.img['playlist'],
-                                                     image_width, image_height)
+                                                     image_width, image_height)[0]
 
         str_w_selection, str_h_selection = \
                          osd.stringsize('Ajg', val.selection.font, val.selection.size)
@@ -314,7 +317,7 @@ class Skin_Image:
                     orientation = i.binsexif['Orientation']
                         
                 preview = self.getFormatedImage(i.filename, image_width,
-                                                          image_height, orientation)
+                                                image_height, orientation)[0]
                 text = i.name
 
             elif i.type == 'playlist':
