@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.109  2004/06/28 20:39:27  dischi
+# make sure HOME and USER are set
+#
 # Revision 1.108  2004/06/20 18:19:53  rshortt
 # Bugfix: 'config' has no namespace here, we are config.  UMASK is a local from
 # freevo_config.py or local_conf.py.
@@ -31,56 +34,6 @@
 #
 # Revision 1.106  2004/06/09 17:08:45  rshortt
 # Attempt to sort channels properly (numericly, if possible).
-#
-# Revision 1.105  2004/04/12 14:58:38  dischi
-# prevent crash for bad TV.xml
-#
-# Revision 1.104  2004/04/11 18:51:59  mikeruelle
-# do dir processing for games too. fixes annoying crashes due to trailing slashes
-#
-# Revision 1.103  2004/03/21 10:01:18  dischi
-# FREEVO_LOCALE is used somewhere else
-#
-# Revision 1.102  2004/03/18 15:38:18  dischi
-# Automouter patch to check for hosts in mediamenu from Soenke Schwardt.
-# See doc of VIDEO_ITEMS for details
-#
-# Revision 1.101  2004/03/12 22:01:18  rshortt
-# Fix some assumptions with channel detection.  Also channel id's are strings,
-# not ints.  I discovered some problems when using an xmltv file generated from
-# zap2it's data-direct service.
-#
-# Revision 1.100  2004/02/27 20:10:02  dischi
-# helper function to check if an object is some sort of string
-#
-# Revision 1.99  2004/02/23 16:09:34  dischi
-# make it possible to print unicode
-#
-# Revision 1.98  2004/02/22 21:01:39  rshortt
-# Make sure input_num is actually an int.
-#
-# Revision 1.97  2004/02/19 04:57:55  gsbarbieri
-# Support Web Interface i18n.
-#
-# Revision 1.96  2004/02/08 19:53:14  dischi
-# create metadata dir
-#
-# Revision 1.95  2004/02/07 17:12:16  dischi
-# remove non ascii chars from log message
-#
-# Revision 1.94  2004/02/05 19:26:41  dischi
-# fix unicode handling
-#
-# Revision 1.93  2004/02/05 02:52:20  gsbarbieri
-# Handle filenames internally as unicode objects.
-#
-# This does *NOT* affect filenames that have only ASCII chars, since the
-# translation ASCII -> Unicode is painless. However this *DOES* affect files
-# with accents
-#
-# It determines the encoding based on (in order) FREEVO_LOCALE, LANG and
-# LC_ALL, which may have the form: "LANGUAGE_CODE.ENCODING",
-# like "pt_BR.UTF-8"
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -104,7 +57,7 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import sys, os, time, re, string
+import sys, os, time, re, string, pwd
 import setup_freevo
 import traceback
 import __builtin__
@@ -935,4 +888,9 @@ except:
 if not encoding:
     encoding = LOCALE
 
-_debug_( "Using '%s' encoding" % encoding )
+if not HELPER:
+    _debug_( "Using '%s' encoding" % encoding )
+
+# make sure USER and HOME are set
+os.environ['USER'] = pwd.getpwuid(os.getuid())[0]
+os.environ['HOME'] = pwd.getpwuid(os.getuid())[5]
