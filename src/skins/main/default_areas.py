@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/01/04 18:39:41  dischi
+# take a look at the parent name when building a short name
+#
 # Revision 1.3  2004/01/04 18:25:17  dischi
 # again, better tv show handling
 #
@@ -19,7 +22,6 @@
 #
 # Revision 1.1  2003/12/06 16:41:45  dischi
 # move some classes into extra files
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -103,24 +105,26 @@ class Title_Area(Skin_Area):
 
         text = ''
         try:
+            item = menu.selected
             if content.type == 'menu':
                 text = menu.heading
             elif len(menu.choices) == 0:
                 text = ''
             elif content.type == 'short item':
-                if menu.selected.type == 'video' and \
-                       hasattr(menu.selected, 'tv_show') and \
-                       menu.selected.tv_show and \
-                       ((menu.selected.image and not \
-                         menu.selected.image.endswith('.raw')) or \
-                        (menu.selected.parent and \
-                         menu.selected.parent.name == menu.selected.show_name[0])):
-                    sn = menu.selected.show_name
+                if item.type == 'video' and item.tv_show and \
+                       ((item.image and not item.image.endswith('.raw')) or \
+                        (item.parent and item.parent.name == item.show_name[0])):
+                    sn   = item.show_name
                     text = sn[1] + "x" + sn[2] + " - " + sn[3] 
+                elif item.parent and item.parent.name > 5 and \
+                         item.name.startswith(item.parent.name):
+                    text = item.name[len(item.parent.name):].strip(' -_')
+                    if not text:
+                        text = item.name
                 else:
-                    text = menu.selected.name
+                    text = item.name
             else:
-                text = menu.selected.name
+                text = item.name
         except AttributeError:
             try:
                 if menu.type == 'tv':
