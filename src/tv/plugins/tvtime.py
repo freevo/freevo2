@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2004/03/21 18:30:04  mikeruelle
+# allow for some special options during setup
+#
 # Revision 1.32  2004/02/23 17:56:39  mikeruelle
 # add stop_osd=1 for vcr viewing to work. make vcr viewing work. add some commented out ch+/ch- video group handling. it is broken when you use numeric channel changing.
 #
@@ -252,6 +255,8 @@ class PluginInterface(plugin.Plugin):
             daoptions += ' -d %s -n %s -t %s' % (cf_device, s_norm, config.XMLTV_FILE)
         else:
             daoptions += ' -d %s -n %s' % (cf_device, s_norm)
+	if hasattr(config, "TV_TVTIME_SETUP_OPTS") and config.TV_TVTIME_SETUP_OPTS:
+            daoptions += ' %s' % config.TV_TVTIME_SETUP_OPTS
         os.system(configcmd+daoptions)
 
     def writeStationListXML(self):
