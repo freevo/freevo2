@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2003/03/21 19:44:44  dischi
+# only draw images when needed
+#
 # Revision 1.28  2003/03/20 18:55:45  dischi
 # Correct the rectangle drawing
 #
@@ -235,7 +238,9 @@ class Screen:
                     # redraw only the changed parts of the image (BROKEN)
                     # for x0, y0, x1, y1 in self.updatelist['background']:
                     # self.s_bg.blit(o[1], (x0, y0), (x0-o[2], y0-o[3], x1-x0, y1-y0))
-                    self.s_bg.blit(o[1], o[2:])
+                    if self.in_update(o[2], o[3], o[2]+o[4], o[3]+o[5],
+                                      self.updatelist['background']):
+                        self.s_bg.blit(o[1], o[2:4])
 
                 elif o[0] == 'rectangle':
                     x1, y1, x2, y2, color, border_size, border_color, radius = o[1:]
@@ -263,7 +268,10 @@ class Screen:
         if self.updatelist['background'] or self.updatelist['content']:
             for o in self.drawlist['content']:
                 if o[0] == 'image':
-                    osd.screen.blit(o[1], o[2:])
+                    if self.in_update(o[2], o[3], o[2]+o[4], o[3]+o[5],
+                                      self.updatelist['background'] + \
+                                      self.updatelist['content']):
+                        osd.screen.blit(o[1], o[2:4])
 
                 elif o[0] == 'text':
                     ( text, font, x, y, width, height, update_height, align_h, align_v,
@@ -724,15 +732,18 @@ class Skin_Area:
         in a variable. The real drawing is done inside draw()
         """
         if isinstance(val, tuple):
-            self.screen.draw('content', ('image', image, val[0], val[1]))
+            self.screen.draw('content', ('image', image, val[0], val[1], image.get_width(),
+                                         image.get_height()))
             self.content_objects += [ ( 'image', val[0], val[1], image.get_width(),
                                       image.get_height(), image ) ]
             return
         
         elif hasattr(val, 'label') and val.label == 'background':
-            self.screen.draw('background', ('image', image, val.x, val.y))
+            self.screen.draw('background', ('image', image, val.x, val.y, val.width,
+                                            val.height))
         else:
-            self.screen.draw('content', ('image', image, val.x, val.y))
+            self.screen.draw('content', ('image', image, val.x, val.y, val.width,
+                                         val.height))
 
         self.content_objects += [ ( 'image', val.x, val.y, val.width,
                                     val.height, image ) ]
