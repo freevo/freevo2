@@ -30,7 +30,6 @@ function cvs_tag {
 function cleanup_and_pack {
     echo cleaning up
     cd /tmp/freevo-$version
-    make clean
     rm freevo.conf* local_*
     find /tmp/freevo-$version -type d -name CVS | xargs rm -rf
     find /tmp/freevo-$version -name .cvsignore  | xargs rm -rf
