@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/12/30 15:36:42  dischi
+# support OVERLAY_DIR_STORE_MMPYTHON_DATA
+#
 # Revision 1.9  2003/11/28 19:26:37  dischi
 # renamed some config variables
 #
@@ -130,7 +133,13 @@ def cache_directories(rebuild=True):
         os.mkdir(mmcache)
     mmpython.use_cache(mmcache)
     mmpython.mediainfo.DEBUG = 0
-    mmpython.factory.DEBUG = 0
+    mmpython.factory.DEBUG   = 0
+
+    if config.OVERLAY_DIR_STORE_MMPYTHON_DATA and mmpython.object_cache and \
+           hasattr(mmpython.object_cache, 'md5_cachedir'):
+        _debug_('use OVERLAY_DIR for mmpython cache')
+        mmpython.object_cache.md5_cachedir = False
+        mmpython.object_cache.cachedir     = config.OVERLAY_DIR
 
     if rebuild:
         print 'deleting cache files'
@@ -139,7 +148,13 @@ def cache_directories(rebuild=True):
                 os.unlink(f)
     all_dirs = []
     print 'caching directories...'
-    for n, d in config.VIDEO_ITEMS + config.AUDIO_ITEMS + config.IMAGE_ITEMS:
+    for d in config.VIDEO_ITEMS + config.AUDIO_ITEMS + config.IMAGE_ITEMS:
+        try:
+            d = d[1]
+        except:
+            pass
+        if not os.path.isdir(d):
+            continue
         os.path.walk(d, cache_helper, all_dirs)
     for d in all_dirs:
         dname = d
@@ -152,6 +167,7 @@ def cache_directories(rebuild=True):
 
 
 if __name__ == "__main__":
+    os.umask(config.UMASK)
     if len(sys.argv)>1 and sys.argv[1] == '--help':
         print 'freevo cache helper to delete unused cache entries and to'
         print 'cache all files in your data directories.'
