@@ -81,9 +81,9 @@ function ebuild_upload {
     sudo rm -rf /tmp/ebuild*
     cd /usr/local/portage
 
-    tar --atime-preserve -zcvf /tmp/freevo-ebuild.tgz media-video/freevo \
-	media-video/freevo-snapshot dev-python/mmpython dev-python/mmpython-snapshot \
-	dev-python/pylirc media-video/xine-ui media-libs/libsdl >/dev/null
+    tar --atime-preserve -zcvf /tmp/freevo-ebuild.tgz \
+	media-tv/freevo-snapshot dev-python/mmpython-snapshot \
+	media-video/xine-ui media-libs/libsdl >/dev/null
     scp -r /tmp/freevo-ebuild.tgz dischi@freevo.sf.net:/home/groups/f/fr/freevo/htdocs/gentoo
     rm /tmp/freevo-ebuild.tgz
 }
