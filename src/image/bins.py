@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2002/12/02 18:25:22  dischi
+# Added bins/exif patch from John M Cooper
+#
 # Revision 1.2  2002/11/26 16:28:10  dischi
 # added patch for better bin support
 #
@@ -56,8 +59,12 @@ class BinsDiscription(ContentHandler):
     """
     def __init__(self):
         self.desc = {}
+	self.exif = {}
         self.inDisc = 0
         self.inField = 0
+	self.inExif = 0
+	self.inTag = 0
+
 
     def startElement(self,name,attrs):
         # Check that we  have a discription section
@@ -66,12 +73,22 @@ class BinsDiscription(ContentHandler):
         if name == u'field':
             self.thisField = normalize_whitespace(attrs.get('name', ''))
             self.inField = 1
-            self.desc[self.thisField] = ""
+            self.desc[self.thisField] = ''
+	if name == u'exif':
+	    self.inExif = 1
+	if name == u'tag':
+	    self.inTag = 1
+	    self.thisTag = normalize_whitespace(attrs.get('name', ''))
+	    self.exif[self.thisTag] = ''
+
 
     def characters(self,ch):
         if self.inDisc:
             if self.inField:
                 self.desc[self.thisField] = self.desc[self.thisField] + ch
+        if self.inExif:
+	    if self.inTag:
+	        self.exif[self.thisTag] = self.exif[self.thisTag] + ch
 
  
     def endElement(self,name):
@@ -79,6 +96,10 @@ class BinsDiscription(ContentHandler):
             self.inDisc = 0
         if name == 'field':
             self.inField = 0
+	if name == 'exif':
+	    self.inExif = 0
+	if name == 'tag':
+	    self.inTag = 0
 
 def get_bins_desc(binsname):
      parser = make_parser()
@@ -96,7 +117,8 @@ def get_bins_desc(binsname):
      # Check that there is a title
      parser.parse(binsname)
 
-     return dh.desc
+     return {'desc':dh.desc , 'exif':dh.exif}
+
 
 if __name__ == '__main__':
     parser = make_parser()

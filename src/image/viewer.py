@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2002/12/02 18:25:33  dischi
+# Added bins/exif patch from John M Cooper
+#
 # Revision 1.3  2002/11/27 20:26:39  dischi
 # Added slideshow timer and made some playlist and cosmetic fixes
 #
@@ -300,7 +303,7 @@ class ImageViewer:
 
         if not self.osd_mode: return
 
-        if self.osd_mode == 1:
+        elif self.osd_mode == 1:
             # This is where we add a caption.  Only if playlist is empty
             # May need to check the caption too?
 	    osdstring = []
@@ -316,63 +319,61 @@ class ImageViewer:
             if self.fileitem.binsdesc.has_key('description'):
                 osdstring.append('Description: ' + self.fileitem.binsdesc['description'])
 
-            # Now print the string on screen
-	    # First reverse the list
-	    osdstring.reverse()
-	    # Create a black box for text
-            osd.drawbox(0, osd.height - (25 + (len(osdstring) * 30)),
-                    osd.width, osd.height, width=-1,
-                    color=((60 << 24) | osd.COL_BLACK))
 
-	    for line in range(len(osdstring)):
-	        h=osd.height - (50 + ( line * 30))
-                osd.drawstring(osdstring[line], 10, h, fgcolor=osd.COL_ORANGE)
-            return
-            
-        f = open(self.filename, 'r')
-        tags = exif.process_file(f)
+        elif self.osd_mode == 2:    
+	    osdstring = ['No Exif info available']
+	    # Grab the exif tags from the image we alread have them from
+	    # the bins file XXX Should this be done in the image item stage?
+            f = open(self.filename, 'r')
+            tags = exif.process_file(f)
 
-        # Make the background darker for the OSD info
-        osd.drawbox(0, osd.height - 110, osd.width, osd.height, width=-1,
-                    color=((60 << 24) | osd.COL_BLACK))
-        
-        pos = 50
+	   # create an array with Exif tags, Bins tags, and line Number
+	    exif_tags = [ ['Date:','Image DateTime','DateTime',0],
+	                  ['W:','EXIF ExifImageWidth','ExifImageWidth',0],
+			  ['H:','EXIF ExifImageLength','ExifImageLength',0],
+			  ['Exp:','EXIF ExposureTime','ExposureTime',1],
+                          ['F/','EXIF FNumber','FNumber',1],
+			  ['FL:','EXIF FocalLength','FocalLength',1],
+			  ['ISO:','EXIF ISOSpeedRatings','ISOSpeedRatings',1],
+			  ['Meter:','EXIF MeteringMode','MeteringMode',1],
+			  ['Light:','EXIF LightSource','LightSource',1],
+			  ['Flash:','EXIF Flash','Flash',1],
+			  ['Make:','Image Make','Make',2],
+			  ['Model:','Image Model','Model',2],
+			  ['Software:','Image Software','Software',3]
+			 ]
+	    # You must set this up for each line
+            osdstring = ['','','',''] 
 
-        if tags.has_key('Image DateTime') and \
-		tags.has_key('EXIF ExifImageWidth') and tags.has_key('EXIF ExifImageLength'):
-            osd.drawstring('%s (%s x %s) @ %s' % \
-		(os.path.basename(self.filename), 
-		 tags['EXIF ExifImageWidth'], tags['EXIF ExifImageLength'], \
-		 tags['Image DateTime']), \
-			 20, osd.height - pos, fgcolor=osd.COL_ORANGE)
-	else:
-            osd.drawstring('%s' % (os.path.basename(self.filename)), \
-			 20, osd.height - pos, fgcolor=osd.COL_ORANGE)
+            for exiftag in exif_tags:
+	        line = exiftag[3]
+		exifname = exiftag[1]
+		binsname = exiftag[2]
+		exiftitle = exiftag[0]
+		exifstr=''
+	        if tags.has_key(exifname):
+		    exifstr = '%s %s' % (exiftitle,tags[exifname])
+	        elif self.fileitem.binsexif.has_key(binsname):
+		    exifstr = '%s %s' % (exiftitle, 
+		                         self.fileitem.binsexif[binsname])
+		osdstring[line] = '%s %s' % (osdstring[line],exifstr)
 
-        pos += 30
-            
-	if tags.has_key('EXIF ExposureTime') and tags.has_key('EXIF FNumber') and \
-		tags.has_key('EXIF FocalLength') and \
-                tags.has_key('EXIF ISOSpeedRatings') and \
-		tags.has_key('EXIF ExposureProgram') and \
-                tags.has_key('EXIF MeteringMode') and \
-		tags.has_key('EXIF LightSource') and tags.has_key('EXIF Flash'):
-            osd.drawstring('%s sec F/%s, L=%s mm, ISO %s, %s (%s Mtr), %s (Fls %s)' % \
-			 (tags['EXIF ExposureTime'], tags['EXIF FNumber'], 
-			  tags['EXIF FocalLength'], tags['EXIF ISOSpeedRatings'],
-			  tags['EXIF ExposureProgram'], tags['EXIF MeteringMode'], 
-			  tags['EXIF LightSource'], tags['EXIF Flash']), 
-			 20, osd.height - pos, fgcolor=osd.COL_ORANGE)
-            pos += 30
-            
-        if tags.has_key('Image Make') and tags.has_key('Image Model') and \
-           tags.has_key('Image Software'):
-            osd.drawstring('%s %s (%s)' % (tags['Image Make'], tags['Image Model'],
-                                           tags['Image Software']), 
-                           20, osd.height - pos, fgcolor=osd.COL_ORANGE)
-            pos += 30
-            
-        if self.zoom:
-            osd.drawstring('Zoom = %s' % self.zoom, 20, osd.height - pos, 
-                           fgcolor=osd.COL_ORANGE)
-            
+
+
+        # Now print the string on screen
+	# Remove Blank line
+	for line in range(len(osdstring)):
+	    if osdstring[line] == '':
+	        del osdstring[line]
+		
+        # Reverse the list
+        osdstring.reverse()
+        # Create a black box for text
+        osd.drawbox(0, osd.height - (25 + (len(osdstring) * 30)),
+                osd.width, osd.height, width=-1, 
+                color=((60 << 24) | osd.COL_BLACK))
+	
+
+        for line in range(len(osdstring)):
+            h=osd.height - (50 + ( line * 30))
+            osd.drawstring(osdstring[line], 10, h, fgcolor=osd.COL_ORANGE)

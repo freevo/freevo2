@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2002/12/02 18:25:27  dischi
+# Added bins/exif patch from John M Cooper
+#
 # Revision 1.4  2002/11/28 19:56:12  dischi
 # Added copy function
 #
@@ -64,10 +67,13 @@ class ImageItem(Item):
         # variables only for ImageItem
         self.duration = duration
 	self.binsdesc = {}
+	self.binsexif = {}
 
         # This should check for bins compatable info
 	if os.path.isfile(file + '.xml'):
-	    self.binsdesc = bins.get_bins_desc(file)
+	    binsinfo = bins.get_bins_desc(file)
+	    self.binsdesc = binsinfo['desc']
+	    self.binsexif = binsinfo['exif']
 
         # set name
         if name:

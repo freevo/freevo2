@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2002/12/02 18:25:11  dischi
+# Added bins/exif patch from John M Cooper
+#
 # Revision 1.6  2002/11/28 19:56:12  dischi
 # Added copy function
 #
@@ -215,7 +218,7 @@ class DirItem(Playlist):
         if name:
             self.name = name
 	elif os.path.isfile(dir + '/album.xml'):
-	    self.name = '[' + bins.get_bins_desc(dir)['title'] + ']'
+	    self.name = '[' + bins.get_bins_desc(dir)['desc']['title'] + ']'
         else:
             self.name = '[' + os.path.basename(dir) + ']'
         
