@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.57  2003/12/30 15:31:43  dischi
+# support args for plugin events
+#
 # Revision 1.56  2003/12/06 13:45:26  dischi
 # move more info to the Mimetype
 #
@@ -449,11 +452,11 @@ def get_callbacks(name):
     return __callbacks__[name]
 
     
-def event(name):
+def event(name, arg=None):
     """
     create plugin event
     """
-    return Event('PLUGIN_EVENT %s' % name)
+    return Event('PLUGIN_EVENT %s' % name, arg=arg)
 
 
 def isevent(event):
