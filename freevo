@@ -5,15 +5,26 @@
 # $Id$
 #
 
+# Keep track of where we started. This env var is used inside Freevo.
+export FREEVO_STARTDIR=$cwd
+
+
 # cd to the freevo directory if necessary
 if ! [ -e src/identifymedia.py ]; then
     cd `dirname $0`
 fi
 
 # Is freevo.conf present? If not, ./configure is needed
-if ! [ -e freevo.conf ]; then
-    echo "Please run ./configure first (freevo.conf not found)"
-    exit 1
+# Check the possible locations in prio order
+if ! [ -e $FREEVO_STARTDIR/freevo.conf ]; then
+    if ! [ -e $HOME/freevo.conf ]; then
+        if ! [ -e /etc/freevo.conf ]; then
+            if ! [ -e ./freevo.conf ]; then
+                echo "Please run ./configure first (freevo.conf not found)"
+                exit 1
+            fi
+        fi
+    fi
 fi
 
 # Is runapp present? If not it needs to be compiled
