@@ -202,9 +202,9 @@ class MenuWidget:
             else:
                 action_str = str(action)
                 arg_str = str(menu.selected.arg)[0:40]
-                osd.clearscreen()
-                osd.drawstring('Action: %s' % action_str, 50, 240)
-                osd.drawstring('Args: %s' % arg_str, 50, 280)
+                #osd.clearscreen()
+                #osd.drawstring('Action: %s' % action_str, 50, 240)
+                #osd.drawstring('Args: %s' % arg_str, 50, 280)
                 print 'Calling action "%s"' % str(action)
                 action( arg=menu.selected.arg, menuw=self )
         else:
