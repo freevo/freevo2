@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.72  2004/02/23 19:59:34  dischi
+# unicode fixes
+#
 # Revision 1.71  2004/02/23 16:34:26  dischi
 # better skin i18n support
 #
@@ -32,83 +35,6 @@
 #
 # Revision 1.64  2004/02/05 19:26:41  dischi
 # fix unicode handling
-#
-# Revision 1.63  2004/02/05 07:17:23  gsbarbieri
-# typo
-#
-# Revision 1.62  2004/02/05 05:44:26  gsbarbieri
-# Fixes some bugs related to handling unicode internally.
-# NOTE: Many of the bugs are related to using str() everywhere, so please stop doing that.
-#
-# Revision 1.61  2004/02/05 02:52:20  gsbarbieri
-# Handle filenames internally as unicode objects.
-#
-# This does *NOT* affect filenames that have only ASCII chars, since the
-# translation ASCII -> Unicode is painless. However this *DOES* affect files
-# with accents
-#
-# It determines the encoding based on (in order) FREEVO_LOCALE, LANG and
-# LC_ALL, which may have the form: "LANGUAGE_CODE.ENCODING",
-# like "pt_BR.UTF-8"
-#
-# Revision 1.60  2004/02/03 20:46:57  dischi
-# fix debug warning
-#
-# Revision 1.59  2004/02/01 19:47:13  dischi
-# some fixes by using new mmpython data
-#
-# Revision 1.58  2004/02/01 17:08:38  dischi
-# speedup, remove unneeded stuff
-#
-# Revision 1.57  2004/01/31 16:38:23  dischi
-# changes because of mediainfo changes
-#
-# Revision 1.56  2004/01/31 12:38:47  dischi
-# remove \0 checking, fixed mmpython
-#
-# Revision 1.55  2004/01/30 20:42:59  dischi
-# fix name setting
-#
-# Revision 1.54  2004/01/24 19:14:21  dischi
-# clean up autovar handling
-#
-# Revision 1.53  2004/01/19 20:29:11  dischi
-# cleanup, reduce cache size
-#
-# Revision 1.52  2004/01/18 16:50:10  dischi
-# (re)move unneeded variables
-#
-# Revision 1.51  2004/01/17 20:30:18  dischi
-# use new metainfo
-#
-# Revision 1.50  2004/01/14 01:18:45  outlyer
-# Workaround some weirdness... for some reason these should be of type None, but
-# are instead the string "None" which doesn't help, since the string "None" is
-# a valid string and hence not actually type None
-#
-# I don't think anyone who doesn't know python understands what the heck I
-# just said.
-#
-# Revision 1.49  2004/01/11 10:57:28  dischi
-# remove coming up here, it is no item attr
-#
-# Revision 1.48  2004/01/11 04:04:37  outlyer
-# Ok,  now it shows the "Coming Up" list anywhere in the TV menu. I think
-# it fits, though it looks fairly ugly right now. I'm going to make it more
-# flexible after I get some listings for 'tomorrow' since mine expire tonight.
-#
-# I like this as a feature, but I'm wondering if someone has an idea on a
-# cleaner way to implement this. This is a little hackish, since "Coming Up"
-# isn't really a item "property" so it doesn't exactly fit in the object
-# model.
-#
-# I did remove it from directory.py, so that's at least more logical.
-#
-# Maybe we should have a general function in item.py to call extra
-# functions, or a way to embed python in the skin which isn't so nice.
-#
-# Ideally, we need a different way to have "default" information in an info
-# area, as opposed to putting it in the item.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -342,7 +268,7 @@ class Item:
             if key == var:
                 if val == value:
                     if not self.delete_info(key):
-                        _debug_('unable to store info for \'%s\'' % self.name, 0)
+                        _debug_(u'unable to store info for \'%s\'' % self.name, 0)
                 else:
                     self.store_info(key, value)
                 return
@@ -355,9 +281,9 @@ class Item:
         """
         if isinstance(self.info, mediainfo.Info):
             if not self.info.store(key, value):
-                _debug_('unable to store info for \'%s\'' % self.name, 0)
+                _debug_(u'unable to store info for \'%s\'' % self.name, 0)
         else:
-            _debug_('unable to store info for that kind of item \'%s\'' % self.name, 0)
+            _debug_(u'unable to store info for that kind of item \'%s\'' % self.name, 0)
 
 
     def delete_info(self, key):
@@ -384,7 +310,7 @@ class Item:
         """
         Returns the string how to sort this item
         """
-        return '0%s' % self.name
+        return u'0%s' % self.name
 
     
     def translation(self, application):

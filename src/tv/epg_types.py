@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/02/23 19:59:34  dischi
+# unicode fixes
+#
 # Revision 1.13  2004/02/22 06:18:20  gsbarbieri
 # Better unicode support.
 #
@@ -124,6 +127,8 @@ class TvProgram:
             return Unicode(time.strftime(config.TV_TIMEFORMAT, time.localtime(self.stop)))
         if attr == 'date':
             return Unicode(time.strftime(config.TV_DATEFORMAT, time.localtime(self.start)))
+        if attr == 'time':
+            return self.getattr('start') + u' - ' + self.getattr('stop')
         if hasattr(self, attr):
             return getattr(self,attr)
         return ''

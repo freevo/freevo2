@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.66  2004/02/23 19:59:34  dischi
+# unicode fixes
+#
 # Revision 1.65  2004/02/19 04:57:56  gsbarbieri
 # Support Web Interface i18n.
 # To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
@@ -147,7 +150,7 @@ class Playlist(Item):
 
         self.type     = 'playlist'
         self.menuw    = None
-        self.name     = name
+        self.name     = Unicode(name)
 
         if (isinstance(playlist, str) or isinstance(playlist, unicode)) and not name:
             self.name = util.getname(playlist)
@@ -270,7 +273,7 @@ class Playlist(Item):
                 for p in self.get_plugins:
                     for i in p.get(self, [os.path.join(curdir, ss_name[0])]):
                         if i.type == 'image':
-                            i.name     = ss_caption[0]
+                            i.name     = Unicode(ss_caption[0])
                             i.duration = int(ss_delay[0])
                             self.playlist.append(i)
                             break

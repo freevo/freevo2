@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.120  2004/02/23 19:59:33  dischi
+# unicode fixes
+#
 # Revision 1.119  2004/02/21 19:39:04  dischi
 # use new gui box for password
 #
@@ -44,64 +47,6 @@
 #
 # Revision 1.108  2004/02/02 19:40:53  dischi
 # include overlay in listdir
-#
-# Revision 1.107  2004/02/01 17:09:26  dischi
-# o add menuw to playlist for whole directory to show it when selected
-# o support for dirconfig in mimetype plugins
-#
-# Revision 1.106  2004/01/31 16:40:25  dischi
-# removed unneeded attr
-#
-# Revision 1.105  2004/01/27 19:17:48  dischi
-# fix crash when an item is added to an empty menu
-#
-# Revision 1.104  2004/01/26 20:56:24  dischi
-# do not crash when deleting last item
-#
-# Revision 1.103  2004/01/25 15:38:57  dischi
-# prevent endless checking for overlay change
-#
-# Revision 1.102  2004/01/24 19:57:24  dischi
-# check if dir exists
-#
-# Revision 1.101  2004/01/24 17:35:51  dischi
-# fix crash
-#
-# Revision 1.100  2004/01/20 09:58:09  dischi
-# fix directory update problem
-#
-# Revision 1.99  2004/01/19 20:29:11  dischi
-# cleanup, reduce cache size
-#
-# Revision 1.98  2004/01/18 21:10:51  dischi
-# first load fxd file, than call plugins
-#
-# Revision 1.97  2004/01/18 16:50:34  dischi
-# watcher improvements
-#
-# Revision 1.96  2004/01/17 21:29:01  dischi
-# bugfix
-#
-# Revision 1.95  2004/01/17 20:30:18  dischi
-# use new metainfo
-#
-# Revision 1.94  2004/01/11 04:04:37  outlyer
-# Ok,  now it shows the "Coming Up" list anywhere in the TV menu. I think
-# it fits, though it looks fairly ugly right now. I'm going to make it more
-# flexible after I get some listings for 'tomorrow' since mine expire tonight.
-#
-# I like this as a feature, but I'm wondering if someone has an idea on a
-# cleaner way to implement this. This is a little hackish, since "Coming Up"
-# isn't really a item "property" so it doesn't exactly fit in the object
-# model.
-#
-# I did remove it from directory.py, so that's at least more logical.
-#
-# Maybe we should have a general function in item.py to call extra
-# functions, or a way to embed python in the skin which isn't so nice.
-#
-# Ideally, we need a different way to have "default" information in an info
-# area, as opposed to putting it in the item.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -697,18 +642,17 @@ class DirItem(Playlist):
         if self.DIRECTORY_SMART_SORT:
             self.dir_items.sort(lambda l, o: util.smartsort(l.dir,o.dir))
         else:
-            self.dir_items.sort(lambda l, o: util.ucmp(l.dir.upper(), o.dir.upper()))
+            self.dir_items.sort(lambda l, o: cmp(l.dir.upper(), o.dir.upper()))
 
         # sort playlist
-        self.pl_items.sort(lambda l, o: util.ucmp(l.name.upper(), o.name.upper()))
+        self.pl_items.sort(lambda l, o: cmp(l.name.upper(), o.name.upper()))
 
         # sort normal items
         if self.DIRECTORY_SORT_BY_DATE:
-            self.play_items.sort(lambda l, o: util.ucmp(l.sort('date').upper(),
-                                                        o.sort('date').upper()))
+            self.play_items.sort(lambda l, o: cmp(l.sort('date').upper(),
+                                                  o.sort('date').upper()))
         else:
-            self.play_items.sort(lambda l, o: util.ucmp(l.sort().upper(),
-                                                        o.sort().upper()))
+            self.play_items.sort(lambda l, o: cmp(l.sort().upper(), o.sort().upper()))
 
         if self['num_dir_items'] != len(self.dir_items):
             self['num_dir_items'] = len(self.dir_items)
@@ -903,7 +847,7 @@ class DirItem(Playlist):
 
         # create new item with updated name
         item = copy.copy(menuw.menustack[-1].selected)
-        item.name = item.name[:item.name.find('\t') + 1] + self.configure_set_name(arg)
+        item.name = item.name[:item.name.find(u'\t') + 1] + self.configure_set_name(arg)
 
         try:
             parser = util.fxdparser.FXD(self.folder_fxd)

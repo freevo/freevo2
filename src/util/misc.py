@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2004/02/23 19:59:35  dischi
+# unicode fixes
+#
 # Revision 1.31  2004/02/23 16:34:48  dischi
 # bugfix
 #
@@ -389,26 +392,6 @@ def tagmp3 (filename, title=None, artist=None, album=None, track=None,
     if year:   tag.setDate(year) 
     tag.update()
     return
-
-
-def encode(str, code):
-    try:
-        return str.encode(code)
-    except UnicodeError:
-        result = ''
-        for ch in str:
-            try:
-                result += ch.encode(code)
-            except UnicodeError:
-                pass
-        return result
-
-
-def ucmp(val1, val2):
-    """
-    cmp function taking care of encoding
-    """
-    return cmp(Unicode(val1), Unicode(val2))
 
 
 def htmlenties2txt(string):
