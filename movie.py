@@ -181,7 +181,7 @@ def cwd(arg=None, menuw=None):
     # add everything to the menu
     for (title, mode, file, playlist, image) in files:
         m = menu.MenuItem(title, play_movie, (mode, file, playlist))
-        m.setImage(image)
+        m.setImage(('cover', image))
         items += [m]
     
     moviemenu = menu.Menu('MOVIE MENU', items)
