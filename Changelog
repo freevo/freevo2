@@ -7,6 +7,7 @@ $Id$
 Release 1.2.2 (2002-05-XX):
 ---------------------------
 o Added PNG bitmap support in the OSD
+o Added freetype font support in the OSD
 o Added transparency support in the OSD
 o Added a skins directory
 o Added a background bitmap to the main menu
