@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/04/22 11:56:45  dischi
+# fixed bug that shows the player again after stopping it
+#
 # Revision 1.2  2003/04/21 18:40:32  dischi
 # use plugin name structure to find the real player
 #
@@ -61,6 +64,7 @@ class PlayerGUI(GUIObject):
         self.menuw = menuw
         self.item = item
         self.player = plugin.getbyname(plugin.AUDIO_PLAYER)
+        self.running = FALSE
         
     def play(self):
         if self.player.is_playing():
@@ -69,6 +73,7 @@ class PlayerGUI(GUIObject):
         if self.menuw and self.menuw.visible:
             self.menuw.hide()
 
+        self.running = TRUE
         self.player.play(self.item, self)
         if self.visible:
             rc.app(self.player)
@@ -76,6 +81,7 @@ class PlayerGUI(GUIObject):
 
     def stop(self):
         self.player.stop()
+        self.running = FALSE
         if self.visible:
             rc.app(None)
         
@@ -96,6 +102,9 @@ class PlayerGUI(GUIObject):
         Give information to the skin..
         """
         if not self.visible:
+            return
+
+        if not self.running:
             return
         
         # Calculate some new values
