@@ -35,6 +35,15 @@ import sys, time
 import tv.epg_xmltv, tv.epg_types
 import tv.record_client as ri
 
+# Use the alternate strptime module which seems to handle time zones
+#
+# XXX Remove when we are ready to require Python 2.3
+if float(sys.version[0:3]) < 2.3:
+    import tv.strptime as strptime
+else:
+    import _strptime as strptime
+
+
 from www.web_types import HTMLResource, FreevoResource
 
 TRUE = 1
@@ -92,9 +101,9 @@ class ManualRecordResource(FreevoResource):
                 if int(startmonth) < currentmonth:
                     startyear = str(int(startyear) + 1)
                 # create utc second start time
-                starttime = time.mktime(time.strptime(str(startmonth)+" "+str(startday)+" "+str(startyear)+" "+str(starthour)+":"+str(startminute)+":00",'%m %d %Y %H:%M:%S'))
+                starttime = time.mktime(strptime.strptime(str(startmonth)+" "+str(startday)+" "+str(startyear)+" "+str(starthour)+":"+str(startminute)+":00",'%m %d %Y %H:%M:%S'))
                 # create utc stop time
-                stoptime = time.mktime(time.strptime(str(stopmonth)+" "+str(stopday)+" "+str(stopyear)+" "+str(stophour)+":"+str(stopminute)+":00",'%m %d %Y %H:%M:%S'))
+                stoptime = time.mktime(strptime.strptime(str(stopmonth)+" "+str(stopday)+" "+str(stopyear)+" "+str(stophour)+":"+str(stopminute)+":00",'%m %d %Y %H:%M:%S'))
                 # so we don't record for more then maxdays (maxdays day * 24hr/day * 60 min/hr * 60 sec/min)
                 if abs(stoptime - starttime) < (MAXDAYS * 86400): 
                     if starttime < stoptime:
@@ -124,7 +133,7 @@ class ManualRecordResource(FreevoResource):
             guide = tv.epg_xmltv.get_guide()
             channelselect = '<select name="chan">'
             for ch in guide.chan_list:
-                channelselect = channelselect + '<option value="'+ch.id+'">'+ch.tunerid+"\n"
+                channelselect = channelselect + '<option value="'+ch.id+'">'+str(ch.tunerid)+"\n"
             channelselect = channelselect + "</select>\n"
 
             #build some reusable date inputs
