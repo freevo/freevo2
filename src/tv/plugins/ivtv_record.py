@@ -10,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/05/28 01:48:22  outlyer
+# Florian Demmer's patch for consecutive recordings and a patch to move the
+# snapshot to after we set the flag to idle, just to be safe.
+#
 # Revision 1.19  2004/01/10 04:12:02  outlyer
 # Take a snapshot/thumbnail after a file is recorded...
 #
@@ -116,6 +120,7 @@ class Recorder:
 
     def Record(self, rec_prog):
 
+        self.thread.save_flag.wait()
         self.thread.mode = 'record'
         self.thread.prog = rec_prog
         self.thread.mode_flag.set()
@@ -136,6 +141,8 @@ class Record_Thread(threading.Thread):
         
         self.mode = 'idle'
         self.mode_flag = threading.Event()
+        self.save_flag = threading.Event()
+        self.save_flag.set()
         self.prog  = ''
         self.app = None
 
@@ -188,6 +195,7 @@ class Record_Thread(threading.Thread):
                     if self.mode == 'stop':
                         break
 
+                self.save_flag.clear()
                 v_in.close()
                 v_out.close()
                 v.close()
@@ -195,20 +203,12 @@ class Record_Thread(threading.Thread):
 
                 os.remove(tv_lock_file)
 
-                # XXX Move this into recordserver after
-                # XXX Rob puts the event support in.
-                from  util.videothumb import snapshot
-                snapshot(video_save_file)
-
-
                 if DEBUG: print('Record_Thread::run: finished recording')
 
                 self.mode = 'idle'
-                
+                self.save_flag.set()
+                from  util.videothumb import snapshot
+                snapshot(video_save_file)
             else:
                 self.mode = 'idle'
             time.sleep(0.5)
-
-
-    
-
