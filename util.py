@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2002/11/15 03:39:20  krister
+# Fixed a bug in autoslideshows.
+#
 # Revision 1.45  2002/11/14 03:16:47  krister
 # Bigfixes for VCD playing.
 #
@@ -131,9 +134,12 @@ def unique(s):
 def getdirnames(dirname):
     '''Get all subdirectories in the given directory.
     Returns a list that is case insensitive sorted.'''
-    
-    dirnames = [ os.path.join(dirname, dname) for dname in os.listdir(dirname)
-                 if os.path.isdir(os.path.join(dirname, dname)) ]
+
+    try:
+        dirnames = [ os.path.join(dirname, dname) for dname in os.listdir(dirname)
+                     if os.path.isdir(os.path.join(dirname, dname)) ]
+    except OSError:
+        return []
     
     dirnames.sort(lambda l, o: cmp(l.upper(), o.upper()))
     

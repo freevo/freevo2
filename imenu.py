@@ -204,7 +204,8 @@ def cwd(arg=None, menuw=None):
         items += [menu.MenuItem(title, cwd, dirname, type = 'dir')]
 
     if len(files) > 1:
-        items += [menu.MenuItem('Auto Slide Show', auto_slideshow, dir, eventhandler, type = 'show')]
+        items += [menu.MenuItem('Auto Slide Show', auto_slideshow, dir,
+                                eventhandler, type = 'show')]
     
     number = 0
 
@@ -258,25 +259,21 @@ def slideshow(arg=None, menuw=None):
 #  default delay value between images.
 
 def auto_slideshow(arg=None, menuw=None):
-    dir = arg
+    dirname = arg
 
     global playlist_lines
     playlist_lines = []
 
-    files = util.match_files(dir, config.SUFFIX_IMAGE_FILES)
-    for file in files:
-        tmp_list = []
-        tmp_list.append(os.path.join(os.path.abspath(dir), file))
-        tmp_list.append("")
-        tmp_list.append(5)
-        playlist_lines.append(tmp_list)
+    filenames = util.match_files(dirname, config.SUFFIX_IMAGE_FILES)
+    for filename in filenames:
+        playlist_lines.append([filename, '', 5])
 
-    iview.total_slides = len ( playlist_lines )
+    iview.total_slides = len(playlist_lines)
     iview.slide_num = 0
 
     if iview.total_slides > 0:
-        iview.view ( playlist_lines[0][0], 0, playlist_lines, 1 )
-        # Need to check if the alarmm signal is already in use!!!
-        signal.signal ( signal.SIGALRM, view_handler )
-        signal.alarm ( playlist_lines[0][2] )
+        iview.view(playlist_lines[0][0], 0, playlist_lines, 1)
+        # Need to check if the alarm signal is already in use!
+        signal.signal(signal.SIGALRM, view_handler)
+        signal.alarm(playlist_lines[0][2])
 
