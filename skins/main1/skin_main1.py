@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.89  2003/04/13 10:35:40  dischi
+# cleanup of unneeded stuff in menu.py
+#
 # Revision 1.88  2003/04/06 21:19:44  dischi
 # Switched to new main1 skin
 #
@@ -382,10 +385,6 @@ class Skin:
             settings = object.skin_settings
         else:
             settings = self.settings
-
-        # hack for the main menu to fit all in one screen
-        if not object.packrows:
-            object.item_types = 'main'
 
         rows, cols = self.listing_area.get_items_geometry(settings, object,
                                                           self.display_style)[:2]

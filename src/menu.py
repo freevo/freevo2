@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2003/04/13 10:35:39  dischi
+# cleanup of unneeded stuff in menu.py
+#
 # Revision 1.32  2003/04/11 10:32:59  dischi
 # fixed bug for non Menu items
 #
@@ -109,39 +112,27 @@ def get_singleton():
 
 class MenuItem:
 
-    def __init__( self, name, action=None, arg=None, eventhandler = None,
-                  eventhandler_args = None, type = None, icon=None, scale=1, popup=0 ):
+    def __init__( self, name, action=None, arg=None, type = None, icon=None):
         
         self.name              = name
         self.action            = action
         self.action_arg        = arg
-        self.eventhandler      = eventhandler
-        self.eventhandler_args = eventhandler_args
         self.type              = type
         self.icon              = icon
-        self.scale             = scale
-        self.popup             = popup
         self.image             = None
         self.parent            = None
         
     def setImage(self, image):
         self.type  = image[0]
         self.image = image[1]
-    
-    # XXX do we need this function?
-    def select(self):
-        self.action(self.action_arg)
-
-    def eventhandler(self):
-        self.eventhandler(self.eventhandler_args)
 
 
 
 class Menu:
 
-    def __init__(self, heading, choices, xml_file=None, packrows=1, umount_all = 0,
+    def __init__(self, heading, choices, xml_file=None, umount_all = 0,
                  reload_func = None, item_types = None, force_skin_layout = -1):
-        # XXX Add a list of eventhandlers?
+
         self.heading = heading
         self.choices = choices          # List of MenuItem:s
         if len(self.choices):
@@ -151,9 +142,8 @@ class Menu:
         self.page_start = 0
         self.previous_page_start = []
         self.previous_page_start.append(0)
-        self.packrows = packrows
         self.umount_all = umount_all    # umount all ROM drives on display?
-        self.surface = None
+
         if xml_file:
             self.skin_settings = skin.LoadSettings(xml_file)
         else:
@@ -190,6 +180,7 @@ class Menu:
     def items_per_page(self):
         return skin.items_per_page(('menu', self))
     
+
     def add_item(self, item, pos):
         try:
             sel_pos = self.choices.index(self.selected)
@@ -203,6 +194,8 @@ class Menu:
         if sel_pos >= self.page_start + items_per_page - 1:
             self.previous_page_start.append(self.page_start)
             self.page_start += items_per_page
+
+
 
 #
 # The MenuWidget handles a stack of Menu:s
@@ -540,14 +533,9 @@ class MenuWidget(GUIObject):
                 self.refresh()
                 
 
-        else:
-            action = menu.selected.eventhandler
-            if action:
-                if hasattr(menu.selected, 'eventhandler_args'):
-                    action(event = event, arg=menu.selected.eventhandler_args,
-                           menuw=self)
-                else:
-                    action(event = event, menuw=self)
+        elif hasattr(menu.selected, 'eventhandler') and menu.selected.eventhandler:
+            menu.selected.eventhandler(event = event, menuw=self)
+
         return 0
 
 

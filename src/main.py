@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2003/04/13 10:35:39  dischi
+# cleanup of unneeded stuff in menu.py
+#
 # Revision 1.33  2003/04/12 18:27:29  dischi
 # special video item handling
 #
@@ -324,7 +327,7 @@ class MainMenu(Item):
         
         items = get_main_menu(self)
 
-        mainmenu = menu.Menu('FREEVO MAIN MENU', items, packrows=0, umount_all = 1)
+        mainmenu = menu.Menu('FREEVO MAIN MENU', items, item_types='main', umount_all = 1)
         menuwidget.pushmenu(mainmenu)
         osd.focused_app = menuwidget
 
