@@ -19,6 +19,8 @@ x11: all osds_x11
 
 sdl: all osds_sdl
 
+dxr3: all osds_dxr3
+
 .PHONY: all subdirs x11 osd_x1 $(SUBDIRS) clean release install
 
 osds_x11:
@@ -26,6 +28,9 @@ osds_x11:
 
 osds_sdl:
 	cd osd_server ; $(MAKE) osds_sdl
+
+osds_dxr3:
+	cd osd_server ; $(MAKE) osds_dxr3
 
 runapp: runapp.c
 	$(CC) -o runapp runapp.c -DRUNAPP_LOGDIR=\"/var/log/freevo\"

@@ -70,7 +70,7 @@ def create_makefile(buildops):
 
     
 def print_usage():
-    print 'Usage: ./configure [--osd=fb | --osd=x11 | --osd=sdl]'
+    print 'Usage: ./configure [--osd=fb | --osd=x11 | --osd=sdl | --osd=dxr3]'
 
     
 if __name__ == '__main__':
@@ -90,6 +90,8 @@ if __name__ == '__main__':
             buildops = 'x11'
         elif sys.argv[1] == '--osd=sdl':
             buildops = 'sdl'
+        elif sys.argv[1] == '--osd=dxr3':
+            buildops = 'dxr3'
         elif sys.argv[1] == '--osd=fb':
             buildops = ''
         else:

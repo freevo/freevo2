@@ -137,6 +137,11 @@ osd_x11 = ('osd_x11',
 osd_sdl = ('osd_sdl', 'sh', ['-c',
                              './osd_server/osds_sdl'])
 
+# The DXR3 driver, debug output to /tmp/freevo_osddxr3.log
+osd_dxr3 = ('osd_dxr3',
+           'sh', ['-c',
+                  './osd_server/osds_dxr3 > %s/internal-osddxr3.log' % config.LOGDIR])
+
 # The Freevo main application, debug output in an Xterm
 freevo_main_xterm = ('freevo', 'xterm',
                      [  '-geom', '80x15', '-title', 'Freevo Main',
@@ -175,6 +180,7 @@ options = {
     '--osd=fb'            : 'osd = osd_fb_quiet',
     '--osd=x11'           : 'osd = osd_x11',
     '--osd=sdl'           : 'osd = osd_sdl',
+    '--osd=dxr3'          : 'osd = osd_dxr3',
     '--freevo=main-xterm' : 'freevo = freevo_main_xterm',
     '--freevo=main-quiet' : 'freevo = freevo_main_quiet',
     '--videotools=real'   : 'extra_args_dict["videotools"] = "real"',
