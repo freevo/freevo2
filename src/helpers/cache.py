@@ -23,9 +23,9 @@ def delete_old_files():
 
     for f in del_list:
         if os.path.isdir(f):
-            os.system('rm -rf %s' % f)
+            util.rmrf(f)
         else:
-            os.system('rm %s' % f)
+            os.unlink(f)
 
 
 def cache_helper(result, dirname, names):
