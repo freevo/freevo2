@@ -66,7 +66,7 @@ class AppArgs:
         
 # The remote control simulator, debug output in an Xterm
 remote_xterm = ('remote', '/usr/X11R6/bin/xterm',
-                    [ '-title', 'Freevo Remote Simulator',
+                    [ '-title', 'Freevo Remote Simulator', '-geom', '80x50',
                       '-e', 'python', './rc_client/remote.py', '--remote=%(remote)s'])
 
 # The remote control lirc interface, no debug output
