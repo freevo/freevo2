@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.67  2003/08/31 14:19:11  dischi
+# show splashscreen on startup
+#
 # Revision 1.66  2003/08/26 20:28:05  outlyer
 # Black the screen on shutdown
 #
@@ -266,8 +269,12 @@ def signal_handler(sig, frame):
 #
 def main_func():
     import plugin
-    plugin.init()
-    
+
+    if hasattr(skin, 'Splashscreen'):
+        plugin.init(skin.Splashscreen().progress)
+    else:
+        plugin.init()
+
     signal.signal(signal.SIGTERM, signal_handler)
     signal.signal(signal.SIGINT, signal_handler)
 
