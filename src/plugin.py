@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/04/21 18:19:54  dischi
+# make it possible that whole directories can be a plugin
+#
 # Revision 1.11  2003/04/21 13:28:54  dischi
 # Make it possible to inherit a plugin from Plugin(). This plugin will only
 # be loaded, nothing else!
@@ -207,6 +210,10 @@ def init():
             special = module
             module  = '%s.plugins.%s' % (module, name[name.rfind('.')+1:])
             object  = '%s.PluginInterface' % module
+        elif os.path.isdir('src/%s' % name):
+            module  = name
+            object  = '%s.PluginInterface' % module
+            special = None
         else:
             module  = name
             object  = '%s.PluginInterface' % module
@@ -334,6 +341,7 @@ if __name__ == "__main__":
                 file = re.sub('/', '.', os.path.splitext(file)[0])
                 file = re.sub('src.', '', file)
                 file = re.sub('plugins.', '', file)
+                file = re.sub('.__init__', '', file)
 
                 type = start.match(line).group(2)
                 if re.match('^plugin.(.*)', type):
