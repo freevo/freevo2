@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/02/15 11:18:47  dischi
+# better detachbar plugin, does not need stuff in other files now
+#
 # Revision 1.17  2004/02/14 13:05:03  dischi
 # do not call skin.get_singleton() anymore
 #
@@ -83,15 +86,8 @@ class PlayerGUI(GUIObject):
 
         self.player  = None
         self.running = False
-        self.detachbar = None
 
-    def getDetachbar(self):
-        if self.detachbar == None:
-            self.detachbar = plugin.getbyname('audio.detachbar')
-            if self.detachbar == None:
-                return False
-        return True
-        
+
     def play(self, player=None):
         global _player_
         if _player_ and _player_.player and _player_.player.is_playing():
@@ -121,8 +117,6 @@ class PlayerGUI(GUIObject):
         
         if self.menuw and self.menuw.visible:
             self.menuw.hide(clear=False)
-            if self.getDetachbar():
-                self.detachbar.hide()
 
         self.running = True
         error = self.player.play(self.item, self)
@@ -163,8 +157,6 @@ class PlayerGUI(GUIObject):
         _player_ = None
 
         self.player.stop()
-        if self.getDetachbar():
-            self.detachbar.stop()
         self.running = False
         if self.visible:
             rc.app(None)
@@ -173,8 +165,6 @@ class PlayerGUI(GUIObject):
     def show(self):
         if not self.visible:
             self.visible = 1
-            if self.getDetachbar():
-                self.detachbar.hide()            
             self.refresh()
             rc.app(self.player)
             
@@ -183,8 +173,6 @@ class PlayerGUI(GUIObject):
         if self.visible:
             self.visible = 0
             skin.clear()
-            if self.getDetachbar():
-                self.detachbar.show()
             rc.app(None)
             
 

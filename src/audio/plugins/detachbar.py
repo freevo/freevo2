@@ -28,52 +28,33 @@
 import time
 
 # freevo specific
-import skin,audio.player,plugin
+import skin
+import audio.player
+import plugin
 from event import *
 
+
 # barstates
-BAR_HIDE=0 # timedout, reset and change poll interval
-BAR_SHOW=1 # show the bar
-BAR_IDLE=2 # wait for new track
+BAR_HIDE=0 		# timedout, reset and change poll interval
+BAR_SHOW=1 		# show the bar
+BAR_IDLE=2 		# wait for new track
 
 class PluginInterface(plugin.DaemonPlugin):
     """
-    detachbar plugin.
+    This plugin enables a small bar showing information about audio being played
+    when detached with the detach plugin.
+
+    If the idlebar is loaded and there is enough space left there, this plugin
+    will draw itself there, otherwise it will draw at the right bottom of the
+    screen.
     """
     def __init__(self):
         plugin.DaemonPlugin.__init__(self)
 
         # tunables
         self.TimeOut  = 3  # 3 seconds till we hide the bar
-        self.reset()
-        
-        # register in list (is this necessery?)
-        self.plugin_name = 'audio.detachbar'       
-        plugin.register(self, self.plugin_name)
-        self.image = None
+        self.hide()
 
-    def reset(self):
-        self.status=BAR_HIDE
-        self.render = []
-        self.player = None
-        self.Timer = None
-        self.bar = None
-        self.setPoll(999999)
-
-    def eventhandler(self, event, menuw=None):
-        """
-        Needed to catch the PLAY_START event,
-        since it now integrates with player.py, 
-        this should probably be removed in the future
-        (don't have to many dependencies)
-        """
-        print event
-        if self.player and event == PLAY_START:
-            if self.status == BAR_IDLE:
-                self.refresh()
-            else:
-                self.show()
-        return False
 
     def timer(self):
         """
@@ -87,33 +68,46 @@ class PluginInterface(plugin.DaemonPlugin):
             else:
                 return BAR_IDLE
     
+
+    def eventhandler(self, event, menuw=None):
+        """
+        Needed to catch the plugin DETACH event
+        """
+        if plugin.isevent(event) == 'DETACH':
+            self.show()
+            return True
+        return False
+
+
     def hide(self):
         """
         used when hiding the bar
         """
-        self.reset()
+        self.status = BAR_HIDE
+        self.render = []
+        self.player = None
+        self.Timer  = None
+        self.bar    = None
+        self.setPoll(999999)
     
+
     def show(self):
         """
         used when showing for the first time
         """
-        self.player = audio.player.get().player
+        self.player = audio.player.get()
         self.setPoll(10)       
-        self.refresh()
-    
-    def refresh(self):
-        """
-        used when updating new songinfo
-        """
         self.getInfo()
         self.status = BAR_SHOW
     
+
     def stop(self):
         """
         stops the player, waiting for timeout
         """
         self.status = BAR_IDLE
-        self.Timer = time.time()
+        self.Timer  = time.time()
+
 
     def poll(self):
         """
@@ -121,20 +115,40 @@ class PluginInterface(plugin.DaemonPlugin):
         """
         if self.status == BAR_SHOW:
             skin.redraw()
+
         elif self.status == BAR_IDLE:
             self.status = self.timer()
             if self.status == BAR_HIDE:
-                self.reset()
+                self.hide()
             skin.redraw()
     
+
     def draw(self, (type, object), osd):
         """
         draws the bar
         """
+        if self.status == BAR_IDLE:
+            # when idle, wait for a new player
+            if audio.player.get():
+                self.show()
+                
         if self.status == BAR_SHOW:
+            if not self.player.running:
+                # player stopped, we also stop
+                # and wait for a new one
+                self.player = None
+                self.stop()
+                return
+
+            if type == 'player':
+                # Oops, showing the player again, stop me
+                self.stop()
+                self.hide()
+                return
+
             font = osd.get_font('detachbar')
 
-            if font==osd.get_font('default'):
+            if font == osd.get_font('default'):
                 font = osd.get_font('info value')
        
             self.calculatesizes(osd,font)
@@ -168,9 +182,9 @@ class PluginInterface(plugin.DaemonPlugin):
 
             osd.write_text( progress, font, None, self.t_x, y,
                             self.t_w, self.font_h , 'center', 'center')
-
         return 0
    
+
     def getInfo(self):
         """
         sets an array of things to draw
@@ -198,6 +212,7 @@ class PluginInterface(plugin.DaemonPlugin):
         if len(self.render)==0:
             self.render += [ self.player.item.name ]
     
+
     def calculatesizes(self,osd,font):
         """
         sizecalcs is not necessery on every pass
@@ -229,7 +244,7 @@ class PluginInterface(plugin.DaemonPlugin):
     
             for r in self.render:
                 bar_height += self.font_h
-                bar_width = self.longest(bar_width,font.font.stringsize(r))
+                bar_width = max(bar_width,font.font.stringsize(r))
                 
             self.y = (total_height - bar_height) - osd.y - pad - pad_internal
             self.x = (total_width - bar_width) - osd.x - pad - pad_internal
@@ -253,14 +268,10 @@ class PluginInterface(plugin.DaemonPlugin):
         """
         helper to set the poll_interval
         """
-        self.poll_counter = 0
+        self.poll_counter  = 0
         self.poll_interval = interval
     
-    def longest(self,a,b):
-        if a>b:
-            return a
-        return b
-        
+
     def formattime(self,seconds):
         """
         returns string formatted as mins:seconds

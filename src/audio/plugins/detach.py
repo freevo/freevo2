@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/02/15 11:18:47  dischi
+# better detachbar plugin, does not need stuff in other files now
+#
 # Revision 1.13  2004/02/06 18:33:06  dischi
 # fix mimetype handling
 #
@@ -73,15 +76,9 @@ class PluginInterface(plugin.MainMenuPlugin):
         self.show_item = menu.MenuItem(_('Show player'), action=self.show)
         self.show_item.type = 'detached_player'
 
+
     def detach(self):
-        # start detachbar
-        self.detachbar = plugin.getbyname('audio.detachbar')
-        if self.detachbar == None:
-            plugin.activate('audio.detachbar')
-            self.detachbar = plugin.getbyname('audio.detachbar')
-           
         gui  = audio.player.get()
-        gui.detachbar = self.detachbar
 
         # hide the player and show the menu
         gui.hide()
@@ -93,6 +90,7 @@ class PluginInterface(plugin.MainMenuPlugin):
         gui.item.menuw = None
         if gui.item.parent:
             gui.item.parent.menuw = None
+        rc.post_event(plugin.event('DETACH'))
         
 
     def items(self, parent):
