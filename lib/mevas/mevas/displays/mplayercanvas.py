@@ -72,8 +72,6 @@ class MPlayerCanvas(Canvas):
 		if not self.overlay or not self.overlay().can_write():
 			return False
 
-		if object == None:
-			print "UPDATE BEGIN", self
 		self.freeze()
 	
 		# At this point we can take care of any bmovl2 images that need to be
@@ -87,8 +85,6 @@ class MPlayerCanvas(Canvas):
 
 
 	def _update_end(self, object = None):
-		if object == None:
-			print "UPDATE END", self
 		self.thaw()
 		return True
 
