@@ -27,6 +27,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/03/14 19:38:02  dischi
+# Support the new <menu> and <menuset> structure. See the blue2 skins
+# for example
+#
 # Revision 1.22  2003/03/14 03:08:58  outlyer
 # A fix for a crash problem I had with Dischi's version of my skin.
 #
@@ -446,7 +450,7 @@ class Skin_Area:
             object.width = self.area_val.width - object.x
 
         if object.height + object.y > self.area_val.height + self.area_val.y:
-            object.height = self.area_val.height - object.y
+            object.height = self.area_val.height + self.area_val.y - object.y
 
         return object
 
@@ -493,13 +497,27 @@ class Skin_Area:
         elif widget_type == 'tv':
             area = settings.tv
         else:
-            if self.display_style and settings.menu.has_key('extended %s' % display_type):
-                area = settings.menu['extended %s' % display_type]
-            elif settings.menu.has_key(display_type):
+            # get the correct <menu>
+            if settings.menu.has_key(display_type):
                 area = settings.menu[display_type]
             else:
                 area = settings.menu['default']
 
+            # get the correct style based on display_style
+            if len(area.style) > self.display_style:
+                area = area.style[self.display_style]
+            else:
+                area = area.style[0]
+
+            # get image or text view
+            # FIXME: select text if necessary
+            if area[0]:
+                area = area[0]
+            else:
+                area = area[1]
+
+            area = settings.menuset[area]
+            
         try:
             area = eval('area.%s' % self.area_name)
         except AttributeError:

@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/03/14 19:38:03  dischi
+# Support the new <menu> and <menuset> structure. See the blue2 skins
+# for example
+#
 # Revision 1.24  2003/03/13 21:01:15  dischi
 # docs update
 #
@@ -342,14 +346,17 @@ class XML_area(XML_data):
     """
     def __init__(self):
         XML_data.__init__(self, ('visible', 'layout', 'x', 'y', 'width', 'height'))
+        self.x = -1
+        self.y = -1
 
     def parse(self, node, scale, current_dir):
+        x = self.x
+        y = self.y
         XML_data.parse(self, node, scale, current_dir)
-        for subnode in node.children:
-            if subnode.name == u'area':
-                XML_data.parse(self, subnode, scale, current_dir)
-                self.x += config.OVERSCAN_X
-                self.y += config.OVERSCAN_Y
+        if x != self.x:
+            self.x += config.OVERSCAN_X
+        if y != self.y:
+            self.y += config.OVERSCAN_Y
 
     def rect(self, type):
         if type == 'screen':
@@ -366,7 +373,7 @@ class XML_area(XML_data):
 
 # ======================================================================
 
-class XML_menu:
+class XML_menuset:
     """
     the complete menu with the areas screen, title, view, listing and info in it
     """
@@ -383,6 +390,22 @@ class XML_menu:
                     eval('self.%s.parse(subnode, scale, current_dir)' % c)
         pass
 
+
+# ======================================================================
+
+class XML_menu:
+    """
+    the menu style definitions
+    """
+    def __init__(self):
+        self.style = []
+        pass
+    
+    def parse(self, node, scale, current_dir):
+        for subnode in node.children:
+            if subnode.name == 'style':
+                self.style += [ ( attr_str(subnode, 'image', ''),
+                                  attr_str(subnode, 'text', '') ) ]
 
 # ======================================================================
 
@@ -540,7 +563,7 @@ class XMLSkin:
     """
     def __init__(self):
         self.menu = {}
-        self.menu['default'] = XML_menu()
+        self.menuset = {}
 
         self.layout = {}
         self.font = {}
@@ -558,21 +581,26 @@ class XMLSkin:
                 self.mainmenu.parse(node, scale, c_dir)
 
             if node.name == u'menu':
-                type = attr_str(node, "type", "default")
+                type = attr_str(node, 'type', 'default')
 
                 if type == 'all':
                     # if type is all, all types except default are deleted and
                     # the settings will be loaded for default
-                    tmp = self.menu['default']
                     self.menu = {}
-                    self.menu['default'] = tmp
                     type = 'default'
                     
-                if not type in self.menu:
-                    self.menu[type] = copy.deepcopy(self.menu['default'])
-
+                self.menu[type] = XML_menu()
                 self.menu[type].parse(node, scale, c_dir)
 
+
+            if node.name == u'menuset':
+                label   = attr_str(node, 'label', '')
+                inherit = attr_str(node, 'inherits', '')
+                if inherit:
+                    self.menuset[label] = copy.deepcopy(self.menuset[inherit])
+                elif not self.menuset.has_key(label):
+                    self.menuset[label] = XML_menuset()
+                self.menuset[label].parse(node, scale, c_dir)
 
 
             if node.name == u'layout':
