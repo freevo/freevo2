@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/06/29 01:39:20  mikeruelle
+# added some userproofing to apod
+#
 # Revision 1.3  2004/02/24 16:29:19  mikeruelle
 # make the plugin name and description show in the menu
 #
@@ -50,6 +53,7 @@ import re
 
 from item import Item
 from image.imageitem import ImageItem
+from gui.AlertBox import AlertBox
 
 class ApodMainMenuItem(Item):
     """
@@ -61,16 +65,16 @@ class ApodMainMenuItem(Item):
         self.name = _( 'APOD' )
         self.title = _( 'APOD' )
         self.apoddir = apoddir
-	self.info = { 'name' : 'APOD', 'description' : 'Astronomy Picture of the day', 'title' : 'APOD' }
-	self.type = 'image'
+        self.info = { 'name' : 'APOD', 'description' : 'Astronomy Picture of the day', 'title' : 'APOD' }
+        self.type = 'image'
 
     def actions(self):
         return [ ( self.create_apod_menu , 'APOD Pictures' ) ]
 
     def create_apod_menu(self, arg=None, menuw=None):
         apodmenuitems = []
-	apodmenuitems += [menu.MenuItem(_('Current Picture'), action=self.fetchCurrentPicture)]
-	apodmenuitems += [menu.MenuItem(_('Previous Pictures'), action=self.browsePictureDir)]
+        apodmenuitems += [menu.MenuItem(_('Current Picture'), action=self.fetchCurrentPicture)]
+        apodmenuitems += [menu.MenuItem(_('Previous Pictures'), action=self.browsePictureDir)]
         apod_menu = menu.Menu( _( 'Apod Pictures' ), apodmenuitems)
         rc.app(None)
         menuw.pushmenu(apod_menu)
@@ -87,21 +91,38 @@ class ApodMainMenuItem(Item):
             apodpic_items += [menu.MenuItem(_('No Images found'),
                                              menuw.back_one_menu, 0)]
         apodpic_menu = menu.Menu(_('Apod Pictures'), apodpic_items,
-	                                 reload_func=menuw.back_one_menu )
+                                     reload_func=menuw.back_one_menu )
         rc.app(None)
         menuw.pushmenu(apodpic_menu)
         menuw.refresh()
 
     def fetchCurrentPicture(self, arg=None, menuw=None):
         url = 'http://antwrp.gsfc.nasa.gov/apod/%s'
-        myfile=urllib.urlopen(url % 'index.html')
-        apodpage=myfile.read()
-        result = re.search("a href=\"(image.*)\"", apodpage)
-        apodpichref = result.group(1)
-	apodfile = os.path.join(self.apoddir,os.path.basename(apodpichref))
-        urllib.urlretrieve(url % apodpichref, apodfile)
-        imgitem = ImageItem(apodfile, self)
-	imgitem.view(menuw=menuw)
+        apodpichref = ''
+        try:
+            myfile=urllib.urlopen(url % 'index.html')
+            apodpage=myfile.read()
+            result = re.search("a href=\"(image.*)\"", apodpage)
+            apodpichref = result.group(1)
+        except:
+            #unreachable or url error
+            realurl = url % 'index.html'
+            print 'APOD ERROR: could not open %s' % realurl
+            AlertBox(text=_('Unable to open URL')).show()
+            return
+
+        apodfile = os.path.join(self.apoddir,os.path.basename(apodpichref))
+
+        try:
+            urllib.urlretrieve(url % apodpichref, apodfile)
+            imgitem = ImageItem(apodfile, self)
+            imgitem.view(menuw=menuw)
+        except:
+            #unreachable or url error
+            realurl = url % apodpichref
+            print 'APOD ERROR: could not open %s' % realurl
+            AlertBox(text=_('Unable to open URL')).show()
+            return
 
 class PluginInterface(plugin.MainMenuPlugin):
     """
@@ -116,18 +137,22 @@ class PluginInterface(plugin.MainMenuPlugin):
         if not apoddir:
             self.reason = _('Need a directory to store APOD pictures.')
             return
-	
-	if not os.path.isdir(apoddir):
-	    self.reason = _('directory %s does not exist.') % apoddir
+    
+        if not os.path.isdir(apoddir):
+            self.reason = _('directory %s does not exist.') % apoddir
             return
 
-	self.apoddir = apoddir
+        if not os.access(apoddir, os.R_OK|os.W_OK|os.X_OK):
+            self.reason = _('directory %s must be able to be read, written to and executed by the user running freevo.') % apoddir
+            return
+
+        self.apoddir = apoddir
 
         # init the plugin
         plugin.MainMenuPlugin.__init__(self)
 
     def items(self, parent):
-            return [ ApodMainMenuItem(parent, self.apoddir) ]
-	                                                                                    
+        return [ ApodMainMenuItem(parent, self.apoddir) ]
+                                                                                        
 
 
