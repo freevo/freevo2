@@ -116,7 +116,7 @@ class MenuWidget:
 
 
     def refresh(self):
-        self.osd.clearscreen()
+        self.osd.clearscreen(self.osd.COL_WHITE)
 
         menu = self.menustack[-1]
 
