@@ -82,7 +82,10 @@ class _ProgrammeHandler:
 
     def length(self, node):
         units = _getxmlattr(node, u'units')
-        seconds = int(node.textof())
+        try:
+            seconds = int(node.textof())
+        except:
+            return None
         if units == 'seconds':
             return seconds
         elif units == 'minutes':
