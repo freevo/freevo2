@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/06/20 01:57:21  rshortt
+# A fix in case the user doesn't have mame.  Pass the files along to
+# the next emulator.
+#
 # Revision 1.6  2003/06/20 01:33:56  rshortt
 # Removing the need for the rominfo program.  Now we parse the output of
 # xmame --listinfo directly and build a list of all supported MAME roms.
@@ -170,6 +174,8 @@ def updateMameRomList():
     mameRomList.setMameRoms(cache)
     saveMameRomList(mameRomList)
 
+    return TRUE
+
 
 #
 # This will return a list of things relevant to MameItem based on 
@@ -184,8 +190,11 @@ def getMameItemInfoList(mame_files):
     if not os.path.isfile(config.MAME_CACHE):
         waitmsg = PopupBox(text='Generating MAME cache, please wait.')
 	waitmsg.show()
-        updateMameRomList()
+        mame_ok = updateMameRomList()
 	waitmsg.destroy()
+
+    if not mame_ok:
+        return (mame_files, [])
 
     mameRomList = getMameRomList()
     roms = mameRomList.getMameRoms()
