@@ -91,7 +91,7 @@ picklefile = config.XMLTV_FILE + '-0.pickled'
 
 # Ugly.
 
-if len(sys.argv) > 2:
+if (len(sys.argv) > 2) and ((sys.argv[2] == '-listing') or (sys.argv[2] == '-schedule')):
     pattern = sys.argv[2]
     for m in sys.argv[3:]:
         pattern += '\ ' + m
@@ -103,13 +103,15 @@ else:
 
 # Ugly too, but this works for now. 
 
+
 m = pickle.load(open(picklefile,'r'))
 for a in m.GetPrograms():
     for b in a.programs:
-        if REGEXP.match(b.title):
+        if REGEXP.match(b.title) and (b.start >= int(time.time())):
             if sys.argv[1] == '-schedule':
                 print make_schedule(b)
             elif sys.argv[1] == '-listing':
+                print b.start
                 if b.sub_title:
                     print str(b) + ' - ' + b.sub_title
                 else:
