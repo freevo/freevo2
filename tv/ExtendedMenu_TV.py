@@ -42,7 +42,6 @@ class ExtendedMenu_TV(ExtendedMenu.ExtendedMenu):
 
     def clear(self):
         skin.DrawTVGuide()
-        # skin.DrawTVGuide_Clear()    XXX This doesn't redraw the logo, can't be right?  /Krister
         
 
     def eventhandler(self, event):
@@ -70,12 +69,11 @@ class ExtendedMenu_TV(ExtendedMenu.ExtendedMenu):
             t = self.listing.eventhandler(event)
             if t and len(t) == 2:
                 to_view, to_info = t
+                self.view.ToView(to_view)
+                self.info.ToInfo(to_info)
+                osd.update()
             else:
-                to_view = None
-                to_info = None
-            self.view.ToView(to_view)
-            self.info.ToInfo(to_info)
-            osd.update()
+                self.refresh() # Event didn't affect us
         return 0
     
 
@@ -212,9 +210,8 @@ class ExtendedMenuListing_TV(ExtendedMenu.ExtendedMenuListing):
             return self.event_PageDown()
         else:
             print 'No action defined to event: "%s"' % (event)
+            return None
             
-        return ( 'NO VIEW', 'NO INFO' )
-
 
     def event_ItemRight(self):
         start_time = self.last_to_listing[0]
