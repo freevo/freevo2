@@ -32,23 +32,26 @@
 #
 # -----------------------------------------------------------------------------
 
+# python imports
 import os
-import re
-import string
 import logging
-import traceback
 
+# freevo imports
 import config
 import util.ioctl as ioctl
 
+# get logging object
 log = logging.getLogger('config')
 
 
 class TVCard:
+    """
+    Class handling an analog tv card
+    """
     def __init__(self, number):
         self.vdev = '/dev/video' + number
         self.adev = None
-        self.norm = string.upper(config.CONF.tv)
+        self.norm = config.CONF.tv.upper()
         self.chanlist = config.CONF.chanlist
         self.input = 0
         # TODO: autodetect input_name
@@ -62,6 +65,9 @@ class TVCard:
 
 
 class IVTVCard(TVCard):
+    """
+    Class handling an ivtv analog tv card
+    """
     def __init__(self, number):
         TVCard.__init__(self, number)
 
@@ -86,6 +92,9 @@ class IVTVCard(TVCard):
 
 
 class DVBCard:
+    """
+    Class handling a DVB card
+    """
     def __init__(self, number):
         self.number  = number
         self.adapter = '/dev/dvb/adapter' + number
@@ -113,8 +122,11 @@ class DVBCard:
 
 # auto-load TV_CARDS:
 log.info('Detecting TV cards.')
-tvn = 0
-ivtvn = 0
+
+# internal card counter
+_analog_tv_number = 0
+_ivtv_number = 0
+
 for i in range(10):
     if os.uname()[0] == 'FreeBSD':
         if os.path.exists('/dev/bktr%s' % i):
@@ -145,7 +157,7 @@ for i in range(10):
             import tv.v4l2
             v = tv.v4l2.Videodev(device=vdev)
             driver = v.driver
-            if string.find(driver, 'ivtv') != -1:
+            if driver.find('ivtv') != -1:
                 type = 'ivtv'
             v.close()
             del v
@@ -159,21 +171,21 @@ for i in range(10):
             log.exception('tv detection')
 
         if type == 'ivtv':
-            key = '%s%s' % (type,ivtvn)
+            key = '%s%s' % (type, _ivtv_number)
             log.debug('IVTV card detected as %s' % key)
             config.TV_CARDS[key]  = IVTVCard
-            if ivtvn != i:
+            if _ivtv_number != i:
                 config.TV_CARDS[key].vdev = vdev
-            ivtvn = ivtvn + 1
+            _ivtv_number += 1
 
         else:
             # Default to 'tv' type as set above.
-            key = '%s%s' % (type,tvn)
+            key = '%s%s' % (type, _analog_tv_number)
             log.debug('TV card detected as %s' % key)
             config.TV_CARDS[key]  = TVCard
-            if tvn != i:
+            if _analog_tv_number != i:
                 config.TV_CARDS[key].vdev = vdev
-            tvn = tvn + 1
+            _analog_tv_number += 1
 
         config.TV_CARDS[key].driver = driver
 
@@ -184,4 +196,3 @@ if not config.TV_DEFAULT_DEVICE:
         if type in config.TV_CARDS.keys():
             config.TV_DEFAULT_DEVICE = type[:-1]
             break
-
