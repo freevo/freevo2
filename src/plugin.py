@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2003/08/31 14:18:31  dischi
+# added support for a progress callback (0-100)
+#
 # Revision 1.32  2003/08/30 17:03:02  dischi
 # support for eventhandler in ItemPlugins
 #
@@ -204,7 +207,7 @@ def remove(id):
 
 
     
-def init():
+def init(callback = None):
     """
     load and init all the plugins
     """
@@ -215,7 +218,11 @@ def init():
     __initialized__ = TRUE
     __plugin_basedir__ = os.environ['FREEVO_PYTHON']
 
+    current = 0
     for name, type, level, args, number in __all_plugins__:
+        current += 1
+        if callback:
+            callback(int((float(current) / len(__all_plugins__)) * 100))
         __load_plugin__(name, type, level, args, number)
 
     # sort plugins in extra function (exec doesn't like to be
