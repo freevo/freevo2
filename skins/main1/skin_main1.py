@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.59  2002/11/19 22:04:15  dischi
+# Some changes I had to made to integrate a first version of my code
+# cleanup. This shouldn't break anything and it should work as before.
+#
 # Revision 1.58  2002/11/01 20:05:11  dischi
 # Make it possible to set deactivate the submenu. Just put
 # <submenu visible="no"> in the xml file. If there are no "normal" menu
@@ -399,8 +403,7 @@ class Skin:
             image = item.image
 
             if image:
-                (type, image) = image
-            if image:
+                type = item.type
                 if type == 'photo' and val.cover_image.visible:
                     image_x = val.cover_image.x-val.cover_image.spacing
                     if menu.selected == item:

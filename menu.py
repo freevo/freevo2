@@ -39,6 +39,8 @@ def get_singleton():
     return _singleton
 
 
+
+
 class MenuItem:
 
     def __init__( self, name, action=None, arg=None, eventhandler = None,
@@ -46,7 +48,7 @@ class MenuItem:
         
         self.name              = name
         self.action            = action
-        self.arg               = arg
+        self.action_arg        = arg
         self.eventhandler      = eventhandler
         self.eventhandler_args = eventhandler_args
         self.type              = type
@@ -55,15 +57,32 @@ class MenuItem:
         self.popup             = popup
         self.image             = None
 
-
     def setImage(self, image):
-        self.image = image
+        self.image = image[0]
+        self.type  = image[1]
     
+    # XXX do we need this function?
     def select(self):
-        self.action(self.arg)
+        self.action(self.action_arg)
 
     def eventhandler(self):
         self.eventhandler(self.eventhandler_args)
+
+
+
+#
+# Info class. Inherits from MenuItem and is a template for other info classes
+# like videoinfo
+#
+class Info(MenuItem):
+    def __init__(self):
+        self.name = "UNKNOWN"
+        self.type  = None
+        self.image = None
+        self.icon  = None
+        self.action = None
+        self.action_arg = None
+
 
         
 class Menu:
@@ -199,26 +218,27 @@ class MenuWidget:
             self.goto_main_menu()
         elif event == rc.EXIT:
             self.back_one_menu()
+
         elif event == rc.SELECT or event == rc.PLAY:
             action = menu.selected.action
             if action == None:
                 print 'No action.. '
                 self.refresh()
             else:
-                action_str = str(action)
-                arg_str = str(menu.selected.arg)[0:40]
+                #action_str = str(action)
+                #arg_str = str(menu.selected.action_arg)[0:40]
                 #osd.clearscreen()
                 #osd.drawstring('Action: %s' % action_str, 50, 240)
                 #osd.drawstring('Args: %s' % arg_str, 50, 280)
                 print 'Calling action "%s"' % str(action)
-                action( arg=menu.selected.arg, menuw=self )
+                action( arg=menu.selected.action_arg, menuw=self )
         elif event == rc.REFRESH_SCREEN:
             self.refresh()
         else:
             action = menu.selected.eventhandler
             if action:
-                action_str = str(action)
-                arg_str = str(menu.selected.eventhandler_args)[0:40]
+                #action_str = str(action)
+                #arg_str = str(menu.selected.eventhandler_args)[0:40]
                 print 'Calling action "%s"' % str(action)
                 action(event = event, arg=menu.selected.eventhandler_args,
                        menuw=self)

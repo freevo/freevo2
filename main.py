@@ -4,6 +4,10 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.77  2002/11/19 22:04:12  dischi
+# Some changes I had to made to integrate a first version of my code
+# cleanup. This shouldn't break anything and it should work as before.
+#
 # Revision 1.76  2002/10/21 02:31:38  krister
 # Set DEBUG = config.DEBUG.
 #
@@ -95,6 +99,10 @@ import signal
 
 # Some datatypes we need
 from datatypes import *
+
+# new stuff from code cleanup
+from mediamenu import MediaMenu
+
 
 DEBUG = config.DEBUG
 
