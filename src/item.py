@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/08/30 17:03:02  dischi
+# support for eventhandler in ItemPlugins
+#
 # Revision 1.25  2003/08/30 15:18:09  dischi
 # also react on STOP
 #
@@ -43,6 +46,7 @@
 
 
 import event as em
+import plugin
 
 TRUE  = 1
 FALSE = 0
@@ -157,6 +161,17 @@ class Item:
 
         return FALSE
 
+    def plugin_eventhandler(self, event, menuw=None):
+        if not hasattr(self, '__plugin_eventhandler__'):
+            self.__plugin_eventhandler__ = []
+            for p in plugin.get('item') + plugin.get('item_%s' % self.type):
+                if hasattr(p, 'eventhandler'):
+                    self.__plugin_eventhandler__.append(p.eventhandler)
+        for e in self.__plugin_eventhandler__:
+            if e(self, event, menuw):
+                return TRUE
+        return FALSE
+    
         
     def getattr(self, attr):
         """

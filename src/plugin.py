@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2003/08/30 17:03:02  dischi
+# support for eventhandler in ItemPlugins
+#
 # Revision 1.31  2003/08/30 07:58:57  dischi
 # Fix item plugin handling
 #
@@ -89,6 +92,14 @@ class MainMenuPlugin(Plugin):
 class ItemPlugin(Plugin):
     """
     Plugin class to add something to the item action list
+
+    The plugin can also have an eventhandler. All events passed to the item
+    will also be passed to this plugin. This works only for VideoItems right
+    now (each item type must support it directly). If the function returns
+    TRUE, the event won't be passed to other eventhandlers and also not to
+    the item itself.
+    
+    def eventhandler(self, item, event, menuw):
     """
     def __init__(self):
         Plugin.__init__(self)
