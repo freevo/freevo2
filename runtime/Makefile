@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/08/06 00:34:45  rshortt
+# Adding pylcd.
+#
 # Revision 1.18  2003/06/22 17:20:16  rshortt
 # Go back to using the system python because it is easier.
 #
@@ -178,7 +181,7 @@ python_copy:
 	cp -a lib/python2.2/site-packages/{CDDB.py,DiscID.py,Numeric,Numeric.pth} tmp
 	cp -a lib/python2.2/site-packages/{PIL,PIL.pth,_xmlplus,aomodule.so} tmp
 	cp -a lib/python2.2/site-packages/{cdrom.so,mx,ogg,pygame,pygphoto.so} tmp
-	cp -a lib/python2.2/site-packages/{pylircmodule.so,fchksum.so} tmp
+	cp -a lib/python2.2/site-packages/{pylircmodule.so,fchksum.so,pylcd.py} tmp
 	cp -a lib/python2.2/site-packages/{_xmms.so,xmms.py} tmp
 	cp -a lib/python2.2/site-packages/{mmpython,twisted,pyshift.so} tmp
 	rm -rf lib/python2.2/site-packages
