@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.68  2003/07/13 14:13:13  rshortt
+# If osd.update(rect) fails just osd.update().
+#
 # Revision 1.67  2003/07/12 15:50:46  dischi
 # get alignment size from rendered layer
 #
@@ -988,7 +991,9 @@ class OSD:
             try:
                 pygame.display.update(rect)
             except:
-                if DEBUG: print 'osd.update(rect) failed, bad rect?'
+                if DEBUG: print 'osd.update(rect) failed, bad rect? - (%s,%s,%s,%s)' % rect
+                if DEBUG: print 'updating whole screen'
+                pygame.display.flip()
         else:
             pygame.display.flip()
 
