@@ -924,7 +924,7 @@ GUI_FORCE_TEXTVIEW_STYLE = 1
 #
 GUI_MEDIAMENU_FORCE_TEXTVIEW = 0
 
-
+GUI_DFB_LAYER = 0
 
 
 # ======================================================================

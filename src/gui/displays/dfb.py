@@ -56,7 +56,7 @@ class Display(DirectFBCanvas):
     Display class for DirectFB output
     """
     def __init__(self, size, default=False):
-        DirectFBCanvas.__init__(self, size, 0)
+        DirectFBCanvas.__init__(self, size, config.GUI_DFB_LAYER)
         self.running = True
         self.animation_possible = True
 
