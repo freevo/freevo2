@@ -2,7 +2,7 @@
 %define display  x11
 %define tv_norm  pal
 %define chanlist europe-west
-%define _cvsdate 20021209
+%define _cvsdate %(date +%Y%m%d)
 Summary:	Freevo
 Name:		freevo
 Version:	1.3.1
@@ -66,10 +66,10 @@ mkdir -p %{buildroot}%{_prefix}
 mkdir -p %{buildroot}%{_prefix}/fbcon/matroxset
 mkdir -p %{buildroot}%{_prefix}/{boot,helpers,rc_client}
 mkdir -p %{buildroot}%{_prefix}/src/{audio/eyed3,games/rominfo,gui,image,tv,video/plugins}
-mkdir -p %{buildroot}%{_prefix}/icons/{64x64,gnome}
 mkdir -p %{buildroot}%{_prefix}/plugins/{cddb,weather/icons}
-mkdir -p %{buildroot}%{_prefix}/skins/{fonts,images,main1,xml/type1}
+mkdir -p %{buildroot}%{_prefix}/skins/{fonts,icons,images,main1,xml/type1}
 mkdir -p %{buildroot}%{_prefix}/skins/{aubin1,barbieri,dischi1,krister1,malt1}
+mkdir -p %{buildroot}%{_prefix}/skins/icons/{AquaFusion,gnome,misc,old}
 mkdir -p %{buildroot}%{_sysconfdir}/freevo
 mkdir -p %{buildroot}%{_sysconfdir}/rc.d/init.d
 mkdir -p %{buildroot}%{_cachedir}/freevo/testfiles/{Images/Show,Images/Bins,Mame,Movies/skin.xml_Test,Music,tv-show-images}
@@ -80,9 +80,6 @@ install -m 755 fbcon/vtrelease fbcon/*.sh %{buildroot}%{_prefix}/fbcon
 install -m 755 fbcon/matroxset/matroxset %{buildroot}%{_prefix}/fbcon/matroxset
 install -m 755 helpers/blanking %{buildroot}%{_prefix}/helpers
 install -m 644 helpers/*.py %{buildroot}%{_prefix}/helpers
-install -m 644 icons/*.png %{buildroot}%{_prefix}/icons
-install -m 644 icons/64x64/* %{buildroot}%{_prefix}/icons/64x64
-install -m 644 icons/gnome/* %{buildroot}%{_prefix}/icons/gnome
 install -m 755 plugins/cddb/*.py plugins/cddb/cdrom.so %{buildroot}%{_prefix}/plugins/cddb
 install -m 644 plugins/weather/*.py plugins/weather/librarydoc.txt %{buildroot}%{_prefix}/plugins/weather
 install -m 644 plugins/weather/icons/* %{buildroot}%{_prefix}/plugins/weather/icons
@@ -100,6 +97,10 @@ install -m 644 src/video/*.py %{buildroot}%{_prefix}/src/video
 install -m 644 src/video/plugins/*.py %{buildroot}%{_prefix}/src/video/plugins
 
 install -m 644 skins/fonts/* %{buildroot}%{_prefix}/skins/fonts
+install -m 644 skins/icons/AquaFusion/* %{buildroot}%{_prefix}/skins/icons/AquaFusion
+install -m 644 skins/icons/misc/* %{buildroot}%{_prefix}/skins/icons/misc
+install -m 644 skins/icons/gnome/* %{buildroot}%{_prefix}/skins/icons/gnome
+install -m 644 skins/icons/old/* %{buildroot}%{_prefix}/skins/icons/old
 install -m 644 skins/images/* %{buildroot}%{_prefix}/skins/images
 install -m 644 skins/main1/* %{buildroot}%{_prefix}/skins/main1
 install -m 644 skins/xml/type1/* %{buildroot}%{_prefix}/skins/xml/type1
@@ -180,6 +181,12 @@ ln -sf %{_cachedir}/freevo/testfiles %{_prefix}
 rm -f %{_prefix}/testfiles
 
 %changelog
+* Tue Dec 31 2002 TC Wan <tcwan@cs.usm.my>
+- Automate CVS date generation
+
+* Fri Dec 13 2002 TC Wan <tcwan@cs.usm.my>
+- Update dir structure to Dec 13 CVS
+
 * Fri Nov 29 2002 TC Wan <tcwan@cs.usm.my>
 - Complete revamp for new directory structure
 
