@@ -1,8 +1,0 @@
---- freevo-1.2.4/boot/boot_config.orig	Tue Jul 16 10:20:56 2002
-+++ freevo-1.2.4/boot/boot_config	Tue Jul 16 10:23:12 2002
-@@ -8,4 +8,4 @@
- FREEVO_OPTIONS="--freevo=main-quiet --osd=fb  --remote=lirc-quiet --videotools=real"
- FREEVO_RES="v4l1_to_mga startup.py main.py remote.py osds_fb"
- VTRELEASE="/usr/local/freevo/osd_server/vtrelease"
--TVNORM="NTSC"
-+TVNORM="PAL"
