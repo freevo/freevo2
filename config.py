@@ -20,7 +20,7 @@ import sys, os, time, re
 import movie_xml
 
 # Send debug to stdout as well as to the logfile?
-DEBUG_STDOUT = 1
+DEBUG_STDOUT = 0
 
 # Automatically turn on all DEBUG flags in all modules?
 DEBUG_ALL = 1
