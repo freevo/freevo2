@@ -1,24 +1,27 @@
 %define geometry 800x600
-%define display  xv
+%define display  x11
 %define tv_norm  ntsc
 %define chanlist us-cable
 %define runtimever 4
 Summary:	Freevo
 Name:		freevo
 Version:	1.3.1
-Release:	rc1
+Release:	rc2d
 License:	GPL
 Group:		Applications/Multimedia
 Source:		http://freevo.sourceforge.net/%{name}-%{version}-%{release}.tar.gz
-Patch:		%{name}-%{version}-runtime.patch
+Patch0:		%{name}-%{version}-runtime.patch
+Patch1:		%{name}-%{version}-Makefile.patch
 URL:		http://freevo.sourceforge.net/
 Requires:	freevo-runtime >= %{runtimever}
 Requires:	freevo-apps
+Requires:	libjpeg
 BuildRoot:	%{_tmppath}/%{name}-%{version}-root-%(id -u -n)
 
 %define _prefix /usr/local/freevo
 %define _cachedir /var/cache
 %define _logdir /var/log
+%define _optimize 0
 
 %description
 Freevo is a Linux application that turns a PC with a TV capture card
@@ -29,12 +32,14 @@ and audio.
 %prep
 #%setup  -n %{name}
 %setup  -n %{name}-%{version}-%{release}
-%patch -p0
+%patch0 -p0
+%patch1 -p0
 
 ./configure --geometry=%{geometry} --display=%{display} \
 	--tv=%{tv_norm} --chanlist=%{chanlist}
 
 %build
+find . -name CVS | xargs rm -rf
 make clean; make
 pushd plugins/cddb
 	make
@@ -46,7 +51,9 @@ popd
 %package runtime
 Summary: Libraries used by freevo executable. Must be installed for freevo to work.
 Version:	%{runtimever}
+Obsoletes: freevo_runtime
 Group: Applications/Multimedia
+AutoReqProv: no
 
 %description runtime
 This directory contains the Freevo runtime. It contains an executable,
@@ -60,7 +67,10 @@ for all software included here.
 
 %package apps
 Summary: External applications used by freevo executable.
+Obsoletes: freevo_apps
 Group: Applications/Multimedia
+Requires: freevo-runtime >= %{runtimever}
+AutoReqProv: no
 
 %description apps
 This directory contains the Freevo external applications. 
@@ -106,14 +116,17 @@ mkdir -p %{buildroot}%{_sysconfdir}/rc.d/init.d
 mkdir -p %{buildroot}%{_cachedir}/freevo/testfiles/{Images/Show,Images/Bins,Mame,Movies/skin.xml_Test,Music,tv-show-images}
 
 install -m 755 freevo freevo_xwin runapp %{buildroot}%{_prefix}
+install -m 644 freevo_config.py setup_build.py %{buildroot}%{_prefix}
 install -m 644 fbcon/fbset.db %{buildroot}%{_prefix}/fbcon
 install -m 755 fbcon/vtrelease fbcon/*.sh %{buildroot}%{_prefix}/fbcon
 install -m 755 fbcon/matroxset/matroxset %{buildroot}%{_prefix}/fbcon/matroxset
-install -m 755 helpers/* %{buildroot}%{_prefix}/helpers
+install -m 755 helpers/blanking %{buildroot}%{_prefix}/helpers
+install -m 755 helpers/*.pl %{buildroot}%{_prefix}/helpers
+install -m 755 helpers/*.py %{buildroot}%{_prefix}/helpers
 install -m 755 plugins/cddb/*.py plugins/cddb/cdrom.so %{buildroot}%{_prefix}/plugins/cddb
 install -m 644 plugins/weather/*.py plugins/weather/librarydoc.txt %{buildroot}%{_prefix}/plugins/weather
-install -m 644 plugins/weather/icons/* %{buildroot}%{_prefix}/plugins/weather/icons
-install -m 644 rc_client/* %{buildroot}%{_prefix}/rc_client
+install -m 644 plugins/weather/icons/*.png %{buildroot}%{_prefix}/plugins/weather/icons
+install -m 644 rc_client/*.py %{buildroot}%{_prefix}/rc_client
 
 install -m 644 runtime/*.py %{buildroot}%{_prefix}/runtime
 install -m 644 runtime/preloads %{buildroot}%{_prefix}/runtime
@@ -156,7 +169,7 @@ install -m 644 skins/aubin1/* %{buildroot}%{_prefix}/skins/aubin1
 install -m 644 skins/barbieri/* %{buildroot}%{_prefix}/skins/barbieri
 install -m 644 skins/malt1/* %{buildroot}%{_prefix}/skins/malt1
 
-install -m 644 freevo.conf freevo_config.py boot/boot_config %{buildroot}%{_sysconfdir}/freevo
+install -m 644 freevo.conf boot/boot_config %{buildroot}%{_sysconfdir}/freevo
 install -m 644 boot/URC-7201B00 %{buildroot}%{_prefix}/boot
 install -m755 boot/freevo %{buildroot}%{_sysconfdir}/rc.d/init.d
 install -m755 boot/freevo_dep %{buildroot}%{_sysconfdir}/rc.d/init.d
@@ -175,6 +188,7 @@ install -m 644 testfiles/Music/*.mp3 %{buildroot}%{_cachedir}/freevo/testfiles/M
 rm -rf $RPM_BUILD_ROOT
 
 %post
+cd %{_prefix}; ./runapp python setup_build.py --compile=%{_optimize},%{_prefix}
 mkdir -p %{_cachedir}/freevo
 mkdir -p %{_cachedir}/xmltv/logos
 mkdir -p %{_logdir}/freevo
@@ -193,7 +207,6 @@ find %{_prefix} -name "*.pyc" |xargs rm -f
 %{_prefix}/[s-z]*
 
 %attr(755,root,root) %dir %{_sysconfdir}/freevo
-%attr(644,root,root) %config %{_sysconfdir}/freevo/freevo_config.py
 %attr(644,root,root) %config %{_sysconfdir}/freevo/freevo.conf
 %attr(644,root,root) %doc BUGS ChangeLog COPYING FAQ INSTALL README TODO Docs/*
 
@@ -204,6 +217,7 @@ find %{_prefix} -name "*.pyc" |xargs rm -f
 %{_prefix}/runtime/VERSION
 %{_prefix}/runtime/preloads
 %defattr(755,root,root,755)
+%{_prefix}/runtime/apps/freevo_python
 %{_prefix}/runtime/dll
 %{_prefix}/runtime/lib
 
@@ -212,7 +226,9 @@ find %{_prefix}/runtime -name "*.pyc" |xargs rm -f
 
 %files apps
 %defattr(755,root,root,755)
-%{_prefix}/runtime/apps
+%{_prefix}/runtime/apps/cdparanoia
+%{_prefix}/runtime/apps/lame
+%{_prefix}/runtime/apps/mplayer
 
 %files boot
 %defattr(644,root,root,755)
@@ -247,6 +263,12 @@ ln -sf %{_cachedir}/freevo/testfiles %{_prefix}
 rm -f %{_prefix}/testfiles
 
 %changelog
+* Fri Feb  7 2003 TC Wan <tcwan@cs.usm.my>
+- Moved *.py bytecompilation to post-install to reduce RPM size
+- Disabled automatic requires checking for runtime and apps
+  (since we provide all the necessary libraries) to avoid
+  rpm installation issues
+
 * Tue Feb  4 2003 TC Wan <tcwan@cs.usm.my>
 - Merged 1.3.1 runtime release
 
