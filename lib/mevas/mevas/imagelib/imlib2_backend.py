@@ -28,9 +28,8 @@ class Image(base.Image):
 			self._image = Imlib2.Image(image_or_filename)
 		else:
 			raise ValueError, "Unsupported image type: %s" % type(image_or_filename)
-
 	def __getattr__(self, attr):
-		if attr in ("width", "height", "size", "format", "mode", "filename", "has_alpha", "rowstride", "get_pixel", "crop", "scale_preserve_aspect", "copy_rect"):
+		if attr in ("width", "height", "size", "format", "mode", "filename", "has_alpha", "rowstride", "get_pixel"):
 			return getattr(self._image, attr)
 		return super(Image, self).__getattr__(attr)
 
@@ -101,6 +100,16 @@ class Image(base.Image):
 		return get_capabilities()
 
 
+	def crop(self, pos, size):
+		self._image = self._image.crop(pos, size)
+
+	def scale_preserve_aspect(self, size):
+		self._image = self._image.scale_preserve_aspect(size)
+
+	def copy_rect(self, src_pos, size, dst_pos):
+		self._image.copy_rect(src_pos, size, dst_pos)
+
+
 class Font(base.Font):
 
 	def __init__(self, fontdesc, color = (255, 255, 255, 255)):
@@ -119,10 +128,14 @@ class Font(base.Font):
 
 
 def scale(image, size, src_pos = (0, 0), src_size = (-1, -1)):
-	return Image( image._image.scale(size, src_pos, src_size) )
+	image = image.copy()
+	image.scale(size, src_pos, src_size)
+	return image
 
 def crop(image, pos, size):
-	return Image( image._image.crop(pos, size) )
+	image = image.copy()
+	image.crop(pos, size)
+	return image
 
 def rotate(image, angle):
 	image = image.copy()
@@ -130,7 +143,9 @@ def rotate(image, angle):
 	return image
 
 def scale_preserve_aspect(image, size):
-	return Image( image._image.scale_preserve_aspect(size) )
+	image = image.copy()
+	image.scale_preserve_aspect(size)
+	return image
 
 
 
