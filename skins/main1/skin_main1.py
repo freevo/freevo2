@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2002/09/23 18:16:48  dischi
+# removed shadow mode
+#
 # Revision 1.24  2002/09/22 09:54:31  dischi
 # XML cleanup. Please take a look at the new skin files to see the new
 # structure. The 640x480 skin is also workin now, only one small bug
@@ -246,20 +249,11 @@ class Skin:
 
     def DrawText(self, text, x, y, color, shadow_color = 0x000000,
                  bgcolor = None, font = None, ptsize = None,
-                 drop_shadow=None, shadow_mode=None, shadow_pad_x=2,
-                 shadow_pad_y=2):
+                 drop_shadow=None, shadow_pad_x=2, shadow_pad_y=2):
         
         if drop_shadow:
-            if shadow_mode == 'translucent':
-                osd.drawstring(text, x+shadow_pad_x, y+shadow_pad_y,
-                               (160 << 24) | shadow_color, bgcolor,
-                               font, ptsize)
-            elif shadow_mode == 'solid':
-                osd.drawstring(text, x+shadow_pad_x, y+shadow_pad_y,
-                               shadow_color, bgcolor, font, ptsize)
-            else: # solid
-                osd.drawstring(text, x+shadow_pad_x, y+shadow_pad_y,
-                               shadow_color, bgcolor, font, ptsize)
+            osd.drawstring(text, x+shadow_pad_x, y+shadow_pad_y,
+                           shadow_color, bgcolor, font, ptsize)
                 
         osd.drawstring(text, x, y, color, None, font, ptsize)
 
@@ -385,7 +379,7 @@ class Skin:
             if show_name[0]:
                 x = x0
                 self.DrawText(show_name[0], x, top, obj.color, obj.shadow_color, None,
-                              obj.font, obj.size, obj.shadow_visible, obj.shadow_mode,
+                              obj.font, obj.size, obj.shadow_visible, 
                               obj.shadow_pad_x, obj.shadow_pad_y)
 
                 season_w = 0
@@ -407,7 +401,7 @@ class Skin:
                 
                 self.DrawText('%sx%s' % (show_name[1], show_name[2]), x, top,
                               obj.color, obj.shadow_color, None, obj.font,
-                              obj.size, obj.shadow_visible, obj.shadow_mode,
+                              obj.size, obj.shadow_visible, 
                               obj.shadow_pad_x, obj.shadow_pad_y)
 
                 x = x + season_w + volume_w + \
@@ -415,14 +409,14 @@ class Skin:
 
                 self.DrawText('-  %s' % show_name[3], x, top,
                               obj.color, obj.shadow_color, None, obj.font, obj.size,
-                              obj.shadow_visible, obj.shadow_mode, obj.shadow_pad_x,
+                              obj.shadow_visible, obj.shadow_pad_x,
                               obj.shadow_pad_y)
                 
 
             # normal items
             else:
                 self.DrawText(text, x0, top, obj.color, obj.shadow_color, None, obj.font,
-                              obj.size, obj.shadow_visible, obj.shadow_mode,
+                              obj.size, obj.shadow_visible,
                               obj.shadow_pad_x, obj.shadow_pad_y)
 
             # draw icon
@@ -513,7 +507,6 @@ class Skin:
                               val.submenu.selection.font,
                               val.submenu.selection.size,
                               val.submenu.selection.shadow_visible,
-                              val.submenu.selection.shadow_mode,
                               val.submenu.selection.shadow_pad_x,
                               val.submenu.selection.shadow_pad_y)
                 
@@ -521,7 +514,6 @@ class Skin:
                 self.DrawText(item.name, x0, y0, val.submenu.color, 
                               val.submenu.shadow_color, None, val.submenu.font,
                               val.submenu.size, val.submenu.shadow_visible,
-                              val.submenu.shadow_mode,
                               val.submenu.shadow_pad_x, val.submenu.shadow_pad_y)
             x0 += 190
 
@@ -671,7 +663,6 @@ class Skin:
                               val.submenu.selection.font,
                               val.submenu.selection.size,
                               val.submenu.selection.shadow_visible,
-                              val.submenu.selection.shadow_mode,
                               val.submenu.selection.shadow_pad_x,
                               val.submenu.selection.shadow_pad_y)
                 
@@ -679,7 +670,6 @@ class Skin:
                 self.DrawText(item.name, x0, y0, val.submenu.color, 
                               val.submenu.shadow_color, None, val.submenu.font,
                               val.submenu.size, val.submenu.shadow_visible,
-                              val.submenu.shadow_mode,
                               val.submenu.shadow_pad_x, val.submenu.shadow_pad_y)
             x0 += 190
 
@@ -726,61 +716,61 @@ class Skin:
             py = val.progressbar.y
             self.DrawText('Dir: '+dir_name, 5, py + 20, val.font.color,
                           val.shadow.color, None, val.font.font, val.font.size,
-                          val.shadow.visible, val.shadow.mode, val.shadow.x,
+                          val.shadow.visible, val.shadow.x,
                           val.shadow.y)
             self.DrawText('File: '+file_name, 5, py + 40, val.font.color,
                           val.shadow.color, None, val.font.font, val.font.size,
-                          val.shadow.visible, val.shadow.mode, val.shadow.x,
+                          val.shadow.visible, val.shadow.x,
                           val.shadow.y)
                 
             self.DrawText('Title:', 30, 100, val.font.color, val.shadow.color,
                           None, val.font.font, val.font.size,
-                          val.shadow.visible, val.shadow.mode, val.shadow.x,
+                          val.shadow.visible, val.shadow.x,
                           val.shadow.y)
             self.DrawText('%s ' % info.title, left, 100, val.font.color,
                           val.shadow.color, None, val.font.font, val.font.size,
-                          val.shadow.visible, val.shadow.mode, val.shadow.x,
+                          val.shadow.visible, val.shadow.x,
                           val.shadow.y)
  
             self.DrawText('Artist:', 30, 130, val.font.color, val.shadow.color,
                           None, val.font.font, val.font.size,
-                          val.shadow.visible, val.shadow.mode, val.shadow.x,
+                          val.shadow.visible, val.shadow.x,
                           val.shadow.y)
             self.DrawText('%s ' % info.artist, left, 130, val.font.color,
                           val.shadow.color, None, val.font.font, val.font.size,
-                          val.shadow.visible, val.shadow.mode, val.shadow.x,
+                          val.shadow.visible, val.shadow.x,
                           val.shadow.y)
 
             self.DrawText('Album:', 30, 160, val.font.color, val.shadow.color,
                           None, val.font.font, val.font.size,
-                          val.shadow.visible, val.shadow.mode, val.shadow.x,
+                          val.shadow.visible, val.shadow.x,
                           val.shadow.y)
             self.DrawText('%s ' % info.album, left, 160, val.font.color,
                           val.shadow.color, None, val.font.font, val.font.size,
-                          val.shadow.visible, val.shadow.mode, val.shadow.x,
+                          val.shadow.visible, val.shadow.x,
                           val.shadow.y)
         
             self.DrawText('Year:', 30, 190, val.font.color, val.shadow.color,
                           None, val.font.font, val.font.size,
-                          val.shadow.visible, val.shadow.mode, val.shadow.x,
+                          val.shadow.visible, val.shadow.x,
                           val.shadow.y)
             self.DrawText('%s ' % info.year, left, 190, val.font.color,
                           val.shadow.color, None, val.font.font, val.font.size,
-                          val.shadow.visible, val.shadow.mode, val.shadow.x,
+                          val.shadow.visible, val.shadow.x,
                           val.shadow.y)
 
             self.DrawText('Track:', 30, 220, val.font.color, val.shadow.color,
                           None, val.font.font, val.font.size,
-                          val.shadow.visible, val.shadow.mode, val.shadow.x,
+                          val.shadow.visible, val.shadow.x,
                           val.shadow.y)
             self.DrawText('%s ' % info.track, left, 220, val.font.color,
                           val.shadow.color, None, val.font.font, val.font.size,
-                          val.shadow.visible, val.shadow.mode, val.shadow.x,
+                          val.shadow.visible, val.shadow.x,
                           val.shadow.y)
 
             self.DrawText('Time:', 30, 250, val.font.color, val.shadow.color,
                           None, val.font.font, val.font.size,
-                          val.shadow.visible, val.shadow.mode, val.shadow.x,
+                          val.shadow.visible, val.shadow.x,
                           val.shadow.y)
 
                 
@@ -801,7 +791,7 @@ class Skin:
                                                rem_sec, info.done)
         self.DrawText(str, left, 250, val.font.color, val.shadow.color, None,
                       val.font.font, val.font.size, val.shadow.visible,
-                      val.shadow.mode, val.shadow.x, val.shadow.y)
+                      val.shadow.x, val.shadow.y)
 
         # Draw the progress bar
         if val.progressbar.visible:
