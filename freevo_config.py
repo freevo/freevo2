@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.88  2002/11/12 06:20:39  krister
+# Removed the radio station from the audio list since it doesn't work dur to someones changes.
+#
 # Revision 1.87  2002/10/25 20:03:32  dischi
 # Added *.m2p as video filetype
 #
@@ -200,10 +203,7 @@ MUSICPLAYER          = 'MPLAYER'   # Must be 'XMMS' or 'MPLAYER'
 #           ('Title2', 'directory2'), ... ]
 # The 'mplayer options' field can be omitted.
 #
-DIR_AUDIO = [ ('Test Files', 'testfiles/Music'),
-              ('Radio City 107.3 (Göteborg/Sweden)',
-               'http://www.minradio.no/asx/radiocitygb2.asx',
-               '-cache 100') ]
+DIR_AUDIO = [ ('Test Files', 'testfiles/Music') ]
 
 #
 # The list of filename suffixes that are used to match the files that
