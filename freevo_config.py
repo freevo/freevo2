@@ -1074,16 +1074,15 @@ else:
 
 #
 # Mplayer options to use the software scaler. If your CPU is fast enough, you
-# might try a software scaler. You can disable it later for some larger files
+# should use a software scaler. You can disable it later for some larger files
 # with the mplayer option '-nosws'. If you have -framedrop or -hardframedrop
 # as mplayer option, the software scaler will also not be used.
-# A good value for this variable is:
-# MPLAYER_SOFTWARE_SCALER = "-subfont-text-scale 5 -fs -sws 2 -vf scale=%s:-3,"\
-#                           "expand=%s:%s " % ( CONF.width, CONF.width, CONF.height )
-# older versions of mplayer may need
-# MPLAYER_SOFTWARE_SCALER = '-xy %s -sws 2 -vop scale:-1:-1:-1:100' % CONF.width
+# The bmovl plugin depends on a software scaler, so you should give it a try
 #
-MPLAYER_SOFTWARE_SCALER = ''
+MPLAYER_SOFTWARE_SCALER = "-subfont-text-scale 15 -sws 2 -vf scale=%s:-2,"\
+                          "expand=%s:%s -font /usr/share/mplayer/fonts/"\
+                          "font-arial-28-iso-8859-2/font.desc" % \
+                          ( CONF.width, CONF.width, CONF.height )
 
 #
 # Mplayer arguments for different media formats. (eg DVDs, CDs, AVI files, etc)
