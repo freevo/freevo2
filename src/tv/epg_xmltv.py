@@ -9,6 +9,18 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/03/14 06:38:40  outlyer
+# Added (disabled) support for a simple favourites list. Basically, create
+# a file called "watchlist" and put it somewhere, edit this thing and
+# specify the location of the file and comment in the find_favorites()
+# function in __main__
+#
+# All it does is go through the guide, post-pickle and dump out the schedules
+# for the show in freevo_record.lst format.
+#
+# There is no duplicate filtering, or other neat-o intelligence, but it should
+# lay the groundwork for something more in the future.
+#
 # Revision 1.10  2003/02/27 02:03:03  outlyer
 # Added support for the xmltv 'sub-title' tag which sometimes contains the
 # episode title for TV shows. Its not always there, but if it is, we can use
@@ -105,6 +117,7 @@ import xmltv
 # pickling to work properly when run from inside this module and from the
 # tv.py module.
 import epg_types
+
 
 # Set to 1 for debug output
 DEBUG = config.DEBUG
@@ -332,6 +345,24 @@ def timestr2secs_utc(str):
     return secs
 
 
+def find_favorites():
+
+    import string
+    import tvgrep
+    import re
+
+    SEASONPASS='/var/cache/freevo/recording/watchlist'
+    if os.path.isfile(SEASONPASS):
+        m = open(SEASONPASS,'r')
+        for show in m.readlines():
+            show = string.replace(show.strip(),' ','\ ')
+            ARG = '.*' + show + '*.'
+            REGEXP = re.compile(ARG,re.IGNORECASE)
+            for a in guide.GetPrograms():
+                for b in a.programs:
+                    if REGEXP.match(b.title):
+                        print tvgrep.make_schedule(b)
+
 if __name__ == '__main__':
     # Remove a pickled file (if any) if we're trying to list all channels
     if not config.TV_CHANNELS:
@@ -343,6 +374,9 @@ if __name__ == '__main__':
     print
     guide = get_guide()
 
+    #print "Finding favourites"
+    #find_favorites()
+        
     # No args means just pickle the guide, for use with cron-jobs
     # after getting a new guide.
     if len(sys.argv) == 1:
