@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/07/02 20:10:28  dischi
+# added to mmpython support, removed old stuff
+#
 # Revision 1.9  2003/04/06 21:12:57  dischi
 # o Switched to the new main skin
 # o some cleanups (removed unneeded inports)
@@ -43,65 +46,43 @@ import util
 import os
 
 import viewer
-import bins
-import exif
+import mmpython
 
 from item import Item
 
-tags_check = { 'date':    [ 'Image DateTime','DateTime','EXIF'],
-               'width':   [ 'EXIF ExifImageWidth','ExifImageWidth','EXIF'],
-               'height':  [ 'EXIF ExifImageLength','ExifImageLength','EXIF'],
-               'exp':     [ 'EXIF ExposureTime','ExposureTime','EXIF'],
-               'light':   [ 'EXIF LightSource','LightSource','EXIF'],
-               'flash':   [ 'EXIF Flash','Flash','EXIF'],
-               'make':    [ 'Image Make','Make','EXIF'],
-               'model':   [ 'Image Model','Model','EXIF'],
-               'software':[ 'Image Software','Software','EXIF']
-               }
 
 class ImageItem(Item):
     def __init__(self, filename, parent, name = None, duration = 0):
-        Item.__init__(self, parent)
+        if parent and parent.media:
+            url = 'cd://%s:%s:%s' % (parent.media.devicename, parent.media.mountdir,
+                                     filename[len(parent.media.mountdir)+1:])
+        else:
+            url = filename
+
+        Item.__init__(self, parent, mmpython.parse(url))
         self.type     = 'image'
         self.filename = filename
         self.image    = filename
-
-        # variables only for ImageItem
         self.duration = duration
-	self.binsdesc = {}
-	self.binsexif = {}
-
-        # This should check for bins compatable info
-	if os.path.isfile(filename + '.xml'):
-            try:
-                binsinfo = bins.get_bins_desc(filename)
-                self.binsdesc = binsinfo['desc']
-                self.binsexif = binsinfo['exif']
-            except:
-                pass
+        
         # set name
         if name:
             self.name = name
-	elif self.binsdesc.has_key('title'):
-	    self.name = self.binsdesc['title']
-        else:
+        elif not self.name:
             self.name = util.getname(filename)
 
         self.image_viewer = viewer.get_singleton()
-        self.exiftags = None
-
+        
 
     def copy(self, obj):
         """
-        Special copy value ImageItem
+        Special copy value VideoItems
         """
         Item.copy(self, obj)
         if obj.type == 'image':
             self.duration = obj.duration
-            self.binsdesc = obj.binsdesc
-            self.exiftags = obj.exiftags
+            
 
-        
     def sort(self, mode=None):
         """
         Returns the string how to sort this item
@@ -142,32 +123,3 @@ class ImageItem(Item):
             self.parent.cache_next()
 
 
-    def getattr(self, attr):
-        """
-        return the specific attribute as string or an empty string
-        """
-        if self.exiftags == None:
-            f = open(self.filename, 'r')
-            self.exiftags = exif.process_file(f)
-            f.close()
-            
-        if attr in tags_check:
-            b = ''
-            e = ''
-            if self.binsexif.has_key(tags_check[attr][1]):
-                b = str(self.binsexif[tags_check[attr][1]])
-            if self.exiftags.has_key(tags_check[attr][0]):
-                e = str(self.exiftags[tags_check[attr][0]])
-
-            if tags_check[attr][2] == 'EXIF':
-                if e:
-                    return e
-                return b
-            if b:
-                return b
-            return e
-
-        if attr in self.binsdesc:
-            return str(self.binsdesc[attr])
-
-        return Item.getattr(self, attr)

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/07/02 20:10:28  dischi
+# added to mmpython support, removed old stuff
+#
 # Revision 1.24  2003/05/28 15:03:15  dischi
 # small bugfixes
 #
@@ -17,10 +20,6 @@
 #
 # Revision 1.22  2003/04/27 17:37:26  dischi
 # handle image loading failures
-#
-# Revision 1.21  2003/04/24 19:56:34  dischi
-# comment cleanup for 1.3.2-pre4
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -53,13 +52,12 @@ import time
 
 import config # Configuration file. 
 import osd    # The OSD class, used to communicate with the OSD daemon
-import rc
 import event as em
-import exif
+import objectcache
+import rc
 
 from gui.GUIObject import GUIObject
 from gui.AlertBox import AlertBox
-
 
 DEBUG = config.DEBUG
 
@@ -68,7 +66,6 @@ FALSE = 0
 
 
 osd        = osd.get_singleton()  # Create the OSD object
-rc_app_bkp = None
 
 
 # Module variable that contains an initialized ImageViewer() object
@@ -99,10 +96,10 @@ class ImageViewer(GUIObject):
         self.slideshow = TRUE  # currently in slideshow mode
         self.alertbox  = None  # AlertBox active
         self.app_mode  = 'image'
-
+        self.bitmapcache = objectcache.ObjectCache(3, desc='viewer')
+        
         
     def view(self, item, zoom=0, rotation=0):
-        global rc_app_bkp
         filename = item.filename
 
         self.fileitem = item
@@ -110,29 +107,20 @@ class ImageViewer(GUIObject):
         
         self.filename = filename
         self.rotation = rotation
-        if not rotation and 'Orientation' in item.binsexif:
-            i_orientation = item.binsexif['Orientation']
-            if i_orientation == 'right_top':
-                self.rotation=-90.0
-            elif i_orientation == 'right_bottom':
-                self.rotation=-180.0
-            elif i_orientation == 'left_top':
-                self.rotation=0
-            elif i_orientation == 'left_bottom':
-                self.rotation=-270.0
 
         if filename and len(filename) > 0:
-            image = osd.loadbitmap(filename)
+            image = osd.loadbitmap(filename, cache=self.bitmapcache)
         else:
             # Using Container-Image
-            image = item.loadimage( )
+            image = item.loadimage()
 
         rc.app(self)
 
         if not image:
             osd.clearscreen(color=osd.COL_BLACK)
             osd.update()
-            self.alertbox = AlertBox(parent=self, text="Can't Open Image\n'%s'" % (filename))
+            self.alertbox = AlertBox(parent=self,
+                                     text="Can't Open Image\n'%s'" % (filename))
             self.alertbox.show()
             return
         
@@ -244,7 +232,7 @@ class ImageViewer(GUIObject):
     
     def cache(self, fileitem):
         # cache the next image (most likely we need this)
-        osd.bitmapsize(fileitem.filename)
+        osd.loadbitmap(fileitem.filename, cache=self.bitmapcache)
         
 
     def signalhandler(self, signum, frame):
@@ -269,7 +257,7 @@ class ImageViewer(GUIObject):
             return TRUE
         
         elif event == em.STOP:
-            rc.app(rc_app_bkp)
+            rc.app(None)
             signal.alarm(0)
             self.fileitem.eventhandler(event)
             return TRUE
@@ -286,7 +274,7 @@ class ImageViewer(GUIObject):
         elif event == em.IMAGE_ROTATE:
             osd.clearscreen(color=osd.COL_BLACK)
 
-            if event.arg == 'right':
+            if event.arg == 'left':
                 self.rotation = (self.rotation + 270) % 360
             else:
                 self.rotation = (self.rotation + 90) % 360
@@ -361,19 +349,13 @@ class ImageViewer(GUIObject):
         elif self.osd_mode == 1:
 	    # This is where we add a caption.  Only if playlist is empty
             # May need to check the caption too?
-	    if not self.fileitem.binsdesc.has_key('title'):
-	        osdstring = ["Title: " + self.fileitem.name]
-	    else:
-                osdstring = []
+            osdstring = ["Title: " + self.fileitem.name]
+
 	    # Here we set up the tags that we want to put in the display
 	    # Using the following fields
-            # 0 - Title - Goes befor the field
-            # 1 - ExifTag - Field to look for in Exif strings
-            # 2 - BinsTag - Field to look for in Bins Strings
-            # 3 - Priority - BINS or EXIF which should we use.
-            tags_check = [['Title: ','NOTAG','title','BINS'],
-                          ['Description: ','NOTAG','description','BINS']
-                         ]
+            tags_check = [['Title: ','name'],
+                          ['Description: ','description']
+                          ]
 
 
 
@@ -381,62 +363,28 @@ class ImageViewer(GUIObject):
            # This is where we add a caption.  Only if playlist is empty
 	   # create an array with Exif tags as above
 	   osdstring = []
-           tags_check = [ ['Date:','Image DateTime','DateTime','EXIF'],
-	                  ['W:','EXIF ExifImageWidth','ExifImageWidth','EXIF'],
-			  ['H:','EXIF ExifImageLength','ExifImageLength','EXIF'],
-			  ['Exp:','EXIF ExposureTime','ExposureTime','EXIF'],
-                          ['F/','EXIF FNumber','FNumber','EXIF'],
-			  ['FL:','EXIF FocalLength','FocalLength','EXIF'],
-			  ['ISO:','EXIF ISOSpeedRatings','ISOSpeedRatings','EXIF'],
-			  ['Meter:','EXIF MeteringMode','MeteringMode','EXIF'],
-			  ['Light:','EXIF LightSource','LightSource','EXIF'],
-			  ['Flash:','EXIF Flash','Flash','EXIF'],
-			  ['Make:','Image Make','Make','EXIF'],
-			  ['Model:','Image Model','Model','EXIF'],
-			  ['Software:','Image Software','Software','EXIF']
+           tags_check = [ ['Date:','date'],
+	                  ['W:','width'],
+			  ['H:','height'],
+			  ['Model:','hardware'],
+			  ['Software:', 'software']
 			 ]
 
-
-	# Grab the exif tags from the image we alread have them from
-	# the bins file XXX Should this be done in the image item stage?
-        f = open(self.filename, 'r')
-        tags = exif.process_file(f)
-        f.close()
+           # FIXME: add this informations to mmpython:
+           
+           # ['Exp:','EXIF ExposureTime','ExposureTime','EXIF'],
+           # ['F/','EXIF FNumber','FNumber','EXIF'],
+           # ['FL:','EXIF FocalLength','FocalLength','EXIF'],
+           # ['ISO:','EXIF ISOSpeedRatings','ISOSpeedRatings','EXIF'],
+           # ['Meter:','EXIF MeteringMode','MeteringMode','EXIF'],
+           # ['Light:','EXIF LightSource','LightSource','EXIF'],
+           # ['Flash:','EXIF Flash','Flash','EXIF'],
+           # ['Make:','Image Make','Make','EXIF'],
 
         for strtag in tags_check:
-            exifname = strtag[1]
-            binsname = strtag[2]
-            exiftitle = strtag[0]
-            priority = strtag[3]
-            exifstr = ''
-            binsstr = ''
-
-            # grab the Exif tag if it exists
-            if tags.has_key(exifname):
-                exifstr = '%s %s' % (exiftitle,tags[exifname])
-            # Grab the bins exif tag if it exists
-            if self.fileitem.binsexif.has_key(binsname):
-                binsstr = '%s %s' % (exiftitle, 
-                      self.fileitem.binsexif[binsname])
-            # Grab the bins desc if it exists and overwrite 
-            # the bins exif version
-	    if self.fileitem.binsdesc.has_key(binsname):
-                binsstr = '%s %s' % (exiftitle, 
-                      self.fileitem.binsdesc[binsname])
-
-            if priority == 'BINS':
-               if binsstr != '':
-                   osdstring.append(binsstr)
-               elif exifstr != '':
-                   osdstring.append(exifstr)
-            if priority == 'EXIF':
-               if exifstr != '':
-                   osdstring.append(exifstr)
-               elif binsstr != '':
-                   osdstring.append(binsstr)
-
-
-
+            i = self.fileitem.getattr(strtag[1])
+            if i:
+                osdstring.append('%s %s' % (strtag[0], i))
 
 	# If after all that there is nothing then tell the users that
 	if osdstring == []:
@@ -477,6 +425,7 @@ class ImageViewer(GUIObject):
 	# Now print the Text
         for line in range(len(prt_line)):
             h=osd.height - (40 + config.OVERSCAN_Y + ((len(prt_line) - line - 1) * 30))
-            osd.drawstring(prt_line[line], 15 + config.OVERSCAN_X, h, fgcolor=osd.COL_ORANGE)
+            osd.drawstring(prt_line[line], 15 + config.OVERSCAN_X, h,
+                           fgcolor=osd.COL_ORANGE)
 
 
