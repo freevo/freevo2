@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/08/19 17:30:02  outlyer
+# Fix a crash when ripping a CD for which CDDB information does not exist.
+#
 # Revision 1.15  2003/08/06 18:49:17  gsbarbieri
 # Now it shows an AlertBox() when user doesn't have a key.
 #
@@ -184,6 +187,9 @@ class PluginInterface(plugin.ItemPlugin):
                           "Title (if it's a cd track) to be able to search. " + \
                           "So you need a file with a ID3 tag (mp3) or an Ogg Info. " + \
                           "Maybe you must fix this file (%s) tag?" % item.filename
+            except AttributeError:
+                if SHOW_WARNING:
+                    print "WARNING: Unknown CD, cover searching is disabled"
         return []
 
 
