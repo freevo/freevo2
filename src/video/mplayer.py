@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/01/18 15:51:07  dischi
+# Add the function vop_append to support more than one -vop argument for
+# mplayer (from different mplayer_options sources). All -vop args will
+# be appended at the end of the command as one argument.
+#
 # Revision 1.12  2003/01/11 10:55:57  dischi
 # Call refresh with reload=1 when the menu was disabled during playback
 #
@@ -125,6 +130,30 @@ def get_singleton():
     return _singleton
 
 
+def vop_append(command):
+    """
+    Change a mplayer command to support more than one -vop
+    parameter. This function will grep all -vop parameter from
+    the command and add it at the end as one vop argument
+    """
+    ret = ''
+    vop = ''
+    next_is_vop = FALSE
+    
+    for arg in command.split(' '):
+        if next_is_vop:
+            vop += ',%s' % arg
+            next_is_vop = FALSE
+        elif arg == '-vop':
+            next_is_vop=TRUE
+        else:
+            ret += '%s ' % arg
+
+    if vop:
+        return '%s -vop %s' % (ret,vop[1:])
+    return ret
+
+
 class MPlayer:
     """
     the main class to control mplayer
@@ -227,7 +256,9 @@ class MPlayer:
         if options:
             print options
             command += ' ' + options
-                
+
+        command=vop_append(command)
+        
         self.file = item
 
         # XXX A better place for the major part of this code would be
