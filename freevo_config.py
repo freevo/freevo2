@@ -15,6 +15,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.101  2002/12/29 19:24:25  dischi
+# Integrated two small fixes from Jens Axboe to support overscan for DXR3
+# and to set MPLAYER_VO_OPTS
+#
 # Revision 1.100  2002/12/21 17:26:52  dischi
 # Added dfbmga support. This includes configure option, some special
 # settings for mplayer and extra overscan variables
@@ -363,7 +367,7 @@ if CONF.display == 'mga':
 OVERSCAN_X = 0
 OVERSCAN_Y = 0
 
-if CONF.display == 'dfbmga':
+if CONF.display == 'dfbmga' or CONF.display == 'dxr3':
     OVERSCAN_X = 30
     OVERSCAN_Y = 30
     
@@ -386,6 +390,7 @@ MPLAYER_AO_DEV       = 'oss:/dev/dsp'  # e.g.: oss,sdl,alsa, see mplayer docs
 MPLAYER_AO_HWAC3_DEV = ''              # set this to an audio device which is
                                        # capable of hwac3
 MPLAYER_VO_DEV       = CONF.display    # e.g.: xv,x11,mga,fbdev, see mplayer docs
+MPLAYER_VO_DEV_OPTS  = ''	       # e.g.: ':some_var=vcal'
 
 DVD_LANG_PREF        = 'en,se,no'      # Order of preferred languages on DVD.
 DVD_SUBTITLE_PREF    = ''              # Order of preferred subtitles on DVD.

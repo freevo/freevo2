@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2002/12/29 19:24:25  dischi
+# Integrated two small fixes from Jens Axboe to support overscan for DXR3
+# and to set MPLAYER_VO_OPTS
+#
 # Revision 1.2  2002/12/16 08:02:19  dischi
 # dxr3 patch
 #
@@ -155,11 +159,12 @@ class MPlayer:
                      (device, input, norm, tuner_channel, chanlist, w, h, outfmt))
             
             # Build the MPlayer command
-            mpl = '--prio=%s %s -vo %s -fs %s %s' % (config.MPLAYER_NICE,
-                                                     config.MPLAYER_CMD,
-                                                     config.MPLAYER_VO_DEV,
-                                                     tvcmd,
-                                                     config.MPLAYER_ARGS_TVVIEW)
+            mpl = '--prio=%s %s -vo %s%s -fs %s %s' % (config.MPLAYER_NICE,
+                                                       config.MPLAYER_CMD,
+                                                       config.MPLAYER_VO_DEV,
+                                                       config.MPLAYER_VO_DEV_OPTS,
+                                                       tvcmd,
+                                                       config.MPLAYER_ARGS_TVVIEW)
 
         elif mode == 'vcr':
             cf_norm, cf_input, tmp, cf_device = config.VCR_SETTINGS.split()
@@ -178,9 +183,11 @@ class MPlayer:
                      'chanlist=us-cable:width=%s:height=%s:%s' %
                      (device, input, norm, w, h, outfmt))
             
-            mpl = ('%s -vo %s -fs %s %s' %
-                   (config.MPLAYER_CMD, config.MPLAYER_VO_DEV, tvcmd,
-                    config.MPLAYER_ARGS_TVVIEW))
+            mpl = ('%s -vo %s%s -fs %s %s' % (config.MPLAYER_CMD,
+                                              config.MPLAYER_VO_DEV,
+                                              config.MPLAYER_VO_DEV_OPTS,
+                                              tvcmd,
+                                              config.MPLAYER_ARGS_TVVIEW))
 
         else:
             print 'Mode "%s" is not implemented' % mode  # XXX ui.message()

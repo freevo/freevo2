@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2002/12/29 19:24:26  dischi
+# Integrated two small fixes from Jens Axboe to support overscan for DXR3
+# and to set MPLAYER_VO_OPTS
+#
 # Revision 1.9  2002/12/22 12:23:30  dischi
 # Added deinterlacing in the config menu
 #
@@ -183,7 +187,8 @@ class MPlayer:
             return
 
         # Mplayer command and standard arguments
-        mpl += (' ' + default_args + ' -v -vo ' + config.MPLAYER_VO_DEV)
+        mpl += (' ' + default_args + ' -v -vo ' + config.MPLAYER_VO_DEV + \
+                config.MPLAYER_VO_DEV_OPTS)
             
         # XXX Some testcode by Krister:
         if os.path.isfile('./freevo_xwin') and osd.sdl_driver == 'x11' and \
