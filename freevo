@@ -40,7 +40,7 @@ fi
 if [ -e "$FREEVO_HOME/src/plugins" ]; then
     # starting from src
     helpers=src/helpers
-    $FREEVO_PYTHON=$FREEVO_HOME/src
+    FREEVO_PYTHON=$FREEVO_HOME/src
     export FREEVO_SHARE=share
 
 elif [ -e "$FREEVO_HOME/../share/freevo" ]; then
