@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/07/13 12:45:53  dischi
+# bugfix: max-x was calculated as max+x
+#
 # Revision 1.16  2003/07/12 21:25:54  dischi
 # better skin_force_text_view
 #
@@ -527,12 +530,12 @@ class Skin_Area:
             object = copy.copy(object)
 
         try:
-            object.width = self.area_val.width + int(object.width[4:])
+            object.width = self.area_val.width + int(object.width[3:])
         except TypeError:
             pass
 
         try:
-            object.height = self.area_val.height + int(object.height[4:])
+            object.height = self.area_val.height + int(object.height[3:])
         except TypeError:
             pass
 
