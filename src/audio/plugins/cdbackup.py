@@ -26,6 +26,12 @@
 # -----------------------------------------------------------------------
 #
 # $Log$
+# Revision 1.12  2003/07/12 20:27:46  outlyer
+# cdbackup currently outputs about 250k of logs for one CD worth of music; I'm
+# going to make it quiet for now, until we get runapp hooked in.
+#
+# Speaking of which, anyone volunteering to do the runapp conversion?
+#
 # Revision 1.11  2003/07/04 15:17:56  outlyer
 # New cdstatus plugin. Only tested on my machine so use with caution.
 #
@@ -283,7 +289,9 @@ class main_backup_thread(threading.Thread):
                             
             # Build the cdparanoia command to be run
 
-            cdparanoia_command = '%s -s %s "%s%s.wav"' % (config.CDPAR_CMD, str(i+1), 
+            # XXX Sending output to dev /null; someone should move this into runapp
+            # and parse the output
+            cdparanoia_command = '%s -s %s "%s%s.wav" >/dev/null 2>&1' % (config.CDPAR_CMD, str(i+1), 
                 pathname_cdparanoia, path_tail_cdparanoia)
 
             if DEBUG: print 'cdparanoia:  %s' % cdparanoia_command
@@ -294,8 +302,9 @@ class main_backup_thread(threading.Thread):
             # Build the lame command to be run if mp3 format is selected
             
             if string.upper(rip_format) == 'MP3':
-           
-                lame_command = '%s --nohist -h %s "%s%s.wav" "%s%s.mp3"' % (config.LAME_CMD,
+          
+                # XXX Sending output to /dev/null too; move this into runapp, parse output
+                lame_command = '%s --nohist -h %s "%s%s.wav" "%s%s.mp3" >/dev/null 2>&1' % (config.LAME_CMD,
                     config.CD_RIP_LAME_OPTS, pathname_cdparanoia, path_tail_cdparanoia,
                     pathname, path_tail)
 
