@@ -156,7 +156,7 @@ o Test CVS latest version using anonymous export
   cvs -z3 -d:pserver:anonymous@cvs.freevo.sourceforge.net:/cvsroot/freevo \
     export -r HEAD freevo
   cd freevo
-  make
+  make x11
   ./freevo
 
 o Tag a release/checkpoint:
