@@ -125,6 +125,9 @@ class Recordings:
     def __list_callback(self, result):
         if not self.server:
             return
+        if isinstance(result, mbus.types.MError):
+            log.error(str(result))
+            return
         if result.appResult != 'OK' or not result.appStatus:
             log.error(str(result.appDescription))
             return
@@ -286,6 +289,9 @@ class Favorites:
 
     def __list_callback(self, result):
         if not self.server:
+            return
+        if isinstance(result, mbus.types.MError):
+            log.error(str(result))
             return
         if result.appResult != 'OK' or not result.appStatus:
             log.error(str(result.appDescription))
