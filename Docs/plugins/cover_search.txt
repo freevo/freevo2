@@ -1,0 +1,27 @@
+This plugin will allow you to find album covers. At first, only
+Amazon is supported. Someone could easily add allmusic.com support
+which is more complete, but lacks a general interface like amazon's
+web services.
+
+You also need an Amazon developer key.
+
+
+http://www.amazon.com/webservices
+
+You need a Amazon-provided license key to use these services.
+Follow the link above to get one.  These functions will look in
+several places (in this order) for the license key:
+- the "license_key" argument of each function
+- the module-level LICENSE_KEY variable (call setLicense once to set it)
+- an environment variable called AMAZON_LICENSE_KEY
+- a file called ".amazonkey" in the current directory
+- a file called "amazonkey.txt" in the current directory
+- a file called ".amazonkey" in your home directory
+- a file called "amazonkey.txt" in your home directory
+- a file called ".amazonkey" in the same directory as amazon.py
+- a file called "amazonkey.txt" in the same directory as amazon.py
+
+
+
+activate it in your local_config.py:
+plugin.activate('audio.coversearch')
