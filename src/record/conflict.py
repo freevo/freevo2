@@ -4,6 +4,31 @@
 # -----------------------------------------------------------------------------
 # $Id$
 #
+# This module resolves conflicts by choosing cards for the different recordings
+# to record as much as possible with the best combination.
+#
+# Recordings have priorities between 40 and 100 if the are low priority and
+# around 500 for medium and between 1000 and 1100 for high priority
+# recordings.
+# As a default favorites get a priority of 50, manual records of 1000 to make
+# sure they always win. Important favorites can be adjusted in the priority.
+#
+# Cards have a quality between 1 (poor) and 10 (best). The module will try
+# to make sure the best card is used for the highest rated recording.
+#
+# A conflict only in start and stop padding gives minus points based on the
+# number of involved programs and the rating of them.
+#
+# Algorithm:
+# sum up recording prio * (devices priority * 0.1 + 1)
+# meaning the devices have a priority between 1.1 and 2
+# After that reduce the rating with the rating of the overlapping
+# (see function rate_conflict for documentation)
+#
+# Note: The algorithm isn't perfect. In fact, it can't be perfect because
+# people have a different oppinion what is the correct way to resolve the
+# conflict. Maybe it should also contain the number of seconds in a recording.
+#
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
@@ -151,16 +176,29 @@ def rate_conflict(clist):
     Rate a conflict list created by 'scan'. Result is a negative value
     about the conflict lists.
     """
-    ret  = 0
-    prio = 0
+    number   = 0
+    prio     = 0
+    ret      = 0
+    if not clist:
+        return 0
     for c in clist:
-        # Every item in a conflict list gives 5 minus points
-        ret -= 5 * len(c)
-        # Remeber the priorities of the involved recordings
-        for r in c:
-            prio += r.priority
-    # return the result - the involved priorities
-    return ret - (float(prio) / 100)
+        for pos, r1 in enumerate(c[:-1]):
+            # check all pairs of conflicts (stop from x with start from x + 1)
+            # next recording
+            r2 = c[pos+1]
+            # overlapping time in seconds
+            time_diff = r1.stop + r1.stop_padding - r2.start - r2.start_padding
+            # min priority of the both recordings
+            min_prio = min(r1.priority, r2.priority)
+            # average priority of the both recordings
+            average_prio = (r1.priority + r2.priority) / 2
+
+            # Algorithm for the overlapping rating detection:
+            # min_prio / 2 (difference between 5 card types) +
+            # average_prio / 100 (low priority in algorithm) +
+            # number of overlapping minutes
+            ret -= min_prio / 2 + average_prio / 100 + time_diff / 60
+    return ret
 
 
 def rate(devices, best_rating):
@@ -171,11 +209,20 @@ def rate(devices, best_rating):
     rating = 0
     for d in devices[:-1]:
         for r in d.rec:
-            rating += r.priority * d.rating
+            rating += (0.1 * d.rating + 1) * r.priority
         # overlapping padding gives minus points
         rating += rate_conflict(scan(d.rec, True)) - \
                   rate_conflict(scan(d.rec, False))
 
+
+    if not devices[-1].rec:
+        info = 'possible solution:\n'
+        for d in devices[:-1]:
+            info += 'device %s\n' % d.id
+            for r in d.rec:
+                info += '%s\n' % str(r)[:str(r).rfind(' ')]
+        info += 'rating: %d\n' % rating
+        log.debug(info)
     if rating > best_rating:
         # remember
         best_rating = rating
@@ -237,11 +284,12 @@ def resolve(recordings):
         devices.sort(lambda l, o: cmp(o.rating,l.rating))
 
         for c in conflicts:
+            log.debug('**********************************')
             info = 'found conflict:\n'
             for r in c:
                 info += '%s\n' % str(r)[:str(r).rfind(' ')]
-            check(devices, [], c, 0)
             log.info(info)
+            check(devices, [], c, 0)
             info ='solved by setting:\n'
             for r in c:
                 info += '%s\n' % str(r)
