@@ -13,6 +13,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/07/19 19:41:26  dischi
+# o remove some debug strings
+# o remove (...) and [...] from search string
+#
 # Revision 1.13  2003/07/19 19:18:16  dischi
 # o Since we already load the image from the net, use that image as preview
 #   for the selection
@@ -180,9 +184,11 @@ class PluginInterface(plugin.ItemPlugin):
 
         artist = self.item.info['artist']
 
-        amazon.setLicense(self.license) 
+        amazon.setLicense(self.license)
+        search_string = '%s %s' % (artist,album)
+        search_string = re.sub('[\(\[].*[\)\]]', '', search_string)
         try:
-            cover = amazon.searchByKeyword('%s %s' % (artist,album) , product_line="music")
+            cover = amazon.searchByKeyword(search_string , product_line="music")
         except amazon.AmazonError:
             box.destroy() 
             box = PopupBox(text='No matches for %s - %s' % (str(artist),str(album)))
@@ -204,7 +210,6 @@ class PluginInterface(plugin.ItemPlugin):
         # Grrr I wish Amazon wouldn't return an empty gif (807b)
 
         for i in range(len(cover)):
-            print "Checking Large Cover"
             m = urllib2.urlopen(cover[i].ImageUrlLarge)
             if not (m.info()['Content-Length'] == '807'):
                 image = Image.open(cStringIO.StringIO(m.read()))
@@ -215,7 +220,6 @@ class PluginInterface(plugin.ItemPlugin):
             else:
                 m.close()
                 # see if a small one is available
-                print "No Large Cover, Checking Small Cover..."
                 n = urllib2.urlopen(cover[i].ImageUrlMedium)
                 if not (n.info()['Content-Length'] == '807'):
                     image = Image.open(cStringIO.StringIO(n.read()))
@@ -225,9 +229,7 @@ class PluginInterface(plugin.ItemPlugin):
                 else:
                     n.close()
                     # maybe the url is wrong, try to change '.01.' to '.03.'
-                    print cover[i].ImageUrlLarge
                     cover[i].ImageUrlLarge = cover[i].ImageUrlLarge.replace('.01.', '.03.')
-                    print cover[i].ImageUrlLarge
                     n = urllib2.urlopen(cover[i].ImageUrlLarge)
                     if not (n.info()['Content-Length'] == '807'):
                         image = Image.open(cStringIO.StringIO(n.read()))
@@ -277,6 +279,12 @@ class PluginInterface(plugin.ItemPlugin):
         if self.item.type == 'audiocd':
             self.item.image = filename
             
+        if not self.item.type == 'audiocd' and self.item.parent.type == 'dir':
+            # set the new cover to all items
+            self.item.parent.image = filename
+            for i in self.item.parent.menu.choices:
+                i.image = filename
+
         # check if we have to go one menu back (called directly) or
         # two (called from the item menu)
         back = 1
