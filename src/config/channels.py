@@ -78,8 +78,9 @@ def add_uri(channel, uri):
             # uri doesn't end with a number, add all cards with this based
             for s in config.TV_CARDS:
                 if s.find(uri[:uri.find(':')]) == 0:
-                    add_uri(channel, '%s:%s' % (s, uri))
+                    add_uri(channel, '%s:%s' % (s, uri[uri.find(':')+1:]))
             return
+        print uri
         channel.access_id = uri.split(':')[1]
         channel.uri.append(uri)
 
