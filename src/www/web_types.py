@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/09/02 22:41:08  mikeruelle
+# adding icecast if the user asks for it.
+#
 # Revision 1.10  2003/08/23 12:51:43  dischi
 # removed some old CVS log messages
 #
@@ -188,6 +191,14 @@ class HTMLResource:
         <td class="tablelink" onClick="document.location=\'favorites.rpy\'">&nbsp;&nbsp;Favorites&nbsp;&nbsp;</td>
         <td class="tablelink" onClick="document.location=\'library.rpy\'">&nbsp;&nbsp;Media Library&nbsp;&nbsp;</td>
         <td class="tablelink" onClick="document.location=\'manualrecord.rpy\'">&nbsp;&nbsp;Manually Record&nbsp;&nbsp;</td>
+     """
+        try:
+            if config.ICECAST_WWW_PAGE:
+                self.res += '<td class="tablelink" onClick="document.location=\'iceslistchanger.rpy\'">&nbsp;&nbsp;Change&nbsp;Icecast&nbsp;List&nbsp;&nbsp;</td>'
+        except AttributeError:
+            pass
+
+        self.res += """
 	<td height="24" width="11" background="images/round_right.png" cellpadding=0 cellspacing=0>&nbsp;</td>
       </tr>
     </table>
