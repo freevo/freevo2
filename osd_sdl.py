@@ -192,6 +192,8 @@ class OSD:
 
         if config.OSD_SDL_EXEC_AFTER_STARTUP:
             os.system(config.OSD_SDL_EXEC_AFTER_STARTUP)
+
+        self.sdl_driver = pygame.display.get_driver()
         
         self._started = 1
         self._help = 0  # Is the helpscreen displayed or not
