@@ -19,6 +19,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/11/29 11:41:35  dischi
+# do not import from gui, this object _is_ gui
+#
 # Revision 1.9  2003/10/12 10:56:19  dischi
 # change debug to use _debug_ and set level to 2
 #
@@ -97,28 +100,28 @@ import sys
 import os.path
 import config
 
-from gui.Border            import *
-from gui.Color             import *
-from gui.GUIObject         import *
-from gui.Container         import *
-from gui.PopupBox          import *
-from gui.AlertBox          import *
-from gui.ConfirmBox        import *
-from gui.Label             import *
-from gui.Button            import *
-from gui.LetterBox         import *
-from gui.PasswordLetterBox import *
-from gui.LetterBoxGroup    import *
-from gui.RegionScroller    import *
-from gui.Scrollbar         import *
-from gui.InputBox          import *
-from gui.PasswordInputBox  import *
-from gui.LayoutManagers    import *
-from gui.exceptions        import *
-from gui.scrolldemo        import *
-from gui.listboxdemo       import *
-from gui.optiondemo        import *
+from Border            import *
+from Color             import *
+from GUIObject         import *
+from Container         import *
+from PopupBox          import *
+from AlertBox          import *
+from ConfirmBox        import *
+from Label             import *
+from Button            import *
+from LetterBox         import *
+from PasswordLetterBox import *
+from LetterBoxGroup    import *
+from RegionScroller    import *
+from Scrollbar         import *
+from InputBox          import *
+from PasswordInputBox  import *
+from LayoutManagers    import *
+from exceptions        import *
+from scrolldemo        import *
+from listboxdemo       import *
+from optiondemo        import *
 
 
 if config.DEBUG > 1:
-    from gui.debug import *
+    from debug import *
