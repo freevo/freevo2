@@ -537,7 +537,7 @@ msgid "Rating:"
 msgstr "Calificación:"
 
 msgid "Runtime:"
-msgstr "Tiempo de ejecución:"
+msgstr "Tiempo:"
 
 msgid "Type:"
 msgstr "Tipo:"
@@ -546,7 +546,7 @@ msgid "Resolution:"
 msgstr "Resolución:"
 
 msgid "Copyright:"
-msgstr "Derechos de autor:"
+msgstr "Copyright:"
 
 msgid "Geometry:"
 msgstr "Geometría:"
