@@ -33,7 +33,10 @@ import rc
 import v4l1tv
 
 # The Electronic Program Guide
-import epg
+if config.TV_GUIDE_METHOD == 'xmltv':
+	import epg_xmltv as epg
+else:
+	import epg_yahoo as epg
 
 # Set to 1 for debug output
 DEBUG = 1

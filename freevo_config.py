@@ -132,6 +132,14 @@ TV_CHANNELS = ['2', '4', '5', '6', '8', '9', '10', '11', '13',
                '75', '99']
 WATCH_TV_APP = './matrox_g400/v4l1_to_mga'
 
+# 
+# TV Guide
+#
+# Choose an application to get TV listings
+# Currently 'yahoo' or 'xmltv'
+#
+TV_GUIDE_METHOD = 'yahoo'
+
 #
 # Where the MP3 files can be found.
 #

@@ -44,6 +44,12 @@ cached_guide = None
 #
 # Check if there's a recently cached guide, if not get a newer one
 #
+
+def myversion():
+    version = 'Yahoo Grabber 1.2.3\n'
+    version += 'Author: Krister Lagerström\n'
+    return version
+
 def get_guide():
     global cached_guide
 
