@@ -327,6 +327,10 @@ msgstr "Radio"
 msgid "Radio"
 msgstr "Radio"
 
+#: directory.py:363
+msgid "Play all files in directory"
+msgstr "Lire tous les fichiers de ce répertoire"
+
 #: directory.py:145
 msgid "Movie Playlists"
 msgstr "Liste de films"
@@ -977,15 +981,19 @@ msgstr "Aucun site d'informations n'a été trouvé"
 msgid "Set as icecast playlist"
 msgstr "Utiliser comme liste pour icecast"
 
-#: plugins/file_ops.py:89
-msgid "Delete file"
-msgstr "Effacer un fichier"
+#: plugins/file_ops.py:100
+msgid "Delete"
+msgstr "Effacer"
 
-#: plugins/file_ops.py:91
+#: plugins/file_ops.py:102
 msgid "Delete info"
-msgstr "Effacer une information"
+msgstr "Effacer les informations associées"
 
-#: plugins/file_ops.py:97
+#: plugins/file_ops.py:102
+msgid "Delete image"
+msgstr "Effacer l'image associée"
+
+#: plugins/file_ops.py:108
 #, python-format
 msgid ""
 "Do you wish to delete\n"
@@ -994,7 +1002,7 @@ msgstr ""
 "Voulez vous effacer\n"
 " '%s' ?"
 
-#: plugins/file_ops.py:102
+#: plugins/file_ops.py:113
 #, python-format
 msgid ""
 "Delete info about\n"
