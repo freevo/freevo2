@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/04/20 17:13:55  dischi
+# respect the height
+#
 # Revision 1.1  2003/04/06 21:19:44  dischi
 # Switched to new main1 skin
 #
@@ -134,7 +137,7 @@ class Info_Area(Skin_Area):
                                       height=content.height + content.y - y0, mode='soft',
                                       return_area = TRUE)
                 y0 += rec[3]-rec[1]
-            else:
+            elif content.height + content.y - y0 > font.h:
                 if table[0][i]:
                     self.write_text(table[0][i], font, content, x=x0, y=y0, width=w,
                                     height=-1, mode='hard')
