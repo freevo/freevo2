@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/11/24 19:24:59  dischi
+# move the handler for fxd from xml_parser to fxdhandler
+#
 # Revision 1.21  2003/11/22 20:35:50  dischi
 # use new vfs
 #
@@ -63,7 +66,6 @@ import os
 import config 
 import util
 
-from xml_parser import parseMovieFile
 from mmpython.disc.discinfo import cdrom_disc_id
 #Constants
 
@@ -272,9 +274,10 @@ class FxdImdb:
                 pass
         else: self.append = False
 
-        if self.append == True and \
-           parseMovieFile(self.fxdfile + '.fxd', None, []) == []:
-            raise FxdImdb_XML_Error("FXD file to be updated is invalid, please correct it.")
+        # XXX: add this back in without using parseMovieFile
+        # if self.append == True and \
+        #    parseMovieFile(self.fxdfile + '.fxd', None, []) == []:
+        #     raise FxdImdb_XML_Error("FXD file to be updated is invalid, please correct it.")
 
         if not vfs.isdir(vfs.dirname(self.fxdfile)):
             if vfs.dirname(self.fxdfile):
@@ -335,9 +338,11 @@ class FxdImdb:
                     self.write_movie()
 
             #check fxd 
-            if parseMovieFile(self.fxdfile + '.fxd', None, []) == []:
-                raise FxdImdb_XML_Error("""FXD file generated is invalid, please "+
-                                        "post bugreport, tracebacks and fxd file.""")
+            # XXX: add this back in without using parseMovieFile
+            # if parseMovieFile(self.fxdfile + '.fxd', None, []) == []:
+            #     raise FxdImdb_XML_Error("""FXD file generated is invalid, please "+
+            #                             "post bugreport, tracebacks and fxd file.""")
+
         except (IOError, FxdImdb_IO_Error), error:
             raise FxdImdb_IO_Error('error saving the file: %s' % str(error))
             

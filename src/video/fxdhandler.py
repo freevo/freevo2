@@ -1,66 +1,8 @@
-#if 0 /*
-# -----------------------------------------------------------------------
-# xml_parser.py - Parser for imdb.py xml files
-# -----------------------------------------------------------------------
-# $Id$
-#
-# Notes:
-# Todo:        
-#
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.46  2003/11/23 19:21:35  dischi
-# add doc
-#
-# Revision 1.45  2003/11/23 16:59:16  dischi
-# Complete rewrite to use the new fxdparser. I didn't wanted to do this,
-# it just happened :-)
-# I hope all functions are still in there, maybe someone can rewrite the
-# imdb grabber to use the new fxd class to also write the fxd file.
-#
-# Revision 1.44  2003/11/22 21:26:42  dischi
-# fix search bug
-#
-# Revision 1.43  2003/11/22 20:35:50  dischi
-# use new vfs
-#
-# -----------------------------------------------------------------------
-# Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
-# Please see the file freevo/Docs/CREDITS for a complete list of authors.
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
-# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
-# Public License for more details.
-#
-# You should have received a copy of the GNU General Public License along
-# with this program; if not, write to the Free Software Foundation, Inc.,
-# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-#
-# ----------------------------------------------------------------------- */
-#endif
-
-import os
-import re
-import traceback
-import copy
-
-import config
-import util
-
-from xml.utils import qp_xml
+import fxditem
 from videoitem import VideoItem
 
 
-
-
-class MovieParser:
+class MovieParser(fxditem.FXDItem):
     """
     Class to parse a movie informations from a fxd file
     """
@@ -258,88 +200,8 @@ class MovieParser:
                         'mplayer_options': f.getattr(f, 'mplayer_options') }
                 item.files_options.append(opt)
 
-        
 
-def parseMovieFile(filename, parent=None, duplicate_check=[]):
-    """
-    parse a XML movie file
 
-    Returns:
-      a list of VideoItems,
-      each VideoItem possibly contains a list of VideoItems
-    """
-    try:
-        # create a basic fxd parser
-        parser = util.fxdparser.FXD(filename)
 
-        # create an object that can parse the movie infos out of an fxd
-        mp = MovieParser(parser, filename, parent, duplicate_check)
-
-        # start the parsing
-        parser.parse()
-
-        # now mp contains the list of items, return it
-        return mp.items
-
-    except:
-        print "fxd file %s corrupt" % file
-        traceback.print_exc()
-        return []
-    
-# --------------------------------------------------------------------------------------
-
-#
-# hash all XML movie files
-#
-def hash_xml_database():
-    config.MOVIE_INFORMATIONS       = []
-    config.MOVIE_INFORMATIONS_ID    = {}
-    config.MOVIE_INFORMATIONS_LABEL = []
-    config.DISC_SET_INFORMATIONS_ID = {}
-    config.TV_SHOW_INFORMATIONS     = {}
-    
-    if vfs.exists("/tmp/freevo-rebuild-database"):
-        try:
-            os.remove('/tmp/freevo-rebuild-database')
-        except OSError:
-            print '*********************************************************'
-            print
-            print '*********************************************************'
-            print 'ERROR: unable to remove /tmp/freevo-rebuild-database'
-            print 'please fix permissions'
-            print '*********************************************************'
-            print
-            return 0
-
-    _debug_("Building the xml hash database...",2)
-
-    files = []
-    if not config.ONLY_SCAN_DATADIR:
-        for name,dir in config.DIR_MOVIES:
-            files += util.recursefolders(dir,1,'*'+config.SUFFIX_VIDEO_DEF_FILES[0],1)
-    if config.OVERLAY_DIR:
-        for subdir in ('disc', 'disc-set'):
-            files += util.recursefolders(vfs.join(config.OVERLAY_DIR, subdir),
-                                         1, '*'+config.SUFFIX_VIDEO_DEF_FILES[0],1)
-
-    for file in files:
-        for info in parseMovieFile(file):
-            config.MOVIE_INFORMATIONS += [ info ]
-            for i in info.rom_id:
-                config.MOVIE_INFORMATIONS_ID[i] = info
-            for l in info.rom_label:
-                l_re = re.compile(l)
-                config.MOVIE_INFORMATIONS_LABEL += [(l_re, info)]
-            for fo in info.files_options:
-                config.DISC_SET_INFORMATIONS_ID[fo['file-id']] = fo['mplayer-options']
-
-    if config.TV_SHOW_DATA_DIR:
-        for file in util.recursefolders(config.TV_SHOW_DATA_DIR,1,
-                                        '*'+config.SUFFIX_VIDEO_DEF_FILES[0],1):
-            for info in parseMovieFile(file):
-                k = vfs.splitext(vfs.basename(file))[0]
-                config.TV_SHOW_INFORMATIONS[k] = (info.image, info.info,
-                                                  info.mplayer_options, file)
-            
-    _debug_('done',2)
-    return 1
+# register this callback
+fxditem.register(['video'], MovieParser)

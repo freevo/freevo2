@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.97  2003/11/24 19:24:59  dischi
+# move the handler for fxd from xml_parser to fxdhandler
+#
 # Revision 1.96  2003/11/23 17:00:25  dischi
 # small change (the diff is mostly indention) needed for the new xml_parser
 #
@@ -77,7 +80,6 @@ from gui.ConfirmBox import ConfirmBox
 
 from item import Item
 from event import *
-
 
 class VideoItem(Item):
     def __init__(self, filename, parent, info=None, parse=True):
@@ -161,8 +163,9 @@ class VideoItem(Item):
                     self.image = util.getimage((config.TV_SHOW_DATA_DIR + \
                                                 show_name[0].lower()), self.image)
 
-                    if config.TV_SHOW_INFORMATIONS.has_key(show_name[0].lower()):
-                        tvinfo = config.TV_SHOW_INFORMATIONS[show_name[0].lower()]
+                    from video import tv_show_informations
+                    if tv_show_informations.has_key(show_name[0].lower()):
+                        tvinfo = tv_show_informations[show_name[0].lower()]
                         for i in tvinfo[1]:
                             self.info[i] = tvinfo[1][i]
                         if not self.image:
