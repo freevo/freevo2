@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/09/07 01:02:13  gsbarbieri
+# Fixed a bug in guide that appeared with the new PRECISION thing.
+#
 # Revision 1.16  2003/09/06 22:58:13  mikeruelle
 # fix something i don't think sould have a gap
 #
@@ -218,7 +221,7 @@ class GuideResource(FreevoResource):
 
         fv.tableOpen('border="0" cellpadding="0" cellspacing="0" width="100%"')
         fv.tableRowOpen('class="chanrow"')
-        fv.tableCell('<form>Jump&nbsp;to:&nbsp;' + self.maketimejumpboxday(now) + self.maketimejumpboxoffset(now) + '<input type=submit value="Change"></form>', 'class="utilhead"')
+        fv.tableCell('<form>Time:&nbsp;' + self.maketimejumpboxday(now) + self.maketimejumpboxoffset(now) + '<input type=submit value="View"></form>', 'class="utilhead"')
         categorybox =  self.makecategorybox(guide.chan_list)
         if categorybox:
             fv.tableCell('<form action="genre.rpy">Show&nbsp;Category:&nbsp;'+categorybox+'<input type=submit value="Change"></form>', 'class="utilhead"')
@@ -281,13 +284,13 @@ class GuideResource(FreevoResource):
 
                     if prog.start <= now and prog.stop >= now:
                         cell = ""
-                        if prog.start <= now - PRECISION:
+                        if prog.start <= now - INTERVAL:
                             # show started earlier than the guide start,
                             # insert left arrows
                             cell += '&lt;&lt; '
-                        showtime_left = int(prog.stop - now)
+                        showtime_left = int(prog.stop - now + ( now % INTERVAL ) )
                         intervals = showtime_left / PRECISION
-                        colspan = intervals + 1
+                        colspan = intervals
                         # prog.title = string.replace(prog.title, "&", "SUB")
                         # prog.desc = string.replace(prog.desc, "&", "SUB")
                         cell += '%s' % prog.title
