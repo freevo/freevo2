@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/01/06 19:31:18  dischi
+# add repeat support
+#
 # Revision 1.14  2004/01/03 17:40:27  dischi
 # remove update function
 #
@@ -129,7 +132,7 @@ class PluginInterface(plugin.MimetypePlugin):
 
         <?xml version="1.0" ?>
         <freevo>
-          <slideshow title="foo" random="1|0">
+          <slideshow title="foo" random="1|0" repeat="1|0">
             <cover-img>foo.jpg</cover-img>
             <background-music random="1|0">
               <directory recursive="1|0">path</directory>
@@ -176,7 +179,8 @@ class PluginInterface(plugin.MimetypePlugin):
                 print e
 
         pl = Playlist('', items, fxd.getattr(None, 'parent', None),
-                      random=fxd.getattr(node, 'random', 0))
+                      random=fxd.getattr(node, 'random', 0),
+                      repeat=fxd.getattr(node, 'repeat', 0))
         pl.autoplay = True
 
         pl.name     = fxd.getattr(node, 'title')
@@ -213,7 +217,7 @@ class PluginInterface(plugin.MimetypePlugin):
 
         if files:
             pl.background_playlist = Playlist(playlist=files, random = random,
-                                              display_type='audio')
+                                              repeat=True, display_type='audio')
 
         # add item to list
         fxd.parse_info(fxd.get_children(node, 'info', 1), pl)

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.54  2004/01/06 19:31:18  dischi
+# add repeat support
+#
 # Revision 1.53  2004/01/06 19:17:28  dischi
 # autostart ssr slideshows and fix display_type bug
 #
@@ -552,7 +555,7 @@ class Mimetype(plugin.MimetypePlugin):
 
         <?xml version="1.0" ?>
         <freevo>
-          <playlist title="foo" random="1|0">
+          <playlist title="foo" random="1|0" repeat="1|0">
             <cover-img>foo.jpg</cover-img>
             <files>
               <directory recursive="1|0">path</directory>
@@ -580,7 +583,8 @@ class Mimetype(plugin.MimetypePlugin):
 
         pl = Playlist('', items, fxd.getattr(None, 'parent', None),
                       display_type=fxd.getattr(None, 'display_type'),
-                      build=True, random=fxd.getattr(node, 'random', 0))
+                      build=True, random=fxd.getattr(node, 'random', 0),
+                      repeat=fxd.getattr(node, 'repeat', 0))
 
         pl.name     = fxd.getattr(node, 'title')
         pl.fxd_file = fxd.getattr(None, 'filename', '')
