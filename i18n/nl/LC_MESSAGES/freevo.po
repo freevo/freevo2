@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2003-10-04 17:22+0200\n"
+"POT-Creation-Date: 2003-10-04 20:35+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: den_rdc <den_rdc@users.sourceforge.net>\n"
 "Language-Team: Dutch <LL@li.org>\n"
@@ -141,7 +141,24 @@ msgstr "Analyse schijf, even geduld a.u.b."
 msgid "Scanning directory, be patient..."
 msgstr "Analyse folder, even geduld a.u.b."
 
-#: menu.py:545
+#: directory.py:781 directory.py:818
+msgid "on"
+msgstr ""
+
+#: directory.py:783 directory.py:786 directory.py:820 directory.py:823
+msgid "off"
+msgstr ""
+
+#: directory.py:788 directory.py:825
+msgid "auto"
+msgstr ""
+
+#: directory.py:827
+#, fuzzy
+msgid "Configure"
+msgstr "Verken deze folder"
+
+#: menu.py:547
 msgid "No action defined for this choice!"
 msgstr "Geen actie gedefinieerd voor deze keuze"
 
@@ -165,6 +182,20 @@ msgstr "Escape = Stop / Vorig menu"
 #: osd.py:402
 msgid "h = Help"
 msgstr "h = Help"
+
+#: playlist.py:230
+msgid "Random Playlist"
+msgstr ""
+
+#: playlist.py:235 playlist.py:239 playlist.py:337 video/configure.py:175
+#: video/videoitem.py:287
+#, fuzzy
+msgid "Play"
+msgstr "Speel deze VCD af"
+
+#: playlist.py:236 playlist.py:238
+msgid "Browse Playlist"
+msgstr ""
 
 #: games/mame_cache.py:170
 msgid "Generating MAME cache, please wait."
@@ -259,6 +290,54 @@ msgstr ""
 msgid "%s%%"
 msgstr ""
 
+#: plugins/mediamenu.py:183
+msgid "Media"
+msgstr ""
+
+#: plugins/mediamenu.py:189
+#, fuzzy
+msgid "Movie"
+msgstr "Films"
+
+#: plugins/mediamenu.py:192
+msgid "Audio"
+msgstr ""
+
+#: plugins/mediamenu.py:195
+#, fuzzy
+msgid "Image"
+msgstr "Afbeeldingen"
+
+#: plugins/mediamenu.py:198
+msgid "Games"
+msgstr "Spelletjes"
+
+#: plugins/mediamenu.py:218
+#, fuzzy, python-format
+msgid "%s Main Menu"
+msgstr "TV Hoofdmenu"
+
+#: plugins/headlines.py:111 plugins/headlines.py:277
+msgid "Headlines"
+msgstr ""
+
+#: plugins/headlines.py:200
+msgid "Show Sites Headlines"
+msgstr ""
+
+#: plugins/headlines.py:275
+#, fuzzy
+msgid "No Headlines found"
+msgstr "Geen commandos gevonden"
+
+#: plugins/headlines.py:304
+msgid "No Headlines Sites found"
+msgstr ""
+
+#: plugins/headlines.py:306
+msgid "Headlines Sites"
+msgstr ""
+
 #: plugins/rom_drives.py:254
 #, python-format
 msgid "Drive %s (no disc)"
@@ -273,6 +352,28 @@ msgstr "Open lezer %s"
 #, python-format
 msgid "Reading disc in drive %s"
 msgstr "Bezig met de shijf in lezer %s te analyseren"
+
+#: plugins/file_ops.py:73
+msgid "Delete file"
+msgstr ""
+
+#: plugins/file_ops.py:75
+msgid "Delete info"
+msgstr ""
+
+#: plugins/file_ops.py:81
+#, python-format
+msgid ""
+"Do you wish to delete\n"
+" '%s'?"
+msgstr ""
+
+#: plugins/file_ops.py:86
+#, python-format
+msgid ""
+"Delete info about\n"
+" '%s'?"
+msgstr ""
 
 #: plugins/base.py:68
 msgid "Shutdown Freevo"
@@ -360,6 +461,11 @@ msgstr "Toon meer informatie voor dit bestand"
 msgid "There is no IMDB information for this file."
 msgstr "Er is geen IMDB informatie voor dit bestand."
 
+#: video/plugins/imdb.py:109
+#, fuzzy
+msgid "Search IMDB for this file"
+msgstr "Zoek op IMDB voor [%s]"
+
 #: video/plugins/imdb.py:116 video/plugins/imdb.py:122
 #, python-format
 msgid "Search IMDB for [%s]"
@@ -386,41 +492,109 @@ msgstr "Binnenhalen van de data..."
 msgid "Move to [%s]"
 msgstr "Verplaats naar [%s]"
 
+#: video/plugins/bookmarker.py:96
+msgid "Resume playback"
+msgstr ""
+
+#: video/plugins/bookmarker.py:101
+msgid "Bookmarks"
+msgstr ""
+
+#: video/plugins/bookmarker.py:136
+#, python-format
+msgid "Jump to %s"
+msgstr ""
+
+#: video/plugins/linkbrowser.py:152
+msgid "Downloading link list..."
+msgstr ""
+
 #: video/plugins/linkbrowser.py:159
 #, python-format
 msgid "Failed to download %s"
 msgstr ""
 
 #: video/configure.py:80
-msgid "AUDIO MENU"
-msgstr "Geluidsmenu"
+#, fuzzy
+msgid "Audio Menu"
+msgstr "Geluids menu"
+
+#: video/configure.py:96
+msgid "no subtitles"
+msgstr ""
 
 #: video/configure.py:99
-msgid "SUBTITLE MENU"
+#, fuzzy
+msgid "Subtitle Menu"
 msgstr "Ondertitels menu"
 
+#: video/configure.py:115
+#, fuzzy, python-format
+msgid "Play chapter %s"
+msgstr "Speel titel %s af"
+
 #: video/configure.py:117
-msgid "CHAPTER MENU"
+#, fuzzy
+msgid "Chapter Menu"
 msgstr "Hoofdstukken menu"
 
-#: video/configure.py:175
-msgid "CONFIG MENU"
-msgstr "Configuratiemenu"
+#: video/configure.py:144
+#, python-format
+msgid "Turn off %s"
+msgstr ""
+
+#: video/configure.py:145
+#, python-format
+msgid "Turn on %s"
+msgstr ""
+
+#: video/configure.py:160
+msgid "Audio selection"
+msgstr ""
+
+#: video/configure.py:162
+msgid "Subtitle selection"
+msgstr ""
+
+#: video/configure.py:165
+msgid "Chapter selection"
+msgstr ""
+
+#: video/configure.py:167
+msgid "deinterlacing"
+msgstr ""
+
+#: video/configure.py:176
+#, fuzzy
+msgid "Config Menu"
+msgstr "Configuratie menu"
 
 #: video/videoitem.py:291
 msgid "Play DVD"
 msgstr "Speel deze DVD af"
 
+#: video/videoitem.py:292 video/videoitem.py:294
+msgid "DVD title list"
+msgstr ""
+
+#: video/videoitem.py:295 video/videoitem.py:303
+msgid "Play default track"
+msgstr "Speel standaardnummer"
+
 #: video/videoitem.py:299
 msgid "Play VCD"
 msgstr "Speel deze VCD af"
 
-#: video/videoitem.py:303
-msgid "Play default track"
-msgstr "Speel standaardnummer"
+#: video/videoitem.py:300 video/videoitem.py:302
+msgid "VCD title list"
+msgstr ""
 
 #: video/videoitem.py:308
 msgid "Play with maximum cache"
+msgstr ""
+
+#: video/videoitem.py:311
+msgid "Show variants"
 msgstr ""
 
 #: video/videoitem.py:392
@@ -474,17 +648,16 @@ msgstr "Deze folder  is leeg"
 msgid "TV"
 msgstr "TV"
 
+#, fuzzy
 msgid "Movies"
 msgstr "Films"
 
 msgid "Music"
 msgstr "Muziek"
 
+#, fuzzy
 msgid "Images"
 msgstr "Afbeeldingen"
-
-msgid "Games"
-msgstr "Spelletjes"
 
 msgid "Shutdown"
 msgstr "Afsluiten"

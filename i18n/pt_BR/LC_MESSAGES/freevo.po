@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: freevo-pt_BR\n"
-"POT-Creation-Date: 2003-10-03 17:36+0200\n"
+"POT-Creation-Date: 2003-10-04 20:35+0200\n"
 "PO-Revision-Date: 2003-10-03 19:12-0300\n"
 "Last-Translator: Gustavo Sverzut Barbieri <gustavo@linuxdicas.com.br>\n"
 "Language-Team: Português do Brasil <linux_pt_BR@yahoogrupos.com.br>\n"
@@ -20,7 +20,7 @@ msgstr ""
 msgid "Unknown CD Album"
 msgstr "CD Desconhecido"
 
-#: audio/audiodiskitem.py:95 directory.py:368 image/plugins/gphoto.py:155
+#: audio/audiodiskitem.py:95 directory.py:371 image/plugins/gphoto.py:155
 msgid "Browse directory"
 msgstr "Navegar pelo diretório"
 
@@ -110,62 +110,93 @@ msgstr "[VUX] um ítem diretório, não selecione"
 msgid "[VUX] an audio item, do not select"
 msgstr "[VUX] um ítem de áudio, não selecione"
 
-#: directory.py:349
+#: directory.py:352
 #, python-format
 msgid "Directory on disc [%s]"
 msgstr "Diretório em disco [%s]"
 
-#: directory.py:350
+#: directory.py:353
 msgid "Directory"
 msgstr "Diretório"
 
-#: directory.py:374
+#: directory.py:377
 msgid "Recursive random play all items"
 msgstr "Tocar aleatóriamente e recursivamente todos os ítens"
 
-#: directory.py:375
+#: directory.py:378
 msgid "Configure directory"
 msgstr "Configurar diretório"
 
-#: directory.py:398
+#: directory.py:401
 msgid "Enter Password"
 msgstr "Digite a Senha"
 
-#: directory.py:423
+#: directory.py:426
 msgid "Password incorrect"
 msgstr "Senha incorreta"
 
-#: directory.py:465
+#: directory.py:468
 msgid "Scanning disc, be patient..."
 msgstr "Examinando disco, seja paciente..."
 
-#: directory.py:467
+#: directory.py:470
 msgid "Scanning directory, be patient..."
 msgstr "Examinando diretório, seja paciente..."
 
-#: menu.py:545
+#: directory.py:781 directory.py:818
+msgid "on"
+msgstr ""
+
+#: directory.py:783 directory.py:786 directory.py:820 directory.py:823
+msgid "off"
+msgstr ""
+
+#: directory.py:788 directory.py:825
+msgid "auto"
+msgstr ""
+
+#: directory.py:827
+#, fuzzy
+msgid "Configure"
+msgstr "Configurar diretório"
+
+#: menu.py:547
 msgid "No action defined for this choice!"
 msgstr "Nenhuma ação definida para esta escolha!"
 
-#: osd.py:395
+#: osd.py:398
 msgid "z = Toggle Fullscreen"
 msgstr "z = Mudar tela cheia"
 
-#: osd.py:396
+#: osd.py:399
 msgid "Arrow Keys = Move"
 msgstr "Setas = Move"
 
-#: osd.py:397
+#: osd.py:400
 msgid "Spacebar = Select"
 msgstr "Barra de Espaço = Seleciona"
 
-#: osd.py:398
+#: osd.py:401
 msgid "Escape = Stop/Prev. Menu"
 msgstr "Esc = Pára/Menu anterior"
 
-#: osd.py:399
+#: osd.py:402
 msgid "h = Help"
 msgstr "h = Ajuda"
+
+#: playlist.py:230
+msgid "Random Playlist"
+msgstr ""
+
+#: playlist.py:235 playlist.py:239 playlist.py:337 video/configure.py:175
+#: video/videoitem.py:287
+#, fuzzy
+msgid "Play"
+msgstr "Assistir VCD"
+
+#: playlist.py:236 playlist.py:238
+msgid "Browse Playlist"
+msgstr ""
 
 #: games/mame_cache.py:170
 msgid "Generating MAME cache, please wait."
@@ -259,6 +290,54 @@ msgstr "%iM"
 msgid "%s%%"
 msgstr "%s%%"
 
+#: plugins/mediamenu.py:183
+msgid "Media"
+msgstr ""
+
+#: plugins/mediamenu.py:189
+#, fuzzy
+msgid "Movie"
+msgstr "Vídeos"
+
+#: plugins/mediamenu.py:192
+msgid "Audio"
+msgstr ""
+
+#: plugins/mediamenu.py:195
+#, fuzzy
+msgid "Image"
+msgstr "Imagens"
+
+#: plugins/mediamenu.py:198
+msgid "Games"
+msgstr "Jogos"
+
+#: plugins/mediamenu.py:218
+#, fuzzy, python-format
+msgid "%s Main Menu"
+msgstr "Menu Principal de TV"
+
+#: plugins/headlines.py:111 plugins/headlines.py:277
+msgid "Headlines"
+msgstr ""
+
+#: plugins/headlines.py:200
+msgid "Show Sites Headlines"
+msgstr ""
+
+#: plugins/headlines.py:275
+#, fuzzy
+msgid "No Headlines found"
+msgstr "Nenhum comando encontrado"
+
+#: plugins/headlines.py:304
+msgid "No Headlines Sites found"
+msgstr ""
+
+#: plugins/headlines.py:306
+msgid "Headlines Sites"
+msgstr ""
+
 #: plugins/rom_drives.py:254
 #, python-format
 msgid "Drive %s (no disc)"
@@ -273,6 +352,28 @@ msgstr "Ejetando disco do drive %s"
 #, python-format
 msgid "Reading disc in drive %s"
 msgstr "Lendo disco do drive %s"
+
+#: plugins/file_ops.py:73
+msgid "Delete file"
+msgstr ""
+
+#: plugins/file_ops.py:75
+msgid "Delete info"
+msgstr ""
+
+#: plugins/file_ops.py:81
+#, python-format
+msgid ""
+"Do you wish to delete\n"
+" '%s'?"
+msgstr ""
+
+#: plugins/file_ops.py:86
+#, python-format
+msgid ""
+"Delete info about\n"
+" '%s'?"
+msgstr ""
 
 #: plugins/base.py:68
 msgid "Shutdown Freevo"
@@ -360,6 +461,11 @@ msgstr "Mostrar informações deste arquivo"
 msgid "There is no IMDB information for this file."
 msgstr "Não existe informação do IMDB para este arquivo."
 
+#: video/plugins/imdb.py:109
+#, fuzzy
+msgid "Search IMDB for this file"
+msgstr "Procurar IMDB por [%s]"
+
 #: video/plugins/imdb.py:116 video/plugins/imdb.py:122
 #, python-format
 msgid "Search IMDB for [%s]"
@@ -386,42 +492,112 @@ msgstr "pegando dados..."
 msgid "Move to [%s]"
 msgstr "Mover para [%s]"
 
+#: video/plugins/bookmarker.py:96
+msgid "Resume playback"
+msgstr ""
+
+#: video/plugins/bookmarker.py:101
+msgid "Bookmarks"
+msgstr ""
+
+#: video/plugins/bookmarker.py:136
+#, python-format
+msgid "Jump to %s"
+msgstr ""
+
+#: video/plugins/linkbrowser.py:152
+msgid "Downloading link list..."
+msgstr ""
+
 #: video/plugins/linkbrowser.py:159
 #, python-format
 msgid "Failed to download %s"
 msgstr "Falhei ao fazer download de %s"
 
 #: video/configure.py:80
-msgid "AUDIO MENU"
-msgstr "Menu de Áudio"
+#, fuzzy
+msgid "Audio Menu"
+msgstr " Legendas, "
+
+#: video/configure.py:96
+#, fuzzy
+msgid "no subtitles"
+msgstr " Legendas, "
 
 #: video/configure.py:99
-msgid "SUBTITLE MENU"
-msgstr "Menu de legendas"
+#, fuzzy
+msgid "Subtitle Menu"
+msgstr " Legendas, "
+
+#: video/configure.py:115
+#, fuzzy, python-format
+msgid "Play chapter %s"
+msgstr "Assistir ao título %s"
 
 #: video/configure.py:117
-msgid "CHAPTER MENU"
-msgstr "Menu de Capítulos"
+#, fuzzy
+msgid "Chapter Menu"
+msgstr " Capítulo"
 
-#: video/configure.py:175
-msgid "CONFIG MENU"
-msgstr "Menu de Configuração"
+#: video/configure.py:144
+#, python-format
+msgid "Turn off %s"
+msgstr ""
+
+#: video/configure.py:145
+#, python-format
+msgid "Turn on %s"
+msgstr ""
+
+#: video/configure.py:160
+msgid "Audio selection"
+msgstr ""
+
+#: video/configure.py:162
+#, fuzzy
+msgid "Subtitle selection"
+msgstr " Legendas, "
+
+#: video/configure.py:165
+msgid "Chapter selection"
+msgstr ""
+
+#: video/configure.py:167
+msgid "deinterlacing"
+msgstr ""
+
+#: video/configure.py:176
+#, fuzzy
+msgid "Config Menu"
+msgstr "Configurar diretório"
 
 #: video/videoitem.py:291
 msgid "Play DVD"
 msgstr "Assistir DVD"
 
+#: video/videoitem.py:292 video/videoitem.py:294
+msgid "DVD title list"
+msgstr ""
+
+#: video/videoitem.py:295 video/videoitem.py:303
+msgid "Play default track"
+msgstr "Assistir faixa padrão"
+
 #: video/videoitem.py:299
 msgid "Play VCD"
 msgstr "Assistir VCD"
 
-#: video/videoitem.py:303
-msgid "Play default track"
-msgstr "Assistir faixa padrão"
+#: video/videoitem.py:300 video/videoitem.py:302
+msgid "VCD title list"
+msgstr ""
 
 #: video/videoitem.py:308
 msgid "Play with maximum cache"
 msgstr "Assistir usando máximo de cache"
+
+#: video/videoitem.py:311
+msgid "Show variants"
+msgstr ""
 
 #: video/videoitem.py:392
 msgid "Wait while detecting media..."
@@ -474,17 +650,16 @@ msgstr "Este diretório está vazio"
 msgid "TV"
 msgstr "TV"
 
+#, fuzzy
 msgid "Movies"
 msgstr "Vídeos"
 
 msgid "Music"
 msgstr "Música"
 
+#, fuzzy
 msgid "Images"
 msgstr "Imagens"
-
-msgid "Games"
-msgstr "Jogos"
 
 msgid "Shutdown"
 msgstr "Desligar"
@@ -591,3 +766,14 @@ msgstr "Tamanho:"
 msgid " items in this playlist"
 msgstr " ítens nesta lista."
 
+#~ msgid "AUDIO MENU"
+#~ msgstr "Menu de Áudio"
+
+#~ msgid "SUBTITLE MENU"
+#~ msgstr "Menu de legendas"
+
+#~ msgid "CHAPTER MENU"
+#~ msgstr "Menu de Capítulos"
+
+#~ msgid "CONFIG MENU"
+#~ msgstr "Menu de Configuração"
