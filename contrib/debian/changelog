@@ -1,3 +1,15 @@
+freevo (1.4rc3-2) unstable; urgency=low
+
+  * Don't run makelircrc unless an lircd.conf exists. 
+
+ -- Aubin Paul <debian@outlyer.org>  Wed,  5 Nov 2003 08:12:35 -0500
+
+freevo (1.4rc3-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Aubin Paul <debian@outlyer.org>  Mon,  3 Nov 2003 14:12:04 -0500
+
 freevo (1.4rc2) unstable; urgency=medium
 
   * New upstream release

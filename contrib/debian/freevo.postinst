@@ -4,6 +4,7 @@ action="$1"
 CONFIG_FILE=/etc/freevo/local_conf.py
 SYSTEM_CONF=/etc/freevo/freevo.conf
 LIRCRC=/etc/freevo/lircrc
+LIRCD=/etc/lirc/lircd.conf
 
 . /usr/share/debconf/confmodule
 db_version 2.0
@@ -32,7 +33,11 @@ case "$1" in
             echo "dpkg-reconfigure freevo"
             echo "(as root)"
             fi
-        if [ ! -f $LIRCRC ]; then /usr/bin/freevo makelircrc -w; fi
+        if [ ! -f $LIRCRC ]; then 
+            if [ ! -f $LIRCD ]; then
+                /usr/bin/freevo makelircrc -w; 
+            fi
+        fi
         db_get freevo/start_on_boot
         if [ "$RET" = "true" ]; then update-rc.d freevo defaults 99; fi
     ;;
