@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2004/02/11 04:20:46  outlyer
+# Yet another place where we aren't following the user's time format... fixed now.
+#
 # Revision 1.29  2004/02/05 02:33:00  outlyer
 # <sigh> Escape ALL the text that goes into the FXD file.
 #
@@ -843,7 +846,7 @@ class RecordServer(xmlrpc.XMLRPC):
         fxd.info['tagline'] = fxd.str2XML(rec_prog.sub_title)
         fxd.info['plot'] = fxd.str2XML(rec_prog.desc)
         fxd.info['runtime'] = None
-        fxd.info['year'] = time.strftime('%m-%d %I:%M', time.localtime(rec_prog.start))
+        fxd.info['year'] = time.strftime('%m-%d ' + config.TV_TIMEFORMAT, time.localtime(rec_prog.start))
         fxd.title = fxd.str2XML(rec_prog.title)     # I don't know why this has to be done twice?
         fxd.writeFxd()
             
