@@ -9,6 +9,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2002/11/19 06:24:23  krister
+# Video files that were in an XML file were not removed from the playlist due to Unicode issues, fixed. Please test!
+#
 # Revision 1.14  2002/11/01 16:51:19  dischi
 # Add support for urls in <filename>
 #
@@ -109,8 +112,13 @@ def parseVideo(dir, mplayer_files, video_node):
 
         if node.name == u'files':
             for file_nodes in node.children:
-                try: mplayer_files.remove(os.path.join(add_to_path,file_nodes.textof()))
-                except ValueError: pass
+                fname = os.path.join(add_to_path, file_nodes.textof())
+
+                for i in range(len(mplayer_files)):
+                    if (unicode(mplayer_files[i], 'latin1', 'ignore') == fname):
+                        del mplayer_files[i]
+                        break
+                    
                 # XXX add mplayer_options for specific files, too
                 filename = file_nodes.textof()
                 if filename.find('://') != -1:
