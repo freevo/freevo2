@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.51  2002/10/24 21:34:12  outlyer
+# Changed to use two digits if track is specified. I still can't get Python
+# to accept string = '%0.2(n)s' % int(a) without crashing.
+#
 # Revision 1.50  2002/10/24 21:19:58  outlyer
 # No visible change, but now, we have a function called:
 # skin.format_trackr() which takes in the array of id3 tag data and generates
@@ -774,13 +778,19 @@ class Skin:
 	# This is the default - track name only
 	formatstr = '%(t)s'
        	# This will show the track number as well 
-	#formatstr = '%(n)d - %(t)s'
-        
+	#formatstr = '%(n)s - %(t)s'
+
+	# Since we can't specify the length of the integer in the
+	# format string (Python doesn't seem to recognize it) we
+	# strip it out first, when we see the only thing that can be
+	# a number.
+
+
         # Before we begin, make sure track is an integer
     
         if array.track:
             try:
-    	        mytrack = int(array.track)
+    	        mytrack = ('%0.2d' % int(array.track))
             except:
     	        mytrack = None
         else:
@@ -792,6 +802,4 @@ class Skin:
     	               't'  : array.title,
     	               'y'  : array.year }
    
-	print formatstr % (song_info)
-
         return formatstr % song_info
