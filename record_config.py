@@ -12,6 +12,6 @@ RECORD_SERVER_IP = 'localhost'
 RECORD_SERVER_PORT = 18001
 RECORD_SCHEDULE = '/var/cache/freevo/record_schedule.xml'
 
-plugin.activate('generic_record')
+plugin.activate('plugins.generic_record')
 
 LOGDIR = '/var/log/freevo'
