@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.107  2004/01/18 16:49:39  dischi
+# check cache on startup
+#
 # Revision 1.106  2004/01/17 20:30:18  dischi
 # use new metainfo
 #
@@ -337,12 +340,8 @@ if len(sys.argv) >= 2:
 
 
 
-# # setup mmpython
-mmcache = '%s/mmpython' % config.FREEVO_CACHEDIR
-# if not os.path.isdir(mmcache):
-#     os.mkdir(mmcache)
+# setup mmpython
 
-# mmpython.use_cache(mmcache)
 if config.DEBUG > 2:
     mmpython.mediainfo.DEBUG = config.DEBUG
     mmpython.factory.DEBUG   = config.DEBUG
@@ -352,13 +351,20 @@ else:
 
 mmpython.USE_NETWORK = config.USE_NETWORK
 
-if not os.path.isfile(os.path.join(mmcache, 'VERSION')):
+if not os.path.isfile(os.path.join(config.OVERLAY_DIR, 'cachetime')):
     print '\nWARNING: no pre-cached data'
     print 'Freevo will cache each directory when you first enter it. This can'
     print 'be slow. Start "./freevo cache" to pre-cache all directories to speed'
     print 'up usage of freevo'
     print
-
+else:
+    f = open(os.path.join(config.OVERLAY_DIR, 'cachetime'))
+    if long(time.time()) - long(f.readline()) > 604800:
+        print '\nWARNING: cache files older than 7 days'
+        print 'Please rerun "./freevo cache" to speed up freevo'
+        print
+    f.close()
+    
 # if mmpython.object_cache and hasattr(mmpython.object_cache, 'md5_cachedir'):
 #     mmpython.object_cache.md5_cachedir = False
 #     mmpython.object_cache.cachedir     = config.OVERLAY_DIR
