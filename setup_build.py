@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2002/09/06 05:18:52  krister
+# Added a 640x480 mode. Have not adapted the skin yet.
+#
 # Revision 1.15  2002/09/01 05:15:16  krister
 # Cosmetic changes.
 #
@@ -63,7 +66,7 @@ Usage: ./configure [OPTION]...
 Configure Freevo for your specific environment.
 
    --geometry=WIDTHxHEIGHT      set the display size
-                                  WIDTHxHEIGHT can be 800x600 or 768x576
+                                  WIDTHxHEIGHT can be 800x600, 768x576 or 640x480
 
    --display=DISP               set the display
                                   DISP can be xv, x11, fbdev, mga or sdl
@@ -149,7 +152,7 @@ def main():
 
     sys.exit()
 
-vals_geometry = ['800x600', '768x576']
+vals_geometry = ['800x600', '768x576', '640x480']
 vals_display = ['xv', 'x11', 'fbdev', 'mga', 'sdl']
 vals_tv = ['ntsc', 'pal', 'secam']
 vals_chanlist = ['us-bcast', 'us-cable', 'us-cable-hrc',
