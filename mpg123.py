@@ -49,9 +49,6 @@ FALSE = 0
 # Create the OSD object
 osd = osd.get_singleton()
 
-# Create the skin object
-skin = skin.get_singleton()
-
 # Create the MenuWidget object
 menuwidget = menu.get_singleton()
 
@@ -74,6 +71,7 @@ def get_singleton():
 class MP3Info:
 
     def __init__(self):
+        self.drawall = 0
         self.filename = ''
         self.id3 = None
         self.length = 0
@@ -127,7 +125,9 @@ class MPG123:
             mp3info.id3 = ID3(filename)
             if mp3info.id3.track == None:
                 mp3info.id3.track = ''    # Looks better
+            mp3info.drawall = 1
             skin.DrawMP3(mp3info)
+            mp3info.drawall = 0
 
             self.thread.mode = 'play'
             self.thread.filename = filename
