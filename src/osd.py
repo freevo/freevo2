@@ -11,33 +11,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.161  2004/06/10 10:01:31  dischi
+# cleanup
+#
 # Revision 1.160  2004/06/09 19:50:17  dischi
 # change thumbnail caching format to be much faster: do not use pickle and
 # also reduce the image size from max 300x300 to 255x255
 #
 # Revision 1.159  2004/06/06 16:13:27  dischi
 # handle missing surfarray (Python Numeric)
-#
-# Revision 1.158  2004/06/06 06:32:33  dischi
-# check osd init before drawstringframed
-#
-# Revision 1.157  2004/05/31 10:41:44  dischi
-# remove sleep function, not needed anymore
-#
-# Revision 1.156  2004/05/13 12:33:42  dischi
-# animation damage patch from Viggo Fredriksen
-#
-# Revision 1.155  2004/05/09 14:17:44  dischi
-# do use a SynchronizedObject for the osd
-#
-# Revision 1.154  2004/05/02 11:46:12  dischi
-# make it possible to turn off image caching
-#
-# Revision 1.153  2004/05/02 09:20:55  dischi
-# better support for time==0
-#
-# Revision 1.152  2004/04/25 11:23:57  dischi
-# Added support for animations. Most of the code is from Viggo Fredriksen
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -61,6 +43,7 @@
 # ----------------------------------------------------------------------- */
 #endif
 
+# Python modules
 import time
 import os
 import stat
@@ -69,13 +52,14 @@ import re
 import traceback
 import threading, thread
 from types import *
-import util
-import md5
 from fcntl import ioctl
+import cStringIO
 
-# Configuration file. Determines where to look for AVI/MP3 files, etc
-import config, rc
-import plugin
+# Freevo modules
+import config
+import rc
+import util
+
 
 if __freevo_app__ == 'main':
     # The PyGame Python SDL interface.
@@ -85,7 +69,6 @@ if __freevo_app__ == 'main':
     # import animations
     import animation
 
-import cStringIO
         
 
 
@@ -172,6 +155,7 @@ def restart():
 
 class Font:
     def __init__(self, filename='', ptsize=0, font=None):
+        print 'deprecated font object use'
         self.filename = filename
         self.ptsize   = ptsize
         self.font     = font
@@ -346,7 +330,7 @@ class OSD:
         self.default_fg_color = self.COL_BLACK
         self.default_bg_color = self.COL_WHITE
 
-        self.width = config.CONF.width
+        self.width  = config.CONF.width
         self.height = config.CONF.height
 
         if config.CONF.display== 'dxr3':
@@ -397,7 +381,7 @@ class OSD:
         except:
             self.screen = pygame.display.set_mode((self.width, self.height))
 
-        self.depth = self.screen.get_bitsize()
+        self.depth     = self.screen.get_bitsize()
         self.must_lock = self.screen.mustlock()
         
         if config.CONF.display == 'x11' and config.START_FULLSCREEN_X == 1:
@@ -429,9 +413,9 @@ class OSD:
         pygame.key.set_repeat(500, 30)
         self.mousehidetime = time.time()
         
-        self._help = 0  # Is the helpscreen displayed or not
+        self._help       = 0  # Is the helpscreen displayed or not
         self._help_saved = pygame.Surface((self.width, self.height))
-        self._help_last = 0
+        self._help_last  = 0
 
         # Remove old screenshots
         os.system('rm -f /tmp/freevo_ss*.bmp')
@@ -603,20 +587,72 @@ class OSD:
         self.screen.fill(self._sdlcol(color))
         
     
-    def loadbitmap(self, filename, cache=False):
+    def loadbitmap(self, url, cache=False):
         """
-        Loads a bitmap in the OSD without displaying it.
+        Load a bitmap and return the pygame image object.
         """
-        if not cache:
-            return self._getbitmap(filename)
-        if cache == True:
-            cache = self.bitmapcache
-        s = cache[filename]
-        if s:
-            return s
-        s = self._getbitmap(filename)
-        cache[filename] = s
-        return s
+        if cache:
+            if cache == True:
+                cache = self.bitmapcache
+            s = cache[url]
+            if s:
+                return s
+
+        if not pygame.display.get_init():
+            return None
+
+        try:
+            image = pygame.image.fromstring(url.tostring(), url.size, url.mode)
+        except:
+
+            if url[:8] == 'thumb://':
+                filename = os.path.abspath(url[8:])
+                thumbnail = True
+            else:
+                filename = os.path.abspath(url)
+                thumbnail = False
+            
+            if not os.path.isfile(filename):
+                filename = os.path.join(config.IMAGE_DIR, url[8:])
+
+            if not os.path.isfile(filename):
+                print 'osd.py: Bitmap file "%s" doesnt exist!' % filename
+                return None
+            
+            try:
+                if isstring(filename) and filename.endswith('.raw'):
+                    # load cache
+                    data  = util.read_thumbnail(filename)
+                    # convert to pygame image
+                    image = pygame.image.fromstring(data[0], data[1], data[2])
+
+                elif thumbnail:
+                    # load cache or create it
+                    data = util.cache_image(filename, use_exif=True)
+                    # convert to pygame image
+                    image = pygame.image.fromstring(data[0], data[1], data[2])
+
+                else:
+                    try:
+                        image = pygame.image.load(filename)
+                    except pygame.error, e:
+                        print 'SDL image load problem: %s - trying Imaging' % e
+                        i = Image.open(filename)
+                        image = pygame.image.fromstring(i.tostring(), i.size, i.mode)
+            
+            except:
+                print 'Unknown Problem while loading image %s' % String(url)
+                if config.DEBUG:
+                    traceback.print_exc()
+                    return None
+
+        # convert the surface to speed up blitting later
+        if image and image.get_alpha():
+            image.set_alpha(image.get_alpha(), RLEACCEL)
+
+        if cache:
+            cache[url] = image
+        return image
 
     
     def drawbitmap(self, image, x=0, y=0, scaling=None,
@@ -629,8 +665,7 @@ class OSD:
             return None
         if not isinstance(image, pygame.Surface):
             image = self.loadbitmap(image, True)
-        self.drawsurface(image, x, y, scaling, bbx, bby, bbw,
-                         bbh, rotation, layer)
+        self.drawsurface(image, x, y, scaling, bbx, bby, bbw, bbh, rotation, layer)
 
 
     def drawsurface(self, image, x=0, y=0, scaling=None,
@@ -640,9 +675,9 @@ class OSD:
         """
         if not pygame.display.get_init():
             return None
-        image = self.zoomsurface(image, scaling, bbx,
-                                 bby, bbw, bbh, rotation)
-        if not image: return
+        image = self.zoomsurface(image, scaling, bbx, bby, bbw, bbh, rotation)
+        if not image:
+            return
         if layer:
             layer.blit(image, (x, y))
         else:
@@ -858,6 +893,7 @@ class OSD:
                 opaque_mod -= opaque_stp
         except Exception, e:
             print e
+
 
     def drawstringframed(self, string, x, y, width, height, font, fgcolor=None,
                          bgcolor=None, align_h='left', align_v='top', mode='hard',
@@ -1289,65 +1325,8 @@ class OSD:
             self.busyicon.rect = None
         
 
-    def _getbitmap(self, url):
-        """
-        load the bitmap or thumbnail
-        """
-        if not pygame.display.get_init():
-            return None
 
-        try:
-            image = pygame.image.fromstring(url.tostring(), url.size, url.mode)
-        except:
 
-            if url[:8] == 'thumb://':
-                filename = os.path.abspath(url[8:])
-                thumbnail = True
-            else:
-                filename = os.path.abspath(url)
-                thumbnail = False
-            
-            if not os.path.isfile(filename):
-                filename = os.path.join(config.IMAGE_DIR, url[8:])
-
-            if not os.path.isfile(filename):
-                print 'osd.py: Bitmap file "%s" doesnt exist!' % filename
-                return None
-            
-            try:
-                if isstring(filename) and filename.endswith('.raw'):
-                    # load cache
-                    data  = util.read_thumbnail(filename)
-                    # convert to pygame image
-                    image = pygame.image.fromstring(data[0], data[1], data[2])
-
-                elif thumbnail:
-                    # load cache or create it
-                    data = util.cache_image(filename, use_exif=True)
-                    # convert to pygame image
-                    image = pygame.image.fromstring(data[0], data[1], data[2])
-
-                else:
-                    try:
-                        image = pygame.image.load(filename)
-                    except pygame.error, e:
-                        print 'SDL image load problem: %s - trying Imaging' % e
-                        i = Image.open(filename)
-                        image = pygame.image.fromstring(i.tostring(), i.size, i.mode)
-            
-            except:
-                print 'Unknown Problem while loading image %s' % String(url)
-                if config.DEBUG:
-                    traceback.print_exc()
-                    return None
-
-        # convert the surface to speed up blitting later
-        if image and image.get_alpha():
-            image.set_alpha(image.get_alpha(), RLEACCEL)
-
-        return image
-
-        
     def _helpscreen(self):
         if not pygame.display.get_init():
             return None
