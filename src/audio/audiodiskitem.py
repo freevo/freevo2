@@ -26,6 +26,7 @@
 
 import config
 import menu
+import os
 
 from item import Item
 from audioitem import AudioItem
@@ -59,6 +60,10 @@ class AudioDiskItem(Playlist):
         for v in all_variables:
             setattr(self, v, eval('config.%s' % v))
 
+        cover = '%s/mmpython/disc/%s.jpg' % (config.FREEVO_CACHEDIR, disc_id)
+        if os.path.isfile(cover):
+            self.image = cover
+            
 
     def copy(self, obj):
         """
