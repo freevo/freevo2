@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.49  2004/01/31 11:43:55  dischi
+# fixed bad crash
+#
 # Revision 1.48  2004/01/31 11:20:15  dischi
 # cdda is not network play
 #
@@ -84,7 +87,7 @@ class AudioItem(Item):
     """
     
     def __init__(self, url, parent, name=None, scan=True):
-        Item.__init__(self, parent, info=scan)
+        Item.__init__(self, parent)
 
         self.type       = 'audio'
         self.set_url(url, info=scan)
