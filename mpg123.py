@@ -213,14 +213,18 @@ def mpg123_eof(out):
         if time.time() > (lastupdate + 0.5):
             lastupdate = time.time()
             el = int(round((float(elapsed))))
+	    el_min = int(round(el/60))
+	    el_sec = int(round(el%60))
             rem = int(round((float(remain))))
+	    rem_min = int(round(rem/60))
+	    rem_sec = int(round(rem%60))
 
             # Clear the background
             osd.drawbox(3, 230, 300, 355, width = -1,
                         color = osd.default_bg_color)
-            osd.drawstring('Elapsed: %s   ' % el, 30, 250,
+            osd.drawstring('Elapsed: %s:%02d   ' % (el_min,el_sec), 30, 250,
                            osd.default_fg_color)
-            osd.drawstring('Remain: %s   ' % rem, 30, 290,
+            osd.drawstring('Remain: %s:%02d   ' % (rem_min,rem_sec), 30, 290,
                            osd.default_fg_color)
             osd.drawstring('Done: %5.1f%%   ' % (done / 10.0), 30, 330,
                            osd.default_fg_color)
