@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2002/12/13 04:28:19  krister
+# Minor changes.
+#
 # Revision 1.4  2002/12/10 13:21:19  krister
 # Changed recording file format.
 #
@@ -133,10 +136,11 @@ recinfo.channel = None
 recinfo.program_name = None
 recinfo.start_date = None
 
-start_times = map(lambda t: time.strftime('%H:%M', time.gmtime(t)), range(0, 86400, 300))
+start_times = map(lambda t: time.strftime('%H:%M', time.gmtime(t)), range(0, 86400, 600))
 recinfo.start_time = Setting('Start', start_times, None, 'Start time %s')
 
-recinfo.length = Setting('Length', [1, 10, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300],
+recinfo.length = Setting('Length', [1, 10, 30, 60, 90, 120, 150, 180, 210,
+                                    240, 270, 300, 360, 420, 480, 540, 600, 660, 720],
                          30, 'Length %s minutes')
 
 recinfo.quality = Setting('Quality', ['low', 'medium', 'high'], 'high')
@@ -231,15 +235,15 @@ import socket
 if socket.gethostname() == 'linux':
     cmd = ('/usr/local/bin/mencoder -tv on:driver=v4l:input=0:norm=NTSC:channel=%s:chanlist=us-cable:' +
            'width=320:height=240:outfmt=yv12:adevice=/dev/dsp2:audiorate=32000:' +
-           'forceaudio:forcechan=1 -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=800:' +
-           'keyint=30 -oac mp3lame -lameopts br=80:cbr:mode=3 -ffourcc divx -o %s.avi ')
+           'forceaudio:forcechan=1:buffersize=64 -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=1200:' +
+           'keyint=30 -oac mp3lame -lameopts br=128:cbr:mode=3 -ffourcc divx -o %s.avi ')
 else:
     # XXX Testing? Change norm, chanlist, adevice! this assumes a BT878 WinTV
     # board that has a builtin DSP device (/dev/dsp3 here).
     cmd = ('/usr/local/bin/mencoder -tv on:driver=v4l:input=0:norm=NTSC:channel=%s:chanlist=us-cable:' +
            'width=320:height=240:outfmt=yv12:adevice=/dev/dsp3:audiorate=32000:' +
-           'forceaudio:forcechan=1 -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=800:' +
-           'keyint=30 -oac mp3lame -lameopts br=80:cbr:mode=3 -ffourcc divx -o %s.avi ')
+           'forceaudio:forcechan=1:buffersize=64 -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=1200:' +
+           'keyint=30 -oac mp3lame -lameopts br=128:cbr:mode=3 -ffourcc divx -o %s.avi ')
 
 
 def progname2filename(progname):
