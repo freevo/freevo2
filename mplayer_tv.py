@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2002/10/06 14:41:22  dischi
+# Only use -wid when config.MPLAYER_USE_WID is true
+#
 # Revision 1.6  2002/08/22 04:45:13  krister
 # Changed the test-mplayer to the main one.
 #
@@ -203,7 +206,8 @@ class MPlayer:
             # Already got a freevo_xwin up and running
             wid = self.xwin_wid
             mpl += ' -wid 0x%08x -xy %s -monitoraspect 4:3' % (wid, osd.width)
-        elif os.path.isfile('./freevo_xwin') and osd.sdl_driver == 'x11':
+        elif os.path.isfile('./freevo_xwin') and osd.sdl_driver == 'x11' and \
+             config.MPLAYER_USE_WID:
             if DEBUG: print 'Got freevo_xwin and x11'
             os.system('rm -f /tmp/freevo.wid')
             os.system('./freevo_xwin  0 0 %s %s > /tmp/freevo.wid &' %
