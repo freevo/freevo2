@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2002/10/20 17:20:10  dischi
+# Added layer to drawstringframed. Forgot check in
+#
 # Revision 1.43  2002/10/20 15:54:16  outlyer
 # Added a layer parameter to "drawstringframed()" We don't do anything with
 # it right now, but it keeps skin_main1 from breaking. This is a temporary
@@ -550,13 +553,14 @@ class OSD:
     #  - Debug it
     #  - Improve it
     def drawstringframed(self, string, x, y, width, height, fgcolor=None, bgcolor=None,
-                         font=None, ptsize=0, align_h='left', align_v='top', mode='hard',layer=None):
+                         font=None, ptsize=0, align_h='left', align_v='top', mode='hard',
+                         layer=None):
         if mode == 'hard':
-            return self.drawstringframedhard(string,x,y,width, height, fgcolor,
-                                             bgcolor, font, ptsize, align_h, align_v)
+            return self.drawstringframedhard(string,x,y,width, height, fgcolor, bgcolor,
+                                             font, ptsize, align_h, align_v, layer)
         elif mode == 'soft':
-            return self.drawstringframedsoft(string,x,y,width, height, fgcolor,
-                                             bgcolor, font, ptsize, align_h, align_v)
+            return self.drawstringframedsoft(string,x,y,width, height, fgcolor, bgcolor,
+                                             font, ptsize, align_h, align_v, layer)
 
     # Gustavo:
     # drawstringframedsoft: draws a string (text) in a frame. This tries to fit the
@@ -583,7 +587,7 @@ class OSD:
     #  - Debug it
     #  - Improve it
     def drawstringframedsoft(self, string, x, y, width, height, fgcolor=None, bgcolor=None,
-                         font=None, ptsize=0, align_h='left', align_v='top'):
+                         font=None, ptsize=0, align_h='left', align_v='top', layer=None):
 
         if not pygame.display.get_init():
             return string
@@ -776,7 +780,7 @@ class OSD:
             return_y0 = y0
 
         if bgcolor != None:
-            self.drawbox(x,y, x+width, y+height, width=-1, color=bgcolor)
+            self.drawbox(x,y, x+width, y+height, width=-1, color=bgcolor, layer=layer)
         for line_number in range(len(lines)):
             x0 = x
             #print "WORDS: %s" % lines[line_number]
@@ -798,7 +802,7 @@ class OSD:
                 for word in lines[line_number]:
                     if word:
                         word_size, word_height = self.stringsize(word, font,ptsize)
-                        self.drawstring(word, x0, y0, fgcolor, None, font, ptsize)
+                        self.drawstring(word, x0, y0, fgcolor, None, font, ptsize, layer=layer)
                         x0 += spacing
                         x0 += word_size
                     
@@ -810,7 +814,7 @@ class OSD:
                 for word in lines[line_number]:
                     if word:
                         word_size, word_height = self.stringsize(word, font,ptsize)
-                        self.drawstring(word, x0, y0, fgcolor, None, font, ptsize)
+                        self.drawstring(word, x0, y0, fgcolor, None, font, ptsize, layer=layer)
                         x0 += spacing
                         x0 += word_size
             elif align_h == 'left':
@@ -822,7 +826,7 @@ class OSD:
                 for word in lines[line_number]:
                     if word:
                         word_size, word_height = self.stringsize(word, font,ptsize)
-                        self.drawstring(word, x0, y0, fgcolor, None, font, ptsize)
+                        self.drawstring(word, x0, y0, fgcolor, None, font, ptsize, layer=layer)
                         x0 += spacing
                         x0 += word_size
             elif align_h == 'right':
@@ -837,7 +841,7 @@ class OSD:
                         word_size, word_height = \
                                    self.stringsize(lines[line_number][pos], font,ptsize)
                         self.drawstring(lines[line_number][pos], x0, y0, fgcolor, \
-                                        None, font, ptsize, 'right')
+                                        None, font, ptsize, 'right', layer=layer)
                         x0 -= spacing
                         x0 -= word_size
             # end if 
@@ -879,7 +883,7 @@ class OSD:
     #  - Debug it
     #  - Improve it
     def drawstringframedhard(self, string, x, y, width, height, fgcolor=None, bgcolor=None,
-                             font=None, ptsize=0, align_h='left', align_v='top'):
+                             font=None, ptsize=0, align_h='left', align_v='top', layer=None):
 
         if not pygame.display.get_init():
             return string
@@ -890,7 +894,7 @@ class OSD:
         return_y1 = 0
 
         if DEBUG: print 'drawstringframedhard (%d;%d; w=%d; h=%d) "%s"' % (x, y, width, height, string)
-        
+
         if fgcolor == None:
             fgcolor = self.default_fg_color
         if font == None:
@@ -950,7 +954,7 @@ class OSD:
         rest_words = string[i:len(string)]
 
         if bgcolor != None:
-            self.drawbox(x,y, x+width, y+height, width=-1, color=bgcolor)
+            self.drawbox(x,y, x+width, y+height, width=-1, color=bgcolor, layer=layer)
 
         y0 = y
         if align_v == 'center' or align_v == 'middle':
@@ -967,7 +971,7 @@ class OSD:
             elif align_h == 'right':
                 line_size, line_heigt = self.stringsize(line, font, ptsize)
                 x0 = x + (width - line_size)
-            self.drawstring(line, x0, y0, fgcolor, None, font, ptsize)
+            self.drawstring(line, x0, y0, fgcolor, None, font, ptsize, layer=layer)
             y0 += word_height
 
         return (rest_words, (return_x0,return_y0, return_x1, return_y1))
