@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/10/04 18:42:45  dischi
+# do not kill a dead child
+#
 # Revision 1.25  2003/10/04 18:40:48  dischi
 # try except before trying to kill the child
 #
@@ -212,14 +215,22 @@ class ChildApp:
                 self.lock.release()
                 return
         except OSError:
-            pass
+            # Already dead?
+            self.child = None
+            self.lock.release()
+            return
+
         
         try:
             if signal:
                 _debug_('childapp: killing pid %s signal %s' % (self.child.pid, signal))
                 os.kill(self.child.pid, signal)
         except OSError:
-            pass
+            # Already dead?
+            self.child = None
+            self.lock.release()
+            return
+
             
         # Wait for the child to exit
         try:
