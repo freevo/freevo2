@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2002/12/03 19:17:05  dischi
+# Added arg to all menu callback function
+#
 # Revision 1.7  2002/12/02 18:25:11  dischi
 # Added bins/exif patch from John M Cooper
 #
@@ -249,7 +252,7 @@ class DirItem(Playlist):
         return [ ( self.cwd, 'browse directory' ) ]
         
             
-    def cwd(self, menuw=None):
+    def cwd(self, arg=None, menuw=None):
         """
         make a menu item for each file in the directory
         """
