@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/08/19 02:11:21  krister
+# Make window black at startup.
+#
 # Revision 1.1  2002/08/14 04:35:34  krister
 # Added the new X11 mplayer control app: freevo_xwin.
 #
@@ -53,9 +56,12 @@
 static Display *dpy;
 static Window w;
 static XVisualInfo visinf;
+static GC gc;
 static int xres, yres, depth;
 static void hidecursor (void);
 
+
+void x11_clearscreen (uint32 color);
 
 
 int
@@ -119,6 +125,8 @@ x11_open (int x, int y, int width, int height)
    
    XMapWindow (dpy, w);
 
+   gc = XCreateGC (dpy, w, 0, 0);
+   
    while (1) {                  /* XXX Add a timeout counter */
       XEvent e;
 
@@ -129,10 +137,27 @@ x11_open (int x, int y, int width, int height)
          break;
    }
 
+   x11_clearscreen (0);
+   
    XFlush (dpy);
 
    /* Done */
    return (0);
+
+}
+
+
+void
+x11_clearscreen (uint32 color)
+{
+   int i;
+
+
+   XSetForeground (dpy, gc, color);
+
+   for (i = 0; i < yres; i++) {
+      XDrawLine (dpy, w, gc, 0, i, xres-1, i);
+   }
 
 }
 
@@ -207,7 +232,7 @@ main (int ac, char *av[])
 {
 
   if (ac != 5) {
-    fprintf (stderr, "Wrong number of args\n");
+    fprintf (stderr, "Usage: %s x y width height\n", av[0]);
     exit (1);
   }
                  
