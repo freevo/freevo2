@@ -53,7 +53,10 @@ o MP3 playing:
   o Select several playlists and AND or OR them together.
 o Bugzilla
 o RDF support for headlines from Slashdot, etc
-o Traffic and weather reports (including images).
+o Clock in the skin
+o Temperature & weather type display as part of the skin
+o Traffic report (realtime congestion map download/display, text info).
+o Weather report (animated radar map, text info).
 
 
 Long-term
