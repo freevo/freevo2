@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/02/21 19:32:32  dischi
+# bugfix when setting width
+#
 # Revision 1.3  2004/02/18 21:52:04  dischi
 # Major GUI update:
 # o started converting left/right to x/y
@@ -70,7 +73,7 @@ class ProgressBox(PopupBox):
         PopupBox.__init__(self, text, None, x, y, width, height,
                           icon, vertical_expansion, text_prop, parent)
 
-        self.progressbar = Progressbar(full=full, width=self.width-20)
+        self.progressbar = Progressbar(full=full, width=self.content.width-20)
         self.add_child(self.progressbar)
 
 
