@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/03/16 19:28:04  dischi
+# Item has a function getattr to get the attribute as string
+#
 # Revision 1.16  2003/03/11 03:21:19  gsbarbieri
 # Fix a bug when comming back from image viewer. Now all the screen is restored (force_redraw=TRUE)
 #
@@ -430,7 +433,7 @@ class ImageViewer:
 	# the bins file XXX Should this be done in the image item stage?
         f = open(self.filename, 'r')
         tags = exif.process_file(f)
-
+        f.close()
 
         for strtag in tags_check:
             exifname = strtag[1]

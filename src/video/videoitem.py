@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/03/16 19:28:05  dischi
+# Item has a function getattr to get the attribute as string
+#
 # Revision 1.19  2003/03/14 16:24:33  dischi
 # Patch from Matthieu Weber with some bugfixes
 #
@@ -192,6 +195,15 @@ class VideoItem(Item):
         return self.name
 
     
+    def getattr(self, attr):
+        """
+        return the specific attribute as string or an empty string
+        """
+        a = Item.getattr(self, attr)
+        if not a and self.info and self.info.has_key(attr):
+            a = str(self.info[attr])
+        return a
+
     # ------------------------------------------------------------------------
     # actions:
 

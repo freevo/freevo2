@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/03/16 19:28:03  dischi
+# Item has a function getattr to get the attribute as string
+#
 # Revision 1.7  2003/02/24 04:21:39  krister
 # Mathieu Weber's bugfix for multipart movies
 #
@@ -167,3 +170,10 @@ class Item(MenuItem):
         return FALSE
 
         
+    def getattr(self, attr):
+        """
+        return the specific attribute as string or an empty string
+        """
+        if hasattr(self, attr):
+            return str(getattr(self,attr))
+        return ''

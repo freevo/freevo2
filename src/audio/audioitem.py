@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/03/16 19:28:04  dischi
+# Item has a function getattr to get the attribute as string
+#
 # Revision 1.15  2003/02/20 02:39:11  krister
 # Do not scan for cover images if the file is on URL form (e.g. for CDDA tracks)
 #
@@ -270,6 +273,23 @@ class AudioItem(Item):
         if mode == 'date':
             return '%s%s' % (os.stat(self.filename).st_ctime, self.filename)
         return self.filename
+
+
+    def getattr(self, attr):
+        """
+        return the specific attribute as string or an empty string
+        """
+        if attr == 'year':
+            if self.year:
+                return str(self.year)
+            return ''
+        if attr  == 'length':
+            return '%d:%02d' % (int(self.length / 60), int(self.length % 60))
+
+        if attr  == 'elapsed':
+            return '%d:%02d' % (int(self.elapsed / 60), int(self.elapsed % 60))
+            
+        return Item.getattr(self, attr)
 
 
     def set_info_ogg(self, file):

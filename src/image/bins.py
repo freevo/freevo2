@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/03/16 19:28:04  dischi
+# Item has a function getattr to get the attribute as string
+#
 # Revision 1.4  2003/01/01 11:59:45  dischi
 # fix to remove redundant whitespaces/tabs/newlines at the beginning and the
 # end of a tag
@@ -80,7 +83,6 @@ class BinsDiscription(ContentHandler):
 	self.inExif = 0
 	self.inTag = 0
 
-
     def startElement(self,name,attrs):
         # Check that we  have a discription section
         if name == u'description':
@@ -133,6 +135,14 @@ def get_bins_desc(binsname):
 
      # Check that there is a title
      parser.parse(binsname)
+
+     # remove whitespace at the beginning
+     for d in dh.desc:
+         while len(dh.desc[d]) and dh.desc[d][0] in (' ', '\t', '\n'):
+             dh.desc[d] = dh.desc[d][1:]
+     for d in dh.exif:
+         while len(dh.exif[d]) and dh.exif[d][0] in (' ', '\t', '\n'):
+             dh.exif[d] = dh.exif[d][1:]
 
      return {'desc':dh.desc , 'exif':dh.exif}
 

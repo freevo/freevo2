@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/03/16 19:28:04  dischi
+# Item has a function getattr to get the attribute as string
+#
 # Revision 1.7  2003/01/21 14:16:54  dischi
 # Fix to avoid a crash if bins fails (xml parser broken or invalid xml file)
 #
@@ -62,9 +65,20 @@ import os
 
 import viewer
 import bins
-
+import exif
 
 from item import Item
+
+tags_check = { 'date':    [ 'Image DateTime','DateTime','EXIF'],
+               'width':   [ 'EXIF ExifImageWidth','ExifImageWidth','EXIF'],
+               'height':  [ 'EXIF ExifImageLength','ExifImageLength','EXIF'],
+               'exp':     [ 'EXIF ExposureTime','ExposureTime','EXIF'],
+               'light':   [ 'EXIF LightSource','LightSource','EXIF'],
+               'flash':   [ 'EXIF Flash','Flash','EXIF'],
+               'make':    [ 'Image Make','Make','EXIF'],
+               'model':   [ 'Image Model','Model','EXIF'],
+               'software':[ 'Image Software','Software','EXIF']
+               }
 
 class ImageItem(Item):
     def __init__(self, filename, parent, name = None, duration = 0):
@@ -95,7 +109,7 @@ class ImageItem(Item):
             self.name = util.getname(filename)
 
         self.image_viewer = viewer.get_singleton()
-
+        self.exiftags = None
 
 
     def copy(self, obj):
@@ -106,6 +120,7 @@ class ImageItem(Item):
         if obj.type == 'image':
             self.duration = obj.duration
             self.binsdesc = obj.binsdesc
+            self.exiftags = obj.exiftags
 
         
     def sort(self, mode=None):
@@ -140,3 +155,34 @@ class ImageItem(Item):
 
         if self.parent and hasattr(self.parent, 'cache_next'):
             self.parent.cache_next()
+
+
+    def getattr(self, attr):
+        """
+        return the specific attribute as string or an empty string
+        """
+        if self.exiftags == None:
+            f = open(self.filename, 'r')
+            self.exiftags = exif.process_file(f)
+            f.close()
+            
+        if attr in tags_check:
+            b = ''
+            e = ''
+            if self.binsexif.has_key(tags_check[attr][1]):
+                b = str(self.binsexif[tags_check[attr][1]])
+            if self.exiftags.has_key(tags_check[attr][0]):
+                e = str(self.exiftags[tags_check[attr][0]])
+
+            if tags_check[attr][2] == 'EXIF':
+                if e:
+                    return e
+                return b
+            if b:
+                return b
+            return e
+
+        if attr in self.binsdesc:
+            return str(self.binsdesc[attr])
+
+        return Item.getattr(self, attr)
