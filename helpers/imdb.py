@@ -102,13 +102,21 @@ if imdb_number == '--add-id':
     
 title = year = genre = tagline = plot = rating = image = ""
 
-regexp_title   = re.compile('.*STRONG CLASS="title">(.*?)<')
-regexp_year    = re.compile('.*<A HREF="/Sections/Years/.*?([0-9]*)<')
-regexp_genre   = re.compile('.*<B CLASS="ch">Genre.*?</B>(.*)<BR>')
-regexp_tagline = re.compile('.*<B CLASS="ch">Tagline.*?</B>(.*?)<')
-regexp_plot    = re.compile('.*<B CLASS="ch">Plot Outline.*?</B>(.*?)<')
-regexp_rating  = re.compile('.*<B>([0-9\.]*)</B>/10 (.[0-9]* votes.)')
-regexp_image   = re.compile('.*(http.*?)" ALT="cover"')
+regexp_title   = re.compile('.*STRONG CLASS="title">(.*?)<', re.I)
+regexp_year    = re.compile('.*<A HREF="/Sections/Years/.*?([0-9]*)<', re.I)
+regexp_genre   = re.compile('.*href="/Sections/Genres(.*)$', re.I)
+regexp_tagline = re.compile('.*<B CLASS="ch">Tagline.*?</B>(.*?)<', re.I)
+regexp_plot    = re.compile('.*<B CLASS="ch">Plot Outline.*?</B>(.*?)<', re.I)
+regexp_rating  = re.compile('.*<B>([0-9\.]*)/10</B> (.[0-9,]* votes.?)', re.I)
+regexp_image   = re.compile('.*ALT="cover".*src="(http://.*?)"', re.I)
+
+
+# Old stuff (before IMDb has updated there site):
+
+# regexp_genre   = re.compile('.*<B CLASS="ch">Genre.*?</B>(.*)<BR>')
+# regexp_rating  = re.compile('.*<B>([0-9\.]*)</B>/10 (.[0-9]* votes.)')
+# regexp_image   = re.compile('.*(http.*?)" ALT="cover"')
+
 
 
 # connect to IMDb 
@@ -163,7 +171,6 @@ if r.status != 200:
     sys.exit(1)
     
 for line in r.read().split("\n"):
-
     m = regexp_title.match(line)
     if m: title = str2XML(m.group(1))
 
@@ -172,9 +179,12 @@ for line in r.read().split("\n"):
 
     m = regexp_genre.match(line)
     if m:
-        for g in re.compile(' *</A>.*?> *').split('</A>'+m.group(1)):
+        for g in re.compile(' *</A>.*?> *', re.I).split(' </a>'+line+' > '):
             if genre == "": genre = g
             elif g != "" and g != "(more)": genre += " / "+ g
+
+        # Old stuff:
+        # for g in re.compile(' *</A>.*?> *').split('</A>'+m.group(1)):
 
     m = regexp_tagline.match(line)
     if m:
