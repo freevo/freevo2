@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/04/21 13:01:15  dischi
+# remove osd dependency
+#
 # Revision 1.4  2003/04/20 17:36:49  dischi
 # Renamed TV_SHOW_IMAGE_DIR to TV_SHOW_DATA_DIR. This directory can contain
 # images like before, but also fxd files for the tv show with global
@@ -70,9 +73,6 @@ import audio.interface
 import image.interface
 import games.interface
 
-from osd import SynchronizedObject
-import osd
-osd = osd.get_singleton()
 from item import Item
 
 import gui.PasswordInputBox as PasswordInputBox
@@ -273,8 +273,7 @@ class DirItem(Playlist):
 
 	if os.path.isfile(self.dir + '/.password'):
 	    print 'password protected dir'
-	    pb = PasswordInputBox(osd.focused_app, 'Enter Password', 
-                                  self.pass_cmp_cb)
+	    pb = PasswordInputBox(text='Enter Password', handler=self.pass_cmp_cb)
 	    pb.show()
 	    # save these so the InputBox callback can pass them to do_cwd
 	    self.arg = arg
@@ -299,7 +298,7 @@ class DirItem(Playlist):
 	if word == password:
 	    self.do_cwd(self.arg, self.menuw)
 	else:
-	    pb = AlertBox(osd.focused_app, 'Password incorrect')
+	    pb = AlertBox(text='Password incorrect')
 	    pb.show()
             return
 
