@@ -14,6 +14,7 @@
 <!ENTITY menuex2 SYSTEM "code/menu_Item.py" CDATA linespecific>
 <!ENTITY menuex3 SYSTEM "code/menu_MenuItem.py" CDATA linespecific>
 <!ENTITY menuex4 SYSTEM "code/menu_fullexample.py" CDATA linespecific>
+<!ENTITY mainmenupluginex SYSTEM "code/MainMenuPlugin.py" CDATA linespecific>
 ]>
 
 <book>
@@ -325,7 +326,9 @@
 	of items for the menu.
       </para>
 
-      <para><emphasis>TODO: add an example</emphasis></para>
+      <para> A full up example:</para>
+      <programlisting><inlinegraphic entityref="mainmenupluginex"></inlinegraphic>
+      </programlisting>
     </sect1>
 
 
