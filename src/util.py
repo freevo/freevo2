@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/04/24 17:44:18  dischi
+# strip also newlines and whitespaces inside the text
+#
 # Revision 1.21  2003/04/24 16:13:47  dischi
 # fixed close bug
 #
@@ -441,6 +444,7 @@ def get_bookmarkfile(filename):
 def format_text(text):
     while len(text) and text[0] in (' ', '\t', '\n'):
         text = text[1:]
+    text = re.sub('\n[\t *]', ' ', text)
     return text
 
 
