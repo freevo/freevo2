@@ -1,74 +1,17 @@
-#!/usr/bin/env python
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
-# record_server.py - A network aware TV recording server.
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# recordserver.py - start script for the recordserver
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.73  2004/12/18 13:44:16  dischi
-# use popen and not childapp
+# This helper will start the freevo recordserver.
 #
-# Revision 1.72  2004/12/05 13:01:11  dischi
-# delete old tv variables, rename some and fix detection
-#
-# Revision 1.71  2004/12/04 01:22:18  rshortt
-# Detect channels too and move the detect call into the RecordServer object
-# to call after we're an mbus instance.
-#
-# Revision 1.70  2004/12/01 15:08:07  dischi
-# set logging level to INFO as default
-#
-# Revision 1.69  2004/11/28 17:32:05  dischi
-# use config.detect
-#
-# Revision 1.68  2004/11/21 13:29:13  dischi
-# fix config import
-#
-# Revision 1.67  2004/11/19 02:10:28  rshortt
-# First crack at moving autodetect code for TV cards into src/system.  Added a
-# detect() to system/__init__.py that will call detect() on a system/ module.
-# The general idea here is that only Freevo processes that care about certain
-# things (ie: devices) will request and have the information.  If you want
-# your helper to know about TV_CARDS you would:
-#
-# import config
-# import system
-# system.detect('tvcards')
-#
-# Revision 1.66  2004/11/14 15:57:25  dischi
-# better chuid handling
-#
-# Revision 1.65  2004/11/12 20:39:21  dischi
-# recordserver is working now
-#
-# Revision 1.64  2004/11/07 16:42:33  dischi
-# activate child dispatcher and move plugin init to server.py
-#
-# Revision 1.63  2004/11/06 17:56:21  dischi
-# Current status of the recordserver:
-# o add/delete/modify/list recordings
-# o add/list favorites
-# o tv_grab will force an internal favorite update
-# o create recordings based on favorites
-# o basic conflict detection
-# o store everything in a fxd file
-# Recording itself (a.k.a. record/plugins) is not working yet
-#
-# Revision 1.62  2004/11/02 20:15:51  dischi
-# replace recordserver with mbus test code
-#
-# Revision 1.61  2004/08/05 17:35:40  dischi
-# move recordserver and plugins into extra dir
-#
-# Revision 1.60  2004/07/24 00:24:30  rshortt
-# Upgrade the twisted reactor to something not depricated and move print to
-# debug.
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -85,9 +28,9 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
-
+# python imports
 import os
 import pwd
 import logging
@@ -103,6 +46,7 @@ log = logging.getLogger('record')
 # set basic recording debug to info
 log.setLevel(logging.INFO)
 
+# import freevo config
 import config
 
 # change uid
@@ -115,9 +59,13 @@ try:
 except Exception, e:
     log.warning('unable to set uid: %s' % e)
 
+# init the notifier
 notifier.init(notifier.GENERIC)
 
+# import recordserver
 import record.server
+
+# import popen for process managment
 import util.popen
 
 try:
