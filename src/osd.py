@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2003/06/22 11:35:36  dischi
+# Added null_layer. This layer can be used for drawstringframed to avoid
+# unneccessay drawings.
+#
 # Revision 1.45  2003/06/21 10:18:34  dischi
 # small fix
 #
@@ -281,6 +285,10 @@ class OSD:
         self.width = config.CONF.width
         self.height = config.CONF.height
 
+        # layer for drawstringframed if you don't want to draw, only calc
+        # the geometry
+        self.null_layer = 'null layer'
+        
         if config.CONF.display== 'dxr3':
             os.environ['SDL_VIDEODRIVER'] = 'dxr3'
 
@@ -647,7 +655,8 @@ class OSD:
     #  - Debug it
     #  - Improve it
     def drawstringframedsoft(self, string, x, y, width, height, fgcolor=None, bgcolor=None,
-                         font=None, ptsize=0, align_h='left', align_v='top', layer=None, ellipses='...'):
+                             font=None, ptsize=0, align_h='left', align_v='top', layer=None,
+                             ellipses='...'):
 
         if not pygame.display.get_init():
             return string
@@ -849,7 +858,7 @@ class OSD:
         if DEBUG >= 3:
             print "osd.drawstringframed_soft():\n\n%s\n" % lines
 
-        if bgcolor != None:
+        if bgcolor != None and layer != self.null_layer:
             self.drawbox(x,y, x+width, y+height, width=-1, color=bgcolor, layer=layer)
         for line_number in range(len(lines)):
             x0 = x
@@ -873,7 +882,9 @@ class OSD:
                 for word in lines[line_number]:
                     if word:
                         word_size, word_height = self.stringsize(word, font,ptsize)
-                        self.drawstring(word, x0, y0, fgcolor, None, font, ptsize, layer=layer)
+                        if layer != self.null_layer:
+                            self.drawstring(word, x0, y0, fgcolor, None, font,
+                                            ptsize, layer=layer)
                         x0 += spacing + word_size 
                     
             elif align_h == 'center':
@@ -884,7 +895,9 @@ class OSD:
                 for word in lines[line_number]:
                     if word:
                         word_size, word_height = self.stringsize(word, font,ptsize)
-                        self.drawstring(word, x0, y0, fgcolor, None, font, ptsize, layer=layer)
+                        if layer != self.null_layer:
+                            self.drawstring(word, x0, y0, fgcolor, None, font,
+                                            ptsize, layer=layer)
                         x0 += spacing
                         x0 += word_size
             elif align_h == 'left':
@@ -896,7 +909,9 @@ class OSD:
                 for word in lines[line_number]:
                     if word:
                         word_size, word_height = self.stringsize(word, font,ptsize)
-                        self.drawstring(word, x0, y0, fgcolor, None, font, ptsize, layer=layer)
+                        if layer != self.null_layer:
+                            self.drawstring(word, x0, y0, fgcolor, None, font,
+                                            ptsize, layer=layer)
                         x0 += spacing
                         x0 += word_size
             elif align_h == 'right':
@@ -910,8 +925,9 @@ class OSD:
                         pos = line_len - word_number -1
                         word_size, word_height = \
                                    self.stringsize(lines[line_number][pos], font,ptsize)
-                        self.drawstring(lines[line_number][pos], x0, y0, fgcolor, \
-                                        None, font, ptsize, 'right', layer=layer)
+                        if layer != self.null_layer:
+                            self.drawstring(lines[line_number][pos], x0, y0, fgcolor, \
+                                            None, font, ptsize, 'right', layer=layer)
                         x0 -= spacing
                         x0 -= word_size
             # end if 
@@ -992,7 +1008,7 @@ class OSD:
             height = line_height
         if line_height > height:
             return string
-        
+
         # Fit chars in lines
         lines = [ '' ]
         line_number = 0
@@ -1032,7 +1048,7 @@ class OSD:
                     for j in range(len_line):
                         if (occupied_size + ellipses_size) <= width:
                             break
-                        
+
                         # shorten the line again to make space for 'ellipses'
                         char_size = self.charsize(lines[line_number][len_line-j-1],
                                                   font, ptsize)[0]
@@ -1049,6 +1065,9 @@ class OSD:
                     break
 
         rest_words = string[i+1:len(string)]
+            
+        if layer == self.null_layer:
+            return (rest_words, (return_x0,return_y0, return_x1, return_y1))
 
         if bgcolor != None:
             self.drawbox(x,y, x+width, y+height, width=-1, color=bgcolor, layer=layer)
