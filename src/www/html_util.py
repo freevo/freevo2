@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/02/27 02:04:33  rshortt
+# Committed some code by Michael Ruelle which adds highlighting and file
+# size descriptions to library.cgi.
+#
 # Revision 1.4  2003/02/26 01:16:43  rshortt
 # Added manualrecord.cgi to the links.  We may soon need to think of a better layout for the links as the interface grows.
 #
@@ -136,5 +140,19 @@ def printLinks(fp=sys.stdout):
 </table>
 </center>
 """)
+
+
+def descfsize(size):
+    if size < 1024:
+        return "%d bytes" % size
+    elif size < 1048576:
+        size = size / 1024
+        return "%s KB" % size
+    elif size < 1073741824:
+        size = size / 1048576.0
+        return "%.1f MB" % size
+    else:
+        size = size / 1073741824.0
+        return "%.3f GB" % size
 
 

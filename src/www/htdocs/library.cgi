@@ -13,6 +13,10 @@
 #   human readable size rather than bytes from os
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/02/27 02:04:34  rshortt
+# Committed some code by Michael Ruelle which adds highlighting and file
+# size descriptions to library.cgi.
+#
 # Revision 1.3  2003/02/20 22:36:04  rshortt
 # Fixed a crash where newfile was null.
 #
@@ -46,7 +50,7 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import sys, cgi, os, string, urllib
+import sys, cgi, os, string, urllib, re
 import html_util as fv
 
 so = sys.stdout
@@ -55,6 +59,8 @@ sys.stdout = sys.stderr
 # needed to put these here to suppress its output
 import config
 import util
+import rec_interface as ri
+import rec_favorites as rf
 
 TRUE = 1
 FALSE = 0
@@ -122,20 +128,54 @@ fv.tableCell('Size', 'class="guidehead" align="center" colspan="1"')
 fv.tableCell('Actions', 'class="guidehead" align="center" colspan="1"')
 fv.tableRowClose()
 
+# find out if anything is recording
+recordingprogram = ''
+recordings = ri.getScheduledRecordings()
+progs = recordings.getProgramList()
+f = lambda a, b: cmp(a.start, b.start)
+progl = progs.values()
+progl.sort(f)
+for prog in progl:
+    try:
+        if prog.isRecording == TRUE:
+            recordingprogram = ri.getProgFilename(prog)
+            break
+    except:
+        # sorry, have to pass without doing anything.
+        pass
+
+#generate our favorites regular expression
+favre = ''
+favorites = rf.getFavorites()
+favs = favorites.values()
+if favs:
+    favtitles = [ fav.title for fav in favs ]
+    favre = string.join(favtitles, '|') # no I am not a packers fan
+
 # loop over directory here
 items = util.match_files(config.DIR_RECORD, config.SUFFIX_VIDEO_FILES)
 for file in items:
+    status = 'basic'
+    suppressaction = FALSE
     #find size
     len_file = os.stat(file)[6]
     #chop dir from in front of file
     file = string.replace(file, config.DIR_RECORD + '/', '')
+    if recordingprogram and re.match(recordingprogram, file):
+        status = 'recording'
+        suppressaction = TRUE
+    elif favs and re.match(favre, file):
+        status = 'favorite'
     fv.tableRowOpen('class="chanrow"')
-    fv.tableCell(file, 'class="basic" align="left" colspan="1"')
-    fv.tableCell(str(len_file), 'class="basic" align="left" colspan="1"')
-    file_esc = urllib.quote(file)
-    rename = '<a href="javascript:renameFile(\'%s\')">Rename</a>' % file_esc
-    delete = '<a href="library.cgi?action=delete&file=%s">Delete</a>' % file_esc
-    fv.tableCell(rename + '&nbsp;&nbsp;' + delete, 'class="basic" align="center" colspan="1"')
+    fv.tableCell(file, 'class="'+status+'" align="left" colspan="1"')
+    fv.tableCell(fv.descfsize(len_file), 'class="'+status+'" align="left" colspan="1"')
+    if suppressaction == TRUE:
+        fv.tableCell('&nbsp;', 'class="'+status+'" align="center" colspan="1"')
+    else:
+        file_esc = urllib.quote(file)
+        rename = '<a href="javascript:renameFile(\'%s\')">Rename</a>' % file_esc
+        delete = '<a href="library.cgi?action=delete&file=%s">Delete</a>' % file_esc
+        fv.tableCell(rename + '&nbsp;&nbsp;' + delete, 'class="'+status+'" align="center" colspan="1"')
     fv.tableRowClose()
 
 fv.tableClose()

@@ -6,6 +6,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/02/27 02:04:33  rshortt
+# Committed some code by Michael Ruelle which adds highlighting and file
+# size descriptions to library.cgi.
+#
 # Revision 1.4  2003/02/26 03:12:23  rshortt
 # Reduced the minimum amount of time to record for just in case the user is
 # okay with recording for under a minute.
@@ -129,6 +133,13 @@ def progRunning(prog=None):
     if prog.start <= now and prog.stop >= now:
         return TRUE
     return FALSE
+
+
+def getProgFilename(prog=None):
+    if not prog:
+        return 'ERROR: no prog'
+
+    return '%s--%s' % (prog.title, time.strftime('%Y-%m-%d-%H%M', time.localtime(prog.start)))
 
 
 def minToTOD(min):
@@ -277,7 +288,7 @@ def checkToRecord():
             duration = int(prog.stop - now - 10)
             if duration < 10:
                 return FALSE
-            title = '%s--%s' % (prog.title, time.strftime('%Y-%m-%d-%H%M', time.localtime(prog.start)))
+            title = getProgFilename(prog)
             rec_cmd = '%s %s %s "%s"' % \
               (config.REC_CMD, prog.tunerid, duration, title)
             print 'REC_CMD: %s' % rec_cmd
