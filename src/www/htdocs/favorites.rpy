@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/02/22 23:29:31  gsbarbieri
+# Better unicode support, still no non-ascii in names in Favorite() due
+# marmelade problems.
+#
 # Revision 1.12  2004/02/22 07:12:17  gsbarbieri
 # Add more i18n and fix bugs introduced by last i18n changes.
 #
@@ -93,6 +97,7 @@
 #endif
 
 import sys, time
+import urllib
 
 import tv.record_client as ri
 import util.tv_util as tv_util
@@ -178,8 +183,8 @@ class FavoritesResource(FreevoResource):
                 fchan = fav.channel
                 
             fv.tableRowOpen('class="chanrow"')
-            fv.tableCell(fav.name, 'class="'+status+'" colspan="1"')
-            fv.tableCell(fav.title, 'class="'+status+'" colspan="1"')
+            fv.tableCell(Unicode(fav.name), 'class="'+status+'" colspan="1"')
+            fv.tableCell(Unicode(fav.title), 'class="'+status+'" colspan="1"')
             fv.tableCell(fchan, 'class="'+status+'" colspan="1"')
 
             if fav.dow != 'ANY':
@@ -196,23 +201,24 @@ class FavoritesResource(FreevoResource):
                 cell = _('ANY')
             fv.tableCell(cell, 'class="'+status+'" colspan="1"')
 
+            fname_esc = urllib.quote(String(fav.name.replace('&','%26')))
             # cell = '<input type="hidden" name="action" value="%s">' % action
-            cell = ('<a href="edit_favorite.rpy?action=edit&name=%s">'+_('Edit')+'</a>, ') % fav.name.replace('&','%26')
-            cell += ('<a href="favorites.rpy?action=remove&name=%s">'+_('Remove')+'</a>') % fav.name.replace('&','%26')
+            cell = ('<a href="edit_favorite.rpy?action=edit&name=%s">'+_('Edit')+'</a>, ') % fname_esc
+            cell += ('<a href="favorites.rpy?action=remove&name=%s">'+_('Remove')+'</a>') % fname_esc
             fv.tableCell(cell, 'class="'+status+'" colspan="1"')
 
             cell = ''
 
             if favs.index(fav) != 0:
                 tmp_prio = int(fav.priority) - 1
-                cell += ('<a href="favorites.rpy?action=bump&name=%s&priority=-1">'+_('Higher')+'</a>') % fav.name
+                cell += ('<a href="favorites.rpy?action=bump&name=%s&priority=-1">'+_('Higher')+'</a>') % fname_esc
 
             if favs.index(fav) != 0 and favs.index(fav) != len(favs)-1:
                 cell += ' | '
 
             if favs.index(fav) != len(favs)-1:
                 tmp_prio = int(fav.priority) + 1
-                cell += ('<a href="favorites.rpy?action=bump&name=%s&priority=1">'+_('Lower')+'</a>') % fav.name
+                cell += ('<a href="favorites.rpy?action=bump&name=%s&priority=1">'+_('Lower')+'</a>') % fname_esc
 
             fv.tableCell(cell, 'class="'+status+'" colspan="1"')
         
