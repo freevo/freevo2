@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/04/17 04:44:11  krister
+# Added a quick hack to support tvtime. It uses stdin on tvtime for commands, this is not supported in tvtime yet.
+#
 # Revision 1.6  2003/04/15 20:02:06  dischi
 # use the plugin interface
 #
@@ -73,6 +76,7 @@ import rc
 
 # The TV application
 import mplayer
+import tvtime
 
 # The Electronic Program Guide
 import epg_xmltv as epg
@@ -95,7 +99,11 @@ FALSE = 0
 rc = rc.get_singleton()
 
 # Set up the TV application
-tvapp = mplayer.get_singleton()
+# Select MPlayer by default, tvtime is work in progress
+if 1:
+    tvapp = mplayer.get_singleton()
+else:
+    tvapp = tvtime.get_singleton()
 
 
 
