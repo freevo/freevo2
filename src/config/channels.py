@@ -52,7 +52,7 @@ def add_uri(channel, uri):
            isinstance(config.TV_DEFAULT_DEVICE, tuple):
             for s in config.TV_DEFAULT_DEVICE:
                 defaults.append(s)
-        else:
+        elif config.TV_DEFAULT_DEVICE:
             defaults.append(config.TV_DEFAULT_DEVICE)
 
         for which in defaults:
