@@ -34,6 +34,9 @@
 import time
 import logging
 
+# notifier
+import notifier
+
 # freevo imports
 import sysconfig
 import config
@@ -62,6 +65,14 @@ def get_singleton():
     return _singleton
 
 
+def idle_time():
+    """
+    Return the idle time of Freevo. If an application is running, the idle
+    time is always 0.
+    """
+    return get_singleton().idle_time()
+
+    
 def append(application):
     """
     Add app the list of applications and set the focus
@@ -142,8 +153,30 @@ class Eventhandler:
         self.queue = []
         self.registered = { EVENT_LISTENER : [], GENERIC_HANDLER : []}
         self.stack_change = None
+        # idle timer variable
+        self.__idle_time = 0
+        # callback to inherit idle time every minute
+        notifier.addTimer(60000, self.__update_idle_time)
         
 
+    def __update_idle_time(self):
+        """
+        Notifier callback to inherit the idle time
+        """
+        self.__idle_time += 1
+        return True
+    
+
+    def idle_time(self):
+        """
+        Return the idle time of Freevo. If an application is running, the idle
+        time is always 0.
+        """
+        if len(self.applications) > 1:
+            return 0
+        return self.__idle_time
+
+        
     def notify(self, event):
         """
         Notify registered plugins for the given event
@@ -295,6 +328,9 @@ class Eventhandler:
         
         if config.TIME_DEBUG:
             t1 = time.clock()
+
+        # each event resets the idle time
+        self.__idle_time = 0
 
         try:
             for p in self.registered[EVENT_LISTENER]:
