@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2002/10/28 19:34:55  dischi
+# The tv info area now shows info and description with the extra words info
+# and description. The title will be writen in a larger font than the
+# description. to_info now is a string (e.g. no data loaded) or a tuple
+# (title, description)
+#
 # Revision 1.7  2002/10/24 04:33:25  gsbarbieri
 # Modified to handle <head> from XML file.
 #
@@ -118,9 +124,19 @@ class Skin_TV:
         val = settings.info
         osd.drawroundbox(val.x, val.y, val.x+val.width, val.y+val.height,
                          color=val.bgcolor, radius=val.radius)
-        DrawTextFramed(to_info, val, x=val.x+val.spacing, y=val.y+val.spacing,
-                       width=val.width-2*val.spacing, height=val.height-2*val.spacing,
-                       mode='soft')
+        if isinstance(to_info, tuple):
+            w,h = osd.stringsize(to_info[0], font=val.font, ptsize=val.size+3);
+            DrawTextFramed(to_info[0], val, x=val.x+val.spacing, y=val.y+val.spacing,
+                           width=val.width-2*val.spacing, height=h+5,
+                           size=val.size+3, mode='soft')
+            DrawTextFramed(to_info[1], val, x=val.x+val.spacing,
+                           y=val.y+val.spacing+h+5,
+                           width=val.width-2*val.spacing,
+                           height=val.height-h+5-2*val.spacing, mode='soft')
+        else:
+            DrawTextFramed(to_info, val, x=val.x+val.spacing, y=val.y+val.spacing,
+                           width=val.width-2*val.spacing, height=val.height-2*val.spacing,
+                           mode='soft')
 
 
 

@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2002/10/28 19:34:55  dischi
+# The tv info area now shows info and description with the extra words info
+# and description. The title will be writen in a larger font than the
+# description. to_info now is a string (e.g. no data loaded) or a tuple
+# (title, description)
+#
 # Revision 1.6  2002/10/21 20:30:50  dischi
 # The new alpha layer support slows the system down. For that, the skin
 # now saves the last background/alpha layer combination and can reuse it.
@@ -85,20 +91,22 @@ def DrawText(text, settings, x=-1, y=-1, align=''):
 
 
 # Draws a text inside a frame based on the settings in the XML file
-def DrawTextFramed(text, settings, x=-1, y=-1, width=-1, height=-1, mode='hard'):
+def DrawTextFramed(text, settings, x=-1, y=-1, width=-1, height=-1, size=0, mode='hard'):
     if x == -1: x = settings.x
     if y == -1: y = settings.y
 
     if width  == -1: width  = settings.width
     if height == -1: height = settings.height
 
+    if size == 0: size = settings.size
+
     if settings.shadow_visible:
         osd.drawstringframed(text, x+settings.shadow_pad_x, y+settings.shadow_pad_y,
                              width, height, settings.shadow_color, None,
-                             font=settings.font, ptsize=settings.size,
+                             font=settings.font, ptsize=size,
                              align_h=settings.align, align_v=settings.valign, mode=mode)
     osd.drawstringframed(text, x, y, width, height, settings.color, None,
-                         font=settings.font, ptsize=settings.size,
+                         font=settings.font, ptsize=size,
                          align_h=settings.align, align_v=settings.valign, mode=mode)
 
 

@@ -54,7 +54,6 @@ class ExtendedMenu_TV(ExtendedMenu.ExtendedMenu):
         
 
     def eventhandler(self, event):
-        print 'XXX %s' % event
         
         if event == rc.DISPLAY:
             if self.view.getVisible() == 1:
@@ -268,7 +267,7 @@ class ExtendedMenuListing_TV(ExtendedMenu.ExtendedMenuListing):
                 prg = programs[i+1]
             else:
                 prg = programs[i]
-            to_info = '\tTitle: ' + prg.title + '\n\tDescription: '+prg.desc
+            to_info = (prg.title, prg.desc)
         else:
             prg = epg_types.TvProgram()
             prg.channel_id = channel.id            
@@ -312,7 +311,7 @@ class ExtendedMenuListing_TV(ExtendedMenu.ExtendedMenuListing):
             else:
                 prg = programs[i]
 
-            to_info = '\tTitle: ' + prg.title + '\n\tDescription: '+prg.desc
+            to_info = (prg.title, prg.desc)
         else:
             prg = epg_types.TvProgram()
             prg.channel_id = channel.id            
@@ -370,7 +369,7 @@ class ExtendedMenuListing_TV(ExtendedMenu.ExtendedMenuListing):
 
                 
             prg = programs[i]
-            to_info = '\tTitle: ' + prg.title + '\n\tDescription: '+prg.desc
+            to_info = (prg.title, prg.desc)
         else:
             prg = epg_types.TvProgram()
             prg.channel_id = channel.id            
@@ -431,7 +430,7 @@ class ExtendedMenuListing_TV(ExtendedMenu.ExtendedMenuListing):
                     break
 
             prg = programs[i]
-            to_info = '\tTitle: ' + prg.title + '\n\tDescription: '+prg.desc
+            to_info = (prg.title, prg.desc)
         else:
             prg = epg_types.TvProgram()
             prg.channel_id = channel.id            
@@ -482,7 +481,7 @@ class ExtendedMenuListing_TV(ExtendedMenu.ExtendedMenuListing):
 
                 
             prg = programs[i]
-            to_info = '\tTitle: ' + prg.title + '\n\tDescription: '+prg.desc
+            to_info = (prg.title, prg.desc)
         else:
             prg = epg_types.TvProgram()
             prg.channel_id = channel.id            
@@ -545,7 +544,7 @@ class ExtendedMenuListing_TV(ExtendedMenu.ExtendedMenuListing):
 
                 
             prg = programs[i]
-            to_info = '\tTitle: ' + prg.title + '\n\tDescription: '+prg.desc
+            to_info = (prg.title, prg.desc)
         else:
             prg = epg_types.TvProgram()
             prg.channel_id = channel.id            
