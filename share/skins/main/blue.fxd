@@ -298,6 +298,29 @@
 	  </if>
 	</item>
 
+	<item type="audiocd">
+	  <if expression="title">
+	    <text width="130" font="info label">Title:</text>
+	    <goto_pos x="10" mode="relative"/>
+	    <text font="info value" expression="title"/>
+	    <newline/>
+	  </if>
+	  <if expression="artist">
+	    <text width="130" font="info label">Artist:</text>
+	    <goto_pos x="10" mode="relative"/>
+	    <text font="info value" expression="artist"/>
+	    <newline/>
+	  </if>
+	  <text width="130" font="info label">Tracks:</text>
+	  <goto_pos x="10" mode="relative"/>
+	  <text font="info value" expression="len(tracks)"/>
+	  <newline/>
+	  <text width="130" font="info label">Disc ID:</text>
+	  <goto_pos x="10" mode="relative"/>
+	  <text font="info value" expression="id"/>
+	  <newline/>
+	</item>
+
 	<item type="playlist">
 	  <if expression="len(playlist)>0">
   	     <text font="info value" expression="len(playlist)"/>
