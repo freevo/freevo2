@@ -18,6 +18,18 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/11/22 21:06:41  outlyer
+# Merge of the new version of the pymetar library from upstream.
+#
+# Changes:
+#     * (to upstream) Added back timeoutsocket code which upstream doesn't use,
+#         and removed some print statements
+#     * We now use the pymetar Fahrenheit function instead of doing it in the idle
+#         bar; it was already being calculated by pymetar anyway.
+#     * When we don't have a temperature, use '?' instead of '0' which is misleading
+#         since it's Winter now :)
+#     * minor cleanups
+#
 # Revision 1.3  2003/11/15 17:22:48  dischi
 # format patch from Davin Sagnol
 #
@@ -322,23 +334,23 @@ class weather(IdleBarPlugin):
         #
         if (os.path.isfile(self.WEATHERCACHE) == 0 or \
             (abs(time.time() - os.path.getmtime(self.WEATHERCACHE)) > 3600)):
-            weather = pymetar.MetarReport()
             try:
-                weather.fetchMetarReport(self.METARCODE)
-                if (weather.getTemperatureCelsius()):
+                rf=pymetar.ReportFetcher(self.METARCODE)
+                rep=rf.FetchReport()
+                rp=pymetar.ReportParser()
+                pr=rp.ParseReport(rep)
+                if (pr.getTemperatureCelsius()):
                     if self.TEMPUNITS == 'F':
-                        ctemp = weather.getTemperatureCelsius()
-                        ftemp = ((ctemp + 40) * 9 / 5) - 40
-                        temperature = '%2d' % ftemp
+                        temperature = '%2d' % pr.getTemperatureFahrenheit()
                     elif self.TEMPUNITS == 'K':
-                        ktemp = weather.getTemperatureCelsius() + 273
+                        ktemp = pr.getTemperatureCelsius() + 273
                         temperature = '%3d' % ktemp
                     else:
-                        temperature = '%2d' % weather.getTemperatureCelsius()
+                        temperature = '%2d' % pr.getTemperatureCelsius()
                 else:
-                    temperature = '0'  # Make it a string to match above.
-                if weather.getPixmap():
-                    icon = weather.getPixmap() + '.png'
+                    temperature = '?'  # Make it a string to match above.
+                if pr.getPixmap():
+                    icon = pr.getPixmap() + '.png'
                 else:
                     icon = 'sun.png'
                 cachefile = open(self.WEATHERCACHE,'w+')
@@ -346,8 +358,8 @@ class weather(IdleBarPlugin):
                 cachefile.write(icon + '\n')
                 cachefile.close()
             except:
-                # HTTP Problems, use cache. Wait till next try.
                 try:
+                    # HTTP Problems, use cache. Wait till next try.
                     cachefile = open(self.WEATHERCACHE,'r')
                     newlist = map(string.rstrip, cachefile.readlines())
                     temperature,icon = newlist
@@ -356,12 +368,13 @@ class weather(IdleBarPlugin):
                     print 'WEATHER: error reading cache. Using fake weather.'
                     try:
                         cachefile = open(self.WEATHERCACHE,'w+')
-                        cachefile.write('0' + '\n')
+                        cachefile.write('?' + '\n')
                         cachefile.write('sun.png' + '\n')
                         cachefile.close()
                     except IOError:
                         print 'You have no permission to write %s' % self.WEATHERCACHE
                     return '0', 'sun.png'
+
 
         else:
             cachefile = open(self.WEATHERCACHE,'r')
