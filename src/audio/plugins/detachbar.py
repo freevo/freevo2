@@ -141,10 +141,10 @@ class PluginInterface(plugin.DaemonPlugin):
 
             if self.image:
                 origin = self.x-70
-                width = self.w+60
+                width  = self.w+60
             else:
-                orgin = self.x
-                width = self.w
+                origin = self.x
+                width  = self.w
 
             osd.drawroundbox(origin, self.y, width, osd.height, (0xf0000000L, 1, 0xb0000000L, 10))
             
