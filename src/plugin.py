@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2003/09/10 19:29:29  dischi
+# if plugins do not call __init__ they want to be disabled
+#
 # Revision 1.39  2003/09/10 18:13:48  dischi
 # support for plugins to add defaults to config
 #
@@ -410,6 +413,15 @@ def __load_plugin__(name, type, level, args, number):
         else:
             p = eval('%s()' % object)
 
+        if not hasattr(p, '_type'):
+            if hasattr(p, 'reason'):
+                reason = p.reason
+            else:
+                reason = 'unknown\nThe plugin neither called __init__ nor set a'\
+                         'reason why\nPlease contact the plugin author or the freevo list'
+            print 'plugin %s deactivated, reason: %s' % (name, reason)
+            return
+        
         p._number = number
         p._level = level
 
