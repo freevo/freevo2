@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/10/29 18:12:49  dischi
+# move comingup to tv_utils
+#
 # Revision 1.11  2004/10/23 14:31:59  rshortt
 # Move some EPG functionality into channels.py.
 #
@@ -62,9 +65,7 @@ import sys, string, re
 import time, os, string, traceback
 
 import util, config
-
-DEBUG = 0
-
+import sysconfig
 
 def progname2filename(progname):
     '''Translate a program name to something that can be used as a filename.'''
@@ -141,4 +142,91 @@ def descfsize(size):
     else:
         size = size / 1073741824.0
         return "%.3f GB" % size
+
+
+
+def comingup(items=None, ScheduledRecordings=None):
+    import tv.record_client as ri
+    import time
+    import codecs
+
+    result = u''
+
+    cachefile = '%s/upsoon' % sysconfig.CACHEDIR
+    if not ScheduledRecordings:
+        if (os.path.exists(cachefile) and \
+            (abs(time.time() - os.path.getmtime(cachefile)) < 600)):
+            cache = codecs.open(cachefile,'r', sysconfig.ENCODING)
+            for a in cache.readlines():
+                result = result + a
+            cache.close()
+            return result
+
+        (status, recordings) = ri.getScheduledRecordings()
+    else:
+        (status, recordings) = ScheduledRecordings
+
+    if not status:
+        result = _('The recordserver is down')
+        return result
+
+    progs = recordings.getProgramList()
+
+    f = lambda a, b: cmp(a.start, b.start)
+    progl = progs.values()
+    progl.sort(f)
+
+    today = []
+    tomorrow = []
+    later = []
+
+    for what in progl:
+        if time.localtime(what.start)[2] == time.localtime()[2]:
+            today.append(what)
+        if time.localtime(what.start)[2] == (time.localtime()[2] + 1):
+            tomorrow.append(what)
+        if time.localtime(what.start)[2] > (time.localtime()[2] + 1):
+            later.append(what)
+
+    if len(today) > 0:
+        result = result + _('Today') + u':\n'
+        for m in today:
+            sub_title = ''
+            if hasattr(m,'sub_title') and m.sub_title:
+                sub_title = u' "' + Unicode(m.sub_title) + u'" '
+            result = result + u"- %s%s at %s\n" % \
+                     ( Unicode(m.title), Unicode(sub_title),
+                       Unicode(time.strftime('%I:%M%p',time.localtime(m.start))) )
+
+    if len(tomorrow) > 0:
+        result = result + _('Tomorrow') + u':\n'
+        for m in tomorrow:
+            sub_title = ''
+            if hasattr(m,'sub_title') and m.sub_title:
+                sub_title = ' "' + m.sub_title + '" '
+            result = result + u"- %s%s at %s\n" % \
+                     ( Unicode(m.title), Unicode(sub_title),
+                       Unicode(time.strftime('%I:%M%p',time.localtime(m.start))) )
+
+    if len(later) > 0:
+        result = result + _('This Week') + u':\n'
+        for m in later:
+            sub_title = ''
+            if hasattr(m,'sub_title') and m.sub_title:
+                sub_title = ' "' + m.sub_title + '" '
+            result = result + u"- %s%s at %s\n" % \
+                     ( Unicode(m.title), Unicode(sub_title),
+                       Unicode(time.strftime('%I:%M%p',time.localtime(m.start))) )
+
+    if not result:
+        result = _('No recordings are scheduled')
+
+    if os.path.isfile(cachefile):
+        os.unlink(cachefile)
+    cache = codecs.open(cachefile,'w', sysconfig.ENCODING)
+    cache.write(result)
+    cache.close()
+
+    return result
+
 
