@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/01/11 18:34:02  mikeruelle
+# oops forgot this for zipped roms
+#
 # Revision 1.15  2004/01/03 17:40:27  dischi
 # remove update function
 #
@@ -62,8 +65,8 @@ import mame_cache
 import plugin
 
 from mameitem import MameItem
-from snesitem import SnesItem
-from genesisitem import GenesisItem
+from snesitem import SnesItem, snesromExtensions
+from genesisitem import GenesisItem, genesisromExtensions
 from genericitem import GenericItem
 from gui.AlertBox import PopupBox
 
@@ -110,11 +113,11 @@ class PluginInterface(plugin.MimetypePlugin):
             for ml in mame_list:
                 items += [ MameItem(ml[0], ml[1], ml[2], cmd, args, imgpath, parent) ]
         elif gtype == 'SNES':
-            for file in util.find_matches(files, [ 'smc', 'fig' ]):
+            for file in util.find_matches(files, snesromExtensions + [ 'zip' ]):
                 items += [ SnesItem(file, cmd, args, imgpath, parent) ]
                 files.remove(file)
         elif gtype == 'GENESIS':
-            for file in util.find_matches(files, [ 'smd', 'bin' ]):
+            for file in util.find_matches(files, genesisromExtensions + ['zip']):
                 items += [ GenesisItem(file, cmd, args, imgpath, parent) ]
                 files.remove(file)
         elif gtype == 'GENERIC':
