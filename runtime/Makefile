@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/04/20 13:53:38  rshortt
+# Added a build of DirectFB.
+#
 # Revision 1.14  2003/04/20 13:06:36  rshortt
 # Added a DXR3 build. (build_dxr3)
 #
@@ -225,7 +228,7 @@ jpegtran_copy:
 	cp -a $(COPY_BASE)/bin/jpegtran apps/
 
 
-build_all_pkg: get_packageconfig build_libusb build_python build_sdl build_alsa build_aumix build_cddb build_cdparanoia build_egenix build_expat build_freetype build_jpeg build_lame build_libao build_libexif build_libgphoto build_libogg build_libvorbis build_png build_pyogg build_pyvorbis build_pyao build_pyfchksum build_pyimaging build_pylirc build_pynumeric build_pyxml build_pyxmms build_sdlimage build_sdlttf build_smpeg build_sdlmixer build_pygame build_swig build_pygphoto build_vorbistools build_zlib build_mp1e build_dxr3
+build_all_pkg: build_packageconfig build_libusb build_python build_sdl build_alsa build_aumix build_cddb build_cdparanoia build_egenix build_expat build_freetype build_jpeg build_lame build_libao build_libexif build_libgphoto build_libogg build_libvorbis build_png build_pyogg build_pyvorbis build_pyao build_pyfchksum build_pyimaging build_pylirc build_pynumeric build_pyxml build_pyxmms build_sdlimage build_sdlttf build_smpeg build_sdlmixer build_pygame build_swig build_pygphoto build_vorbistools build_zlib build_mp1e build_dxr3 build_directfb
 
 
 
@@ -463,13 +466,13 @@ build_libvorbis:
 	                $(PACKAGE) $(CFG) $(BUILDCMDS)
 
 
-get_packageconfig: PACKAGE=$(PKGCONFIG)
-get_packageconfig: PACKAGE_GET=$(PKGCONFIG_GET)
-get_packageconfig: EXT=tar.gz
-get_packageconfig: TAR=$(TAR1)
-get_packageconfig: BUILDCMDS=
-get_packageconfig: CFG=$(CFGFLAGS)
-get_packageconfig:
+build_packageconfig: PACKAGE=$(PKGCONFIG)
+build_packageconfig: PACKAGE_GET=$(PKGCONFIG_GET)
+build_packageconfig: EXT=tar.gz
+build_packageconfig: TAR=$(TAR1)
+build_packageconfig: BUILDCMDS=
+build_packageconfig: CFG=$(CFGFLAGS)
+build_packageconfig:
 	@ . build_functions ;\
 	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
 	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
@@ -731,6 +734,19 @@ build_zlib: TAR=$(TAR1)
 build_zlib: BUILDCMDS=
 build_zlib: CFG="$(CFGFLAGS) --shared"
 build_zlib:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+build_directfb: PACKAGE=$(DIRECTFB)
+build_directfb: PACKAGE_GET=$(DIRECTFB_GET)
+build_directfb: EXT=tar.gz
+build_directfb: TAR=$(TAR1)
+build_directfb: BUILDCMDS=
+build_directfb: CFG="$(CFGFLAGS)"
+build_directfb:
 	@ . build_functions ;\
 	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
 	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \

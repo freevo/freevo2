@@ -31,7 +31,7 @@ PYXMMS_GET=http://www.via.ecp.fr/~flo/2002/PyXMMS/dist/$(PYXMMS).tar.gz
 ALSA=alsa-lib-0.9.0rc6
 ALSA_GET=ftp://ftp.alsa-project.org/pub/lib/$(ALSA).tar.bz2 
 
-SDL=SDL-freevo-20030417
+SDL=SDL-freevo-20030420
 # SDL_GET=http://www.libsdl.org/release/$(SDL).tar.gz 
 SDL_GET=http://ettin.danicar.net/$(SDL).tar.gz 
 
@@ -124,3 +124,6 @@ MP1E_GET=http://ettin.danicar.net/$(MP1E).tar.gz
 
 DXR3=em8300-0.13.0
 DXR3_GET=http://dxr3.sourceforge.net/download/$(DXR3).tar.gz
+
+DIRECTFB=DirectFB-20030420
+DIRECTFB_GET=http://ettin.danicar.net/$(DIRECTFB).tar.gz
