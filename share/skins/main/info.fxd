@@ -332,10 +332,20 @@
     ******************************************************* -->
 
     <tv>
+      <style text="tv menu"/>
+      <style text="tv menu more info"/>
+    </tv>
+
+    <menuset label="tv menu">
       <screen layout="screen0" x="0" y="0" width="800" height="600"/>
       <info layout="tv info" x="10" y="400" width="780" height="190"/>
       <title layout="title0" x="10" y="10" width="780" height="60"/>
-    </tv>
+    </menuset>
+
+    <menuset label="tv menu more info" inherits="tv menu">
+      <listing height="150"/>
+      <info layout="tv info" y="250" height="340"/>
+    </menuset>
 
     <layout label="tv info">
       <background/>

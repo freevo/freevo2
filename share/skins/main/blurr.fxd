@@ -47,7 +47,11 @@
     </menuset>
 
 
-     <tv>
+    <tv>
+      <style text="tv menu"/>
+    </tv>
+
+    <menuset label="tv menu">
       <screen layout="screen blank" x="0" y="0" width="800" height="600"/>
       <title visible="no"/>
       <info layout="tv info" x="10" y="80" width="760" height="115"/>
@@ -59,7 +63,7 @@
 	<image width="16" height="16" label="leftarrow" filename="left.png"/>
 	<image width="16" height="16" label="rightarrow" filename="right.png"/>
       </listing>
-    </tv>
+    </menuset>
 
     <!-- definition of video/audio/image menu. The same as default, but with a -->
     <!-- different background -->

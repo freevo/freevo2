@@ -25,6 +25,10 @@
       <!-- TV -->
 
       <tv>
+          <style text="tv menu"/>
+      </tv>
+
+      <menuset label="tv menu">
          <screen layout="tv screen" x="0" y="0" width="800" height="600"/>
          <info   layout="tv info" x="10" y="70" width="780" height="140"/>
          <title  visible="no"/>
@@ -36,7 +40,7 @@
 	    <image width="16" height="16" label="leftarrow" filename="left.png"/>
 	    <image width="16" height="16" label="rightarrow" filename="right.png"/>
          </listing>
-      </tv>
+      </menuset>
 
 
 

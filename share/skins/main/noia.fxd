@@ -70,13 +70,21 @@
       </content>
     </layout>
 
-    <tv>
+    <menuset label="tv menu">
       <subtitle layout="title1" x="10" y="90" width="780" height="30"/>
       <listing y="140">
 	<image y="140" label="uparrow"/>
       </listing>
       <info layout="tv info" y="440" height="150"/>
-    </tv>
+    </menuset>
+
+    <menuset label="tv menu more info">
+      <subtitle layout="title1" x="10" y="90" width="780" height="30"/>
+      <listing y="140">
+	<image y="140" label="uparrow"/>
+      </listing>
+      <info layout="tv info" y="290" height="290"/>
+    </menuset>
 
     <!-- tv info area -->
     <layout label="tv info">

@@ -449,6 +449,10 @@
     ******************************************************* -->
 
     <tv>
+      <style text="tv menu"/>
+    </tv>
+
+    <menuset label="tv menu">
       <screen layout="screen0" x="0" y="0" width="800" height="600"/>
       <title visible="not idlebar" layout="title0" x="10" y="10" width="780" height="60"/>
       <listing layout="tv listing" x="10" y="100" width="750" height="300">
@@ -460,7 +464,7 @@
 	<image width="16" height="16" label="rightarrow" filename="right.png"/>
       </listing>
       <info layout="tv info" x="10" y="400" width="780" height="190"/>
-    </tv>
+    </menuset>
 
     <!-- tv listing area -->
     <layout label="tv listing">
@@ -494,13 +498,15 @@
       <content x="10" y="10" height="max-20" width="max-20" type="text"
 	spacing="10" font="tv">
 	<item type="default">
-	  <if expression="title">
-	    <text font="tv title" width="630" expression="title"/>
-	  </if>
+	  <goto_pos x="600" mode="relative"/>
           <text font="tv time" valign="center" expression="start"/>
           <text font="tv time" valign="center">-</text>
           <text font="tv time" valign="center" expression="stop"/>
 	  <newline/>
+	  <if expression="title">
+	    <text font="tv title" expression="title"/>
+	    <newline/>
+	  </if>
 	  <if expression="sub_title">
 	    <text font="info tagline" expression="sub_title"/>
 	    <newline/>
