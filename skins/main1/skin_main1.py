@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.97  2003/05/04 16:44:45  dischi
+# height=-1 for text in title area
+#
 # Revision 1.96  2003/05/01 12:53:25  dischi
 # added more information to plugin draw()
 #
@@ -181,7 +184,7 @@ class Title_Area(Skin_Area):
             text = menu.selected.name
 
         self.text = text
-        self.write_text(text, content.font, content, mode='hard')
+        self.write_text(text, content.font, content, height=-1, mode='hard')
 
 
 class Subtitle_Area(Title_Area):
