@@ -22,7 +22,7 @@ class PygameCanvas(BitmapCanvas):
 		else:
 			t1=time.time()
 			if img.size != size:
-				img = img.crop(pos, size)
+				img.crop(pos, size)
 
 			data = img.get_raw_data("RGB")
 			# pygame.image.fromstring refuses to read from a buffer :(

@@ -402,10 +402,13 @@ class CanvasContainer(CanvasObject):
 				# need to translate child containers with children with
 				# negative coordinates.
 
+				if bsi["pos"] != (child_x, child_y): print "OBJECT MOVE", child
+				if bsi["size"] != (child_w, child_h): print "OBJECT RESIZE", child
 				# Old rectangle.
 				dirty_rects += ( (bsi["pos"][0] + child_offset_x, bsi["pos"][1] + child_offset_y), bsi["size"]),
 				# New rectangle.
 				dirty_rects += ( (child_x + child_offset_x, child_y + child_offset_y), (child_w, child_h) ),
+				print dirty_rects
 
 			# If visibility or zindex has changed, entire child region gets invalidated.
 			elif ("visible" in bsi and bsi["visible"] != child.visible) or \
@@ -497,6 +500,7 @@ class CanvasContainer(CanvasObject):
 					if move_y < 0:
 						dirty_rects += [ ((0, height + move_y), (bs_width, bs_height-height)) ]
 
+			dirty_rects = rect.remove_intersections(dirty_rects)
 			for r in dirty_rects:
 				# Clip rect to backing store image boundary.
 				r = rect.clip(r, ((offset_x, offset_y), self._backing_store.size) )

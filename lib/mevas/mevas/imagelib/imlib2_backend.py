@@ -30,24 +30,39 @@ class Image(base.Image):
 			raise ValueError, "Unsupported image type: %s" % type(image_or_filename)
 
 	def __getattr__(self, attr):
-		if attr in ("width", "height", "size", "format", "mode", "filename"):
+		if attr in ("width", "height", "size", "format", "mode", "filename", "has_alpha", "rowstride"):
 			return getattr(self._image, attr)
 		return super(Image, self).__getattr__(attr)
 
 	def get_raw_data(self, format = "BGRA"):
 		return self._image.get_bytes(format)
 
-	def scale(self, size, src_pos = (0, 0), src_size = (-1, -1)):
-		return Image( self._image.scale(size, src_pos, src_size) )
-
 	def crop(self, pos, size):
-		return Image( self._image.crop(pos, size) )
+		self._image = self._image.crop(pos, size) 
 
 	def rotate(self, angle):
-		return Image( self._image.rotate(angle) )
+		while angle >= 360: angle -= 360
+		while angle <= -360: angle += 360
+		if angle == 0:
+			return
+
+		if angle % 90 == 0:
+			f = { 90: 1, 180: 2, 270: 3, -90: 3, -180: 2, -270: 1} [ angle ]
+			self._image.orientate(f)
+		else:
+			self._image = self._image.rotate(angle) 
+
+	def flip(self):
+		self._image.flip_vertical()
+
+	def mirror(self):
+		self._image.flip_horizontal()
+
+	def scale(self, size, src_pos = (0, 0), src_size = (-1, -1)):
+		self._image =  self._image.scale(size, src_pos, src_size) 
 
 	def scale_preserve_aspect(self, size):
-		return Image( self._image.scale_preserve_aspect(size) )
+		self._image = self._image.scale_preserve_aspect(size) 
 
 	def copy_rect(self, src_pos, size, dst_pos):
 		return self._image.copy_rect( src_pos, size, dst_pos )
@@ -110,6 +125,22 @@ class Font(base.Font):
 		if attr in ("ascent", "descent", "max_ascent", "max_descent"):
 			return getattr(self._font, attr)
 		return super(Font, self).__getattr__(attr)
+
+
+def scale(image, size, src_pos = (0, 0), src_size = (-1, -1)):
+	return Image( image._image.scale(size, src_pos, src_size) )
+
+def crop(image, pos, size):
+	return Image( image._image.crop(pos, size) )
+
+def rotate(image, angle):
+	image = image.copy()
+	image.rotate(angle)
+	return image
+
+def scale_preserve_aspect(image, size):
+	return Image( image._image.scale_preserve_aspect(size) )
+
 
 
 def open(file):

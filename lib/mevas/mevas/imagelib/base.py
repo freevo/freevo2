@@ -391,6 +391,60 @@ class Font:
 # These methods must be provided by the backend and are accessed by
 # imagelib.functionname when the backend is loaded.
 
+
+def scale(image, (w, h), src_pos = (0, 0), src_size = (-1, -1)):
+
+	"""
+	Scale the specified image and return a new image.
+
+	Arguments:
+	  w, h: the width and height of the new image.  If either argument
+	        is -1, that dimension is calculated from the other dimension
+	        while retaining the original aspect ratio.
+
+	Returns: a new Image instance representing the scaled image.
+	"""
+	pass
+
+def crop(image, (x, y), (w, h)):
+	"""
+	Crop the specified image and return a new image.
+
+	Arguments:
+	  x, y, w, h: represents the left, top, width, height region in
+	              the image.
+
+	Returns: a new Image instance representing the cropped image.
+	"""
+	pass
+
+def rotate(image, angle):
+	"""
+	Rotate the specified image and return a new image.
+
+	Arguments:
+	  angle: the angle in degrees by which to rotate the image.
+
+	Return: a new Image instance representing the rotated image.
+	"""
+	pass
+
+def scale_preserve_aspect(image, (w, h)):
+	"""
+	Scales the specified image while retaining the original aspect ratio and 
+	return a new image.
+
+	Arguments:
+	  w, h: the maximum size of the new image.  The new image will be as
+	        large as possible, using w, h as the upper limits, while
+	        retaining the original aspect ratio.
+
+	Return: a new Image insatnce represented the scaled image.
+	"""
+	pass
+
+
+
 def open(file):
 	"""
 	Opens a file and returns an Image instance.
@@ -401,6 +455,7 @@ def open(file):
 	Returns: a new Image instance representing the file.
 	"""
 	pass
+
 
 def new(size, rawdata = None, from_format = "RGBA"):
 	"""

@@ -64,27 +64,30 @@ class IvtvCanvas(BitmapCanvas):
 		dst_region = rect.translate(src_region, scale = (scale_x, scale_y), scale_pos = True)
 		print "Src", src_region, "Dst", dst_region, img.width
 		# Scale the slice to the necessary aspect.
-		#img = img.scale( (self._fb_width, dst_region[1][1]), 
-		#                 (0, src_region[0][1]), 
-		#                 (img.width, src_region[1][1]) )
+		img = imagelib.scale(img, (self._fb_width, dst_region[1][1]), 
+		           (0, src_region[0][1]), 
+		           (img.width, src_region[1][1]) )
+		#img = imagelib.scale(img,(self._fb_width, self._fb_height))
 		# DEBUG stuff...
-		img = img.crop( (0, img.height-self._fb_height), (self._fb_width, self._fb_height) )
+		#img.crop( (0, 0), (self._fb_width, self._fb_height) )
+		#img = imagelib.crop(img, (0, img.height-self._fb_height), (self._fb_width, self._fb_height) )
+		
 		#img.save("/home/tack/foo.png")
 		#img = img.scale ( (self._fb_width, self._fb_height) )
 
 
 		# Now blit.
 		data = img.get_raw_data("BGRA")
+		print "Image size is", len(data)
 		address = data.get_buffer_address()
 		if not address:
 			print "FATAL: can't access raw image data for blitting"
 			return
 
 		start = dst_region[0][1] * self._fb_stride
-		#size = 44 * self._fb_stride
-		#size = dst_region[1][1] * self._fb_stride
-		args = struct.pack("PLi", address, 0, len(data))
-		#args = struct.pack("PLi", address, start, size)
+		size = dst_region[1][1] * self._fb_stride
+		#args = struct.pack("PLi", address, 0, len(data))
+		args = struct.pack("PLi", address, start, size)
 		r = fcntl.ioctl(self._fd, IVTVFB_IOCTL_PREP_FRAME, args)
 		print "Blit took", time.time()-t0, regions
 		

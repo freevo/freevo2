@@ -27,6 +27,11 @@ class CanvasImage(CanvasObject):
 			return self._needs_blitting
 		self._needs_blitting = blit
 
+	def _image_changed(self):
+		self.set_size(self.image.size)
+		self.needs_blitting(True)
+		self.queue_paint()
+
 	def scale(self, dst_size, src_pos = (0,0), src_size = (-1, -1)):
 		"""
 		Scale the image to the given 'size', where 'size' is a tuple holding the
@@ -38,10 +43,8 @@ class CanvasImage(CanvasObject):
 		#w, h = dst_size
 		#if w % 2: w = int(math.ceil(w / 2.0)) * 2
 		#if h % 2: h = int(math.ceil(h / 2.0)) * 2
-		self.image = self.image.scale(dst_size, src_pos, src_size)
-		self.set_size(self.image.size)
-		self.needs_blitting(True)
-		self.queue_paint()
+		self.image.scale(dst_size, src_pos, src_size)
+		self._image_changed()
 
 
 	def crop(self, pos, size):
@@ -50,22 +53,23 @@ class CanvasImage(CanvasObject):
 		top coordinates, to the size 'size', a tuple holding the new
 		width and height.
 		"""
-		self.image = self.image.crop(pos, size)
-		self.set_size(size)
-		self.needs_blitting(True)
-		self.queue_paint()
+		self.image.crop(pos, size)
+		self._image_changed()
 
 	def rotate(self, angle):
 		"""
 		Rotate the image by the given angle.
 		"""
+		self.image.rotate(angle)
+		self._image_changed()
 
-		# FIXME: this seems broken.
+	def flip(self):
+		self.image.flip()
+		self._image_changed()
 
-		self.image = self.image.rotate(angle)
-		self.set_size((self.image.size[0], self.image.size[1]))
-		self.needs_blitting(True)
-		self.queue_paint()
+	def mirror(self):
+		self.image.mirror()
+		self._image_changed()
 
 	def draw_mask(self, mask_image, pos = (0, 0)):
 		"""
@@ -77,9 +81,9 @@ class CanvasImage(CanvasObject):
 			mask_image = imagelib.open(mask_image)
 		elif isinstance(mask_image, CanvasImage):
 			mask_image = mask_image.image
+
 		self.image.draw_mask(mask_image, pos)
-		self.needs_blitting(True)
-		self.queue_paint()
+		self._image_changed()
 
 
 	def draw_image(self, image, dst_pos = (0, 0), dst_size = (-1, -1), 
@@ -95,13 +99,12 @@ class CanvasImage(CanvasObject):
 			image = image.image
 		if not self.image:
 			if dst_size != (-1, -1):
-				self.image = image.scale(dst_size)
+				image.scale(dst_size)
 			else:
 				self.image = image
 		else:
 			self.image.blend(image, dst_pos, dst_size, src_pos, src_size, alpha)
-		self.needs_blitting(True)
-		self.queue_paint()
+		self._image_changed()
 
 
 	def set_image(self, image):
@@ -120,9 +123,7 @@ class CanvasImage(CanvasObject):
 			self.reset()
 
 		self.image = image
-		self.set_size((image.size[0], image.size[1]))
-		self.needs_blitting(True)
-		self.queue_paint()
+		self._image_changed()
 
 
 	def draw_text(self, text, pos = (0, 0), font = "arial", size = 24, color = (255,255,255,255)):
@@ -134,16 +135,17 @@ class CanvasImage(CanvasObject):
 		if type(font) in types.StringTypes:
 			font = imagelib.load_font(font, size)
 		metrics = self.image.draw_text(pos, text, color, font)
-		self.needs_blitting(True)
-		self.queue_paint()
+		self._image_changed()
 		return metrics
 
 	def draw_rectangle(self, pos, size, color = (255, 255, 255, 255), fill = True):
 		print "Draw rect", pos, size, color, fill
 		self.image.draw_rectangle(pos, size, color, fill)
+		self._image_changed()
 
 	def draw_ellipse(self, center_pos, amplitude, color = (255, 255, 255, 255), fill = True):
 		self.image.draw_ellipse(center_pos, amplitude, color, fill)
+		self._image_changed()
 
 
 	def new(self, size):
@@ -153,9 +155,7 @@ class CanvasImage(CanvasObject):
 		"""
 		self.image = imagelib.new(size)
 		self.filename = None
-		self.needs_blitting(True)
-		self.set_size(size)
-
+		self._image_changed()
 
 	def get_size(self):
 		if not self.image:
