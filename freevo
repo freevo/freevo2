@@ -113,6 +113,7 @@ if [ "$1" = "stop" ] ; then
         PID_FILE=$PID_DIR/freevo-`basename $1`.pid
     fi
     kill -KILL `cat $PID_FILE`
+    rm $PID_FILE
     exit 0
 fi
 
