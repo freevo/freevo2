@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/09/20 17:03:20  dischi
+# draw status while connecting and caching for network files
+#
 # Revision 1.23  2003/09/19 22:09:15  dischi
 # use new childapp thread function
 #
@@ -74,6 +77,9 @@ import plugin
 
 # RegExp
 import re
+
+import osd
+osd = osd.get_singleton()
 
 # contains an initialized MPlayer() object
 mplayer = None
@@ -252,7 +258,7 @@ class MPlayer:
 
         self.file = item
 
-        self.thread.start(MPlayerApp, (command, item))
+        self.thread.start(MPlayerApp, (command, item, network_play))
 
         self.item  = item
 
@@ -387,7 +393,7 @@ class MPlayerApp(childapp.ChildApp):
     class controlling the in and output from the mplayer process
     """
 
-    def __init__(self, (app, item)):
+    def __init__(self, (app, item, network_play)):
         if config.MPLAYER_DEBUG:
             fname_out = os.path.join(config.LOGDIR, 'mplayer_stdout.log')
             fname_err = os.path.join(config.LOGDIR, 'mplayer_stderr.log')
@@ -408,13 +414,15 @@ class MPlayerApp(childapp.ChildApp):
         else:
             self.check_audio = 1
 
+        self.network_play = network_play
         self.RE_TIME = re.compile("^A: *([0-9]+)").match
         self.RE_START = re.compile("^Starting playback\.\.\.").match
         self.RE_EXIT = re.compile("^Exiting\.\.\. \((.*)\)$").match
         self.item = item
         childapp.ChildApp.__init__(self, app)
         self.exit_type = None
-
+        self.osdfont = osd.getfont(config.OSD_DEFAULT_FONTNAME, config.OSD_DEFAULT_FONTSIZE)
+                
         
     def kill(self):
         # Use SIGINT instead of SIGKILL to make sure MPlayer shuts
@@ -444,7 +452,22 @@ class MPlayerApp(childapp.ChildApp):
                 self.log_stdout.write(line + '\n')
             except ValueError:
                 pass # File closed
-                     
+
+        if self.network_play:
+            if line.find('Opening audio decoder') == 0:
+                osd.clearscreen(osd.COL_BLACK)
+                osd.update()
+            elif (line.find('Resolving ') == 0 or line.find('Connecting to server') == 0 or \
+                  line.find('Cache fill:') == 0) and \
+                  line.find('Resolving reference to') == -1:
+                if line.find('Connecting to server') == 0:
+                    line = 'Connecting to server'
+                osd.clearscreen(osd.COL_BLACK)
+                osd.drawstringframed(line, config.OVERSCAN_X, config.OVERSCAN_Y,
+                                     osd.width - 2 * config.OVERSCAN_X, -1, self.osdfont,
+                                     osd.COL_WHITE)
+                osd.update()
+                
         if line.find("A:") == 0:
             m = self.RE_TIME(line) # Convert decimal
             if hasattr(m,'group'):
