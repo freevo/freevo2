@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2003/12/14 17:15:19  dischi
+# check if CDROM.py is complete
+#
 # Revision 1.45  2003/11/30 14:41:10  dischi
 # use new Mimetype plugin interface
 #
@@ -66,7 +69,10 @@ import array
 
 try:
     from CDROM import *
-except ImportError:
+    # test if CDROM_DRIVE_STATUS is there
+    # (for some strange reason, this is missing sometimes)
+    CDROM_DRIVE_STATUS
+except:
     if os.uname()[0] == 'FreeBSD':
         # FreeBSD ioctls - there is no CDROM.py...
         CDIOCEJECT = 0x20006318
