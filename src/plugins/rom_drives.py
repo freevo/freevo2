@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2003/11/24 19:25:28  dischi
+# adjust to variable moving
+#
 # Revision 1.41  2003/11/22 20:36:04  dischi
 # use new vfs
 #
@@ -144,6 +147,8 @@ import rc
 import event as em
 import plugin
 
+import video
+
 from audio.audiodiskitem import AudioDiskItem
 from video.videoitem import VideoItem
 from item import Item
@@ -151,7 +156,6 @@ from item import Item
 import mmpython
 
 
-from video import xml_parser, videoitem
 from directory import DirItem
 
 LABEL_REGEXP = re.compile("^(.*[^ ]) *$").match
@@ -505,16 +509,16 @@ class Identify_Thread(threading.Thread):
         media.type  = 'cdrom'
 
         label = data.label
-        
+
         # is the id in the database?
-        if media.id in config.MOVIE_INFORMATIONS_ID:
-            movie_info = config.MOVIE_INFORMATIONS_ID[media.id]
+        if media.id in video.fxd_database['id']:
+            movie_info = video.fxd_database['id'][media.id]
             if movie_info:
                 title = movie_info.name
             
         # no? Maybe we can find a label regexp match
         else:
-            for (re_label, movie_info_t) in config.MOVIE_INFORMATIONS_LABEL:
+            for (re_label, movie_info_t) in video.fxd_database['label']:
                 if re_label.match(media.label):
                     movie_info = movie_info_t
                     if movie_info_t.name:
@@ -544,7 +548,7 @@ class Identify_Thread(threading.Thread):
             if movie_info:
                 media.info = copy.copy(movie_info)
             else:
-                media.info = videoitem.VideoItem('0', None)
+                media.info = VideoItem('0', None)
                 if config.OVERLAY_DIR:
                     media.info.image = util.getimage(os.path.join(config.OVERLAY_DIR,
                                                                   'disc-set', media.id))
@@ -653,8 +657,8 @@ class Identify_Thread(threading.Thread):
                     elif os.path.isfile((k + ".jpg").lower()):
                         image = (k + ".jpg").lower()
                     title = show_name + ' ('+ volumes + ')'
-                    if config.TV_SHOW_INFORMATIONS.has_key(show_name.lower()):
-                        tvinfo = config.TV_SHOW_INFORMATIONS[show_name.lower()]
+                    if video.tv_show_informations.has_key(show_name.lower()):
+                        tvinfo = video.tv_show_informations[show_name.lower()]
                         more_info = tvinfo[1]
                         if not image:
                             image = tvinfo[0]
@@ -755,7 +759,7 @@ class Identify_Thread(threading.Thread):
             # Check if we need to update the database
             # This is a simple way for external apps to signal changes
             if os.path.exists(rebuild_file):
-                if xml_parser.hash_xml_database() == 0:
+                if video.hash_fxd_movie_database() == 0:
                     # something is wrong, deactivate this feature
                     rebuild_file = '/this/file/should/not/exist'
                     
