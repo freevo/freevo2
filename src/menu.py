@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/01/11 10:54:39  dischi
+# small bugfix
+#
 # Revision 1.8  2003/01/11 10:44:40  dischi
 # o add functions to menu to add or delete an item
 # o the reload_func can return None. If than the old menu will be
@@ -260,9 +263,12 @@ class MenuWidget:
                 util.umount(media.mountdir)
 
         if reload:
-            reload = menu.reload_func()
-            if reload:
-                self.menustack[-1] = reload
+            menu = self.menustack[-1]
+            if menu.reload_func:
+                reload = menu.reload_func()
+                if reload:
+                    self.menustack[-1] = reload
+            self.init_page()
 
         skin.DrawMenu(self)
 
