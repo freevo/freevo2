@@ -5,10 +5,13 @@
 # $Id$
 #
 # Notes:
-# Todo:        
+# Todo:
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/01/10 16:53:22  dischi
+# make eval more secure (and remove trailing whitespaces)
+#
 # Revision 1.9  2004/01/01 15:53:18  dischi
 # move the shadow code into osd.py
 #
@@ -33,7 +36,7 @@
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002 Krister Lagerstrom, et al.
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -75,23 +78,29 @@ class Info_Area(Skin_Area):
         self.updated = 0
         self.sellist = None
 
-        
+
     def update_content_needed( self ):
         """
         check if the content needs an update
         """
         update = 0
-    
+
         if self.layout_content is not self.layout.content:
             return True
 
         if self.last_item != self.infoitem:
             return True
-        
+
         update += self.set_content()    # set self.content
         update += self.set_list(update) # set self.list
 
-        list = self.eval_expressions( self.list )
+        try:
+            list = self.eval_expressions( self.list )
+        except:
+            print "skin error: unable to parse expression in info_area"
+            traceback.print_exc()
+            return 0
+        
         if self.sellist  != list:
             self.sellist = list
             update += 1
@@ -99,7 +108,7 @@ class Info_Area(Skin_Area):
         if update:
             self.updated = 1
         return update
-    
+
 
     def update_content( self ):
         """
@@ -107,7 +116,12 @@ class Info_Area(Skin_Area):
         """
         if not self.updated: # entered a menu for the first time
             self.set_list(self.set_content())
-            self.sellist = self.eval_expressions( self.list )
+            try:
+                self.sellist = self.eval_expressions( self.list )
+            except:
+                print "skin error: unable to parse expression in info_area"
+                traceback.print_exc()
+                return 0
 
         self.last_item = self.infoitem
         if not self.list: # nothing to draw
@@ -127,7 +141,7 @@ class Info_Area(Skin_Area):
                                  i.width , i.height,
                                  align_v = i.valign, align_h = i.align,
                                  mode = i.mode )
-                
+
             elif isinstance( i, xml_skin.FormatImg ):
                 if i.src:
                     tmp = ( self.content.x + i.x, self.content.y + i.y,
@@ -135,8 +149,8 @@ class Info_Area(Skin_Area):
                     self.drawimage( i.src, tmp )
                 else:
                     print _( "ERROR" ) + ": missing 'src' attribute in skin tag!"
-                    
-                    
+
+
         self.last_item = self.infoitem
 
         # always set this to 0 because we don't call update_content
@@ -156,12 +170,12 @@ class Info_Area(Skin_Area):
                 self.content.x != self.area_val.x or \
                 self.content.y != self.area_val.y):
             update=1
-        
+
         if self.layout_content is not self.layout.content or update:
             types = self.layout.content.types
             self.content = self.calc_geometry( self.layout.content, copy_object=True )
             # backup types, which have the previously calculated fcontent
-            self.content.types = types 
+            self.content.types = types
             self.layout_content = self.layout.content
             return 1
         return 0
@@ -175,13 +189,13 @@ class Info_Area(Skin_Area):
             key = 'default'
             if hasattr( self.infoitem, 'info_type'):
                 key = self.infoitem.info_type or key
-            
+
             elif hasattr( self.infoitem, 'type' ):
                 key = self.infoitem.type or key
 
-            try:
+            if self.content.types.has_key(key):
                 val = self.content.types[ key ]
-            except:
+            else:
                 val = self.content.types[ 'default' ]
 
             if not hasattr( val, 'fcontent' ):
@@ -190,7 +204,7 @@ class Info_Area(Skin_Area):
 
             self.list = val.fcontent
             return 1
-        
+
         return 0
 
 
@@ -198,22 +212,22 @@ class Info_Area(Skin_Area):
     def get_expression( self, expression ):
         """
         create the python expression
-        """        
-        exp = ''                
+        """
+        exp = ''
         for b in expression.split( ' ' ):
             if b in ( 'and', 'or', 'not' ):
                 # valid operator
                 exp += ' %s' % ( b )
-                
+
             elif b[ :4 ] == 'len(' and b.find( ')' ) > 0 and \
                      len(b) - b.find(')') < 5:
                 # lenght of something
-                exp += ' item.getattr("%s") %s' % ( b[ : ( b.find(')') + 1 ) ],
+                exp += ' attr("%s") %s' % ( b[ : ( b.find(')') + 1 ) ],
                                                     b[ ( b.find(')') + 1 ) : ])
             else:
                 # an attribute
-                exp += ' item.getattr("%s")' % b
-                
+                exp += ' attr("%s")' % b
+
         return exp.strip()
 
 
@@ -228,13 +242,13 @@ class Info_Area(Skin_Area):
            ( index, 'text value' )
         so you can check if it changed just comparing two lists
         (useful in music player, to update 'elapsed')
-        """        
+        """
         item = self.infoitem
         ret_list = [ ]
 
         if not list:
             return
-        
+
         rg = range( len( list ) )
         for i in rg:
             if isinstance( list[ i ], xml_skin.FormatIf ):
@@ -246,17 +260,11 @@ class Info_Area(Skin_Area):
                     exp = list[ i ].expression
 
                 # Evaluate the expression:
-                try:
-                    if exp and eval( exp ):
-                        # It's true, we should recurse into children
-                        ret_list += self.eval_expressions( list[ i ].content, index + [ i ] )
-                except:
-                    print "ERROR: Could not evaluate 'if' condition in info_area"
-                    print "expression was: 'if %s:', Item was: %s" % ( exp, item.type )
-                    traceback.print_exc()
-                    
+                if exp and eval(exp, {'attr': item.getattr}, {}):
+                    # It's true, we should recurse into children
+                    ret_list += self.eval_expressions( list[ i ].content, index + [ i ] )
                 continue
-            
+
             elif isinstance( list[ i ], xml_skin.FormatText ):
                 exp = None
                 if list[ i ].expression:
@@ -266,20 +274,15 @@ class Info_Area(Skin_Area):
                         list[ i ].expression = exp
                     else:
                         exp = list[ i ].expression
-                    try:
-                        # evaluate the expression:
+                    # evaluate the expression:
+                    if exp:
+                        exp = eval(exp, {'attr': item.getattr}, {})
                         if exp:
-                            exp = eval( exp )
-                            if exp:
-                                list[ i ].text = str( exp )
-                    except:
-                        print "ERROR: Parsing XML in info_area:"
-                        print "could not evaluate: '%s'" % ( exp )
-                        traceback.print_exc()
+                            list[ i ].text = str( exp )
                 # I add a tuple here to be able to compare lists and know if we need to
                 # update, this is useful in the mp3 player
                 ret_list += [ index + [ ( i, list[ i ].text ) ] ]
-            else:   
+            else:
                 ret_list += [ index + [ i ] ]
 
         return ret_list
@@ -295,11 +298,11 @@ class Info_Area(Skin_Area):
         x, y, width and height already calculated)
         """
         x, y = 0, 0
-        
+
         item = self.infoitem
 
         list = self.list
-        ret_list = [ ]        
+        ret_list = [ ]
         last_newline = 0 # index of the last line
         for i in sel_list:
             newline = 0
@@ -335,7 +338,7 @@ class Info_Area(Skin_Area):
                 # Image is a float object
                 if element.x == None:
                     element.x = x
-                    
+
                 if element.y == None:
                     element.y = y
                 else:
@@ -344,22 +347,22 @@ class Info_Area(Skin_Area):
                 if element.width == None or element.height == None:
                     image = osd.loadbitmap( element.src, True )
                     size = image.get_size()
-                    
+
                     if element.width == None:
                         element.width = size[ 0 ]
-                        
+
                     if element.height == None:
-                        element.height = size[ 1 ]                    
-                    
+                        element.height = size[ 1 ]
+
                 ret_list += [ element ]
 
             #
             # Tag: <newline>
-            # 
+            #
             elif isinstance( element, xml_skin.FormatNewline ):
                 newline = 1 # newline height will be added later
                 x = 0
-                
+
             #
             # Tag: <text>
             #
@@ -406,7 +409,7 @@ class Info_Area(Skin_Area):
 
                 x += element.width
                 ret_list.append(element)
-            
+
 
             # We should shrink the width and go next line (overflow)
             if x > self.content.width:
@@ -426,13 +429,13 @@ class Info_Area(Skin_Area):
                         font = j.font
                         if j.text and j.height > newline_height:
                             newline_height = j.height
-                            
+
                 y = y + newline_height
                 last_newline = new_last_newline
                 # update the height of the elements in this line,
                 # so vertical alignment will be respected
                 for j in last_line:
                     j.height = newline_height
-                
-            
+
+
         return ret_list
