@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/01/24 07:25:23  krister
+# Added check for apps in the runtime/apps dir.
+#
 # Revision 1.23  2002/12/21 17:26:52  dischi
 # Added dfbmga support. This includes configure option, some special
 # settings for mplayer and extra overscan variables
@@ -219,9 +222,17 @@ def create_config(conf):
         
     print 'done'
 
+
 def check_program(conf, name, variable, necessary):
+
+    # Check for programs both in the path and the runtime apps dir
+    search_dirs = os.environ['PATH'].split(':')
+    search_dirs.append('./runtime/apps')
+    search_dirs.append('./runtime/apps/mplayer')
+
     print 'checking for %-13s' % (name+'...'),
-    for dir in os.environ['PATH'].split(':'):
+
+    for dir in search_dirs:
         if os.path.exists(os.path.join(dir,name)):
             print os.path.join(dir,name)
             conf.__dict__[variable] = os.path.join(dir,name)
