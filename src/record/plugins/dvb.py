@@ -46,6 +46,7 @@ import config
 # utils
 from util.fileops import find_file_in_path
 from util.popen import Process
+from util.callback import *
 
 # basic recorder
 from record.process import Recorder
@@ -99,6 +100,8 @@ class PluginInterface(Recorder):
         for c in self.device.channels:
             channels.append([c])
         self.channels = [ device, rating, channels ]
+        # activate the plugin
+        self.activate()
 
         
     def get_cmd(self, rec):
@@ -145,11 +148,17 @@ class PluginInterface(Recorder):
         return [ self.channels ]
 
 
-    def stopped(self):
+    def stop_replex(self):
+        # stop replex child
+        self.replex_child.stop()
+        self.replex_child = None
+
+        
+    def stopped(self, child):
         """
         Callback when the recording has stopped
         """
-        Recorder.stopped(self)
+        Recorder.stopped(self, child)
         if self.program == 'tzap' and self.replex:
             # cleanup for tzap + replex
             if self.record_fifo:
@@ -158,6 +167,5 @@ class PluginInterface(Recorder):
                     os.unlink(self.record_fifo)
                 self.record_fifo = None
             if self.replex_child:
-                # stop replex child
-                self.replex_child.stop()
-                self.replex_child = None
+                call_later(self.stop_replex)
+                

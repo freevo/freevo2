@@ -54,6 +54,8 @@ class PluginInterface(Recorder):
         for c in self.device.channels:
             channels.append([c])
         self.channels = [ device, rating, channels ]
+        # activate the plugin
+        self.activate()
 
 
     def config(self):
