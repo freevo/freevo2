@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/08/27 14:22:59  dischi
+# make it possible to switch event context
+#
 # Revision 1.2  2004/08/26 15:32:35  dischi
 # some logic change
 #
@@ -72,6 +75,7 @@ class Application:
         In case it is not overloaded, this function will also update the
         display.
         """
+        self._evt_stopped = False
         if self.visible:
             return False
         self.visible = True
@@ -104,3 +108,14 @@ class Application:
         hide() function will be called.
         """
         self._evt_stopped = True
+
+
+    def set_event_context(self, context):
+        """
+        Set a new context for the event handler
+        """
+        self._evt_context = context
+        if self._evt_handler.get() == self:
+            # We are the current application with the focus,
+            # so set context of the eventhandler to the new context
+            self._evt_handler.context = context
