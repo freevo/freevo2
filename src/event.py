@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2004/03/05 04:01:37  rshortt
+# Make comment match example and fix typo.
+#
 # Revision 1.42  2004/02/27 20:13:01  dischi
 # add global events to avoid duplicate code
 #
@@ -123,9 +126,9 @@ MIXER_VOLDOWN          = Event('MIXER_VOLDOWN', arg=5)
 MIXER_MUTE             = Event('MIXER_MUTE')
 
 # To change the step size, but the following code in your
-# local.conf (setting VOL+ step size to 2)
+# local_conf.py (setting VOL+ step size to 2)
 #
-# EVENTS['global']['VOL+'] = Event('MIXER_VOLUP', arg=1)
+# EVENTS['global']['VOL+'] = Event('MIXER_VOLUP', arg=2)
 
 
 PLAYLIST_NEXT          = Event('PLAYLIST_NEXT')
