@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.78  2004/08/22 20:13:09  dischi
+# support for display change (bmovl)
+#
 # Revision 1.77  2004/08/09 14:38:08  dischi
 # fix mplayer version detection
 #
@@ -134,13 +137,13 @@ class MPlayer(Application):
         """
         init the mplayer object
         """
-        Application.__init__(self, 'mplayer', 'video', True, 'bmovl')
+        Application.__init__(self, 'mplayer', 'video', True)
         self.name       = 'mplayer'
         self.version    = version
         self.seek       = 0
         self.app        = None
         self.plugins    = []
-
+        
 
     def rate(self, item):
         """
@@ -403,7 +406,7 @@ class MPlayer(Application):
             else:
                 plugin.getbyname('idlebar').hide()
                 self.app.write('osd 1\n')
-            gui.get_screen().update()
+            gui.get_display().update()
             return True
 
         if event == PAUSE or event == PLAY:
@@ -511,6 +514,10 @@ class MPlayerApp(childapp.ChildApp2):
             if hasattr(p, 'elapsed'):
                 self.elapsed_plugins.append(p)
 
+        self.width  = 0
+        self.height = 0
+        self.screen = None
+        
         # init the child (== start the threads)
         childapp.ChildApp2.__init__(self, app)
 
@@ -554,6 +561,9 @@ class MPlayerApp(childapp.ChildApp2):
 
         # current elapsed time
         if line.find("A:") == 0:
+            if self.width and self.height and not self.screen:
+                _debug_('starting Bmovl')
+                self.screen = gui.set_display('Bmovl', (self.width, self.height))
             m = self.RE_TIME(line)
             if hasattr(m,'group') and self.item.elapsed != int(m.group(1))+1:
                 self.item.elapsed = int(m.group(1))+1
@@ -573,6 +583,22 @@ class MPlayerApp(childapp.ChildApp2):
             for p in self.stdout_plugins:
                 p.stdout(line)
                 
+            try:
+                if line.find('SwScaler:') ==0 and line.find(' -> ') > 0 and \
+                       line[line.find(' -> '):].find('x') > 0:
+                    width, height = line[line.find(' -> ')+4:].split('x')
+                    if self.height < int(height):
+                        self.width  = int(width)
+                        self.height = int(height)
+
+                if line.find('Expand: ') == 0:
+                    width, height = line[7:line.find(',')].split('x')
+                    if self.height < int(height):
+                        self.width  = int(width)
+                        self.height = int(height)
+            except Exception, e:
+                _debug_(e, 0)
+
             if self.check_audio:
                 if line.find('MPEG: No audio stream found -> no sound') == 0:
                     # OK, audio is broken, restart without -alang
@@ -594,3 +620,12 @@ class MPlayerApp(childapp.ChildApp2):
         """
         for p in self.stdout_plugins:
             p.stdout(line)
+
+    def stop(self, cmd=''):
+        if self.screen:
+            gui.remove_display(self.screen)
+            self.screen = None
+            self.width  = 0
+            self.height = 0
+        childapp.ChildApp2.stop(self, cmd)
+        
