@@ -6,6 +6,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/07/24 00:01:19  rshortt
+# Extending the idlebar.tv plugin with the help (and idea) of Mike Ruelle.
+# Now you may add args=(number,) to the plugin.activate for this plugin and
+# it will warn you that number of hours before your xmltv data is invalid and
+# present a more sever warning when your xmltv data is expired.
+#
+# The new icons are kind of lame so anyone feel free to spruce them up.
+#
 # Revision 1.3  2003/07/13 18:08:51  rshortt
 # Change tv_util.get_chan_displayname() to accept channel_id instead of
 # a TvProgram object and also use config.TV_CHANNELS when available, which
@@ -124,4 +132,22 @@ def get_chan_displayname(channel_id):
     return guide.chan_dict.get(channel_id).displayname
 
     return None
+
+def when_listings_expire():
+    guide = epg_xmltv.get_guide()
+    last = 0
+    left = 0
+
+    for ch in guide.chan_list:
+        for prog in ch.programs:
+            if prog.start > last: last = prog.start
+
+    if last > 0:
+        now = time.time()
+        if last > now:
+            left = int(last - now)
+            # convert to hours
+            left /= 3600
+
+    return left
 

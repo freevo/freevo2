@@ -12,15 +12,32 @@
 #   plugin.activate('idlebar')
 #   
 #   plugin.activate('idlebar.mail',    level=10, args=('/var/spool/mail/dmeyer', ))
-#   plugin.activate('idlebar.tv',      level=20)
+#
+#   plugin.activate('idlebar.tv',      level=20, args=(listings_threshold, ))
+#     listings_threshold must be a number in hours.  For example if you put
+#     args=(12, ) then 12 hours befor your xmltv listings run out the tv icon
+#     will present a warning.  Once your xmltv data is expired it will present
+#     a more severe warning.  If no args are given then no warnings will be
+#     given.
+#
 #   plugin.activate('idlebar.weather', level=30, args=('4-letter code', ))
-#   For weather station codes see: http://www.nws.noaa.gov/tg/siteloc.shtml
+#     For weather station codes see: http://www.nws.noaa.gov/tg/siteloc.shtml
+#     plugin.activate('idlebar.clock',   level=50)
+#
 #   plugin.activate('idlebar.cdstatus', level=30)
 #   plugin.activate('idlebar.clock',    level=50)
 #   
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/07/24 00:01:19  rshortt
+# Extending the idlebar.tv plugin with the help (and idea) of Mike Ruelle.
+# Now you may add args=(number,) to the plugin.activate for this plugin and
+# it will warn you that number of hours before your xmltv data is invalid and
+# present a more sever warning when your xmltv data is expired.
+#
+# The new icons are kind of lame so anyone feel free to spruce them up.
+#
 # Revision 1.24  2003/07/20 18:22:35  dischi
 # added patch for different temp units from Michael Ruelle
 #
@@ -97,10 +114,13 @@ import sys
 import string
 import mailbox
 import skin
+import tv_util
 
 import plugin
 
 import pymetar
+
+DEBUG = config.DEBUG
 
 TRUE  = 1
 FALSE = 0
@@ -246,11 +266,17 @@ class tv(IdleBarPlugin):
     """
     show if the tv is locked or not
     """
-    def __init__(self):
+    def __init__(self, listings_threshold=-1):
         IdleBarPlugin.__init__(self)
+
+        self.listings_threshold = listings_threshold
+        self.next_guide_check = 0
+        self.listings_expire = 0
         self.tvlockfile = config.FREEVO_CACHEDIR + '/record'
         self.TVLOCKED = 'skins/images/status/television_active.png'
         self.TVFREE = 'skins/images/status/television_inactive.png'
+        self.NEAR_EXPIRED = 'skins/images/status/television_near_expired.png'
+        self.EXPIRED = 'skins/images/status/television_expired.png'
         
     def checktv(self):
         if os.path.exists(self.tvlockfile):
@@ -258,10 +284,26 @@ class tv(IdleBarPlugin):
         return 0
 
     def draw(self, (type, object), x, osd):
+
         if self.checktv() == 1:
             return osd.draw_image(self.TVLOCKED, (x, osd.y + 10, -1, -1))[0]
-        else:
-            return osd.draw_image(self.TVFREE, (x, osd.y + 10, -1, -1))[0]
+
+        if self.listings_threshold != -1:
+            now = time.time()
+
+            if now > self.next_guide_check:
+                if DEBUG: print 'TV: checking guide'
+                self.listings_expire = tv_util.when_listings_expire()
+                if DEBUG: print 'TV: listings expire in %s hours' % self.listings_expire
+                # check again in 10 minutes
+                self.next_guide_check = now + 10*60
+
+            if self.listings_expire == 0:
+                return osd.draw_image(self.EXPIRED, (x, osd.y + 10, -1, -1))[0]
+            elif self.listings_expire <= self.listings_threshold:
+                return osd.draw_image(self.NEAR_EXPIRED, (x, osd.y + 10, -1, -1))[0]
+
+        return osd.draw_image(self.TVFREE, (x, osd.y + 10, -1, -1))[0]
 
 
 
