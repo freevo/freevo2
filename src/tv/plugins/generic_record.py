@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/09/05 14:28:01  rshortt
+# Oops.  We don't need tv_util here anymore.
+#
 # Revision 1.7  2003/09/03 17:54:38  dischi
 # Put logfiles into LOGDIR not $FREEVO_STARTDIR because this variable
 # doesn't exist anymore.
@@ -47,7 +50,6 @@ import threading
 import signal
 
 import config
-import tv_util
 import childapp 
 import plugin 
 
