@@ -3,7 +3,6 @@ import os
 import stat
 import traceback
 import Image     # PIL
-import ImageFile # from PIL
 
 import mevas
 
@@ -43,6 +42,18 @@ def load(url, size=None, cache=False, vfs_save=False):
     else:
         width, height = size
         
+    try:
+        # maybe the image is an image object from PIL
+        image = mevas.imagelib.new(url.size, url.tostring(), url.mode)
+
+        # scale the image if needed
+        if width != None or height != None:
+            image = resizebitmap(image, width, height)
+        return image
+    except:
+        # no, it is not
+        pass
+    
     if url.find('/') == -1 and url.find('.') == -1:
         # this looks like a 'theme' image
         surl = theme_engine.get_theme().get_image(url)
@@ -63,45 +74,42 @@ def load(url, size=None, cache=False, vfs_save=False):
         vfs_save = False
 
     # not in cache, load it
-    try:
-        image = mevas.imagelib.new(url.size, url.tostring(), url.mode)
-    except:
-        filename = os.path.abspath(url)
+    filename = os.path.abspath(url)
 
-        if vfs_save:
-            vfs_save = vfs.getoverlay('%s.raw-%sx%s' % (filename, width, height))
-            try:
-                if os.stat(vfs_save)[stat.ST_MTIME] > \
-                       os.stat(filename)[stat.ST_MTIME]:
-                    f = open(vfs_save, 'r')
-                    image = mevas.imagelib.new((width, height), f.read(), 'RGBA')
-                    f.close()
-                    if cache:
-                        cache[key] = image
-                    return image
-            except:
-                pass
-
-        if not os.path.isfile(filename):
-            filename = os.path.join(config.IMAGE_DIR, url[8:])
-
-        if not os.path.isfile(filename):
-            print 'osd.py: Bitmap file "%s" doesnt exist!' % filename
-            return None
-
+    if vfs_save:
+        vfs_save = vfs.getoverlay('%s.raw-%sx%s' % (filename, width, height))
         try:
-            try:
-                image = mevas.imagelib.open(filename)
-            except Exception, e:
-                print 'imagelib load problem: %s - trying Imaging' % e
-                i = Image.open(filename)
-                image = mevas.imagelib.new(i.tostring(), i.size, i.mode)
-
+            if os.stat(vfs_save)[stat.ST_MTIME] > \
+                   os.stat(filename)[stat.ST_MTIME]:
+                f = open(vfs_save, 'r')
+                image = mevas.imagelib.new((width, height), f.read(), 'RGBA')
+                f.close()
+                if cache:
+                    cache[key] = image
+                return image
         except:
-            print 'Unknown Problem while loading image %s' % String(url)
-            if config.DEBUG:
-                traceback.print_exc()
-            return None
+            pass
+
+    if not os.path.isfile(filename):
+        filename = os.path.join(config.IMAGE_DIR, url[8:])
+
+    if not os.path.isfile(filename):
+        print 'osd.py: Bitmap file "%s" doesnt exist!' % filename
+        return None
+
+    try:
+        try:
+            image = mevas.imagelib.open(filename)
+        except Exception, e:
+            print 'imagelib load problem: %s - trying Imaging' % e
+            i = Image.open(filename)
+            image = mevas.imagelib.new(i.tostring(), i.size, i.mode)
+
+    except:
+        print 'Unknown Problem while loading image %s' % String(url)
+        if config.DEBUG:
+            traceback.print_exc()
+        return None
 
     # scale the image if needed
     if width != None or height != None:
