@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.127  2004/10/28 19:34:30  dischi
+# adjust to various changes in util
+#
 # Revision 1.126  2004/10/26 19:14:49  dischi
 # adjust to new sysconfig file
 #
@@ -84,11 +87,12 @@ import __builtin__
 import version
 import input
 import sysconfig
+import logging
 
-if float(sys.version[0:3]) >= 2.3:
-    import warnings
-    warnings.simplefilter("ignore", category=FutureWarning)
-    warnings.simplefilter("ignore", category=DeprecationWarning)
+# if float(sys.version[0:3]) >= 2.3:
+#     import warnings
+#     warnings.simplefilter("ignore", category=FutureWarning)
+#     warnings.simplefilter("ignore", category=DeprecationWarning)
 
 VERSION = version.__version__
 
@@ -115,46 +119,6 @@ def __isstring__(s):
         
 __builtin__.__dict__['isstring'] = __isstring__
 
-
-class Logger:
-    """
-    Class to create a logger object which will send messages to stdout
-    and log them into a logfile
-    """
-    def __init__(self, logtype='(unknown)'):
-        self.lineno = 1
-        self.logtype = logtype
-        appname = os.path.splitext(os.path.basename(sys.argv[0]))[0]
-        logfile = '%s/%s-%s.log' % (LOGDIR, appname, os.getuid())
-        self.logfile = logfile
-        try:
-            self.fp = open(logfile, 'a')
-        except IOError:
-            print 'Could not open logfile: %s' % logfile
-            self.fp = open('/dev/null','a')
-        self.softspace = 0
-        
-    def write(self, msg):
-        global DEBUG_STDOUT
-        if isinstance(msg, unicode):
-            msg = msg.encode(sysconfig.LOCALE)
-        if DEBUG_STDOUT:
-            sys.__stdout__.write(msg)
-        self.fp.write(msg)
-        self.fp.flush()
-        return
-
-    def log(self, msg):
-        self.fp.write(msg)
-        self.fp.flush()
-        return
-
-    def flush():
-        pass
-
-    def close():
-        pass
-    
 
 def print_config_changes(conf_version, file_version, changelist):
     """
@@ -253,6 +217,76 @@ else:
 
 FREEVO_CACHEDIR = sysconfig.CONF.cachedir
 
+# logger = logging.getLogger()
+# formatter = logging.Formatter('%(module)s (%(lineno)s): %(message)s')
+# logger.setLevel(logging.INFO)
+
+# if not HELPER or IS_WEBSERVER or IS_RECORDSERVER:
+#     app = os.path.splitext(os.path.basename(sys.argv[0]))[0]
+#     lf = os.path.join(LOGDIR, app + '-%s.log' % os.getuid())
+#     hdlr = logging.FileHandler(lf)
+#     hdlr.setFormatter(formatter)
+#     logger.addHandler(hdlr)
+#     ts = time.asctime(time.localtime(time.time()))
+#     logger.info('-' * 79)
+#     logger.info('Freevo start at %s' % ts)
+#     logger.info('-' * 79)
+    
+# stdout_logger = logging.StreamHandler()
+# stdout_logger.setFormatter(formatter)
+# logger.addHandler(stdout_logger)
+
+# def _debug_function_(s, level=1):
+#     s = String(s)
+#     if level == 0:
+#         logger.warning(s)
+#     elif level == 1:
+#         logger.info(s)
+#     else:
+#         logger.debug(s)
+#     return
+            
+
+class Logger:
+    """
+    Class to create a logger object which will send messages to stdout
+    and log them into a logfile
+    """
+    def __init__(self, logtype='(unknown)'):
+        self.lineno = 1
+        self.logtype = logtype
+        appname = os.path.splitext(os.path.basename(sys.argv[0]))[0]
+        logfile = '%s/%s-%s.log' % (LOGDIR, appname, os.getuid())
+        self.logfile = logfile
+        try:
+            self.fp = open(logfile, 'a')
+        except IOError:
+            print 'Could not open logfile: %s' % logfile
+            self.fp = open('/dev/null','a')
+        self.softspace = 0
+        
+    def write(self, msg):
+        global DEBUG_STDOUT
+        if isinstance(msg, unicode):
+            msg = msg.encode(LOCALE)
+        if DEBUG_STDOUT:
+            sys.__stdout__.write(msg)
+        self.fp.write(msg)
+        self.fp.flush()
+        return
+
+    def log(self, msg):
+        self.fp.write(msg)
+        self.fp.flush()
+        return
+
+    def flush():
+        pass
+
+    def close():
+        pass
+    
+
 #
 # Redirect stdout and stderr to stdout and /tmp/freevo.log
 #
@@ -271,15 +305,11 @@ def _debug_function_(s, level=1):
     where =  traceback.extract_stack(limit = 2)[0]
     if isinstance( s, unicode ):
         s = s.encode(encoding, 'replace')
-    module = where[0][where[0].rfind('/')+1:]
-    if module == '__init__.py':
-        module = where[0][:where[0].rfind('/')]
-        module = module[module.rfind('/')+1:] + '/__init__.py'
-    s = '%s (%s): %s' % (module, where[1], s)
+    s = '%s (%s): %s' % (where[0][where[0].rfind('/')+1:], where[1], s)
     # print debug message
     print s
 
-            
+
 def _mem_debug_function_(type, name='', level=1):
     if MEMORY_DEBUG < level:
         return
@@ -574,10 +604,17 @@ else:
 # set the umask
 os.umask(UMASK)
 
+# if (not HELPER or IS_WEBSERVER or IS_RECORDSERVER) and not DEBUG_STDOUT:
+#     logger.removeHandler(stdout_logger)
+    
+# # reset log level based on config
+# if DEBUG == 0:
+#     logger.setLevel(logging.WARNING)
+# if DEBUG == 1:
+#     logger.setLevel(logging.INFO)
+# else:
+#     logger.setLevel(logging.DEBUG)
 
-if not HELPER:
-    _debug_('Logging to %s' % sys.stdout.logfile)
-   
 #
 # force fullscreen when freevo is it's own windowmanager
 #
@@ -795,13 +832,13 @@ encoding = LOCALE = sysconfig.CONF.encoding
 
 try:
     OVERLAY_DIR
-    print 'Error: OVERLAY_DIR is deprecated. Please set vfsdir in freevo.conf'
+    print 'Error: OVERLAY_DIR is deprecated. Please set vfs_dir in freevo.conf'
     print 'to change the location of the virtual file system'
     sys.exit(0)
 except NameError, e:
     pass
 
-OVERLAY_DIR = sysconfig.CONF.vfsdir
+OVERLAY_DIR = sysconfig.VFS_DIR
 
 # make sure USER and HOME are set
 os.environ['USER'] = pwd.getpwuid(os.getuid())[0]
