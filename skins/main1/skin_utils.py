@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/07/10 20:01:31  dischi
+# support for mmpython mime types
+#
 # Revision 1.7  2003/07/05 09:24:32  dischi
 # fixed cname cache
 #
@@ -70,7 +73,10 @@ def format_image(settings, item, width, height, force=0):
     try:
         type = item.display_type
     except:
-        type = item.type
+        try:
+            type = item.info.mime.replace('/', '_')
+        except:
+            type = item.type
 
     cname = '%s-%s-%s-%s-%s-%s' % (item.image, type, item.type, width, height, force)
     if item.media:
@@ -107,6 +113,9 @@ def format_image(settings, item, width, height, force=0):
             else:
                 imagefile = '%s/mimetypes/folder.png' % settings.icon_dir
     
+        elif os.path.isfile('%s/mimetypes/%s.png' % (settings.icon_dir, type)):
+            imagefile = '%s/mimetypes/%s.png' % (settings.icon_dir, type)
+
         elif os.path.isfile('%s/mimetypes/%s.png' % (settings.icon_dir, item.type)):
             imagefile = '%s/mimetypes/%s.png' % (settings.icon_dir, item.type)
 
@@ -127,6 +136,9 @@ def format_image(settings, item, width, height, force=0):
     else:
         force = 0
 
+    if type and len(type) > 4:
+        type = type[:5]
+        
     if type == 'audio' and not force:
         m = min(height, width)
         height = m
