@@ -177,7 +177,7 @@
                         <newline/>
                     </if>
                     <if expression="not content and not plot">
-                        <text font="info value" width="max" expression="num_items"/>
+                        <text font="info value" expression="num_items"/>
                         <text font="info value"> Items</text>
                         <!-- other values are num_play_items and num_dir_items -->
                     </if>
