@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.60  2004/01/20 20:24:19  dischi
+# bugfix
+#
 # Revision 1.59  2004/01/19 20:29:11  dischi
 # cleanup, reduce cache size
 #
@@ -475,11 +478,11 @@ class Playlist(Item):
 
         # That doesn't belong here! It should be part of the player!!!
         if event == PLAY_END:
-            if (self.current_item.type == 'audio'):
+            if self.current_item and self.current_item.type == 'audio':
                 rc.post_event(Event(AUDIO_LOG, arg=self.current_item.filename))
 
         if event in (INPUT_1, INPUT_2, INPUT_3, INPUT_4, INPUT_5) and \
-               event.arg and hasattr(self.current_item,'type'):
+               event.arg and self.current_item and hasattr(self.current_item,'type'):
             if (self.current_item.type == 'audio'):
                 rc.post_event(Event(RATING,(event.arg,self.current_item.filename)))
 
