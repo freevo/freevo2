@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.70  2003/09/08 14:40:24  mikeruelle
+# need the os to not crash
+#
 # Revision 1.69  2003/09/03 17:54:38  dischi
 # Put logfiles into LOGDIR not $FREEVO_STARTDIR because this variable
 # doesn't exist anymore.
@@ -375,7 +378,7 @@ if __name__ == "__main__":
         return tracefunc
 
     if len(sys.argv) >= 2 and sys.argv[1] == '--force-fs':
-        system('xset s off')
+        os.system('xset s off')
         config.START_FULLSCREEN_X = 1
         
     if len(sys.argv) >= 2 and sys.argv[1] == '--trace':
