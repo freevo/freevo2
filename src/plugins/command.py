@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/11/29 11:41:04  dischi
+# use the given menuw and not a global one
+#
 # Revision 1.1  2003/11/24 17:12:03  dischi
 # rename commands.py to command.py to avoid name problems with the global python commands.py
 #
@@ -90,7 +93,6 @@ from gui.GUIObject import Align
 
 #get the sinfletons so we can add our menu and get skin info
 skin = skin.get_singleton()
-menuwidget = menu.get_singleton()
 
 
 def islog(name):
@@ -340,12 +342,12 @@ class CommandMainMenuItem(Item):
             command_items += [ cmd_item ]
         if (len(command_items) == 0):
             command_items += [menu.MenuItem(_('No Commands found'),
-                                            menuwidget.goto_prev_page, 0)]
+                                            menuw.goto_prev_page, 0)]
         command_menu = menu.Menu(_('Commands'), command_items,
-                                 reload_func=menuwidget.goto_main_menu)
+                                 reload_func=menuw.goto_main_menu)
         rc.app(None)
-        menuwidget.pushmenu(command_menu)
-        menuwidget.refresh()
+        menuw.pushmenu(command_menu)
+        menuw.refresh()
 
 # our plugin wrapper, just creates the main menu item and adds it.
 class PluginInterface(plugin.MainMenuPlugin):
