@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/11/22 12:02:11  dischi
+# make the skin blankscreen a real plugin area
+#
 # Revision 1.17  2003/10/31 17:00:20  dischi
 # splashscreen for bsd
 #
@@ -222,34 +225,82 @@ class Plugin_Area(Skin_Area):
 
 skin_engine = None
 
-class BlankScreen:
+class BlankScreen(Skin_Area):
     """
     An area only with the background. This can be used by plugins to
     draw some objects with the osd to the screen with bypassing every
     skin setting except the background.
     """
+    class Rectange(xml_skin.XML_rectangle):
+        def __init__(self, color=None, bgcolor=None, size=None, radius = None):
+            xml_skin.XML_rectangle.__init__(self)
+            if not color == None:
+                self.color = color
+            if not bgcolor == None:
+                self.bgcolor = bgcolor
+            if not size == None:
+                self.size = size
+            if not radius == None:
+                self.radius = radius
+    
     def __init__(self):
         """
         init the screen
         """
         global skin_engine
-        osd.clearscreen(color=osd.COL_BLACK)
+        Skin_Area.__init__(self, name='blank', screen=skin_engine.screen)
         if not skin_engine.settings.prepared:
             skin_engine.settings.prepare()
             
         if skin_engine.settings.images.has_key('background'):
             image = osd.loadbitmap(skin_engine.settings.images['background'])
             image = pygame.transform.scale(image, (osd.width, osd.height))
-            osd.drawbitmap(image, 0, 0)
 
-        self.user_area_initialized = TRUE
-        self.bg = osd.screen.convert()
+        self.allow_plugins = False
+        self.bg = xml_skin.XML_image()
+        self.bg.x = 0
+        self.bg.y = 0
+        self.bg.width  = osd.width
+        self.bg.height = osd.height
+        self.bg.label  = 'background'
+        self.bg.image  = image
+
+        self.area_val    = None
+        self.area_name   = 'blank'
+        self.skin_engine = skin_engine
+        
+        # be aware of the idlebar
+        if plugin.getbyname('idlebar'):
+            self.has_idlebar = True
+        else:
+            self.has_idlebar = False
 
 
+            
     def draw(self, x0, y0, x1, y1):
         """
         there is no content in this area
         """
+
+    def init_vars(self, settings, display_type, widget_type):
+        self.area_val = xml_skin.XML_area(self.area_name)
+        self.area_val.visible = TRUE
+        self.area_val.r = (0, 0, osd.width, osd.height)
+        self.layout = 1
+        return 1
+
+
+    def update_content(self):
+        y0 = config.OVERSCAN_Y
+        if self.allow_plugins and self.has_idlebar:
+            y0 += 70
+        self.draw(config.OVERSCAN_X, y0, osd.width - config.OVERSCAN_X,
+                  osd.height - config.OVERSCAN_Y)
+
+            
+    def draw_background(self):
+        self.draw_image(self.bg.image, self.bg)
+        
 
     def refresh(self):
         """
@@ -257,10 +308,7 @@ class BlankScreen:
         self.bg. The class inheriting from this may override self.bg
         later to add something to it.
         """
-        osd.screen.blit(self.bg, (0, 0))
-        self.draw(config.OVERSCAN_X, config.OVERSCAN_Y, osd.width - config.OVERSCAN_X,
-                  osd.height - config.OVERSCAN_Y)
-        osd.update()
+        self.skin_engine.draw((self, self))
 
         
 
@@ -270,11 +318,11 @@ class Splashscreen(BlankScreen):
     """
     def __init__(self):
         BlankScreen.__init__(self)
-        # reset skin engine prepared mode, maybe the idlebar will
-        # be used and than some things will change
-        skin_engine.settings.prepared = FALSE
         self.initialized = FALSE
         self.pos = 0
+
+        self.bar_border   = self.Rectange(bgcolor=0xff000000, size=2)
+        self.bar_position = self.Rectange(bgcolor=0xa0000000L)
 
 
     def draw(self, x0, y0, x1, y1):
@@ -286,26 +334,27 @@ class Splashscreen(BlankScreen):
 
         if not self.initialized:
             if os.uname()[0] == 'FreeBSD':
-                image = osd.loadbitmap(os.path.join(config.IMAGE_DIR, 'splashscreen-bsd.png'))
+                logo = os.path.join(config.IMAGE_DIR, 'splashscreen-bsd.png')
             else:
-                image = osd.loadbitmap(os.path.join(config.IMAGE_DIR, 'splashscreen.png'))
+                logo = os.path.join(config.IMAGE_DIR, 'splashscreen.png')
+                
+            image = osd.loadbitmap(logo)
             if image:
                 image = pygame.transform.scale(image, (x1-x0, y1-y0))
-                osd.drawbitmap(image, x0, y0)
+                osd.drawbitmap(image, x0, y0, layer=self.bg.image)
 
             osd.drawstringframed(_('Starting Freevo, please wait ...'),
                                  x0, y1-180, x1-x0, 40,
                                  osd.getfont(config.OSD_DEFAULT_FONTNAME, 20),
                                  fgcolor=0xffffff, align_h='center',
-                                 align_v='bottom')
-            self.bg = osd.screen.convert()
+                                 align_v='bottom', layer=self.bg.image)
             self.initialized = TRUE
 
         pos = 0
         if self.pos:
-            pos = round(float((x1 - x0 - 2)) / (float(100) / self.pos))
-        osd.drawbox(x0, y1-130, x0 + pos, y1-110, color=0xa0000000L, fill=TRUE)
-        osd.drawbox(x0, y1-130, x1, y1-110, 2)
+            pos = round(float((x1 - x0 - 4)) / (float(100) / self.pos))
+        self.drawroundbox(x0, y1-130, x1-x0, 20, self.bar_border)
+        self.drawroundbox(x0+2, y1-128, pos, 16, self.bar_position)
 
 
     def progress(self, pos):
@@ -345,6 +394,8 @@ class Skin:
         self.normal_areas = []
         self.tv_areas = []
 
+        self.freevo_active = False
+        
         for a in ( 'screen', 'title', 'subtitle', 'view', 'listing', 'info', 'plugin'):
             o = eval('%s%s_Area(self, self.screen)' % (a[0].upper(), a[1:]))
             self.normal_areas.append(o)
@@ -353,7 +404,9 @@ class Skin:
                 o = TVListing_Area(self, self.screen)
                 self.tvlisting = o
             self.tv_areas.append(o)
-        
+            if a == 'plugin':
+                self.plugin_area = o
+                
         _debug_('Skin: Loading XML file %s' % config.SKIN_XML_FILE,2)
     
         self.settings = xml_skin.XMLSkin()
@@ -609,6 +662,10 @@ class Skin:
             
         menu = None
         if type == 'menu':
+            if not self.freevo_active:
+                self.freevo_active = True
+                self.settings.prepare()
+                
             menuw = object
             
             if not menuw.visible:
@@ -655,12 +712,18 @@ class Skin:
 
         if self.last_draw[0] != type:
             self.force_redraw = TRUE
+
         self.last_draw = type, object
 
         self.screen.clear()
 
-        for a in all_areas:
-            a.draw(settings, object, style, type, self.force_redraw)
+        if isinstance(object, Skin_Area):
+            Skin_Area.draw(object, settings, object, style, type, self.force_redraw)
+            if object.allow_plugins:
+                self.plugin_area.draw(settings, object, style, type, self.force_redraw)
+        else:
+            for a in all_areas:
+                a.draw(settings, object, style, type, self.force_redraw)
             
         self.screen.show(self.force_redraw)
 

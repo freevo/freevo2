@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/11/22 12:02:12  dischi
+# make the skin blankscreen a real plugin area
+#
 # Revision 1.12  2003/10/28 17:54:12  dischi
 # take icons from theme if available
 #
@@ -791,15 +794,15 @@ class Skin_Area:
         if height == None:
             height = content.height
 
-        if not align_h:
+        if not align_h and content:
             align_h = content.align
-            if not align_h:
-                align_h = 'left'
+        if not align_h:
+            align_h = 'left'
                 
-        if not align_v:
+        if not align_v and content:
             align_v = content.valign
-            if not align_v:
-                align_v = 'top'
+        if not align_v:
+            align_v = 'top'
 
         height2 = height
         if height2 == -1:

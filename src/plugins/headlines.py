@@ -15,6 +15,9 @@
 # for a full list of tested sites see Docs/plugins/headlines.txt
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/11/22 12:02:11  dischi
+# make the skin blankscreen a real plugin area
+#
 # Revision 1.10  2003/10/27 20:14:24  mikeruelle
 # allow use of outicon
 #
@@ -134,11 +137,11 @@ class ShowHeadlineDetails(skin.BlankScreen):
     """
     def __init__(self, (item, menuw)):
         skin.BlankScreen.__init__(self)
-        skin.force_redraw = True
-        menuw.visible = False
+        self.allow_plugins = True
         self.item = item
         self.menuw = menuw
 
+        self.menuw.hide(clear=False)
         rc.app(self)
         self.refresh()
 
@@ -165,15 +168,14 @@ class ShowHeadlineDetails(skin.BlankScreen):
         x1 -= 10
         y1 -= 10
         
-        y0 = osd.drawstringframed(self.item.name, x0, y0, x1-x0, -1,
-                                  titlefont.font, titlefont.color,
-                                  mode='hard')[1][3] + 30
+        self.write_text(self.item.name, titlefont, None, x0, y0, x1-x0, -1,
+                        align_h='center', mode='hard')
 
-        y0 = osd.drawstringframed(self.render(self.item.description), x0, y0, x1-x0, y1-y0,
-                                  font.font, font.color, mode='soft')[1][3] + 30
-        if y0 < y1:
-            osd.drawstringframed('Link: %s' % self.item.link, x0, y0, x1-x0, y1-y0,
-                                 font.font, font.color, mode='soft')
+        y0 += titlefont.font.height + 30
+
+        self.write_text(self.render(self.item.description) +
+                        '\n\nLink: %s' % self.item.link, font, None, x0, y0, x1-x0, y1-y0,
+                        mode='soft')
             
 
 
