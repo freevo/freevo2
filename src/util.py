@@ -9,6 +9,16 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/03/17 19:04:10  outlyer
+# Changed how we save bookmarks; the path is less important, but the filename
+# is what we match on now.
+#
+# Upside:
+#     MD5's of movie files will take a long time, so filename is quicker.
+#
+# Downside:
+#     Rename the file, and bookmarks vanish.
+#
 # Revision 1.15  2003/03/17 16:34:32  outlyer
 # Added preliminary movie bookmarks (i.e. places to jump to on next play)
 # Currently only writing the bookmarks does anything; I'm going to have to
@@ -476,8 +486,8 @@ def check_media(media_id):
     return None
 
 def get_bookmarkfile(filename):
-    myfile = filename.replace('/','_')
-    myfile = config.FREEVO_CACHEDIR + "/" + str(myfile)
+    myfile = os.path.basename(filename) 
+    myfile = config.FREEVO_CACHEDIR + "/" + str(myfile) + '.bookmark'
     return myfile
 
 
