@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.54  2004/10/18 01:19:05  rshortt
+# Remove old ProgramItem and add some changes for new pyepg interface.
+#
 # Revision 1.53  2004/10/03 15:55:25  dischi
 # adjust to new popup code
 #
@@ -85,6 +88,7 @@
 
 import os
 import time
+import traceback
 
 import config
 import util
@@ -112,18 +116,6 @@ def get_singleton():
     return _guide_
 
 
-class ProgrammItem(Item):
-    def __init__(self, parent, prog):
-        Item.__init__(self, parent)
-        self.name = prog.getattr('date') + '\t' + prog.getattr('start') + '\t' + prog.title
-        # Import all variables from the programm
-        # FIXME: this needs a cleanup to be a real item
-        for var in dir(prog):
-            if var.startswith('_') or var == 'getattr':
-                continue
-            setattr(self, var, getattr(prog, var))
-
-        
 
 class TVGuide(MenuApplication):
     """
@@ -154,6 +146,7 @@ class TVGuide(MenuApplication):
             box.destroy()
             gui.AlertBox(text=_('TV Guide is corrupt!')).show()
             print e
+            traceback.print_exc()
             return False
         
         self.current_time = time.time()
@@ -304,8 +297,8 @@ class TVGuide(MenuApplication):
         elif event == TV_SHOW_CHANNEL:
             _debug_('show channel')
             items = []
-            for prog in self.channel.epg.get(time.time(), time.time() + 10*24*60*60)[:-1]:
-                items.append(ProgrammItem(self.parent, prog))
+            for prog in self.channel.get(time.time(), time.time() + 10*24*60*60)[:-1]:
+                items.append(prog)
             cmenu = menu.Menu(self.channel.name, items)
             # FIXME: the percent values need to be calculated
             cmenu.table = (15, 15, 70)
