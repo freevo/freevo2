@@ -83,16 +83,16 @@ def shutdown(menuw=None, arg=None):
 
 def autostart():
     if config.ROM_DRIVES != None: 
-        media,icon = util.identifymedia(config.ROM_DRIVES[0][0])
+        media,id,label = util.identifymedia(config.ROM_DRIVES[0][0])
         if media == 'DVD':
             mplayer.play('dvd', '1', [])
         elif media == 'VCD' or media == 'SVCD':
             mplayer.play('vcd', '1', [])
-        elif media == 'DivX CD':
+        elif media == 'DIVX':
             movie.cwd(config.ROM_DRIVES[0][0], menuwidget)
-        elif media == 'MP3 CD':
+        elif media == 'MP3':
             mp3.cwd(config.ROM_DRIVES[0][0], menuwidget)
-        elif media == 'Image Library':
+        elif media == 'IMAGE':
             imenu.cwd(config.ROM_DRIVES[0][0], menuwidget)
 
     
@@ -104,23 +104,20 @@ def getcmd():
 
     # XXX Move icons into skin
     if config.ENABLE_TV:
-        items += [menu.MenuItem('TV', tv.main_menu, 'tv','icons/tv.png',0)]
-    items += [menu.MenuItem('MOVIES', movie.main_menu,'','icons/movies.png',0)]
-    items += [menu.MenuItem('MUSIC', mp3.main_menu,'','icons/mp3.png',0)]
-    #items += [menu.MenuItem('DVD/CD', movie.play_movie, ('dvd', '1', []),'icons/dvd.png',0)]  # XXX Add DVD title handling
-    #items += [menu.MenuItem('VCD', movie.play_movie, ('vcd', '1', []))]
-    #items += [menu.MenuItem('RECORD MOVIE', tv.main_menu, 'record')]
+        items += [menu.MenuItem('TV', tv.main_menu, 'tv', None, None, 'icons/tv.png',0)]
+    items += [menu.MenuItem('MOVIES', movie.main_menu,'', None, None, 'icons/movies.png',0)]
+    items += [menu.MenuItem('MUSIC', mp3.main_menu,'', None, None, 'icons/mp3.png',0)]
 
-    items += [menu.MenuItem('IMAGES', imenu.main_menu,'','icons/images.png',0)]
+    items += [menu.MenuItem('IMAGES', imenu.main_menu,'',None, None, 'icons/images.png',0)]
     if config.ENABLE_SHUTDOWN:
-        items += [menu.MenuItem('SHUTDOWN', shutdown, None, 'icons/shutdown.png', 0) ]
+        items += [menu.MenuItem('SHUTDOWN', shutdown, None, None, None, \
+                                'icons/shutdown.png', 0) ]
 
     mainmenu = menu.Menu('FREEVO MAIN MENU', items, packrows=0)
     menuwidget.pushmenu(mainmenu)
 
     muted = 0
     mainVolume = 0
-    tray_open = 0
     while 1:
         
         # Get next command
@@ -151,32 +148,32 @@ def getcmd():
                 mainVolume = mixer.getMainVolume()
                 mixer.setMainVolume(0)
                 muted = 1
-        elif event == rc.EJECT:
-            if tray_open and config.ROM_DRIVES:
-                if DEBUG: print 'Inserting %s' % config.ROM_DRIVES[0][0]
+        elif event == rc.EJECT and len(menuwidget.menustack) == 1 and config.ROM_DRIVES:
+            (rom_dir, name, tray) = config.ROM_DRIVES[0]
+            tray_open = tray
+            config.ROM_DRIVES[0] = (rom_dir, name, (tray + 1) % 2)
+            if tray_open:
+                if DEBUG: print 'Inserting %s' % rom_dir
 
                 # XXX FIXME: this doesn't look very good, we need
                 # XXX some sort of a pop-up widget
                 osd.drawbox(osd.width/2 - 180, osd.height/2 - 30, osd.width/2 + 180,\
                             osd.height/2+30, width=-1,
                             color=((60 << 24) | osd.COL_BLACK))
-                osd.drawstring('mounting %s' % config.ROM_DRIVES[0][0], \
+                osd.drawstring('mounting %s' % rom_dir, \
                                osd.width/2 - 160, osd.height/2 - 10,
                                fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
                 osd.update()
 
                 # close the tray and mount the cd
-                os.system('eject -t %s' % config.ROM_DRIVES[0][0])
-                os.system('mount %s' % config.ROM_DRIVES[0][0])
+                os.system('eject -t %s' % rom_dir)
+                os.system('mount %s' % rom_dir)
                 menuwidget.refresh()
-                tray_open = 0
-                if len(menuwidget.menustack) == 1:
-                    autostart()
+                autostart()
 
-            elif config.ROM_DRIVES:
-                if DEBUG: print 'Ejecting %s' % config.ROM_DRIVES[0][0]
-                os.system('eject %s' % config.ROM_DRIVES[0][0])
-                tray_open = 1
+            else:
+                if DEBUG: print 'Ejecting %s' % rom_dir
+                os.system('eject %s' % rom_dir)
 
             
         # Send events to either the current app or the menu handler
@@ -191,6 +188,13 @@ def getcmd():
 # Main init
 #
 def main_func():
+
+    # add tray status to ROM_DRIVES
+    if config.ROM_DRIVES != None: 
+        pos = 0
+        for (dir, name) in config.ROM_DRIVES:
+            config.ROM_DRIVES[pos] = (dir, name, 0)
+            pos += 1
 
     # Parse the command-line arguments
     video = 'sim'
