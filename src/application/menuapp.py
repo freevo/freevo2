@@ -1,3 +1,4 @@
+import config
 from base import Application
 from event import *
 
