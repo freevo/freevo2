@@ -26,6 +26,9 @@ o Compile Freevo
   o Test the text OSD test driver
   o Test the MGA G400 OSD framebuffer driver
 
+o Test matrox_g400/v4l1_to_mga  (Video4Linux1 -> Framebuffer)
+  o Check out the source for how to set the input, norm, channel
+
 o Update the settings in config.py!
   o TV_SETTINGS, VCR_SETTINGS, TV_CHANNELS depending on where you live.
   o DIR_MP3, DIR_MOVIES, DIR_RECORD for where your files are
