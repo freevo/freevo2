@@ -16,7 +16,7 @@
 
 ##########################################################################
 %define name freevo
-%define version 1.4
+%define version 1.4.1
 %define release 1_rh9
 %define _cachedir /var/cache
 %define _logdir /var/log
@@ -31,7 +31,6 @@ Release: %{release}
 Source0: %{name}-%{version}.tar.gz
 #Source0: %{name}-%{version}%{release}.tar.gz
 Source1: redhat-boot_config
-Patch0: freevo-%{version}-xmms.patch
 Copyright: gpl
 Group: Applications/Multimedia
 BuildArch: noarch
@@ -79,8 +78,6 @@ Note: This installs the initscripts necessary for a standalone Freevo system.
 rm -rf $RPM_BUILD_ROOT
 #%setup -n freevo-%{version}%{release}
 %setup -n freevo-%{version}
-
-%patch0 -p1 
 
 %build
 find . -name CVS | xargs rm -rf
@@ -151,6 +148,9 @@ EOF
 	%{!?_without_use_sysapps:--sysfirst}
 
 %preun
+if [ -s %{_sysconfdir}/freevo/freevo.conf ]; then
+   cp %{_sysconfdir}/freevo/freevo.conf %{_sysconfdir}/freevo/freevo.conf.rpmsave
+fi
 if [ -s %{_sysconfdir}/freevo/local_conf.py ]; then
    cp %{_sysconfdir}/freevo/local_conf.py %{_sysconfdir}/freevo/local_conf.py.rpmsave
 fi
@@ -193,6 +193,9 @@ if [ "$1" = 0 ] ; then
 fi
 
 %changelog
+* Fri Dec 19 2003 TC Wan <tcwan@cs.usm.my>
+- Updated for 1.4.1
+
 * Sat Nov 22 2003 TC Wan <tcwan@cs.usm.my>
 - Updated for 1.4 final
 
