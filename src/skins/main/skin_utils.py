@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/01/17 20:28:47  dischi
+# renamed media.info to media.item
+#
 # Revision 1.11  2004/01/17 12:36:29  dischi
 # add shadow support for image listing
 #
@@ -92,7 +95,7 @@ def format_image(settings, item, width, height, shadow=None, force=0):
 
     cname = '%s-%s-%s-%s-%s-%s-%s-%s' % (settings.icon_dir, item.image, type,
                                          item.type, width, height, shadow, force)
-    if item.media and item.media.info == item:
+    if item.media and item.media.item == item:
         cname = '%s-%s' % (cname, item.media)
         
     cimage = format_imagecache[cname]
@@ -116,7 +119,7 @@ def format_image(settings, item, width, height, shadow=None, force=0):
         if not force:
             return None, 0, 0
 
-        if hasattr(item, 'media') and item.media and item.media.info == item and \
+        if hasattr(item, 'media') and item.media and item.media.item == item and \
            os.path.isfile('%s/mimetypes/%s.png' % (settings.icon_dir, item.media.type)):
             imagefile = '%s/mimetypes/%s.png' % (settings.icon_dir, item.media.type)
             
