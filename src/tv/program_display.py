@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/10/22 02:45:02  rshortt
+# Fix a crash when no recordserver is available.
+#
 # Revision 1.20  2003/10/21 15:11:52  outlyer
 # Remove a stray print... this was probably for debugging.
 #
@@ -318,6 +321,8 @@ class ScheduledRecordings(PopupBox):
                           bg_color, fg_color, icon, border, bd_color, bd_width,
                           vertical_expansion)
 
+        self.result = False
+
         (self.server_available, msg) = record_client.connectionTest()
         if not self.server_available:
             errormsg = Label('Record server unavailable: %s' % msg,
@@ -380,7 +385,7 @@ class ScheduledRecordings(PopupBox):
 
 
     def eventhandler(self, event, menuw=None):
-        if not self.result:
+        if not self.result or not self.server_available:
             self.destroy()
             return
 
