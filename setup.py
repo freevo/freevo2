@@ -22,6 +22,11 @@ check_libs((('mmpython', 'http://www.sf.net/projects/mmpython' ),
             ('twisted', 'http://www.twistedmatrix.com/')))
 
 
+print 'Sorry, the current version of Freevo is for testing only, you'
+print 'can\'t install it right now. Start Freevo from the source directory'
+print 'to test the current cvs snapshot.'
+sys.exit(0)
+
 class Runtime(core.Command):
 
     description     = "download and install runtime"
