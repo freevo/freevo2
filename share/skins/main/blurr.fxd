@@ -762,7 +762,7 @@
                 <rectangle x="5" y="5" width="max-15" height="max-15" color="0x000000" 
 	            size="2" bgcolor="widget background" radius="5"/>
             </background>
-            <content x="8" y="8" width="max-21" height="max-21">
+            <content x="15" y="15" width="max-35" height="max-35">
 	        <!-- special button settings -->
                 <item type="button">
                     <rectangle color="0x000000" bgcolor="widget item background" 
