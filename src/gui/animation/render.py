@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/08/23 14:28:23  dischi
+# fix animation support when changing displays
+#
 # Revision 1.3  2004/08/22 20:06:17  dischi
 # Switch to mevas as backend for all drawing operations. The mevas
 # package can be found in lib/mevas. This is the first version using
@@ -68,21 +71,16 @@ import gui
 import time
 import copy
 
-_singleton = None
+_render = None
 
 def get_singleton():
-    global _singleton
+    global _render
+    return _render
 
-    # don't start render for helper
-    if config.HELPER:
-        return
 
-    # One-time init
-    if _singleton == None:
-        _singleton = util.SynchronizedObject(Render())
-
-    return _singleton
-
+def create(display):
+    global _render
+    _render = Render(display)
 
 
 class Render:
@@ -100,13 +98,11 @@ class Render:
       extend the pygame.sprite.Sprite object.
     """
 
-    animations   = []    # all animations
-    suspended    = []    # suspended animations
-    osd          = None
-
-    def __init__(self):
+    def __init__(self, display):
         # set the update handler to wait for osd
-        self.display = gui.get_display()
+        self.display = display
+        self.animations   = []    # all animations
+        self.suspended    = []    # suspended animations
 
 
     def update(self):
@@ -119,7 +115,7 @@ class Render:
         i = 0
 
         timer = time.time()
-        
+
         update_screen = False
         for a in copy.copy(self.animations):
             # XXX something should be done to clean up the mess
@@ -132,8 +128,7 @@ class Render:
 
             if a.active:
                 update_screen = a.poll(timer) or update_screen
-
-
+                    
             # XXX something might be done to handle stopped animations
             else:
                 pass
@@ -161,7 +156,7 @@ class Render:
         """
         Kills all animations
         """
-        for a in self.animations:
+        for a in copy.copy(self.animations):
             a.remove()
         rc.unregister(self.update)
         
@@ -194,3 +189,6 @@ class Render:
         if len(self.animations) == 1:
             # first animation, register ourself to the main loop:
             rc.register(self.update, True, 0)
+        # no animation possible, finish the animation at once
+        if not self.display.animation_possible:
+            anim_object.finish()

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/08/23 14:28:22  dischi
+# fix animation support when changing displays
+#
 # Revision 1.3  2004/08/22 20:06:17  dischi
 # Switch to mevas as backend for all drawing operations. The mevas
 # package can be found in lib/mevas. This is the first version using
@@ -57,4 +60,4 @@
 
 from transition import *
 from render import get_singleton as render
-
+from render import create

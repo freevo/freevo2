@@ -75,14 +75,23 @@ class Move(BaseAnimation):
         self.frame += 1
 
 
+    def finish(self):
+        """
+        finish the animation
+        """
+        self.frame = self.max_frames
+        self.update()
+        BaseAnimation.finish(self)
+
+
 class Fade(BaseAnimation):
     """
     Animation class to fade objects in or out. The alpha value of each
     object is set to 'start' and than moved to 'stop' with the given
     framerate.
     """
-    def __init__(self, objects, frames, start, stop, fps=25):
-        BaseAnimation.__init__(self, fps)
+    def __init__(self, objects, frames, start, stop, fps=25, callback=None):
+        BaseAnimation.__init__(self, fps, callback)
         self.objects     = objects
         self.max_frames  = frames
         self.frame       = 0
@@ -104,6 +113,16 @@ class Fade(BaseAnimation):
         self.frame += 1
 
 
+    def finish(self):
+        """
+        finish the animation
+        """
+        self.frame = self.max_frames
+        self.update()
+        BaseAnimation.finish(self)
+
+
+        
 class Transition:
     """
     Class that contains different animations for full screen transition
@@ -178,6 +197,22 @@ class Transition:
             a.stop()
 
             
+    def remove(self):
+        """
+        Remove all internal animations.
+        """
+        for a in self.animations:
+            a.remove()
+
+            
+    def finish(self):
+        """
+        finish the animation
+        """
+        for a in self.animations:
+            a.finish()
+
+
     def running(self):
         """
         Check all internal animations if they are still running. Return True

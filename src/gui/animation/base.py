@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/08/23 14:28:23  dischi
+# fix animation support when changing displays
+#
 # Revision 1.4  2004/08/23 12:37:13  dischi
 # remove osd import
 #
@@ -70,13 +73,12 @@ class BaseAnimation:
      @bg_redraw  : set background to original screen bg when finished
     """
 
-    active       = False  # Should it be updated in the poll
-    delete       = False  # Delete from list on next poll
-    next_update  = 0      # timestamp for next update
-
-
-    def __init__(self, fps):
+    def __init__(self, fps, callback = None):
         self.set_fps(fps)
+        self.callback = callback
+        self.active       = False  # Should it be updated in the poll
+        self.delete       = False  # Delete from list on next poll
+        self.next_update  = 0      # timestamp for next update
 
 
     def set_fps(self, fps):
@@ -99,6 +101,9 @@ class BaseAnimation:
         Stops the animation from being polled
         """
         self.active = False
+        if self.callback:
+            self.callback()
+            self.callback = None
 
 
     def running(self):
@@ -114,6 +119,9 @@ class BaseAnimation:
         """
         self.active = False
         self.delete = True
+        if self.callback:
+            self.callback()
+            self.callback = None
 
 
     def poll(self, current_time):
@@ -133,3 +141,9 @@ class BaseAnimation:
         pass
 
 
+    def finish(self):
+        """
+        Finish the animation and stops it. Overload to do stuff
+        on the surface and call the parent function.
+        """
+        self.remove()

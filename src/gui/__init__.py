@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2004/08/23 14:28:21  dischi
+# fix animation support when changing displays
+#
 # Revision 1.24  2004/08/23 12:37:36  dischi
 # better display handling
 #
@@ -56,6 +59,9 @@ from mevas import CanvasContainer
 # Display engine control module
 import displays
 
+# The animation module
+import animation
+
 def get_display():
     """
     return current display output or create the default one
@@ -69,9 +75,12 @@ def set_display(name, size):
     set a new output display
     """
     global display
+    print 'kill animation'
+    animation.render().killall()
     display = displays.set_display(name, size)
     width   = display.width
     height  = display.height
+    animation.create(display)
     return display
 
 
@@ -80,9 +89,11 @@ def remove_display(name):
     remove the output display
     """
     global display
+    animation.render().killall()
     display = displays.remove_display(name)
     width   = display.width
     height  = display.height
+    animation.create(display)
     return display
 
 
@@ -92,6 +103,7 @@ if not config.HELPER:
     display = get_display()
     width   = display.width
     height  = display.height
+    animation.create(display)
 else:
     display = None
     width   = 0

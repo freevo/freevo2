@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/08/23 14:28:22  dischi
+# fix animation support when changing displays
+#
 # Revision 1.3  2004/08/23 12:35:42  dischi
 # make it possible to hide the Areahandler
 #
@@ -55,7 +58,7 @@ import mevas
 
 import config
 import util
-
+import gui.animation as animation 
 
 class AreaScreen:
     def __init__(self, imagelib):
@@ -64,13 +67,26 @@ class AreaScreen:
         for i in range(3):
             c = mevas.CanvasContainer()
             self.layer.append(c)
-        self.imagelib = imagelib
-        self.visible  = False
-        self.width    = 0
-        self.height   = 0
-
-    def show(self, canvas):
+        self.imagelib  = imagelib
+        self.visible   = False
+        self.width     = 0
+        self.height    = 0
+        self.animation = None
+        self.frames_per_fade = 3
+        
+    def stop_animation(self):
         for l in self.layer:
+            l.set_alpha(255)
+        if not self.visible:
+            for l in self.layer:
+                l.unparent()
+            
+    def show(self, canvas):
+        if self.animation:
+            self.animation.remove()
+            self.animation = None
+        for l in self.layer:
+            l.set_alpha(255)
             canvas.add_child(l)
         self.visible = True
         self.canvas  = canvas
@@ -79,6 +95,9 @@ class AreaScreen:
 
 
     def hide(self):
+        if self.animation:
+            self.animation.remove()
+            self.animation = None
         for l in self.layer:
             l.unparent()
         self.visible = False
@@ -90,17 +109,31 @@ class AreaScreen:
     def fade_out(self):
         if not self.visible:
             return
-        while self.layer[0].alpha:
-            for l in self.layer:
-                l.set_alpha(max(min(255, l.get_alpha() - 80), 0))
-            self.canvas.update()
-        for l in self.layer:
-            l.set_alpha(255)
-            l.unparent()
+        if self.animation:
+            self.animation.remove()
         self.canvas  = None
         self.visible = False
         self.width   = 0
         self.height  = 0
+        self.animation = animation.Fade(self.layer, self.frames_per_fade,
+                                        255, 0, callback=self.stop_animation)
+        self.animation.start()
+        
+        
+    def fade_in(self, canvas):
+        if not self.visible:
+            pass
+        if self.animation:
+            self.animation.remove()
+        for l in self.layer:
+            canvas.add_child(l)
+        self.visible = True
+        self.canvas  = canvas
+        self.width   = canvas.width
+        self.height  = canvas.height
+        self.animation = animation.Fade(self.layer, self.frames_per_fade,
+                                        0, 255, callback=self.stop_animation)
+        self.animation.start()
 
         
 class AreaHandler:
@@ -306,7 +339,7 @@ class AreaHandler:
         hide the screen
         """
         if self.visible:
-            self.screen.hide()
+            self.screen.fade_out()
         self.visible = False
         
 
@@ -315,7 +348,7 @@ class AreaHandler:
         hide the screen
         """
         if not self.visible:
-            self.screen.show(self.canvas)
+            self.screen.fade_in(self.canvas)
         self.visible = True
         
 
