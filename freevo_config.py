@@ -204,8 +204,11 @@ SUFFIX_AUDIO_PLAYLISTS = [ 'm3u' ]
 #
 # Where the image files can be found.
 #
-DIR_IMAGES = [ ('Test Images', './testfiles/Images'),
-               ('Test Show',  'testfiles/Images/CA_Coast.ssr') ]
+DIR_IMAGES = [ ('Test Images', './testfiles/Images') ]
+
+# Temporarily disabled, doesn't work
+#DIR_IMAGES = [ ('Test Images', './testfiles/Images'),
+#               ('Test Show',  'testfiles/Images/CA_Coast.ssr') ]
 
 #
 # The list of filename suffixes that are used to match the files that
