@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/04/24 19:54:20  dischi
+# bugfix
+#
 # Revision 1.17  2003/04/24 11:46:29  dischi
 # fixed 'to many open files' bug
 #
@@ -41,7 +44,6 @@
 # Renamed SUFFIX_MPLAYER_FILES to SUFFIX_VIDEO_FILES because we also play
 # audio files with mplayer. Also renamed SUFFIX_FREEVO_FILES to
 # SUFFIX_VIDEO_DEF_FILES because we use this for movie xml files.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -371,7 +373,7 @@ class RandomPlaylist(Playlist):
             files = [ element, ]
             play_items = []
             for t in ( 'video', 'audio', 'image', 'games' ):
-                play_items += eval(t + '.interface.cwd(self, files)')
+                play_items += eval(t + '.cwd(self, files)')
 
             if not play_items:
                 print 'FIXME: this should never happen'
