@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2003/10/18 16:51:34  outlyer
+# Fix a crash when skipping through tracks.
+#
 # Revision 1.29  2003/10/18 10:46:37  dischi
 # use util popen3 for child control
 #
@@ -219,7 +222,7 @@ class ChildApp:
             traceback.print_stack()
 
         # killed already
-        if not self.child:
+        if hasattr(self,'child'):
             _debug_('already dead', 2)
             return
 
