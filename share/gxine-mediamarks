@@ -436,4 +436,106 @@
       <TIME start="0"/>
     </ENTRY>
   </SUB>
+  <SUB NAME="Spraydio">
+    <ENTRY>
+      <TITLE>Visby (Pop)</TITLE>
+      <REF HREF="mms://wms03.nordicwebradio.com/visby"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>Chelsea (Indie)</TITLE>
+      <REF HREF="mms://wms03.nordicwebradio.com/chelsea"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>Picadilly (80s)</TITLE>
+      <REF HREF="mms://wms03.nordicwebradio.com/visbyhitradio"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>Manilla (Hip Hop)</TITLE>
+      <REF HREF="mms://wms03.nordicwebradio.com/manilla"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>Krakow (Metal)</TITLE>
+      <REF HREF="mms://wms03.nordicwebradio.com/krakow"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>Nashville (Country)</TITLE>
+      <REF HREF="mms://wms03.nordicwebradio.com/nashville"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>Detroit (Techno)</TITLE>
+      <REF HREF="mms://wms03.nordicwebradio.com/detroit"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>Seattle (Grunge)</TITLE>
+      <REF HREF="mms://wms03.nordicwebradio.com/krakow"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>Motown (Soul)</TITLE>
+      <REF HREF="mms://wms03.nordicwebradio.com/motown"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>Studio 54 (Disco)</TITLE>
+      <REF HREF="mms://wms03.nordicwebradio.com/studio54"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>90s Dance (Euro)</TITLE>
+      <REF HREF="mms://wms03.nordicwebradio.com/90sdance"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>Santa Cruz (Punk)</TITLE>
+      <REF HREF="mms://wms03.nordicwebradio.com/santacruz"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>FM - Radio City Stockholm</TITLE>
+      <REF HREF="mms://wms05.nordicwebradio.com/radiocitysthlm2"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>FM - Radio City Goteborg</TITLE>
+      <REF HREF="mms://wms05.nordicwebradio.com/radiocitygbg2"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>FM - Radio City Malmo</TITLE>
+      <REF HREF="mms://wms05.nordicwebradio.com/radiocitymalmo2"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>FM - Mix Megapol</TITLE>
+      <REF HREF="mms://wms05.nordicwebradio.com/mix2"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>FM - E-FM</TITLE>
+      <REF HREF="mms://wms05.nordicwebradio.com/efm2"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>FM - Rockklassiker</TITLE>
+      <REF HREF="mms://wms05.nordicwebradio.com/rockklassiker2"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>FM - Vinyl 107</TITLE>
+      <REF HREF="mms://wms05.nordicwebradio.com/vinyl2"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>FM - NRJ</TITLE>
+      <REF HREF="http://live2.nrj.net/nrj"/>
+      <TIME start="0"/>
+    </ENTRY>
+  </SUB>
 </GXINEMM>
