@@ -1327,7 +1327,9 @@ def init_module():
     """
     global current_theme
     cachefile = os.path.join(config.FREEVO_CACHEDIR, 'skin-%s' % os.getuid())
-    storage = util.read_pickle(cachefile)
+    storage = {}
+    if vfs.isfile(cachefile):
+        storage = util.read_pickle(cachefile)
     if storage:
         if not config.SKIN_XML_FILE:
             config.SKIN_XML_FILE = storage['SKIN_XML_FILE']

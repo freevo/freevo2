@@ -92,5 +92,5 @@ if config.ROM_DRIVES == None:
                 # This was not a duplicate of another device
                 if mntdir and devname and dispname:
                     config.ROM_DRIVES += [ (mntdir, devname, dispname) ]
-                    log.info('Auto-detected and added "%s"' % config.ROM_DRIVES[-1])
+                    log.info('Auto-detected and added "%s"' % (config.ROM_DRIVES[-1],))
         fd_fstab.close()

@@ -38,7 +38,7 @@ import string
 import logging
 
 import config
-from util.ioctl import ioctl, pack, unpack
+import util.ioctl as ioctl
 
 log = logging.getLogger('config')
 
@@ -88,11 +88,11 @@ class DVBCard:
     def __init__(self, number):
         self.adapter = '/dev/dvb/adapter' + number
         INFO_ST = '128s10i'
-        val = pack( INFO_ST, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 )
+        val = ioctl.pack( INFO_ST, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 )
         devfd = os.open(self.adapter + '/frontend0', os.O_TRUNC)
-        r = ioctl(devfd, ioctl.IOR('o', 61, INFO_ST), val)
+        r = ioctl.ioctl(devfd, ioctl.IOR('o', 61, INFO_ST), val)
         os.close(devfd)
-        val = unpack( INFO_ST, r )
+        val = ioctl.unpack( INFO_ST, r )
         name = val[0]
         if val[1] == 0:
             self.type = 'DVB-S'
@@ -131,7 +131,7 @@ for i in range(10):
             # likely no device attached
             pass
         except:
-            traceback.print_exc()
+            log.exception('dvb detection')
 
     vdev = '/dev/video%s' % i
     if os.path.exists(vdev):
@@ -152,7 +152,7 @@ for i in range(10):
             # found something that doesn't speak v4l2
             continue
         except:
-            traceback.print_exc()
+            log.exception('tv detection')
 
         if type == 'ivtv':
             key = '%s%s' % (type,ivtvn)

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2004/11/27 13:26:56  dischi
+# smaller bugfixes
+#
 # Revision 1.42  2004/11/20 18:23:03  dischi
 # use python logger module for debug
 #
@@ -54,7 +57,6 @@
 
 
 import os
-import traceback
 import copy
 
 import config
@@ -190,8 +192,7 @@ class MediaMenu(Item):
                             if os.system( config.HOST_ALIVE_CHECK % hostname ) != 0:
                                 reachable = 0
                         except:
-                            log.error('Error parsing %s' % filename)
-                            traceback.print_exc()
+                            log.exception('Error parsing %s' % filename)
                        
                 if reachable:
                     if vfs.isdir(filename):
@@ -203,10 +204,11 @@ class MediaMenu(Item):
                         self.normal_items.append(item)
                     else:
                         if not vfs.isfile(filename):
-                            filename = filename[len(os.getcwd()):]
-                            if filename[0] == '/':
-                                filename = filename[1:]
-                            filename = vfs.join(config.SHARE_DIR, filename)
+                            if filename.startswith(os.getcwd()):
+                                filename = filename[len(os.getcwd()):]
+                                if filename[0] == '/':
+                                    filename = filename[1:]
+                                filename = vfs.join(config.SHARE_DIR, filename)
                         # normal file
                         for p in plugin.mimetype(self.display_type):
                             items = p.get(self, [ String(filename) ])
@@ -216,8 +218,7 @@ class MediaMenu(Item):
                             self.normal_items += items
                             
             except:
-                log.error('Error parsing %s' % item)
-                traceback.print_exc()
+                log.exception('Error parsing %s' % str(item))
 
 
         items = self.main_menu_generate()
