@@ -245,7 +245,7 @@ class Area:
             try:
                 area = area.areas[self.area_name]
             except (KeyError, AttributeError):
-                _debug_('no skin information for %s' % (self.area_name), )
+                _debug_('no skin information for %s' % (self.area_name), 0)
                 return False
 
         if (not self.area_values) or area != self.area_values:
