@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/03/02 14:35:11  dischi
+# Added clear function
+#
 # Revision 1.23  2003/03/02 11:46:32  dischi
 # Added GetPopupBoxStyle to return popup box styles to the gui
 #
@@ -378,6 +381,10 @@ class Skin:
         """
         pass
         
+
+    def Clear(self):
+        osd.clearscreen(osd.COL_BLACK)
+        osd.update()
 
     # Called from the MenuWidget class to draw a menu page on the
     # screen

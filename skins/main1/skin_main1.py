@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.85  2003/03/02 14:35:11  dischi
+# Added clear function
+#
 # Revision 1.84  2003/02/21 19:42:21  outlyer
 # Added a small note/reminder to figure out why we do this.
 #
@@ -194,9 +197,6 @@ class Skin:
             settings.load(local_skin)
             break
         
-    hold = 0
-
-
     def __init__(self):
         self.tv = main1_tv.Skin_TV()
         self.image = main1_image.Skin_Image()
@@ -611,12 +611,15 @@ class Skin:
             y0 += spacing
         
 
+
+    def Clear(self):
+        osd.clearscreen(osd.COL_BLACK)
+        osd.update()
+        
+
     # Called from the MenuWidget class to draw a menu page on the
     # screen
     def DrawMenu(self, menuw):
-        if self.hold:
-            print 'skin.drawmenu() hold!'
-            return
        
         # XXX Is this necessary? We're re-initializing the screen later.
         osd.clearscreen(osd.COL_BLACK)
