@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/06/02 03:28:41  rshortt
+# Fixes for event changes.
+#
 # Revision 1.11  2003/05/21 00:04:25  rshortt
 # General improvements to layout and drawing.
 #
@@ -78,6 +81,7 @@
 
 import pygame, string
 import config
+import event as em
 
 from GUIObject import Align
 from Button import Button
@@ -106,16 +110,16 @@ class LetterBox(Button):
                  '-', '.', ' ' ] 
 
     phoneChars = {
-        1 : ["1"],
-        2 : ["2", "A", "B", "C"],
-        3 : ["3", "D", "E", "F"],
-        4 : ["4", "G", "H", "I"],
-        5 : ["5", "J", "K", "L"],
-        6 : ["6", "M", "N", "O"],
-        7 : ["7", "P", "Q", "R", "S"],
-        8 : ["8", "T", "U", "V"],
-        9 : ["9", "W", "X", "Y", "Z"],
-        0 : ["0", "-", ".", " "],
+        em.INPUT_1.name : ["1"],
+        em.INPUT_2.name : ["2", "A", "B", "C"],
+        em.INPUT_3.name : ["3", "D", "E", "F"],
+        em.INPUT_4.name : ["4", "G", "H", "I"],
+        em.INPUT_5.name : ["5", "J", "K", "L"],
+        em.INPUT_6.name : ["6", "M", "N", "O"],
+        em.INPUT_7.name : ["7", "P", "Q", "R", "S"],
+        em.INPUT_8.name : ["8", "T", "U", "V"],
+        em.INPUT_9.name : ["9", "W", "X", "Y", "Z"],
+        em.INPUT_0.name : ["0", "-", ".", " "],
     }
         
 

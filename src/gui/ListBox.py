@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/06/02 03:28:41  rshortt
+# Fixes for event changes.
+#
 # Revision 1.15  2003/05/27 17:53:34  dischi
 # Added new event handler module
 #
@@ -155,10 +158,10 @@ class ListBox(RegionScroller):
     def scroll(self, direction):
         if DEBUG: print 'listbox scroll: direction="%s"' % direction
 
-        if direction == "RIGHT" or direction == "LEFT":
+        if direction in (em.INPUT_RIGHT, em.INPUT_LEFT):
             return RegionScroller.scroll(self, direction)
 
-        elif direction == "DOWN":
+        elif direction == em.INPUT_DOWN:
 
             i = self.get_selected_index()
             if i < len(self.items)-1:
@@ -170,7 +173,7 @@ class ListBox(RegionScroller):
                 if new_select.top + new_select.height > self.v_y + self.height:
                     return RegionScroller.scroll(self, direction)
 
-        elif direction == "UP":
+        elif direction == em.INPUT_UP:
 
             i = self.get_selected_index()
             if i > 0:
@@ -181,9 +184,6 @@ class ListBox(RegionScroller):
                 new_select = self.get_selected_item()
                 if new_select.top < self.v_y:
                     return RegionScroller.scroll(self, direction)
-
-        # self.draw()
-        # self.osd.update()
 
 
     def get_selected_index(self):
@@ -295,8 +295,10 @@ class ListBox(RegionScroller):
 
 
     def eventhandler(self, event):
+        if DEBUG: print 'ListBox::eventhandler: event=%s' % event
 
         if event in (em.INPUT_UP, em.INPUT_DOWN, em.INPUT_LEFT, em.INPUT_RIGHT ):
+            if DEBUG: print 'ListBox::eventhandler: should scroll' 
             self.scroll(event)
             self.parent.draw()
             self.osd.update(self.parent.get_rect())

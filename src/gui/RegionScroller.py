@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/06/02 03:28:41  rshortt
+# Fixes for event changes.
+#
 # Revision 1.13  2003/05/27 17:53:34  dischi
 # Added new event handler module
 #
@@ -198,22 +201,22 @@ class RegionScroller(Container):
     def scroll(self, direction):
         if DEBUG: print 'scrolldir: direction="%s"' % direction
 
-        if direction == "RIGHT":
+        if direction == em.INPUT_RIGHT:
             new_x = self.v_x + self.x_scroll_interval
             if new_x > self.max_x_offset:
                 new_x = self.max_x_offset
             self.v_x = new_x
-        elif direction == "LEFT":
+        elif direction == em.INPUT_LEFT:
             new_x = self.v_x - self.x_scroll_interval
             if new_x < 0:
                 new_x = 0
             self.v_x = new_x
-        elif direction == "DOWN":
+        elif direction == em.INPUT_DOWN:
             new_y = self.v_y + self.y_scroll_interval
             if new_y > self.max_y_offset:
                 new_y = self.max_y_offset
             self.v_y = new_y
-        elif direction == "UP":
+        elif direction == em.INPUT_UP:
             new_y = self.v_y - self.y_scroll_interval
             if new_y < 0:
                 new_y = 0
