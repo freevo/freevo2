@@ -4,6 +4,9 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.53  2002/08/14 12:38:05  krister
+# Made shutdown loop forever until dead. This hopefully fixes a bug where SDL crashes at polling after shutdown.
+#
 # Revision 1.52  2002/08/14 09:28:37  tfmalt
 #  o Updated all files using skin to create a skin object with the new
 #    get_singleton function. Please tell or add yourself if I forgot a
@@ -140,7 +143,7 @@ def shutdown(menuw=None, arg=None):
     osd.update()
 
     time.sleep(0.5)
-    osd.shutdown()
+    osd.shutdown() # SDL must be shutdown to restore video modes etc
     
     # XXX temporary kludge so it won't break on old config files
     if 'ENABLE_SHUTDOWN_SYS' in dir(config):  
@@ -159,6 +162,10 @@ def shutdown(menuw=None, arg=None):
     # XXX Kludge to shutdown if started with "python main.py"
     os.system('kill -9 `pgrep -f "python main.py" -d" "` 2&> /dev/null') 
 
+    # Just wait until we're dead. SDL cannot be polled here anyway.
+    while 1:
+        time.sleep(1)
+        
 
 def autostart():
     if config.ROM_DRIVES != None: 
