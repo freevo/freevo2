@@ -542,7 +542,8 @@ class RecordServer(RPCServer):
             status['busy'] = max(1, int(busy / 60) + 1)
 
         # find next scheduled recordings for wakeup
-        rec = filter(lambda r: r.status == SCHEDULED, self.recordings)
+        rec = filter(lambda r: r.status == SCHEDULED and \
+                     r.start - r.start_padding > ctime, self.recordings)
         if rec:
             # set wakeup time
             status['wakeup'] = rec[0].start - rec[0].start_padding

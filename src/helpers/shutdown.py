@@ -103,7 +103,7 @@ USER_IDLETIME           = 30       # 30 minutes
 MAX_ENTITY_IDLETIME     = 30       # 30 minutes
 
 
-if 0:
+if 1:
     # variables for testing
     POLL_INTERVALL      = 1000     # 1 second
     FIRST_START         = 1000     # 1 second
@@ -135,7 +135,8 @@ class Shutdown:
         if not self.timer:
             # we are in the startup mode (30 minutes wait)
             return
-        log.warning('entity change, set timer %s seconds' % POLL_INTERVALL)
+        log.warning('entity change, set timer %s seconds' % \
+                    (POLL_INTERVALL / 1000))
         notifier.removeTimer(self.timer)
         self.timer = notifier.addTimer(POLL_INTERVALL, self.check_mbus)
 
@@ -189,6 +190,10 @@ class Shutdown:
         if isinstance(return_list, mbus.types.MError):
             # error, entity can't answer to that request
             return
+
+        # some debug
+        log.info('Answer from %s' % return_list[0][0])
+
         # get the attributes as dict
         attributes = dict(return_list[0][2])
 
@@ -227,6 +232,7 @@ class Shutdown:
 
         for entity in mcomm.instance().entities:
             # ask entity status
+            log.info('send status rpc to %s' % entity)
             entity.status(callback=self.rpcreturn)
         # set timer for shutdown in 5 seconds
         self.timer = notifier.addTimer(5000, self.check_shutdown)
@@ -244,16 +250,22 @@ class Shutdown:
             util.popen.Process(config.SHUTDOWN_WAKEUP_CMD % self.wakeuptime)
 
         wait = 0
-        if self.idletime and self.idletime < MAX_ENTITY_IDLETIME:
+        if self.idletime < MAX_ENTITY_IDLETIME:
             log.info('Entity idletime is %s, waiting %s minutes' % \
                      (self.idletime, 30 - self.idletime))
             wait = 30 - self.idletime
-
+        else:
+            log.info('Minimum idletime is %s, continue' % self.idletime)
+            
         if self.busytime:
             log.info('Entity is busy at least %s minutes' % self.busytime)
             wait = max(wait, self.busytime)
 
         wakeup = int((self.wakeuptime - time.time()) / 60)
+        if wakeup < 0:
+            log.error('Correct buggy wakeup time from %s minutes' % wakeup)
+            wakeup = 10
+            
         if wakeup < 30:
             log.info('Wakeup time is in %s minutes, do not shutdown' % wakeup)
             wait = max(wait, wakeup + 5)
