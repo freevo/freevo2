@@ -406,7 +406,7 @@ class Image:
 
 	def get_pixel(self, (x, y)):
 		"""
-		Read the color for the pixel at x,y
+		Read the color for the pixel at x,y (format=RGBA)
 		"""
 		return self._image.get_pixel((x,y))
 
