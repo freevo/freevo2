@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2004/02/07 11:54:29  dischi
+# handle html code as unicode
+#
 # Revision 1.23  2004/02/05 19:26:42  dischi
 # fix unicode handling
 #
@@ -372,6 +375,10 @@ def encode(str, code):
         return result
 
 def htmlenties2txt(string):
+    """
+    Converts a string to a string with all html entities resolved.
+    Returns the result as Unicode object (that may conatin chars outside 256.
+    """
     e = copy.deepcopy(htmlentitydefs.entitydefs)
     e['ndash'] = "-";
     e['bull'] = "-";
@@ -379,8 +386,7 @@ def htmlenties2txt(string):
     e['lsquo'] = "`";
     e['hellip'] = '...'
 
-    string = string.encode(config.LOCALE, 'ignore').replace("&#039", "'").\
-             replace("&#146;", "'")
+    string = Unicode(string).replace("&#039", "'").replace("&#146;", "'")
 
     i = 0
     while i < len(string):
@@ -392,7 +398,7 @@ def htmlenties2txt(string):
         semicolon = string.find(";", amp) # find ; as end of entity
         if string[amp + 1] == "#": # numerical entity like "&#039;"
             entity = string[amp:semicolon+1]
-            replacement = str(chr(int(entity[2:-1])))
+            replacement = Unicode(unichr(int(entity[2:-1])))
         else:
             entity = string[amp:semicolon + 1]
             if semicolon - amp > 7:
@@ -403,7 +409,6 @@ def htmlenties2txt(string):
             except KeyError:
                 continue
         string = string.replace(entity, replacement)
-    #string = string.encode(config.LOCALE, 'ignore')
     return string
 
 
