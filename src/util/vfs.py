@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/11/23 16:57:08  dischi
+# small fixes
+#
 # Revision 1.1  2003/11/22 20:33:53  dischi
 # new vfs
 #
@@ -44,9 +47,11 @@
             
 
 import os
-import config
-import codecs
+import copy
 import traceback
+import codecs
+
+import config
 
 def getoverlay(item):
     if not config.OVERLAY_DIR:
@@ -166,8 +171,13 @@ def listdir(directory, handle_exception=True):
                         for fname in os.listdir(overlay) ]):
                 if not os.path.isdir(f):
                     files.append(f)
-                    
+
+        # remove unwanted directories
+        for f in copy.copy(files):
+            if vfs.basename(f) in ('CVS', '.xvpics', '.thumbnails', '.pics', '.', '..'):
+                files.remove(f)
         return files
+    
     except OSError:
         _debug_('Error in dir')
         if not handle_exception:
@@ -190,6 +200,9 @@ def normalize(name):
     """
     if isoverlay(name):
         name = name[len(config.OVERLAY_DIR):]
+        if name.startswith('disc-set'):
+            # revert it, disc-sets have no real dir
+            return os.path.join(config.OVERLAY_DIR, name)
         if name.startswith('disc'):
             name = name[5:]
             id = name[:name.find('/')]
