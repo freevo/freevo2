@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/02/05 20:02:16  krister
+# Runtime fixes for the preloads. Disable locale stuff in mplayer.
+#
 # Revision 1.4  2003/01/30 02:48:47  krister
 # Added more MPlayer fixes/patches.
 #
@@ -254,7 +257,7 @@ FFMPEG_CVS = cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg
 MPLAYER_CONF = 	--enable-tv-v4l --enable-mga --enable-xmga \
 		--enable-runtime-cpudetection --enable-largefiles --disable-lirc \
 		--disable-svga --disable-arts --disable-directfb --disable-xvid \
-		--disable-divx4linux --disable-gif --disable-gl \
+		--disable-divx4linux --disable-gif --disable-gl --disable-setlocale --disable-i18n \
 		--datadir=./runtime/apps/mplayer --confdir=./runtime/apps/mplayer
 
 # Build mplayer

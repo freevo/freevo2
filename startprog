@@ -21,6 +21,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/02/05 20:02:15  krister
+# Runtime fixes for the preloads. Disable locale stuff in mplayer.
+#
 # Revision 1.2  2003/02/05 14:06:33  dischi
 # We don't need special handling for gentoo. Removed the gentoo stuff
 #
@@ -71,9 +74,13 @@ fi
 
 if [ -e $BASEDIR/runtime/dll/freevo_loader ] ; then
     # Use the freevo program loader
+    # Use dlls only from the runtime
+    export LD_PRELOAD=`cat runtime/preloads`
     exec $BASEDIR/runtime/dll/freevo_loader $STARTAPP "$@"
 else
     # Just start the program
+    # Make sure any dlls present in the runtime are found
+    export LD_LIBRARY_PATH=$BASEDIR/runtime/dll:$LD_LIBRARY_PATH
     exec $STARTAPP "$@"
 fi
 
