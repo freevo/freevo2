@@ -6,6 +6,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/10/14 17:46:54  dischi
+# fix crash on DEBUG>1
+#
 # Revision 1.10  2003/10/12 10:56:19  dischi
 # change debug to use _debug_ and set level to 2
 #
@@ -183,6 +186,9 @@ class ZIndexRenderer:
         Notify objects above the calling object to do a redraw.
         Does anyone have a better idea for a name for this function?
         """
+
+        return
+    
         # oi = self.zindex.index(object)
         # if not len(self.zindex) > (oi+1):
         #     return
@@ -250,10 +256,10 @@ class ZIndexRenderer:
             if o == object:
                 # o.bg_surface = osd.getsurface(o.left, o.top, 
                 #                               o.width, o.height)
-                if config.DEBUG > 1:
-                    o.bg_image = o.bg_surface.convert()
-                    iname = '/tmp/bg1-%s.bmp' % xx
-                    pygame.image.save( o.bg_image, iname )
+                # if config.DEBUG > 1:
+                #     o.bg_image = o.bg_surface.convert()
+                #     iname = '/tmp/bg1-%s.bmp' % xx
+                #     pygame.image.save( o.bg_image, iname )
                 o.draw()
             xx += 1
 
