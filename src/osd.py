@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.98  2003/10/18 13:05:39  dischi
+# also search share dir for images
+#
 # Revision 1.97  2003/10/18 09:42:13  dischi
 # don't start osd for helpers
 #
@@ -1065,6 +1068,8 @@ class OSD:
             else:
                 filename = os.path.abspath(url)
             
+            if not os.path.isfile(filename):
+                filename = os.path.join(config.IMAGE_DIR, url[8:])
             if not os.path.isfile(filename):
                 print 'osd.py: Bitmap file "%s" doesnt exist!' % filename
                 return None
