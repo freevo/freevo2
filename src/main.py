@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.51  2003/07/01 02:58:17  outlyer
+# Added lame/cdparanoia and defaults for the cdbackup plugin
+# Removed some messages from src/main and src/menu
+#
 # Revision 1.50  2003/06/30 20:39:22  outlyer
 # Less noise.
 #
@@ -329,13 +333,13 @@ def main_func():
                     if p.eventhandler(event=event):
                         break
                 else:
-                    print 'no eventhandler for event %s' % event
+                    if DEBUG: print 'no eventhandler for event %s' % event
 
         else:
             if osd.focused_app:
                 osd.focused_app.eventhandler(event)
             else:
-                print 'no target for events given'
+                if DEBUG: print 'no target for events given'
                 
 #
 # Main function

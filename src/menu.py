@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.52  2003/07/01 02:58:17  outlyer
+# Added lame/cdparanoia and defaults for the cdbackup plugin
+# Removed some messages from src/main and src/menu
+#
 # Revision 1.51  2003/06/29 19:52:58  dischi
 # small fix
 #
@@ -407,7 +411,7 @@ class MenuWidget(GUIObject):
                 if p.eventhandler(event=event, menuw=self):
                     return
 
-            print 'no eventhandler for event %s' % event
+            if DEBUG: print 'no eventhandler for event %s' % event
             return
 
         if event == em.MENU_UP:
@@ -598,7 +602,7 @@ class MenuWidget(GUIObject):
             if p.eventhandler(event=event, menuw=self):
                 return
 
-        print 'no eventhandler for event %s' % str(event)
+        if DEBUG: print 'no eventhandler for event %s' % str(event)
         return 0
 
 
