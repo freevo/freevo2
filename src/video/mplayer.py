@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/02/11 06:10:03  krister
+# Display an error if the DVD is protected and cannot be played.
+#
 # Revision 1.18  2003/02/11 04:37:29  krister
 # Added an empty local_conf.py template for new users. It is now an error if freevo_config.py is found in /etc/freevo etc. Changed DVD protection to use a flag. MPlayer stores debug logs in FREEVO_STARTDIR, and stops with an error if they cannot be written.
 #
@@ -358,7 +361,16 @@ class MPlayer:
             self.stop()
             rc.app = None
             return self.item.eventhandler(event)
-            
+
+        if event == rc.DVD_PROTECTED:
+            self.stop()
+            rc.app = None
+            skin.PopupBox('The DVD is protected, see the docs for more info!')
+            osd.update()
+            time.sleep(5.0)
+            # Forward the event as if it was a regular end of item
+            event = rc.PLAY_END
+            return self.item.eventhandler(event)
 
         if event == rc.MENU:
             if self.mode == 'dvdnav':
@@ -433,14 +445,14 @@ class MPlayerParser:
         self.RE_CHAPTER = re.compile("^There are ([0-9]*) chapters in this DVD title.").match
 
 
-    def parse(self, str):
-        m = self.RE_AUDIO(str)
+    def parse(self, line):
+        m = self.RE_AUDIO(line)
         if m: self.item.available_audio_tracks += [ (m.group(2), m.group(1)) ]
 
-        m = self.RE_SUBTITLE(str)
+        m = self.RE_SUBTITLE(line)
         if m: self.item.available_subtitles += [ (m.group(1), m.group(2)) ]
 
-        m = self.RE_CHAPTER(str)
+        m = self.RE_CHAPTER(line)
         if m: self.item.available_chapters = int(m.group(1))
 
         
@@ -506,6 +518,14 @@ class MPlayerApp(childapp.ChildApp):
 
 
     def stderr_cb(self, line):
+        if line.find('The DVD is protected') != -1:
+            print
+            print 'WARNING: You are trying to play a protected (CSS) DVD!'
+            print 'DVD protection is normally enabled, please see the docs'
+            print 'for more information.'
+            print
+            rc.post_event(rc.DVD_PROTECTED)
+            
         if config.MPLAYER_DEBUG:
             try:
                 self.log_stderr.write(line + '\n')

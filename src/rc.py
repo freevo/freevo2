@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/02/11 06:10:03  krister
+# Display an error if the DVD is protected and cannot be played.
+#
 # Revision 1.3  2003/01/11 10:37:48  dischi
 # added event to reload a menu
 #
@@ -122,6 +125,7 @@ class RemoteControl:
     IDENTIFY_MEDIA = 'IDENTIFY_MEDIA'
     REFRESH_SCREEN = 'REFRESH_SCREEN'
     REBUILD_SCREEN = 'REBUILD_SCREEN'
+    DVD_PROTECTED = 'DVD_PROTECTED' # Cannot play prot. DVDs
 
     def __init__(self, port=config.REMOTE_CONTROL_PORT):
         self.port = port
