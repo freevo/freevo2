@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/07/19 16:24:47  rshortt
+# Attempt to solve scheduled recordings upgrade problem.
+#
 # Revision 1.20  2004/07/10 12:33:41  dischi
 # header cleanup
 #
@@ -54,7 +57,7 @@ import config
 
 # The file format version number. It must be updated when incompatible
 # changes are made to the file format.
-EPG_VERSION = 5
+EPG_VERSION = 6
 
 
 # Cache variables for last GetPrograms()
@@ -67,6 +70,19 @@ cache_last_time = 0
 
 
 class TvProgram:
+
+    channel_id = None
+    title      = None
+    desc       = None
+    sub_title  = None
+    start      = None
+    stop       = None
+    ratings    = None
+    advisories = None
+    categories = None
+    date       = None
+    scheduled  = None
+
 
     def __init__(self):
         self.channel_id = ''

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/07/19 16:24:47  rshortt
+# Attempt to solve scheduled recordings upgrade problem.
+#
 # Revision 1.19  2004/07/10 12:33:41  dischi
 # header cleanup
 #
@@ -54,7 +57,7 @@ FALSE = 0
 server_string = 'http://%s:%s/' % \
                 (config.TV_RECORD_SERVER_IP, config.TV_RECORD_SERVER_PORT)
 
-server = xmlrpclib.Server(server_string)
+server = xmlrpclib.Server(server_string, allow_none=1)
 
 def returnFromJelly(status, response):
     if status:
