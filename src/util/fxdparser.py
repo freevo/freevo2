@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/03/06 10:15:22  dischi
+# patches from Sylvain
+#
 # Revision 1.14  2004/02/28 21:04:17  dischi
 # unicode fixes
 #
@@ -18,41 +21,6 @@
 # Revision 1.12  2004/01/15 04:33:34  outlyer
 # Check for  the filename before trying to read it... without it, I couldn't
 # use fxd files which were only in my overlay, but not in the path.
-#
-# Revision 1.11  2004/01/14 21:20:36  dischi
-# fix writing
-#
-# Revision 1.10  2004/01/14 18:49:37  dischi
-# >= is better
-#
-# Revision 1.9  2004/01/14 18:49:09  dischi
-# also dump raw fxd at saving
-#
-# Revision 1.8  2004/01/14 18:42:47  dischi
-# add new helper function
-#
-# Revision 1.7  2004/01/10 13:17:43  dischi
-# o always check if fxd file contains <skin>
-# o add filename to fxd object
-# o also include info with 'name' when in map
-#
-# Revision 1.6  2004/01/03 17:43:15  dischi
-# OVERLAY_DIR is always used
-#
-# Revision 1.5  2004/01/01 12:24:18  dischi
-# cache fxd files with pickle
-#
-# Revision 1.4  2003/12/29 22:32:15  dischi
-# small speed improvements
-#
-# Revision 1.3  2003/12/07 19:12:09  dischi
-# int support in getattr
-#
-# Revision 1.2  2003/11/25 19:00:14  dischi
-# add support for user data
-#
-# Revision 1.1  2003/11/23 16:56:28  dischi
-# a fxd parser for all kinds of fxd files using callbacks
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -347,13 +315,22 @@ class FXD:
         return r
 
 
+    def setcdata(self, node, cdata):
+        """
+        set cdata for a node
+        """
+        if node:
+            node.first_cdata = cdata
+
+
     def setattr(self, node, name, value):
         """
         sets the attribute of the node or if node is 'None', set user defined data
         for the fxd parser.
         """
         if node:
-            node.attrs[('',name)] = value
+            node.attr_list.append(((None, name), value))
+            #node.attrs[('',name)] = value
         else:
             self.user_data[name] = value
 
