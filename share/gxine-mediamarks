@@ -1,5 +1,5 @@
 <GXINEMM VERSION="1">
-  <SUB NAME="alternative">
+  <SUB NAME="Alternative">
     <ENTRY>
       <TITLE>BBC 6 Music</TITLE>
       <REF HREF="rtsp://rmlivev8.bbc.net.uk/farm/*/ev7/live24/6music/live/dsatg2.ra"/>
@@ -36,7 +36,14 @@
       <TIME start="6122"/>
     </ENTRY>
   </SUB>
-  <SUB NAME="rock">
+  <SUB NAME="Classical">
+    <ENTRY>
+        <TITLE>Mostly Classical</TITLE>
+        <REF HREF="http://www.mostlyclassical.com/mp3/classical128k.pls"/>
+        <TIME START="0"/>
+    </ENTRY>
+  </SUB>
+  <SUB NAME="Rock">
     <ENTRY>
       <TITLE>Project 89.0 digital</TITLE>
       <REF HREF="mms://213.200.64.227/fettesradio$livestream.wma"/>
@@ -113,7 +120,7 @@
       <TIME start="15000"/>
     </ENTRY>
   </SUB>
-  <SUB NAME="pop">
+  <SUB NAME="Pop">
     <ENTRY>
       <TITLE>4FM</TITLE>
       <REF HREF="rtsp://mss.streampower.be/broadcast/streampower/encoder/4fm/high.rm"/>
@@ -155,7 +162,7 @@
       <TIME start="8221"/>
     </ENTRY>
   </SUB>
-  <SUB NAME="news &amp; talk">
+  <SUB NAME="News &amp; Talk">
     <ENTRY>
       <TITLE>BBC World Service</TITLE>
       <REF HREF="rtsp://rmlivev8.bbc.net.uk/farm/*/ev7/live24/worldservice/livenews.ra"/>
@@ -207,7 +214,7 @@
       <TIME start="0"/>
     </ENTRY>
   </SUB>
-  <SUB NAME="oldies">
+  <SUB NAME="Oldies">
     <ENTRY>
       <TITLE>BBC Radio 2 FM</TITLE>
       <REF HREF="rtsp://rmlivev8.bbc.net.uk/farm/*/ev7/live24/radio2/live/fmg2.ra"/>
@@ -224,7 +231,7 @@
       <TIME start="0"/>
     </ENTRY>
   </SUB>
-  <SUB NAME="college">
+  <SUB NAME="College">
     <ENTRY>
       <TITLE>WGXM Flyer Radio Dayton</TITLE>
       <REF HREF="rtsp://131.238.250.75:554/encoder/flyerlive.rm"/>
@@ -251,7 +258,7 @@
       <TIME start="6656"/>
     </ENTRY>
   </SUB>
-  <SUB NAME="hot adult contemporary">
+  <SUB NAME="Hot Adult Contemporary">
     <ENTRY>
       <TITLE>The Peak 95.1 FM</TITLE>
       <REF HREF="mms://204.101.160.36:1037"/>
@@ -308,7 +315,7 @@
       <TIME start="13000"/>
     </ENTRY>
   </SUB>
-  <SUB NAME="top 40">
+  <SUB NAME="Top 40">
     <ENTRY>
       <TITLE>BBC Radio 1 FM</TITLE>
       <REF HREF="rtsp://rmlivev8.bbc.net.uk/farm/*/ev7/live24/radio1/live/fmg2.ra"/>
@@ -355,7 +362,7 @@
       <TIME start="7000"/>
     </ENTRY>
   </SUB>
-  <SUB NAME="adult contemporary">
+  <SUB NAME="Adult Contemporary">
     <ENTRY>
       <TITLE>BKR - Soft Rock</TITLE>
       <REF HREF="pnm://sarnoff.sunshinecable.com/live.ra"/>
@@ -407,7 +414,7 @@
       <TIME start="0"/>
     </ENTRY>
   </SUB>
-  <SUB NAME="dance">
+  <SUB NAME="Dance">
     <ENTRY>
       <TITLE>Sunshine Live</TITLE>
       <REF HREF="rtsp://213.200.75.253/farm/*/encoder/sunshinelive/livestream2.rm"/>
@@ -419,7 +426,7 @@
       <TIME start="0"/>
     </ENTRY>
   </SUB>
-  <SUB NAME="spoken word">
+  <SUB NAME="Spoken word">
     <ENTRY>
       <TITLE>BBC Radio 4 FM</TITLE>
       <REF HREF="rtsp://rmlivev8.bbc.net.uk/farm/*/ev7/live24/radio4/live/fmg2.ra"/>
