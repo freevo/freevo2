@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/12/29 22:32:15  dischi
+# small speed improvements
+#
 # Revision 1.3  2003/12/07 19:12:09  dischi
 # int support in getattr
 #
@@ -228,7 +231,7 @@ class FXD:
         for child in node.children:
             if deep < 2 and child.name == name:
                 ret.append(child)
-            elif deep == 0:
+            if deep == 0:
                 ret += self.get_children(child, name, 0)
             elif deep > 1:
                 ret += self.get_children(child, name, deep-1)
@@ -251,12 +254,17 @@ class FXD:
         set. If 'node' is 'None', it return the user defined data in the fxd
         object.
         """
-        if node and node.attrs.has_key(('',name)):
-            r = node.attrs[('',name)].encode(config.LOCALE)
-        elif not node and self.user_data.has_key(name):
-            r = self.user_data[name]
+        r = default
+        if node:
+            try:
+                r = node.attrs[('',name)].encode(config.LOCALE)
+            except KeyError:
+                pass
         else:
-            r = default
+            try:
+                r = self.user_data[name]
+            except KeyError:
+                pass
         if isinstance(default, int):
             try:
                 r = int(r)
@@ -292,6 +300,14 @@ class FXD:
         if not nodes:
             return
 
+        if hasattr(nodes, 'children'):
+            for node in nodes.children:
+                if node.name == 'info':
+                    nodes = [ node ]
+                    break
+            else:
+                nodes = []
+                
         for node in nodes:
             for child in node.children:
                 txt = child.textof().encode(config.LOCALE)
