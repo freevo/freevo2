@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/04/20 20:58:49  dischi
+# scan for plugins and print them
+#
 # Revision 1.8  2003/04/20 11:44:45  dischi
 # add item plugins
 #
@@ -276,3 +279,55 @@ def isevent(event):
         return event[13:]
     else:
         return None
+
+#
+# Main function
+#
+if __name__ == "__main__":
+    import util
+    import re
+    import os
+    
+    start = re.compile('^class *(.*)\((.*Plugin).:')
+    stop  = re.compile('^[\t ]*def.*:')
+    comment = re.compile('^[\t ]*"""')
+
+    print_line = 0
+    ptypes = {}
+
+    print '------------------------------------------'
+    print 'LIST OF PLUGINS'
+    print
+    print
+    
+    for file in util.recursefolders('src',1, '*.py',1):
+        if file == 'src/plugin.py':
+            continue
+        for line in open(str(file),'r').readlines():
+            if (comment.match(line) and print_line == 2) or \
+               (stop.match(line) and print_line == 1):
+                print_line = 0
+                print
+                
+            if print_line == 2:
+                print line[1:-1]
+
+            if comment.match(line) and print_line == 1:
+                print_line = 2
+                
+            if start.match(line):
+                file = re.sub('/', '.', os.path.splitext(file)[0])
+                file = re.sub('src.', '', file)
+                file = re.sub('plugins.', '', file)
+
+                type = start.match(line).group(2)
+                if re.match('^plugin.(.*)', type):
+                    type = re.match('^plugin.(.*)', type).group(1)
+                if start.match(line).group(1) == 'PluginInterface':
+                    name = file
+                else:
+                    name = '%s.%s' % ( file, start.match(line).group(1))
+                
+                print '%s (%s)' % (name, type)
+                print_line = 1
+        
