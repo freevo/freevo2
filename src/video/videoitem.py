@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2003/03/31 20:37:33  dischi
+# added parent to gui popup box
+#
 # Revision 1.29  2003/03/31 03:04:46  rshortt
 # Make the delete file confirm box default to 'cancel'.
 #
@@ -502,7 +505,7 @@ class VideoItem(Item):
                               icon='skins/icons/misc/cdrom_mount.png')
                 osd.update()
             else:
-                pop = PopupBox('Scanning disc, be patient...',
+                pop = PopupBox(menuw, 'Scanning disc, be patient...',
                                icon='skins/icons/misc/cdrom_mount.png')
                 menuw.add_child(pop)
                 pop.osd.focused_app = pop
