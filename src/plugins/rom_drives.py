@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/07/12 21:24:19  dischi
+# sort list before checkin
+#
 # Revision 1.14  2003/07/05 09:09:47  dischi
 # fixed eject problems
 #
@@ -497,6 +500,9 @@ class Identify_Thread(threading.Thread):
                 volumes   = ''
                 start_ep = 0
                 end_ep   = 0
+
+                mplayer_files.sort(lambda l, o: cmp(l.upper(), o.upper()))
+
                 for movie in mplayer_files:
                     if config.TV_SHOW_REGEXP_MATCH(movie):
                         show = config.TV_SHOW_REGEXP_SPLIT(os.path.basename(movie))
@@ -535,7 +541,7 @@ class Identify_Thread(threading.Thread):
                             image = tvinfo[0]
                         if not xml_file:
                             xml_file = tvinfo[3]
-                    
+                        
                 elif not show_name:
                     if os.path.isfile(config.COVER_DIR+\
                                       os.path.splitext(os.path.basename(movie))[0]+'.png'):
