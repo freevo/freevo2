@@ -345,23 +345,23 @@
       <content x="10" type="text" spacing="0">
 
 	<item type="label" font="white" width="100">
-	  <rectangle bgcolor="0x88000066" size="1" color="0x000000" x="-5" y="-3"
-	    width="max+10" height="max+6"/>
+	  <rectangle bgcolor="0x88000066" size="1" color="0x000000" x="-5" y="-5"
+	    width="max+10" height="max+10"/>
 	</item>
 
 	<item type="head" font="white">
-	  <rectangle bgcolor="0x88000066" size="1" color="0x000000" x="-5" y="-3"
-	    width="max+10" height="max+6"/>
+	  <rectangle bgcolor="0x88000066" size="1" color="0x000000" x="-5" y="-5"
+	    width="max+10" height="max+10"/>
 	</item>
 
 	<item type="default" font="white">
 	  <rectangle bgcolor="0xff000000" color="0x000000" size="1" x="-5"
-	    y="-3" width="max+10" height="max+6"/>
+	    y="-5" width="max+10" height="max+10"/>
 	</item>
 
 	<item type="selected" font="yellow shadow">
 	  <rectangle bgcolor="0x88ffffff" size="1" color="0x000000" x="-5"
-	    y="-3" width="max+10" height="max+6"/>
+	    y="-5" width="max+10" height="max+10"/>
 	</item>
 
       </content>

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/03/08 19:54:41  dischi
+# make it look nicer
+#
 # Revision 1.1  2003/03/08 17:36:15  dischi
 # A listing area for the tv listing
 #
@@ -148,7 +151,7 @@ class TVListing_Area(Skin_Area):
         content_h = content.height + content.y - content_y
 
         self.last_items_geometry = font_h, label_width, label_txt_width, content_y,\
-                                   content_h / item_h
+                                   content_h / item_h, item_h
 
         return self.last_items_geometry
     
@@ -170,7 +173,7 @@ class TVListing_Area(Skin_Area):
         n_cols = len(to_listing[0])-1
         col_time = 30
 
-        font_h, label_width, label_txt_width, y0, num_rows = \
+        font_h, label_width, label_txt_width, y0, num_rows, item_h = \
                 self.get_items_geometry(settings, menu)
 
         label_val, label_font, head_val, head_font, selected_val, \
@@ -232,7 +235,7 @@ class TVListing_Area(Skin_Area):
         for i in range(2,len(to_listing)):
             if label_val.rectangle:
                 r = self.get_item_rectangle(label_val.rectangle,
-                                            label_txt_width, label_font.h)[2]
+                                            label_txt_width, font_h)[2]
                 self.drawroundbox(content.x + r.x, y0 + r.y,
                                   r.width, r.height, r)
                 
@@ -261,10 +264,6 @@ class TVListing_Area(Skin_Area):
                         x1 = x_contents + int(float(prg.stop-start_time) * prop_1sec)
 
 
-                    #if prg.title == 'This channel has no data loaded':
-                    #    val2.align='center'
-                    #    val2.selection.align='center'
-
                     if prg.title == selected_prog.title and \
                        prg.channel_id == selected_prog.channel_id and \
                        prg.start == selected_prog.start and \
@@ -276,6 +275,10 @@ class TVListing_Area(Skin_Area):
                     else:
                         val = default_val
                         font = default_font
+
+                    if prg.title == 'This channel has no data loaded':
+                        val = copy.copy(val)
+                        val.align='center'
 
                     #tx0 = min(x1, x0+(flag_left+1)*spacing+flag_left*left_arrow_size[0])
                     #tx1 = max(x0, x1-(flag_right+1)*spacing-flag_right*right_arrow_size[0])
@@ -289,7 +292,8 @@ class TVListing_Area(Skin_Area):
                                           r.width, r.height, r)
 
                     self.write_text(prg.title, font, content, x=tx0,
-                                    y=y0, width=tx1-tx0, height=font_h, align_v='center')
+                                    y=y0, width=tx1-tx0, height=font_h, align_v='center',
+                                    align_h = val.align)
 
                     #if flag_left:
                     #    osd.drawbitmap(val2.indicator['left'], x0 + spacing,
@@ -300,5 +304,5 @@ class TVListing_Area(Skin_Area):
                     #                   y0+spacing+int((str_h - right_arrow_size[1])/2))
 
             i += 1
-            y0 += font_h + content.spacing
+            y0 += item_h - 1
         return
