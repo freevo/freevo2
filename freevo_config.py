@@ -14,49 +14,46 @@ MPLAYER_ARGS_DVD = ''
 VIDREC_MQ = ''
 VIDREC_HQ = ''
 
-# XXX Add DVD ripping:
-# XXX This is using the XviD encoder
-# /usr/local/bin/mencoder -ovc divx4 -divx4opts br=800:key=300:q=5 -oac mp3lame -lameopts br=80:cbr -sws 2 -x 576 -y 432 -o moviename.avi -dvd 1 -alang en
-#
-# 1.33  576x432
-# 1.78  688x384
-#
-#
-# FFMPEG encoder, better?
-# /usr/local/bin/mencoder -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=800:keyint=300:vhq -oac mp3lame -lameopts br=80:cbr -sws 2 -vop scale=576:432 -o tst.avi -dvd 1 -ffourcc divx -alang en
-#
-#Scale and crop a 2.35:1 DVD
-#/usr/local/bin/mencoder -ovc divx4 -divx4opts br=800:key=300:q=5 -oac mp3lame -lameopts br=80:cbr -sws 2 -vop scale=848:336,crop=720:336:0:72 -o tst.avi -dvd 1 -alang en
-
-# XXX Need to do ratio and scaling
-
-#
-# btaudio notes:
-# use the analog channel, /dev/dsp2,mixer1 for a system with 1 soundcard and 1 bttv card
-# input levels seem high, set a low recgain
-# the samplerate cannot be set to exactly 44100, it becomes 44800 instead. 32000 works
-# NUVrec cannot do samplerates other than 44100, stereo, 16 bits.
-#
 def ConfigInit(videotools = 'sim'):
     print 'VIDEOTOOLS = %s' % videotools
 
-    global MPLAYER_CMD, MPLAYER_ARGS_MPG, MPLAYER_ARGS_DVD, MPLAYER_ARGS_DVDNAV, VIDREC_MQ, VIDREC_HQ
+    global MPLAYER_CMD, MPLAYER_ARGS_MPG, MPLAYER_ARGS_DVD
+    global MPLAYER_ARGS_DVDNAV, VIDREC_MQ, VIDREC_HQ
 
-    # There are two sets of tool settings, one for a real box, and one for development.
+    #
+    # There are two sets of tool settings, one for a real box,
+    # and one for development.
     # 
     if videotools == 'real':
-        MPLAYER_CMD = '/usr/local/bin/mplayer'
-        MPLAYER_ARGS_MPG = '-nolirc -nobps -idx -framedrop -cache 10000 -vo mga -screenw 768 -screenh 576 -fs -ao oss:/dev/dsp0'
-        MPLAYER_ARGS_DVD = '-nolirc -nobps -framedrop -cache 10000 -vo mga -ao oss:/dev/dsp0 -dvd %s -alang en,se  -screenw 768 -screenh 576 -fs '
-        VIDREC_MQ_TV = '/usr/local/bin/DIVX4rec -F 300000 -norm NTSC -input Television -m -r 22050 -w 320 -h 240 -ab 80 -vg 100 -vb 800 -H 50 -o %s'
-        VIDREC_MQ_VCR = '/usr/local/bin/DIVX4rec -F 300000 -norm NTSC -input Composite1 -m -r 22050 -w 320 -h 240 -ab 80 -vg 100 -vb 1000 -H 50 -o %s'
-        VIDREC_MQ_NUVTV = '-F 10000 -norm NTSC -input Television -m -r 44100 -w 320 -h 240 -vg 100 -vq 90 -H 50 -mixsrc /dev/dsp:line -mixvol /dev/dsp:line:80 -o %s'
+        MPLAYER_CMD = 'mplayer'
+        MPLAYER_ARGS_MPG = '-nolirc -nobps -idx -framedrop -cache 5000 ' +
+                           '-vo mga -screenw 768 -screenh 576 -fs ' +
+                           ' -ao oss:/dev/dsp0'
+        MPLAYER_ARGS_DVD = '-nolirc -nobps -framedrop -cache 5000 -vo mga ' +
+                           '-ao oss:/dev/dsp0 -dvd %s -alang en,se  ' +      
+                           '-screenw 768 -screenh 576 -fs '
+        VIDREC_MQ_TV = 'DIVX4rec -F 300000 -norm NTSC ' +
+                       '-input Television -m -r 22050 -w 320 -h 240 ' +
+                       '-ab 80 -vg 100 -vb 800 -H 50 -o %s'
+        # Under development
+        VIDREC_MQ_VCR = 'DIVX4rec -F 300000 -norm NTSC ' +
+                        '-input Composite1 -m -r 22050 -w 320 -h 240 ' +
+                        ' -ab 80 -vg 100 -vb 1000 -H 50 -o %s'
+        # Under development
+        VIDREC_MQ_NUVTV = '-F 10000 -norm NTSC -input Television -m ' +
+                          '-r 44100 -w 320 -h 240 -vg 100 -vq 90 -H 50 ' +
+                          '-mixsrc /dev/dsp:line -mixvol /dev/dsp:line:80 -o %s'
         VIDREC_MQ = VIDREC_MQ_TV
     else:
-        MPLAYER_CMD = '/usr/local/bin/mplayer'
-        MPLAYER_ARGS_MPG = '-nobps -idx -framedrop -cache 512 -vo xv -screenw 768 -screenh 576 -fs -ao oss:/dev/dsp0'
-        MPLAYER_ARGS_DVD = '-nobps -framedrop -cache 4096 -vo xv -ao oss:/dev/dsp0 -dvd %s -alang en,se  -screenw 768 -screenh 576 -fs '
-        VIDREC_MQ = '/usr/local/bin/DIVX4rec -F 300000 -norm NTSC -input Composite1 -m -r 22050 -w 320 -h 240 -ab 80 -vg 300 -vb 800 -H 50 -o %s'
+        MPLAYER_CMD = 'mplayer'
+        MPLAYER_ARGS_MPG = '-nobps -idx -framedrop -cache 512 -vo xv ' +
+                           ' -screenw 768 -screenh 576 -fs -ao oss:/dev/dsp0'
+        MPLAYER_ARGS_DVD = '-nobps -framedrop -cache 4096 -vo xv ' +
+                           '-ao oss:/dev/dsp0 -dvd %s -alang en,se ' +
+                           '  -screenw 768 -screenh 576 -fs '
+        VIDREC_MQ = 'DIVX4rec -F 300000 -norm NTSC ' +
+                    '-input Composite1 -m -r 22050 -w 320 -h 240 -ab 80 ' +
+                    '-vg 300 -vb 800 -H 50 -o %s'
         
 #
 # The list of filename suffixes that are used to match the files that
@@ -84,7 +81,7 @@ REMOTE_CONTROL_PORT = 16310
 #
 # The mpg123 application
 #
-MPG123_APP = '/usr/bin/mpg123'
+MPG123_APP = 'mpg123'
 
 #
 # The list of filename suffixes that are used to match the files that
