@@ -10,6 +10,9 @@
 # 
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/06/23 20:05:16  dischi
+# fix bad bug in the object cache, much faster again
+#
 # Revision 1.7  2004/06/21 12:06:38  dischi
 # fix strange crash with try except
 #
@@ -105,7 +108,7 @@ class ObjectCache:
             # remove old one if key is already in cache
             del self.lru[self.lru.index(key)]
         except:
-            return None
+            pass
             
         # Do we need to delete the oldest item?
         if len(self.cache) > self.cachesize:
@@ -116,7 +119,7 @@ class ObjectCache:
             
         self.cache[key] = object
         self.lru.append(key)
-
+        
 
     def __delitem__(self, key):
         if isinstance(key, str):
