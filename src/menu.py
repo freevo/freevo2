@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.73  2003/12/14 17:13:15  dischi
+# call actions() only once
+#
 # Revision 1.72  2003/12/06 13:46:11  dischi
 # changes to the new draw function in skin
 #
@@ -524,18 +527,19 @@ class MenuWidget(GUIObject):
         elif event == MENU_SELECT or event == MENU_PLAY_ITEM:
             action = None
             arg    = None
+
             try:
                 action = menu.selected.action
             except AttributeError:
-                if menu.selected.actions():
-                    action = menu.selected.actions()[0]
+                action = menu.selected.actions()
+                if action:
+                    action = action[0]
                     if isinstance(action, MenuItem):
                         action = action.function
-                        arg = action.arg
+                        arg    = action.arg
                     else:
                         action = action[0]
-                    
-            if action == None:
+            if not action:
                 print 'No action.. '
                 AlertBox(text=_('No action defined for this choice!')).show()
             else:
