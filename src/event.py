@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2003/12/10 19:01:04  dischi
+# add handler for events who know the needed eventhandler
+#
 # Revision 1.31  2003/11/30 19:41:19  dischi
 # add event to toggle interlacing, it is on no key and only works with xine
 #
@@ -85,21 +88,26 @@ class Event:
     an event is passed to the different eventhandlers in Freevo to
     activate some action.
     """
-    def __init__(self, name, arg=None, context=None):
+    def __init__(self, name, arg=None, context=None, handler=None):
         if isinstance(name, Event):
             self.name    = name.name
             self.arg     = name.arg
             self.context = name.context
+            self.handler = name.handler
         else:
             self.name    = name
             self.arg     = None
             self.context = None
+            self.handler = None
         
         if arg or arg == 0:
             self.arg = arg
 
         if context:
             self.context = context
+
+        if handler:
+            self.handler = handler
 
 
     def __str__(self):
