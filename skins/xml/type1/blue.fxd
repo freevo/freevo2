@@ -374,12 +374,10 @@
 	<item type="default">
 	  <if expression="title">
 	    <text font="player title" expression="title"/>
-	    <text font="player title">yes</text>
 	    <newline/>
 	  </if>
 	  <if expression="not title">
 	    <text font="player title" expression="name"/>
-	    <text font="player title">no</text>
 	    <newline/>
 	  </if>
 	  <if expression="artist">
