@@ -1,0 +1,201 @@
+Disclaimer: this text was written in a train, so some chars are
+missing and I missed some keys on the keyboard. The text was also
+written very fast _without_ proof reading. The information should be
+correct, the grammar and spelling is very bad!
+
+If someone has some time, please send me a corrected version.
+
+
+Dischi
+
+
+
+
+
+Fxd file
+--------
+
+Fxd (Freevo Xml Definition) files are xml based files containing
+metadata for Freevo. A fxd file can contain skin informations,
+playlists, contaner and urls for media data on the net.
+
+There is no DTD for fxd files in general (and it's not even possible
+without namespaces). Instead there are several Definitions for each
+subtype of fxd files. The subtypes are inside the <freevo> tag:
+
+<?xml version="1.0" ?>
+<freevo>
+  <subtag1/>
+  <subtag2/>
+</freevo>
+
+You can fix as many subtags inside a fxd, it depends on the need and
+if it makes sense to put it into one file. The next sections describe
+the possible subtypes.
+
+All subtypes except <skin> have the following optional arguments and
+tags:
+
+  <subtype title="foo">
+    <cover-img>foo</cover-img>
+    <info>
+      <description>some text</description>
+    </info>
+  </subtype>
+
+"title" is the name shown in the menu (each subtype should have one),
+cover-img the image for the item. <info> can always contain a
+<description> shown in the info are of the skin. Other tags inside
+<info> are subtype specific.
+
+
+
+Skin Definitions <skin>:
+------------------------
+
+The skin section inside a fxd file can be used to change the look of
+the other items or the directory in freevo. E.g. putting <skin> inside
+a folder.fxd for directories will change the skin for this
+directory. If you put skin information in a fxd containing e.g. a
+<container>, this skin will be used to display this container.
+
+The skin section in this fxd file is identical with the normal skin
+fxd files. But t doesn't make sense to define a whole new skin just
+for one directory. Most of the time you want something small, like
+changing the background picture.
+
+Background pictures are handled best by the skin image.fxd. You can't
+use this skin as your default skin, but you can inherit from this skin
+in your fxd file.
+
+For an example read the doc in share/skins/main/image.fxd
+
+
+
+Movie information <movie>
+-------------------------
+
+The movie tag is to define whole movies. Movies can be have more than
+one video file, special mplayer arguments, some variants and special
+metadata like plot, summary and so on. The metadata can be created
+using the imdb plugin or helper to get the data from IMDb.
+
+The video tag is very complex, for a detailed description see
+Docs/freevo_XML_data.dtd.
+
+You can also use the <movie> tag for making an item for url on the
+net:
+
+  <movie title="n-tv live">
+    <video>
+      <url id="p1">
+        http://62.156.242.10/cgi-bin/redirNTV?user=ntv&amp;type=live&amp;name=nt00.rm
+        <playlist/>
+      </url>
+    </video>
+    <info>
+      <description>n-tv live video stream</description>
+    </info>
+  </movie>
+
+
+Audio information <audio>
+-------------------------
+
+Example:
+
+  <audio title="Smoothjazz">
+    <cover-img>foo.jpg</cover-img>
+    <mplayer_options></mplayer_options>
+    <player>xine</player>
+    <playlist/>
+    <reconnect/>
+    <url>http://64.236.34.141:80/stream/1005</url>
+
+    <info>
+      <genre>JAZZ</genre>
+      <description>A nice description</description>
+    </info>
+
+  </audio>
+</freevo>
+
+Everything except title and url is optional. If <player> is set,
+this player will be used (possible xine or mplayer). The tag
+<playlist/> signals that this url is a playlist (mplayer needs that).
+<reconnect/> signals that the player should reconnect when the
+connection stopps.
+
+
+Playlists <playlist>
+--------------------
+
+Why a new playlist format? We wanted a way to make very simple
+playlists, like this directory without listing all items in it. 
+
+  <playlist title="foo" random="1|0" repeat="1|0">
+    <cover-img>foo.jpg</cover-img>
+    <files>
+      <directory recursive="1|0">path</directory>
+      <file>filename</file>
+    </files>
+    <info>
+      <description>A nice description</description>
+    </info>
+  </playlist>
+
+Again all arguments and tags are optional, but you shoudl have at
+least one <file> or <directory> in <files> to have a playlist
+here. 'random="1"' plays the playlist always in randommode,
+'repeat="1"' will repeat the playing until the user stops.
+
+<files> is a very easy way to add items to the playlist. The simple
+form is to use <file> to add a specific file, but you can also use
+<directory> to add all files in the directory with one line. Adding
+'recursive="1"' all files in this directory and all subdirectories
+will be taken.
+
+
+
+Slideshows <slideshow>
+----------------------
+
+Slideshows are similar to playlists, except they are for images only
+and can contain a background music which is again similar to a
+playlist.
+
+  <slideshow title="foo" random="1|0" repeat="1|0">
+    <cover-img>foo.jpg</cover-img>
+    <background-music random="1|0">
+      <directory recursive="1|0">path</directory>
+      <file>filename</file>
+    </background-music>
+    <files>
+      <directory recursive="1|0" duration="10">path</directory>
+      <file duration="0">filename</file>
+    </files>
+    <info>
+      <description>A nice description</description>
+    </info>
+  </slideshow>
+
+The only thing different from playlist is the duration argument for
+file or directory. 
+
+
+Container <container>
+---------------------
+
+A <container> is only a (like the word says) container for other
+items. It can contain all media fxd subtypes (== everything except
+<skin>), even <container> again.
+
+As example take a look at share/fxd/webradio.fxd. It is a container
+with container in it, containing <audio> items. Selecting a container
+item inside Freevo will show a menu looking similar to a directory
+menu.
+
+
+
+
+
