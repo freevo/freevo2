@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/10/17 18:51:33  dischi
+# check for default with description area
+#
 # Revision 1.10  2003/10/14 17:57:32  dischi
 # more debug
 #
@@ -443,23 +446,31 @@ class Skin_Area:
         try:
             self.use_text_view = menu.skin_force_text_view
             try:
-                self.use_images    = menu.skin_default_no_images
+                self.use_images      = menu.skin_default_no_images
+                self.use_description = menu.skin_default_has_description
             except:
-                menu.skin_default_no_images = FALSE
-                self.use_images    = menu.skin_default_no_images
+                self.use_images      = False
+                self.use_description = False
             return
         except:
             pass
+
         image  = None
         folder = 0
 
-        menu.skin_default_no_images = FALSE
+        menu.skin_default_no_images       = False
+        menu.skin_default_has_description = False
+
         for i in menu.choices:
             if i.image:
-                menu.skin_default_no_images = TRUE
+                menu.skin_default_no_images = True
+            if i.description:
+                menu.skin_default_has_description = True
+            if menu.skin_default_no_images and menu.skin_default_has_description:
                 break
             
         self.use_images = menu.skin_default_no_images
+        self.use_description = menu.skin_default_has_description
 
         if len(menu.choices) < 6:
             try:
@@ -615,10 +626,17 @@ class Skin_Area:
                 area = settings.menu[display_type]
             except:
                 if not self.use_images:
-                    try:
-                        area = settings.menu['default no image']
-                    except:
-                        area = settings.menu['default']
+                    if self.use_description and \
+                           settings.menu.has_key('default description no image'):
+                        area = settings.menu['default description no image']
+                    else:
+                        try:
+                            area = settings.menu['default no image']
+                        except:
+                            area = settings.menu['default']
+                elif self.use_description and \
+                         settings.menu.has_key('default description'):
+                    area = settings.menu['default description']
                 else:
                     area = settings.menu['default']
 
