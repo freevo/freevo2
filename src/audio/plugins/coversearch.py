@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/06/24 18:39:42  dischi
+# some small fixes
+#
 # Revision 1.8  2003/06/24 01:51:13  rshortt
 # Made the license key into an activate argument.  Now you can have:
 # plugin.activate('audio.coversearch', args=('my_key',))
@@ -124,7 +127,7 @@ class PluginInterface(plugin.ItemPlugin):
         self.item = item
         if item.type == 'audio' or item.type == 'audiocd':
             return [ ( self.cover_search_file, 'Find a cover for this music',
-                       'cover_search') ]
+                       'imdb_search_or_cover_search') ]
         return []
 
 
@@ -184,17 +187,20 @@ class PluginInterface(plugin.ItemPlugin):
                                     self.cover_create, cover[i].ImageUrlMedium) ]
                 n.close()
        
+        box.destroy()
+        if len(items) == 1:
+            self.cover_create(arg=items[0].arg, menuw=menuw)
+            return
         if items: 
             moviemenu = menu.Menu('Cover Results', items)
-            box.destroy()
             menuw.pushmenu(moviemenu)
             return
-        else:
-            box = PopupBox(text='No covers available from Amazon')
-            box.show()
-            time.sleep(2)
-            box.destroy()
-            return
+
+        box = PopupBox(text='No covers available from Amazon')
+        box.show()
+        time.sleep(2)
+        box.destroy()
+        return
 
 
     def cover_create(self, arg=None, menuw=None):
@@ -228,6 +234,11 @@ class PluginInterface(plugin.ItemPlugin):
         back = 1
         if menuw.menustack[-2].selected != self.item:
             back = 2
+
+        # maybe we called the function directly because there was only one
+        # cover and we called it with an event
+        if menuw.menustack[-1].selected == self.item:
+            back = 0
             
         # update the directory
         if directory.dirwatcher_thread:
@@ -236,5 +247,4 @@ class PluginInterface(plugin.ItemPlugin):
         # go back in menustack
         for i in range(back):
             menuw.delete_menu()
-        
         box.destroy()

@@ -8,13 +8,16 @@
 #        with the plugin
 #        activate with plugin.activate('video.imdb')
 #        You can also set imdb_search on a key (e.g. '1') by setting
-#        EVENTS['menu']['1'] = Event(MENU_CALL_ITEM_ACTION, arg='imdb_search')
+#        EVENTS['menu']['1'] = Event(MENU_CALL_ITEM_ACTION, arg='imdb_search_or_cover_search')
 #
 # Todo:  - function to add to an existing fxd file
 #        - DVD/VCD support
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/06/24 18:39:42  dischi
+# some small fixes
+#
 # Revision 1.9  2003/06/23 19:52:55  dischi
 # change event key to imdb_search_or_cover_search
 #
@@ -181,10 +184,22 @@ class PluginInterface(plugin.ItemPlugin):
         for id,name,year,type in helpers.imdb.search(name):
             items += [ menu.MenuItem('%s (%s, %s)' % (name, year, type),
                                      self.imdb_create_fxd, (id, year)) ]
-        moviemenu = menu.Menu('IMDB QUERY', items)
 
         box.destroy()
-        menuw.pushmenu(moviemenu)
+        if len(items) == 1:
+            self.imdb_create_fxd(arg=items[0].arg, menuw=menuw)
+            return
+
+        if items: 
+            moviemenu = menu.Menu('IMDB QUERY', items)
+            menuw.pushmenu(moviemenu)
+            return
+
+        box = PopupBox(text='No information available from IMDB')
+        box.show()
+        time.sleep(2)
+        box.destroy()
+        return
 
 
     def imdb_create_fxd(self, arg=None, menuw=None):
@@ -206,6 +221,11 @@ class PluginInterface(plugin.ItemPlugin):
         back = 1
         if menuw.menustack[-2].selected != self.item:
             back = 2
+            
+        # maybe we called the function directly because there was only one
+        # entry and we called it with an event
+        if menuw.menustack[-1].selected == self.item:
+            back = 0
             
         # update the directory
         if directory.dirwatcher_thread:
