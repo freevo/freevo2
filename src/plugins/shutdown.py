@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/06/06 14:16:08  dischi
+# small fix for confirm and enable shutdown sys
+#
 # Revision 1.4  2004/05/30 18:28:15  dischi
 # More event / main loop cleanup. rc.py has a changed interface now
 #
@@ -157,9 +160,7 @@ class ShutdownItem(Item):
                           (self.shutdown_system, _('Shutdown system') ),
                           (self.shutdown_system_restart, _('Restart system') ) ]
         if config.ENABLE_SHUTDOWN_SYS:
-            items = [ (self.shutdown_system, _('Shutdown system') ),
-                          (self.shutdown_freevo, _('Shutdown Freevo') ),
-                          (self.shutdown_system_restart, _('Restart system') ) ]
+            items = [ items[1], items[0], item[2] ]
 
         return items
 
