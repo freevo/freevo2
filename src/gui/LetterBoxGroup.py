@@ -10,6 +10,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/03/30 17:21:19  rshortt
+# New classes: PasswordInputBox, PasswordLetterBox.
+# PasswordLetterBox is a subclass of Letterbox, PasswordInputBox does not
+# extend InputBox but instead is also a subclass of PopupBox.  LetterBoxGroup
+# has a new constructor argument called 'type' which when set to 'password'
+# will make a LetterBoxGroup of PasswordLetterBox's rather than Letterbox's.
+#
 # Revision 1.5  2003/03/30 16:15:42  rshortt
 # Got rid of trailing whitespaces from the 'word'.
 #
@@ -60,13 +67,14 @@
 import pygame
 import config
 
-from GUIObject  import *
-from Color      import *
-from Border     import *
-from Label      import * 
-from LetterBox  import * 
-from types      import * 
-from osd import Font
+from GUIObject          import *
+from Color              import *
+from Border             import *
+from Label              import * 
+from LetterBox          import * 
+from PasswordLetterBox  import * 
+from types              import * 
+from osd import         Font
 
 DEBUG = 0
 
@@ -87,13 +95,14 @@ class LetterBoxGroup(GUIObject):
     """
 
     
-    def __init__(self, numboxes=7, text=None, handler=None, left=None, top=None, 
-                 width=None, height=None, bg_color=None, fg_color=None, 
-                 border=None, bd_color=None, bd_width=None):
+    def __init__(self, numboxes=7, text=None, handler=None, type=None, 
+                 left=None, top=None, width=None, height=None, bg_color=None, 
+                 fg_color=None, border=None, bd_color=None, bd_width=None):
 
         # XXX: text not supported yet
         self.text     = text
         self.handler  = handler
+        self.type     = type
         self.bg_color = bg_color
         self.fg_color = fg_color
         self.border   = border
@@ -139,7 +148,10 @@ class LetterBoxGroup(GUIObject):
         l = 0
         h = 0
         for i in range(self.numboxes):
-            lb = LetterBox()
+            if self.type == 'password': 
+                lb = PasswordLetterBox()
+            else:
+                lb = LetterBox()
             l = l + lb.width
             if lb.height > h:  h = lb.height
             if i == 0:
@@ -189,7 +201,10 @@ class LetterBoxGroup(GUIObject):
     def get_word(self):
         word = ''
         for box in self.boxes:
-            word = word + box.get_text()
+            if isinstance(self.border, PasswordLetterBox):
+                word += box.real_char
+            else:
+                word = word + box.get_text()
 
         return word.rstrip()
 

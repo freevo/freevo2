@@ -1,6 +1,6 @@
 #if 0 /*
 # -----------------------------------------------------------------------
-# LetterBox.py - a gui widget for inputting a letter
+# PasswordLetterBox.py - a gui widget for inputting a password character
 # -----------------------------------------------------------------------
 # $Id$
 #
@@ -9,40 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.6  2003/03/30 17:21:17  rshortt
+# Revision 1.1  2003/03/30 17:21:20  rshortt
 # New classes: PasswordInputBox, PasswordLetterBox.
 # PasswordLetterBox is a subclass of Letterbox, PasswordInputBox does not
 # extend InputBox but instead is also a subclass of PopupBox.  LetterBoxGroup
 # has a new constructor argument called 'type' which when set to 'password'
 # will make a LetterBoxGroup of PasswordLetterBox's rather than Letterbox's.
 #
-# Revision 1.5  2003/03/24 02:40:50  rshortt
-# These objects are now using skin properties.
-#
-# Revision 1.4  2003/03/09 21:37:06  rshortt
-# Improved drawing.  draw() should now be called instead of _draw(). draw()
-# will check to see if the object is visible as well as replace its bg_surface
-# befire drawing if it is available which will make transparencies redraw
-# correctly instead of having the colour darken on every draw.
-#
-# Revision 1.3  2003/03/07 00:19:58  rshortt
-# Just a quick fix to take care of redrawing when changing the letter and still
-# seeing the previous letter though the alpha.  I will have to come up with
-# a better solution (probably using a bg_surface or something) when I hook
-# this object up to the skin properties because if the non-selected bg_color
-# has a transparency it will still be broken.
-#
-# Revision 1.2  2003/03/05 03:53:34  rshortt
-# More work hooking skin properties into the GUI objects, and also making
-# better use of OOP.
-#
-# ListBox and others are working again, although I have a nasty bug regarding
-# alpha transparencies and the new skin.
-#
-# Revision 1.1  2003/02/18 13:40:53  rshortt
-# Reviving the src/gui code, allso adding some new GUI objects.  Event
-# handling will not work untill I make some minor modifications to main.py,
-# osd.py, and menu.py.
 #
 #
 # -----------------------------------------------------------------------
@@ -70,17 +43,18 @@
 import pygame
 import config
 
-from GUIObject import *
-from Color     import *
-from Border    import *
-from Label     import * 
-from types     import * 
+from GUIObject  import *
+from Color      import *
+from Border     import *
+from Label      import * 
+from LetterBox  import * 
+from types      import * 
 from osd import Font
 
 DEBUG = 0
 
 
-class LetterBox(GUIObject):
+class PasswordLetterBox(LetterBox):
     """
     left      x coordinate. Integer
     top       y coordinate. Integer
@@ -95,22 +69,17 @@ class LetterBox(GUIObject):
     """
 
     
-    ourChars = [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 
-                 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 
-                 'Y', 'Z', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 
-                 '-', ' ' ] 
-
     phoneChars = {
         1 : ["1"],
-        2 : ["2", "A", "B", "C"],
-        3 : ["3", "D", "E", "F"],
-        4 : ["4", "G", "H", "I"],
-        5 : ["5", "J", "K", "L"],
-        6 : ["6", "M", "N", "O"],
-        7 : ["7", "P", "Q", "R", "S"],
-        8 : ["8", "T", "U", "V"],
-        9 : ["9", "W", "X", "Y", "Z"],
-        0 : ["0", "-", " "],
+        2 : ["2"],
+        3 : ["3"],
+        4 : ["4"],
+        5 : ["5"],
+        6 : ["6"],
+        7 : ["7"],
+        8 : ["8"],
+        9 : ["9"],
+        0 : ["0"],
     }
         
 
@@ -119,114 +88,11 @@ class LetterBox(GUIObject):
                  selected_bg_color=None, selected_fg_color=None,
                  border=None, bd_color=None, bd_width=None):
 
-        self.border            = border
-        self.bd_color          = bd_color
-        self.bd_width          = bd_width
-        self.bg_color          = bg_color
-        self.fg_color          = fg_color
-        self.selected_fg_color = selected_fg_color
-        self.selected_bg_color = selected_bg_color
+        LetterBox.__init__(self, text, left, top, width, height, bg_color, 
+                           fg_color, selected_color, selected_bg_color, 
+                           selected_fg_color, border, bd_color, bd_width)
 
-        self.skin = skin.get_singleton()
-
-        (BLAH, BLAH, BLAH, BLAH,
-         button_default, button_selected) = \
-         self.skin.GetPopupBoxStyle()
-
-        if not self.bg_color:
-            if button_default.rectangle.bgcolor:
-                self.bg_color = Color(button_default.rectangle.bgcolor)
-            else:
-                self.bg_color = Color(self.osd.default_bg_color)
-
-        if not self.fg_color:
-            if button_default.font.color:
-                self.fg_color = Color(button_default.font.color)
-            else:
-                self.fg_color = Color(self.osd.default_fg_color)
-
-        if not self.selected_bg_color:
-            if button_selected.rectangle.bgcolor:
-                self.selected_bg_color = Color(button_selected.rectangle.bgcolor)
-            else:
-                self.selected_bg_color = Color((0,255,0,128))
-
-        if not self.selected_fg_color:
-            if button_selected.font.color:
-                self.selected_fg_color = Color(button_selected.font.color)
-            else:
-                self.selected_fg_color = Color(self.osd.default_fg_color)
-
-
-        GUIObject.__init__(self, left, top, width, height, 
-                           self.bg_color, self.fg_color)
-
-
-        if not self.bd_color: 
-            if button_default.rectangle.color:
-                self.bd_color = Color(button_default.rectangle.color)
-            else:
-                self.bd_color = Color(self.osd.default_fg_color)
-
-        if not self.bd_width: 
-            if button_default.rectangle.size:
-                self.bd_width = button_default.rectangle.size
-            else:
-                self.bd_width = 1
-
-        if not self.border:   
-            self.border = Border(self, Border.BORDER_FLAT,
-                                 self.bd_color, self.bd_width)
-
-
-        if type(text) is StringType:
-            if text: self.set_text(text)
-        elif not text:
-            self.text = None
-        else:
-            raise TypeError, text
-
-        if button_default.font:       
-            self.set_font(self.label,
-                          button_default.font.name, 
-                          button_default.font.size, 
-                          Color(button_default.font.color))
-        else:
-            self.set_font(config.OSD_DEFAULT_FONTNAME,
-                          config.OSD_DEFAULT_FONTSIZE)
-
-        if button_selected.font:       
-            self.set_font(self.selected_label,
-                          button_selected.font.name, 
-                          button_selected.font.size, 
-                          Color(button_selected.font.color))
-        else:
-            self.set_font(self.selected_label,
-                          config.OSD_DEFAULT_FONTNAME,
-                          config.OSD_DEFAULT_FONTSIZE)
-
-        self.set_v_align(Align.NONE)
-        self.set_h_align(Align.NONE)
-
-
-    def charUp(self):
-        charNow = self.ourChars.index(self.text)
-        if charNow < len(self.ourChars)-1:
-            charNext = charNow + 1
-        else:
-            charNext = 0
-
-        self.set_text(self.ourChars[charNext])
-
-
-    def charDown(self):
-        charNow = self.ourChars.index(self.text)
-        if charNow > 0:
-            charNext = charNow - 1
-        else:
-            charNext = len(self.ourChars)-1
-
-        self.set_text(self.ourChars[charNext])
+        self.real_char = ' '
 
 
     def cycle_phone_char(self, command):
@@ -288,6 +154,10 @@ class LetterBox(GUIObject):
             self.text = text
         else:
             raise TypeError, type(text)
+
+        self.real_char = text
+        if text != ' ':
+            text = '*'
 
         if not self.label:
             self.label = Label(text)

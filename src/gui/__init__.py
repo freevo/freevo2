@@ -19,6 +19,13 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/03/30 17:21:20  rshortt
+# New classes: PasswordInputBox, PasswordLetterBox.
+# PasswordLetterBox is a subclass of Letterbox, PasswordInputBox does not
+# extend InputBox but instead is also a subclass of PopupBox.  LetterBoxGroup
+# has a new constructor argument called 'type' which when set to 'password'
+# will make a LetterBoxGroup of PasswordLetterBox's rather than Letterbox's.
+#
 # Revision 1.5  2003/02/24 11:58:28  rshortt
 # Adding OptionBox and optiondemo.  Also some minor cleaning in a few other
 # objects.
@@ -109,23 +116,25 @@ DEBUG = 0
 import sys
 import os.path
     
-from gui.Border         import *
-from gui.Color          import *
-from gui.GUIObject      import *
-from gui.PopupBox       import *
-from gui.AlertBox       import *
-from gui.ConfirmBox     import *
-from gui.Label          import *
-from gui.Button         import *
-from gui.LetterBox      import *
-from gui.LetterBoxGroup import *
-from gui.RegionScroller import *
-from gui.Scrollbar      import *
-from gui.InputBox       import *
-from gui.exceptions     import *
-from gui.scrolldemo     import *
-from gui.listboxdemo    import *
-from gui.optiondemo     import *
+from gui.Border            import *
+from gui.Color             import *
+from gui.GUIObject         import *
+from gui.PopupBox          import *
+from gui.AlertBox          import *
+from gui.ConfirmBox        import *
+from gui.Label             import *
+from gui.Button            import *
+from gui.LetterBox         import *
+from gui.PasswordLetterBox import *
+from gui.LetterBoxGroup    import *
+from gui.RegionScroller    import *
+from gui.Scrollbar         import *
+from gui.InputBox          import *
+from gui.PasswordInputBox  import *
+from gui.exceptions        import *
+from gui.scrolldemo        import *
+from gui.listboxdemo       import *
+from gui.optiondemo        import *
 
 
 if DEBUG:
