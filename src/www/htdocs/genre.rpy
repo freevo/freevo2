@@ -11,8 +11,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.3  2003/09/06 21:01:32  mikeruelle
-# it would help if the developer could keep his variables straight.
+# Revision 1.4  2003/09/07 13:25:25  mikeruelle
+# update css to match guide.rpy
 #
 # Revision 1.2  2003/09/05 02:48:13  rshortt
 # Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
@@ -172,26 +172,73 @@ class GenreResource(FreevoResource):
                     fv.tableRowOpen('class="chanrow"')
                     fv.tableCell(chan.displayname, 'class="channel"')
                     popid = '%s:%s' % (prog.channel_id, prog.start)
-                    pops += '<div id="%s"  class="proginfo" >\n' % popid
-                    pops += '  <div class="move" onmouseover="focusPop(\'%s\');" onmouseout="unfocusPop(\'%s\');" style="cursor:move">%s</div>\n' % (popid, popid, prog.title)
                     if prog.desc == '':
                         desc = 'Sorry, the program description for %s is unavailable.' % prog.title
                     else:
                         desc = prog.desc
-                    pops += '  <div class="progdesc"><br /><font color="black">%s</font><br /><br /></div>\n' % desc
-                    pops += '  <div class="poplinks" style="cursor:hand">\n' 
-                    pops += '    <table width="100%" border="0" cellpadding="4" cellspacing="0">\n'
-                    pops += '      <tr>\n'
-                    pops += '        <td class="popbottom" '
-                    pops += 'onClick="document.location=\'record.rpy?chan=%s&start=%s&action=add\'">Record</td>\n' % (prog.channel_id, prog.start)
-                    pops += '        <td class="popbottom" '
-                    pops += 'onClick="document.location=\'edit_favorite.rpy?chan=%s&start=%s&action=add\'">Add to Favorites</td>\n' % (prog.channel_id, prog.start)
-                    pops += '        <td class="popbottom" '
-                    pops += 'onClick="javascript:closePop(\'%s\');">Close Window</td>\n' % popid
-                    pops += '      </tr>\n'
-                    pops += '    </table>\n'
-                    pops += '  </div>\n'
-                    pops += '</div>\n'
+                        pops += """
+<div id="%s" class="proginfo">
+   <table width="100%%"
+          cellpadding="0"
+          cellspacing="0"
+          class="popup"
+          onmouseover="focusPop('%s');"
+          onmouseout="unfocusPop('%s');">
+      <thead>
+         <tr>
+            <td>
+               %s
+            </td>
+         </tr>
+      </thead>
+      <tbody>
+         <tr>
+            <td class="progdesc">
+               %s
+            </td>            
+         </tr>
+         <tr>
+         <td class="progtime">
+            <b>Start:</b> %s, 
+            <b>Stop:</b> %s,
+            <b>Runtime:</b> %smin
+            </td>
+         </td>
+      </tbody>
+      <tfoot>
+         <tr>
+            <td>
+               <table width="100%%"
+                      class="popupbuttons"
+                      border="0"
+                      cellpadding="0"
+                      cellspacing="4">
+                  <tbody>
+                     <tr>
+                        <td onclick="document.location='record.rpy?chan=%s&start=%s&action=add'">
+                           Record
+                        </td>
+                        <td onclick="document.location='edit_favorite.rpy?chan=%s&start=%s&action=add'">
+                           Add to Favorites
+                        </td>
+                        <td onclick="javascript:closePop('%s');">
+                           Close Window
+                        </td>
+                     </tr>
+                  </tbody>
+               </table>
+            </td>
+         </tr>
+      </tfoot>
+   </table>
+</div>
+                        """ % ( popid, popid, popid, prog.title, desc,
+                                time.strftime('%H:%M', time.localtime( prog.start ) ),
+                                time.strftime('%H:%M', time.localtime( prog.stop ) ),
+                                int( ( prog.stop - prog.start ) / 60 ),
+                                prog.channel_id, prog.start,
+                                prog.channel_id, prog.start, popid )
+
                     fv.tableCell(prog.title, 'class="'+status+'" onclick="showPop(\'%s\', this)" width="80%%"' % popid )
                     fv.tableCell(time.strftime('%H:%M', time.localtime(prog.start)), 'class="channel"')
                     fv.tableCell(time.strftime('%H:%M', time.localtime(prog.stop)), 'class="channel"')
