@@ -65,26 +65,12 @@ TD.channel {
     border: #638BCA 1px solid;
 }
 
-td.utilhead1 { 
-    background: #0B1C52 url('/images/utilhead-topleft.gif') left no-repeat; 
-/* background: #0B1C52 url('/images/utilhead-topright.gif') right no-repeat; */
+td.utilhead { 
     color: white; 
     font-weight: bold; 
     text-align: center; 
     padding-top: 13px;
-    height: 53px;
 }
-
-td.utilhead2 { 
-    background: #0B1C52 url('/images/utilhead-topright.gif') right no-repeat; 
-    color: white; 
-    font-weight: bold; 
-    text-align: center; 
-    height: 53px;
-    padding-top: 13px; 
-    
-}
-
 
 td.guidehead { 
     background: #0B1C52; 

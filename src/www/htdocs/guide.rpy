@@ -11,6 +11,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/02/09 21:37:43  outlyer
+# Removed the rounded edges I was trying for the guide; they don't work
+# consistently and look very ugly in some browsers. I'll have to rethink
+# them.
+#
 # Revision 1.20  2004/02/09 21:23:42  outlyer
 # New web interface...
 #
@@ -186,10 +191,10 @@ class GuideResource(FreevoResource):
 
         fv.tableOpen()
         fv.tableRowOpen('class="chanrow"')
-        fv.tableCell('<form>Time:&nbsp;' + self.maketimejumpboxday(now) + self.maketimejumpboxoffset(now) + '<input type=submit value="View"></form>', 'class="utilhead1"')
+        fv.tableCell('<form>Time:&nbsp;' + self.maketimejumpboxday(now) + self.maketimejumpboxoffset(now) + '<input type=submit value="View"></form>', 'class="utilhead"')
         categorybox =  self.makecategorybox(guide.chan_list)
         if categorybox:
-            fv.tableCell('<form action="genre.rpy">Show&nbsp;Category:&nbsp;'+categorybox+'<input type=submit value="Change"></form>', 'class="utilhead2"')
+            fv.tableCell('<form action="genre.rpy">Show&nbsp;Category:&nbsp;'+categorybox+'<input type=submit value="Change"></form>', 'class="utilhead"')
         fv.tableRowClose()
         fv.tableClose()
 
