@@ -20,13 +20,15 @@ Release 1.x.x (200x-xx-xx):
  * Update command plugin to allow for X users to run X based apps (Mozilla etc) 
    via a FXD file.
  * big speed enhancement:
-   - better caching of files/attributes
-   - including mmpython cache inside Freevo
+    * better caching of files/attributes
+    * including mmpython cache inside Freevo
  * storage of item variables of Freevo sessions
  * VirtualFileSystem to store metadata
  * Skin enhancements
  * Support for DVD Mirrors (full lossless versions of DVDs played from the
    hard drive)
+ * Reworked the web interface into XHTML with most design and layout in the
+    style sheet.  Removed proprietary HTML attributes.
 	
 	
 Release 1.4.0 (2003-11-20):
