@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2003/04/14 14:14:14  gsbarbieri
+# Fix crash when using "Change Play Settings" with files instead of VCD/DVD/...
+#
 # Revision 1.34  2003/04/13 18:00:15  dischi
 # reload menu when deleting a file
 #
@@ -301,7 +304,7 @@ class VideoItem(Item):
     def confirm_delete(self, arg=None, menuw=None):
         if not self.menuw:
             self.menuw = menuw
-        ConfirmBox(text='Do you wish to delete %s?' % self.name,
+        ConfirmBox(text='Do you wish to delete\n %s?' % self.name,
                    handler=self.delete_file, default_choice=1).show()
 
 
@@ -519,8 +522,9 @@ class VideoItem(Item):
                 probe_file = '-vcd 99'
 
             cmd = config.MPLAYER_CMD + ' -ao null -nolirc -vo null -frames 0 '
-            cmd += ' -cdrom-device %s -dvd-device %s' % \
-                   (self.media.devicename, self.media.devicename)
+            if self.media:
+                cmd += ' -cdrom-device %s -dvd-device %s' % \
+                       (self.media.devicename, self.media.devicename)
             cmd += ' %s 2> /dev/null > /tmp/mplayer_dvd_%s.log' % (probe_file, uid)
 
             os.system(cmd + (' ; touch /tmp/mplayer_dvd_done_%s' % uid))
@@ -625,8 +629,9 @@ class VideoItem(Item):
                 file = '1'
 
             cmd = config.MPLAYER_CMD + ' -v -nocache -nolirc -vo null -frames 0 '
-            cmd += ' -cdrom-device %s -dvd-device %s' % \
-                   (self.media.devicename, self.media.devicename)
+            if self.media:
+                cmd += ' -cdrom-device %s -dvd-device %s' % \
+                       (self.media.devicename, self.media.devicename)
             if self.mode == 'dvd' or self.mode == 'vcd':
                 cmd += ' -%s %s' % (self.mode, file)
             else:
