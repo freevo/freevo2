@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/11/15 22:57:32  rshortt
+# -use util.ioctl for what we can
+# -calculate ioctl numbers instead of hardcoding them, this gets rid of future warnings
+# -add more stream types: IVTV_STREAM_VCD, IVTV_STREAM_SVCD, IVTV_STREAM_DVD_S1, IVTV_STREAM_DVD_S2.
+#
 # Revision 1.16  2004/08/13 16:17:33  rshortt
 # More work on tv settings, configuration of v4l2 devices based on TV_SETTINGS.
 #
@@ -49,26 +54,33 @@
 
 
 import string, struct, fcntl, time
+from util.ioctl import ioctl, IOR, IOW, IOWR
 
 import tv.v4l2, config
 
-# ioctls
-IVTV_IOC_G_CODEC = 0xFFEE7703
-IVTV_IOC_S_CODEC = 0xFFEE7704
-MSP_SET_MATRIX =   0x40086D11
 
 # Stream types 
-IVTV_STREAM_PS     = 0
-IVTV_STREAM_TS     = 1
-IVTV_STREAM_MPEG1  = 2
-IVTV_STREAM_PES_AV = 3
-IVTV_STREAM_PES_V  = 5
-IVTV_STREAM_PES_A  = 7
+IVTV_STREAM_PS     =  0
+IVTV_STREAM_TS     =  1
+IVTV_STREAM_MPEG1  =  2
+IVTV_STREAM_PES_AV =  3
+IVTV_STREAM_PES_V  =  5
+IVTV_STREAM_PES_A  =  7
 IVTV_STREAM_DVD    = 10
+IVTV_STREAM_VCD    = 11
+IVTV_STREAM_SVCD   = 12
+IVTV_STREAM_DVD_S1 = 13
+IVTV_STREAM_DVD_S2 = 14
 
-# structs
+
+# structs and ioctls
+
 CODEC_ST = '15I'
+IVTV_IOC_G_CODEC = IOR('@', 48, CODEC_ST)
+IVTV_IOC_S_CODEC = IOW('@', 49, CODEC_ST)
+
 MSP_MATRIX_ST = '2i'
+IVTV_IOC_S_MSP_MATRIX = IOW('@', 210, MSP_MATRIX_ST)
 
 
 class IVTV(tv.v4l2.Videodev):
@@ -94,12 +106,12 @@ class IVTV(tv.v4l2.Videodev):
                            codec.gop_closure,
                            codec.pulldown,
                            codec.stream_type)
-        r = fcntl.ioctl(self.devfd, IVTV_IOC_S_CODEC, val)
+        r = ioctl(self.devfd, IVTV_IOC_S_CODEC, val)
 
 
     def getCodecInfo(self):
         val = struct.pack( CODEC_ST, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 )
-        r = fcntl.ioctl(self.devfd, IVTV_IOC_G_CODEC, val)
+        r = ioctl(self.devfd, IVTV_IOC_G_CODEC, val)
         codec_list = struct.unpack(CODEC_ST, r)
         return IVTVCodec(codec_list)
 
@@ -109,7 +121,7 @@ class IVTV(tv.v4l2.Videodev):
         if not output: output = 1
 
         val = struct.pack(MSP_MATRIX_ST, input, output)
-        r = fcntl.ioctl(self.devfd, MSP_SET_MATRIX, val)
+        r = ioctl(self.devfd, IVTV_IOC_S_MSP_MATRIX, val)
 
 
     def init_settings(self):
