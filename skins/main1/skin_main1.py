@@ -9,132 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.63  2002/11/23 19:50:29  dischi
-# cleanup
+# Revision 1.64  2002/11/25 03:01:22  krister
+# Removed the old source tree, Dischis new tree seems to work good enough now.
 #
-# Revision 1.62  2002/11/21 05:23:44  krister
-# Made the main menu fonts and icons larger. Made the icon sizes scale with the resolution.
-#
-# Revision 1.61  2002/11/20 22:07:32  dischi
-# small fix for my code cleanup
-#
-# Revision 1.60  2002/11/20 03:44:57  krister
-# Dirty fix in the skin to display the new icons better, the icons should be resized instead.
-#
-# Revision 1.59  2002/11/19 22:04:15  dischi
-# Some changes I had to made to integrate a first version of my code
-# cleanup. This shouldn't break anything and it should work as before.
-#
-# Revision 1.58  2002/11/01 20:05:11  dischi
-# Make it possible to set deactivate the submenu. Just put
-# <submenu visible="no"> in the xml file. If there are no "normal" menu
-# items the submenu item BACK will be displayed to have at least one
-# item to select.
-#
-# Revision 1.57  2002/10/30 16:34:25  outlyer
-# Don't crash if show_name[0][-1] is undefined.
-#
-# (I had files named: 1x14 - something.avi, and it matched the TV SHOW regexp
-# but it crashed since show_name[0] was undefined, so FIRST check if show_name[0]
-# is undefined before doing something with the show_name[0])
-#
-# Revision 1.56  2002/10/28 21:32:42  dischi
-# Oops
-#
-# Revision 1.55  2002/10/26 12:27:45  dischi
-# Keep the aspect ratio for image thumbnails, also show thumbnails for
-# images smaller 1100x800. Maybe these values are too high, for larger
-# images it takes too much time to generate thumbnails on-the-fly.
-#
-# Revision 1.54  2002/10/25 20:11:14  dischi
-# Added support for screenshots instead of cover for the movie browser.
-# For covers is width < height, for screenshots not and to scale them
-# looks odd. So if width > height, it's a screenshot. Keep the ratio
-# and scale it to the width from the xml file. Than check for round
-# boxes alpha masks in this section and when they are around the cover
-# shorten the height of the boxes, too.
-#
-# Revision 1.53  2002/10/24 22:16:50  outlyer
-# We're now using the width field in the fileinfo tag of the XML to decide
-# how wide to write the MP3 data on the screen. This removes the hardcoded
-# '500's from the skin
-#
-# Revision 1.52  2002/10/24 22:03:50  outlyer
-# Changed the DrawTextFramed line to use a hard line height based on the
-# actual height of the displayed string. This way, it's font, skin and
-# screen size independent.
-#
-# Revision 1.51  2002/10/24 21:34:12  outlyer
-# Changed to use two digits if track is specified. I still can't get Python
-# to accept string = '%0.2(n)s' % int(a) without crashing.
-#
-# Revision 1.50  2002/10/24 21:19:58  outlyer
-# No visible change, but now, we have a function called:
-# skin.format_trackr() which takes in the array of id3 tag data and generates
-# the track names for the mp3 browser. By default, it just shows the track
-# name as it did before, but by editing the formatstr (currently IN the
-# function) you can set it to show any combination of artist, album, year,
-# track number, and title.
-#
-# Revision 1.49  2002/10/24 20:20:50  dischi
-# Set height to -1 (font height) to avoid non showing because of the
-# fixed height. If no one is working on the width=500 thing I will fix
-# that this weekend.
-#
-# Revision 1.48  2002/10/24 06:11:45  krister
-# Changed debug levels for less output. Don't display length in DrawMP3 if not valid.
-#
-# Revision 1.47  2002/10/24 05:28:40  outlyer
-# Modified to match the new stuff included in the audioinfo library. We can
-# now show the track number for an id3v2.x track, and we truncate the title,
-# album and artist if they fall outside of the mask.
-#
-# Revision 1.46  2002/10/21 20:30:50  dischi
-# The new alpha layer support slows the system down. For that, the skin
-# now saves the last background/alpha layer combination and can reuse it.
-# It's quite a hack, the main skin needs to call drawroundbox in main1_utils
-# to make the changes to the alpha layer. Look in the code, it's hard to
-# explain, but IMHO it's faster now.
-#
-# Revision 1.45  2002/10/20 16:03:20  outlyer
-# Force seconds in mp3 player to be displayed as two digits. (Previously, if
-# a track was 2 min, 03 sec, it would show as 2:3, now it's 2:03)
-#
-# Revision 1.44  2002/10/20 09:19:12  dischi
-# bugfix
-#
-# Revision 1.43  2002/10/19 17:10:51  dischi
-# some small bugfixes
-#
-# Revision 1.42  2002/10/19 15:09:55  dischi
-# added alpha mask support
-#
-# Revision 1.41  2002/10/16 19:40:34  dischi
-# some cleanups
-#
-# Revision 1.40  2002/10/16 04:58:16  krister
-# Changed the main1 skin to use Gustavos new extended menu for TV guide, and Dischis new XML code. grey1 is now the default skin, I've tested all resolutions. I have not touched the blue skins yet, only copied from skin_dischi1 to skins/xml/type1.
-#
-# Revision 1.16  2002/10/15 19:57:56  dischi
-# Added extended menu support
-#
-# Revision 1.15  2002/10/14 18:47:00  dischi
-# o added scale support, you can define a scale value for the import
-#   grey640x480 and grey768x576 are very simple now
-# o renamed the xml files
-#
-# Revision 1.14  2002/10/13 14:16:55  dischi
-# Popup box and mp3 player are now working, too. This skin can look
-# like main1 and aubin1. I droped the support for the gui classes
-# because there are not powerfull enough
-#
-# Revision 1.13  2002/10/12 19:00:55  dischi
-# deactivated the movie box since we don't have informations for this
-# right now.
-#
-# Revision 1.12  2002/10/12 18:45:25  dischi
-# New skin, Work in progress
-#
+# Revision 1.4  2002/11/24 14:06:57  dischi
+# code cleanup
 #
 #
 # -----------------------------------------------------------------------
@@ -167,6 +46,8 @@ import config
 
 import sys, socket, random, time, os, copy, re
 
+print sys.path
+
 # Various utilities
 import util
 
@@ -185,6 +66,8 @@ import rc
 
 # XML parser for skin informations
 sys.path.append('skins/xml/type1')
+
+
 import xml_skin
 
 # Create the OSD object
@@ -416,12 +299,10 @@ class Skin:
 
             if image:
                 type = item.type
+                if hasattr(item, 'handle_type') and item.handle_type:
+                    type = item.handle_type
 
-                # fix for the new code, I renamed some stuff
-                if type == 'video':
-                    type = 'movie'
-                    
-                if type == 'photo' and val.cover_image.visible:
+                if type == 'image' and val.cover_image.visible:
                     image_x = val.cover_image.x-val.cover_image.spacing
                     if menu.selected == item:
                         thumb = util.getExifThumbnail(image)
@@ -455,7 +336,7 @@ class Skin:
                             i_val.width  = w*scale
 
 
-                elif type == 'movie' and val.cover_movie.visible:
+                elif type == 'video' and val.cover_movie.visible:
                     image_x = val.cover_movie.x-val.cover_movie.spacing
                     if menu.selected == item:
                         w, h = util.pngsize(image)
@@ -489,7 +370,7 @@ class Skin:
                                                  val.cover_movie.height)
                             i_val = val.cover_movie
 
-                elif type == 'music' and val.cover_music.visible:
+                elif type == 'audio' and val.cover_music.visible:
                     image_x = val.cover_music.x-val.cover_music.spacing
                     if menu.selected == item:
                         i_file = util.resize(image, val.cover_music.width, \
@@ -542,6 +423,8 @@ class Skin:
                 obj = item
 
             text = choice.name
+            if choice.type == 'playlist':
+                text = 'PL: %s' % text
             font_w, font_h = osd.stringsize(text, font=obj.font, ptsize=obj.size)
 
             if not spacing:
@@ -660,8 +543,21 @@ class Skin:
         if val.title.visible:
             if val.title.text:
                 menu.heading = val.title.text
+            text = menu.heading
+            width = osd.width
+            if val.title.width:
+                width = val.title.width
+                
+            font_w, font_h = osd.stringsize(text, val.title.font, val.title.size)
 
-            DrawText(menu.heading, val.title)
+            if font_w + 40 > width:     # tv overscan
+                text = text + "..."
+                    
+            while font_w + 40 > width:
+                text = text[0:-4] + "..."
+                font_w, font_h = osd.stringsize(text, val.title.font, val.title.size)
+
+            DrawText(text, val.title)
 
         if val.logo.image and val.logo.visible:
             if val.logo.width and val.logo.height:
@@ -785,21 +681,19 @@ class Skin:
 
             top = iv.y
             DrawText('Title: ', iv, x=left, y=top, align='right')
-            if hasattr(info, 'title'):
-                DrawTextFramed('%s ' % info.title, iv, x=left, y=top, width=right,
-                               height=(str_h_title+5), mode='soft')
-            else:
-                DrawTextFramed('%s ' % info.name, iv, x=left, y=top, width=right,
-                               height=(str_h_title+5), mode='soft')
+            DrawTextFramed('%s ' % info.name, iv, x=left, y=top, width=right,
+                           height=(str_h_title+5), mode='soft')
             if info.artist:
                 top += spacing
                 DrawText('Artist: ', iv, x=left, y=top, align='right')
-                DrawTextFramed('%s ' % info.artist, iv, x=left, y=top, width=right,height=(str_h_artist+5), mode='soft')
+                DrawTextFramed('%s ' % info.artist, iv, x=left, y=top,
+                               width=right,height=(str_h_artist+5), mode='soft')
 
             if info.album:
                 top += spacing
                 DrawText('Album: ', iv, x=left, y=top, align='right')
-                DrawTextFramed('%s ' % info.album, iv, x=left, y=top, width=right,height=(str_h_album+5), mode='soft')
+                DrawTextFramed('%s ' % info.album, iv, x=left, y=top,
+                               width=right,height=(str_h_album+5), mode='soft')
 
             if info.year:
                 top += spacing

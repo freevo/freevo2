@@ -64,7 +64,7 @@ if test -a $RT_DIR/freevo_python ; then
     #$RT_DIR/freevo_python rc_client/joy.py &> /dev/null &
 
     # Start the main freevo application
-    $RT_DIR/freevo_python main.py $*
+    $RT_DIR/freevo_python src/main.py $*
 
     # Freevo exited, make sure all children are killed
     sleep 1
@@ -99,11 +99,11 @@ fi
 # python rc_client/joy.py &> /dev/null &
 
 # Start the main freevo application
-python main.py $*
+python src/main.py $*
 
 # Freevo exited, make sure all children are killed
 sleep 1
-kill -9 `pgrep -f "python main.py" -d" "` &> /dev/null
+kill -9 `pgrep -f "python src/main.py" -d" "` &> /dev/null
 kill -9 `pgrep -f "python rc_client" -d" "` &> /dev/null
 killall -9 freevo_xwin &> /dev/null
 killall -9 mplayer &> /dev/null
