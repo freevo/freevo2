@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/04/24 16:13:47  dischi
+# fixed close bug
+#
 # Revision 1.20  2003/04/24 11:46:30  dischi
 # fixed 'to many open files' bug
 #
@@ -444,7 +447,7 @@ def format_text(text):
 def readfile(filename):
     fd = open(str(filename), 'r')
     ret = fd.readlines()
-    close(fd)
+    fd.close()
     return ret
 
 #
