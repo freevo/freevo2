@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/12/22 12:59:34  dischi
+# Added function sort() to (audio|video|games|image) item to set the sort
+# mode. Default is alphabetical based on the name. For mp3s and images
+# it's based on the filename. Sort by date is in the code but deactivated
+# (see mediamenu.py how to enable it)
+#
 # Revision 1.1  2002/12/09 14:23:53  dischi
 # Added games patch from Rob Shortt to use the interface.py and snes support
 #
@@ -68,7 +74,6 @@ class SnesItem(Item):
         self.type  = 'snes'            # fix value
         self.mode  = 'file'            # file, dvd or vcd
         self.filename = file
-        self.files = [ file, ]
 
         self.name = os.path.splitext(os.path.basename(file))[0]
         self.xml_file = None
@@ -92,6 +97,13 @@ class SnesItem(Item):
 
         self.game_player = game.get_singleton()
         
+
+    def sort(self, mode=None):
+        """
+        Returns the string how to sort this item
+        """
+        return self.name
+
 
     # ------------------------------------------------------------------------
     # actions:

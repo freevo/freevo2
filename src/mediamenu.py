@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2002/12/22 12:59:34  dischi
+# Added function sort() to (audio|video|games|image) item to set the sort
+# mode. Default is alphabetical based on the name. For mp3s and images
+# it's based on the filename. Sort by date is in the code but deactivated
+# (see mediamenu.py how to enable it)
+#
 # Revision 1.12  2002/12/11 16:06:54  dischi
 # First version of a RandomPlaylist. You can access the random playlist
 # from the item menu of the directory. The non-recursive random playlist
@@ -306,7 +312,11 @@ class DirItem(Playlist):
         for t in ( 'video', 'audio', 'image', 'games' ):
             if not self.display_type or self.display_type == t:
                 play_items += eval(t + '.interface.cwd(self, files)')
-        play_items.sort(lambda l, o: cmp(l.name.upper(), o.name.upper()))
+
+        if 0: # sort by date
+            play_items.sort(lambda l, o: cmp(l.sort('date').upper(), o.sort('date').upper()))
+        else:
+            play_items.sort(lambda l, o: cmp(l.sort().upper(), o.sort().upper()))
 
         files.sort(lambda l, o: cmp(l.upper(), o.upper()))
 

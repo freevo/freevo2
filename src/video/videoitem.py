@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2002/12/22 12:59:34  dischi
+# Added function sort() to (audio|video|games|image) item to set the sort
+# mode. Default is alphabetical based on the name. For mp3s and images
+# it's based on the filename. Sort by date is in the code but deactivated
+# (see mediamenu.py how to enable it)
+#
 # Revision 1.7  2002/12/22 12:23:30  dischi
 # Added deinterlacing in the config menu
 #
@@ -139,6 +145,7 @@ class VideoItem(Item):
         self.num_titles        = 0
         self.deinterlace       = 0
 
+
     def copy(self, obj):
         """
         Special copy value VideoItems
@@ -154,7 +161,18 @@ class VideoItem(Item):
             self.num_titles        = obj.num_titles
 
 
+    def sort(self, mode=None):
+        """
+        Returns the string how to sort this item
+        """
+        if mode == 'date' and os.path.isfile(self.files[0]):
+            return '%s%s' % (os.stat(self.files[0]).st_ctime, self.files[0])
 
+        if self.name.find("The ") == 0:
+            return self.name[4]
+        return self.name
+
+    
     # ------------------------------------------------------------------------
     # actions:
 

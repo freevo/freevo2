@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2002/12/22 12:59:34  dischi
+# Added function sort() to (audio|video|games|image) item to set the sort
+# mode. Default is alphabetical based on the name. For mp3s and images
+# it's based on the filename. Sort by date is in the code but deactivated
+# (see mediamenu.py how to enable it)
+#
 # Revision 1.5  2002/12/02 18:25:27  dischi
 # Added bins/exif patch from John M Cooper
 #
@@ -58,11 +64,11 @@ import bins
 from item import Item
 
 class ImageItem(Item):
-    def __init__(self, file, parent, name = None, duration = 0):
+    def __init__(self, filename, parent, name = None, duration = 0):
         Item.__init__(self, parent)
         self.type     = 'image'
-        self.file     = file
-        self.image    = file
+        self.filename = filename
+        self.image    = filename
 
         # variables only for ImageItem
         self.duration = duration
@@ -70,8 +76,8 @@ class ImageItem(Item):
 	self.binsexif = {}
 
         # This should check for bins compatable info
-	if os.path.isfile(file + '.xml'):
-	    binsinfo = bins.get_bins_desc(file)
+	if os.path.isfile(filename + '.xml'):
+	    binsinfo = bins.get_bins_desc(filename)
 	    self.binsdesc = binsinfo['desc']
 	    self.binsexif = binsinfo['exif']
 
@@ -81,7 +87,7 @@ class ImageItem(Item):
 	elif self.binsdesc.has_key('title'):
 	    self.name = self.binsdesc['title']
         else:
-            self.name = util.getname(file)
+            self.name = util.getname(filename)
 
         self.image_viewer = viewer.get_singleton()
 
@@ -97,15 +103,33 @@ class ImageItem(Item):
             self.binsdesc = obj.binsdesc
 
         
+    def sort(self, mode=None):
+        """
+        Returns the string how to sort this item
+        """
+        if mode == 'date':
+            return '%s%s' % (os.stat(self.filename).st_ctime, self.filename)
+        return self.filename
+
+
     def actions(self):
+        """
+        return a list of possible actions on this item.
+        """
         return [ ( self.view, 'View Image' ) ]
 
 
     def cache(self):
+        """
+        caches (loads) the next image
+        """
         self.image_viewer.cache(self)
 
 
     def view(self, arg=None, menuw=None):
+        """
+        view the image
+        """
         self.parent.current_item = self
         self.image_viewer.view(self)
 
