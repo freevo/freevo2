@@ -255,6 +255,22 @@ class Layer:
         pass
 
 
+    def set_position(self, object, x1, y1, x2, y2):
+        """
+        Set object will move to the given position/size
+        """
+        pass
+
+        
+    def modified(self, object):
+        """
+        The object has been modified and needs a redraw. Do not redraw now,
+        wait for a screen.update()
+        """
+        pass
+
+        
+
 
 class Screen:
     """
