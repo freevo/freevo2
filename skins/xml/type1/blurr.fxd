@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <freevo>
 
-  <skin include="blue1_small" geometry="800x600">
+  <skin include="blue1_big" geometry="800x600">
     <iconset dir="skins/icons/blurr/"/>
     <main>
       <item label="tv" name="Watch TV" icon="" 
@@ -235,6 +235,7 @@
     <!-- ********************************************** -->
     <!-- FONT DEFINITIONS -->
 
+    <font label="default" name="Arial_Bold" size="16" color="0xffffff"/>
     <font label="main" name="Arial_Bold" size="16" color="0xffffff"/>
     <font label="main selected" name="Arial_Bold" size="16" color="0xffffff"/>
     <font label="tv" name="Arial_Bold" size="14" color="0xffffff"/>
@@ -244,6 +245,20 @@
     <font label="grey big" name="Arial_Bold" size="18" color="0xdddddd"/>
     <font label="white big" name="Arial_Bold" size="18" color="0xffffff"/>
     <font label="player" name="Arial_Bold" size="18" color="0xffffff"/>
+    <font label="widget" name="Arial_Bold" size="14"/>
+    <font label="widget selected" name="Arial_Bold" size="14"/>
+     
+
+
+    <!-- info area -->
+    <font label="info title"       name="Arial_Bold" size="16" color="0xffffff"/>
+    <font label="info plot"        name="Arial_Bold" size="14" color="0xffffff" />
+    <font label="info tagline"     name="Arial_Bold" size="14" color="0xffffff" />
+    <font label="info description" name="Arial_Bold" size="14" color="0xffffff" />
+    <font label="info label"       name="Arial_Bold" size="14" color="0xffffff" />
+    <font label="info value"       name="Arial_Bold" size="14" color="0xffffff" />
+
+
 
   </skin>
 </freevo>
