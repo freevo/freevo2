@@ -51,7 +51,6 @@ class MenuItem:
 	self.scale = scale
 	self.popup = popup
 	self.image = None
-	print popup
 
     def setImage(self, image):
         self.image = image
