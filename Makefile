@@ -23,7 +23,7 @@ backup:
 
 
 clean:
-	-rm -f *.pyc *.o log_main_out log_main_err
+	-rm -f *.pyc *.o log_main_out log_main_err runapp
 	cd matrox_g400 ; make clean
 	cd rc_client ; make clean
 	cd osd_server ; make clean
