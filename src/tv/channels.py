@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/02/22 21:22:01  rshortt
+# Make sure chan is a string and add better error handling for clist and freq.
+#
 # Revision 1.14  2004/02/19 04:57:57  gsbarbieri
 # Support Web Interface i18n.
 # To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
@@ -158,6 +161,7 @@ class FreevoChannels:
 
 
     def tunerSetFreq(self, chan, app=None, app_cmd=None):
+        chan = str(chan)
         vg = self.getVideoGroup(chan)
 
         freq = config.FREQUENCY_TABLE.get(chan)
@@ -166,7 +170,15 @@ class FreevoChannels:
                 print 'USING CUSTOM FREQUENCY: chan="%s", freq="%s"' % \
                       (chan, freq)
         else:
-            freq = tv.freq.CHANLIST[vg.tuner_chanlist][str(chan)]
+            clist = tv.freq.CHANLIST.get(vg.tuner_chanlist)
+            if clist:
+                freq = clist.get(chan)
+            else:
+                print _('ERROR: Unable to get chanlist for %s') % vg.tuner_chanlist
+                return 0
+            if not freq:
+                print _('ERROR: Unable to get frequency for %s') % chan
+                return 0
             if DEBUG:
                 print 'USING STANDARD FREQUENCY: chan="%s", freq="%s"' % \
                       (chan, freq)
