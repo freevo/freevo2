@@ -506,27 +506,14 @@
 	*******************************************************
 	** TV DEFINITIONS
 	******************************************************* -->
-        
+
+
+        <!-- GUIDE  -->
+
         <menu type="tv">
             <style text="text with tv info style"/>
         </menu>
         
-        <menu type="tv main menu">
-            <style text="text with tv info style (main)"/>
-        </menu>
-        
-        <menu type="tv program menu">
-	    <style text="text with program info style"/>
-        </menu>
-
-        <menu type="tv favorite menu">
-	    <style text="text with favorite info style"/>
-        </menu>
-
-        <menu type="tv manual record menu">
-	    <style text="text with manual record info style"/>
-        </menu>
-
         <menuset label="tv menu">
             <screen layout="screen" x="0" y="0" width="800" height="600"/>
             <title visible="no"/>
@@ -541,68 +528,6 @@
             </listing>
         </menuset>
         
-        <menuset label="tv" inherits="normal text style"> 
-            <view visible="no"/>
-            <listing x="100" width="680">
-                <image label="uparrow" x="290" y="110"/>
-                <image label="downarrow" x="max-32" y="520"/>
-            </listing>
-            <screen layout="tv menu screen"/>
-        </menuset>
-        
-        <menuset label="text with tv info style" inherits="text with info style">
-            <screen layout="tv screen" visible="yes"/>
-        </menuset>
-        
-        <menuset label="text with tv info style (main)" inherits="text with info style">
-            <screen layout="tv screen" visible="yes"/>
-            <info layout="tv extended info" x="30" y="100" width="740" height="230"/>
-            <view visible="no"/>
-        </menuset>
-        
-        <menuset label="text with program info style" 
-	    inherits="text with tv info style (main)">
-            <info layout="tv program info"/>
-        </menuset>
-
-        <menuset label="text with favorite info style"
-	    inherits="text with tv info style (main)">
-            <info layout="tv favorite info"/>
-        </menuset>
-
-        <menuset label="text with manual record info style"
-	    inherits="text with tv info style (main)">
-            <info layout="tv manual record info"/>
-        </menuset>
-
-        <layout label="tv screen">
-            <background>
-                <image image="background" x="0" y="0" label="background"/>
-                <rectangle size="0" bgcolor="0x80000000" radius="10" x="10" y="90"
-		    width="780" height="250"/>
-                <image filename="gant/tv.png" x="435" y="230" width="370"
-		    height="380"/>
-            </background>
-        </layout>
-        
-        <layout label="tv extended info">
-            <content x="0" y="0" type="text" spacing="20" font="default">
-                <item type="default">
-                    <text font="info tagline" width="max" height="max" 
-			expression="function:comingup" mode="soft"/>
-                </item>
-            </content>
-        </layout>
-        
-        <layout label="tv program info">
-            <background>
-                <image image="scheduledtv" x="-5" y="0" width="256" 
-		    height="256" label="top"/>
-            </background>
-            <content x="260"/>
-	</layout>
-
-        <!-- tv info area -->
         <layout label="tv info">
             <background>
                 <rectangle size="0" bgcolor="0x80000000" radius="10" width="max"/>
@@ -622,13 +547,100 @@
                         <newline/>
                     </if>
                     <if expression="description">
-                        <text font="info plot" height="max" mode="soft" expression="description"/>
+                        <text font="info plot" height="max" mode="soft" 
+			    expression="description"/>
                         <newline/>
                     </if>
                 </item>
             </content>
         </layout>
         
+
+	<!-- tv main menu -->
+
+        <menu type="tv main menu">
+            <style text="text with tv info style (main)"/>
+        </menu>
+        
+        <menuset label="text with tv info style (main)" inherits="text with info style">
+            <screen layout="tv screen" visible="yes"/>
+            <info layout="tv extended info" x="30" y="100" width="740" height="230"/>
+            <view visible="no"/>
+        </menuset>
+        
+
+	<!-- program details -->
+
+        <menu type="tv program menu">
+	    <style text="text with program info style"/>
+        </menu>
+
+
+        <menu type="tv favorite menu">
+	    <style text="text with program info style"/>
+        </menu>
+
+        <menuset label="text with program info style" 
+	    inherits="text with tv info style (main)">
+            <listing y="230" height="340"/>
+            <info layout="tv program info" x="10" y="80" width="780" height="125"/>
+        </menuset>
+
+
+	<!-- old stuff ? -->
+
+        <menu type="tv manual record menu">
+	    <style text="text with manual record info style"/>
+        </menu>
+
+        <menuset label="tv" inherits="normal text style"> 
+            <view visible="no"/>
+            <listing x="100" width="680">
+                <image label="uparrow" x="290" y="110"/>
+                <image label="downarrow" x="max-32" y="520"/>
+            </listing>
+            <screen layout="tv menu screen"/>
+        </menuset>
+        
+        <menuset label="text with tv info style" inherits="text with info style">
+            <screen layout="tv screen" visible="yes"/>
+        </menuset>
+        
+        <menuset label="text with favorite info style"
+	    inherits="text with tv info style (main)">
+            <info layout="tv favorite info"/>
+        </menuset>
+
+        <menuset label="text with manual record info style"
+	    inherits="text with tv info style (main)">
+            <info layout="tv manual record info"/>
+        </menuset>
+
+        <layout label="tv screen">
+            <background>
+                <image image="background" x="0" y="0" label="background"/>
+                <image filename="gant/tv.png" x="435" y="230" width="370"
+		    height="380"/>
+            </background>
+        </layout>
+        
+        <layout label="tv extended info">
+            <content x="0" y="0" type="text" spacing="20" font="default">
+                <item type="default">
+                    <text font="info tagline" width="max" height="max" 
+			expression="function:comingup" mode="soft"/>
+                </item>
+            </content>
+        </layout>
+        
+        <layout label="tv program info">
+            <background>
+                <rectangle size="0" bgcolor="0x80000000" radius="10" x="0" y="0"
+		    width="max" height="max"/>
+	    </background>
+            <content x="10" y="10" width="max-20" height="max-20"/>
+	</layout>
+
         <font label="tv" name="Arial_Bold" size="14" color="0xffffff"/>
         <font label="tv selected" name="Arial_Bold" size="14" color="0x164668">
             <shadow visible="no" color="0x000000" border="yes"/>

@@ -541,47 +541,18 @@
 			<text font="tv title" width="max" expression="title"/>
 		    </if>
 		    <newline/>
-		    <if expression="subtitle">
-			<text font="info tagline">"</text>
-			<text font="info tagline" expression="subtitle"/>
-			<text font="info tagline">"</text>
-			<newline/>
-		    </if>
-		    <if expression="description">
-			<text font="info plot" height="60" mode="soft" expression="description"/>
-			<newline/>
-		    </if>
-		    <if expression="categories">
-			<text font="info plot" height="60" mode="soft" expression="categories"/>
-			<newline/>
-		    </if>
-		    <if expression="advisories">
-			<text font="info plot" height="60" mode="soft" expression="advisories"/>
-			<newline/>
-		    </if>
-		    <if expression="ratings">
-			<text font="info plot" height="60" mode="soft" expression="ratings"/>
-			<newline/>
-		    </if>
-		    <goto_pos y="140" mode="absolute"/> 
-		    <if expression="channel">
-			<text width="120" font="info value" mode="soft">Channel: </text>
-			<goto_pos x="10" mode="relative"/>
-			<text font="info value" expression="channel" mode="soft" />
-			<newline/>
-		    </if>
-		    <if expression="start">
-			<text width="120" font="info value" mode="soft">Start: </text>
-			<goto_pos x="10" mode="relative"/>
-			<text font="info value" expression="start" mode="soft" />
-			<newline/>
-		    </if>
-		    <if expression="stop">
-			<text width="120" font="info value" mode="soft">Stop: </text>
-			<goto_pos x="10" mode="relative"/>
-			<text font="info value" expression="stop" mode="soft" />
-			<newline/>
-		    </if>
+		    <goto_pos y="10" mode="relative"/>
+		    <text width="120" font="info value" mode="soft">Channel: </text>
+		    <goto_pos x="10" mode="relative"/>
+		    <text font="info value" expression="channel" mode="soft" />
+		    <newline/>
+		    <text width="120" font="info value" mode="soft">Date: </text>
+		    <goto_pos x="10" mode="relative"/>
+		    <text font="info value" expression="date" mode="soft" />
+		    <newline/>
+		    <text width="120" font="info value" mode="soft">Time: </text>
+		    <goto_pos x="10" mode="relative"/>
+		    <text font="info value" expression="time" mode="soft" />
 		</item>
 	    </content>
 	</layout>
