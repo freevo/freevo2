@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.131  2004/03/21 17:06:42  dischi
+# also search for tv show images in current dir
+#
 # Revision 1.130  2004/03/19 22:10:26  dischi
 # fix dead menu for missing videos
 #
@@ -163,9 +166,15 @@ class VideoItem(Item):
             if show_name[0] and show_name[1] and show_name[2] and show_name[3]:
                 self.name = show_name[0] + u" " + show_name[1] + u"x" + show_name[2] +\
                             u" - " + show_name[3]
-                self.image = util.getimage((config.VIDEO_SHOW_DATA_DIR + \
-                                            show_name[0].lower()), self.image)
+                image = util.getimage((config.VIDEO_SHOW_DATA_DIR + \
+                                       show_name[0].lower()))
+                if self.filename and not image:
+                    image = util.getimage(os.path.dirname(self.filename) + '/' + \
+                                          show_name[0].lower())
 
+                if image:
+                    self.image = image
+                    
                 from video import tv_show_informations
                 if tv_show_informations.has_key(show_name[0].lower()):
                     tvinfo = tv_show_informations[show_name[0].lower()]
