@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2004/08/05 17:39:34  dischi
+# remove skin dep
+#
 # Revision 1.22  2004/08/01 10:48:21  dischi
 # Move idlebar to new gui code:
 # o it is not drawn inside the area (a.k.a skin) code anymore
@@ -73,7 +76,6 @@ import locale
 
 import config
 import plugin
-import skin
 import util.tv_util as tv_util
 import util.pymetar as pymetar
 import gui
@@ -130,7 +132,7 @@ class PluginInterface(plugin.DaemonPlugin):
         
         w = screen.width
         h = config.OSD_OVERSCAN_Y + 60
-        f = skin.get_image('idlebar')
+        f = gui.get_image('idlebar')
 
         if self.barfile != f:
             if self.bar:

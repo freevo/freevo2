@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.76  2004/08/05 17:38:25  dischi
+# remove skin dep
+#
 # Revision 1.75  2004/08/01 10:56:00  dischi
 # do not hide/show the menu, it can do that itself
 #
@@ -48,6 +51,7 @@ import config
 from event import *
 import plugin
 import util
+import gui
 
 from util import mediainfo, vfs, Unicode
 
@@ -169,8 +173,7 @@ class Item:
         self.fxd_file = None
 
         if skin_type:
-            import skin
-            settings  = skin.get_settings()
+            settings  = gui.get_settings()
             skin_info = settings.mainmenu.items
             imagedir  = settings.mainmenu.imagedir
             if skin_info.has_key(skin_type):
