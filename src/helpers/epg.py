@@ -7,7 +7,7 @@ import time
 import sqlite
 
 import config
-from tv.channels import get_epg, get_channels
+from tv.channels import get_epg
 
 epg = get_epg()
 print 'Using database: %s' % epg.db.db.filename
@@ -23,6 +23,7 @@ def usage():
     print '  [-f|--fill]                       Fill DB with XMLTV data.'
     print '  [-p chan|--list-programs chan]    List programs in a given chan.'
     print '  [-s|--search]                     Search DB for matching program.'
+    print '  [-t|--test]                       Developer test function.'
     print '\nDescription:'
     print '      This helper can be used to perform operations on the EPG'
     print '      database.\n'
@@ -44,7 +45,6 @@ def list_channels():
 
 def list_programs(channel):
     print epg.get_programs(channel)
-    # channels = get_channels()
 
 
 def fill_xmltv(xmltv_file):
@@ -83,9 +83,15 @@ def search_progs(subs):
     print '--------'
     programs = epg.search_programs(subs)
     for p in programs:
-        print '%s: %s - %s' % (p.channel_id, p.title, 
-                               time.strftime('%b %d ' + config.TV_TIMEFORMAT, 
-                                             time.localtime(p.start)))
+        print '%s:%d: %s - %s' % (String(p['channel_id']), p['id'], 
+               String(p['title']), 
+               time.strftime('%b %d ' + config.TV_TIMEFORMAT, 
+                             time.localtime(p['start'])))
+
+
+def test_func():
+    epg.expire_programs()
+    sys.exit(0)
 
 
 def main():
@@ -98,9 +104,9 @@ def main():
     search_subs = ''
     channel = ''
 
-    options = 'cfhilp:s:'
+    options = 'cfhilp:s:t'
     long_options = ['update-channels', 'fill', 'help', 'info', 'list', 
-                    'list-programs', 'search']
+                    'list-programs', 'search', 'test']
 
     try:
         opts, args = getopt.getopt(sys.argv[1:], options, long_options)
@@ -124,6 +130,8 @@ def main():
             channel = a
         if o in ('-s', '--search'):
             search_subs = a
+        if o in ('-t', '--test'):
+            test_func()
 
     if update_chan:
         update_channels()
