@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.65  2003/10/24 03:28:08  krister
+# Fixed a bug where the ROM drives autodetection would crash if ROM_DRIVES=None
+#
 # Revision 1.64  2003/10/22 19:08:33  dischi
 # make it possible to deactivate rom drive support
 #
@@ -550,7 +553,11 @@ if not MOVIE_DATA_DIR and not HELPER:
 #
 # Autodetect the CD/DVD drives in the system if not given in local_conf.py
 #
+# ROM_DRIVES == None means autodetect
+# ROM_DRIVES == [] means ignore ROM drives
+#
 if ROM_DRIVES == None:
+    ROM_DRIVES = []
     if os.path.isfile('/etc/fstab'):        
         re_cd        = re.compile( '^(/dev/cdrom[0-9]*|/dev/[am]?cd[0-9]+[a-z]?)[ \t]+([^ \t]+)[ \t]+', re.I )
         re_cdrec     = re.compile( '^(/dev/cdrecorder[0-9]*)[ \t]+([^ \t]+)[ \t]+', re.I )
