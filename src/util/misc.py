@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/01/24 19:00:40  dischi
+# usb storage device support
+#
 # Revision 1.19  2004/01/13 15:18:19  outlyer
 # Check every ten minutes... it's still barely noticeable, but keeps the
 # screen up to date... 30 minutes would work too, but then we'd have to
@@ -299,6 +302,16 @@ def list_usb_devices():
             devices.append('%s:%s' % (line[11:15], line[23:27]))
     fd.close()
     return devices
+
+
+def is_usb_storage_device():
+    fd = open('/proc/bus/usb/devices', 'r')
+    for line in fd.readlines():
+           if line.lower().find('mass storage') != -1:
+                   fd.close()
+                   return 0
+    fd.close()
+    return -1
 
 
 def smartsort(x,y): # A compare function for use in list.sort()
