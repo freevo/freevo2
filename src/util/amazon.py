@@ -1,5 +1,3 @@
-# WARNING: small changes made for Freevo. Look for 'FREEVO' in the code
-
 """Python wrapper
 
 
@@ -56,15 +54,16 @@ Other usage notes:
 """
 
 __author__ = "Mark Pilgrim (f8dy@diveintomark.org)"
-__version__ = "0.61"
+__version__ = "0.62"
 __cvsversion__ = "$Revision$"[11:-2]
 __date__ = "$Date$"[7:-2]
 __copyright__ = "Copyright (c) 2002 Mark Pilgrim"
 __license__ = "Python"
 # Powersearch and return object type fix by Joseph Reagle <geek@goatee.net>
+# Locale support by Michael Josephson <mike@josephson.org>
 
 from xml.dom import minidom
-import os, sys, getopt, cgi, urllib
+import os, sys, getopt, cgi, urllib, string
 try:
     import timeoutsocket # http://www.timo-tasi.org/python/timeoutsocket.py
     timeoutsocket.setDefaultSocketTimeout(10)
@@ -73,6 +72,7 @@ except ImportError:
 
 LICENSE_KEY = None
 HTTP_PROXY = None
+LOCALE = "us"
 
 # don't touch the rest of these constants
 class AmazonError(Exception): pass
@@ -90,6 +90,12 @@ _licenseLocations = (
     (lambda key: _contentsOf(_getScriptDir(), _amazonfile1), '%s in the amazon.py directory' % _amazonfile1),
     (lambda key: _contentsOf(_getScriptDir(), _amazonfile2), '%s in the amazon.py directory' % _amazonfile2)
     )
+_supportedLocales = {
+        "us" : (None, "xml.amazon.com"),   
+        "uk" : ("uk", "xml-eu.amazon.com"),
+        "de" : ("de", "xml-eu.amazon.com"),
+        "jp" : ("jp", "xml.amazon.com")
+    }
 
 ## administrative functions
 def version():
@@ -99,6 +105,20 @@ released %(__date__)s
 """ % globals()
 
 ## utility functions
+
+def setLocale(locale):
+    """set locale"""
+    global LOCALE
+    if _supportedLocales.has_key(locale):
+        LOCALE = locale
+    else:
+        raise AmazonError, ("Unsupported locale. Locale must be one of: %s" %
+            string.join(_supportedLocales, ", "))
+        
+def getLocale():
+    """get locale"""
+    return LOCALE
+
 def setLicense(license_key):
     """set license key"""
     global LICENSE_KEY
@@ -172,18 +192,15 @@ def unmarshal(element):
     else:
         rc = "".join([e.data for e in element.childNodes if isinstance(e, minidom.Text)])
         if element.tagName == 'SalesRank':
-            # FREEVO CHANGES: add '.' as replacement
-            rc = int(rc.replace(',', '').replace('.', ''))
+            rc = int(rc.replace(',', ''))
     return rc
 
-def buildURL(search_type, keyword, product_line, type, page, license_key, lang='us'):
-    if lang=='us':
-        url = "http://xml.amazon.com/onca/xml?v=1.0&f=xml&t=webservices-20"
-    else:
-        url = "http://xml-eu.amazon.com/onca/xml?v=1.0&f=xml&t=webservices-20"
-        url += "&locale=%s" % lang
+def buildURL(search_type, keyword, product_line, type, page, license_key):
+    url = "http://" + _supportedLocales[LOCALE][1] + "/onca/xml2?v=1.0&f=xml&t=webservices-20"
     url += "&dev-t=%s" % license_key.strip()
     url += "&type=%s" % type
+    if _supportedLocales[LOCALE][0]:
+        url += "&locale=%s" % _supportedLocales[LOCALE][0]
     if page:
         url += "&page=%s" % page
     if product_line:
@@ -196,7 +213,7 @@ def buildURL(search_type, keyword, product_line, type, page, license_key, lang='
 
 
 def search(search_type, keyword, product_line, type="heavy", page=None,
-           license_key = None, http_proxy = None, lang='us'):
+           license_key = None, http_proxy = None):
     """search Amazon
 
     You need a license key to call this function; see
@@ -242,26 +259,18 @@ def search(search_type, keyword, product_line, type="heavy", page=None,
       URL - URL of this item
     """
     license_key = getLicense(license_key)
-    url = buildURL(search_type, keyword, product_line, type, page, license_key, lang=lang)
+    url = buildURL(search_type, keyword, product_line, type, page, license_key)
     proxies = getProxies(http_proxy)
     u = urllib.FancyURLopener(proxies)
     usock = u.open(url)
-    try:
-        xmldoc = minidom.parse(usock)
-        data   = unmarshal(xmldoc).ProductInfo
-    except ExpatError, e:
-        # FREEVO CHANGES: catch error and go on
-        data   = Bag()
-        data.ErrorMsg = e
+    xmldoc = minidom.parse(usock)
+
+#     from xml.dom.ext import PrettyPrint
+#     PrettyPrint(xmldoc)
 
     usock.close()
+    data = unmarshal(xmldoc).ProductInfo
     if hasattr(data, 'ErrorMsg'):
-        # FREEVO CHANGES: try other lang
-        # TODO: find more urls
-        if lang == 'us':
-            return search(search_type, keyword, product_line, type, page, license_key, http_proxy, 'uk')
-        if lang == 'uk':
-            return search(search_type, keyword, product_line, type, page, license_key, http_proxy, 'de')
         raise AmazonError, data.ErrorMsg
     else:
         return data.Details
