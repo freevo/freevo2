@@ -12,17 +12,17 @@
 import sys, os
 
 
-PYTHON_REQUIREDVERSION = '2.1'
+#PYTHON_REQUIREDVERSION = '2.1'
 
-print 'checking for Python version >= %s...' % PYTHON_REQUIREDVERSION,
-if ((sys.version_info[0] < 2) or
-    ((sys.version_info[0] == 2) and (sys.version_info[1] < 1))):
-    args = (sys.version_info[0], sys.version_info[1], sys.version_info[2],
-            PYTHON_REQUIREDVERSION)
-    print '%s.%s.%s found, %s or later is required!' % args
-    sys.exit()
-else:
-    print 'found'
+#print 'checking for Python version >= %s...' % PYTHON_REQUIREDVERSION,
+#if ((sys.version_info[0] < 2) or
+#    ((sys.version_info[0] == 2) and (sys.version_info[1] < 1))):
+#    args = (sys.version_info[0], sys.version_info[1], sys.version_info[2],
+#            PYTHON_REQUIREDVERSION)
+#    print '%s.%s.%s found, %s or later is required!' % args
+#    sys.exit()
+#else:
+#    print 'found'
         
 
 print 'checking for Python XML...',

@@ -5,9 +5,14 @@
 # $Id$
 #
 
-# XXX Add a check that we have a recent version of python. Better check for the 
-# version here so that we don't need to restrict the install.py to be 
-# compatible with older versions of Python.
+REQUIRE_PYTHON=210
+PYTHON_VERSION=`python -V 2>&1 | cut -d' ' -f2 | sed -e 's/\.//g'`  # sh doesn't understand decimals
 
-python setup_build.py $*
+if [[ "$PYTHON_VERSION" -gt "$REQUIRE_PYTHON" ]]; then
+	python setup_build.py $*
+else
+	echo "Installed python version is outdated. Please upgrade to 2.1.0 or better"
+fi
+
+#python setup_build.py $*
 
