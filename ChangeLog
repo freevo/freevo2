@@ -4,21 +4,21 @@ Freevo Changelog
 $Id$
 
 Release 1.x.x (200x-xx-xx):
--------------------------------
-* Add MimetypePlugin
-* New fxd parser and better fxd item handling
-* Rename most config variables (!)
-* Add blending in the image viewer
-* Fxd file support for <playlist> and <slideshow> (see share/fxd/examples)
-* Replaced webradio plugin with a fxd file (share/fxd)
-* New, reworked bluetooth plugin for controlling Freevo
-* detachbar plugin to see what Freevo is playing when detaching the audio player
-	
+---------------------------
+ * Add MimetypePlugin
+ * New fxd parser and better fxd item handling
+ * Rename most config variables (!)
+ * Add "cross fading"-style blending in the image viewer
+ * Fxd file support for <playlist> and <slideshow> (see share/fxd/examples)
+ * Replaced webradio plugin with a fxd file (share/fxd)
+ * New, reworked bluetooth plugin for controlling Freevo
+ * detachbar plugin to see what Freevo is playing when detaching the audio player
+ * Support for Rendezvous/Zeroconf based service announcement
 	
 Release 1.4.0 (2003-11-20):
--------------------------------
-* some small bugfixes
-* translation updates
+---------------------------
+ * some small bugfixes
+ * translation updates
 	
 	
 Release 1.4.0-rc4 (2003-11-10):
