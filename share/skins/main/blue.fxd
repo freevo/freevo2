@@ -60,9 +60,6 @@
       <listing layout="list0" x="50" y="110" width="510" height="470">
 	<image x="10" y="110" width="32" height="32" label="uparrow"
 	  filename="up.png"/>
-	<image label="on"   filename="on.png"  />
-	<image label="off"  filename="off.png" />
-	<image label="auto" filename="auto.png"/>
 	<image x="10" y="max-32" width="32" height="32" label="downarrow"
 	  filename="down.png"/>
       </listing>
