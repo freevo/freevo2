@@ -68,15 +68,6 @@ def main_menu(arg=None, menuw=None):
     menuw.pushmenu(moviemenu)
 
 
-# FIXME: MAYBE THIS SHOULD MOVE TO UTILS
-
-def make_filename(dir, file):
-    if file[0] == '/':
-        return file
-    elif file[-1] == '/':
-        return dir + file
-    else:
-        return dir + '/' + file
 
 #
 # parse <video> tag    
@@ -90,10 +81,10 @@ def XML_parseVideo(dir, mplayer_files, video_node):
             for file_nodes in node.children:
                 if file_nodes.name == u'filename':
                     if first_file == "":
-                        first_file = make_filename(dir, file_nodes.textof())
-                try: mplayer_files.remove(make_filename(dir,file_nodes.textof()))
+                        first_file = os.path.join(dir, file_nodes.textof())
+                try: mplayer_files.remove(os.path.join(dir,file_nodes.textof()))
                 except ValueError: pass
-                playlist += [make_filename(dir, file_nodes.textof())]
+                playlist += [os.path.join(dir, file_nodes.textof())]
 
     return ( first_file, playlist)
 
@@ -136,8 +127,8 @@ def cwd(arg=None, menuw=None):
                 if node.name == u'title':
                     title = node.textof()
                 elif node.name == u'cover' and \
-                     os.path.isfile(make_filename(dir,node.textof())):
-                    image = make_filename(dir, node.textof())
+                     os.path.isfile(os.path.join(dir,node.textof())):
+                    image = os.path.join(dir, node.textof())
                 elif node.name == u'video':
                     (first_file, playlist) = XML_parseVideo(dir, mplayer_files, node)
                 elif node.name == u'info':
@@ -185,9 +176,9 @@ def cwd(arg=None, menuw=None):
     
     moviemenu = menu.Menu('MOVIE MENU', items)
 
-    if os.path.isfile(make_filename(dir, "background.jpg")):
-        moviemenu.setBackgroundImage(make_filename(dir, "background.jpg"))
-    elif os.path.isfile(make_filename(dir, "background.png")):
-        moviemenu.setBackgroundImage(make_filename(dir, "background.png"))
+    if os.path.isfile(os.path.join(dir, "background.jpg")):
+        moviemenu.setBackgroundImage(os.path.join(dir, "background.jpg"))
+    elif os.path.isfile(os.path.join(dir, "background.png")):
+        moviemenu.setBackgroundImage(os.path.join(dir, "background.png"))
 
     menuw.pushmenu(moviemenu)
