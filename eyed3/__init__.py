@@ -856,7 +856,7 @@ class Mp3AudioFile:
    def __init__(self, fileName, tagVersion = ID3_ANY):
       self.playTime = None;
       self.fileName = fileName;
-      mp3Match = re.compile(".*\.mp3$");
+      mp3Match = re.compile(".*\.[Mm][Pp]3$");
 
       if not mp3Match.match(fileName):
          raise self.invalidFileExc;
