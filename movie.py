@@ -75,18 +75,28 @@ def main_menu(arg=None, menuw=None):
 def XML_parseVideo(dir, mplayer_files, video_node):
     first_file = ""
     playlist = []
-
+    mode = 'video'
+    add_to_path = dir
+    
     for node in video_node.children:
+        if node.name == u'dvd':
+            mode = 'dvd'
+            first_file = "1"
+        if node.name == u'vcd':
+            mode = 'vcd'
+            first_file = "1"
+        if node.name == u'cd':
+            add_to_path = config.CD_MOUNT_POINT
         if node.name == u'files':
             for file_nodes in node.children:
                 if file_nodes.name == u'filename':
                     if first_file == "":
-                        first_file = os.path.join(dir, file_nodes.textof())
-                try: mplayer_files.remove(os.path.join(dir,file_nodes.textof()))
+                        first_file = os.path.join(add_to_path, file_nodes.textof())
+                try: mplayer_files.remove(os.path.join(add_to_path,file_nodes.textof()))
                 except ValueError: pass
-                playlist += [os.path.join(dir, file_nodes.textof())]
+                playlist += [os.path.join(add_to_path, file_nodes.textof())]
 
-    return ( first_file, playlist)
+    return ( mode, first_file, playlist)
 
 #
 # parse <info> tag (not implemented yet)
@@ -121,7 +131,7 @@ def cwd(arg=None, menuw=None):
         box = parser.parse(open(file).read())
         title = first_file = ""
         image = None
-
+        
         if box.children[0].name == 'movie':
             for node in box.children[0].children:
                 if node.name == u'title':
@@ -130,13 +140,13 @@ def cwd(arg=None, menuw=None):
                      os.path.isfile(os.path.join(dir,node.textof())):
                     image = os.path.join(dir, node.textof())
                 elif node.name == u'video':
-                    (first_file, playlist) = XML_parseVideo(dir, mplayer_files, node)
+                    (mode, first_file, playlist) = XML_parseVideo(dir, mplayer_files, node)
                 elif node.name == u'info':
                     XML_parseInfo(node)
 
         # only add movies when we have all needed informations
         if title != "" and first_file != "":
-            files += [ ( title, first_file, playlist, image ) ]
+            files += [ ( title, mode, first_file, playlist, image ) ]
 
     # "normal" movie files
     for file in mplayer_files:
@@ -162,15 +172,15 @@ def cwd(arg=None, menuw=None):
             image = os.path.splitext(file)[0] + ".jpg"
 
         # add file to list
-        files += [ ( title, file, mplayer_files, image ) ]
+        files += [ ( title, 'video', file, mplayer_files, image ) ]
 
 
     # sort "normal" files and xml files by title
     files.sort(lambda l, o: cmp(l[0].upper(), o[0].upper()))
 
     # add everything to the menu
-    for (title, file, playlist, image) in files:
-        m = menu.MenuItem(title, play_movie, ('video', file, playlist))
+    for (title, mode, file, playlist, image) in files:
+        m = menu.MenuItem(title, play_movie, (mode, file, playlist))
         m.setImage(image)
         items += [m]
     

@@ -127,6 +127,11 @@ MPG123_APP = 'mpg123'
 DEV_MIXER = '/dev/mixer'
 
 #
+# CD mount point
+#
+CD_MOUNT_POINT = '/mnt/cdrom'
+
+#
 # The list of filename suffixes that are used to match the files that
 # are played wih mpg123. They are used as the argument to glob.glob()
 # 
@@ -302,6 +307,7 @@ RC_CMDS = {
     'ff'          : 'FFWD',
     'pause'       : 'PAUSE',
     'stop'        : 'STOP',
-    'rec'         : 'REC'
+    'rec'         : 'REC',
+    'eject'       : 'EJECT'
     }
 

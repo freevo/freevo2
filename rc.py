@@ -71,6 +71,8 @@ class RemoteControl:
     PAUSE    = 'PAUSE'
     STOP     = 'STOP'
     REC      = 'REC'      
+    EJECT    = 'EJECT'
+
     
     # Application generated codes
     PLAY_END = 'PLAY_END'     # Reached end of song, movie, etc

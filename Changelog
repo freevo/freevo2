@@ -24,6 +24,8 @@ o Added PAL support
 o Fullscreen X support
 o Added the install.py script to check dependencies and compile Freevo
 o Changed logfile handling
+o Support for XML config files for each movie/album etc
+o Support for CD/DVD tray open/close and disk mounting
 
 
 Release 1.2.3 (2002-06-01):

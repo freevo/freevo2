@@ -46,6 +46,8 @@ DEBUG = 1
 TRUE = 1
 FALSE = 0
 
+
+
 ###############################################################################
 
 # Set up the mixer
@@ -82,6 +84,7 @@ def getcmd():
     
     muted = 0
     mainVolume = 0
+    tray_open = 0
     while 1:
         
         # Get next command
@@ -105,7 +108,16 @@ def getcmd():
                 mainVolume = mixer.getMainVolume()
                 mixer.setMainVolume(0)
                 muted = 1
+        elif event == rc.EJECT:
+            if tray_open:
+                os.system('eject -t %s' % config.CD_MOUNT_POINT)
+                os.system('mount %s' % config.CD_MOUNT_POINT)
+                tray_open = 0
+            else:
+                os.system('eject %s' % config.CD_MOUNT_POINT)
+                tray_open = 1
 
+            
         # Send events to either the current app or the menu handler
         if rc.app:
             rc.app(event)
