@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.87  2004/01/05 17:18:52  dischi
+# also create parent dir
+#
 # Revision 1.86  2004/01/03 17:38:17  dischi
 # Freevo now needs the vfs active. OVERLAY_DIR is set to ~/.freevo/vfs as
 # default value.
@@ -883,7 +886,7 @@ VIDEO_SHOW_REGEXP_SPLIT = re.compile("[\.\- ]*" + VIDEO_SHOW_REGEXP + "[\.\- ]*"
 #
 
 if not os.path.isdir(OVERLAY_DIR):
-    os.mkdir(OVERLAY_DIR)
+    os.makedirs(OVERLAY_DIR)
     
 # Make sure OVERLAY_DIR doesn't ends with a slash
 # With that, we don't need to use os.path.join, normal string
