@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/10/22 18:42:28  dischi
+# fix crash when item is no VideoItem
+#
 # Revision 1.1  2004/09/14 20:05:19  dischi
 # split __init__ into interface.py and database.py
 #
@@ -90,8 +93,9 @@ def create_movie_database():
 
     files = []
     if not config.VIDEO_ONLY_SCAN_DATADIR:
-        for name,dir in config.VIDEO_ITEMS:
-            files += util.recursefolders(dir,1,'*.fxd',1)
+        if len(config.VIDEO_ITEMS) == 2:
+            for name,dir in config.VIDEO_ITEMS:
+                files += util.recursefolders(dir,1,'*.fxd',1)
 
     for subdir in ('disc', 'disc-set'):
         files += util.recursefolders(vfs.join(config.OVERLAY_DIR, subdir),
@@ -109,6 +113,8 @@ def create_movie_database():
     if config.VIDEO_SHOW_DATA_DIR:
         files = util.recursefolders(config.VIDEO_SHOW_DATA_DIR,1, '*.fxd',1)
         for info in fxditem.mimetype.parse(None, files, display_type='video'):
+            if info.type != 'video':
+                continue
             k = vfs.splitext(vfs.basename(info.files.fxd_file))[0]
             tv_show_informations[k] = (info.image, info.info,
                                        info.mplayer_options, info.skin_fxd)
