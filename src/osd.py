@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.115  2004/01/01 17:40:24  dischi
+# added border support for drawstringframed
+#
 # Revision 1.114  2004/01/01 15:53:18  dischi
 # move the shadow code into osd.py
 #
@@ -772,7 +775,7 @@ class OSD:
 
     def drawstringframed(self, string, x, y, width, height, font, fgcolor=None,
                          bgcolor=None, align_h='left', align_v='top', mode='hard',
-                         layer=None, shadow=None, ellipses='...'):
+                         shadow=None, border_color=None, layer=None, ellipses='...'):
         """
         draws a string (text) in a frame. This tries to fit the
         string in lines, if it can't, it truncates the text,
@@ -792,6 +795,9 @@ class OSD:
         - mode: the way we should break lines/truncate. Can be 'hard'(based on chars)
           or 'soft' (based on words)
         - shadow can be a list of (x, y, color)
+        - border_color is a border around the text.
+
+        You can't use border_color and shadow at the same time
         """
         if not string:
             return '', (x,y,x,y)
@@ -801,18 +807,26 @@ class OSD:
         else:
             shadow_x = 0
             shadow_y = 0
+
+        border_radius = 0
+        if border_color != None:
+            border_radius = int(font.ptsize/10)
             
         if height == -1:
             height = font.height
+        elif border_color != None:
+            height -= border_radius
         else:
             height -= abs(shadow_y)
 
-        width  -= abs(shadow_x)
+        width = width - (abs(shadow_x) + border_radius * 2)
         if shadow_x < 0:
             x -= shadow_x
         if shadow_y < 0:
             y -= shadow_y
-                
+        x += border_radius
+        y += border_radius
+
         line_height = font.height * 1.1
         if int(line_height) < line_height:
             line_height = int(line_height) + 1
@@ -871,7 +885,9 @@ class OSD:
             fgcolor  = self._sdlcol(fgcolor)
             if shadow:
                 shadow_color = self._sdlcol(shadow[2])
-
+            if border_color != None:
+                border_color = self._sdlcol(border_color)
+                
         for w, l in lines:
             if not l:
                 continue
@@ -885,26 +901,44 @@ class OSD:
                     # redraws changed areas, it doesn't matter and saves the time
                     # when searching the cache
                     render = font.font.render(l, 1, fgcolor)
+
+                    # calc x/y positions based on align
                     if align_h == 'right':
                         x0 = x + width - render.get_size()[0]
                     elif align_h == 'center':
                         x0 = x + int((width - render.get_size()[0]) / 2)
+
                     if bgcolor:
+                        # draw a box around the text if we have a bgcolor
                         self.drawbox(x0, y0, x0+render.get_size()[0],
                                      y0+render.get_size()[1], color=bgcolor, fill=1,
                                      layer=layer)
+                    if border_color:
+                        # draw the text 8 times with the border_color to get
+                        # the border effect
+                        for ox in (-border_radius, 0, border_radius):
+                            for oy in (-border_radius, 0, border_radius):
+                                if ox and oy:
+                                    layer.blit(font.font.render(l, 1, border_color),
+                                               (x0+ox, y0+oy))
                     if shadow:
+                        # draw the text in the shadow_color to get a shadow
                         layer.blit(font.font.render(l, 1, shadow_color),
                                    (x0+shadow_x, y0+shadow_y))
+
+                    # draw the text in the fgcolor
                     layer.blit(render, (x0, y0))
                 except:
                     print "Render failed, skipping..."    
+
             if x0 < min_x:
                 min_x = x0
             if x0 + w > max_x:
                 max_x = x0 + w
             y0 += line_height
 
+        # change max_x, min_x, y and height_needed to reflect the
+        # changes from border and shadow
         if shadow:
             if shadow_x < 0:
                 min_x += shadow_x
@@ -915,6 +949,13 @@ class OSD:
                 height_needed -= shadow_y
             else:
                 height_needed += shadow_y
+
+        if border_color:
+            max_x += border_radius
+            min_x -= border_radius
+            y     -= border_radius
+            height_needed += border_radius * 2
+            
         return r, (min_x, y, max_x, y+height_needed)
     
 
