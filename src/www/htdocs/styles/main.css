@@ -1,6 +1,6 @@
 BODY { 
     background: #638BCA; 
-    font-family: Helvetica, Verdana, sans-serif; 
+    font-family: "Trebuchet MS", Helvetica, Verdana, sans-serif; 
     color: navy; 
     margin: 0px 0px 0px 0px;
 }
@@ -106,6 +106,11 @@ TR.chanrow {
 }
 
 
+td.chanrow {
+    padding-left: 1em;
+    padding-right: 1em;
+    }
+
 table.popup {
     background: #638bca;
     color: #000000;
@@ -115,7 +120,7 @@ table.popup thead {
     background: #0B1C52;
     color: white;
     font-size: 22px;
-    font-family: Helvetica, Verdana, sans-serif;
+    font-family: "Trebuchet MS", Helvetica, Verdana, sans-serif;
     text-align: center;
     cursor: move;
 }
@@ -161,7 +166,7 @@ table.popupbuttons td:hover {
     left: 250;
     top: 200;
     font-size: 13px;
-    font-family: Helvetica, Verdana, sans-serif;
+    font-family: "Trebuchet MS", Helvetica, Verdana, sans-serif;
     visibility: hidden;
     border: white 3px outset;
 }
@@ -174,7 +179,8 @@ input, select, textarea {
 div.searchform {
     color: #ffffff;
     background: inherit;
-    padding: 2px;
+    padding-top: 1em;
+    padding-left: 3em;
 }
 
 div.searchform input {
@@ -187,4 +193,36 @@ pre {
     background:  #638BCA;
     color: #000000;
 }
+
+p {     padding-left: 2em;
+        padding-right: 1em;
+        }
     
+h2 {    padding-left: 1em;
+        font-weight: bold;
+       } 
+
+#titlebar { background-image: url(../images/headerfreevo.jpg);
+                    background-repeat: no-repeat;
+                    background-color: #4D77AA;
+                    color: #000;
+                    height: 101px ; }
+
+#subtitle { background-image: url(../images/headertxtbg.png);
+            height: 21px;
+            font-size: 14px;
+            text-align: center;
+            line-height: 21px;
+            vertical-align: middle;
+            padding-left: 5px;
+            padding-top: 1px;
+            margin-bottom: 0px;
+            padding-bottom: 0px;
+            letter-spacing: 1px;
+            font-weight: bold;  }
+/*
+table.guideTable { margin-left: 1em;
+                   margin-right: 1em; }
+
+table.guideForm { margin-left: 1em;
+                  margin-right: 1em; } */
