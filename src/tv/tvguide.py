@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.50  2004/08/26 15:25:52  dischi
+# some MenuApplication fixes
+#
 # Revision 1.49  2004/08/24 16:42:43  dischi
 # Made the fxdsettings in gui the theme engine and made a better
 # integration for it. There is also an event now to let the plugins
@@ -77,15 +80,16 @@ import time
 import config
 import util
 import gui
+import menu
 
 from event import *
-from menu import MenuApplication
+from application import MenuApplication
 
 from channels import get_channels
 
 from program_display import ProgramItem
 import record_client as ri
-
+from item import Item
 
 _guide_ = None
 
@@ -98,6 +102,19 @@ def get_singleton():
         _guide_ = TVGuide()
     return _guide_
 
+
+class ProgrammItem(Item):
+    def __init__(self, parent, prog):
+        Item.__init__(self, parent)
+        self.name = prog.title
+        # Import all variables from the programm
+        # FIXME: this needs a cleanup to be a real item
+        for var in dir(prog):
+            if var.startswith('_') or var == 'getattr':
+                continue
+            setattr(self, var, getattr(prog, var))
+
+        
 
 class TVGuide(MenuApplication):
     """
@@ -143,28 +160,19 @@ class TVGuide(MenuApplication):
         """
         show the guide
         """
-        MenuApplication.show(self)
+        _debug_('show')
         self.update_schedules(force=True)
         self.refresh()
-        self.engine.show(config.OSD_FADE_STEPS)
+        MenuApplication.show(self)
         
 
     def hide(self):
         """
         hide the guide
         """
+        _debug_('hide')
         MenuApplication.hide(self)
-        # self.engine.clear()
-        self.engine.hide(config.OSD_FADE_STEPS)
             
-        
-    def destroy(self):
-        """
-        destroy the guide
-        """
-        MenuApplication.destroy(self)
-        # del self.engine
-        
         
     def start_tv(self):
         """
@@ -284,8 +292,13 @@ class TVGuide(MenuApplication):
 #             self.event_change_channel(self.n_items)
 #             self.refresh()
 
-        elif event == MENU_SUBMENU:
-            pass
+        elif event == TV_SHOW_CHANNEL:
+            _debug_('show channel')
+            items = []
+            for prog in self.channel.epg.get(time.time(), time.time() + 10*24*60*60)[:-1]:
+                items.append(ProgrammItem(self.parent, prog))
+            cmenu = menu.Menu(self.channel.name, items)
+            self.menuw.pushmenu(cmenu)
 
         elif event == TV_START_RECORDING:
             self.event_RECORD()
@@ -331,3 +344,10 @@ class TVGuide(MenuApplication):
         else:
             pi = ProgramItem(self.parent, prog=self.selected, context='guide')
         pi.display_program(menuw=self.menuw)
+
+
+    def __del__(self):
+        """
+        delete function of memory debugging
+        """
+        _mem_debug_('tvguide')
