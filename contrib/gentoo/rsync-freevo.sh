@@ -42,4 +42,7 @@ cd media-video
 tar -zxvf /tmp/$file.tgz
 rm /tmp/$file.tgz
 
+# clear the dep cache because we have new informations
+rm /var/cache/edb/dep/media-video/freevo-*
+
 # end of rsync-freevo
