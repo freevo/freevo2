@@ -33,14 +33,17 @@
 # python imports
 import os
 import time
+import string
 
 # freevo imports
+import config
 import plugin
 from util.fxdimdb import FxdImdb, makeVideo
 from util.videothumb import snapshot
 
 # list of possible plugins
 plugins = []
+
 
 class Plugin(plugin.Plugin):
     """
@@ -51,6 +54,7 @@ class Plugin(plugin.Plugin):
         self.type = 'recorder'
         # reference to the recordserver
         self.server = None
+        self.suffix = 'suffix'
         plugins.append(self)
 
 
@@ -79,34 +83,72 @@ class Plugin(plugin.Plugin):
                 fxd.info['plot'] = fxd.str2XML(rec.info[i])
             else:
                 fxd.info[i] = fxd.str2XML(rec.info[i])
-                
+
         fxd.info['runtime'] = '%s min.' % int((rec.stop - rec.start) / 60)
         fxd.info['record-start'] = str(int(time.time()))
         fxd.info['record-stop'] = str(rec.stop + rec.stop_padding)
         fxd.info['year'] = time.strftime('%m-%d %H:%M',
                                          time.localtime(rec.start))
         if rec.fxdname:
-            fxd.title = rec.fxdname 
+            fxd.title = rec.fxdname
         else:
-            fxd.title = rec.name 
+            fxd.title = rec.name
         fxd.writeFxd()
 
 
     def delete_fxd(self, rec):
+        """
+        Delete the recording fxd file.
+        """
         if not rec.url.startswith('file:'):
             return
         filename = os.path.splitext(rec.url[5:])[0] + '.fxd'
         if vfs.isfile(filename):
             vfs.unlink(filename)
 
-        
+
     def create_thumbnail(self, rec):
+        """
+        Create a thumbnail for the recording
+        """
         if not rec.url.startswith('file:'):
             return
         filename = rec.url[5:]
         snapshot(filename)
 
-        
+
+    def get_url(self, rec):
+        """
+        Return url (e.g. filename) for the given recording
+        """
+        if not rec.url:
+            filename_array = { 'progname': String(rec.name),
+                               'title'   : String(rec.subtitle) }
+
+            filemask = config.TV_RECORD_FILEMASK % filename_array
+            filename = ''
+            for letter in time.strftime(filemask, time.localtime(rec.start)):
+                if letter in string.ascii_letters + string.digits:
+                    filename += letter
+                elif filename and filename[-1] != '_':
+                    filename += '_'
+            filename = filename.rstrip(' -_:') + self.suffix
+            filename = 'file:' + os.path.join(config.TV_RECORD_DIR, filename)
+        else:
+            # check filename
+            if rec.url.startswith('file:'):
+                filename = os.path.join(config.TV_RECORD_DIR, rec.url[5:])
+                if filename.endswith('.suffix'):
+                    filename = os.path.splitext(filename)[0] + self.suffix
+                filename = 'file:' + filename
+        if filename.startswith('file:'):
+            # check if target dir exists
+            d = os.path.dirname(filename[5:])
+            if not os.path.isdir(d):
+                os.makedirs(d)
+        return filename
+
+
     def get_channel_list(self):
         raise Exception('plugin has not defined get_channel_list()')
 
