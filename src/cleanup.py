@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/12/18 13:39:08  dischi
+# wait using the notifier, stop popen children
+#
 # Revision 1.3  2004/11/20 18:22:58  dischi
 # use python logger module for debug
 #
@@ -43,7 +46,8 @@
 import os
 import time
 import sys
-
+import copy
+import notifier
 import config
 
 import logging
@@ -72,6 +76,7 @@ def shutdown(menuw=None, argshutdown=None, argrestart=None, exit=False):
     shut down when argshutdown is True, restarted when argrestart is true,
     else only Freevo will be stopped.
     """
+    import util.popen
     import util.mediainfo
     import gui
 
@@ -104,6 +109,7 @@ def shutdown(menuw=None, argshutdown=None, argrestart=None, exit=False):
         for c in _callbacks:
             log.debug('shutting down %s' % c[ 0 ])
             c[ 0 ]( *c[ 1 ] )
+        util.popen.killall()
         _callbacks = []
         gui.displays.shutdown()
 
@@ -112,19 +118,20 @@ def shutdown(menuw=None, argshutdown=None, argrestart=None, exit=False):
         elif argrestart and not argshutdown:
             os.system(config.RESTART_SYS_CMD)
         # let freevo be killed by init, looks nicer for mga
-        while 1:
-            time.sleep(1)
+        notifier.loop()
         return
 
     #
     # Exit Freevo
     #
-    
+
     # Shutdown all children still running
-    for c in _callbacks:
+    for c in copy.copy(_callbacks):
         log.debug( 'shutting down %s' % c[ 0 ])
         c[ 0 ]( *c[ 1 ] )
-        _callbacks = []
+    _callbacks = []
+
+    util.popen.killall()
 
     # Shutdown the display
     gui.displays.shutdown()
@@ -136,5 +143,4 @@ def shutdown(menuw=None, argshutdown=None, argrestart=None, exit=False):
     os.system('%s stop' % os.environ['FREEVO_SCRIPT'])
 
     # Just wait until we're dead. SDL cannot be polled here anyway.
-    while 1:
-        time.sleep(1)
+    notifier.loop()
