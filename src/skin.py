@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/07/12 10:08:11  dischi
+# load skin only when needed
+#
 # Revision 1.2  2003/04/24 19:55:55  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -60,13 +63,6 @@ import os.path
 
 DEBUG = config.DEBUG
 
-# Loads the skin implementation defined in freevo_config.py
-sys.path += [os.path.dirname(config.OSD_SKIN)]
-modname   = os.path.basename(config.OSD_SKIN)[:-3]
-exec('import ' + modname  + ' as skinimpl')
-
-if DEBUG: print 'Imported skin %s' % config.OSD_SKIN
-    
 _singleton = None
 
 def get_singleton():
@@ -76,6 +72,13 @@ def get_singleton():
     """
     global _singleton
     if _singleton == None:
+        # Loads the skin implementation defined in freevo_config.py
+        sys.path += [os.path.dirname(config.OSD_SKIN)]
+        modname   = os.path.basename(config.OSD_SKIN)[:-3]
+        exec('import ' + modname  + ' as skinimpl')
+
+        if DEBUG: print 'Imported skin %s' % config.OSD_SKIN
+    
         _singleton = skinimpl.Skin()
 
     return _singleton
