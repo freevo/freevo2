@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.71  2004/10/06 19:24:01  dischi
+# switch from rc.py to pyNotifier
+#
 # Revision 1.70  2004/09/13 18:00:50  dischi
 # last cleanups for the image module in Freevo
 #
@@ -52,13 +55,15 @@
 
 __all__ = [ 'imageviewer' ]
 
+# external imports
+import notifier
+
 # python imports
 import os
 
 # freevo imports
 import config
 import util
-import rc
 import plugin
 import gui
 
@@ -108,7 +113,7 @@ class ImageViewer(Application):
         self.filename    = None
         self.rotation    = None
         self.zomm        = None
-        self.signal_registered = False
+        self._timer_id   = None
 
 
     def hide(self):
@@ -134,8 +139,8 @@ class ImageViewer(Application):
         self.osd_mode = 0
         self.filename = None
         # we don't need the signalhandler anymore
-        self.signal_registered = False
-        rc.unregister(self.signalhandler)
+        notifier.removeTimer( self._timer_id )
+        self._timer_id = None
         # reset bitmap cache
         self.bitmapcache = util.objectcache.ObjectCache(3, desc='viewer')
 
@@ -283,9 +288,9 @@ class ImageViewer(Application):
 
         # start timer
         if self.fileitem.duration and self.slideshow and \
-               not self.signal_registered:
-            rc.register(self.signalhandler, False, self.fileitem.duration*100)
-            self.signal_registered = True
+               self._timer_id == None:
+            cb = notifier.Callback( self.fileitem.duration * 1000 )
+            self._timer_id = notifier.addTimer( self.signalhandler, cb )
 
         self.last_image = image
         self.last_item  = item
@@ -319,9 +324,10 @@ class ImageViewer(Application):
         the duration is over.
         """
         self.hide()
-        self.signal_registered = False
+        self._timer_id = None
         self.eventhandler(PLAY_END)
 
+        return False
 
     def eventhandler(self, event, menuw=None):
         """
@@ -331,13 +337,13 @@ class ImageViewer(Application):
             if self.slideshow:
                 self.post_event(Event(OSD_MESSAGE, arg=_('pause')))
                 self.slideshow = False
-                rc.unregister(self.signalhandler)
-                self.signal_registered = False
+                notifier.removeTimer( self._timer_id )
+                self._timer_id = None
             else:
                 self.post_event(Event(OSD_MESSAGE, arg=_('play')))
                 self.slideshow = True
-                rc.register(self.signalhandler, False, 100)
-                self.signal_registered = True
+                cb = notifier.Callback( 1000 )
+                self._timer_id = notifier.addTimer( self.signalhandler, cb )
             return True
 
         if event == STOP:
@@ -347,8 +353,8 @@ class ImageViewer(Application):
         if event == PLAYLIST_NEXT or event == PLAYLIST_PREV:
             # up and down will stop the slideshow and pass the
             # event to the playlist
-            self.signal_registered = False
-            rc.unregister(self.signalhandler)
+            notifier.removeTimer( self._timer_id )
+            self._timer_id = None
             self.fileitem.eventhandler(event)
             return True
 

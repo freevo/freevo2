@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.63  2004/10/06 19:24:00  dischi
+# switch from rc.py to pyNotifier
+#
 # Revision 1.62  2004/10/06 18:44:24  dischi
 # rewrite to use pyNotifier and no threads
 #
@@ -199,7 +202,7 @@ class Instance:
                 self.__kill_timer = notifier.addTimer( 0, cb )
 
             while not self.dead:
-                notifier.step( False )
+                notifier.step( False, False )
 
     def stop_event(self):
         """

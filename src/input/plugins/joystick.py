@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/10/06 19:24:01  dischi
+# switch from rc.py to pyNotifier
+#
 # Revision 1.2  2004/09/27 23:43:50  rshortt
 # A few fixes but it still needs some keymap / post_key work.
 #
@@ -50,7 +53,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-
+import notifier
 
 import sys
 import os
@@ -61,9 +64,7 @@ from time import sleep
 
 import config
 import plugin
-import rc
 
-rc = rc.get_singleton()
 
 class PluginInterface(plugin.InputPlugin):
 
@@ -99,20 +100,13 @@ class PluginInterface(plugin.InputPlugin):
                 return
 
         print 'using joystick', config.JOY_DEV
-        
-        rc.register(self.handle, True, 1)
+
+        notifier.addSocket( self.joyfd, self.handle )
 
 
-    def handle(self):
+    def handle( self ):
         command = ''    
-        _debug_('self.joyfd = %s' % self.joyfd, level=3)
-        (r, w, e) = select.select([self.joyfd], [], [], 0)
-        _debug_('r,w,e = %s,%s,%s' % (r,w,e), level=3)
-        
-        if r:
-            c = os.read(self.joyfd, 8)
-        else: 
-            return
+        c = os.read( self.joyfd, 8 )
 
         data = struct.unpack('IhBB', c)
         if data[2] == 1 & data[1] == 1:
@@ -137,5 +131,6 @@ class PluginInterface(plugin.InputPlugin):
             command = rc.key_event_mapper(command)
             if command:
                 eventhandler.post(command)
-    
+
+        return True
 

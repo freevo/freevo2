@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/10/06 19:24:00  dischi
+# switch from rc.py to pyNotifier
+#
 # Revision 1.1  2004/10/05 19:50:54  dischi
 # Cleanup gui/widgets:
 # o remove unneeded widgets
@@ -62,6 +65,7 @@ __all__ = [ 'WaitBox', 'MessageBox', 'ConfirmBox', 'ProgressBox', 'InputBox',
 
 # python imports
 import math
+import notifier
 
 # freevo imports
 import config
@@ -287,6 +291,7 @@ class ProgressBox(WaitBox):
         """
         increase the bar position
         """
+        notifier.step( False, False )
         self.bar.tick()
         self.update()
 

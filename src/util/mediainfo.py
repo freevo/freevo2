@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.61  2004/10/06 19:24:02  dischi
+# switch from rc.py to pyNotifier
+#
 # Revision 1.60  2004/09/07 18:52:51  dischi
 # move thumbnail to extra file
 #
@@ -74,8 +77,9 @@ from mmpython.disc.discinfo import cdrom_disc_id
 import config
 import util
 import eventhandler
-import rc
 import thumbnail
+
+import notifier
 
 class FileOutdatedException(Exception):
     pass
@@ -114,7 +118,8 @@ class Cache:
         """
         cachefile = self.__get_filename__(dirname)
         if os.path.isfile(cachefile) and \
-               os.stat(cachefile)[stat.ST_MTIME] > os.stat(dirname)[stat.ST_MTIME]:
+               os.stat( cachefile )[ stat.ST_MTIME ] > \
+               os.stat( dirname )[ stat.ST_MTIME ]:
             return 0
         return 1
     
@@ -128,7 +133,8 @@ class Cache:
             util.save_pickle(self.current_objects, self.current_cachefile)
             self.cache_modified = False
             if config.MEDIAINFO_USE_MEMORY:
-                self.all_directories[self.current_cachefile] = self.current_objects
+                self.all_directories[ self.current_cachefile ] = \
+                                      self.current_objects
 
 
     def load_cache(self, dirname):
@@ -144,7 +150,8 @@ class Cache:
         cachefile = self.__get_filename__(dirname)
         _debug_('load cache %s' % cachefile, 2)
 
-        if config.MEDIAINFO_USE_MEMORY and self.all_directories.has_key(cachefile):
+        if config.MEDIAINFO_USE_MEMORY and \
+               self.all_directories.has_key( cachefile ):
             self.current_objects = self.all_directories[cachefile]
         else:
             if os.path.isfile(cachefile):
@@ -205,7 +212,8 @@ class Cache:
                 if callback:
                     callback()
             except FileOutdatedException:
-                info = self.find(filename, directory, fullname, update_check=False)
+                info = self.find( filename, directory, fullname,
+                                  update_check = False )
                 info = self.update(fullname, info)
                 if callback:
                     callback()
@@ -231,7 +239,8 @@ class Cache:
         if dirname != self.current_cachedir:
             self.load_cache(dirname)
         try:
-            self.current_objects[filename] = (info, os.stat(fullname)[stat.ST_MTIME])
+            self.current_objects[ filename ] = \
+                                  ( info, os.stat( fullname )[ stat.ST_MTIME ] )
             self.cache_modified = True
         except OSError:
             # key, the file is gone now
@@ -356,11 +365,12 @@ class MMCache(Cache):
                            (info.has_key(variable) and info[variable]):
                             info[variable] = video[variable]
 
-            if thumbnail_file and config.IMAGE_USE_EXIF_THUMBNAIL and config.CACHE_IMAGES:
+            if thumbnail_file and config.IMAGE_USE_EXIF_THUMBNAIL and \
+                   config.CACHE_IMAGES:
                 if not thumbnail.get_name(filename):
                     thumbnail.create(filename)
-            elif config.CACHE_IMAGES and info.has_key('mime') and info['mime'] and \
-                     info['mime'].startswith('image'):
+            elif config.CACHE_IMAGES and info.has_key( 'mime' ) and \
+                     info[ 'mime' ] and info[ 'mime' ].startswith( 'image' ):
                 if not thumbnail.get_name(filename):
                     thumbnail.create(filename)
             return info
@@ -404,11 +414,13 @@ class MetaCache(Cache):
                 self.cache_modified = True
         if not self.current_objects:
             # delete cache file is no object has any infos
-            if self.current_cachefile and os.path.isfile(self.current_cachefile):
-                os.unlink(self.current_cachefile)
+            if self.current_cachefile and \
+                   os.path.isfile( self.current_cachefile ):
+                os.unlink( self.current_cachefile )
             self.cache_modified = False
             if config.MEDIAINFO_USE_MEMORY:
-                self.all_directories[self.current_cachefile] = self.current_objects
+                self.all_directories[ self.current_cachefile ] = \
+                                      self.current_objects
             return
         # call save_file from 'Cache'
         Cache.save_cache(self)
@@ -498,8 +510,9 @@ class Info:
         elif not self.filename:
             return False
         else:
-            meta_cache.set(os.path.basename(self.filename), os.path.dirname(self.filename),
-                           self.filename, self.metadata)
+            meta_cache.set( os.path.basename(self.filename),
+                            os.path.dirname(self.filename),
+                            self.filename, self.metadata )
             return True
         
 
@@ -516,8 +529,9 @@ class Info:
             return False
         if self.metadata.has_key(key):
             del self.metadata[key]
-            meta_cache.set(os.path.basename(self.filename), os.path.dirname(self.filename),
-                           self.filename, self.metadata)
+            meta_cache.set( os.path.basename( self.filename ),
+                            os.path.dirname( self.filename ),
+                            self.filename, self.metadata )
             return True
 
         
@@ -581,8 +595,9 @@ def cache_recursive(dirlist, verbose=False):
     # create a list of all subdirs
     for dir in dirlist:
         for dirname in util.get_subdirs_recursively(dir):
-            if not dirname in all_dirs and not \
-                   os.path.basename(dirname) in ('.xvpics', '.thumbnails', 'CVS'):
+            if not dirname in all_dirs and \
+                   not os.path.basename( dirname ) in \
+                   ( '.xvpics', '.thumbnails', 'CVS' ):
                 all_dirs.append(dirname)
         if not dir in all_dirs:
             all_dirs.append(dir)
@@ -601,8 +616,9 @@ def cache_recursive(dirlist, verbose=False):
             dname = d
             if len(dname) > 55:
                 dname = dname[:15] + ' [...] ' + dname[-35:]
-            cache_status = CacheStatus(check_cache(d), '  %4d/%-4d %s' % \
-                                       (all_dirs.index(d)+1, len(all_dirs), dname))
+            cache_status = CacheStatus( check_cache( d ), '  %4d/%-4d %s' % \
+                                        ( all_dirs.index( d ) + 1,
+                                          len( all_dirs ), dname ) )
             cache_dir(d, cache_status.callback)
             print
         else:
@@ -643,7 +659,8 @@ def disc_info(media, force=False):
     else:
         metainfo = {}
 
-    if mmdata.mime == 'unknown/unknown' and not metainfo.has_key('disc_num_video'):
+    if mmdata.mime == 'unknown/unknown' and \
+           not metainfo.has_key( 'disc_num_video' ):
         media.mount()
         for type in ('video', 'audio', 'image'):
             items = getattr(config, '%s_SUFFIX' % type.upper())
@@ -708,7 +725,8 @@ def del_cache():
     """
     for f in util.recursefolders(config.OVERLAY_DIR,1,'mmpython.cache',1):
         os.unlink(f)
-    for f in util.match_files(config.OVERLAY_DIR + '/disc/metadata', ['mmpython']):
+    for f in util.match_files( config.OVERLAY_DIR + '/disc/metadata',
+                               [ 'mmpython' ] ):
         os.unlink(f)
     cachefile = os.path.join(config.FREEVO_CACHEDIR, 'mediainfo')
     util.save_pickle((mmpython.version.CHANGED, 0, 0, 0), cachefile)
@@ -754,7 +772,8 @@ def check_cache_status():
 
     # create ProgressBox for reloading
     from gui import ProgressBox
-    box = ProgressBox(text=_('Reloading cache files, be patient...'), full=len(open_cache_files))
+    box = ProgressBox( text = _('Reloading cache files, be patient...'),
+                       full = len( open_cache_files ) )
     box.show()
 
     # reload already open cache files
@@ -763,7 +782,7 @@ def check_cache_status():
         box.tick()
     box.destroy()
 
-    
+    return True
 #
 # setup mmpython
 #
@@ -834,5 +853,4 @@ if __freevo_app__ == 'main':
         print
         print
 
-    
-    rc.register(check_cache_status, True, 100)
+    notifier.addTimer( 1000, notifier.Callback( check_cache_status ) )

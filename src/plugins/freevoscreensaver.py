@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/10/06 19:24:02  dischi
+# switch from rc.py to pyNotifier
+#
 # Revision 1.3  2004/07/26 18:10:18  dischi
 # move global event handling to eventhandler.py
 #
@@ -95,7 +98,7 @@ class PluginInterface(plugin.DaemonPlugin):
 	self.vitem = None
 	self.pl = None
 	self.menuw = None
-	self.poll_interval = 10 * config.SSAVER_POLL
+	self.poll_interval = 1000 * config.SSAVER_POLL
 	self.saver_delay = config.SSAVER_DELAY
 	self.saver_type = sstype
 	self.arg1 = ssarg1

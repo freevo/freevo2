@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/10/06 19:24:02  dischi
+# switch from rc.py to pyNotifier
+#
 # Revision 1.3  2004/09/27 18:40:34  dischi
 # reworked input handling again
 #
@@ -39,12 +42,12 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
+import notifier
 
 import config
 import plugin
 import time
 import os
-import rc
 
 try:
     import pylirc
@@ -60,10 +63,10 @@ class PluginInterface(plugin.InputPlugin):
     def __init__(self):
         plugin.InputPlugin.__init__(self)
         self.plugin_name = 'LIRC'
-
+        self.__fd = None
         try:
             if os.path.isfile(config.LIRCRC):
-                pylirc.init('freevo', config.LIRCRC)
+                self.__fd = pylirc.init('freevo', config.LIRCRC)
                 pylirc.blocking(0)
             else:
                 raise IOError
@@ -83,7 +86,7 @@ class PluginInterface(plugin.InputPlugin):
         self.lastkeycode              = ''
 
         # FIXME: register socket to pynotifier
-        rc.register(self.handle, True, 1)
+        notifier.addSocket( self.__fd, self.handle )
 
 
     def config(self):
@@ -124,7 +127,7 @@ class PluginInterface(plugin.InputPlugin):
 
 
 
-    def handle(self):
+    def handle( self ):
         """
         return next event
         """
@@ -163,3 +166,5 @@ class PluginInterface(plugin.InputPlugin):
 
             for code in list:
                 self.post_key(code)
+
+        return True

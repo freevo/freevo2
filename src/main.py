@@ -39,6 +39,17 @@ import sys, time
 import traceback
 import signal
 
+try:
+    import notifier
+except ImportError:
+    print 'This version of freevo requires pyNotifier 0.2.0rc1 or newer!'
+    print 'You can find the current release at:'
+    print 'http://www.crunchy-home.de/download/'
+    sys.exit( 1 )
+    
+# init notifier
+notifier.init( notifier.GENERIC )
+    
 # i18n support
 
 # First load the xml module. It's not needed here but it will mess
@@ -51,11 +62,22 @@ try:
     
     # now load other modules to check if all requirements are installed
     import Image
-    import twisted
+    try:
+        import twisted
+    except ImportError, e:
+        print e
     import Numeric
     
     import config
     import system
+
+    try:
+        import Imlib2
+    except:
+        print 'The python Imlib2 bindings could not be loaded!'
+        print 'Maybe you did not install Imlib2.'
+        print 'You can find Imlib2 at: http://enlightenment.org'
+        sys.exit( 1 )
 
     if config.OSD_DISPLAY == 'SDL':
         import pygame
@@ -105,7 +127,7 @@ import menu
 
 from item import Item
 from event import *
-from plugins.shutdown import shutdown
+from cleanup import shutdown
 from gui.areas import Area
 
 
@@ -430,10 +452,18 @@ try:
     
     # Kick off the main menu loop
     _debug_('Main loop starting...',2)
-    import rc
-    rc.get_singleton().run()
 
+    # FIXME
+    import eventhandler
+    notifier.addDispatcher( eventhandler.get_singleton().handle )
 
+    import childapp
+    notifier.addDispatcher( childapp.watcher.step )
+
+    # start main loop
+    notifier.loop()
+
+    
 except KeyboardInterrupt:
     print 'Shutdown by keyboard interrupt'
     # Shutdown the application
@@ -476,6 +506,9 @@ except:
 
 # -----------------------------------------------------------------------------
 # $Log$
+# Revision 1.147  2004/10/06 19:24:00  dischi
+# switch from rc.py to pyNotifier
+#
 # Revision 1.146  2004/10/03 16:09:27  dischi
 # changes to a new header (proposal)
 #

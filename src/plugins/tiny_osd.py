@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/10/06 19:24:02  dischi
+# switch from rc.py to pyNotifier
+#
 # Revision 1.14  2004/08/22 20:12:16  dischi
 # changes to new mevas based gui code
 #
@@ -44,11 +47,13 @@
 #
 # ----------------------------------------------------------------------- */
 
+# external imports
+import notifier
 
+# freevo imports
 import config
 import plugin
 import gui
-import rc
 
 from event import OSD_MESSAGE
 
@@ -69,8 +74,7 @@ class PluginInterface(plugin.DaemonPlugin):
         plugin.DaemonPlugin.__init__(self)
         self.message    = ''
         self.gui_object = None
-        self.active     = False
-        
+        self._timer_id  = None
 
     def update(self):
         """
@@ -114,12 +118,12 @@ class PluginInterface(plugin.DaemonPlugin):
         """
         if event == OSD_MESSAGE:
             self.message = event.arg
-            if self.active:
+            if self._timer_id != None:
                 # a not used callback is active, remove it
-                rc.unregister(self.hide)
+                notifier.removeTimer( self._timer_id )
             # register a callback in 2 seconds for hiding
-            rc.register(self.hide, False, 200)
-            self.active = True
+            self._timer_id = notifier.addTimer( 2000,
+                                                notifier.Callback( self.hide ) )
             self.update()
         return False
 
@@ -129,5 +133,7 @@ class PluginInterface(plugin.DaemonPlugin):
         Hide the osd
         """
         self.message = ''
-        self.active  = False
+        self._timer_id = None
         self.update()
+
+        return False

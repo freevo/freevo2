@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/10/06 19:24:02  dischi
+# switch from rc.py to pyNotifier
+#
 # Revision 1.2  2004/09/27 18:40:35  dischi
 # reworked input handling again
 #
@@ -37,13 +40,12 @@
 #
 # ----------------------------------------------------------------------- */
 
+import notifier
+
 import socket
 
 import config
 import eventhandler
-import rc
-
-rc = rc.get_singleton()
 
 
 class PluginInterface(plugin.Plugin):
@@ -57,8 +59,6 @@ class PluginInterface(plugin.Plugin):
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock.setblocking(0)
         self.sock.bind(('', self.port))
-
-        rc.inputs.append(self)
 
 
     def config(self):

@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/10/06 19:24:00  dischi
+# switch from rc.py to pyNotifier
+#
 # Revision 1.7  2004/08/27 14:15:25  dischi
 # split animations into different files
 #
@@ -74,13 +77,16 @@
 
 
 # freevo modules
-import config, util, rc
+import config, util
 import gui
 
 
 # python modules
 import time
 import copy
+
+#external modules
+import notifier
 
 _render = None
 
@@ -108,8 +114,8 @@ class Render:
         self.display = display
         self.animations   = []    # all animations
         self.suspended    = []    # suspended animations
-
-
+        self.__timer_id    = None  # timer id
+        
     def update(self):
         """
         This is the draw method for animations
@@ -119,6 +125,8 @@ class Render:
         remove  = self.animations.remove
         i = 0
 
+        notifier.removeTimer( self.__timer_id )
+        self.__timer_id = None
         timer = time.time()
 
         update_screen = False
@@ -127,9 +135,6 @@ class Render:
             if a.delete:
                 a.active = False
                 self.animations.remove(a)
-                if len(self.animations) == 0:
-                    # no more animations, unregister ourself to the main loop:
-                    rc.unregister(self.update)
                 continue
 
             if a.active:
@@ -146,6 +151,8 @@ class Render:
 
         if update_screen:
             self.display.update()
+        if len( self.animations ):
+            self.__timer_id = notifier.addTimer( 10, self.update )
 
 
     def kill(self, anim_object):
@@ -158,9 +165,10 @@ class Render:
             self.animations[i].remove()
         except:
             pass
-        if len(self.animations) == 0:
+        if len( self.animations ) == 0:
             # no more animations, unregister ourself to the main loop:
-            rc.unregister(self.update)
+            notifier.removeTimer( self.__timer_id )
+            self.__timer_id = None
 
 
     def killall(self):
@@ -169,7 +177,9 @@ class Render:
         """
         for a in copy.copy(self.animations):
             a.remove()
-        rc.unregister(self.update)
+
+        notifier.removeTimer( self.__timer_id )
+        self.__timer_id = None
         
 
     def suspendall(self):
@@ -199,15 +209,18 @@ class Render:
         self.animations.append(anim_object)
         if len(self.animations) == 1:
             # first animation, register ourself to the main loop:
-            rc.register(self.update, True, 0)
+            self.__timer_id = notifier.addTimer( 1, self.update )
 
 
     def wait(self, anim_objects=None):
         """
         wait until the given animations are finished
         """
+        import notifier
+        
         if anim_objects == None:
             # wait for all application show/hide animations
             anim_objects = filter(lambda a: a.application, self.animations)
         while filter(lambda a: a.running(), anim_objects):
             self.update()
+            notifier.step( False, False )
