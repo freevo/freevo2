@@ -5,13 +5,13 @@ import os
 import time
 
 import notifier
+import pyepg
 import config
 import mcomm
 
 server = None
 
-# import pyepg
-# epg = pyepg.get_epg(os.path.join(config.FREEVO_CACHEDIR, 'epgdb'))
+config.detect('channels')
 
 def notification(entity):
     global server
@@ -28,9 +28,7 @@ def notification(entity):
         sys.__stdout__.flush()
 
 def print_result(result):
-    # FIXME: doesn't work for epg results
-    if isinstance(result, (list, tuple)) and len(result) > 0 and \
-           isinstance(result[0], (list, tuple)):
+    if isinstance(result, (list, tuple)):
         for r in result:
             print r
     else:
@@ -48,8 +46,9 @@ def user_input( socket ):
         print '  time(YYYY.MM.DD.HH:MM)     convert into seconds'
         print
         print 'epg commands:'
-        print '  epg.search_programs(name)'
-        print '  epg.get_programs(channels, start, stop)'
+        print '  epg.search(name)'
+        print '  epg[channel id][start time]'
+        print '  epg[channel id][start time:end time]'
         print
         print 'record commands:'
         print '  recording.list()'
@@ -69,9 +68,11 @@ def user_input( socket ):
         print 'parameter strings in quotes when calling epg, recording or'
         print 'favorite calls.'
         
-    elif input == 'exit':
+    elif input in ('exit', 'byte', 'quit'):
         print
         sys.exit(0)
+    elif input == '':
+        pass
     elif input.startswith('time'):
         try:
             s = input[5:-1]
@@ -100,10 +101,11 @@ def user_input( socket ):
                 print_result(result)
         except Exception, e:
             print e
-    elif input.startswith('epg.'):
+    elif input.startswith('epg'):
         print '\rcalling epg command'
         try:
-            result = eval(input)
+            print 
+            result = eval('pyepg.guide' + String(input[3:]))
             print_result(result)
         except Exception, e:
             print e
