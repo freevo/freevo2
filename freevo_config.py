@@ -178,8 +178,8 @@ LOCAL_CONF_CHANGES = [
      player.'''),
     (4.02,
      '''Added CHILDAPP_DEBUG to debug all kinds of childapps. MPLAYER_DEBUG will be
-     removed soon. Renamed PREFERED_VIDEO_PLAYER to VIDEO_PREFERED_PLAYER and added
-     AUDIO_PREFERED_PLAYER.''']
+     removed soon. Renamed PREFERED_VIDEO_PLAYER to VIDEO_PREFERED_PLAYER and
+     added AUDIO_PREFERED_PLAYER.''')]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
