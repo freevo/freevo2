@@ -113,6 +113,9 @@ class Image:
 		src_w, src_h = src_size
 		x, y = src_pos
 
+		if 0 in src_size:
+			raise ValueError, "Invalid scale size specified %s" % repr(src_size)
+
 		aspect = float(self.width) / float(self.height)
 		if w == -1:      w = round(h * aspect)
 		elif h == -1:    h = round(w / aspect)
@@ -171,6 +174,8 @@ class Image:
 
 		Return: a new Image insatnce represented the scaled image.
 		"""
+		if 0 in (w, h):
+			raise ValueError, "Invalid scale size specified %s" % repr((w,h))
 		aspect = float(self.width) / float(self.height)
 		if aspect >= 1.0:
 			img = self._image.scale(w, h / aspect)
@@ -609,6 +614,8 @@ def new(size, bytes = None, from_format = "BGRA"):
 	and height.  If 'bytes' is specified, the image is initialized from the
 	raw BGRA data.
 	"""
+	if 0 in size:
+		raise ValueError, "Invalid image size %s" % repr(size)
 	if bytes:
 		if isinstance(bytes, BufferProxy):
 			bytes = bytes._buffer
