@@ -9,6 +9,11 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2004/02/24 04:42:03  rshortt
+# Add FavoriteItem class here but we could find a better place for them both.
+# One possability is merging the types in here, epg_types, and record_types
+# into one module.
+#
 # Revision 1.30  2004/02/23 23:34:10  rshortt
 # More acurate handling of when to display schedule or remove options.
 #
@@ -46,6 +51,7 @@
 # ----------------------------------------------------------------------
 
 import time, traceback
+from time import gmtime, strftime
 
 import plugin, config, menu
 
@@ -198,6 +204,87 @@ class ProgramItem(Item):
             # were viewing scheduled recordings or back to the guide and
             # update the colour of the program we selected.
 	    # or refresh the menu with remove option instead of schedule
+            if menuw:  
+                menuw.back_one_menu(arg='reload')
+
+        else:
+            AlertBox(text=_('Remove Failed')+(': %s' % msg)).show()
+
+
+
+class FavoriteItem(Item):
+    def __init__(self, parent, fav):
+        Item.__init__(self, parent, skin_type='video')
+        self.fav   = fav
+        self.name  = self.title = fav.name
+        self.title = fav.title
+
+        if fav.channel == 'ANY':
+            self.channel = _('ANY CHANNEL')
+        else:
+            self.channel = fav.channel
+        if fav.dow == 'ANY':
+            self.dow = _('ANY DAY')
+        else:
+            week_days = (_('Mon'), _('Tue'), _('Wed'), _('Thu'), _('Fri'), _('Sat'), _('Sun'))
+            self.dow = week_days[int(fav.dow)]
+        if fav.mod == 'ANY':
+            self.mod = _('ANY TIME')
+        else:
+            self.mod = strftime(config.TV_TIMEFORMAT, gmtime(float(fav.mod * 60)))
+
+
+    def actions(self):
+        return [( self.display_favorite , _('Display favorite') )]
+
+
+    def display_favorite(self, arg=None, menuw=None):
+        items = []
+
+        items.append(menu.MenuItem(_('Modify name'), action=self.mod_name))
+        items.append(menu.MenuItem(_('Modify channel'), action=self.mod_channel))
+        items.append(menu.MenuItem(_('Modify day of week'), action=self.mod_day))
+        items.append(menu.MenuItem(_('Modify time of day'), action=self.mod_time))
+
+        # XXX: priorities aren't quite supported yet
+        if 0:
+            (got_favs, favs) = record_client.getFavorites()
+            if got_favs and len(favs) > 1:
+                items.append(menu.MenuItem(_('Modify priority'), 
+                                           action=self.mod_priority))
+
+        items.append(menu.MenuItem(_('Save changes'), action=self.mod_time))
+        items.append(menu.MenuItem(_('Remove favorite'), action=self.rem_favorite))
+
+        favorite_menu = menu.Menu(_('Favorite Menu'), items, 
+                                 item_types = 'tv favorite menu')
+        favorite_menu.infoitem = self
+        menuw.pushmenu(favorite_menu)
+        menuw.refresh()
+
+
+    def mod_name(self, arg=None, menuw=None):
+        pass
+
+
+    def mod_channel(self, arg=None, menuw=None):
+        pass
+
+
+    def mod_day(self, arg=None, menuw=None):
+        pass
+
+
+    def mod_time(self, arg=None, menuw=None):
+        pass
+
+
+    def rem_favorite(self, arg=None, menuw=None):
+        (result, msg) = record_client.removeFavorite(self.fav.name)
+        if result:
+            # then menu back one which should show an updated list if we
+            # were viewing favorites or back to the program display
+	    # or refresh the program menu with remove option instead of add
             if menuw:  
                 menuw.back_one_menu(arg='reload')
 
