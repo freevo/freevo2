@@ -182,7 +182,7 @@ class Image:
 		else:
 			img = self._image.scale(0, 0, self.width, self.height, w * aspect, h)
 
-		return img
+		return Image(img)
 
 
 	def thumbnail(self, (w, h)):
