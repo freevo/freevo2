@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/03/17 00:24:16  outlyer
+# I don't even know why or how I broke this, but this is a fix for the
+# total "directory" time for a directory of mp3s showing up as 0.
+#
 # Revision 1.13  2003/03/10 07:12:45  outlyer
 # Fixed the missing watermarks on the main menu. and other minor changes.
 #
@@ -526,8 +530,7 @@ class Skin:
                         i_val = val.cover_music
 
                     try:
-                        #if item.playlist:
-                        if 1:
+                        if item.playlist:
                             length = 0
                             for bob in item.playlist:
                                 if artist != bob.artist:
@@ -546,6 +549,7 @@ class Skin:
 			i_val = copy.deepcopy(val.cover_image)
 			i_val.x = 0
 			i_val.y = 0
+
         return i_file, max(0, image_x-val.items.default.selection.spacing), i_val, artist, album, year, length
 
 
