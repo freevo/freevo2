@@ -62,59 +62,15 @@ cmds_kbd = {
     'e'           : 'REC'
     }
 
-#
-# Universal remote "ONE FOR ALL", model "Cinema 7" (URC-7201B00 on the back),
-# bought from Walmart ($17.00).
-# Programmed to code TV "0150". (VCR needs to be programmed too?)
-#
-cmds_rc_URC7201B00 = {
-    'sleep'       : 'SLEEP',
-    'menu'        : 'MENU',
-    'prog_guide'  : 'GUIDE',
-    'exit'        : 'EXIT',
-    'up'          : 'UP',
-    'down'        : 'DOWN',
-    'left'        : 'LEFT',
-    'right'       : 'RIGHT',
-    'sel'         : 'SELECT',
-    'power'       : 'POWER',
-    'mute'        : 'MUTE',
-    'vol+'        : 'VOL+',
-    'vol-'        : 'VOL-',
-    'ch+'         : 'CH+',
-    'ch-'         : 'CH-',
-    '1'           : '1',
-    '2'           : '2',
-    '3'           : '3',
-    '4'           : '4',
-    '5'           : '5',
-    '6'           : '6',
-    '7'           : '7',
-    '8'           : '8',
-    '9'           : '9',
-    '0'           : '0',
-    'display'     : 'DISPLAY',
-    'enter'       : 'ENTER',
-    'prev_ch'     : 'PREV_CH',
-    'pip_onoff'   : 'PIP_ONOFF',
-    'pip_swap'    : 'PIP_SWAP',
-    'pip_move'    : 'PIP_MOVE',
-    'tv_vcr'      : 'TV_VCR',
-    'rew'         : 'REW',
-    'play'        : 'PLAY',
-    'ff'          : 'FFWD',
-    'pause'       : 'PAUSE',
-    'stop'        : 'STOP',
-    'rec'         : 'REC'
-    }
-
 
 class RemoteLirc:
 
     def __init__(self):
         self.lirc = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+
+        # Read directly from the remote control daemon, no translation
         self.lirc.connect('/dev/lircd')
-        self.cmds = cmds_rc_URC7201B00
+        self.cmds = config.RC_CMDS
 
     def get_cmd(self):
         while 1:
