@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.163  2004/06/29 18:29:20  dischi
+# auto repair broken thumbnails
+#
 # Revision 1.162  2004/06/13 18:40:37  dischi
 # fix crash
 #
@@ -631,10 +634,13 @@ class OSD:
 
                 elif thumbnail:
                     # load cache or create it
-                    data = util.cache_image(filename, use_exif=True)
+                    data = util.cache_image(filename)
                     # convert to pygame image
-                    image = pygame.image.fromstring(data[0], data[1], data[2])
-
+                    try:
+                        image = pygame.image.fromstring(data[0], data[1], data[2])
+                    except:
+                        data = util.create_thumbnail(filename)
+                        image = pygame.image.fromstring(data[0], data[1], data[2])
                 else:
                     try:
                         image = pygame.image.load(filename)
