@@ -86,7 +86,6 @@ class IVTVCard(TVCard):
 class DVBCard:
     def __init__(self, number):
         self.adapter = '/dev/dvb/adapter' + number
-        _debug_('register dvb device %s' % self.adapter)
         INFO_ST = '128s10i'
         val = pack( INFO_ST, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 )
         devfd = os.open(self.adapter + '/frontend0', os.O_TRUNC)
@@ -105,6 +104,7 @@ class DVBCard:
         if name.find('\0') > 0:
             name = name[:name.find('\0')]
         self.name = name
+        _debug_('register dvb device %s' % self.adapter)
 
 
 def detect():
