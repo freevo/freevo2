@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2004/01/24 18:57:14  dischi
+# rotation is now stored in mediainfo
+#
 # Revision 1.40  2004/01/19 20:26:41  dischi
 # free image viewer cache on menuw.show()
 #
@@ -329,7 +332,7 @@ class ImageViewer(GUIObject):
                 self.rotation = (self.rotation + 270) % 360
             else:
                 self.rotation = (self.rotation + 90) % 360
-            self.fileitem.rotation = self.rotation
+            self.fileitem['rotation'] = self.rotation
             self.view(self.fileitem, zoom=self.zoom, rotation=self.rotation)
             return True
 

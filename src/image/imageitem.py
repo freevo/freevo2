@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2004/01/24 18:56:45  dischi
+# rotation is now stored in mediainfo
+#
 # Revision 1.21  2003/12/31 16:42:39  dischi
 # changes, related to item.py changes
 #
@@ -69,6 +72,7 @@ from event import *
 class ImageItem(Item):
     def __init__(self, url, parent, name = None, duration = 0):
         self.type = 'image'
+        self.autovars = [ ( 'rotation', 0 ) ]
         Item.__init__(self, parent)
 
         if name:
@@ -79,7 +83,6 @@ class ImageItem(Item):
         if self.mode == 'file':
             self.image = self.filename
         self.duration = duration
-        self.rotation = 0
 
         
     def __getitem__(self, key):
@@ -132,7 +135,7 @@ class ImageItem(Item):
         if self.menuw.visible:
             self.menuw.hide()
 
-        viewer.get_singleton().view(self, rotation=self.rotation)
+        viewer.get_singleton().view(self, rotation=self['rotation'])
 
         if self.parent and hasattr(self.parent, 'cache_next'):
             self.parent.cache_next()
