@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.55  2004/01/30 20:42:59  dischi
+# fix name setting
+#
 # Revision 1.54  2004/01/24 19:14:21  dischi
 # clean up autovar handling
 #
@@ -204,7 +207,7 @@ class Item:
             self.autovars = []
 
         if info and parent and hasattr(parent, 'DIRECTORY_USE_MEDIAID_TAG_NAMES') and \
-               parent.DIRECTORY_USE_MEDIAID_TAG_NAMES and hasattr(self.info, 'title'):
+               parent.DIRECTORY_USE_MEDIAID_TAG_NAMES and self.info.has_key('title'):
             self.name = self.info['title']
         
         if parent:
@@ -300,16 +303,16 @@ class Item:
             if self.parent and \
                    hasattr(self.parent, 'DIRECTORY_USE_MEDIAID_TAG_NAMES') and \
                    self.parent.DIRECTORY_USE_MEDIAID_TAG_NAMES and \
-                   hasattr(self.info, 'title'):
+                   self.info.has_key('title'):
                 self.name = self.info['title']
 
-        if not self.name:
+        if not self.name or self.name == '\0':
             if self.filename:
                 self.name = util.getname(self.filename)
             else:
                 self.name = self.url
 
-
+            
     def __setitem__(self, key, value):
         """
         set the value of 'key' to 'val'
