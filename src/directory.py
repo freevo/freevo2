@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.103  2004/01/25 15:38:57  dischi
+# prevent endless checking for overlay change
+#
 # Revision 1.102  2004/01/24 19:57:24  dischi
 # check if dir exists
 #
@@ -900,10 +903,10 @@ class Dirwatcher(plugin.DaemonPlugin):
         if changed:
             _debug_('directory has changed')
             self.item.build(menuw=self.menuw, arg='update')
-            self.last_time = vfs.mtime(self.dir)
-            self.item.__dirwatcher_last_time__  = self.last_time
-            self.files = self.listoverlay()
-            self.item.__dirwatcher_last_files__ = self.files
+        self.last_time = vfs.mtime(self.dir)
+        self.item.__dirwatcher_last_time__  = self.last_time
+        self.files = self.listoverlay()
+        self.item.__dirwatcher_last_files__ = self.files
 
     
     def poll(self):
