@@ -85,11 +85,22 @@ print 'done'
 print 'Creating Makefile (buildops="%s")...' % buildops,
 
 # Create a new Makefile
-os.system('echo "all:\n\tmake -f Makefile.in %s" > Makefile' % buildops)
+makefile = """
+all:
+\tmake -f Makefile.in %s
+
+install:
+\tmake -f Makefile.in install
+
+clean:
+\tmake -f Makefile.in clean
+""" % buildops
+
+os.system('echo "%s" > Makefile' % makefile)
 
 print 'done'
 
 print
-print 'Now you can type "make" to build and "make install" as root\n',
+print 'Now you can type "make" to build and "make install" as root'
 print 'to put the binaries into /usr/local/freevo or run them from here'
 print
