@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.104  2003/07/07 20:17:52  dischi
+# removed some evals and make a nice list (maybe faster)
+#
 # Revision 1.103  2003/07/05 15:01:49  dischi
 # support for title area in tv mode and prepare the skin if needed
 #
@@ -227,12 +230,17 @@ class Skin:
         self.screen = Screen()
         self.xml_cache = objectcache.ObjectCache(3, desc='xmlskin')
 
-        self.area_names = ( 'screen', 'title', 'subtitle', 'listing', 'view', 'info')
-        for a in self.area_names:
-            setattr(self, '%s_area' % a, eval('%s%s_Area(self, self.screen)' % \
-                                              (a[0].upper(), a[1:])))
+        self.normal_areas = []
+        self.tv_areas = []
 
-        self.tvlisting = TVListing_Area(self, self.screen)
+        for a in ( 'screen', 'title', 'subtitle', 'listing', 'view', 'info'):
+            o = eval('%s%s_Area(self, self.screen)' % (a[0].upper(), a[1:]))
+            self.normal_areas.append(o)
+            if a == 'listing':
+                self.listing_area = o
+                o = TVListing_Area(self, self.screen)
+                self.tvlisting = o
+            self.tv_areas.append(o)
         
         if DEBUG: print 'Skin: Loading XML file %s' % config.SKIN_XML_FILE
     
@@ -341,36 +349,8 @@ class Skin:
         return current display style
         """
         if menu:            
-            if  menu.force_skin_layout != -1:
+            if menu.force_skin_layout != -1:
                 return menu.force_skin_layout
-
-
-            # XXX don't change the global display_style
-            elif 0 and menu.choices:
-                different = 0
-                last = menu.choices[ 0 ].image
-                for i in menu.choices:
-                    if last != i.image:
-                        different = 1
-                        break
-                    last = i.image
-                if not different:
-                    if menu and menu.skin_settings:
-                        settings = menu.skin_settings
-                    else:
-                        settings = self.settings
-
-                    # get the correct <menu>
-                    if settings.menu.has_key(menu.item_types):
-                        area = settings.menu[menu.item_types]
-                    else:
-                        area = settings.menu['default']
-                        
-                    # search for a text menu:
-                    for i in range( len( area.style ) ):
-                        if area.style[ i ][ 1 ] and not area.style[ i ][ 0 ]:
-                            return i
-
         return self.display_style
 
 
@@ -524,10 +504,14 @@ class Skin:
         if type == 'tv':
             if not object.visible:
                 return
-            
-            l = self.listing_area
-            self.listing_area = self.tvlisting
-
+            all_areas = self.tv_areas
+            style = 0
+        elif type == 'player':
+            all_areas = self.normal_areas
+            style = 0
+        else:
+            all_areas = self.normal_areas
+            style = self.GetDisplayStyle(menu)
 
         if self.last_draw != type:
             self.force_redraw = TRUE
@@ -535,23 +519,13 @@ class Skin:
 
         self.screen.clear()
 
-        for a in self.area_names:
-            area = eval('self.%s_area' % a)
-            area.draw(settings, object, self.GetDisplayStyle( menu ), self.last_draw,
-                      self.force_redraw)
-
+        for a in all_areas:
+            a.draw(settings, object, style, self.last_draw, self.force_redraw)
+            
         self.screen.show(self.force_redraw)
-
-        if type == 'tv':
-            self.listing_area = l
-
 
         for p in self.plugin_refresh:
             p.draw((type, object))
 
-            
         osd.update()
         self.force_redraw = FALSE
-
-
-            
