@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.118  2004/02/16 17:57:04  dischi
+# use ucmp to compare
+#
 # Revision 1.117  2004/02/14 15:45:03  dischi
 # add support folder.fxd to hold fxditem tags
 #
@@ -690,18 +693,18 @@ class DirItem(Playlist):
         if self.DIRECTORY_SMART_SORT:
             self.dir_items.sort(lambda l, o: util.smartsort(l.dir,o.dir))
         else:
-            self.dir_items.sort(lambda l, o: cmp(l.dir.upper(), o.dir.upper()))
+            self.dir_items.sort(lambda l, o: util.ucmp(l.dir.upper(), o.dir.upper()))
 
         # sort playlist
-        self.pl_items.sort(lambda l, o: cmp(l.name.upper(), o.name.upper()))
+        self.pl_items.sort(lambda l, o: util.ucmp(l.name.upper(), o.name.upper()))
 
         # sort normal items
         if self.DIRECTORY_SORT_BY_DATE:
-            self.play_items.sort(lambda l, o: cmp(l.sort('date').upper(),
-                                                  o.sort('date').upper()))
+            self.play_items.sort(lambda l, o: util.ucmp(l.sort('date').upper(),
+                                                        o.sort('date').upper()))
         else:
-            self.play_items.sort(lambda l, o: cmp(l.sort().upper(),
-                                                  o.sort().upper()))
+            self.play_items.sort(lambda l, o: util.ucmp(l.sort().upper(),
+                                                        o.sort().upper()))
 
         if self['num_dir_items'] != len(self.dir_items):
             self['num_dir_items'] = len(self.dir_items)
