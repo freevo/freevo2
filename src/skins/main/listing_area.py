@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2004/02/24 21:20:30  dischi
+# unicode fix
+#
 # Revision 1.24  2004/02/04 19:05:36  dischi
 # remove bad log message
 #
@@ -402,7 +405,8 @@ class Listing_Area(Skin_Area):
                         if table_text[i].find('ICON_') == 0:
                             x_mod, table_text[i] = text_or_icon(settings, table_text[i],
                                                                 table_x, table_w, val.font)
-                            if not isinstance(table_text[i], str):
+                            if not (isinstance(table_text[i], str) or
+                                    isinstance(table_text[i], unicode)):
                                 self.drawimage(table_text[i], (table_x + x_mod, y0 + vskip))
                                 table_text[i] = ''
                                 
