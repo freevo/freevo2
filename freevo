@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.90  2003/10/17 19:17:08  dischi
+# typo
+#
 # Revision 1.89  2003/10/16 04:20:56  outlyer
 # Bash-ism fixes from Lars
 #
@@ -254,9 +257,9 @@ help() {
     echo "Example: freevo imdb --help"
     echo "         freevo webserver start"
     echo
-    echo "You can also create a symbolic link to free with the name of the"
+    echo "You can also create a symbolic link to freevo with the name of the"
     echo "script you want to execute. E.g. put a link imdb pointing to freevo"
-    echo "in your patch to access the imdb helper script"
+    echo "in your path to access the imdb helper script"
     echo 
     echo "Example: ln -s path-to-freevo imdb"
     echo "         imdb --help"
