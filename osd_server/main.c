@@ -53,7 +53,7 @@ static uint8 framebuffer[SCREEN_HEIGHT][SCREEN_WIDTH][4]; /* BGR0 */
 
 void osd_close (void);
 void osd_update (void);
-void osd_drawbitmap (char *filename, uint16 x0, uint16 y0);
+void osd_drawbitmap (char *filename, int x0, int y0);
 void osd_drawline (int x0, int y0, int x1, int y1, int width, uint32 color);
 void osd_drawbox (int x0, int y0, int x1, int y1, int width, uint32 color);
 void osd_clearscreen (int color);
@@ -301,10 +301,10 @@ osd_setpixel (uint16 x, uint16 y, uint32 color)
 
 /* Draw a bitmap at the specified x0;y0. Only PNG for now... */
 void
-osd_drawbitmap (char *filename, uint16 x0, uint16 y0)
+osd_drawbitmap (char *filename, int x0, int y0)
 {
-   uint32 *pBM, *pBM2;
-   uint16 w, h;
+   uint32 *pBM, *pBMorg, val;
+   uint16 w, h, bmx, bmy;
    int x, y;
    
    
@@ -313,15 +313,30 @@ osd_drawbitmap (char *filename, uint16 x0, uint16 y0)
       return;
    }
 
-   pBM2 = pBM;
-   
-   for (y = 0; y < h; y++) {
-      for (x = 0; x < w; x++) {
-         osd_setpixel (x0 + x, y0 + y, *pBM++);
+   pBMorg = pBM;
+
+   /* Should the bitmap be tiled? */
+   if ((x0 == -1) || (y0 == -1)) {
+      /* Yes, tile it */
+      for (y = 0; y < SCREEN_HEIGHT; y++) {
+         for (x = 0; x < SCREEN_WIDTH; x++) {
+            bmx = x % w;
+            bmy = y % h;
+            val = pBM[bmy*w + bmx];
+            osd_setpixel (x, y, val);
+         }
+      }
+      
+   } else {
+      /* No tiling */
+      for (y = 0; y < h; y++) {
+         for (x = 0; x < w; x++) {
+            osd_setpixel (x0 + x, y0 + y, *pBM++);
+         }
       }
    }
-
-   free (pBM2);
+   
+   free (pBMorg);
    
 }
 

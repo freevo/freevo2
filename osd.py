@@ -86,7 +86,7 @@ class OSD:
         self._send('setpixel;' + args)
 
         
-    def drawbitmap(self, filename, x, y):
+    def drawbitmap(self, filename, x=-1, y=-1):
         args = filename + ';' + str(x) + ';' + str(y)
         self._send('drawbitmap;' + args)
 
