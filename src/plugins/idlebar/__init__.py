@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2004/10/07 14:02:48  dischi
+# fix redraw when one plugin changes the width
+#
 # Revision 1.30  2004/09/14 14:00:39  dischi
 # move plugins intro seperate files
 #
@@ -149,6 +152,8 @@ class PluginInterface(plugin.DaemonPlugin):
         y2 = h
 
         for p in plugin.get('idlebar'):
+            if changed:
+                p.clear()
             width = p.draw(x2 - x1, y2 - y1)
             if width == p.NO_CHANGE:
                 if p.align == 'left':
@@ -163,7 +168,9 @@ class PluginInterface(plugin.DaemonPlugin):
 
             if p.align == 'left':
                 for o in p.objects:
-                    o.set_pos((o.get_pos()[0] + x1, o.get_pos()[1] + y1))
+                    x, y = o.get_pos()
+                    o._idlebar_pos = x, y
+                    o.set_pos((x + x1, y + y1))
                     self.container.add_child(o)
                 x1 = x1 + width
             else:
