@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/07/11 20:21:15  outlyer
+# Actually, 10 seconds makes more sense than 60.
+#
 # Revision 1.21  2003/07/11 17:27:11  outlyer
 # Because of the variety of encoders out there with variable times to release
 #  the device, I'm going to set the default time between recordings to one
@@ -335,7 +338,7 @@ def set_schedule(arg=None, menuw=None):
     rec_name = os.path.join(config.DIR_RECORD, rec_name)
 
     # Calculate timecode for mp1e and similar encoders
-    temp = len_secs - 60
+    temp = len_secs - 10
     hour = int(temp/3600)
     minu = int(temp/60)
     seco = int(temp%60)
