@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.113  2004/08/09 14:37:45  dischi
+# fix encoding detection
+#
 # Revision 1.112  2004/08/09 14:02:52  dischi
 # first draft of new tv card setup
 #
@@ -933,9 +936,11 @@ if HELPER:
 encoding = None
 try:
     encoding = os.environ[ 'LANG' ].split( '.' )[ 1 ]
+    ''.encode(encoding)
 except:
     try:
         encoding = os.environ[ 'LC_ALL' ].split( '.' )[ 1 ]
+        ''.encode(encoding)
     except:
         encoding = LOCALE
 
