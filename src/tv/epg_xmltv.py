@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/02/16 22:21:45  krister
+# Bugfix for XMLTV data handling during config (tunerid)
+#
 # Revision 1.8  2003/02/14 16:45:16  outlyer
 # Ugly hack to work around missing stop times. This is a slight improvement
 # over my patch from yesterday, because it "guesses" the stop time of the shows.
@@ -249,8 +252,14 @@ def load_guide():
             id = chan['id'].encode('Latin-1')
             c = epg_types.TvChannel()
             c.id = id
-            c.displayname = id.split()[1]   # XXX Educated guess
-            c.tunerid = id.split()[0]       # XXX Educated guess
+            if ' ' in id:
+                # Assume the format is "TUNERID CHANNELNAME"
+                c.displayname = id.split()[1]   # XXX Educated guess
+                c.tunerid = id.split()[0]       # XXX Educated guess
+            else:
+                # Let the user figure it out
+                c.displayname = '%s REPLACE WITH CHANNEL NAME' % id
+                c.tunerid = '%s REPLACE WITH TUNERID' % id
             guide.AddChannel(c)
 
     xmltv_programs = None
