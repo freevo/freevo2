@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2002/08/19 02:46:49  krister
+# Added a flag to hold updates while some functions own the screen.
+#
 # Revision 1.14  2002/08/18 06:10:59  krister
 # Converted tabs to spaces. Please use tabnanny in the future!
 #
@@ -97,6 +100,8 @@ osd = osd.get_singleton()
 
 class Skin:
 
+    hold = 0  # Hold updates
+    
     settings = xml_skin.XMLSkin()
     settings.load(config.SKIN_XML_FILE)
 
@@ -133,6 +138,10 @@ class Skin:
     # Called from the MenuWidget class to draw a menu page on the
     # screen
     def DrawMenu(self, menuw):
+        if self.hold:
+            print 'skin.drawmenu() hold!'
+            return
+        
         osd.clearscreen(osd.COL_WHITE)
 
         menu = menuw.menustack[-1]
