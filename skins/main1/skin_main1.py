@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2002/09/01 09:41:03  dischi
+# switched from eventhandler_args to type by choosing which item
+# style. Please don't abuse the eventhandler_args for something that has
+# nothing to do with the eventhandler.
+#
 # Revision 1.18  2002/09/01 04:31:35  krister
 # Removed the 'text' on an empty line, looks like Dischis cat walked over the clicked the paste-button on his mouse...
 #
@@ -210,19 +215,18 @@ class Skin:
         # Draw the menu choices for the main selection
         y0 = val.items.y
         selection_height = val.items.height
-        icon_size = 75
 
-        if len(menuw.menu_items) == 5:
+        if menu.packrows:
+            spacing = selection_height / menuw.items_per_page
+            icon_size = 28
+        else:
+            spacing = selection_height / max(len(menuw.menu_items),1)
             icon_size = 64
 
         if DEBUG:
             print 'DrawMenu() y0: %s, selh: %s, iconsize: %s' % (y0,
                                                                  selection_height,
                                                                  icon_size)
-        if menu.packrows:
-            spacing = selection_height / menuw.items_per_page
-        else:
-            spacing = selection_height / max(len(menuw.menu_items),1)
 
         image_x = 0
 
@@ -261,13 +265,13 @@ class Skin:
 
             # Pick the settings for this kind of item
             valign = 0 # Vertical aligment to the icon
-            if choice.eventhandler_args:
+            if choice.type:
 
-                if choice.eventhandler_args[0] == 'dir':
+                if choice.type == 'dir':
                     item = val.item_dir
-                elif choice.eventhandler_args[0] == 'list':
+                elif choice.type == 'list':
                     item = val.item_pl
-                elif choice.eventhandler_args[0] == 'main':
+                elif choice.type == 'main':
                     item = val.item_main
                     valign = 1 # Only for the main menu
                 else:
