@@ -1,3 +1,5 @@
+# WARNING: small changes made for Freevo. Look for 'FREEVO' in the code
+
 """Python wrapper
 
 
@@ -54,7 +56,7 @@ Other usage notes:
 """
 
 __author__ = "Mark Pilgrim (f8dy@diveintomark.org)"
-__version__ = "0.5"
+__version__ = "0.61"
 __cvsversion__ = "$Revision$"[11:-2]
 __date__ = "$Date$"[7:-2]
 __copyright__ = "Copyright (c) 2002 Mark Pilgrim"
@@ -63,22 +65,17 @@ __license__ = "Python"
 
 from xml.dom import minidom
 import os, sys, getopt, cgi, urllib
-if float(sys.version[0:3]) >= 2.3:
-    import socket
-    socket.setdefaulttimeout(10)
-else:
-    try:
-        import timeoutsocket # http://www.timo-tasi.org/python/timeoutsocket.py
-        timeoutsocket.setDefaultSocketTimeout(10)
-    except ImportError:
-        pass
+try:
+    import timeoutsocket # http://www.timo-tasi.org/python/timeoutsocket.py
+    timeoutsocket.setDefaultSocketTimeout(10)
+except ImportError:
+    pass
 
 LICENSE_KEY = None
 HTTP_PROXY = None
 
 # don't touch the rest of these constants
 class AmazonError(Exception): pass
-class ParseError(Exception): pass
 class NoLicenseKey(Exception): pass
 _amazonfile1 = ".amazonkey"
 _amazonfile2 = "amazonkey.txt"
@@ -175,11 +172,16 @@ def unmarshal(element):
     else:
         rc = "".join([e.data for e in element.childNodes if isinstance(e, minidom.Text)])
         if element.tagName == 'SalesRank':
-            rc = int(rc.replace(',', ''))
+            # FREEVO CHANGES: add '.' as replacement
+            rc = int(rc.replace(',', '').replace('.', ''))
     return rc
 
-def buildURL(search_type, keyword, product_line, type, page, license_key):
-    url = "http://xml.amazon.com/onca/xml3?v=1.0&f=xml&t=webservices-20"
+def buildURL(search_type, keyword, product_line, type, page, license_key, lang='us'):
+    if lang=='us':
+        url = "http://xml.amazon.com/onca/xml?v=1.0&f=xml&t=webservices-20"
+    else:
+        url = "http://xml-eu.amazon.com/onca/xml?v=1.0&f=xml&t=webservices-20"
+        url += "&locale=%s" % lang
     url += "&dev-t=%s" % license_key.strip()
     url += "&type=%s" % type
     if page:
@@ -194,7 +196,7 @@ def buildURL(search_type, keyword, product_line, type, page, license_key):
 
 
 def search(search_type, keyword, product_line, type="heavy", page=None,
-           license_key = None, http_proxy = None):
+           license_key = None, http_proxy = None, lang='us'):
     """search Amazon
 
     You need a license key to call this function; see
@@ -240,21 +242,26 @@ def search(search_type, keyword, product_line, type="heavy", page=None,
       URL - URL of this item
     """
     license_key = getLicense(license_key)
-    url = buildURL(search_type, keyword, product_line, type, page, license_key)
+    url = buildURL(search_type, keyword, product_line, type, page, license_key, lang=lang)
     proxies = getProxies(http_proxy)
     u = urllib.FancyURLopener(proxies)
     usock = u.open(url)
     try:
         xmldoc = minidom.parse(usock)
-    except:
-        raise ParseError
-
-#     from xml.dom.ext import PrettyPrint
-#     PrettyPrint(xmldoc)
+        data   = unmarshal(xmldoc).ProductInfo
+    except ExpatError, e:
+        # FREEVO CHANGES: catch error and go on
+        data   = Bag()
+        data.ErrorMsg = e
 
     usock.close()
-    data = unmarshal(xmldoc).ProductInfo
     if hasattr(data, 'ErrorMsg'):
+        # FREEVO CHANGES: try other lang
+        # TODO: find more urls
+        if lang == 'us':
+            return search(search_type, keyword, product_line, type, page, license_key, http_proxy, 'uk')
+        if lang == 'uk':
+            return search(search_type, keyword, product_line, type, page, license_key, http_proxy, 'de')
         raise AmazonError, data.ErrorMsg
     else:
         return data.Details
