@@ -59,7 +59,8 @@
 #
 # Developer Notes:
 #    The CVS log isn't used here. Write changes directly in this file
-#    to make it easier for the user
+#    to make it easier for the user. Make alos sure that you insert new
+#    options also in local_conf.py.example
 #
 # Todo:
 #    o a nice configure or install script to ask these things
@@ -744,18 +745,6 @@ MPLAYER_ARGS = { 'dvd': '-cache 8192',
                  'rm' : '-cache 5000 -forceidx',
                  'default': '-cache 5000'
                  }
-
-MPLAYER_USE_WID = 1
-
-#
-# The runtime version of MPlayer/MEncoder are patched to disable DVD
-# protection override (a.k.a decss) by using the flag
-# "-nodvdprotection-override". This flag is set by default if the runtime version
-# of MPlayer is used to play DVDs, since it is illegal (TBC) to use it in some
-# countries. You can modify the program to use the protection override,
-# but only if you're 100% sure that it is legal in your jurisdiction!
-#
-MPLAYER_DVD_PROTECTION = 1
 
 # Number of seconds before seek value times out. This is used when
 # seeking to a specified number of minutes into a movie. If you make

@@ -1,0 +1,680 @@
+#if 0
+# -----------------------------------------------------------------------
+# local_conf.py - Edit this file for your local system settings
+# -----------------------------------------------------------------------
+# $Id$
+#
+# Notes:
+#   This file contains the important options from freevo_config.py that
+#   you might want to change to suit your system. Remove the '#' to
+#   uncomment the setting(s) you want to change. There are more options
+#   in freevo_config.py, copy those that must be changed to this file.
+#
+#   DO NOT CHANGE ANYTHING IN freevo_config.py, ALWAYS MAKE THE CHANGES
+#   IN local_conf.py TO MAKE UPDATES EASIER
+#
+#   Then put this file in ~/.freevo/ or /etc/freevo to make upgrades easier.
+#   Freevo will look in those folders first for this file.
+#
+# -----------------------------------------------------------------------
+# Freevo - A Home Theater PC framework
+# Copyright (C) 2003 Krister Lagerstrom, et al. 
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
+# Please see the file freevo/COPYING for license info.
+#
+# -----------------------------------------------------------------------
+#endif
+
+
+# This version should match the version in freevo_config.py. It makes
+# it easier to update this file. When you get a new version of Freevo,
+# Freevo will tell you any changes made in freevo_config.py. After you
+# merged those changes into this file, set this number to the new one.
+LOCAL_CONF_VERSION  = 3.5
+
+
+# ======================================================================
+# General freevo settings:
+# ======================================================================
+
+# AUDIO_DEVICE        = '/dev/dsp'      # e.g.: /dev/dsp0, /dev/audio, /dev/alsa/?
+# AUDIO_INPUT_DEVICE  = '/dev/dsp1'     # e.g.: /dev/dsp0, /dev/audio, /dev/alsa/?
+# MAJOR_AUDIO_CTRL    = 'VOL'           # Freevo takes control over one audio ctrl
+#                                       # 'VOL', 'PCM' 'OGAIN' etc.
+# CONTROL_ALL_AUDIO   = 1               # Should Freevo take complete control of audio
+# MAX_VOLUME          = 90              # Set what you want maximum volume level to be.
+# DEFAULT_VOLUME      = 40              # Set default volume level.
+# TV_IN_VOLUME        = 60              # Set this to your preferred level 0-100.
+# VCR_IN_VOLUME       = 90              # If you use different input from TV
+# DEV_MIXER           = '/dev/mixer'    # mixer device 
+
+# START_FULLSCREEN_X  = 0               # Start in fullscreen mode if using x11 or xv.
+
+#
+# Physical ROM drives, multiple ones can be specified
+# by adding comma-seperated and quoted entries.
+#
+# Format [ ('mountdir1', 'devicename1', 'displayed name1'),
+#          ('mountdir2', 'devicename2', 'displayed name2'), ...]
+#
+# Leave empty to autodetect drives in during startup from /etc/fstab
+# ROM_DRIVES = []
+
+# ROM_SPEED = 0                       # try to set the drive speed of the rom
+                                      # drive a good value for playing movies
+                                      # with a silent drive is 8
+
+
+#
+# see src/event.py for a list of all possible events. You can add more keybindings
+# by adding them to the correct hash. E.g. pressing 1 should send 'contrast -100'
+# to mplayer, just write the folling line to your local_conf.py
+#
+# EVENTS['video']['1'] = Event(VIDEO_SEND_MPLAYER_CMD, arg='contrast -100')
+
+
+
+# ======================================================================
+# Plugins:
+# ======================================================================
+
+# you can remove all plugins loaded in freevo_config.py
+#
+# Examples:
+# plugin.remove(plugin_tv) or
+# plugin.remove('tv') will remove the tv module from the main menu
+# plugin.remove(rom_plugins['image']) will remove the rom drives from the
+#   image main menu,
+# plugin.remove('rom_drives.rom_items') will remove the rom drives from all
+#   menus
+
+
+# Use this ivtv_record instead if you have an ivtv based card (PVR-250/350)
+# and want freevo to do everthing for you.  TV_SETTINGS must be set 
+# correctly.  To use you need the following two lines in local_conf.py:
+# plugin.remove('tv.generic_record')
+# plugin_record = plugin.activate('tv.ivtv_record')
+
+# For CD ripping
+# plugin.activate('audio.cdbackup')
+
+# For joystick support:
+# plugin.activate('joy')
+
+# Idlebar plugin:
+
+# plugin.activate('idlebar')
+# plugin.activate('idlebar.mail',    level=10, args=('/var/spool/mail/dmeyer', ))
+# plugin.activate('idlebar.tv',      level=20)
+# plugin.activate('idlebar.weather', level=30, args=('EDDW',))
+# plugin.activate('idlebar.clock',   level=50)
+# plugin.activate('idlebar.cdstatus',   level=20)
+# plugin.activate('idlebar.holidays',   level=20)
+
+# ======================================================================
+# Freevo directory settings:
+# ======================================================================
+
+# You can change all this variables in the folder.fxd on a per folder
+# basis
+#
+# Example:
+# <freevo>
+#   <folder>
+#     <setvar name="directory_autoplay_single_item" val="0"/>
+#   </folder>
+# </freevo>
+
+#
+# Should playlists be available for movies, and all movies in a directory
+# be played in succession (unless you press STOP/EXIT)?
+#
+# MOVIE_PLAYLISTS = 0
+
+#
+# Should a Random Playlist be generated for Music?
+#
+# AUDIO_RANDOM_PLAYLIST = 1
+
+#
+# Should directories sorted by date instead of filename
+# 0 = no, 1 = yes, 2 = no for normal menus, yes for DIR_RECORD
+#
+# DIRECTORY_SORT_BY_DATE = 2
+
+#
+# Should we use "smart" sorting to ignore 'The' in directories
+# 0 = no, 1 = yes
+#
+# DIRECTORY_SMART_SORT = 0
+
+#
+# Should freevo autoplay the item if only one item is in the directory
+#
+# DIRECTORY_AUTOPLAY_SINGLE_ITEM = 1
+
+#
+# Force the skin to a specific layout number. -1 == no force. The layout
+# toggle with DISPLAY will be disabled
+#
+# FORCE_SKIN_LAYOUT = -1
+
+#
+# Formatstring for the audio item names, possible strings:
+# a = artist, n = tracknumber, t = title, y = year, f = filename
+#
+# This will show the title and the track number 
+# AUDIO_FORMAT_STRING = '%(n)s - %(t)s'
+# This is the default - track name only
+#
+# AUDIO_FORMAT_STRING = '%(t)s'
+
+# ======================================================================
+# Freevo movie settings:
+# ======================================================================
+
+#
+# Where the movie files can be found.
+#
+# DIR_MOVIES = [ ('action movies', 'movies/action'),
+#                ('funny stuff', 'movies/comedy') ]
+
+#
+# This is where recorded video is written.
+#
+# XXX the path doesn't work from the www cgi scripts!
+# DIR_RECORD = 'testfiles/Movies/Recorded'
+
+#
+# Directory for XML definitions for DVDs and VCDs. Items in this
+# directory won't be in the MOVIE MAIN MENU, but will be used to find
+# titles and images for the current DVD/VCD
+#
+# MOVIE_DATA_DIR = 'movie-data/'
+
+#
+# Directory containing images for tv shows. A tv show maches the regular
+# expression TV_SHOW_REGEXP, e.g. "Name 3x10 - Title". If an image
+# name.(png|jpg) (lowercase) is in this directory, it will be taken as cover
+# image
+#
+# TV_SHOW_DATA_DIR = "testfiles/tv-show-images/"
+
+#
+# Directory for cover images for CD/VCD/DVD and music CDs or when you can't
+# add a cover image to the dir you want. Not for replacing the normal
+# cover file function.
+#
+# COVER_DIR = 'testfiles/Covers/'
+
+#
+# Only scan MOVIE_DATA_DIR and TV_SHOW_DATA_DIR for fxd files containing
+# informations about a disc. If you only have the fxd files for discs in
+# one of this directories (and subdirectories), set this to 1, it will
+# speed up startup.
+#
+# ONLY_SCAN_DATADIR = 0
+
+
+# ======================================================================
+# Freevo audio settings:
+# ======================================================================
+
+#
+# Where the Audio (mp3, ogg) files can be found.
+# Format: [ ('Title1', 'directory1', 'mplayer options'),
+#           ('Title2', 'directory2'), ... ]
+# The 'mplayer options' field can be omitted.
+#
+# DIR_AUDIO = [ ('Test Files', 'testfiles/Music') ]
+
+# AUDIO_BACKUP_DIR = DIR_AUDIO[ 0 ][ 1 ] # or a path, like /home/user/mp3/
+
+
+# ======================================================================
+# Freevo image viewer settings:
+# ======================================================================
+
+# Where the image files can be found.
+
+# DIR_IMAGES = [ ('Arizona 2002', '/video/SlideShows/arizona-2002.ssr'),
+#                ('Carmel 2002',  '/video/SlideShows/carmel.ssr'),
+#                ('Pics',  '/video/SlideShows') ]
+
+# The viewer now supports a new type of menu entry, a slideshow file.
+# It also has the slideshow alarm signal handler for automated shows.
+# It uses a new configuration option:
+
+# SUFFIX_IMAGE_SSHOW = [ 'ssr' ]
+
+# This defines the file extensions of slideshow playlists. When DIR_IMAGES
+# is parsed, it will look for entries that match the SUFFIX_IMAGE_SSHOW
+# patterns. If it finds a match, then it will classify that entry as a
+# slideshow playlist instead of a directory of images. For example:
+
+
+
+# ======================================================================
+# Freevo games settings:
+# ======================================================================
+
+#
+# MAME is an emulator for old arcade video games. It supports almost
+# 2000 different games! The actual emulator is not included in Freevo,
+# you'll need to download and install it separately. The main MAME
+# website is at http://www.mame.net, but the version that is used here
+# is at http://x.mame.net since the regular MAME is for Windows.
+#
+# SNES stands for Super Nintendo Entertainment System.  Freevo relies
+# on other programs that are not included in Freevo to play these games.
+# 
+# Where the mame and snes files can be found.
+# 
+
+# DIR_GAMES = [ ('Test Games', './testfiles/Mame') ]
+
+#
+# The list of filename suffixes that are used to match the files that
+# are used for the Mame arcade emulator. 
+# 
+# SUFFIX_MAME_FILES = [ 'zip' ]
+# SUFFIX_SNES_FILES = [ 'smc', 'fig' ]
+
+# XXX Removed '-ef 1', doesn't work on my older version of mame...  /Krister
+# MAME_ARGS_DEF     = ('-nosound -fullscreen -modenumber 6 ')
+
+# This example is a set of arguments for zsnes.
+# SNES_ARGS_DEF     = ("-m -r 3 -k 100 -1 3 -2 3 -cs -t")
+
+
+# ======================================================================
+# freevo OSD section:
+# ======================================================================
+
+#
+# XML file for the skin
+#
+# SKIN_XML_FILE = 'noia'
+
+#
+# Start the new skin with a specific layout. Default is 0, DISPLAY toggles
+# between the different layouts. If a menu hasn't that layout number, 0 will
+# be taken
+#
+# SKIN_START_LAYOUT = 0
+
+# ENABLE_SHUTDOWN_SYS = 0  # Performs a whole system shutdown at SHUTDOWN!
+                           # For standalone boxes.
+
+# The following fours variables have different settings in freevo_config.py
+# based on the display you use.
+
+# Exec a script on the osd close.
+# OSD_SDL_EXEC_AFTER_CLOSE = ""
+
+# Exec a script after startup
+# OSD_SDL_EXEC_AFTER_STARTUP = ""
+
+# OVERSCAN_X = 0
+# OVERSCAN_Y = 0
+
+    
+# ======================================================================
+# Remote control section
+# ======================================================================
+
+
+#
+# you need a lircrc file, like this:
+#
+# begin
+#       prog = freevo
+#       button = select
+#       config = SELECT
+# end
+#
+# Check contrib/lirc for examples and helpers/freevo2lirc.pl for a converter
+# script.
+#
+
+# LIRCRC = '/etc/freevo/lircrc'
+
+#
+# Set the Joy device to 0 to disable, 1 for js0, 2 for js1, etc...
+# Supports as many buttons as your controller has,
+# but make sure there is a corresponding entry in JOY_CMDS.
+# You will also need to plugin.activate('joy').
+# FYI: new kernels use /dev/input/jsX, but joy.py will fall back on /dev/jsX
+#
+# JOY_DEV = 0
+# JOY_CMDS = {
+#     'up'             : 'UP',
+#     'down'           : 'DOWN',
+#     'left'           : 'LEFT',
+#     'right'          : 'RIGHT',
+#     'button 1'       : 'PLAY',
+#     'button 2'       : 'PAUSE',
+#     'button 3'       : 'STOP',
+#     'button 4'       : 'ENTER',
+#     }
+
+
+
+# ======================================================================
+# cdbackup section and lame defaults:
+# ======================================================================
+
+# CD_RIP_PN_PREF = '%(artist)s/%(album)s/%(song)s'
+# CD_RIP_LAME_OPTS = '--preset standard'
+# CD_RIP_OGG_OPTS = '-m 128'
+
+
+# ======================================================================
+# MPlayer section:
+# ======================================================================
+
+# MPLAYER_AO_DEV       = 'oss:/dev/dsp'  # e.g.: oss,sdl,alsa, see mplayer docs
+
+# DVD_LANG_PREF        = 'en,se,no'      # Order of preferred languages on DVD.
+# DVD_SUBTITLE_PREF    = ''              # Order of preferred subtitles on DVD.
+
+# Priority of mplayer process. 0 is unchanged, <0 is higher prio, >0 lower prio.
+# prio <0 has no effect unless run as root.
+# MPLAYER_NICE         = -20             
+
+# MPLAYER_ARGS_DEF     = (('-ac mad, -autosync 100 -nolirc -autoq 100 -screenw %s '
+#                         + '-screenh %s -fs') % (CONF.width, CONF.height))
+
+
+#
+# Mplayer options to use the software scaler. If your CPU is fast enough, you
+# might try a software scaler. You can disable it later for some larger files
+# with the mplayer option '-nosws'. If you have -framedrop or -hardframedrop
+# as mplayer option, the software scaler will also not be used.
+# A good value for this variable is
+# MPLAYER_SOFTWARE_SCALER = " -subfont-text-scale 5 -fs -sws 2 -vf scale=%s:-3,expand=%s:%s " % ( CONF.width, CONF.width, CONF.HEIGHT )
+#
+
+#
+# Mplayer args for the different kinds of files. Possible values are dvd, vcd,
+# cd (audio cd), tv, all extentions and default if nothing matches
+#
+# MPLAYER_ARGS = { 'dvd': '-cache 8192',
+#                  'vcd': '-cache 4096',
+#                  'cd' : '-cache 500 -cdda speed=1',
+#                  'tv' : '-nocache',
+#                  'avi': '-cache 5000 -idx',
+#                  'rm' : '-cache 5000 -forceidx',
+#                  'default': '-cache 5000'
+#                  }
+
+# Number of seconds before seek value times out. This is used when
+# seeking to a specified number of minutes into a movie. If you make
+# a mistake or change your mind, the seek value will timeout after
+# this many seconds
+#
+# MPLAYER_SEEK_TIMEOUT = 8
+
+# Autocrop files when playing. This is usefull for files in 4:3 with black
+# bars on a 16:9 tv
+#
+# MPLAYER_AUTOCROP = 0
+
+
+# ======================================================================
+# Xine section:
+# ======================================================================
+
+# You need xine-ui version greater 0.9.21 to use the all the features
+# of the xine plugin
+
+# XINE_AO_DEV = 'oss'                     # alsa or oss
+# XINE_USE_VCDNAV = 0                     # use xine for VCD nav playback
+
+
+# ======================================================================
+# TV:
+# ======================================================================
+
+#
+# Watching TV
+#
+# XXX You must change this to fit your local conditions!
+#
+# TV_SETTINGS  = 'NORM INPUT CHANLIST DEVICE'
+# VCR_SETTINGS = 'NORM INPUT CHANLIST DEVICE'
+#
+# NORM: ntsc, pal, secam
+# INPUT: television, composite1
+# CHANLIST: One of the following:
+#
+# us-bcast, us-cable, us-cable-hrc, japan-bcast, japan-cable, europe-west,
+# europe-east, italy, newzealand, australia, ireland, france, china-bcast,
+# southafrica, argentina, canada-cable
+#
+# DEVICE: Usually /dev/video0, but might be /dev/video1 instead for multiple
+# boards.
+#
+# TV_SETTINGS = '%s television %s /dev/video0' % (CONF.tv, CONF.chanlist)
+
+# This is the size (in MB) of the timeshift buffer, ie: how long you can
+# pause tv for.  This is set to a low default because the default buffer
+# location is under FREEVO_CACHEDIR and we don't want to blow /var or /tmp.
+# TIMESHIFT_BUFFER_SIZE = 128
+
+# TIMESHIFT_ENCODE_CMD = 'mp1e -m3 -c%s -p%s -r14,100' % \
+#                        (TV_SETTINGS.split()[3], AUDIO_INPUT_DEVICE) 
+
+# TIMESHIFT_BUFFER = '%s/timeshift.mpeg' % FREEVO_CACHEDIR
+
+# TV_CHANNEL_PROG = './chchan %(channel)s %(norm)s %(freqtable)s'
+
+# TV_DATEFORMAT = '%e-%b' # Day-Month: 11-Jun
+# TV_TIMEFORMAT = '%H:%M' # Hour-Minute 14:05
+
+
+#
+# Number of hours displayed in the tv guide
+# Set this value to 1, 2 or 3. 4 and greater doesn't look good
+#
+# TVGUIDE_HOURS_PER_PAGE = 2
+
+
+#
+# XXX Recording is still work in progress. You need to change
+# XXX the entire string below to fit your local settings.
+# XXX Eventually TV norm (PAL/NTSC) etc will be taken from the
+# XXX other flags. VCR_xxx and TV_REC_xxx is not used yet!
+# XXX You also need to have the recording daemon running, see
+# XXX the website docs or the mailing lists if that fails.
+# XXX Example cron script:
+# XXX * * * * * /usr/local/freevo/freevo execute src/tv/record_daemon.py
+
+# if using record_daemon from cron
+# REC_SCHEDULE_FILE = '/tmp/freevo_record.lst'
+
+# if using the persitant record_server
+# RECORD_SCHEDULE = '%s/record_schedule.xml' % FREEVO_CACHEDIR
+
+# RECORD_SERVER_IP = 'localhost'
+# RECORD_SERVER_PORT = 18001
+
+#
+# XXX Please see the mencoder docs for more info about the settings
+# XXX below. Some stuff must be changed (adevice), others probably
+# XXX should be ("Change"), or could be in some cases ("change?")
+# VCR_CMD = ('/usr/local/bin/mencoder ' +    # Change. Absolute path to the runtime
+#            '-tv on:driver=v4l:input=0' +   # Input 0 = Comp. V. in
+#            ':norm=NTSC' +                  # Change
+#            ':channel=%(channel)s' +         # Filled in by Freevo
+#            ':chanlist=us-cable' +          # Change
+#            ':width=320:height=240' +       # Change if needed
+#            ':outfmt=yv12' +                # Prob. ok, yuy2 might be faster
+#            ':device=/dev/video0' +         # CHANGE!
+#            ':adevice=/dev/dsp4' +          # CHANGE!
+#            ':audiorate=32000' +            # 44100 for better sound
+#            ':forceaudio:forcechan=1:' +    # Forced mono for bug in my driver
+#            'buffersize=64' +               # 64 Megabyte capture buffer, change?
+#            ' -ovc lavc -lavcopts ' +       # Mencoder lavcodec video codec
+#            'vcodec=mpeg4' +                # lavcodec mpeg-4
+#            ':vbitrate=1200:' +             # Change lower/higher, bitrate
+#            'keyint=30 ' +                  # Keyframe every 10 secs, change?
+#            '-oac mp3lame -lameopts ' +     # Use Lame for MP3 encoding
+#            'br=128:cbr:mode=3 ' +          # MP3 const. bitrate, 128 kbit/s
+#            '-ffourcc divx ' +              # Force 'divx' ident, better compat.
+#            '-endpos %(seconds)s ' +        # only mencoder uses this so do it here.
+#            '-o %(filename)s.avi ')                   # Filled in by Freevo
+
+# XXX Not used yet
+# VCR_SETTINGS = '%s composite1 %s /dev/video0' % (CONF.tv, CONF.chanlist)
+
+# TV capture size for viewing and recording. Max 768x480 for NTSC,
+# 768x576 for PAL. Set lower if you have a slow computer!
+#
+# For the 'tvtime' TV viewing application, only the horizontal size is used.
+# Set the horizontal size to 400 or 480 if you have a slow (~500MHz) computer,
+# it still looks OK, and the picture will not be as jerky.
+# The vertical size is always either fullscreen or 480/576 (NTSC/PAL)
+# for tvtime.
+# TV_VIEW_SIZE = (640, 480)
+
+# XXX Not used yet
+# TV_REC_SIZE = (320, 240)   # Default for slower computers
+
+# Input formats for viewing and recording. The format affect viewing
+# and recording performance. It is specific to your hardware, so read
+# the MPlayer docs and experiment with mplayer to see which one fits
+# your computer best.
+# TV_VIEW_OUTFMT = 'yuy2'   # Better quality, slower on pure FB/X11
+# XXX Not used yet
+# TV_REC_OUTFMT = 'yuy2'
+
+
+#
+# Settings for ivtv based cards such as the WinTV PVR-250/350.
+#
+# XXX TODO: Add descriptions and valid settings for each option.
+# bitrate in bps
+# stream type
+# Options are: 0 (mpeg2_ps), 1 (mpeg2_ts), 2 (mpeg1), 3 (mpeg2_pes_av),
+#              5 (mpeg2_pes_v), 7 (mpeg2_pes_a), 10 (dvd)
+
+# IVTV_OPTIONS = {
+#     'input'         : 4,
+#     'resolution'    : '720x480',
+#     'aspect'        : 2,
+#     'audio_bitmask' : 233,
+#     'bframes'       : 3,
+#     'bitrate_mode'  : 1,
+#     'bitrate'       : 4000000,
+#     'bitrate_peak'  : 4000000,
+#     'dnr_mode'      : 0,
+#     'dnr_spatial'   : 0,
+#     'dnr_temporal'  : 0,
+#     'dnr_type'      : 0,
+#     'framerate'     : 0,
+#     'framespergop'  : 15,
+#     'gop_closure'   : 1,
+#     'pulldown'      : 0,
+#     'stream_type'   : 10,
+# }
+
+#
+# FREQUENCY_TABLE - This is only used when Freevo changes the channel natively.
+# This is only the case if you are using V4L2 and any of the following plugins:
+# timeshift, ivtv_record, ivtv_basic_tv.
+# For the standard frequancy tables see src/tv/freq.py.  To add your own just 
+# replace tuner_id in the following example with a valid tuner id (ie: '5' or
+# 'BBC1') and a frequency in KHz.  You may have as many entries as you like,
+# anything here will simply override a coresponding entry in your standard
+# frequency table and you can also have entries here that are not present i
+# there.
+
+# FREQUENCY_TABLE = {
+#     'tuner_id'   :    55250,
+# }
+
+
+#
+# TV Channels. This list contains a mapping from the displayed channel name
+# to the actual channel name as used by the TV watching application.
+# The display name must match the names from the XMLTV guide,
+# and the TV channel name must be what the tuner expects (usually a number).
+#
+# The TV menu is supposed to be supported by the XMLTV application for
+# up to date listings, but can be used without it to just display
+# the available channels.
+#
+# This list also determines the order in which the channels are displayed!
+# N.B.: You must delete the XMLTV cache file (e.g. /tmp/TV.xml.pickled)
+#       if you make changes here and restart!
+#
+# Format: [('xmltv channel id', 'freevo display name', 'tv channel name'), ...]
+#
+# If you want to generate a list of all the channels in the XMLTV guide in
+# this format you can run the following command:
+#    "freevo execute src/tv/epg_xmltv.py config"
+# You must have an XMLTV listing in /tmp/TV.xml before running it, and
+# TV_CHANNELS below must be set to None. The output contains guesses for the
+# displayed name and TV channel name. You can edit this list, delete lines,
+# reorder it, etc. For instance, put all your favorite channels first.
+# Don't forget to actually update TV_CHANNELS afterwards, it won't work
+# if it is set to None!
+#
+# All channels listed here will be displayed on the TV menu, even if they're
+# not present in the XMLTV listing.
+# 
+#
+# Timedependent channels:
+#
+# The TV_CHANNELS-list can look like this:
+#
+# TV_CHANNELS = [('21', 'SVT1',              'E5'),
+#                ('22', 'SVT2',              'E3'),
+#                ('26', 'TV3',               'E10'),
+#                ('27', 'TV4',               'E6'),
+#                ('10', 'Kanal 5',           'E7'),
+#                ('60', 'Fox Kids',          'E8', ('1234567','0600','1659')),
+#                ('16', 'TV6',               'E8', ('1234567','1700','2359'), 
+#                                                  ('1234567','0000','0300')),
+#                ('14', 'MTV Europe',        'E11') ]
+#
+# As you can see the list takes optional tuples:
+# ( 'DAYS', 'START','END')
+#
+# 1234567 in days means all days.
+# 12345 would mean monday to friday.
+#
+# It will display "Fox Kids" from 06:00 to 16:59 and "TV6" from 17:00 to 03:00. 
+# 03:00 to 06:00 it won't be displayed at all.
+#
+
+
+# ======================================================================
+# Builtin WWW server settings
+# ======================================================================
+
+# XXX THIS IS WORK IN PROGRESS! 
+#
+# To activate the build in web server, please activate the www plugin
+# in your local_conf.py:
+#
+# plugin.activate('www')
+
+#
+# Web server port number. 80 is the standard port, but is often
+# taken already by apache, and cannot be used unless the server
+# runs as root. Use port 8080 as the default, change to 80 if
+# needed.
+#
+# WWW_PORT = 8080
+
+#
+# Username / Password combinations to login to the web interface.
+# These should be overridden in local_conf.py
+# 
+# WWW_USERS = { "user1" : "changeme", 
+#            "optional" : "changeme2" }
+
+
+
