@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/03/13 09:23:46  dischi
+# fix doc
+#
 # Revision 1.17  2004/02/24 18:05:19  mikeruelle
 # make the info retreival a lot better
 #
@@ -76,7 +79,7 @@ from gui.AlertBox import PopupBox
 
 class PluginInterface(plugin.MimetypePlugin):
     """
-    Plugin to handle all kinds of audio items
+    Plugin to handle all kinds of games items
     """
     def __init__(self):
         plugin.MimetypePlugin.__init__(self)

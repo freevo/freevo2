@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/03/13 09:23:46  dischi
+# fix doc
+#
 # Revision 1.17  2004/01/18 16:51:48  dischi
 # (re)move unneeded variables
 #
@@ -81,7 +84,7 @@ from playlist import Playlist
 
 class PluginInterface(plugin.MimetypePlugin):
     """
-    Plugin to handle all kinds of audio items
+    Plugin to handle all kinds of image items
     """
     def __init__(self):
         plugin.MimetypePlugin.__init__(self)
