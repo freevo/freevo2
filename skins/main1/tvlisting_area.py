@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/06/22 08:42:55  gsbarbieri
+# fixed problem rendering text outside space when using arrow {left,right} indicators
+#
 # Revision 1.6  2003/06/21 10:19:03  dischi
 # small osd fix
 #
@@ -371,8 +374,10 @@ class TVListing_Area(Skin_Area):
                                                          (ig.height-rightarrow_size[1])/2))
 
                     if tx0 < tx1:
-                        self.write_text(prg.title, font, content, x=tx0+ig.x,
-                                        y=ty0+ig.y, width=ig.width, height=-1,
+                        pad_x0 = flag_right * rightarrow_size[0]
+                        pad_x1 = flag_left  * leftarrow_size[0]
+                        self.write_text(prg.title, font, content, x=tx0+ig.x + pad_x0,
+                                        y=ty0+ig.y, width=ig.width - pad_x0 - pad_x1, height=-1,
                                         align_v='center', align_h = val.align)
 
             i += 1
