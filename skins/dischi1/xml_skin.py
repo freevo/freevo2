@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2002/10/15 21:38:42  dischi
+# more cleanups
+#
 # Revision 1.6  2002/10/15 21:25:16  dischi
 # use copy.deepcopy instead of copy.copy. Saves lots of
 # if copy-content: xxx = copy.copy(xxx)
@@ -127,6 +130,8 @@ OSD_DEFAULT_FONT = 'skins/fonts/arialbd.ttf'
 
 
 
+# ======================================================================
+
 #
 # data structures
 #
@@ -135,26 +140,33 @@ OSD_DEFAULT_FONT = 'skins/fonts/arialbd.ttf'
 # This contains all the stuff a node can have, if it makes sence with
 # this special node or not
 class XML_data:
-    color = bgcolor = 0
-    x = y = 0
-    height = width = 0
-    size = length = 0
-    visible = 1
-    text = None
-    font = OSD_DEFAULT_FONT
-    mode=''
-    shadow_visible = 0
-    shadow_color = 0
-    shadow_pad_x = shadow_pad_y = 1
-    border_color = 0
-    border_size = 0
-    align = 'left'
-    valign = 'top'
-    image = ''
-    mask = ''
+    def __init__(self):
+        self.color = 0
+        self.bgcolor = 0
+        self.x = 0
+        self.y = 0
+        self.height = 0
+        self.width = 0
+        self.size = 0
+        self.length = 0
+        self.visible = 1
+        self.text = None
+        self.font = OSD_DEFAULT_FONT
+        self.mode=''
+        self.shadow_visible = 0
+        self.shadow_color = 0
+        self.shadow_pad_x = 1
+        self.shadow_pad_y = 1
+        self.border_color = 0
+        self.border_size = 0
+        self.align = 'left'
+        self.valign = 'top'
+        self.image = ''
+        self.mask = ''
     
 class XML_menuitem(XML_data):
     def __init__(self):
+        XML_data.__init__(self)
         self.selection = XML_data()
 
 class XML_menuitems:
@@ -187,32 +199,37 @@ class XML_mp3:
 
 class XML_popup(XML_data):
     def __init__(self):
+        XML_data.__init__(self)
         self.message = XML_data()    
 
 
 # compatibilty mode, remove later
 class XML_mainmenuitem:
-    name = ''
-    visible = 1
-    icon = ''
-    pos = 0
-    action = None
-    arg = None
+    def __init__(self):
+        self.name = ''
+        self.visible = 1
+        self.icon = ''
+        self.pos = 0
+        self.action = None
+        self.arg = None
 
 class XML_mainmenu:
-    items = {}
+    def __init__(self):
+        self.items = {}
 
 class XML_listingmenuitem(XML_menuitem):
-    head = XML_data()
-    expand = XML_data()
-    border_color = 0
-    border_size = 1
-    spacing = 2
-    channel_width = 100
-    left_arrow = None
-    right_arrow = None
-    up_arrow = None
-    down_arrow = None
+    def __init__(self):
+        XML_menuitem.__init__(self)
+        self.head = XML_data()
+        self.expand = XML_data()
+        self.border_color = 0
+        self.border_size = 1
+        self.spacing = 2
+        self.channel_width = 100
+        self.left_arrow = None
+        self.right_arrow = None
+        self.up_arrow = None
+        self.down_arrow = None
 
 class XML_extendedmenu:
     def __init__(self):
@@ -223,6 +240,88 @@ class XML_extendedmenu:
         self.info = XML_data()
         self.listing = XML_listingmenuitem()
 
+
+
+
+# ======================================================================
+
+#
+# Help functions
+#
+def attr_int(node, attr, default, scale=0.0):
+    try:
+        if node.attrs.has_key(('', attr)):
+            val = int(node.attrs[('', attr)])
+            if scale:
+                val = scale*val
+            return int(val)
+    except ValueError:
+        pass
+    return default
+
+def attr_float(node, attr, default):
+    try:
+        if node.attrs.has_key(('', attr)):
+            return float(node.attrs[('', attr)])
+    except ValueError:
+        pass
+    return default
+
+def attr_hex(node, attr, default):
+    try:
+        if node.attrs.has_key(('', attr)):
+            return long(node.attrs[('', attr)], 16)
+    except ValueError:
+        pass
+    return default
+
+def attr_bool(node, attr, default):
+    if node.attrs.has_key(('', attr)):
+        if node.attrs[('', attr)] == "yes":
+            return 1
+        elif node.attrs[('', attr)] == "no":
+            return 0
+    return default
+
+def attr_str(node, attr, default):
+    if node.attrs.has_key(('', attr)):
+        return node.attrs[('', attr)].encode('latin-1')
+    return default
+
+def attr_file(node, attr, default, c_dir):
+    if node.attrs.has_key(('', attr)):
+        file = node.attrs[('', attr)].encode('latin-1')
+        if file:
+            return os.path.join(c_dir, file)
+        return ""
+    return default
+
+def attr_font(node, attr, default):
+    if node.attrs.has_key(('', attr)):
+        fontext = os.path.splitext(node.attrs[('', attr)])[1]
+        if fontext:
+            # There is an extension (e.g. '.pfb'), use the full name
+            font = os.path.join(OSD_FONT_DIR,
+                                node.attrs[('', attr)]).encode('latin-1')
+        else:
+            # '.ttf' is the default extension
+            font = os.path.join(OSD_FONT_DIR, node.attrs[('', attr)] +
+                                '.ttf').encode('latin-1')
+            if not os.path.isfile(font):
+                font = os.path.join(OSD_FONT_DIR, node.attrs[('', attr)] +
+                                    '.TTF').encode('latin-1')
+        if not font:
+            print "can find font >%s<" % font
+            font = OSD_DEFAULT_FONT
+        return font
+    return default
+
+
+# ======================================================================
+
+#
+# Main XML skin class
+#
 class XMLSkin:
     def __init__(self):
         self.menu_default = XML_menu()
@@ -238,133 +337,61 @@ class XMLSkin:
 
         
     #
-    # Help functions
-    #
-    def attr_int(self, node, attr, default, scale=0.0):
-        try:
-            if node.attrs.has_key(('', attr)):
-                val = int(node.attrs[('', attr)])
-                if scale:
-                    val = scale*val
-                return int(val)
-        except ValueError:
-            pass
-        return default
-
-    def attr_float(self, node, attr, default):
-        try:
-            if node.attrs.has_key(('', attr)):
-                return float(node.attrs[('', attr)])
-        except ValueError:
-            pass
-        return default
-
-    def attr_hex(self, node, attr, default):
-        try:
-            if node.attrs.has_key(('', attr)):
-                return long(node.attrs[('', attr)], 16)
-        except ValueError:
-            pass
-        return default
-
-    def attr_bool(self, node, attr, default):
-        if node.attrs.has_key(('', attr)):
-            if node.attrs[('', attr)] == "yes":
-                return 1
-            elif node.attrs[('', attr)] == "no":
-                return 0
-        return default
-
-    def attr_str(self, node, attr, default):
-        if node.attrs.has_key(('', attr)):
-            return node.attrs[('', attr)].encode('latin-1')
-        return default
-
-    def attr_file(self, node, attr, default, c_dir):
-        if node.attrs.has_key(('', attr)):
-            file = node.attrs[('', attr)].encode('latin-1')
-            if file:
-                return os.path.join(c_dir, file)
-            return ""
-        return default
-
-    def attr_font(self, node, attr, default):
-        if node.attrs.has_key(('', attr)):
-            fontext = os.path.splitext(node.attrs[('', attr)])[1]
-            if fontext:
-                # There is an extension (e.g. '.pfb'), use the full name
-                font = os.path.join(OSD_FONT_DIR,
-                                    node.attrs[('', attr)]).encode('latin-1')
-            else:
-                # '.ttf' is the default extension
-                font = os.path.join(OSD_FONT_DIR, node.attrs[('', attr)] +
-                                    '.ttf').encode('latin-1')
-                if not os.path.isfile(font):
-                    font = os.path.join(OSD_FONT_DIR, node.attrs[('', attr)] +
-                                        '.TTF').encode('latin-1')
-            if not font:
-                print "can find font >%s<" % font
-                font = OSD_DEFAULT_FONT
-            return font
-        return default
-
-
-    #
     # parse one node
     #
     def parse_node(self, node, data, c_dir=''):
-        data.x = self.attr_int(node, "x", data.x, self.scale)
-        data.y = self.attr_int(node, "y", data.y, self.scale)
-        data.height = self.attr_int(node, "height", data.height, self.scale)
-        data.width = self.attr_int(node, "width", data.width, self.scale)
-        data.length = self.attr_int(node, "length", data.length, self.scale)
+        data.x = attr_int(node, "x", data.x, self.scale)
+        data.y = attr_int(node, "y", data.y, self.scale)
+        data.height = attr_int(node, "height", data.height, self.scale)
+        data.width = attr_int(node, "width", data.width, self.scale)
+        data.length = attr_int(node, "length", data.length, self.scale)
 
-        data.visible = self.attr_bool(node, "visible", data.visible)
-        data.bgcolor = self.attr_hex(node, "bgcolor", data.bgcolor)
-        data.color = self.attr_hex(node, "color", data.color) # will be overrided by font
-        data.border_color = self.attr_hex(node, "border_color", data.border_color)
-        data.border_size = self.attr_int(node, "border_size", data.border_size)
-        data.image = self.attr_file(node, "image", data.image, c_dir)
-        data.mask = self.attr_file(node, "mask", data.mask, c_dir)
+        data.visible = attr_bool(node, "visible", data.visible)
+        data.bgcolor = attr_hex(node, "bgcolor", data.bgcolor)
+        data.color = attr_hex(node, "color", data.color) # will be overrided by font
+        data.border_color = attr_hex(node, "border_color", data.border_color)
+        data.border_size = attr_int(node, "border_size", data.border_size)
+        data.image = attr_file(node, "image", data.image, c_dir)
+        data.mask = attr_file(node, "mask", data.mask, c_dir)
 
         for subnode in node.children:
             if subnode.name == u'font':
-                data.color = self.attr_hex(subnode, "color", data.color)
-                data.size = self.attr_int(subnode, "size", data.size, self.scale)
-                data.font = self.attr_font(subnode, "name", data.font)
-                data.align = self.attr_str(subnode, "align", data.align)
-                data.valign = self.attr_str(subnode, "valign", data.valign)
+                data.color = attr_hex(subnode, "color", data.color)
+                data.size = attr_int(subnode, "size", data.size, self.scale)
+                data.font = attr_font(subnode, "name", data.font)
+                data.align = attr_str(subnode, "align", data.align)
+                data.valign = attr_str(subnode, "valign", data.valign)
             if subnode.name == u'selection':
                 data.selection = copy.copy(data.selection)
                 self.parse_node(subnode, data.selection)
             if subnode.name == u'text':
                 data.text = subnode.textof()
             if subnode.name == u'shadow':
-                data.shadow_visible = self.attr_bool(subnode, "visible", data.shadow_visible)
-                data.shadow_color = self.attr_hex(subnode, "color", data.shadow_color)
-                data.shadow_pad_x = self.attr_int(subnode, "x", data.shadow_pad_x)
-                data.shadow_pad_y = self.attr_int(subnode, "y", data.shadow_pad_y)
+                data.shadow_visible = attr_bool(subnode, "visible", data.shadow_visible)
+                data.shadow_color = attr_hex(subnode, "color", data.shadow_color)
+                data.shadow_pad_x = attr_int(subnode, "x", data.shadow_pad_x)
+                data.shadow_pad_y = attr_int(subnode, "y", data.shadow_pad_y)
             if subnode.name == u'background':
-                data.bgcolor = self.attr_hex(subnode, "color", data.bgcolor)                
+                data.bgcolor = attr_hex(subnode, "color", data.bgcolor)                
             if subnode.name == u'geometry':
-                data.x = self.attr_int(subnode, "x", data.x, self.scale)
-                data.y = self.attr_int(subnode, "y", data.y, self.scale)
-                data.width = self.attr_int(subnode, "width", data.width, self.scale)
-                data.height = self.attr_int(subnode, "height", data.height, self.scale)
+                data.x = attr_int(subnode, "x", data.x, self.scale)
+                data.y = attr_int(subnode, "y", data.y, self.scale)
+                data.width = attr_int(subnode, "width", data.width, self.scale)
+                data.height = attr_int(subnode, "height", data.height, self.scale)
                 
 
     #
     # parse <items>
     #
     def parseItems(self, node, data):
-        data.x = self.attr_int(node, "x", data.x, self.scale)
-        data.y = self.attr_int(node, "y", data.y, self.scale)
-        data.height = self.attr_int(node, "height", data.height, self.scale)
-        data.width  = self.attr_int(node, "width", data.width, self.scale)
+        data.x = attr_int(node, "x", data.x, self.scale)
+        data.y = attr_int(node, "y", data.y, self.scale)
+        data.height = attr_int(node, "height", data.height, self.scale)
+        data.width  = attr_int(node, "width", data.width, self.scale)
 
         for subnode in node.children:
             if subnode.name == u'item':
-                type = self.attr_str(subnode, "type", "all")
+                type = attr_str(subnode, "type", "all")
 
                 if type == "all":
                     # default content, override all settings for pl and dir:
@@ -398,7 +425,7 @@ class XMLSkin:
                 
             elif node.name == u'covers':
                 for subnode in node.children:
-                    type = self.attr_str(subnode, "type", "")
+                    type = attr_str(subnode, "type", "")
 
                     if type == u'all':
                         self.parse_node(subnode, menu.cover_movie)
@@ -457,12 +484,12 @@ class XMLSkin:
     # parse one main menu node
     #
     def parse_mainmenunode(self, node, data):
-        data.name = self.attr_str(node, "name", data.name)
-        data.visible = self.attr_bool(node, "visible", data.visible)
-        data.icon = self.attr_str(node, "icon", data.icon)
-        data.pos = self.attr_int(node, "pos", data.pos)
-        data.action = self.attr_str(node,"action", data.action)
-        data.arg = self.attr_str(node,"arg", data.arg)
+        data.name = attr_str(node, "name", data.name)
+        data.visible = attr_bool(node, "visible", data.visible)
+        data.icon = attr_str(node, "icon", data.icon)
+        data.pos = attr_int(node, "pos", data.pos)
+        data.action = attr_str(node,"action", data.action)
+        data.arg = attr_str(node,"arg", data.arg)
 
     #
     # read the main menu
@@ -484,29 +511,29 @@ class XMLSkin:
             elif subnode.name == u'head':
                 self.parse_node(subnode, data.head)
             elif subnode.name == u'border':
-                data.border_size = self.attr_int(subnode,'size', data.border_size)
-                data.border_color = self.attr_hex(subnode,'color', data.border_color)
+                data.border_size = attr_int(subnode,'size', data.border_size)
+                data.border_color = attr_hex(subnode,'color', data.border_color)
             elif subnode.name == u'spacing':
-                data.spacing = self.attr_int(subnode,'value', data.spacing, self.scale)
+                data.spacing = attr_int(subnode,'value', data.spacing, self.scale)
             elif subnode.name == u'channel_width':
-                data.channel_width = self.attr_int(subnode,'value', data.channel_width, self.scale)
+                data.channel_width = attr_int(subnode,'value', data.channel_width, self.scale)
             elif subnode.name == u'indicator':
                 for sub_subnode in subnode.children:
                     if sub_subnode.name == u'left':
-                        data.left_arrow = self.attr_str(sub_subnode,'image', data.left_arrow)
+                        data.left_arrow = attr_str(sub_subnode,'image', data.left_arrow)
                     if sub_subnode.name == u'right':
-                        data.right_arrow = self.attr_str(sub_subnode,'image', data.right_arrow)
+                        data.right_arrow = attr_str(sub_subnode,'image', data.right_arrow)
                     if sub_subnode.name == u'down':
-                        data.down_arrow = self.attr_str(sub_subnode,'image', data.down_arrow)
+                        data.down_arrow = attr_str(sub_subnode,'image', data.down_arrow)
                     if sub_subnode.name == u'up':
-                        data.up_arrow = self.attr_str(sub_subnode,'image', data.up_arrow)
+                        data.up_arrow = attr_str(sub_subnode,'image', data.up_arrow)
                         
 
     #
     # read the skin informations for extendedmenu
     #
     def read_extendedmenu(self, file, menu_node, copy_content):
-        emn = self.attr_str(menu_node, "type", None)
+        emn = attr_str(menu_node, "type", None)
         if not emn:
             return
 
@@ -543,8 +570,8 @@ class XMLSkin:
             for freevo_type in box.children:
                 if freevo_type.name == 'skin':
 
-                    scale = self.attr_float(freevo_type, "scale", 0.0)
-                    include = self.attr_file(freevo_type, "include", "", \
+                    scale = attr_float(freevo_type, "scale", 0.0)
+                    include = attr_file(freevo_type, "include", "", \
                                              os.path.dirname(file))
                     if include:
                         self.scale = scale
@@ -554,7 +581,7 @@ class XMLSkin:
                     
                     for node in freevo_type.children:
                         if node.name == u'menu':
-                            type = self.attr_str(node, "type", "all")
+                            type = attr_str(node, "type", "all")
                             if type == "all":
                                 if copy_content:
                                     self.menu_default = copy.deepcopy(self.menu_default)
