@@ -20,7 +20,7 @@ import sys, os, time
 import util
 
 # XML support
-from xml.utils import qp_xml
+import movie_xml
 
 
 
@@ -124,40 +124,24 @@ else:
     else:
         print 'No overrides loaded'
 
+
+
 #
 # find movie informations
 #
-
-def XML_to_MOVIE_INFORMATIONS(file, info_struct):
-    try:
-        parser = qp_xml.Parser()
-        box = parser.parse(open(file).read())
-    except:
-        print "XML file %s corrupt" % file
-    else:
-        title = image = ""
-        id = []
-        for c in box.children:
-            if c.name == 'movie':
-                for node in c.children:
-                    if node.name == u'title':
-                        title = node.textof().encode('latin-1')
-                    if node.name == u'id':
-                        id += [node.textof()]
-                    elif node.name == u'cover' and \
-                         os.path.isfile(os.path.join(os.path.dirname(file),node.textof())):
-                        image = os.path.join(os.path.dirname(file), node.textof())
-            if title and id:
-                for i in id:
-                    info_struct += [(title, image, i)]
-
 
 MOVIE_INFORMATIONS = []
 
 for name,dir in DIR_MOVIES:
     for file in util.recursefolders(dir,1,'*.xml',1):
-        XML_to_MOVIE_INFORMATIONS(file, MOVIE_INFORMATIONS)
+        title, image, None, id, info = movie_xml.parse(file, os.path.dirname(file),[])
+        if title and id:
+            for i in id:
+                MOVIE_INFORMATIONS += [(title, image, i)]
 
 for file in util.recursefolders(MOVIE_DATA_DIR,1,'*.xml',1):
-    XML_to_MOVIE_INFORMATIONS(file, MOVIE_INFORMATIONS)
+    title, image, None, id, info = movie_xml.parse(file, os.path.dirname(file),[])
+    if title and id:
+        for i in id:
+            MOVIE_INFORMATIONS += [(title, image, i)]
 
