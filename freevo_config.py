@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.114  2003/02/06 09:54:47  krister
+# Disabled decss by default for the runtime mplayer.
+#
 # Revision 1.113  2003/02/04 13:10:16  dischi
 # o removed MPLAYER_AO_HWAC3_DEV (mplayer is good enough to find that out)
 #   and ENABLE_SHUTDOWN (it's not used anymore)
@@ -447,6 +450,21 @@ MPLAYER_ARGS_TVVIEW  = '-nocache'
 MPLAYER_ARGS_DVDNAV  = '-dvdnav'
 MPLAYER_USE_WID      = 1
 
+#
+# The runtime version of MPlayer/MEncoder are patched to disable DVD
+# protection override (a.k.a decss) by using the flag
+# "-nodvdprotection-override". This flag is used by default if the runtime version
+# of MPlayer is used to play DVDs, since it is illegal (TBC) to use it in some
+# countries. You can modify the program to use the protection override,
+# but only if you're 100% sure that it is legal in your jurisdiction!
+#
+if CONF.mplayer.find('runtime/apps/mplayer') != -1:
+    print
+    print 'WARNING: DVD protection override disabled! You will not be able to play'
+    print 'protected DVDs!'
+    print
+    MPLAYER_ARGS_DVD += ' -nodvdprotection-override'
+    
 # ======================================================================
 # XMMS section:
 # ======================================================================
