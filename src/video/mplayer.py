@@ -20,6 +20,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2003/04/26 20:55:44  dischi
+# Removed MPLAYER_ARGS_* and added a hash MPLAYER_ARGS to set args for
+# all different kinds of files. Also added MPLAYER_SOFTWARE_SCALER to use
+# the software scaler for fast CPUs. Also fixed a small bug in mplayer.py
+# for video.
+#
 # Revision 1.34  2003/04/20 15:54:32  dischi
 # do not stop on select
 #
@@ -198,26 +204,31 @@ class MPlayer:
                                                  config.MPLAYER_ARGS_DEF,
                                                  config.MPLAYER_AO_DEV)
 
-	# Forceidx is required for RealAudio/Video files
-	if (os.path.splitext(filename)[1] == '.rm'):
-	    mpl += ' -forceidx'
+        additional_args = ''
 
         if mode == 'file':
-            default_args = config.MPLAYER_ARGS_MPG
+            try:
+                mode = os.path.splitext(filename)[1]
+            except:
+                pass
+
         elif mode == 'dvdnav':
-            default_args = config.MPLAYER_ARGS_DVDNAV
-            default_args += ' -alang %s' % config.DVD_LANG_PREF
+            additional_args = '-alang %s' % config.DVD_LANG_PREF
+
         elif mode == 'vcd':
-            # Filename is VCD chapter
-            default_args = config.MPLAYER_ARGS_VCD % filename  
+            # Filename is VCD title
+            filename = 'vcd://%s' % filename  
+
         elif mode == 'dvd':
             # Filename is DVD title
-            default_args = config.MPLAYER_ARGS_DVD % filename  
-            default_args += ' -alang %s' % config.DVD_LANG_PREF
+            filename = 'dvd://%s' % filename  
+
+            additional_args = '-alang %s' % config.DVD_LANG_PREF
             if config.DVD_SUBTITLE_PREF:
                 # Only use if defined since it will always turn on subtitles
                 # if defined
-                default_args += ' -slang %s' % config.DVD_SUBTITLE_PREF
+                additional_args += ' -slang %s' % config.DVD_SUBTITLE_PREF
+
         else:
             print "Don't know what do play!"
             print "What is:      " + str(filename)
@@ -225,9 +236,21 @@ class MPlayer:
             print "What is:      " + mpl
             return 'Unknown media: %s' % os.path.basename(filename)
 
+        if not config.MPLAYER_ARGS.has_key(mode):
+            mode = 'default'
+
         # Mplayer command and standard arguments
-        mpl += (' ' + default_args + ' -v -vo ' + config.MPLAYER_VO_DEV + \
-                config.MPLAYER_VO_DEV_OPTS)
+        mpl += (' ' + config.MPLAYER_ARGS[mode] + ' ' + additional_args + \
+                ' -v -vo ' + config.MPLAYER_VO_DEV + config.MPLAYER_VO_DEV_OPTS)
+
+        if options:
+            mpl += (' ' + options)
+
+        # use software scaler?
+        if mpl.find(' -nosws ') > 0:
+            mpl = (mpl[:mpl.find(' -nosws ')] + mpl[mpl.find(' -nosws ')+7:])
+        elif mpl.find(' -framedrop ') == -1 and mpl.find(' -framedrop ') == -1:
+            mpl += (' ' + config.MPLAYER_SOFTWARE_SCALER )
             
         # XXX Some testcode by Krister:
         if (os.path.isfile('./freevo_xwin') and osd.sdl_driver == 'x11' and 
@@ -248,14 +271,7 @@ class MPlayer:
                     pass
 
 
-        if mode == 'file':
-            command = mpl + ' "' + filename + '"'
-        else:
-            command = mpl
-
-        if options:
-            print options
-            command += ' ' + options
+        command = mpl + ' "' + filename + '"'
 
         command=vop_append(command)
         
@@ -270,11 +286,11 @@ class MPlayer:
         if DEBUG:
             print 'MPlayer.play(): Starting thread, cmd=%s' % command
             
-        self.thread.mode    = 'play'
+        rc.app(self)
 
+        self.thread.mode    = 'play'
         self.thread.command = command
         self.thread.mode_flag.set()
-        rc.app(self)
         return None
     
 
@@ -625,7 +641,10 @@ class MPlayer_Thread(threading.Thread):
                         rc.post_event(rc.PLAY_END)
                     elif self.app.exit_type == "Quit":
                         rc.post_event(rc.USER_END)
-
+                    else:
+                        print 'error while playing file'
+                        rc.post_event(rc.PLAY_END)
+                        
                 # Ok, we can use the OSD again.
                 if osd.sdl_driver == 'dxr3' or config.CONF.display == 'dfbmga':
                     osd.restartdisplay()

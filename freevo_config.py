@@ -108,7 +108,7 @@ import plugin
 # is different, there will be only a warning
 
 FREEVO_CONF_VERSION = 1.0
-LOCAL_CONF_VERSION  = 3.1
+LOCAL_CONF_VERSION  = 3.2
 
 # Description of changes in each new version
 FREEVO_CONF_CHANGES = [] # None so far
@@ -134,7 +134,11 @@ LOCAL_CONF_CHANGES = [
      will be activated automaticly if setup.py found mame or snes'''),
     (3.1,
      '''Renamed TV_SHOW_IMAGE_DIR to TV_SHOW_DATA_DIR. This directory now can
-     also contain fxd files with gloabl informations and mplayer options''') ]
+     also contain fxd files with gloabl informations and mplayer options'''),
+    (3.2,
+     '''Removed MPLAYER_ARGS_* and added a hash MPLAYER_ARGS to set args for
+     all different kinds of files. Also added MPLAYER_SOFTWARE_SCALER to use
+     the software scaler for fast CPUs''')]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -587,13 +591,31 @@ else:
     MPLAYER_ARGS_DEF     = (('-ac mad, -autosync 100 -nolirc -autoq 100 -screenw %s '
                              + '-screenh %s -fs') % (CONF.width, CONF.height))
 
-MPLAYER_ARGS_DVD     = '-cache 8192 -dvd %s'
-MPLAYER_ARGS_VCD     = '-cache 4096 -vcd %s'
-MPLAYER_ARGS_MPG     = '-cache 5000 '
-MPLAYER_ARGS_TVVIEW  = '-nocache'
-MPLAYER_ARGS_DVDNAV  = '-dvdnav'
-MPLAYER_ARGS_AUDIOCD = '-cache 500 -cdda speed=1'
-MPLAYER_USE_WID      = 1
+
+#
+# Mplayer options to use the software scaler. If your CPU is fast enough, you
+# might try a software scaler. You can disable it later for some larger files
+# with the mplayer option '-nosws'. If you have -framedrop or -hardframedrop
+# as mplayer option, the software scaler will also not be used.
+# A good value for this variable is
+# MPLAYER_SOFTWARE_SCALER = '-xy %s -sws 2 -vop scale:-1:-1:-1:100' % CONF.width
+#
+MPLAYER_SOFTWARE_SCALER = ''
+
+#
+# Mplayer args for the different kinds of files. Possible values are dvd, vcd,
+# cd (audio cd), tv, all extentions and default if nothing matches
+#
+MPLAYER_ARGS = { 'dvd': '-cache 8192',
+                 'vcd': '-cache 4096',
+                 'cd' : '-cache 500 -cdda speed=1',
+                 'tv' : '-nocache',
+                 'avi': '-cache 5000 -idx',
+                 'rm' : '-cache 5000 -forceidx',
+                 'default': '-cache 5000'
+                 }
+
+MPLAYER_USE_WID = 1
 
 #
 # The runtime version of MPlayer/MEncoder are patched to disable DVD

@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/04/26 20:55:44  dischi
+# Removed MPLAYER_ARGS_* and added a hash MPLAYER_ARGS to set args for
+# all different kinds of files. Also added MPLAYER_SOFTWARE_SCALER to use
+# the software scaler for fast CPUs. Also fixed a small bug in mplayer.py
+# for video.
+#
 # Revision 1.2  2003/04/24 11:51:46  dischi
 # removed debug
 #
@@ -161,7 +167,11 @@ class MPlayer:
             
             # Build the MPlayer command
             args = (config.MPLAYER_NICE, config.MPLAYER_CMD, config.MPLAYER_VO_DEV,
-                    config.MPLAYER_VO_DEV_OPTS, tvcmd, config.MPLAYER_ARGS_TVVIEW)
+                    config.MPLAYER_VO_DEV_OPTS, tvcmd)
+
+            if config.MPLAYER_ARGS.has_key('tv'):
+                args += (' ' + config.MPLAYER_ARGS['tv'])
+
             mpl = '--prio=%s %s -vo %s%s -fs %s %s -slave' % args
 
         elif mode == 'vcr':
