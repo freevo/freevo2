@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/11/20 18:22:59  dischi
+# use python logger module for debug
+#
 # Revision 1.15  2004/10/08 20:18:17  dischi
 # new eventhandler <-> plugin interface
 #
@@ -91,6 +94,9 @@ import config
 import plugin
 
 from event import *
+
+import logging
+log = logging.getLogger()
 
 GENERIC_HANDLER = 'GENERIC_HANDLER'
 EVENT_LISTENER  = 'EVENT_LISTENER'
@@ -338,7 +344,7 @@ class Eventhandler:
             event = self.queue[0]
             del self.queue[0]
         
-        _debug_('handling event %s' % str(event), 2)
+        log.debug('handling event %s' % str(event))
         
         for p in self.registered[EVENT_LISTENER]:
             p.eventhandler(event=event)
@@ -387,8 +393,8 @@ class Eventhandler:
                         break
                 else:
                     # nothing found for this event
-                    _debug_('no eventhandler for event %s (app: %s)' \
-                            % (event, self.applications[-1]), 2)
+                    log.debug( 'no eventhandler for event %s (app: %s)' \
+                               % (event, self.applications[-1]))
 
             # now do some checking if the focus needs to be changed
             if self.stack_change:

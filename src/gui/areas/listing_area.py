@@ -51,6 +51,9 @@ from util.objectcache import ObjectCache
 from area import Area
 from gui import Image
 
+import logging
+log = logging.getLogger('gui')
+
 class ListingArea(Area):
     """
     This class defines the ListingArea to draw menu listings for the area
@@ -104,7 +107,7 @@ class ListingArea(Area):
         Helper function for the table-mode. This function will check if there
         is an image for this string and will return it.
         """
-        l = string.split('_')
+        l = string.split('_') # FIXME: l is not a good name in monofonts
         if len(l) != 4:
             return string
         try:
@@ -127,7 +130,7 @@ class ListingArea(Area):
                 return x_mod, image
 
         except KeyError:
-            _debug_('no image %s' % l[2])
+            log.info('no image %s' % l[2])
             pass
 
         mod_x = width - font.stringsize(l[3])
@@ -221,7 +224,7 @@ class ListingArea(Area):
 
 
         else:
-            _debug_('unknown content type %s' % content.type, 0)
+            log.warning('unknown content type %s' % content.type)
             return None
 
         # shrink width for text menus
@@ -692,4 +695,4 @@ class ListingArea(Area):
                     i = self.drawimage(i, v)
                     self.arrows.append(i)
             except Exception, e:
-                _debug_(e, 0)
+                log.error(e)

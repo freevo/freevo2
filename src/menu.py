@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.111  2004/11/20 18:22:59  dischi
+# use python logger module for debug
+#
 # Revision 1.110  2004/11/01 20:14:14  dischi
 # fix debug
 #
@@ -60,7 +63,8 @@ from event import *
 from item import Item
 from application import Application
 
-
+import logging
+log = logging.getLogger()
 
 class MenuItem(Item):
     """
@@ -562,7 +566,7 @@ class MenuWidget(Application):
             
 
         if event == MENU_CALL_ITEM_ACTION:
-            _debug_('calling action %s' % event.arg)
+            log.info('calling action %s' % event.arg)
 
             for a in menu.selected.actions():
                 if not isinstance(a, Item) and len(a) > 2 and a[2] == event.arg:
@@ -579,7 +583,7 @@ class MenuWidget(Application):
                     if not isinstance(a, MenuItem) and len(a) > 2 and a[2] == event.arg:
                         a[0](arg=None, menuw=self)
                         return True
-            _debug_('action %s not found' % event.arg)
+            log.info('action %s not found' % event.arg)
 
                     
         if event == MENU_CHANGE_STYLE and len(self.menustack) > 1:

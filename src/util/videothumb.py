@@ -48,6 +48,9 @@ from stat import *
 
 _runqueue = []
 
+import logging
+log = logging.getLogger()
+
 # do not import freevo stuff when running this file
 if __name__ != "__main__":
     import childapp
@@ -111,9 +114,9 @@ if __name__ != "__main__":
                     else:
                         image.save(imagefile)
                 except (OSError, IOError), e:
-                    _debug_(e, 0)
+                    log.exception('saving image')
             else:
-                _debug_('no imagefile found', 0)
+                log.warning('no imagefile found')
             if _runqueue:
                 MplayerThumbnail(*_runqueue[0])
             

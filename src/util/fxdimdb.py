@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/11/20 18:23:04  dischi
+# use python logger module for debug
+#
 # Revision 1.8  2004/11/01 20:12:45  dischi
 # fix debug
 #
@@ -64,6 +67,9 @@ import util
 
 from mmpython.disc.discinfo import cdrom_disc_id
 #Constants
+
+import logging
+log = logging.getLogger()
 
 freevo_version = '1.3.4'
 
@@ -700,7 +706,7 @@ class FxdImdb:
         try:
             r = urllib2.urlopen(req)
         except urllib2.HTTPError, error:
-            _debug_(error, 0)
+            log.error(error)
             return (self.title, self.info, self.image_urls)
 
         data = r.read().replace('</a>', '\n').replace('</A>', '\n')
@@ -744,7 +750,7 @@ class FxdImdb:
             except:
                 pass
         if not self.image_url:
-            _debug_('Image dowloading failed', 0)
+            log.error('Image dowloading failed')
             return
         
         self.image = (self.fxdfile + '.jpg')

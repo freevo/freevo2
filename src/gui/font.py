@@ -1,6 +1,8 @@
 import mevas
 import config
 
+import logging
+log = logging.getLogger('gui')
 
 font_warning = []
 
@@ -27,16 +29,16 @@ class Font:
         
 
     def __getfont__(self, name, ptsize):
-        _debug_('Loading font "%s:%s"' % (name, ptsize), 2)
+        log.debug('Loading font "%s:%s"' % (name, ptsize))
         try:
             return mevas.imagelib.load_font(name, ptsize)
         except IOError:
-            _debug_('Couldn\'t load font "%s"' % name, 2)
+            log.debug('Couldn\'t load font "%s"' % name)
 
             # Ok, see if there is an alternate font to use
             if name in config.OSD_FONT_ALIASES:
                 alt_fname = config.OSD_FONT_ALIASES[name]
-                _debug_('trying alternate: %s' % alt_fname, 2)
+                log.debug('trying alternate: %s' % alt_fname)
                 try:
                     return mevas.imagelib.load_font(alt_fname, ptsize)
                 except IOError:

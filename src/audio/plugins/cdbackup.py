@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2004/11/20 18:23:00  dischi
+# use python logger module for debug
+#
 # Revision 1.40  2004/10/29 18:15:56  dischi
 # move some misc utils here (only needed here)
 #
@@ -99,6 +102,10 @@ from event import *
 
 # Included to be able to access the info for Audio CDs
 import mmpython
+
+import logging
+log = logging.getLogger('audio')
+
 
 class PluginInterface(plugin.ItemPlugin):
     """
@@ -212,12 +219,12 @@ class PluginInterface(plugin.ItemPlugin):
                              ( self.stop_ripping, _( 'Stop CD ripping') ) ]
                 else:
                     self.device = self.item.devicename
-                    _debug_('devicename = %s' %self.device)
+                    log.info('devicename = %s' % self.device )
                     return [ ( self.create_backup_menu,
                                _('Rip the CD to the hard drive'),
                                _('Get CDs available for ripping')) ]
         except:
-            _debug_( _( 'ERROR' ) + ': ' + _( 'Item is not an Audio CD' ) )
+            log.error( 'Item is not an Audio CD' ))
         return []
 
 
@@ -402,14 +409,14 @@ class main_backup_thread(threading.Thread):
         try:
             os.makedirs(pathname, 0777)
         except:
-            _debug_(_( 'Directory %s already exists' ) % pathname)
+            log.warning( 'Directory %s already exists' % pathname)
 
         try:
 	    mycoverart = '%s/mmpython/disc/%s.jpg' % (config.FREEVO_CACHEDIR, discid)
 	    if os.path.isfile(mycoverart):
 	        shutil.copy(mycoverart, os.path.join(pathname,'cover.jpg'))
 	except:
-            _debug_('can not copy over cover art')
+            log.warning('can not copy over cover art')
 
         self.output_directory = pathname
         cdparanoia_command = []
@@ -466,7 +473,7 @@ class main_backup_thread(threading.Thread):
             cdparanoia_command = str('%s -s %s' % (config.CDPAR_CMD, str(i+1))).split(' ')+\
                                  [ wav_file ]
 
-            _debug_('cdparanoia:  %s' % cdparanoia_command)
+            log.info('cdparanoia:  %s' % cdparanoia_command )
 
             # Have the OS execute the CD Paranoia rip command
             run(cdparanoia_command, self, 9)
@@ -486,7 +493,7 @@ class main_backup_thread(threading.Thread):
                 cmd = str('%s --nohist -h %s' % (config.LAME_CMD, config.CD_RIP_LAME_OPTS))
                 cmd = cmd.split(' ') + [ wav_file, output ]
 
-                _debug_('lame: %s' % cmd)
+                log.info('lame: %s' % cmd)
                 run(cmd, self, 9)
 
                 try:
@@ -509,7 +516,7 @@ class main_backup_thread(threading.Thread):
                       [ '-a', artist, '-G', genre, '-N', track, '-t', song_names[i],
                         '-l', album, wav_file, '-o', output ]
 
-                _debug_('oggenc_command: %s' % cmd)
+                log.info('oggenc_command: %s' % cmd)
                 run(cmd, self, 9)
 
 
@@ -525,8 +532,8 @@ class main_backup_thread(threading.Thread):
                     '"%s%s.flac"' % (artist, album, song_names[i], track,
                                      len(song_names), pathname, path_tail)
 
-                _debug_('flac_command: %s' % (config.FLAC_CMD))
-                _debug_('metaflac    : %s' % (metaflac_command))
+                log.info('flac_command: %s' % (config.FLAC_CMD))
+                log.info('metaflac    : %s' % (metaflac_command))
                 run(cmd, self, 9)
 
                 if not self.abort:
@@ -567,7 +574,7 @@ class main_backup_thread(threading.Thread):
         # So that subsequent CDs with no CDDB data found don't overwrite each other.
         if ((cd_info.title == None) and (cd_info.artist == None)):
 
-            _debug_( _( 'WARNING' ) + ': ' + _( 'No CDDB data available to mmpython' ) ,2)
+            log.warning( 'No CDDB data available to mmpython' )
             current_time = time.strftime('%d-%b-%y-%I:%M%P')
 
             artist = _( 'Unknown Artist' ) + ' ' + current_time + ' - ' + _( 'RENAME' )
@@ -640,7 +647,7 @@ class main_backup_thread(threading.Thread):
                 else:
                     (new_string, num) = re.subn(pattern, repl, new_string, count=0)
             except:
-                _debug_( _( 'ERROR' ) + ': ' + _( 'Problem trying to call:' ) + ' re.subn' )
+                log.error( 'Problem trying to call: re.subn' )
         return new_string
 
     def fix_case(self, string):

@@ -57,6 +57,9 @@ from event import Event, THEME_CHANGE
 # gui imports
 import font
 
+import logging
+log = logging.getLogger('gui')
+
 # Internal fxd file version
 FXD_FORMAT_VERSION = 2
 
@@ -89,7 +92,7 @@ def set_theme(new):
     if isinstance(new, str):
         # new theme is only a string, load the theme file
         # based on the current theme
-        _debug_('loading new theme %s', new)
+        log.info('loading new theme %s', new)
         filename = new
         if new and vfs.isfile(vfs.join(new, 'folder.fxd')):
             new = vfs.abspath(os.path.join(new, 'folder.fxd'))
@@ -100,7 +103,7 @@ def set_theme(new):
             theme.load(new)
             theme.prepare()
         except:
-            _debug_('XML file corrupt:', 0)
+            log.error('XML file corrupt:')
             traceback.print_exc()
             theme = copy.copy(current_theme)
         theme.filename = new
@@ -1106,7 +1109,7 @@ class FXDSettings:
 
 
     def prepare(self):
-        _debug_('preparing skin settings')
+        log.info('preparing skin settings')
 
         self.prepared = True
         self.sets     = copy.deepcopy(self._sets)
@@ -1288,7 +1291,7 @@ def set_base_fxd(name):
     Set the basic skin fxd file and store it
     """
     config.SKIN_XML_FILE = os.path.splitext(os.path.basename(name))[0]
-    _debug_('load basic skin settings: %s' % config.SKIN_XML_FILE)
+    log.info('load basic skin settings: %s' % config.SKIN_XML_FILE)
 
     try:
         # try to load the new skin
@@ -1298,7 +1301,7 @@ def set_base_fxd(name):
         # default skin (basic.fxd). This skin works
         # (if not, Freevo is broken)
         traceback.print_exc()
-        _debug_('XML file %s corrupt, using default skin' % name, 0)
+        log.error('XML file %s corrupt, using default skin' % name)
         settings = FXDSettings('basic.fxd')
 
     # search for personal skin settings additions
@@ -1306,7 +1309,7 @@ def set_base_fxd(name):
     for dir in config.cfgfilepath:
         local_skin = '%s/local_skin.fxd' % dir
         if os.path.isfile(local_skin):
-            _debug_('Skin: Add local config %s to skin' % local_skin,2)
+            log.debug('add local config %s to skin' % local_skin)
             settings.load(local_skin)
             break
 
@@ -1329,7 +1332,7 @@ def init_module():
         if not config.SKIN_XML_FILE:
             config.SKIN_XML_FILE = storage['SKIN_XML_FILE']
         else:
-            _debug_('skin forced to %s' % config.SKIN_XML_FILE, 2)
+            log.debug('skin forced to %s' % config.SKIN_XML_FILE)
     else:
         if not config.SKIN_XML_FILE:
             config.SKIN_XML_FILE = config.SKIN_DEFAULT_XML_FILE

@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2004/11/20 18:23:00  dischi
+# use python logger module for debug
+#
 # Revision 1.36  2004/10/02 11:44:09  dischi
 # reactivate plugin
 #
@@ -81,6 +84,9 @@ from xml.dom import minidom # ParseError used by amazon module
 from gui import PopupBox, AlertBox
 
 from util import amazon
+
+import logging
+log = logging.getLogger('audio')
 
 
 class PluginInterface(plugin.ItemPlugin):
@@ -156,11 +162,11 @@ class PluginInterface(plugin.ItemPlugin):
                                _( 'Find a cover for this music' ),
                                'imdb_search_or_cover_search') ]
                 else:
-                    _debug_('no artist or album')
+                    log.info('no artist or album')
             except KeyError:
-                _debug_('no artist or album')
+                log.warning('no artist or album')
             except AttributeError:
-                _debug_('unknown disc')
+                log.warning('unknown disc')
         return []
 
 

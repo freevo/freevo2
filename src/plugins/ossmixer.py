@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/11/20 18:23:03  dischi
+# use python logger module for debug
+#
 # Revision 1.11  2004/11/01 20:15:40  dischi
 # fix debug
 #
@@ -72,6 +75,8 @@ from event import *
 
 import ossaudiodev
 
+import logging
+log = logging.getLogger()
 
 class PluginInterface(plugin.DaemonPlugin):
     SOUND_MIXER_LINE = 7
@@ -89,7 +94,7 @@ class PluginInterface(plugin.DaemonPlugin):
             try:
                 self.mixfd = ossaudiodev.openmixer() #open(config.DEV_MIXER, 'r')
             except IOError:
-                _debug_('Couldn\'t open mixer %s' % config.DEV_MIXER, 0)
+                log.error('Couldn\'t open mixer %s' % config.DEV_MIXER)
                 return
 
         if 0:
@@ -111,7 +116,7 @@ class PluginInterface(plugin.DaemonPlugin):
                 self.setMainVolume(config.MAX_VOLUME)
                 self.setOgainVolume(config.MAX_VOLUME)
         else:
-            _debug_("No appropriate audio channel found for mixer")
+            log.warning("No appropriate audio channel found for mixer")
 
         if config.CONTROL_ALL_AUDIO:
             self.setLineinVolume(0)

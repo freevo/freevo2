@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.70  2004/11/20 18:23:03  dischi
+# use python logger module for debug
+#
 # Revision 1.69  2004/11/01 20:15:40  dischi
 # fix debug
 #
@@ -71,6 +74,9 @@ from struct import *
 import array
 
 import eventhandler
+
+import logging
+log = logging.getLogger()
 
 try:
     from CDROM import *
@@ -151,7 +157,7 @@ def shutdown():
     """
     global im_thread
     if im_thread.isAlive():
-        _debug_('stopping Identify_Thread', 2)
+        log.debug('stopping Identify_Thread')
         im_thread.stop = True
         while im_thread.isAlive():
             time.sleep(0.1)
@@ -316,7 +322,7 @@ class RemovableMedia:
                 dir = 'open'
 
         if dir == 'open':
-            _debug_('Ejecting disc in drive %s' % self.drivename,2)
+            log.debug('Ejecting disc in drive %s' % self.drivename)
 
             if notify:
                 pop = PopupBox(text=_('Ejecting disc in drive %s') % self.drivename) 
@@ -331,7 +337,7 @@ class RemovableMedia:
                 os.close(fd)
             except Exception, e:
                 try:
-                    _debug_(String(e), 0)
+                    log.error(e)
                     traceback.print_exc()
                 except IOError:
                     # believe it or not, this sometimes causes an IOError if
@@ -350,7 +356,7 @@ class RemovableMedia:
 
         
         elif dir == 'close':
-            _debug_('Inserting %s' % self.drivename,2)
+            log.debug('Inserting %s' % self.drivename)
 
             if notify:
                 pop = PopupBox(text=_('Reading disc in drive %s') % self.drivename)
@@ -366,7 +372,7 @@ class RemovableMedia:
                     s = ioctl(fd, CDROMCLOSETRAY)
                 os.close(fd)
             except Exception, e:
-                _debug_(String(e), 0)
+                log.error(e)
                 traceback.print_exc()
                 # maybe we need to close the fd if ioctl fails, maybe
                 # open fails and there is no fd
@@ -387,7 +393,7 @@ class RemovableMedia:
         """
         Mount the media
         """
-        _debug_('Mounting disc in drive %s' % self.drivename, 2)
+        log.debug('Mounting disc in drive %s' % self.drivename)
         util.mount(self.mountdir, force=True)
         return
 
@@ -396,7 +402,7 @@ class RemovableMedia:
         """
         Mount the media
         """
-        _debug_('Unmounting disc in drive %s' % self.drivename, 2)
+        log.debug('Unmounting disc in drive %s' % self.drivename)
         util.umount(self.mountdir)
         return
 
@@ -565,9 +571,9 @@ class Identify_Thread(threading.Thread):
         if os.path.isdir(os.path.join(media.mountdir, 'VIDEO_TS')) or \
                os.path.isdir(os.path.join(media.mountdir, 'video_ts')):
             if force_rebuild:
-                _debug_('Double check without success')
+                log.info('Double check without success')
             else:
-                _debug_('Undetected DVD, checking again')
+                log.info('Undetected DVD, checking again')
                 media.drive_status = CDS_NO_DISC
                 util.umount(media.mountdir)
                 return self.identify(media, True)
@@ -579,7 +585,7 @@ class Identify_Thread(threading.Thread):
 
         video_files = util.match_files(media.mountdir, config.VIDEO_SUFFIX)
         
-        _debug_('identifymedia: mplayer = "%s"' % video_files, level = 2)
+        log.debug('identifymedia: mplayer = "%s"' % video_files)
             
         media.item = DirItem(media.mountdir, None, create_metainfo=False)
         media.item.info = disc_info
@@ -729,8 +735,8 @@ class Identify_Thread(threading.Thread):
             self.identify(media)
 
             if last_status != media.drive_status:
-                _debug_('MEDIA: Status=%s' % media.drive_status,2)
-                _debug_('Posting IDENTIFY_MEDIA event',2)
+                log.debug('MEDIA: Status=%s' % media.drive_status)
+                log.debug('Posting IDENTIFY_MEDIA event')
                 if last_status == None:
                     eventhandler.post(plugin.event('IDENTIFY_MEDIA', arg=(media, True)))
                 else:

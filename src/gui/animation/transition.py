@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/11/20 18:23:01  dischi
+# use python logger module for debug
+#
 # Revision 1.7  2004/08/27 14:15:25  dischi
 # split animations into different files
 #
@@ -38,6 +41,9 @@ import random
 from move import *
 from fade import *
 import render
+
+import logging
+log = logging.getLogger('gui')
 
 __all__ = [ 'RANDOM', 'ALPHA_BLENDING', 'VERTICAL_WIPE', 'HORIZONAL_WIPE',
             'ALPHA_VERTICAL_WIPE', 'ALPHA_HORIZONAL_WIPE', 'Transition' ]
@@ -108,7 +114,7 @@ class Transition:
                                            frames, width, fps))
 
         else:
-            _debug_('Error: unsupported transition mode %s' % mode, 0)
+            log.error('unsupported transition mode %s' % mode)
 
 
     def start(self):

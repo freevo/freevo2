@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.85  2004/11/20 18:22:59  dischi
+# use python logger module for debug
+#
 # Revision 1.84  2004/11/13 15:56:12  dischi
 # do not import mediainfo in util.__init__
 #
@@ -83,6 +86,9 @@ from sysconfig import Unicode
 from util import vfs
 import util.mediainfo as mediainfo
 
+import logging
+log = logging.getLogger()
+
 class FileInformation:
     """
     file operations for an item
@@ -148,7 +154,7 @@ class FileInformation:
                 try:
                     os.unlink(f)
                 except:
-                    _debug_('can\'t delete %s' % f, 0)
+                    log.error('can\'t delete %s' % f)
         
                 
 
@@ -228,8 +234,8 @@ class Item:
             if key == var:
                 if val == value:
                     if not self.delete_info(key):
-                        _debug_(u'unable to store info for \'%s\'' % \
-                                self.name, 0)
+                        log.warning( u'unable to store info for \'%s\'' % \
+                                     self.name )
                 else:
                     self.store_info(key, value)
                 return
@@ -242,9 +248,9 @@ class Item:
         """
         if isinstance(self.info, mediainfo.Info):
             if not self.info.store(key, value):
-                _debug_(u'unable to store info for \'%s\'' % self.name, 0)
+                log.warning( u'unable to store info for \'%s\'' % self.name)
         else:
-            _debug_(u'unable to store info for item \'%s\'' % self.name, 0)
+            log.warning( u'unable to store info for item \'%s\'' % self.name)
 
 
     def delete_info(self, key):
@@ -254,7 +260,7 @@ class Item:
         if isinstance(self.info, mediainfo.Info):
             return self.info.delete(key)
         else:
-            _debug_('unable to delete info for that kind of item', 0)
+            log.warning('unable to delete info for that kind of item')
 
         
     def id(self):

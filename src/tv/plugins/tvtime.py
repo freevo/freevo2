@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2004/11/20 18:23:04  dischi
+# use python logger module for debug
+#
 # Revision 1.42  2004/10/06 19:01:33  dischi
 # use new childapp interface
 #
@@ -80,6 +83,9 @@ from tv.channels import FreevoChannels
 import plugin
 import eventhandler
 
+import logging
+log = logging.getLogger('tv')
+
 # Set to 1 for debug output
 DEBUG = config.DEBUG
 
@@ -114,9 +120,9 @@ class PluginInterface(plugin.Plugin):
         if data:
             data = re.search( "^(tvtime: )?Running tvtime (?P<major>\d+).(?P<minor>\d+).(?P<version>\d+).", data )
             if data:
-                _debug_("major is: %s" % data.group( "major" ))
-                _debug_("minor is: %s" % data.group( "minor" ))
-                _debug_("version is: %s" % data.group( "version" ))
+                log.info("major is: %s" % data.group( "major" ))
+                log.info("minor is: %s" % data.group( "minor" ))
+                log.info("version is: %s" % data.group( "version" ))
                 major = int(data.group( "major" ))
                 minor = int(data.group( "minor" ))
                 ver = int(data.group( "version" ))
@@ -154,7 +160,7 @@ class PluginInterface(plugin.Plugin):
             return 1
 
         if not os.path.isfile(self.tvtimecache):
-            _debug_('no cache file')
+            log.info('no cache file')
             return 1
 
         (cachelconf, cachelconf_t, cachefconf_t) = self.readMtimeCache()
@@ -164,15 +170,15 @@ class PluginInterface(plugin.Plugin):
         cachefconf_t = cachefconf_t.rstrip()
 
         if not (cachelconf == self.mylocalconf): 
-            _debug_('local_conf changed places')
+            log.info('local_conf changed places')
             return 1
 
         if (long(self.mylocalconf_t) > long(cachelconf_t)):
-            _debug_('local_conf modified')
+            log.info('local_conf modified')
             return 1
 
         if (long(self.myfconfig_t) > long(cachefconf_t)):
-            _debug_('fconfig modified')
+            log.info('fconfig modified')
             return 1
 
 	return 0
@@ -223,7 +229,7 @@ class PluginInterface(plugin.Plugin):
             self.writeNewStationListXML(tvtimefile, tvnorm, norm)
 
     def mergeStationListXML(self, tvtimefile, tvnorm, norm):
-        _debug_("merging stationlist.xml")
+        log.info("merging stationlist.xml")
         try:
             os.rename(tvtimefile,tvtimefile+'.bak')
         except OSError:
@@ -295,7 +301,7 @@ class PluginInterface(plugin.Plugin):
 
 
     def writeNewStationListXML(self, tvtimefile, tvnorm, norm):
-        _debug_("writing new stationlist.xml")
+        log.info("writing new stationlist.xml")
         fp = open(tvtimefile,'wb')
         fp.write('<?xml version="1.0"?>\n')
         fp.write('<!DOCTYPE stationlist PUBLIC "-//tvtime//DTD stationlist 1.0//EN" "http://tvtime.sourceforge.net/DTD/stationlist1.dtd">\n')
@@ -333,17 +339,17 @@ class PluginInterface(plugin.Plugin):
 	channel = str(channel)
        
         if config.FREQUENCY_TABLE.has_key(channel):
-            _debug_("have a custom")
+            log.info("have a custom")
             return "Custom"
         elif (re.search('^\d+$', channel)):
-            _debug_("have number")
+            log.info("have number")
 	    if self.chanlists.has_key(config.CONF.chanlist):
-                _debug_("found chanlist in our list")
+                log.debug("found chanlist in our list")
 	        return self.chanlists[config.CONF.chanlist]
 	elif self.chans2band.has_key(channel):
-            _debug_("We know this channels band.")
+            log.debug("We know this channels band.")
             return self.chans2band[channel]
-        _debug_("defaulting to USCABLE")
+        log.info("defaulting to USCABLE")
         return "US Cable"
 
     def createChannelsLookupTables(self):
@@ -436,7 +442,7 @@ class TVTime:
             else:
 	        mychan = self.fc.chan_index
 
-            _debug_('starting channel is %s' % mychan)
+            log.info('starting channel is %s' % mychan)
 
             command = '%s -D %s -k -I %s -n %s -d %s -f %s -c %s -i %s' % (config.TVTIME_CMD,
                                                                    outputplugin,
@@ -506,7 +512,7 @@ class TVTime:
         eventhandler.remove(self)
 
     def eventhandler(self, event, menuw=None):
-        _debug_('%s: %s app got %s event' % (time.time(), self.mode, event))
+        log.info('%s: %s app got %s event' % (time.time(), self.mode, event))
         if event == em.STOP or event == em.PLAY_END:
             self.Stop()
             eventhandler.post(em.PLAY_END)
@@ -521,7 +527,7 @@ class TVTime:
             elif event == em.TV_CHANNEL_DOWN:
                 nextchan = self.fc.getPrevChannel()
             nextvg = self.fc.getVideoGroup(nextchan)
-            _debug_("nextchan is %s" % nextchan)
+            log.info("nextchan is %s" % nextchan)
 
             # XXX hazardous to your health. don't use tvtime with anything
             # other than one normal video_group.

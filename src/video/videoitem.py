@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.153  2004/11/20 18:23:05  dischi
+# use python logger module for debug
+#
 # Revision 1.152  2004/11/13 15:54:12  dischi
 # small bugfix
 #
@@ -84,6 +87,8 @@ from event import *
 
 from database import tv_show_informations, discset_informations
 
+import logging
+log = logging.getLogger('video')
 
 class VideoItem(MediaItem):
     def __init__(self, url, parent, info=None, parse=True):
@@ -621,7 +626,7 @@ class VideoItem(MediaItem):
                 self._set_next_available_subitem()
                 # Loop until we find a subitem which plays without error
                 while self.current_subitem: 
-                    _debug_('playing next item')
+                    log.info('playing next item')
                     error = self.current_subitem.play()
                     if error:
                         self.last_error_msg = error

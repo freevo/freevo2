@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.72  2004/11/20 18:23:02  dischi
+# use python logger module for debug
+#
 # Revision 1.71  2004/10/06 19:24:01  dischi
 # switch from rc.py to pyNotifier
 #
@@ -73,6 +76,8 @@ from gui.animation import *
 from event import *
 from application import Application
 
+import logging
+log = logging.getLogger('image')
 
 _singleton = None
 
@@ -179,7 +184,7 @@ class ImageViewer(Application):
                 gui.display.update()
                 return
             if self.zoom and zoom:
-                _debug_('FIXME: do not create the complete image again')
+                log.info('FIXME: do not create the complete image again')
 
         self.filename = filename
         self.rotation = rotation

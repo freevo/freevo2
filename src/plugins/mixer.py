@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/11/20 18:23:03  dischi
+# use python logger module for debug
+#
 # Revision 1.17  2004/11/01 20:15:40  dischi
 # fix debug
 #
@@ -58,6 +61,8 @@ import eventhandler
 import plugin
 from event import *
 
+import logging
+log = logging.getLogger()
 
 class PluginInterface(plugin.DaemonPlugin):
     # These magic numbers were determined by writing a C-program using the
@@ -83,7 +88,7 @@ class PluginInterface(plugin.DaemonPlugin):
             try:
                 self.mixfd = open(config.DEV_MIXER, 'r')
             except IOError:
-                _debug_('Couldn\'t open mixer %s' % config.DEV_MIXER, 0)
+                log.error('Couldn\'t open mixer %s' % config.DEV_MIXER)
                 return
 
         if 0:
@@ -99,7 +104,7 @@ class PluginInterface(plugin.DaemonPlugin):
                 try:
                     fcntl.ioctl( self.mixfd.fileno(), self.SOUND_MIXER_WRITE_RECSRC, data )
                 except IOError:
-                    _debug_('IOError for ioctl')
+                    log.error('IOError for ioctl')
                     pass
                 
         if config.MAJOR_AUDIO_CTRL == 'VOL':
@@ -117,7 +122,7 @@ class PluginInterface(plugin.DaemonPlugin):
                 # XXX Please tell if you have problems with this.
                 self.setOgainVolume(config.MAX_VOLUME)
         else:
-            _debug_("No appropriate audio channel found for mixer")
+            log.warning("No appropriate audio channel found for mixer")
 
         if config.CONTROL_ALL_AUDIO:
             self.setLineinVolume(0)
@@ -170,7 +175,7 @@ class PluginInterface(plugin.DaemonPlugin):
             try:
                 fcntl.ioctl(self.mixfd.fileno(), device, data)
             except IOError:
-                _debug_('IOError for ioctl')
+                log.error('IOError for ioctl')
                 pass
             
     def getMuted(self):

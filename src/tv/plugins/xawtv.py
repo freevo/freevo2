@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/11/20 18:23:04  dischi
+# use python logger module for debug
+#
 # Revision 1.8  2004/10/06 19:01:33  dischi
 # use new childapp interface
 #
@@ -64,6 +67,9 @@ from tv.channels import FreevoChannels
 
 import plugin
 import eventhandler
+
+import logging
+log = logging.getLogger('tv')
 
 # Set to 1 for debug output
 DEBUG = config.DEBUG
@@ -242,7 +248,7 @@ class Xawtv:
         eventhandler.remove(self)
 
     def eventhandler(self, event, menuw=None):
-        _debug_('%s: %s app got %s event' % (time.time(), self.mode, event))
+        log.info('%s: %s app got %s event' % (time.time(), self.mode, event))
         if event == em.STOP or event == em.PLAY_END:
             self.app.sendcmd('quit')
             time.sleep(1)

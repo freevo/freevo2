@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/11/20 18:23:03  dischi
+# use python logger module for debug
+#
 # Revision 1.13  2004/11/01 20:15:41  dischi
 # fix debug
 #
@@ -61,6 +64,9 @@ import util
 import eventhandler
 from gui import PopupBox
 
+import logging
+log = logging.getLogger()
+
 class PluginInterface(plugin.DaemonPlugin):
     """
     This Plugin to scan for usb devices. You should activate this
@@ -108,7 +114,7 @@ class PluginInterface(plugin.DaemonPlugin):
             try:
                 self.devices.remove(d)
             except ValueError:
-                _debug_('new device %s' %d, 0)
+                log.error('new device %s' %d)
                 for device, message, action in config.USB_HOTPLUG:
                     if d == device:
                         pop = PopupBox(message)
@@ -121,7 +127,7 @@ class PluginInterface(plugin.DaemonPlugin):
                         
         for d in self.devices:
             changes = True
-            _debug_('removed device %s' % d, 0)
+            log.warning('removed device %s' % d)
 
         if changes:
             eventhandler.post(plugin.event('USB'))

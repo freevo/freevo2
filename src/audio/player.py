@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2004/11/20 18:23:00  dischi
+# use python logger module for debug
+#
 # Revision 1.30  2004/09/14 20:04:33  dischi
 # fix typo
 #
@@ -66,6 +69,9 @@ import plugin
 from event import *
 from application import Application
 
+import logging
+log = logging.getLogger('audio')
+
 _singleton = None
 
 def audioplayer():
@@ -99,7 +105,7 @@ class AudioPlayer(Application):
         """
         self.item    = item
         if self.player and self.player.is_playing():
-            _debug_('stop playing')
+            log.info('stop playing')
             self.stop()
 
         self.item = item
@@ -122,7 +128,7 @@ class AudioPlayer(Application):
         self.running = True
 
         if self.bg_playing:
-            _debug_('start new background playing')
+            log.info('start new background playing')
         else:
             self.show()
 
@@ -143,7 +149,7 @@ class AudioPlayer(Application):
         try next possible player because the last one didn't work
         """
         self.stop()
-        _debug_('error, try next player')
+        log.info('error, try next player')
         player = None
         next   = False
         for r, p in self.possible_player:
@@ -156,7 +162,7 @@ class AudioPlayer(Application):
         if player:
             self.play(self.item, player=player)
             return 1
-        _debug_('no more players found')
+        log.info('no more players found')
         return 0
 
         

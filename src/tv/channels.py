@@ -35,6 +35,7 @@
 import os
 import time
 import traceback
+import logging
 
 # the electronic program guide
 import pyepg
@@ -43,6 +44,8 @@ import pyepg
 import config
 import plugin
 import item
+
+log = logging.getLogger('tv')
 
 # tv imports
 from program import ProgramItem
@@ -79,7 +82,7 @@ def get_channels():
     """
     global _channels
     if not _channels:
-        _debug_('no channels in memory, loading')
+        log.info('no channels in memory, loading')
         _channels = ChannelList()
     return _channels
 
@@ -121,7 +124,7 @@ def get_lockfile(which):
     settings = config.TV_SETTINGS.get(which)
 
     if not settings:
-        _debug_('No settings for %s' % which)
+        log.info('No settings for %s' % which)
 
     if isinstance(settings, config.DVBCard):
         dev = settings.adapter
@@ -140,7 +143,7 @@ def get_lockfile(which):
     else:
         lockfile = os.path.join(config.FREEVO_CACHEDIR, 'lock.%s' % which)
 
-    _debug_('lockfile for %s is %s' % (which, lockfile))
+    log.info('lockfile for %s is %s' % (which, lockfile))
     return lockfile
 
 

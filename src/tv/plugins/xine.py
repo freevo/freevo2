@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/11/20 18:23:04  dischi
+# use python logger module for debug
+#
 # Revision 1.8  2004/10/06 19:13:42  dischi
 # use config auto detection for xine version
 #
@@ -72,7 +75,8 @@ import plugin
 from event import *
 from tv.player import TVPlayer
 
-
+import logging
+log = logging.getLogger('tv')
 
 class PluginInterface(plugin.Plugin):
     """
@@ -167,7 +171,7 @@ class Xine(TVPlayer):
 
         command.append('dvb://' + freq)
             
-        _debug_('Xine.play(): Starting cmd=%s' % command)
+        log.info('Xine.play(): Starting cmd=%s' % command)
 
         self.show()
         self.app = childapp.Instance( command, prio = config.MPLAYER_NICE )

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/11/20 18:23:03  dischi
+# use python logger module for debug
+#
 # Revision 1.3  2004/10/06 18:52:27  dischi
 # use KEYBOARD_MAP now and switch to new notifier code
 #
@@ -55,6 +58,8 @@ from pygame import locals
 import config
 import plugin
 
+import logging
+log = logging.getLogger('input')
 
 class PluginInterface(plugin.InputPlugin):
     """
@@ -72,7 +77,7 @@ class PluginInterface(plugin.InputPlugin):
                 code = getattr(locals, 'K_%s' % key.lower())
                 self.keymap[code] = config.KEYBOARD_MAP[key]
             else:
-                _debug_('Error: unable to find key code for %s' % key, 0)
+                log.error('unable to find key code for %s' % key)
         self.mousehidetime = time.time()
         pygame.key.set_repeat(500, 30)
         notifier.addTimer( 20, self.handle )

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.145  2004/11/20 18:22:59  dischi
+# use python logger module for debug
+#
 # Revision 1.144  2004/11/01 20:14:14  dischi
 # fix debug
 #
@@ -73,6 +76,9 @@ from event import *
 
 import gui
 from gui import InputBox, AlertBox, ProgressBox
+
+import logging
+log = logging.getLogger()
 
 all_variables = [('DIRECTORY_SORT_BY_DATE', _('Directory Sort By Date'),
                   _('Sort directory by date and not by name.'), False),
@@ -212,7 +218,7 @@ class DirItem(Playlist):
                 parser.set_handler('skin', self.read_folder_fxd)
                 parser.parse()
             except:
-                _debug_("fxd file %s corrupt" % self.folder_fxd, 0)
+                log.error("fxd file %s corrupt" % self.folder_fxd)
                 traceback.print_exc()
 
 
@@ -388,7 +394,7 @@ class DirItem(Playlist):
         num_timestamp = self.info['num_%s_timestamp' % name]
 
         if not num_timestamp or num_timestamp < timestamp:
-            _debug_('create metainfo for %s', self.dir)
+            log.info('create metainfo for %s', self.dir)
             need_umount = False
             if self.media:
                 need_umount = not self.media.is_mounted()
@@ -512,7 +518,7 @@ class DirItem(Playlist):
 
         # FIXME: add support again when InputBox is working
 	if vfs.isfile(self.dir + '/.password') and 0:
-	    _debug_('password protected dir', 0)
+	    log.warning('password protected dir')
             self.arg   = arg
             self.menuw = menuw
 	    pb = InputBox(text=_('Enter Password'), handler=self.pass_cmp_cb,
@@ -531,8 +537,8 @@ class DirItem(Playlist):
 	    pwfile = vfs.open(self.dir + '/.password')
 	    line = pwfile.readline()
 	except IOError, e:
-	    _debug_('error %d (%s) reading password file for %s' % \
-                    (e.errno, e.strerror, self.dir), 0)
+	    log.error('error %d (%s) reading password file for %s' % \
+                      (e.errno, e.strerror, self.dir))
 	    return
 
 	pwfile.close()
@@ -900,7 +906,7 @@ class DirItem(Playlist):
             parser.set_handler('folder', self.write_folder_fxd, 'w', True)
             parser.save()
         except:
-            _debug_("fxd file %s corrupt" % self.folder_fxd, 0)
+            log.error("fxd file %s corrupt" % self.folder_fxd)
             traceback.print_exc()
 
         # rebuild menu
@@ -1026,7 +1032,7 @@ class Dirwatcher(plugin.DaemonPlugin):
                 return True
         except (OSError, IOError):
             # the directory is gone
-            _debug_('Dirwatcher: unable to read directory %s' % self.dir,1)
+            log.info('Dirwatcher: unable to read directory %s' % self.dir)
 
             # send EXIT to go one menu up:
             eventhandler.post(MENU_BACK_ONE_MENU)
@@ -1036,7 +1042,7 @@ class Dirwatcher(plugin.DaemonPlugin):
         changed = False
         if os.stat(self.dir)[stat.ST_MTIME] <= self.last_time:
             # changes are in overlay dir, just check for new/deleted files,
-            _debug_('overlay change')
+            log.info('overlay change')
             new_files = self.listoverlay()
             for f in self.files:
                 if not f in new_files:
@@ -1051,7 +1057,7 @@ class Dirwatcher(plugin.DaemonPlugin):
             changed = True
 
         if changed:
-            _debug_('directory has changed')
+            log.info('directory has changed')
             self.item.build(menuw=self.menuw, arg='update')
         self.last_time = vfs.mtime(self.dir)
         self.item.__dirwatcher_last_time__  = self.last_time

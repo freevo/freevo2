@@ -62,6 +62,8 @@ import util
 # gui imports
 from gui import Rectangle, Text, Textbox, Image
 
+import logging
+log = logging.getLogger('gui')
 
 class Area:
     """
@@ -113,7 +115,7 @@ class Area:
         Clear the complete area. This clears the content and the background.
         """
         if not self.screen:
-            _debug_('ERROR in area %s: no screen defined' % self.name)
+            log.info('ERROR in area %s: no screen defined' % self.name)
             return
 
         for b in self.__background:
@@ -245,7 +247,7 @@ class Area:
             try:
                 area = area.areas[self.area_name]
             except (KeyError, AttributeError):
-                _debug_('no skin information for %s' % (self.area_name), 0)
+                log.warning('no skin information for %s' % self.area_name)
                 return False
 
         if (not self.area_values) or area != self.area_values:

@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/11/20 18:22:59  dischi
+# use python logger module for debug
+#
 # Revision 1.3  2004/08/27 14:22:59  dischi
 # make it possible to switch event context
 #
@@ -44,6 +47,9 @@ import traceback
 
 import eventhandler
 import gui
+
+import logging
+log = logging.getLogger()
 
 
 class Application:
@@ -82,7 +88,7 @@ class Application:
         self._evt_handler.append(self)
         # check if the new app uses animation to show itself
         if not self._animated:
-            _debug_('no show animation for %s -- waiting' % self)
+            log.info('no show animation for %s -- waiting' % self)
             gui.animation.render().wait()
         if traceback.extract_stack(limit = 2)[0][3] != 'Application.show(self)':
             gui.display.update()

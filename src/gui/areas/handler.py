@@ -46,6 +46,9 @@ import os
 import traceback
 import time
 
+import logging
+log = logging.getLogger('gui')
+
 # freevo imports
 import config
 import util.cache
@@ -358,7 +361,7 @@ class AreaHandler:
             if self.visible:
                 self.canvas.update()
             t3 = time.time()
-            _debug_('time debug: %s %s' % (t2-t1, t3-t2), 2)
+            log.debug('time debug: %s %s' % (t2-t1, t3-t2))
 
         except UnicodeError, e:
             print '***********************************************************'

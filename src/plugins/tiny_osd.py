@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/11/20 18:23:03  dischi
+# use python logger module for debug
+#
 # Revision 1.16  2004/10/08 20:19:35  dischi
 # register to OSD_MESSAGE only
 #
@@ -60,6 +63,8 @@ import gui
 
 from event import OSD_MESSAGE
 
+import logging
+log = logging.getLogger()
 
 class PluginInterface(plugin.DaemonPlugin):
     """

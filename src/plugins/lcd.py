@@ -13,6 +13,9 @@
 #    3) Better (and more) LCD screens.
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/11/20 18:23:03  dischi
+# use python logger module for debug
+#
 # Revision 1.20  2004/08/11 17:56:09  gsbarbieri
 # Improve unicode support using String() everywhere.
 #
@@ -55,6 +58,10 @@ import plugin
 from event import *
 import config
 import util
+
+import logging
+log = logging.getLogger()
+
 try:
     import pylcd
 except:
@@ -873,7 +880,7 @@ class PluginInterface( plugin.DaemonPlugin ):
 
     def generate_screens( self ):
         screens = None
-        l = self.height
+        l = self.height # FIXME: please don't use l as a name!
         c = self.width
         # Find a screen
         # find a display with 'l' lines
@@ -881,7 +888,7 @@ class PluginInterface( plugin.DaemonPlugin ):
             try:                
                 screens = layouts[ l ]
             except KeyError:
-                _debug_( _( "WARNING" ) + ": " + _( "Could not find screens for %d lines LCD!" ) % l )
+                log.warning( 'Could not find screens for %d lines LCD!' % l )
                 l -= 1
                 if l < 1:
                     print String(_( "ERROR" )) + ": " + String(_( "No screens found for this LCD (%dx%d)!" )) % ( self.height, self.width )
@@ -892,7 +899,7 @@ class PluginInterface( plugin.DaemonPlugin ):
             try:
                 screens = layouts[ l ][ c ]
             except KeyError:
-                _debug_( _( "WARNING" ) + ": " + _( "Could not find screens for %d lines and %d columns LCD!" ) % ( l, c ) )
+                log.warning( 'Could not find screens for %d lines and %d columns LCD!' % ( l, c ) )
                 c -= 1
                 if c < 1:
                     print String(_( "ERROR" )) + ": " + String(_( "No screens found for this LCD (%dx%d)!" )) % ( self.height, self.width )
@@ -905,7 +912,7 @@ class PluginInterface( plugin.DaemonPlugin ):
         try:
             self.screens = screens = layouts[ l ][ c ]
         except KeyError:
-            _debug_( _( "WARNING" ) + ": " + _( "Could not find screens for %d lines and %d columns LCD!" ) % ( self.height, self.width ))
+            log.warning('Could not find screens for %d lines and %d columns LCD!' ) % ( self.height, self.width ))
             print String(_( "ERROR" )) + ": " + String(_( "No screens found for this LCD (%dx%d)!" )) % ( self.height, self.width )
             self.disable = 1
             return

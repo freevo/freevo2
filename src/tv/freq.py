@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/11/20 18:23:04  dischi
+# use python logger module for debug
+#
 # Revision 1.3  2004/11/19 04:10:32  rshortt
 # Add get_frequency_khz() and get_frequency(), also some cleanup.  The
 # frequency getting code in v4l2.py will be changed / removed in favour of this.
@@ -39,8 +42,11 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
- 
+
+import logging
 import config
+
+log = logging.getLogger('tv')
 
 def get_frequency(tuner_id, chanlist=None):
     """
@@ -50,7 +56,7 @@ def get_frequency(tuner_id, chanlist=None):
     freq = config.FREQUENCY_TABLE.get(tuner_id) 	 
 
     if freq: 	 
-        _debug_('USING CUSTOM FREQUENCY: chan="%s", freq="%s"' % (tuner_id, freq))
+        log.debug('USING CUSTOM FREQUENCY: chan="%s", freq="%s"' % (tuner_id, freq))
     else: 	 
         if not chanlist:
             chanlist = config.CONF.chanlist
@@ -68,8 +74,8 @@ def get_frequency(tuner_id, chanlist=None):
                  (_('Unable to get frequency table for %s.') % chanlist)) 	 
             return 0 	 
 
-        _debug_('USING STANDARD FREQUENCY: chan="%s", freq="%s"' % \
-                (tuner_id, freq)) 	 
+        log.debug('USING STANDARD FREQUENCY: chan="%s", freq="%s"' % \
+                  (tuner_id, freq)) 	 
 
     return freq
 

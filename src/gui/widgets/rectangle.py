@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/11/20 18:23:02  dischi
+# use python logger module for debug
+#
 # Revision 1.6  2004/10/05 19:50:55  dischi
 # Cleanup gui/widgets:
 # o remove unneeded widgets
@@ -53,6 +56,8 @@
 #
 # ----------------------------------------------------------------------
 
+import logging
+log = logging.getLogger('gui')
 
 from mevas.image import CanvasImage
 
@@ -92,7 +97,7 @@ class Rectangle(CanvasImage):
                 else:
                     self.draw_image(r, alpha=color[-1])
             else:
-                _debug_('FIXME: round rectangle with border missing')
+                log.info('FIXME: round rectangle with border missing')
 
         if not bgcolor:
             return

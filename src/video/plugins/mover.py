@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/11/20 18:23:05  dischi
+# use python logger module for debug
+#
 # Revision 1.9  2004/07/10 12:33:43  dischi
 # header cleanup
 #
@@ -42,6 +45,9 @@
 
 import os
 import plugin
+
+import logging
+log = logging.getLogger('video')
 
 class PluginInterface(plugin.ItemPlugin):
     """
@@ -118,11 +124,11 @@ class PluginInterface(plugin.ItemPlugin):
                 if self.makedirs:
                     os.makedirs(local_to_dir)
                 else:
-                    _debug_("Path doesn't exist, and makedirs=%s" % self.makedirs)
+                    log.info("Path doesn't exist, and makedirs=%s" % self.makedirs)
                     menuw.delete_menu(menuw=menuw)
                     return
         elif not os.path.isdir(local_to_dir):
-            _debug_("%s is not a dir" % local_to_dir)
+            log.info("%s is not a dir" % local_to_dir)
             return
 
         if self.item.files:

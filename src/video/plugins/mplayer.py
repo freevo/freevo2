@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.91  2004/11/20 18:23:05  dischi
+# use python logger module for debug
+#
 # Revision 1.90  2004/10/30 18:47:47  dischi
 # move progressbar to gui/area
 #
@@ -81,6 +84,9 @@ import gui
 
 from application import Application
 from event import *
+
+import logging
+log = logging.getLogger('video')
 
 class PluginInterface(plugin.Plugin):
     """
@@ -169,9 +175,9 @@ class MPlayer(Application):
                     url = item.url + str(i+1)
             
         try:
-            _debug_('MPlayer.play(): mode=%s, url=%s' % (mode, url))
+            log.info('MPlayer.play(): mode=%s, url=%s' % (mode, url))
         except UnicodeError:
-            _debug_('MPlayer.play(): [non-ASCII data]')
+            log.info('MPlayer.play(): [non-ASCII data]')
 
         if mode == 'file' and not os.path.isfile(url):
             # This event allows the videoitem which contains subitems to
@@ -279,7 +285,7 @@ class MPlayer(Application):
         # autocrop
         if config.MPLAYER_AUTOCROP and \
                str(' ').join(command).find('crop=') == -1:
-            _debug_('starting autocrop')
+            log.info('starting autocrop')
             (x1, y1, x2, y2) = (1000, 1000, 0, 0)
             crop_cmd = command[1:] + ['-ao', 'null', '-vo', 'null', '-ss',
                                       '60', '-frames', '20', '-vf',
@@ -449,7 +455,7 @@ class MPlayer(Application):
                 # check again if seek is allowed
                 if self.item_length <= self.item.elapsed + event.arg + \
                        seek_safety_time:
-                    _debug_('unable to seek %s secs at time %s, length %s' % \
+                    log.info('unable to seek %s secs at time %s, length %s' % \
                             (event.arg, self.item.elapsed, self.item_length))
                     return False
                 
@@ -553,15 +559,15 @@ class MPlayerApp( childapp.Instance ):
         start bmovl or bmovl2 output
         """
         if config.MPLAYER_BMOVL2_POSSIBLE:
-            _debug_('starting Bmovl2')
+            log.info('starting Bmovl2')
             self.mplayer.overlay.set_can_write(True)
             while not self.mplayer.overlay.can_write():
                 pass
-            _debug_('activating overlay')
+            log.info('activating overlay')
             self.screen = gui.set_display('Bmovl2', (self.width, self.height))
             self.screen.set_overlay(self.mplayer.overlay)
         else:
-            _debug_('starting Bmovl')
+            log.info('starting Bmovl')
             self.screen = gui.set_display('Bmovl', (self.width, self.height))
         self.area_handler = gui.AreaHandler('video', ['screen', 'view', 'info',
                                                       'progress'])
@@ -632,7 +638,7 @@ class MPlayerApp( childapp.Instance ):
                         self.width  = int(width)
                         self.height = int(height)
             except Exception, e:
-                _debug_(e, 0)
+                log.error(e)
 
             if self.check_audio:
                 if line.find('MPEG: No audio stream found -> no sound') == 0:

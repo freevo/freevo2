@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/11/20 18:23:02  dischi
+# use python logger module for debug
+#
 # Revision 1.4  2004/10/05 19:50:55  dischi
 # Cleanup gui/widgets:
 # o remove unneeded widgets
@@ -51,6 +54,9 @@ import config
 from mevas.container import CanvasContainer
 from text import Text
 from textbox import Textbox
+
+import logging
+log = logging.getLogger('gui')
 
 class InfoText(CanvasContainer):
     """
@@ -162,7 +168,7 @@ class InfoText(CanvasContainer):
             # Tag: <img>
             #
             elif element.type == 'image':
-                _debug_('FIXME: image tag not supported by infotext')
+                log.info('FIXME: image tag not supported by infotext')
 
             #
             # Tag: <newline>

@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/11/20 18:23:02  dischi
+# use python logger module for debug
+#
 # Revision 1.5  2004/10/05 19:50:55  dischi
 # Cleanup gui/widgets:
 # o remove unneeded widgets
@@ -54,6 +57,9 @@
 
 from mevas.image import CanvasImage
 import text
+
+import logging
+log = logging.getLogger('gui')
 
 class Textbox(text.Text):
     """
@@ -162,6 +168,6 @@ class Textbox(text.Text):
                     x0 = box_width - width
                 self._render(text, (x0, y0), (width, line_height))
             except Exception, e:
-                _debug_(e, 0)
+                log.error(e)
             y0 += line_height
 

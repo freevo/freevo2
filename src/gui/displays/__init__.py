@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/11/20 18:23:01  dischi
+# use python logger module for debug
+#
 # Revision 1.4  2004/08/24 16:42:41  dischi
 # Made the fxdsettings in gui the theme engine and made a better
 # integration for it. There is also an event now to let the plugins
@@ -43,6 +46,9 @@
 
 import copy
 import config
+
+import logging
+log = logging.getLogger('gui')
 
 # Stack of the current active displays
 display_stack  = []
@@ -92,7 +98,7 @@ def remove_display(screen):
     """
     global display_stack
     if screen != display_stack[-1]:
-        _debug_('Error: removing screen not on top', 0)
+        log.error('removing screen not on top')
         print screen
         print display_stack
         raise AttributeError

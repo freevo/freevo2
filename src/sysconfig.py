@@ -67,6 +67,7 @@ import os
 import sys
 import locale
 import __builtin__
+import logging
 
 # Directories were to search the config file
 _cfgfilepath = [ '.', os.path.expanduser('~/.' + application),
@@ -104,6 +105,7 @@ else:
 
 CONF.cachedir = OS_CACHEDIR + '/' + application
 CONF.datadir  = '/var/lib/' + application
+CONF.logdir   = '/var/log/' + application
 
 # read the config file, if no file is found, the default values
 # are used.
@@ -169,10 +171,47 @@ if not os.path.isdir(CONF.datadir):
         if not os.path.isdir(CONF.datadir):
             os.makedirs(CONF.datadir)
 
+# create logdir
+if not os.path.isdir(CONF.logdir):
+    try:
+        os.makedirs(CONF.logdir)
+    except OSError:
+        CONF.logdir = os.path.expanduser('~/.' + application + '/log')
+        if not os.path.isdir(CONF.logdir):
+            os.makedirs(CONF.logdir)
+
 # add everything in CONF to the module variable list (but in upper
 # case, so CONF.vfs_dir is VFS_DIR, too
 for key in CONF.__dict__:
     exec('%s = CONF.%s' % (key.upper(), key))
+
+
+# create and setup the root logger object.
+# using logging.getLogger() gives the root logger, calling
+# logging.getLogger('foo') returns a new logger with the same default
+# settings.
+logger = logging.getLogger()
+
+# set stdout logging
+# TODO: find a way to shut down that logger later when the user
+# wants to visible debug in the terminal
+formatter = logging.Formatter('%(name)s.%(module)s (%(lineno)s): %(message)s')
+handler = logging.StreamHandler()
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+# set file logger
+formatter = logging.Formatter('%(asctime)s [%(name)6s] %(levelname)-8s ' + \
+                              '%(filename)s %(lineno)s: %(message)s')
+fname = os.path.splitext(os.path.basename(sys.argv[0]))[0]
+fname = '%s/%s-%s' % (CONF.logdir, fname, os.getuid())
+handler = logging.FileHandler(fname)
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+# set log level
+logger.setLevel(logging.WARNING)
+
 
 # encoding helper functions
 

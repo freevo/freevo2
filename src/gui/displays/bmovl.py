@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/11/20 18:23:01  dischi
+# use python logger module for debug
+#
 # Revision 1.5  2004/10/06 19:14:36  dischi
 # use new childapp interface
 #
@@ -53,6 +56,9 @@ from mevas.displays.bmovlcanvas import BmovlCanvas
 # freevo imports
 import config
 
+import logging
+log = logging.getLogger('gui')
+
 class Display(BmovlCanvas):
     """
     Display class for bmovl output over mplayer
@@ -88,7 +94,7 @@ class Display(BmovlCanvas):
             self.child = childapp.Instance( arg, stop_osd = 0 )
             if hasattr(self, 'fifo') and not self.fifo:
                 self.fifo = os.open('/tmp/bmovl', os.O_WRONLY)
-                _debug_('rebuild bmovl')
+                log.info('rebuild bmovl')
                 self.rebuild()
 
     def stop(self):

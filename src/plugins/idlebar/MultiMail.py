@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/11/20 18:23:03  dischi
+# use python logger module for debug
+#
 # Revision 1.7  2004/09/08 08:33:13  dischi
 # patch from Viggo Fredriksen to reactivate the plugins
 #
@@ -52,6 +55,8 @@ import gui
 
 from plugins.idlebar import IdleBarPlugin
 
+import logging
+log = logging.getLogger()
 
 class MultiMail(IdleBarPlugin):
     """
@@ -123,7 +128,7 @@ class Imap(MultiMail):
             imap.logout()
             return unread
         except:
-            _debug_('IMAP exception')
+            log.error('IMAP exception')
             return 0
 
 class Pop3(MultiMail):

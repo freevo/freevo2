@@ -8,6 +8,9 @@
 # Todo:  - Much
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/11/20 18:23:00  dischi
+# use python logger module for debug
+#
 # Revision 1.13  2004/10/12 11:31:57  dischi
 # make animation frame selection timer based
 #
@@ -72,6 +75,10 @@ from gui.animation.base import BaseAnimation
 from mevas.image import CanvasImage
 from mevas.imagelib import *
 #from controlpanel import *
+
+import logging
+log = logging.getLogger('audio')
+
 
 class PluginInterface(plugin.Plugin):
     """
@@ -168,7 +175,7 @@ class PluginInterface(plugin.Plugin):
             return
 
         if line.find( "[export] Memory mapped to file: " ) == 0:
-            _debug_("Detected MPlayer 'export' audio filter! Using libvisual.")
+            log.info("Detected MPlayer 'export' audio filter! Using libvisual.")
             self.start()
 
 

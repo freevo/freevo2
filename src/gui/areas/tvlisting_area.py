@@ -47,6 +47,9 @@ import math
 from area import Area
 from gui import Rectangle
 
+import logging
+log = logging.getLogger('gui')
+
 class Geometry:
     """
     Simple object with x, y, with, height values
@@ -439,7 +442,7 @@ class TvlistingArea(Area):
                                                             align_v='center',
                                                             align_h=val.align))
             except Exception, e:
-                _debug_(e)
+                log.error(e)
             y0 += item_h - 1
 
         # print arrow:

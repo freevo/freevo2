@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/11/20 18:23:05  dischi
+# use python logger module for debug
+#
 # Revision 1.16  2004/11/01 20:16:58  dischi
 # add missing import
 #
@@ -73,6 +76,9 @@ import menu
 import eventhandler
 
 from event import *
+
+import logging
+log = logging.getLogger('video')
 
 def get_bookmarkfile(filename):
     myfile = vfs.basename(filename)
@@ -150,7 +156,7 @@ class PluginInterface(plugin.ItemPlugin):
                    not item.subitems and item.elapsed:
                 item.store_info('autobookmark_resume', item.elapsed)
             else:
-                _debug_('auto-bookmark not supported for this item')
+                log.info('auto-bookmark not supported for this item')
                 
         if event == PLAY_END:
             item.delete_info('autobookmark_resume')

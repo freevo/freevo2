@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2004/11/20 18:23:03  dischi
+# use python logger module for debug
+#
 # Revision 1.41  2004/11/01 20:15:40  dischi
 # fix debug
 #
@@ -66,6 +69,8 @@ import plugins.rom_drives
 from event import *
 from item import Item
 
+import logging
+log = logging.getLogger()
 
 class PluginInterface(plugin.MainMenuPlugin):
     """
@@ -185,7 +190,7 @@ class MediaMenu(Item):
                             if os.system( config.HOST_ALIVE_CHECK % hostname ) != 0:
                                 reachable = 0
                         except:
-                            _debug_('Error parsing %s' % filename, 0)
+                            log.error('Error parsing %s' % filename)
                             traceback.print_exc()
                        
                 if reachable:
@@ -211,7 +216,7 @@ class MediaMenu(Item):
                             self.normal_items += items
                             
             except:
-                _debug_('Error parsing %s' % String(item), 0)
+                log.error('Error parsing %s' % item)
                 traceback.print_exc()
 
 

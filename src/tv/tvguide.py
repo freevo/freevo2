@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.61  2004/11/20 18:23:04  dischi
+# use python logger module for debug
+#
 # Revision 1.60  2004/11/17 19:41:29  dischi
 # more work to make tv stable again
 #
@@ -122,6 +125,9 @@ from channels import get_channels
 
 from item import Item
 
+import logging
+log = logging.getLogger('tv')
+
 _guide_ = None
 
 def get_singleton():
@@ -180,7 +186,7 @@ class TVGuide(MenuApplication):
         """
         show the guide
         """
-        _debug_('show')
+        log.info('show')
         self.update_schedules(force=True)
         self.refresh()
         MenuApplication.show(self)
@@ -190,7 +196,7 @@ class TVGuide(MenuApplication):
         """
         hide the guide
         """
-        _debug_('hide')
+        log.info('hide')
         MenuApplication.hide(self)
             
         
@@ -208,7 +214,7 @@ class TVGuide(MenuApplication):
         if MenuApplication.eventhandler(self, event):
             return True
 
-        _debug_('TVGUIDE EVENT is %s' % event, 2)
+        log.debug('TVGUIDE EVENT is %s' % event)
 
         if event == MENU_CHANGE_STYLE:
             pass

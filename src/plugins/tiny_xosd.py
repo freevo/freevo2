@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/11/20 18:23:03  dischi
+# use python logger module for debug
+#
 # Revision 1.3  2004/10/08 20:19:35  dischi
 # register to OSD_MESSAGE only
 #
@@ -50,6 +53,8 @@ import time, re, string, pyosd
 import config, plugin
 from event import *
 
+import logging
+log = logging.getLogger()
 
 OSD_MESSAGE_FONT    = '-*-helvetica-medium-r-normal-*-*-260-*-*-p-*-*-*'
 OSD_MESSAGE_COLOR   = '#D3D3D3'  # LightGray
@@ -168,7 +173,9 @@ class PluginInterface(plugin.DaemonPlugin):
         Do something when receiving an event
         """
 
-        _debug_('%s: %s app got %s event' % (time.time(), self.plugin_name, event))
+        log.info('%s: %s app got %s event' % ( time.time(),
+                                               self.plugin_name,
+                                               event))
         if event == OSD_MESSAGE :
             self.message = event.arg
             self.draw_osd()

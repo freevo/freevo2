@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/11/20 18:23:03  dischi
+# use python logger module for debug
+#
 # Revision 1.3  2004/07/10 12:33:40  dischi
 # header cleanup
 #
@@ -51,6 +54,8 @@ import plugin
 
 from event import *
 
+import logging
+log = logging.getLogger()
 
 class PluginInterface(plugin.DaemonPlugin):
     """
@@ -84,11 +89,11 @@ class PluginInterface(plugin.DaemonPlugin):
 
 
         if event == VIDEO_START:
-            _debug_('Recieved VIDEO_START event',2)
+            log.debug('Recieved VIDEO_START event')
             os.system(self.before)
 
         if event == VIDEO_END:
-            _debug_('Recieved VIDEO_STOP event',2)
+            log.debug('Recieved VIDEO_STOP event')
             os.system(self.after)
 
         return False

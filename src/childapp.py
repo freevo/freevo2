@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.69  2004/11/20 18:22:58  dischi
+# use python logger module for debug
+#
 # Revision 1.68  2004/11/07 16:39:21  dischi
 # create extra finish function
 #
@@ -101,6 +104,9 @@ import util
 
 from event import *
 
+import logging
+log = logging.getLogger('childapp')
+
 watcher = None
 
 
@@ -180,7 +186,7 @@ class Instance:
             start_str = app
             
             debug_name = app[ 0 ]
-            _debug_('running %s' % self.binary, 1)
+            log.info('running %s' % self.binary)
         
         if debug_name.rfind('/') > 0:
             debug_name = debug_name[ debug_name.rfind( '/' ) + 1 : ]
@@ -241,7 +247,7 @@ class Instance:
 
         if self.isAlive() and not self.__kill_timer:
             if cmd:
-                _debug_('sending exit command to app')
+                log.info('sending exit command to app')
                 self.write(cmd)
                 cb = notifier.Callback( self._kill, 15 )
                 self.__kill_timer = notifier.addTimer( 1000, cb )
@@ -288,12 +294,12 @@ class Instance:
         except OSError:
             pass
 
-        _debug_('kill -%d %s' % ( signal, self.binary ), 1)
+        log.info('kill -%d %s' % ( signal, self.binary ))
         if signal == 15:
             cb = notifier.Callback( self._killall, 9 )
             self.__kill_timer = notifier.addTimer( 1000, cb )
         else:
-            _debug_('PANIC %s' % self.binary, 0)
+            log.critical('PANIC %s' % self.binary)
             
         return False
 
@@ -351,9 +357,9 @@ class IO_Handler:
                 except:
                     pass
                 self.logger = open(logger, 'w')
-                _debug_('logging child to "%s"' % logger, 1)
+                log.info('logging child to "%s"' % logger)
             except IOError:
-                _debug_('Error: Cannot open "%s" for logging' % logger, 0)
+                log.warning('Error: Cannot open "%s" for logging' % logger)
             
     def cleanup( self ):
         notifier.removeSocket( self.fp )
@@ -361,8 +367,8 @@ class IO_Handler:
     def _handle_input( self, socket ):
         data = self.fp.read( 100 )
         if not data:
-            _debug_( '%s: No data, stopping (pid %s)!' % \
-                     ( self.name, os.getpid() ), 2 )
+            log.debug( '%s: No data, stopping (pid %s)!' % \
+                       ( self.name, os.getpid() ) )
             notifier.removeSocket( self.fp )
             self.fp.close()
             if self.logger:
@@ -402,7 +408,7 @@ class IO_Handler:
 
 class _Watcher:
     def __init__( self ):
-        _debug_( "new process watcher instance" )
+        log.info('new process watcher instance')
         self.__processes = {}
 
 
@@ -425,9 +431,9 @@ class _Watcher:
                 remove_proc.append( p )
                 continue
             if not pid: continue
-            _debug_(">>> DEAD CHILD: %s (%s)" % ( pid, status ), 1)
+            log.info('DEAD CHILD: %s (%s)' % ( pid, status ))
             if status == -1:
-                _debug_("error retrieving process information from %d" % p, 0)
+                log.error('error retrieving process information from %d' % p)
             elif os.WIFEXITED( status ) or os.WIFSIGNALED( status ) or \
                      os.WCOREDUMP( status ):
                 self.__processes[ p ]( p )

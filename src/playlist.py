@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.79  2004/11/20 18:22:59  dischi
+# use python logger module for debug
+#
 # Revision 1.78  2004/11/01 20:14:14  dischi
 # fix debug
 #
@@ -72,6 +75,8 @@ import plugin
 from event import *
 from item import Item, MediaItem
 
+import logging
+log = logging.getLogger()
 
 class Playlist(MediaItem):
 
@@ -122,14 +127,14 @@ class Playlist(MediaItem):
         try:
             lines = util.readfile(plsname)
         except IOError:
-            _debug_('Cannot open file "%s"' % plsname, 0)
+            log.error('Cannot open file "%s"' % plsname)
             return 0
 
         try:
             playlist_lines_dos = map(lambda l: l.strip(), lines)
             playlist_lines     = filter(lambda l: l[0] != '#', playlist_lines_dos)
         except IndexError:
-            _debug_('Bad m3u playlist file "%s"' % plsname, 0)
+            log.warning('Bad m3u playlist file "%s"' % plsname)
             return 0
         
         (curdir, playlistname) = os.path.split(plsname)
@@ -150,7 +155,7 @@ class Playlist(MediaItem):
         try:
             lines = util.readfile(plsname)
         except IOError:
-            _debug_(String(_('Cannot open file "%s"')) % list, 0)
+            log.error('Cannot open file "%s"' % list)
             return 0
 
         playlist_lines_dos = map(lambda l: l.strip(), lines)
@@ -190,7 +195,7 @@ class Playlist(MediaItem):
         try:
             lines = util.readfile(ssrname)
         except IOError:
-            _debug_(String(_('Cannot open file "%s"')) % list, 0)
+            log.error( 'Cannot open file "%s"' % list)
             return 0
 
         playlist_lines_dos = map(lambda l: l.strip(), lines)
@@ -256,7 +261,7 @@ class Playlist(MediaItem):
                 else:
                     self.read_m3u(playlist)
             except (OSError, IOError), e:
-                _debug_('playlist error: %s' % e, 0)
+                log.error('playlist error: %s' % e)
             self.set_url(playlist)
 
         # self.playlist is a list of Items or strings (filenames)
@@ -358,7 +363,7 @@ class Playlist(MediaItem):
 
         if not self.playlist:
             # XXX PopupBox please
-            _debug_(String(_('empty playlist')), 0)
+            log.warning('empty playlist')
             return False
         
         if not arg or arg != 'next':
@@ -488,7 +493,7 @@ class Playlist(MediaItem):
                     try:
                         self.current_item.stop()
                     except OSError:
-                        _debug_('ignore playlist event', 1)
+                        log.info('ignore playlist event')
                         return True
                 pos = (pos-1) % len(self.playlist)
                 self.current_item = self.playlist[pos]

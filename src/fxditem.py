@@ -26,6 +26,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/11/20 18:22:59  dischi
+# use python logger module for debug
+#
 # Revision 1.15  2004/11/01 20:14:14  dischi
 # fix debug
 #
@@ -67,6 +70,8 @@ import plugin
 import os
 import stat
 
+import logging
+log = logging.getLogger()
 
 class Mimetype(plugin.MimetypePlugin):
     """
@@ -149,7 +154,7 @@ class Mimetype(plugin.MimetypePlugin):
                 items += parser.getattr(None, 'items')
 
             except:
-                _debug_("fxd file %s corrupt" % fxd_file, 0)
+                log.error("fxd file %s corrupt" % fxd_file)
                 traceback.print_exc()
         return items
 

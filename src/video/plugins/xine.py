@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.56  2004/11/20 18:23:05  dischi
+# use python logger module for debug
+#
 # Revision 1.55  2004/10/06 19:13:41  dischi
 # use config auto detection for xine version
 #
@@ -77,6 +80,8 @@ from application import Application
 from event import *
 import plugin
 
+import logging
+log = logging.getLogger('video')
 
 class PluginInterface(plugin.Plugin):
     """
@@ -213,7 +218,7 @@ class Xine(Application):
         else:
             command.append(item.url)
             
-        _debug_('Xine.play(): Starting cmd=%s' % command)
+        log.info('Xine.play(): Starting cmd=%s' % command)
 
         self.show()
         self.app = childapp.Instance( command )

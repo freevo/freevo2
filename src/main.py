@@ -39,6 +39,12 @@ import sys, time
 import traceback
 import signal
 
+import logging
+import logging.config
+
+#logging.config.fileConfig('log.ini')
+log = logging.getLogger()
+
 #
 # notifier version checking
 #

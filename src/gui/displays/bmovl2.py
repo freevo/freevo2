@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/11/20 18:23:01  dischi
+# use python logger module for debug
+#
 # Revision 1.7  2004/10/06 19:14:36  dischi
 # use new childapp interface
 #
@@ -54,6 +57,9 @@ from mevas.bmovl2 import MPlayerOverlay
 # Freevo imports
 import config
 
+import logging
+log = logging.getLogger('gui')
+
 class Display(MPlayerCanvas):
     """
     Display class for bmovl2 output over mplayer
@@ -82,7 +88,7 @@ class Display(MPlayerCanvas):
         Restart the display. This will restart the background video to
         make the canvas work.
         """
-        _debug_('restart bmovl2')
+        log.info('restart bmovl2')
         if self.start_video and not self.child:
             import childapp
             arg = [config.MPLAYER_CMD] + self.mplayer_args.split(' ') + \
@@ -100,7 +106,7 @@ class Display(MPlayerCanvas):
         """
         Stop the mplayer process
         """
-        _debug_('stop bmovl2')
+        log.info('stop bmovl2')
         if self.start_video and self.child:
             self.child.stop('quit')
             self.child = None
@@ -110,7 +116,7 @@ class Display(MPlayerCanvas):
         Hide the display. This results in shutting down the
         background video
         """
-        _debug_('hide bmovl2')
+        log.info('hide bmovl2')
         self.stop()
 
 
@@ -119,6 +125,6 @@ class Display(MPlayerCanvas):
         Show the display. This results in starting the background
         video again.
         """
-        _debug_('show bmovl2')
+        log.info('show bmovl2')
         self.restart()
 

@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.64  2004/11/20 18:23:00  dischi
+# use python logger module for debug
+#
 # Revision 1.63  2004/09/13 19:35:35  dischi
 # replace player.get_singleton() with audioplayer()
 #
@@ -73,6 +76,8 @@ from event import *
 
 from player import *
 
+import logging
+log = logging.getLogger('audio')
 
 def _image_filter(x):
     """
@@ -121,7 +126,7 @@ class AudioItem(MediaItem):
             try:
                 files = os.listdir(dirname)
             except OSError:
-                _debug_('os.listdir() error', 0)
+                log.error('os.listdir() error')
             images = filter(_image_filter, files)
             image = None
             if len(images) == 1:

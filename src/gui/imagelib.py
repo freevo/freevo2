@@ -11,6 +11,9 @@ import util
 import util.thumbnail
 import theme_engine
 
+import logging
+log = logging.getLogger('gui')
+
 def resizebitmap(image, width=None, height=None):
     image_w, image_h = image.width, image.height
     if width == None:
@@ -95,21 +98,19 @@ def load(url, size=None, cache=False, vfs_save=False):
         filename = os.path.join(config.IMAGE_DIR, url[8:])
 
     if not os.path.isfile(filename):
-        print 'osd.py: Bitmap file "%s" doesnt exist!' % filename
+        log.error('osd.py: Bitmap file "%s" doesnt exist!' % filename)
         return None
 
     try:
         try:
             image = mevas.imagelib.open(filename)
         except Exception, e:
-            print 'imagelib load problem: %s - trying Imaging' % e
+            log.info('imagelib load problem: %s - trying Imaging' % e)
             i = Image.open(filename)
             image = mevas.imagelib.new(i.tostring(), i.size, i.mode)
 
     except:
-        print 'Unknown Problem while loading image %s' % String(url)
-        if config.DEBUG:
-            traceback.print_exc()
+        log.exception('Unknown Problem while loading image %s' % String(url))
         return None
 
     # scale the image if needed

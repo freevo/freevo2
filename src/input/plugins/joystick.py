@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/11/20 18:23:03  dischi
+# use python logger module for debug
+#
 # Revision 1.4  2004/10/13 20:08:25  dischi
 # fix handle to match notifier callback
 #
@@ -68,6 +71,8 @@ from time import sleep
 import config
 import plugin
 
+import logging
+log = logging.getLogger('input')
 
 class PluginInterface(plugin.InputPlugin):
 
@@ -130,7 +135,7 @@ class PluginInterface(plugin.InputPlugin):
                 button = 'right'
                 command = config.JOY_CMDS['right']
         if command != '':
-            _debug_('Translation: "%s" -> "%s"' % (button, command))
+            log.info('Translation: "%s" -> "%s"' % (button, command))
             command = rc.key_event_mapper(command)
             if command:
                 eventhandler.post(command)

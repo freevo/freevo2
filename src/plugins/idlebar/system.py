@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/11/20 18:23:03  dischi
+# use python logger module for debug
+#
 # Revision 1.14  2004/09/08 08:33:13  dischi
 # patch from Viggo Fredriksen to reactivate the plugins
 #
@@ -63,6 +66,9 @@ import config
 
 from plugins.idlebar import IdleBarPlugin
 
+import logging
+log = logging.getLogger()
+
 class procstats(IdleBarPlugin):
     """
     Retrieves information from /proc/stat and shows them in the idlebar.
@@ -113,7 +119,7 @@ class procstats(IdleBarPlugin):
             meminfo = f.read()
             f.close()
         except OSError:
-            _debug_('[procstats]: The file /proc/meminfo is not available')
+            log.error('[procstats]: The file /proc/meminfo is not available')
 
         if meminfo:
             i = 0
@@ -154,7 +160,7 @@ class procstats(IdleBarPlugin):
         try:
             self.getStats()
         except:
-            _debug_('[procstats]: Not working, this plugin is only tested with 2.4 and 2.6 kernels')
+            log.warning('[procstats]: Not working, this plugin is only tested with 2.4 and 2.6 kernels')
 
 
         font = gui.get_font('small0')

@@ -38,6 +38,9 @@ __all__ = [ 'ProgressArea' ]
 from area import Area
 from gui import Progressbar
 
+import logging
+log = logging.getLogger('gui')
+
 class ProgressArea(Area):
     """
     An Area holding a progressbar about the current position of a playing
@@ -67,7 +70,7 @@ class ProgressArea(Area):
         try:
             length = int(self.infoitem.info['length'])
         except Exception, e:
-            _debug_(e, 0)
+            log.error(e)
             length = 0
         start = 0
         if self.infoitem.info['start']:

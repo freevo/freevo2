@@ -2,6 +2,9 @@ import config
 from base import Application
 from event import *
 
+import logging
+log = logging.getLogger()
+
 class MenuApplication(Application):
     """
     An application inside the menu
@@ -67,4 +70,4 @@ class MenuApplication(Application):
 
 
     def __del__(self):
-        _debug_('delete menu application %s' % self)
+        log.info('delete menu application %s' % self)

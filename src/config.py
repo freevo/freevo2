@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.132  2004/11/20 18:22:58  dischi
+# use python logger module for debug
+#
 # Revision 1.131  2004/11/19 02:10:27  rshortt
 # First crack at moving autodetect code for TV cards into src/system.  Added a
 # detect() to system/__init__.py that will call detect() on a system/ module.
@@ -109,6 +112,9 @@ import input
 import sysconfig
 import logging
 import util.ioctl as ioctl
+
+import logging
+log = logging.getLogger()
 
 # if float(sys.version[0:3]) >= 2.3:
 #     import warnings
@@ -212,124 +218,12 @@ if sys.argv[0].find('recordserver.py') != -1:
 elif sys.argv[0].find('webserver.py') != -1:
     IS_WEBSERVER = 1
 
-#
-# Send debug to stdout as well as to the logfile?
-#
-DEBUG_STDOUT = 1
-
-#
-# Debug all modules?
-# 0 = Debug output off
-# 1 = Some debug output
-# A higher number will generate more detailed output from some modules.
-#
+# remove this later
 DEBUG = 0
 
-#
-# find the log directory
-#
-if os.path.isdir('/var/log/freevo'):
-    LOGDIR = '/var/log/freevo'
-else:
-    LOGDIR = '/tmp/freevo'
-    if not os.path.isdir(LOGDIR):
-        os.makedirs(LOGDIR)
 
-
+LOGDIR = sysconfig.CONF.logdir
 FREEVO_CACHEDIR = sysconfig.CONF.cachedir
-
-# logger = logging.getLogger()
-# formatter = logging.Formatter('%(module)s (%(lineno)s): %(message)s')
-# logger.setLevel(logging.INFO)
-
-# if not HELPER or IS_WEBSERVER or IS_RECORDSERVER:
-#     app = os.path.splitext(os.path.basename(sys.argv[0]))[0]
-#     lf = os.path.join(LOGDIR, app + '-%s.log' % os.getuid())
-#     hdlr = logging.FileHandler(lf)
-#     hdlr.setFormatter(formatter)
-#     logger.addHandler(hdlr)
-#     ts = time.asctime(time.localtime(time.time()))
-#     logger.info('-' * 79)
-#     logger.info('Freevo start at %s' % ts)
-#     logger.info('-' * 79)
-    
-# stdout_logger = logging.StreamHandler()
-# stdout_logger.setFormatter(formatter)
-# logger.addHandler(stdout_logger)
-
-# def _debug_function_(s, level=1):
-#     s = String(s)
-#     if level == 0:
-#         logger.warning(s)
-#     elif level == 1:
-#         logger.info(s)
-#     else:
-#         logger.debug(s)
-#     return
-            
-
-class Logger:
-    """
-    Class to create a logger object which will send messages to stdout
-    and log them into a logfile
-    """
-    def __init__(self, logtype='(unknown)'):
-        self.lineno = 1
-        self.logtype = logtype
-        appname = os.path.splitext(os.path.basename(sys.argv[0]))[0]
-        logfile = '%s/%s-%s.log' % (LOGDIR, appname, os.getuid())
-        self.logfile = logfile
-        try:
-            self.fp = open(logfile, 'a')
-        except IOError:
-            print 'Could not open logfile: %s' % logfile
-            self.fp = open('/dev/null','a')
-        self.softspace = 0
-        
-    def write(self, msg):
-        global DEBUG_STDOUT
-        if isinstance(msg, unicode):
-            msg = msg.encode(LOCALE)
-        if DEBUG_STDOUT:
-            sys.__stdout__.write(msg)
-        self.fp.write(msg)
-        self.fp.flush()
-        return
-
-    def log(self, msg):
-        self.fp.write(msg)
-        self.fp.flush()
-        return
-
-    def flush():
-        pass
-
-    def close():
-        pass
-    
-
-#
-# Redirect stdout and stderr to stdout and /tmp/freevo.log
-#
-if not HELPER:
-    sys.stdout = Logger(sys.argv[0] + ':stdin')
-    sys.stderr = Logger(sys.argv[0] + ':stderr')
-    ts = time.asctime(time.localtime(time.time()))
-    sys.stdout.log('-' * 79 + '\n')
-    sys.stdout.log('Freevo start at %s\n' % ts)
-    sys.stdout.log('-' * 79 + '\n')
-
-def _debug_function_(s, level=1):
-    if DEBUG < level:
-        return
-    # add the current trace to the string
-    where =  traceback.extract_stack(limit = 2)[0]
-    if isinstance( s, unicode ):
-        s = s.encode(encoding, 'replace')
-    s = '%s (%s): %s' % (where[0][where[0].rfind('/')+1:], where[1], s)
-    # print debug message
-    print s
-
 
 def _mem_debug_function_(type, name='', level=1):
     if MEMORY_DEBUG < level:
@@ -337,9 +231,7 @@ def _mem_debug_function_(type, name='', level=1):
     print '<mem> %s: %s' % (type, name)
 
 
-__builtin__.__dict__['_debug_']= _debug_function_
 __builtin__.__dict__['_mem_debug_']= _mem_debug_function_
-
 
 #
 # Default settings
@@ -447,7 +339,7 @@ elif CONF.display == 'dxr3':
 # Load freevo_config.py:
 #
 if os.path.isfile(os.environ['FREEVO_CONFIG']):
-    _debug_('Loading cfg: %s' % os.environ['FREEVO_CONFIG'])
+    log.info('Loading cfg: %s' % os.environ['FREEVO_CONFIG'])
     execfile(os.environ['FREEVO_CONFIG'], globals(), locals())
     
 else:
@@ -508,17 +400,6 @@ else:
 
 # set the umask
 os.umask(UMASK)
-
-# if (not HELPER or IS_WEBSERVER or IS_RECORDSERVER) and not DEBUG_STDOUT:
-#     logger.removeHandler(stdout_logger)
-    
-# # reset log level based on config
-# if DEBUG == 0:
-#     logger.setLevel(logging.WARNING)
-# if DEBUG == 1:
-#     logger.setLevel(logging.INFO)
-# else:
-#     logger.setLevel(logging.DEBUG)
 
 #
 # force fullscreen when freevo is it's own windowmanager

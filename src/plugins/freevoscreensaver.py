@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/11/20 18:23:03  dischi
+# use python logger module for debug
+#
 # Revision 1.4  2004/10/06 19:24:02  dischi
 # switch from rc.py to pyNotifier
 #
@@ -51,6 +54,9 @@ from playlist import Playlist
 import eventhandler
 import event as em
 import fxditem
+
+import logging
+log = logging.getLogger()
 
 # Set to 1 for debug output
 DEBUG = config.DEBUG
@@ -113,7 +119,7 @@ class PluginInterface(plugin.DaemonPlugin):
         eventhandler to handle the events. Always return false since we
 	are just a listener and really can't send back true.
         """
-        _debug_("Saver saw %s" % event.name)
+        log.info("Saver saw %s" % event.name)
 	if menuw:
 	    self.menuw = menuw
 
@@ -138,48 +144,48 @@ class PluginInterface(plugin.DaemonPlugin):
         return FALSE
 
     def poll(self):
-        _debug_("Saver got polled %f" % time.time())
+        log.info("Saver got polled %f" % time.time())
 	if not self.screensaver_showing and (time.time() - self.last_event) > self.saver_delay :
 	    eventhandler.post(em.Event("SCREENSAVER_START"))
 
     def start_saver (self):
-	 _debug_("start screensaver")
-         self.screensaver_showing = TRUE
-         if self.saver_type == 'xscreensaver':
-	     os.system('%s -no-splash &' % self.arg1)
-	     os.system('sleep 5 ; %s -activate' % self.arg2)
-	 elif self.saver_type == 'script':
-	     os.system('%s' % self.arg1)
-	 elif self.saver_type == 'ssr':
-	     self.pl = Playlist('ScreenSaver', playlist=self.arg1, display_type='image', repeat=True)
-	     self.pl.play(menuw=self.menuw)
-	 elif self.saver_type == 'fxd':
-	     mylist = fxditem.mimetype.parse(None, [self.arg1], display_type=self.arg2)
-	     if len(mylist) > 0:
-	         self.pl = mylist[0]
-		 arg = None
-		 if self.arg2 == 'image':
-	             self.pl.repeat = 1
-		 elif self.arg2 == 'video':
-		     arg = '-nosound -loop 0'
-	         self.pl.play(arg=arg, menuw=self.menuw)
-             else:
-	         _debug_("saver thinks fxd blew up trying to parse?")
-	 else:
-	     _debug_("Unknown saver type to start.")
+        log.info("start screensaver")
+        self.screensaver_showing = TRUE
+        if self.saver_type == 'xscreensaver':
+            os.system('%s -no-splash &' % self.arg1)
+            os.system('sleep 5 ; %s -activate' % self.arg2)
+        elif self.saver_type == 'script':
+            os.system('%s' % self.arg1)
+        elif self.saver_type == 'ssr':
+            self.pl = Playlist('ScreenSaver', playlist=self.arg1, display_type='image', repeat=True)
+            self.pl.play(menuw=self.menuw)
+        elif self.saver_type == 'fxd':
+            mylist = fxditem.mimetype.parse(None, [self.arg1], display_type=self.arg2)
+            if len(mylist) > 0:
+                self.pl = mylist[0]
+                arg = None
+                if self.arg2 == 'image':
+                    self.pl.repeat = 1
+                elif self.arg2 == 'video':
+                    arg = '-nosound -loop 0'
+                self.pl.play(arg=arg, menuw=self.menuw)
+            else:
+                log.warning("saver thinks fxd blew up trying to parse?")
+        else:
+            log.error("Unknown saver type to start.")
 
     
     def stop_saver (self):
-	 _debug_("stop screensaver")
-         self.screensaver_showing = FALSE
-         if self.saver_type == 'xscreensaver':
-	     os.system('%s -exit' % self.arg2)
-	 elif self.saver_type == 'script':
-	     os.system('%s' % self.arg2)
-	 elif self.saver_type == 'ssr':
-	     eventhandler.post(em.STOP)
-	 elif self.saver_type == 'fxd':
-	     eventhandler.post(em.STOP)
-	 else:
-	     _debug_("Unknown saver type to stop.")
+        log.info("stop screensaver")
+        self.screensaver_showing = FALSE
+        if self.saver_type == 'xscreensaver':
+            os.system('%s -exit' % self.arg2)
+        elif self.saver_type == 'script':
+            os.system('%s' % self.arg2)
+        elif self.saver_type == 'ssr':
+            eventhandler.post(em.STOP)
+        elif self.saver_type == 'fxd':
+            eventhandler.post(em.STOP)
+        else:
+            log.error("Unknown saver type to stop.")
 

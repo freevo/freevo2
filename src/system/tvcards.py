@@ -35,12 +35,13 @@
 import os
 import re
 import string
+import logging
 
 import config
 from util.ioctl import ioctl, pack, unpack
 
-
-_debug_('imported tvcards')
+log = logging.getLogger()
+log.debug('imported tvcards')
 
 class TVCard:
     def __init__(self, number):
@@ -104,7 +105,7 @@ class DVBCard:
         if name.find('\0') > 0:
             name = name[:name.find('\0')]
         self.name = name
-        _debug_('register dvb device %s' % self.adapter)
+        log.debug('register dvb device %s' % self.adapter)
 
 
 def detect():

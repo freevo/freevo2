@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/11/20 18:22:58  dischi
+# use python logger module for debug
+#
 # Revision 1.2  2004/10/08 20:18:52  dischi
 # plugins register to cleanup, no need to call plugin.cleanup()
 #
@@ -43,6 +46,9 @@ import sys
 
 import config
 
+import logging
+log = logging.getLogger()
+
 _callbacks = []
 
 def register( function, *arg ):
@@ -56,7 +62,7 @@ def unregister( function ):
     """
     for c in _callbacks:
         if c[ 0 ] == function:
-            _debug_( 'unregister shutdown callback: %s' % function, 2 )
+            log.debug('unregister shutdown callback: %s' % function)
             _callbacks.remove( c )
 
 
@@ -96,7 +102,7 @@ def shutdown(menuw=None, argshutdown=None, argrestart=None, exit=False):
 
         # Shutdown all children still running
         for c in _callbacks:
-            _debug_( 'shutting down %s' % c[ 0 ], 2 )
+            log.debug('shutting down %s' % c[ 0 ])
             c[ 0 ]( *c[ 1 ] )
         _callbacks = []
         gui.displays.shutdown()
@@ -116,7 +122,7 @@ def shutdown(menuw=None, argshutdown=None, argrestart=None, exit=False):
     
     # Shutdown all children still running
     for c in _callbacks:
-        _debug_( 'shutting down %s' % c[ 0 ], 2 )
+        log.debug( 'shutting down %s' % c[ 0 ])
         c[ 0 ]( *c[ 1 ] )
         _callbacks = []
 

@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/11/20 18:23:02  dischi
+# use python logger module for debug
+#
 # Revision 1.9  2004/10/05 19:50:55  dischi
 # Cleanup gui/widgets:
 # o remove unneeded widgets
@@ -63,6 +66,8 @@ from mevas.image import CanvasImage
 
 import config
 
+import logging
+log = logging.getLogger('gui')
 
 dim_image = None
 
@@ -117,7 +122,7 @@ class Text(CanvasImage):
         try:
             self._calculate_vars()
         except Exception, e:
-            _debug_(e, 0)
+            log.error(e)
 
         if stringsize == 0:
             CanvasImage.__init__(self, (1, 1))
@@ -132,7 +137,7 @@ class Text(CanvasImage):
         try:
             self._render(text, (0, 0), (stringsize, font.height))
         except Exception, e:
-            _debug_(e, 0)
+            log.error(e)
 
         if dim:
             global dim_image

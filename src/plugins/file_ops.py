@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2004/11/20 18:23:03  dischi
+# use python logger module for debug
+#
 # Revision 1.22  2004/11/01 20:15:40  dischi
 # fix debug
 #
@@ -49,6 +52,9 @@ import plugin
 import util
 
 from gui import ConfirmBox
+
+import logging
+log = logging.getLogger()
 
 class PluginInterface(plugin.ItemPlugin):
     """
@@ -102,7 +108,7 @@ class PluginInterface(plugin.ItemPlugin):
         try:
             os.unlink(filename)
         except:
-            _debug_('can\'t delete %s' % filename, 0)
+            log.error('can\'t delete %s' % filename)
         
     def delete_file(self):
         self.item.files.delete()

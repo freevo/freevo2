@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2004/11/20 18:23:03  dischi
+# use python logger module for debug
+#
 # Revision 1.32  2004/10/12 13:55:23  dischi
 # fix plugin position handling
 #
@@ -93,6 +96,8 @@ import gui
 import eventhandler
 from event import *
 
+import logging
+log = logging.getLogger()
 
 class PluginInterface(plugin.DaemonPlugin):
     """
@@ -255,7 +260,7 @@ class PluginInterface(plugin.DaemonPlugin):
                 # 'not in fullscreen' app.
                 self.remove_background()
             if fullscreen == self.visible:
-                _debug_('set visible %s' % (not fullscreen))
+                log.info('set visible %s' % (not fullscreen))
                 if not self.visible:
                     self.show(False, fade=fade)
                 else:

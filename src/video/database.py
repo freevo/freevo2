@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/11/20 18:23:05  dischi
+# use python logger module for debug
+#
 # Revision 1.2  2004/10/22 18:42:28  dischi
 # fix crash when item is no VideoItem
 #
@@ -49,6 +52,9 @@ import re
 # freevo imports
 import config
 import util
+
+import logging
+log = logging.getLogger('video')
 
 # variables for the hashing function
 fxd_database         = {}
@@ -89,7 +95,7 @@ def create_movie_database():
             print
             return 0
 
-    _debug_("Building the xml hash database...",1)
+    log.info("Building the xml hash database...")
 
     files = []
     if not config.VIDEO_ONLY_SCAN_DATADIR:
@@ -122,5 +128,5 @@ def create_movie_database():
                 for fo in info.__fxd_files_options__:
                     discset_informations[fo['file-id']] = fo['mplayer-options']
             
-    _debug_('done',1)
+    log.info('done')
     return 1
