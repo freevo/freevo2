@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2004/01/09 02:07:05  rshortt
+# Marmalade name and title for favorites.  Thanks Matthieu Weber.
+#
 # Revision 1.21  2004/01/08 17:38:59  outlyer
 # Write an FXD file with some of the XMLTV info for recorded programs. I just
 # wrote this and it's fairly simple, but please make sure it works on your end.
@@ -727,7 +730,9 @@ class RecordServer(xmlrpc.XMLRPC):
 
 
     def xmlrpc_addEditedFavorite(self, name, title, chan, dow, mod, priority):
-        (status, response) = self.addEditedFavorite(name, title, chan, dow, mod, priority)
+        (status, response) = \
+            self.addEditedFavorite(marmalade.unjellyFromXML(name), \
+            marmalade.unjellyFromXML(title), chan, dow, mod, priority)
 
         return (status, 'RecordServer::addEditedFavorite: %s' % response)
 

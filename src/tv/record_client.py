@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/01/09 02:07:05  rshortt
+# Marmalade name and title for favorites.  Thanks Matthieu Weber.
+#
 # Revision 1.11  2003/11/30 16:30:58  rshortt
 # Convert some tv variables to new format (TV_).
 #
@@ -184,7 +187,9 @@ def addFavorite(name, prog, exactchan, exactdow, exacttod):
 
 def addEditedFavorite(name, title, chan, dow, mod, priority):
     try:
-        (status, message) = server.addEditedFavorite(name, title, chan, dow, mod, priority)
+        (status, message) = \
+            server.addEditedFavorite(marmalade.jellyToXML(name), \
+            marmalade.jellyToXML(title), chan, dow, mod, priority)
     except:
         return (FALSE, _('record_client: connection error'))
 
