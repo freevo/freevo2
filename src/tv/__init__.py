@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/12/04 01:21:23  rshortt
+# Detect channels too.
+#
 # Revision 1.12  2004/11/21 10:12:47  dischi
 # improve system detect, use config.detect now
 #
@@ -68,7 +71,7 @@ class PluginInterface(plugin.MainMenuPlugin):
         import tvmenu
         import menu
 
-        config.detect('tvcards')
+        config.detect('tvcards', 'channels')
 
         return [ menu.MenuItem('', action=tvmenu.TVMenu().main_menu,
                                type='main', parent=parent, skin_type='tv') ]
