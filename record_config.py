@@ -3,8 +3,8 @@
 import plugin
 
 # We need to remove all of the plugins activated by the main config.
-plugin.all_plugins = []
-plugin.ptl = {}
+plugin.__all_plugins__ = []
+plugin.__plugin_type_list__ = {}
 
 DEBUG = 0
 
