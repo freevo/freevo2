@@ -12,6 +12,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2002/09/25 01:41:09  gsbarbieri
+# Updated osd.drawstringframed() with new break points to words that are
+# larger than the width.
+# Corrected some bugs in stringsize()
+#
 # Revision 1.24  2002/09/24 16:33:52  gsbarbieri
 # osd.drawstringframed() now supports words larger than width.
 #
@@ -79,7 +84,7 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import socket, time, sys, os
+import socket, time, sys, os, re
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
@@ -562,11 +567,10 @@ class OSD:
                         tmp_occupied_size = 0
                         tmp_size, tmp_height = self.stringsize('-',font,ptsize)
                         # Yes, break it
-                        tmp_pieces = words[word_number].replace('a','a ')
-                        tmp_pieces = tmp_pieces.replace('e','e ')
-                        tmp_pieces = tmp_pieces.replace('i','i ')
-                        tmp_pieces = tmp_pieces.replace('o','o ')
-                        tmp_pieces = tmp_pieces.replace('u','u ')
+                        tmp_pieces = words[word_number]
+                        # The chars where we can split words (making it less ugly to read)
+                        tmp_pieces = re.sub(r'(?P<str>[aeiou!@#$%\*\(\)\\/\-~`\'"\?\.,\[\]]+)',' \g<str> ',tmp_pieces)
+                        tmp_pieces = tmp_pieces.replace('  ',' ')                        
                         tmp_pieces = tmp_pieces.split(' ')
                         pieces = []
                         # check if any pieces still is larger than the width
@@ -615,7 +619,7 @@ class OSD:
                                     # save the text that does not fit.
                                 for tmp in range(word_number, len(pieces)):
                                     rest_words += words[tmp]
-                                    if tmp < len_words: rest_words
+                                    if tmp < len_words: rest_words += ' '
                                     # quit the loop
                                 break
                         occupied_size = lines_size[line_number]
@@ -643,7 +647,7 @@ class OSD:
                         lines_size[line_number] += next_word_size - tmp_word_size  + MINIMUM_SPACE_BETWEEN_WORDS
                     # save the text that does not fit.
                     for tmp in range(word_number, len_words):
-                        rest_words += words[tmp]
+                        rest_words += words[tmp]                        
                         if tmp < len_words: rest_words += ' '
                     # quit the loop
                     break
@@ -810,6 +814,9 @@ class OSD:
     def stringsize(self, string, font=None, ptsize=0):
         size_w = 0
         size_h = 0
+        if string == None:
+            return (0, 0)
+        
         for i in range(len(string)):
             size_w_tmp, size_h_tmp = self.charsize(string[i], font, ptsize)
             size_w += size_w_tmp
