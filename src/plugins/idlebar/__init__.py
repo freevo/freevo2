@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2004/08/23 15:53:41  dischi
+# do not remove from display, only hide
+#
 # Revision 1.24  2004/08/22 20:10:38  dischi
 # changes to new mevas based gui code
 #
@@ -113,6 +116,8 @@ class PluginInterface(plugin.DaemonPlugin):
         self.background     = None
         self.container      = gui.CanvasContainer()
         self.container.set_zindex(10)
+        gui.display.add_child(self.container)
+        
         # Getting current LOCALE
         try:
             locale.resetlocale()
@@ -176,8 +181,7 @@ class PluginInterface(plugin.DaemonPlugin):
     def show(self, update=True):
         if self.visible:
             return
-
-        gui.get_display().add_child(self.container)
+        self.container.show()
         self.visible = True
         self.update()
         if update:
@@ -187,7 +191,7 @@ class PluginInterface(plugin.DaemonPlugin):
     def hide(self, update=True):
         if not self.visible:
             return
-        self.container.unparent()
+        self.container.hide()
         self.visible = False
         if update:
             gui.get_display().update()
@@ -198,6 +202,7 @@ class PluginInterface(plugin.DaemonPlugin):
         add a background behind the bar
         """
         if not self.background:
+            # FIXME: respect fxd settings changes!!!
             s = gui.get_display()
             self.background = gui.imagelib.load('background', (s.width, s.height))
             if self.background:
@@ -207,15 +212,17 @@ class PluginInterface(plugin.DaemonPlugin):
                 self.background.set_alpha(230)
                 self.background.set_zindex(-1)
                 self.container.add_child(self.background)
-                
+        else:
+            self.background.show()
+            
                                                   
     def remove_background(self):
         """
         remove the background behind the bar
         """
         if self.background:
-            self.background.unparent()
-            self.background = None
+            self.background.hide()
+
             
     def eventhandler(self, event, menuw=None):
         """
