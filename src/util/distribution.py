@@ -62,16 +62,17 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/02/25 19:19:36  dischi
+# add skins/plugins from which not to install __init__
+#
 # Revision 1.3  2004/02/19 04:57:58  gsbarbieri
-# Support Web Interface i18n.
-# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
+# Support i18n.
 #
 # Revision 1.2  2003/11/22 12:03:31  dischi
 # do not install __init__ files from freevo
 #
 # Revision 1.1  2003/11/18 15:56:38  dischi
 # distutils.py replacement after 1.4
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -271,7 +272,7 @@ class freevo_install_lib (install_lib.install_lib):
         if os.path.isdir(self.build_dir):
             # remove __init__.py which will override the normal Freevo files
             for i in [ 'plugins', 'plugins/idlebar', 'video/plugins', 'audio/plugins',
-                       'image/plugins', 'tv/plugins']:
+                       'image/plugins', 'tv/plugins', 'skins/plugins']:
                 init = os.path.join(self.build_dir, 'freevo', i, '__init__.py')
                 if os.path.isfile(init):
                     os.remove(init)
