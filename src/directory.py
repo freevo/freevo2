@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.74  2003/12/08 20:37:33  dischi
+# merged Playlist and RandomPlaylist into one class
+#
 # Revision 1.73  2003/12/07 14:45:57  dischi
 # make the busy icon thread save
 #
@@ -104,7 +107,7 @@ import plugin
 import osd
 
 from item import Item
-from playlist import Playlist, RandomPlaylist
+from playlist import Playlist
 from event import *
 from gui import PasswordInputBox, AlertBox, ProgressBox
 
@@ -156,7 +159,7 @@ class DirItem(Playlist):
     class for handling directories
     """
     def __init__(self, directory, parent, name = '', display_type = None, add_args = None):
-        Item.__init__(self, parent)
+        Playlist.__init__(self, parent=parent)
         self.type = 'dir'
         self.menuw = None
         self.menu  = None
@@ -165,11 +168,6 @@ class DirItem(Playlist):
         if name:
             self.name = name
         
-        # variables only for Playlist
-        self.current_item = 0
-        self.playlist = []
-        self.autoplay = False
-
         # variables only for DirItem
         self.dir          = os.path.abspath(directory)
         self.display_type = display_type
@@ -364,33 +362,38 @@ class DirItem(Playlist):
         """
         return a list of actions for this item
         """
-        suffix = []
-
         display_type = self.display_type
         if self.display_type == 'tv':
             display_type = 'video'
 
-        for p in plugin.mimetype(display_type):
-            suffix += p.suffix()
+        items = [ ( self.cwd, _('Browse directory')) ]
 
-        items = [ ( self.cwd, _('Browse directory')),
-                  ( self.play, _('Play all files in directory')) ]
+        has_files = False
+        has_dirs  = False
 
-        if display_type in self.DIRECTORY_AUTOPLAY_ITEMS:
-            for d in util.getdirnames(self.dir):
-                if not (d.endswith('CVS') or d.endswith('.xvpics') or \
-                        d.endswith('.thumbnails') or d.endswith('.pics')):
-                    break
-            else:
-                items.reverse()
+        for f in vfs.listdir(self.dir):
+            if vfs.isfile(f):
+                has_files = True
+            if vfs.isdir(f) and not (f.endswith('CVS') or f.endswith('.xvpics') or \
+                                     f.endswith('.thumbnails') or f.endswith('.pics')):
+                has_dirs = True
+            if has_dirs and has_files:
+                break
 
-        if suffix:
-            items += [ RandomPlaylist(_('Random play all items'), (self.dir, suffix),
-                                      self, recursive=False),
-                       RandomPlaylist(_('Recursive random play all items'),
-                                      (self.dir, suffix), self),
-                       RandomPlaylist(_('Recursive play all items'), (self.dir, suffix),
-                                      self, random = False) ]
+        if has_files:
+            items.append((self.play, _('Play all files in directory')))
+            
+        if display_type in self.DIRECTORY_AUTOPLAY_ITEMS and not has_dirs:
+            items.reverse()
+
+        if has_files:
+            items.append(Playlist(_('Random play all items'), [ (self.dir, 0) ],
+                                  self, display_type=display_type, random=True))
+        if has_dirs:
+            items += [ Playlist(_('Recursive random play all items'), [ (self.dir, 1) ],
+                                self, display_type=display_type, random=True),
+                       Playlist(_('Recursive play all items'), [ (self.dir, 1) ],
+                                self, display_type=display_type, random=False) ]
 
         items.append((self.configure, _('Configure directory'), 'configure'))
         return items
@@ -506,8 +509,7 @@ class DirItem(Playlist):
         # random playlist (only active for audio)
         if self.display_type and self.display_type in self.DIRECTORY_ADD_RANDOM_PLAYLIST \
                and len(self.play_items) > 1:
-            pl = Playlist(self.play_items, self)
-            pl.randomize()
+            pl = Playlist(_('Random playlist'), self.play_items, self, random=True)
             pl.autoplay = True
             items = [ pl ] + items
 

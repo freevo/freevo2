@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/12/08 20:37:34  dischi
+# merged Playlist and RandomPlaylist into one class
+#
 # Revision 1.24  2003/11/08 12:58:41  dischi
 # better support for mixed discs
 #
@@ -50,7 +53,7 @@ import os
 
 from item import Item
 from audioitem import AudioItem
-from playlist import Playlist, RandomPlaylist
+from playlist import Playlist
 from directory import DirItem
 
 class AudioDiskItem(Playlist):
@@ -59,7 +62,7 @@ class AudioDiskItem(Playlist):
     """
     def __init__(self, disc_id, parent, devicename = None, display_type = None):
 
-        Item.__init__(self, parent)
+        Playlist.__init__(self, parent=parent)
         self.type = 'audiocd'
         self.media = None
         self.disc_id = disc_id
@@ -67,8 +70,6 @@ class AudioDiskItem(Playlist):
         self.name = _('Unknown CD Album')
         
         # variables only for Playlist
-        self.current_item = 0
-        self.playlist = []
         self.autoplay = 0
 
         # variables only for DirItem
@@ -136,10 +137,9 @@ class AudioDiskItem(Playlist):
         items = []
 
         # random playlist (only active for audio)
-        if len(play_items) > 1 and config.AUDIO_RANDOM_PLAYLIST == 1:
-            pl = Playlist(play_items, self)
-            pl.randomize()
-            pl.autoplay = 1
+        if 'audio' in self.DIRECTORY_ADD_RANDOM_PLAYLIST and len(play_items) > 1:
+            pl = Playlist(_('Random playlist'), play_items, self, random=True)
+            pl.autoplay = True
             items += [ pl ]
 
         items += play_items

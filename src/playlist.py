@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2003/12/08 20:37:33  dischi
+# merged Playlist and RandomPlaylist into one class
+#
 # Revision 1.39  2003/12/08 16:18:44  mikeruelle
 # getting a lot of crashes. quickfix
 #
@@ -70,6 +73,39 @@ from item import Item
 
 
 class Playlist(Item):
+
+    def __init__(self, name='', playlist=[], parent=None, display_type=None,
+                 random=False, build=False, autoplay=False, repeat=False):
+        """
+        Init the playlist
+        """
+        Item.__init__(self, parent)
+
+        self.type     = 'playlist'
+        self.menuw    = None
+        self.name     = name
+        
+        if (isinstance(playlist, str) or isinstance(playlist, unicode)) and not name:
+            self.name = playlist
+            
+        # variables only for Playlist
+        self.current_item = None
+        self.playlist     = playlist
+        self.autoplay     = autoplay
+        self.repeat       = repeat
+        self.display_type = display_type
+
+        self.__build__    = False
+        self.suffixlist   = []
+        self.get_plugins  = []
+
+        self.background_playlist = None
+        if build:
+            self.build()
+
+        self.random = random
+
+
     def read_m3u(self, plsname):
         """
         This is the (m3u) playlist reading function.
@@ -77,7 +113,6 @@ class Playlist(Item):
         Arguments: plsname  - the playlist filename
         Returns:   The list of interesting lines in the playlist
         """
-
         try:
             lines = util.readfile(plsname)
         except IOError:
@@ -92,11 +127,7 @@ class Playlist(Item):
             if line.endswith('\r\n'):
                 line = line.replace('\\', '/') # Fix MSDOS slashes
             if os.path.exists(os.path.join(curdir,line)):
-                # XXX add display_type
-                for p in plugin.mimetype(None):
-                    for i in p.get(self, [os.path.join(curdir, line)]):
-                        self.playlist.append(i)
-                        break
+                self.playlist.append(os.path.join(curdir,line))
             
 
     def read_pls(self, plsname):
@@ -106,7 +137,6 @@ class Playlist(Item):
         Arguments: plsname  - the playlist filename
         Returns:   The list of interesting lines in the playlist
         """
-
         try:
             lines = util.readfile(plsname)
         except IOError:
@@ -126,11 +156,8 @@ class Playlist(Item):
         for line in playlist_lines:
             if line.endswith('\r\n'):
                 line = line.replace('\\', '/') # Fix MSDOS slashes
-            # XXX add display_type
-            for p in plugin.mimetype(None):
-                for i in p.get(self, [os.path.join(curdir, line)]):
-                    self.playlist.append(i)
-                    break
+            if os.path.exists(os.path.join(curdir,line)):
+                self.playlist.append(os.path.join(curdir,line))
             
 
 
@@ -176,7 +203,7 @@ class Playlist(Item):
                 if ss_delay == []:
                     ss_delay += [5]
 
-                for p in plugin.mimetype('image'):
+                for p in self.get_plugins:
                     for i in p.get(self, [os.path.join(curdir, ss_name[0])]):
                         if i.type == 'image':
                             i.name     = ss_caption[0]
@@ -185,45 +212,62 @@ class Playlist(Item):
                             break
 
 
-    def __init__(self, file, parent):
-        Item.__init__(self, parent)
-        self.type     = 'playlist'
-        self.menuw    = None
-
-        # variables only for Playlist
-        self.current_item = None
-        self.playlist = []
-        self.autoplay = False
-
-        if isinstance(file, list):      # file is a playlist
-            self.filename = ''
-            for i in file:
-                element = copy.copy(i)
-                element.parent = self
-                self.playlist += [ element ]
-            self.name = 'Playlist'
-        else:
-            self.filename = file
-            self.name    = os.path.splitext(os.path.basename(file))[0]
-
-        self.background_playlist = None
-
-
-    def read_playlist(self):
+    def build(self):
         """
-        Read the playlist from file and create the items
+        Build the playlist. Create a list of items and filenames. This function
+        will load the playlist file or expand directories
         """
-        if hasattr(self, 'filename') and self.filename and not self.playlist:
-            f=open(self.filename, "r")
-            line = f.readline()
-            f.close
-            if line.find("[playlist]") > -1:
-                self.read_pls(self.filename)
-            elif line.find("[Slides]") > -1:
-                self.read_ssr(self.filename)
-            else:
-                self.read_m3u(self.filename)
+        if self.suffixlist:
+            # we called this function before
+            return
         
+        playlist      = self.playlist
+        self.playlist = []
+        
+        for p in plugin.mimetype(self.display_type):
+            if self.display_type in p.display_type:
+                self.suffixlist += p.suffix()
+                self.get_plugins.append(p)
+                
+        if isinstance(playlist, str) or isinstance(playlist, unicode):
+            # it's a filename with a playlist
+            try:
+                f=open(self.filename, "r")
+                line = f.readline()
+                f.close
+                if line.find("[playlist]") > -1:
+                    self.read_pls(self.filename)
+                elif line.find("[Slides]") > -1:
+                    self.read_ssr(self.filename)
+                else:
+                    self.read_m3u(self.filename)
+            except OSError, e:
+                print 'playlist error: %s' % e
+
+
+        # self.playlist is a list of Items or strings (filenames)
+        for i in playlist:
+            if isinstance(i, Item):
+                # Item object, correct parent
+                i = copy.copy(i)
+                i.parent = self
+                self.playlist.append(i)
+
+            elif isinstance(i, list) or isinstance(i, tuple) and \
+                 len(i) == 2 and vfs.isdir(i[0]):
+                # (directory, recursive=True|False)
+                if i[1]:
+                    self.playlist += util.match_files_recursively(i[0], self.suffixlist)
+                else:
+                    self.playlist += util.match_files(i[0], self.suffixlist)
+                # set autoplay to True on such big lists
+                self.autoplay = True
+
+            else:
+                # filename
+                self.playlist.append(i)
+        self.__build__ = True
+                
 
     def copy(self, obj):
         """
@@ -246,13 +290,13 @@ class Playlist(Item):
             element = random.choice(old)
             old.remove(element)
             self.playlist += [ element ]
-        self.name = _('Random Playlist')
 
         
     def actions(self):
         """
         return the actions for this item: play and browse
         """
+        self.build()
         if self.autoplay:
             return [ ( self.play, _('Play') ),
                      ( self.browse, _('Browse Playlist') ) ]
@@ -265,7 +309,24 @@ class Playlist(Item):
         """
         show the playlist in the menu
         """
-        self.read_playlist()
+        self.build()
+        for item in self.playlist:
+            if not callable(item):
+                # element is a string, make a correct item
+                play_items = []
+
+                # get a real item
+                for p in self.get_plugins:
+                    for i in p.get(self, [ item ]):
+                        play_items.append(i)
+
+                if play_items:
+                    pos = self.playlist.index(item)
+                    self.playlist[pos] = play_items[0]
+
+        if self.random:
+            self.randomize()
+
         moviemenu = menu.Menu(self.name, self.playlist)
         menuw.pushmenu(moviemenu)
         
@@ -274,21 +335,44 @@ class Playlist(Item):
         """
         play the playlist
         """
-        self.read_playlist()
         if not self.menuw:
             self.menuw = menuw
+
 
         if not self.playlist:
             # XXX PopupBox please
             print _('empty playlist')
             return False
         
+
         if not arg or arg != 'next':
+            # first start
+            self.build()
+            if self.random:
+                self.randomize()
+
             if self.background_playlist:
                 self.background_playlist.play()
+
             self.current_item = self.playlist[0]
+
+
+        if not callable(self.current_item):
+            # element is a string, make a correct item
+            play_items = []
+
+            # get a real item
+            for p in self.get_plugins:
+                for i in p.get(self, [ self.current_item ]):
+                    play_items.append(i)
+
+            if play_items:
+                pos = self.playlist.index(self.current_item)
+                self.current_item = play_items[0]
+                self.playlist[pos] = play_items[0]
+
             
-        if not self.current_item.actions():
+        if not hasattr(self.current_item, 'actions') or not self.current_item.actions():
             # skip item
             pos = self.playlist.index(self.current_item)
             pos = (pos+1) % len(self.playlist)
@@ -341,7 +425,7 @@ class Playlist(Item):
             pos = self.playlist.index(self.current_item)
             pos = (pos+1) % len(self.playlist)
 
-            if pos:
+            if pos or self.repeat:
                 if hasattr(self.current_item, 'stop'):
                     try:
                         self.current_item.stop()
@@ -353,10 +437,11 @@ class Playlist(Item):
                 return True
             elif event == PLAYLIST_NEXT:
                 rc.post_event(Event(OSD_MESSAGE, arg=_('no next item in playlist')))
+
                 
         # end and no next item
         if event in (PLAY_END, USER_END, STOP):
-            if hasattr(self, 'background_playlist') and self.background_playlist:
+            if self.background_playlist:
                 self.background_playlist.stop()
             self.current_item = None
             if menuw:
@@ -384,154 +469,6 @@ class Playlist(Item):
         return Item.eventhandler(self, event, menuw)
 
 
-
-
-
-class RandomPlaylist(Playlist):
-    """
-    A playlist that can be played in random mode, recursive in subdirs
-    or a combination of both. It is _not_ possible to browse this playlist
-    right now, only play it.
-    """
-    def __init__(self, name, playlist, parent, recursive = True,
-                 random = True):
-        Item.__init__(self, parent)
-        self.type         = 'playlist'
-        self.name         = name
-        
-        # variables only for Playlist
-        self.current_item = None
-        self.playlist     = []
-        self.autoplay     = True
-        self.unplayed     = playlist
-        self.recursive    = recursive
-        self.random       = random
-
-        self.background_playlist = None
-
-
-    def actions(self):
-        return [ ( self.play, _('Play') ) ]
-
-
-    def play_next(self, arg=None, menuw=None):
-        if not self.unplayed:
-            return False
-        
-        if self.random:
-            element = random.choice(self.unplayed)
-        else:
-            element = self.unplayed[0]
-        self.unplayed.remove(element)
-
-        if not callable(element):
-            # element is a string, make a correct item
-            files = [ element, ]
-            play_items = []
-
-            # get a real item
-            for p in plugin.mimetype(None):
-                for i in p.get(self, files):
-                    play_items.append(i)
-
-            if not play_items:
-                return False
-                
-            element = play_items[0]
-                
-        self.playlist += [ element ]
-        self.current_item = element
-        element.parent = self
-        element(menuw=menuw)
-        return True
-        
-
-    def play(self, arg=None, menuw=None):
-        if not self.menuw:
-            self.menuw = menuw
-
-        if self.background_playlist:
-            self.background_playlist.play()
-            
-        if isinstance(self.unplayed, tuple):
-            # playlist is a list: dir:prefix
-            # build a correct playlist now
-            dir, prefix = self.unplayed
-            if self.recursive:
-                self.unplayed = util.match_files_recursively(dir, prefix)
-            else:
-                self.unplayed = util.match_files(dir, prefix)
-
-        # reset playlist
-        self.unplayed += self.playlist
-        self.playlist = []
-
-        # play
-        if self.unplayed:
-            return self.play_next(arg=arg, menuw=menuw)
-        return False
-
-
-    def cache_next(self):
-        pass
-
-
-    def stop(self):
-        """
-        stop playling
-        """
-        if self.background_playlist:
-            self.background_playlist.stop()
-        if self.current_item:
-            self.current_item.parent = self.parent
-            if hasattr(self.current_item, 'stop'):
-                try:
-                    self.current_item.stop()
-                except OSError:
-                    pass
-        
-
-    def eventhandler(self, event, menuw=None):
-        if not menuw:
-            menuw = self.menuw
-
-        if (event == PLAYLIST_NEXT or event == PLAY_END) and self.unplayed:
-            if self.current_item:
-                self.current_item.parent = self.parent
-                if hasattr(self.current_item, 'stop'):
-                    try:
-                        self.current_item.stop()
-                    except OSError:
-                        _debug_('ignore playlist event', 1)
-                        return True
-            return self.play_next(menuw=menuw)
-
-        if event == PLAYLIST_NEXT and not self.unplayed:
-            rc.post_event(Event(OSD_MESSAGE, arg=_('no next item in playlist')))
-            return True
-        
-        # end and no next item
-        if event in (STOP, PLAY_END, USER_END):
-            if self.background_playlist:
-                self.background_playlist.stop()
-
-            if self.current_item:
-                self.current_item.parent = self.parent
-            self.current_item = None
-            if menuw:
-                if hasattr(menuw.menustack[-1], 'is_submenu'):
-                    menuw.back_one_menu()
-                if menuw.visible:
-                    menuw.refresh()
-                else:
-                    menuw.show()
-            return True
-            
-        if event == PLAYLIST_PREV:
-            print 'random playlist up: not implemented yet'
-
-        # give the event to the next eventhandler in the list
-        return Item.eventhandler(self, event, menuw)
     
 
 
@@ -560,7 +497,7 @@ class Mimetype(plugin.MimetypePlugin):
         items = []
 
         for filename in util.find_matches(files, self.suffix()):
-            items.append(Playlist(filename, parent))
+            items.append(Playlist(playlist=filename, parent=parent, build=True))
             files.remove(filename)
 
         return items
@@ -603,35 +540,21 @@ class Mimetype(plugin.MimetypePlugin):
           </playlist>
         </freevo>
         """
-        suffix = []
-        for p in plugin.mimetype(fxd.getattr(None, 'display_type')):
-            suffix += p.suffix()
-
         children = fxd.get_children(node, 'files')
         if children:
             children = children[0].children
 
         items = []
         for child in children:
-            try:
-                if child.name == 'directory':
-                    try:
-                        recursive = int(fxd.getattr(child, 'recursive', 0))
-                    except:
-                        recursive = False
-                    if recursive:
-                        items += util.match_files_recursively(fxd.gettext(child), suffix)
-                    else:
-                        items += util.match_files(fxd.gettext(child), suffix)
+            if child.name == 'directory':
+                items.append((fxd.gettext(child), fxd.getattr(child, 'recursive', 0)))
 
-                elif child.name == 'file':
-                    items.append(fxd.gettext(child))
-            except OSError, e:
-                print 'playlist error:'
-                print e
+            elif child.name == 'file':
+                items.append(fxd.gettext(child))
 
-        pl = RandomPlaylist('', items, fxd.getattr(None, 'parent', None),
-                            random = fxd.getattr(node, 'random', 0))
+        pl = Playlist('', items, fxd.getattr(None, 'parent', None),
+                      display_type=fxd.getattr(None, 'display_type'),
+                      build=True, random=fxd.getattr(node, 'random', 0))
 
         pl.name     = fxd.getattr(node, 'title')
         pl.xml_file = fxd.getattr(None, 'filename', '')
@@ -645,4 +568,3 @@ class Mimetype(plugin.MimetypePlugin):
 
 # load the MimetypePlugin
 plugin.activate(Mimetype())
-

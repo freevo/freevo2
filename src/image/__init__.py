@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/12/08 20:37:34  dischi
+# merged Playlist and RandomPlaylist into one class
+#
 # Revision 1.9  2003/12/08 15:58:50  mikeruelle
 # change cwd to get
 #
@@ -57,7 +60,7 @@ import util
 import plugin
 
 from imageitem import ImageItem
-from playlist import Playlist, RandomPlaylist
+from playlist import Playlist
 
 class PluginInterface(plugin.MimetypePlugin):
     """
@@ -176,9 +179,8 @@ class PluginInterface(plugin.MimetypePlugin):
                 print 'slideshow error:'
                 print e
 
-        pl = Playlist(items, fxd.getattr(None, 'parent', None))
-        if fxd.getattr(node, 'random', 0):
-            pl.randomize()
+        pl = Playlist('', items, fxd.getattr(None, 'parent', None),
+                      random=fxd.getattr(node, 'random', 0))
         pl.autoplay = True
 
         pl.name     = fxd.getattr(node, 'title')
@@ -213,7 +215,7 @@ class PluginInterface(plugin.MimetypePlugin):
                 print e
 
         if files:
-            pl.background_playlist = RandomPlaylist('', files, None, random = random)
+            pl.background_playlist = Playlist(playlist=files, random = random)
 
         # add item to list
         fxd.parse_info(fxd.get_children(node, 'info', 1), pl)
