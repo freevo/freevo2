@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/02/19 16:59:39  outlyer
+# Changing a stray print into a 'debug' to match the rest of the OSD.
+#
 # Revision 1.16  2003/02/18 23:08:25  rshortt
 # Hooking up the code in src/gui.  Added osd.focused_app to keep track of
 # what should first receive the events.  In main this is set to be the
@@ -811,7 +814,8 @@ class OSD:
         if not return_y0:
             return_y0 = y0
 
-        print "osd.drawstringframed_soft():\n\n%s\n" % lines
+        if DEBUG >= 3:
+            print "osd.drawstringframed_soft():\n\n%s\n" % lines
 
         if bgcolor != None:
             self.drawbox(x,y, x+width, y+height, width=-1, color=bgcolor, layer=layer)
