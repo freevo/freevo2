@@ -121,9 +121,7 @@ def getcmd():
         while 1:
 
             if 'OSD_SDL' in dir(config):  
-                if '_cb' in dir(osd):
-                    event = osd._cb()
-
+                event = osd._cb()
                 if event: break
             
             event = rc.poll()
