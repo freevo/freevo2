@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/09/20 17:02:49  dischi
+# do not scan with mmpython
+#
 # Revision 1.1  2003/09/20 12:58:44  dischi
 # small browser to get video from the web
 #
@@ -103,7 +106,6 @@ class Link(Item):
             all += line + ' '
         all = all.replace('\r', '').replace('\t', ' ')
 
-
         # find names for links (text between <a>)
         name_map = {}
         m = re.compile('href="([^"]*)">([^<]*)</a>', re.I).findall(all)
@@ -190,7 +192,7 @@ class Link(Item):
                 if not url[0] in murl:
                     murl.append(url[0])
             for url in murl:
-                movies.append(VideoItem(url, self))
+                movies.append(VideoItem(url, self, parse=False))
                 movies[-1].name = 'Video: ' + url[url.rfind('/')+1:]
 
         # all done
