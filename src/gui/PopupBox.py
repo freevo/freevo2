@@ -10,6 +10,12 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/04/06 21:08:52  dischi
+# Make osd.focusapp the default parent (string "osd").
+# Maybe someone should clean up the paramter, a PopupBox and an Alertbox
+# needs no colors because they come from the skin and parent should be
+# the last parameter.
+#
 # Revision 1.12  2003/03/30 20:50:00  rshortt
 # Improvements in how we get skin properties.
 #
@@ -140,18 +146,14 @@ class PopupBox(GUIObject):
     Trying to make a standard popup/dialog box for various usages.
     """
     
-    def __init__(self, parent=None, text=" ", left=None, top=None, width=360, height=60,
+    def __init__(self, parent='osd', text=" ", left=None, top=None, width=360, height=60,
                  bg_color=None, fg_color=None, icon=None, border=None, 
                  bd_color=None, bd_width=None):
 
-        self.parent = parent
-        
-        GUIObject.__init__(self, left, top, width, height, bg_color, fg_color)
-
         if parent:
-            parent.add_child(self)
-            self.osd.focused_app = self
-
+            self.parent = parent
+            
+        GUIObject.__init__(self, left, top, width, height, bg_color, fg_color)
 
         self.border   = border
         self.bd_color = bd_color

@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/04/06 21:08:53  dischi
+# Make osd.focusapp the default parent (string "osd").
+# Maybe someone should clean up the paramter, a PopupBox and an Alertbox
+# needs no colors because they come from the skin and parent should be
+# the last parameter.
+#
 # Revision 1.7  2003/03/30 15:54:07  rshortt
 # Added 'parent' as a constructor argument for PopupBox and all of its
 # derivatives.
@@ -98,13 +104,15 @@ class AlertBox(PopupBox):
     bd_width  Border width Integer
     """
 
-    def __init__(self, parent=None, text=" ", left=None, top=None, width=300,
+    def __init__(self, parent='osd', text=" ", left=None, top=None, width=300,
                  height=110, bg_color=None, fg_color=None, icon=None, 
                  border=None, bd_color=None, bd_width=None):
 
-        PopupBox.__init__(self, parent, text, left, top, width, height, bg_color, 
+        if parent:
+            self.parent = parent
+            
+        PopupBox.__init__(self, self.parent, text, left, top, width, height, bg_color, 
                           fg_color, icon, border, bd_color, bd_width)
-
 
         self.set_h_align(Align.CENTER)
 
@@ -120,7 +128,7 @@ class AlertBox(PopupBox):
 
 
     def eventhandler(self, event):
-        if DEBUG: print 'AlertBox: EVENT = %s' % event
+        if DEBUG: print 'AlertBox: EVENT = %s for %s' % (event, self)
 
         trapped = [self.rc.UP, self.rc.DOWN, self.rc.LEFT, self.rc.RIGHT]
         if trapped.count(event) > 0:
