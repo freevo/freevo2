@@ -1,10 +1,10 @@
 Python Library Documentation: module pymetar
 
 NAME
-    pymetar - Pymetar v0.4 (c) 2002 Tobias Klausman
+    pymetar - Pymetar v0.5 (c) 2002 Tobias Klausman
 
 FILE
-    /home/klausman/pymetar-0.4/pymetar.py
+    /home/klausman/pymetar-0.5/pymetar.py
 
 DESCRIPTION
     Pymetar is a python module and command line tool designed to fetch Metar
@@ -226,10 +226,10 @@ DATA
     __author__ = 'klausman-usenet@tuts.net'
     __file__ = './pymetar.pyc'
     __name__ = 'pymetar'
-    __version__ = '0.4'
+    __version__ = '0.5'
 
 VERSION
-    0.4
+    0.5
 
 AUTHOR
     klausman-usenet@tuts.net

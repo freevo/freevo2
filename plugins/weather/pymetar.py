@@ -1,5 +1,6 @@
 # Copyright (C) 2002  Tobias Klausmann
 # Modified by Jerome Alet
+# Code contributed by Jerome Alet and Davide Di Blasi
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,13 +20,13 @@
 
 import string
 import re
-import urllib
+import urllib2
 import types
 import math, fpformat
 
 __author__ = "klausman-usenet@tuts.net"
 
-__version__ = "0.4"
+__version__ = "0.5"
 
 __doc__ = """Pymetar v%s (c) 2002 Tobias Klausman
 
@@ -754,7 +755,13 @@ class MetarReport:
         self._ClearAllFields()
         station=string.upper(station)
         self.reporturl="%s%s.TXT" % (baseurl, station)
-        fn=urllib.urlopen(self.reporturl)
+        
+        # Honor HTTP_PROXY environment var
+        # Thanks to Davide Di Blasi for suggesting this
+        urllib2.install_opener(
+            urllib2.build_opener(urllib2.ProxyHandler, urllib2.HTTPHandler))
+        
+        fn=urllib2.urlopen(self.reporturl)
         # Dump entire report in a variable
         self.fullreport=fn.read()
 
