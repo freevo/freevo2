@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.88  2003/11/16 10:18:10  dischi
+# add -dpms for xset
+#
 # Revision 1.87  2003/11/02 09:01:28  dischi
 # check for missing libs on startup
 #
@@ -386,7 +389,7 @@ if __name__ == "__main__":
         return tracefunc
 
     if len(sys.argv) >= 2 and sys.argv[1] == '--force-fs':
-        os.system('xset s off')
+        os.system('xset -dpms s off')
         config.START_FULLSCREEN_X = 1
         
     if len(sys.argv) >= 2 and sys.argv[1] == '--trace':
