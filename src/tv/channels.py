@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2004/10/23 15:51:54  rshortt
+# -Move get_dummy_programs() out of the ChannelItem class and into the module.
+# -Bugfixes for dummy programs.
+# -Add channels from config.TV_CHANNELS if they don't exist in the database.
+#
 # Revision 1.28  2004/10/23 14:46:35  rshortt
 # -Move ProgramItem into program_display.py (at least for now).
 # -Move when_listings_expire() and get_chan_displayname() to here from util.
@@ -313,6 +318,33 @@ def when_listings_expire():
     return left
 
 
+def get_dummy_programs(channel_id, start, stop):
+    """
+    Return some default ProgramItems with intervals no longer than a
+    set default.
+    """
+    default_prog_interval = 30 * 60
+    dummies = []
+    d_start = start
+    d_stop  = 0
+
+    sec_after_last = start % default_prog_interval
+    sec_until_next = default_prog_interval - sec_after_last
+
+    while(d_stop < stop):
+        d_stop = d_start + sec_until_next
+        if d_stop > stop:
+            d_stop = stop
+
+        dummies.append(ProgramItem(u'NO DATA', d_start, d_stop,
+                                   id=-1, channel_id=id))
+
+        sec_until_next = default_prog_interval
+        d_start = d_stop
+
+    return dummies
+ 
+
 
 class ChannelItem(Item):
     """
@@ -416,7 +448,7 @@ class ChannelItem(Item):
 
         l = len(new_progs)
         if not l:
-            for d in get_dummy_programs(start, stop):
+            for d in get_dummy_programs(self.info['id'], start, stop):
                 dummy_progs.append(d)
 
         for p in new_progs:
@@ -424,20 +456,22 @@ class ChannelItem(Item):
             if i == 0:
                 # fill gaps before
                 if p.start > start:
-                    for d in get_dummy_programs(start, p.start):
+                    for d in get_dummy_programs(self.info['id'], start, 
+                                                p.start):
                         dummy_progs.append(d)
 
             if i < l-1:
                 # fill gaps between programs
                 next_p = new_progs[i+1]
                 if p.stop < next_p.start: 
-                    for d in get_dummy_programs(p.stop, next_p.start):
+                    for d in get_dummy_programs(self.info['id'], p.stop, 
+                                                next_p.start):
                         dummy_progs.append(d)
 
             elif i == l-1:
                 # fill gaps at the end
                 if p.stop < stop:
-                    for d in get_dummy_programs(p.stop, stop):
+                    for d in get_dummy_programs(self.info['id'], p.stop, stop):
                         dummy_progs.append(d)
                 
 
@@ -450,33 +484,6 @@ class ChannelItem(Item):
         # TODO: check for duplicates?
         self.sort_programs()
 
-
-    def get_dummy_programs(self, start, stop):
-        """
-        Return some default ProgramItems with intervals no longer than a
-        set default.
-        """
-        default_prog_interval = 30 * 60
-        dummies = []
-        d_start = start
-        d_stop  = 0
-
-        sec_after_last = start % default_prog_interval
-        sec_until_next = default_prog_interval - sec_after_last
-
-        while(d_stop < stop):
-            d_stop = d_start + sec_until_next
-            if d_stop > stop:
-                d_stop = stop
-
-            dummies.append(ProgramItem(u'NO DATA', d_start, d_stop,
-                                       id=-1, channel_id=self.info['id']))
-
-            sec_until_next = default_prog_interval
-            d_start = d_stop
-
-        return dummies
- 
 
     def get(self, start, stop=0):
         """
@@ -621,8 +628,11 @@ class ChannelList:
                 self.add_channel(ChannelItem(id=c.id, call_sign=c.call_sign, 
                                              uri=c.tuner_id))
 
-        # TODO:  Check TV_CHANNELS for any channels that aren't in EPGDB then
-        #        at them to the list.
+        # Check TV_CHANNELS for any channels that aren't in EPGDB then
+        # at them to the list.
+        for c in config.TV_CHANNELS:
+            if not c[0] in self.channel_dict.keys():
+                self.add_channel(ChannelItem(id=c[0], call_sign=c[1], uri=c[2]))
         
 
     def add_channel(self, channel):
