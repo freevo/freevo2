@@ -2,6 +2,7 @@
 #include <X11/Xlib.h> 
 #include <X11/Xutil.h> 
 #include <unistd.h>
+#include <stdlib.h>
 #include <assert.h>
 
 #include "x11.h"
@@ -171,16 +172,14 @@ x11_drawbitmap (int x, int y, int width, int height, uint8 *pBitmap)
    uint8 r, g, b, a;
    
    
-   printf ("Got ptr = %p\n", pBitmap);
-   
    for (i = 0; i < height; i++) {
       for (j = 0; j < width; j++) {
-         b = pBitmap[i*width*4+j*4+0];
-         g = pBitmap[i*width*4+j*4+1];
-         r = pBitmap[i*width*4+j*4+2];
-         a = pBitmap[i*width*4+j*4+3];
+         a = pBitmap[i*width*4+j*4+0];
+         r = pBitmap[i*width*4+j*4+1];
+         g = pBitmap[i*width*4+j*4+2];
+         b = pBitmap[i*width*4+j*4+3];
 
-         /*  printf ("%3d %3d   %3d   %3d   %3d     %3d", i, j, r, g, b, a); */
+         /*  printf ("%3d %3d   %3d   %3d   %3d     %3d", i, j, r, g, b, a);  */
          
          if (a) {
             float alpha = (float) (((float) a) / 255.0);
@@ -195,10 +194,10 @@ x11_drawbitmap (int x, int y, int width, int height, uint8 *pBitmap)
             XSetForeground (dpy, gc, color);
             XDrawPoint (dpy, w, gc, x+j, y+i);
          }
-         /*  printf ("\n"); */
+         /*  printf ("\n");  */
       }
 
-      /*  printf ("\n\n"); */
+      /*  printf ("\n\n");  */
       
    }
    
