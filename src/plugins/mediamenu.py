@@ -1,45 +1,17 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # mediamenu.py - Basic menu for all kinds of media
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes:
-# Todo:        
+# This plugin can create submenus for the different kind of media plugins.
 #
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.44  2004/12/31 11:57:43  dischi
-# renamed SKIN_* and OSD_* variables to GUI_*
+# First edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
 #
-# Revision 1.43  2004/11/27 13:26:56  dischi
-# smaller bugfixes
-#
-# Revision 1.42  2004/11/20 18:23:03  dischi
-# use python logger module for debug
-#
-# Revision 1.41  2004/11/01 20:15:40  dischi
-# fix debug
-#
-# Revision 1.40  2004/08/14 08:40:08  dischi
-# bugfix for new menu interface
-#
-# Revision 1.39  2004/07/26 18:10:18  dischi
-# move global event handling to eventhandler.py
-#
-# Revision 1.38  2004/07/25 19:47:39  dischi
-# use application and not rc.app
-#
-# Revision 1.37  2004/07/10 12:33:40  dischi
-# header cleanup
-#
-# Revision 1.36  2004/03/18 15:38:18  dischi
-# Automouter patch to check for hosts in mediamenu from Soenke Schwardt.
-# See doc of VIDEO_ITEMS for details
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -56,26 +28,29 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
-
+# python imports
 import os
 import copy
+import logging
 
+# freevo imports
 import config
-import menu
-
-import directory
-import eventhandler
 
 import plugin
 import plugins.rom_drives
 
 from event import *
 from item import Item
+from directory import DirItem
+from mainmenu import MainMenuItem
+from menu import Menu
 
-import logging
+
+# get logging object
 log = logging.getLogger()
+
 
 class PluginInterface(plugin.MainMenuPlugin):
     """
@@ -86,13 +61,15 @@ class PluginInterface(plugin.MainMenuPlugin):
     def __init__(self, type=None, force_text_view=FALSE):
         plugin.MainMenuPlugin.__init__(self)
         self.type = type
-        self.force_text_view = force_text_view or config.GUI_MEDIAMENU_FORCE_TEXTVIEW
+        self.force_text_view = force_text_view or \
+                               config.GUI_MEDIAMENU_FORCE_TEXTVIEW
 
 
     def items(self, parent):
-        return [ menu.MenuItem('', action=MediaMenu().main_menu,
-                               arg=(self.type,self.force_text_view), type='main',
-                               parent=parent, skin_type = self.type) ]
+        return [ MainMenuItem('', action=MediaMenu().main_menu,
+                              arg=(self.type,self.force_text_view),
+                              type='main', parent=parent,
+                              skin_type = self.type) ]
 
 
 
@@ -101,7 +78,7 @@ class MediaMenu(Item):
     This is the main menu for audio, video and images. It displays the default
     directories and the ROM_DRIVES
     """
-    
+
     def __init__(self):
         Item.__init__(self)
         self.type = 'mediamenu'
@@ -109,8 +86,9 @@ class MediaMenu(Item):
 
     def main_menu_generate(self):
         """
-        generate the items for the main menu. This is needed when first generating
-        the menu and if something changes by pressing the EJECT button
+        generate the items for the main menu. This is needed when first
+        generating the menu and if something changes by pressing the EJECT
+        button
         """
         items = copy.copy(self.normal_items)
 
@@ -126,16 +104,16 @@ class MediaMenu(Item):
             for type in ('audio', 'video', 'image', 'games'):
                 dir_types[type] = [ 'dir', 'audiocd', 'audio', 'video',
                                     'vcd', 'dvd', 'empty_cdrom' ]
-                
+
         if self.display_type:
             plugins_list = plugin.get('mainmenu_%s' % self.display_type)
         else:
             plugins_list = []
 
         dir_type = dir_types.get( self.display_type, [ ] )
-        
+
         for p in plugins_list:
-            
+
             if isinstance( p, plugins.rom_drives.rom_items ):
                 # do not show media from other menus
                 for i in p.items( self ):
@@ -155,7 +133,7 @@ class MediaMenu(Item):
         title = _('Media')
 
         self.menuw = menuw
-        
+
         if self.display_type == 'video':
             title = _('Movie')
         if self.display_type == 'audio':
@@ -166,7 +144,7 @@ class MediaMenu(Item):
             title = _('Games')
 
         menutitle = _('%s Main Menu') % title
-        
+
         if self.display_type:
             items = getattr(config, '%s_ITEMS' % self.display_type.upper())
         else:
@@ -188,20 +166,21 @@ class MediaMenu(Item):
                 reachable = 1
                 pos = filename.find(':/')
                 if pos > 0:
-                    if filename.find(':/') < filename.find('/'):                        
+                    if filename.find(':/') < filename.find('/'):
                         hostname = filename[0:pos]
                         filename = filename[pos+1:]
                         try:
-                            if os.system( config.HOST_ALIVE_CHECK % hostname ) != 0:
+                            alive = config.HOST_ALIVE_CHECK % hostname
+                            if os.system(alive) != 0:
                                 reachable = 0
                         except:
                             log.exception('Error parsing %s' % filename)
-                       
+
                 if reachable:
                     if vfs.isdir(filename):
-                        item = directory.DirItem(String(filename), self,
-                                                 display_type=self.display_type,
-                                                 add_args=add_args)
+                        item = DirItem(String(filename), self,
+                                       display_type=self.display_type,
+                                       add_args=add_args)
                         if title:
                             item.name = title
                         self.normal_items.append(item)
@@ -219,7 +198,7 @@ class MediaMenu(Item):
                                 for i in items:
                                     i.name = title
                             self.normal_items += items
-                            
+
             except:
                 log.exception('Error parsing %s' % str(item))
 
@@ -230,19 +209,20 @@ class MediaMenu(Item):
         if len(items) == 1:
             items[0](menuw=menuw)
             return
-        
-        item_menu = menu.Menu(menutitle, items,
-                              item_types = '%s main menu' % self.display_type,
-                              umount_all=1, reload_func = self.reload)
+
+        type = '%s main menu' % self.display_type
+        item_menu = Menu(menutitle, items, item_types = type, umount_all=1,
+                         reload_func = self.reload)
         item_menu.skin_force_text_view = force_text_view
         self.menuw = menuw
         menuw.pushmenu(item_menu)
 
 
     def reload(self):
-        menuw = self.menuw
-
-        menu = menuw.menustack[1]
+        """
+        Reload the menu. maybe a disc changed or some other plugin.
+        """
+        menu = self.menuw.menustack[1]
 
         sel = menu.choices.index(menu.selected)
         new_choices = self.main_menu_generate()
@@ -257,12 +237,13 @@ class MediaMenu(Item):
 
     def eventhandler(self, event = None, menuw=None):
         """
-        eventhandler for the main menu. The menu must be regenerated
+        Eventhandler for the media main menu. The menu must be regenerated
         when a disc in a rom drive changes
         """
         if plugin.isevent(event):
             if not menuw:
-                menuw = self.menuw
+                # nothing to do when no menuw is shown
+                return False
 
             menu = menuw.menustack[1]
 
@@ -276,14 +257,10 @@ class MediaMenu(Item):
                 else:
                     menu.selected = None
 
-            if menu == menuw.menustack[-1] and eventhandler.is_menu():
+            if menu == menuw.menustack[-1] and menuw.visible:
                 menuw.refresh()
             # others may need this event, too
             return False
-
-        if event in (PLAY_END, USER_END, STOP) and event.context != 'menu':
-            menuw.show()
-            return True
 
         # give the event to the next eventhandler in the list
         return Item.eventhandler(self, event, menuw)
