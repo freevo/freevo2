@@ -185,7 +185,32 @@ class OSD:
     def update(self):
         self._send('update')
 
+    def popup_box(self, text):
+        """
+        Trying to make a standard popup/dialog box for various usages.
+        Currently it just draws itself in the middle of the screen.
 
+        Arguments: Text, the text to print.
+        Returns:   None
+        Todo:      Should be able to calculate size of box to draw.
+                   Maybe be able to set size manually aswell.
+                   It'd look nice to have an icon drawn for some events
+                   such as ejects.
+        """
+        start_x = self.width/2 - 180
+        start_y = self.height/2 - 30
+        end_x   = self.width/2 + 180
+        end_y   = self.height/2 + 30
+
+        # XXX This is a hack to get a border around a white box to look
+        # XXX nicer.
+        self.drawbox(start_x-2, start_y-2, end_x+2, end_y+2, width=2,
+                     color=self.COL_BLACK)
+        self.drawbox(start_x, start_y, end_x, end_y, width=-1,
+                     color=((60 << 24) | self.COL_WHITE))
+        self.drawstring(text, start_x+20, start_y+10,
+                        fgcolor=self.COL_BLACK, bgcolor=self.COL_WHITE)
+        
 
 # XXX TEST CODE BY KRISTER! This code fragment will load the experimental OSD SDL module
 # if the symbol OSD_SDL is in the config module namespace, but will work fine if it is not.
