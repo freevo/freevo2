@@ -81,7 +81,8 @@ SUFFIX_MPLAYER_FILES = [ '/*.[aA][vV][iI]',
                          '/*.[bB][iI][nN]',
  			 '/*.[rR][mM]',
 			 '/*.[dD][iI][vV][xX]',
-			 '/*.[oO][gG][mM]'
+			 '/*.[oO][gG][mM]',
+			 '/*.[vV][oO][bB]',
 			 '/*.[aA][sS][fF]' ]
 
 #
