@@ -813,13 +813,13 @@ MPLAYER_SOFTWARE_SCALER = ''
 # Mplayer args for the different kinds of files. Possible values are dvd, vcd,
 # cd (audio cd), tv, all extentions and default if nothing matches
 #
-MPLAYER_ARGS = { 'dvd': '-ac mad, -cache 8192',
-                 'vcd': '-ac mad, -cache 4096',
-                 'cd' : '-cache 500 -cdda speed=1',
-                 'tv' : '-nocache',
-                 'ivtv' : '-ac mad, -cache 8192',
-                 'avi': '-ac mad, -cache 5000 -idx',
-                 'rm' : '-ac mad, -cache 5000 -forceidx',
+MPLAYER_ARGS = { 'dvd'    : '-cache 8192',
+                 'vcd'    : '-cache 4096',
+                 'cd'     : '-cache 500 -cdda speed=1',
+                 'tv'     : '-nocache',
+                 'ivtv'   : '-cache 8192',
+                 'avi'    : '-cache 5000 -idx',
+                 'rm'     : '-cache 5000 -forceidx',
                  'default': '-cache 5000'
                  }
 
