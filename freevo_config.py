@@ -12,10 +12,12 @@
 #
 # Todo:     o a nice configure or install script to ask these things
 #           o different settings for MPG, AVI, VOB, etc
-#             Reason: maybe you want to enable hwac3 on some files
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.68  2002/09/24 08:08:22  dischi
+# Removed last osd server stuff and some other cleanups
+#
 # Revision 1.67  2002/09/23 16:53:33  dischi
 # check mplayer, nice, jpegtrans and xmame.SDL in configure
 #
@@ -27,7 +29,8 @@
 # enabled for DVDs and VOB files
 #
 # Revision 1.64  2002/09/08 18:26:03  krister
-# Applied Andrew Drummond's MAME patch. It seems to work OK on X11, but still needs some work before it is ready for prime-time...
+# Applied Andrew Drummond's MAME patch. It seems to work OK on X11,
+# but still needs some work before it is ready for prime-time...
 #
 # Revision 1.63  2002/09/08 16:40:33  krister
 # Added some docs for the new ROM_DRIVES format.
@@ -39,75 +42,6 @@
 # Added a 3rd parameter to ROM_DRIVES: mountpoint, device, name. I also
 # named the drives CD-1 and CD-2 to avoid missunderstandings about the
 # name DVD.
-#
-# Revision 1.60  2002/09/04 05:32:32  krister
-# Added some helptext for the remote control config.
-#
-# Revision 1.59  2002/09/04 04:09:10  krister
-# Added the movie suffix *.M2V which is for SVCDs.
-#
-# Revision 1.58  2002/09/04 03:59:11  krister
-# Removed the obsolete ENABLE_TV and ENABLE_IMAGES options, they're in the skin now.
-#
-# Revision 1.57  2002/09/01 18:12:46  dischi
-# mplayer can play movs, too. The current CVS version is very good at
-# it, only one file from my ten I tried is not playable.
-#
-# Revision 1.56  2002/09/01 05:15:55  krister
-# Switched to the new freely distributable fonts.
-#
-# Revision 1.55  2002/08/30 02:29:53  krister
-# Added joystick support from Dan Eriksen. Untested!
-#
-# Revision 1.54  2002/08/22 04:46:03  krister
-# Select between the freevo_apps mplayer and a generic one from the path.
-#
-# Revision 1.53  2002/08/21 04:58:26  krister
-# Massive changes! Obsoleted all osd_server stuff. Moved vtrelease and matrox stuff to a new dir fbcon. Updated source to use only the SDL OSD which was moved to osd.py. Changed the default TV viewing app to mplayer_tv.py. Changed configure/setup_build.py/config.py/freevo_config.py to generate and use a plain-text config file called freevo.conf. Updated docs. Changed mplayer to use -vo null when playing music. Fixed a bug in music playing when the top dir was empty.
-#
-# Revision 1.52  2002/08/19 05:50:39  krister
-# Added helptext for configuring the TV.
-#
-# Revision 1.51  2002/08/19 02:15:44  krister
-# Added settings for TV viewing/recording.
-#
-# Revision 1.50  2002/08/18 06:10:58  krister
-# Converted tabs to spaces. Please use tabnanny in the future!
-#
-# Revision 1.49  2002/08/18 04:09:38  krister
-# Made the main skin always the default.
-#
-# Revision 1.48  2002/08/13 09:56:18  dischi
-# configure has three new parameters for the new OSD_SDL:
-# --output=x11_800x600 | --output=mga_pal | --output=mga_ntcs
-#
-# If you choose one of them and no osd=... configure will write a file called
-# configure_conf.py (I couldn't think of a better name). This file
-# may contain the OUTPUT variable and freevo_config.py will set some
-# things based on this variable.
-#
-# Revision 1.47  2002/08/13 09:22:51  dischi
-# Added a variable OUTPUT to set some values automaticly. This variable
-# should be set by configure
-#
-# Revision 1.46  2002/08/13 08:39:58  dischi
-# Sorted the config file into several groups. Now it's easier to find
-# something. Also added RESOLUTION to set the OSD resolution for OSD_SDL
-#
-# Revision 1.45  2002/08/12 07:12:33  dischi
-# moved xml to subdir type1
-#
-# Revision 1.44  2002/08/11 08:13:00  dischi
-# New variable SKIN_XML_FILE, where to find the xml file for the skin
-#
-# Revision 1.38  2002/08/03 18:55:44  outlyer
-# Last change to config file :)
-#
-# o You can now set the priority of the mplayer process via a nice setting
-# o This involves two lines in the config file: NICE and MPLAYER_NICE for the
-#       path to 'nice' and the actual numeric priority where '-10' is the
-#       default (high priority) set it to 0 for normal priority or +10 for
-#       low priority.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -313,13 +247,9 @@ OSD_DEFAULT_FONTNAME = 'skins/fonts/bluehigh.ttf'
 OSD_DEFAULT_FONTSIZE = 18
 
 
-#
-# Exec a script after the osd startup. This only works with the OSD_SDL
-# osd server. Matrox G400 users who wants to use the framebuffer and have
-# a PAL tv may set this to './matrox_g400/mga_pal_768x576.sh'
-#
-OSD_SDL_EXEC_AFTER_STARTUP=''
-
+# Exec a script after the osd startup. Matrox G400 users who wants to
+# use the framebuffer and have a PAL tv may set this to
+# './matrox_g400/mga_pal_768x576.sh' OSD_SDL_EXEC_AFTER_STARTUP=''
 if CONF.display == 'mga':
     if CONF.tv == 'ntsc':
         OSD_SDL_EXEC_AFTER_STARTUP='./fbcon/mga_ntsc_768x576.sh'
@@ -500,13 +430,6 @@ VIDREC_HQ = ''
 SUFFIX_FREEVO_FILES = [ '/*.[xX][mM][lL]' ]
 TV_SHOW_REGEXP = "s?([0-9]|[0-9][0-9])[xe]([0-9]|[0-9][0-9])[^0-9]"
 
-
-#
-# OSD server, standalone application in osd_server/
-#
-OSD_HOST = '127.0.0.1'      # The remote host
-OSD_PORT = 16480            # The daemon port, osd_server/osd_fb/main.c has
-                            # to be changed manually!
 
 #
 # Remote control daemon. The server is in the Freevo main application,
