@@ -59,6 +59,10 @@
       <style text="image"/>
     </menu>
       
+    <menu type="tv">
+      <style text="tv"/>
+    </menu>
+      
     <menuset label="video" inherits="normal text style">
       <screen layout="video screen"/>
     </menuset>
@@ -69,6 +73,12 @@
       
     <menuset label="image" inherits="normal text style">
       <screen layout="image screen"/>
+    </menuset>
+      
+    <menuset label="tv" inherits="normal text style">
+      <view visible="no"/>
+      <listing x="100" width="680"/>
+      <screen layout="tv menu screen"/>
     </menuset>
       
 
@@ -112,6 +122,14 @@
       <background>
 	<image filename="aubin/blurr.jpg" x="0" y="0" label="background"/>
 	<image filename="image_watermark.png" x="435" y="230" width="370"
+	  height="380"/>
+      </background>
+    </layout>
+
+    <layout label="tv menu screen">
+      <background>
+	<image filename="aubin/blurr.jpg" x="0" y="0" label="background"/>
+	<image filename="tv_watermark.png" x="435" y="230" width="370"
 	  height="380"/>
       </background>
     </layout>
