@@ -23,7 +23,7 @@
         <!-- default without an image -->
         <menuset label="default no image" inherits="normal text style">
             <view visible="no"/>
-            <listing x="20" width="760"/>
+            <listing x="20" width="730"/>
         </menuset>
         
         <!-- default with description and image -->
@@ -35,7 +35,7 @@
         <!-- default with description without an image -->
         <menuset label="default description no image" inherits="default description">
             <view visible="no"/>
-            <listing x="20" width="760"/>
+            <listing x="20" width="730"/>
         </menuset>
 
         <!-- default view area -->
@@ -98,9 +98,9 @@
             <!-- 4. listing area: the list of all items -->
             <screen layout="video screen" visible="yes"/>
             <view layout="view" x="10" y="90" width="280" height="250" align="left"/>
-            <listing x="30" y="350" width="740" height="230">
-                <image filename="up.png" label="uparrow" x="730" y="350"/>
-                <image filename="down.png" label="downarrow" x="730" y="max-32"/>
+            <listing x="30" y="350" width="710" height="230">
+                <image filename="up.png" label="uparrow" x="750" y="350"/>
+                <image filename="down.png" label="downarrow" x="750" y="max-32"/>
             </listing>
             <info layout="video info" x="300" y="100" width="450" height="300"/>
         </menuset>
@@ -340,7 +340,7 @@
 	******************************************************* -->
 
         <menu type="image">
-            <style text="image"/>
+            <style image="image" text="normal text style (image)"/>
             <style text="normal text style (image)"/>
         </menu>
         
