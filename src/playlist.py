@@ -9,15 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/09/19 22:07:15  dischi
+# TRUE/True/FALSE/False changes
+#
 # Revision 1.24  2003/09/14 20:09:36  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.23  2003/09/13 10:08:21  dischi
-# i18n support
-#
-# Revision 1.22  2003/08/23 12:51:41  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -180,7 +176,7 @@ class Playlist(Item):
         # variables only for Playlist
         self.current_item = None
         self.playlist = []
-        self.autoplay = FALSE
+        self.autoplay = False
 
         if isinstance(file, list):      # file is a playlist
             self.filename = ''
@@ -256,7 +252,7 @@ class Playlist(Item):
 
         if not self.playlist:
             print 'empty playlist'
-            return FALSE
+            return False
         
         if not arg or arg != 'next':
             self.current_item = self.playlist[0]
@@ -272,7 +268,7 @@ class Playlist(Item):
             else:
                 # no repeat
                 self.current_item = None
-            return TRUE
+            return True
 
         self.current_item.actions()[0][0](menuw=menuw)
         
@@ -285,7 +281,6 @@ class Playlist(Item):
 
 
     def eventhandler(self, event, menuw=None):
-        
         if not menuw:
             menuw = self.menuw
             
@@ -299,14 +294,14 @@ class Playlist(Item):
                     self.current_item.stop()
                 self.current_item = self.playlist[pos]
                 self.play(menuw=menuw, arg='next')
-                return TRUE
+                return True
 
         # end and no next item
         if event in (em.PLAY_END, em.USER_END, em.STOP):
             self.current_item = None
             if menuw:
                 menuw.show()
-            return TRUE
+            return True
             
 
         if event == em.PLAYLIST_PREV and self.current_item and self.playlist:
@@ -317,7 +312,7 @@ class Playlist(Item):
                 pos = (pos-1) % len(self.playlist)
                 self.current_item = self.playlist[pos]
                 self.play(menuw=menuw, arg='next')
-                return TRUE
+                return True
 
         # give the event to the next eventhandler in the list
         return Item.eventhandler(self, event, menuw)
@@ -334,7 +329,7 @@ class RandomPlaylist(Playlist):
         # variables only for Playlist
         self.current_item = None
         self.playlist = []
-        self.autoplay = TRUE
+        self.autoplay = True
         self.unplayed = playlist
 
         
@@ -354,7 +349,7 @@ class RandomPlaylist(Playlist):
 
             if not play_items:
                 print 'FIXME: this should never happen'
-                return FALSE
+                return False
                 
             element = play_items[0]
                 
@@ -362,7 +357,7 @@ class RandomPlaylist(Playlist):
         self.current_item = element
         element.parent = self
         element(menuw=menuw)
-        return TRUE
+        return True
         
 
     def play(self, arg=None, menuw=None):
@@ -377,7 +372,7 @@ class RandomPlaylist(Playlist):
         # play
         if self.unplayed:
             return self.play_next(arg=arg, menuw=menuw)
-        return FALSE
+        return False
 
 
     def cache_next(self):
@@ -402,7 +397,7 @@ class RandomPlaylist(Playlist):
             self.current_item = None
             if menuw:
                 menuw.show()
-            return TRUE
+            return True
             
         if event == em.PLAYLIST_PREV:
             print 'random playlist up: not implemented yet'

@@ -9,18 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/09/19 22:07:14  dischi
+# TRUE/True/FALSE/False changes
+#
 # Revision 1.20  2003/09/10 19:05:05  dischi
 # move osd keybindings into the config file
-#
-# Revision 1.19  2003/09/01 16:40:53  dischi
-# add PLAY_START
-#
-# Revision 1.18  2003/08/28 03:46:13  outlyer
-# Support for Chapter-by-chapter navigation in DVDs using the CH+ and CH- keys.
-#
-# Revision 1.17  2003/08/23 12:51:41  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
