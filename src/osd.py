@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.59  2003/07/05 09:24:01  dischi
+# cleanup old unneeded stuff
+#
 # Revision 1.58  2003/07/05 09:08:47  dischi
 # remove old drawstringframed
 #
@@ -278,7 +281,6 @@ class OSD:
         self.fontcache = objectcache.ObjectCache(300, desc='font')
         self.stringcache = objectcache.ObjectCache(100, desc='string')
         self.bitmapcache = objectcache.ObjectCache(10, desc='bitmap')
-        self.stringsize_cache = {}
         self.font_info_cache = {}
         
         self.default_fg_color = self.COL_BLACK
@@ -576,6 +578,19 @@ class OSD:
         self.screen.blit(surface, (x, y))
 
 
+    def getFontInfo(self, font, ptsize):
+        """
+        return cached font info
+        """
+        key = (font, ptsize)
+        try:
+            return self.font_info_cache[key]
+        except:
+            fi = FontInfo(self._getfont(font, ptsize))
+            self.font_info_cache[key] = fi
+            return fi
+
+
     def __drawstringframed_line__(self, string, max_width, font, hard,
                                   ellipses, word_splitter):
         """
@@ -837,45 +852,6 @@ class OSD:
         
         return surf
 
-
-    def charsize(self, char, font=None, ptsize=0):
-        """
-        Return a (width, height) tuple for the given char, font, size.
-        Use CACHE to speed up things
-        """
-        key = (font, ptsize)
-        try:
-            c = self.stringsize_cache[key]
-        except:
-            c = {}
-            self.stringsize_cache[key] = c
-
-        try:
-            return c[char]
-        except:
-            cs = self._getfont(font, ptsize).size(char)
-            c[char] = cs
-            return cs
-
-
-    def stringsize(self, string, font=None, ptsize=0):
-        """
-        Return a (width, height) tuple for the given string, font, size
-        """
-        if string == None:
-            return (0, 0)
-        
-        size_w = 0
-        size_h = 0
-
-        for i in range(len(string)):
-            size_w_tmp, size_h_tmp = self.charsize(string[i], font, ptsize)
-            size_w += size_w_tmp
-            if size_h_tmp > size_h:
-                size_h = size_h_tmp
-                
-        return (size_w, size_h)
-    
 
     def _savepixel(self, x, y, s):
         """
@@ -1265,17 +1241,3 @@ class OSD:
     # NEW drawstringframed stuff
 
 
-    def getFontInfo(self, font, ptsize):
-        """
-        return cached font info
-        """
-        key = (font, ptsize)
-        try:
-            return self.font_info_cache[key]
-        except:
-            fi = FontInfo(self._getfont(font, ptsize))
-            self.font_info_cache[key] = fi
-            return fi
-
-
-        
