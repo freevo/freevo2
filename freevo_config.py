@@ -67,6 +67,7 @@ def ConfigInit(videotools = 'sim'):
 # XXX Move to a file ("autoconf.py"?) that is create during "./configure"
 # from the parameters to it.
 #
+ENABLE_TV = 1            # Disable this if you don't have a tv card
 ENABLE_SHUTDOWN = 0      # Enable main menu choice for Linux shutdown (careful!)
 
 #

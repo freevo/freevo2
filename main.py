@@ -101,7 +101,10 @@ def autostart():
 #
 def getcmd():
     items = []
-    items += [menu.MenuItem('TV', tv.main_menu, 'tv','icons/tv.png',0)]  # XXX Move icons into skin
+
+    # XXX Move icons into skin
+    if config.ENABLE_TV:
+        items += [menu.MenuItem('TV', tv.main_menu, 'tv','icons/tv.png',0)]
     items += [menu.MenuItem('MOVIES', movie.main_menu,'','icons/movies.png',0)]
     items += [menu.MenuItem('MUSIC', mp3.main_menu,'','icons/mp3.png',0)]
     #items += [menu.MenuItem('DVD/CD', movie.play_movie, ('dvd', '1', []),'icons/dvd.png',0)]  # XXX Add DVD title handling
@@ -109,7 +112,8 @@ def getcmd():
     #items += [menu.MenuItem('RECORD MOVIE', tv.main_menu, 'record')]
 
     items += [menu.MenuItem('IMAGES', imenu.main_menu,'','icons/images.png',0)]
-    if config.ENABLE_SHUTDOWN: items += [menu.MenuItem('SHUTDOWN', shutdown, None) ]
+    if config.ENABLE_SHUTDOWN:
+        items += [menu.MenuItem('SHUTDOWN', shutdown, None, 'icons/shutdown.png', 0) ]
 
     mainmenu = menu.Menu('FREEVO MAIN MENU', items, packrows=0)
     menuwidget.pushmenu(mainmenu)
