@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/08/24 19:24:19  gsbarbieri
+# Fix problem: exiting mplayer from playing ROM files hang freevo
+#
 # Revision 1.14  2003/08/23 12:51:43  dischi
 # removed some old CVS log messages
 #
@@ -282,7 +285,7 @@ class MPlayer:
         rc.app(None)
         while self.thread.mode == 'stop':
             time.sleep(0.3)
-            
+        rc.post_event( PLAY_END )
 
     def eventhandler(self, event):
         """
