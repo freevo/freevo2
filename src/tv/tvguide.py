@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/10/18 09:34:37  dischi
+# show the current recodings in the guide, RECORD toggles record and remove
+#
 # Revision 1.16  2003/09/13 10:08:23  dischi
 # i18n support
 #
@@ -49,6 +52,7 @@
 #endif
 
 import os
+import time
 
 import gui.GUIObject
 
@@ -59,16 +63,12 @@ import config, skin
 import event as em
 
 # The Electronic Program Guide
-import tv.epg_xmltv, tv.epg_types
+import epg_xmltv, epg_types
 
-import tv.program_display
+import program_display
+import record_client as ri
 
 skin = skin.get_singleton() # Create the Skin object
-
-TRUE = 1
-FALSE = 0
-
-DEBUG = config.DEBUG
 
 CHAN_NO_DATA = _('This channel has no data loaded')
 
@@ -80,7 +80,7 @@ class TVGuide(gui.GUIObject):
         self.n_items, hours_per_page = skin.items_per_page(('tv', self))
         stop_time = start_time + hours_per_page * 60 * 60
 
-        guide = tv.epg_xmltv.get_guide(PopupBox(text=_('Preparing the program guide')))
+        guide = epg_xmltv.get_guide(PopupBox(text=_('Preparing the program guide')))
         channels = guide.GetPrograms(start=start_time+1, stop=stop_time-1)
 
         if not channels:
@@ -100,12 +100,28 @@ class TVGuide(gui.GUIObject):
         self.type = 'tv'
         self.menuw = menuw
 
+        self.update_schedules(force=True)
+        
         self.rebuild(start_time, stop_time, guide.chan_list[0].id, selected)
         menuw.pushmenu(self)
 
 
+    def update_schedules(self, force=False):
+        if not force and self.last_update + 60 > time.time():
+            return
+
+        _debug_('update schedule')
+        self.last_update = time.time()
+        self.scheduled_programs = []
+        (got_schedule, schedule) = ri.getScheduledRecordings()
+        if got_schedule:
+            l = schedule.getProgramList()
+            for k in l:
+                self.scheduled_programs.append(l[k])
+
+        
     def eventhandler(self, event):
-        if DEBUG: print 'TVGUIDE EVENT is %s' % event
+        _debug_('TVGUIDE EVENT is %s' % event)
 
         if event == em.MENU_CHANGE_STYLE:
             if skin.ToggleDisplayStyle('tv'):
@@ -169,7 +185,11 @@ class TVGuide(gui.GUIObject):
             self.menuw.refresh()
 
         elif event == em.MENU_SUBMENU or event == em.TV_START_RECORDING:
-            tv.program_display.ProgramDisplay(prog=self.selected).show()
+            if self.selected.scheduled:
+                program_display.ProgramDisplay(parent=self, context='recording',
+                                                  prog=self.selected).show()
+            else:
+                program_display.ProgramDisplay(parent=self, prog=self.selected).show()
  
         elif event == em.MENU_SELECT or event == em.PLAY:
             tvlockfile = config.FREEVO_CACHEDIR + '/record'
@@ -207,15 +227,17 @@ class TVGuide(gui.GUIObject):
         
 
     def refresh(self):
+        self.update_schedules(force=True)
         self.menuw.refresh()
 
 
     def rebuild(self, start_time, stop_time, start_channel, selected):
 
-        self.guide = tv.epg_xmltv.get_guide()
+        self.guide = epg_xmltv.get_guide()
         channels = self.guide.GetPrograms(start=start_time+1, stop=stop_time-1)
 
         table = [ ]
+        self.update_schedules()
 
         self.start_time    = start_time
         self.stop_time     = stop_time
@@ -224,7 +246,6 @@ class TVGuide(gui.GUIObject):
 
         self.display_up_arrow   = FALSE
         self.display_down_arrow = FALSE
-
 
         # table header
         table += [ ['Chan'] ]
@@ -253,7 +274,7 @@ class TVGuide(gui.GUIObject):
                 
             if found_1stchannel:
                 if not chan.programs:
-                    prg = tv.epg_types.TvProgram()
+                    prg = epg_types.TvProgram()
                     prg.channel_id = chan.id
                     prg.start = 0
                     prg.stop = 2147483647   # Year 2038
@@ -284,8 +305,15 @@ class TVGuide(gui.GUIObject):
                                 break
 
         self.table = table
-
-
+        for t in table:
+            try:
+                for p in t.programs:
+                    if p in self.scheduled_programs:
+                        p.scheduled = True
+                    else:
+                        p.scheduled = False
+            except:
+                pass
 
     def event_RIGHT(self):
         start_time    = self.start_time
@@ -321,7 +349,7 @@ class TVGuide(gui.GUIObject):
                 procdesc = prg.desc
             to_info = (prg.title, procdesc)
         else:
-            prg = tv.epg_types.TvProgram()
+            prg = epg_types.TvProgram()
             prg.channel_id = channel.id            
             prg.start = 0
             prg.stop = 2147483647   # Year 2038
@@ -365,7 +393,7 @@ class TVGuide(gui.GUIObject):
                 procdesc = prg.desc
             to_info = (prg.title, procdesc)
         else:
-            prg = tv.epg_types.TvProgram()
+            prg = epg_types.TvProgram()
             prg.channel_id = channel.id            
             prg.start = 0
             prg.stop = 2147483647   # Year 2038
@@ -423,7 +451,7 @@ class TVGuide(gui.GUIObject):
             
             to_info = (prg.title, procdesc)
         else:
-            prg = tv.epg_types.TvProgram()
+            prg = epg_types.TvProgram()
             prg.channel_id = channel.id            
             prg.start = 0
             prg.stop = 2147483647   # Year 2038
@@ -444,7 +472,7 @@ class TVGuide(gui.GUIObject):
         last_prg      = self.selected
 
         if last_prg == None:
-            last_prg = tv.epg_types.TvProgram()
+            last_prg = epg_types.TvProgram()
 
         n = 0
         flag_start_channel = 0
@@ -483,7 +511,7 @@ class TVGuide(gui.GUIObject):
             
             to_info = (prg.title, procdesc)
         else:
-            prg = tv.epg_types.TvProgram()
+            prg = epg_types.TvProgram()
             prg.channel_id = channel.id            
             prg.start = 0
             prg.stop = 2147483647   # Year 2038
@@ -534,7 +562,7 @@ class TVGuide(gui.GUIObject):
             
             to_info = (prg.title, procdesc)
         else:
-            prg = tv.epg_types.TvProgram()
+            prg = epg_types.TvProgram()
             prg.channel_id = channel.id            
             prg.start = 0
             prg.stop = 2147483647   # Year 2038
@@ -591,7 +619,7 @@ class TVGuide(gui.GUIObject):
             to_info = (prg.title, procdesc)
 
         else:
-            prg = tv.epg_types.TvProgram()
+            prg = epg_types.TvProgram()
             prg.channel_id = channel.id            
             prg.start = 0
             prg.stop = 2147483647   # Year 2038
