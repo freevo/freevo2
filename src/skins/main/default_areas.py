@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/02/05 19:54:55  dischi
+# fix crash
+#
 # Revision 1.7  2004/01/19 20:29:11  dischi
 # cleanup, reduce cache size
 #
@@ -125,7 +128,7 @@ class Title_Area(Skin_Area):
                         (item.parent and item.parent.name == item.show_name[0])):
                     sn   = item.show_name
                     text = sn[1] + "x" + sn[2] + " - " + sn[3] 
-                elif item.parent and item.parent.name > 5 and \
+                elif item.parent and len(item.parent.name) > 5 and \
                          item.name.startswith(item.parent.name):
                     text = item.name[len(item.parent.name):].strip(' -_')
                     if not text:
