@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/09/27 18:41:38  dischi
+# remove key->event mapping, it is in the input plugins now
+#
 # Revision 1.11  2004/09/25 05:08:11  rshortt
 # Disable some now-broken code.
 #
@@ -160,15 +163,6 @@ def post(event):
     return get_singleton().post(event)
     
 
-def post_key(key):
-    """
-    Send a keyboard event to the event queue
-    """
-    return get_singleton().post_key(key)
-
-
-
-
 # --------------------------------------------------------------------------------
 
 class Eventhandler:
@@ -318,29 +312,6 @@ class Eventhandler:
             self.queue += [ Event(event, context=self.context) ]
         else:
             self.queue += [ event ]
-
-
-
-    def post_key(self, key):
-        """
-        Send a keyboard event to the event queue
-        """
-        if not key:
-            return None
-
-        for c in (self.context, 'global'):
-            try:
-                e = config.EVENTS[c][key]
-                e.context = self.context
-                self.queue.append(e)
-                break
-            except KeyError:
-                pass
-        else:
-            if self.context != 'input':
-                print 'no event mapping for key %s in context %s' % (key, self.context)
-                print 'send button event BUTTON arg=%s' % key
-            self.queue.append(Event(BUTTON, arg=key))
 
 
 
