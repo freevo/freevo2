@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2003/11/30 19:41:19  dischi
+# add event to toggle interlacing, it is on no key and only works with xine
+#
 # Revision 1.30  2003/11/09 16:03:09  dischi
 # add step size in VOL+- an arg
 #
@@ -197,6 +200,7 @@ VIDEO_SEND_MPLAYER_CMD = Event('VIDEO_SEND_MPLAYER_CMD')
 VIDEO_MANUAL_SEEK      = Event('VIDEO_MANUAL_SEEK')
 VIDEO_NEXT_AUDIOLANG   = Event('VIDEO_NEXT_AUDIOLANG')
 VIDEO_NEXT_SUBTITLE    = Event('VIDEO_NEXT_SUBTITLE')
+VIDEO_TOGGLE_INTERLACE = Event('VIDEO_TOGGLE_INTERLACE')
 STORE_BOOKMARK         = Event('STORE_BOOKMARK')
 MENU                   = Event('MENU')
 
