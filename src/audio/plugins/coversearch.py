@@ -13,6 +13,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/06/12 23:41:11  outlyer
+# Don't crash if no matches are found...
+# notify user and return.
+#
 # Revision 1.4  2003/06/12 17:12:32  outlyer
 # Fallback to medium cover if it's available, only if that too is missing, give
 # up.
@@ -116,7 +120,16 @@ class PluginInterface(plugin.ItemPlugin):
         artist = self.item.artist
 
         amazon.setLicense('...') # must get your own key!
-        cover = amazon.searchByKeyword('%s %s' % (artist,album) , product_line="music")
+        try:
+            cover = amazon.searchByKeyword('%s %s' % (artist,album) , product_line="music")
+        except amazon.AmazonError:
+            box.destroy() 
+            box = PopupBox(text='No matches for %s - %s' % (str(artist),str(album)))
+            box.show()
+            time.sleep(2)
+            box.destroy()
+            return
+
         items = []
         
         # Check if they're valid before presenting the list to the user
