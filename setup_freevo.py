@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/06/20 18:18:23  dischi
+# add comment about the xmame change to force the user to rerun setup
+#
 # Revision 1.4  2003/06/20 01:50:14  rshortt
 # Look for xmame.x11 as well, but override with xmame.SDL.  Changed xmame_SDL
 # to just xmame.
@@ -47,7 +50,7 @@ import os
 import getopt
 import string
 
-CONFIG_VERSION = 1.0
+CONFIG_VERSION = 2.0
 
 # Help text
 usage = '''\

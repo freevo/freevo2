@@ -108,11 +108,13 @@ from event import *
 # of the config file doesn't match, Freevo won't start. If the minor version
 # is different, there will be only a warning
 
-FREEVO_CONF_VERSION = 1.0
+FREEVO_CONF_VERSION = 2.0
 LOCAL_CONF_VERSION  = 3.3
 
 # Description of changes in each new version
-FREEVO_CONF_CHANGES = [] # None so far
+FREEVO_CONF_CHANGES = [
+    (2.0,
+     '''Changed xmame_SDL to just xmame'''), ]
 
 LOCAL_CONF_CHANGES = [
     (1.1,

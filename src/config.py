@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/06/20 18:18:23  dischi
+# add comment about the xmame change to force the user to rerun setup
+#
 # Revision 1.27  2003/05/11 17:33:22  dischi
 # small bugfix
 #
@@ -169,7 +172,7 @@ CONF.width, CONF.height = 800, 600
 CONF.display = 'x11'
 CONF.tv = 'ntsc'
 CONF.chanlist = 'us-cable'
-CONF.xmame_SDL = ''
+CONF.xmame = ''
 CONF.jpegtran = ''
 CONF.mplayer = ''
 CONF.snes = ''
