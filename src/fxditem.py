@@ -26,6 +26,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/11/26 18:30:49  dischi
+# <container> support
+#
 # Revision 1.2  2003/11/25 19:00:52  dischi
 # make fxd item parser _much_ simpler
 #
@@ -62,6 +65,7 @@ import traceback
 
 import config
 import util
+import item
 
 
 _callbacks_ = []
@@ -96,9 +100,10 @@ def getitems(parent, fxd_files, duplicate_check=[], display_type=None):
             parser.setattr(None, 'parent', parent)
             parser.setattr(None, 'filename', fxd_file)
             parser.setattr(None, 'duplicate_check', duplicate_check)
+            parser.setattr(None, 'display_type', display_type)
 
             for types, tag, handler in _callbacks_:
-                if not display_type or display_type in types:
+                if not display_type or not types or display_type in types:
                     parser.set_handler(tag, handler)
 
             # start the parsing
@@ -118,7 +123,7 @@ def cwd(parent, files):
     """
     return a list of items based on the files
     """
-    if parent.type != 'dir':
+    if not hasattr(parent, 'display_type'):
         # don't know what to do here
         return
 
@@ -174,3 +179,77 @@ def update(parent, new_files, del_files, new_items, del_items, current_items):
                 else:
                     new_files.remove(f)
 
+
+# -------------------------------------------------------------------------------------
+
+class Container(item.Item):
+    """
+    a simple container containing for items parsed from the fxd
+    """
+    def __init__(self, fxd, node):
+        item.Item.__init__(self, fxd.getattr(None, 'parent', None))
+        self.items    = []
+        self.name     = fxd.getattr(node, 'title', 'no title')
+        self.type     = fxd.getattr(node, 'type', '')
+        self.xml_file = fxd.getattr(None, 'filename', '')
+
+        self.image    = fxd.childcontent(node, 'cover-img')
+        if self.image:
+            self.image = vfs.join(vfs.dirname(self.xml_file), self.image)
+
+        parent_items  = fxd.getattr(None, 'items', [])
+        display_type  = fxd.getattr(None, 'display_type', None)
+
+        # set variables new for the subtitems
+        fxd.setattr(None, 'parent', self)
+        fxd.setattr(None, 'items', self.items)
+
+        for child in node.children:
+            for types, tag, handler in _callbacks_:
+                if (not display_type or not types or display_type in types) and \
+                       child.name == tag:
+                    handler(fxd, child)
+                    break
+                
+        # restore settings
+        fxd.setattr(None, 'parent', self.parent)
+        fxd.setattr(None, 'items', parent_items)
+
+
+    def sort(self, mode=None):
+        """
+        Returns the string how to sort this item
+        """
+        if mode == 'date':
+            return '%s%s' % (os.stat(self.xml_file).st_ctime, self.xml_file)
+        return self.name
+
+        
+    def actions(self):
+        """
+        actions for this item
+        """
+        return [ ( self.browse, _('Browse list')) ]
+
+
+    def browse(self, arg=None, menuw=None):
+        """
+        show all items
+        """
+        import menu
+        moviemenu = menu.Menu(self.name, self.items)
+        menuw.pushmenu(moviemenu)
+
+        
+
+def container_callback(fxd, node):
+    """
+    handle <container> tags. Inside this tag all other base level tags
+    like <audio>, <movie> and <container> itself will be parsed as normal.
+    """
+    c = Container(fxd, node)
+    if c.items:
+        fxd.getattr(None, 'items', []).append(c)
+    
+
+register(None, 'container', container_callback)
