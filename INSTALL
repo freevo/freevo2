@@ -15,6 +15,8 @@ o Compile and install all the programs in apps/
   o Install XviD
   o Install MPlayer
     o Test with the MGA graphics driver
+  o Install mpg321 (or alternately, mpg123)
+    o Test audio output with an mp3
   o Install NVrec
     o Test recording to a file
   o Install lirc
@@ -23,7 +25,8 @@ o Compile and install all the programs in apps/
       o Start the daemon
 
 o Compile Freevo
-  o Requires freetype 2.x, libpng
+  o Requires freetype 2 (2.0.9 is preferred for now)
+  o Requires libpng
   o Requires Python >= version 2.1 (1.5 OK?)
   o Optionally install Python Imaging Library for cover art.
   o Test the remote using the lirc application irw, and using the 

@@ -19,8 +19,9 @@ People:
 
 Krister Lagerstrom <krister-freevo@kmlager.com>:
 o Initial implementation
+o osd server and bulk of code and libraries
 
-
-Paul Aubin <aubin@debian.org>:
+Aubin Paul <aubin@debian.org>:
 o Testing, ideas, shell programming
+o XMLTV integration and mp3 player fixes
 
