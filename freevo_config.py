@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2002/08/03 20:20:54  krister
+# Nice cannot be used as non-root to raise the prio! Set to 0 as default. Changed mplayer settings from dsp0+mga to dsp+xv which is better for newbie desktop users (mplayer cannot play mp3s if -vo is set wrong!) Fixed speling errors.
+#
 # Revision 1.38  2002/08/03 18:55:44  outlyer
 # Last change to config file :)
 #
@@ -62,7 +65,7 @@
 
 
 
-AUDIO_DEVICE        = '/dev/dsp'      # ie: /dev/dsp0, /dev/audio, /dev/alsa/??
+AUDIO_DEVICE        = '/dev/dsp'      # e.g.: /dev/dsp0, /dev/audio, /dev/alsa/??
 MAJOR_AUDIO_CTRL    = 'PCM'           # Freevo takes control over one audio ctrl
                                       # 'VOL', 'PCM' 'OGAIN' etc.
 CONTROL_ALL_AUDIO   = 1               # Should Freevo take complete control of audio
@@ -72,13 +75,14 @@ TV_IN_VOLUME        = 60              # Set this to your preferred level 0-100.
 VCR_IN_VOLUME       = 90              # If you use different input from TV
                     
 MPLAYER_CMD         = 'mplayer'       # A complete path may be nice.
-MPLAYER_AO_DEV      = 'oss:/dev/dsp0' # oss sdl alsa whatchawant?
-MPLAYER_VO_DEV      = 'mga'           # If you use X 'xv' is a good alternative.
-DVD_LANG_PREF       = 'en,se,no'      # Order of preffered languages on DVD.
-DVD_SUBTITLE_PREF   = ''              # Order of preffered subtitles on DVD.
+MPLAYER_AO_DEV      = 'oss:/dev/dsp'  # e.g.: oss,sdl,alsa, see mplayer docs
+MPLAYER_VO_DEV      = 'xv'            # e.g.: xv,x11,mga, see mplayer docs
+DVD_LANG_PREF       = 'en,se,no'      # Order of preferred languages on DVD.
+DVD_SUBTITLE_PREF   = ''              # Order of preferred subtitles on DVD.
 NICE		    = '/usr/bin/nice' # Priority setting app
-MPLAYER_NICE	    = '-10'	      # Priority of mplayer process
-
+MPLAYER_NICE	    = '0'	      # Priority of mplayer process. 0 is unchanged,
+                                      # <0 is higher prio, >0 lower prio. You must run
+                                      # freevo as root to use prio <0 !
 
 
 #---- You should really _NOT_ need to change these settings  ----
