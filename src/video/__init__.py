@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2004/01/09 21:05:27  dischi
+# set directory skin_settings for tv shows
+#
 # Revision 1.21  2004/01/03 17:40:27  dischi
 # remove update function
 #
@@ -125,8 +128,8 @@ class PluginInterface(plugin.MimetypePlugin):
             diritem.info = tvinfo[1]
             if not diritem.image:
                 diritem.image = tvinfo[0]
-            if not diritem.fxd_file:
-                diritem.fxd_file = tvinfo[3]
+            if not diritem.skin_settings:
+                diritem.skin_settings = tvinfo[3]
 
 
 def hash_fxd_movie_database():
