@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/03/13 21:01:15  dischi
+# docs update
+#
 # Revision 1.23  2003/03/08 17:36:47  dischi
 # integration of the tv guide
 #
@@ -42,31 +45,6 @@
 # blue_round1 skin looks like with the old skin, blue_round2 is the
 # beginning of recreating aubin_round1. tv and music player aren't
 # implemented yet.
-#
-# Revision 1.14  2003/02/26 21:21:12  dischi
-# blue_round1.xml working
-#
-# Revision 1.13  2003/02/26 19:59:27  dischi
-# title area in area visible=(yes|no) is working
-#
-# Revision 1.12  2003/02/26 19:18:53  dischi
-# Added blue1_small and changed the coordinates. Now there is no overscan
-# inside the skin, it's only done via config.OVERSCAN_[XY]. The background
-# images for the screen area should have a label "background" to override
-# the OVERSCAN resizes.
-#
-# Revision 1.11  2003/02/25 23:27:36  dischi
-# changed max usage
-#
-# Revision 1.10  2003/02/25 22:56:00  dischi
-# New version of the new skin. It still looks the same (except that icons
-# are working now), but the internal structure has changed. Now it will
-# be easier to do the next steps.
-#
-# Revision 1.9  2003/02/23 18:42:20  dischi
-# Current status of my skin redesign. Currently only the background and
-# the listing area is working, the listing without icons. Let me know what
-# you thing before I spend more time with it
 #
 #
 # -----------------------------------------------------------------------
@@ -114,14 +92,18 @@ FALSE = 0
 # XXX Shouldn't this be moved to the config file?
 
 OSD_FONT_DIR = 'skins/fonts/'
-OSD_DEFAULT_FONT = 'skins/fonts/kimberly_alt.ttf'
 
 geometry = (config.CONF.width, config.CONF.height)
 
 #
 # Help functions
 #
+
+
 def attr_int(node, attr, default, scale=0.0):
+    """
+    return the attribute as integer
+    """
     try:
         if node.attrs.has_key(('', attr)):
             max = FALSE
@@ -147,7 +129,11 @@ def attr_int(node, attr, default, scale=0.0):
         pass
     return default
 
+
 def attr_hex(node, attr, default):
+    """
+    return the attribute in hex as integer
+    """
     try:
         if node.attrs.has_key(('', attr)):
             return long(node.attrs[('', attr)], 16)
@@ -155,19 +141,32 @@ def attr_hex(node, attr, default):
         pass
     return default
 
+
 def attr_visible(node, attr, default):
+    """
+    return TRUE or FALSE based in the attribute values 'yes' or 'no'
+    """
     if node.attrs.has_key(('', attr)):
         if node.attrs[('', attr)] == "no":
             return ''
         return node.attrs[('', attr)].encode('latin-1')
     return default
 
+
 def attr_str(node, attr, default):
+    """
+    return the attribute as string
+    """
     if node.attrs.has_key(('', attr)):
         return node.attrs[('', attr)].encode('latin-1')
     return default
 
+
 def attr_file(node, attr, default, c_dir, guessing=TRUE):
+    """
+    return the attribute as filename. This functions searches for alternative
+    image filenames based on the string
+    """
     if node.attrs.has_key(('', attr)):
         file = node.attrs[('', attr)].encode('latin-1')
         if file and guessing:
@@ -191,7 +190,11 @@ def attr_file(node, attr, default, c_dir, guessing=TRUE):
         return file
     return default
 
+
 def attr_font(node, attr, default):
+    """
+    return the attribute as font (with full path)
+    """
     if node.attrs.has_key(('', attr)):
         fontext = os.path.splitext(node.attrs[('', attr)])[1]
         if fontext:
@@ -207,7 +210,7 @@ def attr_font(node, attr, default):
                                     '.TTF').encode('latin-1')
         if not font:
             print "can find font >%s<" % font
-            font = OSD_DEFAULT_FONT
+            font = config.OSD_DEFAULT_FONTNAME
         return font
     return default
 
@@ -405,6 +408,9 @@ class XML_rectangle(XML_data):
 # ======================================================================
 
 class XML_content(XML_data):
+    """
+    content inside a layout
+    """
     def __init__(self):
         XML_data.__init__(self, ('type', 'spacing', 'x', 'y', 'width',
                                  'height', 'font', 'align', 'valign', 'color'))
@@ -438,6 +444,9 @@ class XML_content(XML_data):
 
         
 class XML_layout:
+    """
+    layout tag
+    """
     def __init__(self, label):
         self.label = label
         self.background = ()
@@ -462,6 +471,9 @@ class XML_layout:
 # ======================================================================
 
 class XML_font(XML_data):
+    """
+    font tag
+    """
     def __init__(self, label):
         XML_data.__init__(self, ('name', 'size', 'color'))
         self.label = label
@@ -482,6 +494,9 @@ class XML_font(XML_data):
 
 
 class XML_player:
+    """
+    player tag for the audio play skin
+    """
     def __init__(self):
         self.content = ( 'screen', 'title', 'view', 'info' )
         for c in self.content:
@@ -499,6 +514,9 @@ class XML_player:
 
 
 class XML_tv:
+    """
+    tv tag for the tv menu
+    """
     def __init__(self):
         self.content = ( 'screen', 'title', 'view', 'info', 'listing' )
         for c in self.content:
@@ -514,10 +532,12 @@ class XML_tv:
 
 # ======================================================================
 
-#
-# Main XML skin class
-#
+
+
 class XMLSkin:
+    """
+    skin main settings class
+    """
     def __init__(self):
         self.menu = {}
         self.menu['default'] = XML_menu()
@@ -587,10 +607,11 @@ class XMLSkin:
 
 
 
-    #
-    # parse the skin file
-    #
     def load(self, file, copy_content = 0):
+        """
+        load and parse the skin file
+        """
+
         if not os.path.isfile(file):
             if os.path.isfile(file+".xml"):
                 file += ".xml"
