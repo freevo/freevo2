@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/02/24 21:13:18  dischi
+# Moved RC_MPLAYER_CMDS higher in the eventhandler
+#
 # Revision 1.22  2003/02/24 04:21:40  krister
 # Mathieu Weber's bugfix for multipart movies
 #
@@ -386,6 +389,12 @@ class MPlayer:
             event = rc.PLAY_END
             return self.item.eventhandler(event)
 
+        # try to find the event in RC_MPLAYER_CMDS 
+        e = config.RC_MPLAYER_CMDS.get(event, None)
+        if e:
+            self.thread.app.write('%s\n' % config.RC_MPLAYER_CMDS[event][0])
+            return TRUE
+
         if event == rc.MENU:
             if self.mode == 'dvdnav':
                 self.thread.app.write('dvdnav 5\n')
@@ -431,12 +440,6 @@ class MPlayer:
                 self.thread.app.write('seek 60\n')
             return TRUE
 
-
-        # try to find the event in RC_MPLAYER_CMDS 
-        e = config.RC_MPLAYER_CMDS.get(event, None)
-        if e:
-            self.thread.app.write('%s\n' % config.RC_MPLAYER_CMDS[event][0])
-            return TRUE
 
         # nothing found? Try the eventhandler of the object who called us
         return self.item.eventhandler(event)
