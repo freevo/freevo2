@@ -70,7 +70,9 @@ SUFFIX_MPLAYER_FILES = [ '/*.[aA][vV][iI]',
                          '/*.[mM][pP][eE][gG]',
                          '/*.[wW][mM][vV]',
                          '/*.[bB][iI][nN]',
-			 '/*.[rR][mM]' ]
+			 			 '/*.[rR][mM]',
+						 '/*.[dD][iI][vV][xX]',
+						 '/*.[oO][gG][mM]' ]
 
 #
 # Config for xml support in the movie browser
