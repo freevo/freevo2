@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2003/04/27 17:36:20  dischi
+# enhance image loading with Imaging fallback
+#
 # Revision 1.37  2003/04/24 19:55:52  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -1417,13 +1420,22 @@ class OSD:
                             else:
                                 height = int(float(width * h) / w)
                             image = image.resize((width, height), Image.BICUBIC)
+                            # save for future use
                             image.save(thumb, 'PNG')
+                            # convert to pygame image
+                            image = pygame.image.fromstring(image.tostring(),
+                                                            image.size, image.mode)
 
                         filename = thumb
 
-                            
-            image = pygame.image.load(filename)
-
+            try:
+                if not image:
+                    image = pygame.image.load(filename)
+            except pygame.error, e:
+                print 'SDL image load problem: %s - trying Imaging' % e
+                i = Image.open(filename)
+                image = pygame.image.fromstring(i.tostring(), i.size, i.mode)
+            
             # convert the surface to speed up blitting later
             if image.get_alpha():
                 image.set_alpha(image.get_alpha(), RLEACCEL)
@@ -1433,9 +1445,6 @@ class OSD:
                     i.blit(image, (0,0))
                     image = i
                     
-        except pygame.error, e:
-            print 'SDL image load problem: %s' % e
-            return None
         except:
             print 'Unknown Problem while loading image'
             return None
