@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/05/30 00:53:20  rshortt
+# Various event bugfixes.
+#
 # Revision 1.5  2003/05/27 17:53:35  dischi
 # Added new event handler module
 #
@@ -85,6 +88,22 @@ class TVGuide(gui.GUIObject):
             eval('self.event_%s()' % event)
             self.menuw.refresh()
             
+        elif event == em.MENU_UP:
+            self.event_UP()
+            self.menuw.refresh()
+
+        elif event == em.MENU_DOWN:
+            self.event_DOWN()
+            self.menuw.refresh()
+
+        elif event == em.MENU_LEFT:
+            self.event_LEFT()
+            self.menuw.refresh()
+
+        elif event == em.MENU_RIGHT:
+            self.event_RIGHT()
+            self.menuw.refresh()
+
         elif event == em.MENU_PAGEUP:
             self.event_PageUp()
             self.menuw.refresh()
@@ -96,7 +115,7 @@ class TVGuide(gui.GUIObject):
         elif event == em.TV_START_RECORDING:
             record_video.main_menu(self.selected)
 
-        elif event == em.SELECT or event == em.PLAY:
+        elif event == em.MENU_SELECT or event == em.PLAY:
             self.hide()
             self.player('tv', self.selected.channel_id)
 

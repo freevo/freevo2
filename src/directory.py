@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/05/30 00:53:19  rshortt
+# Various event bugfixes.
+#
 # Revision 1.11  2003/05/27 17:53:33  dischi
 # Added new event handler module
 #
@@ -571,7 +574,7 @@ class DirItem(Playlist):
                     
         # reload the menu, use an event to avoid problems because this function
         # was called by a thread
-        rc.post_event('REBUILD_SCREEN')
+        rc.post_event('MENU_REBUILD')
 
 
 

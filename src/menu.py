@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.48  2003/05/30 00:53:19  rshortt
+# Various event bugfixes.
+#
 # Revision 1.47  2003/05/27 17:53:33  dischi
 # Added new event handler module
 #
@@ -566,7 +569,7 @@ class MenuWidget(GUIObject):
             if p.eventhandler(event=event, menuw=self):
                 return
 
-        print 'no eventhandler for event %s' % event.name
+        print 'no eventhandler for event %s' % str(event)
         return 0
 
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/05/30 00:53:19  rshortt
+# Various event bugfixes.
+#
 # Revision 1.15  2003/05/27 17:53:33  dischi
 # Added new event handler module
 #
@@ -199,7 +202,8 @@ class RemoteControl:
             list = pylirc.nextcode()
             if list:
                 for code in list:
-                    e = self.key_event_mapper(osd._cb())
+                    if not (e == self.key_event_mapper(code)):
+	                e = self.key_event_mapper(osd._cb)
                     if e:
                         return e
                 

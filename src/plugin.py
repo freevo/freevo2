@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/05/30 00:53:19  rshortt
+# Various event bugfixes.
+#
 # Revision 1.20  2003/05/29 21:06:48  rshortt
 # Add a shutdown function to the module which will call possible shutdown methods on daemon plugins.
 #
@@ -364,8 +367,9 @@ def isevent(event):
     """
     plugin event parsing
     """
-    if event.name[:12] == 'PLUGIN_EVENT':
-        return event.name[13:]
+    event = str(event)
+    if event[:12] == 'PLUGIN_EVENT':
+        return event[13:]
     else:
         return None
 

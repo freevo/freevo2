@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/05/30 00:53:19  rshortt
+# Various event bugfixes.
+#
 # Revision 1.5  2003/05/29 03:28:22  outlyer
 # Fix seeking in video too...
 #
@@ -118,6 +121,7 @@ MENU_UP                = Event('MENU_UP')
 MENU_DOWN              = Event('MENU_DOWN')
 MENU_PAGEUP            = Event('MENU_PAGEUP')
 MENU_PAGEDOWN          = Event('MENU_PAGEDOWN')
+MENU_REBUILD           = Event('MENU_REBUILD')
                        
 MENU_GOTO_MAINMENU     = Event('MENU_GOTO_MAINMENU')
 MENU_BACK_ONE_MENU     = Event('MENU_BACK_ONE_MENU')
