@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/02/11 06:53:01  krister
+# Fixed small bugs.
+#
 # Revision 1.24  2003/02/08 23:31:37  gsbarbieri
 # hanged the Image menu to ExtendedMenu.
 #
@@ -88,6 +91,7 @@ import copy
 import rc
 import string
 import skin
+import menu
 
 from item import Item
 from playlist import Playlist, RandomPlaylist

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.76  2003/02/11 06:53:00  krister
+# Fixed small bugs.
+#
 # Revision 1.75  2003/02/08 23:31:33  gsbarbieri
 # hanged the Image menu to ExtendedMenu.
 #
@@ -791,7 +794,7 @@ class Skin:
                         val.progressbar.y + val.progressbar.height -1,
                         width = -1,
                         color = val.progressbar.bgcolor)
-            pixels = int(round((info.done)/100 * val.progressbar.width))
+            pixels = info.elapsed * val.progressbar.width / info.length
 
             # the progress indicator:
             osd.drawbox(val.progressbar.x +1,
