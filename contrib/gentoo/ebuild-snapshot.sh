@@ -12,7 +12,7 @@ sudo cp `dirname $0`/freevo.ebuild /usr/local/portage/app-misc/freevo_snapshot/$
 
 cd `dirname $0`/../../
 echo cvs update
-#cvs update -dP
+cvs update -dP
 
 cd ..
 echo copy directory to /tmp

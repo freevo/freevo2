@@ -39,11 +39,14 @@ src_install() {
 
 	install -d ${D}/usr/bin
 	install ${FILESDIR}/freevo ${D}/usr/bin
+	install ${FILESDIR}/freevo $FREEVO_INSTALL_DIR
 
 	install -m 0777 -d ${D}/var/log/freevo
 	install -m 0777 -d ${D}/var/cache/freevo
 	install -m 0777 -d ${D}/var/cache/xmltv
+}
 
+pkg_postinst() {
 	einfo
 	einfo please check /etc/freevo/freevo.conf and 
 	einfo /etc/freevo/freevo_config.py before starting freevo
