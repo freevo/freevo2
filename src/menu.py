@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.84  2004/02/06 20:42:55  dischi
+# fix LEFT and RIGHT for tv guide
+#
 # Revision 1.83  2004/02/05 19:56:40  dischi
 # make it possible to change back to the old navigation style
 #
@@ -363,17 +366,18 @@ class MenuWidget(GUIObject):
     def eventhandler(self, event):
         menu = self.menustack[-1]
 
-        if self.cols == 1 and config.MENU_ARROW_NAVIGATION:
-            if event == MENU_LEFT:
-                event = MENU_BACK_ONE_MENU
-            elif event == MENU_RIGHT:
-                event = MENU_SELECT
+        if self.cols == 1 and isinstance(menu, Menu):
+            if config.MENU_ARROW_NAVIGATION:
+                if event == MENU_LEFT:
+                    event = MENU_BACK_ONE_MENU
+                elif event == MENU_RIGHT:
+                    event = MENU_SELECT
             
-        elif self.cols == 1:
-            if event == MENU_LEFT:
-                event = MENU_PAGEUP
-            elif event == MENU_RIGHT:
-                event = MENU_PAGEDOWN
+            else:
+                if event == MENU_LEFT:
+                    event = MENU_PAGEUP
+                elif event == MENU_RIGHT:
+                    event = MENU_PAGEDOWN
             
         if self.eventhandler_plugins == None:
             self.eventhandler_plugins = plugin.get('daemon_eventhandler')
