@@ -15,6 +15,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.97  2002/11/26 22:02:09  dischi
+# Added key to enable/disable subtitles. This works only with mplayer pre10
+# (maybe pre9). Keyboard: l (for language) or remote SUBTITLE
+#
 # Revision 1.96  2002/11/24 19:10:19  dischi
 # Added mame support to the new code. Since the hole new code is
 # experimental, mame is activated by default. Change local_skin.xml
@@ -669,7 +673,8 @@ RC_CMDS = {
     'pause'       : 'PAUSE',
     'stop'        : 'STOP',
     'rec'         : 'REC',
-    'eject'       : 'EJECT'
+    'eject'       : 'EJECT',
+    'subtitle'    : 'SUBTITLE'
     }
 
 # XXX This is experimental, please send in testreports!

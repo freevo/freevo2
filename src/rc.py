@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/11/26 22:02:10  dischi
+# Added key to enable/disable subtitles. This works only with mplayer pre10
+# (maybe pre9). Keyboard: l (for language) or remote SUBTITLE
+#
 # Revision 1.1  2002/11/24 13:58:44  dischi
 # code cleanup
 #
@@ -107,6 +111,7 @@ class RemoteControl:
     STOP     = 'STOP'
     REC      = 'REC'      
     EJECT    = 'EJECT'
+    SUBTITLE = 'SUBTITLE'
 
     
     # Application generated codes

@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2002/11/26 22:02:10  dischi
+# Added key to enable/disable subtitles. This works only with mplayer pre10
+# (maybe pre9). Keyboard: l (for language) or remote SUBTITLE
+#
 # Revision 1.2  2002/11/26 20:58:44  dischi
 # o Fixed bug that not only the first character of mplayer_options is used
 # o added the configure stuff again (without play from stopped position
@@ -234,6 +238,7 @@ class MPlayer:
         eventhandler for mplayer control. If an event is not bound in this
         function it will be passed over to the items eventhandler
         """
+        print event
         if event == rc.STOP or event == rc.SELECT:
             if self.mode == 'dvdnav':
                 self.thread.app.write('S')
@@ -293,6 +298,11 @@ class MPlayer:
                 self.thread.app.write('L')
             else:
                 self.thread.cmd('skip_forward2')
+            return TRUE
+
+        if event == rc.SUBTITLE:
+            print "SUBBB"
+            self.thread.cmd('subtitle')
             return TRUE
 
         # nothing found? Try the eventhandler of the object who called us
@@ -450,6 +460,9 @@ class MPlayer_Thread(threading.Thread):
             str = mplayerKey('DOWN')
         elif command == 'skip_back3':
             str = mplayerKey('PAGEDOWN')
+        elif command == 'subtitle':
+            print "sub"
+            str = mplayerKey('SUBTITLE')
 
         #print "In cmd going to write: " + str
         self.app.write(str) 
@@ -479,6 +492,7 @@ def mplayerKey(rcCommand):
         'UP'             : '\x1bOA',
         'VOLUMEUP'       : '*',
         'VOLUMEDOWN'     : '/',
+        'SUBTITLE'       : 'v',
         'DISPLAY'        : 'o'
         }
     

@@ -65,7 +65,8 @@ cmds_kbd = {
     'u'           : 'PAUSE',
     's'           : 'STOP',
     'e'           : 'REC',
-    'Y'           : 'EJECT'
+    'Y'           : 'EJECT',
+    'L'           : 'SUBTITLE'
     }
 
 
