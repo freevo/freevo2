@@ -16,11 +16,27 @@
 #          * Add support for Ogg-Vorbis
 # ----------------------------------------------------------------------
 # $Log$
-# Revision 1.15  2002/10/23 14:47:48  dischi
-# Removed (disabled) some debug
+# Revision 1.16  2002/10/24 05:27:10  outlyer
+# Updated audioinfo to use new ID3v2, ID3v1 support. Much cleaner, and uses
+# the eyed3 library included. Notable changes:
 #
-# Revision 1.14  2002/10/21 05:09:50  krister
-# Started adding support for playing network audio files (i.e. radio stations). Added one station in freevo_config.py, seems to work. Need to fix audioinfo.py with title, time etc. Need to look at using xml files for this too.
+# o Invalid audio files do not cause a crash, both broken oggs and broken mp3s
+#    now pop up an "Invalid Audio File" message (also if you just rename a non-
+#    audiofile to *.mp3 or *.ogg.
+# o Full ID3v2.3 and 2.4 support, v2.2 is not supported, but gracefully falls
+#    back to v1.1, if no tags are found, behaviour is normal.
+# o Now survives the crash reported by a user
+# o There are self.valid and self.trackof variables in audioinfo, to store the
+#    validity of the file (passing the header checks for Ogg and MP3) and to
+#    store the total numbers of tracks in an album as allowed by the v2.x spec.
+# o I'll be updating the skin as well, with support for self.trackof, and to
+#    truncate the text in album, artist and title, since they can now be
+#    significantly longer than v1.1 and can (and have) run off the screen.
+#
+# Revision 1.3  2002/10/23 01:18:25  outlyer
+# Graceful fallback from 2.x to 1.x if a 2.2 or corrupted 2.x tag is found.
+# Only issue left is that we don't get track numbers from v1.1 tags without
+# a v1.1 comment defined. It's a weird one.
 #
 # Revision 1.13  2002/10/13 14:06:50  dischi
 # Accept jpg as cover images, too, and when there is no title, return
@@ -120,11 +136,11 @@ import sys
 import string
 import time
 import re
-import mp3_id3
+import eyed3
 import skin
 import imghdr
 
-DEBUG=0
+DEBUG=1
 
 skin = skin.get_singleton()
 
@@ -135,7 +151,7 @@ class AudioInfo:
     __pause_timer = 0 # Private variable to store time for pause.
     __lastupdate  = 0.0
     
-    def __init__(self, file, drawall=0):
+    def __init__( self, file, drawall=0 ):
         self.drawall    = drawall
         self.filename   = file
         self.album      = ''
@@ -143,6 +159,7 @@ class AudioInfo:
         self.length     = 0
         self.title      = 0
         self.track      = 0
+	self.trackof	= 0
         self.year       = 0
         self.start      = 0
         self.elapsed    = 0
@@ -150,16 +167,17 @@ class AudioInfo:
         self.done       = 0.0
         self.image      = ''
         self.pause      = 0
+	self.valid	= 1
 
         # XXX This is really not a very smart way to do it. We should be
         # XXX able to handle files with messed up extentions.
         if self.is_ogg():
             if DEBUG: print "Got ogg..."
-            self.set_info_ogg(self.filename)
+            self.set_info_ogg( self.filename )
 
         elif self.is_mp3():
             if DEBUG: print "Got mp3..."
-            self.set_info_mp3(self.filename)
+            self.set_info_mp3( self.filename )
         else:
             if DEBUG: print "Got something else..."
 
@@ -223,6 +241,7 @@ class AudioInfo:
             vc = vf.comment()
         except ogg.vorbis.VorbisError:
             if DEBUG: print "Got VorbisError.. not an ogg file."
+	    self.valid = 0
             return 0
         
         try:
@@ -265,20 +284,28 @@ class AudioInfo:
         Arguments: filename
           Returns: 1 if success
         """
-        id3 = mp3_id3.ID3( file )
-        m =  mp3_id3.mp3header( file)
-        s,b = m.info()
+	try:
+	    id3 = eyed3.Mp3AudioFile( file )
+	except eyed3.TagException:
+	    id3 = eyed3.Mp3AudioFile( file, 1)
+	except eyed3.InvalidAudioFormatException:
+	    # File is not an MP3
+	    self.valid = 0
+	    return 0
 
-        self.album  = id3.album
-        self.artist = id3.artist
-        self.length = s
-        self.title  = id3.title
+	if id3.tag:
+	    self.album  = id3.tag.getAlbum()
+            self.artist = id3.tag.getArtist()
+            self.title  = id3.tag.getTitle()
+     	    self.track,self.trackof  = id3.tag.getTrackNum()
+	    self.year   = id3.tag.getYear()
+
+	self.length = id3.getPlayTime()
+
         if not self.title:
             self.title = os.path.splitext(os.path.basename(file))[0]
-        self.track  = id3.track
         if not self.track:
             self.track = ''
-        self.year   = id3.year
         return 1
 
     def yes( self ):
@@ -341,36 +368,3 @@ class AudioInfo:
 # End of AudioInfo class
 # ======================================================================
 
-
-
-def mp3info(fn):
-    h['freq_idx'] = 3*h['id'] + h['sampling_freq']
-
-    h['length'] = ((1.0*eof-off) / h['mean_frame_size']) * ((115200./2)*(1.+h['id']))/(1.0*h['fs'])
-    h['secs'] = int(h['length'] / 100);
-  
-
-    i = {}
-    i['VERSION'] = h['id']
-    i['MM'] = int(h['secs']/60)
-    i['SS'] = h['secs']%60
-    i['STEREO'] = not(h['mode'] == 3)
-    if h['layer'] >= 0:
-        if h['layer'] == 3:
-            i['LAYER'] = 2
-        else:
-            i['LAYER'] = 3
-    else:
-        i['LAYER'] = ''
-    i['MODE'] = h['mode']
-    i['COPYRIGHT'] = h['copyright']
-    if h['bitrate'] >=0:
-        i['BITRATE'] = h['bitrate']
-    else:
-        i['BITRATE'] = ''
-    if h['freq_idx'] >= 0:
-        i['FREQUENCY'] = frequency_tbl[h['freq_idx']]
-    else:
-        i['FREQUENCY'] = ''
-
-    return i

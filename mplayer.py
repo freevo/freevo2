@@ -9,6 +9,23 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2002/10/24 05:27:10  outlyer
+# Updated audioinfo to use new ID3v2, ID3v1 support. Much cleaner, and uses
+# the eyed3 library included. Notable changes:
+#
+# o Invalid audio files do not cause a crash, both broken oggs and broken mp3s
+#    now pop up an "Invalid Audio File" message (also if you just rename a non-
+#    audiofile to *.mp3 or *.ogg.
+# o Full ID3v2.3 and 2.4 support, v2.2 is not supported, but gracefully falls
+#    back to v1.1, if no tags are found, behaviour is normal.
+# o Now survives the crash reported by a user
+# o There are self.valid and self.trackof variables in audioinfo, to store the
+#    validity of the file (passing the header checks for Ogg and MP3) and to
+#    store the total numbers of tracks in an album as allowed by the v2.x spec.
+# o I'll be updating the skin as well, with support for self.trackof, and to
+#    truncate the text in album, artist and title, since they can now be
+#    significantly longer than v1.1 and can (and have) run off the screen.
+#
 # Revision 1.41  2002/10/23 06:58:03  krister
 # Added OSD stop/start patch from Michael Hunold.
 #
@@ -250,9 +267,17 @@ class MPlayer:
 
         if mode == 'audio':
             self.thread.audioinfo = audioinfo.AudioInfo(filename, 1)
-            self.thread.audioinfo.start = time.time()
-            skin.DrawMP3(self.thread.audioinfo) 
-            self.thread.audioinfo.drawall = 0
+	    print "Valid: " + str(self.thread.audioinfo.valid)
+	    if self.thread.audioinfo.valid:
+                self.thread.audioinfo.start = time.time()
+                skin.DrawMP3(self.thread.audioinfo) 
+                self.thread.audioinfo.drawall = 0
+	    else:
+	        # Invalid file, show an error and survive.
+		skin.PopupBox('Invalid audio file')
+		time.sleep(3.0)
+		menuwidget.refresh()
+		return
         else:
             # clear the screen for mplayer
             osd.clearscreen(color=osd.COL_BLACK)
