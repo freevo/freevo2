@@ -6,7 +6,7 @@ $Id$
 This file contains random notes that are useful when dealing with Freevo
 
 ----------------------------------------------------------------------
-Dependencies:
+Dependencies (OUTDATED!):
 
 Freevo:
   MPlayer
@@ -30,22 +30,10 @@ Freevo:
 
 ----------------------------------------------------------------------
 
-Mixed stuff:
-
-o Openmovie is a very similar project
-
-----------------------------------------------------------------------
-
 libdvdread, libdvdcss from dtek
 
 css:
 ./configure --disable-gtk   --disable-x11   --disable-xvideo   
-
-
-----------------------------------------------------------------------
-XviD:
-
-libcore.a needs to be copied manually to /usr/local/lib
 
 ----------------------------------------------------------------------
 MPlayer:
@@ -84,10 +72,19 @@ Then run
 
 NVREC:
 
+Requires very recent versions of autoconf and automake:
+
+ftp://ftp.gnu.org/gnu/autoconf/autoconf-2.53.tar.gz
+ftp://ftp.gnu.org/gnu/automake/automake-1.6.2.tar.gz
+
+Compile autoconf before automake.
+
+Build only nuvrec:
+
 cd ..
 ./bootstrap
-./configure --without-avifile --without-rte --with-divx4linux \
-  --without-quicktime  --without-sdl --without-mad
+./configure --without-avifile --without-rte --without-divx4linux \
+   --without-quicktime --without-sdl --without-mad --without--ffmpeg
 make
 
 ----------------------------------------------------------------------
@@ -160,7 +157,13 @@ o Test CVS latest version using anonymous export
   ./freevo
 
 o Release checklist:
+  o Have you added testfiles for new functions. Try to keep them as small 
+    as possible, we don't want the testdata to be several megs since it 
+    will be included in the releases.
   o Test it!
+    o Functions
+    o Memory leaks
+    o Process management (no zombies, extra copies, etc)
   o Update changelog, including the release date
   o Update TODO
 
