@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2004/02/06 20:55:28  dischi
+# move debug to 2
+#
 # Revision 1.22  2004/01/09 02:10:00  rshortt
 # Patch from Matthieu Weber to revive add/edit favorites support from the
 # TV interface.
@@ -99,7 +102,6 @@ class TVGuide(gui.GUIObject):
 
         guide = epg_xmltv.get_guide(PopupBox(text=_('Preparing the program guide')))
         channels = guide.GetPrograms(start=start_time+1, stop=stop_time-1)
-
         if not channels:
             AlertBox(text=_('TV Guide is corrupt!')).show()
             return
@@ -138,7 +140,7 @@ class TVGuide(gui.GUIObject):
 
         
     def eventhandler(self, event):
-        _debug_('TVGUIDE EVENT is %s' % event)
+        _debug_('TVGUIDE EVENT is %s' % event, 2)
 
         if event == em.MENU_CHANGE_STYLE:
             if skin.toggle_display_style('tv'):
