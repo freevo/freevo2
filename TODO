@@ -18,6 +18,8 @@ o Add proper X11 support for mplayer and tv-watching
 o Add a freevo exit command
   o Shutdown implemented for standalone boxen, add for X11/SDL too
 o Add rcs id to all files!
+  o Use the new Docs/fileheader after it has been approved by all
+    authors
 o Make the OSD/skins support adapt to the OSD resolution
 o Channel guide layout
 o Use btaudio for audio recording from the video card
@@ -43,6 +45,7 @@ o Website:
 
 Mid-term
 --------
+o Recording schedule
 o Adjustment of saturation, contrast, etc for both TV-in and
   TV-out.
   o Have a menu choice to save the settings to a config file
@@ -57,12 +60,15 @@ o MP3 playing:
     MP3 player is playing from it. 
   o Random playing
   o Select several playlists and AND or OR them together.
+  o Use blursk (or something similar) to display fancy graphics
 o Bugzilla
 o RDF support for headlines from Slashdot, etc
 o Clock in the skin
 o Temperature & weather type display as part of the skin
 o Traffic report (realtime congestion map download/display, text info).
 o Weather report (animated radar map, text info).
+o Add a startup screen with the GPL info and a button to display 
+  the non-warranty as suggested by FSF
 
 
 Long-term
@@ -70,9 +76,7 @@ Long-term
 o Radio in, record to MP3
 o email and ICQ notifs
 o ir out to control a cable box, satellite receiver, etc
-o recording schedule
 o text-to-speech for menus, notifications
-o MAME, other emulators
 o Rate shows and get recommendations on other shows
 o Control and receive video data from a network TV tuner daemon
 
