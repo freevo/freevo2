@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/09/25 09:39:27  dischi
+# fix childapp killing problem
+#
 # Revision 1.18  2003/09/24 18:01:56  outlyer
 # A workaround for the problems with playback being aborted for every
 # 2nd song when played in sequence.
@@ -263,16 +266,9 @@ class Read_Thread(threading.Thread):
 
             data = self.fp.readline(300)
             if not data:
-                # FIXME: This shouldn't be necessary, but it keeps
-                # killing the playback when switching songs, perhaps
-                # because playing songs in sequence leads to a slightly
-                # longer load or something?
-                time.sleep(1)   # Wait one second, in case.
-                data = self.fp.readline(300)
-                if not data:
-                    _debug_('%s: No data, stopping (pid %s)!' % (self.name, os.getpid()))
-                    self.fp.close()
-                    break
+                _debug_('%s: No data, stopping (pid %s)!' % (self.name, os.getpid()))
+                self.fp.close()
+                break
             else:
                 data = data.replace('\r', '\n')
                 lines = data.split('\n')
@@ -371,20 +367,26 @@ class ChildThread(threading.Thread):
                 while self.mode == 'play' and self.app.isAlive():
                     time.sleep(0.1)
 
-                if self.mode == 'play' and not self.manual_stop:
+                # remember if we have to send the STOP signal
+                send_stop = self.mode == 'play' and not self.manual_stop
+
+                # kill the app
+                self.app.kill()
+
+                # Ok, we can use the OSD again.
+                if self.stop_osd and config.STOP_OSD_WHEN_PLAYING:
+                    osd.restart()
+
+                # send mode to idle
+                self.mode = 'idle'
+
+                # inform Freevo that the app stopped itself
+                if send_stop:
                     if hasattr(self.app, 'stopped'): 
                         self.app.stopped()
                     else:
                         _debug_('app has no stopped function, send PLAY_END')
                         rc.post_event(PLAY_END)
                         
-                self.app.kill()
-
-                # Ok, we can use the OSD again.
-                if self.stop_osd and config.STOP_OSD_WHEN_PLAYING:
-                    osd.restart()
-                
-                self.mode = 'idle'
-                
             else:
                 self.mode = 'idle'
