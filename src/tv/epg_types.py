@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/08/24 17:08:15  dischi
+# added attr date and use config formatstrings
+#
 # Revision 1.7  2003/08/23 12:51:43  dischi
 # removed some old CVS log messages
 #
@@ -99,12 +102,11 @@ class TvProgram:
         return the specific attribute as string or an empty string
         """
         if attr == 'start':
-            bt = time.localtime(self.start)   # Beginning time tuple
-            return '%02d:%02d' % (bt[3], bt[4])
+            return time.strftime(config.TV_TIMEFORMAT, time.localtime(self.start))
         if attr == 'stop':
-            et = time.localtime(self.stop)   # End time tuple
-            return '%02d:%02d' % (et[3], et[4])
-
+            return time.strftime(config.TV_TIMEFORMAT, time.localtime(self.stop))
+        if attr == 'date':
+            return time.strftime(config.TV_DATEFORMAT, time.localtime(self.start))
         if hasattr(self, attr):
             return str(getattr(self,attr))
         return ''
