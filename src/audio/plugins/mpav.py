@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/02/23 05:38:05  gsbarbieri
+# i18n: help translators job.
+#
 # Revision 1.2  2004/02/21 03:19:54  gsbarbieri
 # Improvements and bug fixes:
 #   - now use path from freevo.conf;
@@ -266,7 +269,7 @@ class PluginInterface( plugin.Plugin ):
         iattr = self.player.item.getattr
         x, y = 10, 10
         for a in ( "title", "artist", "album" ):
-            m = String( _( string.capwords( a ) + ":" ), "latin-1" )
+            m = String( _( string.capwords( a ) ) + ":", "latin-1" )
             m += " " + String( iattr( a ), "latin-1" ) 
             self.mpav.add_msg( font, x, y, m )
             y += font.height
