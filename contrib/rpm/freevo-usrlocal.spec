@@ -18,7 +18,7 @@
 %define name freevo-usrlocal
 %define freevoname freevo
 %define freevover 1.4
-%define release rc2
+%define release rc3
 %define runtimever 0.1
 
 %define _prefix /usr/local/freevo
@@ -158,8 +158,8 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 
 %changelog
-* Mon Nov  3 2003 TC Wan <tcwan@cs.usm.my>
-- 1.4-rc2 usrlocal (no-dependency) package
+* Tue Nov  4 2003 TC Wan <tcwan@cs.usm.my>
+- 1.4-rc3 usrlocal (no-dependency) package
 
 * Sat Oct 25 2003 TC Wan <tcwan@cs.usm.my>
 - Updated for 1.4-rc2

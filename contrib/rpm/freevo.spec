@@ -17,7 +17,7 @@
 ##########################################################################
 %define name freevo
 %define version 1.4
-%define release rc2
+%define release rc3
 %define _cachedir /var/cache
 %define _logdir /var/log
 
@@ -176,8 +176,8 @@ if [ "$1" = 0 ] ; then
 fi
 
 %changelog
-* Mon Nov  3 2003 TC Wan <tcwan@cs.usm.my>
-- Updated for 1.4-rc2 (name change)
+* Tue Nov  4 2003 TC Wan <tcwan@cs.usm.my>
+- Updated for 1.4-rc3 (name change)
 
 * Sat Oct 25 2003 TC Wan <tcwan@cs.usm.my>
 - Updated for 1.4-rc2
