@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/08/26 18:47:29  outlyer
+# Initial FLAC support (for encoding) Xine is required for playback.
+#
 # Revision 1.13  2003/08/23 12:51:42  dischi
 # removed some old CVS log messages
 #
@@ -87,7 +90,7 @@ import re
 import mmpython
 
 # Set to 1 for debug output
-DEBUG = config.DEBUG
+DEBUG = 1 #config.DEBUG
 
 TRUE = 1
 FALSE = 0
@@ -115,6 +118,8 @@ class main_backup_thread(threading.Thread):
             self.cd_backup_threaded(self.device, rip_format='ogg')                      
         elif self.rip_format == 'wav' :
             self.cd_backup_threaded(self.device, rip_format='wav')        
+        elif self.rip_format == 'flac' :
+            self.cd_backup_threaded(self.device, rip_format='flac')
           
     
     def cd_backup_threaded(self, device, rip_format='mp3'):  
@@ -188,7 +193,8 @@ class main_backup_thread(threading.Thread):
             
             # If rip_format is mp3 or ogg, then copy the file to /temp/track_being_ripped.wav
 
-            if (string.upper(rip_format) == 'MP3') or (string.upper(rip_format) == 'OGG'):
+            if (string.upper(rip_format) == 'MP3') or (string.upper(rip_format) == 'OGG') or \
+                (string.upper(rip_format) == 'FLAC'):
                 pathname_cdparanoia = '/tmp'
                 path_tail_cdparanoia   = '/track_being_ripped'
            
@@ -245,6 +251,21 @@ class main_backup_thread(threading.Thread):
                 # Remove the .wav file.
                 rm_command = '%s%s.wav' % (pathname_cdparanoia, path_tail_cdparanoia)
                 if os.path.exists (rm_command): os.unlink(rm_command)                
+
+            elif string.upper(rip_format) == 'FLAC':
+                flac_command = \
+                    '%s %s "%s%s.wav" -o "%s%s.flac"' % \
+                        ( config.FLAC_CMD, config.FLAC_OPTS, pathname_cdparanoia,
+                          path_tail_cdparanoia, pathname, path_tail)
+                metaflac_command = \
+                    'metaflac --set-vc-field=ARTIST="%s" --set-vc-field=ALBUM="%s" --set-vc-field=TITLE="%s" --set-vc-field=TRACKNUMBER="%s/%s" "%s%s.flac"' % \
+                    (artist, album, song_names[i], track, len(song_names), pathname, path_tail)
+                if DEBUG: 'flac_command: %s' % (flac_command)
+                if DEBUG: 'metaflac    : %s' % (metaflac_command)
+                os.system(flac_command)
+                os.system(metaflac_command)
+                rm_command = '%s%s.wav' % (pathname_cdparanoia, path_tail_cdparanoia)
+                if os.path.exists (rm_command): os.unlink(rm_command)
         
         # Flash a popup window indicating copying is done
         time_taken = time.time() - begin + 300
@@ -372,7 +393,9 @@ class PluginInterface(plugin.ItemPlugin):
         if config.OGGENC_CMD:
             items += [menu.MenuItem('Backup CD to hard drive in Ogg format',
                                 self.cd_backup_ogg, arg=arg)]
-                                
+        if config.FLAC_CMD:
+            items += [menu.MenuItem('Backup CD to hard drive in FLAC format',
+                                self.cd_backup_flac, arg=arg)]
         items += [menu.MenuItem('Backup CD to hard drive in wav format',
                                 self.cd_backup_wav, arg=arg)]
 
@@ -394,4 +417,8 @@ class PluginInterface(plugin.ItemPlugin):
         device = arg
         rip_thread = main_backup_thread(device=device, rip_format='ogg')        
         rip_thread.start()
-        
+    
+    def cd_backup_flac(self, arg, menuw=None):
+        device = arg
+        rip_thread = main_backup_thread(device=device, rip_format='flac')
+        rip_thread.start()

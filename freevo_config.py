@@ -687,9 +687,11 @@ TVTIME_CMD = CONF.tvtime
 LAME_CMD = CONF.lame
 CDPAR_CMD = CONF.cdparanoia
 OGGENC_CMD = CONF.oggenc
+FLAC_CMD = CONF.flac
 CD_RIP_PN_PREF = '%(artist)s/%(album)s/%(song)s'
 CD_RIP_LAME_OPTS = '--preset standard'
 CD_RIP_OGG_OPTS = '-m 128'
+FLAC_OPTS = '-8'                # Best, but slowest compression
 
 # ======================================================================
 # Holiday idlebar plugin
