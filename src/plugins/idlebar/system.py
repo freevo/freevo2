@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/11/02 20:06:44  mikeruelle
+# some fixes from den_RDC. adds 2.6 support too
+#
 # Revision 1.4  2003/11/02 18:02:09  dischi
 # fix case temp
 #
@@ -195,6 +198,8 @@ class sensors(IdleBarPlugin):
         """
         def __init__(self, sensor, compute_expression, hotstack):
             self.initpath = "/proc/sys/dev/sensors/"
+            self.k6path = '/sys/bus/i2c/devices'
+            self.k6 = 0
             self.senspath = self.getSensorPath()
             self.sensor = sensor
             self.compute_expression = compute_expression
@@ -213,13 +218,28 @@ class sensors(IdleBarPlugin):
             if self.senspath == -1 or not self.senspath:
                 return "?"        
             
-            file = os.path.join( self.senspath, self.sensor )
+            if self.k6 :
+                file = os.path.join( self.senspath, 'temp_input' + self.sensor[-1] )
+                fhot = os.path.join( self.senspath, 'temp_max' + self.sensor[-1] )
+                f = open(fhot)
+                hotdata = f.read()
+                f.close()
+            
+            else:
+                file = os.path.join( self.senspath, self.sensor )
+            
             f = open(file)
             data = f.read()
             f.close()
             
-            temp = int(temp_compute (float(string.split(data)[2])))
-            hot = int(temp_compute (float(string.split(data)[0])))
+            if self.k6:
+                temp = int(temp_compute(float(data[0:2])))
+                hot = int(temp_compute(float(hotdata[0:2])))
+                
+            else:
+                temp = int(temp_compute (float(string.split(data)[2])))
+                hot = int(temp_compute (float(string.split(data)[0])))
+            
             if temp > hot:
                 if self.washot == False:
                     self.hotstack = self.hotstack + 1
@@ -232,10 +252,25 @@ class sensors(IdleBarPlugin):
             return "%s°" % temp
             
         def getSensorPath(self):
+            #let's try if we find a sys filesystem (and kernel2.6 style sensors)
+            if os.path.exists(self.k6path):
+                self.k6 = 1
+                #print "Detected kernel 2.6 sys fs"
+                for senspath in os.listdir(self.k6path):
+                    testpath = os.path.join(self.k6path , senspath)
+                    for pos_sensors in os.listdir(testpath):
+                        if pos_sensors == "temp_input1":
+                            return testpath
+                            
             if not os.path.exists(self.initpath):
-                print "LM_Sensors proc data not available? Did you load i2c-proc"
-                print "and configured lm_sensors?"
-                print "temperatures will be bogus"
+                if self.k6:
+                    print "Kernel 2.5/2.6 detected, but no i2c sensors found"
+                    print "Did u load (or compile) the necessary bus driver"
+                    print "and sensor chip modules"
+                else:
+                    print "LM_Sensors proc data not available? Did you load i2c-proc"
+                    print "and configured lm_sensors?"
+                    print "temperatures will be bogus"
                 return -1 #failure
                 
             for senspath in os.listdir(self.initpath):
