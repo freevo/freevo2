@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/06/24 17:41:09  dischi
+# added mixer keys
+#
 # Revision 1.12  2003/06/20 17:39:00  dischi
 # set \\PLAY\ to play item
 #
@@ -254,12 +257,6 @@ BUTTON                 = Event('BUTTON')
 # Default key-event map
 #
 
-GLOBAL_EVENTS = {
-    'VOL+'      : MIXER_VOLUP,
-    'VOL-'      : MIXER_VOLDOWN,
-    'MUTE'      : MIXER_MUTE
-    }
-
 MENU_EVENTS = {
     'LEFT'      : MENU_LEFT,
     'RIGHT'     : MENU_RIGHT,
@@ -274,8 +271,11 @@ MENU_EVENTS = {
     'ENTER'     : MENU_SUBMENU,
     'DISPLAY'   : MENU_CHANGE_STYLE,
     'EJECT'     : EJECT,
-    'REC'       : TV_START_RECORDING
-    }
+    'REC'       : TV_START_RECORDING,
+    'VOL+'      : MIXER_VOLUP,
+    'VOL-'      : MIXER_VOLDOWN,
+    'MUTE'      : MIXER_MUTE
+    } 
 
 INPUT_EVENTS = {
     'EXIT'      : INPUT_EXIT,
@@ -297,6 +297,9 @@ INPUT_EVENTS = {
     '0'         : INPUT_0,
     'CH+'       : MENU_PAGEUP,
     'CH-'       : MENU_PAGEDOWN,
+    'VOL+'      : MIXER_VOLUP,
+    'VOL-'      : MIXER_VOLDOWN,
+    'MUTE'      : MIXER_MUTE
     }
 
 TV_EVENTS = {
@@ -312,6 +315,9 @@ TV_EVENTS = {
     'REW'       : Event(SEEK, arg=-10),
     'FFWD'      : Event(SEEK, arg=10),
     'DISPLAY'   : TOGGLE_OSD,
+    'VOL+'      : MIXER_VOLUP,
+    'VOL-'      : MIXER_VOLDOWN,
+    'MUTE'      : MIXER_MUTE
     }
 
 VIDEO_EVENTS = {
@@ -334,7 +340,10 @@ VIDEO_EVENTS = {
     'UP'        : PLAYLIST_PREV,
     'DOWN'      : PLAYLIST_NEXT,
     'CH+'       : PLAYLIST_PREV,
-    'CH-'       : PLAYLIST_NEXT
+    'CH-'       : PLAYLIST_NEXT,
+    'VOL+'      : MIXER_VOLUP,
+    'VOL-'      : MIXER_VOLDOWN,
+    'MUTE'      : MIXER_MUTE
     }
 
 AUDIO_EVENTS = {
@@ -349,7 +358,10 @@ AUDIO_EVENTS = {
     'UP'        : PLAYLIST_PREV,
     'DOWN'      : PLAYLIST_NEXT,
     'CH+'       : PLAYLIST_PREV,
-    'CH-'       : PLAYLIST_NEXT
+    'CH-'       : PLAYLIST_NEXT,
+    'VOL+'      : MIXER_VOLUP,
+    'VOL-'      : MIXER_VOLDOWN,
+    'MUTE'      : MIXER_MUTE
     }
     
 IMAGE_EVENTS = {
@@ -374,7 +386,10 @@ IMAGE_EVENTS = {
     'UP'        : PLAYLIST_PREV,
     'DOWN'      : PLAYLIST_NEXT,
     'CH+'       : PLAYLIST_PREV,
-    'CH-'       : PLAYLIST_NEXT
+    'CH-'       : PLAYLIST_NEXT,
+    'VOL+'      : MIXER_VOLUP,
+    'VOL-'      : MIXER_VOLDOWN,
+    'MUTE'      : MIXER_MUTE
     }
 
 GAMES_EVENTS = {
@@ -382,7 +397,10 @@ GAMES_EVENTS = {
     'SELECT'    : STOP,
     'MENU'      : MENU,
     'DISPLAY'   : GAMES_CONFIG,
-    'ENTER'     : GAMES_RESET
+    'ENTER'     : GAMES_RESET,
+    'VOL+'      : MIXER_VOLUP,
+    'VOL-'      : MIXER_VOLDOWN,
+    'MUTE'      : MIXER_MUTE
     }
 
 
