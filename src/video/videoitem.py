@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.142  2004/07/11 10:22:28  dischi
+# fix bug for auto joined files on disc
+#
 # Revision 1.141  2004/07/11 10:14:12  dischi
 # reset current_subitem on play start
 #
@@ -393,6 +396,9 @@ class VideoItem(Item):
                 if (si.media_id or si.media):
                     # If the file is on a removeable media
                     if util.check_media(si.media_id):
+                        self.current_subitem = si
+                        return 1
+                    elif si.media and util.check_media(si.media.id):
                         self.current_subitem = si
                         return 1
                 else:
