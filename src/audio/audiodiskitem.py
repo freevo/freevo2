@@ -148,18 +148,13 @@ class AudioDiskItem(Playlist):
 
         # add all playable items to the playlist of the directory
         # to play one files after the other
-        if (not self.display_type or self.display_type == 'audio' or \
-            self.display_type == 'image' or \
-            (self.MOVIE_PLAYLISTS and self.display_type == 'video')):
-            self.playlist = play_items
+        self.playlist = play_items
 
         # all items together
         items = []
 
         # random playlist (only active for audio)
-        if ((not self.display_type or self.display_type == 'audio') and \
-            len(play_items) > 1 and self.display_type and
-            config.AUDIO_RANDOM_PLAYLIST == 1):
+        if len(play_items) > 1 and config.AUDIO_RANDOM_PLAYLIST == 1:
             pl = Playlist(play_items, self)
             pl.randomize()
             pl.autoplay = 1
