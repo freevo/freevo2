@@ -3,10 +3,8 @@
 #
 # $Id$
 
-# The JPEG support will not be finished for a while.
-
 CFLAGS = -O2 -Wall `freetype-config --cflags`
-LIBS = -lm -lpng -lz `freetype-config --libs`
+LIBS = -lm -lpng -lz `freetype-config --libs` -ljpeg
 
 # Uncomment the following line to enable fullscren/vidmode support
 #X11_FULLSCREEN = 1
@@ -28,17 +26,19 @@ SDLLIBS = -lSDL -lpthread
 
 all: osds_fb vtrelease
 
-osds_fb: main.c ft.c ft.h fb.c fb.h readpng.c readpng.h
-	gcc -DOSD_FB $(CFLAGS) -Wall main.c ft.c fb.c readpng.c -o osds_fb $(LIBS)
+osds_fb: main.c ft.c ft.h fb.c fb.h readpng.c readpng.h readjpeg.c readjpeg.h
+	gcc -DOSD_FB $(CFLAGS) -Wall main.c ft.c fb.c readpng.c readjpeg.c -o osds_fb $(LIBS)
 
-osds_x11: main.c ft.c ft.h x11.c x11.h readpng.c readpng.h
-	gcc $(DFLAGS) $(CFLAGS) main.c ft.c x11.c -o osds_x11 readpng.c $(XLIBS) $(LIBS)
+osds_x11: main.c ft.c ft.h x11.c x11.h readpng.c readpng.h readjpeg.c readjpeg.h
+	gcc $(DFLAGS) $(CFLAGS) -o osds_x11 main.c ft.c x11.c readpng.c readjpeg.c \
+	$(XLIBS) $(LIBS)
 
-osds_sdl: main.c ft.c ft.h sdl.c sdl.h readpng.c readpng.h
-	gcc -DOSD_SDL $(CFLAGS) $(SDLFLAGS) main.c ft.c sdl.c -o osds_sdl readpng.c $(SDLLIBS) $(LIBS)
+osds_sdl: main.c ft.c ft.h sdl.c sdl.h readpng.c readpng.h readjpeg.c readjpeg.h
+	gcc -DOSD_SDL $(CFLAGS) $(SDLFLAGS) -o osds_sdl main.c ft.c sdl.c \
+	readpng.c readjpeg.c $(SDLLIBS) $(LIBS)
 
-x11test: x11.c x11.h readpng.c readpng.h
-	gcc $(CFLAGS) -DTEST x11.c readpng.c -o x11test $(XLIBS) $(LIBS)
+x11test: x11.c x11.h readpng.c readpng.h readjpeg.c readjpeg.h
+	gcc -Wall -g -DTEST x11.c readpng.c readjpeg.c -o x11test $(XLIBS) $(LIBS)
 
 sdltest: sdl.c sdl.h readpng.c readpng.h
 	gcc $(CFLAGS) $(DFLAGS) -DTEST sdl.c readpng.c -o sdltest $(SDLLIBS) $(LIBS)
@@ -50,4 +50,4 @@ pngtest: readpng.c readpng.h
 	gcc -DPNGTEST $(CFLAGS) -Wall readpng.c -o pngtest $(LIBS)
 
 clean:
-	-rm -f *.o *.pyc osds_fb osds_x11 x11test pngtest fttest sdltest osds_sdl
+	-rm -f *.o *.pyc osds_fb osds_x11 x11test pngtest fttest sdltest osds_sdl vtrelease
