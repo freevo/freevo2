@@ -13,6 +13,9 @@
 #   human readable size rather than bytes from os
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/02/20 22:36:04  rshortt
+# Fixed a crash where newfile was null.
+#
 # Revision 1.2  2003/02/20 22:12:26  rshortt
 # Added a check in case the user doesn't input anything or clicks cancel.
 #
@@ -74,12 +77,15 @@ if bs_result == -1 and fs_result == -1:
     file_loc = os.path.join(config.DIR_RECORD, action_file)
     if os.path.isfile(file_loc):
         if action == 'rename':
-            newfile_loc = os.path.join(config.DIR_RECORD, action_newfile)
-            if os.path.isfile(newfile_loc):
-                print '%s already exists file not renamed.' % newfile_loc
+            if action_newfile:
+                newfile_loc = os.path.join(config.DIR_RECORD, action_newfile)
+                if os.path.isfile(newfile_loc):
+                    print '%s already exists file not renamed.' % newfile_loc
+                else:
+                    print 'rename %s to %s' % (file_loc, newfile_loc)
+                    os.rename(file_loc, newfile_loc)
             else:
-                print 'rename %s to %s' % (file_loc, newfile_loc)
-                os.rename(file_loc, newfile_loc)
+                print 'Error: no newfile specified.'
         elif action == 'delete':
             print 'delete %s' % file_loc
             os.unlink(file_loc)
