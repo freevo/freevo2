@@ -2,7 +2,7 @@
 
 while true
 do
-  echo "Starting record_server.py"
+  echo "Starting webserver.py"
   ./freevo execute src/www/webserver.py
   sleep 10
 done
