@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/12/03 18:46:08  dischi
+# fix to avoid crashes when you have a bad cd (e.g. empty disc)
+#
 # Revision 1.1  2002/11/24 13:58:44  dischi
 # code cleanup
 #
@@ -111,16 +114,20 @@ class Identify_Thread(threading.Thread):
 
         # Read the volume label directly from the ISO9660 file system
         os.close(fd)
-        img = open(media.devicename)
-        img.seek(0x0000832d)
-        id = img.read(16)
-        img.seek(32808, 0)
-        label = img.read(32)
-        m = LABEL_REGEXP(label)
-        if m:
-            label = m.group(1)
-        img.close()
-
+        try:
+            img = open(media.devicename)
+            img.seek(0x0000832d)
+            id = img.read(16)
+            img.seek(32808, 0)
+            label = img.read(32)
+            m = LABEL_REGEXP(label)
+            if m:
+                label = m.group(1)
+            img.close()
+        except IOError:
+            print 'I/O error on disc %s' % media.devicename
+            return
+        
         # is the id in the database?
         if id in config.MOVIE_INFORMATIONS_ID:
             movie_info = config.MOVIE_INFORMATIONS_ID[id]
