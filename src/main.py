@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.87  2003/11/02 09:01:28  dischi
+# check for missing libs on startup
+#
 # Revision 1.86  2003/10/27 20:38:30  dischi
 # cleaner shutdown
 #
@@ -24,42 +27,6 @@
 #
 # Revision 1.82  2003/10/19 11:17:38  dischi
 # move gettext into config so that everything has _()
-#
-# Revision 1.81  2003/10/19 09:07:09  dischi
-# use util popen to start the process
-#
-# Revision 1.80  2003/10/18 10:44:11  dischi
-# renamed POPEN2 to OS_EVENT_POPEN2
-#
-# Revision 1.79  2003/10/18 09:44:44  dischi
-# add POPEN2 event
-#
-# Revision 1.78  2003/10/14 17:58:04  dischi
-# more debug
-#
-# Revision 1.77  2003/10/04 18:37:28  dischi
-# i18n changes and True/False usage
-#
-# Revision 1.76  2003/09/24 18:30:35  outlyer
-# Remove a scary looking, but innocuous message.
-#
-# Revision 1.75  2003/09/23 13:46:16  outlyer
-# I don't even know why this debug line is useful, but moving to higher
-# debug level.
-#
-# Revision 1.74  2003/09/21 10:50:37  dischi
-# shutdown children, too
-#
-# Revision 1.73  2003/09/14 20:09:36  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.72  2003/09/13 10:08:21  dischi
-# i18n support
-#
-# Revision 1.71  2003/09/10 19:28:41  dischi
-# add USE_NETWORK
-#
-# Revision 1.70  2003/09/08 14:40:24  mikeruelle
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -98,9 +65,24 @@ import traceback
 # up with the domain we set (set it from freevo 4Suite). By loading it
 # first, Freevo will override the 4Suite setting to freevo
 
-from xml.utils import qp_xml
-from xml.dom import minidom
+try:
+    from xml.utils import qp_xml
+    from xml.dom import minidom
+    
+    # now load other modules to check if all requirements are installed
+    import mmpython
+    import Image
+    import pygame
+    import twisted
+    
+except ImportError:
+    traceback.print_exc()
+    print
+    print 'Not all requirements of Freevo are installed on your system'
+    print 'Please check the INSTALL file for more informations'
+    sys.exit(0)
 
+    
 import config
 
 import util    # Various utilities
@@ -430,7 +412,6 @@ if __name__ == "__main__":
             os.rename(file, 'Docs/api/%s' % file)
         shutdown(allow_sys_shutdown=0)
 
-    import mmpython
     mmcache = '%s/mmpython' % config.FREEVO_CACHEDIR
     if not os.path.isdir(mmcache):
         os.mkdir(mmcache)
