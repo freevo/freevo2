@@ -30,6 +30,6 @@ for i in x:
 		# Make a seekable file object
 		img = cStringIO.StringIO(fp.read())
 		# Convert the image into a PNG and save to logos directory
-		output_file = config.TV_LOGOS + channel + '.png'
+		output_file = config.TV_LOGOS + '/' + channel + '.png'
 		Image.open(img).save(output_file)
 
