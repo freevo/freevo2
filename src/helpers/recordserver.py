@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2004/06/23 20:57:14  dischi
+# fix recording stopping
+#
 # Revision 1.45  2004/06/23 19:07:05  outlyer
 # The snapshot in the event doesn't work. I've tried it numerous times, and it
 # is being killed before completing.
@@ -210,17 +213,30 @@ class RecordServer(xmlrpc.XMLRPC):
         if not prog:
             return (FALSE, 'no prog')
 
+        # get our version of 'prog'
+        # It's a bad hack, but we can use isRecording than
+        sr = self.getScheduledRecordings()
+        progs = sr.getProgramList()
+
+        for saved_prog in progs.values():
+            if str(saved_prog) == str(prog):
+                prog = saved_prog
+                break
+            
+        try:
+            recording = prog.isRecording
+        except Exception, e:
+            print e
+            recording = FALSE
+
         scheduledRecordings = self.getScheduledRecordings()
         scheduledRecordings.removeProgram(prog, tv_util.getKey(prog))
         self.saveScheduledRecordings(scheduledRecordings)
         now = time.time()
-        try:
-            recording = prog.isRecording
-        except:
-            recording = FALSE
 
         # if prog.start <= now and prog.stop >= now and recording:
         if recording:
+            print 'stopping current recording'
             plugin.getbyname('RECORD').Stop()
        
         return (TRUE, 'recording removed')
