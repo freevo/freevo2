@@ -27,7 +27,7 @@ function closePop(pop) {
 }
 
 function mouseDown(e) {
-  popY = e.pageY;
+  popY = (N) ? e.pageY : event.y+document.body.scrollTop;
   if(over) {
     if(N) {
       ob = document.getElementById(popid);
