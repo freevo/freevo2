@@ -72,7 +72,7 @@ class Process:
             # app is a string to execute. It will be executed by 'sh -c '
             # inside the popen code
             self.binary = app.lstrip()
-            
+
             start_str = app
         else:
             # app is a list
@@ -81,13 +81,14 @@ class Process:
 
             self.binary = str( ' ' ).join( app )
             start_str = app
-            
-            log.info('running %s' % self.binary)
-        
+
         self.__kill_timer = None
         self.stopping = False
         self.dead = False
         self.child = popen2.Popen3( start_str, True, 100 )
+
+        log.info('running %s (pid=%s)' % ( self.binary, self.child.pid ) )
+
         # IO_Handler for stdout
         self.stdout = IO_Handler( 'stdout', self.child.fromchild,
                                     self.stdout_cb, debugname )
@@ -95,26 +96,26 @@ class Process:
         self.stderr = IO_Handler( 'stderr', self.child.childerr,
                                     self.stderr_cb, debugname )
         watcher.add( self, self.__child_died )
-        
-        
+
+
 
     def write( self, line ):
         """
-        Write a string to the app. 
+        Write a string to the app.
         """
         try:
             self.child.tochild.write(line)
             self.child.tochild.flush()
         except (IOError, ValueError):
             pass
-        
+
 
     def isAlive( self ):
         """
         Return True if the app is still running
         """
         return not self.dead
-        
+
 
     def stop( self, cmd = '' ):
         """
@@ -158,9 +159,9 @@ class Process:
             cb = notifier.Callback( self._kill, 9 )
         else:
             cb = notifier.Callback( self._killall, 15 )
-            
+
         self.__kill_timer = notifier.addTimer( 3000, cb )
-        
+
         return False
 
 
@@ -204,7 +205,7 @@ class Process:
             self.__kill_timer = notifier.addTimer( 2000, cb )
         else:
             log.critical('PANIC %s' % self.binary)
-            
+
         return False
 
     def __child_died( self ):
@@ -219,7 +220,7 @@ class Process:
             notifier.removeTimer( self.__kill_timer )
         self.finished()
 
-        
+
     def finished(self):
         """
         Override this method to handle cleanup / notifications after the child
@@ -227,7 +228,7 @@ class Process:
         """
         pass
 
-        
+
     def stdout_cb( self, line ):
         """
         Override this method to receive stdout from the child app
@@ -267,14 +268,14 @@ class IO_Handler:
                 log.info('logging child to "%s"' % logger)
             except IOError:
                 log.warning('Error: Cannot open "%s" for logging' % logger)
-            
+
 
     def close( self ):
         notifier.removeSocket( self.fp )
         self.fp.close()
         if self.logger:
             self.logger.close()
-        
+
 
     def cleanup( self ):
         notifier.removeSocket( self.fp )
@@ -320,7 +321,7 @@ class IO_Handler:
                             self.logger.write( line + '\n' )
                         self.callback( line )
         return True
-    
+
 
 class _Watcher:
     def __init__( self ):
@@ -332,9 +333,9 @@ class _Watcher:
         self.__processes[ proc ] = cb
 
     def remove( self, proc ):
-        if self.__processes.has_key():
+        if self.__processes.has_key( proc ):
             del self.__processes[ proc ]
-    
+
     def step( self ):
         remove_proc = []
         for p in copy.copy( self.__processes ):
@@ -356,9 +357,9 @@ class _Watcher:
 
         # remove dead processes
         for p in remove_proc:
-            if p in self.__processes:
+            if p in copy.copy(self.__processes):
 	    	self.__processes[ p ]()
-                del self.__processes[ p ]
+                self.remove( p )
 
     def killall( self ):
         for p in copy.copy(self.__processes):
