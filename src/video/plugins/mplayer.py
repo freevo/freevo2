@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/08/23 10:07:18  dischi
+# restore the context
+#
 # Revision 1.11  2003/08/22 17:51:29  dischi
 # Some changes to make freevo work when installed into the system
 #
@@ -49,118 +52,6 @@
 #
 # Revision 1.2  2003/07/01 20:35:58  outlyer
 # Replaced the os.system('rm ...') calls with os.unlink()
-#
-# Revision 1.1  2003/06/29 20:43:30  dischi
-# o mmpython support
-# o mplayer is now a plugin
-#
-# Revision 1.43  2003/06/23 00:16:04  outlyer
-# Fixed the regular expression. It wasn't making bookmarks when less than
-# 1000 seconds has elapsed. I don't know who made this one, but just in case,
-#
-# here is the old one:
-#
-# self.RE_TIME = re.compile("^A:?([0-9]+)").match
-#
-# The '?' means, match ':' zero or one times, which doesn't make sense in this context.
-#
-# The new one:
-#
-# self.RE_TIME = re.compile("^A: *([0-9]+)").match
-#
-# In this case '*' means match ' ' zero or more times.
-#
-# I also removed the comment about multiple bookmarks since you can have as many bookmarks
-# as you want. The limitation with bookmarks is that mplayer isn't great at seeking in files
-# other than avi; DVD, and mpg files will have varying results.
-#
-# Revision 1.42  2003/06/10 18:02:57  dischi
-# Bad alang hack for mplayer and badly mastered DVDs. Restart mplayer if we
-# have audio tracks in the ifo that aren't there.
-#
-# Revision 1.41  2003/05/28 15:34:43  dischi
-# fixed seeking bug
-#
-# Revision 1.40  2003/05/28 15:02:02  dischi
-# reactivated seeking by first pressing 0
-#
-# Revision 1.39  2003/05/27 17:53:35  dischi
-# Added new event handler module
-#
-# Revision 1.38  2003/05/06 03:11:20  outlyer
-# Whoops... commited something specific to my machine...
-#
-# Revision 1.37  2003/05/05 21:11:15  dischi
-# save video width and height
-#
-# Revision 1.36  2003/05/05 15:14:55  outlyer
-# Fixed a crash in the bookmarks submenu, and fixed the long standing bug
-# where times greater than 999 seconds (16m39s) wouldn't be recorded, because
-# mplayer logs time like this:
-#
-# A: XXX
-#
-# but after it reaches 1000,
-#
-# A:XXXX
-#
-# and the regular expression that got the time used a space.
-#
-# Revision 1.35  2003/04/26 20:55:44  dischi
-# Removed MPLAYER_ARGS_* and added a hash MPLAYER_ARGS to set args for
-# all different kinds of files. Also added MPLAYER_SOFTWARE_SCALER to use
-# the software scaler for fast CPUs. Also fixed a small bug in mplayer.py
-# for video.
-#
-# Revision 1.34  2003/04/20 15:54:32  dischi
-# do not stop on select
-#
-# Revision 1.33  2003/04/20 12:43:34  dischi
-# make the rc events global in rc.py to avoid get_singleton. There is now
-# a function app() to get/set the app. Also the events should be passed to
-# the daemon plugins when there is no handler for them before. Please test
-# it, especialy the mixer functions.
-#
-# Revision 1.32  2003/04/20 10:55:41  dischi
-# mixer is now a plugin, too
-#
-# Revision 1.31  2003/04/12 18:30:04  dischi
-# add support for audio/subtitle selection for avis, too
-#
-# Revision 1.30  2003/04/06 21:13:04  dischi
-# o Switched to the new main skin
-# o some cleanups (removed unneeded inports)
-#
-# Revision 1.29  2003/03/23 20:00:26  dischi
-# Added patch from Matthieu Weber for better mplayer_options and subitem
-# handling
-#
-# Revision 1.28  2003/03/23 15:19:39  gsbarbieri
-# Fixed a bug when ESC was pressed while watching a movie. Freevo used to crash.
-# Fixed key conflict, rc.SELECT was used to exit and seek to a specifc position,
-# now rc.ENTER (e) is used to seek.
-#
-# Revision 1.27  2003/03/17 18:54:44  outlyer
-# Some changes for the bookmarks
-#     o videoitem.py - Added bookmark menu, bookmark "parser" and menu generation,
-#             haven't figured out how to pass the timecode to mplayer though. I tried
-#             setting mplayer_options, but self.play seems to just ignore them. I don't
-#             know how to pass anything to self.play either. ARGH.
-#     o mplayer.py - commented out two extraneous prints.
-#
-# Revision 1.26  2003/03/17 16:34:33  outlyer
-# Added preliminary movie bookmarks (i.e. places to jump to on next play)
-# Currently only writing the bookmarks does anything; I'm going to have to
-# add a menu of bookmarks to the menu afterwards.
-#
-# Note that the get_bookmarkfile thing should be replaced with something less
-# flaky than the path+filename of the movie, but this is good for a initial
-# go.
-#
-# Revision 1.25  2003/03/17 15:47:16  outlyer
-# Merged patch from Angel <angel@knight-industries.com> for "Jump to"
-# functionality.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -440,12 +331,14 @@ class MPlayer:
                 self.thread.app.write('seek ' + str(self.seek) + ' 2\n')
                 if DEBUG: print "seek "+str(self.seek)+" 2\n"
                 self.seek = 0
+                rc.set_context('video')
                 return TRUE
 
             elif event == INPUT_EXIT:
                 if DEBUG: print 'seek stopped'
                 self.seek_timer.cancel()
                 self.seek = 0
+                rc.set_context('video')
                 return TRUE
 
         if event == STOP:
