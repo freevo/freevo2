@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.75  2002/10/07 05:26:25  outlyer
+# Added recursive playlist support from Alex Polite <m2@plusseven.com>
+#
 # Revision 1.74  2002/10/06 14:39:53  dischi
 # Removed older log messages and added MPLAYER_USE_WID to turn on/off
 # the usage of -wid (on by default)
@@ -77,7 +80,11 @@ DEFAULT_VOLUME      = 40              # Set default volume level.
 TV_IN_VOLUME        = 60              # Set this to your preferred level 0-100.
 VCR_IN_VOLUME       = 90              # If you use different input from TV
 DEV_MIXER           = '/dev/mixer'    # mixer device 
-                    
+
+RANDOM_PLAYLIST     = 1               #Random playlist in all music folders
+RECURSIVE_PLAYLIST  = 0               #Random playlist in all music folders 
+                                      #including all files below the current folder
+
 #
 # Physical ROM drives, multiple ones can be specified
 # by adding comma-seperated and quoted entries.
