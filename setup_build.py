@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2002/08/30 02:05:15  krister
+# Fixed a bug for configuring TV for other than NTSC.
+#
 # Revision 1.12  2002/08/21 05:07:59  krister
 # Moved Makefile.in to Makefile.
 #
@@ -114,7 +117,7 @@ def main():
             conf.display = a
 
         if o == '--tv':
-            conf.norm = a
+            conf.tv = a
 
         if o == '--chanlist':
             conf.chanlist = a
