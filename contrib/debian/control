@@ -7,8 +7,9 @@ Standards-Version: 3.5.2
 
 Package: freevo
 Architecture: all
-Depends: ${python:Depends}, ${misc:Depends}, python2.3-pygame, xmltv-util, libxmltv-perl, python2.3-xml, python2.3-imaging, mplayer, mplayer-fonts, python2.3-pylirc, python2.3-twisted, python2.3-mmpython, python2.3-fchksum, cdparanoia, freevo-media, debconf
-Recommends: fbset, matrox-tools, xine-ui, flac, vorbis-tools, lame
+Depends: ${python:Depends}, ${misc:Depends}, python2.3-pygame, xmltv-util, libxmltv-perl, python2.3-xml, python2.3-imaging, python2.3-pylirc, python2.3-twisted, python2.3-mmpython, freevo-media, debconf, mplayer | xine-ui | fbxine, msttcorefonts | ttf-bitstream-vera
+Recommends: lame, cdparanoia
+Suggests: flac, vorbis-tools, fbset, matrox-tools
 Description: A Python based PVR/DVR Framework for Music and Movies
  A Python-based PVR/DVR Framework and working system for music, movies
  Television, and more.

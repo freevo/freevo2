@@ -1,3 +1,13 @@
+freevo (1.5.0-0pre1) unstable; urgency=low
+
+  * New upstream release
+  * Removed the Vera Truetype fonts from the packages since they are
+    available in Debian
+  * Reduced the dependencies to allow alternates
+  * Add the HTML documentation
+
+ -- Aubin Paul <debian@outlyer.org>  Sun, 21 Mar 2004 10:00:19 -0500
+
 freevo (1.4.1cvs20040109-1) unstable; urgency=low
 
   * New snapshot
