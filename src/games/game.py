@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/10/23 00:30:42  rshortt
+# Bugfix for xmame.x11.  Since our new process code xmame will go defunct after
+# exit and Freevo will hang.  This used to happen with xmame.SDL and the
+# wait() call I am removing was the solution.  I hope that is no longer needed
+# without runapp.
+#
 # Revision 1.11  2003/09/13 10:08:22  dischi
 # i18n support
 #
@@ -167,7 +173,13 @@ class Game_Thread(threading.Thread):
                 
                 osd.stopdisplay()     
                 self.app = GameApp(self.command)
-                self.app.child.wait()
+
+                while self.mode == 'play' and self.app.isAlive():
+                    time.sleep(0.5)
+
+                print('Game_Thread::run: GAME OVER')
+
+                self.app.kill()
 
                 if config.OSD_SDL_EXEC_AFTER_STARTUP:
                     os.system(config.OSD_SDL_EXEC_AFTER_STARTUP)
