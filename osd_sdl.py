@@ -6,7 +6,7 @@
 #
 # $Id$
 
-import socket, time, sys
+import socket, time, sys, os
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
@@ -28,7 +28,7 @@ from pygame.locals import *
 #    python setup.py install
 
 # Set to 1 for debug output
-DEBUG = 1
+DEBUG = 0
 
 print 'XXXXXX LOADING TEST OSD'
 
@@ -168,7 +168,16 @@ class OSD:
         self.width = width
         self.height = height
 
+        # Initialize the PyGame modules.
         pygame.init()
+
+        # The mixer module must not be running, it will
+        # prevent sound from working.
+        try:
+            pygame.mixer.quit()
+        except NotImplementedError, MissingPygameModule:
+            pass # Ok, we didn't have the mixer module anyways
+
         self.screen = pygame.display.set_mode((width, height), 0, 32)
 
         self.clearscreen(self.COL_WHITE)
@@ -188,7 +197,7 @@ class OSD:
         #print 'SDL: Got event %s' % event
 
         #if event.type == MOUSEBUTTONDOWN:
-        #    self._helpscreen()
+        #    self._helpscreen(1)
             
         if event.type == KEYDOWN:
             if event.key in cmds_sdl:
@@ -305,7 +314,7 @@ class OSD:
     def drawstring(self, string, x, y, fgcolor=None, bgcolor=None,
                    font=None, ptsize=0):
 
-        print 'drawstring (%d;%d) "%s"' % (x, y, string)
+        if DEBUG: print 'drawstring (%d;%d) "%s"' % (x, y, string)
         
         if fgcolor == None:
             fgcolor = self.default_fg_color
@@ -315,14 +324,14 @@ class OSD:
         if not ptsize:
             ptsize = config.OSD_DEFAULT_FONTSIZE
 
-        ptsize = int(ptsize * 1.3333)  # XXX The osd_sdl.py fonts are smaller,
-        # I think that is because the osd_server screenres is 100 dpi, and here
-        # it is 75.
+        ptsize = int(ptsize / 0.7)  # XXX pygame multiplies by 0.7 for some reason
 
+        if DEBUG: print 'FONT: %s %s' % (font, ptsize)
+        
         f = self._getfont(font, ptsize)
 
         # Render string with anti-aliasing
-        string = string[:50] # XXX TEST
+        #string = string[:50] # XXX TEST
         if bgcolor == None:
             ren = f.render(string, 1, self._sdlcol(fgcolor))
         else:
@@ -331,14 +340,39 @@ class OSD:
         self.screen.blit(ren, (x, y))
 
 
+    def popup_box(self, text):
+        """
+        Trying to make a standard popup/dialog box for various usages.
+        Currently it just draws itself in the middle of the screen.
+
+        Arguments: Text, the text to print.
+        Returns:   None
+        Todo:      Should be able to calculate size of box to draw.
+                   Maybe be able to set size manually aswell.
+                   It'd look nice to have an icon drawn for some events
+                   such as ejects.
+        """
+        start_x = self.width/2 - 180
+        start_y = self.height/2 - 30
+        end_x   = self.width/2 + 180
+        end_y   = self.height/2 + 30
+
+        # XXX This is a hack to get a border around a white box to look
+        # XXX nicer.
+        self.drawbox(start_x-2, start_y-2, end_x+2, end_y+2, width=2,
+                     color=self.COL_BLACK)
+        self.drawbox(start_x, start_y, end_x, end_y, width=-1,
+                     color=((60 << 24) | self.COL_WHITE))
+        self.drawstring(text, start_x+20, start_y+10,
+                        fgcolor=self.COL_BLACK, bgcolor=self.COL_WHITE)
+        
+
     # Return a (width, height) tuple for the given string, font, size
     def stringsize(self, string, font=None, ptsize=0):
         if not ptsize:
             ptsize = config.OSD_DEFAULT_FONTSIZE
 
-        ptsize = int(ptsize * 1.3333)  # XXX The osd_sdl.py fonts are smaller,
-        # I think that is because the osd_server screenres is 100 dpi, and here
-        # it is 75.
+        ptsize = int(ptsize / 0.7)  # XXX pygame multiplies with 0.7 for some reason
 
         f = self._getfont(font, ptsize)
 
@@ -369,6 +403,11 @@ class OSD:
 
         
     def _getbitmap(self, filename):
+
+        if not os.path.isfile(filename):
+            print 'Bitmap file "%s" doesnt exist!' % filename
+            return None
+        
         for i in range(len(self.bitmapcache)):
             fname, image = self.bitmapcache[i]
             if fname == filename:
@@ -378,7 +417,7 @@ class OSD:
                 return image
 
         try:
-            print 'Trying to load file "%s"' % filename
+            if DEBUG: print 'Trying to load file "%s"' % filename
             tmp = pygame.image.load(filename)  # XXX Cannot load everything
             image = tmp.convert_alpha()  # XXX Cannot load everything
         except:
@@ -393,14 +432,15 @@ class OSD:
         return image
 
     
-    def _helpscreen(self):
+    def _helpscreen(self, on):
+        self._help = on
+        #self._help = {0:1, 1:0}[self._help]
+        #if time.time() > self._help_last + 1:
+        #    self._help = {0:1, 1:0}[self._help]
+        #else:
+        #    return
 
-        if time.time() > self._help_last + 1:
-            self._help = {0:1, 1:0}[self._help]
-        else:
-            return
-
-        self._help_last = time.time()
+        #self._help_last = time.time()
         
         if self._help:
             if DEBUG: print 'Help on'
@@ -446,14 +486,17 @@ class OSD:
         c = (r, g, b, a)
         return c
             
-
+s = ("/hdc/krister_mp3/mp3/rage_against_the_machine-the_battle_of_los_angeles" +
+       "-1999-bkf/02-Rage_Against_the_Machine-Guerilla_Radio-BKF.mp3")
 #
 # Simple test...
 #
 if __name__ == '__main__':
     osd = OSD()
     osd.clearscreen()
-
+    osd.drawstring(s, 10, 10, font='skins/fonts/Cultstup.ttf', ptsize=14)
+    osd.update()
+    time.sleep(5)
 
 
 #
