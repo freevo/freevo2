@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2004/01/10 13:21:19  dischi
+# cleanup
+#
 # Revision 1.26  2004/01/05 18:03:43  dischi
 # support for extra fxd files for plugins
 #
@@ -20,40 +23,6 @@
 #
 # Revision 1.23  2004/01/01 12:25:07  dischi
 # store version information and list of depending files
-#
-# Revision 1.22  2003/12/14 17:39:52  dischi
-# Change TRUE and FALSE to True and False; vfs fixes
-#
-# Revision 1.21  2003/12/06 13:43:03  dischi
-# more cleanup
-#
-# Revision 1.20  2003/12/05 18:07:55  dischi
-# renaming of XML_xxx variables to Xxx
-#
-# Revision 1.19  2003/12/03 21:50:44  dischi
-# rework of the loading/selecting
-# o all objects that need a skin need to register what they areas they need
-# o remove all 'player' and 'tv' stuff to make it more generic
-# o renamed some skin function names
-#
-# Revision 1.18  2003/11/28 20:08:58  dischi
-# renamed some config variables
-#
-# Revision 1.17  2003/11/23 19:01:39  dischi
-# support for new fxd parser
-#
-# Revision 1.16  2003/10/22 18:23:56  dischi
-# speedup and less debug
-#
-# Revision 1.15  2003/10/21 23:46:22  gsbarbieri
-# Info_Area now support images as
-#    <img src="file" x="1" y="2" width="123" height="456" />
-# x and y are optional and will be set to "pen position" when not specified.
-# width and height are also optional and defaults to the image size.
-# file is the filename.
-#
-# <img> will define FLOAT images, not inline ones. You can simulate inline
-# images with <goto_pos>... Maybe someday, if needed, someone can implement it.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -217,7 +186,7 @@ def attr_font(node, attr, default):
                 font = os.path.join(config.FONT_DIR, node.attrs[('', attr)] +
                                     '.TTF').encode(config.LOCALE)
         if not font:
-            print "can find font >%s<" % font
+            print "skin error: can find font >%s<" % font
             font = config.OSD_DEFAULT_FONTNAME
         return font
     return default
@@ -236,7 +205,12 @@ def search_file(file, search_dirs):
         if vfs.isfile("%s.jpg" % dfile):
             return vfs.abspath("%s.jpg" % dfile)
 
-    _debug_('can\'t find image %s' % file)
+    print 'skin error: can\'t find image %s' % file
+    if config.DEBUG:
+        print 'image search path is:'
+        for s in search_dirs:
+            print s
+    print
     return ''
 
 
@@ -364,10 +338,8 @@ class XML_data:
                     p = plugin.getbyname(self.visible[4:])
                 else:
                     p = plugin.getbyname(self.visible)
-                try:
+                if hasattr(p, 'visible'):
                     p = p.visible
-                except:
-                    pass
                 if len(self.visible) > 4 and self.visible[:4] == 'not ':
                     self.visible = not p
                 else:
@@ -419,13 +391,12 @@ class MenuSet:
         for subnode in node.children:
             for c in self.content:
                 if subnode.name == c:
-                    eval('self.%s.parse(subnode, scale, current_dir)' % c)
+                    getattr(self, c).parse(subnode, scale, current_dir)
 
 
     def prepare(self, layout):
         for c in self.content:
-            eval('self.%s.prepare(layout)' % c)
-
+            getattr(self, c).prepare(layout)
 
 
 class Area(XML_data):
@@ -513,10 +484,15 @@ class Layout:
             if subnode.name == u'background':
                 self.background = []
                 for bg in subnode.children:
-                    if bg.name in ( 'image', 'rectangle' ):
-                        b = eval(bg.name.capitalize()+'()')
-                        b.parse(bg, scale, current_dir)
-                        self.background += [ b ]
+                    if bg.name == 'image':
+                        b = Image()
+                    elif bg.name == 'rectangle':
+                        b = Rectangle()
+                    else:
+                        continue
+                    b.parse(bg, scale, current_dir)
+                    self.background += [ b ]
+
             if subnode.name == u'content':
                 self.content.parse(subnode, scale, current_dir)
 
@@ -588,10 +564,10 @@ class Content(XML_data):
     def prepare(self, font, color, search_dirs):
         XML_data.prepare(self)
         if self.font:
-            try:
+            if font.has_key(self.font):
                 self.font = font[self.font]
-            except:
-                print 'can\'t find font %s' % self.font
+            else:
+                print 'skin error: can\'t find font %s' % self.font
                 print font
                 self.font = font['default']
         else:
@@ -649,10 +625,10 @@ class FormatText(XML_data):
 
     def prepare(self, font, color, search_dirs):
         if self.font:
-            try:
+            if font.has_key(self.font):
                 self.font = font[self.font]
-            except:
-                print 'can\'t find font %s' % self.font
+            else:
+                print 'skin error: can\'t find font %s' % self.font
                 self.font = font['default']
         else:
             self.font = font['default']
@@ -753,11 +729,10 @@ class Image(XML_data):
         """
         XML_data.prepare(self)
         if self.image:
-            try:
+            if image_names.has_key(self.image):
                 self.filename = image_names[self.image]
-            except KeyError:
-                print 'can\'t find image definition %s' % self.image
-                pass
+            else:
+                print 'skin error: can\'t find image definition %s' % self.image
 
         if self.filename:
             self.filename = search_file(self.filename, search_dirs)
