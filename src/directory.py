@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/07/12 21:23:32  dischi
+# attribute type to return the disc label
+#
 # Revision 1.21  2003/07/11 19:44:18  dischi
 # close file after parsing
 #
@@ -247,6 +250,16 @@ class DirItem(Playlist):
             self.display_type = obj.display_type
             self.info         = obj.info
             
+
+    def getattr(self, attr):
+        """
+        return the specific attribute as string or an empty string
+        """
+        if attr == 'type':
+            if self.media:
+                return 'Directory on disc [%s]' % self.media.label
+            return 'Directory'
+        return Item.getattr(self, attr)
 
     def actions(self):
         """
