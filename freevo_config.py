@@ -497,9 +497,10 @@ SUFFIX_VIDEO_FILES = [ 'avi', 'mpg', 'mpeg', 'wmv', 'bin', 'rm',
 # Only scan MOVIE_DATA_DIR and TV_SHOW_DATA_DIR for fxd files containing
 # informations about a disc. If you only have the fxd files for discs in
 # one of this directories (and subdirectories), set this to 1, it will
-# speed up startup.
+# speed up startup, 0 may be needed if you have fxd files with disc links
+# in your normal movie tree.
 #
-ONLY_SCAN_DATADIR = 0
+ONLY_SCAN_DATADIR = 1
 
 
 # ======================================================================
