@@ -5,9 +5,24 @@ from mevas import imagelib
 
 fifo_counter = 0
 
+def create_fifo():
+	"""
+	return a unique fifo name
+	"""
+	global fifo_counter
+	fifo = '/tmp/bmovl-%s-%s' % (os.getpid(), fifo_counter)
+	fifo_counter += 1
+	if os.path.exists(fifo):
+		os.unlink(fifo)
+	os.mkfifo(fifo)
+	return fifo
+
+
 class BmovlCanvas(BitmapCanvas):
 
-	def __init__(self, size):
+	def __init__(self, size, fifo = None):
+		if fifo:
+			self.__fname = fifo
 		self.open_fifo()
 		self.bmovl_visible = True
 		self.send('SHOW\n')
@@ -16,9 +31,6 @@ class BmovlCanvas(BitmapCanvas):
 
 
 	def open_fifo(self):
-		if os.path.exists(self.get_fname()):
-			os.unlink(self.get_fname())
-		os.mkfifo(self.get_fname())
 		self.fifo = os.open(self.get_fname(), os.O_RDWR, os.O_NONBLOCK)
 
 		
@@ -40,9 +52,7 @@ class BmovlCanvas(BitmapCanvas):
 			return self.__fname
 		except AttributeError:
 			pass
-		global fifo_counter
-		self.__fname = '/tmp/bmovl-%s-%s' % (os.getpid(), fifo_counter)
-		fifo_counter += 1
+		self.__fname = create_fifo()
 		return self.__fname
 
 		

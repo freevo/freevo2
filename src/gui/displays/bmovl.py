@@ -56,7 +56,7 @@ class Display(BmovlCanvas):
     """
     Display class for bmovl output over mplayer
     """
-    def __init__(self, size, default=False):
+    def __init__(self, size, default=False, fifo = None):
         self.animation_possible = False
         self.start_video = default
         self.running = True
@@ -69,7 +69,7 @@ class Display(BmovlCanvas):
                          config.OSD_BACKGROUND_VIDEO ]
             self.child = None
             self.restart()
-        BmovlCanvas.__init__(self, size)
+        BmovlCanvas.__init__(self, size, fifo)
 
 
     def restart(self):

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.93  2004/12/19 10:36:31  dischi
+# update bmovl fifo handling
+#
 # Revision 1.92  2004/12/18 13:36:08  dischi
 # adjustments to new bmovl display
 #
@@ -51,6 +54,7 @@ import popen2
 import notifier
 import mmpython
 from mevas.bmovl2 import MPlayerOverlay
+from mevas.displays import bmovlcanvas
 
 # freevo imports
 import config     # Configuration handler. reads config file.
@@ -301,9 +305,9 @@ class MPlayer(Application):
                 self.overlay = MPlayerOverlay()
                 command += [ '-vf', 'bmovl2=%s' % self.overlay.fifo_fname ]
             else:
-                self.overlay = gui.set_display('Bmovl', (1, 1))
-                command += [ '-vf', 'bmovl=1:0:%s' % self.overlay.get_fname() ]
-
+                self.fifoname = bmovlcanvas.create_fifo()
+                command += [ '-vf', 'bmovl=1:0:%s' % self.fifoname ]
+                print '-%s-%s-' % (self.fifoname, command[-1])
         self.plugins = plugin.get('mplayer_video')
 
         for p in self.plugins:
@@ -314,9 +318,9 @@ class MPlayer(Application):
         if plugin.getbyname('MIXER'):
             plugin.getbyname('MIXER').reset()
 
+        self.show()
         self.app = MPlayerApp(command, self)
         self.osd_visible = False
-        self.show()
 
         return None
     
@@ -541,8 +545,8 @@ class MPlayerApp( childapp.Instance ):
             self.screen.set_overlay(self.mplayer.overlay)
         else:
             log.info('activating bmovl')
-            self.screen = self.mplayer.overlay
-            self.screen.set_size((self.width, self.height))
+            self.screen = gui.set_display('Bmovl', (self.width, self.height),
+                                          self.mplayer.fifoname)
         self.area_handler = gui.AreaHandler('video', ['screen', 'view', 'info',
                                                       'progress'])
         self.area_handler.hide(False)

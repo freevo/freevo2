@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/12/19 10:36:31  dischi
+# update bmovl fifo handling
+#
 # Revision 1.5  2004/11/20 18:23:01  dischi
 # use python logger module for debug
 #
@@ -65,7 +68,7 @@ def get_display():
     return display_stack[-1]
 
 
-def set_display(name, size):
+def set_display(name, size, *args, **kwargs):
     """
     set a new output display
     """
@@ -81,7 +84,7 @@ def set_display(name, size):
 
     # create a new display
     exec('from %s import Display' % name.lower())
-    new = Display(size)
+    new = Display(size, False, *args, **kwargs)
     display_stack.append(new)
 
     # move all children to new display

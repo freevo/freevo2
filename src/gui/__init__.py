@@ -73,12 +73,12 @@ import displays as _displays
 
 get_display = _displays.get_display
 
-def set_display(name, size):
+def set_display(name, size, *args, **kwargs):
     """
     set a new output display
     """
     animation.render().killall()
-    display = _displays.set_display(name, size)
+    display = _displays.set_display(name, size, *args, **kwargs)
     width   = display.width
     height  = display.height
     animation.create(display)
