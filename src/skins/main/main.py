@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2004/01/18 16:45:32  dischi
+# store last skin information
+#
 # Revision 1.34  2004/01/13 19:12:02  dischi
 # support for basic.fxd
 #
@@ -33,28 +36,6 @@
 #
 # Revision 1.28  2004/01/01 12:26:15  dischi
 # use pickle to cache parsed skin files
-#
-# Revision 1.27  2003/12/14 17:39:52  dischi
-# Change TRUE and FALSE to True and False; vfs fixes
-#
-# Revision 1.26  2003/12/06 13:43:02  dischi
-# more cleanup
-#
-# Revision 1.25  2003/12/05 18:07:55  dischi
-# renaming of XML_xxx variables to Xxx
-#
-# Revision 1.24  2003/12/05 17:30:18  dischi
-# some cleanup
-#
-# Revision 1.23  2003/12/04 21:49:18  dischi
-# o remove BlankScreen and the Splashscreen
-# o make it possible to register objects as areas
-#
-# Revision 1.22  2003/12/03 21:50:44  dischi
-# rework of the loading/selecting
-# o all objects that need a skin need to register what they areas they need
-# o remove all 'player' and 'tv' stuff to make it more generic
-# o renamed some skin function names
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -118,7 +99,7 @@ class Skin:
         global skin_engine
         skin_engine = self
         
-        self.display_style = { 'menu' : config.SKIN_START_LAYOUT }
+        self.display_style = { 'menu' : 0 }
         self.force_redraw  = True
         self.last_draw     = None, None, None
         self.screen        = screen.get_singleton()
@@ -135,9 +116,22 @@ class Skin:
             self.areas[a] = eval('%s_Area()' % a.capitalize())
         self.areas['tvlisting'] = TVListing_Area()
 
+        self.storage_file = os.path.join(config.FREEVO_CACHEDIR, 'skin-%s' % os.getuid())
+        self.storage = util.read_pickle(self.storage_file)
+        if self.storage:
+            if not config.SKIN_XML_FILE:
+                config.SKIN_XML_FILE = self.storage['SKIN_XML_FILE']
+            else:
+                print 'skin forced to %s' % config.SKIN_XML_FILE
+        else:
+            if not config.SKIN_XML_FILE:
+                config.SKIN_XML_FILE = config.SKIN_DEFAULT_XML_FILE
+            self.storage = {}
+            
         # load the fxd file
         self.settings = xml_skin.XMLSkin()
         self.set_base_fxd(config.SKIN_XML_FILE)
+
 
 
     def cachename(self, filename):
@@ -248,6 +242,13 @@ class Skin:
                 self.settings.load(local_skin)
                 break
 
+        self.storage['SKIN_XML_FILE'] = config.SKIN_XML_FILE
+        util.save_pickle(self.storage, self.storage_file)
+
+        if self.storage.has_key(config.SKIN_XML_FILE):
+            self.display_style['menu'] = self.storage[config.SKIN_XML_FILE]
+        else:
+            self.display_style['menu'] = 0
         
         
     def load(self, filename, copy_content = 1):
@@ -331,6 +332,9 @@ class Skin:
         if self.display_style['menu'] >=  len(area.style):
             self.display_style['menu'] = 0
         self.display_style['menu'] = (self.display_style['menu'] + 1) % len(area.style)
+
+        self.storage[config.SKIN_XML_FILE] = self.display_style['menu']
+        util.save_pickle(self.storage, self.storage_file)
         return 1
 
 
