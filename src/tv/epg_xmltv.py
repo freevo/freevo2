@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2004/02/09 20:14:06  dischi
+# add verbose flag
+#
 # Revision 1.42  2004/02/06 20:54:26  dischi
 # fix for undefined timezone
 #
@@ -168,7 +171,7 @@ def myversion():
 # Get a TV guide from memory cache, file cache or raw XMLTV file.
 # Tries to return at least the channels from the config file if there
 # is no other data
-def get_guide(popup=None):
+def get_guide(popup=None, verbose=True):
     global cached_guide
 
     # Can we use the cached version (if same as the file)?
@@ -183,7 +186,8 @@ def get_guide(popup=None):
         if (os.path.isfile(config.XMLTV_FILE) and
             os.path.isfile(pname) and (os.path.getmtime(pname) >
                                        os.path.getmtime(config.XMLTV_FILE))):
-            if DEBUG: print 'XMLTV, reading cached file (%s)' % pname
+            if DEBUG and verbose:
+                print 'XMLTV, reading cached file (%s)' % pname
 
             if popup:
                 popup.show()
@@ -197,21 +201,24 @@ def get_guide(popup=None):
             try:
                 epg_ver = cached_guide.EPG_VERSION
             except AttributeError:
-                print _('EPG does not have a version number, must be reloaded')
-                print dir(cached_guide)
+                if verbose:
+                    print _('EPG does not have a version number, must be reloaded')
+                    print dir(cached_guide)
 
             if epg_ver != epg_types.EPG_VERSION:
-                print ((_('EPG version number %s is stale (new is %s), must ') +
-                        _('be reloaded')) % (epg_ver, epg_types.EPG_VERSION))
+                if verbose:
+                    print ((_('EPG version number %s is stale (new is %s), must ') +
+                            _('be reloaded')) % (epg_ver, epg_types.EPG_VERSION))
 
             elif cached_guide.timestamp != os.path.getmtime(config.XMLTV_FILE):
                 # Hmmm, weird, there is a pickled file newer than the TV.xml
                 # file, but the timestamp in it does not match the TV.xml
                 # timestamp. We need to reload!
-                print _('EPG: Pickled file timestamp mismatch, reloading!')
+                if verbose:
+                    print _('EPG: Pickled file timestamp mismatch, reloading!')
                 
             else:
-                if DEBUG:
+                if DEBUG and verbose:
                     print 'XMLTV, got cached guide (version %s).' % epg_ver
                 got_cached_guide = TRUE
 
@@ -221,13 +228,14 @@ def get_guide(popup=None):
             if popup:
                 popup.show()
                 
-            if DEBUG:
+            if DEBUG and verbose:
                 print 'XMLTV, trying to read raw file (%s)' % config.XMLTV_FILE
             try:    
                 cached_guide = load_guide()
 	    except:
 	    	# Don't violently crash on a incomplete or empty TV.xml please.
 	    	cached_guide = None
+                print
                 print _("Couldn't load the TV Guide, got an exception!")
                 print
                 traceback.print_exc()
