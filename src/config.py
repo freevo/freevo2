@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/02/12 06:32:28  krister
+# Added cdrecord and supermounted drives autodetection for ROM_DRIVES.
+#
 # Revision 1.12  2003/02/11 06:07:59  krister
 # Improved CV/DVD autodetection. Use mad for mp3 playing, fixes a decoding bug.
 #
@@ -276,21 +279,31 @@ for dirname in cfgfilepath:
 else:
     print 'No overrides loaded'
     
-
 # Autodetect the CD/DVD drives in the system if not given in local_conf.py
 if not ROM_DRIVES:
     if os.path.isfile('/etc/fstab'):
+        RE_CD = '^(/dev/cdrom)[ \t]+([^ \t]+)[ \t]+'
+        RE_CDREC ='^(/dev/cdrecorder)[ \t]+([^ \t]+)[ \t]+'
+        RE_DVD ='^(/dev/dvd)[ \t]+([^ \t]+)[ \t]+'
+        RE_ISO ='^([^ \t]+)[ \t]+([^ \t]+)[ \t]+iso9660'
+        RE_AUTOMOUNT = '^none[ \t]+([^ \t]+) supermount dev=([^,]+)'
         fd_fstab = open('/etc/fstab')
         for line in fd_fstab:
             # Match on the devices /dev/cdrom, /dev/dvd, and fstype iso9660
-            match_cd = re.compile('^(/dev/cdrom)[ \t]+([^ \t]+)[ \t]+', re.I).match(line)
-            match_dvd = re.compile('^(/dev/dvd)[ \t]+([^ \t]+)[ \t]+', re.I).match(line)
-            match_iso = re.compile('^([^ \t]+)[ \t]+([^ \t]+)[ \t]+iso9660', re.I).match(line)
+            match_cd = re.compile(RE_CD, re.I).match(line)
+            match_cdrec = re.compile(RE_CDREC, re.I).match(line)
+            match_dvd = re.compile(RE_DVD, re.I).match(line)
+            match_iso = re.compile(RE_ISO, re.I).match(line)
+            match_automount = re.compile(RE_AUTOMOUNT, re.I).match(line)
             mntdir = devname = ''
             if match_cd:
                 mntdir = match_cd.group(2)
                 devname = match_cd.group(1)
                 dispname = 'CD-%s' % (len(ROM_DRIVES)+1)
+            elif match_cdrec: 
+                mntdir = match_cd.group(2)
+                devname = match_cd.group(1)
+                dispname = 'CDREC-%s' % (len(ROM_DRIVES)+1)
             elif match_dvd:
                 mntdir = match_dvd.group(2)
                 devname = match_dvd.group(1)
@@ -299,11 +312,19 @@ if not ROM_DRIVES:
                 mntdir = match_iso.group(2)
                 devname = match_iso.group(1)
                 dispname = 'CD-%s' % (len(ROM_DRIVES)+1)
+            elif match_automount:
+                mntdir = match_iso.group(1)
+                devname = match_iso.group(2)
+                # Must check that the supermount device is cd or dvd
+                if devname.lower().find('cdrom') != -1:
+                    dispname = 'CD-%s' % (len(ROM_DRIVES)+1)
+                elif devname.lower().find('dvd') != -1:
+                    dispname = 'DVD-%s' % (len(ROM_DRIVES)+1)
 
             # Weed out duplicates
             for rd_mntdir, rd_devname, rd_dispname in ROM_DRIVES:
                 if os.path.realpath(rd_devname) == os.path.realpath(devname):
-                    print (('ROM_DRIVES: Autodetected that %s is the same ' +
+                    print (('ROM_DRIVES: Auto-detected that %s is the same ' +
                             'device as %s, skipping') % (devname, rd_devname))
                     break
             else:
