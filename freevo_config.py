@@ -517,7 +517,9 @@ TV_SETTINGS = '%s television %s /dev/video0' % (CONF.tv, CONF.chanlist)
 # XXX Example cron script:
 # XXX * * * * * /usr/local/freevo/freevo execute src/tv/record_daemon.py
 
+REC_SCHEDULE_FILE = '/tmp/freevo_record.lst'
 REC_SCHEDULE = '/tmp/freevo_record.pickle'
+
 #
 # XXX Please see the mencoder docs for more info about the settings
 # XXX below. Some stuff must be changed (adevice), others probably
