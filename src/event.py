@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/07/12 19:56:18  rshortt
+# Fix for when event arg is 0, like with INPUT_0.
+#
 # Revision 1.13  2003/06/24 17:41:09  dischi
 # added mixer keys
 #
@@ -85,7 +88,7 @@ class Event:
             self.arg     = None
             self.context = None
         
-        if arg:
+        if arg or arg == 0:
             self.arg = arg
 
         if context:
