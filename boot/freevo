@@ -27,11 +27,11 @@ case "$1" in
 	;;
   stop)
 	echo -n "Stopping $DESC: "
-        killall -9 freevo_rt &> /dev/null
-        killall -9 freevo_xwin &> /dev/null
-        killall -9 mplayer &> /dev/null
-        kill -9 `pgrep -f "python main.py" -d" "` &> /dev/null
-        kill -9 `pgrep -f "python rc_client" -d" "` &> /dev/null
+        killall freevo_rt &> /dev/null
+        killall freevo_xwin &> /dev/null
+        killall mplayer &> /dev/null
+        kill `pgrep -f "python main.py" -d" "` &> /dev/null
+        kill `pgrep -f "python rc_client" -d" "` &> /dev/null
 	echo "$NAME."
 	echo -n "Releasing the VT: "
 	$VTRELEASE
