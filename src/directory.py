@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.50  2003/10/17 18:50:45  dischi
+# add description to configure menu and make random playlist for video, too
+#
 # Revision 1.49  2003/10/17 00:55:52  rshortt
 # Ooops.
 #
@@ -109,11 +112,36 @@ skin = skin.get_singleton()
 
 dirwatcher_thread = None
 
-all_variables = ('MOVIE_PLAYLISTS', 'DIRECTORY_SORT_BY_DATE',
-                 'DIRECTORY_AUTOPLAY_SINGLE_ITEM', 'COVER_DIR',
-                 'AUDIO_RANDOM_PLAYLIST', 'FORCE_SKIN_LAYOUT',
-                 'AUDIO_FORMAT_STRING','DIRECTORY_SMART_SORT',
-                 'USE_MEDIAID_TAG_NAMES', 'DIRECTORY_REVERSE_SORT')
+all_variables = [('MOVIE_PLAYLISTS', _('Movie Playlists'),
+                  _('Use automatic playlist for movie items.')),
+                 
+                 ('DIRECTORY_SORT_BY_DATE', _('Directory Sort By Date'),
+                  _('Sort directory by date and not by name.')),
+                 
+                 ('DIRECTORY_AUTOPLAY_SINGLE_ITEM', _('Directory Autoplay Single Item'),
+                  _('Don\'t show directory if only one item exists and auto-select ' +
+                    'the item.')),
+
+                 ('AUDIO_RANDOM_PLAYLIST', _('Audio Random Playlist'),
+                  _('Show radom playlist item for audio menus.')),
+
+                 ('FORCE_SKIN_LAYOUT', _('Force Skin Layout'),
+                  _('Force skin to a specific layout. This option doesn\'t work with '+
+                    'all skins and the result may differ based on the skin.')),
+
+                 ('DIRECTORY_SMART_SORT', _('Directory Smart Sort'),
+                  _('Use a smarter way to sort the items.')),
+
+                 ('USE_MEDIAID_TAG_NAMES', _('Use MediaID Tag Names'),
+                  _('Use the names from the media files tags as display name.')),
+
+                 ('DIRECTORY_REVERSE_SORT', _('Directory Reverse Sort'),
+                  _('Show the items in the list in reverse order.')),
+
+                 ('COVER_DIR', '', ''),
+                 ('AUDIO_FORMAT_STRING', '', '') ]
+
+
 
 possible_display_types = [ ]
 
@@ -146,7 +174,7 @@ class DirItem(Playlist):
 
         # set directory variables to default
         global all_variables
-        for v in all_variables:
+        for v,n,d in all_variables:
             setattr(self, v, eval('config.%s' % v))
         self.modified_vars = []
 
@@ -302,7 +330,7 @@ class DirItem(Playlist):
         for child in node.children:
             # set directory variables
             if child.name == 'setvar':
-                for v in all_variables:
+                for v,n,d in all_variables:
                     if child.attrs[('', 'name')].upper() == v.upper():
                         try:
                             setattr(self, v, int(child.attrs[('', 'val')]))
@@ -396,13 +424,19 @@ class DirItem(Playlist):
         """
         return a list of actions for this item
         """
-        items = [ ( self.cwd, _('Browse directory') ) ]
+        suffix = ''
+        if self.display_type == 'audio':
+            suffix = config.SUFFIX_AUDIO_FILES
+        elif self.display_type == 'video':
+            suffix = config.SUFFIX_VIDEO_FILES
 
-        if ((not self.display_type or self.display_type == 'audio') and
-            config.AUDIO_RANDOM_PLAYLIST == 1):
-            items += [ (RandomPlaylist((self.dir, config.SUFFIX_AUDIO_FILES),
-                                       self),
-                        _('Recursive random play all items')) ]
+        items = [ ( self.cwd, _('Browse directory')) ]
+        if suffix:
+            items += [ ( RandomPlaylist((self.dir, suffix), self, recursive=False),
+                         _('Random play all items')),
+                       ( RandomPlaylist((self.dir, suffix), self),
+                         _('Recursive random play all items')) ]
+        
         items.append((self.configure, _('Configure directory'), 'configure'))
         return items
     
@@ -839,14 +873,14 @@ class DirItem(Playlist):
         show the configure dialog for folder specific settings in folder.fxd
         """
         items = []
-        for i in all_variables:
-            if i in ('COVER_DIR', 'AUDIO_FORMAT_STRING'):
+        for i, name, descr in all_variables:
+            if name == '':
                 continue
             if (self.display_type and not self.display_type == 'audio') and \
                    i == 'AUDIO_RANDOM_PLAYLIST':
                 continue
-            
-            name = str(i + '\t').replace('_', ' ').capitalize()
+
+            name += '\t'
             if i in self.modified_vars:
                 if i == 'FORCE_SKIN_LAYOUT':
                     name += str(getattr(self, i))
@@ -859,7 +893,9 @@ class DirItem(Playlist):
                     name += _('off')
                 else:
                     name += _('auto')
-            items.append(menu_module.MenuItem(name, self.configure_set_var, i))
+            mi = menu_module.MenuItem(name, self.configure_set_var, i)
+            mi.description = descr
+            items.append(mi)
         m = menu_module.Menu(_('Configure'), items)
         m.table = (80, 20)
         m.back_one_menu = 2
