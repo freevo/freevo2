@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/06/20 02:02:34  rshortt
+# Bugfix.
+#
 # Revision 1.7  2003/06/20 01:57:21  rshortt
 # A fix in case the user doesn't have mame.  Pass the files along to
 # the next emulator.
@@ -193,8 +196,9 @@ def getMameItemInfoList(mame_files):
         mame_ok = updateMameRomList()
 	waitmsg.destroy()
 
-    if not mame_ok:
-        return (mame_files, [])
+        if not mame_ok:
+            return (mame_files, [])
+
 
     mameRomList = getMameRomList()
     roms = mameRomList.getMameRoms()
