@@ -1,4 +1,5 @@
 #if 0 /*
+#  -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # idlebar.py - IdleBar plugin
 # -----------------------------------------------------------------------
@@ -40,6 +41,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2003/08/16 12:57:55  outlyer
+# Added encoding
+#
 # Revision 1.29  2003/08/15 19:25:15  dischi
 # search all the share stuff in $FREEVO_SHARE now
 #
@@ -400,7 +404,7 @@ class weather(IdleBarPlugin):
         temp,icon = self.checkweather()
         font  = osd.get_font('weather')
         osd.draw_image(os.path.join(config.ICON_DIR, 'weather/' + icon),
-                                    (x, osd.y + 15, -1, -1))
+                        (x, osd.y + 15, -1, -1))
         temp = '%s°' % temp
         width = font.font.stringsize(temp)
         osd.write_text(temp, font, None, x + 15, osd.y + 55 - font.h, width, font.h,
