@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.63  2004/02/05 07:17:23  gsbarbieri
+# typo
+#
 # Revision 1.62  2004/02/05 05:44:26  gsbarbieri
 # Fixes some bugs related to handling unicode internally.
 # NOTE: Many of the bugs are related to using str() everywhere, so please stop doing that.
@@ -519,7 +522,7 @@ class Item:
                 except UnicodeDecodeError, e:
                     _debug_( "WARNING: " + \
                              "Could not convert %s to unicode using \"%s\" encoding: %s" % \
-                             ( repr( directory ), encoding, e )
+                             ( repr( r ), encoding, e )
                              )
                              
             return r
