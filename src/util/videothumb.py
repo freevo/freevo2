@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/06/23 21:09:29  dischi
+# handle mplayer TS, PES problems
+#
 # Revision 1.10  2004/05/02 09:21:57  dischi
 # better python code
 #
@@ -96,6 +99,7 @@ def snapshot(videofile, imagefile=None, pos=None, update=True, popup=None):
         pop.show()
         
     args = [ config.MPLAYER_CMD, videofile, imagefile ]
+
     if pos != None:
         args.append(str(pos))
 
@@ -152,7 +156,11 @@ if __name__ == "__main__":
         position = sys.argv[4]
     except IndexError:
         try:
-            position = str(int(mmpython.parse(filename).video[0].length / 2.0))
+            mminfo = mmpython.parse(filename)
+            position = str(int(mminfo.video[0].length / 2.0))
+            if hasattr(mminfo, 'type'):
+                if mminfo.type in ('MPEG-TS', 'MPEG-PES'):
+                    position = str(int(mminfo.video[0].length / 20.0))
         except:
             # else arbitrary consider that file is 1Mbps and grab position at 10%
             position = os.stat(filename)[ST_SIZE]/1024/1024/10.0
