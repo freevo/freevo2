@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2003/08/20 21:25:21  dischi
+# get SHARE_DIR earlier
+#
 # Revision 1.38  2003/08/20 13:33:48  outlyer
 # Patch from Lars Eggert to support FreeBSD device naming conventions.
 #
@@ -256,6 +259,12 @@ def read_config(filename, conf):
     conf.width, conf.height = int(w), int(h)
         
 
+SHARE_DIR = os.environ['FREEVO_SHARE']
+SKIN_DIR  = os.path.join(SHARE_DIR, 'skins')
+ICON_DIR  = os.path.join(SHARE_DIR, 'icons')
+IMAGE_DIR = os.path.join(SHARE_DIR, 'images')
+FONT_DIR  = os.path.join(SHARE_DIR, 'fonts')
+
 # Check that freevo_config.py is not found in the config file dirs
 for dirname in [os.path.expanduser('~/.freevo'), '/etc/freevo']:
     freevoconf = dirname + '/freevo_config.py'
@@ -332,12 +341,6 @@ else:
 if len(sys.argv) >= 2 and sys.argv[1] == '--force-fs':
     START_FULLSCREEN_X = 1
 
-
-SHARE_DIR = os.environ['FREEVO_SHARE']
-SKIN_DIR  = os.path.join(SHARE_DIR, 'skins')
-ICON_DIR  = os.path.join(SHARE_DIR, 'icons')
-IMAGE_DIR = os.path.join(SHARE_DIR, 'images')
-FONT_DIR  = os.path.join(SHARE_DIR, 'fonts')
 
 OSD_DEFAULT_FONTNAME = os.path.join(FONT_DIR, OSD_DEFAULT_FONTNAME)
 
@@ -452,3 +455,4 @@ if not os.path.isdir('%s/thumbnails/' % FREEVO_CACHEDIR):
     import stat
     os.mkdir('%s/thumbnails/' % FREEVO_CACHEDIR,
              stat.S_IMODE(os.stat(FREEVO_CACHEDIR)[stat.ST_MODE]))
+
