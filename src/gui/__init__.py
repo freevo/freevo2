@@ -1,45 +1,20 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # gui - Interface to all gui functions and objects
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.29  2004/10/09 16:24:00  dischi
-# import Area for external use
+# This file is the interface to the complete gui code of Freevo. It includes
+# some basic get/set functions and also imports all parts from submodules that
+# should be allowed to use.
 #
-# Revision 1.28  2004/10/05 19:52:11  dischi
-# changes to reflect widget update
-#
-# Revision 1.27  2004/08/24 19:23:37  dischi
-# more theme updates and design cleanups
-#
-# Revision 1.26  2004/08/24 16:42:40  dischi
-# Made the fxdsettings in gui the theme engine and made a better
-# integration for it. There is also an event now to let the plugins
-# know that the theme is changed.
-#
-# Revision 1.25  2004/08/23 14:28:21  dischi
-# fix animation support when changing displays
-#
-# Revision 1.24  2004/08/23 12:37:36  dischi
-# better display handling
-#
-# Revision 1.23  2004/08/22 20:06:16  dischi
-# Switch to mevas as backend for all drawing operations. The mevas
-# package can be found in lib/mevas. This is the first version using
-# mevas, there are some problems left, some popup boxes and the tv
-# listing isn't working yet.
-#
-# Revision 1.22  2004/08/14 15:08:21  dischi
-# new area handling code
-#
-# -----------------------------------------------------------------------
-#
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
 #
-# Copyright (C) 2002 Krister Lagerstrom, et al.
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -55,38 +30,55 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
-import copy
-import config
+# The theme engine
+from theme_engine import *
 
-# basic objects
+# Image library
+import imagelib
+
+# Basic widgets
 from widgets import *
 
-# Display engine control module
-import displays
-
-# Image load library
-import imagelib
+# Dialog boxes
+from window   import Window
+from popupbox import *
 
 # The animation module
 import animation
 
-def get_display():
-    """
-    return current display output or create the default one
-    if no display is currently set
-    """
-    return displays.get_display()
 
+# -----------------------------------------------------------------------------
+# Display engine control module. Based on the different display engines
+# in the display subdirectory it is possible to change the display on
+# runtime and get some basic display informations.
+#
+# provided functions:
+#
+# get_display()
+#      Returns the current active display object
+#
+# set_display(name, size)
+#      Create a display based on the display type name with the given size.
+#      The new display will be returned. This will also create a new animation
+#      render class for this display.
+#
+# remove_display(name)
+#      Remove the display name and stop all animations for it. The function
+#      will return the new active display.
+# -----------------------------------------------------------------------------
+
+import displays as _displays
+
+get_display = _displays.get_display
 
 def set_display(name, size):
     """
     set a new output display
     """
-    global display
     animation.render().killall()
-    display = displays.set_display(name, size)
+    display = _displays.set_display(name, size)
     width   = display.width
     height  = display.height
     animation.create(display)
@@ -97,40 +89,48 @@ def remove_display(name):
     """
     remove the output display
     """
-    global display
     animation.render().killall()
-    display = displays.remove_display(name)
+    display = _displays.remove_display(name)
     width   = display.width
     height  = display.height
     animation.create(display)
     return display
 
+import config as _config
 
-# create default display and set gui width and height
-# in case some part of Freevo needs this
-if not config.HELPER:
+if not _config.HELPER:
+    # create default display and set gui width and height
+    # in case some part of Freevo needs this
     display = get_display()
     width   = display.width
     height  = display.height
     animation.create(display)
 else:
-    display = None
+    # set width and height to fake values
     width   = 0
     height  = 0
 
 
+# -----------------------------------------------------------------------------
+# Area module.
+#
+# provided classes:
+#
+# AreaHandler(type, area_list)
+#      AreaHandler based on the area/handler.py code. This is only a wrapper
+#      class to give basic gui information to the subclass
+#
+# Area(name)
+#      Template for an Area to add to the AreaHandler
+# -----------------------------------------------------------------------------
+
 from areas import AreaHandler as _AreaHandler
 from areas import Area
 
-def AreaHandler(type, area_list):
+class AreaHandler(_AreaHandler):
     """
-    return the area object
+    Create an AreaHandler
     """
-    return _AreaHandler(type, area_list, get_theme, display, imagelib)
-
-
-from theme_engine import *
-
-# dialog boxes
-from window   import Window
-from popupbox import *
+    def __init__(self, type, area_list):
+        _AreaHandler.__init__(self, type, area_list, get_theme,
+                              get_display(), imagelib)
