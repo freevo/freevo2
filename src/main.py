@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.125  2004/06/06 08:31:15  dischi
+# check for mmpython version
+#
 # Revision 1.124  2004/06/06 07:45:35  dischi
 # check for numeric
 #
@@ -87,6 +90,7 @@ try:
         print 'all discs are detected. Please install lsdvd, you can get it'
         print 'from http://acidrip.thirtythreeandathird.net/lsdvd.html'
         print
+        print 'After installing it, you should run \'freevo cache --rebuild\''
     else:
         os.environ['LSDVD'] = config.CONF.lsdvd
         
@@ -102,17 +106,32 @@ except ImportError, i:
     print 'Not all requirements of Freevo are installed on your system.'
     print 'Please check the INSTALL file for more informations.'
     print
-    print 'A quick solution is to install the Freevo runtime. This contains'
-    print 'all Python dependencies to run Freevo. Get the current runtime at'
-    print 'http://sourceforge.net/project/showfiles.php?group_id=46652&release_id=194955'
-    print 'After downloading, run \'./freevo install path-to-runtime.tgz\'.'
-    print
-    print 'The runtime doesn\'t contain external applications like mplayer, xine'
-    print 'or tvtime. You need to download and install them, too (all except'
-    print 'mplayer are optional).'
-    print
+    #
+    # XXX: we need a new runtime :-)
+    #
+    # print 'A quick solution is to install the Freevo runtime. This contains'
+    # print 'all Python dependencies to run Freevo. Get the current runtime at'
+    # print 'http://sourceforge.net/project/showfiles.php?group_id=46652&release_id=194955'
+    # print 'After downloading, run \'./freevo install path-to-runtime.tgz\'.'
+    # print
+    # print 'The runtime doesn\'t contain external applications like mplayer, xine'
+    # print 'or tvtime. You need to download and install them, too (all except'
+    # print 'mplayer are optional).'
+    # print
     sys.exit(0)
 
+
+# check if mmpython is up to date to avoid bug reports
+# for already fixed bugs
+try:
+    import mmpython.version
+    if mmpython.version.CHANGED < 20040606:
+        raise ImportError
+except ImportError:
+    print 'Error: Installed mmpython version is too old.'
+    print 'Please update mmpython to version 0.4.3 or higher'
+    print
+    sys.exit(0)
     
 import util    # Various utilities
 import osd     # The OSD class, used to communicate with the OSD daemon
@@ -445,6 +464,10 @@ try:
     # Fire up splashscreen and load the cache
     if config.MEDIAINFO_USE_MEMORY == 2:
         import util.mediainfo
+
+        splash = Splashscreen(_('Reading cache, please wait ...'))
+        skin.register('splashscreen', ('screen', splash))
+
         cachefiles = []
         for type in ('video', 'audio', 'image', 'games'):
             if plugin.is_active(type):
@@ -457,8 +480,6 @@ try:
 
         cachefiles = util.unique(cachefiles)
 
-        splash = Splashscreen(_('Reading cache, please wait ...'))
-        skin.register('splashscreen', ('screen', splash))
         for f in cachefiles:
             splash.progress(int((float((cachefiles.index(f)+1)) / len(cachefiles)) * 100))
             util.mediainfo.load_cache(f)
