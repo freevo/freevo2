@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.65  2004/02/08 17:39:39  dischi
+# small cosmetic fixes
+#
 # Revision 1.64  2004/02/05 19:26:41  dischi
 # fix unicode handling
 #
@@ -22,11 +25,13 @@
 # Revision 1.61  2004/02/05 02:52:20  gsbarbieri
 # Handle filenames internally as unicode objects.
 #
-# This does *NOT* affect filenames that have only ASCII chars, since the translation ASCII -> Unicode is painless. However this *DOES* affect files with accents, like é (e acute, \xe9) and others.
+# This does *NOT* affect filenames that have only ASCII chars, since the
+# translation ASCII -> Unicode is painless. However this *DOES* affect files
+# with accents
 #
-# I tested with Video, Images and Music modules, but *NOT* with Games, so if you have the games modules, give it a try.
-#
-# It determines the encoding based on (in order) FREEVO_LOCALE, LANG and LC_ALL, which may have the form: "LANGUAGE_CODE.ENCODING", like "pt_BR.UTF-8", and others.
+# It determines the encoding based on (in order) FREEVO_LOCALE, LANG and
+# LC_ALL, which may have the form: "LANGUAGE_CODE.ENCODING",
+# like "pt_BR.UTF-8"
 #
 # Revision 1.60  2004/02/03 20:46:57  dischi
 # fix debug warning

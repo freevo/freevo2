@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.63  2004/02/08 17:39:39  dischi
+# small cosmetic fixes
+#
 # Revision 1.62  2004/01/31 16:38:49  dischi
 # removed unneeded attr
 #
@@ -623,4 +626,5 @@ class Mimetype(plugin.MimetypePlugin):
 
 
 # load the MimetypePlugin
-plugin.activate(Mimetype())
+mimetype = Mimetype()
+plugin.activate(mimetype)
