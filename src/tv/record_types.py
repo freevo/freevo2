@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/07/13 18:10:21  rshortt
+# Use new tv_util.get_chan_displayname() format also.
+#
 # Revision 1.2  2003/07/06 20:04:27  rshortt
 # Change favorites to use tv_util.get_chan_displayname(prog) as
 # favorite.channel rather than channel_id.
@@ -151,7 +154,7 @@ class Favorite:
             self.title = prog.title
 
 	    if exactchan:
-                self.channel = tv_util.get_chan_displayname(prog)
+                self.channel = tv_util.get_chan_displayname(prog.channel_id)
             else:
                 self.channel = 'ANY'
           
