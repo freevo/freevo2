@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/10/08 15:50:54  dischi
+# Parse more infos from the xml file to MovieExtraInformation (maybe we
+# should change that name...)
+#
 # Revision 1.1  2002/10/06 14:58:51  dischi
 # Lots of changes:
 # o removed some old cvs log messages
@@ -71,3 +75,8 @@ class MovieInformation:
         self.disc_label = disc_label
         self.info = info
         self.xml_file = xml_file
+
+class MovieExtraInformation:
+    def __init__(self):
+        self.url = self.genre = self.tagline = self.plot = self.year = self.rating = ''
+        

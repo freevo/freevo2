@@ -9,6 +9,10 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2002/10/08 15:50:54  dischi
+# Parse more infos from the xml file to MovieExtraInformation (maybe we
+# should change that name...)
+#
 # Revision 1.7  2002/10/06 14:58:51  dischi
 # Lots of changes:
 # o removed some old cvs log messages
@@ -114,13 +118,26 @@ def parseVideo(dir, mplayer_files, video_node):
     return playlist
 
 
+
 #
 # parse <info> tag (not implemented yet)
 #
 def parseInfo(info_node):
+    info = MovieExtraInformation()
     for node in info_node.children:
-        pass
-
+        if node.name == u'url':
+            info.url = node.textof().encode('latin-1')
+        if node.name == u'genre':
+            info.genre = node.textof().encode('latin-1')
+        if node.name == u'tagline':
+            info.tagline = node.textof().encode('latin-1')
+        if node.name == u'plot':
+            info.plot = node.textof().encode('latin-1')
+        if node.name == u'year':
+            info.year = node.textof().encode('latin-1')
+        if node.name == u'rating':
+            info.rating = node.textof().encode('latin-1')
+    return info
 
 
 #
