@@ -31,6 +31,8 @@ except ImportError:
 if len(sys.argv) > 1:
 	if sys.argv[1] == 'x11':
 		buildops = 'x11'
+	if sys.argv[1] == 'sdl':
+		buildops = 'sdl'
 	else:
 		buildops = ''
 else:
