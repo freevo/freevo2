@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.97  2003/11/09 13:29:34  rshortt
+# Bugfix for the new runtime.
+#
 # Revision 1.96  2003/11/07 15:47:25  dischi
 # change dir for runtime (may not work for all helpers)
 #
@@ -157,7 +160,7 @@ if [ -e "`dirname $FREEVO_SCRIPT`/src/plugins" ]; then
 	if [ -e "./runtime/runapp" ]; then
 	    # set runapp
 	    export RUNAPP="./runtime/runapp"
-	    PYTHON=python
+            PYTHON="./runtime/apps/freevo_python"
 	else
 	    # runapp only works in the Freevo directory
 	    # restarting with new pwd
