@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/03/01 00:12:20  dischi
+# Some bug fixes, some speed-ups. blue_round2 has a correct main menu,
+# but on the main menu the idle bar still flickers (stupid watermarks),
+# on other menus it's ok.
+#
 # Revision 1.15  2003/02/27 22:39:50  dischi
 # The view area is working, still no extended menu/info area. The
 # blue_round1 skin looks like with the old skin, blue_round2 is the
@@ -304,8 +309,20 @@ class XML_area(XML_data):
                 XML_data.parse(self, subnode, scale, current_dir)
                 self.x += config.OVERSCAN_X
                 self.y += config.OVERSCAN_Y
-                
 
+    def rect(self, type):
+        if type == 'screen':
+            return (self.x - config.OVERSCAN_X, self.y - config.OVERSCAN_X,
+                    self.width + 2 * config.OVERSCAN_X,
+                    self.height + 2 * config.OVERSCAN_X)
+        return (self.x, self.y, self.width, self.height)
+
+    def pos(self, type):
+        if type == 'screen':
+            return (self.x - config.OVERSCAN_X, self.y - config.OVERSCAN_X)
+        return (self.x, self.y)
+
+        
 class XML_menu:
     def __init__(self):
         self.content = ( 'screen', 'title', 'view', 'listing', 'info' )
@@ -346,7 +363,7 @@ class XML_content(XML_data):
             if subnode.name == u'item':
                 type = attr_str(subnode, "type", '')
                 if type and not self.types.has_key(type):
-                    self.types[type] = XML_data(('font',))
+                    self.types[type] = XML_data(('font', 'align', 'valign'))
                     self.types[type].rectangle = None
                 if type:
                     self.types[type].parse(subnode, scale, current_dir)

@@ -37,6 +37,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/03/01 00:12:17  dischi
+# Some bug fixes, some speed-ups. blue_round2 has a correct main menu,
+# but on the main menu the idle bar still flickers (stupid watermarks),
+# on other menus it's ok.
+#
 # Revision 1.5  2003/02/27 22:39:49  dischi
 # The view area is working, still no extended menu/info area. The
 # blue_round1 skin looks like with the old skin, blue_round2 is the
@@ -189,9 +194,9 @@ class Skin_Area:
             for rect in self.content_alpha:
                 self.alpha_bg.blit(self.background, (rect[0], rect[1]), rect)
                 self.alpha_bg.blit(self.alpha, (rect[0], rect[1]), rect)
-                osd.screen.blit(self.alpha_bg, (rect[0], rect[1]), rect)
-
             self.content_alpha = []
+            osd.screen.blit(self.alpha_bg, (area.x, area.y),
+                            (area.x, area.y, area.width, area.height))
 
         if not area.visible:
             return
@@ -204,10 +209,7 @@ class Skin_Area:
             if not self.update_content_needed(settings, menuw):
                 return
 
-        for rect in self.content_alpha:
-            self.alpha_bg.blit(self.background, (rect[0], rect[1]), rect)
-            self.alpha_bg.blit(self.alpha, (rect[0], rect[1]), rect)
-            osd.screen.blit(self.alpha_bg, (rect[0], rect[1]), rect)
+        self.redraw_alpha += self.content_alpha
 
         self.content_alpha = []
 
@@ -215,28 +217,36 @@ class Skin_Area:
         self.update_content(settings, menuw)
 
         for rect in self.redraw_background:
-            # FIXME: redraw background
+            # redraw background
             self.alpha_bg.blit(self.background, rect[:2], rect)
 
-
-        for rect in self.redraw_alpha:
+        if self.redraw_alpha:
             # redraw alpha means to create a new merge of background
             # and alpha on alpha_bg and blit it into osd.screen
-            self.alpha_bg.blit(self.background, rect[:2], rect)
-            self.alpha_bg.blit(self.alpha, rect[:2], rect)
+            x0 = osd.width
+            y0 = osd.height
+            x1 = 0
+            y1 = 0
+            
+            for rect in self.redraw_alpha:
+                x0 = min(x0, rect[0])
+                y0 = min(y0, rect[1])
+                x1 = max(x1, rect[0] + rect[2])
+                y1 = max(y1, rect[1] + rect[3])
+            self.alpha_bg.blit(self.background, (x0, y0), (x0, y0, x1-x0, y1-y0))
+            self.alpha_bg.blit(self.alpha, (x0, y0), (x0, y0, x1-x0, y1-y0))
 
         self.redraw_alpha = []
         self.redraw_background = []
 
+        # now blit the alpha_bg on the osd.screen
         if old_area:
-            osd.screen.blit(self.alpha_bg, (old_area.x,old_area.y),
-                            (old_area.x, old_area.y, old_area.width,
-                             old_area.height))
-
-        osd.screen.blit(self.alpha_bg, (area.x,area.y),
-                        (area.x, area.y, area.width, area.height))
+            osd.screen.blit(self.alpha_bg, old_area.pos(self.name),
+                            old_area.rect(self.name))
 
 
+        # FIXME: at this point with blue_round2 we blit the hole screen,
+        osd.screen.blit(self.alpha_bg, area.pos(self.name), area.rect(self.name))
 
         
         for t in self._write_text:
@@ -362,9 +372,15 @@ class Skin_Area:
         """
         area = self.area_val
 
-        if hasattr(self, 'has_watermark') and self.has_watermark:
-            self.redraw = TRUE
-            self.has_watermark = FALSE
+        redraw_watermark = self.redraw
+        last_watermark = None
+
+        if hasattr(self, 'watermark') and self.watermark:
+            last_watermark = self.watermark[4]
+            if self.menu.selected.image != self.watermark[4]:
+                self.redraw_background += [ self.watermark[:4] ]
+                self.watermark = None
+                redraw_watermark = TRUE
             
         for bg in copy.deepcopy(self.layout.background):
             if isinstance(bg, xml_skin.XML_image):
@@ -381,8 +397,10 @@ class Skin_Area:
 
                 if bg.label == 'watermark' and self.menu.selected.image:
                     imagefile = self.menu.selected.image
-                    self.has_watermark = TRUE
-                    self.redraw = TRUE
+                    if last_watermark != imagefile:
+                        self.redraw = TRUE
+                        redraw_watermark = TRUE
+                    self.watermark = (bg.x, bg.y, bg.width, bg.height, imagefile)
                 else:
                     imagefile = bg.filename
 
@@ -398,13 +416,15 @@ class Skin_Area:
                             image = pygame.transform.scale(image,(bg.width,bg.height))
                             self.imagecache[cname] = image
                     if image:
-                        self.draw_image(image, bg, redraw=self.redraw)
-                
+                        self.draw_image(image, bg, redraw=redraw_watermark)
+                            
             elif isinstance(bg, xml_skin.XML_rectangle):
                 self.calc_geometry(bg)
                 self.drawroundbox(bg.x, bg.y, bg.width, bg.height, bg, redraw=self.redraw)
 
-
+        if redraw_watermark:
+            self.redraw = TRUE
+            
 
     def drawroundbox(self, x, y, width, height, rect, redraw=TRUE):
         """
@@ -467,12 +487,9 @@ class Skin_Area:
         elif hasattr(val, 'label') and val.label == 'background':
             if redraw:
                 self.background.blit(image, (val.x, val.y))
-                self.redraw_background += [ (val.x, val.y, val.width, val.height) ]
-                if val.label == 'background':
-                    osd.screen.blit(image, (val.x, val.y))
+                # really redraw or is this a watermark problem?
+                if self.redraw:
+                    self.redraw_background += [ (val.x, val.y, val.width, val.height) ]
         else:
             self._draw_image += [ ( image, (val.x, val.y)) ]
             
-
-
-

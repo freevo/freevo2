@@ -4,17 +4,17 @@
   <skin include="blue1_small" geometry="800x600">
 
     <main>
-      <item pos="0" name="         Watch TV"       action="tv.tv.main_menu"  arg="" 
+      <item pos="0" name="Watch TV"       action="tv.tv.main_menu"  arg="" 
 	visible="yes" icon="" image="skins/dischi1/tv_watermark.png" />
-      <item pos="1" name="      Watch a Movie" action="MediaMenu().main_menu" arg="video" 
+      <item pos="1" name="Watch a Movie" action="MediaMenu().main_menu" arg="video" 
 	visible="yes" icon="" image="skins/dischi1/movie_watermark.png"  />
-      <item pos="2" name="     Listen to Music"   action="MediaMenu().main_menu" arg="audio" 
+      <item pos="2" name="Listen to Music"   action="MediaMenu().main_menu" arg="audio" 
 	visible="yes" icon="" image="skins/dischi1/music_watermark.png" />
-      <item pos="3" name="     Look at Pictures"   action="MediaMenu().main_menu" arg="image" 
+      <item pos="3" name="Look at Pictures"   action="MediaMenu().main_menu" arg="image" 
 	visible="yes" icon="" image="skins/dischi1/image_watermark.png" />
       <item pos="4" name="Games"   action="MediaMenu().main_menu" arg="games" 
 	visible="no" icon="" image="" />
-      <item pos="5" name="         Shutdown" action="ShutdownItem" arg="" 
+      <item pos="5" name="Shutdown" action="ShutdownItem" arg="" 
 	visible="yes" icon="" image="skins/dischi1/shutdown_watermark.png" />
     </main>
     
@@ -41,13 +41,15 @@
       <info visible="no"/>
     </menu>
 
+
+
     <menu type="main">
       <!-- definition of the main menu -->
       <screen layout="screen watermark" visible="yes">
 	<area x="0" y="0" width="800" height="600"/>
       </screen>
       <listing layout="list_main" visible="yes">
-	<area x="230" y="120" width="380" height="390"/> 
+	<area x="230" y="180" width="360" height="240"/> 
       </listing>
     </menu>
 
@@ -79,8 +81,7 @@
     <layout label="screen watermark">
       <background>
 	<image filename="../images/aubin/blurr.jpg" x="0" y="0" label="background"/>
-	<image filename="../images/logo.png" x="10" y="0" width="200" height="98"/>
-	<image x="500" y="300" width="300" height="300" label="watermark"/>
+	<image x="435" y="230" width="370" height="380" label="watermark"/>
       </background>
     </layout>
 
@@ -130,16 +131,24 @@
     <!-- redefine the main menu listing area -->
     <layout label="list_main">
       <content type="text" spacing="10">
-	<item type="default" font="white shadow1 big"/>
-	<item type="selected" font="white shadow3 big">
-	  <rectangle bgcolor="0xa0000000" size="0" y="-5" x="-10"
-	    width="max+20" height="max+10" radius="5"/>
+	<item type="default" font="main menu font" align="center"/>
+	<item type="selected" font="main menu font" align="center">
+	  <rectangle bgcolor="0xaa000000" size="0" x="-3" y="-3"
+	    width="max+6" height="max+6" radius="8"/>
 	</item>
       </content>
     </layout>
 
     <!-- ********************************************** -->
     <!-- FONT DEFINITIONS -->
+
+
+    <font label="main menu font">
+      <definition name="Arial_Bold" color="0xffffff" size="18"/>
+      <shadow visible="no"/>
+    </font>
+
+
 
     <font label="white shadow1">
       <definition name="bluehigh" color="0xffffff" size="20"/>

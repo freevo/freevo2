@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/03/01 00:12:18  dischi
+# Some bug fixes, some speed-ups. blue_round2 has a correct main menu,
+# but on the main menu the idle bar still flickers (stupid watermarks),
+# on other menus it's ok.
+#
 # Revision 1.1  2003/02/27 22:39:50  dischi
 # The view area is working, still no extended menu/info area. The
 # blue_round1 skin looks like with the old skin, blue_round2 is the
@@ -135,18 +140,22 @@ class Listing_Area(Skin_Area):
             rh = 0
             rw = 0
             if ct.rectangle:
-                rw, rh, r = self.get_item_rectangle(ct.rectangle, font_w, font_h)
+                rw, rh, r = self.get_item_rectangle(ct.rectangle, content.width, font_h)
                 hskip = min(hskip, r.x)
                 vskip = min(vskip, r.y)
-                
+
             items_h = max(items_h, font_h, rh)
             items_w = max(items_w, font_w, rw)
 
         # restore
         self.area_val, self.layout = backup
 
-        items_w
-        items_h
+        # shrink width for text menus
+        # FIXME
+        width = content.width
+
+        if items_w > width:
+            width, items_w = width - (items_w - width), width 
 
         cols = 0
         rows = 0
@@ -159,9 +168,9 @@ class Listing_Area(Skin_Area):
               content.spacing <= content.height:
             rows += 1
 
-        # return cols, rows, item_w, item_h
+        # return cols, rows, item_w, item_h, content.width
         return (cols, rows, items_w + content.spacing,
-                items_h + content.spacing, -hskip, -vskip)
+                items_h + content.spacing, -hskip, -vskip, width)
 
 
 
@@ -190,13 +199,11 @@ class Listing_Area(Skin_Area):
         area      = self.area_val
         content   = self.calc_geometry(layout.content, copy_object=TRUE)
 
-        cols, rows, hspace, vspace, hskip, vskip = \
+        cols, rows, hspace, vspace, hskip, vskip, width = \
               self.get_items_geometry(settings, menu)
 
         x0 = content.x
         y0 = content.y
-
-        width  = content.width
 
         for choice in menuw.menu_items:
             if choice == menu.selected:
@@ -237,13 +244,12 @@ class Listing_Area(Skin_Area):
 
                 if val.rectangle:
                     None, None, r = self.get_item_rectangle(val.rectangle, width, font_h)
-                    if hskip + r.x + r.width > width:
-                        r.width = width - hskip - r.y
                     self.drawroundbox(x0 + hskip + r.x + icon_x, y0 + vskip + r.y,
                                       r.width - icon_x, r.height, r)
-                    
+
                 self.write_text(text, font, content, x=x0 + hskip + icon_x, y=y0 + vskip,
-                                width=width-icon_x, height=-1, mode='hard')
+                                width=width-icon_x, height=-1, align_h=val.align,
+                                mode='hard')
 
             else:
                 print 'no support for content type %s' % content.type
