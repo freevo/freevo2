@@ -6,14 +6,14 @@
 __revision__ = "$Id$"
 
 # Python distutils stuff
-from distutils.core import setup, Extension
 import os
 import sys
 
 # Freevo distutils stuff
 sys.path.append('./src')
 import version
-from util.distutils import *
+from util.distribution import setup, Extension, check_libs, docbook_finder
+
 
 check_libs((('mmpython', 'http://www.sf.net/projects/mmpython' ),
             ('pygame', 'http://www.pygame.org'),
@@ -28,6 +28,9 @@ if (not os.path.isdir('./Docs/installation/html')) and \
     print 'of Freevo. Please run ./autogen.sh first'
     sys.exit(0)
 
+# only add files not in share and src
+
+data_files = []
 # add some files to Docs
 for f in ('BUGS', 'COPYING', 'ChangeLog', 'INSTALL', 'README'):
     data_files.append(('share/doc/freevo-%s' % version.__version__, ['%s' % f ]))
@@ -41,9 +44,7 @@ data_files.append(('share/freevo', [ 'freevo_config.py' ]))
 os.path.walk('./Docs/installation', docbook_finder, data_files)
 os.path.walk('./Docs/plugin_writing', docbook_finder, data_files)
 
-# i18n support
-i18n('freevo')
-
+# start script
 scripts = ['freevo']
 
 # now start the python magic
@@ -55,10 +56,7 @@ setup (name         = "freevo",
        url          = "http://www.freevo.org",
        license      = "GPL",
 
-       scripts      =scripts,
-       package_dir  = package_dir,
-       packages     = packages,
+       i18n         = 'freevo',
+       scripts      = scripts,
        data_files   = data_files
        )
-
-finalize()
