@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/10/18 13:04:42  dischi
+# add distutils
+#
 # Revision 1.1  2003/10/11 11:20:11  dischi
 # move util.py into a directory and split it into two files
 #
@@ -36,9 +39,11 @@
 # ----------------------------------------------------------------------- */
 #endif
 
+import sys
 
 # import the stuff from misc and fileops to be compatible
 # with util in only one file
 
-from misc import *
-from fileops import *
+if sys.argv[0].find('setup.py') == -1:
+    from misc import *
+    from fileops import *
