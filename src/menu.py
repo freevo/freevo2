@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2003/03/30 19:10:32  dischi
+# fixed some navigating bugs
+#
 # Revision 1.28  2003/03/30 17:00:00  dischi
 # removed debug (again)
 #
@@ -426,8 +429,10 @@ class MenuWidget(GUIObject):
                 try:
                     if self.cols == 1:
                         curr_selected = self.rows - 1
-                    else:
+                    elif self.rows != 1:
                         curr_selected = self.all_items.index(menu.selected)
+                    else:
+                        curr_selected+=self.cols
                 except ValueError:
                     curr_selected += self.cols
             curr_selected = max(curr_selected-self.cols, 0)
@@ -437,13 +442,17 @@ class MenuWidget(GUIObject):
         elif event == rc.DOWN:
             curr_selected = self.all_items.index(menu.selected)
             if curr_selected+self.cols > len(self.all_items)-1 and \
-               (self.cols > 1 or config.NEW_SKIN):
+               (self.cols > 1 or config.NEW_SKIN) and \
+               menu.page_start + len(self.all_items) < len(menu.choices):
+
                 self.goto_next_page(arg='no_refresh')
                 try:
                     if self.cols == 1:
                         curr_selected = 0
-                    else:
+                    elif self.rows != 1:
                         curr_selected = self.all_items.index(menu.selected)
+                    else:
+                        curr_selected-=self.cols
                 except ValueError:
                     curr_selected -= self.cols
             curr_selected = min(curr_selected+self.cols, len(self.all_items)-1)
@@ -461,6 +470,8 @@ class MenuWidget(GUIObject):
                     self.goto_prev_page(arg='no_refresh')
                     try:
                         curr_selected = self.all_items.index(menu.selected)
+                        if self.rows == 1:
+                            curr_selected = len(self.all_items)
                     except ValueError:
                         curr_selected += self.cols
                 curr_selected = max(curr_selected-1, 0)
@@ -490,8 +501,11 @@ class MenuWidget(GUIObject):
                     self.goto_next_page(arg='no_refresh')
                     try:
                         curr_selected = self.all_items.index(menu.selected)
+                        if self.rows == 1:
+                            curr_selected -= 1
                     except ValueError:
                         curr_selected -= self.cols
+
                 curr_selected = min(curr_selected+1, len(self.all_items)-1)
                 menu.selected = self.all_items[curr_selected]
                 self.refresh()
