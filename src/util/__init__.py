@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/02/07 11:53:33  dischi
+# use "ignore" to make unicode->string possible
+#
 # Revision 1.9  2004/02/05 19:26:42  dischi
 # fix unicode handling
 #
@@ -64,11 +67,7 @@ if sys.argv[0].find('setup.py') == -1 and sys.argv[0].find('install.py') == -1:
 
     def String(string, encoding=config.encoding):
         if type(string) == unicode:
-            try:
-                return string.encode(encoding)
-            except Exception, e:
-                _debug_( "Could not convert %s to string using \"%s\" encoding: %s" % \
-                         ( repr(string), encoding, e ))
+            return string.encode(encoding, 'replace')
         return string
 
     import vfs
