@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.52  2003/09/20 12:58:11  dischi
+# add VERSION
+#
 # Revision 1.51  2003/09/19 18:57:43  dischi
 # fixed TRUE/FALSE problems
 #
@@ -67,6 +70,7 @@
 # ----------------------------------------------------------------------- */
 #endif
 
+VERSION = '1.4-rc1-CVS'
 
 import sys, os, time, re
 import setup_freevo
