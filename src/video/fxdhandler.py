@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2004/07/11 10:43:22  dischi
+# fix unicode error
+#
 # Revision 1.21  2004/07/10 12:33:43  dischi
 # header cleanup
 #
@@ -90,7 +93,8 @@ def parse_movie(fxd, node):
                 files.append(filename)
         if mode == 'url':
             return id, filename, media_id, options, player, playlist
-        return id, String('%s://%s' % (mode, filename)), media_id, options, player, playlist
+        return id, String('%s://%s' % (String(mode), String(filename))), \
+               media_id, options, player, playlist
     
 
     item = VideoItem('', fxd.getattr(None, 'parent', None), parse=False)
