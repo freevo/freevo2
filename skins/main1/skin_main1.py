@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.62  2002/11/21 05:23:44  krister
+# Made the main menu fonts and icons larger. Made the icon sizes scale with the resolution.
+#
 # Revision 1.61  2002/11/20 22:07:32  dischi
 # small fix for my code cleanup
 #
@@ -503,8 +506,10 @@ class Skin:
             spacing = 0                 # calculate this later
             icon_size = 28
         else:
-            spacing = height / max(len(menuw.menu_items),1)
-            icon_size = 48  # XXX Quick hack to make the new icons look OK, fix!
+            spacing = height / max(len(menuw.menu_items), 1)
+            # The icons are 64x64 in 800x600 resolution, scale for other res.
+            scale = osd.width / 800.0
+            icon_size = int(round(64 * scale))
 
 
         for choice in menuw.menu_items:

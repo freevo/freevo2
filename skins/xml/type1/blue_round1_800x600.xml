@@ -65,13 +65,13 @@
       <background mask=""/>
       <title visible="no"/>
       <logo x="560"/>
-      <items x="220" y="140" width="320">
+      <items x="240" y="140" width="380" height="400">
 	<item type="all">
-	  <font name="bluehigh" size="36" color="0xffffff"/>
+	  <font name="bluehigh" size="44" color="0xffffff"/>
 	  <shadow visible="yes" color="0x000000" x="1" y="1"/>
 
 	  <selection bgcolor="0xaa000000">
-	    <font name="bluehigh" size="36" color="0xffffff"/>
+	    <font name="bluehigh" size="44" color="0xffffff"/>
 	    <shadow visible="yes" color="0xaa000000" x="3" y="3"/>
 	  </selection>
 	</item>
