@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2004/10/06 19:13:41  dischi
+# use config auto detection for xine version
+#
 # Revision 1.21  2004/10/06 19:01:34  dischi
 # use new childapp interface
 #
@@ -61,7 +64,8 @@ class PluginInterface(plugin.Plugin):
             self.reason = "'fbxine' not found"
             return
 
-        if config.FBXINE_VERSION < '0.99.1':
+        if config.FBXINE_VERSION < '0.99.1' and \
+               config.FBXINE_VERSION < '0.9.23':
             self.reason = "'fbxine' version too old"
             return
             

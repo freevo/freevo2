@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/10/06 19:13:42  dischi
+# use config auto detection for xine version
+#
 # Revision 1.7  2004/10/06 19:01:33  dischi
 # use new childapp interface
 #
@@ -95,40 +98,27 @@ class PluginInterface(plugin.Plugin):
         ( 'kika.de', 'Kika', 'Doku/KiKa' ) ]
     """
     def __init__(self):
-        plugin.Plugin.__init__(self)
-
         try:
             config.XINE_COMMAND
         except:
-            print String(_( 'ERROR' )) + ': ' + \
-                  String(_("'XINE_COMMAND' not defined, plugin 'xine' deactivated.\n" \
-                           'please check the xine section in freevo_config.py' ))
+            self.reason = '\'XINE_COMMAND\' not defined'
             return
 
         if config.XINE_COMMAND.find('fbxine') >= 0:
             type = 'fb'
+            if config.FBXINE_VERSION < '0.99.1' and \
+                   config.FBXINE_VERSION < '0.9.23':
+                self.reason = "'fbxine' version too old"
+                return
         else:
             type = 'X'
+            if config.XINE_VERSION < '0.99.1' and \
+                   config.XINE_VERSION < '0.9.23':
+                self.reason = "'xine' version too old"
+                return
 
-        if not hasattr(config, 'XINE_VERSION'):
-            config.XINE_VERSION = 0
-            for data in util.popen3.stdout('%s --version' % config.XINE_COMMAND):
-                m = re.match('^.* v?([0-9])\.([0-9]+)\.([0-9]*).*', data)
-                if m:
-                    config.XINE_VERSION = int('%02d%02d%02d' % (int(m.group(1)),
-                                                                  int(m.group(2)),
-                                                                  int(m.group(3))))
-                    if data.find('cvs') >= 0:
-                        config.XINE_VERSION += 1
+        plugin.Plugin.__init__(self)
 
-            _debug_('detect xine version %s' % config.XINE_VERSION)
-            
-        if config.XINE_VERSION < 922:
-            print String(_( 'ERROR' )) + ': ' + \
-                  String(_( "'xine-ui' version too old, plugin 'xine' deactivated" ))
-            print String(_( 'You need software %s' )) % 'xine-ui > 0.9.21'
-            return
-            
         # register xine as the object to play
         plugin.register(Xine(type, config.XINE_VERSION), plugin.TV, True)
 
