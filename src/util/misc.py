@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2004/02/23 16:34:48  dischi
+# bugfix
+#
 # Revision 1.30  2004/02/22 05:27:01  gsbarbieri
 # comingup to support i18n and unicode.
 #
@@ -241,6 +244,9 @@ def getname(file, skip_ext=True):
     """
     make a nicer display name from file
     """
+    if len(file) < 2:
+        return Unicode(file)
+
     # basename without ext
     if file.rfind('/') < file.rfind('.') and skip_ext:
         name = file[file.rfind('/')+1:file.rfind('.')]
