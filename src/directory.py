@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.82  2004/01/01 19:48:42  dischi
+# fix dir playing
+#
 # Revision 1.81  2004/01/01 17:42:23  dischi
 # add FileInformation
 #
@@ -348,7 +351,7 @@ class DirItem(Playlist):
         has_dirs  = False
 
         for f in os.listdir(self.dir):
-            if not has_files and os.path.isfile(f):
+            if not has_files and os.path.isfile(os.path.join(self.dir,f)):
                 has_files = True
             if not has_dirs and os.path.isdir(f) and \
                    not f in ('CVS', '.xvpics', '.thumbnails', '.pics'):
@@ -358,7 +361,7 @@ class DirItem(Playlist):
 
         if has_files:
             items.append((self.play, _('Play all files in directory')))
-            
+
         if display_type in self.DIRECTORY_AUTOPLAY_ITEMS and not has_dirs:
             items.reverse()
 
