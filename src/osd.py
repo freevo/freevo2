@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.141  2004/02/18 21:55:44  dischi
+# Some osd updates for new gui code
+#
 # Revision 1.140  2004/02/14 13:05:03  dischi
 # do not call skin.get_singleton() anymore
 #
@@ -538,7 +541,11 @@ class OSD:
         self._screenshotnum = 1
         self.active = True
 
-        
+
+        # some functions from pygame
+        self.Surface = pygame.Surface
+        self.polygon = pygame.draw.polygon
+
     def focused_app(self):
         if len(self.app_list):
             return self.app_list[-1]
@@ -770,12 +777,12 @@ class OSD:
             else:
                 self.screen.blit(box, (x0, y0))
         else:
-            r = (x0, y0, x1-x0, y1-y0)
             c = self._sdlcol(color)
-            if layer:
-                pygame.draw.rect(layer, c, r, width)
-            else:
-                pygame.draw.rect(self.screen, c, r, width)
+            if not layer:
+                layer = self.screen
+            for i in range(0, width):
+                # looks strange, but sometimes thinkness doesn't work
+                pygame.draw.rect(layer, c, (x0+i, y0+i, x1-x0-2*i, y1-y0-2*i), 1)
 
 
     def getsurface(self, x, y, width, height):
