@@ -1,9 +1,14 @@
-Release 1.2.0:
---------------
+Release 1.2.0 (2002-05-12):
+---------------------------
 o Watching TV is enabled again, the Matrox G400 BES bug seems to be fixed.
 
 
-Release 1.1:
-------------
+Release 1.1 (2002-05-10):
+-------------------------
 o Moved mp3/movie suffix definitions to config.py
 o Watching TV is disabled at the moment, seems to be a bug in it.
+
+
+Release 1.0 (2002-05-08):
+-------------------------
+o Initial release
