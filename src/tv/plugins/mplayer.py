@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2004/10/06 19:01:33  dischi
+# use new childapp interface
+#
 # Revision 1.42  2004/08/05 17:27:16  dischi
 # Major (unfinished) tv update:
 # o the epg is now taken from pyepg in lib
@@ -108,8 +111,8 @@ class MPlayer(TVPlayer):
         outfmt = 'outfmt=%s' % config.TV_VIEW_OUTFMT
 
         # Build the MPlayer command
-        args = (config.MPLAYER_NICE, config.MPLAYER_CMD, config.MPLAYER_VO_DEV,
-                config.MPLAYER_VO_DEV_OPTS, config.MPLAYER_ARGS_DEF)
+        args = ( config.MPLAYER_CMD, config.MPLAYER_VO_DEV,
+                 config.MPLAYER_VO_DEV_OPTS, config.MPLAYER_ARGS_DEF )
 
         if mode == 'tv':
             if vg.group_type == 'ivtv':
@@ -134,7 +137,8 @@ class MPlayer(TVPlayer):
             elif vg.group_type == 'dvb':
                 self.fc.chanSet(tuner_channel, app='mplayer')
                 tvcmd = ''
-                args += ('"dvb://%s" %s' % (tuner_channel, config.MPLAYER_ARGS['dvb']),)
+                args += ( '"dvb://%s" %s' % ( tuner_channel,
+                                              config.MPLAYER_ARGS[ 'dvb' ] ) , )
 
             else:
                 freq_khz = self.fc.chanSet(tuner_channel, app='mplayer')
@@ -164,7 +168,7 @@ class MPlayer(TVPlayer):
 
         args += (tvcmd,)
 
-        mpl = '--prio=%s %s -vo %s%s -fs %s -slave %s %s' % args
+        mpl = '%s -vo %s%s -fs %s -slave %s %s' % args
 
         command = mpl
         self.mode = mode
@@ -184,7 +188,7 @@ class MPlayer(TVPlayer):
             mixer.setPcmVolume(0)
 
         # Start up the TV task
-        self.app = childapp.ChildApp2(command)
+        self.app = childapp.Instance( command, prio = config.MPLAYER_NICE )
         
         eventhandler.append(self)
 

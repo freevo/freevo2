@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2004/10/06 19:01:33  dischi
+# use new childapp interface
+#
 # Revision 1.41  2004/08/23 12:40:56  dischi
 # remove osd.py dep
 #
@@ -565,13 +568,13 @@ class TVTime:
             
 
 # ======================================================================
-class TVTimeApp(childapp.ChildApp2):
+class TVTimeApp( childapp.Instance ):
     """
     class controlling the in and output from the tvtime process
     """
 
     def __init__(self, (app)):
-        childapp.ChildApp2.__init__(self, app, stop_osd=1)
+        childapp.Instance.__init__(self, app, stop_osd=1)
 
     def stdout_cb(self, line):
         if not len(line) > 0: return

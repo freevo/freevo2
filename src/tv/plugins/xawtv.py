@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/10/06 19:01:33  dischi
+# use new childapp interface
+#
 # Revision 1.7  2004/07/26 18:10:19  dischi
 # move global event handling to eventhandler.py
 #
@@ -283,14 +286,14 @@ class Xawtv:
             
 
 # ======================================================================
-class XawtvApp(childapp.ChildApp2):
+class XawtvApp( childapp.Instance ):
     """
     class controlling the in and output from the xawtv process
     """
 
     def __init__(self, app, remote):
         self.remote = remote
-        childapp.ChildApp2.__init__(self, app, stop_osd=1)
+        childapp.Instance.__init__( self, app, stop_osd = 1 )
 
     def sendcmd(self, cmd):
         os.system('%s %s' % (self.remote, cmd))

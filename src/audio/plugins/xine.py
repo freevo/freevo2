@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/10/06 19:01:34  dischi
+# use new childapp interface
+#
 # Revision 1.20  2004/09/29 18:58:17  dischi
 # cleanup
 #
@@ -148,7 +151,9 @@ class Xine:
         return False
 
         
-class XineApp(childapp.ChildApp2):
+# ======================================================================
+
+class XineApp(childapp.Instance):
     """
     class controlling the in and output from the xine process
     """
@@ -157,7 +162,7 @@ class XineApp(childapp.ChildApp2):
         self.player      = player
         self.elapsed     = 0
         self.stop_reason = 0 # 0 = ok, 1 = error
-        childapp.ChildApp2.__init__(self, app, stop_osd=0)
+        childapp.Instance.__init__(self, app, stop_osd=0)
 
 
     def stop_event(self):

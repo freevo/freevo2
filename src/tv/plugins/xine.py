@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/10/06 19:01:33  dischi
+# use new childapp interface
+#
 # Revision 1.6  2004/09/15 20:45:13  dischi
 # fix to stop event
 #
@@ -60,7 +63,6 @@ import copy
 
 import config     # Configuration handler. reads config file.
 import childapp   # Handle child applications
-import rc         # The RemoteControl class.
 import util
 import plugin
 
@@ -141,8 +143,7 @@ class Xine(TVPlayer):
         self.xine_type = type
         self.version   = version
         self.app       = None
-        self.command = [ '--prio=%s' % config.MPLAYER_NICE ] + \
-                       config.XINE_COMMAND.split(' ') + \
+        self.command = config.XINE_COMMAND.split(' ') + \
                        [ '--stdctl', '-V', config.XINE_VO_DEV,
                          '-A', config.XINE_AO_DEV ] + \
                        config.XINE_ARGS_DEF.split(' ')
@@ -166,15 +167,20 @@ class Xine(TVPlayer):
 
         command = copy.copy(self.command)
 
-        if not rc.PYLIRC and '--no-lirc' in command:
-            command.remove('--no-lirc')
+        if config.XINE_COMMAND.startswith(config.CONF.xine) and \
+               config.XINE_USE_LIRC:
+            command.append('--no-lirc')
+
+        if config.XINE_COMMAND.startswith(config.CONF.fbxine) and \
+               config.FBXINE_USE_LIRC:
+            command.append('--no-lirc')
 
         command.append('dvb://' + freq)
             
         _debug_('Xine.play(): Starting cmd=%s' % command)
 
         self.show()
-        self.app = childapp.ChildApp2(command)
+        self.app = childapp.Instance( command, prio = config.MPLAYER_NICE )
     
 
     def stop(self, channel_change=0):

@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.54  2004/10/06 19:01:32  dischi
+# use new childapp interface
+#
 # Revision 1.53  2004/09/29 18:48:41  dischi
 # fix xine lirc handling
 #
@@ -64,10 +67,8 @@ import time, os, re
 import copy
 
 import config     # Configuration handler. reads config file.
-import childapp   # Handle child applications
-import rc         # The RemoteControl class.
 import util
-
+import childapp
 from application import Application
 
 from event import *
@@ -223,7 +224,7 @@ class Xine(Application):
         _debug_('Xine.play(): Starting cmd=%s' % command)
 
         self.show()
-        self.app = childapp.ChildApp2(command)
+        self.app = childapp.Instance( command )
         return None
     
 

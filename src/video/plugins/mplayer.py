@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.89  2004/10/06 19:01:32  dischi
+# use new childapp interface
+#
 # Revision 1.88  2004/09/14 20:05:44  dischi
 # bmovl updates, remove mplayer 0.90 support
 #
@@ -57,21 +60,24 @@
 #
 # ----------------------------------------------------------------------- */
 
-
+# python imports
 import os, re
 import popen2
+
+# external imports
+import notifier
 import mmpython
 from mevas.bmovl2 import MPlayerOverlay
 
+# freevo imports
 import config     # Configuration handler. reads config file.
 import util       # Various utilities
-import childapp   # Handle child applications
+import childapp
 import plugin
 import gui
 
 from application import Application
 from event import *
-import rc
 
 class PluginInterface(plugin.Plugin):
     """
@@ -106,6 +112,7 @@ class MPlayer(Application):
         self.seek       = 0
         self.app        = None
         self.plugins    = []
+        self._timer_id  = None
         self.hide_osd_cb = False
         self.use_bmovl  = True
 
@@ -352,8 +359,8 @@ class MPlayer(Application):
         if not self.osd_visible and self.app and self.app.area_handler:
             self.app.area_handler.hide()
             gui.get_display().update()
-        self.hide_osd_cb = False
-        
+        self._timer_id = None
+        return False
         
     def eventhandler(self, event, menuw=None):
         """
@@ -444,12 +451,13 @@ class MPlayer(Application):
                     return False
                 
             if self.use_bmovl and not self.osd_visible:
-                if self.hide_osd_cb:
-                    rc.unregister(self.hide_osd)
+                if self._timer_id != None:
+                    notifier.removeTimer( self._timer_id )
+                    self._timer_id = None
                 else:
                     self.app.area_handler.show()
-                rc.register(self.hide_osd, False, 200)
-                self.hide_osd_cb = True
+                cb = notifier.Callback( self.hide_osd )
+                self._timer_id = notifier.addTimer( 2000, cb )
                 
             self.app.write('seek %s\n' % event.arg)
             return True
@@ -560,7 +568,7 @@ class Progressbar(Area):
 
 # ======================================================================
 
-class MPlayerApp(childapp.ChildApp2):
+class MPlayerApp( childapp.Instance ):
     """
     class controlling the in and output from the mplayer process
     """
@@ -596,7 +604,7 @@ class MPlayerApp(childapp.ChildApp2):
         self.area_handler = None
         
         # init the child (== start the threads)
-        childapp.ChildApp2.__init__(self, app)
+        childapp.Instance.__init__( self, app )
 
                 
     def stop_event(self):
@@ -727,5 +735,5 @@ class MPlayerApp(childapp.ChildApp2):
             self.screen = None
             self.width  = 0
             self.height = 0
-        childapp.ChildApp2.stop(self, cmd)
+        childapp.Instance.stop( self, cmd )
         

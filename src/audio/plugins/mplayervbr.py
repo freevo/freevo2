@@ -18,6 +18,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/10/06 19:01:33  dischi
+# use new childapp interface
+#
 # Revision 1.4  2004/08/01 10:41:03  dischi
 # deactivate plugin
 #
@@ -69,7 +72,6 @@ import re
 import config     # Configuration handler. reads config file.
 import childapp   # Handle child applications
 
-import rc
 import plugin
 
 from event import *
@@ -142,9 +144,7 @@ class MPlayer:
             filename = item.url
             
         # Build the MPlayer command
-        mpl = '--prio=%s %s -slave %s' % (config.MPLAYER_NICE,
-                                          config.MPLAYER_CMD,
-                                          config.MPLAYER_ARGS_DEF)
+        mpl = '%s -slave %s' % ( config.MPLAYER_CMD, config.MPLAYER_ARGS_DEF )
 
         if not item.network_play:
             demux = ' %s ' % self.get_demuxer(filename)
@@ -167,8 +167,8 @@ class MPlayer:
         if hasattr(item, 'reconnect') and item.reconnect:
             extra_opts += ' -loop 0'
             
-        command = '%s -vo null -ao %s %s %s' % (mpl, config.MPLAYER_AO_DEV, demux,
-                                                extra_opts)
+        command = '%s -vo null -ao %s %s %s' % ( mpl, config.MPLAYER_AO_DEV,
+                                                 demux, extra_opts )
 
         if command.find('-playlist') > 0:
             command = command.replace('-playlist', '')
@@ -191,7 +191,7 @@ class MPlayer:
 
         _debug_('MPlayer.play(): Starting cmd=%s' % command)
             
-        self.app = MPlayerApp(command, self)
+        self.app = MPlayerApp( command, self )
         self.app.write('seek -1\n');
         return None
     
@@ -252,7 +252,7 @@ class MPlayer:
             
 # ======================================================================
 
-class MPlayerApp(childapp.ChildApp2):
+class MPlayerApp(childapp.Instance):
     """
     class controlling the in and output from the mplayer process
     """
@@ -272,7 +272,8 @@ class MPlayerApp(childapp.ChildApp2):
                 self.stdout_plugins.append(p)
             if hasattr(p, 'elapsed'):
                 self.elapsed_plugins.append(p)
-        childapp.ChildApp2.__init__(self, app, stop_osd=0)
+        childapp.Instance.__init__( self, app, stop_osd = 0,
+                                    prio = config.MPLAYER_NICE )
 
 
     def stop_event(self):
