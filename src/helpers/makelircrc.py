@@ -3,6 +3,7 @@
 import re
 import config
 import sys
+import os
 
 if len(sys.argv)>1 and sys.argv[1] == '--help':
     print 'script to write the freevo lircrc file'
@@ -49,8 +50,9 @@ for arg in sys.argv:
     if arg.find('=') > 0:
         alternatives[arg[:arg.find('=')]] = arg[arg.find('=')+1:]
         
-    
-x = open('/etc/lircd.conf')
+if os.path.exists('/etc/lircd.conf'): x = open('/etc/lircd.conf')
+elif os.path.exists('/etc/lirc/lircd.conf'): x = open ('/etc/lirc/lircd.conf')
+
 pos = 0
 for line in x.readlines():
     if line.find('begin codes') != -1:
