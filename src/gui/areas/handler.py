@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/09/07 18:47:10  dischi
+# each area has it's own layer (CanvasContainer) now
+#
 # Revision 1.11  2004/08/27 14:16:58  dischi
 # switch to new animation names
 #
@@ -19,39 +22,6 @@
 # Made the fxdsettings in gui the theme engine and made a better
 # integration for it. There is also an event now to let the plugins
 # know that the theme is changed.
-#
-# Revision 1.8  2004/08/23 20:37:02  dischi
-# cleanup fading code
-#
-# Revision 1.7  2004/08/23 15:52:58  dischi
-# fix area hide/show/fade code
-#
-# Revision 1.6  2004/08/23 15:16:02  dischi
-# removed some bad hack
-#
-# Revision 1.5  2004/08/23 15:12:24  dischi
-# wait for fade animation to finish
-#
-# Revision 1.4  2004/08/23 14:28:22  dischi
-# fix animation support when changing displays
-#
-# Revision 1.3  2004/08/23 12:35:42  dischi
-# make it possible to hide the Areahandler
-#
-# Revision 1.2  2004/08/22 20:06:18  dischi
-# Switch to mevas as backend for all drawing operations. The mevas
-# package can be found in lib/mevas. This is the first version using
-# mevas, there are some problems left, some popup boxes and the tv
-# listing isn't working yet.
-#
-# Revision 1.1  2004/08/14 15:07:34  dischi
-# New area handling to prepare the code for mevas
-# o each area deletes it's content and only updates what's needed
-# o work around for info and tvlisting still working like before
-# o AreaHandler is no singleton anymore, each type (menu, tv, player)
-#   has it's own instance
-# o clean up old, not needed functions/attributes
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -77,70 +47,13 @@
 
 import os
 import traceback
+import time
 import mevas
 
 import config
 import util
 import gui.animation as animation 
 
-class AreaScreen:
-    def __init__(self, display, imagelib):
-        self.layer = []
-        # add 3 layer for drawing (based on how ofter they change):
-        for i in range(3):
-            c = mevas.CanvasContainer()
-            c.sticky = True
-            self.layer.append(c)
-            display.add_child(c)
-        self.imagelib  = imagelib
-        self.display   = display
-        self.width     = display.width
-        self.height    = display.height
-
-        
-    def show(self):
-        """
-        show the layer on the display
-        """
-        for l in self.layer:
-            l.set_alpha(255)
-            l.show()
-
-
-    def hide(self):
-        """
-        hide all layers
-        """
-        for l in self.layer:
-            l.hide()
-
-
-    def destroy(self):
-        """
-        destroy all layer
-        """
-        for l in self.layer:
-            l.unparent()
-
-        
-    def fade_out(self, frames):
-        """
-        fade out layer and hide them
-        """
-        a = animation.FadeAnimation(self.layer, frames, 255, 0)
-        a.application = True
-        a.start()
-
-        
-    def fade_in(self, frames):
-        """
-        show layers again and fade them in
-        """
-        a = animation.FadeAnimation(self.layer, frames, 0, 255)
-        a.application = True
-        a.start()
-
-        
 class AreaHandler:
     """
     main skin class
@@ -157,9 +70,13 @@ class AreaHandler:
         self.visible       = False
 
         self.canvas = screen
-        self.screen = AreaScreen(screen, imagelib)
-        self.screen.hide()
         
+        self.layer = []
+
+        self.imagelib  = imagelib
+        self.width     = self.canvas.width
+        self.height    = self.canvas.height
+
         # load default areas
         from listing_area   import Listing_Area
         from tvlisting_area import TVListing_Area as Tvlisting_Area
@@ -174,8 +91,13 @@ class AreaHandler:
                 self.areas.append(a)
 
         for a in self.areas:
-            a.set_screen(self.screen)
-
+            a.set_screen(self)
+            c = a.layer
+            c.sticky = True
+            c.hide()
+            self.layer.append(c)
+            self.canvas.add_child(c)
+            
         self.storage_file = os.path.join(config.FREEVO_CACHEDIR, 'skin-%s' % os.getuid())
         self.storage = util.read_pickle(self.storage_file)
         if self.storage and self.storage.has_key(config.SKIN_XML_FILE):
@@ -192,7 +114,8 @@ class AreaHandler:
         while self.areas:
             self.areas[0].clear_all()
             del self.areas[0]
-        self.screen.destroy()
+        for l in self.layer:
+            l.unparent()
         self.container = None
 
         
@@ -333,9 +256,12 @@ class AreaHandler:
         """
         if self.visible:
             if fade:
-                self.screen.fade_out(fade)
+                a = animation.FadeAnimation(self.layer, fade, 255, 0)
+                a.application = True
+                a.start()
             else:
-                self.screen.hide()
+                for l in self.layer:
+                    l.hide()
         self.visible = False
         
 
@@ -345,11 +271,16 @@ class AreaHandler:
         """
         if not self.visible:
             if fade:
-                self.screen.fade_in(fade)
+                a = animation.FadeAnimation(self.layer, fade, 0, 255)
+                a.application = True
+                a.start()
             else:
-                self.screen.show()
+                for l in self.layer:
+                    l.set_alpha(255)
+                    l.show()
                 self.canvas.update()
         self.visible = True
+
 
     def draw(self, object):
         """
@@ -417,11 +348,15 @@ class AreaHandler:
                 viewitem = object
                 infoitem = object
 
+        t1 = time.time()
         try:
             for a in self.areas:
                 a.draw(theme, object, viewitem, infoitem, area_definitions)
+            t2 = time.time()
             if self.visible:
                 self.canvas.update()
+            t3 = time.time()
+            _debug_('time debug: %s %s' % (t2-t1, t3-t2), 2)
 
         except UnicodeError, e:
             print '******************************************************************'
@@ -433,8 +368,8 @@ class AreaHandler:
             print traceback.print_exc()
             print
             print self.type, object
-#             if hasattr(object, 'choices'):
-#                 for i in object.choices:
-#                     print i
+            if hasattr(object, 'choices'):
+                for i in object.choices:
+                    print i
             print
             raise UnicodeError, e

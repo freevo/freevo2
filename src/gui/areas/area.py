@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/09/07 18:47:10  dischi
+# each area has it's own layer (CanvasContainer) now
+#
 # Revision 1.13  2004/08/27 14:17:15  dischi
 # remove old plugin code
 #
@@ -110,6 +113,8 @@
 import copy
 import os
 
+import mevas
+
 import config
 import util
 
@@ -142,7 +147,15 @@ class Geometry:
         self.height = height
 
 
+class CanvasContainer(mevas.CanvasContainer):
+    def __init__(self, name):
+        self.name = name
+        mevas.CanvasContainer.__init__(self)
 
+    def __str__(self):
+        return 'AreaContainer %s' % self.name
+
+    
 class Area:
     """
     the base call for all areas. Each child needs two functions:
@@ -158,9 +171,10 @@ class Area:
         self.screen      = None
         self.imagelib    = None
         self.objects     = SkinObjects()
-
+        self.layer       = CanvasContainer(name)
+        if name == 'screen':
+            self.layer.set_zindex(-10)
         self.__background__ = []
-        
         self.imagecache = util.objectcache.ObjectCache(imagecachesize,
                                                        desc='%s_image' % self.name)
 
@@ -422,15 +436,15 @@ class Area:
             box = self.drawbox(x, y, width, height, (bgcolor, size, color, radius))
             self.__background__.append(box)
             box.info = rec
-
-                
+            box.set_zindex(-1)
+            
         for image in background_image:
             imagefile, x, y, width, height = image
             i = self.drawimage(imagefile, (x, y, width, height), background=True)
-            i.set_zindex(-10)
             if i:
                 self.__background__.append(i)
                 i.info = image
+                i.set_zindex(-1)
             
 
 
@@ -451,7 +465,7 @@ class Area:
         except AttributeError, e:
             r = Rectangle((x, y), (width, height), rect[0], rect[1], rect[2], rect[3])
 
-        self.screen.layer[1].add_child(r)
+        self.layer.add_child(r)
         return r
     
             
@@ -490,7 +504,7 @@ class Area:
             height = font.height
 
         t = Text(text, (x, y), (width, height), font, align_h, align_v, mode, ellipses, dim)
-        self.screen.layer[2].add_child(t)
+        self.layer.add_child(t)
         return t
 
     
@@ -557,10 +571,10 @@ class Area:
                 i.set_pos((x,y))
             else:
                 i = Image(image, (x, y), (w, h))
-            self.screen.layer[0].add_child(i)
+            self.layer.add_child(i)
         else:
             i = Image(image, (x, y), (w, h))
-            self.screen.layer[2].add_child(i)
+            self.layer.add_child(i)
         return i
 
 

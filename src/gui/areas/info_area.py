@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/09/07 18:47:10  dischi
+# each area has it's own layer (CanvasContainer) now
+#
 # Revision 1.5  2004/08/23 15:11:50  dischi
 # avoid redraw when not needed
 #
@@ -109,7 +112,7 @@ class Info_Area(Area):
         if self.canvas:
             self.canvas.unparent()
         self.canvas = t
-        self.screen.layer[2].add_child(t)
+        self.layer.add_child(t)
         self.last_item = self.infoitem
         self.last_content = self.content
 
