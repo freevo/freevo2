@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/07/18 16:40:02  rshortt
+# Added support for a custom frequency table, config.FREQUENCY_TABLE.  See
+# freevo_config.py or local_conf.py for details.
+#
 # Revision 1.3  2003/07/14 11:44:42  rshortt
 # Add some init and print methods to Videodev and IVTV.
 #
@@ -49,6 +53,9 @@ import struct
 import fcntl
 
 import config
+
+DEBUG = config.DEBUG
+
 
 _IOC_NRBITS = 8
 _IOC_TYPEBITS = 8
@@ -123,8 +130,16 @@ GET_AUDIO_NO = _IOWR ('V', 33, AUDIO_ST)
 SET_AUDIO_NO = _IOW  ('V', 34, AUDIO_ST)
 
 
+V4L2_TUNER_CAP_LOW    = 0x0001
+V4L2_TUNER_CAP_NORM   = 0x0002
+V4L2_TUNER_CAP_STEREO = 0x0010
+V4L2_TUNER_CAP_LANG2  = 0x0020
+V4L2_TUNER_CAP_SAP    = 0x0020
+V4L2_TUNER_CAP_LANG1  = 0x0040
+
+
 NORMS = { 'NTSC'  : 0,
-          'PAL  ' : 1,
+          'PAL' : 1,
           'SECAM' : 2  }
 
 
@@ -138,6 +153,13 @@ class Videodev:
         else:
             print "Video Opened at %s" % device
 
+        results           = self.querycap()
+        self.driver       = results[0]
+        self.card         = results[1]
+        self.bus_info     = results[2]
+        self.version      = results[3]
+        self.capabilities = results[4]
+    
 
     def close(self):
         os.close(self.device)
@@ -156,7 +178,26 @@ class Videodev:
 
 
     def setchannel(self, channel):
-        freq = (self.chanlist[channel]*16)/1000
+        freq = config.FREQUENCY_TABLE.get(channel)
+        if freq:
+            if DEBUG: 
+                print 'USING CUSTOM FREQUENCY: chan="%s", freq="%s"' % \
+                      (channel, freq)
+        else:
+            freq = self.chanlist[channel]
+            if DEBUG: 
+                print 'USING STANDARD FREQUENCY: chan="%s", freq="%s"' % \
+                      (channel, freq)
+
+        freq *= 16
+
+        # The folowing check for TUNER_LOW capabilities was not working for
+        # me... needs further investigation. 
+        # if not (self.capabilities & V4L2_TUNER_CAP_LOW):
+        #     # Tune in MHz.
+        #     freq /= 1000
+        freq /= 1000
+
         try:
             self.setfreq(freq)
         except:
@@ -259,9 +300,10 @@ class Videodev:
 
 
     def print_settings(self):
-        (driver,card,bus_info,version,capabilities) = self.querycap()
-        print "Driver: %s, Card: %s, Ver: %i, Cap: 0x%x" % \
-              (driver, card, version, capabilities)
+        print 'Driver: %s' % self.driver
+        print 'Card: %s' % self.card
+        print 'Version: %s' % self.version
+        print 'Capabilities: %s' % self.capabilities
 
         print "Enumerating supported Standards."
         try:
