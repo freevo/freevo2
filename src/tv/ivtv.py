@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/12/31 16:05:34  rshortt
+# No longer override setstd because the mspSetMatrix() call was only to work
+# around a (fixed) ivtv bug.  Also removed the setinput call because that is
+# now taken care of by the VideoGroup and channels.py.
+#
 # Revision 1.11  2003/11/30 16:30:58  rshortt
 # Convert some tv variables to new format (TV_).
 #
@@ -90,12 +95,6 @@ class IVTV(tv.v4l2.Videodev):
         r = fcntl.ioctl(self.device, IVTV_IOC_S_CODEC, val)
 
 
-    def setstd(self, value):
-        tv.v4l2.Videodev.setstd(self, value)
-        time.sleep(1)
-        self.mspSetMatrix()
-
-
     def getCodecInfo(self):
         val = struct.pack( CODEC_ST, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 )
         r = fcntl.ioctl(self.device, IVTV_IOC_G_CODEC, val)
@@ -116,8 +115,6 @@ class IVTV(tv.v4l2.Videodev):
             opts = config.TV_IVTV_OPTIONS
 
         tv.v4l2.Videodev.init_settings(self)
-
-        self.setinput(opts['input'])
 
         (width, height) = string.split(opts['resolution'], 'x')
         self.setfmt(int(width), int(height))
