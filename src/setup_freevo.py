@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/08/25 14:12:07  outlyer
+# Unify the app finder.
+#
 # Revision 1.7  2003/08/25 12:08:20  outlyer
 # Additional compatibility patches for FreeBSD from Lars Eggert
 #
@@ -60,36 +63,21 @@ import string
 
 CONFIG_VERSION = 2.1
 
-if os.uname()[0] == 'FreeBSD':
-    EXTERNAL_PROGRAMS = (("mplayer", "mplayer", 1),
-                         ("tvtime", "tvtime", 0),
-                         ("xine", "xine", 0),
-                         ("fbxine", "fbxine", 0),
-                         ("jpegtran", "jpegtran", 0),
-                         ("xmame", "xmame", 0),
-                         ("snes9x", "snes", 0),
-                         ("zsnes", "snes", 0 ),
-                         ("lame", "lame",0),
-                         ("cdparanoia","cdparanoia",0),
-                         ("oggenc","oggenc",0),
-                         ("renice","renice",0),
-                         ("setterm", "setterm", 0))
-
-else:
-    EXTERNAL_PROGRAMS = (("mplayer", "mplayer", 1),
-                         ("tvtime", "tvtime", 0),
-                         ("xine", "xine", 0),
-                         ("fbxine", "fbxine", 0),
-                         ("jpegtran", "jpegtran", 0),
-                         ("xmame.x11", "xmame", 0),
-                         ("xmame.SDL", "xmame", 0),
-                         ("ssnes9x", "snes", 0),
-                         ("zsnes", "snes", 0 ),
-                         ("lame", "lame",0),
-                         ("cdparanoia","cdparanoia",0),
-                         ("oggenc","oggenc",0),
-                         ("renice","renice",0),
-                         ("setterm", "setterm", 0))
+EXTERNAL_PROGRAMS = (("mplayer", "mplayer", 1),
+                     ("tvtime", "tvtime", 0),
+                     ("xine", "xine", 0),
+                     ("fbxine", "fbxine", 0),
+                     ("jpegtran", "jpegtran", 0),
+                     ("xmame.x11", "xmame", 0),
+                     ("xmame.SDL", "xmame", 0),
+                     ("xmame","xmame",0),
+                     ("ssnes9x", "snes", 0),
+                     ("zsnes", "snes", 0 ),
+                     ("lame", "lame",0),
+                     ("cdparanoia","cdparanoia",0),
+                     ("oggenc","oggenc",0),
+                     ("renice","renice",0),
+                     ("setterm", "setterm", 0))
 
 # Help text
 def print_usage():
