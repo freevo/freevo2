@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2002/09/22 09:54:31  dischi
+# XML cleanup. Please take a look at the new skin files to see the new
+# structure. The 640x480 skin is also workin now, only one small bug
+# in the submenu (seems there is something hardcoded).
+#
 # Revision 1.23  2002/09/21 10:08:53  dischi
 # Added the function PopupBox. This function is identical with
 # osd.popup_box, but drawing a popup box should be part of the skin.
@@ -177,15 +182,15 @@ class Skin:
         for item in menu.choices[menu.page_start : len(menu.choices)]:
             if item.type:
                 if item.type == 'dir':
-                    pref_item = val.item_dir
+                    pref_item = val.items.dir
                 elif item.type == 'list':
-                    pref_item = val.item_pl
+                    pref_item = val.items.pl
                 elif item.type == 'main':
                     pref_item = val.item_main
                 else:
-                    pref_item = val.items;
+                    pref_item = val.items.default;
             else:
-                pref_item = val.items;
+                pref_item = val.items.default;
 
             # Size of the non-selected item
             ns_str_w, ns_str_h = osd.stringsize('Ajg', font=pref_item.font,
@@ -259,6 +264,175 @@ class Skin:
         osd.drawstring(text, x, y, color, None, font, ptsize)
 
 
+
+    def DrawMenu_Cover(self, menuw, settings):
+        image_x = 0
+        val = settings
+        menu = menuw.menustack[-1]
+        
+        # display the image and store the x0 position of the image
+        for item in menuw.menu_items:
+            image = item.image
+            if image:
+                (type, image) = image
+            if image:
+                if type == 'photo' and val.cover_image.visible:
+                    image_x = val.cover_image.x
+                    if menu.selected == item:
+                        thumb = util.getExifThumbnail(image, val.cover_image.width, \
+                                                      val.cover_image.height)
+                        if thumb:
+                            osd.drawbitmap(thumb, val.cover_image.x, val.cover_image.y)
+                elif type == 'movie' and val.cover_movie.visible:
+                    image_x = val.cover_movie.x
+                    if menu.selected == item:
+                        osd.drawbitmap(util.resize(image, val.cover_movie.width, \
+                                                   val.cover_movie.height),\
+                                       val.cover_movie.x, val.cover_movie.y)
+
+                elif type == 'music' and val.cover_music.visible:
+                    image_x = val.cover_music.x
+                    if menu.selected == item:
+                        osd.drawbitmap(util.resize(image, val.cover_music.width, \
+                                                   val.cover_music.height),\
+                                       val.cover_music.x, val.cover_music.y)
+        return image_x
+
+
+    
+    def DrawMenu_Selection(self, menuw, settings, x0, y0, width, height):
+        val = settings
+        menu = menuw.menustack[-1]
+
+        if menu.packrows:
+            spacing = 0                 # calculate this later
+            icon_size = 28
+        else:
+            spacing = height / max(len(menuw.menu_items),1)
+            icon_size = 64
+
+
+        for choice in menuw.menu_items:
+            
+            if menu.selected == choice:
+                image = choice.image
+
+            # Pick the settings for this kind of item
+            valign = 0 # Vertical aligment to the icon
+            if choice.type:
+
+                if choice.type == 'dir':
+                    item = val.items.dir
+                elif choice.type == 'list':
+                    item = val.items.pl
+
+                # XXX BAD HACK (tm)
+                # overwrite settings for main
+                elif choice.type == 'main':
+                    item = val.item_main
+                    valign = 1
+                    x0 = val.item_main.x
+                    width = val.item_main.width
+                    
+                else:
+                    item = val.items.default
+            else:
+                item = val.items.default
+
+
+            # And then pick the selected or non-selected settings for
+            # that object
+            if menu.selected == choice:
+                obj = item.selection
+            else:
+                obj = item
+
+            text = choice.name
+            font_w, font_h = osd.stringsize(text, font=obj.font, ptsize=obj.size)
+
+            if not spacing:
+                spacing = font_h + PADDING
+            
+            # Draw the menu item text, shorten the text before to fit
+            # the selection length
+
+            if font_w + 26 > width:
+                text = text + "..."
+                    
+            while font_w + 26 > width:
+                text = text[0:-4] + "..."
+                font_w, font_h = osd.stringsize(text, font=obj.font, ptsize=obj.size)
+
+
+            # Try and center the text to the middle of the icon
+            if valign:
+                top = y0 + (icon_size - font_h) / 2
+            else:
+                top = y0
+
+            # Draw the selection bar for selected items
+            if menu.selected == choice and obj.visible:
+                osd.drawbox(x0 - 8, top - 2, x0 - 8 + width, top + font_h + 2,
+                            width = -1, color = ((160 << 24) | obj.bgcolor))
+
+            show_name = (None, None, None, None)
+            if config.TV_SHOW_REGEXP_MATCH(text):
+                show_name = config.TV_SHOW_REGEXP_SPLIT(os.path.basename(text))
+                if show_name[0][-1] == '(':
+                    show_name[0] = None
+
+            # TV show, align the text with all files from the same show
+            if show_name[0]:
+                x = x0
+                self.DrawText(show_name[0], x, top, obj.color, obj.shadow_color, None,
+                              obj.font, obj.size, obj.shadow_visible, obj.shadow_mode,
+                              obj.shadow_pad_x, obj.shadow_pad_y)
+
+                season_w = 0
+                volume_w = 0
+                
+                for i in menuw.menu_items:
+                    if config.TV_SHOW_REGEXP_MATCH(i.name):
+                        s = config.TV_SHOW_REGEXP_SPLIT(os.path.basename(i.name))
+                        if s[0] == show_name[0]:
+                            season_w = max(osd.stringsize(s[1], font=obj.font, \
+                                                          ptsize=obj.size)[0], season_w)
+                            volume_w = max(osd.stringsize(s[2], font=obj.font, \
+                                                          ptsize=obj.size)[0], volume_w)
+
+                x = x + \
+                    osd.stringsize('%s  ' % show_name[0], font=obj.font, \
+                                   ptsize=obj.size)[0] - season_w + \
+                    osd.stringsize(show_name[1], font=obj.font, ptsize=obj.size)[0]
+                
+                self.DrawText('%sx%s' % (show_name[1], show_name[2]), x, top,
+                              obj.color, obj.shadow_color, None, obj.font,
+                              obj.size, obj.shadow_visible, obj.shadow_mode,
+                              obj.shadow_pad_x, obj.shadow_pad_y)
+
+                x = x + season_w + volume_w + \
+                    osd.stringsize('x  ', font=obj.font, ptsize=obj.size)[0]
+
+                self.DrawText('-  %s' % show_name[3], x, top,
+                              obj.color, obj.shadow_color, None, obj.font, obj.size,
+                              obj.shadow_visible, obj.shadow_mode, obj.shadow_pad_x,
+                              obj.shadow_pad_y)
+                
+
+            # normal items
+            else:
+                self.DrawText(text, x0, top, obj.color, obj.shadow_color, None, obj.font,
+                              obj.size, obj.shadow_visible, obj.shadow_mode,
+                              obj.shadow_pad_x, obj.shadow_pad_y)
+
+            # draw icon
+            if choice.icon != None:
+                icon_x = item.x - icon_size - 15
+                osd.drawbitmap(util.resize(choice.icon, icon_size, icon_size), icon_x, y0)
+
+            y0 += spacing
+        
+
     # Called from the MenuWidget class to draw a menu page on the
     # screen
     def DrawMenu(self, menuw):
@@ -301,205 +475,26 @@ class Skin:
                 al = 'left'
                 tx = val.title.x
 
-            if DEBUG: print 'XXX x=%s, al=%s' % (val.title.x, al)
             osd.drawstring(menu.heading, tx, val.title.y, val.title.color,
                            font=val.title.font,
                            ptsize=val.title.size, align=al)
             
+
         # Draw the menu choices for the main selection
         y0 = val.items.y
-        selection_height = val.items.height
 
-        if menu.packrows:
-            spacing = 0                 # calculate this later
-            icon_size = 28
-        else:
-            spacing = selection_height / max(len(menuw.menu_items),1)
-            icon_size = 64
+        image_x = self.DrawMenu_Cover(menuw, val)
 
-        if DEBUG:
-            print 'DrawMenu() y0: %s, selh: %s, iconsize: %s' % (y0,
-                                                                 selection_height,
-                                                                 icon_size)
+        selection_length = val.items.width
 
-        image_x = 0
+        # if there is an image and the selection will be cover the image
+        # shorten the selection
 
-        # display the image and store the x0 position of the image
-        for item in menuw.menu_items:
-            image = item.image
-            if image:
-                (type, image) = image
-            if image:
-                if type == 'photo' and val.cover_image.visible:
-                    image_x = val.cover_image.x
-                    if menu.selected == item:
-                        thumb = util.getExifThumbnail(image, val.cover_image.width, \
-                                                      val.cover_image.height)
-                        if thumb:
-                            osd.drawbitmap(thumb, val.cover_image.x, val.cover_image.y)
-                elif type == 'movie' and val.cover_movie.visible:
-                    image_x = val.cover_movie.x
-                    if menu.selected == item:
-                        osd.drawbitmap(util.resize(image, val.cover_movie.width, \
-                                                   val.cover_movie.height),\
-                                       val.cover_movie.x, val.cover_movie.y)
+        if image_x and val.items.x - 8 + val.items.width > image_x - 30:
+            selection_length = image_x - 30 - val.items.x + 8
 
-                elif type == 'music' and val.cover_music.visible:
-                    image_x = val.cover_music.x
-                    if menu.selected == item:
-                        osd.drawbitmap(util.resize(image, val.cover_music.width, \
-                                                   val.cover_music.height),\
-                                       val.cover_music.x, val.cover_music.y)
-
-        
-        for choice in menuw.menu_items:
-
-            if menu.selected == choice:
-                image = choice.image
-
-            # Pick the settings for this kind of item
-            valign = 0 # Vertical aligment to the icon
-            if choice.type:
-
-                if choice.type == 'dir':
-                    item = val.item_dir
-                elif choice.type == 'list':
-                    item = val.item_pl
-                elif choice.type == 'main':
-                    item = val.item_main
-                    valign = 1 # Only for the main menu
-                else:
-                    item = val.items
-            else:
-                item = val.items
-
-            # And then pick the selected or non-selected settings for
-            # that object
-            if menu.selected == choice:
-                obj = item.selection
-            else:
-                obj = item
-
-            # Get the rendered string height. Not totally correct if
-            # shadows are used. 'Ajg' is just a way to get the full height.
-            str_w, str_h = osd.stringsize('Ajg', font=obj.font,
-                                          ptsize=obj.size)
-
-            # Try and center the text to the middle of the icon
-            if valign:
-                top = y0 + (icon_size - str_h) / 2
-            else:
-                top = y0
-
-            # if there is an image and the selection will be cover the image
-            # shorten the selection
-
-            selection_length = item.selection.length
-
-            if image_x and item.x - 8 + selection_length > image_x - 30:
-                selection_length = image_x - 30 - val.items.x + 8
-
-
-            # Draw the selection bar for selected items
-            if menu.selected == choice:
-                osd.drawbox(item.x - 8, top - 2,
-                            item.x - 8 + selection_length,
-                            top + str_h + 2,
-                            width = -1,
-                            color = ((160 << 24) |
-                                     obj.bgcolor))
-
-            # Draw the menu item text, shorten the text before to fit
-            # the selection length
-            text = choice.name
-
-            font_w, font_h = osd.stringsize(text, font=obj.font, ptsize=obj.size)
-            if not spacing:
-                spacing = font_h + PADDING
-            
-            if font_w + 26 > selection_length:
-                text = text + "..."
-                    
-            while font_w + 26 > selection_length:
-                text = text[0:-4] + "..."
-                font_w, font_h = osd.stringsize(text, font=obj.font, ptsize=obj.size)
-
-            show_name = (None, None, None, None)
-            if config.TV_SHOW_REGEXP_MATCH(text):
-                show_name = config.TV_SHOW_REGEXP_SPLIT(os.path.basename(text))
-                if show_name[0][-1] == '(':
-                    show_name[0] = None
-
-            # TV show, align the text with all files from the same show
-            if show_name[0]:
-                x = item.x
-                self.DrawText(show_name[0], x, top,
-                              obj.color, 
-                              obj.shadow_color, None,
-                              obj.font,
-                              obj.size,
-                              obj.shadow_visible,
-                              obj.shadow_mode,
-                              obj.shadow_pad_x,
-                              obj.shadow_pad_y)
-
-                season_w = 0
-                volume_w = 0
-                
-                for i in menuw.menu_items:
-                    if config.TV_SHOW_REGEXP_MATCH(i.name):
-                        s = config.TV_SHOW_REGEXP_SPLIT(os.path.basename(i.name))
-                        if s[0] == show_name[0]:
-                            season_w = max(osd.stringsize(s[1], font=obj.font, \
-                                                          ptsize=obj.size)[0], season_w)
-                            volume_w = max(osd.stringsize(s[2], font=obj.font, \
-                                                          ptsize=obj.size)[0], volume_w)
-
-                x = x + \
-                    osd.stringsize('%s  ' % show_name[0], font=obj.font, \
-                                   ptsize=obj.size)[0] - season_w + \
-                    osd.stringsize(show_name[1], font=obj.font, ptsize=obj.size)[0]
-                
-                self.DrawText('%sx%s' % (show_name[1], show_name[2]), x, top,
-                              obj.color, 
-                              obj.shadow_color, None,
-                              obj.font,
-                              obj.size,
-                              obj.shadow_visible,
-                              obj.shadow_mode,
-                              obj.shadow_pad_x,
-                              obj.shadow_pad_y)
-
-                x = x + season_w + volume_w + \
-                    osd.stringsize('x  ', font=obj.font, ptsize=obj.size)[0]
-
-                self.DrawText('-  %s' % show_name[3], x, top,
-                              obj.color, 
-                              obj.shadow_color, None,
-                              obj.font,
-                              obj.size,
-                              obj.shadow_visible,
-                              obj.shadow_mode,
-                              obj.shadow_pad_x,
-                              obj.shadow_pad_y)
-                
-            else:
-                self.DrawText(text, item.x, top,
-                              obj.color, 
-                              obj.shadow_color, None,
-                              obj.font,
-                              obj.size,
-                              obj.shadow_visible,
-                              obj.shadow_mode,
-                              obj.shadow_pad_x,
-                              obj.shadow_pad_y)
-
-            if choice.icon != None:
-                icon_x = item.x - icon_size - 15
-                osd.drawbitmap(util.resize(choice.icon,
-                                           icon_size, icon_size), icon_x, y0)
-
-            y0 += spacing
+        self.DrawMenu_Selection(menuw, val, val.items.x, val.items.y, selection_length, \
+                                val.items.height)
 
 
         # Draw the menu choices for the meta selection
@@ -577,17 +572,20 @@ class Skin:
 
         x0 = val.items.x
         y0 = val.items.y
-        selection_height = val.items.height
+        height = val.items.height
+
+        fontsize = val.items.default.size
 
         if menu.packrows:
-            spacing = selection_height / self.ItemsPerPage(menu)
+            w, h = osd.stringsize('Ajg', font=val.items.default.font,
+                                  ptsize=fontsize)
+            spacing = h + PADDING
         else:
-            spacing = selection_height / max(len(menuw.menu_items),1)
+            spacing = height / max(len(menuw.menu_items),1)
 
         # image to display
         image = None
         
-        fontsize = val.items.size
         
         # Handle multiple columns in the menu widget.
         # Only the first column is highlighted, and all columns have
@@ -602,7 +600,7 @@ class Skin:
         # Determine the width of the widest column string
         maxwidth = 0
         for row in rows:
-            w, h = osd.stringsize(row[0], font=val.items.font,
+            w, h = osd.stringsize(row[0], font=val.items.default.font,
                                   ptsize=fontsize)
             maxwidth = max(maxwidth, w)
             
@@ -615,15 +613,15 @@ class Skin:
                                icon_x, y0)
 
             # Draw the selection
-            osd.drawstring(rows[row][0], x0, y0, val.items.color,
-                           font=val.items.font,
+            osd.drawstring(rows[row][0], x0, y0, val.items.default.color,
+                           font=val.items.default.font,
                            ptsize=fontsize)
             
             if menu.selected == choice:
                 osd.drawbox(x0 - 3, y0 - 3,
                             x0 + maxwidth + 3,
                             y0 + fontsize*1.5 + 1, width=-1,
-                            color=((160 << 24) | val.items.selection.bgcolor))
+                            color=((160 << 24) | val.items.default.selection.bgcolor))
 
                 image = choice.image
 
@@ -642,15 +640,15 @@ class Skin:
             for row in rows:
                 if col >= len(row): continue # Not all rows are same length
                 
-                w, h = osd.stringsize(row[col], font=val.items.font,
+                w, h = osd.stringsize(row[col], font=val.items.default.font,
                                       ptsize=fontsize)
                 maxwidth = max(maxwidth, w)
 
             # Draw the column strings for all rows
             for row in rows:
                 if col < len(row): 
-                    osd.drawstring(row[col], x0, y0, val.items.color,
-                                   font=val.items.font,
+                    osd.drawstring(row[col], x0, y0, val.items.default.color,
+                                   font=val.items.default.font,
                                    ptsize=fontsize)
                 y0 += spacing
 

@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2002/09/22 09:54:31  dischi
+# XML cleanup. Please take a look at the new skin files to see the new
+# structure. The 640x480 skin is also workin now, only one small bug
+# in the submenu (seems there is something hardcoded).
+#
 # Revision 1.5  2002/09/15 12:32:01  dischi
 # The DVD/VCD/SCVD/CD description file for the automounter can now also
 # contain skin informations. An announcement will follow. For this the
@@ -101,17 +106,21 @@ class XML_data:
     border_color = 0
     border_size = 0
 
+
 class XML_menuitem(XML_data):
     selection = XML_data()
 
+class XML_menuitems:
+    x = y = height = width = 0
+    default = XML_menuitem()
+    dir = XML_menuitem()
+    pl = XML_menuitem()
     
     
 class XML_menu:
     bgbitmap = ''
     title = XML_data()
-    items = XML_menuitem()
-    item_dir = XML_menuitem()
-    item_pl = XML_menuitem()
+    items = XML_menuitems()
     item_main = XML_menuitem()    
     cover_movie = XML_data()
     cover_music = XML_data()
@@ -221,8 +230,39 @@ class XMLSkin:
                 data.shadow_pad_x = self.attr_int(subnode, "x", data.shadow_pad_x)
                 data.shadow_pad_y = self.attr_int(subnode, "y", data.shadow_pad_y)
                 
-                
 
+    #
+    # parse <items>
+    #
+    def parseItems(self, node, data, copy_content):
+        data.x = self.attr_int(node, "x", data.x)
+        data.y = self.attr_int(node, "y", data.y)
+        data.height = self.attr_int(node, "height", data.height)
+        data.width  = self.attr_int(node, "width", data.width)
+
+        for subnode in node.children:
+            if subnode.name == u'item':
+                type = self.attr_str(subnode, "type", "all")
+
+                if type == "all":
+                    # default content, override all settings for pl and dir:
+                    if copy_content:
+                        self.menu.items = copy.copy(self.menu.items)
+                        self.menu.items = copy.copy(self.menu.item_dir)
+                        self.menu.items = copy.copy(self.menu.item_pl)
+
+                    self.parse_node(subnode, self.menu.items.default)
+                    self.parse_node(subnode, self.menu.items.dir)
+                    self.parse_node(subnode, self.menu.items.pl)
+
+                elif type == 'dir':
+                    if copy_content: self.menu.item_dir = copy.copy(self.menu.item_dir)
+                    self.parse_node(subnode, self.menu.items.dir)
+
+                elif type == 'playlist':
+                    if copy_content: self.menu.item_pl = copy.copy(self.menu.item_pl)
+                    self.parse_node(subnode, self.menu.items.pl)
+        
     #
     # read the skin informations for menu
     #
@@ -238,20 +278,8 @@ class XMLSkin:
 
             elif node.name == u'items':
                 if copy_content: self.menu.items = copy.copy(self.menu.items)
-                self.parse_node(node, self.menu.items)
-
-            elif node.name == u'item_dir':
-                if copy_content: self.menu.item_dir = copy.copy(self.menu.item_dir)
-                self.parse_node(node, self.menu.item_dir)
-
-            elif node.name == u'item_pl':
-                if copy_content: self.menu.item_pl = copy.copy(self.menu.item_pl)
-                self.parse_node(node, self.menu.item_pl)
-
-            elif node.name == u'item_main':
-                if copy_content: self.menu.item_main = copy.copy(self.menu.item_main)
-                self.parse_node(node, self.menu.item_main)
-
+                self.parseItems(node, self.menu.items, copy_content)
+                
             elif node.name == u'cover':
                 for subnode in node.children:
                     if subnode.name == u'movie':
@@ -331,7 +359,7 @@ class XMLSkin:
     # read the main menu
     #
     def read_mainmenu(self, file, menu_node, copy_content):
-        if copy_content: self.mainmenu = copy.copy(self.mainmenu)
+        self.parse_node(menu_node, self.menu.item_main)
         for node in menu_node.children:
             if node.name == u'item':
                 item = XML_mainmenuitem()

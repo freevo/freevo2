@@ -3,12 +3,28 @@
 
    <skin>
 
-    <main>        
-      <item pos="0" name="TV"       action="tv.main_menu"  arg="" visible="yes" icon="icons/tv.png"   />
-      <item pos="1" name="Movies"   action="movie.main_menu" arg="" visible="yes" icon="icons/movies.png"  />
-      <item pos="2" name="Music"    action="music.main_menu" arg="" visible="yes" icon="icons/mp3.png"  />
-      <item pos="3" name="Images"   action="imenu.main_menu" arg="" visible="yes" icon="icons/images.png"  />
-      <item pos="4" name="Shutdown" action="shutdown" arg="" visible="yes" icon="icons/shutdown2.png"  />
+    <!-- Settings for the main menu (will change soon) -->
+    <main x="260" width="320">        
+      <font name="neuropol" size="32" color="0x38474c"/>
+      <shadow visible="yes" mode="solid" color="0x000000" x="1" y="1"/>
+
+      <selection color="0xffffff" bgcolor="0x38474c">
+	<font name="neuropol" size="32" color="0xffffff"/>
+	<shadow visible="yes" mode="solid" color="0x000000" x="3" y="3"/>
+      </selection>
+
+      <item pos="0" name="TV"       action="tv.main_menu"  arg="" 
+	visible="yes" icon="icons/tv.png"   />
+      <item pos="1" name="Movies"   action="movie.main_menu" arg="" 
+	visible="yes" icon="icons/movies.png"  />
+      <item pos="2" name="Music"    action="music.main_menu" arg="" 
+	visible="yes" icon="icons/mp3.png"  />
+      <item pos="3" name="Images"   action="imenu.main_menu" arg="" 
+	visible="yes" icon="icons/images.png"  />
+      <item pos="4" name="Video Games" action="videogame.main_menu" arg="" 
+	visible="no" icon="icons/mame.png"  />
+      <item pos="5" name="Shutdown" action="shutdown" arg="" 
+	visible="yes" icon="icons/shutdown2.png"  />
     </main>
     
     <!-- Settings for a normal menu -->
@@ -20,40 +36,31 @@
 	<font name="oliversb" size="38" color="0x000000"/>
       </title>
 
-      <item_main x="260">
-        <font name="neuropol" size="32" color="0x38474c"/>
-        <selection length="300" color="0xffffff" bgcolor="0x38474c">
-          <font name="neuropol" size="32" color="0xffffff"/>
-          <shadow visible="yes" mode="solid" color="0x000000" x="3" y="3"/> <!-- mode= solid | translucent -->
-        </selection>
-        <shadow visible="yes" mode="solid" color="0x000000" x="1" y="1"/> <!-- mode= solid | translucent -->
-      </item_main>
+      <items x="60" y="110" height="390" width="653">
+	<item type="all">
+	  <font name="bluehigh" size="18" color="0x000000"/>
+	  <shadow visible="no" mode="solid" color="0x000000" x="1" y="1"/>
 
-      <item_dir x="60" >
-        <font name="bluehigh" size="18" color="0x38474c"/>
-        <selection length="653" bgcolor="0x38474c">
-           <font name="bluehigh" size="18" color="0xffffff"/>
-           <shadow visible="yes" mode="solid" color="0x000000" x="1" y="1"/> <!-- mode= solid | translucent -->
-        </selection>
-        <shadow visible="yes" mode="solid" color="0x000000" x="1" y="1"/> <!-- mode= solid | translucent -->
-      </item_dir>
+	  <selection visible="yes" color="0xffffff" bgcolor="0x000000">
+	    <font name="bluehigh" size="18" color="0xffffff"/>
+	    <shadow visible="yes" mode="solid" color="0x000000" x="1" y="1"/>
+	  </selection>
+	</item>
 
-      <item_pl x="60" >
-         <font name="bluehigh" size="18" color="0x58677c"/>
- 	 <selection length="653" color="0xffffff" bgcolor="0x38474c">
-            <font name="bluehigh" size="18" color="0xffffff"/>
-            <shadow visible="yes" mode="solid" color="0x000000" x="1" y="1"/> <!-- mode= solid | translucent -->
-         </selection>
-         <shadow visible="yes" mode="solid" color="0x000000" x="1" y="1"/> <!-- mode= solid | translucent -->
-      </item_pl>
+	<item type="dir">
+	  <font color="0x38474c"/>
+	  <selection bgcolor="0x38474c"/>
+	  <shadow visible="yes" mode="solid" color="0x000000" x="1" y="1"/>
+	</item>
 
-      <items x="60" y="110" height="390">
-	<font name="bluehigh" size="18" color="0x000000"/>
-	<selection length="653" color="0xffffff" bgcolor="0x000000">
-     	   <font name="bluehigh" size="18" color="0xffffff"/>
-           <shadow visible="yes" mode="solid" color="0x000000" x="1" y="1"/> <!-- mode= solid | translucent -->
-        </selection>
-        <shadow visible="no" mode="solid" color="0x000000" x="1" y="1"/> <!-- mode= solid | translucent -->
+	<item type="playlist">
+	  <font color="0x58677c"/>
+	  <selection bgcolor="0x38474c">
+            <font color="0xffffff"/>
+            <shadow color="0x000000"/>
+	  </selection>
+	  <shadow visible="yes"/>
+	</item>
       </items>
 
       <cover>
@@ -66,7 +73,7 @@
 	<font name="interpla" size="20" color="0x000000"/>
 	<selection length="154" bgcolor="0x08171c" color="0xffffff">
            <font name="interpla" size="20" color="0xffffff"/>
-           <shadow visible="yes" mode="solid" color="0x000000" x="2" y="2"/> <!-- mode= solid | translucent -->
+           <shadow visible="yes" mode="solid" color="0x000000" x="2" y="2"/>
         </selection>
       </submenu>
 
@@ -79,11 +86,11 @@
       </title>
       <bgbitmap>../../images/aubin_bg1_800x600.png</bgbitmap>
       <font name="neuropol" size="18" color="0x58677c"/>
-      <shadow visible="yes" mode="solid" color="0x000000" x="1" y="1"/> <!-- mode= solid | translucent -->
+      <shadow visible="yes" mode="solid" color="0x000000" x="1" y="1"/>
       <progressbar visible="yes" x="0" y="515" width="799" height="5"      
-      color="0x58677c" bgcolor="0xffffff" 
-      border_color="0x000000" border_size="1"/>
+	color="0x58677c" bgcolor="0xffffff" 
+	border_color="0x000000" border_size="1"/>
     </mp3>
   </skin>
-
+  
 </freevo>
