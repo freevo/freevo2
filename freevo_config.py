@@ -145,8 +145,7 @@ CD_MOUNT_POINT = '/mnt/cdrom'
 # Physical ROM drives, multiple ones can be specified
 # by adding comma-seperated and quoted entries.
 
-CD_DRIVES = ('/mnt/cdrom')
-DVD_DRIVES = ('/mnt/dvdrom')
+ROM_DRIVES = ('/mnt/cdrom')
 
 #
 # The list of filename suffixes that are used to match the files that
