@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/01/29 05:35:45  krister
+# Updated MPlayer
+#
 # Revision 1.2  2003/01/28 03:45:35  krister
 # Work in progress...
 #
@@ -40,7 +43,7 @@
 #endif
 
 
-TARGETS = mplayer_fonts
+TARGETS = mplayer_fonts mplayer
 
 # Build all libs and apps
 all: Archive $(TARGETS)
@@ -241,23 +244,22 @@ libgphoto2_build:
 # mplayer/mencoder
 #
 ################################################################################
-MPLAYER_DATE = "2003-01-24 21:30 CST"
-FFMPEG_DATE = "2003-01-24 21:30 CST"
+MPLAYER_DATE = "2003-01-27 22:45 CST"
+FFMPEG_DATE = "2003-01-27 22:45 CST"
 MPLAYER_CVS = cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer co -D $(MPLAYER_DATE) main
 FFMPEG_CVS = cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg co -D $(FFMPEG_DATE) ffmpeg
 MPLAYER_CONF = 	--enable-tv-v4l --enable-mga --enable-xmga \
 		--enable-runtime-cpudetection --enable-largefiles --disable-lirc \
 		--disable-svga --disable-arts --disable-directfb --disable-xvid \
 		--disable-divx4linux --disable-gif --disable-gl \
-		--datadir=./runtime/apps/mplayer --confdir=./runtime/apps/mplayer \
-		--disable-mpdvdkit --disable-css
+		--datadir=./runtime/apps/mplayer --confdir=./runtime/apps/mplayer
 
-mplayer: Archive/mplayer-CVS200301242130.tgz
+mplayer: Archive/mplayer-CVS200301272245.tgz
 	@echo Building mplayer/mencoder
-	tar xvzf Archive/mplayer-CVS200301242130.tgz
+	tar xvzf $<
 	(cd mplayer ; ./configure $(MPLAYER_CONF) ; make)
 
-Archive/mplayer-CVS200301242130.tgz:
+Archive/mplayer-CVS200301272245.tgz:
 	(export CVS_PASSFILE cvspass ; $(MPLAYER_CVS) ; \
 	$(FFMPEG_CVS) ; mv ffmpeg/libavcodec main ; \
 	rm -rf ffmpeg ; mv main mplayer ; tar cvzf $@ mplayer ; rm -rf mplayer)
