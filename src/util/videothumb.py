@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/02/09 20:04:33  dischi
+# better error handling
+#
 # Revision 1.8  2004/02/08 12:16:27  dischi
 # chdir to tmp to call mplayer
 #
@@ -96,7 +99,8 @@ def snapshot(videofile, imagefile=None, pos=None, update=True, popup=None):
     out = popen3.stdout([os.environ['FREEVO_SCRIPT'], 'execute',
                          os.path.abspath(__file__) ] + args)
     if out:
-        print out
+        for line in out:
+            print line
     if vfs.isfile(imagefile):
         try:
             image = Image.open(imagefile)
@@ -119,9 +123,11 @@ def snapshot(videofile, imagefile=None, pos=None, update=True, popup=None):
                 util.save_pickle(data, imagefile)
             else:
                 image.save(imagefile)
-        except (OSError, IOError):
-            pass
-
+        except (OSError, IOError), e:
+            print e
+    else:
+        print 'no imagefile found'
+        
     if popup:
         pop.destroy()
         
@@ -131,7 +137,9 @@ def snapshot(videofile, imagefile=None, pos=None, update=True, popup=None):
 #
 
 if __name__ == "__main__":
+    import config
     import popen2
+    import vfs
     
     mplayer   = os.path.abspath(sys.argv[1])
     filename  = os.path.abspath(sys.argv[2])
@@ -164,7 +172,6 @@ if __name__ == "__main__":
     child.fromchild.close()
     child.childerr.close()
     child.tochild.close()
-
     # store the correct thumbnail
     captures = glob.glob('000000??.png')
     if captures:
