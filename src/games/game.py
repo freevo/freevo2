@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/07/02 15:39:49  outlyer
+# Fix from Simon Windmill <siw@coolpowers.com> for a NameError
+#
 # Revision 1.7  2003/05/27 17:53:34  dischi
 # Added new event handler module
 #
@@ -201,15 +204,15 @@ class Game_Thread(threading.Thread):
         print "In cmd going to do: " + command
         str = ''
         if command == 'config':
-            str = mameKey('CONFIGMENU')
+            str = gameKey('CONFIGMENU')
         elif command == 'pause':
-            str = mameKey('PAUSE')
+            str = gameKey('PAUSE')
         elif command == 'reset':
-            str = mameKey('RESET')
+            str = gameKey('RESET')
         elif command == 'exit':
-            str = mameKey('EXIT')
+            str = gameKey('EXIT')
         elif command == 'snapshot':
-            str = mameKey('SNAPSHOT')
+            str = gameKey('SNAPSHOT')
 
         self.app.write(str) 
 
