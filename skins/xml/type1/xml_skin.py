@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/02/17 19:41:44  dischi
+# make it possible to have special 'video', 'audio' ... sections in the
+# xml file.
+#
 # Revision 1.23  2003/02/17 05:32:11  gsbarbieri
 # Now supports the <preview width='<int>' height='<int>'/> into the <extendedmenu><listing><table><content>
 #
@@ -660,8 +664,11 @@ class XML_extendedmenu:
 #
 class XMLSkin:
     def __init__(self):
-        self.menu_default = XML_menu()
-        self.menu_main    = XML_menu()
+        self.menu_types = ( 'default', 'main', 'video', 'audio', 'image' )
+        self.menu = {}
+        for t in self.menu_types:
+            self.menu[t] = XML_menu()
+
         self.mp3          = XML_mp3()
         self.popup        = XML_popup()
 
@@ -675,13 +682,13 @@ class XMLSkin:
                 type = attr_str(node, "type", "all")
                 if type == "all":
                     if copy_content:
-                        self.menu_default = copy.deepcopy(self.menu_default)
-                        self.menu_main = copy.deepcopy(self.menu_main)
-                    self.menu_default.parse(node, scale, c_dir)
-                    self.menu_main.parse(node, scale, c_dir)
+                        for t in self.menu_types:
+                            self.menu[t] = copy.deepcopy(self.menu[t])
+                    for t in self.menu_types:
+                        self.menu[t].parse(node, scale, c_dir)
 
-                if type == "main":
-                    self.menu_main.parse(node, scale, c_dir)
+                if type in self.menu:
+                    self.menu[type].parse(node, scale, c_dir)
 
             if node.name == u'mp3':
                 if copy_content:
