@@ -218,6 +218,11 @@ class PluginInterface(Plugin):
                 if rec.url.endswith('.suffix'):
                     rec.url = os.path.splitext(rec.url)[0] + self.suffix
                 rec.url = 'file:' + rec.url
+        if rec.url.startswith('file:'):
+            # check if target dir exists
+            d = os.path.dirname(rec.url[5:])
+            if not os.path.isdir(d):
+                os.makedirs(d)
         # get the cmd for the childapp
         cmd = self.get_cmd(rec)
         self.item = rec

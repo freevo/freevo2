@@ -1,8 +1,51 @@
+# -*- coding: iso-8859-1 -*-
+# -----------------------------------------------------------------------------
+# conflict.py - resolve conflicts for the recordserver
+# -----------------------------------------------------------------------------
+# $Id$
+#
+#
+# -----------------------------------------------------------------------------
+# Freevo - A Home Theater PC framework
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# -----------------------------------------------------------------------------
+
+
 __all__ = [ 'resolve' ]
 
-import recorder
+# python imports
+import logging
+
+# notifier
 import notifier
 
+# record imports
+import recorder
+
+# get logging object
+log = logging.getLogger('conflict')
+
+# global variable to keep the notifier alive
 call_notifier = 0
 
 class Device:
@@ -116,11 +159,9 @@ def rate(devices, best_rating):
         best_rating = rating
 
         for d in devices[:-1]:
-            # print d.id
             for r in d.rec:
                 r.status   = 'scheduled'
                 r.recorder = d.plugin, d.id
-                # print ' ', r
         for r in devices[-1].rec:
             r.status   = 'conflict'
             r.recorder = None, None
@@ -166,12 +207,13 @@ def resolve(recordings):
         devices.sort(lambda l, o: cmp(o.rating,l.rating))
 
         for c in conflicts:
-            print 'found conflict:'
+            info = 'found conflict:\n'
             for r in c:
-                print ' ', str(r)[:str(r).rfind(' ')]
+                info += '%s\n' % str(r)[:str(r).rfind(' ')]
             check(devices, [], c, 0)
-            print 'solved by setting'
+            log.info(info)
+            info ='solved by setting:\n'
             for r in c:
-                print ' ', r
-            print
+                info += '%s\n' % str(r)
+            log.info(info)
     return True

@@ -205,6 +205,8 @@ class RecordServer(RPCServer):
                     # also prevents from added a deleted favorite as active
                     # again.
                     continue
+                r.episode  = episode
+                r.subtitle = subtitle
                 log.info('added %s: %s (%s)' % (String(channel),
                                                 String(title), start))
                 f.add_data(r)

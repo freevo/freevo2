@@ -30,11 +30,19 @@
 #
 # -----------------------------------------------------------------------------
 
+
+# python imports
 import re
 import time
+import logging
 
+# freevo imports
 import config
 import util.fxdparser as fxdparser
+
+# get logging object
+log = logging.getLogger('record')
+
 
 # internal regexp for time format
 _time_re = re.compile('([0-9]*):([0-9]*)-([0-9]*):([0-9]*)')
@@ -140,13 +148,14 @@ class Favorite:
                     'month'    : month,
                     'day'      : day,
                     'time'     : hour_min,
+                    'episode'  : rec.episode,
                     'subtitle' : rec.subtitle }
         for pattern in re.findall('%\([a-z]*\)', text):
             if not pattern[2:-1] in options:
                 options[pattern[2:-1]] = pattern
         text = re.sub('%\([a-z]*\)', lambda x: x.group(0)+'s', text)
         text = text % options
-        return text.rstrip(' -_:')
+        return text.rstrip(u' -_:')
 
 
     def add_data(self, rec):
@@ -160,16 +169,16 @@ class Favorite:
         if self.url:
             # add url template to recording
             try:
-                rec.url = self.__fill_template(rec, self.url) + '.suffix'
+                rec.url = String(self.__fill_template(rec, self.url) + '.suffix')
             except Exception, e:
-                print 'Error setting recording url:', e
+                log.exception('Error setting recording url')
                 rec.url = ''
         if self.fxdname:
             # add fxd name template to recording
             try:
                 rec.fxdname = self.__fill_template(rec, self.fxdname)
             except Exception, e:
-                print 'Error setting recording fxd name:', e
+                log.exception('Error setting recording fxd name:')
                 rec.fxdname = ''
         return True
 

@@ -30,27 +30,29 @@
 #
 # -----------------------------------------------------------------------------
 
+
+# python imports
 import time
 import copy
 import re
 
+# freevo imports
 import config
 import util.fxdparser as fxdparser
 
-_time_format = '%Y%m%d.%H:%M'
 
 def _int2time(i):
     """
     Helper function to create a time string from an int.
     """
-    return time.strftime(_time_format, time.localtime(i))
+    return time.strftime('%Y%m%d.%H:%M', time.localtime(i))
 
 
 def _time2int(s):
     """
     Helper function to create an int from a string created by _int2time
     """
-    return int(time.mktime(time.strptime(s, _time_format)))
+    return int(time.mktime(time.strptime(s, '%Y%m%d.%H:%M')))
 
 
 class Recording:
@@ -70,6 +72,7 @@ class Recording:
         self.info     = {}
 
         self.subtitle = ''
+        self.episode  = ''
         self.url      = ''
         self.fxdname  = ''
         self.start_padding = config.TV_RECORD_PADDING
