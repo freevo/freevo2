@@ -194,36 +194,32 @@ class Guide:
                         description='', episode=''):
         now = time.time()
         title = self.__escape_value(title)
-        subtitle = self.__escape_value(subtitle)
-        description = self.__escape_value(description)
-        episode = self.__escape_value(episode)
+        subtitle = self.__escape_value(subtitle).strip(' \t-_')
+        description = self.__escape_value(description).strip(' \t-_')
+        episode = self.__escape_value(episode).strip(' \t-_')
 
         old_prog = None
 
         del_list = []
 
         query = 'select * from programs where channel_id="%s" ' % channel_id +\
-                'and start=%s' % start
+                'and start>%s and start<%s' % (start, stop)
         rows = self.sql_execute(query)
-        if len(rows) > 1:
-            # With the current schema this should NOT be possible.  If we stay
-            # with it this may be removed.
-            #
-            # Bad. We should only have one program for each chanid:start
-            # Lets end this right here.
+        if len(rows) and (len(rows) > 1 or rows[0]['start'] != start or \
+                          rows[0]['stop'] != stop):
+            log.info('changed program time table:')
+            # The time table changed. Old programs overlapp new once
+            # Better remove everything here
             for row in rows:
+                log.info('delete %s:' % row['title'])
                 del_list.append(row.id)
             self.sql_remove_programs(del_list)
 
-        elif len(rows) == 1:
+        query = 'select * from programs where channel_id="%s" ' % channel_id +\
+                'and start=%s' % start
+        rows = self.sql_execute(query)
+        if len(rows) == 1:
             old_prog = rows[0]
-
-        else:
-            # we got no results
-            pass
-
-
-        if old_prog:
             if Unicode(old_prog['title']) == Unicode(title):
                 # program timeslot is unchanged, see if there's anything
                 # that we should update
@@ -287,15 +283,15 @@ class Guide:
         try:
             self.sql_execute(query)
             self.sql_commit()
-        except IntegrityError:
+        except Exception, e:
             log.error('Program for (%s, %s) exists:' % \
                       (String(channel_id), start))
+            log.exception('trace:')
             query = 'select * from programs where channel_id="%s" and start=%s'
             rows = self.sql_execute(query % (channel_id, start))
             self.sql_commit()
             for row in rows:
                 log.error('    %s' % row)
-            log.exception('trace:')
 
 
     def sql_get_programs(self, channels, start=0, stop=-1):
