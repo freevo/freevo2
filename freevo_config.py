@@ -811,6 +811,7 @@ MPLAYER_ARGS = { 'dvd': '-cache 8192',
                  'vcd': '-cache 4096',
                  'cd' : '-cache 500 -cdda speed=1',
                  'tv' : '-nocache',
+                 'ivtv' : '-cache 8192',
                  'avi': '-cache 5000 -idx',
                  'rm' : '-cache 5000 -forceidx',
                  'default': '-cache 5000'

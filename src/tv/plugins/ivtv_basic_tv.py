@@ -12,6 +12,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/10/15 12:57:16  rshortt
+# Patch from Eirik Meland to add 'ivtv' MPLAYER_ARGS.  This is now only used
+# by the ivtv_basic_tv.py plugin.
+#
 # Revision 1.11  2003/09/05 02:48:12  rshortt
 # Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
 #
@@ -164,8 +168,8 @@ class IVTV_TV:
             args = (config.MPLAYER_NICE, config.MPLAYER_CMD, config.MPLAYER_VO_DEV,
                     config.MPLAYER_VO_DEV_OPTS)
 
-            if config.MPLAYER_ARGS.has_key('tv'):
-                args += (config.MPLAYER_ARGS['tv'],)
+            if config.MPLAYER_ARGS.has_key('ivtv'):
+                args += (config.MPLAYER_ARGS['ivtv'],)
 
             args += (cf_device,)
 
