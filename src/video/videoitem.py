@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2002/12/03 20:03:43  dischi
+# Now it's impossible to show the dvd title menu when you are already in this
+# menu. Also dvdnav support is now working (more or less, depends if mplayer
+# can dvdnav your dvd). Give it a try and select dvdnav in the item menu
+#
 # Revision 1.4  2002/12/03 19:16:23  dischi
 # Some changes in actions(): play will always play the item, for DVD/VCD
 # this means track 1. The DVD/VCD title menu is an extra action
@@ -153,11 +158,15 @@ class VideoItem(Item):
         return a list of possible actions on this item.
         """
         items = [ (self.play, 'Play') ]
-        if self.mode == 'dvd':
-            #items += [( self.dvdnav, 'DVD Menu (experimental)' )]
-            items += [( self.dvd_vcd_title_menu, 'DVD title list' )]
-        if self.mode == 'vcd':
-            items += [( self.dvd_vcd_title_menu, 'VCD title list' )]
+
+        # show DVD/VCD title menu for DVDs, but only when we aren't in a
+        # submenu of a such a menu already
+        if not self.files[0]:
+            if self.mode == 'dvd':
+                items += [( self.dvdnav, 'DVD Menu (experimental)' )]
+                items += [( self.dvd_vcd_title_menu, 'DVD title list' )]
+            if self.mode == 'vcd':
+                items += [( self.dvd_vcd_title_menu, 'VCD title list' )]
         return items
 
 
@@ -166,14 +175,15 @@ class VideoItem(Item):
         play the item.
         """
         self.parent.current_item = self
-        if not self.files[0] and (self.mode == 'dvd' or self.mode == 'vcd'):
-            self.files[0] = '1'
-
         self.current_file = self.files[0]
+
+        if not self.files[0] and (self.mode == 'dvd' or self.mode == 'vcd'):
+            self.current_file = '1'
+
         mplayer_options = self.mplayer_options
 
         if self.media:
-            mplayer_options += '-cdrom-device %s -dvd-device %s' % \
+            mplayer_options += ' -cdrom-device %s -dvd-device %s' % \
                                (self.media.devicename, self.media.devicename)
 
         if self.selected_subtitle:
@@ -183,7 +193,7 @@ class VideoItem(Item):
             mplayer_options += ' -aid %s' % self.selected_audio
 
         if arg:
-            mplayer_options += arg
+            mplayer_options += ' %s' % arg
 
         self.video_player.play(self.current_file, mplayer_options, self)
 
@@ -197,9 +207,25 @@ class VideoItem(Item):
 
     def dvdnav(self, arg=None, menuw=None):
         """
-        dvdnav support, not implemented yet, it's also still buggy in mplayer
+        dvdnav support, it's also still buggy in mplayer
         """
-        return
+        
+        self.parent.current_item = self
+        mplayer_options = self.mplayer_options
+
+        mplayer_options += ' -dvd-device %s' % self.media.devicename
+
+        if self.selected_subtitle:
+            mplayer_options += ' -sid %s' % self.selected_subtitle
+
+        if self.selected_audio:
+            mplayer_options += ' -aid %s' % self.selected_audio
+
+        if arg:
+            mplayer_options += ' %s' % arg
+
+        self.video_player.play('', mplayer_options, self, 'dvdnav')
+
 
 
     def dvd_vcd_title_menu(self, arg=None, menuw=None):
@@ -304,12 +330,15 @@ class VideoItem(Item):
         
         # PLAY_END: do have have to play another file?
         if event == rc.PLAY_END:
-            pos = self.files.index(self.current_file)
-            if pos < len(self.files)-1:
-                self.current_file = self.files[pos+1]
-                print "playing next file"
-                self.video_player.play(self.current_file, self.mplayer_options, self)
-                return TRUE
+            try:
+                pos = self.files.index(self.current_file)
+                if pos < len(self.files)-1:
+                    self.current_file = self.files[pos+1]
+                    print "playing next file"
+                    self.video_player.play(self.current_file, self.mplayer_options, self)
+                    return TRUE
+            except:
+                pass
 
         # show configure menu
         if event == rc.MENU:
