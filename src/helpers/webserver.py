@@ -11,6 +11,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/07/09 16:20:54  outlyer
+# Remove the request logging for 0-level debug. Exceptions will still be
+# logged, but standard requests will not.
+#
+# (i.e. this removes the Apache-style access logging for DEBUG = 0)
+#
 # Revision 1.9  2004/01/09 18:57:06  dischi
 # stop on normal exit
 #
@@ -101,7 +107,10 @@ def main():
     
     root.putChild('vhost', vhost.VHostMonsterResource())
     rewriter =  rewrite.RewriterResource(root, helpimagesrewrite)
-    site = server.Site(rewriter)
+    if (config.DEBUG == 0):
+        site = server.Site(rewriter, logPath='/dev/null')
+    else:
+        site = server.Site(rewriter)
     
     application = app.Application('web')
     application.listenTCP(config.WWW_PORT, site)

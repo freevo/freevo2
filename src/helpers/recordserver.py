@@ -6,6 +6,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.53  2004/07/09 16:20:54  outlyer
+# Remove the request logging for 0-level debug. Exceptions will still be
+# logged, but standard requests will not.
+#
+# (i.e. this removes the Apache-style access logging for DEBUG = 0)
+#
 # Revision 1.52  2004/07/09 11:19:21  dischi
 # fix unicode crash
 #
@@ -948,7 +954,10 @@ class RecordServer(xmlrpc.XMLRPC):
 def main():
     app = Application("RecordServer")
     rs = RecordServer()
-    app.listenTCP(config.TV_RECORD_SERVER_PORT, server.Site(rs))
+    if (config.DEBUG == 0):
+        app.listenTCP(config.TV_RECORD_SERVER_PORT, server.Site(rs, logPath='/dev/null'))
+    else:
+        app.listenTCP(config.TV_RECORD_SERVER_PORT, server.Site(rs))
     rs.startMinuteCheck()
     rc_object.subscribe(rs.eventNotice)
     app.run(save=0)
