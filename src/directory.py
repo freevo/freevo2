@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.69  2003/12/01 19:06:46  dischi
+# better handling of the MimetypePlugin
+#
 # Revision 1.68  2003/11/30 14:41:09  dischi
 # use new Mimetype plugin interface
 #
@@ -165,8 +168,6 @@ class DirItem(Playlist):
 
         self.add_args = add_args
 
-        self.mimetypes = plugin.getbyname(plugin.MIMETYPE, True)
-        
         # set directory variables to default
         global all_variables
         for v,n,d in all_variables:
@@ -370,7 +371,7 @@ class DirItem(Playlist):
         if event == DIRECTORY_CHANGE_DISPLAY_TYPE and menuw.menustack[-1] == self.menu:
             possible_display_types = [ ]
 
-            for p in self.mimetypes:
+            for p in plugin.get('mimetype'):
                 for t in p.display_type:
                     if not t in possible_display_types:
                         possible_display_types.append(t)
@@ -411,9 +412,8 @@ class DirItem(Playlist):
         if self.display_type == 'tv':
             display_type = 'video'
 
-        for p in self.mimetypes:
-            if not p.display_type or not display_type or display_type in p.display_type:
-                suffix += p.suffix()
+        for p in plugin.mimetype(display_type):
+            suffix += p.suffix()
 
         items = [ ( self.cwd, _('Browse directory')),
                   ( self.play, _('Play all files in directory')) ]
@@ -427,13 +427,13 @@ class DirItem(Playlist):
                 items.reverse()
 
         if suffix:
-            items += [ ( RandomPlaylist((self.dir, suffix), self, recursive=False),
-                         _('Random play all items')),
-                       ( RandomPlaylist((self.dir, suffix), self),
-                         _('Recursive random play all items')), 
-                       ( RandomPlaylist((self.dir, suffix), self, random = False),
-                         _('Recursive play all items')) ]
-        
+            items += [ RandomPlaylist(_('Random play all items'), (self.dir, suffix),
+                                      self, recursive=False),
+                       RandomPlaylist(_('Recursive random play all items'),
+                                      (self.dir, suffix), self),
+                       RandomPlaylist(_('Recursive play all items'), (self.dir, suffix),
+                                      self, random = False) ]
+
         items.append((self.configure, _('Configure directory'), 'configure'))
         return items
     
@@ -612,15 +612,14 @@ class DirItem(Playlist):
 
 
         # build play_items, pl_items and dir_items
-        for p in self.mimetypes:
-            if not p.display_type or not display_type or display_type in p.display_type:
-                for i in p.get(self, files):
-                    if i.type == 'playlist':
-                        self.pl_items.append(i)
-                    elif i.type == 'dir':
-                        self.dir_items.append(i)
-                    else:
-                        self.play_items.append(i)
+        for p in plugin.mimetype(display_type):
+            for i in p.get(self, files):
+                if i.type == 'playlist':
+                    self.pl_items.append(i)
+                elif i.type == 'dir':
+                    self.dir_items.append(i)
+                else:
+                    self.play_items.append(i)
                         
         # normal DirItems
         for filename in files:
@@ -693,10 +692,9 @@ class DirItem(Playlist):
 
 
         # add/delete items based on mimetypes
-        for p in self.mimetypes:
-            if not p.display_type or not display_type or display_type in p.display_type:
-                p.update(self, new_files, del_files, new_items, del_items,
-                         self.play_items + self.dir_items + self.pl_items)
+        for p in plugin.mimetype(display_type):
+            p.update(self, new_files, del_files, new_items, del_items,
+                     self.play_items + self.dir_items + self.pl_items)
 
         # delete directories
         for file in del_files:

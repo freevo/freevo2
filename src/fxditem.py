@@ -26,6 +26,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/12/01 19:06:46  dischi
+# better handling of the MimetypePlugin
+#
 # Revision 1.4  2003/11/30 14:41:10  dischi
 # use new Mimetype plugin interface
 #
@@ -260,3 +263,5 @@ def container_callback(fxd, node):
 
 plugin.register_callback('fxditem', None, 'container', container_callback)
 mimetype = Mimetype()
+plugin.activate(mimetype, level=0)
+

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/12/01 19:09:37  dischi
+# better handling of the MimetypePlugin
+#
 # Revision 1.26  2003/11/30 14:41:10  dischi
 # use new Mimetype plugin interface
 #
@@ -164,10 +167,8 @@ class MediaMenu(Item):
             try:
                 if isinstance(d, str):
                     # normal file
-                    for p in plugin.getbyname(plugin.MIMETYPE, True):
-                        if not p.display_type or not self.display_type or \
-                               self.display_type in p.display_type:
-                            self.normal_items += p.get(self, [ d ])
+                    for p in plugin.mimetype(self.display_type):
+                        self.normal_items += p.get(self, [ d ])
                 else:
                     (t, dir) = d[:2]
                     if len(d) > 2:

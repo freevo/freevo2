@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.55  2003/12/01 19:06:46  dischi
+# better handling of the MimetypePlugin
+#
 # Revision 1.54  2003/11/30 14:38:36  dischi
 # o new plugin type: MimetypePlugin to handle what files to display in
 #   what kinds of menus
@@ -185,7 +188,6 @@ class MimetypePlugin(Plugin):
     def __init__(self):
         Plugin.__init__(self)
         self.display_type = []
-        register(self, MIMETYPE, True)
 
 
     def suffix(self):
@@ -218,7 +220,6 @@ AUDIO_PLAYER   = 'AUDIO_PLAYER'
 RADIO_PLAYER   = 'RADIO_PLAYER'
 VIDEO_PLAYER   = 'VIDEO_PLAYER'
 TV             = 'TV'
-MIMETYPE       = 'MIMETYPE'
 
 
 #
@@ -367,6 +368,20 @@ def get(type):
     return __plugin_type_list__[type]
 
 
+def mimetype(display_type):
+    """
+    return all MimetypePlugins for the given display_type. If display_type is
+    None, return all MimetypePlugins.
+    """
+    if not display_type:
+        return __plugin_type_list__['mimetype']
+    ret = []
+    for p in __plugin_type_list__['mimetype']:
+        if not p.display_type or display_type in p.display_type:
+            ret.append(p)
+    return ret
+
+        
 def getall():
     """
     return a list of all plugins
@@ -591,6 +606,9 @@ def __load_plugin__(name, type, level, args, number):
 
             if isinstance(p, ItemPlugin):
                 __add_to_ptl__('item%s' % special, p)
+
+            if isinstance(p, MimetypePlugin):
+                __add_to_ptl__('mimetype', p)
 
         if p.plugin_name:
             __named_plugins__[p.plugin_name] = p

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2003/12/01 19:06:46  dischi
+# better handling of the MimetypePlugin
+#
 # Revision 1.36  2003/11/30 14:41:10  dischi
 # use new Mimetype plugin interface
 #
@@ -81,7 +84,8 @@ class Playlist(Item):
             if line.endswith('\r\n'):
                 line = line.replace('\\', '/') # Fix MSDOS slashes
             if os.path.exists(os.path.join(curdir,line)):
-                for p in plugin.getbyname(plugin.MIMETYPE, True):
+                # XXX add display_type
+                for p in plugin.mimetype(None):
                     for i in p.get(self, [os.path.join(curdir, line)]):
                         self.playlist.append(i)
                         break
@@ -114,7 +118,8 @@ class Playlist(Item):
         for line in playlist_lines:
             if line.endswith('\r\n'):
                 line = line.replace('\\', '/') # Fix MSDOS slashes
-            for p in plugin.getbyname(plugin.MIMETYPE, True):
+            # XXX add display_type
+            for p in plugin.mimetype(None):
                 for i in p.get(self, [os.path.join(curdir, line)]):
                     self.playlist.append(i)
                     break
@@ -163,7 +168,7 @@ class Playlist(Item):
                 if ss_delay == []:
                     ss_delay += [5]
 
-                for p in plugin.getbyname(plugin.MIMETYPE, True):
+                for p in plugin.mimetype('image'):
                     for i in p.get(self, [os.path.join(curdir, ss_name[0])]):
                         if i.type == 'image':
                             i.name     = ss_caption[0]
@@ -235,6 +240,9 @@ class Playlist(Item):
 
         
     def actions(self):
+        """
+        return the actions for this item: play and browse
+        """
         if self.autoplay:
             return [ ( self.play, _('Play') ),
                      ( self.browse, _('Browse Playlist') ) ]
@@ -244,17 +252,24 @@ class Playlist(Item):
 
 
     def browse(self, arg=None, menuw=None):
+        """
+        show the playlist in the menu
+        """
         self.read_playlist()
         moviemenu = menu.Menu(self.name, self.playlist)
         menuw.pushmenu(moviemenu)
         
         
     def play(self, arg=None, menuw=None):
+        """
+        play the playlist
+        """
         self.read_playlist()
         if not self.menuw:
             self.menuw = menuw
 
         if not self.playlist:
+            # XXX PopupBox please
             print _('empty playlist')
             return False
         
@@ -278,6 +293,9 @@ class Playlist(Item):
         
 
     def cache_next(self):
+        """
+        cache next item, usefull for image playlists
+        """
         pos = self.playlist.index(self.current_item)
         pos = (pos+1) % len(self.playlist)
         if pos and hasattr(self.playlist[pos], 'cache'):
@@ -285,6 +303,9 @@ class Playlist(Item):
 
 
     def eventhandler(self, event, menuw=None):
+        """
+        Handle playlist specific events
+        """
         if not menuw:
             menuw = self.menuw
             
@@ -338,10 +359,17 @@ class Playlist(Item):
 
 
 class RandomPlaylist(Playlist):
-    def __init__(self, playlist, parent, add_args = None, recursive = True, random = True):
+    """
+    A playlist that can be played in random mode, recursive in subdirs
+    or a combination of both. It is _not_ possible to browse this playlist
+    right now, only play it.
+    """
+    def __init__(self, name, playlist, parent, recursive = True,
+                 random = True):
         Item.__init__(self, parent)
-        self.type     = 'playlist'
-
+        self.type         = 'playlist'
+        self.name         = name
+        
         # variables only for Playlist
         self.current_item = None
         self.playlist     = []
@@ -349,13 +377,15 @@ class RandomPlaylist(Playlist):
         self.unplayed     = playlist
         self.recursive    = recursive
         self.random       = random
-
         
     def actions(self):
         return [ ( self.play, _('Play') ) ]
 
 
     def play_next(self, arg=None, menuw=None):
+        if not self.unplayed:
+            return False
+        
         if self.random:
             element = random.choice(self.unplayed)
         else:
@@ -363,16 +393,16 @@ class RandomPlaylist(Playlist):
         self.unplayed.remove(element)
 
         if not callable(element):
-            # try to get the item for this file
+            # element is a string, make a correct item
             files = [ element, ]
             play_items = []
 
-            for p in plugin.getbyname(plugin.MIMETYPE, True):
+            # get a real item
+            for p in plugin.mimetype(None):
                 for i in p.get(self, files):
                     play_items.append(i)
 
             if not play_items:
-                print 'FIXME: this should never happen'
                 return False
                 
             element = play_items[0]
@@ -385,7 +415,12 @@ class RandomPlaylist(Playlist):
         
 
     def play(self, arg=None, menuw=None):
+        if not self.menuw:
+            self.menuw = menuw
+
         if isinstance(self.unplayed, tuple):
+            # playlist is a list: dir:prefix
+            # build a correct playlist now
             dir, prefix = self.unplayed
             if self.recursive:
                 self.unplayed = util.match_files_recursively(dir, prefix)
@@ -420,14 +455,23 @@ class RandomPlaylist(Playlist):
                         _debug_('ignore playlist event', 1)
                         return True
             return self.play_next(menuw=menuw)
+
+        if event == PLAYLIST_NEXT and not self.unplayed:
+            rc.post_event(Event(OSD_MESSAGE, arg=_('no next item in playlist')))
+            return True
         
         # end and no next item
-        if event == PLAY_END:
+        if event in (STOP, PLAY_END, USER_END) and menuw:
             if self.current_item:
                 self.current_item.parent = self.parent
             self.current_item = None
             if menuw:
-                menuw.show()
+                if hasattr(menuw.menustack[-1], 'is_submenu'):
+                    menuw.back_one_menu()
+                if menuw.visible:
+                    menuw.refresh()
+                else:
+                    menuw.show()
             return True
             
         if event == PLAYLIST_PREV:
@@ -482,4 +526,5 @@ class Mimetype(plugin.MimetypePlugin):
 
 
 # load the MimetypePlugin
-mimetype = Mimetype()
+plugin.activate(Mimetype())
+
