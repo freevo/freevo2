@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/01/09 02:08:07  rshortt
+# GUI fixes from Matthieu Weber.
+#
 # Revision 1.16  2003/10/12 10:56:19  dischi
 # change debug to use _debug_ and set level to 2
 #
@@ -222,15 +225,21 @@ class Button(Container):
             raise TypeError, type(text)
 
         if not self.label:
-            self.label = Label()
+            self.label = Label(h_align = Align.CENTER, v_align = Align.CENTER,
+                               text_prop = {
+                                             'align_h': 'center',
+                                             'align_v': 'center',
+                                             'mode': 'hard',
+                                           }
+                              )
             self.label.set_text(text)
             self.label.set_background_color(None)
             self.add_child(self.label)
         else:
             self.label.set_text(text)
 
-        self.label.set_v_align(Align.CENTER)
-        self.label.set_h_align(Align.CENTER)
+        #self.label.set_v_align(Align.CENTER)
+        #self.label.set_h_align(Align.CENTER)
 
         self.surface_changed = 1
 

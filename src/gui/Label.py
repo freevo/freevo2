@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2004/01/09 02:08:07  rshortt
+# GUI fixes from Matthieu Weber.
+#
 # Revision 1.22  2003/10/12 10:56:19  dischi
 # change debug to use _debug_ and set level to 2
 #
@@ -223,8 +226,8 @@ class Label(GUIObject):
         else:
             raise TypeError, type(text)
 
-        # self.width = -1
-        # self.height = -1
+        self.width = -1
+        self.height = -1
         self.surface_changed = 1
 
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/01/09 02:08:07  rshortt
+# GUI fixes from Matthieu Weber.
+#
 # Revision 1.13  2003/10/12 10:56:19  dischi
 # change debug to use _debug_ and set level to 2
 #
@@ -142,6 +145,8 @@ class LetterBox(Button):
         self.v_spacing          = 0
         self.set_v_align(Align.BOTTOM)
         self.set_h_align(Align.CENTER)
+        self.label.set_v_align(Align.CENTER)
+        self.label.set_h_align(Align.CENTER)
 
 
     def set_text(self, text):
@@ -149,6 +154,8 @@ class LetterBox(Button):
         Button.set_text(self, text)
         self.label.width = self.width
         self.label.height = self.height
+        self.label.set_v_align(Align.CENTER)
+        self.label.set_h_align(Align.CENTER)
 
 
     def charUp(self):
@@ -161,7 +168,7 @@ class LetterBox(Button):
         self.set_text(self.ourChars[charNext])
 
         # XXX: should not have to draw here but it fixes an align problem.
-        self.draw()
+        #self.draw()
 
 
     def charDown(self):
@@ -174,7 +181,7 @@ class LetterBox(Button):
         self.set_text(self.ourChars[charNext])
 
         # XXX: should not have to draw here but it fixes an align problem.
-        self.draw()
+        #self.draw()
 
 
     def cycle_phone_char(self, command):
