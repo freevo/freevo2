@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/07/25 18:22:27  dischi
+# changes to reflect gui update
+#
 # Revision 1.20  2004/07/24 17:49:48  dischi
 # rename or deactivate some stuff for gui update
 #
@@ -128,7 +131,7 @@ class PluginInterface(plugin.DaemonPlugin):
         catch the IDENTIFY_MEDIA event to redraw the skin (maybe the cd status
         plugin wants to redraw)
         """
-        if plugin.isevent(event) == 'IDENTIFY_MEDIA' and skin.active():
+        if plugin.isevent(event) == 'IDENTIFY_MEDIA' and skin.active:
             skin.redraw()
         return False
 
@@ -137,7 +140,7 @@ class PluginInterface(plugin.DaemonPlugin):
         """
         update the idlebar every 30 secs even if nothing happens
         """
-        if skin.active():
+        if skin.active:
             skin.redraw()
 
 

@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/07/25 18:22:27  dischi
+# changes to reflect gui update
+#
 # Revision 1.17  2004/07/24 12:23:09  dischi
 # replaced osd.py with a dummy
 #
@@ -68,7 +71,7 @@ _singleton = None
 # a list of all functions the skin needs to have
 __all__ = ( 'Rectange', 'Image', 'Area', 'register', 'delete', 'change_area',
             'toggle_display_style', 'get_display_style', 'items_per_page',
-            'clear', 'draw', 'redraw' )
+            'clear', 'draw', 'redraw', 'active' )
     
 __all__gui__ = ( 'get_settings', 'get_font', 'get_image', 'get_icon' )
     
@@ -87,13 +90,6 @@ def get_singleton():
         import gui
         _singleton = gui.get_skin()
     return _singleton
-
-
-def active():
-    """
-    returns if the skin is active right now (not cleared)
-    """
-    return True
 
 
 if __freevo_app__ == 'main':

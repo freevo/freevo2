@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.97  2004/07/25 18:22:27  dischi
+# changes to reflect gui update
+#
 # Revision 1.96  2004/07/23 19:44:00  dischi
 # move most of the settings code out of the skin engine
 #
@@ -55,7 +58,7 @@ from event import *
 from item import Item
 
 import gui
-from gui import GUIObject, AlertBox
+from gui import AlertBox
 
 
 class MenuItem(Item):
@@ -139,12 +142,11 @@ class Menu:
 
 
 
-class MenuWidget(GUIObject):
+class MenuWidget:
     """
     The MenuWidget handles a stack of Menus
     """
     def __init__(self):
-        GUIObject.__init__(self)
         self.menustack = []
         self.rows = 0
         self.cols = 0
@@ -309,10 +311,6 @@ class MenuWidget(GUIObject):
         menu = self.menustack[-1]
 
         if not isinstance(menu, Menu):
-            # Do not draw if there are any children
-            if self.children:
-                return False
-            
             return skin.draw(menu.type, menu)
 
         if self.menustack[-1].umount_all == 1:

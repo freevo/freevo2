@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/07/25 18:22:27  dischi
+# changes to reflect gui update
+#
 # Revision 1.20  2004/07/22 21:21:46  dischi
 # small fixes to fit the new gui code
 #
@@ -40,8 +43,6 @@
 # ----------------------------------------------------------------------- */
 
 
-from gui import GUIObject
-
 import config
 import skin
 import rc
@@ -54,9 +55,8 @@ def get():
     global _player_
     return _player_
 
-class PlayerGUI(GUIObject):
+class PlayerGUI:
     def __init__(self, item, menuw):
-        GUIObject.__init__(self)
         if menuw:
             self.visible = True
         else:

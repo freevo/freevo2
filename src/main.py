@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.133  2004/07/25 18:22:27  dischi
+# changes to reflect gui update
+#
 # Revision 1.132  2004/07/24 17:49:48  dischi
 # rename or deactivate some stuff for gui update
 #
@@ -145,7 +148,6 @@ from item import Item
 from event import *
 from plugins.shutdown import shutdown
 
-
 # Create the OSD object
 import osd     # The OSD class, used to communicate with the OSD daemon
 osd = osd.get_singleton()
@@ -168,7 +170,6 @@ class SkinSelectItem(Item):
         """
         Load the new skin and rebuild the main menu
         """
-        import gui
         gui.set_base_fxd(self.skin)
         pos = menuw.menustack[0].choices.index(menuw.menustack[0].selected)
 
@@ -183,7 +184,6 @@ class SkinSelectItem(Item):
         menuw.menustack[0].selected = menuw.menustack[0].choices[pos]
         menuw.back_one_menu()
 
-        
 
 class MainMenu(Item):
     """

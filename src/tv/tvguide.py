@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2004/07/25 18:22:28  dischi
+# changes to reflect gui update
+#
 # Revision 1.38  2004/07/22 21:21:49  dischi
 # small fixes to fit the new gui code
 #
@@ -257,9 +260,8 @@ class TVGuide(Item):
 
     def refresh(self):
         self.update_schedules(force=True)
-        if not self.menuw.children:
-            rc.set_context(self.event_context)
-            self.menuw.refresh()
+        rc.set_context(self.event_context)
+        self.menuw.refresh()
 
 
     def rebuild(self, start_time, stop_time, start_channel, selected):
