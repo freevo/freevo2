@@ -141,7 +141,7 @@
       </screen>
       <title visible="no"/>
       <view layout="player view" visible="yes">
-	<area x="460" y="200" width="390" height="330"/> 
+	<area x="430" y="200" width="420" height="360"/> 
       </view>
       <info layout="player info" visible="yes">
 	<area x="-50" y="80" width="550" height="300"/> 
@@ -155,10 +155,12 @@
     </layout>
 
     <layout label="player view">
-      <background>
-	<rectangle size="0" bgcolor="0x80000000" radius="10" width="max"/>
-      </background>
-      <content width="max-50" type="text" spacing="10"/>
+      <content type="text" spacing="10">
+	<item type="default">
+	  <rectangle size="0" bgcolor="0x80000000" radius="10" x="-15" y="-15"
+	    width="max+80" height="max+30"/>
+	</item>
+      </content>
     </layout>
 
     <layout label="player info">
