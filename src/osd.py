@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.169  2004/08/22 20:15:16  dischi
+# some gui renaming, osd.py still needed :-(
+#
 # Revision 1.168  2004/07/26 18:10:16  dischi
 # move global event handling to eventhandler.py
 #
@@ -93,7 +96,7 @@ def get_singleton():
     import gui
     # One-time init
     if _singleton == None:
-        _singleton = gui.get_renderer()
+        _singleton = gui.get_display()
         
     return _singleton
 
