@@ -204,6 +204,13 @@ SHUTDOWN_SYS_CMD = 'shutdown -h now'  # set this to 'sudo shutdown -h now' if
                                       # you don't have the permissions to
                                       # shutdown
 
+#
+# see src/event.py for a list of all possible events. You can add more keybindings
+# by adding them to the correct hash. E.g. pressing 1 should send 'contrast -100'
+# to mplayer, just write the folling line to your local_conf.py
+#
+# EVENTS['video']['1'] = Event(VIDEO_SEND_MPLAYER_CMD, arg='contrast -100')
+#
 EVENTS = {
     'menu'    : MENU_EVENTS,
     'input'   : INPUT_EVENTS,
