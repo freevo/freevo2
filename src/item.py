@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/08/30 15:18:09  dischi
+# also react on STOP
+#
 # Revision 1.24  2003/08/23 18:34:38  dischi
 # do not use info[title] when parent has USE_MEDIAID_TAG_NAMES = 0
 #
@@ -145,7 +148,7 @@ class Item:
             return self.parent.eventhandler(event, menuw)
 
         else:
-            if event == em.PLAY_END or event == em.USER_END and menuw:
+            if event == em.STOP or em.PLAY_END or event == em.USER_END and menuw:
                 if menuw.visible:
                     menuw.refresh()
                 else:
