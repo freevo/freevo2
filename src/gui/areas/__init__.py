@@ -5,10 +5,14 @@
 # $Id$
 #
 # Notes:
-# Todo:        
+# Todo:        Do not share AreaHandler:s between menu, tv, player
+#              and splashscreen. They should get one of there own!
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/08/05 17:30:24  dischi
+# cleanup
+#
 # Revision 1.6  2004/08/01 10:37:39  dischi
 # remove some functions
 #
@@ -54,7 +58,6 @@ import traceback
 
 import config
 import util
-from event import *
 
 from area import Skin_Area
 
@@ -76,20 +79,19 @@ class AreaHandler:
         """
         self.settings      = settings
         self.display_style = { 'menu' : 0 }
-        self.last_draw     = None, None, None
+        self.last_draw     = None, None
         self.screen        = None
         self.areas         = {}
         self.all_areas     = []
-        self.active        = False
         
         # load default areas
         from listing_area   import Listing_Area
         from tvlisting_area import TVListing_Area
         from view_area      import View_Area
         from info_area      import Info_Area
-        from default_areas  import Screen_Area, Title_Area, Subtitle_Area, Plugin_Area
+        from default_areas  import Screen_Area, Title_Area, Subtitle_Area
         
-        for a in ( 'screen', 'title', 'subtitle', 'view', 'listing', 'info', 'plugin'):
+        for a in ( 'screen', 'title', 'subtitle', 'view', 'listing', 'info'):
             self.areas[a] = eval('%s_Area()' % a.capitalize())
         self.areas['tvlisting'] = TVListing_Area()
 
@@ -129,15 +131,15 @@ class AreaHandler:
         delete informations about a special skin type
         """
         exec('del self.%s_areas' % type)
-        self.last_draw = None, None, None
+        self.last_draw = None, None
 
 
     def change_area(self, name, module, object):
         """
         replace an area with the code from module.object() from skins/plugins
         """
-        exec('import skins.plugins.%s' % module)
-        self.areas[name] = eval('skins.plugins.%s.%s()' % (module, object))
+        exec('import gui.plugins.%s' % module)
+        self.areas[name] = eval('gui.plugins.%s.%s()' % (module, object))
 
         
     def toggle_display_style(self, menu):
@@ -149,10 +151,10 @@ class AreaHandler:
                 self.display_style[menu] = 0
             self.display_style[menu] = (self.display_style[menu] + 1) % \
                                        len(self.settings.sets[menu].style)
-            return 1
+            return
             
         if menu.force_skin_layout != -1:
-            return 0
+            return
         
         if menu and menu.skin_settings:
             settings = menu.skin_settings
@@ -170,7 +172,7 @@ class AreaHandler:
 
         self.storage[config.SKIN_XML_FILE] = self.display_style['menu']
         util.save_pickle(self.storage, self.storage_file)
-        return 1
+
 
 
     def get_display_style(self, menu=None):
@@ -188,31 +190,18 @@ class AreaHandler:
         return self.display_style['menu']
 
 
+
     def items_per_page(self, (type, object)):
         """
         returns the number of items per menu page
         (cols, rows) for normal menu and
         rows         for the tv menu
+        WARNING: only works for tv, will be removed soon
         """
-        if type == 'tv':
-            info = self.areas['tvlisting']
-            info = info.get_items_geometry(self.settings, object,
-                                           self.get_display_style('tv'))
-            return (info[4], info[-1])
-
-        if object.skin_settings:
-            settings = object.skin_settings
-        else:
-            settings = self.settings
-
-        menu = None
-        if type == 'menu':
-            menu = object
-
-        info = self.areas['listing']
-        rows, cols = info.get_items_geometry(settings, object,
-                                             self.get_display_style( menu ))[:2]
-        return (cols, rows)
+        info = self.areas['tvlisting']
+        info = info.get_items_geometry(self.settings, object,
+                                       self.get_display_style('tv'))
+        return (info[4], info[-1])
 
 
 
@@ -222,15 +211,14 @@ class AreaHandler:
         """
         if self.last_draw and self.last_draw[0] == type:
             _debug_('clear skin (%s)' % type)
-            self.active = False
             for a in self.all_areas:
                 a.clear()
 
 
-    def draw(self, type, object, menu=None):
+    def draw(self, type, object):
         """
         draw the object.
-        object may be a menu widget, a table for the tv menu are an audio item for
+        object may be a menu, a table for the tv menu are an audio item for
         the audio player
         """
         if not self.screen:
@@ -239,38 +227,24 @@ class AreaHandler:
         settings = self.settings
             
         if type == 'menu':
-            menu = object.menustack[-1]
-            if menu.skin_settings:
-                settings = menu.skin_settings
-            # XXX FIXME
-            if len(object.menustack) == 1:
-                menu.item_types = 'main'
-            style = self.get_display_style(menu)
-
+            if object.skin_settings:
+                settings = object.skin_settings
+            style = self.get_display_style(object)
         else:
-            try:
-                if not object.visible:
-                    return
-            except AttributeError:
-                pass
             style = self.get_display_style(type)
-
 
         if self.last_draw[0] != type:
             areas = getattr(self, '%s_areas' % type)
             for a in self.all_areas:
                 if not a in areas:
-                    print 'remove area %s' % a
+                    _debug_('remove area %s' % a)
                     a.clear()
             self.all_areas = areas
             
-
-        self.last_draw = type, object, menu
-        self.active = True
-
+        self.last_draw = type, object
         try:
             for a in self.all_areas:
-                a.draw(settings, object, menu, style, type)
+                a.draw(settings, object, style, type)
             self.screen.update()
 
         except UnicodeError, e:
@@ -283,8 +257,8 @@ class AreaHandler:
             print traceback.print_exc()
             print
             print type, object
-            if type == 'menu':
-                for i in object.menustack[-1].choices:
+            if hasattr(object, 'choices'):
+                for i in object.choices:
                     print i
             print
             raise UnicodeError, e

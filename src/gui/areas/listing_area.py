@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/08/05 17:30:24  dischi
+# cleanup
+#
 # Revision 1.4  2004/07/27 18:52:30  dischi
 # support more layer (see README.txt in backends for details
 #
@@ -62,8 +65,6 @@ class Listing_Area(Skin_Area):
 
     def __init__(self):
         Skin_Area.__init__(self, 'listing')
-        self.last_choices = ( None, None )
-        self.last_get_items_geometry = [ None, None ]
 
         
     def get_items_geometry(self, settings, menu, display_style):
@@ -72,28 +73,20 @@ class Listing_Area(Skin_Area):
         between each item, etc
         """
 
-        # hack for empty directories
-        if not len(menu.choices):
-            return self.last_get_items_geometry[1]
-
-        if self.last_get_items_geometry[0] == ( menu, settings, display_style ) and \
-               hasattr(menu, 'skin_force_text_view'):
-            return self.last_get_items_geometry[1]
-        
-        # store the old values in case we are called by ItemsPerMenuPage
-        backup = ( self.area_val, self.layout)
-
-        self.display_style = display_style
         if menu.force_skin_layout != -1:
-            self.display_style = menu.force_skin_layout
+            display_style = menu.force_skin_layout
 
-        self.scan_for_text_view(menu)
-        self.init_vars(settings, menu.item_types)
-
-        content   = self.calc_geometry(self.layout.content, copy_object=True)
-
-        self.last_get_items_geometry[0] = ( menu, settings, display_style )
+        # ok, we use settings + display_style as key
+        # FIXME: is that ok or do we need something else?
+        key = '%s-%s-%s' % (settings, display_style, self.layout.content.type)
+        try:
+            # returned cached information
+            return menu.listing_area_dict[key]
+        except (KeyError, AttributeError):
+            pass
         
+        content = self.calc_geometry(self.layout.content, copy_object=True)
+
         if content.type == 'text':
             items_w = content.width
             items_h = 0
@@ -101,10 +94,9 @@ class Listing_Area(Skin_Area):
             items_w = 0
             items_h = 0
 
+        # get the list of possible types we need for this
+        # menu to draw correctly
         possible_types = {}
-
-        hskip = 0
-        vskip = 0
         for i in menu.choices:
             if hasattr(i, 'display_type') and i.display_type:
                 x = i.display_type
@@ -113,12 +105,13 @@ class Listing_Area(Skin_Area):
                 x = '%s selected' % i.display_type
                 if content.types.has_key(x) and not possible_types.has_key(x):
                     possible_types[x] = content.types[x]
-
         if content.types.has_key('default'):
             possible_types['default'] = content.types['default']
         if content.types.has_key('selected'):
             possible_types['selected'] = content.types['selected']
 
+        hskip = 0
+        vskip = 0
         # get the max height of a text item
         if content.type == 'text':
             for t in possible_types:
@@ -161,14 +154,9 @@ class Listing_Area(Skin_Area):
 
         else:
             print 'unknown content type %s' % content.type
-            self.area_val, self.layout = backup
             return None
         
-        # restore
-        self.area_val, self.layout = backup
-
         # shrink width for text menus
-        # FIXME
         width = content.width
 
         if items_w > width:
@@ -185,30 +173,20 @@ class Listing_Area(Skin_Area):
               content.spacing <= content.height:
             rows += 1
 
-        # return cols, rows, item_w, item_h, content.width
-        self.last_get_items_geometry[1] = (cols, rows, items_w + content.spacing,
-                                           items_h + content.spacing, -hskip, -vskip,
-                                           width)
+        if not hasattr(menu, 'listing_area_dict'):
+            menu.listing_area_dict = {}
 
-        return self.last_get_items_geometry[1]
-
+        info = cols, rows, items_w + content.spacing, items_h + content.spacing, \
+               -hskip, -vskip, width
+        menu.listing_area_dict[key] = info
+        return info
 
 
     def update_content_needed(self):
         """
         check if the content needs an update
         """
-        if self.last_choices[0] != self.menu.selected:
-            return True
-
-        i = 0
-        for choice in self.menuw.menu_items:
-            try:
-                if self.last_choices[1][i] != choice:
-                    return True
-                i += 1
-            except IndexError:
-                return True
+        return True
             
         
     def update_content(self):
@@ -216,22 +194,24 @@ class Listing_Area(Skin_Area):
         update the listing area
         """
 
-        menuw     = self.menuw
         menu      = self.menu
         settings  = self.settings
         layout    = self.layout
         area      = self.area_val
         content   = self.calc_geometry(layout.content, copy_object=True)
 
+        if not len(menu.choices):
+            self.drawstring(_('This directory is empty'), content.font, content)
+            return
+        
         cols, rows, hspace, vspace, hskip, vskip, width = \
               self.get_items_geometry(settings, menu, self.display_style)
 
+        menu.rows = rows
+        menu.cols = cols
+        
         BOX_UNDER_ICON = self.xml_settings.box_under_icon
 
-        if not len(menu.choices):
-            val = content.types['default']
-            self.drawstring(_('This directory is empty'), content.font, content)
-            
         if content.align == 'center':
             item_x0 = content.x + (content.width - cols * hspace) / 2
         else:
@@ -251,8 +231,11 @@ class Listing_Area(Skin_Area):
         last_tvs      = ('', 0)
         all_tvs       = True
         tvs_shortname = True
-                
-        for choice in menuw.menu_items:
+
+        start = (menu.selected_pos / (cols * rows)) * (cols * rows)
+        end   = start + cols * rows
+
+        for choice in menu.choices[start:end]:
             if content.types.has_key( '%s selected' % choice.type ):
                 s_val = content.types[ '%s selected' % choice.type ]
             else:
@@ -486,17 +469,15 @@ class Listing_Area(Skin_Area):
                 
         # print arrow:
         try:
-            if menuw.menu_items[0] != menu.choices[0] and area.images['uparrow']:
+            if start > 0 and area.images['uparrow']:
                 self.drawimage(area.images['uparrow'].filename, area.images['uparrow'])
-            if menuw.menu_items[-1] != menu.choices[-1] and area.images['downarrow']:
+            if end < len(menu.choices):
                 if isinstance(area.images['downarrow'].y, str):
                     v = copy.copy(area.images['downarrow'])
                     v.y = eval(v.y, {'MAX':(item_y0-vskip)})
                 else:
                     v = area.images['downarrow']
                 self.drawimage(area.images['downarrow'].filename, v)
-        except:
-            # empty menu / missing images
-            pass
-        
-        self.last_choices = (menu.selected, copy.copy(menuw.menu_items))
+
+        except Exception, e:
+            print e

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/08/05 17:30:24  dischi
+# cleanup
+#
 # Revision 1.2  2004/07/24 17:49:05  dischi
 # interface cleanup
 #
@@ -63,6 +66,7 @@ class TVListing_Area(Skin_Area):
         self.last_settings = None
         self.last_items_geometry = None
         
+
     def update_content_needed(self):
         """
         check if the content needs an update
@@ -166,7 +170,8 @@ class TVListing_Area(Skin_Area):
         update the listing area
         """
 
-        menuw     = self.menuw
+        return
+    
         menu      = self.menu
         settings  = self.settings
         layout    = self.layout
@@ -396,9 +401,9 @@ class TVListing_Area(Skin_Area):
 
 
         # print arrow:
-        if menuw.display_up_arrow and area.images['uparrow']:
+        if menu.display_up_arrow and area.images['uparrow']:
             self.drawimage(area.images['uparrow'].filename, area.images['uparrow'])
-        if menuw.display_down_arrow and area.images['downarrow']:
+        if menu.display_down_arrow and area.images['downarrow']:
             if isinstance(area.images['downarrow'].y, str):
                 v = copy.copy(area.images['downarrow'])
                 v.y = eval(v.y, {'MAX' : y0})

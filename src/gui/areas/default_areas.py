@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/08/05 17:30:24  dischi
+# cleanup
+#
 # Revision 1.2  2004/07/24 12:21:30  dischi
 # use new renderer and screen features
 #
@@ -152,36 +155,4 @@ class Subtitle_Area(Title_Area):
         Skin_Area.__init__(self, 'subtitle')
         self.text = ''
 
-
-
-class Plugin_Area(Skin_Area):
-    """
-    in this area all plugins can draw
-    """
-    def __init__(self):
-        Skin_Area.__init__(self, 'plugin')
-        self.plugins = None
-        self.x = config.OSD_OVERSCAN_X
-        self.y = config.OSD_OVERSCAN_Y
-
-        
-    def get_font(self, name):
-        try:
-            return self.xml_settings.font[name]
-        except:
-            return self.xml_settings.font['default']
-    
-
-    def update_content(self):
-        """
-        there is no content in this area
-        """
-        self.width   = self.screen.width  - 2 * config.OSD_OVERSCAN_X
-        self.height  = self.screen.height - 2 * config.OSD_OVERSCAN_Y
-
-        if self.plugins == None:
-            self.plugins = plugin.get('daemon_draw')
-
-        for p in self.plugins:
-            p.draw((self.widget_type, self.menuw), self)
 

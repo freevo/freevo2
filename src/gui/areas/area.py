@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/08/05 17:30:24  dischi
+# cleanup
+#
 # Revision 1.5  2004/07/27 18:52:30  dischi
 # support more layer (see README.txt in backends for details
 #
@@ -168,7 +171,7 @@ class Skin_Area:
         self.objects = SkinObjects()
             
 
-    def draw(self, settings, obj, menu, display_style=0, widget_type='menu'):
+    def draw(self, settings, obj, display_style=0, widget_type='menu'):
         """
         this is the main draw function. This function draws the background,
         checks if redraws are needed and calls the two update functions
@@ -181,8 +184,8 @@ class Skin_Area:
         self.xml_settings  = settings
         self.widget_type   = widget_type
 
-        self.menuw = obj
-        if menu:
+        if widget_type == 'menu':
+            menu = obj
             self.menu = menu
             if self.menu.force_skin_layout != -1:
                 self.display_style = self.menu.force_skin_layout
@@ -302,7 +305,7 @@ class Skin_Area:
         image  = None
         folder = 0
 
-        menu.skin_default_has_images       = False
+        menu.skin_default_has_images      = False
         menu.skin_default_has_description = False
 
         if hasattr(menu, 'is_submenu'):
