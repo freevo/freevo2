@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/11/09 19:35:46  rshortt
+# Runtime fixes.
+#
 # Revision 1.21  2003/11/09 16:36:46  rshortt
 # Some pygphoto and gphoto plugin fixes.
 #
@@ -98,6 +101,8 @@
 
 include package_list.mk
 
+RUNTIME_VERSION="0.2"
+
 COPY_BASE=`pwd`
 
 EXT=
@@ -142,8 +147,10 @@ runapp_dyn: src/runapp.c
 
 
 runtime_release: runapp_static copy
-	rm -f runtime.tar.gz
-	tar zcvhf runtime.tar.gz runapp apps lib dll preloads
+	rm -f ../freevo-runtime-$(RUNTIME_VERSION).tar.gz
+	cd ..; \
+	tar zcvhf freevo-runtime-$(RUNTIME_VERSION).tar.gz runtime/runapp runtime/apps runtime/lib runtime/dll runtime/preloads ; \
+	cd -
 
 # Copy the libraries, programs etc to this directory
 # There is no dependency checking, the libs are just copied
