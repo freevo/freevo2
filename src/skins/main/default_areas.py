@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/01/13 19:12:12  dischi
+# small fix
+#
 # Revision 1.5  2004/01/05 21:13:36  dischi
 # make it possible that menu itself has title and subtitle
 #
@@ -148,7 +151,7 @@ class Title_Area(Skin_Area):
                     text = menu.title
 
         self.text = text
-        self.drawstring(text, content.font, content, height=-1, mode='hard')
+        self.drawstring(text, content.font, content, mode='hard')
 
 
 
