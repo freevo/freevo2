@@ -9,6 +9,17 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/10/23 02:26:52  outlyer
+# Bugfix for missing 'menu' button; it was here before, and it was removed
+# for some reason.
+#
+# Most DVDs have multiple menus, but not all DVDs have a TitleMenu, so under
+# the previous event structure, you could only move to the topmost menu, and
+# only if it was designated as such.
+#
+# This patch allows the old behaviour (from when I first implemented code to
+# support Dischi's Xine patches) which works with more DVDs.
+#
 # Revision 1.27  2003/10/19 16:15:51  rshortt
 # Added OS_EVENT_KILL.  recordserver will now kill and wait.
 #
@@ -356,7 +367,8 @@ DVD_EVENTS = {
     'SELECT'    : DVDNAV_SELECT,
     'REW'       : Event(SEEK, arg=-10),
     'FFWD'      : Event(SEEK, arg=10),
-    'MENU'      : DVDNAV_TITLEMENU,
+    'GUIDE'     : DVDNAV_TITLEMENU,
+    'MENU'      : DVDNAV_MENU,
     'VOL+'      : MIXER_VOLUP,
     'VOL-'      : MIXER_VOLDOWN,
     'MUTE'      : MIXER_MUTE,
