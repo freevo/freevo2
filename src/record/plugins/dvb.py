@@ -2,21 +2,43 @@ import os
 import config
 import generic
 
+import util.fileops
+
 class PluginInterface(generic.PluginInterface):
 
     def __init__(self, device='dvb0'):
         self.name = device
         self.device = config.TV_SETTINGS[device]
-        generic.PluginInterface.__init__(self)
 
-        self.suffix = '.ts'
-
+	home = os.environ[ 'HOME' ]
+	pathes = [ os.path.join( home, '.freevo' ),
+		   os.path.join( home, '.mplayer' ),
+		   os.path.join( home, '.xine' ) ]
+        self.program = 'mplayer'
         if self.device.type == 'DVB-T':
             rating = 10
+	    self.program = 'tzap'
+            self.program_file = util.fileops.find_file_in_path( self.program )
+            if self.program_file:
+                pathes.insert( 0, os.path.join( home, '.tzap' ) )
         elif self.device.type == 'DVB-C':
             rating = 20 
         else:
             rating = 15 
+	
+        if not self.program_file:
+	    self.program = 'mplayer'
+	    self.program_file = config.CONF.mplayer
+	
+	self.configfile = util.fileops.find_file_in_path( 'channels.conf',
+							  pathes )
+	if not self.configfile:
+	    self.reason = 'no channels configuration found'
+	    return
+
+        generic.PluginInterface.__init__(self)
+        self.suffix = '.ts'
+
         channels = []
         for c in self.device.channels:
             channels.append([c])
@@ -29,8 +51,13 @@ class PluginInterface(generic.PluginInterface):
             filename = rec.url[5:]
         else:
             filename = rec.url
-        return [ config.CONF.mplayer, '-dumpstream', '-dumpfile',
-                 filename, 'dvb://' + String(channel) ]
+
+        if self.program == 'mplayer':
+            return [ self.program_file, '-dumpstream', '-dumpfile',
+                     filename, 'dvb://' + String(channel) ]
+        elif self.program == 'tzap':
+	    return [ self.program_file, '-o', filename, '-c', self.configfile,
+	             '-a', self.device.adapter, String( channel ) ]
 
     
     def get_channel_list(self):
