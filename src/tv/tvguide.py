@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/05/30 03:40:39  outlyer
+# CVS has very weird merging behaviour. Both Rob and I made the same bugfix
+# and it appeared to add both. I'm removing the dupe code since it's quite
+# dumb to have it twice.
+#
 # Revision 1.7  2003/05/30 03:29:09  outlyer
 # Added missing direction events (UP/DOWN/LEFT/RIGHT) to TV Guide.
 #
@@ -122,22 +127,6 @@ class TVGuide(gui.GUIObject):
             self.hide()
             self.player('tv', self.selected.channel_id)
         
-        elif event == em.MENU_DOWN:
-            self.event_DOWN()
-            self.menuw.refresh()
-        
-        elif event == em.MENU_UP:
-            self.event_UP()
-            self.menuw.refresh()
-
-        elif event == em.MENU_RIGHT:
-            self.event_RIGHT()
-            self.menuw.refresh()
-
-        elif event == em.MENU_LEFT:
-            self.event_LEFT()
-            self.menuw.refresh()
-
         elif event == em.PLAY_END:
             self.show()
 
