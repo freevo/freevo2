@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/06/25 15:37:37  dischi
+# some try-except if you can't write files
+#
 # Revision 1.24  2003/06/24 18:38:41  dischi
 # Fixed handling when search returns only one result
 #
@@ -318,9 +321,14 @@ def download_image(url, filename):
         print error
         return None
         
-    i = open(filename, 'w')
-    i.write(r.read())
-    i.close()
+    try:
+        i = open(filename, 'w')
+        i.write(r.read())
+        i.close()
+    except IOError:
+        print "Writing image failed"
+        conn.close()
+        return None
 
     # try to crop the image to avoid borders by imdb and unidented tot return
     try:
@@ -380,7 +388,13 @@ def write_fxd(imdb_number, filename, drive, image_url, type, files, cdid, imdb_d
 
     title, info, None = imdb_data
     
-    i = codecs.open('%s.fxd' % filename, 'w', encoding='utf-8')
+
+    try:
+        i = codecs.open('%s.fxd' % filename, 'w', encoding='utf-8')
+    except IOError:
+        print "Writing .fxd failed"
+        return 
+
     i.write("<?xml version=\"1.0\" ?>\n<freevo>\n")
     i.write("  <copyright>\n" +
             "    The information in this file are from the Internet " +
