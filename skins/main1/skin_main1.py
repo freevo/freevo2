@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.94  2003/04/21 17:35:41  dischi
+# only shorten name if we have an image
+#
 # Revision 1.93  2003/04/21 13:31:04  dischi
 # moved audio name parser to audioitem until the skin has better support for it
 #
@@ -138,8 +141,8 @@ class Title_Area(Skin_Area):
         elif len(menu.choices) == 0:
             text = ''
         elif content.type == 'short item':
-            if menu.selected.type == 'video' and hasattr(menu.selected,'tv_show') and \
-               menu.selected.tv_show:
+            if menu.selected.image and menu.selected.type == 'video' and \
+               hasattr(menu.selected,'tv_show') and menu.selected.tv_show:
                 sn = menu.selected.show_name
                 text = sn[1] + "x" + sn[2] + " - " + sn[3] 
             else:
@@ -164,8 +167,8 @@ class Title_Area(Skin_Area):
         elif len(menu.choices) == 0:
             text = ''
         elif content.type == 'short item':
-            if menu.selected.type == 'video' and hasattr(menu.selected, 'tv_show') and \
-               menu.selected.tv_show:
+            if menu.selected.image and menu.selected.type == 'video' and \
+               hasattr(menu.selected, 'tv_show') and menu.selected.tv_show:
                 sn = menu.selected.show_name
                 text = sn[1] + "x" + sn[2] + " - " + sn[3] 
             else:
