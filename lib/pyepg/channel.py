@@ -46,6 +46,7 @@
 #
 # -----------------------------------------------------------------------------
 
+import time
 
 # Try to import the notifier or set the variable notifier to None. If
 # 'notifier' is not None and 'notifier.step' is not None, call the step
@@ -86,31 +87,12 @@ class Channel:
         self.title     = display_name
 
 
-    def __get_dummy_programs(self, start, stop):
+    def __get_dummy_program(self, start, stop):
         """
         Return some default Program with intervals no longer than a
         set default.
         """
-        default_prog_interval = 30 * 60
-        dummies = []
-        d_start = start
-        d_stop  = 0
-
-        sec_after_last = start % default_prog_interval
-        sec_until_next = default_prog_interval - sec_after_last
-
-        while(d_stop < stop):
-            d_stop = d_start + sec_until_next
-            if d_stop > stop:
-                d_stop = stop
-
-            dummies.append(Program(-1, u'NO DATA', d_start, d_stop,
-                                   '', '', '', self))
-
-            sec_until_next = default_prog_interval
-            d_start = d_stop
-
-        return dummies
+        return Program(-1, u'NO DATA', start, stop, '', '', '', self)
 
 
     def __import_programs(self, start, stop=-1, progs=[]):
@@ -119,8 +101,6 @@ class Channel:
         add them to our local list.  If there are gaps between the programs
         we will add dummy programs to fill it (TODO).
         """
-        # FIXME: adding dummy programs will add them from start to stop and
-        # not in 30 minutes chunks. That's bad!
         new_progs = []
         dummy_progs = []
         # keep the notifier alive
@@ -140,7 +120,7 @@ class Channel:
 
         l = len(new_progs)
         if not l:
-            dummy_progs = self.__get_dummy_programs(start, stop)
+            dummy_progs.append(self.__get_dummy_program(start, stop))
         else:
             p0 = new_progs[0]
             p1 = new_progs[-1]
@@ -153,18 +133,16 @@ class Channel:
                 if p == p0:
                     # fill gaps before
                     if p.start > start:
-                        n = self.__get_dummy_programs(start, p.start)
-                        dummy_progs += n
+                        dummy_progs.append(self.__get_dummy_program(start, p.start))
                 elif p == p1:
                     # fill gaps at the end
                     if p.stop < stop:
-                        n = self.__get_dummy_programs(p.stop, stop)
-                        dummy_progs += n
+                        dummy_progs.append(self.__get_dummy_program(p.stop, 
+                                            (int(time.time())/86400*86400)))
                 else:
                     # fill gaps between programs
                     if last.stop < p.start:
-                        n = self.__get_dummy_programs(last.stop, p.start)
-                        dummy_progs += n
+                        dummy_progs.append(self.__get_dummy_program(last.stop, p.start))
                 last = p
                 # Add program. Because of some bad jitter from 60 seconds in
                 # __import_programs calling the first one and the last could
