@@ -145,4 +145,5 @@ def notification(entity):
         server.recording_list(callback=record_list_callback)
         server.favorite_list(callback=favorite_list_callback)
 
-mcomm.register_entity_notification(notification)
+if not mcomm.get_instance('recordserver'):
+    mcomm.register_entity_notification(notification)
