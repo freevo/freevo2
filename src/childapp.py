@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2003/11/11 17:59:03  dischi
+# remove empty vals from app list
+#
 # Revision 1.40  2003/11/08 13:18:23  dischi
 # support for unicode start strings
 #
@@ -150,6 +153,9 @@ class ChildApp:
 
         else:
             # app is a list
+            while '' in app:
+                app.remove('')
+
             if app[0].find('--prio=') == 0 and not config.RUNAPP:
                 try:
                     prio = int(app[7:app.find(' ')])
