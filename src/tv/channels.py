@@ -9,6 +9,20 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2004/10/23 14:46:35  rshortt
+# -Move ProgramItem into program_display.py (at least for now).
+# -Move when_listings_expire() and get_chan_displayname() to here from util.
+# -Remove index for ChanelItem's programs.
+# -Add import_programs() for getting programs from the database and adding
+#  ProgramItems to self.programs of ChannelItem.  This also checks for gaps
+#  in program data and fills them with default ProgramItems.  It sorts the
+#  list as well.
+# -Modified ChannelItem's get() to check self.programs first, then call
+#  import_programs() for what we may be missing.  Also next() and prev() both
+#  check self.programs, then call import_programs() if there is no next or
+#  prev program.
+# -Add import_programs() to ChannelList which calls it on all of its channels.
+#
 # Revision 1.27  2004/10/18 01:15:20  rshortt
 # Changes to use new pyepg:
 # -Add ProgramItem and ChannelItem classes which take code from the old tv
@@ -94,6 +108,7 @@ import tv.freq
 import plugin
 # import util.fthread as fthread
 from item import Item
+from tv.program_display import ProgramItem
 
 # The Electronic Program Guide
 import pyepg
@@ -270,83 +285,32 @@ def get_actual_channel(channel_id, which):
                     return string.lstrip(u, '%s:' % which)
 
 
-class ProgramItem(Item):
-    """
-    Information about one TV program.
-    """
+def get_chan_displayname(channel_id):
 
-    def __init__(self, title, start, stop, subtitle='', description='', 
-                 id=None, channel_id=None, parent=None):
-        if parent:
-            Item.__init__(self, parent)
-        else:
-            Item.__init__(self)
+    for chan in get_channels().get_all():
+        if chan.info['id'] == channel_id:
+            return chan.name
 
-        self.title = self.info['title'] = title
-        # self.info['title'] = title
-        self.start = self.info['start'] = start
-        self.stop = self.info['stop'] = stop
-        self.channel_id = channel_id
-        self.info['subtitle'] = subtitle
-        self.info['description'] = description
-        self.info['id'] = id
-        self.name = '%d\t%s' % (self.info['start'], self.title)
-
-        self.valid = 1
-# XXX: getting acsii error with if title == NO_DATA:
-#        if title == NO_DATA:
-#            self.valid = 0
-#        else:
-#            self.valid = 1
-        
-        self.scheduled  = 0
-
-    def __unicode__(self):
-        """
-        return as unicode for debug
-        """
-        bt = time.localtime(self.start)   # Beginning time tuple
-        et = time.localtime(self.stop)    # End time tuple
-        begins = '%s-%02d-%02d %02d:%02d' % (bt[0], bt[1], bt[2], bt[3], bt[4])
-        ends   = '%s-%02d-%02d %02d:%02d' % (et[0], et[1], et[2], et[3], et[4])
-        return u'%s to %s  %3s ' % (begins, ends, self.channel_id) + \
-                   self.title + u' (%s)' % self.pos
+    return 'Unknown'
 
 
-    def __str__(self):
-        """
-        return as string for debug
-        """
-        return String(self.__unicode__())
+def when_listings_expire():
 
-    
-    def __cmp__(self, other):
-        """
-        compare function, return 0 if the objects are identical, 1 otherwise
-        """
-        if not other:
-            return 1
-        return self.title != other.title or \
-               self.start != other.start or \
-               self.stop  != other.stop or \
-               self.channel_id != other.channel_id
+    last = 0
+    left = 0
 
+    for ch in get_channels().get_all():
+        prog = ch.programs[len(ch.programs)-1]
+        if prog.start > last: last = prog.start
 
-    def getattr(self, attr):
-        """
-        return the specific attribute as string or an empty string
-        """
-        if attr == 'start':
-            return Unicode(time.strftime(config.TV_TIMEFORMAT, time.localtime(self.start)))
-        if attr == 'stop':
-            return Unicode(time.strftime(config.TV_TIMEFORMAT, time.localtime(self.stop)))
-        if attr == 'date':
-            return Unicode(time.strftime(config.TV_DATEFORMAT, time.localtime(self.start)))
-        if attr == 'time':
-            return self.getattr('start') + u' - ' + self.getattr('stop')
-        if hasattr(self, attr):
-            return getattr(self,attr)
-        return ''
+    if last > 0:
+        now = time.time()
+        if last > now:
+            left = int(last - now)
+            # convert to hours
+            left /= 3600
+
+    return left
 
 
 
@@ -355,7 +319,7 @@ class ChannelItem(Item):
     Information about one specific channel, also containing
     epg informations.
     """
-    def __init__(self, id, call_sign, uri, add_programs=True):
+    def __init__(self, id, call_sign, uri):
         Item.__init__(self)
 
         self.info['id'] = id
@@ -364,9 +328,6 @@ class ChannelItem(Item):
         self.uri = []
         self.programs = []
         self.logo = ''
-        self.index       = {}
-        self.index_start = 0
-        self.index_end   = 0
 
         if isinstance(uri, list) or isinstance(uri, tuple):
             for u in uri:
@@ -382,21 +343,6 @@ class ChannelItem(Item):
 
         # print 'C: %s' % self.info['id']
         # print 'C: %s' % self.id()
-        if add_programs:
-            # Create a list of ProgramItems containing EPG data.
-            for p in get_epg().get_programs(self.info['id']):
-                # print 'P: %s' % p
-                self.programs.append(ProgramItem(p.title, p.start, p.stop,
-                                                 subtitle=p.subtitle,
-                                                 description=p.description,
-                                                 id=p.id,
-                                                 channel_id=self.info['id']))
-
-                # TODO: add information about program being recorded which
-                #       comes from another DB table - same with categories,
-                #       ratings and advisories.
-
-        self.create_index()
 
 
     def __add_uri__(self, uri):
@@ -442,104 +388,176 @@ class ChannelItem(Item):
         return settings
 
 
-    def create_index(self):
+    def sort_programs(self):
+        f = lambda a, b: cmp(a.start, b.start)
+        self.programs.sort(f)
+
+
+    def import_programs(self, start, stop=-1):
         """
-        create index for faster access
+        Get programs from the database to create ProgramItems from then
+        add them to our local list.  If there are gaps between the programs
+        we will add dummy programs to fill it (TODO).
         """
-        last     = 0
-        index    = 0
-        last_key = 0
+        new_progs = []
+        dummy_progs = []
 
-        self.programs[0].index = 0
-        for p in self.programs[1:]:
-            index += 1
-            p.index = index
-            key = int(p.start) / (60 * 60 * 24)
-            if not self.index_start:
-                self.index_start = key
-            self.index_end = key
-            if not self.index.has_key(key):
-                if last_key:
-                    while len(self.index[last_key]) < 48:
-                        self.index[last_key].append(last)
-                self.index[key] = []
-            pos = (int(p.start) / (60 * 30)) % (48)
-            p.pos = pos
-            
-            if len(self.index[key]) >= pos + 1:
-                last = index
-                continue
-            while len(self.index[key]) < pos:
-                self.index[key].append(last)
-            self.index[key].append(index)
-            last = index
-            last_key = key
-        while len(self.index[key]) < 48:
-            self.index[key].append(index)
+        progs = get_epg().get_programs(self.info['id'], start, stop)
+        for p in progs:
+            new_progs.append(ProgramItem(p.title, p.start, p.stop,
+                                         subtitle=p.subtitle,
+                                         description=p.description,
+                                         id=p.id,
+                                         channel_id=self.info['id']))
+
+            # TODO: add information about program being recorded which
+            #       comes from another DB table - same with categories,
+            #       ratings and advisories.
+
+        l = len(new_progs)
+        if not l:
+            for d in get_dummy_programs(start, stop):
+                dummy_progs.append(d)
+
+        for p in new_progs:
+            i = new_progs.index(p)
+            if i == 0:
+                # fill gaps before
+                if p.start > start:
+                    for d in get_dummy_programs(start, p.start):
+                        dummy_progs.append(d)
+
+            if i < l-1:
+                # fill gaps between programs
+                next_p = new_progs[i+1]
+                if p.stop < next_p.start: 
+                    for d in get_dummy_programs(p.stop, next_p.start):
+                        dummy_progs.append(d)
+
+            elif i == l-1:
+                # fill gaps at the end
+                if p.stop < stop:
+                    for d in get_dummy_programs(p.stop, stop):
+                        dummy_progs.append(d)
+                
+
+        for p in new_progs:
+            self.programs.append(p)
+
+        for p in dummy_progs:
+            self.programs.append(p)
+
+        # TODO: check for duplicates?
+        self.sort_programs()
 
 
-    def __get_pos__(self, start, stop):
+    def get_dummy_programs(self, start, stop):
         """
-        get internal positions for programs between start and stop
+        Return some default ProgramItems with intervals no longer than a
+        set default.
         """
-        start -= 60 * 30
-        key = int(start) / (60 * 60 * 24)
-        if key < self.index_start:
-            key = self.index_start
-            pos = 0
-        else:
-            pos = (int(start) / (60 * 30)) % (48)
+        default_prog_interval = 30 * 60
+        dummies = []
+        d_start = start
+        d_stop  = 0
 
-        start = max(self.index[key][pos], 0)
-        
-        key = int(stop) / (60 * 60 * 24)
-        if key > self.index_end:
-            key = self.index_end
-            pos = 47
-        else:
-            pos = (int(stop) / (60 * 30)) % (48) + 1
+        sec_after_last = start % default_prog_interval
+        sec_until_next = default_prog_interval - sec_after_last
 
-        if pos >= 48:
-            # next day
-            key += 1
-            if key > self.index_end:
-                key = self.index_end
-                pos = 47
-            else:
-                pos = 0
+        while(d_stop < stop):
+            d_stop = d_start + sec_until_next
+            if d_stop > stop:
+                d_stop = stop
 
-        stop = self.index[key][pos] + 1
-        return start, stop
+            dummies.append(ProgramItem(u'NO DATA', d_start, d_stop,
+                                       id=-1, channel_id=self.info['id']))
 
+            sec_until_next = default_prog_interval
+            d_start = d_stop
+
+        return dummies
+ 
 
     def get(self, start, stop=0):
         """
         get programs between start and stop time or if stop=0, get
         the program running at 'start'
         """
-        print 'RLS: get(%d, %d)' % (start, stop)
-        if not stop:
-            stop = start
-        start_p, stop_p = self.__get_pos__(start, stop)
-        f = lambda p, a=start, b=stop: not (p.start > b or p.stop < a)
-        try:
-            progs = filter(f, self.programs[start_p:stop_p])
-            if not len(progs):  return [ None, ]
-            return progs
-        except Exception, e:
-            print 'RLS: return filter failed'
-            traceback.print_exc()
-            return [ None, ]
-                
+        progs = []
+        need_before = 0
+        need_after = 0
+
+        # print 'GET 1: programs len %d' % len(self.programs)
+        if len(self.programs):
+            # see if we're missing programs before start
+            p = self.programs[0]
+            if p.start > start:
+                need_before = p.start
+
+            p = self.programs[len(self.programs)-1]
+            if p.stop < stop:
+                need_after = p.stop
+        else:
+            self.import_programs(start, stop)
+     
+        if need_before:
+            self.import_programs(start, need_before)
+
+        if need_after:
+            self.import_programs(need_after, stop)
+        
+        # print 'GET 2: programs len %d' % len(self.programs)
+        for p in self.programs:
+            if stop == 0:
+                # only get what's running at time start
+                if p.start <= start and p.stop > start:
+                    progs.append(p)
+                    continue
+
+            elif stop == -1:
+                # get everything from time start onwards
+                if (p.start <= start and p.stop > start) or \
+                    p.start > start:
+                    progs.append(p)
+                    continue
+
+            elif stop > 0:
+                # get everything from time start to time stop
+                if (p.start <= start and p.stop > start) or \
+                   (p.start > start and p.stop < stop) or \
+                   (p.start < stop and p.stop >= stop):
+                    progs.append(p)
+                    continue
+
+        return progs
+
 
     def next(self, prog):
         """
         return next program after 'prog'
         """
-        pos  = min(len(self.programs)-1, prog.index + 1)
-        prog = self.programs[pos]
-        if pos < len(self.programs) and not prog.valid:
-            return self.next(prog)
+        # print 'next: programs len %d' % len(self.programs)
+        # for p in self.programs:
+        #     print 'P: %s' % p
+        # print 'next: at prog %s' % prog
+
+        pos = self.programs.index(prog)
+        # print 'next: at pos %d' % pos
+
+        if pos < len(self.programs)-1:
+            # print 'next: which is less than %d' % (len(self.programs)-1)
+            # return self.programs[pos+1]
+            next_prog = self.programs[pos+1]
+            # print 'next: nex_prog %s' % next_prog
+            return next_prog
+        else:
+            i_start = self.programs[len(self.programs)-1].stop
+            self.import_programs(i_start, i_start+3*3600)
+
+            if self.programs.index(prog) < len(self.programs)-1:
+                return self.programs[pos+1]
+
+        # print 'next: returning prog %s' % prog
         return prog
 
     
@@ -547,10 +565,20 @@ class ChannelItem(Item):
         """
         return previous program before 'prog'
         """
-        pos = max(0, prog.index - 1)
-        prog = self.programs[pos]
-        if pos > 0 and not prog.valid:
-            return self.prev(prog)
+        pos = self.programs.index(prog)
+
+        if pos > 0:
+            return self.programs[pos-1]
+        else:
+            i_stop = self.programs[0].start
+            self.import_programs(i_stop-3*3600, i_stop)
+
+            if self.programs.index(prog) > 0:
+                return self.programs[pos-1]
+
+        # print 'prev: at pos %d' % pos
+
+        # print 'prev: returning prog %s' % prog
         return prog
                     
 
@@ -592,6 +620,9 @@ class ChannelList:
             if not override:
                 self.add_channel(ChannelItem(id=c.id, call_sign=c.call_sign, 
                                              uri=c.tuner_id))
+
+        # TODO:  Check TV_CHANNELS for any channels that aren't in EPGDB then
+        #        at them to the list.
         
 
     def add_channel(self, channel):
@@ -603,6 +634,13 @@ class ChannelList:
             # well in Python since they will both point to the same object!
             self.channel_dict[channel.id] = channel
             self.channel_list.append(channel)
+
+
+    def import_programs(self, start, stop=-1):
+        """
+        """
+        for c in self.channel_list:
+            c.import_programs(start, stop)
 
 
     def down(self):
