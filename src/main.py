@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.101  2004/01/01 12:27:38  dischi
+# bugfix and add config.TIME_DEBUG to trace the needed time
+#
 # Revision 1.100  2003/12/30 15:34:02  dischi
 # o move the shutdown function to plugins/shutdown
 # o merge the two parts of the main function
@@ -148,7 +151,7 @@ class SkinSelectItem(Item):
 
         menuw.menustack[0].choices = []
         for p in plugin.get('mainmenu'):
-            menuw.menustack[0].choices += p.items(parent)
+            menuw.menustack[0].choices += p.items(self)
 
         menuw.menustack[0].selected = menuw.menustack[0].choices[pos]
         menuw.back_one_menu()
@@ -443,7 +446,11 @@ try:
             app = osd.focused_app()
             if app:
                 try:
+                    if config.TIME_DEBUG:
+                        t1 = time.clock()
                     app.eventhandler(event)
+                    if config.TIME_DEBUG:
+                        print time.clock() - t1
                 except SystemExit:
                     raise SystemExit
                 except:
