@@ -1,6 +1,6 @@
-#!/usr/bin/env python2
+################################################################################
 #
-#  Copyright (C) 2002  Travis Shirk <travis@pobox.com>
+#  Copyright (C) 2002-2003  Travis Shirk <travis@pobox.com>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -16,9 +16,9 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-import utils, binfuncs;
-from binfuncs import *;
-from utils import *;
+################################################################################
+from eyeD3.binfuncs import *;
+from eyeD3.utils import *;
 
 #######################################################################
 class Mp3Exception:

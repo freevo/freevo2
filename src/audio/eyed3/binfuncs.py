@@ -1,6 +1,7 @@
+################################################################################
 #
+#  Copyright (C) 2002-2003  Travis Shirk <travis@pobox.com>
 #  Copyright (C) 2001  Ryan Finne <ryan@finnie.org>
-#  Copyright (C) 2002  Travis Shirk <travis@pobox.com>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -16,6 +17,7 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
+################################################################################
 
 # Accepts a string of bytes (chars) and returns an array of bits
 # representing the bytes in big endian byte (Most significant byte/bit first)
@@ -108,22 +110,14 @@ def bin2synchsafe(x):
    elif len(x) < 8:
       return x;
 
-   bits = [];
-   bits.extend(x);
-   # LSB first.
-   bits.reverse();
+   n = bin2dec(x);
+   bites = "";
+   bites += chr((n >> 21) & 0x7f);
+   bites += chr((n >> 14) & 0x7f);
+   bites += chr((n >>  7) & 0x7f);
+   bites += chr((n >>  0) & 0x7f);
+   bits = bytes2bin(bites);
+   if len(bits) < 32:
+      bits = ([0] * (32 - len(x))) + bits;
 
-   c = 1;
-   while c <= (len(bits) // 8):
-      i = (c * 8) - 1;
-      if bits[i]:
-         bits.insert(i, 0);
-      c += 1;
-   if len(bits) > 32:
-      bits = bits[:32];
-   elif len(bits) < 32:
-      bits.extend([0] * (32 - len(bits)));
-
-   # MSB first.
-   bits.reverse();
    return bits;
