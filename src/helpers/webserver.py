@@ -1,38 +1,17 @@
-#!/usr/bin/env python
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
-# webserver.py - start the webserver
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# webserver.py - start script for the webserver
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes:
+# This helper will start the freevo webserver.
 #
-# Todo:        
-#
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.18  2004/12/21 15:06:53  dischi
-# catch exceptions on normal exit
-#
-# Revision 1.17  2004/12/19 16:39:39  dischi
-# adjust to new record.client module
-#
-# Revision 1.16  2004/12/19 11:27:09  dischi
-# add new htdocs dir
-#
-# Revision 1.15  2004/12/18 20:08:23  dischi
-# use logging module for debug
-#
-# Revision 1.14  2004/12/18 19:49:48  dischi
-# find the recordserver :)
-#
-# Revision 1.13  2004/12/18 19:05:07  dischi
-# make the webserver work again
-#
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -49,8 +28,9 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
+# python imports
 import os
 import notifier
 import logging
@@ -61,9 +41,10 @@ log = logging.getLogger('www')
 # set basic recording debug to info
 log.setLevel(logging.INFO)
 
-
+# import freevo config
 import config
 
+# import webserver
 from www.server import Server, RequestHandler
 
 # init notifier
@@ -79,7 +60,9 @@ htdocs  = [ os.path.join(cgi_dir, 'htdocs'),
 
 try:
     # launch the server on port 8080
-    Server('', config.WWW_PORT, RequestHandler, [ cgi_dir, 'www' ], htdocs)
+    Server('', config.WWW_PORT, RequestHandler,
+           [ (os.path.join(cgi_dir, 'plugins'), 'www.plugins'),
+             (os.path.join(cgi_dir, 'pages'), 'www.pages') ] , htdocs)
     log.info("HTTPServer running on port %s" % str(config.WWW_PORT))
     
     # loop

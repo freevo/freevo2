@@ -10,7 +10,7 @@
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
 #
-# Fisrt Version: Dirk Meyer <dmeyer@tzi.de>
+# First Version: Dirk Meyer <dmeyer@tzi.de>
 # Maintainer:    Dirk Meyer <dmeyer@tzi.de>
 #
 # Based on ideas from the ASPN Python Cookbook:
@@ -110,28 +110,32 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             self.wfile.writefd(f)
             return None
             
-        if os.path.isdir(self.server.scripts[0] + path):
-            path += '/index'
-        path = path.replace('//', '/')
-        if os.path.isfile(self.server.scripts[0] + path + '.py'):
-            try:
-                module = path[1:].replace('/', '.')
-                if not self.server.resources.has_key(path):
-                    exec('import %s.%s as r' % \
-                         (self.server.scripts[1], module))
-                    self.server.resources[path] = r
-                else:
-                    reload(self.server.resources[path])
-            except Exception:
-                self.send_response(501)
-                self.send_header("Content-type", 'text/html')
-                self.end_headers()
-                self.wfile.write('<h1>Webserver: Internal Server Error</h1>')
-                self.wfile.write('<pre>')
-                traceback.print_exc(file=self.wfile)
-                self.wfile.write('</pre>')
-                return
-        if not self.server.resources.has_key(path):
+        for script_dir, script_import in self.server.scripts:
+            path = self.path
+            if os.path.isdir(script_dir + path):
+                path += '/index'
+            path = path.replace('//', '/')
+            if os.path.isfile(script_dir + path + '.py'):
+                try:
+                    module = path[1:].replace('/', '.')
+                    if not self.server.resources.has_key(path):
+                        exec('import %s.%s as r' % \
+                             (script_import, module))
+                        self.server.resources[path] = r
+                    else:
+                        reload(self.server.resources[path])
+                    break
+                except Exception:
+                    self.send_response(501)
+                    self.send_header("Content-type", 'text/html')
+                    self.end_headers()
+                    error = '<h1>Webserver: Internal Server Error</h1>'
+                    self.wfile.write(error)
+                    self.wfile.write('<pre>')
+                    traceback.print_exc(file=self.wfile)
+                    self.wfile.write('</pre>')
+                    return
+        else:
             self.send_error(404, "File not found")
             return
         
