@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/03/10 07:09:48  outlyer
+# Added an uppercase /VIDEO_TS/ for DVDs in identifymedia. I couldn't verify
+# this works since I lack a cdrom drive.
+#
 # Revision 1.18  2003/02/25 05:31:47  krister
 # Made CD audio playing use -cdrom-device for mplayer.
 #
@@ -207,7 +211,8 @@ class Identify_Thread(threading.Thread):
                 pass
             
         mediatypes = [('VCD', '/mpegav/', 'vcd'), ('SVCD','/SVCD/', 'vcd'), 
-                      ('SVCD','/svcd/', 'vcd'), ('DVD', '/video_ts/', 'dvd') ]
+                      ('SVCD','/svcd/', 'vcd'), ('DVD', '/video_ts/', 'dvd') 
+		      ('DVD','/VIDEO_TS/','dvd')]
 
         image = title = movie_info = None
 
