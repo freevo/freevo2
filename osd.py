@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2002/10/15 01:05:21  gsbarbieri
+# I'd forgot some things...
+#
 # Revision 1.36  2002/10/14 21:37:04  gsbarbieri
 # Now osd.drawstringframed() has one more parameter: mode. It define the way
 # we break lines/truncate. Valid values can be: 'hard' and 'soft'. Soft is
@@ -571,7 +574,7 @@ class OSD:
     #  - Test it
     #  - Debug it
     #  - Improve it
-    def drawstringframed(self, string, x, y, width, height, fgcolor=None, bgcolor=None,
+    def drawstringframedsoft(self, string, x, y, width, height, fgcolor=None, bgcolor=None,
                          font=None, ptsize=0, align_h='left', align_v='top'):
 
         if not pygame.display.get_init():
