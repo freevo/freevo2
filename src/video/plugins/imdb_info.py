@@ -14,24 +14,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/11/24 19:21:04  dischi
+# do not depend on xml_parser, the item has all infos in it
+#
 # Revision 1.11  2003/11/16 17:41:05  dischi
 # i18n patch from David Sagnol
 #
 # Revision 1.10  2003/09/23 21:15:14  dischi
 # show info not only for files
-#
-# Revision 1.9  2003/09/14 03:19:42  outlyer
-# Fixed to accomodate changes in xml_parser.py; works again.
-#
-# Revision 1.8  2003/09/13 10:08:24  dischi
-# i18n support
-#
-# Revision 1.7  2003/08/30 12:21:13  dischi
-# small changes for the changed xml_parser
-#
-# Revision 1.6  2003/08/23 12:51:43  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -63,9 +53,7 @@ import plugin
 import re
 import time
 
-from video import xml_parser
 from gui.AlertBox import AlertBox
-
 
 class PluginInterface(plugin.ItemPlugin):        
 
@@ -82,17 +70,13 @@ class PluginInterface(plugin.ItemPlugin):
         """
         show info for this item
         """
-
-        file = self.item.xml_file
-        
-        if not file:
+        if not self.item.xml_file:
             box = AlertBox(text=_('There is no IMDB information for this file.'))
             box.show()
             return
 
-        infolist = xml_parser.parseMovieFile(file)
-        for info in infolist:
-            box = AlertBox(icon=info.image, width=550, height=400, text=_('%s\n \n \n  %s\n \n \n----\n Year: %s\n Genre: %s\n Rating: %s\n Runtime: %s') % (info.name,info.info['plot'],info.info['year'],info.info['genre'],info.info['rating'],info.info['length']))
-            box.show()
-        return
+        info = self.item
+
+        box = AlertBox(icon=info.image, width=550, height=400, text=_('%s\n \n \n  %s\n \n \n----\n Year: %s\n Genre: %s\n Rating: %s\n Runtime: %s') % (info.name,info.info['plot'],info.info['year'],info.info['genre'],info.info['rating'],info.info['length']))
+        box.show()
 
