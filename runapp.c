@@ -43,10 +43,10 @@ main (int ac, char *av[])
   
   /* Does the logdir exist? */
   if (!stat (RUNAPP_LOGDIR, &statbuf)) {
-    sprintf (logfile, "%s/internal-runapp.log", RUNAPP_LOGDIR);
+    sprintf (logfile, "%s/internal-runapp-%d.log", RUNAPP_LOGDIR, getuid());
   } else {
     /* No, log to the /tmp/freevo dir instead */
-    sprintf (logfile, "/tmp/freevo/internal-runapp.log");
+    sprintf (logfile, "/tmp/freevo/internal-runapp-%d.log", getuid());
     mkdir ("/tmp/freevo", 0777); /* Make sure the dir exists, ignore errors */
   }
   

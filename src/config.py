@@ -22,6 +22,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/01/04 16:39:47  dischi
+# Added uid to the name of the logfile to avoid conflicts when running
+# freevo with different users
+#
 # Revision 1.4  2002/12/30 15:07:40  dischi
 # Small but important changes to the remote control. There is a new variable
 # RC_MPLAYER_CMDS to specify mplayer commands for a remote. You can also set
@@ -92,7 +96,7 @@ class Logger:
         self.logtype = logtype
         try:
             appname = os.path.splitext(os.path.basename(sys.argv[0]))[0]
-            logfile = '%s/internal-%s.log' % (LOGDIR, appname)
+            logfile = '%s/internal-%s-%s.log' % (LOGDIR, appname, os.getuid())
             self.fp = open(logfile, 'a')
             print 'Logging info in %s' % logfile
         except IOError:
