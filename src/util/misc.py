@@ -10,17 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.13  2004/01/11 03:22:30  outlyer
-# First try at the "Coming Up" page. It only shows up when a directory in the
-# TV menu is selected, but I'm working on a way to have it show up for the
-# rest of the TV menu.
-#
-# TODO:
-# o Cache the coming up list for an hour at a time (misc.py)
-# o Cleanup the 'comingup()' function, it's currently just executable pseudo-code (misc.py)
-# o Show the Coming Up list for all items (skin)
-#
-# If you don't use 'blurr2.fxd' this will have no effect on you whatsoever.
+# Revision 1.14  2004/01/11 05:45:38  outlyer
+# Ouch! We definitely need a cache sooner than later. Without the cache
+# the  CPU usage on my Athlon 2000 was going to 40% (sorting, most likely
+# being a chunk of that)
 #
 # Revision 1.12  2004/01/01 16:18:11  dischi
 # fix crash
@@ -389,6 +382,18 @@ def comingup(items):
     # 
     import tv.record_client as ri
     import time
+   
+    result = ''
+
+    cachefile = '%s/upsoon' % (config.FREEVO_CACHEDIR)
+    print cachefile
+    if (os.path.exists(cachefile) and \
+        (abs(time.time() - os.path.getmtime(cachefile)) < 3600)):
+        cache = open(cachefile,'r')
+        for a in cache.readlines():
+            result = result + a
+        cache.close()
+        return result
 
     (status, recordings) = ri.getScheduledRecordings()
     progs = recordings.getProgramList()
@@ -408,9 +413,6 @@ def comingup(items):
             tomorrow.append(what)
         if what.start >= time.time() + 172800:
             later.append(what)
-
-    result = ''
-
 
 
     if len(today) > 0:
@@ -438,6 +440,10 @@ def comingup(items):
                 sub_title = ' "' + m.sub_title + '" '
             result = result + " " + str(m.title) + str(sub_title) + " at " + \
                 str(time.strftime('%I:%M%p',time.localtime(m.start))) + '\n'
+
+    cache = open(cachefile,'w')
+    cache.write(result)
+    cache.close()
 
     return result
 

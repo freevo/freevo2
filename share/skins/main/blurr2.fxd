@@ -140,7 +140,7 @@
 
     <menuset label="text with tv info style" inherits="text with info style">
         <screen layout="tv screen" visible="yes"/>
-        <info layout="tv extended info" x="50" y="100" width="700" height="300"/>
+        <info layout="tv extended info" x="50" y="100" width="700" height="230"/>
     </menuset>
 
 
