@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/06/23 11:11:18  dischi
+# bufix
+#
 # Revision 1.1  2003/11/11 01:56:57  outlyer
 # Move makelogos into the helpers directory. This works with
 # "freevo makelogos"
@@ -57,8 +60,8 @@ import urllib2
 import cStringIO
 import Image
 
-from freevo.tv import xmltv
-from freevo import config
+import config
+from tv import xmltv
 
 # Check if the logos directory exists, if not, make it before
 # proceeding
