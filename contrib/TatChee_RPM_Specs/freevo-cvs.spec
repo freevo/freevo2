@@ -78,8 +78,7 @@ install -m 755 freevo freevo_xwin runapp %{buildroot}%{_prefix}
 install -m 644 fbcon/fbset.db %{buildroot}%{_prefix}/fbcon
 install -m 755 fbcon/vtrelease fbcon/*.sh %{buildroot}%{_prefix}/fbcon
 install -m 755 fbcon/matroxset/matroxset %{buildroot}%{_prefix}/fbcon/matroxset
-install -m 755 helpers/blanking %{buildroot}%{_prefix}/helpers
-install -m 644 helpers/*.py %{buildroot}%{_prefix}/helpers
+install -m 755 helpers/* %{buildroot}%{_prefix}/helpers
 install -m 755 plugins/cddb/*.py plugins/cddb/cdrom.so %{buildroot}%{_prefix}/plugins/cddb
 install -m 644 plugins/weather/*.py plugins/weather/librarydoc.txt %{buildroot}%{_prefix}/plugins/weather
 install -m 644 plugins/weather/icons/* %{buildroot}%{_prefix}/plugins/weather/icons
@@ -181,6 +180,9 @@ ln -sf %{_cachedir}/freevo/testfiles %{_prefix}
 rm -f %{_prefix}/testfiles
 
 %changelog
+* Wed Jan 29 2003 TC Wan <tcwan@cs.usm.my>
+- Minor tweak to helpers subdirectory install
+
 * Tue Dec 31 2002 TC Wan <tcwan@cs.usm.my>
 - Automate CVS date generation
 
