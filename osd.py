@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2002/10/08 22:04:28  krister
+# Added an error message for when a font cannot be loaded.
+#
 # Revision 1.29  2002/10/06 14:33:26  dischi
 # log message cleanup and fixed a nasty bug in stringproxy
 #
@@ -867,7 +870,11 @@ class OSD:
                 return font.font
 
         if DEBUG: print 'OSD: Loading font "%s"' % filename
-        font = pygame.font.Font(filename, ptsize)
+        try:
+            font = pygame.font.Font(filename, ptsize)
+        except RuntimeError:
+            print 'Couldnt load font "%s"' % filename
+            raise
         f = Font()
         f.filename = filename
         f.ptsize = ptsize
