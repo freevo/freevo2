@@ -45,7 +45,12 @@
 
   This also works for movie files. E.g. you have a fxd file for a dvd, you can
   add the <skin> information to it. When you press ENTER on the DVD or MENU 
-  while playing to get the submenu, you will get the background image
+  while playing to get the submenu, you will get the background image. For a
+  DVD you may also want to redefine the colors of a popup box:
+
+      <color label="popup background" value="0xa0ffffff"/>
+      <color label="popup font" value="0xff0000"/>
+
 
    -->
 
