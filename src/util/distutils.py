@@ -66,6 +66,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/10/19 16:40:09  dischi
+# i18n support function for plugins
+#
 # Revision 1.4  2003/10/19 14:04:19  dischi
 # bugfix
 #
@@ -152,6 +155,44 @@ def check_libs(libs):
                 sys.exit(1)
             
 
+def i18n(application):
+    if len(sys.argv) > 1 and sys.argv[1].lower() == 'i18n':
+        if len(sys.argv) > 2 and sys.argv[2].lower() == '--help':
+            print 'Updates the i18n translation. This includes generating the pot'
+            print 'file, merging the pot file into the po files and generate the'
+            print 'mo files from them.'
+            print
+            print 'Options for \'i18n\' command:'
+            print '  --no-merge     don\'t merge pot file into po files'
+            print
+            sys.exit(0)
+            
+        # arg i18n will update the pot file and maybe merge the po files
+        print 'updating pot file'
+        os.system('(cd src ; find . -name \*.py | xargs xgettext -o ../i18n/%s.pot)' % \
+                  application)
+
+        # if arg 2 is not --no-merge to the merge
+        if not (len(sys.argv) > 2 and sys.argv[2] == '--no-merge'):
+            for file in ([ os.path.join('i18n', fname) for fname in os.listdir('i18n') ]):
+                if os.path.isdir(file) and file.find('CVS') == -1:
+                    print 'updating %s...' % file,
+                    sys.stdout.flush()
+                    file = os.path.join(file, 'LC_MESSAGES/%s.po' % application)
+                    os.system('msgmerge --update --backup=off %s i18n/%s.pot' % \
+                              (file, application))
+
+    if len(sys.argv) > 1 and sys.argv[1].lower() in ('i18n', 'sdist', 'bdist_rpm'):
+        # update the mo files
+        print 'updating mo files'
+        for file in ([ os.path.join('i18n', fname) for fname in os.listdir('i18n') ]):
+            if os.path.isdir(file) and file.find('CVS') == -1:
+                file = os.path.join(file, 'LC_MESSAGES/%s.po' % application)
+                mo = os.path.splitext(file)[0] + '.mo'
+                os.system('msgfmt -o %s %s' % (mo, file))
+        
+    if len(sys.argv) > 1 and sys.argv[1].lower() == 'i18n':
+        sys.exit(0)
     
 # create list of source files
 package_dir = {}
