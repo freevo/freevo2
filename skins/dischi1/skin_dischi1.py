@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/03/02 15:18:48  dischi
+# Don't redraw if a child is visble
+#
 # Revision 1.25  2003/03/02 15:04:08  dischi
 # Added forced_redraw after Clear()
 #
@@ -394,7 +397,15 @@ class Skin:
     def DrawMenu(self, menuw):
         if not menuw.visible:
             return
-        
+
+        draw_allowed = TRUE
+        for child in menuw.children:
+            draw_allowed = draw_allowed and not child.visible
+
+        if not draw_allowed:
+            self.force_redraw = TRUE
+            return
+            
         menu = menuw.menustack[-1]
 
         if not menu:
