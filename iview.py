@@ -74,6 +74,51 @@ class ImageViewer:
         osd.clearscreen(color=osd.COL_BLACK)
         osd.update()
 
+
+
+        # XXX New version of the code below, use "if 0" to disable
+        # XXX This version uses the OSD server JPEG support and bitmap scaling
+        # XXX It also scales the bitmap to max resolution while maintaining the aspect ratio
+        # XXX and places it in the middle of the screen. The filename is displayed in the corner.
+        if 1:
+            osd.drawstring('please wait...', osd.width/2 - 60, osd.height/2 - 10,
+                           fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
+            osd.update()
+
+            image = Image.open(filename)
+            width, height = image.size
+
+            scale_x = scale_y = 1.0
+            if width > osd.width: scale_x = float(osd.width) / width
+            if height > osd.height: scale_y = float(osd.height) / height
+
+            scale = min(scale_x, scale_y)
+
+            new_w, new_h = int(scale*width), int(scale*height)
+
+            x = (osd.width - new_w) / 2
+            y = (osd.height - new_h) / 2
+
+            print width, height, scale, new_w, new_h, x, y
+
+            osd.drawbitmap(filename, x, y, scale)
+            osd.drawstring(os.path.basename(filename), 10, osd.height - 30, fgcolor=osd.COL_ORANGE)
+            osd.update()
+
+            return
+
+
+
+
+
+
+
+
+
+
+
+
+
         # draw the current image
         image_file = (config.FREEVO_CACHEDIR + '/' +
                       os.path.basename('image-viewer-%s.png' % number))
