@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/07/18 19:44:54  dischi
+# special text_view_fallback for directories on rom drives
+#
 # Revision 1.18  2003/07/13 12:46:45  dischi
 # bugfix: max-x was calculated as max+x (again at a different place)
 #
@@ -492,7 +495,7 @@ class Skin_Area:
                 pass
 
             for i in menu.choices:
-                if i.type == 'dir':
+                if i.type == 'dir' and not i.media:
                     # directory with few items and folder:
                     self.use_text_view = FALSE
                     return
@@ -511,7 +514,7 @@ class Skin_Area:
             if i.type == 'dir':
                 folder += 1
                 # directory with mostly folder:
-                if folder > 3:
+                if folder > 3 and not i.media:
                     self.use_text_view = FALSE
                     return
                     
