@@ -1,4 +1,4 @@
-!/usr/bin/env python
+#!/usr/bin/env python
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # record_server.py - A network aware TV recording server.
@@ -7,6 +7,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.58  2004/07/12 22:33:17  mikeruelle
+# need the sharp part of the shebang line
+#
 # Revision 1.57  2004/07/12 14:52:32  outlyer
 # More debug. If no one objects, I'll delete these completely rather than
 # commenting them out.
