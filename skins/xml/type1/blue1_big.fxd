@@ -323,6 +323,7 @@
 	spacing="10" font="tv">
 	<item type="default">
 	  @title@
+          @sub_title@
 	  @start@ - @stop@
 
 	  @desc@
