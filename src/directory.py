@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.96  2004/01/17 21:29:01  dischi
+# bugfix
+#
 # Revision 1.95  2004/01/17 20:30:18  dischi
 # use new metainfo
 #
@@ -365,7 +368,7 @@ class DirItem(Playlist):
         for f in os.listdir(self.dir):
             if not has_files and os.path.isfile(os.path.join(self.dir,f)):
                 has_files = True
-            if not has_dirs and os.path.isdir(f) and \
+            if not has_dirs and os.path.isdir(os.path.join(self.dir,f)) and \
                    not f in ('CVS', '.xvpics', '.thumbnails', '.pics'):
                 has_dirs = True
             if has_dirs and has_files:
