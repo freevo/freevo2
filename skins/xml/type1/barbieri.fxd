@@ -2,7 +2,7 @@
 <freevo>
 
   <skin include="blue1_small" geometry="800x600">
-
+    <iconset dir="skins/icons/blurr/"/>
     <main>
       <item label="tv" name="Watch TV" icon="" 
 	image="../blue_round2/tv_watermark.png"/>
@@ -28,8 +28,8 @@
       <title visible="no"/>
       <view x="20" y="100" width="300" height="300"/> 
       <listing layout="listing" x="330" y="110" width="460" height="450">
-	<image label="uparrow" x="290" y="110"/>
-	<image label="downarrow" x="290" y="520"/>
+	<image filename="blurr-up.png" label="uparrow" x="290" y="110"/>
+	<image filename="blurr-down.png" label="downarrow" x="290" y="520"/>
       </listing>
     </menuset>
 
@@ -136,7 +136,7 @@
     <!-- LAYOUT DEFINITIONS -->
 
 
-    <image label="background" filename="aubin/blurr.jpg"/>
+    <image label="background" filename="blurrback.jpg"/>
     
     <layout label="screen watermark">
       <background>
