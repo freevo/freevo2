@@ -24,3 +24,8 @@ class PluginInterface(plugin.DaemonPlugin):
             traceback.print_exc()
             sleep(1)
                                                                                 
+
+    def shutdown(self):
+        # print 'WEBSERVER::shutdown: pid=%s' % self.pid
+        print 'Stopping webserver plugin.'
+        os.system('./runapp ./freevo stop webserver.py')
