@@ -8,6 +8,9 @@ Short-term
 ----------
 o Check that the applications exist in startup.py, now it will
   just loop forever trying to start them
+o Add ogg123 support to Music Player. Shouldn't be too difficult, as
+  Vorbis ships with ogg123; we should allow both ogg123 and mpg123 to
+  co-exist so we can support as many formats as possible.
 o Add version info to freevo_config.py and refuse to start if the 
   found version does not match the requirement.
   o We're constantly adding new parameters etc that
