@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/12/13 14:46:58  outlyer
+# Fix the example XML
+#
 # Revision 1.10  2003/12/08 20:37:34  dischi
 # merged Playlist and RandomPlaylist into one class
 #
@@ -148,7 +151,7 @@ class PluginInterface(plugin.MimetypePlugin):
             <info>
               <description>A nice description</description>
             </info>
-          </playlist>
+          </slideshow>
         </freevo>
         """
         items = []
