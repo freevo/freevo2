@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.51  2003/12/15 03:45:29  outlyer
+# Added onscreen notification of bookmark being added via mplayer's
+# osd_show_text... older versions of mplayer will ignore the command so
+# it should be a non-issue to add this in without checking the version.
+#
 # Revision 1.50  2003/12/10 19:47:49  dischi
 # make it possible to bypass version checking
 #
@@ -397,6 +402,11 @@ class MPlayer:
             if event == SEEK:
                 self.app.write('seek %s\n' % event.arg)
                 return True
+
+            if event == OSD_MESSAGE:
+                self.app.write('osd_show_text "%s"\n' % event.arg);
+                return TRUE
+
         except:
             print 'Exception while sending command to mplayer:'
             traceback.print_exc()

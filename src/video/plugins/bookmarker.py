@@ -20,6 +20,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/12/15 03:45:29  outlyer
+# Added onscreen notification of bookmark being added via mplayer's
+# osd_show_text... older versions of mplayer will ignore the command so
+# it should be a non-issue to add this in without checking the version.
+#
 # Revision 1.5  2003/10/04 18:37:29  dischi
 # i18n changes and True/False usage
 #
@@ -65,6 +70,7 @@ import plugin
 import config
 import util
 import menu
+import rc
 
 from event import *
 
@@ -175,6 +181,7 @@ class PluginInterface(plugin.ItemPlugin):
             handle.write(str(item.elapsed))
             handle.write('\n')
             handle.close()
+            rc.post_event(Event(OSD_MESSAGE, arg='Added Bookmark'))
             return True
 
         return False
