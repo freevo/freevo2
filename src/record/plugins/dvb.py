@@ -6,7 +6,7 @@ import util.fileops
 
 class PluginInterface(generic.PluginInterface):
 
-    def __init__(self, device='dvb0'):
+    def __init__(self, device='dvb0', rating=0):
         self.name = device
         self.device = config.TV_SETTINGS[device]
 
@@ -16,15 +16,15 @@ class PluginInterface(generic.PluginInterface):
 		   os.path.join( home, '.xine' ) ]
         self.program = 'mplayer'
         if self.device.type == 'DVB-T':
-            rating = 10
+            rating = rating or 8
 	    self.program = 'tzap'
             self.program_file = util.fileops.find_file_in_path( self.program )
             if self.program_file:
                 pathes.insert( 0, os.path.join( home, '.tzap' ) )
         elif self.device.type == 'DVB-C':
-            rating = 20 
+            rating = rating or 10
         else:
-            rating = 15 
+            rating = rating or 9
 	
         if not self.program_file:
 	    self.program = 'mplayer'
@@ -57,7 +57,7 @@ class PluginInterface(generic.PluginInterface):
                      filename, 'dvb://' + String(channel) ]
         elif self.program == 'tzap':
 	    return [ self.program_file, '-o', filename, '-c', self.configfile,
-	             '-a', self.device.adapter, String( channel ) ]
+	             '-a', self.device.number, String( channel ) ]
 
     
     def get_channel_list(self):

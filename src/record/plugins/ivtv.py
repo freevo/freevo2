@@ -3,16 +3,15 @@
 # ivtv.py - A plugin for recording from an ivtv card supported by the drivers
 #           found at http://ivtv.sf.net.
 #
+# -----------------------------------------------------------------------------
+# $Id$
+#
 # This plugin requires the "encoder" utility that comes with the CK series of
 # ivtv drivers found at http://67.18.1.101/~ckennedy/ivtv/.  You neeed at least
 # version 0.2.0-rc2w from the stable branch or 0.3.1t from the unstable branch
 # because we rely on a paramerter for passing the channel frequency as well as
 # support for multiple cards and PAL settings that were introduced in those 
 # versions.
-#
-# -----------------------------------------------------------------------------
-# $Id$
-#
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -49,7 +48,7 @@ from system.tvcards import IVTVCard
 
 class PluginInterface(generic.PluginInterface):
 
-    def __init__(self, device='ivtv0'):
+    def __init__(self, device='ivtv0', rating=7):
         self.name = device
         self.device = config.TV_SETTINGS[device]
         generic.PluginInterface.__init__(self)
@@ -60,7 +59,6 @@ class PluginInterface(generic.PluginInterface):
 
         self.suffix = '.mpeg'
 
-        rating = 1
         channels = []
         for c in self.device.channels:
             channels.append([c])
