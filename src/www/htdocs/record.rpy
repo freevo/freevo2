@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/07/06 19:28:35  rshortt
+# Now use tv_util.get_chan_displayname() to get each program's channel's
+# definate display name.
+#
 # Revision 1.5  2003/05/22 21:33:24  outlyer
 # Lots of cosmetic changes:
 #
@@ -58,6 +62,7 @@
 #endif
 
 import sys, time
+import tv_util
 
 import record_client as ri
 
@@ -138,7 +143,10 @@ class RecordResource(FreevoResource):
             fv.tableRowOpen('class="chanrow"')
             fv.tableCell(time.strftime('%b %d %H:%M', time.localtime(prog.start)), 'class="'+status+'" align="left" colspan="1"')
             fv.tableCell(time.strftime('%b %d %H:%M', time.localtime(prog.stop)), 'class="'+status+'" align="left" colspan="1"')
-            fv.tableCell(prog.channel_id, 'class="'+status+'" align="left" colspan="1"')
+
+            chan = tv_util.get_chan_displayname(prog)
+            if not chan: chan = 'UNKNOWN'
+            fv.tableCell(chan, 'class="'+status+'" align="left" colspan="1"')
             fv.tableCell(prog.title, 'class="'+status+'" align="left" colspan="1"')
     
             if prog.desc == '':
