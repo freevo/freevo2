@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.50  2004/01/10 16:52:19  dischi
+# shut down identify thread before exit to prevent a strange error sometimes
+#
 # Revision 1.49  2004/01/03 17:43:15  dischi
 # OVERLAY_DIR is always used
 #
@@ -106,6 +109,9 @@ im_thread = None
 
 
 def init():
+    """
+    create a list of media objects and start the Identify_Thread
+    """
     # Add the drives to the config.removable_media list. There doesn't have
     # to be any drives defined.
     if config.ROM_DRIVES != None: 
@@ -127,6 +133,18 @@ def init():
     im_thread.setDaemon(1)
     im_thread.start()
 
+
+def shutdown():
+    """
+    shut down the Identify_Thread
+    """
+    global im_thread
+    if im_thread.isAlive():
+        _debug_('stopping Identify_Thread', 2)
+        im_thread.stop = True
+        while im_thread.isAlive():
+            time.sleep(0.1)
+        
 
 class autostart(plugin.DaemonPlugin):
     """
@@ -173,6 +191,8 @@ class autostart(plugin.DaemonPlugin):
                 media.move_tray(dir='toggle')
                 return True
             
+    def shutdown(self):
+        shutdown()
 
 
 class rom_items(plugin.MainMenuPlugin):
@@ -351,7 +371,8 @@ class RemovableMedia:
         util.umount(self.mountdir)
         return
     
-
+    def shutdown(self):
+        shutdown()
 
 
 class Identify_Thread(threading.Thread):
@@ -710,6 +731,15 @@ class Identify_Thread(threading.Thread):
                 for media in config.REMOVABLE_MEDIA:
                     media.drive_status = None
 
-            self.check_all()
-            time.sleep(2)
+            if not rc.app():
+                # check only in the menu
+                self.check_all()
+
+            for i in range(4):
+                # wait some time
+                time.sleep(0.5)
+
+                # check if we need to stop
+                if hasattr(self, 'stop'):
+                    return
 
