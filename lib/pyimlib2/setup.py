@@ -12,7 +12,7 @@ try:
     if not os.path.isdir('/usr/include/python2.3/pygame/'):
         raise ImportError
     print 'building pygame extention'
-    includes += ['/usr/include/SDL', '/usr/include/python2.3/pygame/']
+    includes += ['/usr/include/SDL', '/usr/include/python2.3/pygame/', '/usr/local/include/SDL']
     config_h.write('#define USE_PYGAME\n')
 except ImportError:
     pass
