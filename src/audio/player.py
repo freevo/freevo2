@@ -9,23 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.23  2004/07/26 18:10:16  dischi
-# move global event handling to eventhandler.py
+# Revision 1.24  2004/08/01 10:42:51  dischi
+# make the player an "Application"
 #
-# Revision 1.22  2004/07/25 19:47:38  dischi
-# use application and not rc.app
-#
-# Revision 1.21  2004/07/25 18:22:27  dischi
-# changes to reflect gui update
-#
-# Revision 1.20  2004/07/22 21:21:46  dischi
-# small fixes to fit the new gui code
-#
-# Revision 1.19  2004/07/10 12:33:37  dischi
-# header cleanup
-#
-# Revision 1.18  2004/02/15 11:18:47  dischi
-# better detachbar plugin, does not need stuff in other files now
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -50,44 +36,50 @@
 
 
 import config
-import skin
-
+import gui
 import plugin
-import event
+
+from event import *
+from eventhandler import Application
 
 _player_ = None
 
-def get():
+def get_singleton():
+    """
+    return the global audio player object
+    """
     global _player_
+    if not _player_:
+        _player_ = PlayerGUI()
+        # register player to the skin
+        gui.get_areas().register('player', ('screen', 'title', 'view', 'info', 'plugin'))
     return _player_
 
-class PlayerGUI:
-    def __init__(self, item, menuw):
-        if menuw:
-            self.visible = True
-        else:
-            self.visible = False
 
-        self.menuw = menuw
-        self.item = item
-
-        self.player  = None
-        self.running = False
+class PlayerGUI(Application):
+    """
+    basic object to handle the different player
+    """
+    def __init__(self):
+        Application.__init__(self, 'mplayer', 'audio', False)
+        self.player     = None
+        self.running    = False
+        self.bg_playing = False
 
 
-    def play(self, player=None):
-        global _player_
-        if _player_ and _player_.player and _player_.player.is_playing():
-            _player_.stop()
-
-        _player_ = self
-        
+    def play(self, item, player=None):
+        """
+        play an item
+        """
+        self.item    = item
         if self.player and self.player.is_playing():
+            _debug_('stop playing')
             self.stop()
 
+        self.item = item
+        
         if player:
             self.player = player
-
         else:
             self.possible_player = []
             for p in plugin.getbyname(plugin.AUDIO_PLAYER, True):
@@ -102,25 +94,29 @@ class PlayerGUI:
             self.possible_player.sort(lambda l, o: -cmp(l[0], o[0]))
             self.player = self.possible_player[0][1]
         
-        if self.menuw and self.menuw.visible:
-            self.menuw.hide(clear=False)
-
         self.running = True
+
+        if self.bg_playing:
+            _debug_('start new background playing')
+        else:
+            self.show()
+
+        if plugin.getbyname('MIXER'):
+            plugin.getbyname('MIXER').reset()
+
         error = self.player.play(self.item, self)
         if error:
-            print error
             self.running = False
-            if self.visible:
-                eventhandler.remove(self.player)
-            self.item.eventhandler(event.PLAY_END)
+            self.item.eventhandler(PLAY_END)
             
         else:
-            if self.visible:
-                eventhandler.append(self.player)
             self.refresh()
 
 
     def try_next_player(self):
+        """
+        try next possible player because the last one didn't work
+        """
         self.stop()
         _debug_('error, try next player')
         player = None
@@ -133,39 +129,51 @@ class PlayerGUI:
                 next = True
 
         if player:
-            self.play(player=player)
+            self.play(self.item, player=player)
             return 1
         _debug_('no more players found')
         return 0
 
         
     def stop(self):
-        global _player_
-        _player_ = None
-
-        self.player.stop()
+        """
+        stop playing
+        """
+        if self.player:
+            self.player.stop()
         self.running = False
-        if self.visible:
-            eventhandler.remove(self.player)
+        self.destroy()
         
 
     def show(self):
-        if not self.visible:
-            self.visible = 1
-            self.refresh()
-            eventhandler.append(self.player)
-            
+        """
+        show the player gui
+        """
+        Application.show(self)
+        self.bg_playing = False
+        self.refresh()
+
 
     def hide(self):
-        if self.visible:
-            self.visible = 0
-            skin.clear()
-            eventhandler.remove(self.player)
+        """
+        hide the player gui
+        """
+        Application.hide(self)
+        gui.get_areas().clear('audio')
+        self.bg_playing = True
             
 
+    def destroy(self):
+        """
+        destroy the gui (remove it from handling)
+        """
+        Application.destroy(self)
+        gui.get_areas().clear('audio')
+
+        
     def refresh(self):
         """
-        Give information to the skin..
+        update the screen
         """
         if not self.visible:
             return
@@ -178,9 +186,29 @@ class PlayerGUI:
             self.item.remain = 0
         else:
             self.item.remain = self.item.length - self.item.elapsed
-        skin.draw('player', self.item)
-        return
+        gui.get_areas().draw('player', self.item)
 
 
-# register player to the skin
-skin.register('player', ('screen', 'title', 'view', 'info', 'plugin'))
+    def eventhandler(self, event):
+        """
+        React on some events or send them to the real player or the
+        item belongig to the player
+        """
+        if event == PLAY_END and event.arg:
+            self.player.stop()
+            if self.try_next_player():
+                return True
+            
+        if event in ( STOP, PLAY_END, USER_END ):
+            self.stop()
+            return self.item.eventhandler(event)
+
+        # try the real player
+        if self.player.eventhandler(event):
+            return True
+
+        # give it to the item
+        return self.item.eventhandler(event)
+        
+
+

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.60  2004/08/01 10:42:51  dischi
+# make the player an "Application"
+#
 # Revision 1.59  2004/07/26 18:10:16  dischi
 # move global event handling to eventhandler.py
 #
@@ -65,17 +68,15 @@
 
 
 import os
-import string
-import time
 import re
 import traceback
-import config
-import util
-import eventhandler
 
-from player import PlayerGUI
+import config
+import player
+
 from item import Item
 from event import *
+
 
 class AudioItem(Item):
     """
@@ -194,50 +195,11 @@ class AudioItem(Item):
         self.parent.current_item = self
         self.elapsed = 0
 
-        if not self.menuw:
-            self.menuw = menuw
-
-        self.player = PlayerGUI(self, menuw)
-        error = self.player.play()
-
-        if error and menuw:
-            AlertBox(text=error).show()
-            eventhandler.post(PLAY_END)
+        player.get_singleton().play(self)
 
 
     def stop(self, arg=None, menuw=None):
         """
         Stop the current playing
         """
-        self.player.stop()
-
-
-    def format_track(self):
-        """ Return a formatted string for use in music.py """
-	# Since we can't specify the length of the integer in the
-	# format string (Python doesn't seem to recognize it) we
-	# strip it out first, when we see the only thing that can be
-	# a number.
-
-
-        # Before we begin, make sure track is an integer
-    
-        if self.track:
-            try:
-    	        mytrack = ('%0.2d' % int(self.track))
-            except ValueError:
-    	        mytrack = None
-        else:
-           mytrack = None
-    
-        song_info = {  'a'  : self.artist,
-       	               'l'  : self.album,
-    	               'n'  : mytrack,
-    	               't'  : self.title,
-    	               'y'  : self.year,
-    	               'f'  : self.name }
-
-        if self.parent and hasattr(self.parent, 'AUDIO_FORMAT_STRING'):
-            return self.parent.DIRECTORY_AUDIO_FORMAT_STRING % song_info
-        return config.DIRECTORY_AUDIO_FORMAT_STRING % song_info
-        
+        player.get_singleton().stop()

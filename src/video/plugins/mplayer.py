@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.76  2004/08/01 10:45:19  dischi
+# make the player an "Application"
+#
 # Revision 1.75  2004/07/26 18:10:20  dischi
 # move global event handling to eventhandler.py
 #
@@ -56,17 +59,16 @@
 
 
 import os, re
-import threading
 import popen2
 import mmpython
 
 import config     # Configuration handler. reads config file.
 import util       # Various utilities
 import childapp   # Handle child applications
-         # The RemoteControl class.
-import eventhandler
 import plugin
+import gui
 
+from eventhandler import Application
 from event import *
 
 
@@ -120,7 +122,7 @@ class PluginInterface(plugin.Plugin):
 
 
 
-class MPlayer:
+class MPlayer(Application):
     """
     the main class to control mplayer
     """
@@ -128,12 +130,10 @@ class MPlayer:
         """
         init the mplayer object
         """
+        Application.__init__(self, 'mplayer', 'video', True, 'bmovl')
         self.name       = 'mplayer'
-
-        self.app_mode   = 'video'
         self.version    = version
         self.seek       = 0
-        self.seek_timer = threading.Timer(0, self.reset_seek)
         self.app        = None
 
 
@@ -322,6 +322,8 @@ class MPlayer:
             util.mount(d)
             command += ['-audiofile', f]
 
+        command += [ '-vf', 'bmovl=1:0:/tmp/bmovl' ]
+        
         self.plugins = plugin.get('mplayer_video')
 
         for p in self.plugins:
@@ -332,9 +334,11 @@ class MPlayer:
         if plugin.getbyname('MIXER'):
             plugin.getbyname('MIXER').reset()
 
-        eventhandler.append(self)
-
+        
         self.app = MPlayerApp(command, self)
+        self.osd_visible = False
+        self.show()
+
         return None
     
 
@@ -349,7 +353,7 @@ class MPlayer:
             return
         
         self.app.stop('quit\n')
-        eventhandler.remove(self)
+        self.destroy()
         self.app = None
 
 
@@ -366,32 +370,9 @@ class MPlayer:
                 return True
 
         if event == VIDEO_MANUAL_SEEK:
-            self.seek = 0
-            eventhandler.set_context('input')
-            return True
-        
-        if event.context == 'input':
-            if event in INPUT_ALL_NUMBERS:
-                self.reset_seek_timeout()
-                self.seek = self.seek * 10 + int(event);
-                return True
+            from gui import PopupBox
+            PopupBox('Seek disabled, press QUIT').show()
             
-            elif event == INPUT_ENTER:
-                self.seek_timer.cancel()
-                self.seek *= 60
-                self.app.write('seek ' + str(self.seek) + ' 2\n')
-                _debug_("seek "+str(self.seek)+" 2\n")
-                self.seek = 0
-                eventhandler.set_context('video')
-                return True
-
-            elif event == INPUT_EXIT:
-                _debug_('seek stopped')
-                self.seek_timer.cancel()
-                self.seek = 0
-                eventhandler.set_context('video')
-                return True
-
         if event == STOP:
             self.stop()
             return self.item.eventhandler(event)
@@ -410,7 +391,14 @@ class MPlayer:
             return True
 
         if event == TOGGLE_OSD:
-            self.app.write('osd\n')
+            self.osd_visible = not self.osd_visible
+            if self.osd_visible:
+                plugin.getbyname('idlebar').show()
+                self.app.write('osd 3\n')
+            else:
+                plugin.getbyname('idlebar').hide()
+                self.app.write('osd 1\n')
+            gui.get_screen().update()
             return True
 
         if event == PAUSE or event == PLAY:
@@ -441,32 +429,18 @@ class MPlayer:
                 if self.item_length <= self.item.elapsed + event.arg + seek_safety_time:
                     _debug_('unable to seek %s secs at time %s, length %s' % \
                             (event.arg, self.item.elapsed, self.item_length))
-                    self.app.write('osd_show_text "%s"\n' % _('Seeking not possible'))
+                    # FIXME:
+                    # self.app.write('osd_show_text "%s"\n' % _('Seeking not possible'))
                     return False
                 
             self.app.write('seek %s\n' % event.arg)
             return True
 
-        if event == OSD_MESSAGE:
-            self.app.write('osd_show_text "%s"\n' % event.arg);
-            return True
-
         # nothing found? Try the eventhandler of the object who called us
         return self.item.eventhandler(event)
 
-    
-    def reset_seek(self):
-        _debug_('seek timeout')
-        self.seek = 0
-        eventhandler.set_context('video')
 
-        
-    def reset_seek_timeout(self):
-        self.seek_timer.cancel()
-        self.seek_timer = threading.Timer(config.MPLAYER_SEEK_TIMEOUT, self.reset_seek)
-        self.seek_timer.start()
 
-        
     def sort_filter(self, command):
         """
         Change a mplayer command to support more than one -vop
@@ -517,10 +491,11 @@ class MPlayerApp(childapp.ChildApp2):
         else:
             self.check_audio = 1
 
-        import osd     
-        self.osd       = osd.get_singleton()
-        self.osdfont   = self.osd.getfont(config.OSD_DEFAULT_FONTNAME,
-                                          config.OSD_DEFAULT_FONTSIZE)
+        # FIXME
+        # import osd     
+        # self.osd       = osd.get_singleton()
+        # self.osdfont   = self.osd.getfont(config.OSD_DEFAULT_FONTNAME,
+        #                                   config.OSD_DEFAULT_FONTSIZE)
 
         # check for mplayer plugins
         self.stdout_plugins  = []
@@ -552,25 +527,25 @@ class MPlayerApp(childapp.ChildApp2):
         """
         parse the stdout of the mplayer process
         """
+        # FIXME
         # show connection status for network play
-        if self.item.network_play:
-            if line.find('Opening audio decoder') == 0:
-                self.osd.clearscreen(self.osd.COL_BLACK)
-                self.osd.update()
-            elif (line.startswith('Resolving ') or \
-                  line.startswith('Connecting to server') or \
-                  line.startswith('Cache fill:')) and \
-                  line.find('Resolving reference to') == -1:
-
-                if line.startswith('Connecting to server'):
-                    line = 'Connecting to server'
-                self.osd.clearscreen(self.osd.COL_BLACK)
-                self.osd.drawstringframed(line, config.OSD_OVERSCAN_X+10,
-                                          config.OSD_OVERSCAN_Y+10,
-                                          self.osd.width - 2 * (config.OSD_OVERSCAN_X+10),
-                                          -1, self.osdfont, self.osd.COL_WHITE)
-                self.osd.update()
-
+        # if self.item.network_play:
+        #     if line.find('Opening audio decoder') == 0:
+        #         self.osd.clearscreen(self.osd.COL_BLACK)
+        #         self.osd.update()
+        #     elif (line.startswith('Resolving ') or \
+        #           line.startswith('Connecting to server') or \
+        #           line.startswith('Cache fill:')) and \
+        #           line.find('Resolving reference to') == -1:
+        # 
+        #         if line.startswith('Connecting to server'):
+        #             line = 'Connecting to server'
+        #         self.osd.clearscreen(self.osd.COL_BLACK)
+        #         self.osd.drawstringframed(line, config.OSD_OVERSCAN_X+10,
+        #                                   config.OSD_OVERSCAN_Y+10,
+        #                                   self.osd.width - 2 * (config.OSD_OVERSCAN_X+10),
+        #                                   -1, self.osdfont, self.osd.COL_WHITE)
+        #         self.osd.update()
 
         # current elapsed time
         if line.find("A:") == 0:
@@ -598,7 +573,7 @@ class MPlayerApp(childapp.ChildApp2):
                     # OK, audio is broken, restart without -alang
                     self.check_audio = 2
                     self.item.mplayer_audio_broken = True
-                    eventhandler.post(Event('AUDIO_ERROR_START_AGAIN'))
+                    self.post_event(Event('AUDIO_ERROR_START_AGAIN'))
                 
                 if self.RE_START(line):
                     if self.check_audio == 1:

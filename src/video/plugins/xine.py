@@ -17,40 +17,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.48  2004/08/01 10:45:19  dischi
+# make the player an "Application"
+#
 # Revision 1.47  2004/07/26 18:10:20  dischi
 # move global event handling to eventhandler.py
-#
-# Revision 1.46  2004/07/25 19:47:41  dischi
-# use application and not rc.app
-#
-# Revision 1.45  2004/07/21 11:35:19  dischi
-# xine can play iso files
-#
-# Revision 1.44  2004/07/10 12:33:43  dischi
-# header cleanup
-#
-# Revision 1.43  2004/06/28 15:53:59  dischi
-# angle switching
-#
-# Revision 1.42  2004/06/19 17:21:52  dischi
-# only set app.mode to valid events
-#
-# Revision 1.41  2004/05/02 08:55:52  dischi
-# dvd as .iso support
-#
-# Revision 1.39  2004/02/06 19:29:06  dischi
-# fix/cleanup dvd on hd handling
-#
-# Revision 1.38  2004/02/03 20:51:12  dischi
-# fix/enhance dvd on disc
-#
-# Revision 1.37  2004/02/02 22:15:53  outlyer
-# Support for mirrors of DVDs...
-#
-# (1) Make one using vobcopy, run 'vobcopy -m'
-# (2) Put it in your movie directory and it'll look like a single file, and can
-#     be played with XINE with all of the features of the original DVD (chapters,
-#     audio tracks, etc) and works with dvdnav.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -81,7 +52,8 @@ import config     # Configuration handler. reads config file.
 import childapp   # Handle child applications
 import rc         # The RemoteControl class.
 import util
-import eventhandler
+
+from eventhandler import Application
 
 from event import *
 import plugin
@@ -131,23 +103,21 @@ class PluginInterface(plugin.Plugin):
 
 
 
-class Xine:
+class Xine(Application):
     """
     the main class to control xine
     """
     def __init__(self, type, version):
+        Application.__init__(self, 'xine', 'video', True, 'none')
         self.name      = 'xine'
-
-        self.app_mode  = ''
         self.xine_type = type
         self.version   = version
         self.app       = None
-
-        self.command = [ '--prio=%s' % config.MPLAYER_NICE ] + \
-                       config.XINE_COMMAND.split(' ') + \
-                       [ '--stdctl', '-V', config.XINE_VO_DEV,
-                         '-A', config.XINE_AO_DEV ] + \
-                       config.XINE_ARGS_DEF.split(' ')
+        self.command   = [ '--prio=%s' % config.MPLAYER_NICE ] + \
+                         config.XINE_COMMAND.split(' ') + \
+                         [ '--stdctl', '-V', config.XINE_VO_DEV,
+                           '-A', config.XINE_AO_DEV ] + \
+                           config.XINE_ARGS_DEF.split(' ')
 
 
     def rate(self, item):
@@ -175,11 +145,10 @@ class Xine:
         """
         play a dvd with xine
         """
-        self.item     = item
+        self.item        = item
+        self.evt_context = 'video'
         if config.EVENTS.has_key(item.mode):
-            self.app_mode = item.mode
-        else:
-             self.app_mode = 'video'
+            self.evt_context = item.mode
 
         if plugin.getbyname('MIXER'):
             plugin.getbyname('MIXER').reset()
@@ -228,14 +197,14 @@ class Xine:
 
         elif item.mimetype == 'cue':
             command.append('vcd://%s' % item.filename)
-            self.app_mode = 'vcd'
+            self.evt_context = 'vcd'
             
         else:
             command.append(item.url)
             
         _debug_('Xine.play(): Starting cmd=%s' % command)
 
-        eventhandler.append(self)
+        self.show()
         self.app = childapp.ChildApp2(command)
         return None
     
@@ -246,7 +215,7 @@ class Xine:
         """
         if self.app:
             self.app.stop('quit\n')
-            eventhandler.remove(self)
+        self.destroy()
             
 
     def eventhandler(self, event, menuw=None):
