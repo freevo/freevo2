@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/01/13 00:34:20  krister
+# Applied Thomas Schuppels patch for improved bitmap handling.
+#
 # Revision 1.5  2003/01/07 07:17:07  krister
 # Added Thomas Schüppels objectcache layer for the OSD objects.
 #
@@ -375,24 +378,16 @@ class OSD:
 
     # Caches a bitmap in the OSD without displaying it.
     def loadbitmap(self, filename):
-        self._getbitmap(filename)
+        return self._getbitmap(filename)
     
-
-    # Loads and zooms a bitmap and return the surface. A cache is currently
-    # missing, but maybe we don't need it, it's fast enough.
-    def zoombitmap(self, filename, scaling=None, bbx=0, bby=0, bbw=0, bbh=0, rotation = 0):
-        if not pygame.display.get_init():
-            return None
-
-        image = self._getbitmap(filename)
-
-        if not image: return
-
+    # Zooms a Surface. It gets a Pygame Surface which is rotated and scaled according
+    # to the parameters.
+    def zoomsurface(self, image, scaling=None, bbx=0, bby=0, bbw=0, bbh=0, rotation = 0):
         if bbx or bby or bbw or bbh:
             imbb = pygame.Surface((bbw, bbh), 0, 32)
             imbb.blit(image, (0, 0), (bbx, bby, bbw, bbh))
             image = imbb
-            
+
         if scaling:
             w, h = image.get_size()
             w = int(w*scaling)
@@ -406,9 +401,33 @@ class OSD:
             image = pygame.transform.rotate(image, rotation)
 
         return image
+    
+
+    # Loads, zooms a bitmap and returns the surface. A cache is currently
+    # missing, but maybe we don't need it, it's fast enough.
+    def zoombitmap(self, filename, scaling=None, bbx=0, bby=0, bbw=0,
+                   bbh=0, rotation = 0):
+        if not pygame.display.get_init():
+            return None
+        image = self._getbitmap(filename)
+        if not image: return
+        return self.zoomimage(image, scaling, bbx, bby, bbw, bbh, rotation)
 
     
-        
+    # scales and rotates a surface and then draws it to the screen.
+    def drawsurface(self, image, x=0, y=0, scaling=None,
+                   bbx=0, bby=0, bbw=0, bbh=0, rotation = 0, layer=None):
+        if not pygame.display.get_init():
+            return None
+        image = self.zoomsurface(image, scaling, bbx,
+                                 bby, bbw, bbh, rotation)
+        if not image: return
+        if layer:
+            layer.blit(image, (x, y))
+        else:
+            self.screen.blit(image, (x, y))
+            
+
     # Draw a bitmap on the OSD. It is automatically loaded into the cache
     # if not already there. The loadbitmap()/zoombitmap() functions can
     # be used to "pipeline" bitmap loading/drawing.
@@ -416,14 +435,12 @@ class OSD:
                    bbx=0, bby=0, bbw=0, bbh=0, rotation = 0, layer=None):
         if not pygame.display.get_init():
             return None
-        image = self.zoombitmap(filename, scaling, bbx, bby, bbw, bbh, rotation)
-        if not image: return
-        if layer:
-            layer.blit(image, (x, y))
-        else:
-            self.screen.blit(image, (x, y))
+        image = self._getbitmap(filename)
+        self.drawsurface(image, x, y, scaling, bbx, bby, bbw,
+                         bbh, rotation, layer)
 
 
+    # returns the size of the bitmap given by a filename
     def bitmapsize(self, filename):
         if not pygame.display.get_init():
             return None
