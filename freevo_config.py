@@ -15,6 +15,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.103  2003/01/05 12:48:29  dischi
+# MAME_CACHE contains the uid to avoid conflicts when you start freevo as
+# different users
+#
 # Revision 1.102  2002/12/30 15:07:36  dischi
 # Small but important changes to the remote control. There is a new variable
 # RC_MPLAYER_CMDS to specify mplayer commands for a remote. You can also set
@@ -608,7 +612,8 @@ else:
         os.makedirs('/tmp/freevo/cache')
     FREEVO_CACHEDIR = '/tmp/freevo/cache'
 
-MAME_CACHE = '%s/romlist.pickled' % FREEVO_CACHEDIR
+import os
+MAME_CACHE = '%s/romlist-%s.pickled' % (FREEVO_CACHEDIR, os.getuid())
 
 #
 # XMLTV File
