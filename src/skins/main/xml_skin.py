@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2004/01/05 18:03:43  dischi
+# support for extra fxd files for plugins
+#
 # Revision 1.25  2004/01/02 14:29:44  dischi
 # add border to font.h
 #
@@ -878,7 +881,7 @@ class XMLSkin:
         self.box_under_icon   = 0
 
         
-    def parse(self, freevo_type, scale, c_dir, copy_content):
+    def parse(self, freevo_type, scale, c_dir):
         for node in freevo_type.children:
             if node.name == u'main':
                 self._mainmenu.parse(node, scale, c_dir)
@@ -1015,7 +1018,7 @@ class XMLSkin:
         callback for the 'skin' tag
         """
         # get args back
-        (clear, copy_content, file, prepare) = fxd.getattr(None, 'args')
+        (clear, file, prepare) = fxd.getattr(None, 'args')
 
         font_scale    = attr_float(node, "fontscale", 1.0)
         file_geometry = attr_str(node, "geometry", '')
@@ -1032,21 +1035,9 @@ class XMLSkin:
         include  = attr_str(node, 'include', '')
 
         if include:
-            if clear:
-                self._layout   = {}
-                self._font     = {}
-                self._color    = {}
-                self._images   = {}
-                self._menuset  = {}
-                self._menu     = {}
-                self._popup    = ''
-                self._sets     = {}
-                self._mainmenu = MainMenu()
-                self.skindirs  = []
-                self.fxd_files = []
-            self.load(include, copy_content, prepare=False)
+            self.load(include, prepare=False)
 
-        self.parse(node, scale, os.path.dirname(file), copy_content)
+        self.parse(node, scale, os.path.dirname(file))
         if not os.path.dirname(file) in self.skindirs:
             self.skindirs = [ os.path.dirname(file) ] + self.skindirs
         if not prepare:
@@ -1058,10 +1049,29 @@ class XMLSkin:
         return
 
         
-    def load(self, file, copy_content=0, prepare=True, clear=False):
+    def load(self, file, prepare=True, clear=False):
         """
         load and parse the skin file
         """
+        if clear:
+            self._layout   = {}
+            self._font     = {}
+            self._color    = {}
+            self._images   = {}
+            self._menuset  = {}
+            self._menu     = {}
+            self._popup    = ''
+            self._sets     = {}
+            self._mainmenu = MainMenu()
+            self.skindirs  = []
+            self.fxd_files = []
+
+            # load plugin skin files:
+            pdir = os.path.join(config.SHARE_DIR, 'skins/plugins')
+            if os.path.isdir(pdir):
+                for p in util.match_files(pdir, [ 'fxd' ]):
+                    self.load(p, prepare=False)
+
         self.prepared     = False
         
         if not vfs.isfile(file):
@@ -1081,7 +1091,7 @@ class XMLSkin:
 
         try:
             parser = util.fxdparser.FXD(file)
-            parser.setattr(None, 'args', (clear, copy_content, file, prepare))
+            parser.setattr(None, 'args', (clear, file, prepare))
             parser.set_handler('skin', self.fxd_callback)
             parser.parse()
             self.fxd_files.append(file)

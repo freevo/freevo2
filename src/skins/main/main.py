@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2004/01/05 18:03:43  dischi
+# support for extra fxd files for plugins
+#
 # Revision 1.28  2004/01/01 12:26:15  dischi
 # use pickle to cache parsed skin files
 #
@@ -117,9 +120,9 @@ class Skin:
         self.settings = xml_skin.XMLSkin()
         
         # try to find the skin xml file
-        if not self.settings.load(config.SKIN_XML_FILE):
+        if not self.settings.load(config.SKIN_XML_FILE, clear=True):
             print "skin not found, using fallback skin"
-            self.settings.load('blue.fxd')
+            self.settings.load('blue.fxd', clear=True)
             config.SKIN_XML_FILE = 'blue.fxd'
             
         for dir in config.cfgfilepath:
@@ -163,10 +166,20 @@ class Skin:
         if not settings or version != xml_skin.FXD_FORMAT_VERSION:
             return None
 
+        pdir = os.path.join(config.SHARE_DIR, 'skins/plugins')
+        if os.path.isdir(pdir):
+            ffiles = util.match_files(pdir, [ 'fxd' ])
+        else:
+            ffiles = []
+
+        for f in settings.fxd_files:
+            if not os.path.dirname(f).endswith(pdir):
+                ffiles.append(f)
+            
         # check if all files used by the skin are not newer than
         # the cache file
         ftime = os.stat(cache)[stat.ST_MTIME]
-        for f in settings.fxd_files:
+        for f in ffiles:
             if os.stat(f)[stat.ST_MTIME] > ftime:
                 return None
 
@@ -218,8 +231,9 @@ class Skin:
         else:
             settings = xml_skin.XMLSkin()
 
-        if not settings.load(filename, copy_content, clear=True):
+        if not settings.load(filename, clear=True):
             return None
+
         self.save_cache(settings, filename)
         return settings
     
