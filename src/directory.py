@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.52  2003/10/20 18:28:23  outlyer
+# Also move print into _debug_
+#
 # Revision 1.51  2003/10/18 08:13:35  dischi
 # add recursive _not_ random playlist
 #
@@ -968,7 +971,7 @@ class DirwatcherThread(threading.Thread):
                        for fname in os.listdir(self.dir) ])
         except OSError:
             # the directory is gone
-            print 'DirwatcherThread: unable to read directory %s' % self.dir
+            _debug_('DirwatcherThread: unable to read directory %s' % self.dir,1)
 
             # send EXIT to go one menu up:
             rc.post_event(MENU_BACK_ONE_MENU)
