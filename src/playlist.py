@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2003/12/07 19:11:22  dischi
+# o add <playlist> fxd support
+# o add background_playlist to a playlist to support playing music
+#   in slideshows
+#
 # Revision 1.37  2003/12/01 19:06:46  dischi
 # better handling of the MimetypePlugin
 #
@@ -197,7 +202,9 @@ class Playlist(Item):
         else:
             self.filename = file
             self.name    = os.path.splitext(os.path.basename(file))[0]
-        
+
+        self.background_playlist = None
+
 
     def read_playlist(self):
         """
@@ -274,6 +281,8 @@ class Playlist(Item):
             return False
         
         if not arg or arg != 'next':
+            if self.background_playlist:
+                self.background_playlist.play()
             self.current_item = self.playlist[0]
             
         if not self.current_item.actions():
@@ -302,6 +311,21 @@ class Playlist(Item):
             self.playlist[pos].cache()
 
 
+    def stop(self):
+        """
+        stop playling
+        """
+        if self.background_playlist:
+            self.background_playlist.stop()
+        if self.current_item:
+            self.current_item.parent = self.parent
+            if hasattr(self.current_item, 'stop'):
+                try:
+                    self.current_item.stop()
+                except OSError:
+                    pass
+        
+
     def eventhandler(self, event, menuw=None):
         """
         Handle playlist specific events
@@ -329,6 +353,8 @@ class Playlist(Item):
                 
         # end and no next item
         if event in (PLAY_END, USER_END, STOP):
+            if self.background_playlist:
+                self.background_playlist.stop()
             self.current_item = None
             if menuw:
                 menuw.show()
@@ -377,7 +403,10 @@ class RandomPlaylist(Playlist):
         self.unplayed     = playlist
         self.recursive    = recursive
         self.random       = random
-        
+
+        self.background_playlist = None
+
+
     def actions(self):
         return [ ( self.play, _('Play') ) ]
 
@@ -418,6 +447,9 @@ class RandomPlaylist(Playlist):
         if not self.menuw:
             self.menuw = menuw
 
+        if self.background_playlist:
+            self.background_playlist.play()
+            
         if isinstance(self.unplayed, tuple):
             # playlist is a list: dir:prefix
             # build a correct playlist now
@@ -441,6 +473,21 @@ class RandomPlaylist(Playlist):
         pass
 
 
+    def stop(self):
+        """
+        stop playling
+        """
+        if self.background_playlist:
+            self.background_playlist.stop()
+        if self.current_item:
+            self.current_item.parent = self.parent
+            if hasattr(self.current_item, 'stop'):
+                try:
+                    self.current_item.stop()
+                except OSError:
+                    pass
+        
+
     def eventhandler(self, event, menuw=None):
         if not menuw:
             menuw = self.menuw
@@ -461,7 +508,10 @@ class RandomPlaylist(Playlist):
             return True
         
         # end and no next item
-        if event in (STOP, PLAY_END, USER_END) and menuw:
+        if event in (STOP, PLAY_END, USER_END):
+            if self.background_playlist:
+                self.background_playlist.stop()
+
             if self.current_item:
                 self.current_item.parent = self.parent
             self.current_item = None
@@ -486,6 +536,13 @@ class Mimetype(plugin.MimetypePlugin):
     """
     Plugin class for playlist items
     """
+    def __init__(self):
+        plugin.MimetypePlugin.__init__(self)
+
+        # register the callback
+        plugin.register_callback('fxditem', [], 'playlist', self.fxdhandler)
+
+
     def suffix(self):
         """
         return the list of suffixes this class handles
@@ -523,6 +580,64 @@ class Mimetype(plugin.MimetypePlugin):
         for file in util.find_matches(new_files, self.suffix()):
             new_items.append(Playlist(file, parent))
             new_files.remove(file)
+
+
+    def fxdhandler(self, fxd, node):
+        """
+        parse audio specific stuff from fxd files
+
+        <?xml version="1.0" ?>
+        <freevo>
+          <playlist title="foo" random="1|0">
+            <cover-img>foo.jpg</cover-img>
+            <files>
+              <directory recursive="1|0">path</directory>
+              <file>filename</file>
+            </files>
+            <info>
+              <description>A nice description</description>
+            </info>
+          </playlist>
+        </freevo>
+        """
+        suffix = []
+        for p in plugin.mimetype(fxd.getattr(None, 'display_type')):
+            suffix += p.suffix()
+
+        children = fxd.get_children(node, 'files')
+        if children:
+            children = children[0].children
+
+        items = []
+        for child in children:
+            try:
+                if child.name == 'directory':
+                    try:
+                        recursive = int(fxd.getattr(child, 'recursive', 0))
+                    except:
+                        recursive = False
+                    if recursive:
+                        items += util.match_files_recursively(fxd.gettext(child), suffix)
+                    else:
+                        items += util.match_files(fxd.gettext(child), suffix)
+
+                elif child.name == 'file':
+                    items.append(fxd.gettext(child))
+            except OSError, e:
+                print 'playlist error:'
+                print e
+
+        pl = RandomPlaylist('', items, fxd.getattr(None, 'parent', None),
+                            random = fxd.getattr(node, 'random', 0))
+
+        pl.name     = fxd.getattr(node, 'title')
+        pl.xml_file = fxd.getattr(None, 'filename', '')
+        pl.image    = fxd.childcontent(node, 'cover-img')
+        if pl.image:
+            pl.image = vfs.join(vfs.dirname(pl.xml_file), pl.image)
+
+        fxd.parse_info(fxd.get_children(node, 'info', 1), pl)
+        fxd.getattr(None, 'items', []).append(pl)
 
 
 # load the MimetypePlugin
