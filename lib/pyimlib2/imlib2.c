@@ -67,6 +67,8 @@ PyObject *imlib2_open(PyObject *self, PyObject *args)
 	image = imlib_load_image_with_error_return(file, &error_return);
 	if (!image) {
 		PyErr_Format(PyExc_IOError, "Could not open %s: %d", file, error_return);
+		if (error_return == IMLIB_LOAD_ERROR_NO_LOADER_FOR_FILE_FORMAT)
+		    PyErr_Format(PyExc_IOError, "no loader for file format");
 		return NULL;
 	}
 	//imlib_context_set_image(image);
