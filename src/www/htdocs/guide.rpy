@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/05/30 18:26:52  rshortt
+# More mods from Mike including bugfixes and pretty(er) arrows.
+#
 # Revision 1.6  2003/05/29 23:06:56  rshortt
 # The ability to previous / next added by Mike Ruelle.  We'll make it pretty later.  Also some comment cleanup.
 #
@@ -96,7 +99,9 @@ class GuideResource(FreevoResource):
         now = int(mfrguidestart / INTERVAL) * INTERVAL
         now2 = int(time.time() / INTERVAL) * INTERVAL
         mfrnextguide = now + INTERVAL * n_cols
+        mfrnextguide += 10
         mfrprevguide = now - INTERVAL * n_cols
+        mfrprevguide += 10
         if mfrprevguide < now2:
             mfrprevguide = 0
 
@@ -113,17 +118,25 @@ class GuideResource(FreevoResource):
         pops = ''
         desc = ''
 
-        if mfrprevguide > 0:
-            fv.res += '<a href="guide.rpy?stime=%i">Prev</a>&nbsp;&nbsp;' % mfrprevguide
-        fv.res += '<a href="guide.rpy?stime=%i">Next</a><br />' % mfrnextguide
-
         fv.tableOpen('border="0" cellpadding="4" cellspacing="1"')
 
         fv.tableRowOpen('class="chanrow"')
         fv.tableCell(time.strftime('%b %d'), 'class="guidehead"')
         now = int(mfrguidestart / INTERVAL) * INTERVAL
         for i in range(n_cols):
-            fv.tableCell(time.strftime('%H:%M', time.localtime(now)), 'class="guidehead"')
+            if i == n_cols-1 or i == 0:
+                dacell = ''
+                datime = time.strftime('%H:%M', time.localtime(now))
+                if i == n_cols-1:
+                   dacell = datime + '&nbsp;&nbsp;<a href="guide.rpy?stime=%i"><img src="images/RightArrow.png" border="0"></a>' % mfrnextguide
+                else:
+                   if mfrprevguide > 0:
+                       dacell = '<a href="guide.rpy?stime=%i"><img src="images/LeftArrow.png" border="0"></a>&nbsp;&nbsp;' % mfrprevguide + datime
+                   else:
+                       dacell = datime
+                fv.tableCell(dacell, 'class="guidehead"')
+            else:
+                fv.tableCell(time.strftime('%H:%M', time.localtime(now)), 'class="guidehead"')
             now += INTERVAL
         fv.tableRowClose()
 
@@ -200,10 +213,6 @@ class GuideResource(FreevoResource):
         fv.tableClose()
         
         fv.res += pops
-
-        if mfrprevguide > 0:
-            fv.res += '<a href="guide.rpy?stime=%i">Prev</a>&nbsp;&nbsp;' % mfrprevguide
-        fv.res += '<a href="guide.rpy?stime=%i">Next</a><br /><br />' % mfrnextguide
 
         fv.printSearchForm()
         fv.printLinks()
