@@ -6,10 +6,11 @@
 #include <assert.h>
 
 #include "x11.h"
+
 #ifdef OSD_X11_FULLSCREEN
-   #include <X11/extensions/xf86vmode.h>
-   XF86VidModeModeLine old_mode;
-   int old_dotclock;
+#include <X11/extensions/xf86vmode.h>
+XF86VidModeModeLine old_mode;
+int old_dotclock;
 #endif
 
       
@@ -57,6 +58,7 @@ x11_open (int width, int height)
    
    attr.backing_store = Always;
    attr.background_pixel = 0xffffff;
+
 #ifdef OSD_X11_FULLSCREEN
 {
    XF86VidModeModeInfo **modelines;
@@ -233,33 +235,45 @@ x11_close (void)
    XF86VidModeModeInfo info;
    XF86VidModeModeInfo **modelines;
    int numModes;
+
+
    // This is a bit ugly - a quick hack to copy the ModeLine structure
    // into the modeInfo structure.
-   memcpy((XF86VidModeModeLine *)((char *)&info + sizeof(info.dotclock)), &old_mode, sizeof(XF86VidModeModeLine));
+   memcpy((XF86VidModeModeLine *)((char *)&info + sizeof(info.dotclock)),
+          &old_mode, sizeof(XF86VidModeModeLine));
    info.dotclock = old_dotclock;
    XF86VidModeLockModeSwitch(dpy, DefaultScreen(dpy), 0);
-   printf("Restoring mode %i x %i dotclock %i\n", info.hdisplay, info.vdisplay, info.dotclock );
+
+   printf("Restoring mode %i x %i dotclock %i\n", info.hdisplay,
+          info.vdisplay, info.dotclock );
    XF86VidModeSwitchToMode(dpy, DefaultScreen(dpy), &info);
 
    /* XXX This is retarded but it seems to need it */
-   XF86VidModeGetAllModeLines( dpy, DefaultScreen(dpy), &numModes, &modelines );
+   XF86VidModeGetAllModeLines (dpy, DefaultScreen(dpy),
+                               &numModes, &modelines);
    XFree(modelines);
    /* XXX Should save viewport too */
    XF86VidModeSetViewPort(dpy, DefaultScreen(dpy),0, 0);
 #endif
+   
    return;
 }
 
 
 #ifdef TEST
+#include "readjpeg.h"
+
+
 int
 main (int ac, char *av[])
 {
+   int i;
    
    
    printf ("open()\n");
    x11_open (768, 576);
 
+   /* Various test code. Uncomment and use as needed. */
 #if 0
    printf ("clearscreen()\n");
    x11_clearscreen (0);
@@ -296,6 +310,43 @@ main (int ac, char *av[])
    }
    
 #endif
+
+   for (i = 1; i < ac; i++) {
+      int res;
+      uint8 *pBitmap;
+      uint16 w, h;
+      uint8 fb[576][768][4];
+      int x, y, idx;
+      
+      
+      printf ("read jpeg %s...", av[i]);
+      res = read_jpeg (av[i], &pBitmap, &w, &h);
+      printf ("%s\n", res == OK ? "OK" : "ERROR");
+
+      memset (fb, 0xff, sizeof(fb));
+
+      idx = 0;
+      printf ("Size %dx%d\n", w, h);
+      for (y = 0; y < h; y++) {
+         for (x = 0; x < w; x++) {
+            int r, g, b;
+
+            
+            r = fb[10+y][10+x][0] = pBitmap[idx++];
+            g = fb[10+y][10+x][1] = pBitmap[idx++];
+            b = fb[10+y][10+x][2] = pBitmap[idx++];
+            fb[10+y][10+x][3] = pBitmap[idx++];
+            /*  printf ("%3d %3d   %3d %3d %3d\n", x, y, r, g, b); */
+            
+            fb[10+x][10+y][3] = 0;
+         }
+      }
+            
+      x11_update ((uint8 *) fb);
+      
+      if (res == OK) free (pBitmap);
+   }
+   
    
    printf ("\nPress a <CR> to exit!\n");
    
@@ -307,5 +358,3 @@ main (int ac, char *av[])
    
 }
 #endif /* TEST */
-
-
