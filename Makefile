@@ -37,4 +37,7 @@ install: all
 	-rm -rf /usr/local/freevo
 	-mkdir /usr/local/freevo
 	-mkdir /var/log/freevo
+	chmod o+w /var/log/freevo
+	-mkdir /var/cache/freevo
+	chmod o+w /var/cache/freevo
 	cp -r * /usr/local/freevo
