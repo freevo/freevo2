@@ -1,0 +1,23 @@
+#! /sbin/runscript
+# Boot script for freevoweb on gentoo
+# by den_RDC
+
+
+depend() {
+        need localmount net
+}
+
+start() {
+        ebegin "Starting freevo webserver"
+                /opt/freevo/freevo execute /opt/freevo/src/www/webserver.py \
+		    &> /dev/null &
+        eend
+}
+
+stop() {
+        ebegin "Stopping freevo webserver"
+                kill `pgrep -f "python /opt/freevo/src/www/webserver.py" -d" "` \
+		    &> /dev/null
+        eend
+}
+
