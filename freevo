@@ -69,32 +69,6 @@ if test -a $RT_DIR/freevo_python ; then
 fi
 
 echo
-echo Runtime version 2 not found, checking for version 1...
-echo 
-
-# Old runtime version
-RUNTIME_VERSION=1
-
-# The runtime is stored in a directory one level up
-RT_DIR=../freevo_runtime$RUNTIME_VERSION
-
-# Check if the old runtime is installed
-if test -a $RT_DIR/freevo_rt ; then
-    
-    # The new runtime is not released on sourceforge yet.
-    echo 
-    echo
-    echo You have an old version of the Freevo runtime!
-    echo You must download and use version 2 from the website:
-    echo 
-    echo http://freevo.sourceforge.net/freevo_runtime2-pre1.tgz
-    echo
-    echo
-    exit 1
-
-fi
-
-echo
 echo
 echo
 echo No runtime found!
