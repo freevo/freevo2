@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/12/18 18:18:39  dischi
+# small update, still not working
+#
 # Revision 1.1  2004/10/21 18:02:13  dischi
 # example resources for the webserver
 #
@@ -135,7 +138,7 @@ class HTMLResource:
 #                  (_('Media Library'),_('View Media Library'),'%slibrary.rpy' % str(strprefix)),
 #                  (_('Manual Recording'),_('Schedule a Manual Recording'),'%smanualrecord.rpy' % str(strprefix)),
 #                  (_('Search'),_('Advanced Search Page'),'%ssearch.rpy' % str(strprefix)),
-                 (_('Help'),_('View Online Help and Documentation'),'%shelp/' % str(strprefix))]
+                 (_('Doc'),_('View Online Help and Documentation'),'%sdoc' % str(strprefix))]
 
         try:
             if config.ICECAST_WWW_PAGE:

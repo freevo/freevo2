@@ -66,11 +66,16 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         """
         path = self.path
         if os.path.splitext(path)[1]:
-            path = os.path.abspath(self.server.htdocs + path)
-            if not path.startswith(self.server.htdocs):
-                print 'Sandbox violation: %s' % path
+            for htdocs in self.server.htdocs:
+                path = os.path.abspath(htdocs + path)
+                if not path.startswith(htdocs):
+                    print 'Sandbox violation: %s' % path
+                    self.send_error(404, "File not found")
+                    return None
+                if os.path.isfile(path):
+                    break
+            else:
                 self.send_error(404, "File not found")
-                return None
                 
             ctype = self.guess_type(path)
             if ctype.startswith('text/'):
@@ -243,7 +248,7 @@ if __name__=="__main__":
 
     # launch the server on port 8080
     Server('', config.WWW_PORT, RequestHandler, ['src/www', 'www'],
-           os.path.abspath('src/www/htdocs'))
+           [os.path.abspath('src/www/htdocs')])
     print "HTTPServer running on port %s" % str(config.WWW_PORT)
 
     # loop
