@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.70  2004/02/15 15:23:55  dischi
+# some attr fixes/movements
+#
 # Revision 1.69  2004/02/14 15:06:25  dischi
 # add basic sort function
 #
@@ -457,32 +460,6 @@ class Item:
         """
         return the specific attribute
         """
-        if attr == 'runtime':
-            length = None
-
-            if self.info['runtime'] and self.info['runtime'] != 'None':
-                length = self.info['runtime']
-            elif self.info['length'] and self.info['length'] != 'None':
-                length = self.info['length']
-            if not length and hasattr(self, 'length'):
-                length = self.length
-            if not length:
-                return ''
-
-            if isinstance(length, int) or isinstance(length, float) or \
-                   isinstance(length, long):
-                length = str(int(round(length) / 60))
-            if length.find('min') == -1:
-                length = '%s min' % length
-            if length.find('/') > 0:
-                length = length[:length.find('/')].rstrip()
-            if length.find(':') > 0:
-                length = length[length.find(':')+1:]
-            if length == '0 min':
-                return ''
-            return length
-
-        
         if attr == 'length':
             try:
                 length = int(self.info['length'])
@@ -499,6 +476,21 @@ class Item:
                 return '%d:%02d:%02d' % ( length / 3600, (length % 3600) / 60, length % 60)
             else:
                 return '%d:%02d' % (length / 60, length % 60)
+
+
+        if attr == 'length:min':
+            try:
+                length = int(self.info['length'])
+            except ValueError:
+                return self.info['length']
+            except:
+                try:
+                    length = int(self.length)
+                except:
+                    return ''
+            if length == 0:
+                return ''
+            return '%d min' % (length / 60)
 
 
         if attr[:4] == 'len(' and attr[-1] == ')':
