@@ -6,6 +6,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.1  2003/10/11 17:57:39  rshortt
+# Sorry, there was a namespace issue with having a tv.py module here.  For
+# example the save_pickle function was bombing because it was looking in this
+# tv namespace for the TVGuide object.
+#
 # Revision 1.1  2003/10/11 12:04:46  rshortt
 # Moving tv/tv_util.py to util/tv.py.  I will remove te old one once I am
 # sure everthing else is working fine with the new location.
