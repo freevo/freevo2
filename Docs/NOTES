@@ -94,6 +94,15 @@ Mencoder TV recording
 mencoder -tv on:driver=v4l:input=0:norm=NTSC:channel=49:chanlist=us-cable:width=320:height=240:outfmt=yuy2:adevice=/dev/dsp2:audiorate=32000 -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=800:keyint=300:vhq -oac mp3lame -lameopts br=80:cbr -ffourcc divx -o tst.avi
 
 
+Options for bmovl:
+-vop bmovl=1:0:/tmp/bmovl-freevo.fifo
+1 = Hidden at startup (send SHOW/HIDE to change)
+0 = Opaque at startup = don't use alpha = copy whole buffer overwriting
+    background. Use OPAQUE/ALPHA to change.
+
+N.B.: You must use YV12 output (outfmt=yv12) from the TV with bmovl, 
+      otherwise it will have to use a slow SW conversion!
+
 ----------------------------------------------------------------------
 
 NVREC:

@@ -8,6 +8,9 @@ to keep the code more consistent (while not being too fascist).
                 / Krister
 
 
+o Do not use names of builtin functions (IMPORTANT!):
+  o dir, filter, str, file, etc
+
 o Always use 4 spaces four indentation. Do not use tabs as 
   that can lead to errors if tabs and spaces are mixed in Python!
 
@@ -16,9 +19,6 @@ o Use tabnanny.py in the python lib to check for potential tab problems.
 
 o Use 'python -t -Wall::PendingDeprecationWarning main.py' to 
   check for potential problems.
-
-o Do not use names of builtin functions:
-  o dir, filter, TBD
 
 o PyChecker TBD
 
