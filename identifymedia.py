@@ -53,7 +53,7 @@ class Identify_Thread(threading.Thread):
         mediatypes = [('VCD', '/mpegav/', 'vcd'), ('SVCD','/SVCD/', 'vcd'), 
                       ('SVCD','/svcd/', 'vcd'), ('DVD', '/video_ts/', 'dvd') ]
 
-        image = title = None
+        image = title = xml_filename = None
 
         # Read the volume label directly from the ISO9660 file system
         os.close(fd)
@@ -81,7 +81,8 @@ class Identify_Thread(threading.Thread):
                     title = '%s [%s]' % (mediatype[0], label)
 
                 media.info = RemovableMediaInfo(mediatype[0], title, image,\
-                                                (mediatype[2], media.mountdir, []))
+                                                (mediatype[2], media.mountdir, []),\
+                                                xml_filename)
                 return
                 
         mplayer_files = util.match_files(media.mountdir, config.SUFFIX_MPLAYER_FILES)
@@ -107,7 +108,7 @@ class Identify_Thread(threading.Thread):
 
             # return the title
             elif title:
-                info = RemovableMediaInfo('DIVX', title, image)
+                info = RemovableMediaInfo('DIVX', title, image, xml_file = xml_filename)
 
             # only one movie on DVD/CD, title is movie name and action is play
             elif len(mplayer_files) == 1:
@@ -157,7 +158,7 @@ class Identify_Thread(threading.Thread):
 
         elif mplayer_files or image_files or mp3_files:
             if title:
-                info = RemovableMediaInfo('DATA', title, image)
+                info = RemovableMediaInfo('DATA', title, image, xml_file = xml_filename)
             else:
                 info = RemovableMediaInfo("DATA", '%s [%s]' % (media.drivename, label))
 

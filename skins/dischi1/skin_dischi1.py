@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2002/09/15 12:32:02  dischi
+# The DVD/VCD/SCVD/CD description file for the automounter can now also
+# contain skin informations. An announcement will follow. For this the
+# paramter dir in menu.py is renamed to xml_file since the only use
+# was to find the xml file. All other modules are adapted (dir -> xml_file)
+#
 # Revision 1.6  2002/09/01 15:05:28  dischi
 # synced with main1. The only difference is that tv shows are aligned
 # now. All files belonging to the same show are shown as a table:
@@ -146,6 +152,10 @@ class Skin:
         if dir and os.path.isfile(os.path.join(dir, "skin.xml")):
             settings = copy.copy(self.settings)
             settings.load(os.path.join(dir, "skin.xml"), 1)
+            return settings
+        elif dir and os.path.isfile(dir):
+            settings = copy.copy(self.settings)
+            settings.load(dir, 1)
             return settings
         return None
 

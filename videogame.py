@@ -247,7 +247,7 @@ def cwd(arg=None, menuw=None):
         m.setImage(('movie', image))
         items += [m]
     
-    mamemenu = menu.Menu('VIDEOGAME MENU', items, dir=mamedir)
+    mamemenu = menu.Menu('VIDEOGAME MENU', items, xml_file=mamedir)
 
     if len(menuw.menustack) > 1:
         if menuw.menustack[1] == menuw.menustack[-1]:

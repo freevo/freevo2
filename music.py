@@ -14,6 +14,12 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2002/09/15 12:32:01  dischi
+# The DVD/VCD/SCVD/CD description file for the automounter can now also
+# contain skin informations. An announcement will follow. For this the
+# paramter dir in menu.py is renamed to xml_file since the only use
+# was to find the xml file. All other modules are adapted (dir -> xml_file)
+#
 # Revision 1.10  2002/09/15 11:53:41  dischi
 # Make info in RemovableMedia a class (RemovableMediaInfo)
 #
@@ -226,7 +232,7 @@ def parse_entry(arg=None, menuw=None):
             title = os.path.splitext(os.path.basename(file))[0]
             items += [menu.MenuItem( title, play, ('audio', file, files) )]
 
-        mp3menu = menu.Menu('MUSIC MENU', items, dir=mdir)
+        mp3menu = menu.Menu('MUSIC MENU', items, xml_file=mdir)
         menuw.pushmenu(mp3menu)
 
     else:

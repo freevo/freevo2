@@ -68,15 +68,15 @@ class MenuItem:
         
 class Menu:
 
-    def __init__(self, heading, choices, dir=None, packrows=1, umount_all = 0):
+    def __init__(self, heading, choices, xml_file=None, packrows=1, umount_all = 0):
         # XXX Add a list of eventhandlers?
         self.heading = heading
         self.choices = choices          # List of MenuItem:s
         self.page_start = 0
         self.packrows = packrows
         self.umount_all = umount_all    # umount all ROM drives on display?
-        if dir:
-            self.skin_settings = skin.LoadSettings(dir)
+        if xml_file:
+            self.skin_settings = skin.LoadSettings(xml_file)
         else:
             self.skin_settings = None
 

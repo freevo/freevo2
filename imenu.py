@@ -110,7 +110,7 @@ def cwd(arg=None, menuw=None):
         number += 1
 
         
-    imagemenu = menu.Menu('IMAGE MENU', items, dir=dir)
+    imagemenu = menu.Menu('IMAGE MENU', items, xml_file=dir)
     menuw.pushmenu(imagemenu)
 
 

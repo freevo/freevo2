@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2002/09/15 12:32:01  dischi
+# The DVD/VCD/SCVD/CD description file for the automounter can now also
+# contain skin informations. An announcement will follow. For this the
+# paramter dir in menu.py is renamed to xml_file since the only use
+# was to find the xml file. All other modules are adapted (dir -> xml_file)
+#
 # Revision 1.4  2002/09/01 21:07:20  krister
 # Made sure unicode encodes to latin-1.
 #
@@ -341,16 +347,18 @@ class XMLSkin:
     #
     def load(self, file, copy_content = 0):
         try:
+            print "********** LOAD %s" % file
             parser = qp_xml.Parser()
             box = parser.parse(open(file).read())
-            if box.children[0].name == 'skin':
-                for node in box.children[0].children:
-                    if node.name == u'menu':
-                        self.read_menu(file, node, copy_content)
-                    if node.name == u'mp3':
-                        self.read_mp3(file, node, copy_content)
-                    if node.name == u'main':
-                        self.read_mainmenu(file, node, copy_content)
+            for freevo_type in box.children:
+                if freevo_type.name == 'skin':
+                    for node in freevo_type.children:
+                        if node.name == u'menu':
+                            self.read_menu(file, node, copy_content)
+                        if node.name == u'mp3':
+                            self.read_mp3(file, node, copy_content)
+                        if node.name == u'main':
+                            self.read_mainmenu(file, node, copy_content)
                     
         except:
             print "ERROR: XML file corrupt"
