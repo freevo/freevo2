@@ -1,7 +1,8 @@
-BODY, TH, TD { 
+BODY { 
     background: #638BCA; 
     font-family: Helvetica, Verdana, sans-serif; 
     color: navy; 
+    margin: 0px 0px 0px 0px;
 }
 
 A:link { 

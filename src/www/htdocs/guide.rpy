@@ -11,6 +11,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/05/22 21:33:23  outlyer
+# Lots of cosmetic changes:
+#
+# o Moved the header/logo into web_types
+# o Made the error messages all use <h4> instead of <h2> so they look the same
+# o Removed most <hr> tags since they don't really mesh well with the light blue
+# o Moved the title into the "status bar" under the logo
+#
 # Revision 1.4  2003/05/14 12:28:00  rshortt
 # Forgot to comment out a 'SUB'.
 #
@@ -84,18 +92,17 @@ class GuideResource(FreevoResource):
         if got_schedule:
             schedule = schedule.getProgramList()
 
-        fv.printHeader('Freevo TV Guide', web.STYLESHEET, web.JAVASCRIPT)
+        fv.printHeader('TV Guide', web.STYLESHEET, web.JAVASCRIPT)
 
-        fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
-        fv.tableRowOpen('class="chanrow"')
-        fv.tableCell('<img src="images/logo_200x100.png" />', 'align="left"')
-        fv.tableCell('TV Guide', 'class="heading" align="left"')
-        fv.tableRowClose()
-        fv.tableClose()
+        #fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
+        #fv.tableRowOpen('class="chanrow"')
+        #fv.tableCell('<img src="images/logo_200x100.png" />', 'align="left"')
+        #fv.tableCell('TV Guide', 'class="heading" align="left"')
+        #fv.tableRowClose()
+        #fv.tableClose()
 
         if not got_schedule:
-            fv.res += '<hr /><h2>The recording server is down, recording information is unavailable.</h2>'
-        fv.res += '<hr />'
+            fv.res += '<h4>The recording server is down, recording information is unavailable.</h4>'
 
         pops = ''
         desc = ''

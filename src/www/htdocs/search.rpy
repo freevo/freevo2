@@ -11,6 +11,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/05/22 21:33:24  outlyer
+# Lots of cosmetic changes:
+#
+# o Moved the header/logo into web_types
+# o Made the error messages all use <h4> instead of <h2> so they look the same
+# o Removed most <hr> tags since they don't really mesh well with the light blue
+# o Moved the title into the "status bar" under the logo
+#
 # Revision 1.6  2003/05/16 03:21:33  rshortt
 # Bugfix.
 #
@@ -81,7 +89,7 @@ class SearchResource(FreevoResource):
             fv.tableCell('Search Results', 'class="heading" align="left"')
             fv.tableRowClose()
             fv.tableClose()
-            fv.res += '<hr /><h2>ERROR: recording server is unavailable</h2><hr />'
+            fv.res += '<h4>ERROR: recording server is unavailable</h4>'
             fv.printSearchForm()
             fv.printLinks()
             fv.printFooter()
@@ -108,7 +116,7 @@ class SearchResource(FreevoResource):
         fv.tableClose()
 
         if not got_matches: 
-            fv.res += '<h3>No matches</h3><hr />'
+            fv.res += '<h3>No matches</h3>'
 
         else:
             fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')

@@ -13,6 +13,14 @@
 #   human readable size rather than bytes from os
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/05/22 21:33:23  outlyer
+# Lots of cosmetic changes:
+#
+# o Moved the header/logo into web_types
+# o Made the error messages all use <h4> instead of <h2> so they look the same
+# o Removed most <hr> tags since they don't really mesh well with the light blue
+# o Moved the title into the "status bar" under the logo
+#
 # Revision 1.5  2003/05/14 01:11:20  rshortt
 # More error handling and notice if the record server is down.
 #
@@ -133,13 +141,6 @@ class LibraryResource(FreevoResource):
 
         fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
         fv.tableRowOpen('class="chanrow"')
-        fv.tableCell('<img src="images/logo_200x100.png" />', 'align=left')
-        fv.tableCell('Video Library', 'class="heading" align="left"')
-        fv.tableRowClose()
-        fv.tableClose()
-
-        fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
-        fv.tableRowOpen('class="chanrow"')
         fv.tableCell('Name', 'class="guidehead" align="center" colspan="1"')
         fv.tableCell('Size', 'class="guidehead" align="center" colspan="1"')
         fv.tableCell('Actions', 'class="guidehead" align="center" colspan="1"')
@@ -163,7 +164,7 @@ class LibraryResource(FreevoResource):
                     # sorry, have to pass without doing anything.
                     pass
         else:
-            fv.res += '<hr /><h2>The recording server is down, recording information is unavailable.</h2><hr />'
+            fv.res += '<h4>The recording server is down, recording information is unavailable.</h4>'
             
 
         #generate our favorites regular expression

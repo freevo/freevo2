@@ -9,6 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/05/22 21:33:23  outlyer
+# Lots of cosmetic changes:
+#
+# o Moved the header/logo into web_types
+# o Made the error messages all use <h4> instead of <h2> so they look the same
+# o Removed most <hr> tags since they don't really mesh well with the light blue
+# o Moved the title into the "status bar" under the logo
+#
 # Revision 1.4  2003/05/20 16:15:37  rshortt
 # Fixes for IE authentication and to get it to read the javascript.
 #
@@ -109,14 +117,29 @@ class HTMLResource:
 
 
     def printHeader(self, title='unknown page', style=None, script=None):
-        self.res += '<html><head>\n'
-        self.res += '<title>'+title+'</title>\n'
+        self.res += '<html>\n\t<head>\n'
+        self.res += '<title>Freevo | '+title+'</title>\n'
         if style != None:
             self.res += '<link rel="stylesheet" href="styles/main.css" type="text/css" />\n'
         if script != None:
             self.res += '<script language="JavaScript" src="'+script+'"></script>\n'
         self.res += '</head>\n'
-        self.res += '<body>\n'
+        self.res += '\n\n\n\n<body>\n'
+        # Header
+        self.res += '<!-- Header Logo and Status Line -->'
+        self.tableOpen('width="100%" border="0" cellspacing="0" cellpadding="0" background="images/headerbg.png"')
+        self.tableRowOpen()
+        self.tableCell('<a target="_new" href="http://freevo.sf.net/"><img src="images/headerfreevo.png" width="313" height="101"/></a>')
+        self.tableRowClose()
+        self.tableClose()
+        self.tableOpen('width="100%" border="0" cellspacing="0" cellpadding="0" background="images/headertxtbg.png"')
+        self.tableRowOpen()
+        self.tableCell('<center>' + title + '</center>','height=22')
+        self.tableRowClose()
+        self.tableClose()
+        self.res += '<!-- Main Content -->'
+        self.res+=('<ul>')
+
 
 
     def tableOpen(self, opts=''):
@@ -152,7 +175,7 @@ class HTMLResource:
 
 
     def printFooter(self):
-        self.res += '<hr />\n'
+        self.res += '</ul>\n'
         self.res += "</body></html>\n"
     
     

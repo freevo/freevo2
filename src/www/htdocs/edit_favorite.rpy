@@ -11,6 +11,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/05/22 21:33:23  outlyer
+# Lots of cosmetic changes:
+#
+# o Moved the header/logo into web_types
+# o Made the error messages all use <h4> instead of <h2> so they look the same
+# o Removed most <hr> tags since they don't really mesh well with the light blue
+# o Moved the title into the "status bar" under the logo
+#
 # Revision 1.5  2003/05/14 01:11:19  rshortt
 # More error handling and notice if the record server is down.
 #
@@ -73,13 +81,8 @@ class EditFavoriteResource(FreevoResource):
         (server_available, message) = ri.connectionTest()
         if not server_available:
             fv.printHeader('Edit Favorite', 'styles/main.css')
-            fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
-            fv.tableRowOpen('class="chanrow"')
-            fv.tableCell('<img src="images/logo_200x100.png" />', 'align="left"')
-            fv.tableCell('Edit Favorite', 'class="heading" align="left"')
-            fv.tableRowClose()
-            fv.tableClose()
-            fv.res += '<hr /><h2>ERROR: recording server is unavailable</h2><hr />'
+            
+	    fv.res += '<h4>ERROR: recording server is unavailable</h4>'
             fv.printSearchForm()
             fv.printLinks()
             fv.printFooter()

@@ -11,6 +11,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/05/22 21:33:23  outlyer
+# Lots of cosmetic changes:
+#
+# o Moved the header/logo into web_types
+# o Made the error messages all use <h4> instead of <h2> so they look the same
+# o Removed most <hr> tags since they don't really mesh well with the light blue
+# o Moved the title into the "status bar" under the logo
+#
 # Revision 1.3  2003/05/14 12:31:05  rshortt
 # Added the standard Freevo graphic and title.
 #
@@ -57,24 +65,16 @@ class IndexResource(FreevoResource):
     def _render(self, request):
         fv = HTMLResource()
 
-        fv.printHeader('Freevo Web Interface', 'styles/main.css')
-        fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
-        fv.tableRowOpen('class="chanrow"')
-        fv.tableCell('<img src="images/logo_200x100.png" />', 'align="left"')
-        fv.tableCell('Home', 'class="heading" align="left"')
-        fv.tableRowClose()
-        fv.tableClose()
-
-        fv.res += '<hr />'
-        fv.res += '<h2>Someone please design a nice index page. :)</h2>'
+        fv.printHeader('Welcome', 'styles/main.css')
     
         (server_available, schedule) = record_client.connectionTest()
         if not server_available:
-            fv.res += '<h4>Notice: The recording server is down.</h4><hr />'
+            fv.res += '<h4>Notice: The recording server is down.</h4>'
 
         fv.printSearchForm()
         fv.printLinks()
         fv.printFooter()
+        fv.res+=('</ul>')
 
         return fv.res
     
