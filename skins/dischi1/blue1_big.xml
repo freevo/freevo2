@@ -31,7 +31,7 @@
       <title layout="title0" visible="yes">
 	<area x="10" y="10" width="780" height="60"/> 
       </title>
-      <view layout="view0" visible="yes">
+      <view layout="view0" visible="no">
 	<area x="560" y="115" width="200" height="300"/> 
       </view>
       <listing layout="list0" visible="yes">
