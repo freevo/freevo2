@@ -108,6 +108,7 @@ class Display(BmovlCanvas):
             self.nbsocket.close()
             self.nbsocket = None
             self.send = None
+            self.fifo = None
         BmovlCanvas.close_fifo(self)
         
 
