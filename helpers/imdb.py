@@ -234,6 +234,15 @@ def download_image(url, filename):
         i.write(r.read())
         i.close()
         conn.close()
+
+        # try to crop the image to avoid borders by imdb
+        try:
+            import Image
+            image = Image.open(filename)
+            width, height = image.size
+            image.crop((2,2,width-4, height-4)).save(filename)
+        except:
+            pass
         return url[0]
 
     else:
