@@ -16,21 +16,24 @@ class IdleTool:
     def __init__(self):
         self.idlecount = 0
         self.clock_surface = osd.getsurface(525, 25, 225, 50)
-        self.mail_surface  = osd.getsurface(25,25,225,50)
-        self.MAILBOX='/var/mail/aubin'
+        self.mail_surface  = osd.getsurface(25, 25, 225, 50)
+        self.MAILBOX = '/var/mail/aubin'
         if not os.path.isfile(self.MAILBOX):
-            # XXX Try the mail environment; this might not work if the user runs this
+            # Try the mail environment; this might not work if the user runs this
             # as root, if he starts with 'sudo' it will though.
-            self.MAILBOX=os.environ['MAIL']
-        self.CLOCKFONT='skins/fonts/Trebuchet_MS.ttf'
+            if 'MAIL' in os.environ:
+                self.MAILBOX = os.environ['MAIL']
+            else:
+                self.MAILBOX = ''
+        self.CLOCKFONT = 'skins/fonts/Trebuchet_MS.ttf'
         if not os.path.isfile(self.CLOCKFONT):
             # XXX Get this from the skin, but for now this will allow it to work
-            self.CLOCKFONT=config.OSD_DEFAULT_FONTNAME
-        self.NO_MAILIMAGE='skins/images/status/newmail_dimmed.png'
-        self.MAILIMAGE='skins/images/status/newmail_active.png'
-        self.TVLOCKED='skins/images/status/television_active.png'
-        self.TVFREE='skins/images/status/television_inactive.png'
-        self.METARCODE='CYYZ'
+            self.CLOCKFONT = config.OSD_DEFAULT_FONTNAME
+        self.NO_MAILIMAGE = 'skins/images/status/newmail_dimmed.png'
+        self.MAILIMAGE = 'skins/images/status/newmail_active.png'
+        self.TVLOCKED = 'skins/images/status/television_active.png'
+        self.TVFREE = 'skins/images/status/television_inactive.png'
+        self.METARCODE = 'CYYZ'
         self.WEATHERCACHE = '/var/cache/freevo/weather'
         self.interval = 300
         self.tvlockfile = '/var/cache/freevo/record'
@@ -45,6 +48,8 @@ class IdleTool:
         self.idlecount = -1
 
     def checkmail(self):
+        if not self.MAILBOX:
+            return 0
         if os.path.isfile(self.MAILBOX):
             mb = mailbox.UnixMailbox (file(self.MAILBOX,'r'))
             msg = mb.next()
