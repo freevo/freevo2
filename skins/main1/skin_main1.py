@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2002/09/24 02:17:00  gsbarbieri
+# In DrawMP3 changed the layout, now the labels ('Title: ', 'Author: ', ...) are right aligned.
+#
 # Revision 1.26  2002/09/23 19:01:06  dischi
 # o Added alignment from the xml file for fonts
 # o Added PopupBox from gui classes (looks better)
@@ -653,8 +656,17 @@ class Skin:
     def DrawMP3(self, info):
 
         val = self.settings.mp3
+        val2 = copy.copy(val)
+        val2.align = 'right'
 
-        left = 120
+        str_w_title, str_h_title = osd.stringsize('Title: ',val2.font, val2.size)
+        str_w_artist, str_h_artist = osd.stringsize('Artist: ',val2.font, val2.size)
+        str_w_album, str_h_album = osd.stringsize('Album: ',val2.font, val2.size)
+        str_w_year, str_h_year = osd.stringsize('Year: ',val2.font, val2.size)
+        str_w_track, str_h_track = osd.stringsize('Track: ',val2.font, val2.size)
+        str_w_time, str_h_time = osd.stringsize('Time: ',val2.font, val2.size)
+        left = max( str_w_title, str_w_artist, str_w_album, str_w_year, str_w_track, str_w_time )
+        left += 30
 
         if info.drawall:
             osd.clearscreen()
@@ -683,29 +695,29 @@ class Skin:
             self.DrawText('Dir: '+dir_name, val, x=5, y=(py + 20))
             self.DrawText('File: '+file_name, val, 5, y=(py + 40))
                 
-            self.DrawText('Title:', val, x=30, y=100)
+            self.DrawText('Title: ', val2, x=left, y=100)
             self.DrawText('%s ' % info.title, val, x=left, y=100)
  
-            self.DrawText('Artist:', val, x=30, y=130)
+            self.DrawText('Artist: ', val2, x=left, y=130)
             self.DrawText('%s ' % info.artist, val, x=left, y=130)
 
-            self.DrawText('Album:', val, x=30, y=160)
+            self.DrawText('Album: ', val2, x=left, y=160)
             self.DrawText('%s ' % info.album, val, x=left, y=160)
         
-            self.DrawText('Year:', val, x=30, y=190)
+            self.DrawText('Year: ', val2, x=left, y=190)
             self.DrawText('%s ' % info.year, val, x=left, y=190)
 
-            self.DrawText('Track:', val, x=30, y=220)
+            self.DrawText('Track: ', val2, x=left, y=220)
             self.DrawText('%s ' % info.track, val, x=left, y=220)
 
-            self.DrawText('Time:', val, x=30, y=250)
+            self.DrawText('Time: ', val2, x=left, y=250)
 
                 
         else:
             # Erase the portion that will be redrawn
             if val.bgbitmap[0]:
                 osd.drawbitmap( val.bgbitmap, left, 250, None, left,
-                                250, 250, 30 )
+                                250, 300, 30 )
 
         # XXX I changed this because round rounds up on 3.58 etc. instead
         # XXX of giving us the desired "round down modulo" effect.
