@@ -18,6 +18,9 @@ o Added Thomas Schüppels objectcache patch.
 o Code cleanup / restructuring (xmms support dropped for now)
 o Speeded up the keyboard handling.
 o Changed keyboard volume +/- keys
+o Added small contributed XMLTV Python apps for Belgium and Netherlands.
+o New runtime with more libs and apps.
+o The startscript freevo is less bash-ist
 	
 	
 Release 1.3.0 (2002-11-13):
