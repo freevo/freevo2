@@ -138,14 +138,12 @@ o Checkout the entire module:
 o Check for your local changes compared to the CVS server:
   cvs -z3 -d:ext:SF_USERNAME@cvs.freevo.sourceforge.net:/cvsroot/freevo diff
 
-o Sync with CVS server:  (IMPORTANT!)
-  o You should always use "cvs update" immediately before "cvs commit", 
-    otherwise other's changes could be overwritten.
+o Sync with CVS server:
   cvs -z3 -d:ext:SF_USERNAME@cvs.freevo.sourceforge.net:/cvsroot/freevo update
 
 o Update Changelog, BUGS, README!
 
-o Commit changes to the CVS server:  (UPDATE first!)
+o Commit changes to the CVS server:
   cvs -z3 -d:ext:SF_USERNAME@cvs.freevo.sourceforge.net:/cvsroot/freevo \
     commit -m "Comment... " [file...]
 
