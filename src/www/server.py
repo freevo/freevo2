@@ -42,9 +42,14 @@ import cgi
 import cStringIO
 import os
 import traceback
+import logging
 
 import notifier
 import util.fsocket as fsocket
+
+
+# get logging object
+log = logging.getLogger('www')
 
             
 class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
@@ -60,6 +65,13 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         self.wfile=self.rfile
 
 
+    def log_message(self, format, *args):
+        """
+        Override BaseHTTPRequestHandler logging
+        """
+        log.info(format, *args)
+
+        
     def do_GET(self):
         """
         Begins serving a GET request
@@ -69,7 +81,7 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             for htdocs in self.server.htdocs:
                 path = os.path.abspath(htdocs + self.path)
                 if not path.startswith(htdocs):
-                    print 'Sandbox violation: %s' % path
+                    log.warning('Sandbox violation: %s' % path)
                     self.send_error(404, "File not found")
                     return None
                 if os.path.isfile(path):
@@ -223,10 +235,10 @@ class Server:
         try:
             conn, addr = socket.accept()
         except socket.error:
-            print 'warning: server accept() threw an exception'
+            log.error('warning: server accept() threw an exception')
             return True
         except TypeError:
-            print 'warning: server accept() threw EWOULDBLOCK'
+            log.error('warning: server accept() threw EWOULDBLOCK')
             return True
         # creates an instance of the handler class to handle the
         # request/response on the incoming connexion

@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/12/18 20:08:23  dischi
+# use logging module for debug
+#
 # Revision 1.14  2004/12/18 19:49:48  dischi
 # find the recordserver :)
 #
@@ -41,6 +44,15 @@
 
 import os
 import notifier
+import logging
+
+# get logging object
+log = logging.getLogger('www')
+
+# set basic recording debug to info
+log.setLevel(logging.INFO)
+
+
 import config
 
 from www.server import Server, RequestHandler
@@ -58,7 +70,7 @@ htdocs  = [ os.path.join(cgi_dir, 'htdocs'),
 
 # launch the server on port 8080
 Server('', config.WWW_PORT, RequestHandler, [ cgi_dir, 'www' ], htdocs)
-print "HTTPServer running on port %s" % str(config.WWW_PORT)
+log.info("HTTPServer running on port %s" % str(config.WWW_PORT))
 
 # loop
 notifier.loop()
