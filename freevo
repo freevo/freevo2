@@ -88,7 +88,7 @@ if [ "$1" = "execute" ] ; then
     # Exit if there is one already running
     if [ -f $PID_FILE ] ; then
         PID=`cat $PID_FILE`
-        RUNNING=`ps -ef | grep $PID | grep -v grep`
+        RUNNING=`ps -ef | grep " $PID " | grep $APP`
         if ! [ "$RUNNING" = "" ] ; then
           echo "Freevo's $APP is already running as process $PID."
           exit 0
@@ -121,7 +121,7 @@ fi
 PID_FILE=$PID_DIR/freevo-main.pid
 if [ -f $PID_FILE ] ; then
     PID=`cat $PID_FILE`
-    RUNNING=`ps -ef | grep $PID | grep -v grep`
+    RUNNING=`ps -ef | grep " $PID " | grep main`
     if ! [ "$RUNNING" = "" ] ; then
       echo "Freevo is already running as process $PID."
       exit 0
