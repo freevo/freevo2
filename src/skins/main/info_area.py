@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/01/14 21:30:44  dischi
+# add ==, != and string support to exp
+#
 # Revision 1.12  2004/01/11 20:23:31  dischi
 # move skin font handling to osd to avoid duplicate code
 #
@@ -226,10 +229,14 @@ class Info_Area(Skin_Area):
         """
         exp = ''
         for b in expression.split( ' ' ):
-            if b in ( 'and', 'or', 'not' ):
+            if b in ( 'and', 'or', 'not', '==', '!=' ):
                 # valid operator
                 exp += ' %s' % ( b )
 
+            elif b.startswith('\'') and b.endswith('\''):
+                # string
+                exp += ' %s' % ( b )
+                
             elif b.startswith('function:'):
                 exp += ' %s()' % b[9:]
                 
