@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/01/14 20:54:02  mikeruelle
+# umm that's a little bit better
+#
 # Revision 1.7  2004/01/14 20:38:07  mikeruelle
 # it's still broken. help dischi.
 #
@@ -93,8 +96,8 @@ class RadioPlayer:
         0 = unplayable
         """
         if item.url.startswith('radio://'):
-            return 0
-        return 2
+            return 2
+        return 0
 
 
     def play(self, item, playerGUI):
