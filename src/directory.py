@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.147  2004/12/31 11:57:22  dischi
+# renamed SKIN_* and OSD_* variables to GUI_*
+#
 # Revision 1.146  2004/12/30 11:31:51  dischi
 # rename id to __id__
 #
@@ -602,8 +605,8 @@ class DirItem(Playlist):
                          display_type=display_type, random=True).play(menuw=menuw)
             return
         
-#         if config.OSD_BUSYICON_TIMER:
-#             osd.get_singleton().busyicon.wait(config.OSD_BUSYICON_TIMER[0])
+#         if config.GUI_BUSYICON_TIMER:
+#             osd.get_singleton().busyicon.wait(config.GUI_BUSYICON_TIMER[0])
         
         files       = vfs.listdir(self.dir, include_overlay=True)
         num_changes = mediainfo.check_cache(self.dir)
@@ -620,7 +623,7 @@ class DirItem(Playlist):
             callback=pop.tick
 
 
-#         elif config.OSD_BUSYICON_TIMER and len(files) > config.OSD_BUSYICON_TIMER[1]:
+#         elif config.GUI_BUSYICON_TIMER and len(files) > config.GUI_BUSYICON_TIMER[1]:
 #             # many files, just show the busy icon now
 #             osd.get_singleton().busyicon.wait(0)
         
@@ -729,7 +732,7 @@ class DirItem(Playlist):
             if self.media:
                 self.media.mount()
 
-#         if config.OSD_BUSYICON_TIMER:
+#         if config.GUI_BUSYICON_TIMER:
 #             # stop the timer. If the icons is drawn, it will stay there
 #             # until the osd is redrawn, if not, we don't need it to pop
 #             # up the next milliseconds

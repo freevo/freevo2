@@ -66,7 +66,7 @@ class Display(BmovlCanvas):
                          % ( config.CONF.width, config.CONF.width,
                              config.CONF.height, self.get_fname() ),
                          '-vo', config.MPLAYER_VO_DEV, '-ao', 'null',
-                         config.OSD_BACKGROUND_VIDEO ]
+                         config.GUI_BACKGROUND_VIDEO ]
             self.child = None
             self.restart()
         BmovlCanvas.__init__(self, size, fifo)

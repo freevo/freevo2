@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/12/31 11:57:44  dischi
+# renamed SKIN_* and OSD_* variables to GUI_*
+#
 # Revision 1.4  2004/11/20 18:23:03  dischi
 # use python logger module for debug
 #
@@ -59,7 +62,7 @@ log = logging.getLogger()
 OSD_MESSAGE_FONT    = '-*-helvetica-medium-r-normal-*-*-260-*-*-p-*-*-*'
 OSD_MESSAGE_COLOR   = '#D3D3D3'  # LightGray
 OSD_MESSAGE_TIMEOUT = 3          # 3 seconds
-OSD_MESSAGE_OFFSET  = 20 + config.OSD_OVERSCAN_Y  # Offset of 20 pixels
+OSD_MESSAGE_OFFSET  = 20 + config.GUI_OVERSCAN_Y  # Offset of 20 pixels
 
 # Labels which are displayed with percent
 PERCENT = [ 'Volume', 

@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/12/31 11:57:41  dischi
+# renamed SKIN_* and OSD_* variables to GUI_*
+#
 # Revision 1.3  2004/10/06 18:59:52  dischi
 # remove import rc
 #
@@ -66,10 +69,10 @@ class Display(IvtvCanvas):
     def hide(self):
         """
         Hide the output display. In most cases this does nothing since
-        a simple window doesn't matter. If OSD_STOP_WHEN_PLAYING the
+        a simple window doesn't matter. If GUI_STOP_WHEN_PLAYING the
         display will be shut down.
         """
-        if config.OSD_STOP_WHEN_PLAYING:
+        if config.GUI_STOP_WHEN_PLAYING:
             self.stop()
 
 
@@ -77,7 +80,7 @@ class Display(IvtvCanvas):
         """
         Show the output window again if it is not visible
         """
-        if config.OSD_STOP_WHEN_PLAYING:
+        if config.GUI_STOP_WHEN_PLAYING:
             self.restart()
 
 

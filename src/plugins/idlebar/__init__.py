@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2004/12/31 11:57:44  dischi
+# renamed SKIN_* and OSD_* variables to GUI_*
+#
 # Revision 1.34  2004/11/28 15:46:24  dischi
 # fix poll intervall
 #
@@ -145,7 +148,7 @@ class PluginInterface(plugin.DaemonPlugin):
         changed = False
 
         w = screen.width
-        h = config.OSD_OVERSCAN_Y + 60
+        h = config.GUI_OVERSCAN_Y + 60
 
         f = gui.get_image('idlebar')
 
@@ -157,9 +160,9 @@ class PluginInterface(plugin.DaemonPlugin):
             self.container.add_child(self.bar)
             changed = True
 
-        x1 = config.OSD_OVERSCAN_X
-        y1 = config.OSD_OVERSCAN_Y
-        x2 = screen.width - config.OSD_OVERSCAN_X
+        x1 = config.GUI_OVERSCAN_X
+        y1 = config.GUI_OVERSCAN_Y
+        x2 = screen.width - config.GUI_OVERSCAN_X
         y2 = h
 
         for p in plugin.get('idlebar'):
@@ -223,7 +226,7 @@ class PluginInterface(plugin.DaemonPlugin):
             s = gui.get_display()
             self.background = gui.imagelib.load('background', (s.width, s.height))
             if self.background:
-                size = (s.width, config.OSD_OVERSCAN_Y + 60)
+                size = (s.width, config.GUI_OVERSCAN_Y + 60)
                 self.background.crop((0,0), size)
                 self.background = gui.Image(self.background, (0,0))
                 self.background.set_alpha(230)
@@ -252,7 +255,7 @@ class PluginInterface(plugin.DaemonPlugin):
             # the screen itself, this is done by the app later
             app, fullscreen, fade = event.arg
             if fade:
-                fade = config.OSD_FADE_STEPS
+                fade = config.GUI_FADE_STEPS
             else:
                 fade = 0
             if fullscreen:

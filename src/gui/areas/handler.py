@@ -107,8 +107,8 @@ class AreaHandler:
         self.display_style['menu'] = 0
         if vfs.isfile(self.storage_file):
             self.storage = util.cache.load(self.storage_file)
-            if self.storage and self.storage.has_key(config.SKIN_XML_FILE):
-                self.display_style['menu'] = self.storage[config.SKIN_XML_FILE]
+            if self.storage and self.storage.has_key(config.GUI_XML_FILE):
+                self.display_style['menu'] = self.storage[config.GUI_XML_FILE]
 
 
     def __del__(self):
@@ -150,7 +150,7 @@ class AreaHandler:
         self.display_style['menu'] = (self.display_style['menu'] + 1) % \
                                      len(area.style)
 
-        self.storage[config.SKIN_XML_FILE] = self.display_style['menu']
+        self.storage[config.GUI_XML_FILE] = self.display_style['menu']
         util.cache.save(self.storage_file, self.storage)
 
 
@@ -207,7 +207,7 @@ class AreaHandler:
                 pass
 
             for i in menu.choices:
-                if config.SKIN_FORCE_TEXTVIEW_STYLE == 1 and \
+                if config.GUI_FORCE_TEXTVIEW_STYLE == 1 and \
                        i.type == 'dir' and not i.media:
                     # directory with few items and folder:
                     self.use_text_view = False
@@ -227,7 +227,7 @@ class AreaHandler:
             if i.type == 'dir':
                 folder += 1
                 # directory with mostly folder:
-                if config.SKIN_FORCE_TEXTVIEW_STYLE == 1 and folder > 3 \
+                if config.GUI_FORCE_TEXTVIEW_STYLE == 1 and folder > 3 \
                        and not i.media:
                     self.use_text_view = False
                     return

@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/12/31 11:57:41  dischi
+# renamed SKIN_* and OSD_* variables to GUI_*
+#
 # Revision 1.6  2004/12/19 10:36:31  dischi
 # update bmovl fifo handling
 #
@@ -63,7 +66,7 @@ def get_display():
     if no display is currently set
     """
     if not display_stack:
-        exec('from %s import Display' % config.OSD_DISPLAY.lower())
+        exec('from %s import Display' % config.GUI_DISPLAY.lower())
         display_stack.append(Display((config.CONF.width, config.CONF.height), True))
     return display_stack[-1]
 

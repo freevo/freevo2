@@ -113,15 +113,15 @@ class ControlManager:
             self.container.add_child(o)
 
         # TODO: support different placements
-        tw = display.width  - 2*config.OSD_OVERSCAN_X
-        th = display.height - 2*config.OSD_OVERSCAN_Y
+        tw = display.width  - 2*config.GUI_OVERSCAN_X
+        th = display.height - 2*config.GUI_OVERSCAN_Y
 
         x = int(tw/2) - int(w/2)
         y = th - h
 
         self.container.set_pos((x,y))
 
-        fade = config.OSD_FADE_STEPS
+        fade = config.GUI_FADE_STEPS
         if fade:
             gui.animation.FadeAnimation([self.container],fade, 0, 255).start()
 

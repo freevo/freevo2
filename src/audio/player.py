@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2004/12/31 11:57:40  dischi
+# renamed SKIN_* and OSD_* variables to GUI_*
+#
 # Revision 1.31  2004/11/20 18:23:00  dischi
 # use python logger module for debug
 #
@@ -183,7 +186,7 @@ class AudioPlayer(Application):
         Application.show(self)
         self.bg_playing = False
         self.refresh()
-        self.draw_engine.show(config.OSD_FADE_STEPS)
+        self.draw_engine.show(config.GUI_FADE_STEPS)
 
 
     def hide(self):
@@ -191,7 +194,7 @@ class AudioPlayer(Application):
         hide the player gui
         """
         Application.hide(self)
-        self.draw_engine.hide(config.OSD_FADE_STEPS)
+        self.draw_engine.hide(config.GUI_FADE_STEPS)
         if self.running:
             self.bg_playing = True
             

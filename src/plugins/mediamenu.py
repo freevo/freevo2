@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2004/12/31 11:57:43  dischi
+# renamed SKIN_* and OSD_* variables to GUI_*
+#
 # Revision 1.43  2004/11/27 13:26:56  dischi
 # smaller bugfixes
 #
@@ -83,7 +86,7 @@ class PluginInterface(plugin.MainMenuPlugin):
     def __init__(self, type=None, force_text_view=FALSE):
         plugin.MainMenuPlugin.__init__(self)
         self.type = type
-        self.force_text_view = force_text_view or config.SKIN_MEDIAMENU_FORCE_TEXTVIEW
+        self.force_text_view = force_text_view or config.GUI_MEDIAMENU_FORCE_TEXTVIEW
 
 
     def items(self, parent):

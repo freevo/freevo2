@@ -44,7 +44,7 @@ class MenuApplication(Application):
             self.inside_menu = False
             self.engine.show(0)
         elif self.engine:
-            self.engine.show(config.OSD_FADE_STEPS)
+            self.engine.show(config.GUI_FADE_STEPS)
     
 
     def hide(self):
@@ -58,7 +58,7 @@ class MenuApplication(Application):
             self.inside_menu = False
             self.engine.hide(0)
         elif self.engine:
-            self.engine.hide(config.OSD_FADE_STEPS)
+            self.engine.hide(config.GUI_FADE_STEPS)
 
     
 

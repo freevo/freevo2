@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.73  2004/12/31 11:57:42  dischi
+# renamed SKIN_* and OSD_* variables to GUI_*
+#
 # Revision 1.72  2004/11/20 18:23:02  dischi
 # use python logger module for debug
 #
@@ -453,9 +456,9 @@ class ImageViewer(Application):
             osdstring = osdstring[1:]
 
         # create the text widget
-        pos = (config.OSD_OVERSCAN_X + 10, config.OSD_OVERSCAN_Y + 10)
-        size = (gui.width - 2 * config.OSD_OVERSCAN_X - 20,
-                gui.height - 2 * config.OSD_OVERSCAN_Y - 20)
+        pos = (config.GUI_OVERSCAN_X + 10, config.GUI_OVERSCAN_Y + 10)
+        size = (gui.width - 2 * config.GUI_OVERSCAN_X - 20,
+                gui.height - 2 * config.GUI_OVERSCAN_Y - 20)
         self.osd_text = gui.Textbox(osdstring, pos, size,
                                     gui.get_font('default'),
                                     'left', 'bottom', mode='soft')
@@ -470,7 +473,7 @@ class ImageViewer(Application):
         if rect[1] < 100:
             # text too small, set to a minimum position
             self.osd_text.set_pos((self.osd_text.get_pos()[0], gui.height - \
-                                   config.OSD_OVERSCAN_Y - 100))
+                                   config.GUI_OVERSCAN_Y - 100))
             rect = rect[0], 100
 
         # now draw a box around the osd

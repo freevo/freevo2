@@ -245,10 +245,10 @@ class Area:
                 # if this is the real background image, ignore the
                 # OVERSCAN to fill the whole screen
                 if bg.label == 'background':
-                    bg.x -= config.OSD_OVERSCAN_X
-                    bg.y -= config.OSD_OVERSCAN_Y
-                    bg.width  += 2 * config.OSD_OVERSCAN_X
-                    bg.height += 2 * config.OSD_OVERSCAN_Y
+                    bg.x -= config.GUI_OVERSCAN_X
+                    bg.y -= config.GUI_OVERSCAN_Y
+                    bg.width  += 2 * config.GUI_OVERSCAN_X
+                    bg.height += 2 * config.GUI_OVERSCAN_Y
                 if bg.label == 'watermark' and self.menu.selected.image:
                     imagefile = self.menu.selected.image
                 else:

@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/12/31 11:57:41  dischi
+# renamed SKIN_* and OSD_* variables to GUI_*
+#
 # Revision 1.10  2004/11/27 19:07:50  dischi
 # add exec before/after support
 #
@@ -62,17 +65,17 @@ class Display(PygameCanvas):
         self.running = True
         self.animation_possible = True
         plugin.activate('input.sdl')
-        if config.OSD_SDL_EXEC_AFTER_STARTUP:
-            print config.OSD_SDL_EXEC_AFTER_STARTUP
-            os.system(config.OSD_SDL_EXEC_AFTER_STARTUP)
+        if config.GUI_SDL_EXEC_AFTER_STARTUP:
+            print config.GUI_SDL_EXEC_AFTER_STARTUP
+            os.system(config.GUI_SDL_EXEC_AFTER_STARTUP)
         
     def hide(self):
         """
         Hide the output display. In most cases this does nothing since
-        a simple window doesn't matter. If OSD_STOP_WHEN_PLAYING the
+        a simple window doesn't matter. If GUI_STOP_WHEN_PLAYING the
         ygame display will be shut down.
         """
-        if config.OSD_STOP_WHEN_PLAYING:
+        if config.GUI_STOP_WHEN_PLAYING:
             self.stop()
 
 
@@ -80,7 +83,7 @@ class Display(PygameCanvas):
         """
         Show the output window again if it is not visible
         """
-        if config.OSD_STOP_WHEN_PLAYING:
+        if config.GUI_STOP_WHEN_PLAYING:
             self.restart()
 
 
@@ -92,8 +95,8 @@ class Display(PygameCanvas):
             pygame.display.quit()
             self.freeze()
             self.running = False
-            if config.OSD_SDL_EXEC_AFTER_CLOSE:
-                os.system(config.OSD_SDL_EXEC_AFTER_CLOSE)
+            if config.GUI_SDL_EXEC_AFTER_CLOSE:
+                os.system(config.GUI_SDL_EXEC_AFTER_CLOSE)
         
     def restart(self):
         """

@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/12/31 11:57:44  dischi
+# renamed SKIN_* and OSD_* variables to GUI_*
+#
 # Revision 1.17  2004/11/20 18:23:03  dischi
 # use python logger module for debug
 #
@@ -108,9 +111,9 @@ class PluginInterface(plugin.DaemonPlugin):
         # create the text object
         # FIXME: do respect the idlebar if active
         self.gui_object = gui.Text(self.message,
-                                   (config.OSD_OVERSCAN_X, config.OSD_OVERSCAN_Y + 10),
-                                   (display.width - 10 - 2 * config.OSD_OVERSCAN_X,
-                                    config.OSD_OVERSCAN_Y + 10 + font.height), 
+                                   (config.GUI_OVERSCAN_X, config.GUI_OVERSCAN_Y + 10),
+                                   (display.width - 10 - 2 * config.GUI_OVERSCAN_X,
+                                    config.GUI_OVERSCAN_Y + 10 + font.height), 
                                    font, align_h='right')
 
         # make sure the object is on top of everything else

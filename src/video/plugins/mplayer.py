@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.94  2004/12/31 11:57:44  dischi
+# renamed SKIN_* and OSD_* variables to GUI_*
+#
 # Revision 1.93  2004/12/19 10:36:31  dischi
 # update bmovl fifo handling
 #
@@ -572,9 +575,9 @@ class MPlayerApp( childapp.Instance ):
         #         if line.startswith('Connecting to server'):
         #             line = 'Connecting to server'
         #         self.osd.clearscreen(self.osd.COL_BLACK)
-        #         self.osd.drawstringframed(line, config.OSD_OVERSCAN_X+10,
-        #              config.OSD_OVERSCAN_Y+10,
-        #              self.osd.width - 2 * (config.OSD_OVERSCAN_X+10),
+        #         self.osd.drawstringframed(line, config.GUI_OVERSCAN_X+10,
+        #              config.GUI_OVERSCAN_Y+10,
+        #              self.osd.width - 2 * (config.GUI_OVERSCAN_X+10),
         #              -1, self.osdfont, self.osd.COL_WHITE)
         #         self.osd.update()
 

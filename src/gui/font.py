@@ -36,8 +36,8 @@ class Font:
             log.debug('Couldn\'t load font "%s"' % name)
 
             # Ok, see if there is an alternate font to use
-            if name in config.OSD_FONT_ALIASES:
-                alt_fname = config.OSD_FONT_ALIASES[name]
+            if name in config.GUI_FONT_ALIASES:
+                alt_fname = config.GUI_FONT_ALIASES[name]
                 log.debug('trying alternate: %s' % alt_fname)
                 try:
                     return mevas.imagelib.load_font(alt_fname, ptsize)
@@ -48,7 +48,7 @@ class Font:
                         print 'WARNING: No alternate found in the alias list!'
                         print 'Falling back to default font, this may look very ugly'
                         font_warning.append(name)
-                    return mevas.imagelib.load_font(config.OSD_DEFAULT_FONTNAME, ptsize)
+                    return mevas.imagelib.load_font(config.GUI_FONT_DEFAULT_NAME, ptsize)
 
         
 

@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/12/31 11:57:41  dischi
+# renamed SKIN_* and OSD_* variables to GUI_*
+#
 # Revision 1.8  2004/11/20 18:23:01  dischi
 # use python logger module for debug
 #
@@ -92,7 +95,7 @@ class Display(MPlayerCanvas):
         if self.start_video and not self.child:
             import childapp
             arg = [config.MPLAYER_CMD] + self.mplayer_args.split(' ') + \
-                  [config.OSD_BACKGROUND_VIDEO]
+                  [config.GUI_BACKGROUND_VIDEO]
             self.child = childapp.Instance( arg, stop_osd = 0 )
             time.sleep(2)
             self.mplayer_overlay.set_can_write(True)

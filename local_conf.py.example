@@ -4,12 +4,9 @@
 # -----------------------------------------------------------------------
 # $Id$
 #
+# WARNING: this file is not up to date!
+#
 # Notes:
-#    This file contains the freevo settings. To change the settings
-#    you can edit this file, or better, put a file named local_conf.py
-#    # in the same directory and add your changes there.  E.g.: when
-#    you # want a alsa as mplayer audio out, just put
-#    "MPLAYER_AO_DEV = # 'alsa9'" in local_conf.py
 #
 #    This is no normal config file, it's Python code. Because of that, you 
 #    need to follow some rules to avoid crashes. The examples should explain
@@ -48,8 +45,8 @@ CONFIG_VERSION = 5.14
 # General freevo settings:
 # ======================================================================
 
-# AUDIO_DEVICE        = '/dev/dsp'      # e.g.: /dev/dsp0, /dev/audio, /dev/alsa/?
-# AUDIO_INPUT_DEVICE  = '/dev/dsp1'     # e.g.: /dev/dsp0, /dev/audio, /dev/alsa/?
+# AUDIO_DEVICE        = '/dev/dsp'      # e.g.: /dev/dsp0, /dev/audio
+# AUDIO_INPUT_DEVICE  = '/dev/dsp1'     # e.g.: /dev/dsp0, /dev/audio
 # MAJOR_AUDIO_CTRL    = 'VOL'           # Freevo takes control over one audio ctrl
                                         # 'VOL', 'PCM' 'OGAIN' etc.
 # CONTROL_ALL_AUDIO   = 1               # Should Freevo take complete control of audio
@@ -485,14 +482,14 @@ IMAGEVIEWER_BLEND_MODE = -1
 # 2 = Ignore the directories, always switch to text view when all images
 #     are the same
 #
-# SKIN_FORCE_TEXTVIEW_STYLE = 1
+# GUI_FORCE_TEXTVIEW_STYLE = 1
 
 #
 # Force text view for the media menu
 # (The media menu is the first menu displayed for video, audio, images 
 # and games). 
 #
-# SKIN_MEDIAMENU_FORCE_TEXTVIEW = 0
+# GUI_MEDIAMENU_FORCE_TEXTVIEW = 0
 
 
 # ======================================================================
@@ -502,13 +499,13 @@ IMAGEVIEWER_BLEND_MODE = -1
 #
 # System Path to search for fonts not included in the Freevo distribution
 #
-# OSD_EXTRA_FONT_PATH  = [ '/usr/X11R6/lib/X11/fonts/truetype/' ]
+# GUI_FONT_PATH  = [ '/usr/X11R6/lib/X11/fonts/truetype/' ]
 
 #
 # Font aliases 
 # All names must be lowercase! All alternate fonts must be in './share/fonts/'
 #
-# OSD_FONT_ALIASES = { 'arial_bold.ttf' : 'VeraBd.ttf' }
+# GUI_FONT_ALIASES = { 'arial_bold.ttf' : 'VeraBd.ttf' }
 
 #
 # Number of seconds to wait until the busy icon is shown in the menu.
@@ -518,26 +515,26 @@ IMAGEVIEWER_BLEND_MODE = -1
 # Set this to None to disable this.
 # (seconds, files)
 #
-# OSD_BUSYICON_TIMER = (0.7, 200)
+# GUI_BUSYICON_TIMER = (0.7, 200)
 
-# OSD_OVERSCAN_X = 0
-# OSD_OVERSCAN_Y = 0
+# GUI_OVERSCAN_X = 0
+# GUI_OVERSCAN_Y = 0
 
 #
 # Execute a script on OSD startup.
 #
-# OSD_SDL_EXEC_AFTER_STARTUP = ""
+# GUI_SDL_EXEC_AFTER_STARTUP = ""
 
 #
 # Execute a script on OSD close.
 #
-# OSD_SDL_EXEC_AFTER_CLOSE = ""
+# GUI_SDL_EXEC_AFTER_CLOSE = ""
 
 #
 # Stop the osd before playing a movie with xine or mplayer. Some output
 # devices need this. After playback, the osd will be restored
 #
-# OSD_STOP_WHEN_PLAYING = 0
+# GUI_STOP_WHEN_PLAYING = 0
 
 #
 # Dim text that doesn't fit instead of using ellipses. 
@@ -729,7 +726,7 @@ IMAGEVIEWER_BLEND_MODE = -1
 # 
 # More can be found at: http://www.python.org/doc/current/lib/module-time.html
 
-# TV_RECORDFILE_MASK = '%%m-%%d %%H:%%M %(progname)s - %(title)s'
+# TV_RECORD_FILEMASK = '%%m-%%d %%H:%%M %(progname)s - %(title)s'
 
 
 # if using the persitant recordserver

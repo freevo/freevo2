@@ -216,7 +216,7 @@ if len(sys.argv) >= 2 and sys.argv[1] == '--force-fs':
 #
 # set default font
 #
-OSD_DEFAULT_FONTNAME = os.path.join(FONT_DIR, OSD_DEFAULT_FONTNAME)
+GUI_FONT_DEFAULT_NAME = os.path.join(FONT_DIR, GUI_FONT_DEFAULT_NAME)
 
 #
 # set list of video files to []

@@ -88,7 +88,7 @@ try:
     
     import config
 
-    if config.OSD_DISPLAY == 'SDL':
+    if config.GUI_DISPLAY == 'SDL':
         import pygame
 
 except ImportError, i:
@@ -311,7 +311,7 @@ class Splashscreen(gui.Area):
         """
         fade out
         """
-        self.engine.hide(config.OSD_FADE_STEPS)
+        self.engine.hide(config.GUI_FADE_STEPS)
 
         
     def destroy(self):

@@ -557,12 +557,12 @@ class Area(XML_data):
         XML_data.parse(self, node, scale, current_dir)
         if x != self.x:
             try:
-                self.x += config.OSD_OVERSCAN_X
+                self.x += config.GUI_OVERSCAN_X
             except TypeError:
                 pass
         if y != self.y:
             try:
-                self.y += config.OSD_OVERSCAN_Y
+                self.y += config.GUI_OVERSCAN_Y
             except TypeError:
                 pass
         for subnode in node.children:
@@ -575,12 +575,12 @@ class Area(XML_data):
                     self.images[label].parse(subnode, scale, current_dir)
                     if x != self.images[label].x:
                         try:
-                            self.images[label].x += config.OSD_OVERSCAN_X
+                            self.images[label].x += config.GUI_OVERSCAN_X
                         except TypeError:
                             pass
                     if y != self.images[label].y:
                         try:
-                            self.images[label].y += config.OSD_OVERSCAN_Y
+                            self.images[label].y += config.GUI_OVERSCAN_Y
                         except TypeError:
                             pass
 
@@ -593,16 +593,16 @@ class Area(XML_data):
 
     def rect(self, type):
         if type == 'screen':
-            return (self.x - config.OSD_OVERSCAN_X,
-                    self.y - config.OSD_OVERSCAN_X,
-                    self.width + 2 * config.OSD_OVERSCAN_X,
-                    self.height + 2 * config.OSD_OVERSCAN_X)
+            return (self.x - config.GUI_OVERSCAN_X,
+                    self.y - config.GUI_OVERSCAN_X,
+                    self.width + 2 * config.GUI_OVERSCAN_X,
+                    self.height + 2 * config.GUI_OVERSCAN_X)
         return (self.x, self.y, self.width, self.height)
 
     def pos(self, type):
         if type == 'screen':
-            return (self.x - config.OSD_OVERSCAN_X,
-                    self.y - config.OSD_OVERSCAN_X)
+            return (self.x - config.GUI_OVERSCAN_X,
+                    self.y - config.GUI_OVERSCAN_X)
         return (self.x, self.y)
 
 
@@ -1269,8 +1269,8 @@ class FXDSettings:
         else:
             w, h = config.CONF.width, config.CONF.height
 
-        scale = (float(config.CONF.width-2*config.OSD_OVERSCAN_X)/float(w),
-                 float(config.CONF.height-2*config.OSD_OVERSCAN_Y)/float(h))
+        scale = (float(config.CONF.width-2*config.GUI_OVERSCAN_X)/float(w),
+                 float(config.CONF.height-2*config.GUI_OVERSCAN_Y)/float(h))
 
         include = attr_str(node, 'include', '')
 
@@ -1350,8 +1350,8 @@ def set_base_fxd(name):
     """
     Set the basic skin fxd file and store it
     """
-    config.SKIN_XML_FILE = os.path.splitext(os.path.basename(name))[0]
-    log.info('load basic skin settings: %s' % config.SKIN_XML_FILE)
+    config.GUI_XML_FILE = os.path.splitext(os.path.basename(name))[0]
+    log.info('load basic skin settings: %s' % config.GUI_XML_FILE)
 
     try:
         # try to load the new skin
@@ -1391,14 +1391,14 @@ def init_module():
     if vfs.isfile(cachefile):
         storage = util.read_pickle(cachefile)
     if storage:
-        if not config.SKIN_XML_FILE:
-            config.SKIN_XML_FILE = storage['SKIN_XML_FILE']
+        if not config.GUI_XML_FILE:
+            config.GUI_XML_FILE = storage['GUI_XML_FILE']
         else:
-            log.debug('skin forced to %s' % config.SKIN_XML_FILE)
+            log.debug('skin forced to %s' % config.GUI_XML_FILE)
     else:
-        if not config.SKIN_XML_FILE:
-            config.SKIN_XML_FILE = config.SKIN_DEFAULT_XML_FILE
+        if not config.GUI_XML_FILE:
+            config.GUI_XML_FILE = config.GUI_DEFAULT_XML_FILE
         storage = {}
     # load the fxd file at set current_theme
-    current_theme = set_base_fxd(config.SKIN_XML_FILE)
-    current_theme.filename = config.SKIN_XML_FILE
+    current_theme = set_base_fxd(config.GUI_XML_FILE)
+    current_theme.filename = config.GUI_XML_FILE

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.113  2004/12/31 11:57:39  dischi
+# renamed SKIN_* and OSD_* variables to GUI_*
+#
 # Revision 1.112  2004/12/28 18:09:58  dischi
 # add extra Action class for item actions
 #
@@ -215,7 +218,7 @@ class MenuWidget(Application):
             self.engine.show(0)
             self.inside_menu = False
         else:
-            self.engine.show(config.OSD_FADE_STEPS)
+            self.engine.show(config.GUI_FADE_STEPS)
 
                 
     def hide(self, clear=True):
@@ -227,7 +230,7 @@ class MenuWidget(Application):
             self.engine.hide(0)
             self.inside_menu = False
         else:
-            self.engine.hide(config.OSD_FADE_STEPS)
+            self.engine.hide(config.GUI_FADE_STEPS)
         
         
     def delete_menu(self, arg=None, menuw=None, allow_reload=True):

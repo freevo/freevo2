@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/12/31 11:57:43  dischi
+# renamed SKIN_* and OSD_* variables to GUI_*
+#
 # Revision 1.19  2004/10/06 19:15:12  dischi
 # use new childapp interface
 #
@@ -116,7 +119,7 @@ class LogScroll(PopupBox):
         PopupBox.__init__(self, text, handler, top, left, width, height,
                           icon, None, None, parent)
 
-        myfont = self.osd.getfont(config.OSD_DEFAULT_FONTNAME, config.OSD_DEFAULT_FONTSIZE)
+        myfont = self.osd.getfont(config.GUI_FONT_DEFAULT_NAME, config.GUI_FONT_DEFAULT_SIZE)
         surf_w = myfont.stringsize('AAAAAAAAAA'*8) 
         data = self.osd.drawstringframed(self.filetext, 0, 0, surf_w, 1000000,
                                          myfont, align_h='left', align_v='top',

@@ -106,6 +106,15 @@ for dirname in cfgfilepath:
             print
             sys.exit(1)
 
+        if int(str(CONFIG_VERSION).split('.')[0]) < 5:
+            print
+            print 'Error: You local_conf.py is too old, too much has changed.'
+            print 'Please check freevo_config.py for changes and set'
+            print 'CONFIG_VERSION in %s to %s' % \
+                  (overridefile, LOCAL_CONF_VERSION)
+            print
+            sys.exit(1)
+            
         if int(str(CONFIG_VERSION).split('.')[0]) != \
            int(str(LOCAL_CONF_VERSION).split('.')[0]):
             print

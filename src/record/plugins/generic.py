@@ -187,7 +187,7 @@ class PluginInterface(Plugin):
             filename_array = { 'progname': String(rec.name),
                                'title'   : String(rec.subtitle) }
 
-            filemask = config.TV_RECORDFILE_MASK % filename_array
+            filemask = config.TV_RECORD_FILEMASK % filename_array
             filename = ''
             for letter in time.strftime(filemask, time.localtime(rec.start)):
                 if letter in string.ascii_letters + string.digits:
