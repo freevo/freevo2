@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/10/05 19:51:49  dischi
+# remove bad import
+#
 # Revision 1.17  2004/08/28 17:16:32  dischi
 # doc fix
 #
@@ -72,7 +75,7 @@ import rc
 
 from event import *
 from item import Item
-from gui import ListBox
+# from gui import ListBox
 # from gui import RegionScroller
 from gui import PopupBox
 
