@@ -124,7 +124,36 @@
 
     <sect1>
       <title>The Menu System</title>
-      <para><emphasis>not written yet</emphasis></para>
+      <para>
+        Menu's in freevo are done using the classes described below. But in general they are essential lists of items which have their names displayed in the list. Each item then has actions associated with them. The first action is the one used when selected and you can use enter to see the others. Menu's also have actions that can be associated with them to perform actions or updates.
+      </para>
+      <sect2>
+	<title>Menu</title>
+	<para>
+          Menu is essentially a class wrapped around an array of choices. It has several methods but the constructor is the most commonly used. It takes a title, then an array of options, and then some optional parameters. The reload_func is the most commonly used. The reload_func is used when you come back from executing an item. It's only used when you want to show something other than the menu you started with when you come back.
+        </para>
+        <para><emphasis>Code Sample not written yet</emphasis></para>
+      </sect2>
+      <sect2>
+	<title>Item</title>
+	<para>Item is the base class for anything that appears in the Menu. Generally you create a subclass of Item and then create an actions method to tell the menu what to do when the item is clicked. The name property is what the Menu object uses to display on the screen. You can then create other variables to hold important data points in.</para>
+        <para><emphasis>Code Sample not written yet</emphasis></para>
+      </sect2>
+      <sect2>
+	<title>MenuItem</title>
+	<para>This is a convenience class it is useful in two different situations. The first and most common is for creating Menus to display error conditions. The second use is for when you only need a very simple item with a single easy action.</para>
+        <para>To use MenuItem in the error condition case you call the constructor with three parameters. The first parameter is what to display in the menu, the second is the action to take  when the item to select and the third is put the arg to the action function. In this case you typically wrap the constructor call into an append to your list of items to be given to menu.</para>
+        <para><emphasis>Code Sample not written yet</emphasis></para>
+        <para>To use MenuItem as a simple Item and not bother with creating your own sub item class, you again call the constructor with the set of three parameters.  The first parameter is what to display in the menu, the second is the action to take  when the item to select and the third is put the arg to the action function. But typically you save a reference to this item and set a few additional parameters manually.</para>
+        <para><emphasis>Code Sample not written yet</emphasis></para>
+      </sect2>
+      <sect2>
+	<title>MenuWidget</title>
+	<para>MenuWidget or menuw as it is often labelled in the code. Is a handy utility class where most of the menu magic happens. It has most of the default utility actions for menus as well as the methods to manage the menu stack.</para>
+        <para><emphasis>List of common menu actions not written yet</emphasis></para>
+        <para><emphasis>List of menu stack actions not written yet</emphasis></para>
+        <para><emphasis>Code Sample not written yet</emphasis></para>
+      </sect2>
     </sect1>
 
     <sect1>
