@@ -591,7 +591,8 @@ OVERSCAN_Y = 0
 # use the framebuffer and have a PAL tv may set this to
 # './matrox_g400/mga_pal_768x576.sh' OSD_SDL_EXEC_AFTER_STARTUP=''
 if CONF.display == 'mga':
-    OSD_SDL_EXEC_AFTER_STARTUP='./contrib/fbcon/mgafb %s %s ' % (CONF.tv, CONF.geometry)
+    OSD_SDL_EXEC_AFTER_STARTUP='%s %s %s' % (os.path.join(CONTRIB_DIR, 'fbcon/mgafb'),
+                                             CONF.tv, CONF.geometry)
     OVERSCAN_X = 20
     OVERSCAN_Y = 10
 
@@ -607,7 +608,7 @@ if CONF.display == 'dxr3':
 OSD_SDL_EXEC_AFTER_CLOSE = ""
 
 if CONF.display == 'mga':
-    OSD_SDL_EXEC_AFTER_CLOSE='./contrib/fbcon/mgafb restore'
+    OSD_SDL_EXEC_AFTER_CLOSE='%s restore' % os.path.join(CONTRIB_DIR, 'fbcon/mgafb')
 
 # Stop the osd before playing a movie with xine or mplayer. Some output
 # devices need this. After playback, the osd will be restored
