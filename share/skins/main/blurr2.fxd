@@ -328,7 +328,7 @@
 
     <!-- listing area for image with images (preview) -->
     <layout label="image list">
-      <content type="image" spacing="10">
+      <content type="image" spacing="0">
         <item type="default" width="140" height="115" align="center"
           valign="center">
 	  <shadow x="5" y="5" color="0xaa000000" visible="yes"/>

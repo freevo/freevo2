@@ -92,7 +92,7 @@
     <!-- different listing area and a subtitle -->
     <menuset label="video menu with info" inherits="default description">
       <subtitle layout="subtitle" x="45" y="100" width="470" height="40"/>
-      <listing layout="video list" y="140" height="290">
+      <listing layout="video list" y="140" height="300">
 	<image label="uparrow" y="140"/>
 	<image label="downarrow" y="max-32"/>
       </listing>
