@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.48  2003/09/11 15:50:25  dischi
+# delete LD_PRELOADS after startup
+#
 # Revision 1.47  2003/09/08 19:43:14  dischi
 # added some internal help messages and a tv grab helper
 #
@@ -579,3 +582,10 @@ if not os.path.isdir('%s/thumbnails/' % FREEVO_CACHEDIR):
     os.mkdir('%s/thumbnails/' % FREEVO_CACHEDIR,
              stat.S_IMODE(os.stat(FREEVO_CACHEDIR)[stat.ST_MODE]))
 
+#
+# delete LD_PRELOAD for all helpers, main.py does it after
+# starting the display
+#
+if HELPER:
+    os.environ['LD_PRELOAD'] = ''
+    
