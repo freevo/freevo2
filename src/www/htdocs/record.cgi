@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/02/26 01:08:04  rshortt
+# Fixed a bug where it was often impossible to remove a manually scheduled recording.
+#
 # Revision 1.2  2003/02/11 06:40:57  krister
 # Applied Robs patch for std fileheaders.
 #
@@ -55,17 +58,20 @@ chan = fv.formValue(form, 'chan')
 start = fv.formValue(form, 'start')
 action = fv.formValue(form, 'action')
 
-prog = ri.findProg(chan, start)
+if action == 'remove':
+    recordings = ri.getScheduledRecordings()
+    progs = recordings.getProgramList()
 
-if prog:
-    print 'PROG: %s' % prog
+    for what in progs.values():
+        if start == '%s' % what.start and chan == '%s' % what.channel_id:
+            prog = what
 
-if prog:
-    if action == 'remove':
-       print 'want to remove prog: %s' % prog
-       ri.removeScheduledRecording(prog)
-    else:
-       ri.scheduleRecording(prog)
+    print 'want to remove prog: %s' % prog
+    ri.removeScheduledRecording(prog)
+else:
+    prog = ri.findProg(chan, start)
+    ri.scheduleRecording(prog)
+
 
 recordings = ri.getScheduledRecordings()
 progs = recordings.getProgramList()
