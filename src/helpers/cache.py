@@ -11,6 +11,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/02/08 17:41:55  dischi
+# add more caching:
+# o playlist metainfo
+# o directory metainfo (e.g. number of items)
+# cleanup
+#
 # Revision 1.20  2004/02/07 20:46:21  dischi
 # more old files to remove
 #
@@ -77,6 +83,16 @@ import util
 import stat
 import time
 import copy
+
+import util.mediainfo
+import plugin
+import directory
+import playlist
+import fxditem
+
+# use this number to keep track of changes in
+# this helper. Check this against util/mediainfo
+VERSION =1
 
 def delete_old_files_1():
     """
@@ -155,31 +171,6 @@ def cache_directories(rebuild):
     1   rebuild all files on disc
     2   like 1, but also delete discinfo data
     """
-    import util.mediainfo
-    try:
-        import mmpython.version
-
-        info = None
-        cachefile = os.path.join(config.FREEVO_CACHEDIR, 'mediainfo')
-        if os.path.isfile(cachefile):
-            info = util.read_pickle(cachefile)
-        if not info:
-            print
-            print 'Unable to detect last complete rebuild, forcing rebuild'
-            rebuild         = 2
-            complete_update = int(time.time())
-        else:
-            mmchanged, part_update, complete_update = info
-    except ImportError:
-        print
-        print 'Error: unable to read mmpython version information'
-        print 'Please update mmpython to the latest release or if you use'
-        print 'Freevo CVS versions, please also use mmpython CVS.'
-        print
-        print 'Some functions in Freevo may not work or even crash!'
-        print
-        print
-
     if rebuild:
         print 'deleting cache files..................................',
         sys.__stdout__.flush()
@@ -191,22 +182,13 @@ def cache_directories(rebuild):
                 print f
         print 'done'
 
-    print
     all_dirs = []
-    print 'caching directories...'
+    print 'checking mmpython cache files.........................',
+    sys.__stdout__.flush()
     for d in config.VIDEO_ITEMS + config.AUDIO_ITEMS + config.IMAGE_ITEMS:
         if os.path.isdir(d[1]):
             all_dirs.append(d[1])
     util.mediainfo.cache_recursive(all_dirs, verbose=True)
-    print
-
-    try:
-        import mmpython.version
-        util.save_pickle((mmpython.version.CHANGED, int(time.time()), complete_update),
-                         cachefile)
-        print 
-    except ImportError:
-        pass
     
 
 def cache_thumbnails():
@@ -217,7 +199,8 @@ def cache_thumbnails():
     import stat
     import Image
     
-    print 'caching thumbnails...'
+    print 'checking thumbnails...................................',
+    sys.__stdout__.flush()
 
     files = []
     for d in config.VIDEO_ITEMS + config.AUDIO_ITEMS + config.IMAGE_ITEMS:
@@ -240,6 +223,8 @@ def cache_thumbnails():
         except OSError:
             pass
 
+    print '%s file(s)' % len(files)
+        
     for filename in files:
         fname = filename
         if len(fname) > 65:
@@ -274,8 +259,8 @@ def cache_thumbnails():
             util.save_pickle(data, thumb)
         except:
             print 'error caching image %s' % filename
-    print
-
+    if files:
+        print
 
     
 def create_metadata():
@@ -283,27 +268,104 @@ def create_metadata():
     scan files and create metadata
     """
     import util.extendedmeta
-    print 'create audio metadata...'
+    print 'creating audio metadata...............................',
+    sys.__stdout__.flush()
     for dir in config.AUDIO_ITEMS:
         if os.path.isdir(dir[1]):
-            print "  Scanning %s" % dir[0]
             util.extendedmeta.AudioParser(dir[1], rescan=True)
-    print
+    print 'done'
+
+    print 'creating playlist metadata............................',
+    sys.__stdout__.flush()
+    pl  = []
+    fxd = []
+    for dir in config.AUDIO_ITEMS:
+        if os.path.isdir(dir[1]):
+            pl  += util.match_files_recursively(dir[1], playlist.mimetype.suffix())
+            fxd += util.match_files_recursively(dir[1], fxditem.mimetype.suffix())
+        elif util.match_suffix(dir, playlist.mimetype.suffix()):
+            pl.append(dir)
+        elif util.match_suffix(dir, fxditem.mimetype.suffix()):
+            fxd.append(dir)
+        elif util.match_suffix(dir[1], playlist.mimetype.suffix()):
+            pl.append(dir[1])
+        elif util.match_suffix(dir[1], fxditem.mimetype.suffix()):
+            fxd.append(dir[1])
+
+    
+    items = playlist.mimetype.get(None, util.misc.unique(pl))
+
+    # ignore fxd files for now, they can't store metainfo
+    # for f in fxditem.mimetype.get(None, util.misc.unique(fxd)):
+    #     if f.type == 'playlist':
+    #         items.append(f)
+
+    for i in items:
+        util.extendedmeta.PlaylistParser(i)
+    print 'done'
+
+    print 'checking database.....................................',
+    sys.__stdout__.flush()
     try:
         # The DB stuff
         import sqlite
-    except:
-        print 'no pysqlite installed, skipping db support'
-        print
-        return
 
-    print 'checking database...'
-    for dir in config.AUDIO_ITEMS:
-        if os.path.isdir(dir[1]):
-            print "  Scanning %s" % dir[0]
-            util.extendedmeta.addPathDB(dir[1], dir[0])
-    print
+        for dir in config.AUDIO_ITEMS:
+            if os.path.isdir(dir[1]):
+                util.extendedmeta.addPathDB(dir[1], dir[0], verbose=False)
+        print 'done'
+    except ImportError:
+        print 'skipping'
+        pass
 
+
+    print 'creating directory metadata...........................',
+    sys.__stdout__.flush()
+
+    subdirs = { 'all': [] }
+
+    # get all subdirs for each type
+    for type in activate_plugins:
+        subdirs[type] = []
+        for d in getattr(config, '%s_ITEMS' % type.upper()):
+            try:
+                d = d[1]
+            except:
+                pass
+            if not os.path.isdir(d):
+                continue
+            rec = util.get_subdirs_recursively(d)
+            subdirs['all'] += rec
+            subdirs[type]  += rec
+                
+    subdirs['all'] = util.misc.unique(subdirs['all'])
+    subdirs['all'].sort(lambda l, o: cmp(l.upper(), o.upper()))
+
+    # walk though each directory
+    for s in subdirs['all']:
+        if s.find('/.') > 0:
+            continue
+
+        # create the DirItems
+        d = directory.DirItem(s, None)
+
+        # remove all infos starting with 'num_' to force rebuild
+        for k in copy.copy(d.info.metadata):
+            if k.startswith('num_'):
+                d.info.delete(k)
+
+        # rebuild metainfo
+        d.create_metainfo()
+        for type in activate_plugins:
+            if subdirs.has_key(type) and s in subdirs[type]:
+                # reset num_timestamp and set the display_type
+                d['num_timestamp'] = 0
+                d.display_type = type
+                d.autovars.append(('num_%s_items' % type, 0))
+                # scan again with display_type
+                d.create_metainfo()
+
+    print 'done'
 
     
 if __name__ == "__main__":
@@ -346,7 +408,44 @@ if __name__ == "__main__":
             util.videothumb.snapshot(filename, update=False)
         print
         sys.exit(0)
-        
+
+
+    # check for current cache informations
+    if (len(sys.argv)>1 and sys.argv[1] == '--rebuild'):
+        rebuild = 1
+    else:
+        rebuild = 0
+    try:
+        import mmpython.version
+
+        info = None
+        cachefile = os.path.join(config.FREEVO_CACHEDIR, 'mediainfo')
+        if os.path.isfile(cachefile):
+            info = util.read_pickle(cachefile)
+        if not info:
+            print
+            print 'Unable to detect last complete rebuild, forcing rebuild'
+            rebuild         = 2
+            complete_update = int(time.time())
+        else:
+            complete_update = info[-1]
+    except ImportError:
+        print
+        print 'Error: unable to read mmpython version information'
+        print 'Please update mmpython to the latest release or if you use'
+        print 'Freevo CVS versions, please also use mmpython CVS.'
+        print
+        print 'Some functions in Freevo may not work or even crash!'
+        print
+        print
+
+    activate_plugins = []
+    for type in ('video', 'audio', 'image', 'games'):
+        if plugin.is_active(type):
+            # activate all mimetype plugins
+            plugin.init_special_plugin(type)
+            activate_plugins.append(type)
+            
     delete_old_files_1()
     delete_old_files_2()
 
@@ -358,14 +457,18 @@ if __name__ == "__main__":
                 print '%s_ITEMS contains root directory, skipped.' % type
                 setattr(config, '%s_ITEMS' % type, [])
 
-    if len(sys.argv)>1 and sys.argv[1] == '--rebuild':
-        cache_directories(1)
-    else:
-        cache_directories(0)
-
-    create_metadata()
+    cache_directories(rebuild)
     cache_thumbnails()
+    create_metadata()
 
+    
 # close db
 util.mediainfo.sync()
 
+# save cache info
+try:
+    import mmpython.version
+    util.save_pickle((mmpython.version.CHANGED, VERSION,
+                      int(time.time()), complete_update), cachefile)
+except ImportError:
+    print 'WARNING: please update mmpython'
