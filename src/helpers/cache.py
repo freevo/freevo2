@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2004/08/29 18:38:15  dischi
+# make cache helper work again
+#
 # Revision 1.38  2004/07/21 11:33:34  dischi
 # support one file thumbnailing
 #
@@ -445,7 +448,7 @@ if __name__ == "__main__":
     if config.CACHE_IMAGES:
         cache_thumbnails()
     create_metadata()
-    create_tv_pickle()
+#     create_tv_pickle()
     
 # close db
 util.mediainfo.sync()

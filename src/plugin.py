@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.73  2004/08/29 18:38:15  dischi
+# make cache helper work again
+#
 # Revision 1.72  2004/08/05 17:36:46  dischi
 # support for special plugin loading
 #
@@ -356,6 +359,33 @@ def init(callback = None, reject=['record', 'www'], exclusive=[]):
     # in the same function is 'lambda' 
     __sort_plugins__()
 
+
+
+def init_special_plugin(id):
+    """
+    load only the plugin 'id'
+    """
+    global __all_plugins__
+    global __initialized__
+    global __plugin_basedir__
+    
+    __plugin_basedir__ = os.environ['FREEVO_PYTHON']
+
+    try:
+        id = int(id)
+    except ValueError:
+        pass
+    for i in range(len(__all_plugins__)):
+        name, type, level, args, number = __all_plugins__[i]
+        if number == id or name == id:
+            __load_plugin__(name, type, level, args, number)
+            del __all_plugins__[i]
+            break
+        
+    # sort plugins in extra function (exec doesn't like to be
+    # in the same function is 'lambda' 
+    __sort_plugins__()
+    
 
 
 def shutdown(plugin_name=None):
