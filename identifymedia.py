@@ -9,7 +9,7 @@ import rc
 import string
 import movie_xml
 
-DEBUG = 2   # 1 = regular debug, 2 = more verbose
+DEBUG = 1   # 1 = regular debug, 2 = more verbose
 
 LABEL_REGEXP = re.compile("^(.*[^ ]) *$").match
 
