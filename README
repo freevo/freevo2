@@ -53,6 +53,7 @@ rc.py                   Server for the remote control clients
 osd.py                  Client for the OSD servers
 mixer.py                Class for controlling the audio mixer
 util.py                 Various utility functions
+mplayer.py              Handles the external MPlayer app for movies
 
 
 Coding
