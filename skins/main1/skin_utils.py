@@ -4,11 +4,14 @@
 # -----------------------------------------------------------------------
 # $Id$
 #
-# Notes: WIP
+# Notes:
 # Todo:        
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/04/24 19:57:53  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.4  2003/04/21 13:25:28  dischi
 # use "unknown" icon to always have an icon
 #
@@ -20,8 +23,6 @@
 #
 # Revision 1.1  2003/04/06 21:19:44  dischi
 # Switched to new main1 skin
-#
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

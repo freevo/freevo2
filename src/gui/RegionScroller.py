@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/04/24 19:56:28  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.9  2003/04/20 13:02:29  dischi
 # make the rc changes here, too
 #
@@ -36,7 +39,8 @@
 # objects.
 #
 # Revision 1.3  2003/02/23 18:21:50  rshortt
-# Some code cleanup, better OOP, influenced by creating a subclass of RegionScroller called ListBox.
+# Some code cleanup, better OOP, influenced by creating a subclass of
+# RegionScroller called ListBox.
 #
 # Revision 1.2  2003/02/19 00:58:18  rshortt
 # Added scrolldemo.py for a better demonstration.  Use my audioitem.py
@@ -46,7 +50,6 @@
 # Reviving the src/gui code, allso adding some new GUI objects.  Event
 # handling will not work untill I make some minor modifications to main.py,
 # osd.py, and menu.py.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2003/04/24 19:55:48  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.43  2003/04/24 19:13:27  dischi
 # bugfix
 #
@@ -30,61 +33,6 @@
 # Revision 1.38  2003/04/19 21:28:39  dischi
 # identifymedia.py is now a plugin and handles everything related to
 # rom drives (init, autostarter, items in menus)
-#
-# Revision 1.37  2003/04/19 19:03:38  dischi
-# bugfix
-#
-# Revision 1.36  2003/04/15 20:00:20  dischi
-# make MenuItem inherit from Item
-#
-# Revision 1.35  2003/04/13 17:58:32  dischi
-# make it possible to force a reload when going one menu back
-#
-# Revision 1.34  2003/04/13 10:39:14  dischi
-# fix small bug
-#
-# Revision 1.33  2003/04/13 10:35:39  dischi
-# cleanup of unneeded stuff in menu.py
-#
-# Revision 1.32  2003/04/11 10:32:59  dischi
-# fixed bug for non Menu items
-#
-# Revision 1.31  2003/04/06 21:11:09  dischi
-# o Switch to the new main1 skin
-# o You can now add any object to the menuwidget, not only Menu objects
-#   This is needed to add the tv guide to the stack
-#
-# Revision 1.30  2003/03/31 18:59:27  dischi
-# bugfix for going up on the first item in the new skin
-#
-# Revision 1.29  2003/03/30 19:10:32  dischi
-# fixed some navigating bugs
-#
-# Revision 1.28  2003/03/30 17:00:00  dischi
-# removed debug (again)
-#
-# Revision 1.27  2003/03/30 16:52:51  dischi
-# removed debug
-#
-# Revision 1.26  2003/03/30 16:50:19  dischi
-# pass xml_file definition to submenus
-#
-# Revision 1.25  2003/03/30 14:17:06  dischi
-# added force_skin_layout for the new skin
-#
-# Revision 1.24  2003/03/27 20:07:06  dischi
-# Fix for adding/deleting the only item in the directory for the new skin
-#
-# Revision 1.23  2003/03/23 21:39:03  dischi
-# Added better up/down handling for text menus in the new skin
-#
-# Revision 1.22  2003/03/18 09:37:00  dischi
-# Added viewitem and infoitem to the menu to set an item which image/info
-# to take (only for the new skin)
-#
-# Revision 1.21  2003/03/09 21:38:37  rshortt
-# In MenuWidget call child.draw() now instead of child._draw().
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

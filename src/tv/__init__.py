@@ -9,9 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/04/24 19:56:39  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.2  2003/04/21 18:20:44  dischi
 # make tv itself and not tv.tv the plugin (using __init__.py)
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

@@ -11,10 +11,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/04/24 19:56:20  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.1  2003/04/09 01:38:10  rshortt
 # Initial commit of some in-progress classes.
-#
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

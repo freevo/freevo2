@@ -9,36 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/04/24 19:56:13  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.7  2003/04/20 12:43:33  dischi
 # make the rc events global in rc.py to avoid get_singleton. There is now
 # a function app() to get/set the app. Also the events should be passed to
 # the daemon plugins when there is no handler for them before. Please test
 # it, especialy the mixer functions.
-#
-# Revision 1.6  2003/04/10 16:37:41  dischi
-# Fix menu redraw after playing ended (untested, please test)
-#
-# Revision 1.5  2003/04/06 21:12:57  dischi
-# o Switched to the new main skin
-# o some cleanups (removed unneeded inports)
-#
-# Revision 1.4  2003/01/11 10:55:56  dischi
-# Call refresh with reload=1 when the menu was disabled during playback
-#
-# Revision 1.3  2002/12/22 12:59:34  dischi
-# Added function sort() to (audio|video|games|image) item to set the sort
-# mode. Default is alphabetical based on the name. For mp3s and images
-# it's based on the filename. Sort by date is in the code but deactivated
-# (see mediamenu.py how to enable it)
-#
-# Revision 1.2  2002/12/09 14:23:53  dischi
-# Added games patch from Rob Shortt to use the interface.py and snes support
-#
-# Revision 1.1  2002/11/24 19:10:19  dischi
-# Added mame support to the new code. Since the hole new code is
-# experimental, mame is activated by default. Change local_skin.xml
-# to deactivate it after running ./cleanup
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

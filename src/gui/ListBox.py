@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/04/24 19:56:23  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.10  2003/04/20 13:02:29  dischi
 # make the rc changes here, too
 #
@@ -17,12 +20,6 @@
 #
 # Revision 1.8  2003/03/30 18:19:53  rshortt
 # Adding self to the other GetPopupBoxStyle calls.
-#
-# Revision 1.7  2003/03/24 00:37:06  rshortt
-# OptionBox now uses skin properties.
-#
-# Revision 1.6  2003/03/23 23:19:39  rshortt
-# When selected these objects now use skin properties as well.
 #
 # Revision 1.5  2003/03/09 21:37:06  rshortt
 # Improved drawing.  draw() should now be called instead of _draw(). draw()
@@ -37,17 +34,15 @@
 # ListBox and others are working again, although I have a nasty bug regarding
 # alpha transparencies and the new skin.
 #
-# Revision 1.3  2003/02/24 11:58:28  rshortt
-# Adding OptionBox and optiondemo.  Also some minor cleaning in a few other
-# objects.
-#
 # Revision 1.2  2003/02/23 18:30:45  rshortt
-# Fixed a really annoying bug where items got reused and appended to.  I have about a zillion lines of debug print statements to remove. :)  Thanks to Krister for the help nailing it.
+# Fixed a really annoying bug where items got reused and appended to.
+# I have about a zillion lines of debug print statements to remove. :)
+# Thanks to Krister for the help nailing it.
 #
 # Revision 1.1  2003/02/23 18:24:04  rshortt
-# New classes.  ListBox is a subclass of RegionScroller so that it can scroll though a list of ListItems which are drawn to a surface.  Also included is a listboxdemo to demonstrate and test everything.
-#
-#
+# New classes.  ListBox is a subclass of RegionScroller so that it can
+# scroll though a list of ListItems which are drawn to a surface.
+# Also included is a listboxdemo to demonstrate and test everything.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

@@ -9,28 +9,16 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2003/04/24 19:56:43  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.44  2003/04/24 19:22:10  dischi
 # xml_file fix again
-#
-# Revision 1.43  2003/04/24 19:14:50  dischi
-# pass xml_file to directory and videoitems
-#
-# Revision 1.42  2003/04/24 18:07:16  dischi
-# add vcd main movie track detection
-#
-# Revision 1.41  2003/04/24 11:46:30  dischi
-# fixed 'to many open files' bug
-#
-# Revision 1.40  2003/04/21 17:35:12  dischi
-# also remove images on delete
 #
 # Revision 1.39  2003/04/20 17:36:50  dischi
 # Renamed TV_SHOW_IMAGE_DIR to TV_SHOW_DATA_DIR. This directory can contain
 # images like before, but also fxd files for the tv show with global
 # informations (plot/tagline/etc) and mplayer options.
-#
-# Revision 1.38  2003/04/20 13:07:38  dischi
-# bugfix
 #
 # Revision 1.37  2003/04/20 12:43:34  dischi
 # make the rc events global in rc.py to avoid get_singleton. There is now
@@ -38,47 +26,11 @@
 # the daemon plugins when there is no handler for them before. Please test
 # it, especialy the mixer functions.
 #
-# Revision 1.36  2003/04/19 21:27:24  dischi
-# small fix
-#
 # Revision 1.35  2003/04/14 14:14:14  gsbarbieri
 # Fix crash when using "Change Play Settings" with files instead of VCD/DVD/...
 #
-# Revision 1.34  2003/04/13 18:00:15  dischi
-# reload menu when deleting a file
-#
 # Revision 1.33  2003/04/12 18:30:04  dischi
 # add support for audio/subtitle selection for avis, too
-#
-# Revision 1.32  2003/04/06 21:13:06  dischi
-# o Switched to the new main skin
-# o some cleanups (removed unneeded inports)
-#
-# Revision 1.31  2003/03/31 20:44:53  dischi
-# shorten time between pop.destroy and menu drawing
-#
-# Revision 1.30  2003/03/31 20:37:33  dischi
-# added parent to gui popup box
-#
-# Revision 1.29  2003/03/31 03:04:46  rshortt
-# Make the delete file confirm box default to 'cancel'.
-#
-# Revision 1.28  2003/03/31 03:02:35  rshortt
-# Inside the item menu added the option to delete the file.  This pops up
-# a confirm box to make sure.
-#
-# Revision 1.27  2003/03/30 18:04:46  dischi
-# update to new gui interface
-#
-# Revision 1.26  2003/03/30 16:50:20  dischi
-# pass xml_file definition to submenus
-#
-# Revision 1.25  2003/03/23 20:00:26  dischi
-# Added patch from Matthieu Weber for better mplayer_options and subitem
-# handling
-#
-# Revision 1.24  2003/03/22 20:03:02  dischi
-# add detailed information for tv shows
 #
 # Revision 1.23  2003/03/19 05:40:58  outlyer
 # Bugfixes to the 'bookmark' facility.
@@ -119,20 +71,6 @@
 #             setting mplayer_options, but self.play seems to just ignore them. I don't
 #             know how to pass anything to self.play either. ARGH.
 #     o mplayer.py - commented out two extraneous prints.
-#
-# Revision 1.20  2003/03/16 19:28:05  dischi
-# Item has a function getattr to get the attribute as string
-#
-# Revision 1.19  2003/03/14 16:24:33  dischi
-# Patch from Matthieu Weber with some bugfixes
-#
-# Revision 1.18  2003/03/03 00:36:53  rshortt
-# Implimenting the new PopupBox for the 'Scanning disc, be patient...' messages.
-#
-# Revision 1.17  2003/03/02 14:58:23  dischi
-# Removed osd.clearscreen and if we have the NEW_SKIN deactivate
-# skin.popupbox, refresh, etc. Use menuw.show and menuw.hide to do this.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

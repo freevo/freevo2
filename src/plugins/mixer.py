@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/04/24 19:56:37  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.2  2003/04/20 12:43:33  dischi
 # make the rc events global in rc.py to avoid get_singleton. There is now
 # a function app() to get/set the app. Also the events should be passed to
@@ -17,16 +20,6 @@
 #
 # Revision 1.1  2003/04/20 10:55:40  dischi
 # mixer is now a plugin, too
-#
-# Revision 1.4  2003/04/06 21:12:55  dischi
-# o Switched to the new main skin
-# o some cleanups (removed unneeded inports)
-#
-# Revision 1.3  2003/02/19 17:11:21  outlyer
-# Don't try to open the mixer if we're not using it. I don't imagine it's a
-# useful way to spend startup time. Also, remove the duplicate "CDDB not
-# installed" as the user probably only needs to be told once :)
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

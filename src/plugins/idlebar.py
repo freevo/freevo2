@@ -21,6 +21,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/04/24 19:56:35  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.3  2003/04/19 21:25:00  dischi
 # small changes at the plugin interface
 #
@@ -30,8 +33,6 @@
 #
 # Revision 1.1  2003/04/17 21:21:57  dischi
 # Moved the idle bar to plugins and changed the plugin interface
-#
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

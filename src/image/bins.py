@@ -9,27 +9,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.7  2003/03/22 20:04:02  dischi
-# when using util, we need to import it ;-) -- my fault
-#
-# Revision 1.6  2003/03/20 15:42:58  dischi
-# use the new text format function
-#
-# Revision 1.5  2003/03/16 19:28:04  dischi
-# Item has a function getattr to get the attribute as string
-#
-# Revision 1.4  2003/01/01 11:59:45  dischi
-# fix to remove redundant whitespaces/tabs/newlines at the beginning and the
-# end of a tag
-#
-# Revision 1.3  2002/12/02 18:25:22  dischi
-# Added bins/exif patch from John M Cooper
-#
-# Revision 1.2  2002/11/26 16:28:10  dischi
-# added patch for better bin support
-#
-# Revision 1.1  2002/11/24 13:58:45  dischi
-# code cleanup
+# Revision 1.8  2003/04/24 19:56:33  dischi
+# comment cleanup for 1.3.2-pre4
 #
 #
 # -----------------------------------------------------------------------

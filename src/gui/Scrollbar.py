@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/04/24 19:56:29  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.6  2003/03/30 20:50:00  rshortt
 # Improvements in how we get skin properties.
 #
@@ -25,7 +28,8 @@
 # correctly instead of having the colour darken on every draw.
 #
 # Revision 1.2  2003/02/23 18:21:50  rshortt
-# Some code cleanup, better OOP, influenced by creating a subclass of RegionScroller called ListBox.
+# Some code cleanup, better OOP, influenced by creating a subclass of
+# RegionScroller called ListBox.
 #
 # Revision 1.1  2003/02/18 13:40:53  rshortt
 # Reviving the src/gui code, allso adding some new GUI objects.  Event

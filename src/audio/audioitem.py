@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/04/24 19:55:59  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.20  2003/04/21 13:27:46  dischi
 # o make it possible to hide() the audio player
 # o mplayer is now a plugin, controlled by the PlayerGUI
@@ -18,23 +21,6 @@
 # a function app() to get/set the app. Also the events should be passed to
 # the daemon plugins when there is no handler for them before. Please test
 # it, especialy the mixer functions.
-#
-# Revision 1.18  2003/04/10 16:36:17  dischi
-# small fix
-#
-# Revision 1.17  2003/04/06 21:12:56  dischi
-# o Switched to the new main skin
-# o some cleanups (removed unneeded inports)
-#
-# Revision 1.16  2003/03/16 19:28:04  dischi
-# Item has a function getattr to get the attribute as string
-#
-# Revision 1.15  2003/02/20 02:39:11  krister
-# Do not scan for cover images if the file is on URL form (e.g. for CDDA tracks)
-#
-# Revision 1.14  2003/02/19 07:16:11  krister
-# Matthieu Weber's patch for smart music cover search, modified the logic slightly.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

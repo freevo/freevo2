@@ -12,33 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.2  2003/02/18 03:56:11  krister
-# Added an option --sysfirst to search the system path first, the default is now runtime/apps first.
+# Revision 1.3  2003/04/24 19:58:20  dischi
+# comment cleanup for 1.3.2-pre4
 #
-# Revision 1.1  2003/02/14 04:19:54  krister
-# Renamed from setup_build.py
-#
-# Revision 1.30  2003/02/07 17:08:22  dischi
-# store the version in freevo.conf
-#
-# Revision 1.29  2003/02/05 15:22:51  krister
-# Updated build stuff, Changelog
-#
-# Revision 1.28  2003/02/05 06:05:21  krister
-# Removed the backup of old config files, they just clutter the folder
-#
-# Revision 1.27  2003/02/04 13:07:16  dischi
-# setip_build can now compile python files. This is used by the Makefile
-# (make all). The Makefile now also has the directories as variables.
-#
-# Revision 1.26  2003/01/31 02:08:59  krister
-# Changed the X11 display option to automatically select between xv,x11,etc.
-#
-# Revision 1.25  2003/01/28 03:46:02  krister
-# Fixed a bug in application checking.
-#
-# Revision 1.24  2003/01/24 07:25:23  krister
-# Added check for apps in the runtime/apps dir.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

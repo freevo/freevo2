@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/04/24 19:55:45  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.7  2003/04/24 19:14:49  dischi
 # pass xml_file to directory and videoitems
 #
@@ -34,7 +37,6 @@
 #
 # Revision 1.1  2003/04/20 10:53:23  dischi
 # moved identifymedia and mediamenu to plugins
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

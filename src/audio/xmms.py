@@ -9,12 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/04/24 19:56:02  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.2  2003/02/22 07:13:19  krister
 # Set all sub threads to daemons so that they die automatically if the main thread dies.
-#
-# Revision 1.1  2002/11/24 13:58:44  dischi
-# code cleanup
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/04/24 19:56:20  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.4  2003/03/02 20:15:41  rshortt
 # GUIObject and PopupBox now get skin settings from the new skin.  I put
 # a test for config.NEW_SKIN in GUIObject because this object is used by
@@ -21,7 +24,8 @@
 # same with the other objects as I make them skinnable.
 #
 # Revision 1.3  2003/02/23 18:21:50  rshortt
-# Some code cleanup, better OOP, influenced by creating a subclass of RegionScroller called ListBox.
+# Some code cleanup, better OOP, influenced by creating a subclass of
+# RegionScroller called ListBox.
 #
 # Revision 1.2  2003/02/18 13:40:52  rshortt
 # Reviving the src/gui code, allso adding some new GUI objects.  Event

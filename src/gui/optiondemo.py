@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/04/24 19:56:30  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.6  2003/04/20 13:02:30  dischi
 # make the rc changes here, too
 #
@@ -36,8 +39,6 @@
 # Revision 1.1  2003/02/24 11:58:28  rshortt
 # Adding OptionBox and optiondemo.  Also some minor cleaning in a few other
 # objects.
-#
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

@@ -9,8 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2003/04/24 19:55:52  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.36  2003/04/23 06:30:45  krister
-# Changed fullscreen toggling, the state is kept throughout stop/restart display, and can be queried so that other apps (e.g. tvtime) can start up in the correct state.
+# Changed fullscreen toggling, the state is kept throughout
+# stop/restart display, and can be queried so that other apps
+# (e.g. tvtime) can start up in the correct state.
 #
 # Revision 1.35  2003/04/21 12:57:16  dischi
 # moved SynchronizedObject to util.py
@@ -42,53 +47,6 @@
 # - use hardware layer (it will be deactivated if not possible by pygame)
 # - don't convert images to alpha layers. If the image format supports that
 #   they already are alpha layers, if not, it makes no sense to convert
-#
-# Revision 1.26  2003/03/24 00:39:29  rshortt
-# Put try/catch in update() for updating rects in case the rect has a bad value for one of its properties.
-#
-# Revision 1.25  2003/03/23 06:28:02  gsbarbieri
-# Corrected drawstringframedhard() truncate.
-#
-# Revision 1.24  2003/03/20 19:27:19  dischi
-# Fix drawstringframedhard: the ellipses must fit the width, too
-#
-# Revision 1.23  2003/03/15 10:15:43  dischi
-# Faster caching and there is no need for fchksum anymore
-#
-# Revision 1.22  2003/03/11 20:24:06  dischi
-# Fixed some return values
-#
-# Revision 1.21  2003/03/06 21:06:04  dischi
-# catch empty strings first
-#
-# Revision 1.20  2003/03/01 17:27:29  dischi
-# *** empty log message ***
-#
-# Revision 1.19  2003/03/01 17:26:40  dischi
-# _getbitmap now generates and stores thumbnails for large images without
-# EXIF header and thumb:// in the url. This speeds up the image menu
-# (and most of it the extended version). This requires fchksum (should
-# be added to the runtime)
-#
-# Revision 1.18  2003/02/24 06:00:30  outlyer
-# Allow update to optionally use a screen region rather than flipping the whole
-# display.
-#
-# Revision 1.17  2003/02/19 16:59:39  outlyer
-# Changing a stray print into a 'debug' to match the rest of the OSD.
-#
-# Revision 1.16  2003/02/18 23:08:25  rshortt
-# Hooking up the code in src/gui.  Added osd.focused_app to keep track of
-# what should first receive the events.  In main this is set to be the
-# menuwidget which is the parent UI object.  I also made MenuWidget into
-# a subclass of GUIObject so that it can closely take advantage of the
-# parent / child relationship therein.
-#
-# Revision 1.15  2003/02/18 07:27:23  gsbarbieri
-# Corrected the misspelled 'elipses' -> 'ellipses'
-# Now, main1_video uses osd.drawtext(mode='soft') to render text, so it should be
-# better displayed
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

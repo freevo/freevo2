@@ -4,11 +4,14 @@
 # -----------------------------------------------------------------------
 # $Id$
 #
-# Notes: WIP
+# Notes:
 # Todo:        
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.95  2003/04/24 19:57:52  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.94  2003/04/21 17:35:41  dischi
 # only shorten name if we have an image
 #
@@ -30,8 +33,6 @@
 #
 # Revision 1.88  2003/04/06 21:19:44  dischi
 # Switched to new main1 skin
-#
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

@@ -9,14 +9,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/04/24 19:56:26  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.1  2003/03/30 17:21:20  rshortt
 # New classes: PasswordInputBox, PasswordLetterBox.
 # PasswordLetterBox is a subclass of Letterbox, PasswordInputBox does not
 # extend InputBox but instead is also a subclass of PopupBox.  LetterBoxGroup
 # has a new constructor argument called 'type' which when set to 'password'
 # will make a LetterBoxGroup of PasswordLetterBox's rather than Letterbox's.
-#
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

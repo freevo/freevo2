@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/04/24 19:56:01  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.3  2003/04/22 11:56:45  dischi
 # fixed bug that shows the player again after stopping it
 #
@@ -18,7 +21,6 @@
 # Revision 1.1  2003/04/21 13:27:48  dischi
 # o make it possible to hide() the audio player
 # o mplayer is now a plugin, controlled by the PlayerGUI
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/04/24 19:55:44  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.25  2003/04/24 11:46:29  dischi
 # fixed 'to many open files' bug
 #
@@ -36,37 +39,6 @@
 # Revision 1.22  2003/04/06 21:12:54  dischi
 # o Switched to the new main skin
 # o some cleanups (removed unneeded inports)
-#
-# Revision 1.21  2003/03/21 19:51:34  dischi
-# moved some main menu settings from skin to freevo_config.py (new skin only)
-#
-# Revision 1.20  2003/03/15 10:03:40  dischi
-# create subdirs in the cache directory
-#
-# Revision 1.19  2003/03/01 10:45:43  dischi
-# new variable config.NEW_SKIN to integrate the gui code
-#
-# Revision 1.18  2003/02/25 04:37:29  krister
-# Updated local_conf version to 2.0 to make it clear that the remote control stuff changed. Added automatic information about what has changed in the config files since the user's version.
-#
-# Revision 1.17  2003/02/22 22:32:12  krister
-# Init FREEVO_STARTDIR if not set.
-#
-# Revision 1.16  2003/02/20 19:03:42  dischi
-# Removed REMOTE because we use lirc now
-#
-# Revision 1.15  2003/02/12 19:45:39  krister
-# Fixed more stupid bugs in rom-drives autodetect for automounted drives.
-#
-# Revision 1.14  2003/02/12 16:20:31  krister
-# Fixed stupid bugs in rom-drives autodetect for cdrecorder and automounted drives.
-#
-# Revision 1.13  2003/02/12 06:32:28  krister
-# Added cdrecord and supermounted drives autodetection for ROM_DRIVES.
-#
-# Revision 1.12  2003/02/11 06:07:59  krister
-# Improved CV/DVD autodetection. Use mad for mp3 playing, fixes a decoding bug.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

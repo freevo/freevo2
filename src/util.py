@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/04/24 19:55:57  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.22  2003/04/24 17:44:18  dischi
 # strip also newlines and whitespaces inside the text
 #
@@ -47,7 +50,6 @@
 # Note that the get_bookmarkfile thing should be replaced with something less
 # flaky than the path+filename of the movie, but this is good for a initial
 # go.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

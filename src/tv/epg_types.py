@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/04/24 19:56:40  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.4  2003/03/16 19:29:06  dischi
 # add getattr to TvProgram
 #
@@ -20,10 +23,6 @@
 # Added support for the xmltv 'sub-title' tag which sometimes contains the
 # episode title for TV shows. Its not always there, but if it is, we can use
 # it, and I'll show it if it's available in the extended menu.
-#
-# Revision 1.1  2002/11/24 13:58:45  dischi
-# code cleanup
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

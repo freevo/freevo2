@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/04/24 19:56:45  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.16  2003/04/24 19:14:51  dischi
 # pass xml_file to directory and videoitems
 #
@@ -22,50 +25,7 @@
 #
 # Revision 1.13  2003/04/06 21:13:07  dischi
 # o Switched to the new main skin
-# o some cleanups (removed unneeded inports)
-#
-# Revision 1.12  2003/03/30 16:50:20  dischi
-# pass xml_file definition to submenus
-#
-# Revision 1.11  2003/03/24 19:42:23  dischi
-# fixed cd id search
-#
-# Revision 1.10  2003/03/23 20:00:26  dischi
-# Added patch from Matthieu Weber for better mplayer_options and subitem
-# handling
-#
-# Revision 1.9  2003/03/14 16:24:34  dischi
-# Patch from Matthieu Weber with some bugfixes
-#
-# Revision 1.8  2003/02/17 18:32:24  dischi
-# Added the infos from the xml file to VideoItem
-#
-# Revision 1.7  2003/02/15 19:56:51  dischi
-# Removed some debug
-#
-# Revision 1.6  2003/02/12 10:28:28  dischi
-# Added new xml file support. The old xml files won't work, you need to
-# convert them.
-#
-# Revision 1.5  2003/01/19 16:26:35  dischi
-# small bugfix
-#
-# Revision 1.4  2003/01/12 13:51:51  dischi
-# Added the feature to remove items for videos, too. For that the interface
-# was modified (update instead of remove).
-#
-# Revision 1.3  2003/01/12 10:58:31  dischi
-# Changed the multiple file handling. If a videoitem has more than one file,
-# the videoitem gets the filename '' and subitems for each file. With that
-# change it is possible to spit a movie that part one is a VCD, part two a
-# file on the harddisc.
-#
-# Revision 1.2  2002/12/07 13:29:49  dischi
-# Make a new database with all movies, even without id and label
-#
-# Revision 1.1  2002/11/24 13:58:45  dischi
-# code cleanup
-#
+# o some cleanups (removed unneeded imports)
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/04/24 19:56:18  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.10  2003/04/20 13:02:29  dischi
 # make the rc changes here, too
 #
@@ -24,7 +27,8 @@
 # derivatives.
 #
 # Revision 1.6  2003/03/24 01:53:15  rshortt
-# Added support in the contructor to have either button selected by default instead of assuming 'OK' to be the default all the time.
+# Added support in the contructor to have either button selected by
+# default instead of assuming 'OK' to be the default all the time.
 #
 # Revision 1.5  2003/03/23 23:11:10  rshortt
 # Better default height now.
@@ -49,7 +53,6 @@
 # Reviving the src/gui code, allso adding some new GUI objects.  Event
 # handling will not work untill I make some minor modifications to main.py,
 # osd.py, and menu.py.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

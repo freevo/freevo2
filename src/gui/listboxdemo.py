@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/04/24 19:56:29  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.6  2003/04/20 13:02:30  dischi
 # make the rc changes here, too
 #
@@ -33,9 +36,9 @@
 # Removed more unneeded self.parent.refresh() calls.
 #
 # Revision 1.1  2003/02/23 18:24:04  rshortt
-# New classes.  ListBox is a subclass of RegionScroller so that it can scroll though a list of ListItems which are drawn to a surface.  Also included is a listboxdemo to demonstrate and test everything.
-#
-#
+# New classes.  ListBox is a subclass of RegionScroller so that it can
+# scroll though a list of ListItems which are drawn to a surface.
+# Also included is a listboxdemo to demonstrate and test everything.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

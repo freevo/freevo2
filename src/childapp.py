@@ -9,22 +9,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/04/24 19:55:44  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.8  2003/04/24 11:46:29  dischi
 # fixed 'to many open files' bug
 #
 # Revision 1.7  2003/04/06 21:12:54  dischi
 # o Switched to the new main skin
 # o some cleanups (removed unneeded inports)
-#
-# Revision 1.6  2003/02/20 06:57:15  krister
-# Made the threads daemons, should make them less likely to live after the parent dies.
-#
-# Revision 1.5  2003/02/06 09:52:25  krister
-# Changed the runtime handling to use runapp to start programs with the supplied dlls
-#
-# Revision 1.4  2003/02/05 06:10:46  krister
-# Changed the start scripts and childapp.py to use startprog to start all programs.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/04/24 19:55:53  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.16  2003/04/24 11:46:30  dischi
 # fixed 'to many open files' bug
 #
@@ -18,9 +21,6 @@
 # Revision 1.14  2003/04/22 19:33:35  dischi
 # o Added TV has plugin name
 # o support for remove by name
-#
-# Revision 1.13  2003/04/21 18:39:43  dischi
-# cleanup
 #
 # Revision 1.12  2003/04/21 18:19:54  dischi
 # make it possible that whole directories can be a plugin

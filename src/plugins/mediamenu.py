@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/04/24 19:56:36  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.3  2003/04/21 13:02:45  dischi
 # Reload the mediamenu everytime we display it, some plugins may have
 # changed
@@ -66,6 +69,10 @@ import plugin
 # Plugin interface to integrate the MediaMenu into Freevo
 #
 class PluginInterface(plugin.MainMenuPlugin):
+    """
+    Plugin to integrate a meniamenu (video/audio/image/games) into
+    the Freevo main menu
+    """
     def __init__(self, type=None):
         plugin.MainMenuPlugin.__init__(self)
         self.type = type

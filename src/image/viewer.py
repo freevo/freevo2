@@ -9,28 +9,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.20  2003/04/21 18:16:46  dischi
-# return TRUE if event is handled
-#
-# Revision 1.19  2003/04/20 12:43:33  dischi
-# make the rc events global in rc.py to avoid get_singleton. There is now
-# a function app() to get/set the app. Also the events should be passed to
-# the daemon plugins when there is no handler for them before. Please test
-# it, especialy the mixer functions.
-#
-# Revision 1.18  2003/04/06 21:12:57  dischi
-# o Switched to the new main skin
-# o some cleanups (removed unneeded inports)
-#
-# Revision 1.17  2003/03/16 19:28:04  dischi
-# Item has a function getattr to get the attribute as string
-#
-# Revision 1.16  2003/03/11 03:21:19  gsbarbieri
-# Fix a bug when comming back from image viewer. Now all the screen is restored
-# (force_redraw=TRUE)
-#
-# Revision 1.15  2003/02/17 06:38:26  krister
-# Cleaned up, need a better background for the image not loadable warning.
+# Revision 1.21  2003/04/24 19:56:34  dischi
+# comment cleanup for 1.3.2-pre4
 #
 #
 # -----------------------------------------------------------------------

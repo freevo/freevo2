@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/04/24 19:55:54  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.11  2003/04/20 12:43:32  dischi
 # make the rc events global in rc.py to avoid get_singleton. There is now
 # a function app() to get/set the app. Also the events should be passed to
@@ -23,9 +26,6 @@
 # o Switched to the new main skin
 # o some cleanups (removed unneeded inports)
 #
-# Revision 1.8  2003/02/24 04:21:40  krister
-# Mathieu Weber's bugfix for multipart movies
-#
 # Revision 1.7  2003/02/20 18:31:02  dischi
 # except on IOError if config.LIRCRC doesn't exists
 #
@@ -37,7 +37,6 @@
 # The rc.func will contain the function being used (i.e. 'video' 'audio' etc.)
 #
 # Currently, this does nothing, so ignore it.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

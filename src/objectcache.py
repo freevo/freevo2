@@ -9,9 +9,11 @@
 # 
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/04/24 19:55:51  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.1  2003/01/07 07:17:07  krister
 # Added Thomas Schüppels objectcache layer for the OSD objects.
-#
 # 
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

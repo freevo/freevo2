@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/04/24 19:56:24  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.6  2003/03/30 20:50:00  rshortt
 # Improvements in how we get skin properties.
 #
@@ -29,8 +32,9 @@
 # objects.
 #
 # Revision 1.1  2003/02/23 18:24:04  rshortt
-# New classes.  ListBox is a subclass of RegionScroller so that it can scroll though a list of ListItems which are drawn to a surface.  Also included is a listboxdemo to demonstrate and test everything.
-#
+# New classes.  ListBox is a subclass of RegionScroller so that it can
+# scroll though a list of ListItems which are drawn to a surface.
+# Also included is a listboxdemo to demonstrate and test everything.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

@@ -19,6 +19,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/04/24 19:56:29  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.6  2003/03/30 17:21:20  rshortt
 # New classes: PasswordInputBox, PasswordLetterBox.
 # PasswordLetterBox is a subclass of Letterbox, PasswordInputBox does not
@@ -31,7 +34,8 @@
 # objects.
 #
 # Revision 1.4  2003/02/23 18:21:50  rshortt
-# Some code cleanup, better OOP, influenced by creating a subclass of RegionScroller called ListBox.
+# Some code cleanup, better OOP, influenced by creating a subclass of
+# RegionScroller called ListBox.
 #
 # Revision 1.3  2003/02/19 00:58:18  rshortt
 # Added scrolldemo.py for a better demonstration.  Use my audioitem.py
@@ -41,36 +45,6 @@
 # Reviving the src/gui code, allso adding some new GUI objects.  Event
 # handling will not work untill I make some minor modifications to main.py,
 # osd.py, and menu.py.
-#
-# Revision 1.1  2002/12/07 15:21:31  dischi
-# moved subdir gui into src
-#
-# Revision 1.5  2002/10/09 02:35:15  krister
-# Removed special workarounds for the old runtime since the new runtime works better.
-#
-# Revision 1.4  2002/09/26 09:20:58  dischi
-# Fixed (?) bug when using freevo_runtime. Krister, can you take a look
-# at that?
-#
-# Revision 1.3  2002/09/21 10:06:47  dischi
-# Make it work again, the last change was when we used osd_sdl.py
-#
-# Revision 1.2  2002/08/18 22:15:20  tfmalt
-# o Moved debug and test code to its own file.
-#
-# Revision 1.1  2002/08/15 22:45:42  tfmalt
-# o Inital commit of Freevo GUI library. Files are put in directory 'gui'
-#   under Freevo.
-# o At the moment the following classes are implemented (but still under
-#   development):
-#     Border, Color, Label, GUIObject, PopupBox, ZIndexRenderer.
-# o These classes are fully workable, any testing and feedback will be
-#   appreciated.
-#
-# Revision 1.2  2002/08/13 12:46:48  tfmalt
-# o Implemented ZIndexRenderer to keep track of what is under objects and
-#   redrawing supporting N levels of transparency (for example copy gui_sdl
-#   to main freevo catalog and run standalone.
 #
 #-----------------------------------------------------------------------
 #

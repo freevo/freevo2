@@ -9,15 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/04/24 19:56:41  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.12  2003/04/20 12:43:34  dischi
 # make the rc events global in rc.py to avoid get_singleton. There is now
 # a function app() to get/set the app. Also the events should be passed to
 # the daemon plugins when there is no handler for them before. Please test
 # it, especialy the mixer functions.
-#
-# Revision 1.11  2003/04/06 21:12:58  dischi
-# o Switched to the new main skin
-# o some cleanups (removed unneeded inports)
 #
 # Revision 1.10  2003/03/15 05:01:31  outlyer
 # Merged Kyle Weston's Schedule Viewer/Editor patch.
@@ -54,34 +53,6 @@
 # more sense.
 #
 # Please test this and let me know if it's bad.
-#
-# Revision 1.8  2003/02/27 06:15:14  krister
-# cleanup
-#
-# Revision 1.7  2003/01/30 02:44:37  krister
-# Moved settings to freevo_config
-#
-# Revision 1.6  2003/01/29 05:36:27  krister
-# WIP
-#
-# Revision 1.5  2002/12/13 04:28:19  krister
-# Minor changes.
-#
-# Revision 1.4  2002/12/10 13:21:19  krister
-# Changed recording file format.
-#
-# Revision 1.3  2002/12/09 07:17:20  krister
-# Background video recording seems to work now. Need to clean up, add menu to edit/delete recordings, move commandline to config etc.
-#
-# Revision 1.2  2002/11/25 02:17:54  krister
-# Minor bugfixes. Synced to changes made in the main tree.
-#
-# Revision 1.1  2002/11/25 01:56:03  krister
-# Updated from old src tree.
-#
-# Revision 1.1  2002/11/24 07:21:25  krister
-# Clean. Started working on a simple TV recording menu.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

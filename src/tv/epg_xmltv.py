@@ -9,18 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/04/24 19:56:41  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.15  2003/04/06 21:12:58  dischi
 # o Switched to the new main skin
 # o some cleanups (removed unneeded inports)
-#
-# Revision 1.14  2003/03/20 15:44:09  dischi
-# use the new text format function for desc
-#
-# Revision 1.13  2003/03/15 10:26:48  dischi
-# moved pickled file to cache dir
-#
-# Revision 1.12  2003/03/14 16:34:23  dischi
-# Added patch from Erland Lewin to fix a timezone problem
 #
 # Revision 1.11  2003/03/14 06:38:40  outlyer
 # Added (disabled) support for a simple favourites list. Basically, create
@@ -65,26 +59,6 @@
 # ugly, it hurts to look at it. I don't know the internals of the xmltv.py
 # library well enough to do a proper fix but I will try. As I said, at least
 #  the guide works now.
-#
-# Revision 1.6  2003/01/07 07:36:09  krister
-# Removed the hack to scrub 8-bit chars from the guide.
-#
-# Revision 1.5  2003/01/05 12:47:35  dischi
-# The pickled file now has the uid in the name to avoid conflicts when you
-# start freevo with different users
-#
-# Revision 1.4  2002/12/09 07:17:58  krister
-# Quick fix for a bug where XML crashes on 8-bit chars. Need a proper fix!
-#
-# Revision 1.3  2002/12/03 05:13:04  krister
-# Changed so that the EPG can be run standalone again. Disabled mplayer process killing, not good on a multiuser machine.
-#
-# Revision 1.2  2002/11/24 17:00:16  dischi
-# Copied the new transparent gif support to the code cleanup tree
-#
-# Revision 1.1  2002/11/24 13:58:45  dischi
-# code cleanup
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

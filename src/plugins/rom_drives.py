@@ -1,6 +1,6 @@
 #if 0 /*
 # -----------------------------------------------------------------------
-# identifymedia.py - the Freevo identifymedia/automount plugin
+# rom_drives.py - the Freevo identifymedia/automount plugin
 # -----------------------------------------------------------------------
 # $Id$
 #
@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/04/24 19:56:38  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.4  2003/04/24 19:14:50  dischi
 # pass xml_file to directory and videoitems
 #
@@ -25,31 +28,6 @@
 #
 # Revision 1.1  2003/04/20 10:53:23  dischi
 # moved identifymedia and mediamenu to plugins
-#
-# Revision 1.25  2003/04/19 21:28:38  dischi
-# identifymedia.py is now a plugin and handles everything related to
-# rom drives (init, autostarter, items in menus)
-#
-# Revision 1.24  2003/04/12 18:27:29  dischi
-# special video item handling
-#
-# Revision 1.23  2003/04/06 21:12:54  dischi
-# o Switched to the new main skin
-# o some cleanups (removed unneeded inports)
-#
-# Revision 1.22  2003/03/24 19:42:20  dischi
-# fixed cd id search
-#
-# Revision 1.21  2003/03/15 17:13:22  dischi
-# store rom drive type in media
-#
-# Revision 1.20  2003/03/11 19:40:33  dischi
-# bugfix
-#
-# Revision 1.19  2003/03/10 07:09:48  outlyer
-# Added an uppercase /VIDEO_TS/ for DVDs in identifymedia. I couldn't verify
-# this works since I lack a cdrom drive.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

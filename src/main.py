@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2003/04/24 19:55:48  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.40  2003/04/20 12:43:32  dischi
 # make the rc events global in rc.py to avoid get_singleton. There is now
 # a function app() to get/set the app. Also the events should be passed to
@@ -30,48 +33,6 @@
 #
 # Revision 1.35  2003/04/15 20:00:19  dischi
 # make MenuItem inherit from Item
-#
-# Revision 1.34  2003/04/13 10:35:39  dischi
-# cleanup of unneeded stuff in menu.py
-#
-# Revision 1.33  2003/04/12 18:27:29  dischi
-# special video item handling
-#
-# Revision 1.32  2003/04/06 21:12:55  dischi
-# o Switched to the new main skin
-# o some cleanups (removed unneeded inports)
-#
-# Revision 1.31  2003/03/29 21:49:54  dischi
-# Added new tv main menu for the new skin. This includes the tv guide
-# (file is now called tvguide and not tvmenu) and DIR_RECORD. This
-# directory is sort by date and can have a different menu style in the skin.
-# See blue_round2 as example: there is a tv watermark, no view area and
-# the listing area is larger.
-#
-# Revision 1.30  2003/03/21 19:51:35  dischi
-# moved some main menu settings from skin to freevo_config.py (new skin only)
-#
-# Revision 1.29  2003/03/15 17:13:22  dischi
-# store rom drive type in media
-#
-# Revision 1.28  2003/03/15 16:45:47  dischi
-# make the shutdown look nicer for mga video
-#
-# Revision 1.27  2003/03/10 07:11:23  outlyer
-# Just some fixes to prevent the idle bar from appearing on top of widescreen
-# video.
-#
-# Revision 1.26  2003/03/02 22:09:19  dischi
-# Reload main menu on skin change, too
-#
-# Revision 1.25  2003/03/02 21:33:17  dischi
-# The main menu is a class of its own, all items in the main menu inherit
-# from Item. If the new skin code is active, DISPLAY will pop up a skin
-# selector.
-#
-# Revision 1.24  2003/02/24 04:03:25  krister
-# Added a --trace option to see all function calls in freevo.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

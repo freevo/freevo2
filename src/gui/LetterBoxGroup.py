@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/04/24 19:56:22  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.8  2003/03/30 20:50:00  rshortt
 # Improvements in how we get skin properties.
 #
@@ -22,12 +25,6 @@
 # extend InputBox but instead is also a subclass of PopupBox.  LetterBoxGroup
 # has a new constructor argument called 'type' which when set to 'password'
 # will make a LetterBoxGroup of PasswordLetterBox's rather than Letterbox's.
-#
-# Revision 1.5  2003/03/30 16:15:42  rshortt
-# Got rid of trailing whitespaces from the 'word'.
-#
-# Revision 1.4  2003/03/24 02:40:50  rshortt
-# These objects are now using skin properties.
 #
 # Revision 1.3  2003/03/09 21:37:06  rshortt
 # Improved drawing.  draw() should now be called instead of _draw(). draw()
@@ -46,7 +43,6 @@
 # Reviving the src/gui code, allso adding some new GUI objects.  Event
 # handling will not work untill I make some minor modifications to main.py,
 # osd.py, and menu.py.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

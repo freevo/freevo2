@@ -11,13 +11,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/04/24 19:56:20  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.2  2003/04/22 23:55:20  rshortt
 # FlowLayout now really works.  Still have some quirks to work out.
 #
 # Revision 1.1  2003/04/09 01:38:09  rshortt
 # Initial commit of some in-progress classes.
-#
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

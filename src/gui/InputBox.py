@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/04/24 19:56:20  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.6  2003/04/20 13:02:29  dischi
 # make the rc changes here, too
 #
@@ -37,7 +40,6 @@
 # Reviving the src/gui code, allso adding some new GUI objects.  Event
 # handling will not work untill I make some minor modifications to main.py,
 # osd.py, and menu.py.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

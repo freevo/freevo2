@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/04/24 19:56:10  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.5  2003/04/20 12:43:33  dischi
 # make the rc events global in rc.py to avoid get_singleton. There is now
 # a function app() to get/set the app. Also the events should be passed to
@@ -26,7 +29,6 @@
 #
 # Revision 1.1  2002/12/09 14:23:53  dischi
 # Added games patch from Rob Shortt to use the interface.py and snes support
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

@@ -9,25 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/04/24 19:56:42  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.11  2003/04/22 19:34:12  dischi
 # mplayer and tvtime are now plugins
 #
 # Revision 1.10  2003/04/21 18:20:44  dischi
 # make tv itself and not tv.tv the plugin (using __init__.py)
-#
-# Revision 1.9  2003/04/20 12:43:34  dischi
-# make the rc events global in rc.py to avoid get_singleton. There is now
-# a function app() to get/set the app. Also the events should be passed to
-# the daemon plugins when there is no handler for them before. Please test
-# it, especialy the mixer functions.
-#
-# Revision 1.8  2003/04/20 10:55:41  dischi
-# mixer is now a plugin, too
-#
-# Revision 1.7  2003/04/17 04:44:11  krister
-# Added a quick hack to support tvtime. It uses stdin on tvtime for commands,
-# this is not supported in tvtime yet.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

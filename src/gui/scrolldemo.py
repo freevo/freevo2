@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/04/24 19:56:31  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.6  2003/04/20 13:02:30  dischi
 # make the rc changes here, too
 #
@@ -35,7 +38,6 @@
 # Revision 1.1  2003/02/19 00:58:18  rshortt
 # Added scrolldemo.py for a better demonstration.  Use my audioitem.py
 # to test.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

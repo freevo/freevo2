@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/04/24 19:56:21  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.8  2003/03/30 20:50:00  rshortt
 # Improvements in how we get skin properties.
 #
@@ -38,18 +41,10 @@
 # this object up to the skin properties because if the non-selected bg_color
 # has a transparency it will still be broken.
 #
-# Revision 1.2  2003/03/05 03:53:34  rshortt
-# More work hooking skin properties into the GUI objects, and also making
-# better use of OOP.
-#
-# ListBox and others are working again, although I have a nasty bug regarding
-# alpha transparencies and the new skin.
-#
 # Revision 1.1  2003/02/18 13:40:53  rshortt
 # Reviving the src/gui code, allso adding some new GUI objects.  Event
 # handling will not work untill I make some minor modifications to main.py,
 # osd.py, and menu.py.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

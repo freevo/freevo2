@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/04/24 19:56:42  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.9  2003/04/12 18:30:04  dischi
 # add support for audio/subtitle selection for avis, too
 #
@@ -17,29 +20,6 @@
 #
 # Revision 1.7  2003/03/30 16:50:20  dischi
 # pass xml_file definition to submenus
-#
-# Revision 1.6  2003/03/02 14:58:23  dischi
-# Removed osd.clearscreen and if we have the NEW_SKIN deactivate
-# skin.popupbox, refresh, etc. Use menuw.show and menuw.hide to do this.
-#
-# Revision 1.5  2003/01/07 19:45:17  dischi
-# small bugfix
-#
-# Revision 1.4  2002/12/22 12:23:30  dischi
-# Added deinterlacing in the config menu
-#
-# Revision 1.3  2002/11/26 21:42:28  dischi
-# small bugfix to remove configure menu for chapters
-#
-# Revision 1.2  2002/11/26 20:58:44  dischi
-# o Fixed bug that not only the first character of mplayer_options is used
-# o added the configure stuff again (without play from stopped position
-#   because the mplayer -ss option is _very_ broken)
-# o Various fixes in DVD playpack
-#
-# Revision 1.1  2002/11/24 13:58:45  dischi
-# code cleanup
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

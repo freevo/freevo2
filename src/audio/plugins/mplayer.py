@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/04/24 19:56:07  dischi
+# comment cleanup for 1.3.2-pre4
+#
 # Revision 1.3  2003/04/22 11:57:07  dischi
 # added STOP
 #
@@ -17,7 +20,6 @@
 #
 # Revision 1.1  2003/04/21 13:26:12  dischi
 # mplayer is now a plugin
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
