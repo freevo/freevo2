@@ -6,6 +6,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/08/08 19:04:25  rshortt
+# Adding get_guide() and caching here temporarily until we have a working
+# replacement since various parts of Freevo need it and I need it to fix
+# them else I'll lose my sanity. :)
+#
 # Revision 1.7  2004/08/05 17:40:26  dischi
 # deactivate some code for now
 #
@@ -166,4 +171,68 @@ def when_listings_expire():
             left /= 3600
 
     return left
+
+
+# XXX: Adding get_guide() and caching here temporarily until we have a working
+#      replacement since various parts of Freevo need it and I need it to fix
+#      them else I'll lose my sanity. :) -Rob
+
+_cached_guide = None
+
+def get_guide():
+    global _cached_guide
+                
+    source = config.XMLTV_FILE
+    pickle = os.path.join(config.FREEVO_CACHEDIR, 'epg')
+
+    if(_cached_guide == None or
+       (os.path.isfile(source) and
+        _cached_guide.timestamp != os.path.getmtime(source))):
+
+        got_cached_guide = False
+        if (os.path.isfile(source) and
+            os.path.isfile(pickle) and (os.path.getmtime(pickle) >
+                                       os.path.getmtime(source))):
+
+
+            _cached_guide = util.read_pickle(pickle)
+
+            epg_ver = None
+            try:
+                epg_ver = _cached_guide.EPG_VERSION
+            except AttributeError:
+                _debug_('EPG does not have a version number, must be reloaded')
+                print dir(cached_guide)
+
+            if _cached_guide.timestamp != os.path.getmtime(source):
+                # Hmmm, weird, there is a pickled file newer than the TV.xml
+                # file, but the timestamp in it does not match the TV.xml
+                # timestamp. We need to reload!
+                _debug_('EPG: Pickled file timestamp mismatch, reloading!')
+
+            else:
+                _debug_('XMLTV, got cached guide (version %s).' % epg_ver)
+                got_cached_guide = True
+
+
+        if not got_cached_guide:
+            _debug_('XMLTV, trying to read raw file (%s)' % source)
+
+            try:    
+                _cached_guide = pyepg.load(source)
+                if not _cached_guide:
+                    _debug_('TV Guide is corrupt!')
+                    return False
+            except:                    
+                # Don't violently crash on a incomplete or empty TV.xml please.
+                _cached_guide = None
+                print
+                print String(_("Couldn't load the TV Guide, got an exception!"))
+                print 
+                traceback.print_exc()
+            else:
+                # Dump a pickled version for later reads
+                util.save_pickle(_cached_guide, pickle)
+                
+    return _cached_guide
 
