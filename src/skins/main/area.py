@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2004/03/14 10:52:53  dischi
+# Make it possible to have a background image above the background rect.
+#
 # Revision 1.36  2004/02/27 20:15:03  dischi
 # more unicode fixes
 #
@@ -598,7 +601,8 @@ class Skin_Area:
                     imagefile = bg.filename
 
                 # set to 'background' to be added to that image list
-                bg.label = 'background'
+                if bg.label != 'top':
+                    bg.label = 'background'
                     
                 if imagefile:
                     cname = '%s-%s-%s' % (imagefile, bg.width, bg.height)
