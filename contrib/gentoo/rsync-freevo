@@ -58,35 +58,26 @@ echo unpack ebuilds
 tar -zxvf /tmp/$file  2>&1 | grep ebuild
 rm /tmp/$file /tmp/rsync-ChangeLog
 
-cd /usr/portage
+if ! grep pylirc /etc/portage/package.keywords 2>/dev/null >/dev/null; then
+    echo
+    echo "Warning: pylirc is masked"
+    echo "To install freevo without any problems, you need to add"
+    echo "dev-python/pylirc ~x86"
+    echo "into /etc/portage/package.keywords"
+    echo
+fi
 
-for idir in media-tv/freevo dev-python/mmpython dev-python/pylirc \
-    media-libs/xine-lib media-video/xine-ui; do
-    echo changing mask $idir
-    for i in $idir/*.ebuild; do
-	cache=`echo $i | sed 's/\/.*\//\//' | sed 's/\.ebuild$//'`
-
-	rm -f /var/cache/edb/dep/$cache
-
-	mv $i /tmp/$$
-	sed 's/~x86/x86/' /tmp/$$ > $i
-	rm /tmp/$$
-    done
-    cp /usr/portage/profiles/package.mask /tmp/package.mask
-    grep -v $idir /tmp/package.mask > /usr/portage/profiles/package.mask
-done
-
-echo
-echo
-echo
-echo "WARNING: Freevo is now in the gentoo portage tree, you don't need this script"
-echo "anymore. It does the following things:"
-echo "1. add stuff to use Freevo with the DXR3 (USE dxr3)"
-echo "2. add ebuilds for freevo-snapshot and mmpython-snapshot"
-echo "3. remove the mask from all packages Freevo needs"
-echo "4. add ebuilds for new version which are not in the portage tree (yet)"
-echo
-echo "And a small change: freevo is now in media-tv, not media-video"
-echo
+# echo
+# echo
+# echo
+# echo "WARNING: Freevo is now in the gentoo portage tree, you don't need this script"
+# echo "anymore. It does the following things:"
+# echo "1. add stuff to use Freevo with the DXR3 (USE dxr3)"
+# echo "2. add ebuilds for freevo-snapshot and mmpython-snapshot"
+# echo "3. remove the mask from all packages Freevo needs"
+# echo "4. add ebuilds for new version which are not in the portage tree (yet)"
+# echo
+# echo "And a small change: freevo is now in media-tv, not media-video"
+# echo
 
 # end of rsync-freevo
