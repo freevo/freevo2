@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2003/04/13 17:58:32  dischi
+# make it possible to force a reload when going one menu back
+#
 # Revision 1.34  2003/04/13 10:39:14  dischi
 # fix small bug
 #
@@ -261,7 +264,11 @@ class MenuWidget(GUIObject):
             else:
                 self.init_page()
 
-            self.refresh()
+            if arg == 'reload':
+                self.refresh(reload=1)
+            else:
+                self.refresh()
+                
 
     def goto_main_menu(self, arg=None, menuw=None):
         self.menustack = [self.menustack[0]]
