@@ -108,6 +108,12 @@
       <shadow x="1" y="1" color="0x000000" visible="yes"/>
     </font>
 
+    <font label="item" color="item"/>
+    <font label="selected" color="selected"/>
+
+    <color label="item" value="0xdddddd"/>
+    <color label="selected" value="0xffffff"/>
+    
     <color label="selection bar" value="0xa0000000"/>
 
   </skin>
