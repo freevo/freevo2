@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/05/16 03:21:33  rshortt
+# Bugfix.
+#
 # Revision 1.5  2003/05/14 01:11:20  rshortt
 # More error handling and notice if the record server is down.
 #
@@ -87,11 +90,13 @@ class SearchResource(FreevoResource):
 
         find = fv.formValue(form, 'find')
 
-        (result, progs) = ri.findMatches(find)
-        (result, favs) = ri.getFavorites()
+        (got_matches, progs) = ri.findMatches(find)
 
-        (result, recordings) = ri.getScheduledRecordings()
-        rec_progs = recordings.getProgramList()
+        if got_matches: 
+            (result, favs) = ri.getFavorites()
+            (result, recordings) = ri.getScheduledRecordings()
+            if result:
+                rec_progs = recordings.getProgramList()
 
         fv.printHeader('Search Results', 'styles/main.css')
 
@@ -102,58 +107,62 @@ class SearchResource(FreevoResource):
         fv.tableRowClose()
         fv.tableClose()
 
-        fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
-        fv.tableRowOpen('class="chanrow"')
-        fv.tableCell('Start Time', 'class="guidehead" align="center" colspan="1"')
-        fv.tableCell('Stop Time', 'class="guidehead" align="center" colspan="1"')
-        fv.tableCell('Channel', 'class="guidehead" align="center" colspan="1"')
-        fv.tableCell('Title', 'class="guidehead" align="center" colspan="1"')
-        fv.tableCell('Program Description', 'class="guidehead" align="center" colspan="1"')
-        fv.tableCell('Actions', 'class="guidehead" align="center" colspan="1"')
-        fv.tableRowClose()
+        if not got_matches: 
+            fv.res += '<h3>No matches</h3><hr />'
 
-        for prog in progs:
-
-            status = 'basic'
-
-            for rp in rec_progs.values():
-
-                if rp.start == prog.start and rp.channel_id == prog.channel_id:
-                    status = 'scheduled'
-                    try:
-                        if rp.isRecording == TRUE:
-                            status = 'recording'
-                    except:
-                        sys.stderr.write('isRecording not set')
-
-            if ri.isProgAFavorite(prog, favs):
-                status = 'favorite'
-
+        else:
+            fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
             fv.tableRowOpen('class="chanrow"')
-            fv.tableCell(time.strftime('%b %d %H:%M', time.localtime(prog.start)), 'class="'+status+'" align="left" colspan="1"')
-            fv.tableCell(time.strftime('%b %d %H:%M', time.localtime(prog.stop)), 'class="'+status+'" align="left" colspan="1"')
-            fv.tableCell(prog.channel_id, 'class="'+status+'" align="left" colspan="1"')
-            fv.tableCell(prog.title, 'class="'+status+'" align="left" colspan="1"')
-
-            if prog.desc == '':
-                cell = 'Sorry, the program description for "%s" is unavailable.' % prog.title
-            else:
-                cell = prog.desc
-            fv.tableCell(cell, 'class="'+status+'" align="left" colspan="1"')
-
-            if status == 'scheduled':
-                cell = '<a href="record.rpy?chan=%s&start=%s&action=remove">Remove</a>' % (prog.channel_id, prog.start)
-            elif status == 'recording':
-                cell = '<a href="record.rpy?chan=%s&start=%s&action=add">Record</a>' % (prog.channel_id, prog.start)
-            else:
-                cell = '<a href="record.rpy?chan=%s&start=%s&action=add">Record</a>' % (prog.channel_id, prog.start)
-
-            cell += ' | <a href="edit_favorite.rpy?chan=%s&start=%s&action=add">New favorite</a>' % (prog.channel_id, prog.start)
-            fv.tableCell(cell, 'class="'+status+'" align="left" colspan="1"')
-
+            fv.tableCell('Start Time', 'class="guidehead" align="center" colspan="1"')
+            fv.tableCell('Stop Time', 'class="guidehead" align="center" colspan="1"')
+            fv.tableCell('Channel', 'class="guidehead" align="center" colspan="1"')
+            fv.tableCell('Title', 'class="guidehead" align="center" colspan="1"')
+            fv.tableCell('Program Description', 'class="guidehead" align="center" colspan="1"')
+            fv.tableCell('Actions', 'class="guidehead" align="center" colspan="1"')
             fv.tableRowClose()
 
-        fv.tableClose()
+            for prog in progs:
+
+                status = 'basic'
+
+                for rp in rec_progs.values():
+
+                    if rp.start == prog.start and rp.channel_id == prog.channel_id:
+                        status = 'scheduled'
+                        try:
+                            if rp.isRecording == TRUE:
+                                status = 'recording'
+                        except:
+                            sys.stderr.write('isRecording not set')
+    
+                if ri.isProgAFavorite(prog, favs):
+                    status = 'favorite'
+    
+                fv.tableRowOpen('class="chanrow"')
+                fv.tableCell(time.strftime('%b %d %H:%M', time.localtime(prog.start)), 'class="'+status+'" align="left" colspan="1"')
+                fv.tableCell(time.strftime('%b %d %H:%M', time.localtime(prog.stop)), 'class="'+status+'" align="left" colspan="1"')
+                fv.tableCell(prog.channel_id, 'class="'+status+'" align="left" colspan="1"')
+                fv.tableCell(prog.title, 'class="'+status+'" align="left" colspan="1"')
+    
+                if prog.desc == '':
+                    cell = 'Sorry, the program description for "%s" is unavailable.' % prog.title
+                else:
+                    cell = prog.desc
+                fv.tableCell(cell, 'class="'+status+'" align="left" colspan="1"')
+    
+                if status == 'scheduled':
+                    cell = '<a href="record.rpy?chan=%s&start=%s&action=remove">Remove</a>' % (prog.channel_id, prog.start)
+                elif status == 'recording':
+                    cell = '<a href="record.rpy?chan=%s&start=%s&action=add">Record</a>' % (prog.channel_id, prog.start)
+                else:
+                    cell = '<a href="record.rpy?chan=%s&start=%s&action=add">Record</a>' % (prog.channel_id, prog.start)
+    
+                cell += ' | <a href="edit_favorite.rpy?chan=%s&start=%s&action=add">New favorite</a>' % (prog.channel_id, prog.start)
+                fv.tableCell(cell, 'class="'+status+'" align="left" colspan="1"')
+    
+                fv.tableRowClose()
+
+            fv.tableClose()
 
         fv.printSearchForm()
 
