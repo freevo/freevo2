@@ -538,4 +538,56 @@
       <TIME start="0"/>
     </ENTRY>
   </SUB>
+  <SUB NAME="Sveriges Radio">
+    <ENTRY>
+      <TITLE>Sveriges Radio: P1</TITLE>
+      <REF HREF="http://www.sr.se/cgi-bin/spelare/createAsx.asp?namn=p1-wm-High"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>Sveriges Radio: P2 Musik</TITLE>
+      <REF HREF="http://www.sr.se/cgi-bin/spelare/createAsx.asp?namn=p2-musik-wm-High"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>Sveriges Radio: P3</TITLE>
+      <REF HREF="http://www.sr.se/cgi-bin/spelare/createAsx.asp?namn=p3-wm-High"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>Sveriges Radio: P3 Star</TITLE>
+      <REF HREF="http://www.sr.se/cgi-bin/spelare/createAsx.asp?namn=p3star-wm-High"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>Sveriges Radio: P4 Riks</TITLE>
+      <REF HREF="http://www.sr.se/cgi-bin/spelare/createAsx.asp?namn=p4riks-wm-High"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>P5 Radio Stockholm</TITLE>
+      <REF HREF="http://www.sr.se/cgi-bin/spelare/createAsx.asp?namn=p5sth-wm-High"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>Sisuradio</TITLE>
+      <REF HREF="http://www.sr.se/cgi-bin/spelare/createAsx.asp?namn=sisu-wm-High"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>Sveriges Radio: SR c</TITLE>
+      <REF HREF="http://www.sr.se/cgi-bin/spelare/createAsx.asp?namn=src-wm-High"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>Sveriges Radio: SR Klassiskt</TITLE>
+      <REF HREF="http://www.sr.se/cgi-bin/spelare/createAsx.asp?namn=srk-wm-High"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>Sveriges Radio: SR X</TITLE>
+      <REF HREF="http://www.sr.se/cgi-bin/spelare/createAsx.asp?namn=srx-wm-High"/>
+      <TIME start="0"/>
+    </ENTRY>
+  </SUB>
 </GXINEMM>
