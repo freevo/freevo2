@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/08/14 01:23:30  rshortt
+# Use the chanlist/epg from cache.
+#
 # Revision 1.19  2004/08/10 14:32:56  rshortt
 # Make it "work", still some bugs.
 #
@@ -119,8 +122,8 @@
 
 import sys, time, string
 
+from tv.channels import get_channels
 from tv.record_types import Favorite
-import util.tv_util as tv_util
 import tv.record_client as ri
 
 from www.web_types import HTMLResource, FreevoResource
@@ -196,8 +199,6 @@ class EditFavoriteResource(FreevoResource):
             return String(fv.res)
 
 
-        guide = tv_util.get_guide()
-
         fv.printHeader(_('Edit Favorite'), 'styles/main.css')
         fv.res += '&nbsp;<br/>\n'
 
@@ -229,7 +230,8 @@ class EditFavoriteResource(FreevoResource):
 
         i = 1
         chan_index = 0
-        for ch in guide.chan_list:
+        for ch in get_channels().get_all():
+            ch = ch.epg
             if ch.displayname == fav.channel:
                 chan_index = i
             cell += '  <option value="%s">%s</option>\n' % (ch.displayname, ch.displayname)

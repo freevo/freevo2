@@ -31,10 +31,10 @@ import time
 from www.web_types import HTMLResource, FreevoResource
 from twisted.web.woven import page
 
-import util.tv_util as tv_util
 import util
 import config 
 import tv.record_client as ri
+from tv.channels import get_channels
 from twisted.web import static
 
 MAX_DESCRIPTION_CHAR = 1000
@@ -48,11 +48,11 @@ class ProgInfoResource(FreevoResource):
         chanid = id[:id.find(":")]
         starttime = int( id[id.find(":")+1:] )
 
-        guide = tv_util.get_guide()
-
-        chan = guide.chan_dict[chanid]
-        for prog in chan.programs:
-            if prog.start == starttime:
+        for chan in get_channels().get_all():
+            if chan.id == chanid:
+                for prog in chan.epg.programs:
+                    if prog.start == starttime:
+                        break
                 break
 
         if prog.desc == '':

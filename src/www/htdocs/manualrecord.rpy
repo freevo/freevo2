@@ -32,7 +32,8 @@
 
 import sys, time
 
-import tv.epg_xmltv, tv.epg_types
+from tv.channels import get_channels
+from pyepg.program import TvProgram
 import tv.record_client as ri
 
 # Use the alternate strptime module which seems to handle time zones
@@ -109,7 +110,7 @@ class ManualRecordResource(FreevoResource):
                             errormsg = "Sorry, the stop time does not give enough time for cron to pickup the change.  Please set it to record for a few minutes longer."
                         else:
                             # assign attributes to object
-                            prog = tv.epg_types.TvProgram()
+                            prog = TvProgram()
                             prog.channel_id = chan
                             if title:
                                 prog.title = title
@@ -131,12 +132,11 @@ class ManualRecordResource(FreevoResource):
                         errormsg = _("Program would record for more than 1 day!") % MAXDAYS
 
         if errormsg or not action:
-            guide = tv.epg_xmltv.get_guide()
             channelselect = '<select name="chan">'
-            for ch in guide.chan_list:
-                if not ch.displayname:
-                    ch.displayname="?"
-                channelselect = channelselect + '<option value="'+ch.id+'">'+ch.displayname+"\n"
+            for ch in get_channels().get_all():
+                if not ch.name:
+                    ch.name="?"
+                channelselect = channelselect + '<option value="'+ch.id+'">'+ch.name+"\n"
             channelselect = channelselect + "</select>\n"
 
             #build some reusable date inputs

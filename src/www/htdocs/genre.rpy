@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/08/14 01:23:30  rshortt
+# Use the chanlist/epg from cache.
+#
 # Revision 1.10  2004/08/10 12:54:22  outlyer
 # An impressive update to the guide code from Jason Tackaberry that
 # dramatically speeds up rendering and navigation of the guide.  I will be
@@ -66,8 +69,8 @@ import sys, time, string
 
 import tv.record_client as ri
 from www.web_types import HTMLResource, FreevoResource
-import tv.epg_xmltv
 import util, config
+from tv.channels import get_channels
 
 TRUE = 1
 FALSE = 0
@@ -112,7 +115,6 @@ class GenreResource(FreevoResource):
 
         category = fv.formValue(form, 'category')
 
-        guide = tv.epg_xmltv.get_guide()
         (got_schedule, schedule) = ri.getScheduledRecordings()
         if got_schedule:
             schedule = schedule.getProgramList()
@@ -125,8 +127,8 @@ class GenreResource(FreevoResource):
                 )
 
         allcategories = []
-        for chan in guide.chan_list:
-            for prog in chan.programs:
+        for chan in get_channels().get_all():
+            for prog in chan.epg.programs:
                 if prog.categories:
                     allcategories.extend(prog.categories)
         if allcategories:
@@ -167,8 +169,8 @@ class GenreResource(FreevoResource):
 
         desc = ''
         gotdata = 0
-        for chan in guide.chan_list:
-            for prog in chan.programs:
+        for chan in get_channels().get_all():
+            for prog in chan.epg.programs:
                 if prog.stop > mfrguidestart and prog.start < mfrnextguide:
                     status = 'program'
 

@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/08/14 01:23:30  rshortt
+# Use the chanlist/epg from cache.
+#
 # Revision 1.4  2004/02/19 04:57:59  gsbarbieri
 # Support Web Interface i18n.
 # To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
@@ -112,8 +115,6 @@ class WRecResource(FreevoWapResource):
                 fv.res += '     </anchor></p>\n'
                 fv.res += '  </card>\n'
             else:
-                guide = tv.epg_xmltv.get_guide()
-
                 fv.res += '  <card id="card1" title="Freevo" ontimer="#card2">\n'
                 fv.res += '  <timer value="30"/>\n'
                 fv.res += '   <p><big><strong>Freevo WAP Sheduler</strong></big></p>\n'
@@ -130,8 +131,8 @@ class WRecResource(FreevoWapResource):
                 fv.res += '          Start Time: <input  name="start" title="Start Time (hh:mm)" format="NN:NN" size="4" value="%s" /><br/>\n' % time.strftime("%H:%M", time.localtime(time.time()))
                 fv.res += '          Stop Time: <input  name="stop" title="Stop Time (hh:mm)" format="NN:NN" size="4" value="%s" /><br/>\n' % time.strftime("%H:%M", time.localtime(time.time() + 3600))
                 fv.res += '          Channel: <select  name="channel">\n'
-                for ch in guide.chan_list:
-                    fv.res += '                   <option value="'+ch.id+'">'+ch.displayname+"</option>\n"
+                for ch in get_channels().get_all():
+                    fv.res += '                   <option value="'+ch.id+'">'+ch.name+"</option>\n"
                 fv.res += '                  </select></p>\n'         
                 fv.res += '   <do type="accept" label="Record">\n'
                 fv.res += '     <go href="wap_rec.rpy" method="post">\n'
