@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/09/23 21:13:00  dischi
+# adjust to mmpython change
+#
 # Revision 1.17  2003/09/23 20:05:29  dischi
 # imdb patch from Eirik Meland
 #
@@ -827,7 +830,7 @@ class FxdImdb:
         return a unique identifier for the disc"""
 
         if not os.path.exists(drive): return drive
-        return cdrom_disc_id(drive)
+        return cdrom_disc_id(drive)[1]
         
     def print_info(self):
         """return info part for FXD writing""" 
