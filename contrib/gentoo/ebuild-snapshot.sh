@@ -24,7 +24,7 @@ function cvs_update {
 
 function cvs_tag {
     echo setting new cvs tag
-    cvs tag $tag
+    cvs tag -F $tag
 }
 
 function pack {
