@@ -22,44 +22,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2003/09/08 19:43:14  dischi
+# added some internal help messages and a tv grab helper
+#
 # Revision 1.46  2003/09/05 20:09:30  dischi
 # add function to auto detect channels and some help messages
-#
-# Revision 1.45  2003/09/03 20:03:34  dischi
-# toggle between x11 and fbdev based on $DISPLAY
-#
-# Revision 1.44  2003/08/25 12:08:20  outlyer
-# Additional compatibility patches for FreeBSD from Lars Eggert
-#
-# Revision 1.43  2003/08/24 01:35:59  outlyer
-# These two changes reduce the amount of stuff being emailed to people when they
-# use cron.
-#
-# (In both cases, outputting text to a command run from cron sends an email to
-# root, which is very annoying)
-#
-# Revision 1.42  2003/08/23 22:27:06  gsbarbieri
-# Match (CD|DVD) by mount point
-#
-# Revision 1.41  2003/08/22 17:51:29  dischi
-# Some changes to make freevo work when installed into the system
-#
-# Revision 1.40  2003/08/20 22:46:39  gsbarbieri
-# Optimized and added cdrom[0-9]* to regexp, so it works in RH9
-#
-# Revision 1.39  2003/08/20 21:25:21  dischi
-# get SHARE_DIR earlier
-#
-# Revision 1.38  2003/08/20 13:33:48  outlyer
-# Patch from Lars Eggert to support FreeBSD device naming conventions.
-#
-# Revision 1.37  2003/08/15 19:25:14  dischi
-# search all the share stuff in $FREEVO_SHARE now
-#
-# Revision 1.36  2003/08/15 17:23:06  dischi
-# Added a new command line parameter -fs (Fullscreen). This will start Freevo
-# in a new xsession (even if one is running). Freevo will get _all_ keys
-# and there are no problems with other applications when switching fullscreen
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -87,7 +54,6 @@
 import sys, os, time, re
 import setup_freevo
 
-# Logging class. Logs stuff on stdout and /tmp/freevo.log
 class Logger:
     """
     Class to create a logger object which will send messages to stdout
@@ -116,19 +82,36 @@ class Logger:
             sys.__stdout__.write(msg)
         self.fp.write(msg)
         self.fp.flush()
-
         return
-
 
     def flush():
         pass
-
 
     def close():
         pass
     
 
+def error(message, *desc):
+    """
+    Small helper function to print out errors so that they fit on a
+    normal terminal screen (80 chars)
+    """
+    print
+    print 'ERROR: %s' % message
+    message = ''
+    for line in desc:
+        message += line
+    for line in message.split('\n'):
+        while(line):
+            if len(line) > 80:
+                print line[:line[:80].rfind(' ')]
+                line = line[line[:80].rfind(' ')+1:]
+            else:
+                print line
+                line = ''
+    print
 
+    
 def print_config_changes(conf_version, file_version, changelist):
     """
     print changes made between version on the screen
@@ -151,31 +134,45 @@ def print_config_changes(conf_version, file_version, changelist):
     print
             
     
-        
+
+#
+# get information about what is started here:
+# helper = some script from src/helpers or is webserver or recordserver
+#
+HELPER          = 0
+IS_RECORDSERVER = 0
+IS_WEBSERVER    = 0
 
 if sys.argv[0].find('main.py') == -1:
     HELPER=1
-else:
-    HELPER=0
+elif sys.argv[0].find('recordserver.py') == -1:
+    IS_RECORDSERVER = 1
+elif sys.argv[0].find('webserver.py') == -1:
+    IS_WEBSERVER = 1
 
 
+#
 # Send debug to stdout as well as to the logfile?
+#
 DEBUG_STDOUT = 1
 
+#
 # Debug all modules?
 # 0 = Debug output off
 # 1 = Some debug output
 # A higher number will generate more detailed output from some modules.
+#
 DEBUG = 0
 
-
+#
+# find the log directory
+#
 if os.path.isdir('/var/log/freevo'):
     LOGDIR = '/var/log/freevo'
 else:
     LOGDIR = '/tmp/freevo'
     if not os.path.isdir(LOGDIR):
         os.makedirs(LOGDIR)
-
 
 
 #
@@ -192,8 +189,10 @@ if not HELPER:
 cfgfilepath = [ '.', os.path.expanduser('~/.freevo'), '/etc/freevo' ]
 
 
+#
 # Default settings
 # These will be overwritten by the contents of 'freevo.conf'
+#
 CONF = setup_freevo.Struct()
 CONF.geometry = '800x600'
 CONF.width, CONF.height = 800, 600
@@ -202,7 +201,9 @@ CONF.tv = 'ntsc'
 CONF.chanlist = 'us-cable'
 CONF.version = 0
 
+#
 # Read the environment set by the start script
+#
 SHARE_DIR = os.environ['FREEVO_SHARE']
 CONTRIB_DIR = os.environ['FREEVO_CONTRIB']
 SKIN_DIR  = os.path.join(SHARE_DIR, 'skins')
@@ -213,7 +214,9 @@ FONT_DIR  = os.path.join(SHARE_DIR, 'fonts')
 RUNAPP = os.environ['RUNAPP']
 
 
+#
 # Check that freevo_config.py is not found in the config file dirs
+#
 for dirname in [os.path.expanduser('~/.freevo'), '/etc/freevo']:
     freevoconf = dirname + '/freevo_config.py'
     if os.path.isfile(freevoconf):
@@ -221,7 +224,9 @@ for dirname in [os.path.expanduser('~/.freevo'), '/etc/freevo']:
                 'and use local_conf.py instead!') % freevoconf)
         sys.exit(1)
         
+#
 # Search for freevo.conf:
+#
 for dir in cfgfilepath:
     freevoconf = dir + '/freevo.conf'
     if os.path.isfile(freevoconf):
@@ -244,18 +249,24 @@ for dir in cfgfilepath:
         CONF.width, CONF.height = int(w), int(h)
         break
 else:
-    print 'Error: freevo.conf not found. Please run freevo setup first'
+    error('Error', 'freevo.conf not found', 'Freevo needs a basic configuration to guess ',
+          'the best settings for your system. Please run \'freevo setup\' first')
     sys.exit(1)
 
+
+#
 # search missing programs at runtime
+#
 for program, valname, needed in setup_freevo.EXTERNAL_PROGRAMS:
     if not hasattr(CONF, valname) or not getattr(CONF, valname):
         setup_freevo.check_program(CONF, program, valname, needed, verbose=0)
     if not hasattr(CONF, valname) or not getattr(CONF, valname):
         setattr(CONF, valname, '')
 
+#
 # fall back to x11 if display is mga or fb and DISPLAY ist set
 # or switch to fbdev if we have no DISPLAY and x11 or dga is used
+#
 if not HELPER:
     if os.environ.has_key('DISPLAY') and os.environ['DISPLAY']:
         if CONF.display in ('mga', 'fbdev'):
@@ -271,7 +282,9 @@ if not HELPER:
             print 'Setting display to fbdev.'
             CONF.display='fbdev'
    
+#
 # Load freevo_config.py:
+#
 if os.path.isfile(os.environ['FREEVO_CONFIG']):
     if DEBUG:
         print 'Loading cfg: %s' % os.environ['FREEVO_CONFIG']
@@ -282,7 +295,9 @@ else:
     sys.exit(1)
 
 
+#
 # Search for local_conf.py:
+#
 for dirname in cfgfilepath:
     overridefile = dirname + '/local_conf.py'
     if os.path.isfile(overridefile):
@@ -315,16 +330,33 @@ for dirname in cfgfilepath:
         break
 
 else:
-    if DEBUG: print 'No overrides loaded'
+    error('local_conf.py not found', 'Freevo can be configured with a file called ',
+          'local_conf.py. It\'s possible to override variables from freevo_config.py ',
+          'in this file. Freevo searched for local_conf.py in the following locations:')
+    for dirname in cfgfilepath:
+        print dirname + '/local_conf.py'
+    print
+    print 'the location of freevo_config.py is %s' % os.environ['FREEVO_CONFIG']
+    print
 
-    
+
+#
+# force fullscreen when freevo is it's own windowmanager
+#
 if len(sys.argv) >= 2 and sys.argv[1] == '--force-fs':
     START_FULLSCREEN_X = 1
 
 
+#
+# set default font
+#
 OSD_DEFAULT_FONTNAME = os.path.join(FONT_DIR, OSD_DEFAULT_FONTNAME)
 
+
+
+#
 # Autodetect the CD/DVD drives in the system if not given in local_conf.py
+#
 if not ROM_DRIVES:
     if os.path.isfile('/etc/fstab'):        
         re_cd        = re.compile( '^(/dev/cdrom[0-9]*|/dev/[am]?cd[0-9]+[a-z]?)[ \t]+([^ \t]+)[ \t]+', re.I )
@@ -403,10 +435,12 @@ if not ROM_DRIVES:
 # List of objects representing removable media, e.g. CD-ROMs,
 # DVDs, etc.
 #
-
 REMOVABLE_MEDIA = []
 
 
+#
+# Auto detect xmltv channel list
+#
 
 def sortchannels(list, key):
     # This should be more generic, but I couldn't get it
@@ -420,14 +454,12 @@ def sortchannels(list, key):
     return map(lambda (key, x): x, nlist)
 
 
-
-if TV_CHANNELS == None:
-    # auto detect them
-    
-    from tv import xmltv
-    import sys,os
+def detect_channels():
+    """
+    Auto detect a list of possible channels in the xmltv file
+    """
     import codecs
-    import cPickle, pickle # pickle because sometimes cPickle doesn't work
+    import cPickle, pickle
 
     file = XMLTV_FILE
     path = FREEVO_CACHEDIR
@@ -436,14 +468,13 @@ if TV_CHANNELS == None:
     pname = os.path.join(path,pfile)
 
     if not os.path.isfile(file):
-        print
-        print 'ERROR: can\'t find %s' % file
-        print 'Use xmltv to create this file or when you don\'t want '\
-              'to use the tv module at all,'
-        print 'add TV_CHANNELS = [] and plugin.remove(\'tv\') to your local_conf.py'
-        print 'TVguide is deactivted now.'
-        print
-        TV_CHANNELS = []
+        if not HELPER:
+            error('can\'t find %s' % file,
+                  'Use xmltv to create this file or when you don\'t want ',
+                  'to use the tv module at all, add TV_CHANNELS = [] and ',
+                  'plugin.remove(\'tv\') to your local_conf.py\n',
+                  'TVguide is deactivated now.')
+        return []
         
     elif os.path.isfile(pname) and (os.path.getmtime(pname) >
                                     os.path.getmtime(file)):
@@ -454,12 +485,13 @@ if TV_CHANNELS == None:
             except:
                 data = pickle.load(f)
             f.close()
-            TV_CHANNELS = data
+            return data
         except:
-            print 'unable to read cachefile %s' % pname
-            TV_CHANNELS = []
+            error('unable to read cachefile %s' % pname)
+            return []
 
     else:
+        from tv import xmltv
         input = open(file, 'r')
         tmp   = open('/tmp/xmltv_parser', 'w')
         while(1):
@@ -499,37 +531,26 @@ if TV_CHANNELS == None:
             cPickle.dump(chanlist, f, 1)
             f.close()
         except IOError:
-            print 'unable to save to cachefile %s' % pname
+            error('unable to save to cachefile %s' % pname)
 
-        print_list = DEBUG
         for c in chanlist:
             if c[2] == 0:
                 print_list = 1
-                print
-                print 'XMLTV ERROR: Audo-detection failed'
-                print 'some channels in the channel list have no station id'
-                print 'Please add it by putting the list in your local_conf.py'
-                print
+                if not HELPER:
+                    error('XMLTV auto detection failed', 'Some channels in the channel ',
+                          'list have no station id. Please add it by putting the list '
+                          'in your local_conf.py. Start \'freevo tv_grab --help\' for ',
+                          'more informations')
                 break
-
-        if print_list:
-            print
-            print 'Possible list of tv channels. If you want to change the station'
-            print 'id, copy the next statement into your local_conf.py and edit it.'
-            print 'You can also remove lines or resort them'
-            print
-            print 'TV_CHANNELS = ['
-            for c in chanlist[:-1]:
-                print '    ( \'%s\', \'%s\', %s ), ' % c
-            print '    ( \'%s\', \'%s\', %s ) ] ' % chanlist[-1]
-
         else:
-            print 'XMTV: Auto-detected channel list, remove %s and set DEBUG=1'\
-                  'to see it' % file
+            print 'XMTV: Auto-detected channel list'
 
-        TV_CHANNELS = chanlist
+        return chanlist
          
 
+if TV_CHANNELS == None:
+    # auto detect them
+    TV_CHANNELS = detect_channels()
 
 #
 # Movie information database.

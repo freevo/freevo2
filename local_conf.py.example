@@ -30,7 +30,7 @@
 # it easier to update this file. When you get a new version of Freevo,
 # Freevo will tell you any changes made in freevo_config.py. After you
 # merged those changes into this file, set this number to the new one.
-LOCAL_CONF_VERSION  = 3.5
+LOCAL_CONF_VERSION  = 3.7
 
 
 # ======================================================================
@@ -612,6 +612,7 @@ MAME_CACHE = '%s/romlist-%s.pickled' % (FREEVO_CACHEDIR, os.getuid())
 
 
 
+#
 # TV Channels. This list contains a mapping from the displayed channel name
 # to the actual channel name as used by the TV watching application.
 # The display name must match the names from the XMLTV guide,
@@ -632,9 +633,8 @@ MAME_CACHE = '%s/romlist-%s.pickled' % (FREEVO_CACHEDIR, os.getuid())
 # xmltv grabber, e.g. the German list doesn't contain station lists. In this
 # case Freevo will output the possible list for you to add them manually.
 #
-# If auto-detection works and you want to edit the list, set DEBUG=1 and
-# remove the cache file (e.g. /var/cache/freevo/xmltv_channels.pickle) to
-# see the complete list.
+# If auto-detection doesn't work or you want to edit the list, run
+# freevo tv_grab -query.
 #
 # Setting this variable to [] will deactivate the tv guide. If you don't have
 # a tv card, you may also want to add plugin.remove('tv') to remove the whole
@@ -667,6 +667,19 @@ MAME_CACHE = '%s/romlist-%s.pickled' % (FREEVO_CACHEDIR, os.getuid())
 # It will display "Fox Kids" from 06:00 to 16:59 and "TV6" from 17:00 to 03:00. 
 # 03:00 to 06:00 it won't be displayed at all.
 #
+
+
+
+# Program to grab xmltv listings. To get a grabber, you need to download
+# xmltv. A possible value for users in the USA is tv_grab_na
+# Use the tv_grab helper to grab the listings and cache them. Start
+# 'freevo tv_grab --help' for more informations.
+
+XMLTV_GRABBER = ''
+
+# Number of days the grabber should get
+
+XMLTV_DAYS = 3
 
 
 

@@ -109,7 +109,7 @@ from event import *
 # of the config file doesn't match, Freevo won't start. If the minor version
 # is different, there will be only a warning
 
-LOCAL_CONF_VERSION  = 3.6
+LOCAL_CONF_VERSION  = 3.8
 
 # Description of changes in each new version
 FREEVO_CONF_CHANGES = [
@@ -152,9 +152,12 @@ LOCAL_CONF_CHANGES = [
      '''Added xine support (see xine section in freevo_config.py),
      MPLAYER_AUTOCROP for 16:9 tv sets, ONLY_SCAN_DATADIR to make freevo start
      faster and TVGUIDE_HOURS_PER_PAGE customize the tv guide'''),
-    (3.6,
+    (3.7,
      '''Added USE_MEDIAID_TAG_NAMES as directory based variable and
-     HIDE_UNUSABLE_DISCS to hide discs in the wrong menus and empty drives''') ]
+     HIDE_UNUSABLE_DISCS to hide discs in the wrong menus and empty drives'''),
+    (3.8,
+     '''Restructured DIR_GAMES and added XMLTV_GRABBER and XMLTV_DAYS for the
+     tv_grab helper script''')]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -989,9 +992,8 @@ FREQUENCY_TABLE = {
 # xmltv grabber, e.g. the German list doesn't contain station lists. In this
 # case Freevo will output the possible list for you to add them manually.
 #
-# If auto-detection works and you want to edit the list, set DEBUG=1 and
-# remove the cache file (e.g. /var/cache/freevo/xmltv_channels.pickle) to
-# see the complete list.
+# If auto-detection doesn't work or you want to edit the list, run
+# freevo tv_grab -query.
 #
 # Setting this variable to [] will deactivate the tv guide. If you don't have
 # a tv card, you may also want to add plugin.remove('tv') to remove the whole
@@ -1026,6 +1028,19 @@ FREQUENCY_TABLE = {
 #
 
 TV_CHANNELS = None
+
+
+# Program to grab xmltv listings. To get a grabber, you need to download
+# xmltv. A possible value for users in the USA is tv_grab_na
+# Use the tv_grab helper to grab the listings and cache them. Start
+# 'freevo tv_grab --help' for more informations.
+
+XMLTV_GRABBER = ''
+
+# Number of days the grabber should get
+
+XMLTV_DAYS = 3
+
 
 # ======================================================================
 # Builtin WWW server settings
