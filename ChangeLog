@@ -10,6 +10,7 @@ Release 1.3.2 (TBD):
   * Converted some functions into plugins
   * detach plugin to listen to music in the background
   * IMDB search and XML generation plugin
+  * Album cover search plugin
  * New skin engine
  * Reactivated and fixed GUI code
  * Bugfixes
