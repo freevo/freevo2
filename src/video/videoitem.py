@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/03/03 00:36:53  rshortt
+# Implimenting the new PopupBox for the 'Scanning disc, be patient...' messages.
+#
 # Revision 1.17  2003/03/02 14:58:23  dischi
 # Removed osd.clearscreen and if we have the NEW_SKIN deactivate
 # skin.popupbox, refresh, etc. Use menuw.show and menuw.hide to do this.
@@ -90,6 +93,7 @@ if not config.NEW_SKIN:
     osd  = osd.get_singleton()
 
 
+from gui.PopupBox import PopupBox
 from item import Item
 import configure
 
@@ -337,6 +341,8 @@ class VideoItem(Item):
         """
         Generate special menu for DVD/VCD/SVCD content
         """
+        pop = None
+
         if not self.num_titles:
             # Use the uid to make a user-unique filename
             uid = os.getuid()
@@ -346,6 +352,12 @@ class VideoItem(Item):
                 skin.PopupBox('Scanning disc, be patient...',
                               icon='skins/icons/misc/cdrom_mount.png')
                 osd.update()
+            else:
+                pop = PopupBox('Scanning disc, be patient...',
+                               icon='skins/icons/misc/cdrom_mount.png')
+                menuw.add_child(pop)
+                pop.osd.focused_app = pop
+                pop.show()
 
                 
             os.system('rm -f /tmp/mplayer_dvd_%s.log /tmp/mplayer_dvd_done_%s' % (uid, uid))
@@ -407,6 +419,9 @@ class VideoItem(Item):
             if not done or not found:
                 self.num_titles = 100 # XXX Kludge
 
+        if pop and config.NEW_SKIN:
+            pop.destroy()
+
         #
         # Done scanning the disc, set up the menu.
         #
@@ -442,6 +457,13 @@ class VideoItem(Item):
                 skin.PopupBox('Scanning disc, be patient...',
                               icon='skins/icons/misc/cdrom_mount.png')
                 osd.update()
+            else:
+                pop = PopupBox('Scanning disc, be patient...',
+                               icon='skins/icons/misc/cdrom_mount.png')
+                menuw.add_child(pop)
+                pop.osd.focused_app = pop
+                pop.show()
+
 
                 
             os.system('rm -f /tmp/mplayer_dvd_%s.log /tmp/mplayer_dvd_done_%s' % (uid, uid))
@@ -472,6 +494,10 @@ class VideoItem(Item):
             p = mplayer.MPlayerParser(self)
             for line in open('/tmp/mplayer_dvd_%s.log' % uid).readlines():
                 p.parse(line)
+
+            if config.NEW_SKIN:
+                pop.destroy()
+
             
         configure.main_menu(self, menuw)
         
