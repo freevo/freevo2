@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/02/19 08:08:29  krister
+# Applied Aubins new pylirc code after testing it (seems to work with keyboard at least), and adding the pylircmodule to the runtime build environment (not required for keyboard operation).
+#
 # Revision 1.8  2003/02/18 04:54:05  krister
 # runtime builder updates.
 #
@@ -93,7 +96,7 @@ build_copy:
 # Remove all copied libraries, programs etc
 # The build directory is not touched
 clean: 
-	-rm -rf lib apps/* dll/*
+	-rm -rf lib apps/* dll/* tmp
 
 
 # A python app that checks all libs and apps to find dynamic
@@ -128,7 +131,8 @@ python_copy:
 	mkdir tmp
 	cp -a lib/python2.2/site-packages/{CDDB.py,DiscID.py,Numeric,Numeric.pth} tmp
 	cp -a lib/python2.2/site-packages/{PIL,PIL.pth,_xmlplus,_xmms.so,aomodule.so} tmp
-	cp -a lib/python2.2/site-packages/{cdrom.so,mx,ogg,psyco,pygame,xmms.py} tmp
+	cp -a lib/python2.2/site-packages/{cdrom.so,mx,ogg,psyco,pygame} tmp
+	cp -a lib/python2.2/site-packages/{xmms.py,pylircmodule.so} tmp
 	rm -rf lib/python2.2/site-packages
 	mv tmp lib/python2.2/site-packages
 	cp -a /usr/local/bin/python2.2 apps/freevo_python

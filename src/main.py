@@ -9,6 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/02/19 08:08:30  krister
+# Applied Aubins new pylirc code after testing it (seems to work with keyboard at least), and adding the pylircmodule to the runtime build environment (not required for keyboard operation).
+#
+# Revision 1.5  2003/02/18 23:47:56  outlyer
+# Synced pylirc version of main to Rob's latest changes, added some
+# error handling to weather checker.
+#
 # Revision 1.15  2003/02/18 23:08:25  rshortt
 # Hooking up the code in src/gui.  Added osd.focused_app to keep track of
 # what should first receive the events.  In main this is set to be the
@@ -113,6 +120,8 @@ import tv.tv   # The TV module
 
 import identifymedia
 import signal
+
+import idle
 
 from mediamenu import MediaMenu
 from item import Item
@@ -295,6 +304,9 @@ def getcmd():
 
     muted = 0
     mainVolume = 0 # XXX We are using this for PcmVolume as well.
+    
+    #m = idle.IdleTool()
+    #m.refresh()
     while 1:
         
         # Get next command
@@ -302,13 +314,13 @@ def getcmd():
 
             event = osd._cb()
             if event: break
-            
             event = rc.poll()
-            if event == rc.NONE:
-                time.sleep(0.1) # give a little time for buffers to fill
-            else:
-                break
+            if event: break
+            #if not rc.app: m.poll()
+            time.sleep(0.1)
 
+
+        #m.refresh()
         # Handle volume control   XXX move to the skin
         if event == rc.VOLUP:
             print "Got VOLUP in main!"

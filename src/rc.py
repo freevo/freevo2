@@ -9,8 +9,22 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.4  2003/02/11 06:10:03  krister
-# Display an error if the DVD is protected and cannot be played.
+# Revision 1.5  2003/02/19 08:08:30  krister
+# Applied Aubins new pylirc code after testing it (seems to work with keyboard at least), and adding the pylircmodule to the runtime build environment (not required for keyboard operation).
+#
+# Revision 1.4  2003/01/29 19:21:55  outlyer
+# Changed to use config.LIRCRC directive in freevo_config
+#
+# Revision 1.2  2003/01/29 05:53:33  outlyer
+# Ok, I'm compromising until I can figure out an elegant way to do this.
+#
+# o This now works, movies play, etc.
+# o We are non-blocking, so we still use time.sleep, need to fix that.
+# o No UDP daemon, and we use an lircrc file, hardcoded to /etc/freevo for now.
+#
+# As it stands, this works the same as the old code, except keyboard support
+# is missing. I don't have a keyboard on my Freevo machine so I can't implement
+# the keyboard stuff just yet.
 #
 # Revision 1.3  2003/01/11 10:37:48  dischi
 # added event to reload a menu
@@ -47,6 +61,14 @@
 
 import socket, time, sys
 import config
+
+
+PYLIRC = 1
+try:
+    import pylirc
+except ImportError:
+    print 'WARNING: PyLirc not found, lirc remote control disabled!'
+    PYLIRC = 0
 
 # Set to 1 for debug output
 DEBUG = config.DEBUG
@@ -128,15 +150,18 @@ class RemoteControl:
     DVD_PROTECTED = 'DVD_PROTECTED' # Cannot play prot. DVDs
 
     def __init__(self, port=config.REMOTE_CONTROL_PORT):
-        self.port = port
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.sock.setblocking(0)
-        self.sock.bind(('', self.port))
+        self.pylirc = PYLIRC
+        
+        if self.pylirc:
+            try:
+                pylirc.init('freevo', config.LIRCRC)
+                pylirc.blocking(0)
+            except RuntimeError:
+                print 'WARNING: Could not initialize PyLirc!'
+                self.pylirc = 0
         self.app = None
         self.queue = []
         
-
     def post_event(self, event):
         self.queue += [event]
 
@@ -146,14 +171,12 @@ class RemoteControl:
             ret = self.queue[0]
             del self.queue[0]
             return ret
-        try:
-            data = self.sock.recv(100)
-            if data == '':
-                print 'Lost the connection'
-                self.conn.close()
-            else:
+        if self.pylirc:
+            list = pylirc.nextcode()
+            if list == None:
+                return None
+            for code in list:
+                data = code
                 return data
-        except:
-            # No data available
-            return self.NONE
-
+        else:
+            return None

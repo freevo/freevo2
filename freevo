@@ -66,24 +66,12 @@ if [ "$1" = "execute" ] ; then
     exit 0
 fi
 
-# Start the lirc remote control app if the device is present
-if [ -S /dev/lircd ] ; then
-    echo Found a lirc device, starting the remote control daemon
-    ./runapp python rc_client/remote.py --remote=lirc > /dev/null 2>&1 &
-fi
-
-# XXX Uncomment the command below to enable joystick input. 
-# XXX It has not been tested much! Please send in testreports!
-# If JOY_DEV is 0 then joy.py just exits.
-# ./runapp python rc_client/joy.py > /dev/null 2>&1 &
-
 # Start the main freevo application
 ./runapp python src/main.py $@
 
 # Freevo exited, make sure all children are killed
 sleep 1
 kill -9 `pgrep -f "python src/main.py" -d" "` > /dev/null 2>&1
-kill -9 `pgrep -f "python rc_client" -d" "` > /dev/null 2>&1
 kill -9 `pgrep -f freevo_python -d" "` > /dev/null 2>&1
 killall -9 freevo_loader > /dev/null 2>&1
 killall -9 freevo_xwin > /dev/null 2>&1
