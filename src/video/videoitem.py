@@ -9,8 +9,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.66  2003/07/20 20:43:29  dischi
-# small bugfix for xine
+# Revision 1.67  2003/07/25 20:54:03  dischi
+# prevent some crashes
 #
 # Revision 1.65  2003/07/20 17:46:59  dischi
 # special handling if there is a DVD_PLAYER plugin
@@ -203,7 +203,7 @@ class VideoItem(Item):
     def __init__(self, filename, parent, info=None):
         if parent and parent.media:
             url = 'cd://%s:%s:%s' % (parent.media.devicename, parent.media.mountdir,
-                                     file[len(parent.media.mountdir)+1:])
+                                     filename[len(parent.media.mountdir)+1:])
         else:
             url = filename
 
@@ -238,7 +238,7 @@ class VideoItem(Item):
         
         # find image for tv show and build new title
         if config.TV_SHOW_REGEXP_MATCH(self.name):
-            show_name = config.TV_SHOW_REGEXP_SPLIT(os.path.basename(self.name))
+            show_name = config.TV_SHOW_REGEXP_SPLIT(self.name)
             self.name = show_name[0] + " " + show_name[1] + "x" + show_name[2] +\
                          " - " + show_name[3] 
 
@@ -402,7 +402,10 @@ class VideoItem(Item):
             os.remove(base + 'jpg')
         if os.path.isfile(base + 'png'):
             os.remove(base + 'png')
-        os.remove(self.filename)
+        if os.path.isfile(self.filename):
+            os.unlink(self.filename)
+        if hasattr(self, 'fxd_file') and os.path.isfile(self.fxd_file):
+            os.unlink(self.fxd_file)
         self.menuw.back_one_menu(arg='reload')
 
 
