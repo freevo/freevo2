@@ -10,10 +10,6 @@ class MPlayerOverlay:
 
 	fifo_id = 0
 
-	# These states must be set externally.  (By an MPlayer class, most likely.)
-	STATE_MPLAYER_RUNNING = 1   # When MPlayer has been loaded.
-	STATE_BMOVL2_READY    = 2   # When bmovl2 filter is initialized.
-
 	def __init__(self):
 		self.fifo_fname = "/tmp/bmovl2-fifo-%d-%d" % (os.getpid(), MPlayerOverlay.fifo_id)
 		MPlayerOverlay.fifo_id += 1
@@ -23,21 +19,21 @@ class MPlayerOverlay:
 		os.mkfifo(self.fifo_fname)
 
 		self.fifo = os.open(self.fifo_fname, os.O_RDWR, os.O_NONBLOCK)
-		self.state = 0
+		self._can_write = False
 
 		self.blitted_ids = {}
 		self.deleted_queue = []
 		self.buffer = []
 
-	def is_alive(self):
-		return self.state & MPlayerOverlay.STATE_MPLAYER_RUNNING
-
 	def can_write(self):
-		return self.state & MPlayerOverlay.STATE_BMOVL2_READY
+		return self._can_write
 
+	def set_can_write(self, can_write):
+		self._can_write = can_write
 
 	def __del__(self):
 		print "Delete", self.fifo_fname
+		self.close()
 		os.unlink(self.fifo_fname)
 	
 
@@ -46,13 +42,13 @@ class MPlayerOverlay:
 	
 
 	def write(self, line):
-		if self.is_alive():
+		if self.can_write():
 			self.write_buffer(line)
 			self.flush()
 	
 
 	def write_buffer(self, line):
-		if self.is_alive():
+		if self.can_write():
 			self.buffer.append(line)
 
 
@@ -102,7 +98,7 @@ class MPlayerOverlay:
 			return
 
 		self.buffer = self.optimize_buffer(self.buffer)
-		if self.buffer != [] and self.is_alive() and self.can_write():
+		if self.buffer != [] and self.can_write():
 			buffer = string.join(self.buffer, "")
 			os.write(self.fifo, buffer)
 
@@ -188,7 +184,7 @@ class MPlayerOverlay:
 
 	def close(self):
 		os.close(self.fifo)
-		self.state &= ~MPlayerOverlay.STATE_MPLAYER_RUNNING
+		self.set_can_write(False)
 
 
 # vim: ts=4

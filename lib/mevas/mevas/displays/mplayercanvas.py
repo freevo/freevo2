@@ -42,7 +42,7 @@ class MPlayerCanvas(Canvas):
 		"""
 		Freezes the canvas by sending an ATOM to bmovl2.
 		"""
-		if self.overlay and self.overlay().is_alive():
+		if self.overlay and self.overlay().can_write():
 			if self.atom == 0:
 				self.overlay().atom()
 			self.atom += 1
@@ -54,7 +54,7 @@ class MPlayerCanvas(Canvas):
 		the last ENDATOM, all of the previous commands get applied 
 		immediately.
 		"""
-		if self.overlay and self.overlay().is_alive():
+		if self.overlay and self.overlay().can_write():
 			self.atom -= 1
 			if self.atom == 0:
 				self.overlay().endatom()
@@ -68,7 +68,7 @@ class MPlayerCanvas(Canvas):
 		# Bail if the overlay isn't writable.  Returning false in this
 		# function will abort the update and the child will not ask the
 		# canvas to paint it.
-		if not self.overlay or not self.overlay().is_alive():
+		if not self.overlay or not self.overlay().can_write():
 			return False
 
 		self.freeze()
