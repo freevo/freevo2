@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.49  2004/06/09 20:09:10  dischi
+# cleanup
+#
 # Revision 1.48  2004/06/06 06:52:37  dischi
 # cache updates
 #
@@ -39,45 +42,6 @@
 #
 # Revision 1.39  2004/03/27 17:44:39  krister
 # Fixed divide by zero bug.
-#
-# Revision 1.38  2004/03/22 11:04:51  dischi
-# improve caching
-#
-# Revision 1.37  2004/03/21 09:39:54  dischi
-# check for updated mmpython
-#
-# Revision 1.36  2004/03/13 23:44:02  dischi
-# audio stream selection fixes
-#
-# Revision 1.35  2004/02/28 21:04:17  dischi
-# unicode fixes
-#
-# Revision 1.34  2004/02/27 20:42:05  dischi
-# save disc file info
-#
-# Revision 1.33  2004/02/27 20:27:18  dischi
-# add number of files to rom drives
-#
-# Revision 1.32  2004/02/27 20:15:03  dischi
-# more unicode fixes
-#
-# Revision 1.31  2004/02/23 19:27:07  dischi
-# fix mmpython init
-#
-# Revision 1.30  2004/02/16 20:36:42  dischi
-# fix crash
-#
-# Revision 1.29  2004/02/15 15:30:52  dischi
-# improved item with track storage
-#
-# Revision 1.28  2004/02/14 13:05:04  dischi
-# do not call skin.get_singleton() anymore
-#
-# Revision 1.27  2004/02/13 20:26:39  dischi
-# small bugfix
-#
-# Revision 1.26  2004/02/13 19:42:44  dischi
-# cleanup
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

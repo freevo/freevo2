@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/06/09 20:09:10  dischi
+# cleanup
+#
 # Revision 1.17  2004/02/14 15:45:26  dischi
 # do not include folder.fxd
 #
@@ -245,9 +248,9 @@ def listdir(directory, handle_exception=True, include_dot_files=False,
 
         overlay = getoverlay(directory)
         if overlay and overlay != directory and os.path.isdir(overlay):
-            for fname in os.listdir( overlay ):
-                if fname.startswith('.') or fname == 'folder.fxd' or \
-                       fname.endswith('.raw'):
+            for fname in os.listdir(overlay):
+                if fname.endswith('.raw') or fname.startswith('.') or \
+                       fname == 'folder.fxd':
                     continue
                 f = overlay + fname
                 if not os.path.isdir(f):

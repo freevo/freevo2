@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.130  2004/06/09 20:09:09  dischi
+# cleanup
+#
 # Revision 1.129  2004/06/06 07:19:47  dischi
 # fix crash if dir does not exist
 #
@@ -668,7 +671,6 @@ class DirItem(Playlist):
             self.play_items.sort(lambda l, o: cmp(l.sort('date').upper(),
                                                   o.sort('date').upper()))
         elif self['%s_advanced_sort' % display_type]:
-            print 'adv'
             self.play_items.sort(lambda l, o: cmp(l.sort('advanced').upper(),
                                                   o.sort('advanced').upper()))
         else:

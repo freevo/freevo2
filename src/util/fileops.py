@@ -10,30 +10,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/06/09 20:09:10  dischi
+# cleanup
+#
 # Revision 1.18  2004/06/09 19:50:32  dischi
 # change thumbnail caching format to be much faster: do not use pickle and
 # also reduce the image size from max 300x300 to 255x255
 #
 # Revision 1.17  2004/03/22 11:04:51  dischi
 # improve caching
-#
-# Revision 1.16  2004/02/27 20:07:28  dischi
-# add function to check if a media is mounted
-#
-# Revision 1.15  2004/02/05 19:26:42  dischi
-# fix unicode handling
-#
-# Revision 1.14  2004/02/05 02:52:26  gsbarbieri
-# Handle filenames internally as unicode objects.
-#
-# Revision 1.13  2004/01/16 16:23:29  dischi
-# add softlink checking
-#
-# Revision 1.12  2004/01/05 17:19:10  dischi
-# change some vfs to os.path
-#
-# Revision 1.11  2004/01/03 17:41:01  dischi
-# add helper to get all subdirs recursive
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
