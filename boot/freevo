@@ -49,6 +49,7 @@ case "$1" in
 	kill -HUP `ps -ef | grep main.py | grep -v -e grep -e bin/sh | cut -c9-14` > /dev/null 2>&1
 	kill -HUP `ps -ef | grep remote.py | grep -v -e grep -e bin/sh | cut -c9-14` > /dev/null 2>&1
 	kill -HUP `ps -ef | grep osds_fb | grep -v -e grep -e bin/sh | cut -c9-14` > /dev/null 2>&1
+	kill -HUP `ps -ef | grep osds_sdl | grep -v -e grep -e bin/sh | cut -c9-14` > /dev/null 2>&1
 	echo "$NAME."
 	echo -n "Releasing the VT: "
 	$VTRELEASE
