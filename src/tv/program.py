@@ -63,9 +63,9 @@ class ProgramItem(Item):
 
         self.channel = program.channel
         self.prog_id = program.id
-        self.info['subtitle'] = program.subtitle
-        self.info['description'] = program.description
-
+        self.subtitle = program.subtitle
+        self.description = program.description
+        self.episode = program.episode
         
         self.scheduled = recordings.get(program.channel.id,
                                         program.start, program.stop)
