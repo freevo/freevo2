@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/07/12 10:12:34  dischi
+# handle the case where mmpython returns no results
+#
 # Revision 1.25  2003/07/11 19:44:18  dischi
 # close file after parsing
 #
@@ -607,16 +610,18 @@ def parseMovieFile(file, parent, duplicate_check):
         m.fxd_file = file
         if not m.subitems and os.path.isfile(m.filename):
             mminfo = mmpython.parse(m.filename)
-            for i in m.info:
-                if m.info[i]:
-                    mminfo[i] = m.info[i]
-            m.info = mminfo
+            if mminfo:
+                for i in m.info:
+                    if m.info[i]:
+                        mminfo[i] = m.info[i]
+                m.info = mminfo
         elif m.subitems and os.path.isfile(m.subitems[0].filename):
             mminfo = mmpython.parse(m.subitems[0].filename)
-            for i in m.info:
-                if m.info[i]:
-                    mminfo[i] = m.info[i]
-            m.info = mminfo
+            if mminfo:
+                for i in m.info:
+                    if m.info[i]:
+                        mminfo[i] = m.info[i]
+                m.info = mminfo
 
     return movies
 
