@@ -298,9 +298,9 @@ class RemovableMedia:
             try:
                 fd = os.open(self.devicename, os.O_RDONLY | os.O_NONBLOCK)
                 if os.uname()[0] == 'FreeBSD':
-                    s = util.fthread.call(ioctl, fd, CDIOCCLOSE, 0)
+                    s = ioctl(fd, CDIOCCLOSE, 0)
                 else:
-                    s = util.fthread.call(ioctl, fd, CDROMCLOSETRAY)
+                    s = ioctl(fd, CDROMCLOSETRAY)
                 os.close(fd)
             except Exception, e:
                 log.exception('close tray')
