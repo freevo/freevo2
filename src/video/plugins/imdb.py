@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2003/12/07 19:44:14  dischi
+# bugfix
+#
 # Revision 1.28  2003/12/01 20:02:15  dischi
 # only show when needed
 #
@@ -113,8 +116,9 @@ class PluginInterface(plugin.ItemPlugin):
     def actions(self, item):
         self.item = item
 
-        if item.type == 'video' and (item.xml_file.endswith('folder.fxd') or \
-                                     not item.xml_file):
+        if item.type == 'video' and (not item.xml_file or \
+                                     item.xml_file.endswith('folder.fxd')):
+
             if item.mode == 'file':
                 self.disc_set = False
                 return [ ( self.imdb_search , _('Search IMDB for this file'),
