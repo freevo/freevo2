@@ -60,7 +60,7 @@ use_vfs = True
 
 # That's it, you shouldn't need to make changes after this point
 
-__all__ = [ 'CONF', 'Unicode', 'String', 'getvar', 'cachefile' ]
+__all__ = [ 'CONF', 'Unicode', 'String', 'getvar', 'cachefile', 'datafile' ]
 
 # Python imports
 import os
@@ -103,6 +103,7 @@ else:
     OS_CACHEDIR = '/var/cache'
 
 CONF.cachedir = OS_CACHEDIR + '/' + application
+CONF.datadir  = '/var/lib/' + application
 
 # read the config file, if no file is found, the default values
 # are used.
@@ -158,6 +159,15 @@ if not os.path.isdir(CONF.cachedir):
         CONF.cachedir = os.path.expanduser('~/.' + application + '/cache')
         if not os.path.isdir(CONF.cachedir):
             os.makedirs(CONF.cachedir)
+
+# create datadir
+if not os.path.isdir(CONF.datadir):
+    try:
+        os.makedirs(CONF.datadir)
+    except OSError:
+        CONF.datadir = os.path.expanduser('~/.' + application + '/lib')
+        if not os.path.isdir(CONF.datadir):
+            os.makedirs(CONF.datadir)
 
 # add everything in CONF to the module variable list (but in upper
 # case, so CONF.vfs_dir is VFS_DIR, too
@@ -226,10 +236,17 @@ def getvar(variable):
 
 def cachefile(name, uid=False):
     """
-    Return a cachefile based on the name. The name is an absolute path.
+    Return a cachefile based on the name. The result is an absolute path.
     If uid is True, the uid will be added to the name.
     """
     if uid:
         return os.path.join(CONF.cachedir, name + '-' + os.getuid())
     else:
         return os.path.join(CONF.cachedir, name)
+
+
+def datafile(name):
+    """
+    Return a datafile based on the name. The result is an absolute path.
+    """
+    return os.path.join(CONF.datadir, name)
