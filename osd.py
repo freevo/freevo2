@@ -12,6 +12,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2002/10/12 20:48:59  outlyer
+# Added an exception in DrawStringFramed() to prevent a weird error when
+# drawing Gustavo's TV Guide. Has no other effect except to continue a loop
+# instead of crashing.
+#
 # Revision 1.33  2002/10/11 12:55:01  gsbarbieri
 # Fixed bug in osd.drawstringframed(). Now Gustavo's new TV Guide works.
 #
@@ -638,8 +643,11 @@ class OSD:
                                     lines_size[line_number] = tmp_word_size  + MINIMUM_SPACE_BETWEEN_WORDS
                                     # save the text that does not fit.
                                 for tmp in range(word_number, len(pieces)):
-                                    rest_words += words[tmp]
-                                    if tmp < len_words: rest_words += ' '
+                                    try:
+				    	rest_words += words[tmp]
+                                    	if tmp < len_words: rest_words += ' '
+				    except IndexError:
+				        continue
                                     # quit the loop
                                 break
                         occupied_size = lines_size[line_number]
