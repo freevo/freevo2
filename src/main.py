@@ -9,6 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/02/18 23:08:25  rshortt
+# Hooking up the code in src/gui.  Added osd.focused_app to keep track of
+# what should first receive the events.  In main this is set to be the
+# menuwidget which is the parent UI object.  I also made MenuWidget into
+# a subclass of GUIObject so that it can closely take advantage of the
+# parent / child relationship therein.
+#
 # Revision 1.14  2003/02/12 10:41:10  dischi
 # Removed some stuff we don't need anymore with the new menu extention
 #
@@ -284,6 +291,7 @@ def getcmd():
     
     mainmenu = menu.Menu('FREEVO MAIN MENU', items, packrows=0, umount_all = 1)
     menuwidget.pushmenu(mainmenu)
+    osd.focused_app = menuwidget
 
     muted = 0
     mainVolume = 0 # XXX We are using this for PcmVolume as well.
@@ -344,8 +352,8 @@ def getcmd():
         if rc.app:
             rc.app(event)
         else:
-            # Menu events
-            menuwidget.eventhandler(event)
+            if osd.focused_app:
+                osd.focused_app.eventhandler(event)
         
 
 

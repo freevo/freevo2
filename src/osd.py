@@ -9,6 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/02/18 23:08:25  rshortt
+# Hooking up the code in src/gui.  Added osd.focused_app to keep track of
+# what should first receive the events.  In main this is set to be the
+# menuwidget which is the parent UI object.  I also made MenuWidget into
+# a subclass of GUIObject so that it can closely take advantage of the
+# parent / child relationship therein.
+#
 # Revision 1.15  2003/02/18 07:27:23  gsbarbieri
 # Corrected the misspelled 'elipses' -> 'ellipses'
 # Now, main1_video uses osd.drawtext(mode='soft') to render text, so it should be better displayed
@@ -259,6 +266,8 @@ class OSD:
 
 
     def __init__(self):
+
+        self.focused_app = None
 
         self.fontcache = objectcache.ObjectCache(300, desc='font')
         self.stringcache = objectcache.ObjectCache(100, desc='string')

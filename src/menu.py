@@ -9,6 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/02/18 23:08:25  rshortt
+# Hooking up the code in src/gui.  Added osd.focused_app to keep track of
+# what should first receive the events.  In main this is set to be the
+# menuwidget which is the parent UI object.  I also made MenuWidget into
+# a subclass of GUIObject so that it can closely take advantage of the
+# parent / child relationship therein.
+#
 # Revision 1.14  2003/02/17 18:46:39  dischi
 # LEFT/RIGHT now also works for the first/last item in the menuw
 #
@@ -97,6 +104,8 @@ import rc
 
 # The OSD
 import osd
+
+from gui.GUIObject import *
 
 TRUE  = 1
 FALSE = 0
@@ -205,9 +214,11 @@ class Menu:
 #
 # The MenuWidget handles a stack of Menu:s
 #
-class MenuWidget:
+class MenuWidget(GUIObject):
 
     def __init__(self):
+        GUIObject.__init__(self)
+
         self.menustack = []
         self.prev_page = MenuItem('Prev Page', self.goto_prev_page)
         self.next_page = MenuItem('Next Page', self.goto_next_page)
@@ -318,6 +329,10 @@ class MenuWidget:
             self.init_page()
 
         skin.DrawMenu(self)
+
+        # Draw any child UI objects
+        for child in self.children:
+            child._draw()
 
 
     def make_submenu(self, menu_name, actions, item):
