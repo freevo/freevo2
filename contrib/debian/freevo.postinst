@@ -34,7 +34,7 @@ case "$1" in
             echo "(as root)"
             fi
         if [ ! -f $LIRCRC ]; then 
-            if [ ! -f $LIRCD ]; then
+            if [ -f $LIRCD ]; then
                 /usr/bin/freevo makelircrc -w; 
             fi
         fi
