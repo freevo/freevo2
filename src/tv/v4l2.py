@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/08/23 01:24:50  rshortt
+# -Revive v4l2 channel changing.
+# -Set the card's input based on the current settings.
+#
 # Revision 1.18  2004/08/13 16:17:33  rshortt
 # More work on tv settings, configuration of v4l2 devices based on TV_SETTINGS.
 #
@@ -195,16 +199,22 @@ class Videodev:
 
 
     def setchannel(self, channel):
+        channel = str(channel)
+
         freq = config.FREQUENCY_TABLE.get(channel)
         if freq:
             if DEBUG: 
                 print 'USING CUSTOM FREQUENCY: chan="%s", freq="%s"' % \
                       (channel, freq)
         else:
-            freq = self.chanlist[str(channel)]
+            freq = self.chanlist.get(channel)
             if DEBUG: 
                 print 'USING STANDARD FREQUENCY: chan="%s", freq="%s"' % \
                       (channel, freq)
+
+        if not freq:
+            print 'ERROR: unable to get frequency for %s' % channel
+            return
 
         freq *= 16
 
@@ -316,8 +326,7 @@ class Videodev:
         self.setstd(NORMS.get(self.settings.norm))
         self.setchanlist(self.settings.chanlist)
 
-        # XXX TODO: make a good way of setting the input
-        # self.setinput(....)
+        self.setinput(self.settings.input)
 
         # XXX TODO: make a good way of setting the capture resolution
         # self.setfmt(int(width), int(height))
