@@ -7,10 +7,12 @@
 #
 # This helper relies on a few VDR config variables for Freevo (local_conf.py).
 # These are (for example):
-#   VDR_DIR  = '/video'
-#   VDR_HOST = 'localhost'
-#   VDR_PORT = 2001
-#   VDR_EPG  = 'epg.dat'
+#   VDR_DIR       = '/video'
+#   VDR_HOST      = 'localhost'
+#   VDR_PORT      = 2001
+#   VDR_EPG       = 'epg.dat'
+#   VDR_CHANNELS  = 'channels.conf'
+#   VDR_ACCESS_ID = 'sid'
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -42,15 +44,16 @@ import os
 
 import pyepg
 import config
+import sysconfig
 import mcomm
 
-epg = pyepg.get_epg(os.path.join(config.FREEVO_CACHEDIR, 'epgdb'))
+epg = pyepg.get_epg(sysconfig.datafile('epgdb'))
 
 
 def usage():
     print 'Fills the EPG databse with data from VDR.'
     print
-    print 'usage: freevo tv_grab_vdr [ --query ]'
+    print 'usage: freevo tv_grab_vdr'
     print 'options:'
     sys.exit(0)
 
@@ -58,11 +61,9 @@ def usage():
 def grab():
     print 'Fetching guide from VDR.'
 
-    epg_file = os.path.join(config.VDR_DIR, config.VDR_EPG)
-    if os.path.exists(epg_file):
-        epg.add_data_vdr(epg_file)
-    else:
-        epg.add_data_vdr(host=config.VDR_HOST, port=config.VDR_PORT)
+    epg.add_data_vdr(config.VDR_DIR, config.VDR_CHANNELS, config.VDR_EPG, 
+                     config.VDR_HOST, config.VDR_PORT, config.VDR_ACCESS_ID,
+                     config.TV_CHANNELS_EXCLUDE)
 
 
 if __name__ == '__main__':
