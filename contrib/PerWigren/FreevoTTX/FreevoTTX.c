@@ -2,8 +2,8 @@
  * Teletext handler for use in Freevo
  * by Per Wigren <wigren@open-source.nu>
  *
- * FIXME: Get version from commandline. Display error-text if bad version.
  * FIXME: Lock mutex everytime a global variable is accessed
+ * FIXME: Why the HELL doesn't "PAGE NEXT" work?!!!!!!!!!!!!!!!
  * 
  */
 
@@ -17,12 +17,12 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include <libzvbi.h>
+#include "libzvbi.h"
 
 #include <X11/Xlib.h>
 #include <Imlib2.h>
 
-#define DEBUG 0
+#define DEBUG 1
 #define DBG(a) printf("DEBUG: %d\n",a);
 
 #define ERROR strerror(errno)
@@ -49,10 +49,10 @@ int					src_w, src_h;
 
 vbi_bool			QUIT = FALSE;
 
-int					fifo_in, fifo_out;
+int					fifo_in=-1, fifo_out=-1;
 
 char				pgtxt[6];
-char				timetxt[8]="HH:MM:XX";
+char				timetxt[9]="HH:MM:SS";
 vbi_pgno			pgno   = 0x100;
 vbi_pgno			atpage = 0x100;
 vbi_page			header;
@@ -87,7 +87,7 @@ sendstr(char *str) {
 static void
 quit(int err_num) {
 	QUIT = TRUE;
-	sendstr("HIDE\n");
+	if(fifo_out>=0) sendstr("HIDE\n");
 	vbi_capture_delete(cap);
 	exit(err_num);
 }
@@ -188,7 +188,6 @@ blit_page(vbi_page *pg, int startrow, int endrow, int startcol, int endcol) {
 			fprintf(stderr, "Internal error: zoompos = %d\n", zoompos);
 	}
 
-
 	// Set all black pixels to transparent if seethrough
 	if(seethrough) {
 		int i, alpha=0;
@@ -223,7 +222,7 @@ update_body(void)
 	vbi_page		new_body;
 	int i;
 
-	if(DEBUG) fprintf(stderr, "update_body()\n");
+	if(DEBUG) fprintf(stderr, "update_body(), pgno=%x\n",pgno);
 
 	updated ^= BODY;
 
@@ -257,7 +256,7 @@ update_body(void)
 		vbi_unref_page(&body);
 		body = new_body;
 	}
-	
+
 	blit_page(&body, 1, 25, 0, body.columns);
 }
 
@@ -385,7 +384,7 @@ cmd_page(char *arg) {
 	sprintf( pgtxt, "%03x", pgno);
 
 	searching = TRUE;
-	updated |= BODY;
+	updated |= BODY|FORCE_HEADER;
 }
 
 static void
@@ -429,7 +428,7 @@ cmd_reveal(char *arg) {
 
 	if		( strncmp(arg, "ON",     2)==0 )	reveal = TRUE;
 	else if	( strncmp(arg, "OFF",    3)==0 )	reveal = FALSE;
-	else if	( strncmp(arg, "TOOGLE", 6)==0 )	{ if(reveal) reveal=FALSE; else reveal=TRUE; }
+	else if	( strncmp(arg, "TOGGLE", 6)==0 )	{ if(reveal) reveal=FALSE; else reveal=TRUE; }
 	else {
 		printf("Bad argument for REVEAL: %s\n", arg);
 		printf("Valid arguments are: ON, OFF, TOGGLE\n");
@@ -448,7 +447,7 @@ cmd_hold(char *arg) {
 
 	if		( strncmp(arg, "ON",     2)==0 )	hold = TRUE;
 	else if	( strncmp(arg, "OFF",    3)==0 )	hold = FALSE;
-	else if	( strncmp(arg, "TOOGLE", 6)==0 )	{ if(hold) hold=FALSE; else hold=TRUE; }
+	else if	( strncmp(arg, "TOGGLE", 6)==0 )	{ if(hold) hold=FALSE; else hold=TRUE; }
 	else {
 		printf("Bad argument for HOLD: %s\n", arg);
 		printf("Valid arguments are: ON, OFF, TOGGLE\n");
@@ -518,7 +517,7 @@ cmd_flash(char *arg) {
 
 	if		( strncmp(arg, "ON",     2)==0 )	flash = TRUE;
 	else if	( strncmp(arg, "OFF",    3)==0 )	flash = FALSE;
-	else if	( strncmp(arg, "TOOGLE", 6)==0 )	{ if(flash) flash=FALSE; else flash=TRUE; }
+	else if	( strncmp(arg, "TOGGLE", 6)==0 )	{ if(flash) flash=FALSE; else flash=TRUE; }
 	else {
 		printf("Bad argument for FLASH: %s\n", arg);
 		printf("Valid arguments are: ON, OFF, TOGGLE\n");
@@ -573,6 +572,7 @@ ttx_handler(vbi_event* ev, void *unused) {
 			updated |= PAGE;
 		}	
 	pthread_mutex_unlock(&mutex);
+
 	return;
 }
 
@@ -677,14 +677,11 @@ mainloop(void) {
 			if(body_flash) updated |= FORCE_BODY;
 		}
 		
-		
 		if( ioctl( fifo_in, FIONREAD, &got_data) ) {
 			fprintf(stderr, "ioctl() error in input-FIFO: %s\n", ERROR);
 			quit(EXIT_FAILURE);
 		} else if(got_data) {
 			// Yeah! We've got some input! ;-)
-
-			// fscanf(fifo_in, "%s %s\n", cmd, arg);
 
 			_read_cmd(fifo_in, cmd, arg);
 			
@@ -705,13 +702,9 @@ mainloop(void) {
 				fprintf(stderr, "Unknown command \"%s\"!\n", cmd);
 		}
 
-		pthread_mutex_lock(&mutex);
-			update_what = updated;
-		pthread_mutex_unlock(&mutex);
+		if ( updated & HEADER ) update_header();
+		if ( updated & BODY   ) update_body();
 
-		if ( update_what & HEADER ) update_header();
-		if ( update_what & BODY   ) update_body();
- 
 		usleep(20000);		// Sleep for a fraction of a second ;)
 	}
 }
