@@ -21,6 +21,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/07/18 03:47:34  outlyer
+# Nasty bug that would cause a crash if you hit any remote button not used
+# by the plugin you were in. It expected menuw to be defined, else it crashed
+# hard.
+#
 # Revision 1.22  2003/07/15 17:08:21  dischi
 # o Add/update some docs
 # o show all rom drives in the bar
@@ -125,7 +130,7 @@ class interface(plugin.DaemonPlugin):
             if add_x:
                 x += add_x + 20
 
-    def eventhandler(self, event, menuw):
+    def eventhandler(self, event, menuw=None):
         """
         catch the IDENTIFY_MEDIA event to redraw the skin (maybe the cd status
         plugin wants to redraw)
