@@ -12,9 +12,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/07/08 12:35:43  dischi
+# add warning that this plugin may not work
+#
 # Revision 1.1  2004/03/14 19:46:22  dischi
 # Plugin to replace the item menu for video
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -57,6 +59,13 @@ class PluginInterface(plugin.ItemPlugin):
         plugin.ItemPlugin.__init__(self)
         skin.register('video_details', ('screen', 'title', 'view',
                                         'listing', 'info', 'plugin'))
+        print
+        print 'Activated plugin video.details'
+        print 'This plugin may cause some problems because it changes the'
+        print 'item menu and not all parts of Freevo may like this. If'
+        print 'Freevo crashes inside the item menu, please remove this plugin.'
+        print
+
 
     def actions(self, item):
         self.item = item
@@ -95,4 +104,5 @@ class PluginInterface(plugin.ItemPlugin):
         m.infoitem   = self.item
         m.viewitem   = self.item
         m.item_types = 'video details'
+        m.is_submenu = True
         menuw.pushmenu(m)
