@@ -7,6 +7,9 @@
 <!ENTITY daemonpoll SYSTEM "code/daemon_poll.py" CDATA linespecific>
 <!ENTITY daemonaction SYSTEM "code/daemon_action.py" CDATA linespecific>
 <!ENTITY item SYSTEM "code/item.py" CDATA linespecific>
+<!ENTITY plugindir SYSTEM "code/dir" CDATA linespecific>
+<!ENTITY setup SYSTEM "code/setup.py" CDATA linespecific>
+<!ENTITY MANIFEST SYSTEM "code/MANIFEST.in" CDATA linespecific>
 <!ENTITY menuex1 SYSTEM "code/menu_Menu.py" CDATA linespecific>
 <!ENTITY menuex2 SYSTEM "code/menu_Item.py" CDATA linespecific>
 <!ENTITY menuex3 SYSTEM "code/menu_MenuItem.py" CDATA linespecific>
@@ -122,7 +125,40 @@
 
     <sect1>
       <title>Events</title>
-      <para><emphasis>not written yet</emphasis></para>
+      <para>
+	The communication between input devices (remote control or keyboard)
+	and the menu or the application is based on events. It's also possible
+	that a plugin sends an event to other parts of Freevo. The mapping
+	between keys and the events depends on the application type (menu,
+	video, audio, etc). See <filename>event.py</filename> for details about
+	the default event mapping.
+      </para>
+      <para>
+	A event is an identifier string and optional an argument. The event
+	itself can be compared with a string, comparing two event objects only
+	compares the identifier. This makes it possible to check for events
+	without caring for the argument.
+      </para>
+      <para>
+	An event is send into Freevo with the function
+	<function>rc.post_event</function>. The events are stored in a fifo
+	queue. If an event is in the queue, Freevo tries to find the correct
+	eventhandler for this event. If the menu is active, Freevo will pass
+	the event to the current selected item. Each item will send the event
+	to it's parent if it doesn't consume the event. If the event wasn't
+	consumed by one of the menu items, it will be passed to the
+	DaemonPlugins (see <link linkend="daemon">DaemonPlugins section</link>
+	for deatils).
+      </para>
+      <para>
+	Instead of the class <classname>Event</classname>, the plugin can use
+	the functions helper functions in <filename>plugin.py</filename>
+	<function>event</function> to create and <function>isevent</function>
+	to get the name of an event. This functions adds the string
+	<function>PLUGIN_EVENT</function> to the event name. The media menu has
+	some extra redraw checkings if the event has something to do with a
+	plugin. 
+      </para>
     </sect1>
 
     <sect1>
@@ -195,6 +231,7 @@
 
     <sect1>
       <title>DaemonPlugin</title>
+      <anchor id="daemon">
       <para>
 	A DaemonPlugin is somthing that works in the background of
 	Freevo. Examples for this kind of plugin are the idlebar, the usb
@@ -455,7 +492,7 @@ Description:
 	  let the user set the variables. Since a plugin should be self
 	  contained, it should not add something to
 	  <filename>freevo_config.py</filename>. A better way is to use the
-	  memeber function <function>config</function> to return a list of
+	  member function <function>config</function> to return a list of
 	  variables for this plugin. If the user doesn't define the variable
 	  the default values will be added to the <function>config</function>
 	  module. Warning: the <function>config</function> function will be
@@ -500,9 +537,52 @@ Description:
 
   <chapter> 
     <title>Plugin Distribution</title>
-    <para><emphasis>not written yet</emphasis>
-      <anchor id="external">
-      </para>
+    <anchor id="external">
+    <para>
+      If you wrote a plugin, it would be nice to send it to the Freevo mailing
+      list. If you like (and we), we could integrate the plugin into the Freevo
+      distribution. If you don't want that, or your plugin is very special and
+      we won't include it, there is a way to build an external plugin with the
+      Freevo distutils as installer. We will add a plugin (or a link to a
+      plugin) on the Freevo homepage if it's build for the Freevo distutils. 
+    </para>
+    <para>
+      The Freevo distutils are an enhancement for Freevo of the normal Python
+      distutils. To install a plugin, the user only needs to call
+      <command>freevo install tarball.tgz</command>. To make this work, the
+      plugin needs to use the same directory structure as the Freevo
+      distribution and a <filename>setup.py</filename> and
+      <filename>MANIFEST.in</filename> file in the root directory.
+    </para>
+    <para>
+      The directory structure should only conatin the needed directories and an
+      empty <filename>__init__.py</filename> in the plugin directory. The
+      <filename>__init__.py</filename> is needed by Python. Since the
+      <filename>__init__.py</filename> isn't empty for
+      <filename>plugins/idlebar/</filename>, it's not possible to write external
+      idlebar plugins at the moment (you could place it in the normal plugin
+      dir, that works). We are working on a solution to fix that.
+      E.g if your plugin is a video plugin (video.foo) and contains one image
+      <filename>foo.png</filename>, the directory structure may look like this:
+      <programlisting><inlinegraphic entityref="plugindir"></inlinegraphic>
+      </programlisting>
+    </para>
+    <para>
+      The MANIFEST.in file describes a list of files to be included in the
+      distribution (you can build a source distribution by calling
+      <command>python setup.py sdist</command>).
+      <programlisting><inlinegraphic entityref="MANIFEST"></inlinegraphic>
+      </programlisting>
+    </para>
+    <para>
+      The <filename>setup.py</filename> script is a Python distutils script
+      with some default attributes for Freevo. If the plugin uses the Freevo
+      file structure, a setup script could look like this:
+      <programlisting><inlinegraphic entityref="setup"></inlinegraphic>
+      </programlisting>
+      For more details about the parameter for the setup function, read the
+      Python manual. 
+    </para>
   </chapter>
 
 </book>
