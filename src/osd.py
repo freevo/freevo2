@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.154  2004/05/02 11:46:12  dischi
+# make it possible to turn off image caching
+#
 # Revision 1.153  2004/05/02 09:20:55  dischi
 # better support for time==0
 #
@@ -1382,7 +1385,8 @@ class OSD:
 
                     # save for future use
                     data = (image.tostring(), image.size, image.mode)
-                    util.save_pickle(data, thumb)
+                    if config.CACHE_IMAGES:
+                        util.save_pickle(data, thumb)
                     
                 # convert to pygame image
                 image = pygame.image.fromstring(data[0], data[1], data[2])

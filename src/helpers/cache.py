@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2004/05/02 11:46:13  dischi
+# make it possible to turn off image caching
+#
 # Revision 1.32  2004/04/18 08:14:31  dischi
 # fix crash for bad paths
 #
@@ -462,7 +465,8 @@ if __name__ == "__main__":
     config.IMAGE_USE_EXIF_THUMBNAIL = 0
     
     cache_directories(rebuild)
-    cache_thumbnails()
+    if config.CACHE_IMAGES:
+        cache_thumbnails()
     create_metadata()
     create_tv_pickle()
     

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2004/05/02 11:46:13  dischi
+# make it possible to turn off image caching
+#
 # Revision 1.42  2004/04/11 08:39:54  dischi
 # warn about old cache
 #
@@ -378,12 +381,11 @@ class MMCache(Cache):
                            (info.has_key(variable) and info[variable]):
                             info[variable] = video[variable]
 
-            if thumbnail and config.IMAGE_USE_EXIF_THUMBNAIL:
+            if thumbnail and config.IMAGE_USE_EXIF_THUMBNAIL and config.CACHE_IMAGES:
                 util.cache_image(filename, thumbnail)
-            else:
-                if info.has_key('mime') and info['mime'] and \
-                   info['mime'].startswith('image'):
-                    util.cache_image(filename)
+            elif config.CACHE_IMAGES and info.has_key('mime') and info['mime'] and \
+                     info['mime'].startswith('image'):
+                util.cache_image(filename)
 
             return info
         return {}
@@ -393,7 +395,7 @@ class MMCache(Cache):
         """
         return true if the information needs an update
         """
-        return timestamp != os.stat(filename)[stat.ST_MTIME]
+        return timestamp < os.stat(filename)[stat.ST_MTIME]
 
         
     def update(self, filename, info):

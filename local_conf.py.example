@@ -34,7 +34,7 @@
 #endif
 
 
-CONFIG_VERSION = 5.08
+CONFIG_VERSION = 5.09
 
 # ======================================================================
 # General freevo settings:
@@ -149,6 +149,12 @@ CONFIG_VERSION = 5.08
 # WARNING: you should not run 'freevo cache' when freevo is running.
 #
 # MEDIAINFO_USE_MEMORY   = 1
+
+#
+# Cache images. This uses a lot of disc space but it's a huge speed
+# enhancement. The images will be cached in OVERLAY_DIR
+#
+CACHE_IMAGES = 1
 
 
 # ======================================================================

@@ -109,7 +109,7 @@ from event import *
 # of the config file doesn't match, Freevo won't start. If the minor version
 # is different, there will be only a warning
 
-LOCAL_CONF_VERSION  = 5.08
+LOCAL_CONF_VERSION  = 5.09
 
 # Description of changes in each new version
 FREEVO_CONF_CHANGES = [
@@ -208,7 +208,9 @@ LOCAL_CONF_CHANGES = [
      now. Also added OSD_EXTRA_FONT_PATH to search for fonts'''),
     (5.08,
      '''Change MENU_ARROW_NAVIGATION to old style and make blurr the new default
-     skin. Also added RESTART_SYS_CMD, OSD_DIM_TEXT and OSD_UPDATE_COMPLETE_REDRAW.''') ]
+     skin. Also added RESTART_SYS_CMD, OSD_DIM_TEXT and OSD_UPDATE_COMPLETE_REDRAW.'''),
+    (5.09,
+     '''Add CACHE_IMAGES to turn off image caching.''') ]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -376,6 +378,11 @@ MMPYTHON_CREATE_MD5_ID = 0
 #
 MEDIAINFO_USE_MEMORY   = 1
 
+#
+# Cache images. This uses a lot of disc space but it's a huge speed
+# enhancement. The images will be cached in OVERLAY_DIR
+#
+CACHE_IMAGES = 1
 
 # ======================================================================
 # Plugins:
