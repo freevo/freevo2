@@ -82,7 +82,7 @@ def getcmd():
     #items += [menu.MenuItem('VCD', movie.play_movie, ('vcd', '1', []))]
     #items += [menu.MenuItem('RECORD MOVIE', tv.main_menu, 'record')]
 
-    items += [menu.MenuItem('IMAGES', imenu.main_menu)]
+    items += [menu.MenuItem('IMAGES', imenu.main_menu,'','icons/images.png',0)]
 
     mainmenu = menu.Menu('FREEVO MAIN MENU', items, packrows=0)
     menuwidget.pushmenu(mainmenu)
