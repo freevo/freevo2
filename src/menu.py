@@ -9,56 +9,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.53  2003/07/12 10:05:04  dischi
+# Load skin singleton only when needed and make events global
+#
 # Revision 1.52  2003/07/01 02:58:17  outlyer
 # Added lame/cdparanoia and defaults for the cdbackup plugin
 # Removed some messages from src/main and src/menu
 #
-# Revision 1.51  2003/06/29 19:52:58  dischi
-# small fix
-#
 # Revision 1.50  2003/06/07 11:30:27  dischi
 # support for MENU_CALL_ITEM_ACTION
-#
-# Revision 1.49  2003/06/07 04:36:18  outlyer
-# Prevent a crash.
-#
-# Revision 1.48  2003/05/30 00:53:19  rshortt
-# Various event bugfixes.
-#
-# Revision 1.47  2003/05/27 17:53:33  dischi
-# Added new event handler module
-#
-# Revision 1.46  2003/04/28 18:07:45  dischi
-# restore the correct item
-#
-# Revision 1.45  2003/04/26 15:08:51  dischi
-# o better mount/umount, also for directories who are no rom drive.
-# o added list_usb_devices to util
-#
-# Revision 1.44  2003/04/24 19:55:48  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.43  2003/04/24 19:13:27  dischi
-# bugfix
-#
-# Revision 1.42  2003/04/21 12:59:35  dischi
-# better plugin event handling
-#
-# Revision 1.41  2003/04/20 12:43:32  dischi
-# make the rc events global in rc.py to avoid get_singleton. There is now
-# a function app() to get/set the app. Also the events should be passed to
-# the daemon plugins when there is no handler for them before. Please test
-# it, especialy the mixer functions.
-#
-# Revision 1.40  2003/04/20 11:44:45  dischi
-# add item plugins
-#
-# Revision 1.39  2003/04/20 10:55:40  dischi
-# mixer is now a plugin, too
-#
-# Revision 1.38  2003/04/19 21:28:39  dischi
-# identifymedia.py is now a plugin and handles everything related to
-# rom drives (init, autostarter, items in menus)
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -80,13 +39,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 
-import traceback
-
-# Configuration file. Determines where to look for AVI/MP3 files, etc
-import config
-
 import plugin
-
 from item import Item
 
 # Various utilities
@@ -95,14 +48,12 @@ import util
 # The skin class
 import skin
 
-import event as em
+from event import *
 
 from gui.GUIObject import *
 from gui.AlertBox import AlertBox
-TRUE  = 1
-FALSE = 0
 
-skin = skin.get_singleton() # Crate the skin object.
+
 
 # Module variable that contains an initialized MenuWidget() object
 _singleton = None
@@ -161,9 +112,9 @@ class Menu:
         self.previous_page_start = []
         self.previous_page_start.append(0)
         self.umount_all = umount_all    # umount all ROM drives on display?
-
+        self.skin = skin.get_singleton()
         if xml_file:
-            self.skin_settings = skin.LoadSettings(xml_file)
+            self.skin_settings = self.skin.LoadSettings(xml_file)
         else:
             self.skin_settings = None
 
@@ -177,7 +128,7 @@ class Menu:
         self.reload_func = reload_func  
         self.item_types = item_types
         self.force_skin_layout = force_skin_layout
-        self.display_style = skin.GetDisplayStyle(self)
+        self.display_style = self.skin.GetDisplayStyle(self)
 
 
     def delete_item(self, item):
@@ -196,7 +147,7 @@ class Menu:
             
 
     def items_per_page(self):
-        return skin.items_per_page(('menu', self))
+        return self.skin.items_per_page(('menu', self))
     
 
     def add_item(self, item, pos):
@@ -228,6 +179,7 @@ class MenuWidget(GUIObject):
         self.visible = 1
         self.eventhandler_plugins = None
         self.event_context = 'menu'
+        self.skin = skin.get_singleton()
         
     def show(self):
         if not self.visible:
@@ -237,7 +189,7 @@ class MenuWidget(GUIObject):
     def hide(self):
         if self.visible:
             self.visible = 0
-            skin.clear()
+            self.skin.clear()
         
     def delete_menu(self, arg=None, menuw=None):
         if len(self.menustack) > 1:
@@ -263,7 +215,7 @@ class MenuWidget(GUIObject):
                 menu.refresh()
                 return TRUE
             
-            if skin.GetDisplayStyle(menu) != menu.display_style:
+            if self.skin.GetDisplayStyle(menu) != menu.display_style:
                 self.rebuild_page()
                 
             if menu.reload_func:
@@ -344,7 +296,7 @@ class MenuWidget(GUIObject):
         menu = self.menustack[-1]
 
         if not isinstance(menu, Menu):
-            return skin.draw((menu.type, menu))
+            return self.skin.draw((menu.type, menu))
 
         if self.menustack[-1].umount_all == 1:
             util.umount_all()
@@ -356,7 +308,7 @@ class MenuWidget(GUIObject):
                     self.menustack[-1] = reload
             self.init_page()
 
-        skin.draw(('menu', self))
+        self.skin.draw(('menu', self))
 
         # Draw any child UI objects
         for child in self.children:
@@ -378,11 +330,11 @@ class MenuWidget(GUIObject):
     def eventhandler(self, event):
         menu = self.menustack[-1]
 
-        if event == em.MENU_GOTO_MAINMENU:
+        if event == MENU_GOTO_MAINMENU:
             self.goto_main_menu()
             return
         
-        if event == em.MENU_BACK_ONE_MENU:
+        if event == MENU_BACK_ONE_MENU:
             self.back_one_menu()
             return
 
@@ -399,7 +351,7 @@ class MenuWidget(GUIObject):
             return
         
         if not self.menu_items:
-            if event in ( em.MENU_SELECT, em.MENU_SUBMENU, em.MENU_PLAY_ITEM):
+            if event in ( MENU_SELECT, MENU_SUBMENU, MENU_PLAY_ITEM):
                 self.back_one_menu()
             return
             
@@ -414,7 +366,7 @@ class MenuWidget(GUIObject):
             if DEBUG: print 'no eventhandler for event %s' % event
             return
 
-        if event == em.MENU_UP:
+        if event == MENU_UP:
             curr_selected = self.all_items.index(menu.selected)
             if curr_selected-self.cols < 0 and \
                    menu.selected != menu.choices[0]:
@@ -434,7 +386,7 @@ class MenuWidget(GUIObject):
             return
 
 
-        elif event == em.MENU_DOWN:
+        elif event == MENU_DOWN:
             curr_selected = self.all_items.index(menu.selected)
             if curr_selected+self.cols > len(self.all_items)-1 and \
                    menu.page_start + len(self.all_items) < len(menu.choices):
@@ -455,12 +407,12 @@ class MenuWidget(GUIObject):
             return
 
 
-        elif event == em.MENU_LEFT or event == em.MENU_PAGEUP:
+        elif event == MENU_LEFT or event == MENU_PAGEUP:
             # Do nothing for an empty file list
             if not len(self.menu_items):
                 return
             
-            if event == em.MENU_LEFT and self.cols > 1:
+            if event == MENU_LEFT and self.cols > 1:
                 curr_selected = self.all_items.index(menu.selected)
                 if curr_selected == 0:
                     self.goto_prev_page(arg='no_refresh')
@@ -487,7 +439,7 @@ class MenuWidget(GUIObject):
                     self.refresh()
             return
 
-        elif event == em.MENU_RIGHT or event == em.MENU_PAGEDOWN:
+        elif event == MENU_RIGHT or event == MENU_PAGEDOWN:
             # Do nothing for an empty file list
             if not len(self.menu_items):
                 return
@@ -495,7 +447,7 @@ class MenuWidget(GUIObject):
             if menu.selected == menu.choices[-1]:
                 return
             
-            if event == em.MENU_RIGHT and self.cols > 1:
+            if event == MENU_RIGHT and self.cols > 1:
                 curr_selected = self.all_items.index(menu.selected)
                 if curr_selected == len(self.all_items)-1:
                     self.goto_next_page(arg='no_refresh')
@@ -525,10 +477,10 @@ class MenuWidget(GUIObject):
             return
 
 
-        elif event == em.MENU_PLAY_ITEM and hasattr(menu.selected, 'play'):
+        elif event == MENU_PLAY_ITEM and hasattr(menu.selected, 'play'):
             menu.selected.play(menuw=self)
             
-        elif event == em.MENU_SELECT or event == em.MENU_PLAY_ITEM:
+        elif event == MENU_SELECT or event == MENU_PLAY_ITEM:
             try:
                 action = menu.selected.action
             except AttributeError:
@@ -545,7 +497,7 @@ class MenuWidget(GUIObject):
             return
 
 
-        elif event == em.MENU_SUBMENU:
+        elif event == MENU_SUBMENU:
             actions = menu.selected.actions()
 
             if hasattr(menu.selected, 'display_type'):
@@ -565,7 +517,7 @@ class MenuWidget(GUIObject):
             return
             
 
-        elif event == em.MENU_CALL_ITEM_ACTION:
+        elif event == MENU_CALL_ITEM_ACTION:
             print 'calling action %s', event.arg
             if hasattr(menu.selected, 'display_type'):
                 if menu.selected.display_type:
@@ -583,9 +535,9 @@ class MenuWidget(GUIObject):
             print 'action %s not found' % event.arg
 
                     
-        elif event == em.MENU_CHANGE_STYLE and len(self.menustack) > 1:
+        elif event == MENU_CHANGE_STYLE and len(self.menustack) > 1:
             # did the menu change?
-            if skin.ToggleDisplayStyle(menu):
+            if self.skin.ToggleDisplayStyle(menu):
                 self.rebuild_page()
                 self.refresh()
                 return
@@ -629,7 +581,7 @@ class MenuWidget(GUIObject):
 
         menu.selected = current
         self.init_page()
-        menu.display_style = skin.GetDisplayStyle(menu)
+        menu.display_style = self.skin.GetDisplayStyle(menu)
         
 
     def init_page(self):
