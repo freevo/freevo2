@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/01/14 18:54:38  dischi
+# Added gphoto support from Thomas Schüppel. You need gphoto and the
+# Python bindings to get this working. I added try-except to integrate
+# this without breaking anything.
+#
 # Revision 1.8  2003/01/11 10:55:56  dischi
 # Call refresh with reload=1 when the menu was disabled during playback
 #
@@ -110,13 +115,15 @@ class ImageViewer:
         self.rotation = rotation
 
         rc.app = self.eventhandler
-
-        width, height = osd.bitmapsize(filename)
-
-        # Image load problem?
-        if width == 0 or height == 0:
-	    skin.PopupBox('Cannot load image %s!' % filename)
+        if filename and len(filename) > 0:
+            image = osd.loadbitmap(filename)
+        else:
+            # Using Container-Image
+            image = item.loadimage( )
+        if not image:
+            skin.PopupBox('Cannot load image %s!' % filename)
             return
+	width, height = image.get_size()
             
         # Bounding box default values
         bbx = bby = bbw = bbh = 0
@@ -204,7 +211,7 @@ class ImageViewer:
         y = (osd.height - new_h) / 2
         
         osd.clearscreen(color=osd.COL_BLACK)
-        osd.drawbitmap(filename, x, y, scale, bbx, bby, bbw, bbh,
+        osd.drawsurface(image, x, y, scale, bbx, bby, bbw, bbh,
                        rotation = self.rotation)
 
         # update the OSD

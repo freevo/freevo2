@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/01/14 18:54:26  dischi
+# Added gphoto support from Thomas Schüppel. You need gphoto and the
+# Python bindings to get this working. I added try-except to integrate
+# this without breaking anything.
+#
 # Revision 1.19  2003/01/12 13:51:51  dischi
 # Added the feature to remove items for videos, too. For that the interface
 # was modified (update instead of remove).
@@ -86,6 +91,13 @@ import audio.interface
 import image.interface
 import games.interface
 
+try:
+    import image.camera
+    USE_CAMERA = 1
+except:
+    USE_CAMERA = 0
+
+    
 # Add support for bins album files
 from image import bins
 
@@ -133,6 +145,15 @@ class MediaMenu(Item):
             except:
                 # XXX catch other stuff like playlists and files here later
                 pass
+
+        # DigiCam
+        if USE_CAMERA:
+            cams = image.camera.detectCameras( )
+            for c in cams:
+                m = image.camera.cameraFactory( self, c[0], c[1] )
+                m.type = 'camera'
+                m.name = c[0]
+                items += [ m ]
 
         # add rom drives
         for media in config.REMOVABLE_MEDIA:
