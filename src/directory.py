@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.122  2004/02/27 20:11:19  dischi
+# o fix umount while scanning the dir
+# o shorten name if they start similar
+#
 # Revision 1.121  2004/02/25 17:57:11  dischi
 # bugfix: call parse() for fxd files
 #
@@ -395,8 +399,11 @@ class DirItem(Playlist):
         num_timestamp = self.info['num_%s_timestamp' % name]
 
         if not num_timestamp or num_timestamp < timestamp:
+            need_umount = False
             if self.media:
+                need_umount = not self.media.is_mounted()
                 self.media.mount()
+
             num_dir_items  = 0
             num_play_items = 0
             files          = vfs.listdir(self.dir, include_overlay=True)
@@ -416,7 +423,8 @@ class DirItem(Playlist):
             if self['num_dir_items'] != num_dir_items:
                 self['num_dir_items'] = num_dir_items
             self['num_%s_timestamp' % name] = timestamp
-            if self.media:
+
+            if need_umount:
                 self.media.umount()
 
         
@@ -596,7 +604,7 @@ class DirItem(Playlist):
         
         files       = vfs.listdir(self.dir, include_overlay=True)
         num_changes = mediainfo.check_cache(self.dir)
-            
+
         pop = None
         callback=None
         if (num_changes > 10) or (num_changes and self.media):
@@ -633,10 +641,26 @@ class DirItem(Playlist):
 
         # normal DirItems
         for filename in files:
+            print filename
             if os.path.isdir(filename):
                 d = DirItem(filename, self, display_type = self.display_type)
                 self.dir_items.append(d)
 
+        # remove same begiing from all play_items
+        substr = ''
+        if len(self.play_items) > 4 and len(self.play_items[0].name) > 5:
+            substr = self.play_items[0].name[:-5].lower()
+            for i in self.play_items[1:]:
+                if len(i.name) > 5:
+                    substr = util.find_start_string(i.name.lower(), substr)
+                    if not substr:
+                        break
+                else:
+                    break
+            else:
+                for i in self.play_items:
+                    i.name = util.remove_start_string(i.name, substr)
+        
         #
         # sort all items
         #
