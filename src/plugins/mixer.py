@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/10/20 19:37:39  dischi
+# better exception handling for ioctl
+#
 # Revision 1.10  2003/10/20 19:36:04  dischi
 # ioctl may fail
 #
@@ -100,7 +103,8 @@ class PluginInterface(plugin.DaemonPlugin):
                 data = struct.pack( 'L', self.SOUND_MASK_LINE )
                 try:
                     fcntl.ioctl( self.mixfd.fileno(), self.SOUND_MIXER_WRITE_RECSRC, data )
-                except:
+                except IOError:
+                    _debug_('IOError for ioctl')
                     pass
                 
         if config.MAJOR_AUDIO_CTRL == 'VOL':
@@ -165,7 +169,8 @@ class PluginInterface(plugin.DaemonPlugin):
             data = struct.pack('L', vol)
             try:
                 fcntl.ioctl(self.mixfd.fileno(), device, data)
-            except:
+            except IOError:
+                _debug_('IOError for ioctl')
                 pass
             
     def getMuted(self):
