@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.87  2003/09/07 11:19:16  dischi
+# add name and ptsize to OSDFont
+#
 # Revision 1.86  2003/09/06 13:29:00  gsbarbieri
 # PopupBox and derivates now support you to choose mode (soft/hard) and
 # alignment (vertical/horizontal).
@@ -263,7 +266,9 @@ class OSDFont:
         self.font   = self.__getfont__(name, ptsize)
         self.height = max(self.font.size('A')[1], self.font.size('j')[1])
         self.chars  = {}
-
+        self.name   = name
+        self.ptsize = ptsize
+        
     def charsize(self, c):
         try:
             return self.chars[c]
