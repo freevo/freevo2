@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.100  2004/02/27 20:10:02  dischi
+# helper function to check if an object is some sort of string
+#
 # Revision 1.99  2004/02/23 16:09:34  dischi
 # make it possible to print unicode
 #
@@ -30,7 +33,6 @@
 #
 # Revision 1.97  2004/02/19 04:57:55  gsbarbieri
 # Support Web Interface i18n.
-# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
 #
 # Revision 1.96  2004/02/08 19:53:14  dischi
 # create metadata dir
@@ -51,21 +53,6 @@
 # It determines the encoding based on (in order) FREEVO_LOCALE, LANG and
 # LC_ALL, which may have the form: "LANGUAGE_CODE.ENCODING",
 # like "pt_BR.UTF-8"
-#
-# Revision 1.92  2004/01/17 20:30:18  dischi
-# use new metainfo
-#
-# Revision 1.91  2004/01/10 13:12:02  dischi
-# create disc and disc-set dirs in OVERLAY_DIR
-#
-# Revision 1.90  2004/01/10 04:30:32  outlyer
-# Newer versions of twisted print this message:
-# "/usr/lib/python2.3/site-packages/freevo/helpers/webserver.py:106:
-# exceptions.DeprecationWarning: twisted.internet.app is deprecated,
-# use twisted.application instead."
-#
-# Which is nice to know, but is non-trivial to implement so let's not see
-# it every time we start an app.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -112,15 +99,18 @@ except: # unavailable, define '_' for all modules
     __builtin__.__dict__['_']= lambda m: m
 
 
-# add True and False to __builtin__ for older python versions
-if float(sys.version[0:3]) < 2.3:
-    __builtin__.__dict__['True']  = 1
-    __builtin__.__dict__['False'] = 0
-
 # temp solution until this is fixed to True and False
 # in all freevo modules
 __builtin__.__dict__['TRUE']  = 1
 __builtin__.__dict__['FALSE'] = 0
+
+
+# String helper function. Always use this function to detect if the
+# object is a string or not. It checks against str and unicode
+def __isstring__(s):
+    return isinstance(s, str) or isinstance(s, unicode)
+        
+__builtin__.__dict__['isstring'] = __isstring__
 
 
 class Logger:
@@ -586,7 +576,7 @@ for type in ('video', 'audio', 'image', 'games'):
         # The algorithm doesn't work for GAMES_ITEMS, so we leave it out
         abs = []
         for d in x:
-            if isinstance(d, str):
+            if isstring(d):
                 abs.append(os.path.abspath(d))
             else:
                 abs.append((d[0], os.path.abspath(d[1])))
