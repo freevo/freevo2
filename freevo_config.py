@@ -386,7 +386,7 @@ DIR_IMAGES = [ ('Test Images', './testfiles/Images') ]
 # The list of filename suffixes that are used to match the files that
 # are used for the image viewer.
 # 
-SUFFIX_IMAGE_FILES = [ 'jpg' ]
+SUFFIX_IMAGE_FILES = [ 'jpg','gif','png', 'jpeg','bmp','tiff','psd' ]
 
 # The viewer now supports a new type of menu entry, a slideshow file.
 # It also has the slideshow alarm signal handler for automated shows.
