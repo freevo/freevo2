@@ -152,7 +152,7 @@
 
 
     <!-- background image -->
-    <image label="background" filename="aubin_bg2"/>
+    <image label="background" filename="blurr"/>
 
 
     <!-- 
