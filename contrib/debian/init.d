@@ -15,6 +15,11 @@ fi
 
 set -e
 
+[ "${NOMOUSE}" = "true" ] && {
+    export SDL_NOMOUSE=true
+}
+
+
 case "$1" in
   start)
 	echo -n "Starting $DESC: "
