@@ -9,6 +9,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/03/17 16:34:32  outlyer
+# Added preliminary movie bookmarks (i.e. places to jump to on next play)
+# Currently only writing the bookmarks does anything; I'm going to have to
+# add a menu of bookmarks to the menu afterwards.
+#
+# Note that the get_bookmarkfile thing should be replaced with something less
+# flaky than the path+filename of the movie, but this is good for a initial
+# go.
+#
 # Revision 1.14  2003/02/20 06:56:07  krister
 # Bugfix for dot-files
 #
@@ -465,3 +474,10 @@ def check_media(media_id):
         if media_id == media.id:
             return media
     return None
+
+def get_bookmarkfile(filename):
+    myfile = filename.replace('/','_')
+    myfile = config.FREEVO_CACHEDIR + "/" + str(myfile)
+    return myfile
+
+

@@ -9,6 +9,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/03/17 16:34:33  outlyer
+# Added preliminary movie bookmarks (i.e. places to jump to on next play)
+# Currently only writing the bookmarks does anything; I'm going to have to
+# add a menu of bookmarks to the menu afterwards.
+#
+# Note that the get_bookmarkfile thing should be replaced with something less
+# flaky than the path+filename of the movie, but this is good for a initial
+# go.
+#
 # Revision 1.25  2003/03/17 15:47:16  outlyer
 # Merged patch from Angel <angel@knight-industries.com> for "Jump to"
 # functionality.
@@ -220,6 +229,7 @@ class MPlayer:
         self.thread.setDaemon(1)
         self.thread.start()
         self.mode = None
+        self.filename = None
 
                          
     def play(self, filename, options, item, mode = None):
@@ -236,7 +246,9 @@ class MPlayer:
             network_play = 1
         else:
             network_play = 0
-            
+           
+        self.filename = filename
+
         self.mode = mode   # setting global var to mode.
 
         if DEBUG:
@@ -378,6 +390,20 @@ class MPlayer:
                 rc.app = None
                 print self.item
                 return self.item.eventhandler(event)
+
+        if event == rc.REC:
+            # Bookmark the current time into a file
+            
+            bookmarkfile = util.get_bookmarkfile(self.filename)
+            
+            handle = open(bookmarkfile,'a+') # Should be appending so we could
+                                             # have multiple bookmarks later, with
+                                             # a menu or something. 
+            handle.write(str(self.item.elapsed))
+            handle.write('\n')
+            handle.close()
+            print "Added bookmark at position " + str(self.item.elapsed)
+            return self.item.eventhandler(event)
 
         if event == rc.EXIT:
             self.stop()
@@ -582,6 +608,7 @@ class MPlayerApp(childapp.ChildApp):
             else:
                 print 'MPlayer logging to "%s" and "%s"' % (fname_out, fname_err)
 
+        self.RE_TIME = re.compile("^A: +([0-9]+)").match
         self.item = item
         self.parser = MPlayerParser(item)
         childapp.ChildApp.__init__(self, app)
@@ -611,7 +638,9 @@ class MPlayerApp(childapp.ChildApp):
                 pass # File closed
                      
         if line.find("A:") == 0:
-            self.item.elapsed = line
+            m = self.RE_TIME(line) # Convert decimal
+            if hasattr(m,'group'):
+                self.item.elapsed = int(m.group(1))+1
 
         elif line.find("Exiting...") == 0:
             self.exit_type = self.parser.end_type(line)
