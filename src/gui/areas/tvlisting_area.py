@@ -355,7 +355,7 @@ class TvlistingArea(Area):
             #    self.objects.append(self.drawimage(channel_logo, \
             #                (logo_geo[0], logo_geo[1])))
 
-            self.objects.append(self.drawstring(channel.name, label_val.font,
+            self.objects.append(self.drawstring(channel.title, label_val.font,
                                                 content, x=tx0, y=ty0,
                                                 width=r.width+2*r.x,
                                                 height=item_h))
