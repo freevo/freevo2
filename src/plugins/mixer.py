@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/09/23 13:31:24  outlyer
+# More FreeBSD patches from Lars
+#
 # Revision 1.6  2003/09/14 20:09:37  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
@@ -208,7 +211,7 @@ class PluginInterface(plugin.DaemonPlugin):
         if volume > 100: volume = 100 
         elif volume < 0: volume = 0
         self.igainVolume = volume
-        os.system('aumix -i%s &> /dev/null &' % volume)
+        os.system('aumix -i%s > /dev/null 2>&1 &' % volume)
 
     def getIgainVolume(self):
         return self.igainVolume
@@ -216,19 +219,19 @@ class PluginInterface(plugin.DaemonPlugin):
     def decIgainVolume(self):
         self.igainVolume -= 5
         if self.igainVolume < 0: self.igainVolume = 0
-        os.system('aumix -i-5 &> /dev/null &')
+        os.system('aumix -i-5 > /dev/null 2>&1 &')
         
     def incIgainVolume(self):
         self.igainVolume += 5
         if self.igainVolume > 100: self.igainVolume = 100
-        os.system('aumix -i+5 &> /dev/null &')
+        os.system('aumix -i+5 > /dev/null 2>&1 &')
         
     def setOgainVolume(self, volume):
         """For Ogain on SB Live Cards"""
         if volume > 100: volume = 100 
         elif volume < 0: volume = 0
         self.ogainVolume = volume
-        os.system('aumix -o%s &> /dev/null &' % volume)
+        os.system('aumix -o%s > /dev/null 2>&1' % volume)
 
     def reset(self):
         if config.CONTROL_ALL_AUDIO:

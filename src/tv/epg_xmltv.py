@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2003/09/23 13:31:24  outlyer
+# More FreeBSD patches from Lars
+#
 # Revision 1.35  2003/09/08 19:37:11  rshortt
 # Made helper 'updateguide'.  This can be used as './freevo updateguide' in
 # place of './freevo execute src/tv/epg_xmltv.py' to greate the program guide.
@@ -299,9 +302,14 @@ def load_guide():
                 c.displayname = id.split()[1]   # XXX Educated guess
                 c.tunerid = id.split()[0]       # XXX Educated guess
             else:
-                # Let the user figure it out
-                c.displayname = '%s REPLACE WITH CHANNEL NAME' % id
-                c.tunerid = '%s REPLACE WITH TUNERID' % id
+                displayname = chan['display-name'][0][0]
+                if ' ' in displayname:
+                    c.displayname = displayname.split()[1]
+                    c.tunerid = displayname.split()[0]
+                else:
+                    c.displayname = displayname
+                    c.tunerid = 'REPLACE WITH TUNERID FOR %s' % displayname
+
             guide.AddChannel(c)
 
     xmltv_programs = None

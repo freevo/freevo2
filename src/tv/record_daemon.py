@@ -66,9 +66,9 @@ class ScheduleItem:
         '''Build the command line for this recording.'''
 
         if DEBUG: 
-            cmd = self.cmd + ' >& %s/freevo_record_%s.log &' % (config.LOGDIR, int(time.time()))
+            cmd = self.cmd + ' > %s/freevo_record_%s.log 2>&1 &' % (config.LOGDIR, int(time.time()))
         else: 
-            cmd = self.cmd +  ' >& /dev/null &'
+            cmd = self.cmd +  ' > /dev/null 2>&1 &'
 
         return cmd
         

@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.85  2003/09/23 13:31:23  outlyer
+# More FreeBSD patches from Lars
+#
 # Revision 1.84  2003/09/20 08:47:47  dischi
 # handle helper scripts killing by killing the script
 #
@@ -176,7 +179,7 @@ fi
 # help function to kill the current child from PID_FILE
 # needed to work around signal problems when starting
 # a helper
-function kill_waiting_child() {
+kill_waiting_child() {
     kill -KILL `cat $PID_FILE` > /dev/null 2>&1
 }
 
@@ -350,7 +353,7 @@ if [ "$1" = "start" ]; then
     shift
 
     # Start the main freevo application
-    $RUNAPP python $OPTIMZE $FREEVO_PYTHON/main.py $@ >/dev/null 2>/dev/null&
+    $RUNAPP python $OPTIMZE $FREEVO_PYTHON/main.py $@ > /dev/null 2>&1 &
     
     echo $! > $PID_FILE
     disown
