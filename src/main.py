@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.52  2003/07/02 20:06:04  dischi
+# turn off more mmpython debug
+#
 # Revision 1.51  2003/07/01 02:58:17  outlyer
 # Added lame/cdparanoia and defaults for the cdbackup plugin
 # Removed some messages from src/main and src/menu
@@ -396,6 +399,7 @@ if __name__ == "__main__":
         os.mkdir(mmcache)
     mmpython.use_cache(mmcache)
     mmpython.mediainfo.DEBUG = 0
+    mmpython.factory.DEBUG = 0
     
     try:
         main_func()
