@@ -1001,13 +1001,10 @@ class Dirwatcher(plugin.DaemonPlugin):
             return []
         ret = []
         for f in os.listdir(vfs.getoverlay(self.dir)):
-            if f.endswith('.raw'):
-                if f[f[:-4].rfind('.')+1:-4].lower() in config.VIDEO_SUFFIX:
-                    ret.append(f)
-            else:
-                if not f.endswith('.cache')  and not \
+            # ignore .raw and .cache files
+            if not f.endswith('.raw') and not f.endswith('.cache') and not \
                    os.path.isdir(os.path.join(self.dir, f)):
-                    ret.append(f)
+                ret.append(f)
         return ret
 
 
@@ -1039,7 +1036,7 @@ class Dirwatcher(plugin.DaemonPlugin):
             # send EXIT to go one menu up:
             eventhandler.post(MENU_BACK_ONE_MENU)
             self.dir = None
-            return
+            return False
 
         changed = False
         if os.stat(self.dir)[stat.ST_MTIME] <= self.last_time:
@@ -1048,11 +1045,13 @@ class Dirwatcher(plugin.DaemonPlugin):
             new_files = self.listoverlay()
             for f in self.files:
                 if not f in new_files:
+                    # deleted a file
                     changed = True
                     break
             else:
                 for f in new_files:
                     if not f in self.files:
+                        # added a file
                         changed = True
                         break
         else:
@@ -1067,6 +1066,7 @@ class Dirwatcher(plugin.DaemonPlugin):
             self.item.build(menuw=self.menuw, arg='update')
 
         self.item.__dirwatcher_last_files = self.files
+        return True
 
 
     def poll(self):
@@ -1074,6 +1074,8 @@ class Dirwatcher(plugin.DaemonPlugin):
                self.menuw.menustack[-1] == self.item_menu and \
                eventhandler.is_menu():
             self.scan()
+        return True
+
 
 # and activate that DaemonPlugin
 dirwatcher = Dirwatcher()
