@@ -9,6 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2003/07/04 14:37:17  outlyer
+# Missing named parameter 'info' was causing crashes when using cdaudio.
+# Also had to make a change in mmpython:
+#
+# factory.py:
+# 119: elif scheme == 'cd' or scheme == 'cdda':
+#
 # Revision 1.28  2003/07/03 23:13:46  dischi
 # moved mmpython parsing to audioinfo to support playlists
 #
@@ -96,7 +103,7 @@ class AudioItem(Item):
     This is the common class to get information about audiofiles.
     """
     
-    def __init__(self, file, parent, name = None):
+    def __init__(self, file, parent, info = None, name = None):
         if parent and parent.media:
             url = 'cd://%s:%s:%s' % (parent.media.devicename, parent.media.mountdir,
                                      file[len(parent.media.mountdir)+1:])
