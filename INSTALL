@@ -30,6 +30,8 @@ o Compile Freevo
   o Test the MGA G400 OSD framebuffer driver
 
 o Test matrox_g400/v4l1_to_mga  (Video4Linux1 -> Framebuffer)
+  o It _must_ be used with the matrox_g400/mga_vid.o module,
+    not the one from MPlayer.
   o Check out the source for how to set the input, norm, channel
 
 o Update the settings in config.py!
