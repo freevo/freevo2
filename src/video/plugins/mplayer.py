@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.81  2004/08/23 15:54:15  dischi
+# hide osd on startup
+#
 # Revision 1.80  2004/08/23 14:30:38  dischi
 # support bmovl2
 #
@@ -625,7 +628,7 @@ class MPlayerApp(childapp.ChildApp2):
         self.area_handler = gui.AreaHandler('video', ['screen', 'view', 'info',
                                                       Progressbar()])
         self.area_handler.screen.frames_per_fade = 10
-        #self.area_handler.hide()
+        self.area_handler.hide(False)
         self.area_handler.draw(self.item)
         
 
@@ -718,7 +721,7 @@ class MPlayerApp(childapp.ChildApp2):
     def stop(self, cmd=''):
         if self.screen:
             gui.remove_display(self.screen)
-            self.area_handler.clear()
+            del self.area_handler
             self.area_handler = None
             self.screen = None
             self.width  = 0
