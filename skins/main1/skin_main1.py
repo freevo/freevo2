@@ -319,9 +319,9 @@ class Skin:
 
 
         # draw the image
-        if image != None:
+        if image:
             (type, image) = image
-        if image != None:
+        if image:
             if type == 'photo' and val.cover_image.visible:
                 thumb = util.getExifThumbnail(image, val.cover_image.width, \
                                               val.cover_image.height)
