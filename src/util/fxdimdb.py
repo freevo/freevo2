@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/01/09 19:49:04  dischi
+# looks like imdb changed the interface again
+#
 # Revision 1.2  2004/01/09 06:30:49  outlyer
 # Two fixes:
 #
@@ -160,8 +163,8 @@ class FxdImdb:
         try:
             response = urllib2.urlopen(req)
         except urllib2.HTTPError, error:
+            print 'Oops'
             raise FxdImdb_Net_Error("IMDB unreachable : " + error) 
-            return None
             
         regexp_get_imdb_id = re.compile(r'''
         http://.*imdb\.com/
@@ -179,41 +182,24 @@ class FxdImdb:
                                     "Movie/TV-Movie") ]
             return self.imdb_id_list
         
-        regexp_type  = re.compile(r'''
-        <H2><A[ ]NAME=.*?>
-        (?P<type>.*?)     # Most popular searches/Movies/TV-Movies/Video Games etc.
-        </A></H2>
-        ''', re.VERBOSE)
+        regexp_type  = re.compile('.*<tr><td valign="top" align="right">'+
+                                  '.*/title/tt(\d+)/">(.*)\((\d{4})\)(.*)</a>')
 
-        regexp_imdb_list_entry = re.compile(r'''
-        <LI><A[ ]HREF="/(?:Title\?|title/tt)  # match both old and new style 
-        (?P<id>      \d+)/">                  # imdb id
-        (?P<title>   .*?)\s*                  # imdb movie title
-        \(
-        (?P<year>    \d{4}.*?)                # year and possibly /I, /II etc.
-        \)</A>
-        ''', re.VERBOSE)
-
-        type = ''
         for line in response.read().split("\n"):
+            line = line.replace('&#34;', '"')
             m = regexp_type.match(line)
             if m:
-                type = m.group('type')
-                # delete plural s
-                if type in ('Movies', 'TV-Movies'):
-                    type = type[:-1]
-    
-            m = regexp_imdb_list_entry.search(line)
-
-            if m and not type == 'Video Games':
-                id   = m.group('id')
-                name = m.group('title')
-                year = m.group('year')
-    
+                #print line
+                id, name, year, info = m.groups(0)
+                name = name.strip().rstrip()
+                type = ''
                 # delete " before and after name
                 if name[0] == '"' and name [-1] == '"':
+                    type = 'TV Show'
                     name=name[1:-1]
-    
+                elif info.find('(TV)') != -1:
+                    type = 'TV Movie'
+                    
                 # only add entries that hasn't been added before
                 for i in self.imdb_id_list:
                     if i[0] == id:
@@ -289,7 +275,8 @@ class FxdImdb:
                 self.append = True
             except: 
                 pass
-        else: self.append = False
+        else:
+            self.append = False
 
         # XXX: add this back in without using parseMovieFile
         # if self.append == True and \
