@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/06/07 16:45:54  rshortt
+# Didn't mean to add partial support for multiple recording plugins yet.
+#
 # Revision 1.17  2004/06/07 16:10:51  rshortt
 # Change 'RECORD' to plugin.RECORD.
 #
@@ -93,7 +96,7 @@ class PluginInterface(plugin.Plugin):
     def __init__(self):
         plugin.Plugin.__init__(self)
 
-        plugin.register(Recorder(), plugin.RECORD, True)
+        plugin.register(Recorder(), plugin.RECORD)
 
 
 class Recorder:
