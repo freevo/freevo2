@@ -59,8 +59,14 @@ class IdleTool:
         if (os.path.isfile(self.WEATHERCACHE) == 0 or (abs(time.time() - os.path.getmtime(self.WEATHERCACHE)) > 7200)):
             weather = pymetar.MetarReport()
             weather.fetchMetarReport(self.METARCODE)
-            temperature = '%2d' % weather.getTemperatureCelsius()
-            icon = weather.extractSkyConditions()[1] + '.png'
+            if (weather.getTemperatureCelsius()):
+                temperature = '%2d' % weather.getTemperatureCelsius()
+            else:
+                temperature = 0
+            if weather.extractSkyConditions():
+                icon = weather.extractSkyConditions()[1] + '.png'
+            else:
+                icon = 'moon.png'
             cachefile = open(self.WEATHERCACHE,'w+')
             cachefile.write(temperature + '\n')
             cachefile.write(icon + '\n')
@@ -69,7 +75,7 @@ class IdleTool:
             cachefile = open(self.WEATHERCACHE,'r')
             newlist = map(string.rstrip, cachefile.readlines())
             temperature,icon = newlist 
-            cachefile.close
+            cachefile.close()
         return temperature, icon
 
     def drawtv(self):
