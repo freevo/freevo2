@@ -153,7 +153,8 @@ LOCAL_CONF_CHANGES = [
      MPLAYER_AUTOCROP for 16:9 tv sets, ONLY_SCAN_DATADIR to make freevo start
      faster and TVGUIDE_HOURS_PER_PAGE customize the tv guide'''),
     (3.6,
-     '''Added USE_MEDIAID_TAG_NAMES as directory based variable''') ]
+     '''Added USE_MEDIAID_TAG_NAMES as directory based variable and
+     HIDE_UNUSABLE_DISCS to hide discs in the wrong menus and empty drives''') ]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -204,6 +205,9 @@ START_FULLSCREEN_X  = 0               # Start in fullscreen mode if using x11 or
 #
 # Leave empty to autodetect drives in during startup from /etc/fstab
 ROM_DRIVES = []
+
+# hide discs from the wrong menu (e.g. VCDs in audio menu) and empty discs
+HIDE_UNUSABLE_DISCS = 1               
 
 ROM_SPEED = 0                         # try to set the drive speed of the rom
                                       # drive a good value for playing movies
