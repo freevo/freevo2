@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.88  2005/01/07 20:44:57  dischi
+# handle None returns as nothing for getattr
+#
 # Revision 1.87  2004/12/30 11:31:51  dischi
 # rename id to __id__
 #
@@ -446,6 +449,8 @@ class Item:
             return self.__getitem__(attr)
         else:
             r = self.__getitem__(attr)
+            if r == None:
+                return ''
             return Unicode(r)
 
 
