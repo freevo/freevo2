@@ -188,7 +188,7 @@ if [ "$1" = "execute" ] ; then
     echo PID is $!
     echo $! > $PID_FILE
     wait `cat $PID_FILE`
-    rm $PID_FILE
+    rm $PID_FILE > /dev/null 2>&1
     exit 0
 fi
 
@@ -201,8 +201,8 @@ if [ "$1" = "stop" ] ; then
     else
         PID_FILE=$PID_DIR/freevo-`basename $1`.pid
     fi
-    kill -KILL `cat $PID_FILE` > /dev/null
-    rm $PID_FILE
+    kill -KILL `cat $PID_FILE` > /dev/null 2>&1
+    rm $PID_FILE > /dev/null 2>&1
     exit 0
 fi
 
