@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/01/19 16:55:59  dischi
+# small bugfix
+#
 # Revision 1.20  2002/12/21 17:26:52  dischi
 # Added dfbmga support. This includes configure option, some special
 # settings for mplayer and extra overscan variables
@@ -210,23 +213,23 @@ def attr_file(node, attr, default, c_dir):
     if node.attrs.has_key(('', attr)):
         file = node.attrs[('', attr)].encode('latin-1')
         if file:
-            file=os.path.join(c_dir, file)
-            if os.path.isfile(file):
-                return file
-            if os.path.isfile("%s_%sx%s.png" % (file, config.CONF.width,
+            dfile=os.path.join(c_dir, file)
+            if os.path.isfile(dfile):
+                return dfile
+            if os.path.isfile("%s_%sx%s.png" % (dfile, config.CONF.width,
                                                 config.CONF.height)):
-                return "%s_%sx%s.png" % (file, config.CONF.width, config.CONF.height)
-            if os.path.isfile("%s_%sx%s.jpg" % (file, config.CONF.width,
+                return "%s_%sx%s.png" % (dfile, config.CONF.width, config.CONF.height)
+            if os.path.isfile("%s_%sx%s.jpg" % (dfile, config.CONF.width,
                                                 config.CONF.height)):
-                return "%s_%sx%s.jpg" % (file, config.CONF.width, config.CONF.height)
-            if config.CONF.width == 720 and os.path.isfile("%s_768x576.png" % file):
-                return "%s_768x576.png" % file
-            if config.CONF.width == 720 and os.path.isfile("%s_768x576.jpg" % file):
-                return "%s_768x576.jpg" % file
-            if os.path.isfile("%s_800x600.png" % file):
-                return "%s_800x600.png" % file
-            if os.path.isfile("%s_800x600.jpg" % file):
-                return "%s_800x600.jpg" % file
+                return "%s_%sx%s.jpg" % (dfile, config.CONF.width, config.CONF.height)
+            if config.CONF.width == 720 and os.path.isfile("%s_768x576.png" % dfile):
+                return "%s_768x576.png" % dfile
+            if config.CONF.width == 720 and os.path.isfile("%s_768x576.jpg" % dfile):
+                return "%s_768x576.jpg" % dfile
+            if os.path.isfile("%s_800x600.png" % dfile):
+                return "%s_800x600.png" % dfile
+            if os.path.isfile("%s_800x600.jpg" % dfile):
+                return "%s_800x600.jpg" % dfile
         return file
     return default
 
@@ -703,6 +706,7 @@ class XMLSkin:
 
         if not os.path.isfile(file):
             return 0
+
         try:
             parser = qp_xml.Parser()
             box = parser.parse(open(file).read())
