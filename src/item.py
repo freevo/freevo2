@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/04/15 20:00:17  dischi
+# make MenuItem inherit from Item
+#
 # Revision 1.9  2003/04/06 21:12:55  dischi
 # o Switched to the new main skin
 # o some cleanups (removed unneeded inports)
@@ -40,8 +43,6 @@
 #endif
 
 
-from menu import MenuItem
-
 import rc
 
 rc = rc.get_singleton()
@@ -54,7 +55,7 @@ FALSE = 0
 # Item class. Inherits from MenuItem and is a template for other info items
 # like VideoItem, AudioItem and ImageItem
 #
-class Item(MenuItem):
+class Item:
     def __init__(self, parent = None):
         self.name = None                # name in menu
         self.image = None               # imagefile

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2003/04/15 20:00:20  dischi
+# make MenuItem inherit from Item
+#
 # Revision 1.35  2003/04/13 17:58:32  dischi
 # make it possible to force a reload when going one menu back
 #
@@ -83,6 +86,8 @@ import traceback
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
 
+from item import Item
+
 # Various utilities
 import util
 
@@ -116,21 +121,29 @@ def get_singleton():
 
 
 
-class MenuItem:
-
-    def __init__( self, name, action=None, arg=None, type = None, icon=None):
-        
-        self.name              = name
-        self.action            = action
-        self.action_arg        = arg
-        self.type              = type
-        self.icon              = icon
-        self.image             = None
-        self.parent            = None
+class MenuItem(Item):
+    """
+    Default item for the main menu actions
+    """
+    def __init__( self, name, action=None, arg=None, type=None, image=None,
+                  icon=None, parent=None):
+        Item.__init__(self, parent)
+        self.name     = name
+        self.icon     = icon
+        self.function = action
+        self.arg      = arg
+        self.type     = type
+        self.image    = image
         
     def setImage(self, image):
         self.type  = image[0]
         self.image = image[1]
+
+    def actions(self):
+        return [ ( self.select, '' ) ]
+
+    def select(self, arg=None, menuw=None):
+        self.function(arg=self.arg, menuw=menuw)
 
 
 
@@ -518,10 +531,7 @@ class MenuWidget(GUIObject):
                 print 'No action.. '
                 AlertBox(text='No action defined for this choice!').show()
             else:
-                if hasattr(menu.selected, 'action_arg'):
-                    action( arg=menu.selected.action_arg, menuw=self )
-                else:
-                    action( menuw=self )
+                action( menuw=self )
 
 
         elif event == rc.ENTER:

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2003/04/15 20:00:19  dischi
+# make MenuItem inherit from Item
+#
 # Revision 1.34  2003/04/13 10:35:39  dischi
 # cleanup of unneeded stuff in menu.py
 #
@@ -96,8 +99,6 @@ import skin    # The skin class
 import mixer   # The mixer class
 import rc      # The RemoteControl class.
 
-from tv.tv import TVMenu
-
 from gui.PopupBox import PopupBox
 
 import identifymedia
@@ -105,7 +106,6 @@ import signal
 
 import idle
 
-from mediamenu import MediaMenu
 from item import Item
 
 
@@ -116,7 +116,6 @@ DEBUG = config.DEBUG
 
 TRUE  = 1
 FALSE = 0
-
 
 # Set up the mixer
 # XXX Doing stuff to select correct device to manipulate.
@@ -216,80 +215,14 @@ def get_main_menu(parent):
     in the skin
     """
 
+    import plugin
+
     items = []
-    menu_items = skin.settings.mainmenu.items
-
-    icon_dir = skin.settings.icon_dir
-    for i in config.MAIN_MENU_ITEMS:
-        # if it's has actions() it is an item already
-        if hasattr(eval(i.action), 'actions'):
-            item = eval(i.action)(None)
-            item.name = menu_items[i.label].name
-            if menu_items[i.label].icon:
-                item.icon = os.path.join(icon_dir, menu_items[i.label].icon)
-            if menu_items[i.label].image:
-                item.image = menu_items[i.label].image
-            item.parent = parent
-            items += [ item ]
-
-        else:
-            icon = ""
-            if menu_items[i.label].icon:
-                icon = os.path.join(icon_dir, menu_items[i.label].icon)
-            items += [ MainMenuItem(parent, menu_items[i.label].name, icon,
-                                    menu_items[i.label].image,
-                                    eval(i.action), i.arg) ]
+    for p in plugin.mainmenu:
+        items += p.items(parent)
+        
     return items
     
-
-class ShutdownItem(Item):
-    """
-    Item for shutdown
-    """
-    def actions(self):
-        """
-        return a list of actions for this item
-        """
-        items = [ ( self.shutdown_freevo, 'Shutdown Freevo' ),
-                  ( self.shutdown_system, 'Shutdown system' ) ]
-        if config.ENABLE_SHUTDOWN_SYS:
-            items.reverse()
-        return items
-
-
-    def shutdown_freevo(self, arg=None, menuw=None):
-        """
-        shutdown freevo, don't shutdown the system
-        """
-        shutdown(menuw=menuw, arg=FALSE)
-
-        
-    def shutdown_system(self, arg=None, menuw=None):
-        """
-        shutdown the complete system
-        """
-        shutdown(menuw=menuw, arg=TRUE)
-    
-
-class MainMenuItem(Item):
-    """
-    Default item for the main menu actions
-    """
-    def __init__(self, parent, name, icon, image, action, arg):
-        Item.__init__(self, parent)
-        self.name     = name
-        self.icon     = icon
-        self.image    = image
-        self.function = action
-        self.arg      = arg
-        self.type     = 'main'
-        
-    def actions(self):
-        return [ ( self.select, '' ) ]
-
-    def select(self, arg=None, menuw=None):
-        self.function(arg=self.arg, menuw=menuw)
-
 
 class SkinSelectItem(Item):
     """
@@ -457,6 +390,9 @@ def signal_handler(sig, frame):
 #
 def main_func():
 
+    import plugin
+    plugin.init()
+    
     # Add the drives to the config.removable_media list. There doesn't have
     # to be any drives defined.
     if config.ROM_DRIVES != None: 
