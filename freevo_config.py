@@ -696,6 +696,8 @@ TIMESHIFT_ENCODE_CMD = 'mp1e -m3 -c%s -p%s -r14,100' % \
 
 TV_CHANNEL_PROG = './chchan %(channel)s %(norm)s %(freqtable)s'
 
+TV_DATEFORMAT = '%e-%b' # Day-Month: 11-Jun
+
 #
 # XXX Recording is still work in progress. You need to change
 # XXX the entire string below to fit your local settings.
