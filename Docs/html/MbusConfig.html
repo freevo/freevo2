@@ -1,0 +1,75 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<meta name="robots" content="index,nofollow">
+
+
+<title>MbusConfig - Freevo 2.0 Wiki</title>
+
+
+<link rel="stylesheet" type="text/css" charset="utf-8" media="all" href="modern/css/common.css">
+<link rel="stylesheet" type="text/css" charset="utf-8" media="screen" href="modern/css/screen.css">
+<link rel="stylesheet" type="text/css" charset="utf-8" media="print" href="modern/css/print.css">
+<link rel="stylesheet" type="text/css" charset="utf-8" href="modern/css/freevo.css">
+
+<link rel="alternate" title="Freevo 2.0 Wiki Recent Changes" href="/cgi-bin/freevo-2.0/RecentChanges?action=rss_rc&amp;ddiffs=1&amp;unique=1" type="application/rss+xml">
+<link rel="Start" href="/cgi-bin/freevo-2.0/Index">
+<link rel="Alternate" title="Wiki Markup" href="/cgi-bin/freevo-2.0/MbusConfig?action=raw">
+<link rel="Alternate" media="print" title="Print View" href="/cgi-bin/freevo-2.0/MbusConfig?action=print">
+<link rel="Search" href="/cgi-bin/freevo-2.0/FindPage">
+<link rel="Index" href="/cgi-bin/freevo-2.0/TitleIndex">
+<link rel="Glossary" href="/cgi-bin/freevo-2.0/WordIndex">
+<link rel="Help" href="/cgi-bin/freevo-2.0/HelpOnFormatting">
+</head>
+
+<body  lang="en" dir="ltr">
+
+            <!-- Header Logo and Status Line -->
+<div id="titlebar"><span class="name"><a href="http://freevo.sourceforge.net/" target="_blank">Freevo</a></span></div>
+<div id="header">
+<ul>
+
+	<li id="current"><a href="Index.html">User Documentation</a></li>
+	<li><a href="SourceDoc.html">Source Documenation</a></li>
+        
+</ul>
+</div>
+<p>&nbsp;</p>
+<div id="page" lang="en" dir="ltr"><!-- start page -->
+
+
+<h1 id="title">MbusConfig</h1>
+<div lang="en" id="content" dir="ltr">
+<a id="top"></a>
+<ol>
+
+<li>
+<a href="#head-2bffa81d4b1d7f6f9e2f5b40fcc46e6c0dae7b01">Configuration file</a>
+</li>
+
+<li>
+<a href="#head-456b3171040eefa0896e3a65eee1ff8ccb687fd0">Multicast setup</a>
+</li>
+
+</ol>
+<p> </p>
+
+<h2 id="head-2bffa81d4b1d7f6f9e2f5b40fcc46e6c0dae7b01">Configuration file</h2>
+
+<p>All known mbus implementations read the config file ~/.mbus or if the environment variable MBUS set, the file to which this variable points. When you first start freevo or a helper application a mbus configuration file is created. Please check the variables later. If you have mbus applications on different hosts, you need to change SCOPE=HOSTLOCAL to SCOPE=LINKLOCAL. </p>
+<p>All applications on the same bus must share most of the values in the config file. If ADDRESS or PORT don't match, the applications simply won't find each other, if HASHKEY is different, pymbus won't deliver the messages. Do not activate ENCRYPTIONKEY, pyMbus doesn't support encryption yet. </p>
+
+<h2 id="head-456b3171040eefa0896e3a65eee1ff8ccb687fd0">Multicast setup</h2>
+
+<p>Mbus communicates over multicast. Most Linux distributions enable multicast in their default kernel. If you build your own kernel, make sure multicast is enabled. </p>
+<p>If no special route is given, the multicast traffic will be routed through the default route. This may not what you want. E.g. eth0 is the uplink and eth1 the private network, eth0 has the default route but eth1 should be used for link local mbus communication. A second problem may be that the firewall is blocking the communication and not even host local communication is possible. </p>
+<p>To set the default route for mbus for 224.255.222.240 (default) type 'route add 224.255.222.240 &lt;interface&gt;' as root. For host local usage use 'lo' as &lt;interface&gt;. </p>
+<a id="bottom"></a>
+
+</div>
+<p id="pageinfo" class="info" lang="en" dir="ltr">last edited 2004-12-09 11:53:29 by <span title="riemen.informatik.uni-bremen.de">Dischi</span>
+<br>Current version: <a href="http://freevo.sourceforge.net/cgi-bin/freevo-2.0/MbusConfig">http://freevo.sourceforge.net/cgi-bin/freevo-2.0/MbusConfig</a></p>
+</div> <!-- end page -->
+</body>
+</html>

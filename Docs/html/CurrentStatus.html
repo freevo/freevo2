@@ -1,0 +1,102 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<meta name="robots" content="index,nofollow">
+
+
+<title>CurrentStatus - Freevo 2.0 Wiki</title>
+
+
+<link rel="stylesheet" type="text/css" charset="utf-8" media="all" href="modern/css/common.css">
+<link rel="stylesheet" type="text/css" charset="utf-8" media="screen" href="modern/css/screen.css">
+<link rel="stylesheet" type="text/css" charset="utf-8" media="print" href="modern/css/print.css">
+<link rel="stylesheet" type="text/css" charset="utf-8" href="modern/css/freevo.css">
+
+<link rel="alternate" title="Freevo 2.0 Wiki Recent Changes" href="/cgi-bin/freevo-2.0/RecentChanges?action=rss_rc&amp;ddiffs=1&amp;unique=1" type="application/rss+xml">
+<link rel="Start" href="/cgi-bin/freevo-2.0/Index">
+<link rel="Alternate" title="Wiki Markup" href="/cgi-bin/freevo-2.0/CurrentStatus?action=raw">
+<link rel="Alternate" media="print" title="Print View" href="/cgi-bin/freevo-2.0/CurrentStatus?action=print">
+<link rel="Search" href="/cgi-bin/freevo-2.0/FindPage">
+<link rel="Index" href="/cgi-bin/freevo-2.0/TitleIndex">
+<link rel="Glossary" href="/cgi-bin/freevo-2.0/WordIndex">
+<link rel="Help" href="/cgi-bin/freevo-2.0/HelpOnFormatting">
+</head>
+
+<body  lang="en" dir="ltr">
+
+            <!-- Header Logo and Status Line -->
+<div id="titlebar"><span class="name"><a href="http://freevo.sourceforge.net/" target="_blank">Freevo</a></span></div>
+<div id="header">
+<ul>
+
+	<li id="current"><a href="Index.html">User Documentation</a></li>
+	<li><a href="SourceDoc.html">Source Documenation</a></li>
+        
+</ul>
+</div>
+<p>&nbsp;</p>
+<div id="page" lang="en" dir="ltr"><!-- start page -->
+
+
+<h1 id="title">CurrentStatus</h1>
+<div lang="en" id="content" dir="ltr">
+<a id="top"></a>
+<p>For Freevo 2.0 we changed many parts of the code, some parts moved in extra python modules and some parts got a complete rewrite. Because of that, not everything is working right now, e.g. the gui part got a restructuring with a big rewrite of important parts. For that reason some plugins still don't work, they are auto deactivated and can onlt be activated when the code is ported to the new interface. </p>
+
+<h2 id="head-5ad711f4968bb04ded9189d3b1cd74c0faccb0fa">Changes</h2>
+
+<ul>
+<li><p> Changed the main loop to use <a href="SourceDoc/Notifier.html">PyNotifier</a>. No threads are allowed anymore and every part must take care that the notifier loop is kept alive. Not all parts respect that right now. </p>
+</li>
+<li><p> Removed Twisted. It is a huge monster and hard to understand. As communication we now use <a href="SourceDoc/Mbus.html">PyMbus</a>. As a side effect, modules using twisted need to be rewritten. </p>
+</li>
+<li><p> Complete rewrite of the recordserver. </p>
+<ul>
+<li><p> Switched to Mbus </p>
+</li>
+<li><p> Support more than one tv card </p>
+</li>
+<li><p> Conflict detection </p>
+</li>
+</ul>
+</li>
+<li><p> Rewrote the channels part of the tv module. It now uses a database as backend for much faster access. This whole epg part is in an extra package <a href="SourceDoc/PyEPG.html">PyEPG</a> </p>
+</li>
+<li><p> Major cleanup of the gui, skin and osd part. Everything gui related is now in the gui subdirectory </p>
+<ul>
+<li><p> Moved to <a href="SourceDoc/Mevas.html">Mevas</a> as gui backend, using imlib2 as underlaying render engine </p>
+</li>
+<li><p> Support different display engines. Besides the old pygame output you can now alos use native imlib2 for X, DirectFB (PleaseUpdate: status of DirectFB?) or bmovl and bmovl2 on mplayer (currently broken as primary backend). </p>
+</li>
+<li><p> Draw with the normal Freevo gui code on mplayer using bmvol </p>
+</li>
+</ul>
+</li>
+</ul>
+<p>PleaseUpdate: more? </p>
+
+<h2 id="head-dc811c8c9e7b834cb87abdf7533717f3f737502e">Status</h2>
+
+<p>Most parts of Freevo already work again. There are at least three people using cvs Freevo for daily use. But it may crash. Here a list of parts that won't work: </p>
+<ul>
+<li><p> The tv guide is slow and has a bad support for the recordserver. In most cases you need to edit the recordings in the fxd file after scheduling. The tv part is under heavy development </p>
+</li>
+<li><p> Some plugins are deactivated </p>
+</li>
+<li><p> The webserver doesn't work because we removed Twisted </p>
+</li>
+</ul>
+<p>Everything else should work. </p>
+
+<h2 id="head-c1d0d4a1e237a47bc5de6ed4adcb74ad20471ab0">TODO</h2>
+
+<p>PleaseUpdate: add todo list </p>
+<a id="bottom"></a>
+
+</div>
+<p id="pageinfo" class="info" lang="en" dir="ltr">last edited 2004-12-11 18:25:10 by <span title="port-212-202-30-101.dynamic.qsc.de">Juergen</span>
+<br>Current version: <a href="http://freevo.sourceforge.net/cgi-bin/freevo-2.0/CurrentStatus">http://freevo.sourceforge.net/cgi-bin/freevo-2.0/CurrentStatus</a></p>
+</div> <!-- end page -->
+</body>
+</html>
