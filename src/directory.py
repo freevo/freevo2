@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/07/18 19:47:24  dischi
+# add files from datadir to the current directory
+#
 # Revision 1.22  2003/07/12 21:23:32  dischi
 # attribute type to return the disc label
 #
@@ -116,16 +119,15 @@ class DirItem(Playlist):
     def __init__(self, dir, parent, name = '', display_type = None):
         Item.__init__(self, parent)
         self.type = 'dir'
-        self.media = None
         self.menuw = None
-        
+
         # variables only for Playlist
         self.current_item = 0
         self.playlist = []
         self.autoplay = FALSE
 
         # variables only for DirItem
-        self.dir          = dir
+        self.dir          = os.path.abspath(dir)
         self.display_type = display_type
         self.info         = {}
         self.mountpoint   = None
@@ -261,6 +263,7 @@ class DirItem(Playlist):
             return 'Directory'
         return Item.getattr(self, attr)
 
+
     def actions(self):
         """
         return a list of actions for this item
@@ -332,9 +335,16 @@ class DirItem(Playlist):
 
 
     def do_cwd(self, arg=None, menuw=None):
+        datadir = util.getdatadir(self)
         try:
             files = ([ os.path.join(self.dir, fname)
                        for fname in os.listdir(self.dir) ])
+            if os.path.isdir(datadir):
+                for f in ([ os.path.join(datadir, fname)
+                            for fname in os.listdir(datadir) ]):
+                    if not os.path.isdir(f):
+                        files.append(f)
+                        
             self.all_files = copy.copy(files)
         except OSError:
             print 'util:match_files(): Got error on dir = "%s"' % self.dir
@@ -475,11 +485,7 @@ class DirItem(Playlist):
                 dirwatcher_thread.setDaemon(1)
                 dirwatcher_thread.start()
 
-            if self.media:
-                # don't watch rom drives
-                dirwatcher_thread.cwd(self, item_menu, None, self.all_files)
-            else:
-                dirwatcher_thread.cwd(self, item_menu, self.dir, self.all_files)
+            dirwatcher_thread.cwd(self, item_menu, self.dir, datadir, self.all_files)
             self.menu = item_menu
 
         return items
@@ -490,7 +496,8 @@ class DirItem(Playlist):
         called when we return to this menu
         """
         global dirwatcher_thread
-        dirwatcher_thread.cwd(self, self.menu, self.dir, self.all_files)
+        datadir = util.getdatadir(self)
+        dirwatcher_thread.cwd(self, self.menu, self.dir, datadir, self.all_files)
         dirwatcher_thread.scan()
 
         # we changed the menu, don't build a new one
@@ -644,23 +651,22 @@ class DirwatcherThread(threading.Thread):
         self.menuw = menuw
         self.item_menu = None
         self.dir = None
+        self.datadir = None
         self.files = None
         self.lock = thread.allocate_lock()
         
-    def cwd(self, item, item_menu, dir, files):
+    def cwd(self, item, item_menu, dir, datadir, files):
         self.lock.acquire()
 
         self.item = item
         self.item_menu = item_menu
         self.dir = dir
+        self.datadir = datadir
         self.files = files
 
         self.lock.release()
 
     def scan(self):
-        if not self.dir:
-            return
-        
         self.lock.acquire()
 
         try:
@@ -675,6 +681,13 @@ class DirwatcherThread(threading.Thread):
             self.lock.release()
             return
         
+        try:
+            for f in ([ os.path.join(self.datadir, fname)
+                        for fname in os.listdir(self.datadir) ]):
+                if not os.path.isdir(f):
+                    files.append(f)
+        except OSError:
+            pass
         
         new_files = []
         del_files = []
