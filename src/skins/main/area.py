@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2004/01/01 12:25:48  dischi
+# use pickle to cache the large background images
+#
 # Revision 1.22  2003/12/14 17:39:52  dischi
 # Change TRUE and FALSE to True and False; vfs fixes
 #
@@ -93,6 +96,7 @@
 import copy
 import os
 import pygame
+import stat
 
 import osd
 import config
@@ -624,11 +628,26 @@ class Skin_Area:
                 if imagefile:
                     cname = '%s-%s-%s' % (imagefile, bg.width, bg.height)
                     image = self.imagecache[cname]
+                    if not image and config.OVERLAY_DIR:
+                        cache = vfs.getoverlay('%s.raw-%sx%s' % (imagefile, bg.width,
+                                                                 bg.height))
+                        if os.path.isfile(cache) and \
+                               os.stat(cache)[stat.ST_MTIME] > \
+                               os.stat(imagefile)[stat.ST_MTIME]:
+                            f = open(cache, 'r')
+                            image = pygame.image.fromstring(str().join(f.readlines()),
+                                                            (bg.width,bg.height), 'RGBA')
+                            f.close()
+                            self.imagecache[cname] = image
                     if not image:
                         image = osd.loadbitmap(imagefile)
                         if image:
                             image = pygame.transform.scale(image,(bg.width,bg.height))
-                            self.imagecache[cname] = image
+                        if image and config.OVERLAY_DIR:
+                            f = open(cache, 'w')
+                            f.write(pygame.image.tostring(image, 'RGBA'))
+                            f.close()
+                        self.imagecache[cname] = image
                     if image:
                         self.drawimage(image, bg)
                             
@@ -717,16 +736,11 @@ class Skin_Area:
         cname = '%s-%s-%s' % (image, w, h)
         cimage = self.imagecache[cname]
         if not cimage:
-            try:
-                image = osd.loadbitmap(image)
-                if w > 0 and h > 0:
-                    image = pygame.transform.scale(image, (w, h))
-                self.imagecache[cname] = image
-            except:
-                return None
-        else:
-            image = cimage
-        return image
+            cimage = osd.loadbitmap(image)
+            if cimage and w > 0 and h > 0:
+                cimage = pygame.transform.scale(cimage, (w, h))
+            self.imagecache[cname] = cimage
+        return cimage
 
         
     def drawimage(self, image, val):
