@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/03/16 01:04:18  rshortt
+# Changes to stop two processes tripping over the creation of the epg pickle file.
+#
 # Revision 1.4  2003/10/20 00:32:11  rshortt
 # Placed most of the work into functions and added a check for '__main__' for
 # the command line.  I'm planning on importing this module from recordserver
@@ -82,23 +85,22 @@ def grab():
                                              config.XMLTV_DAYS ))
 
     if os.path.exists(xmltvtmp):
-        shutil.copyfile(xmltvtmp, config.XMLTV_FILE)
-        os.unlink(xmltvtmp)
+        if os.path.isfile(config.XMLTV_SORT):
+            print 'Sorting listings.'
+            os.system('%s --output %s %s' % ( config.XMLTV_SORT,
+                                              xmltvtmp+'.1',
+                                              config.XMLTV_FILE ))
 
+            shutil.copyfile(xmltvtmp+'.1', xmltvtmp)
+            os.unlink(xmltvtmp+'.1')
 
-def sort():
-    if os.path.isfile(config.XMLTV_SORT):
-        print 'Sorting listings.'
-        xmltvtmp = '/tmp/TV.xml.tmp'
-        os.system('%s --output %s %s' % ( config.XMLTV_SORT,
-                                          xmltvtmp,
-                                          config.XMLTV_FILE ))
+        else:
+            print 'Not configured to use tv_sort, skipping.'
 
-        if os.path.exists(xmltvtmp):
-            shutil.copyfile(xmltvtmp, config.XMLTV_FILE)
-            os.unlink(xmltvtmp)
-    else:
-        print 'Not configured to use tv_sort, skipping.'
+        print 'caching data, this may take a while'
+
+        import tv.epg_xmltv
+        tv.epg_xmltv.get_guide(XMLTV_FILE=xmltvtmp)
 
 
 if __name__ == '__main__':
@@ -124,12 +126,6 @@ if __name__ == '__main__':
         sys.exit(0)
 
     grab()
-    sort()
-
-    print 'caching data, this may take a while'
-
-    import tv.epg_xmltv
-    tv.epg_xmltv.get_guide()
 
     import tv.record_client as rc
     

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.49  2004/03/16 01:04:18  rshortt
+# Changes to stop two processes tripping over the creation of the epg pickle file.
+#
 # Revision 1.48  2004/03/13 22:28:41  dischi
 # better handling of bad programs
 #
@@ -68,6 +71,7 @@ import time
 import os
 import traceback
 import calendar
+import shutil
 
 import config
 import util
@@ -93,7 +97,7 @@ EPG_TIME_EXC = _('Time conversion error')
 cached_guide = None
 
 
-def get_guide(popup=None, verbose=True):
+def get_guide(popup=None, verbose=True, XMLTV_FILE=None):
     """
     Get a TV guide from memory cache, file cache or raw XMLTV file.
     Tries to return at least the channels from the config file if there
@@ -101,18 +105,21 @@ def get_guide(popup=None, verbose=True):
     """
     global cached_guide
 
+    if not XMLTV_FILE:
+        XMLTV_FILE = config.XMLTV_FILE
+
     # Can we use the cached version (if same as the file)?
     if (cached_guide == None or
-        (os.path.isfile(config.XMLTV_FILE) and 
-         cached_guide.timestamp != os.path.getmtime(config.XMLTV_FILE))):
+        (os.path.isfile(XMLTV_FILE) and 
+         cached_guide.timestamp != os.path.getmtime(XMLTV_FILE))):
 
         # No, is there a pickled version ("file cache") in a file?
         pname = '%s/TV.xml.pickled' % config.FREEVO_CACHEDIR
         
         got_cached_guide = False
-        if (os.path.isfile(config.XMLTV_FILE) and
+        if (os.path.isfile(XMLTV_FILE) and
             os.path.isfile(pname) and (os.path.getmtime(pname) >
-                                       os.path.getmtime(config.XMLTV_FILE))):
+                                       os.path.getmtime(XMLTV_FILE))):
             if verbose:
                 _debug_('XMLTV, reading cached file (%s)' % pname)
 
@@ -136,7 +143,7 @@ def get_guide(popup=None, verbose=True):
                 if verbose:
                     _debug_('EPG version missmatch, must be reloaded')
 
-            elif cached_guide.timestamp != os.path.getmtime(config.XMLTV_FILE):
+            elif cached_guide.timestamp != os.path.getmtime(XMLTV_FILE):
                 # Hmmm, weird, there is a pickled file newer than the TV.xml
                 # file, but the timestamp in it does not match the TV.xml
                 # timestamp. We need to reload!
@@ -155,9 +162,9 @@ def get_guide(popup=None, verbose=True):
                 popup.show()
                 
             if verbose:
-                _debug_('XMLTV, trying to read raw file (%s)' % config.XMLTV_FILE)
+                _debug_('XMLTV, trying to read raw file (%s)' % XMLTV_FILE)
             try:    
-                cached_guide = load_guide(verbose)
+                cached_guide = load_guide(verbose, XMLTV_FILE)
 	    except:
 	    	# Don't violently crash on a incomplete or empty TV.xml please.
 	    	cached_guide = None
@@ -166,6 +173,13 @@ def get_guide(popup=None, verbose=True):
                 print
                 traceback.print_exc()
             else:
+                # Replace config.XMLTV_FILE before we save the pickle in order
+                # to avoid timestamp confision.
+                if XMLTV_FILE != config.XMLTV_FILE:
+                    shutil.copyfile(XMLTV_FILE, config.XMLTV_FILE)
+                    os.unlink(XMLTV_FILE)
+                    cached_guide.timestamp = os.path.getmtime(config.XMLTV_FILE)
+
                 # Dump a pickled version for later reads
                 util.save_pickle(cached_guide, pname)
 
@@ -179,20 +193,23 @@ def get_guide(popup=None, verbose=True):
     return cached_guide
 
 
-def load_guide(verbose=True):
+def load_guide(verbose=True, XMLTV_FILE=None):
     """
     Load a guide from the raw XMLTV file using the xmltv.py support lib.
     Returns a TvGuide or None if an error occurred
     """
+    if not XMLTV_FILE:
+        XMLTV_FILE = config.XMLTV_FILE
+
     # Create a new guide
     guide = epg_types.TvGuide()
 
     # Is there a file to read from?
-    if os.path.isfile(config.XMLTV_FILE):
+    if os.path.isfile(XMLTV_FILE):
         gotfile = 1
-        guide.timestamp = os.path.getmtime(config.XMLTV_FILE)
+        guide.timestamp = os.path.getmtime(XMLTV_FILE)
     else:
-        _debug_('XMLTV file (%s) missing!' % config.XMLTV_FILE)
+        _debug_('XMLTV file (%s) missing!' % XMLTV_FILE)
         gotfile = 0
 
     # Add the channels that are in the config list, or all if the
@@ -222,7 +239,7 @@ def load_guide(verbose=True):
         xmltv_channels = None
         if gotfile:
             # Don't read the channel info unless we have to, takes a long time!
-            xmltv_channels = xmltv.read_channels(util.gzopen(config.XMLTV_FILE))
+            xmltv_channels = xmltv.read_channels(util.gzopen(XMLTV_FILE))
         
         # Was the guide read successfully?
         if not xmltv_channels:
@@ -251,7 +268,7 @@ def load_guide(verbose=True):
     if gotfile:
         if verbose:
             _debug_('reading xmltv data')
-        f = util.gzopen(config.XMLTV_FILE)
+        f = util.gzopen(XMLTV_FILE)
         xmltv_programs = xmltv.read_programmes(f)
         f.close()
         
