@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/04/16 08:47:00  dischi
+# bugfix for bad plugins
+#
 # Revision 1.1  2003/04/15 20:01:34  dischi
 # first version of a plugin interface
 #
@@ -82,15 +85,15 @@ def init():
                 module = l[i][0]
                 object = '%s.PluginInterface' % module
 
-            exec('import %s' % module)
             try:
+                exec('import %s' % module)
                 if l[i][2]:
                     l[i] = eval('%s%s' % (object, str(l[i][2])))
                 else:
                     l[i] = eval('%s()' % object)
 
             except ImportError:
-                print 'failed to load plugin %s' % l[i][0]
+                print 'failed to import plugin %s' % l[i][0]
                 remove.append(i-len(remove))
 
             except AttributeError:
