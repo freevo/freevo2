@@ -178,7 +178,8 @@ o Upload the tar file to Sourceforge
 
   OR, using curl:
 
-  curl -T freevo-1.2.1.tar.gz ftp://anonymous:freevo_sf.net@upload.sourceforge.net/incoming/
+  curl -T freevo-1.2.1.tar.gz \
+    ftp://anonymous:freevo_sf.net@upload.sourceforge.net/incoming/
 
 o Make a new release
   o Goto http://sourceforge.net/project/admin/qrs.php?package_id=&group_id=46652 

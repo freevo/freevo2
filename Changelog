@@ -4,7 +4,7 @@ Freevo Changelog
 $Id$
 
 
-Release 1.2.2 (2002-05-XX):
+Release 1.2.2 (2002-05-31):
 ---------------------------
 o Added PNG bitmap support in the OSD
 o Added freetype font support in the OSD
