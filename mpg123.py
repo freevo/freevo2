@@ -97,6 +97,7 @@ class MPG123:
             osd.drawstring('Artist: %s' % id.artist, 30, 110)
             osd.drawstring('Album: %s' % id.album, 30, 140)
             osd.drawstring('Year: %s' % id.year, 30, 170)
+	    osd.drawstring('Track: %s' % id.track, 30, 200)
         osd.update()
         
         
