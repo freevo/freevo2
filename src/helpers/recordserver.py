@@ -7,6 +7,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.59  2004/07/16 19:39:57  dischi
+# store recording timestamp
+#
 # Revision 1.58  2004/07/12 22:33:17  mikeruelle
 # need the sharp part of the shebang line
 #
@@ -862,6 +865,7 @@ class RecordServer(xmlrpc.XMLRPC):
         fxd.info['tagline'] = fxd.str2XML(rec_prog.sub_title)
         fxd.info['plot'] = fxd.str2XML(rec_prog.desc)
         fxd.info['runtime'] = None
+        fxd.info['recording_timestamp'] = str(time.time())
         fxd.info['year'] = time.strftime('%m-%d ' + config.TV_TIMEFORMAT, 
                                          time.localtime(rec_prog.start))
         fxd.title = rec_prog.title 
