@@ -7,7 +7,10 @@ $Id$
 Release 1.2.6 (2002-XX-XX):
 ---------------------------
 Features, bugfixes:
-o XXX
+o Fixed a bug for configuring TV for other than NTSC.
+o Added new RPM building specs from Wan Tat Chee in the contrib/ dir.
+o Added sdl as a display option to configure. Not tested!
+o Added joystick support code from Dan Eriksen. Not tested!
 
 
 Release 1.2.5 (2002-08-21):
