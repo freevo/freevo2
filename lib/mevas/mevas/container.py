@@ -67,7 +67,8 @@ class CanvasContainer(CanvasObject):
 		# If this child has been rendered to the backing store, we add the
 		# child's backing store rectangle to the list of dirty rectangles
 		# to be updated on next call to _get_backing_store().
-		if self._backing_store and hasattr(o, "_backing_store_info"):
+		if self._backing_store and hasattr(o, "_backing_store_info") and \
+		   "pos" in o._backing_store_info:
 			self._backing_store_dirty = True
 			x, y = o._backing_store_info["pos"]
 			w, h = o._backing_store_info["size"]
