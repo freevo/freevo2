@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/10/28 18:16:26  dischi
+# move amazon.py to util
+#
 # Revision 1.21  2003/10/21 21:17:41  gsbarbieri
 # Some more i18n improvements.
 #
@@ -106,7 +109,7 @@ from xml.dom import minidom # ParseError used by amazon module
 from gui.PopupBox import PopupBox
 from gui.AlertBox import AlertBox
 
-import amazon
+from util import amazon
 
 
 class PluginInterface(plugin.ItemPlugin):
@@ -290,7 +293,6 @@ class PluginInterface(plugin.ItemPlugin):
         """
         create cover file for the item
         """
-        import amazon
         import directory
         
         box = PopupBox(text= _( 'getting data...' ) )
