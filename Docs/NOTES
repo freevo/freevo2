@@ -1,3 +1,20 @@
+Freevo Notes
+============
+
+$Id$
+
+This file contains random notes that are useful when dealing with Freevo
+
+----------------------------------------------------------------------
+CVS on Sourceforge:
+
+o Generate a public key using ssh-keygen and upload it to Sourceforge
+  using your account page. This allows you to use CVS without 
+  typing your password for each operation.
+
+
+----------------------------------------------------------------------
+
 Mixed stuff:
 
 o Openmovie is a very similar project
@@ -50,3 +67,7 @@ cd ..
 ./configure --without-avifile --without-rte --with-divx4linux --without-quicktime  --without-sdl --without-mad
 make
 
+----------------------------------------------------------------------
+Video4Linux1 API docs:
+
+http://www.linuxhq.com/kernel/v2.4/doc/video4linux/API.html
