@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/09/09 18:54:59  dischi
+# Add some doc
+#
 # Revision 1.2  2003/09/01 19:46:02  dischi
 # add menuw to eventhandler, it may be needed
 #
@@ -292,6 +295,21 @@ class CommandMainMenuItem(Item):
 
 # our plugin wrapper, just creates the main menu item and adds it.
 class PluginInterface(plugin.MainMenuPlugin):
+    """
+    A small plugin to run commands from the main menu. Currently supports only small
+    scripts which need no inputs. All output is logged in the freevo logdir, and
+    success or failure is determined on the return value of the command. You can now
+    also view the log file after the command has finished in freevo itself.
+
+    to activate it, put the following in your local_conf.py:
+
+    plugin.activate('commands', level=45) 
+    COMMANDS_DIR = '/usr/local/freevo_data/Commands' 
+
+    The level argument is used to influence the placement in the Main Menu. consult
+    freevo_config.py for the level of the other Menu Items if you wish to place it
+    in a particular location.
+    """
     def items(self, parent):
         menu_items = skin.settings.mainmenu.items
 

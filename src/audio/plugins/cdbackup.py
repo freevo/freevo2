@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/09/09 18:54:59  dischi
+# Add some doc
+#
 # Revision 1.14  2003/08/26 18:47:29  outlyer
 # Initial FLAC support (for encoding) Xine is required for playback.
 #
@@ -360,7 +363,75 @@ class main_backup_thread(threading.Thread):
         
 class PluginInterface(plugin.ItemPlugin):
     """
-    Plugin to rip and burn MP3s/CDs/Movies 
+    Freevo can now backup your audio CDs in .mp3, .ogg, or .wav format.
+    
+    To do so, the following variables need to be added to your local_conf.py:
+    
+    Directory that you want to backup your audio CD to.
+    AUDIO_BACKUP_DIR = '/music/MP3'
+    
+    You can use any combination of the 4 variables below to create subdirectories,
+    and filename of songs.
+    The four variables are: genre, artist,album, and song.
+    Whatever follows the last slash indicates how to create the filename.
+    Everything before the last slash indicates the directory structure you would
+    like to use -which will be appended to AUDIO_BACKUP_DIR.
+    CD_RIP_PN_PREF= '%(genre)s/%(artist)s/%(album)s/%(song)s'
+    
+    This would give you something like:
+    /music/MP3/metal/Metallica/And Justice For All/Blackened.mp3
+    (or Blackened.wav, Blackened.ogg)
+    
+    Here is another example which includes the artist and album in the filename:
+    CD_RIP_PN_PREF = '%(artist)s/%(artist)s - %(album)s - %(song)s'
+    /music/MP3/Metallica/Metallica - And Justice For All - Blackened.mp3
+    
+    cdparanoia is used to rip the CD to your hard drive. The actual command that
+    will be executed is stored in CDPAR_CMD.
+    CDPAR_CMD = 'cdparanoia'
+    
+    Lame .mp3 encoding parameters:
+    Lame is used for .mp3 encoding. The actual command that will be executed is
+    stored in LAME_CMD
+    LAME_CMD = 'lame'
+    
+    For ripping to .mp3 you can provide your own Lame encoder parameters for
+    bitrate, algorithm, and various other lame options. Add your custom parameters
+    in CD_RIP_LAME_OPTS.
+    CD_RIP_LAME_OPTS = '--vbr-new'
+    
+    Ogg Encoding:
+    Likewise for Ogg format, the command is as below, and you can add your own
+    custom ogg encoding options.
+    OGGENC_CMD ='oggenc'
+    CD_RIP_OGG_OPTS = ' '
+    
+    To activate this plugin, add the following to local_conf.py:
+    plugin.activate('audio.cdbackup')
+    
+    Finally, to actually backup an audio CD within Freeevo, when you are in the
+    Music menu, highlight/choose a CD, then hit 'e' on keyboard or 'ENTER' on
+    your remote control and you will be able to access the rip/backup menu.
+    
+    Here is a list of all the above mentioned parameters for simple cutting and
+    pasting:
+    
+    #The following are for adding and configuring the CD Audio backup plugin: 
+    AUDIO_BACKUP_DIR =  '/music/MP3' 
+     
+    CD_RIP_PN_PREF= '%(genre)s/%(artist)s/%(album)s/%(song)s' 
+    CDPAR_CMD = 'cdparanoia' 
+     
+    LAME_CMD = 'lame' 
+    CD_RIP_LAME_OPTS  = '--vbr-new' 
+     
+    #You can leave this out if you never use ogg and it won't show up in the
+    #backup menu 
+    OGGENC_CMD ='oggenc' 
+    CD_RIP_OGG_OPTS = ' ' 
+     
+    #To activate the cdbackup plugin: 
+    plugin.activate('audio.cdbackup') 
     """
     artist = ''
     album = ''

@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/09/09 18:55:00  dischi
+# Add some doc
+#
 # Revision 1.5  2003/08/23 12:51:42  dischi
 # removed some old CVS log messages
 #
@@ -43,7 +46,19 @@ import plugin
 import util
 
 class PluginInterface(plugin.ItemPlugin):
+    """
+    This plugin adds an item to your Audio, Video, Games, and Pictures Items. It
+    states how much memory is free on the partition that directory belongs to.
 
+    to activate it, put this in your local_conf.py:
+
+    plugin.activate('df') 
+
+    to see the disk usage go to any directory listing and, press ENTER ('e' key or
+    key it maps to on your remote) and you will see the disk usage under the Browse
+    directory option. This also works on the main directory listings where you see
+    your cdrom drives.
+    """
     def __init__(self):
         plugin.ItemPlugin.__init__(self)
 

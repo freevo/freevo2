@@ -15,6 +15,9 @@
 # for a full list of tested sites see Docs/plugins/headlines.txt
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/09/09 18:55:00  dischi
+# Add some doc
+#
 # Revision 1.2  2003/09/03 21:40:38  dischi
 # o use util pickle function
 # o show popup while getting the data
@@ -170,7 +173,17 @@ class HeadlinesMainMenuItem(Item):
 
 # our plugin wrapper, just creates the main menu item and adds it.
 class PluginInterface(plugin.MainMenuPlugin):
+    """
+    A plugin to list headlines from an XML (RSS) feed. To activate, put the
+    following lines in local_conf.py:
 
+    plugin.activate('headlines', level=45) 
+    HEADLINES_LOCATIONS = [
+          ('Advogato', 'http://advogato.org/rss/articles.xml'), 
+          ('DVD Review', 'http://www.dvdreview.com/rss/newschannel.rss') ] 
+
+    For a full list of tested sites, see 'Docs/plugins/headlines.txt'. 
+    """
     # make an init func that creates the cache dir if it don't exist
 
     def items(self, parent):

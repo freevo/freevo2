@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/09/09 18:54:59  dischi
+# Add some doc
+#
 # Revision 1.17  2003/08/23 12:51:42  dischi
 # removed some old CVS log messages
 #
@@ -96,6 +99,26 @@ from gui.AlertBox import AlertBox
 SHOW_WARNING=1
 
 class PluginInterface(plugin.ItemPlugin):
+    """
+    This plugin will allow you to search for CD Covers for your albums. To do that
+    just go in an audio item and press 'e' (on your keyboard) or 'ENTER' on your
+    remote control. That will present you a list of options with Find a cover for
+    this music as one item, just select it press 'enter' (on your keyboard) or
+    'SELECT' on your remote control and then it will search the cover in amazon.com.
+
+    Please Notice that this plugin use the Amazon.com web services and you will need
+    an Amazon developer key. You can get your at: http://www.amazon.com/webservices,
+    get that key and put it in a file named ~/.amazonkey or passe it as an argument
+    to this plugin.
+
+    To activate this plugin, put the following in your local_conf.py.
+
+    If you have the key in ~/.amazonkey
+    plugin.activate( 'audio.coversearch' ) 
+
+    Or this one if you want to pass the key to the plugin directly:
+    plugin.activate( 'audio.coversearch', args=('YOUR_KEY',) ) 
+    """
     def __init__(self, license=None):
         plugin.ItemPlugin.__init__(self)
 
