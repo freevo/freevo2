@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2002/11/26 21:42:28  dischi
+# small bugfix to remove configure menu for chapters
+#
 # Revision 1.2  2002/11/26 20:58:44  dischi
 # o Fixed bug that not only the first character of mplayer_options is used
 # o added the configure stuff again (without play from stopped position
@@ -98,10 +101,14 @@ def subtitle_selection_menu(arg=None, menuw=None):
 # Chapter selection
 #
 
+def chapter_selection(menuw=None, arg=None):
+    menuw.delete_menu()
+    play_movie(menuw=menuw, arg=arg)
+    
 def chapter_selection_menu(arg=None, menuw=None):
     items = []
     for c in range(1, arg.available_chapters+1):
-        items += [ menu.MenuItem("play chapter %s" % c, play_movie,
+        items += [ menu.MenuItem("play chapter %s" % c, chapter_selection,
                                  (arg, ' -chapter %s' % c)) ]
     moviemenu = menu.Menu('CHAPTER MENU', items)
     menuw.pushmenu(moviemenu)
