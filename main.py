@@ -74,10 +74,10 @@ menuwidget = menu.get_singleton()
 
 def shutdown(menuw=None, arg=None):
     osd.clearscreen(color=osd.COL_BLACK)
-    osd.drawstring('shutting down', osd.width/2 - 90, osd.height/2 - 10,
+    osd.drawstring('shutting down...', osd.width/2 - 90, osd.height/2 - 10,
                    fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
     osd.update()
-    os.system("sutdown -h now")
+    os.system("shutdown -h now")
 
     
 
@@ -119,7 +119,7 @@ def getcmd():
     #items += [menu.MenuItem('RECORD MOVIE', tv.main_menu, 'record')]
 
     items += [menu.MenuItem('IMAGES', imenu.main_menu,'','icons/images.png',0)]
-    items += [menu.MenuItem('SHUTDOWN', shutdown, None) ]
+    if config.ENABLE_SHUTDOWN: items += [menu.MenuItem('SHUTDOWN', shutdown, None) ]
 
     mainmenu = menu.Menu('FREEVO MAIN MENU', items, packrows=0)
     menuwidget.pushmenu(mainmenu)

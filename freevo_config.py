@@ -60,7 +60,15 @@ def ConfigInit(videotools = 'sim'):
         VIDREC_MQ = ('DIVX4rec -F 300000 -norm NTSC ' +
                      '-input Composite1 -m -r 22050 -w 320 -h 240 -ab 80 ' +
                      '-vg 300 -vb 800 -H 50 -o %s')
-        
+
+#
+# General settings
+# 
+# XXX Move to a file ("autoconf.py"?) that is create during "./configure"
+# from the parameters to it.
+#
+ENABLE_SHUTDOWN = 0      # Enable main menu choice for Linux shutdown (careful!)
+
 #
 # The list of filename suffixes that are used to match the files that
 # are played wih MPlayer. They are used as the argument to glob.glob()
