@@ -6,6 +6,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/09/11 20:54:37  outlyer
+# Added some other valid characters to the list. Technically, we could
+# allow a lot more (' and " are perfectly legal, but I don't think
+# SMB or other network filesystems like them)
+#
 # Revision 1.10  2003/09/11 19:35:36  outlyer
 # Oops again. It's been a long day, ok?
 #
@@ -74,7 +79,7 @@ def progname2filename(progname):
     '''Translate a program name to something that can be used as a filename.'''
 
     # Letters that can be used in the filename
-    ok = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_'
+    ok = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-:'
 
     s = ''
     for letter in progname:
