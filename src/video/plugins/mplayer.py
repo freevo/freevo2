@@ -20,6 +20,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2003/10/04 14:38:10  dischi
+# Try to auto-correct av sync problems. Set MPLAYER_SET_AUDIO_DELAY to
+# enable it. You need mmpython > 0.2 to make it work.
+#
 # Revision 1.29  2003/10/02 10:24:33  dischi
 # bmovl update
 #
@@ -278,6 +282,10 @@ class MPlayer:
             
         if os.path.exists('/tmp/bmovl') and config.MPLAYER_SOFTWARE_SCALER:
             mpl += ' -vf bmovl=1:0:/tmp/bmovl'
+
+        if config.MPLAYER_SET_AUDIO_DELAY and item.info.has_key('delay') and \
+               item.info['delay'] > 0:
+            mpl += ' -mc %s -delay -%s' % (int(item.info['delay'])+1, item.info['delay'])
 
         command = mpl + ' "' + filename + '"'
 

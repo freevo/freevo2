@@ -109,7 +109,7 @@ from event import *
 # of the config file doesn't match, Freevo won't start. If the minor version
 # is different, there will be only a warning
 
-LOCAL_CONF_VERSION  = 3.8
+LOCAL_CONF_VERSION  = 3.9
 
 # Description of changes in each new version
 FREEVO_CONF_CHANGES = [
@@ -158,7 +158,9 @@ LOCAL_CONF_CHANGES = [
     (3.8,
      '''Restructured DIR_GAMES and added XMLTV_GRABBER and XMLTV_DAYS for the
      tv_grab helper script. Also added USE_NETWORK to deactivate everything
-     that needs a network connection.''')]
+     that needs a network connection.'''),
+    (3.9,
+     '''Add MPLAYER_SET_AUDIO_DELAY to correct AV sync problems''') ]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -800,6 +802,15 @@ MPLAYER_SEEK_TIMEOUT = 8
 # bars on a 16:9 tv
 #
 MPLAYER_AUTOCROP = 0
+
+#
+# Try to set correct 'delay' and 'mc' values for mplayer based on the delay
+# from mmpython. This should correct av sync problems with mplayer for some
+# files, but may also break things (I don't know, that's why it's disabled
+# as default). WARNING: when seeking, the playpack is out of sync for some
+# seconds! This only works with mmpython > 0.2
+#
+MPLAYER_SET_AUDIO_DELAY = 0
 
 
 # ======================================================================

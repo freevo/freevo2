@@ -434,6 +434,15 @@ MAME_CACHE = '%s/romlist-%s.pickled' % (FREEVO_CACHEDIR, os.getuid())
 #
 # MPLAYER_AUTOCROP = 0
 
+#
+# Try to set correct 'delay' and 'mc' values for mplayer based on the delay
+# from mmpython. This should correct av sync problems with mplayer for some
+# files, but may also break things (I don't know, that's why it's disabled
+# as default). WARNING: when seeking, the playpack is out of sync for some
+# seconds! This only works with mmpython > 0.2
+#
+# MPLAYER_SET_AUDIO_DELAY = 0
+
 
 # ======================================================================
 # Xine section:
