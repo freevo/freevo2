@@ -13,6 +13,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/02/08 12:09:01  dischi
+# o let mplayer keep the aspect of the movie
+# o add bars/resize to fit 4:3 so all thumbnails have the same geometry
+#
 # Revision 1.6  2004/02/01 17:05:28  dischi
 # popup support
 #
@@ -94,15 +98,25 @@ def snapshot(videofile, imagefile=None, pos=None, update=True, popup=None):
         try:
             image = Image.open(imagefile)
             image.thumbnail((300,300), Image.ANTIALIAS)
+            if image.size[0] * 3 > image.size[1] * 4:
+                # fix image with blank bars to be 4:3
+                ni = Image.new('RGB', (image.size[0], (image.size[0]*3)/4))
+                ni.paste(image, (0,(((image.size[0]*3)/4)-image.size[1])/2))
+                image = ni
+            elif image.size[0] * 3 < image.size[1] * 4:
+                # strange aspect, let's guess it's 4:3
+                image = Image.open(imagefile).resize((image.size[0], (image.size[0]*3)/4),
+                                                     Image.ANTIALIAS)
             if image.mode == 'P':
                 image = image.convert('RGB')
-            image = image.crop((5, 0, image.size[0]-10, image.size[1]))
+            # crob some pixels, looks better that way
+            image = image.crop((4, 3, image.size[0]-8, image.size[1]-6))
             if imagefile.endswith('.raw'):
                 data = (image.tostring(), image.size, image.mode)
                 util.save_pickle(data, imagefile)
             else:
                 image.save(imagefile)
-        except OSError:
+        except (OSError, IOError):
             pass
 
     if popup:
@@ -135,7 +149,7 @@ if __name__ == "__main__":
 
     # call mplayer to get the image
     child = popen2.Popen3((mplayer, '-nosound', '-vo', 'png', '-frames', '8',
-                           '-ss', position, filename), 1, 100)
+                           '-ss', position, '-zoom', filename), 1, 100)
     while(1):
         data = child.fromchild.readline()
         if not data:
