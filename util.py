@@ -158,4 +158,25 @@ def recursefolders(root, recurse=0, pattern='*', return_folders=0):
         return result
 
 
+PROC_MOUNT_REGEXP = re.compile("^([^ ]*) ([^ ]*) .*$").match
 
+def proc_mount(dir):
+    f = open('/proc/mounts')
+    l = f.readline()
+    while(l):
+        m = PROC_MOUNT_REGEXP(l)
+        if m:
+            if m.group(2) == dir and m.group(1).encode() != 'none':
+                f.close()
+                return m.group(1).encode()
+        l = f.readline()
+    f.close()
+    return None
+
+def umount(dir):
+    if proc_mount(dir):
+        os.system("umount %s" % dir)
+
+def mount(dir):
+    if not proc_mount(dir):
+        os.system("mount %s" % dir)

@@ -11,6 +11,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2002/09/04 19:47:46  dischi
+# wrap (u)mount to get rid of the error messages
+#
 # Revision 1.25  2002/09/04 19:32:31  dischi
 # Added a new identifymedia. Freevo now polls the rom drives for media
 # change and won't mount the drive unless you want to play a file from cd or
@@ -123,7 +126,7 @@ def play_movie( arg=None, menuw=None ):
     if config.ROM_DRIVES:
         for rom in config.ROM_DRIVES:
             if string.find(filename, rom[0]) == 0:
-                os.system('mount %s' % rom[0])
+                util.mount(rom[0])
                 
     mplayer.play(mode, filename, playlist, 0, mplayer_options)
 
@@ -219,7 +222,7 @@ def cwd(arg=None, menuw=None):
     if config.ROM_DRIVES:
         for rom in config.ROM_DRIVES:
             if rom[0] == dir:
-                os.system('mount %s' % rom[0])
+                util.mount(rom[0])
                 
     dirnames = util.getdirnames(dir)
     mplayer_files = util.match_files(dir, config.SUFFIX_MPLAYER_FILES)

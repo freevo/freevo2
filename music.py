@@ -14,6 +14,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2002/09/04 19:47:46  dischi
+# wrap (u)mount to get rid of the error messages
+#
 # Revision 1.7  2002/09/04 19:32:31  dischi
 # Added a new identifymedia. Freevo now polls the rom drives for media
 # change and won't mount the drive unless you want to play a file from cd or
@@ -251,7 +254,6 @@ def handle_config( event=None, menuw=None, arg=None ):
             osd.update()
             # close the tray and mount the cd
             os.system('eject -t %s' % rom_dir)
-            os.system('mount %s' % rom_dir)
             menuw.refresh()
             main_menu( None, menuw )
         else:

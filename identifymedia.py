@@ -62,11 +62,11 @@ class Identify_Thread(threading.Thread):
             title, image, xml_filename = config.MOVIE_INFORMATIONS[id]
             
 
-        os.system("mount %s" % dir)
+        util.mount(dir)
 
         for media in mediatypes:
             if os.path.exists(dir + media[1]):
-                os.system("umount %s" % dir)
+                util.umount(dir)
                 info = media[0], '%s [%s]' % (media[0], label), image, (media[2], 1, [])
                 return last_code, info
                 
@@ -74,7 +74,7 @@ class Identify_Thread(threading.Thread):
         mp3_files = util.match_files(dir, config.SUFFIX_AUDIO_FILES)
         image_files = util.match_files(dir, config.SUFFIX_AUDIO_FILES)
 
-        os.system("umount %s" % dir)
+        util.umount(dir)
 
         info = None
 

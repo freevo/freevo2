@@ -139,7 +139,7 @@ class MenuWidget:
         if self.menustack[-1].umount_all == 1:
             if config.ROM_DRIVES:
                 for rom in config.ROM_DRIVES:
-                    os.system('umount %s' % rom[0])
+                    util.umount(rom[0])
     
         skin.DrawMenu(self)
         

@@ -4,6 +4,9 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.62  2002/09/04 19:47:45  dischi
+# wrap (u)mount to get rid of the error messages
+#
 # Revision 1.61  2002/09/04 19:32:31  dischi
 # Added a new identifymedia. Freevo now polls the rom drives for media
 # change and won't mount the drive unless you want to play a file from cd or
@@ -200,24 +203,24 @@ def eventhandler(event = None, menuw=None, arg=None):
         if info:
             (media, label, image, play_options ) = info
             if play_options:
-                os.system('mount %s' % config.ROM_DRIVES[0][0])
+                util.mount(config.ROM_DRIVES[0][0])
                 movie.play_movie(menuw=None, arg=play_options)
 
             elif media == 'AUDIO-CD':
                 print "play the audio cd -- not implemented yet"
 
             elif media == 'DIVX':
-                os.system('mount %s' % config.ROM_DRIVES[0][0])
+                util.mount(config.ROM_DRIVES[0][0])
                 movie.cwd(config.ROM_DRIVES[0][0], menuwidget)
 
             elif media == 'AUDIO':
-                os.system('mount %s' % config.ROM_DRIVES[0][0])
+                util.mount(config.ROM_DRIVES[0][0])
                 music.parse_entry([config.ROM_DRIVES[0][0],
                                    config.ROM_DRIVES[0][0]],
                                   menuwidget)
 
             elif media == 'IMAGE':
-                os.system('mount %s' % config.ROM_DRIVES[0][0])
+                util.mount(config.ROM_DRIVES[0][0])
                 imenu.cwd(config.ROM_DRIVES[0][0], menuwidget)
 
 
