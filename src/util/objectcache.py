@@ -10,6 +10,9 @@
 # 
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/06/21 12:06:38  dischi
+# fix strange crash with try except
+#
 # Revision 1.6  2004/04/20 17:11:21  dischi
 # fix strange crash
 #
@@ -98,9 +101,11 @@ class ObjectCache:
         if isinstance(key, str):
             key = unicode(key, config.LOCALE)
 
-        # remove old one if key is already in cache
-        if key in self.cache:
+        try:
+            # remove old one if key is already in cache
             del self.lru[self.lru.index(key)]
+        except:
+            return None
             
         # Do we need to delete the oldest item?
         if len(self.cache) > self.cachesize:
