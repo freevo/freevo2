@@ -618,6 +618,51 @@
       </content>
     </layout>
 
+    <!-- tv listing area -->
+    <layout label="tv info">
+      <background>
+	<rectangle size="0" bgcolor="0x80000000" radius="10" width="max"/>
+      </background>
+      <content x="10" y="10" height="max-20" width="max-20" type="text"
+	spacing="10" font="tv">
+	<item type="default">
+	  <if expression="title">
+	     <text font="info title" 
+	           width="630" height="line_height"
+	           mode="hard" align="left"
+		   expression="title" />
+	  </if>
+          <text font="info value"
+	        width="max" height="line_height"
+	        mode="hard" align="left" valign="center"
+	        expression="start" />
+          <text font="info value"
+	        width="max" height="line_height"
+	        mode="hard" align="left" valign="center">-</text>
+          <text font="info value"
+	        width="max" height="line_height"
+	        mode="hard" align="left" valign="center"
+	        expression="stop" />
+	  <newline />
+	  <if expression="sub_title">
+	     <text font="info tagline"
+	           width="max" height="line_height"
+	           mode="hard" align="left"
+		   expression="sub_title" />
+             <newline />
+	  </if>
+	  <if expression="desc">
+             <text font="info plot"
+	           width="max" height="line_height"
+	           mode="hard" align="left"
+	          expression="desc" />	  
+             <newline />
+	  </if>
+	</item>
+      </content>
+    </layout>
+
+
     <!-- ********************************************** -->
     <!-- FONT DEFINITIONS -->
 
