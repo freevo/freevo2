@@ -30,7 +30,13 @@ if __name__ == '__main__':
     # executable. So it was patched a little to keep track
     # of updates to sys.path.
     sys.path = ['.', pildir, maindir] + sys.path
+
+    progname = sys.argv[1]
+
+    # Adjust sys.argv[] for the started program
+    sys.argv = sys.argv[1:]
     
-    print 'Starting "%s"' % sys.argv[1]
-    fd = open(sys.argv[1], 'r')
-    mod = imp.load_source('__main__', sys.argv[1], fd)
+    print 'Starting "%s"' % progname
+
+    fd = open(progname, 'r')
+    mod = imp.load_source('__main__', progname, fd)
