@@ -10,6 +10,10 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/03/30 17:42:20  rshortt
+# Now passing self along to skin.GetPopupBoxStyle in an attempt to get the
+# skin propertied of the current menu in case we are using a menu based skin.
+#
 # Revision 1.9  2003/03/30 15:54:07  rshortt
 # Added 'parent' as a constructor argument for PopupBox and all of its
 # derivatives.
@@ -151,7 +155,7 @@ class PopupBox(GUIObject):
 
         # XXX: skin settings
         ((bg_type, skin_bg), BLAH, BLAH, skin_font, BLAH, BLAH) = \
-         self.skin.GetPopupBoxStyle()
+         self.skin.GetPopupBoxStyle(self)
 
         if not self.left:     self.left   = self.osd.width/2 - self.width/2
         if not self.top:      self.top    = self.osd.height/2 - self.height/2
