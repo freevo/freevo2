@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/03/30 17:00:00  dischi
+# removed debug (again)
+#
 # Revision 1.27  2003/03/30 16:52:51  dischi
 # removed debug
 #
@@ -406,7 +409,6 @@ class MenuWidget(GUIObject):
             items += [ MenuItem(title, function, item) ]
         xml_file = None
         if hasattr(item, 'xml_file'):
-            print item.xml_file
             xml_file = item.xml_file
 
         s = Menu(menu_name, items, xml_file=xml_file)
