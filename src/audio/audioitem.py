@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.56  2004/07/10 13:36:07  outlyer
+# Handle the situation where track number can't be converted into an int()
+#
 # Revision 1.55  2004/07/10 12:33:37  dischi
 # header cleanup
 #
@@ -131,7 +134,10 @@ class AudioItem(Item):
                 return '%s%s' % (os.stat(self.filename).st_ctime, self.filename)
         if mode == 'advanced':
             # sort by track number
-            return '%0.3i-%s' % (int(self['trackno']), String(self.url))
+            try:
+                return '%0.3i-%s' % (int(self['trackno']), String(self.url))
+            except ValuError:
+                return '%s-%s' % (String(self['trackno']), String(self.url))
         return self.url
 
 
