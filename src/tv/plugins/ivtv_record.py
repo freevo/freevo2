@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/09/14 03:22:47  outlyer
+# Move some output into 'DEBUG:'
+#
 # Revision 1.12  2003/09/06 15:12:04  rshortt
 # recordserver's name changed.
 #
@@ -134,7 +137,7 @@ class Record_Thread(threading.Thread):
                 print 'Setting Channel to %s' % self.prog.tunerid
                 v.setchannel(self.prog.tunerid)
 
-                v.print_settings()
+                if DEBUG: v.print_settings()
 
                 now = time.time()
                 stop = now + self.prog.rec_duration
