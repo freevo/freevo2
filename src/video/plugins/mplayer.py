@@ -20,6 +20,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2003/10/17 21:30:02  rshortt
+# We need self.osdfont set before calling childapp's init.  This was crashing
+# for me on network play.
+#
 # Revision 1.32  2003/10/14 16:58:48  dischi
 # fix mode detection, MPLAYER_ARGS never worked
 #
@@ -582,12 +586,12 @@ class MPlayerApp(childapp.ChildApp):
         self.RE_EXIT      = re.compile("^Exiting\.\.\. \((.*)\)$").match
         self.item         = item
         self.mplayer      = mplayer
+        self.osdfont      = osd.getfont(config.OSD_DEFAULT_FONTNAME,
+                                        config.OSD_DEFAULT_FONTSIZE)
 
         childapp.ChildApp.__init__(self, app)
 
         self.exit_type = None
-        self.osdfont   = osd.getfont(config.OSD_DEFAULT_FONTNAME,
-                                     config.OSD_DEFAULT_FONTSIZE)
 
         self.use_bmovl = False
         if app.find('/tmp/bmovl') > 0:
