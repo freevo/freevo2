@@ -690,7 +690,14 @@ VCR_SETTINGS = '%s composite1 %s /dev/video0' % (CONF.tv, CONF.chanlist)
 
 # TV capture size for viewing and recording. Max 768x480 for NTSC,
 # 768x576 for PAL. Set lower if you have a slow computer!
+#
+# For the 'tvtime' TV viewing application, only the horizontal size is used.
+# Set the horizontal size to 400 or 480 if you have a slow (~500MHz) computer,
+# it still looks OK, and the picture will not be as jerky.
+# The vertical size is always either fullscreen or 480/576 (NTSC/PAL)
+# for tvtime.
 TV_VIEW_SIZE = (640, 480)
+
 # XXX Not used yet
 TV_REC_SIZE = (320, 240)   # Default for slower computers
 
