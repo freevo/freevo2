@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2002/10/18 06:19:53  krister
+# Changed TV button rc button 'menu' to 'display'. Changed to stay in the TV guide while watching TV. Fixed a bug where a new XMLTV guide was not loaded properly after update. Started adding simple recording support, not nearly done.
+#
 # Revision 1.8  2002/10/17 04:21:03  krister
 # Changed the way mplayer is stopped to prevent hangups. Added the priority setting.
 #
@@ -313,8 +316,8 @@ class MPlayer:
             os.system('killall -9 freevo_xwin 2&> /dev/null')
             self.xwin_wid = 0
             skin.hold = FALSE  # Allow drawing again
-            rc.app = None
-            menuwidget.refresh()
+            rc.app = tv.eventhandler
+            tv.refresh()
 
         elif event == rc.CHUP:
             if self.mode == 'vcr':

@@ -2,7 +2,11 @@
 # Logging is initialized here, so it should be imported first
 import config
 
-import sys, time, copy, re
+import sys
+import os
+import time
+import copy
+import re
 
 # Various utilities
 import util
@@ -14,6 +18,7 @@ import mixer
 import osd
 import gui
 import skin
+import tv
 import ExtendedMenu
 
 # The RemoteControl class, sets up a UDP daemon that the remote control client
@@ -45,7 +50,9 @@ class ExtendedMenu_TV(ExtendedMenu.ExtendedMenu):
         
 
     def eventhandler(self, event):
-        if event == rc.MENU:
+        print 'XXX %s' % event
+        
+        if event == rc.DISPLAY:
             if self.view.getVisible() == 1:
                 self.view.setVisible(0)
             else:
@@ -64,6 +71,24 @@ class ExtendedMenu_TV(ExtendedMenu.ExtendedMenu):
             self.refresh()
         elif event == rc.REFRESH_SCREEN:
             self.refresh()
+        elif event == rc.REC:
+            print self.listing.last_to_listing[3]
+            prog = self.listing.last_to_listing[3]
+            s = 'Recording program %s\n' % prog.title
+            s += 'Stop %s\n' % time.ctime(prog.stop)
+            s += 'Tuner channel %s' % tv.get_tunerid(prog.channel_id)
+            skin.PopupBox(s)
+            time.sleep(2)
+            self.refresh()
+
+            cmd = (('/home/krister/proj/freevo/apps/test/C500/' +
+                    'nvrec_20020821a/nuvrec -F 300000 -norm NTSC ' +
+                    '-input Television -w 320 -h 240 -vq 100 -d ' +
+                    '/dev/dsp2 -mixsrc /dev/mixer2:line1 -o /home/' +
+                    'krister/Movies/%s.avi &> /dev/null &') %
+                   time.ctime().replace(' ', '_'))
+            #os.system(cmd)
+            print 'Started cmd "%s"' % cmd
         elif event != rc.IDENTIFY_MEDIA:
             self.clear()
             t = self.listing.eventhandler(event)
@@ -116,13 +141,13 @@ class ExtendedMenuInfo_TV(ExtendedMenu.ExtendedMenuInfo):
 class ExtendedMenuListing_TV(ExtendedMenu.ExtendedMenuListing):
     n_cols  = 4
     col_time = 30 # each col represents 30 minutes 
-    guide = epg.get_guide()
     last_to_listing = [ None, None, None , None ]
 
 
     # Parameters:
     #    - to_listing: (start_time, stop_time, prg_start) to listing
     def ToListing(self, to_listing):
+        self.guide = epg.get_guide()
         channels = self.guide.GetPrograms(start=to_listing[0]+1, stop=to_listing[1]-1)
         self.last_to_listing = to_listing
 
@@ -164,7 +189,10 @@ class ExtendedMenuListing_TV(ExtendedMenu.ExtendedMenuListing):
                     
                 for i in range(len(chan.programs)):
                     if to_listing[3]:
-                        if chan.programs[i].title == to_listing[3].title and chan.programs[i].start == to_listing[3].start and chan.programs[i].stop == to_listing[3].stop and chan.programs[i].channel_id == to_listing[3].channel_id:
+                        if (chan.programs[i].title == to_listing[3].title and
+                            chan.programs[i].start == to_listing[3].start and
+                            chan.programs[i].stop == to_listing[3].stop and
+                            chan.programs[i].channel_id == to_listing[3].channel_id):
                             self.last_to_listing[3] = chan.programs[i]
                             flag_selected = 1
                                 

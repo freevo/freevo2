@@ -75,6 +75,7 @@ info = ExtendedMenu_TV.ExtendedMenuInfo_TV()
 listing = ExtendedMenu_TV.ExtendedMenuListing_TV()
 em = ExtendedMenu_TV.ExtendedMenu_TV(view, info, listing)
 
+
 def get_start_time():
     ttime = time.localtime()
     stime = [ ]
@@ -94,23 +95,28 @@ stop_time = get_start_time()
 
 
 def start_tv(mode=None, channel_id=None):
-    tuner_id = None
-    for tv_channel_id, tv_display_name, tv_tuner_id in config.TV_CHANNELS:
-        if tv_channel_id == channel_id:
-            tuner_id = tv_tuner_id
-            break
 
-    if not tuner_id:
-        skin.PopupBox('Could not find TV channel %s' % channel_id)
-        time.sleep(2)
-        return
+    tuner_id = get_tunerid(channel_id)
     
     print 'mode=%s    channel=%s  tuner=%s' % (mode, channel_id, tuner_id)
     
     tvapp.Play(mode, tuner_id)
 
 
+def get_tunerid(channel_id):
+    tuner_id = None
+    for tv_channel_id, tv_display_name, tv_tuner_id in config.TV_CHANNELS:
+        if tv_channel_id == channel_id:
+            return tv_tuner_id
+
+    skin.PopupBox('Could not find TV channel %s' % channel_id)
+    time.sleep(2)
+    return None
+    
+   
 def eventhandler(event):
+    print 'TV %s' % event
+    
     if event == rc.EXIT:
         rc.app = None
         menuwidget.refresh()
@@ -119,6 +125,9 @@ def eventhandler(event):
     else:
         em.eventhandler(event)
 
+
+def refresh():
+     em.refresh()
 
 
 def main_menu(arg, menuw):

@@ -105,6 +105,10 @@ cd ..
    --without-quicktime --without-sdl --without-mad --without--ffmpeg
 make
 
+Record sound using the btaudio device
+./nuvrec -F 300000 -norm NTSC -input Television -w 320 -h 240 -vq 100 \
+    -d /dev/dsp2 -mixsrc /dev/mixer2:line1 -o tst2.avi
+
 ----------------------------------------------------------------------
 Video4Linux1 API docs:
 
