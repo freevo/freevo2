@@ -131,6 +131,6 @@ DIR_RECORD = '/movies_local/recorded'
 # Electronic Program Guide (EPG) settings
 #
 # This setting will download TV listings for Charter Cable in St Charles, MO
-# from yahoo.com
+# from yahoo.com. It will not work outside the US as of now.
 # 
 EPG_URL = 'http://tv.yahoo.com/grid?.intl=us&zip=63303&.done=&lineup=us_MO24526&dur=6'
