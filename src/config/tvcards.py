@@ -87,6 +87,7 @@ class IVTVCard(TVCard):
 class DVBCard:
     def __init__(self, number):
         self.adapter = '/dev/dvb/adapter' + number
+        self.number = number
         INFO_ST = '128s10i'
         val = ioctl.pack( INFO_ST, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 )
         devfd = os.open(self.adapter + '/frontend0', os.O_TRUNC)
