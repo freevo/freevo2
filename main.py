@@ -4,6 +4,9 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.60  2002/09/01 09:43:01  dischi
+# Fixes for the new "type" parameter in MenuItem
+#
 # Revision 1.59  2002/08/31 18:22:47  dischi
 # changed pgrep regexp to kill freevo
 #
@@ -209,7 +212,8 @@ def getcmd():
     menu_items = skin.settings.mainmenu.items
     for i in menu_items:
         if i.visible:
-            items += [menu.MenuItem(i.name,eval(i.action), i.arg, None, ('main',''), i.icon)]
+            items += [menu.MenuItem(i.name,eval(i.action), i.arg, None, None,
+                                    'main', i.icon)]
             
     mainmenu = menu.Menu('FREEVO MAIN MENU', items, packrows=0)
     menuwidget.pushmenu(mainmenu)

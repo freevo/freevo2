@@ -14,6 +14,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2002/09/01 09:43:01  dischi
+# Fixes for the new "type" parameter in MenuItem
+#
 # Revision 1.5  2002/08/21 04:58:26  krister
 # Massive changes! Obsoleted all osd_server stuff. Moved vtrelease and matrox stuff to a new dir fbcon. Updated source to use only the SDL OSD which was moved to osd.py. Changed the default TV viewing app to mplayer_tv.py. Changed configure/setup_build.py/config.py/freevo_config.py to generate and use a plain-text config file called freevo.conf. Updated docs. Changed mplayer to use -vo null when playing music. Fixed a bug in music playing when the top dir was empty.
 #
@@ -126,7 +129,7 @@ def main_menu(arg=None, menuw=None):
             type = 'file'
         
         items += [ menu.MenuItem( title, parse_entry, (title, file),
-                                  handle_config, (type, file),
+                                  handle_config, (type, file), type,
                                   None, None, None ) ]
                                   
     for (drive) in config.ROM_DRIVES:
@@ -137,7 +140,7 @@ def main_menu(arg=None, menuw=None):
 
         if media == 'AUDIO':
             items += [menu.MenuItem(dir, parse_entry, (label,dir),
-                                    handle_config, ('dir', dir))]
+                                    handle_config, ('dir', dir), 'dir')]
             
     mp3menu = menu.Menu('MUSIC MAIN MENU', items)
     menuw.pushmenu(mp3menu)
@@ -168,7 +171,7 @@ def parse_entry( arg=None, menuw=None ):
             # XXX Should I do '_' to ' ' translation here and stuff?
             # Yes recursive stupid.
             m = menu.MenuItem( title, parse_entry, (title, dirname),
-                               handle_config, ('dir', dirname),
+                               handle_config, ('dir', dirname), 'dir',
                                None, None, None )
             
             if os.path.isfile(dirname+'/cover.png'): 
@@ -183,12 +186,12 @@ def parse_entry( arg=None, menuw=None ):
             create_randomized_playlist(files, playlist)
             title = 'PL: Randomized playlist with all songs in this directory'
             items += [menu.MenuItem(title, make_playlist_menu, playlist,
-                                    handle_config, ('list', playlist))]
+                                    handle_config, ('list', playlist), 'list')]
     
         for playlist in playlists:
             title = 'PL: ' + os.path.basename(playlist)[:-4]
             items += [menu.MenuItem(title, make_playlist_menu, playlist,
-                                    handle_config, ('list', playlist))]
+                                    handle_config, ('list', playlist), 'list')]
             
     
         for file in files:
