@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/02/01 16:58:34  rshortt
+# Catch some exceptions probably having to do with bad data.
+#
 # Revision 1.3  2004/01/18 19:06:00  outlyer
 # Add a "commit" function...call it to make sure the insert/updates are
 # written to disc.
@@ -59,7 +62,7 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import os
+import os, traceback
 import config
 
 # helper functions
@@ -90,10 +93,15 @@ def escape(sql):
         return 'null'
 
 def inti(a):
+    ret = 0
     if a:
-        return int(a)
-    else:
-        return 0
+	try: 
+	    ret = int(a)
+	except ValueError:
+	    traceback.print_exc()
+	    ret = 0
+
+    return ret
 
 # defines:
 DATABASE = os.path.join(config.FREEVO_CACHEDIR, 'freevo.sqlite')
@@ -113,7 +121,12 @@ class MetaDatabase:
         self.cursor = self.db.cursor()
 
     def runQuery(self,query, close=False):
-        self.cursor.execute(query)
+	try:
+            self.cursor.execute(query)
+        except TypeError:
+            traceback.print_exc()
+            return False
+
         if close:
             # run a single query then close
             result = self.cursor.fetchall()
