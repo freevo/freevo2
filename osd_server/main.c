@@ -61,16 +61,25 @@ static uint8 framebuffer[SCREEN_HEIGHT][SCREEN_WIDTH][4]; /* BGR0 */
 
 void osd_close (void);
 void osd_update (void);
-void osd_drawbitmap (char *filename, int x0, int y0, int scalefactor);
+void osd_loadbitmap (char *filename, uint8 **ppBitmap,
+                     uint16 *pWidth, uint16 *pHeight);
+void osd_zoombitmap (char *filename, uint16 bbx, uint16 bby, uint16 bbw,
+                     uint16 bbh, int scalefactor, uint8 **ppScaledBM,
+                     uint16 *pScaledWidth, uint16 *pScaledHeight);
+void osd_drawbitmap (char *filename, int x0, int y0,
+                     uint16 bbx, uint16 bby, uint16 bbw, uint16 bbh,
+                     int scalefactor);
 void osd_drawline (int x0, int y0, int x1, int y1, int width, uint32 color);
 void osd_drawbox (int x0, int y0, int x1, int y1, int width, uint32 color);
 void osd_clearscreen (int color);
 void osd_drawstring (char *pFont, int ptsize, char str[], int x, int y,
                      uint32 fgcol, int *width);
 static int strcasecmp_tail (char *str, char *tail);
-static void
-resizebitmap (uint32 *pBM, uint16 rows, uint16 cols, double zoom,
-              uint32 **ppScaledBM, uint16 *pScaledRows, uint16 *pScaledCols);
+static time_t getmtime (char *filename);
+static void zoombitmap (uint8 *pBM, uint16 cols, uint16 rows,
+                        uint16 bbx, uint16 bby, uint16 bbw, uint16 bbh,
+                        double zoom, uint8 **ppScaledBM, uint16 *pScaledCols,
+                        uint16 *pScaledRows);
 
 
 void
@@ -147,9 +156,41 @@ executecommand (char command[], char args[][1000], int argc)
     osd_setpixel (atoi (args[0]), atoi (args[1]), atoi (args[2]));
   }
 
+  if (!strcmp ("loadbitmap", command)) {
+    printf ("Exec: loadbitmap '%s'\n", args[0]);
+    osd_loadbitmap (args[0], NULL, NULL, NULL);
+  }
+
+  if (!strcmp ("zoombitmap", command)) {
+    uint16 bbx, bby, bbw, bbh, scalefactor;
+
+
+    bbx = atoi (args[1]);
+    bby = atoi (args[2]);
+    bbw = atoi (args[3]);
+    bbh = atoi (args[4]);
+    scalefactor = atoi (args[5]);
+    
+    printf ("Exec: zoombitmap '%s' (%d;%d, %dx%d) %d\n", args[0],
+            bbx, bby, bbw, bbh, scalefactor);
+    osd_zoombitmap (args[0], bbx, bby, bbw, bbh, scalefactor, NULL, 0, 0);
+  }
+
   if (!strcmp ("drawbitmap", command)) {
-    printf ("Exec: drawbitmap\n");
-    osd_drawbitmap (args[0], atoi (args[1]), atoi (args[2]), atoi (args[3]));
+    uint16 x, y, bbx, bby, bbw, bbh, scalefactor;
+
+
+    x = atoi (args[1]);
+    y = atoi (args[2]);
+    bbx = atoi (args[3]);
+    bby = atoi (args[4]);
+    bbw = atoi (args[5]);
+    bbh = atoi (args[6]);
+    scalefactor = atoi (args[7]);
+    
+    printf ("Exec: drawbitmap '%s' %d;%d (%d;%d, %dx%d) %d\n", args[0],
+            x, y, bbx, bby, bbw, bbh, scalefactor);
+    osd_drawbitmap (args[0], x, y, bbx, bby, bbw, bbh, scalefactor);
   }
 
   if (!strcmp ("drawline", command)) {
@@ -359,75 +400,296 @@ strcasecmp_tail (char *str, char *tail)
   
 }
 
-/* Draw a bitmap at the specified x0;y0. PNG and JPEG are supported.
- * Scaling = (scalefactor / 1000), i.e. 500 means half size. */
-void
-osd_drawbitmap (char *filename, int x0, int y0, int scalefactor)
+
+/* Return the modification time in seconds for a file. Returns 0 for errors. */
+static time_t
+getmtime (char *filename)
 {
-   uint32 *pBM, *pBMorg, val;
-   uint16 w, h, bmx, bmy;
-   int x, y;
+  struct stat buf;
+
+
+  if (!stat (filename, &buf)) {
+    return (buf.st_mtime);
+  } else {
+    return (0);
+  }
+  
+}
+
+
+/* Load a bitmap from file to memory. Keeps the last loaded file in
+ * memory for fast redisplaying, zooming, etc.
+ *
+ * The function returns a pointer to the loaded bitmap, as well as
+ * width and height. The bitmap data should not be modified, and
+ * the memory is handled by this function, i.e. it should not
+ * be free()-d by the calling function.
+ *
+ * The output parameter pointers can be NULL, in which case the
+ * bitmap is loaded into the cache for future use.
+ */
+void
+osd_loadbitmap (char *filename, uint8 **ppBitmap,
+                uint16 *pWidth, uint16 *pHeight)
+{
+  /* This is the last loaded raw bitmap file */
+  static uint8 *pBitmapCache = NULL;
+  static char bitmapFilename[256] = "";
+  static uint16 bitmapWidth, bitmapHeight;
+  static time_t bitmapModtime = 0;     /* File timestamp */
    
 
-   if (strcasecmp_tail (filename, ".png")) {
-     if (read_png (filename, (uint8 **) &pBM, &w, &h) != OK) {
-       DBG ("cannot load bitmap '%s'!\n", filename);
-       return;
-     }
-   } else if (strcasecmp_tail (filename, ".jpg") ||
-              strcasecmp_tail (filename, ".jpeg")) {
-     if (read_jpeg (filename, (uint8 **) &pBM, &w, &h) != OK) {
-       DBG ("cannot load bitmap '%s'!\n", filename);
-       return;
-     }
-   } else {
-     DBG ("Filename '%s', unrecognized suffix!", filename);
-     return;
-   }
+  /* Result (OK, ERROR) is signified by this output parameter, which is
+   * ERROR by default. */
+  if (ppBitmap) *ppBitmap = NULL;
+  
+  /* Is the bitmap already loaded? */
+  if (!strcmp (filename, bitmapFilename)) {
+    /* Same filename, same modtime? */
+    if (getmtime (filename) == bitmapModtime) {
+      /* Yep, return the old buffer */
+      DBG ("Returning cached data");
+      if (ppBitmap) *ppBitmap = pBitmapCache;
+      if (pWidth) *pWidth = bitmapWidth;
+      if (pHeight) *pHeight = bitmapHeight;
+      return;
+    }
+  }
 
-   pBMorg = pBM;
+  DBG ("Loading new bitmap");
+  
+  /* No, other bitmap than the cached one wanted. Free the cache, if used. */
+  if (pBitmapCache) {
+    free (pBitmapCache);
+    pBitmapCache = NULL;
+  }
+  
+  /* Load the new bitmap */
+  if (strcasecmp_tail (filename, ".png")) {
+    if (read_png (filename, &pBitmapCache, &bitmapWidth,
+                  &bitmapHeight) != OK) {
+      DBG ("cannot load bitmap '%s'!\n", filename);
+      return;
+    }
+  } else if (strcasecmp_tail (filename, ".jpg") ||
+             strcasecmp_tail (filename, ".jpeg")) {
+    if (read_jpeg (filename, &pBitmapCache, &bitmapWidth,
+                   &bitmapHeight) != OK) {
+      DBG ("cannot load bitmap '%s'!\n", filename);
+      return;
+    }
+  } else {
+    DBG ("Filename '%s', unrecognized suffix!", filename);
+    return;
+  }
 
-   /* Perform scaling, if any */
-   if (scalefactor != 1000) {
-     double zoom = scalefactor / 1000.0;
-     uint32 *pScaledBM;
-     uint16 sw, sh;             /* Scaled width and height */
+  /* Ok, we got the new bitmap. Set the cache parameters. */
+  strcpy (bitmapFilename, filename);
+  bitmapModtime = getmtime (filename);
 
-     
-     resizebitmap (pBM, h, w, zoom, &pScaledBM, &sh, &sw);
-     free (pBM);
+  /* Output parameters. */
+  if (ppBitmap) *ppBitmap = pBitmapCache;
+  if (pWidth) *pWidth = bitmapWidth;
+  if (pHeight) *pHeight = bitmapHeight;
 
-     DBG ("Scaled bitmap. Zoom = %d, org size %dx%d, new size %dx%d",
-          scalefactor, w, h, sw, sh);
+  DBG ("Loaded bitmap 0x%08x, %dx%d", (uint32) pBitmapCache,
+       bitmapWidth, bitmapHeight);
+  
+  /* Done */
+  return;
 
-     pBMorg = pBM = pScaledBM;
-     w = sw;
-     h = sh;
-   }
-   
-   /* Should the bitmap be tiled? */
-   if ((x0 == -1) || (y0 == -1)) {
-      /* Yes, tile it */
-      for (y = 0; y < SCREEN_HEIGHT; y++) {
-         for (x = 0; x < SCREEN_WIDTH; x++) {
-            bmx = x % w;
-            bmy = y % h;
-            val = pBM[bmy*w + bmx];
-            osd_setpixel (x, y, val);
-         }
+}
+
+
+/* Perform a zoom operation on a bitmap. The result is cached, so the routine
+ * can be used to pipeline grahics operations (load->zoom->draw->update)
+ * The bitmap is retrieved using osd_loadbitmap() which might have it in its'
+ * cache already.
+ *
+ * Input parameters:  Original bitmap filename, scalefactor.
+ * zoom = Scaling = (scalefactor / 1000), i.e. 500 means half size.
+ * Zoom options: bounding box (x, y, width, height), zoom. Bounding box is
+ *               not used if width or height is 0. The zoom is applied
+ *               *after* the bounding box, which is applied on the original
+ *               bitmap.
+ * Output parameters: Scaled bitmap (ppScaledBM, pScaledWidth, pScaledHeight).
+ *                    The scaled bitmap must not be modified or free()-d!
+ *
+ * The output parameter pointers can be NULL, in which case the
+ * bitmap is zoomed and loaded into the zoom cache for future use.
+ */
+void
+osd_zoombitmap (char *filename, uint16 bbx, uint16 bby, uint16 bbw, uint16 bbh,
+                int scalefactor, uint8 **ppScaledBM,
+                uint16 *pScaledWidth, uint16 *pScaledHeight)
+{
+  /* This is the cached version of the zoomed bitmap */
+  static uint8 *pBitmapCache = NULL;
+  static char bitmapFilename[256] = "";
+  static uint16 bitmapWidth, bitmapHeight;
+  static uint16 bitmapBBX, bitmapBBY, bitmapBBW, bitmapBBH;
+  static int bitmapScalefactor;
+  static time_t bitmapModtime = 0;     /* File timestamp */
+  uint8 *pBM;  /* Raw bitmap buffer */
+  uint16 width, height;  /* Raw bitmap */
+  
+  
+  /* Result (OK, ERROR) is signified by this output parameter, which is
+   * ERROR by default. */
+  if (ppScaledBM) *ppScaledBM = NULL;
+
+  osd_loadbitmap (filename, (uint8 **) &pBM, &width, &height);
+    
+  if (pBM == NULL) {
+    DBG ("cannot load bitmap '%s'!\n", filename);
+    return;
+  }
+
+  DBG ("Loaded bitmap 0x%08x, %dx%d", (uint32) pBM, width, height);
+  
+  /* Bounding box default values for 0 */
+  if (!bbw) {
+    bbw = width;
+  }
+  
+  if (!bbh) {
+    bbh = height;
+  }
+    
+  /* Does the cached bitmap have the same zoom etc? */
+  if (!strcmp (filename, bitmapFilename)) {
+    /* Same filename, same modtime? */
+    if (getmtime (filename) == bitmapModtime) {
+      /* Same bounding box and zoom? */
+      if ((bbx == bitmapBBX) && (bby == bitmapBBY) &&
+          (bbw == bitmapBBW) && (bbh == bitmapBBH) &&
+          (scalefactor == bitmapScalefactor)) {
+        /* Yep, return the old buffer */
+        DBG ("Returning cached data. 0x%08x, %dx%d", (uint32) pBitmapCache,
+             bitmapWidth, bitmapHeight);
+        if (ppScaledBM) *ppScaledBM = pBitmapCache;
+        if (pScaledWidth) *pScaledWidth = bitmapWidth;
+        if (pScaledHeight) *pScaledHeight = bitmapHeight;
+        return;
       }
+    }
+  }
+
+  DBG ("Creating new zoomed bitmap");
+
+  /* No, other bitmap than the cached one wanted. Free the cache, if used. */
+  if (pBitmapCache) {
+    free (pBitmapCache);
+    pBitmapCache = NULL;
+    bitmapFilename[0] = 0;
+  }
+
+  /* Does the bitmap actually need to be zoomed? */
+  if (bbw || bbh || (scalefactor != 1000)) {
+    double zoom = (double) scalefactor / 1000.0;
+    
+
+    /* Yes, perform the zoom operation */
+    zoombitmap (pBM, width, height, bbx, bby, bbw, bbh, zoom, &pBitmapCache,
+                &bitmapWidth, &bitmapHeight);
+
+    /* Error checking */
+    if (!pBitmapCache) {
+      DBG ("Zoom failed!");
+      return;
+    }
+    
+    /* Ok, we zoomed the bitmap. Set the cache parameters. */
+    strcpy (bitmapFilename, filename);
+    bitmapModtime = getmtime (filename);
+    bitmapBBX = bbx;
+    bitmapBBY = bby;
+    bitmapBBW = bbw;
+    bitmapBBH = bbh;
+    bitmapScalefactor = scalefactor;
+    
+    
+    /* Output parameters. */
+    if (ppScaledBM) *ppScaledBM = pBitmapCache;
+    if (pScaledWidth) *pScaledWidth = bitmapWidth;
+    if (pScaledHeight) *pScaledHeight = bitmapHeight;
+    
+    DBG ("Zoomed data. 0x%08x, %dx%d", (uint32) pBitmapCache,
+         bitmapWidth, bitmapHeight);
+    
+    /* Done */
+    return;
+    
+  } else {
+
+    /* No zoom, just use the loaded bitmap instead */
+    
+    /* Output parameters. */
+    if (ppScaledBM) *ppScaledBM = pBM;
+    if (pScaledWidth) *pScaledWidth = width;
+    if (pScaledHeight) *pScaledHeight = height;
+    
+    DBG ("Non-zoomed data. 0x%08x, %dx%d", (uint32) pBitmapCache,
+         bitmapWidth, bitmapHeight);
+    
+    /* Done */
+    return;
+    
+  }
+
+  /* NOTREACHED */
+  
+}
+
+
+/* Draw a bitmap at the specified x0;y0. PNG and JPEG are supported.
+ * zoom = Scaling = (scalefactor / 1000), i.e. 500 means half size.
+ * Zoom options: bounding box (x, y, width, height), zoom. Bounding box is
+ *               not used if width or height is 0. The zoom is applied
+ *               *after* the bounding box, which is applied on the original
+ *               bitmap.
+ */
+void
+osd_drawbitmap (char *filename, int x0, int y0,
+                uint16 bbx, uint16 bby, uint16 bbw, uint16 bbh, int scalefactor)
+{
+  uint32 *pBM, val;
+  uint16 w, h, bmx, bmy;
+  int x, y;
+  
+
+  /* Load and zoom bitmap as needed. */
+  osd_zoombitmap (filename, bbx, bby, bbw, bbh, scalefactor,
+                  (uint8 **) &pBM, &w, &h);
+  
+  if (pBM == NULL) {
+    DBG ("cannot load/zoom bitmap '%s'!\n", filename);
+    return;
+  }
+
+  DBG ("Got bitmap (0x%08x), %dx%d", (uint32) pBM, w, h);
+  
+  /* Should the bitmap be tiled? */
+  if ((x0 == -1) || (y0 == -1)) {
+    /* Yes, tile it */
+    for (y = 0; y < SCREEN_HEIGHT; y++) {
+      for (x = 0; x < SCREEN_WIDTH; x++) {
+        bmx = x % w;
+        bmy = y % h;
+        val = pBM[bmy*w + bmx];
+        osd_setpixel (x, y, val);
+      }
+    }
       
-   } else {
-      /* No tiling */
-      for (y = 0; y < h; y++) {
-         for (x = 0; x < w; x++) {
-            osd_setpixel (x0 + x, y0 + y, *pBM++);
-         }
+  } else {
+    /* No tiling */
+    for (y = 0; y < h; y++) {
+      for (x = 0; x < w; x++) {
+        osd_setpixel (x0 + x, y0 + y, *pBM++);
       }
-   }
-   
-   free (pBMorg);
-   
+    }
+  }
+  
 }
 
 
@@ -636,27 +898,49 @@ main (int ac, char *av[])
 
 
 /* Allocs an output image buffer, into which a scaled version of the input
- * image is written. The output buffer must be free()-d by the caller! */
+ * image is written. The output buffer must be free()-d by the caller!
+ *
+ * Input bitmap: pBM, cols, rows
+ * Zoom options: bounding box (x, y, width, height), zoom. Bounding box is
+ *               not used if width or height is 0. The zoom is applied
+ *               *after* the bounding box, which is applied on the original
+ *               bitmap.
+ * Output bitmap: ppScaledBM, pScaledCols, pScaledRows. Allocated in this
+ *                function, free()-d by the caller.
+ */
 static void
-resizebitmap (uint32 *pBM, uint16 rows, uint16 cols, double zoom,
-              uint32 **ppScaledBM, uint16 *pScaledRows, uint16 *pScaledCols)
+zoombitmap (uint8 *pBM, uint16 cols, uint16 rows,
+            uint16 bbx, uint16 bby, uint16 bbw, uint16 bbh, double zoom,
+            uint8 **ppScaledBM, uint16 *pScaledCols, uint16 *pScaledRows)
 {
   int x, y;
   int ddax, dday, izoom, i, j, k;
   int new_cols = 0, last_row;
-  uint32 *pTmp, *pLine;
+  uint32 *pOrg, *pTmp, *pLine;
   
 
+  pOrg = (uint32 *) pBM;
+
+  /* Check for default input parameters */
+  if ((bbw == 0) || (bbh == 0)) {
+    /* Set the bounding box to the entire picture */
+    bbx = bby = 0;
+    bbw = cols;
+    bbh = rows;
+  }
+  
   /* Calculate the differential amount */
   izoom = (int) ((1.0/zoom) * 1000);
 
-  DBG ("zoom = %f, %dx%d", zoom, (int) (zoom * cols + 10),
-       (int) (zoom * rows + 10));
+  DBG ("zoom (0x%08x) = %f, %dx%d", (uint32) pBM,
+       zoom, (int) (zoom * bbw + 10),
+       (int) (zoom * bbh + 10));
        
   /* Allocate a buffer for the scaled image, and a line buffer. */
-  /* XXX The +10 is a fudge factor, don't know the exact formula, but this seems to be big enough for now! */
-  pTmp = (uint32 *) malloc((zoom * cols + 10) * (zoom * rows + 10) * 4);
-  pLine = (uint32 *) malloc((zoom * cols + 10) * 4);
+  /* XXX The +10 is a fudge factor, don't know the exact formula,
+   * XXX but this seems to be big enough for now! */
+  pTmp = (uint32 *) malloc((zoom * bbw + 10) * (zoom * bbh + 10) * 4);
+  pLine = (uint32 *) malloc((zoom * bbw + 10) * 4);
 
   if (!pTmp) {
     EXIT ("malloc() error!");
@@ -667,8 +951,8 @@ resizebitmap (uint32 *pBM, uint16 rows, uint16 cols, double zoom,
   y = 0;
   dday = 0;
 
-  /* Loop over rows in the original image */
-  for (i = 0; i < rows; i++) {
+  /* Loop over rows in the original image (bounding box area) */
+  for (i = bby; i < (bby+bbh); i++) {
     
     /* Adjust the vertical accumulated differential, initialize the
      * output X pixel and horizontal accumulated differential */
@@ -676,8 +960,8 @@ resizebitmap (uint32 *pBM, uint16 rows, uint16 cols, double zoom,
     x = 0;
     ddax = 0;
     
-    /* Loop over pixels in the original image */
-    for (j = 0; j < cols; j++) {
+    /* Loop over pixels in the original image (bounding box area) */
+    for (j = bbx; j < (bbx+bbw); j++) {
 
       
       /* Adjust the horizontal accumulated differential */
@@ -686,7 +970,7 @@ resizebitmap (uint32 *pBM, uint16 rows, uint16 cols, double zoom,
       while (ddax < 0) {
         /* Store RGBA values from the original image scanline into the scaled
         ** buffer until accumulated differential crosses threshold */
-        pLine[x] = pBM[i*cols + j];
+        pLine[x] = pOrg[i*cols + j]; /* cols must be used, not bbw! */
 
         x++;
         ddax += izoom;
@@ -721,10 +1005,12 @@ resizebitmap (uint32 *pBM, uint16 rows, uint16 cols, double zoom,
   }
 
   /* Output parameters */
-  *ppScaledBM = pTmp;
+  *ppScaledBM = (uint8 *) pTmp;
   *pScaledRows = y;
   *pScaledCols = x;
 
+  DBG ("Done. Bitmap = 0x%08x, %dx%d.", (uint32) pTmp, x, y);
+  
   /* Done */
   return;
   

@@ -85,15 +85,58 @@ class OSD:
         args = str(x) + ';' + str(y) + ';' + str(color)
         self._send('setpixel;' + args)
 
-        
-    def drawbitmap(self, filename, x=-1, y=-1, scaling=None):
+
+    # Bitmap buffers in Freevo:
+    #
+    # There are 4 different bitmap buffers in the system.
+    # 1) The load bitmap buffer
+    # 2) The zoom bitmap buffer
+    # 3) The OSD drawing buffer
+    # 4) The screen (fb/x11/sdl) buffer
+    #
+    # Drawing operations (text, line, etc) operate on the
+    # OSD drawing buffer, and are copied to the screen buffer
+    # using update().
+    #
+    # The drawbitmap() operation is time-consuming for larger
+    # images, which is why the load, zoom, and draw operations each
+    # have their own buffer. This can speed up things if the
+    # application is pipelined to preload/prezoom the bitmap
+    # where the next bitmap file is known in advance, or the same
+    # portions of the same bitmap is zoomed repeatedly.
+    # 
+
+    # Caches a bitmap in the OSD without displaying it.
+    def loadbitmap(self, filename):
+        args = filename
+        self._send('loadbitmap;' + args)
+
+
+    # Loads and zooms a bitmap without copying it to the OSD drawing
+    # buffer.
+    def zoombitmap(self, filename, scaling=None, bbx=0, bby=0, bbw=0, bbh=0):
         if scaling == None:
             zoom = 1000
         else:
             zoom = int(scaling * 1000)
             
-        args = filename + ';' + str(x) + ';' + str(y) + ';' + str(zoom)
-        self._send('drawbitmap;' + args)
+        args = [filename, str(bbx), str(bby), str(bbw), str(bbh), str(zoom)]
+        self._send('zoombitmap;' + ';'.join(args))
+
+        
+    # Draw a bitmap on the OSD. It is automatically loaded into the cache
+    # if not already there. The loadbitmap()/zoombitmap() functions can
+    # be used to "pipeline" bitmap loading/drawing.
+    def drawbitmap(self, filename, x=-1, y=-1, scaling=None,
+                   bbx=0, bby=0, bbw=0, bbh=0):
+        if scaling == None:
+            zoom = 1000
+        else:
+            zoom = int(scaling * 1000)
+            
+        args = [filename, str(x), str(y), str(bbx), str(bby), str(bbw),
+                str(bbh), str(zoom)]
+        self._send('drawbitmap;' + ';'.join(args))
 
         
     def drawline(self, x0, y0, x1, y1, width=None, color=None):
