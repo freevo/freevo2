@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.136  2004/08/01 10:57:59  dischi
+# show menu application on startup
+#
 # Revision 1.135  2004/07/26 18:10:16  dischi
 # move global event handling to eventhandler.py
 #
@@ -208,8 +211,8 @@ class MainMenu(Item):
 
         mainmenu = menu.Menu(_('Freevo Main Menu'), items, item_types='main', umount_all = 1)
         menuw.pushmenu(mainmenu)
-        eventhandler.append(menuw)
-
+        menuw.show()
+        
 
     def get_skins(self):
         """
