@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/02/14 19:47:27  mikeruelle
+# set the skin type
+#
 # Revision 1.7  2004/02/14 19:01:49  mikeruelle
 # move main menu item into this file.
 #
@@ -209,7 +212,7 @@ class CommandItem(Item):
     and for displaying stdout and stderr of last command run.
     """
     def __init__(self, command=None, directory=None):
-        Item.__init__(self)
+        Item.__init__(self, skin_type='commands')
 	self.stoposd = 0
 	self.use_wm  = None
 	self.spawnwm = config.COMMAND_SPAWN_WM
