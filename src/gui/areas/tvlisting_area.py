@@ -35,7 +35,7 @@
 #
 # -----------------------------------------------------------------------------
 
-__all__ = [ 'TVListingArea' ]
+__all__ = [ 'TvlistingArea' ]
 
 
 import copy
@@ -58,7 +58,7 @@ class Geometry:
         self.height = height
 
 
-class TVListingArea(Area):
+class TvlistingArea(Area):
     """
     this call defines the listing area
     """
