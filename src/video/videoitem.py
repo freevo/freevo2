@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.132  2004/03/21 18:20:38  mikeruelle
+# needed by encoding server
+#
 # Revision 1.131  2004/03/21 17:06:42  dischi
 # also search for tv show images in current dir
 #
@@ -592,6 +595,7 @@ class VideoItem(Item):
         items = []
         for title in range(len(self.info['tracks'])):
             i = copy.copy(self)
+            i.parent = self
             i.set_url(self.url + str(title+1), False)
             i.info = copy.copy(self.info)
             # copy the attributes from mmpython about this track
