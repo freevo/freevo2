@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2005/01/03 18:29:16  dischi
+# do not use more space than max height
+#
 # Revision 1.5  2004/11/20 18:23:02  dischi
 # use python logger module for debug
 #
@@ -221,7 +224,7 @@ class InfoText(CanvasContainer):
                         # use the complete free space
                         w = size[0] - x
                     if isinstance(h, str):
-                        h = min(int(eval(h, {'MAX': size[1]})), size[1])
+                        h = min(int(eval(h, {'MAX': size[1]})), (size[1] - y))
                     elif h == 0:
                         # use the complete free space
                         h = size[1] - y
