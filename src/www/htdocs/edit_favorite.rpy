@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/02/22 21:04:58  gsbarbieri
+# Fix crash when server returns error message instead of program.
+#
 # Revision 1.11  2004/02/22 07:10:52  gsbarbieri
 # Fix bug introduced by i18n changes.
 #
@@ -128,6 +131,8 @@ class EditFavoriteResource(FreevoResource):
             (result, prog) = ri.findProg(chan, start)
 
             if prog:
+                if isinstance( prog, unicode ):
+                    prog = String( prog )
                 print 'PROG: %s' % prog
 
             priority = num_favorites + 1
