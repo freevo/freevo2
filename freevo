@@ -1,3 +1,6 @@
+#!/hdb3/home/krister/build/busybox-0.60.5/_install/bin/ash
+
+
 #!/bin/sh
 
 # freevo - the main entry point to the whole suite of applications
@@ -11,7 +14,7 @@ if ! test -a src/identifymedia.py ; then
 fi
 
 # Is runapp present? If not it needs to be compiled
-if ! test -a runapp ; then
+if ! [ -e runapp ]; then
     echo ./runapp not found! You must compile freevo, see the INSTALL file.
     exit
 fi
@@ -27,11 +30,11 @@ RUNTIME_VERSION4=4
 RT_DIR=../freevo_runtime$RUNTIME_VERSION
 
 # First check if the runtime is installed
-if test -a runtime/apps/freevo_python ; then
+if [ -e runtime/apps/freevo_python ] ; then
     
     # Double-check that we have the correct runtime version
     rt_ver=`cat runtime/VERSION`
-    if [[ "$rt_ver" != "$RUNTIME_VERSION4" ]] ; then
+    if [ "$rt_ver" != "$RUNTIME_VERSION4" ] ; then
         echo Runtime version $rt_ver found, but version $RUNTIME_VERSION4 is required!
         echo Please install the required version in runtime/
         exit 1
@@ -46,13 +49,13 @@ if test -a runtime/apps/freevo_python ; then
 
     # Execute using the runtime:
     echo "Using the Freevo runtime (./runtime)"
-    PYTHON=runtime/apps/freevo_python
+    PYTHON='runtime/dll/ld-linux.so.2 runtime/apps/freevo_python'
 
-elif test -a $RT_DIR/freevo_python ; then
+elif [ -e $RT_DIR/freevo_python ] ; then
     
     # Double-check that we have the correct runtime version
     rt_ver=`cat $RT_DIR/VERSION`
-    if [[ "$rt_ver" != "$RUNTIME_VERSION" ]] ; then
+    if [ "$rt_ver" != "$RUNTIME_VERSION" ] ; then
         echo Runtime version $rt_ver found, but version $RUNTIME_VERSION is required!
         echo Please install the required version in $RT_DIR/
         exit 1
@@ -94,22 +97,23 @@ fi
 
 
 # Support for using just Python
-if [[ $1 = prompt ]] ; then
+if [ "$1" = "prompt" ] ; then
     $PYTHON
     exit 0
 fi
     
 # Support executing a standalone Python application, e.g. epg_xmltv.py
 # Usage: freevo execute appname.py arg1 arg2...
-if [[ $1 = execute ]] ; then
+if [ "$1" = "execute" ] ; then
     export PYTHONPATH=./src
-    $PYTHON $2 $3 $4 $5 $6 $7 $8 $9
+    shift 1
+    $PYTHON $@
     exit 0
 fi
     
 
 # Start the lirc remote control app if the device is present
-if test -S /dev/lircd ; then
+if [ -S /dev/lircd ] ; then
     echo Found a lirc device, starting the remote control daemon
     $PYTHON rc_client/remote.py --remote=lirc &> /dev/null &
 fi
@@ -117,21 +121,21 @@ fi
 # XXX Uncomment the command below to enable joystick input. 
 # XXX It has not been tested! Please send in testreports!
 # If JOY_DEV is 0 then joy.py just exits.
-# python rc_client/joy.py &> /dev/null &
+# $PYTHON rc_client/joy.py &> /dev/null &
 
 # now set the LD_PRELOAD for Gentoo Linux
-if [[ "$FREEVO_LD_PRELOAD" != "" ]]; then
+if [ "$FREEVO_LD_PRELOAD" != "" ]; then
     export LD_PRELOAD=$FREEVO_LD_PRELOAD
 fi
 
 # Start the main freevo application
-$PYTHON src/main.py $*
+$PYTHON src/main.py $@
 
 # Freevo exited, make sure all children are killed
 sleep 1
 kill -9 `pgrep -f "python src/main.py" -d" "` &> /dev/null
 kill -9 `pgrep -f "python rc_client" -d" "` &> /dev/null
-kill -9 `pgrep -f PYTHON -d" "` &> /dev/null
+kill -9 `pgrep -f freevo_python -d" "` &> /dev/null
 killall -9 freevo_xwin &> /dev/null
 killall -9 freevo_python &> /dev/null
 #killall -9 mplayer &> /dev/null
