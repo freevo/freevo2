@@ -10,6 +10,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/10/19 14:19:44  rshortt
+# Added OS_EVENT_WAITPID event for popen3.waitpid() to post so that recordserver
+# can pick it up and wait on its own child.  Child processes from recordserver
+# now get signals and clean up properly.
+#
 # Revision 1.6  2003/10/19 12:42:19  rshortt
 # Oops.
 #
@@ -139,8 +144,12 @@ def waitpid(pid=0):
             wait_lock.release()
         return
     
+    if config.IS_RECORDSERVER:
+        rc.post_event(Event(OS_EVENT_WAITPID, (pid,)))
+        return True
+
     # do not use this for helpers
-    if config.HELPER and not config.IS_RECORDSERVER:
+    if config.HELPER:
         return os.waitpid(pid, os.WNOHANG)[0] == pid
 
     # do not use this for the main thread

@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/10/19 14:19:44  rshortt
+# Added OS_EVENT_WAITPID event for popen3.waitpid() to post so that recordserver
+# can pick it up and wait on its own child.  Child processes from recordserver
+# now get signals and clean up properly.
+#
 # Revision 1.25  2003/10/18 10:44:11  dischi
 # renamed POPEN2 to OS_EVENT_POPEN2
 #
@@ -493,15 +498,16 @@ DEFAULT_KEYMAP = {
 # Internal events, don't map any button on them
 #
 
-PLAY_END        = Event('PLAY_END')
-USER_END        = Event('USER_END')
-DVD_PROTECTED   = Event('DVD_PROTECTED')
-AUDIO_PLAY_END  = Event('AUDIO_PLAY_END')
-PLAY_START      = Event('PLAY_START')
+PLAY_END         = Event('PLAY_END')
+USER_END         = Event('USER_END')
+DVD_PROTECTED    = Event('DVD_PROTECTED')
+AUDIO_PLAY_END   = Event('AUDIO_PLAY_END')
+PLAY_START       = Event('PLAY_START')
 
-OSD_MESSAGE     = Event('OSD_MESSAGE')
+OSD_MESSAGE      = Event('OSD_MESSAGE')
 
-VIDEO_START     = Event('VIDEO_START')
-VIDEO_END       = Event('VIDEO_END')
+VIDEO_START      = Event('VIDEO_START')
+VIDEO_END        = Event('VIDEO_END')
 
-OS_EVENT_POPEN2 = Event('OS_EVENT_POPEN2')
+OS_EVENT_POPEN2  = Event('OS_EVENT_POPEN2')
+OS_EVENT_WAITPID = Event('OS_EVENT_WAITPID')

@@ -6,6 +6,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/10/19 14:19:44  rshortt
+# Added OS_EVENT_WAITPID event for popen3.waitpid() to post so that recordserver
+# can pick it up and wait on its own child.  Child processes from recordserver
+# now get signals and clean up properly.
+#
 # Revision 1.14  2003/10/19 12:46:30  rshortt
 # Calling popen from the main loop now but signals still aren't getting thgough.
 #
@@ -747,12 +752,18 @@ class RecordServer(xmlrpc.XMLRPC):
 
         event, event_repeat_count = rc_object.poll()
 
-        if event and event == OS_EVENT_POPEN2:
-            print 'popen %s' % event.arg[1]
-            event.arg[0].child = util.popen3.Popen3(event.arg[1])
+        if event:
+            if event == OS_EVENT_POPEN2:
+                print 'popen %s' % event.arg[1]
+                event.arg[0].child = util.popen3.Popen3(event.arg[1])
+            elif event == OS_EVENT_WAITPID:
+                print 'waiting on pid %s' % event.arg[0]
+                os.waitpid(event.arg[0], os.WNOHANG)
+            else:
+                print 'not handling event %s' % str(event)
+                return
         else:
-            print 'not handling event %s' % str(event)
-            return
+            print 'no event to get' 
 
 
 def main():
