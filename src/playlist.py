@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2003/12/10 19:51:51  dischi
+# make playlist files work again
+#
 # Revision 1.41  2003/12/08 20:40:57  dischi
 # add doc
 #
@@ -242,15 +245,15 @@ class Playlist(Item):
         if isinstance(playlist, str) or isinstance(playlist, unicode):
             # it's a filename with a playlist
             try:
-                f=open(self.filename, "r")
+                f=open(playlist, "r")
                 line = f.readline()
                 f.close
                 if line.find("[playlist]") > -1:
-                    self.read_pls(self.filename)
+                    self.read_pls(playlist)
                 elif line.find("[Slides]") > -1:
-                    self.read_ssr(self.filename)
+                    self.read_ssr(playlist)
                 else:
-                    self.read_m3u(self.filename)
+                    self.read_m3u(playlist)
             except OSError, e:
                 print 'playlist error: %s' % e
 
