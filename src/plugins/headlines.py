@@ -15,6 +15,9 @@
 # for a full list of tested sites see Docs/plugins/headlines.txt
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/10/27 20:14:24  mikeruelle
+# allow use of outicon
+#
 # Revision 1.9  2003/10/16 16:05:31  dischi
 # small i18n patch
 #
@@ -119,7 +122,8 @@ class PluginInterface(plugin.MainMenuPlugin):
             item.icon = os.path.join(skin.settings.icon_dir, menu_items['headlines'].icon)
         if menu_items.has_key('headlines') and menu_items['headlines'].image:
             item.image = menu_items['headlines'].image
-
+        if menu_items.has_key('headlines') and menu_items['headlines'].outicon:
+            item.outicon = os.path.join(skin.settings.icon_dir, menu_items['headlines'].outicon)
         item.parent = parent
         return [ item ]
 
