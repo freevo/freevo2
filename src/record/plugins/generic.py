@@ -95,7 +95,7 @@ class PluginInterface(Plugin):
         # timer for next recording
         self.rec_timer = None
         # suffix for filename
-        self.suffix = config.TV_RECORDFILE_SUFFIX
+        self.suffix = '.suffix'
 
 
     def get_cmd(self, rec):
