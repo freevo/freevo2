@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/06/11 05:04:31  outlyer
+# Added OSD toggle; uses the standard 'display' button on the remote; also
+# removed the stuff that is being done by tvtime internally now.
+#
 # Revision 1.7  2003/06/09 17:04:28  outlyer
 # Looks I did in fact break x11 output, but it was only for a few seconds,
 # so no one should be upset :) Mapped config of 'x11' to 'xv' and 'dfbmga'
@@ -305,28 +309,12 @@ class TVTime:
 
             new_channel = self.TunerGetChannel()
             self.thread.app.setchannel(new_channel)
-
-            # Display a channel changed message
-            # XXX Experimental, disabled for now
-            #tuner_id, chan_name, prog_info = self.TunerGetChannelInfo()
-            #now = time.strftime('%H:%M')
-            #msg = '%s %s (%s): %s' % (now, chan_name, tuner_id, prog_info)
-            #cmd = 'show_osd_msg "%s" 4000\n' % msg
-            #self.thread.app.write(cmd)
             return TRUE
             
         elif event == em.TOGGLE_OSD:
-            return FALSE
+            self.thread.app.write('DISPLAY_INFO\n')
+            return TRUE
         
-            # Display the channel info message
-            # XXX Experimental, disabled for now
-            tuner_id, chan_name, prog_info = self.TunerGetChannelInfo()
-            now = time.strftime('%H:%M')
-            msg = '%s %s (%s): %s' % (now, chan_name, tuner_id, prog_info)
-            cmd = 'show_osd_msg "%s" 4000\n' % msg
-            print 'msg = "%s" %s chars' % (msg, len(msg))
-            self.thread.app.write(cmd)
-            
         return FALSE
         
             
