@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2003/03/13 19:57:08  dischi
+# add font height information to font
+#
 # Revision 1.34  2003/03/08 17:36:47  dischi
 # integration of the tv guide
 #
@@ -271,7 +274,13 @@ class Skin:
                 self.settings.load(local_skin)
                 break
         
-
+        # add the height to each font
+        for font_name in self.settings.font:
+            font = self.settings.font[font_name]
+            font.h = osd.stringsize('Ajg', font.name, font.size)[1]
+            if font.shadow.visible:
+                font.h += font.shadow.y
+            
     # Parse XML files with additional settings
     # TODO: parse also parent directories
     def LoadSettings(self, dir, copy_content = 1):
@@ -282,9 +291,22 @@ class Skin:
             
         if dir and os.path.isfile(os.path.join(dir, "skin.xml")):
             settings.load(os.path.join(dir, "skin.xml"), copy_content)
+            # add the height to each font
+            for font_name in settings.font:
+                font = settings.font[font_name]
+                font.h = osd.stringsize('Ajg', font.name, font.size)[1]
+                if font.shadow.visible:
+                    font.h += font.shadow.y
             return settings
+
         elif dir and os.path.isfile(dir):
             settings.load(dir, copy_content)
+            # add the height to each font
+            for font_name in settings.font:
+                font = settings.font[font_name]
+                font.h = osd.stringsize('Ajg', font.name, font.size)[1]
+                if font.shadow.visible:
+                    font.h += font.shadow.y
             return settings
         return None
 
