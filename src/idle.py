@@ -45,7 +45,7 @@ class IdleTool:
         self.idlecount = -1
 
     def checkmail(self):
-        if not os.path.isfile(self.MAILBOX):
+        if os.path.isfile(self.MAILBOX):
             mb = mailbox.UnixMailbox (file(self.MAILBOX,'r'))
             msg = mb.next()
             count = 0
