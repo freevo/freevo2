@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.48  2003/05/04 11:52:51  dischi
+# small sort bugfix
+#
 # Revision 1.47  2003/04/26 16:46:25  dischi
 # added refresh bugfix from Matthieu Weber
 #
@@ -239,7 +242,7 @@ class VideoItem(Item):
             return '%s%s' % (os.stat(self.filename).st_ctime, self.filename)
 
         if self.name.find("The ") == 0:
-            return self.name[4]
+            return self.name[4:]
         return self.name
 
     
