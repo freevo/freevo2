@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/10/16 19:40:34  dischi
+# some cleanups
+#
 # Revision 1.1  2002/10/16 04:58:16  krister
 # Changed the main1 skin to use Gustavos new extended menu for TV guide, and Dischis new XML code. grey1 is now the default skin, I've tested all resolutions. I have not touched the blue skins yet, only copied from skin_dischi1 to skins/xml/type1.
 #
@@ -52,12 +55,9 @@ osd = osd.get_singleton()
 
 # Draws a text based on the settings in the XML file
 def DrawText(text, settings, x=-1, y=-1, align=''):
-    if x == -1:
-        x = settings.x
-    if y == -1:
-        y = settings.y
-    if not align:
-        align = settings.align
+    if x == -1: x = settings.x
+    if y == -1: y = settings.y
+    if not align: align = settings.align
 
     if settings.shadow_visible:
         osd.drawstring(text, x+settings.shadow_pad_x, y+settings.shadow_pad_y,
@@ -69,13 +69,11 @@ def DrawText(text, settings, x=-1, y=-1, align=''):
 
 # Draws a text inside a frame based on the settings in the XML file
 def DrawTextFramed(text, settings, x=-1, y=-1, width=-1, height=-1):
-    if x == -1:
-        x = settings.x
-    if y == -1:
-        y = settings.y
+    if x == -1: x = settings.x
+    if y == -1: y = settings.y
 
-    if width == -1:
-        width = settings.width
+    if width  == -1: width  = settings.width
+    if height == -1: height = settings.height
 
     if settings.shadow_visible:
         osd.drawstringframed(text, x+settings.shadow_pad_x, y+settings.shadow_pad_y,
@@ -87,11 +85,26 @@ def DrawTextFramed(text, settings, x=-1, y=-1, width=-1, height=-1):
                          align_h=settings.align, align_v=settings.valign)
 
 
-def DrawLogo(settings):
-    if settings.image and settings.visible:
-        if settings.width and settings.height:
-            osd.drawbitmap(util.resize(settings.image, settings.width, settings.height),
-                           settings.x, settings.y)
+def InitScreen(settings):
+    osd.clearscreen(osd.COL_BLACK)
+
+    if settings.background.image:
+        apply(osd.drawbitmap, (settings.background.image, -1, -1))
+
+    if settings.background.mask:
+        osd.drawbitmap(settings.background.mask,-1,-1)
+
+    val = settings.logo
+    if val.image and val.visible:
+        if val.width and val.height:
+            osd.drawbitmap(util.resize(val.image, val.width, val.height),
+                           val.x, val.y)
         else:
-            osd.drawbitmap(settings.image, settings.x, settings.y)
+            osd.drawbitmap(val.image, val.x, val.y)
+    
+
+def DrawBox(x0, y0, x1, y1, color = None, border_size = 0, border_color = None):
+    osd.drawbox(x0, y0, x1, y1, width=-1, color=color)
+    if border_size >= 0:
+        osd.drawbox(x0, y0, x1, y1, width=border_size, color=border_color)
     

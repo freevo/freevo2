@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2002/10/16 19:40:34  dischi
+# some cleanups
+#
 # Revision 1.40  2002/10/16 04:58:16  krister
 # Changed the main1 skin to use Gustavos new extended menu for TV guide, and Dischis new XML code. grey1 is now the default skin, I've tested all resolutions. I have not touched the blue skins yet, only copied from skin_dischi1 to skins/xml/type1.
 #
@@ -484,12 +487,7 @@ class Skin:
         else:
             val = val.menu_default
             
-
-        if val.background.image:
-            apply(osd.drawbitmap, (val.background.image, -1, -1))
-
-        if val.background.mask:
-            osd.drawbitmap(val.background.mask,-1,-1)
+        InitScreen(val)
 
         # Menu heading
         if val.title.visible:
@@ -557,13 +555,8 @@ class Skin:
         spacing = iv.height / 7
 
         if info.drawall:
-            osd.clearscreen()
 
-            if val.background.image:
-                apply(osd.drawbitmap, (val.background.image, -1, -1))
-
-            if val.background.mask:
-                osd.drawbitmap(val.background.mask,-1,-1)
+            InitScreen(val)
 
             if val.title.visible:
                 osd.drawstring('Playing Music', val.title.x, val.title.y,
