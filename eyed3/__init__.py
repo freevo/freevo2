@@ -441,7 +441,7 @@ class Tag:
 
             year = re.sub("\x00+$", "", id3tag[93:97].strip())
             TRACE_MSG("Year: " + year);
-            if year and int(year):
+            if year: #and int(year): # We're ignoring invalid year codes they /should/ be int().
                self.setYear(year);
 
 	    comment = id3tag[97:127] 
