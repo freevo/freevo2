@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/07/24 12:23:09  dischi
+# replaced osd.py with a dummy
+#
 # Revision 1.16  2004/07/23 19:44:00  dischi
 # move most of the settings code out of the skin engine
 #
@@ -65,7 +68,7 @@ _singleton = None
 # a list of all functions the skin needs to have
 __all__ = ( 'Rectange', 'Image', 'Area', 'register', 'delete', 'change_area',
             'toggle_display_style', 'get_display_style', 'items_per_page',
-            'clear', 'redraw', 'draw' )
+            'clear', 'draw', 'redraw' )
     
 __all__gui__ = ( 'get_settings', 'get_font', 'get_image', 'get_icon' )
     
@@ -90,7 +93,7 @@ def active():
     """
     returns if the skin is active right now (not cleared)
     """
-    return not _singleton.force_redraw
+    return True
 
 
 if __freevo_app__ == 'main':
