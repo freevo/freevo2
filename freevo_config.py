@@ -480,6 +480,8 @@ SUFFIX_SNES_FILES = [ 'smc', 'fig' ]
 MAME_CMD         = CONF.xmame_SDL
 SNES_CMD         = CONF.snes
 
+MAME_SHOTS = './testfiles/Mame'
+
 GAMES_NICE        = -20       # Priority of the game process. 0 is unchanged,
                               # <0 is higher prio, >0 lower prio. 
                               # prio <0 has no effect unless run as root.

@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/06/20 01:31:14  rshortt
+# Adding support for a seperate directory for screen/titleshots.  They show
+# up in the MAME menu like album covers do in the audio menu.
+#
 # Revision 1.10  2003/06/01 05:06:40  outlyer
 # Fixed a missing import as pointed out by Paul de Bruin
 #
@@ -82,10 +86,12 @@ class MameItem(Item):
         
         # find image for this file
         if image == None:
-            if os.path.isfile(os.path.splitext(file)[0] + ".png"):
+	    shot = config.MAME_SHOTS + '/' + \
+	           os.path.splitext(os.path.basename(file))[0] + ".png"
+            if os.path.isfile(shot):
+                self.image = shot
+            elif os.path.isfile(os.path.splitext(file)[0] + ".png"):
                 self.image = os.path.splitext(file)[0] + ".png"
-            elif os.path.isfile(os.path.splitext(file)[0] + ".jpg"):
-                self.image = os.path.splitext(file)[0] + ".jpg"
 
         command = '--prio=%s %s %s' % (config.GAMES_NICE,
                                        config.MAME_CMD,
