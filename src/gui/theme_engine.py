@@ -912,7 +912,9 @@ class Rectangle(XML_data):
     def prepare(self, color, search_dirs=None, image_names=None):
         XML_data.prepare(self, None, color)
 
-
+    def __str__(self):
+        return 'theme.Rectangle at %s,%s %sx%s' % \
+               (self.x, self.y, self.width, self.height)
 
 class Font(XML_data):
     """
