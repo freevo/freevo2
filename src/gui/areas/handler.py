@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/08/27 14:16:58  dischi
+# switch to new animation names
+#
 # Revision 1.10  2004/08/26 15:29:18  dischi
 # make the tv guide work again (but very slow)
 #
@@ -124,7 +127,7 @@ class AreaScreen:
         """
         fade out layer and hide them
         """
-        a = animation.Fade(self.layer, frames, 255, 0)
+        a = animation.FadeAnimation(self.layer, frames, 255, 0)
         a.application = True
         a.start()
 
@@ -133,7 +136,7 @@ class AreaScreen:
         """
         show layers again and fade them in
         """
-        a = animation.Fade(self.layer, frames, 0, 255)
+        a = animation.FadeAnimation(self.layer, frames, 0, 255)
         a.application = True
         a.start()
 
