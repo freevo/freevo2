@@ -73,6 +73,8 @@ class Menu:
         self.heading = heading
         self.choices = choices          # List of MenuItem:s
         self.page_start = 0
+        self.previous_page_start = []
+        self.previous_page_start.append(0)
         self.packrows = packrows
         self.umount_all = umount_all    # umount all ROM drives on display?
         if xml_file:
@@ -88,7 +90,6 @@ class MenuWidget:
 
     def __init__(self):
         self.menustack = []
-        self.items_per_page = skin.items_per_page
         self.prev_page = MenuItem('Prev Page', self.goto_prev_page)
         self.next_page = MenuItem('Next Page', self.goto_next_page)
         self.back_menu = MenuItem('Back', self.back_one_menu)
@@ -112,7 +113,7 @@ class MenuWidget:
     def goto_prev_page(self, arg=None, menuw=None):
         menu = self.menustack[-1]
         if menu.page_start != 0:
-            menu.page_start -= self.items_per_page
+            menu.page_start = menu.previous_page_start.pop()
         self.init_page()
         menu.selected = self.all_items[0]
         self.refresh()
@@ -120,8 +121,10 @@ class MenuWidget:
     
     def goto_next_page(self, arg=None, menuw=None):
         menu = self.menustack[-1]
-        if menu.page_start + self.items_per_page < len(menu.choices):
-            menu.page_start += self.items_per_page
+        items_per_page = skin.ItemsPerMenuPage(menu)
+        if menu.page_start +  items_per_page < len(menu.choices):
+            menu.previous_page_start.append(menu.page_start)
+            menu.page_start += items_per_page
         self.init_page()
         menu.selected = self.menu_items[-1]
         self.refresh()
@@ -229,12 +232,13 @@ class MenuWidget:
         # Create the list of main selection items (menu_items)
         menu_items = []
         first = menu.page_start
-        for choice in menu.choices[first : first+self.items_per_page]:
+        for choice in menu.choices[first : first+skin.ItemsPerMenuPage(menu)]:
             menu_items += [choice]
      
         # Create the list of navigation items (nav_items)
         nav_items = []
-        if menu.page_start + self.items_per_page < len(menu.choices):
+        items_per_page = skin.ItemsPerMenuPage(menu)
+        if menu.page_start + items_per_page < len(menu.choices):
             nav_items += [self.next_page]
         if menu.page_start != 0:
             nav_items += [self.prev_page]
