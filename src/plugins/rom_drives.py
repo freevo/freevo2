@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.61  2004/05/25 17:35:29  dischi
+# make nicer title for discs
+#
 # Revision 1.60  2004/03/21 14:49:00  dischi
 # Bufix to set the correct skin display type. Great, just after 1.5.0-pre1
 # is out. :-(
@@ -556,7 +559,8 @@ class Identify_Thread(threading.Thread):
         # There is data from mmpython for these three types
         if data['mime'] in ('video/vcd', 'video/dvd'):
             if not title:
-                title = '%s [%s]' % (data['mime'][6:].upper(), media.label)
+                title = media.label.replace('_', ' ').lstrip().rstrip()
+                title = '%s [%s]' % (data['mime'][6:].upper(), title)
 
             if movie_info:
                 media.item = copy.copy(movie_info)
