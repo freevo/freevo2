@@ -16,7 +16,7 @@ class IndexResource(FreevoResource):
         fv.res += '<br/><br/><h2>'+( _('Freevo Web Status as of %s') % \
                 time.strftime('%B %d ' + config.TV_TIMEFORMAT, time.localtime()) ) +'</h2>'
 
-        if record.client.server:
+        if record.client.recordings.server:
             fv.res += '<p class="normal">'\
                       +_('The recording server is up and running.')+'</p>\n'
         else:
