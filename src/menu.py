@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.114  2005/01/08 11:54:15  dischi
+# remove skin_type attribute
+#
 # Revision 1.113  2004/12/31 11:57:39  dischi
 # renamed SKIN_* and OSD_* variables to GUI_*
 #
@@ -77,8 +80,8 @@ class MenuItem(Item):
     Default item for the menu. It includes one action
     """
     def __init__( self, name, action=None, arg=None, type=None, image=None,
-                  icon=None, parent=None, skin_type=None):
-        Item.__init__(self, parent, skin_type = skin_type)
+                  icon=None, parent=None):
+        Item.__init__(self, parent)
         if name:
             self.name  = Unicode(name)
         if icon:
