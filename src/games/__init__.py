@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/02/24 18:05:19  mikeruelle
+# make the info retreival a lot better
+#
 # Revision 1.16  2004/01/11 18:34:02  mikeruelle
 # oops forgot this for zipped roms
 #
@@ -111,7 +114,7 @@ class PluginInterface(plugin.MimetypePlugin):
             for rm_file in rm_files:
                 files.remove(rm_file)
             for ml in mame_list:
-                items += [ MameItem(ml[0], ml[1], ml[2], cmd, args, imgpath, parent) ]
+                items += [ MameItem(ml[0], ml[1], ml[2], cmd, args, imgpath, parent, ml[3]) ]
         elif gtype == 'SNES':
             for file in util.find_matches(files, snesromExtensions + [ 'zip' ]):
                 items += [ SnesItem(file, cmd, args, imgpath, parent) ]

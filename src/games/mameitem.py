@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/02/24 18:05:19  mikeruelle
+# make the info retreival a lot better
+#
 # Revision 1.18  2004/02/24 17:04:39  mikeruelle
 # Add some info to the info area where we have it
 #
@@ -80,7 +83,7 @@ from item import Item
 
 
 class MameItem(Item):
-    def __init__(self, title, file, image = None, cmd = None, args = None, imgpath = None, parent = None):
+    def __init__(self, title, file, image = None, cmd = None, args = None, imgpath = None, parent = None, info = None):
         Item.__init__(self, parent)
         self.type  = 'mame'            # fix value
         self.set_url(file, info=True)
@@ -118,9 +121,8 @@ class MameItem(Item):
 	print "Command for MAME : %s" % self.command
 
         self.game_player = game.get_singleton()
-	rominfo = mame_cache.getMameItemInfo(file)
-	if rominfo:
-	    self.info = { 'description' : '%s - %s - %s' % (rominfo.description,rominfo.manufacturer,rominfo.year) }
+	if info:
+	    self.info = { 'description' : '%s - %s - %s' % (info['description'],info['manufacturer'],info['year']) }
 	else:
 	    self.info = { 'description' : 'No ROM information' }
         

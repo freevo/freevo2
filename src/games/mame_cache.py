@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/02/24 18:05:19  mikeruelle
+# make the info retreival a lot better
+#
 # Revision 1.17  2004/02/24 17:04:39  mikeruelle
 # Add some info to the info area where we have it
 #
@@ -188,7 +191,13 @@ def getMameItemInfoList(mame_files, mame_cmd):
         key = os.path.splitext(os.path.basename(romfile))[0]
         if roms.has_key(key):
             rom = roms[key]
-            items += [(rom.description, romfile, None)]
+	    info = { 'manufacturer': rom.manufacturer,
+	             'name': rom.name,
+	             'description': rom.description,
+	             'year': rom.year,
+	             'cloneof': rom.cloneof,
+	             'romof': rom.romof } 
+            items += [(rom.description, romfile, None, info)]
             rm_files.append(romfile)
 
     return (rm_files, items)
