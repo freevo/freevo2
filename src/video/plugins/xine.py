@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.49  2004/08/22 20:12:12  dischi
+# class application doesn't change the display (screen) type anymore
+#
 # Revision 1.48  2004/08/01 10:45:19  dischi
 # make the player an "Application"
 #
@@ -108,7 +111,7 @@ class Xine(Application):
     the main class to control xine
     """
     def __init__(self, type, version):
-        Application.__init__(self, 'xine', 'video', True, 'none')
+        Application.__init__(self, 'xine', 'video', True)
         self.name      = 'xine'
         self.xine_type = type
         self.version   = version

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/08/22 20:12:12  dischi
+# class application doesn't change the display (screen) type anymore
+#
 # Revision 1.1  2004/08/05 17:27:16  dischi
 # Major (unfinished) tv update:
 # o the epg is now taken from pyepg in lib
@@ -60,11 +63,11 @@ class TVPlayer(Application):
     """
     template for tv player application
     """
-    def __init__(self, name, event_context='tv', fullscreen=True, backend='default'):
+    def __init__(self, name, event_context='tv', fullscreen=True):
         """
         init the player
         """
-        Application.__init__(self, name, event_context, fullscreen, backend)
+        Application.__init__(self, name, event_context, fullscreen)
 
 
     def rate(self, type):

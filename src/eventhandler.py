@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/08/22 20:12:11  dischi
+# class application doesn't change the display (screen) type anymore
+#
 # Revision 1.2  2004/08/01 10:53:54  dischi
 # o Add class for an Application. This class works together with the
 #   eventhandler itself and can show/hide/destry itself.
@@ -139,12 +142,11 @@ class Application:
     """
     A basic application
     """
-    def __init__(self, name, event_context, fullscreen, backend='default'):
+    def __init__(self, name, event_context, fullscreen):
         self.evt_name       = name
         self.evt_context    = event_context
         self.evt_fullscreen = fullscreen
         self.evt_handler    = get_singleton()
-        self.evt_backend    = backend
         self.post_event     = self.evt_handler.post
         self.visible        = False
         
@@ -156,7 +158,7 @@ class Application:
         self.visible = True
         self.evt_handler.append(self)
         if traceback.extract_stack(limit = 2)[0][3] != 'Application.show(self)':
-            gui.get_screen().update()
+            gui.get_display().update()
             
         
     def hide(self):
@@ -188,7 +190,6 @@ class Eventhandler:
         self.queue = []
         self.registered = {}
         self.focus_change = None
-        self.backend = 'default'
         
 
     def set_focus(self):
@@ -202,10 +203,6 @@ class Eventhandler:
             for c in self.registered[str(SCREEN_CONTENT_CHANGE)]:
                 arg = app, app.evt_fullscreen
                 c.eventhandler(Event(SCREEN_CONTENT_CHANGE, arg=arg))
-        if self.backend != 'default' or app.evt_backend != 'default':
-            _debug_('**** backend switch: %s ****' % app.evt_backend)
-            gui.set_screen(app.evt_backend)
-            self.backend = app.evt_backend
         if self.focus_change == REMOVE:
             _debug_('show hidden application')
             app.show()
@@ -396,7 +393,6 @@ class Eventhandler:
         except:
             if config.FREEVO_EVENTHANDLER_SANDBOX:
                 import traceback
-                import gui
                 from plugins.shutdown import shutdown
 
                 traceback.print_exc()
