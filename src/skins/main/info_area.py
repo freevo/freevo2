@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/01/11 10:57:58  dischi
+# support for function calls (e.g. comingup)
+#
 # Revision 1.10  2004/01/10 16:53:22  dischi
 # make eval more secure (and remove trailing whitespaces)
 #
@@ -56,13 +59,18 @@
 # -----------------------------------------------------------------------
 #endif
 
+import copy
+import util
+
 from area import Skin_Area
 from skin_utils import *
 import xml_skin
-import copy
 from area import Geometry
 
 import traceback
+
+# function calls to get more info from the skin
+function_calls = { 'comingup': util.comingup }
 
 class Info_Area(Skin_Area):
     """
@@ -219,6 +227,9 @@ class Info_Area(Skin_Area):
                 # valid operator
                 exp += ' %s' % ( b )
 
+            elif b.startswith('function:'):
+                exp += ' %s()' % b[9:]
+                
             elif b[ :4 ] == 'len(' and b.find( ')' ) > 0 and \
                      len(b) - b.find(')') < 5:
                 # lenght of something
@@ -260,7 +271,7 @@ class Info_Area(Skin_Area):
                     exp = list[ i ].expression
 
                 # Evaluate the expression:
-                if exp and eval(exp, {'attr': item.getattr}, {}):
+                if exp and eval(exp, {'attr': item.getattr}, function_calls):
                     # It's true, we should recurse into children
                     ret_list += self.eval_expressions( list[ i ].content, index + [ i ] )
                 continue
@@ -276,7 +287,7 @@ class Info_Area(Skin_Area):
                         exp = list[ i ].expression
                     # evaluate the expression:
                     if exp:
-                        exp = eval(exp, {'attr': item.getattr}, {})
+                        exp = eval(exp, {'attr': item.getattr}, function_calls)
                         if exp:
                             list[ i ].text = str( exp )
                 # I add a tuple here to be able to compare lists and know if we need to
