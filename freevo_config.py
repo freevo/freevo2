@@ -159,7 +159,15 @@ MAIN_MENU_ITEMS = [
 #     <directory_autoplay_single_item>0</directory_autoplay_single_item>
 #   </variables>
 # </freevo>
-# 
+#
+# and for the new skin (dischi1) in a file called folder.fxd with the following
+# syntax:
+#
+# <freevo>
+#   <folder>
+#     <setvar name="directory_autoplay_single_item" val="0"/>
+#   </folder>
+# </freevo>
 
 #
 # Should playlists be available for movies, and all movies in a directory
@@ -182,6 +190,12 @@ DIRECTORY_SORT_BY_DATE = 2
 # Should freevo autoplay the item if only one item is in the directory
 #
 DIRECTORY_AUTOPLAY_SINGLE_ITEM = 1
+
+#
+# Force the new skin to a specific layout number. -1 == no force. The layout
+# toggle with DISPLAY will be disabled
+#
+FORCE_SKIN_LAYOUT = -1
 
 # ======================================================================
 # Freevo movie settings:
@@ -352,6 +366,13 @@ OSD_SKIN = 'skins/main1/skin_main1.py'
 # XML file for the skin
 #
 SKIN_XML_FILE = 'blue_round1'
+
+#
+# Start the new skin with a specific layout. Default is 0, DISPLAY toggles
+# between the different layouts. If a menu hasn't that layout number, 0 will
+# be taken
+#
+SKIN_START_LAYOUT = 0
 
 ENABLE_SHUTDOWN_SYS = 0  # Performs a whole system shutdown at SHUTDOWN!
                          # For standalone boxes.
