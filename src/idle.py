@@ -15,10 +15,8 @@ class IdleTool:
     
     def __init__(self):
         self.idlecount = 0
-        #osd.drawbox(0,0,768,75,color=0x80000000,width=-1)
-        self.clock_surface = osd.getsurface(525, 25, 225, 50)
-        self.mail_surface  = osd.getsurface(25, 25, 225, 50)
-        #self.toolbar_surface = osd.getsurface(0,0,768,75)
+        osd.drawbox(0,0,768,75,color=0x80000000,width=-1)
+        self.toolbar_surface = osd.getsurface(0,0,768,75)
         self.MAILBOX = '/var/mail/aubin'
         if not os.path.isfile(self.MAILBOX):
             # Try the mail environment; this might not work if the user runs this
@@ -42,12 +40,13 @@ class IdleTool:
 
 
     def refresh(self):
-        #osd.putsurface(self.toolbar_surface,0,0)
+        osd.putsurface(self.toolbar_surface,0,0)
         self.drawclock()
         self.drawmail()
         self.drawtv()
         self.drawweather()
-        osd.update()
+        rect = (0,0,768,75)
+        osd.update(rect)
         self.idlecount = -1
 
     def checkmail(self):
@@ -75,17 +74,17 @@ class IdleTool:
         # 
         # First check the age of the cache.
         #
-        if (os.path.isfile(self.WEATHERCACHE) == 0 or (abs(time.time() - os.path.getmtime(self.WEATHERCACHE)) > 7200)):
+        if (os.path.isfile(self.WEATHERCACHE) == 0 or (abs(time.time() - os.path.getmtime(self.WEATHERCACHE)) > 3600)):
             weather = pymetar.MetarReport()
             weather.fetchMetarReport(self.METARCODE)
             if (weather.getTemperatureCelsius()):
                 temperature = '%2d' % weather.getTemperatureCelsius()
             else:
                 temperature = '0'  # Make it a string to match above.
-            if weather.extractSkyConditions():
-                icon = weather.extractSkyConditions()[1] + '.png'
+            if weather.getPixmap():
+                icon = weather.getPixmap() + '.png'
             else:
-                icon = 'moon.png'
+                icon = 'sun.png'
             cachefile = open(self.WEATHERCACHE,'w+')
             cachefile.write(temperature + '\n')
             cachefile.write(icon + '\n')
@@ -107,15 +106,13 @@ class IdleTool:
         temp,icon = self.checkweather()
         osd.drawbitmap('plugins/weather/icons/' + icon,160,30)
         osd.drawstring(temp,175,50,fgcolor=0xbbbbbb,font=self.CLOCKFONT,ptsize=14)
-        osd.drawstring('o',195,47,fgcolor=0xbbbbbb,font=self.CLOCKFONT,ptsize=10)
+        osd.drawstring('o',192,47,fgcolor=0xbbbbbb,font=self.CLOCKFONT,ptsize=10)
         
     def drawclock(self):
         clock = time.strftime('%a %I:%M %P')
-        osd.putsurface(self.clock_surface,525,25)
         osd.drawstring(clock,580,40,fgcolor=0xffffff,font=self.CLOCKFONT,ptsize=12)
 
     def drawmail(self):
-        osd.putsurface(self.mail_surface,25,25)
         if self.checkmail() > 0:
             osd.drawbitmap(self.MAILIMAGE,25,25)
         else:
