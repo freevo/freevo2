@@ -41,34 +41,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2003/09/21 13:19:00  dischi
+# adjust poll intervall
+#
 # Revision 1.40  2003/09/14 20:09:36  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
 # Revision 1.39  2003/09/12 20:32:49  dischi
 # move holiday settings into the plugin
-#
-# Revision 1.38  2003/09/05 02:48:12  rshortt
-# Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
-#
-# Revision 1.37  2003/08/24 19:59:43  outlyer
-# Fixed this to be endian independent, as required by Python 2.3 (prevents
-# another warning)
-#
-# Here's the warning in case anyone is curious:
-# /usr/local/freevo/src/plugins/idlebar.py:115: FutureWarning: hex/oct
-# constants > sys.maxint will return positive values in Python 2.4 and up
-#
-# Revision 1.36  2003/08/24 19:56:38  outlyer
-# Adjust to the renamed 'type' of empty cdrom drives.
-#
-# Revision 1.35  2003/08/24 10:16:26  dischi
-# do not use osd.OSDFont, xml_font has the font as font.font in it
-#
-# Revision 1.34  2003/08/23 12:51:42  dischi
-# removed some old CVS log messages
-#
-# Revision 1.33  2003/08/22 05:56:56  gsbarbieri
-# Better alignment and horizontal expansion.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -117,10 +97,10 @@ class PluginInterface(plugin.DaemonPlugin):
         init the idlebar
         """
         plugin.DaemonPlugin.__init__(self)
-        self.poll_interval   = 300
+        self.poll_interval   = 3000
         self.plugins = None
         plugin.register(self, 'idlebar')
-        self.visible = TRUE
+        self.visible = True
         
     def draw(self, (type, object), osd):
         """
@@ -142,7 +122,7 @@ class PluginInterface(plugin.DaemonPlugin):
         """
         if plugin.isevent(event) == 'IDENTIFY_MEDIA':
             skin.get_singleton().redraw()
-        return FALSE
+        return False
     
     def poll(self):
         """
@@ -442,7 +422,7 @@ class sensors(IdleBarPlugin):
             self.senspath = self.getSensorPath()
             self.sensor = sensor
             self.hotstack = hotstack
-            self.washot = FALSE
+            self.washot = False
             
         def temp(self):
             if self.senspath == -1 or not self.senspath:
@@ -456,14 +436,14 @@ class sensors(IdleBarPlugin):
             temp = int(float(string.split(data)[2]))
             hot = int(float(string.split(data)[0]))
             if temp > hot:
-                if self.washot == FALSE:
+                if self.washot == False:
                     self.hotstack = self.hotstack + 1
-                    self.washot == TRUE
+                    self.washot == True
                     print temp
             else:
-                if self.washot == TRUE:
+                if self.washot == True:
                     self.hotstack = self.hotstack - 1
-                    self.washot = FALSE
+                    self.washot = False
                 
             return "%s°" % temp
             
