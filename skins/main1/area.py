@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/06/22 11:34:46  dischi
+# use null layer
+#
 # Revision 1.5  2003/04/24 19:57:52  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -275,7 +278,6 @@ class Skin_Area:
         
         self.imagecache = objectcache.ObjectCache(imagecachesize,
                                                   desc='%s_image' % self.name)
-        self.dummy_layer = pygame.Surface((osd.width, osd.height))
 
 
     def draw(self, settings, obj, display_style=0, widget_type='menu', force_redraw=FALSE):
@@ -707,7 +709,7 @@ class Skin_Area:
             ret = osd.drawstringframed(text, x, y, width, height, None, None,
                                        font=font.name, ptsize=font.size,
                                        align_h = align_h, align_v = align_v,
-                                       mode=mode, ellipses=ellipses, layer=self.dummy_layer)
+                                       mode=mode, ellipses=ellipses, layer=osd.null_layer)
 
         self.tmp_objects.text.append((x, y, x+width, y+height2, text, font, height,
                                             align_h, align_v, mode, ellipses ))
