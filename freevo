@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.117  2004/08/29 18:37:05  dischi
+# epeg support for fast jpg thumbnailing
+#
 # Revision 1.116  2004/08/15 14:53:27  dischi
 # add mevas and pyimlib2 to python path
 #
@@ -360,6 +363,7 @@ else:
 os.environ['PYTHONPATH'] = '%s/../lib:%s' % (freevo_python, os.environ['PYTHONPATH'])
 os.environ['PYTHONPATH'] = '%s/../lib/mevas:%s' % (freevo_python, os.environ['PYTHONPATH'])
 os.environ['PYTHONPATH'] = '%s/../lib/pyimlib2:%s' % (freevo_python, os.environ['PYTHONPATH'])
+os.environ['PYTHONPATH'] = '%s/../lib/pyepeg:%s' % (freevo_python, os.environ['PYTHONPATH'])
 
 # extend PATH to make sure the basics are there
 os.environ['PATH'] = '%s:/usr/bin:/bin:/usr/local/bin:' % os.environ['PATH'] + \

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2004/08/29 18:37:05  dischi
+# epeg support for fast jpg thumbnailing
+#
 # Revision 1.25  2004/07/10 12:33:42  dischi
 # header cleanup
 #
@@ -61,7 +64,11 @@ import Image
 import cStringIO
 from mmpython.image import EXIF as exif
 
-
+try:
+    import epeg
+except ImportError:
+    _debug_('epeg not found')
+    
 if float(sys.version[0:3]) < 2.3:
     PICKLE_PROTOCOL = 1
 else:
@@ -482,11 +489,17 @@ def create_thumbnail(filename, thumbnail=None):
         try:
             image = Image.open(cStringIO.StringIO(thumbnail))
         except Exception, e:
-            print 'Invalid thumbnail for %s' % filename
+            _debug_('Invalid thumbnail for %s' % filename, 0)
             if config.DEBUG:
                 print e
 
     if not image:
+        try:
+            # epeg support for fast jpg thumbnailing
+            return epeg.fri_thumbnail(filename, thumb)
+        except:
+            pass
+
         if __freevo_app__ == 'main':
             try:
                 f=open(filename, 'rb')
@@ -543,5 +556,8 @@ def cache_image(filename, thumbnail=None, use_exif=False):
     except OSError:
         pass
 
-    return create_thumbnail(filename, thumbnail)
-
+    data = create_thumbnail(filename, thumbnail)
+    if not data:
+        # epeg
+        return read_thumbnail(filename)
+    
