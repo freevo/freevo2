@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2003/11/21 18:04:27  dischi
+# remove debug
+#
 # Revision 1.39  2003/11/21 17:56:50  dischi
 # Plugins now 'rate' if and how good they can play an item. Based on that
 # a good player will be choosen.
@@ -187,7 +190,7 @@ class MPlayer:
                     url = item.url + str(i+1)
             
         _debug_('MPlayer.play(): mode=%s, url=%s' % (mode, url))
-        print network_play
+
         if mode == 'file' and not os.path.isfile(url) and not network_play:
             # This event allows the videoitem which contains subitems to
             # try to play the next subitem
