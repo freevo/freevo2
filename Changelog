@@ -4,6 +4,14 @@ Freevo Changelog
 $Id$
 
 
+Release 1.2.1 (2002-05-XX):
+---------------------------
+o Changed remote control cursor left/right behavior in menus, making
+  it easier to navigate.
+o Added a feature to playing movies where a file can be attached to each
+  movie containing special arguments to MPlayer, e.g. aspect etc.
+  The file is named <filename>.mplayer.
+
 
 Release 1.2.0 (2002-05-12):
 ---------------------------
