@@ -1,4 +1,4 @@
-freevo (1.4.1cvs20030108-1) unstable; urgency=low
+freevo (1.4.1cvs20040109-1) unstable; urgency=low
 
   * New snapshot
   * Replaced `pwd` with $(CURDIR)
