@@ -312,9 +312,14 @@ class OSD:
             
 
     def drawstring(self, string, x, y, fgcolor=None, bgcolor=None,
-                   font=None, ptsize=0):
+                   font=None, ptsize=0, align='left'):
 
-        if DEBUG: print 'drawstring (%d;%d) "%s"' % (x, y, string)
+        # XXX Krister: Workaround for new feature that is only possible in the new
+        # XXX SDL ODS, line up columns delimited by tabs. Here the tabs are just
+        # XXX replaced with spaces
+        s = string.replace('\t', '   ')  
+
+        if DEBUG: print 'drawstring (%d;%d) "%s"' % (x, y, s)
         
         if fgcolor == None:
             fgcolor = self.default_fg_color
@@ -333,11 +338,19 @@ class OSD:
         # Render string with anti-aliasing
         #string = string[:50] # XXX TEST
         if bgcolor == None:
-            ren = f.render(string, 1, self._sdlcol(fgcolor))
+            ren = f.render(s, 1, self._sdlcol(fgcolor))
         else:
-            ren = f.render(string, 1, self._sdlcol(fgcolor), self._sdlcol(bgcolor))
+            ren = f.render(s, 1, self._sdlcol(fgcolor), self._sdlcol(bgcolor))
 
-        self.screen.blit(ren, (x, y))
+        # Handle horizontal alignment
+        w, h = ren.get_size()
+        tx = x # Left align is default
+        if align == 'center':
+            tx = x - w/2
+        elif align == 'right':
+            tx = x - w
+            
+        self.screen.blit(ren, (tx, y))
 
 
     def popup_box(self, text):
