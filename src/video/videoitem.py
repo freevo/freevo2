@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/03/22 20:03:02  dischi
+# add detailed information for tv shows
+#
 # Revision 1.23  2003/03/19 05:40:58  outlyer
 # Bugfixes to the 'bookmark' facility.
 #
@@ -165,7 +168,8 @@ class VideoItem(Item):
 
         self.filename = filename
         self.name    = util.getname(filename)
-
+        self.tv_show = FALSE
+        
         # find image for tv show and build new title
         if config.TV_SHOW_REGEXP_MATCH(self.name):
             show_name = config.TV_SHOW_REGEXP_SPLIT(os.path.basename(self.name))
@@ -177,6 +181,9 @@ class VideoItem(Item):
             elif os.path.isfile((config.TV_SHOW_IMAGES + show_name[0] + ".jpg").lower()):
                 self.image = (config.TV_SHOW_IMAGES + show_name[0] + ".jpg").lower()
 
+            self.tv_show = TRUE
+            self.show_name = show_name
+            
         # find image for this file
         # First check in COVER_DIR
         if os.path.isfile(config.COVER_DIR+self.name+'.png'):
