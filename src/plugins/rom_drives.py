@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/04/20 17:36:49  dischi
+# Renamed TV_SHOW_IMAGE_DIR to TV_SHOW_DATA_DIR. This directory can contain
+# images like before, but also fxd files for the tv show with global
+# informations (plot/tagline/etc) and mplayer options.
+#
 # Revision 1.2  2003/04/20 12:43:33  dischi
 # make the rc events global in rc.py to avoid get_singleton. There is now
 # a function app() to get/set the app. Also the events should be passed to
@@ -401,7 +406,7 @@ class Identify_Thread(threading.Thread):
                       ('SVCD','/svcd/', 'vcd'), ('DVD', '/video_ts/', 'dvd'),
 		      ('DVD','/VIDEO_TS/','dvd')]
 
-        image = title = movie_info = None
+        image = title = movie_info = more_info = None
 
         # Read the volume label directly from the ISO9660 file system
         
@@ -512,11 +517,18 @@ class Identify_Thread(threading.Thread):
                         volumes += show[1] + "x" + show[2]
 
                 if show_name and the_same:
-                    if os.path.isfile((config.TV_SHOW_IMAGES + show_name + ".png").lower()):
-                        image = (config.TV_SHOW_IMAGES + show_name + ".png").lower()
-                    elif os.path.isfile((config.TV_SHOW_IMAGES + show_name + ".jpg").lower()):
-                        image = (config.TV_SHOW_IMAGES + show_name + ".jpg").lower()
+                    k = config.TV_SHOW_DATA_DIR + show_name
+                    if os.path.isfile((k + ".png").lower()):
+                        image = (k + ".png").lower()
+                    elif os.path.isfile((k + ".jpg").lower()):
+                        image = (k + ".jpg").lower()
                     title = show_name + ' ('+ volumes + ')'
+                    if config.TV_SHOW_INFORMATIONS.has_key(show_name.lower()):
+                        tvinfo = config.TV_SHOW_INFORMATIONS[show_name.lower()]
+                        more_info = tvinfo[1]
+                        if not image:
+                            image = tvinfo[0]
+                    
                 elif not show_name:
                     if os.path.isfile(config.COVER_DIR+\
                                       os.path.splitext(os.path.basename(movie))[0]+'.png'):
@@ -559,6 +571,8 @@ class Identify_Thread(threading.Thread):
             media.info.name = title
         if image:
             media.info.image = image
+        if more_info:
+            media.info.info = more_info
 
         if len(mplayer_files) == 1:
             media.videoinfo = VideoItem(mplayer_files[0], None)
@@ -570,6 +584,8 @@ class Identify_Thread(threading.Thread):
                 media.videoinfo.name = title
             if image:
                 media.videoinfo.image = image
+            if more_info:
+                media.videoinfo.info = more_info
             
         media.info.media = media
         return

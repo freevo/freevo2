@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/04/20 17:36:50  dischi
+# Renamed TV_SHOW_IMAGE_DIR to TV_SHOW_DATA_DIR. This directory can contain
+# images like before, but also fxd files for the tv show with global
+# informations (plot/tagline/etc) and mplayer options.
+#
 # Revision 1.13  2003/04/06 21:13:07  dischi
 # o Switched to the new main skin
 # o some cleanups (removed unneeded inports)
@@ -333,7 +338,17 @@ def make_videoitem(video, variant):
             if not vitem.mplayer_options:
                 vitem.mplayer_options = None
     else:
-        if len(video['items-list']) > 1:
+        if not video.has_key('items-list'):
+            video['items-list'] = []
+            vitem = VideoItem('', None)
+            
+        elif len(video['items-list']) == 0:
+            vitem = VideoItem('', None)
+            vitem.mplayer_options = ''
+            if video['mplayer-options']:
+                vitem.mplayer_options += ' ' + video['mplayer-options']
+
+        elif len(video['items-list']) > 1:
             vitem = VideoItem('', None)
             for v in video['items-list']:
                 subitem = VideoItem(video['items'][v]['data'], vitem)
@@ -494,22 +509,23 @@ def parseMovieFile(file, parent, duplicate_check):
                 title = freevo_child.attrs[('', "title")].encode('latin-1')
             except KeyError:
                 pass
-            
-            for p in video['items'].keys():
-                if video['items'][p]['type'] == 'file':
-                    filename = video['items'][p]['data']
-                    if filename.find('://') == -1 and not video['items'][p]['media-id']:
-                        video['items'][p]['data'] = os.path.join(dir, filename)
-                    for i in range(len(duplicate_check)):
-                        try:
-                            if (unicode(duplicate_check[i], 'latin1', 'ignore') == \
-                                os.path.join(dir, filename)):
-                                del duplicate_check[i]
-                                break
-                        except:
-                            if duplicate_check[i] == os.path.join(dir, filename):
-                                del duplicate_check[i]
-                                break
+
+            if video.has_key('items'):
+                for p in video['items'].keys():
+                    if video['items'][p]['type'] == 'file':
+                        filename = video['items'][p]['data']
+                        if filename.find('://') == -1 and not video['items'][p]['media-id']:
+                            video['items'][p]['data'] = os.path.join(dir, filename)
+                        for i in range(len(duplicate_check)):
+                            try:
+                                if (unicode(duplicate_check[i], 'latin1', 'ignore') == \
+                                    os.path.join(dir, filename)):
+                                    del duplicate_check[i]
+                                    break
+                            except:
+                                if duplicate_check[i] == os.path.join(dir, filename):
+                                    del duplicate_check[i]
+                                    break
 
             mitem = None
             if variants:
@@ -549,7 +565,8 @@ def hash_xml_database():
     config.MOVIE_INFORMATIONS       = []
     config.MOVIE_INFORMATIONS_ID    = {}
     config.MOVIE_INFORMATIONS_LABEL = []
-
+    config.TV_SHOW_INFORMATIONS     = {}
+    
     if os.path.exists("/tmp/freevo-rebuild-database"):
         os.system('rm -f /tmp/freevo-rebuild-database')
 
@@ -580,4 +597,11 @@ def hash_xml_database():
                     l_re = re.compile(l)
                     config.MOVIE_INFORMATIONS_LABEL += [(l_re, info)]
 
+    for file in util.recursefolders(config.TV_SHOW_DATA_DIR,1,
+                                    '*'+config.SUFFIX_VIDEO_DEF_FILES[0],1):
+        infolist = parseMovieFile(file, os.path.dirname(file),[])
+        for info in infolist:
+            k = os.path.splitext(os.path.basename(file))[0]
+            config.TV_SHOW_INFORMATIONS[k] = (info.image, info.info, info.mplayer_options)
+            
     if DEBUG: print 'done'

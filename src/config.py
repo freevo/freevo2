@@ -22,6 +22,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/04/20 17:36:49  dischi
+# Renamed TV_SHOW_IMAGE_DIR to TV_SHOW_DATA_DIR. This directory can contain
+# images like before, but also fxd files for the tv show with global
+# informations (plot/tagline/etc) and mplayer options.
+#
 # Revision 1.23  2003/04/18 15:01:36  dischi
 # support more types of plugins and removed the old item plugin support
 #
@@ -387,6 +392,7 @@ REMOVABLE_MEDIA = []
 MOVIE_INFORMATIONS       = []
 MOVIE_INFORMATIONS_ID    = {}
 MOVIE_INFORMATIONS_LABEL = []
+TV_SHOW_INFORMATIONS     = {}
 
 #
 # compile the regexp

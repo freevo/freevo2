@@ -108,7 +108,7 @@ import plugin
 # is different, there will be only a warning
 
 FREEVO_CONF_VERSION = 1.0
-LOCAL_CONF_VERSION  = 3.0
+LOCAL_CONF_VERSION  = 3.1
 
 # Description of changes in each new version
 FREEVO_CONF_CHANGES = [] # None so far
@@ -131,7 +131,10 @@ LOCAL_CONF_CHANGES = [
      '''New skin engine. The new engine has no automatic TV overscan support,
      you need to set OVERSCAN_X and OVERSCAN_Y. There are also new variables
      for this engine: MAIN_MENU_ITEMS and FORCE_SKIN_LAYOUT. The games menu
-     will be activated automaticly if setup.py found mame or snes''')]
+     will be activated automaticly if setup.py found mame or snes'''),
+    (3.1,
+     '''Renamed TV_SHOW_IMAGE_DIR to TV_SHOW_DATA_DIR. This directory now can
+     also contain fxd files with gloabl informations and mplayer options''') ]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -297,7 +300,7 @@ MOVIE_DATA_DIR = 'movie-data/'
 # name.(png|jpg) (lowercase) is in this directory, it will be taken as cover
 # image
 #
-TV_SHOW_IMAGES = "testfiles/tv-show-images/"
+TV_SHOW_DATA_DIR = "testfiles/tv-show-images/"
 
 #
 # Directory for cover images for CD/VCD/DVD and music CDs or when you can't
@@ -600,7 +603,8 @@ MPLAYER_SEEK_TIMEOUT = 8
 #
 # XXX You must change this to fit your local conditions!
 #
-# TV/VCR_SETTINGS = 'NORM INPUT CHANLIST DEVICE'
+# TV_SETTINGS  = 'NORM INPUT CHANLIST DEVICE'
+# VCR_SETTINGS = 'NORM INPUT CHANLIST DEVICE'
 #
 # NORM: ntsc, pal, secam
 # INPUT: television, composite1

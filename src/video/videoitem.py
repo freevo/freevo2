@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2003/04/20 17:36:50  dischi
+# Renamed TV_SHOW_IMAGE_DIR to TV_SHOW_DATA_DIR. This directory can contain
+# images like before, but also fxd files for the tv show with global
+# informations (plot/tagline/etc) and mplayer options.
+#
 # Revision 1.38  2003/04/20 13:07:38  dischi
 # bugfix
 #
@@ -185,18 +190,30 @@ class VideoItem(Item):
         self.filename = filename
         self.name    = util.getname(filename)
         self.tv_show = FALSE
+        self.mplayer_options = ''
         
+        # XML file infos
+        # possible values are: genre, runtime, tagline, plot, year, rating
+        self.info = {}
+
         # find image for tv show and build new title
         if config.TV_SHOW_REGEXP_MATCH(self.name):
             show_name = config.TV_SHOW_REGEXP_SPLIT(os.path.basename(self.name))
             self.name = show_name[0] + " " + show_name[1] + "x" + show_name[2] +\
                          " - " + show_name[3] 
 
-            if os.path.isfile((config.TV_SHOW_IMAGES + show_name[0] + ".png").lower()):
-                self.image = (config.TV_SHOW_IMAGES + show_name[0] + ".png").lower()
-            elif os.path.isfile((config.TV_SHOW_IMAGES + show_name[0] + ".jpg").lower()):
-                self.image = (config.TV_SHOW_IMAGES + show_name[0] + ".jpg").lower()
+            if os.path.isfile((config.TV_SHOW_DATA_DIR + show_name[0] + ".png").lower()):
+                self.image = (config.TV_SHOW_DATA_DIR + show_name[0] + ".png").lower()
+            elif os.path.isfile((config.TV_SHOW_DATA_DIR + show_name[0] + ".jpg").lower()):
+                self.image = (config.TV_SHOW_DATA_DIR + show_name[0] + ".jpg").lower()
 
+            if config.TV_SHOW_INFORMATIONS.has_key(show_name[0].lower()):
+                tvinfo = config.TV_SHOW_INFORMATIONS[show_name[0].lower()]
+                self.info = tvinfo[1]
+                if not self.image:
+                    self.image = tvinfo[0]
+                self.mplayer_options = tvinfo[2]
+                
             self.tv_show = TRUE
             self.show_name = show_name
             
@@ -206,7 +223,7 @@ class VideoItem(Item):
             self.image = config.COVER_DIR+self.name+'.png'
         elif os.path.isfile(config.COVER_DIR+self.name+'.jpg'):
             self.image = config.COVER_DIR+self.name+'.jpg'
-        # Then check for episode in TV_SHOW_IMAGES
+        # Then check for episode in TV_SHOW_DATA_DIR
         if os.path.isfile(os.path.splitext(filename)[0] + ".png"):
             self.image = os.path.splitext(filename)[0] + ".png"
         elif os.path.isfile(os.path.splitext(filename)[0] + ".jpg"):
@@ -228,9 +245,6 @@ class VideoItem(Item):
         self.num_titles        = 0
         self.deinterlace       = 0
 
-        # XML file infos
-        # possible values are: genre, runtime, tagline, plot, year, rating
-        self.info = {}
         self.xml_file = None
 
         

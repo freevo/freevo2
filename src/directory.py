@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/04/20 17:36:49  dischi
+# Renamed TV_SHOW_IMAGE_DIR to TV_SHOW_DATA_DIR. This directory can contain
+# images like before, but also fxd files for the tv show with global
+# informations (plot/tagline/etc) and mplayer options.
+#
 # Revision 1.3  2003/04/20 16:08:50  dischi
 # take directory image based on TV_SHOW_IMAGES
 #
@@ -105,6 +110,7 @@ class DirItem(Playlist):
         # variables only for DirItem
         self.dir          = dir
         self.display_type = display_type
+        self.info         = {}
 
         # set directory variables to default
 	all_variables = ('MOVIE_PLAYLISTS', 'DIRECTORY_SORT_BY_DATE',
@@ -170,11 +176,17 @@ class DirItem(Playlist):
             self.image = image
 
         if not self.image:
-            f = os.path.join(config.TV_SHOW_IMAGES, os.path.basename(dir).lower())
+            f = os.path.join(config.TV_SHOW_DATA_DIR, os.path.basename(dir).lower())
             if os.path.isfile(f+'.png'):
                 self.image = f+'.png'
             if os.path.isfile(f+'.jpg'):
                 self.image = f+'.jpg'
+
+            if config.TV_SHOW_INFORMATIONS.has_key(os.path.basename(dir).lower()):
+                tvinfo = config.TV_SHOW_INFORMATIONS[os.path.basename(dir).lower()]
+                self.info = tvinfo[1]
+                if not self.image:
+                    self.image = tvinfo[0]
             
         if os.path.isfile(dir+'/folder.fxd'): 
             self.xml_file = dir+'/folder.fxd'
@@ -211,6 +223,7 @@ class DirItem(Playlist):
         if obj.type == 'dir':
             self.dir          = obj.dir
             self.display_type = obj.display_type
+            self.info         = obj.info
             
 
     def actions(self):
@@ -233,6 +246,16 @@ class DirItem(Playlist):
                         'Recursive random play all items') ]
         return items
     
+
+    def getattr(self, attr):
+        """
+        return the specific attribute as string or an empty string
+        """
+        a = Item.getattr(self, attr)
+        if not a and self.info and self.info.has_key(attr):
+            a = str(self.info[attr])
+        return a
+
 
     def cwd(self, arg=None, menuw=None):
         """
