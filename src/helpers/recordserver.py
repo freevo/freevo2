@@ -7,6 +7,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.73  2004/12/18 13:44:16  dischi
+# use popen and not childapp
+#
 # Revision 1.72  2004/12/05 13:01:11  dischi
 # delete old tv variables, rename some and fix detection
 #
@@ -85,17 +88,20 @@
 # ----------------------------------------------------------------------- */
 
 
-import time
 import os
 import pwd
-import traceback
 import logging
+
+import notifier
 
 # create logger objects in sysconfig
 import sysconfig
 
+# get logging object
+log = logging.getLogger('record')
+
 # set basic recording debug to info
-logging.getLogger('record').setLevel(logging.INFO)
+log.setLevel(logging.INFO)
 
 import config
 
@@ -107,25 +113,20 @@ try:
         os.environ['USER'] = pwd.getpwuid(os.getuid())[0]
         os.environ['HOME'] = pwd.getpwuid(os.getuid())[5]
 except Exception, e:
-    print e
+    log.warning('unable to set uid: %s' % e)
 
-import plugin
-import childapp
-import notifier
+notifier.init(notifier.GENERIC)
+
 import record.server
+import util.popen
 
+try:
+    record.server.RecordServer()
+    notifier.loop()
+except KeyboardInterrupt:
+    pass
+except:
+    log.exception('recordserver crash')
 
-while 1:
-    try:
-        notifier.init(notifier.GENERIC)
-        notifier.addDispatcher( childapp.watcher.step )
-        record.server.RecordServer()
-        notifier.loop()
-    except KeyboardInterrupt:
-        break
-    except:
-        traceback.print_exc()
-        print 'server problem, sleeping 1 min'
-        break
-        time.sleep(60)
-        
+# kill all running recorder
+util.popen.killall()

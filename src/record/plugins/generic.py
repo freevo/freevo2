@@ -41,7 +41,7 @@ import notifier
 
 # freevo imports
 import config
-import childapp
+from util.popen import Process
 
 # record imports
 from record.recorder import Plugin
@@ -49,16 +49,15 @@ from record.recorder import Plugin
 # get logging object
 log = logging.getLogger('record')
 
-class Childapp(childapp.Instance):
+class Childapp(Process):
     """
     ChildApp wrapper for use inside a recorder plugin
     """
-    def __init__(self, app, control, debugname = None, doeslogging = 0,
-                 prio = 0):
+    def __init__(self, app, control):
         """
         Init the childapp
         """
-        childapp.Instance.__init__(self, app, debugname, doeslogging, prio, 0)
+        Process.__init__(self, app)
         self.control = control
 
 
@@ -135,7 +134,7 @@ class PluginInterface(Plugin):
             # the first one is running right now, so the timer
             # should be set to the next one
             if len(self.recordings) == 1:
-                log.info('%s.schedule: scheduled already recording' % self.name)
+                log.info('%s.schedule: already scheduled' % self.name)
                 return
             log.info('%s.schedule: currently recording' % self.name)
             rec0 = recordings[0]
@@ -216,7 +215,7 @@ class PluginInterface(Plugin):
         if self.stop_timer:
             notifier.removeTimer(self.stop_timer)
         timer = max(0, int(rec.stop + rec.stop_padding + 10 - time.time()))
-        log.info('%s.record: add stop timer for %s seconds' % (self.name, timer))
+        log.info('%s.record: add stop timer for %s sec' % (self.name, timer))
         self.stop_timer = notifier.addTimer(timer * 1000, self.stop)
 
         # Create fxd file now, even if we don't know if it is working. It
