@@ -38,6 +38,7 @@ __all__ = [ 'MainMenuItem', 'MainMenu' ]
 import os
 
 # freevo imports
+import config
 import gui
 import menu
 import util
