@@ -68,14 +68,10 @@ class PluginInterface(generic.PluginInterface):
         else:
             filename = rec.url
 
-        duration = int(rec.stop - time.time())
+        duration = int(rec.stop + rec.stop_padding - time.time())
 
-#        return [ config.CONF.mplayer, '-cache', '1024', '-dumpstream', 
-#                 '-dumpfile', filename, 
-#                 config.VDR_STREAMDEV_URL + String(channel) ]
-
-        return [ os.environ['FREEVO_SCRIPT'],
-                 'url_record',  
+        return [ '/usr/bin/env', 'python',
+                 os.path.join(os.environ['FREEVO_HELPERS'], 'url_record.py'),
                  config.VDR_STREAMDEV_URL + String(channel),
                  filename, 
                  String(duration) ]
