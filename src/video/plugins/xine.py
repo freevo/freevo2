@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2004/01/10 13:22:54  dischi
+# fix mimetype = cue
+#
 # Revision 1.34  2004/01/02 11:17:35  dischi
 # cleanup
 #
@@ -201,7 +204,7 @@ class Xine:
             # vcd:///dev/cdrom -- NO track support (?)
             command.append('vcd://%s' % item.media.devicename)
 
-        elif item.mime_type == 'cue':
+        elif item.mimetype == 'cue':
             command.append('vcd://%s' % item.filename)
             self.app_mode = 'vcd'
             
