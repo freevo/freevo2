@@ -45,18 +45,18 @@ class ViewArea(Area):
     """
     def __init__(self):
         Area.__init__(self, 'view')
-        self.info    = (None, None, None, None)
-        self.content = []
+        self.info = (None, None, None)
+        self.gui_objects = []
 
 
     def clear(self):
         """
         Delete the shown image from screen
         """
-        self.info  = (None, None, None, None)
-        for c in self.content:
+        self.info  = (None, None, None)
+        for c in self.gui_objects:
             c.unparent()
-        self.content = []
+        self.gui_objects = []
 
 
     def update(self):
@@ -72,32 +72,32 @@ class ViewArea(Area):
             pass
 
         if not image:
-            if self.content:
+            if self.gui_objects:
                 self.clear()
             return
 
         # get layout values and calc the geometry
-        content = self.calc_geometry(self.layout.content, copy_object=True)
-        width   = content.width  - 2 * content.spacing
-        height  = content.height - 2 * content.spacing
+        settings = self.settings
+        width    = settings.width  - 2 * settings.spacing
+        height   = settings.height - 2 * settings.spacing
 
         # check if we need a redraw
-        if self.info == (self.settings, item.image, width, height):
+        if not settings.changed and self.info == (item.image, width, height):
             return
-        self.clear()
-        self.info = self.settings, item.image, width, height
 
+        self.clear()
+        self.info = item.image, width, height
 
         x0 = 0
         y0 = 0
 
         try:
-            val = content.types[item.type]
+            val = settings.types[item.type]
         except (KeyError, AttributeError):
-            val = content.types['default']
+            val = settings.types['default']
 
         if val.rectangle:
-            r = self.calc_rectangle(val.rectangle, width, height)[2]
+            r = val.rectangle.calculate(width, height)[2]
 
             if r.x < 0:
                 x0 -= r.x
@@ -113,8 +113,8 @@ class ViewArea(Area):
             if r.y + r.height > y0 + height:
                 r.height, height = height, height - (r.height - height)
 
-        addx = content.x + content.spacing
-        addy = content.y + content.spacing
+        addx = settings.x + settings.spacing
+        addy = settings.y + settings.spacing
 
         # FIXME: use cache here.
         image = self.imagelib.item_image(item, (width, height),
@@ -125,16 +125,16 @@ class ViewArea(Area):
 
         i_w, i_h = image.width, image.height
 
-        if content.align == 'center' and i_w < width:
+        if settings.align == 'center' and i_w < width:
             addx += (width - i_w) / 2
 
-        if content.align == 'right' and i_w < width:
+        if settings.align == 'right' and i_w < width:
             addx += width - i_w
 
-        if content.valign == 'center' and i_h < height:
+        if settings.valign == 'center' and i_h < height:
             addy += (height - i_h) / 2
 
-        if content.valign == 'bottom' and i_h < height:
+        if settings.valign == 'bottom' and i_h < height:
             addy += height - i_h
 
         x0 += addx
@@ -143,8 +143,7 @@ class ViewArea(Area):
         if val.rectangle:
             r.width  -= width  - i_w
             r.height -= height - i_h
-            self.content.append(self.drawbox(r.x + addx, r.y + addy,
-                                             r.width, r.height, r))
+            box = self.drawbox(r.x + addx, r.y + addy, r.width, r.height, r)
+            self.gui_objects.append(box)
 
-        self.content.append(self.drawimage(image, (x0, y0)))
-
+        self.gui_objects.append(self.drawimage(image, (x0, y0)))

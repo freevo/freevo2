@@ -64,9 +64,8 @@ class ListingArea(Area):
         Create the Area and define some needed variables
         """
         Area.__init__(self, 'listing')
-        self.content           = []
         self.last_listing      = []
-        self.last_content_type = ''
+        self.last_settings_type = ''
         self.last_selection    = None
         self.last_start        = -1
         self.last_max_len      = -1
@@ -92,7 +91,7 @@ class ListingArea(Area):
         self.arrows = []
         # reset variables
         if not keep_settings:
-            self.last_content_type = ''
+            self.last_settings_type = ''
             self.last_selection    = None
             self.last_start        = -1
             self.last_max_len      = -1
@@ -143,26 +142,22 @@ class ListingArea(Area):
         return 0, l[3]
 
 
-    def __get_items_geometry(self, settings, menu, area_settings):
+    def __get_items_geometry(self, menu):
         """
         Get the geometry of the items. How many items per row/col, spaces
         between each item, etc
         """
-        # ok, we use settings + area_settings as key
-        # FIXME: is that ok or do we need something else?
-        key = '%s-%s-%s' % (settings, area_settings, self.layout.content.type)
-        try:
-            # returned cached information
-            return menu.listing_area_dict[key]
-        except (KeyError, AttributeError):
-            pass
+        if hasattr(menu, '_skin_info_listing_area') and \
+           menu._skin_info_listing_area[0] == self.settings:
+            # return cache
+            return menu._skin_info_listing_area[1]
 
-        content = self.calc_geometry(self.layout.content, copy_object=True)
+        settings = self.settings
 
-        if content.type == 'text':
-            items_w = content.width
+        if settings.type == 'text':
+            items_w = settings.width
             items_h = 0
-        elif content.type == 'image' or content.type == 'image+text':
+        elif settings.type == 'image' or settings.type == 'image+text':
             items_w = 0
             items_h = 0
 
@@ -172,51 +167,50 @@ class ListingArea(Area):
         for i in menu.choices:
             if hasattr(i, 'display_type') and i.display_type:
                 x = i.display_type
-                if content.types.has_key(x) and not possible_types.has_key(x):
-                    possible_types[x] = content.types[x]
+                if settings.types.has_key(x) and not possible_types.has_key(x):
+                    possible_types[x] = settings.types[x]
                 x = '%s selected' % i.display_type
-                if content.types.has_key(x) and not possible_types.has_key(x):
-                    possible_types[x] = content.types[x]
-        if content.types.has_key('default'):
-            possible_types['default'] = content.types['default']
-        if content.types.has_key('selected'):
-            possible_types['selected'] = content.types['selected']
+                if settings.types.has_key(x) and not possible_types.has_key(x):
+                    possible_types[x] = settings.types[x]
+        if settings.types.has_key('default'):
+            possible_types['default'] = settings.types['default']
+        if settings.types.has_key('selected'):
+            possible_types['selected'] = settings.types['selected']
 
         hskip = 0
         vskip = 0
         # get the max height of a text item
-        if content.type == 'text':
+        if settings.type == 'text':
             for t in possible_types:
                 ct = possible_types[t]
 
                 rh = 0
                 rw = 0
                 if ct.rectangle:
-                    rw, rh, r = self.calc_rectangle(ct.rectangle,
-                                                    content.width,
-                                                    ct.font.height)
+                    rw, rh, r = ct.rectangle.calculate(settings.width,
+                                                       ct.font.height)
                     hskip = min(hskip, r.x)
                     vskip = min(vskip, r.y)
                     items_w = max(items_w, r.width)
 
                 items_h = max(items_h, ct.font.height, rh)
 
-        elif content.type == 'image' or content.type == 'image+text':
+        elif settings.type == 'image' or settings.type == 'image+text':
             for t in possible_types:
                 ct = possible_types[t]
                 rh = 0
                 rw = 0
                 if ct.rectangle:
-                    if content.type == 'image+text':
+                    if settings.type == 'image+text':
                         mh = max(ct.height, int(ct.font.height * 1.1))
                     else:
                         mh = ct.height
-                    rw, rh, r = self.calc_rectangle(ct.rectangle, ct.width, mh)
+                    rw, rh, r = ct.rectangle.calculate(ct.width, mh)
                     hskip = min(hskip, r.x)
                     vskip = min(vskip, r.y)
 
                 addh = 0
-                if content.type == 'image+text':
+                if settings.type == 'image+text':
                     addh = int(ct.font.height * 1.1)
 
                 items_w = max(items_w, ct.width, rw)
@@ -224,11 +218,11 @@ class ListingArea(Area):
 
 
         else:
-            log.warning('unknown content type %s' % content.type)
+            log.warning('unknown settings type %s' % settings.type)
             return None
 
         # shrink width for text menus
-        width = content.width
+        width = settings.width
 
         if items_w > width:
             width, items_w = width - (items_w - width), width
@@ -236,24 +230,21 @@ class ListingArea(Area):
         cols = 0
         rows = 0
 
-        while (cols + 1) * (items_w + content.spacing) - \
-              content.spacing <= content.width:
+        while (cols + 1) * (items_w + settings.spacing) - \
+              settings.spacing <= settings.width:
             cols += 1
 
-        while (rows + 1) * (items_h + content.spacing) - \
-              content.spacing <= content.height:
+        while (rows + 1) * (items_h + settings.spacing) - \
+              settings.spacing <= settings.height:
             rows += 1
 
-        if not hasattr(menu, 'listing_area_dict'):
-            menu.listing_area_dict = {}
-
-        info = cols, rows, items_w + content.spacing, items_h + \
-               content.spacing, -hskip, -vskip, width
-        menu.listing_area_dict[key] = info
+        info = cols, rows, items_w + settings.spacing, items_h + \
+               settings.spacing, -hskip, -vskip, width
+        menu._skin_info_listing_area = self.settings, info
         return info
 
 
-    def __draw_text_listing_item(self, choice, (x,y), content, val, hspace,
+    def __draw_text_listing_item(self, choice, (x,y), settings, val, hspace,
                                  vspace, gui_objects, width, hskip, vskip):
         """
         Draw an item for the text menu. This function is called from update
@@ -262,7 +253,7 @@ class ListingArea(Area):
         """
         icon_x = 0
         icon   = None
-        align  = val.align or content.align
+        align  = val.align or settings.align
         menu   = self.menu
         x_icon = 0
 
@@ -330,7 +321,7 @@ class ListingArea(Area):
         # draw the rectangle below the item
         #
         if val.rectangle:
-            r = self.calc_rectangle(val.rectangle, width, val.font.height)[2]
+            r = val.rectangle.calculate(width, val.font.height)[2]
             b = self.drawbox(x + hskip + r.x + x_icon - \
                              self.settings.box_under_icon * x_icon,
                              y + vskip + r.y,
@@ -342,9 +333,9 @@ class ListingArea(Area):
         #
         # special handling for tv shows
         #
-        if choice.type == 'video' and hasattr(choice,'tv_show') and \
-           choice.tv_show and (val.align=='left' or val.align=='') and \
-           (content.align=='left' or content.align==''):
+        if choice.type == 'video' and choice.tv_show and \
+               (val.align=='left' or val.align=='') and \
+               (settings.align=='left' or settings.align==''):
             sn = choice.show_name
 
             if self.last_tvs[0] == sn[0]:
@@ -371,28 +362,41 @@ class ListingArea(Area):
                        len(menu.choices) > 5:
                     self.tvs_shortname = True
 
-                if self.all_tvs and self.tvs_shortname:
-                    tvs_w = val.font.stringsize('x') + season + episode
+                if sn[1]:
+                    if self.all_tvs and self.tvs_shortname:
+                        tvs_w = val.font.stringsize('x') + season + episode
+                    else:
+                        tvs_w = val.font.stringsize('%s x' % sn[0]) + \
+                                season + episode
                 else:
-                    tvs_w = val.font.stringsize('%s x' % sn[0]) + \
-                            season + episode
+                    if self.all_tvs and self.tvs_shortname:
+                        tvs_w = season + episode
+                    else:
+                        tvs_w = val.font.stringsize('%s ' % sn[0]) + \
+                                season + episode
                 self.last_tvs = (sn[0], tvs_w)
 
-            s = self.drawstring(' - %s' % sn[3], val.font, content,
+            s = self.drawstring(' - %s' % sn[3], val.font, settings,
                                 x=x + hskip + icon_x + tvs_w,
                                 y=y + vskip, width=width-icon_x-tvs_w,
                                 height=-1, align_h='left', dim=False,
                                 mode='hard')
             gui_objects.append(s)
-            s = self.drawstring(sn[2], val.font, content,
+            s = self.drawstring(sn[2], val.font, settings,
                                 x=x + hskip + icon_x + tvs_w - 100,
                                 y=y + vskip, width=100, height=-1,
                                 align_h='right', dim=False, mode='hard')
             gui_objects.append(s)
-            if self.all_tvs and self.tvs_shortname:
-                text = '%sx' % sn[1]
+            if sn[1]:
+                if self.all_tvs and self.tvs_shortname:
+                    text = '%sx' % sn[1]
+                else:
+                    text = '%s %sx' % (sn[0], sn[1])
             else:
-                text = '%s %sx' % (sn[0], sn[1])
+                if self.all_tvs and self.tvs_shortname:
+                    text = ''
+                else:
+                    text = sn[0]
 
         #
         # if the menu has an attr table, the menu is a table. Each
@@ -418,7 +422,7 @@ class ListingArea(Area):
                         table_text[i] = ''
 
                 if table_text[i]:
-                    s = self.drawstring(table_text[i], val.font, content,
+                    s = self.drawstring(table_text[i], val.font, settings,
                                         x=table_x + x_mod, y=y + vskip,
                                         width=table_w, height=-1,
                                         align_h=val.align, mode='hard',
@@ -430,13 +434,14 @@ class ListingArea(Area):
             #
             # draw the text
             #
-            s = self.drawstring(text, val.font, content, x=x + hskip + x_icon,
+            s = self.drawstring(text, val.font, settings, x=x + hskip + x_icon,
                                 y=y + vskip, width=width-icon_x, height=-1,
                                 align_h=val.align, mode='hard', dim=True)
-            gui_objects.append(s)
+            if s:
+                gui_objects.append(s)
 
 
-    def __draw_image_listing_item(self, choice, (x, y), content, val, hspace,
+    def __draw_image_listing_item(self, choice, (x, y), settings, val, hspace,
                                   vspace, gui_objects):
         """
         Draw an item for the image menu. This function is called from update
@@ -444,7 +449,7 @@ class ListingArea(Area):
         once.
         """
         height = val.height
-        if content.type == 'image+text':
+        if settings.type == 'image+text':
             height += int(1.1 * val.font.height)
 
         if val.align == 'center':
@@ -458,11 +463,11 @@ class ListingArea(Area):
             y += vskip
 
         if val.rectangle:
-            if content.type == 'image+text':
+            if settings.type == 'image+text':
                 max_h = max(height, int(val.font.height * 1.1))
-                r = self.calc_rectangle(val.rectangle, val.width, max_h)[2]
+                r = val.rectangle.calculate(val.width, max_h)[2]
             else:
-                r = self.calc_rectangle(val.rectangle, val.width, height)[2]
+                r = val.rectangle.calculate(val.width, height)[2]
             b = self.drawbox(x + r.x, y + r.y, r.width, r.height, r)
             gui_objects.append(b)
 
@@ -495,8 +500,8 @@ class ListingArea(Area):
             self.layer.add_child(i)
             gui_objects.append(i)
 
-        if content.type == 'image+text':
-            s = self.drawstring(choice.name, val.font, content, x=x,
+        if settings.type == 'image+text':
+            s = self.drawstring(choice.name, val.font, settings, x=x,
                                 y=y + val.height, width=val.width, height=-1,
                                 align_h=val.align, mode='hard',
                                 ellipses='', dim=False)
@@ -520,7 +525,7 @@ class ListingArea(Area):
         self.imagelib.item_image(self.__cache_listing[0],
                                  (self.__default_val.width,
                                   self.__default_val.height),
-                                 self.settings, force=False,
+                                 self.settings.icon_dir, force=False,
                                  cache=self.imagecache)
         if len(self.__cache_listing) == 1:
             # Nothing more to cache, return False to stop this callback
@@ -539,13 +544,14 @@ class ListingArea(Area):
         do the real update.
         """
         menu      = self.menu
-        content   = self.calc_geometry(self.layout.content, copy_object=True)
+        settings   = self.settings
 
         if not len(menu.choices):
             if not self.empty_listing:
                 self.clear()
                 t = _('This directory is empty')
-                self.empty_listing = self.drawstring(t, content.font, content)
+                self.empty_listing = self.drawstring(t, settings.font,
+                                                     settings)
             return
 
         # delete 'empty listing' message
@@ -554,26 +560,26 @@ class ListingArea(Area):
             self.empty_listing = None
 
         cols, rows, hspace, vspace, hskip, vskip, width = \
-              self.__get_items_geometry(self.settings, menu, self.area_values)
+              self.__get_items_geometry(menu)
 
         menu.rows = rows
         menu.cols = cols
 
-        if content.align == 'center':
-            x = content.x + (content.width - cols * hspace) / 2
+        if settings.align == 'center':
+            x = settings.x + (settings.width - cols * hspace) / 2
         else:
-            x = content.x
+            x = settings.x
 
-        if content.valign == 'center':
-            y = content.y + (content.height - rows * vspace) / 2
+        if settings.valign == 'center':
+            y = settings.y + (settings.height - rows * vspace) / 2
         else:
-            y = content.y
+            y = settings.y
 
         current_col = 1
 
-        if content.type == 'image':
-            width  = hspace - content.spacing
-            height = vspace - content.spacing
+        if settings.type == 'image':
+            width  = hspace - settings.spacing
+            height = vspace - settings.spacing
 
         self.last_tvs      = ('', 0)
         self.all_tvs       = True
@@ -583,16 +589,16 @@ class ListingArea(Area):
         end     = start + cols * rows
         listing = menu.choices[start:end]
         self.__cache_listing = []
-        if content.type != 'text' and end < len(menu.choices):
+        if settings.type != 'text' and end < len(menu.choices):
             self.__cache_listing = menu.choices[end:end + cols * rows]
             notifier.addTimer(0, notifier.Callback(self.__cache_next_image))
 
         # do some checking if we have to redraw everything
         # or only update because the selection changed
-        if self.last_content_type != content.type or \
+        if self.last_settings_type != settings.type or \
            len(listing) != len(self.last_listing) or \
            self.last_start != start or self.last_max_len != len(menu.choices):
-            self.last_content_type = content.type
+            self.last_settings_type = settings.type
             self.last_start        = start
             self.last_max_len      = len(menu.choices)
             redraw = True
@@ -632,15 +638,15 @@ class ListingArea(Area):
 
             # init the 'val' settings
             if draw_this_item:
-                if content.types.has_key( '%s selected' % choice.type ):
-                    s_val = content.types[ '%s selected' % choice.type ]
+                if settings.types.has_key( '%s selected' % choice.type ):
+                    s_val = settings.types[ '%s selected' % choice.type ]
                 else:
-                    s_val = content.types[ 'selected' ]
+                    s_val = settings.types[ 'selected' ]
 
-                if content.types.has_key( choice.type ):
-                    n_val = content.types[ choice.type ]
+                if settings.types.has_key( choice.type ):
+                    n_val = settings.types[ choice.type ]
                 else:
-                    n_val = content.types['default']
+                    n_val = settings.types['default']
 
                 if choice == menu.selected:
                     val = s_val
@@ -648,25 +654,25 @@ class ListingArea(Area):
                     val = n_val
                     self.__default_val = val
 
-            if draw_this_item and content.type == 'text':
+            if draw_this_item and settings.type == 'text':
                 # draw item for text listing
-                self.__draw_text_listing_item(choice, (x,y), content, val,
+                self.__draw_text_listing_item(choice, (x,y), settings, val,
                                               hspace, vspace, gui_objects,
                                               width, hskip, vskip)
 
-            if draw_this_item and content.type == 'image' or \
-                   content.type == 'image+text':
+            if draw_this_item and settings.type == 'image' or \
+                   settings.type == 'image+text':
                 # draw item for image listing
-                self.__draw_image_listing_item(choice, (x,y), content, val,
+                self.__draw_image_listing_item(choice, (x,y), settings, val,
                                                hspace, vspace, gui_objects)
 
             # calculate next item position
             if current_col == cols:
                 # max number of cols reached, skip to next row
-                if content.align == 'center':
-                    x = content.x + (content.width - cols * hspace) / 2
+                if settings.align == 'center':
+                    x = settings.x + (settings.width - cols * hspace) / 2
                 else:
-                    x = content.x
+                    x = settings.x
                 y += vspace
                 current_col = 1
             else:
@@ -681,17 +687,17 @@ class ListingArea(Area):
         if redraw:
             # draw the arrows
             try:
-                if start > 0 and self.area_values.images['uparrow']:
-                    i = self.area_values.images['uparrow'].filename
-                    i = self.drawimage(i, self.area_values.images['uparrow'])
+                if start > 0 and settings.images['uparrow']:
+                    i = settings.images['uparrow'].filename
+                    i = self.drawimage(i, settings.images['uparrow'])
                     self.arrows.append(i)
                 if end < len(menu.choices):
-                    if isinstance(self.area_values.images['downarrow'].y, str):
-                        v = copy.copy(self.area_values.images['downarrow'])
+                    if isinstance(settings.images['downarrow'].y, str):
+                        v = copy.copy(settings.images['downarrow'])
                         v.y = eval(v.y, {'MAX':(y-vskip)})
                     else:
-                        v = self.area_values.images['downarrow']
-                    i = self.area_values.images['downarrow'].filename
+                        v = settings.images['downarrow']
+                    i = settings.images['downarrow'].filename
                     i = self.drawimage(i, v)
                     self.arrows.append(i)
             except Exception, e:

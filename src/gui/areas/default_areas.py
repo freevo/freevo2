@@ -35,8 +35,12 @@
 
 __all__ = [ 'ScreenArea', 'TitleArea', 'SubtitleArea' ]
 
-from area import Area
+# gui imports
 from gui import Progressbar
+
+# area imports
+from area import Area
+
 
 class ScreenArea(Area):
     """
@@ -72,16 +76,16 @@ class TitleArea(Area):
         Update the title area
         """
         menu      = self.menu
-        content   = self.calc_geometry(self.layout.content, copy_object=True)
+        settings   = self.settings
 
         text = ''
         try:
             item = menu.selected
-            if content.type == 'menu':
+            if settings.type == 'menu':
                 text = menu.heading
             elif len(menu.choices) == 0:
                 text = ''
-            elif content.type == 'short item':
+            elif settings.type == 'short item':
                 if item.type == 'video' and item.tv_show and \
                        ((item.image and not item.image.endswith('.raw')) or \
                         (item.parent and item.parent.name == \
@@ -101,7 +105,8 @@ class TitleArea(Area):
         except AttributeError:
             try:
                 if menu.type == 'tv':
-                    if content.type == 'item' or content.type == 'short item':
+                    if settings.type == 'item' or \
+                           settings.type == 'short item':
                         text = menu.table[1].title
                     else:
                         text = _('TV GUIDE')
@@ -112,17 +117,17 @@ class TitleArea(Area):
             if hasattr(self.infoitem, 'name'):
                 text = self.infoitem.name
             else:
-                if content.type == 'short item' and hasattr(menu, 'subtitle'):
+                if settings.type == 'short item' and hasattr(menu, 'subtitle'):
                     text = menu.subtitle
                 elif hasattr(menu, 'title'):
                     text = menu.title
 
-        if self.text == (text, content.font, content):
+        if self.text == (text, settings.font, settings):
             return
 
         self.clear()
-        self.text = text, content.font, content
-        self.gui_object = self.drawstring(text, content.font, content,
+        self.text = text, settings.font, settings
+        self.gui_object = self.drawstring(text, settings.font, settings,
                                           height=-1, mode='hard')
 
 

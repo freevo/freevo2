@@ -65,7 +65,7 @@ class ProgressArea(Area):
         """
         Update the progressbar
         """
-        content = self.calc_geometry(self.layout.content, copy_object=True)
+        settings = self.settings
 
         try:
             length = int(self.infoitem.info['length'])
@@ -79,15 +79,15 @@ class ProgressArea(Area):
         # get start pos
         pos = self.infoitem.elapsed - start
 
-        if self.__last_c != (content.x, content.y, content.width,
-                                content.height):
+        if self.__last_c != (settings.x, settings.y, settings.width,
+                                settings.height):
             if self.bar:
                 self.bar.unparent()
-            self.bar = Progressbar((content.x, content.y),
-                                   (content.width, content.height),
+            self.bar = Progressbar((settings.x, settings.y),
+                                   (settings.width, settings.height),
                                    2, (0,0,0), (255, 255, 255, 95), 0,
                                    None, (0, 0, 150), 0, length)
             self.layer.add_child(self.bar)
-            self.__last_c = content.x, content.y, content.width, \
-                            content.height
+            self.__last_c = settings.x, settings.y, settings.width, \
+                            settings.height
         self.bar.set_bar_position(pos)

@@ -285,11 +285,11 @@ class Splashscreen(gui.Area):
         if self.bar:
             return
 
-        content = self.calc_geometry(self.layout.content, copy_object=True)
-        x0, x1 = content.x, content.x + content.width
-        y = content.y + content.font.font.height + content.spacing
+        settings = self.settings
+        x0, x1 = settings.x, settings.x + settings.width
+        y = settings.y + settings.font.font.height + settings.spacing
 
-        self.text = self.drawstring(self.text, content.font, content,
+        self.text = self.drawstring(self.text, settings.font, settings,
                                     height=-1, align_h='center')
         self.bar = gui.Progressbar((x0, y), (x1-x0, 20), 2, (0,0,0),
                                    None, 0, None, (0,0,0,95), 0,
