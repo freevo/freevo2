@@ -82,8 +82,10 @@ class Recording:
         self.start_padding = config.TV_RECORD_PADDING
         self.stop_padding  = config.TV_RECORD_PADDING
         for i in info:
-            if i in ('subtitle', 'url'):
-                setattr(self, i, info[i])
+            if i == 'subtitle':
+                self.subtitle = info[i]
+            elif i == 'url':
+                self.url = String(info[i])
             elif i == 'start-padding':
                 self.start_padding = int(info[i])
             elif i == 'stop-padding':
@@ -109,7 +111,7 @@ class Recording:
         if self.subtitle:
             info['subtitle'] = self.subtitle
         if self.url:
-            info['url'] = self.url
+            info['url'] = Unicode(self.url)
         return self.id, self.name, self.channel, self.priority, self.start, \
                self.stop, self.status, self.start_padding, self.stop_padding, \
                info
@@ -121,10 +123,11 @@ class Recording:
         """
         self.id = int(parser.getattr(node, 'id'))
         for child in node.children:
-            for var in ('name', 'channel', 'status', 'subtitle', 'url',
-                        'fxdname'):
+            for var in ('name', 'channel', 'status', 'subtitle', 'fxdname'):
                 if child.name == var:
                     setattr(self, var, parser.gettext(child))
+            if child.name == 'url':
+                self.url = String(parser.gettext(child))
             if child.name == 'priority':
                 self.priority = int(parser.gettext(child))
             if child.name == 'padding':
@@ -171,7 +174,7 @@ class Recording:
         for var in ('name', 'channel', 'priority', 'url', 'status',
                     'subtitle', 'fxdname'):
             if getattr(self, var):
-                subnode = fxdparser.XMLnode(var, [], getattr(self, var) )
+                subnode = fxdparser.XMLnode(var, [], Unicode(getattr(self, var)) )
                 fxd.add(subnode, node)
         timer = fxdparser.XMLnode('timer', [ ('start', _int2time(self.start)),
                                              ('stop', _int2time(self.stop)) ])
