@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2003/10/20 13:46:41  outlyer
+# A small change to fix a frequent source of crashes. I don't know why,
+# but it happens on occaison, so it's better to silently skip over than
+# to crash horribly.
+#
 # Revision 1.33  2003/10/19 09:51:10  dischi
 # better debug
 #
@@ -200,8 +205,12 @@ class ChildApp:
             traceback.print_stack()
 
         # killed already
-        if not self.child:
-            _debug_('already dead', 2)
+        if hasattr(self,'child'):
+            if not self.child:
+                _debug_('already dead', 2)
+                return
+        else:
+            _debug_('This should never happen!',1)
             return
 
         self.lock.acquire()
