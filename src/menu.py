@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.93  2004/05/09 09:58:43  dischi
+# make it possible to force a page rebuild
+#
 # Revision 1.92  2004/03/19 21:03:39  dischi
 # fix tvguide context bug
 #
@@ -17,12 +20,6 @@
 #
 # Revision 1.90  2004/02/25 17:44:30  dischi
 # add special event mapping for tvmenu
-#
-# Revision 1.89  2004/02/23 21:45:09  dischi
-# refresh fix
-#
-# Revision 1.88  2004/02/22 20:33:47  dischi
-# some unicode fixes
 #
 # Revision 1.87  2004/02/14 19:29:07  dischi
 # send osd message when not using a submenu
@@ -179,7 +176,8 @@ class MenuWidget(GUIObject):
         self.eventhandler_plugins = None
         self.event_context  = 'menu'
         self.show_callbacks = []
-
+        self.force_page_rebuild = False
+        
         
     def get_event_context(self):
         """
@@ -349,6 +347,9 @@ class MenuWidget(GUIObject):
                 reload = menu.reload_func()
                 if reload:
                     self.menustack[-1] = reload
+            if self.force_page_rebuild:
+                self.force_page_rebuild = False
+                self.rebuild_page()
             self.init_page()
 
         skin.draw('menu', self, self.menustack[-1])
