@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/03/24 02:40:50  rshortt
+# These objects are now using skin properties.
+#
 # Revision 1.4  2003/03/09 21:37:06  rshortt
 # Improved drawing.  draw() should now be called instead of _draw(). draw()
 # will check to see if the object is visible as well as replace its bg_surface
@@ -104,45 +107,70 @@ class LetterBox(GUIObject):
     }
         
 
-    def __init__(self, text=" ", left=None, top=None, width=None, height=None, 
+    def __init__(self, text=" ", left=None, top=None, width=25, height=25, 
                  bg_color=None, fg_color=None, selected_color=None,
+                 selected_bg_color=None, selected_fg_color=None,
                  border=None, bd_color=None, bd_width=None):
 
-        GUIObject.__init__(self)
+        self.border            = border
+        self.bd_color          = bd_color
+        self.bd_width          = bd_width
+        self.bg_color          = bg_color
+        self.fg_color          = fg_color
+        self.selected_fg_color = selected_fg_color
+        self.selected_bg_color = selected_bg_color
 
-        self.text           = text
-        self.border         = border
-        self.h_margin       = 2
-        self.v_margin       = 2
-        self.bd_color       = bd_color
-        self.bd_width       = bd_width
-        self.width          = width
-        self.height         = height
-        self.left           = left
-        self.top            = top
-        self.bg_color       = bg_color
-        self.fg_color       = fg_color
-        self.label          = None
-        self.selected_color = selected_color
+        self.skin = skin.get_singleton()
 
-        # XXX: Place a call to the skin object here then set the defaults
-        #      acodringly. self.skin is set in the superclass.
+        (BLAH, BLAH, BLAH, BLAH,
+         button_default, button_selected) = \
+         self.skin.GetPopupBoxStyle()
 
-        if not self.width:    self.width  = 25
-        if not self.height:   self.height = 25
-        if not self.left:     self.left   = -100
-        if not self.top:      self.top    = -100
-        if not self.bg_color: self.bg_color = Color(self.osd.default_bg_color)
-        if not self.fg_color: self.fg_color = Color(self.osd.default_fg_color)
-        if not self.bd_color: self.bd_color = Color(self.osd.default_fg_color) 
-        if not self.bd_width: self.bd_width = 2
-        if not self.border:   self.border = Border(self, Border.BORDER_FLAT, 
-                                                   self.bd_color, self.bd_width)
+        if not self.bg_color:
+            if button_default.rectangle.bgcolor:
+                self.bg_color = Color(button_default.rectangle.bgcolor)
+            else:
+                self.bg_color = Color(self.osd.default_bg_color)
 
-        if not self.selected_color: self.selected_color = Color((0,255,0,128))
+        if not self.fg_color:
+            if button_default.font.color:
+                self.fg_color = Color(button_default.font.color)
+            else:
+                self.fg_color = Color(self.osd.default_fg_color)
 
-        self.set_v_align(Align.NONE)
-        self.set_h_align(Align.NONE)
+        if not self.selected_bg_color:
+            if button_selected.rectangle.bgcolor:
+                self.selected_bg_color = Color(button_selected.rectangle.bgcolor)
+            else:
+                self.selected_bg_color = Color((0,255,0,128))
+
+        if not self.selected_fg_color:
+            if button_selected.font.color:
+                self.selected_fg_color = Color(button_selected.font.color)
+            else:
+                self.selected_fg_color = Color(self.osd.default_fg_color)
+
+
+        GUIObject.__init__(self, left, top, width, height, 
+                           self.bg_color, self.fg_color)
+
+
+        if not self.bd_color: 
+            if button_default.rectangle.color:
+                self.bd_color = Color(button_default.rectangle.color)
+            else:
+                self.bd_color = Color(self.osd.default_fg_color)
+
+        if not self.bd_width: 
+            if button_default.rectangle.size:
+                self.bd_width = button_default.rectangle.size
+            else:
+                self.bd_width = 1
+
+        if not self.border:   
+            self.border = Border(self, Border.BORDER_FLAT,
+                                 self.bd_color, self.bd_width)
+
 
         if type(text) is StringType:
             if text: self.set_text(text)
@@ -150,6 +178,28 @@ class LetterBox(GUIObject):
             self.text = None
         else:
             raise TypeError, text
+
+        if button_default.font:       
+            self.set_font(self.label,
+                          button_default.font.name, 
+                          button_default.font.size, 
+                          Color(button_default.font.color))
+        else:
+            self.set_font(config.OSD_DEFAULT_FONTNAME,
+                          config.OSD_DEFAULT_FONTSIZE)
+
+        if button_selected.font:       
+            self.set_font(self.selected_label,
+                          button_selected.font.name, 
+                          button_selected.font.size, 
+                          Color(button_selected.font.color))
+        else:
+            self.set_font(self.selected_label,
+                          config.OSD_DEFAULT_FONTNAME,
+                          config.OSD_DEFAULT_FONTSIZE)
+
+        self.set_v_align(Align.NONE)
+        self.set_h_align(Align.NONE)
 
 
     def charUp(self):
@@ -199,24 +249,24 @@ class LetterBox(GUIObject):
         if not self.width or not self.height or not self.text:
             raise TypeError, 'Not all needed variables set.'
 
+        if self.selected:
+            c = self.selected_bg_color.get_color_sdl()
+            a = self.selected_bg_color.get_alpha()
+        else:
+            c = self.bg_color.get_color_sdl()
+            a = self.bg_color.get_alpha()
+
         box = pygame.Surface(self.get_size(), 0, 32)
-        c = self.bg_color.get_color_sdl()
-        a = self.bg_color.get_alpha()
         box.fill(c)
         box.set_alpha(a)
 
-        if self.selected:
-            sel_box = pygame.Surface(self.get_size(), 0, 32)
-            c = self.selected_color.get_color_sdl()
-            a = self.selected_color.get_alpha()
-            sel_box.fill(c)
-            sel_box.set_alpha(a)
-            box.blit(sel_box, (0,0))
-
-
         self.osd.screen.blit(box, self.get_position())
 
-        if self.label:  self.label.draw()
+        if self.selected:
+            self.selected_label.draw()
+        else:
+            self.label.draw()
+
         if self.border: self.border.draw()
 
     
@@ -235,20 +285,27 @@ class LetterBox(GUIObject):
         if not self.label:
             self.label = Label(text)
             self.label.set_parent(self)
-            # These values can also be maipulated by the user through
-            # get_font and set_font functions.
-            self.label.set_font( config.OSD_DEFAULT_FONTNAME,
-                                 config.OSD_DEFAULT_FONTSIZE )
             # XXX Set the background color to none so it is transparent.
             self.label.set_background_color(None)
             self.label.set_h_margin(self.h_margin)
             self.label.set_v_margin(self.v_margin)
-            self.label.set_h_align(Align.CENTER)
         else:
             self.label.set_text(text)
 
+        if not self.selected_label:
+            self.selected_label = Label(text)
+            self.selected_label.set_parent(self)
+            # XXX Set the background color to none so it is transparent.
+            self.selected_label.set_background_color(None)
+            self.selected_label.set_h_margin(self.h_margin)
+            self.selected_label.set_v_margin(self.v_margin)
+        else:
+            self.selected_label.set_text(text)
+
         self.label.set_v_align(Align.MIDDLE)
         self.label.set_h_align(Align.CENTER)
+        self.selected_label.set_v_align(Align.MIDDLE)
+        self.selected_label.set_h_align(Align.CENTER)
 
 
     def get_font(self):
@@ -258,16 +315,13 @@ class LetterBox(GUIObject):
         return (self.label.font.filename, self.label.font.ptsize)
 
 
-    def set_font(self, file, size):
+    def set_font(self, label, file, size, color):
         """
         Set the font.
 
         Just hands the info down to the label. Might raise an exception.
         """
-        if self.label:
-            self.label.set_font(file, size)
-        else:
-            raise TypeError, file
+        label.set_font(file, size, color)
 
 
     def set_border(self, bs):
