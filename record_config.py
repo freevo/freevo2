@@ -19,5 +19,9 @@ RECORD_SERVER_PORT = 18001
 RECORD_SCHEDULE = '/var/cache/freevo/record_schedule.xml'
 
 plugin.activate('plugins.generic_record')
+# Use the next line instead if you have an ivtv based card (PVR-250/350)
+# and want freevo to do everthing for you.  TV_SETTINGS must be set up
+# right in your local_conf.py
+# plugin.activate('plugins.ivtv_record')
 
 LOGDIR = '/var/log/freevo'
