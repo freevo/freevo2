@@ -121,7 +121,7 @@
     <title>Internal Structure</title>
     <sect1>
       <title>Plugin Location</title>
-      <para><emphasis>not written yet</emphasis></para>
+      <para>Plugins are intended to be grouped by type and then there is a general location for hard to fit plugins. The main location is in the /usr/local/freevo/src/plugins. The type locations for plugins is in the various plugins subdirectories of the tv, video, audio, and image in /usr/local/freevo/src.</para>
     </sect1>
 
     <sect1>
