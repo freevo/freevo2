@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/10/04 09:31:39  dischi
+# copy loop first
+#
 # Revision 1.10  2003/10/03 17:49:23  dischi
 # add support for directory with one movie
 #
@@ -46,6 +49,7 @@ import config
 import util
 import xml_parser
 import os
+import copy
 
 from videoitem import VideoItem
 
@@ -56,7 +60,7 @@ def cwd(parent, files):
     """
     items = []
 
-    for file in files:
+    for file in copy.copy(files):
         if (os.path.isdir(file)):
             if (os.path.basename(file)[0] == '.'):
                 files.remove(file)
