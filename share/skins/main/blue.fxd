@@ -566,5 +566,35 @@
     <color label="tv label" value="0x88000066"/>
     <color label="tv selection" value="0x88ffffff"/>
 
+    <!-- 
+    *******************************************************
+    ** Splashscreen
+    ******************************************************* -->
+
+    <splashscreen>
+      <screen layout="screen blank" x="0" y="0" width="800" height="600"/>
+      <content layout="splashscreen" x="10" y="10" width="780" height="580"/>
+    </splashscreen>
+
+    <layout label="splashscreen">
+      <background>
+	<image filename="splashscreen.png" x="10" y="10" width="780" height="580"/>
+      </background>
+      <content x="30" y="400" width="740" font="splashscreen font" spacing="10"/>
+    </layout>
+
+    <font label="splashscreen font" name="Vera.ttf" size="20" color="0xffffff"/>
+
+    <!-- 
+    *******************************************************
+    ** Headlines
+    ******************************************************* -->
+
+    <headlines>
+      <screen layout="screen0" x="0" y="0" width="800" height="600"/>
+      <title visible="not idlebar" layout="title0" x="10" y="10" width="780" height="60"/>
+      <info layout="info" x="10" y="110" width="780" height="480"/>
+    </headlines>
+
   </skin>
 </freevo>
