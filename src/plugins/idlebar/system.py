@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/10/28 20:38:36  mikeruelle
+# fix a crash
+#
 # Revision 1.1  2003/10/27 20:11:12  dischi
 # move idlebar.py to a directory
 #
@@ -238,7 +241,6 @@ class sensors(IdleBarPlugin):
     def __init__(self, cpu='temp3', case='temp2' , ram='MemTotal'):
         IdleBarPlugin.__init__(self)
         
-        import re
         
         self.hotstack = 0
         self.case = None
@@ -260,6 +262,7 @@ class sensors(IdleBarPlugin):
 
         
     def getRamStat(self):
+        import re
 
         f = open('/proc/meminfo')
         data = f.read()
