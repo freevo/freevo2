@@ -9,6 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/03/17 18:54:45  outlyer
+# Some changes for the bookmarks
+#     o videoitem.py - Added bookmark menu, bookmark "parser" and menu generation,
+#             haven't figured out how to pass the timecode to mplayer though. I tried
+#             setting mplayer_options, but self.play seems to just ignore them. I don't
+#             know how to pass anything to self.play either. ARGH.
+#     o mplayer.py - commented out two extraneous prints.
+#
 # Revision 1.20  2003/03/16 19:28:05  dischi
 # Item has a function getattr to get the attribute as string
 #
@@ -123,7 +131,6 @@ class VideoItem(Item):
         self.audio_file = {}            # audio dubbing
 
         self.filename = filename
-        
         self.name    = util.getname(filename)
 
         # find image for tv show and build new title
@@ -212,11 +219,10 @@ class VideoItem(Item):
         """
         return a list of possible actions on this item.
         """
-        
         items = [ (self.play, 'Play'), (self.settings, 'Change play settings') ]
         if self.variants:
             items += [ (self.show_variants, 'Show variants') ]
-        
+
         # show DVD/VCD title menu for DVDs, but only when we aren't in a
         # submenu of a such a menu already
         if not self.filename or self.filename == '0':
@@ -225,6 +231,13 @@ class VideoItem(Item):
                 items += [( self.dvd_vcd_title_menu, 'DVD title list' )]
             if self.mode == 'vcd':
                 items += [( self.dvd_vcd_title_menu, 'VCD title list' )]
+            for m in self.subitems:
+                # Allow user to watch one of the subitems instead of always both
+                items += [( self.play, 'Play %s' % (m.filename))]
+                if os.path.exists(util.get_bookmarkfile(m.filename)):
+                    myfilename = util.get_bookmarkfile(m.filename)
+                    self.current_subitem = myfilename
+                    items += [( self.bookmark_menu, 'Bookmark list %s' % (myfilename))]
         return items
 
 
@@ -349,6 +362,32 @@ class VideoItem(Item):
         if menuw.visible:
             menuw.hide()
         self.video_player.play('', mplayer_options, self, 'dvdnav')
+
+    def bookmark_menu(self,arg=None, menuw=None):
+        """
+        Bookmark list
+        """
+        bookmarkfile = self.current_subitem
+        items = []
+        m = open(bookmarkfile,'r')
+        lines = open(bookmarkfile,'r').readlines()
+        for line in lines: 
+            file = copy.copy(self)
+            sec = int(line)
+            hour = int(sec/3600)
+            min = int(sec/60)
+            sec = int(sec%60)
+            file.filename = '%0.2d:%0.2d:%0.2d' % (hour,min,sec)
+            file.name = 'Jump to %s' % (file.filename)
+            file.mplayer_options += " -ss %s" % (file.filename)
+            items += [file]
+        
+        moviemenu = menu.Menu(self.name, items)
+        menuw.pushmenu(moviemenu)
+
+        return
+
+
 
 
 

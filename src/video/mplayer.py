@@ -9,6 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/03/17 18:54:44  outlyer
+# Some changes for the bookmarks
+#     o videoitem.py - Added bookmark menu, bookmark "parser" and menu generation,
+#             haven't figured out how to pass the timecode to mplayer though. I tried
+#             setting mplayer_options, but self.play seems to just ignore them. I don't
+#             know how to pass anything to self.play either. ARGH.
+#     o mplayer.py - commented out two extraneous prints.
+#
 # Revision 1.26  2003/03/17 16:34:33  outlyer
 # Added preliminary movie bookmarks (i.e. places to jump to on next play)
 # Currently only writing the bookmarks does anything; I'm going to have to
@@ -384,11 +392,9 @@ class MPlayer:
                 self.thread.app.write('dvdnav 6\n')
                 return TRUE
             else:
-                print self.item
                 self.stop()
                 self.thread.item = None
                 rc.app = None
-                print self.item
                 return self.item.eventhandler(event)
 
         if event == rc.REC:
