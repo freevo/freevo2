@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.63  2003/11/23 17:04:53  dischi
+# directory.py now handles fxd files itself based on the new fxd parser
+#
 # Revision 1.62  2003/11/22 20:34:44  dischi
 # use new vfs
 #
@@ -251,20 +254,16 @@ class DirItem(Playlist):
         self.xml_file = file
         if self.xml_file and vfs.isfile(self.xml_file):
             try:
-                parser = qp_xml.Parser()
-                f = vfs.open(self.xml_file)
-                var_def = parser.parse(f.read())
-                f.close()
-                for node in var_def.children:
-                    if node.name == 'folder':
-                        self.fxd_parser(node)
+                parser = util.fxdparser.FXD(self.xml_file)
+                parser.set_handler('folder', self.read_folder_fxd)
+                parser.parse()
             except:
                 print "fxd file %s corrupt" % self.xml_file
                 traceback.print_exc()
 
 
 
-    def fxd_parser(self, node):
+    def read_folder_fxd(self, fxd, node):
         '''
         parse the xml file for directory settings
         
@@ -281,108 +280,68 @@ class DirItem(Playlist):
 
         global all_variables
         set_all = self.xml_file == self.dir+'/folder.fxd'
+
         # read attributes
         if set_all:
-            try:
+            if node.attrs.has_key(('', 'title')):
                 self.name = node.attrs[('', 'title')].encode(config.LOCALE)
-            except KeyError:
-                pass
 
-            try:
+            if node.attrs.has_key(('', 'cover-img')):
                 image = node.attrs[('', 'cover-img')].encode(config.LOCALE)
                 if image and vfs.isfile(vfs.join(self.dir, image)):
                     self.image = vfs.join(self.dir, image)
-            except KeyError:
-                pass
 
-            try:
+            if node.attrs.has_key(('', 'import')):
                 import_xml = node.attrs[('', 'import')].encode(config.LOCALE)
                 if vfs.isfile(vfs.join(self.dir, import_xml + '.fxd')):
-                    info = parseMovieFile(vfs.join(self.dir, import_xml + '.fxd'),
-                                          self, [])
+                    info = parseMovieFile(vfs.join(self.dir, import_xml + '.fxd'), self, [])
                     if info:
                         self.name      = info[0].name
                         self.image     = info[0].image
                         self.info_type = info[0].type
                         for key in info[0].info:
                             self.info[key] = info[0].info[key]
-                            
-            except KeyError:
-                pass
-            
-        for child in node.children:
-            # set directory variables
-            if child.name == 'setvar':
-                for v,n,d in all_variables:
-                    if child.attrs[('', 'name')].upper() == v.upper():
-                        if v.upper() in type_list_variables:
-                            if int(child.attrs[('', 'val')]):
-                                setattr(self, v, [self.display_type])
-                            else:
-                                setattr(self, v, [])
+
+            # parse <info> tag
+            fxd.parse_info(fxd.get_children(node, 'info', 1), self,
+                           {'description': 'content', 'content': 'content' })
+
+        for child in fxd.get_children(node, 'setvar', 1):
+            # <setvar name="directory_smart_sort" val="1"/>
+            for v,n,d in all_variables:
+                if child.attrs[('', 'name')].upper() == v.upper():
+                    if v.upper() in type_list_variables:
+                        if int(child.attrs[('', 'val')]):
+                            setattr(self, v, [self.display_type])
                         else:
-                            try:
-                                setattr(self, v, int(child.attrs[('', 'val')]))
-                            except ValueError:
-                                setattr(self, v, child.attrs[('', 'val')])
-                        self.modified_vars.append(v)
-            # get more info
-            if child.name == 'info' and set_all:
-                for info in child.children:
-                    if info.name == 'content':
-                        self.info['content'] = util.format_text(info.textof().\
-                                                                encode(config.LOCALE))
+                            setattr(self, v, [])
+                    else:
+                        try:
+                            setattr(self, v, int(child.attrs[('', 'val')]))
+                        except ValueError:
+                            setattr(self, v, child.attrs[('', 'val')])
+                    self.modified_vars.append(v)
 
-        
-    def write_fxd(self):
+    
+    def write_folder_fxd(self, fxd, node):
         """
-        save the modified fxd file
+        callback to save the modified fxd file
         """
-        self.xml_file = vfs.join(self.dir, 'folder.fxd')
-
-        try:
-            fxd = util.FXDtree(self.xml_file)
-        except:
-            return 0
-
-        folder_elem = None
-        for node in fxd.tree.children:
-            if node.name == 'folder':
-                folder_elem = node
-                folder_elem.first_cdata = None
-                folder_elem.following_cdata = None
-                break
-        else:
-            folder_elem = util.XMLnode('folder')
-            fxd.add(folder_elem, pos=0)
-
-        del_items = []
-        for child in folder_elem.children:
+        # remove old setvar
+        for child in copy.copy(node.children):
             if child.name == 'setvar':
-                del_items.append(child)
+                node.children.remove(child)
 
-        # remove old setvar items
-        for child in del_items:
-            folder_elem.children.remove(child)
-
+        # add current vars as setvar
         for v in self.modified_vars:
             if v in type_list_variables:
                 if getattr(self, v):
                     val = 1
                 else:
                     val = 0
-                n = util.XMLnode('setvar', (('name', v.lower()), ('val', val)))
             else:
-                n = util.XMLnode('setvar', (('name', v.lower()), ('val', getattr(self, v))))
-            fxd.add(n, folder_elem, 0)
-
-        try:
-            fxd.save()
-        except IndexError:
-            return 0
-        except IOError:
-            AlertBox(text=_('Unable to save folder.fxd')).show()
-        return 1 
+                val = getattr(self, v)
+            fxd.add(fxd.XMLnode('setvar', (('name', v.lower()), ('val', val))), node, 0)
 
 
     def copy(self, obj):
@@ -454,16 +413,61 @@ class DirItem(Playlist):
         return items
     
 
+
+    def fxd_handler(self, fxd_files, duplicate_check, display_type):
+        """
+        return a list of items that belong to a fxd files
+        """
+        items = []
+        for fxd_file in fxd_files:
+            try:
+                # create a basic fxd parser
+                parser = util.fxdparser.FXD(fxd_file)
+
+                # create an object that can parse the special infos
+                # from the fxd
+                handler = []
+                for t in possible_display_types:
+                    if not display_type or display_type == t and \
+                           hasattr(eval(t), 'FXDHandler'):
+                        h = eval(t).FXDHandler(parser, fxd_file, self, duplicate_check)
+                        handler.append(h)
+
+                # start the parsing
+                parser.parse()
+
+                # get this informations back
+                for h in handler:
+                    items += h.items
+
+            except:
+                print "fxd file %s corrupt" % fxd_file
+                traceback.print_exc()
+        return items
+    
+        
     def cwd(self, arg=None, menuw=None):
+        """
+        browse directory
+        """
         self.check_password_and_build(arg=None, menuw=menuw)
 
+
+
     def play(self, arg=None, menuw=None):
+        """
+        play directory
+        """
         if arg == 'next':
             Playlist.play(self, arg=arg, menuw=menuw)
         else:
             self.check_password_and_build(arg='play', menuw=menuw)
 
+
     def check_password_and_build(self, arg=None, menuw=None):
+        """
+        password checker
+        """
         if not self.menuw:
             self.menuw = menuw
 
@@ -487,7 +491,10 @@ class DirItem(Playlist):
 
 
     def pass_cmp_cb(self, word=None):
-	# read the contents of self.dir/.passwd and compare to word
+        """
+        read the contents of self.dir/.passwd and compare to word
+        callback for check_password_and_build
+        """
 	try:
 	    pwfile = vfs.open(self.dir + '/.password')
 	    line = pwfile.readline()
@@ -507,6 +514,9 @@ class DirItem(Playlist):
 
 
     def build(self, arg=None, menuw=None):
+        """
+        build the items for the directory
+        """
         self.playlist = []
 
         display_type = self.display_type
@@ -519,6 +529,11 @@ class DirItem(Playlist):
         # build play_items for video, audio, image, games
         # the interface functions must remove the files they cover, they
         # can also remove directories
+
+
+        # 
+        # PHASE I: scan directory with mmpython
+        #
 
         mmpython_dir = self.dir
         if self.media:
@@ -558,9 +573,33 @@ class DirItem(Playlist):
                 self.media.cached = True
 
         play_items = []
+
+
+        # 
+        # PHASE II: parse fxd files
+        #
+
+        fxd_files = util.find_matches(files, ['fxd'])
+        for d in copy.copy(files):
+            if vfs.isdir(d) and vfs.isfile(vfs.join(d, vfs.basename(d) + '.fxd')):
+                fxd_files.append(vfs.join(d, vfs.basename(d) + '.fxd'))
+                files.remove(d)
+
+        play_items += self.fxd_handler(fxd_files, files, display_type)
+
+
+        # 
+        # PHASE III: add normal files
+        #
+
         for t in possible_display_types:
             if not display_type or display_type == t:
-                play_items += eval(t + '.cwd(self, files)')
+                play_items += eval(t).cwd(self, files)
+
+
+        # 
+        # PHASE IV: sort play items
+        #
 
         if self.DIRECTORY_SORT_BY_DATE:
             play_items.sort(lambda l, o: cmp(l.sort('date').upper(),
@@ -579,14 +618,14 @@ class DirItem(Playlist):
         if not display_type or display_type in self.DIRECTORY_CREATE_PLAYLIST:
             self.playlist = play_items
 
-        # build items for sub-directories
+
+        # 
+        # PHASE V: add subdirs
+        #
+
         dir_items = []
         for filename in files:
-            if (vfs.isdir(filename) and
-                vfs.basename(filename) != 'CVS' and
-                vfs.basename(filename) != '.xvpics' and
-                vfs.basename(filename) != '.thumbnails' and
-                vfs.basename(filename) != '.pics'):
+            if vfs.isdir(filename):
                 dir_items += [ DirItem(filename, self, display_type =
                                        self.display_type) ]
 
@@ -598,7 +637,11 @@ class DirItem(Playlist):
         if self.DIRECTORY_REVERSE_SORT:
             dir_items.reverse()
             
-        # build items for playlists
+
+        # 
+        # PHASE VI: add playlists
+        #
+
         pl_items = []
         if not self.display_type or display_type in self.DIRECTORY_ADD_PLAYLIST_FILES:
             for pl in util.find_matches(files, config.SUFFIX_AUDIO_PLAYLISTS):
@@ -611,6 +654,11 @@ class DirItem(Playlist):
                 pl_items += [ pl ]
 
         pl_items.sort(lambda l, o: cmp(l.name.upper(), o.name.upper()))
+
+
+        # 
+        # PHASE VII: finalize
+        #
 
         # all items together
         items = []
@@ -638,6 +686,10 @@ class DirItem(Playlist):
             # the drive
             if self.media:
                 self.media.mount()
+
+        # 
+        # PHASE VIII: action!
+        #
 
         # autoplay
         if len(items) == 1 and items[0].actions() and \
@@ -677,7 +729,7 @@ class DirItem(Playlist):
         # we changed the menu, don't build a new one
         return None
 
-        
+
     def update(self, new_files, del_files, all_files):
         """
         update the current item set. Maybe this function can share some code
@@ -692,12 +744,39 @@ class DirItem(Playlist):
         if self.display_type == 'tv':
             display_type = 'video'
 
+
+        # a fxd files may be removed, 'free' covered files
+        for fxd_file in util.find_matches(del_files, ['fxd']):
+            for i in self.play_items:
+                if i.xml_file == fxd_file and hasattr(i, '_fxd_covered_'):
+                    for covered in i._fxd_covered_:
+                        if not covered in del_files:
+                            new_files.append(covered)
+                    del_items.append(i)
+                    del_files.remove(fxd_file)
+
+            
+        # a new fxd file may cover items
+        fxd_files = util.find_matches(new_files, ['fxd'])
+        if fxd_files:
+            for f in fxd_files:
+                new_files.remove(f)
+            copy_all = copy.copy(all_files)
+            new_items += self.fxd_handler(fxd_files, copy_all, display_type)
+            for f in all_files:
+                if not f in copy_all:
+                    # covered by fxd now
+                    if not f in new_files:
+                        del_files.append(f)
+                    else:
+                        new_files.remove(f)
+
+                    
         # check modules if they know something about the deleted/new files
         for t in possible_display_types:
             if not display_type or display_type == t:
-                eval(t + '.update')(self, new_files, del_files, \
-                                    new_items, del_items, \
-                                    self.play_items)
+                eval(t).update(self, new_files, del_files, new_items, del_items,
+                               self.play_items)
                 
         # store the current selected item
         selected = self.menu.selected
@@ -722,7 +801,6 @@ class DirItem(Playlist):
                     self.pl_items.remove(item)
 
 
-                    
         # add new play items to the menu
         if new_items:
             self.play_items += new_items
@@ -736,13 +814,8 @@ class DirItem(Playlist):
         # add new dir items to the menu
         new_dir_items = []
         for dir in new_files:
-            if (vfs.isdir(dir) and
-                vfs.basename(dir) != 'CVS' and
-                vfs.basename(dir) != '.xvpics' and
-                vfs.basename(dir) != '.thumbnails' and
-                vfs.basename(dir) != '.pics'):
-                new_dir_items += [ DirItem(dir, self,
-                                           display_type = self.display_type) ]
+            if vfs.isdir(dir):
+                new_dir_items += [ DirItem(dir, self, display_type = self.display_type) ]
 
         if new_dir_items:
             self.dir_items += new_dir_items
@@ -875,9 +948,17 @@ class DirItem(Playlist):
             else:
                 item.name += 'ICON_RIGHT_AUTO_' + _('auto')
 
+
         # write folder.fxd
-        if not self.write_fxd():
-            print 'error writing file'
+        self.xml_file = vfs.join(self.dir, 'folder.fxd')
+
+        try:
+            parser = util.fxdparser.FXD(self.xml_file)
+            parser.set_handler('folder', self.write_folder_fxd, 'w', True)
+            parser.save()
+        except:
+            print "fxd file %s corrupt" % self.xml_file
+            traceback.print_exc()
 
         # rebuild menu
         menuw.menustack[-1].choices[menuw.menustack[-1].choices.\
@@ -944,6 +1025,9 @@ class DirItem(Playlist):
         
         return Playlist.eventhandler(self, event, menuw)
         
+
+
+
 
 # ======================================================================
 
