@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2003/07/19 19:40:47  dischi
+# handling for mp3 files without length information
+#
 # Revision 1.30  2003/07/04 16:11:02  dischi
 # removed info again from AudioItem parameter at both places
 #
@@ -221,7 +224,7 @@ class AudioItem(Item):
         """
         return the specific attribute as string or an empty string
         """
-        if attr  == 'length':
+        if attr  == 'length' and self.length:
             return '%d:%02d' % (int(self.length / 60), int(self.length % 60))
 
         if attr  == 'elapsed':
