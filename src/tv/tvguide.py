@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2004/06/28 15:56:42  dischi
+# fix off by one error on scrolling down
+#
 # Revision 1.33  2004/06/20 14:07:58  dischi
 # remove upsoon on changes
 #
@@ -446,7 +449,7 @@ class TVGuide(Item):
             if self.guide.chan_list[i].id == last_prg.channel_id:
                 break
 
-        channel_pos = min(len(self.guide.chan_list)-2, max(0, i+value))
+        channel_pos = min(len(self.guide.chan_list)-1, max(0, i+value))
 
         # calc real changed value
         value = channel_pos - i
@@ -455,7 +458,7 @@ class TVGuide(Item):
             # move start channel up
             start_channel = self.guide.chan_list[start_pos + value].id
 
-        if value > 0 and channel_pos < len(self.guide.chan_list)-2 and \
+        if value > 0 and channel_pos < len(self.guide.chan_list)-1 and \
                channel_pos + 1 >= end_pos:
             # move start channel down
             start_channel = self.guide.chan_list[start_pos + value].id
