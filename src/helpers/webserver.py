@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/09/06 14:59:38  gsbarbieri
+# Fixed to work in non system-wide installs
+#
 # Revision 1.2  2003/09/05 16:20:11  dischi
 # take care for installed version
 #
@@ -64,11 +67,11 @@ if len(sys.argv)>1 and sys.argv[1] == '--help':
 logfile = '%s/internal-webserver-%s.log' % (config.LOGDIR, os.getuid())
 log.startLogging(open(logfile, 'a'))
 
-if os.path.isfile(os.path.join(os.environ['FREEVO_PYTHON'], 'www/htdocs')):
+if os.path.isdir(os.path.join(os.environ['FREEVO_PYTHON'], 'www/htdocs')):
     docRoot = os.path.join(os.environ['FREEVO_PYTHON'], 'www/htdocs')
 else:
     docRoot = os.path.join(config.SHARE_DIR, 'htdocs')
-    
+
 root = static.File(docRoot)
 root.processors = { '.rpy': script.ResourceScript, }
 
