@@ -12,27 +12,27 @@ if ! test -a runapp ; then
 fi
 
 # First check if the runtime is installed
-if test -a freevo_rt/freevo_rt ; then
+if test -a ../runtime/freevo_rt ; then
 
     # Prevent the linker from using other libraries than the ones
     # in freevo_rt
-    export LD_PRELOAD=`cat freevo_rt/preloads`
+    export LD_PRELOAD=`cat ../runtime/preloads`
 
     # Execute using the runtime:
-    echo "Using the Freevo runtime (./freevo_rt)"
+    echo "Using the Freevo runtime (../runtime)"
     
     # Start the lirc remote control app if the device is present
     if test -S /dev/lircd ; then
         echo Found a lirc device, starting the remote control daemon
-        freevo_rt/freevo_rt rc_client/remote.py --remote=lirc /dev/null 2> /dev/null &
+        ../runtime/freevo_rt rc_client/remote.py --remote=lirc /dev/null 2> /dev/null &
     fi
     
     # Start the main freevo application
-    freevo_rt/freevo_rt main.py $*
+    ../runtime/freevo_rt main.py $*
 
     # Freevo exited, make sure all children are killed
     sleep 1
-    killall -9 freevo_rt/freevo_rt 2&> /dev/null
+    killall -9 ../runtime/freevo_rt 2&> /dev/null
     exit
 fi
 

@@ -63,7 +63,7 @@ if __name__ == '__main__':
             continue
 
         fname = os.path.basename(dep)
-        fd.write('freevo_rt/%s ' % fname)
+        fd.write('../runtime/%s ' % fname)
     fd.write('\n')
         
     
