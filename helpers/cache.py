@@ -3,22 +3,7 @@
 import sys
 import os
 
-try:
-    import config
-
-except ImportError:
-    if 'FREEVO_HOME' in os.environ and os.environ['FREEVO_HOME']:
-        os.chdir(os.environ['FREEVO_HOME'])
-    else:
-        os.chdir(os.path.join(os.path.dirname(sys.argv[0]), '..'))
-    sys.path = [ 'src', ] + sys.path
-    try:
-        import config
-    except:
-        print 'can\'t find freevo files. Please set FREEVO_HOME to the Freevo root directory'
-        sys.exit(1)
-
-
+import config
 import util
 
 
@@ -64,8 +49,17 @@ def cache_directories():
     for d in all_dirs:
         print d
         mmpython.cache_dir(d)
+
     
 if __name__ == "__main__":
+    if len(sys.argv)>1 and sys.argv[1] == '--help':
+        print 'freevo cache helper to delete unused cache entries and to'
+        print 'cache all files in your data directories.'
+        print
+        print 'this script has no options (yet)'
+        print
+        sys.exit(0)
+        
     delete_old_files()
     cache_directories()
     

@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/08/04 18:42:03  dischi
+# remove some stuff we do not need with the new freevo script
+#
 # Revision 1.26  2003/07/18 21:31:03  dischi
 # new imdb helper based in the new fxdimdb
 #
@@ -57,30 +60,14 @@
 #endif
 
 
-
 import sys
 import os
 
-current_dir = os.getcwd()
-os.environ['FREEVO_STARTDIR'] = current_dir
+import config
 
-if 'FREEVO_HOME' in os.environ and os.environ['FREEVO_HOME']:
-    os.chdir(os.environ['FREEVO_HOME'])
-else:
-    os.chdir(os.path.join(os.path.dirname(sys.argv[0]), '..'))
-
-sys.path = [ 'src', ] + sys.path
-
-try:
-    import config
-except:
-    print 'can\'t find freevo files. Please set FREEVO_HOME to the Freevo root directory'
-    sys.exit(1)
-    
 from video.fxdimdb import FxdImdb, makeVideo
 from random import Random
 
-os.chdir(current_dir)
 
 FALSE = 0
 TRUE = 1
