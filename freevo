@@ -12,7 +12,7 @@ if ! test -a runapp ; then
 fi
 
 # First check if the runtime is installed
-if test -a freevo_rtfreevo_rt ; then
+if test -a freevo_rt/freevo_rt ; then
     echo Found the runtime, will use it.
     # Prevent the linker from using other libraries than the ones
     # in freevo_rt
