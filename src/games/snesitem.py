@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/02/24 16:03:11  mikeruelle
+# contributed patch from Andraes Leitner. i changed the values used to legit ones but this patch allows some broken roms to play
+#
 # Revision 1.16  2004/01/19 21:33:02  mikeruelle
 #  a patch from Sylvian to use the new set_url stuff
 #
@@ -239,7 +242,13 @@ class SnesItem(Item):
         for offset in snesromFileOffset:
             snesFile.seek(offset)
             romHeader = snesFile.read(32)
-            (romName,romHL,romMem,romROM,romSRAM,romCountry,romLic,romVer,romICHK,romCHK) = unpack('21scccccccHH', romHeader)
+	    try:
+                (romName,romHL,romMem,romROM,romSRAM,romCountry,romLic,romVer,romICHK,romCHK) = unpack('21scccccccHH', romHeader)
+            except:
+	        romCountry = chr(255)
+		romLic = chr(51)
+		romName = "unknown"
+		break
             # Break now if CHECKSUM is OK
             if (romICHK | romCHK) == 0xFFFF:
                 if DEBUG:
@@ -249,7 +258,13 @@ class SnesItem(Item):
             for offset in snesromFileOffset:
                 snesFile.seek(offset)
                 romHeader = snesFile.read(32)
-                (romName,romHL,romMem,romROM,romSRAM,romCountry,romLic,romVer,romICHK,romCHK) = unpack('21scccccccHH', romHeader)
+		try:
+                    (romName,romHL,romMem,romROM,romSRAM,romCountry,romLic,romVer,romICHK,romCHK) = unpack('21scccccccHH', romHeader)
+                except:
+	            romCountry = chr(255)
+		    romLic = chr(51)
+		    romName = "unknown"
+		    break
                 # Some times, the ROM is OK, but the checksum is incorrect, so we do a very dummy ASCII detection
                 if match('[a-zA-Z0-9 ]{4}', romName[0:4]) != None:
                     if DEBUG:
