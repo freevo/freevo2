@@ -7,6 +7,9 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/03/03 00:41:41  rshortt
+# show() now updates its own area
+#
 # Revision 1.6  2003/03/02 20:15:41  rshortt
 # GUIObject and PopupBox now get skin settings from the new skin.  I put
 # a test for config.NEW_SKIN in GUIObject because this object is used by
@@ -288,6 +291,7 @@ class GUIObject:
         """
         self.visible = 1    
         self.zir.update_show(self)
+        self.osd.update(self.get_rect())
 
 
     def hide(self):
