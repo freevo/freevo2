@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-03-21 10:50+0100\n"
+"POT-Creation-Date: 2004-05-29 15:09+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: audio/audiodiskitem.py:83 audio/plugins/cdbackup.py:507
+#: audio/audiodiskitem.py:83 audio/plugins/cdbackup.py:554
 msgid "Unknown CD Album"
 msgstr ""
 
@@ -24,7 +24,7 @@ msgstr ""
 msgid "Browse disc"
 msgstr ""
 
-#: audio/audiodiskitem.py:138 directory.py:733
+#: audio/audiodiskitem.py:138 directory.py:694
 msgid "Random playlist"
 msgstr ""
 
@@ -32,123 +32,132 @@ msgstr ""
 msgid "Data files on disc"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:251
+#: audio/plugins/cdbackup.py:257
 msgid "Show CD ripping status"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:256
+#: audio/plugins/cdbackup.py:258
+msgid "Stop CD ripping"
+msgstr ""
+
+#: audio/plugins/cdbackup.py:263
 msgid "Rip the CD to the hard drive"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:257
+#: audio/plugins/cdbackup.py:264
 msgid "Get CDs available for ripping"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:259 audio/plugins/cdbackup.py:576
-#: audio/plugins/xine.py:88 audio/plugins/xine.py:107 childapp.py:376
+#: audio/plugins/cdbackup.py:266 audio/plugins/cdbackup.py:623
+#: audio/plugins/xine.py:88 audio/plugins/xine.py:107 childapp.py:337
 #: plugins/lcd.py:110 plugins/lcd.py:731 plugins/lcd.py:933 plugins/lcd.py:944
 #: plugins/lcd.py:955 skins/main/info_area.py:155 tv/channels.py:149
 #: tv/channels.py:186 tv/channels.py:189 tv/record_client.py:133
-#: video/plugins/xine.py:107 video/plugins/xine.py:131
+#: video/plugins/xine.py:110 video/plugins/xine.py:134
 #: www/htdocs/help/howto.rpy:132 www/htdocs/help/doc.rpy:108
-#: www/htdocs/edit_favorite.rpy:126 www/htdocs/edit_favorite.rpy:149
-#: www/htdocs/edit_favorite.rpy:173 www/htdocs/favorites.rpy:127
+#: www/htdocs/edit_favorite.rpy:133 www/htdocs/edit_favorite.rpy:157
+#: www/htdocs/edit_favorite.rpy:181 www/htdocs/favorites.rpy:130
 #: www/htdocs/genre.rpy:118 www/htdocs/guide.rpy:201
-#: www/htdocs/library.rpy:253 www/htdocs/library.rpy:263
-#: www/htdocs/library.rpy:265 www/htdocs/manualrecord.rpy:70
-#: www/htdocs/record.rpy:136 www/htdocs/record.rpy:157
-#: www/htdocs/search.rpy:135
+#: www/htdocs/library.rpy:257 www/htdocs/library.rpy:267
+#: www/htdocs/library.rpy:269 www/htdocs/manualrecord.rpy:70
+#: www/htdocs/record.rpy:139 www/htdocs/record.rpy:160
+#: www/htdocs/search.rpy:145
 msgid "ERROR"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:259
+#: audio/plugins/cdbackup.py:266
 msgid "Item is not an Audio CD"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:266
+#: audio/plugins/cdbackup.py:279
 #, python-format
 msgid ""
 "Ripping in progress\n"
 "Track %d of %d"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:281
+#: audio/plugins/cdbackup.py:294
 msgid "Backup CD to hard drive in mp3 format"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:284
+#: audio/plugins/cdbackup.py:297
 msgid "Backup CD to hard drive in Ogg format"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:287
+#: audio/plugins/cdbackup.py:300
 msgid "Backup CD to hard drive in FLAC format"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:289
+#: audio/plugins/cdbackup.py:302
 msgid "Backup CD to hard drive in wav format"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:292
+#: audio/plugins/cdbackup.py:305
 msgid "CD Backup"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:300
+#: audio/plugins/cdbackup.py:318
 msgid "Ripping started"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:368
+#: audio/plugins/cdbackup.py:385
 #, python-format
 msgid "Directory %s already exists"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:490
+#: audio/plugins/cdbackup.py:401 audio/plugins/cdbackup.py:454
+#: audio/plugins/cdbackup.py:524
+msgid "Ripping aborted"
+msgstr ""
+
+#: audio/plugins/cdbackup.py:537
 msgid "Ripping complete"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:503 audio/plugins/coversearch.py:197
-#: audio/plugins/coversearch.py:206 audio/plugins/coversearch.py:215
+#: audio/plugins/cdbackup.py:550 audio/plugins/coversearch.py:200
+#: audio/plugins/coversearch.py:209 audio/plugins/coversearch.py:218
 #: plugins/lcd.py:930 plugins/lcd.py:941 plugins/lcd.py:954
 msgid "WARNING"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:503
+#: audio/plugins/cdbackup.py:550
 msgid "No CDDB data available to mmpython"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:506
+#: audio/plugins/cdbackup.py:553
 msgid "Unknown Artist"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:506 audio/plugins/cdbackup.py:507
+#: audio/plugins/cdbackup.py:553 audio/plugins/cdbackup.py:554
 msgid "RENAME"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:508
+#: audio/plugins/cdbackup.py:555
 msgid "Other"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:511
+#: audio/plugins/cdbackup.py:558
 msgid ""
 "CD info not found!\n"
 "Must manually rename files\n"
 "when finished ripping"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:576
+#: audio/plugins/cdbackup.py:623
 msgid "Problem trying to call:"
 msgstr ""
 
-#: audio/plugins/coversearch.py:157
+#: audio/plugins/coversearch.py:160
 msgid ""
 "To search for covers you need an Amazon.com Web Services\n"
 "license key. You can get yours from:\n"
 msgstr ""
 
-#: audio/plugins/coversearch.py:193
+#: audio/plugins/coversearch.py:196
 msgid "Find a cover for this music"
 msgstr ""
 
-#: audio/plugins/coversearch.py:198 audio/plugins/coversearch.py:207
+#: audio/plugins/coversearch.py:201 audio/plugins/coversearch.py:210
 #, python-format
 msgid ""
 "Plugin 'coversearch' was disabled for this item! 'coversearch' needs an item "
@@ -157,40 +166,40 @@ msgid ""
 "Info. Maybe you must fix this file (%s) tag?"
 msgstr ""
 
-#: audio/plugins/coversearch.py:216
+#: audio/plugins/coversearch.py:219
 msgid "Unknown CD, cover searching is disabled"
 msgstr ""
 
-#: audio/plugins/coversearch.py:224
+#: audio/plugins/coversearch.py:227
 msgid "searching Amazon..."
 msgstr ""
 
-#: audio/plugins/coversearch.py:239
+#: audio/plugins/coversearch.py:242
 #, python-format
 msgid "No matches for %(artist)s - %(album)s"
 msgstr ""
 
-#: audio/plugins/coversearch.py:247
+#: audio/plugins/coversearch.py:250
 msgid "Unknown error while searching."
 msgstr ""
 
-#: audio/plugins/coversearch.py:284 audio/plugins/coversearch.py:294
+#: audio/plugins/coversearch.py:287 audio/plugins/coversearch.py:299
 msgid "small"
 msgstr ""
 
-#: audio/plugins/coversearch.py:303
+#: audio/plugins/coversearch.py:310
 msgid "Cover Search Results"
 msgstr ""
 
-#: audio/plugins/coversearch.py:307
+#: audio/plugins/coversearch.py:314
 msgid "No covers available from Amazon"
 msgstr ""
 
-#: audio/plugins/coversearch.py:320 video/plugins/imdb.py:215
+#: audio/plugins/coversearch.py:327 video/plugins/imdb.py:215
 msgid "getting data..."
 msgstr ""
 
-#: audio/plugins/detach.py:80
+#: audio/plugins/detach.py:83
 msgid "Show player"
 msgstr ""
 
@@ -285,182 +294,186 @@ msgstr ""
 msgid "'fbxine' version too old, plugin 'xine' deactivated"
 msgstr ""
 
-#: audio/plugins/xine.py:109 video/plugins/xine.py:133
+#: audio/plugins/xine.py:109 video/plugins/xine.py:136
 #, python-format
 msgid "You need software %s"
 msgstr ""
 
-#: childapp.py:373
+#: childapp.py:334
 #, python-format
 msgid "logging child to \"%s\""
 msgstr ""
 
-#: childapp.py:376
+#: childapp.py:338
 #, python-format
 msgid "Cannot open \"%s\" for logging!"
 msgstr ""
 
-#: childapp.py:377
-#, python-format
-msgid "Set CHILDAPP_DEBUG=0 in local_conf.py, or make %s writable!"
+#: childapp.py:339
+msgid "Set CHILDAPP_DEBUG=0 in local_conf.py, "
 msgstr ""
 
-#: directory.py:114
+#: childapp.py:340
+#, python-format
+msgid "or make %s writable!"
+msgstr ""
+
+#: directory.py:71
 msgid "Directory Sort By Date"
 msgstr ""
 
-#: directory.py:115
+#: directory.py:72
 msgid "Sort directory by date and not by name."
 msgstr ""
 
-#: directory.py:117
+#: directory.py:74
 msgid "Directory Autoplay Single Item"
 msgstr ""
 
-#: directory.py:118
+#: directory.py:75
 msgid "Don't show directory if only one item exists and auto-select the item."
 msgstr ""
 
-#: directory.py:121
+#: directory.py:78
 msgid "Force Skin Layout"
 msgstr ""
 
-#: directory.py:122
+#: directory.py:79
 msgid ""
 "Force skin to a specific layout. This option doesn't work with all skins and "
 "the result may differ based on the skin."
 msgstr ""
 
-#: directory.py:125
+#: directory.py:82
 msgid "Directory Smart Sort"
 msgstr ""
 
-#: directory.py:126
+#: directory.py:83
 msgid "Use a smarter way to sort the items."
 msgstr ""
 
-#: directory.py:128
+#: directory.py:85
 msgid "Use MediaID Tag Names"
 msgstr ""
 
-#: directory.py:129
+#: directory.py:86
 msgid "Use the names from the media files tags as display name."
 msgstr ""
 
-#: directory.py:131
+#: directory.py:88
 msgid "Directory Reverse Sort"
 msgstr ""
 
-#: directory.py:132
+#: directory.py:89
 msgid "Show the items in the list in reverse order."
 msgstr ""
 
-#: directory.py:136
+#: directory.py:93
 msgid "Directory Create Playlist"
 msgstr ""
 
-#: directory.py:137
+#: directory.py:94
 msgid ""
 "Handle the directory as playlist. After one file is played, the next one "
 "will be started."
 msgstr ""
 
-#: directory.py:140
+#: directory.py:97
 msgid "Directory Add Playlist Files"
 msgstr ""
 
-#: directory.py:141
+#: directory.py:98
 msgid "Add playlist files to the list of items"
 msgstr ""
 
-#: directory.py:143
+#: directory.py:100
 msgid "Directory Add Random Playlist"
 msgstr ""
 
-#: directory.py:144
+#: directory.py:101
 msgid "Add an item for a random playlist"
 msgstr ""
 
-#: directory.py:146
+#: directory.py:103
 msgid "Directory Autoplay Items"
 msgstr ""
 
-#: directory.py:147
+#: directory.py:104
 msgid ""
 "Autoplay the whole directory (as playlist) when it contains only files and "
 "no directories"
 msgstr ""
 
-#: directory.py:339
+#: directory.py:296
 #, python-format
 msgid "Directory on disc [%s]"
 msgstr ""
 
-#: directory.py:340
+#: directory.py:297
 msgid "Directory"
 msgstr ""
 
-#: directory.py:469 image/plugins/gphoto.py:142
+#: directory.py:426 image/plugins/gphoto.py:142
 msgid "Browse directory"
 msgstr ""
 
-#: directory.py:472
+#: directory.py:429
 msgid "Play all files in directory"
 msgstr ""
 
-#: directory.py:478 playlist.py:378
+#: directory.py:435 playlist.py:308
 msgid "Random play all items"
 msgstr ""
 
-#: directory.py:480
+#: directory.py:437
 msgid "Recursive random play all items"
 msgstr ""
 
-#: directory.py:481
+#: directory.py:438
 msgid "Recursive play all items"
 msgstr ""
 
-#: directory.py:483
+#: directory.py:440
 msgid "Configure directory"
 msgstr ""
 
-#: directory.py:550
+#: directory.py:507
 msgid "Enter Password"
 msgstr ""
 
-#: directory.py:575
+#: directory.py:532
 msgid "Password incorrect"
 msgstr ""
 
-#: directory.py:635
+#: directory.py:592
 msgid "Scanning disc, be patient..."
 msgstr ""
 
-#: directory.py:637
+#: directory.py:594
 msgid "Scanning directory, be patient..."
 msgstr ""
 
-#: directory.py:833 directory.py:923 directory.py:957
+#: directory.py:794 directory.py:884 directory.py:918
 msgid "on"
 msgstr ""
 
-#: directory.py:835 directory.py:838 directory.py:927 directory.py:955
+#: directory.py:796 directory.py:799 directory.py:888 directory.py:916
 msgid "off"
 msgstr ""
 
-#: directory.py:840
+#: directory.py:801
 msgid "auto"
 msgstr ""
 
-#: directory.py:959
+#: directory.py:920
 msgid "Show all kinds of items"
 msgstr ""
 
-#: directory.py:961
+#: directory.py:922
 msgid "Show video, audio and image items in this directory"
 msgstr ""
 
-#: directory.py:964
+#: directory.py:925
 msgid "Configure"
 msgstr ""
 
@@ -468,23 +481,23 @@ msgstr ""
 msgid "Browse list"
 msgstr ""
 
-#: main.py:178
+#: main.py:198
 msgid "Freevo Main Menu"
 msgstr ""
 
-#: main.py:194
+#: main.py:214
 msgid "Skin Selector"
 msgstr ""
 
-#: main.py:346
+#: main.py:366
 msgid "Starting Freevo, please wait ..."
 msgstr ""
 
-#: main.py:366
+#: main.py:386
 msgid "Reading cache, please wait ..."
 msgstr ""
 
-#: main.py:454 pyui_renderer.py:610
+#: main.py:474
 #, python-format
 msgid ""
 "Event '%s' crashed\n"
@@ -497,97 +510,97 @@ msgid ""
 "\n"
 msgstr ""
 
-#: main.py:490
+#: main.py:510
 msgid "Freevo crashed!"
 msgstr ""
 
-#: main.py:491
+#: main.py:511
 #, python-format
 msgid "Filename: %s"
 msgstr ""
 
-#: main.py:492
+#: main.py:512
 #, python-format
 msgid "Lineno: %s"
 msgstr ""
 
-#: main.py:493
+#: main.py:513
 #, python-format
 msgid "Function: %s"
 msgstr ""
 
-#: main.py:494
+#: main.py:514
 #, python-format
 msgid "Text: %s"
 msgstr ""
 
-#: main.py:496
+#: main.py:516
 msgid "Please see the logfiles for more info"
 msgstr ""
 
-#: main.py:498
+#: main.py:518
 #, python-format
 msgid "Exit in %s seconds"
 msgstr ""
 
-#: osd.py:415 pyui_renderer.py:277
+#: osd.py:392
 msgid "z = Toggle Fullscreen"
 msgstr ""
 
-#: osd.py:416 pyui_renderer.py:278
+#: osd.py:393
 msgid "Arrow Keys = Move"
 msgstr ""
 
-#: osd.py:417 pyui_renderer.py:279
+#: osd.py:394
 msgid "Spacebar = Select"
 msgstr ""
 
-#: osd.py:418 pyui_renderer.py:280
+#: osd.py:395
 msgid "Escape = Stop/Prev. Menu"
 msgstr ""
 
-#: osd.py:419 pyui_renderer.py:281
+#: osd.py:396
 msgid "h = Help"
 msgstr ""
 
-#: playlist.py:216 playlist.py:256
+#: playlist.py:146 playlist.py:186
 #, python-format
 msgid "Cannot open file \"%s\""
 msgstr ""
 
-#: playlist.py:368
+#: playlist.py:298
 msgid "Browse Playlist"
 msgstr ""
 
-#: playlist.py:370 video/configure.py:212 video/videoitem.py:332
+#: playlist.py:300 video/configure.py:220 video/videoitem.py:295
 msgid "Play"
 msgstr ""
 
-#: playlist.py:424
+#: playlist.py:354
 msgid "empty playlist"
 msgstr ""
 
-#: playlist.py:520
+#: playlist.py:450
 msgid "playlist repeat on"
 msgstr ""
 
-#: playlist.py:522
+#: playlist.py:452
 msgid "playlist repeat off"
 msgstr ""
 
-#: playlist.py:536
+#: playlist.py:466
 msgid "no next item in playlist"
 msgstr ""
 
-#: playlist.py:563
+#: playlist.py:493
 msgid "no previous item in playlist"
 msgstr ""
 
-#: menu.py:587
+#: menu.py:588
 msgid "No action defined for this choice!"
 msgstr ""
 
-#: setup_freevo.py:119
+#: setup_freevo.py:123
 msgid ""
 "Usage: ./freevo setup [OPTION]...\n"
 "Set up Freevo for your specific environment.\n"
@@ -620,42 +633,42 @@ msgid ""
 "Please report bugs to <freevo-users@lists.sourceforge.net>.\n"
 msgstr ""
 
-#: setup_freevo.py:223
+#: setup_freevo.py:227
 #, python-format
 msgid "checking for %-13s"
 msgstr ""
 
-#: setup_freevo.py:236
+#: setup_freevo.py:240
 #, python-format
 msgid "ERROR: can't find %s"
 msgstr ""
 
-#: setup_freevo.py:237
+#: setup_freevo.py:241
 msgid "Please install the application respectively put it in your path."
 msgstr ""
 
-#: setup_freevo.py:238
+#: setup_freevo.py:242
 msgid "Freevo won't work without it."
 msgstr ""
 
-#: setup_freevo.py:244
+#: setup_freevo.py:248
 msgid "not found (deactivated)"
 msgstr ""
 
-#: setup_freevo.py:307
+#: setup_freevo.py:311
 #, python-format
 msgid "System path first=%s"
 msgstr ""
 
-#: setup_freevo.py:307
+#: setup_freevo.py:311
 msgid "No"
 msgstr ""
 
-#: setup_freevo.py:307
+#: setup_freevo.py:311
 msgid "Yes"
 msgstr ""
 
-#: setup_freevo.py:323
+#: setup_freevo.py:327
 msgid "Settings:"
 msgstr ""
 
@@ -713,54 +726,58 @@ msgstr ""
 msgid "View Image"
 msgstr ""
 
-#: image/viewer.py:153
+#: image/viewer.py:146
 #, python-format
 msgid ""
 "Can't Open Image\n"
 "'%s'"
 msgstr ""
 
-#: image/viewer.py:308
+#: image/viewer.py:347
 msgid "pause"
 msgstr ""
 
-#: image/viewer.py:312
+#: image/viewer.py:351
 msgid "play"
 msgstr ""
 
-#: image/viewer.py:390 image/viewer.py:400 tv/edit_favorite.py:143
-#: www/htdocs/manualrecord.rpy:222 www/htdocs/record.rpy:188
-#: www/htdocs/search.rpy:174
+#: image/viewer.py:438 image/viewer.py:449 tv/edit_favorite.py:143
+#: www/htdocs/manualrecord.rpy:222 www/htdocs/record.rpy:191
+#: www/htdocs/search.rpy:184
 msgid "Title"
 msgstr ""
 
-#: image/viewer.py:391 plugins/lcd.py:150 plugins/lcd.py:152
+#: image/viewer.py:439 plugins/lcd.py:150 plugins/lcd.py:152
 #: plugins/lcd.py:329
 msgid "Description"
 msgstr ""
 
-#: image/viewer.py:401 plugins/lcd.py:149
+#: image/viewer.py:440
+msgid "Author"
+msgstr ""
+
+#: image/viewer.py:450 plugins/lcd.py:149
 msgid "Date"
 msgstr ""
 
-#: image/viewer.py:404
+#: image/viewer.py:453
 msgid "Model"
 msgstr ""
 
-#: image/viewer.py:405
+#: image/viewer.py:454
 msgid "Software"
 msgstr ""
 
-#: image/viewer.py:426
+#: image/viewer.py:475
 msgid "No information available"
 msgstr ""
 
-#: plugins/idlebar/system.py:125
+#: plugins/idlebar/system.py:137
 #, python-format
 msgid "%iM"
 msgstr ""
 
-#: plugins/idlebar/system.py:150
+#: plugins/idlebar/system.py:162
 #, python-format
 msgid "%s%%"
 msgstr ""
@@ -810,7 +827,7 @@ msgstr ""
 msgid "%i free of %i Mb total"
 msgstr ""
 
-#: plugins/file_ops.py:84 www/htdocs/library.rpy:445
+#: plugins/file_ops.py:84 www/htdocs/library.rpy:449
 msgid "Delete"
 msgstr ""
 
@@ -945,7 +962,7 @@ msgstr ""
 msgid "Information"
 msgstr ""
 
-#: plugins/lcd.py:243 plugins/lcd.py:590 www/htdocs/library.rpy:305
+#: plugins/lcd.py:243 plugins/lcd.py:590 www/htdocs/library.rpy:309
 msgid "Music"
 msgstr ""
 
@@ -958,14 +975,14 @@ msgid "Genre"
 msgstr ""
 
 #: plugins/lcd.py:320 plugins/lcd.py:645 tv/edit_favorite.py:145
-#: www/htdocs/edit_favorite.rpy:199 www/htdocs/favorites.rpy:173
-#: www/htdocs/manualrecord.rpy:219 www/htdocs/record.rpy:187
-#: www/htdocs/search.rpy:173
+#: www/htdocs/edit_favorite.rpy:207 www/htdocs/favorites.rpy:177
+#: www/htdocs/manualrecord.rpy:219 www/htdocs/record.rpy:190
+#: www/htdocs/search.rpy:183
 msgid "Channel"
 msgstr ""
 
-#: plugins/lcd.py:323 plugins/lcd.py:648 www/htdocs/edit_favorite.rpy:198
-#: www/htdocs/favorites.rpy:172
+#: plugins/lcd.py:323 plugins/lcd.py:648 www/htdocs/edit_favorite.rpy:206
+#: www/htdocs/favorites.rpy:176
 msgid "Program"
 msgstr ""
 
@@ -1002,27 +1019,27 @@ msgstr ""
 msgid "Could not find screens for %d lines and %d columns LCD!"
 msgstr ""
 
-#: plugins/mediamenu.py:172
+#: plugins/mediamenu.py:176
 msgid "Media"
 msgstr ""
 
-#: plugins/mediamenu.py:177
+#: plugins/mediamenu.py:181
 msgid "Movie"
 msgstr ""
 
-#: plugins/mediamenu.py:179
+#: plugins/mediamenu.py:183
 msgid "Audio"
 msgstr ""
 
-#: plugins/mediamenu.py:181
+#: plugins/mediamenu.py:185
 msgid "Image"
 msgstr ""
 
-#: plugins/mediamenu.py:183
+#: plugins/mediamenu.py:187
 msgid "Games"
 msgstr ""
 
-#: plugins/mediamenu.py:185
+#: plugins/mediamenu.py:189
 #, python-format
 msgid "%s Main Menu"
 msgstr ""
@@ -1037,21 +1054,6 @@ msgstr ""
 
 #: plugins/mixer.py:166 plugins/ossmixer.py:156
 msgid "Mute"
-msgstr ""
-
-#: plugins/rom_drives.py:271
-#, python-format
-msgid "Drive %s (no disc)"
-msgstr ""
-
-#: plugins/rom_drives.py:337
-#, python-format
-msgid "Ejecting disc in drive %s"
-msgstr ""
-
-#: plugins/rom_drives.py:370
-#, python-format
-msgid "Reading disc in drive %s"
 msgstr ""
 
 #: plugins/shoppingcart.py:84
@@ -1124,6 +1126,25 @@ msgstr ""
 msgid "Message: %s"
 msgstr ""
 
+#: plugins/rom_drives.py:279
+#, python-format
+msgid "Drive %s (no disc)"
+msgstr ""
+
+#: plugins/rom_drives.py:345
+#, python-format
+msgid "Ejecting disc in drive %s"
+msgstr ""
+
+#: plugins/rom_drives.py:378
+#, python-format
+msgid "Reading disc in drive %s"
+msgstr ""
+
+#: skins/main/default_areas.py:128
+msgid "TV GUIDE"
+msgstr ""
+
 #: skins/main/info_area.py:155
 msgid "missing 'src' attribute in skin tag!"
 msgstr ""
@@ -1137,154 +1158,150 @@ msgstr ""
 msgid "This channel has no data loaded"
 msgstr ""
 
-#: skins/main/default_areas.py:128
-msgid "TV GUIDE"
-msgstr ""
-
-#: tv/plugins/manual_record.py:68 www/htdocs/manualrecord.rpy:68
+#: tv/plugins/manual_record.py:71 www/htdocs/manualrecord.rpy:68
 #: www/htdocs/manualrecord.rpy:202
 msgid "Manual Record"
 msgstr ""
 
-#: tv/plugins/manual_record.py:78 www/htdocs/manualrecord.rpy:145
+#: tv/plugins/manual_record.py:81 www/htdocs/manualrecord.rpy:145
 msgid "Jan"
 msgstr ""
 
-#: tv/plugins/manual_record.py:78 www/htdocs/manualrecord.rpy:145
+#: tv/plugins/manual_record.py:81 www/htdocs/manualrecord.rpy:145
 msgid "Feb"
 msgstr ""
 
-#: tv/plugins/manual_record.py:78 www/htdocs/manualrecord.rpy:145
+#: tv/plugins/manual_record.py:81 www/htdocs/manualrecord.rpy:145
 msgid "Mar"
 msgstr ""
 
-#: tv/plugins/manual_record.py:78 www/htdocs/manualrecord.rpy:145
+#: tv/plugins/manual_record.py:81 www/htdocs/manualrecord.rpy:145
 msgid "Apr"
 msgstr ""
 
-#: tv/plugins/manual_record.py:78 www/htdocs/manualrecord.rpy:145
+#: tv/plugins/manual_record.py:81 www/htdocs/manualrecord.rpy:145
 msgid "May"
 msgstr ""
 
-#: tv/plugins/manual_record.py:78 www/htdocs/manualrecord.rpy:145
+#: tv/plugins/manual_record.py:81 www/htdocs/manualrecord.rpy:145
 msgid "Jun"
 msgstr ""
 
-#: tv/plugins/manual_record.py:78 www/htdocs/manualrecord.rpy:145
+#: tv/plugins/manual_record.py:81 www/htdocs/manualrecord.rpy:145
 msgid "Jul"
 msgstr ""
 
-#: tv/plugins/manual_record.py:78 www/htdocs/manualrecord.rpy:145
+#: tv/plugins/manual_record.py:81 www/htdocs/manualrecord.rpy:145
 msgid "Aug"
 msgstr ""
 
-#: tv/plugins/manual_record.py:78 www/htdocs/manualrecord.rpy:145
+#: tv/plugins/manual_record.py:81 www/htdocs/manualrecord.rpy:145
 msgid "Sep"
 msgstr ""
 
-#: tv/plugins/manual_record.py:78 www/htdocs/manualrecord.rpy:145
+#: tv/plugins/manual_record.py:81 www/htdocs/manualrecord.rpy:145
 msgid "Oct"
 msgstr ""
 
-#: tv/plugins/manual_record.py:78 www/htdocs/manualrecord.rpy:145
+#: tv/plugins/manual_record.py:81 www/htdocs/manualrecord.rpy:145
 msgid "Nov"
 msgstr ""
 
-#: tv/plugins/manual_record.py:78 www/htdocs/manualrecord.rpy:145
+#: tv/plugins/manual_record.py:81 www/htdocs/manualrecord.rpy:145
 msgid "Dec"
 msgstr ""
 
-#: tv/plugins/manual_record.py:111
+#: tv/plugins/manual_record.py:114
 msgid "Display record item"
 msgstr ""
 
-#: tv/plugins/manual_record.py:119 tv/program_display.py:267
+#: tv/plugins/manual_record.py:122 tv/program_display.py:273
 msgid "Modify name"
 msgstr ""
 
-#: tv/plugins/manual_record.py:120 tv/program_display.py:268
+#: tv/plugins/manual_record.py:123 tv/program_display.py:274
 msgid "Modify channel"
 msgstr ""
 
-#: tv/plugins/manual_record.py:121
+#: tv/plugins/manual_record.py:124
 msgid "Modify start month"
 msgstr ""
 
-#: tv/plugins/manual_record.py:122
+#: tv/plugins/manual_record.py:125
 msgid "Modify start day"
 msgstr ""
 
-#: tv/plugins/manual_record.py:123
+#: tv/plugins/manual_record.py:126
 msgid "Modify start time"
 msgstr ""
 
-#: tv/plugins/manual_record.py:124
+#: tv/plugins/manual_record.py:127
 msgid "Modify stop month"
 msgstr ""
 
-#: tv/plugins/manual_record.py:125
+#: tv/plugins/manual_record.py:128
 msgid "Modify stop day"
 msgstr ""
 
-#: tv/plugins/manual_record.py:126
+#: tv/plugins/manual_record.py:129
 msgid "Modify stop time"
 msgstr ""
 
-#: tv/plugins/manual_record.py:127 tv/edit_favorite.py:214
-#: www/htdocs/edit_favorite.rpy:305
+#: tv/plugins/manual_record.py:130 tv/edit_favorite.py:214
+#: www/htdocs/edit_favorite.rpy:313
 msgid "Save"
 msgstr ""
 
-#: tv/plugins/manual_record.py:129
+#: tv/plugins/manual_record.py:132
 msgid "Record Item Menu"
 msgstr ""
 
-#: tv/plugins/manual_record.py:138 tv/program_display.py:291
+#: tv/plugins/manual_record.py:141 tv/program_display.py:297
 msgid "Alter Name"
 msgstr ""
 
-#: tv/plugins/manual_record.py:148 tv/program_display.py:313
+#: tv/plugins/manual_record.py:151 tv/program_display.py:319
 msgid "Modify Channel"
 msgstr ""
 
-#: tv/plugins/manual_record.py:164 tv/plugins/manual_record.py:180
-#: tv/plugins/manual_record.py:213 tv/plugins/manual_record.py:229
-#: tv/program_display.py:363
+#: tv/plugins/manual_record.py:167 tv/plugins/manual_record.py:183
+#: tv/plugins/manual_record.py:216 tv/plugins/manual_record.py:232
+#: tv/program_display.py:369
 msgid "Modify Day"
 msgstr ""
 
-#: tv/plugins/manual_record.py:197 tv/plugins/manual_record.py:246
-#: tv/program_display.py:383
+#: tv/plugins/manual_record.py:200 tv/plugins/manual_record.py:249
+#: tv/program_display.py:389
 msgid "Modify Time"
 msgstr ""
 
-#: tv/plugins/manual_record.py:303 tv/plugins/manual_record.py:332
-#: tv/plugins/manual_record.py:336 tv/plugins/manual_record.py:341
-#: tv/plugins/manual_record.py:345
+#: tv/plugins/manual_record.py:306 tv/plugins/manual_record.py:335
+#: tv/plugins/manual_record.py:339 tv/plugins/manual_record.py:344
+#: tv/plugins/manual_record.py:348
 msgid "Save Failed, recording was lost"
 msgstr ""
 
-#: tv/plugins/manual_record.py:331 www/htdocs/manualrecord.rpy:129
+#: tv/plugins/manual_record.py:334 www/htdocs/manualrecord.rpy:129
 #, python-format
 msgid "Program would record for more than %d days!"
 msgstr ""
 
-#: tv/plugins/manual_record.py:335 www/htdocs/manualrecord.rpy:131
+#: tv/plugins/manual_record.py:338 www/htdocs/manualrecord.rpy:131
 msgid "Program would record for more than 1 day!"
 msgstr ""
 
-#: tv/plugins/manual_record.py:340 www/htdocs/manualrecord.rpy:126
+#: tv/plugins/manual_record.py:343 www/htdocs/manualrecord.rpy:126
 msgid "start time is not before stop time."
 msgstr ""
 
-#: tv/plugins/manual_record.py:344
+#: tv/plugins/manual_record.py:347
 msgid ""
 "Sorry, the stop time does not give enough time for scheduler to pickup the "
 "change.  Please set it to record for a few minutes longer."
 msgstr ""
 
 #: tv/plugins/scheduled_recordings.py:71 tv/plugins/scheduled_recordings.py:85
-#: www/web_types.py:180 www/htdocs/record.rpy:179
+#: www/web_types.py:180 www/htdocs/record.rpy:182
 msgid "Scheduled Recordings"
 msgstr ""
 
@@ -1297,10 +1314,10 @@ msgid "Nothing scheduled."
 msgstr ""
 
 #: tv/plugins/scheduled_recordings.py:117 tv/plugins/view_favorites.py:106
-#: tv/program_search.py:99 www/htdocs/edit_favorite.rpy:126
-#: www/htdocs/favorites.rpy:127 www/htdocs/genre.rpy:118
+#: tv/program_search.py:99 www/htdocs/edit_favorite.rpy:133
+#: www/htdocs/favorites.rpy:130 www/htdocs/genre.rpy:118
 #: www/htdocs/guide.rpy:201 www/htdocs/manualrecord.rpy:70
-#: www/htdocs/record.rpy:136
+#: www/htdocs/record.rpy:139
 msgid "Recording server is unavailable."
 msgstr ""
 
@@ -1345,8 +1362,8 @@ msgstr ""
 msgid "Failed to set freq for channel %s."
 msgstr ""
 
-#: tv/edit_favorite.py:123 www/htdocs/edit_favorite.rpy:124
-#: www/htdocs/edit_favorite.rpy:184 www/htdocs/edit_favorite.rpy:189
+#: tv/edit_favorite.py:123 www/htdocs/edit_favorite.rpy:131
+#: www/htdocs/edit_favorite.rpy:192 www/htdocs/edit_favorite.rpy:197
 msgid "Edit Favorite"
 msgstr ""
 
@@ -1354,8 +1371,8 @@ msgstr ""
 msgid "Name"
 msgstr ""
 
-#: tv/edit_favorite.py:149 www/htdocs/favorites.rpy:186
-#: www/htdocs/favorites.rpy:198 www/htdocs/favorites.rpy:204
+#: tv/edit_favorite.py:149 www/htdocs/favorites.rpy:190
+#: www/htdocs/favorites.rpy:202 www/htdocs/favorites.rpy:208
 msgid "ANY"
 msgstr ""
 
@@ -1363,43 +1380,43 @@ msgstr ""
 msgid "Day of Week"
 msgstr ""
 
-#: tv/edit_favorite.py:172 tv/program_display.py:248
-#: www/htdocs/edit_favorite.rpy:230
+#: tv/edit_favorite.py:172 tv/program_display.py:254
+#: www/htdocs/edit_favorite.rpy:238
 msgid "ANY DAY"
 msgstr ""
 
-#: tv/edit_favorite.py:176 tv/program_display.py:241
-#: www/htdocs/edit_favorite.rpy:231
+#: tv/edit_favorite.py:176 tv/program_display.py:247
+#: www/htdocs/edit_favorite.rpy:239
 msgid "Mon"
 msgstr ""
 
-#: tv/edit_favorite.py:176 tv/program_display.py:241
-#: www/htdocs/edit_favorite.rpy:232
+#: tv/edit_favorite.py:176 tv/program_display.py:247
+#: www/htdocs/edit_favorite.rpy:240
 msgid "Tue"
 msgstr ""
 
-#: tv/edit_favorite.py:176 tv/program_display.py:241
-#: www/htdocs/edit_favorite.rpy:233
+#: tv/edit_favorite.py:176 tv/program_display.py:247
+#: www/htdocs/edit_favorite.rpy:241
 msgid "Wed"
 msgstr ""
 
-#: tv/edit_favorite.py:176 tv/program_display.py:241
-#: www/htdocs/edit_favorite.rpy:234
+#: tv/edit_favorite.py:176 tv/program_display.py:247
+#: www/htdocs/edit_favorite.rpy:242
 msgid "Thu"
 msgstr ""
 
-#: tv/edit_favorite.py:176 tv/program_display.py:241
-#: www/htdocs/edit_favorite.rpy:235
+#: tv/edit_favorite.py:176 tv/program_display.py:247
+#: www/htdocs/edit_favorite.rpy:243
 msgid "Fri"
 msgstr ""
 
-#: tv/edit_favorite.py:176 tv/program_display.py:241
-#: www/htdocs/edit_favorite.rpy:236
+#: tv/edit_favorite.py:176 tv/program_display.py:247
+#: www/htdocs/edit_favorite.rpy:244
 msgid "Sat"
 msgstr ""
 
-#: tv/edit_favorite.py:176 tv/program_display.py:241
-#: www/htdocs/edit_favorite.rpy:237
+#: tv/edit_favorite.py:176 tv/program_display.py:247
+#: www/htdocs/edit_favorite.rpy:245
 msgid "Sun"
 msgstr ""
 
@@ -1407,17 +1424,17 @@ msgstr ""
 msgid "Time of Day"
 msgstr ""
 
-#: tv/edit_favorite.py:192 tv/program_display.py:252
-#: www/htdocs/edit_favorite.rpy:243
+#: tv/edit_favorite.py:192 tv/program_display.py:258
+#: www/htdocs/edit_favorite.rpy:251
 msgid "ANY TIME"
 msgstr ""
 
-#: tv/edit_favorite.py:217 www/htdocs/favorites.rpy:210
-#: www/htdocs/record.rpy:232 www/htdocs/search.rpy:213
+#: tv/edit_favorite.py:217 www/htdocs/favorites.rpy:214
+#: www/htdocs/record.rpy:235 www/htdocs/search.rpy:230
 msgid "Remove"
 msgstr ""
 
-#: tv/edit_favorite.py:241 tv/program_display.py:229 tv/program_display.py:428
+#: tv/edit_favorite.py:241 tv/program_display.py:235 tv/program_display.py:434
 msgid "Remove Failed"
 msgstr ""
 
@@ -1436,115 +1453,115 @@ msgstr ""
 msgid "Do you want to remove %s?"
 msgstr ""
 
-#: tv/epg_xmltv.py:90
+#: tv/epg_xmltv.py:94
 msgid "Time conversion error"
 msgstr ""
 
-#: tv/epg_xmltv.py:165
+#: tv/epg_xmltv.py:172
 msgid "Couldn't load the TV Guide, got an exception!"
 msgstr ""
 
-#: tv/epg_xmltv.py:246
+#: tv/epg_xmltv.py:263
 #, python-format
 msgid "REPLACE WITH TUNERID FOR %s"
 msgstr ""
 
-#: tv/program_display.py:119
+#: tv/program_display.py:122
 msgid "Display program"
 msgstr ""
 
-#: tv/program_display.py:133
+#: tv/program_display.py:136
 msgid "Remove from schedule"
 msgstr ""
 
-#: tv/program_display.py:136
+#: tv/program_display.py:139
 msgid "Schedule for recording"
 msgstr ""
 
-#: tv/program_display.py:140
+#: tv/program_display.py:143
 msgid "Search for more of this program"
 msgstr ""
 
-#: tv/program_display.py:150
+#: tv/program_display.py:153
 msgid "Remove from favorites"
 msgstr ""
 
-#: tv/program_display.py:153
+#: tv/program_display.py:156
 msgid "Add to favorites"
 msgstr ""
 
-#: tv/program_display.py:156
+#: tv/program_display.py:159
 msgid "Program Menu"
 msgstr ""
 
-#: tv/program_display.py:178 tv/program_search.py:129
+#: tv/program_display.py:181 tv/program_search.py:129
 msgid "Searching, please wait..."
 msgstr ""
 
-#: tv/program_display.py:194
+#: tv/program_display.py:197
 #, python-format
 msgid "No matches found for %s"
 msgstr ""
 
-#: tv/program_display.py:196
+#: tv/program_display.py:199
 #, python-format
 msgid "findMatches failed: %s"
 msgstr ""
 
-#: tv/program_display.py:199 www/htdocs/search.rpy:134
+#: tv/program_display.py:202 www/htdocs/search.rpy:144
 msgid "Search Results"
 msgstr ""
 
-#: tv/program_display.py:208
+#: tv/program_display.py:216
 #, python-format
 msgid "\"%s\" has been scheduled for recording"
 msgstr ""
 
-#: tv/program_display.py:213
+#: tv/program_display.py:219
 msgid "Scheduling Failed"
 msgstr ""
 
-#: tv/program_display.py:244 www/htdocs/edit_favorite.rpy:217
+#: tv/program_display.py:250 www/htdocs/edit_favorite.rpy:225
 msgid "ANY CHANNEL"
 msgstr ""
 
-#: tv/program_display.py:261
+#: tv/program_display.py:267
 msgid "Display favorite"
 msgstr ""
 
-#: tv/program_display.py:269
+#: tv/program_display.py:275
 msgid "Modify day of week"
 msgstr ""
 
-#: tv/program_display.py:270
+#: tv/program_display.py:276
 msgid "Modify time of day"
 msgstr ""
 
-#: tv/program_display.py:276
+#: tv/program_display.py:282
 msgid "Modify priority"
 msgstr ""
 
-#: tv/program_display.py:279
+#: tv/program_display.py:285
 msgid "Save changes"
 msgstr ""
 
-#: tv/program_display.py:280
+#: tv/program_display.py:286
 msgid "Remove favorite"
 msgstr ""
 
-#: tv/program_display.py:282
+#: tv/program_display.py:288
 msgid "Favorite Menu"
 msgstr ""
 
-#: tv/program_display.py:404
+#: tv/program_display.py:410
 msgid "Save Failed, favorite was lost"
 msgstr ""
 
-#: tv/program_display.py:411
+#: tv/program_display.py:417
 msgid "Save Failed"
 msgstr ""
 
-#: tv/program_display.py:416
+#: tv/program_display.py:422
 msgid "Favorite not added yet."
 msgstr ""
 
@@ -1623,23 +1640,23 @@ msgstr ""
 msgid "Please check the config file."
 msgstr ""
 
-#: util/misc.py:432
+#: util/misc.py:441
 msgid "The recordserver is down"
 msgstr ""
 
-#: util/misc.py:454
+#: util/misc.py:463
 msgid "Today"
 msgstr ""
 
-#: util/misc.py:464
+#: util/misc.py:473
 msgid "Tomorrow"
 msgstr ""
 
-#: util/misc.py:474
+#: util/misc.py:483
 msgid "This Week"
 msgstr ""
 
-#: util/misc.py:484
+#: util/misc.py:493
 msgid "No recordings are scheduled"
 msgstr ""
 
@@ -1707,17 +1724,17 @@ msgstr ""
 msgid "Move to [%s]"
 msgstr ""
 
-#: video/plugins/mplayer.py:474
+#: video/plugins/mplayer.py:473
 msgid "Seeking not possible"
 msgstr ""
 
-#: video/plugins/xine.py:108
+#: video/plugins/xine.py:111
 msgid ""
 "'XINE_COMMAND' not defined, plugin 'xine' deactivated.\n"
 "please check the xine section in freevo_config.py"
 msgstr ""
 
-#: video/plugins/xine.py:132
+#: video/plugins/xine.py:135
 msgid "'xine-ui' version too old, plugin 'xine' deactivated"
 msgstr ""
 
@@ -1729,134 +1746,124 @@ msgstr ""
 msgid "Details"
 msgstr ""
 
-#: video/__init__.py:174
+#: video/__init__.py:181
 msgid "Directory Autobuild Thumbnails "
 msgstr ""
 
-#: video/__init__.py:175
-msgid "Build video thumbnails for all items (may yake a while when entering)."
+#: video/__init__.py:182
+msgid "Build video thumbnails for all items (may take a while when entering)."
 msgstr ""
 
-#: video/configure.py:105
+#: video/configure.py:111
 #, python-format
 msgid "Stream %s"
 msgstr ""
 
-#: video/configure.py:111
-msgid "Unknown"
-msgstr ""
-
-#: video/configure.py:116
+#: video/configure.py:119
 msgid "Audio Menu"
 msgstr ""
 
-#: video/configure.py:132
+#: video/configure.py:134
 msgid "no subtitles"
 msgstr ""
 
-#: video/configure.py:135
+#: video/configure.py:138
 msgid "Subtitle Menu"
 msgstr ""
 
-#: video/configure.py:151
+#: video/configure.py:155
 #, python-format
 msgid "Play chapter %s"
 msgstr ""
 
-#: video/configure.py:153
+#: video/configure.py:162
 msgid "Chapter Menu"
 msgstr ""
 
-#: video/configure.py:180
+#: video/configure.py:191
 #, python-format
 msgid "Turn off %s"
 msgstr ""
 
-#: video/configure.py:181
+#: video/configure.py:192
 #, python-format
 msgid "Turn on %s"
 msgstr ""
 
-#: video/configure.py:194
+#: video/configure.py:205
 msgid "Audio selection"
 msgstr ""
 
-#: video/configure.py:196
+#: video/configure.py:207
 msgid "Subtitle selection"
 msgstr ""
 
-#: video/configure.py:199
+#: video/configure.py:210
 msgid "Chapter selection"
 msgstr ""
 
-#: video/configure.py:204
+#: video/configure.py:215
 msgid "deinterlacing"
 msgstr ""
 
-#: video/configure.py:213
+#: video/configure.py:221
 msgid "Config Menu"
 msgstr ""
 
-#: video/videoitem.py:318
+#: video/videoitem.py:281
 msgid "Play DVD"
 msgstr ""
 
-#: video/videoitem.py:319 video/videoitem.py:321
+#: video/videoitem.py:282 video/videoitem.py:284
 msgid "DVD title list"
 msgstr ""
 
-#: video/videoitem.py:322 video/videoitem.py:330
+#: video/videoitem.py:285 video/videoitem.py:293
 msgid "Play default track"
 msgstr ""
 
-#: video/videoitem.py:326
+#: video/videoitem.py:289
 msgid "Play VCD"
 msgstr ""
 
-#: video/videoitem.py:327 video/videoitem.py:329
+#: video/videoitem.py:290 video/videoitem.py:292
 msgid "VCD title list"
 msgstr ""
 
-#: video/videoitem.py:335
+#: video/videoitem.py:297
+msgid "Play with alternate player"
+msgstr ""
+
+#: video/videoitem.py:300
 msgid "Play with maximum cache"
 msgstr ""
 
-#: video/videoitem.py:340
+#: video/videoitem.py:305
 msgid "Show variants"
 msgstr ""
 
-#: video/videoitem.py:343
+#: video/videoitem.py:308
 msgid "Create Thumbnail"
 msgstr ""
 
-#: video/videoitem.py:364
+#: video/videoitem.py:329
 msgid "Please wait...."
 msgstr ""
 
-#: video/videoitem.py:486
+#: video/videoitem.py:460 video/videoitem.py:474 video/videoitem.py:488
 #, python-format
 msgid "No media found for \"%s\".\n"
 msgstr ""
 
-#: video/videoitem.py:487 video/videoitem.py:501 video/videoitem.py:515
+#: video/videoitem.py:461 video/videoitem.py:475 video/videoitem.py:489
 msgid "Please insert the media."
 msgstr ""
 
-#: video/videoitem.py:500
-#, python-format
-msgid "Media not found for file \"%s\".\n"
-msgstr ""
-
-#: video/videoitem.py:514
-#, python-format
-msgid "Media not found for \"%s\".\n"
-msgstr ""
-
-#: video/videoitem.py:520
+#: video/videoitem.py:494
 msgid "No player for this item found"
 msgstr ""
 
-#: video/videoitem.py:594
+#: video/videoitem.py:569
 #, python-format
 msgid "Play Title %s"
 msgstr ""
@@ -1873,12 +1880,12 @@ msgstr ""
 msgid "View Scheduled Recordings"
 msgstr ""
 
-#: www/web_types.py:181 www/htdocs/favorites.rpy:125
-#: www/htdocs/favorites.rpy:167
+#: www/web_types.py:181 www/htdocs/favorites.rpy:128
+#: www/htdocs/favorites.rpy:171
 msgid "Favorites"
 msgstr ""
 
-#: www/web_types.py:182 www/htdocs/library.rpy:273
+#: www/web_types.py:182 www/htdocs/library.rpy:277
 msgid "Media Library"
 msgstr ""
 
@@ -1895,7 +1902,7 @@ msgid "Schedule a Manual Recording"
 msgstr ""
 
 #: www/web_types.py:184 www/web_types.py:282 www/web_types.py:289
-#: www/htdocs/search.rpy:134 www/htdocs/search.rpy:158
+#: www/htdocs/search.rpy:144 www/htdocs/search.rpy:168
 msgid "Search"
 msgstr ""
 
@@ -1927,7 +1934,7 @@ msgstr ""
 msgid "Go!"
 msgstr ""
 
-#: www/web_types.py:297 www/htdocs/library.rpy:284
+#: www/web_types.py:297 www/htdocs/library.rpy:288
 msgid "Messages"
 msgstr ""
 
@@ -2035,82 +2042,82 @@ msgstr ""
 msgid "index"
 msgstr ""
 
-#: www/htdocs/edit_favorite.rpy:150 www/htdocs/record.rpy:158
+#: www/htdocs/edit_favorite.rpy:158 www/htdocs/record.rpy:161
 #, python-format
 msgid "No program found on %s at %s."
 msgstr ""
 
-#: www/htdocs/edit_favorite.rpy:174
+#: www/htdocs/edit_favorite.rpy:182
 #, python-format
 msgid "Favorite %s doesn't exists."
 msgstr ""
 
-#: www/htdocs/edit_favorite.rpy:197
+#: www/htdocs/edit_favorite.rpy:205
 msgid "Name of favorite"
 msgstr ""
 
-#: www/htdocs/edit_favorite.rpy:200 www/htdocs/favorites.rpy:174
+#: www/htdocs/edit_favorite.rpy:208 www/htdocs/favorites.rpy:178
 msgid "Day of week"
 msgstr ""
 
-#: www/htdocs/edit_favorite.rpy:201 www/htdocs/favorites.rpy:175
+#: www/htdocs/edit_favorite.rpy:209 www/htdocs/favorites.rpy:179
 msgid "Time of day"
 msgstr ""
 
-#: www/htdocs/edit_favorite.rpy:202
+#: www/htdocs/edit_favorite.rpy:210
 msgid "Action"
 msgstr ""
 
-#: www/htdocs/favorites.rpy:158
+#: www/htdocs/favorites.rpy:162
 msgid "Monday"
 msgstr ""
 
-#: www/htdocs/favorites.rpy:159
+#: www/htdocs/favorites.rpy:163
 msgid "Tuesday"
 msgstr ""
 
-#: www/htdocs/favorites.rpy:160
+#: www/htdocs/favorites.rpy:164
 msgid "Wednesday"
 msgstr ""
 
-#: www/htdocs/favorites.rpy:161
+#: www/htdocs/favorites.rpy:165
 msgid "Thursday"
 msgstr ""
 
-#: www/htdocs/favorites.rpy:162
+#: www/htdocs/favorites.rpy:166
 msgid "Friday"
 msgstr ""
 
-#: www/htdocs/favorites.rpy:163
+#: www/htdocs/favorites.rpy:167
 msgid "Saturday"
 msgstr ""
 
-#: www/htdocs/favorites.rpy:164
+#: www/htdocs/favorites.rpy:168
 msgid "Sunday"
 msgstr ""
 
-#: www/htdocs/favorites.rpy:171
+#: www/htdocs/favorites.rpy:175
 msgid "Favorite Name"
 msgstr ""
 
-#: www/htdocs/favorites.rpy:176 www/htdocs/record.rpy:191
-#: www/htdocs/search.rpy:176
+#: www/htdocs/favorites.rpy:180 www/htdocs/record.rpy:194
+#: www/htdocs/search.rpy:187
 msgid "Actions"
 msgstr ""
 
-#: www/htdocs/favorites.rpy:177
+#: www/htdocs/favorites.rpy:181
 msgid "Priority"
 msgstr ""
 
-#: www/htdocs/favorites.rpy:209
+#: www/htdocs/favorites.rpy:213
 msgid "Edit"
 msgstr ""
 
-#: www/htdocs/favorites.rpy:217
+#: www/htdocs/favorites.rpy:221
 msgid "Higher"
 msgstr ""
 
-#: www/htdocs/favorites.rpy:224
+#: www/htdocs/favorites.rpy:228
 msgid "Lower"
 msgstr ""
 
@@ -2131,8 +2138,8 @@ msgstr ""
 msgid "Change"
 msgstr ""
 
-#: www/htdocs/genre.rpy:194 www/htdocs/guide.rpy:290 www/htdocs/record.rpy:227
-#: www/htdocs/search.rpy:207
+#: www/htdocs/genre.rpy:194 www/htdocs/guide.rpy:290 www/htdocs/record.rpy:230
+#: www/htdocs/search.rpy:224
 #, python-format
 msgid "Sorry, the program description for %s is unavailable."
 msgstr ""
@@ -2149,8 +2156,8 @@ msgstr ""
 msgid "Runtime"
 msgstr ""
 
-#: www/htdocs/genre.rpy:236 www/htdocs/guide.rpy:338 www/htdocs/search.rpy:215
-#: www/htdocs/search.rpy:217
+#: www/htdocs/genre.rpy:236 www/htdocs/guide.rpy:338 www/htdocs/search.rpy:232
+#: www/htdocs/search.rpy:234
 msgid "Record"
 msgstr ""
 
@@ -2227,61 +2234,61 @@ msgstr ""
 msgid "%i of %i Mb free in %s"
 msgstr ""
 
-#: www/htdocs/library.rpy:248
+#: www/htdocs/library.rpy:252
 #, python-format
 msgid "%s already exists! File not renamed."
 msgstr ""
 
-#: www/htdocs/library.rpy:250
+#: www/htdocs/library.rpy:254
 #, python-format
 msgid "Rename %s to %s."
 msgstr ""
 
-#: www/htdocs/library.rpy:253
+#: www/htdocs/library.rpy:257
 msgid "No new file specified."
 msgstr ""
 
-#: www/htdocs/library.rpy:255
+#: www/htdocs/library.rpy:259
 #, python-format
 msgid "Delete %s."
 msgstr ""
 
-#: www/htdocs/library.rpy:263
+#: www/htdocs/library.rpy:267
 #, python-format
 msgid "%s does not exist. No action taken."
 msgstr ""
 
-#: www/htdocs/library.rpy:265
+#: www/htdocs/library.rpy:269
 #, python-format
 msgid "I do not process names (%s) with slashes for security reasons."
 msgstr ""
 
-#: www/htdocs/library.rpy:297
+#: www/htdocs/library.rpy:301
 msgid "Movies"
 msgstr ""
 
-#: www/htdocs/library.rpy:301
+#: www/htdocs/library.rpy:305
 msgid "Recorded TV"
 msgstr ""
 
-#: www/htdocs/library.rpy:309
+#: www/htdocs/library.rpy:313
 msgid "Images"
 msgstr ""
 
-#: www/htdocs/library.rpy:321
+#: www/htdocs/library.rpy:325
 msgid "Choose a Directory"
 msgstr ""
 
-#: www/htdocs/library.rpy:324 www/htdocs/library.rpy:396
-#: www/htdocs/library.rpy:398 www/htdocs/library.rpy:401
+#: www/htdocs/library.rpy:328 www/htdocs/library.rpy:400
+#: www/htdocs/library.rpy:402 www/htdocs/library.rpy:405
 msgid "Back"
 msgstr ""
 
-#: www/htdocs/library.rpy:443
+#: www/htdocs/library.rpy:447
 msgid "Download"
 msgstr ""
 
-#: www/htdocs/library.rpy:446
+#: www/htdocs/library.rpy:450
 msgid "Rename"
 msgstr ""
 
@@ -2293,18 +2300,18 @@ msgstr ""
 msgid "Error Message"
 msgstr ""
 
-#: www/htdocs/manualrecord.rpy:220 www/htdocs/record.rpy:185
-#: www/htdocs/search.rpy:171
+#: www/htdocs/manualrecord.rpy:220 www/htdocs/record.rpy:188
+#: www/htdocs/search.rpy:181
 msgid "Start Time"
 msgstr ""
 
-#: www/htdocs/manualrecord.rpy:221 www/htdocs/record.rpy:186
-#: www/htdocs/search.rpy:172
+#: www/htdocs/manualrecord.rpy:221 www/htdocs/record.rpy:189
+#: www/htdocs/search.rpy:182
 msgid "Stop Time"
 msgstr ""
 
-#: www/htdocs/manualrecord.rpy:223 www/htdocs/record.rpy:190
-#: www/htdocs/search.rpy:175
+#: www/htdocs/manualrecord.rpy:223 www/htdocs/record.rpy:193
+#: www/htdocs/search.rpy:186
 msgid "Program Description"
 msgstr ""
 
@@ -2312,23 +2319,23 @@ msgstr ""
 msgid "Add to Recording Schedule"
 msgstr ""
 
-#: www/htdocs/record.rpy:189
+#: www/htdocs/record.rpy:192 www/htdocs/search.rpy:185
 msgid "Episode"
 msgstr ""
 
-#: www/htdocs/record.rpy:215
+#: www/htdocs/record.rpy:218
 msgid "UNKNOWN"
 msgstr ""
 
-#: www/htdocs/search.rpy:135
+#: www/htdocs/search.rpy:145
 msgid "recording server is unavailable"
 msgstr ""
 
-#: www/htdocs/search.rpy:165
+#: www/htdocs/search.rpy:175
 msgid "No matches"
 msgstr ""
 
-#: www/htdocs/search.rpy:219
+#: www/htdocs/search.rpy:236
 msgid "New favorite"
 msgstr ""
 # Manualy added from fxd skin files
