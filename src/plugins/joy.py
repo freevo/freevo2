@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/08/01 10:49:47  dischi
+# deactivate plugin
+#
 # Revision 1.13  2004/07/26 18:10:18  dischi
 # move global event handling to eventhandler.py
 #
@@ -58,6 +61,9 @@ rc = rc.get_singleton()
 class PluginInterface(plugin.DaemonPlugin):
 
     def __init__(self):
+        self.reason = config.REDESIGN_FIXME
+        return
+
         self.plugin_name = 'JOY'
         self.device_name = ''
      

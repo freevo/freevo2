@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/08/01 10:50:08  dischi
+# deactivate plugin
+#
 # Revision 1.20  2004/07/22 21:21:48  dischi
 # small fixes to fit the new gui code
 #
@@ -61,6 +64,9 @@ class PluginInterface(plugin.MimetypePlugin):
     Plugin to handle all kinds of games items
     """
     def __init__(self):
+        self.reason = config.REDESIGN_FIXME
+        return
+
         plugin.MimetypePlugin.__init__(self)
         self.display_type = [ 'games' ]
 

@@ -15,6 +15,9 @@
 # for a full list of tested sites see Docs/plugins/headlines.txt
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/08/01 10:49:47  dischi
+# deactivate plugin
+#
 # Revision 1.20  2004/07/26 18:10:18  dischi
 # move global event handling to eventhandler.py
 #
@@ -93,6 +96,8 @@ class PluginInterface(plugin.MainMenuPlugin):
     """
     # make an init func that creates the cache dir if it don't exist
     def __init__(self):
+        self.reason = config.REDESIGN_BROKEN
+        return
         if not hasattr(config, 'HEADLINES_LOCATIONS'):
             self.reason = 'HEADLINES_LOCATIONS not defined'
             return

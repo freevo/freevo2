@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/08/01 10:49:47  dischi
+# deactivate plugin
+#
 # Revision 1.14  2004/07/22 21:21:49  dischi
 # small fixes to fit the new gui code
 #
@@ -65,7 +68,7 @@ import rc
 from event import *
 from item import Item
 from gui import ListBox
-from gui import RegionScroller
+# from gui import RegionScroller
 from gui import PopupBox
 
 def islog(name):
@@ -357,6 +360,9 @@ class PluginInterface(plugin.MainMenuPlugin):
     from command.fxdhandler for details.
     """
     def __init__(self):
+        self.reason = config.REDESIGN_BROKEN
+        return
+
         # register command to normal fxd item parser
         # to enable <command> tags in fxd files in every menu
         plugin.register_callback('fxditem', [], 'command', fxdparser)
