@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/03/13 20:11:36  rshortt
+# Some quick debug for addEditedFavorite()
+#
 # Revision 1.17  2004/03/13 18:31:51  rshortt
 # Lets see traceback and exception.  We should clean this file up further.
 #
@@ -213,7 +216,9 @@ def addEditedFavorite(name, title, chan, dow, mod, priority):
         (status, message) = \
             server.addEditedFavorite(jellyToXML(name), \
             jellyToXML(title), chan, dow, mod, priority)
-    except:
+    except Exception, e:
+        print e
+        traceback.print_exc()
         return (FALSE, 'record_client: '+_('connection error'))
 
     return (status, message) 
