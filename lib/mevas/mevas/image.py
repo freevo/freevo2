@@ -11,6 +11,8 @@ class CanvasImage(CanvasObject):
 
 		self.image = None
 		if type(image_or_size) == types.TupleType:
+			if 0 in image_or_size:
+				raise ValueError, "Invalid dimension for CanvasImage %s" % repr(image_or_size)
 			self.new(image_or_size)
 		else:
 			self.set_image(image_or_size)
