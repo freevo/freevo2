@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/02/28 17:55:05  krister
+# Bugfix, the output fp was not set to sys.stdout at the time of the call, instead it used the value at startup time. sys.stdout is re-routed dynamically by the internal python webserver after the client connects.
+#
 # Revision 1.5  2003/02/27 02:04:33  rshortt
 # Committed some code by Michael Ruelle which adds highlighting and file
 # size descriptions to library.cgi.
@@ -59,12 +62,16 @@ def debug():
     sys.stderr = sys.stdout
 
 
-def printContentType(type="text/html", fp=sys.stdout):
+def printContentType(content_type="text/html", fp=None):
+    if not fp:
+        fp = sys.stdout
     if cgiIsCaller():
-        fp.write('Content-type:'+type+'\n\n\n')
+        fp.write('Content-type: %s\n\n' % content_type)
 
 
-def printHeader(title="unknown page", style=None, script=None, fp=sys.stdout):
+def printHeader(title="unknown page", style=None, script=None, fp=None):
+    if not fp:
+        fp = sys.stdout
     fp.write('<html><head>\n')
     fp.write('<title>'+title+'</title>\n')
     if style != None:
@@ -76,23 +83,33 @@ def printHeader(title="unknown page", style=None, script=None, fp=sys.stdout):
     fp.write('<body>\n')
 
 
-def tableOpen(opts="", fp=sys.stdout):
+def tableOpen(opts="", fp=None):
+    if not fp:
+        fp = sys.stdout
     fp.write("<table "+opts+">\n")
 
 
-def tableClose(fp=sys.stdout):
+def tableClose(fp=None):
+    if not fp:
+        fp = sys.stdout
     fp.write("</table>\n")
 
 
-def tableRowOpen(opts="", fp=sys.stdout):
+def tableRowOpen(opts="", fp=None):
+    if not fp:
+        fp = sys.stdout
     fp.write("  <tr "+opts+">\n")
 
 
-def tableRowClose(fp=sys.stdout):
+def tableRowClose(fp=None):
+    if not fp:
+        fp = sys.stdout
     fp.write("  </tr>\n")
 
 
-def tableCell(data="", opts="", fp=sys.stdout):
+def tableCell(data="", opts="", fp=None):
+    if not fp:
+        fp = sys.stdout
     fp.write("    <td "+opts+">"+data+"</td>\n")
 
 
@@ -108,12 +125,16 @@ def formValue(form=None, key=None):
     return val
 
 
-def printFooter(fp=sys.stdout):
+def printFooter(fp=None):
+    if not fp:
+        fp = sys.stdout
     fp.write('<hr>\n')
     fp.write("</body></html>\n")
 
 
-def printSearchForm(fp=sys.stdout):
+def printSearchForm(fp=None):
+    if not fp:
+        fp = sys.stdout
     fp.write("""
 <form name="SearchForm" action="search.cgi" METHOD="GET">
 <table>
@@ -126,7 +147,9 @@ def printSearchForm(fp=sys.stdout):
 """)
 
 
-def printLinks(fp=sys.stdout):
+def printLinks(fp=None):
+    if not fp:
+        fp = sys.stdout
     fp.write("""
 <center>
 <table border=0 cellpadding=4 cellspacing=1>
