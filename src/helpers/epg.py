@@ -1,10 +1,7 @@
 import getopt
 import os
 import sys
-import traceback
 import time
-
-import sqlite
 
 import config
 import sysconfig

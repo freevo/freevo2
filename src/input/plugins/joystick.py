@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2005/01/22 13:28:47  dischi
+# remove unneeded imports
+#
 # Revision 1.5  2004/11/20 18:23:03  dischi
 # use python logger module for debug
 #
@@ -65,7 +68,6 @@ import sys
 import os
 import select
 import struct
-import traceback
 from time import sleep
 
 import config

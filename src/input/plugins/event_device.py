@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2005/01/22 13:28:46  dischi
+# remove unneeded imports
+#
 # Revision 1.7  2004/12/13 01:45:17  rshortt
 # small cleanup and add logging
 #
@@ -76,7 +79,6 @@ import sys
 import os
 import select
 import struct
-import traceback
 import fcntl
 import logging
 from time import sleep
