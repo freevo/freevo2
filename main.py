@@ -4,6 +4,17 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.72  2002/10/06 14:58:51  dischi
+# Lots of changes:
+# o removed some old cvs log messages
+# o some classes without member functions are in datatypes.py
+# o movie_xml.parse now returns an object of MovieInformation instead of
+#   a long list
+# o mplayer_options now works better for options on cd/dvd/vcd
+# o you can disable -wid usage
+# o mplayer can play movies as strings or as FileInformation objects with
+#   mplayer_options
+#
 # Revision 1.71  2002/10/05 18:10:56  dischi
 # Added support for a local_skin.xml file. See Docs/documentation.html
 # section 4.1 for details. An example is also included.
@@ -25,95 +36,6 @@
 #
 # Revision 1.66  2002/09/15 11:53:41  dischi
 # Make info in RemovableMedia a class (RemovableMediaInfo)
-#
-# Revision 1.65  2002/09/14 16:55:33  dischi
-# cosmetic change
-#
-# Revision 1.64  2002/09/08 18:26:03  krister
-# Applied Andrew Drummond's MAME patch. It seems to work OK on X11, but still needs some work before it is ready for prime-time...
-#
-# Revision 1.63  2002/09/07 06:19:44  krister
-# Improved removable media support.
-#
-# Revision 1.62  2002/09/04 19:47:45  dischi
-# wrap (u)mount to get rid of the error messages
-#
-# Revision 1.61  2002/09/04 19:32:31  dischi
-# Added a new identifymedia. Freevo now polls the rom drives for media
-# change and won't mount the drive unless you want to play a file from cd or
-# you browse it.
-#
-# Revision 1.60  2002/09/01 09:43:01  dischi
-# Fixes for the new "type" parameter in MenuItem
-#
-# Revision 1.59  2002/08/31 18:22:47  dischi
-# changed pgrep regexp to kill freevo
-#
-# Revision 1.58  2002/08/31 18:09:33  krister
-# Removed old code for shutting down from startup.py which is not used anymore.
-#
-# Revision 1.57  2002/08/21 04:58:26  krister
-# Massive changes! Obsoleted all osd_server stuff. Moved vtrelease and matrox stuff to a new dir fbcon. Updated source to use only the SDL OSD which was moved to osd.py. Changed the default TV viewing app to mplayer_tv.py. Changed configure/setup_build.py/config.py/freevo_config.py to generate and use a plain-text config file called freevo.conf. Updated docs. Changed mplayer to use -vo null when playing music. Fixed a bug in music playing when the top dir was empty.
-#
-# Revision 1.56  2002/08/19 05:51:15  krister
-# Load main menu items from the skin.
-#
-# Revision 1.55  2002/08/19 02:08:38  krister
-# Added killall for freevo_xwin at shutdown. Fixed tabs.
-#
-# Revision 1.54  2002/08/17 02:57:52  krister
-# Gustavi Barbieris changes for getting the main menu items from the skin.
-#
-# Revision 1.53  2002/08/14 12:38:05  krister
-# Made shutdown loop forever until dead. This hopefully fixes a bug where SDL crashes at polling after shutdown.
-#
-# Revision 1.52  2002/08/14 09:28:37  tfmalt
-#  o Updated all files using skin to create a skin object with the new
-#    get_singleton function. Please tell or add yourself if I forgot a
-#    place.
-#
-# Revision 1.51  2002/08/14 07:47:18  dischi
-# freevo_main_quiet is now default
-#
-# Revision 1.50  2002/08/14 04:33:00  krister
-# Bugfixes in shutdown.
-#
-# Revision 1.49  2002/08/14 02:40:28  krister
-# Moved the runtime dir freevo_rt to ../runtime.
-#
-# Revision 1.48  2002/08/13 04:35:53  krister
-# Removed the 1.5s delay at startup. Removed obsolete code.
-#
-# Revision 1.47  2002/08/13 01:21:42  krister
-# Hide output from the shutdown commands.
-#
-# Revision 1.46  2002/08/12 11:36:33  dischi
-# removed some unneeded code
-#
-# Revision 1.45  2002/08/11 19:23:35  krister
-# Updated shutdown code.
-#
-# Revision 1.44  2002/08/11 17:03:50  krister
-# Removed delay after crash. Updated the shutdown process.
-#
-# Revision 1.43  2002/08/11 09:05:18  krister
-# Added a killall for the runtime tasks at shutdown.
-#
-# Revision 1.42  2002/08/08 06:05:32  outlyer
-# Small changes:
-#  o Made Images menu a config file option "ENABLE_IMAGES"
-#  o Removed the redundant fbset 640x480-60 which doesn't even exist in the
-#    fbset.db (?)
-#
-# Revision 1.41  2002/08/07 04:53:01  krister
-# Changed shutdown to just exit freevo. A new config variable can be set to shutdown the entire machine.
-#
-# Revision 1.40  2002/08/05 00:45:50  tfmalt
-# o Started work in a popup widget / dialog box type thing.
-#   Changed the "mouting /mnt/cdrom" entry on EJECT and put it in osd.py
-#
-# Revision 1.39  2002/08/04 22:17:44  tfmalt
-# o Fixed autostart so that it handles CD's of type AUDIO properly again.
 #
 # ----------------------------------------------------------------------
 #
@@ -142,10 +64,10 @@ import sys, socket, random, time, os
 import traceback
 
 import util    # Various utilities
+import osd     # The OSD class, used to communicate with the OSD daemon
 import menu    # The menu widget class
 import skin    # The skin class
 import mixer   # The mixer class
-import osd     # The OSD class, used to communicate with the OSD daemon
 import rc      # The RemoteControl class.
 import music   # The Music module
 import movie   # The Movie module
@@ -157,6 +79,9 @@ import mame           # The Mame Module
 
 import identifymedia
 import signal
+
+# Some datatypes we need
+from datatypes import *
 
 DEBUG = 1 # Set to 1 for debug output
 TRUE  = 1
@@ -357,19 +282,6 @@ def getcmd():
         
 
 
-# XXX does this belong to main.py?
-
-class RemovableMediaInfo:
-
-    def __init__(self, type, label = None, image = None, play_options = None, \
-                 xml_file = None):
-        self.type = type
-        self.label = label
-        self.image = image
-        self.play_options = play_options
-        self.xml_file = xml_file
-        
-    
 class RemovableMedia:
 
     def __init__(self, mountdir='', devicename='', drivename=''):

@@ -9,30 +9,23 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2002/10/06 14:58:51  dischi
+# Lots of changes:
+# o removed some old cvs log messages
+# o some classes without member functions are in datatypes.py
+# o movie_xml.parse now returns an object of MovieInformation instead of
+#   a long list
+# o mplayer_options now works better for options on cd/dvd/vcd
+# o you can disable -wid usage
+# o mplayer can play movies as strings or as FileInformation objects with
+#   mplayer_options
+#
 # Revision 1.6  2002/09/15 14:57:16  dischi
 # Support for <label> instead of <id> in the movie xml files. You can use a
 # regexp to match a hole set of discs (use with care!)
 #
 # Revision 1.5  2002/09/13 18:07:51  dischi
 # Added tag <mplayer_options> inside <video>
-#
-# Revision 1.4  2002/08/18 21:23:29  tfmalt
-# o Added a comment when trying to figure out config.py <-> movie_xml.py
-#   dependencies.
-#
-# Revision 1.3  2002/08/14 02:39:45  krister
-# Polished the debug output.
-#
-# Revision 1.2  2002/08/12 11:34:59  dischi
-# Changed IMDb support:
-# o informations are now stored in hashes (Python dict)
-# o support for rebuilding the database when imdb.py added something
-# o support for the the new timestamp+label keys (only the timestamp is
-#   used right now, this may change)
-#
-# Revision 1.1  2002/07/31 08:07:23  dischi
-# Moved the XML movie file parsing in a new file. Both movie.py and
-# config.py use the same code now.
 #
 #
 # ----------------------------------------------------------------------
@@ -60,24 +53,23 @@
 import os
 import re
 
-# XXX > Dirk, this is _really circular. Any other way you can do it? :^)
-# XXX Not that I know, sorry
 import config
 import util
 
 # XML support
 from xml.utils import qp_xml
 
+# Some datatypes we need
+from datatypes import *
+
 # Set to 1 for debug output
 DEBUG = 1
-
 
 
 #
 # parse <video> tag    
 #
 def parseVideo(dir, mplayer_files, video_node):
-    first_file = ""
     playlist = []
     mode = 'video'
     add_to_path = dir
@@ -92,14 +84,15 @@ def parseVideo(dir, mplayer_files, video_node):
             first_file = "1"
         if node.name == u'mplayer_options':
             mplayer_options += node.textof()
+
         if node.name == u'files':
             for file_nodes in node.children:
-                if file_nodes.name == u'filename':
-                    if first_file == "":
-                        first_file = os.path.join(add_to_path, file_nodes.textof())
                 try: mplayer_files.remove(os.path.join(add_to_path,file_nodes.textof()))
                 except ValueError: pass
-                playlist += [os.path.join(add_to_path, file_nodes.textof())]
+                # XXX add mplayer_options for specific files, too
+                file = FileInformation(file=os.path.join(add_to_path, file_nodes.textof()))
+                playlist += [file]
+
         if node.name == u'crop':
             try:
                 crop = "-vop crop=%s:%s:%s:%s " % \
@@ -108,7 +101,17 @@ def parseVideo(dir, mplayer_files, video_node):
                 mplayer_options += crop
             except KeyError:
                 pass
-    return ( mode, first_file, playlist, mplayer_options )
+
+    for file in playlist:
+        file.mode = mode
+        file.mplayer_options = mplayer_options
+
+    # make dummy filename
+    if not playlist:
+        file = FileInformation(mode, '', mplayer_options)
+        playlist += [file]
+
+    return playlist
 
 
 #
@@ -124,7 +127,7 @@ def parseInfo(info_node):
 # parse a XML movie file
 #
 def parse(file, dir, mplayer_files):
-    title = first_file = mplayer_options = ""
+    title = mplayer_options = ""
     image = None
     playlist = []
     info = []
@@ -152,12 +155,11 @@ def parse(file, dir, mplayer_files):
                     elif node.name == u'label':
                         label += [node.textof()]
                     elif node.name == u'video':
-                        (mode, first_file, playlist, mplayer_options) = \
-                               parseVideo(dir, mplayer_files, node)
+                        playlist = parseVideo(dir, mplayer_files, node)
                     elif node.name == u'info':
                         parseInfo(node)
 
-    return title, image, (mode, first_file, playlist, mplayer_options), id, label, info
+    return MovieInformation(title, image, playlist, id, label, info, file)
 
 
 
@@ -175,28 +177,27 @@ def hash_xml_database():
 
     for name,dir in config.DIR_MOVIES:
         for file in util.recursefolders(dir,1,'*.xml',1):
-            title, image, None, id, label, info = parse(file, os.path.dirname(file),[])
-            if id:
-                for i in id:
+            info = parse(file, os.path.dirname(file),[])
+            if info.disc_id:
+                for i in info.disc_id:
                     if len(i) > 16:
                         i = i[0:16]
-                    config.MOVIE_INFORMATIONS_ID[i] = (title, image, file)
-            if label:
-                for l in label:
+                    config.MOVIE_INFORMATIONS_ID[i] = info
+            if info.disc_label:
+                for l in info.disc_label:
                     l_re = re.compile(l)
-                    config.MOVIE_INFORMATIONS_LABEL += [(l_re, title, image, file)]
+                    config.MOVIE_INFORMATIONS_LABEL += [(l_re, info)]
                 
     for file in util.recursefolders(config.MOVIE_DATA_DIR,1,'*.xml',1):
-        title, image, None, id, label, info = parse(file, os.path.dirname(file),[])
-        if id:
-            for i in id:
+        info = parse(file, os.path.dirname(file),[])
+        if info.disc_id:
+            for i in info.disc_id:
                 if len(i) > 16:
                     i = i[0:16]
-                config.MOVIE_INFORMATIONS_ID[i] = (title, image, file)
-        if label:
-            for l in label:
+                config.MOVIE_INFORMATIONS_ID[i] = info
+        if info.disc_label:
+            for l in info.disc_label:
                 l_re = re.compile(l)
-                config.MOVIE_INFORMATIONS_LABEL += [(l_re, title, image, file)]
-                
+                config.MOVIE_INFORMATIONS_LABEL += [(l_re, info)]
 
     if DEBUG: print 'done'

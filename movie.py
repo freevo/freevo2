@@ -11,6 +11,17 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2002/10/06 14:58:51  dischi
+# Lots of changes:
+# o removed some old cvs log messages
+# o some classes without member functions are in datatypes.py
+# o movie_xml.parse now returns an object of MovieInformation instead of
+#   a long list
+# o mplayer_options now works better for options on cd/dvd/vcd
+# o you can disable -wid usage
+# o mplayer can play movies as strings or as FileInformation objects with
+#   mplayer_options
+#
 # Revision 1.41  2002/09/27 08:46:00  dischi
 # add debug
 #
@@ -126,6 +137,8 @@ osd = osd.get_singleton()
 import skin    # The skin class
 skin = skin.get_singleton()
 
+from datatypes import *
+
 # Set to 1 for debug output
 DEBUG = 1
 
@@ -141,42 +154,43 @@ main_menu_selected = -1
 #
 # mplayer dummy
 #
+# arg = type, file, playlist 
+#
+# file is based on type:
+#
+# vcd-cwd/svcd-cwd/dvd-cwd: file is RemovableMediaInfo, display a title menu
+#                           to select the title
+# vcd/svcd/dvd:             file is title number as string (or FileInformation)
+# video:                    title is filename (or FileInformation)
+#
 def play_movie(arg=None, menuw=None):
-    mode = arg[0]      # 'dvd', 'vcd', etc
-    filename = arg[1]
+    mode = arg[0]
+    file = arg[1]
     playlist = arg[2]
-    play_options = ""
 
-    if len(arg) > 3:
-        play_options = arg[3]
+    # if file is REMOVABLE_MEDIA, check the info what to do
+    if hasattr(file, 'drive_status'):
+        # dvd/vcd/svcd
+        if mode == 'dvd' or mode == 'vcd' or mode == 'svcd':
+            # mode is dvd or vcd; svcd is vcd
+            dvd_vcd_handler(file, mode[-3:], menuw)
+        else:
+            print "ERROR: can't play this media"
+        return
+        
+    filename = file
+    if isinstance(file, FileInformation):
+        filename = file.file
         
     print 'playmovie: Got arg=%s, filename="%s"' % (arg, filename)
 
     # Is the file on a removable media? If so it needs to be mounted.
     for media in config.REMOVABLE_MEDIA:
         if filename.find(media.mountdir) == 0:
-            if mode == 'dvd':
-                dvd_vcd_handler(media, 'dvd', menuw)
-                return
-            if mode == 'vcd' or mode == 'svcd':
-                dvd_vcd_handler(media, 'vcd', menuw)
-                return
-            else:
-                util.mount(media.mountdir)
-                break
+            util.mount(media.mountdir)
+            break
                 
-    mplayer.play(mode, filename, playlist, 0, play_options)
-
-
-def play_dvd(arg=None, menuw=None):
-    titlenum = arg
-    print 'play_dvd: Got title %s' % titlenum
-    mplayer.play('dvd', titlenum, [], 0, '')
-
-def play_vcd(arg=None, menuw=None):
-    titlenum = arg
-    print 'play_vcd: Got title %s' % titlenum
-    mplayer.play('vcd', titlenum, [], 0, '')
+    mplayer.play(mode, file, playlist, 0)
 
 
 #
@@ -189,19 +203,25 @@ def dvd_vcd_handler(media, type, menuw):
     osd.update()
     os.system('rm /tmp/mplayer_dvd.log /tmp/mplayer_dvd_done')
 
-    cmd = ('%s -ao null -nolirc -vo null -frames 0 %s -cdrom-device %s ' +
-           '2>&1 > /tmp/mplayer_dvd.log')
+    mplayer_options = '-cdrom-device %s -dvd-device %s' % \
+                      (media.devicename, media.devicename)
+
+    # find mplayer_options from the xml data file
+    if media.info and media.info.info:
+        mplayer_options = '%s %s' % (mplayer_options, \
+                                     media.info.info.playlist[0].mplayer_options)
+    
+    cmd = ('%s -ao null -nolirc -vo null -frames 0 %s %s ' +
+           '2>/dev/null > /tmp/mplayer_dvd.log')
 
     if type == 'dvd':
         #mplayer -ao null -nolirc -vo null -frames 0 -dvd 1 2> &1 > /tmp/mplayer_dvd.log
         cmd = cmd % (config.MPLAYER_CMD, '-dvd 1', media.devicename)
-        play_function = play_dvd
     else:
         # play track 99 which isn't there (very sure!), scan mplayers list
         # of found tracks to get the total number of tracks
         #mplayer -ao null -nolirc -vo null -frames 0 -vcd 99 2> &1 > /tmp/mplayer_dvd.log
         cmd = cmd % (config.MPLAYER_CMD, '-vcd 99', media.devicename)
-        play_function = play_vcd
 
     os.system(cmd + ' ; touch /tmp/mplayer_dvd_done')
 
@@ -248,16 +268,19 @@ def dvd_vcd_handler(media, type, menuw):
     if not done or not found:
         num_titles = 100 # XXX Kludge
 
+
     # Now let's see what we can do now:
     
     # only one track, play it
     if num_titles == 1:
-        play_function('1 -cdrom-device %s' % media.devicename)
+        file = FileInformation(type, '1', mplayer_options)
+        play_movie((type, file, []), menuw)
         return
     
     # two tracks and only one file, play 2
     if num_titles == 2 and num_files == 1:
-        play_function('2 -cdrom-device %s' % media.devicename)
+        file = FileInformation(type, '2', mplayer_options)
+        play_movie((type, file, []), menuw)
         return
     
     # one track more than files, track 1 is menu, ignore it
@@ -266,9 +289,9 @@ def dvd_vcd_handler(media, type, menuw):
     if num_titles == num_files + 1:
         items = []
         for title in range(2,num_titles+1):
-            m = menu.MenuItem('Play Title %s' % (title - 1), play_function,
-                              '%s -cdrom-device %s' % (title, media.devicename), 
-                              dvd_menu_eventhandler, media)
+            file = FileInformation(type, '%s' % title, mplayer_options)
+            m = menu.MenuItem('Play Title %s' % (title - 1), play_movie,
+                              (type, file, []), dvd_menu_eventhandler, media)
             m.setImage(('movie', media.info.image))
             items += [m]
 
@@ -280,14 +303,17 @@ def dvd_vcd_handler(media, type, menuw):
     # build a normal menu
     items = []
     for title in range(1,num_titles+1):
-        m = menu.MenuItem('Play Title %s' % title, play_function,
-                          '%s -cdrom-device %s' % (title, media.devicename), 
-                          dvd_menu_eventhandler, media)
+        file = FileInformation(type, '%s' % title, mplayer_options)
+        m = menu.MenuItem('Play Title %s' % title, play_movie,
+                          (type, file, []), dvd_menu_eventhandler, media)
         m.setImage(('movie', media.info.image))
         items += [m]
 
     label = media.info.label
-    moviemenu = menu.Menu(label, items, xml_file = media.info.xml_file, umount_all = 1)
+    xml_file = ""
+    if media.info and media.info.info:
+        xml_file = media.info.info.xml_file
+    moviemenu = menu.Menu(label, items, xml_file = xml_file, umount_all = 1)
     menuw.pushmenu(moviemenu)
 
     return
@@ -384,7 +410,7 @@ def main_menu_generate():
                 m = menu.MenuItem(media.info.label, play_movie, media.info.play_options,
                                   eventhandler, media)
 
-            elif media.info.type != None:
+            elif media.info.type:
                 # Just data files
                 m = menu.MenuItem(media.info.label, cwd, media.mountdir, eventhandler, media)
             m.setImage(('movie', media.info.image))
@@ -408,12 +434,16 @@ def main_menu(arg=None, menuw=None):
 def cwd(arg=None, menuw=None):
     mountdir = arg
     skin_xml_file = mountdir
+    movie_info = None
     
     for media in config.REMOVABLE_MEDIA:
         if string.find(mountdir, media.mountdir) == 0:
             util.mount(mountdir)
-            if media.info and media.info.xml_file:
-                skin_xml_file = media.info.xml_file
+            if media.info:
+                movie_info = media.info.info
+
+    if movie_info:
+        skin_xml_file = movie_info.xml_file
                 
     dirnames = util.getdirnames(mountdir)
     mplayer_files = util.match_files(mountdir, config.SUFFIX_MPLAYER_FILES)
@@ -434,12 +464,13 @@ def cwd(arg=None, menuw=None):
 
     # XML files
     for file in util.match_files(mountdir, config.SUFFIX_FREEVO_FILES):
-        title, image, (mode, first_file, playlist, play_options), id, label, info =\
-               movie_xml.parse(file, mountdir, mplayer_files)
-
+        movie_info = movie_xml.parse(file, mountdir, mplayer_files)
+        
         # only add movies when we have all needed informations
-        if title != "" and first_file != "":
-            files += [ ( title, mode, first_file, playlist, play_options, image ) ]
+        if movie_info.title and len(movie_info.playlist) > 0 and \
+           movie_info.playlist[0].file:
+            files += [ ( movie_info.title, movie_info.playlist[0], \
+                         movie_info.playlist, movie_info.image, movie_info ) ]
 
     # "normal" movie files
     for file in mplayer_files:
@@ -465,15 +496,20 @@ def cwd(arg=None, menuw=None):
             image = os.path.splitext(file)[0] + ".jpg"
 
         # add file to list
-        files += [ ( title, 'video', file, [], None, image ) ]
+        if movie_info:
+            if not image:
+                image = movie_info.image
+            if movie_info.playlist[0].mplayer_options:
+                file = FileInformation('video', file, movie_info.playlist[0].mplayer_options)
+        files += [ ( title, file, [], image, None ) ]
 
 
     # sort "normal" files and xml files by title
     files.sort(lambda l, o: cmp(l[0].upper(), o[0].upper()))
 
     # add everything to the menu
-    for (title, mode, file, playlist, play_options, image) in files:
-        m = menu.MenuItem(title, play_movie, (mode, file, playlist, play_options),
+    for (title, file, playlist, image, more_info) in files:
+        m = menu.MenuItem(title, play_movie, ('video', file, playlist, more_info),
                           eventhandler = eventhandler)
         m.setImage(('movie', image))
         items += [m]
