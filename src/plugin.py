@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.72  2004/08/05 17:36:46  dischi
+# support for special plugin loading
+#
 # Revision 1.71  2004/08/01 10:55:27  dischi
 # cosmetic change for debug
 #
@@ -237,7 +240,6 @@ VIDEO_PLAYER   = 'VIDEO_PLAYER'
 TV             = 'TV'
 RECORD         = 'RECORD'
 
-
 #
 # Plugin functions
 #
@@ -316,7 +318,7 @@ def is_active(name, arg=None):
     return False
                 
     
-def init(callback = None):
+def init(callback = None, reject=['record', 'www'], exclusive=[]):
     """
     load and init all the plugins
     """
@@ -332,39 +334,29 @@ def init(callback = None):
         current += 1
         if callback:
             callback(int((float(current) / len(__all_plugins__)) * 100))
-        __load_plugin__(name, type, level, args, number)
+        if exclusive:
+            # load only plugins from exclusive list
+            for e in exclusive:
+                if not isinstance(name, str):
+                    __load_plugin__(name, type, level, args, number)
+                    break
+                if name.startswith('%s.' % e):
+                    __load_plugin__(name, type, level, args, number)
+                    break
+        else:
+            # load all plugin except rejected once
+            for r in reject:
+                if isinstance(name, str) and name.startswith('%s.' % r):
+                    break
+            else:
+                __load_plugin__(name, type, level, args, number)
+
 
     # sort plugins in extra function (exec doesn't like to be
     # in the same function is 'lambda' 
     __sort_plugins__()
 
 
-
-def init_special_plugin(id):
-    """
-    load only the plugin 'id'
-    """
-    global __all_plugins__
-    global __initialized__
-    global __plugin_basedir__
-    
-    __plugin_basedir__ = os.environ['FREEVO_PYTHON']
-
-    try:
-        id = int(id)
-    except ValueError:
-        pass
-    for i in range(len(__all_plugins__)):
-        name, type, level, args, number = __all_plugins__[i]
-        if number == id or name == id:
-            __load_plugin__(name, type, level, args, number)
-            del __all_plugins__[i]
-            break
-        
-    # sort plugins in extra function (exec doesn't like to be
-    # in the same function is 'lambda' 
-    __sort_plugins__()
-    
 
 def shutdown(plugin_name=None):
     """
