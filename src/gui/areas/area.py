@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/08/26 15:29:18  dischi
+# make the tv guide work again (but very slow)
+#
 # Revision 1.10  2004/08/24 16:42:41  dischi
 # Made the fxdsettings in gui the theme engine and made a better
 # integration for it. There is also an event now to let the plugins
@@ -107,7 +110,7 @@ import util
 # FIXME: this is really bad, correct this so fxdparser a.k.a theme
 # is not needed anymore
 from gui import theme_engine as fxdparser
-from gui import Rectangle, Text, Image
+from gui import Rectangle, Text, Textbox, Image
 
 
 class SkinObjects:
@@ -149,7 +152,6 @@ class Area:
         self.screen      = None
         self.imagelib    = None
         self.objects     = SkinObjects()
-        self.NEW_STYLE   = True
 
         self.__background__ = []
         
@@ -196,9 +198,6 @@ class Area:
 
 
     def clear_all(self):
-        if not self.NEW_STYLE:
-            return
-
         if not self.screen:
             _debug_('ERROR in area %s: no screen defined' % self.name)
             return
@@ -495,7 +494,7 @@ class Area:
             t = Text(text, (x, y), (width, height2), font, align_h, align_v,
                      mode, ellipses, dim)
         else:
-            t = TextBox(text, (x, y), (width, height2), font, align_h, align_v,
+            t = Textbox(text, (x, y), (width, height2), font, align_h, align_v,
                         mode, ellipses)
         self.screen.layer[2].add_child(t)
         return t
@@ -569,3 +568,10 @@ class Area:
             i = Image(image, (x, y), (w, h))
             self.screen.layer[2].add_child(i)
         return i
+
+
+    def __del__(self):
+        """
+        delete function of memory debugging
+        """
+        _mem_debug_('Area', self.name)

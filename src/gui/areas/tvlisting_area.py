@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/08/26 15:29:18  dischi
+# make the tv guide work again (but very slow)
+#
 # Revision 1.7  2004/08/24 16:42:41  dischi
 # Made the fxdsettings in gui the theme engine and made a better
 # integration for it. There is also an event now to let the plugins
@@ -69,6 +72,7 @@
 
 
 import copy
+import os
 
 import time
 import config
@@ -87,15 +91,8 @@ class TVListing_Area(Area):
         self.last_settings = None
         self.last_items_geometry = None
         self.last_start_time = 0
-        self.NEW_STYLE = False
+        self.objects = []
         
-
-    def update_content_needed(self):
-        """
-        check if the content needs an update
-        """
-        return True
-
 
     def get_items_geometry(self, settings, obj):
         if self.last_settings == settings:
@@ -188,9 +185,14 @@ class TVListing_Area(Area):
             r.y, y = 0, -r.y
             height -= y
         return Geometry(x, y, width, height), r
-    
 
-    def update_content(self):
+
+    def clear(self):
+        for o in self.objects:
+            if o:
+                o.unparent()
+
+    def update(self):
         """
         update the listing area
         """
@@ -200,6 +202,7 @@ class TVListing_Area(Area):
         area      = self.area_values
         content   = self.calc_geometry(layout.content, copy_object=True)
 
+        self.clear()
 #         to_listing     = menu.table
 
 #         n_cols   = len(to_listing[0])-1
@@ -214,6 +217,7 @@ class TVListing_Area(Area):
         label_val, head_val, selected_val, default_val, scheduled_val = self.all_vals
 
         leftarrow = None
+        leftarrow_size = (0,0)
         if area.images['leftarrow']:
             i = area.images['leftarrow']
             leftarrow = self.loadimage(i.filename, i)
@@ -221,6 +225,7 @@ class TVListing_Area(Area):
                 leftarrow_size = (leftarrow.get_width(), leftarrow.get_height())
 
         rightarrow = None
+        rightarrow_size = (0,0)
         if area.images['rightarrow']:
             i = area.images['rightarrow']
             rightarrow = self.loadimage(i.filename, i)
@@ -266,8 +271,8 @@ class TVListing_Area(Area):
                                                  head_h, head_h )
 
 
-        self.drawbox( x_contents - r.width, y_contents - r.height,
-                      r.width+1, head_h+1, r )
+        self.objects.append(self.drawbox( x_contents - r.width, y_contents - r.height,
+                                 r.width+1, head_h+1, r ))
 
     
         # use label padding for x; head padding for y
@@ -297,16 +302,17 @@ class TVListing_Area(Area):
         x0 = x_contents
         ty0 = y_contents - r.height
         for i in range( n_cols ):
-            self.drawbox( math.floor(x0), ty0,
-                          math.floor( col_size + x0 ) - math.floor( x0 ) + 1,
-                          head_h + 1, r2 )
+            self.objects.append(self.drawbox( math.floor(x0), ty0,
+                                              math.floor( col_size + x0 ) - \
+                                              math.floor( x0 ) + 1,
+                                              head_h + 1, r2 ))
 
-            self.drawstring( time.strftime( timeformat,
-                                            time.localtime(start_time + col_time*i*60 ) ),
-                             head_val.font, content,
-                             x=( x0 + ig.x ), y=( ty0 + ig.y ),
-                             width=ig.width, height=-1,
-                             align_v='center', align_h=head_val.align)
+            self.objects.append(self.drawstring( time.strftime( timeformat,
+                                                                time.localtime(start_time + col_time*i*60 ) ),
+                                                 head_val.font, content,
+                                                 x=( x0 + ig.x ), y=( ty0 + ig.y ),
+                                                 width=ig.width, height=-1,
+                                                 align_v='center', align_h=head_val.align))
             x0 += col_size
 
 
@@ -331,7 +337,7 @@ class TVListing_Area(Area):
                             
                 val = default_val
 
-                self.drawbox(tx0 + r.x, ty0 + r.y, r.width+1, item_h, r)
+                self.objects.append(self.drawbox(tx0 + r.x, ty0 + r.y, r.width+1, item_h, r))
                 logo_geo =[ tx0+r.x+r.size, ty0+r.y+r.size, r.width-2*r.size,
                             r.height-2*r.size ]
                     
@@ -345,14 +351,14 @@ class TVListing_Area(Area):
 
 
             if channel_logo:
-                self.drawimage(channel_logo, (logo_geo[0], logo_geo[1]))
+                self.objects.append(self.drawimage(channel_logo, (logo_geo[0], logo_geo[1])))
 
 
             else:
-                self.drawstring(channel.name, label_val.font, content,
-                                x=tx0, y=ty0, width=r.width+2*r.x, height=item_h)
+                self.objects.append(self.drawstring(channel.name, label_val.font, content,
+                                x=tx0, y=ty0, width=r.width+2*r.x, height=item_h))
 
-            self.drawbox(tx0 + r.x, ty0 + r.y, r.width+1, item_h, r)
+            self.objects.append(self.drawbox(tx0 + r.x, ty0 + r.y, r.width+1, item_h, r))
             try:
                 for prg in channel.get(start_time, stop_time):
                     flag_left   = 0
@@ -402,43 +408,41 @@ class TVListing_Area(Area):
                     if val.rectangle:
                         ig, r = self.fit_item_in_rectangle(val.rectangle, tx1-tx0+1,
                                                            item_h, font_h)
-                        self.drawbox(tx0+r.x, ty0+r.y, r.width, item_h, r)
+                        self.objects.append(self.drawbox(tx0+r.x, ty0+r.y, r.width, item_h, r))
 
                     # draw left flag and reduce width and add to x0
                     if flag_left:
                         tx0      += leftarrow_size[0]
                         ig.width -= leftarrow_size[0]
                         if tx0 < tx1:
-                            self.drawimage(leftarrow, (tx0-leftarrow_size[0], ty0 +\
-                                                       (item_h-leftarrow_size[1])/2))
+                            self.objects.append(self.drawimage(leftarrow, (tx0-leftarrow_size[0], ty0 +\
+                                                       (item_h-leftarrow_size[1])/2)))
 
                     # draw right flag and reduce width and x1
                     if flag_right:
                         tx1      -= rightarrow_size[0]
                         ig.width -= rightarrow_size[0]
                         if tx0 < tx1:
-                            self.drawimage(rightarrow,
-                                           (tx1, ty0 + (item_h-rightarrow_size[1])/2))
+                            self.objects.append(self.drawimage(rightarrow,
+                                           (tx1, ty0 + (item_h-rightarrow_size[1])/2)))
 
                     # draw the text
                     if tx0 < tx1:
-                        self.drawstring(prg.title, font, content, x=tx0+ig.x,
+                        self.objects.append(self.drawstring(prg.title, font, content, x=tx0+ig.x,
                                         y=ty0+ig.y, width=ig.width, height=ig.height,
-                                        align_v='center', align_h = val.align)
-
+                                        align_v='center', align_h = val.align))
             except Exception, e:
                 _debug_(e)
             y0 += item_h - 1
 
-
         # print arrow:
         if start_channel > 0 and area.images['uparrow']:
-            self.drawimage(area.images['uparrow'].filename, area.images['uparrow'])
+            self.objects.append(self.drawimage(area.images['uparrow'].filename, area.images['uparrow']))
         if len(all_channels) >= start_channel+num_rows and area.images['downarrow']:
             if isinstance(area.images['downarrow'].y, str):
                 v = copy.copy(area.images['downarrow'])
                 v.y = eval(v.y, {'MAX' : y0})
             else:
                 v = area.images['downarrow']
-            self.drawimage(area.images['downarrow'].filename, v)
+            self.objects.append(self.drawimage(area.images['downarrow'].filename, v))
 

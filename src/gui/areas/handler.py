@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/08/26 15:29:18  dischi
+# make the tv guide work again (but very slow)
+#
 # Revision 1.9  2004/08/24 16:42:41  dischi
 # Made the fxdsettings in gui the theme engine and made a better
 # integration for it. There is also an event now to let the plugins
@@ -182,7 +185,7 @@ class AreaHandler:
         """
         delete an area handler
         """
-        _debug_('delete AreaHandler for %s' % self.type)
+        _mem_debug_('AreaHandler', self.type)
         while self.areas:
             self.areas[0].clear_all()
             del self.areas[0]
@@ -342,6 +345,7 @@ class AreaHandler:
                 self.screen.fade_in(fade)
             else:
                 self.screen.show()
+                self.canvas.update()
         self.visible = True
 
     def draw(self, object):
@@ -413,7 +417,8 @@ class AreaHandler:
         try:
             for a in self.areas:
                 a.draw(theme, object, viewitem, infoitem, area_definitions)
-            self.canvas.update()
+            if self.visible:
+                self.canvas.update()
 
         except UnicodeError, e:
             print '******************************************************************'
