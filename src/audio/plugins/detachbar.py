@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/07/24 17:27:27  dischi
+# deactivate plugin
+#
 # Revision 1.9  2004/07/11 11:14:53  dischi
 # lcd detach fixes from Magnus Schmidt
 #
@@ -64,6 +67,8 @@ class PluginInterface(plugin.DaemonPlugin):
     screen.
     """
     def __init__(self):
+        self.reason = 'not working while gui rebuild'
+        return
         plugin.DaemonPlugin.__init__(self)
         self.plugin_name = 'audio.detachbar'
 
