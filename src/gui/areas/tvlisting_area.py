@@ -80,19 +80,14 @@ class TvlistingArea(Area):
         self.time_obj = []
         self.last_channels = None
         self.objects = []
+        self.background = None
         
 
-    def get_items_geometry(self, settings, obj):
-        if self.last_settings == settings:
-            return self.last_items_geometry
+    def __calc_items_geometry(self):
+        # get the content skin information
+        content   = self.calc_geometry(self.layout.content, copy_object=True)
 
-        menuw     = obj
-        menu      = obj
-
-        layout    = self.layout
-        area      = self.area_values
-        content   = self.calc_geometry(layout.content, copy_object=True)
-
+        # get all values for the different types
         label_val     = content.types['label']
         head_val      = content.types['head']
         selected_val  = content.types['selected']
@@ -103,15 +98,13 @@ class TvlistingArea(Area):
         self.all_vals = label_val, head_val, selected_val, default_val, \
                         scheduled_val, conflict_val
 
+        # get max font height
         font_h = max(selected_val.font.height, default_val.font.height,
-                     label_val.font.height)
+                     label_val.font.height, conflict_val.height)
 
 
-        # get the max width needed for the longest channel name
+        # get label width
         label_width = label_val.width
-
-        label_txt_width = label_width
-
         if label_val.rectangle:
             r = self.calc_rectangle(label_val.rectangle, label_width,
                                     label_val.font.height)[2]
@@ -119,10 +112,13 @@ class TvlistingArea(Area):
         else:
             label_width += content.spacing
 
-        # get head height
+
+        # get headline height
+        head_h = head_val.font.height
         if head_val.rectangle:
             r = self.calc_rectangle(head_val.rectangle, 20,
                                     head_val.font.height)[2]
+            head_h = max(head_h, r.height + content.spacing)
             content_y = content.y + r.height + content.spacing
         else:
             content_y = content.y + head_val.font.height + content.spacing
@@ -130,32 +126,13 @@ class TvlistingArea(Area):
 
         # get item height
         item_h = font_h
+        for val in (label_val, default_val, selected_val, conflict_val):
+            if val.rectangle:
+                r = self.calc_rectangle(val.rectangle, 20, val.font.height)[2]
+                item_h = max(item_h, r.height + content.spacing)
 
-        if label_val.rectangle:
-            r = self.calc_rectangle(label_val.rectangle, 20,
-                                    label_val.font.height)[2]
-            item_h = max(item_h, r.height + content.spacing)
-        if default_val.rectangle:
-            r = self.calc_rectangle(default_val.rectangle, 20,
-                                    default_val.font.height)[2]
-            item_h = max(item_h, r.height + content.spacing)
-        if selected_val.rectangle:
-            r = self.calc_rectangle(selected_val.rectangle, 20,
-                                    selected_val.font.height)[2]
-            item_h = max(item_h, r.height + content.spacing)
-
-        head_h = head_val.font.height
-        if head_val.rectangle:
-            r = self.calc_rectangle(head_val.rectangle, 20,
-                                    head_val.font.height)[2]
-            head_h = max(head_h, r.height + content.spacing)
-
-        content_h = content.height + content.y - content_y
-
-        self.last_items_geometry = font_h, label_width, label_txt_width, \
-                                   content_y, content_h / item_h, item_h, \
-                                   head_h, content.hours_per_page
-        return self.last_items_geometry
+        num_rows = (content.height + content.y - content_y) / item_h
+        return font_h, label_width, content_y, num_rows, item_h, head_h
 
 
 
@@ -183,6 +160,9 @@ class TvlistingArea(Area):
         for o in self.objects + self.chan_obj + self.time_obj:
             if o:
                 o.unparent()
+        if self.background:
+            self.background.unparent()
+            self.background = None
         self.objects = []
         self.chan_obj = []
         self.time_obj = []
@@ -280,15 +260,9 @@ class TvlistingArea(Area):
         update the listing area
         """
         menu      = self.menu
-        settings  = self.settings
         layout    = self.layout
         area      = self.area_values
         content   = self.calc_geometry(layout.content, copy_object=True)
-
-        for o in self.objects:
-            if o:
-                o.unparent()
-        self.objects = []
 
         # to_listing     = menu.table
         # n_cols   = len(to_listing[0])-1
@@ -296,10 +270,26 @@ class TvlistingArea(Area):
         n_cols = 4
         col_time = 30
 
-        font_h, label_width, label_txt_width, y0, num_rows, item_h, head_h = \
-                self.get_items_geometry(settings, menu)[:-1]
+        if self.last_settings == self.settings:
+            # same layout, only clean 'objects'
+            for o in self.objects:
+                if o: o.unparent()
+            self.objects = []
+            # get last geometry values
+            geometry = self.last_items_geometry
+        else:
+            # layout change, clean everything
+            self.clear()
+            # calculate new geometry values
+            geometry = self.__calc_items_geometry()
+            # save everything for later use
+            self.last_settings = self.settings
+            self.last_items_geometry = geometry
 
+        # split geometry
+        font_h, label_width, y0, num_rows, item_h, head_h = geometry
 
+        # get all 'val's
         label_val, head_val, selected_val, default_val, \
                    scheduled_val, conflict_val = self.all_vals
 
@@ -356,9 +346,10 @@ class TvlistingArea(Area):
         col_size = prop_1sec * 1800 # 30 minutes
 
 
-        self.objects.append(self.drawbox( x_contents - r.width,
-                                          y_contents - r.height,
-                                          r.width+1, head_h+1, r ))
+        if not self.background:
+            self.background = self.drawbox( x_contents - r.width,
+                                            y_contents - r.height,
+                                            r.width+1, head_h+1, r )
 
 
         # use label padding for x; head padding for y
