@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/08/23 10:08:14  dischi
+# remove dbdnav stuff, use xine for that
+#
 # Revision 1.12  2003/08/23 10:07:18  dischi
 # restore the context
 #
@@ -201,9 +204,6 @@ class MPlayer:
             except:
                 pass
 
-        elif mode == 'dvdnav':
-            additional_args = '-alang %s' % config.DVD_LANG_PREF
-
         elif mode == 'vcd':
             # Filename is VCD title
             filename = 'vcd://%s' % filename  
@@ -342,12 +342,8 @@ class MPlayer:
                 return TRUE
 
         if event == STOP:
-            if self.mode == 'dvdnav':
-                self.thread.app.write('dvdnav 6\n')
-                return TRUE
-            else:
-                self.stop()
-                return self.item.eventhandler(event)
+            self.stop()
+            return self.item.eventhandler(event)
 
         if event == 'AUDIO_ERROR_START_AGAIN':
             self.stop()
@@ -374,11 +370,6 @@ class MPlayer:
             if event == VIDEO_SEND_MPLAYER_CMD:
                 self.thread.app.write('%s\n' % event.arg)
                 return TRUE
-
-            if event == MENU:
-                if self.mode == 'dvdnav':
-                    self.thread.app.write('dvdnav 5\n')
-                    return TRUE
 
             if event == TOGGLE_OSD:
                 self.thread.app.write('osd\n')
