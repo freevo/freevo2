@@ -206,7 +206,7 @@ def identifymedia(dir):
     else:
         return None, None, None, None
 
-    if id in config.MOVIE_INFORMATIONS:
+    if id in config.MOVIE_INFORMATIONS.keys():
         title, image, xml_filename = config.MOVIE_INFORMATIONS[id]
             
     for media in mediatypes:
