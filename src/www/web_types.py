@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/05/23 01:09:24  rshortt
+# Removing border from the freevo image/link in the header.
+#
 # Revision 1.5  2003/05/22 21:33:23  outlyer
 # Lots of cosmetic changes:
 #
@@ -129,7 +132,7 @@ class HTMLResource:
         self.res += '<!-- Header Logo and Status Line -->'
         self.tableOpen('width="100%" border="0" cellspacing="0" cellpadding="0" background="images/headerbg.png"')
         self.tableRowOpen()
-        self.tableCell('<a target="_new" href="http://freevo.sf.net/"><img src="images/headerfreevo.png" width="313" height="101"/></a>')
+        self.tableCell('<a target="_new" href="http://freevo.sf.net/"><img src="images/headerfreevo.png" width="313" height="101" border="0"/></a>')
         self.tableRowClose()
         self.tableClose()
         self.tableOpen('width="100%" border="0" cellspacing="0" cellpadding="0" background="images/headertxtbg.png"')
