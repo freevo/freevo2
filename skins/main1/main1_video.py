@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/02/18 06:05:21  gsbarbieri
+# Bug fixes and new UI features.
+#
 # Revision 1.2  2003/02/17 18:32:55  dischi
 # Display some example xml infos
 #
@@ -137,6 +140,9 @@ class Skin_Video:
     def View(self, item, settings):
         val = settings.view
 
+        if not val.visible:
+            return
+
         osd.drawroundbox(val.x, val.y, val.x+val.width, val.y+val.height,
                          color=val.bgcolor, radius=val.radius)
 
@@ -167,6 +173,11 @@ class Skin_Video:
 
     def Info(self, item, settings):
         val = settings.info
+
+        if not val.visible:
+            return
+
+        
         osd.drawroundbox(val.x, val.y, val.x+val.width, val.y+val.height,
                          color=val.bgcolor, radius=val.radius)
         if item:
@@ -180,13 +191,32 @@ class Skin_Video:
             if item.type == 'video':
                 DrawTextFramed('Video: %s' % item.name, val, x, y, w, h)
                 y += str_h
-                if 'year' in item.info:
-                    DrawTextFramed('Year: %s' % item.info["year"], val, x, y, w, h)
-                    y += str_h
+                
                 if 'tagline' in item.info:
                     DrawTextFramed('Tagline: %s' % item.info["tagline"], val, x, y, w, h)
                     y += str_h
-                
+
+                text = ''
+                if 'genre' in item.info:
+                    if text: text += ', '
+                    text += item.info['genre']
+
+                if 'year' in item.info:
+                    if text: text += ', '
+                    text += item.info['year']
+
+                if 'runtime' in item.info:
+                    if text: text += ', '
+                    text += item.info['runtime']
+
+                if 'rating' in item.info:
+                    if text: text += ', '
+                    text += item.info['rating']
+
+                if text:
+                    DrawTextFramed(text, val, x, y, w, h)
+                    y += str_h
+
                 if item.available_audio_tracks:
                     text = 'Audio: '
                     for audio in item.available_audio_tracks:
@@ -204,6 +234,10 @@ class Skin_Video:
                         text += subtitle
                     DrawTextFramed(text, val, x, y, w, h)
                     y+=str_h                
+
+                if 'plot' in item.info:
+                    DrawTextFramed('Plot: %s' % item.info['plot'], val, x, y, w, (val.height-h))
+                                    
                     
                                 
             elif item.type == 'dir':
@@ -217,7 +251,6 @@ class Skin_Video:
                 y += str_h
                 DrawTextFramed('There are %d videos in this playlist' %
                                len(item.playlist), val, x, y, w, h)
-                
 
 
     def getCols(self, settings):
@@ -266,6 +299,9 @@ class Skin_Video:
 
     def Listing(self, to_listing, settings):
         val = settings.listing 
+
+        if not val.visible:
+            return
 
         if self.getExpand(settings) == 0:
             conf_x = val.x
@@ -344,7 +380,7 @@ class Skin_Video:
                 ch = y0 + (video_height - i_h) /2
                 osd.drawsurface(preview, cx, ch)
             if text:
-                DrawTextFramed(text, cur_val, x0, y0 + video_height, video_width, str_h)
+                DrawTextFramed(text, cur_val, x0, y0 + video_height, video_width, str_h, elipses=None)
                     
             x0 = x0 + video_width + spacing_x
 
