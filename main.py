@@ -4,6 +4,9 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2002/08/11 17:03:50  krister
+# Removed delay after crash. Updated the shutdown process.
+#
 # Revision 1.43  2002/08/11 09:05:18  krister
 # Added a killall for the runtime tasks at shutdown.
 #
@@ -117,9 +120,17 @@ def shutdown(menuw=None, arg=None):
         if config.ENABLE_SHUTDOWN_SYS:
             os.system("shutdown -h now")
 
-
-    os.system('touch /tmp/freevo-shutdown') # XXX kludge to signal startup.py to abort
-    os.system('killall -9 freevo_rt/ld-linux.so.2') # XXX kludge to shutdown the runtime version
+    #
+    # Here are some different ways of exiting freevo for the
+    # different ways that it could have been started.
+    #
+    
+    # XXX kludge to signal startup.py to abort
+    os.system('touch /tmp/freevo-shutdown') 
+    # XXX kludge to shutdown the runtime version
+    os.system('killall -9 freevo_rt/ld-linux.so.2') 
+    # XXX Kludge to shutdown if started with "python main.py"
+    os.system('kill -9 `pgrep -f "python main.py" -d" "`') 
 
 
 def autostart():
@@ -283,6 +294,5 @@ if __name__ == "__main__":
     except:
         print 'Crash!'
         traceback.print_exc()
-        time.sleep(5)
 
 
