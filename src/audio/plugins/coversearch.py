@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2004/01/25 20:16:32  dischi
+# typo
+#
 # Revision 1.26  2004/01/25 15:37:06  dischi
 # adjust to vfs and amazon changes
 #
@@ -167,7 +170,8 @@ class PluginInterface(plugin.ItemPlugin):
 
         # do don't call this when we have an image
         if item.type == 'audio' and item.filename and \
-           vfs.isfile(os.path.join(os.path.join(dirname(item.filename), 'cover.jpg'))):
+           vfs.isfile(os.path.join(os.path.join(os.path.dirname(item.filename),
+                                                'cover.jpg'))):
             return []
         
         if item.type in ('audio', 'audiocd', 'dir'):
