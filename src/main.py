@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.113  2004/02/11 11:09:40  dischi
+# cachetime checking not working right now
+#
 # Revision 1.112  2004/02/05 20:39:11  dischi
 # check mmpython cache version
 #
@@ -336,19 +339,19 @@ else:
 mmpython.USE_NETWORK = config.USE_NETWORK
 mmpython.disc.discinfo.CREATE_MD5_ID = config.MMPYTHON_CREATE_MD5_ID
 
-if not os.path.isfile(os.path.join(config.OVERLAY_DIR, 'cachetime')):
-    print '\nWARNING: no pre-cached data'
-    print 'Freevo will cache each directory when you first enter it. This can'
-    print 'be slow. Start "./freevo cache" to pre-cache all directories to speed'
-    print 'up usage of freevo'
-    print
-else:
-    f = open(os.path.join(config.OVERLAY_DIR, 'cachetime'))
-    if long(time.time()) - long(f.readline()) > 604800:
-        print '\nWARNING: cache files older than 7 days'
-        print 'Please rerun "./freevo cache" to speed up freevo'
-        print
-    f.close()
+# if not os.path.isfile(os.path.join(config.OVERLAY_DIR, 'cachetime')):
+#     print '\nWARNING: no pre-cached data'
+#     print 'Freevo will cache each directory when you first enter it. This can'
+#     print 'be slow. Start "./freevo cache" to pre-cache all directories to speed'
+#     print 'up usage of freevo'
+#     print
+# else:
+#     f = open(os.path.join(config.OVERLAY_DIR, 'cachetime'))
+#     if long(time.time()) - long(f.readline()) > 604800:
+#         print '\nWARNING: cache files older than 7 days'
+#         print 'Please rerun "./freevo cache" to speed up freevo'
+#         print
+#     f.close()
     
 
 os.umask(config.UMASK)
