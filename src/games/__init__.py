@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/09/16 20:45:02  mikeruelle
+# warn user about old DIR_GAMES entry
+#
 # Revision 1.6  2003/09/12 22:25:00  dischi
 # prevent a possible crash
 #
@@ -43,13 +46,17 @@
 
 import config
 import util
+import types
 
+import menu
 import mame_cache
 from mameitem import MameItem
 from snesitem import SnesItem
 from genesisitem import GenesisItem
 from genericitem import GenericItem
+from gui.AlertBox import PopupBox
 
+menuwidget = menu.get_singleton()
 
 def cwd(parent, files):
     """
@@ -57,12 +64,13 @@ def cwd(parent, files):
     """
     items = []
 
-    if not hasattr(parent, 'add_args'):
-        return []
-    
-    (type, cmd, args, imgpath, suffixlist) = parent.add_args[0]
-    if type == 'MAME':
-        print 'Type : %s' % type
+    if not hasattr(parent, 'add_args') or type(parent.add_args) is not types.TupleType: 
+	pop = PopupBox(text="please update DIR_GAMES in local_conf.py")
+	pop.show()
+        return [menu.MenuItem(_('please update DIR_GAMES in local_conf.py'), menuwidget.goto_prev_page, 0)]
+
+    (gtype, cmd, args, imgpath, suffixlist) = parent.add_args[0]
+    if gtype == 'MAME':
         mame_files = util.find_matches(files, [ 'zip' ] )
         # This will only add real mame roms to the cache.
         (rm_files, mame_list) = mame_cache.getMameItemInfoList(mame_files, cmd)
@@ -70,15 +78,15 @@ def cwd(parent, files):
             files.remove(rm_file)
         for ml in mame_list:
             items += [ MameItem(ml[0], ml[1], ml[2], cmd, args, imgpath, parent) ]
-    elif type == 'SNES':
+    elif gtype == 'SNES':
         for file in util.find_matches(files, [ 'smc', 'fig' ]):
             items += [ SnesItem(file, cmd, args, imgpath, parent) ]
             files.remove(file)
-    elif type == 'GENESIS':
+    elif gtype == 'GENESIS':
         for file in util.find_matches(files, [ 'smd', 'bin' ]):
             items += [ GenesisItem(file, cmd, args, imgpath, parent) ]
             files.remove(file)
-    elif type == 'GENERIC':
+    elif gtype == 'GENERIC':
         for file in util.find_matches(files, suffixlist):
             items += [ GenericItem(file, cmd, args, imgpath, parent) ]
             files.remove(file)
@@ -93,8 +101,8 @@ def update(parent, new_files, del_files, new_items, del_items, current_items):
     del_files or add them to new_items based on new_files
     """
 
-    (type, cmd, args, shots, suffixlist) = parent.add_args[0]
-    if type == 'MAME':
+    (gtype, cmd, args, shots, suffixlist) = parent.add_args[0]
+    if gtype == 'MAME':
         for item in current_items:
             for file in util.find_matches(del_files, [ 'zip' ] ):
                 if item.type == 'mame' and item.filename == file:
@@ -102,20 +110,22 @@ def update(parent, new_files, del_files, new_items, del_items, current_items):
                     # from the cache.
                     del_items += [ item ]
                     del_files.remove(file)
-    elif type == 'SNES':
+    elif gtype == 'SNES':
         for file in util.find_matches(del_files, [ 'smc', 'fig' ]):
             if item.type == 'snes' and item.filename == file:
                 del_items += [ item ]
                 del_files.remove(file)
-    elif type == 'GENESIS':
+    elif gtype == 'GENESIS':
         for file in util.find_matches(del_files, suffixlist):
             if item.type == 'genesis' and item.filename == file:
                 del_items += [ item ]
                 del_files.remove(file)
-    elif type == 'GENERIC':
+    elif gtype == 'GENERIC':
         for file in util.find_matches(del_files, suffixlist):
             if item.type == 'generic' and item.filename == file:
                 del_items += [ item ]
                 del_files.remove(file)
 
     new_items += cwd(parent, new_files)
+
+
