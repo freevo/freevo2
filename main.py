@@ -4,6 +4,9 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.79  2002/11/23 19:47:16  dischi
+# Small fix in case you make a cleanup :-)
+#
 # Revision 1.78  2002/11/23 19:32:05  dischi
 # Some stuff needed by the code cleanup, shouldn't break anything
 #
@@ -98,19 +101,23 @@ import signal
 from mediamenu import MediaMenu
 
 # old stuff
-import imenu
-import movie
-import music
-import mplayer
-import videogame
-import mame
+try:
+    import imenu
+    import movie
+    import music
+    import mplayer
+    import videogame
+    import mame
+
+    mplayer = mplayer.get_singleton() # Create the mplayer object
+except:
+    pass
 
 DEBUG = config.DEBUG
 
 TRUE  = 1
 FALSE = 0
 
-mplayer = mplayer.get_singleton() # Create the mplayer object
 skin    = skin.get_singleton()
 
 
