@@ -10,6 +10,9 @@
 # 
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/12/07 16:04:50  dischi
+# speed up
+#
 # Revision 1.1  2003/11/29 11:27:41  dischi
 # move objectcache to util
 #
@@ -68,15 +71,12 @@ class ObjectCache:
 
 
     def __getitem__(self, key):
-        if not key in self.cache:
+        try:
+            del self.lru[self.lru.index(key)]
+            self.lru.append(key)
+            return self.cache[key]
+        except:
             return None
-        else:
-            try:
-                del self.lru[self.lru.index(key)]
-                self.lru.append(key)
-                return self.cache[key]
-            except:
-                return None
 
     def __setitem__(self, key, object):
         try:
