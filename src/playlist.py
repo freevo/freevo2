@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.68  2004/03/02 20:28:54  dischi
+# prefer "play" function in playlist mode
+#
 # Revision 1.67  2004/02/27 20:15:02  dischi
 # more unicode fixes
 #
@@ -447,7 +450,7 @@ class Playlist(Item):
                 self.current_item = play_items[0]
                 self.playlist[pos] = play_items[0]
 
-            
+
         if not hasattr(self.current_item, 'actions') or not self.current_item.actions():
             # skip item
             pos = self.playlist.index(self.current_item)
@@ -461,7 +464,10 @@ class Playlist(Item):
                 self.current_item = None
             return True
 
-        self.current_item.actions()[0][0](menuw=menuw)
+        if hasattr(self.current_item, 'play'):
+            self.current_item.play(menuw=menuw)
+        else:
+            self.current_item.actions()[0][0](menuw=menuw)
         
 
     def cache_next(self):
