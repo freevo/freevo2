@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/05/20 23:48:03  rshortt
+# A few fixes but we still need better except blocks.
+#
 # Revision 1.6  2003/05/14 00:18:55  rshortt
 # Better error handling.
 #
@@ -67,8 +70,9 @@
 #endif
 
 import config
+import epg_types
 
-import time, sys, socket
+import time, sys, socket, traceback, string
 import xmlrpclib
 from twisted.persisted import marmalade
 
@@ -117,16 +121,22 @@ def connectionTest(teststr='testing'):
 
 def scheduleRecording(prog=None):
     if not prog:
-        print 'ERROR: no prog'
-        return
+        return (FALSE, 'no prog')
 
     if prog.stop < time.time():
-        print 'ERROR: cannot record it if it is over'
-        return
+        return (FALSE, 'ERROR: cannot record it if it is over')
         
+    progxml = marmalade.jellyToXML(prog)
+    # A CRUDE HACK because importing tv.anything causes skin to be
+    # imported which actually creates a freevo window!!
+    # The real problem here will need to be addressed.
+    progxml = string.replace(progxml,'tv.','')
+
     try:
-        (status, message) = server.scheduleRecording(marmalade.jellyToXML(prog))
+        # (status, message) = server.scheduleRecording(marmalade.jellyToXML(prog))
+        (status, message) = server.scheduleRecording(progxml)
     except:
+        traceback.print_exc()
         return (FALSE, 'record_client: connection error')
 
     return (status, message)
@@ -188,7 +198,6 @@ def findMatches(find=None):
         (status, response) = server.findMatches(find)
     except:
         return (FALSE, 'record_client: connection error')
-
 
     return returnFromJelly(status, response)
 
