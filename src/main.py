@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.83  2003/10/20 19:32:33  dischi
+# catch exception caused by eventhandlers
+#
 # Revision 1.82  2003/10/19 11:17:38  dischi
 # move gettext into config so that everything has _()
 #
@@ -335,7 +338,23 @@ def main_func():
         else:
             app = osd.focused_app()
             if app:
-                app.eventhandler(event)
+                try:
+                    app.eventhandler(event)
+                except:
+                    if config.FREEVO_EVENTHANDLER_SANDBOX:
+                        traceback.print_exc()
+                        from gui.AlertBox import AlertBox
+                        pop = AlertBox(text=_('Event \'%s\' crashed\n\nPlease take a ' \
+                                              'look at the logfile and report the bug to ' \
+                                              'the Freevo mailing list. The state of '\
+                                              'Freevo may be corrupt now and this error '\
+                                              'could cause more errors until you restart '\
+                                              'Freevo.\n\nLogfile: %s\n\n') % \
+                                       (event, sys.stdout.logfile),
+                                       width=osd.width-2*config.OVERSCAN_X-50)
+                        pop.show()
+                    else:
+                        raise 
             else:
                 _debug_('no target for events given')
                 
