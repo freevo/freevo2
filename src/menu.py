@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2003/04/13 10:39:14  dischi
+# fix small bug
+#
 # Revision 1.33  2003/04/13 10:35:39  dischi
 # cleanup of unneeded stuff in menu.py
 #
@@ -463,6 +466,9 @@ class MenuWidget(GUIObject):
             if not len(self.menu_items):
                 return
 
+            if menu.selected == menu.choices[-1]:
+                return
+            
             if event == rc.RIGHT and self.cols > 1:
                 curr_selected = self.all_items.index(menu.selected)
                 if curr_selected == len(self.all_items)-1:
