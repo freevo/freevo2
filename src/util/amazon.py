@@ -196,7 +196,7 @@ def unmarshal(element):
     return rc
 
 def buildURL(search_type, keyword, product_line, type, page, license_key):
-    url = "http://" + _supportedLocales[LOCALE][1] + "/onca/xml2?v=1.0&f=xml&t=webservices-20"
+    url = "http://" + _supportedLocales[LOCALE][1] + "/onca/xml3?f=xml&t=webservices-20"
     url += "&dev-t=%s" % license_key.strip()
     url += "&type=%s" % type
     if _supportedLocales[LOCALE][0]:
