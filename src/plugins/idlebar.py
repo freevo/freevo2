@@ -41,6 +41,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2003/08/22 05:56:56  gsbarbieri
+# Better alignment and horizontal expansion.
+#
 # Revision 1.32  2003/08/21 20:48:16  gsbarbieri
 # Corrected comment
 #
@@ -231,8 +234,19 @@ class clock(IdleBarPlugin):
     def draw(self, (type, object), x, osd):
         clock = time.strftime(self.timeformat)
         font  = osd.get_font('clock')
-        osd.write_text(clock, font, None, osd.x + osd.width-200, osd.y + 10, 190,
-                       40, 'right', 'center')
+        pad_x = 10
+        idlebar_height = 60
+        
+        import osd as _osd
+        f = _osd.OSDFont( font.name, font.size )
+        w = f.stringsize( clock )
+        h = f.height
+        if h > idlebar_height:
+            h = idlebar_height
+        osd.write_text( clock, font, None,
+                       ( osd.x + osd.width - w -pad_x ),
+                       ( osd.y + ( idlebar_height - h ) / 2 ),
+                       ( w + 1 ), h , 'right', 'center')
         return 0
     
 
