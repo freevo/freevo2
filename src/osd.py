@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.60  2003/07/05 15:45:57  dischi
+# Doh
+#
 # Revision 1.59  2003/07/05 09:24:01  dischi
 # cleanup old unneeded stuff
 #
@@ -689,7 +692,7 @@ class OSD:
           or 'soft' (based on words)
         """
         if not string:
-            return [], '', (0,0,0,0)
+            return '', (0,0,0,0)
 
         if font == None:
             font = config.OSD_DEFAULT_FONTNAME
@@ -703,7 +706,7 @@ class OSD:
             height = line_height
 
         if width <= 0 or height < line_height:
-            return [], string, (0,0,0,0)
+            return string, (0,0,0,0)
             
         num_lines_left = int(height / line_height)
         lines = []
