@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.100  2003/12/06 16:25:45  dischi
+# support for type=url and <playlist> and <player>
+#
 # Revision 1.99  2003/11/28 20:08:58  dischi
 # renamed some config variables
 #
@@ -301,13 +304,18 @@ class VideoItem(Item):
         else:
             self.mime_type = self.mode
 
+        if self.mode == 'url':
+            self.network_play = 1
+            
         self.possible_player = []
         for p in plugin.getbyname(plugin.VIDEO_PLAYER, True):
             rating = p.rate(self) * 10
             if config.VIDEO_PREFERED_PLAYER == p.name:
                 rating += 1
+            if hasattr(self, 'force_player') and p.name == self.force_player:
+                rating += 100
             self.possible_player.append((rating, p))
-            
+
         self.possible_player.sort(lambda l, o: -cmp(l[0], o[0]))
 
         self.player        = None

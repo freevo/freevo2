@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2003/12/06 16:25:45  dischi
+# support for type=url and <playlist> and <player>
+#
 # Revision 1.44  2003/11/29 18:37:30  dischi
 # build config.VIDEO_SUFFIX in config on startup
 #
@@ -136,6 +139,8 @@ class MPlayer:
         if os.path.splitext(item.filename)[1][1:].lower() in \
                config.VIDEO_MPLAYER_SUFFIX:
             return 2
+        if item.mode == 'url':
+            return 1
         return 0
     
     
@@ -224,7 +229,13 @@ class MPlayer:
                 ' ' + config.MPLAYER_ARGS[mode])
 
         # make the options a list
-        mpl = mpl.split(' ') + [ url ] + additional_args.split(' ')
+        mpl = mpl.split(' ') + additional_args.split(' ')
+
+        if hasattr(item, 'is_playlist') and item.is_playlist:
+            mpl.append('-playlist')
+
+        # add the file to play
+        mpl.append(url)
 
         if options:
             mpl += options.split(' ')
@@ -275,7 +286,7 @@ class MPlayer:
 
         for p in self.plugins:
             command = p.play(command, self)
-            
+
         command=self.vop_append(command)
 
         if plugin.getbyname('MIXER'):

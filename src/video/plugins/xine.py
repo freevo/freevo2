@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/12/06 16:25:45  dischi
+# support for type=url and <playlist> and <player>
+#
 # Revision 1.27  2003/11/30 19:41:57  dischi
 # enhance interlacing, needs xine cvs to work as it should
 #
@@ -183,6 +186,8 @@ class Xine:
         if os.path.splitext(item.filename)[1][1:].lower() in \
                config.VIDEO_XINE_SUFFIX:
             return 2
+        if item.mode == 'url':
+            return 1
         return 0
     
     

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/12/06 16:25:45  dischi
+# support for type=url and <playlist> and <player>
+#
 # Revision 1.3  2003/11/30 14:41:10  dischi
 # use new Mimetype plugin interface
 #
@@ -70,6 +73,11 @@ def parse_movie(fxd, node):
         id         = fxd.getattr(node, 'id')
         media_id   = fxd.getattr(node, 'media_id')
         options    = fxd.getattr(node, 'mplayer_options')
+        player     = fxd.childcontent(node, 'player')
+        playlist   = False
+
+        if fxd.get_children(node, 'playlist'):
+            playlist = True
 
         duplicates = fxd.getattr(None, 'duplicate_check', [])
 
@@ -85,7 +93,7 @@ def parse_movie(fxd, node):
             if filename in duplicates:
                 duplicates.remove(filename)
 
-        return id, filename, mode, media_id, options
+        return id, filename, mode, media_id, options, player, playlist
     
 
     item = VideoItem('', fxd.getattr(None, 'parent', None), parse=False)
@@ -105,7 +113,8 @@ def parse_movie(fxd, node):
         mplayer_options = fxd.getattr(video[0], 'mplayer_options')
         video = fxd.get_children(video[0], 'file') + \
                 fxd.get_children(video[0], 'vcd') + \
-                fxd.get_children(video[0], 'dvd')
+                fxd.get_children(video[0], 'dvd') + \
+                fxd.get_children(video[0], 'url')
 
     variants = fxd.get_children(node, 'variants')
     if variants:
@@ -167,7 +176,12 @@ def parse_movie(fxd, node):
     elif len(video) == 1:
         # only one file, this is directly for the item
         id, item.filename, item.mode, item.media_id, \
-            item.mplayer_options = parse_video_child(fxd, video[0], item, dirname)
+            item.mplayer_options, player, is_playlist = \
+            parse_video_child(fxd, video[0], item, dirname)
+        if player:
+            item.force_player = player
+        if is_playlist:
+            item.is_playlist  = True
         # global <video> mplayer_options
         if mplayer_options:
             item.mplayer_options += mplayer_options
@@ -178,6 +192,10 @@ def parse_movie(fxd, node):
             info = parse_video_child(fxd, s, item, dirname)
             v = VideoItem(info[1], parent=item, parse=False)
             v.mode, v.media_id, v.mplayer_options = info[2:]
+            if info[-2]:
+                v.force_player = info[-2]
+            if info[-1]:
+                item.is_playlist = True
             # global <video> mplayer_options
             if mplayer_options:
                 v.mplayer_options += mplayer_options
