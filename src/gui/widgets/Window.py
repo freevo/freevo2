@@ -7,6 +7,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/07/27 18:52:31  dischi
+# support more layer (see README.txt in backends for details
+#
 # Revision 1.6  2004/07/26 18:10:17  dischi
 # move global event handling to eventhandler.py
 #
@@ -120,10 +123,10 @@ class Window(GUIObject):
                 if r.y + r.height > self.height:
                     r.height = self.height - r.y
 
-            self.layer.drawbox(r.x + self.x1, r.y + self.y1,
-                               r.x + r.width + self.x1,
-                               r.y + r.height + self.y1,
-                               r.bgcolor, r.size, r.color, r.radius)
+            self.screen.drawbox(r.x + self.x1, r.y + self.y1,
+                                r.x + r.width + self.x1,
+                                r.y + r.height + self.y1,
+                                r.bgcolor, r.size, r.color, r.radius)
 
     def show(self):
         if self.screen:

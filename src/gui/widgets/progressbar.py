@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/07/27 18:52:31  dischi
+# support more layer (see README.txt in backends for details
+#
 # Revision 1.1  2004/07/25 18:14:05  dischi
 # make some widgets and boxes work with the new gui interface
 #
@@ -51,13 +54,13 @@ class Progressbar(GUIObject):
 
 
     def draw(self, rect=None):
-        if not self.layer:
-            raise TypeError, 'no layer defined for %s' % self
+        if not self.screen:
+            raise TypeError, 'no screen defined for %s' % self
 
         r = self.style.rectangle
-        self.layer.drawbox(self.x1, self.y1, self.x2, self.y2,
-                           color=0xaa000000, border_size=r.size,
-                           border_color=r.color, radius=r.radius)
+        self.screen.drawbox(self.x1, self.y1, self.x2, self.y2,
+                            color=0xaa000000, border_size=r.size,
+                            border_color=r.color, radius=r.radius)
 
         # catch division by zero error.
         if not self.full:
@@ -67,9 +70,9 @@ class Progressbar(GUIObject):
 
         width = ((self.x2 - self.x1) * position ) / 100
         if width > r.size * 2:
-            self.layer.drawbox(self.x1, self.y1, self.x1 + width, self.y2,
-                               color=r.bgcolor, border_size=r.size,
-                               border_color=r.color, radius=r.radius)
+            self.screen.drawbox(self.x1, self.y1, self.x1 + width, self.y2,
+                                color=r.bgcolor, border_size=r.size,
+                                border_color=r.color, radius=r.radius)
 
     def tick(self):
         if self.bar_position < self.full:

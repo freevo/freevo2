@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/07/27 18:52:31  dischi
+# support more layer (see README.txt in backends for details
+#
 # Revision 1.1  2004/07/25 18:14:05  dischi
 # make some widgets and boxes work with the new gui interface
 #
@@ -48,11 +51,11 @@ class Rectangle(GUIObject):
 
 
     def draw(self, rect=None):
-        if not self.layer:
-            raise TypeError, 'no layer defined for %s' % self
-        self.layer.drawbox(self.x1, self.y1, self.x2, self.y2, color=self.bgcolor,
-                           border_size=self.size, border_color=self.color,
-                           radius=self.radius)
+        if not self.screen:
+            raise TypeError, 'no screen defined for %s' % self
+        self.screen.drawbox(self.x1, self.y1, self.x2, self.y2, color=self.bgcolor,
+                            border_size=self.size, border_color=self.color,
+                            radius=self.radius)
 
             
     def __cmp__(self, o):

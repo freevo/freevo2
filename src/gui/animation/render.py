@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/07/27 18:52:30  dischi
+# support more layer (see README.txt in backends for details
+#
 # Revision 1.1  2004/07/22 21:11:52  dischi
 # move the animation into gui, code needs update later
 #
@@ -51,13 +54,15 @@
 
 
 # freevo modules
-import osd, config, util, rc
+import config, util, rc
+import gui
+
 
 # pygame modules
 import pygame.time
 
 # python modules
-from time      import sleep, time
+from time import sleep, time
 import copy
 
 _singleton = None
@@ -98,24 +103,10 @@ class Render:
 
     def __init__(self):
         # set the update handler to wait for osd
-        self.update = self.update_wait
+        self.screen = gui.get_screen()
 
 
-    def update_wait(self):
-        """
-        This is used while starting freevo
-        """
-        if osd._singleton == None:
-            return
-
-        if self.osd == None:
-            self.osd    = osd.get_singleton()
-            rc.unregister(self.update)
-            self.update = self.update_enabled
-            rc.register(self.update, True, 0)
-
-
-    def update_enabled(self):
+    def update(self):
         """
         This is the draw method for animations
         """
@@ -126,8 +117,8 @@ class Render:
 
         timer   = pygame.time.get_ticks()
 
+        update_screen = False
         for a in copy.copy(self.animations):
-
             # XXX something should be done to clean up the mess
             if a.delete:
                 self.animations.remove(a)
@@ -137,33 +128,14 @@ class Render:
                 continue
 
             if a.active:
-                r = a.poll(timer)
-                if r:
-                    i += 1
-                    add(r)
+                update_screen = a.poll(timer) or update_screen
+
             # XXX something might be done to handle stopped animations
             else:
                 pass
 
-        # only invoke osd singleton if there are updates
-        # since this is a potential time hog
-        if len(render) > 0:
-            rects = []
-            for (rect, surf) in render:
-                self.osd.putsurface(surf, rect.left, rect.top)
-                rects.append(rect)
-
-            if len(rects)>0:
-                self.osd.update(rects)
-
-
-    def damage(self, rects=[]):
-        """
-        This method invokes damages on animations.
-        """
-        for a in self.animations:
-            if a.bg_redraw or a.bg_update:
-                a.damage(rects)
+        if update_screen:
+            self.screen.update()
 
 
     def kill(self, anim_object):

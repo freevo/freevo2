@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/07/27 18:52:31  dischi
+# support more layer (see README.txt in backends for details
+#
 # Revision 1.1  2004/07/25 18:14:05  dischi
 # make some widgets and boxes work with the new gui interface
 #
@@ -331,7 +334,7 @@ class Text(GUIObject):
                 continue
 
             x0 = x
-            if self.layer:
+            if self.screen:
                 try:
                     # render the string. Ignore all the helper functions for that
                     # in here, it's faster because he have more information
@@ -349,9 +352,9 @@ class Text(GUIObject):
 
                     if shadow_x or shadow_y:
                         shadow = font.render(l, shadow_color, dim=dim)
-                        self.layer.blit(shadow, (x0+shadow_x, y0+shadow_y))
+                        self.screen.blit(shadow, (x0+shadow_x, y0+shadow_y))
 
-                    self.layer.blit(render, (x0, y0))
+                    self.screen.blit(render, (x0, y0))
 
                 except Exception, e:
                     print 'Render failed, skipping \'%s\'...' % l
@@ -370,8 +373,8 @@ class Text(GUIObject):
 
             
     def draw(self, rect=None):
-        if not self.layer:
-            raise TypeError, 'no layer defined for %s' % self
+        if not self.screen:
+            raise TypeError, 'no screen defined for %s' % self
         self.__render__()
 
         
@@ -382,6 +385,7 @@ class Text(GUIObject):
                    self.height != o.height or self.align_h != o.align_h or \
                    self.align_v != o.align_v or self.mode != o.mode or \
                    self.ellipses != o.ellipses or self.dim != o.dim
+        
         except:
             return 1
         

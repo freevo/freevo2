@@ -208,67 +208,6 @@ class Font:
     
 
 
-class Layer:
-    """
-    A layer is something objects from gui.base are added or removed. It belongs
-    the a Screen (the below). You can add more functions you need when you update
-    a layer from your screen implementation.
-    """
-    def __init__(self, *args):
-        """
-        Attributes: width and height of the layer. This should be identical
-        with the Screen values.
-        """
-        self.width
-        self.height
-        
-
-    def blit(self, image, src, dest=None):
-        """
-        Blit the given image (it is a Surface from above) to the layer. The objects
-        from gui.base call this function to draw themself.
-        src is the position on the layer (x,y), if dest is given, only blit this
-        rectangle (x,y,w,h).
-        """
-        pass
-
-
-    def drawbox(self, x0, y0, x1, y1, color=None, border_size=0,
-                border_color=None, radius=0):
-        """
-        Draw a round box (needed for the Rectangle in gui.base).
-        """
-        pass
-
-
-    def add(self, object):
-        """
-        Add an object to this layer
-        """
-        pass
-    
-
-    def remove(self, object):
-        """
-        Add an object from this layer
-        """
-        pass
-
-
-    def set_position(self, object, x1, y1, x2, y2):
-        """
-        Set object will move to the given position/size
-        """
-        pass
-
-        
-    def modified(self, object):
-        """
-        The object has been modified and needs a redraw. Do not redraw now,
-        wait for a screen.update()
-        """
-        pass
-
         
 
 
@@ -276,6 +215,34 @@ class Screen:
     """
     This is the screen. It should have 3 Layers: bg, alpha and content. Freevo
     will add objects to it and draw it.
+
+    An object has an attribute 'layer'. A higher value means higher on the screen.
+    The default layer for an object is 0 and it is not allowed to change this
+    value when the object is on the screen. Objects with the same layer are drawn
+    the order they are added.
+
+    All objects _must_ use the pre-defined values for the layer:
+    -5       is the background image covering the whole screen
+    -4       is on the background, used for watermarks in the area code
+    -3 to -1 is an alpha layer (for rectangles in the area code). The alpha
+             values don't add to themself. E.g. if you add two transparent
+             rectangles with the same alpha value, it is the same as if only
+             one is added.
+     0 to  4 is normal content
+     5       is background for additional screen data (e.g. idlebar)
+     6       is content for additional screen data
+     7 to  9 [reserverd for future use]
+    10 to 19 is used for dialog boxes. Each box uses two layers: one for
+             the background, one for the content. We don't support more than
+             5 boxes at the same time.
+    20       on top info like the osd
+
+
+    If you look at the sdl code, you see a class screen and a class layer. The
+    screen has two layers and the function listed above or sometimes only in
+    the layer and not in the screen. The sdl code set the screen of the objects
+    to a layer. Internal we have only 3 layer here: bg covering layer -5 and -4,
+    alpha covering -3 to -1 and content for 0 and greater.
     """
     def clear(self):
         """
@@ -285,18 +252,18 @@ class Screen:
         pass
     
 
-    def add(self, layer, object):
+    def add(self, object):
         """
-        Add object to a specific layer. Right now, this screen has
-        only three layers: bg, alpha and content. The layer is provided
-        as a string.
+        Add object to the screen. The screen must set the attribute 'screen'
+        of the object to itself.
         """
         pass
     
             
     def remove(self, layer, object):
         """
-        Remove an object from the screen
+        Remove an object from the screen. The screen must set the attribute
+        'screen' of the object to None
         """
         pass
 
@@ -308,6 +275,43 @@ class Screen:
         """
         pass
     
+
+    def blit(self, image, src, dest=None):
+        """
+        Blit the given image (it is a Surface from above) to the screen. The objects
+        from gui.widgets call this function to draw themself.
+        src is the position on the layer (x,y), if dest is given, only blit this
+        rectangle (x,y,w,h).
+        INTERNAL USE FOR WIDGETS
+        """
+        pass
+
+
+    def drawbox(self, x0, y0, x1, y1, color=None, border_size=0,
+                border_color=None, radius=0):
+        """
+        Draw a round box (needed for widgets).
+        INTERNAL USE FOR WIDGETS
+        """
+        pass
+
+
+    def set_position(self, object, x1, y1, x2, y2):
+        """
+        Set object will move to the given position/size
+        INTERNAL USE FOR WIDGETS
+        """
+        pass
+
+        
+    def modified(self, object):
+        """
+        The object has been modified and needs a redraw. Do not redraw now,
+        wait for a screen.update()
+        INTERNAL USE FOR WIDGETS
+        """
+        pass
+
 
 
 class Keyboard:

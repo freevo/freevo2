@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/07/27 18:52:31  dischi
+# support more layer (see README.txt in backends for details
+#
 # Revision 1.1  2004/07/25 18:14:05  dischi
 # make some widgets and boxes work with the new gui interface
 #
@@ -45,16 +48,16 @@ class Image(GUIObject):
 
 
     def draw(self, rect=None):
-        if not self.layer:
-            raise TypeError, 'no layer defined for %s' % self
+        if not self.screen:
+            raise TypeError, 'no screen defined for %s' % self
         if not rect:
             _debug_('full update')
-            self.layer.blit(self.image, (self.x1, self.y1))
+            self.screen.blit(self.image, (self.x1, self.y1))
         else:
             x1, y1, x2, y2 = rect
             if not (self.x2 < x1 or self.y2 < y1 or self.x1 > x2 or self.y1 > y2):
-                self.layer.blit(self.image, rect[:2],
-                                (x1-self.x1, y1-self.y1, x2-x1, y2-y1))
+                self.screen.blit(self.image, rect[:2],
+                                 (x1-self.x1, y1-self.y1, x2-x1, y2-y1))
 
 
     def __cmp__(self, o):

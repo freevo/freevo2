@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/07/27 18:52:30  dischi
+# support more layer (see README.txt in backends for details
+#
 # Revision 1.1  2004/07/22 21:11:40  dischi
 # move the animation into gui, code needs update later
 #
@@ -41,7 +44,9 @@
 # ----------------------------------------------------------------------- */
 
 
-from render     import *
-from base       import *
-from marquee    import *
-from transition import *
+# from render     import *
+# from base       import *
+# from marquee    import *
+# from transition import *
+
+from move import Move

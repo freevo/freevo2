@@ -7,15 +7,16 @@ class Screen:
     """
     def __init__(self, renderer):
         self.renderer = renderer
+        self.width    = self.renderer.width
+        self.height   = self.renderer.height
         self.layer    = {}
-        self.layer['content'] = Layer('content', self.renderer)
-        self.layer['alpha']   = Layer('alpha', self.renderer, True)
-        self.layer['bg']      = Layer('bg', self.renderer)
-        self.layer['widget']  = Layer('widget', self.renderer, True)
+
+        self.layer['content'] = Layer('content', self)
+        self.layer['alpha']   = Layer('alpha', self, True)
+        self.layer['bg']      = Layer('bg', self)
+        self.layer['widget']  = Layer('widget', self, True)
         self.complete_bg      = self.renderer.screen.convert()
 
-        self.width  = self.renderer.width
-        self.height = self.renderer.height
         
 
     def clear(self):
@@ -26,21 +27,26 @@ class Screen:
         self.layer['bg'].add_to_update_rect(0, 0, 800, 600)
 
 
-    def add(self, layer, object):
+    def add(self, object):
         """
-        Add object to a specific layer. Right now, this screen has
-        only three layers: bg, alpha and content
+        Add object to the screen
         """
-        return self.layer[layer].add(object)
+        if object.layer < -4:
+            return self.layer['bg'].add(object)
+        if object.layer < 0:
+            return self.layer['alpha'].add(object)
+        return self.layer['content'].add(object)
     
             
-    def remove(self, layer, object):
+    def remove(self, object):
         """
         Remove an object from the screen
         """
-        if layer == None:
-            return self.special_layer.remove(object)
-        return self.layer[layer].remove(object)
+        if object.layer < -4:
+            return self.layer['bg'].remove(object)
+        if object.layer < 0:
+            return self.layer['alpha'].remove(object)
+        return self.layer['content'].remove(object)
 
 
 

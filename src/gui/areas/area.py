@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/07/27 18:52:30  dischi
+# support more layer (see README.txt in backends for details
+#
 # Revision 1.4  2004/07/25 18:17:34  dischi
 # interface update
 #
@@ -152,13 +155,13 @@ class Skin_Area:
             return
         try:
             for o in self.objects.bgimages:
-                self.screen.remove('bg', o)
+                self.screen.remove(o)
             for o in self.objects.rectangles:
-                self.screen.remove('alpha', o)
+                self.screen.remove(o)
             for o in self.objects.images:
-                self.screen.remove('content', o)
+                self.screen.remove(o)
             for o in self.objects.text:
-                self.screen.remove('content', o)
+                self.screen.remove(o)
         except Exception, e:
             print e
             
@@ -238,40 +241,40 @@ class Skin_Area:
             try:
                 self.objects.bgimages.remove(b)
             except:
-                self.screen.add('bg', b)
+                self.screen.add(b)
 
         for b in self.objects.bgimages:
-            self.screen.remove('bg', b)
+            self.screen.remove(b)
 
 
         for b in self.tmp_objects.rectangles:
             try:
                 self.objects.rectangles.remove(b)
             except:
-                self.screen.add('alpha', b)
+                self.screen.add(b)
 
         for b in self.objects.rectangles:
-            self.screen.remove('alpha', b)
+            self.screen.remove(b)
 
 
         for b in self.tmp_objects.images:
             try:
                 self.objects.images.remove(b)
             except:
-                self.screen.add('content', b)
+                self.screen.add(b)
 
         for b in self.objects.images:
-            self.screen.remove('content', b)
+            self.screen.remove(b)
 
 
         for b in self.tmp_objects.text:
             try:
-                self.objects.text.remove(t)
-            except:
-                self.screen.add('content', b)
+                self.objects.text.remove(b)
+            except Exception, e:
+                self.screen.add(b)
 
         for b in self.objects.text:
-            self.screen.remove('content', b)
+            self.screen.remove(b)
 
         # save and exit
         self.objects = self.tmp_objects
@@ -579,6 +582,7 @@ class Skin_Area:
         except AttributeError:
             r = Rectangle(x, y, x + width, y + height, rect[0], rect[1], rect[2], rect[3])
 
+        r.layer = -3
         self.tmp_objects.rectangles.append(r)
         return r
     
@@ -619,8 +623,9 @@ class Skin_Area:
         if height2 == -1:
             height2 = font.h + 2
 
-        self.tmp_objects.text.append(Text(x, y, x+width, y+height2, text, font, height,
-                                          align_h, align_v, mode, ellipses, dim))
+        t = Text(x, y, x+width, y+height2, text, font, height,
+                 align_h, align_v, mode, ellipses, dim)
+        self.tmp_objects.text.append(t)
 
 
     def loadimage(self, image, val):
@@ -669,24 +674,26 @@ class Skin_Area:
             return 0,0
         
         if isinstance(val, tuple):
+            i = Image(val[0], val[1], val[0] + image.get_width(),
+                      val[1] + image.get_height(), image)
             if background:
-                o = self.tmp_objects.bgimages
+                i.layer = -5
+                self.tmp_objects.bgimages.append(i)
             else:
-                o = self.tmp_objects.images
-            o.append(Image(val[0], val[1], val[0] + image.get_width(),
-                           val[1] + image.get_height(), image))
+                self.tmp_objects.images.append(i)
             return image.get_width(), image.get_height()
 
         try:
             if background or val.label == 'background':
-                self.tmp_objects.bgimages.append(Image(val.x, val.y, val.x + val.width,
-                                                       val.y + val.height, image))
+                i = Image(val.x, val.y, val.x + val.width, val.y + val.height, image)
+                i.layer = -5
+                self.tmp_objects.bgimages.append(i)
                 return val.width, val.height
         except:
             pass
-        
-        self.tmp_objects.images.append(Image(val.x, val.y, val.x + val.width,
-                                             val.y + val.height, image))
+
+        i = Image(val.x, val.y, val.x + val.width, val.y + val.height, image)
+        self.tmp_objects.images.append(i)
         return val.width, val.height
         
 

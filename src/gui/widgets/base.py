@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/07/27 18:52:31  dischi
+# support more layer (see README.txt in backends for details
+#
 # Revision 1.1  2004/07/25 18:14:05  dischi
 # make some widgets and boxes work with the new gui interface
 #
@@ -46,10 +49,10 @@ class GUIObject:
         self.x2 = x2
         self.y2 = y2
 
-        self.width    = x2 - x1
-        self.height   = y2 - y1
-        self.layer    = None
-        self.position = 0
+        self.width  = x2 - x1
+        self.height = y2 - y1
+        self.screen = None
+        self.layer  = 0
 
 
     def draw(self, rect=None):
@@ -63,8 +66,8 @@ class GUIObject:
         """
         change the position (will be done by the layer)
         """
-        if self.layer:
-            self.layer.set_position(self, x1, y1, x2, y2)
+        if self.screen:
+            self.screen.set_position(self, x1, y1, x2, y2)
 
         self.x1 = x1
         self.y1 = y1
@@ -80,7 +83,7 @@ class GUIObject:
         call this function to notify the layer that this object
         needs a redraw
         """
-        if self.layer:
-            self.layer.modified(self)
+        if self.screen:
+            self.screen.modified(self)
             
 

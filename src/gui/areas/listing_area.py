@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/07/27 18:52:30  dischi
+# support more layer (see README.txt in backends for details
+#
 # Revision 1.3  2004/07/24 17:49:05  dischi
 # interface cleanup
 #
@@ -458,7 +461,7 @@ class Listing_Area(Skin_Area):
                                            y0 + addy + val.shadow.y,
                                            image.get_width(), image.get_height(),
                                            (val.shadow.color, 0, 0, 0))
-                        box.position = 10
+                        box.layer = -1
                         
                     self.drawimage(image, (x0 + addx, y0 + addy))
                         

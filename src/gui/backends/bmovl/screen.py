@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/07/27 18:52:30  dischi
+# support more layer (see README.txt in backends for details
+#
 # Revision 1.1  2004/07/24 12:21:06  dischi
 # move renderer into backend subdir
 #
@@ -58,11 +61,7 @@ class Screen(SDLScreen):
     """
     def __init__(self, renderer):
         SDLScreen.__init__(self, renderer)
-
-        self.layer['content'] = Layer('content', self.renderer, True)
-        self.layer['alpha']   = Layer('alpha', self.renderer, True)
-        self.layer['bg']      = Layer('bg', self.renderer, True)
-        self.complete_bg      = self.renderer.screen.convert_alpha()
+        self.layer = Layer('content', self, True)
 
         print
         print 'Activating skin bmovl output'
@@ -87,33 +86,38 @@ class Screen(SDLScreen):
             pass
 
 
-    def add(self, layer, object):
+    def add(self, object):
         """
         Add an object to a specific layer.
         Hack: remove all images covering the whole screen to test transparency
         """
-        if object.x1 == 0 and object.y1 == 0 and object.x2 == self.width and \
-           object.y2 == self.height:
+        if object.layer == -5:
             return
-        SDLScreen.add(self, layer, object)
+        return self.layer.add(object)
 
         
-    def show(self):
+    def remove(self, object):
+        """
+        Remove an object from the screen
+        """
+        try:
+            return self.layer.remove(object)
+        except:
+            pass
+        
+
+    def update(self):
         """
         Update the screen
         """
         if self.renderer.must_lock:
             # only lock s_alpha layer, because only there
             # are pixel operations (round rectangle)
-            self.layer['alpha'].lock()
-
-        bg      = self.layer['bg']
-        alpha   = self.layer['alpha']
-        content = self.layer['content']
+            self.layer.lock()
 
         # Merge all update_areas
         # This is very slow, but there are transparency problems otherwise
-        update_area = bg.update_rect + alpha.update_rect + content.update_rect
+        update_area = self.layer.update_rect
 
         if not update_area:
             return
@@ -123,36 +127,17 @@ class Screen(SDLScreen):
             rect = ( min(x1, rect[0]), min(y1, rect[1]),
                      max(x2, rect[2]), max(y2, rect[3]))
 
-        update_area         = [ rect ]
+        update_area            = [ rect ]
+        self.layer.update_rect = update_area
 
-        bg.update_rect      = update_area
-        alpha.update_rect   = update_area
-        content.update_rect = update_area
-
-        bg.screen.fill((0,0,0,0))
-        bg.draw()
-
-        alpha.screen.fill((0,0,0,0))
-        alpha.draw()
-
-        self.complete_bg.fill((0,0,0,0))
-        # and than blit only the changed parts of the screen
-        for x0, y0, x1, y1 in update_area:
-            self.complete_bg.blit(bg.screen, (x0, y0), (x0, y0, x1-x0, y1-y0))
-            self.complete_bg.blit(alpha.screen, (x0, y0), (x0, y0, x1-x0, y1-y0))
-
-        content.screen.fill((0,0,0,0))
-
-        for x0, y0, x1, y1 in update_area:
-            content.blit(self.complete_bg, (x0, y0), (x0, y0, x1-x0, y1-y0))
-
-        rect = content.draw()[1]
+        self.layer.screen.fill((0,0,0,0))
+        self.layer.draw()
 
         if self.renderer.must_lock:
-            self.s_alpha.unlock()
+            self.layer.lock()
 
         blitrect = rect[0], rect[1], rect[2] - rect[0], rect[3] - rect[1]
-        surface = content.screen.subsurface(blitrect)
+        surface  = self.layer.screen.subsurface(blitrect)
         try:
             os.write(self.fifo, 'RGBA32 %d %d %d %d %d %d\n' % \
                      (surface.get_width(), surface.get_height(),

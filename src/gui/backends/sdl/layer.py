@@ -6,9 +6,11 @@ class Layer:
     This is a layer implementation for pygame. You can add objects from
     basic.py to it and they will be drawn.
     """
-    def __init__(self, name, renderer, alpha=False, width=None, height=None):
+    def __init__(self, name, parent, alpha=False):
         self.name     = name
-        self.renderer = renderer
+        self.parent   = parent
+        self.renderer = parent.renderer
+        self.update   = parent.update
         self.alpha    = alpha
         if alpha:
             self.screen = self.renderer.screen.convert_alpha()
@@ -24,22 +26,9 @@ class Layer:
         self.update_rect = []
         self.objects     = []
 
-        if width:
-            self.width = width
-        else:
-            self.width = self.renderer.width
-
-        if height:
-            self.height = height
-        else:
-            self.height = self.renderer.height
-
-        self.x1 = 0
-        self.y1 = 0
-
-        self.x2 = self.width
-        self.y2 = self.height
-
+        self.width  = parent.width
+        self.height = parent.height
+        
 
     def __str__(self):
         """
@@ -178,6 +167,10 @@ class Layer:
         """
         Add (x1,y1,x2,y2) to the list of rectangles we need to update
         """
+        x1 = max(x1, 0)
+        y1 = max(y1, 0)
+        x2 = min(x2, self.width)
+        y2 = min(y2, self.height)
         if not self.in_update(x1, y1, x2, y2, self.update_rect, True):
             self.update_rect.append((x1, y1, x2, y2))
 
@@ -198,7 +191,7 @@ class Layer:
         """
         Add an object to this layer
         """
-        object.layer = self
+        object.screen = self
         self.objects.append(object)
         self.add_to_update_rect(object.x1, object.y1, object.x2, object.y2)
 
@@ -208,7 +201,7 @@ class Layer:
         Add an object from this layer
         """
         self.objects.remove(object)
-        object.layer = None
+        object.screen = None
         self.add_to_update_rect(object.x1, object.y1, object.x2, object.y2)
 
         # FIXME: bad hack for background layer
@@ -260,7 +253,7 @@ class Layer:
             rect = ( min(x0, rect[0]), min(y0, rect[1]),
                      max(x1, rect[2]), max(y1, rect[3]))
 
-        self.objects.sort(lambda  l, o: cmp(l.position, o.position))
+        self.objects.sort(lambda  l, o: cmp(l.layer, o.layer))
         for o in self.objects:
             if self.in_update(o.x1, o.y1, o.x2, o.y2, self.update_rect):
                 o.draw(rect)

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/07/27 18:52:31  dischi
+# support more layer (see README.txt in backends for details
+#
 # Revision 1.1  2004/07/25 18:14:05  dischi
 # make some widgets and boxes work with the new gui interface
 #
@@ -53,9 +56,9 @@ class Button(Label):
         
 
     def draw(self, rect=None):
-        self.layer.drawbox(self.x1, self.y1, self.x2, self.y2,
-                           color=self.style.rectangle.bgcolor,
-                           border_size=self.style.rectangle.size,
-                           border_color=self.style.rectangle.color,
-                           radius=self.style.rectangle.radius)
+        self.screen.drawbox(self.x1, self.y1, self.x2, self.y2,
+                            color=self.style.rectangle.bgcolor,
+                            border_size=self.style.rectangle.size,
+                            border_color=self.style.rectangle.color,
+                            radius=self.style.rectangle.radius)
         Label.draw(self, rect)
