@@ -6,7 +6,7 @@
 
     <menu type="all">
       <background image="../../images/aubin_bg2.png"/>
-      <logo height="60" width="100"/>
+      <logo image="../../images/logo_100x50.png"/>
     </menu>
 
     <mp3>

@@ -23,14 +23,14 @@
     <menu type="all">
 
       <background image="../../images/aubin_bg2_800x600.png"/>
-      <logo visible="yes" x="10" y="10" image="../../images/logo.png"/>
+      <logo visible="yes" x="20" y="20" image="../../images/logo.png"/>
 
       <title visible="no" x="400" y="19">
 	<font name="Arial_Bold" size="36" color="0x000000" align="center"/>
 	<shadow visible="no" color="0xaaffffff" x="3" y="3"/>
       </title>
 
-      <items x="60" y="110" height="390" width="680">
+      <items x="60" y="120" height="390" width="680">
 	<item type="all">
 	  <font name="Arial_Bold" size="19" color="0xdddddd"/>
 	  <shadow visible="no" color="0x000000" x="1" y="1"/> 
@@ -42,17 +42,17 @@
       </items>
 
       <covers>
-	<cover type="movie" visible="yes" x="560" y="105" width="200"
+	<cover type="movie" visible="yes" x="560" y="115" width="200"
 	  height="280" border_color="0x000000" border_size="1"/>
-	<cover type="music" visible="yes" x="560" y="105" width="200"
+	<cover type="music" visible="yes" x="560" y="115" width="200"
 	  height="200" border_color="0x000000" border_size="1"/> 
-	<cover type="image" visible="yes" x="560" y="105" width="200" 
+	<cover type="image" visible="yes" x="560" y="115" width="200" 
 	  height="160" border_color="0x000000" border_size="1"/>
       </covers>
       
       <submenu x="40" y="520">
 	<font name="Arial_Bold" size="15" color="0xdddddd"/>
-	<selection length="154" bgcolor="0xa008171c" color="0xffffff">
+	<selection length="154" bgcolor="0xa008171c">
 	  <font name="Arial_Bold" size="15" color="0xffffff"/>
 	  <shadow visible="no" color="0x000000" x="2" y="2"/>
         </selection>
@@ -113,31 +113,30 @@
 
     <extendedmenu type="tv">
       <background image="../../images/aubin_bg2_800x600.png" mask=""/>
-      <logo visible="yes" x="10" y="10" width="100" height="60" 
-	image="../../images/logo.png"/>
+      <logo visible="yes" x="20" y="20" image="../../images/logo_100x50.png"/>
 
       <header>
-        <geometry x="10" y="10" width="780" height="55"/>
+        <geometry x="20" y="20" width="760" height="55"/>
 	<font name="Arial_Bold" size="25" color="0xffffff" align="center" valign="center"/>
 	<shadow visible="no"/>
       </header>
 
       <info spacing="5">
-        <geometry x="10" y="75" width="670" height="100"/>
+        <geometry x="20" y="80" width="630" height="120"/>
 	<background color="0xaa000000"/>
 	<font name="Arial_Bold" size="16" color="0xffffff" align="left"/>
 	<shadow visible="no" color="0x000000" x="1" y="1"/>
       </info>
       
       <view>
-        <geometry x="690" y="75" width="100" height="100"/>
+        <geometry x="660" y="80" width="120" height="120"/>
 	<background color="0x000000"/>
 	<font name="Arial_Bold" size="20" color="0xffffff" align="center" valign="center"/>
 	<shadow visible="no"/>
       </view>
       
       <listing type="table">
-        <geometry x="10" y="190" width="780" height="380"/>
+        <geometry x="20" y="220" width="760" height="350"/>
 	<background color="0xbb58677c"/>
 	
 	<expand>
