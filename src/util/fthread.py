@@ -51,17 +51,21 @@ class _FThread(threading.Thread):
     """
     def __init__(self, function, *args, **kargs):
         threading.Thread.__init__(self)
-        self.function = function
-        self.args     = args
-        self.kargs    = kargs
-        self.result   = None
-        self.finished = False
-
+        self.function  = function
+        self.args      = args
+        self.kargs     = kargs
+        self.result    = None
+        self.finished  = False
+        self.exception = None
+        
     def run(self):
         """
         Call the function and store the result
         """
-        self.result = self.function(*self.args, **self.kargs)
+        try:
+            self.result = self.function(*self.args, **self.kargs)
+        except Exception, e:
+            self.exception = e
         self.finished = True
 
 
@@ -80,4 +84,6 @@ def call(function, *args, **kargs):
         # function will return at some point.
         notifier.step()
     thread.join()
+    if thread.exception:
+        raise thread.exception
     return thread.result
