@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.50  2004/02/19 04:43:47  gsbarbieri
+# Fix string problems and add a work around to avoid isAlive() being called during __init__()
+#
 # Revision 1.49  2004/01/12 19:52:46  dischi
 # store return value for ChildApp2
 #
@@ -129,7 +132,7 @@ def shutdown():
 
         
 class ChildApp:
-
+    ready = False
     def __init__(self, app, debugname=None, doeslogging=0):
         global __all_childapps__
         __all_childapps__.append(self)
@@ -220,7 +223,9 @@ class ChildApp:
                 start_str = str(' ').join(start_str)
             print 'ChildApp.__init__(), pid=%s, app=%s, poll=%s' % \
                   (self.child.pid, start_str, self.child.poll())
-            
+
+        self.ready = True
+        
 
     # Write a string to the app. 
     def write(self, line):
@@ -244,7 +249,10 @@ class ChildApp:
 
 
     def isAlive(self):
+        if not self.ready: # return true if constructor has not finished yet
+            return True
         return self.t1.isAlive() or self.t2.isAlive()
+        
 
 
     def wait(self):
@@ -359,13 +367,12 @@ class Read_Thread(threading.Thread):
                 except:
                     pass
                 self.logger = open(logger, 'w')
-                print _( 'logging child to "%s"' ) % logger
+                print String(_( 'logging child to "%s"' )) % logger
             except IOError:
                 print
-                print _('ERROR') + ': ' + _( 'Cannot open "%s" for logging!') % logger
-                print _('Set CHILDAPP_DEBUG=0 in local_conf.py, or make %s writable!' ) % \
+                print String(_('ERROR')) + ': ' + String(_( 'Cannot open "%s" for logging!')) % logger
+                print String(_('Set CHILDAPP_DEBUG=0 in local_conf.py, or make %s writable!' )) % \
                       config.LOGDIR
-                print
             
         
     def run(self):
