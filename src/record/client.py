@@ -56,6 +56,7 @@ class Recordings:
     def __init__(self):
         self.last_update = time.time()
         self.__recordings = {}
+        self.server = None
         mcomm.register_entity_notification(self.__entity_update)
 
 
@@ -177,6 +178,7 @@ class Favorites:
     def __init__(self):
         self.last_update = time.time()
         self.__favorites = []
+        self.server = None
         mcomm.register_entity_notification(self.__entity_update)
 
 
