@@ -1,5 +1,5 @@
 import copy
-
+import pygame
 
 class Layer:
     """
@@ -44,12 +44,92 @@ class Layer:
             return self.screen.blit(layer, *arg1, **arg2)
             
 
-    def drawroundbox(self, *arg1, **arg2):
+    def __savepixel__(self, x, y, s):
         """
-        Interface for the objects draw a round box
+        help functions to save and restore a pixel
+        for drawcircle
         """
-        arg2['layer'] = self.screen
-        return self.renderer.drawroundbox(*arg1, **arg2)
+        try:
+            return (x, y, s.get_at((x,y)))
+        except:
+            return None
+
+            
+    def __restorepixel__(self, save, s):
+        """
+        restore the saved pixel
+        """
+        if save:
+            s.set_at((save[0],save[1]), save[2])
+
+
+    def __drawcircle__(self, s, color, x, y, radius):
+        """
+        draws a circle to the surface s and fixes the borders
+        pygame.draw.circle has a bug: there are some pixels where
+        they don't belong. This function stores the values and
+        restores them
+        """
+        p1 = self.__savepixel__(x-1, y-radius-1, s)
+        p2 = self.__savepixel__(x,   y-radius-1, s)
+        p3 = self.__savepixel__(x+1, y-radius-1, s)
+        p4 = self.__savepixel__(x-1, y+radius, s)
+        p5 = self.__savepixel__(x,   y+radius, s)
+        p6 = self.__savepixel__(x+1, y+radius, s)
+
+        pygame.draw.circle(s, color, (x, y), radius)
+        
+        self.__restorepixel__(p1, s)
+        self.__restorepixel__(p2, s)
+        self.__restorepixel__(p3, s)
+        self.__restorepixel__(p4, s)
+        self.__restorepixel__(p5, s)
+        self.__restorepixel__(p6, s)
+        
+        
+    def drawbox(self, x0, y0, x1, y1, color=None, border_size=0,
+                border_color=None, radius=0):
+        """
+        Draw a round box
+        """
+        # Make sure the order is top left, bottom right
+        x0, x1 = min(x0, x1), max(x0, x1)
+        y0, y1 = min(y0, y1), max(y0, y1)
+
+        x = x0
+        y = y0
+        w = x1 - x0
+        h = y1 - y0
+
+        bc = self.renderer._sdlcol(border_color)
+        c  = self.renderer._sdlcol(color)
+
+        # make sure the radius fits the box
+        radius = min(radius, h / 2, w / 2)
+        
+        if border_size:
+            if radius >= 1:
+                self.__drawcircle__(self.screen, bc, x+radius, y+radius, radius)
+                self.__drawcircle__(self.screen, bc, x+w-radius, y+radius, radius)
+                self.__drawcircle__(self.screen, bc, x+radius, y+h-radius, radius)
+                self.__drawcircle__(self.screen, bc, x+w-radius, y+h-radius, radius)
+                pygame.draw.rect(self.screen, bc, (x+radius, y, w-2*radius, h))
+            pygame.draw.rect(self.screen, bc, (x, y+radius, w, h-2*radius))
+        
+            x += border_size
+            y += border_size
+            h -= 2* border_size
+            w -= 2* border_size
+            radius -= min(0, border_size)
+        
+        if radius >= 1:
+            self.__drawcircle__(self.screen, c, x+radius, y+radius, radius)
+            self.__drawcircle__(self.screen, c, x+w-radius, y+radius, radius)
+            self.__drawcircle__(self.screen, c, x+radius, y+h-radius, radius)
+            self.__drawcircle__(self.screen, c, x+w-radius, y+h-radius, radius)
+            pygame.draw.rect(self.screen, c, (x+radius, y, w-2*radius, h))
+        pygame.draw.rect(self.screen, c, (x, y+radius, w, h-2*radius))
+
 
 
     def in_update(self, x1, y1, x2, y2, update_area, full=False):

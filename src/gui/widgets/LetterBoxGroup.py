@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/07/24 17:49:06  dischi
+# interface cleanup
+#
 # Revision 1.1  2004/07/22 21:12:35  dischi
 # move all widget into subdir, code needs update later
 #
@@ -185,8 +188,8 @@ class LetterBoxGroup(Container):
 
         rect = self.content_layout.types['button'].rectangle
         self.surface = self.get_surface()
-        self.osd.drawroundbox(0, 0, self.width, self.height, rect.bgcolor, 0, rect.color,
-                              0, self.surface)
+#         self.osd.drawroundbox(0, 0, self.width, self.height, rect.bgcolor, 0, rect.color,
+#                               0, self.surface)
         Container._draw(self)
 
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/07/24 17:49:05  dischi
+# interface cleanup
+#
 # Revision 1.1  2004/07/22 21:13:39  dischi
 # move skin code to gui, update to new interface started
 #
@@ -233,8 +236,8 @@ class TVListing_Area(Skin_Area):
                                                  head_h, head_h )
 
 
-        self.drawroundbox( x_contents - r.width, y_contents - r.height,
-                           r.width+1, head_h+1, r )
+        self.drawbox( x_contents - r.width, y_contents - r.height,
+                      r.width+1, head_h+1, r )
 
         # use label padding for x; head padding for y
         self.drawstring( time.strftime( dateformat, time.localtime( to_listing[ 0 ][ 1 ] ) ),
@@ -250,9 +253,9 @@ class TVListing_Area(Skin_Area):
         x0 = x_contents
         ty0 = y_contents - r.height
         for i in range( n_cols ):
-            self.drawroundbox( math.floor(x0), ty0,
-                               math.floor( col_size + x0 ) - math.floor( x0 ) + 1,
-                               head_h + 1, r2 )
+            self.drawbox( math.floor(x0), ty0,
+                          math.floor( col_size + x0 ) - math.floor( x0 ) + 1,
+                          head_h + 1, r2 )
 
             self.drawstring( time.strftime( timeformat,
                                             time.localtime( to_listing[ 0 ][ i + 1 ] ) ),
@@ -286,7 +289,7 @@ class TVListing_Area(Skin_Area):
                             
                 val = default_val
 
-                self.drawroundbox(tx0 + r.x, ty0 + r.y, r.width+1, item_h, r)
+                self.drawbox(tx0 + r.x, ty0 + r.y, r.width+1, item_h, r)
                 logo_geo =[ tx0+r.x+r.size, ty0+r.y+r.size, r.width-2*r.size,
                             r.height-2*r.size ]
                     
@@ -307,7 +310,7 @@ class TVListing_Area(Skin_Area):
                 self.drawstring(to_listing[i].displayname, label_val.font, content,
                                 x=tx0, y=ty0, width=r.width+2*r.x, height=item_h)
 
-            self.drawroundbox(tx0 + r.x, ty0 + r.y, r.width+1, item_h, r)
+            self.drawbox(tx0 + r.x, ty0 + r.y, r.width+1, item_h, r)
 
             if to_listing[i].programs:
                 for prg in to_listing[i].programs:
@@ -364,7 +367,7 @@ class TVListing_Area(Skin_Area):
                     if val.rectangle:
                         ig, r = self.fit_item_in_rectangle(val.rectangle, tx1-tx0+1,
                                                            item_h, font_h)
-                        self.drawroundbox(tx0+r.x, ty0+r.y, r.width, item_h, r)
+                        self.drawbox(tx0+r.x, ty0+r.y, r.width, item_h, r)
 
                     # draw left flag and reduce width and add to x0
                     if flag_left:

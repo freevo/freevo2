@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/07/24 17:49:05  dischi
+# interface cleanup
+#
 # Revision 1.2  2004/07/24 12:21:31  dischi
 # use new renderer and screen features
 #
@@ -144,4 +147,4 @@ class View_Area(Skin_Area):
         if val.rectangle:
             r.width -= width - i_w
             r.height -= height - i_h
-            self.drawroundbox(r.x + addx, r.y + addy, r.width, r.height, r)
+            self.drawbox(r.x + addx, r.y + addy, r.width, r.height, r)

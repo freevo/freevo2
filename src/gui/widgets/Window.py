@@ -7,6 +7,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/07/24 17:49:06  dischi
+# interface cleanup
+#
 # Revision 1.2  2004/07/24 12:22:16  dischi
 # gui update
 #
@@ -175,9 +178,9 @@ class Window(GUIObject):
                     r.width = self.get_size()[0] - r.x
                 if r.y + r.height > self.get_size()[1]:
                     r.height = self.get_size()[1] - r.y
-                self.osd.drawroundbox(r.x, r.y, r.x+r.width, r.y+r.height,
-                                      r.bgcolor, r.size, r.color, r.radius,
-                                      self.surface)
+#                 self.osd.drawroundbox(r.x, r.y, r.x+r.width, r.y+r.height,
+#                                       r.bgcolor, r.size, r.color, r.radius,
+#                                       self.surface)
 
         self.get_selected_child = self.content.get_selected_child
         if not self.content.parent:

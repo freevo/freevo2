@@ -137,15 +137,6 @@ class Renderer:
         pass
     
 
-    def drawroundbox(self, x0, y0, x1, y1, color=None, border_size=0, border_color=None,
-                     radius=0, layer=None):
-
-        """
-        Draw a round box on the layer.
-        """
-        pass
-    
-
     def update(self, rect=None, blend_surface=None, blend_speed=0,
                blend_steps=0, blend_time=None, stop_busyicon=True):
         """
@@ -242,11 +233,10 @@ class Layer:
         pass
 
 
-    def drawroundbox(self, x0, y0, x1, y1, color=None, border_size=0, border_color=None,
-                     radius=0):
+    def drawbox(self, x0, y0, x1, y1, color=None, border_size=0,
+                border_color=None, radius=0):
         """
-        Draw a round box (needed for the Rectangle in gui.base). It's the same
-        interface as Renderer has.
+        Draw a round box (needed for the Rectangle in gui.base).
         """
         pass
 

@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/07/24 17:49:05  dischi
+# interface cleanup
+#
 # Revision 1.2  2004/07/24 12:21:30  dischi
 # use new renderer and screen features
 #
@@ -549,18 +552,18 @@ class Skin_Area:
                             
             elif isinstance(bg, fxdparser.Rectangle):
                 self.calc_geometry(bg)
-                self.drawroundbox(bg.x, bg.y, bg.width, bg.height, bg)
+                self.drawbox(bg.x, bg.y, bg.width, bg.height, bg)
         return redraw
             
 
 
     # functions for the area to draw stuff on the screen
     #
-    # drawroundbox
+    # drawbox
     # drawimage
     # drawstring
 
-    def drawroundbox(self, x, y, width, height, rect):
+    def drawbox(self, x, y, width, height, rect):
         """
         draw a round box ... or better stores the information about this call
         in a variable. The real drawing is done inside draw()
@@ -682,7 +685,3 @@ class Skin_Area:
         return val.width, val.height
         
 
-
-    # compatibility functions, will be removed
-    write_text = drawstring
-    draw_image = drawimage

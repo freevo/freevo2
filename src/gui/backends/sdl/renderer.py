@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/07/24 17:49:06  dischi
+# interface cleanup
+#
 # Revision 1.1  2004/07/24 12:21:06  dischi
 # move renderer into backend subdir
 #
@@ -520,121 +523,6 @@ class Renderer:
         self.drawstringframed(string, x, y, width, -1, self.getfont(font, ptsize),
                               fgcolor, bgcolor, align_h = align, layer=layer,
                               ellipses='')
-
-
-    def _savepixel(self, x, y, s):
-        """
-        help functions to save and restore a pixel
-        for drawcircle
-        """
-        try:
-            return (x, y, s.get_at((x,y)))
-        except:
-            return None
-
-            
-    def _restorepixel(self, save, s):
-        """
-        restore the saved pixel
-        """
-        if save:
-            s.set_at((save[0],save[1]), save[2])
-
-
-    def drawcircle(self, s, color, x, y, radius):
-        """
-        draws a circle to the surface s and fixes the borders
-        pygame.draw.circle has a bug: there are some pixels where
-        they don't belong. This function stores the values and
-        restores them
-        """
-        p1 = self._savepixel(x-1, y-radius-1, s)
-        p2 = self._savepixel(x,   y-radius-1, s)
-        p3 = self._savepixel(x+1, y-radius-1, s)
-
-        p4 = self._savepixel(x-1, y+radius, s)
-        p5 = self._savepixel(x,   y+radius, s)
-        p6 = self._savepixel(x+1, y+radius, s)
-
-        pygame.draw.circle(s, color, (x, y), radius)
-        
-        self._restorepixel(p1, s)
-        self._restorepixel(p2, s)
-        self._restorepixel(p3, s)
-        self._restorepixel(p4, s)
-        self._restorepixel(p5, s)
-        self._restorepixel(p6, s)
-        
-        
-    def drawroundbox(self, x0, y0, x1, y1, color=None, border_size=0, border_color=None,
-                     radius=0, layer=None):
-        """
-        draw a round box
-        """
-        if not pygame.display.get_init():
-            return None
-
-        # Make sure the order is top left, bottom right
-        x0, x1 = min(x0, x1), max(x0, x1)
-        y0, y1 = min(y0, y1), max(y0, y1)
-        if color == None:
-            color = self.default_fg_color
-
-        if border_color == None:
-            border_color = self.default_fg_color
-
-        if layer:
-            x = x0
-            y = y0
-        else:
-            x = 0
-            y = 0
-            
-        w = x1 - x0
-        h = y1 - y0
-
-        bc = self._sdlcol(border_color)
-        c =  self._sdlcol(color)
-
-        # make sure the radius fits the box
-        radius = min(radius, h / 2, w / 2)
-        
-        if not layer:
-            box = pygame.Surface((w, h), SRCALPHA)
-
-            # clear surface
-            box.fill((0,0,0,0))
-        else:
-            box = layer
-            
-        r,g,b,a = self._sdlcol(color)
-        
-        if border_size:
-            if radius >= 1:
-                self.drawcircle(box, bc, x+radius, y+radius, radius)
-                self.drawcircle(box, bc, x+w-radius, y+radius, radius)
-                self.drawcircle(box, bc, x+radius, y+h-radius, radius)
-                self.drawcircle(box, bc, x+w-radius, y+h-radius, radius)
-                pygame.draw.rect(box, bc, (x+radius, y, w-2*radius, h))
-            pygame.draw.rect(box, bc, (x, y+radius, w, h-2*radius))
-        
-            x += border_size
-            y += border_size
-            h -= 2* border_size
-            w -= 2* border_size
-            radius -= min(0, border_size)
-        
-        if radius >= 1:
-            self.drawcircle(box, c, x+radius, y+radius, radius)
-            self.drawcircle(box, c, x+w-radius, y+radius, radius)
-            self.drawcircle(box, c, x+radius, y+h-radius, radius)
-            self.drawcircle(box, c, x+w-radius, y+h-radius, radius)
-            pygame.draw.rect(box, c, (x+radius, y, w-2*radius, h))
-        pygame.draw.rect(box, c, (x, y+radius, w, h-2*radius))
-        
-        if not layer:
-            self.screen.blit(box, (x0, y0))
-
 
 
     def update(self, rect=None, blend_surface=None, blend_speed=0,

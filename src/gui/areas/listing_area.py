@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/07/24 17:49:05  dischi
+# interface cleanup
+#
 # Revision 1.2  2004/07/24 12:21:31  dischi
 # use new renderer and screen features
 #
@@ -327,10 +330,10 @@ class Listing_Area(Skin_Area):
 
                 if val.rectangle:
                     r = self.get_item_rectangle(val.rectangle, width, val.font.h)[2]
-                    self.drawroundbox(x0 + hskip + r.x + x_icon - BOX_UNDER_ICON * x_icon,
-                                      y0 + vskip + r.y,
-                                      r.width - icon_x + BOX_UNDER_ICON * icon_x,
-                                      r.height, r)
+                    self.drawbox(x0 + hskip + r.x + x_icon - BOX_UNDER_ICON * x_icon,
+                                 y0 + vskip + r.y,
+                                 r.width - icon_x + BOX_UNDER_ICON * icon_x,
+                                 r.height, r)
 
                 # special handling for tv shows
                 if choice.type == 'video' and hasattr(choice,'tv_show') and \
@@ -431,7 +434,7 @@ class Listing_Area(Skin_Area):
                                                     max(rec_h, int(val.font.h * 1.1)))[2]
                     else:
                         r = self.get_item_rectangle(val.rectangle, val.width, rec_h)[2]
-                    self.drawroundbox(x0 + r.x, y0 + r.y, r.width, r.height, r)
+                    self.drawbox(x0 + r.x, y0 + r.y, r.width, r.height, r)
 
                 image, i_w, i_h = format_image(self.screen.renderer, settings,
                                                choice, val.width, val.height, force=True)
@@ -451,10 +454,10 @@ class Listing_Area(Skin_Area):
                         addy = val.height - i_h
 
                     if val.shadow and val.shadow.visible and image.get_alpha() == None:
-                        box = self.drawroundbox(x0 + addx + val.shadow.x,
-                                                y0 + addy + val.shadow.y,
-                                                image.get_width(), image.get_height(),
-                                                (val.shadow.color, 0, 0, 0))
+                        box = self.drawbox(x0 + addx + val.shadow.x,
+                                           y0 + addy + val.shadow.y,
+                                           image.get_width(), image.get_height(),
+                                           (val.shadow.color, 0, 0, 0))
                         box.position = 10
                         
                     self.drawimage(image, (x0 + addx, y0 + addy))
