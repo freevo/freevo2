@@ -3,19 +3,10 @@
 %define geometry 800x600
 %define display  x11
 
-%define _us_defaults 1
-%{?_without_us_defaults:%define _us_defaults 0}
-
-# Use system provided (not binary runtime) apps (default)
-%define _sysfirst "--sysfirst"
-%{?_without_use_sysapps:%define _sysfirst ""}
-
-# Compile python object files (default)
-%{?_without_compile_obj:%define _nopycompile 1}
 ##########################################################################
 
 
-%if %{_us_defaults}
+%if %{?_without_us_defaults:0}%{!?_without_us_defaults:1}
 %define tv_norm  ntsc
 %define chanlist us-cable
 %else
@@ -25,8 +16,8 @@
 
 ##########################################################################
 %define name freevo-src
-%define version 1.4
-%define release 3_freevo
+%define version 1.4.0
+%define release 4_freevo
 %define _cachedir /var/cache
 %define _logdir /var/log
 
@@ -39,6 +30,7 @@ Source0: %{name}-%{version}.tar.gz
 Copyright: gpl
 Group: Applications/Multimedia
 BuildRoot: %{_tmppath}/%{name}-buildroot
+BuildRequires: docbook-utils, wget
 Prefix: %{_prefix}
 URL:            http://freevo.sourceforge.net/
 
@@ -50,6 +42,13 @@ and record video and audio.
 
 Available rpmbuild rebuild options :
 --without: us_defaults use_sysapps compile_obj
+
+Note: In order to build the source package, you must have an Internet connection.
+If you need to configure a proxy server, set the shell environmental variable 'http_proxy'
+to the URL of the proxy server before rebuilding the package.
+
+E.g. for bash:
+# export http_proxy=http://myproxy.server.net:3128
 
 %package boot
 Summary: Files to enable a standalone Freevo system (started from initscript)
@@ -64,13 +63,6 @@ video and audio.
 
 Note: This installs the initscripts necessary for a standalone Freevo system.
 
-%package testfiles
-Summary: Sample multimedia files to test freevo
-Group: Applications/Multimedia
-
-%description testfiles
-Test files that came with freevo. Placed in %{_cachedir}/freevo
-
 %prep
 rm -rf $RPM_BUILD_ROOT
 #%setup -n %{name}_%{version}
@@ -82,6 +74,8 @@ find . -name ".cvsignore" |xargs rm -f
 find . -name "*.pyc" |xargs rm -f
 find . -name "*.pyo" |xargs rm -f
 find . -name "*.py" |xargs chmod 644
+
+./autogen.sh
 
 env CFLAGS="$RPM_OPT_FLAGS" python setup.py build
 
@@ -108,15 +102,12 @@ mkdir -p %{buildroot}%{_cachedir}/xmltv/logos
 chmod 777 %{buildroot}%{_cachedir}/{freevo,freevo/thumbnails,freevo/audio,xmltv,xmltv/logos}
 chmod 777 %{buildroot}%{_logdir}/freevo
 
-# test files
-cp -av testfiles %{buildroot}%{_cachedir}/freevo/
-
 %install
-python setup.py install %{?_nopycompile:--no-compile} \
+python setup.py install %{?_without_compile_obj:--no-compile} \
 		--root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
 
 cat >>INSTALLED_FILES <<EOF
-%doc BUGS COPYING ChangeLog FAQ INSTALL README TODO VERSION Docs local_conf.py.example
+%doc BUGS COPYING ChangeLog FAQ INSTALL README TODO Docs local_conf.py.example
 %attr(755,root,root) %dir %{_sysconfdir}/freevo
 %attr(777,root,root) %dir %{_logdir}/freevo
 %attr(777,root,root) %dir %{_cachedir}/freevo
@@ -133,7 +124,8 @@ EOF
 %post
 # Copy old local_conf.py to replace dummy file
 freevo setup --geometry=%{geometry} --display=%{display} \
-        --tv=%{tv_norm} --chanlist=%{chanlist} %{_sysfirst} 
+        --tv=%{tv_norm} --chanlist=%{chanlist} \
+	%{!?_without_use_sysapps:--sysfirst}
 
 %preun
 if [ -s %{_sysconfdir}/freevo/local_conf.py ]; then
@@ -152,10 +144,6 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/freevo_*
 %attr(755,root,root) %dir %{_sysconfdir}/freevo
 %attr(644,root,root) %config %{_sysconfdir}/freevo/boot_config
-
-%files testfiles
-%defattr(644,root,root,755)
-%{_cachedir}/freevo/testfiles
 
 %post boot
 if [ -x /sbin/chkconfig ]; then
@@ -177,6 +165,10 @@ if [ "$1" = 0 ] ; then
 fi
 
 %changelog
+* Fri Sep 26 2003 TC Wan <tcwan@cs.usm.my>
+- Removed testfiles from build since it's no longer part of the package
+  Cleaned up conditional flags
+
 * Thu Sep 18 2003 TC Wan <tcwan@cs.usm.my>
 - Added supporting directories and files to package
 

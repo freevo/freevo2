@@ -2,7 +2,7 @@ Freevo Dependency List
 ----------------------
 $Id$
 
-Version 0.5 2003/09/25	TC Wan (tcwan at cs dot usm dot my)
+Version 0.51 2003/09/26	TC Wan (tcwan at cs dot usm dot my)
 
 > Contributed by Jorn A Hansen (jornh at person dot dk)
 >
@@ -143,7 +143,8 @@ python-pylirc		http://sourceforge.net/projects/pylirc/
 			# pylirc-0.0.4-1.src.rpm		Lirc 0.6.6 (see Apps)
 			# pylirc-0.0.4-1.i386.rpm
 
-pylcd			http://unattached.i-no.de/software-pylcd.shtml
+pylcd			http://unattached.i-no.de/software-pylcd.shtml	lcdproc				http://lcdproc.omnipotent.net
+			[0.2, RPMs available from freevo downloads]					[0.4.3, RPMs available from freevo downloads]
 
 pygphoto		?
 
