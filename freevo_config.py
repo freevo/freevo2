@@ -920,6 +920,7 @@ TV_CHANNEL_PROG = './chchan %(channel)s %(norm)s %(freqtable)s'
 
 TV_DATEFORMAT = '%e-%b' # Day-Month: 11-Jun
 TV_TIMEFORMAT = '%H:%M' # Hour-Minute 14:05
+TV_DATETIMEFORMAT = '%A %b %d %I:%M %p' # Thursday September 24 8:54 am
 
 # This is the filename format for files recorded using Freevo.
 # You can use any of the strftime variables in it, provided you

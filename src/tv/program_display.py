@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/10/14 17:06:02  dischi
+# add datetimeformat patch from patch from Eirik Meland
+#
 # Revision 1.16  2003/10/14 02:30:12  rshortt
 # Changes to make the list update when you remove a scheduled recording.
 #
@@ -140,13 +143,13 @@ class ProgramDisplay(PopupBox):
         chan.set_font(font=self.font.name, size=self.font.size -2,
                       color=self.font.color)
 
-        start = Label('Start:  %s' % time.strftime('%A %b %d %I:%M %p', 
+        start = Label('Start:  %s' % time.strftime(config.TV_DATETIMEFORMAT, 
                                       time.localtime(self.prog.start)),
                                       self, Align.LEFT)
         start.set_font(font=self.font.name, size=self.font.size -2,
                        color=self.font.color)
 
-        stop = Label('Stop:  %s' % time.strftime('%A %b %d %I:%M %p', 
+        stop = Label('Stop:  %s' % time.strftime(config.TV_DATETIMEFORMAT, 
                                      time.localtime(self.prog.stop)), 
                                      self, Align.LEFT)
         stop.set_font(font=self.font.name, size=self.font.size -2,
@@ -349,10 +352,10 @@ class ScheduledRecordings(PopupBox):
             for prog in progs:
                 i += 1
                 self.results.add_item(text='%s %s: %s' % \
-                                        (time.strftime('%b %d %I:%M %p',
-                                           time.localtime(prog.start)),
-                                         tv.tv_util.get_chan_displayname(prog.channel_id),
-                                         prog.title),
+                                      (time.strftime(config.TV_DATETIMEFORMAT,
+                                                     time.localtime(prog.start)),
+                                       tv.tv_util.get_chan_displayname(prog.channel_id),
+                                       prog.title),
                                       value=prog)
 
             space_left = self.num_shown_items - i
