@@ -19,7 +19,7 @@ print 'Using database: %s' % pyepg.guide.db.db.db.filename
 
 
 def usage():
-    print '\nUsage:  %s [options]' % sys.argv[0]
+    print '\nUsage: freevo epg [options]'
     print '\nOptions:'
     print '  [-h|--help]                       Print help and exit.'
     print '  [-i|--info]                       Print some information.'
