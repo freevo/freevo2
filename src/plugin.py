@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.52  2003/11/29 11:20:30  dischi
+# doc update, remove AUDIOCD_PLAYER
+#
 # Revision 1.51  2003/11/22 12:02:51  dischi
 # better plugin remove
 #
@@ -20,36 +23,6 @@
 #
 # Revision 1.1  2003/11/16 09:57:23  dischi
 # bugfix and make the DirwatcherThread a plugin
-#
-# Revision 1.48  2003/11/08 13:18:48  dischi
-# add AUDIOCD as plugin type
-#
-# Revision 1.47  2003/10/27 20:09:38  dischi
-# Rewrote the function to find the plugins to make it more generic
-#
-# Revision 1.46  2003/10/19 14:03:25  dischi
-# external i18n support for plugins
-#
-# Revision 1.45  2003/09/21 16:46:27  dischi
-# typo
-#
-# Revision 1.44  2003/09/20 15:07:45  dischi
-# add a function to search if a plugin is active
-#
-# Revision 1.43  2003/09/20 09:42:12  dischi
-# do not eval the args
-#
-# Revision 1.42  2003/09/19 18:57:43  dischi
-# fixed TRUE/FALSE problems
-#
-# Revision 1.41  2003/09/14 20:09:36  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.40  2003/09/10 19:29:29  dischi
-# if plugins do not call __init__ they want to be disabled
-#
-# Revision 1.39  2003/09/10 18:13:48  dischi
-# support for plugins to add defaults to config
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -107,6 +80,11 @@ class Plugin:
                 setattr(config, var, val)
             
     def config(self):
+        """
+        return a list of config variables this plugin needs to be set in
+        in freevo_config.py. Each variable in again a list and contains
+        (varname, default value, description)
+        """
         return []
 
     def translation(self, application):
@@ -187,15 +165,16 @@ class DaemonPlugin(Plugin):
         self.poll_menu_only = True      # poll only when menu is active
         self.event_listener = False     # process all events
 
+
+
 #
 # Some plugin names to avoid typos
 #
 
 AUDIO_PLAYER   = 'AUDIO_PLAYER'
-AUDIOCD_PLAYER = 'AUDIOCD_PLAYER'
+RADIO_PLAYER   = 'RADIO_PLAYER'
 VIDEO_PLAYER   = 'VIDEO_PLAYER'
 TV             = 'TV'
-RADIO_PLAYER   = 'RADIO_PLAYER'
 
 
 
