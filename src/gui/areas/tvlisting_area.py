@@ -91,6 +91,9 @@ class TvlistingArea(Area):
         self.objects    = []
         self.background = None
 
+        # FIXME: debug, remove me
+        self.__ONE_TIME_DEBUG = True
+
 
     def __calc_items_geometry(self):
         # get the settings
@@ -267,6 +270,11 @@ class TvlistingArea(Area):
         """
         menu      = self.menu
         settings  = self.settings
+
+        # FIXME: debug, remove me
+        if self.__ONE_TIME_DEBUG:
+            t1 = time.time()
+            log.info('tv listing debug on')
 
         # FIXME: move to skin
         n_cols   = 4
@@ -474,3 +482,9 @@ class TvlistingArea(Area):
             # no arrow needed but on the screen, remove it
             self.down_arrow.unparent()
             self.down_arrow = None
+
+        # FIXME: debug, remove me
+        if self.__ONE_TIME_DEBUG:
+            t2 = time.time()
+            log.info('tv listing debug time: %s' % (t2-t1))
+            self.__ONE_TIME_DEBUG = False
