@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/09/21 13:20:03  dischi
+# destroy the popup after some time
+#
 # Revision 1.7  2003/09/16 20:45:02  mikeruelle
 # warn user about old DIR_GAMES entry
 #
@@ -47,6 +50,7 @@
 import config
 import util
 import types
+import time
 
 import menu
 import mame_cache
@@ -67,7 +71,9 @@ def cwd(parent, files):
     if not hasattr(parent, 'add_args') or type(parent.add_args) is not types.TupleType: 
 	pop = PopupBox(text="please update DIR_GAMES in local_conf.py")
 	pop.show()
-        return [menu.MenuItem(_('please update DIR_GAMES in local_conf.py'), menuwidget.goto_prev_page, 0)]
+        time.sleep(2)
+	pop.destroy()
+        return []
 
     (gtype, cmd, args, imgpath, suffixlist) = parent.add_args[0]
     if gtype == 'MAME':
