@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.56  2003/06/28 02:01:58  outlyer
+# Mplayer won't play a file on a CD rom if -dvd-device is specified and it isn't a
+# DVD rom drive, so just pass -dvd-device if playing an actual DVD.
+#
 # Revision 1.55  2003/06/20 19:38:31  dischi
 # moved getattr to item.py
 #
@@ -442,8 +446,12 @@ class VideoItem(Item):
             mplayer_options = ""
 
         if self.media:
-            mplayer_options += ' -cdrom-device %s -dvd-device %s' % \
-                               (self.media.devicename, self.media.devicename)
+            mplayer_options += ' -cdrom-device %s ' % \
+                               (self.media.devicename)
+
+        if self.mode == 'dvd':
+            mplayer_options += ' -dvd-device %s' % self.media.devicename
+
 
         if self.selected_subtitle and self.mode == 'file':
             mplayer_options += ' -vobsubid %s' % self.selected_subtitle
