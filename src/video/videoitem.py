@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.54  2003/06/20 18:46:53  dischi
+# set menu type to video and info_item type to track for DVD/VCD menu
+#
 # Revision 1.53  2003/06/20 17:48:01  dischi
 # Title menu is now the default action for DVD/VCD. Autoplay is done by
 # pressing PLAY and not SELECT. This file is also prepared for the use of
@@ -284,7 +287,10 @@ class VideoItem(Item):
         """
         a = Item.getattr(self, attr)
         if not a and self.info and self.info.has_key(attr):
-            a = str(self.info[attr])
+            if attr == 'length':
+                a = '%s:%s' % (self.info[attr] / 60, self.info[attr] % 60)
+            else:
+                a = str(self.info[attr])
         return a
 
     # ------------------------------------------------------------------------
@@ -650,12 +656,13 @@ class VideoItem(Item):
             # copy the attributes from mmpython about this track
             if self.info.has_key('tracks'):
                 file.info = self.info.tracks[title-1]
+            file.info_type = 'track'
             file.filename = '%s' % title
             file.name = 'Play Title %s' % title
             items += [file]
 
         moviemenu = menu.Menu(self.name, items, umount_all = 1, xml_file=self.xml_file)
-
+        moviemenu.item_types = 'video'
         if pop:
             pop.destroy()
 
