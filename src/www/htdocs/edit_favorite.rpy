@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/02/22 21:41:21  rshortt
+# Check result instead.
+#
 # Revision 1.12  2004/02/22 21:04:58  gsbarbieri
 # Fix crash when server returns error message instead of program.
 #
@@ -130,9 +133,15 @@ class EditFavoriteResource(FreevoResource):
         if action == 'add' and chan and start:
             (result, prog) = ri.findProg(chan, start)
 
+	    if not result:
+                fv.printHeader('Edit Favorite', 'styles/main.css')
+                fv.res += '<h4>ERROR: no program found on % at %</h4>' % (chan, start)
+                fv.printSearchForm()
+                fv.printLinks()
+                fv.printFooter()
+                return fv.res
+
             if prog:
-                if isinstance( prog, unicode ):
-                    prog = String( prog )
                 print 'PROG: %s' % prog
 
             priority = num_favorites + 1
