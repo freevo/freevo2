@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2004/08/10 16:02:39  rshortt
+# Remove comma from between tag attributes.
+#
 # Revision 1.27  2004/08/10 12:54:22  outlyer
 # An impressive update to the guide code from Jason Tackaberry that
 # dramatically speeds up rendering and navigation of the guide.  I will be
@@ -296,7 +299,7 @@ class GuideResource(FreevoResource):
                         if colspan == n_cols * cpb:
                             style += 'text-align: center; '
 
-                        rowdata.append('<td class="%s" onclick="guide_click(this, event)" id="%s" colspan="%s", style="%s">%s</td>' % (status, popid, colspan, style, cell))
+                        rowdata.append('<td class="%s" onclick="guide_click(this, event)" id="%s" colspan="%s" style="%s">%s</td>' % (status, popid, colspan, style, cell))
                         now += colspan * PRECISION
                         c_left -= colspan
 
