@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/08/18 06:12:57  krister
+# Added load font with extension.
+#
 # Revision 1.1  2002/08/17 02:55:45  krister
 # Submitted by Gustavo Barbieri.
 #
@@ -148,9 +151,15 @@ class XMLSkin:
 
     def attr_font(self, node, attr, default):
         if node.attrs.has_key(('', attr)):
-            font = os.path.join(OSD_FONT_DIR, node.attrs[('', attr)] + '.ttf').encode()
-            if not os.path.isfile(font):
-                font = os.path.join(OSD_FONT_DIR, node.attrs[('', attr)] + '.TTF')
+            fontext = os.path.splitext(node.attrs[('', attr)])[1]
+            if fontext:
+                # There is an extension (e.g. '.pfb'), use the full name
+                font = os.path.join(OSD_FONT_DIR, node.attrs[('', attr)]).encode()
+            else:
+                # '.ttf' is the default extension
+                font = os.path.join(OSD_FONT_DIR, node.attrs[('', attr)] + '.ttf').encode()
+                if not os.path.isfile(font):
+                    font = os.path.join(OSD_FONT_DIR, node.attrs[('', attr)] + '.TTF')
             if not font:
                 print "can find font >%s<" % font
                 font = OSD_DEFAULT_FONT
