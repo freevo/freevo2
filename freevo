@@ -6,7 +6,7 @@
 #
 
 # cd to the freevo directory if necessary
-if ! test -a src/identifymedia.py ; then
+if test ! -a src/identifymedia.py ; then
     cd `dirname $0`
 fi
 
@@ -112,7 +112,7 @@ fi
 # Start the lirc remote control app if the device is present
 if [ -S /dev/lircd ] ; then
     echo Found a lirc device, starting the remote control daemon
-    $PYTHON rc_client/remote.py --remote=lirc &> /dev/null &
+    $PYTHON rc_client/remote.py --remote=lirc > /dev/null 2>&1 &
 fi
 
 # XXX Uncomment the command below to enable joystick input. 
