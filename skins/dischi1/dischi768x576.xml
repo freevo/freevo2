@@ -83,8 +83,8 @@
 	<item type="all">
 	  <font name="neuropol" size="32" color="0xffffff"/>
 	  <shadow visible="yes" color="0x000000" x="1" y="1"/>
-      
-	  <selection color="0xffffff" bgcolor="0x38474c">
+
+	  <selection color="0xffffff" bgcolor="0x000000">
 	    <font name="neuropol" size="32" color="0xffffff"/>
 	    <shadow visible="yes" color="0xaa000000" x="3" y="3"/>
 	  </selection>
