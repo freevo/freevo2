@@ -50,9 +50,8 @@ rm -rf ffmpeg
 
 cp /usr/local/include/dvdnav/* /usr/local/include
 
-Latest config (20020505)
-./configure --enable-largefiles --with-csslibdir=/usr/local/lib \
-  --with-cssincdir=/usr/local/include --with-extraincdir=/usr/local/include \
+Latest config (20020716)
+./configure --enable-largefiles --with-extraincdir=/usr/local/include \
   --with-extralibdir=/usr/local/lib
 
 mga_vid driver:
@@ -160,6 +159,7 @@ o Release checklist:
   o Have you added testfiles for new functions. Try to keep them as small 
     as possible, we don't want the testdata to be several megs since it 
     will be included in the releases.
+  o Run PyChecker for static analysis of the source
   o Test it!
     o Functions
     o Memory leaks
