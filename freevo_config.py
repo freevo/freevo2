@@ -250,6 +250,9 @@ plugin.activate('audio.detach', level=20)
 # plugin.activate('tv.tvtime')
 plugin.activate('tv.mplayer')
 
+# For joystick support:
+# plugin.activate('joy')
+
 
 # ======================================================================
 # Freevo directory settings:
