@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2003/11/22 21:26:42  dischi
+# fix search bug
+#
 # Revision 1.43  2003/11/22 20:35:50  dischi
 # use new vfs
 #
@@ -663,7 +666,7 @@ def hash_xml_database():
     if config.OVERLAY_DIR:
         files = []
         for subdir in ('disc', 'disc-set'):
-            files += util.recursefolders(vfs.join(config.OVERLAY_DIR, 'disc'),
+            files += util.recursefolders(vfs.join(config.OVERLAY_DIR, subdir),
                                          1, '*'+config.SUFFIX_VIDEO_DEF_FILES[0],1)
         for file in files:
             infolist = parseMovieFile(file)
