@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/10/06 18:52:52  dischi
+# use REMOTE_MAP now and switch to new notifier code
+#
 # Revision 1.2  2004/09/30 02:16:20  rshortt
 # -turned this into an InputPlugin type
 # -use the new (old) keymap
@@ -55,6 +58,7 @@
 #
 # ----------------------------------------------------------------------- */
 #endif
+import notifier
 
 import sys
 import os
@@ -66,15 +70,12 @@ from time import sleep
 
 import config
 import plugin
-import rc
 
 #from input.linux_input import *
 import input.linux_input as li
 import input.evdev_keymaps as ek
 
 from event import *
-
-rc = rc.get_singleton()
 
 
 class PluginInterface(plugin.InputPlugin):
@@ -109,10 +110,10 @@ class PluginInterface(plugin.InputPlugin):
         print 'Using input device %s.' % self.device_name
 
         self.keymap = {}
-        for key in config.KEYMAP:
+        for key in config.REMOTE_MAP:
             if hasattr(li, 'KEY_%s' % key):
                 code = getattr(li, 'KEY_%s' % key)
-                self.keymap[code] = config.KEYMAP[key]
+                self.keymap[code] = config.REMOTE_MAP[key]
 
         device_codes = ek.maps.get(config.EVDEV_NAME)
         for s, k in device_codes.items():
@@ -125,7 +126,7 @@ class PluginInterface(plugin.InputPlugin):
         for s, k in keymap.items():
             print '    0x%04x = %3d' % (s, k)
 
-        rc.register(self.handle, True, 1)
+        notifier.addSocket( self.fd, self.handle )
 
 
     def config(self):
@@ -143,17 +144,9 @@ class PluginInterface(plugin.InputPlugin):
                   'Time between consecutive repeats (miliseconds).' ), ]
 
 
-    def handle(self):
+    def handle( self ):
         command = ''    
-        # _debug_('self.fd = %s' % self.fd, level=3)
-        (r, w, e) = select.select([self.fd], [], [], 0)
-        # _debug_('r,w,e = %s,%s,%s' % (r,w,e), level=3)
-        
-        if r:
-            c = os.read(self.fd, 16)
-#            print 'RLS: got stuff from event device'
-        else: 
-            return
+        c = os.read(self.fd, 16)
 
 #struct input_event {
 #        struct timeval time;
@@ -216,3 +209,4 @@ class PluginInterface(plugin.InputPlugin):
         print '  sending off event %s' % key
         self.post_key(key)
 
+        return True
