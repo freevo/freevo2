@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.140  2004/08/23 20:37:52  dischi
+# fading support in splash screen
+#
 # Revision 1.139  2004/08/22 20:16:22  dischi
 # move splashscreen to new mevas based gui code
 #
@@ -279,6 +282,7 @@ class Splashscreen(Area):
         self.content      = []
         self.bar          = None
         self.engine       = gui.AreaHandler('splashscreen', ('screen', self))
+        self.engine.show()
 
         
     def clear(self):
@@ -324,7 +328,17 @@ class Splashscreen(Area):
             self.engine.draw(None)
 
 
+    def hide(self):
+        """
+        fade out
+        """
+        self.engine.hide(config.OSD_FADE_STEPS)
+
+        
     def destroy(self):
+        """
+        destroy the object
+        """
         del self.engine
 
 
@@ -430,11 +444,11 @@ try:
     # Fire up splashscreen and load the plugins
     splash = Splashscreen(_('Starting Freevo, please wait ...'))
     plugin.init(splash.progress)
-    splash.destroy()
-    del splash
-    
+
     # Fire up splashscreen and load the cache
     if config.MEDIAINFO_USE_MEMORY == 2:
+        # delete previous splash screen object
+        splash.destroy()
         import util.mediainfo
 
         splash = Splashscreen(_('Reading cache, please wait ...'))
@@ -454,15 +468,24 @@ try:
         for f in cachefiles:
             splash.progress(int((float((cachefiles.index(f)+1)) / len(cachefiles)) * 100))
             util.mediainfo.load_cache(f)
-        splash.destroy()
-        del splash
 
+    # fade out the splash screen
+    splash.hide()
+    
     # prepare again, now that all plugins are loaded
     gui.settings.settings.prepare()
 
     # start menu
     MainMenu().getcmd()
 
+    # Wait for the startup animation. This is a bad hack but we won't
+    # be able to remove our splashscreen otherwise. Big FIXME!
+    gui.animation.render().wait()
+
+    # delete splash screen
+    splash.destroy()
+    del splash
+    
     # Kick off the main menu loop
     _debug_('Main loop starting...',2)
     import rc
