@@ -10,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.58  2003/08/06 19:36:47  dischi
+# o removed freevo_xwin
+# o use the freevo startscript to call matroxset
+#
 # Revision 1.57  2003/08/05 17:24:59  dischi
 # use config.DEBUG for mmpython debug
 #
@@ -178,13 +182,14 @@ def shutdown(menuw=None, arg=None, allow_sys_shutdown=1):
         if config.ENABLE_SHUTDOWN_SYS:
             # shutdown dual head for mga
             if config.CONF.display == 'mga':
-                os.system('./fbcon/matroxset/matroxset -f /dev/fb1 -m 0')
+                os.system('%s runapp matroxset -f /dev/fb1 -m 0' % \
+                          os.environ['FREEVO_SCRIPT'])
                 time.sleep(1)
-                os.system('./fbcon/matroxset/matroxset -f /dev/fb0 -m 1')
+                os.system('%s runapp matroxset -f /dev/fb0 -m 1' % \
+                          os.environ['FREEVO_SCRIPT'])
                 time.sleep(1)
 
             os.system(config.SHUTDOWN_SYS_CMD)
-        
             # let freevo be killed by init, looks nicer for mga
             return
 
@@ -199,10 +204,6 @@ def shutdown(menuw=None, arg=None, allow_sys_shutdown=1):
     plugin.shutdown()
 
     os.system('./runapp ./freevo stop')
-
-    # XXX kludge to shutdown freevo_xwin
-    util.killall('freevo_xwin')
-
 
     # Just wait until we're dead. SDL cannot be polled here anyway.
     while 1:
@@ -296,9 +297,6 @@ def signal_handler(sig, frame):
         plugin.shutdown()
 
         os.system('./runapp ./freevo stop')
-
-        # XXX kludge to shutdown freevo_xwin
-        util.killall('freevo_xwin')
 
 
 #
