@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2003/12/14 17:46:02  dischi
+# cleanup
+#
 # Revision 1.37  2003/12/07 19:08:15  dischi
 # Add blending for slideshows.
 #
@@ -51,24 +54,17 @@
 #endif
 
 
-import os.path
-import Image
 import signal
 import os
-import time
-import plugin
 
-import config # Configuration file. 
-import osd    # The OSD class, used to communicate with the OSD daemon
-from event import *
+import config 
+import osd    
+import plugin
 import util
 import rc
 
-from gui.GUIObject import GUIObject
-from gui.AlertBox import AlertBox
-
-osd        = osd.get_singleton()  # Create the OSD object
-
+from gui import GUIObject, AlertBox
+from event import *
 
 # Module variable that contains an initialized ImageViewer() object
 _singleton = None
@@ -95,12 +91,13 @@ class ImageViewer(GUIObject):
                            str(IMAGE_ZOOM_GRID6):6, str(IMAGE_ZOOM_GRID7):7,
                            str(IMAGE_ZOOM_GRID8):8, str(IMAGE_ZOOM_GRID9):9 }
 
-        self.slideshow   = TRUE  # currently in slideshow mode
+        self.slideshow   = True  # currently in slideshow mode
         self.alertbox    = None  # AlertBox active
         self.app_mode    = 'image'
         self.bitmapcache = util.objectcache.ObjectCache(3, desc='viewer')
         self.last_image  = (None, None)
-        
+        self.osd         = osd.get_singleton()
+
 
     def view(self, item, zoom=0, rotation=0):
         filename = item.filename
@@ -112,7 +109,7 @@ class ImageViewer(GUIObject):
         self.rotation = rotation
 
         if filename and len(filename) > 0:
-            image = osd.loadbitmap(filename, cache=self.bitmapcache)
+            image = self.osd.loadbitmap(filename, cache=self.bitmapcache)
         else:
             # Using Container-Image
             image = item.loadimage()
@@ -120,8 +117,8 @@ class ImageViewer(GUIObject):
         rc.app(self)
 
         if not image:
-            osd.clearscreen(color=osd.COL_BLACK)
-            osd.update()
+            self.osd.clearscreen(color=self.osd.COL_BLACK)
+            self.osd.update()
             self.alertbox = AlertBox(parent=self,
                                      text=_("Can't Open Image\n'%s'") % (filename))
             self.alertbox.show()
@@ -159,24 +156,24 @@ class ImageViewer(GUIObject):
 
             if self.rotation % 180:
                 # different calculations because image width is screen height
-                scale_x = float(osd.width) / (height / 3)
-                scale_y = float(osd.height) / (width / 3)
+                scale_x = float(self.osd.width) / (height / 3)
+                scale_y = float(self.osd.height) / (width / 3)
                 scale = min(scale_x, scale_y)
 
                 # read comment for the bbw and bbh calculations below
-                bbw = min(max((width / 3) * scale, osd.height), width) / scale
-                bbh = min(max((height / 3) * scale, osd.width), height) / scale
+                bbw = min(max((width / 3) * scale, self.osd.height), width) / scale
+                bbh = min(max((height / 3) * scale, self.osd.width), height) / scale
 
             else:
-                scale_x = float(osd.width) / (width / 3)
-                scale_y = float(osd.height) / (height / 3)
+                scale_x = float(self.osd.width) / (width / 3)
+                scale_y = float(self.osd.height) / (height / 3)
                 scale = min(scale_x, scale_y)
 
                 # the bb width is the width / 3 * scale, to avoid black bars left
                 # and right exapand it to the osd.width but not if this is more than the
                 # image width (same for height)
-                bbw = min(max((width / 3) * scale, osd.width), width) / scale
-                bbh = min(max((height / 3) * scale, osd.height), height) / scale
+                bbw = min(max((width / 3) * scale, self.osd.width), width) / scale
+                bbh = min(max((height / 3) * scale, self.osd.height), height) / scale
                 
 
             # calculate the beginning of the bounding box
@@ -200,8 +197,8 @@ class ImageViewer(GUIObject):
             # scale_x = scale_y = 1.0
             # if width > osd.width: scale_x = float(osd.width) / width
             # if height > osd.height: scale_y = float(osd.height) / height
-            scale_x = float(osd.width) / width
-            scale_y = float(osd.height) / height
+            scale_x = float(self.osd.width) / width
+            scale_y = float(self.osd.height) / height
             
             scale = min(scale_x, scale_y)
             
@@ -211,29 +208,29 @@ class ImageViewer(GUIObject):
         # Now we have all necessary informations about zoom yes/no and
         # the kind of rotation
         
-        x = (osd.width - new_w) / 2
-        y = (osd.height - new_h) / 2
+        x = (self.osd.width - new_w) / 2
+        y = (self.osd.height - new_h) / 2
         
         last_image = self.last_image[1]
 
         if (last_image and self.last_image[0] != item and
             config.IMAGEVIEWER_BLEND_STEPS):
-            screen = osd.screen.convert()
+            screen = self.osd.screen.convert()
             screen.fill((0,0,0,0))
-            screen.blit(osd.zoomsurface(image, scale, bbx, bby, bbw, bbh,
+            screen.blit(self.osd.zoomsurface(image, scale, bbx, bby, bbw, bbh,
                                         rotation = self.rotation).convert(), (x, y))
             # update the OSD
             self.drawosd(layer=screen)
 
             if config.IMAGEVIEWER_BLEND_STEPS:
-                osd.update(blend_surface=screen,
-                           blend_steps=config.IMAGEVIEWER_BLEND_STEPS,
-                           blend_time=config.IMAGEVIEWER_BLEND_TIME)
+                self.osd.update(blend_surface=screen,
+                                blend_steps=config.IMAGEVIEWER_BLEND_STEPS,
+                                blend_time=config.IMAGEVIEWER_BLEND_TIME)
 
         else:
-            osd.clearscreen(color=osd.COL_BLACK)
-            osd.drawsurface(image, x, y, scale, bbx, bby, bbw, bbh,
-                            rotation = self.rotation)
+            self.osd.clearscreen(color=self.osd.COL_BLACK)
+            self.osd.drawsurface(image, x, y, scale, bbx, bby, bbw, bbh,
+                                 rotation = self.rotation)
 
             # update the OSD
             self.drawosd()
@@ -242,7 +239,7 @@ class ImageViewer(GUIObject):
             plugin.getbyname('osd').draw(('osd', None), osd)
             
         # draw
-        osd.update()
+        self.osd.update()
 
         # start timer
         if self.fileitem.duration:
@@ -260,7 +257,7 @@ class ImageViewer(GUIObject):
         
     def cache(self, fileitem):
         # cache the next image (most likely we need this)
-        osd.loadbitmap(fileitem.filename, cache=self.bitmapcache)
+        self.osd.loadbitmap(fileitem.filename, cache=self.bitmapcache)
         
 
     def signalhandler(self, signum, frame):
@@ -273,7 +270,7 @@ class ImageViewer(GUIObject):
         #if event == rc.SELECT and self.alertbox:
         #    self.alertbox.destroy()
         #    self.alertbox = None
-        #    return TRUE
+        #    return True
         
         if event == PAUSE or event == PLAY:
             if self.slideshow:
@@ -296,7 +293,7 @@ class ImageViewer(GUIObject):
         # up and down will stop the slideshow and pass the
         # event to the playlist
         elif event == PLAYLIST_NEXT or event == PLAYLIST_PREV:
-            self.slideshow = FALSE
+            self.slideshow = False
             signal.alarm(0)
             self.fileitem.eventhandler(event)
             return True
@@ -331,7 +328,7 @@ class ImageViewer(GUIObject):
                 # Display entire picture, don't load next image in case
                 # the user wants to zoom around some more.
                 self.view(self.fileitem, zoom=0, rotation = self.rotation)
-            return TRUE                
+            return True                
 
         # save the image with the current rotation
         elif event == IMAGE_SAVE:
@@ -341,7 +338,7 @@ class ImageViewer(GUIObject):
                 os.system(cmd)
                 os.system('mv /tmp/freevo-iview %s' % self.filename)
                 self.rotation = 0
-                osd.bitmapcache.__delitem__(self.filename)
+                self.osd.bitmapcache.__delitem__(self.filename)
                 return True                
 
         else:
@@ -424,15 +421,16 @@ class ImageViewer(GUIObject):
                     prt_line[line] += '   ' + textstr
 
         # Create a black box for text
-        osd.drawbox(config.OSD_OVERSCAN_X,
-                    osd.height - (config.OSD_OVERSCAN_X + 25 + (len(prt_line) * 30)),
-                    osd.width, osd.height, width=-1, 
-                    color=((60 << 24) | osd.COL_BLACK), layer=layer)
+        self.osd.drawbox(config.OSD_OVERSCAN_X, self.osd.height - \
+                         (config.OSD_OVERSCAN_X + 25 + (len(prt_line) * 30)),
+                         self.osd.width, self.osd.height, width=-1, 
+                         color=((60 << 24) | self.osd.COL_BLACK), layer=layer)
 
 	# Now print the Text
         for line in range(len(prt_line)):
-            h=osd.height - (40 + config.OSD_OVERSCAN_Y + ((len(prt_line) - line - 1) * 30))
-            osd.drawstring(prt_line[line], 15 + config.OSD_OVERSCAN_X, h,
-                           fgcolor=osd.COL_ORANGE, layer=layer)
+            h=self.osd.height - (40 + config.OSD_OVERSCAN_Y + \
+                                 ((len(prt_line) - line - 1) * 30))
+            self.osd.drawstring(prt_line[line], 15 + config.OSD_OVERSCAN_X, h,
+                                fgcolor=self.osd.COL_ORANGE, layer=layer)
 
 
