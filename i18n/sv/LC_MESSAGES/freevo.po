@@ -5,155 +5,185 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: Fri Sep 12 21:41:21 2003\n"
+"POT-Creation-Date: 2003-10-03 17:30+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
-"Content-Transfer-Encoding: ENCODING\n"
+"Content-Type: text/plain; charset=ISO-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
 
-
-#: audio/audiodiskitem.py:61
+#: src/audio/audiodiskitem.py:60
 msgid "Unknown CD Album"
 msgstr "Okänd CD"
 
-#: audio/audiodiskitem.py:96 directory.py:331 image/plugins/gphoto.py:152
+#: src/audio/audiodiskitem.py:95 src/directory.py:368
+#: src/image/plugins/gphoto.py:155
 msgid "Browse directory"
 msgstr "Visa katalog"
 
-#: audio/plugins/cdbackup.py:377
-msgid "Get CDs available for ripping"
-msgstr "Visa tillgängliga CD-skivor"
+#: src/audio/xmms.py:156 src/games/game.py:99
+#, python-format
+msgid "File \"%s\" not found!"
+msgstr "Kan inte hitta \"%s\"!"
 
-#: audio/plugins/cdbackup.py:377
+#: src/audio/plugins/cdbackup.py:207
 msgid "Rip the CD to the hard drive"
 msgstr "Spara CDn till hårddisken"
 
-#: audio/plugins/cdbackup.py:391
+#: src/audio/plugins/cdbackup.py:208
+msgid "Get CDs available for ripping"
+msgstr "Visa tillgängliga CD-skivor"
+
+#: src/audio/plugins/cdbackup.py:233
 msgid "Backup CD to hard drive in mp3 format"
 msgstr "Spara CDn till hårddisken i MP3-format"
 
-#: audio/plugins/cdbackup.py:394
+#: src/audio/plugins/cdbackup.py:236
 msgid "Backup CD to hard drive in Ogg format"
 msgstr "Spara CDn till hårddisken i OGG-format"
 
-#: audio/plugins/cdbackup.py:397
+#: src/audio/plugins/cdbackup.py:239
 msgid "Backup CD to hard drive in FLAC format"
 msgstr "Spara CDn till hårddisken i FLAC-format"
 
-#: audio/plugins/cdbackup.py:399
+#: src/audio/plugins/cdbackup.py:241
 msgid "Backup CD to hard drive in wav format"
 msgstr "Spara CDn till hårddisken i WAV-format"
 
-#: audio/plugins/cdbackup.py:402
+#: src/audio/plugins/cdbackup.py:244
 msgid "CD Backup"
 msgstr "CD-backup"
 
-#: audio/plugins/detach.py:57
+#: src/audio/plugins/detach.py:63
 msgid "Show player"
 msgstr "Visa spelare"
 
-#: audio/plugins/mplayer.py:127
+#: src/audio/plugins/mplayer.py:131
+#, python-format
 msgid ""
 "%s\n"
 "not found!"
 msgstr ""
 
-#: audio/plugins/mplayer.py:155
+#: src/audio/plugins/mplayer.py:158
 msgid "Invalid audio file"
 msgstr "Felaktig ljudfil"
 
-#: audio/plugins/sqlmusic_view.py:57
-msgid "Show database information for this file"
-msgstr "Visa databasinformation för den här filen"
-
-#: audio/plugins/vux.py:38
+#: src/audio/plugins/vux.py:90
 msgid "[VUX] Start playing"
 msgstr ""
 
-#: audio/plugins/vux.py:39
+#: src/audio/plugins/vux.py:91
 msgid "[VUX] Stop playing"
 msgstr ""
 
-#: audio/plugins/vux.py:40
+#: src/audio/plugins/vux.py:92
 msgid "[VUX] Next (rating down)"
 msgstr ""
 
-#: audio/plugins/vux.py:41
+#: src/audio/plugins/vux.py:93
 msgid "[VUX] Next (rating intact)"
 msgstr ""
 
-#: audio/plugins/vux.py:42
+#: src/audio/plugins/vux.py:94
 msgid "[VUX] Next (rating up)"
 msgstr ""
 
-#: audio/plugins/vux.py:43
+#: src/audio/plugins/vux.py:95
 msgid "[VUX] Playing item rating up"
 msgstr ""
 
-#: audio/plugins/vux.py:44
+#: src/audio/plugins/vux.py:96
 msgid "[VUX] Playing item rating down"
 msgstr ""
 
-#: audio/plugins/vux.py:45
+#: src/audio/plugins/vux.py:97
 msgid "[VUX] a dir item do not select"
 msgstr ""
 
-#: audio/plugins/vux.py:46
+#: src/audio/plugins/vux.py:98
 msgid "[VUX] an audio item, do not select"
 msgstr ""
 
-#: audio/xmms.py:153 games/game.py:96
-msgid "File \"%s\" not found!"
-msgstr "Kan inte hitta \"%s\"!"
-
-#: directory.py:312
+#: src/directory.py:349
+#, python-format
 msgid "Directory on disc [%s]"
 msgstr "Katalog på disk [%s]"
 
-#: directory.py:313
+#: src/directory.py:350
 msgid "Directory"
 msgstr "Katalog"
 
-#: directory.py:344
+#: src/directory.py:374
 msgid "Recursive random play all items"
 msgstr "Rekursiv slumpmässig uppspelning av allt"
 
-#: directory.py:367
+#: src/directory.py:375
+#, fuzzy
+msgid "Configure directory"
+msgstr "Visa katalog"
+
+#: src/directory.py:398
 msgid "Enter Password"
 msgstr "Ange lösenord"
 
-#: directory.py:392
+#: src/directory.py:423
 msgid "Password incorrect"
 msgstr "Felaktigt lösenord"
 
-#: directory.py:435
+#: src/directory.py:465
 msgid "Scanning disc, be patient..."
 msgstr "Scannar disk, var god vänta..."
 
-#: directory.py:437
+#: src/directory.py:467
 msgid "Scanning directory, be patient..."
 msgstr "Scannar katalog, var god vänta..."
 
-#: games/mame_cache.py:163
+#: src/menu.py:545
+msgid "No action defined for this choice!"
+msgstr "Ingen åtgärd definerad för detta val!"
+
+#: src/osd.py:395
+msgid "z = Toggle Fullscreen"
+msgstr "z = Växla fullskärm"
+
+#: src/osd.py:396
+msgid "Arrow Keys = Move"
+msgstr "Piltangenter = Flytta"
+
+#: src/osd.py:397
+msgid "Spacebar = Select"
+msgstr "Mellanslag = Välj"
+
+#: src/osd.py:398
+msgid "Escape = Stop/Prev. Menu"
+msgstr "Escape = Stoppa/Föregående meny"
+
+#: src/osd.py:399
+msgid "h = Help"
+msgstr "h = Hjälp"
+
+#: src/games/mame_cache.py:170
 msgid "Generating MAME cache, please wait."
 msgstr "Genererar MAME-cache, var god vänta."
 
-#: gui/AlertBox.py:149 gui/ConfirmBox.py:146 plugins/commands.py:162
+#: src/gui/AlertBox.py:161 src/gui/ConfirmBox.py:161
+#: src/plugins/commands.py:171
 msgid "OK"
 msgstr "OK"
 
-#: gui/ConfirmBox.py:150
+#: src/gui/ConfirmBox.py:165
 msgid "CANCEL"
 msgstr "AVBRYT"
 
-#: image/imageitem.py:107 image/plugins/gphoto.py:116
+#: src/image/plugins/gphoto.py:119 src/image/imageitem.py:110
 msgid "View Image"
 msgstr "Visa bild"
 
-#: image/viewer.py:118
+#: src/image/viewer.py:118
+#, python-format
 msgid ""
 "Can't Open Image\n"
 "'%s'"
@@ -161,279 +191,283 @@ msgstr ""
 "Kan inte öppna bild\n"
 "'%s'"
 
-#: image/viewer.py:351
+#: src/image/viewer.py:351
 msgid "Title: "
 msgstr "Titel:"
 
-#: image/viewer.py:352
+#: src/image/viewer.py:352
 msgid "Description: "
 msgstr "Beskrivning:"
 
-#: image/viewer.py:386
+#: src/image/viewer.py:386
 msgid "No information available"
 msgstr "Ingen information tillgänglig"
 
-#: main.py:152
-msgid "shutting down..."
-msgstr "Avslutar Freevo..."
-
-#: main.py:254
-msgid "Freevo Main Menu"
-msgstr "Freevo huvudmeny"
-
-#: menu.py:528
-msgid "No action defined for this choice!"
-msgstr "Ingen åtgärd definerad för detta val!"
-
-#: osd.py:405
-msgid "z = Toggle Fullscreen"
-msgstr "z = Växla fullskärm"
-
-#: osd.py:406
-msgid "Arrow Keys = Move"
-msgstr "Piltangenter = Flytta"
-
-#: osd.py:407
-msgid "Spacebar = Select"
-msgstr "Mellanslag = Välj"
-
-#: osd.py:408
-msgid "Escape = Stop/Prev. Menu"
-msgstr "Escape = Stoppa/Föregående meny"
-
-#: osd.py:409
-msgid "h = Help"
-msgstr "h = Hjälp"
-
-#: plugins/base.py:67
-msgid "Shutdown Freevo"
-msgstr "Avsluta Freevo"
-
-#: plugins/base.py:68
-msgid "Shutdown system"
-msgstr "Stäng ner systemet"
-
-#: plugins/commands.py:147
+#: src/plugins/commands.py:156
 msgid "Command finished"
 msgstr "Kommando avslutat"
 
-#: plugins/commands.py:163
+#: src/plugins/commands.py:172
 msgid "Show Stderr"
 msgstr "Visa Stderr"
 
-#: plugins/commands.py:164
+#: src/plugins/commands.py:173
 msgid "Show Stdout"
 msgstr "Visa Stdout"
 
-#: plugins/commands.py:178
+#: src/plugins/commands.py:187
 msgid "Stdout File"
 msgstr "Stdout fil"
 
-#: plugins/commands.py:182
+#: src/plugins/commands.py:191
 msgid "Stderr File"
 msgstr "Stderr fil"
 
-#: plugins/commands.py:236
+#: src/plugins/commands.py:245
 msgid "Run Command"
 msgstr "Kör kommando"
 
-#: plugins/commands.py:259
+#: src/plugins/commands.py:268
 msgid "Command Failed"
 msgstr "Kommando misslyckades"
 
-#: plugins/commands.py:262
+#: src/plugins/commands.py:271
 msgid "Command Completed"
 msgstr "Kommando utfört"
 
-#: plugins/commands.py:287
+#: src/plugins/commands.py:296
 msgid "No Commands found"
 msgstr "Hittade inget kommando"
 
-#: plugins/commands.py:288 plugins/commands.py:299
+#: src/plugins/commands.py:297 src/plugins/commands.py:323
 msgid "Commands"
 msgstr "Kommandon"
 
-#: plugins/df.py:52
+#: src/plugins/df.py:70
+#, python-format
 msgid "%i of %i Mb free"
 msgstr "%i av %i Mb ledigt"
 
-#: plugins/rom_drives.py:225
+#: src/plugins/idlebar.py:465
+#, python-format
+msgid "%iM"
+msgstr ""
+
+#: src/plugins/idlebar.py:490
+#, python-format
+msgid "%s%%"
+msgstr ""
+
+#: src/plugins/rom_drives.py:254
+#, python-format
 msgid "Drive %s (no disc)"
 msgstr "Enhet %s (ingen disk)"
 
-#: plugins/rom_drives.py:289
+#: src/plugins/rom_drives.py:317
+#, python-format
 msgid "Ejecting disc in drive %s"
 msgstr "Matar ut skiva ur enhet %s"
 
-#: plugins/rom_drives.py:318
+#: src/plugins/rom_drives.py:350
+#, python-format
 msgid "Reading disc in drive %s"
 msgstr "Läser skiva i enhet %s"
 
-#: skins/main/listing_area.py:243
-msgid "This directory is empty"
-msgstr "Den här katalogen är tom"
+#: src/plugins/base.py:68
+msgid "Shutdown Freevo"
+msgstr "Avsluta Freevo"
 
-#: skins/main/main.py:161
-msgid "TV GUIDE"
-msgstr "TV-GUIDE"
+#: src/plugins/base.py:69
+msgid "Shutdown system"
+msgstr "Stäng ner systemet"
 
-#: skins/main/main.py:288
-msgid "Starting Freevo, please wait ..."
-msgstr "Startar Freevo, var god vänta..."
-
-#: skins/main/main.py:528 skins/main/main.py:595
-msgid "INTERNAL ERROR, NO MENU!"
-msgstr "INTERNT FEL, INGEN MENY!"
-
-#: skins/main/tvlisting_area.py:351 tv/tvguide.py:67 tv/tvguide.py:447
-#: tv/tvguide.py:449
-msgid "This channel has no data loaded"
-msgstr "Ingen information om denna kanal"
-
-#: tv/record_schedule.py:95
+#: src/tv/record_schedule.py:98
 msgid "View Recording Schedule"
 msgstr "Visa inspelningsschema"
 
-#: tv/record_schedule.py:97
+#: src/tv/record_schedule.py:100
 msgid "Delete Scheduled Item"
 msgstr "Ta bort schemalagda inspelningar"
 
-#: tv/record_schedule.py:99
+#: src/tv/record_schedule.py:102
 msgid "RECORDING SCHEDULE"
 msgstr "INSPELNINGSSCHEMA"
 
-#: tv/record_schedule.py:172
+#: src/tv/record_schedule.py:175
 msgid "VIEW RECORDING SCHEDULE"
 msgstr "VISA INSPELNINGSSCHEMA"
 
-#: tv/record_schedule.py:175
+#: src/tv/record_schedule.py:178
 msgid "DELETE SCHEDULED ITEM"
 msgstr ""
 
-#: tv/record_schedule.py:179
+#: src/tv/record_schedule.py:182
 msgid "All Currently Recording Items Have Been Killed!"
 msgstr "Alla pågående inspelningar har tagits bort!"
 
-#: tv/tvguide.py:77
+#: src/tv/tvguide.py:73 src/tv/tvguide.py:490 src/tv/tvguide.py:492
+#: src/skins/main/tvlisting_area.py:363
+msgid "This channel has no data loaded"
+msgstr "Ingen information om denna kanal"
+
+#: src/tv/tvguide.py:83
 msgid "Preparing the program guide"
 msgstr "Förbereder programguiden"
 
-#: tv/tvguide.py:81
+#: src/tv/tvguide.py:87
 msgid "TV Guide is corrupt!"
 msgstr "TV-guiden är felaktig!"
 
-#: tv/tvmenu.py:141 tv/tvmenu.py:149
+#: src/tv/tvmenu.py:144 src/tv/tvmenu.py:152
+#, python-format
 msgid "Could not find TV channel %s"
 msgstr "Kunde inte hitta TV-kanal %s"
 
-#: tv/tvmenu.py:174
+#: src/tv/tvmenu.py:177
 msgid "TV Guide"
 msgstr "TV-guide"
 
-#: tv/tvmenu.py:175
+#: src/tv/tvmenu.py:178
 msgid "Recorded Shows"
 msgstr "Inspelade program"
 
-#: tv/tvmenu.py:177
+#: src/tv/tvmenu.py:180
 msgid "Scheduled Recordings"
 msgstr "Schemalagda inspelningar"
 
-#: tv/tvmenu.py:179
+#: src/tv/tvmenu.py:182
 msgid "Search Guide"
 msgstr "Sök i guiden"
 
-#: tv/tvmenu.py:182
+#: src/tv/tvmenu.py:185
 msgid "TV Main Menu"
 msgstr "TV Huvudmeny"
 
-#: tv/tvmenu.py:218
-msgid ""
-"The list of TV channels is invalid!\n"
+#: src/tv/tvmenu.py:221
+msgid "The list of TV channels is invalid!\n"
 msgstr "Listan över TV-kanaler är felaktig!\n"
 
-#: tv/tvmenu.py:219
+#: src/tv/tvmenu.py:222
 msgid "Please check the config file."
 msgstr "Var god undersök konfigurationsfilen!"
 
-#: video/configure.py:77
-msgid "AUDIO MENU"
-msgstr "LJUDMENY"
-
-#: video/configure.py:96
-msgid "SUBTITLE MENU"
-msgstr "BILDTEXTMENY"
-
-#: video/configure.py:114
-msgid "CHAPTER MENU"
-msgstr "KAPITELMENY"
-
-#: video/configure.py:172
-msgid "CONFIG MENU"
-msgstr "KONFIGURATIONSMENY"
-
-#: video/plugins/imdb.py:91 video/plugins/imdb.py:97
-msgid "Search IMDB for [%s]"
-msgstr "Sök IMDB efter [%s]"
-
-#: video/plugins/imdb.py:108
-msgid "searching IMDB..."
-msgstr "söker i IMDB..."
-
-#: video/plugins/imdb.py:127
-msgid "Unknown error while connecting to IMDB"
-msgstr "Okänt fel vid uppkoppling till IMDB"
-
-#: video/plugins/imdb.py:149
-msgid "No information available from IMDB"
-msgstr "Ingen information tillgänglig från IMDB"
-
-#: video/plugins/imdb.py:188
-msgid "getting data..."
-msgstr "hämtar data..."
-
-#: video/plugins/imdb_info.py:64
+#: src/video/plugins/imdb_info.py:72
 msgid "Show info for this file"
 msgstr "Visa information om den här filen"
 
-#: video/plugins/imdb_info.py:78
+#: src/video/plugins/imdb_info.py:86
 msgid "There is no IMDB information for this file."
 msgstr "Det finns ingen IMDB-information om den här filen."
 
-#: video/plugins/mover.py:61
+#: src/video/plugins/imdb.py:116 src/video/plugins/imdb.py:122
+#, python-format
+msgid "Search IMDB for [%s]"
+msgstr "Sök IMDB efter [%s]"
+
+#: src/video/plugins/imdb.py:133
+msgid "searching IMDB..."
+msgstr "söker i IMDB..."
+
+#: src/video/plugins/imdb.py:157
+msgid "Unknown error while connecting to IMDB"
+msgstr "Okänt fel vid uppkoppling till IMDB"
+
+#: src/video/plugins/imdb.py:179
+msgid "No information available from IMDB"
+msgstr "Ingen information tillgänglig från IMDB"
+
+#: src/video/plugins/imdb.py:218
+msgid "getting data..."
+msgstr "hämtar data..."
+
+#: src/video/plugins/mover.py:64
+#, python-format
 msgid "Move to [%s]"
 msgstr "Flytta till [%s]"
 
-#: video/videoitem.py:267
+#: src/video/plugins/linkbrowser.py:159
+#, python-format
+msgid "Failed to download %s"
+msgstr ""
+
+#: src/video/configure.py:80
+msgid "AUDIO MENU"
+msgstr "LJUDMENY"
+
+#: src/video/configure.py:99
+msgid "SUBTITLE MENU"
+msgstr "BILDTEXTMENY"
+
+#: src/video/configure.py:117
+msgid "CHAPTER MENU"
+msgstr "KAPITELMENY"
+
+#: src/video/configure.py:175
+msgid "CONFIG MENU"
+msgstr "KONFIGURATIONSMENY"
+
+#: src/video/videoitem.py:291
 msgid "Play DVD"
 msgstr "Spela DVD"
 
-#: video/videoitem.py:275
+#: src/video/videoitem.py:299
 msgid "Play VCD"
 msgstr "Spela VCD"
 
-#: video/videoitem.py:279
+#: src/video/videoitem.py:303
 msgid "Play default track"
 msgstr "Spela förvalt spår"
 
-#: video/videoitem.py:359
+#: src/video/videoitem.py:308
+msgid "Play with maximum cache"
+msgstr ""
+
+#: src/video/videoitem.py:392
 msgid "Wait while detecting media..."
 msgstr "Letar media, vänta..."
 
-#: video/videoitem.py:381
+#: src/video/videoitem.py:414
+#, python-format
 msgid "Media not found for file \"%s\".\n"
 msgstr "Kan inte hitta media i fil \"%s\".\n"
 
-#: video/videoitem.py:382
+#: src/video/videoitem.py:415
 msgid "Please insert the media."
 msgstr "Vänligen stoppa i media."
 
-#: video/videoitem.py:398
+#: src/video/videoitem.py:431
+#, python-format
 msgid "Media not found for %s track %s"
 msgstr "Kan inte hitta media i %s spår %s"
 
-#: video/videoitem.py:518
+#: src/video/videoitem.py:551
+#, python-format
 msgid "Play Title %s"
 msgstr "Spela titel %s"
+
+#: src/main.py:117
+msgid "shutting down..."
+msgstr "Avslutar Freevo..."
+
+#: src/main.py:223
+msgid "Freevo Main Menu"
+msgstr "Freevo huvudmeny"
+
+#: src/skins/main/main.py:154
+msgid "TV GUIDE"
+msgstr "TV-GUIDE"
+
+#: src/skins/main/main.py:284
+msgid "Starting Freevo, please wait ..."
+msgstr "Startar Freevo, var god vänta..."
+
+#: src/skins/main/main.py:544 src/skins/main/main.py:612
+msgid "INTERNAL ERROR, NO MENU!"
+msgstr "INTERNT FEL, INGEN MENY!"
+
+#: src/skins/main/listing_area.py:249
+msgid "This directory is empty"
+msgstr "Den här katalogen är tom"
 
 # Manualy added from fxd skin files
 msgid "TV"
@@ -555,3 +589,6 @@ msgstr "Storlek:"
 
 msgid " items in this playlist"
 msgstr " saker i den här spellistan"
+
+#~ msgid "Show database information for this file"
+#~ msgstr "Visa databasinformation för den här filen"
