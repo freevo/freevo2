@@ -37,7 +37,7 @@ import sys
 
 import config
 
-DEBUG = config.DEBUG
+
 CHUNKSIZE = 1024 * 128
 
 data = None
@@ -77,9 +77,6 @@ def main():
     try:
         while record_forever or time.time() < stop:
             buf = data.read(CHUNKSIZE)
-            if DEBUG:  
-                sys.stdout.write('.')
-                sys.stdout.flush()
             save_file.write(buf)
             save_file.flush()
     except:
@@ -93,7 +90,6 @@ def finish(signum=None, frame=None):
     global save_file
     global URL
 
-    if DEBUG: print
     print 'Finished recording %s with signal %s.' % (URL, signum)
     data.close()
     save_file.close()
