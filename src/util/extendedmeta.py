@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/01/18 16:47:35  dischi
+# cleanup
+#
 # Revision 1.4  2004/01/17 20:28:12  dischi
 # use new metainfo
 #
@@ -80,13 +83,9 @@ import util.fxdparser
 import mediainfo
 
 try:
-    # The DB stuff
-    import sqlite
-
     from util.dbutil import *
-    has_db = True
 except ImportError:
-    has_db = False
+    pass
     
 from mmpython.audio import eyeD3
 from util import recursefolders
@@ -102,8 +101,6 @@ def make_query(filename,dirtitle):
     if not os.path.exists(filename):
         print "File %s does not exist" % (filename)
         return None
-
-    mediainfo.cache_dir(os.path.dirname(filename))
 
     a = mediainfo.get(filename)
     t = tracknum(a['trackno'])
@@ -134,56 +131,17 @@ def addPathDB(path='/media/Music',dirtitle=config.AUDIO_ITEMS[0][0],type='*.mp3'
             # Why doesn't it just give a return code
             pass
   
-    if count > 0: print "Skipped %i songs already in the database..." % (count)
+    if count > 0:
+        print "  Skipped %i songs already in the database..." % (count)
 
     for song in songs:
         db.runQuery(make_query(song,dirtitle))
     db.close()
 
 
-##### Images
-
-def get_md5(obj):
-    m = md5.new()
-    if isinstance(obj,file):     # file
-        for line in obj.readlines():
-            m.update(line)
-        return m.digest()
-    else:                        # str
-        m.update(obj)
-        return m.digest()
-
-def extract_image(path):
-    songs = util.recursefolders(path, pattern='*.mp3',recurse=0)
-    name = 'cover.jpg'
-    for i in songs:
-        id3 = eyeD3.Mp3AudioFile( i )
-        path = os.path.dirname(i)
-        myname = os.path.join(path,name)
-        if id3.tag:
-            images = id3.tag.getImages();
-            for img in images:
-                if vfs.isfile(myname) and (get_md5(vfs.open(myname,'rb')) == get_md5(img.imageData)):
-                    # Image already there and has identical md5, skip
-                    pass 
-                elif not vfs.isfile(myname):
-                    f = vfs.open(myname, "wb")
-                    f.write(img.imageData)
-                    f.flush()
-                    f.close()
-                else:
-                    # image exists, but sums are different, write a unique cover
-                    myname = os.path.join(path,os.path.splitext(os.path.basename(i))[0]+'.jpg')
-                    f = vfs.open(myname, "wb")
-                    f.write(img.imageData)
-                    f.flush()
-                    f.close()
-     
-
-##### Audio Folder Information
+##### Audio Information
 
 various = '__various__'
-
 
 class AudioParser:
 
@@ -259,7 +217,7 @@ class AudioParser:
             if getattr(self, type):
                 mediainfo.set(dirname, type, getattr(self, type))
 
-        if config.DEBUG:
+        if config.DEBUG > 1:
             print dirname
             if self.artist:
                 print self.artist
@@ -275,7 +233,13 @@ class AudioParser:
                 print '%i:%0.2i' % (int(self.length/60), int(self.length%60))
             print
 
+        data    = mediainfo.get(dirname)
+        modtime = os.stat(dirname)[stat.ST_MTIME]
+        if not data['coverscan'] or data['coverscan'] != modtime:
+            data.store('coverscan', modtime)
+            self.extract_image(dirname)
 
+            
     def strcmp(self, s1, s2):
         if not s1 or not s2:
             return s1 or s2
@@ -287,11 +251,42 @@ class AudioParser:
         return various
 
 
+    def get_md5(self, obj):
+        m = md5.new()
+        if isinstance(obj,file):     # file
+            for line in obj.readlines():
+                m.update(line)
+            return m.digest()
+        else:                        # str
+            m.update(obj)
+            return m.digest()
 
-##### Helper to do all of them
 
-def AddExtendedMeta(path):
-    AudioParser(path) #, rescan=True)
-    extract_image(path)
-    if has_db:
-        addPathDB(path)
+    def extract_image(self, path):
+        for i in util.match_files(path, ['mp3']):
+            try:
+                id3 = eyeD3.Mp3AudioFile( i )
+            except:
+                continue
+            myname = os.path.join(path, 'cover.jpg')
+            if id3.tag:
+                images = id3.tag.getImages();
+                for img in images:
+                    if vfs.isfile(myname) and (self.get_md5(vfs.open(myname,'rb')) == \
+                                               self.get_md5(img.imageData)):
+                        # Image already there and has identical md5, skip
+                        pass 
+                    elif not vfs.isfile(myname):
+                        f = vfs.open(myname, "wb")
+                        f.write(img.imageData)
+                        f.flush()
+                        f.close()
+                    else:
+                        # image exists, but sums are different, write a unique cover
+                        iname = os.path.splitext(os.path.basename(i))[0]+'.jpg'
+                        myname = os.path.join(path, iname)
+                        f = vfs.open(myname, "wb")
+                        f.write(img.imageData)
+                        f.flush()
+                        f.close()
+     
