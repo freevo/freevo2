@@ -34,6 +34,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/09/10 19:32:22  dischi
+# remove not needed imports
+#
 # Revision 1.27  2003/09/01 21:32:00  outlyer
 # PopupBox expects "StringType" which for some reason, doesn't include
 # UnicodeType, so it crashes when you shcedule a recording. Ideally, we'd
@@ -76,12 +79,6 @@ import time
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
 
-# Various utilities
-import util
-
-# The OSD class
-import osd
-
 # The menu widget class
 import menu
 
@@ -107,9 +104,6 @@ DEBUG = config.DEBUG
 
 TRUE = 1
 FALSE = 0
-
-# Create the OSD object
-osd = osd.get_singleton()
 
 menuwidget = menu.get_singleton()
 
