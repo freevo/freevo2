@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# configure - the main configure script
+#
+# $Id$
+#
+
+# XXX Add a check that we have a recent version of python. Better check for the 
+# version here so that we don't need to restrict the install.py to be 
+# compatible with older versions of Python.
+
+python setup_build.py $*
+
