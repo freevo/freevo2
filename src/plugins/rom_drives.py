@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.58  2004/02/27 20:07:28  dischi
+# add function to check if a media is mounted
+#
 # Revision 1.57  2004/02/15 15:29:47  dischi
 # remove old stuff
 #
@@ -380,7 +383,7 @@ class RemovableMedia:
         """
         Mount the media
         """
-        _debug_('Mounting disc in drive %s' % self.drivename,2)
+        _debug_('Mounting disc in drive %s' % self.drivename, 2)
         util.mount(self.mountdir, force=True)
         return
 
@@ -389,10 +392,18 @@ class RemovableMedia:
         """
         Mount the media
         """
-        _debug_('Unmounting disc in drive %s' % self.drivename,2)
+        _debug_('Unmounting disc in drive %s' % self.drivename, 2)
         util.umount(self.mountdir)
         return
-    
+
+
+    def is_mounted(self):
+        """
+        Check if the media is mounted
+        """
+        return util.is_mounted(self.mountdir)
+        
+
     def shutdown(self):
         shutdown()
 

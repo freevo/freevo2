@@ -10,17 +10,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/02/27 20:07:28  dischi
+# add function to check if a media is mounted
+#
 # Revision 1.15  2004/02/05 19:26:42  dischi
 # fix unicode handling
 #
 # Revision 1.14  2004/02/05 02:52:26  gsbarbieri
 # Handle filenames internally as unicode objects.
-#
-# This does *NOT* affect filenames that have only ASCII chars, since the translation ASCII -> Unicode is painless. However this *DOES* affect files with accents, like é (e acute, \xe9) and others.
-#
-# I tested with Video, Images and Music modules, but *NOT* with Games, so if you have the games modules, give it a try.
-#
-# It determines the encoding based on (in order) FREEVO_LOCALE, LANG and LC_ALL, which may have the form: "LANGUAGE_CODE.ENCODING", like "pt_BR.UTF-8", and others.
 #
 # Revision 1.13  2004/01/16 16:23:29  dischi
 # add softlink checking
@@ -30,35 +27,6 @@
 #
 # Revision 1.11  2004/01/03 17:41:01  dischi
 # add helper to get all subdirs recursive
-#
-# Revision 1.10  2003/12/31 16:43:49  dischi
-# major speed enhancements
-#
-# Revision 1.8  2003/12/12 19:11:20  dischi
-# rewrote find_matches. It's not 100% correct because it doesn't use splitext
-# anymore, but it's _much_ faster now.
-#
-# Revision 1.7  2003/12/09 19:42:23  dischi
-# more generic resolve_media_mountdir and arg checking for mount functions
-#
-# Revision 1.6  2003/11/22 20:34:08  dischi
-# use new vfs
-#
-# Revision 1.5  2003/11/04 11:26:07  dischi
-# fix runtime install -- arg
-#
-# Revision 1.4  2003/11/03 18:25:36  dischi
-# fix
-#
-# Revision 1.3  2003/11/02 09:24:35  dischi
-# Check for libs and make it possible to install runtime from within
-# freevo
-#
-# Revision 1.2  2003/10/17 17:28:41  dischi
-# bugfix
-#
-# Revision 1.1  2003/10/11 11:20:11  dischi
-# move util.py into a directory and split it into two files
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -90,7 +58,6 @@ import copy
 import cPickle, pickle # pickle because sometimes cPickle doesn't work
 import fnmatch
 import traceback
-import time
 
 if float(sys.version[0:3]) < 2.3:
     PICKLE_PROTOCOL = 1
@@ -403,7 +370,15 @@ def umount_all():
     for d in copy.copy(mounted_dirs):
         umount(d)
         
-            
+
+def is_mounted(dir):
+    """
+    return if the dir is mounted
+    """
+    global mounted_dirs
+    return dir in mounted_dirs
+
+    
 def resolve_media_mountdir(*arg):
     """
     get the mount point of the media with media_id
