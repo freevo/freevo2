@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/02/07 17:09:19  dischi
+# Changed the config file loading based on the guidelines from Krister.
+#
 # Revision 1.8  2003/01/19 16:03:36  dischi
 # reverse the path for searching for the config file. First try to find the
 # files in . (maybe you have more than one version of Freevo installed), after
@@ -166,10 +169,10 @@ sys.stderr = Logger(sys.argv[0] + ':stderr')
 #
 # Config file handling
 #
-cfgfilepath = [ '.',
+cfgfilepath = [ os.environ['FREEVO_STARTDIR'],
                 os.path.expanduser('~/.freevo'),
-                '/etc/freevo'
-                ]
+                '/etc/freevo',
+                '.' ]
 
 class Struct:
     pass
@@ -185,6 +188,7 @@ CONF.xmame_SDL = ''
 CONF.jpegtran = ''
 CONF.mplayer = ''
 CONF.snes = ''
+CONF.version = 0
 
 def read_config(filename, conf):
     if DEBUG: print 'Reading config file %s' % filename
@@ -203,64 +207,79 @@ def read_config(filename, conf):
     w, h = conf.geometry.split('x')
     conf.width, conf.height = int(w), int(h)
         
-    
-found = 0
-founddir = ''
+
+# Search for freevo.conf:
 for dir in cfgfilepath:
-    cfgfilename = dir + '/freevo_config.py'
-    if os.path.isfile(cfgfilename):
-
-        freevoconf = os.path.dirname(cfgfilename) + "/freevo.conf"
-        if os.path.isfile(freevoconf):
-            print 'Loading configure settings: %s' % freevoconf
-            read_config(freevoconf, CONF)
-            if not CONF.mplayer:
-                print
-                print "please re-run configure, it has changed"
-                sys.exit(1)
-
-        print 'Loading cfg: %s' % cfgfilename
-        execfile(cfgfilename, globals(), locals())
-        found = 1
-        founddir = dir
+    freevoconf = dir + '/freevo.conf'
+    if os.path.isfile(freevoconf):
+        print 'Loading configure settings: %s' % freevoconf
+        read_config(freevoconf, CONF)
         break
-    else:
-        print '%s not found' % cfgfilename
+    
+# Load freevo_config.py:
+cfgfilename = './freevo_config.py'
+if os.path.isfile(cfgfilename):
+    print 'Loading cfg: %s' % cfgfilename
+    execfile(cfgfilename, globals(), locals())
 
-if not found:
-    # This is a fatal error, the freevo_config.py file must be loaded!
-    print ('Freevo: Fatal error, cannot find freevo_config.py. ' +
-          'Looked in the following dirs:')
-    for dir in cfgfilepath:
-        print ' '*5 + dir
+    if int(str(CONF.version).split('.')[0]) != \
+       int(str(FREEVO_CONF_VERSION).split('.')[0]):
+        print '\nERROR: The version informations in freevo_config.py doesn\'t'
+        print 'match the version in %s.' % freevoconf
+        print 'please rerun configure to generate a new freevo.conf'
+        sys.exit(1)
 
-    raise 'Cannot find freevo_config.py'
+    if int(str(CONF.version).split('.')[1]) != \
+       int(str(FREEVO_CONF_VERSION).split('.')[1]):
+        print 'WARNING: freevo_config.py was changed, please rerun ./configure'
+    
 else:
-    overridefile = founddir + '/local_conf.py'
+    print '\nERROR: can\' find freevo_config.py'
+    sys.exit(1)
+
+
+# Search for local_conf.py:
+for dir in cfgfilepath:
+    overridefile = dir + '/local_conf.py'
     if os.path.isfile(overridefile):
         print 'Loading cfg overrides: %s' % overridefile
         execfile(overridefile, globals(), locals())
-    else:
-        print 'No overrides loaded'
 
-    # XXX Check that the user has updated the config file for the new
-    # XXX ROM_DRIVES format.
-    if ROM_DRIVES:
-        for drive in ROM_DRIVES:
-            if len(drive) != 3:
-                sys.__stdout__.write('ERROR! config.ROM_DRIVES is ' +
-                                     'not 3 elements!\n')
-                sys.exit(1)
+        try:
+            CONFIG_VERSION
+        except NameError:
+            print '\nERROR: your local_config.py file has no version information'
+            print 'Please check freevo_config.py for changes and set CONFIG_VERSION'
+            print 'in %s to %s' % (overridefile, LOCAL_CONF_VERSION)
+            sys.exit(1)
 
+        if int(str(CONFIG_VERSION).split('.')[0]) != \
+           int(str(LOCAL_CONF_VERSION).split('.')[0]):
+            print '\nERROR: The version informations in freevo_config.py doesn\'t'
+            print 'match the version in your local_config.py.'
+            print 'Please check freevo_config.py for changes and set CONFIG_VERSION'
+            print 'in %s to %s' % (overridefile, LOCAL_CONF_VERSION)
+            sys.exit(1)
 
-for dir in ( os.path.expanduser('~/.freevo'), '/etc/freevo', './rc_client' ):
-    if REMOTE and os.path.isfile('%s/%s.py' % (dir, REMOTE)):
-        print 'load REMOTE file %s/%s.py' % (dir, REMOTE)
-        execfile('%s/%s.py' % (dir, REMOTE), globals(), locals())
+        if int(str(CONFIG_VERSION).split('.')[1]) != \
+           int(str(LOCAL_CONF_VERSION).split('.')[1]):
+            print 'WARNING: freevo_config.py was changed, please check local_config.py'
         break
-    else:
-        print 'no REMOTE file %s/%s.py' % (dir, REMOTE)
+
+else:
+    print 'No overrides loaded'
     
+
+#search the remote
+if REMOTE:
+    for dir in ( os.path.expanduser('~/.freevo'), '/etc/freevo', './rc_client' ):
+        if os.path.isfile('%s/%s.py' % (dir, REMOTE)):
+            print 'load REMOTE file %s/%s.py' % (dir, REMOTE)
+            execfile('%s/%s.py' % (dir, REMOTE), globals(), locals())
+            break
+    else:
+        print 'No remote config found'
+
 
 #
 # List of objects representing removable media, e.g. CD-ROMs,
