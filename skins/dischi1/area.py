@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/03/20 18:55:45  dischi
+# Correct the rectangle drawing
+#
 # Revision 1.27  2003/03/20 15:44:59  dischi
 # faster now
 #
@@ -282,6 +285,13 @@ class Screen:
 
 
 
+class Geometry:
+    def __init__(self, x, y, width, height):
+        self.x = x
+        self.y = y
+        self.width  = width
+        self.height = height
+
 
 class Skin_Area:
     """
@@ -505,6 +515,26 @@ class Skin_Area:
         return max(item_w, r.width), max(item_h, r.height), r
     
 
+    def fit_item_in_rectangle(self, rectangle, width, height):
+        """
+        calculates the rectangle geometry and fits it into the area
+        """
+        x = 0
+        y = 0
+        r = self.get_item_rectangle(rectangle, width, height)[2]
+        if r.width > width:
+            r.width, width = width, width - (r.width - width)
+        if r.height > height:
+            r.height, height = height, height - (r.height - height)
+        if r.x < 0:
+            r.x, x = 0, -r.x
+            width -= x
+        if r.y < 0:
+            r.y, y = 0, -r.y
+            height -= y
+
+        return Geometry(x, y, width, height), r
+    
 
     def init_vars(self, settings, display_type, widget_type = 'menu'):
         """

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/03/20 18:55:46  dischi
+# Correct the rectangle drawing
+#
 # Revision 1.7  2003/03/19 11:00:31  dischi
 # cache images inside the area and some bugfixes to speed up things
 #
@@ -66,7 +69,7 @@ import config
 
 osd = osd.get_singleton()
 
-from area import Skin_Area
+from area import Skin_Area, Geometry
 from skin_utils import *
 
 
@@ -154,10 +157,15 @@ class TVListing_Area(Skin_Area):
             r = self.get_item_rectangle(selected_val.rectangle, 20, selected_val.font.h)[2]
             item_h = max(item_h, r.height + content.spacing)
 
+        head_h = head_val.font.h
+        if head_val.rectangle:
+            r = self.get_item_rectangle(head_val.rectangle, 20, head_val.font.h)[2]
+            head_h = max(head_h, r.height + content.spacing)
+
         content_h = content.height + content.y - content_y
 
         self.last_items_geometry = font_h, label_width, label_txt_width, content_y,\
-                                   content_h / item_h, item_h
+                                   content_h / item_h, item_h, head_h
 
         return self.last_items_geometry
     
@@ -179,7 +187,7 @@ class TVListing_Area(Skin_Area):
         n_cols = len(to_listing[0])-1
         col_time = 30
 
-        font_h, label_width, label_txt_width, y0, num_rows, item_h = \
+        font_h, label_width, label_txt_width, y0, num_rows, item_h, head_h = \
                 self.get_items_geometry(settings, menu)
 
         label_val, label_font, head_val, head_font, selected_val, \
@@ -219,18 +227,16 @@ class TVListing_Area(Skin_Area):
             x1 = int(x_contents + (float(w_contents) / n_cols) * (i+1))
             ty0 = content.y
 
+            ig = Geometry(0, 0, x1-x0+1, head_h)
             if head_val.rectangle:
-                r = self.get_item_rectangle(head_val.rectangle, x1-x0, head_font.h)[2]
-                if r.x < 0:
-                    x0 -= r.x
-                if r.y < 0:
-                    ty0 -= r.y
-                self.drawroundbox(x0 + r.x, ty0 + r.y, r.width, r.height, r)
+                ig, r = self.fit_item_in_rectangle(head_val.rectangle, x1-x0+1, head_h)
+                self.drawroundbox(x0+r.x, ty0+r.y, r.width, r.height, r)
                 
             self.write_text(time.strftime("%H:%M",time.localtime(to_listing[0][i+1])),
-                            head_font, content, x=x0, y=ty0, width=x1-x0, height=-1)
+                            head_font, content, x=x0+ig.x,
+                            y=ty0+ig.y, width=ig.width, height=-1,
+                            align_v='center', align_h = head_val.align)
 
-        
         # define start and stop time
         date = time.strftime("%x", time.localtime())
         start_time = to_listing[0][1]
@@ -238,7 +244,7 @@ class TVListing_Area(Skin_Area):
         stop_time += (col_time*60)
 
         # 1 sec = x pixels
-        prop_1sec = float(w_contents) / float(n_cols * col_time * 60) 
+        prop_1sec = float(w_contents) / float(n_cols * col_time * 60)
 
         # selected program:
         selected_prog = to_listing[1]
@@ -296,8 +302,8 @@ class TVListing_Area(Skin_Area):
 
             if to_listing[i].programs:
                 for prg in to_listing[i].programs:
-                    flag_left  = 0
-                    flag_right = 0
+                    flag_left   = 0
+                    flag_right  = 0
 
                     if prg.start < start_time:
                         flag_left = 1
@@ -314,7 +320,6 @@ class TVListing_Area(Skin_Area):
                     else:
                         w =  int( float(prg.stop - t_start) * prop_1sec )
                         x1 = x_contents + int(float(prg.stop-start_time) * prop_1sec)
-
 
                     if prg.title == selected_prog.title and \
                        prg.channel_id == selected_prog.channel_id and \
@@ -341,19 +346,15 @@ class TVListing_Area(Skin_Area):
                     tx0 = x0
                     tx1 = x1
                     ty0 = y0
-                    
+
+                    ig = Geometry(0, 0, tx1-tx0+1, item_h)
                     if val.rectangle:
-                        r = self.get_item_rectangle(val.rectangle, tx1-tx0, font_h)[2]
-                        if r.x < 0:
-                            tx0 -= r.x
-                        if r.y < 0:
-                            ty0 -= r.y
-                            
+                        ig, r = self.fit_item_in_rectangle(val.rectangle, tx1-tx0+1, item_h)
                         self.drawroundbox(tx0+r.x, ty0+r.y, r.width, r.height, r)
                         
                     if tx0 < tx1:
-                        self.write_text(prg.title, font, content, x=tx0,
-                                        y=ty0, width=tx1-tx0, height=font_h,
+                        self.write_text(prg.title, font, content, x=tx0+ig.x,
+                                        y=ty0+ig.y, width=ig.width, height=-1,
                                         align_v='center', align_h = val.align)
 
                     #if flag_left:
