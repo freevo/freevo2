@@ -15,6 +15,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.113  2003/02/04 13:10:16  dischi
+# o removed MPLAYER_AO_HWAC3_DEV (mplayer is good enough to find that out)
+#   and ENABLE_SHUTDOWN (it's not used anymore)
+# o added DIRECTORY_SORT_BY_DATE and DIRECTORY_AUTOPLAY_SINGLE_ITEM
+#   This variables can be set in skin.xml
+# o reformat to 80 chars/line
+#
 # Revision 1.112  2003/01/31 02:08:59  krister
 # Changed the X11 display option to automatically select between xv,x11,etc.
 #
@@ -38,39 +45,15 @@
 # SUFFIX_VIDEO_DEF_FILES because we use this for movie xml files.
 #
 # Revision 1.106  2003/01/10 05:32:35  krister
-# Ooops, autosync for mplayer isn't supported until recently. Wait until it is in freevo_apps.
+# Ooops, autosync for mplayer isn't supported until recently. Wait until it is
+# in freevo_apps.
 #
 # Revision 1.105  2003/01/09 05:04:05  krister
-# Added an option to play all movies in a dir, and generate random playlists for them.
+# Added an option to play all movies in a dir, and generate random playlists
+# for them.
 #
 # Revision 1.104  2003/01/07 07:18:56  krister
 # Added autosync as a default option for MPlayer.
-#
-# Revision 1.103  2003/01/05 12:48:29  dischi
-# MAME_CACHE contains the uid to avoid conflicts when you start freevo as
-# different users
-#
-# Revision 1.102  2002/12/30 15:07:36  dischi
-# Small but important changes to the remote control. There is a new variable
-# RC_MPLAYER_CMDS to specify mplayer commands for a remote. You can also set
-# the variable REMOTE to a file in rc_clients to contain settings for a
-# remote. The only one right now is realmagic, feel free to add more.
-# RC_MPLAYER_CMDS uses the slave commands from mplayer, src/video/mplayer.py
-# now uses -slave and not the key bindings.
-#
-# Revision 1.101  2002/12/29 19:24:25  dischi
-# Integrated two small fixes from Jens Axboe to support overscan for DXR3
-# and to set MPLAYER_VO_OPTS
-#
-# Revision 1.100  2002/12/21 17:26:52  dischi
-# Added dfbmga support. This includes configure option, some special
-# settings for mplayer and extra overscan variables
-#
-# Revision 1.99  2002/12/09 14:23:52  dischi
-# Added games patch from Rob Shortt to use the interface.py and snes support
-#
-# Revision 1.98  2002/12/03 21:29:39  dischi
-# added dvdnav options
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -104,7 +87,7 @@
 # General freevo settings:
 # ======================================================================
 
-AUDIO_DEVICE        = '/dev/dsp'      # e.g.: /dev/dsp0, /dev/audio, /dev/alsa/??
+AUDIO_DEVICE        = '/dev/dsp'      # e.g.: /dev/dsp0, /dev/audio, /dev/alsa/?
 MAJOR_AUDIO_CTRL    = 'VOL'           # Freevo takes control over one audio ctrl
                                       # 'VOL', 'PCM' 'OGAIN' etc.
 CONTROL_ALL_AUDIO   = 1               # Should Freevo take complete control of audio
@@ -113,10 +96,6 @@ DEFAULT_VOLUME      = 40              # Set default volume level.
 TV_IN_VOLUME        = 60              # Set this to your preferred level 0-100.
 VCR_IN_VOLUME       = 90              # If you use different input from TV
 DEV_MIXER           = '/dev/mixer'    # mixer device 
-
-RANDOM_PLAYLIST     = 1               # Random playlist in all music folders
-RECURSIVE_PLAYLIST  = 0               # Random playlist in all music folders 
-                                      # including all files below the current folder
 
 START_FULLSCREEN_X  = 0               # Start in fullscreen mode if using x11 or xv.
 
@@ -131,13 +110,37 @@ ROM_DRIVES = [ ('/mnt/cdrom', '/dev/cdrom', 'CD-1'),
                ('/mnt/dvd', '/dev/dvd', 'CD-2') ]
 
 
-ROM_SPEED = 0                         # try to set the drive speed of the rom drive
-                                      # a good value for playing movies with a silent
-                                      # drive is 8
+ROM_SPEED = 0                         # try to set the drive speed of the rom
+                                      #drive a good value for playing movies
+                                      # with a silent drive is 8
 
 
-SHUTDOWN_SYS_CMD = 'shutdown -h now'  # set this to 'sudo shutdown -h now' if you
-                                      # don't have the permissions to shutdown
+SHUTDOWN_SYS_CMD = 'shutdown -h now'  # set this to 'sudo shutdown -h now' if
+                                      # you don't have the permissions to
+                                      # shutdown
+
+# ======================================================================
+# Freevo directory settings:
+# ======================================================================
+
+# You can change all this variables in the skin.xml on a per folder
+# basis
+
+#
+# Should playlists be available for movies, and all movies in a directory
+# be played in succession (unless you press STOP/EXIT)?
+#
+MOVIE_PLAYLISTS = 0
+
+#
+# Should directories sorted by date instead of filename
+#
+DIRECTORY_SORT_BY_DATE = 0
+
+#
+# Should freevo autoplay the item if only one item is in the directory
+#
+DIRECTORY_AUTOPLAY_SINGLE_ITEM = 1
 
 # ======================================================================
 # Freevo movie settings:
@@ -162,16 +165,11 @@ MOVIE_DATA_DIR = 'movie-data/'
 
 #
 # Directory containing images for tv shows. A tv show maches the regular
-# expression TV_SHOW_REGEXP, e.g. "Name 3x10 - Title". If an image name.(png|jpg)
-# (lowercase) is in this directory, it will be taken as cover image
+# expression TV_SHOW_REGEXP, e.g. "Name 3x10 - Title". If an image
+# name.(png|jpg) (lowercase) is in this directory, it will be taken as cover
+# image
 #
 TV_SHOW_IMAGES = "testfiles/tv-show-images/"
-
-#
-# Should playlists be available for movies, and all movies in a directory
-# be played in succession (unless you press STOP/EXIT)?
-#
-MOVIE_PLAYLISTS = 0
 
 #
 # The list of filename suffixes that are used to match the files that
@@ -301,14 +299,11 @@ OSD_SKIN = 'skins/main1/skin_main1.py'
 #
 SKIN_XML_FILE = 'blue_round1'
 
-# XXX The options to disable TV and Images have been removed. This must be
-# XXX done in the skin instead (visible="no").
-ENABLE_SHUTDOWN = 1      # Enable main menu choice for Linux shutdown. Exits Freevo.
-ENABLE_SHUTDOWN_SYS = 0  # Performs a whole system shutdown! For standalone boxes.
+ENABLE_SHUTDOWN_SYS = 0  # Performs a whole system shutdown at SHUTDOWN!
+                         # For standalone boxes.
 
 #
-# OSD default font. It is only used for debug/error stuff, not regular   XXX remove
-# skinning.
+# OSD default font. It is only used for debug/error stuff, not regular skinning.
 #
 OSD_DEFAULT_FONTNAME = 'skins/fonts/bluehigh.ttf'
 OSD_DEFAULT_FONTSIZE = 18
@@ -339,11 +334,12 @@ if CONF.display == 'dfbmga' or CONF.display == 'dxr3':
 
 
 #
-# Config file for the remote. This file should contain RC_CMDS and RC_MPLAYER_CMDS
-# The location of the file is rc_client, right now the only remote in there is
-# realmagic.py. The choose this remote, set the variable to 'realmagic'
-# Please send files for other remotes to the freevo mailing list
+# Config file for the remote. This file should contain RC_CMDS and
+# RC_MPLAYER_CMDS. The location of the file is rc_client, right now the only
+# remote in there is realmagic.py. The choose this remote, set the variable to
+# 'realmagic'. Please send files for other remotes to the freevo mailing list
 #
+
 REMOTE = ''
 
 
@@ -372,8 +368,8 @@ LIRCRC = '/etc/freevo/lircrc'
 # Programmed to code TV "0150". (VCR needs to be programmed too?)
 #
 # There is a config file for lirc for this remote in freevo/boot/URC-7201B00.
-# Please see the Freevo website for information about buying or building a remote
-# control receiver.
+# Please see the Freevo website for information about buying or building a
+# remote control receiver.
 #
 RC_CMDS = {
     'prog_guide'  : 'GUIDE',
@@ -423,20 +419,20 @@ MPLAYER_CMD = CONF.mplayer
 print 'Using MPlayer: %s' % MPLAYER_CMD
     
 MPLAYER_AO_DEV       = 'oss:/dev/dsp'  # e.g.: oss,sdl,alsa, see mplayer docs
-MPLAYER_AO_HWAC3_DEV = ''              # set this to an audio device which is
-                                       # capable of hwac3
+
 if CONF.display == 'x11':
     MPLAYER_VO_DEV       = 'xmga,xv,x11,'  # X11 drivers in order of preference
 else:
     MPLAYER_VO_DEV       = CONF.display    # e.g.: x11,mga,fbdev, see mplayer docs
-    
+
 MPLAYER_VO_DEV_OPTS  = ''	       # e.g.: ':some_var=vcal'
 
 DVD_LANG_PREF        = 'en,se,no'      # Order of preferred languages on DVD.
 DVD_SUBTITLE_PREF    = ''              # Order of preferred subtitles on DVD.
-MPLAYER_NICE         = -20             # Priority of mplayer process. 0 is unchanged,
-                                       # <0 is higher prio, >0 lower prio.
-                                       # prio <0 has no effect unless run as root.
+
+# Priority of mplayer process. 0 is unchanged, <0 is higher prio, >0 lower prio.
+# prio <0 has no effect unless run as root.
+MPLAYER_NICE         = -20             
 
 if CONF.display == 'dfbmga':
     MPLAYER_ARGS_DEF     = '-nobps -nolirc -autoq 100 -fs -vsync -double'
@@ -455,10 +451,10 @@ MPLAYER_USE_WID      = 1
 # XMMS section:
 # ======================================================================
 
+# Priority of xmms process. 0 is unchanged, <0 is higher prio, >0 lower prio.
+# prio <0 has no effect unless run as root.
 XMMS_NICE            = -20
-XMMS_CMD             = 'xmms'   # Priority of the XMMS process. 0 is unchanged,
-                                # <0 is higher prio, >0 lower prio.
-                                # prio <0 has no effect unless run as root.
+XMMS_CMD             = 'xmms'
 
 
 # ======================================================================
@@ -651,10 +647,13 @@ TV_CHANNELS = [('69 COMEDY', 'COMEDY', '69'),
                ('96 LOOR096', 'TV Guide', '96'),
                ('101 Station 1a', 'Station 1a', '101', ('123', '0000', '1759')),
                ('101 Station 1b', 'Station 1b', '101', ('123', '1800', '2359')),
-               ('102 Station 2a', 'Station 2a', '102', ('12345', '0000', '2359')),
+               ('102 Station 2a', 'Station 2a', '102',
+                ('12345', '0000', '2359')),
                ('102 Station 2b', 'Station 2b', '102', ('67', '0000', '2359')),
-               ('103 Station 3a', 'Station 3a', '103', ('1234567', '0000', '1559'), ('1234567', '2200', '2359')),
-               ('103 Station 3b', 'Station 3b', '103', ('1234567', '1600', '2159'))]
+               ('103 Station 3a', 'Station 3a', '103',
+                ('1234567', '0000', '1559'), ('1234567', '2200', '2359')),
+               ('103 Station 3b', 'Station 3b', '103',
+                ('1234567', '1600', '2159'))]
 
 # ======================================================================
 # Internal stuff, you shouldn't change anything here unless you know
