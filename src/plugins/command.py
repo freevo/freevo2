@@ -1,6 +1,6 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
-# commands.py - a simple plugin to run arbitrary commands from a directory.
+# command.py - a simple plugin to run arbitrary commands from a directory.
 #               it determines success or failure of command based on its
 #               exit status.
 # -----------------------------------------------------------------------
@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/08/28 17:16:32  dischi
+# doc fix
+#
 # Revision 1.16  2004/08/23 12:39:59  dischi
 # remove osd.py dep
 #
