@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/03/19 21:11:17  dischi
+# fix input return handling
+#
 # Revision 1.17  2004/03/13 22:33:15  dischi
 # changes for the new input widget
 #
@@ -102,9 +105,10 @@ class InputBox(PopupBox):
             return True
         
         if event == INPUT_ENTER:
+            txt = self.lbg.get_word()
             self.destroy()
             if self.handler:
-                self.handler(self.lbg.get_word())
+                self.handler(txt)
             return True
 
         if event == INPUT_EXIT:
