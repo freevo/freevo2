@@ -69,7 +69,15 @@ osd = osd.get_singleton()
 # Create the MenuWidget object
 menuwidget = menu.get_singleton()
 
+def shutdown(menuw=None, arg=None):
+    osd.clearscreen(color=osd.COL_BLACK)
+    osd.drawstring('shutting down', osd.width/2 - 90, osd.height/2 - 10,
+                   fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
+    os.system("sutdown -h now")
+    osd.update()
 
+    
+    
 #
 # Setup the main menu and handle events (remote control, etc)
 #
@@ -79,10 +87,11 @@ def getcmd():
     items += [menu.MenuItem('MOVIES', movie.main_menu,'','icons/movies.png',0)]
     items += [menu.MenuItem('MUSIC', mp3.main_menu,'','icons/mp3.png',0)]
     items += [menu.MenuItem('DVD/CD', movie.play_movie, ('dvd', '1', []),'icons/dvd.png',0)]  # XXX Add DVD title handling
-    #items += [menu.MenuItem('VCD', movie.play_movie, ('vcd', '1', []))]
+    items += [menu.MenuItem('VCD', movie.play_movie, ('vcd', '1', []))]
     #items += [menu.MenuItem('RECORD MOVIE', tv.main_menu, 'record')]
 
     items += [menu.MenuItem('IMAGES', imenu.main_menu,'','icons/images.png',0)]
+    items += [menu.MenuItem('SHUTDOWN', shutdown, None) ]
 
     mainmenu = menu.Menu('FREEVO MAIN MENU', items, packrows=0)
     menuwidget.pushmenu(mainmenu)
