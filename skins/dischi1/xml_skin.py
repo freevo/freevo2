@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/03/05 21:57:15  dischi
+# Added audio player. The info area is empty right now, but this skin
+# can player audio files
+#
 # Revision 1.18  2003/03/02 21:48:34  dischi
 # Support for skin changing in the main menu
 #
@@ -426,6 +430,22 @@ class XML_font(XML_data):
 
     
 # ======================================================================
+
+
+class XML_player:
+    def __init__(self):
+        self.content = ( 'screen', 'title', 'view', 'info' )
+        for c in self.content:
+            setattr(self, c, XML_area())
+
+
+    def parse(self, node, scale, current_dir):
+        for subnode in node.children:
+            for c in self.content:
+                if subnode.name == c:
+                    eval('self.%s.parse(subnode, scale, current_dir)' % c)
+
+
 # ======================================================================
 
 #
@@ -442,6 +462,8 @@ class XMLSkin:
         self.mainmenu = XML_mainmenu()
         self.icon_dir = ""
         self.popup = ''
+        self.player = XML_player()
+        
         
     def parse(self, freevo_type, scale, c_dir, copy_content):
         for node in freevo_type.children:
@@ -480,6 +502,10 @@ class XMLSkin:
 
             if node.name == u'popup':
                 self.popup = attr_str(node, 'layout', self.popup)
+
+            if node.name == u'player':
+                self.player.parse(node, scale, c_dir)
+
 
 
     #

@@ -27,6 +27,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/03/05 21:57:02  dischi
+# Added audio player. The info area is empty right now, but this skin
+# can player audio files
+#
 # Revision 1.14  2003/03/05 20:08:17  dischi
 # More speed enhancements. It's now faster than the keyboard control :-)
 #
@@ -114,7 +118,6 @@ import config
 import objectcache
 
 import xml_skin
-
 
 # Create the OSD object
 osd = osd.get_singleton()
@@ -259,17 +262,22 @@ class Skin_Area:
         self.imagecache = objectcache.ObjectCache(5, desc='%s_image' % self.name)
 
 
-    def draw(self, settings, menuw):
+    def draw(self, settings, obj, widget_type='menu'):
         """
         this is the main draw function. This function draws the background,
         checks if redraws are needed and calls the two update functions
         for the different types of areas
         """
-        
-        menu = menuw.menustack[-1]
 
-        self.menu = menu
-
+        if widget_type == 'menu':
+            self.menuw = obj
+            self.menu  = obj.menustack[-1]
+            self.item  = self.menu.selected
+            item_type  = self.menu.item_types
+        else:
+            item_type = None
+            self.item = obj
+            
         self.bg_objects = []
         self.content_objects = []
         
@@ -277,14 +285,14 @@ class Skin_Area:
         self.mode = 0                   # start draw
         
         area = self.area_val
-
+        self.settings = settings
         if area:
             visible = area.visible
         else:
             visible = FALSE
             
-        self.redraw = self.init_vars(settings, menu.item_types)
-
+        self.redraw = self.init_vars(settings, item_type, widget_type)
+            
         if area and area != self.area_val:
             old_area = area
         else:
@@ -308,12 +316,12 @@ class Skin_Area:
         # dependencies haven't changed
         if not self.redraw:
             # no update needed: return
-            if not self.update_content_needed(settings, menuw):
+            if not self.update_content_needed():
                 self.content_objects = self.last_content_objects
                 return
 
         self.mode = 1 # content
-        self.update_content(settings, menuw)
+        self.update_content()
 
         bg_rect = [ osd.width, osd.height, 0, 0 ]
         c_rect  = [ osd.width, osd.height, 0, 0 ]
@@ -431,19 +439,26 @@ class Skin_Area:
     
 
 
-    def init_vars(self, settings, display_type):
+    def init_vars(self, settings, display_type, widget_type = 'menu'):
         """
         check which layout is used and set variables for the object
         """
         redraw = self.redraw
-        
-        if settings.menu.has_key(display_type):
-            area = settings.menu[display_type][0]
-        else:
-            area = settings.menu['default'][0]
 
-        area = eval('area.%s' % self.area_name)
-        
+        if widget_type == 'player':
+            area = settings.player
+        else:
+            if settings.menu.has_key(display_type):
+                area = settings.menu[display_type][0]
+            else:
+                area = settings.menu['default'][0]
+
+        try:
+            area = eval('area.%s' % self.area_name)
+        except AttributeError:
+            area = xml_skin.XML_area()
+            area.visible = FALSE
+            
         if (not self.area_val) or area != self.area_val:
             self.area_val = area
             redraw = TRUE

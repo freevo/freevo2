@@ -168,5 +168,14 @@
       <shadow visible="no"/>
     </font>
 
+    <!-- ********************************************** -->
+    <!-- AUDIO PLAYER DEFINITIONS -->
+
+    <layout label="player screen">
+      <background>
+	<image filename="../images/aubin/blurr.jpg" x="0" y="0" label="background"/>
+      </background>
+    </layout>
+
   </skin>
 </freevo>

@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2003/03/05 21:57:11  dischi
+# Added audio player. The info area is empty right now, but this skin
+# can player audio files
+#
 # Revision 1.31  2003/03/05 20:08:18  dischi
 # More speed enhancements. It's now faster than the keyboard control :-)
 #
@@ -147,6 +151,7 @@ from area import Screen
 
 from listing_area import Listing_Area
 from view_area import View_Area
+from info_area import Info_Area
 
 
 class Screen_Area(Skin_Area):
@@ -156,13 +161,13 @@ class Screen_Area(Skin_Area):
     def __init__(self, parent, screen):
         Skin_Area.__init__(self, 'screen', screen)
 
-    def update_content_needed(self, settings, menuw):
+    def update_content_needed(self):
         """
         this area needs never a content update
         """
         return FALSE
 
-    def update_content(self, settings, menuw):
+    def update_content(self):
         """
         there is no content in this area
         """
@@ -179,12 +184,11 @@ class Title_Area(Skin_Area):
         self.text = ''
 
         
-    def update_content_needed(self, settings, menuw):
+    def update_content_needed(self):
         """
         check if the content needs an update
         """
-        menu = menuw.menustack[-1]
-
+        menu      = self.menu
         layout    = self.layout
         area      = self.area_val
         content   = self.calc_geometry(layout.content, copy_object=TRUE)
@@ -197,12 +201,11 @@ class Title_Area(Skin_Area):
         return self.text != text
 
 
-    def update_content(self, settings, menuw):
+    def update_content(self):
         """
         update the content
         """
-        menu = menuw.menustack[-1]
-
+        menu      = self.menu
         layout    = self.layout
         area      = self.area_val
         content   = self.calc_geometry(layout.content, copy_object=TRUE)
@@ -214,11 +217,11 @@ class Title_Area(Skin_Area):
 
         self.text = text
 
-        if not settings.font.has_key(content.font):
+        if not self.settings.font.has_key(content.font):
             print '*** font <%s> not found' % content.font
             return
 
-        self.write_text(text, settings.font[content.font], content, mode='hard')
+        self.write_text(text, self.settings.font[content.font], content, mode='hard')
 
 
 
@@ -236,7 +239,7 @@ class Skin:
     def __init__(self):
         self.force_redraw = TRUE
         self.screen = Screen()
-        self.area_names = ( 'screen', 'title', 'listing', 'view')
+        self.area_names = ( 'screen', 'title', 'listing', 'view', 'info')
         for a in self.area_names:
             setattr(self, '%s_area' % a, eval('%s%s_Area(self, self.screen)' % \
                                               (a[0].upper(), a[1:])))
@@ -456,7 +459,16 @@ class Skin:
         
 
     def DrawMP3(self, info):
+        self.screen.clear()
+
+        for a in self.area_names:
+            area = eval('self.%s_area' % a)
+            area.draw(self.settings, info, 'player')
+
+        self.screen.show(self.force_redraw)
+
         osd.update()
+
 
     # TV Guide:
 
