@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/02/18 03:56:11  krister
+# Added an option --sysfirst to search the system path first, the default is now runtime/apps first.
+#
 # Revision 1.1  2003/02/14 04:19:54  krister
 # Renamed from setup_build.py
 #
@@ -87,6 +90,9 @@ Set up Freevo for your specific environment.
                                   ireland, france, china-bcast, southafrica,
                                   argentina, canada-cable
 
+   --sysfirst                   look in the system path for applications before checking
+                                ./runtime/apps.
+
    --help                       display this help and exit
 
 The default is "--geometry=800x600 --display=x11 --tv=ntsc --chanlist=us-cable"
@@ -122,10 +128,11 @@ def main():
     conf.tv = 'ntsc'
     conf.chanlist = 'us-cable'
     conf.version = CONFIG_VERSION
+    sysfirst = 0 # Check the system path for apps first, then the runtime
     
     # Parse commandline options
     try:
-        long_opts = 'help compile= geometry= display= tv= chanlist='.split()
+        long_opts = 'help compile= geometry= display= tv= chanlist= sysfirst'.split()
         opts, args = getopt.getopt(sys.argv[1:], 'h', long_opts)
     except getopt.GetoptError:
         # print help information and exit:
@@ -149,6 +156,9 @@ def main():
         if o == '--chanlist':
             conf.chanlist = a
 
+        if o == '--sysfirst':
+            sysfirst = 1
+
         # this is called by the Makefile, don't call it directly
         if o == '--compile':
             # Compile python files:
@@ -166,11 +176,13 @@ def main():
             sys.exit(0)
 
 
-    check_program(conf, "mplayer", "mplayer", 1)
-    check_program(conf, "jpegtran", "jpegtran", 0)
-    check_program(conf, "xmame.SDL", "xmame_SDL", 0)
-    check_program(conf, "ssnes9x", "snes", 0)
-    check_program(conf, "zsnes", "snes", 0)
+    print 'System path first=%s' % ( ['NO','YES'][sysfirst])
+    
+    check_program(conf, "mplayer", "mplayer", 1, sysfirst)
+    check_program(conf, "jpegtran", "jpegtran", 0, sysfirst)
+    check_program(conf, "xmame.SDL", "xmame_SDL", 0, sysfirst)
+    check_program(conf, "ssnes9x", "snes", 0, sysfirst)
+    check_program(conf, "zsnes", "snes", 0, sysfirst)
 
     check_config(conf)
 
@@ -245,13 +257,15 @@ def create_config(conf):
     print 'done'
 
 
-def check_program(conf, name, variable, necessary):
+def check_program(conf, name, variable, necessary, sysfirst):
 
     # Check for programs both in the path and the runtime apps dir
-    search_dirs = os.environ['PATH'].split(':')
-    search_dirs.append('./runtime/apps')
-    search_dirs.append('./runtime/apps/mplayer')
-
+    search_dirs_runtime = ['./runtime/apps', './runtime/apps/mplayer']
+    if sysfirst:
+        search_dirs = os.environ['PATH'].split(':') + search_dirs_runtime
+    else:
+        search_dirs = search_dirs_runtime + os.environ['PATH'].split(':')
+        
     print 'checking for %-13s' % (name+'...'),
 
     for dirname in search_dirs:
