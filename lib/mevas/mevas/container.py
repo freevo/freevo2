@@ -46,9 +46,13 @@ class CanvasContainer(CanvasObject):
 
 
 	def add_child(self, o):
+		assert( o != self )
+		assert( isinstance(o, CanvasObject) )
+
 		if o in self.children:
 			return
 
+		# Child will queue_paint, making us dirty as well.
 		o._reparent(self)
 		self.children.append(o)
 
@@ -69,8 +73,8 @@ class CanvasContainer(CanvasObject):
 			w, h = o._backing_store_info["size"]
 			self._backing_store_info["dirty-rects"] += [( (x, y), (w, h) )]
 			#print "Child delete", o,  self._backing_store_info["dirty-rects"]
-			
-		self.dirty = True
+	
+		self.queue_paint()		
 
 
 	def draw_image(self, image, dst_pos = (0, 0), dst_size = (-1, -1), 

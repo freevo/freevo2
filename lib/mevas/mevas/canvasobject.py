@@ -88,11 +88,7 @@ class CanvasObject(object):
 			parent.remove_child(self)
 
 	def _reparent(self, parent):
-		if not isinstance(parent, CanvasContainer):
-			print "*** WARNING: Trying to reparent to a non-container (%s)" % repr(parent)
-			return
-
-		dirty = self.dirty
+		assert( isinstance(parent, CanvasContainer) )
 
 		# Unparent first from any existing parent before reparenting.
 		if check_weakref(self.parent) and self.parent() != parent:
@@ -109,10 +105,8 @@ class CanvasObject(object):
 			if check_weakref(parent.canvas):
 				self.canvas = parent.canvas
 
-			# If we're dirty, we need to tell our new parent that we need
-			# drawing.
-			if dirty:
-				self.queue_paint()
+			# We need to tell our new parent that we need drawing.
+			self.queue_paint()
 
 
 
@@ -249,6 +243,11 @@ class CanvasObject(object):
 
 	def move(self, (x, y)):
 		self.set_pos( (x, y) )
+
+
+	def move_relative( (offset_x, offset_y) ):
+		x, y = self.get_pos()
+		return self.move( (x + offset_x, y + offset_y) )
 
 
 	def set_pos(self, (x, y)):
