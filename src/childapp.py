@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/09/20 17:32:49  dischi
+# less debug
+#
 # Revision 1.14  2003/09/20 17:30:23  dischi
 # do not close streams when we have to kill the app by force
 #
@@ -125,9 +128,6 @@ class ChildApp:
         if not self.child:
             return
 
-        import traceback
-        traceback.print_exc()
-        
         # maybe child is dead and only waiting?
         if os.waitpid(self.child.pid, os.WNOHANG)[0] == self.child.pid:
             self.outfile.close()
