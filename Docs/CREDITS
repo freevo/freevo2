@@ -12,6 +12,7 @@ o mplayer: http://www.mplayerhq.hu
 o NVrec: http://www.ee.up.ac.za/~justin/v4l2/
 o XviD: http://www.xvid.org
 o mp3_id.py: http://id3-py.sourceforge.net/
+o jpgtn, used in part by osd_server: http://jpgtn.sourceforge.net/
 
 
 People:
@@ -31,7 +32,6 @@ Dirk Meyer <dmeyer@tzi.de>:
 o IMDB support
 o XML config files for movies/albums
 o and more...
-
 
 Jason Ball <jason.ball@ce.com.au>:
 o SDL support in the OSD
