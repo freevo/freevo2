@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/02/20 06:56:07  krister
+# Bugfix for dot-files
+#
 # Revision 1.13  2003/02/17 21:00:24  dischi
 # catch an error
 #
@@ -395,6 +398,11 @@ def getname(file):
     if not os.path.exists(file):
         return file
     name = os.path.splitext(os.path.basename(file))[0]
+
+    if not name:
+        # Bugfix for empty stem
+        return os.path.basename(file)
+    
     name = name[0].upper() + name[1:]
     while FILENAME_REGEXP.match(name):
         m = FILENAME_REGEXP.match(name)
