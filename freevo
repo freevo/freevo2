@@ -36,9 +36,6 @@ if test -a $RT_DIR/freevo_python ; then
     # in freevo_runtime
     export LD_PRELOAD=`cat $RT_DIR/preloads`
 
-    # Execute using the runtime:
-    echo "Using the Freevo runtime ($RT_DIR)"
-    
     # Support for using just Python
     if [[ $1 = prompt ]] ; then
         $RT_DIR/freevo_python 
@@ -59,6 +56,9 @@ if test -a $RT_DIR/freevo_python ; then
         $RT_DIR/freevo_python rc_client/remote.py --remote=lirc &> /dev/null &
     fi
 
+    # Execute using the runtime:
+    echo "Using the Freevo runtime ($RT_DIR)"
+    
     # XXX Uncomment the command below to enable joystick input. 
     # XXX It has not been tested! Please send in testreports!
     # If JOY_DEV is 0 then joy.py just exits.
