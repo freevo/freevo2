@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/03/13 18:33:17  rshortt
+# Handle an empty list better (still needs improving).
+#
 # Revision 1.4  2004/03/13 17:31:01  rshortt
 # Fix the menu index.
 #
@@ -90,9 +93,9 @@ class ScheduledRecordingsItem(Item):
 
         menu = menuw.menustack[-1]
 
-        sel = menu.choices.index(menu.selected)
         new_choices = self.get_items()
-        if not menu.selected in new_choices:
+        if not menu.selected in new_choices and len(new_choices):
+            sel = menu.choices.index(menu.selected)
             if len(new_choices) <= sel:
                 menu.selected = new_choices[-1]
             else:
