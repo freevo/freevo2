@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/09/18 17:09:54  gsbarbieri
+# Faster version detection + handle for CVS versions.
+#
 # Revision 1.21  2003/09/14 20:09:37  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
@@ -114,17 +117,22 @@ class PluginInterface(plugin.Plugin):
         # create the mplayer object
         plugin.Plugin.__init__(self)
 
-        child = popen2.Popen3('%s --version' % config.MPLAYER_CMD, 1, 100)
-        while(1):
-            data = child.fromchild.readline()
-            if not data:
-                break
-            if data.find('MPlayer 1') == 0:
-                mplayer_version = 1.0
-            if data.find('MPlayer 0') == 0:
-                mplayer_version = 0.9
+        child = popen2.Popen3( "%s -v" % config.MPLAYER_CMD, 1, 100 )
+        data = child.fromchild.readline() # Just need the first line
+        if data:
+            data = re.search( "^MPlayer (?P<version>\S+)", data )
+            if data:                
+                if DEBUG:
+                    print "MPlayer version is: %s" % data.group( "version" )
+                data = data.group( "version" )
+                if data[ 0 ] == "1":
+                    mplayer_version = 1.0
+                elif data[ 0 ] == "0":
+                    mplayer_version = 0.9
+                elif data[ 0 : 7 ] == "dev-CVS":
+                    mplayer_version = 9999
+                    
         child.wait()
-
         mplayer = util.SynchronizedObject(MPlayer())
 
         # register it as the object to play audio
@@ -152,7 +160,7 @@ def vop_append(command):
             ret += '%s ' % arg
 
     if vop:
-        if mplayer_version == 1:
+        if mplayer_version >= 1:
             return '%s -vf %s' % (ret,vop[1:])
         return '%s -vop %s' % (ret,vop[1:])
     return ret
