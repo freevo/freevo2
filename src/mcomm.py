@@ -273,7 +273,7 @@ class RPCServer:
                     ret.append(True)
                 if val[i] in ( 'FALSE', 'False', 'false', '0', 0,
                                'No', 'No', 'no'):
-                    ret.append(True)
+                    ret.append(False)
                 else:
                     raise AttributeError('%s is no bool' % String(val[i]))
             elif pattern[i].__class__ in (list, tuple):
