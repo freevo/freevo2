@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2004/02/22 06:25:15  gsbarbieri
+# Fix bugs introduced by i18n changes.
+#
 # Revision 1.22  2004/02/19 04:57:59  gsbarbieri
 # Support Web Interface i18n.
 # To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
@@ -284,61 +287,63 @@ class GuideResource(FreevoResource):
                         desc = desc.lstrip()
                         if MAX_DESCRIPTION_CHAR and len(desc) > MAX_DESCRIPTION_CHAR:
                             desc=desc[:desc[:MAX_DESCRIPTION_CHAR].rfind('.')] + '. [...]'
-                        pops += """
-<div id="%s" class="proginfo">
-   <table class="popup"
-          onmouseover="focusPop('%s');"
-          onmouseout="unfocusPop('%s');">
-      <thead>
-         <tr>
-            <td>
-               %s
-            </td>
-         </tr>
-      </thead>
-      <tbody>
-         <tr>
-            <td class="progdesc">
-               %s
-            </td>            
-         </tr>
-         <tr>
-         <td class="progtime">
-            <b>"""+_('Start')+""":</b> %s, 
-            <b>"""+_('Stop')+""":</b> %s,
-            <b>"""+_('Runtime')+""":</b> %smin
-            </td>
-         </td>
-      </tbody>
-      <tfoot>
-         <tr>
-            <td>
-               <table class="popupbuttons">
-                  <tbody>
-                     <tr>
-                        <td onclick="document.location='record.rpy?chan=%s&start=%s&action=add'">
-                           """+_('Record')+"""
-                        </td>
-                        <td onclick="document.location='edit_favorite.rpy?chan=%s&start=%s&action=add'">
-                        """+_('Add to Favorites')+"""                        
-                        </td>
-                        <td onclick="javascript:closePop('%s');">
-                        """+_('Close Window')+"""                        
-                        </td>
-                     </tr>
-                  </tbody>
-               </table>
-            </td>
-         </tr>
-      </tfoot>
-   </table>
-</div>
-                        """ % ( popid, popid, popid, prog.title, desc,
-                                time.strftime(config.TV_TIMEFORMAT, time.localtime( prog.start ) ),
-                                time.strftime(config.TV_TIMEFORMAT, time.localtime( prog.stop ) ),
-                                int( ( prog.stop - prog.start ) / 60 ),
-                                prog.channel_id, prog.start,
-                                prog.channel_id, prog.start, popid )
+                        pops += (
+                            u"<div id=\"%s\" class=\"proginfo\">\n"\
+                            u"   <table class=\"popup\"\n"\
+                            u"          onmouseover=\"focusPop('%s');\"\n"\
+                            u"          onmouseout=\"unfocusPop('%s');\">\n"\
+                            u"      <thead>\n"\
+                            u"         <tr>\n"\
+                            u"            <td>\n"\
+                            u"               %s\n"\
+                            u"            </td>\n"\
+                            u"         </tr>\n"\
+                            u"      </thead>\n"\
+                            u"      <tbody>\n"\
+                            u"         <tr>\n"\
+                            u"            <td class=\"progdesc\">\n"\
+                            u"               %s\n"\
+                            u"            </td>\n"\
+                            u"         </tr>\n"\
+                            u"         <tr>\n"\
+                            u"         <td class=\"progtime\">\n"\
+                            u"            <b>"+_('Start')+u":</b> %s, \n"\
+                            u"            <b>"+_('Stop')+u":</b> %s, \n"\
+                            u"            <b>"+_('Runtime')+u":</b> %smin\n"\
+                            u"            </td>\n"\
+                            u"         </td>\n"\
+                            u"      </tbody>\n"\
+                            u"      <tfoot>\n"\
+                            u"         <tr>\n"\
+                            u"            <td>\n"\
+                            u"               <table class=\"popupbuttons\">\n"\
+                            u"                  <tbody>\n"\
+                            u"                     <tr>\n"\
+                            u"                        <td onclick=\"document.location='record.rpy?chan=%s&start=%s&action=add'\">\n"\
+                            u"                           "+_('Record')+u"\n"\
+                            u"                        </td>\n"\
+                            u"                        <td onclick=\"document.location='edit_favorite.rpy?chan=%s&start=%s&action=add'\">\n"\
+                            u"                        "+_('Add to Favorites')+u"\n"\
+                            u"                        </td>\n"\
+                            u"                        <td onclick=\"javascript:closePop('%s');\">\n"\
+                            u"                        "+_('Close Window')+u"\n"\
+                            u"                        </td>\n"\
+                            u"                     </tr>\n"\
+                            u"                  </tbody>\n"\
+                            u"               </table>\n"\
+                            u"            </td>\n"\
+                            u"         </tr>\n"\
+                            u"      </tfoot>\n"\
+                            u"   </table>\n"\
+                            u"</div>\n"
+                            ) % ( popid, popid, popid, prog.title, desc,
+                                  time.strftime(config.TV_TIMEFORMAT,
+                                                time.localtime( prog.start ) ),
+                                  time.strftime(config.TV_TIMEFORMAT,
+                                                time.localtime( prog.stop ) ),
+                                  int( ( prog.stop - prog.start ) / 60 ),
+                                  prog.channel_id, prog.start,
+                                  prog.channel_id, prog.start, popid )
                         
                         style = ''
                         if colspan == n_cols * cpb:
