@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2003/05/06 03:11:20  outlyer
+# Whoops... commited something specific to my machine...
+#
 # Revision 1.37  2003/05/05 21:11:15  dischi
 # save video width and height
 #
@@ -301,8 +304,6 @@ class MPlayer:
          
         if DEBUG:
             print 'MPlayer.play(): Starting thread, cmd=%s' % command
-        print "Adjusting brightness"
-        os.system('/usr/sbin/matroxcolor')     
         rc.app(self)
 
         self.thread.mode    = 'play'
@@ -318,8 +319,6 @@ class MPlayer:
         self.thread.mode = 'stop'
         self.thread.mode_flag.set()
         self.thread.item = None
-        print "Restoring brightness..."
-        os.system('/usr/sbin/undomatroxcolor')
         rc.app(None)
         while self.thread.mode == 'stop':
             time.sleep(0.3)
