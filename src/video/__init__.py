@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2004/02/01 19:47:13  dischi
+# some fixes by using new mmpython data
+#
 # Revision 1.24  2004/02/01 17:10:09  dischi
 # add thumbnail generation as directory config variable
 #
@@ -136,7 +139,7 @@ class PluginInterface(plugin.MimetypePlugin):
 
         if tv_show_informations.has_key(vfs.basename(diritem.dir).lower()):
             tvinfo = tv_show_informations[vfs.basename(diritem.dir).lower()]
-            diritem.info = tvinfo[1]
+            diritem.info.set_variables(tvinfo[1])
             if not diritem.image:
                 diritem.image = tvinfo[0]
             if not diritem.skin_fxd:

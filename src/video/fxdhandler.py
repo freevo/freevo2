@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/02/01 19:47:13  dischi
+# some fixes by using new mmpython data
+#
 # Revision 1.14  2004/01/19 20:20:35  dischi
 # fix missing url problem
 #
@@ -206,7 +209,12 @@ def parse_movie(fxd, node):
         # only one file, this is directly for the item
         id, url, item.media_id, item.mplayer_options, player, is_playlist = \
             parse_video_child(fxd, video[0], dirname)
-        item.set_url(url, info=False)
+        if url.startswith('file://') and os.path.isfile(url[7:]):
+            variables = item.info.get_variables()
+            item.set_url(url, info=True)
+            item.info.set_variables(variables)
+        else:
+            item.set_url(url, info=False)
         if player:
             item.force_player = player
         if is_playlist:

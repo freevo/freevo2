@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.59  2004/02/01 19:47:13  dischi
+# some fixes by using new mmpython data
+#
 # Revision 1.58  2004/02/01 17:08:38  dischi
 # speedup, remove unneeded stuff
 #
@@ -272,6 +275,8 @@ class Item:
                         self.name = self.info['title'] or self.name
                 except:
                     pass
+                if not self.name:
+                    self.name = self.info['title:filename']
             if not self.name:
                 self.name = util.getname(self.filename)
 
@@ -290,9 +295,10 @@ class Item:
         for var, val in self.autovars:
             if key == var:
                 if val == value:
-                    self.delete_info(key)
-                else:
-                    self.store_info(key, value)
+                    if not self.delete_info(key):
+                        _debug_('unable to store info for \'%s\'' % self.name, 0)
+                elif not self.store_info(key, value):
+                    _debug_('unable to store info for \'%s\'' % self.name, 0)
                 return
         self.info[key] = value
 
@@ -302,9 +308,10 @@ class Item:
         store the key/value in metadata
         """
         if isinstance(self.info, util.mediainfo.Info):
-            self.info.store(key, value)
+            if not self.info.store(key, value):
+                _debug_('unable to store info for \'%s\'' % self.name, 0)
         else:
-            print 'unable to store info for that kind of item'
+            _debug_('unable to store info for that kind of item \'%s\'' % self.name, 0)
 
 
     def delete_info(self, key):
@@ -410,8 +417,6 @@ class Item:
                 length = self.info['runtime']
             elif self.info['length'] and self.info['length'] != 'None':
                 length = self.info['length']
-            elif self.info['video']:
-                length = self.info['video'][0]['length']
             if not length and hasattr(self, 'length'):
                 length = self.length
             if not length:

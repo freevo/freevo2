@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.121  2004/02/01 19:47:13  dischi
+# some fixes by using new mmpython data
+#
 # Revision 1.120  2004/01/31 16:38:24  dischi
 # changes because of mediainfo changes
 #
@@ -212,23 +215,12 @@ class VideoItem(Item):
                     
             return util.hexify(md5.new(id).digest())
         
-        if key in ('length', 'geometry', 'aspect'):
-            try:
-                video = self.info['video'][0]
-                if key == 'length':
-                    length = video.length
-                    if length / 3600:
-                        return '%d:%02d:%02d' % ( length / 3600, (length % 3600) / 60,
-                                                  length % 60)
-                    else:
-                        return '%d:%02d' % (length / 60, length % 60)
-                if key == 'geometry':
-                    return '%sx%s' % (video.width, video.height)
-                if key == 'aspect':
-                    aspect = getattr(video, key)
-                    return aspect[:aspect.find(' ')].replace('/', ':')
-            except:
-                pass
+        if key in ('geometry', 'aspect') and self.info:
+            if key == 'geometry' and self.info['width'] and self.info['height']:
+                return '%sx%s' % (self.info['width'], self.info['height'])
+            if key == 'aspect' and self.info['aspect']:
+                aspect = self.info['aspect']
+                return aspect[:aspect.find(' ')].replace('/', ':')
             
         return Item.__getitem__(self, key)
 
