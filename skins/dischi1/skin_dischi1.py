@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2003/03/04 22:46:33  dischi
+# VERY fast now (IMHO as fast as we can get it). There are some cleanups
+# necessary, but it's working. area.py only blits the parts of the screen
+# that changed, Aubins idle bar won't blink at all anymore (except you change
+# the background below it)
+#
 # Revision 1.28  2003/03/02 21:48:34  dischi
 # Support for skin changing in the main menu
 #
@@ -440,6 +446,8 @@ class Skin:
         for a in self.area_names:
             area = eval('self.%s_area' % a)
             area.prepare(settings, menuw, self.force_redraw)
+
+        self.screen.show()
 
         for a in self.area_names:
             area = eval('self.%s_area' % a)

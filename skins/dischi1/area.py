@@ -7,9 +7,7 @@
 # Notes:
 #
 #
-# This is the main class for all area. Right now it's working, but
-# some things are not very good. Maybe someone can create a new
-# Skin_Area with a different behaviour.
+# This is the main class for all area.
 #
 # My first draft was an area which redraws only the needed parts and
 # blits it onto the surface.. But there are some problems with that,
@@ -33,10 +31,17 @@
 # For more informations contact me (dmeyer@tzi.de)
 #
 #
-# Todo: make it faster :-)
+# Todo: make it faster -- DONE
+#       code cleanup
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/03/04 22:46:32  dischi
+# VERY fast now (IMHO as fast as we can get it). There are some cleanups
+# necessary, but it's working. area.py only blits the parts of the screen
+# that changed, Aubins idle bar won't blink at all anymore (except you change
+# the background below it)
+#
 # Revision 1.11  2003/03/02 22:00:13  dischi
 # bugfix
 #
@@ -138,12 +143,35 @@ class Screen:
         self.alpha       = self.background.convert_alpha()
         self.alpha.fill((0,0,0,0))
         self.alpha_bg    = self.background.convert()
+
+        self.background_update = []
+        self.content_update = []
+
         
     def clear(self):
         self.alpha.fill((0,0,0,0))
+        self.background_update = []
+        self.content_update = []
 
 
-	
+    def update(self, layer, rect):
+        if layer == 'background':
+            self.background_update += [ rect ]
+        else:
+            self.content_update += [ rect ]
+
+
+    def show(self):
+        if self.background_update:
+            for x0, y0, x1, y1 in self.background_update:
+                self.alpha_bg.blit(self.background, (x0, y0), (x0, y0, x1-x0, y1-y0))
+                self.alpha_bg.blit(self.alpha, (x0, y0), (x0, y0, x1-x0, y1-y0))
+                osd.screen.blit(self.alpha_bg, (x0, y0), (x0, y0, x1-x0, y1-y0))
+        if self.content_update:
+            for x0, y0, x1, y1 in self.content_update:
+                osd.screen.blit(self.alpha_bg, (x0, y0), (x0, y0, x1-x0, y1-y0))
+
+            
 class Skin_Area:
     """
     the base call for all areas. Each child needs two functions:
@@ -171,7 +199,15 @@ class Skin_Area:
         self._write_text   = []
         self._draw_image   = []
 
+        # new test stuff:
+        self.last_background_cache = []
+        self.background_cache = []
+        self.content_cache    = []
+        self.last_content_cache    = []
+        self.screen = screen
+        
         self.imagecache = objectcache.ObjectCache(5, desc='%s_image' % self.name)
+
 
     def prepare(self, settings, menuw, force_redraw):
         """
@@ -183,6 +219,9 @@ class Skin_Area:
         menu = menuw.menustack[-1]
 
         self.menu = menu
+
+        self.background_cache = []
+        self.content_cache = []
         
         self.redraw = force_redraw
         self.mode = 0                   # start draw
@@ -206,13 +245,11 @@ class Skin_Area:
 
         # maybe we are NOW invisible
         if visible and not area.visible and old_area:
-            for rect in self.content_alpha:
-                self.alpha_bg.blit(self.background, (rect[0], rect[1]), rect)
-                self.alpha_bg.blit(self.alpha, (rect[0], rect[1]), rect)
-
-            self.content_alpha = []
-            osd.screen.blit(self.alpha_bg, old_area.pos(self.name),
-                            old_area.rect(self.name))
+            self.screen.update('background', (old_area.x, old_area.y,
+                                              old_area.x + old_area.width,
+                                              old_area.y + old_area.height))
+            self.last_background_cache = self.background_cache
+            self.last_content_cache = self.content_cache
 
         if not area.visible:
             return
@@ -223,6 +260,7 @@ class Skin_Area:
         if not self.redraw:
             # no update needed: return
             if not self.update_content_needed(settings, menuw):
+                self.content_cache = self.last_content_cache
                 return
 
         self.redraw_alpha += self.content_alpha
@@ -232,37 +270,56 @@ class Skin_Area:
         self.mode = 1                   # draw alpha stuff
         self.update_content(settings, menuw)
 
-        for rect in self.redraw_background:
-            # redraw background
-            self.alpha_bg.blit(self.background, rect[:2], rect)
+        bg_rect = [ osd.width, osd.height, 0, 0 ]
+        c_rect  = [ osd.width, osd.height, 0, 0 ]
+        
+        for b in self.background_cache:
+            if not b in self.last_background_cache:
+                bg_rect[0] = min(bg_rect[0], b[1])
+                bg_rect[1] = min(bg_rect[1], b[2])
+                bg_rect[2] = max(bg_rect[2], b[1] + b[3])
+                bg_rect[3] = max(bg_rect[3], b[2] + b[4])
+        for b in self.last_background_cache:
+            if not b in self.background_cache:
+                bg_rect[0] = min(bg_rect[0], b[1])
+                bg_rect[1] = min(bg_rect[1], b[2])
+                bg_rect[2] = max(bg_rect[2], b[1] + b[3])
+                bg_rect[3] = max(bg_rect[3], b[2] + b[4])
 
-        if self.redraw_alpha:
-            # redraw alpha means to create a new merge of background
-            # and alpha on alpha_bg and blit it into osd.screen
-            x0 = osd.width
-            y0 = osd.height
-            x1 = 0
-            y1 = 0
-            
-            for rect in self.redraw_alpha:
-                x0 = min(x0, rect[0])
-                y0 = min(y0, rect[1])
-                x1 = max(x1, rect[0] + rect[2])
-                y1 = max(y1, rect[1] + rect[3])
-            self.alpha_bg.blit(self.background, (x0, y0), (x0, y0, x1-x0, y1-y0))
-            self.alpha_bg.blit(self.alpha, (x0, y0), (x0, y0, x1-x0, y1-y0))
+        for b in self.content_cache:
+            if not b in self.last_content_cache:
+                if b[0] == 'rectangle':
+                    bg_rect[0] = min(bg_rect[0], b[1])
+                    bg_rect[1] = min(bg_rect[1], b[2])
+                    bg_rect[2] = max(bg_rect[2], b[1] + b[3])
+                    bg_rect[3] = max(bg_rect[3], b[2] + b[4])
+                if b[0] == 'image' or b[0] == 'text':
+                    c_rect[0] = min(c_rect[0], b[1])
+                    c_rect[1] = min(c_rect[1], b[2])
+                    c_rect[2] = max(c_rect[2], b[1] + b[3])
+                    c_rect[3] = max(c_rect[3], b[2] + b[4])
 
-        self.redraw_alpha = []
-        self.redraw_background = []
+        for b in self.last_content_cache:
+            if not b in self.content_cache:
+                if b[0] == 'rectangle':
+                    bg_rect[0] = min(bg_rect[0], b[1])
+                    bg_rect[1] = min(bg_rect[1], b[2])
+                    bg_rect[2] = max(bg_rect[2], b[1] + b[3])
+                    bg_rect[3] = max(bg_rect[3], b[2] + b[4])
+                if b[0] == 'image' or b[0] == 'text':
+                    c_rect[0] = min(c_rect[0], b[1])
+                    c_rect[1] = min(c_rect[1], b[2])
+                    c_rect[2] = max(c_rect[2], b[1] + b[3])
+                    c_rect[3] = max(c_rect[3], b[2] + b[4])
 
-        # now blit the alpha_bg on the osd.screen
-        if old_area:
-            osd.screen.blit(self.alpha_bg, old_area.pos(self.name),
-                            old_area.rect(self.name))
+        if bg_rect[0] < bg_rect[2]:
+            self.screen.update('background', bg_rect)
+        if c_rect[0] < c_rect[2]:
+            self.screen.update('content', c_rect)
+        
+        self.last_background_cache = self.background_cache
+        self.last_content_cache = self.content_cache
 
-
-        # FIXME: at this point with blue_round2 we blit the hole screen,
-        osd.screen.blit(self.alpha_bg, area.pos(self.name), area.rect(self.name))
 
         
     def draw(self):
@@ -270,6 +327,7 @@ class Skin_Area:
         this is the second part of main draw function. This function draws the
         content (text and images)
         """
+
 
         for t in self._write_text:
             ( text, font, x, y, width, height, align_h, align_v, mode, ellipses ) = t
@@ -289,7 +347,6 @@ class Skin_Area:
 
         self._write_text = []
         self._draw_image = []
-
 
 
 
@@ -431,6 +488,8 @@ class Skin_Area:
                     bg.label = 'background'
                     
                 if imagefile:
+                    self.background_cache += [ ( 'image', bg.x, bg.y, bg.width, bg.height,
+                                                 imagefile ) ]
                     cname = '%s-%s-%s' % (imagefile, bg.width, bg.height)
                     image = self.imagecache[cname]
                     if not image:
@@ -443,6 +502,9 @@ class Skin_Area:
                             
             elif isinstance(bg, xml_skin.XML_rectangle):
                 self.calc_geometry(bg)
+                self.background_cache += [ ( 'rectangle', bg.x, bg.y, bg.width,
+                                             bg.height, bg.bgcolor, bg.size, bg.color,
+                                             bg.radius ) ]
                 self.drawroundbox(bg.x, bg.y, bg.width, bg.height, bg, redraw=self.redraw)
 
         if redraw_watermark:
@@ -457,6 +519,11 @@ class Skin_Area:
         if self.mode > 1:
             return
 
+        if self.mode == 1:
+            self.content_cache += [ ( 'rectangle', x, y, width,
+                                      height, rect.bgcolor, rect.size, rect.color,
+                                      rect.radius ) ]
+            
         area = self.area_val
         osd.drawroundbox(x, y, x+width, y+height,
                          color = rect.bgcolor, border_size=rect.size,
@@ -497,6 +564,14 @@ class Skin_Area:
                                 align_v, mode, ellipses ) ]
 
 
+        height2 = height
+        if height2 == -1:
+            height2 = osd.stringsize('Arj', font=font.name, ptsize=font.size)[1] + 10
+
+        self.content_cache += [ ( 'text', x, y, width, height2, height, text, font, align_h,
+                                  align_v, mode, ellipses ) ]
+
+
 
     def draw_image(self, image, val, redraw=TRUE):
         """
@@ -505,6 +580,8 @@ class Skin_Area:
         """
         if isinstance(val, tuple):
             self._draw_image += [ ( image, val ) ]
+            self.content_cache += [ ( 'image', val[0], val[1], image.get_width(),
+                                      image.get_height(), image ) ]
             
             
         elif hasattr(val, 'label') and val.label == 'background':
