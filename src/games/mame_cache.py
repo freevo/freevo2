@@ -1,18 +1,27 @@
-# ----------------------------------------------------------------------
+#if 0 /*
+# -----------------------------------------------------------------------
 # mame_cache.py - Module for caching MAME rom information for Freevo.
-# ----------------------------------------------------------------------
+# -----------------------------------------------------------------------
 # $Id$
 #
-# Authors:     Rob Shortt <rob@infointeractive.com>
-#
-# Notes:  This contains some rominfo code from videogame.py.
+# Notes: This contains some rominfo code from videogame.py.
 # Todo:        
 #
-# ----------------------------------------------------------------------
+# -----------------------------------------------------------------------
+# $Log$
+# Revision 1.2  2002/11/24 19:52:56  dischi
+# Changed header to the freevo default
 #
-# ----------------------------------------------------------------------
-# 
-# Copyright (C) 2002 Rob Shortt
+# Revision 1.1  2002/11/24 19:10:19  dischi
+# Added mame support to the new code. Since the hole new code is
+# experimental, mame is activated by default. Change local_skin.xml
+# to deactivate it after running ./cleanup
+#
+#
+# -----------------------------------------------------------------------
+# Freevo - A Home Theater PC framework
+# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,8 +37,8 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------
-#
+# ----------------------------------------------------------------------- */
+#endif
 
 import sys
 import random
