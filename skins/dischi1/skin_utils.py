@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/04/03 09:27:18  dischi
+# better cache (more RAM usage but faster image menus)
+#
 # Revision 1.9  2003/04/02 14:14:14  dischi
 # small cleanups
 #
@@ -39,13 +42,16 @@
 
 
 import pygame
+from pygame.locals import *
+
 import osd
 import os
 import objectcache
 
 osd = osd.get_singleton()
 
-format_imagecache = objectcache.ObjectCache(20, desc='format_image')
+format_imagecache = objectcache.ObjectCache(30, desc='format_image')
+load_imagecache   = objectcache.ObjectCache(20, desc='load_image')
 
 
 def format_image(settings, item, width, height, force=0):
@@ -62,35 +68,42 @@ def format_image(settings, item, width, height, force=0):
 
     if cimage:
         return cimage
-    
+
     image = None
     if item.image:
-        image = osd.loadbitmap('thumb://%s' % item.image)
-
+        image = load_imagecache['thumb://%s' % item.image]
+        if not image:
+            image = osd.loadbitmap('thumb://%s' % item.image)
+            load_imagecache['thumb://%s' % item.image] = image
+            
     if not image:
         if not force:
             return None, 0, 0
 
         if hasattr(item, 'media') and item.media and item.media.info == item and \
            os.path.isfile('%s/mimetypes/%s.png' % (settings.icon_dir, item.media.type)):
-            image = '%s/mimetypes/%s.png' % (settings.icon_dir, item.media.type)
+            imagefile = '%s/mimetypes/%s.png' % (settings.icon_dir, item.media.type)
             
 
         elif item.type == 'dir':
             if os.path.isfile('%s/mimetypes/folder_%s.png' % \
                               (settings.icon_dir, item.display_type)):
-                image = '%s/mimetypes/folder_%s.png' % \
-                        (settings.icon_dir, item.display_type)
+                imagefile = '%s/mimetypes/folder_%s.png' % \
+                            (settings.icon_dir, item.display_type)
             else:
-                image = '%s/mimetypes/folder.png' % settings.icon_dir
+                imagefile = '%s/mimetypes/folder.png' % settings.icon_dir
     
         elif os.path.isfile('%s/mimetypes/%s.png' % (settings.icon_dir, item.type)):
-            image = '%s/mimetypes/%s.png' % (settings.icon_dir, item.type)
+            imagefile = '%s/mimetypes/%s.png' % (settings.icon_dir, item.type)
 
-        if not image:
+        if not imagefile:
             return None, 0, 0
 
-        image = osd.loadbitmap('thumb://%s' % image)
+        image = load_imagecache['thumb://%s' % imagefile]
+        if not image:
+            image = osd.loadbitmap('thumb://%s' % imagefile)
+            load_imagecache['thumb://%s' % imagefile] = image
+
         if not image:
             return None, 0, 0
 
@@ -114,7 +127,8 @@ def format_image(settings, item, width, height, force=0):
         else:
             height = int(float(width * i_h) / i_w)
 
-    cimage = pygame.transform.scale(image, (width, height)), width, height
-    format_imagecache[cname] = cimage
-    return cimage
+    cimage = pygame.transform.scale(image, (width, height))
+    cimage.set_alpha(cimage.get_alpha(), RLEACCEL)
+    format_imagecache[cname] = cimage, width, height
+    return cimage, width, height
     
