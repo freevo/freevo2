@@ -1,1 +1,1 @@
-*.pyc log.txt runapp *.so *.o freevo_xwin local_conf.py freevo.proj* freevo.conf* mplayer_stdout.log mplayer_stderr.log
+*.pyc log.txt runapp *.so *.o freevo_xwin freevo.proj* freevo.conf* mplayer_stdout.log mplayer_stderr.log
