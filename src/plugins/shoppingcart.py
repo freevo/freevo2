@@ -10,9 +10,16 @@
 #   plugin.activate('shoppingcart')
 #
 # Todo:        
+#   o handle fxd files
+#   o also add metafiles like covers to the cart
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/12/14 11:53:03  dischi
+# o use os.system to move because Python 2.2.3 has no shutil.move
+# o add menu shortcuts
+# o add support to add directories to the cart
+#
 # Revision 1.1  2003/12/09 23:29:46  mikeruelle
 # make it a little easier to move multiple files around
 #
@@ -48,6 +55,7 @@ import util
 from gui.PopupBox import PopupBox
 import rc
 import event as em
+import menu
 
 class PluginInterface(plugin.ItemPlugin):
     """
@@ -68,7 +76,8 @@ class PluginInterface(plugin.ItemPlugin):
         popup = PopupBox(text=_('Moving files...'))
         popup.show()
         for cartfile in cartfiles:
-            shutil.move(cartfile, self.item.dir)
+            # python 2.2 has no shutil.move
+            os.system('mv "%s" "%s"' % (cartfile, self.item.dir))
         os.unlink(self.pfile)
         popup.destroy()
         rc.post_event(em.MENU_BACK_ONE_MENU)
@@ -88,10 +97,16 @@ class PluginInterface(plugin.ItemPlugin):
             cartfiles = []
         else:
             cartfiles = util.read_pickle(self.pfile)
-        cartfiles.append(self.item.filename)
+        if self.item.type == 'dir':
+            cartfiles.append(self.item.dir)
+        else:
+            cartfiles.append(self.item.filename)
         util.save_pickle(cartfiles, self.pfile)
-        rc.post_event(em.MENU_BACK_ONE_MENU)
-
+        if isinstance(menuw.menustack[-1].selected, menu.MenuItem):
+            rc.post_event(em.MENU_BACK_ONE_MENU)
+        else:
+            rc.post_event(em.Event(em.OSD_MESSAGE, arg=_('Added to Cart')))
+            
     def deleteCart(self, arg=None, menuw=None):
         if (os.path.isfile(self.pfile) != 0):
             os.unlink(self.pfile)
@@ -104,12 +119,20 @@ class PluginInterface(plugin.ItemPlugin):
             cartfiles = []
         else:
             cartfiles = util.read_pickle(self.pfile)
-        if item.type == 'dir' and len(cartfiles) > 0:
-            myactions.append((self.moveHere, _('Move Files Here')))
-            myactions.append((self.copyHere, _('Copy Files Here')))
+
+        if item.type == 'dir':
+            if len(cartfiles) > 0:
+                myactions.append((self.moveHere, _('Cart: Move Files Here')))
+                myactions.append((self.copyHere, _('Cart: Copy Files Here')))
+            if not item.dir in cartfiles:
+                myactions.append((self.addToCart, _('Add Directory to Cart'), 'cart:add'))
+
         elif hasattr(item, 'filename'):
-            myactions.append((self.addToCart, _('Add File to Cart')))
+            if not item.filename in cartfiles:
+                myactions.append((self.addToCart, _('Add File to Cart'), 'cart:add'))
+
         if (os.path.isfile(self.pfile) != 0):
             myactions.append((self.deleteCart, _('Delete Cart')))
+
         return myactions
 
