@@ -57,13 +57,29 @@ def get_guide():
 
         # No, is there a pickled version ("file cache") in a file?
         pname = config.XMLTV_FILE + '.pickled'
+        got_cached_guide = FALSE
         if (os.path.isfile(config.XMLTV_FILE) and
             os.path.isfile(pname) and (os.path.getmtime(pname) >
                                        os.path.getmtime(config.XMLTV_FILE))):
             if DEBUG: print 'XMLTV, reading cached file (%s)' % pname
             cached_guide = pickle.load(open(pname, 'r'))
-        else:
-            # No, need to reload it
+
+            epg_ver = None
+            try:
+                epg_ver = cached_guide.EPG_VERSION
+            except AttributeError:
+                print 'EPG does not have a version number, must be reloaded'
+
+            if epg_ver != epg_types.EPG_VERSION:
+                print (('EPG version number %s is stale (new is %s), must ' +
+                        'be reloaded') % (epg_ver, epg_types.EPG_VERSION))
+            else:
+                if DEBUG:
+                    print 'XMLTV, got cached guide (version %s).' % epg_ver
+                got_cached_guide = TRUE
+
+        if not got_cached_guide:
+            # Need to reload the guide
             if DEBUG:
                 print 'XMLTV, trying to read raw file (%s)' % config.XMLTV_FILE
                 
@@ -98,11 +114,19 @@ def load_guide():
     # list is empty
     if config.TV_CHANNELS:
         if DEBUG: print 'epg_xmltv.py: Only adding channels in list'
-        for (id, disp, tunerid) in config.TV_CHANNELS:
+        for data in config.TV_CHANNELS:
+            (id, disp, tunerid) = data[:3]
             c = epg_types.TvChannel()
             c.id = id
             c.displayname = disp
             c.tunerid = tunerid
+
+            # Handle the optional time-dependent station info
+            c.times = []
+            if len(data) > 3:
+                for (days, start_time, stop_time) in data[3:]:
+                    c.times.append((days, int(start_time), int(stop_time)))
+                    
             guide.AddChannel(c)
     else: # Add all channels in the XMLTV file
         if DEBUG: print 'epg_xmltv.py: Adding all channels'

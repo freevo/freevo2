@@ -8,6 +8,10 @@
 import sys
 import time, os, string
 
+# The file format version number. It must be updated when incompatible
+# changes are made to the file format.
+EPG_VERSION = 2
+
 # Set to 1 for debug output
 DEBUG = 1
 
@@ -40,6 +44,7 @@ class TvChannel:
     tunerid = ''
     logo = ''   # URL or file   Not used yet
     programs = None
+    times = None
 
 
     def __init__(self):
@@ -75,6 +80,7 @@ class TvGuide:
         # These two types map to the same channel objects
         self.chan_dict = {}   # Channels mapped using the id
         self.chan_list = []   # Channels, ordered
+        self.EPG_VERSION = EPG_VERSION
 
         
     def AddChannel(self, channel):
@@ -117,6 +123,7 @@ class TvGuide:
             c.displayname = chan.displayname
             c.tunerid = chan.tunerid
             c.logo = chan.logo
+            c.times = chan.times
             # Copy the programs that are inside the indicated time bracket
             f = lambda p, a=start, b=stop: not (p.start > b or p.stop < a)
             c.programs = filter(f, chan.programs)

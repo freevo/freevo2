@@ -27,6 +27,8 @@ o Configure now checks for external programs
 o Bugfix for 8-bit chars in bitmap filenames by Alex Polite 
 o Added Per Wigren's app for fetching Swedish and Norwegian TV listings
   in contrib/PerWigren.
+o Added Per Wigren's patch for different TV stations on the same channel
+  at different times of the week and/or day.	
 	
 	
 Release 1.2.5 (2002-08-21):

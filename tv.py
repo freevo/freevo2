@@ -87,8 +87,26 @@ def main_menu(arg, menuw):
     # Get all programs from now until the end of the guide
     now = time.time()
     channels = guide.GetPrograms(start=now, stop=None)
-    
+
+    local = time.localtime()
+    weekday, hh, mm = local[6]+1, local[3], local[4]
+    today_wday = str(weekday)
+    today_hhmm = hh*100 + mm
+
     for channel in channels:
+        # Only display active channels
+        if DEBUG: print channel.displayname, channel.times
+        if channel.times:
+            displayit = FALSE
+            for (days, start_time, stop_time) in channel.times:
+                if today_wday in list(days):
+                    if DEBUG: print "Channel timeinfo today"
+                    if start_time <= today_hhmm <= stop_time:
+                        displayit = TRUE
+                        break # Out of for-loop
+            if not displayit:
+                continue  # Skip to next channel
+
         # Channel display name
         menu_str = '%s' % channel.displayname
         # Logo
