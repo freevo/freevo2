@@ -66,6 +66,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/10/19 17:30:30  dischi
+# looks nicer
+#
 # Revision 1.5  2003/10/19 16:40:09  dischi
 # i18n support function for plugins
 #
@@ -181,6 +184,7 @@ def i18n(application):
                     file = os.path.join(file, 'LC_MESSAGES/%s.po' % application)
                     os.system('msgmerge --update --backup=off %s i18n/%s.pot' % \
                               (file, application))
+            print
 
     if len(sys.argv) > 1 and sys.argv[1].lower() in ('i18n', 'sdist', 'bdist_rpm'):
         # update the mo files
