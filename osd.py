@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2002/10/06 14:33:26  dischi
+# log message cleanup and fixed a nasty bug in stringproxy
+#
 # Revision 1.28  2002/10/03 17:34:37  dischi
 # Small update to support more resolutions. I tried to get 720x576 working,
 # but for some reason I can't see a freevo on my tv, mplayer works fine.
@@ -42,37 +45,6 @@
 # ('\t' is considered a word '   ')
 # BUGS: It doesn't work fully when we have a word that is larger than width,
 # It overflows the area.
-#
-# Revision 1.22  2002/09/24 03:21:46  gsbarbieri
-# Changed stringsize() to _stringsize(). The stringsize() is still avaiable,
-# but now it uses the charsize() to cache values.
-# charsize() use dictionaries to store calculated values. charsize() actually
-# stores everything (char or strings) in the cache structure, but please make
-# the correct use of it, only pass chars to it. To get string's size, please
-# use stringsize().
-#
-# Revision 1.21  2002/09/21 10:12:11  dischi
-# Moved osd.popup_box to skin.PopupBox. A popup box should be part of the
-# skin.
-#
-# Revision 1.20  2002/09/08 18:26:03  krister
-# Applied Andrew Drummond's MAME patch. It seems to work OK on X11, but still needs some work before it is ready for prime-time...
-#
-# Revision 1.19  2002/09/07 06:16:51  krister
-# Cleanup.
-#
-# Revision 1.18  2002/09/01 05:15:55  krister
-# Switched to the new freely distributable fonts.
-#
-# Revision 1.17  2002/09/01 04:12:04  krister
-# Added error checking for font rendering.
-#
-# Revision 1.16  2002/08/31 17:18:29  dischi
-# added function to delete a bitmap from cache
-#
-# Revision 1.15  2002/08/21 04:58:26  krister
-# Massive changes! Obsoleted all osd_server stuff. Moved vtrelease and matrox stuff to a new dir fbcon. Updated source to use only the SDL OSD which was moved to osd.py. Changed the default TV viewing app to mplayer_tv.py. Changed configure/setup_build.py/config.py/freevo_config.py to generate and use a plain-text config file called freevo.conf. Updated docs. Changed mplayer to use -vo null when playing music. Fixed a bug in music playing when the top dir was empty.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -226,7 +198,7 @@ def stringproxy(str):
             result = unicode(str, 'unicode-escape')
         except:
             pass
-        return result
+    return result
 
 
 class Font:
@@ -913,7 +885,7 @@ class OSD:
         if not os.path.isfile(filename):
             print 'Bitmap file "%s" doesnt exist!' % filename
             return None
-        
+
         for i in range(len(self.bitmapcache)):
             fname, image = self.bitmapcache[i]
             if stringproxy(fname) == stringproxy(filename):
