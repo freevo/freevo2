@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/05/22 00:10:16  rshortt
+# Getting rid of LD_PRELOAD.
+#
 # Revision 1.6  2003/05/20 23:43:58  rshortt
 # Improve search using regex.
 #
@@ -71,6 +74,11 @@ import record_types
 import epg_xmltv
 import tv_util
 import plugin
+
+# We won't be needing this!!!  If you are using the freevo distributed
+# mencoder you may need to comment this line out until we give you 
+# a staticly compiled one.
+os.environ['LD_PRELOAD'] = ''
 
 # We need to locate record_config.py
 cfgfilepath = [ os.environ['FREEVO_STARTDIR'],
