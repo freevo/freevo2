@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.71  2003/07/14 19:34:07  rshortt
+# Adding dgs to the list of supported display types.
+#
 # Revision 1.70  2003/07/14 17:09:49  rshortt
 # Start in fullscreen mode with xv too.
 #
@@ -382,7 +385,8 @@ class OSD:
         self.depth = self.screen.get_bitsize()
         self.must_lock = self.screen.mustlock()
         
-        if (config.CONF.display == 'x11' or config.CONF.display == 'xv') \
+        if (config.CONF.display == 'x11' or config.CONF.display == 'xv' \
+            or config.CONF.display == 'dga' ) \
            and config.START_FULLSCREEN_X == 1:
             self.toggle_fullscreen()
 

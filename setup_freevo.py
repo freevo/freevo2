@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/07/14 19:34:07  rshortt
+# Adding dgs to the list of supported display types.
+#
 # Revision 1.9  2003/07/14 17:02:54  rshortt
 # Add xv to the list of allowed display values.
 #
@@ -74,7 +77,7 @@ Set up Freevo for your specific environment.
                                   WIDTHxHEIGHT can be 800x600, 768x576 or 640x480
 
    --display=DISP               set the display
-                                  DISP can be xv, x11, fbdev, dxr3, mga, 
+                                  DISP can be xv, x11, fbdev, dxr3, mga, dga,
                                   dfbmga or sdl
                                   
    --tv=NORM                    set the TV standard
@@ -219,7 +222,7 @@ def main():
     sys.exit()
 
 vals_geometry = ['800x600', '768x576', '640x480']
-vals_display = ['xv', 'x11', 'fbdev', 'dfbmga', 'mga', 'dxr3', 'sdl']
+vals_display = ['xv', 'x11', 'fbdev', 'dfbmga', 'mga', 'dga', 'dxr3', 'sdl']
 vals_tv = ['ntsc', 'pal', 'secam']
 vals_chanlist = ['us-bcast', 'us-cable', 'us-cable-hrc',
                  'japan-bcast', 'japan-cable', 'europe-west',
