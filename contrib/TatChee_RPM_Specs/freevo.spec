@@ -1,11 +1,11 @@
 %define geometry 800x600
 %define display  x11
-%define tv_norm  pal
-%define chanlist europe-west
+%define tv_norm  ntsc
+%define chanlist us-cable
 Summary:	Freevo
 Name:		freevo
 Version:	1.2.6
-Release:	1
+Release:	2
 License:	GPL
 Group:		Applications/Multimedia
 Source:		http://freevo.sourceforge.net/%{name}-%{version}.tar.gz
@@ -74,7 +74,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/freevo
 mkdir -p %{buildroot}%{_sysconfdir}/rc.d/init.d
 mkdir -p %{buildroot}%{_cachedir}/freevo/testfiles/{Images,Movies,Music}
 
-install -m 755 freevo freevo_xwin runapp freevo.conf skin.py strptime.py [a-e,g-r,t-z]*.py %{buildroot}%{_prefix}
+install -m 755 freevo freevo_xwin runapp skin.py strptime.py [a-e,g-r,t-z]*.py %{buildroot}%{_prefix}
 install -m 644 fbcon/fbset.db %{buildroot}%{_prefix}/fbcon
 install -m 755 fbcon/vtrelease %{buildroot}%{_prefix}/fbcon
 install -m 755 fbcon/*.sh %{buildroot}%{_prefix}/fbcon
@@ -97,7 +97,7 @@ install -m 644 skins/dischi1/* %{buildroot}%{_prefix}/skins/dischi1
 install -m 644 skins/krister1/* %{buildroot}%{_prefix}/skins/krister1
 install -m 644 skins/malt1/* %{buildroot}%{_prefix}/skins/malt1
 
-install -m 644 freevo_config.py boot/boot_config %{buildroot}%{_sysconfdir}/freevo
+install -m 644 freevo.conf freevo_config.py boot/boot_config %{buildroot}%{_sysconfdir}/freevo
 install -m 644 boot/URC-7201B00 %{buildroot}%{_prefix}/boot
 install -m755 boot/freevo %{buildroot}%{_sysconfdir}/rc.d/init.d
 install -m755 boot/freevo_dep %{buildroot}%{_sysconfdir}/rc.d/init.d
@@ -148,7 +148,6 @@ find %{_prefix} -name "*.pyc" |xargs rm -f
 %attr(755,root,root) %{_prefix}/freevo_xwin
 %attr(755,root,root) %{_prefix}/runapp
 %attr(644,root,root) %{_prefix}/*.py
-%attr(644,root,root) %{_prefix}/freevo.conf
 %attr(644,root,root) %{_prefix}/fbcon/fbset.db
 %attr(755,root,root) %{_prefix}/fbcon/vtrelease
 %attr(755,root,root) %{_prefix}/fbcon/*.sh
@@ -172,6 +171,7 @@ find %{_prefix} -name "*.pyc" |xargs rm -f
 %attr(644,root,root) %{_prefix}/skins/krister1/*
 %attr(644,root,root) %{_prefix}/skins/malt1/*
 %config %{_sysconfdir}/freevo/freevo_config.py
+%config %{_sysconfdir}/freevo/freevo.conf
 %doc BUGS ChangeLog COPYING FAQ INSTALL* README TODO Docs/*
 
 %files boot
@@ -203,12 +203,16 @@ fi
 
 %post testfiles
 mkdir -p %{_cachedir}/freevo/testfiles/Movies/Recorded
-ln -s %{_cachedir}/freevo/testfiles %{_prefix}
+ln -sf %{_cachedir}/freevo/testfiles %{_prefix}
 
 %preun testfiles
 rm -f %{_prefix}/testfiles
 
 %changelog
+* Tue Oct 15 2002 TC Wan <tcwan@cs.usm.my>
+- Moved freevo.conf to /etc/freevo where freevo_config.py resides
+- Defaulted TV settings to ntsc, us-cable to match TV guide
+
 * Mon Oct 14 2002 TC Wan <tcwan@cs.usm.my>
 - Updated for 1.2.6 release.
 
