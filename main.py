@@ -4,6 +4,9 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.58  2002/08/31 18:09:33  krister
+# Removed old code for shutting down from startup.py which is not used anymore.
+#
 # Revision 1.57  2002/08/21 04:58:26  krister
 # Massive changes! Obsoleted all osd_server stuff. Moved vtrelease and matrox stuff to a new dir fbcon. Updated source to use only the SDL OSD which was moved to osd.py. Changed the default TV viewing app to mplayer_tv.py. Changed configure/setup_build.py/config.py/freevo_config.py to generate and use a plain-text config file called freevo.conf. Updated docs. Changed mplayer to use -vo null when playing music. Fixed a bug in music playing when the top dir was empty.
 #
@@ -167,8 +170,6 @@ def shutdown(menuw=None, arg=None):
     # different ways that it could have been started.
     #
 
-    # XXX kludge to signal startup.py to abort
-    os.system('touch /tmp/freevo-shutdown') 
     # XXX kludge to shutdown the runtime version (no linker)
     os.system('killall -9 freevo_rt 2&> /dev/null') 
     os.system('killall -9 freevo_xwin 2&> /dev/null')  # X11 helper app
