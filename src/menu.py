@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/01/07 20:43:38  dischi
+# Small fixes, the actions get the item as arg
+#
 # Revision 1.6  2002/12/11 16:08:48  dischi
 # no ENTER selects the item menu
 #
@@ -213,10 +216,10 @@ class MenuWidget:
         skin.DrawMenu(self)
 
 
-    def make_submenu(self, menu_name, actions):
+    def make_submenu(self, menu_name, actions, item):
         items = []
         for function, title in actions:
-            items += [ MenuItem(title, function) ]
+            items += [ MenuItem(title, function, item) ]
         s = Menu(menu_name, items)
         self.pushmenu(s)
             
@@ -298,7 +301,7 @@ class MenuWidget:
                         except:
                             traceback.print_exc()
                 if len(actions) > 1:
-                    self.make_submenu(menu.selected.name, actions)
+                    self.make_submenu(menu.selected.name, actions, menu.selected)
             except:
                 pass
             

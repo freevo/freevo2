@@ -4,11 +4,14 @@
 # -----------------------------------------------------------------------
 # $Id$
 #
-# Notes: This is an example who plugins work
+# Notes: This is an example how plugins work
 # Todo:        
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/01/07 20:43:39  dischi
+# Small fixes, the actions get the item as arg
+#
 # Revision 1.3  2003/01/07 19:44:29  dischi
 # small bugfix
 #
@@ -52,13 +55,9 @@ import osd
 skin = skin.get_singleton()
 osd  = osd.get_singleton()
 
-current_media = None
-
 def actions(item):
-    global current_media
     if (not item.type == 'video') or item.mode == 'file' or item.rom_id or item.rom_label:
         return []
-    current_media = item.media
     return [ (imdb_search_disc, 'Search IMDB for [%s]' % item.label),
              (imdb_add_disc_menu, 'Add disc to existing entry in database') ]
 
@@ -69,13 +68,12 @@ def imdb_search_disc(arg=None, menuw=None):
     search imdb for this disc
     """
     import helpers.imdb
-    global current_media
 
     skin.PopupBox('searching IMDB, be patient...')
     osd.update()
 
     items = []
-    for id,name,year,type in helpers.imdb.search(current_media.info.label):
+    for id,name,year,type in helpers.imdb.search(arg.label):
         items += [ menu.MenuItem('%s (%s, %s)' % (name, year, type),
                                  imdb_create_disc, (id, year)) ]
     moviemenu = menu.Menu('IMDB QUERY', items)
@@ -87,21 +85,20 @@ def imdb_create_disc(arg=None, menuw=None):
     get imdb informations and store them
     """
     import helpers.imdb
-    global current_media
 
     skin.PopupBox('getting data, be patient...')
     osd.update()
     menuw.delete_menu()
     menuw.delete_menu()
 
-    disc_id = helpers.imdb.getCDID(current_media.devicename)
-    filename = ('%s/%s_%s' % (config.MOVIE_DATA_DIR, current_media.info.label, \
+    disc_id = helpers.imdb.getCDID(arg.media.devicename)
+    filename = ('%s/%s_%s' % (config.MOVIE_DATA_DIR, arg.label, \
                               arg[1])).lower()
     if os.path.isfile('%s.xml' % filename):
         filename = '%s_%s' % (filename, disc_id)
 
     helpers.imdb.get_data_and_write_xml(arg[0], filename, disc_id,
-                                        current_media.info.mode,None)
+                                        arg.mode,None)
     
 # -------------------------------------------
 
@@ -110,14 +107,13 @@ def imdb_add_disc(arg=None, menuw=None):
     call imdb.py to add this disc to the database
     """
     import helpers.imdb
-    global current_media
 
     skin.PopupBox('adding to database, be patient...')
     osd.update()
     menuw.delete_menu()
     menuw.delete_menu()
 
-    helpers.imdb.add_id(current_media.devicename, arg.xml_file)
+    helpers.imdb.add_id(arg.media.devicename, arg.xml_file)
 
 
 def imdb_add_disc_menu(arg=None, menuw=None):
