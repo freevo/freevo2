@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/08/01 10:51:10  dischi
+# use new gui code for popup
+#
 # Revision 1.14  2004/07/21 11:34:31  dischi
 # only import config/vfs when needed
 #
@@ -62,8 +65,7 @@ def snapshot(videofile, imagefile=None, pos=None, update=True, popup=None):
     import Image
     import util
     import vfs
-    import gui.PopupBox
-    import osd
+    import gui
     
     if not imagefile:
         imagefile = vfs.getoverlay(videofile + '.raw')
@@ -78,7 +80,7 @@ def snapshot(videofile, imagefile=None, pos=None, update=True, popup=None):
     if popup:
         pop = gui.PopupBox(text='Creating thumbnail for \'%s\'...' % \
                            os.path.basename(videofile),
-                           width=osd.get_singleton().width-config.OSD_OVERSCAN_X*2-80)
+                           width=gui.get_screen().width-config.OSD_OVERSCAN_X*2-80)
         pop.show()
         
     args = [ config.MPLAYER_CMD, videofile, imagefile ]
