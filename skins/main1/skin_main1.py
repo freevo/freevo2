@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2002/09/25 18:53:43  dischi
+# Added border around the cover image (set by the xml file border_size
+# and border_color)
+#
 # Revision 1.27  2002/09/24 02:17:00  gsbarbieri
 # In DrawMP3 changed the layout, now the labels ('Title: ', 'Author: ', ...) are right aligned.
 #
@@ -283,6 +287,8 @@ class Skin:
         # display the image and store the x0 position of the image
         for item in menuw.menu_items:
             image = item.image
+            i_val = None
+            
             if image:
                 (type, image) = image
             if image:
@@ -293,12 +299,15 @@ class Skin:
                                                       val.cover_image.height)
                         if thumb:
                             osd.drawbitmap(thumb, val.cover_image.x, val.cover_image.y)
+                            i_val = val.cover_image
+                            
                 elif type == 'movie' and val.cover_movie.visible:
                     image_x = val.cover_movie.x
                     if menu.selected == item:
                         osd.drawbitmap(util.resize(image, val.cover_movie.width, \
                                                    val.cover_movie.height),\
                                        val.cover_movie.x, val.cover_movie.y)
+                        i_val = val.cover_movie
 
                 elif type == 'music' and val.cover_music.visible:
                     image_x = val.cover_music.x
@@ -306,6 +315,16 @@ class Skin:
                         osd.drawbitmap(util.resize(image, val.cover_music.width, \
                                                    val.cover_music.height),\
                                        val.cover_music.x, val.cover_music.y)
+                        i_val = val.cover_music
+
+                if i_val and i_val.border_size > 0:
+                    osd.drawbox(i_val.x - i_val.border_size,
+                                i_val.y - i_val.border_size,
+                                i_val.x + i_val.width + i_val.border_size,
+                                i_val.y + i_val.height + i_val.border_size,
+                                width = i_val.border_size,
+                                color = i_val.border_color)
+            
         return image_x
 
 
