@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.107  2003/07/12 17:29:33  dischi
+# added redraw() to force a redraw (plugins may need this)
+#
 # Revision 1.106  2003/07/12 17:16:30  dischi
 # created a special area for plugins to draw
 #
@@ -268,7 +271,7 @@ class Skin:
     def __init__(self):
         self.display_style = config.SKIN_START_LAYOUT
         self.force_redraw = TRUE
-        self.last_draw = None
+        self.last_draw = None, None
         self.screen = Screen()
         self.xml_cache = objectcache.ObjectCache(3, desc='xmlskin')
 
@@ -494,6 +497,14 @@ class Skin:
         osd.update()
 
 
+    def redraw(self):
+        """
+        redraw the current screen
+        """
+        if self.last_draw[0] and self.last_draw[1]:
+            self.draw(self.last_draw)
+
+            
     def draw(self, (type, object)):
         """
         draw the object.
@@ -550,14 +561,14 @@ class Skin:
             all_areas = self.normal_areas
             style = self.GetDisplayStyle(menu)
 
-        if self.last_draw != type:
+        if self.last_draw[0] != type:
             self.force_redraw = TRUE
-            self.last_draw = type
+        self.last_draw = type, object
 
         self.screen.clear()
 
         for a in all_areas:
-            a.draw(settings, object, style, self.last_draw, self.force_redraw)
+            a.draw(settings, object, style, type, self.force_redraw)
             
         self.screen.show(self.force_redraw)
 
