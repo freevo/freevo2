@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2003/11/08 12:57:54  dischi
+# also set speed for audio discs
+#
 # Revision 1.37  2003/10/18 17:57:22  dischi
 # remove debug
 #
@@ -460,6 +463,13 @@ class Identify_Thread(threading.Thread):
         media.tray_open = False
         data = mmpython.parse(media.devicename)
 
+        # try to set the speed
+        if config.ROM_SPEED and data and not data.mime == 'video/dvd':
+            try:
+                ioctl(fd, CDROM_SELECT_SPEED, config.ROM_SPEED)
+            except:
+                pass
+
         if data and data.mime == 'audio/cd':
             os.close(fd)
             disc_id = data.id
@@ -473,13 +483,6 @@ class Identify_Thread(threading.Thread):
                 media.info.name = data.title
             media.info.info = data
             return
-
-        # try to set the speed
-        if config.ROM_SPEED and data and not data.mime == 'video/dvd':
-            try:
-                ioctl(fd, CDROM_SELECT_SPEED, config.ROM_SPEED)
-            except:
-                pass
 
         os.close(fd)
         image = title = movie_info = more_info = xml_file = None
