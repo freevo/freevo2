@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/07/12 17:17:27  dischi
+# moved idlebar to a skin plugin
+#
 # Revision 1.18  2003/07/05 14:57:07  dischi
 # the idlebar registers itself as idlebar to the plugin interface
 #
@@ -120,9 +123,6 @@ import plugin
 
 import pymetar
 
-import osd
-osd  = osd.get_singleton()
-
 TRUE  = 1
 FALSE = 0
 
@@ -131,51 +131,46 @@ class interface(plugin.DaemonPlugin):
     def __init__(self):
         plugin.DaemonPlugin.__init__(self)
         self.poll_interval   = 300
-        self.toolbar_surface = None
         self.plugins = None
         plugin.register(self, 'idlebar')
         self.visible = TRUE
         
-    def draw(self, (type, object)):
-        if not self.toolbar_surface:
-            osd.drawbox(0,0,osd.width,75,color=0x80000000,width=-1)
-            self.toolbar_surface = osd.getsurface(0,0,osd.width,75)
+    def draw(self, (type, object), osd):
+        osd.drawroundbox(0, 0, osd.width, osd.y + 60, (0x80000000, 0, 0, 0))
         if not self.plugins:
             self.plugins = plugin.get('idlebar')
-
-        osd.putsurface(self.toolbar_surface,0,0)
+        x = osd.x
         for p in self.plugins:
-            p.draw((type, object))
-        rect = (0,0,osd.width,75)
-        osd.update(rect)
+            add_x = p.draw((type, object), x, osd)
+            if add_x:
+                x += add_x + 20
 
 
     def poll(self):
         # XXX This probably shouldn't be None,None, but at least it doesn't crash
-        self.draw((None,None))
-
+        # self.draw((None,None))
+        pass
 
 class IdleBarPlugin(plugin.Plugin):
     def __init__(self):
         plugin.Plugin.__init__(self)
         self._type = 'idlebar'
         
-    def draw(self, (type, object)):
+    def draw(self, (type, object), x, osd):
         return
 
 
 class clock(IdleBarPlugin):
     def __init__(self):
         IdleBarPlugin.__init__(self)
-        self.CLOCKFONT = 'skins/fonts/Trebuchet_MS.ttf'
-        if not os.path.isfile(self.CLOCKFONT):
-            # XXX Get this from the skin, but for now this will allow it to work
-            self.CLOCKFONT = config.OSD_DEFAULT_FONTNAME
     
-    def draw(self, (type, object)):
+    def draw(self, (type, object), x, osd):
         clock = time.strftime('%a %I:%M %P')
-        osd.drawstring(clock,580,40,fgcolor=0xffffff,font=self.CLOCKFONT,ptsize=12)
-
+        font  = osd.get_font('clock')
+        osd.write_text(clock, font, None, osd.x + osd.width-200, osd.y + 10, 190,
+                       40, 'right', 'center')
+        return 0
+    
 
 class cdstatus(IdleBarPlugin):
     def __init__(self):
@@ -189,7 +184,7 @@ class cdstatus(IdleBarPlugin):
         self.cdimages ['cdrip'] = 'skins/images/status/cd_rip.png'
         self.cdimages ['mixed'] = 'skins/images/status/cd_mixed.png'
 
-    def draw(self, (type, object)):
+    def draw(self, (type, object), x, osd):
         image = self.cdimages['empty_cdrom']
         for media in config.REMOVABLE_MEDIA:
             if hasattr(media.info,'type') and hasattr(media.info,'handle_type'):
@@ -197,7 +192,8 @@ class cdstatus(IdleBarPlugin):
                     image = self.cdimages['mixed']
                 elif media.info.handle_type: 
                     image = self.cdimages[media.info.handle_type]
-        osd.drawbitmap(image,220,30)
+        return osd.draw_image(image, (x, osd.y + 15, -1, -1))[0]
+
 
 class mail(IdleBarPlugin):
     def __init__(self, mailbox):
@@ -220,11 +216,11 @@ class mail(IdleBarPlugin):
         else:
             return 0
 
-    def draw(self, (type, object)):
+    def draw(self, (type, object), x, osd):
         if self.checkmail() > 0:
-            osd.drawbitmap(self.MAILIMAGE,25,25)
+            return osd.draw_image(self.MAILIMAGE, (x, osd.y + 10, -1, -1))[0]
         else:
-            osd.drawbitmap(self.NO_MAILIMAGE,25,25) 
+            return osd.draw_image(self.NO_MAILIMAGE, (x, osd.y + 10, -1, -1))[0] 
 
 
 
@@ -241,11 +237,11 @@ class tv(IdleBarPlugin):
             return 1
         return 0
 
-    def draw(self, (type, object)):
+    def draw(self, (type, object), x, osd):
         if self.checktv() == 1:
-            osd.drawbitmap(self.TVLOCKED,100,25)
+            return osd.draw_image(self.TVLOCKED, (x, osd.y + 10, -1, -1))[0]
         else:
-            osd.drawbitmap(self.TVFREE,100,25)
+            return osd.draw_image(self.TVFREE, (x, osd.y + 10, -1, -1))[0]
 
 
 
@@ -300,12 +296,15 @@ class weather(IdleBarPlugin):
             cachefile.close()
         return temperature, icon
 
-    def draw(self, (type, object)):
+    def draw(self, (type, object), x, osd):
         temp,icon = self.checkweather()
-        osd.drawbitmap('skins/icons/weather/' + icon,160,30)
-        osd.drawstring(temp,175,50,fgcolor=0xbbbbbb,font=self.CLOCKFONT,ptsize=14)
-        osd.drawstring('o',192,47,fgcolor=0xbbbbbb,font=self.CLOCKFONT,ptsize=10)
-
+        font  = osd.get_font('weather')
+        osd.draw_image('skins/icons/weather/' + icon, (x, osd.y + 15, -1, -1))
+        temp = '%s°' % temp
+        width = font.font.stringsize(temp)
+        osd.write_text(temp, font, None, x + 15, osd.y + 55 - font.h, width, font.h,
+                       'left', 'top')
+        return width + 15
         
 # This class checks if the current date is a holiday and will
 # display a user specified icon for that holiday.    
@@ -329,7 +328,7 @@ class holidays(IdleBarPlugin):
                 if todays_date == holiday:
                     return icon
 
-    def draw(self, (type, object)):
+    def draw(self, (type, object), x, osd):
         icon = self.get_holiday_icon()
         if icon:
-            osd.drawbitmap( 'skins/images/holidays/' + icon, 580, 2)        
+            return osd.draw_image('skins/images/holidays/' + icon, (x, osd.y + 10, -1, -1))[0]
