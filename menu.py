@@ -56,6 +56,7 @@ class Menu:
         self.choices = choices          # List of MenuItem:s
         self.page_start = 0
         self.packrows = packrows
+        self.bgbitmap = ('', 0, 0)
         
 
 #
@@ -116,12 +117,16 @@ class MenuWidget:
 
     def refresh(self):
         self.osd.clearscreen()
+
         menu = self.menustack[-1]
 
         if not menu:
             osd.drawstring('xxx', 'INTERNAL ERROR, NO MENU!', 100, osd.height/2)
             return
 
+        if menu.bgbitmap[0]:
+            apply(self.osd.drawbitmap, menu.bgbitmap)
+            
         # Menu heading
         self.osd.drawstring('xxx', menu.heading, 230, 55)
         
@@ -154,6 +159,8 @@ class MenuWidget:
                              color=self.osd.COL_ORANGE)
             x0 += 190
 
+        self.osd.update()
+        
         
     def eventhandler(self, event):
         menu = self.menustack[-1]
@@ -192,7 +199,7 @@ class MenuWidget:
             
             # Move to the next page if the current position is at the
             # bottom of the list, otherwise move to the bottom of the list.
-            if curr_selected == bottom_index:
+            if curr_selected >= bottom_index:
                 self.goto_next_page()
             else:
                 curr_selected = bottom_index

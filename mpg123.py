@@ -97,6 +97,7 @@ class MPG123:
             osd.drawstring('xxx', 'Artist: %s' % id.artist, 30, 110)
             osd.drawstring('xxx', 'Album: %s' % id.album, 30, 140)
             osd.drawstring('xxx', 'Year: %s' % id.year, 30, 170)
+        osd.update()
         
         
     def stop(self):
@@ -212,15 +213,16 @@ def mpg123_eof(out):
             old_done = done
             el = int(round((float(elapsed))))
             rem = int(round((float(remain))))
-            osd.drawstring('xxx', 'Elapsed: %s   ' % el, 30, 250)
-            osd.drawstring('xxx', 'Remain: %s   ' % rem, 30, 290)
-            osd.drawstring('xxx', 'Done: %5.1f%%   ' % (done / 10.0), 30, 330)
+            osd.drawstring('xxx', 'Elapsed: %s   ' % el, 30, 250, osd.default_fg_color, osd.default_bg_color)
+            osd.drawstring('xxx', 'Remain: %s   ' % rem, 30, 290, osd.default_fg_color, osd.default_bg_color)
+            osd.drawstring('xxx', 'Done: %5.1f%%   ' % (done / 10.0), 30, 330, osd.default_fg_color, osd.default_bg_color)
             osd.drawbox(33, 370, 635, 390, width = 3)
             osd.drawbox(43, 380, 625, 380, width = 9, color = osd.default_bg_color)
             pixels = int(round((done / 10.0) * 6.0))
             for i in range(19):
                 y = 371 + i
                 osd.drawline(34, y, 34 + pixels, y, color = 0x038D11)
+            osd.update()
         retval = 0
     else:
         retval = 0
