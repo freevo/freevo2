@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/08/23 18:35:40  dischi
+# use new set_xml_file function in DirItem
+#
 # Revision 1.21  2003/08/23 12:51:42  dischi
 # removed some old CVS log messages
 #
@@ -608,9 +611,9 @@ class Identify_Thread(threading.Thread):
             media.info.image = image
         if more_info:
             media.info.info = more_info
-        if xml_file:
-            media.info.xml_file = xml_file
-
+        if xml_file and not media.info.xml_file:
+            media.info.set_xml_file(xml_file)
+            
         if len(mplayer_files) == 1:
             media.videoinfo = VideoItem(mplayer_files[0], None)
             media.videoinfo.media = media
