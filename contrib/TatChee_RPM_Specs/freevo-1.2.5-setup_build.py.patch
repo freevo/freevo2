@@ -1,0 +1,11 @@
+--- setup_build.py.orig	Fri Aug 23 16:11:29 2002
++++ setup_build.py	Fri Aug 23 16:10:48 2002
+@@ -114,7 +114,7 @@
+             conf.display = a
+ 
+         if o == '--tv':
+-            conf.norm = a
++            conf.tv = a
+ 
+         if o == '--chanlist':
+             conf.chanlist = a

@@ -1,0 +1,11 @@
+--- freevo_config.py.orig	Thu Sep 19 08:27:22 2002
++++ freevo_config.py	Thu Sep 19 08:27:38 2002
+@@ -254,7 +254,7 @@
+ 
+ DVD_LANG_PREF       = 'en,se,no'      # Order of preferred languages on DVD.
+ DVD_SUBTITLE_PREF   = ''              # Order of preferred subtitles on DVD.
+-NICE                = '/usr/bin/nice' # Priority setting app
++NICE                = '/usr/bin/env nice' # Priority setting app
+ MPLAYER_NICE        = '0'             # Priority of mplayer process. 0 is unchanged,
+                                       # <0 is higher prio, >0 lower prio. You must run
+                                       # freevo as root to use prio <0 !
