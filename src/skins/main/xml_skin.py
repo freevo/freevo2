@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/11/23 19:01:39  dischi
+# support for new fxd parser
+#
 # Revision 1.16  2003/10/22 18:23:56  dischi
 # speedup and less debug
 #
@@ -234,23 +237,23 @@ def attr_font(node, attr, default):
 
 def search_file(file, search_dirs):
     for s_dir in search_dirs:
-        dfile=os.path.join(s_dir, file)
+        dfile=vfs.join(s_dir, file)
 
-        if os.path.isfile(dfile):
+        if vfs.isfile(dfile):
             return dfile
-        if os.path.isfile("%s_%sx%s.png" % (dfile, config.CONF.width,
-                                            config.CONF.height)):
+        if vfs.isfile("%s_%sx%s.png" % (dfile, config.CONF.width,
+                                        config.CONF.height)):
             return "%s_%sx%s.png" % (dfile, config.CONF.width, config.CONF.height)
-        if os.path.isfile("%s_%sx%s.jpg" % (dfile, config.CONF.width,
-                                            config.CONF.height)):
+        if vfs.isfile("%s_%sx%s.jpg" % (dfile, config.CONF.width,
+                                        config.CONF.height)):
             return "%s_%sx%s.jpg" % (dfile, config.CONF.width, config.CONF.height)
-        if config.CONF.width == 720 and os.path.isfile("%s_768x576.png" % dfile):
+        if config.CONF.width == 720 and vfs.isfile("%s_768x576.png" % dfile):
             return "%s_768x576.png" % dfile
-        if config.CONF.width == 720 and os.path.isfile("%s_768x576.jpg" % dfile):
+        if config.CONF.width == 720 and vfs.isfile("%s_768x576.jpg" % dfile):
             return "%s_768x576.jpg" % dfile
-        if os.path.isfile("%s.png" % dfile):
+        if vfs.isfile("%s.png" % dfile):
             return "%s.png" % dfile
-        if os.path.isfile("%s.jpg" % dfile):
+        if vfs.isfile("%s.jpg" % dfile):
             return "%s.jpg" % dfile
 
     _debug_('can\'t find image %s' % file)
@@ -1001,84 +1004,85 @@ class XMLSkin:
             self.images[name] = search_file(self._images[name], search_dirs)
         return 1
 
+
+    def fxd_callback(self, fxd, node):
+        """
+        callback for the 'skin' tag
+        """
+        # get args back
+        (clear, copy_content, file, prepare) = fxd.skin_args
+
+        font_scale    = attr_float(node, "fontscale", 1.0)
+        file_geometry = attr_str(node, "geometry", '')
+        
+        if file_geometry:
+            w, h = file_geometry.split('x')
+        else:
+            w = config.CONF.width
+            h = config.CONF.height
+
+        scale = (float(config.CONF.width-2*config.OVERSCAN_X)/float(w),
+                 float(config.CONF.height-2*config.OVERSCAN_Y)/float(h))
+
+        include  = attr_str(node, 'include', '')
+
+        if include:
+            if clear:
+                self._layout = {}
+                self._font = {}
+                self._color = {}
+                self._images = {}
+                self._menuset = {}
+                self._menu = {}
+                self._popup = ''
+                self._player = XML_player()
+                self._tv = XML_tv()
+                self._mainmenu = XML_mainmenu()
+                self.skin_directories = []
+            self.load(include, copy_content, prepare = FALSE)
+
+        self.parse(node, scale, vfs.dirname(file), copy_content)
+        if not vfs.dirname(file) in self.skin_directories:
+            self.skin_directories = [ vfs.dirname(file) ] + \
+                                    self.skin_directories
+        if not prepare:
+            return
+            
+        self.font_scale = font_scale
+        self.prepare()
+        self.prepared = FALSE
+        return
+
         
     def load(self, file, copy_content = 0, prepare = TRUE, clear=FALSE):
         """
         load and parse the skin file
         """
-
-        self.prepared = FALSE
-        if not os.path.isfile(file):
-            if os.path.isfile(file+".fxd"):
+        self.prepared     = False
+        
+        if not vfs.isfile(file):
+            if vfs.isfile(file+".fxd"):
                 file += ".fxd"
-            elif os.path.isfile(os.path.join(config.SKIN_DIR, '%s/%s.fxd' % (file, file))):
-                file = os.path.join(config.SKIN_DIR, '%s/%s.fxd' % (file, file))
+            elif vfs.isfile(vfs.join(config.SKIN_DIR, '%s/%s.fxd' % (file, file))):
+                file = vfs.join(config.SKIN_DIR, '%s/%s.fxd' % (file, file))
             else:
-                file = os.path.join(config.SKIN_DIR, 'main/%s' % file)
-                if os.path.isfile(file+".fxd"):
+                file = vfs.join(config.SKIN_DIR, 'main/%s' % file)
+                if vfs.isfile(file+".fxd"):
                     file += ".fxd"
 
-        if not os.path.isfile(file):
+        if not vfs.isfile(file):
             return 0
 
-        font_scale = 1.0
-
         try:
-            parser = qp_xml.Parser()
-            f = open(file)
-            box = parser.parse(f.read())
-            f.close()
-            for freevo_type in box.children:
-                if freevo_type.name == 'skin':
+            parser = util.fxdparser.FXD(file)
 
-                    font_scale = attr_float(freevo_type, "fontscale", 1.0)
+            # bad hack to give args to the callback
+            parser.skin_args = (clear, copy_content, file, prepare)
 
-                    file_geometry = attr_str(freevo_type, "geometry", '')
-
-                    if file_geometry:
-                        w, h = file_geometry.split('x')
-                    else:
-                        w = config.CONF.width
-                        h = config.CONF.height
-                        
-                    scale = (float(config.CONF.width-2*config.OVERSCAN_X)/float(w),
-                             float(config.CONF.height-2*config.OVERSCAN_Y)/float(h))
-
-                    include  = attr_str(freevo_type, 'include', '')
-                    
-                    if include:
-                        if clear:
-                            self._layout = {}
-                            self._font = {}
-                            self._color = {}
-                            self._images = {}
-                            self._menuset = {}
-                            self._menu = {}
-                            self._popup = ''
-                            self._player = XML_player()
-                            self._tv = XML_tv()
-                            self._mainmenu = XML_mainmenu()
-                            self.skin_directories = []
-                            
-                        self.load(include, copy_content, prepare = FALSE)
-
-                    self.parse(freevo_type, scale, os.path.dirname(file), copy_content)
-                    if not os.path.dirname(file) in self.skin_directories:
-                        self.skin_directories = [ os.path.dirname(file) ] + \
-                                                self.skin_directories
-                    break
-            else:
-                # no new skin settings loaded, return without action
-                return 1
-            
-            if not prepare:
-                return 1
-            self.font_scale = font_scale
-            self.prepare()
-            self.prepared = FALSE
+            parser.set_handler('skin', self.fxd_callback)
+            parser.parse()
             return 1
         
-
         except:
             print "ERROR: XML file corrupt"
             traceback.print_exc()
