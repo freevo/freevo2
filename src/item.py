@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.67  2004/02/12 17:17:08  dischi
+# get image dir from skin
+#
 # Revision 1.66  2004/02/12 16:26:59  dischi
 # fix watermark problem once and for all
 #
@@ -249,6 +252,7 @@ class Item:
             import skin
             settings  = skin.get_singleton().settings
             skin_info = settings.mainmenu.items
+            imagedir  = settings.mainmenu.imagedir
             if skin_info.has_key(skin_type):
                 skin_info  = skin_info[skin_type]
                 self.name  = Unicode(skin_info.name)
@@ -257,8 +261,9 @@ class Item:
                     self.icon = os.path.join(settings.icon_dir, skin_info.icon)
                 if skin_info.outicon:
                     self.outicon = os.path.join(settings.icon_dir, skin_info.outicon)
-            
-
+            if not self.image and imagedir:
+                self.image = util.getimage(os.path.join(imagedir, skin_type))
+        
 
     def set_url(self, url, info=True, search_image=True):
         """
