@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/02/14 15:45:26  dischi
+# do not include folder.fxd
+#
 # Revision 1.16  2004/02/05 19:26:42  dischi
 # fix unicode handling
 #
@@ -230,11 +233,11 @@ def listdir(directory, handle_exception=True, include_dot_files=False,
 
         if include_dot_files:
             for f in os.listdir(directory):
-                if not f in ('CVS', '.xvpics', '.thumbnails', '.pics', '.', '..'):
+                if not f in ('CVS', '.xvpics', '.thumbnails', '.pics', 'folder.fxd'):
                     files.append(directory + f)
         else:
             for f in os.listdir(directory):
-                if not f.startswith('.') and f != 'CVS':
+                if not f.startswith('.') and not f in ('CVS', 'folder.fxd'):
                     files.append(directory + f)
 
         if not include_overlay:
@@ -243,9 +246,11 @@ def listdir(directory, handle_exception=True, include_dot_files=False,
         overlay = getoverlay(directory)
         if overlay and overlay != directory and os.path.isdir(overlay):
             for fname in os.listdir( overlay ):
+                if fname.startswith('.') or fname == 'folder.fxd' or \
+                       fname.endswith('.raw'):
+                    continue
                 f = overlay + fname
-        
-                if not os.path.isdir(f) and not f.endswith('.raw'):
+                if not os.path.isdir(f):
                     files.append(f)
         return files
     
