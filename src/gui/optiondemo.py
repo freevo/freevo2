@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/07/13 19:28:58  rshortt
+# Bugfix.
+#
 # Revision 1.10  2003/05/27 17:53:34  dischi
 # Added new event handler module
 #
@@ -137,13 +140,13 @@ class optiondemo(PopupBox):
             self.ob.change_item(event)
             self.draw()
 
-        elif event == em.ENTER:
+        elif event == em.INPUT_ENTER:
             if self.ob.selected or self.ob.list.is_visible():
                 print '  Want to toggle_box'
                 self.ob.toggle_box()
                 self.draw()
 
-        elif event == em.EXIT:
+        elif event == em.INPUT_EXIT:
             self.destroy()
 
         else:

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/07/13 19:28:58  rshortt
+# Bugfix.
+#
 # Revision 1.10  2003/05/27 17:53:34  dischi
 # Added new event handler module
 #
@@ -131,7 +134,7 @@ class listboxdemo(PopupBox):
         if event in (em.INPUT_UP, em.INPUT_DOWN, em.INPUT_LEFT, em.INPUT_RIGHT ):
             return self.pb.eventhandler(event)
 
-        elif event == em.ENTER or event == em.EXIT:
+        elif event == em.INPUT_ENTER or event == em.INPUT_EXIT:
             self.destroy()
 
         else:
