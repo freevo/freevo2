@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/02/23 03:51:22  rshortt
+# Remove scheduled recordings because it is now a plugin.  Also comment out
+# view favorites because it is next as well as search because search is now
+# menu and item based, we just need a text input for the skin based UI.
+# View/Edit favorites and search will be plugins as well.
+#
 # Revision 1.13  2004/02/04 14:11:18  outlyer
 # Cleanup and fixup:
 #
@@ -73,7 +79,8 @@ from directory import DirItem
 from gui.AlertBox import AlertBox
 from gui.PopupBox import PopupBox
 
-import tv.program_display, tv.program_search, tv.view_favorites
+import tv.program_display
+# , tv.program_search, tv.view_favorites
 
 # Set to 1 for debug output
 DEBUG = config.DEBUG
@@ -126,10 +133,10 @@ class TVMenu(Item):
             items.append(menu.MenuItem(_('View VCR Input'), action=self.start_vcr))
         items.append(DirItem(config.TV_RECORD_DIR, None, name = _('Recorded Shows'),
                              display_type='tv'))
-        items.append(menu.MenuItem(_('Scheduled Recordings'), 
-                                   action=self.view_schedule))
-        items.append(menu.MenuItem(_('Search Guide'), action=self.show_search))
-        items.append(menu.MenuItem('View Favorites', action=self.show_favorites))
+
+        # XXX: these are becomming plugins
+        # items.append(menu.MenuItem(_('Search Guide'), action=self.show_search))
+        # items.append(menu.MenuItem('View Favorites', action=self.show_favorites))
 
         plugins_list = plugin.get('mainmenu_tv')
         for p in plugins_list:
