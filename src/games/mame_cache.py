@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2002/12/07 11:23:52  dischi
+# moved rominfo into the games subdir
+#
 # Revision 1.2  2002/11/24 19:52:56  dischi
 # Changed header to the freevo default
 #
@@ -132,7 +135,7 @@ def updateMameRomList(mame_files):
 
             dirname = '' # not supported yet
             image = None
-            rominfo = os.popen('./rominfo ' + mame_file , 'r')
+            rominfo = os.popen('./src/games/rominfo/rominfo ' + mame_file , 'r')
             matched = 0
             partial = 0
 

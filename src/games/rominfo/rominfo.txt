@@ -1,0 +1,10 @@
+Make generates rominfo
+
+usage
+-----
+rominfo /path/to/mame/game.zip
+
+Make sure you do a "mkdir rominfodats ; xmame -listinfo > rominfodats/mame.dat" first
+
+currently the path to the dats are hardcoded as ./rominfodats
+
