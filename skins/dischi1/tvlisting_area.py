@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/03/14 19:29:07  dischi
+# some position fixes
+#
 # Revision 1.3  2003/03/13 21:02:08  dischi
 # misc cleanups
 #
@@ -209,13 +212,18 @@ class TVListing_Area(Skin_Area):
         for i in range(n_cols):
             x0 = int(x_contents + (float(w_contents) / n_cols) * i)
             x1 = int(x_contents + (float(w_contents) / n_cols) * (i+1))
+            ty0 = content.y
            
             if head_val.rectangle:
                 r = self.get_item_rectangle(head_val.rectangle, x1-x0, head_font.h)[2]
-                self.drawroundbox(x0 + r.x, content.y + r.y, r.width, r.height, r)
+                if r.x < 0:
+                    x0 -= r.x
+                if r.y < 0:
+                    ty0 -= r.y
+                self.drawroundbox(x0 + r.x, ty0 + r.y, r.width, r.height, r)
                 
             self.write_text(time.strftime("%H:%M",time.localtime(to_listing[0][i+1])),
-                            head_font, content, x=x0, y=content.y, width=x1-x0, height=-1)
+                            head_font, content, x=x0, y=ty0, width=x1-x0, height=-1)
 
         
         # define start and stop time
@@ -231,14 +239,21 @@ class TVListing_Area(Skin_Area):
         selected_prog = to_listing[1]
 
         for i in range(2,len(to_listing)):
+            ty0 = y0
+            tx0 = content.x
             if label_val.rectangle:
                 r = self.get_item_rectangle(label_val.rectangle,
                                             label_txt_width, font_h)[2]
-                self.drawroundbox(content.x + r.x, y0 + r.y,
-                                  r.width, r.height, r)
+                    
+                if r.x < 0:
+                    tx0 -= r.x
+                if r.y < 0:
+                    ty0 -= r.y
+                            
+                self.drawroundbox(tx0 + r.x, ty0 + r.y, r.width, r.height, r)
                 
             self.write_text(to_listing[i].displayname, label_font, content,
-                            y=y0, width=label_width, height=-1)
+                            x=tx0, y=ty0, width=label_width, height=font_h)
 
             if to_listing[i].programs:
                 for prg in to_listing[i].programs:
@@ -284,14 +299,20 @@ class TVListing_Area(Skin_Area):
                     tx0 = min(x1, x0)
                     tx1 = max(x0, x1)
 
+                    ty0 = y0
+                    
                     if val.rectangle:
                         r = self.get_item_rectangle(val.rectangle, tx1-tx0, font_h)[2]
-                        self.drawroundbox(tx0 + r.x, y0 + r.y,
-                                          r.width, r.height, r)
-
+                        if r.x < 0:
+                            tx0 -= r.x
+                        if r.y < 0:
+                            ty0 -= r.y
+                            
+                        self.drawroundbox(tx0+r.x, ty0+r.y, r.width, r.height, r)
+                        
                     self.write_text(prg.title, font, content, x=tx0,
-                                    y=y0, width=tx1-tx0, height=font_h, align_v='center',
-                                    align_h = val.align)
+                                    y=ty0, width=tx1-tx0, height=font_h,
+                                    align_v='center', align_h = val.align)
 
                     #if flag_left:
                     #    osd.drawbitmap(val2.indicator['left'], x0 + spacing,
