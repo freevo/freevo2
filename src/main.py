@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.128  2004/06/29 18:48:49  dischi
+# prepare for 1.5.0-rc4
+#
 # Revision 1.127  2004/06/20 15:52:14  dischi
 # set umask as early as possible
 #
@@ -131,7 +134,7 @@ except ImportError, i:
 # for already fixed bugs
 try:
     import mmpython.version
-    if mmpython.version.CHANGED < 20040606:
+    if mmpython.version.CHANGED < 20040629:
         raise ImportError
 except ImportError:
     print 'Error: Installed mmpython version is too old.'
