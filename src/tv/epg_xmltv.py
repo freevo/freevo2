@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/06/04 22:33:11  rshortt
+# Adding 1 to the pickle.dump uses a binary format that seems WAY quicker to
+# both create and load the pickle file.  You must remove your TV.xml-x.pickled
+# file and rerun epg_xmltv.py to test.
+#
 # Revision 1.18  2003/06/02 20:58:21  rshortt
 # A couple try/excepy blocks that actually end up fixing a problem when scheduling a recording, record_server tried to init the display.  This was tested on two people's systems.
 #
@@ -209,7 +214,7 @@ def get_guide(popup=None):
                 traceback.print_exc()
             else:
                 # Dump a pickled version for later reads
-                pickle.dump(cached_guide, open(pname, 'w'))
+                pickle.dump(cached_guide, open(pname, 'w'), 1)
 
 
     if not cached_guide:
