@@ -10,6 +10,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.138  2004/06/23 12:22:16  outlyer
+# Allow the user to create a thumbnail for a file even if a folder or file
+# image already exists. For example, I have a generic "cover.jpg" in my
+# movie folder, but I will occaisonally use the thumbnailing for a file in
+# that directory. This 'if' clause prevents that from being possible.
+#
 # Revision 1.137  2004/05/29 13:10:55  dischi
 # re-use string for better translation
 #
@@ -307,7 +313,7 @@ class VideoItem(Item):
         if self.variants and len(self.variants) > 1:
             items = [ (self.show_variants, _('Show variants')) ] + items
 
-        if not self.image and self.mode == 'file' and not self.variants and not self.subitems:
+        if self.mode == 'file' and not self.variants and not self.subitems:
             items.append((self.create_thumbnail, _('Create Thumbnail'), 'create_thumbnail'))
             
         return items
