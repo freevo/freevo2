@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.122  2004/10/18 01:43:54  rshortt
+# Make "freevo prompt" work.
+#
 # Revision 1.121  2004/10/09 16:26:54  dischi
 # remove unsupported parameter -trace and -doc
 #
@@ -500,7 +503,7 @@ if getpid(name, python + proc)[1] and check:
 if python[0].find('python') != -1:
     python = [ python[0] , '-OO' ] + python[1:]
 
-if not os.path.isfile(proc[0]):
+if len(proc) and not os.path.isfile(proc[0]):
     print 'Error: please run \'make\' first'
     sys.exit(0)
 start(name, python + proc , bg, check)
