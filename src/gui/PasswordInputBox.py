@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/04/21 12:57:41  dischi
+# make osd.focusapp default parent
+#
 # Revision 1.2  2003/04/20 13:02:29  dischi
 # make the rc changes here, too
 #
@@ -77,10 +80,13 @@ class PasswordInputBox(PopupBox):
     """
 
         
-    def __init__(self, parent=None, text=" ", handler=None, left=None, top=None, 
+    def __init__(self, parent='osd', text=" ", handler=None, left=None, top=None, 
                  width=300, height=160, bg_color=None, fg_color=None, icon=None,
                  border=None, bd_color=None, bd_width=None):
 
+        if parent:
+            self.parent = parent
+            
         self.handler = handler
 
         PopupBox.__init__(self, parent, text, left, top, width, height, 
