@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/11/17 19:44:43  dischi
+# fix disc set support
+#
 # Revision 1.4  2003/09/26 11:28:34  dischi
 # small warning when executed outside freevo env
 #
@@ -201,5 +204,8 @@ if __name__ == "__main__":
         else: video = makeVideo(type, 'f' + str(x), file)
         fxd.setVideo(video)
         x = x+1
+
+    if not files:
+        fxd.setDiscset(drive, None)
         
     fxd.writeFxd()
