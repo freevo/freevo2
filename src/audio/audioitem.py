@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/06/29 20:42:14  dischi
+# changes for mmpython support
+#
 # Revision 1.26  2003/06/09 18:12:50  outlyer
 # Rename eyed3 to eyeD3
 #
@@ -69,7 +72,6 @@ import os
 import string
 import time
 import re
-import eyeD3
 import imghdr
 import traceback
 import config
@@ -90,24 +92,16 @@ class AudioItem(Item):
     This is the common class to get information about audiofiles.
     """
     
-    def __init__(self, file, parent, cache = None, name = None):
-        Item.__init__(self, parent)
+    def __init__(self, file, parent, info = None, name = None):
+        Item.__init__(self, parent, info)
         self.filename   = file[:]
+        self.url        = None
         if name:
             self.name   = name
-        else:
+        elif not self.name:
             self.name   = util.getname(file)
         self.type       = 'audio'
         
-        # variables only for AudioItem
-        self.title      = ''
-        self.album      = ''
-        self.artist     = ''
-        self.length     = 0
-        self.track      = 0
-	self.trackof	= 0
-        self.year       = 0
-        self.url        = ''
         self.start      = 0
         self.elapsed    = 0
         self.remain     = 0
@@ -115,33 +109,11 @@ class AudioItem(Item):
         self.pause      = 0
 	self.valid	= 1
 
-        if cache:
-            self.restore(cache)
-
-        else:
-            # XXX This is really not a very smart way to do it. We should be
-            # XXX able to handle files with messed up extentions.
-
-            if re.match('.*[oO][gG]{2}$', self.filename):
-                if DEBUG > 1: print "Got ogg..."
-                self.set_info_ogg(self.filename)
-
-            elif re.match('.*[mM][pP]3$', self.filename):
-                if DEBUG > 1: print "Got mp3..."
-                self.set_info_mp3(self.filename)
-
-            elif re.match('.*[fF][xX][dD]$', self.filename):
-                if DEBUG > 1: print "Got FXD...."
-                self.set_info_radio(self.filename)
-
-            else:
-                if DEBUG > 1: print "Got something else..."
-
-        if self.title:
-            self.name = self.format_track()
-        else:
-            self.title = self.name
-
+        try:
+            self.length = self.info['length']
+        except:
+            self.length = 0
+            
         cover_logo = os.path.dirname(file)+'/cover.'
 
         # Only draw the cover if the file exists. We'll
@@ -194,21 +166,6 @@ class AudioItem(Item):
                     image = os.path.join(os.path.dirname(file), covers[0])
             self.image = image
 
-        if DEBUG > 1:
-            try:
-                print "DEBUG:"
-                print "  Album: " + str(self.album)
-                print " Artist: " + str(self.artist)
-                print "  Title: " + str(self.title)
-                print "  Track: " + str(self.track)
-                print "   Year: " + str(self.year)
-                print " Length: " + str(self.length)
-                print "  Image: " + str(self.image)
-                print "    URL: " + str(self.url)
-            except UnicodeError:
-                print "Oops.. Got UnicodeError.. doing nothing.. :)"
-
-
 
     def copy(self, obj):
         """
@@ -217,13 +174,8 @@ class AudioItem(Item):
         Item.copy(self, obj)
         if obj.type == 'audio':
             self.title      = obj.title
-            self.album      = obj.album
-            self.artist     = obj.artist
-            self.length     = onj.length
-            self.track      = obj.track
-            self.trackof    = obj.trackof
-            self.year       = obj.year
             self.start      = obj.start
+            self.length     = obj.length
             self.elapsed    = obj.elapsed
             self.remain     = obj.remain
             self.done       = obj.done
@@ -232,13 +184,6 @@ class AudioItem(Item):
             self.url        = obj.url
 
 
-    def dump(self):
-        return ( self.title, self.album, self.artist, self.length,
-                 self.track, self.trackof, self.year, self.url )
-
-    def restore(self, data):
-        self.title, self.album, self.artist, self.length, self.track, \
-                    self.trackof, self.year, self.url = data
 
     def sort(self, mode=None):
         """
@@ -253,10 +198,6 @@ class AudioItem(Item):
         """
         return the specific attribute as string or an empty string
         """
-        if attr == 'year':
-            if self.year:
-                return str(self.year)
-            return ''
         if attr  == 'length':
             return '%d:%02d' % (int(self.length / 60), int(self.length % 60))
 
@@ -310,120 +251,8 @@ class AudioItem(Item):
         prs.Parse(xmlpp)
         return 1
 
-    def set_info_ogg(self, file):
-        """
-        Sets all the info variables with useful info from the oggfile.
-
-        Arguments: Filename of file to get info from
-        Returns:   1 if success.
-        """
-        try:
-            import ogg.vorbis
-        except ImportError:
-            return None
-        try: 
-            vf = ogg.vorbis.VorbisFile(file)
-            vc = vf.comment()
-        except ogg.vorbis.VorbisError:
-            if DEBUG: print "Got VorbisError.. not an ogg file."
-	    self.valid = 0
-            return 0
-        except IOError:
-            if DEBUG: print "Couldn't read the file %s." % (file)
-            self.valid = 0
-            return 0
-        
-        try:
-            if 'ALBUM' in vc.keys():
-                self.album  = vc['ALBUM'][0].encode('latin-1')
-            else:
-                self.album  = ''
-                
-            if 'ARTIST' in vc.keys():
-                self.artist = vc['ARTIST'][0].encode('latin-1')
-            else:
-                self.artist = ''
-                
-            if 'TITLE' in vc.keys():
-                self.title  = vc['TITLE'][0].encode('latin-1')
-                
-            if 'TRACK' in vc.keys():
-                self.track  = str(vc['TRACK'][0])
-            elif 'TRACKNUMBER' in vc.keys():
-                self.track  = str(vc['TRACKNUMBER'][0])
-            else:
-                self.track  = ''
-                
-            if 'YEAR' in vc.keys():
-                self.year = str(vc['YEAR'][0])
-            else:
-                self.year = ''
-        except UnicodeError:
-            if DEBUG: print "Oops, got UnicodeError"
-
-        self.length = vf.time_total( -1 )
-        return 1
-
-
-    def set_info_mp3(self, filename):
-        """
-        Sets the info variables with info from the mp3
-
-        Arguments: filename
-          Returns: 1 if success
-        """
-
-        id3 = None
-	try:
-	    id3 = eyeD3.Mp3AudioFile(filename)
-	except eyeD3.TagException:
-            try:
-                id3 = eyeD3.Mp3AudioFile(filename, 1)
-            except eyeD3.InvalidAudioFormatException:
-                # File is not an MP3
-                self.valid = 0
-                return 0
-            except:
-                # The MP3 tag decoder crashed, assume the file is still
-                # MP3 and try to play it anyway
-                print 'music: oops, mp3 tag parsing failed!'
-                print 'music: filename = "%s"' % filename
-                traceback.print_exc()
-        except:
-            # The MP3 tag decoder crashed, assume the file is still
-            # MP3 and try to play it anyway
-            print 'music: oops, mp3 tag parsing failed!'
-            print 'music: filename = "%s"' % filename
-            traceback.print_exc()
-            
-
-	if id3:
-            if id3.tag:
-                self.album  = id3.tag.getAlbum()
-                self.artist = id3.tag.getArtist()
-                self.title  = id3.tag.getTitle()
-                self.track,self.trackof  = id3.tag.getTrackNum()
-                self.year   = id3.tag.getYear()
-            self.length = id3.getPlayTime()
-        else:
-            self.album = 'Broken MP3 tag!'
-
-        if not self.name:
-            self.name = os.path.splitext(os.path.basename(filename))[0]
-        if not self.track:
-            self.track = ''
-        return 1
 
    
-    def set_info(self, artist, album, title, track, trackof, year):
-        self.album = album
-        self.track = track
-        self.trackof = trackof
-        self.artist = artist
-        self.year = year
-        self.title = title
-
-
     # ----------------------------------------------------------------------------
 
     def actions(self):

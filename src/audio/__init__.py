@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/06/29 20:42:14  dischi
+# changes for mmpython support
+#
 # Revision 1.3  2003/06/06 21:41:54  dischi
 # Set AUDIO_CACHE_VERSION to 2 to audio-rebuild the cache if the
 # audio cache is from older versions to avoid crash and manual
@@ -40,17 +43,12 @@
 # ----------------------------------------------------------------------- */
 #endif
 
+import mmpython
 import config
 import util
 
-import cPickle as pickle
-import md5
-import os
-
-
 from audioitem import AudioItem
 
-AUDIO_CACHE_VERSION = 2
 
 def cwd(parent, files):
     """
@@ -58,38 +56,14 @@ def cwd(parent, files):
     """
     items = []
 
-    if parent and parent.type == 'dir':
-        cache_file = '%s/audio/%s' % (config.FREEVO_CACHEDIR,
-                                      util.hexify(md5.new(parent.dir).digest()))
-    else:
-        cache_file = None
-        
-    if cache_file and os.path.isfile(cache_file):
-        version, cache = pickle.load(open(cache_file, 'r'))
-        if version != AUDIO_CACHE_VERSION:
-            print 'cache file has a wrong version'
-            cache = {}
-    else:
-        cache = {}
-
-
-    new_cache = {}
-
     for file in util.find_matches(files, config.SUFFIX_AUDIO_FILES):
-        try:
-            data = cache[file]
-            items += [ AudioItem(file, parent, data) ]
-            new_cache[file] = data
-        except KeyError:
-            item = AudioItem(file, parent)
-            new_cache[file] = item.dump()
-            items += [ item ]
-            
+        if parent.media:
+            url = 'cd://%s:%s:%s' % (parent.media.devicename, parent.media.mountdir,
+                                     file[len(parent.media.mountdir)+1:])
+        else:
+            url = file
+        items.append(AudioItem(file, parent, mmpython.parse(url)))
         files.remove(file)
-
-
-    if cache_file:
-        pickle.dump((AUDIO_CACHE_VERSION, new_cache), open(cache_file, 'w'))
 
     return items
 

@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/06/29 20:42:14  dischi
+# changes for mmpython support
+#
 # Revision 1.9  2003/06/24 18:39:42  dischi
 # some small fixes
 #
@@ -126,8 +129,12 @@ class PluginInterface(plugin.ItemPlugin):
     def actions(self, item):
         self.item = item
         if item.type == 'audio' or item.type == 'audiocd':
-            return [ ( self.cover_search_file, 'Find a cover for this music',
-                       'imdb_search_or_cover_search') ]
+            try:
+                if self.item.getattr('artist') and self.item.getattr('album'):
+                    return [ ( self.cover_search_file, 'Find a cover for this music',
+                               'imdb_search_or_cover_search') ]
+            except KeyError:
+                pass
         return []
 
 
@@ -139,13 +146,9 @@ class PluginInterface(plugin.ItemPlugin):
 
         box = PopupBox(text='searching Amazon...')
         box.show()
-        
-        if self.item.type == 'audiocd':
-            album = self.item.info['title']
-            artist = self.item.info['artist']
-        else:
-            album = self.item.album
-            artist = self.item.artist
+
+        album = self.item.info['album']
+        artist = self.item.info['artist']
 
         amazon.setLicense(self.license) 
         try:
