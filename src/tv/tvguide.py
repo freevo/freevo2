@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/05/30 03:29:09  outlyer
+# Added missing direction events (UP/DOWN/LEFT/RIGHT) to TV Guide.
+#
 # Revision 1.6  2003/05/30 00:53:20  rshortt
 # Various event bugfixes.
 #
@@ -118,6 +121,22 @@ class TVGuide(gui.GUIObject):
         elif event == em.MENU_SELECT or event == em.PLAY:
             self.hide()
             self.player('tv', self.selected.channel_id)
+        
+        elif event == em.MENU_DOWN:
+            self.event_DOWN()
+            self.menuw.refresh()
+        
+        elif event == em.MENU_UP:
+            self.event_UP()
+            self.menuw.refresh()
+
+        elif event == em.MENU_RIGHT:
+            self.event_RIGHT()
+            self.menuw.refresh()
+
+        elif event == em.MENU_LEFT:
+            self.event_LEFT()
+            self.menuw.refresh()
 
         elif event == em.PLAY_END:
             self.show()
