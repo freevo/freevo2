@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/10/18 21:23:38  rshortt
+# Added a subscribe method so that you can get a callback when events are
+# posted.  Also rework __init__ sligntly.
+#
 # Revision 1.24  2003/10/14 17:40:11  mikeruelle
 # enable network remote to work.
 #
@@ -61,12 +65,12 @@ DEBUG = config.DEBUG
 # Module variable that contains an initialized RemoteControl() object
 _singleton = None
 
-def get_singleton():
+def get_singleton(**kwargs):
     global _singleton
 
     # One-time init
     if _singleton == None:
-        _singleton = util.SynchronizedObject(RemoteControl())
+        _singleton = util.SynchronizedObject(RemoteControl(**kwargs))
         
     return _singleton
 
@@ -93,9 +97,23 @@ def set_context(context):
     
 class RemoteControl:
 
-    def __init__(self, port=config.REMOTE_CONTROL_PORT):
-        self.pylirc = PYLIRC
-        self.osd    = osd.get_singleton()
+    def __init__(self, use_pylirc=1, use_netremote=1):
+        self.osd = osd.get_singleton()
+
+        self.use_pylirc = use_pylirc
+        if self.use_pylirc:
+            self.pylirc = PYLIRC
+        else:
+            # do not use pylirc if we know we don't want it
+            self.pylirc = 0
+
+        if use_netremote and config.ENABLE_NETWORK_REMOTE:
+            port = config.REMOTE_CONTROL_PORT
+        else:
+            port = 0
+            use_netremote = 0
+        self.use_netremote = use_netremote
+
         if self.pylirc:
             try:
                 pylirc.init('freevo', config.LIRCRC)
@@ -106,7 +124,8 @@ class RemoteControl:
             except IOError:
                 print 'WARNING: %s not found!' % config.LIRCRC
                 self.pylirc = 0
-        if config.ENABLE_NETWORK_REMOTE:
+
+        if self.use_netremote:
             self.port = port
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -119,6 +138,7 @@ class RemoteControl:
         self.previous_returned_code = None
         self.previous_code = None;
         self.repeat_count = 0
+        self.event_callback = None
 
         # Take into consideration only 1 event out of ``modulo''
         self.default_repeat_modulo = 4 # Config
@@ -146,6 +166,9 @@ class RemoteControl:
             self.queue += [ Event(e, context=self.context) ]
         else:
             self.queue += [ e ]
+
+        if self.event_callback:
+            self.event_callback()
 
     def key_event_mapper(self, key):
         if not key:
@@ -216,7 +239,7 @@ class RemoteControl:
                     if e:
                         return e
                 
-        if config.ENABLE_NETWORK_REMOTE:
+        if self.use_netremote:
             try:
                 data = self.sock.recv(100)
                 if data == '':
@@ -229,3 +252,10 @@ class RemoteControl:
                 pass
 
         return (None, None)
+
+    def subscribe(self, event_callback=None):
+        # Only one thing can call poll() so we only handle one subscriber.
+        if not event_callback:  return
+
+        self.event_callback = event_callback
+
