@@ -4,18 +4,20 @@
 # -----------------------------------------------------------------------
 # $Id$
 #
-# Notes:
-# Todo:        
+# This file handles the lirc input device and maps it to freevo events.
+# If /dev/lirc is present, this plugin will be actiavted by
+# freevo_config.py.
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/09/27 18:40:34  dischi
+# reworked input handling again
+#
 # Revision 1.2  2004/09/25 23:38:15  mikeruelle
 # more missing imports
 #
 # Revision 1.1  2004/09/25 04:39:07  rshortt
-# An input plugin for lirc: plugin.activate('input.lirc') - untested.
-#
-#
+# An input plugin for lirc: plugin.activate('input.lirc')
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -40,11 +42,9 @@
 
 import config
 import plugin
-import eventhandler
 import time
 import os
 import rc
-rc = rc.get_singleton()
 
 try:
     import pylirc
@@ -53,11 +53,12 @@ except ImportError:
     raise Exception
 
 
-
-class PluginInterface(plugin.Plugin):
-
+class PluginInterface(plugin.InputPlugin):
+    """
+    Input plugin for lirc
+    """
     def __init__(self):
-        plugin.Plugin.__init__(self)
+        plugin.InputPlugin.__init__(self)
         self.plugin_name = 'LIRC'
 
         try:
@@ -66,12 +67,12 @@ class PluginInterface(plugin.Plugin):
                 pylirc.blocking(0)
             else:
                 raise IOError
-        except RuntimeError:
+        except RuntimeError, e:
             print 'WARNING: Could not initialize PyLirc!'
-            raise Exception
-        except IOError:
+            raise e
+        except IOError, e:
             print 'WARNING: %s not found!' % config.LIRCRC
-            raise Exception
+            raise e
 
         self.nextcode = pylirc.nextcode
         self.previous_returned_code   = None
@@ -80,10 +81,9 @@ class PluginInterface(plugin.Plugin):
         self.firstkeystroke           = 0.0
         self.lastkeystroke            = 0.0
         self.lastkeycode              = ''
-        self.default_keystroke_delay1 = config.LIRC_DELAY1
-        self.default_keystroke_delay2 = config.LIRC_DELAY2
 
-        rc.inputs.append(self)
+        # FIXME: register socket to pynotifier
+        rc.register(self.handle, True, 1)
 
 
     def config(self):
@@ -121,46 +121,45 @@ class PluginInterface(plugin.Plugin):
 
         self.previous_code = result
         return result
-        
 
-    def poll(self):
+
+
+    def handle(self):
         """
         return next event
         """
         list = self.get_last_code()
-        
+
         if list == None:
             nowtime = 0.0
             nowtime = time.time()
-            if (self.lastkeystroke + self.default_keystroke_delay2 < nowtime) and \
+            if (self.lastkeystroke + config.LIRC_DELAY2 < nowtime) and \
                    (self.firstkeystroke != 0.0):
                 self.firstkeystroke = 0.0
                 self.lastkeystroke = 0.0
                 self.repeat_count = 0
-            
+
         if list != None:
             nowtime = time.time()
-            
-            if list: 
+
+            if list:
                 for code in list:
                     if ( self.lastkeycode != code ):
                         self.lastkeycode = code
                         self.lastkeystroke = nowtime
-                        self.firstkeystroke = nowtime
+                        self.firstkeystoke = nowtime
 
             if self.firstkeystroke == 0.0 :
                 self.firstkeystroke = time.time()
             else:
-                if (self.firstkeystroke + self.default_keystroke_delay1 > nowtime):
+                if (self.firstkeystroke + config.LIRC_DELAY1 > nowtime):
                     list = []
                 else:
-                    if (self.lastkeystroke + self.default_keystroke_delay2 < nowtime):
+                    if (self.lastkeystroke + config.LIRC_DELAY2 < nowtime):
                         self.firstkeystroke = nowtime
 
             self.lastkeystroke = nowtime
             self.repeat_count += 1
 
             for code in list:
-                eventhandler.post_key(code)
-
-
+                self.post_key(code)

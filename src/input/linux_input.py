@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/09/27 18:40:34  dischi
+# reworked input handling again
+#
 # Revision 1.1  2004/09/25 04:37:41  rshortt
 # Support files for freevo input.
 #
@@ -40,6 +43,44 @@
 #
 # ----------------------------------------------------------------------- */
 
+import struct
+
+_IOC_NRBITS = 8
+_IOC_TYPEBITS = 8
+_IOC_SIZEBITS = 14
+_IOC_DIRBITS = 2
+
+_IOC_NRMASK = ((1 << _IOC_NRBITS)-1)
+_IOC_TYPEMASK = ((1 << _IOC_TYPEBITS)-1)
+_IOC_SIZEMASK = ((1 << _IOC_SIZEBITS)-1)
+_IOC_DIRMASK = ((1 << _IOC_DIRBITS)-1)
+
+_IOC_NRSHIFT = 0
+_IOC_TYPESHIFT = (_IOC_NRSHIFT+_IOC_NRBITS)
+_IOC_SIZESHIFT = (_IOC_TYPESHIFT+_IOC_TYPEBITS)
+_IOC_DIRSHIFT = (_IOC_SIZESHIFT+_IOC_SIZEBITS)
+
+# Direction bits.
+_IOC_NONE = 0
+_IOC_WRITE = 1
+_IOC_READ = 2
+
+def _IOC(dir,type,nr,size):
+    return (((dir)  << _IOC_DIRSHIFT) | \
+           (ord(type) << _IOC_TYPESHIFT) | \
+           ((nr)   << _IOC_NRSHIFT) | \
+           ((size) << _IOC_SIZESHIFT))
+
+def IO(type,nr): return _IOC(_IOC_NONE,(type),(nr),0)
+def IOR(type,nr,size): return _IOC(_IOC_READ,(type),(nr),struct.calcsize(size))
+def IOW(type,nr,size): return _IOC(_IOC_WRITE,(type),(nr),struct.calcsize(size))
+def IOWR(type,nr,size): return _IOC(_IOC_READ|_IOC_WRITE,(type),(nr),struct.calcsize(size))
+
+# used to decode ioctl numbers..
+def IOC_DIR(nr): return (((nr) >> _IOC_DIRSHIFT) & _IOC_DIRMASK)
+def IOC_TYPE(nr): return (((nr) >> _IOC_TYPESHIFT) & _IOC_TYPEMASK)
+def IOC_NR(nr): return (((nr) >> _IOC_NRSHIFT) & _IOC_NRMASK)
+def IOC_SIZE(nr): return (((nr) >> _IOC_SIZESHIFT) & _IOC_SIZEMASK)
 
 #struct input_event {
 #struct timeval time;
@@ -67,7 +108,6 @@
 #__s32 flat;
 #};
 
-from util.ioctl import *
 
 EVIOCGVERSION_ST = 'i'
 EVIOCGVERSION_NO = IOR('E', 0x01, EVIOCGVERSION_ST)# get driver version 

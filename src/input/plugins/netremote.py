@@ -9,10 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/09/27 18:40:35  dischi
+# reworked input handling again
+#
 # Revision 1.1  2004/09/25 04:40:03  rshortt
-# A network remote control plugin for freevo: plugin.activate('input.netremote') - untested.
-#
-#
+# A network remote control plugin for freevo:
+# plugin.activate('input.netremote') - untested.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
