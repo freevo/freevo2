@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.48  2003/10/17 00:31:55  rshortt
+# Make a bit cleaner.
+#
 # Revision 1.47  2003/10/17 00:19:42  rshortt
 # Respect a parent dir's add_args is we were not given any.
 #
@@ -132,9 +135,11 @@ class DirItem(Playlist):
         self.display_type = display_type
         self.info         = {}
         self.mountpoint   = None
-        self.add_args     = add_args
+
         if add_args == None and parent.add_args: 
-            self.add_args = parent.add_args
+            add_args = parent.add_args
+
+        self.add_args = add_args
 
         # set directory variables to default
         global all_variables
