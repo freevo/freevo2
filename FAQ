@@ -72,3 +72,20 @@ A: The SDL library that Freevo uses resets the framebuffer settings.
    using the scripts in matrox_g400/mga_[ntsc|pal]_*. There is an
    option to run a script like this automatically after startup, see
    OSD_SDL_EXEC_AFTER_STARTUP in freevo_config.py.
+
+----------------------------------------------------------------------
+Q: Movies and TV are not displayed as part of the Freevo window
+   in X11, instead they're displayed in the top left corner.
+
+A: This is a known problem at the moment. It should look better in
+   fullscreen mode.
+
+----------------------------------------------------------------------
+Q: If I watch a movie that has a different aspect ratio than the 
+   TV/monitor (i.e. is letter-boxed, e.g. 16:9), the movie is 
+   displayed at the top of the screen. In other words, it is not
+   vertically centered.
+
+A: This is a known problem with the X11/Xv display in MPlayer, 
+   hopefully this will be fixed later.
+
