@@ -253,8 +253,8 @@ class OSD:
         self._getbitmap(filename)
     
 
-    # Loads and zooms a bitmap without copying it to the OSD drawing
-    # buffer.
+    # Loads and zooms a bitmap and return the surface. A cache is currently
+    # missing, but maybe we don't need it, it's fast enough.
     def zoombitmap(self, filename, scaling=None, bbx=0, bby=0, bbw=0, bbh=0, rotation = 0):
         image = self._getbitmap(filename)
 
@@ -290,6 +290,12 @@ class OSD:
         image = self.zoombitmap(filename, scaling, bbx, bby, bbw, bbh, rotation)
         if not image: return
         self.screen.blit(image, (x, y))
+
+
+    def bitmapsize(self, filename):
+        image = self._getbitmap(filename)
+        if not image: return 0,0
+        return image.get_size()
 
 
     def drawline(self, x0, y0, x1, y1, width=None, color=None):
@@ -359,7 +365,6 @@ class OSD:
             tx = x - w
             
         self.screen.blit(ren, (tx, y))
-
 
     # Render a string to an SDL surface. Uses a cache for speedup.
     def _renderstring(self, string, font, ptsize, fgcolor, bgcolor):
