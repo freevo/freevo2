@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.49  2003/10/17 00:55:52  rshortt
+# Ooops.
+#
 # Revision 1.48  2003/10/17 00:31:55  rshortt
 # Make a bit cleaner.
 #
@@ -136,7 +139,7 @@ class DirItem(Playlist):
         self.info         = {}
         self.mountpoint   = None
 
-        if add_args == None and parent.add_args: 
+        if add_args == None and hasattr(parent, 'add_args'): 
             add_args = parent.add_args
 
         self.add_args = add_args
