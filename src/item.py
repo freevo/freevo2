@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.49  2004/01/11 10:57:28  dischi
+# remove coming up here, it is no item attr
+#
 # Revision 1.48  2004/01/11 04:04:37  outlyer
 # Ok,  now it shows the "Coming Up" list anywhere in the TV menu. I think
 # it fits, though it looks fairly ugly right now. I'm going to make it more
@@ -425,9 +428,6 @@ class Item:
                 return '%d:%02d:%02d' % ( length / 3600, (length % 3600) / 60, length % 60)
             else:
                 return '%d:%02d' % (length / 60, length % 60)
-
-        if attr in ('comingup'):
-                    return util.comingup(None)
 
 
         if attr[:4] == 'len(' and attr[-1] == ')':
