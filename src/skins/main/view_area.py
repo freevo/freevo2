@@ -9,12 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/12/06 13:43:03  dischi
+# more cleanup
+#
 # Revision 1.3  2003/09/14 20:09:37  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.2  2003/08/23 12:51:43  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -38,6 +37,7 @@
 # -----------------------------------------------------------------------
 #endif
 
+
 from area import Skin_Area
 from skin_utils import *
 
@@ -46,8 +46,8 @@ class View_Area(Skin_Area):
     this call defines the view area
     """
 
-    def __init__(self, parent, screen):
-        Skin_Area.__init__(self, 'view', screen)
+    def __init__(self):
+        Skin_Area.__init__(self, 'view')
         self.image = None
 
 
@@ -73,7 +73,7 @@ class View_Area(Skin_Area):
         
         layout    = self.layout
         area      = self.area_val
-        content   = self.calc_geometry(layout.content, copy_object=TRUE)
+        content   = self.calc_geometry(layout.content, copy_object=True)
 
         if hasattr(item, 'type') and content.types.has_key(item.type):
             val = content.types[item.type]
@@ -133,7 +133,7 @@ class View_Area(Skin_Area):
         x0 += addx
         y0 += addy
 
-        self.draw_image(image, (x0, y0))
+        self.drawimage(image, (x0, y0))
 
         if val.rectangle:
             r.width -= width - i_w

@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/12/06 13:43:02  dischi
+# more cleanup
+#
 # Revision 1.19  2003/12/05 18:07:55  dischi
 # renaming of XML_xxx variables to Xxx
 #
@@ -90,168 +93,27 @@ import config
 import util
 
 import xml_skin
+import screen
 
 # Create the OSD object
 osd = osd.get_singleton()
 
+
 class SkinObjects:
+    """
+    object which stores the different types of objects
+    an area wants to draw
+    """
     def __init__(self):
         self.bgimages   = []
         self.rectangles = []
         self.images     = []
         self.text       = []
 
-
-class Screen:
-    """
-    this call is a set of surfaces for the area to do it's job
-    """
-
-    def __init__(self):
-        self.s_content  = osd.screen.convert()
-        self.s_alpha    = self.s_content.convert_alpha()
-        self.s_bg       = self.s_content.convert()
-
-        self.s_alpha.fill((0,0,0,0))
-
-        self.update_bg      = None
-        self.update_alpha   = []
-        self.update_content = []
-
-        self.drawlist = []
-        self.avoid_list = []
-
-        
-    def clear(self):
-        self.update_bg      = None
-        self.update_alpha   = []
-        self.update_content = []
-        self.drawlist = []
-
-
-    def draw(self, obj):
-        self.drawlist.append(obj)
-
-
-    def update(self, layer, rect):
-        if layer == 'content':
-            self.update_content.append(rect)
-        elif layer == 'alpha':
-            self.update_alpha.append(rect)
-        else:
-            if self.update_bg:
-                self.update_bg = ( min(self.update_bg[0], rect[0]),
-                                   min(self.update_bg[1], rect[1]),
-                                   max(self.update_bg[2], rect[2]),
-                                   max(self.update_bg[3], rect[3]))
-            else:
-                self.update_bg = rect
-
-            
-    def in_update(self, x1, y1, x2, y2, update_area, full=FALSE):
-        if full:
-            for ux1, uy1, ux2, uy2 in update_area:
-                # if the area is not complete inside the area but is inside on
-                # some pixels, return FALSE
-                if (not (ux1 >= x1 and uy1 >= y1 and ux2 <= x2 and uy2 <= y2)) and \
-                   (not (x2 < ux1 or y2 < uy1 or x1 > ux2 or y1 > uy2)):
-                    return FALSE
-            return TRUE
-        
-        for ux1, uy1, ux2, uy2 in update_area:
-            if not (x2 < ux1 or y2 < uy1 or x1 > ux2 or y1 > uy2):
-                return TRUE
-        return FALSE
-
-
-    def show(self, force_redraw=FALSE):
-        """
-        the main drawing function
-        """
-        if osd.must_lock:
-            self.s_bg.lock()
-            self.s_alpha.lock()
-            self.s_content.lock()
-            osd.screen.lock()
-
-        if force_redraw:
-            _debug_('show, force update', 2)
-            self.update_bg      = (0,0,osd.width, osd.height)
-            self.update_alpha   = []
-            self.update_content = []
-
-        update_area = self.update_alpha
-
-        # if the background has some changes ...
-        if self.update_bg:
-            ux1, uy1, ux2, uy2 = self.update_bg 
-            for area in self.drawlist:
-                for x1, y1, x2, y2, image in area.bgimages:
-                    if not (x2 < ux1 or y2 < uy1 or x1 > ux2 or y1 > uy2):
-                        self.s_bg.blit(image, (ux1, uy1), (ux1-x1, uy1-y1, ux2-ux1, uy2-uy1))
-
-            update_area.append(self.update_bg)
-            
-        if update_area:
-            # clear it
-            self.s_alpha.fill((0,0,0,0))
-
-            for area in self.drawlist:
-                for x1, y1, x2, y2, bgcolor, size, color, radius in area.rectangles:
-                    # only redraw if necessary
-                    if self.in_update(x1, y1, x2, y2, update_area):
-                        # if the radius and the border is not inside the update area,
-                        # use drawbox, it's faster
-                        if self.in_update(x1+size+radius, y1+size+radius, x2-size-radius,
-                                          y2-size-radius, update_area, full=TRUE):
-                            osd.drawroundbox(x1, y1, x2, y2, color=bgcolor,
-                                             layer=self.s_alpha)
-                        else:
-                            osd.drawroundbox(x1, y1, x2, y2, color=bgcolor,
-                                             border_size=size, border_color=color,
-                                             radius=radius, layer=self.s_alpha)
-            # and than blit only the changed parts of the screen
-            for x0, y0, x1, y1 in update_area:
-                self.s_content.blit(self.s_bg, (x0, y0), (x0, y0, x1-x0, y1-y0))
-                self.s_content.blit(self.s_alpha, (x0, y0), (x0, y0, x1-x0, y1-y0))
-
-        layer = self.s_content.convert()
-        update_area += self.update_content
-
-        # if something changed redraw all content objects
-        if update_area:
-            for area in self.drawlist:
-                for x1, y1, x2, y2, image in area.images:
-                    if self.in_update(x1, y1, x2, y2, update_area):
-                        layer.blit(image, (x1, y1))
-
-                for x1, y1, x2, y2, text, font, height, align_h, align_v, mode, \
-                        ellipses in area.text:
-                    if self.in_update(x1, y1, x2, y2, update_area):
-                        width = x2 - x1
-                        if font.shadow.visible:
-                            width -= font.shadow.x
-                            osd.drawstringframed(text, x1+font.shadow.x, y1+font.shadow.y,
-                                                 width, height, font.font, font.shadow.color,
-                                                 None, align_h = align_h, align_v = align_v,
-                                                 mode=mode, ellipses=ellipses, layer=layer)
-                        osd.drawstringframed(text, x1, y1, width, height, font.font,
-                                             font.color, None, align_h = align_h,
-                                             align_v = align_v, mode=mode,
-                                             ellipses=ellipses, layer=layer)
-
-        for x0, y0, x1, y1 in update_area:
-            osd.screen.blit(layer, (x0, y0), (x0, y0, x1-x0, y1-y0))
-
-        if osd.must_lock:
-            self.s_bg.unlock()
-            self.s_alpha.unlock()
-            self.s_content.unlock()
-            osd.screen.unlock()
-
-
-
 class Geometry:
+    """
+    Simple object with x, y, with, height values
+    """
     def __init__(self, x, y, width, height):
         self.x = x
         self.y = y
@@ -267,14 +129,13 @@ class Skin_Area:
     def update_content_needed
     def update_content
     """
-
-    def __init__(self, name, screen, imagecachesize=5):
+    def __init__(self, name, imagecachesize=5):
         self.area_name = name
         self.area_val  = None
         self.redraw    = TRUE
         self.layout    = None
         self.name      = name
-        self.screen    = screen
+        self.screen    = screen.get_singleton()
         self.objects   = SkinObjects()
         
         self.imagecache = util.objectcache.ObjectCache(imagecachesize,
@@ -283,7 +144,7 @@ class Skin_Area:
 
     def update_content_needed(self):
         """
-        this area needs never a content update
+        this area needs a content update
         """
         return True
 
@@ -295,7 +156,8 @@ class Skin_Area:
         pass
     
 
-    def draw(self, settings, obj, display_style=0, widget_type='menu', force_redraw=FALSE):
+    def draw(self, settings, obj, menu, display_style=0, widget_type='menu',
+             force_redraw=False):
         """
         this is the main draw function. This function draws the background,
         checks if redraws are needed and calls the two update functions
@@ -306,9 +168,9 @@ class Skin_Area:
         self.xml_settings  = settings
         self.widget_type   = widget_type
 
-        if widget_type == 'menu':
-            self.menuw = obj
-            self.menu  = obj.menustack[-1]
+        self.menuw = obj
+        if menu:
+            self.menu = menu
             if self.menu.force_skin_layout != -1:
                 self.display_style = self.menu.force_skin_layout
             
@@ -324,9 +186,8 @@ class Skin_Area:
             self.scan_for_text_view(self.menu)
 
         else:
-            self.menuw    = obj
-            self.menu     = obj
-            item_type     = None
+            self.menu = obj
+            item_type = None
             try:
                 self.viewitem = obj.selected
                 self.infoitem = obj.selected
@@ -364,7 +225,7 @@ class Skin_Area:
                 return
 
             self.tmp_objects = SkinObjects()
-            self.draw_background()
+            self.__draw_background__()
         else:
             self.tmp_objects = SkinObjects()
             
@@ -483,6 +344,12 @@ class Skin_Area:
                 menu.skin_default_no_images = True
             if i.description:
                 menu.skin_default_has_description = True
+            try:
+                if i.info['description']:
+                    menu.skin_default_has_description = True
+            except KeyError:
+                pass
+            
             if menu.skin_default_no_images and menu.skin_default_has_description:
                 break
             
@@ -711,8 +578,7 @@ class Skin_Area:
         return redraw
         
 
-
-    def draw_background(self):
+    def __draw_background__(self):
         """
         draw the <background> of the area
         """
@@ -767,13 +633,20 @@ class Skin_Area:
                             image = pygame.transform.scale(image,(bg.width,bg.height))
                             self.imagecache[cname] = image
                     if image:
-                        self.draw_image(image, bg)
+                        self.drawimage(image, bg)
                             
             elif isinstance(bg, xml_skin.Rectangle):
                 self.calc_geometry(bg)
                 self.drawroundbox(bg.x, bg.y, bg.width, bg.height, bg)
 
             
+
+
+    # functions for the area to draw stuff on the screen
+    #
+    # drawroundbox
+    # drawimage
+    # drawstring
 
     def drawroundbox(self, x, y, width, height, rect, redraw=TRUE):
         """
@@ -789,7 +662,7 @@ class Skin_Area:
 
 
             
-    def write_text(self, text, font, content, x=-1, y=-1, width=None, height=None,
+    def drawstring(self, text, font, content, x=-1, y=-1, width=None, height=None,
                    align_h = None, align_v = None, mode='hard', ellipses='...'):
         """
         writes a text ... or better stores the information about this call
@@ -828,7 +701,7 @@ class Skin_Area:
                                             align_h, align_v, mode, ellipses))
 
 
-    def load_image(self, image, val, redraw=TRUE):
+    def loadimage(self, image, val, redraw=TRUE):
         """
         load an image (use self.imagecache)
         """
@@ -859,7 +732,7 @@ class Skin_Area:
         return image
 
         
-    def draw_image(self, image, val):
+    def drawimage(self, image, val):
         """
         draws an image ... or better stores the information about this call
         in a variable. The real drawing is done inside draw()
@@ -870,9 +743,9 @@ class Skin_Area:
 
         if isinstance(image, str):
             if isinstance(val, tuple):
-                image = self.load_image(image, val[2:])
+                image = self.loadimage(image, val[2:])
             else:
-                image = self.load_image(image, val)
+                image = self.loadimage(image, val)
 
         if not image:
             return 0,0
@@ -894,3 +767,8 @@ class Skin_Area:
                                         val.y + val.height, image))
         return val.width, val.height
         
+
+
+    # compatibility functions, will be removed
+    write_text = drawstring
+    draw_image = drawimage

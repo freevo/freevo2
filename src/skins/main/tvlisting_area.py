@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/12/06 13:43:03  dischi
+# more cleanup
+#
 # Revision 1.12  2003/10/18 09:35:30  dischi
 # handling to show scheduled recordings
 #
@@ -17,33 +20,6 @@
 #
 # Revision 1.10  2003/09/21 18:18:31  dischi
 # do not calc the arrows twice
-#
-# Revision 1.9  2003/09/14 20:09:37  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.8  2003/09/13 10:08:23  dischi
-# i18n support
-#
-# Revision 1.7  2003/09/07 15:43:06  dischi
-# tv guide can now also have different styles
-#
-# Revision 1.6  2003/08/25 18:44:31  dischi
-# Moved HOURS_PER_PAGE into the skin fxd file, default=2
-#
-# Revision 1.5  2003/08/24 16:36:25  dischi
-# add support for y=max-... in listing area arrows
-#
-# Revision 1.4  2003/08/23 12:51:43  dischi
-# removed some old CVS log messages
-#
-# Revision 1.3  2003/08/22 05:59:35  gsbarbieri
-# Fixed some mistakes.
-# Now it's possible to have more than one line for program/label, just make
-# the height fit the number of wanted lines.
-#
-# Revision 1.2  2003/08/21 22:40:55  gsbarbieri
-# Now left-top corner cell (date) use vertical padding from head and
-# horizontal padding from label.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -82,8 +58,8 @@ class TVListing_Area(Skin_Area):
     this call defines the listing area
     """
 
-    def __init__(self, parent, screen):
-        Skin_Area.__init__(self, 'listing', screen, imagecachesize=20)
+    def __init__(self):
+        Skin_Area.__init__(self, 'listing', imagecachesize=20)
         self.last_choices = ( None, None )
         self.last_settings = None
         self.last_items_geometry = None
@@ -193,14 +169,14 @@ class TVListing_Area(Skin_Area):
         leftarraw = None
         if area.images['leftarrow']:
             i = area.images['leftarrow']
-            leftarrow = self.load_image(i.filename, i)
+            leftarrow = self.loadimage(i.filename, i)
             if leftarrow:
                 leftarrow_size = (leftarrow.get_width(), leftarrow.get_height())
 
         rightarraw = None
         if area.images['rightarrow']:
             i = area.images['rightarrow']
-            rightarrow = self.load_image(i.filename, i)
+            rightarrow = self.loadimage(i.filename, i)
             if rightarrow:
                 rightarrow_size = (rightarrow.get_width(), rightarrow.get_height())
 
@@ -246,7 +222,7 @@ class TVListing_Area(Skin_Area):
                            r.width+1, head_h+1, r )
 
         # use label padding for x; head padding for y
-        self.write_text( time.strftime( dateformat, time.localtime( to_listing[ 0 ][ 1 ] ) ),
+        self.drawstring( time.strftime( dateformat, time.localtime( to_listing[ 0 ][ 1 ] ) ),
                          head_val.font, content,
                          x=( x_contents  - r.width + pad_x ),
                          y=( y_contents - r.height + ig.y ),
@@ -263,7 +239,7 @@ class TVListing_Area(Skin_Area):
                                math.floor( col_size + x0 ) - math.floor( x0 ) + 1,
                                head_h + 1, r2 )
 
-            self.write_text( time.strftime( timeformat,
+            self.drawstring( time.strftime( timeformat,
                                             time.localtime( to_listing[ 0 ][ i + 1 ] ) ),
                              head_val.font, content,
                              x=( x0 + ig.x ), y=( ty0 + ig.y ),
@@ -302,18 +278,18 @@ class TVListing_Area(Skin_Area):
 
             channel_logo = config.TV_LOGOS + '/' + to_listing[i].id + '.png'
             if os.path.isfile(channel_logo):
-                channel_logo = self.load_image(channel_logo, (r.width+1-2*r.size,
+                channel_logo = self.loadimage(channel_logo, (r.width+1-2*r.size,
                                                               item_h-2*r.size))
             else:
                 channel_logo = None
 
 
             if channel_logo:
-                self.draw_image(channel_logo, (logo_geo[0], logo_geo[1]))
+                self.drawimage(channel_logo, (logo_geo[0], logo_geo[1]))
 
 
             else:
-                self.write_text(to_listing[i].displayname, label_val.font, content,
+                self.drawstring(to_listing[i].displayname, label_val.font, content,
                                 x=tx0, y=ty0, width=r.width+2*r.x, height=item_h)
 
             self.drawroundbox(tx0 + r.x, ty0 + r.y, r.width+1, item_h, r)
@@ -384,17 +360,17 @@ class TVListing_Area(Skin_Area):
                         tx0 += leftarrow_size[0]
                         ig.width -= leftarrow_size[0]
                         if tx0 < tx1:
-                            self.draw_image(leftarrow, (tx0-leftarrow_size[0], ty0 +\
+                            self.drawimage(leftarrow, (tx0-leftarrow_size[0], ty0 +\
                                                         (item_h-leftarrow_size[1])/2))
                     if flag_right:
                         tx1 -= rightarrow_size[0]
                         ig.width -= rightarrow_size[0]
                         if tx0 < tx1:
-                            self.draw_image(rightarrow, (tx1, ty0 + \
+                            self.drawimage(rightarrow, (tx1, ty0 + \
                                                          (item_h-rightarrow_size[1])/2))
 
                     if tx0 < tx1:
-                        self.write_text(prg.title, font, content, x=tx0+ig.x,
+                        self.drawstring(prg.title, font, content, x=tx0+ig.x,
                                         y=ty0+ig.y, width=ig.width,
                                         height=item_h - 2 * ig.y,
                                         align_v='center', align_h = val.align)
@@ -405,7 +381,7 @@ class TVListing_Area(Skin_Area):
 
         # print arrow:
         if menuw.display_up_arrow and area.images['uparrow']:
-            self.draw_image(area.images['uparrow'].filename, area.images['uparrow'])
+            self.drawimage(area.images['uparrow'].filename, area.images['uparrow'])
         if menuw.display_down_arrow and area.images['downarrow']:
             if isinstance(area.images['downarrow'].y, str):
                 v = copy.copy(area.images['downarrow'])
@@ -413,7 +389,7 @@ class TVListing_Area(Skin_Area):
                 v.y = eval(v.y)
             else:
                 v = area.images['downarrow']
-            self.draw_image(area.images['downarrow'].filename, v)
+            self.drawimage(area.images['downarrow'].filename, v)
 
         
     def check_schedule (self):

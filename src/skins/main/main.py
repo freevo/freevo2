@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/12/06 13:43:02  dischi
+# more cleanup
+#
 # Revision 1.25  2003/12/05 18:07:55  dischi
 # renaming of XML_xxx variables to Xxx
 #
@@ -63,141 +66,21 @@
 #endif
 
 
-import sys, os, copy
+import os, copy
 import stat
 
 import config
 import util
 import osd
-import plugin
 
-from area import Skin_Area, Screen
+from area import Skin_Area
 from gui  import GUIObject
 
 import xml_skin
+import screen
 
 # Create the OSD object
 osd = osd.get_singleton()
-
-
-class Screen_Area(Skin_Area):
-    """
-    this area is the screen or background of the skin
-    """
-    def __init__(self, parent, screen):
-        Skin_Area.__init__(self, 'screen', screen)
-
-    def update_content_needed(self):
-        """
-        this area needs never a content update
-        """
-        return False
-
-    def update_content(self):
-        """
-        there is no content in this area
-        """
-        pass
-
-
-
-class Title_Area(Skin_Area):
-    """
-    in this area the title of the menu is drawn
-    """
-    def __init__(self, parent, screen):
-        Skin_Area.__init__(self, 'title', screen)
-        self.text = ''
-
-        
-    def update_content_needed(self):
-        """
-        check if the content needs an update. This function does the same as
-        update_content, so it's faster to return always 1
-        """
-        return 1
-
-
-    def update_content(self):
-        """
-        update the content
-        """
-        menu      = self.menu
-        layout    = self.layout
-        area      = self.area_val
-        content   = self.calc_geometry(layout.content, copy_object=True)
-
-        text = ''
-        try:
-            if content.type == 'menu':
-                text = menu.heading
-            elif len(menu.choices) == 0:
-                text = ''
-            elif content.type == 'short item':
-                if menu.selected.image and menu.selected.type == 'video' and \
-                   hasattr(menu.selected, 'tv_show') and menu.selected.tv_show:
-                    sn = menu.selected.show_name
-                    text = sn[1] + "x" + sn[2] + " - " + sn[3] 
-                else:
-                    text = menu.selected.name
-            else:
-                text = menu.selected.name
-        except AttributeError:
-            try:
-                if menu.type == 'tv':
-                    if content.type == 'item' or content.type == 'short item':
-                        text = menu.table[1].title
-                    else:
-                        text = _('TV GUIDE')
-            except:
-                pass
-
-        if not text:
-            text = self.infoitem.name
-
-        self.text = text
-        self.write_text(text, content.font, content, height=-1, mode='hard')
-
-
-class Subtitle_Area(Title_Area):
-    """
-    in this area the subtitle of the menu is drawn
-    """
-    def __init__(self, parent, screen):
-        Skin_Area.__init__(self, 'subtitle', screen)
-        self.text = ''
-
-
-class Plugin_Area(Skin_Area):
-    """
-    in this area all plugins can draw
-    """
-    def __init__(self, parent, screen):
-        Skin_Area.__init__(self, 'plugin', screen)
-        self.plugins = None
-        self.x = config.OSD_OVERSCAN_X
-        self.y = config.OSD_OVERSCAN_Y
-        self.width   = osd.width  - 2 * config.OSD_OVERSCAN_X
-        self.height  = osd.height - 2 * config.OSD_OVERSCAN_Y
-
-        
-    def get_font(self, name):
-        try:
-            return self.xml_settings.font[name]
-        except:
-            return self.xml_settings.font['default']
-    
-
-    def update_content(self):
-        """
-        there is no content in this area
-        """
-        if self.plugins == None:
-            self.plugins = plugin.get('daemon_draw')
-
-        for p in self.plugins:
-            p.draw((self.widget_type, self.menuw), self)
-
 
 
 ###############################################################################
@@ -210,23 +93,9 @@ class Skin:
     main skin class
     """
     
-    class Rectange(xml_skin.Rectangle):
-        def __init__(self, color=None, bgcolor=None, size=None, radius = None):
-            xml_skin.Rectangle.__init__(self)
-            if not color == None:
-                self.color = color
-            if not bgcolor == None:
-                self.bgcolor = bgcolor
-            if not size == None:
-                self.size = size
-            if not radius == None:
-                self.radius = radius
-
-
-    class Area(Skin_Area):
-        def __init__(self, name, imagecachesize=5):
-            global skin_engine
-            Skin_Area.__init__(self, name, skin_engine.screen, imagecachesize)
+    Rectange = xml_skin.Rectangle
+    Image    = xml_skin.Image
+    Area     = Skin_Area
 
     
     def __init__(self):
@@ -238,8 +107,8 @@ class Skin:
         
         self.display_style = { 'menu' : config.SKIN_START_LAYOUT }
         self.force_redraw  = True
-        self.last_draw     = None, None
-        self.screen        = Screen()
+        self.last_draw     = None, None, None
+        self.screen        = screen.get_singleton()
         self.xml_cache     = util.objectcache.ObjectCache(3, desc='xmlskin')
         self.areas         = {}
 
@@ -248,10 +117,11 @@ class Skin:
         from tvlisting_area import TVListing_Area
         from view_area      import View_Area
         from info_area      import Info_Area
+        from default_areas  import Screen_Area, Title_Area, Subtitle_Area, Plugin_Area
+        
         for a in ( 'screen', 'title', 'subtitle', 'view', 'listing', 'info', 'plugin'):
-            self.areas[a] = eval('%s%s_Area(self, self.screen)' % \
-                                 (a[0].upper(), a[1:]))
-        self.areas['tvlisting'] = TVListing_Area(self, self.screen)
+            self.areas[a] = eval('%s_Area()' % a.capitalize())
+        self.areas['tvlisting'] = TVListing_Area()
 
         # load the fxd file
         self.settings = xml_skin.XMLSkin()
@@ -508,7 +378,7 @@ class Skin:
         """
         _debug_('redraw', 2)
         if self.last_draw[0] and self.last_draw[1]:
-            self.draw(self.last_draw)
+            self.draw(self.last_draw[0], self.last_draw[1], self.last_draw[2])
 
 
     def prepare(self):
@@ -518,7 +388,7 @@ class Skin:
         self.settings.prepare()
 
         
-    def draw(self, (type, object)):
+    def draw(self, type, object, menu=None):
         """
         draw the object.
         object may be a menu widget, a table for the tv menu are an audio item for
@@ -561,11 +431,11 @@ class Skin:
             self.force_redraw = True
             self.all_areas    = getattr(self, '%s_areas' % type)
             
-        self.last_draw = type, object
+        self.last_draw = type, object, menu
 
         self.screen.clear()
         for a in self.all_areas:
-            a.draw(settings, object, style, type, self.force_redraw)
+            a.draw(settings, object, menu, style, type, self.force_redraw)
         self.screen.show(self.force_redraw)
 
         osd.update()

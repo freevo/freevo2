@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/12/06 13:43:03  dischi
+# more cleanup
+#
 # Revision 1.20  2003/12/05 18:07:55  dischi
 # renaming of XML_xxx variables to Xxx
 #
@@ -742,11 +745,19 @@ class Image(XML_data):
 
 class Rectangle(XML_data):
     """
-    a rectangle
+    a Rectangle
     """
-    def __init__(self):
+    def __init__(self, color=None, bgcolor=None, size=None, radius = None):
         XML_data.__init__(self, ('x', 'y', 'width', 'height', 'color',
                                  'bgcolor', 'size', 'radius' ))
+        if not color == None:
+            self.color = color
+        if not bgcolor == None:
+            self.bgcolor = bgcolor
+        if not size == None:
+            self.size = size
+        if not radius == None:
+            self.radius = radius
 
     def prepare(self, color, search_dirs=None, image_names=None):
         XML_data.prepare(self)
@@ -763,9 +774,9 @@ class Font(XML_data):
     """
     def __init__(self, label):
         XML_data.__init__(self, ('name', 'size', 'color'))
-        self.label = label
+        self.label  = label
         self.shadow = XML_data(('visible', 'color', 'x', 'y'))
-        self.shadow.visible = FALSE
+        self.shadow.visible = False
         
     def parse(self, node, scale, current_dir):
         XML_data.parse(self, node, scale, current_dir)
@@ -779,11 +790,11 @@ class Font(XML_data):
         self.size   = int(float(self.size) * scale)
         self.font   = osd.getfont(self.name, self.size)
         self.h      = self.font.height
-        self.height = self.font.height
         if self.shadow.visible:
             if color.has_key(self.shadow.color):
                 self.shadow.color = color[self.shadow.color]
             self.h += self.shadow.y
+        self.height = self.h
         
 
     
@@ -818,21 +829,22 @@ class XMLSkin:
     """
     def __init__(self):
 
-        self._layout = {}
-        self._font = {}
-        self._color = {}
-        self._images = {}
-        self._menuset = {}
-        self._menu = {}
-        self._popup = ''
-        self._sets = {}
+        self._layout   = {}
+        self._font     = {}
+        self._color    = {}
+        self._images   = {}
+        self._menuset  = {}
+        self._menu     = {}
+        self._popup    = ''
+        self._sets     = {}
         self._mainmenu = MainMenu()
-        self.skin_directories = []
-        self.icon_dir = ""
+        self.skindirs  = []
+        self.icon_dir  = ""
 
         # variables set by set_var
-        self.all_variables  = ('box_under_icon', )
-        self.box_under_icon = 0
+        self.all_variables    = ('box_under_icon', )
+        self.box_under_icon   = 0
+
         
     def parse(self, freevo_type, scale, c_dir, copy_content):
         for node in freevo_type.children:
@@ -846,7 +858,7 @@ class XMLSkin:
                     # if type is all, all types except default are deleted and
                     # the settings will be loaded for default
                     self._menu = {}
-                    type = 'default'
+                    type       = 'default'
                     
                 self._menu[type] = Menu()
                 self._menu[type].parse(node, scale, c_dir)
@@ -921,7 +933,7 @@ class XMLSkin:
 
         if not os.path.isdir(self.icon_dir):
             self.icon_dir = os.path.join(config.ICON_DIR, 'themes', self.icon_dir)
-        search_dirs = self.skin_directories + [ config.IMAGE_DIR, self.icon_dir, '.' ]
+        search_dirs = self.skindirs + [ config.IMAGE_DIR, self.icon_dir, '.' ]
         
         for f in self.font:
             self.font[f].prepare(self._color, scale=self.font_scale)
@@ -998,12 +1010,12 @@ class XMLSkin:
                 self._popup   = ''
                 self._sets    = {}
                 self._mainmenu = MainMenu()
-                self.skin_directories = []
+                self.skindirs = []
             self.load(include, copy_content, prepare=False)
 
         self.parse(node, scale, vfs.dirname(file), copy_content)
-        if not vfs.dirname(file) in self.skin_directories:
-            self.skin_directories = [ vfs.dirname(file) ] + self.skin_directories
+        if not vfs.dirname(file) in self.skindirs:
+            self.skindirs = [ vfs.dirname(file) ] + self.skindirs
         if not prepare:
             return
             

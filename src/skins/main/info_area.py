@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/12/06 13:43:02  dischi
+# more cleanup
+#
 # Revision 1.6  2003/12/05 18:07:55  dischi
 # renaming of XML_xxx variables to Xxx
 #
@@ -57,8 +60,8 @@ class Info_Area(Skin_Area):
     this call defines the view area
     """
 
-    def __init__( self, parent, screen ):
-        Skin_Area.__init__(self, 'info', screen)
+    def __init__(self):
+        Skin_Area.__init__(self, 'info')
         self.last_item = None
         self.content = None
         self.layout_content = None
@@ -112,7 +115,7 @@ class Info_Area(Skin_Area):
             if isinstance( i, xml_skin.FormatText ):
                 if i.y + i.height > self.content.height:
                     break
-                self.write_text( i.text,
+                self.drawstring( i.text,
                                  i.font, self.content,
                                  ( self.content.x + i.x), ( self.content.y + i.y ),
                                  i.width , i.height,
@@ -123,7 +126,7 @@ class Info_Area(Skin_Area):
                 if i.src:
                     tmp = ( self.content.x + i.x, self.content.y + i.y,
                             i.width, i.height )
-                    self.draw_image( i.src, tmp )
+                    self.drawimage( i.src, tmp )
                 else:
                     print _( "ERROR" ) + ": missing 'src' attribute in skin tag!"
                     
