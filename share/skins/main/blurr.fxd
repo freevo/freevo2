@@ -305,6 +305,16 @@
                         </if>
                     </if>
 		    
+		    <if expression="parent(audio_advanced_sort)">
+                        <text font="info value">Track </text>
+                        <text font="info value" expression="trackno"/>
+			<if expression="trackof">
+			    <text font="info value"> of </text>
+			    <text font="info value" expression="trackof"/>
+			</if>
+                        <newline/>
+		    </if>
+
                     <if expression="date">
                         <text font="info value" expression="date"/>
                         <newline/>
