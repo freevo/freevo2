@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/08/04 13:26:46  outlyer
+# Add "Search" to actions for scheduled recordings to find alternate airings
+# of the program.
+#
 # Revision 1.17  2004/07/12 14:43:29  outlyer
 # Remove some debugging information.
 #
@@ -235,7 +239,7 @@ class RecordResource(FreevoResource):
                 cell = Unicode(prog.desc)
             fv.tableCell(cell, 'class="'+status+'" colspan="1"')
     
-            cell = ('<a href="record.rpy?chan=%s&amp;start=%s&amp;action=remove">'+_('Remove')+'</a>') % (prog.channel_id, prog.start)
+            cell = ('<a href="record.rpy?chan=%s&amp;start=%s&amp;action=remove" title="Remove Scheduled Recording">'+_('Remove')+'</a>'+'<br/>' + '<a href="search.rpy?find=%s" title="Search for other airings">' + _('Search') + '</a>') % (prog.channel_id, prog.start, Unicode(prog.title))
             fv.tableCell(cell, 'class="'+status+'" colspan="1"')
 
             fv.tableRowClose()
