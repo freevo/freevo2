@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/08/05 17:04:22  outlyer
+# Oops.
+#
 # Revision 1.6  2004/08/05 17:03:07  outlyer
 # Prevent a crash.
 #
@@ -77,11 +80,12 @@ class PluginInterface(plugin.DaemonPlugin):
             self.runquery(query)
 
     def log_rating(self, filename, rating):
-        query = 'UPDATE music SET rating=%i WHERE \
-                 path = "%s" and filename = "%s"' % (int(rating),  
-                 util.escape(os.path.dirname(filename)), 
-                 util.escape(os.path.basename(filename)) )
-        self.runquery(query)
+        if filename:
+            query = 'UPDATE music SET rating=%i WHERE \
+                     path = "%s" and filename = "%s"' % (int(rating),  
+                     util.escape(os.path.dirname(filename)), 
+                     util.escape(os.path.basename(filename)) )
+            self.runquery(query)
 
     def eventhandler(self, event, menuw=None):
         if event == AUDIO_LOG:
