@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.83  2003/12/30 15:27:47  dischi
+# reset OVERLAY_DIR usage if OVERLAY_DIR is not set
+#
 # Revision 1.82  2003/12/22 13:30:32  dischi
 # supermount patch from Erwan Velu
 #
@@ -861,6 +864,14 @@ if not os.path.isdir('%s/thumbnails/' % FREEVO_CACHEDIR):
     import stat
     os.mkdir('%s/thumbnails/' % FREEVO_CACHEDIR,
              stat.S_IMODE(os.stat(FREEVO_CACHEDIR)[stat.ST_MODE]))
+
+if OVERLAY_DIR_STORE_THUMBNAILS and not OVERLAY_DIR:
+    print 'OVERLAY_DIR not set, use normal caching'
+    OVERLAY_DIR_STORE_THUMBNAILS = False
+
+if OVERLAY_DIR_STORE_MMPYTHON_DATA and not OVERLAY_DIR:
+    print 'OVERLAY_DIR not set, use normal mmpython cache'
+    OVERLAY_DIR_STORE_MMPYTHON_DATA = False
 
 #
 # delete LD_PRELOAD for all helpers, main.py does it after
