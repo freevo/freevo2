@@ -1198,6 +1198,10 @@ msgstr "ProgramDisplay : évènement = %s"
 msgid "\"%s\" has been scheduled for recording"
 msgstr "\"%s\" a été programmé pour enregistrement"
 
+#: tv/plugins/scheduled_recordings.py:82
+msgid "Nothing scheduled."
+msgstr "Aucun enregistrement programmé"
+
 #: tv/program_display.py:243
 #, python-format
 msgid "Scheduling Failed: %s"
@@ -1286,6 +1290,10 @@ msgstr "Si ce n'est pas vrai, alors supprimez "
 #: tv/view_favorites.py:83
 msgid "View Favorites"
 msgstr "Voir les favoris"
+
+#: tv/plugins/view_favorites.py:71
+msgid "No favorites."
+msgstr "Aucun favoris"
 
 #: tv/view_favorites.py:96
 msgid "Name\tTitle\tChannel\tDOW\tTOD"
@@ -1678,3 +1686,112 @@ msgstr "Taille :"
 
 msgid " items in this playlist"
 msgstr " éléments dans cette liste"
+
+#: tv/plugins/manual_record.py:68 www/htdocs/manualrecord.rpy:68
+#: www/htdocs/manualrecord.rpy:202
+msgid "Manual Record"
+msgstr "Programmation manuelle"
+
+#: tv/plugins/manual_record.py:111
+msgid "Display record item"
+msgstr "Afficher"
+
+#: tv/plugins/manual_record.py:119 tv/program_display.py:267
+msgid "Modify name"
+msgstr "Modifier le nom"
+
+#: tv/plugins/manual_record.py:120 tv/program_display.py:268
+msgid "Modify channel"
+msgstr "Modifier la chaine"
+
+msgid "Modify Channel"
+msgstr "Modifier la chaine"
+
+#: tv/plugins/manual_record.py:121
+msgid "Modify start month"
+msgstr "Modifier le mois"
+
+#: tv/plugins/manual_record.py:122
+msgid "Modify start day"
+msgstr "Modifier le jour de départ"
+
+#: tv/plugins/manual_record.py:123
+msgid "Modify start time"
+msgstr "Modifier l'heure"
+
+#: tv/plugins/manual_record.py:124
+msgid "Modify stop month"
+msgstr "Modifier le mois de fin"
+
+#: tv/plugins/manual_record.py:125
+msgid "Modify stop day"
+msgstr "Modifier le jour de fin"
+
+#: tv/plugins/manual_record.py:126
+msgid "Modify stop time"
+msgstr "Modifier l'heure de fin"
+
+#: tv/plugins/manual_record.py:129
+msgid "Record Item Menu"
+msgstr "Menu d'enregistrement"
+
+#: tv/plugins/manual_record.py:138 tv/program_display.py:291
+msgid "Alter Name"
+msgstr "Changer le nom"
+
+#: tv/plugins/manual_record.py:164 tv/plugins/manual_record.py:180
+#: tv/plugins/manual_record.py:213 tv/plugins/manual_record.py:229
+#: tv/program_display.py:363
+msgid "Modify Day"
+msgstr "Modifier le jour"
+
+#: tv/plugins/manual_record.py:197 tv/plugins/manual_record.py:246
+#: tv/program_display.py:383
+msgid "Modify Time"
+msgstr "Modifier l'heure"
+
+#: tv/plugins/manual_record.py:303 tv/plugins/manual_record.py:332
+#: tv/plugins/manual_record.py:336 tv/plugins/manual_record.py:341
+#: tv/plugins/manual_record.py:345
+msgid "Save Failed, recording was lost"
+msgstr "Sauvegarde échouée."
+
+#: tv/plugins/manual_record.py:331 www/htdocs/manualrecord.rpy:129
+#, python-format
+msgid "Program would record for more than %d days!"
+msgstr "Ce programme s'enregistrera sur plus de %d jours!"
+
+#: tv/plugins/manual_record.py:335 www/htdocs/manualrecord.rpy:131
+msgid "Program would record for more than 1 day!"
+msgstr "Ce programme s'enregistrera sur plus d'1 jour!"
+
+#: tv/plugins/manual_record.py:340 www/htdocs/manualrecord.rpy:126
+msgid "start time is not before stop time."
+msgstr "L'heure de départ est après l'heure de fin"
+
+#: tv/plugins/manual_record.py:344
+msgid ""
+"Sorry, the stop time does not give enough time for scheduler to pickup the "
+"change.  Please set it to record for a few minutes longer."
+msgstr ""
+"Désolé, enregistrement impossible"
+
+#: video/plugin/allocine.py:10
+msgid "Search ALLOCINE for this file"
+msgstr "Chercher sur ALLOCINE pour ce fichier"
+
+#: video/plugin/allocine.py:10
+msgid "Searching ALLOCINE..."
+msgstr "Recherche ALLOCINE en cours..."
+
+#: video/plugin/allocine.py:10
+msgid "Unknown error while connecting to ALLOCINE"
+msgstr "Erreur inconnue lors de la connexion à ALLOCINE"
+
+#: video/plugin/allocine.py:10
+msgid "ALLOCINE Query"
+msgstr "Requête ALLOCINE"
+
+#: video/plugin/allocine.py:10
+msgid "No information available from ALLOCINE"
+msgstr "Aucune information disponible sur ALLOCINE"
