@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.73  2003/07/19 19:16:05  dischi
+# support for loading an image which is already an Imaging object
+#
 # Revision 1.72  2003/07/18 16:51:03  rshortt
 # Removing xv and dga from the valid display types.  x11 should cover all
 # X related -vo options for mplayer.
@@ -24,17 +27,8 @@
 # app_list.  Maintaining this list is helpfull for managing 'toplevel'
 # GUIObject based apps (popup types).
 #
-# Revision 1.68  2003/07/13 14:13:13  rshortt
-# If osd.update(rect) fails just osd.update().
-#
-# Revision 1.67  2003/07/12 15:50:46  dischi
-# get alignment size from rendered layer
-#
 # Revision 1.66  2003/07/12 14:30:14  outlyer
 # Changed to Vera for default font.
-#
-# Revision 1.65  2003/07/11 20:35:58  dischi
-# fixed some height problems in drawstringframed
 #
 # Revision 1.64  2003/07/07 16:24:16  dischi
 # More cleanups:
@@ -42,40 +36,8 @@
 #   avoids searching the cache.
 # o drawstring now uses drawstringframed, removed all the older stuff
 #
-# Revision 1.63  2003/07/06 19:39:40  dischi
-# Return the max_y, int() rounds down
-#
-# Revision 1.62  2003/07/06 19:27:53  dischi
-# remove some old stuff
-#
-# Revision 1.61  2003/07/06 19:26:24  dischi
-# small bugfix
-#
-# Revision 1.60  2003/07/05 15:45:57  dischi
-# Doh
-#
-# Revision 1.59  2003/07/05 09:24:01  dischi
-# cleanup old unneeded stuff
-#
-# Revision 1.58  2003/07/05 09:08:47  dischi
-# remove old drawstringframed
-#
-# Revision 1.57  2003/07/04 00:46:48  outlyer
-# I think Dischi left a debug line in, I only commented it out in case it's
-# for something else.
-#
 # Revision 1.56  2003/07/03 23:07:51  dischi
 # convert 8 bit images (e.g. gif) to rgb, pygame cannot handle 8 bit
-#
-# Revision 1.55  2003/07/03 22:44:52  dischi
-# Oops
-#
-# Revision 1.54  2003/07/03 21:58:10  dischi
-# small fixes for very short strings in dsf
-#
-# Revision 1.53  2003/07/03 21:27:21  dischi
-# Created a new drawstringframed. Please test it. The old code is still there
-# if there are major problems, but I tested it good, and it worked
 #
 # Revision 1.52  2003/07/02 20:02:54  dischi
 # Speed improvements:
@@ -85,20 +47,6 @@
 #   up the info area
 # removed old unneeded code
 # changed docs
-#
-# Revision 1.51  2003/06/28 01:51:38  gsbarbieri
-# Some code reformating, removed some bloat code and fixed
-# drawstringframedsoft(align='justified') to render justified code properly.
-#
-# Revision 1.50  2003/06/27 18:55:40  gsbarbieri
-# Fixed some bugs in osd.drawstringframed*()
-#
-# Revision 1.49  2003/06/26 01:41:15  rshortt
-# Fixed a bug wit drawstringframed hard.  Its return coords were always 0's
-# which made it impossible to judge the size.
-#
-# Revision 1.48  2003/06/24 22:48:08  outlyer
-# Updated to reflect moved icon.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -1041,22 +989,29 @@ class OSD:
         if not pygame.display.get_init():
             return None
 
-        if url[:8] == 'thumb://':
-            filename = os.path.abspath(url[8:])
-        else:
-            filename = os.path.abspath(url)
+        thumbnail = FALSE
+
+        try:
+            image = pygame.image.fromstring(url.tostring(), url.size, url.mode)
+        except:
+            image = None
+
+            if url[:8] == 'thumb://':
+                filename = os.path.abspath(url[8:])
+                thumbnail = TRUE
+            else:
+                filename = os.path.abspath(url)
             
-        if not os.path.isfile(filename):
-            print 'Bitmap file "%s" doesnt exist!' % filename
-            return None
+            if not os.path.isfile(filename):
+                print 'osd.py: Bitmap file "%s" doesnt exist!' % filename
+                return None
             
-        image = None
         try:
             thumb = None
             if DEBUG >= 3:
                 print 'Trying to load file "%s"' % filename
 
-            if url[:8] == 'thumb://':
+            if thumbnail:
                 sinfo = os.stat(filename)
                 if sinfo[stat.ST_SIZE] > 10000:
                     m = md5.new(filename)
