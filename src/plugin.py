@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.71  2004/08/01 10:55:27  dischi
+# cosmetic change for debug
+#
 # Revision 1.70  2004/07/26 18:10:16  dischi
 # move global event handling to eventhandler.py
 #
@@ -592,7 +595,7 @@ def __load_plugin__(name, type, level, args, number):
                 else:
                     reason = 'unknown\nThe plugin neither called __init__ nor set a '\
                              'reason why\nPlease contact the plugin author or the freevo list'
-                print 'plugin %s deactivated, reason: %s' % (name, reason)
+                print 'plugin %s deactivated\nreason: %s' % (name, reason)
                 return
         else:
             p = name
