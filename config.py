@@ -25,7 +25,11 @@ class Logger:
     def __init__(self, logtype='(unknown)'):
         self.lineno = 1
         self.logtype = logtype
-        self.fp = open('/var/log/freevo/internal.log', 'a') # XXX Add try...catch
+	try:
+        	self.fp = open('/var/log/freevo/internal.log', 'a')
+	except IOError:
+		print 'Could not open logfile: /var/log/freevo/internal.log' 
+		self.fp = open('/dev/null','a')
         self.softspace = 0
         ts = time.asctime(time.localtime(time.time()))
         self.write('Starting %s at %s\n' % (logtype, ts))

@@ -68,8 +68,10 @@ def makeNonBlocking(fd):
 	fcntl.fcntl(fd, f_setfl, fl | fndelay)
 
 
-
-fp = open('log.txt', 'a', 0)
+try:
+	fp = open('log.txt', 'a', 0)
+except IOError:
+	fp = open('/dev/null','a')
 
 write_lock = threading.Lock()
 
