@@ -11,6 +11,9 @@
 #       -stream tv, video and music somehow
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2004/03/21 23:40:00  mikeruelle
+# unicode breaks several key test rework the interface to cope.
+#
 # Revision 1.21  2004/02/23 08:33:21  gsbarbieri
 # i18n: help translators job.
 #
@@ -233,12 +236,12 @@ class LibraryResource(FreevoResource):
         #check to make sure no bad chars in action_file
         fs_result = 0
         bs_result = 0
-        if action_file:
+        if len(action_file):
             fs_result = string.find(action_file, '/')
             bs_result = string.find(action_file, '\\')
 
         #do actions here
-        if bs_result == -1 and fs_result == -1:
+        if not action == 'view' and bs_result == -1 and fs_result == -1:
             file_loc = os.path.join(action_dir, action_file)
             if os.path.isfile(file_loc):
                 if action == 'rename':
@@ -261,7 +264,7 @@ class LibraryResource(FreevoResource):
                     #request.finish()
             else:
                 messages += [ '<b>'+_('ERROR') + '</b>: ' + _( '%s does not exist. No action taken.') % ('<b>'+file_loc+'</b>') ]
-        elif action_file:
+        elif action_file and action != 'view':
             messages += [ '<b>'+_('ERROR')+'</b>: ' +_( 'I do not process names (%s) with slashes for security reasons.') % action_file ]
 
         directories = []
@@ -290,7 +293,7 @@ class LibraryResource(FreevoResource):
 
         if not action_mediatype:
             fv.tableOpen('class="library"')
-            movmuslink = '<a href="%s?media=%s">%s</a>' 
+            movmuslink = '<a href="%s?media=%s&dir=">%s</a>' 
             rectvlink = '<a href="%s?media=%s&dir=%s">%s</a>' 
             fv.tableRowOpen('class="chanrow"')
             fv.tableCell('<img src=\"images/library/library-movies.jpg\">')
@@ -312,7 +315,7 @@ class LibraryResource(FreevoResource):
             fv.printSearchForm()
             fv.printLinks()
             fv.printFooter()
-        elif action_mediatype and not action_dir:
+        elif action_mediatype and len(action_dir) == 0:
             # show the appropriate dirs from config variables
             # make a back to pick music or movies
             # now make the list unique
@@ -333,8 +336,8 @@ class LibraryResource(FreevoResource):
             fv.printSearchForm()
             fv.printLinks()
             fv.printFooter()
-        elif action_mediatype and action_dir and not action == "download":
-            if not self.check_dir(action_mediatype,action_dir):
+        elif action_mediatype and len(action_dir) and action != "download":
+            if not self.check_dir(action_mediatype,action_dir) and action != 'view':
                 sys.exit(1)
 
             fv.tableOpen('class="library"')
@@ -395,7 +398,7 @@ class LibraryResource(FreevoResource):
             if actiondir_is_root == TRUE and action_mediatype == 'rectv':
                 backlink = '<a href="'+ action_script +'">&laquo; '+_('Back')+'</a>'
             elif actiondir_is_root == TRUE:
-                backlink = '<a href="'+ action_script +'?media='+action_mediatype+'">&laquo; '+_('Back')+'</a>'
+                backlink = '<a href="'+ action_script +'?media='+action_mediatype+'&dir=">&laquo; '+_('Back')+'</a>'
             else:
                 backdir = os.path.dirname(action_dir)
                 backlink = '<a href="'+ action_script +'?media='+action_mediatype+'&dir='+urllib.quote(backdir)+'">&laquo; '+_('Back')+'</a>'
