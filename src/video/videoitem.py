@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.149  2004/08/28 17:18:07  dischi
+# fix multiple files in one video when replaying
+#
 # Revision 1.148  2004/08/27 14:23:39  dischi
 # VideoItem is now based on MediaItem
 #
@@ -359,6 +362,12 @@ class VideoItem(MediaItem):
             beginning of the list, then we consider that at least one media
             had been found in the past: we return 1.
         """
+        if hasattr(self, 'conf_select_this_item'):
+            # XXX bad hack, clean me up
+            self.current_subitem = self.conf_select_this_item
+            del self.conf_select_this_item
+            return True
+            
         cont = 1
         from_start = 0
         si = self.current_subitem
@@ -598,7 +607,7 @@ class VideoItem(MediaItem):
             return True
 
         # PLAY_END: do we have to play another file?
-        if self.subitems:
+        if self.subitems and not self.variants:
             if event == PLAY_END:
                 self.set_next_available_subitem()
                 # Loop until we find a subitem which plays without error
