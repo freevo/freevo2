@@ -7,6 +7,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/08/05 17:29:14  dischi
+# improved screen and eventhandler
+#
 # Revision 1.8  2004/08/01 10:37:08  dischi
 # smaller changes to stuff I need
 #
@@ -147,7 +150,8 @@ class Window(GUIObject):
 
     def destroy(self):
         eventhandler.remove(self)
-
+        if not self.screen:
+            return
         for o in self.objects:
             o.screen.remove(o)
         gui.get_screen().update()
