@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/05/20 16:15:37  rshortt
+# Fixes for IE authentication and to get it to read the javascript.
+#
 # Revision 1.3  2003/05/12 23:34:53  rshortt
 # Added index link.
 #
@@ -78,7 +81,7 @@ class FreevoResource(Resource):
 
         if not self.auth_user(username, password):
             request.setResponseCode(401, 'Authentication needed')
-            request.setHeader('Connection', 'close')
+            # request.setHeader('Connection', 'close')
             request.setHeader('WWW-Authenticate', 'Basic realm="unknown"')
             request.setHeader('Content-Length', str(len('401: = Authorization needed.')))
             request.setHeader('Content-Type', 'text/html')
@@ -111,7 +114,7 @@ class HTMLResource:
         if style != None:
             self.res += '<link rel="stylesheet" href="styles/main.css" type="text/css" />\n'
         if script != None:
-            self.res += '<script language="JavaScript" src="'+script+'" />\n'
+            self.res += '<script language="JavaScript" src="'+script+'"></script>\n'
         self.res += '</head>\n'
         self.res += '<body>\n'
 
