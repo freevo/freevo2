@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.105  2003/07/10 20:01:11  dischi
+# small bugfix for blue_round1
+#
 # Revision 1.104  2003/07/07 20:17:52  dischi
 # removed some evals and make a nice list (maybe faster)
 #
@@ -233,7 +236,7 @@ class Skin:
         self.normal_areas = []
         self.tv_areas = []
 
-        for a in ( 'screen', 'title', 'subtitle', 'listing', 'view', 'info'):
+        for a in ( 'screen', 'title', 'subtitle', 'view', 'listing', 'info'):
             o = eval('%s%s_Area(self, self.screen)' % (a[0].upper(), a[1:]))
             self.normal_areas.append(o)
             if a == 'listing':

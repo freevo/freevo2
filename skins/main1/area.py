@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/07/10 20:01:11  dischi
+# small bugfix for blue_round1
+#
 # Revision 1.13  2003/07/07 20:19:52  dischi
 # some small speed enhancements
 #
@@ -99,7 +102,6 @@ import config
 import objectcache
 
 import xml_skin
-import time
 
 # Create the OSD object
 osd = osd.get_singleton()
@@ -190,7 +192,7 @@ class Screen:
             self.s_alpha.lock()
             self.s_content.lock()
             osd.screen.lock()
-        
+
         if force_redraw:
             self.update_bg      = (0,0,osd.width, osd.height)
             self.update_alpha   = []
@@ -220,18 +222,16 @@ class Screen:
                         # use drawbox, it's faster
                         if self.in_update(x1+size+radius, y1+size+radius, x2-size-radius,
                                           y2-size-radius, update_area, full=TRUE):
-                            osd.drawbox(x1, y1, x2, y2, color=bgcolor, fill=1,
-                                        layer=self.s_alpha)
+                            osd.drawroundbox(x1, y1, x2, y2, color=bgcolor,
+                                             layer=self.s_alpha)
                         else:
                             osd.drawroundbox(x1, y1, x2, y2, color=bgcolor,
                                              border_size=size, border_color=color,
                                              radius=radius, layer=self.s_alpha)
-
             # and than blit only the changed parts of the screen
             for x0, y0, x1, y1 in update_area:
                 self.s_content.blit(self.s_bg, (x0, y0), (x0, y0, x1-x0, y1-y0))
                 self.s_content.blit(self.s_alpha, (x0, y0), (x0, y0, x1-x0, y1-y0))
-
 
         layer = self.s_content.convert()
         update_area += self.update_content
