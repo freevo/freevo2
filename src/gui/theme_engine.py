@@ -512,7 +512,7 @@ class MenuSet:
     """
     def __init__(self):
         self.areas = [ 'screen', 'title', 'subtitle', 'view', 'listing',
-                       'info' ]
+                       'info', 'progress' ]
         for c in self.areas:
             setattr(self, c, Area(c))
 
