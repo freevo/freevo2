@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/02/15 03:31:21  krister
+# Updated for new setup app.
+#
 # Revision 1.24  2003/02/07 20:49:09  dischi
 # safety check
 #
@@ -82,7 +85,7 @@ CACHEDIR = /var/cache/freevo
 all: subdirs runapp freevo_xwin
 
 python_compile: runapp
-	./runapp python setup_build.py --compile=$(OPTIMIZE),$(PREFIX)
+	./runapp python setup_freevo.py --compile=$(OPTIMIZE),$(PREFIX)
 
 runapp: runapp.c
 	$(CC) $(CFLAGS) -static -o runapp runapp.c -DRUNAPP_LOGDIR=\"$(LOGDIR)\"
