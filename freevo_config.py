@@ -126,6 +126,11 @@ SHUTDOWN_SYS_CMD = 'shutdown -h now'  # set this to 'sudo shutdown -h now' if
 MOVIE_PLAYLISTS = 0
 
 #
+# Should a Random Playlist be generated for Music?
+#
+AUDIO_RANDOM_PLAYLIST = 1
+
+#
 # Should directories sorted by date instead of filename
 #
 DIRECTORY_SORT_BY_DATE = 0

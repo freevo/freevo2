@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/02/15 03:31:59  krister
+# Joakim Berglunds patch for disabling audio random playlists.
+#
 # Revision 1.27  2003/02/12 10:38:51  dischi
 # Added a patch to make the current menu system work with the new
 # main1_image.py to have an extended menu for images
@@ -291,7 +294,7 @@ class DirItem(Playlist):
 
         # set directory variables to default
         all_variables = ('MOVIE_PLAYLISTS', 'DIRECTORY_SORT_BY_DATE',
-                         'DIRECTORY_AUTOPLAY_SINGLE_ITEM')
+                         'DIRECTORY_AUTOPLAY_SINGLE_ITEM', 'AUDIO_RANDOM_PLAYLIST')
         for v in all_variables:
             setattr(self, v, eval('config.%s' % v))
 
@@ -336,7 +339,8 @@ class DirItem(Playlist):
         #     items += [ (RandomPlaylist(self.playlist, self),
         #                 'Random play all items' ) ]
 
-        if not self.display_type or self.display_type == 'audio':
+        if ((not self.display_type or self.display_type == 'audio') and
+            config.AUDIO_RANDOM_PLAYLIST == 1):
             items += [ (RandomPlaylist((self.dir, config.SUFFIX_AUDIO_FILES),
                                        self),
                         'Recursive random play all items') ]
@@ -417,8 +421,9 @@ class DirItem(Playlist):
         items = []
 
         # random playlist (only active for audio)
-        if (not self.display_type or self.display_type == 'audio') and \
-           len(play_items) > 1 and self.display_type:
+        if ((not self.display_type or self.display_type == 'audio') and \
+            len(play_items) > 1 and self.display_type and
+            config.AUDIO_RANDOM_PLAYLIST == 1):
             pl = Playlist(play_items, self)
             pl.randomize()
             pl.autoplay = TRUE
@@ -553,8 +558,9 @@ class DirItem(Playlist):
         items = []
 
         # random playlist (only active for audio)
-        if (not self.display_type or self.display_type == 'audio') and \
-           len(self.play_items) > 1 and self.display_type:
+        if ((not self.display_type or self.display_type == 'audio') and \
+            len(self.play_items) > 1 and self.display_type and
+            config.AUDIO_RANDOM_PLAYLIST == 1):
 
             # some files changed, rebuild playlist
             if new_items or del_items:
