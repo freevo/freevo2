@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/05/11 16:21:31  dischi
+# delete whitespaces at the end in format_text
+#
 # Revision 1.25  2003/04/26 15:23:33  dischi
 # make usb listing more like lsusb
 #
@@ -472,6 +475,8 @@ def format_text(text):
     while len(text) and text[0] in (' ', '\t', '\n'):
         text = text[1:]
     text = re.sub('\n[\t *]', ' ', text)
+    while len(text) and text[-1] in (' ', '\t', '\n'):
+        text = text[:-1]
     return text
 
 
