@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/11/13 16:07:54  dischi
+# fix ioctl future warning for now
+#
 # Revision 1.20  2004/10/28 19:45:38  dischi
 # remove future warning
 #
@@ -59,7 +62,7 @@ import os
 import struct
 import fcntl
 import sys
-
+from util.ioctl import _IOC
 import config
 
 DEBUG = config.DEBUG
@@ -84,12 +87,6 @@ _IOC_DIRSHIFT = (_IOC_SIZESHIFT+_IOC_SIZEBITS)
 _IOC_NONE = 0
 _IOC_WRITE = 1
 _IOC_READ = 2
-
-def _IOC(dir,type,nr,size):
-    return ((long(dir)  << _IOC_DIRSHIFT) | \
-           (long(ord(type)) << _IOC_TYPESHIFT) | \
-           (long(nr)   << _IOC_NRSHIFT) | \
-           (long(size) << _IOC_SIZESHIFT))
 
 def _IO(type,nr): return _IOC(_IOC_NONE,(type),(nr),0)
 def _IOR(type,nr,size): return _IOC(_IOC_READ,(type),(nr),struct.calcsize(size))
@@ -193,7 +190,7 @@ class Videodev:
     def getfreq(self):
         val = struct.pack( FREQUENCY_ST, 0,0,0 )
         try:
-            r = fcntl.ioctl(self.devfd, long(GETFREQ_NO), val)
+            r = fcntl.ioctl(self.devfd, GETFREQ_NO, val)
             (junk,junk, freq, ) = struct.unpack(FREQUENCY_ST, r)
             return freq
         except IOError:
@@ -255,7 +252,7 @@ class Videodev:
 
     def querycap(self):
         val = struct.pack( QUERYCAP_ST, "", "", "", 0, 0 )
-        r = fcntl.ioctl(self.devfd, long(QUERYCAP_NO), val)
+        r = fcntl.ioctl(self.devfd, QUERYCAP_NO, val)
         return struct.unpack( QUERYCAP_ST, r )
 
 
