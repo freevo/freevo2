@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/09/01 18:49:33  dischi
+# add internal_v_align == Align.CENTER for more than one row
+#
 # Revision 1.10  2003/06/26 01:46:49  rshortt
 # Set DEBUG back to 0 as to not annoy everyone with my insane debug statements
 # which I still need to help with gui development. :)
@@ -241,14 +244,21 @@ class FlowLayout(LayoutManager):
                 return
 
 
+        global_height = 0
         for row in self.table:
-            if not len(row): continue
-            row_width = 0
+            if not len(row):
+                continue
+
+            row_width  = 0
+            row_height = 0
             for child in row:
                 row_width += child.width
+                row_height = max(row_height, child.height)
                 if len(row) - row.index(child) > 1:
                     row_width += self.container.h_spacing
 
+            global_height += row_height + self.container.v_spacing
+            
             if self.container.internal_h_align == Align.CENTER:
                 row_center = row[0].left + row_width / 2
                 x_offset = self.container.width / 2 - row_center
@@ -262,6 +272,17 @@ class FlowLayout(LayoutManager):
                            (row[0].left + row[0].width / 2)
                 row[0].left += x_offset
                 if DEBUG: print '            moved right by %s' % x_offset
+
+
+        if len(self.table) == 1:
+            space = self.container.height - self.container.v_spacing - global_height
+            shift = space / (len(self.table) + 4)
+            if self.container.internal_v_align == Align.CENTER and shift > 0:
+                current = 2 * shift
+                for row in self.table:
+                    for child in row:
+                        child.top += current
+                    current += shift
 
 
 class GridLayout(LayoutManager):
