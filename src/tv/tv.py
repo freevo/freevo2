@@ -9,6 +9,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/06/29 15:01:31  outlyer
+# Display the channel's friendly (display name) in the tuner popupbox.
+#
+# Since XMLTV 0.6.11 uses what they call "RFC" channel names which are
+# very long and don't reveal much about the channel.
+#
+# This will obviously have no regressive effect, since users had the
+# friendly name before.
+#
 # Revision 1.13  2003/06/02 21:29:22  outlyer
 # Changed the "Schedule Editor" to show up in the TV Submenu, along with "Guide" and
 # "Recorded Shows" which makes a lot more sense then where it was before, which was
@@ -97,6 +106,16 @@ def get_tunerid(channel_id):
         tv_channel_id, tv_display_name, tv_tuner_id = vals[:3]
         if tv_channel_id == channel_id:
             return tv_tuner_id
+
+    AlertBox(text='Could not find TV channel %s' % channel_id).show()
+    return None
+
+def get_friendly_channel(channel_id):
+    channel_name = None
+    for vals in config.TV_CHANNELS:
+        tv_channel_id, tv_display_name, tv_tuner_id = vals[:3]
+        if tv_channel_id == channel_id:
+            return tv_display_name
 
     AlertBox(text='Could not find TV channel %s' % channel_id).show()
     return None

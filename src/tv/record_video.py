@@ -9,6 +9,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/06/29 15:01:31  outlyer
+# Display the channel's friendly (display name) in the tuner popupbox.
+#
+# Since XMLTV 0.6.11 uses what they call "RFC" channel names which are
+# very long and don't reveal much about the channel.
+#
+# This will obviously have no regressive effect, since users had the
+# friendly name before.
+#
 # Revision 1.18  2003/06/24 21:08:41  outlyer
 # Use the episode title if available in the recording filename.
 #
@@ -299,6 +308,7 @@ def set_schedule(arg=None, menuw=None):
     this function if it should start immediately).'''
 
     tunerid = tv.get_tunerid(recinfo.channel)
+    tunername = tv.get_friendly_channel(recinfo.channel)
 
     # Start timestamp
     ts = recinfo.start_date.selected + ' ' + recinfo.start_time.selected
@@ -343,7 +353,7 @@ def set_schedule(arg=None, menuw=None):
 
 
     s = 'Scheduled recording:\n'
-    s += 'Channel %s\n' % recinfo.channel
+    s += 'Channel %s\n' % tunername
     s += '%s %s %s min' % (recinfo.start_date.selected, recinfo.start_time.selected,
                            recinfo.length.selected)
     print '"%s"' % s
