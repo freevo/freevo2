@@ -38,6 +38,8 @@ case "$1" in
 	echo "768x576."
 
 	echo -n "Starting $DESC: "
+	export SDL_NOKEYBOARD=true
+	export SDL_VIDEODRIVER=fbcon
 	(cd $FREEVO_HOME && $DAEMON $FREEVO_OPTIONS >> $FREEVO_LOG 2>&1 &)
 	echo "$NAME."
 	;;
