@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/01/02 14:03:32  dischi
+# use osd to display volume
+#
 # Revision 1.6  2003/10/12 11:05:48  dischi
 # respect config.CONTROL_ALL_AUDIO
 #
@@ -67,11 +70,12 @@
 """
 
 import struct
-import config
 import os
 
+import config
 import plugin
-import event as em
+import rc
+from event import *
 
 import ossaudiodev
 
@@ -126,26 +130,31 @@ class PluginInterface(plugin.DaemonPlugin):
         eventhandler to handle the VOL events
         """
         # Handle volume control
-        if event == em.MIXER_VOLUP:
-            print "Got VOLUP"
-            if( config.MAJOR_AUDIO_CTRL == 'VOL' ):
+        if event == MIXER_VOLUP:
+            if config.MAJOR_AUDIO_CTRL == 'VOL':
                 self.incMainVolume()
-            elif( config.MAJOR_AUDIO_CTRL == 'PCM' ):
+                rc.post_event(Event(OSD_MESSAGE, arg=_('Volume: %s%%') % self.getVolume()))
+            elif config.MAJOR_AUDIO_CTRL == 'PCM':
                 self.incPcmVolume()
+                rc.post_event(Event(OSD_MESSAGE, arg=_('Volume: %s%%') % self.getVolume()))
             return True
         
-        elif event == em.MIXER_VOLDOWN:
-            if( config.MAJOR_AUDIO_CTRL == 'VOL' ):
+        elif event == MIXER_VOLDOWN:
+            if config.MAJOR_AUDIO_CTRL == 'VOL':
                 self.decMainVolume()
-            elif( config.MAJOR_AUDIO_CTRL == 'PCM' ):
+                rc.post_event(Event(OSD_MESSAGE, arg=_('Volume: %s%%') % self.getVolume()))
+            elif config.MAJOR_AUDIO_CTRL == 'PCM':
                 self.decPcmVolume()
+                rc.post_event(Event(OSD_MESSAGE, arg=_('Volume: %s%%') % self.getVolume()))
             return True
 
-        elif event == em.MIXER_MUTE:
-            if self.getMuted() == 1: self.setMuted(0)
-            else: self.setMuted(1)
-            return True
-
+        elif event == MIXER_MUTE:
+            if self.getMuted() == 1:
+                rc.post_event(Event(OSD_MESSAGE, arg=_('Volume: %s%%') % self.getVolume()))
+                self.setMuted(0)
+            else:
+                rc.post_event(Event(OSD_MESSAGE, arg=_('Mute')))
+                self.setMuted(1)
             return True
 
         return False
@@ -154,10 +163,10 @@ class PluginInterface(plugin.DaemonPlugin):
 
     def _setVolume(self, device, volume):
         if self.mixfd and (self.mixfd.controls() & (1 << device)):
-            # Don't do anything if there is no control
-            _debug_('Volume = %d' % volume, 2)
-            if volume < 0: volume = 0
-            if volume > 100: volume = 100
+            if volume < 0:
+                volume = 0
+            if volume > 100:
+                volume = 100
             self.mixfd.set(device, (volume,volume))
 
     def getMuted(self):
@@ -165,11 +174,19 @@ class PluginInterface(plugin.DaemonPlugin):
 
     def setMuted(self, mute):
         self.muted = mute
-        if mute == 1: self._setVolume(ossaudiodev.SOUND_MIXER_VOLUME, 0)
-        else:self._setVolume(ossaudiodev.SOUND_MIXER_VOLUME, self.mainVolume)
+        if mute == 1:
+            self._setVolume(ossaudiodev.SOUND_MIXER_VOLUME, 0)
+        else:
+            self._setVolume(ossaudiodev.SOUND_MIXER_VOLUME, self.mainVolume)
 
+    def getVolume(self):
+        if config.MAJOR_AUDIO_CTRL == 'VOL':
+            return self.mainVolume
+        elif config.MAJOR_AUDIO_CTRL == 'PCM':
+            return self.pcmVolume
+        
     def getMainVolume(self):
-        return(self.mainVolume)
+        return self.mainVolume
 
     def setMainVolume(self, volume):
         self.mainVolume = volume
@@ -177,16 +194,18 @@ class PluginInterface(plugin.DaemonPlugin):
 
     def incMainVolume(self):
         self.mainVolume += 5
-        if self.mainVolume > 100: self.mainVolume = 100
+        if self.mainVolume > 100:
+            self.mainVolume = 100
         self._setVolume(ossaudiodev.SOUND_MIXER_VOLUME, self.mainVolume)
 
     def decMainVolume(self):
         self.mainVolume -= 5
-        if self.mainVolume < 0: self.mainVolume = 0
+        if self.mainVolume < 0:
+            self.mainVolume = 0
         self._setVolume(ossaudiodev.SOUND_MIXER_VOLUME, self.mainVolume)
 
     def getPcmVolume(self):
-        return( self.pcmVolume )
+        return self.pcmVolume
     
     def setPcmVolume(self, volume):
         self.pcmVolume = volume
@@ -194,12 +213,14 @@ class PluginInterface(plugin.DaemonPlugin):
 
     def incPcmVolume(self):
         self.pcmVolume += 5
-        if self.pcmVolume > 100: self.pcmvolume = 100
+        if self.pcmVolume > 100:
+            self.pcmvolume = 100
         self._setVolume( ossaudiodev.SOUND_MIXER_PCM, self.pcmVolume )
 
     def decPcmVolume(self):
         self.pcmVolume -= 5
-        if self.pcmVolume < 0: self.pcmVolume = 0
+        if self.pcmVolume < 0:
+            self.pcmVolume = 0
         self._setVolume( ossaudiodev.SOUND_MIXER_PCM, self.pcmVolume )
     
     def setLineinVolume(self, volume):
@@ -228,17 +249,21 @@ class PluginInterface(plugin.DaemonPlugin):
 
     def decIgainVolume(self):
         self.igainVolume -= 5
-        if self.igainVolume < 0: self.igainVolume = 0
+        if self.igainVolume < 0:
+            self.igainVolume = 0
         self._setVolume(ossaudiodev.SOUND_MIXER_IGAIN, volume)
         
     def incIgainVolume(self):
         self.igainVolume += 5
-        if self.igainVolume > 100: self.igainVolume = 100
+        if self.igainVolume > 100:
+            self.igainVolume = 100
         self._setVolume(ossaudiodev.SOUND_MIXER_IGAIN, volume)
 
     def setOgainVolume(self, volume):
-        if volume > 100: volume = 100 
-        elif volume < 0: volume = 0
+        if volume > 100:
+            volume = 100 
+        elif volume < 0:
+            volume = 0
         self.ogainVolume = volume
         self._setVolume(ossaudiodev.SOUND_MIXER_IGAIN, volume)
 
@@ -252,10 +277,3 @@ class PluginInterface(plugin.DaemonPlugin):
                 self.setMainVolume(config.MAX_VOLUME)
 
         self.setIgainVolume(0) # SB Live input from TV Card.
-
-        
-# Simple test...
-if __name__ == '__main__':
-    mixer = PluginInterface()
-    mixer.setPcmVolume(50)
-    
