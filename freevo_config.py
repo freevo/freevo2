@@ -306,6 +306,10 @@ plugin.activate('audio.detach', level=20)
 # plugin.activate('tv.tvtime')
 plugin.activate('tv.mplayer')
 
+# support for settings bookmarks (key RECORD) while playing. Also
+# auto bookmarking when playback is stopped
+plugin.activate('video.bookmarker')
+
 # For recording tv
 #
 # generic_record plugin needs VCR_CMD to be set correctly
