@@ -424,6 +424,22 @@ class Image:
 
 		return self._image.move_to_shmem(format, id)
 
+
+	def set_alpha(self, has_alpha):
+		"""
+		Enable / disable the alpha layer.
+
+		Arguments:
+		has_alpha: if True, the alpha layer will be enabled, if
+		           False disabled
+		Returns: None
+		"""
+		if has_alpha:
+			self._image.set_alpha(1)
+		else:
+			self._image.set_alpha(0)
+
+			
 	def save(self, filename, format = None):
 		"""
 		Saves the image to a file.
@@ -434,7 +450,10 @@ class Image:
 
 		Returns: None.
 		"""
-		return self._image.save(filename)
+		if not format:
+			format = os.path.splitext(filename)[1][1:]
+		return self._image.save(filename, format)
+	
 
 	def to_sdl_surface(self, sdl_surface):
 		"""

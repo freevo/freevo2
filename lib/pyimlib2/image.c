@@ -340,6 +340,20 @@ PyObject *Image_PyObject__draw_ellipse(PyObject *self, PyObject *args)
 	return Py_None;
 }
 
+
+PyObject *Image_PyObject__set_alpha(PyObject *self, PyObject *args)
+{ 
+	int alpha = 0;
+
+	if (!PyArg_ParseTuple(args, "i", &alpha))
+	        return NULL;
+	imlib_context_set_image(((Image_PyObject *)self)->image);
+	imlib_image_set_has_alpha(alpha);
+	Py_INCREF(Py_None);
+	return Py_None;
+}
+
+	
 PyObject *Image_PyObject__copy_rect(PyObject *self, PyObject *args)
 { 
 	int src_x, src_y, w, h, dst_x, dst_y;
@@ -437,17 +451,23 @@ PyObject *Image_PyObject__to_sdl_surface(PyObject *self, PyObject *args)
 
 PyObject *Image_PyObject__save(PyObject *self, PyObject *args)
 {
-	unsigned char *filename;
-
-	if (!PyArg_ParseTuple(args, "s", &filename))
+	unsigned char *filename, *ext;
+	
+	if (!PyArg_ParseTuple(args, "ss", &filename, &ext))
 		return NULL;
 
 	imlib_context_set_image(((Image_PyObject *)self)->image);
 	// TODO: call imlib_save_image_with_error_return
+
+	/* set the image format to be the format of the extension of our last */
+	/* argument - i.e. .png = png, .tif = tiff etc. */
+	imlib_image_set_format(ext);
 	imlib_save_image(filename);
 	Py_INCREF(Py_None);
 	return Py_None;
 }
+
+
 PyMethodDef Image_PyObject_methods[] = {
 	{ "draw_rectangle", Image_PyObject__draw_rectangle, METH_VARARGS },
 	{ "draw_ellipse", Image_PyObject__draw_ellipse, METH_VARARGS },
@@ -461,6 +481,7 @@ PyMethodDef Image_PyObject_methods[] = {
 	{ "orientate", Image_PyObject__orientate, METH_VARARGS },
 	{ "flip", Image_PyObject__flip, METH_VARARGS },
 	{ "blend", Image_PyObject__blend, METH_VARARGS },
+	{ "set_alpha", Image_PyObject__set_alpha, METH_VARARGS },
 	{ "move_to_shmem", Image_PyObject__move_to_shmem, METH_VARARGS },
 	{ "get_bytes", Image_PyObject__get_bytes, METH_VARARGS },
 	{ "to_sdl_surface", Image_PyObject__to_sdl_surface, METH_VARARGS },
