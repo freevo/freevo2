@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/02/17 21:00:24  dischi
+# catch an error
+#
 # Revision 1.12  2003/02/13 07:47:25  krister
 # Bugfixes for image errors.
 #
@@ -286,10 +289,13 @@ def resize(filename, x0=25, y0=25):
             im = Image.open(filename)
         except IOError:
             return ''
-        im_res = im.resize((x0,y0), Image.BICUBIC)
-        im_res.save(mythumb, 'PNG')
-        return mythumb
-    
+        try:
+            im_res = im.resize((x0,y0), Image.BICUBIC)
+            im_res.save(mythumb, 'PNG')
+            return mythumb
+        except IOError:
+            print 'error resizing image %s' % filename
+            return filename
 
 def getExifThumbnail(file, x0=0, y0=0):
     import Image
