@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.59  2004/01/24 19:16:24  dischi
+# clean up autovar handling
+#
 # Revision 1.58  2004/01/13 15:03:45  dischi
 # add version detection patch
 #
@@ -245,9 +248,9 @@ class MPlayer:
         if item.selected_audio:
             additional_args += [ '-aid', item.selected_audio ]
 
-        if self.version >= 1 and item.deinterlace:
+        if self.version >= 1 and item['deinterlace']:
             additional_args += [ '-vf',  'pp=de/fd' ]
-        elif item.deinterlace:
+        elif item['deinterlace']:
             additional_args += [ '-vop', 'pp=fd' ]
         elif self.version >= 1:
             additional_args += [ '-vf',  'pp=de' ]

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/01/24 19:15:20  dischi
+# clean up autovar handling
+#
 # Revision 1.5  2004/01/19 20:25:08  dischi
 # do not store every time, use sync
 #
@@ -338,7 +341,7 @@ class Info:
                 val = var[key]
                 if not var == self.metadata or not val in bad_info:
                     result = val
-                if result:
+                if result != None and result != '':
                     return result
         return result
 

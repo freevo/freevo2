@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.54  2004/01/24 19:14:21  dischi
+# clean up autovar handling
+#
 # Revision 1.53  2004/01/19 20:29:11  dischi
 # cleanup, reduce cache size
 #
@@ -185,11 +188,6 @@ class Item:
         if not hasattr(self, 'type'):
             self.type     = None            # e.g. video, audio, dir, playlist
 
-        # set auto variables for this item
-        if hasattr(self, 'autovars'):
-            for var, val in self.autovars:
-                setattr(self, var, val)
-
         self.name         = ''              # name in menu
         self.icon         = None
         if info and isinstance(info, util.mediainfo.Info):
@@ -201,6 +199,9 @@ class Item:
         self.description  = ''
 
         self.eventhandler_plugins = []
+
+        if not hasattr(self, 'autovars'):
+            self.autovars = []
 
         if info and parent and hasattr(parent, 'DIRECTORY_USE_MEDIAID_TAG_NAMES') and \
                parent.DIRECTORY_USE_MEDIAID_TAG_NAMES and hasattr(self.info, 'title'):
@@ -302,11 +303,6 @@ class Item:
                    hasattr(self.info, 'title'):
                 self.name = self.info['title']
 
-            if hasattr(self, 'autovars'):
-                for var, val in self.autovars:
-                    if self.info.has_key('var'):
-                        setattr(var, self.info['var'])
-        
         if not self.name:
             if self.filename:
                 self.name = util.getname(self.filename)
@@ -318,15 +314,14 @@ class Item:
         """
         set the value of 'key' to 'val'
         """
-        if hasattr(self, 'autovars'):
-            for var, val in self.autovars:
-                if key == var:
+        for var, val in self.autovars:
+            if key == var:
+                if val == value:
+                    self.delete_info(key)
+                else:
                     self.store_info(key, value)
-                    setattr(self, key, value)
-            else:
-                self.info[key] = value
-        else:
-            self.info[key] = value
+                return
+        self.info[key] = value
 
         
     def store_info(self, key, value):
@@ -500,6 +495,10 @@ class Item:
                 r = getattr(self,attr)
             if r != None:
                 return r
+            if hasattr(self, 'autovars'):
+                for var, val in self.autovars:
+                    if var == attr:
+                        return val
         return ''
 
 

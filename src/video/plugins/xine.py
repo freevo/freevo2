@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2004/01/24 19:17:10  dischi
+# clean up autovar handling
+#
 # Revision 1.35  2004/01/10 13:22:54  dischi
 # fix mimetype = cue
 #
@@ -172,7 +175,7 @@ class Xine:
 
         command = copy.copy(self.command)
 
-        if item.deinterlace and (self.xine_type == 'X' or self.version > 922):
+        if item['deinterlace'] and (self.xine_type == 'X' or self.version > 922):
             command.append('-D')
 
         if not rc.PYLIRC and '--no-lirc' in command:
@@ -269,6 +272,7 @@ class Xine:
 
         if event == VIDEO_TOGGLE_INTERLACE:
             self.app.write('ToggleInterleave\n')
+            self.item['deinterlace'] = not self.item['deinterlace']
             return True
 
         if event == NEXT:

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.119  2004/01/24 19:16:14  dischi
+# clean up autovar handling
+#
 # Revision 1.118  2004/01/19 20:21:33  dischi
 # change doc string
 #
@@ -529,7 +532,7 @@ class VideoItem(Item):
             i.possible_player = []
             # copy the attributes from mmpython about this track
             if self.info.mmdata.has_key('tracks'):
-                i.info = self.info.mmdata.tracks[title-1]
+                i.info.mmdata = self.info.mmdata.tracks[title-1]
             i.info_type = 'track'
             i.set_url(self.url + str(title), False)
             i.name = _('Play Title %s') % title
