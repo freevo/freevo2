@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.62  2003/07/07 21:56:24  dischi
+# preserve mmpython info
+#
 # Revision 1.61  2003/07/07 21:39:50  dischi
 # add special handling for mmpython video informations
 #
@@ -227,7 +230,8 @@ class VideoItem(Item):
 
             if config.TV_SHOW_INFORMATIONS.has_key(show_name[0].lower()):
                 tvinfo = config.TV_SHOW_INFORMATIONS[show_name[0].lower()]
-                self.info = tvinfo[1]
+                for i in tvinfo[1]:
+                    self.info[i] = tvinfo[1][i]
                 if not self.image:
                     self.image = tvinfo[0]
                 if not self.xml_file:
