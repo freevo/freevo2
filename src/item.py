@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2004/01/04 18:19:16  dischi
+# fix len() calc
+#
 # Revision 1.42  2004/01/04 10:20:05  dischi
 # fix missing DIRECTORY_USE_MEDIAID_TAG_NAMES for all kinds of parents
 #
@@ -384,16 +387,16 @@ class Item:
                 return '%d:%02d' % (length / 60, length % 60)
 
         if attr[:4] == 'len(' and attr[-1] == ')':
-            try:
+            r = None
+            if self.info and self.info.has_key(attr[4:-1]):
                 r = self.info[attr[4:-1]]
-            except:
-                try:
-                    r = getattr(self,attr[4:-1])
-                except:
-                    return 0
+
+            if not r and hasattr(self, attr[4:-1]):
+                r = getattr(self,attr[4:-1])
                 
             if r != None:
                 return len(r)
+            return 0
 
         else:
             r = None
