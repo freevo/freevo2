@@ -1,32 +1,24 @@
 #!/usr/bin/env python
-
 #if 0 /*
 # -----------------------------------------------------------------------
-# webserver.py - A small webserver based on twisted.web
+# webserver.py - start the webserver
 # -----------------------------------------------------------------------
 # $Id$
 #
 # Notes:
+#
 # Todo:        
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.9  2003/08/23 12:51:43  dischi
-# removed some old CVS log messages
+# Revision 1.1  2003/08/31 09:18:41  dischi
+# Move webserver start script to helpers. Use 'freevo webserver start'
+# and 'freevo webserver stop'.
 #
-# Revision 1.8  2003/05/26 00:40:24  rshortt
-# Backing out the vhost code because it was unneccessary and only made things
-# harder.  There is no need to use it as a form of security now because of the
-# user / pass authentication.  The webserver will now listen on all local adresses.
-#
-# Revision 1.6  2003/05/12 16:46:18  rshortt
-# The webserver now binds to a particular host address, localhost is
-# the default so if left unchanged you will only be able to access it
-# from the same machine (unless maybe someone does some DNS tricks).
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2003 Krister Lagerstrom, et al. 
+# Copyright (C) 2002 Krister Lagerstrom, et al. 
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -59,10 +51,17 @@ DEBUG = 1
 TRUE = 1
 FALSE = 0
 
+if len(sys.argv)>1 and sys.argv[1] == '--help':
+    print 'start or stop the internal webserver'
+    print 'usage freevo webserver [ start | stop ]'
+    sys.exit(0)
+
+# the start and stop stuff will be handled from the freevo script
+
 logfile = '%s/internal-webserver-%s.log' % (config.LOGDIR, os.getuid())
 log.startLogging(open(logfile, 'a'))
 
-docRoot = './src/www/htdocs'
+docRoot = os.path.join(os.environ['FREEVO_PYTHON'], 'www/htdocs')
 
 root = static.File(docRoot)
 root.processors = { '.rpy': script.ResourceScript, }
