@@ -101,12 +101,12 @@ class Mame:
         # XXX A better place for the major part of this code would be
         # XXX mixer.py
         if config.CONTROL_ALL_AUDIO:
-            mixer.setLineinVolume( 0 )
-            mixer.setMicVolume( 0 )
-            if( config.MAJOR_AUDIO_CTRL == 'VOL' ):
-                mixer.setPcmVolume( 100 )
-            elif( config.MAJOR_AUDIO_CTRL == 'PCM' ):
-                mixer.setMainVolume( 100 )
+            mixer.setLineinVolume(0)
+            mixer.setMicVolume(0)
+            if config.MAJOR_AUDIO_CTRL == 'VOL':
+                mixer.setPcmVolume(config.MAX_VOLUME)
+            elif config.MAJOR_AUDIO_CTRL == 'PCM':
+                mixer.setMainVolume(config.MAX_VOLUME)
                 
         mixer.setIgainVolume( 0 ) # SB Live input from TV Card.
         # This should _really_ be set to zero when playing other audio.

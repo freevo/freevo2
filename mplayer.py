@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2002/10/16 02:49:33  krister
+# Changed to use config.MAX_VOLUME for when resetting the volume to max.
+#
 # Revision 1.36  2002/10/13 05:41:17  outlyer
 # Fixed another drawstring call that should be skin.PopupBox()
 #
@@ -210,14 +213,14 @@ class MPlayer:
         # XXX A better place for the major part of this code would be
         # XXX mixer.py
         if config.CONTROL_ALL_AUDIO:
-            mixer.setLineinVolume( 0 )
-            mixer.setMicVolume( 0 )
-            if( config.MAJOR_AUDIO_CTRL == 'VOL' ):
-                mixer.setPcmVolume( 100 )
-            elif( config.MAJOR_AUDIO_CTRL == 'PCM' ):
-                mixer.setMainVolume( 100 )
+            mixer.setLineinVolume(0)
+            mixer.setMicVolume(0)
+            if config.MAJOR_AUDIO_CTRL == 'VOL':
+                mixer.setPcmVolume(config.MAX_VOLUME)
+            elif config.MAJOR_AUDIO_CTRL == 'PCM':
+                mixer.setMainVolume(config.MAX_VOLUME)
                 
-        mixer.setIgainVolume( 0 ) # SB Live input from TV Card.
+        mixer.setIgainVolume(0) # SB Live input from TV Card.
         # This should _really_ be set to zero when playing other audio.
 
         if mode == 'audio':

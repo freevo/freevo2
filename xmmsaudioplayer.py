@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/10/16 02:49:32  krister
+# Changed to use config.MAX_VOLUME for when resetting the volume to max.
+#
 # Revision 1.1  2002/10/02 02:40:56  krister
 # Applied Alex Polite's patch for using XMMS instead of MPlayer for music playing and visualization.
 #
@@ -146,10 +149,10 @@ class AbstractAudioPlayer(Singleton):
         if config.CONTROL_ALL_AUDIO:
             mixer.setLineinVolume(0)
             mixer.setMicVolume(0)
-            if( config.MAJOR_AUDIO_CTRL == 'VOL' ):
-                mixer.setPcmVolume(100)
-            elif( config.MAJOR_AUDIO_CTRL == 'PCM' ):
-                mixer.setMainVolume(100)
+            if config.MAJOR_AUDIO_CTRL == 'VOL':
+                mixer.setPcmVolume(config.MAX_VOLUME)
+            elif config.MAJOR_AUDIO_CTRL == 'PCM':
+                mixer.setMainVolume(config.MAX_VOLUME)
                 
         mixer.setIgainVolume(0) # SB Live input from TV Card.
         # This should _really_ be set to zero when playing other audio.
