@@ -1,5 +1,5 @@
 %define name mmpython
-%define version 0.4.6
+%define version 0.4.7
 %define release 1_fc2
 
 Summary: Module for retrieving information about media files
