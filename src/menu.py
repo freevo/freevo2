@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2003/04/24 19:13:27  dischi
+# bugfix
+#
 # Revision 1.42  2003/04/21 12:59:35  dischi
 # better plugin event handling
 #
@@ -393,7 +396,7 @@ class MenuWidget(GUIObject):
     def make_submenu(self, menu_name, actions, item):
         items = []
         for function, title in actions:
-            items += [ MenuItem(title, function, item) ]
+            items += [ MenuItem(title, function) ]
         xml_file = None
         if hasattr(item, 'xml_file'):
             xml_file = item.xml_file
