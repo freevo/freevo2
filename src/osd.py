@@ -10,11 +10,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.82  2003/08/23 12:51:41  dischi
+# removed some old CVS log messages
+#
 # Revision 1.81  2003/08/23 09:19:01  dischi
 # merged blanking helper into osd.py
-#
-# Revision 1.80  2003/08/16 12:10:55  dischi
-# this does not work on mga framebuffer
 #
 # Revision 1.79  2003/08/15 19:25:15  dischi
 # search all the share stuff in $FREEVO_SHARE now
@@ -28,25 +28,12 @@
 # Revision 1.76  2003/08/05 17:25:34  dischi
 # better error handling for missing SDL_VIDEODRIVER
 #
-# Revision 1.75  2003/08/04 19:46:35  dischi
-# force sdl to x11 when using x11. Sometimes detection fails
-#
 # Revision 1.74  2003/07/30 15:13:01  outlyer
 # Add encoding to remove some warnings from Python 2.3. Has no effect on
 # Python < 2.3
 #
 # Revision 1.73  2003/07/19 19:16:05  dischi
 # support for loading an image which is already an Imaging object
-#
-# Revision 1.72  2003/07/18 16:51:03  rshortt
-# Removing xv and dga from the valid display types.  x11 should cover all
-# X related -vo options for mplayer.
-#
-# Revision 1.71  2003/07/14 19:34:07  rshortt
-# Adding dgs to the list of supported display types.
-#
-# Revision 1.70  2003/07/14 17:09:49  rshortt
-# Start in fullscreen mode with xv too.
 #
 # Revision 1.69  2003/07/13 19:35:44  rshortt
 # Change osd.focused_app to a function that returns the last object in

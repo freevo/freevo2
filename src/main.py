@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.65  2003/08/23 12:51:41  dischi
+# removed some old CVS log messages
+#
 # Revision 1.64  2003/08/22 18:21:24  dischi
 # fix to prevent pygame from crashing
 #
@@ -28,13 +31,6 @@
 # Revision 1.59  2003/08/12 19:39:06  dischi
 # Added event_lister to get all events
 #
-# Revision 1.58  2003/08/06 19:36:47  dischi
-# o removed freevo_xwin
-# o use the freevo startscript to call matroxset
-#
-# Revision 1.57  2003/08/05 17:24:59  dischi
-# use config.DEBUG for mmpython debug
-#
 # Revision 1.56  2003/08/04 20:38:59  dischi
 # Notice the user that pre-caching is missing
 #
@@ -49,65 +45,6 @@
 # Change osd.focused_app to a function that returns the last object in
 # app_list.  Maintaining this list is helpfull for managing 'toplevel'
 # GUIObject based apps (popup types).
-#
-# Revision 1.52  2003/07/02 20:06:04  dischi
-# turn off more mmpython debug
-#
-# Revision 1.51  2003/07/01 02:58:17  outlyer
-# Added lame/cdparanoia and defaults for the cdbackup plugin
-# Removed some messages from src/main and src/menu
-#
-# Revision 1.50  2003/06/30 20:39:22  outlyer
-# Less noise.
-#
-# Revision 1.49  2003/06/29 20:45:14  dischi
-# mmpython support
-#
-# Revision 1.48  2003/06/20 17:38:11  dischi
-# setup mmpython if it is installed
-#
-# Revision 1.47  2003/06/08 18:09:20  dischi
-# add --doc switch to generate api doc in Docs/api
-#
-# Revision 1.46  2003/05/29 21:17:00  rshortt
-# Make sure we use runapp to avoid linker errors.
-#
-# Revision 1.45  2003/05/29 21:10:18  rshortt
-# Remove the 'killall' kludge and save and use process id's.  The freevo script accepts a stop command that can be used alone to stop freevo or with an extra argument to stop a process that was started with 'execute'.  That extra argument must be the .py file or the path to the .py file.
-#
-# Revision 1.44  2003/05/28 15:01:24  dischi
-# improved event handling
-#
-# Revision 1.43  2003/05/27 17:53:33  dischi
-# Added new event handler module
-#
-# Revision 1.42  2003/04/27 17:59:06  dischi
-# better plugin poll() handling
-#
-# Revision 1.41  2003/04/24 19:55:48  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.40  2003/04/20 12:43:32  dischi
-# make the rc events global in rc.py to avoid get_singleton. There is now
-# a function app() to get/set the app. Also the events should be passed to
-# the daemon plugins when there is no handler for them before. Please test
-# it, especialy the mixer functions.
-#
-# Revision 1.39  2003/04/20 10:55:40  dischi
-# mixer is now a plugin, too
-#
-# Revision 1.38  2003/04/19 21:28:39  dischi
-# identifymedia.py is now a plugin and handles everything related to
-# rom drives (init, autostarter, items in menus)
-#
-# Revision 1.37  2003/04/18 15:01:36  dischi
-# support more types of plugins and removed the old item plugin support
-#
-# Revision 1.36  2003/04/17 21:21:56  dischi
-# Moved the idle bar to plugins and changed the plugin interface
-#
-# Revision 1.35  2003/04/15 20:00:19  dischi
-# make MenuItem inherit from Item
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -324,7 +261,6 @@ def signal_handler(sig, frame):
 # Main init
 #
 def main_func():
-
     import plugin
     plugin.init()
     

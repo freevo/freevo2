@@ -11,40 +11,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.7  2003/05/20 23:48:03  rshortt
-# A few fixes but we still need better except blocks.
-#
-# Revision 1.6  2003/05/14 00:18:55  rshortt
-# Better error handling.
-#
-# Revision 1.5  2003/05/14 00:04:54  rshortt
-# Better error handling.
-#
-# Revision 1.4  2003/05/13 16:13:24  rshortt
-# Added updateFavoritesSchedule to the interface and make it accessable through
-# the command-line of record_client.py.
-#
-# Revision 1.3  2003/05/13 01:20:22  rshortt
-# Bugfixes.
-#
-# Revision 1.2  2003/05/12 11:21:51  rshortt
-# bugfixes
-#
-# Revision 1.1  2003/05/11 22:41:22  rshortt
-# The client interface to the recording server.
-#
-# Revision 1.4  2003/04/28 02:51:31  rshortt
-# Making some progress here.
-#
-# Revision 1.3  2003/04/26 18:01:02  rshortt
-# *** empty log message ***
-#
-# Revision 1.2  2003/04/26 15:52:05  rshortt
-# *** empty log message ***
-#
-# Revision 1.1  2003/04/26 12:55:04  rshortt
-# Starting work on a recording server.
-#
+# Revision 1.8  2003/08/23 12:51:43  dischi
+# removed some old CVS log messages
 #
 #
 # -----------------------------------------------------------------------

@@ -9,51 +9,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.16  2003/07/29 19:06:40  dischi
-# add vcd events (used by xine)
-#
-# Revision 1.15  2003/07/27 19:12:21  dischi
-# add dvd events
-#
-# Revision 1.14  2003/07/12 19:56:18  rshortt
-# Fix for when event arg is 0, like with INPUT_0.
-#
-# Revision 1.13  2003/06/24 17:41:09  dischi
-# added mixer keys
-#
-# Revision 1.12  2003/06/20 17:39:00  dischi
-# set \\PLAY\ to play item
-#
-# Revision 1.11  2003/06/07 11:30:02  dischi
-# Readded INPUT_[0-9] event args (why were they gone, we need them).
-# Also added MENU_CALL_ITEM_ACTION to call an action directly
-#
-# Revision 1.10  2003/06/05 02:21:40  rshortt
-# Forgot PAUSE for TV.
-#
-# Revision 1.9  2003/06/04 23:00:42  rshortt
-# Add some new TV_EVENTS.
-#
-# Revision 1.8  2003/06/02 22:56:19  rshortt
-# Need a pageup/pagedown for input events.
-#
-# Revision 1.7  2003/06/01 18:32:08  rshortt
-# INPUT_EXIT was the same as INPUT_ENTER
-#
-# Revision 1.6  2003/05/30 00:53:19  rshortt
-# Various event bugfixes.
-#
-# Revision 1.5  2003/05/29 03:28:22  outlyer
-# Fix seeking in video too...
-#
-# Revision 1.4  2003/05/28 19:54:23  outlyer
-# REW/FFWD were reversed (REW was going forward, FFWD was going backwards)
-#
-# Revision 1.3  2003/05/28 17:55:15  dischi
-# fixed mixer button names
-#
-# Revision 1.2  2003/05/28 15:01:24  dischi
-# improved event handling
+# Revision 1.17  2003/08/23 12:51:41  dischi
+# removed some old CVS log messages
 #
 #
 # -----------------------------------------------------------------------

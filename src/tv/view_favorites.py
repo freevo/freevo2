@@ -11,12 +11,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.2  2003/06/03 01:41:39  rshortt
-# More progress, still ots to do.
-#
-# Revision 1.1  2003/06/01 19:05:15  rshortt
-# Better to commit these before I mess something up.  Still event code to fix I think, among other things.
-#
+# Revision 1.3  2003/08/23 12:51:43  dischi
+# removed some old CVS log messages
 #
 #
 # -----------------------------------------------------------------------

@@ -9,18 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.4  2003/08/05 18:59:21  dischi
-# Directory cleanup, part 1:
-# move skins/main1/* to src/skins/main
+# Revision 1.5  2003/08/23 12:51:41  dischi
+# removed some old CVS log messages
 #
-# Revision 1.3  2003/07/12 10:08:11  dischi
-# load skin only when needed
-#
-# Revision 1.2  2003/04/24 19:55:55  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.1  2002/11/24 13:58:44  dischi
-# code cleanup
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

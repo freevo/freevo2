@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/08/23 12:51:43  dischi
+# removed some old CVS log messages
+#
 # Revision 1.13  2003/08/23 10:08:14  dischi
 # remove dbdnav stuff, use xine for that
 #
@@ -28,33 +31,6 @@
 #
 # Revision 1.11  2003/08/22 17:51:29  dischi
 # Some changes to make freevo work when installed into the system
-#
-# Revision 1.10  2003/08/20 19:01:16  dischi
-# added dga support and STOP_OSD_WHEN_PLAYING to shutdown down osd
-#
-# Revision 1.9  2003/08/06 19:32:40  dischi
-# removed freevo_xwin support. Most users have problems with it and it works without it
-#
-# Revision 1.8  2003/08/05 17:25:58  dischi
-# fixed event name
-#
-# Revision 1.7  2003/08/02 16:21:40  dischi
-# add MPLAYER_AUTOCROP
-#
-# Revision 1.6  2003/07/27 17:12:37  dischi
-# exception handling
-#
-# Revision 1.5  2003/07/11 19:47:08  dischi
-# close file after parsing
-#
-# Revision 1.4  2003/07/06 20:21:10  outlyer
-# Removed more debug statements and extraneous log messages.
-#
-# Revision 1.3  2003/07/01 21:47:35  outlyer
-# Made a check to see if file exists before unlinking.
-#
-# Revision 1.2  2003/07/01 20:35:58  outlyer
-# Replaced the os.system('rm ...') calls with os.unlink()
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

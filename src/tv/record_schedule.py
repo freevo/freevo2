@@ -15,50 +15,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.7  2003/08/15 19:25:15  dischi
-# search all the share stuff in $FREEVO_SHARE now
+# Revision 1.8  2003/08/23 12:51:43  dischi
+# removed some old CVS log messages
 #
-# Revision 1.6  2003/06/24 11:52:55  outlyer
-# A quick fix for the problem reported by Wan Tat Chee, if there are
-# no entries in the recording schedule, don't crash. Should be more
-# informative though...
 #
-# Revision 1.5  2003/06/20 21:05:06  outlyer
-# Use icons instead of printing "Recording now" since that takes up a lot of
-# space and can't be seen on shows with titles
-#
-# Revision 1.4  2003/06/02 21:29:21  outlyer
-# Changed the "Schedule Editor" to show up in the TV Submenu, along with "Guide" and
-# "Recorded Shows" which makes a lot more sense then where it was before, which was
-# also exceptionally well hidden.
-#
-# To do this properly, I also had to move record_schedule into a class, subclassing
-# from Item, and so problems may and possibly will arise. I've tested it a little,
-# but please bang on this, because while it's a relatively minor change, it does
-# get things working inside the properly model, at least for a start.
-#
-# Bug reports are expected and welcome :)
-#
-# Revision 1.3  2003/04/20 12:43:33  dischi
-# make the rc events global in rc.py to avoid get_singleton. There is now
-# a function app() to get/set the app. Also the events should be passed to
-# the daemon plugins when there is no handler for them before. Please test
-# it, especialy the mixer functions.
-#
-# Revision 1.2  2003/04/06 21:12:58  dischi
-# o Switched to the new main skin
-# o some cleanups (removed unneeded inports)
-#
-# Revision 1.1  2003/03/15 05:01:30  outlyer
-# Merged Kyle Weston's Schedule Viewer/Editor patch.
-#
-# Please note, it currently only works with recording files ending in '.avi'
-# This is temporary, but as a fix, there is a commented line on line 171,
-# if you use mpgs (like I do) you can enable line 171 and comment out line 170.
-#
-# Since avi is the default, I'm leaving it that way, but I will use mpg myself.
-#
-
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002 Krister Lagerstrom, et al.

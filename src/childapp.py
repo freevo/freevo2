@@ -9,21 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/08/23 12:51:41  dischi
+# removed some old CVS log messages
+#
 # Revision 1.11  2003/08/22 17:51:29  dischi
 # Some changes to make freevo work when installed into the system
-#
-# Revision 1.10  2003/05/28 17:24:23  dischi
-# fixed bug when child is dead
-#
-# Revision 1.9  2003/04/24 19:55:44  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.8  2003/04/24 11:46:29  dischi
-# fixed 'to many open files' bug
-#
-# Revision 1.7  2003/04/06 21:12:54  dischi
-# o Switched to the new main skin
-# o some cleanups (removed unneeded inports)
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

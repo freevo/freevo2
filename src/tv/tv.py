@@ -9,44 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.17  2003/08/20 22:29:37  gsbarbieri
-# UPPER CASE TEXT IS UGLY! :)
+# Revision 1.18  2003/08/23 12:51:43  dischi
+# removed some old CVS log messages
 #
-# Revision 1.16  2003/08/03 11:10:26  dischi
-# Added TVGUIDE_HOURS_PER_PAGE
-#
-# Revision 1.15  2003/07/13 19:46:21  rshortt
-# Move the work portion of get_friendly_channel() into tv_util.
-#
-# Revision 1.14  2003/06/29 15:01:31  outlyer
-# Display the channel's friendly (display name) in the tuner popupbox.
-#
-# Since XMLTV 0.6.11 uses what they call "RFC" channel names which are
-# very long and don't reveal much about the channel.
-#
-# This will obviously have no regressive effect, since users had the
-# friendly name before.
-#
-# Revision 1.13  2003/06/02 21:29:22  outlyer
-# Changed the "Schedule Editor" to show up in the TV Submenu, along with "Guide" and
-# "Recorded Shows" which makes a lot more sense then where it was before, which was
-# also exceptionally well hidden.
-#
-# To do this properly, I also had to move record_schedule into a class, subclassing
-# from Item, and so problems may and possibly will arise. I've tested it a little,
-# but please bang on this, because while it's a relatively minor change, it does
-# get things working inside the properly model, at least for a start.
-#
-# Bug reports are expected and welcome :)
-#
-# Revision 1.12  2003/04/24 19:56:42  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.11  2003/04/22 19:34:12  dischi
-# mplayer and tvtime are now plugins
-#
-# Revision 1.10  2003/04/21 18:20:44  dischi
-# make tv itself and not tv.tv the plugin (using __init__.py)
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

@@ -9,40 +9,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.8  2003/08/02 12:56:41  rshortt
-# Increase the sleep time because 0.3 was too short for some people.
-#
-# Revision 1.7  2003/07/30 23:04:01  rshortt
-# Work around an msp3400 bug where it will lose sound when doing a few things,
-# one of which is setting the video standard.  Right now it calls the newly added
-# mspSetMatrix() method with no args -- it is possible the default input and
-# output values here are not valid for some users.  This should be fixed in
-# the driver soon but I will make these values configurable if it becomes a
-# problem for users in the meantime.
-#
-# Revision 1.6  2003/07/24 00:57:30  rshortt
-# Remove framespergop setting for now.  We don't want to hardcode an NTSC
-# setting for anyone in PAL or SECAM land.
-#
-# Revision 1.5  2003/07/14 17:08:45  rshortt
-# Remove setting the framerate and rely on the card's initialized defaults instead.
-#
-# Revision 1.4  2003/07/14 11:44:42  rshortt
-# Add some init and print methods to Videodev and IVTV.
-#
-# Revision 1.3  2003/07/11 00:27:23  rshortt
-# Added a mspSetMatrix which is currently not used by anything.
-#
-# This was previously needed to correct an audio problem that is now fixed
-# by specifying standard as a msp3400 modprobe option.
-#
-# Revision 1.2  2003/07/07 01:59:06  rshortt
-# Updating for current ivtv CVS, added bitrate_mode and use constant bitrate
-# by default.
-#
-# Revision 1.1  2003/06/01 16:05:40  rshortt
-# Further suport for ivtv based cards.  Now you can set the bitrate to encode at or the stream type to use.
-#
+# Revision 1.9  2003/08/23 12:51:43  dischi
+# removed some old CVS log messages
 #
 #
 # -----------------------------------------------------------------------

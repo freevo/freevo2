@@ -27,12 +27,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.2  2003/08/05 19:47:27  dischi
-# fix fallback value
-#
-# Revision 1.1  2003/08/05 18:59:22  dischi
-# Directory cleanup, part 1:
-# move skins/main1/* to src/skins/main
+# Revision 1.3  2003/08/23 12:51:42  dischi
+# removed some old CVS log messages
 #
 #
 # -----------------------------------------------------------------------

@@ -14,112 +14,24 @@
 # plugin.activate('audio.cdbackup') 
 # 
 # Todo:      
-# Add a status bar showing progress
-# Parse the output of cdparanoia and lame to determine status of rip, mp3 conversion
-# For encoding parameters, make choices dynamic/selectable from menu instead of only local_conf.py
-# maybe just use local_conf.py parameters as defaults.
-# Be able to stop ripping once it's started.
-# Be able to select individual songs for ripping.
-# There is slight delay before menu opens up after being selected from main menu, 
-# add a hourglass or some other notification that its loading.
-# Albums with more than one Artist aren't handled very well.
+#
+# Add a status bar showing progress Parse the output of cdparanoia and
+# lame to determine status of rip, mp3 conversion For encoding
+# parameters, make choices dynamic/selectable from menu instead of
+# only local_conf.py
+# maybe just use local_conf.py parameters as defaults.  Be able to
+# stop ripping once it's started.  Be able to select individual songs
+# for ripping.  There is slight delay before menu opens up after being
+# selected from main menu, add a hourglass or some other notification
+# that its loading.  Albums with more than one Artist aren't handled
+# very well.
+#
 # -----------------------------------------------------------------------
-#
 # $Log$
-# Revision 1.12  2003/07/12 20:27:46  outlyer
-# cdbackup currently outputs about 250k of logs for one CD worth of music; I'm
-# going to make it quiet for now, until we get runapp hooked in.
-#
-# Speaking of which, anyone volunteering to do the runapp conversion?
-#
-# Revision 1.11  2003/07/04 15:17:56  outlyer
-# New cdstatus plugin. Only tested on my machine so use with caution.
-#
-# To use it:
-# plugin.activate('idlebar.cdstatus', level=60)
-#
-# There are a couple of known problems:
-#
-#     o Only the 'last' drive is shown (last from ROM_DRIVES)
-#     o The way that cdbackup tells us we are ripping isn't so nice
-#
-# Revision 1.10  2003/07/03 04:24:45  outlyer
-# use OGGENC_CMD, and only show encoding options for encoders that are
-# actually available.
-#
-# Revision 1.9  2003/07/03 04:19:31  outlyer
-# Updated cdbackup with Rich's new Ogg patch; also changed some variables,
-# and added oggenc to setup and configuration.
+# Revision 1.13  2003/08/23 12:51:42  dischi
+# removed some old CVS log messages
 #
 #
-# Revision 1.9  2003/07/03 21:12:58  cornejo
-# Added capability to rip to Ogg format.
-#
-# Revision 1.8  2003/07/01 20:28:29  outlyer
-# Two things:
-#     o Major code cleanup, removed lots of commented out stuff, changed
-#         most of the commands being called
-#     o Made mp3 the default in the ripping menu (i.e. the top item rather
-#         than wav.
-#
-# Revision 1.7  2003/07/01 19:56:29  outlyer
-# Use util.tagmp3() function by default, since we can choose the tag version.
-# Well, it's not in the configuration yet, but soon enough.
-#
-# Revision 1.6  2003/07/01 14:33:26  outlyer
-# Fixed a double escape of single quotes.
-#
-# Todo:
-#
-# o Move os.system() into runapp.
-# o Use eyeD3 for tagging
-#
-# Revision 1.5  2003/07/01 06:34:31  outlyer
-# Forgot to commit this stuff.
-#
-# 1. Fix filenames so songs with ' work
-# 2. Show time taken to encode in the popup box.
-#
-# Revision 1.4  2003/07/01 06:10:52  gsbarbieri
-# Destination dir is now configurable via AUDIO_BACKUP_DIR
-# We have to add this option and others that came with this plugin to
-# FREEVO_CONF_CHANGES and LOCAL_CONF_CHANGES.
-# Also, this variables should be checked... they're missing some information, like MOVIE_DATA_DIR
-#
-# Revision 1.3  2003/07/01 04:34:48  outlyer
-# Fixed header
-#
-# Revision 1.2  2003/07/01 04:31:48  outlyer
-# Cleanup comments, add 'if DEBUG:' to most print statements and change
-# os.system(rm ...) to os.unlink(...)
-#
-# Revision 1.1  2003/07/01 03:52:41  outlyer
-# Added a working cd backup plugin.
-# 
-# I was able to rip songs succesfully after making some minor changes.
-# 
-# From the submitted code I made the following changes:
-# 
-# o Moved all command-line tools to config
-# o Put defaults in freevo_config for encoding parameters.
-# o Removed all CDDB code, we only use mmpython now.
-# 
-# Current issues:
-# 
-# o As far as I can tell, mmpython is swapping the artist and the album
-# o No progress or information of any kind. I'll probably put something into
-#    the idle bar to at least make it clear something is happening.
-# 
-# Still, it's very complete and works very well so far.  I put --preset standard as the
-# default encoding style for lame, which is reasonable, though not what I would use.
-# 
-# Revision 1.0  2003/06/09 21:12:58  cornejo
-# o Initial Revision - currently only supports ripping a CD to the hard drive 
-# o in either .wav or .mp3.
-# o Uses directory and file naming as obtained by CDDB CD Artist, Album, and track info. 
-# o local_conf.py parameter is used to determine directory structure and file naming scheme.
-# o local_conf.py parameter is also used for lame encoding parameters, and id3 tagging info
-# o CD Audio detection/identifciation code was copied/modified from rom_drives.py who's Author=dischi
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002 Krister Lagerstrom, et al.

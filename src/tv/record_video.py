@@ -5,85 +5,6 @@
 # $Id$
 #
 # Notes:
-# Todo:        
-#
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.24  2003/07/30 21:33:06  outlyer
-# Done.
-#
-# Revision 1.23  2003/07/12 06:23:44  outlyer
-# Fix the gap for consecutive recordings. Only "timecode" formats were getting
-# the buffer time before, now both timecode and seconds type recording get the
-# 10 second buffer.
-#
-# Revision 1.22  2003/07/11 20:21:15  outlyer
-# Actually, 10 seconds makes more sense than 60.
-#
-# Revision 1.21  2003/07/11 17:27:11  outlyer
-# Because of the variety of encoders out there with variable times to release
-#  the device, I'm going to set the default time between recordings to one
-#  minute. this is probably a lot.
-#
-# Revision 1.20  2003/07/06 20:22:32  outlyer
-# Cleanup
-#
-# Revision 1.19  2003/06/29 15:01:31  outlyer
-# Display the channel's friendly (display name) in the tuner popupbox.
-#
-# Since XMLTV 0.6.11 uses what they call "RFC" channel names which are
-# very long and don't reveal much about the channel.
-#
-# This will obviously have no regressive effect, since users had the
-# friendly name before.
-#
-# Revision 1.18  2003/06/24 21:08:41  outlyer
-# Use the episode title if available in the recording filename.
-#
-# Revision 1.17  2003/06/02 21:29:22  outlyer
-# Changed the "Schedule Editor" to show up in the TV Submenu, along with "Guide" and
-# "Recorded Shows" which makes a lot more sense then where it was before, which was
-# also exceptionally well hidden.
-#
-# To do this properly, I also had to move record_schedule into a class, subclassing
-# from Item, and so problems may and possibly will arise. I've tested it a little,
-# but please bang on this, because while it's a relatively minor change, it does
-# get things working inside the properly model, at least for a start.
-#
-# Bug reports are expected and welcome :)
-#
-# Revision 1.16  2003/05/31 20:53:03  outlyer
-# Fix what I hope is the last event-related crash. Choosing shows to record
-# works again.
-#
-# Revision 1.15  2003/05/27 17:53:35  dischi
-# Added new event handler module
-#
-# Revision 1.14  2003/05/05 01:19:49  outlyer
-# An attempt to fix the daylight savings issue; it makes one potentially bad
-# assumption, that daylight savings time is one hour rather than more.
-#
-# Revision 1.13  2003/04/24 19:56:41  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.12  2003/04/20 12:43:34  dischi
-# make the rc events global in rc.py to avoid get_singleton. There is now
-# a function app() to get/set the app. Also the events should be passed to
-# the daemon plugins when there is no handler for them before. Please test
-# it, especialy the mixer functions.
-#
-# Revision 1.10  2003/03/15 05:01:31  outlyer
-# Merged Kyle Weston's Schedule Viewer/Editor patch.
-#
-# Please note, it currently only works with recording files ending in '.avi'
-# This is temporary, but as a fix, there is a commented line on line 171,
-# if you use mpgs (like I do) you can enable line 171 and comment out line 170.
-#
-# Since avi is the default, I'm leaving it that way, but I will use mpg myself.
-#
-# Revision 1.9  2003/03/07 17:13:34  outlyer
-# A bunch of internal changes that should be completely invisible to most
-# people. Mainly, the scheduling routine is now a little more configurable.
 #
 # I use mp1e, some people use lavrec, but as long as the command-line options
 # they take can be expressed in terms of some simple options, you can add support
@@ -107,6 +28,15 @@
 # more sense.
 #
 # Please test this and let me know if it's bad.
+#
+#
+# Todo:        
+#
+# -----------------------------------------------------------------------
+# $Log$
+# Revision 1.25  2003/08/23 12:51:43  dischi
+# removed some old CVS log messages
+#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

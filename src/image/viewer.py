@@ -9,20 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.26  2003/08/15 19:24:24  dischi
-# smaller width for Vera font
+# Revision 1.27  2003/08/23 12:51:42  dischi
+# removed some old CVS log messages
 #
-# Revision 1.25  2003/07/02 20:10:28  dischi
-# added to mmpython support, removed old stuff
-#
-# Revision 1.24  2003/05/28 15:03:15  dischi
-# small bugfixes
-#
-# Revision 1.23  2003/05/27 17:53:35  dischi
-# Added new event handler module
-#
-# Revision 1.22  2003/04/27 17:37:26  dischi
-# handle image loading failures
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

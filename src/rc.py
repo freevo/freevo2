@@ -9,67 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.21  2003/08/01 13:17:48  outlyer
-# Added Matthew Weber's "rc repeat" patch; it requires pylirc 0.0.4 or newer (CVS)
+# Revision 1.22  2003/08/23 12:51:41  dischi
+# removed some old CVS log messages
 #
-# Revision 1.20  2003/07/24 00:12:05  rshortt
-# Network remote bugfix.
-#
-# Revision 1.19  2003/07/12 10:10:56  dischi
-# load osd only when needed
-#
-# Revision 1.18  2003/07/11 02:01:11  rshortt
-# Stop freevo from getting double events in some cases.
-#
-# Revision 1.17  2003/05/30 14:47:32  outlyer
-# This wasn't working because you can do:
-#
-# if (e = something):
-#
-# since setting the variable doesn't seem to return a true. This version
-# works.
-#
-# Revision 1.16  2003/05/30 00:53:19  rshortt
-# Various event bugfixes.
-#
-# Revision 1.15  2003/05/27 17:53:33  dischi
-# Added new event handler module
-#
-# Revision 1.14  2003/04/27 17:43:30  dischi
-# secure RemoteControl against different threads
-#
-# Revision 1.13  2003/04/27 15:28:24  rshortt
-# Adding back support for using a network remote.  If ENABLE_NETWORK_REMOTE is
-# set to 1 in local_conf.py then rc.py will also listen for commands over UDP.
-#
-# Revision 1.12  2003/04/24 19:55:54  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.11  2003/04/20 12:43:32  dischi
-# make the rc events global in rc.py to avoid get_singleton. There is now
-# a function app() to get/set the app. Also the events should be passed to
-# the daemon plugins when there is no handler for them before. Please test
-# it, especialy the mixer functions.
-#
-# Revision 1.10  2003/04/19 21:28:39  dischi
-# identifymedia.py is now a plugin and handles everything related to
-# rom drives (init, autostarter, items in menus)
-#
-# Revision 1.9  2003/04/06 21:12:56  dischi
-# o Switched to the new main skin
-# o some cleanups (removed unneeded inports)
-#
-# Revision 1.7  2003/02/20 18:31:02  dischi
-# except on IOError if config.LIRCRC doesn't exists
-#
-# Revision 1.6  2003/02/19 17:15:15  outlyer
-# The idletool needs to know what function we're running so it doesn't try
-# to draw when a movie is playing, however, if music is playing, it can still
-# draw the information, so we need to distinguish between 'video' and 'audio'
-#
-# The rc.func will contain the function being used (i.e. 'video' 'audio' etc.)
-#
-# Currently, this does nothing, so ignore it.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

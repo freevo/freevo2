@@ -10,24 +10,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/08/23 12:51:43  dischi
+# removed some old CVS log messages
+#
 # Revision 1.6  2003/08/16 18:41:10  dischi
 # Fix overlapping programs. The German listing sometimes has a program with
 # a wrong stop time so that is overlapps the next entries (mostly the wrong
 # entry stops at the end of the day)
-#
-# Revision 1.5  2003/04/24 19:56:40  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.4  2003/03/16 19:29:06  dischi
-# add getattr to TvProgram
-#
-# Revision 1.3  2003/03/08 17:37:56  dischi
-# added compare function
-#
-# Revision 1.2  2003/02/27 02:03:04  outlyer
-# Added support for the xmltv 'sub-title' tag which sometimes contains the
-# episode title for TV shows. Its not always there, but if it is, we can use
-# it, and I'll show it if it's available in the extended menu.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

@@ -9,35 +9,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.9  2003/08/20 19:01:16  dischi
-# added dga support and STOP_OSD_WHEN_PLAYING to shutdown down osd
-#
-# Revision 1.8  2003/08/06 19:32:40  dischi
-# removed freevo_xwin support. Most users have problems with it and it works without it
-#
-# Revision 1.7  2003/07/13 19:35:45  rshortt
-# Change osd.focused_app to a function that returns the last object in
-# app_list.  Maintaining this list is helpfull for managing 'toplevel'
-# GUIObject based apps (popup types).
-#
-# Revision 1.6  2003/07/01 21:47:34  outlyer
-# Made a check to see if file exists before unlinking.
-#
-# Revision 1.5  2003/07/01 20:35:58  outlyer
-# Replaced the os.system('rm ...') calls with os.unlink()
-#
-# Revision 1.4  2003/06/23 18:44:23  the_krow
-# Does not need Prebuffering with the new timeshifted mplayer.
-#
-# Revision 1.3  2003/06/05 02:24:00  rshortt
-# Use TV_EVENTS now, improved channel changing, add PAUSE and SEEK.
-#
-# Revision 1.2  2003/06/02 03:33:53  rshortt
-# Some bugfixes and make it (almost) work with new events.
-#
-# Revision 1.1  2003/05/28 23:31:52  rshortt
-# Timeshift plugin by Thomas Schueppel.  Still WIP.
-#
+# Revision 1.10  2003/08/23 12:51:43  dischi
+# removed some old CVS log messages
 #
 #
 # -----------------------------------------------------------------------

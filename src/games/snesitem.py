@@ -9,26 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.8  2003/05/27 17:53:34  dischi
-# Added new event handler module
+# Revision 1.9  2003/08/23 12:51:42  dischi
+# removed some old CVS log messages
 #
-# Revision 1.7  2003/04/24 19:56:13  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.6  2003/04/20 12:43:33  dischi
-# make the rc events global in rc.py to avoid get_singleton. There is now
-# a function app() to get/set the app. Also the events should be passed to
-# the daemon plugins when there is no handler for them before. Please test
-# it, especialy the mixer functions.
-#
-# Revision 1.2  2002/12/22 12:59:34  dischi
-# Added function sort() to (audio|video|games|image) item to set the sort
-# mode. Default is alphabetical based on the name. For mp3s and images
-# it's based on the filename. Sort by date is in the code but deactivated
-# (see mediamenu.py how to enable it)
-#
-# Revision 1.1  2002/12/09 14:23:53  dischi
-# Added games patch from Rob Shortt to use the interface.py and snes support
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

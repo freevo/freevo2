@@ -2,6 +2,18 @@
 # -----------------------------------------------------------------------
 # audiodiskitem.py - Item for CD Audio Disks
 # -----------------------------------------------------------------------
+# $Id$
+#
+# Notes:
+# Todo:        
+#
+# -----------------------------------------------------------------------
+# $Log$
+# Revision 1.20  2003/08/23 12:51:41  dischi
+# removed some old CVS log messages
+#
+#
+# -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2003 Krister Lagerstrom, et al. 
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.

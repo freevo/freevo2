@@ -9,63 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2003/08/23 12:51:41  dischi
+# removed some old CVS log messages
+#
 # Revision 1.33  2003/08/22 13:19:46  outlyer
 # Patch to allow mplayer-options in Web "Radio" FXD files.
-#
-# Revision 1.32  2003/08/02 19:04:59  dischi
-# webradio fix
-#
-# Revision 1.31  2003/07/19 19:40:47  dischi
-# handling for mp3 files without length information
-#
-# Revision 1.30  2003/07/04 16:11:02  dischi
-# removed info again from AudioItem parameter at both places
-#
-# Revision 1.29  2003/07/04 14:37:17  outlyer
-# Missing named parameter 'info' was causing crashes when using cdaudio.
-# Also had to make a change in mmpython:
-#
-# factory.py:
-# 119: elif scheme == 'cd' or scheme == 'cdda':
-#
-# Revision 1.28  2003/07/03 23:13:46  dischi
-# moved mmpython parsing to audioinfo to support playlists
-#
-# Revision 1.27  2003/06/29 20:42:14  dischi
-# changes for mmpython support
-#
-# Revision 1.26  2003/06/09 18:12:50  outlyer
-# Rename eyed3 to eyeD3
-#
-# Revision 1.25  2003/05/19 19:00:08  outlyer
-# Trapping the IOError that Fridtjof Busse was getting with Ogg files,
-# hopefully we can track down the problem this way, and avoid crashes at the
-# same time.
-#
-# Revision 1.24  2003/05/16 13:17:45  outlyer
-# Bugfix for web radio station caching from Urmet J?nes <urmet@uninet.ee>
-#
-# Revision 1.23  2003/05/11 18:08:06  dischi
-# added AUDIO_FORMAT_STRING to format the audio items
-#
-# Revision 1.22  2003/05/08 14:17:36  outlyer
-# Initial version of Paul's FXD radio station support. I made some changes from
-# the original patch, in that I added an URL field to the audioitem class instead of
-# using the year field as his patch did. I will be adding a example FXD file to
-# testfiles as well.
-#
-# Revision 1.21  2003/04/24 19:55:59  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.20  2003/04/21 13:27:46  dischi
-# o make it possible to hide() the audio player
-# o mplayer is now a plugin, controlled by the PlayerGUI
-#
-# Revision 1.19  2003/04/20 12:43:32  dischi
-# make the rc events global in rc.py to avoid get_singleton. There is now
-# a function app() to get/set the app. Also the events should be passed to
-# the daemon plugins when there is no handler for them before. Please test
-# it, especialy the mixer functions.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

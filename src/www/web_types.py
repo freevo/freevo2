@@ -9,42 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/08/23 12:51:43  dischi
+# removed some old CVS log messages
+#
 # Revision 1.9  2003/07/14 19:30:36  rshortt
 # Library update from Mike Ruelle.  Now you can view other media types and
 # download as well.
-#
-# Revision 1.8  2003/05/29 23:13:26  rshortt
-# The guide looked wierd squished to the right, but now I'm not sure if I like
-# it taking up the entire width either.
-#
-# Revision 1.7  2003/05/25 21:40:53  outlyer
-# Round edges for the toolbar.
-#
-# Revision 1.6  2003/05/23 01:09:24  rshortt
-# Removing border from the freevo image/link in the header.
-#
-# Revision 1.5  2003/05/22 21:33:23  outlyer
-# Lots of cosmetic changes:
-#
-# o Moved the header/logo into web_types
-# o Made the error messages all use <h4> instead of <h2> so they look the same
-# o Removed most <hr> tags since they don't really mesh well with the light blue
-# o Moved the title into the "status bar" under the logo
-#
-# Revision 1.4  2003/05/20 16:15:37  rshortt
-# Fixes for IE authentication and to get it to read the javascript.
-#
-# Revision 1.3  2003/05/12 23:34:53  rshortt
-# Added index link.
-#
-# Revision 1.2  2003/05/12 23:02:41  rshortt
-# Adding HTTP BASIC Authentication.  In order to use you must override WWW_USERS
-# in local_conf.py.  This does not work for directories yet.
-#
-# Revision 1.1  2003/05/11 23:04:04  rshortt
-# Classes used by the web interface.
-#
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

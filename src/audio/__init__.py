@@ -9,19 +9,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.5  2003/07/03 23:13:46  dischi
-# moved mmpython parsing to audioinfo to support playlists
-#
-# Revision 1.4  2003/06/29 20:42:14  dischi
-# changes for mmpython support
-#
-# Revision 1.3  2003/06/06 21:41:54  dischi
-# Set AUDIO_CACHE_VERSION to 2 to audio-rebuild the cache if the
-# audio cache is from older versions to avoid crash and manual
-# removal of the cache files
-#
-# Revision 1.2  2003/04/21 18:17:50  dischi
-# Moved the code from interface.py for video/audio/image/games to __init__.py
+# Revision 1.6  2003/08/23 12:51:41  dischi
+# removed some old CVS log messages
 #
 #
 # -----------------------------------------------------------------------

@@ -9,61 +9,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.14  2003/08/06 19:32:40  dischi
-# removed freevo_xwin support. Most users have problems with it and it works without it
-#
-# Revision 1.13  2003/07/13 19:35:45  rshortt
-# Change osd.focused_app to a function that returns the last object in
-# app_list.  Maintaining this list is helpfull for managing 'toplevel'
-# GUIObject based apps (popup types).
-#
-# Revision 1.12  2003/07/01 21:47:34  outlyer
-# Made a check to see if file exists before unlinking.
-#
-# Revision 1.11  2003/07/01 20:38:51  outlyer
-# system->unlink
-#
-# Revision 1.10  2003/06/27 10:58:06  rshortt
-# MOved tvtime command into the config.
-#
-# Revision 1.9  2003/06/24 11:58:21  outlyer
-# Setup the output plugin by default to fix Wan Tat Chee's crash.
-#
-# Revision 1.8  2003/06/11 05:04:31  outlyer
-# Added OSD toggle; uses the standard 'display' button on the remote; also
-# removed the stuff that is being done by tvtime internally now.
-#
-# Revision 1.7  2003/06/09 17:04:28  outlyer
-# Looks I did in fact break x11 output, but it was only for a few seconds,
-# so no one should be upset :) Mapped config of 'x11' to 'xv' and 'dfbmga'
-# to 'directfb' since that's what tvtime uses.
-#
-# Revision 1.6  2003/06/09 16:42:13  outlyer
-# Don't shut down the display if using mga since it breaks the framebuffer
-# config. Please retest with x11, I know mga works but I don't have an x11
-# system to use.
-#
-# (Note that none of the changes I made should have any effect on x11, but
-# who knows)
-#
-# Revision 1.5  2003/06/09 16:32:23  outlyer
-# A bugfix and support for mga output via Tvtime.
-#
-# o self.app_mode was missing so remote support was broken
-# o Added -D to tvtime command-line so it can use mga if you have
-# mga in freevo.conf; uses x11 as before too.
-#
-# Revision 1.4  2003/05/27 17:53:35  dischi
-# Added new event handler module
-#
-# Revision 1.3  2003/04/24 05:20:57  krister
-# Bugfix for fullscreen/windowed mode using the new tvtime option '-M'. Added a translation table for the different freq table names.
-#
-# Revision 1.2  2003/04/23 06:33:55  krister
-# More fixes, TV viewing with tvtime seems to work pretty good now using tvtime 0.9.8-rc12 + a patch from me which has been sent to the tvtime team. tvtime 0.9.8 will be released soon, hopefully without needing special freevo patches. Unlike MPlayer, tvtime sends keypress events back to freevo for better integration.
-#
-# Revision 1.1  2003/04/22 19:34:16  dischi
-# mplayer and tvtime are now plugins
+# Revision 1.15  2003/08/23 12:51:43  dischi
+# removed some old CVS log messages
 #
 #
 # -----------------------------------------------------------------------

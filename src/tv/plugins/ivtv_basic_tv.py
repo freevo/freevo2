@@ -12,28 +12,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.7  2003/08/20 19:01:15  dischi
-# added dga support and STOP_OSD_WHEN_PLAYING to shutdown down osd
-#
-# Revision 1.6  2003/08/06 19:32:39  dischi
-# removed freevo_xwin support. Most users have problems with it and it works without it
-#
-# Revision 1.5  2003/07/18 12:09:03  outlyer
-# Oops... shouldn't have committed that
-#
-# Revision 1.4  2003/07/18 03:49:50  outlyer
-# Revert this change, since it was due to the idlebar problem I just fixed.
-#
-# Revision 1.3  2003/07/16 14:58:20  outlyer
-# Just a change to prevent a crash; this should do something eventually.
-#
-# Revision 1.2  2003/07/14 17:09:15  rshortt
-# User the init_ and print_ functions from the IVTV class.
-#
-# Revision 1.1  2003/07/13 19:26:53  rshortt
-# A basic tv viewing plugin for IVTV based capture cards (PVR-250/350)
-# that does not have pause/rewind/fast forward functionality.
-#
+# Revision 1.8  2003/08/23 12:51:43  dischi
+# removed some old CVS log messages
 #
 #
 # -----------------------------------------------------------------------

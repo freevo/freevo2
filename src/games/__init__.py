@@ -9,11 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.3  2003/04/24 19:56:08  dischi
-# comment cleanup for 1.3.2-pre4
+# Revision 1.4  2003/08/23 12:51:42  dischi
+# removed some old CVS log messages
 #
-# Revision 1.2  2003/04/21 18:17:51  dischi
-# Moved the code from interface.py for video/audio/image/games to __init__.py
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

@@ -11,11 +11,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/08/23 12:51:42  dischi
+# removed some old CVS log messages
+#
 # Revision 1.1  2003/08/17 17:17:34  dischi
 # Webradio plugin. Right now it uses the mediamarks from WIP/Dischi, but
 # most of them are broken (with mplayer and xine). We need our own
 # collection.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

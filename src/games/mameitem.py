@@ -9,24 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/08/23 12:51:42  dischi
+# removed some old CVS log messages
+#
 # Revision 1.11  2003/06/20 01:31:14  rshortt
 # Adding support for a seperate directory for screen/titleshots.  They show
 # up in the MAME menu like album covers do in the audio menu.
-#
-# Revision 1.10  2003/06/01 05:06:40  outlyer
-# Fixed a missing import as pointed out by Paul de Bruin
-#
-# Revision 1.9  2003/05/27 17:53:34  dischi
-# Added new event handler module
-#
-# Revision 1.8  2003/04/24 19:56:13  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.7  2003/04/20 12:43:33  dischi
-# make the rc events global in rc.py to avoid get_singleton. There is now
-# a function app() to get/set the app. Also the events should be passed to
-# the daemon plugins when there is no handler for them before. Please test
-# it, especialy the mixer functions.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

@@ -11,19 +11,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.2  2003/07/14 18:25:17  rshortt
-# Minor updates.
-#
-# Revision 1.1  2003/04/26 15:14:58  dischi
-# renamed to gphoto
-#
-# Revision 1.1  2003/04/18 15:00:39  dischi
-# camera (gphoto support) ist now a plugin
-#
-# Revision 1.1  2003/01/14 18:54:30  dischi
-# Added gphoto support from Thomas Schüppel. You need gphoto and the
-# Python bindings to get this working. I added try-except to integrate
-# this without breaking anything.
+# Revision 1.3  2003/08/23 12:51:42  dischi
+# removed some old CVS log messages
 #
 #
 # -----------------------------------------------------------------------

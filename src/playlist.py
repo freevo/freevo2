@@ -9,51 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.21  2003/07/10 18:14:26  outlyer
-# Skip files that are in the playlist but cannot be found on the disk to avoid
-# crashing.
+# Revision 1.22  2003/08/23 12:51:41  dischi
+# removed some old CVS log messages
 #
-# Revision 1.20  2003/05/27 17:53:33  dischi
-# Added new event handler module
-#
-# Revision 1.19  2003/05/11 17:44:13  dischi
-# load playlist only when really needed
-#
-# Revision 1.18  2003/04/24 19:54:20  dischi
-# bugfix
-#
-# Revision 1.17  2003/04/24 11:46:29  dischi
-# fixed 'to many open files' bug
-#
-# Revision 1.16  2003/04/21 18:17:46  dischi
-# Moved the code from interface.py for video/audio/image/games to __init__.py
-#
-# Revision 1.15  2003/04/21 13:01:48  dischi
-# handle events without eventhandler
-#
-# Revision 1.14  2003/04/20 12:43:32  dischi
-# make the rc events global in rc.py to avoid get_singleton. There is now
-# a function app() to get/set the app. Also the events should be passed to
-# the daemon plugins when there is no handler for them before. Please test
-# it, especialy the mixer functions.
-#
-# Revision 1.13  2003/04/06 21:12:55  dischi
-# o Switched to the new main skin
-# o some cleanups (removed unneeded inports)
-#
-# Revision 1.12  2003/02/27 05:29:42  krister
-# Only change backslashes to slashes if it is an MSDOS file
-#
-# Revision 1.11  2003/02/26 03:56:24  krister
-# Convert MSDOS filenames to unix slashes
-#
-# Revision 1.10  2003/02/24 04:21:40  krister
-# Mathieu Weber's bugfix for multipart movies
-#
-# Revision 1.9  2003/01/12 17:57:52  dischi
-# Renamed SUFFIX_MPLAYER_FILES to SUFFIX_VIDEO_FILES because we also play
-# audio files with mplayer. Also renamed SUFFIX_FREEVO_FILES to
-# SUFFIX_VIDEO_DEF_FILES because we use this for movie xml files.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

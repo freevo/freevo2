@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/08/23 12:51:43  dischi
+# removed some old CVS log messages
+#
 # Revision 1.6  2003/08/23 10:41:24  dischi
 # Oops, remove debug
 #
@@ -29,10 +32,8 @@
 # Revision 1.1  2003/07/12 11:19:49  dischi
 # add new fxdimdb from den_RDC
 #
-#
 # Revision 0.1  2003/07/08 22:31:00  den_RDC
 # Initial release.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

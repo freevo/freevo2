@@ -1,3 +1,42 @@
+#if 0 /*
+# -----------------------------------------------------------------------
+# icecast.py - icecaset plugin for freevo
+# -----------------------------------------------------------------------
+# $Id$
+#
+# Notes: 
+#
+# Todo:        
+#
+# -----------------------------------------------------------------------
+# $Log$
+# Revision 1.5  2003/08/23 12:51:42  dischi
+# removed some old CVS log messages
+#
+#
+# -----------------------------------------------------------------------
+# Freevo - A Home Theater PC framework
+# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# ----------------------------------------------------------------------- */
+#endif
+
+
 import os
 import config
 import sys
@@ -20,7 +59,8 @@ class PluginInterface(plugin.DaemonPlugin):
         try:
             # start icecast
             mycmd = os.path.basename(config.ICECAST_CMD)
-            self.icecast_pid = os.spawnl(os.P_NOWAIT, config.ICECAST_CMD, mycmd, '-d', config.ICECAST_CONF_DIR)
+            self.icecast_pid = os.spawnl(os.P_NOWAIT, config.ICECAST_CMD,
+                                         mycmd, '-d', config.ICECAST_CONF_DIR)
             time.sleep(1)
             # start ices
             mycmd = os.path.basename(config.ICES_CMD)
@@ -43,7 +83,8 @@ class PluginInterface(plugin.DaemonPlugin):
         if (os.path.isfile(os.path.join(config.FREEVO_CACHEDIR, 'changem3u.txt'))):
             try:
                 mycmd = os.path.basename(config.ICES_CMD)
-                newm3ufile = file(os.path.join(config.FREEVO_CACHEDIR, 'changem3u.txt'), 'rb').read()
+                newm3ufile = file(os.path.join(config.FREEVO_CACHEDIR,
+                                               'changem3u.txt'), 'rb').read()
                 if os.path.exists(os.path.join(config.FREEVO_CACHEDIR, 'changem3u.txt')):
                     os.unlink(os.path.join(config.FREEVO_CACHEDIR, 'changem3u.txt'))
                 os.kill(self.ices_pid, signal.SIGTERM)

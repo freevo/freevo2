@@ -9,14 +9,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.4  2003/05/28 15:02:49  dischi
-# ported detach plugin to new event model and other small fixes
-#
-# Revision 1.3  2003/05/27 17:53:34  dischi
-# Added new event handler module
-#
-# Revision 1.2  2003/04/24 19:56:04  dischi
-# comment cleanup for 1.3.2-pre4
+# Revision 1.5  2003/08/23 12:51:42  dischi
+# removed some old CVS log messages
 #
 #
 # -----------------------------------------------------------------------

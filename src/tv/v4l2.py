@@ -9,22 +9,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.5  2003/07/30 22:59:06  rshortt
-# Fix a set standard bug and add the begining of vidio groups.
-#
-# Revision 1.4  2003/07/18 16:40:02  rshortt
-# Added support for a custom frequency table, config.FREQUENCY_TABLE.  See
-# freevo_config.py or local_conf.py for details.
-#
-# Revision 1.3  2003/07/14 11:44:42  rshortt
-# Add some init and print methods to Videodev and IVTV.
-#
-# Revision 1.2  2003/05/29 12:08:45  rshortt
-# Make sure we close the device when done.
-#
-# Revision 1.1  2003/05/28 23:32:50  rshortt
-# V4L device control by Thomas Schueppel.
-#
+# Revision 1.6  2003/08/23 12:51:43  dischi
+# removed some old CVS log messages
 #
 #
 # -----------------------------------------------------------------------

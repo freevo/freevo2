@@ -15,9 +15,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/08/23 12:51:43  dischi
+# removed some old CVS log messages
+#
 # Revision 1.1  2003/04/20 11:45:42  dischi
 # add an example item plugin
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

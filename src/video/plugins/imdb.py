@@ -15,14 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.17  2003/07/18 19:48:24  dischi
-# support for datadir
+# Revision 1.18  2003/08/23 12:51:43  dischi
+# removed some old CVS log messages
 #
-# Revision 1.16  2003/07/12 11:20:14  dischi
-# switch to new imdb helper
-#
-# Revision 1.16 2003/07/10 15:00:00 den_RDC
-# rewrite to use fxdimdb
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

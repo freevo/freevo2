@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/08/23 12:51:42  dischi
+# removed some old CVS log messages
+#
 # Revision 1.12  2003/08/22 19:18:08  gsbarbieri
 # Now it shows empty ROMs again.
 #
@@ -19,41 +22,6 @@
 #    * When media is not present, ask for it and wait until media is
 # identified. A better solution is to force identify media and BLOCK until
 # it's done.
-#
-# Revision 1.10  2003/08/20 22:45:15  gsbarbieri
-# Capitalize (MOVIE|IMAGE|VIDEO|...). UPPERCASE IS UGLY!
-#
-# Revision 1.9  2003/08/20 22:29:37  gsbarbieri
-# UPPER CASE TEXT IS UGLY! :)
-#
-# Revision 1.8  2003/07/06 19:40:01  dischi
-# fix menu title
-#
-# Revision 1.7  2003/05/28 09:10:00  dischi
-# bugfix
-#
-# Revision 1.6  2003/05/27 17:53:35  dischi
-# Added new event handler module
-#
-# Revision 1.5  2003/05/04 12:05:45  dischi
-# make it possible to force the mediamenu to text or image view
-#
-# Revision 1.4  2003/04/24 19:56:36  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.3  2003/04/21 13:02:45  dischi
-# Reload the mediamenu everytime we display it, some plugins may have
-# changed
-#
-# Revision 1.2  2003/04/20 12:43:33  dischi
-# make the rc events global in rc.py to avoid get_singleton. There is now
-# a function app() to get/set the app. Also the events should be passed to
-# the daemon plugins when there is no handler for them before. Please test
-# it, especialy the mixer functions.
-#
-# Revision 1.1  2003/04/20 10:53:23  dischi
-# moved identifymedia and mediamenu to plugins
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

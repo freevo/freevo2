@@ -9,20 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.4  2003/05/27 17:53:35  dischi
-# Added new event handler module
+# Revision 1.5  2003/08/23 12:51:42  dischi
+# removed some old CVS log messages
 #
-# Revision 1.3  2003/04/24 19:56:37  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.2  2003/04/20 12:43:33  dischi
-# make the rc events global in rc.py to avoid get_singleton. There is now
-# a function app() to get/set the app. Also the events should be passed to
-# the daemon plugins when there is no handler for them before. Please test
-# it, especialy the mixer functions.
-#
-# Revision 1.1  2003/04/20 10:55:40  dischi
-# mixer is now a plugin, too
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

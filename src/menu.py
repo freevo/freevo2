@@ -9,30 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.59  2003/08/23 12:51:41  dischi
+# removed some old CVS log messages
+#
 # Revision 1.58  2003/08/22 17:51:29  dischi
 # Some changes to make freevo work when installed into the system
 #
-# Revision 1.57  2003/08/15 19:25:14  dischi
-# search all the share stuff in $FREEVO_SHARE now
-#
-# Revision 1.56  2003/08/03 14:24:57  dischi
-# cosmetic fix
-#
 # Revision 1.55  2003/08/02 10:08:46  dischi
 # make it possible to return MenuItems in the list of actions()
-#
-# Revision 1.54  2003/07/18 19:46:54  dischi
-# better error handling
-#
-# Revision 1.53  2003/07/12 10:05:04  dischi
-# Load skin singleton only when needed and make events global
-#
-# Revision 1.52  2003/07/01 02:58:17  outlyer
-# Added lame/cdparanoia and defaults for the cdbackup plugin
-# Removed some messages from src/main and src/menu
-#
-# Revision 1.50  2003/06/07 11:30:27  dischi
-# support for MENU_CALL_ITEM_ACTION
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

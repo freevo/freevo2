@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/08/23 12:51:41  dischi
+# removed some old CVS log messages
+#
 # Revision 1.1  2003/08/13 13:08:36  rshortt
 # Moving record_server.py into the main src directory to resolve some nasty
 # namespace issues that was preventing it from import needed modules, use
@@ -24,39 +27,6 @@
 # Change tv_util.get_chan_displayname() to accept channel_id instead of
 # a TvProgram object and also use config.TV_CHANNELS when available, which
 # is 99% of the time.
-#
-# Revision 1.8  2003/07/06 20:04:27  rshortt
-# Change favorites to use tv_util.get_chan_displayname(prog) as
-# favorite.channel rather than channel_id.
-#
-# Revision 1.7  2003/05/22 00:10:16  rshortt
-# Getting rid of LD_PRELOAD.
-#
-# Revision 1.6  2003/05/20 23:43:58  rshortt
-# Improve search using regex.
-#
-# Revision 1.5  2003/05/14 00:04:54  rshortt
-# Better error handling.
-#
-# Revision 1.4  2003/05/13 16:13:23  rshortt
-# Added updateFavoritesSchedule to the interface and make it accessable through
-# the command-line of record_client.py.
-#
-# Revision 1.3  2003/05/13 01:20:22  rshortt
-# Bugfixes.
-#
-# Revision 1.2  2003/05/12 11:21:51  rshortt
-# bugfixes
-#
-# Revision 1.1  2003/05/12 02:09:06  rshortt
-# A new recording backend which is intended to run outside of the main freevo process.
-#
-# Revision 1.6  2003/05/11 22:28:50  rshortt
-# Now uses the plugin interface to get a recording childapp.
-#
-# Revision 1.5  2003/05/06 01:40:01  rshortt
-# Now uses a childapp to record.  I'm going to make that part into a plugin next.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

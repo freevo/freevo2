@@ -11,25 +11,18 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/08/23 12:51:43  dischi
+# removed some old CVS log messages
+#
 # Revision 1.8  2003/05/26 00:40:24  rshortt
 # Backing out the vhost code because it was unneccessary and only made things
 # harder.  There is no need to use it as a form of security now because of the
 # user / pass authentication.  The webserver will now listen on all local adresses.
 #
-# Revision 1.7  2003/05/12 23:33:50  rshortt
-# Cleanup.
-#
 # Revision 1.6  2003/05/12 16:46:18  rshortt
-# The webserver now binds to a particular host address, localhost is the default
-# so if left unchanged you will only be able to access it from the same machine (unless maybe someone does some DNS tricks).
-#
-# Revision 1.5  2003/05/11 23:00:03  rshortt
-# Fix logging and doc root.
-#
-# Revision 1.4  2003/05/11 22:44:02  rshortt
-# A new webserver based on twisted web.  This webserver will support user authentication.
-#
-#
+# The webserver now binds to a particular host address, localhost is
+# the default so if left unchanged you will only be able to access it
+# from the same machine (unless maybe someone does some DNS tricks).
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

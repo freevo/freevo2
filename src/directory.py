@@ -9,47 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/08/23 12:51:41  dischi
+# removed some old CVS log messages
+#
 # Revision 1.25  2003/08/13 17:33:17  dischi
 # add "please wait" message for rom drives every time
-#
-# Revision 1.24  2003/08/05 17:27:13  dischi
-# changed debug
-#
-# Revision 1.23  2003/07/18 19:47:24  dischi
-# add files from datadir to the current directory
-#
-# Revision 1.22  2003/07/12 21:23:32  dischi
-# attribute type to return the disc label
-#
-# Revision 1.21  2003/07/11 19:44:18  dischi
-# close file after parsing
-#
-# Revision 1.20  2003/07/05 15:53:25  outlyer
-# Quiet some debugging stuff.
-#
-# Revision 1.19  2003/07/03 22:23:16  outlyer
-# Prevent a crash I was having.
-#
-# Revision 1.18  2003/07/02 22:05:16  dischi
-# better cache handling
-#
-# Revision 1.17  2003/07/02 20:07:49  dischi
-# use bins support from mmpython
-#
-# Revision 1.16  2003/06/29 20:45:14  dischi
-# mmpython support
-#
-# Revision 1.15  2003/06/14 00:09:40  outlyer
-# The "Smartsort" code. You can enable it in local_conf, it's disabled
-# by default. I fixed the smartsort cmpfunc to work a little more
-# efficiently though quite frankly, it could probably be optimized better.
-#
-# Revision 1.14  2003/06/07 11:28:33  dischi
-# use an id to find the new selected item (e.g. after creating a fxd file
-#
-# Revision 1.13  2003/06/03 19:10:28  outlyer
-# Prevent a crash if a directory is removed while you're inside it. This just
-# wasn't adapted to the new event framework, the bulk was there.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

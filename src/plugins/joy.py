@@ -11,28 +11,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.7  2003/07/24 00:40:10  rshortt
-# bugfix
-#
-# Revision 1.6  2003/07/20 14:57:50  rshortt
-# Set poll_interval to 0 until we pass some checks.
-#
-# Revision 1.5  2003/07/20 14:37:25  rshortt
-# Patch from Dan Eriksen that:
-# - crash when plugin is activated, but no device is specified in config
-# - bad/confusing error message
-# - treat joystick axis as bool input (adds a dead zone, fixes jitter problems with analog joysticks)
-#
-# Revision 1.4  2003/07/11 02:02:29  rshortt
-# Fix for new events, we must call rc.key_event_mapper for the right event
-# for what context we are in.
-#
-# Revision 1.3  2003/05/01 22:50:43  rshortt
-# This is now a real plugin that no longer needs ENABLE_NETWORK_REMOTE to work.
-#
-# Revision 1.2  2003/04/27 17:28:59  rshortt
-# Added the proper fileheader and some notes.
-#
+# Revision 1.8  2003/08/23 12:51:42  dischi
+# removed some old CVS log messages
 #
 #
 # -----------------------------------------------------------------------

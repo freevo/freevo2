@@ -9,63 +9,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.24  2003/08/16 18:41:37  dischi
-# fix bad timezone descriptions
-#
-# Revision 1.23  2003/08/14 03:34:06  outlyer
-# Whoops; left in some useless debug code.
-#
-# Revision 1.22  2003/08/11 13:11:32  outlyer
-# Synced with latest xmltv.py; also, use Python 2.3 strptime if it's available
-# since it's better than the version we include, and also beter than 2.2.
-#
-# Please try this new xmltv parser; it worked nicely on my end.
-#
-# Revision 1.21  2003/07/06 14:10:41  outlyer
-# Reclaim stdout from config.
-#
-# Revision 1.20  2003/06/07 14:24:12  dischi
-# Sometimes cPickle crashes (with a strange cause). Try to use the
-# normal pickle (== slower but works) when it failed.
-#
-# Revision 1.19  2003/06/04 22:33:11  rshortt
-# Adding 1 to the pickle.dump uses a binary format that seems WAY quicker to
-# both create and load the pickle file.  You must remove your TV.xml-x.pickled
-# file and rerun epg_xmltv.py to test.
-#
-# Revision 1.18  2003/06/02 20:58:21  rshortt
-# A couple try/excepy blocks that actually end up fixing a problem when scheduling a recording, record_server tried to init the display.  This was tested on two people's systems.
-#
-# Revision 1.17  2003/05/05 01:33:24  outlyer
-# Show a popup when reading the cached guide too, for visual feedback on slower
-# machines.
-#
-# Revision 1.16  2003/04/24 19:56:41  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.15  2003/04/06 21:12:58  dischi
-# o Switched to the new main skin
-# o some cleanups (removed unneeded inports)
-#
-# Revision 1.11  2003/03/14 06:38:40  outlyer
-# Added (disabled) support for a simple favourites list. Basically, create
-# a file called "watchlist" and put it somewhere, edit this thing and
-# specify the location of the file and comment in the find_favorites()
-# function in __main__
-#
-# All it does is go through the guide, post-pickle and dump out the schedules
-# for the show in freevo_record.lst format.
-#
-# There is no duplicate filtering, or other neat-o intelligence, but it should
-# lay the groundwork for something more in the future.
-#
-# Revision 1.10  2003/02/27 02:03:03  outlyer
-# Added support for the xmltv 'sub-title' tag which sometimes contains the
-# episode title for TV shows. Its not always there, but if it is, we can use
-# it, and I'll show it if it's available in the extended menu.
-#
-# Revision 1.9  2003/02/16 22:21:45  krister
-# Bugfix for XMLTV data handling during config (tunerid)
+# Revision 1.25  2003/08/23 12:51:43  dischi
+# removed some old CVS log messages
 #
 # Revision 1.8  2003/02/14 16:45:16  outlyer
 # Ugly hack to work around missing stop times. This is a slight improvement

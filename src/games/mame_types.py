@@ -10,22 +10,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/08/23 12:51:42  dischi
+# removed some old CVS log messages
+#
 # Revision 1.4  2003/06/20 01:33:56  rshortt
 # Removing the need for the rominfo program.  Now we parse the output of
 # xmame --listinfo directly and build a list of all supported MAME roms.
 # This should only need to be updated when you upgrade xmame and you should
 # remove your existing romlist-n.pickled.
-#
-# Revision 1.3  2003/04/24 19:56:12  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.2  2002/11/24 19:52:56  dischi
-# Changed header to the freevo default
-#
-# Revision 1.1  2002/11/24 19:10:19  dischi
-# Added mame support to the new code. Since the hole new code is
-# experimental, mame is activated by default. Change local_skin.xml
-# to deactivate it after running ./cleanup
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

@@ -6,30 +6,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/08/23 12:51:43  dischi
+# removed some old CVS log messages
+#
 # Revision 1.4  2003/07/24 00:01:19  rshortt
 # Extending the idlebar.tv plugin with the help (and idea) of Mike Ruelle.
 # Now you may add args=(number,) to the plugin.activate for this plugin and
 # it will warn you that number of hours before your xmltv data is invalid and
 # present a more sever warning when your xmltv data is expired.
-#
-# The new icons are kind of lame so anyone feel free to spruce them up.
-#
-# Revision 1.3  2003/07/13 18:08:51  rshortt
-# Change tv_util.get_chan_displayname() to accept channel_id instead of
-# a TvProgram object and also use config.TV_CHANNELS when available, which
-# is 99% of the time.
-#
-# Revision 1.2  2003/07/06 19:27:02  rshortt
-# Add a function to get the display name of a program's channel.  Using this
-# helps with recent xmltv changes.
-#
-# Revision 1.1  2003/05/11 22:40:49  rshortt
-# Helpers for tv and recording apps.
-#
-# Revision 1.1  2003/04/26 13:01:09  rshortt
-# *** empty log message ***
-#
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

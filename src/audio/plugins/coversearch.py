@@ -13,51 +13,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.16  2003/08/19 17:30:02  outlyer
-# Fix a crash when ripping a CD for which CDDB information does not exist.
-#
-# Revision 1.15  2003/08/06 18:49:17  gsbarbieri
-# Now it shows an AlertBox() when user doesn't have a key.
-#
-# Revision 1.14  2003/07/19 19:41:26  dischi
-# o remove some debug strings
-# o remove (...) and [...] from search string
-#
-# Revision 1.13  2003/07/19 19:18:16  dischi
-# o Since we already load the image from the net, use that image as preview
-#   for the selection
-# o Some German cds have the wrong cover image in the database. Change .01.
-#   to .03. and it works (don't know why)
-#
-# Revision 1.12  2003/07/03 23:08:24  dischi
-# force refresh
-#
-# Revision 1.11  2003/07/03 21:58:40  dischi
-# fixed audiocd handling
-#
-# Revision 1.10  2003/06/29 20:42:14  dischi
-# changes for mmpython support
-#
-# Revision 1.9  2003/06/24 18:39:42  dischi
-# some small fixes
-#
-# Revision 1.8  2003/06/24 01:51:13  rshortt
-# Made the license key into an activate argument.  Now you can have:
-# plugin.activate('audio.coversearch', args=('my_key',))
-#
-# Revision 1.7  2003/06/23 19:28:32  dischi
-# cover support for audio cds (only with installed mmpython)
-#
-# Revision 1.6  2003/06/20 20:51:42  outlyer
-# Trap ParserErrors if Amazon sends bad xml
-#
-# Revision 1.5  2003/06/12 23:41:11  outlyer
-# Don't crash if no matches are found...
-# notify user and return.
-#
-# Revision 1.4  2003/06/12 17:12:32  outlyer
-# Fallback to medium cover if it's available, only if that too is missing, give
-# up.
+# Revision 1.17  2003/08/23 12:51:42  dischi
+# removed some old CVS log messages
 #
 # Revision 1.3  2003/06/12 16:47:04  outlyer
 # Tried to make the Amazon search more intelligent.
@@ -98,10 +55,6 @@
 # if someone writes something to interface with it. Amazon was dead-simple
 # to use, so I did it first, though Amazon is pretty weak, selection-wise
 # compared to allmusic.com
-#
-# Revision 1.7  2003/06/07 11:32:48  dischi
-# reactivated the plugin
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

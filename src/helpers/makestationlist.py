@@ -12,9 +12,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/08/23 12:51:42  dischi
+# removed some old CVS log messages
+#
 # Revision 1.1  2003/08/23 09:09:18  dischi
 # moved some helpers to src/helpers
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

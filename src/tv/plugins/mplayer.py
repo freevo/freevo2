@@ -9,63 +9,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.15  2003/08/20 19:01:16  dischi
-# added dga support and STOP_OSD_WHEN_PLAYING to shutdown down osd
-#
-# Revision 1.14  2003/08/06 19:32:40  dischi
-# removed freevo_xwin support. Most users have problems with it and it works without it
-#
-# Revision 1.13  2003/08/05 18:37:02  dischi
-# fix mplayer plugin to work with dfbmga, too
-#
-# Revision 1.12  2003/07/13 19:35:44  rshortt
-# Change osd.focused_app to a function that returns the last object in
-# app_list.  Maintaining this list is helpfull for managing 'toplevel'
-# GUIObject based apps (popup types).
-#
-# Revision 1.11  2003/07/11 19:47:09  dischi
-# close file after parsing
-#
-# Revision 1.10  2003/07/01 21:47:35  outlyer
-# Made a check to see if file exists before unlinking.
-#
-# Revision 1.9  2003/07/01 20:35:58  outlyer
-# Replaced the os.system('rm ...') calls with os.unlink()
-#
-# Revision 1.8  2003/06/23 20:15:25  the_krow
-# Trivial Fix for mplayer command line with the new runtime. Thanks to
-# mikeruelle in irc for the bugfix.
-#
-# Revision 1.7  2003/06/13 01:06:46  outlyer
-# Now using the URL format for channel specification in mplayer...
-#
-# tv://
-#
-# Revision 1.6  2003/06/04 23:01:44  rshortt
-# Some event fixes but I can't test them with my card.
-#
-# Revision 1.5  2003/05/27 17:53:35  dischi
-# Added new event handler module
-#
-# Revision 1.4  2003/04/29 20:59:04  outlyer
-# Fixed a crash caused here, because this code was trying to append a str to a
-# tuple; the proper way to do it (apparently) is to treat the string as a single
-# item tuple, which is accomplished by adding a single comma after the str.
-#
-# Since I was using a virgin checkout from CVS, wasn't this breaking for everyone
-# else?
-#
-# Revision 1.3  2003/04/26 20:55:44  dischi
-# Removed MPLAYER_ARGS_* and added a hash MPLAYER_ARGS to set args for
-# all different kinds of files. Also added MPLAYER_SOFTWARE_SCALER to use
-# the software scaler for fast CPUs. Also fixed a small bug in mplayer.py
-# for video.
-#
-# Revision 1.2  2003/04/24 11:51:46  dischi
-# removed debug
-#
-# Revision 1.1  2003/04/22 19:34:16  dischi
-# mplayer and tvtime are now plugins
+# Revision 1.16  2003/08/23 12:51:43  dischi
+# removed some old CVS log messages
 #
 #
 # -----------------------------------------------------------------------

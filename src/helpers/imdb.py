@@ -11,37 +11,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.1  2003/08/05 19:32:55  dischi
-# Moved the first three helpers from helpers/ to src/helpers and changed
-# the freevo script to easy access them. The old helpers need a cleanup:
-# o what is realy needed?
-# o what should be in src/helpers because we need it from time to time?
-# o what should go to contrib?
-#
-# Revision 1.27  2003/08/04 18:42:03  dischi
-# remove some stuff we do not need with the new freevo script
-#
-# Revision 1.26  2003/07/18 21:31:03  dischi
-# new imdb helper based in the new fxdimdb
-#
-# Revision 1.26 2003/07/16 22:07:00 den_RDC
-#   rewrite to use fxd_imdb class
-#
-# Revision 1.25  2003/06/25 15:37:37  dischi
-# some try-except if you can't write files
-#
-# Revision 1.24  2003/06/24 18:38:41  dischi
-# Fixed handling when search returns only one result
-#
-# Revision 1.23  2003/06/24 18:12:45  dischi
-# fixed string translation with urllib (not urllib2)
-#
-# Revision 1.22  2003/06/24 16:15:07  dischi
-# o updated by den_RDC - changed code to urllib2 - exceptions are handled by
-#   urllib2, including 302 redirection -- proxy servers ,including transparant
-#   proxies now work
-# o added support for better image finder. Right now there we can also get
-#   posters from www.impawards.com
+# Revision 1.2  2003/08/23 12:51:42  dischi
+# removed some old CVS log messages
 #
 #
 # -----------------------------------------------------------------------

@@ -9,8 +9,8 @@
 # Activate this plugin by putting plugin.activate('video.xine') in your
 # local_conf.py. Than xine will be used for DVDs when you SELECT the item.
 # When you select a title directly in the menu, this plugin won't be used
-# and the default player (mplayer) will be used. You need the current xine
-# CVS version to use this.
+# and the default player (mplayer) will be used. You need xine-ui >= 0.9.22
+# to use this.
 #
 # This plugin can also be used for VCD playback with menus. Install
 # xine-vcdnav and set XINE_USE_VCDNAV = 1
@@ -28,34 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.10  2003/08/20 19:01:16  dischi
-# added dga support and STOP_OSD_WHEN_PLAYING to shutdown down osd
+# Revision 1.11  2003/08/23 12:51:43  dischi
+# removed some old CVS log messages
 #
-# Revision 1.9  2003/08/16 13:10:03  dischi
-# bugfix in DEBUG
-#
-# Revision 1.8  2003/08/13 17:23:23  dischi
-# fix when no lirc device is detected
-#
-# Revision 1.7  2003/08/04 19:01:57  dischi
-# prevent crash when interlacing
-#
-# Revision 1.6  2003/08/02 16:21:24  dischi
-# wait for child to exit
-#
-# Revision 1.5  2003/08/02 09:08:14  dischi
-# support different versions of xine, check version at startup
-#
-# Revision 1.4  2003/08/01 17:55:45  dischi
-# Make xine_cvs the normal xine plugin. We don't support older versions
-# of xine, it was a very bad hack. You need xine-ui > 0.9.21 to use the
-# plugin.
-#
-# Revision 1.2  2003/07/29 19:08:35  dischi
-# o new notes
-# o VCD support (vcdnav)
-# o deinterlacing with tvtime or -D paramter
-# o VIDEO_NEXT_AUDIOLANG warp around
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

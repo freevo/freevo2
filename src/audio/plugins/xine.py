@@ -12,8 +12,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.1  2003/08/17 15:46:12  dischi
-# Audio plugin for xine. The needed patch is not in xine-ui yet
+# Revision 1.2  2003/08/23 12:51:42  dischi
+# removed some old CVS log messages
 #
 #
 # -----------------------------------------------------------------------

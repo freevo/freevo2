@@ -9,38 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/08/23 12:51:43  dischi
+# removed some old CVS log messages
+#
 # Revision 1.10  2003/08/22 05:59:35  gsbarbieri
 # Fixed some mistakes.
 # Now it's possible to have more than one line for program/label, just make
 # the height fit the number of wanted lines.
-#
-# Revision 1.9  2003/08/03 11:10:26  dischi
-# Added TVGUIDE_HOURS_PER_PAGE
-#
-# Revision 1.8  2003/05/30 03:40:39  outlyer
-# CVS has very weird merging behaviour. Both Rob and I made the same bugfix
-# and it appeared to add both. I'm removing the dupe code since it's quite
-# dumb to have it twice.
-#
-# Revision 1.7  2003/05/30 03:29:09  outlyer
-# Added missing direction events (UP/DOWN/LEFT/RIGHT) to TV Guide.
-#
-# Revision 1.6  2003/05/30 00:53:20  rshortt
-# Various event bugfixes.
-#
-# Revision 1.5  2003/05/27 17:53:35  dischi
-# Added new event handler module
-#
-# Revision 1.4  2003/04/20 12:43:34  dischi
-# make the rc events global in rc.py to avoid get_singleton. There is now
-# a function app() to get/set the app. Also the events should be passed to
-# the daemon plugins when there is no handler for them before. Please test
-# it, especialy the mixer functions.
-#
-# Revision 1.3  2003/04/06 21:12:59  dischi
-# o Switched to the new main skin
-# o some cleanups (removed unneeded inports)
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

@@ -9,28 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.13  2003/08/02 10:09:52  dischi
-# Don't add 'Settings' with a submenu to the list of actions, add the
-# settings directly (max 4 items, mostly 1)
+# Revision 1.14  2003/08/23 12:51:43  dischi
+# removed some old CVS log messages
 #
-# Revision 1.12  2003/07/25 20:54:29  dischi
-# make audio selection work for files, too
-#
-# Revision 1.11  2003/06/29 20:43:30  dischi
-# o mmpython support
-# o mplayer is now a plugin
-#
-# Revision 1.10  2003/04/24 19:56:42  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.9  2003/04/12 18:30:04  dischi
-# add support for audio/subtitle selection for avis, too
-#
-# Revision 1.8  2003/03/31 20:44:52  dischi
-# shorten time between pop.destroy and menu drawing
-#
-# Revision 1.7  2003/03/30 16:50:20  dischi
-# pass xml_file definition to submenus
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

@@ -10,53 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.42  2003/08/21 15:27:17  outlyer
-# Sorry! Left this commented out... was part of my testing.
+# Revision 1.43  2003/08/23 12:51:41  dischi
+# removed some old CVS log messages
 #
-# Revision 1.41  2003/08/21 02:45:49  outlyer
-# Another pure Python version of a system call. Soon all the os.system calls
-# (except the user-specified ones) will be gone, I hope.
-#
-# Revision 1.40  2003/08/20 21:50:12  outlyer
-# Just a simple pure python replacement for os.system('touch %s...')
-#
-# Revision 1.39  2003/07/30 15:13:01  outlyer
-# Add encoding to remove some warnings from Python 2.3. Has no effect on
-# Python < 2.3
-#
-# Revision 1.38  2003/07/18 19:46:36  dischi
-# function to get the datadir of a given directory
-#
-# Revision 1.37  2003/07/04 16:51:39  outlyer
-# Added a 'title_case' case normalizing function to use with data returned
-# from CDDB. Not used anywhere yet.
-#
-# Revision 1.36  2003/07/02 20:06:49  dischi
-# removed exif support, it is now in osd.py
-#
-# Revision 1.35  2003/07/01 20:44:52  dischi
-# added pickle wrapper
-#
-# Revision 1.34  2003/07/01 19:44:59  outlyer
-# A simple function to add tags to MP3s.
-#
-# Revision 1.33  2003/06/30 22:35:04  outlyer
-# Move escape(sql) into escape, and use it now.
-#
-# Revision 1.32  2003/06/30 20:05:35  outlyer
-# Don't print stuff for every call of md5.
-#
-# Revision 1.31  2003/06/30 05:07:09  outlyer
-# Optionally use fchksum for md5's for a increase in speed.
-#
-# Revision 1.30  2003/06/14 00:09:40  outlyer
-# The "Smartsort" code. You can enable it in local_conf, it's disabled
-# by default. I fixed the smartsort cmpfunc to work a little more
-# efficiently though quite frankly, it could probably be optimized better.
-#
-# Revision 1.29  2003/06/13 18:19:57  outlyer
-# A cmpfunc for doing a "smart sort" which is to say, a sort that ignores
-# "The" at the beginning of titles. Doesn't do anything yet.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

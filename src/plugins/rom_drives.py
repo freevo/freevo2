@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/08/23 12:51:42  dischi
+# removed some old CVS log messages
+#
 # Revision 1.20  2003/08/23 12:10:00  dischi
 # move to CDROM.py stuff and remove external eject
 #
@@ -22,29 +25,6 @@
 #
 # Revision 1.18  2003/08/20 21:51:34  outlyer
 # Use Python 'touch' rather than system call
-#
-# Revision 1.17  2003/07/20 16:09:53  dischi
-# bugfix
-#
-# Revision 1.16  2003/07/18 19:49:47  dischi
-# do not set speed for dvd, it does not work
-#
-# Revision 1.15  2003/07/12 21:24:19  dischi
-# sort list before checkin
-#
-# Revision 1.14  2003/07/05 09:09:47  dischi
-# fixed eject problems
-#
-# Revision 1.13  2003/07/02 22:05:50  dischi
-# o better cache handling
-# o shorter label for tv show discs
-#
-# Revision 1.12  2003/06/30 15:30:54  dischi
-# some checking to avoid endless scanning
-#
-# Revision 1.11  2003/06/29 20:44:21  dischi
-# mmpython support
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

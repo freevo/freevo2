@@ -12,17 +12,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.4  2003/07/15 16:52:47  dischi
-# removed some debug
-#
-# Revision 1.3  2003/07/05 17:00:01  dischi
-# added doc
-#
-# Revision 1.2  2003/05/28 17:58:48  dischi
-# moved freespace and totalspace from df.py to util.py
-#
-# Revision 1.1  2003/05/28 17:51:28  dischi
-# added df item plugin for directories from den_RDC
+# Revision 1.5  2003/08/23 12:51:42  dischi
+# removed some old CVS log messages
 #
 #
 # -----------------------------------------------------------------------

@@ -9,18 +9,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.11  2003/07/23 07:12:12  gsbarbieri
-# Added support for 'geometry' attribute ( getattr() now returns 'widthxheight', like videoitem )
-#
-# Revision 1.10  2003/07/02 20:10:28  dischi
-# added to mmpython support, removed old stuff
-#
-# Revision 1.9  2003/04/06 21:12:57  dischi
-# o Switched to the new main skin
-# o some cleanups (removed unneeded inports)
-#
-# Revision 1.8  2003/03/16 19:28:04  dischi
-# Item has a function getattr to get the attribute as string
+# Revision 1.12  2003/08/23 12:51:42  dischi
+# removed some old CVS log messages
 #
 #
 # -----------------------------------------------------------------------

@@ -41,86 +41,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2003/08/23 12:51:42  dischi
+# removed some old CVS log messages
+#
 # Revision 1.33  2003/08/22 05:56:56  gsbarbieri
 # Better alignment and horizontal expansion.
-#
-# Revision 1.32  2003/08/21 20:48:16  gsbarbieri
-# Corrected comment
-#
-# Revision 1.31  2003/08/16 13:12:29  dischi
-# move timeformat to plugin arg
-#
-# Revision 1.30  2003/08/16 12:57:55  outlyer
-# Added encoding
-#
-# Revision 1.29  2003/08/15 19:25:15  dischi
-# search all the share stuff in $FREEVO_SHARE now
-#
-# Revision 1.28  2003/08/05 17:54:33  dischi
-# added sensors plugin
-#
-# Revision 1.25 2003/08/5 17:00:00 den_RDC
-# added sensors
-#
-# Revision 1.27  2003/08/04 19:40:00  dischi
-# add doc
-#
-# Revision 1.26  2003/08/04 04:25:09  gsbarbieri
-# changed interface -> PluginInterface to conform with the plugin usage.
-#
-# Revision 1.25  2003/07/24 00:01:19  rshortt
-# Extending the idlebar.tv plugin with the help (and idea) of Mike Ruelle.
-# Now you may add args=(number,) to the plugin.activate for this plugin and
-# it will warn you that number of hours before your xmltv data is invalid and
-# present a more sever warning when your xmltv data is expired.
-#
-# The new icons are kind of lame so anyone feel free to spruce them up.
-#
-# Revision 1.24  2003/07/20 18:22:35  dischi
-# added patch for different temp units from Michael Ruelle
-#
-# Revision 1.23  2003/07/18 03:47:34  outlyer
-# Nasty bug that would cause a crash if you hit any remote button not used
-# by the plugin you were in. It expected menuw to be defined, else it crashed
-# hard.
-#
-# Revision 1.22  2003/07/15 17:08:21  dischi
-# o Add/update some docs
-# o show all rom drives in the bar
-# o update the bar on event IDENTIFY_MEDIA
-#
-# Revision 1.21  2003/07/12 18:52:22  dischi
-# fixed overscan bug
-#
-# Revision 1.20  2003/07/12 17:29:58  dischi
-# redraw when polling
-#
-# Revision 1.19  2003/07/12 17:17:27  dischi
-# moved idlebar to a skin plugin
-#
-# Revision 1.18  2003/07/05 14:57:07  dischi
-# the idlebar registers itself as idlebar to the plugin interface
-#
-# Revision 1.17  2003/07/04 20:14:04  outlyer
-# Fixed some confusing logic. It's still confusing, but it works now. Probably
-# need to clean this up.
-#
-# Revision 1.16  2003/07/04 19:48:18  outlyer
-# Whoops, fix path.
-#
-# Revision 1.15  2003/07/04 19:46:51  outlyer
-# Added Rich C's "holidays" plugin for the idlebar.
-#
-# Revision 1.14  2003/07/04 15:17:56  outlyer
-# New cdstatus plugin. Only tested on my machine so use with caution.
-#
-# To use it:
-# plugin.activate('idlebar.cdstatus', level=60)
-#
-# There are a couple of known problems:
-#
-#     o Only the 'last' drive is shown (last from ROM_DRIVES)
-#     o The way that cdbackup tells us we are ripping isn't so nice
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

@@ -9,14 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.4  2003/07/15 07:37:53  dischi
-# import tv when needed to prevent osd screen from popup when you use the webserver
+# Revision 1.5  2003/08/23 12:51:43  dischi
+# removed some old CVS log messages
 #
-# Revision 1.3  2003/04/24 19:56:39  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.2  2003/04/21 18:20:44  dischi
-# make tv itself and not tv.tv the plugin (using __init__.py)
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

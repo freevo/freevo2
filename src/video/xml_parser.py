@@ -9,74 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.32  2003/08/22 18:38:39  gsbarbieri
-# Fixed previously introduced bug.
+# Revision 1.33  2003/08/23 12:51:43  dischi
+# removed some old CVS log messages
 #
-# Revision 1.31  2003/08/21 20:54:45  gsbarbieri
-#    *ROM media just shows up when needed, ie: audiocd is not displayed in
-# video main menu.
-#    * ROM media is able to use variants, subtitles and more.
-#    * When media is not present, ask for it and wait until media is
-# identified. A better solution is to force identify media and BLOCK until
-# it's done.
-#
-# Revision 1.30  2003/08/03 10:11:37  dischi
-# remove debug
-#
-# Revision 1.29  2003/08/03 10:03:31  dischi
-# add ONLY_SCAN_DATADIR to speed up startup
-#
-# Revision 1.28  2003/07/18 19:48:24  dischi
-# support for datadir
-#
-# Revision 1.27  2003/07/13 13:11:17  dischi
-# show xml info on variants, too
-#
-# Revision 1.26  2003/07/12 10:12:34  dischi
-# handle the case where mmpython returns no results
-#
-# Revision 1.25  2003/07/11 19:44:18  dischi
-# close file after parsing
-#
-# Revision 1.24  2003/07/07 21:51:44  dischi
-# add mmpython info to VideoItems with subitems (take infos from first item)
-#
-# Revision 1.23  2003/06/30 15:30:54  dischi
-# some checking to avoid endless scanning
-#
-# Revision 1.22  2003/06/29 21:31:56  gsbarbieri
-# subtitle and audio now use the path to files and are quoted.
-#
-# Revision 1.21  2003/06/29 20:43:30  dischi
-# o mmpython support
-# o mplayer is now a plugin
-#
-# Revision 1.20  2003/05/11 16:22:14  dischi
-# use format_text for data
-#
-# Revision 1.19  2003/04/28 17:57:11  dischi
-# exception handling for bad fxd files
-#
-# Revision 1.18  2003/04/26 16:38:57  dischi
-# added patch from Matthieu Weber for mplayer options in disc
-#
-# Revision 1.17  2003/04/24 19:56:45  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.16  2003/04/24 19:14:51  dischi
-# pass xml_file to directory and videoitems
-#
-# Revision 1.15  2003/04/24 18:07:45  dischi
-# use format_text for plot and tagline
-#
-# Revision 1.14  2003/04/20 17:36:50  dischi
-# Renamed TV_SHOW_IMAGE_DIR to TV_SHOW_DATA_DIR. This directory can contain
-# images like before, but also fxd files for the tv show with global
-# informations (plot/tagline/etc) and mplayer options.
-#
-# Revision 1.13  2003/04/06 21:13:07  dischi
-# o Switched to the new main skin
-# o some cleanups (removed unneeded imports)
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

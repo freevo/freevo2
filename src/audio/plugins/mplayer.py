@@ -9,46 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.12  2003/08/22 17:51:29  dischi
-# Some changes to make freevo work when installed into the system
+# Revision 1.13  2003/08/23 12:51:42  dischi
+# removed some old CVS log messages
 #
-# Revision 1.11  2003/08/17 17:16:44  dischi
-# cache less for urls to save time
-#
-# Revision 1.10  2003/06/29 02:36:01  rshortt
-# Now works with mplayer's new audio (string) format.  The way I did this
-# seems a bit repetitive so feel free to make it better.
-#
-# Revision 1.9  2003/06/06 14:13:00  outlyer
-# Patch for audiofiles with length > 1000sec from Urmet... I made a similar
-# fix for video awhile back, don't know why I forgot audio.
-#
-# Revision 1.8  2003/05/28 15:34:43  dischi
-# fixed seeking bug
-#
-# Revision 1.7  2003/05/28 15:02:49  dischi
-# ported detach plugin to new event model and other small fixes
-#
-# Revision 1.6  2003/05/27 17:53:34  dischi
-# Added new event handler module
-#
-# Revision 1.5  2003/05/08 14:17:38  outlyer
-# Initial version of Paul's FXD radio station support. I made some changes from
-# the original patch, in that I added an URL field to the audioitem class instead of
-# using the year field as his patch did. I will be adding a example FXD file to
-# testfiles as well.
-#
-# Revision 1.4  2003/04/24 19:56:07  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.3  2003/04/22 11:57:07  dischi
-# added STOP
-#
-# Revision 1.2  2003/04/21 18:40:33  dischi
-# use plugin name structure to find the real player
-#
-# Revision 1.1  2003/04/21 13:26:12  dischi
-# mplayer is now a plugin
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

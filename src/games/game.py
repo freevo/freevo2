@@ -9,32 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.8  2003/07/02 15:39:49  outlyer
-# Fix from Simon Windmill <siw@coolpowers.com> for a NameError
+# Revision 1.9  2003/08/23 12:51:42  dischi
+# removed some old CVS log messages
 #
-# Revision 1.7  2003/05/27 17:53:34  dischi
-# Added new event handler module
-#
-# Revision 1.6  2003/04/24 19:56:10  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.5  2003/04/20 12:43:33  dischi
-# make the rc events global in rc.py to avoid get_singleton. There is now
-# a function app() to get/set the app. Also the events should be passed to
-# the daemon plugins when there is no handler for them before. Please test
-# it, especialy the mixer functions.
-#
-# Revision 1.4  2003/04/20 10:55:40  dischi
-# mixer is now a plugin, too
-#
-# Revision 1.3  2003/02/22 07:13:19  krister
-# Set all sub threads to daemons so that they die automatically if the main thread dies.
-#
-# Revision 1.2  2003/02/13 05:55:15  krister
-# Rob Shortts bugfix for games.
-#
-# Revision 1.1  2002/12/09 14:23:53  dischi
-# Added games patch from Rob Shortt to use the interface.py and snes support
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

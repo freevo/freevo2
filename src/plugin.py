@@ -9,35 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2003/08/23 12:51:41  dischi
+# removed some old CVS log messages
+#
 # Revision 1.28  2003/08/22 17:51:29  dischi
 # Some changes to make freevo work when installed into the system
-#
-# Revision 1.27  2003/08/20 21:26:36  dischi
-# use $FREEVO_PYTHON if set to find the plugins
-#
-# Revision 1.26  2003/08/12 19:39:05  dischi
-# Added event_lister to get all events
-#
-# Revision 1.25  2003/07/29 19:06:40  dischi
-# add vcd events (used by xine)
-#
-# Revision 1.24  2003/07/12 19:13:25  rshortt
-# Need to set the plugin level in the plugin object.
-#
-# Revision 1.23  2003/07/12 17:17:45  dischi
-# update doc
-#
-# Revision 1.22  2003/07/09 19:12:57  dischi
-# A plugin can now inherit from more than one basic plugin type. Basic
-# types are the types known to this file: MainMenuPlugin, ItemPlugin and
-# DaemonPlugin. This doesn't work for special plugins like IdleBarPlugins
-#
-# Second a plugin can be activated during runtime (e.g. by another plugin).
-# It's not possible to remove a plugin during runtime, this only works on
-# startup.
-#
-# Revision 1.21  2003/05/30 00:53:19  rshortt
-# Various event bugfixes.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -68,6 +44,10 @@ from event import Event
 
 TRUE  = 1
 FALSE = 0
+
+
+DEBUG = 0
+
 
 #
 # Some basic plugins known to Freevo.
@@ -343,6 +323,9 @@ def __load_plugin__(name, type, level, args, number):
         special = None
 
     try:
+        if DEBUG:
+            print 'loading %s as plugin %s' % (module, name)
+            
         exec('import %s' % module)
         if args:
             p = eval('%s%s' % (object, str(args)))

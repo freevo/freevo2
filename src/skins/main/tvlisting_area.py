@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/08/23 12:51:43  dischi
+# removed some old CVS log messages
+#
 # Revision 1.3  2003/08/22 05:59:35  gsbarbieri
 # Fixed some mistakes.
 # Now it's possible to have more than one line for program/label, just make
@@ -17,11 +20,6 @@
 # Revision 1.2  2003/08/21 22:40:55  gsbarbieri
 # Now left-top corner cell (date) use vertical padding from head and
 # horizontal padding from label.
-#
-# Revision 1.1  2003/08/05 18:59:22  dischi
-# Directory cleanup, part 1:
-# move skins/main1/* to src/skins/main
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

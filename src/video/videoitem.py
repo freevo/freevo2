@@ -5,37 +5,8 @@
 # $Id$
 #
 # Notes:
-# Todo:        
 #
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.75  2003/08/23 10:28:47  dischi
-# fixed some variants handling
-#
-# Revision 1.74  2003/08/22 18:47:06  gsbarbieri
-# - Added more time to retry to check for media.
-# - Corrected a bug when playing variant from CD when the parent is a string
-#   (the base directory). BTW: why that as parent?!
-#
-# Revision 1.73  2003/08/21 20:54:44  gsbarbieri
-#    *ROM media just shows up when needed, ie: audiocd is not displayed in
-# video main menu.
-#    * ROM media is able to use variants, subtitles and more.
-#    * When media is not present, ask for it and wait until media is
-# identified. A better solution is to force identify media and BLOCK until
-# it's done.
-#
-# Revision 1.72  2003/08/20 20:47:02  outlyer
-# Fixed the bookmark file "parser" I don't know what happened, but it was
-# completely broken for AVI files (or any file without options in local_conf)
-#
-# Also, the minute calculation wasn't working. I don't know why I thought
-# the old one would, but this works for bookmarks > 3600
-#
-# Revision 1.22  2003/03/17 19:22:31  outlyer
-# Bookmarks are working now.
-#
-# Usage:
+# Bookmark Usage:
 #     1. while watching a movie file, hit the 'record' button and it'll save a
 #     bookmark. There is no visual feedback though.
 #     2. Later, to get back there, choose the actions button in the menu, and it'll
@@ -45,18 +16,20 @@
 #     The bookmarks do work for multiple AVI's together, though the time shown in the
 #     menu will be the time for the individual file, not the aggregate.
 #
-# TODO:
+# Bookmark Todo:
 #     For multi-part files (i.e. two AVI's together via an XML file) it would be
 #     nice to be able to choose which one. I added a menu item (commented out now)
 #     until I can figure out how to pass self.play a specific filename.
 #
-# Revision 1.21  2003/03/17 18:54:45  outlyer
-# Some changes for the bookmarks
-#     o videoitem.py - Added bookmark menu, bookmark "parser" and menu generation,
-#             haven't figured out how to pass the timecode to mplayer though. I tried
-#             setting mplayer_options, but self.play seems to just ignore them. I don't
-#             know how to pass anything to self.play either. ARGH.
-#     o mplayer.py - commented out two extraneous prints.
+# Todo:        
+#
+# -----------------------------------------------------------------------
+# $Log$
+# Revision 1.76  2003/08/23 12:51:43  dischi
+# removed some old CVS log messages
+#
+# Revision 1.75  2003/08/23 10:28:47  dischi
+# fixed some variants handling
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
