@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2003/12/08 16:18:44  mikeruelle
+# getting a lot of crashes. quickfix
+#
 # Revision 1.38  2003/12/07 19:11:22  dischi
 # o add <playlist> fxd support
 # o add background_playlist to a playlist to support playing music
@@ -353,7 +356,7 @@ class Playlist(Item):
                 
         # end and no next item
         if event in (PLAY_END, USER_END, STOP):
-            if self.background_playlist:
+            if hasattr(self, 'background_playlist') and self.background_playlist:
                 self.background_playlist.stop()
             self.current_item = None
             if menuw:
