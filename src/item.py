@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2003/10/28 19:32:36  dischi
+# do not inherit watermark images
+#
 # Revision 1.31  2003/10/19 14:03:25  dischi
 # external i18n support for plugins
 #
@@ -42,6 +45,7 @@ import gettext
 
 from event import *
 import plugin
+import config
 
 class Item:
     """
@@ -102,6 +106,10 @@ class Item:
 
         if parent:
             self.image = parent.image
+            if self.image and isinstance(self.image, str) and \
+                   self.image.find('watermark') > 0 and \
+                   self.image.find(config.IMAGE_DIR) == 0:
+                self.image = None
             self.handle_type = parent.handle_type
             self.xml_file = parent.xml_file
             self.media = parent.media
