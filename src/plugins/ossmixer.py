@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/10/21 12:32:22  dischi
+# fix variable type
+#
 # Revision 1.9  2004/07/26 18:10:18  dischi
 # move global event handling to eventhandler.py
 #
@@ -201,7 +204,7 @@ class PluginInterface(plugin.DaemonPlugin):
     def incPcmVolume(self):
         self.pcmVolume += 5
         if self.pcmVolume > 100:
-            self.pcmvolume = 100
+            self.pcmVolume = 100
         self._setVolume( ossaudiodev.SOUND_MIXER_PCM, self.pcmVolume )
 
     def decPcmVolume(self):
