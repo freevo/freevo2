@@ -49,7 +49,7 @@ other applications such as xine, mplayer, tvtime and mencoder to play
 and record video and audio.
 
 Available rpmbuild rebuild options :
---without: us_defaults use_sysapps compile
+--without: us_defaults use_sysapps compile_obj
 
 %package boot
 Summary: Files to enable a standalone Freevo system (started from initscript)
@@ -94,10 +94,10 @@ mkdir -p %{buildroot}%{_sysconfdir}/rc.d/init.d
 mkdir -p %{buildroot}%{_bindir}
 install -m 755 boot/freevo %{buildroot}%{_sysconfdir}/rc.d/init.d
 install -m 755 boot/freevo_dep %{buildroot}%{_sysconfdir}/rc.d/init.d
-install -m 755 boot/record_server %{buildroot}%{_sysconfdir}/rc.d/init.d
-install -m 755 boot/webserver %{buildroot}%{_sysconfdir}/rc.d/init.d
-install -m 755 boot/record_server_init %{buildroot}%{_bindir}
-install -m 755 boot/webserver_init %{buildroot}%{_bindir}
+install -m 755 boot/record_server %{buildroot}%{_sysconfdir}/rc.d/init.d/freevo_recordserver
+install -m 755 boot/webserver %{buildroot}%{_sysconfdir}/rc.d/init.d/freevo_webserver
+install -m 755 boot/record_server_init %{buildroot}%{_bindir}/freevo_recordserver_init
+install -m 755 boot/webserver_init %{buildroot}%{_bindir}/freevo_webserver_init
 install -m 644 boot/boot_config %{buildroot}%{_sysconfdir}/freevo/
 
 
@@ -148,31 +148,33 @@ rm -rf $RPM_BUILD_ROOT
 
 %files boot
 %defattr(644,root,root,755)
-%attr(755,root,root) %dir %{_sysconfdir}/freevo
 %attr(755,root,root) %{_sysconfdir}/rc.d/init.d
-%attr(755,root,root) %{_bindir}/record_server_init
-%attr(755,root,root) %{_bindir}/webserver_init
+%attr(755,root,root) %{_bindir}/freevo_*
+%attr(755,root,root) %dir %{_sysconfdir}/freevo
 %attr(644,root,root) %config %{_sysconfdir}/freevo/boot_config
 
 %files testfiles
 %defattr(644,root,root,755)
 %{_cachedir}/freevo/testfiles
 
-#
-# The boot scripts were not chkconfig enabled
-#
-#%post boot
-#if [ -x /sbin/chkconfig ]; then
-#  chkconfig --add freevo
-#fi
-#depmod -a
-#
-#%preun boot
-#if [ "$1" = 0 ] ; then
-#  if [ -x /sbin/chkconfig ]; then
-#    chkconfig --del freevo
-#  fi
-#fi
+%post boot
+if [ -x /sbin/chkconfig ]; then
+     chkconfig --add freevo
+     chkconfig --add freevo_dep
+     chkconfig --add freevo_recordserver
+     chkconfig --add freevo_webserver
+fi
+depmod -a
+
+%preun boot
+if [ "$1" = 0 ] ; then
+  if [ -x /sbin/chkconfig ]; then
+     chkconfig --del freevo
+     chkconfig --del freevo_dep
+     chkconfig --del freevo_recordserver
+     chkconfig --del freevo_webserver
+  fi
+fi
 
 %changelog
 * Thu Sep 18 2003 TC Wan <tcwan@cs.usm.my>
