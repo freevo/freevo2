@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/09/25 15:58:44  mikeruelle
+# need this import for keyboard to work
+#
 # Revision 1.7  2004/09/25 05:17:59  rshortt
 # This was broken because I removed rc.Keyboard.  Here I add Keyboard class
 # to this module and also the default keymap.  All of this stuff should actually
@@ -62,7 +65,7 @@ from mevas.displays.pygamecanvas import PygameCanvas
 # Freevo imports
 import config
 import rc
-
+import eventhandler
 
 DEFAULT_KEYMAP = {
     K_F1          : 'SLEEP',
