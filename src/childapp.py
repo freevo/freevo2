@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/09/21 10:49:58  dischi
+# add shutdown to kill all running children
+#
 # Revision 1.16  2003/09/20 18:54:04  dischi
 # brute force if the app refuces to die
 #
@@ -61,11 +64,31 @@ import osd
 import rc
 from event import *
 
+
+__all_childapps__ = []
+
+
+def shutdown():
+    """
+    shutdown all running childapps
+    """
+    global __all_childapps__
+
+    if not len(__all_childapps__):
+        return
+        
+    print '%d child(s) still running, terminate them' % len(__all_childapps__)
+    while __all_childapps__:
+        print 'shutting down %s' % __all_childapps__[0].binary
+        __all_childapps__[0].kill()
+
+        
 class ChildApp:
 
     def __init__(self, app):
-        # Start the child app through 'runapp' which will unblock signals and
-        # sets the priority.
+        global __all_childapps__
+        __all_childapps__.append(self)
+
         prio = 0
         if app.find('--prio=') == 0 and not config.RUNAPP:
             try:
@@ -135,16 +158,24 @@ class ChildApp:
 
     
     def kill(self, signal=9):
+        global __all_childapps__
+
+        if self in __all_childapps__:
+            __all_childapps__.remove(self)
+            
         # killed already
         if not self.child:
             return
 
         # maybe child is dead and only waiting?
-        if os.waitpid(self.child.pid, os.WNOHANG)[0] == self.child.pid:
-            self.child = None
-            if not self.infile.closed:
-                self.infile.close()
-            return
+        try:
+            if os.waitpid(self.child.pid, os.WNOHANG)[0] == self.child.pid:
+                self.child = None
+                if not self.infile.closed:
+                    self.infile.close()
+                return
+        except OSError:
+            pass
         
         if signal:
             _debug_('childapp: killing pid %s signal %s' % (self.child.pid, signal))
