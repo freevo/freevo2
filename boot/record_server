@@ -18,8 +18,8 @@ test -f /etc/freevo/boot_config || exit 0
 . /etc/freevo/boot_config
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin
-DAEMON_START="$FREEVO_HOME/freevo record_server start"
-DAEMON_STOP="$FREEVO_HOME/freevo record_server stop"
+DAEMON_START="$FREEVO_HOME/freevo recordserver start"
+DAEMON_STOP="$FREEVO_HOME/freevo recordserver stop"
 NAME="record server"
 
 test -f $DAEMON || exit 0
