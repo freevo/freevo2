@@ -6,12 +6,23 @@ $Id$
 This file contains random notes that are useful when dealing with Freevo
 
 ----------------------------------------------------------------------
+Python debuggers:
+
+Wing IDE: Seems pretty good. Free trial, free smaller version, free
+          for open-source developers.
+
+HAP: http://sourceforge.net/projects/hapdebugger
+
+----------------------------------------------------------------------
 Good icons and backgrounds:
 
 http://themes.freshmeat.net/projects/marblessolid/?topic_id=976%2C57
 
 www.kde-look.org
+----------------------------------------------------------------------
+Nice looking PVR:
 
+http://www.metrolink.com/products/media/index.html
 ----------------------------------------------------------------------
 Dependencies (OUTDATED!):
 
