@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2002/10/19 17:09:32  dischi
+# Lot of restructuring. Every object now has a function parse to fill
+# the internal variables from the xml file. I also fixed scaling when
+# you inherit from an already inherit xml file
+#
 # Revision 1.14  2002/10/19 15:09:19  dischi
 # Added support for roundboxes. The file extreme_round_768x576.xml is an
 # example of round box usage. blue2_768x576.xml also looks a little bit
@@ -149,6 +154,77 @@ OSD_DEFAULT_FONT = 'skins/fonts/arialbd.ttf'
 
 
 
+#
+# Help functions
+#
+def attr_int(node, attr, default, scale=0.0):
+    try:
+        if node.attrs.has_key(('', attr)):
+            val = int(node.attrs[('', attr)])
+            if scale:
+                val = scale*val
+            return int(val)
+    except ValueError:
+        pass
+    return default
+
+def attr_float(node, attr, default):
+    try:
+        if node.attrs.has_key(('', attr)):
+            return float(node.attrs[('', attr)])
+    except ValueError:
+        pass
+    return default
+
+def attr_hex(node, attr, default):
+    try:
+        if node.attrs.has_key(('', attr)):
+            return long(node.attrs[('', attr)], 16)
+    except ValueError:
+        pass
+    return default
+
+def attr_visible(node, attr, default):
+    if node.attrs.has_key(('', attr)):
+        if node.attrs[('', attr)] == "no":
+            return ''
+        return node.attrs[('', attr)].encode('latin-1')
+    return default
+
+def attr_str(node, attr, default):
+    if node.attrs.has_key(('', attr)):
+        return node.attrs[('', attr)].encode('latin-1')
+    return default
+
+def attr_file(node, attr, default, c_dir):
+    if node.attrs.has_key(('', attr)):
+        file = node.attrs[('', attr)].encode('latin-1')
+        if file:
+            return os.path.join(c_dir, file)
+        return ""
+    return default
+
+def attr_font(node, attr, default):
+    if node.attrs.has_key(('', attr)):
+        fontext = os.path.splitext(node.attrs[('', attr)])[1]
+        if fontext:
+            # There is an extension (e.g. '.pfb'), use the full name
+            font = os.path.join(OSD_FONT_DIR,
+                                node.attrs[('', attr)]).encode('latin-1')
+        else:
+            # '.ttf' is the default extension
+            font = os.path.join(OSD_FONT_DIR, node.attrs[('', attr)] +
+                                '.ttf').encode('latin-1')
+            if not os.path.isfile(font):
+                font = os.path.join(OSD_FONT_DIR, node.attrs[('', attr)] +
+                                    '.TTF').encode('latin-1')
+        if not font:
+            print "can find font >%s<" % font
+            font = OSD_DEFAULT_FONT
+        return font
+    return default
+
+
 # ======================================================================
 
 #
@@ -230,19 +306,18 @@ class XML_data:
 
 
 
+# ======================================================================
 
 class XML_menuitem(XML_data):
     def __init__(self):
         XML_data.__init__(self)
         self.selection = XML_data()
 
-class XML_menuitems:
-    def __init__(self):
-        self.x = self.y = self.height = self.width = 0
-        self.default = XML_menuitem()
-        self.dir = XML_menuitem()
-        self.pl = XML_menuitem()
+    def parse(self, node, scale = 0.0, c_dir=''):
+        XML_data.parse(self, node, scale, c_dir)
+        
 
+# ======================================================================
 
 class XML_cover(XML_data):
     def __init__(self):
@@ -260,72 +335,40 @@ class XML_cover(XML_data):
                         rect.parse(masknode, scale)
                         self.mask += [ rect ]
         
-class XML_menu:
+
+# ======================================================================
+
+class XML_menuitems:
     def __init__(self):
-        self.background = XML_background()
-        self.logo = XML_data()
-        self.title = XML_data()
-        self.items = XML_menuitems()
-        self.cover_movie = XML_cover()
-        self.cover_music = XML_cover()
-        self.cover_image = XML_cover()
-        self.submenu = XML_menuitem()
+        self.x = self.y = self.height = self.width = 0
+        self.default = XML_menuitem()
+        self.dir = XML_menuitem()
+        self.pl = XML_menuitem()
 
-    
-class XML_mp3:
-    def __init__(self):
-        self.background = XML_background()
-        self.progressbar = XML_data()
-        self.title = XML_data()    
-        self.cover = XML_cover()    
-        self.info  = XML_data()
-        self.logo  = XML_data()
+    def parse(self, node, scale = 0.0, c_dir=''):
+        self.x = attr_int(node, "x", self.x, scale)
+        self.y = attr_int(node, "y", self.y, scale)
+        self.height = attr_int(node, "height", self.height, scale)
+        self.width  = attr_int(node, "width", self.width, scale)
 
-class XML_popup(XML_data):
-    def __init__(self):
-        XML_data.__init__(self)
-        self.message = XML_data()    
+        for subnode in node.children:
+            if subnode.name == u'item':
+                type = attr_str(subnode, "type", "all")
 
+                if type == "all":
+                    # default content, override all settings for pl and dir:
+                    self.default.parse(subnode, scale)
+                    self.dir.parse(subnode, scale)
+                    self.pl.parse(subnode, scale)
 
-# compatibilty mode, remove later
-class XML_mainmenuitem:
-    def __init__(self):
-        self.name = ''
-        self.visible = 'yes'
-        self.icon = ''
-        self.pos = 0
-        self.action = None
-        self.arg = None
+                elif type == 'dir':
+                    self.dir.parse(subnode, scale)
 
-class XML_mainmenu:
-    def __init__(self):
-        self.items = {}
-
-class XML_listingmenuitem(XML_menuitem):
-    def __init__(self):
-        XML_menuitem.__init__(self)
-        self.label = XML_data()
-        self.expand = XML_data()
-        self.border_color = 0
-        self.border_size = 1
-        self.spacing = 0
-        self.left_arrow = None
-        self.right_arrow = None
-        self.up_arrow = None
-        self.down_arrow = None
+                elif type == 'playlist':
+                    self.pl.parse(subnode, scale)
 
 
-class XML_extendedmenu:
-    def __init__(self):
-        self.background = XML_background()
-        self.logo = XML_data()
-        self.header = XML_data()
-        self.view = XML_data()
-        self.info = XML_data()
-        self.listing = XML_listingmenuitem()
-
-
-
+# ======================================================================
 
 class XML_background:
     def __init__(self):
@@ -351,78 +394,212 @@ class XML_background:
 
 # ======================================================================
 
-#
-# Help functions
-#
-def attr_int(node, attr, default, scale=0.0):
-    try:
-        if node.attrs.has_key(('', attr)):
-            val = int(node.attrs[('', attr)])
-            if scale:
-                val = scale*val
-            return int(val)
-    except ValueError:
-        pass
-    return default
+class XML_menu:
+    def __init__(self):
+        self.background = XML_background()
+        self.logo = XML_data()
+        self.title = XML_data()
+        self.items = XML_menuitems()
+        self.cover_movie = XML_cover()
+        self.cover_music = XML_cover()
+        self.cover_image = XML_cover()
+        self.submenu = XML_menuitem()
 
-def attr_float(node, attr, default):
-    try:
-        if node.attrs.has_key(('', attr)):
-            return float(node.attrs[('', attr)])
-    except ValueError:
-        pass
-    return default
+    def parse(self, menu_node, scale = 0.0, c_dir=''):
+        for node in menu_node.children:
+            if node.name == u'background':
+                self.background.parse(node, scale, c_dir)
 
-def attr_hex(node, attr, default):
-    try:
-        if node.attrs.has_key(('', attr)):
-            return long(node.attrs[('', attr)], 16)
-    except ValueError:
-        pass
-    return default
+            if node.name == u'logo':
+                self.logo.parse(node, scale, c_dir)
 
-def attr_visible(node, attr, default):
-    if node.attrs.has_key(('', attr)):
-        if node.attrs[('', attr)] == "no":
-            return ''
-        return node.attrs[('', attr)].encode('latin-1')
-    return default
+            elif node.name == u'title':
+                self.title.parse(node, scale)
 
-def attr_str(node, attr, default):
-    if node.attrs.has_key(('', attr)):
-        return node.attrs[('', attr)].encode('latin-1')
-    return default
+            elif node.name == u'items':
+                self.items.parse(node, scale, c_dir)
+                
+            elif node.name == u'covers':
+                for subnode in node.children:
+                    type = attr_str(subnode, "type", "")
 
-def attr_file(node, attr, default, c_dir):
-    if node.attrs.has_key(('', attr)):
-        file = node.attrs[('', attr)].encode('latin-1')
-        if file:
-            return os.path.join(c_dir, file)
-        return ""
-    return default
+                    if type == u'all':
+                        self.cover_movie.parse(subnode, scale)
+                        self.cover_music.parse(subnode, scale)
+                        self.cover_image.parse(subnode, scale)
 
-def attr_font(node, attr, default):
-    if node.attrs.has_key(('', attr)):
-        fontext = os.path.splitext(node.attrs[('', attr)])[1]
-        if fontext:
-            # There is an extension (e.g. '.pfb'), use the full name
-            font = os.path.join(OSD_FONT_DIR,
-                                node.attrs[('', attr)]).encode('latin-1')
-        else:
-            # '.ttf' is the default extension
-            font = os.path.join(OSD_FONT_DIR, node.attrs[('', attr)] +
-                                '.ttf').encode('latin-1')
-            if not os.path.isfile(font):
-                font = os.path.join(OSD_FONT_DIR, node.attrs[('', attr)] +
-                                    '.TTF').encode('latin-1')
-        if not font:
-            print "can find font >%s<" % font
-            font = OSD_DEFAULT_FONT
-        return font
-    return default
+                    if type == u'movie':
+                        self.cover_movie.parse(subnode, scale)
+                    if type == u'music':
+                        self.cover_music.parse(subnode, scale)
+                    if type == u'image':
+                        self.cover_image.parse(subnode, scale)
+
+            elif node.name == u'submenu':
+                self.submenu.parse(node, scale)
 
 
 # ======================================================================
+
+class XML_mp3:
+    def __init__(self):
+        self.background = XML_background()
+        self.progressbar = XML_data()
+        self.title = XML_data()    
+        self.cover = XML_cover()    
+        self.info  = XML_data()
+        self.logo  = XML_data()
+
+    def parse(self, menu_node, scale = 0.0, c_dir=''):
+        for node in menu_node.children:
+            if node.name == u'background':
+                self.background.parse(node, scale, c_dir)
+
+            elif node.name == u'title':
+                self.title.parse(node, scale)
+
+            elif node.name == u'cover':
+                self.cover.parse(node, scale)
+
+            elif node.name == u'progressbar':
+                self.progressbar.parse(node, scale)
+
+            elif node.name == u'fileinfo':
+                self.info.parse(node, scale)
+
+            elif node.name == u'logo':
+                self.logo.parse(node, scale, c_dir)
+
+
+# ======================================================================
+
+class XML_popup(XML_data):
+    def __init__(self):
+        XML_data.__init__(self)
+        self.message = XML_data()    
+
+    def parse(self, node, scale = 0.0, c_dir=''):
+        XML_data.parse(self, node, scale, c_dir)
+
+        for subnode in node.children:
+            if subnode.name == u'message':
+                self.message.parse(subnode, scale, c_dir)
+
+
+
+# ======================================================================
+
+class XML_mainmenuitem:
+    def __init__(self):
+        self.name = ''
+        self.visible = 'yes'
+        self.icon = ''
+        self.pos = 0
+        self.action = None
+        self.arg = None
+
+    def parse(self, node, scale = 0.0, c_dir=''):
+        self.name = attr_str(node, "name", self.name)
+        self.visible = attr_visible(node, "visible", self.visible)
+        self.icon = attr_str(node, "icon", self.icon)
+        self.pos = attr_int(node, "pos", self.pos)
+        self.action = attr_str(node,"action", self.action)
+        self.arg = attr_str(node,"arg", self.arg)
+
+
+# ======================================================================
+
+class XML_mainmenu:
+    def __init__(self):
+        self.items = {}
+
+    def parse(self, menu_node, scale = 0.0, c_dir=''):
+        for node in menu_node.children:
+            if node.name == u'item':
+                item = XML_mainmenuitem()
+                item.parse(node, scale, c_dir)
+                self.items[item.pos] = item                
+
+# ======================================================================
+
+class XML_listingmenuitem(XML_menuitem):
+    def __init__(self):
+        XML_menuitem.__init__(self)
+        self.label = XML_data()
+        self.expand = XML_data()
+        self.border_color = 0
+        self.border_size = 1
+        self.spacing = 0
+        self.left_arrow = None
+        self.right_arrow = None
+        self.up_arrow = None
+        self.down_arrow = None
+
+
+    def parse_content(self, node, scale):
+        self.parse(node, scale)
+        for subnode in node.children:
+            if subnode.name == u'indicator':
+                type = attr_str(subnode, 'type', 'None')
+                if type == 'left':
+                    self.left_arrow = attr_str(subnode,'image', self.left_arrow)
+                if type == 'right':
+                    self.right_arrow = attr_str(subnode,'image', self.right_arrow)
+                if type == 'down':
+                    self.down_arrow = attr_str(subnode,'image', self.down_arrow)
+                if type == 'up':
+                    self.up_arrow = attr_str(subnode,'image', self.up_arrow)
+
+
+    def parse(self, node, scale = 0.0, c_dir=''):
+        XML_menuitem.parse(self, node, scale, c_dir)
+        for subnode in node.children:
+            if subnode.name == u'expand':
+                self.expand.parse(subnode, scale)
+
+            elif subnode.name == u'table':
+                self.spacing = attr_int(subnode,'spacing', self.spacing, scale)
+                self.parse(subnode, scale)
+
+                for subsubnode in subnode.children:
+                    if subsubnode.name == u'label':
+                        self.label.parse(subsubnode, scale)
+                    elif subsubnode.name == u'content':
+                        self.parse_content(subsubnode, scale)
+
+
+# ======================================================================
+
+class XML_extendedmenu:
+    def __init__(self):
+        self.background = XML_background()
+        self.logo = XML_data()
+        self.header = XML_data()
+        self.view = XML_data()
+        self.info = XML_data()
+        self.listing = XML_listingmenuitem()
+
+    def parse(self, menu_node, scale = 0.0, c_dir=''):
+        for node in menu_node.children:
+            if node.name == u'background':
+                self.background.parse(node, scale, c_dir)
+            elif node.name == u'logo':
+                self.logo.parse(node, scale, c_dir)
+            elif node.name == u'header':
+                self.header.parse(node, scale)
+            elif node.name == u'view':
+                self.view.parse(node, scale)
+            elif node.name == u'info':
+                self.info.parse(node, scale)
+            elif node.name == u'listing':
+                self.listing.parse(node, scale)
+
+
+
+
+# ======================================================================
+# ======================================================================
+
 
 #
 # Main XML skin class
@@ -437,196 +614,50 @@ class XMLSkin:
         self.mainmenu = XML_mainmenu()
         self.e_menu = { }
 
-        self.scale = 0.0
-
         
-    #
-    # parse <items>
-    #
-    def parseItems(self, node, data):
-        data.x = attr_int(node, "x", data.x, self.scale)
-        data.y = attr_int(node, "y", data.y, self.scale)
-        data.height = attr_int(node, "height", data.height, self.scale)
-        data.width  = attr_int(node, "width", data.width, self.scale)
-
-        for subnode in node.children:
-            if subnode.name == u'item':
-                type = attr_str(subnode, "type", "all")
-
+    def parse(self, freevo_type, scale, c_dir, copy_content):
+        for node in freevo_type.children:
+            if node.name == u'menu':
+                type = attr_str(node, "type", "all")
                 if type == "all":
-                    # default content, override all settings for pl and dir:
-                    data.default.parse(subnode, self.scale)
-                    data.dir.parse(subnode, self.scale)
-                    data.pl.parse(subnode, self.scale)
+                    if copy_content:
+                        self.menu_default = copy.deepcopy(self.menu_default)
+                        self.menu_main = copy.deepcopy(self.menu_main)
+                    self.menu_default.parse(node, scale, c_dir)
+                    self.menu_main.parse(node, scale, c_dir)
 
-                elif type == 'dir':
-                    data.dir.parse(subnode, self.scale)
+                if type == "main":
+                    self.menu_main.parse(node, scale, c_dir)
 
-                elif type == 'playlist':
-                    data.pl.parse(subnode, self.scale)
+            if node.name == u'mp3':
+                if copy_content:
+                    self.mp3 = copy.deepcopy(self.mp3)
+                self.mp3.parse(node, scale, c_dir)
+
+            if node.name == u'popup':
+                if copy_content:
+                    self.popup = copy.deepcopy(self.popup)
+                self.popup.parse(node, scale, c_dir)
+
+            if node.name == u'main':
+                self.mainmenu.parse(node, scale, c_dir)
+
+            if node.name == u'extendedmenu':
+                emn = attr_str(node, "type", None)
+                if emn:
+                    if not emn in self.e_menu:
+                        self.e_menu[emn] = XML_extendedmenu() 
+                    else:
+                        if copy_content: self.e_menu[emn] = copy.deepcopy(self.e_menu[emn])
+                    self.e_menu[emn].parse(node, scale, c_dir)
+
         
-
-    #
-    # read the skin informations for menu
-    #
-    def read_menu(self, file, menu_node, menu):
-        for node in menu_node.children:
-            if node.name == u'background':
-                menu.background.parse(node, self.scale, os.path.dirname(file))
-
-            if node.name == u'logo':
-                menu.logo.parse(node, self.scale, os.path.dirname(file))
-
-            elif node.name == u'title':
-                menu.title.parse(node, self.scale)
-
-            elif node.name == u'items':
-                self.parseItems(node, menu.items)
-                
-            elif node.name == u'covers':
-                for subnode in node.children:
-                    type = attr_str(subnode, "type", "")
-
-                    if type == u'all':
-                        menu.cover_movie.parse(subnode, self.scale)
-                        menu.cover_music.parse(subnode, self.scale)
-                        menu.cover_image.parse(subnode, self.scale)
-
-                    if type == u'movie':
-                        menu.cover_movie.parse(subnode, self.scale)
-                    if type == u'music':
-                        menu.cover_music.parse(subnode, self.scale)
-                    if type == u'image':
-                        menu.cover_image.parse(subnode, self.scale)
-
-            elif node.name == u'submenu':
-                menu.submenu.parse(node, self.scale)
-
-
-    #
-    # read the skin informations for the mp3 player
-    #
-    def read_mp3(self, file, menu_node, copy_content):
-        if copy_content: self.mp3 = copy.deepcopy(self.mp3)
-
-        for node in menu_node.children:
-            if node.name == u'background':
-                self.mp3.background.parse(node, self.scale, os.path.dirname(file))
-
-            elif node.name == u'title':
-                self.mp3.title.parse(node, self.scale)
-
-            elif node.name == u'cover':
-                self.mp3.cover.parse(node, self.scale)
-
-            elif node.name == u'progressbar':
-                self.mp3.progressbar.parse(node, self.scale)
-
-            elif node.name == u'fileinfo':
-                self.mp3.info.parse(node, self.scale)
-
-            elif node.name == u'logo':
-                self.mp3.logo.parse(node, self.scale, os.path.dirname(file))
-
-    #
-    # read the skin informations for a popup
-    #
-    def read_popup(self, file, popup_node, copy_content):
-        if copy_content: self.popup = copy.deepcopy(self.popup)
-        self.popup.parse(popup_node, self.scale, os.path.dirname(file))
-
-        for node in popup_node.children:
-            if node.name == u'message':
-                self.popup.message.parse(node, self.scale)
-
-
-    #
-    # parse one main menu node
-    #
-    def parse_mainmenunode(self, node, data):
-        data.name = attr_str(node, "name", data.name)
-        data.visible = attr_visible(node, "visible", data.visible)
-        data.icon = attr_str(node, "icon", data.icon)
-        data.pos = attr_int(node, "pos", data.pos)
-        data.action = attr_str(node,"action", data.action)
-        data.arg = attr_str(node,"arg", data.arg)
-
-    #
-    # read the main menu
-    #
-    def read_mainmenu(self, file, menu_node):
-        for node in menu_node.children:
-            if node.name == u'item':
-                item = XML_mainmenuitem()
-                self.parse_mainmenunode(node, item)
-                self.mainmenu.items[item.pos] = item                
-
-    def parse_listingnode_content(self, node, data):
-        data.parse(node, self.scale)
-        for subnode in node.children:
-            if subnode.name == u'indicator':
-                type = attr_str(subnode, 'type', 'None')
-                if type == 'left':
-                    data.left_arrow = attr_str(subnode,'image', data.left_arrow)
-                if type == 'right':
-                    data.right_arrow = attr_str(subnode,'image', data.right_arrow)
-                if type == 'down':
-                    data.down_arrow = attr_str(subnode,'image', data.down_arrow)
-                if type == 'up':
-                    data.up_arrow = attr_str(subnode,'image', data.up_arrow)
-
-
-    # parse listing conf from extendedmenu
-    def parse_listingnode(self, node, data):
-        data.parse(node, self.scale)
-        for subnode in node.children:
-            if subnode.name == u'expand':
-                data.expand.parse(subnode, self.scale)
-
-            elif subnode.name == u'table':
-                data.spacing = attr_int(subnode,'spacing', data.spacing, self.scale)
-                data.parse(subnode, self.scale)
-
-                for subsubnode in subnode.children:
-                    if subsubnode.name == u'label':
-                        data.label.parse(subsubnode, self.scale)
-                    elif subsubnode.name == u'content':
-                        self.parse_listingnode_content(subsubnode, data)
-
-                        
-
-    #
-    # read the skin informations for extendedmenu
-    #
-    def read_extendedmenu(self, file, menu_node, copy_content):
-        emn = attr_str(menu_node, "type", None)
-        if not emn:
-            return
-
-        if not 'tv' in self.e_menu:
-            self.e_menu[emn] = XML_extendedmenu() 
-        else:
-            if copy_content: self.e_menu[emn] = copy.deepcopy(self.e_menu[emn])
-
-        for node in menu_node.children:
-            if node.name == u'background':
-                self.e_menu[emn].background.parse(node, self.scale, os.path.dirname(file))
-            elif node.name == u'logo':
-                self.e_menu[emn].logo.parse(node, self.scale, os.path.dirname(file))
-            elif node.name == u'header':
-                self.e_menu[emn].header.parse(node, self.scale)
-            elif node.name == u'view':
-                self.e_menu[emn].view.parse(node, self.scale)
-            elif node.name == u'info':
-                self.e_menu[emn].info.parse(node, self.scale)
-            elif node.name == u'listing':
-                self.parse_listingnode(node, self.e_menu[emn].listing)
 
 
     #
     # parse the skin file
     #
-    def load(self, file, copy_content = 0):
+    def load(self, file, copy_content = 0, scale=0.0):
         if not os.path.isfile(file):
             return 0
         
@@ -636,37 +667,21 @@ class XMLSkin:
             for freevo_type in box.children:
                 if freevo_type.name == 'skin':
 
-                    scale = attr_float(freevo_type, "scale", 0.0)
+                    new_scale = attr_float(freevo_type, "scale", 0.0)
                     include = attr_file(freevo_type, "include", "", \
                                              os.path.dirname(file))
-                    if include:
-                        self.scale = scale
-                        print "load %s" % include
-                        self.load(include + ".xml")
-                        self.scale = 0.0
-                    
-                    for node in freevo_type.children:
-                        if node.name == u'menu':
-                            type = attr_str(node, "type", "all")
-                            if type == "all":
-                                if copy_content:
-                                    self.menu_default = copy.deepcopy(self.menu_default)
-                                    self.menu_main = copy.deepcopy(self.menu_main)
-                                self.read_menu(file, node, self.menu_default)
-                                self.read_menu(file, node, self.menu_main)
 
-                            if type == "main":
-                                self.read_menu(file, node, self.menu_main)
-
-                        if node.name == u'mp3':
-                            self.read_mp3(file, node, copy_content)
-                        if node.name == u'popup':
-                            self.read_popup(file, node, copy_content)
-                        if node.name == u'main':
-                            self.read_mainmenu(file, node)
-                        if node.name == u'extendedmenu':
-                            self.read_extendedmenu(file, node, copy_content)
+                    if scale and new_scale:
+                        new_scale = scale * new_scale
+                    elif scale:
+                        new_scale = scale
                         
+                    if include:
+                        print "load %s with scale %s" % (include, new_scale)
+                        self.load(include + ".xml", copy_content, new_scale)
+
+                    self.parse(freevo_type, scale, os.path.dirname(file), copy_content)
+
         except:
             print "ERROR: XML file corrupt"
             traceback.print_exc()
