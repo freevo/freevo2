@@ -94,6 +94,12 @@ SUFFIX_FREEVO_FILES = [ '/*.[xX][mM][lL]' ]
 TV_SHOW_REGEXP = "s?([0-9]|[0-9][0-9])[xe]([0-9]|[0-9][0-9])[^0-9]"
 TV_SHOW_IMAGES = "tv-show-images/"
 
+#
+# Directory for XML definitions for DVDs and VCDs. Items in this
+# directory won't be in the MOVIE MAIN MENU, but will be used to find
+# titles and images for the current DVD/VCD
+#
+MOVIE_DATA_DIR = 'movie-data/'
 
 #
 # Skin file that contains the actual skin code. This is imported

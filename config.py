@@ -17,6 +17,11 @@
 #
 
 import sys, os, time
+import util
+
+# XML support
+from xml.utils import qp_xml
+
 
 
 if os.path.isdir('/var/log/freevo'):
@@ -118,3 +123,41 @@ else:
         execfile(overridefile, globals(), locals())
     else:
         print 'No overrides loaded'
+
+#
+# find movie informations
+#
+
+def XML_to_MOVIE_INFORMATIONS(file):
+    try:
+        parser = qp_xml.Parser()
+        box = parser.parse(open(file).read())
+    except:
+        print "XML file %s corrupt" % file
+    else:
+        title = image = id = ""
+        if box.children[0].name == 'movie':
+            for node in box.children[0].children:
+                if node.name == u'title':
+                    title = node.textof()
+                if node.name == u'id':
+                    id = node.textof()
+                elif node.name == u'cover' and \
+                     os.path.isfile(os.path.join(os.path.dirname(file),node.textof())):
+                    image = os.path.join(os.path.dirname(file), node.textof())
+        if title and id:
+            return (title, image, id)
+    return None
+
+
+MOVIE_INFORMATIONS = []
+
+for name,dir in DIR_MOVIES:
+    for file in util.recursefolders(dir,1,'*.xml',1):
+        info = XML_to_MOVIE_INFORMATIONS(file)
+        if info: MOVIE_INFORMATIONS += [info]
+
+for file in util.recursefolders(MOVIE_DATA_DIR,1,'*.xml',1):
+    info = XML_to_MOVIE_INFORMATIONS(file)
+    if info: MOVIE_INFORMATIONS += [info]
+
