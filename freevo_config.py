@@ -60,7 +60,7 @@
 # is different, there will be only a warning
 
 FREEVO_CONF_VERSION = 1.0
-LOCAL_CONF_VERSION  = 1.0
+LOCAL_CONF_VERSION  = 1.1
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
 # steps
