@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2002/10/14 17:10:26  dischi
+# One skin can inherit from another. Example 800x600.xml defines everything,
+# 768x576 only the differences.
+#
 # Revision 1.2  2002/10/13 14:16:55  dischi
 # Popup box and mp3 player are now working, too. This skin can look
 # like main1 and aubin1. I droped the support for the gui classes
@@ -350,6 +354,15 @@ class XMLSkin:
                 for subnode in node.children:
                     type = self.attr_str(subnode, "type", "")
 
+                    if type == u'all':
+                        if copy_content:
+                            menu.cover_movie = copy.copy(menu.cover_movie)
+                            menu.cover_music = copy.copy(menu.cover_music)
+                            menu.cover_image = copy.copy(menu.cover_image)
+                        self.parse_node(subnode, menu.cover_movie)
+                        self.parse_node(subnode, menu.cover_music)
+                        self.parse_node(subnode, menu.cover_image)
+
                     if type == u'movie':
                         if copy_content:
                             menu.cover_movie = copy.copy(menu.cover_movie)
@@ -444,6 +457,11 @@ class XMLSkin:
             box = parser.parse(open(file).read())
             for freevo_type in box.children:
                 if freevo_type.name == 'skin':
+                    include = self.attr_file(freevo_type, "include", "", \
+                                             os.path.dirname(file))
+                    if include:
+                        self.load(include + ".xml")
+
                     for node in freevo_type.children:
                         if node.name == u'menu':
                             type = self.attr_str(node, "type", "all")

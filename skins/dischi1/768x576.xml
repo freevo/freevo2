@@ -1,121 +1,46 @@
 <?xml version="1.0" ?>
 <freevo>
 
-   <skin>
+   <skin include="800x600">
 
-    <!-- Items of the main menu (will change soon) -->
-    <main>        
-      <item pos="0" name="TV"       action="tv.main_menu"  arg="" 
-	visible="yes" icon="icons/64x64/tv.png"   />
-      <item pos="1" name="Movies"   action="movie.main_menu" arg="" 
-	visible="yes" icon="icons/64x64/movies.png"  />
-      <item pos="2" name="Music"    action="music.main_menu" arg="" 
-	visible="yes" icon="icons/64x64/mp3.png"  />
-      <item pos="3" name="Images"   action="imenu.main_menu" arg="" 
-	visible="yes" icon="icons/64x64/images.png"  />
-      <item pos="4" name="Video Games" action="videogame.main_menu" arg="" 
-	visible="no" icon="icons/mame.png"  />
-      <item pos="5" name="Shutdown" action="shutdown" arg="" 
-	visible="yes" icon="icons/64x64/shutdown.png"  />
-    </main>
-    
     <!-- Settings for a normal menu -->
     <menu type="all">
 
-      <background image="../images/aubin_bg1.png" mask=""/>
+      <background image="../images/aubin_bg1.png"/>
 
-      <title visible="yes" x="384" y="18">
-	<font name="oliversb" size="34" color="0x000000" align="center"/>
-	<shadow visible="no" color="0xaaffffff" x="3" y="3"/>
+      <title visible="yes" x="384">
+	<font size="34"/>
       </title>
 
-      <items x="60" y="105" height="370" width="620">
-	<item type="all">
-	  <font name="bluehigh" size="18" color="0x000000"/>
-	  <shadow visible="no" color="0x000000" x="1" y="1"/> 
-	  <selection visible="yes" color="0xffffff" bgcolor="0x000000">
-	    <font name="bluehigh" size="18" color="0xffffff"/>
-	    <shadow visible="yes" color="0x000000" x="1" y="1"/>
-	  </selection>
-	</item>
-
-	<item type="dir">
-	  <font color="0x38474c"/>
-	  <selection bgcolor="0x38474c"/>
-	  <shadow visible="yes" color="0x000000" x="1" y="1"/>
-	</item>
-
-	<item type="playlist">
-	  <font color="0x58677c"/>
-	  <selection bgcolor="0x38474c">
-            <font color="0xffffff"/>
-            <shadow color="0x000000"/>
-	  </selection>
-	  <shadow visible="yes"/>
-	</item>
-      </items>
+      <items y="105" height="370" width="620"/>
 
       <covers>
-	<cover type="movie" visible="yes" x="538" y="100" width="200"
-	  height="280" border_color="0x000000" border_size="1"/>
-	<cover type="music" visible="yes" x="538" y="100" width="200"
-	  height="200" border_color="0x000000" border_size="1"/> 
-	<cover type="image" visible="yes" x="538" y="100" width="200" 
-	  height="160" border_color="0x000000" border_size="1"/>
+	<cover type="all" x="538"/>
       </covers>
 
-      <submenu x="40" y="500">
-	<font name="interpla" size="20" color="0x000000"/>
-	<selection length="154" bgcolor="0x08171c" color="0xffffff">
-           <font name="interpla" size="20" color="0xffffff"/>
-           <shadow visible="yes" color="0x000000" x="2" y="2"/>
-        </selection>
-      </submenu>
+      <submenu y="500"/>
 
     </menu>
 
     <!-- Override some settings for the main menu -->
     <menu type="main">
-      <items x="230" width="320">
-	<item type="all">
-	  <font name="neuropol" size="32" color="0x38474c"/>
-	  <shadow visible="yes" color="0x000000" x="1" y="1"/>
-      
-	  <selection color="0xffffff" bgcolor="0x38474c">
-	    <font name="neuropol" size="32" color="0xffffff"/>
-	    <shadow visible="yes" color="0xaa000000" x="3" y="3"/>
-	  </selection>
-	</item>
-      </items>
+      <items x="230" width="320"/>
     </menu>
 
 
     <!-- Settings for the mp3 player -->
     <mp3>
-      <title visible="yes" x="384" y="15">
-	<font name="oliversb" size="38" color="0x000000" align="center"/>
-      </title>
+      <title x="384"/>
       <background image="../images/aubin_bg1.png"/>
       <cover visible="yes" x="466" y="191" width="289"
 	height="289" border_color="0x000000" border_size="1"/> 
-
-      <fileinfo x="30" y="100" height="210">
-	<font name="neuropol" size="18" color="0x58677c"/>
-	<shadow visible="yes" color="0x000000" x="1" y="1"/>
-      </fileinfo>
-
-      <progressbar visible="yes" x="0" y="490" width="768" height="5"      
-	color="0x58677c" bgcolor="0xffffff" 
-	border_color="0x000000" border_size="1"/>
+      <progressbar y="490" width="768"/>
     </mp3>
 
 
     <!-- Settings for a popup box -->
     <popup bgcolor="0x33ffffff" border_size="2" border_color="0x000000">
-      <message x="100" y="100" width="586" height="376">
-	<font name="bluehigh" size="18" color="0x000000" align="center"/>
-	<shadow visible="no"/>
-      </message>
+      <message width="586" height="376"/>
     </popup>
 
   </skin>
