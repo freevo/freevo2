@@ -42,7 +42,11 @@ log = logging.getLogger('record')
 
 
 class Recording:
-    def __init__(self, id, channel, priority, start, stop, status):
+    def __init__(self, *args):
+        self.update(*args)
+
+        
+    def update(self, id, channel, priority, start, stop, status):
         self.id = id
         self.channel = channel
         self.priority = priority
@@ -50,15 +54,15 @@ class Recording:
         self.stop = stop
         self.status = status
         self.description = {}
-
-
+        
 class Recordings:
     def __init__(self):
         self.last_update = time.time()
         self.__recordings = {}
         self.server = None
         mcomm.register_entity_notification(self.__entity_update)
-
+        mcomm.register_event('record.list.update', self.__list_update)
+        
 
     def __entity_update(self, entity):
         if not entity.present and entity == self.server:
@@ -66,7 +70,8 @@ class Recordings:
             self.server = None
             return
 
-        if entity.present and entity.matches(mcomm.get_address('recordserver')):
+        if entity.present and \
+               entity.matches(mcomm.get_address('recordserver')):
             log.info('recordserver found')
             self.server = entity
             self.server.recording_list(callback=self.__list_callback)
@@ -88,9 +93,23 @@ class Recordings:
         for l in listing:
             self.__recordings['%s-%s-%s' % (l[1], l[3], l[4])] = Recording(*l)
         log.info('got recording list')
-        self.__update_description()
+        self.__request_description()
         
 
+    def __list_update(self, result):
+        log.info('got recording list update')
+        for l in result.payload[0].args:
+            key = '%s-%s-%s' % (l[1], l[3], l[4])
+            if key in self.__recordings:
+                log.debug('update: %s: %s', l[0], l[5])
+                self.__recordings[key].update(*l)
+            else:
+                log.debug('new: %s', l[0])
+                self.__recordings[key] = Recording(*l)
+        self.__request_description()
+        return True
+    
+        
     def __describe_callback(self, result):
         try:
             status, rec = result[0][1:]
@@ -104,17 +123,19 @@ class Recordings:
         description['title'] = rec[1]
         description['start_padding'] = rec[7]
         description['stop_padding'] = rec[8]
-        self.__recordings['%s-%s-%s' % (rec[2], rec[4], rec[5])].description = description
-        self.__update_description()
+        key = '%s-%s-%s' % (rec[2], rec[4], rec[5])
+        self.__recordings[key].description = description
+        self.__request_description()
 
 
-    def __update_description(self):
+    def __request_description(self):
         if not self.server:
             return
         for key in self.__recordings:
             if not self.__recordings[key].description:
+                cb = self.__describe_callback
                 self.server.recording_describe(self.__recordings[key].id,
-                                               callback=self.__describe_callback)
+                                               callback=cb)
                 return
         log.info('got all recording descriptions')
         return
@@ -187,7 +208,8 @@ class Favorites:
             self.server = None
             return
 
-        if entity.present and entity.matches(mcomm.get_address('recordserver')):
+        if entity.present and \
+               entity.matches(mcomm.get_address('recordserver')):
             self.server = entity
             self.server.favorite_list(callback=self.__list_callback)
 
