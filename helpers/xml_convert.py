@@ -11,6 +11,9 @@
 #
 #-------------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/05/09 13:56:25  dischi
+# small bugfix
+#
 # Revision 1.2  2003/02/19 08:03:38  krister
 # Changed the program to accept a list of XML-filenames to convert.
 #
@@ -178,7 +181,7 @@ def print_tree(filename, t):
                 i.write('>%s</cover-img>\n' % movie['cover']['text-data'])
             i.write('    <video')
             if movie['video']['mplayer-options']:
-                i.write('mplayer-options="%s"' % (movie['video']['mplayer-options'])),
+                i.write(' mplayer-options="%s"' % (movie['video']['mplayer-options'])),
             i.write('>\n')
             for f in movie['video']['files']:
                 tag = ""
