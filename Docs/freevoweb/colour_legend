@@ -1,4 +1,0 @@
-
-TV programs may appear as different colours.  Programs that you don't care much about yet are usinf the style 'basic' and are blue by default.  Favorites show up as green, syle 'favorite', scheduled recordings show up as yellow, style 'scheduled', and if something is recording it will be red, style 'recording'.  On the scheduled recordings page normally scheduled recordings show up as blue 'basic' instead of yellow because too much yellow would look annoying on this page.
-
-You may customize your colours if you wish, by modifying the stylesheet src/www/htdocs/styles/main.css.
