@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/12/17 16:58:37  mikeruelle
+# xmltv autochannel detect still occasionally sets things to numbers instead of strings
+#
 # Revision 1.24  2003/12/10 20:40:57  mikeruelle
 # remove childthread use new childapp2 class
 #
@@ -307,7 +310,7 @@ class PluginInterface(plugin.Plugin):
 
         c = 0
         for m in config.TV_CHANNELS:
-            mychan = m[2]
+            mychan = str(m[2])
 	    myband = self.lookupChannelBand(mychan)
             if myband == "Custom":
                 mychan = config.FREQUENCY_TABLE.get(mychan)
