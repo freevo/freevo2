@@ -1,7 +1,7 @@
 #if 0 /*
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
-# util.py - Some Utilities
+# util/misc.py - Some Misc Utilities
 # -----------------------------------------------------------------------
 # $Id$
 #
@@ -10,70 +10,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.56  2003/10/03 16:46:13  dischi
-# moved the encoding type (latin-1) to the config file config.LOCALE
-#
-# Revision 1.55  2003/10/02 18:45:57  dischi
-# add a helper class to read/write fxd files
-#
-# Revision 1.54  2003/09/23 20:05:29  dischi
-# imdb patch from Eirik Meland
-#
-# Revision 1.53  2003/09/21 16:45:47  dischi
-# add function to convert a string with html entities
-#
-# Revision 1.52  2003/09/20 15:08:25  dischi
-# some adjustments to the missing testfiles
-#
-# Revision 1.51  2003/09/20 08:48:11  dischi
-# fixed rmrf to work with python < 2.3
-#
-# Revision 1.50  2003/09/05 20:08:32  dischi
-# o Move getXMLTVChannels to config.py
-# o add encode function to handle non ascii chars
-#
-# Revision 1.49  2003/09/05 18:29:58  dischi
-# fix walk
-#
-# Revision 1.48  2003/09/03 21:02:46  dischi
-# make sure we can save the data
-#
-# Revision 1.47  2003/09/01 14:01:20  outlyer
-# Added automatic XMLTV channel list code; the idea is that you can avoid
-# editing the TV_CHANNELS thing yourself, if your xmltv grabber outputs
-# properly formatted channel listings.
-#
-# If this doesn't work, you can always fall back to adding it manually.
-#
-# To use it, you need this in your local_conf.py
-# ---
-# from util import getXMLTVChannels
-# TV_CHANNELS = getXMLTVChannels(XMLTV_FILE)
-# ---
-#
-# instead of
-#
-# TV_CHANNELS = [('69 COMEDY', 'COMEDY', '69'),
-#                ...
-#               ]
-#
-#
-# I don't know if this will work for everyone, but it's working nicely for me,
-# and I know it's a constant setup difficulty, so please test it. If you don't
-# want to use it, don't do anything, it will not be used unless you add it
-# to your config.
-#
-# Revision 1.46  2003/08/28 18:09:39  dischi
-# use pickle.HIGHEST_PROTOCOL for python 2.3
-#
-# Revision 1.45  2003/08/23 18:33:29  dischi
-# add default parameter to getimage
-#
-# Revision 1.44  2003/08/23 15:15:21  dischi
-# add cover searcher
-#
-# Revision 1.43  2003/08/23 12:51:41  dischi
-# removed some old CVS log messages
+# Revision 1.1  2003/10/11 11:20:11  dischi
+# move util.py into a directory and split it into two files
 #
 #
 # -----------------------------------------------------------------------
@@ -101,20 +39,12 @@
 
 import glob
 import os, sys
-import statvfs
-import string, fnmatch, re
-import md5
+import string, re
 import Image # PIL
 import copy
-import cPickle, pickle # pickle because sometimes cPickle doesn't work
 import htmlentitydefs
 from xml.utils import qp_xml
 import codecs
-
-if float(sys.version[0:3]) < 2.3:
-    PICKLE_PROTOCOL = 1
-else:
-    PICKLE_PROTOCOL = pickle.HIGHEST_PROTOCOL
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
@@ -189,127 +119,19 @@ def unique(s):
     return u
 
 
-def getdirnames(dirname):
-    '''Get all subdirectories in the given directory.
-    Returns a list that is case insensitive sorted.'''
-
-    try:
-        dirnames = [ os.path.join(dirname, dname) for dname in os.listdir(dirname)
-                     if os.path.isdir(os.path.join(dirname, dname)) ]
-    except OSError:
-        return []
-    
-    dirnames.sort(lambda l, o: cmp(l.upper(), o.upper()))
-    
-    return dirnames
-
-
-def match_suffix(filename, suffixlist):
-    '''Check if a filename ends in a given suffix, case is ignored.'''
-
-    fsuffix = os.path.splitext(filename)[1].lower()[1:]
-
-    for suffix in suffixlist:
-        if fsuffix == suffix:
-            return 1
-
-    return 0
-
-
-def match_files(dirname, suffix_list):
-    '''Find all files in a directory that has matches a list of suffixes.
-    Returns a list that is case insensitive sorted.'''
-
-    try:
-        files = [ os.path.join(dirname, fname) for fname in os.listdir(dirname) if
-                  os.path.isfile(os.path.join(dirname, fname)) ]
-    except OSError:
-        print 'util:match_files(): Got error on dir = "%s"' % dirname
-        return []
-
-    matches = [ fname for fname in files if match_suffix(fname, suffix_list) ]
-        
-    matches.sort(lambda l, o: cmp(l.upper(), o.upper()))
-    
-    return matches
-
-
-def find_matches(files, suffix_list):
-    return [ fname for fname in files if match_suffix(fname, suffix_list) ]
-
-
-def match_files_recursively_helper(result, dirname, names):
-    for name in names:
-        fullpath = os.path.join(dirname, name)
-        result.append(fullpath)
-    return result
-
-
-def match_files_recursively(dir, suffix_list):
-    all_files = []
-    os.path.walk(dir, match_files_recursively_helper, all_files)
-
-    matches = unique([f for f in all_files if match_suffix(f, suffix_list) ])
-
-    matches.sort(lambda l, o: cmp(l.upper(), o.upper()))
-    
-    return matches
-
-
 # Helper function for the md5 routine; we don't want to
 # write filenames that aren't in lower ascii so we uhm,
 # hexify them.
 def hexify(str):
-        hexStr = string.hexdigits
-        r = ''
-        for ch in str:
-                i = ord(ch)
-                r = r + hexStr[(i >> 4) & 0xF] + hexStr[i & 0xF]
-        return r
-
-
-# Python's bundled MD5 class only acts on strings, so
-# we have to calculate it in this loop
-def md5file(filename):
-        # Try and use fchksum if installed
-        try:
-            import fchksum
-            return fchksum.fmd5t(filename)[0]
-        except ImportError:
-            m = md5.new()
-            try:
-                f = open(filename, 'r')
-            except IOError:
-                print 'Cannot find file "%s"!' % filename
-                return ''
-            for line in f.readlines():
-                    m.update(line)
-            f.close()
-            return hexify(m.digest())
-
-def resize(filename, x0=25, y0=25):
-
-    if not os.path.isfile(filename):
-        return ''
-        
-    # Since the filenames are not unique we need
-    # to cache them by content, not name.
-    mythumb = (config.FREEVO_CACHEDIR + '/' +
-               os.path.basename(md5file(filename)) + '-%s-%s.png' % (x0, y0))
-    if os.path.isfile(mythumb):
-        return mythumb
-    else:
-        try:
-            im = Image.open(filename)
-        except IOError:
-            return ''
-        try:
-            im_res = im.resize((x0,y0), Image.BICUBIC)
-            im_res.save(mythumb, 'PNG')
-            return mythumb
-        except IOError:
-            print 'error resizing image %s' % filename
-            return filename
+    """
+    return the string 'str' as hex string
+    """
+    hexStr = string.hexdigits
+    r = ''
+    for ch in str:
+        i = ord(ch)
+        r = r + hexStr[(i >> 4) & 0xF] + hexStr[i & 0xF]
+    return r
 
 
 def escape(sql):
@@ -322,93 +144,15 @@ def escape(sql):
     else:
         return 'null'
     
-def recursefolders(root, recurse=0, pattern='*', return_folders=0):
-        # Before anyone asks why I didn't use os.path.walk; it's simple, 
-        # os.path.walk is difficult, clunky and doesn't work right in my
-        # mind. 
-        #
-        # Here's how you use this function:
-        #
-        # songs = recursefolders('/media/Music/Guttermouth',1,'*.mp3',1):
-        # for song in songs:
-        #       print song      
-        #
-        # Should be easy to add to the mp3.py app.
 
-        # initialize
-        result = []
-
-        # must have at least root folder
-        try:
-                names = os.listdir(root)
-        except os.error:
-                return result
-
-        # expand pattern
-        pattern = pattern or '*'
-        pat_list = string.splitfields( pattern , ';' )
-        
-        # check each file
-        for name in names:
-                fullname = os.path.normpath(os.path.join(root, name))
-
-                # grab if it matches our pattern and entry type
-                for pat in pat_list:
-                        if fnmatch.fnmatch(name, pat):
-                                if os.path.isfile(fullname) or \
-                                   (return_folders and os.path.isdir(fullname)):
-                                        result.append(fullname)
-                                continue
-                                
-                # recursively scan other folders, appending results
-                if recurse:
-                        if os.path.isdir(fullname) and not os.path.islink(fullname):
-                                result = result + recursefolders( fullname, recurse,
-                                                                  pattern, return_folders )
-                        
-        return result
-
-
-mounted_dirs = []
-
-def umount(dir):
-    global mounted_dirs
-    if os.path.ismount(dir):
-        os.system("umount %s" % dir)
-        if not os.path.ismount(dir) and dir in mounted_dirs:
-            mounted_dirs.remove(dir)
-
-
-def mount(dir, force=0):
-    global mounted_dirs
-    if not os.path.ismount(dir):
-        os.system("mount %s 2>/dev/null" % dir)
-        if os.path.ismount(dir) and not dir in mounted_dirs:
-            mounted_dirs.append(dir)
-    if force and not dir in mounted_dirs:
-        mounted_dirs.append(dir)
-        
-    
-def umount_all():
-    global mounted_dirs
-    for d in copy.copy(mounted_dirs):
-        umount(d)
-        
-            
-def gzopen(file):
-    import gzip
-    m = open(file)
-    magic = m.read(2)
-    m.close
-    if magic == '\037\213':
-         f = gzip.open(file)
-    else:
-         f = open(file)
-    return f
 
 FILENAME_REGEXP = re.compile("^(.*?)_(.)(.*)$")
 
 def getimage(base, default=None):
+    """
+    return the image base+'.png' or base+'.jpg' if one of them exists.
+    If not return the default
+    """
     if os.path.isfile(base+'.png'):
         return base+'.png'
     if os.path.isfile(base+'.jpg'):
@@ -417,6 +161,9 @@ def getimage(base, default=None):
 
 
 def getname(file):
+    """
+    make a nicer display name from file
+    """
     if not os.path.exists(file):
         return file
     name = os.path.splitext(os.path.basename(file))[0]
@@ -442,6 +189,9 @@ def killall(appname, sig=9):
     This implementation uses the /proc filesystem, it might be Linux-dependent.
     '''
 
+    unify_name = re.compile('[^A-Za-z0-9]').sub
+    appname = unify_name('', appname)
+    
     cmdline_filenames = glob.glob('/proc/[0-9]*/cmdline')
 
     for cmdline_filename in cmdline_filenames:
@@ -453,18 +203,16 @@ def killall(appname, sig=9):
         except IOError:
             continue
 
-        cmdline_args = cmdline.split('\x00')
-
-        for cmdline_arg in cmdline_args:
-            if cmdline_arg.find(appname) != -1:
-                # Found one, kill it
-                pid = int(cmdline_filename.split('/')[2])
-                if config.DEBUG:
-                    a = sig, pid, ' '.join(cmdline_args)
-                    print 'killall: Sending signal %s to pid %s ("%s")' % a
+        if unify_name('', cmdline).find(appname) != -1:
+            # Found one, kill it
+            pid = int(cmdline_filename.split('/')[2])
+            if config.DEBUG:
+                a = sig, pid, ' '.join(cmdline.split('\x00'))
+                print 'killall: Sending signal %s to pid %s ("%s")' % a
+            try:
                 os.kill(pid, sig)
-                break # Done with this process, go on to the next one
-
+            except:
+                pass
     return
 
 
@@ -489,25 +237,6 @@ def title_case(phrase):
 
 
  
-def resolve_media_mountdir(media_id, file):
-    mountdir = None
-    full_filename = file
-    # Find on what media it is located
-    for media in config.REMOVABLE_MEDIA:
-        if media_id == media.id:
-            # Then set the filename
-            mountdir = media.mountdir
-            full_filename = os.path.join(media.mountdir, file)
-            break
-
-    return mountdir, full_filename
-
-def check_media(media_id):
-    for media in config.REMOVABLE_MEDIA:
-        if media_id == media.id:
-            return media
-    return None
-
 def get_bookmarkfile(filename):
     myfile = os.path.basename(filename) 
     myfile = config.FREEVO_CACHEDIR + "/" + str(myfile) + '.bookmark'
@@ -523,57 +252,15 @@ def format_text(text):
     return text
 
 
-def read_pickle(file):
-    try:
-        f = open(file, 'r')
-        try:
-            data = cPickle.load(f)
-        except:
-            data = pickle.load(f)
-        f.close()
-        try:
-            os.utime(file, None)
-        except OSError:
-            _debug_('can change access time for %s' % file)
-        return data
-    except:
-        return None
-
-def save_pickle(data, file):
-    try:
-        if os.path.isfile(file):
-            os.unlink(file)
-        f = open(file, 'w')
-        cPickle.dump(data, f, PICKLE_PROTOCOL)
-        f.close()
-    except IOError:
-        print 'unable to save to cachefile %s' % file
-
-
-def readfile(filename):
-    fd = open(str(filename), 'r')
-    ret = fd.readlines()
-    fd.close()
-    return ret
-
-
 def list_usb_devices():
     devices = []
-    lines = readfile('/proc/bus/usb/devices')
-    for line in lines:
+    fd = open('/proc/bus/usb/devices', 'r')
+    for line in fd.readlines():
         if line[:2] == 'P:':
             devices.append('%s:%s' % (line[11:15], line[23:27]))
+    fd.close()
     return devices
 
-def freespace(path):
-    """
-    freespace(path) -> integer
-    Return the number of bytes available to the user on the file system
-    pointed to by path.
-    """
-    s = os.statvfs(path)
-    return s[statvfs.F_BAVAIL] * long(s[statvfs.F_BSIZE])
-        
 def smartsort(x,y): # A compare function for use in list.sort()
     """
     Compares strings after stripping off 'The' to be "smarter"
@@ -588,16 +275,6 @@ def smartsort(x,y): # A compare function for use in list.sort()
         n = n.replace('The ','',1)
 
     return cmp(m.upper(),n.upper()) # be case insensitive
-
-def totalspace(path):
-    """
-    totalspace(path) -> integer
-    Return the number of total bytes available on the file system
-    pointed to by path.
-    """
-    s = os.statvfs(path)
-    return s[statvfs.F_BLOCKS] * long(s[statvfs.F_BSIZE])
-        
 
 def tagmp3 (filename, title=None, artist=None, album=None, track=None, tracktotal=None, year=None):
     """
@@ -632,43 +309,6 @@ def getdatadir(item):
         if len(directory) and directory[0] == '/':
             directory = directory[1:]
         return os.path.join(config.MOVIE_DATA_DIR, directory)
-
-def touch(file):
-    try:
-        fd = open(file,'w+')
-        fd.close()
-    except IOError:
-        pass
-    return 0
-
-
-def rmrf_helper(result, dirname, names):
-    for name in names:
-        fullpath = os.path.join(dirname, name)
-        if os.path.isfile(fullpath):
-            result[0].append(fullpath)
-    result[1] = [dirname] + result[1]
-    return result
-
-
-def rmrf(top=None):
-    """
-    Pure python version of 'rm -rf'
-    """
-    if not top == '/' and not top == '' and not top == ' ' and top:
-        files = [[],[]]
-        path_walk = os.path.walk(top, rmrf_helper, files)
-        for f in files[0]:
-            try:
-                os.remove(f)
-            except IOError:
-                pass
-        for d in files[1]:
-            try:
-                os.rmdir(d)
-            except IOError:
-                pass
-            
 
 def encode(str, code):
     try:
