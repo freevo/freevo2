@@ -20,7 +20,7 @@ FALSE = 0
 #
 def xml_parseVideo(video_node, dir):
     playlist = []
-    mode = 'video'
+    mode = 'file'
     mplayer_options = ""
 
     for node in video_node.children:
@@ -51,7 +51,7 @@ def xml_parseVideo(video_node, dir):
                 pass
 
     mi = VideoInfo(playlist)
-    #mi.type = mode
+    mi.mode = mode
     mi.mplayer_options = mplayer_options
     return mi
 

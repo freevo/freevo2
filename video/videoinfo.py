@@ -11,13 +11,21 @@ from xml.utils import qp_xml
 # Set to 1 for debug output
 DEBUG = config.DEBUG
 
+TRUE  = 1
+FALSE = 0
+
+import menu
+import rc
+rc         = rc.get_singleton()
+
 from menu import Info
 
 
 class VideoInfo(Info):
     def __init__(self, files):
         Info.__init__(self)
-        self.mode  = 'video'
+        self.type  = 'video'            # fix value
+        self.mode  = 'file'             # file, dvd or vcd
         self.files = files
 
         if isinstance(files, list):
@@ -61,6 +69,12 @@ class VideoInfo(Info):
         self.rom_id    = []
         self.rom_label = []
 
+        # interactive stuff, parsed my mplayer
+        self.current_playtime = 0
+        self.available_audio_tracks = []
+        self.available_subtitles = []
+        self.available_chapters = 0
+
         self.action = self.play
         self.video_player = mplayer.get_singleton()
 
@@ -70,8 +84,31 @@ class VideoInfo(Info):
     def play(self, arg=None, menuw=None):
         print "now playing %s" % self.files
 
-    def eventhandler(self, event):
-        print "eventhandler %s" % self.name
+        if isinstance(self.files, list):
+            self.current_file = self.files[0]
+        else:
+            self.current_file = self.files
 
+        self.video_player.play(self.current_file, self.mplayer_options, self)
+
+        
+    def eventhandler(self, event):
+        print "event %s for %s" % (event , self.name)
+
+        # PLAY_END: do have have to play another file?
+        if event == rc.PLAY_END:
+            if isinstance(self.files, list):
+                pos = self.files.index(self.current_file)
+                if pos < len(self.files)-1:
+                    self.current_file = self.files[pos+1]
+                    print "playing next file"
+                    self.video_player.play(self.current_file, self.mplayer_options, self)
+                    return TRUE
+
+            menuwidget = menu.get_singleton()
+            menuwidget.refresh()
+            return TRUE
+            
+        return FALSE
         
 
