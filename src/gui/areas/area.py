@@ -27,6 +27,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/08/24 16:42:41  dischi
+# Made the fxdsettings in gui the theme engine and made a better
+# integration for it. There is also an event now to let the plugins
+# know that the theme is changed.
+#
 # Revision 1.9  2004/08/23 12:36:09  dischi
 # crop bg image if the screen area is smaller than the screen
 #
@@ -99,7 +104,9 @@ import os
 import config
 import util
 
-import gui.fxdparser as fxdparser
+# FIXME: this is really bad, correct this so fxdparser a.k.a theme
+# is not needed anymore
+from gui import theme_engine as fxdparser
 from gui import Rectangle, Text, Image
 
 
@@ -148,8 +155,6 @@ class Area:
         
         self.imagecache = util.objectcache.ObjectCache(imagecachesize,
                                                        desc='%s_image' % self.name)
-        self.Rectangle = fxdparser.Rectangle
-        self.Image     = fxdparser.Image
 
 
     def set_screen(self, screen):
@@ -226,7 +231,7 @@ class Area:
 
         # maybe we are NOW invisible
         if visible and not self.area_values.visible:
-            print 'FIXME area.py:', self.area_values.name
+            _debug_('FIXME: handle %s' % self.area_values.name, 0)
 
         if not self.area_values.visible or not self.layout:
             self.clear_all()
@@ -339,7 +344,7 @@ class Area:
                 try:
                     area = area.areas[self.area_name]
                 except (KeyError, AttributeError):
-                    print 'no skin information for %s' % (self.area_name)
+                    _debug_('no skin information for %s' % (self.area_name), )
                     area = fxdparser.Area(self.area_name)
                     area.visible = False
 
@@ -484,15 +489,14 @@ class Area:
 
         height2 = height
         if height2 == -1:
-            height2 = font.h + 2
+            height2 = font.height + 2
 
         if height == -1:
             t = Text(text, (x, y), (width, height2), font, align_h, align_v,
                      mode, ellipses, dim)
         else:
-            print 'Warning: TextBox not supported yet', text
-            t = Text(text, (x, y), (width, height2), font, align_h, align_v,
-                     mode, ellipses, dim)
+            t = TextBox(text, (x, y), (width, height2), font, align_h, align_v,
+                        mode, ellipses)
         self.screen.layer[2].add_child(t)
         return t
 
@@ -555,7 +559,6 @@ class Area:
                     h == self.screen.height) and \
                     self.area_values.x == x and self.area_values.y == y and \
                     self.area_values.width == w and self.area_values.height == h:
-                _debug_('full screen crop: %s' % image)
                 i = Image(image, (0, 0), (self.screen.width, self.screen.height))
                 i.crop((x,y), (w,h))
                 i.set_pos((x,y))

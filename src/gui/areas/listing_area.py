@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/08/24 16:42:41  dischi
+# Made the fxdsettings in gui the theme engine and made a better
+# integration for it. There is also an event now to let the plugins
+# know that the theme is changed.
+#
 # Revision 1.7  2004/08/22 20:06:18  dischi
 # Switch to mevas as backend for all drawing operations. The mevas
 # package can be found in lib/mevas. This is the first version using
@@ -101,7 +106,7 @@ class Listing_Area(Area):
         if len(l) != 4:
             return string
         try:
-            height = font.h
+            height = font.height
             image = os.path.join(self.settings.icon_dir, l[2].lower())
             if os.path.isfile(image + '.jpg'):
                 image += '.jpg' 
@@ -183,12 +188,12 @@ class Listing_Area(Area):
                 rw = 0
                 if ct.rectangle:
                     rw, rh, r = self.get_item_rectangle(ct.rectangle, content.width,
-                                                        ct.font.h)
+                                                        ct.font.height)
                     hskip = min(hskip, r.x)
                     vskip = min(vskip, r.y)
                     items_w = max(items_w, r.width)
 
-                items_h = max(items_h, ct.font.h, rh)
+                items_h = max(items_h, ct.font.height, rh)
 
         elif content.type == 'image' or content.type == 'image+text':
             for t in possible_types:
@@ -199,7 +204,7 @@ class Listing_Area(Area):
                     if content.type == 'image+text':
                         rw, rh, r = self.get_item_rectangle(ct.rectangle, ct.width,
                                                             max(ct.height,
-                                                                int(ct.font.h * 1.1)))
+                                                                int(ct.font.height * 1.1)))
                     else:
                         rw, rh, r = self.get_item_rectangle(ct.rectangle, ct.width,
                                                             ct.height)
@@ -208,7 +213,7 @@ class Listing_Area(Area):
 
                 addh = 0
                 if content.type == 'image+text':
-                    addh = int(ct.font.h * 1.1)
+                    addh = int(ct.font.height * 1.1)
                     
                 items_w = max(items_w, ct.width, rw)
                 items_h = max(items_h, ct.height + addh, rh + addh)
@@ -406,10 +411,10 @@ class Listing_Area(Area):
                         r1 = r2 = None
                         if s_val.rectangle:
                             r1 = self.get_item_rectangle(s_val.rectangle,
-                                                         width, s_val.font.h)[2]
+                                                         width, s_val.font.height)[2]
                         if n_val.rectangle:
                             r2 = self.get_item_rectangle(n_val.rectangle,
-                                                         width, n_val.font.h)[2]
+                                                         width, n_val.font.height)[2]
                         min_rx = 0
                         max_rw = width
                         if r1:
@@ -427,7 +432,7 @@ class Listing_Area(Area):
                 # draw the rectangle below the item
                 #
                 if val.rectangle:
-                    r = self.get_item_rectangle(val.rectangle, width, val.font.h)[2]
+                    r = self.get_item_rectangle(val.rectangle, width, val.font.height)[2]
                     b = self.drawbox(x0 + hskip + r.x + x_icon - \
                                      self.settings.box_under_icon * x_icon,
                                      y0 + vskip + r.y,
@@ -531,7 +536,7 @@ class Listing_Area(Area):
             if draw_this_item and content.type == 'image' or content.type == 'image+text':
                 rec_h = val.height
                 if content.type == 'image+text':
-                    rec_h += int(1.1 * val.font.h)
+                    rec_h += int(1.1 * val.font.height)
 
                 if val.align == 'center':
                     x0 = item_x0 + (hspace - val.width) / 2
@@ -546,7 +551,7 @@ class Listing_Area(Area):
                 if val.rectangle:
                     if content.type == 'image+text':
                         r = self.get_item_rectangle(val.rectangle, val.width,
-                                                    max(rec_h, int(val.font.h * 1.1)))[2]
+                                                    max(rec_h, int(val.font.height * 1.1)))[2]
                     else:
                         r = self.get_item_rectangle(val.rectangle, val.width, rec_h)[2]
                     b = self.drawbox(x0 + r.x, y0 + r.y, r.width, r.height, r)

@@ -7,6 +7,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/08/24 16:42:42  dischi
+# Made the fxdsettings in gui the theme engine and made a better
+# integration for it. There is also an event now to let the plugins
+# know that the theme is changed.
+#
 # Revision 1.10  2004/08/22 20:06:21  dischi
 # Switch to mevas as backend for all drawing operations. The mevas
 # package can be found in lib/mevas. This is the first version using
@@ -54,7 +59,7 @@ class Window(CanvasContainer):
         
         self._display_width  = gui.get_display().width
         self._display_height = gui.get_display().height
-        self.evt_context   = 'input'
+        self.event_context   = 'input'
 
         self.center_on_screen = False
 
@@ -71,7 +76,8 @@ class Window(CanvasContainer):
             y  = self._display_height/2 - height/2
             self.center_on_screen = True
 
-        self.__set_popupbox_style__()
+        self.content_layout    = gui.theme.popup.content
+        self.background_layout = gui.theme.popup.background
 
         self.set_size((width, height))
         self.set_pos((x, y))
@@ -91,8 +97,8 @@ class Window(CanvasContainer):
         _debug_('Window::_create_background %s' % self, 1)
         
         for o in self.background_layout:
-            if o[0] == 'rectangle':
-                r = copy.deepcopy(o[1])
+            if o.type == 'rectangle':
+                r = copy.deepcopy(o)
                 r.width  = eval(str(r.width),  { 'MAX' : self.width })
                 r.height = eval(str(r.height), { 'MAX' : self.height })
 
@@ -114,9 +120,7 @@ class Window(CanvasContainer):
     def show(self):
         if self._display:
             return
-        self.parent_handler = eventhandler.get().eventhandler
-        eventhandler.append(self)
-
+        eventhandler.add_window(self)
         self._display = gui.get_display()
         self._create_background(self._display)
         self._display.add_child(self)
@@ -124,58 +128,9 @@ class Window(CanvasContainer):
 
 
     def destroy(self):
-        eventhandler.remove(self)
+        eventhandler.remove_window(self)
         if not self._display:
             return
         self._display.remove_child(self)
         self._display.update()
         self._display = None
-        
-
-    def __find_current_menu__(self, widget):
-        if not widget:
-            return None
-        if not hasattr(widget, 'menustack'):
-            return self.__find_current_menu__(widget.parent)
-        return widget.menustack[-1]
-        
-
-    def __set_popupbox_style__(self, widget=None):
-        """
-        This function returns style information for drawing a popup box.
-
-        return backround, spacing, color, font, button_default, button_selected
-        background is ('image', Image) or ('rectangle', Rectangle)
-
-        Image attributes: filename
-        Rectangle attributes: color (of the border), size (of the border),
-           bgcolor (fill color), radius (round box for the border). There are also
-           x, y, width and height as attributes, but they may not be needed for the
-           popup box
-
-        button_default, button_selected are XML_item
-        attributes: font, rectangle (Rectangle)
-
-        All fonts are Font objects
-        attributes: name, size, color, shadow
-        shadow attributes: visible, color, x, y
-        """
-        from gui import fxdparser
-        menu = self.__find_current_menu__(widget)
-
-        if menu and hasattr(menu, 'skin_settings') and menu.skin_settings:
-            settings = menu.skin_settings
-        else:
-            settings = gui.settings.settings
-
-        layout = settings.popup
-
-        background = []
-        for bg in layout.background:
-            if isinstance(bg, fxdparser.Image):
-                background.append(( 'image', bg))
-            elif isinstance(bg, fxdparser.Rectangle):
-                background.append(( 'rectangle', bg))
-
-        self.content_layout   = layout.content
-        self.background_layout = background

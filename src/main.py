@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.141  2004/08/24 16:42:39  dischi
+# Made the fxdsettings in gui the theme engine and made a better
+# integration for it. There is also an event now to let the plugins
+# know that the theme is changed.
+#
 # Revision 1.140  2004/08/23 20:37:52  dischi
 # fading support in splash screen
 #
@@ -181,24 +186,20 @@ class SkinSelectItem(Item):
         self.skin  = skin
         
     def actions(self):
+        """
+        Return the select function to load that skin
+        """
         return [ ( self.select, '' ) ]
 
     def select(self, arg=None, menuw=None):
         """
         Load the new skin and rebuild the main menu
         """
-        gui.set_base_fxd(self.skin)
-        pos = menuw.menustack[0].choices.index(menuw.menustack[0].selected)
-
-        parent = menuw.menustack[0].choices[0].parent
-        menuw.menustack[0].choices = []
-        for p in plugin.get('mainmenu'):
-            menuw.menustack[0].choices += p.items(parent)
-
-        for i in menuw.menustack[0].choices:
-            i.is_mainmenu_item = True
-
-        menuw.menustack[0].selected = menuw.menustack[0].choices[pos]
+        # load new theme
+        theme = gui.theme_engine.set_base_fxd(self.skin)
+        # set it to the main menu as used theme
+        pos = menuw.menustack[0].theme = theme
+        # and go back
         menuw.back_one_menu()
 
 
@@ -223,6 +224,7 @@ class MainMenu(Item):
 
         mainmenu = menu.Menu(_('Freevo Main Menu'), items, item_types='main', umount_all = 1)
         mainmenu.item_types = 'main'
+        mainmenu.theme = gui.get_theme()
         menuw.pushmenu(mainmenu)
         menuw.show()
         
@@ -276,8 +278,8 @@ class Splashscreen(Area):
     def __init__(self, text):
         Area.__init__(self, 'content')
         self.pos          = 0
-        self.bar_border   = self.Rectangle(bgcolor=0xff000000L, size=2)
-        self.bar_position = self.Rectangle(bgcolor=0xa0000000L)
+        self.bar_border   = gui.theme_engine.Rectangle(bgcolor=0xff000000L, size=2)
+        self.bar_position = gui.theme_engine.Rectangle(bgcolor=0xa0000000L)
         self.text         = text
         self.content      = []
         self.bar          = None
@@ -439,7 +441,7 @@ try:
     import gui
     
     # prepare the skin
-    gui.settings.settings.prepare()
+    gui.theme.prepare()
 
     # Fire up splashscreen and load the plugins
     splash = Splashscreen(_('Starting Freevo, please wait ...'))
@@ -473,7 +475,7 @@ try:
     splash.hide()
     
     # prepare again, now that all plugins are loaded
-    gui.settings.settings.prepare()
+    gui.theme.prepare()
 
     # start menu
     MainMenu().getcmd()

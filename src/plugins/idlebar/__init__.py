@@ -17,6 +17,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2004/08/24 16:42:42  dischi
+# Made the fxdsettings in gui the theme engine and made a better
+# integration for it. There is also an event now to let the plugins
+# know that the theme is changed.
+#
 # Revision 1.26  2004/08/23 20:41:47  dischi
 # fade support
 #
@@ -109,7 +114,7 @@ class PluginInterface(plugin.DaemonPlugin):
         plugin.DaemonPlugin.__init__(self)
         plugin.register(self, 'idlebar')
         eventhandler.register(self, SCREEN_CONTENT_CHANGE)
-        
+        eventhandler.register(self, THEME_CHANGE)
         self.poll_interval  = 300
         self.poll_menu_only = False
         self.plugins        = None
@@ -259,6 +264,9 @@ class PluginInterface(plugin.DaemonPlugin):
         
         if not self.visible:
             return False
+
+        if event == THEME_CHANGE:
+            self.update()
         if plugin.isevent(event) == 'IDENTIFY_MEDIA':
             if self.update():
                 gui.get_display().update()
@@ -582,7 +590,7 @@ class weather(IdleBarPlugin):
                         (x, osd.y + 15, -1, -1))
         temp = u'%s\xb0' % temp
         width = font.stringsize(temp)
-        osd.drawstring(temp, font, None, x + 15, osd.y + 55 - font.h, width, font.h,
+        osd.drawstring(temp, font, None, x + 15, osd.y + 55 - font.height, width, font.height,
                        'left', 'top')
         return width + 15
 

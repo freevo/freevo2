@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/08/24 16:42:42  dischi
+# Made the fxdsettings in gui the theme engine and made a better
+# integration for it. There is also an event now to let the plugins
+# know that the theme is changed.
+#
 # Revision 1.3  2004/08/22 20:06:21  dischi
 # Switch to mevas as backend for all drawing operations. The mevas
 # package can be found in lib/mevas. This is the first version using
@@ -71,5 +76,3 @@ class AlertBox(PopupBox):
             self.destroy()
             if self.handler:
                 self.handler()
-        else:
-            return self.parent_handler(event)

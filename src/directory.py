@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.140  2004/08/24 16:42:39  dischi
+# Made the fxdsettings in gui the theme engine and made a better
+# integration for it. There is also an event now to let the plugins
+# know that the theme is changed.
+#
 # Revision 1.139  2004/08/14 15:10:20  dischi
 # do not use skin.py
 #
@@ -779,7 +784,7 @@ class DirItem(Playlist):
                                   force_skin_layout = self.DIRECTORY_FORCE_SKIN_LAYOUT)
 
             if self.skin_fxd:
-                item_menu.skin_settings = gui.load_settings(self.skin_fxd)
+                item_menu.theme = self.skin_fxd
 
             menuw.pushmenu(item_menu)
 
@@ -847,10 +852,10 @@ class DirItem(Playlist):
 
         # for DIRECTORY_FORCE_SKIN_LAYOUT max = number of styles in the menu
         if arg == 'FORCE_SKIN_LAYOUT':
-            if self.display_type and gui.get_settings().menu.has_key(self.display_type):
-                area = gui.get_settings().menu[self.display_type]
+            if self.display_type and gui.theme.menu.has_key(self.display_type):
+                area = gui.theme.menu[self.display_type]
             else:
-                area = gui.get_settings().menu['default']
+                area = gui.theme.menu['default']
             max = len(area.style) - 1
 
         # switch from no settings to 0

@@ -6,6 +6,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2004/08/24 16:42:40  dischi
+# Made the fxdsettings in gui the theme engine and made a better
+# integration for it. There is also an event now to let the plugins
+# know that the theme is changed.
+#
 # Revision 1.25  2004/08/23 14:28:21  dischi
 # fix animation support when changing displays
 #
@@ -116,45 +121,58 @@ def AreaHandler(type, area_list):
     """
     import areas
     import imagelib
-    return areas.AreaHandler(type, area_list, get_settings(), display, imagelib)
+    return areas.AreaHandler(type, area_list, get_theme, display, imagelib)
 
-    
-def get_settings():
+
+import theme_engine
+theme = theme_engine.init()
+
+def get_theme():
     """
-    get current fxd settings
+    get current fxd theme
     """
-    return settings.settings
+    return theme
 
 
-
-
-# Bad interface into settings based on current
-# skin interface.
-# FIXME: needs cleanup where used!
-
-if not config.HELPER:
-    import fxdparser
-    settings = fxdparser.Settings()
-
-
-def set_base_fxd(file):
-    return settings.set_base_fxd(file)
-
-
-def load_settings(filename, copy_content = 1):
-    return settings.load(filename, copy_content)
+def set_theme(new):
+    """
+    set current fxd theme
+    """
+    global theme
+    if new == theme:
+        # new and old theme are the same,
+        # don't do anything
+        return theme
+    if isinstance(new, str):
+        # new theme is only a string, load the theme file
+        # based on the current theme
+        _debug_('loading new theme %s', new)
+        theme = theme_engine.load(new, theme)
+    else:
+        # set the global theme variable
+        theme = new
+    # notify other parts of Freevo about the theme change
+    # FIXME: this is a bad piece of code because it imports
+    # event and eventhandler here. We can do it at the beginning
+    # because eventhandler needs gui (bad code style, I know)
+    import eventhandler
+    import event
+    eventhandler.get_singleton().notify(event.Event(event.THEME_CHANGE))
+    # return new theme in case the new one was given to this
+    # function as string and the caller wants the object
+    return theme
 
 
 def get_font(name):
-    return settings.settings.get_font(name)
+    return theme.get_font(name)
 
 
 def get_image(name):
-    return settings.settings.get_image(name)
+    return theme.get_image(name)
 
 
 def get_icon(name):
-    return settings.settings.get_icon(name)
+    return theme.get_icon(name)
 
 
 

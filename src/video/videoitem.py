@@ -10,6 +10,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.147  2004/08/24 16:42:44  dischi
+# Made the fxdsettings in gui the theme engine and made a better
+# integration for it. There is also an event now to let the plugins
+# know that the theme is changed.
+#
 # Revision 1.146  2004/08/01 10:46:34  dischi
 # remove menuw hiding, add some test code
 #
@@ -340,7 +345,7 @@ class VideoItem(Item):
         """
         if not self.menuw:
             self.menuw = menuw
-        m = menu.Menu(self.name, self.variants, reload_func=None, fxd_file=self.skin_fxd)
+        m = menu.Menu(self.name, self.variants, reload_func=None, theme=self.skin_fxd)
         m.item_types = 'video'
         self.menuw.pushmenu(m)
 
@@ -600,7 +605,7 @@ class VideoItem(Item):
             i.name            = Unicode(_('Play Title %s')) % (title+1)
             items.append(i)
 
-        moviemenu = menu.Menu(self.name, items, umount_all = 1, fxd_file=self.skin_fxd)
+        moviemenu = menu.Menu(self.name, items, umount_all = 1, theme=self.skin_fxd)
         moviemenu.item_types = 'video'
         self.menuw.pushmenu(moviemenu)
 

@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.49  2004/08/24 16:42:43  dischi
+# Made the fxdsettings in gui the theme engine and made a better
+# integration for it. There is also an event now to let the plugins
+# know that the theme is changed.
+#
 # Revision 1.48  2004/08/14 16:54:47  rshortt
 # Remove encode() call on program object.
 #
@@ -141,6 +146,7 @@ class TVGuide(MenuApplication):
         MenuApplication.show(self)
         self.update_schedules(force=True)
         self.refresh()
+        self.engine.show(config.OSD_FADE_STEPS)
         
 
     def hide(self):
@@ -148,7 +154,8 @@ class TVGuide(MenuApplication):
         hide the guide
         """
         MenuApplication.hide(self)
-        self.engine.clear()
+        # self.engine.clear()
+        self.engine.hide(config.OSD_FADE_STEPS)
             
         
     def destroy(self):
@@ -156,7 +163,7 @@ class TVGuide(MenuApplication):
         destroy the guide
         """
         MenuApplication.destroy(self)
-        del self.engine
+        # del self.engine
         
         
     def start_tv(self):

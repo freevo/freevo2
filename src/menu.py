@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.106  2004/08/24 16:42:39  dischi
+# Made the fxdsettings in gui the theme engine and made a better
+# integration for it. There is also an event now to let the plugins
+# know that the theme is changed.
+#
 # Revision 1.105  2004/08/23 20:36:42  dischi
 # rework application handling
 #
@@ -123,7 +128,7 @@ class Menu:
     """
     a Menu with Items for the MenuWidget
     """
-    def __init__(self, heading, choices=[], fxd_file=None, umount_all = 0,
+    def __init__(self, heading, choices=[], theme=None, umount_all = 0,
                  reload_func = None, item_types = None, force_skin_layout = -1):
 
         self.heading = heading
@@ -136,9 +141,9 @@ class Menu:
             self.selected_pos = -1
             
         self.umount_all    = umount_all    # umount all ROM drives on display?
-        self.skin_settings = None
-        if fxd_file:
-            self.skin_settings = gui.load_settings(fxd_file)
+        self.theme = None
+        if theme:
+            self.theme = theme
 
         # special items for the new skin to use in the view or info
         # area. If None, menu.selected will be taken
@@ -212,6 +217,13 @@ class MenuApplication(Application):
         show the menu on the screen
         """
         Application.show(self)
+
+
+    def destroy(self):
+        """
+        destroy the menu
+        """
+        Application.stop(self)
 
 
     def refresh(self):
@@ -319,7 +331,10 @@ class MenuWidget(Application):
                 reload = menu.reload_func()
                 if reload:
                     self.menustack[-1] = reload
+                    menu = self.menustack[-1]
 
+            if isinstance(menu, Menu):
+                gui.set_theme(menu.theme)
             if arg == 'reload':
                 self.refresh(reload=1)
             else:
@@ -330,6 +345,7 @@ class MenuWidget(Application):
         while len(self.menustack) > 1:
             del self.menustack[-1]
         menu = self.menustack[0]
+        gui.set_theme(menu.theme)
         self.refresh()
 
     
@@ -338,7 +354,16 @@ class MenuWidget(Application):
             _debug_('menu auto-hide %s' % self.menustack[-1])
             self.menustack[-1].hide()
         self.menustack.append(menu)
-        if not isinstance(menu, Menu):
+        if isinstance(menu, Menu):
+            if not menu.theme:
+                menu.theme = self.menustack[-2].theme
+            if isinstance(menu.theme, str):
+                if menu.theme == self.menustack[-2].theme.filename:
+                    menu.theme = self.menustack[-2].theme
+                else:
+                    menu.theme = gui.set_theme(menu.theme)
+            gui.set_theme(menu.theme)
+        else:
             menu.menuw = self
         self.refresh()
 
@@ -370,10 +395,10 @@ class MenuWidget(Application):
                 items.append(a)
             else:
                 items.append(MenuItem(a[1], a[0]))
-        fxd_file = None
+        theme = None
 
         if item.skin_fxd:
-            fxd_file = item.skin_fxd
+            theme = item.skin_fxd
 
         for i in items:
             if not hasattr(item, 'is_mainmenu_item'):
@@ -383,7 +408,7 @@ class MenuWidget(Application):
             elif hasattr(item, 'type'):
                 i.display_type = item.type
                 
-        s = Menu(menu_name, items, fxd_file=fxd_file)
+        s = Menu(menu_name, items, theme=theme)
         s.is_submenu = True
         self.pushmenu(s)
             

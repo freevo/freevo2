@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/08/24 16:42:41  dischi
+# Made the fxdsettings in gui the theme engine and made a better
+# integration for it. There is also an event now to let the plugins
+# know that the theme is changed.
+#
 # Revision 1.8  2004/08/23 20:37:02  dischi
 # cleanup fading code
 #
@@ -135,12 +140,12 @@ class AreaHandler:
     main skin class
     """
     
-    def __init__(self, type, areas, settings, screen, imagelib):
+    def __init__(self, type, areas, get_theme, screen, imagelib):
         """
         init the skin engine
         """
         self.type          = type
-        self.settings      = settings
+        self.get_theme     = get_theme
         self.display_style = { 'menu' : 0 }
         self.areas         = []
         self.visible       = False
@@ -189,25 +194,22 @@ class AreaHandler:
         """
         Toggle display style
         """
+        theme = self.get_theme()
+
         if isinstance(menu, str):
             if not self.display_style.has_key(menu):
                 self.display_style[menu] = 0
             self.display_style[menu] = (self.display_style[menu] + 1) % \
-                                       len(self.settings.sets[menu].style)
+                                       len(theme.sets[menu].style)
             return
             
         if menu.force_skin_layout != -1:
             return
         
-        if menu and menu.skin_settings:
-            settings = menu.skin_settings
+        if theme.special_menu.has_key(menu.item_types):
+            area = theme.special_menu[menu.item_types]
         else:
-            settings = self.settings
-
-        if settings.special_menu.has_key(menu.item_types):
-            area = settings.special_menu[menu.item_types]
-        else:
-            area = settings.default_menu['default']
+            area = theme.default_menu['default']
 
         if self.display_style['menu'] >=  len(area.style):
             self.display_style['menu'] = 0
@@ -341,7 +343,6 @@ class AreaHandler:
             else:
                 self.screen.show()
         self.visible = True
-        
 
     def draw(self, object):
         """
@@ -349,19 +350,17 @@ class AreaHandler:
         object may be a menu, a table for the tv menu are an audio item for
         the audio player
         """
-        settings = self.settings
+        theme = self.get_theme()
         
         if self.type == 'menu':
-            if object.skin_settings:
-                settings = object.skin_settings
             style = self.__get_display_style__(object)
 
             if object.force_skin_layout != -1:
                 style = object.force_skin_layout
 
             # get the correct <menu>
-            if object.item_types and settings.special_menu.has_key(object.item_types):
-                area_definitions = settings.special_menu[object.item_types]
+            if object.item_types and theme.special_menu.has_key(object.item_types):
+                area_definitions = theme.special_menu[object.item_types]
             else:
                 self.__scan_for_text_view__(object)
 
@@ -370,7 +369,7 @@ class AreaHandler:
                     name += ' description'
                 if not self.use_images:
                     name += ' no image'
-                area_definitions = settings.default_menu[name]
+                area_definitions = theme.default_menu[name]
 
             # get the correct style based on style
             if len(area_definitions.style) > style:
@@ -398,7 +397,7 @@ class AreaHandler:
                 
         else:
             style = self.__get_display_style__(self.type)
-            area_definitions  = settings.sets[self.type]
+            area_definitions  = theme.sets[self.type]
             if hasattr(area_definitions, 'style'):
                 try:
                     area_definitions = area_definitions.style[style][1]
@@ -413,7 +412,7 @@ class AreaHandler:
 
         try:
             for a in self.areas:
-                a.draw(settings, object, viewitem, infoitem, area_definitions)
+                a.draw(theme, object, viewitem, infoitem, area_definitions)
             self.canvas.update()
 
         except UnicodeError, e:

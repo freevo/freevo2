@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.51  2004/08/24 16:42:39  dischi
+# Made the fxdsettings in gui the theme engine and made a better
+# integration for it. There is also an event now to let the plugins
+# know that the theme is changed.
+#
 # Revision 1.50  2004/08/08 18:56:37  rshortt
 # Add some quick recordserver events.  I'm planning on reviewing them and
 # adding more with names that make sense.
@@ -581,5 +586,4 @@ RECORD_STOP      = Event('RECORD_STOP')
 
 
 SCREEN_CONTENT_CHANGE = Event('SCREEN_CONTENT_CHANGE')
-
-                         
+THEME_CHANGE          = Event('THEME_CHANGE')

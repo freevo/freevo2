@@ -1,6 +1,6 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
-# xml_skin.py - XML reader for the skin
+# theme.py - xml based theme engine
 # -----------------------------------------------------------------------
 # $Id$
 #
@@ -9,23 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.5  2004/08/22 20:06:17  dischi
-# Switch to mevas as backend for all drawing operations. The mevas
-# package can be found in lib/mevas. This is the first version using
-# mevas, there are some problems left, some popup boxes and the tv
-# listing isn't working yet.
+# Revision 1.1  2004/08/24 16:42:40  dischi
+# Made the fxdsettings in gui the theme engine and made a better
+# integration for it. There is also an event now to let the plugins
+# know that the theme is changed.
 #
-# Revision 1.4  2004/08/01 10:39:05  dischi
-# remove some visible code for testing
-#
-# Revision 1.3  2004/07/24 12:22:15  dischi
-# gui update
-#
-# Revision 1.2  2004/07/23 19:43:30  dischi
-# move most of the settings code out of the skin engine
-#
-# Revision 1.1  2004/07/22 21:16:01  dischi
-# add first draft of new gui code
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -327,6 +315,21 @@ XML_types = {
     'dim'      : ('visible', 0),    
 }
 
+def int2col(col):
+    """
+    Convert a 32-bit TRGB color to a 4 element tuple
+    """
+    if col == None:
+        return (0,0,0,255)
+    a = 255 - ((col >> 24) & 0xff)
+    r = (col >> 16) & 0xff
+    g = (col >> 8) & 0xff
+    b = (col >> 0) & 0xff
+    c = (r, g, b, a)
+    return c
+        
+    
+
 class XML_data:
     """
     a basic data element for parsing the attributes
@@ -351,22 +354,25 @@ class XML_data:
         parse the node
         """
         for attr in node.attrs:
-            c = attr[1].encode(config.LOCALE)
+            c = attr[1]
 
             if c in self.content:
                 this_scale = 0
-                if XML_types[c][1] == 1: this_scale = scale[0]
-                if XML_types[c][1] == 2: this_scale = scale[1]
-                if XML_types[c][1] == 3: this_scale = min(scale[0], scale[1])
+                if XML_types[c][1] == 1:
+                    this_scale = scale[0]
+                if XML_types[c][1] == 2:
+                    this_scale = scale[1]
+                if XML_types[c][1] == 3:
+                    this_scale = min(scale[0], scale[1])
 
                 if this_scale:
-                    e = 'attr_int(node, "%s", self.%s, %s)' % (c, c, this_scale)
+                    setattr(self, c, attr_int(node, c, getattr(self, c), this_scale))
                 else:
                     e = 'attr_%s(node, "%s", self.%s)' % (XML_types[c][0], c, c)
-                setattr(self, c, eval(e))
+                    setattr(self, c, eval(e))
 
 
-    def prepare(self):
+    def prepare(self, font_dict=None, color_dict=None):
         """
         basic prepare function
         """
@@ -376,16 +382,30 @@ class XML_data:
                     p = plugin.getbyname(self.visible[4:])
                 else:
                     p = plugin.getbyname(self.visible)
-#                 if hasattr(p, 'visible'):
-#                     p = p.visible
                 if len(self.visible) > 4 and self.visible[:4] == 'not ':
                     self.visible = not p
                 else:
                     self.visible = p
         except (TypeError, AttributeError):
             pass
-            
-    
+        # Brute force, maybe this item has no font or color attributes.
+        # But catching exceptions is faster than searching first
+        if font_dict:
+            try:
+                self.font = font_dict[self.font]
+            except (TypeError, KeyError, AttributeError):
+                pass
+        if color_dict:
+            try:
+                self.color = color_dict[self.color]
+            except (TypeError, KeyError, AttributeError):
+                pass
+            try:
+                self.bgcolor = color_dict[self.bgcolor]
+            except (TypeError, KeyError, AttributeError):
+                pass
+
+
 
 # ======================================================================
 
@@ -606,20 +626,7 @@ class Content(XML_data):
         
 
     def prepare(self, font, color, search_dirs):
-        XML_data.prepare(self)
-        if self.font:
-            if font.has_key(self.font):
-                self.font = font[self.font]
-            else:
-                print 'skin error: can\'t find font %s' % self.font
-                print font
-                self.font = font['default']
-        else:
-            self.font = font['default']
-
-        if color.has_key(self.color):
-            self.color = color[self.color]
-
+        XML_data.prepare(self, font, color)
         for type in self.types:
             if self.types[type].font:
                 self.types[type].font = font[self.types[type].font]
@@ -778,6 +785,7 @@ class Image(XML_data):
     an image
     """
     def __init__(self):
+        self.type = 'image'
         XML_data.__init__(self, ('x', 'y', 'width', 'height', 'image', 'filename',
                                  'label', 'visible'))
 
@@ -802,6 +810,7 @@ class Rectangle(XML_data):
     a Rectangle
     """
     def __init__(self, color=None, bgcolor=None, size=None, radius = None):
+        self.type = 'rectangle'
         XML_data.__init__(self, ('x', 'y', 'width', 'height', 'color',
                                  'bgcolor', 'size', 'radius' ))
         if not color == None:
@@ -814,30 +823,29 @@ class Rectangle(XML_data):
             self.radius = radius
 
     def prepare(self, color, search_dirs=None, image_names=None):
-        XML_data.prepare(self)
-        if color.has_key(self.color):
-            self.color = color[self.color]
-        if color.has_key(self.bgcolor):
-            self.bgcolor = color[self.bgcolor]
+        XML_data.prepare(self, None, color)
 
 
 
 class Font(XML_data):
     """
-    font tag
+    Font tag. The prepared object is a font object that can
+    be used in the text widgets for drawing texts.
     """
     def __init__(self, label):
         XML_data.__init__(self, ('name', 'size', 'color', 'bgcolor'))
-        self.label  = label
+        self.label = label
         self.shadow = XML_data(('visible', 'color', 'x', 'y', 'border'))
         self.shadow.visible = False
-        self.shadow.border  = False
+        self.shadow.border = False
+
         
     def parse(self, node, scale, current_dir):
         XML_data.parse(self, node, scale, current_dir)
         for subnode in node.children:
             if subnode.name == u'shadow':
                 self.shadow.parse(subnode, scale, current_dir)
+
 
     def stringsize(self, text):
         size = self.font.stringsize(text)
@@ -852,18 +860,16 @@ class Font(XML_data):
     def prepare(self, color, search_dirs=None, image_names=None, scale=1.0):
         if color.has_key(self.color):
             self.color = color[self.color]
-        self.size   = int(float(self.size) * scale)
-        import gui
-        self.font   = font.get(self.name, self.size)
-        self.h      = self.font.height
+        self.size = int(float(self.size) * scale)
+        self.font = font.get(self.name, self.size)
+        self.height = self.font.height
         if self.shadow.visible:
             if color.has_key(self.shadow.color):
                 self.shadow.color = color[self.shadow.color]
             if self.shadow.border:
-                self.h += (self.size / 10) * 2
+                self.height += (self.size / 10) * 2
             else:
-                self.h += abs(self.shadow.y)
-        self.height = self.h
+                self.height += abs(self.shadow.y)
         
 
     
@@ -878,15 +884,23 @@ class AreaSet:
         self.areas = {}
 
     def parse(self, node, scale, current_dir):
+        """
+        parse an area node
+        """
         for subnode in node.children:
-            if not self.areas.has_key(subnode.name):
-                self.areas[subnode.name] = Area(subnode.name)
-                self.areas[subnode.name].visible = True
-            self.areas[subnode.name].parse(subnode, scale, current_dir)
-
+            try:
+                self.areas[subnode.name].parse(subnode, scale, current_dir)
+            except KeyError:
+                a = Area(subnode.name)
+                a.visible = True
+                a.parse(subnode, scale, current_dir)
+                self.areas[subnode.name] = a
+                
     def prepare(self, layout):
-        for c in self.areas:
-            self.areas[c].prepare(layout)
+        """
+        prepare all areas
+        """
+        map(lambda a: a[1].prepare(layout), self.areas.items())
 
     
 # ======================================================================
@@ -896,8 +910,7 @@ class FXDSettings:
     """
     skin main settings class
     """
-    def __init__(self):
-
+    def __init__(self, filename):
         self._layout   = {}
         self._font     = {}
         self._color    = {}
@@ -916,9 +929,20 @@ class FXDSettings:
         self.all_variables    = ('box_under_icon', )
         self.box_under_icon   = 0
 
+        # load plugin skin files:
+        pdir = os.path.join(config.SHARE_DIR, 'skins/plugins')
+        if os.path.isdir(pdir):
+            for p in util.match_files(pdir, [ 'fxd' ]):
+                self.load(p)
+
+        self.load(filename)
+
         
-    def parse(self, freevo_type, scale, c_dir):
-        for node in freevo_type.children:
+    def parse(self, children, scale, c_dir):
+        """
+        parse the skin root node
+        """
+        for node in children:
             if node.name == u'main':
                 self._mainmenu.parse(node, scale, c_dir)
 
@@ -952,7 +976,6 @@ class FXDSettings:
                         self._layout[label] = Layout(label)
                     self._layout[label].parse(node, scale, c_dir)
                         
-
             elif node.name == u'font':
                 label = attr_str(node, 'label', '')
                 if label:
@@ -961,17 +984,19 @@ class FXDSettings:
                     self._font[label].parse(node, scale, c_dir)
 
             elif node.name == u'color':
-                label = attr_str(node, 'label', '')
-                if label:
+                try:
                     value = attr_col(node, 'value', '')
-                    self._color[label] = value
+                    self._color[node.attrs[('', 'label')]] = value
+                except KeyError:
+                    pass
                         
             elif node.name == u'image':
-                label = attr_str(node, 'label', '')
-                if label:
+                try:
                     value = attr_col(node, 'filename', '')
-                    self._images[label] = value
-                        
+                    self._images[node.attrs[('', 'label')]] = value
+                except KeyError:
+                    pass
+                
             elif node.name == u'iconset':
                 self.icon_dir = attr_str(node, 'theme', self.icon_dir)
 
@@ -995,6 +1020,8 @@ class FXDSettings:
 
 
     def prepare(self):
+        _debug_('preparing skin settings')
+        
         self.prepared = True
         self.sets     = copy.deepcopy(self._sets)
         
@@ -1071,7 +1098,7 @@ class FXDSettings:
         self.images = {}
         for name in self._images:
             self.images[name] = search_file(self._images[name], search_dirs)
-        return 1
+
 
 
     def fxd_callback(self, fxd, node):
@@ -1079,34 +1106,27 @@ class FXDSettings:
         callback for the 'skin' tag
         """
         # get args back
-        (clear, file, prepare) = fxd.getattr(None, 'args')
+        filename = fxd.getattr(None, 'args')
 
-        font_scale    = attr_float(node, "fontscale", 1.0)
-        file_geometry = attr_str(node, "geometry", '')
+        self.font_scale = attr_float(node, "fontscale", 1.0)
+        file_geometry   = attr_str(node, "geometry", '')
         
         if file_geometry:
             w, h = file_geometry.split('x')
         else:
-            w = config.CONF.width
-            h = config.CONF.height
+            w, h = config.CONF.width, config.CONF.height
 
         scale = (float(config.CONF.width-2*config.OSD_OVERSCAN_X)/float(w),
                  float(config.CONF.height-2*config.OSD_OVERSCAN_Y)/float(h))
 
-        include  = attr_str(node, 'include', '')
+        include = attr_str(node, 'include', '')
 
         if include:
-            self.load(include, prepare=False)
+            self.load(include)
 
-        self.parse(node, scale, os.path.dirname(file))
-        if not os.path.dirname(file) in self.skindirs:
-            self.skindirs = [ os.path.dirname(file) ] + self.skindirs
-        if not prepare:
-            return
-            
-        self.font_scale = font_scale
-        self.prepare()
-        self.prepared = False
+        self.parse(node.children, scale, os.path.dirname(filename))
+        if not os.path.dirname(filename) in self.skindirs:
+            self.skindirs = [ os.path.dirname(filename) ] + self.skindirs
         return
 
 
@@ -1143,30 +1163,11 @@ class FXDSettings:
         return util.getimage(os.path.join(config.ICON_DIR, name), '')
 
         
-    def load(self, file, prepare=True, clear=False):
+    def load(self, file):
         """
         load and parse the skin file
         """
-        if clear:
-            self._layout   = {}
-            self._font     = {}
-            self._color    = {}
-            self._images   = {}
-            self._menuset  = {}
-            self._menu     = {}
-            self._popup    = ''
-            self._sets     = {}
-            self._mainmenu = MainMenu()
-            self.skindirs  = []
-            self.fxd_files = []
-
-            # load plugin skin files:
-            pdir = os.path.join(config.SHARE_DIR, 'skins/plugins')
-            if os.path.isdir(pdir):
-                for p in util.match_files(pdir, [ 'fxd' ]):
-                    self.load(p, prepare=False)
-
-        self.prepared     = False
+        self.prepared = False
         
         if not vfs.isfile(file):
             if vfs.isfile(file+".fxd"):
@@ -1183,95 +1184,84 @@ class FXDSettings:
         if not vfs.isfile(file):
             return 0
 
-        try:
-            parser = util.fxdparser.FXD(file)
-            parser.setattr(None, 'args', (clear, file, prepare))
-            parser.set_handler('skin', self.fxd_callback)
-            parser.parse()
-            self.fxd_files.append(file)
-            return 1
-        
-        except:
-            print "ERROR: XML file corrupt"
-            traceback.print_exc()
-            return 0
+        parser = util.fxdparser.FXD(file)
+        parser.setattr(None, 'args', (file))
+        parser.set_handler('skin', self.fxd_callback)
+        parser.parse()
+        self.fxd_files.append(file)
 
 
 
 
 
-
-###
-# FIXME: Settings should be somewere else
-###
-
-
-class Settings:
+def load(filename, base=None):
     """
-    Current settings for gui objects
+    load new settings file, if base is set, inherit from base and
+    add the new settings
     """
-    def __init__(self):
-        self.storage_file = os.path.join(config.FREEVO_CACHEDIR, 'skin-%s' % os.getuid())
-        self.storage = util.read_pickle(self.storage_file)
-        if self.storage:
-            if not config.SKIN_XML_FILE:
-                config.SKIN_XML_FILE = self.storage['SKIN_XML_FILE']
-            else:
-                _debug_('skin forced to %s' % config.SKIN_XML_FILE, 2)
-        else:
-            if not config.SKIN_XML_FILE:
-                config.SKIN_XML_FILE = config.SKIN_DEFAULT_XML_FILE
-            self.storage = {}
-            
-        # load the fxd file
-        self.settings = FXDSettings()
-        self.set_base_fxd(config.SKIN_XML_FILE)
-
-
-    def set_base_fxd(self, name):
-        """
-        set the basic skin fxd file
-        """
-        config.SKIN_XML_FILE = os.path.splitext(os.path.basename(name))[0]
-        _debug_('load basic skin settings: %s' % config.SKIN_XML_FILE)
-        
-        # try to find the skin xml file
-        if not self.settings.load(name, clear=True):
-            print "skin not found, using fallback skin"
-            self.settings.load('basic.fxd', clear=True)
-            
-        for dir in config.cfgfilepath:
-            local_skin = '%s/local_skin.fxd' % dir
-            if os.path.isfile(local_skin):
-                _debug_('Skin: Add local config %s to skin' % local_skin,2)
-                self.settings.load(local_skin)
-                break
-
-        self.storage['SKIN_XML_FILE'] = config.SKIN_XML_FILE
-        util.save_pickle(self.storage, self.storage_file)
-
-
-    def load(self, filename, copy_content = 1):
-        """
-        return an object with new skin settings
-        """
+    if base:
         _debug_('load additional skin info: %s' % filename)
         if filename and vfs.isfile(vfs.join(filename, 'folder.fxd')):
             filename = vfs.abspath(os.path.join(filename, 'folder.fxd'))
-
         elif filename and vfs.isfile(filename):
             filename = vfs.abspath(filename)
-
-        else:
+        settings = copy.copy(base)
+        try:
+            settings.load(filename)
+            settings.prepare()
+        except:
+            _debug_('XML file corrupt:', 0)
+            traceback.print_exc()
+            settings = copy.copy(base)
+    else:
+        try:
+            settings = FXDSettings(filename)
+            settings.prepare()
+        except:
+            _debug_('XML file corrupt:', 0)
+            traceback.print_exc()
             return None
+    settings.filename = filename
+    return settings
+    
 
-        if copy_content:
-            settings = copy.copy(self.settings)
+def set_base_fxd(name):
+    """
+    set the basic skin fxd file and store it
+    """
+    config.SKIN_XML_FILE = os.path.splitext(os.path.basename(name))[0]
+    _debug_('load basic skin settings: %s' % config.SKIN_XML_FILE)
+        
+    # try to find the skin xml file
+    settings = load(name)
+    if not settings:
+        print "skin not found, using fallback skin"
+        settings = load('basic.fxd')
+
+    for dir in config.cfgfilepath:
+        local_skin = '%s/local_skin.fxd' % dir
+        if os.path.isfile(local_skin):
+            _debug_('Skin: Add local config %s to skin' % local_skin,2)
+            settings.load(local_skin)
+            break
+    settings.prepare()
+    return settings
+
+
+def init():
+    # init basic settings
+    f = os.path.join(config.FREEVO_CACHEDIR, 'skin-%s' % os.getuid())
+    storage = util.read_pickle(f)
+    if storage:
+        if not config.SKIN_XML_FILE:
+            config.SKIN_XML_FILE = storage['SKIN_XML_FILE']
         else:
-            settings = FXDSettings()
+            _debug_('skin forced to %s' % config.SKIN_XML_FILE, 2)
+    else:
+        if not config.SKIN_XML_FILE:
+            config.SKIN_XML_FILE = config.SKIN_DEFAULT_XML_FILE
+        storage = {}
+    # load the fxd file
+    return set_base_fxd(config.SKIN_XML_FILE)
 
-        if not settings.load(filename, clear=True):
-            return None
-
-        return settings
 

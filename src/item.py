@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.77  2004/08/24 16:42:39  dischi
+# Made the fxdsettings in gui the theme engine and made a better
+# integration for it. There is also an event now to let the plugins
+# know that the theme is changed.
+#
 # Revision 1.76  2004/08/05 17:38:25  dischi
 # remove skin dep
 #
@@ -173,17 +178,16 @@ class Item:
         self.fxd_file = None
 
         if skin_type:
-            settings  = gui.get_settings()
-            skin_info = settings.mainmenu.items
-            imagedir  = settings.mainmenu.imagedir
+            skin_info = gui.theme.mainmenu.items
+            imagedir  = gui.theme.mainmenu.imagedir
             if skin_info.has_key(skin_type):
                 skin_info  = skin_info[skin_type]
                 self.name  = _(skin_info.name)
                 self.image = skin_info.image
                 if skin_info.icon:
-                    self.icon = os.path.join(settings.icon_dir, skin_info.icon)
+                    self.icon = os.path.join(gui.theme.icon_dir, skin_info.icon)
                 if skin_info.outicon:
-                    self.outicon = os.path.join(settings.icon_dir, skin_info.outicon)
+                    self.outicon = os.path.join(gui.theme.icon_dir, skin_info.outicon)
             if not self.image and imagedir:
                 self.image = util.getimage(os.path.join(imagedir, skin_type))
         

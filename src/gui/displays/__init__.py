@@ -6,6 +6,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/08/24 16:42:41  dischi
+# Made the fxdsettings in gui the theme engine and made a better
+# integration for it. There is also an event now to let the plugins
+# know that the theme is changed.
+#
 # Revision 1.3  2004/08/23 15:54:48  dischi
 # do not move sticky objects to new display
 #
@@ -90,7 +95,7 @@ def remove_display(screen):
         _debug_('Error: removing screen not on top', 0)
         print screen
         print display_stack
-        return display_stack[-1]
+        raise AttributeError
 
     display_stack = display_stack[:-1]
     # move all active children to new display

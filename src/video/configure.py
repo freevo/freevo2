@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2004/08/24 16:42:44  dischi
+# Made the fxdsettings in gui the theme engine and made a better
+# integration for it. There is also an event now to let the plugins
+# know that the theme is changed.
+#
 # Revision 1.27  2004/07/10 12:33:43  dischi
 # header cleanup
 #
@@ -87,7 +92,7 @@ def audio_selection_menu(arg=None, menuw=None):
         txt = '%s (channels=%s)' % (a['language'], a['channels'])
         menu_items.append(menu.MenuItem(txt, audio_selection, (item, a['id'])))
 
-    moviemenu = menu.Menu(_('Audio Menu'), menu_items, fxd_file=item.skin_fxd)
+    moviemenu = menu.Menu(_('Audio Menu'), menu_items, theme=item.skin_fxd)
     menuw.pushmenu(moviemenu)
         
 
@@ -106,7 +111,7 @@ def subtitle_selection_menu(arg=None, menuw=None):
     for s in range(len(item.info['subtitles'])):
         menu_items.append(menu.MenuItem(item.info['subtitles'][s],
                                         subtitle_selection, (item, s)))
-    moviemenu = menu.Menu(_('Subtitle Menu'), menu_items, fxd_file=item.skin_fxd)
+    moviemenu = menu.Menu(_('Subtitle Menu'), menu_items, theme=item.skin_fxd)
     menuw.pushmenu(moviemenu)
 
         
@@ -130,7 +135,7 @@ def chapter_selection_menu(arg=None, menuw=None):
             menu_items += [ menu.MenuItem(c.name, chapter_selection,
                                           (arg, ' -ss %s' % c.pos)) ]
         
-    moviemenu = menu.Menu(_('Chapter Menu'), menu_items, fxd_file=item.skin_fxd)
+    moviemenu = menu.Menu(_('Chapter Menu'), menu_items, theme=item.skin_fxd)
     menuw.pushmenu(moviemenu)
 
 
@@ -189,5 +194,5 @@ def get_items(item):
         
 def get_menu(item, menuw):
     items = get_items(item) + [ menu.MenuItem(_('Play'), play_movie, (item, '')) ]
-    return menu.Menu(_('Config Menu'), items, fxd_file=item.skin_fxd)
+    return menu.Menu(_('Config Menu'), items, theme=item.skin_fxd)
     

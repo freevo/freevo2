@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.83  2004/08/24 16:42:44  dischi
+# Made the fxdsettings in gui the theme engine and made a better
+# integration for it. There is also an event now to let the plugins
+# know that the theme is changed.
+#
 # Revision 1.82  2004/08/23 20:36:44  dischi
 # rework application handling
 #
@@ -501,8 +506,8 @@ class Progressbar(Area):
     def __init__(self):
         Area.__init__(self, 'content')
         self.content = []
-        self.bar_border   = self.Rectangle(bgcolor=0xa0ffffffL, radius=4)
-        self.bar_position = self.Rectangle(bgcolor=0x6e9441L, radius=4)
+        self.bar_border   = gui.theme_engine.Rectangle(bgcolor=0xa0ffffffL, radius=4)
+        self.bar_position = gui.theme_engine.Rectangle(bgcolor=0x6e9441L, radius=4)
         self.bar          = None
         self.last_width   = 0
 

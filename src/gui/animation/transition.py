@@ -49,7 +49,7 @@ class Move(BaseAnimation):
         self.objects     = objects
         self.orientation = orientation
         self.pixel       = pixel
-        self.max_frames  = frames
+        self.max_frames  = max(frames, 1)
         self.frame       = 0
         self.pos         = 0
         # make sure all objects are visible
@@ -102,21 +102,14 @@ class Fade(BaseAnimation):
     def __init__(self, objects, frames, start, stop, fps=25):
         BaseAnimation.__init__(self, fps)
         self.objects     = objects
-        self.max_frames  = frames
+        self.max_frames  = max(frames, 1)
         self.frame       = 0
         self.diff        = stop - start
         self.start_alpha = start
         # make sure all objects are visible
         map(lambda o: o.show(), objects)
-        if frames:
-            # set start alpha value to all objects
-            map(lambda o: o.set_alpha(start), objects)
-        else:
-            # no frames, set stop alpha value to all frames
-            map(lambda o: o.set_alpha(stop), objects)
-            if stop == 0:
-                # if stop is 0, we can also hide the objects
-                map(lambda o: o.hide(), objects)
+        # set start alpha value to all objects
+        map(lambda o: o.set_alpha(start), objects)
 
 
     def update(self):
@@ -124,11 +117,6 @@ class Fade(BaseAnimation):
         update the animation
         """
         self.frame += 1
-        if not self.max_frames:
-            # if there are no frames, remove the
-            # animation, it can't run
-            self.remove()
-            return
         # calculate the new alpha
         alpha = self.start_alpha + int(self.frame * (float(self.diff) / self.max_frames))
         for o in self.objects:

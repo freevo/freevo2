@@ -20,6 +20,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/08/24 16:42:44  dischi
+# Made the fxdsettings in gui the theme engine and made a better
+# integration for it. There is also an event now to let the plugins
+# know that the theme is changed.
+#
 # Revision 1.13  2004/07/26 18:10:20  dischi
 # move global event handling to eventhandler.py
 #
@@ -121,7 +126,7 @@ class PluginInterface(plugin.ItemPlugin):
             items.append(file)
 
         if items:
-            moviemenu = menu.Menu(self.item.name, items, fxd_file=self.item.skin_fxd)
+            moviemenu = menu.Menu(self.item.name, items, theme=self.item.skin_fxd)
             menuw.pushmenu(moviemenu)
         return
 

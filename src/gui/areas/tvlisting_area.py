@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/08/24 16:42:41  dischi
+# Made the fxdsettings in gui the theme engine and made a better
+# integration for it. There is also an event now to let the plugins
+# know that the theme is changed.
+#
 # Revision 1.6  2004/08/22 20:06:18  dischi
 # Switch to mevas as backend for all drawing operations. The mevas
 # package can be found in lib/mevas. This is the first version using
@@ -111,7 +116,8 @@ class TVListing_Area(Area):
 
         self.all_vals = label_val, head_val, selected_val, default_val, scheduled_val
         
-        font_h = max(selected_val.font.h, default_val.font.h, label_val.font.h)
+        font_h = max(selected_val.font.height, default_val.font.height,
+                     label_val.font.height)
 
 
         # get the max width needed for the longest channel name
@@ -120,35 +126,39 @@ class TVListing_Area(Area):
         label_txt_width = label_width
 
         if label_val.rectangle:
-            r = self.get_item_rectangle(label_val.rectangle, label_width, label_val.font.h)[2]
+            r = self.get_item_rectangle(label_val.rectangle, label_width,
+                                        label_val.font.height)[2]
             label_width = r.width
         else:
             label_width += content.spacing
 
         # get head height
         if head_val.rectangle:
-            r = self.get_item_rectangle(head_val.rectangle, 20, head_val.font.h)[2]
+            r = self.get_item_rectangle(head_val.rectangle, 20, head_val.font.height)[2]
             content_y = content.y + r.height + content.spacing
         else:
-            content_y = content.y + head_val.font.h + content.spacing
+            content_y = content.y + head_val.font.height + content.spacing
 
 
         # get item height
         item_h = font_h
 
         if label_val.rectangle:
-            r = self.get_item_rectangle(label_val.rectangle, 20, label_val.font.h)[2]
+            r = self.get_item_rectangle(label_val.rectangle, 20,
+                                        label_val.font.height)[2]
             item_h = max(item_h, r.height + content.spacing)
         if default_val.rectangle:
-            r = self.get_item_rectangle(default_val.rectangle, 20, default_val.font.h)[2]
+            r = self.get_item_rectangle(default_val.rectangle, 20,
+                                        default_val.font.height)[2]
             item_h = max(item_h, r.height + content.spacing)
         if selected_val.rectangle:
-            r = self.get_item_rectangle(selected_val.rectangle, 20, selected_val.font.h)[2]
+            r = self.get_item_rectangle(selected_val.rectangle, 20,
+                                        selected_val.font.height)[2]
             item_h = max(item_h, r.height + content.spacing)
             
-        head_h = head_val.font.h
+        head_h = head_val.font.height
         if head_val.rectangle:
-            r = self.get_item_rectangle(head_val.rectangle, 20, head_val.font.h)[2]
+            r = self.get_item_rectangle(head_val.rectangle, 20, head_val.font.height)[2]
             head_h = max(head_h, r.height + content.spacing)
 
         content_h = content.height + content.y - content_y

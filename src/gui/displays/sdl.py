@@ -6,6 +6,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/08/24 16:42:42  dischi
+# Made the fxdsettings in gui the theme engine and made a better
+# integration for it. There is also an event now to let the plugins
+# know that the theme is changed.
+#
 # Revision 1.4  2004/08/23 20:33:41  dischi
 # smaller bugfixes, restart has some problems
 #
@@ -69,7 +74,6 @@ class Display(PygameCanvas):
         a simple window doesn't matter. If OSD_STOP_WHEN_PLAYING the
         ygame display will be shut down.
         """
-        _debug_('hide SDL display')
         if config.OSD_STOP_WHEN_PLAYING:
             self.stop()
 
@@ -78,7 +82,6 @@ class Display(PygameCanvas):
         """
         Show the output window again if it is not visible
         """
-        _debug_('show SDL display')
         if config.OSD_STOP_WHEN_PLAYING:
             self.restart()
 
