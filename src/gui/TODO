@@ -1,21 +1,7 @@
-o make sure all parts respect the guidelines:
-  - no part of freevo is allowed to import osd or skin
-  - no part outside the gui code should use the renderer
-  - never call screen.clear or osd.clear, everyone cleans up it's own mess
-
-o better integration of the settings code
-
-o make animation work again
-
 o clean up the code in widgets:
-  This is done for a small set of widgets. PopupBox, AlertBox,
-  ConfirmBox and ProgressBox are working again. If someone wants to
-  fix the other boxes, please do so (and drop me a note). The design
-  is different now:
-  - A window is only something that draws on the screen. The label
-    inside it has nothing to do with the window. So x/y coordiates are
-    based to the screen values, not the parent once (there is no
-    parent). 
+  This is done for a small set of widgets. PopupBox is working again, 
+  AlertBox, ConfirmBox and ProgressBox are at least not crashing. 
+  If someone wants to fix the other boxes, please do so (and drop me a note). 
   - There is no container support, I'm still thinking how and if we
     need it. 
   - Layout is done inside the boxes. If someone wants to re-add the
@@ -26,15 +12,8 @@ o clean up the code in widgets:
     a label _is_ a text, a button _is_ a label (only with a different
     drawing function).
 
-o split sdl keyboard into keyboard and sdl poll loop for redraw
-
-o split menu.MenuWidget into a real menustack and the drawing of it. 
-  The drawing (initpage) should be inside the gui code (listing area)
-
 o CLEANUP OLD STUFF I ONLY NEEDED FOR TESTING!!!!
 
 
 If you want to help, just tell me (and ask questions). If you want to
 add a backend, look in the README.txt inside the backends dir.
-
-
