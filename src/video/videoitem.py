@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.139  2004/07/04 08:05:13  dischi
+# auto deinterlace mpeg files
+#
 # Revision 1.138  2004/06/23 12:22:16  outlyer
 # Allow the user to create a thumbnail for a file even if a folder or file
 # image already exists. For example, I have a generic "cover.jpg" in my
@@ -27,21 +30,6 @@
 # The much appreciated 'alternate player' patch from den_RDC. Allows you to
 # switch between your default player and an alternate without restarting
 # Freevo.
-#
-# Revision 1.134  2004/05/12 19:24:54  dischi
-# remove debug and cvs log
-#
-# Revision 1.133  2004/05/02 08:55:52  dischi
-# dvd as .iso support
-#
-# Revision 1.132  2004/03/21 18:20:38  mikeruelle
-# needed by encoding server
-#
-# Revision 1.131  2004/03/21 17:06:42  dischi
-# also search for tv show images in current dir
-#
-# Revision 1.130  2004/03/19 22:10:26  dischi
-# fix dead menu for missing videos
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -189,6 +177,11 @@ class VideoItem(Item):
            if os.path.exists(image):
                self.image = image
                self.files.image = image
+
+        if config.VIDEO_INTERLACING and self.info['interlaced'] \
+               and not self['deinterlace']:
+            # force deinterlacing
+            self['deinterlace'] = 1
                
         
     def id(self):
@@ -313,7 +306,8 @@ class VideoItem(Item):
         if self.variants and len(self.variants) > 1:
             items = [ (self.show_variants, _('Show variants')) ] + items
 
-        if self.mode == 'file' and not self.variants and not self.subitems:
+        if self.mode == 'file' and not self.variants and not self.subitems and \
+               (not self.image or not self.image.endswith('raw')):
             items.append((self.create_thumbnail, _('Create Thumbnail'), 'create_thumbnail'))
             
         return items

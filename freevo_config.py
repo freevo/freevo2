@@ -682,6 +682,11 @@ VIDEO_ONLY_SCAN_DATADIR = 1
 #
 VIDEO_AUTOJOIN = 1
 
+#
+# try to find out if deinterlacing is needed or not
+#
+VIDEO_INTERLACING = 1
+
 
 # ======================================================================
 # Freevo audio settings:
