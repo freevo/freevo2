@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/03/21 22:58:16  mikeruelle
+# make start channel work and messages display fully
+#
 # Revision 1.1  2004/03/21 21:21:54  mikeruelle
 # start of an xawtv plugin. it works sorta
 #
@@ -184,6 +187,7 @@ class Xawtv:
         self.app=XawtvApp(command, self.remote_prog)        
 
 	if tuner_channel:
+	    time.sleep(0.5)
 	    self.app.sendcmd('setstation %s' % tuner_channel)
         #XXX use remote to change the input we want
 
@@ -221,7 +225,7 @@ class Xawtv:
         _debug_('%s: %s app got %s event' % (time.time(), self.mode, event))
         if event == em.STOP or event == em.PLAY_END:
             self.app.sendcmd('quit')
-            time.sleep(2)
+            time.sleep(1)
             self.Stop()
             rc.post_event(em.PLAY_END)
             return True
@@ -241,11 +245,11 @@ class Xawtv:
             
         elif event == em.TOGGLE_OSD:
 	    #try to send channel name
-            self.app.sendcmd('msg %s' % self.TunerGetChannel())
+            self.app.sendcmd('msg \'%s\'' % self.TunerGetChannel())
             return True
         
         elif event == em.OSD_MESSAGE:
-            self.app.sendcmd('msg %s' % event.arg)
+            self.app.sendcmd('msg \'%s\'' % event.arg)
             return True
        
         elif event in em.INPUT_ALL_NUMBERS:
