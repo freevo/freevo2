@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/05/29 12:32:23  dischi
+# try to find out if all items in a dir belong to one album
+#
 # Revision 1.11  2004/02/24 18:55:38  dischi
 # unicode fix
 #
@@ -165,7 +168,6 @@ various = u'__various__'
 class AudioParser:
 
     def __init__(self, dirname, force=False, rescan=False):
-
         self.artist  = ''
         self.album   = ''
         self.year    = ''
@@ -218,6 +220,8 @@ class AudioParser:
         # cache dir first
         mediainfo.cache_dir(dirname)
 
+        use_tracks = True
+        
         for song in filelist:
             try:
                 data = mediainfo.get(song)
@@ -226,9 +230,13 @@ class AudioParser:
                 self.year = self.strcmp(self.year, data['date'])
                 if data['length']:
                     self.length += int(data['length'])
+                use_tracks = use_tracks and data['trackno']
             except OSError:
                 pass
 
+        if use_tracks and (self.album or self.artist):
+            mediainfo.set(dirname, 'audio_advanced_sort', True)
+            
         if not self.length:
             return
 
