@@ -10,6 +10,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/01/13 15:18:19  outlyer
+# Check every ten minutes... it's still barely noticeable, but keeps the
+# screen up to date... 30 minutes would work too, but then we'd have to
+# make sure we check at the top of every hour to keep it inline.
+#
 # Revision 1.18  2004/01/11 17:04:15  outlyer
 # Until \t is fixed, this '-' at least provides some indentation to make it
 # easier to read the list. (I used this in the screenshot I took last night)
@@ -394,7 +399,7 @@ def comingup(items=None):
 
     cachefile = '%s/upsoon' % (config.FREEVO_CACHEDIR)
     if (os.path.exists(cachefile) and \
-        (abs(time.time() - os.path.getmtime(cachefile)) < 3600)):
+        (abs(time.time() - os.path.getmtime(cachefile)) < 600)):
         cache = open(cachefile,'r')
         for a in cache.readlines():
             result = result + a
