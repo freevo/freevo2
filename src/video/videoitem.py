@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.106  2004/01/01 16:15:45  dischi
+# make sure we have a player even for classes inheriting from videoitem
+#
 # Revision 1.105  2003/12/31 16:42:40  dischi
 # changes, related to item.py changes
 #
@@ -347,6 +350,20 @@ class VideoItem(Item):
         """
         play the item.
         """
+        if not self.possible_player:
+            for p in plugin.getbyname(plugin.VIDEO_PLAYER, True):
+                rating = p.rate(self) * 10
+                if config.VIDEO_PREFERED_PLAYER == p.name:
+                    rating += 1
+                if hasattr(self, 'force_player') and p.name == self.force_player:
+                    rating += 100
+                self.possible_player.append((rating, p))
+
+            self.possible_player.sort(lambda l, o: -cmp(l[0], o[0]))
+
+        if not self.possible_player:
+            return
+
         self.player_rating, self.player = self.possible_player[0]
         self.parent.current_item = self
 
