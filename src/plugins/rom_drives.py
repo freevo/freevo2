@@ -391,12 +391,14 @@ class Watcher:
                     (address, length) = data.buffer_info()
                     buf = struct.pack('BBHP', CD_MSF_FORMAT, 0,
                                       length, address)
-                    s = ioctl(fd, CDIOREADTOCENTRYS, buf)
+                    # use unthreader ioctl here, it is fast
+                    s = util.ioctl.ioctl(fd, CDIOREADTOCENTRYS, buf)
                     s = CDS_DISC_OK
                 except:
                     s = CDS_NO_DISC
             else:
-                s = ioctl(fd, CDROM_DRIVE_STATUS, CDSL_CURRENT)
+                # use unthreader ioctl here, it is fast
+                s = util.ioctl.ioctl(fd, CDROM_DRIVE_STATUS, CDSL_CURRENT)
         except:
             # maybe we need to close the fd if ioctl fails, maybe
             # open fails and there is no fd
