@@ -41,6 +41,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2003/10/01 19:02:09  dischi
+# add cpu usage patch from Viggo Fredriksen
+#
 # Revision 1.41  2003/09/21 13:19:00  dischi
 # adjust poll intervall
 #
@@ -407,6 +410,109 @@ class holidays(IdleBarPlugin):
             return osd.draw_image(icon, (x, osd.y + 10, -1, -1))[0]
             
             
+#----------------------------------- PROCSTATS ----------------------------
+class procstats(IdleBarPlugin):
+    """
+    Retrieves information from /proc/stat and shows them in the idlebar.
+    This plugin can show semi-accurate cpu usage stats and free memory
+    in megabytes (calculated approx. as MemFree+Cached?)
+
+    Activate with 
+       plugin.activate('idlebar.procstats',level=20) for defaults or
+       plugin.activate('idlebar.procstats',level=20,args=(Mem,Cpu,Prec))
+      where
+       Mem:  Draw memfree  (default=1, -1 to disable)
+       Cpu:  Draw cpuusage (default=1, -1 to disable)
+       Prec: Precision used when drawing cpu usage (default=1)
+    """
+    def __init__(self,Mem=1,Cpu=1,Prec=1):
+        IdleBarPlugin.__init__(self)
+        self.drawCpu = Cpu
+        self.drawMem = Mem
+        self.precision = Prec
+        self.time = 0
+        self.lastused = 0
+        self.lastuptime = 0
+
+    def getStats(self):
+        """
+        Don't get the stats for each update
+        as it gets annoying while navigating
+        Update maximum every 10 seconds
+        """
+        if (time.time()-self.time)>10:
+            self.time = time.time()
+
+            if self.drawMem == 1:
+                self.getMemUsage()
+
+            if self.drawCpu == 1:
+                self.getCpuUsage()
+
+    def getMemUsage(self):
+        """
+        May not be correct, but i like to see
+        total free mem as freemem+cached
+        """
+        free = 0
+        f = open('/proc/meminfo')
+
+        if f:
+            meminfo = f.read()
+            free = int(string.split(string.split(meminfo,'\n')[1])[3])
+
+        f.close()
+        self.currentMem = _('%iM') % (((free)/1024)/1024)
+
+    def getCpuUsage(self):
+        """
+        This could/should maybe be an even more
+        advanced algorithm, but it will suffice 
+        for normal use.
+
+        Note:
+        cpu defined as 'cpu <user> <nice> <system> <idle>'
+        at first line in /proc/stat
+        """
+        uptime = 0
+        used = 0
+        f = open('/proc/stat')
+
+        if f:
+            stat = string.split(f.readline())
+            used = long(stat[1])+long(stat[2])+long(stat[3])
+            uptime = used + long(stat[4])
+
+        f.close()
+        usage = (float(used-self.lastused)/float(uptime-self.lastuptime))*100
+        self.lastuptime = uptime
+        self.lastused = used
+        self.currentCpu = _('%s%%') % round(usage,self.precision)
+ 
+    def draw(self, (type, object), x, osd):
+        font = osd.get_font('weather')
+        self.getStats()
+        widthmem = 0
+        widthcpu = 0
+
+        if self.drawCpu == 1:
+            widthcpu = font.font.stringsize(self.currentCpu)
+            osd.draw_image(os.path.join(config.ICON_DIR, 'misc/cpu.png'),
+                          (x, osd.y + 7, -1, -1))    
+            osd.write_text(self.currentCpu, font, None, x + 15, osd.y + 55 - font.h,
+                           widthcpu, font.h, 'left', 'top')
+
+        if self.drawMem == 1:
+            widthmem = font.font.stringsize(self.currentMem)
+
+            osd.draw_image(os.path.join(config.ICON_DIR, 'misc/memory.png'),
+                          (x + 15 + widthcpu, osd.y + 7, -1, -1))
+            osd.write_text(self.currentMem, font, None, x + 40 + widthcpu, 
+                           osd.y + 55 - font.h, widthmem, font.h, 'left', 'top')
+
+        return widthmem + widthcpu + 15
+
+
 #----------------------------------- SENSOR --------------------------------
 
 class sensors(IdleBarPlugin):
