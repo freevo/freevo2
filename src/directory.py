@@ -1,46 +1,16 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # directory.py - Directory handling
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes:
-# Todo:        
-#
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.147  2004/12/31 11:57:22  dischi
-# renamed SKIN_* and OSD_* variables to GUI_*
-#
-# Revision 1.146  2004/12/30 11:31:51  dischi
-# rename id to __id__
-#
-# Revision 1.145  2004/11/20 18:22:59  dischi
-# use python logger module for debug
-#
-# Revision 1.144  2004/11/01 20:14:14  dischi
-# fix debug
-#
-# Revision 1.143  2004/09/25 05:04:01  rshortt
-# Ignore lost+found directories.
-#
-# Revision 1.142  2004/08/26 15:26:49  dischi
-# add code to do some memory debugging
-#
-# Revision 1.141  2004/08/24 19:23:36  dischi
-# more theme updates and design cleanups
-#
-# Revision 1.140  2004/08/24 16:42:39  dischi
-# Made the fxdsettings in gui the theme engine and made a better
-# integration for it. There is also an event now to let the plugins
-# know that the theme is changed.
-#
-# Revision 1.139  2004/08/14 15:10:20  dischi
-# do not use skin.py
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -57,19 +27,18 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
-
+# python imports
 import os
-import traceback
-import re
 import stat
 import copy
+import logging
 
-import util.mediainfo as mediainfo
-
+# freevo imports
 import config
 import util
+import util.mediainfo as mediainfo
 
 import menu
 import plugin
@@ -83,25 +52,30 @@ from event import *
 import gui
 from gui import InputBox, AlertBox, ProgressBox
 
-import logging
+# get logging object
 log = logging.getLogger()
 
+# variables for 'configure' submenu
 all_variables = [('DIRECTORY_SORT_BY_DATE', _('Directory Sort By Date'),
                   _('Sort directory by date and not by name.'), False),
-                 
-                 ('DIRECTORY_AUTOPLAY_SINGLE_ITEM', _('Directory Autoplay Single Item'),
-                  _('Don\'t show directory if only one item exists and auto-select ' \
-                    'the item.'), False),
+
+                 ('DIRECTORY_AUTOPLAY_SINGLE_ITEM',
+                  _('Directory Autoplay Single Item'),
+                  _('Don\'t show directory if only one item exists and ' \
+                    'auto-select the item.'), False),
 
                  ('DIRECTORY_FORCE_SKIN_LAYOUT', _('Force Skin Layout'),
-                  _('Force skin to a specific layout. This option doesn\'t work with ' \
-                    'all skins and the result may differ based on the skin.'), False),
+                  _('Force skin to a specific layout. This option doesn\'t ' \
+                    'work with all skins and the result may differ based on ' \
+                    'the skin.'), False),
 
                  ('DIRECTORY_SMART_SORT', _('Directory Smart Sort'),
                   _('Use a smarter way to sort the items.'), False),
 
-                 ('DIRECTORY_USE_MEDIAID_TAG_NAMES', _('Use MediaID Tag Names'),
-                  _('Use the names from the media files tags as display name.'), False),
+                 ('DIRECTORY_USE_MEDIAID_TAG_NAMES',
+                  _('Use MediaID Tag Names'),
+                  _('Use the names from the media files tags as display ' \
+                    'name.'), False),
 
                  ('DIRECTORY_REVERSE_SORT', _('Directory Reverse Sort'),
                   _('Show the items in the list in reverse order.'), False),
@@ -109,18 +83,21 @@ all_variables = [('DIRECTORY_SORT_BY_DATE', _('Directory Sort By Date'),
                  ('DIRECTORY_AUDIO_FORMAT_STRING', '', '', False),
 
                  ('DIRECTORY_CREATE_PLAYLIST', _('Directory Create Playlist'),
-                  _('Handle the directory as playlist. After one file is played, the next '\
-                    'one will be started.'), True) ,
+                  _('Handle the directory as playlist. After one file is '\
+                    'played, the next one will be started.'), True) ,
 
-                 ('DIRECTORY_ADD_PLAYLIST_FILES', _('Directory Add Playlist Files'),
+                 ('DIRECTORY_ADD_PLAYLIST_FILES',
+                  _('Directory Add Playlist Files'),
                   _('Add playlist files to the list of items'), True) ,
 
-                 ('DIRECTORY_ADD_RANDOM_PLAYLIST', _('Directory Add Random Playlist'),
+                 ('DIRECTORY_ADD_RANDOM_PLAYLIST',
+                  _('Directory Add Random Playlist'),
                   _('Add an item for a random playlist'), True) ,
 
                  ('DIRECTORY_AUTOPLAY_ITEMS', _('Directory Autoplay Items'),
-                  _('Autoplay the whole directory (as playlist) when it contains only '\
-                    'files and no directories' ), True)]
+                  _('Autoplay the whole directory (as playlist) when it '\
+                    'contains only files and no directories' ), True)]
+
 
 
 class DirItem(Playlist):
@@ -139,7 +116,7 @@ class DirItem(Playlist):
         if self.media:
             self.files.read_only = True
         self.files.append(directory)
-        
+
         self.dir  = os.path.abspath(directory)
         self.info = mediainfo.get_dir(directory)
 
@@ -149,8 +126,8 @@ class DirItem(Playlist):
             self.name = self.info['title:filename']
         else:
             self.name = util.getname(directory, skip_ext=False)
-            
-        if add_args == None and hasattr(parent, 'add_args'): 
+
+        if add_args == None and hasattr(parent, 'add_args'):
             add_args = parent.add_args
 
         self.add_args = add_args
@@ -164,15 +141,14 @@ class DirItem(Playlist):
 
         if self['show_all_items']:
             self.display_type = None
-            
+
         # set tv to video now
         if self.display_type == 'tv':
             display_type = 'video'
 
         # set directory variables to default
-        global all_variables
         self.all_variables = copy.copy(all_variables)
-        
+
         # Check mimetype plugins if they want to add something
         for p in plugin.mimetype(display_type):
             self.all_variables += p.dirconfig(self)
@@ -196,11 +172,11 @@ class DirItem(Playlist):
         self.folder_fxd = directory+'/folder.fxd'
         if vfs.isfile(self.folder_fxd):
             self.set_fxd_file(self.folder_fxd)
-            
+
         # Check mimetype plugins if they want to add something
         for p in plugin.mimetype(display_type):
             p.dirinfo(self)
-            
+
         if self.DIRECTORY_SORT_BY_DATE == 2 and self.display_type != 'tv':
             self.DIRECTORY_SORT_BY_DATE = 0
 
@@ -224,14 +200,13 @@ class DirItem(Playlist):
                 parser.set_handler('skin', self.read_folder_fxd)
                 parser.parse()
             except:
-                log.error("fxd file %s corrupt" % self.folder_fxd)
-                traceback.print_exc()
+                log.exception("fxd file %s corrupt" % self.folder_fxd)
 
 
     def read_folder_fxd(self, fxd, node):
         '''
         parse the xml file for directory settings
-        
+
 	<?xml version="1.0" ?>
 	<freevo>
 	  <folder title="Incoming TV Shows" cover-img="foo.jpg">
@@ -245,7 +220,7 @@ class DirItem(Playlist):
         if node.name == 'skin':
             self.skin_fxd = self.folder_fxd
             return
-        
+
         # read attributes
         self.name = Unicode(fxd.getattr(node, 'title', self.name))
 
@@ -274,7 +249,7 @@ class DirItem(Playlist):
                     self.modified_vars.append(v)
 
 
-    def __is_type_list_var__(self, var):
+    def __is_type_list_var(self, var):
         """
         return if this variable to be saved is a type_list
         """
@@ -282,7 +257,7 @@ class DirItem(Playlist):
             if v == var:
                 return type_list
         return False
-    
+
 
     def write_folder_fxd(self, fxd, node):
         """
@@ -295,14 +270,15 @@ class DirItem(Playlist):
 
         # add current vars as setvar
         for v in self.modified_vars:
-            if self.__is_type_list_var__(v):
+            if self.__is_type_list_var(v):
                 if getattr(self, v):
                     val = 1
                 else:
                     val = 0
             else:
                 val = getattr(self, v)
-            fxd.add(fxd.XMLnode('setvar', (('name', v.lower()), ('val', val))), node, 0)
+            fxd.add(fxd.XMLnode('setvar', (('name', v.lower()),
+                                           ('val', val))), node, 0)
 
 
     def __getitem__(self, key):
@@ -329,32 +305,35 @@ class DirItem(Playlist):
         if key in ( 'freespace', 'totalspace' ):
             if self.media:
                 return None
-            
+
             space = getattr(util, key)(self.dir) / 1000000
             if space > 1000:
                 space='%s,%s' % (space / 1000, space % 1000)
             return space
-      
+
         return Item.__getitem__(self, key)
 
 
     # eventhandler for this item
     def eventhandler(self, event, menuw=None):
-        if event == DIRECTORY_CHANGE_DISPLAY_TYPE and menuw.menustack[-1] == self.menu:
+        if event == DIRECTORY_CHANGE_DISPLAY_TYPE and \
+               menuw.menustack[-1] == self.menu:
             possible_display_types = [ ]
 
             for p in plugin.get('mimetype'):
                 for t in p.display_type:
                     if not t in possible_display_types:
                         possible_display_types.append(t)
-                        
+
             try:
                 pos = possible_display_types.index(self.display_type)
-                type = possible_display_types[(pos+1) % len(possible_display_types)]
+                type = possible_display_types[(pos+1) % \
+                                              len(possible_display_types)]
 
                 menuw.delete_menu(allow_reload = False)
 
-                newdir = DirItem(self.dir, self.parent, self.name, type, self.add_args)
+                newdir = DirItem(self.dir, self.parent, self.name, type,
+                                 self.add_args)
                 newdir.DIRECTORY_AUTOPLAY_SINGLE_ITEM = False
                 newdir.cwd(menuw=menuw)
 
@@ -365,9 +344,9 @@ class DirItem(Playlist):
                 return True
             except (IndexError, ValueError):
                 pass
-        
+
         return Playlist.eventhandler(self, event, menuw)
-        
+
 
     # ======================================================================
     # metainfo
@@ -391,16 +370,16 @@ class DirItem(Playlist):
         else:
             self.autovars += [ ( 'num_%s_timestamp' % name, 0 ),
                                ( 'num_%s_items' % name, 0 ) ]
-            
+
         try:
             timestamp     = os.stat(self.dir)[stat.ST_MTIME]
         except OSError:
             return
-        
+
         num_timestamp = self.info['num_%s_timestamp' % name]
 
         if not num_timestamp or num_timestamp < timestamp:
-            log.info('create metainfo for %s', self.dir)
+            log.debug('create metainfo for %s', self.dir)
             need_umount = False
             if self.media:
                 need_umount = not self.media.is_mounted()
@@ -429,7 +408,7 @@ class DirItem(Playlist):
             if need_umount:
                 self.media.umount()
 
-        
+
     # ======================================================================
     # actions
     # ======================================================================
@@ -440,7 +419,7 @@ class DirItem(Playlist):
         """
         if self.media:
             self.media.mount()
-            
+
         display_type = self.display_type
         if self.display_type == 'tv':
             display_type = 'video'
@@ -450,13 +429,15 @@ class DirItem(Playlist):
         if self['num_%s_items' % display_type]:
             items.append((self.play, _('Play all files in directory')))
 
-        if display_type in self.DIRECTORY_AUTOPLAY_ITEMS and not self['num_dir_items']:
+        if display_type in self.DIRECTORY_AUTOPLAY_ITEMS and \
+               not self['num_dir_items']:
             items.reverse()
 
         if self['num_%s_items' % display_type]:
             items.append((self.play_random, _('Random play all items')))
         if self['num_dir_items']:
-            items += [ (self.play_random_recursive, _('Recursive random play all items')),
+            items += [ (self.play_random_recursive,
+                        _('Recursive random play all items')),
                        (self.play_recursive, _('Recursive play all items')) ]
 
         items.append((self.configure, _('Configure directory'), 'configure'))
@@ -468,7 +449,7 @@ class DirItem(Playlist):
             self.media.umount()
 
         return items
-    
+
 
 
     def cwd(self, arg=None, menuw=None):
@@ -493,21 +474,22 @@ class DirItem(Playlist):
         play in random order
         """
         self.check_password_and_build(arg='playlist:random', menuw=menuw)
-        
+
 
     def play_recursive(self, arg=None, menuw=None):
         """
         play recursive
         """
         self.check_password_and_build(arg='playlist:recursive', menuw=menuw)
-        
+
 
     def play_random_recursive(self, arg=None, menuw=None):
         """
         play recursive in random order
         """
-        self.check_password_and_build(arg='playlist:random_recursive', menuw=menuw)
-        
+        self.check_password_and_build(arg='playlist:random_recursive',
+                                      menuw=menuw)
+
 
     def check_password_and_build(self, arg=None, menuw=None):
         """
@@ -569,9 +551,9 @@ class DirItem(Playlist):
         if self.media:
             self.media.mount()
 
-        if hasattr(self, '__dirwatcher_last_time__'):
-            del self.__dirwatcher_last_time__
-            
+        if hasattr(self, '__dirwatcher_last_time'):
+            del self.__dirwatcher_last_time
+
         if arg == 'update':
             if not self.menu.choices:
                 selected_pos = -1
@@ -588,26 +570,29 @@ class DirItem(Playlist):
         elif not os.path.exists(self.dir):
 	    AlertBox(text=_('Directory does not exist')).show()
             return
-        
+
         display_type = self.display_type
         if self.display_type == 'tv':
             display_type = 'video'
 
         if arg and arg.startswith('playlist:'):
             if arg.endswith(':random'):
-                Playlist(playlist = [ (self.dir, 0) ], parent = self,
-                         display_type=display_type, random=True).play(menuw=menuw)
+                pl = Playlist(playlist = [ (self.dir, 0) ], parent = self,
+                              display_type=display_type, random=True)
             elif arg.endswith(':recursive'):
-                Playlist(playlist = [ (self.dir, 1) ], parent = self,
-                         display_type=display_type, random=False).play(menuw=menuw)
+                pl = Playlist(playlist = [ (self.dir, 1) ], parent = self,
+                              display_type=display_type, random=False)
             elif arg.endswith(':random_recursive'):
-                Playlist(playlist = [ (self.dir, 1) ], parent = self,
-                         display_type=display_type, random=True).play(menuw=menuw)
+                pl = Playlist(playlist = [ (self.dir, 1) ], parent = self,
+                              display_type=display_type, random=True)
+            else:
+                return
+            pl.play(menuw=menuw)
             return
-        
-#         if config.GUI_BUSYICON_TIMER:
-#             osd.get_singleton().busyicon.wait(config.GUI_BUSYICON_TIMER[0])
-        
+
+        # if config.GUI_BUSYICON_TIMER:
+        # osd.get_singleton().busyicon.wait(config.GUI_BUSYICON_TIMER[0])
+
         files       = vfs.listdir(self.dir, include_overlay=True)
         num_changes = mediainfo.check_cache(self.dir)
 
@@ -615,7 +600,8 @@ class DirItem(Playlist):
         callback=None
         if (num_changes > 10) or (num_changes and self.media):
             if self.media:
-                pop = ProgressBox(text=_('Scanning disc, be patient...'), full=num_changes)
+                pop = ProgressBox(text=_('Scanning disc, be patient...'),
+                                  full=num_changes)
             else:
                 pop = ProgressBox(text=_('Scanning directory, be patient...'),
                                   full=num_changes)
@@ -623,10 +609,11 @@ class DirItem(Playlist):
             callback=pop.tick
 
 
-#         elif config.GUI_BUSYICON_TIMER and len(files) > config.GUI_BUSYICON_TIMER[1]:
-#             # many files, just show the busy icon now
-#             osd.get_singleton().busyicon.wait(0)
-        
+            # elif config.GUI_BUSYICON_TIMER and len(files) > \
+            #    config.GUI_BUSYICON_TIMER[1]:
+            # # many files, just show the busy icon now
+            # osd.get_singleton().busyicon.wait(0)
+
 
         if num_changes > 0:
             mediainfo.cache_dir(self.dir, callback=callback)
@@ -668,11 +655,11 @@ class DirItem(Playlist):
             else:
                 for i in self.play_items:
                     i.name = util.remove_start_string(i.name, substr)
-        
+
         #
         # sort all items
         #
-        
+
         # sort directories
         if self.DIRECTORY_SMART_SORT:
             self.dir_items.sort(lambda l, o: util.smartsort(l.dir,o.dir))
@@ -690,26 +677,31 @@ class DirItem(Playlist):
             self.play_items.sort(lambda l, o: cmp(l.sort('advanced').upper(),
                                                   o.sort('advanced').upper()))
         else:
-            self.play_items.sort(lambda l, o: cmp(l.sort().upper(), o.sort().upper()))
+            self.play_items.sort(lambda l, o: cmp(l.sort().upper(),
+                                                  o.sort().upper()))
 
         if self['num_dir_items'] != len(self.dir_items):
             self['num_dir_items'] = len(self.dir_items)
-            
-        if self['num_%s_items' % display_type] != len(self.play_items) + len(self.pl_items):
-            self['num_%s_items' % display_type] = len(self.play_items) + len(self.pl_items)
-            
+
+        if self['num_%s_items' % display_type] != \
+               len(self.play_items) + len(self.pl_items):
+            self['num_%s_items' % display_type] = len(self.play_items) + \
+                                                  len(self.pl_items)
+
         if self.DIRECTORY_REVERSE_SORT:
             self.dir_items.reverse()
             self.play_items.reverse()
             self.pl_items.reverse()
 
         # delete pl_items if they should not be displayed
-        if self.display_type and not self.display_type in self.DIRECTORY_ADD_PLAYLIST_FILES:
+        if self.display_type and not self.display_type in \
+               self.DIRECTORY_ADD_PLAYLIST_FILES:
             self.pl_items = []
 
         # add all playable items to the playlist of the directory
         # to play one files after the other
-        if not self.display_type or self.display_type in self.DIRECTORY_CREATE_PLAYLIST:
+        if not self.display_type or self.display_type in \
+               self.DIRECTORY_CREATE_PLAYLIST:
             self.playlist = self.play_items
 
 
@@ -717,12 +709,13 @@ class DirItem(Playlist):
         items = self.dir_items + self.pl_items + self.play_items
 
         # random playlist (only active for audio)
-        if self.display_type and self.display_type in self.DIRECTORY_ADD_RANDOM_PLAYLIST \
+        if self.display_type and self.display_type in \
+               self.DIRECTORY_ADD_RANDOM_PLAYLIST \
                and len(self.play_items) > 1:
-            pl = Playlist(_('Random playlist'), self.play_items, self, random=True)
+            pl = Playlist(_('Random playlist'), self.play_items, self,
+                          random=True)
             pl.autoplay = True
             items = [ pl ] + items
-
 
 
         if pop:
@@ -732,17 +725,17 @@ class DirItem(Playlist):
             if self.media:
                 self.media.mount()
 
-#         if config.GUI_BUSYICON_TIMER:
-#             # stop the timer. If the icons is drawn, it will stay there
-#             # until the osd is redrawn, if not, we don't need it to pop
-#             # up the next milliseconds
-#             osd.get_singleton().busyicon.stop()
+            # if config.GUI_BUSYICON_TIMER:
+            # # stop the timer. If the icons is drawn, it will stay there
+            # # until the osd is redrawn, if not, we don't need it to pop
+            # # up the next milliseconds
+            # osd.get_singleton().busyicon.stop()
 
 
         #
         # action
         #
-        
+
         if arg == 'update':
             # update because of dirwatcher changes
             self.menu.choices = items
@@ -768,7 +761,7 @@ class DirItem(Playlist):
                 else:
                     self.menu.set_selection(None)
             self.menuw.refresh()
-                
+
 
         elif len(items) == 1 and items[0].actions() and \
                  self.DIRECTORY_AUTOPLAY_SINGLE_ITEM:
@@ -779,12 +772,13 @@ class DirItem(Playlist):
             # called by play function
             self.playlist = self.play_items
             Playlist.play(self, menuw=menuw)
-            
+
         else:
             # normal menu build
             item_menu = menu.Menu(self.name, items, reload_func=self.reload,
                                   item_types = self.skin_display_type,
-                                  force_skin_layout = self.DIRECTORY_FORCE_SKIN_LAYOUT)
+                                  force_skin_layout = \
+                                  self.DIRECTORY_FORCE_SKIN_LAYOUT)
 
             if self.skin_fxd:
                 item_menu.theme = self.skin_fxd
@@ -816,7 +810,7 @@ class DirItem(Playlist):
         self.play_items = []
         self.dir_items  = []
         self.pl_items   = []
-        
+
 
     def __del__(self):
         """
@@ -848,16 +842,16 @@ class DirItem(Playlist):
             else:
                 return 'ICON_RIGHT_AUTO_' + _('auto')
 
-        
+
     def configure_set_var(self, arg=None, menuw=None):
         """
-        Update the variable in arg and change the menu. This function is used by
-        'configure'
+        Update the variable in arg and change the menu. This function is used
+        by 'configure'
         """
 
         # get current value, None == no special settings
         if arg in self.modified_vars:
-            if self.__is_type_list_var__(arg):
+            if self.__is_type_list_var(arg):
                 if getattr(self, arg):
                     current = 1
                 else:
@@ -872,7 +866,8 @@ class DirItem(Playlist):
 
         # for DIRECTORY_FORCE_SKIN_LAYOUT max = number of styles in the menu
         if arg == 'FORCE_SKIN_LAYOUT':
-            if self.display_type and gui.get_theme().menu.has_key(self.display_type):
+            if self.display_type and \
+                   gui.get_theme().menu.has_key(self.display_type):
                 area = gui.get_theme().menu[self.display_type]
             else:
                 area = gui.get_theme().menu['default']
@@ -881,14 +876,14 @@ class DirItem(Playlist):
         # switch from no settings to 0
         if current == None:
             self.modified_vars.append(arg)
-            if self.__is_type_list_var__(arg):
+            if self.__is_type_list_var(arg):
                 setattr(self, arg, [])
             else:
                 setattr(self, arg, 0)
 
         # inc variable
         elif current < max:
-            if self.__is_type_list_var__(arg):
+            if self.__is_type_list_var(arg):
                 setattr(self, arg, [self.display_type])
             else:
                 setattr(self, arg, current+1)
@@ -905,22 +900,22 @@ class DirItem(Playlist):
 
         # create new item with updated name
         item = copy.copy(menuw.menustack[-1].selected)
-        item.name = item.name[:item.name.find(u'\t') + 1] + self.configure_set_name(arg)
+        item.name = item.name[:item.name.find(u'\t') + 1] + \
+                    self.configure_set_name(arg)
 
         try:
             parser = util.fxdparser.FXD(self.folder_fxd)
             parser.set_handler('folder', self.write_folder_fxd, 'w', True)
             parser.save()
         except:
-            log.error("fxd file %s corrupt" % self.folder_fxd)
-            traceback.print_exc()
+            log.exception("fxd file %s corrupt" % self.folder_fxd)
 
         # rebuild menu
         menuw.menustack[-1].choices[menuw.menustack[-1].choices.\
                                     index(menuw.menustack[-1].selected)] = item
         menuw.menustack[-1].selected = item
         menuw.refresh(reload=1)
-            
+
 
     def configure_set_display_type(self, arg=None, menuw=None):
         """
@@ -945,7 +940,7 @@ class DirItem(Playlist):
         menuw.menustack[-1].selected = item
         menuw.refresh(reload=1)
 
-        
+
     def configure(self, arg=None, menuw=None):
         """
         show the configure dialog for folder specific settings in folder.fxd
@@ -967,21 +962,22 @@ class DirItem(Playlist):
 
             mi = menu.MenuItem(_('Show all kinds of items') + name,
                                self.configure_set_display_type)
-            mi.description = _('Show video, audio and image items in this directory')
+            descr = _('Show video, audio and image items in this directory')
+            mi.description = descr
             items.append(mi)
-            
+
         m = menu.Menu(_('Configure'), items)
         m.table = (80, 20)
         m.back_one_menu = 2
         menuw.pushmenu(m)
 
-        
+
 
 
 # ======================================================================
 
 class Dirwatcher(plugin.DaemonPlugin):
-                
+
     def __init__(self):
         plugin.DaemonPlugin.__init__(self)
         self.item          = None
@@ -996,7 +992,7 @@ class Dirwatcher(plugin.DaemonPlugin):
 
     def listoverlay(self):
         """
-        Get listing of overlay dir for change checking. 
+        Get listing of overlay dir for change checking.
         Do not count *.cache, directories and *.raw (except videofiles.raw)
         """
         if not os.path.isdir(vfs.getoverlay(self.dir)):
@@ -1013,21 +1009,21 @@ class Dirwatcher(plugin.DaemonPlugin):
                    os.path.isdir(os.path.join(self.dir, f)):
                     ret.append(f)
         return ret
-    
-        
+
+
     def cwd(self, menuw, item, item_menu, dir):
         self.menuw     = menuw
         self.item      = item
         self.item_menu = item_menu
         self.dir       = dir
         try:
-            self.last_time = item.__dirwatcher_last_time__
-            self.files     = item.__dirwatcher_last_files__
+            self.last_time = item.__dirwatcher_last_time
+            self.files     = item.__dirwatcher_last_files
         except AttributeError:
             self.last_time = vfs.mtime(self.dir)
             self.files     = self.listoverlay()
-            self.item.__dirwatcher_last_time__  = self.last_time
-            self.item.__dirwatcher_last_files__ = self.files
+            self.item.__dirwatcher_last_time  = self.last_time
+            self.item.__dirwatcher_last_files = self.files
 
 
     def scan(self):
@@ -1066,14 +1062,15 @@ class Dirwatcher(plugin.DaemonPlugin):
             log.info('directory has changed')
             self.item.build(menuw=self.menuw, arg='update')
         self.last_time = vfs.mtime(self.dir)
-        self.item.__dirwatcher_last_time__  = self.last_time
+        self.item.__dirwatcher_last_time  = self.last_time
         self.files = self.listoverlay()
-        self.item.__dirwatcher_last_files__ = self.files
+        self.item.__dirwatcher_last_files = self.files
 
-    
+
     def poll(self):
         if self.dir and self.menuw and \
-               self.menuw.menustack[-1] == self.item_menu and eventhandler.is_menu():
+               self.menuw.menustack[-1] == self.item_menu and \
+               eventhandler.is_menu():
             self.scan()
 
 # and activate that DaemonPlugin
