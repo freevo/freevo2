@@ -14,6 +14,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/01/13 20:40:55  mikeruelle
+# We now use childapp2 to run the commands and store our output. We now have
+# an fxd file format to run commands in X which people wanted (aka firebird
+# plugin).
+#
 # Revision 1.3  2003/11/30 14:35:43  dischi
 # new skin handling
 #
@@ -78,20 +83,21 @@
 #endif
 
 #python modules
-import os, popen2, fcntl, select, time
+import os, time
 import pygame
 
 #freevo modules
 import config, menu, rc, plugin, util
-
+import childapp
+import osd
 from event import *
 from item import Item
 from gui import AlertBox, RegionScroller, ListBox, PopupBox, Align
-
+import traceback
 
 
 def islog(name):
-    f = open(os.path.join(config.LOGDIR,'command_std%s.log' % name))
+    f = open(os.path.join(config.LOGDIR,'command-std%s.log' % name))
     data = f.readline()
     if name == 'out':
         data = f.readline()
@@ -210,11 +216,11 @@ class CommandOptions(PopupBox):
             if selection == 'ok':
                 self.destroy()
             elif selection == 'out':
-                LogScroll(os.path.join(config.LOGDIR,'command_stdout.log'),
+                LogScroll(os.path.join(config.LOGDIR,'command-stdout.log'),
                           text=_('Stdout File')).show()
                 return
             elif selection == 'err':
-                LogScroll(os.path.join(config.LOGDIR,'command_stderr.log'),
+                LogScroll(os.path.join(config.LOGDIR,'command-stderr.log'),
                           text=_('Stderr File')).show()
                 return
         elif event == INPUT_EXIT:
@@ -230,49 +236,55 @@ class CommandItem(Item):
     hope to add actions for different ways of running commands
     and for displaying stdout and stderr of last command run.
     """
-    def __init__(self, command, directory):
+    def __init__(self, command=None, directory=None, xmlfile=None):
         Item.__init__(self)
-        self.name = command
-        self.cmd  = os.path.join(directory, command)
+	self.stoposd = 0
+	self.use_wm = None
+	self.spawnwm = config.COMMAND_SPAWN_WM
+	self.killwm = config.COMMAND_KILL_WM
+	if command and directory:
+            self.name = command
+            self.cmd  = os.path.join(directory, command)
+            self.image = util.getimage(self.cmd)
+        elif xmlfile:
+	    #create using xmlfile
+            try:
+	        self.xml_file = xmlfile
+                parser = util.fxdparser.FXD(self.xml_file)
+                parser.set_handler('command', self.read_command_fxd)
+	        parser.parse()
+	    except:
+	        print "fxd file %s corrupt" % self.xml_file
+                traceback.print_exc()
+	else:
+	    print "bad things...."
+	
+
+    def read_command_fxd(self, fxd, node):
+        '''
+        parse the file for command settings
+                                                                                
+        <?xml version="1.0" ?>
+        <freevo>
+          <command title="Mozilla">
+            <cmd>/usr/local/bin/mozilla</cmd>
+            <stoposd>1</stoposd>
+	    <spawnwm>1</spawnwm>
+            <info>
+              <content>Unleash mozilla on the www</content>
+            </info>
+          </command>
+        </freevo>
+        '''
+        self.name = fxd.getattr(node, 'title')
+        self.cmd = fxd.childcontent(node, 'cmd')
         self.image = util.getimage(self.cmd)
-        
-    def makeNonBlocking(self, fd):
-        fl = fcntl.fcntl(fd, fcntl.F_GETFL)
-        fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NDELAY)
+        self.stoposd = fxd.childcontent(node, 'stoposd')
+        self.use_wm = fxd.childcontent(node, 'spawnwm')
 
-
-    def getCommandOutput(self, command, outputfile, erroutputfile):
-        child = popen2.Popen3(command, 1) # capture stdout and stderr from command
-        child.tochild.close()             # don't need to talk to child
-        outfile = child.fromchild 
-        outfd = outfile.fileno()
-        errfile = child.childerr
-        errfd = errfile.fileno()
-        self.makeNonBlocking(outfd)            # don't deadlock!
-        self.makeNonBlocking(errfd)
-        outeof = erreof = 0
-        while 1:
-            ready = select.select([outfd,errfd],[],[]) # wait for input
-            if outfd in ready[0]:
-                outchunk = outfile.read()
-                if outchunk == '': outeof = 1
-                outputfile.write(outchunk)
-            if errfd in ready[0]:
-                errchunk = errfile.read()
-                if errchunk == '': erreof = 1
-                erroutputfile.write(errchunk)
-            if outeof and erreof:
-                break
-            select.select([],[],[],.1) # give a little time for buffers to fill
-
-        err = child.wait()
-        if (os.WIFEXITED(err)):
-            outputfile.write('process exited with status ' + str(os.WEXITSTATUS(err)))
-        if (os.WIFSTOPPED(err)):
-            outputfile.write('process  ws stopped with signal ' + str(os.WSTOPSIG(err)))
-        if (os.WIFSIGNALED(err)):
-            outputfile.write('process terminated with signal ' + str(os.WTERMSIG(err)))
-        return err
+        # parse <info> tag
+        fxd.parse_info(fxd.get_children(node, 'info', 1), self,
+                       {'description': 'content', 'content': 'content' })
 
     def actions(self):
         """
@@ -281,40 +293,36 @@ class CommandItem(Item):
         items = [ ( self.flashpopup , _('Run Command') ) ]
         return items
 
-    #  1) make running popup
-    #  2) run command (spawn and then get exit status)
-    #  3) figure out success/failure status (pick correct msg and icon)
-    #  4) dispose running popup
-    #  5) make new alert popup with messages
     def flashpopup(self, arg=None, menuw=None):
-        popup_string=_("Running Command...")
-        pop = PopupBox(text=popup_string)
-        pop.show()
+        if self.stoposd:
+	    if self.use_wm:
+	        os.system(self.spawnwm)
+	else:
+            popup_string=_("Running Command...")
+            pop = PopupBox(text=popup_string)
+            pop.show()
 
-        logfile = os.path.join(config.LOGDIR,'command_stdout.log')
-        if os.path.isfile(logfile):
-            os.unlink(logfile)
-        myout = open(logfile, 'wb')
+	workapp = childapp.ChildApp2(self.cmd, 'command', 1, self.stoposd)
+	while workapp.isAlive():
+	    for child in childapp.running_children:
+	        if child != workapp:
+	            child.poll()
+	    time.sleep(0.5)
 
-        logfile = os.path.join(config.LOGDIR,'command_stderr.log')
-        if os.path.isfile(logfile):
-            os.unlink(logfile)
-        myerr = open(logfile, 'wb')
-
-        status = self.getCommandOutput(self.cmd, myout, myerr)
-        myout.close()
-        myerr.close()
-
-        icon=""
-        message=""
-        if status:
-            icon='bad'
-            message=_('Command Failed')
+        if self.stoposd:
+	    if self.use_wm:
+	        os.system(self.killwm)
+	        time.sleep(0.5)
+	else:
+            pop.destroy()
+	workapp.stop()
+	message = ''
+	if workapp.status:
+	    message = _('Command Failed')
         else:
-            icon='ok'
-            message=_('Command Completed')
-        pop.destroy()
-        if status or islog('err') or islog('out'):
+            message = _('Command Completed')
+
+        if not self.stoposd:
             CommandOptions(text=message).show()
         
 
@@ -343,13 +351,16 @@ class CommandMainMenuItem(Item):
         for command in commands:
             if os.path.splitext(command)[1] in ('.jpg', '.png'):
                 continue
-            cmd_item = CommandItem(command, config.COMMANDS_DIR)
+            if os.path.splitext(command)[1] in ('.fxd', '.xml'):
+		myxmlfile=os.path.join(config.COMMANDS_DIR, command)
+                cmd_item = CommandItem(xmlfile=myxmlfile)
+	    else:
+                cmd_item = CommandItem(command, config.COMMANDS_DIR)
             command_items += [ cmd_item ]
         if (len(command_items) == 0):
             command_items += [menu.MenuItem(_('No Commands found'),
-                                            menuw.goto_prev_page, 0)]
-        command_menu = menu.Menu(_('Commands'), command_items,
-                                 reload_func=menuw.goto_main_menu)
+                                            menuw.goto_main_menu, 0)]
+        command_menu = menu.Menu(_('Commands'), command_items)
         rc.app(None)
         menuw.pushmenu(command_menu)
         menuw.refresh()
@@ -376,5 +387,8 @@ class PluginInterface(plugin.MainMenuPlugin):
         return [ CommandMainMenuItem(parent) ]
 
     def config(self):
-        return [ ('COMMANDS_DIR', '/usr/local/bin', 'The directory to show commands from.') ]
+        return [ ('COMMANDS_DIR', '/usr/local/bin', 'The directory to show commands from.'),
+                 ('COMMAND_SPAWN_WM', '', 'command to start window manager.'),
+                 ('COMMAND_KILL_WM', '', 'command to stop window manager.'),
+	]
 
