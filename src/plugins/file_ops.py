@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/02/18 21:54:34  dischi
+# use new gui ConfirmBox feature to show handler message
+#
 # Revision 1.18  2004/02/14 13:03:32  dischi
 # o make it possible to turn off the menu item for delete image/info
 # o use new menu delete_submenu function
@@ -89,7 +92,8 @@ class PluginInterface(plugin.ItemPlugin):
     def confirm_delete(self, arg=None, menuw=None):
         self.menuw = menuw
         ConfirmBox(text=_('Do you wish to delete\n \'%s\'?') % self.item.name,
-                   handler=self.delete_file, default_choice=1).show()
+                   handler=self.delete_file, default_choice=1,
+                   handler_message=_('Deleting...')).show()
         
     def confirm_info_delete(self, arg=None, menuw=None):
         self.menuw = menuw
