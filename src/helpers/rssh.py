@@ -10,8 +10,8 @@ import mcomm
 
 server = None
 
-import pyepg
-epg = pyepg.get_epg(os.path.join(config.FREEVO_CACHEDIR, 'epgdb'))
+# import pyepg
+# epg = pyepg.get_epg(os.path.join(config.FREEVO_CACHEDIR, 'epgdb'))
 
 def notification(entity):
     global server
