@@ -109,7 +109,7 @@ from event import *
 # of the config file doesn't match, Freevo won't start. If the minor version
 # is different, there will be only a warning
 
-LOCAL_CONF_VERSION  = 5.07
+LOCAL_CONF_VERSION  = 5.08
 
 # Description of changes in each new version
 FREEVO_CONF_CHANGES = [
@@ -184,9 +184,8 @@ LOCAL_CONF_CHANGES = [
      '''Removed MOVIE_DATA_DIR and COVER_DIR. It has been replaved by the new
      virtual filesystem controlled by OVERLAY_DIR'''),
     (5.00,
-     '''Changed some config variables. From now on until told otherwise in this log
-     always run \'./freevo convert_config\' to convert your local_conf.py to
-     change the variable names'''),
+     '''Changed some config variables. Use \'./freevo convert_config\' to convert
+     your local_conf.py to change the variable names'''),
     (5.01,
      '''Add AUDIO_SHOW_VIDEOFILES to enable video files in the audio menu'''),
     (5.02,
@@ -206,7 +205,10 @@ LOCAL_CONF_CHANGES = [
      will speed up entering the dir'''),
     (5.07,
      '''Add MENU_ARROW_NAVIGATION to change navigation style. New one is default
-     now. Also added OSD_EXTRA_FONT_PATH to search for fonts''') ]
+     now. Also added OSD_EXTRA_FONT_PATH to search for fonts'''),
+    (5.08,
+     '''Change MENU_ARROW_NAVIGATION to old style and make blurr the new default
+     skin''') ]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -298,7 +300,7 @@ EVENTS = {
 #
 # use arrow keys for back and select (alternative way of navigating)
 #
-MENU_ARROW_NAVIGATION = 1
+MENU_ARROW_NAVIGATION = 0
 
 #
 # keymap to map keyboard keys to event strings. You can also add new keys
@@ -743,7 +745,7 @@ SKIN_MODULE = 'main'
 # used, otherwise the skin will rememeber the last choosen skin.
 #
 SKIN_XML_FILE         = ''
-SKIN_DEFAULT_XML_FILE = 'noia'
+SKIN_DEFAULT_XML_FILE = 'blurr'
 
 #
 # Select a way when to switch to text view even if a image menu is there
@@ -976,7 +978,6 @@ if CONF.display == 'x11' and CONF.xine:
 XINE_ARGS_DEF = '--no-lirc --post=pp:quality=10,expand'
 
 XINE_AO_DEV = 'oss'                     # alsa or oss
-XINE_USE_VCDNAV = 0                     # use xine for VCD nav playback
 
 if XINE_COMMAND:
     plugin.activate('video.xine')
@@ -998,7 +999,6 @@ TV_RECORD_DIR = None
 # XXX You must change this to fit your local conditions!
 #
 # TV_SETTINGS  = 'NORM INPUT CHANLIST DEVICE'
-# TV_VCR_SETTINGS = 'NORM INPUT CHANLIST DEVICE'
 #
 # NORM: ntsc, pal, secam
 # INPUT: television, composite1
@@ -1060,20 +1060,6 @@ TV_DATETIMEFORMAT = '%A %b %d %I:%M %p' # Thursday September 24 8:54 am
 
 TV_RECORDFILE_MASK = '%%m-%%d %%H:%%M %(progname)s - %(title)s'
 
-
-#
-# XXX Recording is still work in progress. You need to change
-# XXX the entire string below to fit your local settings.
-# XXX Eventually TV norm (PAL/NTSC) etc will be taken from the
-# XXX other flags. VCR_xxx and TV_REC_xxx is not used yet!
-# XXX You also need to have the recording daemon running, see
-# XXX the website docs or the mailing lists if that fails.
-# XXX Example cron script:
-# XXX * * * * * /usr/local/freevo/freevo execute src/tv/record_daemon.py
-
-# if using record_daemon from cron
-REC_SCHEDULE_FILE = '/tmp/freevo_record.lst'
-
 # if using the persitant recordserver
 TV_RECORD_SCHEDULE = '%s/record_schedule.xml' % FREEVO_CACHEDIR
 
@@ -1111,7 +1097,7 @@ TV_REC_SIZE = (320, 240)   # Default for slower computers
 # the MPlayer docs and experiment with mplayer to see which one fits
 # your computer best.
 TV_VIEW_OUTFMT = 'yuy2'   # Better quality, slower on pure FB/X11
-TV_REC_OUTFMT = 'yuy2'
+TV_REC_OUTFMT  = 'yuy2'
 
 # XXX Please see the mencoder docs for more info about the settings
 # XXX below. Some stuff must be changed (adevice), others probably
@@ -1135,9 +1121,6 @@ VCR_CMD = (CONF.mencoder + ' ' +
            '-ffourcc divx ' +              # Force 'divx' ident, better compat.
            '-endpos %(seconds)s ' +        # only mencoder uses this so do it here.
            '-o %(filename)s.avi ')         # Filled in by Freevo
-
-# XXX Not used yet
-TV_VCR_SETTINGS = '%s composite1 %s %s' % (CONF.tv, CONF.chanlist, TV_DEVICE)
 
 
 #

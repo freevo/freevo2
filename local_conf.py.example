@@ -1,37 +1,40 @@
 #if 0
 # -----------------------------------------------------------------------
-# local_conf.py - Edit this file for your local system settings
+# freevo_config.py - System configuration
 # -----------------------------------------------------------------------
 # $Id$
 #
 # Notes:
-#   This file contains the important options from freevo_config.py that
-#   you might want to change to suit your system. Remove the '#' to
-#   uncomment the setting(s) you want to change. There are more options
-#   in freevo_config.py, copy those that must be changed to this file.
-#
-#   DO NOT CHANGE ANYTHING IN freevo_config.py, ALWAYS MAKE THE CHANGES
-#   IN local_conf.py TO MAKE UPDATES EASIER
-#
-#   Then put this file in ~/.freevo/ or /etc/freevo to make upgrades easier.
-#   Freevo will look in those folders first for this file.
+#    This file contains the freevo settings. To change the settings
+#    you can edit this file, or better, put a file named local_conf.py
+#    # in the same directory and add your changes there.  E.g.: when
+#    you # want a alsa as mplayer audio out, just put
+#    "MPLAYER_AO_DEV = # 'alsa9'" in local_conf.py
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2003 Krister Lagerstrom, et al. 
+# Copyright (C) 2002 Krister Lagerstrom, et al. 
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
-# Please see the file freevo/COPYING for license info.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # -----------------------------------------------------------------------
 #endif
 
 
-# This version should match the version in freevo_config.py. It makes
-# it easier to update this file. When you get a new version of Freevo,
-# Freevo will tell you any changes made in freevo_config.py. After you
-# merged those changes into this file, set this number to the new one.
-CONFIG_VERSION  = 4.00
-
+CONFIG_VERSION = 5.08
 
 # ======================================================================
 # General freevo settings:
@@ -40,7 +43,7 @@ CONFIG_VERSION  = 4.00
 # AUDIO_DEVICE        = '/dev/dsp'      # e.g.: /dev/dsp0, /dev/audio, /dev/alsa/?
 # AUDIO_INPUT_DEVICE  = '/dev/dsp1'     # e.g.: /dev/dsp0, /dev/audio, /dev/alsa/?
 # MAJOR_AUDIO_CTRL    = 'VOL'           # Freevo takes control over one audio ctrl
-#                                       # 'VOL', 'PCM' 'OGAIN' etc.
+                                      # 'VOL', 'PCM' 'OGAIN' etc.
 # CONTROL_ALL_AUDIO   = 1               # Should Freevo take complete control of audio
 # MAX_VOLUME          = 90              # Set what you want maximum volume level to be.
 # DEFAULT_VOLUME      = 40              # Set default volume level.
@@ -64,11 +67,15 @@ CONFIG_VERSION  = 4.00
 # ROM_DRIVES = None
 
 # hide discs from the wrong menu (e.g. VCDs in audio menu) and empty discs
-HIDE_UNUSABLE_DISCS = 1               
+# HIDE_UNUSABLE_DISCS = 1               
 
-# ROM_SPEED = 0                       # try to set the drive speed of the rom
-                                      # drive a good value for playing movies
-                                      # with a silent drive is 8
+# ROM_SPEED = 0                         # try to set the drive speed of the rom
+                                        # drive a good value for playing movies
+                                        # with a silent drive is 8
+
+
+# ENABLE_SHUTDOWN_SYS = 0  # Performs a whole system shutdown at SHUTDOWN!
+                           # For standalone boxes.
 
 
 #
@@ -77,14 +84,73 @@ HIDE_UNUSABLE_DISCS = 1
 # to mplayer, just write the folling line to your local_conf.py
 #
 # EVENTS['video']['1'] = Event(VIDEO_SEND_MPLAYER_CMD, arg='contrast -100')
+#
 
+#
+# use arrow keys for back and select (alternative way of navigating)
+#
+# MENU_ARROW_NAVIGATION = 0
+
+#
+# keymap to map keyboard keys to event strings. You can also add new keys
+# here, e.g. KEYMAP[K_x] = 'SUBTITLE'. The K_-names are defined by pygame.
+#
+
+#
+# use resources for the internet to get more informations, like CDDB,
+# IMDB and Amazon cover search. Set this variable to 0 if your computer
+# has no network and stop Freevo from trying to use it.
+#
+# USE_NETWORK = 1
+
+#
+# directory structure to save files when the normal filesystem
+# doesn't allow saving. This directory can handle covers and fxd files
+# for read only filesystems like a rom drive. Set this variable to your
+# old MOVIE_DATA_DIR if you have one. It needs to be set to a directory
+# freevo can write to.
+#
+# OVERLAY_DIR = os.path.join(FREEVO_CACHEDIR, 'vfs')
+
+#
+# umask for all files
+# 022 means only the user has write access. If you share your Freevo
+# installation with different users, set it to 002
+#
+# UMASK = 022
+
+#
+# suffix for playlist files
+#
+# PLAYLIST_SUFFIX = [ 'm3u' ]
+
+#
+# use md5 in mmpython to create unique disc ids. Use this if you have
+# problems with different discs having the same id
+#
+# MMPYTHON_CREATE_MD5_ID = 0
+
+#
+# keep metadata in memory
+# Setting this variable will keep all cache files in memory. Startup will be
+# slower, but for large directories, this will speed up entering the dir.
+# 0 = Only keep current dir in memory. Use this if you have too much data
+#     and not enough RAM
+# 1 = Once loaded, keep cachefile for directory in memory
+# 2 = Load all cachefiles on startup
+#
+# WARNING: you should not run 'freevo cache' when freevo is running.
+#
+# MEDIAINFO_USE_MEMORY   = 1
 
 
 # ======================================================================
 # Plugins:
 # ======================================================================
 
-# you can remove all plugins loaded in freevo_config.py
+# you can remove all plugins later in your local_conf.py by setting
+# plugin.remove(code). You can also use the name to remove a plugin. But
+# if you do that, all instances of this plugin will be removed.
 #
 # Examples:
 # plugin.remove(plugin_tv) or
@@ -93,7 +159,8 @@ HIDE_UNUSABLE_DISCS = 1
 #   image main menu,
 # plugin.remove('rom_drives.rom_items') will remove the rom drives from all
 #   menus
-
+#
+# See freevo_config.py for a list of loaded plugins
 
 # Use this ivtv_record instead if you have an ivtv based card (PVR-250/350)
 # and want freevo to do everthing for you.  TV_SETTINGS must be set 
@@ -103,23 +170,6 @@ HIDE_UNUSABLE_DISCS = 1
 
 # For joystick support:
 # plugin.activate('joy')
-
-# control an external tv tuner using irsend or another command
-# to use this you must reassign plugin_external_tuner in local_conf.py:
-# plugin_external_tuner = plugin.activate('tv.irsend_generic',
-#                                         args=('...', '...', ))
-# Please see each irsend plugin for individual arguments and be sure to
-# alter VIDEO_GROUPS to tell a VideoGroup to use it (tuner_type='external').
-
-# Idlebar plugin:
-
-# plugin.activate('idlebar')
-# plugin.activate('idlebar.mail',    level=10, args=('/var/spool/mail/dmeyer', ))
-# plugin.activate('idlebar.tv',      level=20)
-# plugin.activate('idlebar.weather', level=30, args=('EDDW',))
-# plugin.activate('idlebar.clock',   level=50)
-# plugin.activate('idlebar.cdstatus',   level=20)
-# plugin.activate('idlebar.holidays',   level=20)
 
 # ======================================================================
 # Freevo directory settings:
@@ -182,11 +232,11 @@ HIDE_UNUSABLE_DISCS = 1
 #
 # DIRECTORY_USE_MEDIAID_TAG_NAMES = 1
 
-
 #
 # The next varibales are a list of types in which the feature should be
-# enabled (video, audio, image, games). E.g. to enable audoplay for
-# audio and images set DIRECTORY_AUTOPLAY_ITEMS = [ 'audio', 'image' ]
+# enabled (video, audio, image, games). E.g. to enable autoplay for
+# audio and images set DIRECTORY_AUTOPLAY_ITEMS = [ 'audio', 'image' ],
+# to disable it set it to [].
 #
 # If you set this variable in a folder.fxd, the value is 1 (enabled)
 # or 0 (disabled).
@@ -201,7 +251,7 @@ HIDE_UNUSABLE_DISCS = 1
 #
 # Add playlist files ('m3u') to the directory
 #
-# DIRECTORY_ADD_PLAYLIST_FILES   = [ 'audio' ]
+# DIRECTORY_ADD_PLAYLIST_FILES   = [ 'audio', 'image' ]
 
 #
 # Add an item 'Random Playlist' to the directory
@@ -214,28 +264,18 @@ HIDE_UNUSABLE_DISCS = 1
 #
 # DIRECTORY_AUTOPLAY_ITEMS       = [ ]
 
+
 # ======================================================================
 # Freevo movie settings:
 # ======================================================================
 
 #
 # Where the movie files can be found.
+# This is a list of items (e.g. directories, fxd files). The items itself
+# can also be a list of (title, file)
 #
-# VIDEO_ITEMS = [ ('action movies', 'movies/action'),
-#                ('funny stuff', 'movies/comedy') ]
-
-#
-# This is where recorded video is written.
-#
-# XXX the path doesn't work from the www cgi scripts!
-# TV_RECORD_DIR = 'testfiles/Movies/Recorded'
-
-#
-# Directory for XML definitions for DVDs and VCDs. Items in this
-# directory won't be in the MOVIE MAIN MENU, but will be used to find
-# titles and images for the current DVD/VCD
-#
-# MOVIE_DATA_DIR = 'movie-data/'
+# VIDEO_ITEMS = [ ('My new files', '/files/new'), 
+#                 ('All files', '/files/') ]
 
 #
 # Directory containing images for tv shows. A tv show maches the regular
@@ -243,17 +283,30 @@ HIDE_UNUSABLE_DISCS = 1
 # name.(png|jpg) (lowercase) is in this directory, it will be taken as cover
 # image
 #
-# VIDEO_SHOW_DATA_DIR = "testfiles/tv-show-images/"
+VIDEO_SHOW_DATA_DIR = None
 
 #
-# Directory for cover images for CD/VCD/DVD and music CDs or when you can't
-# add a cover image to the dir you want. Not for replacing the normal
-# cover file function.
-#
-# COVER_DIR = 'testfiles/Covers/'
+# The list of filename suffixes that are used to match the files that
+# are played wih MPlayer.
+# 
+# VIDEO_MPLAYER_SUFFIX = [ 'avi', 'mpg', 'mpeg', 'wmv', 'bin', 'rm',
+#                          'divx', 'ogm', 'vob', 'asf', 'm2v', 'm2p',
+#                          'mp4', 'viv', 'nuv', 'mov' ]
 
 #
-# Only scan MOVIE_DATA_DIR and VIDEO_SHOW_DATA_DIR for fxd files containing
+# The list of filename suffixes that are used to match the files that
+# are played wih Xine.
+# 
+# VIDEO_XINE_SUFFIX = [ 'avi', 'mpg', 'mpeg', 'rm', 'divx', 'ogm',
+#                       'asf', 'm2v', 'm2p', 'mp4', 'mov', 'cue' ]
+
+#
+# Prefered video player
+#
+# VIDEO_PREFERED_PLAYER = 'mplayer'
+
+#
+# Only scan OVERLAY_DIR and VIDEO_SHOW_DATA_DIR for fxd files containing
 # informations about a disc. If you only have the fxd files for discs in
 # one of this directories (and subdirectories), set this to 1, it will
 # speed up startup, 0 may be needed if you have fxd files with disc links
@@ -268,22 +321,53 @@ HIDE_UNUSABLE_DISCS = 1
 
 #
 # Where the Audio (mp3, ogg) files can be found.
-# Format: [ ('Title1', 'directory1', 'mplayer options'),
-#           ('Title2', 'directory2'), ... ]
-# The 'mplayer options' field can be omitted.
+# This is a list of items (e.g. directories, fxd files). The items itself
+# can also be a list of (title, file)
 #
-# AUDIO_ITEMS = [ ('Test Files', 'testfiles/Music') ]
+# To add webradio support, add fxd/webradio.fxd to this list
+#
+# AUDIO_ITEMS = [ ('Music Collection', '/local/mp3/'),
+#                 'fxd/webradio.fxd' ]
 
+#
+# The list of filename suffixes that are used to match the files that
+# are played as audio.
+# 
+# AUDIO_SUFFIX     = [ 'mp3', 'ogg', 'wav','m4a', 'wma', 'aac', 'flac']
+
+#
+# This regexp should recognize filenames which are likely to be covers
+# for an album. This example will match front.jpg and cover-f.jpg, but
+# not back.jpg nor cover-b.jpg
+#
+# AUDIO_COVER_REGEXP = 'front|-f'
+
+#
+# Prefered audio player
+#
+# AUDIO_PREFERED_PLAYER = 'mplayer'
+
+#
+# Also show video files in the audio menu (for musicvideos)
+#
+# AUDIO_SHOW_VIDEOFILES = False
 
 # ======================================================================
 # Freevo image viewer settings:
 # ======================================================================
 
+#
 # Where the image files can be found.
+# This is a list of items (e.g. directories, fxd files). The items itself
+# can also be a list of (title, file)
+#
+# IMAGE_ITEMS = None
 
-# IMAGE_ITEMS = [ ('Arizona 2002', '/video/SlideShows/arizona-2002.ssr'),
-#                ('Carmel 2002',  '/video/SlideShows/carmel.ssr'),
-#                ('Pics',  '/video/SlideShows') ]
+#
+# The list of filename suffixes that are used to match the files that
+# are used for the image viewer.
+# 
+# IMAGE_SUFFIX = [ 'jpg','gif','png', 'jpeg','bmp','tiff','psd' ]
 
 # The viewer now supports a new type of menu entry, a slideshow file.
 # It also has the slideshow alarm signal handler for automated shows.
@@ -291,16 +375,18 @@ HIDE_UNUSABLE_DISCS = 1
 
 # IMAGE_SSHOW_SUFFIX = [ 'ssr' ]
 
-# This defines the file extensions of slideshow playlists. When IMAGE_ITEMS
-# is parsed, it will look for entries that match the IMAGE_SSHOW_SUFFIX
-# patterns. If it finds a match, then it will classify that entry as a
-# slideshow playlist instead of a directory of images. For example:
 
+# The number of blend steps between images, 0 to disable blending
+# IMAGEVIEWER_BLEND_STEPS = 10
+    
+# Total time in seconds for blending from one image to the next
+# IMAGEVIEWER_BLEND_TIME  = 0.75
 
 
 # ======================================================================
 # Freevo games settings:
 # ======================================================================
+
 #
 # MAME is an emulator for old arcade video games. It supports almost
 # 2000 different games! The actual emulator is not included in Freevo,
@@ -331,33 +417,23 @@ HIDE_UNUSABLE_DISCS = 1
 #               ('SUPER NINTENDO', '/home/media/games/snes/roms', 
 #                ('SNES', '/usr/local/bin/zsnes', '-m -r 3 -k 100 -cs -u', '', None )),
 #               ('Visual Boy Advance', '/home/media/games/vba/roms/',
-#                ('GENERIC', '/usr/local/vba/VisualBoyAdvance', '', '', [ 'gba' ] )),
+#                ('GENERIC', '/usr/local/vba/VisualBoyAdvance', ' ', '', [ 'gba' ] )),
 #               ('MEGADRIVE', '/home/media/games/megadrive/roms', 
 #                ('GENESIS', '/usr/local/bin/generator-svgalib', '', '', '' )) ]
- 
+
+# GAMES_ITEMS = None
+
 # are used for the Mame arcade emulator.
 #
-GAMES_NICE        = -20       # Priority of the game process. 0 is unchanged,
-                              # <0 is higher prio, >0 lower prio.
-                              # prio <0 has no effect unless run as root.
+# GAMES_NICE        = -20       # Priority of the game process. 0 is unchanged,
+                                # <0 is higher prio, >0 lower prio.
+                                # prio <0 has no effect unless run as root.
  
-GAMES_MAME_CACHE = '%s/romlist-%s.pickled' % (FREEVO_CACHEDIR, os.getuid())
+# GAMES_MAME_CACHE = '%s/romlist-%s.pickled' % (FREEVO_CACHEDIR, os.getuid())
 
 # ======================================================================
-# freevo OSD section:
+# freevo SKIN section:
 # ======================================================================
-
-#
-# XML file for the skin
-#
-# SKIN_XML_FILE = 'noia'
-
-#
-# Start the new skin with a specific layout. Default is 0, DISPLAY toggles
-# between the different layouts. If a menu hasn't that layout number, 0 will
-# be taken
-#
-# SKIN_START_LAYOUT = 0
 
 #
 # Select a way when to switch to text view even if a image menu is there
@@ -367,29 +443,45 @@ GAMES_MAME_CACHE = '%s/romlist-%s.pickled' % (FREEVO_CACHEDIR, os.getuid())
 # 2. Ignore the directories, always switch to text view when all images
 #    are the same
 #
-SKIN_FORCE_TEXTVIEW_STYLE = 1
+# SKIN_FORCE_TEXTVIEW_STYLE = 1
 
 #
 # Force text view for the mediamenu (first menu for video, audio, images and
 # games). 
 #
-SKIN_MEDIAMENU_FORCE_TEXTVIEW = 0
+# SKIN_MEDIAMENU_FORCE_TEXTVIEW = 0
 
 
-# ENABLE_SHUTDOWN_SYS = 0  # Performs a whole system shutdown at SHUTDOWN!
-                           # For standalone boxes.
 
-# The following fours variables have different settings in freevo_config.py
-# based on the display you use.
+# ======================================================================
+# freevo OSD section:
+# ======================================================================
 
+#
+# Sytem Path were to search for fonts not in the Freevo distribution
+#
+# OSD_EXTRA_FONT_PATH  = [ '/usr/X11R6/lib/X11/fonts/truetype/' ]
+
+# Font aliases, all names must be lowercase!
+# All alternate fonts must be in './share/fonts/'
+# OSD_FONT_ALIASES = { 'arial_bold.ttf' : 'VeraBd.ttf' }
+
+# (seconds, files)
+# number seconds until the busy icon is shown in the menu.
+# or show it right away when we know it takes some time (more than files number
+# of files in a directory. Set this to None to disable this
+# OSD_BUSYICON_TIMER = (0.7, 200)
+
+# OSD_SDL_EXEC_AFTER_STARTUP = ""
+# OSD_OVERSCAN_X = 0
+# OSD_OVERSCAN_Y = 0
+    
 # Exec a script on the osd close.
 # OSD_SDL_EXEC_AFTER_CLOSE = ""
 
-# Exec a script after startup
-# OSD_SDL_EXEC_AFTER_STARTUP = ""
-
-# OSD_OVERSCAN_X = 0
-# OSD_OVERSCAN_Y = 0
+# Stop the osd before playing a movie with xine or mplayer. Some output
+# devices need this. After playback, the osd will be restored
+# OSD_STOP_WHEN_PLAYING = 0
 
     
 # ======================================================================
@@ -409,7 +501,6 @@ SKIN_MEDIAMENU_FORCE_TEXTVIEW = 0
 # Check contrib/lirc for examples and helpers/freevo2lirc.pl for a converter
 # script.
 #
-
 # LIRCRC = '/etc/freevo/lircrc'
 
 #
@@ -434,10 +525,19 @@ SKIN_MEDIAMENU_FORCE_TEXTVIEW = 0
 
 
 # ======================================================================
+# tvtime section:
+# ======================================================================
+
+# TVTIME_CMD = CONF.tvtime
+
+
+# ======================================================================
 # MPlayer section:
 # ======================================================================
 
 # MPLAYER_AO_DEV       = 'oss:/dev/dsp'  # e.g.: oss,sdl,alsa, see mplayer docs
+
+# MPLAYER_VO_DEV_OPTS  = ''	       # e.g.: ':some_var=vcal'
 
 # DVD_LANG_PREF        = 'en,se,no'      # Order of preferred languages on DVD.
 # DVD_SUBTITLE_PREF    = ''              # Order of preferred subtitles on DVD.
@@ -445,10 +545,6 @@ SKIN_MEDIAMENU_FORCE_TEXTVIEW = 0
 # Priority of mplayer process. 0 is unchanged, <0 is higher prio, >0 lower prio.
 # prio <0 has no effect unless run as root.
 # MPLAYER_NICE         = -20             
-
-# MPLAYER_ARGS_DEF     = (('-ac mad, -autosync 100 -nolirc -autoq 100 -screenw %s '
-#                         + '-screenh %s -fs') % (CONF.width, CONF.height))
-
 
 #
 # Mplayer options to use the software scaler. If your CPU is fast enough, you
@@ -461,17 +557,20 @@ SKIN_MEDIAMENU_FORCE_TEXTVIEW = 0
 # older versions of mplayer may need
 # MPLAYER_SOFTWARE_SCALER = '-xy %s -sws 2 -vop scale:-1:-1:-1:100' % CONF.width
 #
+# MPLAYER_SOFTWARE_SCALER = ''
 
 #
 # Mplayer args for the different kinds of files. Possible values are dvd, vcd,
 # cd (audio cd), tv, all extentions and default if nothing matches
 #
-# MPLAYER_ARGS = { 'dvd': '-cache 8192',
-#                  'vcd': '-cache 4096',
-#                  'cd' : '-cache 500 -cdda speed=1',
-#                  'tv' : '-nocache',
-#                  'avi': '-cache 5000 -idx',
-#                  'rm' : '-cache 5000 -forceidx',
+# MPLAYER_ARGS = { 'dvd'    : '-cache 8192',
+#                  'vcd'    : '-cache 4096',
+#                  'cd'     : '-cache 1024 -cdda speed=2',
+#                  'tv'     : '-nocache',
+#                  'ivtv'   : '-cache 8192',
+#                  'avi'    : '-cache 5000 -idx',
+#                  'rm'     : '-cache 5000 -forceidx',
+#                  'rmvb'   : '-cache 5000 -forceidx',
 #                  'webcam' : 'tv:// -tv driver=v4l:width=352:height=288:outfmt=yuy2:device=/dev/video2',
 #                  'default': '-cache 5000'
 #                  }
@@ -492,7 +591,7 @@ SKIN_MEDIAMENU_FORCE_TEXTVIEW = 0
 # Try to set correct 'delay' and 'mc' values for mplayer based on the delay
 # from mmpython. This should correct av sync problems with mplayer for some
 # files, but may also break things (I don't know, that's why it's disabled
-# as default). WARNING: when seeking, the playpack is out of sync for some
+# as default). WARNING: when seeking, the playback is out of sync for some
 # seconds! This only works with mmpython > 0.2
 #
 # MPLAYER_SET_AUDIO_DELAY = 0
@@ -505,8 +604,13 @@ SKIN_MEDIAMENU_FORCE_TEXTVIEW = 0
 # You need xine-ui version greater 0.9.21 to use the all the features
 # of the xine plugin
 
+# XINE_VO_DEV  = 'xv'
+# XINE_COMMAND = '%s --hide-gui -pq -g -B --geometry %sx%s+0+0 --no-splash' % \
+#                  (CONF.xine, CONF.width, CONF.height)
+
+# XINE_ARGS_DEF = '--no-lirc --post=pp:quality=10,expand'
+
 # XINE_AO_DEV = 'oss'                     # alsa or oss
-# XINE_USE_VCDNAV = 0                     # use xine for VCD nav playback
 
 
 # ======================================================================
@@ -514,12 +618,17 @@ SKIN_MEDIAMENU_FORCE_TEXTVIEW = 0
 # ======================================================================
 
 #
+# This is where recorded video is written.
+#
+# XXX the path doesn't work from the www cgi scripts!
+# TV_RECORD_DIR = None
+
+#
 # Watching TV
 #
 # XXX You must change this to fit your local conditions!
 #
 # TV_SETTINGS  = 'NORM INPUT CHANLIST DEVICE'
-# TV_VCR_SETTINGS = 'NORM INPUT CHANLIST DEVICE'
 #
 # NORM: ntsc, pal, secam
 # INPUT: television, composite1
@@ -532,7 +641,17 @@ SKIN_MEDIAMENU_FORCE_TEXTVIEW = 0
 # DEVICE: Usually /dev/video0, but might be /dev/video1 instead for multiple
 # boards.
 #
-# TV_SETTINGS = '%s television %s /dev/video0' % (CONF.tv, CONF.chanlist)
+# FreeBSD uses the Brooktree TV-card driver, not V4L.
+#
+# TV_DRIVER = 'v4l'
+# TV_DEVICE = '/dev/video0'
+# TV_INPUT = 0
+
+# Additional options to pass to mplayer in TV mode.
+# For example, TV_OPTS = '-vop pp=ci' would turn on deinterlacing.
+# TV_OPTS = ''
+
+# TV_SETTINGS = '%s television %s %s' % (CONF.tv, CONF.chanlist, TV_DEVICE)
 
 # This is the size (in MB) of the timeshift buffer, ie: how long you can
 # pause tv for.  This is set to a low default because the default buffer
@@ -548,56 +667,41 @@ SKIN_MEDIAMENU_FORCE_TEXTVIEW = 0
 
 # TV_DATEFORMAT = '%e-%b' # Day-Month: 11-Jun
 # TV_TIMEFORMAT = '%H:%M' # Hour-Minute 14:05
+# TV_DATETIMEFORMAT = '%A %b %d %I:%M %p' # Thursday September 24 8:54 am
+
+# This is the filename format for files recorded using Freevo.
+# You can use any of the strftime variables in it, provided you
+# put two '%%' at the beginning. 
+# 
+# Some examples:
+# %%A - Full weekday name.
+# %%H - Hour (24-hour clock) as a decimal number [00,23].
+# %%M - Minute as a decimal number [00,59].
+# %%m - Month as a decimal number [01,12].
+# %%d - Day of the month as a decimal number [01,31].
+# %%p - Locale's equivalent of either AM or PM.
+# 
+# More can be found at: http://www.python.org/doc/current/lib/module-time.html
+
+# TV_RECORDFILE_MASK = '%%m-%%d %%H:%%M %(progname)s - %(title)s'
 
 
-#
-# XXX Recording is still work in progress. You need to change
-# XXX the entire string below to fit your local settings.
-# XXX Eventually TV norm (PAL/NTSC) etc will be taken from the
-# XXX other flags. VCR_xxx and TV_REC_xxx is not used yet!
-# XXX You also need to have the recording daemon running, see
-# XXX the website docs or the mailing lists if that fails.
-# XXX Example cron script:
-# XXX * * * * * /usr/local/freevo/freevo execute src/tv/record_daemon.py
-
-# if using record_daemon from cron
-# REC_SCHEDULE_FILE = '/tmp/freevo_record.lst'
-
-# if using the persitant record_server
+# if using the persitant recordserver
 # TV_RECORD_SCHEDULE = '%s/record_schedule.xml' % FREEVO_CACHEDIR
 
 # TV_RECORD_SERVER_IP = 'localhost'
 # TV_RECORD_SERVER_PORT = 18001
 
-#
-# XXX Please see the mencoder docs for more info about the settings
-# XXX below. Some stuff must be changed (adevice), others probably
-# XXX should be ("Change"), or could be in some cases ("change?")
-# VCR_CMD = ('/usr/local/bin/mencoder ' +    # Change. Absolute path to the runtime
-#            'tv:// ' +                      # New mplayer requires this.
-#            '-tv on:driver=v4l:input=0' +   # Input 0 = Comp. V. in
-#            ':norm=NTSC' +                  # Change
-#            ':channel=%(channel)s' +         # Filled in by Freevo
-#            ':chanlist=us-cable' +          # Change
-#            ':width=320:height=240' +       # Change if needed
-#            ':outfmt=yv12' +                # Prob. ok, yuy2 might be faster
-#            ':device=/dev/video0' +         # CHANGE!
-#            ':adevice=/dev/dsp4' +          # CHANGE!
-#            ':audiorate=32000' +            # 44100 for better sound
-#            ':forceaudio:forcechan=1:' +    # Forced mono for bug in my driver
-#            'buffersize=64' +               # 64 Megabyte capture buffer, change?
-#            ' -ovc lavc -lavcopts ' +       # Mencoder lavcodec video codec
-#            'vcodec=mpeg4' +                # lavcodec mpeg-4
-#            ':vbitrate=1200:' +             # Change lower/higher, bitrate
-#            'keyint=30 ' +                  # Keyframe every 10 secs, change?
-#            '-oac mp3lame -lameopts ' +     # Use Lame for MP3 encoding
-#            'br=128:cbr:mode=3 ' +          # MP3 const. bitrate, 128 kbit/s
-#            '-ffourcc divx ' +              # Force 'divx' ident, better compat.
-#            '-endpos %(seconds)s ' +        # only mencoder uses this so do it here.
-#            '-o %(filename)s.avi ')                   # Filled in by Freevo
+# start every recording X minutes before scheduled,
+# and stop X minutes after scheduled - default to zero minutes.
+# This must be a value in seconds although at the moment only has
+# the percision of one minute.
+# TV_RECORD_PADDING = 0 * 60
 
-# XXX Not used yet
-# TV_VCR_SETTINGS = '%s composite1 %s /dev/video0' % (CONF.tv, CONF.chanlist)
+# VCR_AUDIO = (':adevice=%s' % AUDIO_DEVICE +
+#              ':audiorate=32000' +         # 44100 for better sound
+#              ':forceaudio:forcechan=1:' + # Forced mono for bug in my driver
+#              'buffersize=64')             # 64MB capture buffer, change?
 
 # TV capture size for viewing and recording. Max 768x480 for NTSC,
 # 768x576 for PAL. Set lower if you have a slow computer!
@@ -608,8 +712,6 @@ SKIN_MEDIAMENU_FORCE_TEXTVIEW = 0
 # The vertical size is always either fullscreen or 480/576 (NTSC/PAL)
 # for tvtime.
 # TV_VIEW_SIZE = (640, 480)
-
-# XXX Not used yet
 # TV_REC_SIZE = (320, 240)   # Default for slower computers
 
 # Input formats for viewing and recording. The format affect viewing
@@ -617,8 +719,30 @@ SKIN_MEDIAMENU_FORCE_TEXTVIEW = 0
 # the MPlayer docs and experiment with mplayer to see which one fits
 # your computer best.
 # TV_VIEW_OUTFMT = 'yuy2'   # Better quality, slower on pure FB/X11
-# XXX Not used yet
 # TV_REC_OUTFMT = 'yuy2'
+
+# XXX Please see the mencoder docs for more info about the settings
+# XXX below. Some stuff must be changed (adevice), others probably
+# XXX should be ("Change"), or could be in some cases ("change?")
+# VCR_CMD = (CONF.mencoder + ' ' +
+#            'tv:// ' +                      # New mplayer requires this.
+#            '-tv driver=%s:input=%d' % (TV_DRIVER, TV_INPUT) +
+#            ':norm=%s' % CONF.tv +
+#            ':channel=%(channel)s' +        # Filled in by Freevo
+#            ':chanlist=%s' % CONF.chanlist +
+#            ':width=%d:height=%d' % (TV_REC_SIZE[0], TV_REC_SIZE[1]) +
+#            ':outfmt=%s' % TV_REC_OUTFMT +
+#            ':device=%s' % TV_DEVICE +
+#            VCR_AUDIO +                     # set above
+#            ' -ovc lavc -lavcopts ' +       # Mencoder lavcodec video codec
+#            'vcodec=mpeg4' +                # lavcodec mpeg-4
+#            ':vbitrate=1200:' +             # Change lower/higher, bitrate
+#            'keyint=30 ' +                  # Keyframe every 10 secs, change?
+#            '-oac mp3lame -lameopts ' +     # Use Lame for MP3 encoding, must be enabled in mencoder!
+#            'br=128:cbr:mode=3 ' +          # MP3 const. bitrate, 128 kbit/s
+#            '-ffourcc divx ' +              # Force 'divx' ident, better compat.
+#            '-endpos %(seconds)s ' +        # only mencoder uses this so do it here.
+#            '-o %(filename)s.avi ')         # Filled in by Freevo
 
 
 #
@@ -657,14 +781,28 @@ SKIN_MEDIAMENU_FORCE_TEXTVIEW = 0
 # For the standard frequancy tables see src/tv/freq.py.  To add your own just 
 # replace tuner_id in the following example with a valid tuner id (ie: '5' or
 # 'BBC1') and a frequency in KHz.  You may have as many entries as you like,
-# anything here will simply override a coresponding entry in your standard
-# frequency table and you can also have entries here that are not present i
+# anything here will simply override a corresponding entry in your standard
+# frequency table and you can also have entries here that are not present in
 # there.
 
 # FREQUENCY_TABLE = {
 #     'tuner_id'   :    55250,
 # }
 
+
+# VIDEO_GROUPS is a new setting to handle multiple arbitrary groups of devices
+# for viewing or recording.  It will be possible to have different Freevo
+# channels use different Video Groups.
+
+# VIDEO_GROUPS = [
+#     VideoGroup(vdev=TV_DEVICE,
+#                adev=AUDIO_DEVICE,
+#                input_type='tuner',
+#                tuner_norm=CONF.tv,
+#                tuner_chanlist=CONF.chanlist,
+#                desc='Default Video Group',
+#                recordable=True),
+# ]
 
 
 #
@@ -723,6 +861,7 @@ SKIN_MEDIAMENU_FORCE_TEXTVIEW = 0
 # 03:00 to 06:00 it won't be displayed at all.
 #
 
+# TV_CHANNELS = None
 
 
 # Program to grab xmltv listings. To get a grabber, you need to download
@@ -730,26 +869,23 @@ SKIN_MEDIAMENU_FORCE_TEXTVIEW = 0
 # Use the tv_grab helper to grab the listings and cache them. Start
 # 'freevo tv_grab --help' for more informations.
 
-XMLTV_GRABBER = ''
+# XMLTV_GRABBER = ''
 
 # If you want to run tv_sort on your listings add the path to tv_sort here.
 # tv_sort will make sure all your programs have proper stop times, otherwise
 # programs might get cut off at midnight.
 
-XMLTV_SORT = ''
+# XMLTV_SORT = ''
 
 # Number of days the grabber should get
 
-XMLTV_DAYS = 3
-
+# XMLTV_DAYS = 3
 
 
 # ======================================================================
 # Builtin WWW server settings
 # ======================================================================
 
-# XXX THIS IS WORK IN PROGRESS! 
-#
 # To activate the build in web server, please activate the www plugin
 # in your local_conf.py:
 #
@@ -769,6 +905,57 @@ XMLTV_DAYS = 3
 # 
 # WWW_USERS = { "user1" : "changeme", 
 #            "optional" : "changeme2" }
+#
+
+# The tv guide is divided into 30 minute intervals
+# WWW_GUIDE_INTERVAL = 30
+# WWW_GUIDE_PRECISION = 5 # 5 minutes precision
+
+# Show this many blocks at once
+# WWW_GUIDE_COLS = 6
+
+# WWW_STYLESHEET = 'styles/main.css'
+
+# WWW_JAVASCRIPT = 'scripts/display_prog-head.js'
 
 
 
+
+
+# ======================================================================
+# Internal stuff, you shouldn't change anything here unless you know
+# what you are doing
+# ======================================================================
+
+#
+# Config for xml support in the movie browser
+# the regexp has to be with ([0-9]|[0-9][0-9]) so we can get the numbers
+#
+# VIDEO_SHOW_REGEXP = "s?([0-9]|[0-9][0-9])[xe]([0-9]|[0-9][0-9])[^0-9]"
+
+
+#
+# Remote control daemon. The server is in the Freevo main application,
+# and the client is a standalone application in rc_client/
+#
+# ENABLE_NETWORK_REMOTE = 0
+# REMOTE_CONTROL_HOST = '127.0.0.1'
+# REMOTE_CONTROL_PORT = 16310
+
+
+#
+# XMLTV File
+#
+# This is the XMLTV file that can be optionally used for TV listings
+#
+# XMLTV_FILE = '/tmp/TV.xml'
+
+#
+# XML TV Logo Location
+#
+# Use the "makelogos.py" script to download all the
+# Station logos into a directory. And then put the path
+# to those logos here
+# TV_LOGOS = OS_CACHEDIR + '/xmltv/logos'
+
+# LOCALE='latin-1'
