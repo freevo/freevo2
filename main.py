@@ -4,6 +4,9 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.65  2002/09/14 16:55:33  dischi
+# cosmetic change
+#
 # Revision 1.64  2002/09/08 18:26:03  krister
 # Applied Andrew Drummond's MAME patch. It seems to work OK on X11, but still needs some work before it is ready for prime-time...
 #
@@ -187,6 +190,9 @@ def shutdown(menuw=None, arg=None):
     if 'ENABLE_SHUTDOWN_SYS' in dir(config):  
         if config.ENABLE_SHUTDOWN_SYS:
             os.system("shutdown -h now")
+            # let freevo be killed by init, looks nicer if the picture
+            # vanishes just before matroxset kills the tv out
+            return
 
     #
     # Here are some different ways of exiting freevo for the
