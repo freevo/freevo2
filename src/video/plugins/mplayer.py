@@ -9,6 +9,18 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.57  2004/01/11 23:21:58  outlyer
+# Fix for this crash:
+#
+# Traceback (most recent call last):
+#   File "/usr/lib/python2.3/site-packages/freevo/main.py", line 435, in ?
+#     child.poll()
+#   File "/usr/lib/python2.3/site-packages/freevo/childapp.py", line 610, in poll
+#     rc.post_event(self.stop_event())
+#   File "/usr/lib/python2.3/site-packages/freevo/video/plugins/mplayer.py", line 505, in stop_event
+#     print _( 'ERROR' ) + ': ' + self.exit_type + \
+# TypeError: cannot concatenate 'str' and 'NoneType' objects
+#
 # Revision 1.56  2004/01/02 11:17:35  dischi
 # cleanup
 #
@@ -502,7 +514,7 @@ class MPlayerApp(childapp.ChildApp2):
         elif self.exit_type == "Quit":
             return USER_END
         else:
-            print _( 'ERROR' ) + ': ' + self.exit_type + \
+            print _( 'ERROR' ) + ': ' + str(self.exit_type) + \
                   _( 'unknow error while playing file' )
             return PLAY_END
                         
