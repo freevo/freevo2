@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/03/16 19:33:12  dischi
+# adjustments to the new xml_parser
+#
 # Revision 1.23  2003/03/14 19:38:02  dischi
 # Support the new <menu> and <menuset> structure. See the blue2 skins
 # for example
@@ -152,14 +155,6 @@ DEBUG = 1
 
 TRUE = 1
 FALSE = 0
-
-
-
-default_font = xml_skin.XML_font('none')
-default_font.name = config.OSD_DEFAULT_FONTNAME
-default_font.size = config.OSD_DEFAULT_FONTSIZE
-default_font.h = config.OSD_DEFAULT_FONTSIZE
-default_font.shadow.visible = 0
 
 
 
@@ -422,7 +417,6 @@ class Skin_Area:
         self.last_content_objects = self.content_objects
 
 
-
     def calc_geometry(self, object, copy_object=0):
         """
         calculate the real values of the object (e.g. content) based
@@ -516,8 +510,6 @@ class Skin_Area:
             else:
                 area = area[1]
 
-            area = settings.menuset[area]
-            
         try:
             area = eval('area.%s' % self.area_name)
         except AttributeError:
@@ -528,14 +520,11 @@ class Skin_Area:
             self.area_val = area
             redraw = TRUE
             
-        if not settings.layout.has_key(area.layout):
-            if self.area_val.visible:
-                print '*** layout <%s> not found' % area.layout
-            self.layout = None
+        if not area.layout:
             return redraw
 
-        old_layout = self.layout
-        self.layout = settings.layout[area.layout]
+        old_layout  = self.layout
+        self.layout = area.layout
 
         if old_layout and old_layout != self.layout:
             redraw = TRUE
@@ -558,7 +547,8 @@ class Skin_Area:
         if hasattr(self, 'watermark') and self.watermark:
             last_watermark = self.watermark[4]
             #if self.menu.selected.image != self.watermark[4]:
-	    if hasattr(self.menu.selected,'image') and self.menu.selected.image != self.watermark[4]:
+	    if hasattr(self.menu.selected,'image') and \
+               self.menu.selected.image != self.watermark[4]:
                 self.watermark = None
                 redraw_watermark = TRUE
             
@@ -611,17 +601,6 @@ class Skin_Area:
             self.redraw = TRUE
             
 
-    def get_font(self, name):
-        """
-        return the font object from the settings with that name. If not found,
-        print an error message and return the default font
-        """
-        if self.settings.font.has_key(name):
-            return self.settings.font[name]
-        print '*** font <%s> not found' % name
-        return default_font
-
-    
     def drawroundbox(self, x, y, width, height, rect, redraw=TRUE):
         """
         draw a round box ... or better stores the information about this call
@@ -691,9 +670,12 @@ class Skin_Area:
             self.screen.draw('content', ('image', image, val[0], val[1]))
             self.content_objects += [ ( 'image', val[0], val[1], image.get_width(),
                                       image.get_height(), image ) ]
-            
+            return
+        
         elif hasattr(val, 'label') and val.label == 'background':
             self.screen.draw('background', ('image', image, val.x, val.y))
         else:
             self.screen.draw('content', ('image', image, val.x, val.y))
-            
+
+        self.content_objects += [ ( 'image', val.x, val.y, val.width,
+                                    val.height, image ) ]
