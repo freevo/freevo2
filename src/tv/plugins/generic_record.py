@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/06/05 00:04:46  rshortt
+# Create the tv lock file so the idlebar plugin will know. :)
+#
 # Revision 1.2  2003/05/12 02:04:03  rshortt
 # cleanup
 #
@@ -143,6 +146,10 @@ class Record_Thread(threading.Thread):
                 
             elif self.mode == 'record':
                 print('Record_Thread::run: cmd=%s' % self.command)
+
+                tv_lock_file = config.FREEVO_CACHEDIR + '/record'
+                open(tv_lock_file, 'w').close()
+
                 self.app = RecordApp(self.command)
                 
                 while self.mode == 'record' and self.app.isAlive():
@@ -151,6 +158,8 @@ class Record_Thread(threading.Thread):
                 print('Record_Thread::run: past wait()!!')
 
                 self.app.kill()
+
+                os.remove(tv_lock_file)
 
                 self.mode = 'idle'
                 

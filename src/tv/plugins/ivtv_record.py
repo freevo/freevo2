@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/06/05 00:04:46  rshortt
+# Create the tv lock file so the idlebar plugin will know. :)
+#
 # Revision 1.3  2003/06/01 16:05:40  rshortt
 # Further suport for ivtv based cards.  Now you can set the bitrate to encode at or the stream type to use.
 #
@@ -118,6 +121,9 @@ class Record_Thread(threading.Thread):
             elif self.mode == 'record':
                 print 'Record_Thread::run: started recording'
 
+                tv_lock_file = config.FREEVO_CACHEDIR + '/record'
+                open(tv_lock_file, 'w').close()
+
                 video_save_file = '%s/%s.mpeg' % (config.DIR_RECORD, 
                                              string.replace(self.prog.filename,
                                                             ' ', '_'))
@@ -125,7 +131,6 @@ class Record_Thread(threading.Thread):
                 (v_norm, v_input, v_clist, v_dev) = config.TV_SETTINGS.split()
                 v_norm = string.upper(v_norm)
 
-                # v = v4l2.Videodev(v_dev)
                 v = ivtv.IVTV(v_dev)
 
                 print 'Setting chanlist to %s' % v_clist
@@ -164,12 +169,14 @@ class Record_Thread(threading.Thread):
                 print "Read Frequency: %i" % v.getfreq()
 
                 codec = v.getCodecInfo()
+
                 codec.bitrate = config.IVTV_BITRATE
-                codec.bitrate_peak = config.IVTV_BITRATE + 1
+                codec.bitrate_peak = config.IVTV_BITRATE 
                 codec.stream_type = config.IVTV_STREAM_TYPE
 
                 v.setCodecInfo(codec)
                 codec = v.getCodecInfo()
+
                 print 'CODEC::bitrate: %s' % codec.bitrate
                 print 'CODEC::bitrate_peak: %s' % codec.bitrate_peak
                 print 'CODEC::stream_type: %s' % codec.stream_type
@@ -188,6 +195,8 @@ class Record_Thread(threading.Thread):
                 v_out.close()
                 v.close()
                 v = None
+
+                os.remove(tv_lock_file)
 
                 print('Record_Thread::run: finished recording')
 
