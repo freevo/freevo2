@@ -27,6 +27,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/07/03 21:29:27  dischi
+# Reversed the changes I made to speed up things when I split
+# drawstringframed into a calc and draw function. The new dsf doesn't need
+# that and now vertical alignment in the info area works again
+#
 # Revision 1.8  2003/07/02 20:13:30  dischi
 # use now the two parts of drawstringframed
 #
@@ -230,10 +235,25 @@ class Screen:
                 if self.in_update(x1, y1, x2, y2, update_area):
                     layer.blit(image, (x1, y1))
 
-            for x1, y1, x2, y2, dsf_object in objects.text:
+            for x1, y1, x2, y2, text, font, height, align_h, align_v, mode, \
+                ellipses in objects.text:
                 if self.in_update(x1, y1, x2, y2, update_area):
                     width = x2 - x1
-                    osd.dsf_draw(dsf_object, layer)
+                    if font.shadow.visible:
+                        osd.drawstringframed(text, x1+font.shadow.x, y1+font.shadow.y,
+                                             width, height, font.shadow.color, None,
+                                             font=font.name, ptsize=font.size,
+                                             align_h = align_h, align_v = align_v,
+                                             mode=mode, ellipses=ellipses, layer=layer)
+                    osd.drawstringframed(text, x1, y1, width, height, font.color, None,
+                                         font=font.name, ptsize=font.size,
+                                         align_h = align_h, align_v = align_v,
+                                         mode=mode, ellipses=ellipses, layer=layer)
+
+#             for x1, y1, x2, y2, dsf_object in objects.text:
+#                 if self.in_update(x1, y1, x2, y2, update_area):
+#                     width = x2 - x1
+#                     osd.dsf_draw(dsf_object, layer)
 
         for x0, y0, x1, y1 in update_area:
             osd.screen.blit(layer, (x0, y0), (x0, y0, x1-x0, y1-y0))
@@ -711,25 +731,28 @@ class Skin_Area:
         if font.shadow.visible:
             width -= font.shadow.x
 
-        dsf_info = osd.dsf_calc(text, x, y, width, height, font.color, None,
-                                font=font.name, ptsize=font.size,
-                                align_h = align_h, align_v = align_v,
-                                mode=mode, ellipses=ellipses)
-        if dsf_info[1] == text:
-            # there is nothing to draw
-            return dsf_info[2]
-            
-        if font.shadow.visible:
-            objects = copy.deepcopy(dsf_info[0])
-            for o in objects:
-                o.x += font.shadow.x
-                o.y += font.shadow.y
-                o.fgcolor = font.shadow.color
-            self.tmp_objects.text.append((x+font.shadow.x, y+font.shadow.y,
-                                          x+width, y+height2, objects))
+        self.tmp_objects.text.append((x, y, x+width, y+height2, text, font, height,
+                                            align_h, align_v, mode, ellipses))
 
-        self.tmp_objects.text.append((x, y, x+width, y+height2, dsf_info[0]))
-        return dsf_info[2]
+#         dsf_info = osd.dsf_calc(text, x, y, width, height, font.color, None,
+#                                 font=font.name, ptsize=font.size,
+#                                 align_h = align_h, align_v = align_v,
+#                                 mode=mode, ellipses=ellipses)
+#         if dsf_info[1] == text:
+#             # there is nothing to draw
+#             return dsf_info[2]
+            
+#         if font.shadow.visible:
+#             objects = copy.deepcopy(dsf_info[0])
+#             for o in objects:
+#                 o.x += font.shadow.x
+#                 o.y += font.shadow.y
+#                 o.fgcolor = font.shadow.color
+#             self.tmp_objects.text.append((x+font.shadow.x, y+font.shadow.y,
+#                                           x+width, y+height2, objects))
+
+#         self.tmp_objects.text.append((x, y, x+width, y+height2, dsf_info[0]))
+#         return dsf_info[2]
     
 
     def load_image(self, image, val, redraw=TRUE):

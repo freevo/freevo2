@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/07/03 21:29:27  dischi
+# Reversed the changes I made to speed up things when I split
+# drawstringframed into a calc and draw function. The new dsf doesn't need
+# that and now vertical alignment in the info area works again
+#
 # Revision 1.6  2003/07/02 20:13:30  dischi
 # use now the two parts of drawstringframed
 #
@@ -102,13 +107,6 @@ class Info_Area(Skin_Area):
         if not self.list: # nothing to draw
             self.updated = 0
             return
-
-
-        if 1:
-            self.return_formatedtext( self.sellist )
-            self.updated = 0
-            return
-
 
         # get items to be draw
         list = self.return_formatedtext( self.sellist )
@@ -332,10 +330,12 @@ class Info_Area(Skin_Area):
                 else:
                     height = -1
                     
-                size = self.write_text(element.text, element.font, self.content,
-                                       self.content.x+x, self.content.y+y,
-                                       r.width, height, element.align,
-                                       element.valign, element.mode)
+                size = osd.drawstringframed( element.text, 0, 0,
+                                             r.width, r.height,
+                                             None, None,
+                                             element.font.name, element.font.size,
+                                             element.align, element.valign,
+                                             element.mode, layer='' )[ 1 ]
 
                 m_width  = size[ 2 ] - size[ 0 ]
                 m_height = size[ 3 ] - size[ 1 ]
@@ -364,10 +364,6 @@ class Info_Area(Skin_Area):
 
 
             # Need to recalculate line height?
-            #
-            # XXX varitical alignment is broekn right now. We need to
-            # XXX use parts of write_text and the dsf functions to do that
-            #
             if newline and ret_list:
                 newline_height = 0
                 # find the tallest string
@@ -385,8 +381,4 @@ class Info_Area(Skin_Area):
                     j.height = newline_height
                 
             
-        return # XXX ret_list
-
-
-
-
+        return ret_list
