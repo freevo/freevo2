@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2003/11/02 12:01:37  dischi
+# remove debug
+#
 # Revision 1.38  2003/11/02 09:24:34  dischi
 # Check for libs and make it possible to install runtime from within
 # freevo
@@ -322,9 +325,7 @@ class Read_Thread(threading.Thread):
         saved = ''
         while 1:
 
-            x = time.time()
             data = self.fp.readline(300)
-            print time.time() - x
             if not data:
                 _debug_('%s: No data, stopping (pid %s)!' % (self.name, os.getpid()),2)
                 self.fp.close()
