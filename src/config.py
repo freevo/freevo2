@@ -22,6 +22,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.117  2004/08/13 02:05:39  rshortt
+# Remove VideoGroup class and add TV_DEFAULT_SETTINGS which will allow users
+# to leave out dvb0: or tv0: from their tuner_id portion of TV_CHANNELS.
+# This may be overriden in local_conf.py.
+#
 # Revision 1.116  2004/08/13 00:36:27  rshortt
 # Set the right vdev for BSD.
 #
@@ -154,46 +159,6 @@ class Logger:
     def close():
         pass
     
-
-class VideoGroup:
-    """
-    vdev:        The video device, such as /dev/video.
-    adev:        The audio device, such as /dev/dsp.
-    input_type:  tuner, composite, svideo, webcam
-    input_num:   The number of this input according to V4L
-    tuner_type:  internal (on a v4l device), or external (cable or sat box)
-    tuner_norm:  NTSC, PAL, SECAM
-    tuner_chanlist:  us-cable, 
-    tuner_chan:  If using input_type=tuner and tuner_type=external set this to
-                 what channel it needs to be to get the signal, usually 3 or 4.
-    recordable:  True or False.  Can you record from this VideoGroup.
-    desc:        A nice description for this VideoGroup.
-    group_type:  Special variable to identify devices like dvb or ivtv.  This
-                 can be left as default, 'normal', or set to 'ivtv' or 'dvb'.
-    """
-
-    def __init__(self, vdev='/dev/video', adev='/dev/dsp', input_type='tuner',
-                 input_num=0, tuner_norm='NTSC', tuner_chanlist='us-cable', 
-                 tuner_type='internal', tuner_chan=None,
-                 recordable=True, desc='Freevo default VideoGroup',
-                 group_type='normal'):
-
-        # XXX: Put checks in here for supplied values.
-        self.vdev = vdev
-        self.adev = adev
-        self.input_type = input_type
-        self.input_num  = int(input_num)
-        self.tuner_type = tuner_type
-        self.tuner_norm = string.upper(tuner_norm)
-        self.tuner_chanlist = tuner_chanlist
-        self.tuner_chan = tuner_chan
-        self.recordable = recordable
-        self.desc = desc
-        self.group_type = group_type
-        self.in_use = FALSE
-        self.tuner = None
-
-
 
 def print_config_changes(conf_version, file_version, changelist):
     """
@@ -442,6 +407,12 @@ for i in range(10):
 # TV_SETTINGS['dvb0'] = DVBCard
 
 
+TV_DEFAULT_SETTINGS = None
+
+for type in ['dvb0', 'tv0', 'ivtv0']:
+    if type in TV_SETTINGS.keys():
+        TV_DEFAULT_SETTINGS = type
+        break
 
 
 #
