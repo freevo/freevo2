@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/06/05 02:24:00  rshortt
+# Use TV_EVENTS now, improved channel changing, add PAUSE and SEEK.
+#
 # Revision 1.2  2003/06/02 03:33:53  rshortt
 # Some bugfixes and make it (almost) work with new events.
 #
@@ -57,7 +60,7 @@ import v4l2	# Video4Linux2 Python Interface
 import pyshift	# Timeshift Interface
 
 # Set to 1 for debug output
-DEBUG = config.DEBUG
+DEBUG = 1
 
 TRUE = 1
 FALSE = 0
@@ -94,6 +97,8 @@ class MPlayer:
         self.thread.start()
         self.tuner_chidx = 0    # Current channel, index into config.TV_CHANNELS
         self.videodev = None
+        self.app_mode = 'tv'
+
 
     def TunerSetChannel(self, tuner_channel):
         for pos in range(len(config.TV_CHANNELS)):
@@ -271,36 +276,43 @@ class MPlayer:
 
     def eventhandler(self, event):
         print '%s: %s app got %s event' % (time.time(), self.mode, event)
-        if event in (em.MENU_GOTO_MAINMENU, em.STOP, em.INPUT_EXIT,
-                     em.MENU_SELECT, em.PLAY_END):
+        # if event == em.STOP or event == em.PLAY_END:
+        if event == em.STOP:
             self.Stop()
             rc.post_event(em.PLAY_END)
             return TRUE
         
-        # elif event == em.TV_CHANNEL_UP or event == em.TV_CHANNEL_DOWN:
-        elif event == em.MENU_PAGEUP or event == em.MENU_PAGEDOWN:
+        if event == em.PAUSE:
+            self.thread.app.write('pause\n')
+            return TRUE
+
+        if event == em.SEEK:
+            self.thread.app.write('seek %s\n' % event.arg)
+            return TRUE
+
+        elif event == em.TV_CHANNEL_UP or event == em.TV_CHANNEL_DOWN:
             if self.mode == 'vcr':
                 return
             
             # Go to the prev/next channel in the list
-            # if event == em.TV_CHANNEL_UP:
-            if event == em.MENU_PAGEUP:
+            if event == em.TV_CHANNEL_UP:
                 self.TunerNextChannel()
             else:
                 self.TunerPrevChannel()
             
             #pause mplayer
-            self.thread.app.write('pause\n')
+            # self.thread.app.write('pause\n')
 
             new_channel = self.TunerGetChannel()
             print "setting channel %s" % new_channel
             self.videodev.setchannel(new_channel)
-            # TODO: Set MPlayer to start of timeshift
 
-            self.thread.app.write('seek 0 0\n')
-            self.thread.app.write('pause\n')
-            # self.thread.app.write('seek 0 type=2\n')
-            # self.thread.app.write('seek 98 type=1\n')
+            # TODO: Set MPlayer to start of timeshift
+            self.thread.app.write('seek 999999 0\n')
+            # self.thread.app.write('seek 0 2\n')
+            # self.thread.app.write('seek 100 1\n')
+
+            # self.thread.app.write('pause\n')
 
 
             # Display a channel changed message
