@@ -43,17 +43,19 @@ def get_singleton():
 
 class MenuItem:
 
-    def __init__(self, name, action=None, arg=None, eventhandler = None, \
-                 eventhandler_args = None, icon=None, scale=1,popup=0):
-        self.name = name
-        self.action = action
-        self.arg = arg
-        self.eventhandler = eventhandler
+    def __init__( self, name, action=None, arg=None, eventhandler = None,
+                  eventhandler_args = None, icon=None, scale=1, popup=0 ):
+        
+        self.name              = name
+        self.action            = action
+        self.arg               = arg
+        self.eventhandler      = eventhandler
         self.eventhandler_args = eventhandler_args
-	self.icon = icon
-	self.scale = scale
-	self.popup = popup
-	self.image = None
+	self.icon              = icon
+	self.scale             = scale
+	self.popup             = popup
+	self.image             = None
+
 
     def setImage(self, image):
         self.image = image
@@ -190,6 +192,7 @@ class MenuWidget:
             if action == None:
                 osd.clearscreen()
                 osd.drawstring('No action defined', 230, 280)
+                print 'No action.. '
                 time.sleep(2.0)
                 self.refresh()
             else:
@@ -199,14 +202,16 @@ class MenuWidget:
                 osd.drawstring('Action: %s' % action_str, 50, 240)
                 osd.drawstring('Args: %s' % arg_str, 50, 280)
                 print 'Calling action "%s"' % str(action)
-                action(arg=menu.selected.arg, menuw=self)
+                action( menu.selected.arg, menuw=self )
         else:
             action = menu.selected.eventhandler
-            if action != None:
+            if action:
                 action_str = str(action)
                 arg_str = str(menu.selected.eventhandler_args)[0:40]
                 print 'Calling action "%s"' % str(action)
-                action(event = event, arg=menu.selected.eventhandler_args, menuw=self)
+                action( event = event, arg=menu.selected.eventhandler_args,
+                        menuw=self )
+        return 0
 
 
     def init_page(self):

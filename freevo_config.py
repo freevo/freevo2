@@ -1,31 +1,50 @@
-#
+# ----------------------------------------------------------------------
 # freevo_config.py
-#
+# ----------------------------------------------------------------------
 # $Id$
 #
 # System configuration, e.g. where to look for MP3:s, AVI files, etc.
+#
 
 #
 # Config values for the video tools
 #
-MPLAYER_CMD = ''
+MPLAYER_CMD      = 'mplayer'
 MPLAYER_ARGS_MPG = ''
 MPLAYER_ARGS_DVD = ''
 VIDREC_MQ = ''
 VIDREC_HQ = ''
 
+#---- You should really _NOT_ need to change these settings  ----
+MPLAYER_ARGS_DEF = '-nolirc'
+#---- End of settings you really _NOT_ should need to change ----
+
+#
+# Audio setup. You might need to alter things here to match your settings
+# (or until we get a fancy install script :)
+# XXX This is not done, I'm working to make the audio stuff more flexible.
+AUDIO_DEVICE     = '/dev/dsp'  # ie: /dev/dsp0, /dev/audio, /dev/alsa/??
+MAJOR_AUDIO_CTRL = 'PCM'       # Freevo takes control over one audio ctrl
+MPLAYER_AO_DEV   = 'oss'
+
 def ConfigInit(videotools = 'sim'):
     print 'VIDEOTOOLS = %s' % videotools
 
-    global MPLAYER_CMD, MPLAYER_ARGS_MPG, MPLAYER_ARGS_DVD, MPLAYER_ARGS_VCD
+    # global MPLAYER_CMD, not needed already global
+    global MPLAYER_ARGS_MPG, MPLAYER_ARGS_DVD, MPLAYER_ARGS_VCD
     global MPLAYER_ARGS_DVDNAV, VIDREC_MQ, VIDREC_HQ
 
     #
     # There are two sets of tool settings, one for a real box,
     # and one for development.
-    # 
+    #
+    # A lot of these settings seem wierd to have in a default setting.
+    #  -idx?, -nobps?
+    # I also don't see the real need for sim versus real? MHO is that
+    # the syntax clutter the configuration file.
     if videotools == 'real':
-        MPLAYER_CMD = 'mplayer'
+        # Not needed, allready global:
+        # MPLAYER_CMD = 'mplayer'
         MPLAYER_ARGS_MPG = ('-nolirc -nobps -idx -framedrop -cache 5000 ' +
                             '-vo mga -screenw 768 -screenh 576 -fs ' +
                             ' -ao oss:/dev/dsp0')
@@ -136,11 +155,6 @@ else:
     FREEVO_CACHEDIR = '/tmp/freevo/cache'
 
 #
-# The mpg123 application
-#
-MPG123_APP = 'mpg123'
-
-#
 # Mixer device
 #
 DEV_MIXER = '/dev/mixer'
@@ -149,14 +163,16 @@ DEV_MIXER = '/dev/mixer'
 # Physical ROM drives, multiple ones can be specified
 # by adding comma-seperated and quoted entries.
 
-ROM_DRIVES = [('/mnt/cdrom', 'CD DRIVE')]
+ROM_DRIVES = [ ('/mnt/cdrom', 'CD'),
+               ('/mnt/dvd', 'DVD') ]
 
 #
 # The list of filename suffixes that are used to match the files that
 # are played wih mpg123. They are used as the argument to glob.glob()
 # 
-SUFFIX_MPG123_FILES = [ '/*.[mM][pP]3' ]
-SUFFIX_MPG123_PLAYLISTS = [ '/*.[mM]3[uU]' ]
+SUFFIX_AUDIO_FILES     = [ '/*.[mM][pP]3',
+                           '/*.[oO][gG][gG]' ]
+SUFFIX_AUDIO_PLAYLISTS = [ '/*.[mM]3[uU]' ]
 
 
 #
@@ -257,12 +273,13 @@ WATCH_TV_APP = './matrox_g400/v4l1_to_mga'
 #
 # Format: [ ('Title1', 'directory1'), ('Title2', 'directory2'), ... ]
 #
-DIR_MP3 = [ ('Test Music', './testfiles/Music') ]
+DIR_MP3 = [ ('Test Files', 'testfiles/Music') ]
 
 #
 # Where the movie files can be found.
 #
-DIR_MOVIES = [ ('Test Movies', './testfiles/Movies') ]
+DIR_MOVIES = [ ('Video', '/usr/local/mm/video'),
+               ('Serier', '/usr/local/mm/serier')]
 
 #
 # Where the image files can be found.

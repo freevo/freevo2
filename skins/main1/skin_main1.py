@@ -50,7 +50,7 @@ osd = osd.get_singleton()
 # XML file parse for the skin
 ###############################################################################
 
-
+# XXX Shouldn't this be moved to the config file?
 OSD_FONT_DIR = 'skins/fonts/'
 OSD_DEFAULT_FONT = 'skins/fonts/SF Arborcrest Medium.ttf'
 #
@@ -388,19 +388,19 @@ class Skin:
             osd.drawstring(info.filename, 30, 520)
 
             osd.drawstring('Title:', 30, 100)
-            osd.drawstring('%s ' % info.id3.title, left, 100)
+            osd.drawstring('%s ' % info.title, left, 100)
         
             osd.drawstring('Artist:', 30, 130)
-            osd.drawstring('%s ' % info.id3.artist, left, 130)
+            osd.drawstring('%s ' % info.artist, left, 130)
         
             osd.drawstring('Album:', 30, 160)
-            osd.drawstring('%s ' % info.id3.album, left, 160)
+            osd.drawstring('%s ' % info.album, left, 160)
         
             osd.drawstring('Year:', 30, 190)
-            osd.drawstring('%s ' % info.id3.year, left, 190)
+            osd.drawstring('%s ' % info.year, left, 190)
         
             osd.drawstring('Track:', 30, 220)
-            osd.drawstring('%s ' % info.id3.track, left, 220)
+            osd.drawstring('%s ' % info.track, left, 220)
 
 
             osd.drawstring('Elapsed:', 30, 300, osd.default_fg_color)
@@ -410,13 +410,15 @@ class Skin:
         else:
             # Erase the portion that will be redrawn
             if val.bgbitmap[0]:
-                osd.drawbitmap(val.bgbitmap, left, 300, None, left, 300, 100, 100)
+                osd.drawbitmap( val.bgbitmap, left, 300, None, left,
+                                300, 100, 100 )
 
-        
-        el_min = int(round(info.elapsed / 60))
-        el_sec = int(round(info.elapsed % 60))
-        rem_min = int(round(info.remain / 60))
-        rem_sec = int(round(info.remain % 60))
+        # XXX I changed this because round rounds up on 3.58 etc. instead
+        # XXX of giving us the desired "round down modulo" effect.
+        el_min  = int(info.elapsed)/60
+        el_sec  = int(info.elapsed)%60
+        rem_min = int(info.remain)/60
+        rem_sec = int(info.remain)%60
 
         osd.drawstring('%s:%02d   ' % (el_min, el_sec), left, 300,
                        osd.default_fg_color)

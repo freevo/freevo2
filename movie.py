@@ -58,7 +58,7 @@ mplayer = mplayer.get_singleton()
 #
 # mplayer dummy
 #
-def play_movie(menuw=None, arg=None):
+def play_movie( arg=None, menuw=None ):
     mode = arg[0]
     filename = arg[1]
     playlist = arg[2]
