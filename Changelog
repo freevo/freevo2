@@ -10,6 +10,7 @@ o Fixed a problem where zombie (defunct) processes were created
 o Changed the osd_server/Makefile to use /usr/X11R6 instead of /usr/X11,
   seems to work for more distros
 o Changed mixer.py to use /dev/mixer instead of /dev/mixer0
+o Hide cursor in X11 OSD
 
 
 Release 1.2.3 (2002-06-01):
