@@ -69,6 +69,7 @@ main (int ac, char *av[])
   char input[200], norm[200], std[200], chan[200];
   float freq;
   sigset_t set;
+  int res;
   
 
   /* If this program is started as a child to another task, one or
@@ -105,7 +106,8 @@ main (int ac, char *av[])
   }
 
   arg = 1;
-  ioctl (fd, VIDIOCCAPTURE, &arg);
+  res = ioctl (fd, VIDIOCCAPTURE, &arg);
+  printf ("%s returns %d. errno = %d\n", "VIDIOCCAPTURE", res, errno);
 
   /* Just wait until the process is killed */
   while (1) {
@@ -137,7 +139,8 @@ main (int ac, char *av[])
   }
   
   arg = 0;
-  ioctl (fd, VIDIOCCAPTURE, &arg);
+  res = ioctl (fd, VIDIOCCAPTURE, &arg);
+  printf ("%s returns %d. errno = %d\n", "VIDIOCCAPTURE", res, errno);
 
   ioctl (mga_fd, MGA_VID_OFF, 0);
   close (mga_fd);
@@ -156,7 +159,8 @@ v4l1_init (void)
   struct video_window vidwin;
   struct video_capture vidsubcap;
   int fd;
-
+  int res;
+  
   
   fd = open ("/dev/video", O_RDWR);
 
@@ -166,7 +170,9 @@ v4l1_init (void)
     exit (1);
   }
     
-  ioctl (fd, VIDIOCGCAP, &vidcap);
+  res = ioctl (fd, VIDIOCGCAP, &vidcap);
+  printf ("%s returns %d. errno = %d\n", "VIDIOCGCAP", res, errno);
+  
 
   printf ("Vidcap:\n");
   printf ("Name:      %s\n", vidcap.name);
@@ -190,7 +196,8 @@ v4l1_init (void)
 
   printf ("set vidpic: %d\n", ioctl (fd, VIDIOCSPICT, &vidpic));
 
-  ioctl (fd, VIDIOCGPICT, &vidpic);
+  res = ioctl (fd, VIDIOCGPICT, &vidpic);
+  printf ("%s returns %d. errno = %d\n", "VIDIOCGPICT", res, errno);
 
   printf ("\nVidpic:\n");
   printf ("bright:   %5d\n", vidpic.brightness);
@@ -212,7 +219,8 @@ v4l1_init (void)
   printf ("set vidbuf: %d\n", ioctl (fd, VIDIOCSFBUF, &vidbuf));
   printf ("Errno = %d\n", errno);
 
-  ioctl (fd, VIDIOCGFBUF, &vidbuf);
+  res = ioctl (fd, VIDIOCGFBUF, &vidbuf);
+  printf ("%s returns %d. errno = %d\n", "VIDIOCGFBUF", res, errno);
 
   printf ("\nVidbuf:\n");
   printf ("base:         0x%08x\n", (unsigned int) vidbuf.base);
@@ -235,7 +243,8 @@ v4l1_init (void)
   printf ("set vidwin: %d\n", ioctl (fd, VIDIOCSWIN, &vidwin));
   printf ("Errno = %d\n", errno);
 
-  ioctl (fd, VIDIOCGWIN, &vidwin);
+  res = ioctl (fd, VIDIOCGWIN, &vidwin);
+  printf ("%s returns %d. errno = %d\n", "VIDIOCGWIN", res, errno);
 
   printf ("\nVidwin:\n");
   printf ("x:         %d\n", (unsigned int) vidwin.x);
@@ -348,19 +357,20 @@ set_input (int fd, char *norm, char *input, float freq)
 {
    struct video_channel chan;
    struct video_audio vidaudio;
-   int i = 0;
+   int i = 0, res;
 
    
    memset (&vidaudio, 0, sizeof (vidaudio));
    vidaudio.volume = 0xffff;
    
-   ioctl (fd, VIDIOCSAUDIO, &vidaudio);
+   res = ioctl (fd, VIDIOCSAUDIO, &vidaudio);
+   printf ("%s returns %d. errno = %d\n", "VIDIOCSAUDIO", res, errno);
    
    do {
       chan.channel = i;
       
       if (ioctl (fd, VIDIOCGCHAN, &chan)) {
-         fprintf (stderr, "Unknown input '%s'\n", input);
+         fprintf (stderr, "Unknown input '%s'. errno=%d\n", input, errno);
          goto error1;
       }
       
@@ -383,7 +393,7 @@ set_input (int fd, char *norm, char *input, float freq)
    }
    
    if (ioctl (fd, VIDIOCSCHAN, &chan)) {
-      perror("v4l1 core init - could not set input");
+      perror("v4l1 core init - could not set input.");
       goto error1;
    }
    
