@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/12/30 15:36:01  dischi
+# remove unneeded copy function, small bugfix
+#
 # Revision 1.9  2003/12/29 22:29:25  dischi
 # small bugfix
 #
@@ -143,7 +146,7 @@ def parse_movie(fxd, node):
             if len(parts) == 1:
                 # a variant with one file
                 ref = fxd.getattr(parts[0] ,'ref')
-                v = VideoItem(id[ref][1], parent=item, parse=False)
+                v = VideoItem(id[ref][1], parent=item, info=item.info, parse=False)
                 v.files = None
                 v.media_id, v.mplayer_options, player, is_playlist = id[ref][2:]
                 if player:
@@ -176,7 +179,7 @@ def parse_movie(fxd, node):
                     v.mplayer_options += mplayer_options
             else:
                 # a variant with a list of files
-                v = VideoItem('', parent=item, parse=False)
+                v = VideoItem('', parent=item, info=item.info, parse=False)
                 for p in parts:
                     ref = fxd.getattr(p ,'ref')
                     audio    = fxd.get_children(p, 'audio')
@@ -198,7 +201,7 @@ def parse_movie(fxd, node):
                     else:
                         subtitle = {}
 
-                    sub = VideoItem(id[ref][1], parent=v, parse=False)
+                    sub = VideoItem(id[ref][1], parent=v, info=item.info, parse=False)
                     sub.files = None
                     sub.media_id, sub.mplayer_options, player, is_playlist = id[ref][2:]
                     sub.subtitle_file = subtitle
@@ -215,7 +218,11 @@ def parse_movie(fxd, node):
         # only one file, this is directly for the item
         id, url, item.media_id, item.mplayer_options, player, is_playlist = \
             parse_video_child(fxd, video[0], dirname)
+        mminfo = item.info
         item.set_url(url)
+        for key in mminfo:
+            item.info[key] = mminfo[key]
+            
         if player:
             item.force_player = player
         if is_playlist:
@@ -223,12 +230,11 @@ def parse_movie(fxd, node):
         # global <video> mplayer_options
         if mplayer_options:
             item.mplayer_options += mplayer_options
-
     else:
         # a list of files
         for s in video:
             info = parse_video_child(fxd, s, dirname)
-            v = VideoItem(info[1], parent=item, parse=False)
+            v = VideoItem(info[1], parent=item, info=item.info, parse=False)
             v.files = None
             v.media_id, v.mplayer_options, player, is_playlist = info[2:]
             if info[-2]:
@@ -275,7 +281,7 @@ def parse_disc_set(fxd, node):
     if item.image:
         item.image = os.path.join(dirname, item.image)
 
-    fxd.parse_info(fxd.get_children(node, 'info', 1), item, {'runtime': 'length'})
+    fxd.parse_info(node, item, {'runtime': 'length'})
     item.__fxd_rom_info__      = True
     item.__fxd_rom_label__     = []
     item.__fxd_rom_id__        = []

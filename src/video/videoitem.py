@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.104  2003/12/30 15:36:01  dischi
+# remove unneeded copy function, small bugfix
+#
 # Revision 1.103  2003/12/29 22:08:54  dischi
 # move to new Item attributes
 #
@@ -71,17 +74,18 @@ class VideoItem(Item):
     def __init__(self, url, parent, info=None, parse=True):
         Item.__init__(self, parent)
 
-        self.type        = 'video'
+        self.type = 'video'
         self.set_url(url, info=parse)
 
         if info:
-            self.info = info
+            for key in info:
+                self.info[key] = info[key]
 
-        self.handle_type = 'video'
+        self.handle_type       = 'video'
 
-        self.variants = []              # if this item has variants
-        self.subitems = []              # if this item has more than one file/track to play
-        self.current_subitem = None
+        self.variants          = []         # if this item has variants
+        self.subitems          = []         # more than one file/track to play
+        self.current_subitem   = None
 
         self.subtitle_file     = {}         # text subtitles
         self.audio_file        = {}         # audio dubbing
@@ -122,7 +126,7 @@ class VideoItem(Item):
                         self.fxd_file = tvinfo[3]
                     self.mplayer_options = tvinfo[2]
 
-                self.tv_show = True
+                self.tv_show   = True
                 self.show_name = show_name
 
         # extra infos in discset_informations
@@ -136,6 +140,11 @@ class VideoItem(Item):
 
         
     def set_url(self, url, info=True):
+        """
+        Sets a new url to the item. Always use this function and not set 'url'
+        directly because this functions also changes other attributes, like
+        filename, mode and network_play
+        """
         Item.set_url(self, url, info)
         if url.startswith('dvd://') or url.startswith('vcd://'):
             self.network_play = False
@@ -143,24 +152,19 @@ class VideoItem(Item):
             
         
         
-    def copy(self, obj):
+    def id(self):
         """
-        Special copy value VideoItems
+        Return a unique id of the item. This id should be the same when the
+        item is rebuild later with the same informations
         """
-        Item.copy(self, obj)
-        if obj.type == 'video':
-            self.selected_subtitle = obj.selected_subtitle
-            self.selected_audio    = obj.selected_audio
-            self.num_titles        = obj.num_titles
-            self.label             = obj.label
-            self.tv_show           = obj.tv_show
-            
-            self.variants          = obj.variants
-            self.subitems          = obj.subitems
-            self.current_subitem   = obj.current_subitem
-            self.subtitle_file     = obj.subtitle_file
-            self.audio_file        = obj.audio_file
-
+        ret = self.url
+        if self.subitems:
+            for s in self.subitems:
+                ret += s.id()
+        if self.variants:
+            for v in self.variants:
+                ret += v.id()
+        return ret
 
 
     def __getitem__(self, key):
@@ -199,6 +203,7 @@ class VideoItem(Item):
                     return aspect[:aspect.find(' ')].replace('/', ':')
             except:
                 pass
+            
         return Item.__getitem__(self, key)
 
     
@@ -206,7 +211,7 @@ class VideoItem(Item):
         """
         Returns the string how to sort this item
         """
-        if mode == 'date' and os.path.isfile(self.filename):
+        if mode == 'date' and self.mode == 'file' and os.path.isfile(self.filename):
             return '%s%s' % (os.stat(self.filename).st_ctime, self.filename)
 
         if self.name.find("The ") == 0:
@@ -272,6 +277,9 @@ class VideoItem(Item):
 
 
     def show_variants(self, arg=None, menuw=None):
+        """
+        show a list of variants in a menu
+        """
         if not self.menuw:
             self.menuw = menuw
         m = menu.Menu(self.name, self.variants, reload_func=None, fxd_file=self.fxd_file)
@@ -280,6 +288,9 @@ class VideoItem(Item):
 
 
     def play_max_cache(self, arg=None, menuw=None):
+        """
+        play and use maximum cache with mplayer
+        """
         self.play(menuw=menuw, arg='-cache 65536')
 
 
@@ -417,7 +428,7 @@ class VideoItem(Item):
             mplayer_options = []
 
         if arg:
-            mplayer_options += arg.split[' ']
+            mplayer_options += arg.split(' ')
 
         if self.menuw.visible:
             self.menuw.hide()
@@ -476,6 +487,9 @@ class VideoItem(Item):
 
 
     def settings(self, arg=None, menuw=None):
+        """
+        create a menu with 'settings'
+        """
         if not self.menuw:
             self.menuw = menuw
         confmenu = configure.get_menu(self, self.menuw, self.fxd_file)
