@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.83  2003/08/24 10:17:11  dischi
+# fallback to default font when the font is not found (bad but better than crash)
+#
 # Revision 1.82  2003/08/23 12:51:41  dischi
 # removed some old CVS log messages
 #
@@ -240,6 +243,8 @@ class Font:
         self.font     = font
 
 
+font_warning = []
+
 class OSDFont:
     def __init__(self, name, ptsize):
         self.font   = self.__getfont__(name, ptsize)
@@ -291,8 +296,16 @@ class OSDFont:
                     print 'Couldnt load alternate font "%s"' % alt_fname
                     raise
             else:
-                print 'No alternate found in the alias list!'
-                raise
+                global font_warning
+                if not fontname in font_warning:
+                    print 'WARNING: No alternate found in the alias list!'
+                    print 'Falling back to default font, this may look very ugly'
+                    font_warning.append(fontname)
+                try:
+                    font = pygame.font.Font(config.OSD_DEFAULT_FONTNAME, ptsize)
+                except (RuntimeError, IOError):
+                    print 'Couldnt load alternate font "%s"' % alt_fname
+                    raise
         f = Font(filename, ptsize, font)
         return f.font
 
