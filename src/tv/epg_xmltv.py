@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/08/14 03:34:06  outlyer
+# Whoops; left in some useless debug code.
+#
 # Revision 1.22  2003/08/11 13:11:32  outlyer
 # Synced with latest xmltv.py; also, use Python 2.3 strptime if it's available
 # since it's better than the version we include, and also beter than 2.2.
@@ -126,7 +129,6 @@ import util
 if float(sys.version[0:3]) < 2.3:
     import strptime
 else:
-    print "Using Python 2.3 strptime"
     import _strptime as strptime
 
 # The XMLTV handler from openpvr.sourceforge.net
