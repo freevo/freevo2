@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/12/13 01:45:17  rshortt
+# small cleanup and add logging
+#
 # Revision 1.6  2004/12/04 01:48:50  rshortt
 # Comment some debug, too noisy.
 #
@@ -75,17 +78,18 @@ import select
 import struct
 import traceback
 import fcntl
+import logging
 from time import sleep
 
 import config
 import plugin
 
-#from input.linux_input import *
 import input.linux_input as li
 import input.evdev_keymaps as ek
 
 from event import *
 
+log = logging.getLogger('input')
 
 class PluginInterface(plugin.InputPlugin):
 
@@ -94,29 +98,25 @@ class PluginInterface(plugin.InputPlugin):
 
         self.plugin_name = 'EVDEV'
         self.device_name = config.EVDEV_DEVICE
-        self.m_ignoreTill = 0
-        self.m_ignore = config.EVDEV_REPEAT_IGNORE
-        self.m_repeatRate = config.EVDEV_REPEAT_RATE
+        self._ignore_until = 0
+        self.repeat_ignore = config.EVDEV_REPEAT_IGNORE
+        self.repeat_rate = config.EVDEV_REPEAT_RATE
      
-        if not self.device_name:
-            print 'Input device plugin disabled, exiting.'
-            return
-
         try:
             self.fd = os.open(self.device_name, 
                               os.O_RDONLY|os.O_NONBLOCK)
         except OSError:
-            print 'Unable to open %s, exiting.' % self.device_name
+            log.error('Unable to open %s, exiting.' % self.device_name)
             return
+
+        log.info('Using input device %s.' % self.device_name)
 
         exclusive = li.exclusive_access(self.fd)
         if exclusive != -1:
-            print 'Freevo granted exclusive access to %s.' % self.device_name
+            log.info('Freevo granted exclusive access to %s.' % self.device_name)
 
-        print 'Event device name: %s' % li.get_name(self.fd)
-
+        log.info('Event device name: %s' % li.get_name(self.fd))
     
-        print 'Using input device %s.' % self.device_name
 
         self.keymap = {}
         for key in config.REMOTE_MAP:
@@ -126,14 +126,14 @@ class PluginInterface(plugin.InputPlugin):
 
         device_codes = ek.maps.get(config.EVDEV_NAME)
         for s, k in device_codes.items():
-            print 'Adding key: 0x%04x = %3d' % (s, k)
+            log.debug('Adding key: 0x%04x = %3d' % (s, k))
             if not li.set_keycode(self.fd, s, k):
-                print 'Failed to set key: 0x%04x = %3d' % (s, k)
+                log.error('Failed to set key: 0x%04x = %3d' % (s, k))
 
         keymap = li.get_keymap(self.fd)
-        print 'KEYCODES:'
+        log.debug('KEYCODES:')
         for s, k in keymap.items():
-            print '    0x%04x = %3d' % (s, k)
+            log.debug('    0x%04x = %3d' % (s, k))
 
         notifier.addSocket( self.fd, self.handle )
 
@@ -147,30 +147,15 @@ class PluginInterface(plugin.InputPlugin):
         return [
                 ( 'EVDEV_NAME', 'Hauppauge PVR-250/350 IR remote', 'Long name of device.' ),
                 ( 'EVDEV_DEVICE', '/dev/input/event0', 'Input device to use.' ),
-                ( 'EVDEV_REPEAT_IGNORE', 500, 
+                ( 'EVDEV_REPEAT_IGNORE', 400, 
                   'Time before first repeat (miliseconds).' ),
-                ( 'EVDEV_REPEAT_RATE',   100, 
+                ( 'EVDEV_REPEAT_RATE',  100, 
                   'Time between consecutive repeats (miliseconds).' ), ]
 
 
     def handle( self, socket ):
-        command = ''    
-        c = os.read(self.fd, 16)
-
-#struct input_event {
-#        struct timeval time;
-#        __u16 type;
-#        __u16 code;
-#        __s32 value;
-#};
-#struct timeval {
-#        time_t          tv_sec;         /* seconds */ long
-#        suseconds_t     tv_usec;        /* microseconds */ long
-#};
-
-#        S_EVDATA = '2l2Hi'
         S_EVDATA = '@llHHi'
-
+        c = os.read(self.fd, 16)
         data = struct.unpack(S_EVDATA, c)
 
         # make that in milliseconds
@@ -179,43 +164,35 @@ class PluginInterface(plugin.InputPlugin):
         code = data[3]
         value = data[4]
 
-        #print '  time: %d type=%04x code=%04x value=%08x' % (now, type, code, value)
+        # log.debug('time: %d type=%04x code=%04x value=%08x' % (now, type, code, value))
 
         # was it a reset?  if so, ignore
         if type == 0 :
-            # print '  ignoring reset from input'
+            # log.debug('ignoring reset from input')
             return True
-        else :
-            pass
         
         # I also want to ignore the "up"
         if value == 0 :
-            # print '  ignoring up'
+            # log.debug('ignoring up')
             return True
         elif value == 1 :
             # set when we want to start paying attention to repeats
-            self.m_ignoreTill = now + self.m_ignore
+            self._ignore_until = now + self.repeat_ignore
         elif value == 2 :
-            if now < self.m_ignoreTill :
-                #print '  ignoring repeat until %d' % self.m_ignoreTill
+            if now < self._ignore_until :
+                # log.debug('ignoring repeat until %d' % self._ignore_until)
                 return True
             else:
                 # we let this one through, but set when we want to start
                 # paying attention to the next repeat 
-                self.m_ignoreTill = now + self.m_repeatRate
-                pass
-            pass
-        else:
-            pass
+                self._ignore_until = now + self.repeat_rate
                 
         key = self.keymap.get(code)
         if not key :
-            print ' UNMAPPED KEY'
+            log.warning('unmapped key: code=%s' % code)
             return True
-        else:
-            pass
 
-        #print '  sending off event %s' % key
+        log.debug('posting key: %s' % key)
         self.post_key(key)
 
         return True
