@@ -24,3 +24,11 @@ Choices: us-bcast, us-cable, us-cable-hrc, japan-bcast, japan-cable, europe-west
 Description: Channel List
  Set the channel list (set of tuning frequencies) that most closely
  matches yours. 
+
+Template: freevo/start_on_boot
+Type: boolean
+Default: false
+Description: Should freevo start automatically on bootup?
+ Freevo can be started as a daemon using init scripts. If you're
+ building a standalone box, this is probably what you want to
+ have it come up seamlessly.

@@ -33,5 +33,7 @@ case "$1" in
             echo "(as root)"
             fi
         if [ ! -f $LIRCRC ];       then echo "Make sure you run 'freevo makelircrc' after the package is installed"; fi
+        db_get freevo/start_on_boot
+        if [ "$RET" = "true" ]; then update-rc.d freevo defaults 99; fi
     ;;
 esac

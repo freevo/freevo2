@@ -68,7 +68,8 @@ binary-arch: build install
 	dh_installdocs $(doclist)
 	dh_installmenu
 	dh_installchangelogs 
-	db_installdebconf
+	dh_installdebconf
+	dh_installinit --noscripts 
 	dh_python
 	dh_link
 	dh_strip
