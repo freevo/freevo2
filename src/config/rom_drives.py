@@ -23,8 +23,13 @@ if config.ROM_DRIVES == None:
         re_automount = re.compile( '^none[ \t]+([^ \t]+).*supermount.*dev=([^,]+).*', re.I )
         re_bymountcd = re.compile( '^(/dev/[^ \t]+)[ \t]+([^ ]*cdrom[0-9]*)[ \t]+', re.I )
         re_bymountdvd= re.compile( '^(/dev/[^ \t]+)[ \t]+([^ ]*dvd[0-9]*)[ \t]+', re.I )
+        re_comment= re.compile( '^[ \t]*#', re.I )
         fd_fstab = open('/etc/fstab')
         for line in fd_fstab:
+	    # if the line starts with a comment it can be ignored
+	    if re_comment.match( line ):
+	        continue
+	    
             # Match on the devices /dev/cdrom, /dev/dvd, and fstype iso9660
             match_cd        = re_cd.match(line)
             match_cdrec     = re_cdrec.match(line)
