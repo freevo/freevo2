@@ -1,3 +1,4 @@
+# translation of freevo.po to Danish
 # translation of da.po to Danish
 # This file is distributed under the same license as the PACKAGE package.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER.
@@ -5,11 +6,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: da\n"
+"Project-Id-Version: freevo\n"
 "POT-Creation-Date: 2003-10-21 19:11-0200\n"
-"PO-Revision-Date: 2003-10-05 10:38+0200\n"
+"PO-Revision-Date: 2003-11-03 00:04+0100\n"
 "Last-Translator: Esben Jensen <esben.jon@privat.dk>\n"
-"Language-Team: Danish\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=ISO-8859-1\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -111,17 +111,19 @@ msgid ""
 "To search for covers you need an Amazon.com Web Services\n"
 "license key. You can get yours from:\n"
 msgstr ""
+"For at søge efter covers skal du bruge en licensnøgle\n"
+"fra Amazon.com Web Services. Du kan hente din fra:\n"
 
 #: audio/plugins/coversearch.py:166
 msgid "Find a cover for this music"
-msgstr ""
+msgstr "Find et cover fra dette nummer"
 
 #: audio/plugins/coversearch.py:170 audio/plugins/coversearch.py:178
 #: audio/plugins/coversearch.py:186 audio/plugins/cdbackup.py:455
 #: video/plugins/xine.py:131 plugins/lcd.py:910 plugins/lcd.py:921
 #: plugins/lcd.py:934
 msgid "WARNING"
-msgstr ""
+msgstr "ADVARSEL"
 
 #: audio/plugins/coversearch.py:170 audio/plugins/coversearch.py:178
 #, python-format
@@ -131,59 +133,60 @@ msgid ""
 "to be able to search. So you need a file with a ID3 tag (mp3) or an Ogg "
 "Info. Maybe you must fix this file (%s) tag?"
 msgstr ""
+"Modulet 'coversøgning' er deaktiveret for dette element! For at kunne søge "
+"skal 'coversøgning' bruge et element med Kunstnernavn og album (hvis "
+"det er en mp3 eller ogg fil), eller titel (hvis det er et CD spor). Derfor er "
+"der brug for en fil med indejrede oplysninger. Måske er der behov for "
+"at rette denne fils (%s) tag."
 
 #: audio/plugins/coversearch.py:186
 msgid "Unknown CD, cover searching is disabled"
-msgstr ""
+msgstr "Ukendt CD, coversøgning er deaktiveret"
 
 #: audio/plugins/coversearch.py:194
-#, fuzzy
 msgid "searching Amazon..."
-msgstr "gennemsøger IMDB..."
+msgstr "gennemsøger Amazon..."
 
 #: audio/plugins/coversearch.py:211
 #, python-format
 msgid "No matches for %(artist)s - %(album)s"
-msgstr ""
+msgstr "Ingen søgeresultater for %(kunstnere) - %(albummer)"
 
 #: audio/plugins/coversearch.py:219
 msgid "The cover provider returned bad information."
-msgstr ""
+msgstr "Udbyderen af covers returnerede ugyldige data."
 
 #: audio/plugins/coversearch.py:256 audio/plugins/coversearch.py:266
 msgid "small"
-msgstr ""
+msgstr "lille"
 
 #: audio/plugins/coversearch.py:275
 msgid "Cover Search Results"
-msgstr ""
+msgstr "Cover-søgeresultater"
 
 #: audio/plugins/coversearch.py:279
-#, fuzzy
 msgid "No covers available from Amazon"
-msgstr "Der fandtes ingen tilgængelige oplysninger hos IMDB"
+msgstr "Ingen covers hos Amazon"
 
 #: audio/plugins/coversearch.py:293 video/plugins/imdb.py:221
 msgid "getting data..."
 msgstr "henter data..."
 
 #: audio/plugins/webradio.py:65
-#, fuzzy
 msgid "Browse entries"
 msgstr "Gennemse katalog"
 
 #: audio/plugins/webradio.py:85
 msgid "Webradio"
-msgstr ""
+msgstr "Webradio"
 
 #: audio/plugins/webradio.py:90
-#, fuzzy
 msgid "Browse genre list"
-msgstr "Gennemse afspilningsliste"
+msgstr "Gennemse genreliste"
 
 #: audio/plugins/webradio.py:99
 msgid "Webradio Genre List"
-msgstr ""
+msgstr "Webradio genreliste"
 
 #: audio/plugins/xine.py:74 audio/plugins/xine.py:98
 #: audio/plugins/cdbackup.py:221 audio/plugins/cdbackup.py:524
@@ -192,24 +195,24 @@ msgstr ""
 #: video/plugins/mplayer.py:637 plugins/lcd.py:716 plugins/lcd.py:913
 #: plugins/lcd.py:924 plugins/lcd.py:935
 msgid "ERROR"
-msgstr ""
+msgstr "FEJL"
 
 #: audio/plugins/xine.py:74
 msgid "'fbxine' not found, plugin 'xine' deactivated"
-msgstr ""
+msgstr "'fbxine' kunne ikke findes, modulet 'xine' er deaktiveret"
 
 #: audio/plugins/xine.py:98 video/plugins/xine.py:128
 msgid "'fbxine' version too old, plugin 'xine' deactivated"
-msgstr ""
+msgstr "'fbxine' versionen er for gammel, 'xine' modulet er deaktiveret"
 
 #: audio/plugins/xine.py:99 video/plugins/xine.py:129
 #, python-format
 msgid "You need software %s"
-msgstr ""
+msgstr "Du har brug for programmet %s"
 
 #: audio/plugins/cdbackup.py:213
 msgid "Show CD ripping status"
-msgstr ""
+msgstr "Vis status for CD kopiering"
 
 #: audio/plugins/cdbackup.py:218
 msgid "Rip the CD to the hard drive"
@@ -221,7 +224,7 @@ msgstr "Vis tilgængelige CD'er"
 
 #: audio/plugins/cdbackup.py:221
 msgid "Item is not an Audio CD"
-msgstr ""
+msgstr "Element er ikke en audio CD"
 
 #: audio/plugins/cdbackup.py:228
 #, python-format
@@ -229,6 +232,8 @@ msgid ""
 "Ripping in progress\n"
 "Track %d of %d"
 msgstr ""
+"Kopiering af CD er i gang\n"
+"Spor %d af %d"
 
 #: audio/plugins/cdbackup.py:243
 msgid "Backup CD to hard drive in mp3 format"
@@ -252,28 +257,28 @@ msgstr "CD-backup"
 
 #: audio/plugins/cdbackup.py:262
 msgid "Ripping started"
-msgstr ""
+msgstr "Kopiering påbegyndt"
 
 #: audio/plugins/cdbackup.py:329
-#, fuzzy, python-format
+#, python-format
 msgid "Directory %s already exists"
-msgstr "Katalog på disk [%s]"
+msgstr "Katalog %s findes i forvejen"
 
 #: audio/plugins/cdbackup.py:455
 msgid "No CDDB data available to mmpython"
-msgstr ""
+msgstr "Der er ingen tilgængelige CDDB data for mmpython"
 
 #: audio/plugins/cdbackup.py:458
 msgid "Unknown Artist"
-msgstr ""
+msgstr "Ukendt kunstner"
 
 #: audio/plugins/cdbackup.py:458 audio/plugins/cdbackup.py:459
 msgid "RENAME"
-msgstr ""
+msgstr "OMDØB"
 
 #: audio/plugins/cdbackup.py:460
 msgid "Other"
-msgstr ""
+msgstr "Anden"
 
 #: audio/plugins/cdbackup.py:463
 msgid ""
@@ -281,27 +286,29 @@ msgid ""
 "Must manually rename files\n"
 "when finished ripping"
 msgstr ""
+"CD oplysninger blev ikke fundet\n"
+"Filerne må navngives manuelt når\n"
+"kopieringen er afsluttet"
 
 #: audio/plugins/cdbackup.py:524
 msgid "Problem trying to call:"
-msgstr ""
+msgstr "Problemer ved udførsel af funktionskaldet:"
 
 #: audio/plugins/radio.py:70
 msgid "Listen to Radio Station"
-msgstr ""
+msgstr "Lyt til radiostation"
 
 #: audio/plugins/radio.py:120
-#, fuzzy
 msgid "No Radio Stations found"
-msgstr "Ingen overskrifter fundet"
+msgstr "Ingen radiostationer blev fundet"
 
 #: audio/plugins/radio.py:121
 msgid "Radio Stations"
-msgstr ""
+msgstr "Radiostationer"
 
 #: audio/plugins/radio.py:151
 msgid "Radio"
-msgstr ""
+msgstr "Radio"
 
 #: audio/plugins/detach.py:63
 msgid "Show player"
@@ -336,7 +343,6 @@ msgid "[VUX] Playing item rating down"
 msgstr "[VUX] Formindsk rating på spor der afspilles"
 
 #: audio/plugins/vux.py:97
-#, fuzzy
 msgid "[VUX] a dir item do not select"
 msgstr "[VUX] et katalog-element kan ikke vælges"
 
@@ -360,27 +366,28 @@ msgstr "Ugyldig lydfil"
 #: audio/plugins/mplayer.py:234 video/plugins/mplayer.py:583
 #, python-format
 msgid "Cannot open \"%s\" and \"%s\" for MPlayer logging!"
-msgstr ""
+msgstr "\"%s\" og \"%s\" kunne ikke åbnes til logning for MPlayer!"
 
 #: audio/plugins/mplayer.py:237
 msgid ""
 "Please set MPLAYER_DEBUG=0 in local_conf.py, or start Freevo from a "
 "directory that is writeable!"
 msgstr ""
+"Sæt venligst MPLAYER_DEBUG=0 i local_conf.py, eller start Freevo fra "
+"et skrivbart katalog!"
 
 #: audio/plugins/mplayer.py:241 video/plugins/mplayer.py:580
 #, python-format
 msgid "MPlayer logging to \"%s\" and \"%s\""
-msgstr ""
+msgstr "MPlayer logger til \"%s\" og \"%s\""
 
 #: audio/plugins/playlist.py:90
 msgid "Enqueue this Music in Playlist"
-msgstr ""
+msgstr "Tilføj dette nummer til afspilningslisten"
 
 #: audio/plugins/playlist.py:92
-#, fuzzy
 msgid "Make a new Audio Playlist"
-msgstr "Gennemse afspilningsliste"
+msgstr "Opret ny afspilningsliste for audio"
 
 #: games/mame_cache.py:170
 msgid "Generating MAME cache, please wait."
@@ -536,21 +543,20 @@ msgstr "Opsætningsmenu"
 
 #: video/plugins/xine.py:97
 msgid "'XINE_COMMAND' not defined, plugin 'xine' deactivated"
-msgstr ""
+msgstr "'XINE_COMMAND' er ikke defineret, modulet 'xine' deaktiveres"
 
 #: video/plugins/xine.py:98
-#, fuzzy
 msgid "please check the xine section in freevo_config.py"
-msgstr "Kontrollér venligst opsætningsfilen."
+msgstr "Kontrollér venligst xine sektionen i freevo_config.py"
 
 #: video/plugins/xine.py:131
 msgid "'xine' version too old, plugin in fallback mode"
-msgstr ""
+msgstr "versionen af 'xine' er for gammel, modulet kører med begrænset funktionalitet"
 
 #: video/plugins/xine.py:132
 #, python-format
 msgid "You need %s to use all features of the '%s' plugin"
-msgstr ""
+msgstr "%s er nødvendig for at udnytte al funktionalitet i modulet '%s'"
 
 #: video/plugins/bookmarker.py:99
 msgid "Resume playback"
@@ -580,9 +586,8 @@ msgid "Failed to download %s"
 msgstr "Kunne ikke hente %s"
 
 #: video/plugins/mplayer.py:637
-#, fuzzy
 msgid "unknow error while playing file"
-msgstr "Ukendt fejl ved forbindelse til IMDB"
+msgstr "ukendt fejl ved afspilning af fil"
 
 #: video/plugins/imdb_info.py:72
 msgid "Show info for this file"
@@ -611,7 +616,7 @@ msgstr "Ukendt fejl ved forbindelse til IMDB"
 
 #: video/plugins/imdb.py:178
 msgid "IMDB Query"
-msgstr ""
+msgstr "IMDB forespørgsel"
 
 #: video/plugins/imdb.py:182
 msgid "No information available from IMDB"
@@ -637,6 +642,14 @@ msgid ""
 "Logfile: %s\n"
 "\n"
 msgstr ""
+"Event '%s' gik ned\n"
+"\n"
+"Se venligst efter i logfilen og rapportér fejlen til Freevo postlisten. "
+"Freevo's tilstand kan være ustabil nu, og denne fejl kan resultere i "
+"yderligere fejl indtil Freevo genstartes. "
+"\n"
+"Logfil: %s\n"
+"\n"
 
 #: menu.py:565
 msgid "No action defined for this choice!"
@@ -663,73 +676,72 @@ msgid "h = Help"
 msgstr "h = Hjælp"
 
 #: directory.py:121
-#, fuzzy
 msgid "Movie Playlists"
-msgstr "Gennemse afspilningsliste"
+msgstr "Afspilninglister for video"
 
 #: directory.py:122
 msgid "Use automatic playlist for movie items."
-msgstr ""
+msgstr "Brug automatisk afspilningsliste til video elementer."
 
 #: directory.py:124
 msgid "Directory Sort By Date"
-msgstr ""
+msgstr "Sortér katalog efter dato"
 
 #: directory.py:125
 msgid "Sort directory by date and not by name."
-msgstr ""
+msgstr "Sortér katalog efter dato og ikke navn"
 
 #: directory.py:127
 msgid "Directory Autoplay Single Item"
-msgstr ""
+msgstr "Automatisk afspilning af enkelt element i katalog"
 
 #: directory.py:128
 msgid "Don't show directory if only one item exists and auto-select the item."
-msgstr ""
+msgstr "Vis ikke katalog hvis kun et element findes, og vælg automatisk elementet."
 
 #: directory.py:131
-#, fuzzy
 msgid "Audio Random Playlist"
-msgstr "Tilfældig afspilningsliste"
+msgstr "Tilfældig afspilningsliste for audio"
 
 #: directory.py:132
 msgid "Show radom playlist item for audio menus."
-msgstr ""
+msgstr "Vis tilfældig afspilningsliste for audiomenuer."
 
 #: directory.py:134
 msgid "Force Skin Layout"
-msgstr ""
+msgstr "Gennemtving layout for tema"
 
 #: directory.py:135
 msgid ""
 "Force skin to a specific layout. This option doesn't work with all skins and "
 "the result may differ based on the skin."
 msgstr ""
+"Gennemtving layout for et bestemt tema. Dette valg virker ikke med alle "
+"temaer, og resultatet kan variere afhængig af det valgte tema."
 
 #: directory.py:138
-#, fuzzy
 msgid "Directory Smart Sort"
-msgstr "Katalog"
+msgstr "Intelligent søgning af katalog"
 
 #: directory.py:139
 msgid "Use a smarter way to sort the items."
-msgstr ""
+msgstr "Brug en smartere metode til sortering af elementerne."
 
 #: directory.py:141
 msgid "Use MediaID Tag Names"
-msgstr ""
+msgstr "Brug navne fra mediets data"
 
 #: directory.py:142
 msgid "Use the names from the media files tags as display name."
-msgstr ""
+msgstr "Brug mediers navne til visning."
 
 #: directory.py:144
 msgid "Directory Reverse Sort"
-msgstr ""
+msgstr "Omvendt sortering af katalog"
 
 #: directory.py:145
 msgid "Show the items in the list in reverse order."
-msgstr ""
+msgstr "Vis listens elementer i omvendt rækkefølge."
 
 #: directory.py:414
 #, python-format
@@ -741,18 +753,16 @@ msgid "Directory"
 msgstr "Katalog"
 
 #: directory.py:442
-#, fuzzy
 msgid "Random play all items"
-msgstr "Tilfældig afspilning af alle underelementer"
+msgstr "Tilfældig afspilning af alle elementer"
 
 #: directory.py:444
 msgid "Recursive random play all items"
 msgstr "Tilfældig afspilning af alle underelementer"
 
 #: directory.py:446
-#, fuzzy
 msgid "Recursive play all items"
-msgstr "Tilfældig afspilning af alle underelementer"
+msgstr "Afspilning af alle underelementer"
 
 #: directory.py:448
 msgid "Configure directory"
@@ -791,9 +801,9 @@ msgid "Configure"
 msgstr "Opsæt"
 
 #: playlist.py:115 playlist.py:157
-#, fuzzy, python-format
+#, python-format
 msgid "Cannot open file \"%s\""
-msgstr "Mediet for filen \"%s\" blev ikke fundet.\n"
+msgstr "Filen \"%s\" kunne ikke åbnes"
 
 #: playlist.py:244
 msgid "Random Playlist"
@@ -804,22 +814,20 @@ msgid "Browse Playlist"
 msgstr "Gennemse afspilningsliste"
 
 #: playlist.py:268
-#, fuzzy
 msgid "empty playlist"
-msgstr " elementer i denne afspilningsliste"
+msgstr "tom afspilningsliste"
 
 #: plugins/headlines.py:117 plugins/headlines.py:283
 msgid "Headlines"
 msgstr "Overskrifter"
 
 #: plugins/headlines.py:206
-#, fuzzy
 msgid "Show Sites Headlines"
 msgstr "Vis overskrifter for steder"
 
 #: plugins/headlines.py:228
 msgid "Fetching headlines..."
-msgstr ""
+msgstr "Henter overskrifter..."
 
 #: plugins/headlines.py:281
 msgid "No Headlines found"
@@ -830,12 +838,11 @@ msgid "Headlines Sites"
 msgstr "Overskriftssteder"
 
 #: plugins/headlines.py:310
-#, fuzzy
 msgid "No Headlines Sites found"
 msgstr "Ingen overskriftssteder fundet"
 
 #: plugins/df.py:70
-#, fuzzy, python-format
+#, python-format
 msgid "%i free of %i Mb total"
 msgstr "%i af %i Mb fri"
 
@@ -865,9 +872,8 @@ msgid "%s Main Menu"
 msgstr "%s Hovedmenu"
 
 #: plugins/icecastchanger.py:77
-#, fuzzy
 msgid "Set as icecast playlist"
-msgstr " numre i denne afspilningsliste."
+msgstr "Sæt til icecast-afspilningsliste"
 
 #: plugins/commands.py:159
 msgid "Command finished"
@@ -894,9 +900,8 @@ msgid "Run Command"
 msgstr "Kør kommando"
 
 #: plugins/commands.py:257
-#, fuzzy
 msgid "Running Command..."
-msgstr "Kør kommando"
+msgstr "Kører kommando..."
 
 #: plugins/commands.py:271
 msgid "Command Failed"
@@ -951,164 +956,162 @@ msgstr ""
 " '%s'?"
 
 #: plugins/lcd.py:118 plugins/lcd.py:126
-#, fuzzy, python-format
+#, python-format
 msgid "Length: %s"
-msgstr "Længde:"
+msgstr "Længde: %s"
 
 #: plugins/lcd.py:119 plugins/lcd.py:123
-#, fuzzy, python-format
+#, python-format
 msgid "Artist: %s"
-msgstr "Kunstner:"
+msgstr "Kunstner: %s"
 
 #: plugins/lcd.py:120 plugins/lcd.py:124
-#, fuzzy, python-format
+#, python-format
 msgid "Album: %s"
-msgstr "Album:"
+msgstr "Album: %s"
 
 #: plugins/lcd.py:121 plugins/lcd.py:125
-#, fuzzy, python-format
+#, python-format
 msgid "Year: %s"
-msgstr "År:"
+msgstr "År: %s"
 
 #: plugins/lcd.py:122
-#, fuzzy, python-format
+#, python-format
 msgid "Tracks: %s"
-msgstr "Spor:"
+msgstr "Spor: %s"
 
 #: plugins/lcd.py:127
-#, fuzzy, python-format
+#, python-format
 msgid "Resolution: %s"
-msgstr "Opløsning:"
+msgstr "Opløsning: %s"
 
 #: plugins/lcd.py:128
 #, python-format
 msgid "Aspect: %s"
-msgstr ""
+msgstr "Billedformat: %s"
 
 #: plugins/lcd.py:129 plugins/lcd.py:132
 #, python-format
 msgid "Tagline: %s"
-msgstr ""
+msgstr "Manchet: %s"
 
 #: plugins/lcd.py:130 plugins/lcd.py:131
 #, python-format
 msgid "Plot: %s"
-msgstr ""
+msgstr "Handling: %s"
 
 #: plugins/lcd.py:133
-#, fuzzy, python-format
+#, python-format
 msgid "Geometry: %s"
-msgstr "Geometri:"
+msgstr "Geometri: %s"
 
 #: plugins/lcd.py:134
-#, fuzzy, python-format
+#, python-format
 msgid "Date: %s"
-msgstr "Dato:"
+msgstr "Dato: %s"
 
 #: plugins/lcd.py:135 plugins/lcd.py:137
-#, fuzzy, python-format
+#, python-format
 msgid "Description: %s"
-msgstr "Beskrivelse: "
+msgstr "Beskrivelse: %s"
 
 #: plugins/lcd.py:136
 #, python-format
 msgid "%s items"
-msgstr ""
+msgstr "%s elementer"
 
 #: plugins/lcd.py:191 plugins/lcd.py:339
 #, python-format
 msgid "Today is %s."
-msgstr ""
+msgstr "I dag er %s"
 
 #: plugins/lcd.py:201 plugins/lcd.py:560
 msgid "MENU"
-msgstr ""
+msgstr "MENU"
 
 #: plugins/lcd.py:204 plugins/lcd.py:563
 msgid "ITEM"
-msgstr ""
+msgstr "ELEMENT"
 
 #: plugins/lcd.py:207
 msgid "TYPE"
-msgstr ""
+msgstr "TYPE"
 
 #: plugins/lcd.py:210
 msgid "INFO"
-msgstr ""
+msgstr "INFO"
 
 #: plugins/lcd.py:228
 msgid " MUSIC"
-msgstr ""
+msgstr " MUSIK"
 
 #: plugins/lcd.py:231
 msgid " ALBUM"
-msgstr ""
+msgstr " ALBUM"
 
 #: plugins/lcd.py:234
 msgid "ARTIST"
-msgstr ""
+msgstr "KUNSTNER"
 
 #: plugins/lcd.py:266 plugins/lcd.py:602
-#, fuzzy
 msgid "VIDEO"
-msgstr "TV-GUIDE"
+msgstr "VIDEO"
 
 #: plugins/lcd.py:269
 msgid "  TAG"
-msgstr ""
+msgstr "  TAG"
 
 #: plugins/lcd.py:272
 msgid "GENRE"
-msgstr ""
+msgstr "GENRE"
 
 #: plugins/lcd.py:305 plugins/lcd.py:630
 msgid "CHAN"
-msgstr ""
+msgstr "KANAL"
 
 #: plugins/lcd.py:308 plugins/lcd.py:633
 msgid "PROG"
-msgstr ""
+msgstr "PROG"
 
 #: plugins/lcd.py:311
 msgid "TIME"
-msgstr ""
+msgstr "TID"
 
 #: plugins/lcd.py:314
 msgid "DESC"
-msgstr ""
+msgstr "BESKR"
 
 #: plugins/lcd.py:575
 msgid "MUSIC"
-msgstr ""
+msgstr "MUSIK"
 
 #: plugins/lcd.py:716
-msgid ""
-"LCD plugin will not load! Maybe you don't have LCDd (lcdproc daemon) running?"
-msgstr ""
+msgid "LCD plugin will not load! Maybe you don't have LCDd (lcdproc daemon) running?"
+msgstr "LCD modulet kunne ikke starte! Måske kører LCDd (lcdproc daemon) ikke?"
 
 #: plugins/lcd.py:721
 #, python-format
 msgid "Connecting to LCD: %s"
-msgstr ""
+msgstr "Forbinder til LCD: %s"
 
 #: plugins/lcd.py:722
 msgid "Info as know by the LCD module:"
-msgstr ""
+msgstr "Info som LCD modulet kender det:"
 
 #: plugins/lcd.py:910
 #, python-format
 msgid "Could not find screens for %d lines LCD!"
-msgstr ""
+msgstr "Kunne ikke finde skærme til %d-liniers LCD!"
 
 #: plugins/lcd.py:913 plugins/lcd.py:924 plugins/lcd.py:935
-#, fuzzy, python-format
+#, python-format
 msgid "No screens found for this LCD (%dx%d)!"
-msgstr "Ingen overskrifter fundet"
+msgstr "Ingen skærme fundet til denne LCD (%dx%d)!"
 
 #: plugins/lcd.py:921 plugins/lcd.py:934
 #, python-format
 msgid "Could not find screens for %d lines and %d columns LCD!"
-msgstr ""
+msgstr "Kunne ikke finde skærme til LCD på %d linier og %d kolonner!"
 
 #: plugins/rom_drives.py:260
 #, python-format
@@ -1161,7 +1164,6 @@ msgstr "Lyt til musik"
 msgid "Look at Pictures"
 msgstr "Se billeder"
 
-#, fuzzy
 msgid " of "
 msgstr " af "
 
@@ -1251,3 +1253,4 @@ msgstr "Størrelse:"
 
 msgid " items in this playlist"
 msgstr " elementer i denne afspilningsliste"
+

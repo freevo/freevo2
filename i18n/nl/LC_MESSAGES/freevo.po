@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2003-10-21 19:11-0200\n"
+"POT-Creation-Date: 2003-11-02 22:27+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: den_rdc <den_rdc@users.sourceforge.net>\n"
 "Language-Team: Dutch <LL@li.org>\n"
@@ -84,7 +84,7 @@ msgstr "Programmagids aan het voorbereiden..."
 msgid "TV Guide is corrupt!"
 msgstr "De TV Gids is ongeldig!"
 
-#: gui/AlertBox.py:162 gui/ConfirmBox.py:162 plugins/commands.py:174
+#: gui/AlertBox.py:162 gui/ConfirmBox.py:162 plugins/commands.py:177
 msgid "OK"
 msgstr "OK"
 
@@ -92,37 +92,39 @@ msgstr "OK"
 msgid "CANCEL"
 msgstr "Annuleer"
 
-#: audio/xmms.py:156 games/game.py:99
+#: audio/xmms.py:156 games/game.py:105
 #, python-format
 msgid "File \"%s\" not found!"
 msgstr "Bestand \"%s\" niet gevonden"
 
-#: audio/audiodiskitem.py:60 audio/plugins/cdbackup.py:459
+#: audio/audiodiskitem.py:60 audio/plugins/cdbackup.py:478
 msgid "Unknown CD Album"
 msgstr "Onbekend CD Album"
 
-#: audio/audiodiskitem.py:95 image/plugins/gphoto.py:155 directory.py:439
+#: audio/audiodiskitem.py:95 image/plugins/gphoto.py:155 directory.py:457
 msgid "Browse directory"
 msgstr "Verken deze folder"
 
-#: audio/plugins/coversearch.py:140
+#: audio/plugins/coversearch.py:146
 msgid ""
 "To search for covers you need an Amazon.com Web Services\n"
 "license key. You can get yours from:\n"
 msgstr ""
+"Om audio cd covers op te zoeken heb je een Amazon.com\n"
+"Web Services license key nodig. Je lan zo'n key verbrijgen op:\n"
 
-#: audio/plugins/coversearch.py:166
+#: audio/plugins/coversearch.py:172
 msgid "Find a cover for this music"
-msgstr ""
+msgstr "Zoek een cover voor dit nummer"
 
-#: audio/plugins/coversearch.py:170 audio/plugins/coversearch.py:178
-#: audio/plugins/coversearch.py:186 audio/plugins/cdbackup.py:455
-#: video/plugins/xine.py:131 plugins/lcd.py:910 plugins/lcd.py:921
+#: audio/plugins/coversearch.py:176 audio/plugins/coversearch.py:184
+#: audio/plugins/coversearch.py:192 audio/plugins/cdbackup.py:474
+#: video/plugins/xine.py:137 plugins/lcd.py:910 plugins/lcd.py:921
 #: plugins/lcd.py:934
 msgid "WARNING"
-msgstr ""
+msgstr "WAARSCHUWING"
 
-#: audio/plugins/coversearch.py:170 audio/plugins/coversearch.py:178
+#: audio/plugins/coversearch.py:176 audio/plugins/coversearch.py:184
 #, python-format
 msgid ""
 "Plugin 'coversearch' was disabled for this item! 'coversearch' needs an item "
@@ -130,182 +132,189 @@ msgid ""
 "to be able to search. So you need a file with a ID3 tag (mp3) or an Ogg "
 "Info. Maybe you must fix this file (%s) tag?"
 msgstr ""
+"De 'coversearch' plugin werkt niet voor dit bestand! ' coversearch heeft"
+"een file nodig met een Artiest en Album (voor mp3 en ogg) of een titel (voor een cd)"
+"om een opzoeking uit te voeren. Dus jehebt een mp3 nodig met een ID3 tag of een Ogg"
+"met Ogg Info. Misschien can je het de tags van het bestand (%s) herstellen?"
 
-#: audio/plugins/coversearch.py:186
+#: audio/plugins/coversearch.py:192
 msgid "Unknown CD, cover searching is disabled"
-msgstr ""
+msgstr "Onbekende cd, een cover zoeken is onmogelijk"
 
-#: audio/plugins/coversearch.py:194
+#: audio/plugins/coversearch.py:200
 #, fuzzy
 msgid "searching Amazon..."
 msgstr "Bezig met zoeken op IMDB..."
 
-#: audio/plugins/coversearch.py:211
+#: audio/plugins/coversearch.py:217
 #, python-format
 msgid "No matches for %(artist)s - %(album)s"
-msgstr ""
+msgstr "Geen resultaten voor %(artist)s - %(album)s"
 
-#: audio/plugins/coversearch.py:219
+#: audio/plugins/coversearch.py:225
 msgid "The cover provider returned bad information."
-msgstr ""
+msgstr "De cover database zond ongeldige informatie."
 
-#: audio/plugins/coversearch.py:256 audio/plugins/coversearch.py:266
+#: audio/plugins/coversearch.py:262 audio/plugins/coversearch.py:272
 msgid "small"
-msgstr ""
+msgstr "klein"
 
-#: audio/plugins/coversearch.py:275
+#: audio/plugins/coversearch.py:281
 msgid "Cover Search Results"
-msgstr ""
+msgstr "Cover zoektocht resultaten"
 
-#: audio/plugins/coversearch.py:279
+#: audio/plugins/coversearch.py:285
 #, fuzzy
 msgid "No covers available from Amazon"
 msgstr "Geen informatie beschikbaar op IMDB"
 
-#: audio/plugins/coversearch.py:293 video/plugins/imdb.py:221
+#: audio/plugins/coversearch.py:298 video/plugins/imdb.py:224
 msgid "getting data..."
 msgstr "Binnenhalen van de data..."
 
-#: audio/plugins/webradio.py:65
+#: audio/plugins/webradio.py:68
 #, fuzzy
 msgid "Browse entries"
 msgstr "Verken deze folder"
 
-#: audio/plugins/webradio.py:85
+#: audio/plugins/webradio.py:88
 msgid "Webradio"
-msgstr ""
+msgstr "Web Radio"
 
-#: audio/plugins/webradio.py:90
+#: audio/plugins/webradio.py:93
 #, fuzzy
 msgid "Browse genre list"
 msgstr "Verken deze folder"
 
-#: audio/plugins/webradio.py:99
+#: audio/plugins/webradio.py:102
 msgid "Webradio Genre List"
-msgstr ""
+msgstr "Web Radio genres"
 
-#: audio/plugins/xine.py:74 audio/plugins/xine.py:98
-#: audio/plugins/cdbackup.py:221 audio/plugins/cdbackup.py:524
-#: audio/plugins/mplayer.py:234 video/plugins/xine.py:97
-#: video/plugins/xine.py:128 video/plugins/mplayer.py:583
-#: video/plugins/mplayer.py:637 plugins/lcd.py:716 plugins/lcd.py:913
-#: plugins/lcd.py:924 plugins/lcd.py:935
+#: audio/plugins/xine.py:77 audio/plugins/xine.py:101
+#: audio/plugins/cdbackup.py:233 audio/plugins/cdbackup.py:543
+#: audio/plugins/mplayer.py:237 skins/main/info_area.py:135
+#: video/plugins/xine.py:103 video/plugins/xine.py:134
+#: video/plugins/mplayer.py:586 video/plugins/mplayer.py:640
+#: plugins/lcd.py:716 plugins/lcd.py:913 plugins/lcd.py:924 plugins/lcd.py:935
 msgid "ERROR"
-msgstr ""
+msgstr "FOUT"
 
-#: audio/plugins/xine.py:74
+#: audio/plugins/xine.py:77
 msgid "'fbxine' not found, plugin 'xine' deactivated"
-msgstr ""
+msgstr "'fbxine' niet gevonden, 'xine' plugin gedeactiveerd"
 
-#: audio/plugins/xine.py:98 video/plugins/xine.py:128
+#: audio/plugins/xine.py:101 video/plugins/xine.py:134
 msgid "'fbxine' version too old, plugin 'xine' deactivated"
-msgstr ""
+msgstr "'fbxine' niet recent genoeg, 'xine' plugin gedeactiveerd"
 
-#: audio/plugins/xine.py:99 video/plugins/xine.py:129
+#: audio/plugins/xine.py:102 video/plugins/xine.py:135
 #, python-format
 msgid "You need software %s"
-msgstr ""
+msgstr "Je hebt software %s nodig"
 
-#: audio/plugins/cdbackup.py:213
+#: audio/plugins/cdbackup.py:225
 msgid "Show CD ripping status"
-msgstr ""
+msgstr "Toon CD rip vooruitgang"
 
-#: audio/plugins/cdbackup.py:218
+#: audio/plugins/cdbackup.py:230
 msgid "Rip the CD to the hard drive"
 msgstr "Neem een harde-schijf backup van deze CD"
 
-#: audio/plugins/cdbackup.py:219
+#: audio/plugins/cdbackup.py:231
 msgid "Get CDs available for ripping"
 msgstr "Toon CD's beschikbaar voor backup"
 
-#: audio/plugins/cdbackup.py:221
+#: audio/plugins/cdbackup.py:233
 msgid "Item is not an Audio CD"
-msgstr ""
+msgstr "Dit is geen Audio CD"
 
-#: audio/plugins/cdbackup.py:228
+#: audio/plugins/cdbackup.py:240
 #, python-format
 msgid ""
 "Ripping in progress\n"
 "Track %d of %d"
 msgstr ""
+"CD Rip bezig\n"
+"Nummer %d van de %d"
 
-#: audio/plugins/cdbackup.py:243
+#: audio/plugins/cdbackup.py:255
 msgid "Backup CD to hard drive in mp3 format"
 msgstr "Neem een harde-schijf backup van deze CD in mp3 formaat"
 
-#: audio/plugins/cdbackup.py:246
+#: audio/plugins/cdbackup.py:258
 msgid "Backup CD to hard drive in Ogg format"
 msgstr "Neem een harde-schijf backup van deze CD in Ogg formaat"
 
-#: audio/plugins/cdbackup.py:249
+#: audio/plugins/cdbackup.py:261
 msgid "Backup CD to hard drive in FLAC format"
 msgstr "Neem een harde-schijf backup van deze CD in FLAC formaat"
 
-#: audio/plugins/cdbackup.py:251
+#: audio/plugins/cdbackup.py:263
 msgid "Backup CD to hard drive in wav format"
 msgstr "Neem een harde-schijf backup van deze CD in WAV formaat"
 
-#: audio/plugins/cdbackup.py:254
+#: audio/plugins/cdbackup.py:266
 msgid "CD Backup"
 msgstr "CD Backup"
 
-#: audio/plugins/cdbackup.py:262
+#: audio/plugins/cdbackup.py:274
 msgid "Ripping started"
-msgstr ""
+msgstr "Rip gestart"
 
-#: audio/plugins/cdbackup.py:329
+#: audio/plugins/cdbackup.py:341
 #, fuzzy, python-format
 msgid "Directory %s already exists"
 msgstr "Folder op schijf [%s]"
 
-#: audio/plugins/cdbackup.py:455
+#: audio/plugins/cdbackup.py:474
 msgid "No CDDB data available to mmpython"
-msgstr ""
+msgstr "Geen CDDB informatie beschikbaar voor mmpython"
 
-#: audio/plugins/cdbackup.py:458
+#: audio/plugins/cdbackup.py:477
 msgid "Unknown Artist"
-msgstr ""
+msgstr "Onbekende Artiest"
 
-#: audio/plugins/cdbackup.py:458 audio/plugins/cdbackup.py:459
+#: audio/plugins/cdbackup.py:477 audio/plugins/cdbackup.py:478
 msgid "RENAME"
-msgstr ""
+msgstr "WIJZIG NAAM"
 
-#: audio/plugins/cdbackup.py:460
+#: audio/plugins/cdbackup.py:479
 msgid "Other"
-msgstr ""
+msgstr "Andere"
 
-#: audio/plugins/cdbackup.py:463
+#: audio/plugins/cdbackup.py:482
 msgid ""
 "CD info not found!\n"
 "Must manually rename files\n"
 "when finished ripping"
 msgstr ""
+"CD info niet gevonden!\n"
+"U moet zelf de bestandsnamen veranderen\n"
+"als het rippen eindigd"
 
-#: audio/plugins/cdbackup.py:524
+#: audio/plugins/cdbackup.py:543
 msgid "Problem trying to call:"
-msgstr ""
+msgstr "Probleem in oproeppoging:"
 
-#: audio/plugins/radio.py:70
+#: audio/plugins/radio.py:73
 msgid "Listen to Radio Station"
-msgstr ""
+msgstr "Luister naar een radiostation"
 
-#: audio/plugins/radio.py:120
-#, fuzzy
+#: audio/plugins/radio.py:123
 msgid "No Radio Stations found"
-msgstr "Geen commandos gevonden"
+msgstr "Geen radiostation gevonden"
 
-#: audio/plugins/radio.py:121
+#: audio/plugins/radio.py:124
 msgid "Radio Stations"
-msgstr ""
+msgstr "Radiostations"
 
-#: audio/plugins/radio.py:151
+#: audio/plugins/radio.py:154
 msgid "Radio"
-msgstr ""
+msgstr "Radio"
 
 #: audio/plugins/detach.py:63
-#, fuzzy
 msgid "Show player"
-msgstr "Toon Stderr"
+msgstr "Toon de mediaspeler"
 
 #: audio/plugins/vux.py:90
 msgid "[VUX] Start playing"
@@ -343,41 +352,44 @@ msgstr "[VUX] een folder, niet selecteren"
 msgid "[VUX] an audio item, do not select"
 msgstr "[VUX] een geluidsbestand, niet selecteren"
 
-#: audio/plugins/mplayer.py:138
+#: audio/plugins/mplayer.py:141
 #, fuzzy, python-format
 msgid ""
 "%s\n"
 "not found!"
-msgstr "Niet gevonden!"
+msgstr "" 
+"%s\n"
+"Niet gevonden!"
 
-#: audio/plugins/mplayer.py:165
+#: audio/plugins/mplayer.py:168
 msgid "Invalid audio file"
 msgstr "Ongeldig geluidsbestand"
 
-#: audio/plugins/mplayer.py:234 video/plugins/mplayer.py:583
+#: audio/plugins/mplayer.py:237 video/plugins/mplayer.py:586
 #, python-format
 msgid "Cannot open \"%s\" and \"%s\" for MPlayer logging!"
-msgstr ""
+msgstr "Kan \"%s\" en \"%s\" niet openen voor Mplayer logging!"
 
-#: audio/plugins/mplayer.py:237
+#: audio/plugins/mplayer.py:240
 msgid ""
 "Please set MPLAYER_DEBUG=0 in local_conf.py, or start Freevo from a "
 "directory that is writeable!"
 msgstr ""
+"Zet MPLAYER_DEBUG=0 in local_conf.py, of start Freevo in een"
+" folder waar u schrijfrechten hebt."
 
-#: audio/plugins/mplayer.py:241 video/plugins/mplayer.py:580
+#: audio/plugins/mplayer.py:244 video/plugins/mplayer.py:583
 #, python-format
 msgid "MPlayer logging to \"%s\" and \"%s\""
-msgstr ""
+msgstr "MPlayer logt naar \"%s\" en \"%s\""
 
 #: audio/plugins/playlist.py:90
 msgid "Enqueue this Music in Playlist"
-msgstr ""
+msgstr "Voeg dit nummer toe aan de playlist"
 
 #: audio/plugins/playlist.py:92
-#, fuzzy
 msgid "Make a new Audio Playlist"
-msgstr " nummers in de afspeellijst."
+msgstr "Maak een nieuwe muziek playlist"
 
 #: games/mame_cache.py:170
 msgid "Generating MAME cache, please wait."
@@ -408,27 +420,27 @@ msgstr "Geen informatie beschikbaar"
 msgid "View Image"
 msgstr "Toon afbeelding"
 
-#: skins/main/listing_area.py:249
+#: skins/main/listing_area.py:264
 msgid "This directory is empty"
 msgstr "Deze folder  is leeg"
 
-#: skins/main/main.py:160
+#: skins/main/main.py:163
 msgid "TV GUIDE"
 msgstr "TV gids"
 
-#: skins/main/main.py:290
+#: skins/main/main.py:296
 msgid "Starting Freevo, please wait ..."
 msgstr "Freevo is aan het starten, even geduld..."
 
-#: skins/main/main.py:550 skins/main/main.py:622
+#: skins/main/main.py:556 skins/main/main.py:628
 msgid "INTERNAL ERROR, NO MENU!"
 msgstr "INTERNE FOUT, GEEN MENU!"
 
-#: video/videoitem.py:290 video/configure.py:178 playlist.py:249
-#: playlist.py:253 playlist.py:361
-#, fuzzy
+#: video/videoitem.py:290 video/configure.py:178
+#: video/plugins/appletrailers.py:124 playlist.py:255 playlist.py:259
+#: playlist.py:367
 msgid "Play"
-msgstr "Speel deze VCD af"
+msgstr "Speel"
 
 #: video/videoitem.py:294
 msgid "Play DVD"
@@ -448,15 +460,15 @@ msgstr "Speel deze VCD af"
 
 #: video/videoitem.py:303 video/videoitem.py:305
 msgid "VCD title list"
-msgstr ""
+msgstr "VCD titel lijst"
 
-#: video/videoitem.py:311
+#: video/videoitem.py:311 video/plugins/appletrailers.py:125
 msgid "Play with maximum cache"
-msgstr ""
+msgstr "Speel af met het maximum aan buffer"
 
 #: video/videoitem.py:314
 msgid "Show variants"
-msgstr ""
+msgstr "Toon varianten"
 
 #: video/videoitem.py:395
 msgid "Wait while detecting media..."
@@ -482,13 +494,12 @@ msgid "Play Title %s"
 msgstr "Speel titel %s af"
 
 #: video/configure.py:83
-#, fuzzy
 msgid "Audio Menu"
-msgstr "Geluids menu"
+msgstr "Geluidsmenu"
 
 #: video/configure.py:99
 msgid "no subtitles"
-msgstr ""
+msgstr "Geen ondertitels"
 
 #: video/configure.py:102
 #, fuzzy
@@ -496,95 +507,149 @@ msgid "Subtitle Menu"
 msgstr "Ondertitels menu"
 
 #: video/configure.py:118
-#, fuzzy, python-format
+#, python-format
 msgid "Play chapter %s"
-msgstr "Speel titel %s af"
+msgstr "Speel hoofdstuk %s af"
 
 #: video/configure.py:120
-#, fuzzy
 msgid "Chapter Menu"
 msgstr "Hoofdstukken menu"
 
 #: video/configure.py:147
 #, python-format
 msgid "Turn off %s"
-msgstr ""
+msgstr "Zet %s af"
 
 #: video/configure.py:148
 #, python-format
 msgid "Turn on %s"
-msgstr ""
+msgstr "Zet %s aan"
 
 #: video/configure.py:163
 msgid "Audio selection"
-msgstr ""
+msgstr "Audio selectie"
 
 #: video/configure.py:165
 msgid "Subtitle selection"
-msgstr ""
+msgstr "Ondertitel selectie"
 
 #: video/configure.py:168
 msgid "Chapter selection"
-msgstr ""
+msgstr "Hoofdstuk selectie"
 
 #: video/configure.py:170
 msgid "deinterlacing"
-msgstr ""
+msgstr "deinterlacing"
 
 #: video/configure.py:179
 #, fuzzy
 msgid "Config Menu"
 msgstr "Configuratie menu"
 
-#: video/plugins/xine.py:97
+#: video/plugins/xine.py:103
 msgid "'XINE_COMMAND' not defined, plugin 'xine' deactivated"
-msgstr ""
+msgstr "'XINE_COMMAND' niet gedefineerd, plugin 'xine' gedeactiveerd"
 
-#: video/plugins/xine.py:98
-#, fuzzy
+#: video/plugins/xine.py:104
 msgid "please check the xine section in freevo_config.py"
-msgstr "Gelieve de configuratie na te kijken."
+msgstr "Gelieve de xine configuratie in freevo_config.py na te kijken."
 
-#: video/plugins/xine.py:131
+#: video/plugins/xine.py:137
 msgid "'xine' version too old, plugin in fallback mode"
-msgstr ""
+msgstr "'xine' versie niet recent genoeg, plugin overgeschakeld naar fallback"
 
-#: video/plugins/xine.py:132
+#: video/plugins/xine.py:138
 #, python-format
 msgid "You need %s to use all features of the '%s' plugin"
-msgstr ""
+msgstr "U hebt %s nodig om alle mogelijkheden van de '%s' plugin te benutten"
 
 #: video/plugins/bookmarker.py:99
 msgid "Resume playback"
-msgstr ""
+msgstr "Ga verder met het afspelen"
 
 #: video/plugins/bookmarker.py:104
 msgid "Bookmarks"
-msgstr ""
+msgstr "Bladwijzers"
 
 #: video/plugins/bookmarker.py:139
 #, python-format
 msgid "Jump to %s"
-msgstr ""
+msgstr "Spring naar %s"
+
+#: video/plugins/appletrailers.py:141
+msgid "get streams"
+msgstr "haal streams af"
+
+#: video/plugins/appletrailers.py:144
+msgid "Downloading trailer list..."
+msgstr "Trailer lijst aan het downloaden..."
+
+#: video/plugins/appletrailers.py:180
+msgid "Trailer Subpage"
+msgstr "Trailer subpagina"
+
+#: video/plugins/appletrailers.py:196
+msgid "Browse by Title"
+msgstr "Verken Titels"
+
+#: video/plugins/appletrailers.py:206 video/plugins/appletrailers.py:292
+msgid "Titles"
+msgstr "Titels"
+
+#: video/plugins/appletrailers.py:222 video/plugins/appletrailers.py:244
+#: video/plugins/appletrailers.py:299
+msgid "Trailers by Name"
+msgstr "Trailers volgens naam"
+
+#: video/plugins/appletrailers.py:232
+msgid "find movies in studio-page"
+msgstr "zoek films in studio-pagina"
+
+#: video/plugins/appletrailers.py:250
+msgid "Browse by Studio"
+msgstr "Verken Studios"
+
+#: video/plugins/appletrailers.py:259
+msgid "Studios"
+msgstr "Studios"
+
+#: video/plugins/appletrailers.py:277
+msgid "Choose Studio"
+msgstr "Kies een Studio"
+
+#: video/plugins/appletrailers.py:282
+msgid "Browse Newest"
+msgstr "Verken nieuwste trailers"
+
+#: video/plugins/appletrailers.py:306 video/plugins/appletrailers.py:314
+msgid "Apple Trailers"
+msgstr "Apple Trailers"
+
+#: video/plugins/appletrailers.py:387
+msgid "Scanning Apple for trailers..."
+msgstr "Bezig met trailers te zoeken op de Apple website..."
+
+#: video/plugins/appletrailers.py:499
+msgid "Scanning Apple for studios..."
+msgstr "Bezig met studios te zoeken op de Apple website..."
 
 #: video/plugins/mover.py:114
 #, python-format
 msgid "Move to [%s]"
 msgstr "Verplaats naar [%s]"
 
-#: video/plugins/linkbrowser.py:155
+#: video/plugins/linkbrowser.py:158
 msgid "Downloading link list..."
-msgstr ""
+msgstr "Link lijst aan het binnenhalen..."
 
-#: video/plugins/linkbrowser.py:162
+#: video/plugins/linkbrowser.py:165
 #, python-format
 msgid "Failed to download %s"
-msgstr ""
+msgstr "Downloaden van %s mislukt"
 
-#: video/plugins/mplayer.py:637
-#, fuzzy
+#: video/plugins/mplayer.py:640
 msgid "unknow error while playing file"
-msgstr "Onbekende fout tijdens het zoeken op IMDB"
+msgstr "Onbekende fout tijdens het afspelen van dit bestand"
 
 #: video/plugins/imdb_info.py:72
 msgid "Show info for this file"
@@ -594,41 +659,40 @@ msgstr "Toon meer informatie voor dit bestand"
 msgid "There is no IMDB information for this file."
 msgstr "Er is geen IMDB informatie voor dit bestand."
 
-#: video/plugins/imdb.py:112
-#, fuzzy
+#: video/plugins/imdb.py:115
 msgid "Search IMDB for this file"
-msgstr "Zoek op IMDB voor [%s]"
+msgstr "Zoek op IMDB naar dit bestand"
 
-#: video/plugins/imdb.py:119 video/plugins/imdb.py:125
+#: video/plugins/imdb.py:122 video/plugins/imdb.py:128
 #, python-format
 msgid "Search IMDB for [%s]"
 msgstr "Zoek op IMDB voor [%s]"
 
-#: video/plugins/imdb.py:136
+#: video/plugins/imdb.py:139
 msgid "searching IMDB..."
 msgstr "Bezig met zoeken op IMDB..."
 
-#: video/plugins/imdb.py:160
+#: video/plugins/imdb.py:163
 msgid "Unknown error while connecting to IMDB"
 msgstr "Onbekende fout tijdens het zoeken op IMDB"
 
-#: video/plugins/imdb.py:178
+#: video/plugins/imdb.py:181
 msgid "IMDB Query"
-msgstr ""
+msgstr "IMDB Zoekopdracht"
 
-#: video/plugins/imdb.py:182
+#: video/plugins/imdb.py:185
 msgid "No information available from IMDB"
 msgstr "Geen informatie beschikbaar op IMDB"
 
-#: main.py:128
+#: main.py:143
 msgid "shutting down..."
 msgstr "Bezig met afsluiten..."
 
-#: main.py:234
+#: main.py:253
 msgid "Freevo Main Menu"
 msgstr "Freevo Hoofdmenu"
 
-#: main.py:347
+#: main.py:367
 #, python-format
 msgid ""
 "Event '%s' crashed\n"
@@ -640,223 +704,225 @@ msgid ""
 "Logfile: %s\n"
 "\n"
 msgstr ""
+"Event '%s' crashte\n"
+"\n"
+"Kijk in de logfile en meld deze fout op de Freevo mailing lijst."
+"De toestand van Freevo kan nu onstabiel blijven en nog meer fouten veroorzaken"
+"tot u Freevo herstart.\n"
+"\n"
+"Logfile: %s\n"
+"\n"
 
 #: menu.py:565
 msgid "No action defined for this choice!"
 msgstr "Geen actie gedefinieerd voor deze keuze"
 
-#: osd.py:414
+#: osd.py:423
 msgid "z = Toggle Fullscreen"
 msgstr "z = Fullscreen aan/uit"
 
-#: osd.py:415
+#: osd.py:424
 msgid "Arrow Keys = Move"
 msgstr "Pijltjestoetsen = Verplaats"
 
-#: osd.py:416
+#: osd.py:425
 #, fuzzy
 msgid "Spacebar = Select"
 msgstr "Spatie = Selecteer"
 
-#: osd.py:417
+#: osd.py:426
 msgid "Escape = Stop/Prev. Menu"
 msgstr "Escape = Stop / Vorig menu"
 
-#: osd.py:418
+#: osd.py:427
 msgid "h = Help"
 msgstr "h = Help"
 
-#: directory.py:121
+#: directory.py:139
 msgid "Movie Playlists"
-msgstr ""
+msgstr "Film afspeellijsten"
 
-#: directory.py:122
+#: directory.py:140
 msgid "Use automatic playlist for movie items."
-msgstr ""
+msgstr "Gebruik een automatische afspeellijst voor films."
 
-#: directory.py:124
+#: directory.py:142
 msgid "Directory Sort By Date"
-msgstr ""
+msgstr "Sorteer folders op datum."
 
-#: directory.py:125
+#: directory.py:143
 msgid "Sort directory by date and not by name."
-msgstr ""
+msgstr "Sorteer folders op datum en niet op naam."
 
-#: directory.py:127
+#: directory.py:145
 msgid "Directory Autoplay Single Item"
-msgstr ""
+msgstr "Speel folders met 1 item automatisch"
 
-#: directory.py:128
+#: directory.py:146
 msgid "Don't show directory if only one item exists and auto-select the item."
-msgstr ""
+msgstr "Toon folders met 1 item niet en speel dat ene item af."
 
-#: directory.py:131
+#: directory.py:149
 msgid "Audio Random Playlist"
-msgstr ""
+msgstr "Willekeurige audio afspeellijst"
 
-#: directory.py:132
+#: directory.py:150
 msgid "Show radom playlist item for audio menus."
-msgstr ""
+msgstr "Toon de willekeurige audio afspeellijst in audio menus."
 
-#: directory.py:134
+#: directory.py:152
 msgid "Force Skin Layout"
-msgstr ""
+msgstr "Verplicht een bepaalde skin layout"
 
-#: directory.py:135
+#: directory.py:153
 msgid ""
 "Force skin to a specific layout. This option doesn't work with all skins and "
 "the result may differ based on the skin."
 msgstr ""
+" Verplicht een bepaalde skin layout. Deze optie werkt niet voor alle skins en "
+"het resultaat kan varieren afhankelijk van skin tot skin."
 
-#: directory.py:138
-#, fuzzy
+#: directory.py:156
 msgid "Directory Smart Sort"
-msgstr "Folder"
+msgstr "Folder intilligent sorteren"
 
-#: directory.py:139
+#: directory.py:157
 msgid "Use a smarter way to sort the items."
-msgstr ""
+msgstr "Gebruik een intilligentere manier om items te sorteren."
 
-#: directory.py:141
+#: directory.py:159
 msgid "Use MediaID Tag Names"
-msgstr ""
+msgstr "Gebruik MediaID Tag namen"
 
-#: directory.py:142
+#: directory.py:160
 msgid "Use the names from the media files tags as display name."
-msgstr ""
+msgstr "Gebruik de namen van de media file tags op het scherm."
 
-#: directory.py:144
+#: directory.py:162
 msgid "Directory Reverse Sort"
-msgstr ""
+msgstr "Achterwaardse Folder Sortering"
 
-#: directory.py:145
+#: directory.py:163
 msgid "Show the items in the list in reverse order."
-msgstr ""
+msgstr "Toon de items in de lijst in omgekeerde volgorde."
 
-#: directory.py:414
+#: directory.py:432
 #, python-format
 msgid "Directory on disc [%s]"
 msgstr "Folder op schijf [%s]"
 
-#: directory.py:415
+#: directory.py:433
 msgid "Directory"
 msgstr "Folder"
 
-#: directory.py:442
-#, fuzzy
+#: directory.py:460
 msgid "Random play all items"
-msgstr "Speel alle bestanden af"
+msgstr "Speel alle bestanden af in willekeurige volgorde"
 
-#: directory.py:444
+#: directory.py:462
 msgid "Recursive random play all items"
-msgstr "Speel alle bestanden af"
+msgstr "Speel alle bestanden non-stop af in willekeurige volgorde"
 
-#: directory.py:446
+#: directory.py:464
 #, fuzzy
 msgid "Recursive play all items"
-msgstr "Speel alle bestanden af"
+msgstr "Speel alle bestanden af non-stop"
 
-#: directory.py:448
-#, fuzzy
+#: directory.py:466
 msgid "Configure directory"
-msgstr "Verken deze folder"
+msgstr "Configureer deze folder"
 
-#: directory.py:471
+#: directory.py:489
 msgid "Enter Password"
 msgstr "Wachtwoord a.u.b"
 
-#: directory.py:496
+#: directory.py:514
 msgid "Password incorrect"
 msgstr "Wachtwoord incorrect"
 
-#: directory.py:540
+#: directory.py:558
 msgid "Scanning disc, be patient..."
 msgstr "Analyse schijf, even geduld a.u.b."
 
-#: directory.py:542
+#: directory.py:560
 msgid "Scanning directory, be patient..."
 msgstr "Analyse folder, even geduld a.u.b."
 
-#: directory.py:859 directory.py:896
+#: directory.py:878 directory.py:916
 msgid "on"
-msgstr ""
+msgstr "aan"
 
-#: directory.py:861 directory.py:864 directory.py:898 directory.py:901
+#: directory.py:880 directory.py:883 directory.py:918 directory.py:921
 msgid "off"
-msgstr ""
+msgstr "af"
 
-#: directory.py:866 directory.py:903
+#: directory.py:885 directory.py:923
 msgid "auto"
-msgstr ""
+msgstr "automatisch"
 
-#: directory.py:907
-#, fuzzy
+#: directory.py:927
 msgid "Configure"
-msgstr "Verken deze folder"
+msgstr "Configureer"
 
-#: playlist.py:115 playlist.py:157
-#, fuzzy, python-format
+#: playlist.py:121 playlist.py:163
+#, python-format
 msgid "Cannot open file \"%s\""
-msgstr "Media niet gevonden voor bestand \"%s\".\n"
+msgstr "Bestand \"%s\" kan niet geopend worden"
 
-#: playlist.py:244
+#: playlist.py:250
 msgid "Random Playlist"
-msgstr ""
+msgstr "Willekeurige afspeellijst"
 
-#: playlist.py:250 playlist.py:252
+#: playlist.py:256 playlist.py:258
 msgid "Browse Playlist"
-msgstr ""
+msgstr "Bekijk afspeellijst"
 
-#: playlist.py:268
-#, fuzzy
+#: playlist.py:274
 msgid "empty playlist"
-msgstr " elementen in de afspeellijst"
+msgstr "lege afspeellijst"
 
-#: plugins/headlines.py:117 plugins/headlines.py:283
+#: plugins/headlines.py:120 plugins/headlines.py:287
 msgid "Headlines"
-msgstr ""
+msgstr "Koppen"
 
-#: plugins/headlines.py:206
+#: plugins/headlines.py:210
 msgid "Show Sites Headlines"
-msgstr ""
+msgstr "Toon Website koppen"
 
-#: plugins/headlines.py:228
+#: plugins/headlines.py:232
 msgid "Fetching headlines..."
-msgstr ""
+msgstr "Bezig met koppen binnen te halen..."
 
-#: plugins/headlines.py:281
-#, fuzzy
+#: plugins/headlines.py:285
 msgid "No Headlines found"
-msgstr "Geen commandos gevonden"
+msgstr "Geen koppen gevonden"
 
-#: plugins/headlines.py:298 plugins/headlines.py:312
+#: plugins/headlines.py:302 plugins/headlines.py:316
 msgid "Headlines Sites"
-msgstr ""
+msgstr "Koppen Websites"
 
-#: plugins/headlines.py:310
+#: plugins/headlines.py:314
 msgid "No Headlines Sites found"
-msgstr ""
+msgstr "Geen koppen sites gevonden"
 
-#: plugins/df.py:70
+#: plugins/df.py:73
 #, fuzzy, python-format
 msgid "%i free of %i Mb total"
 msgstr "%i van de %i Mb vrij"
 
 #: plugins/mediamenu.py:190
 msgid "Media"
-msgstr ""
+msgstr "Audio/Video"
 
 #: plugins/mediamenu.py:196
-#, fuzzy
 msgid "Movie"
 msgstr "Films"
 
 #: plugins/mediamenu.py:199
 msgid "Audio"
-msgstr ""
+msgstr "Muziek"
 
 #: plugins/mediamenu.py:202
-#, fuzzy
 msgid "Image"
 msgstr "Afbeeldingen"
 
@@ -870,247 +936,248 @@ msgid "%s Main Menu"
 msgstr "TV Hoofdmenu"
 
 #: plugins/icecastchanger.py:77
-#, fuzzy
 msgid "Set as icecast playlist"
-msgstr " nummers in de afspeellijst."
+msgstr " nummers in de icecast afspeellijst."
 
-#: plugins/commands.py:159
+#: plugins/commands.py:162
 msgid "Command finished"
 msgstr "Commando volbracht"
 
-#: plugins/commands.py:175
+#: plugins/commands.py:178
 msgid "Show Stderr"
 msgstr "Toon Stderr"
 
-#: plugins/commands.py:176
+#: plugins/commands.py:179
 msgid "Show Stdout"
 msgstr "Toon Stdout"
 
-#: plugins/commands.py:190
+#: plugins/commands.py:193
 msgid "Stdout File"
 msgstr "Stdout bestand"
 
-#: plugins/commands.py:194
+#: plugins/commands.py:197
 msgid "Stderr File"
 msgstr "Stderr bestand"
 
-#: plugins/commands.py:248
+#: plugins/commands.py:251
 msgid "Run Command"
 msgstr "Start commando"
 
-#: plugins/commands.py:257
-#, fuzzy
+#: plugins/commands.py:260
 msgid "Running Command..."
-msgstr "Start commando"
+msgstr "Bezig met commando te starten..."
 
-#: plugins/commands.py:271
+#: plugins/commands.py:274
 msgid "Command Failed"
 msgstr "Commando mislukt"
 
-#: plugins/commands.py:274
-#, fuzzy
+#: plugins/commands.py:277
 msgid "Command Completed"
-msgstr "Commando mislukt"
+msgstr "Commando Volbracht"
 
-#: plugins/commands.py:299
+#: plugins/commands.py:302
 msgid "No Commands found"
 msgstr "Geen commandos gevonden"
 
-#: plugins/commands.py:300 plugins/commands.py:326
+#: plugins/commands.py:303 plugins/commands.py:329
 msgid "Commands"
 msgstr "Commandos"
 
-#: plugins/idlebar.py:495
+#: plugins/idlebar.py:495 plugins/idlebar/system.py:113
 #, python-format
 msgid "%iM"
-msgstr ""
+msgstr "%iM"
 
-#: plugins/idlebar.py:520
+#: plugins/idlebar.py:520 plugins/idlebar/system.py:138
 #, python-format
 msgid "%s%%"
-msgstr ""
+msgstr "%s%%"
 
-#: plugins/file_ops.py:83
+#: plugins/file_ops.py:89
 msgid "Delete file"
-msgstr ""
+msgstr "Wis bestand"
 
-#: plugins/file_ops.py:85
+#: plugins/file_ops.py:91
 msgid "Delete info"
-msgstr ""
+msgstr "Wis meta-informatie"
 
-#: plugins/file_ops.py:92
+#: plugins/file_ops.py:97
 #, python-format
 msgid ""
 "Do you wish to delete\n"
 " '%s'?"
 msgstr ""
+"Wenst u het volgende bestand te wissen:\n"
+" '%s'?"
 
-#: plugins/file_ops.py:97
+#: plugins/file_ops.py:102
 #, python-format
 msgid ""
 "Delete info about\n"
 " '%s'?"
 msgstr ""
+"Wenst u de volgende meta-informatie te wissen:\n"
+" '%s'?"
 
 #: plugins/lcd.py:118 plugins/lcd.py:126
-#, fuzzy, python-format
+#, python-format
 msgid "Length: %s"
 msgstr "Speelduur:"
 
 #: plugins/lcd.py:119 plugins/lcd.py:123
-#, fuzzy, python-format
+#, python-format
 msgid "Artist: %s"
 msgstr "Artiest:"
 
 #: plugins/lcd.py:120 plugins/lcd.py:124
-#, fuzzy, python-format
+#, python-format
 msgid "Album: %s"
 msgstr "Album:"
 
 #: plugins/lcd.py:121 plugins/lcd.py:125
-#, fuzzy, python-format
+#, python-format
 msgid "Year: %s"
 msgstr "Jaar:"
 
 #: plugins/lcd.py:122
-#, fuzzy, python-format
+#, python-format
 msgid "Tracks: %s"
 msgstr "Nummer:"
 
 #: plugins/lcd.py:127
-#, fuzzy, python-format
+#, python-format
 msgid "Resolution: %s"
 msgstr "Resolutie:"
 
 #: plugins/lcd.py:128
 #, python-format
 msgid "Aspect: %s"
-msgstr ""
+msgstr "Beeldverhouding: %s"
 
 #: plugins/lcd.py:129 plugins/lcd.py:132
 #, python-format
 msgid "Tagline: %s"
-msgstr ""
+msgstr "Onderschrift: %s"
 
 #: plugins/lcd.py:130 plugins/lcd.py:131
 #, python-format
 msgid "Plot: %s"
-msgstr ""
+msgstr "Plot: %s"
 
 #: plugins/lcd.py:133
-#, fuzzy, python-format
+#, python-format
 msgid "Geometry: %s"
 msgstr "Verhouding:"
 
 #: plugins/lcd.py:134
-#, fuzzy, python-format
+#, python-format
 msgid "Date: %s"
-msgstr "Datum:"
+msgstr "Datum: %s"
 
 #: plugins/lcd.py:135 plugins/lcd.py:137
-#, fuzzy, python-format
+#, python-format
 msgid "Description: %s"
-msgstr "Beschrijving: "
+msgstr "Beschrijving: %s"
 
 #: plugins/lcd.py:136
 #, python-format
 msgid "%s items"
-msgstr ""
+msgstr "%s items"
 
 #: plugins/lcd.py:191 plugins/lcd.py:339
 #, python-format
 msgid "Today is %s."
-msgstr ""
+msgstr "Vandaag is het %s."
 
 #: plugins/lcd.py:201 plugins/lcd.py:560
 msgid "MENU"
-msgstr ""
+msgstr "MENU"
 
 #: plugins/lcd.py:204 plugins/lcd.py:563
 msgid "ITEM"
-msgstr ""
+msgstr "ITEM"
 
 #: plugins/lcd.py:207
 msgid "TYPE"
-msgstr ""
+msgstr "TYPE"
 
 #: plugins/lcd.py:210
 msgid "INFO"
-msgstr ""
+msgstr "INFORMATIE"
 
 #: plugins/lcd.py:228
 msgid " MUSIC"
-msgstr ""
+msgstr " MUZIEK"
 
 #: plugins/lcd.py:231
 msgid " ALBUM"
-msgstr ""
+msgstr " ALBUM"
 
 #: plugins/lcd.py:234
 msgid "ARTIST"
-msgstr ""
+msgstr "ARTIEST"
 
 #: plugins/lcd.py:266 plugins/lcd.py:602
-#, fuzzy
 msgid "VIDEO"
-msgstr "TV gids"
+msgstr "VIDEO"
 
 #: plugins/lcd.py:269
 msgid "  TAG"
-msgstr ""
+msgstr "  TAG"
 
 #: plugins/lcd.py:272
 msgid "GENRE"
-msgstr ""
+msgstr "GENRE"
 
 #: plugins/lcd.py:305 plugins/lcd.py:630
 msgid "CHAN"
-msgstr ""
+msgstr "KANAAL"
 
 #: plugins/lcd.py:308 plugins/lcd.py:633
 msgid "PROG"
-msgstr ""
+msgstr "PROG"
 
 #: plugins/lcd.py:311
 msgid "TIME"
-msgstr ""
+msgstr "TIJD"
 
 #: plugins/lcd.py:314
 msgid "DESC"
-msgstr ""
+msgstr "BESH"
 
 #: plugins/lcd.py:575
 msgid "MUSIC"
-msgstr ""
+msgstr "MUZIEK"
 
 #: plugins/lcd.py:716
 msgid ""
 "LCD plugin will not load! Maybe you don't have LCDd (lcdproc daemon) running?"
 msgstr ""
+"LCD plugin kan niet gestart worden! Misschien hebt u LCDd (lcdproc daemon) niet gestart?"
 
 #: plugins/lcd.py:721
 #, python-format
 msgid "Connecting to LCD: %s"
-msgstr ""
+msgstr "Connecteren met LCD: %s"
 
 #: plugins/lcd.py:722
 msgid "Info as know by the LCD module:"
-msgstr ""
+msgstr "Info van de LCD module:"
 
 #: plugins/lcd.py:910
 #, python-format
 msgid "Could not find screens for %d lines LCD!"
-msgstr ""
+msgstr "Geen schermen gevonden voor %d lijnen LCD!"
 
 #: plugins/lcd.py:913 plugins/lcd.py:924 plugins/lcd.py:935
-#, fuzzy, python-format
+#, python-format
 msgid "No screens found for this LCD (%dx%d)!"
-msgstr "Geen commandos gevonden"
+msgstr "Geen schermen gevonden voor deze LCD (%dx%d)!"
 
 #: plugins/lcd.py:921 plugins/lcd.py:934
 #, python-format
 msgid "Could not find screens for %d lines and %d columns LCD!"
-msgstr ""
+msgstr "Geen schermen gevonden voor %d lijnen en %d colommen LCD!"
 
 #: plugins/rom_drives.py:260
 #, python-format
@@ -1127,13 +1194,21 @@ msgstr "Open lezer %s"
 msgid "Reading disc in drive %s"
 msgstr "Bezig met de shijf in lezer %s te analyseren"
 
-#: plugins/base.py:71
+#: plugins/base.py:81 plugins/base.py:84
 msgid "Shutdown Freevo"
 msgstr "Freevo afsluiten"
 
-#: plugins/base.py:72
+#: plugins/base.py:82 plugins/base.py:85
 msgid "Shutdown system"
 msgstr "Systeem afsluiten"
+
+#: plugins/base.py:96
+msgid "Do you really want to shut down Freevo?"
+msgstr "Wenst u Freevo echt af te sluiten?"
+
+#: plugins/base.py:105
+msgid "Do you really want to shut down the system?"
+msgstr "Wenst u het systeem echt af te sluiten?"
 
 # Manualy added from fxd skin files
 msgid "TV"
