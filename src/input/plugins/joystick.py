@@ -1,6 +1,6 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
-# joy.py - A joystick control plugin for Freevo.
+# joystick.py - A joystick control plugin for Freevo.
 # -----------------------------------------------------------------------
 # $Id$
 #
@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.1  2004/09/27 23:10:53  rshortt
+# Move the joystick plugin into the input plugins directory and renamed it
+# to joystick.  plugin.activate('input.joystick')
+#
 # Revision 1.14  2004/08/01 10:49:47  dischi
 # deactivate plugin
 #
