@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.83  2004/02/05 19:56:40  dischi
+# make it possible to change back to the old navigation style
+#
 # Revision 1.82  2004/02/04 22:32:42  gsbarbieri
 # Changed LEFT/RIGHT behaviour.
 # Now in single column mode it behaves like BACK_ONE_MENU/SELECT and in multi-column mode (2d menus) it goes one item LEFT/RIGHT (as before).
@@ -360,6 +363,18 @@ class MenuWidget(GUIObject):
     def eventhandler(self, event):
         menu = self.menustack[-1]
 
+        if self.cols == 1 and config.MENU_ARROW_NAVIGATION:
+            if event == MENU_LEFT:
+                event = MENU_BACK_ONE_MENU
+            elif event == MENU_RIGHT:
+                event = MENU_SELECT
+            
+        elif self.cols == 1:
+            if event == MENU_LEFT:
+                event = MENU_PAGEUP
+            elif event == MENU_RIGHT:
+                event = MENU_PAGEDOWN
+            
         if self.eventhandler_plugins == None:
             self.eventhandler_plugins = plugin.get('daemon_eventhandler')
 
@@ -367,8 +382,7 @@ class MenuWidget(GUIObject):
             self.goto_main_menu()
             return
         
-        if event == MENU_BACK_ONE_MENU \
-               or (event == MENU_LEFT and self.cols == 1):
+        if event == MENU_BACK_ONE_MENU:
             self.back_one_menu()
             return
 
@@ -489,7 +503,7 @@ class MenuWidget(GUIObject):
             return
 
 
-        elif event == MENU_LEFT and self.cols > 1:
+        elif event == MENU_LEFT:
             # Do nothing for an empty file list
             if not len(self.menu_items):
                 return
@@ -509,7 +523,7 @@ class MenuWidget(GUIObject):
             return
         
 
-        elif event == MENU_RIGHT and self.cols > 1:
+        elif event == MENU_RIGHT:
             # Do nothing for an empty file list
             if not len(self.menu_items):
                 return
@@ -533,8 +547,7 @@ class MenuWidget(GUIObject):
         elif event == MENU_PLAY_ITEM and hasattr(menu.selected, 'play'):
             menu.selected.play(menuw=self)
             
-        elif event == MENU_SELECT or event == MENU_PLAY_ITEM \
-                 or (event == MENU_RIGHT and self.cols == 1):
+        elif event == MENU_SELECT or event == MENU_PLAY_ITEM:
             action = None
             arg    = None
 

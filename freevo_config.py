@@ -109,7 +109,7 @@ from event import *
 # of the config file doesn't match, Freevo won't start. If the minor version
 # is different, there will be only a warning
 
-LOCAL_CONF_VERSION  = 5.06
+LOCAL_CONF_VERSION  = 5.07
 
 # Description of changes in each new version
 FREEVO_CONF_CHANGES = [
@@ -203,7 +203,10 @@ LOCAL_CONF_CHANGES = [
     (5.06,
      '''Add MEDIAINFO_USE_MEMORY. Setting this variable will keep all cache
      files in memory. Startup will be slower, but for large directories, this
-     will speed up entering the dir''') ]
+     will speed up entering the dir'''),
+    (5.07,
+     '''Add MENU_ARROW_NAVIGATION to change navigation style. New one is default
+     now.''') ]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -289,6 +292,11 @@ EVENTS = {
     'games'   : GAMES_EVENTS,
     'image'   : IMAGE_EVENTS
     }
+
+#
+# use arrow keys for back and select (alternative way of navigating)
+#
+MENU_ARROW_NAVIGATION = 1
 
 #
 # keymap to map keyboard keys to event strings. You can also add new keys
