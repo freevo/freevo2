@@ -709,6 +709,9 @@ TV_CHANNEL_PROG = './chchan %(channel)s %(norm)s %(freqtable)s'
 REC_SCHEDULE_FILE = '/tmp/freevo_record.lst'
 REC_SCHEDULE = '/tmp/freevo_record.pickle'
 
+RECORD_SERVER_IP = 'localhost'
+RECORD_SERVER_PORT = 18001
+
 #
 # XXX Please see the mencoder docs for more info about the settings
 # XXX below. Some stuff must be changed (adevice), others probably
