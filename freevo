@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.75  2003/08/31 09:17:25  dischi
+# support for start-stop helper scripts
+#
 # Revision 1.74  2003/08/30 09:22:36  dischi
 # Removed -OO for Gentoo. Other distros may need this, too. I also had some
 # problems with Python using older version (pyo) and not the current (pyc).
@@ -112,26 +115,6 @@ if [ `basename $0` = "freevo" -a "$1" = "-fs" ]; then
 fi
 
 
-# option to call a helper script
-# Either this script is called with the name of the helper (as $0) or
-# the first parameter is the helper name. In both cases start the helper
-# (with runapp if present)
-if [ `basename $0` = "freevo" ]; then
-    script="$FREEVO_HELPERS/$1.py"
-    if [ -e "$script" ]; then
-	shift
-    fi
-else
-    script="$FREEVO_HELPERS/$0.py"
-fi
-
-if [ -e "$script" ]; then
-    $RUNAPP python "$script" "$@"
-    exit 0
-fi
-
-
-
 # get the directory name where to store the pid of the running
 # Freevo process
 if [ -w /var/run ] ; then
@@ -139,6 +122,41 @@ if [ -w /var/run ] ; then
 else
     PID_DIR=/tmp
 fi
+
+# option to call a helper script
+# Either this script is called with the name of the helper (as $0) or
+# the first parameter is the helper name. In both cases start the helper
+# (with runapp if present)
+if [ `basename $0` = "freevo" ]; then
+    name=$1
+    script="$FREEVO_HELPERS/$1.py"
+    if [ -e "$script" ]; then
+	shift
+    fi
+else
+    name=$0
+    script="$FREEVO_HELPERS/$0.py"
+fi
+
+if [ -e "$script" ]; then
+    PID_FILE="$PID_DIR/freevo-$name.pid"
+    if [ "$1" = "start" ]; then
+	$RUNAPP python "$script" &
+	echo $! > $PID_FILE
+	disown
+    elif [ "$1" = "stop" ]; then
+	if [ -e $PIDFILE ]; then
+	    kill -KILL `cat $PID_FILE` > /dev/null 2>&1
+	    rm $PID_FILE > /dev/null 2>&1
+	else
+	    echo $name not running
+	fi
+    else
+	$RUNAPP python "$script" "$@"
+    fi
+    exit 0
+fi
+
 
 # Help
 if [ "$1" = "--help" -o "$1" = "-" ] ; then
