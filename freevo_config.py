@@ -190,7 +190,8 @@ LOCAL_CONF_CHANGES = [
     (5.01,
      '''Add AUDIO_SHOW_VIDEOFILES to enable video files in the audio menu'''),
     (5.02,
-     '''Add XINE_ARGS_DEF to set xine arguments''') ]
+     '''Add XINE_ARGS_DEF to set xine arguments and OSD_BUSYICON_TIMER to show
+     a busy icon when the menu takes too much time building''') ]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -729,9 +730,14 @@ OSD_DEFAULT_FONTSIZE = 18
 # All alternate fonts must be in './share/fonts/'
 OSD_FONT_ALIASES = { 'arial_bold.ttf' : 'VeraBd.ttf' }
 
+# number seconds until the busy icon is shown in the
+# menu. Set it to 0 to disable this
+OSD_BUSYICON_TIMER = 0.7
+
 OSD_SDL_EXEC_AFTER_STARTUP = ""
 OSD_OVERSCAN_X = 0
 OSD_OVERSCAN_Y = 0
+
 
 # Exec a script after the osd startup. Matrox G400 users who wants to
 # use the framebuffer and have a PAL tv may set this to

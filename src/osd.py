@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.109  2003/12/07 12:26:55  dischi
+# add osd busy icon (work in progress)
+#
 # Revision 1.108  2003/12/01 19:19:37  dischi
 # first grep the keymap
 #
@@ -240,7 +243,60 @@ class OSDFont:
         return f.font
 
         
+
+import threading
+
+class BusyIcon(threading.Thread):
+    def __init__(self, osd):
+        threading.Thread.__init__(self)
+        self.setDaemon(1)
+        self.mode_flag   = threading.Event()
+        threading.Thread.start(self)
+        self.timer  = 0
+        self.osd    = osd
+        self.active = False
+        self.icon   = os.path.join(config.SHARE_DIR, 'icons/popup/popup_wait.png')
+
+    def wait(self, timer):
+        self.active = True
+        self.timer  = timer
+        self.mode_flag.set()
+        
+    def stop(self):
+        self.active = False
     
+    def run(self):
+        while (1):
+            self.mode_flag.clear()
+            self.mode_flag.wait()
+            while self.active and self.timer > 0.01:
+                self.timer -= 0.01
+                time.sleep(0.01)
+            if self.active:
+                image  = self.osd.loadbitmap(self.icon)
+                width  = image.get_width()
+                height = image.get_height()
+                x = self.osd.width  - config.OSD_OVERSCAN_X - 20 - width
+                y = self.osd.height - config.OSD_OVERSCAN_Y - 20 - height
+
+                # XXX what happens if this code pops in just when the
+                # XXX skin code is drawing? A mess I guess.
+                # XXX we need to lock the whole osd!
+                
+                # backup the screen
+                screen = pygame.Surface((width,height))
+                screen.blit(self.osd.screen, (0,0), (x,y,width,height))
+
+                # draw the icon
+                self.osd.drawbitmap(image, x, y)
+                self.osd.update(stop_busyicon=False)
+
+                # restore the screen
+                self.osd.screen.blit(screen, (x,y))
+                
+            while self.active:
+                time.sleep(0.01)
+
 
 class OSD:
 
@@ -304,6 +360,8 @@ class OSD:
                 except:
                     pass
             
+        self.busyicon = BusyIcon(self)
+
         # Initialize the PyGame modules.
         pygame.display.init()
         pygame.font.init()
@@ -355,6 +413,7 @@ class OSD:
         self._screenshotnum = 1
         self.active = True
 
+        
     def focused_app(self):
         if len(self.app_list):
             return self.app_list[-1]
@@ -957,11 +1016,13 @@ class OSD:
 
 
     def update(self, rect=None, blend_surface=None, blend_speed=0,
-               blend_steps=0, blend_time=None):
+               blend_steps=0, blend_time=None, stop_busyicon=True):
         """
         update the screen
         """
-
+        if self.busyicon.active and stop_busyicon:
+            self.busyicon.stop()
+            
         # XXX New style blending
         if blend_surface and blend_steps:
             blend_last_screen = self.screen.convert()

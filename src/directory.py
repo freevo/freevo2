@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.72  2003/12/07 12:26:55  dischi
+# add osd busy icon (work in progress)
+#
 # Revision 1.71  2003/12/06 13:44:11  dischi
 # move more info to the Mimetype
 #
@@ -95,6 +98,7 @@ import util
 import menu
 import skin
 import plugin
+import osd
 
 from item import Item
 from playlist import Playlist, RandomPlaylist
@@ -520,7 +524,11 @@ class DirItem(Playlist):
         if self.display_type == 'tv':
             display_type = 'video'
 
+        if config.OSD_BUSYICON_TIMER:
+            osd.get_singleton().busyicon.wait(config.OSD_BUSYICON_TIMER)
+        
         files = vfs.listdir(self.dir)
+
         self.all_files = copy.copy(files)
 
         mmpython_dir = self.dir
@@ -547,6 +555,12 @@ class DirItem(Playlist):
                                   full=num_changes)
             pop.show()
             callback=pop.tick
+
+
+        elif len(files) > 200 and config.OSD_BUSYICON_TIMER:
+            # many files, just show the busy icon now
+            osd.get_singleton().busyicon.wait(0)
+        
 
         if num_changes > 0:
             try:
