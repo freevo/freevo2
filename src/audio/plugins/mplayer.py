@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/08/17 17:16:44  dischi
+# cache less for urls to save time
+#
 # Revision 1.10  2003/06/29 02:36:01  rshortt
 # Now works with mplayer's new audio (string) format.  The way I did this
 # seems a bit repetitive so feel free to make it better.
@@ -164,7 +167,10 @@ class MPlayer:
         extra_opts = item.mplayer_options
         command = '%s -vo null -ao %s %s %s "%s"' % (mpl, config.MPLAYER_AO_DEV,
                                                      demux, extra_opts, filename)
-                
+
+        if network_play:
+            command = '%s -cache 100' % command
+            
         if plugin.getbyname('MIXER'):
             plugin.getbyname('MIXER').reset()
 
