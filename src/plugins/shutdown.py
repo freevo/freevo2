@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/06/09 19:42:08  dischi
+# fix crash
+#
 # Revision 1.5  2004/06/06 14:16:08  dischi
 # small fix for confirm and enable shutdown sys
 #
@@ -160,7 +163,7 @@ class ShutdownItem(Item):
                           (self.shutdown_system, _('Shutdown system') ),
                           (self.shutdown_system_restart, _('Restart system') ) ]
         if config.ENABLE_SHUTDOWN_SYS:
-            items = [ items[1], items[0], item[2] ]
+            items = [ items[1], items[0], items[2] ]
 
         return items
 
