@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/02/17 18:21:57  dischi
+# Fixed bug that UP/DOWN are now working for extended menus with one row
+#
 # Revision 1.12  2003/02/12 10:38:51  dischi
 # Added a patch to make the current menu system work with the new
 # main1_image.py to have an extended menu for images
@@ -280,7 +283,10 @@ class MenuWidget:
                 menu.selected = self.menu_items[-1]
         else:
             if menu.page_start + self.cols * self.rows < len(menu.choices):
-                menu.page_start += self.cols * (self.rows-1)
+                if self.rows == 1:
+                    menu.page_start += self.cols
+                else:
+                    menu.page_start += self.cols * (self.rows-1)
                 self.init_page()
             
         if arg != 'no_refresh':
@@ -326,7 +332,10 @@ class MenuWidget:
             curr_selected = self.all_items.index(menu.selected)
             if curr_selected-self.cols < 0 and self.cols > 1:
                 self.goto_prev_page(arg='no_refresh')
-                curr_selected = self.all_items.index(menu.selected)
+                try:
+                    curr_selected = self.all_items.index(menu.selected)
+                except ValueError:
+                    curr_selected += self.cols
             curr_selected = max(curr_selected-self.cols, 0)
             menu.selected = self.all_items[curr_selected]
             self.refresh()
@@ -335,7 +344,10 @@ class MenuWidget:
             curr_selected = self.all_items.index(menu.selected)
             if curr_selected+self.cols > len(self.all_items)-1 and self.cols > 1:
                 self.goto_next_page(arg='no_refresh')
-                curr_selected = self.all_items.index(menu.selected)
+                try:
+                    curr_selected = self.all_items.index(menu.selected)
+                except ValueError:
+                    curr_selected -= self.cols
             curr_selected = min(curr_selected+self.cols, len(self.all_items)-1)
             menu.selected = self.all_items[curr_selected]
             self.refresh()
