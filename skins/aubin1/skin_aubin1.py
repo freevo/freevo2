@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/10/08 15:25:29  outlyer
+# Moved the logo to the upper left corner; looks cleaner and doesn't
+# interfere with the menus
+#
 # Revision 1.1  2002/10/07 04:39:44  outlyer
 # Continuing to fix the stupid mistake I made.
 #
@@ -543,7 +547,7 @@ class Skin:
 
             self.DrawText(menu.heading, val.title)
             
-	osd.drawbitmap('skins/images/logo.png',550,30)
+	osd.drawbitmap('skins/images/logo.png',10,10)
         # Draw the menu choices for the main selection
         y0 = val.items.y
 
