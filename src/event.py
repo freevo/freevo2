@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/09/25 14:07:02  outlyer
+# My autocolor plugin which allows me to run a system command before plaaying
+# video. It doesn't have to be a color command, you can change mixer settings
+# or anything else you can do in a shell script.
+#
 # Revision 1.22  2003/09/21 13:17:20  dischi
 # add OSD_MESSAGE and DIRECTORY_CHANGE_DISPLAY_TYPE (not on any key)
 #
@@ -490,3 +495,5 @@ PLAY_START      = Event('PLAY_START')
 
 OSD_MESSAGE     = Event('OSD_MESSAGE')
 
+VIDEO_START     = Event('VIDEO_START')
+VIDEO_END       = Event('VIDEO_END')

@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/09/25 14:07:02  outlyer
+# My autocolor plugin which allows me to run a system command before plaaying
+# video. It doesn't have to be a color command, you can change mixer settings
+# or anything else you can do in a shell script.
+#
 # Revision 1.19  2003/09/25 09:39:27  dischi
 # fix childapp killing problem
 #
@@ -363,7 +368,10 @@ class ChildThread(threading.Thread):
                 
                 if hasattr(self.app, 'item'):
                     rc.post_event(Event(PLAY_START, arg=self.app.item))
-                
+               
+                if self.stop_osd:       # Implies a video file
+                    rc.post_event(Event(VIDEO_START))
+
                 while self.mode == 'play' and self.app.isAlive():
                     time.sleep(0.1)
 
@@ -376,6 +384,9 @@ class ChildThread(threading.Thread):
                 # Ok, we can use the OSD again.
                 if self.stop_osd and config.STOP_OSD_WHEN_PLAYING:
                     osd.restart()
+
+                if self.stop_osd:       # Implies a video file
+                    rc.post_event(Event(VIDEO_END))
 
                 # send mode to idle
                 self.mode = 'idle'
