@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/11/19 05:41:30  krister
+# Spelling fixes, usage note
+#
 # Revision 1.2  2003/11/04 17:57:50  dischi
 # add doc
 #
@@ -101,13 +104,13 @@ class OSDbmovl(OSD):
 
 class PluginInterface(plugin.Plugin):
     """
-    bmovl plugin fro mplayer
+    bmovl plugin for mplayer
 
     This plugin makes the OSD look much better in mplayer. It uses bmovl to show
     images from Freevo inside mplayer.
 
     This plugin is in an early development and may crash mplayer.
-    To activate, you need to create a fifo /tmp/bmovl.
+    To activate, you need to create a fifo /tmp/bmovl  (mkfifo /tmp/bmovl).
     """
 
     def __init__(self):
