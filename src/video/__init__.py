@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/10/03 17:49:23  dischi
+# add support for directory with one movie
+#
 # Revision 1.9  2003/08/30 12:21:13  dischi
 # small changes for the changed xml_parser
 #
@@ -52,6 +55,19 @@ def cwd(parent, files):
     return a list of items based on the files
     """
     items = []
+
+    for file in files:
+        if (os.path.isdir(file)):
+            if (os.path.basename(file)[0] == '.'):
+                files.remove(file)
+                continue
+            f = os.path.join(file, os.path.basename(file) + '.' +  \
+                             config.SUFFIX_VIDEO_DEF_FILES[0])
+            if (os.path.isfile(f)):
+                x = xml_parser.parseMovieFile(f, parent, files)
+                if x:
+                    files.remove(file)
+                    items += x
 
     for file in util.find_matches(files, config.SUFFIX_VIDEO_DEF_FILES):
         x = xml_parser.parseMovieFile(file, parent, files)
