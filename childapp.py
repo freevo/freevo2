@@ -16,6 +16,7 @@ import signal
 
 DEBUG = 0
 
+
 class ChildApp:
 
     def __init__(self, app):
@@ -33,7 +34,9 @@ class ChildApp:
 
 
         if DEBUG:
-            time.sleep(0.5)
+            print 'self.t1.isAlive()=%s, self.t2.isAlive()=%s' % (self.t1.isAlive(),
+                                                                  self.t2.isAlive())
+            time.sleep(0.1)
             print 'ChildApp.__init__(), pid=%s, app=%s, poll=%s' % (self.child.pid, app, self.child.poll())
             
 
@@ -48,11 +51,13 @@ class ChildApp:
 
     # Override this method to receive stdout from the child app
     def stdout_cb(self, str):
+        #print str.replace('\n', '<CR>').replace('\r', '<LF>')
         pass
 
 
     # Override this method to receive stderr from the child app
     def stderr_cb(self, str):
+        #print str.replace('\n', '<CR>').replace('\r', '<LF>')
         pass
 
 
@@ -61,13 +66,24 @@ class ChildApp:
 
     
     def kill(self, signal=9):
-            os.kill(self.child.pid, signal)
+
+        try:
+            if signal:
+                if DEBUG: print 'childapp: killing pid %s' % self.child.pid
+                os.kill(self.child.pid, signal)
             
             # Wait for the child to exit
             try:
+                if DEBUG: print 'childapp: Before wait(%s)' % self.child.pid
                 self.child.wait()
+                if DEBUG: print 'childapp: After wait()'
             except:
                 pass
+
+        except OSError:
+            # Already dead
+            pass
+
         
 class Read_Thread(threading.Thread):
 
@@ -94,7 +110,7 @@ class Read_Thread(threading.Thread):
             data = self.fp.readline(300)
             if not data:
                 if DEBUG:
-                    print '%s: No data, stopping!' % self.name
+                    print '%s: No data, stopping (pid %s)!' % (self.name, os.getpid())
                 break
             else:
                 data = data.replace('\r', '\n')
