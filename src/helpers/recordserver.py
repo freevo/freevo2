@@ -6,6 +6,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2004/06/23 19:07:05  outlyer
+# The snapshot in the event doesn't work. I've tried it numerous times, and it
+# is being killed before completing.
+#
+# Did no one else actually try this change?
+#
 # Revision 1.44  2004/06/22 01:15:15  rshortt
 # Make checkToRecord() void, start the recording plugin from there, call it
 # from multiple places.
@@ -896,7 +902,7 @@ class RecordServer(xmlrpc.XMLRPC):
                 print 'Handling event RECORD_STOP'
                 os.remove(tv_lock_file)
                 prog = event.arg
-                snapshot(prog.filename)
+                #snapshot(prog.filename)
                 if config.VCR_POST_REC:
                     util.popen3.Popen3(config.VCR_POST_REC)
 

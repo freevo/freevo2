@@ -10,6 +10,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2004/06/23 19:07:05  outlyer
+# The snapshot in the event doesn't work. I've tried it numerous times, and it
+# is being killed before completing.
+#
+# Did no one else actually try this change?
+#
 # Revision 1.24  2004/06/22 01:05:51  rshortt
 # Get the filename from tv_util.getProgFilename().
 #
@@ -207,6 +213,9 @@ class Record_Thread(threading.Thread):
                 v = None
 
                 self.mode = 'idle'
+
+                from  util.videothumb import snapshot
+                snapshot(self.prog.filename)
 
                 rc.post_event(Event('RECORD_STOP', arg=self.prog))
                 if DEBUG: print('Record_Thread::run: finished recording')
