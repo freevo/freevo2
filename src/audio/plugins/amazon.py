@@ -63,11 +63,15 @@ __license__ = "Python"
 
 from xml.dom import minidom
 import os, sys, getopt, cgi, urllib
-try:
-    import timeoutsocket # http://www.timo-tasi.org/python/timeoutsocket.py
-    timeoutsocket.setDefaultSocketTimeout(10)
-except ImportError:
-    pass
+if float(sys.version[0:3]) >= 2.3:
+    import socket
+    socket.setdefaulttimeout(10)
+else:
+    try:
+        import timeoutsocket # http://www.timo-tasi.org/python/timeoutsocket.py
+        timeoutsocket.setDefaultSocketTimeout(10)
+    except ImportError:
+        pass
 
 LICENSE_KEY = None
 HTTP_PROXY = None

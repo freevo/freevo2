@@ -49,6 +49,17 @@ Place, Suite 330, Boston, MA 02111-1307, USA.
 
 Please e-mail bugs to: %s""" % (__version__, __author__)
 
+import sys
+if float(sys.version[0:3]) >= 2.3:
+    import socket
+    socket.setdefaulttimeout(10)
+else:
+    try:
+        import timeoutsocket # http://www.timo-tasi.org/python/timeoutsocket.py
+        timeoutsocket.setDefaultSocketTimeout(10)
+    except ImportError:
+        pass
+
 
 #
 # What a boring list to type !
