@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/02/06 09:54:01  krister
+# Changed the runtime handling to use runapp to start programs with the supplied dlls
+#
 # Revision 1.20  2003/02/06 09:52:25  krister
 # Changed the runtime handling to use runapp to start programs with the supplied dlls
 #
@@ -69,8 +72,8 @@ CACHEDIR = /var/cache/freevo
 
 all: subdirs runapp freevo_xwin python_compile
 
-python_compile:
-	./startprog python setup_build.py --compile=$(OPTIMIZE),$(PREFIX)
+python_compile: runapp
+	./runapp python setup_build.py --compile=$(OPTIMIZE),$(PREFIX)
 
 runapp: runapp.c
 	$(CC) $(CFLAGS) -static -o runapp runapp.c -DRUNAPP_LOGDIR=\"$(LOGDIR)\"
