@@ -138,7 +138,6 @@ def main_func():
 # Main function
 #
 if __name__ == "__main__":
-    print os.getcwd()
     try:
         main_func()
     except:
