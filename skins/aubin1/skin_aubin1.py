@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/03/10 07:12:45  outlyer
+# Fixed the missing watermarks on the main menu. and other minor changes.
+#
 # Revision 1.12  2003/03/07 17:38:16  outlyer
 # Whoops. Fixed a nasty crash about a missing file, and changed the ID3
 # display in the 'cover' view to be 'mm:ss' instead of 'mm:s' like it was.
@@ -445,6 +448,7 @@ class Skin:
         menu = menuw.menustack[-1]
         artist,album,year,length = None, None, None, None
 
+
         i_val = None
         i_file = None
             
@@ -452,7 +456,6 @@ class Skin:
         # display the image and store the x0 position of the image
         for item in menuw.menu_items:
             image = item.image
-
             if image:
                 type = item.type
                 if hasattr(item, 'handle_type') and item.handle_type:
@@ -523,7 +526,8 @@ class Skin:
                         i_val = val.cover_music
 
                     try:
-                        if item.playlist:
+                        #if item.playlist:
+                        if 1:
                             length = 0
                             for bob in item.playlist:
                                 if artist != bob.artist:
@@ -536,6 +540,12 @@ class Skin:
                     except:
                         continue
 
+		elif type == 'main':
+		    if menu.selected == item:
+			i_file = image
+			i_val = copy.deepcopy(val.cover_image)
+			i_val.x = 0
+			i_val.y = 0
         return i_file, max(0, image_x-val.items.default.selection.spacing), i_val, artist, album, year, length
 
 
