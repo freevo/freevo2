@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/02/04 13:11:00  dischi
+# remove the AC3 config stuff and reformat some lines to 80 chars/line
+#
 # Revision 1.15  2003/01/29 17:20:25  outlyer
 # According to the mplayer documentation, -forceidx is required for RealPlayer
 # files...
@@ -212,16 +215,10 @@ class MPlayer:
        
 
         # Build the MPlayer command
-        mpl = '--prio=%s %s %s -slave' % (config.MPLAYER_NICE,
-                                          config.MPLAYER_CMD,
-                                          config.MPLAYER_ARGS_DEF)
-
-        # XXX find a way to enable this for AVIs with ac3, too
-        if (mode == 'dvdnav' or mode == 'dvd' or os.path.splitext(filename)[1] == '.vob')\
-           and config.MPLAYER_AO_HWAC3_DEV:
-            mpl += ' -ao %s -ac hwac3' % config.MPLAYER_AO_HWAC3_DEV
-        else:
-            mpl += ' -ao %s' % config.MPLAYER_AO_DEV
+        mpl = '--prio=%s %s %s -slave -ao %s' % (config.MPLAYER_NICE,
+                                                 config.MPLAYER_CMD,
+                                                 config.MPLAYER_ARGS_DEF,
+                                                 config.MPLAYER_AO_DEV)
 
 	# Forceidx is required for RealAudio/Video files
 	if (os.path.splitext(filename)[1] == '.rm'):
@@ -233,12 +230,15 @@ class MPlayer:
             default_args = config.MPLAYER_ARGS_DVDNAV
             default_args += ' -alang %s' % config.DVD_LANG_PREF
         elif mode == 'vcd':
-            default_args = config.MPLAYER_ARGS_VCD % filename  # Filename is VCD chapter
+            # Filename is VCD chapter
+            default_args = config.MPLAYER_ARGS_VCD % filename  
         elif mode == 'dvd':
-            default_args = config.MPLAYER_ARGS_DVD % filename  # Filename is DVD title
+            # Filename is DVD title
+            default_args = config.MPLAYER_ARGS_DVD % filename  
             default_args += ' -alang %s' % config.DVD_LANG_PREF
             if config.DVD_SUBTITLE_PREF:
-                # Only use if defined since it will always turn on subtitles if defined
+                # Only use if defined since it will always turn on subtitles
+                # if defined
                 default_args += ' -slang %s' % config.DVD_SUBTITLE_PREF
         else:
             print "Don't know what do play!"
@@ -263,7 +263,8 @@ class MPlayer:
                 if DEBUG: print 'Got freevo.wid'
                 try:
                     wid = int(open('/tmp/freevo.wid').read().strip(), 16)
-                    mpl += ' -wid 0x%08x -xy %s -monitoraspect 4:3' % (wid, osd.width)
+                    mpl += ' -wid 0x%08x -xy %s -monitoraspect 4:3' % \
+                           (wid, osd.width)
                     if DEBUG: print 'Got WID = 0x%08x' % wid
                 except:
                     pass
@@ -513,7 +514,8 @@ class MPlayer_Thread(threading.Thread):
 
                 # The DXR3 device cannot be shared between our SDL session
                 # and MPlayer.
-                if (osd.sdl_driver == 'dxr3' or config.CONF.display == 'dfbmga'):
+                if (osd.sdl_driver == 'dxr3' or \
+                    config.CONF.display == 'dfbmga'):
                     print "Stopping Display for Video Playback"
                     osd.stopdisplay()
                 
