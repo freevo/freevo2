@@ -9,6 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/03/06 21:45:24  dischi
+# Added mp3 player view area. You can set the infos you want to see in the
+# skin. @VAR@ means insert a variable from the item object here, \t means
+# next col (currently only two cols are supported). I don't like the
+# delimiter @@ and \t, but I don't have a better idea (&var; doesn't work
+# because pyXML want's to replace it)
+#
 # Revision 1.1  2003/03/05 21:55:21  dischi
 # empty info area
 #
@@ -38,6 +45,8 @@
 from area import Skin_Area
 from skin_utils import *
 
+import re
+
 TRUE  = 1
 FALSE = 0
 
@@ -48,18 +57,109 @@ class Info_Area(Skin_Area):
 
     def __init__(self, parent, screen):
         Skin_Area.__init__(self, 'info', screen)
+        self.re_space    = re.compile('^\t *(.*)')
+        self.re_var      = re.compile('@[a-z_]*@')
+        self.re_table    = re.compile('^(.*)\\\\t(.*)')
 
+        self.last_item   = None
+        self.auto_update = []
+        self.table       = []
 
     def update_content_needed(self):
         """
         check if the content needs an update
         """
-        return FALSE
+        return self.auto_update or (self.last_item != self.item)
         
 
     def update_content(self):
         """
         update the info area
         """
-        pass
-    
+        settings  = self.settings
+        layout    = self.layout
+        area      = self.area_val
+        content   = self.calc_geometry(layout.content, copy_object=TRUE)
+        item      = self.item
+
+        if not settings.font.has_key(content.font):
+            print '*** font <%s> not found' % content.font
+            return
+
+        font = settings.font[content.font]
+
+        table = [ [], [] ]
+        self.auto_update = []
+
+        for line in content.cdata.encode('Latin-1').split('\n'):
+            m = self.re_space.match(line)
+            if m:
+                line = m.groups(1)[0]
+
+            has_vars       = FALSE 
+            autoupdate     = ''
+            vars_exists    = FALSE
+
+            for m in self.re_var.findall(line):
+                has_vars = TRUE
+                repl = ''
+                if hasattr(item, m[1:-1]):
+                    if m[1:-1] == 'year':
+                        if not item.year:
+                            repl = ''
+                        else:
+                            repl = str(item.year)
+                    elif m[1:-1] == 'length':
+                        if not item.length:
+                            repl = ''
+                        else:
+                            repl = '%d:%02d' % (int(item.length / 60),
+                                                int(item.length % 60))
+                    elif m[1:-1] == 'elapsed':
+                        autoupdate = 'elapsed'
+                        repl = '%d:%02d' % (int(item.elapsed / 60),
+                                            int(item.elapsed % 60))
+                    else:
+                        repl = str(eval('item.%s' % m[1:-1]))
+
+                if repl:
+                    line = re.sub(m, repl, line)
+                    vars_exists = TRUE
+                else:
+                    line = re.sub(m, '', line)
+
+            if ((not has_vars) or vars_exists) and (line or table[0]):
+                m = self.re_table.match(line)
+                if m:
+                    table[0] += [ m.groups(1)[0] ]
+                    table[1] += [ m.groups(2)[1] ]
+                    if autoupdate:
+                        self.auto_update += [ ( autoupdate, len(table[0]) - 1) ]
+                else:
+                    table[0] += [ line ]
+                    table[1] += [ ' ' ]
+
+        x0 = content.x
+
+        y_spacing = osd.stringsize('Arj', font=font.name, ptsize=font.size)[1] * 1.1
+            
+        for col in table:
+            w = 0
+            txt = ''
+
+            for row in col:
+                w = max(w, osd.stringsize(row, font=font.name, ptsize=font.size)[0])
+                if x0 + w > content.x + content.width:
+                    w = content.x + content.width - x0
+
+            y0 = content.y
+            for row in col:
+                if row:
+                    self.write_text(row, font, content, x=x0, y=y0, width= w + 10,
+                                    height=-1, mode='hard')
+                y0 += y_spacing
+                
+            x0 += w + content.spacing
+
+        self.last_item = self.item
+        self.table = table

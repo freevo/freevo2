@@ -167,7 +167,16 @@
       <background>
 	<rectangle size="0" bgcolor="0x80000000" radius="10" width="max"/>
       </background>
-      <content x="50" type="text" spacing="10"/>
+      <content x="55" y="10" height="max-20" width="max-75" type="text"
+	spacing="10" font="white">
+	Title:   \t@title@
+	Artist:  \t@artist@
+	Album:   \t@album@ (@year@)
+	Track:   \t@track@
+
+	Length:  \t@length@
+	Elapsed: \t@elapsed@
+      </content>
     </layout>
 
   </skin>
