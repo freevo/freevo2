@@ -93,7 +93,7 @@ class Channel:
         self.__epg     = epg
         self.name      = display_name
         self.title     = display_name
-        if notifier:
+        if notifier and notifier.addTimer:
             # add random timer 100-500ms to fill the
             # database with init values
             notifier.addTimer(random.randint(1, 5) * 100,
