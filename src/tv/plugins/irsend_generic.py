@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/11/25 16:32:33  rshortt
+# Make plugin_external_tuner work again.
+#
 # Revision 1.1  2003/11/23 20:32:05  rshortt
 # This is a plugin for sending IR commands to an external tuner.  You can
 # specify your irsend command when you plugin.activate.
@@ -54,7 +57,7 @@ class PluginInterface(plugin.Plugin):
     to tell an external tuner to change the channel.
     Example usage (local_conf.py):
 
-    plugin_external_tuner = plugin.activate('tv.irsend_echostar', 
+    plugin_external_tuner = plugin.activate('tv.irsend_generic', 
                             args=('/usr/bin/irsend SEND_ONCE <remote_name>', ))
 
     Where <remote_name> is the name of the remote you are using to send codes

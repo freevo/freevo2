@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/11/25 16:32:33  rshortt
+# Make plugin_external_tuner work again.
+#
 # Revision 1.9  2003/11/25 09:34:07  krister
 # Changed the frequency returned to be kHz instead of a scaled value
 #
@@ -103,16 +106,9 @@ DEBUG = config.DEBUG
 class FreevoChannels:
 
     def __init__(self):
-        # XXX: soon make TV_CHANNELS a list of real objects instead of a 
-        #      list of lists.
-        # self.TV_CHANNELS = the lists of objects or something
         self.chan_index = 0
 
-        # XXX: Make sure plugin won't allow you to init any plugin
-        #      more than once.  Also it might be better to move
-        #      this init line into the recordserver since in the TV
-        #      interface it will already be initialized in main.
-        if 0: # XXX Crashes!
+        if config.plugin_external_tuner: 
             plugin.init_special_plugin(config.plugin_external_tuner)
 
 
@@ -187,7 +183,6 @@ class FreevoChannels:
                 print 'USING CUSTOM FREQUENCY: chan="%s", freq="%s"' % \
                       (chan, freq)
         else:
-            # freq = self.chanlist[str(chan)]
             freq = tv.freq.CHANLIST[vg.tuner_chanlist][str(chan)]
             if DEBUG:
                 print 'USING STANDARD FREQUENCY: chan="%s", freq="%s"' % \

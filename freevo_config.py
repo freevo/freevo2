@@ -371,6 +371,13 @@ plugin.activate('audio.detach', level=20)
 # plugin.activate('tv.tvtime')
 plugin.activate('tv.mplayer')
 
+# control an external tv tuner using irsend or another command
+# to use this you must reassign plugin_external_tuner in local_conf.py:
+# plugin_external_tuner = plugin.activate('tv.irsend_generic',
+#                                         args=('...', '...', ))
+# Please see each irsend plugin for individual arguments.
+plugin_external_tuner = 0
+
 # support for settings bookmarks (key RECORD) while playing. Also
 # auto bookmarking when playback is stopped
 plugin.activate('video.bookmarker', level=0)

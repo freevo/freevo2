@@ -104,6 +104,12 @@ HIDE_UNUSABLE_DISCS = 1
 # For joystick support:
 # plugin.activate('joy')
 
+# control an external tv tuner using irsend or another command
+# to use this you must reassign plugin_external_tuner in local_conf.py:
+# plugin_external_tuner = plugin.activate('tv.irsend_generic',
+#                                         args=('...', '...', ))
+# Please see each irsend plugin for individual arguments.
+
 # Idlebar plugin:
 
 # plugin.activate('idlebar')
