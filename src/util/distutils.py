@@ -67,6 +67,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/11/10 18:46:09  dischi
+# bugfix for freevo.pot
+#
 # Revision 1.10  2003/11/05 19:19:34  dischi
 # Oops
 #
@@ -219,7 +222,7 @@ def i18n(application):
 
         # for freevo main package: restore the skin settings
         if application == 'freevo':
-            f = open('freevo.pot', 'a')
+            f = open('i18n/freevo.pot', 'a')
             for line in fxd_strings:
                 f.write(line)
             f.close()
