@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/01/09 19:35:49  outlyer
+# Inherit DEBUG parameter from config, move some prints into DEBUG
+#
 # Revision 1.16  2003/11/06 19:55:28  mikeruelle
 # remove hard links so we can run when proxied
 #
@@ -64,7 +67,7 @@ import config
 from twisted.web.woven import page
 from twisted.web.resource import Resource
 
-DEBUG = 1
+DEBUG = config.DEBUG
 TRUE = 1
 FALSE = 0
 

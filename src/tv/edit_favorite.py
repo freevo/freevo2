@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/01/09 19:35:49  outlyer
+# Inherit DEBUG parameter from config, move some prints into DEBUG
+#
 # Revision 1.6  2004/01/09 02:10:00  rshortt
 # Patch from Matthieu Weber to revive add/edit favorites support from the
 # TV interface.
@@ -67,7 +70,7 @@ from gui.OptionBox      import *
 from gui.LetterBoxGroup import *
 from gui.ConfirmBox     import ConfirmBox
 
-DEBUG = 1
+DEBUG = config.DEBUG
 TRUE = 1
 FALSE = 0
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/01/09 19:35:49  outlyer
+# Inherit DEBUG parameter from config, move some prints into DEBUG
+#
 # Revision 1.7  2004/01/09 02:10:00  rshortt
 # Patch from Matthieu Weber to revive add/edit favorites support from the
 # TV interface.
@@ -53,7 +56,7 @@ import util.tv_util as tv_util
 TYPES_VERSION = 2
 
 # Set to 1 for debug output
-DEBUG = 1
+DEBUG = config.DEBUG
 
 TRUE = 1
 FALSE = 0
@@ -73,13 +76,13 @@ class ScheduledRecordings:
             # key = rec_interface.getKey(prog)
             pass
 
-        print 'addProgram: key is "%s"' % key
+        if DEBUG: print 'addProgram: key is "%s"' % key
         if not self.programList.has_key(key):
-            print 'addProgram: actually adding "%s"' % prog
+            if DEBUG: print 'addProgram: actually adding "%s"' % prog
             self.programList[key] = prog
         else:
-            print 'We already know about this recording.'
-        print 'addProgram: len is "%s"' % len(self.programList)
+            if DEBUG: print 'We already know about this recording.'
+        if DEBUG: print 'addProgram: len is "%s"' % len(self.programList)
 
 
     def removeProgram(self, prog, key=None):
@@ -89,9 +92,9 @@ class ScheduledRecordings:
 
         if self.programList.has_key(key):
             del self.programList[key]
-            print 'removed recording: %s' % prog
+            if DEBUG: print 'removed recording: %s' % prog
         else:
-            print 'We do not know about this recording.'
+            if DEBUG: print 'We do not know about this recording.'
 
 
     def getProgramList(self):
@@ -104,18 +107,18 @@ class ScheduledRecordings:
 
     def addFavorite(self, fav):
         if not self.favorites.has_key(fav.name):
-            print 'addFavorites: actually adding "%s"' % fav.name
+            if DEBUG: print 'addFavorites: actually adding "%s"' % fav.name
             self.favorites[fav.name] = fav
         else:
-            print 'We already have a favorite called "%s".' % fav.name
+            if DEBUG: print 'We already have a favorite called "%s".' % fav.name
 
 
     def removeFavorite(self, name):
         if self.favorites.has_key(name):
             del self.favorites[name]
-            print 'removed favorite: %s' % name
+            if DEBUG: print 'removed favorite: %s' % name
         else:
-            print 'We do not have a favorite called "%s".' % name
+            if DEBUG: print 'We do not have a favorite called "%s".' % name
 
 
     def getFavorites(self):

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/01/09 19:35:49  outlyer
+# Inherit DEBUG parameter from config, move some prints into DEBUG
+#
 # Revision 1.1  2003/09/02 22:36:27  mikeruelle
 # commit bart heremans wap recording page
 #
@@ -46,7 +49,7 @@ import config
 
 from twisted.web.resource import Resource
 
-DEBUG = 1
+DEBUG = config.DEBUG
 TRUE = 1
 FALSE = 0
 
