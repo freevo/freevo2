@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2003/08/06 19:39:19  dischi
+# o removed freevo_xwin
+# o remove fbcon/matroxset
+# o replaced all fbcon/mga_* scripts with fbcon/mgafb
+#
 # Revision 1.37  2003/08/04 07:01:26  tcwan
 # Updated spec files and Makefile for 1.3.4.
 #
@@ -114,7 +119,6 @@ XLIBS = -L/usr/X11R6/lib -L/usr/X11/lib -L/usr/lib32 -L/usr/openwin/lib \
         -L/usr/X11R6/lib64 -lX11
 XINC = -I/usr/X11R6/include -I/usr/X11/include -I/usr/openwin/include
 
-SUBDIRS  = fbcon
 OPTIMIZE = 2
 
 PREFIX   = /usr/local/freevo
@@ -122,9 +126,9 @@ LOGDIR   = /var/log/freevo
 CACHEDIR = /var/cache/freevo
 
 
-.PHONY: all subdirs x11 osd_x1 $(SUBDIRS) clean realclean release install cvsup
+.PHONY: all x11 osd_x1 clean realclean release install cvsup
 
-all: subdirs runapp freevo_xwin
+all: runapp
 
 python_compile: runapp
 	./runapp python src/setup_freevo.py --compile=$(OPTIMIZE),$(PREFIX)
@@ -143,15 +147,6 @@ runapp-light: runapp.c
 	$(CC) $(CFLAGS) -o runapp runapp.c -DRUNAPP_LOGDIR=\"$(LOGDIR)\"
 	strip runapp
 
-freevo_xwin: freevo_xwin.c
-	$(CC) $(CFLAGS) -o freevo_xwin freevo_xwin.c $(XINC) $(XLIBS)
-
-subdirs: $(SUBDIRS)
-
-$(SUBDIRS):
-	$(MAKE) -C $@
-
-
 cvsup:
 	cvs update -C -r LATEST_ALPHA
 
@@ -159,8 +154,7 @@ clean:
 	find . -name "*.pyo" -exec rm {} \;
 	find . -name "*.pyc" -exec rm {} \;
 	-rm -f *.o log_main_out trace.txt
-	-rm -f log_main_err log.txt runapp freevo_xwin mplayer_std*.log
-	cd fbcon ; $(MAKE) clean
+	-rm -f log_main_err log.txt runapp
 
 realclean: clean
 	find . -name "*.rej" -exec rm {} \;
@@ -171,7 +165,7 @@ realclean: clean
 # Remove all compiled python files, and other stuff
 distclean:
 	find . -name "*.pyc*" -exec rm -f {} \;
-	$(MAKE) -C fbcon distclean
+
 
 release: clean
 	cd ..; tar czvf freevo-src-`cat freevo/VERSION`-`date +%Y%m%d`.tgz \
