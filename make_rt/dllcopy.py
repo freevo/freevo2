@@ -32,7 +32,7 @@ def query_dlls():
                     print 'Parsing failed on "%s"' % dep
                     sys.exit(1)
                     
-                if dll not in deps:
+                if dll[:5] != '/lib/' and dll not in deps:
                     deps += [dll]
 
                 num_deps += 1
@@ -48,6 +48,7 @@ if __name__ == '__main__':
     deps = query_dlls()
 
     for dep in deps:
+        
         fname = os.path.basename(dep)
         print 'Copying %s' % fname
         os.system('cp %s distfreevo_rt/%s' % (dep, fname))
@@ -57,9 +58,10 @@ if __name__ == '__main__':
     print 'Generating preloads def'
     
     for dep in deps:
-        # ld-linux must not be preloaded
+        # ld-linux must not be preloaded (if present)
         if dep.find('ld-linux') != -1:
             continue
+
         fname = os.path.basename(dep)
         fd.write('freevo_rt/%s ' % fname)
     fd.write('\n')
