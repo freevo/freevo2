@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.124  2004/11/27 19:12:54  dischi
+# turn off logging when started in bg
+#
 # Revision 1.123  2004/11/02 20:17:16  dischi
 # add check if the program is still active
 #
@@ -300,6 +303,11 @@ def start(name, arg, bg, store=1):
                 if store and os.path.isfile(f.name):
                     os.unlink(f.name)
     else:
+        if bg:
+            # close logging fd
+            os.close(2)
+            os.open('/dev/null', os.O_WRONLY)
+            
         os.execvp(arg[0], arg)
 
 
