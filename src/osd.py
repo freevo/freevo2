@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2002/12/12 11:45:02  dischi
+# Moved all icons to skins/icons
+#
 # Revision 1.2  2002/11/26 22:02:10  dischi
 # Added key to enable/disable subtitles. This works only with mplayer pre10
 # (maybe pre9). Keyboard: l (for language) or remote SUBTITLE
@@ -243,7 +246,7 @@ class OSD:
         help += ['h = Help']
         help_str = '    '.join(help)
         pygame.display.set_caption('Freevo' + ' '*7 + help_str)
-        icon = pygame.image.load('icons/freevo_app.png').convert()
+        icon = pygame.image.load('skins/icons/misc/freevo_app.png').convert()
         pygame.display.set_icon(icon)
         
         self.clearscreen(self.COL_BLACK)

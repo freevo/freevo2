@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2002/12/12 11:45:02  dischi
+# Moved all icons to skins/icons
+#
 # Revision 1.5  2002/12/03 20:03:43  dischi
 # Now it's impossible to show the dvd title menu when you are already in this
 # menu. Also dvdnav support is now working (more or less, depends if mplayer
@@ -237,7 +240,8 @@ class VideoItem(Item):
             uid = os.getuid()
 
             # Figure out the number of titles on this disc
-            skin.PopupBox('Scanning disc, be patient...', icon='icons/cdrom_mount.png')
+            skin.PopupBox('Scanning disc, be patient...',
+                          icon='skins/icons/misc/cdrom_mount.png')
             osd.update()
             os.system('rm -f /tmp/mplayer_dvd_%s.log /tmp/mplayer_dvd_done_%s' % (uid, uid))
 
