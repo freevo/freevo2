@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/02/22 07:12:17  gsbarbieri
+# Add more i18n and fix bugs introduced by last i18n changes.
+#
 # Revision 1.11  2004/02/19 04:57:59  gsbarbieri
 # Support Web Interface i18n.
 # To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
@@ -169,11 +172,15 @@ class FavoritesResource(FreevoResource):
         favs.sort(f)
         for fav in favs:
             status = 'favorite'
-
+            if fav.channel == 'ANY':
+                fchan = _('ANY')
+            else:
+                fchan = fav.channel
+                
             fv.tableRowOpen('class="chanrow"')
             fv.tableCell(fav.name, 'class="'+status+'" colspan="1"')
             fv.tableCell(fav.title, 'class="'+status+'" colspan="1"')
-            fv.tableCell(fav.channel, 'class="'+status+'" colspan="1"')
+            fv.tableCell(fchan, 'class="'+status+'" colspan="1"')
 
             if fav.dow != 'ANY':
                 # cell = time.strftime('%b %d %H:%M', time.localtime(fav.start))
@@ -190,22 +197,22 @@ class FavoritesResource(FreevoResource):
             fv.tableCell(cell, 'class="'+status+'" colspan="1"')
 
             # cell = '<input type="hidden" name="action" value="%s">' % action
-            cell = '<a href="edit_favorite.rpy?action=edit&name=%s">Edit</a>, ' % fav.name.replace('&','%26')
-            cell += '<a href="favorites.rpy?action=remove&name=%s">Remove</a>' % fav.name.replace('&','%26')
+            cell = ('<a href="edit_favorite.rpy?action=edit&name=%s">'+_('Edit')+'</a>, ') % fav.name.replace('&','%26')
+            cell += ('<a href="favorites.rpy?action=remove&name=%s">'+_('Remove')+'</a>') % fav.name.replace('&','%26')
             fv.tableCell(cell, 'class="'+status+'" colspan="1"')
 
             cell = ''
 
             if favs.index(fav) != 0:
                 tmp_prio = int(fav.priority) - 1
-                cell += '<a href="favorites.rpy?action=bump&name=%s&priority=-1">'+_('Higher')+'</a>' % fav.name
+                cell += ('<a href="favorites.rpy?action=bump&name=%s&priority=-1">'+_('Higher')+'</a>') % fav.name
 
             if favs.index(fav) != 0 and favs.index(fav) != len(favs)-1:
                 cell += ' | '
 
             if favs.index(fav) != len(favs)-1:
                 tmp_prio = int(fav.priority) + 1
-                cell += '<a href="favorites.rpy?action=bump&name=%s&priority=1">'+_('Lower')+'</a>' % fav.name
+                cell += ('<a href="favorites.rpy?action=bump&name=%s&priority=1">'+_('Lower')+'</a>') % fav.name
 
             fv.tableCell(cell, 'class="'+status+'" colspan="1"')
         
