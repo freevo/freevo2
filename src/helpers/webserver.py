@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/12/18 19:49:48  dischi
+# find the recordserver :)
+#
 # Revision 1.13  2004/12/18 19:05:07  dischi
 # make the webserver work again
 #
@@ -44,6 +47,10 @@ from www.server import Server, RequestHandler
 
 # init notifier
 notifier.init( notifier.GENERIC )
+
+# import recordings to attach to the mbus
+# FIXME: this is bad!
+import tv.recordings
 
 cgi_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../www'))
 htdocs  = [ os.path.join(cgi_dir, 'htdocs'),
