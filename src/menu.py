@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.104  2004/08/23 15:13:30  dischi
+# fade menu in and out
+#
 # Revision 1.103  2004/08/22 20:14:58  dischi
 # remove test code
 #
@@ -246,6 +249,7 @@ class MenuWidget(Application):
         """
         Application.show(self)
         self.refresh(reload=1)
+        self.engine.show()
 
                 
     def hide(self, clear=True):
@@ -253,7 +257,7 @@ class MenuWidget(Application):
         hide the menu
         """
         Application.hide(self)
-        self.engine.clear()
+        self.engine.hide()
             
         
     def delete_menu(self, arg=None, menuw=None, allow_reload=True):
