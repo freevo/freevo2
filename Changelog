@@ -6,15 +6,22 @@ $Id$
 
 Release 1.2.1 (2002-05-XX):
 ---------------------------
-o Changed remote control cursor left/right behavior in menus, making
-  it easier to navigate.
+o Changed the config scripts to look for the file config_freevo.py
+  in /etc/freevo, ~/freevo and the current dir. This makes it easier
+  to use a customized version that is not overwritten by new 
+  releases.
+o Removed fixed paths so that it should be able to run on most Linux systems,
+  independently of where the applications are (/usr/bin, /usr/local/bin, etc).
 o Added a feature to playing movies where a file can be attached to each
   movie containing special arguments to MPlayer, e.g. aspect etc.
   The file is named <filename>.mplayer.
+o Added logging to both stdout and /tmp/freevo.log
 o Added freevo/testfiles, it is now the default in config.py and contains
   some movie/mp3 files for test purposes.
 o Changed movie/music playlists to not repeat after playing all files.
-  This shoyld be configurable when playing in a later version.
+  This should be configurable when playing in a later version.
+o Changed remote control cursor left/right behavior in menus, making
+  it easier to navigate.
 
 
 Release 1.2.0 (2002-05-12):
