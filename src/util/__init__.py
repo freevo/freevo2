@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/02/25 19:50:51  dischi
+# fix unicode problem for utf-8
+#
 # Revision 1.12  2004/02/23 19:39:59  dischi
 # fix vfs problem in mediainfo
 #
@@ -67,8 +70,12 @@ if sys.argv[0].find('setup.py') == -1 and sys.argv[0].find('install.py') == -1:
             try:
                 return unicode(string, encoding)
             except Exception, e:
-                _debug_( "Could not convert %s to unicode using \"%s\" encoding: %s" % \
-                         ( repr(string), encoding, e ))
+                try:
+                    return unicode(string, config.LOCALE)
+                except Exception, e:
+                    print 'Error: Could not convert %s to unicode' % repr(string)
+                    print 'tried encoding %s and %s' % (encoding, config.LOCALE)
+                    print e
         return string
 
     def String(string, encoding=config.encoding):
