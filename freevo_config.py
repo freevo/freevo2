@@ -276,6 +276,9 @@ IMDB_REMOVE_FROM_LABEL = ('season[\._ -][0-9]+', 'disc[\._ -][0-9]+')
 IMDB_REMOVE_FROM_SEARCHSTRING = ('the', 'a')
 
 
+# use mplayer for video playpack
+plugin.activate('video.mplayer')
+
 # use mplayer for audio playpack
 plugin.activate('audio.mplayer')
 
