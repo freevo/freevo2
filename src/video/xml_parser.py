@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/12/07 13:29:49  dischi
+# Make a new database with all movies, even without id and label
+#
 # Revision 1.1  2002/11/24 13:58:45  dischi
 # code cleanup
 #
@@ -170,6 +173,7 @@ def parseMovieFile(file, parent, duplicate_check):
 # hash all XML movie files
 #
 def hash_xml_database():
+    config.MOVIE_INFORMATIONS       = []
     config.MOVIE_INFORMATIONS_ID    = {}
     config.MOVIE_INFORMATIONS_LABEL = []
 
@@ -195,6 +199,7 @@ def hash_xml_database():
     for file in util.recursefolders(config.MOVIE_DATA_DIR,1,'*.xml',1):
         infolist = parseMovieFile(file, os.path.dirname(file),[])
         for info in infolist:
+            config.MOVIE_INFORMATIONS += [ info ]
             if info.rom_id:
                 for i in info.rom_id:
                     if len(i) > 16:

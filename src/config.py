@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/12/07 13:29:49  dischi
+# Make a new database with all movies, even without id and label
+#
 # Revision 1.1  2002/11/24 13:58:44  dischi
 # code cleanup
 #
@@ -50,6 +53,7 @@
 
 
 import sys, os, time, re
+import traceback
 
 # Send debug to stdout as well as to the logfile?
 DEBUG_STDOUT = 1
@@ -229,6 +233,7 @@ REMOVABLE_MEDIA = []
 # and also if the file '/tmp/freevo-rebuild-database' is created.
 #
 
+MOVIE_INFORMATIONS       = []
 MOVIE_INFORMATIONS_ID    = {}
 MOVIE_INFORMATIONS_LABEL = []
 
@@ -238,3 +243,9 @@ MOVIE_INFORMATIONS_LABEL = []
 TV_SHOW_REGEXP_MATCH = re.compile("^.*" + TV_SHOW_REGEXP).match
 TV_SHOW_REGEXP_SPLIT = re.compile("[\.\- ]*" + TV_SHOW_REGEXP + "[\.\- ]*").split
 
+
+#
+# search plugins
+#
+
+FREEVO_PLUGINS = {}
