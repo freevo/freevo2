@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.58  2002/09/04 03:59:11  krister
+# Removed the obsolete ENABLE_TV and ENABLE_IMAGES options, they're in the skin now.
+#
 # Revision 1.57  2002/09/01 18:12:46  dischi
 # mplayer can play movs, too. The current CVS version is very good at
 # it, only one file from my ten I tried is not playable.
@@ -222,10 +225,10 @@ OSD_SKIN = 'skins/main1/skin_main1.py'
 #
 SKIN_XML_FILE = 'skins/xml/type1/%s.xml' % CONF.geometry
 
-ENABLE_TV = 1            # Disable this if you don't have a tv card
+# XXX The options to disable TV and Images have been removed. This must be
+# XXX done in the skin instead (visible="no").
 ENABLE_SHUTDOWN = 1      # Enable main menu choice for Linux shutdown. Exits Freevo.
 ENABLE_SHUTDOWN_SYS = 0  # Performs a whole system shutdown! For standalone boxes.
-ENABLE_IMAGES = 1        # Disable this if you don't want/use the Image Browser
 
 #
 # OSD default font. It is only used for debug/error stuff, not regular   XXX remove
