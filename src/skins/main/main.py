@@ -9,6 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2004/01/13 15:46:19  outlyer
+# Temporary fix for a crash.... probably not the ideal solution, but I don't
+# have the time right now to investigate fully.
+#
+# To reproduce the crash, remove the "hasattr()" line and click 'display'
+# when in any 'feature' menu (TV, Movies, Music, etc.)
+#
 # Revision 1.31  2004/01/10 13:20:52  dischi
 # better skin cache function and set_base_fxd to load a basic skin
 #
@@ -309,15 +316,17 @@ class Skin:
         else:
             settings = self.settings
 
-        # get the correct <menu>
-        if settings.menu.has_key(menu.item_types):
-            area = settings.menu[menu.item_types]
-        else:
-            area = settings.menu['default']
 
-        if self.display_style['menu'] >=  len(area.style):
-            self.display_style['menu'] = 0
-        self.display_style['menu'] = (self.display_style['menu'] + 1) % len(area.style)
+        if hasattr(settings,'menu'):
+            # XXX FIXME
+            if settings.menu.has_key(menu.item_types):
+                area = settings.menu[menu.item_types]
+            else:
+                area = settings.menu['default']
+
+            if self.display_style['menu'] >=  len(area.style):
+                self.display_style['menu'] = 0
+            self.display_style['menu'] = (self.display_style['menu'] + 1) % len(area.style)
         return 1
 
 
