@@ -178,7 +178,8 @@ CONFIG_VERSION = 3.0
 #
 # XXX You must change this to fit your local conditions!
 #
-# TV/VCR_SETTINGS = 'NORM INPUT CHANLIST DEVICE'
+# TV_SETTINGS  = 'NORM INPUT CHANLIST DEVICE'
+# VCR_SETTINGS = 'NORM INPUT CHANLIST DEVICE'
 #
 # NORM: ntsc, pal, secam
 # INPUT: television, composite1
