@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2004/10/09 16:24:00  dischi
+# import Area for external use
+#
 # Revision 1.28  2004/10/05 19:52:11  dischi
 # changes to reflect widget update
 #
@@ -117,6 +120,7 @@ else:
 
 
 from areas import AreaHandler as _AreaHandler
+from areas import Area
 
 def AreaHandler(type, area_list):
     """
