@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/12/29 22:29:25  dischi
+# small bugfix
+#
 # Revision 1.8  2003/12/29 22:08:54  dischi
 # move to new Item attributes
 #
@@ -239,9 +242,9 @@ def parse_movie(fxd, node):
 
     if not item.files:
         item.files = FileInformation()
-    item.files.files = files
-    item.files.fxd   = fxd_file
-    item.files.image = image
+    item.files.files    = files
+    item.files.fxd_file = fxd_file
+    item.files.image    = image
     
     # remove them from the filelist (if given)
     duplicates = fxd.getattr(None, 'duplicate_check', [])
