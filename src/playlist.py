@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2003/10/18 17:56:28  dischi
+# ignore next/prev track request on OSError
+#
 # Revision 1.29  2003/10/18 08:13:35  dischi
 # add recursive _not_ random playlist
 #
@@ -302,7 +305,11 @@ class Playlist(Item):
 
             if pos:
                 if hasattr(self.current_item, 'stop'):
-                    self.current_item.stop()
+                    try:
+                        self.current_item.stop()
+                    except OSError:
+                        _debug_('ignore playlist event', 1)
+                        return True
                 self.current_item = self.playlist[pos]
                 self.play(menuw=menuw, arg='next')
                 return True
@@ -319,7 +326,11 @@ class Playlist(Item):
             pos = self.playlist.index(self.current_item)
             if pos:
                 if hasattr(self.current_item, 'stop'):
-                    self.current_item.stop()
+                    try:
+                        self.current_item.stop()
+                    except OSError:
+                        _debug_('ignore playlist event', 1)
+                        return True
                 pos = (pos-1) % len(self.playlist)
                 self.current_item = self.playlist[pos]
                 self.play(menuw=menuw, arg='next')
