@@ -14,6 +14,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2002/10/08 04:47:47  krister
+# Changed the new playlist type list to be displayed correctly. Added popup box for recursive scanning (can take a long time).
+#
 # Revision 1.15  2002/10/07 05:26:25  outlyer
 # Added recursive playlist support from Alex Polite <m2@plusseven.com>
 #
@@ -67,6 +70,7 @@ import menu    # The menu widget class
 import mplayer # Module for running mplayer.
 import rc      # The remote controller class
 import osd     # Yes.. we use the GUI for printing stuff.
+import skin    # The skin class
 
 # Set to 1 for debug output
 DEBUG = 1
@@ -84,6 +88,7 @@ else:
 
 rc      = rc.get_singleton()
 osd     = osd.get_singleton()
+skin = skin.get_singleton()
 
 
 def play(arg=None, menuw=None):
@@ -180,8 +185,9 @@ def parse_entry(arg=None, menuw=None):
             print 'music:parse_entry(): f="%s"' % files
 
 	    
-        #Add recursive playlist
+        # Add recursive playlist
         if dirnames and config.RECURSIVE_PLAYLIST:
+            skin.PopupBox('Creating recursive playlist, please be patient...')
 	    playlist = config.FREEVO_CACHEDIR + '/freevo-recursiveplaylist.m3u'
             recursive_files = util.match_files_recursively(
                 mdir, config.SUFFIX_AUDIO_FILES)
@@ -189,7 +195,7 @@ def parse_entry(arg=None, menuw=None):
             create_randomized_playlist(recursive_files, playlist)
             title = 'PL: Random playlist with songs here and below'
             items += [menu.MenuItem(title, make_playlist_menu, playlist,
-                                    handle_config, ('list', playlist))]
+                                    handle_config, ('list', playlist), 'list')]
 
             
         for dirname in dirnames:
