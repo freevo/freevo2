@@ -6,6 +6,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/09/01 18:48:36  dischi
+# fix typo
+#
 # Revision 1.5  2003/06/25 02:27:39  rshortt
 # Allow 'frame' containers to grow verticly to hold all contents.  Also
 # better control of object's background images.
@@ -188,7 +191,7 @@ class Container(GUIObject):
         Set which style to draw border around object in. If bs is 'None'
         no border is drawn.
 
-        Default for PopubBox is to have no border.
+        Default for PopupBox is to have no border.
         """
         if isinstance(self.border, Border):
             self.border.set_style(bs)
