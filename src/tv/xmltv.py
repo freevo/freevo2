@@ -96,10 +96,14 @@ class _ProgrammeHandler:
             return None
 
     def icon(self, node):
-        return _ChannelHandler.icon(self, node)
+        data = {}
+        for attr in (u'src', u'width', u'height'):
+            if node.attrs.has_key(('', attr)):
+                data[attr.encode(locale)] = _getxmlattr(node, attr)
+        return data
 
     def url(self, node):
-        return _ChannelHandler.url(self, node)
+        return node.textof()
 
     def country(self, node):
         return _readwithlang(node)
