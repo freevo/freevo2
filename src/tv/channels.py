@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/11/23 21:19:57  rshortt
+# Bugfix - it returned to early if using an external tuner with the v4l
+# tuner as the input.
+#
 # Revision 1.5  2003/11/23 20:47:13  rshortt
 # Another typo!
 #
@@ -151,10 +155,12 @@ class FreevoChannels:
 
         if vg.tuner_type == 'external':
             if vg.input_type == 'tuner' and vg.tuner_chan:
-                return self.tunerSetFreq(vg.tuner_chan, app, app_cmd)
+                freq = self.tunerSetFreq(vg.tuner_chan, app, app_cmd)
 
             tuner = plugin.getbyname('EXTERNAL_TUNER')
             tuner.setChannel(new_chan)
+
+            return freq
 
         else:
             return self.tunerSetFreq(chan, app, app_cmd)
