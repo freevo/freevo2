@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/04/23 06:33:55  krister
+# More fixes, TV viewing with tvtime seems to work pretty good now using tvtime 0.9.8-rc12 + a patch from me which has been sent to the tvtime team. tvtime 0.9.8 will be released soon, hopefully without needing special freevo patches. Unlike MPlayer, tvtime sends keypress events back to freevo for better integration.
+#
 # Revision 1.1  2003/04/22 19:34:16  dischi
 # mplayer and tvtime are now plugins
 #
@@ -139,10 +142,21 @@ class TVTime:
                 pass
 
         if mode == 'tv':
+            
             tuner_channel = self.TunerGetChannel()
 
+            w, h = config.TV_VIEW_SIZE
+            cf_norm, cf_input, cf_clist, cf_device = config.TV_SETTINGS.split()
+            # XXX cf_norm, cf_clist doesn't fully correspond to MPlayer!
+            command = 'tvtime -k -I %s -n %s -d %s -f %s -c %s' % (w,
+                                                                   cf_norm.upper(),
+                                                                   cf_device,
+                                                                   cf_clist,
+                                                                   tuner_channel)
+            if osd.get_fullscreen() == 1:
+                command += ' -m'
+
             if 0: # XXX Later...
-                cf_norm, cf_input, cf_clist, cf_device = config.TV_SETTINGS.split()
 
                 # Convert to MPlayer TV setting strings
                 norm = 'norm=%s' % cf_norm.upper()
@@ -150,7 +164,7 @@ class TVTime:
                         's-video':3}[cf_input.lower()]
                 input = 'input=%s' % tmp
                 chanlist = 'chanlist=%s' % cf_clist
-                device= 'device=%s' % cf_device
+                device = 'device=%s' % cf_device
 
                 w, h = config.TV_VIEW_SIZE
                 outfmt = 'outfmt=%s' % config.TV_VIEW_OUTFMT
@@ -164,7 +178,6 @@ class TVTime:
                         config.MPLAYER_VO_DEV_OPTS, tvcmd, config.MPLAYER_ARGS_TVVIEW)
                 mpl = '--prio=%s %s -vo %s%s -fs %s %s -slave' % args
 
-            command = 'tvtime'
 
         else:
             print 'Mode "%s" is not implemented' % mode  # XXX ui.message()
@@ -211,8 +224,6 @@ class TVTime:
             mixer.setPcmVolume(mixer_vol)
 
         if DEBUG: print '%s: started %s app' % (time.time(), self.mode)
-        self.thread.app.setchannel(tuner_channel)
-
         
         
     def Stop(self):
@@ -254,7 +265,6 @@ class TVTime:
                 self.TunerNextChannel()
 
             new_channel = self.TunerGetChannel()
-            #self.thread.fifo.write('tv_set_channel %s\n' % new_channel)
             self.thread.app.setchannel(new_channel)
 
             # Display a channel changed message
@@ -313,7 +323,7 @@ class TVTimeApp(childapp.ChildApp):
         # Use SIGINT instead of SIGKILL to make sure TVTime shuts
         # down properly and releases all resources before it gets
         # reaped by childapp.kill().wait()
-        self.write('quit')
+        self.write('quit\n')
         childapp.ChildApp.kill(self, signal.SIGINT)
 
         # XXX Krister testcode for proper X11 video
@@ -326,6 +336,39 @@ class TVTimeApp(childapp.ChildApp):
 
 
     def stdout_cb(self, line):
+        events = { 'n' : rc.VOLDOWN,
+                   'm' : rc.VOLUP,
+                   'c' : rc.CHUP,
+                   'v' : rc.CHDOWN,
+                   'Escape' : rc.EXIT,
+                   'Up' : rc.UP,
+                   'Down' : rc.DOWN,
+                   'Left' : rc.LEFT,
+                   'Right' : rc.RIGHT,
+                   ' ' : rc.SELECT,
+                   'Enter' : rc.SELECT,
+                   'F3' : rc.MUTE,
+                   'e' : rc.ENTER,
+                   'd' : rc.DISPLAY,
+                   's' : rc.STOP }
+        
+        print 'TVTIME 1 KEY EVENT: "%s"' % str(list(line)) # XXX TEST
+
+        if line == 'F10':
+            print 'TVTIME screenshot!'
+            self.write('screenshot\n')
+        elif line == 'z':
+            print 'TVTIME fullscreen toggle!'
+            self.write('toggle_fullscreen\n')
+            osd.toggle_fullscreen()
+        else:
+            event = events.get(line, None)
+            if event is not None:
+                rc.post_event(event)
+                if DEBUG: print 'posted translated tvtime event "%s"' % event
+            else:
+                if DEBUG: print 'tvtime cmd "%s" not found!' % line
+        
         if config.MPLAYER_DEBUG:
             try:
                 self.log_stdout.write(line + '\n')
@@ -345,7 +388,7 @@ class TVTimeApp(childapp.ChildApp):
         for digit in ch_digits:
             cmd = 'CHANNEL_%s\n' % digit
             self.write(cmd)
-        self.write('\n')
+        self.write('enter\n')
 
         
 # ======================================================================
@@ -368,12 +411,10 @@ class TVTime_Thread(threading.Thread):
                 self.mode_flag.clear()
                 
             elif self.mode == 'play':
-                # The DXR3 device cannot be shared between our SDL session
-                # and TVTime.
-                if (osd.sdl_driver == 'dxr3'):
-                    if DEBUG:
-                        print "Stopping Display for Video Playback on DXR3"
-                    osd.stopdisplay()			
+                # X11 cannot handle two fullscreen windows, so shut down the window.
+                if DEBUG:
+                    print "Stopping Display for tvtime"
+                osd.stopdisplay()			
                 if DEBUG:
                     print 'TVTime_Thread.run(): Started, cmd=%s' % self.command
                     
@@ -388,10 +429,9 @@ class TVTime_Thread(threading.Thread):
                 self.app.kill()
 
                 # Ok, we can use the OSD again.
-                if osd.sdl_driver == 'dxr3':
-                    osd.restartdisplay()
-                    osd.update()
-                    print "Display back online"
+                osd.restartdisplay()
+                osd.update()
+                print "Display back online"
 
                 if self.mode == 'play':
                     if DEBUG: print 'posting play_end'
