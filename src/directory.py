@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/07/02 20:07:49  dischi
+# use bins support from mmpython
+#
 # Revision 1.16  2003/06/29 20:45:14  dischi
 # mmpython support
 #
@@ -23,48 +26,6 @@
 # Revision 1.13  2003/06/03 19:10:28  outlyer
 # Prevent a crash if a directory is removed while you're inside it. This just
 # wasn't adapted to the new event framework, the bulk was there.
-#
-# Revision 1.12  2003/05/30 00:53:19  rshortt
-# Various event bugfixes.
-#
-# Revision 1.11  2003/05/27 17:53:33  dischi
-# Added new event handler module
-#
-# Revision 1.10  2003/05/11 18:08:06  dischi
-# added AUDIO_FORMAT_STRING to format the audio items
-#
-# Revision 1.9  2003/04/26 15:08:51  dischi
-# o better mount/umount, also for directories who are no rom drive.
-# o added list_usb_devices to util
-#
-# Revision 1.8  2003/04/24 19:55:45  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.7  2003/04/24 19:14:49  dischi
-# pass xml_file to directory and videoitems
-#
-# Revision 1.6  2003/04/21 18:17:46  dischi
-# Moved the code from interface.py for video/audio/image/games to __init__.py
-#
-# Revision 1.5  2003/04/21 13:01:15  dischi
-# remove osd dependency
-#
-# Revision 1.4  2003/04/20 17:36:49  dischi
-# Renamed TV_SHOW_IMAGE_DIR to TV_SHOW_DATA_DIR. This directory can contain
-# images like before, but also fxd files for the tv show with global
-# informations (plot/tagline/etc) and mplayer options.
-#
-# Revision 1.3  2003/04/20 16:08:50  dischi
-# take directory image based on TV_SHOW_IMAGES
-#
-# Revision 1.2  2003/04/20 12:43:32  dischi
-# make the rc events global in rc.py to avoid get_singleton. There is now
-# a function app() to get/set the app. Also the events should be passed to
-# the daemon plugins when there is no handler for them before. Please test
-# it, especialy the mixer functions.
-#
-# Revision 1.1  2003/04/20 10:53:23  dischi
-# moved identifymedia and mediamenu to plugins
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -122,7 +83,7 @@ from gui.PopupBox import PopupBox
 from xml.utils import qp_xml
             
 # Add support for bins album files
-from image import bins
+from mmpython.image import bins
 
 TRUE  = 1
 FALSE = 0
@@ -369,7 +330,6 @@ class DirItem(Playlist):
             num_changes = mmpython.check_cache(mmpython_dir)
             
         pop = None
-
         if num_changes > 10:
             if self.media:
                 pop = PopupBox(text='Scanning disc, be patient...')
