@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/08/26 18:03:32  outlyer
+# Adding FLAC support for the cdbackup plugin
+#
 # Revision 1.8  2003/08/25 14:12:07  outlyer
 # Unify the app finder.
 #
@@ -74,6 +77,7 @@ EXTERNAL_PROGRAMS = (("mplayer", "mplayer", 1),
                      ("ssnes9x", "snes", 0),
                      ("zsnes", "snes", 0 ),
                      ("lame", "lame",0),
+                     ("flac","flac",0),
                      ("cdparanoia","cdparanoia",0),
                      ("oggenc","oggenc",0),
                      ("renice","renice",0),
