@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/09/12 20:34:16  dischi
+# start internal help system
+#
 # Revision 1.13  2003/09/12 19:39:35  gsbarbieri
 # <thead>, <tbody> and <tfoot> support.
 #
@@ -223,6 +226,8 @@ class HTMLResource:
                 self.res += '<td class="tablelink" onClick="document.location=\'iceslistchanger.rpy\'">&nbsp;&nbsp;Change&nbsp;Icecast&nbsp;List&nbsp;&nbsp;</td>'
         except AttributeError:
             pass
+
+        self.res += '<td class="tablelink" onClick="document.location=\'help.rpy\'">&nbsp;&nbsp;Help&nbsp;&nbsp;</td>'
 
         self.res += """
 	<td height="24" width="11" background="images/round_right.png" cellpadding=0 cellspacing=0>&nbsp;</td>
