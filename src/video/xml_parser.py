@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/02/15 19:56:51  dischi
+# Removed some debug
+#
 # Revision 1.6  2003/02/12 10:28:28  dischi
 # Added new xml file support. The old xml files won't work, you need to
 # convert them.
@@ -429,7 +432,6 @@ def parseMovieFile(file, parent, duplicate_check):
                 elif movie_child.name == u'cover-img':
                     # movie_child == /freevo/items/movie/cover-img
                     img = movie_child.textof().encode('ascii')
-                    print img
                     # the image file must be stored in the same
                     # directory than that XML file
                     if os.path.isfile(os.path.join(dir, img)):
