@@ -35,6 +35,13 @@ TD.channel {
     border: #638BCA 1px solid;
 }
 
+td.utilhead { 
+    background: #0B1C52; 
+    color: white; 
+    font-weight: bold; 
+    text-align: center; 
+}
+
 td.guidehead { 
     background: #0B1C52; 
     color: white; 
@@ -160,7 +167,7 @@ table.popupbuttons td:hover {
     border: white 3px outset;
 }
 
-input, select {
+input, select, textarea {
     background: #2A577E; 
     color: white; 
 }
