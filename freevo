@@ -24,7 +24,7 @@ if [ "$1" = "update" ] ; then
     fi
     echo "updating freevo binary release in $2"
     find $2/src | grep -v /plugins/ | xargs rm -rf
-    rm -rf $2/src/skins/main1 $2/src/xml
+    rm -rf $2/src/skins $2/WIP
     cp -r * $2
     exit 0
 fi
