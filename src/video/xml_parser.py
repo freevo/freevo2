@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/05/11 16:22:14  dischi
+# use format_text for data
+#
 # Revision 1.19  2003/04/28 17:57:11  dischi
 # exception handling for bad fxd files
 #
@@ -143,7 +146,7 @@ def xml_parseVideo(video_node):
         except KeyError:
             pass
 
-        i['data'] = node.textof().encode('latin-1')
+        i['data'] = util.format_text(node.textof().encode('latin-1'))
             
         video['items'][id] = i
         video['items-list'] += [ id ]
