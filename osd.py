@@ -12,6 +12,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2002/10/15 19:36:48  dischi
+# Fixed the return value for drawstringframed, drawstringframedhard
+# still returns (0,0,0,0) als rectangle.
+#
 # Revision 1.37  2002/10/15 01:05:21  gsbarbieri
 # I'd forgot some things...
 #
@@ -544,11 +548,11 @@ class OSD:
     def drawstringframed(self, string, x, y, width, height, fgcolor=None, bgcolor=None,
                          font=None, ptsize=0, align_h='left', align_v='top', mode='hard'):
         if mode == 'hard':
-            self.drawstringframedhard(string,x,y,width, height, fgcolor, bgcolor, font, ptsize,
-                                      align_h, align_v)
+            return self.drawstringframedhard(string,x,y,width, height, fgcolor,
+                                             bgcolor, font, ptsize, align_h, align_v)
         elif mode == 'soft':
-            self.drawstringframedsoft(string,x,y,width, height, fgcolor, bgcolor, font, ptsize,
-                                      align_h, align_v)
+            return self.drawstringframedsoft(string,x,y,width, height, fgcolor,
+                                             bgcolor, font, ptsize, align_h, align_v)
 
     # Gustavo:
     # drawstringframedsoft: draws a string (text) in a frame. This tries to fit the
