@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2003/03/30 21:21:25  rshortt
+# Fix for people not using the new skin (skins/dischi1/skin_dischi1.py).
+#
 # Revision 1.44  2003/03/30 20:55:25  rshortt
 # Commiting Brian J. Murrell's password protected folder patch so that people can hide their porn.  This uses the new PasswordInputBox and modified for other new gui code as well.
 #
@@ -470,7 +473,7 @@ class DirItem(Playlist):
                 util.mount(self.dir)
                 self.media = media
 
-	if os.path.isfile(self.dir + '/.password'):
+	if os.path.isfile(self.dir + '/.password') and config.NEW_SKIN:
 	    print 'password protected dir'
 	    pb = PasswordInputBox(osd.focused_app, 'Enter Password', 
                                   self.pass_cmp_cb)
