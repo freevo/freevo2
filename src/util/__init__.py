@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/02/28 21:04:17  dischi
+# unicode fixes
+#
 # Revision 1.14  2004/02/27 20:15:03  dischi
 # more unicode fixes
 #
@@ -79,6 +82,9 @@ if sys.argv[0].find('setup.py') == -1 and sys.argv[0].find('install.py') == -1:
                     print 'Error: Could not convert %s to unicode' % repr(string)
                     print 'tried encoding %s and %s' % (encoding, config.LOCALE)
                     print e
+        elif string.__class__ != unicode:
+            return unicode(str(string), config.LOCALE)
+        
         return string
 
     def String(string, encoding=config.encoding):

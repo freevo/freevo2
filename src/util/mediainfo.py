@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2004/02/28 21:04:17  dischi
+# unicode fixes
+#
 # Revision 1.34  2004/02/27 20:42:05  dischi
 # save disc file info
 #
@@ -345,15 +348,6 @@ class MMCache(Cache):
                            (info.has_key(variable) and info[variable]):
                             info[variable] = video[variable]
 
-            if info.has_key('tracks') and info['tracks'] and not info.has_key('length'):
-                info['length'] = 0
-                for track in info['tracks']:
-                    if track.has_key('length') and track['length']:
-                        info['length'] += track['length']
-                if info['tracks'][0].has_key('length') and info['tracks'][0]['length'] and \
-                   info['tracks'][0]['length'] * len(info['tracks']) == info['length']:
-                    # badly masted dvd
-                    info['length'] = info['tracks'][0]['length']
             return info
         return {}
 

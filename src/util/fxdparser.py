@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/02/28 21:04:17  dischi
+# unicode fixes
+#
 # Revision 1.13  2004/01/16 16:23:07  dischi
 # made a ugly unicode fix...I will never understand python character encoding
 #
@@ -85,6 +88,7 @@ import util
 import codecs
 
 
+
 class XMLnode:
     """
     One node for the FXDtree
@@ -152,17 +156,9 @@ class FXDtree(qp_xml.Parser):
             filename = self.filename
         if vfs.isfile(filename):
             vfs.unlink(filename)
-        f = vfs.codecs_open(filename, 'w', encoding='utf-8')
-        f.write('<?xml version="1.0" ?>\n')
-        try:
-            self._dump_recurse(f, self.tree)
-        except UnicodeDecodeError:
-            # sigh, some strange encoding errors again, make it slower
-            # but it should work now
-            f.close()
-            f = vfs.codecs_open(filename, 'w', encoding='utf-8')
-            f.write('<?xml version="1.0" ?>\n')
-            self._dump_recurse(f, self.tree, encoding_problem=True)
+        f = vfs.codecs_open(filename, 'wb', encoding='utf-8')
+        f.write('<?xml version="1.0" encoding="utf-8" ?>\n')
+        self._dump_recurse(f, self.tree)
 
         f.write('\n')
         f.close()
@@ -173,8 +169,9 @@ class FXDtree(qp_xml.Parser):
         if self.tree:
             util.save_pickle(self.tree, vfs.getoverlay(filename + '.raw'))
 
-        
-    def _dump_recurse(self, f, elem, depth=0, encoding_problem=False):
+
+
+    def _dump_recurse(self, f, elem, depth=0):
         """
         Help function to dump all elements
         """
@@ -182,24 +179,18 @@ class FXDtree(qp_xml.Parser):
             return
         f.write('<' + elem.name)
         for (ns, name), value in elem.attrs.items():
-            f.write(' %s="%s"' % (name, value))
+            f.write(u' ' + Unicode(name) + u'="' + Unicode(value) + '"')
         if elem.children or elem.first_cdata:
             if elem.first_cdata == None:
                 f.write('>\n  ')
                 for i in range(depth):
                     f.write('  ')
             else:
-                data = elem.first_cdata.replace('&', '&amp;')
-                if encoding_problem:
-                    unidata = unicode()
-                    for c in data:
-                        unidata += unichr(ord(c))
-                    data = unidata
-                f.write('>' + data)
+                data = Unicode(elem.first_cdata).replace(u'&', u'&amp;')
+                f.write(u'>' + data)
                     
             for child in elem.children:
-                self._dump_recurse(f, child, depth=depth+1,
-                                   encoding_problem=encoding_problem)
+                self._dump_recurse(f, child, depth=depth+1)
                 if child.following_cdata == None:
                     if child == elem.children[-1]:
                         f.write('\n')
@@ -327,7 +318,7 @@ class FXD:
         """
         for child in node.children:
             if child.name == name:
-                return util.format_text(child.textof().encode(config.LOCALE))
+                return util.format_text(child.textof())
         return ''
 
 
@@ -340,7 +331,7 @@ class FXD:
         r = default
         if node:
             try:
-                r = node.attrs[('',name)].encode(config.LOCALE)
+                r = node.attrs[('',name)]
             except KeyError:
                 pass
         else:
@@ -371,7 +362,7 @@ class FXD:
         """
         rerurn the text of the node
         """
-        return util.format_text(node.textof().encode(config.LOCALE))
+        return util.format_text(node.textof())
 
 
     def parse_info(self, nodes, object, map={}):
@@ -393,7 +384,7 @@ class FXD:
                 
         for node in nodes:
             for child in node.children:
-                txt = child.textof().encode(config.LOCALE)
+                txt = child.textof()
                 if not txt:
                     continue
                 if child.name in map:

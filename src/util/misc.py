@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2004/02/28 21:04:17  dischi
+# unicode fixes
+#
 # Revision 1.33  2004/02/27 20:08:42  dischi
 # add function to check for identical string beginnings
 #
@@ -267,10 +270,10 @@ def get_bookmarkfile(filename):
 
 
 def format_text(text):
-    while len(text) and text[0] in (' ', '\t', '\n'):
+    while len(text) and text[0] in (u' ', u'\t', u'\n'):
         text = text[1:]
-    text = re.sub('\n[\t *]', ' ', text)
-    while len(text) and text[-1] in (' ', '\t', '\n'):
+    text = re.sub(u'\n[\t *]', u' ', text)
+    while len(text) and text[-1] in (u' ', u'\t', u'\n'):
         text = text[:-1]
     return text
 
