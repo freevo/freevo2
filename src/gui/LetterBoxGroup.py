@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/03/30 16:15:42  rshortt
+# Got rid of trailing whitespaces from the 'word'.
+#
 # Revision 1.4  2003/03/24 02:40:50  rshortt
 # These objects are now using skin properties.
 #
@@ -188,7 +191,7 @@ class LetterBoxGroup(GUIObject):
         for box in self.boxes:
             word = word + box.get_text()
 
-        return word
+        return word.rstrip()
 
 
     def _draw(self):
