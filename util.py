@@ -172,9 +172,10 @@ def proc_mount(dir):
 
 LABEL_REGEXP = re.compile("^(.*[^ ]) *$").match
 
-# returns (type, label, image)
+# returns (type, label, image, play_options)
 def identifymedia(dir):
-    mediatypes = [('VCD','/mpegav/'), ('SVCD','/SVCD/'), ('DVD','/video_ts/') ]
+    mediatypes = [('VCD','/mpegav/', 'vcd'), ('SVCD','/SVCD/', 'vcd'), \
+                  ('DVD','/video_ts/', 'dvd') ]
 
     image = title = None
 
@@ -190,7 +191,7 @@ def identifymedia(dir):
             label = m.group(1)
         img.close()
     else:
-        return None, None, None
+        return None, None, None, None
 
     for ( title_db, image_db, id_db ) in config.MOVIE_INFORMATIONS:
         if id_db == id:
@@ -200,23 +201,28 @@ def identifymedia(dir):
     for media in mediatypes:
         if os.path.exists(dir + media[1]):
             if title:
-                return media[0], title, image
-            return media[0], '%s [%s]' % (media[0], label), image
+                return media[0], title, image, (media[2], 1, [])
+            return media[0], '%s [%s]' % (media[0], label), image, (media[2], 1, [])
         
     mplayer_files = match_files(dir, config.SUFFIX_MPLAYER_FILES)
     mp3_files = match_files(dir, config.SUFFIX_MPG123_FILES)
     image_files = match_files(dir, config.SUFFIX_IMAGE_FILES)
     
     if mplayer_files and not mp3_files:
-        return "DIVX", label, None
+        if title:
+            if len(mplayer_files) == 1:
+                # XXX add mplayer_options, too
+                return 'DIVX', title, image, ('video', mplayer_files[0], [])
+            return 'DIVX', title, image, None
+        return "DIVX", label, None, None
     if not mplayer_files and mp3_files:
-        return "MP3" , label, None
+        return "MP3" , label, None, None
     if not mplayer_files and not mp3_files and image_files:
-        return "IMAGE", label, None
+        return "IMAGE", label, None, None
     
     if mplayer_files or image_files or mp3_files:
-        return "DATA", label, None
+        return "DATA", label, None, None
 
-    return "AUDIO", label, None
+    return "AUDIO", label, None, None
 
 
