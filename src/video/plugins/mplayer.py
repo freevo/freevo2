@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.58  2004/01/13 15:03:45  dischi
+# add version detection patch
+#
 # Revision 1.57  2004/01/11 23:21:58  outlyer
 # Fix for this crash:
 #
@@ -97,21 +100,26 @@ class PluginInterface(plugin.Plugin):
         # 0.9 (for 0.9.x series), 1.0 (for 1.0preX series) and 9999 for cvs
         if not hasattr(config, 'MPLAYER_VERSION'):
             child = popen2.Popen3( "%s -v" % config.MPLAYER_CMD, 1, 100)
-            data = child.fromchild.readline() # Just need the first line
-            if data:
-                data = re.search( "^MPlayer (?P<version>\S+)", data )
-                if data:                
-                    _debug_("MPlayer version is: %s" % data.group( "version" ))
-                    data = data.group( "version" )
-                    if data[ 0 ] == "1":
-                        config.MPLAYER_VERSION = 1.0
-                    elif data[ 0 ] == "0":
-                        config.MPLAYER_VERSION = 0.9
-                    elif data[ 0 : 7 ] == "dev-CVS":
-                        config.MPLAYER_VERSION = 9999
-                else:
-                    config.MPLAYER_VERSION = None
-                _debug_("MPlayer version set to: %s" % config.MPLAYER_VERSION)
+            data  = True
+            while data:
+                data = child.fromchild.readline()
+                if data:
+                    data = re.search( "^MPlayer (?P<version>\S+)", data )
+                    if data:                
+                        break
+
+            if data:                
+                _debug_("MPlayer version is: %s" % data.group( "version" ))
+                data = data.group( "version" )
+                if data[ 0 ] == "1":
+                    config.MPLAYER_VERSION = 1.0
+                elif data[ 0 ] == "0":
+                    config.MPLAYER_VERSION = 0.9
+                elif data[ 0 : 7 ] == "dev-CVS":
+                    config.MPLAYER_VERSION = 9999
+            else:
+                config.MPLAYER_VERSION = None
+            _debug_("MPlayer version set to: %s" % config.MPLAYER_VERSION)
             child.wait()
 
         if not config.MPLAYER_VERSION:
