@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/07/18 19:49:47  dischi
+# do not set speed for dvd, it does not work
+#
 # Revision 1.15  2003/07/12 21:24:19  dischi
 # sort list before checkin
 #
@@ -367,7 +370,7 @@ class Identify_Thread(threading.Thread):
             return
 
         # try to set the speed
-        if config.ROM_SPEED:
+        if config.ROM_SPEED and not data.mime == 'video/dvd':
             try:
                 ioctl(fd, CDROM_SELECT_SPEED, config.ROM_SPEED)
             except:
