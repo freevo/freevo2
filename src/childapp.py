@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.51  2004/03/14 11:43:08  dischi
+# prevent crash
+#
 # Revision 1.50  2004/02/19 04:43:47  gsbarbieri
 # Fix string problems and add a work around to avoid isAlive() being called during __init__()
 #
@@ -596,7 +599,12 @@ class ChildApp2(ChildApp):
 
 
     def wait(self):
-        pid, status = os.waitpid(self.child.pid, os.WNOHANG)
+        try:
+            pid, status = os.waitpid(self.child.pid, os.WNOHANG)
+        except OSError:
+            # strange, no child? So it is finished
+            return True
+        
         if pid == self.child.pid:
             self.status = status
             return True
