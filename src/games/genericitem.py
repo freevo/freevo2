@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/01/14 18:29:49  mikeruelle
+# .
+#
 # Revision 1.4  2003/12/29 22:30:35  dischi
 # move to new Item attributes
 #
@@ -130,29 +133,13 @@ class GenericItem(Item):
         self.game_player.stop()
 
 
-    def eventhandler(self, event, menuw=None, mythread=None):
+    def eventhandler(self, event, menuw=None):
 
-        if not mythread == None:
-            if event == em.STOP:
-                self.stop()
-                rc.app(None)
-                if not menuw == None:
-                    menuw.refresh(reload=1)
-
-            elif event == em.MENU:
-                mythread.app.write('M')
-
-            elif event == em.GAMES_CONFIG:
-                mythread.cmd( 'config' )
-
-            elif event == em.PAUSE or event == em.PLAY:
-                mythread.cmd('pause')
-
-            elif event == em.GAMES_RESET:
-                mythread.cmd('reset')
-
-            elif event == em.GAMES_SNAPSHOT:
-                mythread.cmd('snapshot')
+        if event == em.STOP:
+            self.stop()
+            rc.app(None)
+            if not menuw == None:
+                menuw.refresh(reload=1)
 
         # give the event to the next eventhandler in the list
         return Item.eventhandler(self, event, menuw)

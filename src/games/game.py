@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/01/14 18:29:49  mikeruelle
+# .
+#
 # Revision 1.13  2003/11/29 11:39:38  dischi
 # use the given menuw abd not a global one
 #
@@ -89,9 +92,6 @@ def get_singleton():
 class Game:
 
     def __init__(self):
-        self.thread = Game_Thread()
-        self.thread.setDaemon(1)
-        self.thread.start()
         self.mode = None
         self.app_mode = 'games'
 
@@ -114,119 +114,26 @@ class Game:
         if plugin.getbyname('MIXER'):
             plugin.getbyname('MIXER').reset()
 
-        # clear the screen for mame
-        osd.clearscreen(color=osd.COL_BLACK)
-        osd.update()
-
-        self.thread.play_mode = self.mode
-        self.thread.item  = item
-        self.item  = item
-
         if DEBUG:
             print 'Game.play(): Starting thread, cmd=%s' % self.command
-            
-        self.thread.mode    = 'play'
-
-        self.thread.command = self.command
-        self.thread.mode_flag.set()
-        rc.app(self)
         
+	self.app=GameApp(self.command, stop_osd=1)
+        self.prev_app = rc.app()
+        rc.app(self)
 
     def stop(self):
-        self.thread.mode = 'stop'
-        self.thread.mode_flag.set()
-        rc.app(None)
-        while self.thread.mode == 'stop':
-            time.sleep(0.3)
-
+        self.app.stop()
+	rc.app(None)
 
     def eventhandler(self, event, menuw=None):
-        return self.item.eventhandler(event, self.menuw, self.thread)
+        return self.item.eventhandler(event, self.menuw)
 
  
 # ======================================================================
-class GameApp(childapp.ChildApp):
+class GameApp(childapp.ChildApp2):
+    def stop_event(self):
+        return em.STOP
         
     def kill(self):
         childapp.ChildApp.kill(self, signal.SIGINT)
-        osd.update()
-
-
-# ======================================================================
-class Game_Thread(threading.Thread):
-
-    def __init__(self):
-        threading.Thread.__init__(self)
-        
-        self.mode      = 'idle'
-        self.mode_flag = threading.Event()
-        self.command   = ''
-        self.app       = None
-
-    def run(self):
-        while 1:
-            if self.mode == 'idle':
-                self.mode_flag.wait()
-                self.mode_flag.clear()
-                
-            elif self.mode == 'play':
-
-                if DEBUG:
-                    print 'Game_Thread.run(): Started, cmd=%s' % self.command
-                
-                osd.stopdisplay()     
-                self.app = GameApp(self.command)
-
-                while self.mode == 'play' and self.app.isAlive():
-                    time.sleep(0.5)
-
-                print('Game_Thread::run: GAME OVER')
-
-                self.app.kill()
-
-                if config.OSD_SDL_EXEC_AFTER_STARTUP:
-                    os.system(config.OSD_SDL_EXEC_AFTER_STARTUP)
-
-                osd.restartdisplay()
-
-                if self.mode == 'play':
-                    rc.post_event(em.STOP)
-
-                self.mode = 'idle'
-                
-            else:
-                self.mode = 'idle'
-
-
-    def cmd(self, command):
-        print "In cmd going to do: " + command
-        str = ''
-        if command == 'config':
-            str = gameKey('CONFIGMENU')
-        elif command == 'pause':
-            str = gameKey('PAUSE')
-        elif command == 'reset':
-            str = gameKey('RESET')
-        elif command == 'exit':
-            str = gameKey('EXIT')
-        elif command == 'snapshot':
-            str = gameKey('SNAPSHOT')
-
-        self.app.write(str) 
-
-
-#
-# Translate an abstract remote control command to an mame
-# command key
-#
-# I should add a hook back to whatever Item was passed here.
-#
-def gameKey(rcCommand):
-    gameKeys = {
-        'EXIT'           : '\x1b',
-        }
-    
-    key = gameKeys.get(rcCommand, '')
-
-    return key
 
