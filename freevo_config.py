@@ -15,50 +15,26 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.74  2002/10/06 14:39:53  dischi
+# Removed older log messages and added MPLAYER_USE_WID to turn on/off
+# the usage of -wid (on by default)
+#
 # Revision 1.73  2002/10/03 17:34:37  dischi
 # Small update to support more resolutions. I tried to get 720x576 working,
 # but for some reason I can't see a freevo on my tv, mplayer works fine.
 # Strange....
 #
 # Revision 1.72  2002/10/02 02:40:55  krister
-# Applied Alex Polite's patch for using XMMS instead of MPlayer for music playing and visualization.
+# Applied Alex Polite's patch for using XMMS instead of MPlayer for
+# music playing and visualization.
 #
 # Revision 1.71  2002/10/01 01:55:06  krister
-# Changed the TV channel list to contain examples for Per Wigren's patch for multiple TV stations on the same channel on different times.
+# Changed the TV channel list to contain examples for Per Wigren's
+# patch for multiple TV stations on the same channel on different
+# times.
 #
 # Revision 1.70  2002/09/29 19:57:59  dischi
 # Added SHUTDOWN_SYS_CMD to freevo_config to set the shutdown command
-#
-# Revision 1.69  2002/09/25 18:43:07  dischi
-# Oops, I broke it
-#
-# Revision 1.68  2002/09/24 08:08:22  dischi
-# Removed last osd server stuff and some other cleanups
-#
-# Revision 1.67  2002/09/23 16:53:33  dischi
-# check mplayer, nice, jpegtrans and xmame.SDL in configure
-#
-# Revision 1.66  2002/09/19 10:17:46  dischi
-# Added mp4, viv and nuv to SUFFIX_MPLAYER_FILES
-#
-# Revision 1.65  2002/09/14 16:49:19  dischi
-# Add support for hwac3. If MPLAYER_AO_HWAC3_DEV is set hwac3 will be
-# enabled for DVDs and VOB files
-#
-# Revision 1.64  2002/09/08 18:26:03  krister
-# Applied Andrew Drummond's MAME patch. It seems to work OK on X11,
-# but still needs some work before it is ready for prime-time...
-#
-# Revision 1.63  2002/09/08 16:40:33  krister
-# Added some docs for the new ROM_DRIVES format.
-#
-# Revision 1.62  2002/09/07 06:15:30  krister
-# Added wav-files to the list of music-formats.
-#
-# Revision 1.61  2002/09/04 19:24:51  dischi
-# Added a 3rd parameter to ROM_DRIVES: mountpoint, device, name. I also
-# named the drives CD-1 and CD-2 to avoid missunderstandings about the
-# name DVD.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -311,7 +287,7 @@ MPLAYER_ARGS_VCD     = '-cache 4096 -vcd %s'
 MPLAYER_ARGS_MPG     = '-cache 5000 -idx'
 MPLAYER_ARGS_TVVIEW  = '-nocache'
 MPLAYER_ARGS_DVDNAV  = ''
-
+MPLAYER_USE_WID      = 1
 
 # ======================================================================
 # XMMS section:
