@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.87  2004/01/05 15:21:04  outlyer
+# I am seeing OSErrors not IOErrors for this, so we can just watch for both
+#
 # Revision 1.86  2004/01/04 17:18:50  dischi
 # also check OVERLAY_DIR for update
 #
@@ -868,7 +871,7 @@ class Dirwatcher(plugin.DaemonPlugin):
                    os.stat(self.dir)[stat.ST_MTIME] <= self.last_time and \
                    os.stat(self.overlay)[stat.ST_MTIME] <= self.last_time:
                 return True
-        except IOError:
+        except (OSError, IOError):
             # the directory is gone
             _debug_('Dirwatcher: unable to read directory %s' % self.dir,1)
 
