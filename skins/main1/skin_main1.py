@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.55  2002/10/26 12:27:45  dischi
+# Keep the aspect ratio for image thumbnails, also show thumbnails for
+# images smaller 1100x800. Maybe these values are too high, for larger
+# images it takes too much time to generate thumbnails on-the-fly.
+#
 # Revision 1.54  2002/10/25 20:11:14  dischi
 # Added support for screenshots instead of cover for the movie browser.
 # For covers is width < height, for screenshots not and to scale them
@@ -370,12 +375,37 @@ class Skin:
                 if type == 'photo' and val.cover_image.visible:
                     image_x = val.cover_image.x-val.cover_image.spacing
                     if menu.selected == item:
-                        thumb = util.getExifThumbnail(image, val.cover_image.width, \
-                                                      val.cover_image.height)
-                        if thumb:
-                            i_file = thumb
-                            i_val = val.cover_image
+                        thumb = util.getExifThumbnail(image)
+                        if not thumb:
+                            thumb = image
+
+                        w, h = util.pngsize(thumb)
+
+                        # don't make thumbnails for very large images when
+                        # they don't have a thumbnail in the exif header, it
+                        # takes too much time
+                        if w<1100 and h<800:
+                            scale = min(float(val.cover_image.width) / w,
+                                        float(val.cover_image.height) / h)
                             
+                            i_file = util.resize(thumb, int(w*scale), int(h*scale))
+                            i_val = copy.deepcopy(val.cover_image)
+                        
+                            # check all round masks if they are around the image
+                            # and shorten the width of those who are to fit
+                            # the new size
+                            if isinstance(i_val.mask, list):
+                                for m in i_val.mask:
+                                    if m.x <= i_val.x and m.y <= i_val.y and \
+                                       m.width >= i_val.width and \
+                                       m.height >= i_val.height:
+                                        m.height -= val.cover_image.height-h*scale
+                                        m.width -= val.cover_image.width-w*scale
+                                    
+                            i_val.height = h*scale
+                            i_val.width  = w*scale
+
+
                 elif type == 'movie' and val.cover_movie.visible:
                     image_x = val.cover_movie.x-val.cover_movie.spacing
                     if menu.selected == item:
@@ -388,8 +418,6 @@ class Skin:
                             scale = float(val.cover_movie.width) / w
                             i_file = util.resize(image, val.cover_movie.width,
                                                  h*scale)
-                            i_val = copy.deepcopy(val.cover_movie)
-                            i_val.height = h*scale
 
                             # check all round masks if they are around the image
                             # and shorten the width of those who are to fit
@@ -401,6 +429,9 @@ class Skin:
                                        m.height >= i_val.height:
                                         m.height -= val.cover_movie.height-h*scale
                                 
+                            i_val = copy.deepcopy(val.cover_movie)
+                            i_val.height = h*scale
+
 
                         # normal cover
                         else:
