@@ -52,16 +52,18 @@ class Favorite:
     Base class for a favorite.
     """
     def __init__(self, id = -1, name = 'unknown', channels = [],
-                 priority = 0, days = [], times = [], once = False):
-        self.id       = id
-        self.name     = name
-        self.channels = channels
-        self.priority = priority
-        self.days     = days
-        self.times    = []
-        self.url      = ''
-        self.fxdname  = ''
-        self.once     = once
+                 priority = 0, days = [], times = [], once = False,
+                 substring = False):
+        self.id        = id
+        self.name      = name
+        self.channels  = channels
+        self.priority  = priority
+        self.days      = days
+        self.times     = []
+        self.url       = ''
+        self.fxdname   = ''
+        self.once      = once
+        self.substring = substring
         for t in times:
             m = _time_re.match(t).groups()
             start = int(m[0])*100 + int(m[1])
@@ -83,7 +85,7 @@ class Favorite:
         Return a long list with every information about the favorite.
         """
         return self.id, self.name, self.channels, self.priority, self.days, \
-               self.times, self.once
+               self.times, self.once, self.substring
 
 
     def parse_fxd(self, parser, node):
@@ -97,6 +99,8 @@ class Favorite:
                     setattr(self, var, parser.gettext(child))
             if child.name == 'once':
                 self.once = True
+            if child.name == 'substring':
+                self.substring = True
             if child.name == 'channels':
                 self.channels = []
                 for v in parser.gettext(child).split(' '):
@@ -122,7 +126,9 @@ class Favorite:
         """
         Return True if name, channel and start match this favorite.
         """
-        if name != self.name:
+        if name.lower() != self.name.lower() and not self.substring:
+            return False
+        if name.lower().find(self.name.lower()) == -1:
             return False
         if not channel in self.channels:
             return False
@@ -189,15 +195,19 @@ class Favorite:
         recordserver.
         """
         name = self.name
-        if len(name) > 45:
-            name = name[:45] + u'...'
+        if len(name) > 30:
+            name = name[:30] + u'...'
         name = u'"' + name + u'"'
         if self.once:
             once = '(schedule once)'
         else:
             once = ''
-        return '%3d %-45s %4d %s' % \
-               (self.id, String(name), self.priority, once)
+        if self.substring:
+            substring = '(substring matching)'
+        else:
+            substring = '(exact matching)'
+        return '%3d %-35s %4d %s %s' % \
+               (self.id, String(name), self.priority, once, substring)
 
 
     def __fxd__(self, fxd):
@@ -223,6 +233,9 @@ class Favorite:
         fxd.add(subnode, node)
         if self.once:
             subnode = fxdparser.XMLnode('once')
+            fxd.add(subnode, node)
+        if self.substring:
+            subnode = fxdparser.XMLnode('substring')
             fxd.add(subnode, node)
         padding = fxdparser.XMLnode('padding', [ ('start', self.start_padding),
                                                  ('stop', self.stop_padding) ])
