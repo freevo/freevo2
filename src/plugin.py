@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2003/09/01 18:45:28  dischi
+# update doc
+#
 # Revision 1.34  2003/08/31 17:15:00  dischi
 # default level is 10 now to make it possible to set items before default ones
 #
@@ -105,7 +108,7 @@ class ItemPlugin(Plugin):
     TRUE, the event won't be passed to other eventhandlers and also not to
     the item itself.
     
-    def eventhandler(self, item, event, menuw):
+    def eventhandler(self, item, event, menuw=None):
     """
     def __init__(self):
         Plugin.__init__(self)
@@ -129,7 +132,7 @@ class DaemonPlugin(Plugin):
         this function will be called every poll_intervall*0.1 seconds
     def draw(self(type, object), osd):
         this function will be called to update the screen
-    def eventhandler(self, event):
+    def eventhandler(self, event, menuw=None):
         events no one else wants will be passed to this functions, when
         you also set the variable event_listener to TRUE, the object will
         get all events
