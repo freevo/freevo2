@@ -941,7 +941,7 @@ TV_RECORD_DIR = None
 # XXX You must change this to fit your local conditions!
 #
 # TV_SETTINGS  = 'NORM INPUT CHANLIST DEVICE'
-# VCR_SETTINGS = 'NORM INPUT CHANLIST DEVICE'
+# TV_VCR_SETTINGS = 'NORM INPUT CHANLIST DEVICE'
 #
 # NORM: ntsc, pal, secam
 # INPUT: television, composite1
@@ -1018,16 +1018,16 @@ TV_RECORDFILE_MASK = '%%m-%%d %%H:%%M %(progname)s - %(title)s'
 REC_SCHEDULE_FILE = '/tmp/freevo_record.lst'
 
 # if using the persitant recordserver
-RECORD_SCHEDULE = '%s/record_schedule.xml' % FREEVO_CACHEDIR
+TV_RECORD_SCHEDULE = '%s/record_schedule.xml' % FREEVO_CACHEDIR
 
-RECORD_SERVER_IP = 'localhost'
-RECORD_SERVER_PORT = 18001
+TV_RECORD_SERVER_IP = 'localhost'
+TV_RECORD_SERVER_PORT = 18001
 
 # start every recording X minutes before scheduled,
 # and stop X minutes after scheduled - default to zero minutes.
 # This must be a value in seconds although at the moment only has
 # the percision of one minute.
-RECORD_PADDING = 0 * 60
+TV_RECORD_PADDING = 0 * 60
 
 if os.uname()[0] == 'FreeBSD':
   # FreeBSD's bsdbt848 TV driver doesn't support audio settings?
@@ -1080,7 +1080,7 @@ VCR_CMD = (CONF.mencoder + ' ' +
            '-o %(filename)s.avi ')         # Filled in by Freevo
 
 # XXX Not used yet
-VCR_SETTINGS = '%s composite1 %s %s' % (CONF.tv, CONF.chanlist, TV_DEVICE)
+TV_VCR_SETTINGS = '%s composite1 %s %s' % (CONF.tv, CONF.chanlist, TV_DEVICE)
 
 
 #
@@ -1092,7 +1092,7 @@ VCR_SETTINGS = '%s composite1 %s %s' % (CONF.tv, CONF.chanlist, TV_DEVICE)
 # Options are: 0 (mpeg2_ps), 1 (mpeg2_ts), 2 (mpeg1), 3 (mpeg2_pes_av),
 #              5 (mpeg2_pes_v), 7 (mpeg2_pes_a), 10 (dvd)
 
-IVTV_OPTIONS = {
+TV_IVTV_OPTIONS = {
     'input'         : 4,
     'resolution'    : '720x480',
     'aspect'        : 2,

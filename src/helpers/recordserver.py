@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/11/30 16:30:58  rshortt
+# Convert some tv variables to new format (TV_).
+#
 # Revision 1.19  2003/11/30 13:07:27  rshortt
 # Make the search function check the sub_title of the programs.
 #
@@ -159,9 +162,9 @@ class RecordServer(xmlrpc.XMLRPC):
         file_ver = None
         scheduledRecordings = None
 
-        if os.path.isfile(config.RECORD_SCHEDULE):
-            if DEBUG: log.debug('GET: reading cached file (%s)' % config.RECORD_SCHEDULE)
-            scheduledRecordings = marmalade.unjellyFromXML(open(config.RECORD_SCHEDULE, 'r'))
+        if os.path.isfile(config.TV_RECORD_SCHEDULE):
+            if DEBUG: log.debug('GET: reading cached file (%s)' % config.TV_RECORD_SCHEDULE)
+            scheduledRecordings = marmalade.unjellyFromXML(open(config.TV_RECORD_SCHEDULE, 'r'))
     
             try:
                 file_ver = scheduledRecordings.TYPES_VERSION
@@ -195,9 +198,9 @@ class RecordServer(xmlrpc.XMLRPC):
             if DEBUG: print 'SAVE: making a new ScheduledRecordings'
             scheduledRecordings = ScheduledRecordings()
     
-        if DEBUG: log.debug('SAVE: saving cached file (%s)' % config.RECORD_SCHEDULE)
+        if DEBUG: log.debug('SAVE: saving cached file (%s)' % config.TV_RECORD_SCHEDULE)
         if DEBUG: log.debug("SAVE: ScheduledRecordings has %s items." % len(scheduledRecordings.programList))
-        marmalade.jellyToXML(scheduledRecordings, open(config.RECORD_SCHEDULE, 'w'))
+        marmalade.jellyToXML(scheduledRecordings, open(config.TV_RECORD_SCHEDULE, 'w'))
         return TRUE
 
  
@@ -349,15 +352,15 @@ class RecordServer(xmlrpc.XMLRPC):
             except:
                 recording = FALSE
 
-            if (prog.start - config.RECORD_PADDING) <= now \
-                   and (prog.stop + config.RECORD_PADDING) >= now \
+            if (prog.start - config.TV_RECORD_PADDING) <= now \
+                   and (prog.stop + config.TV_RECORD_PADDING) >= now \
                    and recording == FALSE:
                 # just add to the 'we want to record this' list
                 # then end the loop, and figure out which has priority,
                 # remember to take into account the full length of the shows
                 # and how much they overlap, or chop one short
 
-                duration = int((prog.stop + config.RECORD_PADDING ) - now - 10)
+                duration = int((prog.stop + config.TV_RECORD_PADDING ) - now - 10)
                 if duration < 10:
                     return FALSE
 
@@ -378,9 +381,9 @@ class RecordServer(xmlrpc.XMLRPC):
                             # Therefore we have overlapping paddings but not
                             # real stop / start times.
                             overlap = (currently_recording.stop + \
-                                       config.RECORD_PADDING) - \
-                                      (prog.start - config.RECORD_PADDING)
-                            if overlap <= (config.RECORD_PADDING/2):
+                                       config.TV_RECORD_PADDING) - \
+                                      (prog.start - config.TV_RECORD_PADDING)
+                            if overlap <= (config.TV_RECORD_PADDING/2):
                                 sr.removeProgram(currently_recording, 
                                                  tv_util.getKey(currently_recording))
                                 plugin.getbyname('RECORD').Stop()
@@ -404,7 +407,7 @@ class RecordServer(xmlrpc.XMLRPC):
 
         for prog in progs.values():
             # If the program is over remove the entry.
-            if ( prog.stop + config.RECORD_PADDING) < now:
+            if ( prog.stop + config.TV_RECORD_PADDING) < now:
                 if DEBUG: log.debug('found a program to clean')
                 cleaned = TRUE
                 del progs[tv_util.getKey(prog)]
@@ -878,7 +881,7 @@ class RecordServer(xmlrpc.XMLRPC):
 def main():
     app = Application("RecordServer")
     rs = RecordServer()
-    app.listenTCP(config.RECORD_SERVER_PORT, server.Site(rs))
+    app.listenTCP(config.TV_RECORD_SERVER_PORT, server.Site(rs))
     rs.startMinuteCheck()
     rc_object.subscribe(rs.eventNotice)
     app.run(save=0)

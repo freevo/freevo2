@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/11/30 16:30:58  rshortt
+# Convert some tv variables to new format (TV_).
+#
 # Revision 1.10  2003/09/05 02:48:12  rshortt
 # Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
 #
@@ -110,7 +113,7 @@ class IVTV(tv.v4l2.Videodev):
 
     def init_settings(self, opts=None):
         if not opts:
-            opts = config.IVTV_OPTIONS
+            opts = config.TV_IVTV_OPTIONS
 
         tv.v4l2.Videodev.init_settings(self)
 

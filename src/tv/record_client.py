@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/11/30 16:30:58  rshortt
+# Convert some tv variables to new format (TV_).
+#
 # Revision 1.10  2003/11/16 17:38:48  dischi
 # i18n patch from David Sagnol
 #
@@ -55,7 +58,7 @@ TRUE = 1
 FALSE = 0
 
 server_string = 'http://%s:%s/' % \
-                (config.RECORD_SERVER_IP, config.RECORD_SERVER_PORT)
+                (config.TV_RECORD_SERVER_IP, config.TV_RECORD_SERVER_PORT)
 
 server = xmlrpclib.Server(server_string)
 
