@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/08/24 18:15:59  outlyer
+# Use the "best" Python pickle available. Starting in Python 2.3 this is
+# a defined constant, so we'll use the constant; older versions of Python
+# will continue to use the binary format.
+#
 # Revision 1.25  2003/08/23 12:51:43  dischi
 # removed some old CVS log messages
 #
@@ -76,8 +81,10 @@ import util
 # XXX Remove when we are ready to require Python 2.3
 if float(sys.version[0:3]) < 2.3:
     import strptime
+    PICKLE_PROTOCOL = 1
 else:
     import _strptime as strptime
+    PICKLE_PROTOCOL = pickle.HIGHEST_PROTOCOL
 
 # The XMLTV handler from openpvr.sourceforge.net
 import xmltv
@@ -184,11 +191,11 @@ def get_guide(popup=None):
             else:
                 # Dump a pickled version for later reads
                 try:
-                    pickle.dump(cached_guide, open(pname, 'w'), 1)
+                    pickle.dump(cached_guide, open(pname, 'w'), PICKLE_PROTOCOL)
                 except:
                     print 'strange cPickle error...try pickle'
                     import pickle as pypickle
-                    pypickle.dump(cached_guide, open(pname, 'w'), 1)
+                    pypickle.dump(cached_guide, open(pname, 'w'), PICKLE_PROTOCOL)
 
     if not cached_guide:
         # An error occurred, return an empty guide
