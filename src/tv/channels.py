@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2004/11/13 16:08:28  dischi
+# remove some old code from tv, some tv plugins do not work anymore
+#
 # Revision 1.30  2004/11/12 20:40:07  dischi
 # some tv crash fixes and cleanup
 #
@@ -112,9 +115,8 @@ import time
 import traceback
 
 import config
-import tv.freq
 import plugin
-# import util.fthread as fthread
+
 from item import Item
 from tv.program_display import ProgramItem
 
@@ -134,13 +136,9 @@ def get_epg():
     """
     Return an existing instance of the EPG database.
     """
-
     global _epg
-
     if not _epg:
         _epg = pyepg.get_epg(EPGDB)
-        # _epg = fthread.call(pyepg.get_epg, EPGDB)
-
     return _epg
 
 
@@ -148,7 +146,6 @@ def get_new_epg():
     """
     Return a fresh instance of the EPG database.
     """
-
     global _epg
     _epg = pyepg.get_epg(EPGDB)
 
@@ -159,42 +156,37 @@ def get_channels():
     """
     Return an already created ChannelList, this may save a bit of time.
     """
-    
     global _channels
-
     if not _channels:
         _debug_('no channels in memory, loading')
         _channels = ChannelList()
-
     return _channels
 
 
 def get_settings_by_id(chan_id):
     """
     """
-    
     settings = []
-
     for c in get_channels().get_all():
         if c.id == chan_id:
             for u in c.uri:
                 which = string.split(u, ':')[0]
                 settings.append(which)
             return settings
+    return None
 
 
 def get_settings_by_name(chan_name):
     """
     """
-    
     settings = []
-
     for c in get_channels().get_all():
         if c.name == chan_name:
             for u in c.uri:
                 which = string.split(u, ':')[0]
                 settings.append(which)
             return settings
+    return None
 
 
 def get_lockfile(which):

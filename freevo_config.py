@@ -480,13 +480,13 @@ plugin.activate('tiny_osd')
 # plugin.activate('record.ivtv_record')
 
 # TV menu plugin to view scheduled recordings
-plugin.activate('tv.scheduled_recordings')
+# plugin.activate('tv.scheduled_recordings')
 
 # TV menu plugin to view and edit favorites
-plugin.activate('tv.view_favorites')
+# plugin.activate('tv.view_favorites')
 
 # TV menu plugin to manually schedule recordings
-plugin.activate('tv.manual_record')
+# plugin.activate('tv.manual_record')
 
 #
 # Enable this for joystick support:

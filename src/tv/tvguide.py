@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.58  2004/11/13 16:08:30  dischi
+# remove some old code from tv, some tv plugins do not work anymore
+#
 # Revision 1.57  2004/11/12 20:40:07  dischi
 # some tv crash fixes and cleanup
 #
@@ -111,7 +114,6 @@ from application import MenuApplication
 
 from channels import get_channels
 
-import record_client as ri
 from item import Item
 
 _guide_ = None
@@ -215,7 +217,10 @@ class TVGuide(MenuApplication):
         #       epg.get_scheduled_recordings() which will in turn just
         #       select * from record_programs.  src/tv/channels.py may
         #       even translate the results into ProgramItems.
-
+        #
+        # NOT WORKING RIGHT NOW
+        return
+    
         if not force and self.last_update + 60 > time.time():
             return
 
@@ -230,11 +235,11 @@ class TVGuide(MenuApplication):
         _debug_('update schedule')
         self.last_update = time.time()
         self.scheduled_programs = []
-        try:
-            (got_schedule, schedule) = ri.getScheduledRecordings()
-        except Exception, e:
-            print e
-            return
+        # try:
+        #     (got_schedule, schedule) = ri.getScheduledRecordings()
+        # except Exception, e:
+        #     print e
+        #     return
         
         # util.misc.comingup(None, (got_schedule, schedule))
 
@@ -290,7 +295,11 @@ class TVGuide(MenuApplication):
         if event == MENU_UP:
             self.channel_list.up()
             self.channel  = self.channel_list.get()
-            self.selected = self.channel.get(self.current_time)[0]
+            try:
+                self.selected = self.channel.get(self.current_time)[0]
+            except Exception, e:
+                print e
+                print self.current_time
             self.refresh()
 
         elif event == MENU_DOWN:

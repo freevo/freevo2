@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.48  2004/11/13 16:08:28  dischi
+# remove some old code from tv, some tv plugins do not work anymore
+#
 # Revision 1.47  2004/11/12 20:40:07  dischi
 # some tv crash fixes and cleanup
 #
@@ -70,25 +73,20 @@
 # ----------------------------------------------------------------------
 
 
-import time, traceback
+import time
+import traceback
 from time import gmtime, strftime
 
-import plugin, config, menu
+import menu
+import plugin
+import config
 import gui
-
-# import util.tv_util as tv_util
-import tv.record_client as record_client
-import event as em
 
 from item import Item
 from gui import AlertBox
 from gui import InputBox
-# from tv.record_types import Favorite
 
 import recordings
-
-DEBUG = config.DEBUG
-
 
 class ProgramItem(Item):
     def __init__(self, title, start, stop, subtitle='', description='',
@@ -220,13 +218,10 @@ class ProgramItem(Item):
     def display_program(self, arg=None, menuw=None):
         items = []
 
-        (got_schedule, schedule) = record_client.getScheduledRecordings()
-        if got_schedule:
-            (result, message) = record_client.isProgScheduled(self.prog, 
-                                                              schedule.getProgramList())
-            if result:
-                self.scheduled = True
-
+        # FIXME:
+        self.scheduled = False
+        self.favorite = False
+        
         if self.scheduled:
 	    items.append(menu.MenuItem(_('Remove from schedule'), 
                                        action=self.remove_program))
@@ -237,12 +232,6 @@ class ProgramItem(Item):
         if self.context != 'search':
             items.append(menu.MenuItem(_('Search for more of this program'), 
                                        action=self.find_more))
-
-        (got_favs, favs) = record_client.getFavorites()
-        if got_favs:
-            (result, junk) = record_client.isProgAFavorite(self.prog, favs)
-            if result:
-                self.favorite = True
 
         if self.favorite:
             items.append(menu.MenuItem(_('Remove from favorites'), 
@@ -273,36 +262,6 @@ class ProgramItem(Item):
         AlertBox(text=_('Scheduling Failed')+(': %s' % msg)).show()
         return
 
-        # XXX: The searching part of this function could probably be moved
-	#      into a util module or record_client itself.
-        _debug_(String('searching for: %s' % self.prog.title))
-
-        pop = AlertBox(text=_('Searching, please wait...'))
-        pop.show()
-
-        items = []
-        (result, matches) = record_client.findMatches(self.prog.title)
-                             
-        pop.destroy()
-        if result:
-            _debug_('search found %s matches' % len(matches))
-
-            f = lambda a, b: cmp(a.start, b.start)
-            matches.sort(f)
-            for prog in matches:
-               items.append(ProgramItem(self, prog, context='search'))
-        else:
-	    if matches == 'no matches':
-                AlertBox(text=_('No matches found for %s') % self.prog.title).show()
-                return
-            AlertBox(text=_('findMatches failed: %s') % matches).show()
-            return
-
-        search_menu = menu.Menu(_( 'Search Results' ), items,
-                                item_types = 'tv program menu')
-        menuw.pushmenu(search_menu)
-        menuw.refresh()
-
 
     def schedule_program(self, arg=None, menuw=None):
         (result, msg) = recordings.schedule_recording(self)
@@ -322,19 +281,6 @@ class ProgramItem(Item):
         msg = 'WORK IN PROGRESS'
         AlertBox(text=_('Scheduling Failed')+(': %s' % msg)).show()
         return
-
-        (result, msg) = record_client.removeScheduledRecording(self.prog)
-        if result:
-            # then menu back one which should show an updated list if we
-            # were viewing scheduled recordings or back to the guide and
-            # update the colour of the program we selected.
-	    # or refresh the menu with remove option instead of schedule
-            if menuw:  
-                menuw.back_one_menu(arg='reload')
-
-        else:
-            AlertBox(text=_('Remove Failed')+(': %s' % msg)).show()
-
 
 
 
@@ -394,13 +340,6 @@ class FavoriteItem(Item):
         items.append(menu.MenuItem(_('Modify channel'), action=self.mod_channel))
         items.append(menu.MenuItem(_('Modify day of week'), action=self.mod_day))
         items.append(menu.MenuItem(_('Modify time of day'), action=self.mod_time))
-
-        # XXX: priorities aren't quite supported yet
-        if 0:
-            (got_favs, favs) = record_client.getFavorites()
-            if got_favs and len(favs) > 1:
-                items.append(menu.MenuItem(_('Modify priority'), 
-                                           action=self.mod_priority))
 
         items.append(menu.MenuItem(_('Save changes'), action=self.save_changes))
         items.append(menu.MenuItem(_('Remove favorite'), action=self.rem_favorite))
@@ -519,45 +458,9 @@ class FavoriteItem(Item):
                      self.title).show()
         else:
             AlertBox(text=_('Scheduling Failed')+(': %s' % msg)).show()
-#         if self.fav_action == 'edit':
-#             (result, msg) = record_client.removeFavorite(self.origname)
-#         else:
-#             result = True
-
-#         if result:
-#             (result, msg) = record_client.addEditedFavorite(self.fav.name, 
-#                                                             self.fav.title, 
-#                                                             self.fav.channel, 
-#                                                             self.fav.dow, 
-#                                                             self.fav.mod, 
-#                                                             self.fav.priority)
-#             if not result:
-#                 AlertBox(text=_('Save Failed, favorite was lost')+(': %s' % msg)).show()
-#             else:
-#                 self.fav_action = 'edit'
-#                 if menuw:  
-#                     menuw.back_one_menu(arg='reload')
-
-#         else:
-#             AlertBox(text=_('Save Failed')+(': %s' % msg)).show()
 
 
     def rem_favorite(self, arg=None, menuw=None):
-        if self.fav_action == 'add':
-            AlertBox(text=_('Favorite not added yet.')).show()
-            return
-       
-        (result, msg) = record_client.removeFavorite(self.origname)
-        if result:
-            # then menu back one which should show an updated list if we
-            # were viewing favorites or back to the program display
-	    # or refresh the program menu with remove option instead of add
-            if menuw:  
-                menuw.back_one_menu(arg='reload')
-
-        else:
-            AlertBox(text=_('Remove Failed')+(': %s' % msg)).show()
-
-
-
-
+        msg = 'WORK IN PROGRESS'
+        AlertBox(text=_('Scheduling Failed')+(': %s' % msg)).show()
+        return

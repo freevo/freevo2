@@ -11,7 +11,7 @@ def add_favorite(prog):
         if prog.channel == 'ANY':
             channel = []
             for c in config.TV_CHANNELS:
-                channel.append(c[1])
+                channel.append(c[0])
         else:
             channel = [ prog.channel ]
         days = (_('Mon'), _('Tue'), _('Wed'), _('Thu'), _('Fri'),

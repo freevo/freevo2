@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/11/13 16:08:27  dischi
+# remove some old code from tv, some tv plugins do not work anymore
+#
 # Revision 1.12  2004/10/29 18:12:49  dischi
 # move comingup to tv_utils
 #
@@ -146,7 +149,8 @@ def descfsize(size):
 
 
 def comingup(items=None, ScheduledRecordings=None):
-    import tv.record_client as ri
+    return _('ComingUp not working')
+    
     import time
     import codecs
 
