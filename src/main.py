@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/02/20 20:14:44  dischi
+# needed for a new gentoo runtime with pylirc
+#
 # Revision 1.16  2003/02/19 08:08:30  krister
 # Applied Aubins new pylirc code after testing it (seems to work with keyboard at least), and adding the pylircmodule to the runtime build environment (not required for keyboard operation).
 #
@@ -108,6 +111,10 @@ import traceback
 
 sys.path.append('.')
 
+# Gentoo runtime has some python files in runtime/python
+if os.path.exists('./runtime/python'):
+    sys.path.append('./runtime/python')
+    
 import config
 
 import util    # Various utilities
