@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/03/22 05:33:59  outlyer
+# Removed a line of debug.
+#
 # Revision 1.19  2004/03/17 15:56:54  outlyer
 # Add Episode field to search results...
 #
@@ -148,7 +151,7 @@ class SearchResource(FreevoResource):
         else:
             movies_only = 0
 
-        print 'DEBUG: movies_only=%s' % movies_only
+        #print 'DEBUG: movies_only=%s' % movies_only
 
         (got_matches, progs) = ri.findMatches(find, movies_only)
 
