@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2003/08/30 19:00:56  dischi
+# multi movie files fixed
+#
 # Revision 1.34  2003/08/30 12:20:10  dischi
 # Respect the given parent for parsing. This avoids calling mmpython again
 # with maybe wrong informations (disc or not). Also restructured the code
@@ -463,6 +466,7 @@ def parse_disc_set(node, file, parent, duplicate_check):
                 for fo in disc['files-options']:
                     dsitem.files_options += [ fo ]
         movies += [ dsitem ]
+
     return movies
 
 
@@ -591,10 +595,10 @@ def parseMovieFile(file, parent=None, duplicate_check=[]):
 
         for freevo_child in freevo.children:
             if freevo_child.name == 'disc-set':
-                movies = parse_disc_set(freevo_child, file, parent, duplicate_check)
+                movies += parse_disc_set(freevo_child, file, parent, duplicate_check)
 
             elif freevo_child.name == 'movie':
-                movies = parse_movie(freevo_child, file, parent, duplicate_check)
+                movies += parse_movie(freevo_child, file, parent, duplicate_check)
 
         for m in movies:
             m.fxd_file = file
