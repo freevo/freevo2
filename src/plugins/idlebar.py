@@ -23,6 +23,15 @@
 #   plugin.activate('idlebar.weather', level=30, args=('4-letter code', ))
 #     For weather station codes see: http://www.nws.noaa.gov/tg/siteloc.shtml
 #     You can also set the unit as second parameter in args ('C', 'F', or 'K')
+#
+#   plugin.activate('idlebar.sensors', level=40, args=('cpusensor', 'casesensor', 'meminfo'))
+#     cpu and case sensor are the corresponding lm_sensors : this should be
+#     temp1, temp2 or temp3. defaults to temp3 for cpu and temp2 for case
+#     meminfo is the memory info u want, types ar the same as in /proc/meminfo :
+#     MemTotal -> SwapFree.
+#     casesensor and meminfo can be set to None if u don't want them
+#     This requires a properly configure lm_sensors! If the standard sensors frontend
+#     delivered with lm_sensors works your OK.
 #   
 #   plugin.activate('idlebar.clock',   level=50)
 #   plugin.activate('idlebar.cdstatus', level=30)
@@ -31,6 +40,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/08/05 17:54:33  dischi
+# added sensors plugin
+#
+# Revision 1.25 2003/08/5 17:00:00 den_RDC
+# added sensors
+#
 # Revision 1.27  2003/08/04 19:40:00  dischi
 # add doc
 #
@@ -126,6 +141,8 @@ import tv_util
 import plugin
 
 import pymetar
+
+import re
 
 DEBUG = config.DEBUG
 
@@ -412,3 +429,136 @@ class holidays(IdleBarPlugin):
         icon = self.get_holiday_icon()
         if icon:
             return osd.draw_image('skins/images/holidays/' + icon, (x, osd.y + 10, -1, -1))[0]
+            
+            
+#----------------------------------- SENSOR --------------------------------
+
+class sensors(IdleBarPlugin):
+    """
+    read lm_sensors data for cpu temperature
+    """
+    class sensor:
+        """
+        small class defining a temperature sensor
+        """
+        def __init__(self, sensor, hotstack):
+            self.initpath = "/proc/sys/dev/sensors/"
+            self.senspath = self.getSensorPath()
+            self.sensor = sensor
+            self.hotstack = hotstack
+            self.washot = FALSE
+            
+        def temp(self):
+            if self.senspath == -1 or not self.senspath:
+                return "?"        
+            
+            file = os.path.join( self.senspath, self.sensor )
+            f = open(file)
+            data = f.read()
+            f.close()
+            
+            temp = int(float(string.split(data)[2]))
+            hot = int(float(string.split(data)[0]))
+            if temp > hot:
+                if self.washot == FALSE:
+                    self.hotstack = self.hotstack + 1
+                    self.washot == TRUE
+                    print temp
+            else:
+                if self.washot == TRUE:
+                    self.hotstack = self.hotstack - 1
+                    self.washot = FALSE
+                
+            return "%s°" % temp
+            
+        def getSensorPath(self):
+            if not os.path.exists(self.initpath):
+                print "LM_Sensors proc data not available? Did you load i2c-proc"
+                print "and configured lm_sensors?"
+                print "temperatures will be bogus"
+                return -1 #failure
+                
+            for senspath in os.listdir(self.initpath):
+                testpath = os.path.join(self.initpath , senspath)
+                if os.path.isdir(testpath): 
+                    return testpath
+                    
+    
+    
+    def __init__(self, cpu='temp3', case='temp2' , ram='MemTotal'):
+        IdleBarPlugin.__init__(self)
+        
+        import re
+        
+        self.hotstack = 0
+        self.case = None
+    
+        self.cpu = self.sensor(cpu, self.hotstack)
+        if case: 
+            self.case = self.sensor(case, self.hotstack)
+
+        self.ram = ram
+        self.retwidth = 0
+
+        
+    def getRamStat(self):
+
+        f = open('/proc/meminfo')
+        data = f.read()
+        f.close()
+        rxp_ram = re.compile('^%s' % self.ram)
+        
+        for line in data.split("\n"):
+            m = rxp_ram.match(line)
+            if m :
+                return "%sM" % (int(string.split(line)[1])/1024)
+        
+    
+    def draw(self, (type, object), x, osd):
+        casetemp = None
+        widthcase = 0
+        widthram  = 0
+
+        font  = osd.get_font('weather')
+        if self.hotstack != 0:
+            font.color = 0xff0000
+        elif font.color == 0xff0000 and self.hotstack == 0:
+            font.color = 0xffffff
+        
+        cputemp = self.cpu.temp()        
+        widthcpu = font.font.stringsize(cputemp)
+        osd.draw_image('skins/icons/misc/cpu.png', (x, osd.y + 8, -1, -1))    
+        osd.write_text(cputemp, font, None, x + 15, osd.y + 55 - font.h, widthcpu, font.h,
+                       'left', 'top')
+        widthcpu = max(widthcpu, 32) + 10
+        
+        if self.case:
+            casetemp = self.case.temp()
+            
+            widthcase = font.font.stringsize(casetemp)
+            osd.draw_image('skins/icons/misc/case.png', (x + 15 + widthcpu,
+                                                         osd.y + 7, -1, -1))
+            osd.write_text(casetemp, font, None, x + 40 + widthcpu,
+                           osd.y + 55 - font.h, widthcase, font.h,
+                           'left', 'top')
+            widthcase = max(widthcase, 32) + 10
+            
+        if self.ram:
+            text = self.getRamStat()
+            widthram = font.font.stringsize(text)
+            if casetemp:
+                img_width = x + 15 + widthcpu + widthcase + 15
+            else:
+                img_width = x + 15 + widthcpu
+            osd.draw_image('skins/icons/misc/memory.png', (img_width, osd.y + 7, -1, -1))
+            osd.write_text(text, font, None, img_width + 15, osd.y + 55 - font.h,
+                           widthram, font.h, 'left', 'top')
+                       
+        if self.retwidth == 0:
+            self.retwidth = widthcpu + 15
+            if self.case: 
+                self.retwidth = self.retwidth + widthcase + 12
+            if self.ram:
+                self.retwidth = self.retwidth + 15 + widthram
+                
+        return self.retwidth
