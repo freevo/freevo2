@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/11/09 12:51:21  dischi
+# fix poster download
+#
 # Revision 1.19  2003/10/03 16:46:13  dischi
 # moved the encoding type (latin-1) to the config file config.LOCALE
 #
@@ -736,15 +739,16 @@ class FxdImdb:
         #if not self.image_url_handler:
         #    return #(title, info, image_urls)
     
-        url = 'http://us.imdb.com/Posters?%s' % id
+        url = 'http://us.imdb.com/title/tt%s/posters' % id
         req = urllib2.Request(url, txdata, txheaders)
         try:
             r = urllib2.urlopen(req)
         except urllib2.HTTPError, error:
             print error
             return (self.title, self.info, self.image_urls)
-    
-        for line in r.read().split("\n"):
+
+        data = r.read().replace('</a>', '\n').replace('</A>', '\n')
+        for line in data.split('\n'):
             m = regexp_url.match(line)
             if m:
                 url = urlparse.urlsplit(m.group(1))
