@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/08/26 19:53:38  outlyer
+# Quiet another Python 2.4 warning
+#
 # Revision 1.25  2003/08/25 12:08:20  outlyer
 # Additional compatibility patches for FreeBSD from Lars Eggert
 #
@@ -97,10 +100,10 @@ LABEL_REGEXP = re.compile("^(.*[^ ]) *$").match
 from struct import *
 import array
 if os.uname()[0] == 'FreeBSD':
-    # FreeBSD ioctls - there is no CDROM.py
+    # FreeBSD ioctls - there is no CDROM.py...
     CDIOCEJECT = 0x20006318
     CDIOCCLOSE = 0x2000631c
-    CDIOREADTOCENTRYS = 0xc0086305
+    CDIOREADTOCENTRYS = 0xc0086305L
     CD_LBA_FORMAT = 1
     CD_MSF_FORMAT = 2
     CDS_NO_DISC = 1
