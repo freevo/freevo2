@@ -5,10 +5,20 @@
 # $Id$
 #
 # Notes:
-# Todo:
+# Todo:     o remove theme style dep
+#           o support 'set to position'
+#           o support 'set percent'
+#           o doc
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/10/05 19:50:55  dischi
+# Cleanup gui/widgets:
+# o remove unneeded widgets
+# o move window and boxes to the gui main level
+# o merge all popup boxes into one file
+# o rename popup boxes
+#
 # Revision 1.3  2004/10/04 18:37:20  dischi
 # make ProgressBox work again
 #
@@ -17,7 +27,6 @@
 #
 # Revision 1.1  2004/07/25 18:14:05  dischi
 # make some widgets and boxes work with the new gui interface
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -54,13 +63,14 @@ class Progressbar(CanvasImage):
         self.bar_position = 0
         self.full = full
         self.style = style
-        self._draw()
+        self.__draw()
         
 
-    def _draw(self):
+    def __draw(self):
         self.draw_rectangle((0,0), self.get_size(), (0,0,0,0), 1)
         r = self.style.rectangle
-        self.draw_image(Rectangle((0,0), self.get_size(), None, r.size, r.color, r.radius))
+        self.draw_image(Rectangle((0,0), self.get_size(), None,
+                                  r.size, r.color, r.radius))
 
         # catch division by zero error.
         if not self.full:
@@ -77,5 +87,5 @@ class Progressbar(CanvasImage):
     def tick(self):
         if self.bar_position < self.full:
             self.bar_position += 1
-        self._draw()
+        self.__draw()
 

@@ -6,6 +6,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/10/05 19:50:55  dischi
+# Cleanup gui/widgets:
+# o remove unneeded widgets
+# o move window and boxes to the gui main level
+# o merge all popup boxes into one file
+# o rename popup boxes
+#
 # Revision 1.8  2004/10/03 15:54:00  dischi
 # make PopupBoxes work again as they should
 #
@@ -119,7 +126,8 @@ class Text(CanvasImage):
         CanvasImage.__init__(self, (stringsize, font.height))
 
         if self.bgcolor:
-            self.draw_rectangle((0, 0), (stringsize, font.height), self.bgcolor, 1)
+            self.draw_rectangle((0, 0), (stringsize, font.height),
+                                self.bgcolor, 1)
 
         try:
             self._render(text, (0, 0), (stringsize, font.height))
@@ -159,7 +167,8 @@ class Text(CanvasImage):
             if ellipses:
                 ellipses_width = self.font.stringsize(text[:c] + ellipses)
 
-            # check were the last position would be if we have to use the ellipses
+            # check were the last position would be if we have to use the
+            # ellipses
             if ellipses and ellipses_c == 0 and ellipses_width > max_width:
                 # if we use ellipses, this is the max position
                 ellipses_c = c
@@ -236,7 +245,8 @@ class Text(CanvasImage):
             x += self.border_radius
             y += self.border_radius
             border = CanvasImage((w, h))
-            border.draw_text(text, (0, 0), font=self.font, color=self.border_color)
+            border.draw_text(text, (0, 0), font=self.font,
+                             color=self.border_color)
             for bx in range(-self.border_radius, self.border_radius+1):
                 for by in range(-self.border_radius, self.border_radius+1):
                     if bx or by:

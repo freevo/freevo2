@@ -6,6 +6,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/10/05 19:50:55  dischi
+# Cleanup gui/widgets:
+# o remove unneeded widgets
+# o move window and boxes to the gui main level
+# o merge all popup boxes into one file
+# o rename popup boxes
+#
 # Revision 1.4  2004/10/03 15:54:00  dischi
 # make PopupBoxes work again as they should
 #
@@ -86,21 +93,27 @@ class Textbox(text.Text):
                 text = ''
             else:
                 if mode == 'hard':
-                    fit, rest = self._cut_string(text, width, '', current_ellipses)
+                    fit, rest = self._cut_string(text, width, '',
+                                                 current_ellipses)
                 else:
-                    fit, rest = self._cut_string(text, width, ' ', current_ellipses)
+                    fit, rest = self._cut_string(text, width, ' ',
+                                                 current_ellipses)
                     if not fit:
                         # nothing fits? Try to break words at ' -_'
-                        fit, rest = self._cut_string(text, width, '-_ ', current_ellipses)
+                        fit, rest = self._cut_string(text, width, '-_ ',
+                                                     current_ellipses)
                         if not fit:
                             # still nothing? Try the 'hard' way:
-                            fit, rest = self._cut_string(text, width, '', current_ellipses)
+                            fit, rest = self._cut_string(text, width, '',
+                                                         current_ellipses)
+                fit = fit.strip()
                 w = font.stringsize(fit)
                 formated_text.append((fit, w))
                 max_width = max(max_width, w)
                 if rest and rest[0] == '\n':
                     rest = rest[1:]
                 text = rest.lstrip(' \t')
+
                 
         # store not fitting text
         self.rest = text
@@ -135,7 +148,8 @@ class Textbox(text.Text):
 
         # create background
         if self.bgcolor:
-            self.draw_rectangle((0, 0), (box_width, box_height), self.bgcolor, 1)
+            self.draw_rectangle((0, 0), (box_width, box_height),
+                                self.bgcolor, 1)
 
         # fill the box with text
         y0 = 0

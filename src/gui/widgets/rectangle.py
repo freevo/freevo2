@@ -6,6 +6,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/10/05 19:50:55  dischi
+# Cleanup gui/widgets:
+# o remove unneeded widgets
+# o move window and boxes to the gui main level
+# o merge all popup boxes into one file
+# o rename popup boxes
+#
 # Revision 1.5  2004/09/07 18:48:57  dischi
 # internal colors are now lists, not int
 #
@@ -23,7 +30,6 @@
 #
 # Revision 1.1  2004/07/25 18:14:05  dischi
 # make some widgets and boxes work with the new gui interface
-#
 #
 # -----------------------------------------------------------------------
 #
@@ -54,7 +60,8 @@ class Rectangle(CanvasImage):
     """
     A rectangle object that can be drawn onto a layer
     """
-    def __init__(self, (x, y), (w, h), bgcolor=None, size=0, color=None, radius=0):
+    def __init__(self, (x, y), (w, h), bgcolor=None, size=0, color=None,
+                 radius=0):
         CanvasImage.__init__(self, ((w, h)))
         if x or y:
             self.set_pos((x, y))
@@ -70,7 +77,8 @@ class Rectangle(CanvasImage):
                 for i in range(size):
                     self.draw_rectangle((i, i), (w-2*i, h-2*i), color, 0)
             if bgcolor:
-                self.draw_rectangle((size, size), (w-2*size, h-2*size), bgcolor, 1)
+                self.draw_rectangle((size, size), (w-2*size, h-2*size),
+                                    bgcolor, 1)
             return
         
         # Round rectangle. Simple again, if there is no alpha
@@ -89,6 +97,7 @@ class Rectangle(CanvasImage):
         if not bgcolor:
             return
 
+        bg = bgcolor[:3]
         if len(bgcolor) == 3 or bgcolor[3] == 255:
             # no alpha, just draw
             # first set some variables, this part needs some tuning because
@@ -97,15 +106,15 @@ class Rectangle(CanvasImage):
             h -= 2 * size
             amplitude = (radius, radius)
             radius += 1
-            self.draw_ellipse((radius+size, radius+size), amplitude, bgcolor[:3], 1)
-            self.draw_ellipse((size+w-radius, radius+size), amplitude, bgcolor[:3], 1)
-            self.draw_ellipse((radius+size, size+h-radius), amplitude, bgcolor[:3], 1)
-            self.draw_ellipse((size+w-radius, size+h-radius), amplitude, bgcolor[:3], 1)
-            self.draw_rectangle((radius+size, size), (w-2*radius, h), bgcolor[:3], 1)
-            self.draw_rectangle((size, radius+size), (w, h-2*radius), bgcolor[:3], 1)
+            self.draw_ellipse((radius+size, radius+size), amplitude, bg, 1)
+            self.draw_ellipse((size+w-radius, radius+size), amplitude, bg, 1)
+            self.draw_ellipse((radius+size, size+h-radius), amplitude, bg, 1)
+            self.draw_ellipse((size+w-radius, size+h-radius), amplitude, bg, 1)
+            self.draw_rectangle((radius+size, size), (w-2*radius, h), bg, 1)
+            self.draw_rectangle((size, radius+size), (w, h-2*radius), bg, 1)
         else:
             # alpha value :-(
-            r = Rectangle((size,size), (w-2*size, h-2*size), bgcolor[:3], 0, 0, radius)
+            r = Rectangle((size,size), (w-2*size, h-2*size), bg, 0, 0, radius)
             self.draw_image(r, alpha=bgcolor[3])
 
 

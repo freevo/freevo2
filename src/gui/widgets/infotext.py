@@ -6,6 +6,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/10/05 19:50:55  dischi
+# Cleanup gui/widgets:
+# o remove unneeded widgets
+# o move window and boxes to the gui main level
+# o merge all popup boxes into one file
+# o rename popup boxes
+#
 # Revision 1.3  2004/08/27 14:16:10  dischi
 # do not draw outside the given size
 #
@@ -17,7 +24,6 @@
 # package can be found in lib/mevas. This is the first version using
 # mevas, there are some problems left, some popup boxes and the tv
 # listing isn't working yet.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -67,17 +73,17 @@ class InfoText(CanvasContainer):
         Update the container items to attribute changes
         FIXME: right now, this is a complete redraw
         """
-        exp_list = self._eval_expression(self.item, self.expression_list,
-                                         self.function_calls)
+        exp_list = self.__eval(self.item, self.expression_list,
+                               self.function_calls)
         if exp_list == self.old_content:
             return
         self.clear()
         if exp_list:
-            self._format(self.size, self.item, exp_list)
+            self.__format(self.size, self.item, exp_list)
         self.old_content = exp_list
         
         
-    def _eval_expression(self, item, expression_list, function_calls):
+    def __eval(self, item, expression_list, function_calls):
         """
         travesse the list evaluating the expressions,
         """
@@ -91,10 +97,12 @@ class InfoText(CanvasContainer):
                 exp = expression_list[i].expression
                 # Evaluate the expression:
                 try:
-                    if exp and eval(exp, {'attr': item.getattr}, function_calls):
+                    if exp and eval(exp, {'attr': item.getattr},
+                                    function_calls):
                         # It's true, we should recurse into children
-                        ret_list += self._eval_expression(item, expression_list[i].content,
-                                                          function_calls)
+                        ret_list += self.__eval(item,
+                                                expression_list[i].content,
+                                                function_calls)
                 except Exception, e:
                     print 'infotext eval error: %s', e
                     print 'expression:', exp
@@ -110,7 +118,8 @@ class InfoText(CanvasContainer):
                     if exp:
                         ret_list.append((expression_list[i], exp))
                 else:
-                    ret_list.append((expression_list[i], expression_list[i].text))
+                    ret_list.append((expression_list[i],
+                                     expression_list[i].text))
             else:
                 ret_list.append((expression_list[i], None))
 
@@ -118,7 +127,7 @@ class InfoText(CanvasContainer):
 
 
 
-    def _format(self, size, item, exp_list):
+    def __format(self, size, item, exp_list):
         """
         Use the 'eval'ed list with the expressions to add all needed
         childs to this conatiner

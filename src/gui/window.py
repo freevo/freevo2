@@ -7,25 +7,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.13  2004/10/03 15:54:00  dischi
-# make PopupBoxes work again as they should
+# Revision 1.1  2004/10/05 19:50:54  dischi
+# Cleanup gui/widgets:
+# o remove unneeded widgets
+# o move window and boxes to the gui main level
+# o merge all popup boxes into one file
+# o rename popup boxes
 #
-# Revision 1.12  2004/08/24 19:23:37  dischi
-# more theme updates and design cleanups
-#
-# Revision 1.11  2004/08/24 16:42:42  dischi
-# Made the fxdsettings in gui the theme engine and made a better
-# integration for it. There is also an event now to let the plugins
-# know that the theme is changed.
-#
-# Revision 1.10  2004/08/22 20:06:21  dischi
-# Switch to mevas as backend for all drawing operations. The mevas
-# package can be found in lib/mevas. This is the first version using
-# mevas, there are some problems left, some popup boxes and the tv
-# listing isn't working yet.
-#
-# Revision 1.9  2004/08/05 17:29:14  dischi
-# improved screen and eventhandler
 #
 # -----------------------------------------------------------------------
 #
@@ -49,16 +37,17 @@
 #
 # ----------------------------------------------------------------------
 
+# python imports
 import copy
 
-from mevas.container import CanvasContainer
-
+# freevo imports
 import eventhandler
-import gui
 
+# gui imports
+from displays import get_display
+from theme_engine import get_theme
+from widgets import Rectangle, CanvasContainer
 
-class ContentPosition:
-    pass
 
 class Window(CanvasContainer):
     """
@@ -67,8 +56,8 @@ class Window(CanvasContainer):
         CanvasContainer.__init__(self)
         self.set_zindex(100)
         
-        self._display_width  = gui.get_display().width
-        self._display_height = gui.get_display().height
+        self._display_width  = get_display().width
+        self._display_height = get_display().height
         self.event_context   = 'input'
 
         self.center_on_screen = False
@@ -86,37 +75,31 @@ class Window(CanvasContainer):
             y  = self._display_height/2 - height/2
             self.center_on_screen = True
 
-        self.content_layout    = gui.get_theme().popup.content
-        self.background_layout = gui.get_theme().popup.background
-
+        layout = get_theme().popup.content
+        
         self.set_size((width, height))
         self.set_pos((x, y))
         
-        self.widget_normal   = self.content_layout.types['widget']
-        self.widget_selected = self.content_layout.types['selected']
-        self.button_normal   = self.content_layout.types['button']
-        self.button_selected = self.content_layout.types['button selected']
-
-        self.content_pos = ContentPosition()
-        self.content_pos.x1 = int(eval(str(self.content_layout.x), { 'MAX': 0}))
-        self.content_pos.y1 = int(eval(str(self.content_layout.y), { 'MAX': 0}))
-        self.content_pos.x2 = -int(eval(str(self.content_layout.width),
-                                        { 'MAX': 0})) - self.content_pos.x1
-        self.content_pos.y2 = -int(eval(str(self.content_layout.height),
-                                        { 'MAX': 0})) - self.content_pos.y1
-        self.content_pos.width = self.content_pos.x1 + self.content_pos.x2
-        self.content_pos.height = self.content_pos.y1 + self.content_pos.y2
+        self.widget_normal   = layout.types['widget']
+        self.widget_selected = layout.types['selected']
+        self.button_normal   = layout.types['button']
+        self.button_selected = layout.types['button selected']
+        self.content_spacing = layout.spacing
         
+        self.__c_x = int(eval(str(layout.x), { 'MAX': 0}))
+        self.__c_y = int(eval(str(layout.y), { 'MAX': 0}))
+        self.__c_w = -int(eval(str(layout.width), { 'MAX': 0}))
+        self.__c_h = -int(eval(str(layout.height), { 'MAX': 0}))
         self._display  = None
 
 
-    def _create_background(self, screen):
+    def __create_background(self, screen):
         """
         The draw function.
         """
-        _debug_('Window::_create_background %s' % self, 1)
+        _debug_('Window::__create_background %s' % self, 1)
         
-        for o in self.background_layout:
+        for o in get_theme().popup.background:
             if o.type == 'rectangle':
                 r = copy.deepcopy(o)
                 r.width  = eval(str(r.width),  { 'MAX' : self.width })
@@ -131,18 +114,27 @@ class Window(CanvasContainer):
                 if r.y + r.height > self.height:
                     r.height = self.height - r.y
 
-            r = gui.Rectangle((r.x, r.y), (r.width, r.height),
-                              r.bgcolor, r.size, r.color, r.radius)
+            r = Rectangle((r.x, r.y), (r.width, r.height),
+                          r.bgcolor, r.size, r.color, r.radius)
             r.set_zindex(-1)
             self.add_child(r)
 
+
+    def get_content_pos(self):
+        return self.__c_x, self.__c_y
+
+
+    def get_content_size(self):
+        w, h = self.get_size()
+        return w - self.__c_w, h - self.__c_h
+    
             
     def show(self):
         if self._display:
             return
         eventhandler.add_window(self)
-        self._display = gui.get_display()
-        self._create_background(self._display)
+        self._display = get_display()
+        self.__create_background(self._display)
         self._display.add_child(self)
         self._display.update()
 

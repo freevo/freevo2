@@ -5,10 +5,18 @@
 # $Id$
 #
 # Notes:
-# Todo:
+# Todo:     o remove theme style dep
+#           o more doc
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/10/05 19:50:55  dischi
+# Cleanup gui/widgets:
+# o remove unneeded widgets
+# o move window and boxes to the gui main level
+# o merge all popup boxes into one file
+# o rename popup boxes
+#
 # Revision 1.4  2004/10/03 15:54:00  dischi
 # make PopupBoxes work again as they should
 #
@@ -47,9 +55,9 @@
 # ----------------------------------------------------------------------- */
 
 
-from label import Label
 from rectangle import Rectangle
 from mevas.image import CanvasImage
+from text import Text
 
 class Button(CanvasImage):
     """
@@ -72,6 +80,6 @@ class Button(CanvasImage):
                       style.rectangle.radius)
         self.draw_image(r, (0, 0))
         width = self.get_size()[0]
-        label = Label(self.text, (0,0), (width - 20, style.font.height),
-                      style, 'center', 'center')
-        self.draw_image(label, ((width - label.get_size()[0]) / 2, 2))
+        text = Text(self.text, (0,0), (width - 20, style.font.height),
+                    style.font, 'center', 'center', 'hard')
+        self.draw_image(text, ((width - text.get_size()[0]) / 2, 2))
