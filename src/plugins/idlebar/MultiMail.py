@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/08/01 10:48:47  dischi
+# deactivate plugin because of interface change
+#
 # Revision 1.5  2004/07/24 17:49:48  dischi
 # rename or deactivate some stuff for gui update
 #
@@ -57,6 +60,9 @@ class MultiMail(IdleBarPlugin):
     
     """
     def __init__(self):
+        self.reason = 'draw() function needs update to work with new interface'
+        return
+
         IdleBarPlugin.__init__(self)
         self.NO_MAILIMAGE = os.path.join(config.ICON_DIR, 'status/newmail_dimmed.png')
         self.MAILIMAGE = os.path.join(config.ICON_DIR, 'status/newmail_active_small.png')

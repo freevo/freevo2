@@ -7,6 +7,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/08/01 10:48:47  dischi
+# deactivate plugin because of interface change
+#
 # Revision 1.2  2004/07/10 12:33:41  dischi
 # header cleanup
 #
@@ -46,6 +49,9 @@ class PluginInterface(IdleBarPlugin):
     plugin.activate('idlebar.volume.Volume', level=0)
     """
     def __init__(self):
+        self.reason = 'draw() function needs update to work with new interface'
+        return
+
         IdleBarPlugin.__init__(self)
         self.plugin_name = 'idlebar.volume'
 

@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/08/01 10:48:47  dischi
+# deactivate plugin because of interface change
+#
 # Revision 1.12  2004/07/24 17:49:48  dischi
 # rename or deactivate some stuff for gui update
 #
@@ -71,6 +74,9 @@ class procstats(IdleBarPlugin):
        Prec: Precision used when drawing cpu usage (default=1)
     """
     def __init__(self,Mem=1,Cpu=1,Prec=1):
+        self.reason = 'draw() function needs update to work with new interface'
+        return
+
         IdleBarPlugin.__init__(self)
         self.drawCpu = Cpu
         self.drawMem = Mem
@@ -293,8 +299,10 @@ class sensors(IdleBarPlugin):
     
     
     def __init__(self, cpu='temp3', case='temp2' , ram='MemTotal'):
+        self.reason = 'draw() function needs update to work with new interface'
+        return
+
         IdleBarPlugin.__init__(self)
-        
         
         self.hotstack = 0
         self.case = None
