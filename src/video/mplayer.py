@@ -20,6 +20,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2003/06/10 18:02:57  dischi
+# Bad alang hack for mplayer and badly mastered DVDs. Restart mplayer if we
+# have audio tracks in the ifo that aren't there.
+#
 # Revision 1.41  2003/05/28 15:34:43  dischi
 # fixed seeking bug
 #
@@ -207,6 +211,8 @@ class MPlayer:
         play a audioitem with mplayer
         """
 
+        self.parameter = (filename, options, item, mode)
+        
         if not mode:
             mode = item.mode
 
@@ -255,7 +261,16 @@ class MPlayer:
             # Filename is DVD title
             filename = 'dvd://%s' % filename  
 
-            additional_args = '-alang %s' % config.DVD_LANG_PREF
+            if config.DVD_LANG_PREF:
+                # There are some bad mastered DVDs out there. E.g. the specials on
+                # the German Babylon 5 Season 2 disc claim they have more than one
+                # audio track, even more then on en. But only the second en works,
+                # mplayer needs to be started without -alang to find the track
+                if hasattr(item, 'mplayer_audio_broken') and item.mplayer_audio_broken:
+                    print '*** dvd audio broken, try without alang ***'
+                else:
+                    additional_args = '-alang %s' % config.DVD_LANG_PREF
+
             if config.DVD_SUBTITLE_PREF:
                 # Only use if defined since it will always turn on subtitles
                 # if defined
@@ -376,6 +391,12 @@ class MPlayer:
                 self.stop()
                 return self.item.eventhandler(event)
 
+        if event == 'AUDIO_ERROR_START_AGAIN':
+            self.stop()
+            self.play(self.parameter[0], self.parameter[1], self.parameter[2],
+                      self.parameter[3])
+            return TRUE
+        
         if event == STORE_BOOKMARK:
             # Bookmark the current time into a file
             
@@ -479,6 +500,14 @@ class MPlayerParser:
         self.parse_additional_data = not (self.item.available_audio_tracks or \
                                           self.item.available_subtitles )
 
+        # DVD items also store mplayer_audio_broken to check if you can
+        # start them with -alang or not
+        if hasattr(item, 'mplayer_audio_broken') or item.mode != 'dvd':
+            self.check_audio = 0
+        else:
+            self.check_audio = 1
+            
+        
     def parse(self, line):
         if self.parse_additional_data:
             m = self.RE_AUDIO(line)
@@ -502,10 +531,21 @@ class MPlayerParser:
                 self.item.video_width = m.group(1)
                 self.item.video_height = m.group(2)
 
-            if self.RE_START(line):
-                print 'data parsing done'
-                self.parse_additional_data = FALSE
-
+        if self.check_audio:
+            if line.find('MPEG: No audio stream found -> no sound') == 0:
+                # OK, audio is broken, restart without -alang
+                self.check_audio = 2
+                self.item.mplayer_audio_broken = TRUE
+                rc.post_event(Event('AUDIO_ERROR_START_AGAIN'))
+                
+        if self.RE_START(line):
+            print 'data parsing done'
+            self.parse_additional_data = FALSE
+            if self.check_audio == 1:
+                # audio seems to be ok
+                self.item.mplayer_audio_broken = FALSE
+            self.check_audio = 0
+                
     def end_type(self, str):
         m = self.RE_EXIT(str)
         if m: return m.group(1)
