@@ -20,11 +20,10 @@ This assumes that freevo is installed in /usr/local/freevo!
 import sys
 import os
 import time
+import config
 
-
-SCHEDULE = '/tmp/freevo_record.lst'
-LOG_FILE = '/tmp/freevo_record.log'
-
+SCHEDULE = config.REC_SCHEDULE_FILE
+LOG_FILE = config.LOGDIR + '/freevo_record.log'
 
 def log(s=''):
     fd = open(LOG_FILE, 'a')
@@ -70,7 +69,7 @@ class ScheduleItem:
         cmd = self.cmd + (' -v -endpos %s' % len_secs)
 
         #cmd += ' >& /dev/null &'
-        cmd += ' >& /tmp/freevo_record_%s.log &' % int(time.time())
+        cmd += ' >& %s/freevo_record_%s.log &' % (config.LOGDIR, int(time.time()))
 
         return cmd
         
@@ -146,11 +145,11 @@ def schedule_init():
         fd.close()
 
 
-def schedule_recording(start_time_s, length_secs, cmd):
+def schedule_recording(start_time_s, length_secs, cmd, channel_id=''):
     '''Schedule a new recording. The start time is a unix timestamp.'''
 
     ts = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time_s))
-    s = '%s,%s,%s\n' % (ts, length_secs, cmd)
+    s = '%s,%s,%s,%s\n' % (ts, length_secs, cmd, channel_id)
 
     schedule_init()
     
