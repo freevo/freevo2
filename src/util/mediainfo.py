@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.59  2004/08/28 17:17:05  dischi
+# force rechecking if it seems a dvd but is not detected as one
+#
 # Revision 1.58  2004/07/27 09:24:38  dischi
 # rename application to eventhandler
 #
@@ -603,7 +606,7 @@ def cache_recursive(dirlist, verbose=False):
         print
 
         
-def disc_info(media):
+def disc_info(media, force=False):
     """
     return mmpython disc information for the media
     """
@@ -614,8 +617,8 @@ def disc_info(media):
     
     cachedir  = os.path.join(config.OVERLAY_DIR, 'disc/metadata')
     cachefile = os.path.join(cachedir, id + '.mmpython')
-    
-    if os.path.isfile(cachefile):
+
+    if os.path.isfile(cachefile) and not force:
         mmdata = util.read_pickle(cachefile)
     else:
         mmdata = mmpython.parse(media.devicename)

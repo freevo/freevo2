@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.66  2004/08/28 17:17:04  dischi
+# force rechecking if it seems a dvd but is not detected as one
+#
 # Revision 1.65  2004/07/26 18:10:18  dischi
 # move global event handling to eventhandler.py
 #
@@ -400,7 +403,7 @@ class Identify_Thread(threading.Thread):
     """
     Thread to watch the rom drives for changes
     """
-    def identify(self, media):
+    def identify(self, media, force_rebuild=False):
         """
         magic!
         Try to find out as much as possible about the disc in the
@@ -452,7 +455,7 @@ class Identify_Thread(threading.Thread):
 
         # if there is a disc, the tray can't be open
         media.tray_open = False
-        disc_info = util.mediainfo.disc_info(media)
+        disc_info = util.mediainfo.disc_info(media, force_rebuild)
         if not disc_info:
             # bad disc, e.g. blank disc.
             os.close(fd)
@@ -546,8 +549,16 @@ class Identify_Thread(threading.Thread):
 
         # Disc is data of some sort. Mount it to get the file info
         util.mount(media.mountdir, force=True)
+        if os.path.isdir(os.path.join(media.mountdir, 'VIDEO_TS')) or \
+               os.path.isdir(os.path.join(media.mountdir, 'video_ts')):
+            if force_rebuild:
+                _debug_('Double check without success')
+            else:
+                _debug_('Undetected DVD, checking again')
+                media.drive_status = CDS_NO_DISC
+                util.umount(media.mountdir)
+                return self.identify(media, True)
         
-
         # Check for movies/audio/images on the disc
         num_video = disc_info['disc_num_video']
         num_audio = disc_info['disc_num_audio']
