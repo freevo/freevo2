@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2003/08/24 10:39:04  dischi
+# fix a bug that the folder.fxd was not loaded anymore
+#
 # Revision 1.28  2003/08/23 18:35:16  dischi
 # new function to set the xml_file to make it possible to parse it later
 #
@@ -183,6 +186,9 @@ class DirItem(Playlist):
         if os.path.isfile(dir+'/folder.fxd'): 
             self.xml_file = dir+'/folder.fxd'
 
+        if self.xml_file:
+            self.set_xml_file(self.xml_file)
+            
         if self.DIRECTORY_SORT_BY_DATE == 2 and self.display_type != 'tv':
             self.DIRECTORY_SORT_BY_DATE = 0
 
