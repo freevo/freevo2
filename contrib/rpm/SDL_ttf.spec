@@ -4,13 +4,13 @@ Version: 2.0.6
 Release: 2_freevo
 Source0: %{name}-%{version}.tar.gz
 Patch0: %{name}-%{version}-freevo.patch
+URL: http://www.libsdl.org/
 Copyright: LGPL
 Group: System Environment/Libraries
 BuildRoot: /var/tmp/%{name}-buildroot
 Prefix: %{_prefix}
-Packager: Hakan Tandogan <hakan@iconsult.com>
-#BuildRequires: SDL-devel
-#BuildRequires: freetype-devel
+BuildRequires: SDL-devel
+BuildRequires: freetype-devel
 
 %description
 This library allows you to use TrueType fonts to render text in SDL
@@ -55,6 +55,8 @@ rm -rf $RPM_BUILD_ROOT
 %{prefix}/include/SDL/
 
 %changelog
+* Mon Sep 23 2003 Sam Lantinga 
+- Rebuilt for Freevo, patched
 * Wed Jan 19 2000 Sam Lantinga 
 - converted to get package information from configure
 * Sun Jan 16 2000 Hakan Tandogan <hakan@iconsult.com>
