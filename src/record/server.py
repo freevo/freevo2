@@ -37,6 +37,7 @@ import os
 import sys
 import time
 import logging
+import notifier
 
 # pyepg
 import pyepg
@@ -444,7 +445,8 @@ class RecordServer(RPCServer):
         self.send_update([recording.short_list()])
         # call plugins
         for p in plugins.list:
-            p.stop_recording(recording)
+            cb = notifier.Callback(p.stop_recording, recording)
+            notifier.addTimer(0, cb)
         # print some debug
         self.print_schedule()
         
