@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.98  2003/11/25 19:01:37  dischi
+# remove the callback stuff from fxd, it was to complicated
+#
 # Revision 1.97  2003/11/24 19:24:59  dischi
 # move the handler for fxd from xml_parser to fxdhandler
 #
@@ -86,18 +89,14 @@ class VideoItem(Item):
         info = None
         create_from_fxd = False
         
-        if isinstance(filename, list) or isinstance(filename, tuple):
-            create_from_fxd = True
+        if parse and filename:
+            if parent and parent.media:
+                url = 'cd://%s:%s:%s' % (parent.media.devicename, parent.media.mountdir,
+                                         filename[len(parent.media.mountdir)+1:])
+            else:
+                url = filename
 
-        else:
-            if parse:
-                if parent and parent.media:
-                    url = 'cd://%s:%s:%s' % (parent.media.devicename, parent.media.mountdir,
-                                             filename[len(parent.media.mountdir)+1:])
-                else:
-                    url = filename
-
-                info = mmpython.parse(url)
+            info = mmpython.parse(url)
 
         Item.__init__(self, parent, info)
 
@@ -138,49 +137,40 @@ class VideoItem(Item):
         self.possible_player = []
 
 
-        if create_from_fxd:
-            fxd, node, callback = filename
+        self.filename = filename
+        self.id       = filename
 
-            self.filename = ''
-            callback(fxd, node, self)
-            self.id = self.filename
+        if not self.name:
+            self.name     = util.getname(filename)
 
-        else:
-            self.filename = filename
-            self.id       = filename
-        
-            if not self.name:
-                self.name     = util.getname(filename)
-        
-            # find image for tv show and build new title
-            if config.TV_SHOW_REGEXP_MATCH(self.name) and filename.find('://') == -1 and \
-                   config.TV_SHOW_DATA_DIR:
+        # find image for tv show and build new title
+        if config.TV_SHOW_REGEXP_MATCH(self.name) and filename.find('://') == -1 and \
+               config.TV_SHOW_DATA_DIR:
 
-                show_name = config.TV_SHOW_REGEXP_SPLIT(self.name)
-                if show_name[0] and show_name[1] and show_name[2] and show_name[3]:
-                    self.name = show_name[0] + " " + show_name[1] + "x" + show_name[2] +\
-                                " - " + show_name[3]
-                    self.image = util.getimage((config.TV_SHOW_DATA_DIR + \
-                                                show_name[0].lower()), self.image)
+            show_name = config.TV_SHOW_REGEXP_SPLIT(self.name)
+            if show_name[0] and show_name[1] and show_name[2] and show_name[3]:
+                self.name = show_name[0] + " " + show_name[1] + "x" + show_name[2] +\
+                            " - " + show_name[3]
+                self.image = util.getimage((config.TV_SHOW_DATA_DIR + \
+                                            show_name[0].lower()), self.image)
 
-                    from video import tv_show_informations
-                    if tv_show_informations.has_key(show_name[0].lower()):
-                        tvinfo = tv_show_informations[show_name[0].lower()]
-                        for i in tvinfo[1]:
-                            self.info[i] = tvinfo[1][i]
-                        if not self.image:
-                            self.image = tvinfo[0]
-                        if not self.xml_file:
-                            self.xml_file = tvinfo[3]
-                        self.mplayer_options = tvinfo[2]
+                from video import tv_show_informations
+                if tv_show_informations.has_key(show_name[0].lower()):
+                    tvinfo = tv_show_informations[show_name[0].lower()]
+                    for i in tvinfo[1]:
+                        self.info[i] = tvinfo[1][i]
+                    if not self.image:
+                        self.image = tvinfo[0]
+                    if not self.xml_file:
+                        self.xml_file = tvinfo[3]
+                    self.mplayer_options = tvinfo[2]
 
-                    self.tv_show = True
-                    self.show_name = show_name
-            
-            # find image for this file
-            # check for episode in TV_SHOW_DATA_DIR
-            self.image = util.getimage(os.path.splitext(filename)[0], self.image)
+                self.tv_show = True
+                self.show_name = show_name
 
+        # find image for this file
+        # check for episode in TV_SHOW_DATA_DIR
+        self.image = util.getimage(os.path.splitext(filename)[0], self.image)
 
         if parent and hasattr(self.parent, 'xml_file') and not self.xml_file:
             self.xml_file = self.parent.xml_file
