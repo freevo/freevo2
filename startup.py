@@ -31,7 +31,7 @@ class task:
         self.appname = app_args.app_name
         self.application = app_args.exec_name
         self.app_args = [self.application] + app_args.exec_args
-        self.pid = os.spawnv(os.P_NOWAIT, self.application, self.app_args)
+        self.pid = os.spawnvp(os.P_NOWAIT, self.application, self.app_args)
         #print 'Spawned "%s", pid %s' % (' '.join(self.app_args), self.pid)
         print 'Spawned "%s", pid %s' % (self.app_args, self.pid)
 
@@ -69,32 +69,32 @@ class AppArgs:
 
         
 # The remote control simulator, debug output in an Xterm
-remote_xterm = ('remote', '/usr/X11R6/bin/xterm',
+remote_xterm = ('remote', 'xterm',
                     [ '-title', 'Freevo Remote Simulator', '-geom', '57x50',
                       '-e', 'python', './rc_client/remote.py', '--remote=%(remote)s'])
 
 # The remote control lirc interface, no debug output
-remote_quiet = ('remote', '/bin/sh',
+remote_quiet = ('remote', 'sh',
                      [ '-c',
-                       '/usr/local/bin/python ./rc_client/remote.py --remote=lirc > /dev/null', ])
+                       'python ./rc_client/remote.py --remote=lirc > /dev/null', ])
 
 # The OSD framebuffer driver, no debug output
-osd_fb_quiet = ('osd_fb', '/bin/sh', ['-c',
-                                      './osd_server/osd_fb/osd_fb > /dev/null'])
+osd_fb_quiet = ('osd_fb', 'sh', ['-c',
+                                 './osd_server/osd_fb/osd_fb > /dev/null'])
 
 # The X11 framebuffer driver
-osd_x11 = ('osd_x11', '/bin/sh', ['-c',
-                                  './osd_server/osd_fb/osd_x11 > /dev/null'])
+osd_x11 = ('osd_x11', 'sh', ['-c',
+                             './osd_server/osd_fb/osd_x11 > /dev/null'])
 
 # The Freevo main application, debug output in an Xterm
-freevo_main_xterm = ('freevo', '/usr/X11R6/bin/xterm',
+freevo_main_xterm = ('freevo', 'xterm',
                      [  '-geom', '80x15', '-title', 'Freevo Main',
-                        '-e', '/usr/local/bin/python',
+                        '-e', 'python',
                        './main.py', '--videotools=%(videotools)s'])
 
 # The Freevo main application, no debug output
-freevo_main_quiet = ('freevo', '/bin/sh',
-                     [ '-c', '/usr/local/bin/python ./main.py '
+freevo_main_quiet = ('freevo', 'sh',
+                     [ '-c', 'python ./main.py '
                        '--videotools=%(videotools)s > /dev/null'])
 
 task_args = []
