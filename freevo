@@ -32,7 +32,7 @@ if test -a freevo_rt/freevo_rt ; then
 
     # Freevo exited, make sure all children are killed
     sleep 1
-    killall -9 freevo_rt/ld-linux.so.2
+    killall -9 freevo_rt/freevo_rt 2&> /dev/null
     exit
 fi
 
