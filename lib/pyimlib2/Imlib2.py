@@ -178,10 +178,9 @@ class Image:
 			raise ValueError, "Invalid scale size specified %s" % repr((w,h))
 		aspect = float(self.width) / float(self.height)
 		if aspect >= 1.0:
-			img = self._image.scale(0, 0, self.width, self.height, w, h / aspect)
+			img = self._image.scale(0, 0, self.width, self.height, w, int(h / aspect))
 		else:
-			img = self._image.scale(0, 0, self.width, self.height, w * aspect, h)
-
+			img = self._image.scale(0, 0, self.width, self.height, int(w * aspect), h)
 		return Image(img)
 
 
@@ -209,7 +208,7 @@ class Image:
 		  dst_pos: a tuple holding the x, y coordinates within the image
 		           where the region will be moved to.
 		Returns: None
-	    """
+		"""
 		return self._image.copy_rect(src_pos, size, dst_pos)
 
 	def blend(self, src, src_pos = (0, 0), src_size = (-1, -1), 
