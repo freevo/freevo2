@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/08/23 15:52:58  dischi
+# fix area hide/show/fade code
+#
 # Revision 1.6  2004/08/23 15:16:02  dischi
 # removed some bad hack
 #
@@ -67,44 +70,53 @@ import util
 import gui.animation as animation 
 
 class AreaScreen:
-    def __init__(self, imagelib):
+    def __init__(self, display, imagelib):
         self.layer = []
         # add 3 layer for drawing (based on how ofter they change):
         for i in range(3):
             c = mevas.CanvasContainer()
+            c.sticky = True
             self.layer.append(c)
+            display.add_child(c)
         self.imagelib  = imagelib
-        self.visible   = False
-        self.width     = 0
-        self.height    = 0
+        self.visible   = True
+        self.display   = display
+        self.width     = display.width
+        self.height    = display.height
         self.frames_per_fade = 3
 
         
-    def show(self, canvas):
+    def show(self):
         """
         show the layer on the display
         """
+        if self.visible:
+            return
         for l in self.layer:
-            canvas.add_child(l)
             l.set_alpha(255)
+            l.show()
         self.visible = True
-        self.canvas  = canvas
-        self.width   = canvas.width
-        self.height  = canvas.height
 
 
     def hide(self):
         """
         hide all layers
         """
+        if not self.visible:
+            return
         for l in self.layer:
-            l.unparent()
+            l.hide()
         self.visible = False
         self.canvas  = None
-        self.width   = 0
-        self.height  = 0
 
 
+    def destroy(self):
+        """
+        destroy all layer
+        """
+        for l in self.layer:
+            l.unparent()
+        
     def fade_out(self):
         """
         fade out layer and hide them
@@ -114,7 +126,6 @@ class AreaScreen:
         a = animation.Fade(self.layer, self.frames_per_fade, 255, 0)
         a.start()
         a.wait()
-        self.hide()
 
         
     def fade_in(self, canvas):
@@ -122,8 +133,7 @@ class AreaScreen:
         show layers again and fade them in
         """
         if not self.visible:
-            pass
-        self.show(canvas)
+            return
         a = animation.Fade(self.layer, self.frames_per_fade, 0, 255)
         a.start()
         a.wait()
@@ -145,8 +155,7 @@ class AreaHandler:
         self.visible       = True
 
         self.canvas = screen
-        self.screen = AreaScreen(imagelib)
-        self.screen.show(self.canvas)
+        self.screen = AreaScreen(screen, imagelib)
         
         # load default areas
         from listing_area   import Listing_Area
@@ -180,7 +189,7 @@ class AreaHandler:
         while self.areas:
             self.areas[0].clear_all()
             del self.areas[0]
-        self.screen.hide()
+        self.screen.destroy()
         self.container = None
 
         
@@ -318,29 +327,25 @@ class AreaHandler:
 
 
 
-    def clear(self):
-        """
-        clean the screen
-        """
-        _debug_('clear skin (%s)' % self.type)
-        self.screen.hide()
-
-
-    def hide(self):
+    def hide(self, fade=True):
         """
         hide the screen
         """
         if self.visible:
-            self.screen.fade_out()
+            if fade:
+                self.screen.fade_out()
+            self.screen.hide()
         self.visible = False
         
 
-    def show(self):
+    def show(self, fade=True):
         """
         hide the screen
         """
         if not self.visible:
-            self.screen.fade_in(self.canvas)
+            self.screen.show()
+            if fade:
+                self.screen.fade_in(self.canvas)
         self.visible = True
         
 
@@ -352,9 +357,6 @@ class AreaHandler:
         """
         settings = self.settings
         
-        if not self.screen.visible and self.visible:
-            self.screen.show(self.canvas)
-            
         if self.type == 'menu':
             if object.skin_settings:
                 settings = object.skin_settings
