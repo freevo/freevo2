@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/10/06 19:19:13  dischi
+# use new childapp interface
+#
 # Revision 1.18  2004/08/23 12:40:00  dischi
 # remove osd.py dep
 #
@@ -115,6 +118,6 @@ class Game:
 
  
 # ======================================================================
-class GameApp(childapp.ChildApp2):
+class GameApp( childapp.Instance ):
     def stop_event(self):
         return em.STOP

@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/10/06 19:14:36  dischi
+# use new childapp interface
+#
 # Revision 1.6  2004/08/26 19:05:10  dischi
 # fix bmovl2 output
 #
@@ -84,7 +87,7 @@ class Display(MPlayerCanvas):
             import childapp
             arg = [config.MPLAYER_CMD] + self.mplayer_args.split(' ') + \
                   [config.OSD_BACKGROUND_VIDEO]
-            self.child = childapp.ChildApp2(arg, stop_osd=0)
+            self.child = childapp.Instance( arg, stop_osd = 0 )
             time.sleep(2)
             self.mplayer_overlay.set_can_write(True)
             while 1:

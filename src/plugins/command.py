@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/10/06 19:15:12  dischi
+# use new childapp interface
+#
 # Revision 1.18  2004/10/05 19:51:49  dischi
 # remove bad import
 #
@@ -71,7 +74,6 @@ import plugin
 import util
 import childapp
 import fxditem
-import rc
 
 from event import *
 from item import Item
@@ -209,7 +211,7 @@ class CommandOptions(PopupBox):
             return self.parent.eventhandler(event)
                                                                                 
 
-class CommandChild(childapp.ChildApp2):
+class CommandChild( childapp.Instance ):
     def poll(self):
         pass
 

@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/10/06 19:14:36  dischi
+# use new childapp interface
+#
 # Revision 1.4  2004/08/23 20:33:39  dischi
 # smaller bugfixes, restart has some problems
 #
@@ -82,7 +85,7 @@ class Display(BmovlCanvas):
             import childapp
             arg = [config.MPLAYER_CMD] + self.mplayer_args.split(' ') + \
                   [config.OSD_BACKGROUND_VIDEO]
-            self.child = childapp.ChildApp2(arg, stop_osd=0)
+            self.child = childapp.Instance( arg, stop_osd = 0 )
             if hasattr(self, 'fifo') and not self.fifo:
                 self.fifo = os.open('/tmp/bmovl', os.O_WRONLY)
                 _debug_('rebuild bmovl')

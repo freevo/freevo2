@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/10/06 19:19:13  dischi
+# use new childapp interface
+#
 # Revision 1.1  2004/08/05 17:35:40  dischi
 # move recordserver and plugins into extra dir
 #
@@ -82,7 +85,7 @@ class Recorder:
 
         self.rec_command = config.VCR_CMD % cl_options
 
-        self.app = childapp.ChildApp2(self.rec_command)
+        self.app = childapp.Instance( self.rec_command )
         if DEBUG:
             print('Recorder::Record: %s' % self.rec_command)
         
