@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.105  2003/11/23 18:44:37  krister
+# Fixed blending bug where the final update contained a shadow of the previous image.
+#
 # Revision 1.104  2003/11/21 12:22:15  dischi
 # move blending effect to osd.py
 #
@@ -945,7 +948,7 @@ class OSD:
 
 
 
-    def update(self,rect=None, blend_surface=None, blend_speed=0):
+    def update(self, rect=None, blend_surface=None, blend_speed=0):
         """
         update the screen
         """
@@ -954,9 +957,14 @@ class OSD:
             blend_next_screen = blend_surface.convert()
             blend_surface = self.screen.convert()
 
-            for i in range(1, (255 / blend_speed)):
-                blend_last_screen.set_alpha(255 - (i * blend_speed))
-                blend_next_screen.set_alpha(i * blend_speed)
+            blend_steps = 255 / blend_speed
+            for i in range(1, blend_steps+1):
+                if i == blend_steps:
+                    blend_last_screen.set_alpha(0)
+                    blend_next_screen.set_alpha(255)
+                else:
+                    blend_last_screen.set_alpha(255 - (i * blend_speed))
+                    blend_next_screen.set_alpha(i * blend_speed)
                 blend_surface.fill((0,0,0,0))
                 blend_surface.blit(blend_last_screen, (0, 0))
                 blend_surface.blit(blend_next_screen, (0, 0))
