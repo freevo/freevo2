@@ -10,6 +10,19 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/12/04 01:31:49  rshortt
+# -get_channels() roughly sorts the channels returned.  We will add sorting
+#  options to Freevo.
+# -Some unicode fixes.
+# -remove_program() will purge a program from all tables (which aren't
+#  actually in use yet)
+# -expire_programs(): new method to remove old data from the EPG to keep it
+#  small (and faster).  This will not remove a programs entry if is found in
+#  the recorded_programs table (not in use yet either).
+# -add_data_xmltv(): pass along which channels to exclude.  Call expire_programs()
+# -add_data_vdr(): accept more VDR properties, also support SVDRP.  This also
+#  checks which channels to exclude. Call expire_programs().
+#
 # Revision 1.10  2004/11/27 15:00:37  dischi
 # create db if missing
 #
@@ -181,9 +194,9 @@ class EPGDB:
         return table
 
 
-    def add_channel(self, id, call_sign, tuner_id):
-        query = 'insert or replace into channels (id, call_sign, tuner_id) \
-                 values ("%s", "%s", "%s")' % (id, call_sign, tuner_id)
+    def add_channel(self, id, display_name, access_id):
+        query = 'insert or replace into channels (id, display_name, access_id) \
+                 values ("%s", "%s", "%s")' % (id, display_name, access_id)
 
         self.execute(query)
         self.commit()
@@ -198,7 +211,7 @@ class EPGDB:
 
 
     def get_channels(self):
-        query = 'select * from channels'
+        query = 'select * from channels order by access_id'
 
         rows = self.execute(query)
         return rows
@@ -264,7 +277,7 @@ class EPGDB:
 
 
         if old_prog:
-            if old_prog['title'] == title:
+            if Unicode(old_prog['title']) == Unicode(title):
                 # program timeslot is unchanged, see if there's anything
                 # that we should update
                 if old_prog['subtitle'] != subtitle:
@@ -385,20 +398,80 @@ class EPGDB:
 
     def remove_program(self, id):
         query = 'delete from programs where id=%d' % id
-
-        print 'REMOVE: %s' % escape_query(query)
         self.execute(query)
+
+        query = 'delete from program_category where program_id=%d' % id
+        self.execute(query)
+
+        query = 'delete from program_advisory where program_id=%d' % id
+        self.execute(query)
+
+        query = 'delete from record_programs where program_id=%d' % id
+        self.execute(query)
+
+        query = 'delete from recorded_programs where program_id=%d' % id
+        self.execute(query)
+
+        self.commit()
+
+
+    def expire_programs(self):
+        EXPIRE_TIME = time.time() - 12*3600
+
+        query = 'delete from program_category where program_id in \
+                 (select id from programs where \
+                id not in (select program_id from recorded_programs) \
+                and stop<%d)' % EXPIRE_TIME
+        rows = self.execute(query)
+
+        query = 'delete from program_advisory where program_id in \
+                 (select id from programs where \
+                id not in (select program_id from recorded_programs) \
+                and stop<%d)' % EXPIRE_TIME
+        rows = self.execute(query)
+
+        query = 'delete from programs where \
+                 id not in (select program_id from recorded_programs) \
+                 and stop<%d' % EXPIRE_TIME
+        rows = self.execute(query)
+
         self.commit()
 
 
     def remove_programs(self, ids):
-        query = 'delete from programs where'
+        clause = ''
         for id in ids:
-            query = '%s id=%d' % id
+            clause += ' id=%d' % id
             if ids.index(id) < len(ids)-1: 
-                query = '%s or' % query
+                clause += ' or'
 
-        print 'REMOVE: %s' % escape_query(query)
+        query = 'delete from programs where %s' % clause
+        #print 'REMOVE: %s' % escape_query(query)
+        self.execute(query)
+
+        clause = ''
+        for id in ids:
+            clause += ' program_id=%d' % id
+            if ids.index(id) < len(ids)-1: 
+                clause += ' or'
+
+        query = 'delete from program_category where %s' % clause
+        #print 'REMOVE: %s' % escape_query(query)
+        self.execute(query)
+
+        query = 'delete from program_advisory where %s' % clause
+        #print 'REMOVE: %s' % escape_query(query)
+        self.execute(query)
+
+        query = 'delete from record_programs where %s' % clause
+        #print 'REMOVE: %s' % escape_query(query)
+        self.execute(query)
+
+        query = 'delete from recorded_programs where %s' % clause
+        #print 'REMOVE: %s' % escape_query(query)
+        self.execute(query)
+
+        #print 'REMOVE: %s' % escape_query(query)
         self.execute(query)
         self.commit()
 
@@ -418,11 +491,11 @@ class EPGDB:
         return rows
 
 
-    # XXX: Should we add a generic load() with a parser argument like before?
-
-    def add_data_xmltv(self, xmltv_file, verbose=1):
+    def add_data_xmltv(self, xmltv_file, exclude_channels=None, verbose=1):
         import xmltv
-        xmltv.load_guide(self, xmltv_file, verbose=verbose)
+        xmltv.load_guide(self, xmltv_file, exclude_channels, verbose)
+
+        self.expire_programs()
 
         return True
 
@@ -431,42 +504,66 @@ class EPGDB:
         return False
 
 
-    def add_data_vdr(self, epg_file=None, host=None, port=None):
+    def add_data_vdr(self, vdr_dir=None, channels_file=None, epg_file=None, 
+                     host=None, port=None, access_by='sid', 
+                     exclude_channels=None, verbose=1):
         try:
             import vdr.vdr
         except:
             print 'vdrpylib is not installed:'
             print 'http://sourceforge.net/projects/vdrpylib/'
 
-        print 'pyepg epgfile1 is %s' % epg_file
-        if os.path.isfile(epg_file):
-            (vdr_dir, epg_file) = os.path.split(epg_file)
-            vdr = vdr.vdr.VDR(epgfile=epg_file, videopath=vdr_dir)
-            print 'pyepg epgfile is %s' % vdr.epgfile
-            epg = vdr.readepg()
-            chans = vdr.channels.values()
-            for c in chans:
-                # print '%s has %d events' % (c.__str__(), len(c.events))
-                print 'Adding channel: %s' % c.id
-                self.add_channel(c.id, c.name, c.rid)
-                for e in c.events:
-                    subtitle = e.subtitle
-                    if not subtitle: subtitle = ''
-                    desc = e.desc
-                    if not desc: desc = ''
-       
-                    self.add_program(c.id, e.title, e.start, int(e.start+e.dur),
-                                     subtitle=subtitle, description=desc)
+        if not (isinstance(exclude_channels, list) or \
+                isinstance(exclude_channels, tuple)):
+            exclude_channels = []
 
+        print 'excluding channels: %s' % exclude_channels
 
-        elif host and port:
-            # ss = s.SVDRP(host='localhost')
-            print 'VDR EPG from SVDRP not yet implimented.'
-            return False
+        vdr = vdr.vdr.VDR(host=host, port=port, videopath=vdr_dir, 
+                          channelsfile=channels_file, epgfile=epg_file,
+                          close_connection=0)
+
+        if vdr.epgfile and os.path.isfile(vdr.epgfile):
+            print 'Using VDR EPG from %s.' % vdr.epgfile
+            if os.path.isfile(vdr.channelsfile):
+                vdr.readchannels()
+            else:
+                print 'WARNING: VDR channels file not found as %s.' % \
+                      vdr.channelsfile
+            vdr.readepg()
+        elif vdr.host and vdr.port:
+            print 'Using VDR EPG from %s:%s.' % (vdr.host, vdr.port)
+            vdr.retrievechannels()
+            vdr.retrieveepg()
         else:
             print 'No source for VDR EPG.'
             return False
 
 
+        chans = vdr.channels.values()
+        for c in chans:
+            if c.id in exclude_channels:  continue
+            if access_by == 'name':
+               access_id = c.name
+            elif access_by == 'rid':
+               access_id = c.rid
+            else:
+               access_id = c.sid
+            
+            if verbose:
+                print 'Adding channel: %s as %s' % (c.id, access_id)
 
+            self.add_channel(c.id, c.name, access_id)
+            for e in c.events:
+                subtitle = e.subtitle
+                if not subtitle: subtitle = ''
+                desc = e.desc
+                if not desc: desc = ''
+       
+                self.add_program(c.id, e.title, e.start, int(e.start+e.dur),
+                                 subtitle=subtitle, description=desc)
+
+        self.expire_programs()
+
+        return True
 
