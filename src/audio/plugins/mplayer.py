@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/09/20 01:55:04  mikeruelle
+# fix refresh issue
+#
 # Revision 1.18  2003/09/19 22:09:16  dischi
 # use new childapp thread function
 #
@@ -281,6 +284,7 @@ class MPlayerApp(childapp.ChildApp):
                     self.item.elapsed = int(m.group(1))
 
             if self.item.elapsed != self.elapsed:
+	        mplayer = plugin.getbyname(plugin.AUDIO_PLAYER)
                 mplayer.refresh()
             self.elapsed = self.item.elapsed
 
