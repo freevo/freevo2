@@ -13,6 +13,7 @@ Requires: freevo-core-suite
 Requires: python-twisted >= 1.0.7 
 Requires: vorbis-tools, libvorbis, lame, cdparanoia
 Requires: mp1e >= 1.9.3
+Requires: pyogg, pyao, pyvorbis
 #Requires: ffmpeg >= 0.4.7
 Requires: %{freevoname}
 
@@ -36,5 +37,8 @@ for using freevo to record TV programs.
 %defattr(-,root,root)
 
 %changelog
+* Thu Sep 18 2003 TC Wan <tcwan@cs.usm.my>
+- Added pyao, pyogg, pyvorbis dependencies
+
 * Wed Sep 17 2003 TC Wan <tcwan@cs.usm.my>
 - Initial SPEC file for RH 9

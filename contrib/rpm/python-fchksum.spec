@@ -32,6 +32,7 @@ BuildRoot: %{_tmppath}/%{name}-buildroot
 env CFLAGS="$RPM_OPT_FLAGS" python setup.py build
 
 %install
+rm -rf $RPM_BUILD_ROOT
 python setup.py install --no-compile --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
 
 mkdir -p $RPM_BUILD_ROOT/%{_includedir}/python%{pyver}
