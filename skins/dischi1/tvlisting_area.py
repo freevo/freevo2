@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/03/15 11:08:40  dischi
+# added channel logos
+#
 # Revision 1.4  2003/03/14 19:29:07  dischi
 # some position fixes
 #
@@ -50,6 +53,7 @@ import copy
 import osd
 import pygame
 import time
+import config
 
 osd = osd.get_singleton()
 
@@ -126,7 +130,6 @@ class TVListing_Area(Skin_Area):
             label_width = r.width
         else:
             label_width += content.spacing
-
 
         # get head height
         if head_val.rectangle:
@@ -241,10 +244,20 @@ class TVListing_Area(Skin_Area):
         for i in range(2,len(to_listing)):
             ty0 = y0
             tx0 = content.x
+
+            channel_logo = config.TV_LOGOS + '/' + to_listing[i].id + '.png'
+            if os.path.isfile(channel_logo):
+                channel_logo = osd.loadbitmap(channel_logo)
+            else:
+                channel_logo = None
+
+
+            logo_geo = [ tx0, ty0, label_width, font_h ]
+            
             if label_val.rectangle:
                 r = self.get_item_rectangle(label_val.rectangle,
                                             label_txt_width, font_h)[2]
-                    
+
                 if r.x < 0:
                     tx0 -= r.x
                 if r.y < 0:
@@ -252,8 +265,25 @@ class TVListing_Area(Skin_Area):
                             
                 self.drawroundbox(tx0 + r.x, ty0 + r.y, r.width, r.height, r)
                 
-            self.write_text(to_listing[i].displayname, label_font, content,
-                            x=tx0, y=ty0, width=label_width, height=font_h)
+                if channel_logo:
+                    logo_geo =[ tx0+r.x+r.size, ty0+r.y+r.size, r.width-2*r.size,
+                                r.height-2*r.size ]
+                    
+
+            if channel_logo:
+                i_w, i_h = channel_logo.get_size()
+                if int(float(logo_geo[2] * i_h) / i_w) > logo_geo[3]:
+                    logo_geo[2] = int(float(logo_geo[3] * i_w) / i_h)
+                else:
+                    logo_geo[3] = int(float(logo_geo[2] * i_h) / i_w)
+                    
+                channel_logo = pygame.transform.scale(channel_logo, logo_geo[2:])
+                self.draw_image(channel_logo, (logo_geo[0], logo_geo[1]))
+
+
+            else:
+                self.write_text(to_listing[i].displayname, label_font, content,
+                                x=tx0, y=ty0, width=label_width, height=font_h)
 
             if to_listing[i].programs:
                 for prg in to_listing[i].programs:
