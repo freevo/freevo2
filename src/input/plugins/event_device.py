@@ -8,6 +8,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/09/30 02:16:20  rshortt
+# -turned this into an InputPlugin type
+# -use the new (old) keymap
+# -remove EVDEV_KEYMAP
+# -set/get device keycodes
+# -request exclusive access to the event device
+# -add EVDEV_NAME to make it easy for users to pick it from a list, at least
+#  until we autodetect it.
+#
 # Revision 1.1  2004/09/25 04:45:51  rshortt
 # A linux event input device plugin, still a work in progress but I am using
 # this for my PVR-250 remote with a custom keymap.  You may find some input
@@ -52,28 +61,29 @@ import os
 import select
 import struct
 import traceback
+import fcntl
 from time import sleep
 
 import config
 import plugin
-import eventhandler
 import rc
 
-from input.linux_input import *
+#from input.linux_input import *
+import input.linux_input as li
+import input.evdev_keymaps as ek
+
 from event import *
 
-ev = eventhandler.get_singleton()
 rc = rc.get_singleton()
 
 
-class PluginInterface(plugin.Plugin):
+class PluginInterface(plugin.InputPlugin):
 
     def __init__(self):
-        plugin.Plugin.__init__(self)
+        plugin.InputPlugin.__init__(self)
 
         self.plugin_name = 'EVDEV'
         self.device_name = config.EVDEV_DEVICE
-        self.keymap = config.EVDEV_KEYMAP
         self.m_ignoreTill = 0
         self.m_ignore = config.EVDEV_REPEAT_IGNORE
         self.m_repeatRate = config.EVDEV_REPEAT_RATE
@@ -88,60 +98,52 @@ class PluginInterface(plugin.Plugin):
         except OSError:
             print 'Unable to open %s, exiting.' % self.device_name
             return
+
+        exclusive = li.exclusive_access(self.fd)
+        if exclusive != -1:
+            print 'Freevo granted exclusive access to %s.' % self.device_name
+
+        print 'Event device name: %s' % li.get_name(self.fd)
+
     
         print 'Using input device %s.' % self.device_name
 
-        rc.inputs.append(self)
+        self.keymap = {}
+        for key in config.KEYMAP:
+            if hasattr(li, 'KEY_%s' % key):
+                code = getattr(li, 'KEY_%s' % key)
+                self.keymap[code] = config.KEYMAP[key]
+
+        device_codes = ek.maps.get(config.EVDEV_NAME)
+        for s, k in device_codes.items():
+            print 'Adding key: 0x%04x = %3d' % (s, k)
+            if not li.set_keycode(self.fd, s, k):
+                print 'Failed to set key: 0x%04x = %3d' % (s, k)
+
+        keymap = li.get_keymap(self.fd)
+        print 'KEYCODES:'
+        for s, k in keymap.items():
+            print '    0x%04x = %3d' % (s, k)
+
+        rc.register(self.handle, True, 1)
 
 
     def config(self):
+        # XXX TODO: Autodetect which type of device it is so we don't need
+        #           to set EVDEV_NAME, or have the user pick it from a list.
+        #           Right now it is called something pretty to make it easier
+        #           for users to choose the right one.
+
         return [
-                ( 'EVDEV_KEYMAP', 
-                  {
-                   KEY_POWER : 'POWER',
-                   KEY_KP0   : '0',
-                   KEY_KP1   : '1',
-                   KEY_KP2   : '2',
-                   KEY_KP3   : '3',
-                   KEY_KP4   : '4',
-                   KEY_KP5   : '5',
-                   KEY_KP6   : '6',
-                   KEY_KP7   : '7',
-                   KEY_KP8   : '8',
-                   KEY_KP9   : '9',
-                   KEY_RED   : 'VOL+',
-                   KEY_CLEAR   : '0',
-                   KEY_MENU   : 'MENU',
-                   KEY_MUTE   : 'MUTE',
-                   KEY_VOLUMEUP   : 'RIGHT',
-                   KEY_VOLUMEDOWN   : 'LEFT',
-                   KEY_FORWARD   : '0',
-                   KEY_EXIT   : 'EXIT',
-                   KEY_CHANNELUP   : 'UP',
-                   KEY_CHANNELDOWN   : 'DOWN',
-                   KEY_BACK   : '0',
-                   KEY_OK   : 'SELECT',
-                   KEY_BLUE   : 'CH-',
-                   KEY_GREEN   : 'CH+',
-                   KEY_PAUSE   : 'PAUSE',
-                   KEY_REWIND   : 'REW',
-                   KEY_FASTFORWARD   : 'FFWD',
-                   KEY_PLAY   : 'PLAY',
-                   KEY_STOP   : 'STOP',
-                   KEY_RECORD   : 'REC',
-                   KEY_YELLOW   : 'VOL-',
-                   KEY_GOTO   : 'INFO',
-                   KEY_SCREEN   : 'DISPLAY',
-                  }, 
-                  'Default event device keymap.' ),
+                ( 'EVDEV_NAME', 'Hauppauge PVR-250/350 IR remote', 'Long name of device.' ),
                 ( 'EVDEV_DEVICE', '/dev/input/event0', 'Input device to use.' ),
                 ( 'EVDEV_REPEAT_IGNORE', 500, 
                   'Time before first repeat (miliseconds).' ),
-                ( 'EVDEV_REPEAT_RATE',   250, 
+                ( 'EVDEV_REPEAT_RATE',   100, 
                   'Time between consecutive repeats (miliseconds).' ), ]
 
 
-    def poll(self):
+    def handle(self):
         command = ''    
         # _debug_('self.fd = %s' % self.fd, level=3)
         (r, w, e) = select.select([self.fd], [], [], 0)
@@ -212,5 +214,5 @@ class PluginInterface(plugin.Plugin):
             pass
 
         print '  sending off event %s' % key
-        ev.post_key(key)
+        self.post_key(key)
 
