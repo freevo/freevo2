@@ -13,9 +13,6 @@
 # I'm only using a TV on vga-connector 2
 # /Krister
 
-./fbset/fbset -fb /dev/fb0 > /dev/null 2> /dev/null
-./fbset/fbset -fb /dev/fb1 > /dev/null 2> /dev/null
-
 # disconnect both heads
 ./matroxset/matroxset -f /dev/fb0 -m 0 > /dev/null 2> /dev/null
 ./matroxset/matroxset -f /dev/fb1 -m 0 > /dev/null 2> /dev/null
