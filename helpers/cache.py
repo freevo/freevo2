@@ -5,10 +5,19 @@ import os
 
 try:
     import config
+
 except ImportError:
-    os.chdir(os.path.join(os.path.dirname(sys.argv[0]), '..'))
+    if 'FREEVO_HOME' in os.environ and os.environ['FREEVO_HOME']:
+        os.chdir(os.environ['FREEVO_HOME'])
+    else:
+        os.chdir(os.path.join(os.path.dirname(sys.argv[0]), '..'))
     sys.path = [ 'src', ] + sys.path
-    import config
+    try:
+        import config
+    except:
+        print 'can\'t find freevo files. Please set FREEVO_HOME to the Freevo root directory'
+        sys.exit(1)
+
 
 import util
 
