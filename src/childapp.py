@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/10/02 16:20:55  dischi
+# add lock() to make it thread save
+#
 # Revision 1.23  2003/09/27 00:36:21  outlyer
 # Dischi was right, this probably doesn't do anything... the problem still
 # exists, though it's fairly intermittent. Reversing this change.
@@ -83,7 +86,7 @@ import sys
 import time
 import os
 import popen2
-import threading
+import threading, thread
 import signal
 
 import config
@@ -115,6 +118,8 @@ class ChildApp:
     def __init__(self, app):
         global __all_childapps__
         __all_childapps__.append(self)
+
+        self.lock = thread.allocate_lock()
 
         prio = 0
         if app.find('--prio=') == 0 and not config.RUNAPP:
@@ -194,12 +199,14 @@ class ChildApp:
         if not self.child:
             return
 
+        self.lock.acquire()
         # maybe child is dead and only waiting?
         try:
             if os.waitpid(self.child.pid, os.WNOHANG)[0] == self.child.pid:
                 self.child = None
                 if not self.infile.closed:
                     self.infile.close()
+                self.lock.release()
                 return
         except OSError:
             pass
@@ -258,6 +265,7 @@ class ChildApp:
             if not self.infile.closed:
                 self.infile.close()
         self.child = None
+        self.lock.release()
 
 
         
