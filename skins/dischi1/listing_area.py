@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/03/29 21:43:39  dischi
+# small bugfix
+#
 # Revision 1.17  2003/03/27 20:10:59  dischi
 # Fix endless loop on empty directories (and added a messages)
 #
@@ -169,6 +172,7 @@ class Listing_Area(Skin_Area):
                                                         ct.font.h)
                     hskip = min(hskip, r.x)
                     vskip = min(vskip, r.y)
+                    items_w = max(items_w, r.width)
 
                 items_h = max(items_h, ct.font.h, rh)
 
