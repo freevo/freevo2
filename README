@@ -1,5 +1,5 @@
 Freevo
-------
+======
 
 $Id$
 
@@ -11,29 +11,38 @@ record video and audio.
 
 
 Overview
---------
+========
 
 Sub-directories:
-
+----------------
 osd_server/             Contains the Linux framebuffer OSD server,
-                        and the simulated OSD server
+						X11 server, and SDL server.
 rc_server/              Contains the lirc remote control client,
                         and the simulated remote control client
-../apps/                Contains MPlayer, NVrec, XviD and Lirc
 matrox_g400/            Contains things that are specific to the 
                         Matrox G400 graphics card. Might work for 
                         other cards such as G450, but that is 
                         untested.
 boot/                   Contains files that are unique for the
                         user's machine, e.g. start scripts.
+helpers/				Standalone utils that grab album covers
+						from the web, imdb data.
+icons/					Some icon files for the main menu						
 
 
-Files:
-
-config.py               Configuration constants, i.e. where the 
+Configuration Files:
+--------------------
+freevo_config.py        Configuration constants, i.e. where the 
                         movie and MP3 files are located, UDP port
-                        numbers to use, etc
-                        You probably need to change stuff in here!
+                        numbers to use, etc. This can be placed 
+						into /etc/freevo or left here
+boot/boot_config		If you're planning to run Freevo from your
+						init scripts, put this into /etc/freevo
+						and edit it to suit your configuration.
+
+
+Application Files:
+------------------
 freevo                  Shell script to start the entire system
                         Modules etc must be initialized before
                         this.
@@ -46,25 +55,24 @@ startup.py              Background task that keeps the three
                           o rc_client - sends remote control cmds to main
 main.py                 Main Freevo application
                           o Uses matrox_g400/v4l1_to_mga for watching TV
-                          o Errors are logged in log_main_err
-                          o Debug output is logged in log_main_out
                           o Uses the rc, osd, mixer and util modules
 rc.py                   Server for the remote control clients
 osd.py                  Client for the OSD servers
 mixer.py                Class for controlling the audio mixer
 util.py                 Various utility functions
 mplayer.py              Handles the external MPlayer app for movies
+xmltv.py				XMLTV parser module from the OpenPVR project
+epg_xmltv.py			XMLTV helper module for Freevo
+config.py	`			Freevo configuration module
 
 
 Coding
-------
+======
 
 o Things that should be fixed are marked "XXX"
 
-
-
 Terminology
------------
+===========
 
 BES             Matrox G400 back-end scaler, HW accelerated viewing of 
                 video
