@@ -62,7 +62,10 @@ def play_movie(menuw=None, arg=None):
     mode = arg[0]
     filename = arg[1]
     playlist = arg[2]
-    mplayer.play(mode, filename, playlist)
+    mplayer_options = ""
+    if len(arg) > 3:
+        mplayer_options = arg[3]
+    mplayer.play(mode, filename, playlist, 0, mplayer_options)
 
 
 #
@@ -172,6 +175,7 @@ def XML_parseVideo(dir, mplayer_files, video_node):
     playlist = []
     mode = 'video'
     add_to_path = dir
+    mplayer_options = ""
     
     for node in video_node.children:
         if node.name == u'dvd':
@@ -190,8 +194,16 @@ def XML_parseVideo(dir, mplayer_files, video_node):
                 try: mplayer_files.remove(os.path.join(add_to_path,file_nodes.textof()))
                 except ValueError: pass
                 playlist += [os.path.join(add_to_path, file_nodes.textof())]
+        if node.name == u'crop':
+            try:
+                crop = "-vop crop=%s:%s:%s:%s " % \
+                       (node.attrs[('', "width")], node.attrs[('', "height")], \
+                        node.attrs[('', "x")], node.attrs[('', "y")])
+                mplayer_options += crop
+            except KeyError:
+                pass
+    return ( mode, first_file, playlist, mplayer_options )
 
-    return ( mode, first_file, playlist)
 
 #
 # parse <info> tag (not implemented yet)
@@ -229,26 +241,31 @@ def cwd(arg=None, menuw=None):
     for file in util.match_files(dir, config.SUFFIX_FREEVO_FILES):
         playlist = []
 
-        parser = qp_xml.Parser()
-        box = parser.parse(open(file).read())
         title = first_file = ""
         image = None
-        
-        if box.children[0].name == 'movie':
-            for node in box.children[0].children:
-                if node.name == u'title':
-                    title = node.textof()
-                elif node.name == u'cover' and \
-                     os.path.isfile(os.path.join(dir,node.textof())):
-                    image = os.path.join(dir, node.textof())
-                elif node.name == u'video':
-                    (mode, first_file, playlist) = XML_parseVideo(dir, mplayer_files, node)
-                elif node.name == u'info':
-                    XML_parseInfo(node)
+
+        try:
+            parser = qp_xml.Parser()
+            box = parser.parse(open(file).read())
+        except:
+            print "XML file %s corrupt" % file
+        else:
+            if box.children[0].name == 'movie':
+                for node in box.children[0].children:
+                    if node.name == u'title':
+                        title = node.textof()
+                    elif node.name == u'cover' and \
+                         os.path.isfile(os.path.join(dir,node.textof())):
+                        image = os.path.join(dir, node.textof())
+                    elif node.name == u'video':
+                        (mode, first_file, playlist, mplayer_options) = \
+                               XML_parseVideo(dir, mplayer_files, node)
+                    elif node.name == u'info':
+                        XML_parseInfo(node)
 
         # only add movies when we have all needed informations
         if title != "" and first_file != "":
-            files += [ ( title, mode, first_file, playlist, image ) ]
+            files += [ ( title, mode, first_file, playlist, mplayer_options, image ) ]
 
     # "normal" movie files
     for file in mplayer_files:
@@ -274,15 +291,15 @@ def cwd(arg=None, menuw=None):
             image = os.path.splitext(file)[0] + ".jpg"
 
         # add file to list
-        files += [ ( title, 'video', file, mplayer_files, image ) ]
+        files += [ ( title, 'video', file, mplayer_files, None, image ) ]
 
 
     # sort "normal" files and xml files by title
     files.sort(lambda l, o: cmp(l[0].upper(), o[0].upper()))
 
     # add everything to the menu
-    for (title, mode, file, playlist, image) in files:
-        m = menu.MenuItem(title, play_movie, (mode, file, playlist))
+    for (title, mode, file, playlist, mplayer_options, image) in files:
+        m = menu.MenuItem(title, play_movie, (mode, file, playlist, mplayer_options))
         m.setImage(('movie', image))
         items += [m]
     

@@ -73,8 +73,8 @@ class MPlayer:
         self.thread.start()
 
 
-    def play(self, mode, filename, playlist, repeat=0):
-
+    def play(self, mode, filename, playlist, repeat=0, mplayer_options=""):
+            
         # Repeat playlist setting
         self.repeat = repeat
         
@@ -83,6 +83,12 @@ class MPlayer:
             # Mplayer command and standard arguments
             mpl = config.MPLAYER_CMD + ' ' + config.MPLAYER_ARGS_MPG
             
+            # Add special arguments for the hole playlist from the
+            # XML file
+            if mplayer_options:
+                mpl += (' ' + mplayer_options)
+                if DEBUG: print 'options, mpl = "%s"' % mpl
+
             # Some files needs special arguments to mplayer, they can be
             # put in a <filename>.mplayer options file. The <filename>
             # includes the suffix (.avi, etc)!
@@ -105,6 +111,7 @@ class MPlayer:
         self.filename = filename
         self.playlist = playlist
         self.mode = mode
+        self.mplayer_options = mplayer_options
         
         if mode == 'video' and not os.path.isfile(filename):
             osd.clearscreen()
@@ -175,7 +182,8 @@ class MPlayer:
                     pos = self.playlist.index(self.filename)
                     pos = (pos-1) % len(self.playlist)
                     filename = self.playlist[pos]
-                    self.play(self.mode, filename, self.playlist)
+                    self.play(self.mode, filename, self.playlist, self.repeat,\
+                              self.mplayer_options)
         elif event == rc.PLAY_END or event == rc.RIGHT:
             if event == rc.LEFT and self.mode == 'dvdnav':
                 self.thread.app.write('L')
@@ -196,7 +204,8 @@ class MPlayer:
                         # Go to the next song in the list
                         pos = (pos+1) % len(self.playlist)
                         filename = self.playlist[pos]
-                        self.play(self.mode, filename, self.playlist)
+                        self.play(self.mode, filename, self.playlist, self.repeat,\
+                                  self.mplayer_options)
             
 
 class MPlayerApp(childapp.ChildApp):
