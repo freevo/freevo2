@@ -7,14 +7,14 @@
 # This file is the python start file for Freevo. It handles the init phase like
 # checking the python modules, loading the plugins and starting the main menu.
 #
-# It also contains the splashscreen and the skin chooser.
+# It also contains the splashscreen.
 #
 # First edition: Krister Lagerstrom <krister-freevo@kmlager.com>
 # Maintainer:    Dirk Meyer <dmeyer@tzi.de>
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al. 
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -69,7 +69,7 @@ except:
     print 'To compile pyimlib run \'make\''
     sys.exit(1)
 
-    
+
 try:
     # i18n support
 
@@ -81,11 +81,11 @@ try:
         from xml.dom import minidom
     except ImportError:
         raise ImportError('No module named pyxml')
-    
+
     # now load other modules to check if all requirements are installed
     import Image
     import sqlite
-    
+
     import config
 
     if config.GUI_DISPLAY == 'SDL':
@@ -141,121 +141,22 @@ except Exception, e:
     print e
     print
     sys.exit(0)
-    
+
 
 # freevo imports
 import eventhandler
 import gui
 import util
 import util.mediainfo
-import menu
 import plugin
 
-from item import Item
-from event import *
 from cleanup import shutdown
+from mainmenu import MainMenu
 
 # load the fxditem to make sure it's the first in the
 # mimetypes list
 import fxditem
 
-
-class SkinSelectItem(Item):
-    """
-    Item for the skin selector
-    """
-    def __init__(self, parent, name, image, skin):
-        Item.__init__(self, parent)
-        self.name  = name
-        self.image = image
-        self.skin  = skin
-
-        
-    def actions(self):
-        """
-        Return the select function to load that skin
-        """
-        return [ ( self.select, '' ) ]
-
-
-    def select(self, arg=None, menuw=None):
-        """
-        Load the new skin and rebuild the main menu
-        """
-        # load new theme
-        theme = gui.theme_engine.set_base_fxd(self.skin)
-        # set it to the main menu as used theme
-        pos = menuw.menustack[0].theme = theme
-        # and go back
-        menuw.back_one_menu()
-
-
-class MainMenu(Item):
-    """
-    This class handles the main menu
-    """
-    def getcmd(self):
-        """
-        Setup the main menu and handle events (remote control, etc)
-        """
-        menuw = menu.MenuWidget()
-        items = []
-        for p in plugin.get('mainmenu'):
-            items += p.items(self)
-
-        for i in items:
-            i.is_mainmenu_item = True
-
-        mainmenu = menu.Menu(_('Freevo Main Menu'), items, item_types='main',
-                             umount_all = 1)
-        mainmenu.item_types = 'main'
-        mainmenu.theme = gui.get_theme()
-        menuw.pushmenu(mainmenu)
-        menuw.show()
-        
-
-    def get_skins(self):
-        """
-        return a list of all possible skins with name, image and filename
-        """
-        ret = []
-        skindir = os.path.join(config.SKIN_DIR, 'main')
-        skin_files = util.match_files(skindir, ['fxd'])
-
-        # image is not usable stand alone
-        skin_files.remove(os.path.join(config.SKIN_DIR, 'main/image.fxd'))
-        skin_files.remove(os.path.join(config.SKIN_DIR, 'main/basic.fxd'))
-        
-        for skin in skin_files:
-            name  = os.path.splitext(os.path.basename(skin))[0]
-            if os.path.isfile('%s.png' % os.path.splitext(skin)[0]):
-                image = '%s.png' % os.path.splitext(skin)[0]
-            elif os.path.isfile('%s.jpg' % os.path.splitext(skin)[0]):
-                image = '%s.jpg' % os.path.splitext(skin)[0]
-            else:
-                image = None
-            ret += [ ( name, image, skin ) ]
-        return ret
-
-
-    def eventhandler(self, event = None, menuw=None, arg=None):
-        """
-        Automatically perform actions depending on the event, e.g. play DVD
-        """
-        # pressing DISPLAY on the main menu will open a skin selector
-        # (only for the new skin code)
-        if event == MENU_CHANGE_STYLE:
-            items = []
-            for name, image, skinfile in self.get_skins():
-                items += [ SkinSelectItem(self, name, image, skinfile) ]
-
-            menuw.pushmenu(menu.Menu(_('Skin Selector'), items))
-            return True
-
-        # give the event to the next eventhandler in the list
-        return Item.eventhandler(self, event, menuw)
-        
-    
 
 class Splashscreen(gui.Area):
     """
@@ -269,15 +170,15 @@ class Splashscreen(gui.Area):
         self.engine    = gui.AreaHandler('splashscreen', ('screen', self))
         self.engine.show()
 
-        
+
     def clear(self):
         """
         clear all content objects
         """
         self.bar.unparent()
         self.text.unparent()
-            
-        
+
+
     def update(self):
         """
         update the splashscreen
@@ -313,7 +214,7 @@ class Splashscreen(gui.Area):
         """
         self.engine.hide(config.GUI_FADE_STEPS)
 
-        
+
     def destroy(self):
         """
         destroy the object
@@ -372,14 +273,14 @@ try:
 
         cachefiles = util.unique(cachefiles)
         splash.bar.set_max_value(len(cachefiles))
-        
+
         for f in cachefiles:
             splash.progress()
             util.mediainfo.load_cache(f)
 
     # fade out the splash screen
     splash.hide()
-    
+
     # prepare again, now that all plugins are loaded
     gui.get_theme().prepare()
 
@@ -393,14 +294,14 @@ try:
     # delete splash screen
     splash.destroy()
     del splash
-    
+
     # kick off the main menu loop
     notifier.addDispatcher( eventhandler.get_singleton().handle )
 
     # start main loop
     notifier.loop()
 
-    
+
 except KeyboardInterrupt:
     log.info('Shutdown by keyboard interrupt')
     # Shutdown Freevo
