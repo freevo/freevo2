@@ -107,5 +107,8 @@
     <font label="info value">
       <shadow x="1" y="1" color="0x000000" visible="yes"/>
     </font>
+
+    <color label="selection bar" value="0xa0000000"/>
+
   </skin>
 </freevo>
