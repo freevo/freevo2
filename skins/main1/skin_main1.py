@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2002/10/09 02:35:16  krister
+# Removed special workarounds for the old runtime since the new runtime works better.
+#
 # Revision 1.38  2002/10/08 04:48:08  krister
 # Made popup box width stringsize dependent.
 #
@@ -109,21 +112,8 @@ import mixer
 # The OSD class, used to communicate with the OSD daemon
 import osd
 
-
-# XXX Krister, please change this to 1 and start freevo with and
-# without the runtime. Very strange.
-
-SHOW_FREEVO_RUNTIME_BUG=0
-
-if not SHOW_FREEVO_RUNTIME_BUG:
-    sys.path.append(os.path.abspath('./gui'))
-    from Color import Color
-    from PopupBox import PopupBox
-    from Label import Label
-    
-else:
-    import gui
-
+# Freevo's GUI class
+import gui
     
 # The RemoteControl class, sets up a UDP daemon that the remote control client
 # sends commands to
@@ -278,28 +268,16 @@ class Skin:
         icn    = icon
         bd_w   = 2
 
-        if not SHOW_FREEVO_RUNTIME_BUG:
-            bg_c   = Color(osd.default_bg_color)
-            fg_c   = Color(osd.default_fg_color)
+        bg_c   = gui.Color(osd.default_bg_color)
+        fg_c   = gui.Color(osd.default_fg_color)
 
-            bg_c.set_alpha(192)
+        bg_c.set_alpha(192)
 
-            pb = PopupBox(left, top, width, height, icon=icn, bg_color=bg_c,
+        pb = gui.PopupBox(left, top, width, height, icon=icn, bg_color=bg_c,
                           fg_color=fg_c, border='flat', bd_width=bd_w)
-            pb.set_text(text)
-            pb.set_h_align(Label.CENTER)
 
-        else:
-            bg_c   = gui.Color(osd.default_bg_color)
-            fg_c   = gui.Color(osd.default_fg_color)
-
-            bg_c.set_alpha(192)
-
-            pb = gui.PopupBox(left, top, width, height, icon=icn, bg_color=bg_c,
-                              fg_color=fg_c, border='flat', bd_width=bd_w)
-
-            pb.set_text(text)
-            pb.set_h_align(gui.Label.CENTER)
+        pb.set_text(text)
+        pb.set_h_align(gui.Label.CENTER)
 
         pb.set_font('skins/fonts/bluehigh.ttf', 24)
         pb.show()

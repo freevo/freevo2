@@ -19,6 +19,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2002/10/09 02:35:15  krister
+# Removed special workarounds for the old runtime since the new runtime works better.
+#
 # Revision 1.4  2002/09/26 09:20:58  dischi
 # Fixed (?) bug when using freevo_runtime. Krister, can you take a look
 # at that?
@@ -82,31 +85,25 @@ __version__ = "$Revision$"
 __author__  = """Thomas Malt <thomas@malt.no>"""
 
 
-# XXX Hack to import modules placed above us.
+import sys
+import os.path
 
+import gui.ZIndexRenderer
 
-if 0:
-    import sys
-    import os.path
-    sys.path.append(os.path.abspath('.'))
-    sys.path.append(os.path.abspath('..'))
+from gui.Border     import *
+from gui.Color      import *
+from gui.GUIObject  import *
+from gui.PopupBox   import *
+from gui.Label      import *
+from gui.exceptions import *
+
+DEBUG = 0
+if DEBUG:
+    from gui.debug import *
     
-    import gui.ZIndexRenderer
+import osd
     
-    from gui.Border     import *
-    from gui.Color      import *
-    from gui.GUIObject  import *
-    from gui.PopupBox   import *
-    from gui.Label      import *
-    from gui.exceptions import *
-    
-    DEBUG = 0
-    if DEBUG:
-        from gui.debug import *
-        
-    import osd
-        
-    osd = osd.get_singleton()
-    zir = gui.ZIndexRenderer.get_singleton()
+osd = osd.get_singleton()
+zir = gui.ZIndexRenderer.get_singleton()
 
 
