@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/08/09 21:19:47  dischi
+# make tv guide working again (but very buggy)
+#
 # Revision 1.20  2004/08/05 17:27:16  dischi
 # Major (unfinished) tv update:
 # o the epg is now taken from pyepg in lib
@@ -53,12 +56,17 @@
 #
 # ----------------------------------------------------------------------- */
 
-
-import config, plugin
-import tv.freq, tv.v4l2
+import os
 import time
+import stat
+
+import config
+import tv.freq, tv.v4l2
+import util
 import plugin
 
+# The Electronic Program Guide
+import pyepg
 
 class Channel:
     """
@@ -101,23 +109,36 @@ class Channel:
         return None
 
                     
+
+
 class ChannelList:
 
-    def __init__(self, epg):
+    def __init__(self):
         self.selected = 0
         self.channels = []
+
+        source = config.XMLTV_FILE
+        pickle = os.path.join(config.FREEVO_CACHEDIR, 'epg')
+
+        epg = util.read_pickle(pickle)
+        if not epg:
+            epg = pyepg.load(source)
+            if not epg:
+                raise Exception(_('TV Guide is corrupt!'))
+            util.save_pickle(epg, pickle)
+
         for c in config.TV_CHANNELS:
             self.channels.append(Channel(c[1], c[2], epg.get(c[0])))
         
 
-    def up(self):
+    def down(self):
         """
         go one channel up
         """
         self.selected = (self.selected + 1) % len(self.channels)
 
 
-    def down(self):
+    def up(self):
         """
         go one channel down
         """

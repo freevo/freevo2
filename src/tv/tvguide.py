@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2004/08/09 21:19:47  dischi
+# make tv guide working again (but very buggy)
+#
 # Revision 1.43  2004/08/05 17:27:16  dischi
 # Major (unfinished) tv update:
 # o the epg is now taken from pyepg in lib
@@ -61,9 +64,6 @@ import gui
 from event import *
 from menu import MenuApplication
 
-# The Electronic Program Guide
-import pyepg
-
 from channels import ChannelList
 
 from program_display import ProgramItem
@@ -106,18 +106,13 @@ class TVGuide(MenuApplication):
         box = gui.PopupBox(text=_('Preparing the program guide'))
         box.show()
 
-        source = config.XMLTV_FILE
-        pickle = os.path.join(config.FREEVO_CACHEDIR, 'epg')
-
-        guide = util.read_pickle(pickle)
-        if not guide:
-            guide = pyepg.load(source)
-            if not guide:
-                gui.AlertBox(text=_('TV Guide is corrupt!')).show()
-                return False
-            util.save_pickle(guide, pickle)
-
-        channels = ChannelList(guide)
+        try:
+            channels = ChannelList()
+        except Exception, e:
+            box.destroy()
+            gui.AlertBox(text=_('TV Guide is corrupt!')).show()
+            print e
+            return False
         
         self.current_time = time.time()
         self.channel      = channels.get()
@@ -170,8 +165,12 @@ class TVGuide(MenuApplication):
         _debug_('update schedule')
         self.last_update = time.time()
         self.scheduled_programs = []
-        (got_schedule, schedule) = ri.getScheduledRecordings()
-
+        try:
+            (got_schedule, schedule) = ri.getScheduledRecordings()
+        except Exception, e:
+            print e
+            return
+        
         util.misc.comingup(None, (got_schedule, schedule))
 
         if got_schedule:
@@ -236,10 +235,8 @@ class TVGuide(MenuApplication):
             self.refresh()
 
         elif event == MENU_LEFT:
-            print self.selected
             pos = max(0, self.selected.index-1)
             self.selected = self.channel.epg.programs[pos]
-            print self.selected
             self.refresh()
 
         elif event == MENU_RIGHT:

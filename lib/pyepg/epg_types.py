@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/08/09 21:19:46  dischi
+# make tv guide working again (but very buggy)
+#
 # Revision 1.2  2004/08/05 17:16:05  dischi
 # misc enhancements
 #
@@ -67,9 +70,9 @@ cache_last_time = 0
 
 class TvProgram:
 
-    def __init__(self):
+    def __init__(self, title=''):
         self.channel_id = ''
-        self.title      = ''
+        self.title      = title
         self.desc       = ''
         self.sub_title  = ''
         self.start      = 0.0
@@ -139,6 +142,7 @@ class TvChannel:
         self.index       = {}
         self.index_start = 0
         self.index_end   = 0
+
         
     def sort(self):
         # Sort the programs so that the earliest is first in the list
@@ -170,10 +174,11 @@ class TvChannel:
         """
         create index for faster access
         """
-        if not self.programs:
-            return
         last  = -1
         index = -1
+
+        last_key = None
+
         for p in self.programs:
             index += 1
             key = self.get_key(p.start)
@@ -181,6 +186,9 @@ class TvChannel:
                 self.index_start = key
             self.index_end = key
             if not self.index.has_key(key):
+                if last_key:
+                    while len(self.index[last_key]) < 48:
+                        self.index[last_key].append(last)
                 self.index[key] = []
             pos = time.localtime(p.start)[3:5]
             pos = pos[0] * 2 + ((pos[1] + 29) / 30)
@@ -193,6 +201,7 @@ class TvChannel:
                 self.index[key].append(last)
             self.index[key].append(index)
             last = index
+            last_key = key
         while len(self.index[key]) < 48:
             self.index[key].append(index)
             
@@ -204,17 +213,31 @@ class TvChannel:
         key = self.get_key(start)
         if key < self.index_start:
             key = self.index_start
-        pos   = time.localtime(start)[3:5]
-        pos   = max(pos[0] * 2 + (pos[1] / 30), 0)
+            pos = 0
+        else:
+            pos   = time.localtime(start)[3:5]
+            pos   = max(pos[0] * 2 + (pos[1] / 30), 0)
+
         start = self.index[key][pos]
         
         key = self.get_key(stop)
         if key > self.index_end:
             key = self.index_end
-        pos  = time.localtime(stop)[3:5]
-        pos  = max(pos[0] * 2 + ((pos[1] + 29) / 30), 0)
-        stop = self.index[key][pos] + 1
+            pos = 47
+        else:
+            pos  = time.localtime(stop)[3:5]
+            pos  = max(pos[0] * 2 + ((pos[1] + 29) / 30), 0)
 
+        if pos == 48:
+            # next day
+            key = self.get_key(stop+60*30)
+            if key > self.index_end:
+                key = self.index_end
+                pos = 47
+            else:
+                pos = 0
+
+        stop = self.index[key][pos] + 1
         return start, stop
 
         
@@ -232,7 +255,7 @@ class TvChannel:
             try:
                 return filter(f, self.programs[start_p:stop_p])[0]
             except Exception, e:
-                return None
+                return TvProgram(_('This channel has no data loaded'))
 
 
 class TvGuide:
@@ -269,6 +292,19 @@ class TvGuide:
             if len(p) and p[-1].start == p[-1].stop:
                 # Oops, something is broken here
                 self.chan_dict[program.channel_id].programs = p[:-1]
+
+            if len(p) and p[-1].stop + 60 < program.start:
+                no_data = TvProgram(_('This channel has no data loaded'))
+                no_data.start = p[-1].stop
+                no_data.stop  = program.start
+                no_data.index = len(self.chan_dict[program.channel_id].programs)
+                self.chan_dict[program.channel_id].programs.append(no_data)
+
+            elif not len(p):
+                no_data = TvProgram(_('This channel has no data loaded'))
+                no_data.stop  = program.start
+                no_data.index = len(self.chan_dict[program.channel_id].programs)
+                self.chan_dict[program.channel_id].programs.append(no_data)
             program.index = len(self.chan_dict[program.channel_id].programs)
             self.chan_dict[program.channel_id].programs.append(program)
 
