@@ -1,5 +1,10 @@
 #!/usr/bin/env python
-#
+
+#changelog 2.0 - logo generation now works, 40 channels
+# added, configuration is now saved in config file
+#including the number of days to be fetched..
+#more info see config file -- den_RDC
+
 # changelog 1.31 - tvsite.be word teveblad.be -- den_RDC
 # universal timezone generator included for tz generation
 
@@ -10,18 +15,29 @@
 import re
 import urllib
 import getopt, sys
-from string import replace
+import ConfigParser
+from string import replace, lower
 from time import time
 from time import localtime
 from time import strftime
 from time import altzone
 
-version = '1.31'
+version = '2.0'
 locale = 'Latin-1'
+TRUE=1
+FALSE=0
 
-def usage():
-     print "xml_tv_be.py version " + version
-     print "xml_tv_be.py --days=3 (default=2)"
+def usage(dagen):
+    """print help message"""
+    print "xml_tv_be.py version %s" % version
+    print "Usage :"
+    print "  xml_tv_be.py > /tmp/TV.xml"    
+    print "    Generate xml listing"
+    print "  xml_tv_be.py --days=3    (current=%s)" % dagen
+    print "    Sets number of days to fetch. Persistent."
+    print "  xml_tv_be --help"
+    print "    Display this message"
+    print "xml_tv_be.config file contains the configuration"
 
 def inttochar( match ):
      """Return the hex string for a decimal number"""
@@ -31,18 +47,21 @@ def inttochar( match ):
 
 
 def escape(s):
-    """Replace special HTML chars"""
+    """Replace special HTML chars and <br> tag"""
     s = replace(s,'&#146;','\x27')
     p = re.compile(r'&#(\d+);')
     s = p.sub(inttochar,s)
     s = replace(s,' & ',' &#38; ')
+    #replace <br> tags, some of them can be in the desc field
+    s = replace(s, '<br>', ' ')
     return s
 
 def localtz():
-    # returns timezone in "+xxxx" or "-xxxx"' format, daylight savings time aware
-    # will work everywhere, minute precision
-    # check if timezone is gmt + or gmt -
-    # will not work if system time is not local i think
+    """returns timezone in "+xxxx" or "-xxxx"' format, daylight savings time aware
+     will work everywhere, minute precision
+     check if timezone is gmt + or gmt -
+     will not work if system time is not local i think """
+     
     if altzone <= 0:
         tz = "+"
     else:
@@ -173,7 +192,7 @@ class cChannel:
 
         print "  <channel id=\"%s\">" % self.id
         print "    <display-name lang=\"nl\">%s</display-name>" % self.title
-        print "    <icon>http://www.teveblad.be/gfx/logos/%s.gif</icon>" % self.title
+        print "    <icon src=\"http://www.teveblad.be/gfx/logos/%s.gif\" />" % self.title
         print "  </channel>"
         for event in self.events:
             event.xml(self.id)
@@ -181,42 +200,45 @@ class cChannel:
 
 def main():
 
+  config = ConfigParser.ConfigParser()
+  
+  #try to open config file and load the settings
+  try:
+    configfile = open('xml_tv_be.config', 'r+')
+  except IOError:
+    sys.stderr.write( 'Cannot open xml_tv_be.config. Does this file exist?\n')
+    sys.exit()    
+  
+  config.readfp(configfile)
+  dagen = config.getint('settings', 'days')
+  
   try:
     opts, args = getopt.getopt(sys.argv[1:], "hd:", ["help", "days="])
   except getopt.GetoptError:
     # print help information and exit:
-    usage()
+    sys.stderr.write('Invalid command line options. Try --help for more info.\n')
     sys.exit(2)
-  dagen = 2
+  
   for o, a in opts:
     if o in ("-h", "--help"):
-       print "help"
-       usage()
+       #print "help"
+       usage(dagen)
        sys.exit()
+       
     if o in ("-d", "--days"):
        dagen = int(a)
+       config.set('settings', 'days' , a)
+       config.write(configfile)
+       print "New value written to config file."
+       sys.exit()
+       
   print "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>"
   print "<tv generator-info-name=\"Script by Bart Heremans and den_RDC\">"
 
-  cChannel(1,'TV1',dagen).xml()
-  cChannel(2,'Ketnet',dagen).xml()
-  cChannel(3,'Canvas',dagen).xml()
-  cChannel(4,'VTM',dagen).xml()
-  cChannel(5,'Kanaal2',dagen).xml()
-  cChannel(6,'VT4',dagen).xml()
-  cChannel(7,'Vitaya',dagen).xml()
-  #cChannel(8,'EventTV',dagen).xml() #LibertyTV
-  #cChannel(9,'KanaalZ',dagen).xml()
-  #cChannel(10,'NBC',dagen).xml()
-  cChannel(11,'Ned1',dagen).xml()
-  cChannel(12,'Ned2',dagen).xml()
-  cChannel(13,'Ned3',dagen).xml()
-  #Channel(14,'Eurosport',dagen).xml()
-  #cChannel(15,'Canal+',dagen).xml()
-  #cChannel(16,'Canal+Blauw',dagen).xml()
-  cChannel(17,'RTBF1',dagen).xml()
-  cChannel(18,'RTBF2',dagen).xml()
-
+  for channel in config.options('channels'):
+    if config.getint('channels', channel) == TRUE:
+       cChannel(lower(channel), channel, dagen).xml()
+  
   print "</tv>"
 
 if __name__ == "__main__":
