@@ -420,6 +420,16 @@
             </background>
             <content x="10" y="10" type="text" height="max-20" width="max-20"
 		spacing="20" font="default">
+                <item type="default">
+                    <text font="info tagline" expression="name"/>
+                    <newline/>
+                    <if expression="description">
+                        <text font="info plot" height="max" mode="soft" 
+			    expression="description"/>
+                        <newline/>
+                    </if>
+		</item>
+
                 <item type="dir">
                     <text font="info tagline" width="max" expression="name"/>
                     <newline/>
