@@ -913,11 +913,6 @@ WWW_PORT = 8080
 WWW_VHOST = 'localhost'
 
 #
-# Allowed IP addresses list. Set to [] to allow all addresses.
-#
-WWW_IP_ALLOW = ['127.0.0.1']
-
-#
 # Username / Password combinations to login to the web interface.
 # These should be overridden in local_conf.py
 # 
