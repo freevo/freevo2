@@ -22,6 +22,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.101  2004/03/12 22:01:18  rshortt
+# Fix some assumptions with channel detection.  Also channel id's are strings,
+# not ints.  I discovered some problems when using an xmltv file generated from
+# zap2it's data-direct service.
+#
 # Revision 1.100  2004/02/27 20:10:02  dischi
 # helper function to check if an object is some sort of string
 #
@@ -706,7 +711,7 @@ def sortchannels(list, key):
     for l in list:
         if len(l[key]) == 1:
             l[key].append(('0',))
-    nlist = map(lambda x, key=key: (int(x[key][1][0]), x), list)
+    nlist = map(lambda x, key=key: (string.split(x[key][1][0])[0], x), list)
     nlist.sort()
     return map(lambda (key, x): x, nlist)
 
@@ -774,13 +779,13 @@ def detect_channels():
         for a in xmltv_channels:
             if (a['display-name'][1][0][0].isdigit()):
                 display_name = a['display-name'][0][0].encode(LOCALE, 'ignore')
-                tunerid = a['display-name'][1][0].encode(LOCALE, 'ignore')
+                tunerid = string.split(a['display-name'][1][0].encode(LOCALE, 'ignore'))[0]
             else:
                 display_name = a['display-name'][1][0].encode(LOCALE, 'ignore')
-                tunerid = a['display-name'][0][0].encode(LOCALE, 'ignore')
+                tunerid = string.split(a['display-name'][0][0].encode(LOCALE, 'ignore'))[0]
             id = a['id'].encode(LOCALE, 'ignore')
 
-            chanlist += [(id,display_name,int(tunerid))]
+            chanlist += [(id,display_name,tunerid)]
 
         try:
             if os.path.isfile(pname):
