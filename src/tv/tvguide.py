@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.55  2004/10/23 14:35:02  rshortt
+# Get smaller amounts of data at a time to improve speed and make our list
+# of programs more realtime.  Also remove import of ProgramItem because we
+# no longer need to create any ourselves.
+#
 # Revision 1.54  2004/10/18 01:19:05  rshortt
 # Remove old ProgramItem and add some changes for new pyepg interface.
 #
@@ -100,7 +105,6 @@ from application import MenuApplication
 
 from channels import get_channels
 
-from program_display import ProgramItem
 import record_client as ri
 from item import Item
 
@@ -134,8 +138,18 @@ class TVGuide(MenuApplication):
                                              'tvlisting', 'info'))
         self.parent = parent
         
-        # self.n_items, hours_per_page = self.engine.items_per_page(('tv', self))
-        # stop_time = start_time + hours_per_page * 60 * 60
+        # theme = self.engine.get_theme()
+        # print 'ENGINE: %s' % dir(self.engine.get_theme())
+        # print '_sets: %s' % theme._sets
+        # print '_layout: %s' % theme._layout
+        # print '_menuset: %s' % theme._menuset
+        # print '_menu: %s' % theme._menu
+        # print 'all_variables: %s' % theme.all_variables
+          
+
+        # hours_per_page = self.engine.get_theme().hours_per_page
+        #self.n_items, hours_per_page = self.engine.hours_per_page(('tv', self))
+        #stop_time = start_time + hours_per_page * 60 * 60
 
         box = gui.PopupBox(text=_('Preparing the program guide'))
         box.show()
@@ -148,9 +162,15 @@ class TVGuide(MenuApplication):
             print e
             traceback.print_exc()
             return False
-        
+
         self.current_time = time.time()
+
+        # stop_time = self.current_time + hours_per_page * 60 * 60
+        stop_time = self.current_time + 3*3600
+        channels.import_programs(self.current_time-3*3600, stop_time)
+
         self.channel      = channels.get()
+        print 'RLS: on channel %s' % self.channel.name
         self.selected     = self.channel.get(self.current_time)[0]
 
         self.channel_list = channels
@@ -178,7 +198,7 @@ class TVGuide(MenuApplication):
         
     def start_tv(self):
         """
-        start the bester player for the current channel
+        start the best player for the current channel
         """
         p = self.channel.player()
         if p:
@@ -187,6 +207,11 @@ class TVGuide(MenuApplication):
 
 
     def update_schedules(self, force=False):
+        # TODO: this will most likely change into something like
+        #       epg.get_scheduled_recordings() which will in turn just
+        #       select * from record_programs.  src/tv/channels.py may
+        #       even translate the results into ProgramItems.
+
         if not force and self.last_update + 60 > time.time():
             return
 
@@ -311,13 +336,12 @@ class TVGuide(MenuApplication):
         elif event == MENU_SELECT or event == PLAY:
             tvlockfile = config.FREEVO_CACHEDIR + '/record'
 
-            # jlaska -- START
             # Check if the selected program is >7 min in the future
             # if so, bring up the record dialog
             now = time.time() + (7*60)
             if self.selected.start > now:
                 self.event_RECORD()
-            # jlaska -- END
+            
             elif os.path.exists(tvlockfile):
                 # XXX: In the future add the options to watch what we are
                 #      recording or cancel it and watch TV.
@@ -341,13 +365,8 @@ class TVGuide(MenuApplication):
         self.engine.draw(self)
 
 
-
     def event_RECORD(self):
-        if self.selected.scheduled:
-            pi = ProgramItem(self.parent, prog=self.selected, context='schedule')
-        else:
-            pi = ProgramItem(self.parent, prog=self.selected, context='guide')
-        pi.display_program(menuw=self.menuw)
+        self.selected.display_program(menuw=self.menuw)
 
 
     def __del__(self):
