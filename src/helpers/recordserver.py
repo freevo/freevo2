@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2004/02/05 02:33:00  outlyer
+# <sigh> Escape ALL the text that goes into the FXD file.
+#
 # Revision 1.28  2004/01/31 01:52:53  mikeruelle
 # at least be able to set another extension manually until we can do this more properly
 #
@@ -837,8 +840,8 @@ class RecordServer(xmlrpc.XMLRPC):
 
         video = makeVideo('file', 'f1', os.path.basename(rec_prog.filename) + fileext)
         fxd.setVideo(video)
-        fxd.info['tagline'] = rec_prog.sub_title
-        fxd.info['plot'] = rec_prog.desc
+        fxd.info['tagline'] = fxd.str2XML(rec_prog.sub_title)
+        fxd.info['plot'] = fxd.str2XML(rec_prog.desc)
         fxd.info['runtime'] = None
         fxd.info['year'] = time.strftime('%m-%d %I:%M', time.localtime(rec_prog.start))
         fxd.title = fxd.str2XML(rec_prog.title)     # I don't know why this has to be done twice?
