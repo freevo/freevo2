@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.93  2003/11/22 15:31:34  dischi
+# renamed config.PREFERED_VIDEO_PLAYER to config.VIDEO_PREFERED_PLAYER
+#
 # Revision 1.92  2003/11/21 17:56:50  dischi
 # Plugins now 'rate' if and how good they can play an item. Based on that
 # a good player will be choosen.
@@ -283,7 +286,7 @@ class VideoItem(Item):
         self.possible_player = []
         for p in plugin.getbyname(plugin.VIDEO_PLAYER, True):
             rating = p.rate(self) * 10
-            if config.PREFERED_VIDEO_PLAYER == p.name:
+            if config.VIDEO_PREFERED_PLAYER == p.name:
                 rating += 1
             self.possible_player.append((rating, p))
             
