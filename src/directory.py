@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2003/10/17 00:19:42  rshortt
+# Respect a parent dir's add_args is we were not given any.
+#
 # Revision 1.46  2003/10/12 13:15:41  dischi
 # prevent a crash when reconfiguring the directory
 #
@@ -130,6 +133,8 @@ class DirItem(Playlist):
         self.info         = {}
         self.mountpoint   = None
         self.add_args     = add_args
+        if add_args == None and parent.add_args: 
+            self.add_args = parent.add_args
 
         # set directory variables to default
         global all_variables
