@@ -145,11 +145,16 @@ class MenuWidget:
         else:
             spacing = selection_height / max(len(self.menu_items),1)
         for choice in self.menu_items:
+            if len(self.menustack) == 1:
+                ptscale = 2.0
+            else:
+                ptscale = 1.0
+            fontsize = config.OSD_FONTSIZE_ITEMS*ptscale
             self.osd.drawstring(choice.name, x0, y0,
                             font=config.OSD_FONTNAME_ITEMS,
-                            ptsize=config.OSD_FONTSIZE_ITEMS)
+                            ptsize=fontsize)
             if menu.selected == choice:
-                self.osd.drawbox(x0 - 4, y0 - 3, 700, y0 + 24, width=3,
+                self.osd.drawbox(x0 - 8, y0 - 3, 705, y0 + fontsize*1.4, width=3,
                              color=self.osd.COL_ORANGE)
             y0 += spacing
 
