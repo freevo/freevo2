@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/02/26 19:59:25  dischi
+# title area in area visible=(yes|no) is working
+#
 # Revision 1.3  2003/02/26 19:18:52  dischi
 # Added blue1_small and changed the coordinates. Now there is no overscan
 # inside the skin, it's only done via config.OVERSCAN_[XY]. The background
@@ -76,20 +79,29 @@ class Skin_Area:
         self.depends   = ()
         self.bg        = [ None, None ]
         self.layout    = None
+        self.visible   = FALSE
         
     def draw(self, settings, menuw):
         menu = menuw.menustack[-1]
 
         self.redraw = FALSE
+
         for d in self.depends:
             self.redraw = d.redraw or self.redraw
         
         dep_redraw = self.redraw
         self.redraw = self.init_vars(settings, menu.item_types)
 
-        # we need to redraw the area we want to draw in
-        if not dep_redraw and self.redraw and self.bg[0]:
+        # we need to restore the area we want to draw in
+        if not dep_redraw and self.redraw and self.bg[0] and self.visible:
             osd.screen.blit(self.bg[0][0], self.bg[0][1:])
+
+        self.visible = self.area_val.visible
+
+        # maybe we are invisible
+        if not self.visible:
+            return
+
         self.draw_background()
 
         # dependencies haven't changed
@@ -123,6 +135,12 @@ class Skin_Area:
 
         if not object.height:
             object.height = self.area_val.height
+
+        if object.width + object.x > self.area_val.width + self.area_val.x:
+            object.width = self.area_val.width - object.x
+
+        if object.height + object.y > self.area_val.height + self.area_val.y:
+            object.height = self.area_val.height - object.y
 
         return object
 
@@ -221,24 +239,36 @@ class Skin_Area:
 
         
     # Draws a text inside a frame based on the settings in the XML file
-    def write_text(self, text, font, area, x=-1, y=-1, width=None, height=None,
-                   mode='hard', ellipses='...'):
+    def write_text(self, text, font, content, x=-1, y=-1, width=None, height=None,
+                   align_h = None, align_v = None, mode='hard', ellipses='...'):
     
-        if x == -1: x = area.x
-        if y == -1: y = area.y
+        if x == -1: x = content.x
+        if y == -1: y = content.y
 
         if width == None:
-            width  = area.width
+            width  = content.width
         if height == None:
-            height = area.height
+            height = content.height
 
+        if not align_h:
+            align_h = content.align
+            if not align_h:
+                align_h = 'left'
+                
+        if not align_v:
+            align_v = content.valign
+            if not align_v:
+                align_v = 'top'
+                
         if font.shadow.visible:
             osd.drawstringframed(text, x+font.shadow.x, y+font.shadow.y,
                                  width, height, font.shadow.color, None,
                                  font=font.name, ptsize=font.size,
+                                 align_h = align_h, align_v = align_v,
                                  mode=mode, ellipses=ellipses)
         osd.drawstringframed(text, x, y, width, height, font.color, None,
                              font=font.name, ptsize=font.size,
+                             align_h = align_h, align_v = align_v,
                              mode=mode, ellipses=ellipses)
 
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/02/26 19:59:26  dischi
+# title area in area visible=(yes|no) is working
+#
 # Revision 1.19  2003/02/25 22:56:00  dischi
 # New version of the new skin. It still looks the same (except that icons
 # are working now), but the internal structure has changed. Now it will
@@ -95,9 +98,9 @@ rc = rc.get_singleton()
 # We have five areas, all inherit from Skin_Area (file area.py)
 #
 # Skin_Screen   (this file)
-# Skin_Title    (not implemented yet)
-# Skin_Listing  (listing.py)
+# Skin_Title    (this file)
 # Skin_View     (not implemented yet)
+# Skin_Listing  (listing.py)
 # Skin_Info     (not implemented yet)
 
 from area import Skin_Area
@@ -113,6 +116,49 @@ class Skin_Screen(Skin_Area):
     def update_content(self, settings, menuw):
         pass
 
+
+class Skin_Title(Skin_Area):
+    def __init__(self, parent):
+        Skin_Area.__init__(self, 'title')
+        self.depends = ( parent.screen_area, )
+        self.text = ''
+
+        
+    def update_content_needed(self, settings, menuw):
+        menu = menuw.menustack[-1]
+
+        layout    = self.layout
+        area      = self.area_val
+        content   = self.calc_geometry(layout.content, copy_object=TRUE)
+
+        if content.type == 'menu':
+            text = menu.heading
+        else:
+            text = menu.selected.name
+
+        return self.text != text
+
+
+    def update_content(self, settings, menuw):
+        menu = menuw.menustack[-1]
+
+        layout    = self.layout
+        area      = self.area_val
+        content   = self.calc_geometry(layout.content, copy_object=TRUE)
+
+        if content.type == 'menu':
+            text = menu.heading
+        else:
+            text = menu.selected.name
+
+        self.text = text
+
+        if not settings.font.has_key(content.font):
+            print '*** font <%s> not found' % content.font
+            return
+
+        self.write_text(text, settings.font[content.font], content, height=-1,
+                        mode='hard')
 
 ###############################################################################
 
@@ -145,7 +191,7 @@ class Skin:
     hold = 0
 
     def __init__(self):
-        self.area_names = ( 'screen', 'listing')
+        self.area_names = ( 'screen', 'title', 'listing')
         for a in self.area_names:
             setattr(self, '%s_area' % a, eval('Skin_%s%s(self)' % (a[0].upper(), a[1:])))
 

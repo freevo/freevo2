@@ -42,7 +42,8 @@
 
     <menu type="main">
       <!-- definition of the main menu -->
-      <view layout="view0" visible="no"/>
+      <view visible="no"/>
+      <title visible="no"/>
       <listing layout="list_main" visible="yes">
 	<area x="230" y="120" width="380" height="390"/> 
       </listing>
@@ -58,8 +59,13 @@
     <layout label="screen0">
       <background>
 	<image filename="../images/aubin_bg2" x="0" y="0" label="background"/>
-	<image filename="../images/logo.png" x="10" y="10" width="200" height="98"/>
+	<image filename="../images/logo.png" x="10" y="0" width="200" height="98"/>
       </background>
+    </layout>
+
+    <!-- title -->
+    <layout label="title0">
+      <content x="210" type="menu" font="main" align="center"/>
     </layout>
 
     <!-- default listing area -->

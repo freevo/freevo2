@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/02/26 19:59:27  dischi
+# title area in area visible=(yes|no) is working
+#
 # Revision 1.12  2003/02/26 19:18:53  dischi
 # Added blue1_small and changed the coordinates. Now there is no overscan
 # inside the skin, it's only done via config.OVERSCAN_[XY]. The background
@@ -246,7 +249,7 @@ class XML_data:
             if XML_types[c][0] in ('str', 'file', 'font'):
                 setattr(self, c, '')
             elif XML_types[c][0] in ('visible',):
-                setattr(self, c, 1)
+                setattr(self, c, 'yes')
             else:
                 setattr(self, c, 0)
 
@@ -323,8 +326,8 @@ class XML_rectangle(XML_data):
 
 class XML_content(XML_data):
     def __init__(self):
-        XML_data.__init__(self, ('type', 'spacing', 'x', 'y',
-                                 'width', 'height'))
+        XML_data.__init__(self, ('type', 'spacing', 'x', 'y', 'width',
+                                 'height', 'font', 'align', 'valign'))
         self.types = {}
         
     def parse(self, node, scale, current_dir):
@@ -370,7 +373,7 @@ class XML_layout:
 
 class XML_font(XML_data):
     def __init__(self, label):
-        XML_data.__init__(self, ('name', 'size', 'color', 'align', 'valign'))
+        XML_data.__init__(self, ('name', 'size', 'color'))
         self.label = label
         self.shadow = XML_data(('visible', 'color', 'x', 'y'))
         

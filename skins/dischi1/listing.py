@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/02/26 19:59:26  dischi
+# title area in area visible=(yes|no) is working
+#
 # Revision 1.3  2003/02/26 19:18:53  dischi
 # Added blue1_small and changed the coordinates. Now there is no overscan
 # inside the skin, it's only done via config.OVERSCAN_[XY]. The background
@@ -227,7 +230,7 @@ class Skin_Listing(Skin_Area):
                                       r.width - icon_x, r.height, r)
                                   
                     
-                self.write_text(text, font, area, x=x0 + hskip + icon_x, y=y0 + vskip,
+                self.write_text(text, font, content, x=x0 + hskip + icon_x, y=y0 + vskip,
                                 width=width-icon_x, height=-1, mode='hard')
 
             else:
