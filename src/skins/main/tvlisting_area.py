@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/09/21 18:18:31  dischi
+# do not calc the arrows twice
+#
 # Revision 1.9  2003/09/14 20:09:37  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
@@ -384,10 +387,8 @@ class TVListing_Area(Skin_Area):
                                                          (item_h-rightarrow_size[1])/2))
 
                     if tx0 < tx1:
-                        pad_x0 = flag_right * rightarrow_size[0]
-                        pad_x1 = flag_left  * leftarrow_size[0]
-                        self.write_text(prg.title, font, content, x=tx0+ig.x + pad_x0,
-                                        y=ty0+ig.y, width=ig.width - pad_x0 - pad_x1,
+                        self.write_text(prg.title, font, content, x=tx0+ig.x,
+                                        y=ty0+ig.y, width=ig.width,
                                         height=item_h - 2 * ig.y,
                                         align_v='center', align_h = val.align)
 
@@ -406,7 +407,8 @@ class TVListing_Area(Skin_Area):
             else:
                 v = area.images['downarrow']
             self.draw_image(area.images['downarrow'].filename, v)
-
+        print 'x'
+        
     def check_schedule (self):
 
         SCHEDULE = config.REC_SCHEDULE_FILE
