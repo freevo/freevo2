@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.145  2004/03/12 18:33:56  dischi
+# text input patch from Viggo Frederiksen
+#
 # Revision 1.144  2004/03/10 20:13:52  dischi
 # set keyboard repeat
 #
@@ -596,7 +599,8 @@ class OSD:
             if event.type == KEYDOWN:
                 if not map and event.key > 30:
                     try:
-                        return chr(event.key)
+                        if event.unicode != u'':
+                            return event.unicode
                     except:
                         pass
                     
@@ -621,7 +625,8 @@ class OSD:
                 else:
                     # don't know what this is, return it as it is
                     try:
-                        return chr(event.key)
+                        if event.unicode != u'':
+                            return event.unicode
                     except:
                         return None
     
