@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.87  2004/02/14 19:29:07  dischi
+# send osd message when not using a submenu
+#
 # Revision 1.86  2004/02/14 13:02:34  dischi
 # o remove unneeded functions
 # o add function to delete the submenu or do nothing (avoid duplicate code)
@@ -75,6 +78,7 @@ import config
 import plugin
 import util
 import skin
+import rc
 
 from event import *
 from item import Item
@@ -205,9 +209,11 @@ class MenuWidget(GUIObject):
             self.init_page()
 
 
-    def delete_submenu(self, refresh=True, reload=False):
+    def delete_submenu(self, refresh=True, reload=False, osd_message=''):
         """
-        Delete the last menu if it is a submenu
+        Delete the last menu if it is a submenu. Also refresh or reload the
+        new menu if the attributes are set to True. If osd_message is set,
+        this message will be send if the current menu is no submenu
         """
         if len(self.menustack) > 1 and hasattr(self.menustack[-1], 'is_submenu') and \
                self.menustack[-1].is_submenu:
@@ -217,6 +223,8 @@ class MenuWidget(GUIObject):
                 self.back_one_menu()
             else:
                 self.delete_menu()
+        elif len(self.menustack) > 1 and osd_message:
+            rc.post_event(Event(OSD_MESSAGE, arg=osd_message))
 
             
     def back_one_menu(self, arg=None, menuw=None):
