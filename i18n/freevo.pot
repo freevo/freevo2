@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2003-11-16 18:41+0100\n"
+"POT-Creation-Date: 2003-11-20 15:05+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -427,19 +427,19 @@ msgstr ""
 msgid "Scanning directory, be patient..."
 msgstr ""
 
-#: directory.py:885 directory.py:923
+#: directory.py:893 directory.py:931
 msgid "on"
 msgstr ""
 
-#: directory.py:887 directory.py:890 directory.py:925 directory.py:928
+#: directory.py:895 directory.py:898 directory.py:933 directory.py:936
 msgid "off"
 msgstr ""
 
-#: directory.py:892 directory.py:930
+#: directory.py:900 directory.py:938
 msgid "auto"
 msgstr ""
 
-#: directory.py:934
+#: directory.py:942
 msgid "Configure"
 msgstr ""
 
@@ -543,7 +543,7 @@ msgstr ""
 msgid "h = Help"
 msgstr ""
 
-#: setup_freevo.py:95
+#: setup_freevo.py:105
 msgid ""
 "Usage: ./freevo setup [OPTION]...\n"
 "Set up Freevo for your specific environment.\n"
@@ -569,15 +569,50 @@ msgid ""
 "southafrica,\n"
 "                                  argentina, canada-cable\n"
 "\n"
-"   --sysfirst                   look in the system path for applications "
-"before checking\n"
-"                                ./runtime/apps.\n"
-"\n"
 "   --help                       display this help and exit\n"
 "\n"
 "The default is \"--geometry=800x600 --display=x11 --tv=ntsc --chanlist=us-"
 "cable\"\n"
 "Please report bugs to <freevo-users@lists.sourceforge.net>.\n"
+msgstr ""
+
+#: setup_freevo.py:209
+#, python-format
+msgid "checking for %-13s"
+msgstr ""
+
+#: setup_freevo.py:222
+#, python-format
+msgid "ERROR: can't find %s"
+msgstr ""
+
+#: setup_freevo.py:223
+msgid "Please install the application respectively put it in your path."
+msgstr ""
+
+#: setup_freevo.py:224
+msgid "Freevo won't work without it."
+msgstr ""
+
+#: setup_freevo.py:230
+msgid "not found (deactivated)"
+msgstr ""
+
+#: setup_freevo.py:293
+#, python-format
+msgid "System path first=%s"
+msgstr ""
+
+#: setup_freevo.py:293
+msgid "No"
+msgstr ""
+
+#: setup_freevo.py:293
+msgid "Yes"
+msgstr ""
+
+#: setup_freevo.py:309
+msgid "Settings:"
 msgstr ""
 
 #: games/__init__.py:75
