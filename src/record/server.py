@@ -7,6 +7,18 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/08/08 19:03:18  rshortt
+# -Integrate some things into the Twisted main loop:
+#   -More events.
+#   -Daemon plugins (polling and event handling).
+#
+# -Recording plugins are now DaemonPlugins that:
+#   -Get polled.
+#   -Handle events.
+#
+# -Add hooks to a temporary cached guide in util.tv_util, at least until
+#  there's a replacement.
+#
 # Revision 1.1  2004/08/05 17:35:40  dischi
 # move recordserver and plugins into extra dir
 #
@@ -34,8 +46,6 @@
 
 
 import sys, string, random, time, os, re, pwd, traceback, stat
-import config
-from util import vfs
 
 from twisted.web import xmlrpc, server
 from twisted.internet import reactor
@@ -46,8 +56,12 @@ from util.marmalade import jellyToXML, unjellyFromXML
 from tv.record_types import TYPES_VERSION
 from tv.record_types import ScheduledRecordings
 
+import config, eventhandler
+eh = eventhandler.get_singleton()
+
+from event import *
+from util import vfs
 import tv.record_types
-import tv.epg_xmltv
 import util.tv_util as tv_util
 import plugin
 import util.popen3
@@ -57,7 +71,13 @@ def _debug_(text):
     if config.DEBUG:
         log.debug(String(text))
         
-# XXX: In the future we should have one lock per VideoGroup.
+# Do we need to change logging?
+appname = os.path.splitext(os.path.basename(sys.argv[0]))[0]
+logfile = '%s/%s-%s.log' % (config.LOGDIR, appname, os.getuid())
+log.startLogging(open(logfile, 'a'))
+
+# XXX: change this to use tv0.lock (ivtvX/dvbX/etc..) where
+#      it may need it.
 tv_lock_file = config.FREEVO_CACHEDIR + '/record'
 
 
@@ -142,7 +162,7 @@ class RecordServer(xmlrpc.XMLRPC):
 
  
     def scheduleRecording(self, prog=None):
-        global guide
+        guide = tv_util.get_guide()
 
         if not prog:
             return (FALSE, 'no prog')
@@ -194,10 +214,8 @@ class RecordServer(xmlrpc.XMLRPC):
 
         # if prog.start <= now and prog.stop >= now and recording:
         if recording:
-            #print 'stopping current recording'
-            rec_plugin = plugin.getbyname('RECORD')
-            if rec_plugin:
-                rec_plugin.Stop()
+            _debug_('stopping current recording')
+            eh.post(Event('STOP_RECORDING', arg=prog))
        
         return (TRUE, 'recording removed')
    
@@ -218,7 +236,7 @@ class RecordServer(xmlrpc.XMLRPC):
 
 
     def findProg(self, chan=None, start=None):
-        global guide
+        guide = tv_util.get_guide()
 
         _debug_('findProg: %s, %s' % (chan, start))
 
@@ -232,14 +250,14 @@ class RecordServer(xmlrpc.XMLRPC):
                 _debug_('CHANNEL MATCH: %s' % ch.id)
                 for prog in ch.programs:
                     if start == '%s' % prog.start:
-                        _debug_('PROGRAM MATCH: %s' % prog.decode().title)
-                        return (TRUE, prog.decode())
+                        _debug_('PROGRAM MATCH: %s' % prog.title)
+                        return (TRUE, prog)
 
         return (FALSE, 'prog not found')
 
 
     def findMatches(self, find=None, movies_only=None):
-        global guide
+        guide = tv_util.get_guide()
 
         _debug_('findMatches: %s' % find)
     
@@ -288,7 +306,7 @@ class RecordServer(xmlrpc.XMLRPC):
         global guide
 
         # XXX TODO: only do this if the guide has changed?
-        guide = tv.epg_xmltv.get_guide()
+        guide = tv_util.get_guide()
 
         
     def checkToRecord(self):
@@ -338,8 +356,8 @@ class RecordServer(xmlrpc.XMLRPC):
                         # our new recording should start no later than now!
                         sr.removeProgram(currently_recording, 
                                          tv_util.getKey(currently_recording))
-                        plugin.getbyname('RECORD').Stop()
-                        time.sleep(5)
+                        eh.post(Event('STOP_RECORDING', arg=prog))
+                        # time.sleep(5)
                         _debug_('CALLED RECORD STOP 1')
                     else:
                         # at this moment we must be in the pre-record padding
@@ -354,8 +372,8 @@ class RecordServer(xmlrpc.XMLRPC):
                             if overlap <= (config.TV_RECORD_PADDING/2):
                                 sr.removeProgram(currently_recording, 
                                                  tv_util.getKey(currently_recording))
-                                plugin.getbyname('RECORD').Stop()
-                                time.sleep(5)
+                                eh.post(Event('STOP_RECORDING', arg=prog))
+                                # time.sleep(5)
                                 _debug_('CALLED RECORD STOP 2')
                             else: 
                                 delay_recording = TRUE
@@ -386,7 +404,11 @@ class RecordServer(xmlrpc.XMLRPC):
 
         if rec_prog:
             _debug_('start recording')
-            self.record_app = plugin.getbyname('RECORD')
+            self.record_app = True
+
+            # XXX: make a good list of recordserver events, maybe use one to
+            #      notify if we aren't really recording something so we can
+            #      clear it from the schedule.
 
             if not self.record_app:
                 print_plugin_warning()
@@ -394,7 +416,7 @@ class RecordServer(xmlrpc.XMLRPC):
                 self.removeScheduledRecording(rec_prog)
                 return
 
-            self.record_app.Record(rec_prog)
+            eh.post(Event('RECORD', arg=rec_prog))
 
 
     def addFavorite(self, name, prog, exactchan=FALSE, exactdow=FALSE, exacttod=FALSE):
@@ -551,7 +573,7 @@ class RecordServer(xmlrpc.XMLRPC):
     
     
     def addFavoriteToSchedule(self, fav):
-        global guide
+        guide = tv_util.get_guide()
         favs = {}
         favs[fav.name] = fav
 
@@ -571,7 +593,7 @@ class RecordServer(xmlrpc.XMLRPC):
         #  TODO: do not re-add a prog to record if we have
         #        previously decided not to record it.
 
-        global guide
+        guide = tv_util.get_guide()
     
         self.updateGuide()
     
@@ -787,17 +809,23 @@ class RecordServer(xmlrpc.XMLRPC):
         fxd.writeFxd()
             
 
+    def startup(self):
+        self.startMinuteCheck()
+        self.startPlugins()
+        self.handleEvents()
+            
+
     def startMinuteCheck(self):
         next_minute = (int(time.time()/60) * 60 + 60) - int(time.time())
         _debug_('top of the minute in %s seconds' % next_minute)
         reactor.callLater(next_minute, self.minuteCheck)
         
+
     def minuteCheck(self):
         next_minute = (int(time.time()/60) * 60 + 60) - int(time.time())
         if next_minute != 60:
             # Compensate for timer drift 
-            if config.DEBUG:
-                log.debug('top of the minute in %s seconds' % next_minute)
+            _debug_('top of the minute in %s seconds' % next_minute)
             reactor.callLater(next_minute, self.minuteCheck)
         else:
             reactor.callLater(60, self.minuteCheck)
@@ -805,100 +833,127 @@ class RecordServer(xmlrpc.XMLRPC):
         self.checkToRecord()
 
 
-    def eventNotice(self):
-        _debug_('RECORDSERVER GOT EVENT NOTICE')
-        # Use callLater so that handleEvents will get called the next time
-        # through the main loop.
-        reactor.callLater(0, self.handleEvents) 
+    def poll_plugin(self, plugin):
+        # _debug_('polling %s' % plugin.plugin_name)
+        plugin.poll()
+        reactor.callLater(plugin.poll_interval*0.1, self.poll_plugin, plugin)
+
+
+    def startPlugins(self):
+        for p in plugin.get('daemon_poll'):
+            _debug_('found a poll plugin: %s' % p.plugin_name)
+            reactor.callLater(0.1, self.poll_plugin, p)
 
 
     def handleEvents(self):
-        _debug_('RECORDSERVER HANDLING EVENT')
 
-        if event:
-            if event == OS_EVENT_POPEN2:
-                print 'popen %s' % event.arg[1]
-                event.arg[0].child = util.popen3.Popen3(event.arg[1])
+        if not len(eh.queue):
+            # No event, check again really soon.
+            reactor.callLater(0.1, self.handleEvents) 
+            return
 
-            elif event == OS_EVENT_WAITPID:
-                pid = event.arg[0]
-                print 'waiting on pid %s' % pid
+        event = eh.queue[0]
+        del eh.queue[0]
+        # If we got an event then call this function in the next iteration
+        # of the main loop to exhaust the queue quickly without blocking as
+        # if we clear them all at the same time.
+        reactor.callLater(0, self.handleEvents) 
 
-                for i in range(20):
-                    try:
-                        wpid = os.waitpid(pid, os.WNOHANG)[0]
-                    except OSError:
-                        # forget it
-                        continue
-                    if wpid == pid:
-                        break
-                    time.sleep(0.1)
+        _debug_('handling event %s' % str(event))
 
-            elif event == OS_EVENT_KILL:
-                pid = event.arg[0]
-                sig = event.arg[1]
+        if eh.eventhandler_plugins == None:
+            import plugin
+            _debug_('init')
+            eh.eventhandler_plugins  = []
+            eh.eventlistener_plugins = []
 
-                print 'killing pid %s with sig %s' % (pid, sig)
-                try:
-                    os.kill(pid, sig)
-                except OSError:
-                    pass
-
-                for i in range(20):
-                    try:
-                        wpid = os.waitpid(pid, os.WNOHANG)[0]
-                    except OSError:
-                        # forget it
-                        continue
-                    if wpid == pid:
-                        break
-                    time.sleep(0.1)
-
+            for p in plugin.get('daemon_eventhandler'):
+                if hasattr(p, 'event_listener') and p.event_listener:
+                    eh.eventlistener_plugins.append(p)
                 else:
-                    print 'force killing with signal 9'
-                    try:
-                        os.kill(pid, 9)
-                    except OSError:
-                        pass
-                    for i in range(20):
-                        try:
-                            wpid = os.waitpid(pid, os.WNOHANG)[0]
-                        except OSError:
-                            # forget it
-                            continue
-                        if wpid == pid:
-                            break
-                        time.sleep(0.1)
-                print 'recorderver: After wait()'
+                    eh.eventhandler_plugins.append(p)
 
-            elif event == RECORD_START:
-                _debug_('Handling event RECORD_START')
-                prog = event.arg
-                open(tv_lock_file, 'w').close()
-                self.create_fxd(prog)
-                if config.VCR_PRE_REC:
-                    util.popen3.Popen3(config.VCR_PRE_REC)
+        for p in eh.eventlistener_plugins:
+            p.eventhandler(event=event)
 
-            elif event == RECORD_STOP:
-                _debug_('Handling event RECORD_STOP')
-                os.remove(tv_lock_file)
-                prog = event.arg
+        if event == OS_EVENT_POPEN2:
+            print 'popen %s' % event.arg[1]
+            event.arg[0].child = util.popen3.Popen3(event.arg[1])
+
+        elif event == OS_EVENT_WAITPID:
+            pid = event.arg[0]
+            _debug_('waiting on pid %s' % pid)
+
+            for i in range(20):
                 try:
-                    snapshot(prog.filename)
-                except:
-                    # If automatic pickling fails, use on-demand caching when
-                    # the file is accessed instead. 
-                    os.rename(vfs.getoverlay(prog.filename + '.raw.tmp'),
-                              vfs.getoverlay(os.path.splitext(prog.filename)[0] + '.png'))
+                    wpid = os.waitpid(pid, os.WNOHANG)[0]
+                except OSError:
+                    # forget it
+                    continue
+                if wpid == pid:
+                    break
+                time.sleep(0.1)
 
-                if config.VCR_POST_REC:
-                    util.popen3.Popen3(config.VCR_POST_REC)
+        elif event == OS_EVENT_KILL:
+            pid = event.arg[0]
+            sig = event.arg[1]
+
+            _debug_('killing pid %s with sig %s' % (pid, sig))
+            try:
+                os.kill(pid, sig)
+            except OSError:
+                pass
+
+            for i in range(20):
+                try:
+                    wpid = os.waitpid(pid, os.WNOHANG)[0]
+                except OSError:
+                    # forget it
+                    continue
+                if wpid == pid:
+                    break
+                time.sleep(0.1)
 
             else:
-                print 'not handling event %s' % str(event)
-                return
-        else:
-            print 'no event to get' 
+                _debug_('force killing with signal 9')
+                try:
+                    os.kill(pid, 9)
+                except OSError:
+                    pass
+                for i in range(20):
+                    try:
+                        wpid = os.waitpid(pid, os.WNOHANG)[0]
+                    except OSError:
+                        # forget it
+                        continue
+                    if wpid == pid:
+                        break
+                    time.sleep(0.1)
+            _debug_('recorderver: After wait()')
+
+        elif event == RECORD_START:
+            _debug_('Handling event RECORD_START')
+            prog = event.arg
+            open(tv_lock_file, 'w').close()
+            self.create_fxd(prog)
+            if config.VCR_PRE_REC:
+                util.popen3.Popen3(config.VCR_PRE_REC)
+
+        elif event == RECORD_STOP:
+            _debug_('Handling event RECORD_STOP')
+            os.remove(tv_lock_file)
+            prog = event.arg
+            try:
+                snapshot(prog.filename)
+            except:
+                # If automatic pickling fails, use on-demand caching when
+                # the file is accessed instead. 
+                os.rename(vfs.getoverlay(prog.filename + '.raw.tmp'),
+                          vfs.getoverlay(os.path.splitext(prog.filename)[0] + '.png'))
+
+            if config.VCR_POST_REC:
+                util.popen3.Popen3(config.VCR_POST_REC)
+
 
 
 def start():
@@ -909,5 +964,5 @@ def start():
     else:
         reactor.listenTCP(config.TV_RECORD_SERVER_PORT, server.Site(rs))
 
-    rs.startMinuteCheck()
+    rs.startup()
     reactor.run()
