@@ -9,6 +9,10 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/06/26 01:46:49  rshortt
+# Set DEBUG back to 0 as to not annoy everyone with my insane debug statements
+# which I still need to help with gui development. :)
+#
 # Revision 1.12  2003/06/26 01:41:16  rshortt
 # Fixed a bug wit drawstringframed hard.  Its return coords were always 0's
 # which made it impossible to judge the size.
@@ -107,7 +111,7 @@ import pygame
 from GUIObject import *
 from osd import Font
 
-DEBUG = 1
+DEBUG = 0
 
 
 class Label(GUIObject):
