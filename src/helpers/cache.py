@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/02/07 20:46:21  dischi
+# more old files to remove
+#
 # Revision 1.19  2004/02/07 13:08:41  dischi
 # also remove covers in vfs if directory is gone
 #
@@ -84,7 +87,7 @@ def delete_old_files_1():
     sys.__stdout__.flush()
     del_list = []
 
-    for name in ('image-viewer-thumb.jpg', 'thumbnails', 'audio', 'mmpython'):
+    for name in ('image-viewer-thumb.jpg', 'thumbnails', 'audio', 'mmpython', 'disc'):
         if os.path.exists(os.path.join(config.FREEVO_CACHEDIR, name)):
             del_list.append(os.path.join(config.FREEVO_CACHEDIR, name))
 
