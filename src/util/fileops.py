@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/06/13 18:49:39  dischi
+# do not take care of install.py
+#
 # Revision 1.20  2004/06/13 18:47:46  dischi
 # expect errors when loading image
 #
@@ -55,12 +58,10 @@ import cPickle, pickle # pickle because sometimes cPickle doesn't work
 import fnmatch
 import traceback
 
-
-if sys.argv[0].find('setup.py') == -1 and sys.argv[0].find('install.py') == -1:
-    # don't try to import these when Freevo isn't installed (yet)
-    import Image
-    import cStringIO
-    from mmpython.image import EXIF as exif
+# image stuff
+import Image
+import cStringIO
+from mmpython.image import EXIF as exif
 
 
 if float(sys.version[0:3]) < 2.3:

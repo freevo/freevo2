@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/06/13 18:49:39  dischi
+# do not take care of install.py
+#
 # Revision 1.16  2004/03/13 22:30:02  dischi
 # better string transformation
 #
@@ -21,27 +24,6 @@
 #
 # Revision 1.13  2004/02/25 19:50:51  dischi
 # fix unicode problem for utf-8
-#
-# Revision 1.12  2004/02/23 19:39:59  dischi
-# fix vfs problem in mediainfo
-#
-# Revision 1.11  2004/02/23 19:27:07  dischi
-# fix mmpython init
-#
-# Revision 1.10  2004/02/07 11:53:33  dischi
-# use "ignore" to make unicode->string possible
-#
-# Revision 1.9  2004/02/05 19:26:42  dischi
-# fix unicode handling
-#
-# Revision 1.8  2004/01/02 11:19:40  dischi
-# import popen3
-#
-# Revision 1.7  2003/11/29 11:27:41  dischi
-# move objectcache to util
-#
-# Revision 1.6  2003/11/23 16:57:36  dischi
-# move xml help stuff to new fxdparser
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -70,7 +52,7 @@ import sys
 # import the stuff from misc and fileops to be compatible
 # with util in only one file
 
-if sys.argv[0].find('setup.py') == -1 and sys.argv[0].find('install.py') == -1:
+if sys.argv[0].find('setup.py') == -1:
     import config
     import __builtin__
 
