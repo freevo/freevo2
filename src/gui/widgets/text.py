@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/09/07 18:48:57  dischi
+# internal colors are now lists, not int
+#
 # Revision 1.6  2004/08/26 18:12:13  dischi
 # make sure we create valid sizes
 #
@@ -61,6 +64,7 @@ class Text(CanvasImage):
                  align_v='top', mode='hard', ellipses = '...', dim=True,
                  fgcolor=None, bgcolor=None):
 
+        self.text = text
         if not text or height < font.height:
             CanvasImage.__init__(self, (1, 1))
             return
@@ -124,7 +128,7 @@ class Text(CanvasImage):
             if not dim_image:
                 f = os.path.join(config.IMAGE_DIR, 'blend.png')
                 dim_image = mevas.imagelib.open(f)
-                dim_image.scale((25, font.height))
+                dim_image.scale((25, 1000))
             self.image.draw_mask(dim_image, (stringsize - 25, 0))
 
         self.set_pos((x, y))
@@ -204,12 +208,12 @@ class Text(CanvasImage):
             # fxd file settings
             if self.font.shadow.visible:
                 if self.font.shadow.border:
-                    self.border_color  = self._mevascol(self.font.shadow.color)
+                    self.border_color  = self.font.shadow.color
                     self.border_radius = int(self.font.font.ptsize/10)
                 else:
                     self.shadow_x     = self.font.shadow.y
                     self.shadow_y     = self.font.shadow.x
-                    self.shadow_color = self._mevascol(self.font.shadow.color)
+                    self.shadow_color = self.font.shadow.color
             if not self.fgcolor:
                 self.fgcolor = self.font.color
             if not self.bgcolor:
@@ -218,9 +222,6 @@ class Text(CanvasImage):
 
         # save the new values
         self.font = self.font.font
-        self.fgcolor = self._mevascol(self.fgcolor)
-        if self.bgcolor:
-            self.bgcolor = self._mevascol(self.bgcolor)
 
 
     def _render(self, text, (x, y), (w, h)):
@@ -239,15 +240,10 @@ class Text(CanvasImage):
         self.draw_text(text, (x, y), font=self.font, color=self.fgcolor)
 
 
-    def _mevascol(self, col):
-        """
-        Convert a 32-bit TRGB color to a 4 element tuple
-        """
-        if col == None:
-            return (0,0,0,255)
-        a = 255 - ((col >> 24) & 0xff)
-        r = (col >> 16) & 0xff
-        g = (col >> 8) & 0xff
-        b = (col >> 0) & 0xff
-        c = (r, g, b, a)
-        return c
+    def __str__(self):
+        if len(self.text) > 20:
+            t = self.text[:20]
+        else:
+            t = self.text
+        return 'Text: "%s", zindex=%s' % (String(t), self.get_zindex())
+    

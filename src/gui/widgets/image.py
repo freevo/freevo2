@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/09/07 18:48:57  dischi
+# internal colors are now lists, not int
+#
 # Revision 1.3  2004/08/22 20:06:21  dischi
 # Switch to mevas as backend for all drawing operations. The mevas
 # package can be found in lib/mevas. This is the first version using
@@ -17,7 +20,6 @@
 #
 # Revision 1.1  2004/07/25 18:14:05  dischi
 # make some widgets and boxes work with the new gui interface
-#
 #
 # -----------------------------------------------------------------------
 #
@@ -41,7 +43,6 @@
 #
 # ----------------------------------------------------------------------
 
-
 from mevas.image import CanvasImage
 
 class Image(CanvasImage):
@@ -50,10 +51,10 @@ class Image(CanvasImage):
     """
     def __init__(self, image, (x, y), size=None):
         if not image:
-            return None
-
+            CanvasImage.__init__(self, (1,1))
+            return
+        
         CanvasImage.__init__(self, image)
-
         if size:
             width, height = size
             # check width and height for scaling
@@ -61,9 +62,9 @@ class Image(CanvasImage):
                 # calculate width
                 width = (height * float(image_w)) / float(image_h)
             if height == None or height == -1:
-                # calculate width
+                # calculate height
                 height = (width * float(image_h)) / float(image_w)
             if width != self.image.width or height != self.image.height:
                 self.image.scale((width, height))
-        self.set_pos((x, y))
 
+        self.set_pos((x, y))

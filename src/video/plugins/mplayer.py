@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.86  2004/09/07 18:56:13  dischi
+# internal colors are now lists, not int
+#
 # Revision 1.85  2004/08/27 14:24:04  dischi
 # more bmovl support
 #
@@ -101,6 +104,11 @@ class PluginInterface(plugin.Plugin):
             child.wait()
 
         if not config.MPLAYER_VERSION:
+            print
+            print 'Failed to detect mplayer version. Please set MPLAYER_VERSION in your'
+            print 'local_conf.py to 0.9  (for 0.9.x series), 1.0 (for 1.0preX series)'
+            print 'or 9999 for cvs.'
+            print
             self.reason = 'failed to detect mplayer version'
             return
         
@@ -493,8 +501,8 @@ class Progressbar(Area):
     def __init__(self):
         Area.__init__(self, 'content')
         self.content = []
-        self.bar_border   = gui.theme_engine.Rectangle(bgcolor=0xa0ffffffL, radius=4)
-        self.bar_position = gui.theme_engine.Rectangle(bgcolor=0x6e9441L, radius=4)
+        self.bar_border   = gui.theme_engine.Rectangle(bgcolor=(255, 255, 255, 95), radius=4)
+        self.bar_position = gui.theme_engine.Rectangle(bgcolor=(0, 0, 150), radius=4)
         self.bar          = None
         self.last_width   = 0
         self.last_layout  = None

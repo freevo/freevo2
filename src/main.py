@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.144  2004/09/07 18:56:12  dischi
+# internal colors are now lists, not int
+#
 # Revision 1.143  2004/09/02 00:12:46  rshortt
 # Only import pygame is config.OSD_DISPLAY is 'SDL'.
 #
@@ -286,8 +289,8 @@ class Splashscreen(Area):
     def __init__(self, text):
         Area.__init__(self, 'content')
         self.pos          = 0
-        self.bar_border   = gui.theme_engine.Rectangle(bgcolor=0xff000000L, size=2)
-        self.bar_position = gui.theme_engine.Rectangle(bgcolor=0xa0000000L)
+        self.bar_border   = gui.theme_engine.Rectangle(color=(0,0,0), size=2)
+        self.bar_position = gui.theme_engine.Rectangle(bgcolor=(0,0,0,95))
         self.text         = text
         self.content      = []
         self.bar          = None

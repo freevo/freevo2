@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/09/07 18:51:39  dischi
+# internal colors are now lists, not int
+#
 # Revision 1.4  2004/08/27 14:20:19  dischi
 # support custom areas
 #
@@ -147,7 +150,6 @@ def get_icon(name):
 #
 # Help functions
 #
-
 
 def attr_int(node, attr, default, scale=0.0):
     """
@@ -407,14 +409,17 @@ def int2col(col):
     """
     Convert a 32-bit TRGB color to a 4 element tuple
     """
+    if isinstance(col, tuple):
+        return col
     if col == None:
         return (0,0,0,255)
     a = 255 - ((col >> 24) & 0xff)
     r = (col >> 16) & 0xff
     g = (col >> 8) & 0xff
     b = (col >> 0) & 0xff
-    c = (r, g, b, a)
-    return c
+    if a == 255:
+        return (r, g, b)
+    return (r, g, b, a)
         
     
 
@@ -493,7 +498,15 @@ class XML_data:
             except (TypeError, KeyError, AttributeError):
                 pass
 
-
+        try:
+            self.color = int2col(self.color)
+        except (TypeError, AttributeError):
+            pass
+        try:
+            self.bgcolor = int2col(self.bgcolor)
+        except (TypeError, AttributeError):
+            pass
+            
 
 # ======================================================================
 
@@ -723,7 +736,8 @@ class Content(XML_data):
                 self.types[type].font = None
             if self.types[type].rectangle:
                 self.types[type].rectangle.prepare(color)
-
+            if self.types[type].shadow:
+                self.types[type].shadow.prepare(None, color)
             if hasattr( self.types[type], 'fcontent' ):
                 for i in self.types[type].fcontent:
                     i.prepare( font, color, search_dirs )
@@ -949,6 +963,7 @@ class Font(XML_data):
     def prepare(self, color, search_dirs=None, image_names=None, scale=1.0):
         if color.has_key(self.color):
             self.color = color[self.color]
+        self.color = int2col(self.color)
         self.size = int(float(self.size) * scale)
         self.font = font.get(self.name, self.size)
         self.height = self.font.height
@@ -959,6 +974,7 @@ class Font(XML_data):
                 self.height += (self.size / 10) * 2
             else:
                 self.height += abs(self.shadow.y)
+            self.shadow.color = int2col(self.shadow.color)
         
 
     
@@ -1075,7 +1091,7 @@ class FXDSettings:
             elif node.name == u'color':
                 try:
                     value = attr_col(node, 'value', '')
-                    self._color[node.attrs[('', 'label')]] = value
+                    self._color[node.attrs[('', 'label')]] = int2col(value)
                 except KeyError:
                     pass
                         

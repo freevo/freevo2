@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/09/07 18:48:57  dischi
+# internal colors are now lists, not int
+#
 # Revision 1.2  2004/08/26 15:30:06  dischi
 # bug fix for very small sizes
 #
@@ -50,6 +53,7 @@ class Textbox(text.Text):
                  align_v='top', mode='hard', ellipses = '...', 
                  fgcolor=None, bgcolor=None):
 
+        self.text = text
         if not text or height < font.height:
             CanvasImage.__init__(self, (1, 1))
             return
