@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.118  2004/01/04 17:18:15  dischi
+# make it possible that image is already a .raw file
+#
 # Revision 1.117  2004/01/03 17:43:14  dischi
 # OVERLAY_DIR is always used
 #
@@ -1225,7 +1228,9 @@ class OSD:
                 data = None
 
                 try:
-                    if os.stat(thumb)[stat.ST_MTIME] > sinfo[stat.ST_MTIME]:
+                    if filename.endswith('.raw'):
+                        data = util.read_pickle(filename)
+                    elif os.stat(thumb)[stat.ST_MTIME] > sinfo[stat.ST_MTIME]:
                         data = util.read_pickle(thumb)
                 except OSError:
                     pass
@@ -1252,7 +1257,7 @@ class OSD:
                     # save for future use
                     data = (image.tostring(), image.size, image.mode)
                     util.save_pickle(data, thumb)
-                            
+                    
                 # convert to pygame image
                 image = pygame.image.fromstring(data[0], data[1], data[2])
 
