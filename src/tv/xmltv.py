@@ -30,10 +30,16 @@
 #  If you have any trouble: jfunk@funktronics.ca
 #
 
+# Changes for Freevo:
+# o change data_format to '%Y%m%d%H%M%S %Z'
+# o change encode to use 'replace' ro error:
+#   string.encode(locale) -> string.encode(locale, 'replace')
+# o add except AttributeError: for unhandled elements (line 250ff)
+
+
 from xml.utils import qp_xml
 from xml.sax import saxutils
 import string, types, re
-
 
 # The Python-XMLTV version
 VERSION = "0.5.15"
@@ -56,20 +62,6 @@ XML_BADCHARS = re.compile(u'[^\x09\x0A\x0D\x20-\uD7FF\uE000-\uFFFD\u10000-\u10FF
 locale = 'Latin-1'
 
 
-# small enoce helper because not all strings have to be
-# in ASCII range
-def __encode__(str, code):
-    try:
-        return str.encode(code)
-    except UnicodeError:
-        result = ''
-        for ch in str:
-            try:
-                result += ch.encode(code)
-            except UnicodeError:
-                pass
-        return result
-    
 
 # The extraction process could be simpler, building a tree recursively
 # without caring about the element names, but it's done this way to allow
@@ -123,7 +115,7 @@ class _ProgrammeHandler:
         data = {}
         for attr in (u'src', u'width', u'height'):
             if node.attrs.has_key(('', attr)):
-                data[__encode__(attr,locale)] = _getxmlattr(node, attr)
+                data[attr.encode(locale, 'replace')] = _getxmlattr(node, attr)
         return data
 
     def url(self, node):
@@ -141,20 +133,20 @@ class _ProgrammeHandler:
     def video(self, node):
         result = {}
         for child in node.children:
-            result[__encode__(child.name, locale)] = self._call(child)
+            result[child.name.encode(locale, 'replace')] = self._call(child)
         return result
 
     def audio(self, node):
         result = {}
         for child in node.children:
-            result[__encode__(child.name, locale)] = self._call(child)
+            result[child.name.encode(locale, 'replace')] = self._call(child)
         return result
 
     def previously_shown(self, node):
         data = {}
         for attr in (u'start', u'channel'):
             if node.attrs.has_key(('', attr)):
-                data[__encode__(attr, locale)] = node.attrs[('', attr)]
+                data[attr.encode(locale, 'replace')] = node.attrs[('', attr)]
         return data
 
     def premiere(self, node):
@@ -254,7 +246,7 @@ class _ProgrammeHandler:
 
     def _call(self, node):
         try:
-            return getattr(self, string.replace(__encode__(node.name, locale), '-', '_'))(node)
+            return getattr(self, string.replace(node.name.encode(), '-', '_'))(node)
         except NameError:
             return '**Unhandled Element**'
         except AttributeError:
@@ -271,7 +263,7 @@ class _ChannelHandler:
         data = {}
         for attr in (u'src', u'width', u'height'):
             if node.attrs.has_key(('', attr)):
-                data[__encode__(attr, locale)] = _getxmlattr(node, attr)
+                data[attr.encode(locale, 'replace')] = _getxmlattr(node, attr)
         return data
 
     def url(self, node):
@@ -284,7 +276,7 @@ class _ChannelHandler:
 
     def _call(self, node):
         try:
-            return getattr(self, string.replace(__encode__(node.name, locale), '-', '_'))(node)
+            return getattr(self, string.replace(node.name.encode(), '-', '_'))(node)
         except NameError:
             return '**Unhandled Element**'
 
@@ -301,8 +293,8 @@ def _extractNodes(node, handler):
     result = {}
     for child in node.children:
         if not result.has_key(child.name):
-            result[__encode__(child.name, locale)] = []
-        result[__encode__(child.name, locale)].append(handler._call(child))
+            result[child.name.encode(locale, 'replace')] = []
+        result[child.name.encode(locale, 'replace')].append(handler._call(child))
     return result
 
 def _getxmlattr(node, attr):
@@ -341,15 +333,14 @@ def _node_to_programme(node):
     programme = _extractNodes(node, handler)
 
     for attr in (u'start', u'channel'):
-        programme[__encode__(attr, locale)] = node.attrs[(u'', attr)]
+        programme[attr.encode(locale, 'replace')] = node.attrs[(u'', attr)]
     if (u'', u'stop') in node.attrs:
-        programme[__encode__(u'stop', locale)] = node.attrs[(u'', u'stop')]
+        programme[u'stop'.encode(locale, 'replace')] = node.attrs[(u'', u'stop')]
     else:
         # Sigh. Make show zero-length. This will allow the show to appear in
         # searches, but it won't be seen in a grid, if the grid is drawn to
         # scale
-        #programme[u'stop'.encode(locale)] = node.attrs[(u'', u'start')]
-        pass
+        programme[u'stop'.encode(locale, 'replace')] = node.attrs[(u'', u'start')]
     return programme
 
 def _node_to_channel(node):
@@ -396,7 +387,7 @@ def read_data(fp):
     attrs = {}
 
     for key in doc.attrs.keys():
-        attrs[__encode__(key[1], locale)] = doc.attrs[key]
+        attrs[key[1].encode(locale, 'replace')] = doc.attrs[key]
 
     return attrs
 
@@ -503,7 +494,7 @@ class Writer:
         """
         # Let's do what 4Suite does, and replace bad characters with '?'
         cdata = XML_BADCHARS.sub(u'?', cdata)
-        return __encode__(saxutils.escape(cdata).encode, self.encoding)
+        return saxutils.escape(cdata).encode(self.encoding)
 
 
     def _formatTag(self, tagname, attrs=None, pcdata=None, indent=4):
