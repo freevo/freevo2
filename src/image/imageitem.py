@@ -9,11 +9,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.13  2003/09/13 10:08:22  dischi
-# i18n support
-#
-# Revision 1.12  2003/08/23 12:51:42  dischi
-# removed some old CVS log messages
+# Revision 1.14  2003/11/21 11:46:07  dischi
+# moved rotation info into the item
 #
 #
 # -----------------------------------------------------------------------
@@ -68,7 +65,8 @@ class ImageItem(Item):
             self.name = util.getname(filename)
 
         self.image_viewer = viewer.get_singleton()
-
+        self.rotation     = 0
+        
     def getattr(self, attr):
         """
         return the specific attribute as string or an empty string
@@ -92,6 +90,7 @@ class ImageItem(Item):
         Item.copy(self, obj)
         if obj.type == 'image':
             self.duration = obj.duration
+            self.rotation = obj.rotation
             
 
     def sort(self, mode=None):
@@ -128,7 +127,7 @@ class ImageItem(Item):
         if self.menuw.visible:
             self.menuw.hide()
 
-        self.image_viewer.view(self)
+        self.image_viewer.view(self, rotation=self.rotation)
 
         if self.parent and hasattr(self.parent, 'cache_next'):
             self.parent.cache_next()
