@@ -9,6 +9,9 @@
 # ----------------------------------------------------------------------
 #
 # $Log$
+# Revision 1.8  2002/08/19 05:51:02  krister
+# Added debug output.
+#
 # Revision 1.7  2002/08/14 09:26:48  tfmalt
 #  o Recommitted my changes. Updated all other files aswell. Now: this works
 #    flawlessly for me. Please tell if it breaks something for others. I will
@@ -62,11 +65,15 @@ import config # Freevo configuration.
 import sys
 import os.path
 
+DEBUG = 1
+
 # Loads the skin implementation defined in freevo_config.py
 sys.path += [os.path.dirname(config.OSD_SKIN)]
 modname   = os.path.basename(config.OSD_SKIN)[:-3]
 exec('import ' + modname  + ' as skinimpl')
 
+if DEBUG: print 'Imported skin %s' % config.OSD_SKIN
+    
 _singleton = None
 
 def get_singleton():
