@@ -124,7 +124,7 @@ if __name__ == '__main__':
         buildops = ''
         settings = ''
 
-    #create_makefile(buildops)
+    create_makefile(buildops)
     create_config(settings)
     
     print
