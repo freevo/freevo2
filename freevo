@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.91  2003/10/19 17:16:56  rshortt
+# DOn't start a helper is there is already one like it running.
+#
 # Revision 1.90  2003/10/17 19:17:08  dischi
 # typo
 #
@@ -212,13 +215,7 @@ kill_waiting_child() {
 
 if [ -e "$script" ]; then
     PID_FILE="$PID_DIR/freevo-$name.pid"
-    if [ "$1" = "start" ]; then
-	$RUNAPP $PYTHON "$script" &
-	echo $! > $PID_FILE
-	if [ `uname -s` != "FreeBSD" ]; then
-	    disown
-	fi
-    elif [ "$1" = "stop" ]; then
+    if [ "$1" = "stop" ]; then
 	if [ -e $PIDFILE ]; then
 	    kill -KILL `cat $PID_FILE` > /dev/null 2>&1
 	    rm $PID_FILE > /dev/null 2>&1
@@ -226,11 +223,28 @@ if [ -e "$script" ]; then
 	    echo $name not running
 	fi
     else
-	$RUNAPP $PYTHON "$script" "$@" &
-	echo $! > $PID_FILE
-	trap kill_waiting_child SIGTERM
-	trap kill_waiting_child SIGINT
-	wait `cat $PID_FILE` >/dev/null 2>/dev/null </dev/null
+        # Exit if there is one already running
+        if [ -f $PID_FILE ] ; then
+            PID=`cat $PID_FILE`
+            RUNNING=`ps -ef | grep " $PID " | grep $name`
+            if [ ! "$RUNNING" = "" ] ; then
+              echo "Freevo's $name is already running as process $PID."
+              exit 0
+            fi
+        fi
+        if [ "$1" = "start" ]; then
+	    $RUNAPP $PYTHON "$script" &
+	    echo $! > $PID_FILE
+	    if [ `uname -s` != "FreeBSD" ]; then
+	        disown
+	    fi
+        else
+	    $RUNAPP $PYTHON "$script" "$@" &
+	    echo $! > $PID_FILE
+	    trap kill_waiting_child SIGTERM
+	    trap kill_waiting_child SIGINT
+	    wait `cat $PID_FILE` >/dev/null 2>/dev/null </dev/null
+        fi
     fi
     exit 0
 fi
@@ -332,7 +346,6 @@ if [ "$1" = "execute" ] ; then
 
     trap './freevo stop $APP' 1 2 15
     $RUNAPP $PYTHON $@ &
-    #echo PID is $!
     echo $! > $PID_FILE
     wait `cat $PID_FILE` >/dev/null 2>/dev/null
     rm $PID_FILE > /dev/null 2>&1
