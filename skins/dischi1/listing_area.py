@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/03/13 21:03:51  dischi
+# only load it when necessary
+#
 # Revision 1.7  2003/03/13 21:02:05  dischi
 # misc cleanups
 #
@@ -254,9 +257,6 @@ class Listing_Area(Skin_Area):
                 else:
                     val = content.types['default']
                 
-            font = self.get_font(val.font)
-
-
             text = choice.name
             if not text:
                 text = "unknown"
@@ -269,6 +269,8 @@ class Listing_Area(Skin_Area):
                 text = '[%s]' % text
 
             if content.type == 'text':
+                font = self.get_font(val.font)
+
                 if choice.icon:
                     image = osd.loadbitmap(choice.icon)
                     if image:
