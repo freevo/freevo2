@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.49  2004/05/31 10:45:27  dischi
+# update to new callback handling in rc
+#
 # Revision 1.48  2004/05/12 18:56:36  dischi
 # add keys to move inside a zoom image in image viewer
 #
@@ -275,7 +278,7 @@ class ImageViewer(GUIObject):
             blend = Transition(self.osd.screen, screen, config.IMAGEVIEWER_BLEND_MODE)
             blend.start()
             while not blend.finished:
-                self.osd.sleep(0)
+                rc.poll()
             blend.remove()
 
         else:

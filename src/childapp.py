@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.55  2004/05/31 10:40:57  dischi
+# update to new callback handling in rc
+#
 # Revision 1.54  2004/05/30 18:27:53  dischi
 # More event / main loop cleanup. rc.py has a changed interface now
 #
@@ -321,7 +324,7 @@ class Read_Thread(threading.Thread):
                     # Combine saved data and first line, send to app
                     if self.logger:
                         self.logger.write(saved + lines[0]+'\n')
-                    rc.register(self.callback, saved + lines[0])
+                    rc.register(self.callback, False, 0, saved + lines[0])
                     saved = ''
 
                     # There's one or more lines + possibly a partial line
@@ -333,13 +336,13 @@ class Read_Thread(threading.Thread):
                         for line in lines[1:-1]:
                             if self.logger:
                                 self.logger.write(line+'\n')
-                            rc.register(self.callback, line)
+                            rc.register(self.callback, False, 0, line)
                     else:
                         # Send all lines to the app
                         for line in lines[1:]:
                             if self.logger:
                                 self.logger.write(line+'\n')
-                            rc.register(self.callback, line)
+                            rc.register(self.callback, False, 0, line)
                         
 
 
@@ -349,7 +352,8 @@ class ChildApp2(ChildApp):
     Enhanced version of ChildApp handling most playing stuff
     """
     def __init__(self, app, debugname=None, doeslogging=0, stop_osd=2):
-        rc.register(self)
+        rc.register(self.poll, True, 10)
+        rc.register(self.stop, True, rc.SHUTDOWN)
         
         self.is_video = 0                       # Be more explicit
         if stop_osd == 2: 
@@ -398,7 +402,8 @@ class ChildApp2(ChildApp):
         """
         stop the child
         """
-        rc.unregister(self)
+        rc.unregister(self.poll)
+        rc.unregister(self.stop)
 
         if cmd and self.isAlive():
             _debug_('sending exit command to app')

@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/05/31 10:46:18  dischi
+# update to new callback handling in rc
+#
 # Revision 1.1  2004/04/25 11:23:58  dischi
 # Added support for animations. Most of the code is from Viggo Fredriksen
 #
@@ -45,14 +48,14 @@
 
 
 # freevo modules
-import osd, config, util
+import osd, config, util, rc
 
 # pygame modules
 import pygame.time
 
 # python modules
 from time      import sleep, time
-
+import copy
 
 _singleton = None
 
@@ -89,18 +92,13 @@ class Render:
     animations   = []    # all animations
     suspended    = []    # suspended animations
     osd          = None
-    realtime     = False # update as fast as possible
 
     def __init__(self):
         # set the update handler to wait for osd
         self.update = self.update_wait
 
 
-    def set_realtime(self, realtime=False):
-        self.realtime = realtime
-
-
-    def update_wait(self, timer=0):
+    def update_wait(self):
         """
         This is used while starting freevo
         """
@@ -109,10 +107,12 @@ class Render:
 
         if self.osd == None:
             self.osd    = osd.get_singleton()
+            rc.unregister(self.update)
             self.update = self.update_enabled
+            rc.register(self.update, True, 0)
 
 
-    def update_enabled(self, timer=0):
+    def update_enabled(self):
         """
         This is the draw method for animations
         """
@@ -121,11 +121,16 @@ class Render:
         remove  = self.animations.remove
         i = 0
 
-        for a in self.animations:
+        timer   = pygame.time.get_ticks()
+
+        for a in copy.copy(self.animations):
 
             # XXX something should be done to clean up the mess
             if a.delete:
                 self.animations.remove(a)
+                if len(self.animations) == 0:
+                    # no more animations, unregister ourself to the main loop:
+                    rc.unregister(self.update)
                 continue
 
             if a.active:
@@ -168,6 +173,9 @@ class Render:
             self.animations[i].remove()
         except:
             pass
+        if len(self.animations) == 0:
+            # no more animations, unregister ourself to the main loop:
+            rc.unregister(self.update)
 
 
     def killall(self):
@@ -176,6 +184,7 @@ class Render:
         """
         for a in self.animations:
             a.remove()
+        rc.unregister(self.update)
         
 
     def suspendall(self):
@@ -203,4 +212,6 @@ class Render:
         Add an animation to our list
         """
         self.animations.append(anim_object)
-
+        if len(self.animations) == 1:
+            # first animation, register ourself to the main loop:
+            rc.register(self.update, True, 0)

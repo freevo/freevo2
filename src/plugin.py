@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.65  2004/05/31 10:40:57  dischi
+# update to new callback handling in rc
+#
 # Revision 1.64  2004/05/29 19:06:46  dischi
 # register poll function to rc
 #
@@ -91,6 +94,7 @@ import gettext
 import copy
 
 from event import Event
+import rc
 
 DEBUG = 0
 
@@ -197,16 +201,19 @@ class DaemonPlugin(Plugin):
         be called on freevo shutdown
     """
     def __init__(self):
-        import rc
         Plugin.__init__(self)
         self.poll_counter   = 0         # poll counter, don't change this
         self.poll_interval  = 1         # poll every x*0.1 seconds
         self.poll_menu_only = True      # poll only when menu is active
         self.event_listener = False     # process all events
-        if hasattr(self, 'poll'):
-            rc.register(self)
 
 
+    def poll_wrapper(self):
+        if self.poll_menu_only and rc.app():
+            return
+        self.real_poll()
+
+        
 class MimetypePlugin(Plugin):
     """
     Plugin class for mimetypes handled in a directory/playlist.
@@ -568,6 +575,8 @@ def __load_plugin__(name, type, level, args, number):
     """
     load the plugin and add it to the lists
     """
+    import rc
+    
     global __plugin_type_list__
     global __named_plugins__
     global __plugin_basedir__
@@ -645,6 +654,13 @@ def __load_plugin__(name, type, level, args, number):
                 for type in ('poll', 'draw', 'eventhandler', 'shutdown' ):
                     if hasattr(p, type):
                         __add_to_ptl__('daemon_%s' % type, p)
+                if hasattr(p, 'poll'):
+                    if p.poll_menu_only:
+                        # replace poll with the poll wrapper to handle
+                        # poll_menu_only
+                        p.real_poll = p.poll
+                        p.poll      = p.poll_wrapper
+                    rc.register(p.poll, True, p.poll_interval)
 
             if isinstance(p, MainMenuPlugin):
                 __add_to_ptl__('mainmenu%s' % special, p)
@@ -657,6 +673,10 @@ def __load_plugin__(name, type, level, args, number):
             if isinstance(p, MimetypePlugin):
                 __add_to_ptl__('mimetype', p)
 
+            if hasattr(p, 'shutdown'):
+                # register shutdown handler
+                rc.register(p.shutdown, True, rc.SHUTDOWN)
+                
         if p.plugin_name:
             __named_plugins__[p.plugin_name] = p
 

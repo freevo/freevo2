@@ -26,6 +26,7 @@
 
 # python specific
 import time
+import rc
 
 # freevo specific
 import skin
@@ -88,7 +89,7 @@ class PluginInterface(plugin.DaemonPlugin):
         self.player = None
         self.Timer  = None
         self.bar    = None
-        self.setPoll(999999)
+        rc.unregister(self.update)
     
 
     def show(self):
@@ -96,7 +97,7 @@ class PluginInterface(plugin.DaemonPlugin):
         used when showing for the first time
         """
         self.player = audio.player.get()
-        self.setPoll(10)       
+        rc.register(self.update, True, 10)
         self.getInfo()
         self.status = BAR_SHOW
     
@@ -109,7 +110,7 @@ class PluginInterface(plugin.DaemonPlugin):
         self.Timer  = time.time()
 
 
-    def poll(self):
+    def update(self):
         """
         update the bar according to showstatus
         """
@@ -264,14 +265,6 @@ class PluginInterface(plugin.DaemonPlugin):
             self.t_w = min(self.t_w, self.idlebar_max - self.x - 30)
 
             
-    def setPoll(self,interval):
-        """
-        helper to set the poll_interval
-        """
-        self.poll_counter  = 0
-        self.poll_interval = interval
-    
-
     def formattime(self,seconds):
         """
         returns string formatted as mins:seconds
