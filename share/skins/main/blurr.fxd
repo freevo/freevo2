@@ -645,7 +645,7 @@
         <layout label="tv extended info">
             <content x="0" y="0" type="text" spacing="20" font="default">
                 <item type="default">
-                    <text font="info tagline" width="max" height="max" 
+                    <text font="comingup" width="max" height="max" 
 			expression="function:comingup" mode="soft"/>
                 </item>
             </content>
@@ -665,6 +665,7 @@
         </font>
         <font label="tv time" name="Arial_Bold" size="14" color="0xffffff"/>
         <font label="tv title" name="Arial_Bold" size="16" color="0xffffff"/>
+        <font label="comingup" name="Arial_Bold" size="14" color="0xffffff"/>
 
         <!-- 
 	*******************************************************
