@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/06/06 14:13:00  outlyer
+# Patch for audiofiles with length > 1000sec from Urmet... I made a similar
+# fix for video awhile back, don't know why I forgot audio.
+#
 # Revision 1.8  2003/05/28 15:34:43  dischi
 # fixed seeking bug
 #
@@ -253,7 +257,7 @@ class MPlayerApp(childapp.ChildApp):
         self.item = item
         self.elapsed = 0
         childapp.ChildApp.__init__(self, app)
-        self.RE_TIME = re.compile("^A: +([0-9]+)").match
+        self.RE_TIME = re.compile("^A: *([0-9]+)").match
               
     def kill(self):
         # Use SIGINT instead of SIGKILL to make sure MPlayer shuts
