@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/09/25 14:08:03  outlyer
+# Bump the priority of this message down.
+#
 # Revision 1.20  2003/09/25 14:07:02  outlyer
 # My autocolor plugin which allows me to run a system command before plaaying
 # video. It doesn't have to be a color command, you can change mixer settings
@@ -271,7 +274,7 @@ class Read_Thread(threading.Thread):
 
             data = self.fp.readline(300)
             if not data:
-                _debug_('%s: No data, stopping (pid %s)!' % (self.name, os.getpid()))
+                _debug_('%s: No data, stopping (pid %s)!' % (self.name, os.getpid()),2)
                 self.fp.close()
                 break
             else:
