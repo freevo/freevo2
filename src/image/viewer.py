@@ -9,6 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2003/12/15 04:12:54  outlyer
+# Fix a crash...
+#
+# When you are going through a bunch of images manually (up/down) when you reach
+# the last image, it used to crash because the 'osd' object lacks a "drawstringframed"
+# method. By sending the proper initialized object (self.osd) it works nicely instead
+# showing the message over the image in the top right corner.
+#
 # Revision 1.38  2003/12/14 17:46:02  dischi
 # cleanup
 #
@@ -235,8 +243,9 @@ class ImageViewer(GUIObject):
             # update the OSD
             self.drawosd()
 
+
         if plugin.getbyname('osd'):
-            plugin.getbyname('osd').draw(('osd', None), osd)
+            plugin.getbyname('osd').draw(('osd', None), self.osd)
             
         # draw
         self.osd.update()
