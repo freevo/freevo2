@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/04/20 13:49:00  dischi
+# some special tv show handling
+#
 # Revision 1.1  2003/04/06 21:19:44  dischi
 # Switched to new main1 skin
 #
@@ -231,6 +234,9 @@ class Listing_Area(Skin_Area):
             width  = hspace - content.spacing
             height = vspace - content.spacing
             
+        last_tvs = ('', 0)
+        all_tvs  = TRUE
+        
         for choice in menuw.menu_items:
             if choice == menu.selected:
                 try:
@@ -269,6 +275,49 @@ class Listing_Area(Skin_Area):
                     r = self.get_item_rectangle(val.rectangle, width, val.font.h)[2]
                     self.drawroundbox(x0 + hskip + r.x + icon_x, y0 + vskip + r.y,
                                       r.width - icon_x, r.height, r)
+
+                # special handling for tv shows
+                if choice.type == 'video' and hasattr(choice,'tv_show') and \
+                   choice.tv_show and (val.align=='left' or val.align==''):
+                    sn = choice.show_name
+
+                    if last_tvs[0] == sn[0]:
+                        tvs_w = last_tvs[1]
+                    else:
+                        season  = 0
+                        episode = 0
+                        for c in menuw.menu_items:
+                            if c.type == 'video' and hasattr(c,'tv_show') and \
+                               c.tv_show and c.show_name[0] == sn[0]:
+                                season  = max(season, osd.stringsize(c.show_name[1],
+                                                                     val.font.name,
+                                                                     val.font.size)[0])
+                                episode = max(episode, osd.stringsize(c.show_name[2],
+                                                                      val.font.name,
+                                                                      val.font.size)[0])
+                            else:
+                                all_tvs = FALSE
+
+                        if all_tvs and choice.image:
+                            tvs_w = osd.stringsize('x', val.font.name,
+                                                   val.font.size)[0] + season + episode
+                        else:
+                            tvs_w = osd.stringsize('%s x' % sn[0], val.font.name,
+                                                   val.font.size)[0] + season + episode
+                        last_tvs = (sn[0], tvs_w)
+                        
+                    self.write_text(' - %s' % sn[3], val.font, content,
+                                    x=x0 + hskip + icon_x + tvs_w,
+                                    y=y0 + vskip, width=width-icon_x-tvs_w, height=-1,
+                                    align_h='left', mode='hard')
+                    self.write_text(sn[2], val.font, content,
+                                    x=x0 + hskip + icon_x + tvs_w - 100,
+                                    y=y0 + vskip, width=100, height=-1,
+                                    align_h='right', mode='hard')
+                    if all_tvs and choice.image:
+                        text = '%sx' % sn[1]
+                    else:
+                        text = '%s %sx' % (sn[0], sn[1])
 
                 self.write_text(text, val.font, content, x=x0 + hskip + icon_x,
                                 y=y0 + vskip, width=width-icon_x, height=-1,
