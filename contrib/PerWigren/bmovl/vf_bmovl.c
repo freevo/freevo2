@@ -137,6 +137,18 @@ config(struct vf_instance_s* vf,
     return vf_next_config(vf, width, height, d_width, d_height, flags, outfmt);
 }
 
+static void
+uninit(struct vf_instance_s *vf)
+{
+	if(vf->priv) {
+		free(vf->priv->bitmap.y);
+		free(vf->priv->bitmap.u);
+		free(vf->priv->bitmap.v);
+		free(vf->priv->bitmap.a);
+		free(vf->priv->bitmap.oa);
+		free(vf->priv);
+	}
+}
 
 static int
 _read_cmd(int fd, char *cmd, char *args) {
@@ -398,6 +410,8 @@ vf_open(vf_instance_t* vf, char* args)
     vf->config = config;
     vf->put_image = put_image;
     vf->query_format = query_format;
+	vf->uninit = uninit;
+
     vf->priv = malloc(sizeof(struct vf_priv_s));
 
 	if( sscanf(args, "%d:%d:%s", &vf->priv->hidden, &vf->priv->opaque, filename) < 3 ) {
