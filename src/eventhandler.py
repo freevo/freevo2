@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/08/26 15:28:51  dischi
+# smaller fixes in application/focus handling
+#
 # Revision 1.6  2004/08/25 12:51:20  dischi
 # moved Application for eventhandler into extra dir for future templates
 #
@@ -208,6 +211,8 @@ class Eventhandler:
         """
         Add app the list of applications and set the focus
         """
+        # make sure the app is not stopped
+        app._evt_stopped = False
         # do will have a stack or is this the first application?
         if len(self.applications) == 0:
             # just add the application
