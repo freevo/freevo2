@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/10/11 15:09:41  rshortt
+# Make sure channel is a string.
+#
 # Revision 1.12  2003/10/08 03:29:22  outlyer
 # Just move all FutureWarnings to config. This removes all the silly hex
 # constant warnings.
@@ -152,7 +155,6 @@ NORMS = { 'NTSC'  : 0x3000,
 class Videodev:
     def __init__(self, device):
         self.chanlist = None
-        self.chanlistName = ""
         self.device = os.open (device, os.O_TRUNC)
         if self.device < 0:
             sys.exit("Error: %d\n" %self.device)
@@ -172,7 +174,6 @@ class Videodev:
 
 
     def setchanlist(self, chanlist):
-        self.chanlistName = chanlist
         self.chanlist = freq.CHANLIST[chanlist]
 
 
@@ -190,7 +191,7 @@ class Videodev:
                 print 'USING CUSTOM FREQUENCY: chan="%s", freq="%s"' % \
                       (channel, freq)
         else:
-            freq = self.chanlist[channel]
+            freq = self.chanlist[str(channel)]
             if DEBUG: 
                 print 'USING STANDARD FREQUENCY: chan="%s", freq="%s"' % \
                       (channel, freq)
