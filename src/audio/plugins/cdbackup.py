@@ -27,6 +27,14 @@
 # Albums with more than one Artist aren't handled very well.
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/07/01 14:33:26  outlyer
+# Fixed a double escape of single quotes.
+#
+# Todo:
+#
+# o Move os.system() into runapp.
+# o Use eyeD3 for tagging
+#
 # Revision 1.5  2003/07/01 06:34:31  outlyer
 # Forgot to commit this stuff.
 #
@@ -284,7 +292,7 @@ class main_backup_thread(threading.Thread):
                 
                 if DEBUG: print 'The id3_tag_opts = %s' %id3_tag_opts
             
-                lame_command =  config.LAME_CMD + ' -h ' \
+                lame_command =  config.LAME_CMD + ' --nohist -h ' \
                                           + config.CD_RIP_LAME_OPTS \
                                           + id3_tag_opts \
                                           + ' \"' \
@@ -431,7 +439,7 @@ MUSICCORE = ['trackno', 'trackof', 'album', 'genre']
     # This list of special_chars probably contains some characters that are okay.            
     def replace_special_char(self, string, repl='-'):
         # Regular Expression Special Chars =  . ^ $ * + ? { [ ] \ | ( )
-        special_chars = [ '\"',  '\`', '\\\\', '/','\'' ]
+        special_chars = [ '\"',  '\`', '\\\\', '/','~' ]
         
         """
         special_chars = [ '~', '!', '@', '\\$', '%', \
@@ -452,8 +460,8 @@ MUSICCORE = ['trackno', 'trackof', 'album', 'genre']
             try: 
                 # A few of the special characters get automatically converted to a different char,
                 # rather than what is passed in as repl
-                if (pattern == '\''):
-                    (new_string, num) = re.subn(pattern, '\\\'', new_string, count=0)
+                if (pattern == "\'"):
+                    (new_string, num) = re.subn(pattern, "\\\'", new_string, count=0)
                 elif (pattern == '/'):
                     (new_string, num) = re.subn(pattern, '\\\\', new_string, count=0)                    
                 else:
