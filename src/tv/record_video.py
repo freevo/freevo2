@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/05/05 01:19:49  outlyer
+# An attempt to fix the daylight savings issue; it makes one potentially bad
+# assumption, that daylight savings time is one hour rather than more.
+#
 # Revision 1.13  2003/04/24 19:56:41  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -278,7 +282,11 @@ def set_schedule(arg=None, menuw=None):
 
     # Recording filename
     rec_name = recinfo.program_name.selected
-    ts_ch = time.strftime('%m-%d_%I:%M_-', time.localtime(start_time_s))
+    start_time_f = start_time_s
+    if (time.localtime()[8]==1):
+            start_time_f = start_time_f - 3600
+
+    ts_ch = time.strftime('%m-%d_%I:%M_-', time.localtime(start_time_f))
     if rec_name != recinfo.program_name.choices[0]:
         rec_name = ts_ch
     else:
@@ -301,16 +309,18 @@ def set_schedule(arg=None, menuw=None):
 
     # Build the commandline. The -frames option is added later by the daemon.
     sch_cmd = config.VCR_CMD % cl_options
-    print 'SCHEDULE: %s, %s, %s' % (tunerid, time.ctime(start_time_s), rec_name)
+    print 'SCHEDULE: %s, %s, %s' % (tunerid, time.ctime(start_time_f), rec_name)
     print 'SCHEDULE: %s' % sch_cmd
     
     record_daemon.schedule_recording(start_time_s, len_secs, sch_cmd, recinfo.channel)
-    
+
+
     s = 'Scheduled recording:\n'
     s += 'Channel %s\n' % recinfo.channel
     s += '%s %s %s min' % (recinfo.start_date.selected, recinfo.start_time.selected,
                            recinfo.length.selected)
     print '"%s"' % s
+
 
     pop = PopupBox(text=s)
     pop.show()

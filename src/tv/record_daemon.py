@@ -38,6 +38,8 @@ class ScheduleItem:
         if type(start_time) == type(''):
             t = time.strptime(start_time, '%Y-%m-%d %H:%M:%S')
             self.start_time = time.mktime(t)
+            if (time.localtime()[8]==1):
+                self.start_time = self.start_time - 3600
         else:
             self.start_time = int(start_time)
         self.length_secs = int(length_secs)
@@ -149,8 +151,16 @@ def schedule_init():
 def schedule_recording(start_time_s, length_secs, cmd, channel_id=''):
     '''Schedule a new recording. The start time is a unix timestamp.'''
 
+    if (time.localtime()[8]==1):
+        start_time_s = start_time_s - 3600
+
     ts = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time_s))
+
     s = '%s,%s,%s,%s\n' % (ts, length_secs, cmd, channel_id)
+
+
+
+    
 
     schedule_init()
     
