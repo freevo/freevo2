@@ -38,3 +38,11 @@ diff -Naur mplayer-orig/mplayer.c mplayer/mplayer.c
    /* Test for cpu capabilities (and corresponding OS support) for optimizing */
    GetCpuCaps(&gCpuCaps);
  #ifdef ARCH_X86
+--- mplayer-orig/version.sh     Tue Dec 31 12:23:52 2002
++++ mplayer/version.sh  Wed Jan 29 00:17:43 2003
+@@ -28,4 +28,4 @@
+ if test "$1" ; then
+  extra="-$1"
+ fi
+-echo "#define VERSION \"CVS-${last_cvs_update}${extra} \"" >version.h
++echo "#define VERSION \"CVS-${last_cvs_update}${extra}-FREEVO \"" >version.h

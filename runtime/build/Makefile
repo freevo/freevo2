@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/01/30 02:48:47  krister
+# Added more MPlayer fixes/patches.
+#
 # Revision 1.3  2003/01/29 05:35:45  krister
 # Updated MPlayer
 #
@@ -254,10 +257,15 @@ MPLAYER_CONF = 	--enable-tv-v4l --enable-mga --enable-xmga \
 		--disable-divx4linux --disable-gif --disable-gl \
 		--datadir=./runtime/apps/mplayer --confdir=./runtime/apps/mplayer
 
+# Build mplayer
+# Patch mplayer_dvdprot.diff: Adds -nodvdprotection-override flag
+# Patch mplayer_freevobanner.diff: Adds a Freevo notice
 mplayer: Archive/mplayer-CVS200301272245.tgz
 	@echo Building mplayer/mencoder
 	tar xvzf $<
-	(cd mplayer ; ./configure $(MPLAYER_CONF) ; make)
+	(cd mplayer ; patch -p1 < ../../src/mplayer_dvdprot.diff ; \
+	patch -p1 < ../../src/mplayer_freevobanner.diff ; \
+	./configure $(MPLAYER_CONF) ; make)
 
 Archive/mplayer-CVS200301272245.tgz:
 	(export CVS_PASSFILE cvspass ; $(MPLAYER_CVS) ; \
