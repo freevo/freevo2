@@ -197,7 +197,9 @@ for line in r.read().split("\n"):
     if m: rating = m.group(1) + '/10 ' + m.group(2)
         
     m = regexp_image.match(line)
-    if m and not os.path.exists(filename + ".jpg"):
+    if os.path.exists(filename + ".jpg"):
+        image = filename + ".jpg"
+    elif m:
         # hack for amazon images
         url = re.compile('MZZZZZ').sub('LZZZZZ', m.group(1))
 
@@ -254,8 +256,12 @@ except IndexError:
 # insert image?
 
 if image:
-    i.write("    <cover source=\"%s\">%s</cover>\n" % (url.group(1), str2XML(image)))
-
+    try:
+        # write the url if we have one
+        i.write("    <cover source=\"%s\">%s</cover>\n" % (url.group(1), str2XML(image)))
+    except:
+        # only write the image filename
+        i.write("    <cover>%s</cover>\n" % str2XML(image))
 
 
 # insert filenames and video type
