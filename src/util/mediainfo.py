@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/02/01 19:45:46  dischi
+# store some more infos from mmpython
+#
 # Revision 1.14  2004/02/01 18:34:24  dischi
 # do not believe extentions :-)
 #
@@ -317,25 +320,39 @@ class MMCache(Cache):
         ret = {}
         for k in object.keys:
             if not k in self.uncachable_keys and getattr(object,k) != None:
-                ret[k] = getattr(object,k)
+                value = getattr(object,k)
+                if isinstance(value, str) or isinstance(value, unicode):
+                    value = value.replace('\0', '').lstrip().rstrip()
+                if value:
+                    ret[k] = value
 
         for k in  ( 'video', 'audio'):
             # if it's an AVCORE obejct, also simplify video and audio
             # lists to string and it
-            if hasattr(object, k):
+            if hasattr(object, k) and getattr(object, k):
                 ret[k] = []
                 for o in getattr(object, k):
                     ret[k].append(self.simplify(o))
-        if hasattr(object, 'subtitles'):
+        if hasattr(object, 'subtitles') and object.subtitles:
             # add subtitles for AVCORE
             ret['subtitles'] = object.subtitles
+        if hasattr(object, 'mime'):
+            # mimetype may be good to have :-)
+            ret['mime'] = object.mime
         return ret
 
     
     def create(self, filename):
         info = mmpython.Factory().create(filename)
         if info:
-            return self.simplify(info)
+            info = self.simplify(info)
+            info['title:filename'] = util.getname(filename)
+            if info.has_key('video'):
+                for video in info['video']:
+                    for variable in ('width', 'height', 'length', 'aspect'):
+                        if video.has_key(variable):
+                            info[variable] = video[variable]
+            return info
         return {}
 
 
@@ -434,12 +451,13 @@ class Info:
         if self.disc:
             self.metadata[key] = value
             util.save_pickle(self.metadata, self.filename)
+            return True
         elif not self.filename:
-            print 'unable to store info, no filename'
-            return
+            return False
         else:
             meta_cache.set(os.path.basename(self.filename), os.path.dirname(self.filename),
                            self.filename, self.metadata)
+            return True
         
 
     def delete(self, key):
@@ -450,13 +468,14 @@ class Info:
             if self.metadata.has_key(key):
                 del self.metadata[key]
                 util.save_pickle(self.metadata, self.filename)
+            return True
         elif not self.filename:
-            print 'unable to delete info, no filename'
-            return
+            return False
         if self.metadata.has_key(key):
             del self.metadata[key]
             meta_cache.set(os.path.basename(self.filename), os.path.dirname(self.filename),
                            self.filename, self.metadata)
+            return True
 
         
     def set_variables(self, variables):
