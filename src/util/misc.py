@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/01/01 16:18:11  dischi
+# fix crash
+#
 # Revision 1.11  2003/12/31 16:43:49  dischi
 # major speed enhancements
 #
@@ -187,7 +190,7 @@ def getname(file):
         return file
     
     name = os.path.basename(file)
-    name = name[:name.rfind('.'):]
+    name = name[:name.rfind('.')]
     name = name[0].upper() + name[1:]
     
     while FILENAME_REGEXP.match(name):
