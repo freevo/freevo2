@@ -75,7 +75,7 @@ class Callback:
 
 def call_later(*args, **kwargs):
     """
-    Call a function later from the mail loop. If a function is added more
+    Call a function later from the main loop. If a function is added more
     than once, the timer will be removed and reset. The callback will only
     be called once and removed after that.
 
