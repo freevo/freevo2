@@ -179,7 +179,7 @@ def resize(file, x0=25, y0=25):
                 return mythumb
         else:
                 im = Image.open(file)
-                im_res = im.resize((x0,y0))
+                im_res = im.resize((x0,y0), Image.BICUBIC)
                 im_res.save(mythumb,'PNG')
                 return mythumb
 
