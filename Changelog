@@ -4,7 +4,12 @@ Freevo Changelog
 $Id$
 
 
-Release 1.2.4 (2002-07-XX):
+Release 1.2.5 (2002-XX-XX):
+---------------------------
+o 
+
+
+Release 1.2.4 (2002-07-10):
 ---------------------------
 o Fixed a problem where zombie (defunct) processes were created
 o Changed the osd_server/Makefile to use /usr/X11R6 instead of /usr/X11,
