@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/10/16 09:18:20  dischi
+# patch from Eirik Meland
+#
 # Revision 1.4  2003/10/14 18:15:59  dischi
 # patch from Eirik Meland
 #
@@ -113,35 +116,37 @@ class PluginInterface(plugin.ItemPlugin):
 
     def mover_to_series(self, arg=None, menuw=None):
         # make to_dir an absolute path
+        local_to_dir = self.to_dir
         if not os.path.isabs(self.to_dir):
-            self.to_dir = os.path.join(os.path.dirname(self.item.filename),
-                                       self.to_dir)
+            local_to_dir = os.path.join(os.path.dirname(self.item.filename),
+                                        self.to_dir)
+        
 
         # make to_dir if it doesn't exist and makedirs==True
-        if not os.path.exists(self.to_dir):
-            if os.path.exists(os.path.dirname(self.to_dir)):
+        if not os.path.exists(local_to_dir):
+            if os.path.exists(os.path.dirname(local_to_dir)):
                 if self.makedirs:
-                    os.makedirs(self.to_dir)
+                    os.makedirs(local_to_dir)
                 else:
                     _debug_("Path doesn't exist, and makedirs=%s" % self.makedirs)
                     menuw.delete_menu(menuw=menuw)
                     return
-        elif not os.path.isdir(self.to_dir):
-            _debug_("%s is not a dir" % self.to_dir)
+        elif not os.path.isdir(local_to_dir):
+            _debug_("%s is not a dir" % local_to_dir)
             return
 
         # move file
-        os.system('mv "%s" "%s"' % (self.item.filename, self.to_dir))
+        os.system('mv "%s" "%s"' % (self.item.filename, local_to_dir))
 
         # move fxd file
         if hasattr(self.item, 'fxd_file'):
-            os.system('mv "%s" "%s"' % (self.item.fxd_file, self.to_dir))
+            os.system('mv "%s" "%s"' % (self.item.fxd_file, local_to_dir))
 
         # move picture(s)
         base = os.path.splitext(self.item.filename)[0]
         for suffix in ('jpg', 'png'):
             file = base + '.' + suffix
             if os.path.isfile(file):
-                os.system('mv "%s" "%s"' % (file, self.to_dir))
+                os.system('mv "%s" "%s"' % (file, local_to_dir))
 
         menuw.delete_menu(menuw=menuw)
