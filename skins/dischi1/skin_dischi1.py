@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/03/02 21:48:34  dischi
+# Support for skin changing in the main menu
+#
 # Revision 1.27  2003/03/02 19:31:35  dischi
 # split the draw function in two parts
 #
@@ -218,23 +221,6 @@ XML_SKIN_DIRECTORY = 'skins/dischi1'
 
 class Skin:
 
-    if DEBUG: print 'Skin: Loading XML file %s' % config.SKIN_XML_FILE
-    
-    settings = xml_skin.XMLSkin()
-
-    # try to find the skin xml file
-    
-    if not settings.load(config.SKIN_XML_FILE):
-        print "skin not found, using fallback skin"
-        settings.load("%s/blue1_big.xml" % XML_SKIN_DIRECTORY)
-        
-    for dir in config.cfgfilepath:
-        local_skin = '%s/local_skin.xml' % dir
-        if os.path.isfile(local_skin):
-            if DEBUG: print 'Skin: Add local config %s to skin' % local_skin
-            settings.load(local_skin)
-            break
-        
     def __init__(self):
         self.force_redraw = TRUE
         self.screen = Screen()
@@ -243,6 +229,23 @@ class Skin:
             setattr(self, '%s_area' % a, eval('%s%s_Area(self, self.screen)' % \
                                               (a[0].upper(), a[1:])))
 
+
+        if DEBUG: print 'Skin: Loading XML file %s' % config.SKIN_XML_FILE
+    
+        self.settings = xml_skin.XMLSkin()
+        
+        # try to find the skin xml file
+        if not self.settings.load(config.SKIN_XML_FILE):
+            print "skin not found, using fallback skin"
+            self.settings.load("%s/blue1_big.xml" % XML_SKIN_DIRECTORY)
+        
+        for dir in config.cfgfilepath:
+            local_skin = '%s/local_skin.xml' % dir
+            if os.path.isfile(local_skin):
+                if DEBUG: print 'Skin: Add local config %s to skin' % local_skin
+                self.settings.load(local_skin)
+                break
+        
 
     # This function is called from the rc module and other places
     def HandleEvent(self, ev):
@@ -257,18 +260,33 @@ class Skin:
 
     # Parse XML files with additional settings
     # TODO: parse also parent directories
-    def LoadSettings(self, dir):
-        if dir and os.path.isfile(os.path.join(dir, "skin.xml")):
+    def LoadSettings(self, dir, copy_content = 1):
+        if copy_content:
             settings = copy.copy(self.settings)
-            settings.load(os.path.join(dir, "skin.xml"), 1)
+        else:
+            settings = xml_skin.XMLSkin()
+            
+        if dir and os.path.isfile(os.path.join(dir, "skin.xml")):
+            settings.load(os.path.join(dir, "skin.xml"), copy_content)
             return settings
         elif dir and os.path.isfile(dir):
-            settings = copy.copy(self.settings)
-            settings.load(dir, 1)
+            settings.load(dir, copy_content)
             return settings
         return None
 
 
+    def GetSkins(self):
+        ret = []
+        for skin in util.match_files(XML_SKIN_DIRECTORY, ['xml']):
+            name  = os.path.splitext(os.path.basename(skin))[0]
+            if '%s.png' % os.path.splitext(skin)[0]:
+                image = '%s.png' % os.path.splitext(skin)[0]
+            else:
+                image = None
+            ret += [ ( name, image, skin ) ]
+        return ret
+    
+        
     # Got DISPLAY event from menu
     def ToggleDisplayStyle(self, menu):
         return FALSE
@@ -371,21 +389,15 @@ class Skin:
 
 
     def SubMenuVisible(self, menu):
-        if not menu:
-            osd.drawstring('INTERNAL ERROR, NO MENU!', 100, osd.height/2)
-            return TRUE
-
+        """
+        deprecated
+        """
         return 0
 
 
     def PopupBox(self, text=None, icon=None):
         """
-        text  String to display
-
-        Draw a popupbox with an optional icon and a text.
-        
-        Notes: Should maybe be named print_message or show_message.
-               Maybe I should use one common box item.
+        deprecated
         """
         pass
         

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/03/02 21:48:34  dischi
+# Support for skin changing in the main menu
+#
 # Revision 1.17  2003/03/02 11:46:32  dischi
 # Added GetPopupBoxStyle to return popup box styles to the gui
 #
@@ -147,10 +150,10 @@ def attr_str(node, attr, default):
         return node.attrs[('', attr)].encode('latin-1')
     return default
 
-def attr_file(node, attr, default, c_dir):
+def attr_file(node, attr, default, c_dir, guessing=TRUE):
     if node.attrs.has_key(('', attr)):
         file = node.attrs[('', attr)].encode('latin-1')
-        if file:
+        if file and guessing:
             dfile=os.path.join(c_dir, file)
             if os.path.isfile(dfile):
                 return dfile
@@ -512,7 +515,7 @@ class XMLSkin:
                              float(config.CONF.height-2*config.OVERSCAN_Y)/float(h))
 
                     include  = attr_file(freevo_type, "include", "", \
-                                         os.path.dirname(file))
+                                         os.path.dirname(file), guessing = FALSE)
                     if include:
                         self.load(include, copy_content)
 
