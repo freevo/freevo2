@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2004/05/28 15:53:46  dischi
+# add chapters support
+#
 # Revision 1.44  2004/05/20 15:53:49  dischi
 # prevent a crash
 #
@@ -345,22 +348,10 @@ class MMCache(Cache):
                 for o in getattr(object, k):
                     ret[k].append(self.simplify(o))
 
-        if hasattr(object, 'subtitles') and object.subtitles:
-            # add subtitles for AVCORE
-            ret['subtitles'] = object.subtitles
+        for k in ('subtitles', 'chapters', 'mime', 'id', 'tracks' ):
+            if hasattr(object, k) and getattr(object, k):
+                ret[k] = getattr(object, k)
 
-        if hasattr(object, 'mime'):
-            # mimetype may be good to have :-)
-            ret['mime'] = object.mime
-
-        if hasattr(object, 'id'):
-            # mimetype may be good to have :-)
-            ret['id'] = object.id
-
-        # something with tracks (e.g. dvd on disc)
-        if hasattr(object, 'tracks'):
-            ret['tracks'] = object['tracks']
-                
         return ret
 
     
