@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/09/26 11:28:59  dischi
+# add rebuild option
+#
 # Revision 1.6  2003/08/23 12:51:42  dischi
 # removed some old CVS log messages
 #
@@ -74,7 +77,7 @@ def cache_helper(result, dirname, names):
         result.append(dirname)
     return result
 
-def cache_directories():
+def cache_directories(rebuild=True):
     import mmpython
 
     mmcache = '%s/mmpython' % config.FREEVO_CACHEDIR
@@ -83,13 +86,18 @@ def cache_directories():
     mmpython.use_cache(mmcache)
     mmpython.mediainfo.DEBUG = 0
     mmpython.factory.DEBUG = 0
-    
+
+    if rebuild:
+        print 'deleting cache files'
+        for f in ([ os.path.join(mmcache, fname) for fname in os.listdir(mmcache) ]):
+            if os.path.isfile(f):
+                os.unlink(f)
     all_dirs = []
     print 'caching directories...'
     for n, d in config.DIR_MOVIES + config.DIR_AUDIO + config.DIR_IMAGES:
         os.path.walk(d, cache_helper, all_dirs)
     for d in all_dirs:
-        print d
+        print '%4d/%-4d %s' % (all_dirs.index(d)+1, len(all_dirs), d)
         mmpython.cache_dir(d)
         
     util.touch('%s/VERSION' % mmcache)
@@ -100,10 +108,16 @@ if __name__ == "__main__":
         print 'freevo cache helper to delete unused cache entries and to'
         print 'cache all files in your data directories.'
         print
-        print 'this script has no options (yet)'
+        print 'usage freevo cache [--rebuild]'
+        print 'If the --rebuild option is given, Freevo will delete the cache first'
+        print 'to rebuild the cache from start. Caches from discs won\'t be affected'
         print
         sys.exit(0)
         
     delete_old_files()
-    cache_directories()
+
+    if len(sys.argv)>1 and sys.argv[1] == '--rebuild':
+        cache_directories(1)
+    else:
+        cache_directories(0)
     
