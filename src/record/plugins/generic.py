@@ -45,6 +45,7 @@ from util.popen import Process
 
 # record imports
 from record.recorder import Plugin
+from record.types import *
 
 # get logging object
 log = logging.getLogger('record')
@@ -115,6 +116,8 @@ class PluginInterface(Plugin):
         recordings scheduled by the plugin.
         """
         if self.item and not self.item in recordings:
+            log.info('%s.schedule: recording item no longer in list' % \
+                     self.name)
             self.stop()
         self.recordings = recordings
         if server:
@@ -130,7 +133,7 @@ class PluginInterface(Plugin):
         
         # sort by start time
         recordings.sort(lambda l, o: cmp(l.start,o.start))
-        if recordings[0].status == 'recording':
+        if recordings[0].status == RECORDING:
             # the first one is running right now, so the timer
             # should be set to the next one
             if len(self.recordings) == 1:
@@ -239,7 +242,8 @@ class PluginInterface(Plugin):
         if not self.item:
             # nothing to stop here
             return False
-        log.info('%s.stop: stop recording' % self.name)
+        log.info('%s.stop: stop recording: %s' % \
+                 (self.name, String(self.item.name)))
         # remove the stop timer, we don't need it anymore
         notifier.removeTimer(self.stop_timer)
         self.stop_timer = None
@@ -257,10 +261,10 @@ class PluginInterface(Plugin):
         if self.item.url.startswith('file:'):
             filename = self.item.url[5:]
             if os.path.isfile(filename):
-                self.item.status = 'saved'
+                self.item.status = SAVED
                 self.create_thumbnail(self.item)
             else:
-                self.item.status = 'failed'
+                self.item.status = FAILED
                 self.delete_fxd(self.item)
         else:
             self.item.status = 'done'

@@ -40,6 +40,7 @@ import config
 # get logging object
 log = logging.getLogger('record')
 
+from types import *
 
 class Recording:
     def __init__(self, *args):

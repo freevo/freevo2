@@ -65,6 +65,7 @@ import notifier
 
 # record imports
 import recorder
+from types import *
 
 # get logging object
 log = logging.getLogger('conflict')
@@ -89,7 +90,7 @@ class Device:
 
         
     def is_possible(self):
-        if self.rec[-1].status == 'recording':
+        if self.rec[-1].status == RECORDING:
             # the recording is running right now, do not move it to
             # a new plugin
             if self.rec[-1].recorder[0] == self.plugin:
@@ -229,11 +230,11 @@ def rate(devices, best_rating):
 
         for d in devices[:-1]:
             for r in d.rec:
-                if r.status != 'recording':
-                    r.status = 'scheduled'
+                if r.status != RECORDING:
+                    r.status = SCHEDULED
                     r.recorder = d.plugin, d.id
         for r in devices[-1].rec:
-            r.status   = 'conflict'
+            r.status   = CONFLICT
             r.recorder = None, None
     return best_rating
 

@@ -30,6 +30,7 @@
 #
 # -----------------------------------------------------------------------------
 
+__all__ = [ 'Recording' ]
 
 # python imports
 import time
@@ -43,7 +44,6 @@ import util.fxdparser as fxdparser
 
 # get logging object
 log = logging.getLogger('record')
-
 
 def _int2time(i):
     """

@@ -55,6 +55,7 @@ from mcomm import RPCServer, RPCError, RPCReturn
 
 # record imports
 import recorder
+from types import *
 from recording import Recording
 from favorite import Favorite
 import conflict
@@ -64,14 +65,6 @@ log = logging.getLogger('record')
 
 # FIXME: move to config file
 EPGDB = sysconfig.datafile('epgdb')
-
-
-CONFLICT  = 'conflict'
-SCHEDULED = 'scheduled'
-RECORDING = 'recording'
-MISSED    = 'missed'
-SAVED     = 'saved'
-DELETED   = 'deleted'
 
 
 class RecordServer(RPCServer):
@@ -157,8 +150,8 @@ class RecordServer(RPCServer):
 
         # scan for conflicts
         to_check = (CONFLICT, SCHEDULED, RECORDING)
-        next_recordings = filter(lambda r: r.stop > ctime and \
-                                 r.status in to_check, self.recordings)
+        next_recordings = filter(lambda r: r.stop + r.stop_padding > ctime \
+                                 and r.status in to_check, self.recordings)
         for r in next_recordings:
             try:
                 r.recorder = self.best_recorder[r.channel]
