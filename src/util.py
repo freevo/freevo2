@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2003/07/02 20:06:49  dischi
+# removed exif support, it is now in osd.py
+#
 # Revision 1.35  2003/07/01 20:44:52  dischi
 # added pickle wrapper
 #
@@ -32,65 +35,6 @@
 # Revision 1.29  2003/06/13 18:19:57  outlyer
 # A cmpfunc for doing a "smart sort" which is to say, a sort that ignores
 # "The" at the beginning of titles. Doesn't do anything yet.
-#
-# Revision 1.28  2003/06/08 05:43:25  outlyer
-# Moved 'image-viewer-thumb.jpg' into the thumbnails part of the cachedir
-# to keep it clean.
-#
-# Revision 1.27  2003/05/28 17:58:47  dischi
-# moved freespace and totalspace from df.py to util.py
-#
-# Revision 1.26  2003/05/11 16:21:31  dischi
-# delete whitespaces at the end in format_text
-#
-# Revision 1.25  2003/04/26 15:23:33  dischi
-# make usb listing more like lsusb
-#
-# Revision 1.24  2003/04/26 15:08:51  dischi
-# o better mount/umount, also for directories who are no rom drive.
-# o added list_usb_devices to util
-#
-# Revision 1.23  2003/04/24 19:55:57  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.22  2003/04/24 17:44:18  dischi
-# strip also newlines and whitespaces inside the text
-#
-# Revision 1.21  2003/04/24 16:13:47  dischi
-# fixed close bug
-#
-# Revision 1.20  2003/04/24 11:46:30  dischi
-# fixed 'to many open files' bug
-#
-# Revision 1.19  2003/04/21 12:57:16  dischi
-# moved SynchronizedObject to util.py
-#
-# Revision 1.18  2003/04/06 21:12:56  dischi
-# o Switched to the new main skin
-# o some cleanups (removed unneeded inports)
-#
-# Revision 1.17  2003/03/20 15:42:21  dischi
-# Added function to remove whitespaces and other yunk from the beginning
-# of a text. Usefull for cdata from xml files
-#
-# Revision 1.16  2003/03/17 19:04:10  outlyer
-# Changed how we save bookmarks; the path is less important, but the filename
-# is what we match on now.
-#
-# Upside:
-#     MD5's of movie files will take a long time, so filename is quicker.
-#
-# Downside:
-#     Rename the file, and bookmarks vanish.
-#
-# Revision 1.15  2003/03/17 16:34:32  outlyer
-# Added preliminary movie bookmarks (i.e. places to jump to on next play)
-# Currently only writing the bookmarks does anything; I'm going to have to
-# add a menu of bookmarks to the menu afterwards.
-#
-# Note that the get_bookmarkfile thing should be replaced with something less
-# flaky than the path+filename of the movie, but this is good for a initial
-# go.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -318,30 +262,6 @@ def resize(filename, x0=25, y0=25):
         except IOError:
             print 'error resizing image %s' % filename
             return filename
-
-def getExifThumbnail(file, x0=0, y0=0):
-    import Image
-    import cStringIO
-
-    # EXIF parser
-    from image import exif
-
-    f=open(file, 'rb')
-    tags=exif.process_file(f)
-    
-    if tags.has_key('JPEGThumbnail'):
-        thumb_name='%s/thumbnails/image-viewer-thumb.jpg' % config.FREEVO_CACHEDIR
-        image = Image.open(cStringIO.StringIO(tags['JPEGThumbnail']))
-        if x0 >0 :
-            image.resize((x0, y0), Image.BICUBIC)
-
-        image.save(thumb_name)
-        return thumb_name
-        
-    if tags.has_key('TIFFThumbnail'):
-        print "TIFF thumbnail not supported yet"
-
-    return None
 
 
 def escape(sql):
