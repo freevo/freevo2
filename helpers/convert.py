@@ -39,7 +39,7 @@ if len(sys.argv) > 1:
 		sys.exit('Cannot identify input file; image header corrupt or missing')
 else:
 	print "Usage: %s <input_file> <output file>" % sys.argv[0]
-	print "Take an input file and convert it to any PIL supported"
+	print "Take an input file or HTTP URL and convert it to any PIL supported"
 	print "format. This currently includes:"
 	print
 	for file in FILETYPES: print "%s" % file
