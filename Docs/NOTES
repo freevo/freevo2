@@ -62,7 +62,18 @@ MPlayer TV viewing
 mplayer -vo xv -tv on:driver=v4l:input=0:norm=NTSC:channel=49:chanlist=us-cable:width=640:height=480:outfmt=yuy2 -nocache 
 
 Mencoder TV recording
-mencoder -tv on:driver=v4l:input=0:norm=NTSC:channel=49:chanlist=us-cable:width=320:height=240:outfmt=yuy2:adevice=/dev/dsp2:audiorate=32000 -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=800:keyint=300:vhq -oac mp3lame -lameopts br=80:cbr -ffourcc divx -o tst.avi
+=====================
+
+95% (YUY2)
+mencoder -tv on:driver=v4l:input=0:norm=NTSC:channel=49:chanlist=us-cable:width=320:height=240:outfmt=yuy2:adevice=/dev/dsp2:audiorate=32000:forceaudio:forcechan=2 -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=800:keyint=30 -oac mp3lame -lameopts br=80:cbr -ffourcc divx -o tst.avi
+
+
+80% (YV12)
+mencoder -tv on:driver=v4l:input=0:norm=NTSC:channel=49:chanlist=us-cable:width=320:height=240:outfmt=yv12:adevice=/dev/dsp2:audiorate=32000:forceaudio:forcechan=2 -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=800:keyint=30 -oac mp3lame -lameopts br=80:cbr -ffourcc divx -o tst.avi
+
+
+
+The btaudio module must be loaded, use modprobe "*btaudio*"
 
 
 Options for bmovl:
