@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2003/10/27 17:39:35  dischi
+# just to be save
+#
 # Revision 1.36  2003/10/23 17:57:23  dischi
 # add kill() function to kill the thread
 #
@@ -383,7 +386,7 @@ class ChildThread(threading.Thread):
     def stop(self, cmd=None):
         if not hasattr(self.app, 'child'):
             for t in traceback.extract_stack():
-                if t[0].find('playlist'):
+                if t[0].find('playlist') >= 0:
                     raise OSError
 
             print 'Tried to stop child when no child is running right now'
