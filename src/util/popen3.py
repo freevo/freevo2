@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/10/19 12:42:19  rshortt
+# Oops.
+#
 # Revision 1.5  2003/10/19 12:41:13  rshortt
 # in waitpid handle recordserver like main.
 #
@@ -100,7 +103,6 @@ def Popen3(cmd, cwd = None):
         return Popen4(cmd, cwd=cwd)
 
     # do not use this for the main thread
-    print 'DEBUG: %s' % traceback.extract_stack()
     if traceback.extract_stack()[0][0].find('thread') == -1:
         return Popen4(cmd, cwd=cwd)
         
