@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.84  2004/01/04 10:24:12  dischi
+# inherit config variables from parent if possible
+#
 # Revision 1.83  2004/01/03 17:39:45  dischi
 # Remove the update function fro the MimetypePlugin and inside DirItem.
 # Now all items are rebuild as default, because the old style didn't
@@ -166,7 +169,10 @@ class DirItem(Playlist):
         # set directory variables to default
         global all_variables
         for v,n,d in all_variables:
-            setattr(self, v, eval('config.%s' % v))
+            if hasattr(parent, v):
+                setattr(self, v, eval('parent.%s' % v))
+            else:
+                setattr(self, v, eval('config.%s' % v))
         self.modified_vars = []
 
         # Check for a cover in current dir
