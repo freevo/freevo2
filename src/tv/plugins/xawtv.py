@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/03/21 23:03:23  mikeruelle
+# docs fro devels, this is not for newbs yet
+#
 # Revision 1.2  2004/03/21 22:58:16  mikeruelle
 # make start channel work and messages display fully
 #
@@ -60,6 +63,16 @@ DEBUG = config.DEBUG
 class PluginInterface(plugin.Plugin):
     """
     Plugin to watch tv with xawtv. very beta use at your own risk.
+    to activate:
+    plugin.activate('tv.xawtv', args=('/usr/bin/xawtv', '/usr/bin/xawtv-remote',))
+
+    replace the paths for the programs fo wherever you installed them.
+    currently only remote support really works well. Keyboard is taken by
+    xawtv so you have to know its keys. Also you need a .xawtv file in the
+    homedir of whoever is running the program. it must be synced up with your
+    tv_channels variable or you will get wierd behavior. Only base video
+    groups functionality on startup and no vg switching on ch+/ch- at the
+    moment.
     """
     def __init__(self, app, remote):
         plugin.Plugin.__init__(self)
