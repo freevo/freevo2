@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/02/05 06:10:46  krister
+# Changed the start scripts and childapp.py to use startprog to start all programs.
+#
 # Revision 1.3  2003/01/31 03:09:10  krister
 # Fixed the mplayer audio time display bug.
 #
@@ -44,11 +47,18 @@
 
 import sys
 import random
-import time, os, glob
-import string, popen2, fcntl, select, struct
+import time
+import os
+import glob
+import string
+import popen2
+import fcntl
+import select
+import struct
 import threading
 import signal
 import config
+import re
 
 DEBUG = config.DEBUG
 
@@ -56,8 +66,22 @@ DEBUG = config.DEBUG
 class ChildApp:
 
     def __init__(self, app):
-        # Start the child app through 'runapp' which will unblock signals
-        self.child = popen2.Popen3('./runapp ' + app, 1, 100) 
+        # Start the child app through 'runapp' which will unblock signals and
+        # sets the priority.
+
+        # Actually, we need to use the 'startprog' script too for everything since
+        # it uses the runtime loader and dlls if available.
+        m = re.match(r'\s*--prio=([-+0-9]+)\s+(.*)', app)
+        if m:
+            # Need to put a 'startprog' after the '--prio'
+            prio, cmdline = m.groups()
+            start_str = './startprog ./runapp --prio=%s ./startprog %s' % (prio, cmdline)
+            './startprog ./runapp ' + app.lstrip().replace('--prio=', './startprog ./runapp --prio=')
+        else:
+            # No --prio given
+            start_str = './startprog ./runapp ./startprog ' + app
+        
+        self.child = popen2.Popen3(start_str, 1, 100) 
         self.outfile = self.child.fromchild 
         self.errfile = self.child.childerr
         self.infile = self.child.tochild
@@ -73,7 +97,7 @@ class ChildApp:
             print 'self.t1.isAlive()=%s, self.t2.isAlive()=%s' % (self.t1.isAlive(),
                                                                   self.t2.isAlive())
             time.sleep(0.1)
-            print 'ChildApp.__init__(), pid=%s, app=%s, poll=%s' % (self.child.pid, app, self.child.poll())
+            print 'ChildApp.__init__(), pid=%s, app=%s, poll=%s' % (self.child.pid, start_str, self.child.poll())
             
 
     # Write a string to the app. 

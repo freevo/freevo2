@@ -1,69 +1,46 @@
 #!/bin/sh
-
+#if 0 /*
+# -----------------------------------------------------------------------
 # configure - the main configure script
-#
-# XXX This file duplicates lots of the "freevo" script, can they use
-# a common subroutine file?
-#
+# -----------------------------------------------------------------------
 # $Id$
 #
+# Notes:
+# Todo:        
+#
+# -----------------------------------------------------------------------
+# $Log$
+# Revision 1.13  2003/02/05 06:10:46  krister
+# Changed the start scripts and childapp.py to use startprog to start all programs.
+#
+#
+# -----------------------------------------------------------------------
+# Freevo - A Home Theater PC framework
+# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# ----------------------------------------------------------------------- */
+#endif
 
-# Required runtime version
-RUNTIME_VERSION=3
-
-# The runtime is stored in a directory one level up
-RT_DIR=../freevo_runtime$RUNTIME_VERSION
-
-# First check if the runtime is installed
-if test -f $RT_DIR/freevo_python ; then
-
-    # Double-check that we have the correct runtime version
-    rt_ver=`cat $RT_DIR/VERSION`
-    if [[ "$rt_ver" != "$RUNTIME_VERSION" ]] ; then
-        echo Runtime version $rt_ver found, but version $RUNTIME_VERSION is required!
-        echo Please install the required version in $RT_DIR/
-        exit
-    fi
-
-    # Setup the Python environment variables
-    export PYTHONHOME=$RT_DIR
-    
-    # Prevent the linker from using other libraries than the ones
-    # in freevo_runtime
-    export LD_PRELOAD=`cat $RT_DIR/preloads`
-
-    # Execute using the runtime:
-    echo "Using the Freevo runtime ($RT_DIR)"
-    
-    # Start the setup_build.py application
-    $RT_DIR/freevo_python setup_build.py $*
-
-    # Setup exited, make sure all children are killed
-    sleep 1
-    killall -9 freevo_python &> /dev/null
-    exit 0
+# cd to the freevo directory if necessary
+if ! [ -e src/identifymedia.py ]; then
+    cd `dirname $0`
 fi
 
-echo
-echo
-echo
-echo Runtime not found!
-echo 
-echo If Freevo does not work for you, download the runtime from 
-echo the website, http://freevo.sourceforge.net
-echo
-echo Starting using the regular environment.
-echo
-echo
-
-PYTHON_VERSION=`python -c "import sys ; ok = sys.version_info[:3] >= (2,2,0) ; print ok"`
-
-if command -v python -V > /dev/null 2>&1  && \
-    [ "$PYTHON_VERSION" -eq "1" ]; then
-	python setup_build.py $*
-else
-    echo "Installed python version is outdated. Please upgrade to 2.2.0 or better."
-    echo "Please use the Freevo runtime for the easiest installation!"
-fi
+./startprog python setup_build.py
 
 exit 0

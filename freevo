@@ -6,96 +6,25 @@
 #
 
 # cd to the freevo directory if necessary
-if test ! -a src/identifymedia.py ; then
+if ! [ -e src/identifymedia.py ]; then
     cd `dirname $0`
+fi
+
+# Is freevo.conf present? If not, ./configure is needed
+if ! [ -e freevo.conf ]; then
+    echo "Please run ./configure first (freevo.conf not found)"
+    exit 1
 fi
 
 # Is runapp present? If not it needs to be compiled
 if ! [ -e runapp ]; then
-    echo ./runapp not found! You must compile freevo, see the INSTALL file.
-    exit
+    echo "Please compile freevo (runapp executable not found)"
+    exit 1
 fi
-
-# Defaults
-PYTHON=python
-
-# Required runtime version
-RUNTIME_VERSION=3
-RUNTIME_VERSION4=4
-
-# The runtime is stored in a directory one level up
-RT_DIR=../freevo_runtime$RUNTIME_VERSION
-
-# First check if the runtime is installed
-if [ -e runtime/apps/freevo_python ] ; then
-    
-    # Double-check that we have the correct runtime version
-    rt_ver=`cat runtime/VERSION`
-    if [ "$rt_ver" != "$RUNTIME_VERSION4" ] ; then
-        echo Runtime version $rt_ver found, but version $RUNTIME_VERSION4 is required!
-        echo Please install the required version in runtime/
-        exit 1
-    fi
-
-    # Setup the Python environment variables
-    export PYTHONHOME=runtime
-    
-    # Prevent the linker from using other libraries than the ones
-    # in freevo_runtime
-    export LD_PRELOAD=`cat runtime/preloads`
-
-    # Execute using the runtime:
-    echo "Using the Freevo runtime (./runtime)"
-    PYTHON='runtime/dll/ld-linux.so.2 runtime/apps/freevo_python'
-
-elif [ -e $RT_DIR/freevo_python ] ; then
-    
-    # Double-check that we have the correct runtime version
-    rt_ver=`cat $RT_DIR/VERSION`
-    if [ "$rt_ver" != "$RUNTIME_VERSION" ] ; then
-        echo Runtime version $rt_ver found, but version $RUNTIME_VERSION is required!
-        echo Please install the required version in $RT_DIR/
-        exit 1
-    fi
-
-    # Setup the Python environment variables
-    export PYTHONHOME=$RT_DIR
-    
-    # Prevent the linker from using other libraries than the ones
-    # in freevo_runtime
-    export LD_PRELOAD=`cat $RT_DIR/preloads`
-
-    # Execute using the runtime:
-    echo "Using the Freevo runtime ($RT_DIR)"
-    PYTHON=$RT_DIR/freevo_python
-
-elif test -e runtime/preloads; then
-    # Gentoo has some preloads in runtime, but no complete environment
-    # We don't need to check the version, gentoo emerge will do this for us
-
-    # Prevent the linker from using other libraries than the ones
-    # in freevo_runtime. Only use this for freevo itself, there are some
-    # problems with the rc_client and the preloads
-    export FREEVO_LD_PRELOAD=`cat runtime/preloads`
-
-else
-    echo
-    echo
-    echo
-    echo No runtime found!
-    echo 
-    echo If Freevo does not work for you, download the runtime from 
-    echo the website, http://freevo.sourceforge.net
-    echo
-    echo Starting using the regular environment.
-    echo
-    echo
-fi
-
 
 # Support for using just Python
 if [ "$1" = "prompt" ] ; then
-    $PYTHON
+    ./startprog python
     exit 0
 fi
     
@@ -104,37 +33,30 @@ fi
 if [ "$1" = "execute" ] ; then
     export PYTHONPATH=./src
     shift 1
-    $PYTHON $@
+    ./startprog python $@
     exit 0
 fi
-    
 
 # Start the lirc remote control app if the device is present
 if [ -S /dev/lircd ] ; then
     echo Found a lirc device, starting the remote control daemon
-    $PYTHON rc_client/remote.py --remote=lirc > /dev/null 2>&1 &
+    ./startprog python rc_client/remote.py --remote=lirc > /dev/null 2>&1 &
 fi
 
 # XXX Uncomment the command below to enable joystick input. 
-# XXX It has not been tested! Please send in testreports!
+# XXX It has not been tested much! Please send in testreports!
 # If JOY_DEV is 0 then joy.py just exits.
-# $PYTHON rc_client/joy.py &> /dev/null &
-
-# now set the LD_PRELOAD for Gentoo Linux
-if [ "$FREEVO_LD_PRELOAD" != "" ]; then
-    export LD_PRELOAD=$FREEVO_LD_PRELOAD
-fi
+# ./startprog python rc_client/joy.py > /dev/null 2>&1 &
 
 # Start the main freevo application
-$PYTHON src/main.py $@
+./startprog python src/main.py $@
 
 # Freevo exited, make sure all children are killed
 sleep 1
-kill -9 `pgrep -f "python src/main.py" -d" "` &> /dev/null
-kill -9 `pgrep -f "python rc_client" -d" "` &> /dev/null
-kill -9 `pgrep -f freevo_python -d" "` &> /dev/null
-killall -9 freevo_xwin &> /dev/null
-killall -9 freevo_python &> /dev/null
-#killall -9 mplayer &> /dev/null
+kill -9 `pgrep -f "python src/main.py" -d" "` > /dev/null 2>&1
+kill -9 `pgrep -f "python rc_client" -d" "` > /dev/null 2>&1
+kill -9 `pgrep -f freevo_python -d" "` > /dev/null 2>&1
+killall -9 freevo_loader > /dev/null 2>&1
+killall -9 freevo_xwin > /dev/null 2>&1
 
 exit 0

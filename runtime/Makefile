@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/02/05 06:10:46  krister
+# Changed the start scripts and childapp.py to use startprog to start all programs.
+#
 # Revision 1.3  2003/01/28 03:45:35  krister
 # Work in progress...
 #
@@ -55,11 +58,14 @@ all:
 # There is no dependency checking, the libs are just copied
 # It is probably a good idea to do a build first, unless you know
 # all libs are up-to-date.
+# Python programs in lib/ have their execute flag removed since
+# RPM building chokes on them.
 copy: 	python_copy mplayer_copy mplayer_fonts_copy cdparanoia_copy \
 	lame_copy pygphoto_copy copy_libdeps
 	find lib -name "*.so" -exec strip {} \;
 	find dll -name "*.so*" -exec strip {} \;
 	find apps -perm +111 -type f -exec strip {} \;
+	find lib -name "*.py" -perm +0111 -exec chmod ugo-x \{\} \;
 
 
 # Build all the libraries etc
@@ -75,9 +81,12 @@ clean:
 
 # A python app that checks all libs and apps to find dynamic
 # link lib dependencies. All deps are copied to the dll folder.
+# The dynamic link loader ld-linux is renamed to freevo-run for
+# easy killing in the main startscript 'freevo'
 copy_libdeps:
 	-mkdir -p dll
 	python copy_libdeps.py
+	mv dll/ld-linux.so.2 dll/freevo_loader
 
 
 ################################################################################
