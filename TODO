@@ -14,8 +14,6 @@ o Add proper X11 support for mplayer and tv-watching
 o Add a freevo exit command
 o Add rcs id to all files!
 o Channel guide layout
-o A switch to turn off the EPG altogether if no listings are available.
-o Make the EPG handling more modular
 o Use btaudio for audio recording from the video card
 o Select packages for release (mplayer, xvid, nvrec, ffmpeg)
 o clean up Docs/Notes
