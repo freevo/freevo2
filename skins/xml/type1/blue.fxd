@@ -438,7 +438,7 @@
 
     <tv>
       <screen layout="screen0" x="0" y="0" width="800" height="600"/>
-      <title layout="title0" x="10" y="10" width="780" height="60"/>
+      <title visible="not idlebar" layout="title0" x="10" y="10" width="780" height="60"/>
       <listing layout="tv listing" x="10" y="100" width="750" height="300">
 	<image x="765" y="100" width="32" height="32" label="uparrow"
 	  filename="up.png"/>
