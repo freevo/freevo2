@@ -78,7 +78,7 @@ LOCAL_CONF_CHANGES = [
      standard Lirc program config files, see freevo_config.py for
      more info.'''),
     (2.1,
-     '''Added MPLAYER_ARGS_AUDIOCD for aido cd playback settings.''')]
+     '''Added MPLAYER_ARGS_AUDIOCD for audio cd playback settings.''')]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
