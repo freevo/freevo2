@@ -13,7 +13,7 @@ Quickstart (X11 version)
 ------------------------
 o Download Freevo, preferably from CVS, un-tar
 o Download and install the following dependencies (see below for details):
-  o freetype2, libpng, libz, Python >=2.1, PyXML, PIL, Python Checksum lib
+  o freetype2, libpng, libz, Python >=2.1, PyXML, Python Image Library
 o Update freevo_config.py to suit your system (optional)
 o This will check the dependencies and make the X11 version:
   o python install.py x11
