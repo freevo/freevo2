@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/01/10 04:12:02  outlyer
+# Take a snapshot/thumbnail after a file is recorded...
+#
 # Revision 1.18  2004/01/09 19:25:21  outlyer
 # Since the recordserver has been stable for some time, we can remove some
 # of the original DEBUG messages...
@@ -191,6 +194,12 @@ class Record_Thread(threading.Thread):
                 v = None
 
                 os.remove(tv_lock_file)
+
+                # XXX Move this into recordserver after
+                # XXX Rob puts the event support in.
+                from  util.videothumb import snapshot
+                snapshot(video_save_file)
+
 
                 if DEBUG: print('Record_Thread::run: finished recording')
 

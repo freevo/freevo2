@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/01/10 04:12:02  outlyer
+# Take a snapshot/thumbnail after a file is recorded...
+#
 # Revision 1.3  2004/01/04 17:19:57  dischi
 # store image as .raw file if no filename is given
 #
@@ -56,6 +59,7 @@ def snapshot(videofile, imagefile=None, pos=None, update=True):
     import popen3
     import Image
     import util
+    import vfs
     
     if not imagefile:
         imagefile = vfs.getoverlay(videofile + '.raw')

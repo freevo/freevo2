@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/01/10 04:12:02  outlyer
+# Take a snapshot/thumbnail after a file is recorded...
+#
 # Revision 1.14  2004/01/09 19:37:48  outlyer
 # Inherit config.DEBUG
 #
@@ -203,6 +206,15 @@ class Record_Thread(threading.Thread):
                 self.app.kill()
 
                 os.remove(tv_lock_file)
+
+                # XXX Move this into recordserver after
+                # XXX Rob puts the event support in.
+                #
+                # Can't test this, someone with generic record please
+                # try it
+                #
+                # from  util.videothumb import snapshot
+                # snapshot(rec_prog.filename)
 
                 self.mode = 'idle'
                 
