@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/02/21 04:36:43  krister
+# Bugfix for missing network libs.
+#
 # Revision 1.1  2003/01/24 07:19:48  krister
 # New runtime
 #
@@ -60,10 +63,17 @@ def main():
     check_dir('lib', libdeps)
     check_dir('apps', libdeps)
 
+    extra_libs = ['/lib/libnss_files.so.2',
+                  '/lib/libnss_dns.so.2'] # These are not autodetected
+    for extra_lib in extra_libs:
+        libdeps[extra_lib] = 1
+        check_lib(extra_lib, libdeps)
+
     print
     print 'Found library dependencies:'
     preloads = []
-    for dep in libdeps:
+    deplist = libdeps.keys()
+    for dep in deplist:
         print dep
         os.system('cp -i %s dll/' % dep)
         os.system('chmod +w dll/%s' % os.path.basename(dep))

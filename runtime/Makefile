@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/02/21 04:36:43  krister
+# Bugfix for missing network libs.
+#
 # Revision 1.9  2003/02/19 08:08:29  krister
 # Applied Aubins new pylirc code after testing it (seems to work with keyboard at least), and adding the pylircmodule to the runtime build environment (not required for keyboard operation).
 #
@@ -96,7 +99,7 @@ build_copy:
 # Remove all copied libraries, programs etc
 # The build directory is not touched
 clean: 
-	-rm -rf lib apps/* dll/* tmp
+	-rm -rf lib apps/* dll/* tmp preloads
 
 
 # A python app that checks all libs and apps to find dynamic
