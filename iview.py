@@ -64,7 +64,7 @@ def get_singleton():
 
 
 class ImageViewer:
-    osd = 1    # Draw file info on the image
+    osd = 0    # Draw file info on the image
     zoom = 0   # Image zoom
     zoom_btns = { rc.K0:0, rc.K1:1, rc.K2:2, rc.K3:3, rc.K4:4,
                   rc.K5:5, rc.K6:6, rc.K7:7, rc.K8:8, rc.K9:9 }
@@ -142,7 +142,7 @@ class ImageViewer:
             print width, height, scale, new_w, new_h, x, y
 
             osd.drawbitmap(filename, x, y, scale, bbx, bby, bbw, bbh)
-            self.osd = 0  # don't draw osd as default
+            self.drawosd()
             osd.update()
 
             # cache the next image (most likely we need this)
