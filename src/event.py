@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.52  2004/08/26 15:28:20  dischi
+# add event for switching tv guide look
+#
 # Revision 1.51  2004/08/24 16:42:39  dischi
 # Made the fxdsettings in gui the theme engine and made a better
 # integration for it. There is also an event now to let the plugins
@@ -164,7 +167,8 @@ DIRECTORY_CHANGE_DISPLAY_TYPE = Event('DIRECTORY_CHANGE_DISPLAY_TYPE')
 TV_START_RECORDING     = Event('TV_START_RECORDING')
 TV_CHANNEL_UP          = Event('TV_CHANNEL_UP')
 TV_CHANNEL_DOWN        = Event('TV_CHANNEL_DOWN')
-                       
+TV_SHOW_CHANNEL        = Event('TV_SHOW_CHANNEL')
+
 #
 # Global playing events
 #
@@ -303,6 +307,7 @@ TVMENU_EVENTS = {
     'EXIT'      : MENU_BACK_ONE_MENU,
     'SELECT'    : MENU_SELECT,
     'DISPLAY'   : MENU_CHANGE_STYLE,
+    'ENTER'     : TV_SHOW_CHANNEL,
     'REC'       : TV_START_RECORDING
     } 
 
