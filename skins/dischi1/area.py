@@ -37,6 +37,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/03/02 22:00:13  dischi
+# bugfix
+#
 # Revision 1.10  2003/03/02 21:56:36  dischi
 # Redraw bugfix for items that turn invisible
 #
@@ -372,10 +375,7 @@ class Skin_Area:
         if not settings.layout.has_key(area.layout):
             if self.area_val.visible:
                 print '*** layout <%s> not found' % area.layout
-            elif self.layout and self.layout.visible:
-                self.layout = None
-                return TRUE
-            return FALSE
+            return redraw
 
         old_layout = self.layout
         self.layout = settings.layout[area.layout]
