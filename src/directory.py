@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2003/10/11 09:54:22  dischi
+# just to be save
+#
 # Revision 1.42  2003/10/04 18:37:28  dischi
 # i18n changes and True/False usage
 #
@@ -850,7 +853,7 @@ class DirItem(Playlist):
                 menuw.menustack[-2].choices[pos] = newdir
                 rc.post_event(Event(OSD_MESSAGE, arg='%s view' % type))
                 return True
-            except IndexError:
+            except (IndexError, ValueError):
                 pass
         
         Playlist.eventhandler(self, event, menuw)
