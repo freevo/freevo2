@@ -189,14 +189,14 @@ SHUTDOWN_SYS_CMD = 'shutdown -h now'  # set this to 'sudo shutdown -h now' if
 
 # Items in the main menu.
 
-plugin.activate('tv.tv', plugin.mainmenu, 10, None)
-plugin.activate('mediamenu', plugin.mainmenu, 30, ('audio', ))
-plugin.activate('mediamenu', plugin.mainmenu, 20, ('video', ))
-plugin.activate('mediamenu', plugin.mainmenu, 40, ('image', ))
-plugin.activate('base.shutdown', plugin.mainmenu, 50, None)
+plugin.activate('tv.tv',         'mainmenu', 10, None)
+plugin.activate('mediamenu',     'mainmenu', 20, ('video', ))
+plugin.activate('mediamenu',     'mainmenu', 30, ('audio', ))
+plugin.activate('mediamenu',     'mainmenu', 40, ('image', ))
+plugin.activate('base.shutdown', 'mainmenu', 50, None)
 
 if CONF.xmame_SDL or CONF.snes:
-    plugin.activate('mediamenu', plugin.mainmenu, 40, ('games', ))
+    plugin.activate('mainmenu.media', 'mainmenu', 45, ('games', ))
 
 # ======================================================================
 # Freevo directory settings:
