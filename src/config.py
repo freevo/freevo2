@@ -22,6 +22,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.97  2004/02/19 04:57:55  gsbarbieri
+# Support Web Interface i18n.
+# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
+#
 # Revision 1.96  2004/02/08 19:53:14  dischi
 # create metadata dir
 #
@@ -96,7 +100,7 @@ VERSION = version.__version__
 # an exception is raised with Python 2.1 if LANG is unavailable.
 import gettext
 try:
-    gettext.install('freevo', os.environ['FREEVO_LOCALE'])
+    gettext.install('freevo', os.environ['FREEVO_LOCALE'], True)
 except: # unavailable, define '_' for all modules
     import __builtin__
     __builtin__.__dict__['_']= lambda m: m
@@ -301,6 +305,8 @@ def _debug_function_(s, level=1):
         return
     # add the current trace to the string
     where =  traceback.extract_stack(limit = 2)[0]
+    if isinstance( s, unicode ):
+        s = s.encode(encoding, 'replace')
     s = '%s (%s): %s' % (where[0][where[0].rfind('/')+1:], where[1], s)
     # print debug message
     print s

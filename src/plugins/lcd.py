@@ -13,6 +13,10 @@
 #    3) Better (and more) LCD screens.
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/02/19 04:57:56  gsbarbieri
+# Support Web Interface i18n.
+# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
+#
 # Revision 1.15  2004/02/10 20:08:03  mikeruelle
 # fix some crashing
 #
@@ -716,13 +720,13 @@ class PluginInterface( plugin.DaemonPlugin ):
             self.lcd = pylcd.client()
             cm = self.lcd.connect()
         except:
-            print _( "ERROR" ) + ":" + _( "LCD plugin will not load! Maybe you don't have LCDd (lcdproc daemon) running?" )
+            print String(_( "ERROR" )) + ":" + String(_( "LCD plugin will not load! Maybe you don't have LCDd (lcdproc daemon) running?" ))
             self.disable = 1
             return
         
         if config.DEBUG > 0:
-            print _( "Connecting to LCD: %s" ) % cm
-            print _( "Info as know by the LCD module:" )
+            print String(_( "Connecting to LCD: %s" )) % cm
+            print String(_( "Info as know by the LCD module:" ))
             self.lcd.getinfo()
             print ""
             
@@ -916,7 +920,7 @@ class PluginInterface( plugin.DaemonPlugin ):
                 _debug_( _( "WARNING" ) + ": " + _( "Could not find screens for %d lines LCD!" ) % l )
                 l -= 1
                 if l < 1:
-                    print _( "ERROR" ) + ": " + _( "No screens found for this LCD (%dx%d)!" ) % ( self.height, self.width )
+                    print String(_( "ERROR" )) + ": " + String(_( "No screens found for this LCD (%dx%d)!" )) % ( self.height, self.width )
                     self.disable = 1
                     return
         # find a display with 'l' line and 'c' columns
@@ -927,7 +931,7 @@ class PluginInterface( plugin.DaemonPlugin ):
                 _debug_( _( "WARNING" ) + ": " + _( "Could not find screens for %d lines and %d columns LCD!" ) % ( l, c ) )
                 c -= 1
                 if c < 1:
-                    print _( "ERROR" ) + ": " + _( "No screens found for this LCD (%dx%d)!" ) % ( self.height, self.width )
+                    print String(_( "ERROR" )) + ": " + String(_( "No screens found for this LCD (%dx%d)!" )) % ( self.height, self.width )
                     self.disable = 1
                     return
 
@@ -938,7 +942,7 @@ class PluginInterface( plugin.DaemonPlugin ):
             self.screens = screens = layouts[ l ][ c ]
         except KeyError:
             _debug_( _( "WARNING" ) + ": " + _( "Could not find screens for %d lines and %d columns LCD!" ) % ( self.height, self.width ))
-            print _( "ERROR" ) + ": " + _( "No screens found for this LCD (%dx%d)!" ) % ( self.height, self.width )
+            print String(_( "ERROR" )) + ": " + String(_( "No screens found for this LCD (%dx%d)!" )) % ( self.height, self.width )
             self.disable = 1
             return
         

@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/02/19 04:57:59  gsbarbieri
+# Support Web Interface i18n.
+# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
+#
 # Revision 1.10  2004/02/09 21:23:42  outlyer
 # New web interface...
 #
@@ -111,12 +115,12 @@ class RecordResource(FreevoResource):
         (server_available, message) = ri.connectionTest()
         if not server_available:
             fv.printHeader('Scheduled Recordings', 'styles/main.css')
-            fv.res += '<h4>ERROR: recording server is unavailable</h4>'
+            fv.res += '<h4>'+_('ERROR')+': '+_('recording server is unavailable')+'</h4>'
             fv.printSearchForm()
             fv.printLinks()
             fv.printFooter()
 
-            return fv.res
+            return String( fv.res )
 
         if action == 'remove':
             (status, recordings) = ri.getScheduledRecordings()
@@ -139,18 +143,18 @@ class RecordResource(FreevoResource):
         progs = recordings.getProgramList()
         (status, favs) = ri.getFavorites()
 
-        fv.printHeader('Scheduled Recordings', 'styles/main.css', selected='Scheduled Recordings')
+        fv.printHeader(_('Scheduled Recordings'), 'styles/main.css', selected=_('Scheduled Recordings'))
 
         fv.res += '&nbsp;\n'
 
         fv.tableOpen('')
         fv.tableRowOpen('class="chanrow"')
-        fv.tableCell('Start Time', 'class="guidehead" colspan="1"')
-        fv.tableCell('Stop Time', 'class="guidehead" colspan="1"')
-        fv.tableCell('Channel', 'class="guidehead" colspan="1"')
-        fv.tableCell('Title', 'class="guidehead" colspan="1"')
-        fv.tableCell('Program Description', 'class="guidehead" colspan="1"')
-        fv.tableCell('Actions', 'class="guidehead" colspan="1"')
+        fv.tableCell(_('Start Time'), 'class="guidehead" colspan="1"')
+        fv.tableCell(_('Stop Time'), 'class="guidehead" colspan="1"')
+        fv.tableCell(_('Channel'), 'class="guidehead" colspan="1"')
+        fv.tableCell(_('Title'), 'class="guidehead" colspan="1"')
+        fv.tableCell(_('Program Description'), 'class="guidehead" colspan="1"')
+        fv.tableCell(_('Actions'), 'class="guidehead" colspan="1"')
         fv.tableRowClose()
 
         f = lambda a, b: cmp(a.start, b.start)
@@ -174,17 +178,17 @@ class RecordResource(FreevoResource):
             fv.tableCell(time.strftime(config.TV_TIMEFORMAT, time.localtime(prog.stop)), 'class="'+status+'" colspan="1"')
 
             chan = tv_util.get_chan_displayname(prog.channel_id)
-            if not chan: chan = 'UNKNOWN'
+            if not chan: chan = _('UNKNOWN')
             fv.tableCell(chan, 'class="'+status+'" colspan="1"')
             fv.tableCell(prog.title, 'class="'+status+'" colspan="1"')
     
             if prog.desc == '':
-                cell = 'Sorry, the program description for "%s" is unavailable.' % prog.title
+                cell = _('Sorry, the program description for <b>%s</b> is unavailable.') % prog.title
             else:
                 cell = prog.desc
             fv.tableCell(cell, 'class="'+status+'" colspan="1"')
     
-            cell = '<a href="record.rpy?chan=%s&amp;start=%s&amp;action=remove">Remove</a>' % (prog.channel_id, prog.start)
+            cell = ('<a href="record.rpy?chan=%s&amp;start=%s&amp;action=remove">'+_('Remove')+'</a>') % (prog.channel_id, prog.start)
             fv.tableCell(cell, 'class="'+status+'" colspan="1"')
 
             fv.tableRowClose()
@@ -195,6 +199,6 @@ class RecordResource(FreevoResource):
         #fv.printLinks()
         fv.printFooter()
 
-        return fv.res
+        return String( fv.res )
     
 resource = RecordResource()

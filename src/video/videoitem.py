@@ -10,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.126  2004/02/19 04:57:58  gsbarbieri
+# Support Web Interface i18n.
+# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
+#
 # Revision 1.125  2004/02/15 15:22:42  dischi
 # better dvd disc support
 #
@@ -496,7 +500,7 @@ class VideoItem(Item):
                 self.media = media
             else:
                 self.menuw.show()
-                ConfirmBox(text=(_('Media not not found for "%s".\n')+
+                ConfirmBox(text=(_('Media not found for "%s".\n')+
                                  _('Please insert the media.')) % self.url,
                            handler=self.play).show()
                 return

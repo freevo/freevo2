@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/02/19 04:57:59  gsbarbieri
+# Support Web Interface i18n.
+# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
+#
 # Revision 1.14  2004/02/14 19:28:12  outlyer
 # Fix a display issue.
 #
@@ -117,13 +121,13 @@ class SearchResource(FreevoResource):
 
         (server_available, message) = ri.connectionTest()
         if not server_available:
-            fv.printHeader('Search Results', 'styles/main.css')
-            fv.res += '<h4>ERROR: recording server is unavailable</h4>'
+            fv.printHeader(_('Search Results'), 'styles/main.css')
+            fv.res += '<h4>'+_('ERROR')+': '+_('recording server is unavailable')+'</h4>'
             fv.printSearchForm()
             fv.printLinks()
             fv.printFooter()
 
-            return fv.res
+            return String( fv.res )
 
         find = fv.formValue(form, 'find')
 
@@ -135,21 +139,21 @@ class SearchResource(FreevoResource):
             if result:
                 rec_progs = recordings.getProgramList()
 
-        fv.printHeader('Search Results', 'styles/main.css')
+        fv.printHeader(_('Search Results'), 'styles/main.css')
 
         if not got_matches: 
-            fv.res += '<h3>No matches</h3>'
+            fv.res += '<h3>'+_('No matches')+'</h3>'
 
         else:
             fv.res += '<div id="content"><br>'
             fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
             fv.tableRowOpen('class="chanrow"')
-            fv.tableCell('Start Time', 'class="guidehead" colspan="1"')
-            fv.tableCell('Stop Time', 'class="guidehead" colspan="1"')
-            fv.tableCell('Channel', 'class="guidehead" colspan="1"')
-            fv.tableCell('Title', 'class="guidehead" colspan="1"')
-            fv.tableCell('Program Description', 'class="guidehead" colspan="1"')
-            fv.tableCell('Actions', 'class="guidehead" colspan="1"')
+            fv.tableCell(_('Start Time'), 'class="guidehead" colspan="1"')
+            fv.tableCell(_('Stop Time'), 'class="guidehead" colspan="1"')
+            fv.tableCell(_('Channel'), 'class="guidehead" colspan="1"')
+            fv.tableCell(_('Title'), 'class="guidehead" colspan="1"')
+            fv.tableCell(_('Program Description'), 'class="guidehead" colspan="1"')
+            fv.tableCell(_('Actions'), 'class="guidehead" colspan="1"')
             fv.tableRowClose()
 
             for prog in progs:
@@ -180,19 +184,19 @@ class SearchResource(FreevoResource):
                 fv.tableCell(prog.title, 'class="'+status+'" colspan="1"')
     
                 if prog.desc == '':
-                    cell = 'Sorry, the program description for "%s" is unavailable.' % prog.title
+                    cell = _('Sorry, the program description for <b>%s</b> is unavailable.') % prog.title
                 else:
                     cell = prog.desc
                 fv.tableCell(cell, 'class="'+status+'" colspan="1"')
     
                 if status == 'scheduled':
-                    cell = '<a href="record.rpy?chan=%s&start=%s&action=remove">Remove</a>' % (prog.channel_id, prog.start)
+                    cell = ('<a href="record.rpy?chan=%s&start=%s&action=remove">'+_('Remove')+'</a>') % (prog.channel_id, prog.start)
                 elif status == 'recording':
-                    cell = '<a href="record.rpy?chan=%s&start=%s&action=add">Record</a>' % (prog.channel_id, prog.start)
+                    cell = ('<a href="record.rpy?chan=%s&start=%s&action=add">'+_('Record')+'</a>') % (prog.channel_id, prog.start)
                 else:
-                    cell = '<a href="record.rpy?chan=%s&start=%s&action=add">Record</a>' % (prog.channel_id, prog.start)
+                    cell = ('<a href="record.rpy?chan=%s&start=%s&action=add">'+_('Record')+'</a>') % (prog.channel_id, prog.start)
     
-                cell += ' | <a href="edit_favorite.rpy?chan=%s&start=%s&action=add">New favorite</a>' % (prog.channel_id, prog.start)
+                cell += (' | <a href="edit_favorite.rpy?chan=%s&start=%s&action=add">'+_('New favorite')+'</a>') % (prog.channel_id, prog.start)
                 fv.tableCell(cell, 'class="'+status+'" colspan="1"')
     
                 fv.tableRowClose()
@@ -206,7 +210,7 @@ class SearchResource(FreevoResource):
 
         fv.printFooter()
 
-        return fv.res
+        return String( fv.res )
     
 resource = SearchResource()
 

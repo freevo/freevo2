@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/02/19 04:57:59  gsbarbieri
+# Support Web Interface i18n.
+# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
+#
 # Revision 1.6  2004/02/09 21:23:42  outlyer
 # New web interface...
 #
@@ -68,39 +72,40 @@
 # ----------------------------------------------------------------------- */
 #endif
 
+import util
 from www.web_types import HTMLResource, FreevoResource
 
 class HelpResource(FreevoResource):
 
     def _render(self, request):
         fv = HTMLResource()
-        fv.printHeader('Freevo Help', '/styles/main.css', prefix=request.path.count('/')-1)
+        fv.printHeader(_('Freevo Help'), '/styles/main.css', prefix=request.path.count('/')-1)
         fv.res += '<div id="content">'
         fv.res += '&nbsp;<br/>'
-        fv.res += 'This is the internal Freevo documentation. The documents \
+        fv.res += _('This is the internal Freevo documentation. The documents \
         are in an early stage of development, if you like to help, please \
         contact the developers. You find more informations like \
         the <a href="http://freevo.sourceforge.net/cgi-bin/moin.cgi/FrontPage">\
         WiKi (online manual)</a> and mailing lists on the \
         <a href="http://www.freevo.org">Freevo Homepage</a>.\
         Everyone can edit the WiKi (and we can revert them if someone deletes \
-        informations), feel free to add informations there.'
+        informations), feel free to add informations there.')
 
-        fv.res += '<p><b>Index</b><ol>'
+        fv.res += '<p><b>'+_('Index')+'</b><ol>'
         
-        fv.res += '<li><a href="howto.rpy">Freevo Installation Howto</a></li>'
-        fv.res += '<li><a href="doc.rpy?file=faq">Frequently Asked Questions</a></li>'
-        fv.res += '<li><a href="doc.rpy?file=recording">Recording Information</a></li>'
-        fv.res += '<li><a href="plugins.rpy">Plugin List</a></li>'
-        fv.res += '<li><a href="doc.rpy?file=FxdFiles">FXD files</a></li>'
-        fv.res += '<li><a href="doc.rpy?file=SkinInfo">Skinning Informations</a></li>'
-        fv.res += '<li><a href="howto.rpy?type=plugin">Plugin Writing Howto</a></li>'
+        fv.res += '<li><a href="howto.rpy">'+_('Freevo Installation Howto')+'</a></li>'
+        fv.res += '<li><a href="doc.rpy?file=faq">'+_('Frequently Asked Questions')+'</a></li>'
+        fv.res += '<li><a href="doc.rpy?file=recording">'+_('Recording Information')+'</a></li>'
+        fv.res += '<li><a href="plugins.rpy">'+_('Plugin List')+'</a></li>'
+        fv.res += '<li><a href="doc.rpy?file=FxdFiles">'+_('FXD files')+'</a></li>'
+        fv.res += '<li><a href="doc.rpy?file=SkinInfo">'+_('Skinning Informations')+'</a></li>'
+        fv.res += '<li><a href="howto.rpy?type=plugin">'+_('Plugin Writing Howto')+'</a></li>'
 
         fv.res += '<br><br>'
         fv.printLinks(request.path.count('/')-1)
         fv.printFooter()
         fv.res+=('</ul>')
         fv.res+='</div>'
-        return fv.res
+        return String( fv.res )
     
 resource = HelpResource()

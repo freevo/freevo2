@@ -9,6 +9,10 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/02/19 04:57:57  gsbarbieri
+# Support Web Interface i18n.
+# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
+#
 # Revision 1.8  2004/02/18 21:55:11  dischi
 # update to new gui code
 #
@@ -133,19 +137,19 @@ class EditFavorite(PopupBox):
 
         guide = tv.epg_xmltv.get_guide()
 
-        name = Label(_('Name:'), self, Align.LEFT)
+        name = Label(_('Name')+':', self, Align.LEFT)
         self.name_input = LetterBoxGroup(text=self.fav.name)
         self.name_input.h_align = Align.NONE
         self.add_child(self.name_input)
 
 
-        title = Label(_('Title:%s') % self.fav.title, self, Align.LEFT)
+        title = Label(_('Title')+': %s' % self.fav.title, self, Align.LEFT)
 
-        chan = Label(_('Channel:'), self, Align.LEFT)
+        chan = Label(_('Channel')+':', self, Align.LEFT)
 
         self.chan_box = OptionBox('ANY')
         self.chan_box.h_align = Align.NONE
-        self.chan_box.add_item(text='ANY', value='ANY')
+        self.chan_box.add_item(text=_('ANY'), value='ANY')
       
         i = 1
         chan_index = 0
@@ -164,7 +168,7 @@ class EditFavorite(PopupBox):
         self.chan_box.change_item(None)
         self.add_child(self.chan_box)
 
-        dow = Label(_('Day of Week:'), self, Align.LEFT)
+        dow = Label(_('Day of Week') +':', self, Align.LEFT)
         self.dow_box = OptionBox('ANY DAY')
         self.dow_box.h_align = Align.NONE
 
@@ -172,7 +176,7 @@ class EditFavorite(PopupBox):
 
         i=1
         dow_index = 0
-        for dow in ('Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat', 'Sun'):
+        for dow in (_('Mon'), _('Tue'), _('Wed'), _('Thu'), _('Fri'), _('Sat'), _('Sun')):
             val = "%d" % (i-1)
             self.dow_box.add_item(text=_(dow), value=val )
             if val == self.fav.dow:
@@ -185,7 +189,7 @@ class EditFavorite(PopupBox):
         self.dow_box.change_item(None)
         self.add_child(self.dow_box)
 
-        tod = Label(_('Time of Day:'), self, Align.LEFT)
+        tod = Label(_('Time of Day')+':', self, Align.LEFT)
         self.tod_box = OptionBox('ANY')
         self.tod_box.h_align = Align.NONE
         self.tod_box.add_item(text=_('ANY TIME'), value='ANY')

@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/02/19 04:57:57  gsbarbieri
+# Support Web Interface i18n.
+# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
+#
 # Revision 1.13  2004/02/05 14:23:50  outlyer
 # Patch from Viggo Fredriksen
 #
@@ -132,7 +136,7 @@ class FreevoChannels:
                 self.chan_index = pos
 
         if not new_chan:
-            print _('ERROR: Cannot find tuner channel "%s" in the TV channel listing') % chan
+            print String(_('ERROR: Cannot find tuner channel "%s" in the TV channel listing')) % chan
             return
 
         vg = self.getVideoGroup(new_chan)
@@ -191,7 +195,7 @@ class FreevoChannels:
                     vd.setfreq_old(freq)
                 vd.close()
             except:
-                print _('Failed to set freq for channel %s') % chan
+                print String(_('Failed to set freq for channel %s')) % chan
 
         return 0
 

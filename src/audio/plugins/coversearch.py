@@ -13,6 +13,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2004/02/19 04:57:56  gsbarbieri
+# Support Web Interface i18n.
+# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
+#
 # Revision 1.29  2004/02/14 19:29:39  dischi
 # kill some debug
 #
@@ -150,8 +154,8 @@ class PluginInterface(plugin.ItemPlugin):
         try:
             amazon.getLicense()
         except amazon.NoLicenseKey:
-            print _( 'To search for covers you need an Amazon.com Web Services\n' \
-                     'license key. You can get yours from:\n' )
+            print String(_( 'To search for covers you need an Amazon.com Web Services\n' \
+                     'license key. You can get yours from:\n' ))
             print 'https://associates.amazon.com/exec/panama/associates/join/'\
                   'developer/application.html'
             self.reason = 'no amazon key'
@@ -190,26 +194,26 @@ class PluginInterface(plugin.ItemPlugin):
                                'imdb_search_or_cover_search') ]
                 else:
                     if config.DEBUG > 1:
-                        print _( "WARNING" ) + ": "+\
-                              _( "Plugin 'coversearch' was disabled for this item! " \
+                        print String(_( "WARNING" )) + ": "+\
+                              String(_( "Plugin 'coversearch' was disabled for this item! " \
                                  "'coversearch' needs an item with " \
                                  "Artist and Album (if it's a mp3 or ogg) or " \
                                  "Title (if it's a cd track) to be able to search. "  \
                                  "So you need a file with a ID3 tag (mp3) or an Ogg Info. "  \
-                                 "Maybe you must fix this file (%s) tag?" ) % item.filename 
+                                 "Maybe you must fix this file (%s) tag?" )) % item.filename 
             except KeyError:
                 if config.DEBUG > 1:
-                    print _( "WARNING" ) + ": " +\
-                          _( "Plugin 'coversearch' was disabled for this item! " \
+                    print String(_( "WARNING" )) + ": " +\
+                          String(_( "Plugin 'coversearch' was disabled for this item! " \
                              "'coversearch' needs an item with " \
                              "Artist and Album (if it's a mp3 or ogg) or " \
                              "Title (if it's a cd track) to be able to search. " \
                              "So you need a file with a ID3 tag (mp3) or an Ogg Info. " \
-                             "Maybe you must fix this file (%s) tag?" ) % item.filename
+                             "Maybe you must fix this file (%s) tag?" )) % item.filename
             except AttributeError:
                 if config.DEBUG > 1:
-                    print _( "WARNING" ) + ": " +\
-                          _( "Unknown CD, cover searching is disabled" )
+                    print String(_( "WARNING" )) + ": " +\
+                          String(_( "Unknown CD, cover searching is disabled" ))
         return []
 
 

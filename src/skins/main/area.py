@@ -27,6 +27,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2004/02/19 04:57:57  gsbarbieri
+# Support Web Interface i18n.
+# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
+#
 # Revision 1.33  2004/02/12 16:59:12  dischi
 # keep aspect for scaling
 #
@@ -678,7 +682,7 @@ class Skin_Area:
         if height2 == -1:
             height2 = font.h + 2
 
-        self.tmp_objects.text.append((x, y, x+width, y+height2, _(text), font, height,
+        self.tmp_objects.text.append((x, y, x+width, y+height2, Unicode(_(text)), font, height,
                                             align_h, align_v, mode, ellipses))
 
 

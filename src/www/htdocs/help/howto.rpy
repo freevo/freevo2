@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/02/19 04:57:59  gsbarbieri
+# Support Web Interface i18n.
+# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
+#
 # Revision 1.7  2004/02/09 21:23:42  outlyer
 # New web interface...
 #
@@ -85,10 +89,12 @@ SEARCH_PATH = (os.path.join(config.SHARE_DIR, '../doc/freevo-%s' % version.__ver
 # to add a new docbook style howto, just add the identifier to this
 # list
 TYPES = {
-    'install': ('installation', 'Freevo Installation HOWTO',
-                'Freevo Installation HOWTO: Build your own media box with Freevo and Linux'),
-    'plugin':  ('plugin_writing', 'Freevo Plugin Writing HOWTO',
-                'Freevo Plugin Writing HOWTO: Writing your own plugins for Freevo')
+    'install': ('installation',
+                _('Freevo Installation HOWTO'),
+                _('Freevo Installation HOWTO')+': '+_('Build your own media box with Freevo and Linux')),
+    'plugin':  ('plugin_writing',
+                _('Freevo Plugin Writing HOWTO'),
+                _('Freevo Plugin Writing HOWTO')+': '+_('Writing your own plugins for Freevo'))
     }
                 
 class HowtoResource(FreevoResource):
@@ -123,9 +129,9 @@ class HowtoResource(FreevoResource):
         if not self.BASEDIR.has_key(type):
             fv.printHeader(name, '/styles/main.css', prefix=request.path.count('/')-1)
             fv.res += '<div id="content">\n'
-            fv.res += '<p class="alert">ERROR, unable to load html files<br>'
-            fv.res += 'If you use a CVS version of Freevo, run "autogen.sh".</p> '\
-                      'The files are searched in the following locations:<ol>'
+            fv.res += '<p class="alert">'+_('ERROR')+': '+_('unable to load html files')+'<br>'
+            fv.res += _('If you use a CVS version of Freevo, run <b>autogen.sh</b>.')+'</p>\n' + \
+                      _('The files are searched in the following locations:')+'<ol>'
             for d in SEARCH_PATH:
                 fv.res += '<li>%s/%s</li>\n' % (d, TYPES[type][0])
             fv.res += '</ol>'
@@ -172,7 +178,7 @@ class HowtoResource(FreevoResource):
         fv.printLinks(request.path.count('/')-1)
         fv.printFooter()
         fv.res+=('</ul>')
-        return fv.res
+        return String(fv.res)
     
 
 resource = HowtoResource()

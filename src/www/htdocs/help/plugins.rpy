@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/02/19 04:57:59  gsbarbieri
+# Support Web Interface i18n.
+# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
+#
 # Revision 1.5  2004/02/12 14:04:37  outlyer
 # fixes for some issues Dischi pointed out:
 #
@@ -102,7 +106,7 @@ class PluginResource(FreevoResource):
             plugin_link = '<li><a href="plugins.rpy?type=%s#%s">%s</a></li>'
             page_link = '<li><a href="plugins.rpy?type=%s">%s plugins</a></li>\n<ol>'
 
-            fv.printHeader('Freevo Plugin List', '/styles/main.css',prefix=request.path.count('/')-1)
+            fv.printHeader(_('Freevo Plugin List'), '/styles/main.css',prefix=request.path.count('/')-1)
             fv.res += '<div id="content">\n'
             fv.res += '<p><b>Index</b><ol>'
 
@@ -121,7 +125,7 @@ class PluginResource(FreevoResource):
             fv.res += '</ol>\n'
 
         else:
-            fv.printHeader('Freevo Plugin List - %s Plugins' % type.capitalize(),
+            fv.printHeader(_('Freevo Plugin List')+' - %s Plugins' % type.capitalize(),
                            '/styles/main.css',prefix=request.path.count('/')-1)
             fv.res += '<div id="content">\n'
             fv.res += '<a name="top"></a>'
@@ -131,15 +135,15 @@ class PluginResource(FreevoResource):
                     if not p[0][:p[0].find('.')] in special_plugins:
                         fv.res +=  '<a name="%s"></a>' % p[0]
                         fv.res += info_html(p[0], [p])
-                        fv.res += '[&nbsp;<a href="#top">top</a>&nbsp;|&nbsp;'
-                        fv.res += '<a href="plugins.rpy">index</a>&nbsp;]<hr>\n'
+                        fv.res += '[&nbsp;<a href="#top">'+_('top')+'</a>&nbsp;|&nbsp;'
+                        fv.res += '<a href="plugins.rpy">'+_('index')+'</a>&nbsp;]<hr>\n'
             else:
                 for p in all_plugins:
                     if p[0][:p[0].find('.')] == type:
                         fv.res +=  '<a name="%s"></a>' % p[0]
                         fv.res += info_html(p[0], [p])
-                        fv.res += '[&nbsp;<a href="#top">top</a>&nbsp;|&nbsp;'
-                        fv.res += '<a href="plugins.rpy">index</a>&nbsp;]<hr>\n'
+                        fv.res += '[&nbsp;<a href="#top">'+_('top')+'</a>&nbsp;|&nbsp;'
+                        fv.res += '<a href="plugins.rpy">'+_('index')+'</a>&nbsp;]<hr>\n'
 
 
         fv.res += '</div>\n'
@@ -147,7 +151,7 @@ class PluginResource(FreevoResource):
         fv.printLinks(request.path.count('/')-1)
         fv.printFooter()
         fv.res+=('</ul>')
-        return fv.res
+        return String( fv.res )
     
 
 resource = PluginResource()

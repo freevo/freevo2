@@ -17,6 +17,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2004/02/19 04:57:58  gsbarbieri
+# Support Web Interface i18n.
+# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
+#
 # Revision 1.39  2004/02/06 19:29:06  dischi
 # fix/cleanup dvd on hd handling
 #
@@ -100,9 +104,9 @@ class PluginInterface(plugin.Plugin):
         try:
             config.XINE_COMMAND
         except:
-            print _( 'ERROR' ) + ': ' + \
-                  _("'XINE_COMMAND' not defined, plugin 'xine' deactivated")
-            print _( 'please check the xine section in freevo_config.py' )
+            print String(_( 'ERROR' )) + ': ' + \
+                  String(_("'XINE_COMMAND' not defined, plugin 'xine' deactivated.\n" \
+                           'please check the xine section in freevo_config.py' ))
             return
 
         if config.XINE_COMMAND.find('fbxine') >= 0:
@@ -124,9 +128,9 @@ class PluginInterface(plugin.Plugin):
             _debug_('detect xine version %s' % config.XINE_VERSION)
             
         if config.XINE_VERSION < 922:
-            print _( 'ERROR' ) + ': ' + \
-                  _( "'xine-ui' version too old, plugin 'xine' deactivated" )
-            print _( 'You need software %s' ) % 'xine-ui > 0.9.21'
+            print String(_( 'ERROR' )) + ': ' + \
+                  String(_( "'xine-ui' version too old, plugin 'xine' deactivated" ))
+            print String(_( 'You need software %s' )) % 'xine-ui > 0.9.21'
             return
             
         # register xine as the object to play

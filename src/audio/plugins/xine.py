@@ -12,6 +12,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/02/19 04:57:56  gsbarbieri
+# Support Web Interface i18n.
+# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
+#
 # Revision 1.14  2004/01/14 20:36:16  mikeruelle
 # they guys do not play radio
 #
@@ -81,8 +85,8 @@ class PluginInterface(plugin.Plugin):
         try:
             config.CONF.fbxine
         except:
-            print _( 'ERROR' ) + ': ' + \
-                  _( "'fbxine' not found, plugin 'xine' deactivated" )
+            print String(_( 'ERROR' )) + ': ' + \
+                  String(_( "'fbxine' not found, plugin 'xine' deactivated" ))
             return
 
         if not hasattr(config, 'FBXINE_VERSION'):
@@ -100,9 +104,9 @@ class PluginInterface(plugin.Plugin):
 
         
         if config.FBXINE_VERSION < 923:
-            print _( 'ERROR' ) + ': ' + \
-                  _( "'fbxine' version too old, plugin 'xine' deactivated" )
-            print _( 'You need software %s' ) % 'xine-ui > 0.9.22'
+            print String(_( 'ERROR' )) + ': ' + \
+                  String(_( "'fbxine' version too old, plugin 'xine' deactivated" ))
+            print String(_( 'You need software %s' )) % 'xine-ui > 0.9.22'
             return
             
         # register xine as the object to play

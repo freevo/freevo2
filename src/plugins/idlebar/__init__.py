@@ -18,6 +18,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/02/19 04:57:57  gsbarbieri
+# Support Web Interface i18n.
+# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
+#
 # Revision 1.13  2004/02/12 16:58:49  dischi
 # smaller logo, keep aspect
 #
@@ -419,7 +423,7 @@ class weather(IdleBarPlugin):
         font  = osd.get_font('small0')
         osd.draw_image(os.path.join(config.ICON_DIR, 'weather/' + icon),
                         (x, osd.y + 15, -1, -1))
-        temp = '%s°' % temp
+        temp = u'%s\xb0' % temp
         width = font.stringsize(temp)
         osd.write_text(temp, font, None, x + 15, osd.y + 55 - font.h, width, font.h,
                        'left', 'top')

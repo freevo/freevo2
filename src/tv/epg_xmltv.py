@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2004/02/19 04:57:57  gsbarbieri
+# Support Web Interface i18n.
+# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
+#
 # Revision 1.43  2004/02/09 20:14:06  dischi
 # add verbose flag
 #
@@ -202,20 +206,19 @@ def get_guide(popup=None, verbose=True):
                 epg_ver = cached_guide.EPG_VERSION
             except AttributeError:
                 if verbose:
-                    print _('EPG does not have a version number, must be reloaded')
+                    print String(_('EPG does not have a version number, must be reloaded'))
                     print dir(cached_guide)
 
             if epg_ver != epg_types.EPG_VERSION:
                 if verbose:
-                    print ((_('EPG version number %s is stale (new is %s), must ') +
-                            _('be reloaded')) % (epg_ver, epg_types.EPG_VERSION))
+                    print ((String(_('EPG version number %s is stale (new is %s), must be reloaded'))) % (epg_ver, epg_types.EPG_VERSION))
 
             elif cached_guide.timestamp != os.path.getmtime(config.XMLTV_FILE):
                 # Hmmm, weird, there is a pickled file newer than the TV.xml
                 # file, but the timestamp in it does not match the TV.xml
                 # timestamp. We need to reload!
                 if verbose:
-                    print _('EPG: Pickled file timestamp mismatch, reloading!')
+                    print String(_('EPG: Pickled file timestamp mismatch, reloading!'))
                 
             else:
                 if DEBUG and verbose:
@@ -236,7 +239,7 @@ def get_guide(popup=None, verbose=True):
 	    	# Don't violently crash on a incomplete or empty TV.xml please.
 	    	cached_guide = None
                 print
-                print _("Couldn't load the TV Guide, got an exception!")
+                print String(_("Couldn't load the TV Guide, got an exception!"))
                 print
                 traceback.print_exc()
             else:

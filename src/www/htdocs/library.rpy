@@ -11,6 +11,10 @@
 #       -stream tv, video and music somehow
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/02/19 04:57:59  gsbarbieri
+# Support Web Interface i18n.
+# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
+#
 # Revision 1.19  2004/02/09 21:23:42  outlyer
 # New web interface...
 #
@@ -195,19 +199,29 @@ class LibraryResource(FreevoResource):
 
     def _render(self, request):
         fv = HTMLResource()
+        messages = []
         form = request.args
 
-        action = fv.formValue(form, 'action')
-        action_file = fv.formValue(form, 'file')
-        action_newfile = fv.formValue(form, 'newfile')
-        action_dir = fv.formValue(form, 'dir')
+        action           = fv.formValue(form, 'action')
+        action_file      = Unicode(fv.formValue(form, 'file'))
+        if isinstance( action_file, str ):
+            action_file = Unicode( action_file, 'latin-1' )
+            
+        action_newfile   = Unicode(fv.formValue(form, 'newfile'))
+        if isinstance( action_newfile, str ):
+            action_newfile = Unicode( action_newfile, 'latin-1' )
+            
+        action_dir       = Unicode(fv.formValue(form, 'dir'))
+        if isinstance( action_dir, str ):
+            action_dir = Unicode( action_dir, 'latin-1' )
+            
         action_mediatype = fv.formValue(form, 'media')
-        action_script = os.path.basename(request.path)
+        action_script = os.path.basename(request.path)        
         #use request.postpath array to set action to download
         if not action and len(request.postpath) > 0:
             action = "download"
-            action_file = request.postpath[-1]
-            action_dir = os.sep + string.join(request.postpath[0:-1], os.sep)
+            action_file = Unicode(request.postpath[-1])
+            action_dir = Unicode(os.sep + string.join(request.postpath[0:-1], os.sep))
             action_mediatype = "download"
         elif not action:
             action = "view"
@@ -228,24 +242,24 @@ class LibraryResource(FreevoResource):
                     if action_newfile:
                         newfile_loc = os.path.join(action_dir, action_newfile)
                         if os.path.isfile(newfile_loc):
-                            print '%s already exists file not renamed.' % newfile_loc
+                            messages += [ _( '<b>%s</b> already exists! File not renamed.' ) % newfile_loc ]
                         else:
-                            print 'rename %s to %s' % (file_loc, newfile_loc)
+                            messages += [ _( 'Rename <b>%s</b> to <b>%s</b>.' ) % (file_loc, newfile_loc) ]
                             os.rename(file_loc, newfile_loc)
                     else:
-                        fv.res += 'Error: no newfile specified.'
+                        messages += [ _('ERROR') + ': ' +_('No new file specified.') ]
                 elif action == 'delete':
-                    print 'delete %s' % file_loc
+                    messages += [ _( 'Delete <b>%s</b>.' ) % file_loc ]
                     if os.path.exists(file_loc): os.unlink(file_loc)
                 elif action == 'download':
-                    sys.stderr.write('download %s' % file_loc)
+                    sys.stderr.write('download %s\n' % String(file_loc))
                     sys.stderr.flush()
                     return static.File(file_loc).render(request)
                     #request.finish()
             else:
-                fv.res += '%s does not exist. no action taken.' % file_loc
-        else:
-            print 'I do not process names(%s) with slashes for security reasons.' % action_file
+                messages += [ _('ERROR') + ': ' + _( '<b>%s</b> does not exist. No action taken.') % file_loc ]
+        elif action_file:
+            messages += [ _('ERROR')+': ' +_( 'I do not process names (%s) with slashes for security reasons.') % action_file ]
 
         directories = []
         if action_mediatype:
@@ -253,36 +267,43 @@ class LibraryResource(FreevoResource):
 
 
         if action and action != "download":
-            fv.printHeader('Media Library', 'styles/main.css', selected="Media Library")
+            fv.printHeader(_('Media Library'), 'styles/main.css', selected=_("Media Library"))
             fv.res += '<script language="JavaScript"><!--' + "\n"
             fv.res += 'function renameFile(basedir, file, mediatype) {' + "\n"
-            fv.res += '   newfile=window.prompt("New name please.");' + "\n"
+            fv.res += '   newfile=window.prompt("New name please.", file);' + "\n"
             fv.res += '   if(newfile == "" || newfile == null) return;' + "\n"
             fv.res += '   document.location="' + action_script +'?action=rename&file=" + escape(file) + "&newfile=" + escape(newfile) + "&dir=" + basedir + "&media=" + mediatype;' + "\n"
             fv.res += '}' + "\n"
             fv.res += '//--></script>' + "\n"
             fv.res += '&nbsp;<br/>\n'
 
+            if messages:
+                fv.res += "<h4>"+_("Messages")+":</h4>\n"
+                fv.res += "<ul>\n"
+                for m in messages:
+                    fv.res += "   <li>%s</li>\n" % m
+                fv.res += "</ul>\n"
+                
+
         if not action_mediatype:
             fv.tableOpen('class="library"')
             movmuslink = '<a href="%s?media=%s">%s</a>' 
             rectvlink = '<a href="%s?media=%s&dir=%s">%s</a>' 
-            
             fv.tableRowOpen('class="chanrow"')
             fv.tableCell('<img src=\"images/library/library-movies.jpg\">')
-            fv.tableCell(movmuslink % (action_script, "movies","Movies"), '')
+            fv.tableCell(movmuslink % (action_script, "movies",_("Movies")), '')
             fv.tableRowClose()
             fv.tableRowOpen('class="chanrow"')
             fv.tableCell('<img src=\"images/library/library-tv.jpg\">')
-            fv.tableCell(rectvlink % (action_script, "rectv", config.TV_RECORD_DIR, "Recorded TV"), '')
+            fv.tableCell(rectvlink % (action_script, "rectv", config.TV_RECORD_DIR, _("Recorded TV")), '')
             fv.tableRowClose()
             fv.tableRowOpen('class="chanrow"')
             fv.tableCell('<img src=\"images/library/library-music.jpg\">')
-            fv.tableCell(movmuslink % (action_script,"music","Music"), '')
+            fv.tableCell(movmuslink % (action_script,"music",_("Music")), '')
             fv.tableRowClose()
             fv.tableRowOpen('class="chanrow"')
             fv.tableCell('<img src=\"images/library/library-images.jpg\">')
-            fv.tableCell(movmuslink % (action_script,"images","Images"), '')
+            fv.tableCell(movmuslink % (action_script,"images",_("Images")), '')
             fv.tableRowClose()
             fv.tableClose()
             fv.printSearchForm()
@@ -294,10 +315,10 @@ class LibraryResource(FreevoResource):
             # now make the list unique
             fv.tableOpen('class="library"')
             fv.tableRowOpen('class="chanrow"')
-            fv.tableCell('Choose a Directory', 'class="guidehead" colspan="1"')
+            fv.tableCell(_('Choose a Directory'), 'class="guidehead" colspan="1"')
             fv.tableRowClose()
             fv.tableRowOpen('class="chanrow"')
-            fv.tableCell('<a href="' + action_script + '">&laquo; Back</a>', 'class="basic" colspan="1"')
+            fv.tableCell('<a href="' + action_script + '">&laquo; '+_('Back')+'</a>', 'class="basic" colspan="1"')
             fv.tableRowClose()
             for d in directories:
                 (title, dir) = d
@@ -369,12 +390,12 @@ class LibraryResource(FreevoResource):
                     break
             backlink = ''
             if actiondir_is_root == TRUE and action_mediatype == 'rectv':
-                backlink = '<a href="'+ action_script +'">&laquo; Back</a>'
+                backlink = '<a href="'+ action_script +'">&laquo; '+_('Back')+'</a>'
             elif actiondir_is_root == TRUE:
-                backlink = '<a href="'+ action_script +'?media='+action_mediatype+'">&laquo; Back</a>'
+                backlink = '<a href="'+ action_script +'?media='+action_mediatype+'">&laquo; '+_('Back')+'</a>'
             else:
                 backdir = os.path.dirname(action_dir)
-                backlink = '<a href="'+ action_script +'?media='+action_mediatype+'&dir='+urllib.quote(backdir)+'">&laquo; Back</a>'
+                backlink = '<a href="'+ action_script +'?media='+action_mediatype+'&dir='+urllib.quote(backdir)+'">&laquo; '+_('Back')+'</a>'
             fv.tableRowOpen('class="chanrow"')
             fv.tableCell(backlink, 'class="basic" colspan="1"')
             fv.tableCell('&nbsp;', 'class="basic" colspan="1"')
@@ -384,6 +405,7 @@ class LibraryResource(FreevoResource):
             # get me the directories to output
             directorylist = util.getdirnames(action_dir)
             for mydir in directorylist:
+                mydir = Unicode(mydir)
                 fv.tableRowOpen('class="chanrow"')
                 mydispdir = os.path.basename(mydir)
                 mydirlink = '<a href="'+ action_script +'?media='+action_mediatype+'&dir='+urllib.quote(mydir)+'">'+mydispdir+'</a>'
@@ -409,16 +431,16 @@ class LibraryResource(FreevoResource):
                 elif favs and re.match(favre, file):
                     status = 'favorite'
                 fv.tableRowOpen('class="chanrow"')
-                fv.tableCell(file, 'class="'+status+'" colspan="1"')
+                fv.tableCell(Unicode(file), 'class="'+status+'" colspan="1"')
                 fv.tableCell(tv_util.descfsize(len_file), 'class="'+status+'" colspan="1"')
                 if suppressaction == TRUE:
                     fv.tableCell('&nbsp;', 'class="'+status+'" colspan="1"')
                 else:
-                    file_esc = urllib.quote(file)
-                    dllink = '<a href="'+action_script+'%s">Download</a>' %  os.path.join(basedir,file)
+                    file_esc = urllib.quote(String(file))
+                    dllink = ('<a href="'+action_script+'%s">'+_('Download')+'</a>') %  Unicode(os.path.join(basedir,file))
                     filelink = '<a href="'+action_script+'?media=%s&dir=%s&action=%s&file=%s">%s</a>'
-                    delete = filelink % (action_mediatype, basedir, 'delete', file_esc,'Delete')
-                    rename = '<a href="javascript:renameFile(\'%s\',\'%s\',\'%s\')">Rename</a>' % (basedir, file_esc, action_mediatype)
+                    delete = filelink % (action_mediatype, basedir, 'delete', file_esc,_('Delete'))
+                    rename = ('<a href="javascript:renameFile(\'%s\',\'%s\',\'%s\')">'+_("Rename")+'</a>') % (basedir, file_esc, action_mediatype)
                     fv.tableCell(rename + '&nbsp;&nbsp;' + delete + '&nbsp;&nbsp;' + dllink, 'class="'+status+'" colspan="1"')
                 fv.tableRowClose()
 
@@ -428,7 +450,7 @@ class LibraryResource(FreevoResource):
             fv.printLinks()
             fv.printFooter()
 
-        return fv.res
+        return String( fv.res )
     
 resource = LibraryResource()
 

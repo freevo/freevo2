@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/02/19 04:57:59  gsbarbieri
+# Support Web Interface i18n.
+# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
+#
 # Revision 1.3  2003/10/22 15:38:34  mikeruelle
 # Apply Bart Heremans strptime patch for off by one hour
 #
@@ -142,6 +146,6 @@ class WRecResource(FreevoWapResource):
 
         fv.printFooter()
 
-        return fv.res
+        return String( fv.res )
 
 resource = WRecResource()

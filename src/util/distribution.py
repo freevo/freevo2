@@ -62,6 +62,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/02/19 04:57:58  gsbarbieri
+# Support Web Interface i18n.
+# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
+#
 # Revision 1.2  2003/11/22 12:03:31  dischi
 # do not install __init__ files from freevo
 #
@@ -237,7 +241,7 @@ class i18n (core.Command):
                 f.close()
 
             # update
-            os.system('(cd src ; find . -name \*.py | xargs xgettext -o ../i18n/%s.pot)' % \
+            os.system('(cd src ; find . -name "*.*py" | xargs xgettext -L Python -o ../i18n/%s.pot)' % \
                       i18n_application)
 
             # for freevo main package: restore the skin settings

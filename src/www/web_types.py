@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2004/02/19 04:57:59  gsbarbieri
+# Support Web Interface i18n.
+# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
+#
 # Revision 1.21  2004/02/10 18:32:57  outlyer
 # Anyone notice that the entire content was missing? Apparently Mozilla is
 # more forgiving than IE... this <span> was used to hide some text so people
@@ -145,12 +149,12 @@ class HTMLResource:
 
         strprefix = '../' * prefix
 
-
+        self.res += '<?xml version="1.0" encoding="'+ config.encoding +'"?>\n'
         self.res += '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"\n'
         self.res += '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">'
         self.res += '<html>\n\t<head>\n'
         self.res += '\t<title>Freevo | '+title+'</title>\n'
-        self.res += '\t<meta http-equiv="Content-Type" content= "text/html; charset=us-ascii"/>\n'
+        self.res += '\t<meta http-equiv="Content-Type" content= "text/html; charset='+ config.encoding +'"/>\n'
         if style != None:
             self.res += '\t<link rel="stylesheet" href="styles/main.css" type="text/css" />\n'
         if script != None:
@@ -161,17 +165,17 @@ class HTMLResource:
         self.res += '<!-- Header Logo and Status Line -->\n'
         self.res += '<div id="titlebar"><span class="name"><a href="http://freevo.sourceforge.net/" target="_blank">Freevo</a></span></div>\n'
      
-        items = [('Home','Home','%sindex.rpy' % str(strprefix)),
-                 ('TV Guide','View TV Listings','%sguide.rpy' % str(strprefix)),
-                 ('Scheduled Recordings','View Scheduled Recordings','%srecord.rpy' % str(strprefix)),
-                 ('Favorites','View Favorites','%sfavorites.rpy' % str(strprefix)),
-                 ('Media Library','View Media Library','%slibrary.rpy' % str(strprefix)),
-                 ('Manual Recording','Schedule a Manual Recording','%smanualrecord.rpy' % str(strprefix)),
-                 ('Help','View Online Help and Documentation','%shelp/' % str(strprefix))]
+        items = [(_('Home'),_('Home'),'%sindex.rpy' % str(strprefix)),
+                 (_('TV Guide'),_('View TV Listings'),'%sguide.rpy' % str(strprefix)),
+                 (_('Scheduled Recordings'),_('View Scheduled Recordings'),'%srecord.rpy' % str(strprefix)),
+                 (_('Favorites'),_('View Favorites'),'%sfavorites.rpy' % str(strprefix)),
+                 (_('Media Library'),_('View Media Library'),'%slibrary.rpy' % str(strprefix)),
+                 (_('Manual Recording'),_('Schedule a Manual Recording'),'%smanualrecord.rpy' % str(strprefix)),
+                 (_('Help'),_('View Online Help and Documentation'),'%shelp/' % str(strprefix))]
 
         try:
             if config.ICECAST_WWW_PAGE:
-                items.append(('Icecast List','Change Icecast List','%siceslistchanger.rpy' % (strprefix)))
+                items.append((_('Icecast List'),_('Change Icecast List'),'%siceslistchanger.rpy' % (strprefix)))
         except AttributeError:
             pass
 
@@ -264,7 +268,7 @@ class HTMLResource:
     def printSearchForm(self):
         self.res += """
     <form id="SearchForm" action="search.rpy" method="get">
-    <div class="searchform"><b>Search:</b><input type="text" name="find" size="20"/></div>
+    <div class="searchform"><b>"""+_('Search')+""":</b><input type="text" name="find" size="20"/></div>
     </form>
     """
     

@@ -65,14 +65,14 @@ class ManualRecordResource(FreevoResource):
 
         (server_available, message) = ri.connectionTest()
         if not server_available:
-            fv.printHeader('Manual Record', 'styles/main.css',selected="Manual Record")
+            fv.printHeader(_('Manual Record'), 'styles/main.css',selected=_("Manual Record"))
             fv.res += '&nbsp;<br/>\n'
-            fv.res += '<h4>ERROR: recording server is unavailable</h4>'
+            fv.res += '<h4>'+_('ERROR')+': '+_('recording server is unavailable')+'</h4>'
             fv.printSearchForm()
             fv.printLinks()
             fv.printFooter()
 
-            return fv.res
+            return String( fv.res )
 
         curtime_epoch = time.time()
         curtime = time.localtime(curtime_epoch)
@@ -117,7 +117,7 @@ class ManualRecordResource(FreevoResource):
                             if title:
                                 prog.title = title
                             else:
-                                prog.title = "Manual Recorded"
+                                prog.title = _("Manual Recorded")
                             if desc:
                                 prog.desc = desc
                             prog.start = starttime
@@ -126,21 +126,26 @@ class ManualRecordResource(FreevoResource):
                             ri.scheduleRecording(prog)
                             return '<html><head><meta HTTP-EQUIV="REFRESH" CONTENT="0;URL=record.rpy"></head></html>'
                     else:
-                        errormsg = "start time is not before stop time." 
+                        errormsg = _("start time is not before stop time.")
                 else:
-                    errormsg = "Program would record for more than " + str(MAXDAYS) + " day(s)!"
+                    if MAXDAYS > 1:
+                        errormsg = _("Program would record for more than %d days!") % MAXDAYS
+                    else:
+                        errormsg = _("Program would record for more than 1 day!") % MAXDAYS
 
         if errormsg or not action:
             guide = tv.epg_xmltv.get_guide()
             channelselect = '<select name="chan">'
             for ch in guide.chan_list:
-                channelselect = channelselect + '<option value="'+ch.id+'">'+str(ch.displayname)+"\n"
+                if not ch.displayname:
+                    ch.displayname="?"
+                channelselect = channelselect + '<option value="'+ch.id+'">'+ch.displayname+"\n"
             channelselect = channelselect + "</select>\n"
 
             #build some reusable date inputs
             #month
             monthselect = '<select name="%s" %s >'
-            months = [ 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' ]
+            months = [ _('Jan'), _('Feb'), _('Mar'), _('Apr'), _('May'), _('Jun'), _('Jul'), _('Aug'), _('Sep'), _('Oct'), _('Nov'), _('Dec') ]
             iter=1
             for m in months:
                 if curtime[1] == iter:
@@ -197,28 +202,28 @@ class ManualRecordResource(FreevoResource):
             stopcell = stopcell + ':' 
             stopcell = stopcell + minuteselect % ("stopminute", " ")
 
-            fv.printHeader('Manual Record', 'styles/main.css', selected="Manual Recording")
+            fv.printHeader(_('Manual Record'), 'styles/main.css', selected=_("Manual Recording"))
             fv.res += '&nbsp;<br/>\n'
 
             if errormsg:
                 fv.tableOpen('border=0 cellpadding=4 cellspacing=1 width="100%"')
                 fv.tableRowOpen('class="chanrow"')
-                fv.tableCell('Error Message', 'class="guidehead" colspan="1"')
+                fv.tableCell(_('Error Message'), 'class="guidehead" colspan="1"')
                 fv.tableRowClose()
                 fv.tableRowOpen('class="chanrow"')
                 fv.tableCell(errormsg, 'class="basic" colspan="1"')
                 fv.tableRowClose()
                 fv.tableClose()
 
-            fv.res += '<form name="manrec" action="manualrecord.rpy" method="GET">'
+            fv.res += '<form name="manrec" action="manualrecord.rpy" method="get">'
             fv.res += '<center>'
             fv.tableOpen('border=0 cellpadding=4 cellspacing=1 width="100%"')
             fv.tableRowOpen('class="chanrow"')
-            fv.tableCell('Channel', 'class="guidehead" colspan="1"')
-            fv.tableCell('Start Time', 'class="guidehead" colspan="1"')
-            fv.tableCell('Stop Time', 'class="guidehead" colspan="1"')
-            fv.tableCell('Title', 'class="guidehead" colspan="1"')
-            fv.tableCell('Program Description', 'class="guidehead" colspan="1"')
+            fv.tableCell(_('Channel'), 'class="guidehead" colspan="1"')
+            fv.tableCell(_('Start Time'), 'class="guidehead" colspan="1"')
+            fv.tableCell(_('Stop Time'), 'class="guidehead" colspan="1"')
+            fv.tableCell(_('Title'), 'class="guidehead" colspan="1"')
+            fv.tableCell(_('Program Description'), 'class="guidehead" colspan="1"')
             fv.tableRowClose()
 
             fv.tableRowOpen('class="chanrow"')
@@ -229,7 +234,7 @@ class ManualRecordResource(FreevoResource):
             fv.tableCell('<textarea name="desc" rows="1" cols="20" wrap="soft"></textarea>', 'class="basic" colspan="1"')
             fv.tableRowClose()
             fv.tableRowOpen('class="chanrow"')
-            fv.tableCell('<center><input type="hidden" name="action" value="add" /><input type="submit" value="Add to Recording Schedule" /></center>', 'class="basic" colspan="5"')
+            fv.tableCell('<center><input type="hidden" name="action" value="add" /><input type="submit" value="'+_('Add to Recording Schedule')+'" /></center>', 'class="basic" colspan="5"')
             fv.tableRowClose()
 
             fv.tableClose()
@@ -239,7 +244,7 @@ class ManualRecordResource(FreevoResource):
             fv.printLinks()
             fv.printFooter()
 
-        return fv.res
+        return String( fv.res )
     
 resource = ManualRecordResource()
 

@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/02/19 04:57:59  gsbarbieri
+# Support Web Interface i18n.
+# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
+#
 # Revision 1.10  2004/02/09 21:23:42  outlyer
 # New web interface...
 #
@@ -104,13 +108,13 @@ class FavoritesResource(FreevoResource):
 
         (server_available, message) = ri.connectionTest()
         if not server_available:
-            fv.printHeader('Favorites', 'styles/main.css', selected='Favorites')
-            fv.res += '<h4>ERROR: recording server is unavailable</h4>'
+            fv.printHeader(_('Favorites'), 'styles/main.css', selected=_('Favorites'))
+            fv.res += '<h4>'+_('ERROR')+': '+_('recording server is unavailable')+'</h4>'
             fv.printSearchForm()
             fv.printLinks()
             fv.printFooter()
 
-            return fv.res
+            return String( fv.res )
 
         action = fv.formValue(form, 'action')
         oldname = fv.formValue(form, 'oldname')
@@ -138,26 +142,26 @@ class FavoritesResource(FreevoResource):
 
 
         days = {
-            '0' : 'Monday',
-            '1' : 'Tuesday',
-            '2' : 'Wednesday',
-            '3' : 'Thursday',
-            '4' : 'Friday',
-            '5' : 'Saturday',
-            '6' : 'Sunday'
+            '0' : _('Monday'),
+            '1' : _('Tuesday'),
+            '2' : _('Wednesday'),
+            '3' : _('Thursday'),
+            '4' : _('Friday'),
+            '5' : _('Saturday'),
+            '6' : _('Sunday')
         }
 
-        fv.printHeader('Favorites', 'styles/main.css',selected='Favorites')
+        fv.printHeader(_('Favorites'), 'styles/main.css',selected=_('Favorites'))
         fv.res +='&nbsp;'
         fv.tableOpen('')
         fv.tableRowOpen('class="chanrow"')
-        fv.tableCell('Favorite Name', 'class="guidehead" colspan="1"')
-        fv.tableCell('Program', 'class="guidehead" colspan="1"')
-        fv.tableCell('Channel', 'class="guidehead" colspan="1"')
-        fv.tableCell('Day of week', 'class="guidehead" colspan="1"')
-        fv.tableCell('Time of day', 'class="guidehead" colspan="1"')
-        fv.tableCell('Actions', 'class="guidehead" colspan="1"')
-        fv.tableCell('Priority', 'class="guidehead" colspan="1"')
+        fv.tableCell(_('Favorite Name'), 'class="guidehead" colspan="1"')
+        fv.tableCell(_('Program'), 'class="guidehead" colspan="1"')
+        fv.tableCell(_('Channel'), 'class="guidehead" colspan="1"')
+        fv.tableCell(_('Day of week'), 'class="guidehead" colspan="1"')
+        fv.tableCell(_('Time of day'), 'class="guidehead" colspan="1"')
+        fv.tableCell(_('Actions'), 'class="guidehead" colspan="1"')
+        fv.tableCell(_('Priority'), 'class="guidehead" colspan="1"')
         fv.tableRowClose()
 
         f = lambda a, b: cmp(a.priority, b.priority)
@@ -175,14 +179,14 @@ class FavoritesResource(FreevoResource):
                 # cell = time.strftime('%b %d %H:%M', time.localtime(fav.start))
                 cell = '%s' % days[fav.dow]
             else:
-                cell = 'ANY'
+                cell = _('ANY')
             fv.tableCell(cell, 'class="'+status+'" colspan="1"')
 
             if fav.mod != 'ANY':
                 # cell = time.strftime('%b %d %H:%M', time.localtime(fav.start))
                 cell = '%s' % tv_util.minToTOD(fav.mod)
             else:
-                cell = 'ANY'
+                cell = _('ANY')
             fv.tableCell(cell, 'class="'+status+'" colspan="1"')
 
             # cell = '<input type="hidden" name="action" value="%s">' % action
@@ -194,14 +198,14 @@ class FavoritesResource(FreevoResource):
 
             if favs.index(fav) != 0:
                 tmp_prio = int(fav.priority) - 1
-                cell += '<a href="favorites.rpy?action=bump&name=%s&priority=-1">Higher</a>' % fav.name
+                cell += '<a href="favorites.rpy?action=bump&name=%s&priority=-1">'+_('Higher')+'</a>' % fav.name
 
             if favs.index(fav) != 0 and favs.index(fav) != len(favs)-1:
                 cell += ' | '
 
             if favs.index(fav) != len(favs)-1:
                 tmp_prio = int(fav.priority) + 1
-                cell += '<a href="favorites.rpy?action=bump&name=%s&priority=1">Lower</a>' % fav.name
+                cell += '<a href="favorites.rpy?action=bump&name=%s&priority=1">'+_('Lower')+'</a>' % fav.name
 
             fv.tableCell(cell, 'class="'+status+'" colspan="1"')
         
@@ -215,7 +219,7 @@ class FavoritesResource(FreevoResource):
 
         fv.printFooter()
 
-        return fv.res
+        return String( fv.res )
     
 resource = FavoritesResource()
 

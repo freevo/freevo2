@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/02/19 04:57:59  gsbarbieri
+# Support Web Interface i18n.
+# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
+#
 # Revision 1.5  2004/02/12 14:04:37  outlyer
 # fixes for some issues Dischi pointed out:
 #
@@ -99,18 +103,18 @@ class WikiResource(FreevoResource):
             src_file = os.path.join(self.docRoot, file + '.html')
 
         if not src_file:
-            fv.printHeader('Freevo Documentation', '/styles/main.css', prefix=request.path.count('/')-1)
+            fv.printHeader(_('Freevo Documentation'), '/styles/main.css', prefix=request.path.count('/')-1)
             fv.res += '<div id="content">'
-            fv.res += '<p class="alert">ERROR, unable to load %s.html</p>' % file
-            fv.res += '<p class="normal">If you use a CVS version of Freevo, run ./autogen.sh '\
-                      'in the Freevo root directory.</p></div>'
+            fv.res += '<p class="alert">' + _('ERROR')+': '+(_('unable to load %s.html') % file)+'</p>\n'
+            fv.res += '<p class="normal">'+ _('If you use a CVS version of Freevo, run <b>autogen.sh</b>.')+'</p>\n'
+            fv.res += '</div>\n'
         else:
             pos = 0
             title_reg = re.compile('.*<title>(.*) - Freevo Wiki</title>').match
             for line in util.readfile(src_file):
                 if title_reg(line):
                     title = title_reg(line).group(1).replace('DocumentationPage/', '')
-                    fv.printHeader('Freevo Documentation -- %s' % title,
+                    fv.printHeader(_('Freevo Documentation')+' -- %s' % title,
                                    '/styles/main.css', prefix=request.path.count('/')-1)
                     fv.res += '<div id="content">\n'
                     source = 'http://freevo.sourceforge.net/cgi-bin/moin.cgi/'
@@ -119,8 +123,8 @@ class WikiResource(FreevoResource):
                     else:
                         source += 'DocumentationPage_2f%s' % file
 
-                    fv.res += '<p>This page is generated from the Freevo WiKi. The current '\
-                              'Version can be found <a href="%s">here</a>.</p>' % source
+                    fv.res += '<p>'+(_('This page is generated from the Freevo WiKi. The current '\
+                              'Version can be found <a href="%s">here</a>.') % source ) +'</p>'
                 if file == 'faq':
                     line = line.replace('<H1>', '<H3>').replace('</H1>', '</H3>')
                 line = line.replace('/wiki/img/', '/images/').\
@@ -137,11 +141,10 @@ class WikiResource(FreevoResource):
                     fv.res += line
                 if line.find('<hr>') != -1 and pos == 0:
                     pos = 1
-        fv.res += '<br><br>'
-        fv.res += '</div>\n'
+        fv.res += '<br /><br /></div>\n'
         fv.printLinks(request.path.count('/')-1)
         fv.printFooter()
         fv.res+=('</ul>')
-        return fv.res
+        return String( fv.res )
 
 resource = WikiResource()

@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/02/19 04:57:59  gsbarbieri
+# Support Web Interface i18n.
+# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
+#
 # Revision 1.2  2004/01/09 19:35:49  outlyer
 # Inherit DEBUG parameter from config, move some prints into DEBUG
 #
@@ -76,7 +80,7 @@ class WapResource:
         return val
 
     def printHeader(self):
-        self.res += '<?xml version="1.0"?>\n '  
+        self.res += '<?xml version="1.0" encoding="'+ config.encoding +'"?>\n'
         self.res += '<!DOCTYPE wml PUBLIC "-//WAPFORUM//DTD WML 1.1//EN" "http://www.wapforum.org/DTD/wml_1.1.xml">\n'
         self.res += '<wml>\n'
 

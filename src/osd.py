@@ -10,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.142  2004/02/19 04:57:55  gsbarbieri
+# Support Web Interface i18n.
+# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
+#
 # Revision 1.141  2004/02/18 21:55:44  dischi
 # Some osd updates for new gui code
 #
@@ -515,7 +519,7 @@ class OSD:
         help += [_('Escape = Stop/Prev. Menu')]
         help += [_('h = Help')]
         help_str = '    '.join(help)
-        pygame.display.set_caption('Freevo' + ' '*7 + help_str)
+        pygame.display.set_caption('Freevo' + ' '*7 + String( help_str ) )
         icon = pygame.image.load(os.path.join(config.ICON_DIR,
                                               'misc/freevo_app.png')).convert()
         pygame.display.set_icon(icon)

@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.65  2004/02/19 04:57:56  gsbarbieri
+# Support Web Interface i18n.
+# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
+#
 # Revision 1.64  2004/02/13 18:32:57  dischi
 # add event to toggle playlist repeat
 #
@@ -200,7 +204,7 @@ class Playlist(Item):
         try:
             lines = util.readfile(plsname)
         except IOError:
-            print _('Cannot open file "%s"') % list
+            print String(_('Cannot open file "%s"')) % list
             return 0
 
         playlist_lines_dos = map(lambda l: l.strip(), lines)
@@ -240,7 +244,7 @@ class Playlist(Item):
         try:
             lines = util.readfile(ssrname)
         except IOError:
-            print _('Cannot open file "%s"') % list
+            print String(_('Cannot open file "%s"')) % list
             return 0
 
         playlist_lines_dos = map(lambda l: l.strip(), lines)
@@ -408,7 +412,7 @@ class Playlist(Item):
 
         if not self.playlist:
             # XXX PopupBox please
-            print _('empty playlist')
+            print String(_('empty playlist'))
             return False
         
         if not arg or arg != 'next':

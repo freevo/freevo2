@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/02/19 04:57:59  gsbarbieri
+# Support Web Interface i18n.
+# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
+#
 # Revision 1.4  2004/02/09 21:23:42  outlyer
 # New web interface...
 #
@@ -133,7 +137,7 @@ class IceslistchangerResource(FreevoResource):
         fv.printFooter()
         fv.res+=('</ul>')
 
-        return fv.res
+        return String( fv.res )
 
 
 

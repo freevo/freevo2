@@ -9,6 +9,10 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2004/02/19 04:57:57  gsbarbieri
+# Support Web Interface i18n.
+# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
+#
 # Revision 1.25  2004/02/18 21:55:11  dischi
 # update to new gui code
 #
@@ -219,7 +223,7 @@ class ProgramDisplay(PopupBox):
 
 
     def eventhandler(self, event, menuw=None):
-        if DEBUG: print _('ProgramDisplay: event = %s') % event
+        if DEBUG: print String(_('ProgramDisplay: event = %s')) % event
 
         trapped = em.MENU_EVENTS.values()
 

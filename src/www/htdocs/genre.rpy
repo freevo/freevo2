@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/02/19 04:57:59  gsbarbieri
+# Support Web Interface i18n.
+# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
+#
 # Revision 1.5  2003/09/07 13:34:10  mikeruelle
 # show info message if we don't find any matching categories
 #
@@ -97,10 +101,10 @@ class GenreResource(FreevoResource):
         if got_schedule:
             schedule = schedule.getProgramList()
 
-        fv.printHeader('TV Genre for %s' % time.strftime('%a %b %d', time.localtime(mfrguidestart)), config.WWW_STYLESHEET, config.WWW_JAVASCRIPT)
+        fv.printHeader(_('TV Genre for %s') % time.strftime('%a %b %d', time.localtime(mfrguidestart)), config.WWW_STYLESHEET, config.WWW_JAVASCRIPT)
 
         if not got_schedule:
-            fv.res += '<h4>The recording server is down, recording information is unavailable.</h4>'
+            fv.res += '<h4>'+_('ERROR')+': '+_('recording server is unavailable')+'</h4>'
 
         allcategories = []
         for chan in guide.chan_list:
@@ -125,7 +129,7 @@ class GenreResource(FreevoResource):
         
         fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
         fv.tableRowOpen('class="chanrow"')
-        fv.tableCell('<form>'+bforcell+'Show&nbsp;Category:&nbsp;' + self.makecategorybox(allcategories, category)+stime+'<input type=submit value="Change">'+aftercell+'</form>', 'class="guidehead"')
+        fv.tableCell('<form>'+bforcell+_('Show')+'&nbsp;'+_('Category')+':&nbsp;' + self.makecategorybox(allcategories, category)+stime+'<input type=submit value="'+_('Change')+'">'+aftercell+'</form>', 'class="guidehead"')
         fv.tableRowClose()
         fv.tableClose()
  
@@ -133,7 +137,7 @@ class GenreResource(FreevoResource):
             fv.printSearchForm()
             fv.printLinks()
             fv.printFooter()
-            return fv.res
+            return String( fv.res )
 
         fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
         fv.tableRowOpen('class="chanrow"')
@@ -175,7 +179,7 @@ class GenreResource(FreevoResource):
                     fv.tableCell(chan.displayname, 'class="channel"')
                     popid = '%s:%s' % (prog.channel_id, prog.start)
                     if prog.desc == '':
-                        desc = 'Sorry, the program description for %s is unavailable.' % prog.title
+                        desc = _('Sorry, the program description for <b>%s</b> is unavailable.') % prog.title
                     else:
                         desc = prog.desc
                         pops += """
@@ -201,9 +205,9 @@ class GenreResource(FreevoResource):
          </tr>
          <tr>
          <td class="progtime">
-            <b>Start:</b> %s, 
-            <b>Stop:</b> %s,
-            <b>Runtime:</b> %smin
+            <b>"""+_('Start')+""":</b> %s, 
+            <b>"""+_('Stop')+""":</b> %s,
+            <b>"""+_('Runtime')+""":</b> %smin
             </td>
          </td>
       </tbody>
@@ -218,13 +222,13 @@ class GenreResource(FreevoResource):
                   <tbody>
                      <tr>
                         <td onclick="document.location='record.rpy?chan=%s&start=%s&action=add'">
-                           Record
+                           """+_('Record')+"""
                         </td>
                         <td onclick="document.location='edit_favorite.rpy?chan=%s&start=%s&action=add'">
-                           Add to Favorites
+                           """+_('Add to Favorites')+"""
                         </td>
                         <td onclick="javascript:closePop('%s');">
-                           Close Window
+                           """+_('Close Window')+"""
                         </td>
                      </tr>
                   </tbody>
@@ -248,7 +252,7 @@ class GenreResource(FreevoResource):
 
         if gotdata == 0:
             fv.tableRowOpen('class="chanrow"')
-            fv.tableCell('<center>NO SHOWS MATCHING CATEGORY</center>', 'class="utilhead" colspan="4"')
+            fv.tableCell('<center>'+_('NO SHOWS MATCHING CATEGORY')+'</center>', 'class="utilhead" colspan="4"')
             fv.tableRowClose()
         fv.tableClose()
         fv.res += pops
@@ -257,7 +261,7 @@ class GenreResource(FreevoResource):
         fv.printLinks()
         fv.printFooter()
 
-        return fv.res
+        return String( fv.res )
     
 
 resource = GenreResource()

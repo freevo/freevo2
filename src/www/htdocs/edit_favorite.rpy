@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/02/19 04:57:59  gsbarbieri
+# Support Web Interface i18n.
+# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
+#
 # Revision 1.9  2004/02/09 21:23:42  outlyer
 # New web interface...
 #
@@ -101,14 +105,13 @@ class EditFavoriteResource(FreevoResource):
 
         (server_available, message) = ri.connectionTest()
         if not server_available:
-            fv.printHeader('Edit Favorite', 'styles/main.css')
-            
-	    fv.res += '<h4>ERROR: recording server is unavailable</h4>'
+            fv.printHeader(_('Edit Favorite'), 'styles/main.css')
+            fv.res += '<h4>'+_('ERROR')+': '+_('recording server is unavailable')+'</h4>'
             fv.printSearchForm()
             fv.printLinks()
             fv.printFooter()
 
-            return fv.res
+            return String( fv.res )
 
         chan = fv.formValue(form, 'chan')
         start = fv.formValue(form, 'start')
@@ -135,25 +138,25 @@ class EditFavoriteResource(FreevoResource):
 
         guide = tv.epg_xmltv.get_guide()
 
-        fv.printHeader('Edit Favorite', 'styles/main.css')
+        fv.printHeader(_('Edit Favorite'), 'styles/main.css')
 
         fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
         fv.tableRowOpen('class="chanrow"')
         fv.tableCell('<img src="images/logo_200x100.png" />', 'align="left"')
-        fv.tableCell('Edit Favorite', 'class="heading" align="left"')
+        fv.tableCell(_('Edit Favorite'), 'class="heading" align="left"')
         fv.tableRowClose()
         fv.tableClose()
 
-        fv.res += '<br><form name="editfavorite" method="GET" action="favorites.rpy">'
+        fv.res += '<br><form name="editfavorite" method="get" action="favorites.rpy">'
 
         fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
         fv.tableRowOpen('class="chanrow"')
-        fv.tableCell('Name of favorite', 'class="guidehead" colspan="1"')
-        fv.tableCell('Program', 'class="guidehead" colspan="1"')
-        fv.tableCell('Channel', 'class="guidehead" colspan="1"')
-        fv.tableCell('Day of week', 'class="guidehead" colspan="1"')
-        fv.tableCell('Time of day', 'class="guidehead" colspan="1"')
-        fv.tableCell('Action', 'class="guidehead" colspan="1"')
+        fv.tableCell(_('Name of favorite'), 'class="guidehead" colspan="1"')
+        fv.tableCell(_('Program'), 'class="guidehead" colspan="1"')
+        fv.tableCell(_('Channel'), 'class="guidehead" colspan="1"')
+        fv.tableCell(_('Day of week'), 'class="guidehead" colspan="1"')
+        fv.tableCell(_('Time of day'), 'class="guidehead" colspan="1"')
+        fv.tableCell(_('Action'), 'class="guidehead" colspan="1"')
         fv.tableRowClose()
 
         status = 'basic'
@@ -168,7 +171,7 @@ class EditFavoriteResource(FreevoResource):
         fv.tableCell(cell, 'class="'+status+'" colspan="1"')
 
         cell = '\n<select name="chan" selected="%s">\n' % fav.channel
-        cell += '  <option value=ANY>ANY CHANNEL</option>\n'
+        cell += '  <option value=ANY>'+_('ANY CHANNEL')+'</option>\n'
 
         i=1
         for ch in guide.chan_list:
@@ -182,21 +185,21 @@ class EditFavoriteResource(FreevoResource):
 
         cell = '\n<select name="dow">\n' 
         cell += """
-          <option value="ANY">ANY DAY</option>
-          <option value="0">Mon</option>
-          <option value="1">Tues</option>
-          <option value="2">Wed</option>
-          <option value="3">Thurs</option>
-          <option value="4">Fri</option>
-          <option value="5">Sat</option>
-          <option value="6">Sun</option>
+          <option value="ANY">"""+_('ANY DAY')+"""</option>
+          <option value="0">"""+_('Mon')+"""</option>
+          <option value="1">"""+_('Tue')+"""</option>
+          <option value="2">"""+_('Wed')+"""</option>
+          <option value="3">"""+_('Thu')+"""</option>
+          <option value="4">"""+_('Fri')+"""</option>
+          <option value="5">"""+_('Sat')+"""</option>
+          <option value="6">"""+_('Sun')+"""</option>
         </select>
         """
         fv.tableCell(cell, 'class="'+status+'" colspan="1"')
 
         cell = '\n<select name="mod" selected="%s">\n' % fav.mod
         cell += """
-          <option value="ANY">ANY TIME</option>
+          <option value="ANY">"""+_('ANY TIME')+"""</option>
           <option value="0">12:00 AM</option>
           <option value="30">12:30 AM</option>
           <option value="60">1:00 AM</option>
@@ -257,7 +260,7 @@ class EditFavoriteResource(FreevoResource):
 
         cell = '<input type="hidden" name="priority" value="%s">' % fav.priority
         cell += '<input type="hidden" name="action" value="%s">' % action
-        cell += '<input type="submit" value="Save">' 
+        cell += '<input type="submit" value="'+_('Save')+'">' 
         fv.tableCell(cell, 'class="'+status+'" colspan="1"')
 
         fv.tableRowClose()
@@ -292,7 +295,7 @@ class EditFavoriteResource(FreevoResource):
 
         fv.printFooter()
 
-        return fv.res
+        return String( fv.res )
     
 resource = EditFavoriteResource()
 
