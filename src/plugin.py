@@ -4,11 +4,14 @@
 # -----------------------------------------------------------------------
 # $Id$
 #
-# Notes:
+# Notes: This file handles the Freevo plugin interface
 # Todo:        
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/04/21 18:39:43  dischi
+# cleanup
+#
 # Revision 1.12  2003/04/21 18:19:54  dischi
 # make it possible that whole directories can be a plugin
 #
@@ -28,24 +31,12 @@
 # Revision 1.7  2003/04/20 10:54:04  dischi
 # add getbyname and add some more load paths
 #
-# Revision 1.6  2003/04/19 21:24:59  dischi
-# small changes at the plugin interface
-#
-# Revision 1.5  2003/04/18 15:01:37  dischi
-# support more types of plugins and removed the old item plugin support
-#
 # Revision 1.4  2003/04/18 10:22:07  dischi
 # You can now remove plugins from the list and plugins know the list
 # they belong to (can be overwritten). level and args are optional.
 #
 # Revision 1.3  2003/04/17 21:21:57  dischi
 # Moved the idle bar to plugins and changed the plugin interface
-#
-# Revision 1.2  2003/04/16 08:47:00  dischi
-# bugfix for bad plugins
-#
-# Revision 1.1  2003/04/15 20:01:34  dischi
-# first version of a plugin interface
 #
 #
 # -----------------------------------------------------------------------
@@ -76,6 +67,10 @@ import traceback
 
 TRUE  = 1
 FALSE = 0
+
+#
+# Some basic plugins known to Freevo.
+#
 
 class Plugin:
     """
@@ -139,24 +134,26 @@ class DaemonPlugin(Plugin):
 
 
 
-initialized = FALSE
+#
+# Some plugin names to avoid typos
+#
+
+AUDIO_PLAYER = 'AUDIO_PLAYER'
+VIDEO_PLAYER = 'VIDEO_PLAYER'
+DVD_PLAYER   = 'DVD_PLAYER'
+
+
+
 
 #
-# the plugin list
+# Plugin functions
 #
-all_plugins = []
-plugin_number = 0
 
-#
-# the plugin dictionary
-#
-ptl = {}
-named_plugins = {}
 
-#
-# activate a plugin
-#
 def activate(name, type=None, level=0, args=None):
+    """
+    activate a plugin
+    """
     global plugin_number
     global all_plugins
     global initialized
@@ -169,10 +166,10 @@ def activate(name, type=None, level=0, args=None):
     return plugin_number
 
 
-#
-# remove a plugin from the list
-#
 def remove(number):
+    """
+    remove a plugin from the list
+    """
     global all_plugins
     global initialized
 
@@ -184,10 +181,10 @@ def remove(number):
             all_plugins.remove(p)
             return
         
-#
-# load and init all the plugins
-#
 def init():
+    """
+    load and init all the plugins
+    """
     global ptl
     global all_plugins
     global initialized
@@ -269,10 +266,10 @@ def init():
                     ptl['daemon_eventhandler'].append(p)
                 
             
-#                
-# get the plugin list 'type'
-#
 def get(type):
+    """
+    get the plugin list 'type'
+    """
     global ptl
 
     if not ptl.has_key(type):
@@ -282,25 +279,54 @@ def get(type):
 
 
 def getbyname(name):
+    """
+    get a plugin by it's name
+    """
     global named_plugins
     if named_plugins.has_key(name):
         return named_plugins[name]
     return None
 
-#
-# create plugin event
-#
+
+def register(plugin, name):
+    """
+    register an object as a named plugin
+    """
+    global named_plugins
+    named_plugins[name] = plugin
+
+    
 def event(name):
+    """
+    create plugin event
+    """
     return 'PLUGIN_EVENT %s' % name
 
-#
-# plugin event parsing
-#
+
 def isevent(event):
+    """
+    plugin event parsing
+    """
     if event[:12] == 'PLUGIN_EVENT':
         return event[13:]
     else:
         return None
+
+
+
+
+
+#
+# internal stuff
+#
+
+initialized   = FALSE
+all_plugins   = []
+plugin_number = 0
+
+ptl           = {}
+named_plugins = {}
+
 
 #
 # Main function
