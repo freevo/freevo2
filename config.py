@@ -44,6 +44,7 @@ def ConfigInit(videotools = 'sim'):
         MPLAYER_ARGS_DVD = '-nolirc -nobps -framedrop -cache 10000 -vo mga -ao oss:/dev/dsp0 -dvd %s -alang en,se  -screenw 768 -screenh 576 -fs '
         VIDREC_MQ_TV = '/usr/local/bin/DIVX4rec -F 300000 -norm NTSC -input Television -m -r 22050 -w 320 -h 240 -ab 80 -vg 100 -vb 800 -H 50 -o %s'
         VIDREC_MQ_VCR = '/usr/local/bin/DIVX4rec -F 300000 -norm NTSC -input Composite1 -m -r 22050 -w 320 -h 240 -ab 80 -vg 100 -vb 1000 -H 50 -o %s'
+        VIDREC_MQ_NUVTV = '-F 10000 -norm NTSC -input Television -m -r 44100 -w 320 -h 240 -vg 100 -vq 90 -H 50 -mixsrc /dev/dsp:line -mixvol /dev/dsp:line:80 -o %s'
         VIDREC_MQ = VIDREC_MQ_TV
     else:
         MPLAYER_CMD = '/usr/local/bin/mplayer'
