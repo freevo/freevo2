@@ -8,23 +8,27 @@ import string
 import codecs
 import os
 
-freevo_version = '1.3.0'
+freevo_version = '1.3.2'
 
 
 def getCDID(drive):
     """
     return a unique identifier for the disc
     """
-    
-    img = open(drive)
-    img.seek(0x0000832d)
-    id = img.read(16)
-    img.seek(32808, 0)
-    label = img.read(32)
-    
-    LABEL_REGEXP = re.compile("^(.*[^ ]) *$").match
-    m = LABEL_REGEXP(label)
 
+    try:
+        img = open(drive)
+        img.seek(0x0000832d)
+        id = img.read(16)
+        img.seek(32808, 0)
+        label = img.read(32)
+        
+        LABEL_REGEXP = re.compile("^(.*[^ ]) *$").match
+        m = LABEL_REGEXP(label)
+    except IOError:
+        print 'no disc in drive %s' % drive
+        sys.exit(2)
+        
     if m:
         label = m.group(1)
     img.close()
@@ -50,25 +54,6 @@ def str2XML(line):
         return line
     
 
-def add_id(drive, xml_file):
-    """
-    open the xml file and add the disc id of the disc in drive 'drive'
-    to the database.
-    """
-    
-    id = getCDID(drive)
-
-    x = open(xml_file)
-    content = x.read()
-    x.close()
-
-    content = string.replace(content, "</title>", "</title>\n    <id>%s</id>" % id)
-    x = open(xml_file, 'w')
-    x.write(content)
-    x.close()
-    os.system('touch /tmp/freevo-rebuild-database')
-
-
 def search(name):
     """
     search imdb title database for the given name
@@ -90,9 +75,8 @@ def search(name):
             print response.reason
             print response.msg
             return results
-        (title, year, genre, tagline, plot, rating, \
-         image_urls, runtime) = get_data(m.group(1))
-        return [ ( m.group(1), title, year, '' ) ]
+        (title, info, image_urls) = get_data(m.group(1))
+        return [ ( m.group(1), title, info['year'], '' ) ]
 
     if response.status != 200:
         print response.status
@@ -134,14 +118,21 @@ def search(name):
                 results += [ ( id , name, year, type ) ]
             
     return results
-    
+
+
+imdb_info_tags = ('year', 'genre', 'tagline', 'plot', 'rating', 'runtime');
 
 def get_data(id):
     """
     get imdb data about the movie with the given id
     """
-    
-    title = year = genre = tagline = plot = rating = runtime = ""
+
+    title = ''
+    info = {}
+
+    for t in imdb_info_tags:
+        info[t] = ""
+
     image_urls = []
     dvd = 0
     
@@ -180,7 +171,7 @@ def get_data(id):
     for line in r.read().split("\n"):
         if next_line_is == 'runtime':
             next_line_is = None
-            runtime = str2XML(line)
+            info['runtime'] = str2XML(line)
 
         if regexp_runtime.match(line):
             next_line_is = 'runtime'
@@ -190,24 +181,24 @@ def get_data(id):
         if m: title = str2XML(m.group(1))
 
         m = regexp_year.match(line)
-        if m: year = m.group(1)
+        if m: info['year'] = m.group(1)
 
         m = regexp_genre.match(line)
         if m:
             for g in re.compile(' *</A>.*?> *', re.I).split(' </a>'+line+' > '):
-                if genre == "": genre = g
-                elif g != "" and g != "(more)": genre += " / "+ g
+                if info['genre'] == "": info['genre'] = g
+                elif g != "" and g != "(more)": info['genre'] += " / "+ g
 
 
         m = regexp_tagline.match(line)
         if m:
-            tagline = str2XML(re.compile('[\t ]+').sub(" ", ' ' + m.group(1))[1:])
+            info['tagline'] = str2XML(re.compile('[\t ]+').sub(" ", ' ' + m.group(1))[1:])
 
         m = regexp_plot.match(line)
-        if m: plot = str2XML(re.compile('[\t ]+').sub(" ", ' ' + m.group(1))[1:])
+        if m: info['plot'] = str2XML(re.compile('[\t ]+').sub(" ", ' ' + m.group(1))[1:])
 
         m = regexp_rating.match(line)
-        if m: rating = m.group(1) + '/10 ' + m.group(2)
+        if m: info['rating'] = m.group(1) + '/10 ' + m.group(2)
 
         m = regexp_dvd.match(line)
         if m: dvd = 1
@@ -228,7 +219,7 @@ def get_data(id):
             m = regexp_dvd_image.match(line)
             if m: image_urls += [ m.group(1) ]
             
-    return (title, year, genre, tagline, plot, rating, image_urls, runtime)
+    return (title, info, image_urls)
 
 
 
@@ -274,77 +265,87 @@ def download_image(url, filename):
         return None
     
 
-def write_xml(imdb_number, filename, id, image_url, type, files, imdb_data):
+def print_video(file, part):
+    if file[:3]== 'dvd':
+        return "        <dvd  id=\"p%s\" media-id=\"%s\">%s</dvd>\n" % \
+               (part, getCDID(drive), file[3:])
+    elif file[:3] == 'vcd':
+        return "        <vcd  id=\"p%s\" media-id=\"%s\">%s</vcd>\n" % \
+               (part, getCDID(drive), file[3:])
+
+
+    elif os.path.ismount(os.path.dirname(file)):
+        return "        <file id=\"p%s\" media-id=\"%s\">%s</file>\n" % \
+               (part, getCDID(drive), str2XML(os.path.basename(file)))
+
+    else:
+        return "        <file id=\"p%s\">%s</file>\n" % \
+               (part, str2XML(file))
+
+def print_image(filename, image_url):
+    image = '%s.jpg' % filename
+    if os.path.exists(image):
+        image = re.compile('^.*/').sub("", str(filename)) + '.jpg'
+        if image_url:
+            return "    <cover-img source=\"%s\">%s</cover-img>\n" % \
+                   (str2XML(image_url), str2XML(image))
+        else:
+            return "    <cover-img>%s</cover-img>\n" % str2XML(image)
+    return ''
+
+def print_info(info):
+    ret = ''
+    if info:
+        ret = '    <info>\n'
+        for k in info.keys():
+            ret += '      <%s>%s</%s>\n' % (k,info[k],k)
+        ret += '    </info>\n'
+    return ret
+
+
+def write_fxd(imdb_number, filename, drive, image_url, type, files, cdid, imdb_data):
     """
     write the infos to the xml file
     """
 
-    title, year, genre, tagline, plot, rating, None, runtime = imdb_data
+    title, info, None = imdb_data
     
-    i = codecs.open('%s.xml' % filename, 'w', encoding='utf-8')
+    i = codecs.open('%s.fxd' % filename, 'w', encoding='utf-8')
     i.write("<?xml version=\"1.0\" ?>\n<freevo>\n")
     i.write("  <copyright>\n" +
-            "    The information in this file are from the Internet Movie Database (IMDb).\n" +
+            "    The information in this file are from the Internet " +
+            "Movie Database (IMDb).\n" +
             "    Please visit http://www.imdb.com for more informations.\n" +
             "  </copyright>\n")
 
-    i.write("  <movie>\n    <title>"+title+"</title>\n")
+    if cdid:
+        i.write("  <disc-set title=\"%s\">\n" % str2XML(title))
+        i.write(print_image(filename, image_url))
+        i.write(print_info(info))
+        i.write("    <disc media-id=\"%s\"/>\n" % getCDID(drive))
+        i.write("  </disc-set>\n")
+            
+    if files:
+        i.write("  <movie title=\"%s\">\n" % str2XML(title))
+        i.write(print_image(filename, image_url))
 
-    if id:
-        i.write("    <id type=\"timestamp\">%s</id>\n" % id)
-
-    image = '%s.jpg' % filename
-    if os.path.exists(image):
-        image = re.compile('^.*/').sub("", str(filename)) + '.jpg'
-
-    if image_url:
-        i.write("    <cover source=\"%s\">%s</cover>\n" % (str2XML(image_url),
-                                                           str2XML(image)))
-    else:
-        i.write("    <cover>%s</cover>\n" % str2XML(image))
-
-
-    # insert filenames and video type
-
-    i.write("    <video>\n\
-      <mplayer_options></mplayer_options>\n")
-
-    if type:
-        i.write("      <%s/>\n" % type)
-
-    if not type or type == 'cd':
-        i.write  ("      <files>\n")
+        part = 1
+        i.write("    <video>\n")
         for file in files:
-            i.write( "        <filename>"+str2XML(file)+"</filename>\n")
-        i.write("      </files>\n")
+            i.write(print_video(file, part))
+            part += 1
+        i.write("    </video>\n")
 
+        i.write(print_info(info))
+        i.write("  </movie>\n")
 
-    # insert more IMDb info
-
-    i.write("    </video>\n    <info>\n      <url>http://us.imdb.com/Title?"+
-            imdb_number+"</url>\n")
-
-    if genre:
-        i.write("      <genre>"+genre+"</genre>\n")
-    if year:
-        i.write("      <year>"+year+"</year>\n")
-    if runtime:
-        i.write("      <runtime>"+runtime+"</runtime>\n")
-    if tagline:
-        i.write("      <tagline>"+tagline+"</tagline>\n")
-    if plot:
-        i.write("      <plot>"+plot+"</plot>\n")
-    if rating:
-        i.write("      <rating>"+rating+"</rating>\n")
-
-    i.write("    </info>\n  </movie>\n</freevo>\n")
-    i.close()
+    i.write("</freevo>\n")
 
     os.system('touch /tmp/freevo-rebuild-database')
 
 
 
-def get_data_and_write_xml(imdb_number, filename, id, type, files):
+def get_data_and_write_fxd(imdb_number, filename, drive, type, files, cdid):
     """
     get imdb data and store it into the xml database
     """
@@ -354,7 +355,7 @@ def get_data_and_write_xml(imdb_number, filename, id, type, files):
         print 'getting info for id=%s failt' % imdb_number
         return 0
 
-    (title, year, genre, tagline, plot, rating, image_url_list, runtime) = imdb_data
+    (title, info, image_url_list) = imdb_data
 
     image_file = '%s.jpg' % filename
     image_url = None
@@ -379,110 +380,143 @@ def get_data_and_write_xml(imdb_number, filename, id, type, files):
         print "use of this image"
 
     # Now write the output file
-    write_xml(imdb_number, filename, id, image_url, type, files, imdb_data)
+    write_fxd(imdb_number, filename, drive, image_url, type, files, cdid, imdb_data)
     return 1
 
 
 
+def parse_file_args(input):
+    files = []
+    cdid  = []
+    for i in input:
+        if i == 'dvd' or i == 'vcd' or i == 'cd':
+            cdid += [ i ]
+        else:
+            files += [ i ]
+    return files, cdid
+
+
+    
+def add(fxd_file, files):
+    """
+    open the fxd file and add the disc id of the disc in drive 'drive'
+    to the database.
+    """
+
+    files, sets = parse_file_args(files)
+    
+    x = open(fxd_file+'.fxd')
+    content = x.read()
+    x.close()
+
+    regexp_file = re.compile(' *.file.*id.*/file', re.I)
+    regexp_dvd  = re.compile(' *.dvd.*id.*/dvd', re.I)
+    regexp_vcd  = re.compile(' *.vcd.*id.*/vcd', re.I)
+
+    regexp_video_end  = re.compile(' *</video>', re.I)
+    regexp_set_end    = re.compile(' *./disc-set', re.I)
+
+    x = open(fxd_file+'.fxd', 'w')
+
+    part = 1
+    for line in content.split('\n'):
+        if regexp_file.match(line) or regexp_dvd.match(line) or regexp_vcd.match(line):
+            part += 1
+
+        if regexp_video_end.match(line):
+            for file in files:
+                x.write(print_video(file, part))
+                part += 1
+
+        if regexp_set_end.match(line):
+            for i in sets:
+                x.write("    <disc media-id=\"%s\"/>\n" % getCDID(drive))
+                
+        x.write(line+'\n')
+
+    x.close()
+    os.system('touch /tmp/freevo-rebuild-database')
+
+
+
+
 def usage():
-    print "Usage: imdb.py [IMDB-NUMBER] [OUTPUT_FILE] [-id DRIVE] [MOVIEFILE(S)]"
-    print "       imdb.py -s [SEARCH_STRING]"
-    print "       imdb.py --add-id [DRIVE] [XML_FILE]"
+    print 'imdb.py -s string:   search imdb for string'
     print
-    print "Generate XML data that stores extra IMDB information for use"
-    print "in the movie browser."
+    print 'imdb.py [--rom-drive=/path/to/rom/drive] nr output files'
+    print '  Generate output.fxd for the movie.'
+    print '  Files is a list of files that belongs to this movie.'
+    print '  Use [dvd|vcd] to add the whole disc or use [dvd|vcd][title]'
+    print '  to add a special DVD or VCD title to the list of files'
     print
-    print "IMDB_NUMBER:"
-    print "  IMDB title number for this movie"
+    print 'imdb.py [--rom-drive=/path/to/rom/drive] -a fxd-file files'
+    print '  add files to fxd-file.fxd'
     print
-    print "OUTPUT_FILE:"
-    print "  The script will generate OUTPUT_FILE.xml for the IMDB data"
-    print "  and OUTPUT_FILE.jpg for the image (if possible)"
-    print
-    print "-id [DRIVE]"
-    print "  Stores the DVD/VCD/CD id to the XML file"
-    print
-    print "MOVIE_FILE(S):"
-    print "  One or more files belonging to this movie"
-    print "  -dvd or -vcd to generate data for a DVD or VCD."
-    print "  -cd MOVIEFILES(S) if the files are stored on a cd. Please"
-    print "   give a relative path to the files from the cd mount point"
-    print
-    print "-s [SEARCH_STRING]"
-    print "  Search IMDB to get the IMDB_NUMBER"
-    print
-    print "--add-id [DRIVE] [XML_FILE]"
-    print "  Adds the DVD/VCD/CD id to the XML file"
     sys.exit(1)
-
-
-
-
-
 
 
 #
 # Main function
 #
 if __name__ == "__main__":
+    import getopt
 
+    drive = '/dev/cdrom'
+
+    task = ''
+    search_arg = ''
+    
     try:
-        # add ID tag to exiting XML file
-        if sys.argv[1] == '--add-id':
-            add_id(sys.argv[2], sys.argv[3])
-            sys.exit(0)
+        opts, args = getopt.getopt(sys.argv[1:], 'as:', ('rom-drive=',))
+    except getopt.GetoptError:
+        usage()
+        pass
+    
+    for o, a in opts:
+        if o == '-a':
+            if task:
+                usage()
+            task = 'add'
+        if o == '-s':
+            if task:
+                usage()
+            task = 'search'
+            search_arg = a
+            
+        if o == '--rom-drive':
+            drive=a
 
-        # Search IMDb for a title
-        if sys.argv[1] == '-s':
-            filename = sys.argv[2]
-            print "searching " + filename
-            for result in search(filename):
-                if result[3]:
-                    print '%s   %s (%s, %s)' % result
-                else:
-                    print '%s   %s (%s)' % (result[0], result[1], result[2])
-            sys.exit(0)
+    if task == 'add':
+        if len(args) < 2:
+            usage()
+        add(args[0], args[1:])
+        sys.exit(0)
 
-        # normal usage
-        imdb_number = sys.argv[1]
-        filename = sys.argv[2]
+    if task == 'search':
+        if len(args) != 0:
+            usage()
 
-    except IndexError:
+        filename = search_arg
+        print "searching " + filename
+        for result in search(filename):
+            if result[3]:
+                print '%s   %s (%s, %s)' % result
+            else:
+                print '%s   %s (%s)' % (result[0], result[1], result[2])
+        sys.exit(0)
+
+
+    # normal usage
+    if len(args) < 2:
         usage()
 
-    index = 3
-
-    try:
-        id = ''
-        if sys.argv[3] == "-id":
-            id = getCDID(sys.argv[4])
-            index += 2
-    except IndexError:
-        pass
+    imdb_number = args[0]
+    filename = args[1]
 
 
-    try:
-        type = ''
-        if sys.argv[index] == "-vcd":
-            type = 'vcd'
-            index = 0
-        if sys.argv[index] == "-dvd":
-            type = 'dvd'
-            index = 0
-        if sys.argv[3] == "-cd":
-            type = 'cd'
-            index += 1
-    except IndexError:
-        pass
+    files, cdid = parse_file_args(args[2:])
 
-
-    files = []
-    if index > 0:
-        try:
-            while 1:
-                files += [ sys.argv[index] ]
-                index += 1
-        except IndexError:
-            pass
-
-    get_data_and_write_xml(imdb_number, filename, id, type, files)
+    if not (files or cdid):
+        usage()
+        
+    get_data_and_write_fxd(imdb_number, filename, drive, type, files, cdid)
