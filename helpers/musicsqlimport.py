@@ -91,7 +91,12 @@ if __name__ == '__main__':
     if not check_db():
         print "Creating data file..."
         create_db()
-    print "Populating Database with entries"
-    for dir in config.DIR_AUDIO:
-        print "Scanning %s" % dir[0]
-        mainloop(dir[1],dir[0])
+
+    if sys.argv[1]:
+        print "Adding %s to %s..." % (sys.argv[1],config.DIR_AUDIO[0][0])
+        mainloop(sys.argv[1],config.DIR_AUDIO[0][0])
+    else:
+        print "Populating Database with entries"
+        for dir in config.DIR_AUDIO:
+            print "Scanning %s" % dir[0]
+            mainloop(dir[1],dir[0])
