@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.73  2003/02/07 19:27:29  dischi
+# use config.cfgfilepath to find local_skin.xml
+#
 # Revision 1.72  2003/01/29 16:41:26  outlyer
 # Removed a stray 'print sys.path' line.
 #
@@ -134,9 +137,11 @@ class Skin:
         print "skin not found, using fallback skin"
         settings.load("%s/grey1.xml" % XML_SKIN_DIRECTORY)
         
-    if os.path.isfile("local_skin.xml"):
-        if DEBUG: print 'Skin: Add local config to skin'
-        settings.load("local_skin.xml")
+    for dir in config.cfgfilepath:
+        local_skin = '%s/local_skin.xml' % dir
+        if os.path.isfile(local_skin):
+            if DEBUG: print 'Skin: Add local config %s to skin' % local_skin
+            settings.load(local_skin)
 
     hold = 0
 
