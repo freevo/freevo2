@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/11/24 17:00:15  dischi
+# Copied the new transparent gif support to the code cleanup tree
+#
 # Revision 1.1  2002/11/24 13:58:44  dischi
 # code cleanup
 #
@@ -330,3 +333,14 @@ def umount(dir):
 def mount(dir):
     if not proc_mount(dir):
         os.system("mount %s 2>/dev/null" % dir)
+
+def gzopen(file):
+    import gzip
+    m = open(file)
+    magic = m.read(2)
+    m.close
+    if magic == '\037\213':
+         f = gzip.open(file)
+    else:
+         f = open(file)
+    return f
