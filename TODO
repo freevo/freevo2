@@ -58,8 +58,7 @@ o clean up Docs/Notes
 o Add support for mjpeg recording of video for off-line compression
   o Could also be used to watch the recorded piece in real-time as it 
     is being recorded
-  o Look at MythTV (http://ijr.dnsalias.org/mc.html) for good TV
-    recording source code.
+  o Look at MythTV (http://www.mythtv.org) for good TV recording source code.
 o Add generic emulator support for ZSNES, scummvm and Boycott Advance
 o Add a digital filter to remove 50/60 Hz line-noise from audio line input
   o Is only a problem for connecting line in to a VCR?
