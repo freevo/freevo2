@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/08/20 21:54:13  outlyer
+# Use my Python version of 'touch'
+#
 # Revision 1.3  2003/07/20 16:09:19  dischi
 # & -> &amp;
 #
@@ -65,6 +68,7 @@ import sys
 import string
 import codecs
 import os
+import util
 
 
 import config 
@@ -446,7 +450,8 @@ class FxdImdb:
         i.write("  </disc-set>\n")    
         i.write("</freevo>\n")
     
-        os.system('touch /tmp/freevo-rebuild-database')
+        util.touch('/tmp/freevo-rebuild-database')
+
         
     def write_movie(self):
         """Write <movie> to fxd file"""
@@ -491,7 +496,9 @@ class FxdImdb:
         i.write('  </movie>\n')
         i.write('</freevo>\n')     
         
-        os.system('touch /tmp/freevo-rebuild-database')
+        util.touch('/tmp/freevo-rebuild-database')
+
+
         
     def update_movie(self):
         """Updates an existing file, adds exftra dvd|vcd|file and variant tags"""
@@ -540,7 +547,9 @@ class FxdImdb:
             else: file.write(line + '\n')
             
         file.close()
-        os.system('touch /tmp/freevo-rebuild-database')
+        util.touch('/tmp/freevo-rebuild-database')
+
+
         
     def update_discset(self):
         """Updates an existing file, adds extra disc in discset"""
@@ -589,8 +598,10 @@ class FxdImdb:
             else: file.write(line + '\n')
             
         file.close()
-        os.system('touch /tmp/freevo-rebuild-database')
-        
+        util.touch('/tmp/freevo-rebuild-database')
+
+
+
     
     def parsedata(self, results, id=0):
         """results (imdb html page), imdb_id
