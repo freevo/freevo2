@@ -31,9 +31,7 @@ import osd
 # sends commands to
 import rc
 
-# The MP3 module
-# import mp3
-# No.. the music module :)
+# The Music module
 import music
 
 # The Movie module
@@ -107,8 +105,6 @@ def getcmd():
         items += [menu.MenuItem('TV', tv.main_menu, 'tv', None, None, 'icons/tv.png',0)]
     items += [menu.MenuItem('MOVIES', movie.main_menu,'', None, None, 'icons/movies.png',0)]
     items += [menu.MenuItem('MUSIC', music.main_menu,'', None, None, 'icons/mp3.png',0)]
-#    items += [menu.MenuItem('MUSIC', mp3.main_menu,'', None, None, 'icons/mp3.png',0)]
-
     items += [menu.MenuItem('IMAGES', imenu.main_menu,'',None, None, 'icons/images.png',0)]
     if config.ENABLE_SHUTDOWN:
         items += [menu.MenuItem('SHUTDOWN', shutdown, None, None, None, \
