@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/03/14 19:38:48  dischi
+# some cosmetic fixes
+#
 # Revision 1.6  2003/03/13 21:02:04  dischi
 # misc cleanups
 #
@@ -135,6 +138,9 @@ class Info_Area(Skin_Area):
                                             int(item.elapsed % 60))
                     else:
                         repl = str(eval('item.%s' % m[1:-1]))
+
+                if not repl and hasattr(item, 'info') and item.info.has_key(m[1:-1]):
+                    repl = str(item.info[m[1:-1]])
 
                 if repl:
                     line = re.sub(m, repl, line)

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/03/14 19:38:50  dischi
+# some cosmetic fixes
+#
 # Revision 1.8  2003/03/13 21:03:51  dischi
 # only load it when necessary
 #
@@ -274,9 +277,10 @@ class Listing_Area(Skin_Area):
                 if choice.icon:
                     image = osd.loadbitmap(choice.icon)
                     if image:
-                        image = pygame.transform.scale(image, (font.h, font.h))
+                        image = pygame.transform.scale(image, (vspace-content.spacing,
+                                                               vspace-content.spacing))
                         self.draw_image(image, (x0, y0))
-                        icon_x = font.h + content.spacing
+                        icon_x = vspace
                 else:
                     icon_x = 0
 
@@ -300,7 +304,23 @@ class Listing_Area(Skin_Area):
 
                 image = format_image(settings, choice, val.width, val.height, force=TRUE)
                 if image:
-                    self.draw_image(image, (x0 + hskip, y0+vskip))
+                    i_w, i_h = image.get_size()
+
+                    addx = 0
+                    addy = 0
+                    if content.align == 'center' and i_w < val.width:
+                        addx = (val.width - i_w) / 2
+
+                    if content.align == 'right' and i_w < val.width:
+                        addx = val.width - i_w
+            
+                    if content.valign == 'center' and i_h < val.height:
+                        addy = (val.height - i_h) / 2
+
+                    if content.valign == 'bottom' and i_h < val.height:
+                        addy = val.height - i_h
+
+                    self.draw_image(image, (x0 + hskip + addx, y0 + vskip + addy))
                     
             else:
                 print 'no support for content type %s' % content.type
