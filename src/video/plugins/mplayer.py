@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.96  2005/01/01 17:07:32  dischi
+# fix crash
+#
 # Revision 1.95  2005/01/01 15:06:19  dischi
 # add MPLAYER_RESAMPLE_AUDIO
 #
@@ -246,6 +249,7 @@ class MPlayer(Application):
         if config.MPLAYER_RESAMPLE_AUDIO and self.item_info and \
                self.item_info.audio and \
                hasattr(self.item_info.audio[0], 'samplerate') and \
+               self.item_info.audio[0].samplerate and \
                self.item_info.audio[0].samplerate < 40000:
             srate = max(41000, min(self.item_info.audio[0].samplerate * 2, 48000))
             log.info('resample audio from %s to %s',
