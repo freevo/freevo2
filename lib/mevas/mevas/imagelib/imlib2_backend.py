@@ -118,7 +118,7 @@ def open(file):
 def new(size, rawdata = None, from_format = "BGRA"):
 	if from_format not in get_capabilities()["from-raw-formats"]:
 		raise ValueError, "Unsupported raw format: %s" % from_format
-	return Image( Imlib2.new(size, rawdata) )
+	return Image( Imlib2.new(size, rawdata, from_format) )
 
 def add_font_path(path):
 	return Imlib2.add_font_path(path)

@@ -51,7 +51,7 @@ class Image(base.Image):
 		return super(Image, self).__getattr__(attr)
 
 	def get_raw_data(self, format = "RGBA"):
-		pass
+		return self._image.get_pixels()
 		#return self._image.get_bytes(format)
 
 	def scale(self, size, src_pos = (0, 0), src_size = (-1, -1)):
