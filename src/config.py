@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.121  2004/08/28 17:16:19  dischi
+# support empty ITEM variables
+#
 # Revision 1.120  2004/08/26 15:26:49  dischi
 # add code to do some memory debugging
 #
@@ -680,7 +683,7 @@ for p in plugin.getall():
 for type in ('video', 'audio', 'image', 'games'):
     n = '%s_ITEMS' % type.upper()
     x = eval(n)
-    if not x:
+    if x == None:
         x = []
         if os.environ.has_key('HOME') and os.environ['HOME']:
             x.append(('Home', os.environ['HOME']))
