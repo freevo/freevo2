@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/02/22 20:20:06  dischi
+# unicode fix again
+#
 # Revision 1.9  2004/02/21 19:44:05  dischi
 # unicode fix
 #
@@ -246,7 +249,7 @@ class AudioParser:
         if s1 == various or s2 == various:
             return various
 
-        if s1.replace(' ', '').lower() == s2.replace(' ', '').lower():
+        if s1.replace(u' ', u'').lower() == s2.replace(u' ', u'').lower():
             return s1
         return various
 
