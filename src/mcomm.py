@@ -129,8 +129,8 @@ class RPCReturn(mbus.RPCReturn):
     was sucessfull.
     """
     def __init__(self, result = [], description = 'success'):
-        mbus.RPCReturn.__init__(self, _build_args([result])[0], 'OK',
-                                description)
+        mbus.RPCReturn.__init__(self, _build_args([result])[0], True,
+                                descr = description)
 
 
 class RPCError(mbus.RPCReturn):
@@ -139,7 +139,7 @@ class RPCError(mbus.RPCReturn):
     was unsucessfull for the given reason.
     """
     def __init__(self, description):
-        mbus.RPCReturn.__init__(self, [], 'FAILED', description)
+        mbus.RPCReturn.__init__(self, [], False, 'FAILED', description)
 
 
 
