@@ -165,7 +165,7 @@ install -m 644 skins/aubin1/* %{buildroot}%{_prefix}/skins/aubin1
 install -m 644 skins/barbieri/* %{buildroot}%{_prefix}/skins/barbieri
 install -m 644 skins/malt1/* %{buildroot}%{_prefix}/skins/malt1
 
-install -m 644 freevo.conf boot/boot_config %{buildroot}%{_sysconfdir}/freevo
+install -m 644 freevo.conf local_conf.py boot/boot_config %{buildroot}%{_sysconfdir}/freevo
 install -m 644 boot/URC-7201B00 %{buildroot}%{_prefix}/boot
 install -m755 boot/freevo %{buildroot}%{_sysconfdir}/rc.d/init.d
 install -m755 boot/freevo_dep %{buildroot}%{_sysconfdir}/rc.d/init.d
@@ -204,6 +204,7 @@ find %{_prefix} -name "*.pyc" |xargs rm -f
 
 %attr(755,root,root) %dir %{_sysconfdir}/freevo
 %attr(644,root,root) %config %{_sysconfdir}/freevo/freevo.conf
+%attr(644,root,root) %config %{_sysconfdir}/freevo/local_conf.py
 %attr(644,root,root) %doc BUGS ChangeLog COPYING FAQ INSTALL README TODO Docs/*
 
 %files runtime

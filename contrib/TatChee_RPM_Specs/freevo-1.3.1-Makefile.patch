@@ -1,11 +1,11 @@
---- Makefile.orig	Fri Feb  7 10:47:11 2003
-+++ Makefile	Fri Feb  7 10:47:22 2003
-@@ -70,7 +70,7 @@
+--- Makefile.orig	Sat Feb  8 07:31:03 2003
++++ Makefile	Thu Feb 13 10:37:47 2003
+@@ -117,7 +117,7 @@
  
- .PHONY: all subdirs x11 osd_x1 $(SUBDIRS) clean release install
  
--all: subdirs runapp freevo_xwin python_compile
-+all: subdirs runapp freevo_xwin 
  
- python_compile: runapp
- 	./runapp python setup_build.py --compile=$(OPTIMIZE),$(PREFIX)
+-install: all python_compile
++install: all 
+ 	test "$(PREFIX)" != "${PWD}" || false
+ 	-rm -rf $(PREFIX)
+ 	-mkdir -p $(PREFIX)
