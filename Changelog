@@ -14,6 +14,7 @@ o Hide cursor in X11 OSD
 o Added simple skins
 o Display MP3 file and album PNG cover images
 o Automatic X11 mode switching
+o XMLTV support added
 
 
 Release 1.2.3 (2002-06-01):
