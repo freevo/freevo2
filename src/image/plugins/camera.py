@@ -5,10 +5,15 @@
 # $Id$
 #
 # Notes: you need gphoto and the python bindings to get this working
+#        add plugin.activate('image.camera') to your local_conf.py
+#
 # Todo:        
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.1  2003/04/18 15:00:39  dischi
+# camera (gphoto support) ist now a plugin
+#
 # Revision 1.1  2003/01/14 18:54:30  dischi
 # Added gphoto support from Thomas Schüppel. You need gphoto and the
 # Python bindings to get this working. I added try-except to integrate
@@ -45,21 +50,39 @@ from item import Item
 import pygame
 import pygphoto
 import cStringIO
-import viewer
+import image.viewer
 
-def detectCameras():
-    gplist = pygphoto.gp_detectcameras( ) 
-    count = pygphoto.gp_list_count( gplist )
-    list = []
-    while count > 0:
-        count = count - 1
-        list.append( [pygphoto.gp_name(gplist, count),pygphoto.gp_value(gplist,count)] )
-    return list
+import plugin
 
-def cameraFactory( parent, name, port ):
-    gCamera = pygphoto.gp_camera( name, port )
-    folder = CameraFolder( parent, gCamera, "/", name )
-    return folder
+class PluginInterface(plugin.MainMenuPlugin):
+
+    def detectCameras(self):
+        gplist = pygphoto.gp_detectcameras( ) 
+        count = pygphoto.gp_list_count( gplist )
+        list = []
+        while count > 0:
+            count = count - 1
+            list.append( [pygphoto.gp_name(gplist, count),pygphoto.gp_value(gplist,count)] )
+        return list
+
+
+    def cameraFactory( self, parent, name, port ):
+        gCamera = pygphoto.gp_camera( name, port )
+        folder = CameraFolder( parent, gCamera, "/", name )
+        return folder
+
+
+    def items(self, parent):
+        items = []
+        cams = self.detectCameras( )
+        for c in cams:
+            m = self.cameraFactory( parent, c[0], c[1] )
+            m.type = 'camera'
+            m.name = c[0]
+            items.append(m)
+        return items
+    
+
 
 class CameraFile( Item ):
     def __init__(self, parent, gcamera, path, name, duration=0):
@@ -70,7 +93,7 @@ class CameraFile( Item ):
         self.path = path
         self.name = name
         self.filename = None
-        self.image_viewer = viewer.get_singleton()
+        self.image_viewer = image.viewer.get_singleton()
         self.duration = duration
 
     def loadimage(self):
@@ -110,8 +133,6 @@ class CameraFile( Item ):
         self.parent.current_item = self
         self.image_viewer.view(self)
 
-#        if self.parent and hasattr(self.parent, 'cache_next'):
-#            self.parent.cache_next()              
 
 
 class CameraFolder( Item ):
