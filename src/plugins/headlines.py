@@ -15,6 +15,10 @@
 # for a full list of tested sites see Docs/plugins/headlines.txt
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/09/03 21:40:38  dischi
+# o use util pickle function
+# o show popup while getting the data
+#
 # Revision 1.1  2003/08/30 15:23:39  mikeruelle
 # RDF headlines plugin. does pretty much anysite listed in evolution's summary section
 #
@@ -47,10 +51,11 @@ import os, string, time
 # rdf modules
 from xml.dom.ext.reader import Sax2
 import urllib
-import cPickle
-
+import util
 #freevo modules
 import config, menu, rc, plugin, skin
+
+from gui.PopupBox import PopupBox
 
 from item import Item
 
@@ -86,18 +91,17 @@ class HeadlinesSiteItem(Item):
             headlines = self.fetchheadlinesfromurl()
         else:
             #print 'Cache Headlines'
-            try:
-                headlines = cPickle.load(open(pfile,'rb'))
-            except:
-                 print 'HEADLINES ERROR: could not read %s' % pfile
-                 return []
+            headlines = util.read_pickle(pfile)
         return headlines
 
     def fetchheadlinesfromurl(self):
         headlines = []
         # create Reader object
         reader = Sax2.Reader()
-                                                                                                                    
+
+        popup = PopupBox(text='Fetching headlines...')
+        popup.show()
+
         # parse the document
         try:
             myfile=urllib.urlopen(self.url)
@@ -117,11 +121,10 @@ class HeadlinesSiteItem(Item):
         #write the file
         if len(headlines) > 0:
             pfile = os.path.join(config.FREEVO_CACHEDIR, 'headlines-%i' % self.location_index)
-            try:
-                cPickle.dump(headlines, open(pfile,'wb'))
-            except:
-                print 'HEADLINES ERROR: could not write %s' % pfile
-                pass
+            util.save_pickle(headlines, pfile)
+
+        popup.destroy()
+
         return headlines
 
     def getheadlines(self, arg=None, menuw=None):
