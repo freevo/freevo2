@@ -9,77 +9,16 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.59  2003/11/20 14:13:08  dischi
-# check for older mmpython version
+# Revision 1.60  2003/11/21 11:48:03  dischi
+# Reworked the directory settings: MOVIE_PLAYLISTS and AUDIO_RANDOM_PLAYLIST
+# are removed, the new variables to control a directory style are
+# DIRECTORY_CREATE_PLAYLIST, DIRECTORY_ADD_PLAYLIST_FILES,
+# DIRECTORY_ADD_RANDOM_PLAYLIST and DIRECTORY_AUTOPLAY_ITEMS. The directory
+# updated now uses stat, set DIRECTORY_USE_STAT_FOR_CHANGES = 0 if you have
+# problems with it.
 #
-# Revision 1.58  2003/11/16 17:41:04  dischi
-# i18n patch from David Sagnol
+# The dirwatcher is now a plugin and no thread
 #
-# Revision 1.57  2003/11/03 17:24:21  dischi
-# check if we have write permission
-#
-# Revision 1.56  2003/10/27 17:36:56  dischi
-# NOOOOOOOOOOOOOOOOOO, stupid!!!!!! (sorry, I mean bugfix)
-#
-# Revision 1.55  2003/10/22 18:26:08  dischi
-# Changes in the table code of menu items:
-# o use percentage again, pixel sizes are bad because they don't scale
-# o add special handling to avoid hardcoding texts in the skin file
-# o new function for the skin: text_or_icon for this handling
-#
-# Format for this texts inside a table:
-# ICON_<ORIENTATION>_<IMAGE_NAME>_<TEXT IF NO IMAGE IS THERE>
-#
-# Revision 1.54  2003/10/22 03:00:11  gsbarbieri
-# Support icons instead of labels "on", "off" and "auto"
-#
-# Revision 1.53  2003/10/21 21:17:41  gsbarbieri
-# Some more i18n improvements.
-#
-# Revision 1.52  2003/10/20 18:28:23  outlyer
-# Also move print into _debug_
-#
-# Revision 1.51  2003/10/18 08:13:35  dischi
-# add recursive _not_ random playlist
-#
-# Revision 1.50  2003/10/17 18:50:45  dischi
-# add description to configure menu and make random playlist for video, too
-#
-# Revision 1.49  2003/10/17 00:55:52  rshortt
-# Ooops.
-#
-# Revision 1.48  2003/10/17 00:31:55  rshortt
-# Make a bit cleaner.
-#
-# Revision 1.47  2003/10/17 00:19:42  rshortt
-# Respect a parent dir's add_args is we were not given any.
-#
-# Revision 1.46  2003/10/12 13:15:41  dischi
-# prevent a crash when reconfiguring the directory
-#
-# Revision 1.45  2003/10/12 09:49:46  dischi
-# make option how much "one menu" is and go back 2 for configure directory
-#
-# Revision 1.44  2003/10/12 09:42:37  dischi
-# added DIRECTORY_REVERSE_SORT
-#
-# Revision 1.43  2003/10/11 09:54:22  dischi
-# just to be save
-#
-# Revision 1.42  2003/10/04 18:37:28  dischi
-# i18n changes and True/False usage
-#
-# Revision 1.41  2003/10/03 16:46:13  dischi
-# moved the encoding type (latin-1) to the config file config.LOCALE
-#
-# Revision 1.40  2003/10/02 18:47:18  dischi
-# use new util class to write the fxd file
-#
-# Revision 1.39  2003/10/01 18:56:56  dischi
-# add configure option to write a folder.fxd
-#
-# Revision 1.38  2003/09/21 13:17:49  dischi
-# make it possible to change between video, audio, image and games view
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -108,28 +47,25 @@ import os
 import traceback
 import re
 import codecs
-
-import util
-import config
-import menu as menu_module
+import stat
 import copy
 import rc
+import mmpython
+
+import config
+import util
+import menu as menu_module
 import skin
-
-from item import Item
-from playlist import Playlist, RandomPlaylist
-
+import plugin
 import video
 import audio
 import image
 import games
-from video.xml_parser import parseMovieFile
-
-import mmpython
-
-from event import *
 
 from item import Item
+from playlist import Playlist, RandomPlaylist
+from video.xml_parser import parseMovieFile
+from event import *
 
 import gui.PasswordInputBox as PasswordInputBox
 import gui.AlertBox as AlertBox
@@ -143,20 +79,12 @@ from mmpython.image import bins
 
 skin = skin.get_singleton()
 
-dirwatcher_thread = None
-
-all_variables = [('MOVIE_PLAYLISTS', _('Movie Playlists'),
-                  _('Use automatic playlist for movie items.')),
-                 
-                 ('DIRECTORY_SORT_BY_DATE', _('Directory Sort By Date'),
+all_variables = [('DIRECTORY_SORT_BY_DATE', _('Directory Sort By Date'),
                   _('Sort directory by date and not by name.')),
                  
                  ('DIRECTORY_AUTOPLAY_SINGLE_ITEM', _('Directory Autoplay Single Item'),
                   _('Don\'t show directory if only one item exists and auto-select ' \
                     'the item.')),
-
-                 ('AUDIO_RANDOM_PLAYLIST', _('Audio Random Playlist'),
-                  _('Show radom playlist item for audio menus.')),
 
                  ('FORCE_SKIN_LAYOUT', _('Force Skin Layout'),
                   _('Force skin to a specific layout. This option doesn\'t work with ' \
@@ -172,9 +100,25 @@ all_variables = [('MOVIE_PLAYLISTS', _('Movie Playlists'),
                   _('Show the items in the list in reverse order.')),
 
                  ('COVER_DIR', '', ''),
-                 ('AUDIO_FORMAT_STRING', '', '') ]
+                 ('AUDIO_FORMAT_STRING', '', ''),
 
+                 ('DIRECTORY_CREATE_PLAYLIST', _('Directory Create Playlist'),
+                  _('Handle the directory as playlist. After one file is played, the next '+\
+                    'one will be started.')) ,
 
+                 ('DIRECTORY_ADD_PLAYLIST_FILES', _('Directory Add Playlist Files'),
+                  _('Add playlist files to the list of items')) ,
+
+                 ('DIRECTORY_ADD_RANDOM_PLAYLIST', _('Directory Add Random Playlist'),
+                  _('Add an item for a random playlist')) ,
+
+                 ('DIRECTORY_AUTOPLAY_ITEMS', _('Directory Autoplay Items'),
+                  _('Autoplay the whole directory (as playlist) when it contains only '+\
+                    'files and no directories' ))]
+
+# varibales that contain a type list
+type_list_variables = [ 'DIRECTORY_CREATE_PLAYLIST', 'DIRECTORY_ADD_PLAYLIST_FILES',
+                        'DIRECTORY_ADD_RANDOM_PLAYLIST', 'DIRECTORY_AUTOPLAY_ITEMS' ]
 
 possible_display_types = [ ]
 
@@ -365,10 +309,16 @@ class DirItem(Playlist):
             if child.name == 'setvar':
                 for v,n,d in all_variables:
                     if child.attrs[('', 'name')].upper() == v.upper():
-                        try:
-                            setattr(self, v, int(child.attrs[('', 'val')]))
-                        except ValueError:
-                            setattr(self, v, child.attrs[('', 'val')])
+                        if v.upper() in type_list_variables:
+                            if int(child.attrs[('', 'val')]):
+                                setattr(self, v, [self.display_type])
+                            else:
+                                setattr(self, v, [])
+                        else:
+                            try:
+                                setattr(self, v, int(child.attrs[('', 'val')]))
+                            except ValueError:
+                                setattr(self, v, child.attrs[('', 'val')])
                         self.modified_vars.append(v)
             # get more info
             if child.name == 'info' and set_all:
@@ -410,7 +360,14 @@ class DirItem(Playlist):
             folder_elem.children.remove(child)
 
         for v in self.modified_vars:
-            n = util.XMLnode('setvar', (('name', v.lower()), ('val', getattr(self, v))))
+            if v in type_list_variables:
+                if getattr(self, v):
+                    val = 1
+                else:
+                    val = 0
+                n = util.XMLnode('setvar', (('name', v.lower()), ('val', val)))
+            else:
+                n = util.XMLnode('setvar', (('name', v.lower()), ('val', getattr(self, v))))
             fxd.add(n, folder_elem, 0)
 
         try:
@@ -464,7 +421,21 @@ class DirItem(Playlist):
         elif self.display_type == 'video':
             suffix = config.SUFFIX_VIDEO_FILES
 
-        items = [ ( self.cwd, _('Browse directory')) ]
+        display_type = self.display_type
+        if self.display_type == 'tv':
+            display_type = 'video'
+
+        items = [ ( self.cwd, _('Browse directory')),
+                  ( self.play, _('Play all files in directory')) ]
+
+        if display_type in self.DIRECTORY_AUTOPLAY_ITEMS:
+            for d in util.getdirnames(self.dir):
+                if not (d.endswith('CVS') or d.endswith('.xvpics') or \
+                        d.endswith('.thumbnails') or d.endswith('.pics')):
+                    break
+            else:
+                items.reverse()
+
         if suffix:
             items += [ ( RandomPlaylist((self.dir, suffix), self, recursive=False),
                          _('Random play all items')),
@@ -478,10 +449,15 @@ class DirItem(Playlist):
     
 
     def cwd(self, arg=None, menuw=None):
-        """
-        make a menu item for each file in the directory
-        """
-        
+        self.check_password_and_build(arg=None, menuw=menuw)
+
+    def play(self, arg=None, menuw=None):
+        if arg == 'next':
+            Playlist.play(self, arg=arg, menuw=menuw)
+        else:
+            self.check_password_and_build(arg='play', menuw=menuw)
+
+    def check_password_and_build(self, arg=None, menuw=None):
         if not self.menuw:
             self.menuw = menuw
 
@@ -496,17 +472,15 @@ class DirItem(Playlist):
             
 	if os.path.isfile(self.dir + '/.password'):
 	    print 'password protected dir'
-	    pb = PasswordInputBox(text=_('Enter Password'), handler=self.pass_cmp_cb)
+            self.arg   = arg
+            self.menuw = menuw
+	    pb = PasswordInputBox(text=_('Enter Password'), handler=self.pass_cmp_cp)
 	    pb.show()
-	    # save these so the InputBox callback can pass them to do_cwd
-	    self.arg = arg
-	    self.foo = "bar"
 	else:
-	    self.do_cwd(arg, menuw)
+	    self.build(arg=arg, menuw=menuw)
 
 
     def pass_cmp_cb(self, word=None):
-
 	# read the contents of self.dir/.passwd and compare to word
 	try:
 	    pwfile = open(self.dir + '/.password')
@@ -519,15 +493,19 @@ class DirItem(Playlist):
 	pwfile.close()
 	password = line.strip()
 	if word == password:
-	    self.do_cwd(self.arg, self.menuw)
+	    self.build(self.arg, self.menuw)
 	else:
 	    pb = AlertBox(text=_('Password incorrect'))
 	    pb.show()
             return
 
 
-    def do_cwd(self, arg=None, menuw=None):
+    def build(self, arg=None, menuw=None):
         self.playlist = []
+
+        display_type = self.display_type
+        if self.display_type == 'tv':
+            display_type = 'video'
         
         datadir = util.getdatadir(self)
         try:
@@ -587,12 +565,9 @@ class DirItem(Playlist):
 
         play_items = []
         for t in possible_display_types:
-            if not self.display_type or self.display_type == t:
+            if not display_type or display_type == t:
                 play_items += eval(t + '.cwd(self, files)')
 
-        if self.display_type == 'tv':
-            play_items += video.cwd(self, files)
-            
         if self.DIRECTORY_SORT_BY_DATE:
             play_items.sort(lambda l, o: cmp(l.sort('date').upper(),
                                              o.sort('date').upper()))
@@ -607,9 +582,7 @@ class DirItem(Playlist):
 
         # add all playable items to the playlist of the directory
         # to play one files after the other
-        if (not self.display_type or self.display_type == 'audio' or \
-            self.display_type == 'image' or \
-            (self.MOVIE_PLAYLISTS and self.display_type == 'video')):
+        if not display_type or display_type in self.DIRECTORY_CREATE_PLAYLIST:
             self.playlist = play_items
 
         # build items for sub-directories
@@ -633,7 +606,7 @@ class DirItem(Playlist):
             
         # build items for playlists
         pl_items = []
-        if not self.display_type or self.display_type == 'audio':
+        if not self.display_type or display_type in self.DIRECTORY_ADD_PLAYLIST_FILES:
             for pl in util.find_matches(files, config.SUFFIX_AUDIO_PLAYLISTS):
                 pl_items += [ Playlist(pl, self) ]
 
@@ -645,14 +618,12 @@ class DirItem(Playlist):
 
         pl_items.sort(lambda l, o: cmp(l.name.upper(), o.name.upper()))
 
-
         # all items together
         items = []
 
-        # random playlist (only active for audio)
-        if ((not self.display_type or self.display_type == 'audio') and \
-            len(play_items) > 1 and self.display_type and
-            config.AUDIO_RANDOM_PLAYLIST == 1):
+        # random playlist
+        if display_type and display_type in self.DIRECTORY_ADD_RANDOM_PLAYLIST \
+               and len(play_items) > 1:
             pl = Playlist(play_items, self)
             pl.randomize()
             pl.autoplay = True
@@ -678,6 +649,11 @@ class DirItem(Playlist):
         if len(items) == 1 and items[0].actions() and \
            self.DIRECTORY_AUTOPLAY_SINGLE_ITEM:
             items[0].actions()[0][0](menuw=menuw)
+
+        elif arg=='play' and self.play_items:
+            self.playlist = self.play_items
+            Playlist.play(self, menuw=menuw)
+            
         else:
             item_menu = menu_module.Menu(title, items, reload_func=self.reload,
                                          item_types = self.display_type,
@@ -689,15 +665,10 @@ class DirItem(Playlist):
             if menuw:
                 menuw.pushmenu(item_menu)
 
-            global dirwatcher_thread
-            if not dirwatcher_thread:
-                dirwatcher_thread = DirwatcherThread(menuw)
-                dirwatcher_thread.setDaemon(1)
-                dirwatcher_thread.start()
-
-            dirwatcher_thread.cwd(self, item_menu, self.dir, datadir, self.all_files)
-            self.menu = item_menu
-
+            plugin.getbyname('Dirwatcher').cwd(menuw, self, item_menu, self.dir,
+                                               datadir, self.all_files)
+            self.menu  = item_menu
+            self.menuw = menuw
         return items
 
 
@@ -705,10 +676,10 @@ class DirItem(Playlist):
         """
         called when we return to this menu
         """
-        global dirwatcher_thread
         datadir = util.getdatadir(self)
-        dirwatcher_thread.cwd(self, self.menu, self.dir, datadir, self.all_files)
-        dirwatcher_thread.scan()
+        plugin.getbyname('Dirwatcher').cwd(self.menuw, self, self.menu, self.dir,
+                                           datadir, self.all_files)
+        plugin.getbyname('Dirwatcher').scan(force=True)
 
         # we changed the menu, don't build a new one
         return None
@@ -724,18 +695,17 @@ class DirItem(Playlist):
 
         self.all_files = all_files
 
+        display_type = self.display_type
+        if self.display_type == 'tv':
+            display_type = 'video'
+
         # check modules if they know something about the deleted/new files
         for t in possible_display_types:
-            if not self.display_type or self.display_type == t:
+            if not display_type or display_type == t:
                 eval(t + '.update')(self, new_files, del_files, \
-                                              new_items, del_items, \
-                                              self.play_items)
+                                    new_items, del_items, \
+                                    self.play_items)
                 
-        if self.display_type == 'tv':
-            video.update(self, new_files, del_files, 
-                                   new_items, del_items, self.play_items)
-
-
         # store the current selected item
         selected = self.menu.selected
         
@@ -791,12 +761,11 @@ class DirItem(Playlist):
 
         # add new playlist items to the menu
         new_pl_items = []
-        if not self.display_type or self.display_type == 'audio':
-            for pl in util.find_matches(new_files,
-                                        config.SUFFIX_AUDIO_PLAYLISTS):
+        if not display_type or display_type in self.DIRECTORY_ADD_PLAYLIST_FILES:
+            for pl in util.find_matches(new_files, config.SUFFIX_AUDIO_PLAYLISTS):
                 new_pl_items += [ Playlist(pl, self) ]
 
-        if not self.display_type or self.display_type == 'image':
+        if not display_type or display_type == 'image':
             for file in util.find_matches(new_files, config.SUFFIX_IMAGE_SSHOW):
                 pl = Playlist(file, self)
                 pl.autoplay = True
@@ -811,9 +780,8 @@ class DirItem(Playlist):
         items = []
 
         # random playlist (only active for audio)
-        if ((not self.display_type or self.display_type == 'audio') and \
-            len(self.play_items) > 1 and self.display_type and
-            config.AUDIO_RANDOM_PLAYLIST == 1):
+        if display_type and display_type in self.DIRECTORY_ADD_RANDOM_PLAYLIST \
+               and len(play_items) > 1:
 
             # some files changed, rebuild playlist
             if new_items or del_items:
@@ -856,7 +824,13 @@ class DirItem(Playlist):
 
         # get current value, None == no special settings
         if arg in self.modified_vars:
-            current = getattr(self, arg)
+            if arg in type_list_variables:
+                if getattr(self, arg):
+                    current = 1
+                else:
+                    current = 0
+            else:
+                current = getattr(self, arg)
         else:
             current = None
 
@@ -874,11 +848,17 @@ class DirItem(Playlist):
         # switch from no settings to 0
         if current == None:
             self.modified_vars.append(arg)
-            setattr(self, arg, 0)
+            if arg in type_list_variables:
+                setattr(self, arg, [])
+            else:
+                setattr(self, arg, 0)
 
         # inc variable
         elif current < max:
-            setattr(self, arg, current+1)
+            if arg in type_list_variables:
+                setattr(self, arg, [self.display_type])
+            else:
+                setattr(self, arg, current+1)
 
         # back to no special settings
         elif current == max:
@@ -974,46 +954,46 @@ class DirItem(Playlist):
 
 # ======================================================================
 
-import threading
-import thread
-import time
-
-class DirwatcherThread(threading.Thread):
+class Dirwatcher(plugin.DaemonPlugin):
                 
-    def __init__(self, menuw):
-        threading.Thread.__init__(self)
-        self.item = None
-        self.menuw = menuw
-        self.item_menu = None
-        self.dir = None
-        self.datadir = None
-        self.files = None
-        self.lock = thread.allocate_lock()
-        
-    def cwd(self, item, item_menu, dir, datadir, files):
-        self.lock.acquire()
+    def __init__(self):
+        plugin.DaemonPlugin.__init__(self)
+        self.item          = None
+        self.menuw         = None
+        self.item_menu     = None
+        self.dir           = None
+        self.datadir       = None
+        self.files         = None
+        self.poll_interval = 100
 
-        self.item = item
+        plugin.register(self, 'Dirwatcher')
+
+
+    def cwd(self, menuw, item, item_menu, dir, datadir, files):
+        self.menuw     = menuw
+        self.item      = item
         self.item_menu = item_menu
-        self.dir = dir
-        self.datadir = datadir
-        self.files = files
-
-        self.lock.release()
-
-    def scan(self):
-        self.lock.acquire()
+        self.dir       = dir
+        self.datadir   = datadir
+        self.files     = files
+        self.last_time = os.stat(self.dir)[stat.ST_MTIME]
+        
+    def scan(self, force=False):
+        if not self.dir:
+            return
+        if not force and config.DIRECTORY_USE_STAT_FOR_CHANGES and \
+               os.stat(self.dir)[stat.ST_MTIME] == self.last_time:
+            return True
 
         try:
             files = ([ os.path.join(self.dir, fname)
                        for fname in os.listdir(self.dir) ])
         except OSError:
             # the directory is gone
-            _debug_('DirwatcherThread: unable to read directory %s' % self.dir,1)
+            _debug_('Dirwatcher: unable to read directory %s' % self.dir,1)
 
             # send EXIT to go one menu up:
             rc.post_event(MENU_BACK_ONE_MENU)
-            self.lock.release()
             return
         
         try:
@@ -1037,16 +1017,16 @@ class DirwatcherThread(threading.Thread):
         if new_files or del_files:
             _debug_('directory has changed')
             self.item.update(new_files, del_files, files)
+            self.last_time = os.stat(self.dir)[stat.ST_MTIME]
                     
         self.files = files
-        self.lock.release()
 
     
-    def run(self):
-        while 1:
-            if self.dir and self.menuw and \
+    def poll(self):
+        if self.dir and self.menuw and \
                self.menuw.menustack[-1] == self.item_menu and not rc.app():
-                self.scan()
-            time.sleep(2)
+            self.scan()
 
-    
+# and activate that DaemonPlugin
+dirwatcher_thread = Dirwatcher()
+plugin.activate(dirwatcher_thread)
