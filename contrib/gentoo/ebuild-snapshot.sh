@@ -72,8 +72,8 @@ function pack_tag {
 
 function ebuild {
     sudo cp /home/dmeyer/src/freevo/contrib/gentoo/freevo.ebuild \
-	/usr/local/portage/media-video/freevo/freevo-$ebuild_version.ebuild
-    cd /usr/local/portage/media-video/freevo
+	/usr/local/portage/media-tv/freevo/freevo-$ebuild_version.ebuild
+    cd /usr/local/portage/media-tv/freevo
     sudo rm -f files/digest-freevo-$version
     sudo chown -R root.root .
     sudo ebuild freevo-$ebuild_version.ebuild digest 

@@ -1,7 +1,7 @@
 DESCRIPTION="Digital video jukebox (PVR, DVR)."
 HOMEPAGE="http://www.freevo.org/"
 
-PV2=`echo $PV | sed 's/_/-/'`
+PV2=`echo $PV | sed 's/_//'`
 SRC_URI="mirror://sourceforge/${PN}/${PN}-src-${PV2}.tgz"
 
 LICENSE="GPL-2"
@@ -9,25 +9,24 @@ SLOT="0"
 KEYWORDS="x86"
 IUSE="matrox dvd encode lirc X"
 
-DEPEND=">=dev-python/pygame-1.5.5
+inherit distutils
+
+DEPEND=">=dev-python/pygame-1.5.6
 	>=media-libs/freetype-2.1.4
 	>=dev-python/Imaging-1.1.3
-	>=dev-python/pyxml-0.8.1
-	>=dev-python/twisted-1.0.6
+	>=dev-python/pyxml-0.8.2
+	>=dev-python/twisted-1.0.7
 	>=media-libs/libsdl-1.2.5
-	>=dev-python/pysqlite-0.4.1
-	>=dev-python/mmpython-0.2
+	>=dev-python/mmpython-0.3
 	matrox? ( >=media-video/matroxset-0.3 )
-	>=media-video/mplayer-0.91
-	>=media-tv/xmltv-0.5.16
+	>=media-video/mplayer-0.92
+	>=media-tv/xmltv-0.5.19
 	>=sys-apps/sed-4
 	dvd? ( >=media-video/xine-ui-0.9.22 )
 	encode? ( >=media-sound/cdparanoia-3.9.8 >=media-sound/lame-3.93.1 )
 	lirc? ( app-misc/lirc >=dev-python/pylirc-0.0.3 )
 	X? ( virtual/x11 )"
 
-
-inherit distutils
 
 src_unpack() {
 	unpack freevo-src-${PV2}.tgz
