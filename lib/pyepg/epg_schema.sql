@@ -7,9 +7,9 @@ insert into admin (version) values ("0.1.0");
 
 drop table channels;
 create table channels (
-    id text primary key,
-    call_sign text not null,
-    tuner_id text not null
+    id unicode primary key,
+    call_sign unicode not null,
+    tuner_id unicode not null
 );
 
 drop table channel_types;
@@ -25,11 +25,11 @@ insert into channel_types (id, name) values (3, "radio");
 drop table programs;
 create table programs (
     id integer primary key,
-    channel_id text not null,
-    title text not null,
-    subtitle text,
-    description text,
-    episode text,
+    channel_id unicode not null,
+    title unicode not null,
+    subtitle unicode,
+    description unicode,
+    episode unicode,
     start int not null,
     stop int not null,
     rating int,
@@ -40,7 +40,7 @@ create table programs (
 drop table categories;
 create table categories (
     id integer primary key,
-    name text not null
+    name unicode not null
 );
 insert into categories (id, name) values (0, "undefined");
 insert into categories (id, name) values (1, "series");
@@ -60,7 +60,7 @@ create table program_category (
 drop table advisories;
 create table advisories (
     id integer primary key,
-    name text not null
+    name unicode not null
 );
 insert into advisories (id, name) values (0, "undefined");
 
@@ -73,7 +73,7 @@ create table program_advisory (
 drop table ratings;
 create table ratings (
     id integer primary key,
-    name text not null
+    name unicode not null
 );
 insert into ratings (id, name) values (0, "undefined");
 insert into ratings (id, name) values (1, "NR");

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/10/20 01:06:30  rshortt
+# Unicode changes.
+#
 # Revision 1.2  2004/10/18 01:04:01  rshortt
 # Rework pyepg to use an sqlite database instead of an object pickle.
 # The EPGDB class is the primary interface to the databse, wrapping database
@@ -94,7 +97,7 @@ class EPGDB:
     """
 
     def __init__(self, dbpath):
-        self.db = sqlite.connect(dbpath, client_encoding=config.LOCALE)
+        self.db = sqlite.connect(dbpath, client_encoding='utf-8', timeout=10)
         self.cursor = self.db.cursor()
 
 
