@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/05/08 14:17:38  outlyer
+# Initial version of Paul's FXD radio station support. I made some changes from
+# the original patch, in that I added an URL field to the audioitem class instead of
+# using the year field as his patch did. I will be adding a example FXD file to
+# testfiles as well.
+#
 # Revision 1.4  2003/04/24 19:56:07  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -109,7 +115,11 @@ class MPlayer:
         """
         play a audioitem with mplayer
         """
-        filename = item.filename
+        if item.url:
+            filename = item.url
+        else:
+            filename = item.filename
+
         self.playerGUI = playerGUI
         
         # Is the file streamed over the network?

@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/05/08 14:17:36  outlyer
+# Initial version of Paul's FXD radio station support. I made some changes from
+# the original patch, in that I added an URL field to the audioitem class instead of
+# using the year field as his patch did. I will be adding a example FXD file to
+# testfiles as well.
+#
 # Revision 1.21  2003/04/24 19:55:59  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -87,6 +93,7 @@ class AudioItem(Item):
         self.track      = 0
 	self.trackof	= 0
         self.year       = 0
+        self.url        = ''
         self.start      = 0
         self.elapsed    = 0
         self.remain     = 0
@@ -108,6 +115,10 @@ class AudioItem(Item):
             elif re.match('.*[mM][pP]3$', self.filename):
                 if DEBUG > 1: print "Got mp3..."
                 self.set_info_mp3(self.filename)
+
+            elif re.match('.*[fF][xX][dD]$', self.filename):
+                if DEBUG > 1: print "Got FXD...."
+                self.set_info_radio(self.filename)
 
             else:
                 if DEBUG > 1: print "Got something else..."
@@ -238,6 +249,50 @@ class AudioItem(Item):
             
         return Item.getattr(self, attr)
 
+    def set_info_radio(self, filename):
+        """
+        Sets the info variables with info from the mp3
+
+        Arguments: filename
+          Returns: 1 if success
+        """
+        import xmllib
+        import xml
+        from xml.parsers import expat
+        sourcexml = open(filename, 'r')
+        xmlpp = sourcexml.read()
+
+        def s_el(name, attrs):
+            global glob_name
+            glob_name = name
+        def e_el(name):
+            print "   (attribute", name, "ends)"
+        def c_data(data):
+            global glob_name
+            global glob_val
+            global glob_url
+            print glob_name, data
+            if data:
+                if glob_name == 'title':
+                    self.title = data
+                    glob_name = 0
+                if glob_name == 'genre':
+                    self.album = data
+                    glob_name = 0
+                if glob_name == 'desc':
+                    self.artist = data
+                    glob_name = 0
+                if glob_name == 'url':
+                    self.url = data
+                    print "URL:", self.url
+                    glob_name = 0
+        prs = xml.parsers.expat.ParserCreate()
+        prs.StartElementHandler = s_el
+        prs.EndElementHandler = e_el
+        prs.CharacterDataHandler = c_data
+        prs.returns_unicode = 0
+        prs.Parse(xmlpp)
+        return 1
 
     def set_info_ogg(self, file):
         """
