@@ -11,9 +11,9 @@
     </menu>
 
     <menu type="video">
-      <style image="video menu with info" text="normal text style"/>
+      <style image="video menu with info" text="text with info style"/>
       <style text="normal text style"/>
-      <style image="video details"/>
+      <style image="video details" text="text with info style"/>
     </menu>
 
     <menu type="image">
@@ -73,6 +73,30 @@
       <info layout="video info" x="10" y="160" width="460" height="430"/>
     </menuset>
 
+    <!-- Now the "text with info style" -->
+    <menuset label="text with info style">
+      <!-- 1. screen: the complete background area -->
+      <screen layout="screen0" x="0" y="0" width="800" height="600"/>
+
+      <!-- 2. title: the area where the title of the menu (e.g. directory name -->
+      <!-- will be displayed -->
+      <title layout="title0" x="10" y="10" width="780" height="60"/> 
+
+      <!-- 3. view area: the cover image for audio/video, a thumbnail for image -->
+      <view layout="view0" x="580" y="110" width="200" height="300"/> 
+
+      <!-- 4. listing area: the list of all items -->
+      <listing layout="list0" x="45" y="110" width="515" height="330">
+	<image x="10" y="110" width="32" height="32" label="uparrow" 
+	  filename="up.png"/>
+	<image x="10" y="374" width="32" height="32" label="downarrow" 
+	  filename="down.png"/>
+      </listing>
+      <!-- 5. info area: additional info. This area is invisible in the default -->
+      <!-- menu, it's only visible in the extended menus -->
+      <info layout="info" x="40" y="460" width="750" height="120"/>
+    </menuset>
+
     <layout label="title1">
       <content type="short item" font="title small" align="left"/>
     </layout>
@@ -108,6 +132,9 @@
 	</item>
 	<item type="playlist">
 	  This is a playlist.
+	</item>
+	<item type="track">
+	  Runtime:   \t@length@ min.
 	</item>
       </content>
     </layout>
