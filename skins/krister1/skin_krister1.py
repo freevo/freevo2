@@ -25,7 +25,7 @@ import osd
 import rc
 
 # Set to 1 for debug output
-DEBUG = 1
+DEBUG = 0
 
 TRUE = 1
 FALSE = 0
@@ -117,7 +117,29 @@ class Skin:
 
         # image to display
         image = None
-        
+
+        # Get max text width of the menu choices
+        max_width = 0
+        for choice in menuw.menu_items:
+            if len(menuw.menustack) == 1:
+                if y0 > 450:
+                    y0 = 100
+                    x0 = 384
+                icon_w = 100
+                ptscale = 2.0
+            else:
+                icon_w = 30
+                ptscale = 1.0
+            fontsize = self.OSD_FONTSIZE_ITEMS*ptscale
+
+            str_w, str_h = osd.stringsize(choice.name,
+                                          font=self.OSD_FONTNAME_ITEMS,
+                                          ptsize=fontsize)
+
+            max_width = max(max_width, str_w)
+            
+
+        # Draw the menu strings
         for choice in menuw.menu_items:
             if len(menuw.menustack) == 1:
                 if y0 > 450:
@@ -153,11 +175,12 @@ class Skin:
                                           font=self.OSD_FONTNAME_ITEMS,
                                           ptsize=fontsize)
 
-            print 'Str "%s", size %d, %d' % (choice.name, str_w, str_h)
+            if DEBUG: print 'Str "%s", size %d, %d' % (choice.name, str_w, str_h)
             
 	    if menu.selected == choice:
 
-                osd.drawbox(str_x - 3, str_y, str_x + str_w + 3, str_y + str_h, width = -1,
+                osd.drawbox(str_x - 3, str_y, str_x + max_width + fontsize/4,
+                            str_y + str_h + 3, width = -1,
                             color=((160 << 24) | osd.COL_BLUE))
 
                 if choice.image != None:
