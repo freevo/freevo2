@@ -485,11 +485,6 @@ SUFFIX_IMAGE_SSHOW = [ 'ssr' ]
 # website is at http://www.mame.net, but the version that is used here
 # is at http://x.mame.net since the regular MAME is for Windows.
 #
-# Note: You must have the "rominfo" app from rominfosrc compiled and
-# placed in the main freevo dir first. This is not done by the regular
-# Makefile, you must do it by hand. Read the rominfosrc/rominfo.txt
-# for further instructions on more steps that are required to use MAME!
-# 
 # SNES stands for Super Nintendo Entertainment System.  Freevo relies
 # on other programs that are not included in Freevo to play these games.
 # 
