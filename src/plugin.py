@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.58  2003/12/31 16:39:43  dischi
+# flag if the mimetype returns something else than play files
+#
 # Revision 1.57  2003/12/30 15:31:43  dischi
 # support args for plugin events
 #
@@ -194,6 +197,7 @@ class MimetypePlugin(Plugin):
     def __init__(self):
         Plugin.__init__(self)
         self.display_type = []
+        self.files_only   = True
 
 
     def suffix(self):

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.48  2003/12/31 16:39:43  dischi
+# flag if the mimetype returns something else than play files
+#
 # Revision 1.47  2003/12/30 15:33:29  dischi
 # add random playing an option for normal playlist files
 #
@@ -495,6 +498,7 @@ class Mimetype(plugin.MimetypePlugin):
     """
     def __init__(self):
         plugin.MimetypePlugin.__init__(self)
+        self.files_only = False
 
         # register the callback
         plugin.register_callback('fxditem', [], 'playlist', self.fxdhandler)
