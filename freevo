@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.114  2004/08/05 17:40:56  dischi
+# add lib to python path
+#
 # Revision 1.113  2004/06/08 19:34:12  dischi
 # fix bad freevo_script for installed version
 #
@@ -344,6 +347,9 @@ if os.environ.has_key('PYTHONPATH'):
     os.environ['PYTHONPATH'] = '%s:%s' % (freevo_python, os.environ['PYTHONPATH'])
 else:
     os.environ['PYTHONPATH'] = freevo_python
+
+# FIXME: add lib path
+os.environ['PYTHONPATH'] = '%s/../lib:%s' % (freevo_python, os.environ['PYTHONPATH'])
 
 # extend PATH to make sure the basics are there
 os.environ['PATH'] = '%s:/usr/bin:/bin:/usr/local/bin:' % os.environ['PATH'] + \
