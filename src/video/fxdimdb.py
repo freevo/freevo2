@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/09/20 15:46:01  dischi
+# adjust to new imdb webpage
+#
 # Revision 1.15  2003/09/20 15:08:26  dischi
 # some adjustments to the missing testfiles
 #
@@ -146,6 +149,8 @@ class FxdImdb:
             
         regexp_title = re.compile('.*<LI><A HREF="/Title\?([0-9]*)">(.*) '+
                                    '\(([12][0-9][0-9][0-9].*)\)</A>')
+        regexp_title_new = re.compile('.*<LI><A HREF="/title/tt([0-9]*)/">(.*) '+
+                                      '\(([12][0-9][0-9][0-9].*)\)</A>', re.I)
         regexp_type  = re.compile('<H2><A NAME=.*>(.*)</A></H2>')
         
         type = ''
@@ -168,7 +173,9 @@ class FxdImdb:
                     type = 'TV-Movie'
     
             m = regexp_title.match(line)
-    
+            if not m:
+                m = regexp_title_new.match(line)
+                
             if m and not type == 'Video Games':
                 id   = m.group(1)
                 name = m.group(2)
