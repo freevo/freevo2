@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2002/10/08 20:37:30  outlyer
+# Updated to use my fancy popup box; since I updated the TV code to use
+# the skin.Popup, all the popups look the same per skin.
+#
 # Revision 1.2  2002/10/08 15:25:29  outlyer
 # Moved the logo to the upper left corner; looks cleaner and doesn't
 # interfere with the menus
@@ -283,40 +287,11 @@ class Skin:
         Notes: Should maybe be named print_message or show_message.
                Maybe I should use one common box item.
         """
-        left   = (osd.width/2)-180
-        top    = (osd.height/2)-30
-        width  = 360
-        height = 60
-        icn    = icon
-        bd_w   = 2
-
-        if not SHOW_FREEVO_RUNTIME_BUG:
-            bg_c   = Color(osd.default_bg_color)
-            fg_c   = Color(osd.default_fg_color)
-
-            bg_c.set_alpha(192)
-
-            pb = PopupBox(left, top, width, height, icon=icn, bg_color=bg_c,
-                          fg_color=fg_c, border='flat', bd_width=bd_w)
-            pb.set_text(text)
-            pb.set_h_align(Label.CENTER)
-
-        else:
-            bg_c   = gui.Color(osd.default_bg_color)
-            fg_c   = gui.Color(osd.default_fg_color)
-
-            bg_c.set_alpha(192)
-
-            pb = gui.PopupBox(left, top, width, height, icon=icn, bg_color=bg_c,
-                              fg_color=fg_c, border='flat', bd_width=bd_w)
-
-            pb.set_text(text)
-            pb.set_h_align(gui.Label.CENTER)
-
-        pb.set_font('skins/fonts/bluehigh.ttf', 24)
-        pb.show()
-        
-        osd.update()
+       	osd.drawbitmap('skins/images/popup.png',163,232)
+	osd.drawstring(text,384,280,fgcolor=0xffffff,align='center')	
+	
+	
+	osd.update()
         
 
     # Draws a text based on the settings in the XML file
