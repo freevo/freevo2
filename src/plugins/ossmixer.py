@@ -1,6 +1,6 @@
 #if 0 /*
 # -----------------------------------------------------------------------
-# mixer.py - The mixer interface for freevo.
+# ossmixer.py - The mixer interface for freevo.
 # -----------------------------------------------------------------------
 # $Id$
 #
@@ -9,11 +9,25 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.1  2003/08/26 19:33:08  outlyer
-# Initial (broken) code for using ossaudiodev instead of the other way.
+# Revision 1.2  2003/08/26 19:46:47  outlyer
+# Should be working now; does not require aumix for SBLive control, and
+# will silently ignore any requests to adjust a control that isn't provided
+# by the driver.
 #
-# Revision 1.5  2003/08/23 12:51:42  dischi
-# removed some old CVS log messages
+# Please test this, since I have an ALSA setup, which works fine, but we should
+# check if OSS-native works as well.
+#
+# I propose this could replace 'mixer.py' when it's been tested adequately. It
+# should also work unchanged under BSD.
+#
+# Last note, here is the documentation again:
+# http://www.python.org/doc/current/lib/mixer-device-objects.html
+#
+# And to activate:
+#
+# plugin.remove('mixer')
+# plugin.activate('ossmixer')
+#
 #
 #
 # -----------------------------------------------------------------------
@@ -40,7 +54,6 @@
 """For manipulating the mixer.
 """
 
-import fcntl
 import struct
 import config
 import os
@@ -57,23 +70,8 @@ TRUE = 1
 FALSE = 0
 
 class PluginInterface(plugin.DaemonPlugin):
-    # These magic numbers were determined by writing a C-program using the
-    # macros in /usr/include/linux/... and printing the values.
-    # They seem to work on my machine. XXX Is there a real python interface?
-    #SOUND_MIXER_WRITE_VOLUME = 0xc0044d00
-    #SOUND_MIXER_WRITE_PCM = 0xc0044d04
-    #SOUND_MIXER_WRITE_LINE = 0xc0044d06
-    #SOUND_MIXER_WRITE_MIC = 0xc0044d07
-    #SOUND_MIXER_WRITE_RECSRC = 0xc0044dff
     SOUND_MIXER_LINE = 7
     SOUND_MASK_LINE = 64
-    
-    SOUND_MIXER_WRITE_VOLUME = ossaudiodev.SOUND_MIXER_VOLUME
-    SOUND_MIXER_WRITE_PCM = ossaudiodev.SOUND_MIXER_PCM
-    SOUND_MIXER_WRITE_LINE = ossaudiodev.SOUND_MIXER_LINE
-    SOUND_MIXER_WRITE_MIC = ossaudiodev.SOUND_MIXER_MIC
-    SOUND_MIXER_WRITE_RECSRC = ossaudiodev.SOUND_MIXER_RECLEV
-
     
     def __init__(self):
         plugin.DaemonPlugin.__init__(self)
@@ -95,26 +93,18 @@ class PluginInterface(plugin.DaemonPlugin):
             self.pcmVolume    = 0
             self.lineinVolume = 0
             self.micVolume    = 0
-            self.igainVolume  = 0 # XXX Used on SB Live
-            self.ogainVolume  = 0 # XXX Ditto
-
-            if self.mixfd:
-                data = struct.pack( 'L', self.SOUND_MASK_LINE )
-                fcntl.ioctl( self.mixfd.fileno(), self.SOUND_MIXER_WRITE_RECSRC, data )
+            self.igainVolume  = 0 
+            self.ogainVolume  = 0
 
         if config.MAJOR_AUDIO_CTRL == 'VOL':
             self.setMainVolume(config.DEFAULT_VOLUME)
             if config.CONTROL_ALL_AUDIO:
                 self.setPcmVolume(config.MAX_VOLUME)
-                # XXX This is for SB Live cards should do nothing to others
-                # XXX Please tell if you have problems with this.
                 self.setOgainVolume(config.MAX_VOLUME)
         elif config.MAJOR_AUDIO_CTRL == 'PCM':
             self.setPcmVolume(config.DEFAULT_VOLUME)
             if config.CONTROL_ALL_AUDIO:
                 self.setMainVolume(config.MAX_VOLUME)
-                # XXX This is for SB Live cards should do nothing to others
-                # XXX Please tell if you have problems with this.
                 self.setOgainVolume(config.MAX_VOLUME)
         else:
             if DEBUG: print "No appropriate audio channel found for mixer"
@@ -156,74 +146,69 @@ class PluginInterface(plugin.DaemonPlugin):
 
 
     def _setVolume(self, device, volume):
-        if self.mixfd:
+        if self.mixfd and (self.mixfd.controls() & (1 << device)):        # Don't do anything if there is no control
             if DEBUG: print 'Volume = %d' % volume
             if volume < 0: volume = 0
             if volume > 100: volume = 100
-            vol = (volume << 8) | (volume)
-            data = struct.pack('L', vol)
-            fcntl.ioctl(self.mixfd.fileno(), device, data)
+            self.mixfd.set(device, (volume,volume))
 
     def getMuted(self):
         return(self.muted)
 
     def setMuted(self, mute):
         self.muted = mute
-        if mute == 1: self._setVolume(self.SOUND_MIXER_WRITE_VOLUME, 0)
-        else:self._setVolume(self.SOUND_MIXER_WRITE_VOLUME, self.mainVolume)
+        if mute == 1: self._setVolume(ossaudiodev.SOUND_MIXER_VOLUME, 0)
+        else:self._setVolume(ossaudiodev.SOUND_MIXER_VOLUME, self.mainVolume)
 
     def getMainVolume(self):
         return(self.mainVolume)
 
     def setMainVolume(self, volume):
-        self.mixfd.set(ossaudiodev.SOUND_MIXER_VOLUME, (volume,volume))
         self.mainVolume = volume
-        #self._setVolume(self.SOUND_MIXER_WRITE_VOLUME, self.mainVolume)
+        self._setVolume(ossaudiodev.SOUND_MIXER_VOLUME, self.mainVolume)
 
     def incMainVolume(self):
         self.mainVolume += 5
         if self.mainVolume > 100: self.mainVolume = 100
-        self._setVolume(self.SOUND_MIXER_WRITE_VOLUME, self.mainVolume)
+        self._setVolume(ossaudiodev.SOUND_MIXER_VOLUME, self.mainVolume)
 
     def decMainVolume(self):
         self.mainVolume -= 5
         if self.mainVolume < 0: self.mainVolume = 0
-        self._setVolume(self.SOUND_MIXER_WRITE_VOLUME, self.mainVolume)
+        self._setVolume(ossaudiodev.SOUND_MIXER_VOLUME, self.mainVolume)
 
     def getPcmVolume(self):
         return( self.pcmVolume )
     
     def setPcmVolume(self, volume):
         self.pcmVolume = volume
-        self._setVolume(self.SOUND_MIXER_WRITE_PCM, volume)
+        self._setVolume(ossaudiodev.SOUND_MIXER_PCM, volume)
 
     def incPcmVolume(self):
         self.pcmVolume += 5
         if self.pcmVolume > 100: self.pcmvolume = 100
-        self._setVolume( self.SOUND_MIXER_WRITE_PCM, self.pcmVolume )
+        self._setVolume( ossaudiodev.SOUND_MIXER_PCM, self.pcmVolume )
 
     def decPcmVolume(self):
         self.pcmVolume -= 5
         if self.pcmVolume < 0: self.pcmVolume = 0
-        self._setVolume( self.SOUND_MIXER_WRITE_PCM, self.pcmVolume )
+        self._setVolume( ossaudiodev.SOUND_MIXER_PCM, self.pcmVolume )
     
     def setLineinVolume(self, volume):
         self.lineinVolume = volume
-        self._setVolume(self.SOUND_MIXER_WRITE_LINE, volume)
+        self._setVolume(ossaudiodev.SOUND_MIXER_LINE, volume)
 
     def getLineinVolume(self):
         return self.lineinVolume
        
     def setMicVolume(self, volume):
         self.micVolume = volume
-        self._setVolume(self.SOUND_MIXER_WRITE_MIC, volume)
+        self._setVolume(ossaudiodev.SOUND_MIXER_MIC, volume)
 
     def setIgainVolume(self, volume):
-        """For Igain (input from TV etc) on emu10k cards"""
         if volume > 100: volume = 100 
         elif volume < 0: volume = 0
-        self.igainVolume = volume
-        os.system('aumix -i%s &> /dev/null &' % volume)
+        self._setVolume(ossaudiodev.SOUND_MIXER_IGAIN, volume)
 
     def getIgainVolume(self):
         return self.igainVolume
@@ -231,19 +216,18 @@ class PluginInterface(plugin.DaemonPlugin):
     def decIgainVolume(self):
         self.igainVolume -= 5
         if self.igainVolume < 0: self.igainVolume = 0
-        os.system('aumix -i-5 &> /dev/null &')
+        self._setVolume(ossaudiodev.SOUND_MIXER_IGAIN, volume)
         
     def incIgainVolume(self):
         self.igainVolume += 5
         if self.igainVolume > 100: self.igainVolume = 100
-        os.system('aumix -i+5 &> /dev/null &')
-        
+        self._setVolume(ossaudiodev.SOUND_MIXER_IGAIN, volume)
+
     def setOgainVolume(self, volume):
-        """For Ogain on SB Live Cards"""
         if volume > 100: volume = 100 
         elif volume < 0: volume = 0
         self.ogainVolume = volume
-        os.system('aumix -o%s &> /dev/null &' % volume)
+        self._setVolume(ossaudiodev.SOUND_MIXER_IGAIN, volume)
 
     def reset(self):
         if config.CONTROL_ALL_AUDIO:
