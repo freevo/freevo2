@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/01/11 20:09:41  dischi
+# Added the self.playlist option to the directory again. This was lost
+# during my adding of the last feature, sorry.
+#
 # Revision 1.17  2003/01/11 10:45:55  dischi
 # Add a thread to watch the directory. When something changes, the update
 # function will be called. The DirItem update function will add remove
@@ -304,6 +308,12 @@ class DirItem(Playlist):
 
         files.sort(lambda l, o: cmp(l.upper(), o.upper()))
 
+        # add all playable items to the playlist of the directory
+        # to play one files after the other
+        if (not self.display_type or self.display_type == 'audio' or \
+            self.display_type == 'image' or \
+            (config.MOVIE_PLAYLISTS and self.display_type == 'video')):
+            self.playlist = play_items
 
         # build items for sub-directories
         dir_items = []
