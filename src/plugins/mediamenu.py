@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2004/01/11 15:44:01  dischi
+# changed menu display type to 'x main menu'
+#
 # Revision 1.28  2003/12/06 13:47:11  dischi
 # better fxd handling
 #
@@ -201,8 +204,8 @@ class MediaMenu(Item):
 
         item_menu = menu.Menu(_('%s Main Menu') % title,
                               self.main_menu_generate(),
-                              item_types = self.display_type, umount_all=1,
-                              reload_func = self.reload)
+                              item_types = '%s main menu' % self.display_type,
+                              umount_all=1, reload_func = self.reload)
         item_menu.skin_force_text_view = force_text_view
         self.menuw = menuw
         menuw.pushmenu(item_menu)

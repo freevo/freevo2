@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/01/11 15:44:01  dischi
+# changed menu display type to 'x main menu'
+#
 # Revision 1.11  2004/01/09 02:10:00  rshortt
 # Patch from Matthieu Weber to revive add/edit favorites support from the
 # TV interface.
@@ -204,7 +207,7 @@ class TVMenu(Item):
         for p in plugins_list:
             items += p.items(self)
 
-        menuw.pushmenu(menu.Menu(_('TV Main Menu'), items, item_types = 'tv'))
+        menuw.pushmenu(menu.Menu(_('TV Main Menu'), items, item_types = 'tv main menu'))
 
 
     def show_search(self, arg, menuw):
