@@ -31,6 +31,7 @@ o Added Per Wigren's patch for different TV stations on the same channel
   at different times of the week and/or day.	
 o Added Alex Polite's patch for using XMMS for playing and visualizing 
   music.
+o Added Alex Polite's patch for recursive playlists
 
 	
 Release 1.2.5 (2002-08-21):
