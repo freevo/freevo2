@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2004/06/22 01:05:51  rshortt
+# Get the filename from tv_util.getProgFilename().
+#
 # Revision 1.23  2004/06/10 02:32:17  rshortt
 # Add RECORD_START/STOP events along with VCR_PRE/POST_REC commands.
 #
@@ -95,9 +98,9 @@ import tv.ivtv
 import childapp 
 import plugin 
 import rc
+import util.tv_util as tv_util
 
 from event import Event
-
 from tv.channels import FreevoChannels
 
 DEBUG = config.DEBUG
@@ -128,12 +131,16 @@ class Recorder:
         
 
     def Record(self, rec_prog):
+        # It is safe to ignore config.TV_RECORDFILE_SUFFIX here.
+        rec_prog.filename = os.path.splitext(tv_util.getProgFilename(rec_prog))[0] + '.mpeg'
+
         self.thread.mode = 'record'
         self.thread.prog = rec_prog
         self.thread.mode_flag.set()
         
         if DEBUG: print('Recorder::Record: %s' % rec_prog)
         
+
     def Stop(self):
         self.thread.mode = 'stop'
         self.thread.mode_flag.set()
@@ -159,11 +166,6 @@ class Record_Thread(threading.Thread):
                 self.mode_flag.clear()
                 
             elif self.mode == 'record':
-                self.prog.filename = '%s/%s.mpeg' % \
-                                            (config.TV_RECORD_DIR, 
-                                             string.replace(self.prog.filename,
-                                                            ' ', '_'))
-
                 rc.post_event(Event('RECORD_START', arg=self.prog))
                 if DEBUG: print 'Record_Thread::run: started recording'
 

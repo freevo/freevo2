@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/06/22 01:05:52  rshortt
+# Get the filename from tv_util.getProgFilename().
+#
 # Revision 1.20  2004/06/21 07:21:22  dischi
 # o add autokill to stop recording when the app can't take care of that
 # o try to add suffix to the filename
@@ -92,6 +95,7 @@ import config
 import childapp 
 import plugin 
 import rc
+import util.tv_util as tv_util
 
 from event import *
 from tv.channels import FreevoChannels
@@ -125,7 +129,7 @@ class Recorder:
     def Record(self, rec_prog):
         frequency = self.fc.chanSet(str(rec_prog.tunerid), 'record plugin')
 
-        rec_prog.filename = config.TV_RECORD_DIR + '/' + rec_prog.filename
+        rec_prog.filename = tv_util.getProgFilename(rec_prog)
 
         cl_options = { 'channel'  : rec_prog.tunerid,
                        'frequency' : frequency,
@@ -137,15 +141,6 @@ class Recorder:
 
         self.rec_command = config.VCR_CMD % cl_options
     
-        if config.VCR_CMD.find('%(filename)s') > 0:
-            ext = config.VCR_CMD[config.VCR_CMD.find('%(filename)s')+12:]
-            for bad_char in (' ', '"', '\''):
-                if ext.find(bad_char) > 0:
-                    ext = ext[:ext.find(bad_char)]
-                    print ext
-            if ext.startswith('.') and len(ext) < 5:
-                rec_prog.filename += ext
-
         self.thread.mode     = 'record'
         self.thread.prog     = rec_prog
         self.thread.command  = self.rec_command
