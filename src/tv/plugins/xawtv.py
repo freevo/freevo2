@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/06/06 17:18:39  mikeruelle
+# removing unnecessary and bad kill method
+#
 # Revision 1.3  2004/03/21 23:03:23  mikeruelle
 # docs fro devels, this is not for newbs yet
 #
@@ -287,14 +290,6 @@ class XawtvApp(childapp.ChildApp2):
     def __init__(self, app, remote):
         self.remote = remote
         childapp.ChildApp2.__init__(self, app, stop_osd=1)
-        
-
-    def kill(self):
-        # Use SIGINT instead of SIGKILL to make sure TVTime shuts
-        # down properly and releases all resources before it gets
-        # reaped by childapp.kill().wait()
-        childapp.ChildApp.kill(self, signal.SIGINT)
-        if DEBUG: print 'Killing xawtv'
 
     def sendcmd(self, cmd):
         os.system('%s %s' % (self.remote, cmd))
