@@ -46,8 +46,11 @@
 	  height="280" border_color="0x000000" border_size="1"/>
 	<cover type="music" visible="yes" x="560" y="115" width="200"
 	  height="200" border_color="0x000000" border_size="1"/> 
+
+	<!-- for images width and height is the rectangle to draw the image -->
+	<!-- into. The aspect ration will not be changed! -->
 	<cover type="image" visible="yes" x="560" y="115" width="200" 
-	  height="160" border_color="0x000000" border_size="1"/>
+	  height="300" border_color="0x000000" border_size="1"/>
       </covers>
       
       <submenu x="40" y="520">
@@ -84,10 +87,10 @@
 	</mask>
       </background>
 
-      <cover visible="yes" x="485" y="200" width="300" height="300" 
+      <cover visible="yes" x="475" y="200" width="310" height="300" 
 	border_color="0x000000" border_size="1"> 
 	<mask>
-	  <rectangle x="470" y="185" width="400" height="330" 
+	  <rectangle x="460" y="185" width="400" height="330" 
 	    color="0x80000000" radius="20"/>
 	</mask>
       </cover>

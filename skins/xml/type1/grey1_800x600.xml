@@ -60,8 +60,11 @@
 	  height="280" border_color="0x000000" border_size="1"/>
 	<cover type="music" visible="yes" x="550" y="100" width="200"
 	  height="200" border_color="0x000000" border_size="1"/> 
+
+	<!-- for images width and height is the rectangle to draw the image -->
+	<!-- into. The aspect ration will not be changed! -->
 	<cover type="image" visible="yes" x="550" y="100" width="200" 
-	  height="160" border_color="0x000000" border_size="1"/>
+	  height="300" border_color="0x000000" border_size="1"/>
       </covers>
 
       <submenu x="40" y="520">
