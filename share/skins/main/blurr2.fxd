@@ -362,7 +362,7 @@
                     </if>
                     <if expression="len(audio)">
                         <text font="info value" expression="len(audio)"/>
-                        <text font="info value"> Audiotracks</text>
+                        <text font="info value"> Audio tracks</text>
                         <newline/>
                     </if>
                     <if expression="len(subtitles)">
@@ -372,7 +372,7 @@
                     </if>
                     <if expression="chapters">
                         <text font="info value" expression="chapters"/>
-                        <text font="info value"> Chapter</text>
+                        <text font="info value"> Chapters</text>
                         <newline/>
                     </if>
                 </item>
