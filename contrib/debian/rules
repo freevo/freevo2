@@ -24,6 +24,7 @@ clean:
 	dh_testroot
 	rm -f build-stamp configure-stamp
 	-python2.3 setup.py clean
+	rm -f `find . | grep freevo.mo`
 	rm -f *.pyc
 	rm -fr build
 	rm -f Setup
