@@ -11,6 +11,9 @@
 #       -stream tv, video and music somehow
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2004/05/15 02:08:34  mikeruelle
+# yet another unicode fix
+#
 # Revision 1.23  2004/03/21 23:45:56  mikeruelle
 # remove non dir items from the list of dirs gets rid of webradio oddity
 #
@@ -407,7 +410,7 @@ class LibraryResource(FreevoResource):
             fv.tableRowClose()
 
             # get me the directories to output
-            directorylist = util.getdirnames(action_dir)
+            directorylist = util.getdirnames(String(action_dir))
             for mydir in directorylist:
                 mydir = Unicode(mydir)
                 fv.tableRowOpen('class="chanrow"')
@@ -421,7 +424,7 @@ class LibraryResource(FreevoResource):
             suffixes = self.get_suffixes(action_mediatype)
 
             # loop over directory here
-            items = util.match_files(action_dir, suffixes)
+            items = util.match_files(String(action_dir), suffixes)
             for file in items:
                 status = 'basic'
                 suppressaction = FALSE
