@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.50  2003/06/27 18:55:40  gsbarbieri
+# Fixed some bugs in osd.drawstringframed*()
+#
 # Revision 1.49  2003/06/26 01:41:15  rshortt
 # Fixed a bug wit drawstringframed hard.  Its return coords were always 0's
 # which made it impossible to judge the size.
@@ -678,10 +681,10 @@ class OSD:
         plain_tab = '   '
 
         if DEBUG >= 3:
-            print 'drawstringframed (%d;%d; w=%d; h=%d) "%s"' % (x, y,
-                                                                 width,
-                                                                 height,
-                                                                 string)
+            print 'drawstringframedsoft (%d;%d; w=%d; h=%d) "%s"' % (x, y,
+                                                                     width,
+                                                                     height,
+                                                                     string)
         
         if fgcolor == None:
             fgcolor = self.default_fg_color
@@ -866,10 +869,11 @@ class OSD:
             return_y0 = y0
 
         if DEBUG >= 3:
-            print "osd.drawstringframed_soft():\n\n%s\n" % lines
+            print "osd.drawstringframedsoft():\n\n%s\n" % lines
 
         if bgcolor != None and layer != self.null_layer:
             self.drawbox(x,y, x+width, y+height, width=-1, color=bgcolor, layer=layer)
+
         for line_number in range(len(lines)):
             x0 = x
             #print "WORDS: %s" % lines[line_number]
@@ -877,18 +881,17 @@ class OSD:
             if align_h == 'justified':
                 # Calculate the space between words:
                 ## Disconsider the minimum space
-                x0 = x                    
-                if not return_x0 or return_x0 > x0:
-                    return_x0 = x0
                 if len(lines[line_number]) > 1:
                     lines_size[line_number] -= MINIMUM_SPACE_BETWEEN_WORDS * \
                                                (len(lines[line_number]) -1 )
                     
                     spacing = (width - lines_size[line_number]) / \
                               ( len(lines[line_number]) -1 )
-                else:
+                    
+                elif len( lines ) == 0:
                     spacing = (width - lines_size[line_number]) / 2
                     x0 += spacing
+                    
                 for word in lines[line_number]:
                     if word:
                         word_size, word_height = self.stringsize(word, font,ptsize)
@@ -899,8 +902,9 @@ class OSD:
                     
             elif align_h == 'center':
                 x0 = x + (width - lines_size[line_number]) / 2
-                if not return_x0 or return_x0 > x0:
+                if return_x0 > x0:
                     return_x0 = x0
+                    
                 spacing = MINIMUM_SPACE_BETWEEN_WORDS                
                 for word in lines[line_number]:
                     if word:
@@ -910,11 +914,13 @@ class OSD:
                                             ptsize, layer=layer)
                         x0 += spacing
                         x0 += word_size
+
+                x0 -= spacing
+                if return_x1 < x0:
+                    return_x1 = x0
+                
+                
             elif align_h == 'left':
-                x0 = x
-                if not return_x0 or return_x0 > x0:
-                    return_x0 = x0
-        
                 spacing = MINIMUM_SPACE_BETWEEN_WORDS
                 for word in lines[line_number]:
                     if word:
@@ -924,9 +930,14 @@ class OSD:
                                             ptsize, layer=layer)
                         x0 += spacing
                         x0 += word_size
+
+                x0 -= spacing
+                if return_x1 < x0:
+                    return_x1 = x0
+                    
             elif align_h == 'right':
                 x0 = x + width
-                if not return_x0 or return_x0 > x0:
+                if return_x0 > x0:
                     return_x0 = x0
                 spacing = MINIMUM_SPACE_BETWEEN_WORDS
                 line_len = len(lines[line_number])
@@ -940,18 +951,22 @@ class OSD:
                                             None, font, ptsize, 'right', layer=layer)
                         x0 -= spacing
                         x0 -= word_size
-            # end if 
-            # go down one line
-            if not return_x1 or return_x1 < x0:
-                return_x1 = x0
         
             y0 += line_height
             return_y1 = y0
         # end for
 
+        if align_h == 'justified':
+            return_x0 = x
+            return_x1 = width
+        if align_h == 'left':
+            return_x0 = x
+        if align_h == 'right':
+            return_x1 = x + width
+            
         #self.drawbox(return_x0,return_y0, return_x1, return_y1, width=3)
 
-        return (rest_words, (return_x0,return_y0, return_x1, return_y1))
+        return (rest_words, (return_x0, return_y0, return_x1, return_y1))
 
 
 
