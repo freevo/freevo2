@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2004/08/22 20:15:56  dischi
+# remove keyboard auto append
+#
 # Revision 1.39  2004/07/26 18:10:16  dischi
 # move global event handling to eventhandler.py
 #
@@ -214,12 +217,11 @@ class Keyboard:
     """
     Class to handle keyboard input
     """
-    def __init__(self):
+    def __init__(self, callback):
         """
         init the keyboard event handler
         """
-        import gui
-        self.callback = gui.get_keyboard().poll
+        self.callback = callback
 
 
     def poll(self):
@@ -275,11 +277,6 @@ class MainLoop:
                 self.inputs.append(Lirc())
             except:
                 pass
-
-        try:
-            self.inputs.append(Keyboard())
-        except Exception, e:
-            print e
 
         if use_netremote and config.ENABLE_NETWORK_REMOTE and \
                config.REMOTE_CONTROL_PORT:
