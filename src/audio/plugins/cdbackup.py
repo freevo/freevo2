@@ -27,6 +27,12 @@
 # Albums with more than one Artist aren't handled very well.
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/07/01 06:10:52  gsbarbieri
+# Destination dir is now configurable via AUDIO_BACKUP_DIR
+# We have to add this option and others that came with this plugin to
+# FREEVO_CONF_CHANGES and LOCAL_CONF_CHANGES.
+# Also, this variables should be checked... they're missing some information, like MOVIE_DATA_DIR
+#
 # Revision 1.3  2003/07/01 04:34:48  outlyer
 # Fixed header
 #
@@ -159,14 +165,11 @@ class main_backup_thread(threading.Thread):
         if DEBUG: print 'album = %s' %album
         if DEBUG: print 'genre = %s' %genre
         
-        # Figuring out this little rascal took me  a while, 
-        # the pleasures of learning a new language.
-        # Anyhow, Python is a really kick butt language as I'm quickly finding out.
-        dir_audio = config.DIR_AUDIO[0][1]
+        dir_audio = config.AUDIO_BACKUP_DIR
         
         user_rip_path_prefs = {  'artist': artist,
-                                            'album': album,
-                                            'genre': genre }
+       	                         'album': album,
+                                 'genre': genre }
         
         path_list = re.split("\\/", config.CD_RIP_PN_PREF)
         

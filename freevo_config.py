@@ -420,6 +420,8 @@ SUFFIX_VIDEO_FILES = [ 'avi', 'mpg', 'mpeg', 'wmv', 'bin', 'rm',
 #
 DIR_AUDIO = [ ('Test Files', 'testfiles/Music') ]
 
+AUDIO_BACKUP_DIR = DIR_AUDIO[ 0 ][ 1 ] # or a path, like /home/user/mp3/
+
 #
 # The list of filename suffixes that are used to match the files that
 # are played as audio.
