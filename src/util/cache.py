@@ -93,7 +93,10 @@ def save(file, data, version=None):
         if _isfile(file):
             _unlink(file)
         f = _open(file, 'w')
-        cPickle.dump(data, f, PICKLE_PROTOCOL)
+        if version:
+            cPickle.dump((version, data), f, PICKLE_PROTOCOL)
+        else:
+            cPickle.dump(data, f, PICKLE_PROTOCOL)
         f.close()
     except IOError, e:
         print 'cache.save: %s' % e
