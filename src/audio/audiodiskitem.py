@@ -51,7 +51,6 @@ from xml.utils import qp_xml
 try:
     import DiscID, CDDB
 except:
-    print "CDDB not installed."
     pass
 
             

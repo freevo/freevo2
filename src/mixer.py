@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/02/19 17:11:21  outlyer
+# Don't try to open the mixer if we're not using it. I don't imagine it's a
+# useful way to spend startup time. Also, remove the duplicate "CDDB not
+# installed" as the user probably only needs to be told once :)
+#
 # Revision 1.2  2003/01/29 17:10:48  outlyer
 # Fixed spelling
 #
@@ -74,12 +79,15 @@ class Mixer:
     SOUND_MASK_LINE = 64
     
     def __init__(self):
-        try:
-            self.mixfd        = open(config.DEV_MIXER, 'r')
-        except IOError:
-            print 'Couldn\'t open mixer %s' % config.DEV_MIXER
-            self.mixfd = None
-            return
+        self.mixfd = None
+        if config.DEV_MIXER:    # If you're using ALSA or something and you don't set the mixer, why are
+                                # we trying to open it?
+            try:
+                self.mixfd        = open(config.DEV_MIXER, 'r')
+            except IOError:
+                print 'Couldn\'t open mixer %s' % config.DEV_MIXER
+                return
+        return
         
         self.mainVolume   = 0
         self.pcmVolume    = 0
