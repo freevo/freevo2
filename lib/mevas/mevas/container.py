@@ -167,9 +167,6 @@ class CanvasContainer(CanvasObject):
 		if child and child not in self.dirty_children:
 			self.dirty_children.append(child)
 
-		if self.dirty:
-			return
-
 		self.dirty = True
 		self._backing_store_dirty = True
 		if check_weakref(self.parent):
