@@ -17,10 +17,8 @@
 #
 
 import sys, os, time
-import util
-
-# XML support
 import movie_xml
+
 
 DEBUG = 0
 
@@ -135,18 +133,6 @@ else:
 # find movie informations
 #
 
-MOVIE_INFORMATIONS = []
+MOVIE_INFORMATIONS = {} 
 
-for name,dir in DIR_MOVIES:
-    for file in util.recursefolders(dir,1,'*.xml',1):
-        title, image, None, id, info = movie_xml.parse(file, os.path.dirname(file),[])
-        if title and id:
-            for i in id:
-                MOVIE_INFORMATIONS += [(title, image, i)]
-
-for file in util.recursefolders(MOVIE_DATA_DIR,1,'*.xml',1):
-    title, image, None, id, info = movie_xml.parse(file, os.path.dirname(file),[])
-    if title and id:
-        for i in id:
-            MOVIE_INFORMATIONS += [(title, image, i)]
-
+movie_xml.hash_xml_database()

@@ -9,6 +9,13 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/08/12 11:34:59  dischi
+# Changed IMDb support:
+# o informations are now stored in hashes (Python dict)
+# o support for rebuilding the database when imdb.py added something
+# o support for the the new timestamp+label keys (only the timestamp is
+#   used right now, this may change)
+#
 # Revision 1.1  2002/07/31 08:07:23  dischi
 # Moved the XML movie file parsing in a new file. Both movie.py and
 # config.py use the same code now.
@@ -37,10 +44,16 @@
 
 
 import os
-
+import config
+import util
 
 # XML support
 from xml.utils import qp_xml
+
+# Set to 1 for debug output
+DEBUG = 1
+
+
 
 #
 # parse <video> tag    
@@ -122,3 +135,35 @@ def parse(file, dir, mplayer_files):
                         parseInfo(node)
 
     return title, image, (mode, first_file, playlist, mplayer_options), id, info
+
+
+
+#
+# hash all XML movie files
+#
+def hash_xml_database():
+    config.MOVIE_INFORMATIONS = {}
+
+    if os.path.exists("/tmp/freevo-rebuild-database"):
+        os.system('rm -f /tmp/freevo-rebuild-database')
+
+    if DEBUG: print "building xml hash databse"
+
+    for name,dir in config.DIR_MOVIES:
+        for file in util.recursefolders(dir,1,'*.xml',1):
+            title, image, None, id, info = parse(file, os.path.dirname(file),[])
+            if title and id:
+                for i in id:
+                    if len(i) > 16:
+                        i = i[0:16]
+                    config.MOVIE_INFORMATIONS[i] = (title, image, file)
+
+    for file in util.recursefolders(config.MOVIE_DATA_DIR,1,'*.xml',1):
+        title, image, None, id, info = parse(file, os.path.dirname(file),[])
+        if title and id:
+            for i in id:
+                if len(i) > 16:
+                    i = i[0:16]
+                config.MOVIE_INFORMATIONS[i] = (title, image, file)
+
+

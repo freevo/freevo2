@@ -18,6 +18,9 @@ import md5
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
 
+# XML support
+import movie_xml
+
 
 #
 # Get all subdirectories in the given directory
@@ -156,7 +159,12 @@ def recursefolders(root, recurse=0, pattern='*', return_folders=0):
 	return result
 
 
+
+########################################################################
+# identify media stuff
+
 PROC_MOUNT_REGEXP = re.compile("^([^ ]*) ([^ ]*) .*$").match
+
 def proc_mount(dir):
     f = open('/proc/mounts')
     l = f.readline()
@@ -170,10 +178,16 @@ def proc_mount(dir):
     f.close()
     return None
 
+
 LABEL_REGEXP = re.compile("^(.*[^ ]) *$").match
 
 # returns (type, label, image, play_options)
 def identifymedia(dir):
+
+    # check if we need to update the database
+    if os.path.exists("/tmp/freevo-rebuild-database"):
+        movie_xml.hash_xml_database()
+        
     mediatypes = [('VCD','/mpegav/', 'vcd'), ('SVCD','/SVCD/', 'vcd'), \
                   ('DVD','/video_ts/', 'dvd') ]
 
@@ -193,10 +207,8 @@ def identifymedia(dir):
     else:
         return None, None, None, None
 
-    for ( title_db, image_db, id_db ) in config.MOVIE_INFORMATIONS:
-        if id_db == id:
-            title = title_db
-            image = image_db
+    if id in config.MOVIE_INFORMATIONS:
+        title, image, xml_filename = config.MOVIE_INFORMATIONS[id]
             
     for media in mediatypes:
         if os.path.exists(dir + media[1]):
