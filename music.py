@@ -14,57 +14,16 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2002/10/06 14:42:01  dischi
+# log message cleanup
+#
 # Revision 1.13  2002/10/02 02:40:56  krister
-# Applied Alex Polite's patch for using XMMS instead of MPlayer for music playing and visualization.
+# Applied Alex Polite's patch for using XMMS instead of MPlayer for
+# music playing and visualization.
 #
 # Revision 1.12  2002/09/22 08:50:08  dischi
 # deactivated ROM_DRIVES in main menu (crash!). Someone should make this
 # identifymedia compatible.
-#
-# Revision 1.11  2002/09/15 12:32:01  dischi
-# The DVD/VCD/SCVD/CD description file for the automounter can now also
-# contain skin informations. An announcement will follow. For this the
-# paramter dir in menu.py is renamed to xml_file since the only use
-# was to find the xml file. All other modules are adapted (dir -> xml_file)
-#
-# Revision 1.10  2002/09/15 11:53:41  dischi
-# Make info in RemovableMedia a class (RemovableMediaInfo)
-#
-# Revision 1.9  2002/09/07 06:19:45  krister
-# Improved removable media support.
-#
-# Revision 1.8  2002/09/04 19:47:46  dischi
-# wrap (u)mount to get rid of the error messages
-#
-# Revision 1.7  2002/09/04 19:32:31  dischi
-# Added a new identifymedia. Freevo now polls the rom drives for media
-# change and won't mount the drive unless you want to play a file from cd or
-# you browse it.
-#
-# Revision 1.6  2002/09/01 09:43:01  dischi
-# Fixes for the new "type" parameter in MenuItem
-#
-# Revision 1.5  2002/08/21 04:58:26  krister
-# Massive changes! Obsoleted all osd_server stuff. Moved vtrelease and matrox stuff to a new dir fbcon. Updated source to use only the SDL OSD which was moved to osd.py. Changed the default TV viewing app to mplayer_tv.py. Changed configure/setup_build.py/config.py/freevo_config.py to generate and use a plain-text config file called freevo.conf. Updated docs. Changed mplayer to use -vo null when playing music. Fixed a bug in music playing when the top dir was empty.
-#
-# Revision 1.4  2002/08/05 00:53:41  tfmalt
-# o Added support for ejecting and mounting CD's in the Music menu aswell.
-#   It uses the same osd.popup_box() as main.py
-#
-# Revision 1.3  2002/08/03 11:23:47  krister
-# Quick&dirty fix for playlists.
-#
-# Revision 1.2  2002/07/31 18:31:29  outlyer
-# Cleaned up mpg123 references. 1.2.5 should only use mplayer, so let's
-# not be confusing. Note: The RPM spec files still contain mpg123, but
-# since they're for 1.2.4, it's ok for now.
-#
-# Revision 1.1  2002/07/29 05:24:35  outlyer
-# Lots and lots of changes for new mplayer-based audio playing code.
-# o You'll need to modify your config file, as well as setup the new mplayer
-#   module by editing main.py
-# o This change includes Ogg Support, but that requires the ogg.vorbis
-#   module. If you don't want it, just don't install ogg.vorbis :)
 #
 # ----------------------------------------------------------------------
 # 
