@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/01/12 10:58:31  dischi
+# Changed the multiple file handling. If a videoitem has more than one file,
+# the videoitem gets the filename '' and subitems for each file. With that
+# change it is possible to spit a movie that part one is a VCD, part two a
+# file on the harddisc.
+#
 # Revision 1.9  2002/12/30 15:56:11  dischi
 # store label in the videoitem
 #
@@ -97,7 +103,7 @@ import configure
 
 
 class VideoItem(Item):
-    def __init__(self, files, parent):
+    def __init__(self, filename, parent):
         Item.__init__(self, parent)
 
         # fix values
@@ -106,18 +112,12 @@ class VideoItem(Item):
 
         self.mode  = 'file'             # file, dvd or vcd
 
-        # files can be a list of files, one file or nothing (e.g. dvd)
-        if not files:
-            file = ''
-            self.files = [ file, ]
-        elif isinstance(files, list):
-            file = files[0]
-            self.files = files
-        else:
-            file = files
-            self.files = [ file, ]
-            
-        self.name    = util.getname(file)
+        self.subitems = []              # if this item has more than one file/track to play
+        self.current_subitem = None
+
+        self.filename = filename
+        
+        self.name    = util.getname(filename)
         # find image for tv show and build new title
         if config.TV_SHOW_REGEXP_MATCH(self.name):
             show_name = config.TV_SHOW_REGEXP_SPLIT(os.path.basename(self.name))
@@ -130,10 +130,10 @@ class VideoItem(Item):
                 self.image = (config.TV_SHOW_IMAGES + show_name[0] + ".jpg").lower()
 
         # find image for this file
-        if os.path.isfile(os.path.splitext(file)[0] + ".png"):
-            self.image = os.path.splitext(file)[0] + ".png"
-        elif os.path.isfile(os.path.splitext(file)[0] + ".jpg"):
-            self.image = os.path.splitext(file)[0] + ".jpg"
+        if os.path.isfile(os.path.splitext(filename)[0] + ".png"):
+            self.image = os.path.splitext(filename)[0] + ".png"
+        elif os.path.isfile(os.path.splitext(filename)[0] + ".jpg"):
+            self.image = os.path.splitext(filename)[0] + ".jpg"
 
 
         self.video_player = mplayer.get_singleton()
@@ -170,8 +170,8 @@ class VideoItem(Item):
         """
         Returns the string how to sort this item
         """
-        if mode == 'date' and os.path.isfile(self.files[0]):
-            return '%s%s' % (os.stat(self.files[0]).st_ctime, self.files[0])
+        if mode == 'date' and os.path.isfile(self.filename):
+            return '%s%s' % (os.stat(self.filename).st_ctime, self.filename)
 
         if self.name.find("The ") == 0:
             return self.name[4]
@@ -190,7 +190,7 @@ class VideoItem(Item):
 
         # show DVD/VCD title menu for DVDs, but only when we aren't in a
         # submenu of a such a menu already
-        if not self.files[0]:
+        if not self.filename:
             if self.mode == 'dvd':
                 items += [( self.dvdnav, 'DVD Menu (experimental)' )]
                 items += [( self.dvd_vcd_title_menu, 'DVD title list' )]
@@ -204,10 +204,16 @@ class VideoItem(Item):
         play the item.
         """
         self.parent.current_item = self
-        self.current_file = self.files[0]
 
-        if not self.files[0] and (self.mode == 'dvd' or self.mode == 'vcd'):
-            self.current_file = '1'
+        
+        if self.subitems:
+            self.current_subitem = self.subitems[0]
+            self.current_subitem.play(arg, menuw)
+            return
+
+        file = self.filename
+        if not self.filename and (self.mode == 'dvd' or self.mode == 'vcd'):
+            file = '1'
 
         mplayer_options = self.mplayer_options
 
@@ -227,7 +233,7 @@ class VideoItem(Item):
         if self.deinterlace:
             mplayer_options += ' -vop pp=fd'
             
-        self.video_player.play(self.current_file, mplayer_options, self)
+        self.video_player.play(file, mplayer_options, self)
 
 
     def stop(self, arg=None, menuw=None):
@@ -338,7 +344,7 @@ class VideoItem(Item):
         # only one track, play it
         if self.num_titles == 1:
             file = copy.copy(self)
-            file.files = [ '1', ]
+            file.filename = '1'
             file.play(menuw = menuw)
             return
 
@@ -346,7 +352,7 @@ class VideoItem(Item):
         items = []
         for title in range(1,self.num_titles+1):
             file = copy.copy(self)
-            file.files = ['%s' % title, ]
+            file.filename = '%s' % title
             file.name = 'Play Title %s' % title
             items += [file]
 
@@ -367,7 +373,7 @@ class VideoItem(Item):
             osd.update()
             os.system('rm -f /tmp/mplayer_dvd_%s.log /tmp/mplayer_dvd_done_%s' % (uid, uid))
 
-            file = self.files[0]
+            file = self.filename
             if not file:
                 file = '1'
 
@@ -403,13 +409,13 @@ class VideoItem(Item):
         """
         
         # PLAY_END: do have have to play another file?
-        if event == rc.PLAY_END:
+        if event == rc.PLAY_END and self.subitems:
             try:
-                pos = self.files.index(self.current_file)
-                if pos < len(self.files)-1:
-                    self.current_file = self.files[pos+1]
-                    print "playing next file"
-                    self.video_player.play(self.current_file, self.mplayer_options, self)
+                pos = self.subitems.index(self.current_subitem)
+                if pos < len(self.subitems)-1:
+                    self.current_subitem = self.subitems[pos+1]
+                    print "playing next item"
+                    self.current_subitem.play(menuw=menuw)
                     return TRUE
             except:
                 pass

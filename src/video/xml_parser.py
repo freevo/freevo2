@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/01/12 10:58:31  dischi
+# Changed the multiple file handling. If a videoitem has more than one file,
+# the videoitem gets the filename '' and subitems for each file. With that
+# change it is possible to spit a movie that part one is a VCD, part two a
+# file on the harddisc.
+#
 # Revision 1.2  2002/12/07 13:29:49  dischi
 # Make a new database with all movies, even without id and label
 #
@@ -95,10 +101,24 @@ def xml_parseVideo(video_node, dir, duplicate_check):
             except KeyError:
                 pass
 
-    mi = VideoItem(playlist, None)
-    mi.mode = mode
-    mi.mplayer_options = mplayer_options
-    return mi
+    if len(playlist) > 1:
+        movie = VideoItem('', None)
+        for p in playlist:
+            subitem = VideoItem(p, movie)
+            subitem.mode = mode
+            subitem.mplayer_options = mplayer_options
+            movie.subitems += [ subitem ]
+
+    elif len(playlist) == 1:
+        movie = VideoItem(playlist[0], None)
+
+    else:
+        movie = VideoItem('', None)
+        
+    movie.mode = mode
+    movie.mplayer_options = mplayer_options
+
+    return movie
 
 
 
