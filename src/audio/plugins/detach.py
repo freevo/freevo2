@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/09/13 19:35:36  dischi
+# replace player.get_singleton() with audioplayer()
+#
 # Revision 1.19  2004/08/01 10:42:23  dischi
 # update to new application/eventhandler code
 #
@@ -47,7 +50,7 @@ import config
 import plugin
 import menu
 import eventhandler
-import audio.player
+from audio import audioplayer
 
 from event import *
 
@@ -64,7 +67,7 @@ class PluginInterface(plugin.MainMenuPlugin):
 
 
     def detach(self):
-        gui = audio.player.get_singleton()
+        gui = audioplayer()
 
         # hide the player and show the menu
         # mpav = plugin.getbyname( 'audio.mpav' )
@@ -80,7 +83,7 @@ class PluginInterface(plugin.MainMenuPlugin):
         
 
     def items(self, parent):
-        gui = audio.player.get_singleton()
+        gui = audioplayer()
         if gui.player and gui.player.is_playing():
             self.show_item.parent = parent
             return [ self.show_item ]
@@ -88,7 +91,7 @@ class PluginInterface(plugin.MainMenuPlugin):
 
 
     def show(self, arg=None, menuw=None):
-        gui = audio.player.get_singleton()
+        gui = audioplayer()
         gui.show()
 
         # mpav = plugin.getbyname( 'audio.mpav' )

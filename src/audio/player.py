@@ -1,14 +1,22 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
-# player.py - the Freevo audio player GUI
+# player.py - the Freevo audio player
 # -----------------------------------------------------------------------
 # $Id$
+#
+# This module provides the auido player. It will use one of the registered
+# player plugins to play the audio item (e.g. audio.mplayer)
+#
+# You can access the player by calling audioplayer()
 #
 # Notes:
 # Todo:        
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2004/09/13 19:35:35  dischi
+# replace player.get_singleton() with audioplayer()
+#
 # Revision 1.28  2004/08/25 12:51:44  dischi
 # moved Application for eventhandler into extra dir for future templates
 #
@@ -23,7 +31,6 @@
 #
 # Revision 1.24  2004/08/01 10:42:51  dischi
 # make the player an "Application"
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -46,7 +53,9 @@
 #
 # ----------------------------------------------------------------------- */
 
+__all__ = [ 'audioplayer' ]
 
+# Freevo imports
 import config
 import gui
 import plugin
@@ -54,30 +63,32 @@ import plugin
 from event import *
 from application import Application
 
-_player_ = None
+_singleton = None
 
-def get_singleton():
+def audioplayer():
     """
     return the global audio player object
     """
-    global _player_
-    if not _player_:
-        _player_ = PlayerGUI()
-    return _player_
+    global _singleton
+    if _singleton == None:
+        _singleton = AudioPlayer()
+    return _singleton
 
 
-class PlayerGUI(Application):
+class AudioPlayer(Application):
     """
     basic object to handle the different player
     """
     def __init__(self):
-        Application.__init__(self, 'mplayer', 'audio', False, True)
+        Application.__init__(self, 'audioplayer', 'audio', False, True)
         self.player     = None
         self.running    = False
         self.bg_playing = False
 
         # register player to the skin
-        self.draw_engine = gui.AreaHandler('player', ('screen', 'title', 'view', 'info'))
+        areas = ('screen', 'title', 'view', 'info')
+        self.draw_engine = gui.AreaHandler('player', areas)
+
 
     def play(self, item, player=None):
         """
@@ -98,10 +109,9 @@ class PlayerGUI(Application):
                 rating = p.rate(self.item) * 10
                 if config.AUDIO_PREFERED_PLAYER == p.name:
                     rating += 1
-
-                if hasattr(self.item, 'force_player') and p.name == self.item.force_player:
+                if hasattr(self.item, 'force_player') and \
+                       p.name == self.item.force_player:
                     rating += 100
-                
                 self.possible_player.append((rating, p))
             self.possible_player.sort(lambda l, o: -cmp(l[0], o[0]))
             self.player = self.possible_player[0][1]

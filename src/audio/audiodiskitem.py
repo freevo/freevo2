@@ -4,11 +4,17 @@
 # -----------------------------------------------------------------------
 # $Id$
 #
+# This file handles and item for an audio cd. When selected it will either
+# play the whole disc or show a menu with all items. 
+#
 # Notes:
 # Todo:        
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2004/09/13 19:35:26  dischi
+# replace player.get_singleton() with audioplayer()
+#
 # Revision 1.30  2004/07/10 12:33:37  dischi
 # header cleanup
 #
@@ -36,12 +42,15 @@
 #
 # ----------------------------------------------------------------------- */
 
+__all__ = [ 'AudioDiskItem' ]
 
-import config
-import menu
+# Python imports
 import os
 
-from item import Item
+# Freevo imports
+import config
+import menu
+
 from audioitem import AudioItem
 from playlist import Playlist
 from directory import DirItem
@@ -50,7 +59,8 @@ class AudioDiskItem(Playlist):
     """
     class for handling audio disks
     """
-    def __init__(self, disc_id, parent, devicename = None, display_type = None):
+    def __init__(self, disc_id, parent, devicename = None,
+                 display_type = None):
 
         Playlist.__init__(self, parent=parent)
         self.type = 'audiocd'
@@ -90,10 +100,6 @@ class AudioDiskItem(Playlist):
         for i in range(0, number):
             title=self.info['tracks'][i]['title']
             item = AudioItem('cdda://%d' % (i+1), self, title, scan=False)
-
-            # XXX FIXME: set also all the other infos here if AudioInfo
-            # XXX will be based on mmpython
-            #item.set_info('', self.name, title, i+1, self.disc_id[1], '')
             item.info = self.info['tracks'][i]
             item.length = item.info['length']
             if config.MPLAYER_ARGS.has_key('cd'):
@@ -111,7 +117,8 @@ class AudioDiskItem(Playlist):
         items = []
 
         # random playlist (only active for audio)
-        if 'audio' in config.DIRECTORY_ADD_RANDOM_PLAYLIST and len(play_items) > 1:
+        if 'audio' in config.DIRECTORY_ADD_RANDOM_PLAYLIST and \
+               len(play_items) > 1:
             pl = Playlist(_('Random playlist'), play_items, self, random=True)
             pl.autoplay = True
             items += [ pl ]

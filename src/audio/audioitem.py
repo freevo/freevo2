@@ -4,11 +4,17 @@
 # -----------------------------------------------------------------------
 # $Id$
 #
+# This file contains an item used for audio files. It handles all actions
+# possible for an audio item (right now only 'play')
+#
 # Notes:
 # Todo:        
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.63  2004/09/13 19:35:35  dischi
+# replace player.get_singleton() with audioplayer()
+#
 # Revision 1.62  2004/09/10 19:50:06  outlyer
 # Copy fix from 1.5.1 to HEAD branch.
 #
@@ -54,36 +60,46 @@
 #
 # ----------------------------------------------------------------------- */
 
+__all__ = [ 'AudioItem' ]
 
+# Python imports
 import os
 import re
-import traceback
 
+# Freevo imports
 import config
-import player
-
 from item import MediaItem
 from event import *
+
+from player import *
+
+
+def _image_filter(x):
+    """
+    filter used to find cover images
+    """
+    return re.match('.*(jpg|png)$', x, re.IGNORECASE)
+
+def _cover_filter(x):
+    """
+    filter used to find cover images
+    """
+    return re.search(config.AUDIO_COVER_REGEXP, x, re.IGNORECASE)
 
 
 class AudioItem(MediaItem):
     """
     This is the common class to get information about audiofiles.
     """
-    
     def __init__(self, url, parent, name=None, scan=True):
         MediaItem.__init__(self, 'audio', parent)
-
         self.set_url(url, info=scan)
-
         if name:
             self.name   = name
-
         self.start      = 0
         self.elapsed    = 0
         self.remain     = 0
         self.pause      = 0
-
         self.mplayer_options = ''
             
         try:
@@ -98,10 +114,6 @@ class AudioItem(MediaItem):
             images = ()
             covers = ()
             files =()
-            def image_filter(x):
-                return re.match('.*(jpg|png)$', x, re.IGNORECASE)
-            def cover_filter(x):
-                return re.search(config.AUDIO_COVER_REGEXP, x, re.IGNORECASE)
 
             # Pick an image if it is the only image in this dir, or it matches
             # the configurable regexp
@@ -109,14 +121,13 @@ class AudioItem(MediaItem):
             try:
                 files = os.listdir(dirname)
             except OSError:
-                print "oops, os.listdir() error"
-                traceback.print_exc()
-            images = filter(image_filter, files)
+                _debug_('os.listdir() error', 0)
+            images = filter(_image_filter, files)
             image = None
             if len(images) == 1:
                 image = os.path.join(dirname, images[0])
             elif len(images) > 1:
-                covers = filter(cover_filter, images)
+                covers = filter(_cover_filter, images)
                 if covers:
                     image = os.path.join(dirname, covers[0])
             self.image = image
@@ -128,11 +139,13 @@ class AudioItem(MediaItem):
         """
         if mode == 'date':
             if self.filename:
-                return u'%s%s' % (os.stat(self.filename).st_ctime, Unicode(self.filename))
+                return u'%s%s' % (os.stat(self.filename).st_ctime,
+                                  Unicode(self.filename))
         if mode == 'advanced':
             # sort by track number
             try:
-                return '%s %0.3i-%s' % (self['discs'],int(self['trackno']), Unicode(self.url))
+                return '%s %0.3i-%s' % (self['discs'], int(self['trackno']),
+                                        Unicode(self.url))
             except ValueError:
                 return '%s-%s' % (Unicode(self['trackno']), Unicode(self.url))
         return Unicode(self.url)
@@ -166,8 +179,6 @@ class AudioItem(MediaItem):
         return MediaItem.__getitem__(self, key)
 
    
-    # ----------------------------------------------------------------------------
-
     def actions(self):
         """
         return a list of possible actions on this item
@@ -181,12 +192,11 @@ class AudioItem(MediaItem):
         """
         self.parent.current_item = self
         self.elapsed = 0
-
-        player.get_singleton().play(self)
+        audioplayer().play(self)
 
 
     def stop(self, arg=None, menuw=None):
         """
         Stop the current playing
         """
-        player.get_singleton().stop()
+        audioplayer().stop()
