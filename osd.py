@@ -12,6 +12,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2002/10/18 18:33:28  dischi
+# Added drawroundbox for boxes with round edges (funny combination for
+# these words). Also added support to get a new layer and to put it on
+# the screen. A skin that uses this is in WIP/Dischi right now and will
+# be finished this weekend.
+#
 # Revision 1.40  2002/10/15 21:44:32  krister
 # Added a font alias list, substitute missing non-free fonts with free alternates.
 #
@@ -67,32 +73,6 @@
 # Small update to support more resolutions. I tried to get 720x576 working,
 # but for some reason I can't see a freevo on my tv, mplayer works fine.
 # Strange....
-#
-# Revision 1.27  2002/09/30 09:28:02  dischi
-# small ugly fix to work around the unicode-escape problem. The is only
-# a temporal fix to make freevo working again.
-#
-# Revision 1.26  2002/09/28 04:36:09  krister
-# Bugfix for 8-bit chars in bitmap filenames by Alex Polite
-#
-# Revision 1.25  2002/09/25 01:41:09  gsbarbieri
-# Updated osd.drawstringframed() with new break points to words that are
-# larger than the width.
-# Corrected some bugs in stringsize()
-#
-# Revision 1.24  2002/09/24 16:33:52  gsbarbieri
-# osd.drawstringframed() now supports words larger than width.
-#
-# Revision 1.23  2002/09/24 06:52:03  gsbarbieri
-# Added the new function drawstringframed(). It can draw a string (supporting
-# even '\n' and '\t') in the determinated area, with both horizontal and
-# vertical alignment. If the string doesn't fit, it's truncated and the part
-# that doesn't fit is returned.
-# Note: This function was designated to work with *words*, that is, when
-# truncating or wrapping, it brokes the string where it find spaces ' '.
-# ('\t' is considered a word '   ')
-# BUGS: It doesn't work fully when we have a word that is larger than width,
-# It overflows the area.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -1105,7 +1085,123 @@ class OSD:
             return f.size(string)
         else:
             return (0, 0)
+
+    # create a new layer for drawings
+    def createlayer(self, width=0, height=0):
+        if not width: width = self.width
+        if not height: height = self.height
         
+        l = pygame.Surface((width, height), SRCALPHA, 32)
+        l.fill((0,0,0,0))
+        return l
+
+
+    # insert layer into the screen
+    def putlayer(self, layer, x=0, y=0):
+        self.screen.blit(layer, (x, y))
+
+
+    # help functions to save and restore a pixel
+    # for drawcircle
+    def _savepixel(self, x, y, s):
+        if x>=0 and x<self.width and y>=0 and y<self.height:
+            return (x, y, s.get_at((x,y)))
+        return None
+            
+    def _restorepixel(self, save, s):
+        if save:
+            s.set_at((save[0],save[1]), save[2])
+
+    # pygame.draw.circle has a bug: there are some pixels where
+    # they don't belong. This function stores the values and
+    # restores them
+    def drawcircle(self, s, color, x, y, radius):
+        p1 = self._savepixel(x-1, y-radius-1, s)
+        p2 = self._savepixel(x,   y-radius-1, s)
+        p3 = self._savepixel(x+1, y-radius-1, s)
+
+        p4 = self._savepixel(x-1, y+radius, s)
+        p5 = self._savepixel(x,   y+radius, s)
+        p6 = self._savepixel(x+1, y+radius, s)
+
+        pygame.draw.circle(s, color, (x, y), radius)
+        
+        self._restorepixel(p1, s)
+        self._restorepixel(p2, s)
+        self._restorepixel(p3, s)
+        self._restorepixel(p4, s)
+        self._restorepixel(p5, s)
+        self._restorepixel(p6, s)
+        
+        
+    def drawroundbox(self, x0, y0, x1, y1, color=None, border_size=0, border_color=None,
+                     radius=0, surface=None):
+
+        if not pygame.display.get_init():
+            return None
+
+        # Make sure the order is top left, bottom right
+        x0, x1 = min(x0, x1), max(x0, x1)
+        y0, y1 = min(y0, y1), max(y0, y1)
+        if color == None:
+            color = self.default_fg_color
+
+        if border_color == None:
+            border_color = self.default_fg_color
+
+        if surface:
+            x = x0
+            y = y0
+        else:
+            x = 0
+            y = 0
+            
+        w = x1 - x0
+        h = y1 - y0
+
+        bc = self._sdlcol(border_color)
+        c =  self._sdlcol(color)
+
+        # make sure the radius fits the box
+        radius = min(radius, h / 2, w / 2)
+        
+        if not surface:
+            box = pygame.Surface((w, h), SRCALPHA, 32)
+
+            # clear surface
+            box.fill((0,0,0,0))
+        else:
+            box = surface
+            
+        r,g,b,a = self._sdlcol(color)
+        
+        if border_size:
+            if radius >= 1:
+                self.drawcircle(box, bc, x+radius, y+radius, radius)
+                self.drawcircle(box, bc, x+w-radius, y+radius, radius)
+                self.drawcircle(box, bc, x+radius, y+h-radius, radius)
+                self.drawcircle(box, bc, x+w-radius, y+h-radius, radius)
+            pygame.draw.rect(box, bc, (x+radius, y, w-2*radius, h))
+            pygame.draw.rect(box, bc, (x, y+radius, w, h-2*radius))
+        
+            x += border_size
+            y += border_size
+            h -= 2* border_size
+            w -= 2* border_size
+            radius -= min(0, border_size)
+        
+        if radius >= 1:
+            self.drawcircle(box, c, x+radius, y+radius, radius)
+            self.drawcircle(box, c, x+w-radius, y+radius, radius)
+            self.drawcircle(box, c, x+radius, y+h-radius, radius)
+            self.drawcircle(box, c, x+w-radius, y+h-radius, radius)
+        pygame.draw.rect(box, c, (x+radius, y, w-2*radius, h))
+        pygame.draw.rect(box, c, (x, y+radius, w, h-2*radius))
+        
+        if not surface:
+            self.screen.blit(box, (x0, y0))
+
+
 
     def update(self):
 
