@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.76  2003/09/24 18:30:35  outlyer
+# Remove a scary looking, but innocuous message.
+#
 # Revision 1.75  2003/09/23 13:46:16  outlyer
 # I don't even know why this debug line is useful, but moving to higher
 # debug level.
@@ -315,7 +318,7 @@ def main_func():
                     if p.eventhandler(event=event):
                         break
                 else:
-                    _debug_('no eventhandler for event %s' % event)
+                    _debug_('no eventhandler for event %s' % event,2)
 
         else:
             app = osd.focused_app()
