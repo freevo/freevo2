@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/12/18 21:13:20  outlyer
+# Crash Fix: The self. variable didn't exist, but the config one did. It would
+# crash when I put in a CD.
+#
 # Revision 1.25  2003/12/08 20:37:34  dischi
 # merged Playlist and RandomPlaylist into one class
 #
@@ -137,7 +141,7 @@ class AudioDiskItem(Playlist):
         items = []
 
         # random playlist (only active for audio)
-        if 'audio' in self.DIRECTORY_ADD_RANDOM_PLAYLIST and len(play_items) > 1:
+        if 'audio' in config.DIRECTORY_ADD_RANDOM_PLAYLIST and len(play_items) > 1:
             pl = Playlist(_('Random playlist'), play_items, self, random=True)
             pl.autoplay = True
             items += [ pl ]
