@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2004/01/10 16:49:37  dischi
+# add long to possible length
+#
 # Revision 1.46  2004/01/10 13:14:17  dischi
 # o set self.fxd_file to None as default. It's very confusing to have one
 #   fxd_file, but maybe different files with skin settings, so I added
@@ -374,7 +377,8 @@ class Item:
                 length = self.length
             if not length:
                 return ''
-            if isinstance(length, int) or isinstance(length, float):
+            if isinstance(length, int) or isinstance(length, float) or \
+                   isinstance(length, long):
                 length = str(int(length) / 60)
             if length.find('min') == -1:
                 length = '%s min' % length
@@ -382,6 +386,8 @@ class Item:
                 length = length[:length.find('/')].rstrip()
             if length.find(':') > 0:
                 length = length[length.find(':')+1:]
+            if length == '0 min':
+                return ''
             return length
 
         
