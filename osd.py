@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2002/10/15 19:43:00  krister
+# Fixed a bug in drawstringframedhard(), it broke the lines incorrectly.
+#
 # Revision 1.38  2002/10/15 19:36:48  dischi
 # Fixed the return value for drawstringframed, drawstringframedhard
 # still returns (0,0,0,0) als rectangle.
@@ -885,7 +888,7 @@ class OSD:
         return_x1 = 0
         return_y1 = 0
 
-        if DEBUG: print 'drawstringframedhard (%d;%d; w=%d; h=%d) "%s"' % (x, y, w, h, s)
+        if DEBUG: print 'drawstringframedhard (%d;%d; w=%d; h=%d) "%s"' % (x, y, width, height, string)
         
         if fgcolor == None:
             fgcolor = self.default_fg_color
@@ -914,18 +917,23 @@ class OSD:
         line_number = 0
         for i in range(len(string)):
             char_size, char_height = self.charsize(string[i], font, ptsize)
-            if occupied_size + char_size <= width and string[i] != '\n':
+            if ((occupied_size + char_size) <= width) and (string[i] != '\n'):
                 occupied_size += char_size
                 if string[i] == '\t':
                     lines[line_number] += '   '
                 else:
                     lines[line_number] += string[i] 
             else:
-                if occupied_height + char_height <= height:
+                if (occupied_height + char_height) <= height:
                     occupied_height += word_height
                     line_number += 1
                     lines += [ '' ]
-                    if string[i] != '\n':
+                    if string[i] == '\n':
+                        # Linebreak due to CR
+                        occupied_size = 0
+                    else:
+                        # Linebreak due to the last character didn't fit,
+                        # put it on the next line
                         occupied_size = char_size
                         lines[line_number] = string[i]
                 else:
@@ -933,7 +941,7 @@ class OSD:
                     j = 1
                     len_line = len(lines[line_number])
                     for j in range(len_line):
-                        if occupied_size + tmp_size <= width: break
+                        if (occupied_size + tmp_size) <= width: break
                         char_size, char_height = self.charsize(lines[line_number][len_line-j-1], font, ptsize)
                         occupied_size -= char_size
                     lines[line_number] = lines[line_number][0:len_line-j]+'...'                        
