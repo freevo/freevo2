@@ -15,6 +15,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2004/01/08 17:33:15  outlyer
+# Moved fxdimdb.py to util; it doesn't use the OSD, and having in video
+# makes it import video/__init__...
+#
+# There is a reason for this to follow shortly :)
+#
 # Revision 1.31  2004/01/03 17:43:15  dischi
 # OVERLAY_DIR is always used
 #
@@ -50,7 +56,7 @@ import config
 import plugin
 import re
 import time
-from video.fxdimdb import FxdImdb, makeVideo, makePart, point_maker
+from util.fxdimdb import FxdImdb, makeVideo, makePart, point_maker
 
 from gui.PopupBox import PopupBox
 from util import htmlenties2txt

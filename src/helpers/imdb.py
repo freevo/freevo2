@@ -11,6 +11,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/01/08 17:33:14  outlyer
+# Moved fxdimdb.py to util; it doesn't use the OSD, and having in video
+# makes it import video/__init__...
+#
+# There is a reason for this to follow shortly :)
+#
 # Revision 1.5  2003/11/17 19:44:43  dischi
 # fix disc set support
 #
@@ -57,7 +63,7 @@ except ImportError:
     print 'Please use \'freevo imdb [args]\' instead'
     sys.exit(0)
     
-from video.fxdimdb import FxdImdb, makeVideo
+from util.fxdimdb import FxdImdb, makeVideo
 from random import Random
 
 def usage():
