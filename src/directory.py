@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/08/23 15:16:18  dischi
+# o more infos in folder.fxd: title, cover-img and content info
+# o totalspace and freespace support for getattr
+#
 # Revision 1.26  2003/08/23 12:51:41  dischi
 # removed some old CVS log messages
 #
@@ -122,24 +126,16 @@ class DirItem(Playlist):
             self.name = os.path.basename(dir)
 
         # Check for cover in COVER_DIR
-        if os.path.isfile(config.COVER_DIR+os.path.basename(dir)+'.png'):
-            self.image = config.COVER_DIR+os.path.basename(dir)+'.png'
-            if self.display_type:
-                self.handle_type = self.display_type
-        if os.path.isfile(config.COVER_DIR+os.path.basename(dir)+'.jpg'):
-            self.image = config.COVER_DIR+os.path.basename(dir)+'.jpg'
-            if self.display_type:
-                self.handle_type = self.display_type
+        image = util.getimage(config.COVER_DIR+os.path.basename(dir))
+        if image:
+            self.image = image
+            self.handle_type = self.display_type
 
         # Check for a cover in current dir, overide COVER_DIR if needed
-        if os.path.isfile(dir+'/cover.png'): 
-            self.image = dir+'/cover.png'
-            if self.display_type:
-                self.handle_type = self.display_type
-        if os.path.isfile(dir+'/cover.jpg'): 
-            self.image = dir+'/cover.jpg'
-            if self.display_type:
-                self.handle_type = self.display_type
+        image = util.getimage(dir+'/cover')
+        if image:
+            self.image = image
+            self.handle_type = self.display_type
             
         if not self.image and self.display_type == 'audio':
             images = ()
@@ -168,11 +164,8 @@ class DirItem(Playlist):
             self.image = image
 
         if not self.image:
-            f = os.path.join(config.TV_SHOW_DATA_DIR, os.path.basename(dir).lower())
-            if os.path.isfile(f+'.png'):
-                self.image = f+'.png'
-            if os.path.isfile(f+'.jpg'):
-                self.image = f+'.jpg'
+            self.image = util.getimage(os.path.join(config.TV_SHOW_DATA_DIR,
+                                                    os.path.basename(dir).lower()))
 
             if config.TV_SHOW_INFORMATIONS.has_key(os.path.basename(dir).lower()):
                 tvinfo = config.TV_SHOW_INFORMATIONS[os.path.basename(dir).lower()]
@@ -192,26 +185,65 @@ class DirItem(Playlist):
                 f = open(self.xml_file)
                 var_def = parser.parse(f.read())
                 f.close()
-                for top in var_def.children:
-                    if top.name == 'folder':
-                        for node in top.children:
-                            if node.name == 'setvar':
-                                for v in all_variables:
-                                    if node.attrs[('', 'name')].upper() == v.upper():
-                                        try:
-                                            setattr(self, v, int(node.attrs[('', 'val')]))
-                                        except ValueError:
-                                            setattr(self, v, node.attrs[('', 'val')])
-
+                for node in var_def.children:
+                    if node.name == 'folder':
+                        self.fxd_parser(node, all_variables)
             except:
-                print "Skin XML file %s corrupt" % self.xml_file
+                print "fxd file %s corrupt" % self.xml_file
                 traceback.print_exc()
-                return
 
         if self.DIRECTORY_SORT_BY_DATE == 2 and self.display_type != 'tv':
             self.DIRECTORY_SORT_BY_DATE = 0
 
-            
+
+    def fxd_parser(self, node, all_variables):
+        '''
+        parse the xml file for directory settings
+        
+	<?xml version="1.0" ?>
+	<freevo>
+	  <folder title="Incoming TV Shows" cover-img="taken.jpg">
+	    <setvar name="directory_autoplay_single_item" val="0"/>
+	    <!-- <setvar name="force_skin_layout" val="1"/> -->
+	    <info>
+	      <content>Episodes for current tv shows not seen yet</content>
+	    </info>
+	  </folder>
+	</freevo>
+        '''
+
+        set_all = self.xml_file == self.dir+'/folder.fxd'
+        # read attributes
+        if set_all:
+            try:
+                self.name = node.attrs[('', 'title')].encode('latin-1')
+            except KeyError:
+                pass
+
+            try:
+                image = node.attrs[('', 'cover-img')].encode('latin-1')
+                if image and os.path.isfile(os.path.join(self.dir, image)):
+                    self.image = os.path.join(self.dir, image)
+            except KeyError:
+                pass
+
+        for child in node.children:
+            # set directory variables
+            if child.name == 'setvar':
+                for v in all_variables:
+                    if child.attrs[('', 'name')].upper() == v.upper():
+                        try:
+                            setattr(self, v, int(child.attrs[('', 'val')]))
+                        except ValueError:
+                            setattr(self, v, child.attrs[('', 'val')])
+            # get more info
+            if child.name == 'info' and set_all:
+                for info in child.children:
+                    if info.name == 'content':
+                        self.info['content'] = util.format_text(info.textof().\
+                                                                encode('latin-1'))
+
+        
     def copy(self, obj):
         """
         Special copy value DirItem
@@ -231,6 +263,16 @@ class DirItem(Playlist):
             if self.media:
                 return 'Directory on disc [%s]' % self.media.label
             return 'Directory'
+
+        if attr in ( 'freespace', 'totalspace' ):
+            if self.media:
+                return None
+            
+            space = eval('util.%s(self.dir)' % attr) / 1000000
+            if space > 1000:
+                space='%s,%s' % (space / 1000, space % 1000)
+            return space
+        
         return Item.getattr(self, attr)
 
 
