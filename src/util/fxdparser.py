@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/01/14 18:49:37  dischi
+# >= is better
+#
 # Revision 1.9  2004/01/14 18:49:09  dischi
 # also dump raw fxd at saving
 #
@@ -107,7 +110,7 @@ class FXDtree(qp_xml.Parser):
             self.tree = None
             cache = vfs.getoverlay(filename + '.raw')
             if os.path.isfile(cache) and \
-                   os.stat(cache)[stat.ST_MTIME] > os.stat(filename)[stat.ST_MTIME]:
+                   os.stat(cache)[stat.ST_MTIME] >= os.stat(filename)[stat.ST_MTIME]:
                 self.tree = util.read_pickle(cache)
             if not self.tree:
                 f = vfs.open(filename)
