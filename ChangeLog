@@ -4,9 +4,8 @@ Freevo Changelog
 $Id$
 
 
-Release 1.3.0 (2002-10-XX):
+Release 1.3.0 (2002-11-13):
 ---------------------------
-Features, bugfixes:
 o Added a font alias list in freevo_config to substitute missing non-free
   fonts in skins with free fonts.
 o Changed the TV guide to use Gustavo's new extended menus.
@@ -19,7 +18,12 @@ o Changed runapp to support priority settings of the new app,
   /usr/bin/nice is no longer needed.
 o Rewritten ID3v1 and new ID3v2.3/2.4 support
 o Added DXR3 support using SDL.
-
+o Changed the default skin to the new blue_round1 skin.
+o The image viewer now supports browsing CD/DVDs.
+o Added support for choosing audio track, etc in DVDs.
+o Movies can be played from URLs (LAN or the Internet).
+o Music playlists can contain videos too now.	
+	
 	
 Release 1.2.6 (2002-10-12):
 ---------------------------
