@@ -11,6 +11,9 @@
 #       -stream tv, video and music somehow
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2004/07/17 00:26:59  mikeruelle
+# check to make sure we have tuples. before treating like media dirs
+#
 # Revision 1.27  2004/07/03 00:41:08  mikeruelle
 # fix recording highlighting to match new function output
 #
@@ -150,7 +153,7 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import sys, os, string, urllib, re
+import sys, os, string, urllib, re, types
 
 
 # needed to put these here to suppress its output
@@ -199,9 +202,10 @@ class LibraryResource(FreevoResource):
             dirs2.extend(config.IMAGE_ITEMS)
         #strip out ssr and fxd files
         for d in dirs2:
-            (title, tdir) = d
-            if os.path.isdir(tdir):
-                dirs.append(d)            
+            if isinstance(d, types.TupleType):
+                (title, tdir) = d
+                if os.path.isdir(tdir):
+                    dirs.append(d)            
         return dirs
 
     def check_dir(self, media, dir):
