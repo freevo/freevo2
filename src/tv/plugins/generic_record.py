@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/12/05 02:26:34  rshortt
+# Add some new cl_options: frequency, base_filename, title, and sub-title.
+#
 # Revision 1.12  2003/11/28 19:26:37  dischi
 # renamed some config variables
 #
@@ -69,6 +72,7 @@ import plugin
 import rc
 
 from event import *
+from tv.channels import FreevoChannels
 
 DEBUG = config.DEBUG
 
@@ -92,6 +96,7 @@ class Recorder:
 
         if DEBUG: print 'ACTIVATING GENERIC RECORD PLUGIN'
 
+        self.fc = FreevoChannels()
         self.thread = Record_Thread()
         self.thread.setDaemon(1)
         self.thread.mode = 'idle'
@@ -99,8 +104,14 @@ class Recorder:
         
 
     def Record(self, rec_prog):
+        frequency = self.fc.chanSet(str(rec_prog.tunerid), 'record plugin')
+
         cl_options = { 'channel'  : rec_prog.tunerid,
+                       'frequency' : frequency,
                        'filename' : config.TV_RECORD_DIR + '/' + rec_prog.filename,
+                       'base_filename' : rec_prog.filename,
+                       'title' : rec_prog.title,
+                       'sub-title' : rec_prog.sub_title,
                        'seconds'  : rec_prog.rec_duration }
 
         self.rec_command = config.VCR_CMD % cl_options
