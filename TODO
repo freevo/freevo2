@@ -8,6 +8,7 @@ Short-term
 ----------
 o Add rcs id to all files!
 o Channel guide layout
+o A switch to turn off the EPG altogether if no listings are available.
 o Installation instructions, clean up config stuff
   Paul Aubin:
   1) A lot of the python paths are hardcoded. I s'//'-ed through and fixed
