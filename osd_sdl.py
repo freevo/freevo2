@@ -380,7 +380,7 @@ class OSD:
                    font=None, ptsize=0, align='left'):
 
         # XXX Krister: Workaround for new feature that is only possible in the new
-        # XXX SDL ODS, line up columns delimited by tabs. Here the tabs are just
+        # XXX SDL OSD, line up columns delimited by tabs. Here the tabs are just
         # XXX replaced with spaces
         s = string.replace('\t', '   ')  
 
@@ -415,6 +415,10 @@ class OSD:
 
         f = self._getfont(font, ptsize)
 
+        if not f:
+            print 'Couldnt get font: "%s", size: %s' % (font, ptsize)
+            return
+        
         for i in range(len(self.stringcache)):
             csurf, cstring, cfont, cfgcolor, cbgcolor = self.stringcache[i]
             if (f == cfont and string == cstring and fgcolor == cfgcolor
