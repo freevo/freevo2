@@ -31,3 +31,7 @@ Dirk Meyer <dmeyer@tzi.de>:
 o IMDB support
 o XML config files for movies/albums
 o and more...
+
+
+Jason Ball <jason.ball@ce.com.au>:
+o SDL support in the OSD
