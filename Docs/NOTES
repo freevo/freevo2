@@ -221,7 +221,7 @@ o Upload to the real path
 File release notes:
 
 
-Quick test (using only X11): tar xvzf freevo-XXX.tgz ; cd freevo-XXX ; make ; freevo
+Quick test (using only X11): tar xvzf freevo-XXX.tgz ; cd freevo-XXX ; make x11 ; freevo
 
 
 This release has the following features:

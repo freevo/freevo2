@@ -71,7 +71,7 @@ def getcmd():
     items += [menu.MenuItem('MOVIES', movie.main_menu)]
     items += [menu.MenuItem('MUSIC', mp3.main_menu)]
     items += [menu.MenuItem('DVD/CD', movie.play_movie, ('dvd', '1', []))]  # XXX Add DVD title handling
-    items += [menu.MenuItem('VCD', movie.play_movie, ('vcd', '1', []))]
+    #items += [menu.MenuItem('VCD', movie.play_movie, ('vcd', '1', []))]
     items += [menu.MenuItem('RECORD MOVIE', tv.main_menu, 'record')]
 
     mainmenu = menu.Menu('FREEVO MAIN MENU', items, packrows=0)
