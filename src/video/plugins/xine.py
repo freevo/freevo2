@@ -12,54 +12,20 @@
 # and the default player (mplayer) will be used. You need xine-ui >= 0.9.22
 # to use this.
 #
-# This plugin can also be used for VCD playback with menus. Install
-# xine-vcdnav and set XINE_USE_VCDNAV = 1
-#
-# WARNING:
-# xine-vcdnav has some problems. Some VCDs won't play at all, some one
-# in some drives. It also can take up to 10 secs until the video
-# starts. When nothing happens and you press STOP, it can also take up
-# to 10 secs until xine dies (better: xine will be killed). This could
-# also crash Freevo (python segfault). 
-#
-#
 # Todo:        
 #
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/11/22 15:57:47  dischi
+# cleanup
+#
 # Revision 1.21  2003/11/21 17:56:50  dischi
 # Plugins now 'rate' if and how good they can play an item. Based on that
 # a good player will be choosen.
 #
 # Revision 1.20  2003/11/09 12:01:00  dischi
 # add subtitle selection and osd info support for xine (needs current xine-ui cvs
-#
-# Revision 1.19  2003/11/01 19:54:18  dischi
-# port to new xine-lib
-#
-# Revision 1.18  2003/10/21 21:17:42  gsbarbieri
-# Some more i18n improvements.
-#
-# Revision 1.17  2003/09/19 22:09:16  dischi
-# use new childapp thread function
-#
-# Revision 1.16  2003/09/14 20:09:37  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.15  2003/09/01 19:46:03  dischi
-# add menuw to eventhandler, it may be needed
-#
-# Revision 1.14  2003/09/01 16:41:37  dischi
-# send PLAY_START event
-#
-# Revision 1.13  2003/08/30 18:52:53  dischi
-# Aubin, don't do that :-)
-# Make a nice ItemPlugin do set the color values. Take a look at
-# bookmarker.py how.
-#
-# Revision 1.12  2003/08/28 03:46:13  outlyer
-# Support for Chapter-by-chapter navigation in DVDs using the CH+ and CH- keys.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -184,8 +150,8 @@ class Xine:
             if rc.PYLIRC:
                 command = '%s --no-lirc' % command
 
-        self.command = '%s -V %s -A %s' % (command, config.XINE_VO_DEV, config.XINE_AO_DEV)
-
+        self.command = '--prio=%s %s -V %s -A %s' % (config.MPLAYER_NICE, command,
+                                                     config.XINE_VO_DEV, config.XINE_AO_DEV)
 
     def rate(self, item):
         """
@@ -213,7 +179,6 @@ class Xine:
         """
         play a dvd with xine
         """
-
         self.app_mode = item.mode       # dvd or vcd keymap
         self.item     = item
 
@@ -259,7 +224,8 @@ class Xine:
 
         elif item.mime_type == 'cue':
             command.append('vcd://%s' % item.filename)
-
+            self.app_mode = 'vcd'
+            
         else:
             command.append(item.url)
             
@@ -315,6 +281,18 @@ class Xine:
             self.thread.app.write('%s%s\n' % (action, pos))
             return True
 
+        if event == TOGGLE_OSD:
+            self.thread.app.write('OSDStreamInfos\n')
+            return True
+
+        if event == NEXT:
+            self.thread.app.write('EventNext\n')
+            return True
+
+        if event == PREV:
+            self.thread.app.write('EventPrior\n')
+            return True
+
         # DVD NAVIGATION
         if event == DVDNAV_LEFT:
             self.thread.app.write('EventLeft\n')
@@ -344,19 +322,6 @@ class Xine:
             self.thread.app.write('Menu\n')
             return True
 
-        if event == NEXT:
-            self.thread.app.write('EventNext\n')
-            return True
-
-        if event == PREV:
-            self.thread.app.write('EventPrior\n')
-            return True
-
-        if event == TOGGLE_OSD:
-            self.thread.app.write('OSDStreamInfos\n')
-            return True
-
-
         # VCD NAVIGATION
         if event in INPUT_ALL_NUMBERS:
             self.thread.app.write('Number%s\n' % event.arg)
@@ -369,6 +334,7 @@ class Xine:
             return True
 
 
+        # DVD/VCD language settings
         if event == VIDEO_NEXT_AUDIOLANG and self.max_audio:
             if self.current_audio < self.max_audio - 1:
                 self.thread.app.write('AudioChannelNext\n')

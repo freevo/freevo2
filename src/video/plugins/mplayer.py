@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2003/11/22 15:57:47  dischi
+# cleanup
+#
 # Revision 1.40  2003/11/21 18:04:27  dischi
 # remove debug
 #
@@ -21,35 +24,6 @@
 # Even if we are in a code freeze, this is a major cleanup to put the
 # unstable stuff in a plugin to prevent mplayer from crashing because of
 # bmovl.
-#
-# Revision 1.37  2003/11/01 20:51:49  dischi
-# fix bug in delay
-#
-# Revision 1.36  2003/10/21 21:17:42  gsbarbieri
-# Some more i18n improvements.
-#
-# Revision 1.35  2003/10/20 13:36:42  outlyer
-# Remove double-quit
-#
-# Revision 1.34  2003/10/19 09:51:41  dischi
-# move from str command to list, resort some stuff
-#
-# Revision 1.33  2003/10/17 21:30:02  rshortt
-# We need self.osdfont set before calling childapp's init.  This was crashing
-# for me on network play.
-#
-# Revision 1.32  2003/10/14 16:58:48  dischi
-# fix mode detection, MPLAYER_ARGS never worked
-#
-# Revision 1.31  2003/10/08 02:04:04  outlyer
-# BUGFIX: For some reason, I was seeing a lot of 'killing with signal 9' in
-# my log files when I played certain video files. Adding the 'double' quit here
-# seems to cause it to quit cleanly, and immediately instead of an annoying
-# two seconds later.
-#
-# Revision 1.30  2003/10/04 14:38:10  dischi
-# Try to auto-correct av sync problems. Set MPLAYER_SET_AUDIO_DELAY to
-# enable it. You need mmpython > 0.2 to make it work.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -88,9 +62,6 @@ import plugin
 
 # RegExp
 import re
-
-import osd
-osd = osd.get_singleton()
 
 class PluginInterface(plugin.Plugin):
     """
@@ -134,7 +105,6 @@ class MPlayer:
     """
     the main class to control mplayer
     """
-    
     def __init__(self, version):
         self.name = 'mplayer'
         self.thread = childapp.ChildThread()
@@ -168,7 +138,6 @@ class MPlayer:
         """
         play a videoitem with mplayer
         """
-
         self.parameter = (options, item)
         
         mode         = item.mode
@@ -310,7 +279,6 @@ class MPlayer:
         rc.app(self)
 
         self.thread.start(MPlayerApp, (command, self, item, network_play))
-        _debug_('MPlayer.play(): Starting thread, cmd=%s' % command)
 
         return None
     
@@ -441,26 +409,14 @@ class MPlayer:
 
 # ======================================================================
 
+import osd
+
 class MPlayerApp(childapp.ChildApp):
     """
     class controlling the in and output from the mplayer process
     """
 
     def __init__(self, (app, mplayer, item, network_play)):
-        if config.MPLAYER_DEBUG:
-            fname_out = os.path.join(config.LOGDIR, 'mplayer_stdout.log')
-            fname_err = os.path.join(config.LOGDIR, 'mplayer_stderr.log')
-            try:
-                self.log_stdout = open(fname_out, 'w')
-                self.log_stderr = open(fname_err, 'w')
-                print _( 'MPlayer logging to "%s" and "%s"' ) % (fname_out, fname_err)
-            except IOError:
-                print
-                print ( _('ERROR') + ': ' + _('Cannot open "%s" and "%s" for ' \
-                                              'MPlayer logging!')
-                        ) % (fname_out, fname_err)
-                config.MPLAYER_DEBUG = 0
-                
         # DVD items also store mplayer_audio_broken to check if you can
         # start them with -alang or not
         if hasattr(item, 'mplayer_audio_broken') or item.mode != 'dvd':
@@ -475,8 +431,9 @@ class MPlayerApp(childapp.ChildApp):
         self.item         = item
         self.mplayer      = mplayer
         self.exit_type    = None
-        self.osdfont      = osd.getfont(config.OSD_DEFAULT_FONTNAME,
-                                        config.OSD_DEFAULT_FONTSIZE)
+        self.osd          = osd.get_singleton()
+        self.osdfont      = self.osd.getfont(config.OSD_DEFAULT_FONTNAME,
+                                             config.OSD_DEFAULT_FONTSIZE)
 
         # check for mplayer plugins
         self.stdout_plugins  = []
@@ -492,18 +449,6 @@ class MPlayerApp(childapp.ChildApp):
 
 
                 
-    def kill(self):
-        # Use SIGINT instead of SIGKILL to make sure MPlayer shuts
-        # down properly and releases all resources before it gets
-        # reaped by childapp.kill().wait()
-        childapp.ChildApp.kill(self, signal.SIGINT)
-        _debug_('Killing mplayer')
-
-        if config.MPLAYER_DEBUG:
-            self.log_stdout.close()
-            self.log_stderr.close()
-
-
     def stopped(self):
         if self.exit_type == "End of file":
             rc.post_event(PLAY_END)
@@ -518,27 +463,21 @@ class MPlayerApp(childapp.ChildApp):
         """
         parse the stdout of the mplayer process
         """
-        if config.MPLAYER_DEBUG:
-            try:
-                self.log_stdout.write(line + '\n')
-            except ValueError:
-                pass
-
         # show connection status for network play
         if self.network_play:
             if line.find('Opening audio decoder') == 0:
-                osd.clearscreen(osd.COL_BLACK)
-                osd.update()
+                self.osd.clearscreen(self.osd.COL_BLACK)
+                self.osd.update()
             elif (line.find('Resolving ') == 0 or line.find('Connecting to server') == 0 or \
                   line.find('Cache fill:') == 0) and \
                   line.find('Resolving reference to') == -1:
                 if line.find('Connecting to server') == 0:
                     line = 'Connecting to server'
-                osd.clearscreen(osd.COL_BLACK)
-                osd.drawstringframed(line, config.OVERSCAN_X+10, config.OVERSCAN_Y+10,
-                                     osd.width - 2 * (config.OVERSCAN_X+10), -1,
-                                     self.osdfont, osd.COL_WHITE)
-                osd.update()
+                self.osd.clearscreen(self.osd.COL_BLACK)
+                self.osd.drawstringframed(line, config.OVERSCAN_X+10, config.OVERSCAN_Y+10,
+                                          self.osd.width - 2 * (config.OVERSCAN_X+10), -1,
+                                          self.osdfont, self.osd.COL_WHITE)
+                self.osd.update()
 
 
         # current elapsed time
@@ -581,11 +520,5 @@ class MPlayerApp(childapp.ChildApp):
         """
         parse the stderr of the mplayer process
         """
-        if config.MPLAYER_DEBUG:
-            try:
-                self.log_stderr.write(line + '\n')
-            except ValueError:
-                pass # File closed
-
         for p in self.stdout_plugins:
             p.stdout(line)
