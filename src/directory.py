@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.77  2003/12/17 16:43:59  outlyer
+# Prevent a crash if the current directory is removed... just silently move
+# up to the previous directory.
+#
+# (This is identical to the previous 1.4 behaviour)
+#
 # Revision 1.76  2003/12/12 19:59:33  dischi
 # some speed enhancements
 #
@@ -886,9 +892,13 @@ class Dirwatcher(plugin.DaemonPlugin):
     def scan(self, force=False):
         if not self.dir:
             return
-        if not force and config.DIRECTORY_USE_STAT_FOR_CHANGES and \
+        try:
+            if not force and config.DIRECTORY_USE_STAT_FOR_CHANGES and \
                vfs.stat(self.dir)[stat.ST_MTIME] == self.last_time:
-            return True
+                return True
+        except IOError:
+            # the directory is gone
+            _debug_('Dirwatcher: unable to read directory %s' % self.dir,1)
 
         try:
             files = vfs.listdir(self.dir, False)
