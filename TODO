@@ -36,14 +36,6 @@ o Installation instructions, clean up config stuff
    4) Lots of hard coded things within the application root that probably
      don't need to be there (fbset, matroxset)
 o Add page numbers to the menus, i.e. "Page 3/14"
-o Per-file mplayer options:
-  o Paul Aubin: What about a movie_name.mplayer file that could override the
-                default command-line? Just a text file with the
-                "-aspect 2.35 -hwac3"  etc in it... 
-o Use the "Guide" button to jump to the menu bar (?)
-  o Maybe change the left/right buttons to scroll to top/bottom of the current
-    page (if not there already) on the first click, and then change page on the 
-    second click.
 o Select packages for release (mplayer, xvid, nvrec, ffmpeg)
 o clean up Docs/Notes
 o Add DVD rip
