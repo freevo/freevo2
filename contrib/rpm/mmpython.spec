@@ -1,16 +1,12 @@
-%define name mmpython
-%define version 0.1
-%define release 1
-
-Summary: Python Media Meta Data module. See http://sourceforge.net/projects/mmpython for more info.
-Name: %{name}
-Version: %{version}
-Release: %{release}
+Summary: Python Media Meta Data module. 
+Name: mmpython
+Version: 0.1
+Release: 1_freevo
 Source0: %{name}_%{version}.tar.gz
 Copyright: lgpl
 Group: Development/Libraries
+URL:  http://sourceforge.net/projects/mmpython
 BuildRoot: %{_tmppath}/%{name}-buildroot
-Prefix: %{_prefix}
 
 %description
 MMPython is a Media Meta Data retrieval framework. It retrieves metadata from mp3, ogg, avi,

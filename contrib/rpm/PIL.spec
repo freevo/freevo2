@@ -5,11 +5,12 @@
 Summary:        Python Imaging Library (PIL)
 Name:           PIL
 Version:        %{version}
-Release:        1
+Release:        2
 License:        PIL_Freeware
 Group:          Development/Libraries
 Source:         http://www.pythonware.com/%{tarballname}-%{version}.tar.gz
-Patch:		%{tarballname}-%{version}-setup.patch
+Patch0:		%{tarballname}-%{version}-setup.patch
+Patch1:		%{tarballname}-%{version}-Setup.in.patch
 URL:            http://www.pythonware.com/
 Provides:	python-imaging, Imaging
 Requires:       python
@@ -30,7 +31,8 @@ image processing capabilities.
 
 %prep
 %setup -n %{tarballname}-%{version}
-%patch -p1
+%patch0 -p1
+%patch1 -p1
 
 %build
 pushd %corelib

@@ -2,18 +2,18 @@
 %define freevover 1.4
 %define freevorel 1_freevo
 ##############################################################################
-Summary: Meta-package for Freevo core functionality
-Name: freevo-core-suite
+Summary: Meta-package for Freevo recording functionality
+Name: freevo-recording-suite
 Version: %{freevover}
 Release: %{freevorel}
 Copyright: GPL
 Group: Applications/Multimedia
-URL:            http://freevo.sourceforge.net/
-Requires: SDL >= 1.2.6, SDL_image >= 1.2.3, SDL_ttf >= 2.0.6, SDL_mixer >= 1.2.5
-Requires: smpeg >= 0.4.4, freetype >= 2.1.4, util-linux
-Requires: python >= 2.2, python-game >= 1.5.6, python-imaging >= 1.1.4, PyXML
-Requires: mmpython, python-fchksum, python-mx-base >= 2.0.4, 
-Requires: aumix >= 2.8, libjpeg >= 6b, libexif >= 0.5.10
+URL:   http://freevo.sourceforge.net/
+Requires: freevo-core-suite
+Requires: python-twisted >= 1.0.7 
+Requires: vorbis-tools, libvorbis, lame, cdparanoia
+Requires: mp1e >= 1.9.3
+#Requires: ffmpeg >= 0.4.7
 Requires: %{freevoname}
 
 
@@ -23,8 +23,8 @@ and/or TV-out into a standalone multimedia jukebox/VCR. It builds on
 other applications such as xine, mplayer, tvtime and mencoder to play
 and record video and audio.
 
-This is a meta-package used by apt to setup all required core packages
-for using freevo.
+This is a meta-package used by apt to setup all required recording packages
+for using freevo to record TV programs.
 
 %prep
 

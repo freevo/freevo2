@@ -3,7 +3,7 @@
 Summary: Event-based framework for internet applications
 Name: python-twisted
 Version: 1.0.7
-Release: 1
+Release: 1_freevo
 Source0: Twisted-%{version}.tar.bz2
 License: LGPL
 Group: Development/Python

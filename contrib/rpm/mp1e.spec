@@ -1,6 +1,6 @@
 Name: mp1e
 Version: 1.9.3
-Release: 1
+Release: 1_freevo
 Summary: Real Time Software MPEG-1 Video/Audio Encoder
 Copyright: GPL
 Group: Applications/Multimedia
