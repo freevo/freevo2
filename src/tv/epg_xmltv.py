@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.51  2004/06/23 20:22:19  dischi
+# fix popup crash
+#
 # Revision 1.50  2004/06/22 01:10:21  rshortt
 # Add ratings and advisories.
 #
@@ -130,9 +133,6 @@ def get_guide(popup=None, verbose=True, XMLTV_FILE=None):
                 popup.show()
 
             cached_guide = util.read_pickle(pname)
-
-            if popup:
-                popup.destroy()
 
             epg_ver = None
             try:
