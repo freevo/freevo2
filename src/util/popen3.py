@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/12/10 19:46:35  dischi
+# add function to get the stdout of a command call
+#
 # Revision 1.7  2003/10/19 14:19:44  rshortt
 # Added OS_EVENT_WAITPID event for popen3.waitpid() to post so that recordserver
 # can pick it up and wait on its own child.  Child processes from recordserver
@@ -165,3 +168,17 @@ def waitpid(pid=0):
     wait_lock.release()
     return 0
     
+
+def stdout(app):
+    """
+    start app and return the stdout
+    """
+    ret = []
+    child = popen2.Popen3(app, 1, 100)
+    while(1):
+        data = child.fromchild.readline()
+        if not data:
+            break
+        ret.append(data)
+    child.wait()
+    return ret
