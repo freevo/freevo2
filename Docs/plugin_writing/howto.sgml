@@ -15,6 +15,7 @@
 <!ENTITY menuex3 SYSTEM "code/menu_MenuItem.py" CDATA linespecific>
 <!ENTITY menuex4 SYSTEM "code/menu_fullexample.py" CDATA linespecific>
 <!ENTITY mainmenupluginex SYSTEM "code/MainMenuPlugin.py" CDATA linespecific>
+<!ENTITY idlebarpluginex SYSTEM "code/idlebarplugin.py" CDATA linespecific>
 ]>
 
 <book>
@@ -378,6 +379,8 @@
     <sect1>
       <title>IdlebarPlugin</title>
       <para><emphasis>not written yet</emphasis></para>
+      <programlisting><inlinegraphic entityref="idlebarpluginex"></inlinegraphic>
+      </programlisting>
     </sect1>
 
     <sect1>
