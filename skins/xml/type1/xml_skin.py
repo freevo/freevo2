@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2002/10/05 18:10:57  dischi
+# Added support for a local_skin.xml file. See Docs/documentation.html
+# section 4.1 for details. An example is also included.
+#
 # Revision 1.10  2002/09/25 18:54:32  dischi
 # Changed the <cover> style to <covers> and <cover type=""/>. Added
 # border_size and border_color to cover
@@ -159,7 +163,7 @@ class XML_mainmenuitem:
     arg = None
 
 class XML_mainmenu:
-    items = []
+    items = {}
     
 class XMLSkin:
     menu = XML_menu()
@@ -358,16 +362,13 @@ class XMLSkin:
     #
     # read the main menu
     #
-    def read_mainmenu(self, file, menu_node, copy_content):
+    def read_mainmenu(self, file, menu_node):
         self.parse_node(menu_node, self.menu.item_main)
         for node in menu_node.children:
             if node.name == u'item':
                 item = XML_mainmenuitem()
-                if copy_content:
-                    item = copy.copy(item)
-                    self.mainmenu.items = copy.copy(self.mainmenu.items)
                 self.parse_mainmenunode(node, item)
-                self.mainmenu.items.insert(item.pos,item)                
+                self.mainmenu.items[item.pos] = item                
 
 
     #
@@ -385,7 +386,7 @@ class XMLSkin:
                         if node.name == u'mp3':
                             self.read_mp3(file, node, copy_content)
                         if node.name == u'main':
-                            self.read_mainmenu(file, node, copy_content)
+                            self.read_mainmenu(file, node)
                     
         except:
             print "ERROR: XML file corrupt"

@@ -170,6 +170,37 @@ The file skins/xml/type1/768x576.xml contains the settings for the current skin
 for 768x576 pixel resolutions. Currently there is only support for the menu and
 mp3 player in the XML file, the image viewer is unsupported right now.
 
+If you want to change some parts of the skin, let's say only some colors and
+the background image, you can put a file called config_skin.xml in the freevo
+root directory. This file only needs to contain the changes you made.
+
+For example, you want the mythtv-768 background image and want to disable the
+image viewer you would have the following config_skin.xml file:
+   <?xml version="1.0" ?>
+   <freevo>
+   
+     <skin>
+       <main>
+         <item pos="3" visible="no"/>
+       </main>
+   
+       <menu>
+         <bgbitmap>skins/images/mythtv-768.png</bgbitmap>
+         <title>
+           <font color="0xffffff"/>
+           <shadow visible="yes" color="0xaa000000" x="3" y="3"/>
+         </title>
+         <submenu>
+           <font name="bluehigh" color="0xffffff"/>
+           <selection>
+             <font name="bluehigh"/>
+           </selection>
+         </submenu>
+       </menu>   
+     </skin>
+   </freevo>
+      
+
 WARNING: the XML file depends on the python skin. Other skins may have
 different settings and this is a new feature and maybe some things will change
 in the future.

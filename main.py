@@ -4,6 +4,10 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.71  2002/10/05 18:10:56  dischi
+# Added support for a local_skin.xml file. See Docs/documentation.html
+# section 4.1 for details. An example is also included.
+#
 # Revision 1.70  2002/10/01 13:46:29  dischi
 # Added signal handler for SIGTERM.
 # Now freevo reacts on "kill [-15] ..." for a controlled shutdown
@@ -279,10 +283,12 @@ def getcmd():
 
     # Load the main menu items from the skin
     menu_items = skin.settings.mainmenu.items
+
     for i in menu_items:
-        if i.visible:
-            items += [menu.MenuItem(i.name,eval(i.action), i.arg, eventhandler,
-                                    None, 'main', i.icon)]
+        if menu_items[i].visible:
+            items += [menu.MenuItem(menu_items[i].name, eval(menu_items[i].action),\
+                                    menu_items[i].arg, eventhandler,
+                                    None, 'main', menu_items[i].icon)]
             
     mainmenu = menu.Menu('FREEVO MAIN MENU', items, packrows=0, umount_all = 1)
     menuwidget.pushmenu(mainmenu)
