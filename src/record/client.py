@@ -155,6 +155,9 @@ class Recordings:
 
 
     def __describe_callback(self, result):
+        if isinstance(result, mbus.types.MError):
+            log.error(str(result))
+            return
         if result.appResult != 'OK' or not result.appStatus:
             log.error(str(result.appDescription))
             return
