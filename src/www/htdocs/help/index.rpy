@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/10/31 18:56:15  dischi
+# Add framework for plugin writing howto
+#
 # Revision 1.2  2003/10/07 17:14:21  dischi
 # typo
 #
@@ -68,6 +71,7 @@ class HelpResource(FreevoResource):
         fv.res += '<li><a href="plugins.rpy">Plugin List</a></li>'
         fv.res += '<li><a href="doc.rpy?file=FxdFiles">FXD files</a></li>'
         fv.res += '<li><a href="doc.rpy?file=SkinInfo">Skinning Informations</a></li>'
+        fv.res += '<li><a href="howto.rpy?type=plugin">Plugin Writing Howto</a></li>'
 
         fv.res += '<br><br>'
         fv.printLinks()

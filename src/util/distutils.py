@@ -66,6 +66,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/10/31 18:56:14  dischi
+# Add framework for plugin writing howto
+#
 # Revision 1.6  2003/10/19 17:30:30  dischi
 # looks nicer
 #
@@ -138,6 +141,7 @@ def data_finder(result, dirname, names):
                        replace('./i18n', 'share/locale').\
                        replace('./contrib', 'share/freevo/contrib').\
                        replace('./Docs', 'share/doc/freevo-%s' % version.__version__).\
+                       replace('/plugin_writing/html', '/plugin_writing'). \
                        replace('./helpers', 'share/freevo/helpers'), files))
     return result
 
@@ -214,4 +218,5 @@ os.path.walk('./contrib/xmltv', data_finder, data_files)
 os.path.walk('./src/www/htdocs', data_finder, data_files)
 os.path.walk('./i18n', data_finder, data_files)
 os.path.walk('./Docs/howto', data_finder, data_files)
+os.path.walk('./Docs/plugin_writing/html', data_finder, data_files)
 

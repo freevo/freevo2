@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/10/31 18:56:14  dischi
+# Add framework for plugin writing howto
+#
 # Revision 1.2  2003/10/07 17:13:22  dischi
 # fix howto path lookup
 #
@@ -59,12 +62,17 @@ SEARCH_PATH = (os.path.join(config.SHARE_DIR, '../doc/freevo-%s' % version.__ver
 class HowtoResource(FreevoResource):
     def __init__(self):
         FreevoResource.__init__(self)
-        self.BASEDIR = None
+        self.BASEDIR = {}
         for d in SEARCH_PATH:
             if os.path.isdir(os.path.join(d, 'freevo_howto')):
-                self.BASEDIR = os.path.join(d, 'freevo_howto')
+                self.BASEDIR['howto'] = os.path.join(d, 'freevo_howto')
             elif os.path.isdir(os.path.join(d, 'howto')):
-                self.BASEDIR = os.path.join(d, 'howto')
+                self.BASEDIR['howto'] = os.path.join(d, 'howto')
+
+            if os.path.isdir(os.path.join(d, 'plugin_writing/html')):
+                self.BASEDIR['plugin'] = os.path.join(d, 'plugin_writing/html')
+            elif os.path.isfile(os.path.join(d, 'plugin_writing/index.html')):
+                self.BASEDIR['plugin'] = os.path.join(d, 'plugin_writing')
         
     def _render(self, request):
         fv = HTMLResource()
@@ -75,28 +83,39 @@ class HowtoResource(FreevoResource):
         if not file:
             file = 'index.html'
 
-        if not self.BASEDIR:
-            fv.printHeader('Freevo Installation HOWTO', '/styles/main.css')
-            fv.res += 'ERROR, unable to load freevo_howto html files<br>'
-            fv.res += 'If you use a CVS version of Freevo, run "docbook2html '\
-                      '-o freevo_howto freevo_howto.sgml" in the Docs directory '\
-                      'of Freevo. '\
+        type = fv.formValue(form, 'type')
+        if not type:
+            type = 'howto'
+            
+        if type == 'howto':
+            name = 'Freevo Installation HOWTO'
+        else:
+            name = 'Freevo Plugin Writing HOWTO'
+            
+        if not self.BASEDIR.has_key(type):
+            fv.printHeader(name, '/styles/main.css')
+            fv.res += 'ERROR, unable to load html files<br>'
+            fv.res += 'If you use a CVS version of Freevo, run "autogen.sh". '\
                       'The files are searched in the following locations:<br><ol>'
             for d in SEARCH_PATH:
-                fv.res += '<li>%s</li>\n' % os.path.join(d, 'freevo_howto')
+                fv.res += '<li>%s</li>\n' % d
             fv.res += '</ol>'
+
         else:
-            for line in util.readfile(os.path.join(self.BASEDIR, file)):
+            for line in util.readfile(os.path.join(self.BASEDIR[type], file)):
                 if line.find('HREF') == 0 and line.find('http') == -1:
-                    line = line[:line.find('="')+2] + 'howto.rpy?file=' + \
-                           line[line.find('="')+2:]
+                    line = line[:line.find('="')+2] + 'howto.rpy?type=' + \
+                           type + '&file=' + line[line.find('="')+2:]
                 if line.find('>Freevo Installation HOWTO: Build your own media '\
                              'box with Freevo and Linux</TH') == 0:
+                    line = ''
+                if line.find('>Freevo Plugin Writing HOWTO: Writing your own '\
+                             'plugins for Freevo</TH') == 0:
                     line = ''
                 if pos == 0 and line.find('><TITLE') == 0:
                     pos = 1
                 elif pos == 1:
-                    fv.printHeader('Freevo Installation HOWTO: %s' % line[1:line.find('<')],
+                    fv.printHeader('%s: %s' % (name, line[1:line.find('<')]),
                                    '/styles/main.css')
                     pos = 2
                 elif pos == 2 and line.find('><BODY') == 0:
