@@ -178,7 +178,8 @@ LOCAL_CONF_CHANGES = [
     logic is now in TV_CHANNELS. Removed old not needed variables (please
     check this file). The default audio device is now alsa not oss. 
     Some record and tv variables changed (like padding). See this sections in
-    the freevo_config.py for details. Add MPLAYER_RESAMPLE_AUDIO.
+    the freevo_config.py for details. Also add three mplayer filter
+    MPLAYER_RESAMPLE_AUDIO, MPLAYER_VF_INTERLACED, MPLAYER_VF_PROGRESSIVE.
     ''' ),
     ]
 
