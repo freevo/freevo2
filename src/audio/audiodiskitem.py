@@ -36,7 +36,7 @@ class AudioDiskItem(Playlist):
     """
     class for handling audio disks
     """
-    def __init__(self, disc_id, parent, devicename = None, display_type = None):
+    def __init__(self, disc_id, parent, name='Unknown CD Album', devicename = None, display_type = None):
 
         Item.__init__(self, parent)
         self.type = 'audiocd'
