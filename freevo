@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.74  2003/08/30 09:22:36  dischi
+# Removed -OO for Gentoo. Other distros may need this, too. I also had some
+# problems with Python using older version (pyo) and not the current (pyc).
+#
 # Revision 1.73  2003/08/24 01:35:59  outlyer
 # These two changes reduce the amount of stuff being emailed to people when they
 # use cron.
@@ -258,8 +262,22 @@ fi
 
 trap './freevo stop' 1 2 15
 
+# don't use -OO for Gentoo, it's hard to remove the pyo files
+# later (and it's a source for bugs
+if [ -e /etc/gentoo-release ]; then
+    OPTIMZE=""
+    if [ -e $FREEVO_PYTHON/main.pyo ]; then
+	echo "WARNING: you have Python pyo files in your system. They may"
+	echo "cause some bugs by using older version of some files."
+	echo "Please run 'find $FREEVO_PYTHON/.. -name \\*.pyo | xargs rm'"
+	echo
+    fi
+else
+    OPTIMZE="-OO"
+fi
+
 # Start the main freevo application
-$RUNAPP python -OO $FREEVO_PYTHON/main.py $@ &
+$RUNAPP python $OPTIMZE $FREEVO_PYTHON/main.py $@ &
 
 echo $! > $PID_FILE
 PID=`cat $PID_FILE`
