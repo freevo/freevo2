@@ -14,6 +14,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2002/10/12 22:30:45  krister
+# Removed debug output.
+#
 # Revision 1.16  2002/10/08 04:47:47  krister
 # Changed the new playlist type list to be displayed correctly. Added popup box for recursive scanning (can take a long time).
 #
@@ -73,7 +76,7 @@ import osd     # Yes.. we use the GUI for printing stuff.
 import skin    # The skin class
 
 # Set to 1 for debug output
-DEBUG = 1
+DEBUG = 0
 
 TRUE = 1
 FALSE = 0

@@ -9,6 +9,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2002/10/12 22:30:45  krister
+# Removed debug output.
+#
 # Revision 1.10  2002/10/09 17:24:02  dischi
 # only do debug print when we have info
 #
@@ -181,9 +184,6 @@ def parse(file, dir, mplayer_files):
                         playlist = parseVideo(dir, mplayer_files, node)
                     elif node.name == u'info':
                         info = parseInfo(node)
-
-    if info:
-        print info.rating
 
     return MovieInformation(title, image, playlist, id, label, info, file)
 
