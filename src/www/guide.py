@@ -11,6 +11,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2005/01/14 22:41:45  rshortt
+# More fixes: variable guide start time, category box, recordserver message.
+# TODO:
+#   -find out from pyepg when our last program is scheduled to let us better
+#    determine how far forward to let users skip
+#   -find out from pyepg which program categories it has (ie: news, sports)
+#
 # Revision 1.3  2005/01/13 20:19:33  rshortt
 # Place the authentication into www/server.py to protect mote than just
 # the .py files.
@@ -126,17 +133,10 @@ log = logging.getLogger('www')
 
 class GuideResource(FreevoResource):
 
-    def makecategorybox(self, chanlist):
-        allcategories = []
-        for chan in chanlist:
-            for prog in chan.epg.programs:
-                if prog.categories:
-                    allcategories.extend(prog.categories)
-        if allcategories:
-            allcategories=util.unique(allcategories)
-            allcategories.sort()
-        else:
-            return ''
+    def makecategorybox(self):
+        # TODO: get the categories from pyepg (from the DB)
+        allcategories = ['Sports', 'News']
+        allcategories.sort()
         retval = '<select name="category">' + "\n"
         for cat in allcategories:
             retval += '<option value="%s" ' % cat
@@ -152,8 +152,9 @@ class GuideResource(FreevoResource):
         gstart_t = time.localtime(gstart)
         myt = time.mktime((myt_t[0], myt_t[1], myt_t[2], 0, 0, 5, 
                            myt_t[6], myt_t[7], -1))
-        # listh = tv_util.when_listings_expire()
-        listh = 0
+        # Default to one week ahead, at least until we have a good way to
+        # see when our listings expire.
+        listh = 24*7
         if listh == 0:
             return retval + '</select>\n'
         listd = int((listh/24)+2)
@@ -179,7 +180,7 @@ class GuideResource(FreevoResource):
         hrinc = hrstart
         hrstop = hrstart + (60*60*24)
         while (hrinc < hrstop):
-            myoff = hrinc - hrstart
+            myoff = int(hrinc - hrstart)
             retval += '<option value="' + str(myoff) + '"'
             if (abs(gstart - hrinc) < 60):
                 retval += ' SELECTED '
@@ -203,10 +204,14 @@ class GuideResource(FreevoResource):
         mfrguideinput = form.get('stime')
         mfrguideinputday = form.get('day')
         mfrguideinputoff = form.get('offset')
+
         if mfrguideinput:
-            mfrguidestart = int(mfrguideinput)
+            mfrguidestart = float(mfrguideinput)
         elif mfrguideinputday and mfrguideinputoff:
             mfrguidestart = float(mfrguideinputday) + float(mfrguideinputoff)
+        elif mfrguideinputoff:
+            mfrguidestart = mfrguidestart + float(mfrguideinputoff)
+
         now = int(mfrguidestart / INTERVAL) * INTERVAL
         now2 = int(time.time() / INTERVAL) * INTERVAL
         mfrnextguide = now + INTERVAL * n_cols
@@ -216,29 +221,27 @@ class GuideResource(FreevoResource):
         if mfrprevguide < now2:
             mfrprevguide = 0
 
-        # (got_schedule, schedule) = ri.getScheduledRecordings()
-        got_schedule = False
-        schedule = 'no schedule'
-        if got_schedule:
-            schedule = schedule.getProgramList()
-
         fv.printHeader(_('TV Guide'), config.WWW_STYLESHEET, config.WWW_JAVASCRIPT, selected=_('TV Guide'))
         fv.res += '<div id="content">\n';
         fv.res += '&nbsp;<br/>\n'
-        if not got_schedule:
-            fv.printMessages(
-                [ '<b>'+_('ERROR')+'</b>: '+_('Recording server is unavailable.') ]
-                )
+
+        # Fool "is prog scheduled" until that is hooked up.
+        got_schedule = False
+
+        if not record.client.recordings.server:
+            fv.res += '<p class="alert"><b>'+_('Notice')+'</b>: ' \
+                      +_('The recording server is down.')+'</p>\n'
 
         desc = ''
 
         fv.tableOpen()
         fv.tableRowOpen('class="chanrow"')
+
         fv.tableCell('<form>'+_('Time')+':&nbsp;' + self.maketimejumpboxday(now) + self.maketimejumpboxoffset(now) + '<input type=submit value="'+_('View')+'"></form>', 'class="utilhead"')
-        # categorybox =  self.makecategorybox(get_channels().get_all())
-        categorybox = 0
-        if categorybox:
-            fv.tableCell('<form action="genre">'+_('Show')+'&nbsp;'+_('Category')+':&nbsp;'+categorybox+'<input type=submit value="'+_('Change')+'"></form>', 'class="utilhead"')
+
+        categorybox =  self.makecategorybox()
+        fv.tableCell('<form action="genre">'+_('Show')+'&nbsp;'+_('Category')+':&nbsp;'+categorybox+'<input type=submit value="'+_('Change')+'"></form>', 'class="utilhead"')
+
         fv.tableRowClose()
         fv.tableClose()
 
