@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.107  2004/02/01 17:09:26  dischi
+# o add menuw to playlist for whole directory to show it when selected
+# o support for dirconfig in mimetype plugins
+#
 # Revision 1.106  2004/01/31 16:40:25  dischi
 # removed unneeded attr
 #
@@ -109,44 +113,40 @@ from gui import PasswordInputBox, AlertBox, ProgressBox
 skin = skin.get_singleton()
 
 all_variables = [('DIRECTORY_SORT_BY_DATE', _('Directory Sort By Date'),
-                  _('Sort directory by date and not by name.')),
+                  _('Sort directory by date and not by name.'), False),
                  
                  ('DIRECTORY_AUTOPLAY_SINGLE_ITEM', _('Directory Autoplay Single Item'),
                   _('Don\'t show directory if only one item exists and auto-select ' \
-                    'the item.')),
+                    'the item.'), False),
 
                  ('DIRECTORY_FORCE_SKIN_LAYOUT', _('Force Skin Layout'),
                   _('Force skin to a specific layout. This option doesn\'t work with ' \
-                    'all skins and the result may differ based on the skin.')),
+                    'all skins and the result may differ based on the skin.'), False),
 
                  ('DIRECTORY_SMART_SORT', _('Directory Smart Sort'),
-                  _('Use a smarter way to sort the items.')),
+                  _('Use a smarter way to sort the items.'), False),
 
                  ('DIRECTORY_USE_MEDIAID_TAG_NAMES', _('Use MediaID Tag Names'),
-                  _('Use the names from the media files tags as display name.')),
+                  _('Use the names from the media files tags as display name.'), False),
 
                  ('DIRECTORY_REVERSE_SORT', _('Directory Reverse Sort'),
-                  _('Show the items in the list in reverse order.')),
+                  _('Show the items in the list in reverse order.'), False),
 
-                 ('DIRECTORY_AUDIO_FORMAT_STRING', '', ''),
+                 ('DIRECTORY_AUDIO_FORMAT_STRING', '', '', False),
 
                  ('DIRECTORY_CREATE_PLAYLIST', _('Directory Create Playlist'),
                   _('Handle the directory as playlist. After one file is played, the next '\
-                    'one will be started.')) ,
+                    'one will be started.'), True) ,
 
                  ('DIRECTORY_ADD_PLAYLIST_FILES', _('Directory Add Playlist Files'),
-                  _('Add playlist files to the list of items')) ,
+                  _('Add playlist files to the list of items'), True) ,
 
                  ('DIRECTORY_ADD_RANDOM_PLAYLIST', _('Directory Add Random Playlist'),
-                  _('Add an item for a random playlist')) ,
+                  _('Add an item for a random playlist'), True) ,
 
                  ('DIRECTORY_AUTOPLAY_ITEMS', _('Directory Autoplay Items'),
                   _('Autoplay the whole directory (as playlist) when it contains only '\
-                    'files and no directories' ))]
-
-# varibales that contain a type list
-type_list_variables = [ 'DIRECTORY_CREATE_PLAYLIST', 'DIRECTORY_ADD_PLAYLIST_FILES',
-                        'DIRECTORY_ADD_RANDOM_PLAYLIST', 'DIRECTORY_AUTOPLAY_ITEMS' ]
+                    'files and no directories' ), True)]
 
 
 class DirItem(Playlist):
@@ -170,7 +170,7 @@ class DirItem(Playlist):
             self.name = os.path.basename(directory)
             
         self.dir  = os.path.abspath(directory)
-        self.info = mediainfo.get(directory)
+        self.info = mediainfo.get_dir(directory)
         
         if add_args == None and hasattr(parent, 'add_args'): 
             add_args = parent.add_args
@@ -179,11 +179,21 @@ class DirItem(Playlist):
 
         # set directory variables to default
         global all_variables
-        for v,n,d in all_variables:
-            if hasattr(parent, v):
-                setattr(self, v, eval('parent.%s' % v))
+        self.all_variables = copy.copy(all_variables)
+        
+        # Check mimetype plugins if they want to add something
+        for p in plugin.mimetype(display_type):
+            self.all_variables += p.dirconfig(self)
+
+        # set the variables to the default values
+        for var in self.all_variables:
+            if hasattr(parent, var[0]):
+                setattr(self, var[0], getattr(parent, var[0]))
+            elif hasattr(config, var[0]):
+                setattr(self, var[0], getattr(config, var[0]))
             else:
-                setattr(self, v, eval('config.%s' % v))
+                setattr(self, var[0], False)
+
         self.modified_vars = []
 
         # Check for a cover in current dir
@@ -240,8 +250,6 @@ class DirItem(Playlist):
             self.skin_fxd = self.folder_fxd
             return
         
-        global all_variables
-
         # read attributes
         self.name = fxd.getattr(node, 'title', self.name)
 
@@ -255,9 +263,9 @@ class DirItem(Playlist):
 
         for child in fxd.get_children(node, 'setvar', 1):
             # <setvar name="directory_smart_sort" val="1"/>
-            for v,n,d in all_variables:
+            for v,n,d, type_list in self.all_variables:
                 if child.attrs[('', 'name')].upper() == v.upper():
-                    if v.upper() in type_list_variables:
+                    if type_list:
                         if int(child.attrs[('', 'val')]):
                             setattr(self, v, [self.display_type])
                         else:
@@ -270,6 +278,15 @@ class DirItem(Playlist):
                     self.modified_vars.append(v)
 
 
+    def __is_type_list_var__(self, var):
+        """
+        return if this variable to be saved is a type_list
+        """
+        for v,n,d, type_list in self.all_variables:
+            if v == var:
+                return type_list
+        return False
+    
 
     def write_folder_fxd(self, fxd, node):
         """
@@ -282,7 +299,7 @@ class DirItem(Playlist):
 
         # add current vars as setvar
         for v in self.modified_vars:
-            if v in type_list_variables:
+            if self.__is_type_list_var__(v):
                 if getattr(self, v):
                     val = 1
                 else:
@@ -305,7 +322,7 @@ class DirItem(Playlist):
             if self.media:
                 return None
             
-            space = eval('util.%s(self.dir)' % key) / 1000000
+            space = getattr(util, key)(self.dir) / 1000000
             if space > 1000:
                 space='%s,%s' % (space / 1000, space % 1000)
             return space
@@ -521,22 +538,19 @@ class DirItem(Playlist):
         if arg and arg.startswith('playlist:'):
             if arg.endswith(':random'):
                 Playlist(playlist = [ (self.dir, 0) ], parent = self,
-                         display_type=display_type, random=True).play()
+                         display_type=display_type, random=True).play(menuw=menuw)
             elif arg.endswith(':recursive'):
                 Playlist(playlist = [ (self.dir, 1) ], parent = self,
-                         display_type=display_type, random=False).play()
+                         display_type=display_type, random=False).play(menuw=menuw)
             elif arg.endswith(':random_recursive'):
                 Playlist(playlist = [ (self.dir, 1) ], parent = self,
-                         display_type=display_type, random=True).play()
+                         display_type=display_type, random=True).play(menuw=menuw)
             return
         
         if config.OSD_BUSYICON_TIMER:
             osd.get_singleton().busyicon.wait(config.OSD_BUSYICON_TIMER[0])
         
-        files = vfs.listdir(self.dir)
-
-        self.all_files = copy.copy(files)
-
+        files       = vfs.listdir(self.dir)
         num_changes = mediainfo.check_cache(self.dir)
             
         pop = None
@@ -563,7 +577,6 @@ class DirItem(Playlist):
         #
         # build items
         #
-
         # build play_items, pl_items and dir_items
         for p in plugin.mimetype(display_type):
             for i in p.get(self, files):
@@ -576,7 +589,7 @@ class DirItem(Playlist):
 
         # normal DirItems
         for filename in files:
-            if vfs.isdir(filename):
+            if os.path.isdir(filename):
                 d = DirItem(filename, self, display_type = self.display_type)
                 self.dir_items.append(d)
 
@@ -689,13 +702,12 @@ class DirItem(Playlist):
             if self.skin_fxd:
                 item_menu.skin_settings = skin.load(self.skin_fxd)
 
-            if menuw:
-                menuw.pushmenu(item_menu)
+            menuw.pushmenu(item_menu)
 
             dirwatcher.cwd(menuw, self, item_menu, self.dir)
             self.menu  = item_menu
             self.menuw = menuw
-        return items
+
 
 
     def reload(self):
@@ -741,7 +753,7 @@ class DirItem(Playlist):
 
         # get current value, None == no special settings
         if arg in self.modified_vars:
-            if arg in type_list_variables:
+            if self.__is_type_list_var__(arg):
                 if getattr(self, arg):
                     current = 1
                 else:
@@ -765,21 +777,26 @@ class DirItem(Playlist):
         # switch from no settings to 0
         if current == None:
             self.modified_vars.append(arg)
-            if arg in type_list_variables:
+            if self.__is_type_list_var__(arg):
                 setattr(self, arg, [])
             else:
                 setattr(self, arg, 0)
 
         # inc variable
         elif current < max:
-            if arg in type_list_variables:
+            if self.__is_type_list_var__(arg):
                 setattr(self, arg, [self.display_type])
             else:
                 setattr(self, arg, current+1)
 
         # back to no special settings
         elif current == max:
-            setattr(self, arg, getattr(config, arg))
+            if self.parent and hasattr(self.parent, arg):
+                setattr(self, arg, getattr(self.parent, arg))
+            if hasattr(config, arg):
+                setattr(self, arg, getattr(config, arg))
+            else:
+                setattr(self, arg, False)
             self.modified_vars.remove(arg)
 
         # create new item with updated name
@@ -806,7 +823,7 @@ class DirItem(Playlist):
         show the configure dialog for folder specific settings in folder.fxd
         """
         items = []
-        for i, name, descr in all_variables:
+        for i, name, descr, type_list in self.all_variables:
             if name == '':
                 continue
             name += '\t'  + self.configure_set_name(i)
@@ -871,6 +888,7 @@ class Dirwatcher(plugin.DaemonPlugin):
             self.files     = self.listoverlay()
             self.item.__dirwatcher_last_time__  = self.last_time
             self.item.__dirwatcher_last_files__ = self.files
+
 
     def scan(self, force=False):
         if not self.dir:
