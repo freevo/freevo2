@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2002/11/28 19:55:42  dischi
+# add function to make a nice name from a filename
+#
 # Revision 1.3  2002/11/25 02:17:54  krister
 # Minor bugfixes. Synced to changes made in the main tree.
 #
@@ -347,3 +350,18 @@ def gzopen(file):
     else:
          f = open(file)
     return f
+
+FILENAME_REGEXP = re.compile("^(.*?)_(.)(.*)$")
+
+def getname(file):
+    if not os.path.exists(file):
+        return file
+    name = os.path.splitext(os.path.basename(file))[0]
+    name = name[0].upper() + name[1:]
+    while FILENAME_REGEXP.match(name):
+        m = FILENAME_REGEXP.match(name)
+        if m:
+            name = m.group(1) + ' ' + m.group(2).upper() + m.group(3)
+    if name[-1] == '_':
+        name = name[:-1]
+    return name
