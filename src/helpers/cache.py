@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2004/03/21 09:39:54  dischi
+# check for updated mmpython
+#
 # Revision 1.29  2004/03/13 22:36:16  dischi
 # do not remove num_ infos we already have
 #
@@ -428,7 +431,7 @@ if __name__ == "__main__":
                 mmchanged, freevo_changed, part_update, complete_update = info
 
             # let's warn about some updates
-            if freevo_changed < VERSION:
+            if freevo_changed < VERSION or mmpython.version.CHANGED > mmchanged:
                 print 'Cache too old, forcing rebuild'
                 rebuild = 2
                 complete_update = int(time.time())

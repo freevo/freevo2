@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2004/03/21 09:39:54  dischi
+# check for updated mmpython
+#
 # Revision 1.36  2004/03/13 23:44:02  dischi
 # audio stream selection fixes
 #
@@ -708,6 +711,12 @@ if __freevo_app__ == 'main':
                 print 'Warning: Freevo cache helper/informations updated.'
                 print 'Please rerun \'freevo cache\' to speed up Freevo'
                 print
+            elif mmpython.version.CHANGED > mmchanged:
+                print
+                print 'Warning: mmpython as changed.'
+                print 'Please rerun \'freevo cache\' to get the latest updates'
+                print
+                
     except:
         print
         print 'Error: unable to read mmpython version information'
