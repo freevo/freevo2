@@ -45,6 +45,7 @@ from sqlite import IntegrityError, OperationalError
 # get logging object
 log = logging.getLogger('pyepg')
 
+latest_version = "0.1.1"
 
 class Database:
     """
@@ -52,7 +53,7 @@ class Database:
     """
     def __init__(self, dbpath):
         if not os.path.isfile(dbpath):
-            log.warning('epg database missing, creating it')
+            log.warning('EPG database missing, creating it')
             scheme = os.path.join(os.path.dirname(__file__), 'epg_schema.sql')
             os.system('sqlite %s < %s 2>/dev/null >/dev/null' % \
                       (dbpath, scheme))
@@ -64,6 +65,27 @@ class Database:
             except OperationalError, e:
                 notifier.step(False, False)
         self.cursor = self.db.cursor()
+        ver = self.get_version()
+        log.info('EPG database version %s' % ver)
+        if ver != latest_version:
+            log.warning('EPG database out of date, latest version is %s' % \
+                        latest_version)
+            self.upgrade_db(ver)
+
+
+    def upgrade_db(self, ver):
+        # TODO: finish this or change it 
+        # Here's a quick hack for the current upgrade:
+
+        if ver == "0.0.0" and latest_version == "0.1.1":
+            log.info('Upgrading EPG database from %s to %s.' % \
+                     (ver, latest_version))
+            self.execute('drop table admin')
+            self.execute('create table versioning (thing text primary key, version text)')
+            self.execute('insert into versioning (thing, version) values ("sql", "0.1.1")')
+            self.execute('create index programs_title on programs (title)')
+            self.commit()
+            return
 
 
     def commit(self):
@@ -79,3 +101,22 @@ class Database:
                 return self.cursor.fetchall()
             except OperationalError, e:
                 notifier.step(False, False)
+
+
+    def get_version(self):
+        if self.check_table('versioning'):
+            return self.execute('select version from versioning where thing="sql"')[0][0]
+        else:
+            return "0.0.0"
+
+
+    def check_table(self, table=None):
+        if not table:
+            return False
+        # verify the table exists
+        if not self.execute('select name from sqlite_master where ' + \
+                            'name="%s" and type="table"' % table):
+            return None
+        return table
+
+
