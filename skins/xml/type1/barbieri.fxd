@@ -1,0 +1,244 @@
+<?xml version="1.0" ?>
+<freevo>
+
+  <skin include="blue1_small" geometry="800x600">
+    <iconset dir="skins/icons/blurr/"/>
+    <main>
+      <item label="tv" name="Watch TV" icon="" 
+	image="../blue_round2/tv_watermark.png"/>
+      <item label="video" name="Watch a Movie" icon=""
+	image="../blue_round2/movie_watermark.png"/>
+      <item label="audio" name="Listen to Music" icon="" 
+	image="../blue_round2/music_watermark.png"/>
+      <item label="image" name="Look at Pictures" icon="" 
+	image="../blue_round2/image_watermark.png"/>
+      <item label="games" name="Games" icon="" image=""/>
+      <item label="shutdown" name="Shutdown" icon="" 
+	image="../blue_round2/shutdown_watermark.png" visible="no"/> 
+    </main>
+    
+    <!-- Redefine of the type default -->
+    <menuset label="normal text style">
+      <screen layout="screen0" visible="no"/>
+
+      <!-- 
+      title0 is already defined in blue1_big, but there will
+      is a new definition of the font from the layout (white big)
+      -->
+      <title visible="no"/>
+      <view x="20" y="100" width="300" height="300"/> 
+      <listing layout="listing" x="330" y="110" width="460" height="450">
+	<image filename="blurr-up.png" label="uparrow" x="290" y="110"/>
+	<image filename="blurr-down.png" label="downarrow" x="290" y="520"/>
+      </listing>
+    </menuset>
+
+
+    <!-- definition of the main menu -->
+    <menuset label="main menu">
+      <screen layout="screen watermark" visible="yes">
+	<area x="0" y="0" width="800" height="600"/>
+      </screen>
+      <listing layout="main listing" visible="yes">
+	<area x="230" y="280" width="360" height="240"/> 
+      </listing>
+      <listing layout="list_main" x="230" y="180" width="380" height="390"/>
+      <view visible="no"/>
+    </menuset>
+
+    <!-- definition of video/audio/image menu. The same as default, but with a -->
+    <!-- different background -->
+    <menu type="video">
+      <style text="video"/>
+    </menu>
+      
+    <menu type="audio">
+      <style text="audio"/>
+    </menu>
+      
+    <menu type="image">
+      <style text="image"/>
+    </menu>
+      
+    <menu type="tv">
+      <style text="tv"/>
+    </menu>
+      
+    <menuset label="video" inherits="normal text style">
+      <screen layout="video screen"/>
+    </menuset>
+      
+    <menuset label="audio" inherits="normal text style">
+      <screen layout="audio screen"/>
+    </menuset>
+      
+    <menuset label="image" inherits="normal text style">
+      <screen layout="image screen"/>
+    </menuset>
+      
+    <menuset label="tv" inherits="normal text style"> 
+      <view visible="no"/>
+      <listing x="100" width="680">
+	<image label="uparrow" x="290" y="110"/>
+	<image label="downarrow" x="290" y="520"/>
+      </listing>
+      <screen layout="tv menu screen"/>
+    </menuset>
+      
+
+
+
+    <!-- ********************************************** -->
+    <!-- LAYOUT DEFINITIONS -->
+
+
+    <image label="background" filename="aubin/blurr.jpg"/>
+    
+    <layout label="screen watermark">
+      <background>
+	<image image="background" x="0" y="0" label="background"/>
+	<image x="435" y="230" width="370" height="380" label="watermark"/>
+      </background>
+    </layout>
+
+    <layout label="video screen">
+      <background>
+	<image image="background" x="0" y="0" label="background"/>
+	<image filename="../blue_round2/movie_watermark.png" x="435" y="230" width="370"
+	  height="380"/>
+      </background>
+    </layout>
+
+    <layout label="audio screen">
+      <background>
+	<image image="background" x="0" y="0" label="background"/>
+	<image filename="../blue_round2/music_watermark.png" x="435" y="230" width="370"
+	  height="380"/>
+      </background>
+    </layout>
+
+    <layout label="image screen">
+      <background>
+	<image image="background" x="0" y="0" label="background"/>
+	<image filename="../blue_round2/image_watermark.png" x="435" y="230" width="370"
+	  height="380"/>
+      </background>
+    </layout>
+
+    <layout label="tv menu screen">
+      <background>
+	<image image="background" x="0" y="0" label="background"/>
+	<image filename="../blue_round2/tv_watermark.png" x="435" y="230" width="370"
+	  height="380"/>
+      </background>
+    </layout>
+
+
+
+
+    <layout label="player info">
+      <background>
+	<rectangle size="0" bgcolor="0x80000000" radius="20" width="max"/>
+      </background>
+      <content x="55" y="10" height="max-50" width="max-90" type="text"
+	spacing="10" font="player">
+	<item type="default">
+	  Title:   \t@title@
+	  Artist:  \t@artist@
+	  Album:   \t@album@  (@year@)
+	  Track:   \t@track@/@trackof@
+	  
+	  Elapsed: \t@elapsed@  (@length@)
+	</item>
+      </content>
+    </layout>
+
+    <!-- main menu listing area -->
+    <layout label="list_main">
+      <content align="center" type="text" spacing="10">
+	<item type="default" font="main"/>
+	<item type="selected" font="main selected">
+	  <rectangle bgcolor="selection" size="0" y="-5" x="-10"
+	    width="max+20" height="max+10" radius="15"/>
+	</item>
+      </content>
+    </layout>
+
+
+
+    <!-- default view area -->
+    <layout label="view0">
+      <content align="center" valign="center">
+	<item type="default">
+	  <rectangle size="0" bgcolor="0x80000000" radius="8" x="-10" y="-10"
+	    width="max+20" height="max+20"/>
+	</item>
+      </content>
+    </layout>
+    
+
+    <!-- default listing area -->
+    <layout label="listing">
+      <background/>
+      <content type="text" spacing="2">
+	<item type="default" font="grey"/>
+	<item type="image" font="grey" image="../AquaFusion/images.png"/>
+	<item type="audio" font="grey" image="../AquaFusion/mp3.png"/>
+	<item type="video" font="grey" image="../AquaFusion/movies.png"/>
+	<item type="playlist" font="grey" image="../gnome/gedit-icon.png"/>
+	<item type="dir" font="grey" image="../gnome/gnome-folder.png"/>
+
+
+	<item type="selected" font="white">
+	  <rectangle bgcolor="0xaa000000" size="0" x="-10" y="-3" width="max+20"
+	    height="max+6" radius="15"/>
+	</item>
+	<item type="image selected" font="white" image="../AquaFusion/images.png">
+	  <rectangle bgcolor="0xaa000000" size="0" x="-10" y="-3" width="max+20"
+	    height="max+6" radius="15"/>
+	</item>
+	<item type="audio selected" font="white" image="../AquaFusion/mp3.png">
+	  <rectangle bgcolor="0xaa000000" size="0" x="-10" y="-3" width="max+20"
+	    height="max+6" radius="15"/>
+	</item>
+	<item type="video selected" font="white" image="../AquaFusion/movies.png">
+	  <rectangle bgcolor="0xaa000000" size="0" x="-10" y="-3" width="max+20"
+	    height="max+6" radius="15"/>
+	</item>
+	<item type="playlist selected" font="white" image="../gnome/gedit-icon.png">
+	  <rectangle bgcolor="0xaa000000" size="0" x="-10" y="-3" width="max+20"
+	    height="max+6" radius="15"/>
+	</item>
+	<item type="dir selected" font="white" image="../gnome/gnome-folder.png">
+	  <rectangle bgcolor="0xaa000000" size="0" x="-10" y="-3" width="max+20"
+	    height="max+6" radius="15"/>
+	</item>
+
+      </content>
+    </layout>
+
+
+    <!-- redefine the main menu listing area -->
+    <layout label="main listing">
+      <content type="text" spacing="10">
+	<item type="default" font="grey big" align="center"/>
+	<item type="selected" font="white big" align="center">
+	  <rectangle bgcolor="0xaa000000" size="0" x="-3" y="-3"
+	    width="max+6" height="max+6" radius="15"/>
+	</item>
+      </content>
+    </layout>
+
+    <!-- ********************************************** -->
+    <!-- FONT DEFINITIONS -->
+
+    <font label="main" name="Arial_Bold" size="16" color="0xffffff"/>
+    <font label="main selected" name="Arial_Bold" size="16" color="0xffffff"/>
+    <font label="grey" name="Arial_Bold" size="16" color="0xdddddd"/>
+    <font label="white" name="Arial_Bold" size="16" color="0xffffff"/>
+    <font label="grey big" name="Arial_Bold" size="18" color="0xdddddd"/>
+    <font label="white big" name="Arial_Bold" size="18" color="0xffffff"/>
+    <font label="player" name="Arial_Bold" size="18" color="0xffffff"/>
+
+  </skin>
+</freevo>
