@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/11/08 13:21:18  dischi
+# network m3u support, added AUDIOCD plugin register
+#
 # Revision 1.23  2003/10/21 21:17:41  gsbarbieri
 # Some more i18n improvements.
 #
@@ -93,6 +96,7 @@ class PluginInterface(plugin.Plugin):
 
         # register it as the object to play audio
         plugin.register(mplayer, plugin.AUDIO_PLAYER)
+        plugin.register(mplayer, plugin.AUDIOCD_PLAYER)
 
 
 class MPlayer:
@@ -152,6 +156,9 @@ class MPlayer:
             demux = ''
 
         extra_opts = item.mplayer_options
+        if network_play and filename.endswith('m3u') and \
+               extra_opts.find('-playlist') == -1:
+            extra_opts += ' -playlist'
         command = '%s -vo null -ao %s %s %s "%s"' % (mpl, config.MPLAYER_AO_DEV,
                                                      demux, extra_opts, filename)
 
