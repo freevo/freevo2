@@ -38,7 +38,7 @@ MAX_DESCRIPTION_CHAR = 1000
 
 class ProgInfoResource(FreevoResource):
 
-    def _render(self, request):
+    def render(self, request):
         fv = HTMLResource()
         form = request.query
         id = form.get('id')

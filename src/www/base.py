@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2005/01/13 20:19:33  rshortt
+# Place the authentication into www/server.py to protect mote than just
+# the .py files.
+#
 # Revision 1.5  2005/01/13 18:40:47  rshortt
 # Add support for encrypted passwords, which is actually now required, you may
 # use the passwd helper to generate crypted passwords for local_conf.py.
@@ -71,55 +75,11 @@ import crypt
 
 import config
 
-class Resource:
-    def render(self, request):
-        pass
 
-
-class FreevoResource(Resource):
+class FreevoResource:
 
     def render(self, request):
-        auth = request.headers.getheader('Authorization')
-        if auth and auth.startswith('Basic '):
-            auth = base64.decodestring(auth[6:])
-
-        if not self.__auth_user(auth):
-            request.send_response(401, ' Authorization Required')
-            request.send_header("Content-type", 'text/html')
-            request.send_header("WWW-Authenticate", 'Basic realm="Freevo')
-            request.end_headers()
-            request.wfile.write('''
-            <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
-            <html><head>
-            <title>401 Authorization Required</title>
-            </head><body>
-            <h1>Authorization Required</h1>
-            <p>This server could not verify that you
-            are authorized to access the document
-            requested.  Either you supplied the wrong
-            credentials (e.g., bad password), or your
-            browser doesn\'t understand how to supply
-            the credentials required.</p>
-            <hr>
-            ''')
-        else:
-            return self._render(request)
-
-
-    def _render(self, request):
         pass
-
-    
-    def __auth_user(self, auth):
-        if not auth: return False
-
-        (username, password) = auth.split(':', 1)
-        cryptedpassword = config.WWW_USERS.get(username)
-
-        if cryptedpassword:
-            return crypt.crypt(password, cryptedpassword[:2]) == cryptedpassword
-
-        return False
 
 
 class HTMLResource:

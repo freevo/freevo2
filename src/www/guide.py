@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2005/01/13 20:19:33  rshortt
+# Place the authentication into www/server.py to protect mote than just
+# the .py files.
+#
 # Revision 1.2  2005/01/06 18:49:04  dischi
 # remove old tv_util
 #
@@ -185,7 +189,7 @@ class GuideResource(FreevoResource):
         return retval
 
 
-    def _render(self, request):
+    def render(self, request):
         fv = HTMLResource()
         log.debug(dir(request))
         form = request.query

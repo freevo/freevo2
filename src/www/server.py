@@ -38,7 +38,9 @@ __all__ = [ 'RequestHandler', 'Server' ]
 
 import socket
 import SimpleHTTPServer
+import base64
 import cgi
+import crypt
 import cStringIO
 import os
 import traceback
@@ -155,7 +157,6 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
         self.wfile.write(data)
 
-
         
     def __query(self, parsedQuery):
         """
@@ -193,6 +194,33 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             self.query   = self.__query(cgi.parse_qs(query_string,1))
         else:
             self.query = {}
+
+        auth = self.headers.getheader('Authorization')
+        if auth and auth.startswith('Basic '):
+            auth = base64.decodestring(auth[6:])
+
+        if not self.__auth_user(auth):
+            self.send_response(401, ' Authorization Required')
+            self.send_header("Content-type", 'text/html')
+            self.send_header("WWW-Authenticate", 'Basic realm="Freevo')
+            self.end_headers()
+            self.wfile.write('''
+            <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+            <html><head>
+            <title>401 Authorization Required</title>
+            </head><body>
+            <h1>Authorization Required</h1>
+            <p>This server could not verify that you
+            are authorized to access the document
+            requested.  Either you supplied the wrong
+            credentials (e.g., bad password), or your
+            browser doesn\'t understand how to supply
+            the credentials required.</p>
+            <hr>
+            ''')
+            self.finish()
+            return
+
         if self.command in ['GET','HEAD']:
             # if method is GET or HEAD, call do_GET or do_HEAD and finish
             method="do_"+self.command
@@ -201,6 +229,18 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
                 self.finish()
         else:
             self.send_error(501, "Unsupported method (%s)" % self.command)
+
+
+    def __auth_user(self, auth):
+        if not auth: return False
+
+        (username, password) = auth.split(':', 1)
+        cryptedpassword = config.WWW_USERS.get(username)
+
+        if cryptedpassword:
+            return crypt.crypt(password, cryptedpassword[:2]) == cryptedpassword
+
+        return False
 
 
     def finish(self):

@@ -8,7 +8,7 @@ import util
 import record.client
 
 class IndexResource(FreevoResource):
-    def _render(self, request):
+    def render(self, request):
         fv = HTMLResource()
         fv.printHeader(_('Welcome'), 'styles/main.css',selected=_('Home'))
         fv.res += '<div id="contentmain">\n'

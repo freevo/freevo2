@@ -20,7 +20,7 @@ class DocResource(FreevoResource):
         return '%sdoc?file=%s"' % (href, url)
 
 
-    def _render(self, request):
+    def render(self, request):
         if request.query.has_key('file'):
             self.page = request.query['file']
         else:

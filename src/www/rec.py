@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2005/01/13 20:19:33  rshortt
+# Place the authentication into www/server.py to protect mote than just
+# the .py files.
+#
 # Revision 1.2  2005/01/08 15:40:55  dischi
 # remove TRUE, FALSE, DEBUG and HELPER
 #
@@ -138,7 +142,7 @@ import pyepg
 
 class RecordResource(FreevoResource):
 
-    def _render(self, request):
+    def render(self, request):
         fv = HTMLResource()
         form = request.query
 
