@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/01/01 11:59:45  dischi
+# fix to remove redundant whitespaces/tabs/newlines at the beginning and the
+# end of a tag
+#
 # Revision 1.3  2002/12/02 18:25:22  dischi
 # Added bins/exif patch from John M Cooper
 #
@@ -48,10 +52,21 @@ from xml.sax import make_parser, ContentHandler
 from xml.sax.handler import feature_namespaces
 import string
 import os
+import re
+
 
 def normalize_whitespace(text):
     # Remove Redundant whitespace from a string
     return ' '.join(text.split())
+
+RE_TEXT = re.compile("^[ \n\t]*(.*[^ \n\t])[ \n\t]*$").match
+
+# remove redundant whitespaces/tabs/newlines at the beginning and the end
+def normalize_text(text):
+    m = RE_TEXT(text)
+    if m:
+        return m.group(1)
+    return text
 
 class BinsDiscription(ContentHandler):
     """
@@ -95,8 +110,10 @@ class BinsDiscription(ContentHandler):
         if name == 'discription':
             self.inDisc = 0
         if name == 'field':
+            self.desc[self.thisField] = normalize_text(self.desc[self.thisField])
             self.inField = 0
 	if name == 'exif':
+            self.exif[self.thisTag] = normalize_text(self.exif[self.thisTag])
 	    self.inExif = 0
 	if name == 'tag':
 	    self.inTag = 0
