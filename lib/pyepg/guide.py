@@ -50,6 +50,16 @@ from program import Program
 # get logging object
 log = logging.getLogger('pyepg')
 
+_timer = 0.00
+
+def timer_set():
+    global _timer
+    _timer = time.time()
+
+def timer_report(msg):
+    global _timer
+    log.debug('TIMER: %s took %f' % (msg, time.time()-_timer))
+
 
 class Guide:
     """
@@ -122,8 +132,10 @@ class Guide:
 
     def sql_execute(self, query, close=False):
         query = self.__escape_query(query)
+        log.debug('QUERY: %s' % query)
+        timer_set()
 
-	try:
+        try:
             result = self.db.execute(query)
         except TypeError:
             log.exception('execute error')
@@ -133,8 +145,10 @@ class Guide:
             # run a single query then close
             self.db.commit()
             self.db.close()
+            timer_report('query')
             return result
         else:
+            timer_report('query')
             return result
 
 
@@ -142,14 +156,10 @@ class Guide:
         self.db.commit()
 
 
-    def sql_checkTable(self,table=None):
+    def sql_checkTable(self, table=None):
         if not table:
             return False
-        # verify the table exists
-        if not self.db.execute('select name from sqlite_master where ' + \
-                               'name="%s" and type="table"' % table):
-            return None
-        return table
+        self.db.check_table(table)
 
 
     def sql_add_channel(self, id, display_name, access_id):
@@ -274,17 +284,17 @@ class Guide:
         # program row.
         #
         if len(title) > 255:
-            log.error('title to long %s' % title)
+            log.error('title too long %s' % title)
             title = title[:255]
         if len(subtitle) > 255:
             subtitle = subtitle[:255]
-            log.error('subtitle to long %s' % subtitle)
+            log.error('subtitle too long %s' % subtitle)
         if len(episode) > 255:
             episode = episode[:255]
-            log.error('episode to long %s' % episode)
+            log.error('episode too long %s' % episode)
         if len(description) > 4095:
             episode = episode[:4095]
-            log.error('description to long %s' % description)
+            log.error('description too long %s' % description)
             
         query = 'insert into programs (channel_id, title, start, stop, \
                                        subtitle, episode, description) \
@@ -487,7 +497,8 @@ class Guide:
     
 
     def search(self, searchstr, by_chan=None, search_title=True,
-               search_subtitle=True, search_description=True):
+               search_subtitle=True, search_description=True,
+               exact_match=False):
         """
         Return a list of programs with a title similar to the given parameter.
         If by_chan is given, it has to be a valid channel id and only programs
@@ -506,15 +517,24 @@ class Guide:
         clause += ' and ('
 
         if search_title:
-            clause = '%s title like "%%%s%%"' % (clause, searchstr)
+            if exact_match:
+                clause = '%s title="%s"' % (clause, searchstr)
+            else:
+                clause = '%s title like "%%%s%%"' % (clause, searchstr)
 
         if search_subtitle:
             if search_title: clause += ' or'
-            clause = '%s subtitle like "%%%s%%"' % (clause, searchstr)
+            if exact_match:
+                clause = '%s subtitle="%s"' % (clause, searchstr)
+            else:
+                clause = '%s subtitle like "%%%s%%"' % (clause, searchstr)
 
         if search_description:
             if search_title or se: clause += ' or'
-            clause = '%s description like "%%%s%%"' % (clause, searchstr)
+            if exact_match:
+                clause = '%s description="%s"' % (clause, searchstr)
+            else:
+                clause = '%s description like "%%%s%%"' % (clause, searchstr)
 
         clause += ' )'
 
