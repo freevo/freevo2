@@ -10,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/06/21 07:21:22  dischi
+# o add autokill to stop recording when the app can't take care of that
+# o try to add suffix to the filename
+#
 # Revision 1.19  2004/06/10 02:32:17  rshortt
 # Add RECORD_START/STOP events along with VCR_PRE/POST_REC commands.
 #
@@ -132,10 +136,20 @@ class Recorder:
                        'seconds'  : rec_prog.rec_duration }
 
         self.rec_command = config.VCR_CMD % cl_options
+    
+        if config.VCR_CMD.find('%(filename)s') > 0:
+            ext = config.VCR_CMD[config.VCR_CMD.find('%(filename)s')+12:]
+            for bad_char in (' ', '"', '\''):
+                if ext.find(bad_char) > 0:
+                    ext = ext[:ext.find(bad_char)]
+                    print ext
+            if ext.startswith('.') and len(ext) < 5:
+                rec_prog.filename += ext
 
-        self.thread.mode = 'record'
-        self.thread.prog = rec_prog
-        self.thread.command = self.rec_command
+        self.thread.mode     = 'record'
+        self.thread.prog     = rec_prog
+        self.thread.command  = self.rec_command
+        self.thread.autokill = float(rec_prog.rec_duration + 10)
         self.thread.mode_flag.set()
         
         if DEBUG: print('Recorder::Record: %s' % self.rec_command)
@@ -201,8 +215,13 @@ class Record_Thread(threading.Thread):
                 self.app = RecordApp(self.command)
                 
                 while self.mode == 'record' and self.app.isAlive():
+                    self.autokill -= 0.5
                     time.sleep(0.5)
-
+                    if self.autokill <= 0:
+                        if DEBUG:
+                            print 'autokill timeout, stopping recording'
+                        self.mode = 'stop'
+                        
                 if DEBUG: print('Record_Thread::run: past wait()!!')
 
                 rc.post_event(Event(OS_EVENT_KILL, (self.app.child.pid, 15)))
