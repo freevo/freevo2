@@ -1,0 +1,22 @@
+This is a basic settings for making a plugin. 
+---------------------------------------------
+
+Just rebuild the directory structure you need here. E.g. you have a
+plugin for 'src/video/plugins', create this directories and put your
+plugin there. Same for 'share'. In every directory you put a python
+file, you must also add a file __init__.py without content.
+
+Then edit setup.py to fill in a name, a version and a description. The
+name will be the name of the tgz. Also fill in mail and author and
+maybe homepage. After that, replace this README with your own and
+maybe fill out INSTALL. Remove the CVS dir.
+
+To build a distribution, run 'python setup.py sdist' and the tgz is in
+the 'dist' subdir. Upload it at http://freevo.sourceforge.net/addons/
+and make an announcement at the freevo users list.
+
+
+Thanks adding a new feature to Freevo.
+
+
+The Freevo team
