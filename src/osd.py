@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.101  2003/10/27 20:37:59  dischi
+# add active variable
+#
 # Revision 1.100  2003/10/26 17:59:15  dischi
 # typo
 #
@@ -444,7 +447,7 @@ class OSD:
         # Remove old screenshots
         os.system('rm -f /tmp/freevo_ss*.bmp')
         self._screenshotnum = 1
-
+        self.active = True
 
     def focused_app(self):
         if len(self.app_list):
@@ -517,6 +520,7 @@ class OSD:
         pygame.quit()
         if config.OSD_SDL_EXEC_AFTER_CLOSE:
             os.system(config.OSD_SDL_EXEC_AFTER_CLOSE)
+        self.active = False
 
 
     def stopdisplay(self):
