@@ -10,6 +10,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/10/19 16:17:03  rshortt
+# Post event OS_EVENT_KILL for recordserver to do the deed (kill and wait).
+#
+# Stop() command now works for me using this plugin / VCR_CMD.
+#
 # Revision 1.10  2003/10/12 09:54:27  dischi
 # BSD patches from Lars
 #
@@ -58,6 +63,9 @@ import signal
 import config
 import childapp 
 import plugin 
+import rc
+
+from event import *
 
 DEBUG = config.DEBUG
 
@@ -172,6 +180,8 @@ class Record_Thread(threading.Thread):
                     time.sleep(0.5)
 
                 print('Record_Thread::run: past wait()!!')
+
+                rc.post_event(Event(OS_EVENT_KILL, (self.app.child.pid, 15)))
 
                 self.app.kill()
 
