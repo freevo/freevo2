@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/06/09 18:12:50  outlyer
+# Rename eyed3 to eyeD3
+#
 # Revision 1.25  2003/05/19 19:00:08  outlyer
 # Trapping the IOError that Fridtjof Busse was getting with Ogg files,
 # hopefully we can track down the problem this way, and avoid crashes at the
@@ -66,7 +69,7 @@ import os
 import string
 import time
 import re
-import eyed3
+import eyeD3
 import imghdr
 import traceback
 import config
@@ -372,11 +375,11 @@ class AudioItem(Item):
 
         id3 = None
 	try:
-	    id3 = eyed3.Mp3AudioFile(filename)
-	except eyed3.TagException:
+	    id3 = eyeD3.Mp3AudioFile(filename)
+	except eyeD3.TagException:
             try:
-                id3 = eyed3.Mp3AudioFile(filename, 1)
-            except eyed3.InvalidAudioFormatException:
+                id3 = eyeD3.Mp3AudioFile(filename, 1)
+            except eyeD3.InvalidAudioFormatException:
                 # File is not an MP3
                 self.valid = 0
                 return 0
