@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/07/01 20:38:51  outlyer
+# system->unlink
+#
 # Revision 1.10  2003/06/27 10:58:06  rshortt
 # MOved tvtime command into the config.
 #
@@ -295,7 +298,6 @@ class TVTime:
         while self.thread.mode == 'stop':
             time.sleep(0.05)
         print 'stopped %s app' % self.mode
-        #os.system('rm -f /tmp/freevo.wid')
 
 
     def eventhandler(self, event):
@@ -364,7 +366,7 @@ class TVTimeApp(childapp.ChildApp):
         # XXX Krister testcode for proper X11 video
         if DEBUG: print 'Killing tvtime'
         util.killall('freevo_xwin')
-        os.system('rm -f /tmp/freevo.wid')
+        os.unlink('/tmp/freevo.wid')
         if config.MPLAYER_DEBUG:
             self.log_stdout.close()
             self.log_stderr.close()
