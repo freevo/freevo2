@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.64  2004/05/29 19:06:46  dischi
+# register poll function to rc
+#
 # Revision 1.63  2004/02/08 17:39:09  dischi
 # add count to Mimetype
 #
@@ -194,13 +197,14 @@ class DaemonPlugin(Plugin):
         be called on freevo shutdown
     """
     def __init__(self):
+        import rc
         Plugin.__init__(self)
         self.poll_counter   = 0         # poll counter, don't change this
         self.poll_interval  = 1         # poll every x*0.1 seconds
         self.poll_menu_only = True      # poll only when menu is active
         self.event_listener = False     # process all events
-
-
+        if hasattr(self, 'poll'):
+            rc.register(self)
 
 
 class MimetypePlugin(Plugin):

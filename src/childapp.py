@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.53  2004/05/29 19:06:46  dischi
+# register poll function to rc
+#
 # Revision 1.52  2004/05/09 14:16:16  dischi
 # let the child stdout handled by main
 #
@@ -400,7 +403,8 @@ class ChildApp2(ChildApp):
     def __init__(self, app, debugname=None, doeslogging=0, stop_osd=2):
         global running_children
         running_children.append(self)
-
+        rc.register(self)
+        
         self.is_video = 0                       # Be more explicit
         if stop_osd == 2: 
             self.is_video = 1
@@ -454,6 +458,8 @@ class ChildApp2(ChildApp):
         except ValueError:
             return
         
+        rc.unregister(self)
+
         if cmd and self.isAlive():
             _debug_('sending exit command to app')
             self.write(cmd)
