@@ -1,0 +1,30 @@
+This is the full list of sites I have tested with. If you would like
+your favorite site added please send the url to the freevo-users list.
+Please attempt to test yourself and note your success or lack thereof
+in your email to the list.
+
+HEADLINES_LOCATIONS = [ ("Advogato", "http://advogato.org/rss/articles.xml"),
+("Dictionary.com Word of the Day", "http://www.dictionary.com/wordoftheday/wotd.rss"),
+("DVD Review", "http://www.dvdreview.com/rss/newschannel.rss"),
+("Footnotes - GNOME News", "http://www.gnomedesktop.org/backend.php"),
+("Freshmeat", "http://freshmeat.net/backend/fm.rdf"),
+("Internet.com", "http://headlines.internet.com/internetnews/prod-news/news.rss"),
+("HispaLinux", "http://www.hispalinux.es/backend.php"),
+("KDE Dot News", "http://dot.kde.org/rdf"),
+("Kuro5hin", "http://www.kuro5hin.org/backend.rdf"),
+("Linux Games", "http://linuxgames.com/bin/mynetscape.pl"),
+("Linux Today", "http://linuxtoday.com/backend/my-netscape.rdf"),
+("Linux Weekly News", "http://lwn.net/headlines/rss"),
+("Memepool", "http://memepool.com/memepool.rss"),
+("Mozilla", "http://www.mozilla.org/news.rdf"),
+("Mozillazine", "http://www.mozillazine.org/contents.rdf"),
+("The Motley Fool", "http://www.fool.com/about/headlines/rss_headlines.asp"),
+("Newsforge", "http://www.newsforge.com/newsforge.rss"),
+("Pigdog", "http://www.pigdog.org/pigdog.rdf"),
+("Python.org", "http://www.python.org/channews.rdf"),
+("Quotes of the Day", "http://www.quotationspage.com/data/mqotd.rss"),
+("Salon", "http://www.salon.com/feed/RDF/salon_use.rdf"),
+("Slashdot", "http://slashdot.org/slashdot.rdf"),
+("The Register", "http://www.theregister.co.uk/tonys/slashdot.rdf"),
+("Web Reference", "http://www.webreference.com/webreference.rdf") ]
+
