@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/11/17 03:01:56  rshortt
+# Use util.ioctl.
+#
 # Revision 1.3  2004/09/30 02:19:44  rshortt
 # -remove duplicates from util.ioctl
 # -clean up keycode ioclts
@@ -51,9 +54,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-
-import struct
-import fcntl
 
 from util.ioctl import *
 
@@ -1042,32 +1042,32 @@ INPUT_DEVICE_ID_MATCH_FFBIT = 0x800
 ##
 
 def exclusive_access(devfd):
-    r = fcntl.ioctl(devfd, long(EVIOCGRAB_NO), struct.pack( "i", 0))        
-    res = struct.unpack(EVIOCGRAB_ST, r)
+    r = ioctl(devfd, long(EVIOCGRAB_NO), pack( "i", 0))        
+    res = unpack(EVIOCGRAB_ST, r)
     return res 
 
 
 def get_name(devfd):
-    r = fcntl.ioctl(devfd, long(EVIOCGNAME_NO), struct.pack( EVIOCGNAME_ST, ''))        
-    res = struct.unpack(EVIOCGNAME_ST, r)
+    r = ioctl(devfd, long(EVIOCGNAME_NO), pack( EVIOCGNAME_ST, ''))        
+    res = unpack(EVIOCGNAME_ST, r)
     return res 
 
 
 def get_keycode(devfd, scancode):
     try:
-        r = fcntl.ioctl(devfd, long(EVIOCGKEYCODE_NO), 
-                        struct.pack( KEYCODE_ST, int(scancode),KEY_RESERVED))        
+        r = ioctl(devfd, long(EVIOCGKEYCODE_NO), 
+                  pack( KEYCODE_ST, int(scancode),KEY_RESERVED))        
     except IOError:
         return -1
 
-    (scancode, keycode) = struct.unpack(KEYCODE_ST, r)
+    (scancode, keycode) = unpack(KEYCODE_ST, r)
     return keycode
 
 
 def set_keycode(devfd, scancode, keycode):
     try:
-        r = fcntl.ioctl(devfd, long(EVIOCSKEYCODE_NO), 
-                        struct.pack( KEYCODE_ST, int(scancode),int(keycode)))        
+        r = ioctl(devfd, long(EVIOCSKEYCODE_NO), 
+                  pack( KEYCODE_ST, int(scancode),int(keycode)))        
     except IOError:
         return False
 
