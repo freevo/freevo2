@@ -30,7 +30,7 @@
 #
 # -----------------------------------------------------------------------------
 
-__all__ [ 'MenuItem', 'Menu', 'MenuWidget' ]
+__all__ = [ 'MenuItem', 'Menu', 'MenuWidget' ]
 
 # python imports
 import copy
