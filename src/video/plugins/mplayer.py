@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.70  2004/06/23 19:46:17  dischi
+# prevent mplayer from seeking after the end of a growing file
+#
 # Revision 1.69  2004/06/13 00:36:14  outlyer
 # Without this change, mplayer won't play files on a data DVD. I.e. I have
 # a burned DVD-R with some AVI files on it, but mplayer breaks if I try to play
@@ -58,7 +61,7 @@
 #     child.poll()
 #   File "/usr/lib/python2.3/site-packages/freevo/childapp.py", line 610, in poll
 #     rc.post_event(self.stop_event())
-#   File "/usr/lib/python2.3/site-packages/freevo/video/plugins/mplayer.py", line 505, in stop_event
+#   File "/usr/lib/python2.3/site-packages/freevo/video/plugins/mplayer.py"
 #     print _( 'ERROR' ) + ': ' + self.exit_type + \
 # TypeError: cannot concatenate 'str' and 'NoneType' objects
 #
@@ -227,7 +230,8 @@ class MPlayer:
             url = item.url[6:]
             self.item_info = mmpython.parse(url)
             if hasattr(self.item_info, 'get_length'):
-                self.item_length = self.item_info.get_length()
+                self.item_length = self.item_info.get_endpos()
+                self.dynamic_seek_control = True
                 
         if url.startswith('dvd://') and url[-1] == '/':
             url += '1'
@@ -471,12 +475,27 @@ class MPlayer:
             return True
 
         if event == SEEK:
+            if event.arg > 0 and self.item_length != -1 and self.dynamic_seek_control:
+                # check if the file is growing
+                if self.item_info.get_endpos() == self.item_length:
+                    # not growing, deactivate this
+                    self.item_length = -1
+
+                self.dynamic_seek_control = False
+
             if event.arg > 0 and self.item_length != -1:
+                # safety time for bad mplayer seeking
+                seek_safety_time = 20
+                if self.item_info['type'] in ('MPEG-PES', 'MPEG-TS'):
+                    seek_safety_time = 500
+
                 # check if seek is allowed
-                if self.item_length <= self.item.elapsed + event.arg:
-                    # recheck size
-                    self.item_length = self.item_info.get_length()
-                if self.item_length <= self.item.elapsed + event.arg:
+                if self.item_length <= self.item.elapsed + event.arg + seek_safety_time:
+                    # get new length
+                    self.item_length = self.item_info.get_endpos()
+                    
+                # check again if seek is allowed
+                if self.item_length <= self.item.elapsed + event.arg + seek_safety_time:
                     _debug_('unable to seek %s secs at time %s, length %s' % \
                             (event.arg, self.item.elapsed, self.item_length))
                     self.app.write('osd_show_text "%s"\n' % _('Seeking not possible'))
@@ -613,7 +632,7 @@ class MPlayerApp(childapp.ChildApp2):
         # current elapsed time
         if line.find("A:") == 0:
             m = self.RE_TIME(line)
-            if hasattr(m,'group'):
+            if hasattr(m,'group') and self.item.elapsed != int(m.group(1))+1:
                 self.item.elapsed = int(m.group(1))+1
                 for p in self.elapsed_plugins:
                     p.elapsed(self.item.elapsed)
