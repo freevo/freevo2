@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2004/02/06 01:15:06  mikeruelle
+# use new events in tv context
+#
 # Revision 1.29  2004/01/14 18:39:45  mikeruelle
 # suppress debug always showing
 #
@@ -449,6 +452,7 @@ class TVTime:
             except ValueError:
                 pass
 
+#        if mode == 'tv' or mode == 'vcr':
         if mode == 'tv':
             
             tuner_channel = self.TunerGetChannel()
@@ -478,8 +482,11 @@ class TVTime:
                 command += ' -m'
             else:
                 command += ' -M'
-					     
 
+#            if mode == 'vcr':
+#	        command += ' -i 1'
+#            else:
+#	        command += ' -i 0'
 
         else:
             print 'Mode "%s" is not implemented' % mode  # BUG ui.message()
@@ -564,11 +571,11 @@ class TVTime:
 	    #this does
             os.system('tvtime-command display_message \'%s\'' % event.arg)
             return True
-        
+       
+        elif event in em.INPUT_ALL_NUMBERS:
+            self.app.write('CHANNEL_%s\n' % event.arg)
+	    
         elif event == em.BUTTON:
-	    if re.search('^\d+$', event.arg) and int(event.arg) in range(10):
-                self.app.write('CHANNEL_%s\n' % event.arg)
-                return True
             if event.arg == 'PREV_CH':
                 self.app.write('CHANNEL_PREV\n')
                 return True
@@ -626,16 +633,16 @@ class TVTimeApp(childapp.ChildApp2):
                    'Escape' : em.STOP,
                    'd' : em.TOGGLE_OSD,
                    '_' : em.Event(em.BUTTON, arg='PREV_CHAN'),
-                   '0' : em.Event(em.BUTTON, arg='0'),
-                   '1' : em.Event(em.BUTTON, arg='1'),
-                   '2' : em.Event(em.BUTTON, arg='2'),
-                   '3' : em.Event(em.BUTTON, arg='3'),
-                   '4' : em.Event(em.BUTTON, arg='4'),
-                   '5' : em.Event(em.BUTTON, arg='5'),
-                   '6' : em.Event(em.BUTTON, arg='6'),
-                   '7' : em.Event(em.BUTTON, arg='7'),
-                   '8' : em.Event(em.BUTTON, arg='8'),
-                   '9' : em.Event(em.BUTTON, arg='9'),
+                   '0' : em.INPUT_0,
+                   '1' : em.INPUT_1,
+                   '2' : em.INPUT_2,
+                   '3' : em.INPUT_3,
+                   '4' : em.INPUT_4,
+                   '5' : em.INPUT_5,
+                   '6' : em.INPUT_6,
+                   '7' : em.INPUT_7,
+                   '8' : em.INPUT_8,
+                   '9' : em.INPUT_9,
                    'F3' : em.MIXER_MUTE,
                    's' : em.STOP }
 
