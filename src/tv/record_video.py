@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2002/12/10 13:21:19  krister
+# Changed recording file format.
+#
 # Revision 1.3  2002/12/09 07:17:20  krister
 # Background video recording seems to work now. Need to clean up, add menu to edit/delete recordings, move commandline to config etc.
 #
@@ -45,6 +48,7 @@
 #endif
 
 import sys
+import os
 import time
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
@@ -129,7 +133,7 @@ recinfo.channel = None
 recinfo.program_name = None
 recinfo.start_date = None
 
-start_times = map(lambda t: time.strftime('%H:%M:%S', time.gmtime(t)), range(0, 86400, 900))
+start_times = map(lambda t: time.strftime('%H:%M', time.gmtime(t)), range(0, 86400, 300))
 recinfo.start_time = Setting('Start', start_times, None, 'Start time %s')
 
 recinfo.length = Setting('Length', [1, 10, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300],
@@ -145,13 +149,13 @@ def main_menu(prog):
     recinfo.program_name = Setting('Program name', [prog.title, '[Timestamp]'],
                          None, 'Program name: %s')
     
-    length_minutes = (prog.stop - max(prog.start, time.time())) / 60.0
+    length_minutes = (prog.stop - prog.start) / 60.0
     if (length_minutes - int(length_minutes)) > 0.01:
         recinfo.length.set_selected(int(length_minutes)+1)
     else:
         recinfo.length.set_selected(int(length_minutes))
 
-    prog_time = time.strftime('%H:%M:%S', time.localtime(max(prog.start, time.time())))
+    prog_time = time.strftime('%H:%M', time.localtime(prog.start))
     recinfo.start_time.set_selected(prog_time)
     
     rc.app = None # XXX We'll jump back to the main menu for now, should be the TV menu
@@ -222,23 +226,24 @@ def set_selection(arg=None, menuw=None):
 
 
 
-# XXX TEST!
+# XXX TEST!  Change to use config.NNN settings instead!
 import socket
 if socket.gethostname() == 'linux':
-    cmd = ('mencoder -tv on:driver=v4l:input=0:norm=NTSC:channel=%s:chanlist=us-cable:' +
+    cmd = ('/usr/local/bin/mencoder -tv on:driver=v4l:input=0:norm=NTSC:channel=%s:chanlist=us-cable:' +
            'width=320:height=240:outfmt=yv12:adevice=/dev/dsp2:audiorate=32000:' +
            'forceaudio:forcechan=1 -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=800:' +
-           'keyint=30 -oac mp3lame -lameopts br=80:cbr:mode=3 -ffourcc divx -o %s.avi -frames %s')
-elif socket.gethostname() == 'jamaica':
-    cmd = ('mencoder -tv on:driver=v4l:input=0:norm=NTSC:channel=%s:chanlist=us-cable:' +
+           'keyint=30 -oac mp3lame -lameopts br=80:cbr:mode=3 -ffourcc divx -o %s.avi ')
+else:
+    # XXX Testing? Change norm, chanlist, adevice! this assumes a BT878 WinTV
+    # board that has a builtin DSP device (/dev/dsp3 here).
+    cmd = ('/usr/local/bin/mencoder -tv on:driver=v4l:input=0:norm=NTSC:channel=%s:chanlist=us-cable:' +
            'width=320:height=240:outfmt=yv12:adevice=/dev/dsp3:audiorate=32000:' +
            'forceaudio:forcechan=1 -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=800:' +
-           'keyint=30 -oac mp3lame -lameopts br=80:cbr:mode=3 -ffourcc divx -o %s.avi -frames %s')
+           'keyint=30 -oac mp3lame -lameopts br=80:cbr:mode=3 -ffourcc divx -o %s.avi ')
 
 
-def progname2filename(progname, time_tuple):
-    '''Translate a program name to something that can be used as a filename.
-    Attach a timestamp at the end of the filename from a given time tuple.'''
+def progname2filename(progname):
+    '''Translate a program name to something that can be used as a filename.'''
 
     # Letters that can be used in the filename
     ok = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_'
@@ -251,35 +256,46 @@ def progname2filename(progname, time_tuple):
             if s and s[-1] != '_':
                 s += '_'
 
-    ts = time.strftime('_%Y%m%d_%H%M', time_tuple)
-    return s + ts
+    return s
 
 
 def set_schedule(arg=None, menuw=None):
+    '''Use the information in the module global variable recinfo to
+    schedule a recording through the recording daemon (it might be started by
+    this function if it should start immediately).'''
 
+    tunerid = tv.get_tunerid(recinfo.channel)
+
+    # Start timestamp
+    ts = recinfo.start_date.selected + ' ' + recinfo.start_time.selected
+    start_time_s = time.mktime(time.strptime(ts, '%Y-%m-%d %H:%M'))
+    
+    # Length in seconds
+    len_secs =int(recinfo.length.selected) * 60
+
+    # Recording filename
+    rec_name = recinfo.program_name.selected
+    ts_ch = time.strftime('%Y%m%d_%H%M', time.localtime(start_time_s))
+    ts_ch += '_ch_%s' % tunerid
+    if rec_name != recinfo.program_name.choices[0]:
+        rec_name = ts_ch
+    else:
+        rec_name = progname2filename(rec_name) + '_' + ts_ch
+    rec_name = os.path.join(config.DIR_RECORD, rec_name)
+
+    # Build the commandline. The -frames option is added later by the daemon.
+    sch_cmd = cmd % (tunerid, rec_name)
+    print 'SCHEDULE: %s, %s, %s' % (tunerid, time.ctime(start_time_s), rec_name)
+    print 'SCHEDULE: %s' % sch_cmd
+    
+    record_daemon.schedule_recording(start_time_s, len_secs, sch_cmd)
+    
     s = 'Scheduled recording:\n'
     s += 'Channel %s\n' % recinfo.channel
     s += '%s %s %s min' % (recinfo.start_date.selected, recinfo.start_time.selected,
                            recinfo.length.selected)
     print '"%s"' % s
 
-    tunerid = tv.get_tunerid(recinfo.channel)
-    ts = recinfo.start_date.selected + ' ' + recinfo.start_time.selected
-    time_tuple = time.strptime(ts, '%Y-%m-%d %H:%M:%S')
-    # Length in frames. Subtract 70 secs to make sure it stops before next show
-    len_secs = max(30, recinfo.length.selected * 60 - 70)
-    len_frames = int(len_secs * 29.97)
-    rec_name = recinfo.program_name.selected
-    if rec_name != recinfo.program_name.choices[0]:
-        rec_name = '%s_ch_%s' % (time.strftime('%Y%m%d_%H%M', time_tuple), tunerid)
-    else:
-        rec_name = progname2filename(rec_name, time_tuple) + ('_ch_%s' % tunerid)
-    rec_name = '/hdc/Movies/' + rec_name # XXX HACK!
-    print 'SCHEDULE: %s, %s, %s, %s' % (tunerid, time_tuple, len_frames, rec_name)
-    sch_cmd = cmd % (tunerid, rec_name, len_frames)
-    print 'SCHEDULE: %s' % sch_cmd
-    
-    record_daemon.schedule_recording(time_tuple, sch_cmd)
     skin.PopupBox(s)
     time.sleep(2)
     menuw.refresh()

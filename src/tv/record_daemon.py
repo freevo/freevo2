@@ -34,19 +34,51 @@ def log(s=''):
 
 class ScheduleItem:
 
-    def __init__(self, start_time, cmd):
+    def __init__(self, start_time, length_secs, cmd):
         # Convert start_time to Unix time if needed
         if type(start_time) == type(''):
             t = time.strptime(start_time, '%Y-%m-%d %H:%M:%S')
             self.start_time = time.mktime(t)
         else:
             self.start_time = int(start_time)
+        self.length_secs = int(length_secs)
         self.cmd = cmd
 
+
+    def check_time(self):
+        '''Should this item be started?
+        Returns a boolean.'''
+
+        now = time.time()
+        # Don't start anything that is within 30 seconds of the end.
+        if self.start_time <= now < (self.start_time + self.length_secs - 30):
+            # We're inside the time window for this item
+            return 1
+        else:
+            return 0
+        
+
+    def make_cmd(self):
+        '''Build the command line for this recording.'''
+
+        # How many seconds are left to record?
+        len_secs = int(self.length_secs - (time.time() - self.start_time))
+
+        # Make sure this recording ends before the next one might start
+        len_secs -= 30
+
+        cmd = self.cmd + (' -v -endpos %s' % len_secs)
+
+        #cmd += ' >& /dev/null &'
+        cmd += ' >& /tmp/freevo_record_%s.log &' % int(time.time())
+
+        return cmd
+        
+        
     def __str__(self):
         t = time.localtime(self.start_time)
         ts = time.strftime('%Y-%m-%d %H:%M:%S', t)
-        s = '%s %s' % (ts, self.cmd)
+        s = '%s %s %s' % (ts, self.length_secs, self.cmd)
         return s
 
     
@@ -88,17 +120,15 @@ def main():
             continue
 
         vals = s.strip().split(',')
-        item = ScheduleItem(vals[0], vals[1])
+        item = ScheduleItem(vals[0], vals[1], vals[2])
         log('Parsed entry %s: "%s"' % (num, item))
 
         # Should this item be started?
-        tdiff = item.start_time - time.time()
-        if -59 <= tdiff < 0:
-            log('  Starting item')
-            os.system(item.cmd + ' >& /dev/null &')
+        if item.check_time():
+            cmd = item.make_cmd()
+            log('  Starting item (%s)' % cmd)
+            os.system(cmd)
             s = '#' + s
-        else:
-            log('  Item tdiff = %s seconds, will not start' % tdiff)
         log()
         num += 1
 
@@ -111,11 +141,11 @@ def main():
     log('Done, exiting')
     
 
-def schedule_recording(start_time, cmd):
-    '''Schedule a new recording. The time is a time tuple.'''
+def schedule_recording(start_time_s, length_secs, cmd):
+    '''Schedule a new recording. The start time is a unix timestamp.'''
 
-    ts = time.strftime('%Y-%m-%d %H:%M:%S', start_time)
-    s = '%s,%s\n' % (ts, cmd)
+    ts = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time_s))
+    s = '%s,%s,%s\n' % (ts, length_secs, cmd)
 
     # Append to the schedule file
     fd = open(SCHEDULE, 'a')
