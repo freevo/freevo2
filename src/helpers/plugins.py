@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/10/27 20:12:10  dischi
+# adjust length
+#
 # Revision 1.6  2003/09/22 20:16:57  gsbarbieri
 # Now handle my coding practices (a lot of spaces!)
 # So "class PluginInterface( plugin.DaemonPlugin )" is now parsed.
@@ -243,11 +246,11 @@ if len(sys.argv)>1 and sys.argv[1] == '-l':
                     smalldesc = desc[:desc.find('\n')]
                 else:
                     smalldesc = desc
-                if len(smalldesc) > 48:
-                    smalldesc = smalldesc[:45] + '...'
+                if len(smalldesc) > 43:
+                    smalldesc = smalldesc[:40] + '...'
                 if status == 'active':
                     name = '%s (%s)' % (name, status)
-                print '%-30s %s' % (name, smalldesc)
+                print '%-35s %s' % (name, smalldesc)
 
 # show info about a plugin
 elif len(sys.argv)>2 and sys.argv[1] == '-i':
