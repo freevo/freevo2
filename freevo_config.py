@@ -266,6 +266,9 @@ if CONF.xmame or CONF.snes:
 # mixer
 plugin.activate('mixer')
 
+# add imdb search to the video item menu
+plugin.activate('video.imdb')
+
 # use mplayer for audio playpack
 plugin.activate('audio.mplayer')
 
