@@ -11,6 +11,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/02/22 23:36:49  gsbarbieri
+# Now support listing of non-ascii names/descriptions.
+# So far you can have manual recordings with non-ascii names, but no programs
+# from the guide, since findProg() has problems with marmelade (twisted).
+#
 # Revision 1.11  2004/02/19 04:57:59  gsbarbieri
 # Support Web Interface i18n.
 # To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
@@ -108,7 +113,10 @@ class RecordResource(FreevoResource):
         fv = HTMLResource()
         form = request.args
 
-        chan = fv.formValue(form, 'chan')
+        chan = Unicode(fv.formValue(form, 'chan'))
+        if isinstance( chan, str ):
+            chan = Unicode( chan, 'latin-1' )
+        
         start = fv.formValue(form, 'start')
         action = fv.formValue(form, 'action')
 
@@ -134,6 +142,30 @@ class RecordResource(FreevoResource):
             ri.removeScheduledRecording(prog)
         elif action == 'add':
             (status, prog) = ri.findProg(chan, start)
+
+	    if not status:
+                fv.printHeader('Scheduled Recordings', 'styles/main.css')
+                fv.res += "<h4>"+_("Messages")+":</h4>\n"
+                fv.res += "<ul>\n"
+
+                fv.res += '\t<li>' + \
+                          _('ERROR') + ': ' + \
+                          ( _('no program found on <b>%s</b> at <b>%s</b>. (%s)')%\
+                            (chan,
+                             time.strftime('%x %X', time.localtime(int(start))),
+                             prog
+                             )
+                           )+\
+                           '</li>\n'
+                
+                fv.res += "</ul>\n"
+
+                fv.printSearchForm()
+                fv.printLinks()
+                fv.printFooter()
+                return String(fv.res)
+
+            
             print 'RESULT: %s' % status
             print 'PROG: %s' % prog
             ri.scheduleRecording(prog)
@@ -180,12 +212,12 @@ class RecordResource(FreevoResource):
             chan = tv_util.get_chan_displayname(prog.channel_id)
             if not chan: chan = _('UNKNOWN')
             fv.tableCell(chan, 'class="'+status+'" colspan="1"')
-            fv.tableCell(prog.title, 'class="'+status+'" colspan="1"')
+            fv.tableCell(Unicode(prog.title), 'class="'+status+'" colspan="1"')
     
             if prog.desc == '':
                 cell = _('Sorry, the program description for <b>%s</b> is unavailable.') % prog.title
             else:
-                cell = prog.desc
+                cell = Unicode(prog.desc)
             fv.tableCell(cell, 'class="'+status+'" colspan="1"')
     
             cell = ('<a href="record.rpy?chan=%s&amp;start=%s&amp;action=remove">'+_('Remove')+'</a>') % (prog.channel_id, prog.start)
