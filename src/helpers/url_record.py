@@ -35,20 +35,20 @@ import time
 import signal
 import sys
 
-import config
-
 
 CHUNKSIZE = 1024 * 128
 
 data = None
 save_file = None
 URL = None
+finished = False
 
 
 def main():
     global data
     global save_file
     global URL
+    global finished
     record_forever = False
 
     if len(sys.argv) < 3:
@@ -69,8 +69,10 @@ def main():
     data = urllib.urlopen(URL)
 
     save_file = open(SAVE_FILE, 'w')
-    #signal.signal(signal.SIGINT, finish)
-    #signal.signal(signal.SIGKILL, finish)
+    signal.signal(signal.SIGINT, finish)
+    signal.signal(signal.SIGKILL, finish)
+    signal.signal(signal.SIGSTOP, finish)
+    signal.signal(signal.SIGTERM, finish)
     print 'Recording %s to %s for %s seconds.' % (URL, SAVE_FILE, LENGTH)
 
 
@@ -82,16 +84,20 @@ def main():
     except:
         print 'recording interrupted'
 
-    finish(0)
+    if not finished:
+        finish(0)
 
 
 def finish(signum=None, frame=None):
     global data
     global save_file
     global URL
+    global finished
 
     print 'Finished recording %s with signal %s.' % (URL, signum)
+    finished = True
     data.close()
+    # save_file.flush()
     save_file.close()
     sys.exit(0)
 
