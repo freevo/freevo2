@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2002/11/26 20:57:04  dischi
+# Moved video specific stuff to videoitem
+#
 # Revision 1.2  2002/11/24 15:15:31  dischi
 # skin.xml support re-added
 #
@@ -88,9 +91,6 @@ class Item(MenuItem):
 
         # interactive stuff for video, parsed my mplayer
         self.elapsed = 0
-        self.available_audio_tracks = []
-        self.available_subtitles = []
-        self.available_chapters = 0
 
         if parent:
             self.image = parent.image
@@ -121,9 +121,6 @@ class Item(MenuItem):
         self.media     = obj.media
 
         self.elapsed = obj.elapsed
-        self.available_audio_tracks = obj.available_audio_tracks
-        self.available_subtitles = obj.available_subtitles
-        self.available_chapters = obj.available_chapters
         
 
     # returns a list of possible actions on this item. The first
