@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.146  2004/08/01 10:46:34  dischi
+# remove menuw hiding, add some test code
+#
 # Revision 1.145  2004/07/26 18:10:19  dischi
 # move global event handling to eventhandler.py
 #
@@ -422,6 +425,11 @@ class VideoItem(Item):
         """
         play the item.
         """
+        # try:
+        #     self.player.stop()
+        # except:
+        #     print 'FIXME: stop only when running'
+        
         if not self.possible_player:
             for p in plugin.getbyname(plugin.VIDEO_PLAYER, True):
                 rating = p.rate(self) * 10
@@ -473,7 +481,6 @@ class VideoItem(Item):
                 # PLAY_END/USER_END event is not forwarded to the parent
                 # videoitem.
                 # And besides, we don't need the menu between two subitems.
-                self.menuw.hide()
                 self.last_error_msg = self.current_subitem.play(arg, self.menuw)
                 if self.last_error_msg:
                     self.error_in_subitem = 1
@@ -526,9 +533,6 @@ class VideoItem(Item):
 
         if arg:
             mplayer_options += arg.split(' ')
-
-        if self.menuw.visible:
-            self.menuw.hide()
 
         self.plugin_eventhandler(PLAY, menuw)
         
@@ -605,10 +609,8 @@ class VideoItem(Item):
         """
         create a menu with 'settings'
         """
-        if not self.menuw:
-            self.menuw = menuw
         confmenu = configure.get_menu(self, self.menuw)
-        self.menuw.pushmenu(confmenu)
+        menuw.pushmenu(confmenu)
         
 
     def eventhandler(self, event, menuw=None):
@@ -651,6 +653,14 @@ class VideoItem(Item):
             self.settings(menuw=menuw)
             menuw.show()
             return True
+        
+        # show configure menu
+        # if event == MENU:
+        #     import gui.widgets.MenuBox
+        #     menuw = gui.widgets.MenuBox.MenuBox()
+        #     self.settings(menuw=menuw)
+        #     menuw.show()
+        #     return True
         
         # give the event to the next eventhandler in the list
         if isstring(self.parent):
