@@ -81,7 +81,7 @@
     </menu>
       
     <menu type="tv">
-      <style text="text with info style"/>
+      <style text="text with tv info style"/>
     </menu>
       
     <menuset label="video" inherits="normal text style">
@@ -137,6 +137,9 @@
       <info layout="video info" x="300" y="100" width="450" height="300"/>
     </menuset>
 
+    <menuset label="text with tv info style" inherits="text with info style">
+        <screen layout="tv screen" visible="yes"/>
+    </menuset>
 
 
     <!-- ********************************************** -->
@@ -179,9 +182,11 @@
       </background>
     </layout>
 
-    <layout label="tv menu screen">
+    <layout label="tv screen">
       <background>
 	<image image="background" x="0" y="0" label="background"/>
+        <rectangle size="0" bgcolor="0x80000000" radius="10" x="10" y="90"
+                 width="750" height="250"/>
 	<image filename="watermarks/tv.png" x="435" y="230" width="370"
 	  height="380"/>
       </background>
