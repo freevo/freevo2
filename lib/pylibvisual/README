@@ -1,0 +1,3 @@
+Type 'make' to make the python extension.
+'make install' installs the extension into 
+  freevo/src/plugins/audio/libvisual.so
