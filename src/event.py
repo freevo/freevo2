@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/05/28 17:55:15  dischi
+# fixed mixer button names
+#
 # Revision 1.2  2003/05/28 15:01:24  dischi
 # improved event handling
 #
@@ -222,8 +225,8 @@ BUTTON                 = Event('BUTTON')
 #
 
 GLOBAL_EVENTS = {
-    'VOLUP'     : MIXER_VOLUP,
-    'VOLDOWN'   : MIXER_VOLDOWN,
+    'VOL+'      : MIXER_VOLUP,
+    'VOL-'      : MIXER_VOLDOWN,
     'MUTE'      : MIXER_MUTE
     }
 
