@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/12/31 16:42:39  dischi
+# changes, related to item.py changes
+#
 # Revision 1.20  2003/12/30 21:24:08  dischi
 # prevent crash because True is no dict
 #
@@ -65,18 +68,18 @@ from event import *
 
 class ImageItem(Item):
     def __init__(self, url, parent, name = None, duration = 0):
+        self.type = 'image'
         Item.__init__(self, parent)
 
-        self.type     = 'image'
-        self.set_url(url)
-        
-        self.image    = self.filename
-        self.duration = duration
-        self.rotation = 0
-        
-        # set name
         if name:
             self.name = name
+
+        self.set_url(url, search_image=False)
+
+        if self.mode == 'file':
+            self.image = self.filename
+        self.duration = duration
+        self.rotation = 0
 
         
     def __getitem__(self, key):

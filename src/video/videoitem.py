@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.105  2003/12/31 16:42:40  dischi
+# changes, related to item.py changes
+#
 # Revision 1.104  2003/12/30 15:36:01  dischi
 # remove unneeded copy function, small bugfix
 #
@@ -405,7 +408,7 @@ class VideoItem(Item):
                     return
 
             elif self.media:
-                util.mount(self.dirname)
+                util.mount(os.path.dirname(self.filename))
 
         elif self.url.startswith('dvd://') or self.url.startswith('vcd://'):
             if not self.media:

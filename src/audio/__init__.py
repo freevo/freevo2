@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/12/31 16:42:40  dischi
+# changes, related to item.py changes
+#
 # Revision 1.15  2003/12/29 22:09:18  dischi
 # move to new Item attributes
 #
@@ -61,6 +64,7 @@
 # ----------------------------------------------------------------------- */
 #endif
 
+import os
 import re
 
 import config
@@ -69,6 +73,10 @@ import plugin
 
 from audioitem import AudioItem
 from audiodiskitem import AudioDiskItem
+
+
+def cover_filter(x):
+    return re.search(config.AUDIO_COVER_REGEXP, x, re.IGNORECASE)
 
 
 class PluginInterface(plugin.MimetypePlugin):
@@ -128,31 +136,16 @@ class PluginInterface(plugin.MimetypePlugin):
         set informations for a diritem based on the content, etc.
         """
         if not diritem.image:
-            images = ()
-            covers = ()
-            files =()
-
-            def image_filter(x):
-                return re.match('.*(jpg|png)$', x, re.IGNORECASE)
-            def cover_filter(x):
-                return re.search(config.AUDIO_COVER_REGEXP, x, re.IGNORECASE)
-
             # Pick an image if it is the only image in this dir, or it matches
             # the configurable regexp
-            try:
-                files = vfs.listdir(diritem.dir)
-            except OSError:
-                print "oops, os.listdir() error"
-                traceback.print_exc()
-            images = filter(image_filter, files)
-            image  = None
-            if len(images) == 1:
-                image = vfs.join(diritem.dir, images[0])
-            elif len(images) > 1:
-                covers = filter(cover_filter, images)
+            files = util.find_matches(vfs.listdir(diritem.dir), ('jpg', 'gif', 'png' ))
+            
+            if len(files) == 1:
+                diritem.image = os.path.join(diritem.dir, files[0])
+            elif len(files) > 1:
+                covers = filter(cover_filter, files)
                 if covers:
-                    image = vfs.join(diritem.dir, covers[0])
-            diritem.image = image
+                    diritem.image = os.path.join(diritem.dir, covers[0])
 
             
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2003/12/31 16:42:40  dischi
+# changes, related to item.py changes
+#
 # Revision 1.44  2003/12/30 15:34:42  dischi
 # remove unneeded copy function
 #
@@ -96,7 +99,8 @@ class AudioItem(Item):
             
         # Let's try to find if there is any image in the current directory
         # that could be used as a cover
-        if self.filename and not self.image:
+        if self.filename and not self.image and not \
+           (self.parent and self.parent.type == 'dir'):
             images = ()
             covers = ()
             files =()
@@ -107,19 +111,20 @@ class AudioItem(Item):
 
             # Pick an image if it is the only image in this dir, or it matches
             # the configurable regexp
+            dirname = os.path.dirname(self.filename)
             try:
-                files = os.listdir(self.dirname)
+                files = os.listdir(dirname)
             except OSError:
                 print "oops, os.listdir() error"
                 traceback.print_exc()
             images = filter(image_filter, files)
             image = None
             if len(images) == 1:
-                image = os.path.join(self.dirname, images[0])
+                image = os.path.join(dirname, images[0])
             elif len(images) > 1:
                 covers = filter(cover_filter, images)
                 if covers:
-                    image = os.path.join(self.dirname, covers[0])
+                    image = os.path.join(dirname, covers[0])
             self.image = image
 
 
