@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.65  2002/11/25 04:55:29  outlyer
+# Two small changes:
+#  o Removed some 'print sys.path' lines I left in my last commit
+#  o Re-enabled the skin.format_track() function so the display style of MP3
+#    titles can be customized.
+#
 # Revision 1.64  2002/11/25 03:01:22  krister
 # Removed the old source tree, Dischis new tree seems to work good enough now.
 #
@@ -45,8 +51,6 @@
 import config
 
 import sys, socket, random, time, os, copy, re
-
-print sys.path
 
 # Various utilities
 import util

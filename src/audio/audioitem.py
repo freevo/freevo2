@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/11/25 04:55:29  outlyer
+# Two small changes:
+#  o Removed some 'print sys.path' lines I left in my last commit
+#  o Re-enabled the skin.format_track() function so the display style of MP3
+#    titles can be customized.
+#
 # Revision 1.1  2002/11/24 13:58:44  dischi
 # code cleanup
 #
@@ -94,7 +100,7 @@ class AudioItem(Item):
             if DEBUG > 1: print "Got something else..."
 
         if self.title:
-            self.name = '%s - %s' % (self.artist, self.title)
+            self.name = skin.format_track(self)
         else:
             self.title = self.name
 
