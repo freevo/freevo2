@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/05/31 10:41:22  dischi
+# add function to get info about skin status
+#
 # Revision 1.12  2004/03/14 11:42:34  dischi
 # make idlebar have a background image
 #
@@ -90,6 +93,13 @@ def get_singleton():
         _singleton = skinimpl.Skin()
 
     return _singleton
+
+
+def active():
+    """
+    returns if the skin is active right now (not cleared)
+    """
+    return not _singleton.force_redraw
 
 
 if __freevo_app__ == 'main':
