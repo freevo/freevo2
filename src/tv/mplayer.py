@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/04/22 08:58:28  dischi
+# fixed mixer bug
+#
 # Revision 1.11  2003/04/20 12:43:33  dischi
 # make the rc events global in rc.py to avoid get_singleton. There is now
 # a function app() to get/set the app. Also the events should be passed to
@@ -304,6 +307,7 @@ class MPlayer:
         
         
     def Stop(self):
+        mixer = plugin.getbyname('MIXER')
         mixer.setLineinVolume(0)
         mixer.setMicVolume(0)
         mixer.setIgainVolume(0) # Input on emu10k cards.
