@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/01/31 16:35:26  dischi
+# moved shadow code to listing area, it is much faster now
+#
 # Revision 1.13  2004/01/25 20:16:54  dischi
 # fix mime handling
 #
@@ -87,7 +90,7 @@ format_imagecache = util.objectcache.ObjectCache(30, desc='format_image')
 load_imagecache   = util.objectcache.ObjectCache(20, desc='load_image')
 
 
-def format_image(settings, item, width, height, shadow=None, force=0):
+def format_image(settings, item, width, height, force=0):
     try:
         type = item.display_type
     except:
@@ -96,8 +99,8 @@ def format_image(settings, item, width, height, shadow=None, force=0):
         except:
             type = item.type
 
-    cname = '%s-%s-%s-%s-%s-%s-%s-%s' % (settings.icon_dir, item.image, type,
-                                         item.type, width, height, shadow, force)
+    cname = '%s-%s-%s-%s-%s-%s-%s' % (settings.icon_dir, item.image, type,
+                                      item.type, width, height, force)
     if item.media and item.media.item == item:
         cname = '%s-%s' % (cname, item.media)
         
@@ -189,24 +192,7 @@ def format_image(settings, item, width, height, shadow=None, force=0):
     else:
         height = int(float(width * i_h) / i_w)
 
-    if shadow and not shadow.visible:
-        shadow = None
-        
-    if shadow and image.get_alpha() == None:
-        cimage = pygame.Surface((width+shadow.x, height+shadow.y))
-        cimage = cimage.convert_alpha()
-        cimage.fill((0,0,0,0))
-        cimage.fill(osd._sdlcol(shadow.color), (shadow.x, shadow.y, width, height))
-        cimage.blit(pygame.transform.scale(image, (width, height)), (0,0))
-        cimage.set_alpha(cimage.get_alpha(), RLEACCEL)
-    else:
-        cimage = pygame.transform.scale(image, (width, height))
-        
-
-#     for x in range(cimage.get_width()):
-#         for y in range(cimage.get_height()):
-#             cimage.set_at((x,y), (0,0,0,cimage.get_at((x,y))[-1]))
-
+    cimage = pygame.transform.scale(image, (width, height))
 
     format_imagecache[cname] = cimage, width, height
     return cimage, width, height

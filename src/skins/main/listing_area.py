@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/01/31 16:35:26  dischi
+# moved shadow code to listing area, it is much faster now
+#
 # Revision 1.20  2004/01/19 20:29:11  dischi
 # cleanup, reduce cache size
 #
@@ -460,8 +463,7 @@ class Listing_Area(Skin_Area):
                     self.drawroundbox(x0 + r.x, y0 + r.y, r.width, r.height, r)
 
                 image, i_w, i_h = format_image(settings, choice, val.width,
-                                               val.height, shadow=val.shadow,
-                                               force=True)
+                                               val.height, force=True)
                 if image:
                     addx = 0
                     addy = 0
@@ -478,7 +480,12 @@ class Listing_Area(Skin_Area):
                         addy = val.height - i_h
 
                     self.drawimage(image, (x0 + addx, y0 + addy))
-                    
+                    if val.shadow and val.shadow.visible and image.get_alpha() == None:
+                        self.drawroundbox(x0 + addx + val.shadow.x,
+                                          y0 + addy + val.shadow.y,
+                                          image.get_width(), image.get_height(),
+                                          (val.shadow.color, 0, 0, 0))
+                        
                 if content.type == 'image+text':
                     self.drawstring(choice.name, val.font, content, x=x0,
                                     y=y0 + val.height, width=val.width, height=-1,
