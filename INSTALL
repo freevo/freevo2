@@ -4,8 +4,82 @@ Installation instructions for Freevo
 $Id$
 
 
-This file is now only available on the Freevo Wiki:
-
+Detailed help is in the Freevo WiKi at
 http://freevo.sourceforge.net/cgi-bin/moin.cgi/DocumentationPage
 
+
+Short description:
+------------------
+
+You can either use the full binary package or the source
+distribution. The full binary versions conatins all needed
+dependencies for Freevo, except external programs like mplayer and
+xine. But this version may not work on all distributions. So you could
+install Freevo and all dependencies into your system.
+
+To install Freevo, run 'python setup.py install' as root. If you don't
+want to install freevo, you can also start freevo directly in the
+unpacked tarball. It is not possible to install the full binary
+version of Freevo into the system.
+
+
+
+Dependencies:
+-------------
+
+Freevo has many dependencies. Based on your distribution, it's more or
+less easy to install everything.
+
+
+o Redhat 9 (and maybe other RPM based distributions)
+
+  There is a list of needed RPMs to install Freevo in
+  contrib/rpm/freevo-deps.txt.
+
+
+
+o Gentoo:
+
+  You need to update your portage tree with some missing packages. Get
+  rsync-freevo at http://freevo.sourceforge.net/gentoo/rsync-freevo
+  and start it. You should get a freevo ebuild. Now you can run
+  'emerge freevo' to install Freevo.
+
+
+
+o Debian:
+
+  A Debian apt source is available and includes all the dependencies
+  you'll need.
+  You should add this to your /etc/apt/sources.list file:
+
+  deb http://freevo.sourceforge.net/debian unstable main
+  deb http://marillat.free.fr/ unstable main
+
+  (The second source provides mplayer and other multimedia packages)
+
+  Then, simply run apt-get update && apt-get install freevo to fetch
+  all the dependencies you'll require to run Freevo.
+
+
+
+o If you want to install Freevo on a different distributions, here is
+  a list of all dependencies (some have also dependencies, check the
+  website for details)
+
+  Python 2.2.2 or higher	http://www.python.org/
+  Pygame                        http://www.pygame.org/
+  Imaging (PIL)			http://www.pythonware.com/products/pil/
+  Twisted			http://twistedmatrix.com/
+  mmpython                      http://www.sf.net/projects/mmpython
+  pylirc (optional)             http://pylirc.sourceforge.net/
+
+
+  External programs (except mplayer optional)
+
+  Mplayer                       http://www.mplayerhq.hu/
+  Xine                          http://www.xinehq.de/
+  XMLTV				http://membled.com/work/apps/xmltv/  
+  tvtime                        http://tvtime.sourceforge.net/
+  
 
