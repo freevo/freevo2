@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2003-10-22 21:44+0200\n"
+"POT-Creation-Date: 2003-10-27 21:12+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: audio/audiodiskitem.py:60 audio/plugins/cdbackup.py:462
+#: audio/audiodiskitem.py:60 audio/plugins/cdbackup.py:473
 msgid "Unknown CD Album"
 msgstr ""
 
@@ -23,24 +23,24 @@ msgstr ""
 msgid "Browse directory"
 msgstr ""
 
-#: audio/xmms.py:156 games/game.py:99
+#: audio/xmms.py:156 games/game.py:105
 #, python-format
 msgid "File \"%s\" not found!"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:216
+#: audio/plugins/cdbackup.py:220
 msgid "Show CD ripping status"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:221
+#: audio/plugins/cdbackup.py:225
 msgid "Rip the CD to the hard drive"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:222
+#: audio/plugins/cdbackup.py:226
 msgid "Get CDs available for ripping"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:224 audio/plugins/cdbackup.py:527
+#: audio/plugins/cdbackup.py:228 audio/plugins/cdbackup.py:538
 #: audio/plugins/mplayer.py:237 audio/plugins/xine.py:77
 #: audio/plugins/xine.py:101 plugins/lcd.py:716 plugins/lcd.py:913
 #: plugins/lcd.py:924 plugins/lcd.py:935 video/plugins/mplayer.py:586
@@ -49,77 +49,77 @@ msgstr ""
 msgid "ERROR"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:224
+#: audio/plugins/cdbackup.py:228
 msgid "Item is not an Audio CD"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:231
+#: audio/plugins/cdbackup.py:235
 #, python-format
 msgid ""
 "Ripping in progress\n"
 "Track %d of %d"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:246
+#: audio/plugins/cdbackup.py:250
 msgid "Backup CD to hard drive in mp3 format"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:249
+#: audio/plugins/cdbackup.py:253
 msgid "Backup CD to hard drive in Ogg format"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:252
+#: audio/plugins/cdbackup.py:256
 msgid "Backup CD to hard drive in FLAC format"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:254
+#: audio/plugins/cdbackup.py:258
 msgid "Backup CD to hard drive in wav format"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:257
+#: audio/plugins/cdbackup.py:261
 msgid "CD Backup"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:265
+#: audio/plugins/cdbackup.py:269
 msgid "Ripping started"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:332
+#: audio/plugins/cdbackup.py:336
 #, python-format
 msgid "Directory %s already exists"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:458 audio/plugins/coversearch.py:173
+#: audio/plugins/cdbackup.py:469 audio/plugins/coversearch.py:173
 #: audio/plugins/coversearch.py:181 audio/plugins/coversearch.py:189
 #: plugins/lcd.py:910 plugins/lcd.py:921 plugins/lcd.py:934
 #: video/plugins/xine.py:134
 msgid "WARNING"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:458
+#: audio/plugins/cdbackup.py:469
 msgid "No CDDB data available to mmpython"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:461
+#: audio/plugins/cdbackup.py:472
 msgid "Unknown Artist"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:461 audio/plugins/cdbackup.py:462
+#: audio/plugins/cdbackup.py:472 audio/plugins/cdbackup.py:473
 msgid "RENAME"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:463
+#: audio/plugins/cdbackup.py:474
 msgid "Other"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:466
+#: audio/plugins/cdbackup.py:477
 msgid ""
 "CD info not found!\n"
 "Must manually rename files\n"
 "when finished ripping"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:527
+#: audio/plugins/cdbackup.py:538
 msgid "Problem trying to call:"
 msgstr ""
 
@@ -418,15 +418,15 @@ msgstr ""
 msgid "Configure"
 msgstr ""
 
-#: main.py:128
+#: main.py:134
 msgid "shutting down..."
 msgstr ""
 
-#: main.py:234
+#: main.py:250
 msgid "Freevo Main Menu"
 msgstr ""
 
-#: main.py:347
+#: main.py:365
 #, python-format
 msgid ""
 "Event '%s' crashed\n"
@@ -443,23 +443,23 @@ msgstr ""
 msgid "No action defined for this choice!"
 msgstr ""
 
-#: osd.py:414
+#: osd.py:417
 msgid "z = Toggle Fullscreen"
 msgstr ""
 
-#: osd.py:415
+#: osd.py:418
 msgid "Arrow Keys = Move"
 msgstr ""
 
-#: osd.py:416
+#: osd.py:419
 msgid "Spacebar = Select"
 msgstr ""
 
-#: osd.py:417
+#: osd.py:420
 msgid "Escape = Stop/Prev. Menu"
 msgstr ""
 
-#: osd.py:418
+#: osd.py:421
 msgid "h = Help"
 msgstr ""
 
@@ -567,16 +567,6 @@ msgstr ""
 #: plugins/df.py:73
 #, python-format
 msgid "%i free of %i Mb total"
-msgstr ""
-
-#: plugins/idlebar.py:495
-#, python-format
-msgid "%iM"
-msgstr ""
-
-#: plugins/idlebar.py:520
-#, python-format
-msgid "%s%%"
 msgstr ""
 
 #: plugins/lcd.py:118 plugins/lcd.py:126
@@ -806,26 +796,36 @@ msgstr ""
 msgid "Reading disc in drive %s"
 msgstr ""
 
-#: plugins/file_ops.py:86
+#: plugins/file_ops.py:89
 msgid "Delete file"
 msgstr ""
 
-#: plugins/file_ops.py:88
+#: plugins/file_ops.py:91
 msgid "Delete info"
 msgstr ""
 
-#: plugins/file_ops.py:95
+#: plugins/file_ops.py:97
 #, python-format
 msgid ""
 "Do you wish to delete\n"
 " '%s'?"
 msgstr ""
 
-#: plugins/file_ops.py:100
+#: plugins/file_ops.py:102
 #, python-format
 msgid ""
 "Delete info about\n"
 " '%s'?"
+msgstr ""
+
+#: plugins/idlebar/system.py:103
+#, python-format
+msgid "%iM"
+msgstr ""
+
+#: plugins/idlebar/system.py:128
+#, python-format
+msgid "%s%%"
 msgstr ""
 
 #: plugins/base.py:71
