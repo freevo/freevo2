@@ -7,6 +7,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/10/06 19:19:56  dischi
+# remove pygame dep
+#
 # Revision 1.3  2004/08/01 10:48:47  dischi
 # deactivate plugin because of interface change
 #
@@ -36,7 +39,9 @@
 
 
 # python modules
-import os, pygame
+import os
+
+import gui
 
 # freevo modules
 from plugins.idlebar import IdleBarPlugin
@@ -69,10 +74,10 @@ class PluginInterface(IdleBarPlugin):
                 image = new_image
         if cache:
             if image not in self.cacheimg.keys():
-                self.cacheimg[image] = pygame.image.load(image)
+                self.cacheimg[image] = gui.imagelib.load(image)
             return self.cacheimg[image]
 
-        return pygame.image.load(image)
+        return gui.imagelib.load(image)
 
     def draw(self, (type, object), x, osd):
         mixer = plugin.getbyname('MIXER')
