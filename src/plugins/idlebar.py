@@ -21,6 +21,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/04/27 17:59:41  dischi
+# use new poll interface
+#
 # Revision 1.4  2003/04/24 19:56:35  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -79,8 +82,7 @@ FALSE = 0
 class interface(plugin.DaemonPlugin):
     def __init__(self):
         plugin.DaemonPlugin.__init__(self)
-        self.idlecount = 0
-        self.interval = 300
+        self.poll_interval   = 300
         self.toolbar_surface = None
         self.plugins = None
 
@@ -97,15 +99,10 @@ class interface(plugin.DaemonPlugin):
             p.draw()
         rect = (0,0,osd.width,75)
         osd.update(rect)
-        self.idlecount = -1
 
 
     def poll(self):
-        self.idlecount = self.idlecount + 1
-        if (self.idlecount%self.interval) == 0:
-            self.draw()
-            self.idlecount = 0
-
+        self.draw()
 
 
 class IdleBarPlugin(plugin.Plugin):

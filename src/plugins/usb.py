@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/04/27 17:59:41  dischi
+# use new poll interface
+#
 # Revision 1.1  2003/04/26 15:12:26  dischi
 # usb daemon plugin to watch for bus changes
 #
@@ -33,18 +36,13 @@ class PluginInterface(plugin.DaemonPlugin):
     def __init__(self):
         plugin.DaemonPlugin.__init__(self)
         self.devices = util.list_usb_devices()
-        self.interval  = 10
-        self.idlecount = 0
+        self.poll_interval = 10
 
     def poll(self, menuw=None, arg=None):
         """
         poll to check for devices
         """
-        self.idlecount += 1
-        if self.idlecount != self.interval:
-            return
-        
-        self.idlecount = 0
+
         changes = FALSE
 
         current_devices = util.list_usb_devices()
