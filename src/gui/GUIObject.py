@@ -7,6 +7,9 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/08/26 20:10:50  outlyer
+# More warnings fixed by using explicit types
+#
 # Revision 1.25  2003/07/13 19:35:44  rshortt
 # Change osd.focused_app to a function that returns the last object in
 # app_list.  Maintaining this list is helpfull for managing 'toplevel'
@@ -408,7 +411,7 @@ class GUIObject:
             p = self.osd.screen
 
         if not self.bg_surface:
-            self.bg_surface = pygame.Surface((self.width, self.height))
+            self.bg_surface = pygame.Surface((int(self.width), int(self.height)))
             self.bg_surface.blit(p, (0,0), 
                                  (self.left, self.top, self.width, self.height))
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/08/26 20:10:50  outlyer
+# More warnings fixed by using explicit types
+#
 # Revision 1.12  2003/08/25 18:44:32  dischi
 # Moved HOURS_PER_PAGE into the skin fxd file, default=2
 #
@@ -177,7 +180,7 @@ class TVGuide(gui.GUIObject):
 
         # table header
         table += [ ['Chan'] ]
-        for i in range(self.n_cols):
+        for i in range(int(self.n_cols)):
             table[0] += [ start_time + self.col_time * i* 60 ]
 
         table += [ self.selected ] # the selected program
