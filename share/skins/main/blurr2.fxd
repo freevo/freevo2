@@ -85,6 +85,7 @@
       
     <menuset label="audio" inherits="normal text style">
       <screen layout="audio screen"/>
+      <view layout="view0" x="10" y="90" width="280" height="250" align="left"/>
     </menuset>
       
     <menuset label="image" inherits="normal text style">
@@ -277,10 +278,10 @@
     <!-- default view area -->
     <layout label="view0">
       <content align="center" valign="center">
-	<item type="default">
+        <item type="default">
 	  <rectangle size="0" bgcolor="0x80000000" radius="8" x="-10" y="-10"
 	    width="max+20" height="max+20"/>
-	</item>
+        </item>
       </content>
     </layout>
     
