@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.118  2004/01/19 20:21:33  dischi
+# change doc string
+#
 # Revision 1.117  2004/01/18 16:51:48  dischi
 # (re)move unneeded variables
 #
@@ -186,7 +189,7 @@ class VideoItem(Item):
 
     def __getitem__(self, key):
         """
-        return the specific attribute as string or an empty string
+        return the specific attribute
         """
         if key == 'item_id':
             if self.media:
