@@ -10,13 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.15  2004/01/11 05:46:31  outlyer
-# Remove debug
-#
-# Revision 1.14  2004/01/11 05:45:38  outlyer
-# Ouch! We definitely need a cache sooner than later. Without the cache
-# the  CPU usage on my Athlon 2000 was going to 40% (sorting, most likely
-# being a chunk of that)
+# Revision 1.16  2004/01/11 05:59:41  outlyer
+# How overcomplicated could I have made something so simple? This is a little
+# embarassing. I think this "algorithm" is less dumb.
 #
 # Revision 1.12  2004/01/01 16:18:11  dischi
 # fix crash
@@ -381,8 +377,6 @@ def htmlenties2txt(string):
 #
 
 def comingup(items):
-    # XXX We should cache this information and update it hourly/daily
-    # 
     import tv.record_client as ri
     import time
    
@@ -409,11 +403,11 @@ def comingup(items):
     later = []
 
     for what in progl:
-        if what.start <= time.time() + 86400:
+        if time.localtime(what.start)[2] == time.localtime()[2]:
             today.append(what)
-        if what.start <= time.time() + 172800 and what.start >= time.time() + 86400:
+        if time.localtime(what.start)[2] == (time.localtime()[2] + 1):
             tomorrow.append(what)
-        if what.start >= time.time() + 172800:
+        if time.localtime(what.start)[2] > (time.localtime()[2] + 1):
             later.append(what)
 
 
