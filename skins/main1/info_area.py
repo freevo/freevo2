@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/07/09 07:26:38  gsbarbieri
+# Fixed a small bug when updating the info_area contents
+#
 # Revision 1.9  2003/07/07 16:25:10  dischi
 # changes to work with the new drawstringframed
 #
@@ -137,8 +140,18 @@ class Info_Area(Skin_Area):
         """
         set self.content and self.layout_content if they need to be set (return 1)
         or does nothing (return 0)
-        """        
-        if self.layout_content is not self.layout.content:
+        """
+        update=0
+        try:
+            if self.content.width != self.area_val.width or \
+               self.content.height != self.area_val.height or \
+               self.content.x != self.area_val.x or \
+               self.content.y != self.area_val.y:
+                update=1
+        except:
+            pass
+        
+        if self.layout_content is not self.layout.content or update:
             types = self.layout.content.types
             self.content = self.calc_geometry( self.layout.content, copy_object=TRUE )
             # backup types, which have the previously calculated fcontent
@@ -331,7 +344,6 @@ class Info_Area(Skin_Area):
                     shadow_x = element.font.shadow.x
                     shadow_y = element.font.shadow.y
                     
-
                 # Calculate the geometry
                 r = Geometry( x, y, element.width, element.height)
                 r = self.get_item_rectangle(r, self.content.width - x - shadow_x,
