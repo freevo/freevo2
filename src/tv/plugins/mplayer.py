@@ -9,6 +9,16 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2003/11/27 03:11:08  rshortt
+# Shuffle things around a little bit and add ivtv capabilities.  I intend to
+# depricate the ivtv_basic_tv plugin in favour of this once since that is
+# just an mplayer plugin as well and I don't want to duplicate too much code.
+#
+# I will focus my development effort on this plugin instead of ivtv_basic_tv
+# and will also be really using this one so I can test it out myself. :)
+#
+# I am planning on adding dvb support to this plugin as well.
+#
 # Revision 1.28  2003/11/25 09:37:00  krister
 # Bugfixes, works for me now
 #
@@ -99,6 +109,7 @@ import event as em
 import childapp # Handle child applications
 import tv.epg_xmltv as epg # The Electronic Program Guide
 from tv.channels import FreevoChannels
+import tv.ivtv as ivtv
  
 import plugin
 
@@ -142,8 +153,6 @@ class MPlayer:
         if not tuner_channel:
             tuner_channel = self.fc.getChannel()
             
-        freq_khz = self.fc.chanSet(tuner_channel, app='mplayer')
-        tuner_freq = '%1.3f' % (freq_khz / 1000.0)
         vg = self.current_vg = self.fc.getVideoGroup(tuner_channel)
 
 
@@ -155,12 +164,34 @@ class MPlayer:
         w, h = config.TV_VIEW_SIZE
         outfmt = 'outfmt=%s' % config.TV_VIEW_OUTFMT
 
+        # Build the MPlayer command
+        args = (config.MPLAYER_NICE, config.MPLAYER_CMD, config.MPLAYER_VO_DEV,
+                config.MPLAYER_VO_DEV_OPTS)
 
         if mode == 'tv':
-            tvcmd = ('tv:// -tv driver=%s:freq=%s:%s:%s:'
-                     '%s:width=%s:height=%s:%s %s' %
-                     (config.TV_DRIVER, tuner_freq, device, input, norm, 
-                      w, h, outfmt, config.TV_OPTS))
+            if vg.group_type == 'ivtv':
+                ivtv_dev = ivtv.IVTV(vg.vdev)
+                ivtv_dev.init_settings()
+                ivtv_dev.print_settings()
+                self.fc.chanSet(tuner_channel)
+            
+                tvcmd = vg.vdev
+
+                if config.MPLAYER_ARGS.has_key('ivtv'):
+                    args += (config.MPLAYER_ARGS['ivtv'],)
+
+            else:
+                freq_khz = self.fc.chanSet(tuner_channel, app='mplayer')
+                tuner_freq = '%1.3f' % (freq_khz / 1000.0)
+
+                tvcmd = ('tv:// -tv driver=%s:freq=%s:%s:%s:'
+                         '%s:width=%s:height=%s:%s %s' %
+                         (config.TV_DRIVER, tuner_freq, device, input, norm, 
+                          w, h, outfmt, config.TV_OPTS))
+
+                if config.MPLAYER_ARGS.has_key('tv'):
+                    args += (config.MPLAYER_ARGS['tv'],)
+
 
         elif mode == 'vcr':
             tvcmd = ('tv:// -tv driver=%s:%s:%s:'
@@ -168,19 +199,16 @@ class MPlayer:
                      (config.TV_DRIVER, device, input, norm, 
                       w, h, outfmt, config.TV_OPTS))
 
+            if config.MPLAYER_ARGS.has_key('tv'):
+                args += (config.MPLAYER_ARGS['tv'],)
+
         else:
             print 'Mode "%s" is not implemented' % mode  # XXX ui.message()
             return
 
-
-        # Build the MPlayer command
-        args = (config.MPLAYER_NICE, config.MPLAYER_CMD, config.MPLAYER_VO_DEV,
-                config.MPLAYER_VO_DEV_OPTS, tvcmd)
-
-        if config.MPLAYER_ARGS.has_key('tv'):
-            args += (config.MPLAYER_ARGS['tv'],)
-
-        mpl = '--prio=%s %s -vo %s%s -fs %s %s -slave' % args
+        args += (tvcmd,)
+ 
+        mpl = '--prio=%s %s -vo %s%s -fs %s -slave %s' % args
 
         command = mpl
         self.mode = mode
@@ -251,17 +279,32 @@ class MPlayer:
             return TRUE
         
         elif event == em.TV_CHANNEL_UP or event == em.TV_CHANNEL_DOWN:
+            # XXX: channel Up/Down code will have to be reworked in order
+            #      to handle multiple VideoGroups between channels.
+
             if self.mode == 'vcr':
                 return
             
-            # Go to the prev/next channel in the list
-            if event == em.TV_CHANNEL_UP:
-                freq_khz = self.fc.chanUp(app=self.thread.app)
-            else:
-                freq_khz = self.fc.chanDown(app=self.thread.app)
+            elif self.current_vg.group_type == 'ivtv':
+                # Go to the prev/next channel in the list
+                if event == em.TV_CHANNEL_UP:
+                    self.fc.chanUp()
+                else:
+                    self.fc.chanDown()
+    
+                self.thread.app.write('seek 999999 0\n')
 
-            new_freq = '%1.3f' % (freq_khz / 1000.0)
-            self.thread.app.write('tv_set_freq %s\n' % new_freq)
+            else:
+                # Go to the prev/next channel in the list
+                if event == em.TV_CHANNEL_UP:
+                    freq_khz = self.fc.chanUp(app=self.thread.app)
+                else:
+                    freq_khz = self.fc.chanDown(app=self.thread.app)
+    
+                new_freq = '%1.3f' % (freq_khz / 1000.0)
+                self.thread.app.write('tv_set_freq %s\n' % new_freq)
+
+            self.current_vg = self.fc.getVideoGroup(self.fc.getChannel())
 
             # Display a channel changed message
             # XXX Experimental, disabled for now
