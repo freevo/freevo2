@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/02/01 17:51:14  dischi
+# respect item.rotation of images
+#
 # Revision 1.15  2004/02/01 17:03:58  dischi
 # speedup
 #
@@ -70,9 +73,13 @@ def format_image(settings, item, width, height, force=0):
         except:
             type = item.type
 
+    
     cname = '%s-%s-%s-%s-%s-%s-%s' % (settings.icon_dir, item.image, type,
                                       item.type, width, height, force)
 
+    if item['rotation']:
+        cname = '%s-%s' % (cname, item['rotation'])
+            
     if item.media and item.media.item == item:
         cname = '%s-%s' % (cname, item.media)
         
@@ -92,6 +99,9 @@ def format_image(settings, item, width, height, force=0):
             if not image:
                 image = osd.loadbitmap('thumb://%s' % item.image)
                 load_imagecache['thumb://%s' % item.image] = image
+
+        if item['rotation']:
+            image = pygame.transform.rotate(image, item['rotation'])
             
     if not image:
         if not force:
