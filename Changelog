@@ -22,6 +22,7 @@ o Added min/sec display to music player
 o Added icons to default skin
 o Added PAL support
 o Fullscreen X support
+o Added the install.py script to check dependencies and compile Freevo
 
 
 Release 1.2.3 (2002-06-01):
