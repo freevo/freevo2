@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/11/23 20:46:07  rshortt
+# Dumb typo.
+#
 # Revision 1.3  2003/11/23 19:21:49  rshortt
 # Add getChannelInfo, taken from a method of the mplayer tv plugin.  I have
 # some changes to that as well which will use this one instead.
@@ -56,7 +59,7 @@
 
 import config, plugin
 import tv.freq, tv.v4l2
-impot epg_xmltv
+import epg_xmltv
 
 DEBUG = config.DEBUG
 
