@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/08/16 18:41:37  dischi
+# fix bad timezone descriptions
+#
 # Revision 1.23  2003/08/14 03:34:06  outlyer
 # Whoops; left in some useless debug code.
 #
@@ -381,7 +384,13 @@ def timestr2secs_utc(str):
         secs = calendar.timegm( tmTuple )
 
         adj_neg = int(tz) >= 0
-        adj_secs = int(tz[1:3])*3600+ int(tz[3:5])*60
+        try:
+            min = int(tz[3:5])
+        except ValueError:
+            # sometimes the mins are missing :-(
+            min = 0
+        adj_secs = int(tz[1:3])*3600+ min*60
+
         if adj_neg:
             secs -= adj_secs
         else:
