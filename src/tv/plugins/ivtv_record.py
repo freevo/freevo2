@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/06/07 16:10:51  rshortt
+# Change 'RECORD' to plugin.RECORD.
+#
 # Revision 1.20  2004/05/28 01:48:22  outlyer
 # Florian Demmer's patch for consecutive recordings and a patch to move the
 # snapshot to after we set the flag to idle, just to be safe.
@@ -90,9 +93,6 @@ from tv.channels import FreevoChannels
 
 DEBUG = config.DEBUG
 
-TRUE = 1
-FALSE = 0
-
 CHUNKSIZE = 65536
 
 
@@ -100,7 +100,7 @@ class PluginInterface(plugin.Plugin):
     def __init__(self):
         plugin.Plugin.__init__(self)
 
-        plugin.register(Recorder(), 'RECORD')
+        plugin.register(Recorder(), plugin.RECORD, True)
 
 
 class Recorder:

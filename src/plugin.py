@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.66  2004/06/07 16:10:45  rshortt
+# Change 'RECORD' to plugin.RECORD.
+#
 # Revision 1.65  2004/05/31 10:40:57  dischi
 # update to new callback handling in rc
 #
@@ -269,6 +272,7 @@ AUDIO_PLAYER   = 'AUDIO_PLAYER'
 RADIO_PLAYER   = 'RADIO_PLAYER'
 VIDEO_PLAYER   = 'VIDEO_PLAYER'
 TV             = 'TV'
+RECORD         = 'RECORD'
 
 
 #
