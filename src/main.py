@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.103  2004/01/07 18:15:41  dischi
+# add mmpython warning
+#
 # Revision 1.102  2004/01/03 17:43:14  dischi
 # OVERLAY_DIR is always used
 #
@@ -348,10 +351,12 @@ if not os.path.isfile(os.path.join(mmcache, 'VERSION')):
     print
 
 if mmpython.object_cache and hasattr(mmpython.object_cache, 'md5_cachedir'):
-    _debug_('use OVERLAY_DIR for mmpython cache')
     mmpython.object_cache.md5_cachedir = False
     mmpython.object_cache.cachedir     = config.OVERLAY_DIR
-
+else:
+    print '\nWARNING'
+    print 'Your mmpython version is too old. Freevo may crash later. Please'
+    print 'update mmpython to mmpython cvs'
 
 os.umask(config.UMASK)
 
