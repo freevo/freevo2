@@ -1,17 +1,19 @@
 %define geometry 800x600
-%define display  x11
+%define display  xv
 %define tv_norm  ntsc
 %define chanlist us-cable
+%define runtimever 4
 Summary:	Freevo
 Name:		freevo
-Version:	1.3.0
-Release:	1
+Version:	1.3.1
+Release:	rc1
 License:	GPL
 Group:		Applications/Multimedia
-Source:		http://freevo.sourceforge.net/%{name}-%{version}.tar.gz
+Source:		http://freevo.sourceforge.net/%{name}-%{version}-%{release}.tar.gz
+Patch:		%{name}-%{version}-runtime.patch
 URL:		http://freevo.sourceforge.net/
-Requires:	freevo_runtime >= 3
-BuildRequires:	freevo_runtime
+Requires:	freevo-runtime >= %{runtimever}
+Requires:	freevo-apps
 BuildRoot:	%{_tmppath}/%{name}-%{version}-root-%(id -u -n)
 
 %define _prefix /usr/local/freevo
@@ -25,13 +27,48 @@ other applications such as mplayer and nvrec to play and record video
 and audio.
 
 %prep
-%setup  -n %{name}
+#%setup  -n %{name}
+%setup  -n %{name}-%{version}-%{release}
+%patch -p0
 
 ./configure --geometry=%{geometry} --display=%{display} \
 	--tv=%{tv_norm} --chanlist=%{chanlist}
+
 %build
 make clean; make
-cd plugins/cddb; make
+pushd plugins/cddb
+	make
+popd
+pushd src/games/rominfo
+	make
+popd
+
+%package runtime
+Summary: Libraries used by freevo executable. Must be installed for freevo to work.
+Version:	%{runtimever}
+Group: Applications/Multimedia
+
+%description runtime
+This directory contains the Freevo runtime. It contains an executable,
+freevo_python, dynamic link libraries for running Freevo as well as a copy
+of the standard Python 2.2 libraries. It also contains the Freevo external 
+applications. Right now that is MPlayer, cdparanoia and lame.
+
+Please see the website at http://freevo.sourceforge.net for more information 
+on how to use Freevo. The website also contains links to the source code
+for all software included here.
+
+%package apps
+Summary: External applications used by freevo executable.
+Group: Applications/Multimedia
+
+%description apps
+This directory contains the Freevo external applications. 
+Right now that is MPlayer, cdparanoia and lame.
+
+Note: This package is not manadatory if standalone versions of the external
+applications are installed, though configuration issues may be minimized if 
+it is used.
 
 %package boot
 Summary: Files to enable a standalone Freevo system (started from initscript)
@@ -57,42 +94,66 @@ Test files that came with freevo. Placed in %{_cachedir}/freevo
 rm -rf $RPM_BUILD_ROOT
 mkdir -p %{buildroot}%{_prefix}
 mkdir -p %{buildroot}%{_prefix}/fbcon/matroxset
-mkdir -p %{buildroot}%{_prefix}/{boot,eyed3,fbcon,gui,helpers,icons,plugins,rc_client,skins,tv}
-mkdir -p %{buildroot}%{_prefix}/icons/64x64
-mkdir -p %{buildroot}%{_prefix}/plugins/{cddb,weather}
-mkdir -p %{buildroot}%{_prefix}/plugins/weather/icons
-mkdir -p %{buildroot}%{_prefix}/skins/{fonts,images,main1,xml}
-mkdir -p %{buildroot}%{_prefix}/skins/xml/type1
+mkdir -p %{buildroot}%{_prefix}/{boot,helpers,rc_client}
+mkdir -p %{buildroot}%{_prefix}/{runtime/apps,runtime/dll,runtime/lib}
+mkdir -p %{buildroot}%{_prefix}/src/{audio/eyed3,games/rominfo,gui,image,tv,video/plugins,www/images,www/scripts,www/styles}
+mkdir -p %{buildroot}%{_prefix}/plugins/{cddb,weather/icons}
+mkdir -p %{buildroot}%{_prefix}/skins/{fonts,icons,images,main1,xml/type1}
 mkdir -p %{buildroot}%{_prefix}/skins/{aubin1,barbieri,dischi1,krister1,malt1}
+mkdir -p %{buildroot}%{_prefix}/skins/icons/{AquaFusion,gnome,misc,old}
 mkdir -p %{buildroot}%{_sysconfdir}/freevo
 mkdir -p %{buildroot}%{_sysconfdir}/rc.d/init.d
-mkdir -p %{buildroot}%{_cachedir}/freevo/testfiles/{Images,Movies,Music,tv-show-images}
-mkdir -p %{buildroot}%{_cachedir}/freevo/testfiles/Images/Show
-mkdir -p %{buildroot}%{_cachedir}/freevo/testfiles/Movies/skin.xml_Test
+mkdir -p %{buildroot}%{_cachedir}/freevo/testfiles/{Images/Show,Images/Bins,Mame,Movies/skin.xml_Test,Music,tv-show-images}
 
-install -m 755 freevo freevo_xwin runapp skin.py strptime.py [A-Z,a-e,g-r,t-z]*.py %{buildroot}%{_prefix}
+install -m 755 freevo freevo_xwin runapp %{buildroot}%{_prefix}
 install -m 644 fbcon/fbset.db %{buildroot}%{_prefix}/fbcon
-install -m 755 fbcon/vtrelease %{buildroot}%{_prefix}/fbcon
-install -m 755 fbcon/*.sh %{buildroot}%{_prefix}/fbcon
+install -m 755 fbcon/vtrelease fbcon/*.sh %{buildroot}%{_prefix}/fbcon
 install -m 755 fbcon/matroxset/matroxset %{buildroot}%{_prefix}/fbcon/matroxset
-install -m 644 gui/* %{buildroot}%{_prefix}/gui
-install -m 644 eyed3/* %{buildroot}%{_prefix}/eyed3
-install -m 644 tv/* %{buildroot}%{_prefix}/tv
-install -m 644 helpers/* %{buildroot}%{_prefix}/helpers
-install -m 644 icons/[a-z]* %{buildroot}%{_prefix}/icons
-install -m 644 icons/64x64/* %{buildroot}%{_prefix}/icons/64x64
+install -m 755 helpers/* %{buildroot}%{_prefix}/helpers
 install -m 755 plugins/cddb/*.py plugins/cddb/cdrom.so %{buildroot}%{_prefix}/plugins/cddb
 install -m 644 plugins/weather/*.py plugins/weather/librarydoc.txt %{buildroot}%{_prefix}/plugins/weather
 install -m 644 plugins/weather/icons/* %{buildroot}%{_prefix}/plugins/weather/icons
-install -m 644 rc_client/*py %{buildroot}%{_prefix}/rc_client
+install -m 644 rc_client/* %{buildroot}%{_prefix}/rc_client
+
+install -m 644 runtime/*.py %{buildroot}%{_prefix}/runtime
+install -m 644 runtime/preloads %{buildroot}%{_prefix}/runtime
+install -m 644 runtime/README %{buildroot}%{_prefix}/runtime
+install -m 644 runtime/VERSION %{buildroot}%{_prefix}/runtime
+cp -av runtime/apps/* %{buildroot}%{_prefix}/runtime/apps
+cp -av runtime/dll/* %{buildroot}%{_prefix}/runtime/dll
+cp -av runtime/lib/* %{buildroot}%{_prefix}/runtime/lib
+
+install -m 644 src/*.py %{buildroot}%{_prefix}/src
+install -m 644 src/audio/*.py %{buildroot}%{_prefix}/src/audio
+install -m 644 src/audio/eyed3/*.py %{buildroot}%{_prefix}/src/audio/eyed3
+install -m 644 src/games/*.py %{buildroot}%{_prefix}/src/games
+install -m 644 src/games/rominfo/rominfo* %{buildroot}%{_prefix}/src/games/rominfo
+install -m 644 src/gui/*.py %{buildroot}%{_prefix}/src/gui
+install -m 644 src/image/*.py %{buildroot}%{_prefix}/src/image
+install -m 644 src/tv/*.py %{buildroot}%{_prefix}/src/tv
+install -m 644 src/video/*.py %{buildroot}%{_prefix}/src/video
+install -m 644 src/video/plugins/*.py %{buildroot}%{_prefix}/src/video/plugins
+
+install -m 755 src/www/ENV %{buildroot}%{_prefix}/src/www
+install -m 755 src/www/INSTALL %{buildroot}%{_prefix}/src/www
+install -m 755 src/www/tvrecord %{buildroot}%{_prefix}/src/www
+install -m 755 src/www/*.sh %{buildroot}%{_prefix}/src/www
+install -m 755 src/www/*.cgi %{buildroot}%{_prefix}/src/www
+install -m 644 src/www/*.py %{buildroot}%{_prefix}/src/www
+install -m 644 src/www/images/* %{buildroot}%{_prefix}/src/www/images
+install -m 644 src/www/scripts/* %{buildroot}%{_prefix}/src/www/scripts
+install -m 644 src/www/styles/* %{buildroot}%{_prefix}/src/www/styles
+
 install -m 644 skins/fonts/* %{buildroot}%{_prefix}/skins/fonts
+install -m 644 skins/icons/AquaFusion/* %{buildroot}%{_prefix}/skins/icons/AquaFusion
+install -m 644 skins/icons/misc/* %{buildroot}%{_prefix}/skins/icons/misc
+install -m 644 skins/icons/gnome/* %{buildroot}%{_prefix}/skins/icons/gnome
+install -m 644 skins/icons/old/* %{buildroot}%{_prefix}/skins/icons/old
 install -m 644 skins/images/* %{buildroot}%{_prefix}/skins/images
 install -m 644 skins/main1/* %{buildroot}%{_prefix}/skins/main1
 install -m 644 skins/xml/type1/* %{buildroot}%{_prefix}/skins/xml/type1
 install -m 644 skins/aubin1/* %{buildroot}%{_prefix}/skins/aubin1
 install -m 644 skins/barbieri/* %{buildroot}%{_prefix}/skins/barbieri
-#install -m 644 skins/dischi1/* %{buildroot}%{_prefix}/skins/dischi1
-#install -m 644 skins/krister1/* %{buildroot}%{_prefix}/skins/krister1
 install -m 644 skins/malt1/* %{buildroot}%{_prefix}/skins/malt1
 
 install -m 644 freevo.conf freevo_config.py boot/boot_config %{buildroot}%{_sysconfdir}/freevo
@@ -103,10 +164,12 @@ install -m755 boot/freevo_dep %{buildroot}%{_sysconfdir}/rc.d/init.d
 
 install -m 644 testfiles/Images/*.jpg %{buildroot}%{_cachedir}/freevo/testfiles/Images
 install -m 644 testfiles/Images/*.ssr %{buildroot}%{_cachedir}/freevo/testfiles/Images
-install -m 644 testfiles/Images/Show/*.* %{buildroot}%{_cachedir}/freevo/testfiles/Images/Show
+install -m 644 testfiles/Images/Show/* %{buildroot}%{_cachedir}/freevo/testfiles/Images/Show
+install -m 644 testfiles/Images/Bins/* %{buildroot}%{_cachedir}/freevo/testfiles/Images/Bins
+install -m 644 testfiles/Mame/* %{buildroot}%{_cachedir}/freevo/testfiles/Mame
 install -m 644 testfiles/Movies/*.avi testfiles/Movies/*.jpg testfiles/Movies/*.xml %{buildroot}%{_cachedir}/freevo/testfiles/Movies
 install -m 644 testfiles/Movies/skin.xml_Test/* %{buildroot}%{_cachedir}/freevo/testfiles/Movies/skin.xml_Test
-install -m 644 testfiles/Music/*.* %{buildroot}%{_cachedir}/freevo/testfiles/Music
+install -m 644 testfiles/Music/*.mp3 %{buildroot}%{_cachedir}/freevo/testfiles/Music
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -123,60 +186,33 @@ rm -rf %{_logdir}/freevo
 find %{_prefix} -name "*.pyc" |xargs rm -f
 
 %files
-%defattr(644,root,root,755)
-%attr(755,root,root) %dir %{_prefix}
-%attr(755,root,root) %dir %{_prefix}/eyed3
-%attr(755,root,root) %dir %{_prefix}/fbcon
-%attr(755,root,root) %dir %{_prefix}/gui
-%attr(755,root,root) %dir %{_prefix}/helpers
-%attr(755,root,root) %dir %{_prefix}/plugins
-%attr(755,root,root) %dir %{_prefix}/plugins/cddb
-%attr(755,root,root) %dir %{_prefix}/plugins/weather
-%attr(755,root,root) %dir %{_prefix}/plugins/weather/icons
-%attr(755,root,root) %dir %{_prefix}/rc_client
-%attr(755,root,root) %dir %{_prefix}/skins
-%attr(755,root,root) %dir %{_prefix}/skins/fonts
-%attr(755,root,root) %dir %{_prefix}/skins/images
-%attr(755,root,root) %dir %{_prefix}/skins/main1
-%attr(755,root,root) %dir %{_prefix}/skins/xml
-%attr(755,root,root) %dir %{_prefix}/skins/xml/type1
-%attr(755,root,root) %dir %{_prefix}/skins/aubin1
-%attr(755,root,root) %dir %{_prefix}/skins/barbieri
-#%attr(755,root,root) %dir %{_prefix}/skins/dischi1
-#%attr(755,root,root) %dir %{_prefix}/skins/krister1
-%attr(755,root,root) %dir %{_prefix}/skins/malt1
+%defattr(-,root,root,755)
+%{_prefix}/[c-q]*
+%{_prefix}/rc_client
+%{_prefix}/runapp
+%{_prefix}/[s-z]*
+
 %attr(755,root,root) %dir %{_sysconfdir}/freevo
-%attr(755,root,root) %{_prefix}/freevo
-%attr(755,root,root) %{_prefix}/freevo_xwin
-%attr(755,root,root) %{_prefix}/runapp
-%attr(644,root,root) %{_prefix}/*.py
-%attr(644,root,root) %{_prefix}/eyed3/*
-%attr(644,root,root) %{_prefix}/fbcon/fbset.db
-%attr(755,root,root) %{_prefix}/fbcon/vtrelease
-%attr(755,root,root) %{_prefix}/fbcon/*.sh
-%attr(755,root,root) %{_prefix}/fbcon/matroxset
-%attr(644,root,root) %{_prefix}/gui/*
-%attr(644,root,root) %{_prefix}/tv/*
-%attr(644,root,root) %{_prefix}/helpers/*
-%attr(755,root,root) %{_prefix}/icons
-%attr(755,root,root) %{_prefix}/plugins/cddb/cdrom.so
-%attr(644,root,root) %{_prefix}/plugins/cddb/*.py
-%attr(644,root,root) %{_prefix}/plugins/weather/librarydoc.txt
-%attr(644,root,root) %{_prefix}/plugins/weather/*.py
-%attr(644,root,root) %{_prefix}/plugins/weather/icons/*
-%attr(644,root,root) %{_prefix}/rc_client/*
-%attr(644,root,root) %{_prefix}/skins/fonts/*
-%attr(644,root,root) %{_prefix}/skins/images/*
-%attr(644,root,root) %{_prefix}/skins/main1/*
-%attr(644,root,root) %{_prefix}/skins/xml/type1/*
-%attr(644,root,root) %{_prefix}/skins/aubin1/*
-%attr(644,root,root) %{_prefix}/skins/barbieri/*
-#%attr(644,root,root) %{_prefix}/skins/dischi1/*
-#%attr(644,root,root) %{_prefix}/skins/krister1/*
-%attr(644,root,root) %{_prefix}/skins/malt1/*
-%config %{_sysconfdir}/freevo/freevo_config.py
-%config %{_sysconfdir}/freevo/freevo.conf
-%doc BUGS ChangeLog COPYING FAQ INSTALL* README TODO Docs/*
+%attr(644,root,root) %config %{_sysconfdir}/freevo/freevo_config.py
+%attr(644,root,root) %config %{_sysconfdir}/freevo/freevo.conf
+%attr(644,root,root) %doc BUGS ChangeLog COPYING FAQ INSTALL README TODO Docs/*
+
+%files runtime
+%defattr(644,root,root,755)
+%{_prefix}/runtime/*.py
+%{_prefix}/runtime/README
+%{_prefix}/runtime/VERSION
+%{_prefix}/runtime/preloads
+%defattr(755,root,root,755)
+%{_prefix}/runtime/dll
+%{_prefix}/runtime/lib
+
+%preun runtime
+find %{_prefix}/runtime -name "*.pyc" |xargs rm -f
+
+%files apps
+%defattr(755,root,root,755)
+%{_prefix}/runtime/apps
 
 %files boot
 %defattr(644,root,root,755)
@@ -188,10 +224,7 @@ find %{_prefix} -name "*.pyc" |xargs rm -f
 
 %files testfiles
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_cachedir}/freevo/testfiles/Images
-%attr(755,root,root) %{_cachedir}/freevo/testfiles/Movies
-%attr(755,root,root) %{_cachedir}/freevo/testfiles/Music
-%attr(755,root,root) %{_cachedir}/freevo/testfiles/tv-show-images
+%{_cachedir}/freevo/testfiles
 
 %post boot
 if [ -x /sbin/chkconfig ]; then
@@ -214,8 +247,26 @@ ln -sf %{_cachedir}/freevo/testfiles %{_prefix}
 rm -f %{_prefix}/testfiles
 
 %changelog
-* Mon Nov 18 2002 TC Wan <tcwan@cs.usm.my>
-- Update SPEC file to 1.3.0 release
+* Tue Feb  4 2003 TC Wan <tcwan@cs.usm.my>
+- Merged 1.3.1 runtime release
+
+* Thu Jan 30 2003 TC Wan <tcwan@cs.usm.my>
+- Added www subdir to specfile
+
+* Wed Jan 29 2003 TC Wan <tcwan@cs.usm.my>
+- Minor tweak to helpers subdirectory install
+
+* Tue Dec 31 2002 TC Wan <tcwan@cs.usm.my>
+- Automate CVS date generation
+
+* Fri Dec 13 2002 TC Wan <tcwan@cs.usm.my>
+- Update dir structure to Dec 13 CVS
+
+* Fri Nov 29 2002 TC Wan <tcwan@cs.usm.my>
+- Complete revamp for new directory structure
+
+* Wed Nov 20 2002 TC Wan <tcwan@cs.usm.my>
+- Cleaned up files directive
 
 * Wed Nov 13 2002 TC Wan <tcwan@cs.usm.my>
 - Disabled display=sdl as mplayer doesn't work reliably with this option
