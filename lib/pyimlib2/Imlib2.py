@@ -10,7 +10,8 @@ def utf8(text):
 	latin-1.  Of course it's not foolproof, but it works in practice.
 	"""
 	if type(text) == types.UnicodeType:
-		return text.encode('utf-8')
+		return text.encode("utf-8")
+
 	try:
 		text.decode("utf-8")
 	except:
@@ -94,13 +95,15 @@ class Image:
 
 		Returns: A buffer object containing the raw image data.
 		"""
-		bytes, buffer_addr = self._image.get_bytes(format)
+		bytes, buffer_addr, must_free = self._image.get_bytes(format)
 		if buffer_addr == 0:
 			return bytes
-		return BufferProxy(bytes, _Imlib2._free_buffer, buffer_addr)
+		if must_free:
+			must_free = _Imlib2._free_buffer
+		return BufferProxy(bytes, must_free, buffer_addr)
 
 
-	def scale(self, (w, h)):
+	def scale(self, (w, h), src_pos = (0, 0), src_size = (-1, -1)):
 		"""
 		Scale the image and return a new image.
 
@@ -111,12 +114,15 @@ class Image:
 
 		Returns: a new Image instance representing the scaled image.
 		"""
+		src_w, src_h = src_size
+		x, y = src_pos
+
 		aspect = float(self.width) / float(self.height)
-		if w == -1:
-			w = round(h * aspect)
-		elif h == -1:
-			h = round(w / aspect)
-		return Image(self._image.scale(int(w), int(h)))
+		if w == -1:      w = round(h * aspect)
+		elif h == -1:    h = round(w / aspect)
+		if src_w == -1:  src_w = self.width 
+		if src_h == -1:  src_h = self.height 
+		return Image(self._image.scale(int(x), int(y), int(src_w), int(src_h), int(w), int(h)))
 
 
 	def crop(self, (x, y), (w, h)):
@@ -129,7 +135,8 @@ class Image:
 
 		Returns: a new Image instance representing the cropped image.
 		"""
-		return Image(self._image.crop(int(x), int(y), int(w), int(h)))
+		return self.scale((w, h), (x, y), (w, h) )
+		#return Image(self._image.crop(int(x), int(y), int(w), int(h)))
 
 	def rotate(self, angle):
 		"""
@@ -193,8 +200,9 @@ class Image:
 	    """
 		return self._image.copy_rect(src_pos, size, dst_pos)
 
-	def blend(self, src, dst_pos = (0, 0), src_pos = (0, 0), 
-	          src_size = (-1, -1), alpha = 255, merge_alpha = True):
+	def blend(self, src, src_pos = (0, 0), src_size = (-1, -1), 
+	          dst_pos = (0, 0), dst_size = (-1, -1), 
+	          alpha = 255, merge_alpha = True):
 		"""
 		Blends one image onto another.  
 
@@ -221,12 +229,12 @@ class Image:
 		Returns: None.
 		"""
 
-		if src_size[0] == -1:
-			src_size = src.width, src_size[1]
-		if src_size[1] == -1:
-			src_size = src_size[0], src.height
-		return self._image.blend(src._image, dst_pos, src_pos, src_size, 
-		                         int(alpha), merge_alpha)
+		if src_size[0] == -1: src_size = src.width, src_size[1]
+		if src_size[1] == -1: src_size = src_size[0], src.height
+		if dst_size[0] == -1: dst_size = src_size[0], dst_size[1]
+		if dst_size[1] == -1: dst_size = dst_size[0], src_size[1]
+		return self._image.blend(src._image, src_pos, src_size, 
+		                         dst_pos, dst_size, int(alpha), merge_alpha)
 
 
 	def clear(self, (x, y) = (0, 0), (w, h) = (-1, -1)):
@@ -338,7 +346,7 @@ class Image:
 		if not color:
 			color = font.color
 		if len(color) == 3:
-			color = color + (255,)
+			color = tuple(color) + (255,)
 
 		return self._image.draw_text(font._font, int(x), int(y), 
 		                             utf8(text), color)
@@ -360,7 +368,7 @@ class Image:
 		Returns: None
 		"""
 		if len(color) == 3:
-			color = color + (255,)
+			color = tuple(color) + (255,)
 		return self._image.draw_rectangle(int(x), int(y), int(w), int(h), 
 		                                  color, fill)
 
@@ -380,7 +388,7 @@ class Image:
 		Returns: None
 		"""
 		if len(color) == 3:
-			color = color + (255,)
+			color = tuple(color) + (255,)
 		return self._image.draw_ellipse(int(xc), int(yc), int(a), int(b), color, fill)
 
 	def move_to_shmem(self, format = "BGRA", id = None):
@@ -484,7 +492,7 @@ class Font:
 		         is 255.
 		"""
 		if len(color) == 3:
-			self.color = color + (255,)
+			self.color = tuple(color) + (255,)
 		else:
 			self.color = color
 
@@ -515,6 +523,9 @@ class BufferProxy:
 		self._buffer = buffer
 		self._callback = callback
 		self._cbargs = args
+
+	def get_buffer_address(self):
+		return self._cbargs
 
 	def __del__(self):
 		if self._callback:

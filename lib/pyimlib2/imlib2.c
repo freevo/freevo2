@@ -25,7 +25,6 @@ PyObject *imlib2_create(PyObject *self, PyObject *args)
 		return NULL;
 
 	if (bytes) {
-		printf("Convert from format: %s\n", from_format);
 		if (!strcmp(from_format, "BGRA"))
 			image = imlib_create_image_using_copied_data(w, h, (void *)bytes);
 		else {

@@ -5,6 +5,7 @@
    See Imlib2.py for usage details.
 */
 
+#define HAVE_MMX 1
 #include <Python.h>
 #define X_DISPLAY_MISSING
 #include <Imlib2.h>
@@ -80,53 +81,34 @@ PyObject *Image_PyObject__clear(PyObject *self, PyObject *args)
 
 PyObject *Image_PyObject__scale(PyObject *self, PyObject *args)
 { 
-	int dst_w, dst_h, src_w, src_h;
+	int x, y, dst_w, dst_h, src_w, src_h, i;
+	unsigned char *imgbuf;
 	Imlib_Image *image;
 	Image_PyObject *o;
 
-	if (!PyArg_ParseTuple(args, "ii", &dst_w, &dst_h))
+	if (!PyArg_ParseTuple(args, "iiiiii", &x, &y, &src_w, &src_h, &dst_w, &dst_h))
 		return NULL;
 
 	imlib_context_set_image(((Image_PyObject *)self)->image);
-	src_w = imlib_image_get_width();
-	src_h = imlib_image_get_height();
-	image = imlib_create_cropped_scaled_image(0, 0, src_w, src_h, dst_w, dst_h);
+	imlib_context_set_blend(0);
+	image = imlib_create_cropped_scaled_image(x, y, src_w, src_h, dst_w, dst_h);
+	imlib_context_set_blend(1);
 	if (!image) {
 		PyErr_Format(PyExc_RuntimeError, "Failed scaling image (%d, %d)", dst_w, dst_h);
 		return NULL;
 	}
-	
-	o = PyObject_NEW(Image_PyObject, &Image_PyObject_Type);
-	o->image = image;
-	return (PyObject *)o;
-}
 
-PyObject *Image_PyObject__crop(PyObject *self, PyObject *args)
-{ 
-	int x, y, w, h, src_w, src_h;
-	Imlib_Image *image;
-	Image_PyObject *o;
-
-	if (!PyArg_ParseTuple(args, "iiii", &x, &y, &w, &h))
-		return NULL;
-
-	imlib_context_set_image(((Image_PyObject *)self)->image);
-	src_w = imlib_image_get_width();
-	src_h = imlib_image_get_height();
-	if (w > src_w) w = src_w;
-	if (h > src_h) h = src_h;
-	if (x > src_w) x = 0;
-	if (y > src_h) y = 0;
-
-	// Errmm, why imlib_Create_cropped_image terribly broken?
-	//image = imlib_create_cropped_image(x, y, w, h);
-
-	image = imlib_create_cropped_scaled_image(x, y, w, h, w, h);
-	if (!image) {
-		PyErr_Format(PyExc_RuntimeError, "Failed cropping image (%d, %d), (%d, %d)", x, y, w, h);
-		return NULL;
+#if 0
+	// Imlib2 is broken.  It divides by 256 instead of 255 when blending.
+	// As a result, scaling an image where all pixels have alpha=255 will
+	// result in an image with alpha=254.
+	imlib_context_set_image(image);
+	imgbuf = imlib_image_get_data();
+	for (i = 3; i < (dst_w*dst_h*4); i += 4) {
+		if (*(imgbuf+i) == 254) *(imgbuf+i)+=1;
 	}
-	
+	imlib_image_put_back_data((DATA32 *)imgbuf);
+#endif
 	o = PyObject_NEW(Image_PyObject, &Image_PyObject_Type);
 	o->image = image;
 	return (PyObject *)o;
@@ -177,12 +159,12 @@ PyObject *Image_PyObject__clone(PyObject *self, PyObject *args)
 PyObject *Image_PyObject__blend(PyObject *self, PyObject *args)
 { 
 	int dst_x, dst_y, src_alpha = 255, merge_alpha = 1,
-	    src_w, src_h, src_x = 0, src_y = 0;
+	    src_w, src_h, src_x = 0, src_y = 0, dst_w, dst_h;
 	Image_PyObject *src;
 	Imlib_Image *src_img;
 	Imlib_Color_Modifier cmod;
 
-	if (!PyArg_ParseTuple(args, "O!(ii)(ii)(ii)ii", &Image_PyObject_Type, &src, &dst_x, &dst_y, &src_x, &src_y, &src_w, &src_h, &src_alpha, &merge_alpha))
+	if (!PyArg_ParseTuple(args, "O!(ii)(ii)(ii)(ii)ii", &Image_PyObject_Type, &src, &src_x, &src_y, &src_w, &src_h, &dst_x, &dst_y, &dst_w, &dst_h, &src_alpha, &merge_alpha))
 		return NULL;
 
 	Py_INCREF(Py_None);
@@ -192,10 +174,6 @@ PyObject *Image_PyObject__blend(PyObject *self, PyObject *args)
 
 	src_img = ((Image_PyObject *)src)->image;
 
-	// This yields incorrect results.  We would need to duplicate
-	// the image and apply the color modifer to it for this to
-	// have the correct result, but that's actually slower than the
-	// above code.
 	if (src_alpha < 255) {
 		unsigned char a[256], linear[256];
 		int i;
@@ -211,11 +189,10 @@ PyObject *Image_PyObject__blend(PyObject *self, PyObject *args)
 
 	imlib_context_set_image(((Image_PyObject *)self)->image);
 
-//	imlib_context_set_operation(IMLIB_OP_SUBTRACT);
 	imlib_context_set_blend( src_alpha == 256 ? 0 : 1);
-	imlib_blend_image_onto_image(src_img, merge_alpha, src_x, src_y, 
-			src_w, src_h, dst_x, dst_y,
-			src_w, src_h);
+	imlib_blend_image_onto_image(src_img, merge_alpha, 
+			src_x, src_y, src_w, src_h, 
+			dst_x, dst_y, dst_w, dst_h);
 	imlib_context_set_blend(1);
 	imlib_context_set_color_modifier(NULL);
 
@@ -385,20 +362,19 @@ PyObject *Image_PyObject__get_bytes(PyObject *self, PyObject *args)
 
 	imlib_context_set_image(((Image_PyObject *)self)->image);
 	size = get_raw_bytes_size(format);
-	if (!strcmp(format, "BGRA")) {
-		unsigned char *bytes = imlib_image_get_data_for_reading_only();
-		// Imlib2 docs say we're not supposed to do this.  It seems to
-		// work though. :)
-		ret = PyBuffer_FromReadWriteMemory(bytes, size);
-		return Py_BuildValue("(Ol)", ret, 0);
-	}
+/*
+	if (!strcmp(format, "BGRA"))
+		buffer = imlib_image_get_data_for_reading_only();
+	else
+		buffer = get_raw_bytes(format, NULL);
+*/
 	buffer = get_raw_bytes(format, NULL);
 	ret = PyBuffer_FromMemory(buffer, size);
 
 	// XXX: WARNING!  This function creates a buffer from memory allocated
 	// by get_raw_bytes().  It's the responsibility of the wrapper to
 	// free this buffer by calling _Imlib2.free_buffer().
-	return Py_BuildValue("(Ol)", ret, buffer);
+	return Py_BuildValue("(Oli)", ret, buffer, 1); //strcmp(format, "BGRA") == 1);
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -426,7 +402,6 @@ PyMethodDef Image_PyObject_methods[] = {
 	{ "copy_rect", Image_PyObject__copy_rect, METH_VARARGS },
 	{ "clone", Image_PyObject__clone, METH_VARARGS },
 	{ "scale", Image_PyObject__scale, METH_VARARGS },
-	{ "crop", Image_PyObject__crop, METH_VARARGS },
 	{ "rotate", Image_PyObject__rotate, METH_VARARGS },
 	{ "blend", Image_PyObject__blend, METH_VARARGS },
 	{ "move_to_shmem", Image_PyObject__move_to_shmem, METH_VARARGS },
