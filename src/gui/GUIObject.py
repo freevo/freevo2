@@ -7,6 +7,10 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/05/15 02:21:53  rshortt
+# got RegionScroller, ListBox, ListItem, OptionBox working again, although
+# they suffer from the same label alignment bouncing bug as everything else
+#
 # Revision 1.20  2003/05/02 01:09:02  rshortt
 # Changes in the way these objects draw.  They all maintain a self.surface
 # which they then blit onto their parent or in some cases the screen.  Label
@@ -76,6 +80,9 @@ import ZIndexRenderer
 from Color import *
 
 DEBUG = 0
+
+TRUE = 1
+FALSE = 0
 
 
 class GUIObject:
@@ -519,7 +526,7 @@ class GUIObject:
             ly = by+vm
         elif va == Align.BOTTOM:
             ly = by+bh-lh-vm
-        elif va == Align.MIDDLE:
+        elif va == Align.CENTER:
             ly = by+((bh-lh)/2)
         elif va == Align.NONE:
             ly = self.top

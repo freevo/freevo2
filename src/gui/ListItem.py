@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/05/15 02:21:54  rshortt
+# got RegionScroller, ListBox, ListItem, OptionBox working again, although
+# they suffer from the same label alignment bouncing bug as everything else
+#
 # Revision 1.8  2003/05/02 01:09:02  rshortt
 # Changes in the way these objects draw.  They all maintain a self.surface
 # which they then blit onto their parent or in some cases the screen.  Label
@@ -69,6 +73,7 @@ import config
 from GUIObject import *
 from Color     import *
 from Border    import *
+from Button    import *
 from Label     import * 
 from types     import * 
 from osd import Font
@@ -76,7 +81,7 @@ from osd import Font
 DEBUG = 0
 
 
-class ListItem(GUIObject):
+class ListItem(Button):
     """
     width     Integer
     height    Integer
@@ -94,6 +99,10 @@ class ListItem(GUIObject):
                  selected_fg_color=None, border=None, bd_color=None, 
                  bd_width=None):
 
+        handler = None
+        left = 0
+        top = 0
+
         Button.__init__(self, text, handler, left, top, width, height, bg_color,
                         fg_color, selected_bg_color, selected_fg_color,
                         border, bd_color, bd_width)
@@ -101,20 +110,46 @@ class ListItem(GUIObject):
         self.value             = value
         self.h_margin          = 20
         self.v_margin          = 2
-        self.label.set_v_align(Align.MIDDLE)
+        self.label.set_v_align(Align.CENTER)
         self.label.set_h_align(Align.LEFT)
 
 
     def _draw(self, surface=None):
-        """
-        The actual internal draw function.
+#        """
+#        The actual internal draw function.
+#
+#        """
+#        if not self.width or not self.height or not self.text:
+#            raise TypeError, 'Not all needed variables set.'
+#
+#        if not surface:
+#            surface = self.parent.surface
+#
+#        if self.selected:
+#            c = self.selected_bg_color.get_color_sdl()
+#            a = self.selected_bg_color.get_alpha()
+#        else:
+#            c = self.bg_color.get_color_sdl()
+#            a = self.bg_color.get_alpha()
+#
+#        box = pygame.Surface(self.get_size(), 0, 32)
+#        box.fill(c)
+#        box.set_alpha(a)
+#
+#        if surface:
+#            surface.blit(box, self.get_position())
+#        else:
+#            self.osd.screen.blit(box, self.get_position())
+#
+#        if self.selected:
+#            self.selected_label.draw(surface)
+#        else:
+#            self.label.draw(surface)
+#
+#        if self.border: self.border.draw(surface)
 
-        """
         if not self.width or not self.height or not self.text:
             raise TypeError, 'Not all needed variables set.'
-
-        if not surface:
-            surface = self.parent.surface
 
         if self.selected:
             c = self.selected_bg_color.get_color_sdl()
@@ -123,20 +158,13 @@ class ListItem(GUIObject):
             c = self.bg_color.get_color_sdl()
             a = self.bg_color.get_alpha()
 
-        box = pygame.Surface(self.get_size(), 0, 32)
-        box.fill(c)
-        box.set_alpha(a)
+        self.surface = pygame.Surface(self.get_size(), 0, 32)
+        self.surface.fill(c)
+        self.surface.set_alpha(a)
 
-        if surface:
-            surface.blit(box, self.get_position())
-        else:
-            self.osd.screen.blit(box, self.get_position())
+        Container._draw(self)
 
-        if self.selected:
-            self.selected_label.draw(surface)
-        else:
-            self.label.draw(surface)
+        self.parent.region_surface.blit(self.surface, self.get_position())
 
-        if self.border: self.border.draw(surface)
 
     

@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/05/15 02:21:54  rshortt
+# got RegionScroller, ListBox, ListItem, OptionBox working again, although
+# they suffer from the same label alignment bouncing bug as everything else
+#
 # Revision 1.11  2003/05/02 01:09:03  rshortt
 # Changes in the way these objects draw.  They all maintain a self.surface
 # which they then blit onto their parent or in some cases the screen.  Label
@@ -230,7 +234,7 @@ class RegionScroller(Container):
         return (self.v_x, self.v_y)
 
 
-    def _draw(self):
+    def _draw(self, surface=None):
         """
         The actual internal draw function.
 
@@ -260,7 +264,10 @@ class RegionScroller(Container):
 
         if self.border: self.border.draw()
 
-        self.parent.surface.blit(self.surface, self.get_position())
+        if surface:
+            surface.blit(self.surface, self.get_position())
+        else:
+            self.parent.surface.blit(self.surface, self.get_position())
     
 
     def set_position(self, left, top):

@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/05/15 02:21:54  rshortt
+# got RegionScroller, ListBox, ListItem, OptionBox working again, although
+# they suffer from the same label alignment bouncing bug as everything else
+#
 # Revision 1.7  2003/04/24 19:56:30  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -101,11 +105,11 @@ class optiondemo(PopupBox):
                           bg_color, fg_color, icon, border, bd_color, bd_width)
 
 
-        self.label.top = self.top + 25
+        # self.label.top = self.top + 25
 
         self.ob = OptionBox('Default')
         self.ob.set_h_align(Align.CENTER)
-        self.ob.set_v_align(Align.MIDDLE)
+        self.ob.set_v_align(Align.CENTER)
       
         for i in range(20):
             iname = "Item %s" % i
@@ -114,9 +118,9 @@ class optiondemo(PopupBox):
         self.ob.toggle_selected_index(0)
         self.ob.toggle_selected()
         self.add_child(self.ob)
-        print 'CP: %s,%s' % self.ob.calc_position()
+        # print 'CP: %s,%s' % self.ob.calc_position()
         # self.ob.set_position(self.ob.calc_position())
-        self.ob.set_position(371, 275)
+        # self.ob.set_position(371, 275)
 
 
     def eventhandler(self, event):

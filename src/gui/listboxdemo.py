@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/05/15 02:21:54  rshortt
+# got RegionScroller, ListBox, ListItem, OptionBox working again, although
+# they suffer from the same label alignment bouncing bug as everything else
+#
 # Revision 1.7  2003/04/24 19:56:29  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -103,9 +107,9 @@ class listboxdemo(PopupBox):
 
         self.set_h_align(Align.CENTER)
 
-        self.label.top = self.top + 25
+        # self.label.top = self.top + 25
 
-        self.pb = ListBox(left=self.left+25, top=self.top+75, width=450, height=250)
+        self.pb = ListBox(left=25, top=75, width=450, height=250)
         for i in range(20):
             iname = "Item %s" % i
             self.pb.add_item(text=iname, value=i)

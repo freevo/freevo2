@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/05/15 02:21:54  rshortt
+# got RegionScroller, ListBox, ListItem, OptionBox working again, although
+# they suffer from the same label alignment bouncing bug as everything else
+#
 # Revision 1.8  2003/05/02 01:09:03  rshortt
 # Changes in the way these objects draw.  They all maintain a self.surface
 # which they then blit onto their parent or in some cases the screen.  Label
@@ -136,7 +140,7 @@ class Scrollbar(GUIObject):
     def get_handle_rect(self):
         (a, b, c) = self.parent.get_view_percent(self.orientation)
 
-        print 'SB: a,b,c = %s,%s,%s' % (a, b, c)
+        if DEBUG: print 'SB: a,b,c = %s,%s,%s' % (a, b, c)
 
         if a == 100 or b == 100 or c == 100:
             return self.get_rect()
@@ -156,7 +160,7 @@ class Scrollbar(GUIObject):
             # fg_y = self.top
             fg_y = 0
 
-        print 'SB: handle_rect = %s,%s,%s,%s' % (fg_x, fg_y, fg_width, fg_height)
+        if DEBUG: print 'SB: handle_rect = %s,%s,%s,%s' % (fg_x, fg_y, fg_width, fg_height)
         return (fg_x, fg_y, fg_width, fg_height)
 
 
@@ -197,8 +201,8 @@ class Scrollbar(GUIObject):
             self.border.width = self.width
             self.border.height = self.height
 
-        print 'SB: parent_rect = %s,%s,%s,%s' % (self.parent.left, self.parent.top, self.parent.width, self.parent.height)
-        print 'SB: self_rect = %s,%s,%s,%s' % (self.left, self.top, self.width, self.height)
+        if DEBUG: print 'SB: parent_rect = %s,%s,%s,%s' % (self.parent.left, self.parent.top, self.parent.width, self.parent.height)
+        if DEBUG: print 'SB: self_rect = %s,%s,%s,%s' % (self.left, self.top, self.width, self.height)
 
 
     def _draw(self):
@@ -219,7 +223,7 @@ class Scrollbar(GUIObject):
         self.surface.set_alpha(bg_a)
 
         fg_c = self.fg_color.get_color_sdl()
-        print 'SB: fg_c = %s,%s,%s,%s' % fg_c
+        if DEBUG: print 'SB: fg_c = %s,%s,%s,%s' % fg_c
         fg_a = self.fg_color.get_alpha()
 
         fg_box = pygame.Surface(self.get_handle_size(), 0, 32)
@@ -229,7 +233,7 @@ class Scrollbar(GUIObject):
         self.surface.blit(fg_box, self.get_handle_coords())
         if self.border: self.border.draw()
 
-        print 'SB::_draw: pos=%s,%s' % (self.left, self.top)
+        if DEBUG: print 'SB::_draw: pos=%s,%s' % (self.left, self.top)
         self.parent.surface.blit(self.surface, self.get_position())
 
 

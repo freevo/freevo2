@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/05/15 02:21:54  rshortt
+# got RegionScroller, ListBox, ListItem, OptionBox working again, although
+# they suffer from the same label alignment bouncing bug as everything else
+#
 # Revision 1.6  2003/05/02 01:09:02  rshortt
 # Changes in the way these objects draw.  They all maintain a self.surface
 # which they then blit onto their parent or in some cases the screen.  Label
@@ -94,6 +98,8 @@ class OptionBox(Button):
                  selected_fg_color=None, border=None, bd_color=None, 
                  bd_width=None):
 
+        handler = None
+
         Button.__init__(self, text, handler, left, top, width, height, bg_color,
                         fg_color, selected_bg_color, selected_fg_color,
                         border, bd_color, bd_width)
@@ -104,8 +110,9 @@ class OptionBox(Button):
         self.v_margin    = 2
 
 
-        self.list = ListBox(left=self.left, top=self.top+self.height, 
-                            width=self.width, height=self.height*self.max_visible)
+        # self.list = ListBox(left=self.left, top=self.top+self.height, 
+        #                    width=self.width, height=self.height*self.max_visible)
+        self.list = ListBox(width=self.width, height=self.height*self.max_visible)
         self.add_child(self.list)
         self.list.visible = 0
 
@@ -151,9 +158,9 @@ class OptionBox(Button):
             c = self.bg_color.get_color_sdl()
             a = self.bg_color.get_alpha()
 
-        box = pygame.Surface(self.get_size(), 0, 32)
-        box.fill(c)
-        box.set_alpha(a)
+        self.surface = pygame.Surface(self.get_size(), 0, 32)
+        self.surface.fill(c)
+        self.surface.set_alpha(a)
 
         ar_1 = (self.width-18, 7)
         ar_2 = (self.width-8, 7)
@@ -164,18 +171,16 @@ class OptionBox(Button):
         else:
             arrow_color = self.fg_color.get_color_sdl()
 
-        pygame.draw.polygon(box, arrow_color, [ar_1, ar_2, ar_3])
+        pygame.draw.polygon(self.surface, arrow_color, [ar_1, ar_2, ar_3])
 
-        self.osd.screen.blit(box, self.get_position())
+        # if self.border: self.border.draw()
 
-        if self.border: self.border.draw()
-        if self.list:   self.list.draw()
+        # self.label.draw()
 
-        if self.selected:
-            self.selected_label.draw()
-        else:
-            self.label.draw()
         if isinstance(self.list, ListBox):
             self.list.set_position(self.left, self.top+self.height)
 
+        Container._draw(self)
+        self.parent.surface.blit(self.surface, self.get_position())
+        if self.list:   self.list.draw(self.parent.surface)
     

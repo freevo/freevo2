@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/05/15 02:21:54  rshortt
+# got RegionScroller, ListBox, ListItem, OptionBox working again, although
+# they suffer from the same label alignment bouncing bug as everything else
+#
 # Revision 1.12  2003/05/02 01:09:02  rshortt
 # Changes in the way these objects draw.  They all maintain a self.surface
 # which they then blit onto their parent or in some cases the screen.  Label
@@ -79,6 +83,7 @@ from Scrollbar      import *
 from RegionScroller import *
 from Color          import *
 from Border         import *
+from Button         import *
 from Label          import * 
 from ListItem       import * 
 from types          import * 
@@ -121,12 +126,15 @@ class ListBox(RegionScroller):
         if self.show_v_scrollbar != 0 and not self.show_v_scrollbar:
             self.show_v_scrollbar = 1
 
-        self.set_surface(pygame.Surface(self.get_size(), 0, 32))
 
-        RegionScroller.__init__(self, self.surface, left, top, self.width, 
-                                self.height, self.bg_color, self.fg_color,
+        dummy_surface = pygame.Surface((1,1), 0, 32)
+
+        RegionScroller.__init__(self, dummy_surface, left, top, width, 
+                                height, bg_color, fg_color,
                                 border, bd_color, bd_width,
                                 self.show_h_scrollbar, self.show_v_scrollbar)
+
+        self.set_surface(pygame.Surface(self.get_size(), 0, 32))
 
         self.h_margin                 = 2
         self.v_margin                 = 2
@@ -250,24 +258,25 @@ class ListBox(RegionScroller):
         c   = self.bg_color.get_color_sdl()
         a   = self.bg_color.get_alpha()
         self.set_surface(pygame.Surface((x, y), 0, 32))
-        self.surface.fill(c)
-        self.surface.set_alpha(a)
+        self.region_surface.fill(c)
+        self.region_surface.set_alpha(a)
 
 
-    def _draw(self):
+    def _draw(self, surface=None):
         """
         Lets alter the surface then get our superclass to do the draw.
 
         """
 
-        if not self.width or not self.height or not self.surface:
+        if not self.width or not self.height or not self.region_surface:
             raise TypeError, 'Not all needed variables set.'
 
         self.sort_items()
         for item in self.items:
-            item.draw(self.surface)
+            # item.draw(self.region_surface)
+            item.draw()
 
-        RegionScroller._draw(self)
+        RegionScroller._draw(self, surface)
 
 
     def destroy(self):
@@ -283,8 +292,8 @@ class ListBox(RegionScroller):
         scrolldirs = [rc.UP, rc.DOWN, rc.LEFT, rc.RIGHT]
         if scrolldirs.count(event) > 0:
             self.scroll(event)
-            self.draw()
-            self.osd.update(self.get_rect())
+            self.parent.draw()
+            self.osd.update(self.parent.get_rect())
             return
         else:
             return self.parent.eventhandler(event)
