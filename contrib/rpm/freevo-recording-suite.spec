@@ -1,6 +1,6 @@
-%define freevoname freevo-src
+%define freevoname freevo
 %define freevover 1.4
-%define freevorel 2_freevo
+%define freevorel 3_freevo
 ##############################################################################
 Summary: Meta-package for Freevo recording functionality
 Name: freevo-recording-suite
