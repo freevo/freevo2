@@ -446,6 +446,9 @@ if not os.path.isdir(FREEVO_CACHEDIR):
         os.makedirs(FREEVO_CACHEDIR)
         
     except OSError:
+        print 'Warning: %s does not exists and can\'t be created' % FREEVO_CACHEDIR
+        print 'Please create this directory as root and set permissions for the'
+        print 'Freevo user to write to it.'
         OS_CACHEDIR = '/tmp'        
         FREEVO_CACHEDIR = OS_CACHEDIR + '/freevo'
         
@@ -457,8 +460,8 @@ if not os.path.isdir(FREEVO_CACHEDIR):
                 FREEVO_CACHEDIR = OS_CACHEDIR + '/freevo-' + os.getuid()
                 if not os.path.isdir( FREEVO_CACHEDIR ):
                     os.makedirs( FREEVO_CACHEDIR )
-                
-
+        print 'Using %s as cache directory, but this is a bad idea' % FREEVO_CACHEDIR
+        print
 # ======================================================================
 # Freevo movie settings:
 # ======================================================================
