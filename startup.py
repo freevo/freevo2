@@ -223,7 +223,10 @@ if __name__ == "__main__":
     if 'OSD_SDL' in dir(config):
         # Do not use the regular remote control app and OSD server, they're both replaced by the
         # SDL OSD server!
-        task_args += [ freevo ]
+        if remote == remote_quiet:
+            task_args += [ freevo, remote ]
+        else:
+            task_args += [ freevo ]
     else:
         # Add the OSD server and remote control client applications
         task_args += [ freevo, osd, remote ]
