@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/03/06 21:06:04  dischi
+# catch empty strings first
+#
 # Revision 1.20  2003/03/01 17:27:29  dischi
 # *** empty log message ***
 #
@@ -1049,6 +1052,9 @@ class OSD:
                    font=None, ptsize=0, align='left', layer=None):
 
         if not pygame.display.get_init():
+            return None
+
+        if not string:
             return None
 
         # XXX Krister: Workaround for new feature that is only possible in the new
