@@ -98,7 +98,7 @@ class BitmapCanvas(Canvas):
 		# on the next update().  The child's rectangle was dirtied on the
 		# backing store by remove_child(), so all we need to do is ensure it
 		# gets drawn on the next update.
-		if hasattr(child, "_backing_store_info"):
+		if child.get_parent() and hasattr(child, "_backing_store_info"):
 			child.parent().queue_paint()
 
 
