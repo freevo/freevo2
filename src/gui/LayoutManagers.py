@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/09/07 11:16:16  dischi
+# add option to center the container on screen
+#
 # Revision 1.12  2003/09/01 18:58:15  dischi
 # Oops, wrong condition
 #
@@ -124,7 +127,7 @@ class FlowLayout(LayoutManager):
         line_height = 0
         row = 0
         self.table = [[],]
-        
+
         num_children = len(self.container.children)
         for i in range(num_children):
             child = self.container.children[i]
@@ -213,6 +216,9 @@ class FlowLayout(LayoutManager):
         if not self.table[-1]: del(self.table[-1])
         self.internal_align()
 
+        if hasattr(self.container, 'center_on_screen'):
+            self.container.top = (self.container.osd.height - self.container.height) / 2
+
 
     def internal_align(self):
         if not self.table: return
@@ -287,6 +293,8 @@ class FlowLayout(LayoutManager):
                         child.top += current
                     current += shift
 
+        self.needed_space = global_height
+        
 
 class GridLayout(LayoutManager):
 
