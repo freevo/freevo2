@@ -7,7 +7,6 @@ Name: %{name}
 Version: %{version}
 Release: %{release}
 Source0: %{name}.tgz
-#Patch0: %{name}-setup.patch
 Copyright: GPL
 Group: Development/Libraries
 BuildRoot: %{_tmppath}/%{name}-buildroot
@@ -19,7 +18,6 @@ Python bindings for Goom.
 
 %prep
 %setup -n %{name}
-#%patch0 -p1
 
 %configure
 
@@ -43,5 +41,5 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 
 %changelog
-* Wed May 12 2004 TC Wan <tcwan@cs.usm.my>
-- Initial SPEC file for RH 9 
+* Fri Jun 18 2004 TC Wan <tcwan@cs.usm.my>
+- Initial SPEC file for FC 2 
