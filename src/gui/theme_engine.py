@@ -288,7 +288,7 @@ def get_expression(expression):
                  len(b) - b.find(')') < 5:
             # lenght of something
             exp += ' attr("%s") %s' % ( b[ : ( b.find(')') + 1 ) ],
-                                                b[ ( b.find(')') + 1 ) : ])
+                                        b[ ( b.find(')') + 1 ) : ])
         else:
             # an attribute
             exp += ' attr("%s")' % b
@@ -1050,19 +1050,20 @@ class FXDSettings:
     skin main settings class
     """
     def __init__(self, filename):
-        self._layout   = {}
-        self._font     = {}
-        self._color    = {}
-        self._images   = {}
-        self._menuset  = {}
-        self._menu     = {}
-        self._popup    = ''
-        self._sets     = {}
-        self._mainmenu = MainMenu()
+        self.__layout   = {}
+        self.__font     = {}
+        self.__color    = {}
+        self.__images   = {}
+        self.__menuset  = {}
+        self.__menu     = {}
+        self.__popup    = ''
+        self.__sets     = {}
+        self.__mainmenu = MainMenu()
+
         self.skindirs  = []
         self.icon_dir  = ""
 
-        self.fxd_files        = []
+        self.fxd_files = []
 
         # variables set by set_var
         self.all_variables    = ('box_under_icon', )
@@ -1083,7 +1084,7 @@ class FXDSettings:
         """
         for node in children:
             if node.name == u'main':
-                self._mainmenu.parse(node, scale, c_dir)
+                self.__mainmenu.parse(node, scale, c_dir)
 
             elif node.name == u'menu':
                 type = attr_str(node, 'type', 'default')
@@ -1091,56 +1092,63 @@ class FXDSettings:
                 if type == 'all':
                     # if type is all, all types except default are deleted and
                     # the settings will be loaded for default
-                    self._menu = {}
+                    self.__menu = {}
                     type       = 'default'
 
-                self._menu[type] = Menu()
-                self._menu[type].parse(node, scale, c_dir)
+                self.__menu[type] = Menu()
+                self.__menu[type].parse(node, scale, c_dir)
 
 
             elif node.name == u'menuset':
                 label   = attr_str(node, 'label', '')
                 inherit = attr_str(node, 'inherits', '')
                 if inherit:
-                    self._menuset[label] =copy.deepcopy(self._menuset[inherit])
-                elif not self._menuset.has_key(label):
-                    self._menuset[label] = MenuSet()
-                self._menuset[label].parse(node, scale, c_dir)
+                    m = copy.deepcopy(self.__menuset[inherit])
+                    self.__menuset[label] = m
+                elif not self.__menuset.has_key(label):
+                    self.__menuset[label] = MenuSet()
+                self.__menuset[label].parse(node, scale, c_dir)
 
 
             elif node.name == u'layout':
                 label = attr_str(node, 'label', '')
                 if label:
-                    if not self._layout.has_key(label):
-                        self._layout[label] = Layout(label)
-                    self._layout[label].parse(node, scale, c_dir)
+                    if not self.__layout.has_key(label):
+                        self.__layout[label] = Layout(label)
+                    self.__layout[label].parse(node, scale, c_dir)
+
 
             elif node.name == u'font':
                 label = attr_str(node, 'label', '')
                 if label:
-                    if not self._font.has_key(label):
-                        self._font[label] = Font(label)
-                    self._font[label].parse(node, scale, c_dir)
+                    if not self.__font.has_key(label):
+                        self.__font[label] = Font(label)
+                    self.__font[label].parse(node, scale, c_dir)
+
 
             elif node.name == u'color':
                 try:
                     value = attr_col(node, 'value', '')
-                    self._color[node.attrs[('', 'label')]] = int2col(value)
+                    self.__color[node.attrs[('', 'label')]] = int2col(value)
                 except KeyError:
                     pass
+
 
             elif node.name == u'image':
                 try:
                     value = attr_col(node, 'filename', '')
-                    self._images[node.attrs[('', 'label')]] = value
+                    self.__images[node.attrs[('', 'label')]] = value
                 except KeyError:
                     pass
+
 
             elif node.name == u'iconset':
                 self.icon_dir = attr_str(node, 'theme', self.icon_dir)
 
+
             elif node.name == u'popup':
-                self._popup = attr_str(node, 'layout', self._popup)
+                self.__popup = attr_str(node, 'layout', self.__popup)
+
 
             elif node.name == u'setvar':
                 for v in self.all_variables:
@@ -1152,20 +1160,22 @@ class FXDSettings:
 
             else:
                 if node.children and node.children[0].name == 'style':
-                    self._sets[node.name] = Menu()
-                elif not self._sets.has_key(node.name):
-                    self._sets[node.name] = AreaSet()
-                self._sets[node.name].parse(node, scale, c_dir)
+                    self.__sets[node.name] = Menu()
+                elif not self.__sets.has_key(node.name):
+                    self.__sets[node.name] = AreaSet()
+                self.__sets[node.name].parse(node, scale, c_dir)
 
 
     def prepare(self):
         log.info('preparing skin settings')
 
         self.prepared = True
-        self.sets     = copy.deepcopy(self._sets)
 
-        self.font     = copy.deepcopy(self._font)
-        layout        = copy.deepcopy(self._layout)
+        # copy internal structures to prepare the copy
+        self.sets = copy.deepcopy(self.__sets)
+        all_menus = copy.deepcopy(self.__menu)
+        self.font = copy.deepcopy(self.__font)
+        layout    = copy.deepcopy(self.__layout)
 
         if not os.path.isdir(self.icon_dir):
             self.icon_dir = os.path.join(config.ICON_DIR, 'themes',
@@ -1173,15 +1183,14 @@ class FXDSettings:
         search_dirs = self.skindirs + [ config.IMAGE_DIR, self.icon_dir, '.' ]
 
         for f in self.font:
-            self.font[f].prepare(self._color, scale=self.font_scale)
+            self.font[f].prepare(self.__color, scale=self.font_scale)
 
         for l in layout:
-            layout[l].prepare(self.font, self._color, search_dirs,
-                              self._images)
+            layout[l].prepare(self.font, self.__color, search_dirs,
+                              self.__images)
 
-        all_menus = copy.deepcopy(self._menu)
         for menu in all_menus:
-            all_menus[menu].prepare(self._menuset, layout)
+            all_menus[menu].prepare(self.__menuset, layout)
 
             # prepare listing area images
             for s in all_menus[menu].style:
@@ -1190,11 +1199,12 @@ class FXDSettings:
                         for image in s[i].listing.images:
                             s[i].listing.images[image].prepare(None,
                                                                search_dirs,
-                                                               self._images)
+                                                               self.__images)
 
-
+        # menu structures
         self.default_menu = {}
         self.special_menu = {}
+
         for k in all_menus:
             if k.startswith('default'):
                 self.default_menu[k] = all_menus[k]
@@ -1224,23 +1234,23 @@ class FXDSettings:
                 self.sets[s].prepare(layout)
             else:
                 # prepare a menu
-                self.sets[s].prepare(self._menuset, layout)
+                self.sets[s].prepare(self.__menuset, layout)
                 for s in self.sets[s].style:
                     for i in range(2):
                         if s[i] and hasattr(s[i], 'listing'):
                             sli = s[i].listing.images
                             for image in sli:
                                 sli[image].prepare(None, search_dirs,
-                                                   self._images)
+                                                   self.__images)
 
-        self.popup = layout[self._popup]
+        self.popup = layout[self.__popup]
 
-        self.mainmenu = copy.deepcopy(self._mainmenu)
-        self.mainmenu.prepare(search_dirs, self._images)
+        self.mainmenu = copy.deepcopy(self.__mainmenu)
+        self.mainmenu.prepare(search_dirs, self.__images)
 
         self.images = {}
-        for name in self._images:
-            self.images[name] = search_file(self._images[name], search_dirs)
+        for name in self.__images:
+            self.images[name] = search_file(self.__images[name], search_dirs)
 
 
 
