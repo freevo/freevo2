@@ -9,6 +9,9 @@
 # 
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/10/26 19:14:52  dischi
+# adjust to new sysconfig file
+#
 # Revision 1.9  2004/07/10 12:33:42  dischi
 # header cleanup
 #
@@ -46,7 +49,7 @@
 # ----------------------------------------------------------------------- */
 
 
-import config
+import sysconfig
 
 class ObjectCache:
     '''Provides a cache for objects indexed by a string. It should
@@ -65,7 +68,7 @@ class ObjectCache:
 
     def __getitem__(self, key):
         if isinstance(key, str):
-            key = unicode(key, config.LOCALE)
+            key = unicode(key, sysconfig.CONF.encoding)
 
         try:
             del self.lru[self.lru.index(key)]
@@ -77,7 +80,7 @@ class ObjectCache:
 
     def __setitem__(self, key, object):
         if isinstance(key, str):
-            key = unicode(key, config.LOCALE)
+            key = unicode(key, sysconfig.CONF.encoding)
 
         try:
             # remove old one if key is already in cache
@@ -98,7 +101,7 @@ class ObjectCache:
 
     def __delitem__(self, key):
         if isinstance(key, str):
-            key = unicode(key, config.LOCALE)
+            key = unicode(key, sysconfig.CONF.encoding)
 
         if not key in self.cache:
             return

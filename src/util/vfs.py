@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/10/26 19:14:52  dischi
+# adjust to new sysconfig file
+#
 # Revision 1.20  2004/09/07 18:53:28  dischi
 # exclude new jpg thumbnails
 #
@@ -62,19 +65,20 @@ import traceback
 import codecs
 from stat import ST_MTIME
 
+import sysconfig
 
-import config
+_VFS_DIR = sysconfig.CONF.vfsdir
 
 def getoverlay(directory):
     if not directory.startswith('/'):
         directory = os.path.abspath(directory)
-    if directory.startswith(config.OVERLAY_DIR):
+    if directory.startswith(_VFS_DIR):
         return directory
-    for media in config.REMOVABLE_MEDIA:
+    for media in sysconfig.REMOVABLE_MEDIA:
         if directory.startswith(media.mountdir):
             directory = directory[len(media.mountdir):]
-            return '%s/disc/%s%s' % (config.OVERLAY_DIR, media.id, directory)
-    return config.OVERLAY_DIR + directory
+            return '%s/disc/%s%s' % (_VFS_DIR, media.id, directory)
+    return _VFS_DIR + directory
 
 
 def abspath(name):
@@ -220,7 +224,7 @@ def isoverlay(name):
     """
     return if the name is in the overlay dir
     """
-    return name.startswith(config.OVERLAY_DIR)
+    return name.startswith(_VFS_DIR)
 
 
 def normalize(name):
@@ -228,15 +232,15 @@ def normalize(name):
     remove OVERLAY_DIR if it's in the path
     """
     if isoverlay(name):
-        name = name[len(config.OVERLAY_DIR):]
+        name = name[len(_VFS_DIR):]
         if name.startswith('disc-set'):
             # revert it, disc-sets have no real dir
-            return os.path.join(config.OVERLAY_DIR, name)
+            return os.path.join(_VFS_DIR, name)
         if name.startswith('disc'):
             name = name[5:]
             id = name[:name.find('/')]
             name = name[name.find('/')+1:]
-            for media in config.REMOVABLE_MEDIA:
+            for media in sysconfig.REMOVABLE_MEDIA:
                 if media.id == id:
                     name = os.path.join(media.mountdir, name)
         return name

@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.126  2004/10/26 19:14:49  dischi
+# adjust to new sysconfig file
+#
 # Revision 1.125  2004/10/18 01:29:39  rshortt
 # Remove XMLTV TV_CHANNELS autogeneration because this comes from pyepg now.
 # Also is should be normal to have an empty TV_CHANNELS.
@@ -52,40 +55,6 @@
 # to leave out dvb0: or tv0: from their tuner_id portion of TV_CHANNELS.
 # This may be overriden in local_conf.py.
 #
-# Revision 1.116  2004/08/13 00:36:27  rshortt
-# Set the right vdev for BSD.
-#
-# Revision 1.115  2004/08/13 00:30:28  rshortt
-# Try to maintain FreeBSD support.
-#
-# Revision 1.114  2004/08/12 16:52:49  rshortt
-# Work on autodetecting tv cards.
-#
-# Revision 1.113  2004/08/09 14:37:45  dischi
-# fix encoding detection
-#
-# Revision 1.112  2004/08/09 14:02:52  dischi
-# first draft of new tv card setup
-#
-# Revision 1.111  2004/08/01 10:57:12  dischi
-# add messages for deactivated plugins
-#
-# Revision 1.110  2004/07/10 12:33:36  dischi
-# header cleanup
-#
-# Revision 1.109  2004/06/28 20:39:27  dischi
-# make sure HOME and USER are set
-#
-# Revision 1.108  2004/06/20 18:19:53  rshortt
-# Bugfix: 'config' has no namespace here, we are config.  UMASK is a local from
-# freevo_config.py or local_conf.py.
-#
-# Revision 1.107  2004/06/20 15:52:14  dischi
-# set umask as early as possible
-#
-# Revision 1.106  2004/06/09 17:08:45  rshortt
-# Attempt to sort channels properly (numericly, if possible).
-#
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002 Krister Lagerstrom, et al. 
@@ -114,6 +83,7 @@ import traceback
 import __builtin__
 import version
 import input
+import sysconfig
 
 if float(sys.version[0:3]) >= 2.3:
     import warnings
@@ -167,7 +137,7 @@ class Logger:
     def write(self, msg):
         global DEBUG_STDOUT
         if isinstance(msg, unicode):
-            msg = msg.encode(LOCALE)
+            msg = msg.encode(sysconfig.LOCALE)
         if DEBUG_STDOUT:
             sys.__stdout__.write(msg)
         self.fp.write(msg)
@@ -281,6 +251,8 @@ else:
         os.makedirs(LOGDIR)
 
 
+FREEVO_CACHEDIR = sysconfig.CONF.cachedir
+
 #
 # Redirect stdout and stderr to stdout and /tmp/freevo.log
 #
@@ -322,13 +294,20 @@ __builtin__.__dict__['_mem_debug_']= _mem_debug_function_
 # Default settings
 # These will be overwritten by the contents of 'freevo.conf'
 #
-CONF = setup_freevo.Struct()
-CONF.geometry = '800x600'
-CONF.width, CONF.height = 800, 600
-CONF.display = 'x11'
-CONF.tv = 'ntsc'
-CONF.chanlist = 'us-cable'
-CONF.version = 0
+CONF = sysconfig.CONF
+if not hasattr(CONF, 'geometry'):
+    CONF.geometry = '800x600'
+w, h = CONF.geometry.split('x')
+CONF.width, CONF.height = int(w), int(h)
+
+if not hasattr(CONF, 'display'):
+    CONF.display = 'x11'
+if not hasattr(CONF, 'tv'):
+    CONF.tv = 'ntsc'
+if not hasattr(CONF, 'chanlist'):
+    CONF.chanlist = 'us-cable'
+if not hasattr(CONF, 'version'):
+    CONF.version = 0
 
 
 #
@@ -494,37 +473,6 @@ for dirname in cfgfilepath[1:]:
         sys.exit(1)
         
 #
-# Search for freevo.conf:
-#
-for dirname in cfgfilepath:
-    freevoconf = dirname + '/freevo.conf'
-    if os.path.isfile(freevoconf):
-        _debug_('Loading configure settings: %s' % freevoconf)
-
-        c = open(freevoconf)
-        for line in c.readlines():
-            vals = line.strip().split()
-            _debug_('Cfg file data: "%s"' % line.strip(), 2)
-            try:
-                name, val = vals[0], vals[2]
-            except:
-                print 'Error parsing config file data "%s"' % line.strip()
-                continue
-            CONF.__dict__[name] = val
-
-        c.close()
-        w, h = CONF.geometry.split('x')
-        CONF.width, CONF.height = int(w), int(h)
-        break
-else:
-    print
-    print 'Error: freevo.conf not found'
-    print
-    print_help()
-    sys.exit(1)
-
-
-#
 # search missing programs at runtime
 #
 for program, valname, needed in setup_freevo.EXTERNAL_PROGRAMS:
@@ -532,40 +480,6 @@ for program, valname, needed in setup_freevo.EXTERNAL_PROGRAMS:
         setup_freevo.check_program(CONF, program, valname, needed, verbose=0)
     if not hasattr(CONF, valname) or not getattr(CONF, valname):
         setattr(CONF, valname, '')
-
-#
-# Freevo cache dir:
-#
-# Under Linux, use /var/cache. Under FreeBSD, use /var/db.
-#
-if os.uname()[0] == 'FreeBSD':
-    OS_CACHEDIR = '/var/db'
-else:
-    OS_CACHEDIR = '/var/cache'
-
-FREEVO_CACHEDIR = OS_CACHEDIR + '/freevo'
-if not os.path.isdir(FREEVO_CACHEDIR):
-    try:
-        os.makedirs(FREEVO_CACHEDIR)
-        
-    except OSError:
-        print 'Warning: %s does not exists and can\'t be created' % FREEVO_CACHEDIR
-        print 'Please create this directory as root and set permissions for the'
-        print 'Freevo user to write to it.'
-        OS_CACHEDIR = '/tmp'        
-        FREEVO_CACHEDIR = OS_CACHEDIR + '/freevo'
-        
-        if not os.path.isdir( FREEVO_CACHEDIR ):
-            try:
-                os.makedirs( FREEVO_CACHEDIR )
-            except OSError:
-                OS_CACHEDIR = '/tmp/'
-                FREEVO_CACHEDIR = OS_CACHEDIR + '/freevo-' + os.getuid()
-                if not os.path.isdir( FREEVO_CACHEDIR ):
-                    os.makedirs( FREEVO_CACHEDIR )
-        print 'Using %s as cache directory, but this is a bad idea' % FREEVO_CACHEDIR
-        print
-
 
 #
 # fall back to x11 if display is mga or fb and DISPLAY ist set
@@ -859,68 +773,35 @@ if ROM_DRIVES == None:
 # List of objects representing removable media, e.g. CD-ROMs,
 # DVDs, etc.
 #
-REMOVABLE_MEDIA = []
+REMOVABLE_MEDIA = sysconfig.REMOVABLE_MEDIA
 
 
 #
 # compile the regexp
 #
 VIDEO_SHOW_REGEXP_MATCH = re.compile("^.*" + VIDEO_SHOW_REGEXP).match
-VIDEO_SHOW_REGEXP_SPLIT = re.compile("[\.\- ]*" + VIDEO_SHOW_REGEXP + "[\.\- ]*").split
+VIDEO_SHOW_REGEXP_SPLIT = re.compile("[\.\- ]*" + \
+                                     VIDEO_SHOW_REGEXP + "[\.\- ]*").split
 
 
-#
-# create cache subdirs
-#
-
-if not OVERLAY_DIR or OVERLAY_DIR == '/':
-    print
-    print 'ERROR: bad OVERLAY_DIR.'
-    print 'Set OVERLAY_DIR it to a directory on the local filesystem where Freevo'
-    print 'can store the metadata. Make sure this filesystem has about 100 MB free space'
-    sys.exit(0)
-    
-if not os.path.isdir(OVERLAY_DIR):
-    os.makedirs(OVERLAY_DIR)
-    
-# Make sure OVERLAY_DIR doesn't ends with a slash
-# With that, we don't need to use os.path.join, normal string
-# concat is much faster
-if OVERLAY_DIR and OVERLAY_DIR.endswith('/'):
-    OVERLAY_DIR = OVERLAY_DIR[:-1]
-
-if not os.path.isdir(OVERLAY_DIR + '/disc'):
-    os.makedirs(OVERLAY_DIR + '/disc')
-    
-if not os.path.isdir(OVERLAY_DIR + '/disc/metadata'):
-    os.makedirs(OVERLAY_DIR + '/disc/metadata')
-    
-if not os.path.isdir(OVERLAY_DIR + '/disc-set'):
-    os.makedirs(OVERLAY_DIR + '/disc-set')
-
-#
-# delete LD_PRELOAD for all helpers, main.py does it after
-# starting the display
-#
-if HELPER:
-    os.environ['LD_PRELOAD'] = ''
-    
-encoding = None
 try:
-    encoding = os.environ[ 'LANG' ].split( '.' )[ 1 ]
-    ''.encode(encoding)
-except:
-    try:
-        encoding = os.environ[ 'LC_ALL' ].split( '.' )[ 1 ]
-        ''.encode(encoding)
-    except:
-        encoding = LOCALE
+    LOCALE
+    print 'Error: LOCALE is deprecated. Please set encoding in freevo.conf.'
+    sys.exit(0)
+except NameError, e:
+    pass
+    
+encoding = LOCALE = sysconfig.CONF.encoding
 
-if not encoding:
-    encoding = LOCALE
+try:
+    OVERLAY_DIR
+    print 'Error: OVERLAY_DIR is deprecated. Please set vfsdir in freevo.conf'
+    print 'to change the location of the virtual file system'
+    sys.exit(0)
+except NameError, e:
+    pass
 
-if not HELPER:
-    _debug_( "Using '%s' encoding" % encoding )
+OVERLAY_DIR = sysconfig.CONF.vfsdir
 
 # make sure USER and HOME are set
 os.environ['USER'] = pwd.getpwuid(os.getuid())[0]
@@ -931,3 +812,4 @@ REDESIGN_MAINLOOP = 'not working while mainloop redesign'
 REDESIGN_BROKEN   = 'not working while gui redesign'
 REDESIGN_FIXME    = 'not working since gui redesign, feel free to fix this'
 REDESIGN_UNKNOWN  = 'plugin may be broken after gui redesign, please check'
+

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/10/26 19:14:52  dischi
+# adjust to new sysconfig file
+#
 # Revision 1.16  2004/07/10 12:33:42  dischi
 # header cleanup
 #
@@ -44,7 +47,6 @@ import traceback
 # XML support
 from xml.utils import qp_xml
 
-import config
 import util
 import codecs
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2004/10/26 19:14:52  dischi
+# adjust to new sysconfig file
+#
 # Revision 1.27  2004/09/07 18:52:51  dischi
 # move thumbnail to extra file
 #
@@ -73,12 +76,8 @@ if float(sys.version[0:3]) < 2.3:
 else:
     PICKLE_PROTOCOL = pickle.HIGHEST_PROTOCOL
 
-if traceback.extract_stack()[0][0].find('install.py') == -1:
-    # Configuration file. Determines where to look for AVI/MP3 files, etc
-    import config
-    
-    # import stuff from util.misc
-    import misc
+# import stuff from util.misc
+import misc
 
 
 #
@@ -392,6 +391,7 @@ def resolve_media_mountdir(*arg):
     """
     get the mount point of the media with media_id
     """
+    import config
     if len(arg) == 1 and isinstance(arg[0], dict):
         media_id = arg[0]['media_id']
         file     = arg[0]['file']
@@ -417,6 +417,7 @@ def check_media(media_id):
     """
     check if media_id is a valid media in one of the drives
     """
+    import config
     for media in config.REMOVABLE_MEDIA:
         if media_id == media.id:
             return media

@@ -337,18 +337,6 @@ HOST_ALIVE_CHECK = 'ping -c 1 -W 1 %s > /dev/null 2>&1'
 CHILDAPP_DEBUG = 0
 
 #
-# Directory location to save files when the normal filesystem
-# doesn't allow saving. This directory can save covers and fxd files
-# for read only filesystems like ROM drives. Set this variable to your
-# old MOVIE_DATA_DIR if you have one. It needs to be set to a directory
-# Freevo can write to.
-#
-if os.environ.has_key('HOME') and os.environ['HOME']:
-    OVERLAY_DIR = os.path.join(os.environ['HOME'], '.freevo/vfs')
-else:
-    OVERLAY_DIR = os.path.join(FREEVO_CACHEDIR, 'vfs')
-
-#
 # Umask setting for all files.
 # 022 means only the user has write access. If you share your Freevo
 # installation with different users, set this to 002
@@ -381,7 +369,7 @@ MEDIAINFO_USE_MEMORY   = 1
 
 #
 # Cache images. This uses a lot of disc space but it's a huge speed
-# enhancement. The images will be cached in OVERLAY_DIR
+# enhancement. The images will be cached in the vfs
 #
 CACHE_IMAGES = 1
 
@@ -1441,6 +1429,7 @@ REMOTE_CONTROL_PORT = 16310
 #
 # This is the XMLTV file that can be optionally used for TV listings
 #
+# FIXME: OS_CACHEDIR is gone
 if os.uname()[0] == 'FreeBSD':
     XMLTV_FILE = OS_CACHEDIR + '/xmltv/TV.xml'
 else:
@@ -1452,15 +1441,15 @@ else:
 # Use the "makelogos.py" script to download all the
 # Station logos into a directory. And then put the path
 # to those logos here
-if os.path.isdir(OS_CACHEDIR + '/xmltv/logos'):
+#
+# FIXME: OS_CACHEDIR is gone
+if 0 and os.path.isdir(OS_CACHEDIR + '/xmltv/logos'):
     TV_LOGOS = OS_CACHEDIR + '/xmltv/logos'
 else:
     if not os.path.isdir('/tmp/freevo/xmltv/logos'):
         os.makedirs('/tmp/freevo/xmltv/logos')
     TV_LOGOS = '/tmp/freevo/xmltv/logos'
 
-
-LOCALE='latin-1'
 
 FREEVO_EVENTHANDLER_SANDBOX = 1
 

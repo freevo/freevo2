@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.82  2004/10/26 19:14:50  dischi
+# adjust to new sysconfig file
+#
 # Revision 1.81  2004/09/13 19:39:25  dischi
 # every meddiaitem has play/stop functions
 #
@@ -70,7 +73,8 @@ import plugin
 import util
 import gui
 
-from util import mediainfo, vfs, Unicode
+from sysconfig import Unicode
+from util import mediainfo, vfs
 
 class FileInformation:
     """

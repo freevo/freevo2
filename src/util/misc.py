@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2004/10/26 19:14:52  dischi
+# adjust to new sysconfig file
+#
 # Revision 1.46  2004/10/06 19:13:07  dischi
 # remove util.open3, move run and stdout to misc for now
 #
@@ -66,8 +69,7 @@ import copy
 import htmlentitydefs
 import popen2
 
-# Configuration file. Determines where to look for AVI/MP3 files, etc
-import config
+import sysconfig
 from vfs import abspath as vfs_abspath
 
 # http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/52560
@@ -235,9 +237,6 @@ def killall(appname, sig=9):
         if unify_name('', cmdline).find(appname) != -1:
             # Found one, kill it
             pid = int(cmdline_filename.split('/')[2])
-            if config.DEBUG:
-                a = sig, pid, ' '.join(cmdline.split('\x00'))
-                print 'killall: Sending signal %s to pid %s ("%s")' % a
             try:
                 os.kill(pid, sig)
             except:
@@ -268,7 +267,7 @@ def title_case(phrase):
  
 def get_bookmarkfile(filename):
     myfile = vfs.basename(filename) 
-    myfile = config.FREEVO_CACHEDIR + "/" + myfile + '.bookmark'
+    myfile = sysconfig.CONF.cachedir + "/" + myfile + '.bookmark'
     return myfile
 
 
@@ -421,11 +420,11 @@ def comingup(items=None, ScheduledRecordings=None):
    
     result = u''
 
-    cachefile = '%s/upsoon' % (config.FREEVO_CACHEDIR)
+    cachefile = '%s/upsoon' % sysconfig.CONF.cachedir
     if not ScheduledRecordings:
         if (os.path.exists(cachefile) and \
             (abs(time.time() - os.path.getmtime(cachefile)) < 600)):
-            cache = codecs.open(cachefile,'r', config.encoding)
+            cache = codecs.open(cachefile,'r', sysconfig.CONF.encoding)
             for a in cache.readlines():
                 result = result + a
             cache.close()
@@ -492,7 +491,7 @@ def comingup(items=None, ScheduledRecordings=None):
         
     if os.path.isfile(cachefile):
         os.unlink(cachefile)
-    cache = codecs.open(cachefile,'w', config.encoding)
+    cache = codecs.open(cachefile,'w', sysconfig.CONF.encoding)
     cache.write(result)
     cache.close()
 

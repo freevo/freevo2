@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/10/26 19:14:52  dischi
+# adjust to new sysconfig file
+#
 # Revision 1.13  2004/07/10 12:33:42  dischi
 # header cleanup
 #
@@ -41,8 +44,8 @@
 import os,string,fnmatch,sys,md5,stat
 
 # Metadata tools
-import config, util
-import util.fxdparser
+import config
+import util
 import mediainfo
 import plugin
 

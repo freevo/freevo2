@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2004/10/26 19:14:51  dischi
+# adjust to new sysconfig file
+#
 # Revision 1.21  2004/10/06 19:13:07  dischi
 # remove util.open3, move run and stdout to misc for now
 #
@@ -45,55 +48,18 @@
 #
 # ----------------------------------------------------------------------- */
 
+import __builtin__
+import vfs
+__builtin__.__dict__['vfs'] = vfs
 
-import sys
+from misc import *
+from fileops import *
+from weakref import *
+import objectcache
+import fxdparser
 
-# import the stuff from misc and fileops to be compatible
-# with util in only one file
-
-if sys.argv[0].find('setup.py') == -1:
-    import config
-    import __builtin__
-
-    def Unicode(string, encoding=config.encoding):
-        if string.__class__ == str:
-            try:
-                return unicode(string, encoding)
-            except Exception, e:
-                try:
-                    return unicode(string, config.LOCALE)
-                except Exception, e:
-                    print 'Error: Could not convert %s to unicode' % repr(string)
-                    print 'tried encoding %s and %s' % (encoding, config.LOCALE)
-                    print e
-        elif string.__class__ != unicode:
-            return unicode(str(string), config.LOCALE)
-        
-        return string
-
-
-    def String(string, encoding=config.encoding):
-        if string.__class__ == unicode:
-            return string.encode(encoding, 'replace')
-        if string.__class__ != str:
-            try:
-                return str(string)
-            except:
-                return unicode(string).encode(encoding, 'replace')
-        return string
-
-    
-    import vfs
-    from misc import *
-    from fileops import *
-    from weakref import *
-    
-    import fxdparser
-    import objectcache
-    
-    __builtin__.__dict__['vfs']     = vfs
-    __builtin__.__dict__['Unicode'] = Unicode
-    __builtin__.__dict__['String']  = String
-
+# FIXME: remove this bad hack
+import sys as _sys
+if _sys.argv[0].find('setup.py') == -1:
     import mediainfo
-    import thumbnail
+
