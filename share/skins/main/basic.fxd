@@ -226,6 +226,9 @@
 	<!-- background image -->
 	<image label="background" filename="aubin_bg2"/>
 	
+	<!-- idlebar image -->
+	<image label="idlebar" filename="idlebar"/>
+	
 	<!-- logo -->
 	<image label="logo" filename="logo.png"/>
 

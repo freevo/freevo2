@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/03/14 11:42:34  dischi
+# make idlebar have a background image
+#
 # Revision 1.11  2004/02/24 19:36:25  dischi
 # add function to change a skin area
 #
@@ -63,7 +66,7 @@ _singleton = None
 __all__ = ( 'Rectange', 'Image', 'Area', 'register', 'delete', 'change_area',
             'set_base_fxd', 'load', 'get_skins', 'get_settings',
             'toggle_display_style', 'get_display_style', 'get_popupbox_style',
-            'get_font', 'get_icon', 'items_per_page', 'clear', 'redraw',
+            'get_font', 'get_image', 'get_icon', 'items_per_page', 'clear', 'redraw',
             'prepare', 'draw' )
     
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2004/03/14 11:42:34  dischi
+# make idlebar have a background image
+#
 # Revision 1.44  2004/02/24 19:50:35  dischi
 # change extra area location to skins/plugins
 #
@@ -450,6 +453,17 @@ class Skin:
             return self.settings.font[name]
         except:
             return self.settings.font['default']
+
+        
+    def get_image(self, name):
+        """
+        Get the skin image object 'name'. Return None if
+        an image with this name doesn't exists.
+        """
+        try:
+            return self.settings.images[name]
+        except:
+            return None
 
         
     def get_icon(self, name):

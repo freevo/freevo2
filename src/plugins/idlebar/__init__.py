@@ -18,6 +18,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/03/14 11:42:35  dischi
+# make idlebar have a background image
+#
 # Revision 1.14  2004/02/19 04:57:57  gsbarbieri
 # Support Web Interface i18n.
 # To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
@@ -73,7 +76,7 @@
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002 Krister Lagerstrom, et al.
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -109,6 +112,7 @@ import skin
 import util.tv_util as tv_util
 import util.pymetar as pymetar
 
+from pygame import image,transform
 
 class PluginInterface(plugin.DaemonPlugin):
     """
@@ -123,17 +127,36 @@ class PluginInterface(plugin.DaemonPlugin):
         self.plugins = None
         plugin.register(self, 'idlebar')
         self.visible = True
-	# Getting current LOCALE
+        self.bar     = None
+        self.barfile = ''
+
+        # Getting current LOCALE
         try:
             locale.resetlocale()
         except:
             pass
-        
+
+
     def draw(self, (type, object), osd):
         """
         draw a background and all idlebar plugins
         """
-        osd.drawroundbox(0, 0, osd.width + 2 * osd.x, osd.y + 60, (0x80000000L, 0, 0, 0))
+        w = osd.width + 2 * osd.x
+        h = osd.y + 60
+
+        f = skin.get_image('idlebar')
+
+        if self.barfile != f:
+            self.barfile = f
+            try:
+                self.bar = transform.scale(image.load(f).convert_alpha(), (w,h))
+            except:
+                self.bar = None
+                
+        # draw the cached barimage
+        if self.bar:
+            osd.drawimage(self.bar, (0, 0, w, h) )
+
         if not self.plugins:
             self.plugins = plugin.get('idlebar')
         x = osd.x + 10
@@ -143,7 +166,7 @@ class PluginInterface(plugin.DaemonPlugin):
                 x += add_x + 20
         self.free_space = x
 
-        
+
     def eventhandler(self, event, menuw=None):
         """
         catch the IDENTIFY_MEDIA event to redraw the skin (maybe the cd status
@@ -152,13 +175,13 @@ class PluginInterface(plugin.DaemonPlugin):
         if plugin.isevent(event) == 'IDENTIFY_MEDIA':
             skin.get_singleton().redraw()
         return False
-    
+
     def poll(self):
         """
         update the idlebar every 30 secs even if nothing happens
         """
         skin.get_singleton().redraw()
-        
+
 
 
 
@@ -166,15 +189,15 @@ class IdleBarPlugin(plugin.Plugin):
     """
     To activate the idle bar, put the following in your local_conf.py:
         plugin.activate('idlebar')
-    You can then add various plugins. Plugins inside the idlebar are 
-    sorted based on the level (except the clock, it's always on the 
+    You can then add various plugins. Plugins inside the idlebar are
+    sorted based on the level (except the clock, it's always on the
     right side). Use "freevo plugins -l" to see all available plugins,
     and "freevo plugins -i idlebar.<plugin>" for a specific plugin.
     """
     def __init__(self):
         plugin.Plugin.__init__(self)
         self._type = 'idlebar'
-        
+
     def draw(self, (type, object), x, osd):
         return
 
@@ -196,13 +219,13 @@ class clock(IdleBarPlugin):
             else:
                 format ='%a %I:%M %P'
         self.timeformat = format
-        
+
     def draw(self, (type, object), x, osd):
         clock = time.strftime(self.timeformat)
         font  = osd.get_font('clock')
         pad_x = 10
         idlebar_height = 60
-        
+
         w = font.stringsize( clock )
         h = font.font.height
         if h > idlebar_height:
@@ -213,7 +236,7 @@ class clock(IdleBarPlugin):
                        ( w + 1 ), h , 'right', 'center')
         self.clock_left_position = osd.x + osd.width - w - pad_x
         return 0
-    
+
 
 class cdstatus(IdleBarPlugin):
     """
@@ -256,10 +279,10 @@ class cdstatus(IdleBarPlugin):
 class mail(IdleBarPlugin):
     """
     Shows if new mail is in the mailbox.
-    
+
     Activate with:
     plugin.activate('idlebar.mail',    level=10, args=('path to mailbox', ))
-    
+
     """
     def __init__(self, mailbox):
         IdleBarPlugin.__init__(self)
@@ -285,7 +308,7 @@ class mail(IdleBarPlugin):
         if self.checkmail() > 0:
             return osd.draw_image(self.MAILIMAGE, (x, osd.y + 10, -1, -1))[0]
         else:
-            return osd.draw_image(self.NO_MAILIMAGE, (x, osd.y + 10, -1, -1))[0] 
+            return osd.draw_image(self.NO_MAILIMAGE, (x, osd.y + 10, -1, -1))[0]
 
 
 
@@ -314,7 +337,7 @@ class tv(IdleBarPlugin):
         self.TVFREE       = os.path.join(icondir, 'television_inactive.png')
         self.NEAR_EXPIRED = os.path.join(icondir, 'television_near_expired.png')
         self.EXPIRED      = os.path.join(icondir, 'television_expired.png')
-        
+
     def checktv(self):
         if os.path.exists(self.tvlockfile):
             return 1
@@ -363,8 +386,8 @@ class weather(IdleBarPlugin):
 
     def checkweather(self):
         # We don't want to do this every 30 seconds, so we need
-        # to cache the date somewhere. 
-        # 
+        # to cache the date somewhere.
+        #
         # First check the age of the cache.
         #
         if (os.path.isfile(self.WEATHERCACHE) == 0 or \
@@ -428,12 +451,12 @@ class weather(IdleBarPlugin):
         osd.write_text(temp, font, None, x + 15, osd.y + 55 - font.h, width, font.h,
                        'left', 'top')
         return width + 15
-        
+
 
 class holidays(IdleBarPlugin):
     """
     Display some holidays in the idlebar
-    
+
     This plugin checks if the current date is a holiday and will
     display a specified icon for that holiday. If no holiday is found,
     nothing will be displayed. If you use the idlebar, you should activate
@@ -454,7 +477,7 @@ class holidays(IdleBarPlugin):
     """
     def __init__(self):
         IdleBarPlugin.__init__(self)
-   
+
     def config(self):
         return [ ('HOLIDAYS', [ ('01-01',  'newyear.png'),
                                 ('02-14',  'valentine.png'),
@@ -471,7 +494,7 @@ class holidays(IdleBarPlugin):
         # Creates a string which looks like "07-04" meaning July 04
         todays_date = time.strftime('%m-%d')
 
-        for i in config.HOLIDAYS:                        
+        for i in config.HOLIDAYS:
             holiday, icon = i
             if todays_date == holiday:
                 return os.path.join(config.ICON_DIR, 'holidays', icon)
@@ -480,8 +503,8 @@ class holidays(IdleBarPlugin):
         icon = self.get_holiday_icon()
         if icon:
             return osd.draw_image(icon, (x, osd.y + 10, -1, -1))[0]
-            
-            
+
+
 
 class logo(IdleBarPlugin):
     """
@@ -490,7 +513,7 @@ class logo(IdleBarPlugin):
     def __init__(self, image=None):
         IdleBarPlugin.__init__(self)
         self.image = image
-        
+
     def draw(self, (type, object), x, osd):
         if not self.image:
             image = osd.settings.images['logo']
