@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/07/03 22:05:37  dischi
+# set line_height to -1
+#
 # Revision 1.7  2003/06/29 20:38:58  dischi
 # switch to the new info area
 #
@@ -72,6 +75,8 @@ def attr_int(node, attr, default, scale=0.0):
         if node.attrs.has_key(('', attr)):
             max = FALSE
             val = node.attrs[('', attr)]
+            if val == 'line_height':
+                return -1
             if val[:3] == 'max':
                 max = TRUE
                 val = val[3:]
