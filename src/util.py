@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2003/08/20 21:50:12  outlyer
+# Just a simple pure python replacement for os.system('touch %s...')
+#
 # Revision 1.39  2003/07/30 15:13:01  outlyer
 # Add encoding to remove some warnings from Python 2.3. Has no effect on
 # Python < 2.3
@@ -575,7 +578,12 @@ def getdatadir(item):
         if len(directory) and directory[0] == '/':
             directory = directory[1:]
         return os.path.join(config.MOVIE_DATA_DIR, directory)
-    
+
+def touch(file):
+    fd = open(file,'w+')
+    fd.close()
+    return 0
+
 
 #
 # synchronized objects and methods.
