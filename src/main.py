@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.91  2003/11/22 16:06:06  dischi
+# use drawstringframed to center shutdown message
+#
 # Revision 1.90  2003/11/16 17:41:04  dischi
 # i18n patch from David Sagnol
 #
@@ -142,8 +145,10 @@ def shutdown(menuw=None, arg=None, allow_sys_shutdown=True, exit=False):
     import plugin
     import childapp
     osd.clearscreen(color=osd.COL_BLACK)
-    osd.drawstring(_('shutting down...'), osd.width/2 - 90, osd.height/2 - 10,
-                   fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
+    osd.drawstringframed(_('shutting down...'), 0, 0, osd.width, osd.height,
+                         osd.getfont(config.OSD_DEFAULT_FONTNAME,
+                                     config.OSD_DEFAULT_FONTSIZE),
+                         fgcolor=osd.COL_ORANGE, align_h='center', align_v='center')
     osd.update()
 
     time.sleep(0.5)
