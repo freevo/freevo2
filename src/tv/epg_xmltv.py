@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.50  2004/06/22 01:10:21  rshortt
+# Add ratings and advisories.
+#
 # Revision 1.49  2004/03/16 01:04:18  rshortt
 # Changes to stop two processes tripping over the creation of the epg pickle file.
 #
@@ -295,6 +298,12 @@ def load_guide(verbose=True, XMLTV_FILE=None):
                 prog.date = Unicode(p['date'][0][0])
             if p.has_key('category'):
                 prog.categories = [ cat[0] for cat in p['category'] ]
+            if p.has_key('rating'):
+                for r in p['rating']:
+                    if r.get('system') == 'advisory':
+                        prog.advisories.append(String(r.get('value')))
+                        continue
+                    prog.ratings[String(r.get('system'))] = String(r.get('value'))
             if p.has_key('desc'):
                 prog.desc = Unicode(util.format_text(p['desc'][0][0]))
             if p.has_key('sub-title'):
