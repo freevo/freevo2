@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/04/19 20:08:30  rshortt
+# Better COPY_BASE
+#
 # Revision 1.12  2003/04/19 19:54:42  rshortt
 # Modifications for a runtime build system.  Still WIP but almost done.
 #
@@ -71,9 +74,7 @@
 
 include package_list.mk
 
-# If you built the runtime using this Makefile you will most likely wish to
-# change COPY_BASE to the abolute path of this directory.
-COPY_BASE=/usr/local
+COPY_BASE=`pwd`
 
 EXT=
 PACKAGE=
