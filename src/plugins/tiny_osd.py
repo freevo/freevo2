@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/02/01 09:18:06  dischi
+# fix drawing for skin objects
+#
 # Revision 1.8  2004/01/11 20:23:31  dischi
 # move skin font handling to osd to avoid duplicate code
 #
@@ -139,7 +142,7 @@ class PluginInterface(plugin.DaemonPlugin):
         if event == OSD_MESSAGE:
             self.poll_counter = 1
             self.message = event.arg
-            if not rc.app():
+            if not rc.app() or not skin.get_singleton().force_redraw:
                 skin.get_singleton().redraw()
             elif hasattr(rc.app(), 'im_self') and hasattr(rc.app().im_self, 'redraw'):
                 rc.app().im_self.redraw()
@@ -152,7 +155,7 @@ class PluginInterface(plugin.DaemonPlugin):
         """
         if self.message:
             self.message = ''
-            if not rc.app():
+            if not rc.app() or not skin.get_singleton().force_redraw:
                 skin.get_singleton().redraw()
             elif hasattr(rc.app(), 'im_self') and hasattr(rc.app().im_self, 'redraw'):
                 rc.app().im_self.redraw()
