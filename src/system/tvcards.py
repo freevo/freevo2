@@ -41,7 +41,7 @@ import config
 from util.ioctl import ioctl, pack, unpack
 
 log = logging.getLogger()
-log.debug('imported tvcards')
+
 
 class TVCard:
     def __init__(self, number):
@@ -120,14 +120,14 @@ def detect():
                 config.TV_SETTINGS[key].vdev = '/dev/bktr%s' % i
                 config.TV_SETTINGS[key].driver = 'bsdbt848'
                 config.TV_SETTINGS[key].input = 1
-                print 'BSD TV card detected as %s' % key
+                log.debug('BSD TV card detected as %s' % key)
     
             continue
     
         if os.path.isdir('/dev/dvb/adapter%s' % i):
             try:
                 config.TV_SETTINGS['dvb%s' % i] = DVBCard
-                print 'DVB card detected as dvb%s' % i
+                log.debug('DVB card detected as dvb%s' % i)
             except OSError:
                 # likely no device attached
                 pass
@@ -157,7 +157,7 @@ def detect():
     
             if type == 'ivtv':
                 key = '%s%s' % (type,ivtvn)
-                print 'IVTV card detected as %s' % key
+                log.debug('IVTV card detected as %s' % key)
                 config.TV_SETTINGS[key]  = IVTVCard
                 if ivtvn != i:
                     config.TV_SETTINGS[key].vdev = vdev
@@ -166,7 +166,7 @@ def detect():
             else:
                 # Default to 'tv' type as set above.
                 key = '%s%s' % (type,tvn)
-                print 'TV card detected as %s' % key
+                log.debug('TV card detected as %s' % key)
                 config.TV_SETTINGS[key]  = TVCard
                 if tvn != i:
                     config.TV_SETTINGS[key].vdev = vdev
