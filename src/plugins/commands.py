@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/09/30 17:09:56  mikeruelle
+# add a default dir for commands
+#
 # Revision 1.5  2003/09/14 20:09:36  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
@@ -326,4 +329,6 @@ class PluginInterface(plugin.MainMenuPlugin):
         item.parent = parent
         return [ item ]
 
+    def config(self):
+        return [ ('COMMANDS_DIR', '/usr/local/bin', 'The directory to show commands from.') ]
 
