@@ -11,6 +11,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.1  2003/06/24 22:59:38  outlyer
+# I think this is the last bit of cleanup.
+#
+# o Moved FreevoRemote "Network" client into helpers
+# o Removed old remote code. I think pylirc is working for everyone.
+#
 # Revision 1.1  2003/05/06 00:05:12  rshortt
 # Network remote control app posted by Mike Ruelle.
 #
