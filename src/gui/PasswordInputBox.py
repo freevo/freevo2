@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/05/21 00:01:31  rshortt
+# Contructors may now accept a handler method to call when ok/enter is selected.
+#
 # Revision 1.5  2003/05/02 01:09:02  rshortt
 # Changes in the way these objects draw.  They all maintain a self.surface
 # which they then blit onto their parent or in some cases the screen.  Label
@@ -90,14 +93,8 @@ class PasswordInputBox(PopupBox):
                  width=300, height=160, bg_color=None, fg_color=None, icon=None,
                  border=None, bd_color=None, bd_width=None):
 
-        self.handler = handler
-
-        PopupBox.__init__(self, parent, text, left, top, width, height, 
+        PopupBox.__init__(self, parent, text, handler, left, top, width, height, 
                           bg_color, fg_color, icon, border, bd_color, bd_width)
-
-
-        self.set_v_align(Align.NONE)
-        self.set_h_align(Align.CENTER)
 
         self.lbg = LetterBoxGroup(type='password')
         self.add_child(self.lbg)

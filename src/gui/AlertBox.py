@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/05/21 00:01:31  rshortt
+# Contructors may now accept a handler method to call when ok/enter is selected.
+#
 # Revision 1.12  2003/05/04 23:18:18  rshortt
 # Change some height values (temporarily) to avoid some crashes.
 #
@@ -118,14 +121,12 @@ class AlertBox(PopupBox):
     bd_width  Border width Integer
     """
 
-    def __init__(self, parent='osd', text=" ", left=None, top=None, width=300,
-                 height=150, bg_color=None, fg_color=None, icon=None, 
-                 border=None, bd_color=None, bd_width=None):
+    def __init__(self, parent='osd', text=" ", handler=None, left=None, 
+                 top=None, width=300, height=150, bg_color=None, fg_color=None,
+                 icon=None, border=None, bd_color=None, bd_width=None):
 
-        PopupBox.__init__(self, parent, text, left, top, width, height, bg_color, 
-                          fg_color, icon, border, bd_color, bd_width)
-
-        self.set_h_align(Align.CENTER)
+        PopupBox.__init__(self, parent, text, handler, left, top, width, height,
+                          bg_color, fg_color, icon, border, bd_color, bd_width)
 
         b1 = Button('OK')
         b1.toggle_selected()
@@ -142,6 +143,7 @@ class AlertBox(PopupBox):
         elif [rc.ENTER, rc.SELECT, rc.EXIT].count(event) > 0:
             if DEBUG: print 'HIT OK'
             self.destroy()
+            if self.handler: self.handler()
         else:
             return self.parent.eventhandler(event)
 

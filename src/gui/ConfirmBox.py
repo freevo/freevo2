@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/05/21 00:01:31  rshortt
+# Contructors may now accept a handler method to call when ok/enter is selected.
+#
 # Revision 1.13  2003/05/04 23:18:19  rshortt
 # Change some height values (temporarily) to avoid some crashes.
 #
@@ -119,22 +122,19 @@ class ConfirmBox(PopupBox):
                  fg_color=None, icon=None, border=None, bd_color=None, 
                  bd_width=None):
 
-        self.handler = handler
-
-        PopupBox.__init__(self, parent, text, left, top, width, height, 
+        PopupBox.__init__(self, parent, text, handler, left, top, width, height, 
                           bg_color, fg_color, icon, border, bd_color, bd_width)
 
-
-        self.set_v_align(Align.NONE)
-        self.set_h_align(Align.CENTER)
 
         # XXX: It may be nice if we could choose between
         #      OK/CANCEL and YES/NO
 
         self.b0 = Button('OK')
+        self.b0.set_h_align(Align.NONE)
         self.add_child(self.b0)
 
         self.b1 = Button('CANCEL')
+        self.b1.set_h_align(Align.NONE)
         self.add_child(self.b1)
         select = 'self.b%s.toggle_selected()' % default_choice
         eval(select)
