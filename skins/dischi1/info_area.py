@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/03/16 19:36:04  dischi
+# Adjustments to the new xml_parser, added listing type 'image+text' to
+# the listing area and blue2, added grey skin. It only looks like grey1
+# in the menu. The skin inherits from blue1 and only redefines the colors
+# and the fonts. blue2 now has an image view for the image menu.
+#
 # Revision 1.7  2003/03/14 19:38:48  dischi
 # some cosmetic fixes
 #
@@ -103,8 +109,6 @@ class Info_Area(Skin_Area):
         else:
             val = content.types['default']
 
-        font = self.get_font(content.font)
-
         table = [ [], [] ]
         self.auto_update = []
 
@@ -119,31 +123,12 @@ class Info_Area(Skin_Area):
 
             for m in self.re_var.findall(line):
                 has_vars = TRUE
-                repl = ''
-                if hasattr(item, m[1:-1]):
-                    if m[1:-1] == 'year':
-                        if not item.year:
-                            repl = ''
-                        else:
-                            repl = str(item.year)
-                    elif m[1:-1] == 'length':
-                        if not item.length:
-                            repl = ''
-                        else:
-                            repl = '%d:%02d' % (int(item.length / 60),
-                                                int(item.length % 60))
-                    elif m[1:-1] == 'elapsed':
-                        autoupdate = 'elapsed'
-                        repl = '%d:%02d' % (int(item.elapsed / 60),
-                                            int(item.elapsed % 60))
-                    else:
-                        repl = str(eval('item.%s' % m[1:-1]))
+                if m[1:-1] == 'elapsed':
+                    autoupdate = 'elapsed'
 
-                if not repl and hasattr(item, 'info') and item.info.has_key(m[1:-1]):
-                    repl = str(item.info[m[1:-1]])
-
-                if repl:
-                    line = re.sub(m, repl, line)
+                a = item.getattr(m[1:-1])
+                if a:
+                    line = re.sub(m, a, line)
                     vars_exists = TRUE
                 else:
                     line = re.sub(m, '', line)
@@ -161,6 +146,7 @@ class Info_Area(Skin_Area):
 
         x0 = content.x
 
+        font = content.font
         y_spacing = font.h * 1.1
             
         w = 0

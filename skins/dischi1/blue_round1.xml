@@ -51,7 +51,7 @@
 	<rectangle size="0" bgcolor="0x80000000" radius="10" width="max"/>
       </background>
       <content x="20" y="20" width="max-40" height="max-40" type="text"
-	spacing="2">
+	spacing="-1">
 	<item type="default" font="white shadow1"/>
 	<item type="selected" font="white shadow1">
 	  <rectangle bgcolor="0xff000000" size="0" x="-5" y="-3" width="max+10"
@@ -75,24 +75,20 @@
     <!-- ********************************************** -->
     <!-- FONT DEFINITIONS -->
 
-    <font label="white shadow1">
-      <definition name="bluehigh" color="0xffffff" size="20"/>
+    <font label="white shadow1" name="bluehigh" color="0xffffff" size="20">
       <shadow visible="yes" color="0x00000000" x="1" y="1"/>
     </font>
 
-    <font label="white shadow1 big">
-      <definition name="bluehigh" size="44" color="0xffffff"/>
+    <font label="white shadow1 big" name="bluehigh" size="44" color="0xffffff">
       <shadow visible="yes" color="0xaa000000" x="1" y="1"/>
     </font>
 
-    <font label="white shadow3 big">
-      <definition name="bluehigh" size="44" color="0xffffff"/>
+    <font label="white shadow3 big" name="bluehigh" size="44" color="0xffffff">
       <shadow visible="yes" color="0x000000" x="3" y="3"/>
     </font>
 
     <!-- this font is used by the title -->
-    <font label="white big">
-      <definition name="oliversb" size="29" color="0xffffff"/>
+    <font label="title" name="oliversb" size="29" color="0xffffff">
       <shadow visible="yes" color="0x80000000" x="3" y="3"/>
     </font>
 

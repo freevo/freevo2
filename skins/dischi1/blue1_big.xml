@@ -109,15 +109,15 @@
 
     <!-- title -->
     <layout label="title0">
-      <content x="210" type="menu" font="white big" align="center"/>
+      <content x="210" type="menu" font="title" align="center"/>
     </layout>
 
     <!-- default listing area -->
     <layout label="list0">
       <content type="text" spacing="2">
-	<item type="default" font="grey"/>
-	<item type="selected" font="white">
-	  <rectangle bgcolor="0xa0000000" size="0" x="-5" y="-3" width="max+10"
+	<item type="default" font="item"/>
+	<item type="selected" font="selected">
+	  <rectangle bgcolor="selection" size="0" x="-5" y="-3" width="max+10"
 	    height="max+6"/>
 	</item>
       </content>
@@ -127,8 +127,7 @@
     <layout label="view0">
       <content align="center" valign="top">
 	<item type="default">
-	  <rectangle size="1" bgcolor="0xff000000" x="-1" y="-1"
-	    width="max+2" height="max+2"/>
+	  <rectangle size="1" x="-1" y="-1" width="max+2" height="max+2"/>
 	</item>
       </content>
     </layout>
@@ -137,9 +136,9 @@
     <!-- main menu listing area -->
     <layout label="list_main">
       <content type="text" spacing="10">
-	<item type="default" font="grey big"/>
-	<item type="selected" font="white big">
-	  <rectangle bgcolor="0xa0000000" size="0" y="-5" x="-10"
+	<item type="default" font="main"/>
+	<item type="selected" font="main selected">
+	  <rectangle bgcolor="selection" size="0" y="-5" x="-10"
 	    width="max+20" height="max+10"/>
 	</item>
       </content>
@@ -157,32 +156,21 @@
 
     -->
 
-    <font label="grey">
-      <definition name="Arial_Bold" size="20" color="0xdddddd"/>
-      <shadow visible="no"/>
-    </font>
+    <font label="title" name="Arial_Bold" size="35" color="0xffffff"/>
+    <font label="item" name="Arial_Bold" size="20" color="0xdddddd"/>
+    <font label="selected" name="Arial_Bold" size="20" color="0xffffff"/>
+    <font label="main" name="Arial_Bold" size="35" color="0xdddddd"/>
+    <font label="main selected" name="Arial_Bold" size="35" color="0xffffff"/>
+    <font label="default" name="Arial_Bold" size="20" color="0xffffff"/>
 
-    <font label="white">
-      <definition name="Arial_Bold" size="20" color="0xffffff"/>
-      <shadow visible="no"/>
-    </font>
+    <!--
+    **********************************************
+    COLOR DEFINITIONS 
+    **********************************************
 
-    <font label="yellow shadow">
-      <definition name="Arial_Bold" size="20" color="0xffff66"/>
-      <shadow visible="yes" color="0x000000" x="1" y="1"/>
-    </font>
+    -->
 
-    <font label="grey big">
-      <definition name="Arial_Bold" size="35" color="0xdddddd"/>
-      <shadow visible="no"/>
-    </font>
-
-    <font label="white big">
-      <definition name="Arial_Bold" size="35" color="0xffffff"/>
-      <shadow visible="no"/>
-    </font>
-
-
+    <color label="selection" value="0xa0000000"/>
 
     <!--
     **********************************************
@@ -196,13 +184,13 @@
 
     <layout label="popup">
       <background>
-	<rectangle color="0x000000" size="1" bgcolor="a0000000"/>
+	<rectangle color="0x000000" size="1" bgcolor="0xa0000000"/>
       </background>
-      <content type="text" spacing="10" color="0xffffff" font="white">
-	<item type="default" font="grey">
+      <content type="text" spacing="10" color="0xffffff" font="default">
+	<item type="default" font="default">
 	  <rectangle bgcolor="0xa0000000" size="0"/>
 	</item>
-	<item type="selected" font="white">
+	<item type="selected" font="default">
 	  <rectangle bgcolor="0xa0ffffff" size="0"/>
 	</item>
       </content>
@@ -230,6 +218,8 @@
 	x="-50" y="80" width="550" height="300"/> 
     </player>
 
+    <font label="player" name="Arial_Bold" size="20" color="0xffffff"/>
+
     <layout label="player screen">
       <background>
 	<image filename="../images/aubin_bg2" x="0" y="0" label="background"/>
@@ -249,8 +239,8 @@
       <background>
 	<rectangle size="0" bgcolor="0x80000000" radius="10" width="max"/>
       </background>
-      <content x="55" y="10" height="max-20" width="max-75" type="text"
-	spacing="10" font="white">
+      <content x="55" y="10" height="max-20" width="max-90" type="text"
+	spacing="10" font="player">
 	<item type="default">
 	  Title:   \t@title@
 	  Artist:  \t@artist@
@@ -263,6 +253,7 @@
       </content>
     </layout>
 
+
     <!--
     **********************************************
     TV DEFINITIONS
@@ -273,13 +264,17 @@
       <screen layout="tv screen" visible="yes"
 	x="0" y="0" width="800" height="600"/>
       <title visible="no"/>
-      <view layout="tv view" visible="no" 
-	x="10" y="10" width="420" height="190"/> 
+      <view visible="no"/>
       <info layout="tv info" visible="yes" 
 	x="10" y="10" width="780" height="190"/> 
       <listing layout="tv listing" visible="yes" 
 	x="10" y="220" width="780" height="370"/> 
     </tv>
+
+    <font label="tv" name="Arial_Bold" size="20" color="0xffffff"/>
+    <font label="tv selected" name="Arial_Bold" size="20" color="0xffff66">
+      <shadow visible="yes" color="0x000000" x="1" y="1"/>
+    </font>
 
     <layout label="tv screen">
       <background>
@@ -291,22 +286,22 @@
     <layout label="tv listing">
       <content type="text" spacing="0">
 
-	<item type="label" font="white" width="100">
+	<item type="label" font="tv" width="100">
 	  <rectangle bgcolor="0x88000066" size="1" color="0x000000" x="-5" y="-5"
 	    width="max+10" height="max+10"/>
 	</item>
 
-	<item type="head" font="white">
+	<item type="head" font="tv">
 	  <rectangle bgcolor="0x88000066" size="1" color="0x000000" x="-5" y="-5"
 	    width="max+10" height="max+10"/>
 	</item>
 
-	<item type="default" font="white">
+	<item type="default" font="tv">
 	  <rectangle bgcolor="0xff000000" color="0x000000" size="1" x="-5"
 	    y="-5" width="max+10" height="max+10"/>
 	</item>
 
-	<item type="selected" font="yellow shadow">
+	<item type="selected" font="tv selected">
 	  <rectangle bgcolor="0x88ffffff" size="1" color="0x000000" x="-5"
 	    y="-5" width="max+10" height="max+10"/>
 	</item>
@@ -320,9 +315,10 @@
 	<rectangle size="0" bgcolor="0x80000000" radius="10" width="max"/>
       </background>
       <content x="10" y="10" height="max-20" width="max-20" type="text"
-	spacing="10" font="white">
+	spacing="10" font="tv">
 	<item type="default">
 	  @title@
+	  @start@ - @stop@
 
 	  @desc@
 	</item>

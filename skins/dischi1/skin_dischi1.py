@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2003/03/16 19:36:06  dischi
+# Adjustments to the new xml_parser, added listing type 'image+text' to
+# the listing area and blue2, added grey skin. It only looks like grey1
+# in the menu. The skin inherits from blue1 and only redefines the colors
+# and the fonts. blue2 now has an image view for the image menu.
+#
 # Revision 1.37  2003/03/15 17:20:07  dischi
 # renamed skin.xml to folder.fxd
 #
@@ -154,7 +160,6 @@ rc = rc.get_singleton()
 
 from area import Skin_Area
 from area import Screen
-from area import default_font
 
 from listing_area import Listing_Area
 from tvlisting_area import TVListing_Area
@@ -225,7 +230,7 @@ class Title_Area(Skin_Area):
             text = menu.selected.name
 
         self.text = text
-        self.write_text(text, self.get_font(content.font), content, mode='hard')
+        self.write_text(text, content.font, content, mode='hard')
 
 
 
@@ -270,13 +275,6 @@ class Skin:
                 self.settings.load(local_skin)
                 break
         
-        # add the height to each font
-        for font_name in self.settings.font:
-            font = self.settings.font[font_name]
-            font.h = osd.stringsize('Ajg', font.name, font.size)[1]
-            if font.shadow.visible:
-                font.h += font.shadow.y
-
 
     
     def LoadSettings(self, dir, copy_content = 1):
@@ -290,24 +288,10 @@ class Skin:
             
         if dir and os.path.isfile(os.path.join(dir, 'folder.fxd')):
             settings.load(os.path.join(dir, 'folder.fxd'), copy_content)
-
-            # add the height to each font
-            for font_name in settings.font:
-                font = settings.font[font_name]
-                font.h = osd.stringsize('Ajg', font.name, font.size)[1]
-                if font.shadow.visible:
-                    font.h += font.shadow.y
             return settings
 
         elif dir and os.path.isfile(dir):
             settings.load(dir, copy_content)
-
-            # add the height to each font
-            for font_name in settings.font:
-                font = settings.font[font_name]
-                font.h = osd.stringsize('Ajg', font.name, font.size)[1]
-                if font.shadow.visible:
-                    font.h += font.shadow.y
             return settings
         return None
 
@@ -343,17 +327,6 @@ class Skin:
         return self.display_style
 
 
-    def get_font(self, name):
-        """
-        return the font object from the settings with that name. If not found,
-        print an error message and return the default font
-        """
-        if self.settings.font.has_key(name):
-            return self.settings.font[name]
-        print '*** font <%s> not found' % name
-        return default_font
-
-
     def GetPopupBoxStyle(self, menu=None):
         """
         This function returns style information for drawing a popup box.
@@ -380,11 +353,7 @@ class Skin:
         else:
             settings = self.settings
 
-        if not settings.layout.has_key(settings.popup):
-            print '*** layout <%s> not found' % settings.popup
-            return None
-
-        layout = settings.layout[settings.popup]
+        layout = settings.popup
 
         background = None
 
@@ -400,17 +369,14 @@ class Skin:
         spacing = layout.content.spacing
         color   = layout.content.color
 
-        font = self.get_font(layout.content.font)
-                
         if layout.content.types.has_key('default'):
-            button_default = copy.copy(layout.content.types['default'])
-            button_default.font = self.get_font(button_default.font)
+            button_default = layout.content.types['default']
 
         if layout.content.types.has_key('selected'):
-            button_selected = copy.copy(layout.content.types['selected'])
-            button_selected.font = self.get_font(button_selected.font)
+            button_selected = layout.content.types['selected']
 
-        return (background, spacing, color, font, button_default, button_selected)
+        return (background, spacing, color, layout.content.font,
+                button_default, button_selected)
 
         
     def SubMenuVisible(self, menu):

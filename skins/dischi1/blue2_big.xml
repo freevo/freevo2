@@ -13,9 +13,13 @@
       <style text="normal text style"/>
     </menu>
 
-    <!-- same for video -->
     <menu type="video">
       <style image="video menu with info"/>
+      <style text="normal text style"/>
+    </menu>
+
+    <menu type="image">
+      <style image="image menu with info"/>
       <style text="normal text style"/>
     </menu>
 
@@ -27,28 +31,33 @@
       <title layout="title1" visible="yes" 
 	x="10" y="10" width="780" height="60"/>
       <listing layout="audio list" visible="yes" 
-	x="20" y="120" width="540" height="250"/>
-      <view layout="view0" visible="yes" x="580" 
+	x="10" y="120" width="540" height="250"/>
+      <view layout="view0" visible="yes" x="590" 
 	y="110" width="200" height="300"/>
       <info visible="yes" layout="info" 
-	x="20" y="400" width="760" height="190"/>
+	x="10" y="400" width="760" height="190"/>
     </menuset>
 
     <!-- The "video menu with info" is like the audio one, except a different -->
     <!-- listing area label -->
     <menuset label="video menu with info" inherits="audio menu with info">
-      <listing layout="video list" y="100" height="320"/>
+      <listing layout="video list" y="90" height="340"/>
       <info y="410" height="180"/>
     </menuset>
 
+    <menuset label="image menu with info" inherits="audio menu with info">
+      <title layout="title0"/>
+      <listing y="110" height="280" layout="image list"/>
+    </menuset>
+
     <layout label="title1">
-      <content x="210" type="item" font="white big" align="center"/>
+      <content x="210" type="item" font="title" align="center"/>
     </layout>
 
-    <!-- extended info areas -->
+    <!-- info area -->
     <layout label="info">
       <content x="5" y="15" width="max-10" height="max-10" type="text"
-	spacing="20" font="grey">
+	spacing="20" font="default">
 	<item type="audio">
 	  Title:   \t@title@
 	  Artist:  \t@artist@
@@ -59,6 +68,13 @@
 	  @tagline@
 
 	  @plot@
+	</item>
+	<item type="image">
+	  Title:    \t@name@
+	  Geometry: \t@width@x@height@
+	  Date:     \t@date@
+
+	  @description@
 	</item>
 	<item type="dir">
 	  Directory: \t@name@
@@ -72,8 +88,8 @@
       <content type="image" spacing="4" align="center" valign="center">
 	<item type="default" width="100" height="100"/>
 	<item type="selected" width="100" height="100">
-	  <rectangle bgcolor="0xa0000000" size="0" x="-5" y="-5" width="max+10"
-	    height="max+10"/>
+	  <rectangle bgcolor="selection" size="0" x="-10" y="-10" width="max+20"
+	    height="max+20"/>
 	</item>
       </content>
     </layout>
@@ -83,7 +99,18 @@
       <content type="image" spacing="4" align="center" valign="center">
 	<item type="default" width="100" height="140"/>
 	<item type="selected" width="100" height="140">
-	  <rectangle bgcolor="0xa0000000" size="0" x="-5" y="-5" width="max+10"
+	  <rectangle bgcolor="selection" size="0" x="-10" y="-10" width="max+20"
+	    height="max+20"/>
+	</item>
+      </content>
+    </layout>
+
+    <!-- listing area for video with images -->
+    <layout label="image list">
+      <content type="image+text" spacing="4" align="center" valign="center">
+	<item type="default" width="120" height="90" font="item"/>
+	<item type="selected" width="120" height="90" font="selected">
+	  <rectangle bgcolor="selection" size="0" x="-5" y="-5" width="max+10"
 	    height="max+10"/>
 	</item>
       </content>

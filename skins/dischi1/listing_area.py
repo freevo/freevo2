@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/03/16 19:36:05  dischi
+# Adjustments to the new xml_parser, added listing type 'image+text' to
+# the listing area and blue2, added grey skin. It only looks like grey1
+# in the menu. The skin inherits from blue1 and only redefines the colors
+# and the fonts. blue2 now has an image view for the image menu.
+#
 # Revision 1.9  2003/03/14 19:38:50  dischi
 # some cosmetic fixes
 #
@@ -21,46 +27,6 @@
 # Revision 1.6  2003/03/07 22:54:11  dischi
 # First version of the extended menu with image support. Try the music menu
 # and press DISPLAY
-#
-# Revision 1.5  2003/03/07 17:28:19  dischi
-# small fixes
-#
-# Revision 1.4  2003/03/05 21:56:10  dischi
-# Small changes to integrate the audio player
-#
-# Revision 1.3  2003/03/02 19:03:42  dischi
-# Add [] for directories
-#
-# Revision 1.2  2003/03/01 00:12:18  dischi
-# Some bug fixes, some speed-ups. blue_round2 has a correct main menu,
-# but on the main menu the idle bar still flickers (stupid watermarks),
-# on other menus it's ok.
-#
-# Revision 1.1  2003/02/27 22:39:50  dischi
-# The view area is working, still no extended menu/info area. The
-# blue_round1 skin looks like with the old skin, blue_round2 is the
-# beginning of recreating aubin_round1. tv and music player aren't
-# implemented yet.
-#
-# Revision 1.5  2003/02/26 21:21:11  dischi
-# blue_round1.xml working
-#
-# Revision 1.4  2003/02/26 19:59:26  dischi
-# title area in area visible=(yes|no) is working
-#
-# Revision 1.3  2003/02/26 19:18:53  dischi
-# Added blue1_small and changed the coordinates. Now there is no overscan
-# inside the skin, it's only done via config.OVERSCAN_[XY]. The background
-# images for the screen area should have a label "background" to override
-# the OVERSCAN resizes.
-#
-# Revision 1.2  2003/02/25 23:27:36  dischi
-# changed max usage
-#
-# Revision 1.1  2003/02/25 22:56:00  dischi
-# New version of the new skin. It still looks the same (except that icons
-# are working now), but the internal structure has changed. Now it will
-# be easier to do the next steps.
 #
 #
 # -----------------------------------------------------------------------
@@ -133,7 +99,7 @@ class Listing_Area(Skin_Area):
         if content.type == 'text':
             items_w = content.width
             items_h = 0
-        elif content.type == 'image':
+        elif content.type == 'image' or content.type == 'image+text':
             items_w = 0
             items_h = 0
 
@@ -159,18 +125,18 @@ class Listing_Area(Skin_Area):
         if content.type == 'text':
             for t in possible_types:
                 ct = possible_types[t]
-                font = self.get_font(ct.font)
 
                 rh = 0
                 rw = 0
                 if ct.rectangle:
-                    rw, rh, r = self.get_item_rectangle(ct.rectangle, content.width, font.h)
+                    rw, rh, r = self.get_item_rectangle(ct.rectangle, content.width,
+                                                        ct.font.h)
                     hskip = min(hskip, r.x)
                     vskip = min(vskip, r.y)
 
-                items_h = max(items_h, font.h, rh)
+                items_h = max(items_h, ct.font.h, rh)
 
-        elif content.type == 'image':
+        elif content.type == 'image' or content.type == 'image+text':
             for t in possible_types:
                 ct = possible_types[t]
                 rh = 0
@@ -180,9 +146,18 @@ class Listing_Area(Skin_Area):
                     hskip = min(hskip, r.x)
                     vskip = min(vskip, r.y)
 
-                items_h = max(items_h, ct.height, rh)
+                addh = 0
+                if content.type == 'image+text':
+                    addh = int(ct.font.h * 1.1)
+                    
                 items_w = max(items_w, ct.width, rw)
-            
+                items_h = max(items_h, ct.height + addh, rh + addh)
+
+
+        else:
+            print 'unknown content type %s' % content.type
+            return None
+        
         # restore
         self.area_val, self.layout = backup
 
@@ -272,8 +247,6 @@ class Listing_Area(Skin_Area):
                 text = '[%s]' % text
 
             if content.type == 'text':
-                font = self.get_font(val.font)
-
                 if choice.icon:
                     image = osd.loadbitmap(choice.icon)
                     if image:
@@ -285,19 +258,22 @@ class Listing_Area(Skin_Area):
                     icon_x = 0
 
                 if val.rectangle:
-                    r = self.get_item_rectangle(val.rectangle, width, font.h)[2]
+                    r = self.get_item_rectangle(val.rectangle, width, val.font.h)[2]
                     self.drawroundbox(x0 + hskip + r.x + icon_x, y0 + vskip + r.y,
                                       r.width - icon_x, r.height, r)
 
-                if content.type == 'text':
-                    self.write_text(text, font, content, x=x0 + hskip + icon_x,
-                                    y=y0 + vskip, width=width-icon_x, height=-1,
-                                    align_h=val.align, mode='hard')
+                self.write_text(text, val.font, content, x=x0 + hskip + icon_x,
+                                y=y0 + vskip, width=width-icon_x, height=-1,
+                                align_h=val.align, mode='hard')
 
 
-            elif content.type == 'image':
+            elif content.type == 'image' or content.type == 'image+text':
                 if val.rectangle:
-                    r = self.get_item_rectangle(val.rectangle, val.width, val.height)[2]
+                    rec_h = val.height
+                    if content.type == 'image+text':
+                        rec_h += int(val.font.h * 1.1)
+
+                    r = self.get_item_rectangle(val.rectangle, val.width, rec_h)[2]
                     self.drawroundbox(x0 + hskip + r.x, y0 + vskip + r.y,
                                       r.width, r.height, r)
 
@@ -321,6 +297,11 @@ class Listing_Area(Skin_Area):
                         addy = val.height - i_h
 
                     self.draw_image(image, (x0 + hskip + addx, y0 + vskip + addy))
+                    
+                if content.type == 'image+text':
+                    self.write_text(choice.name, val.font, content, x=x0 + hskip,
+                                    y=y0 + vskip + val.height, width=val.width, height=-1,
+                                    align_h=val.align, mode='hard', ellipses='')
                     
             else:
                 print 'no support for content type %s' % content.type

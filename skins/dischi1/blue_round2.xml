@@ -45,29 +45,29 @@
 
     <!-- definition of video/audio/image menu. The same as default, but with a -->
     <!-- different background -->
-<!--     <menu type="video"> -->
-<!--       <style text="video"/> -->
-<!--     </menu> -->
+    <menu type="video">
+      <style text="video"/>
+    </menu>
       
-<!--     <menu type="audio"> -->
-<!--       <style text="audio"/> -->
-<!--     </menu> -->
+    <menu type="audio">
+      <style text="audio"/>
+    </menu>
       
-<!--     <menu type="image"> -->
-<!--       <style text="image"/> -->
-<!--     </menu> -->
+    <menu type="image">
+      <style text="image"/>
+    </menu>
       
-<!--     <menuset label="video" inherits="normal text style"> -->
-<!--       <screen layout="video screen"/> -->
-<!--     </menuset> -->
+    <menuset label="video" inherits="normal text style">
+      <screen layout="video screen"/>
+    </menuset>
       
-<!--     <menuset label="audio" inherits="normal text style"> -->
-<!--       <screen layout="audio screen"/> -->
-<!--     </menuset> -->
+    <menuset label="audio" inherits="normal text style">
+      <screen layout="audio screen"/>
+    </menuset>
       
-<!--     <menuset label="image" inherits="normal text style"> -->
-<!--       <screen layout="image screen"/> -->
-<!--     </menuset> -->
+    <menuset label="image" inherits="normal text style">
+      <screen layout="image screen"/>
+    </menuset>
       
 
 
@@ -155,25 +155,10 @@
     <!-- FONT DEFINITIONS -->
 
 
-    <font label="grey">
-      <definition name="Arial_Bold" size="16" color="0xdddddd"/>
-      <shadow visible="no"/>
-    </font>
-
-    <font label="white">
-      <definition name="Arial_Bold" size="16" color="0xffffff"/>
-      <shadow visible="no"/>
-    </font>
-
-    <font label="grey big">
-      <definition name="Arial_Bold" size="18" color="0xdddddd"/>
-      <shadow visible="no"/>
-    </font>
-
-    <font label="white big">
-      <definition name="Arial_Bold" size="18" color="0xffffff"/>
-      <shadow visible="no"/>
-    </font>
+    <font label="grey" name="Arial_Bold" size="16" color="0xdddddd"/>
+    <font label="white" name="Arial_Bold" size="16" color="0xffffff"/>
+    <font label="grey big" name="Arial_Bold" size="18" color="0xdddddd"/>
+    <font label="white big" name="Arial_Bold" size="18" color="0xffffff"/>
 
     <!-- ********************************************** -->
     <!-- AUDIO PLAYER DEFINITIONS -->

@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/03/16 19:36:07  dischi
+# Adjustments to the new xml_parser, added listing type 'image+text' to
+# the listing area and blue2, added grey skin. It only looks like grey1
+# in the menu. The skin inherits from blue1 and only redefines the colors
+# and the fonts. blue2 now has an image view for the image menu.
+#
 # Revision 1.5  2003/03/15 11:08:40  dischi
 # added channel logos
 #
@@ -99,57 +105,50 @@ class TVListing_Area(Skin_Area):
         area      = self.area_val
         content   = self.calc_geometry(layout.content, copy_object=TRUE)
 
-        label_val  = content.types['label']
-        label_font = settings.font[label_val.font]
-
-        head_val  = content.types['head']
-        head_font = settings.font[head_val.font]
-
-        selected_val  = content.types['selected']
-        selected_font = settings.font[selected_val.font]
-
+        label_val    = content.types['label']
+        head_val     = content.types['head']
+        selected_val = content.types['selected']
         default_val  = content.types['default']
-        default_font = settings.font[default_val.font]
 
-        self.all_vals = label_val, label_font, head_val, head_font, selected_val, \
-                        selected_font, default_val, default_font
+        self.all_vals = label_val, label_val.font, head_val, head_val.font, selected_val, \
+                        selected_val.font, default_val, default_val.font
         
-        font_h = max(selected_font.h, default_font.h, label_font.h)
+        font_h = max(selected_val.font.h, default_val.font.h, label_val.font.h)
 
 
         # get the max width needed for the longest channel name
         label_width = 0
         for channel in menuw.all_channels:
             label_width = max(label_width, osd.stringsize(channel.displayname,
-                                                          label_font.name,
-                                                          label_font.size)[0])
+                                                          label_val.font.name,
+                                                          label_val.font.size)[0])
         label_txt_width = label_width
 
         if label_val.rectangle:
-            r = self.get_item_rectangle(label_val.rectangle, label_width, label_font.h)[2]
+            r = self.get_item_rectangle(label_val.rectangle, label_width, label_val.font.h)[2]
             label_width = r.width
         else:
             label_width += content.spacing
 
         # get head height
         if head_val.rectangle:
-            r = self.get_item_rectangle(head_val.rectangle, 20, head_font.h)[2]
+            r = self.get_item_rectangle(head_val.rectangle, 20, head_val.font.h)[2]
             content_y = content.y + r.height + content.spacing
         else:
-            content_y = content.y + head_font.h + content.spacing
+            content_y = content.y + head_val.font.h + content.spacing
 
 
         # get item height
         item_h = font_h
 
         if label_val.rectangle:
-            r = self.get_item_rectangle(label_val.rectangle, 20, label_font.h)[2]
+            r = self.get_item_rectangle(label_val.rectangle, 20, label_val.font.h)[2]
             item_h = max(item_h, r.height + content.spacing)
         if default_val.rectangle:
-            r = self.get_item_rectangle(default_val.rectangle, 20, default_font.h)[2]
+            r = self.get_item_rectangle(default_val.rectangle, 20, default_val.font.h)[2]
             item_h = max(item_h, r.height + content.spacing)
         if selected_val.rectangle:
-            r = self.get_item_rectangle(selected_val.rectangle, 20, selected_font.h)[2]
+            r = self.get_item_rectangle(selected_val.rectangle, 20, selected_val.font.h)[2]
             item_h = max(item_h, r.height + content.spacing)
 
         content_h = content.height + content.y - content_y
@@ -326,9 +325,11 @@ class TVListing_Area(Skin_Area):
                     #tx0 = min(x1, x0+(flag_left+1)*spacing+flag_left*left_arrow_size[0])
                     #tx1 = max(x0, x1-(flag_right+1)*spacing-flag_right*right_arrow_size[0])
 
-                    tx0 = min(x1, x0)
-                    tx1 = max(x0, x1)
-
+                    if x0 > x1:
+                        break
+                    
+                    tx0 = x0
+                    tx1 = x1
                     ty0 = y0
                     
                     if val.rectangle:
@@ -340,9 +341,10 @@ class TVListing_Area(Skin_Area):
                             
                         self.drawroundbox(tx0+r.x, ty0+r.y, r.width, r.height, r)
                         
-                    self.write_text(prg.title, font, content, x=tx0,
-                                    y=ty0, width=tx1-tx0, height=font_h,
-                                    align_v='center', align_h = val.align)
+                    if tx0 < tx1:
+                        self.write_text(prg.title, font, content, x=tx0,
+                                        y=ty0, width=tx1-tx0, height=font_h,
+                                        align_v='center', align_h = val.align)
 
                     #if flag_left:
                     #    osd.drawbitmap(val2.indicator['left'], x0 + spacing,

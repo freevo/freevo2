@@ -13,26 +13,15 @@
     blue1_big defines, that's it
     -->
 
-    <font label="grey">
-      <definition size="16"/>
-    </font>
-
-    <font label="white">
-      <definition size="16"/>
-    </font>
-
-    <font label="yellow shadow">
-      <definition name="Arial_Bold" size="16" color="0xffff66"/>
-      <shadow visible="yes" color="0x000000" x="1" y="1"/>
-    </font>
-
-    <font label="grey big">
-      <definition size="30"/>
-    </font>
-
-    <font label="white big">
-      <definition size="30"/>
-    </font>
+    <font label="title" size="30"/>
+    <font label="item" size="16"/>
+    <font label="selected" size="16"/>
+    <font label="main" size="30"/>
+    <font label="main selected" size="30"/>
+    <font label="default" size="16"/>
+    <font label="tv" size="16"/>
+    <font label="player" size="16"/>
+    <font label="tv selected" size="16"/>
 
   </skin>
 </freevo>
