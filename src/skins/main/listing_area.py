@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/10/22 18:45:12  dischi
+# scan for the images without fxd info
+#
 # Revision 1.12  2003/10/22 18:26:09  dischi
 # Changes in the table code of menu items:
 # o use percentage again, pixel sizes are bad because they don't scale
@@ -416,8 +419,8 @@ class Listing_Area(Skin_Area):
                             table_w += 5
                         x_mod = 0
                         if table_text[i].find('ICON_') == 0:
-                            x_mod, table_text[i] = text_or_icon(area, table_text[i], table_x,
-                                                                table_w, val.font)
+                            x_mod, table_text[i] = text_or_icon(settings, table_text[i],
+                                                                table_x, table_w, val.font)
                             if not isinstance(table_text[i], str):
                                 self.draw_image(table_text[i], (table_x + x_mod, y0 + vskip))
                                 table_text[i] = ''

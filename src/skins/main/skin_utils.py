@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/10/22 18:45:12  dischi
+# scan for the images without fxd info
+#
 # Revision 1.7  2003/10/22 18:26:10  dischi
 # Changes in the table code of menu items:
 # o use percentage again, pixel sizes are bad because they don't scale
@@ -183,13 +186,19 @@ def text_or_icon(settings, string, x, width, font):
         return string
     try:
         height = font.h
-        image = settings.images[l[2].lower()].filename
+        image = os.path.join(settings.icon_dir, l[2].lower())
+        if os.path.isfile(image + '.jpg'):
+            image += '.jpg' 
+        if os.path.isfile(image + '.png'):
+            image += '.png'
+        else:
+            image = None
         if image:
-            cname = '%s-%s-%s-%s-%s' % (image, x, l[1], width, height)
+            cname = '%s-%s-%s-%s-%s' % (image, x, l[2], width, height)
             cimage = format_imagecache[cname]
             if cimage:
                 return cimage
-            
+
             image = osd.loadbitmap(image)
             if not image:
                 raise KeyError
