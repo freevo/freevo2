@@ -27,14 +27,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.29  2004/02/04 18:37:14  dischi
-# Major skin bugfix. The rectange calc was wrong. Before this cahnge you
-# needed to draw from -3 to max+6 for a 3 pixel border around the item.
-# This is stupid, max is the item width/height. So now it's max+3, same
-# value as on the other side. This changes fix some problems when
-# an item doesn't fit in it's own height anymore.
-# Changed is the complete skin code and all skins. But some skins may
-# depend on that error, so maybe they need more fixes in the future.
+# Revision 1.30  2004/02/04 19:05:18  dischi
+# o revert rectange calculation
+# o remove bad log message
+#
+# <removed wrong log message>
 #
 # Revision 1.28  2004/02/01 17:03:57  dischi
 # speedup
@@ -428,12 +425,6 @@ class Skin_Area:
         if isinstance(r.y, str):
             r.y = int(eval(r.y, {'MAX':item_h}))
 
-        # correct item_w and item_h to fit the rect for negative values
-        if r.x < 0:
-            item_w -= r.x
-        if r.y < 0:
-            item_h -= r.y
-
         # set rect width and height to something
         if not r.width:
             r.width = item_w
@@ -447,6 +438,14 @@ class Skin_Area:
 
         if isinstance(r.height, str):
             r.height = int(eval(r.height, {'MAX':item_h}))
+
+        # correct item_w and item_h to fit the rect
+        item_w = max(item_w, r.width)
+        item_h = max(item_h, r.height)
+        if r.x < 0:
+            item_w -= r.x
+        if r.y < 0:
+            item_h -= r.y
 
         # return needed width and height to fit original width and height
         # and the rectangle attributes
