@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/08/23 15:54:48  dischi
+# do not move sticky objects to new display
+#
 # Revision 1.2  2004/08/23 12:36:50  dischi
 # cleanup, add doc
 #
@@ -60,7 +63,8 @@ def set_display(name, size):
     # remove all children add update old display
     children = copy.copy(old.children)
     for c in children:
-        old.remove_child(c)
+        if not hasattr(c, 'sticky') or not c.sticky:
+            old.remove_child(c)
     old.update()
     old.hide()
 
@@ -71,7 +75,8 @@ def set_display(name, size):
 
     # move all children to new display
     for c in children:
-        new.add_child(c)
+        if not hasattr(c, 'sticky') or not c.sticky:
+            new.add_child(c)
     new.update()
     return display_stack[-1]
 
@@ -82,14 +87,17 @@ def remove_display(screen):
     """
     global display_stack
     if screen != display_stack[-1]:
-        _debug_('FIXME: removing screen not on top')
-        return
+        _debug_('Error: removing screen not on top', 0)
+        print screen
+        print display_stack
+        return display_stack[-1]
 
     display_stack = display_stack[:-1]
     # move all active children to new display
     for c in copy.copy(screen.children):
-        screen.remove_child(c)
-        display_stack[-1].add_child(c)
+        if not hasattr(c, 'sticky') or not c.sticky:
+            screen.remove_child(c)
+            display_stack[-1].add_child(c)
 
     # stop old display, reactivate new one
     # warning: no update() is called
