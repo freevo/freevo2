@@ -1,0 +1,52 @@
+which icecast should i get?
+
+if you have mp3's for right now i believe you need to get ices-0.2.3.tar.gz.
+I believe you can use this with the icecast cvs server but not sure. I still
+use icecast-1.3.12.tar.gz with my copy of ices.
+Otherwise if you have completely shifted to Ogg Vorbs then you can use all the
+cvs version of icecast2 from http://www.xiph.org/cvs.html.
+
+OK how do I install?
+
+1. first download and install the ices and icecast versions you need.
+2. edit your /usr/local/icecast/conf/icecast.conf
+    - i add 'httpadmin 1' to get the webadmin interface
+    - i reduce the max clients to 5
+    - i change the encoder_password, admin_password, and oper_password
+    - i comment out touch_freq. i don't publicize my server.
+    - i set the server_name
+    - i set reverse_lookups 0 (an internal network no dns )
+    - i set console mode to 2 (we don't want to background and don't wabt
+      an open terminal there)
+    - i set the templatedir to the template dir in freevo
+3. then use the mounts.aut, users.aut and groups.aut so that i can
+   control access to the web admin interface.
+4. add the following into your local_conf.py(making path changes where needed):
+
+plugin.activate('icecast')
+
+ICECAST_CMD = '/usr/local/icecast/bin/icecast'
+ICECAST_CONF_DIR = '/usr/local/icecast/conf'
+ICES_CMD = '/usr/local/icecast/bin/ices'
+ICES_OPTIONS = [ '-d', 'FreevoIcecast',
+                 '-g', 'Rock',
+                 '-m', '/freevo',
+                 '-n', 'Freevo_Music_Collection',
+                 '-P', 'hackme',
+                 '-s',
+                 '-r' ]
+ICES_DEF_LIST = '/usr/local/freevo_data/Music/ROCK/mymix.m3u'
+
+5. you should then be able to hear music! an example m3u list to use to connect
+to your icecast server using xmms.
+
+#EXTM3U
+#EXTINF:-1,Freevo_Music_Collection
+http://192.168.1.3:8000/
+
+Are there any special things i should know?
+
+I have an implicit -F <playlist> at the end of ICES_OPTIONS and we have an
+implicit -d ICECAST_CONF_DIR at the end of the icecast invocation. These may
+not work with icecast2 but i haven't tried them yet.
+
