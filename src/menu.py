@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.100  2004/08/01 10:57:34  dischi
+# make the menu an "Application"
+#
 # Revision 1.99  2004/07/26 18:10:16  dischi
 # move global event handling to eventhandler.py
 #
@@ -58,10 +61,10 @@ import config
 import plugin
 import util
 import skin
-import eventhandler
 
 from event import *
 from item import Item
+from eventhandler import Application
 
 import gui
 from gui import AlertBox
@@ -148,21 +151,19 @@ class Menu:
 
 
 
-class MenuWidget:
+class MenuWidget(Application):
     """
     The MenuWidget handles a stack of Menus
     """
     def __init__(self):
+        Application.__init__(self, 'menu widget', 'menu', False)
         self.menustack = []
-        self.rows = 0
-        self.cols = 0
-        self.visible = 1
+        self.rows      = 0
+        self.cols      = 0
         self.eventhandler_plugins = None
-        self.event_context  = 'menu'
-        self.show_callbacks = []
-        self.force_page_rebuild = False
+        self.force_page_rebuild   = False
         
-        
+
     def get_event_context(self):
         """
         return the event context
@@ -173,19 +174,14 @@ class MenuWidget:
 
 
     def show(self):
-        if not self.visible:
-            self.visible = 1
-            self.refresh(reload=1)
-            for callback in copy.copy(self.show_callbacks):
-                callback()
+        Application.show(self)
+        self.refresh(reload=1)
 
                 
     def hide(self, clear=True):
-        if self.visible:
-            self.visible = 0
-            if clear:
-                skin.clear(osd_update=clear)
-
+        Application.hide(self)
+        skin.clear('menu')
+            
         
     def delete_menu(self, arg=None, menuw=None, allow_reload=True):
         if len(self.menustack) > 1:
@@ -218,7 +214,7 @@ class MenuWidget:
             else:
                 self.delete_menu()
         elif len(self.menustack) > 1 and osd_message:
-            eventhandler.post(Event(OSD_MESSAGE, arg=osd_message))
+            self.post_event(Event(OSD_MESSAGE, arg=osd_message))
 
             
     def back_one_menu(self, arg=None, menuw=None):
@@ -228,6 +224,7 @@ class MenuWidget:
             except:
                 count = -1
 
+            gui.get_screen().prepare_for_move(2)
             self.menustack = self.menustack[:count]
             menu = self.menustack[-1]
 
@@ -302,6 +299,7 @@ class MenuWidget:
     
     
     def pushmenu(self, menu):
+        gui.get_screen().prepare_for_move(1)
         self.menustack.append(menu)
         if isinstance(menu, Menu):
             menu.page_start = 0
@@ -316,8 +314,10 @@ class MenuWidget:
         menu = self.menustack[-1]
 
         if not isinstance(menu, Menu):
-            return skin.draw(menu.type, menu)
-
+            if self.visible:
+                skin.draw(menu.type, menu)
+            return
+        
         if self.menustack[-1].umount_all == 1:
             util.umount_all()
                     
@@ -331,7 +331,8 @@ class MenuWidget:
                 self.rebuild_page()
             self.init_page()
 
-        skin.draw('menu', self, self.menustack[-1])
+        if self.visible:
+            skin.draw('menu', self, self.menustack[-1])
 
 
     def make_submenu(self, menu_name, actions, item):
@@ -380,36 +381,36 @@ class MenuWidget:
 
         if event == MENU_GOTO_MAINMENU:
             self.goto_main_menu()
-            return
+            return True
         
         if event == MENU_BACK_ONE_MENU:
             self.back_one_menu()
-            return
+            return True
 
         if not isinstance(menu, Menu) and menu.eventhandler(event):
-            return
+            return True
 
         if event == 'MENU_REFRESH':
             self.refresh()
-            return
+            return True
         
         if event == 'MENU_REBUILD':
             self.init_page()
             self.refresh()
-            return
+            return True
         
         if not self.menu_items:
             if event in ( MENU_SELECT, MENU_SUBMENU, MENU_PLAY_ITEM):
                 self.back_one_menu()
-                return
+                return True
             menu = self.menustack[-2]
             if hasattr(menu.selected, 'eventhandler') and menu.selected.eventhandler:
                 if menu.selected.eventhandler(event = event, menuw=self):
-                    return
+                    return True
             for p in self.eventhandler_plugins:
                 if p.eventhandler(event=event, menuw=self):
-                    return
-            return
+                    return True
+            return True
             
         if not isinstance(menu, Menu):
             if self.eventhandler_plugins == None:
@@ -417,10 +418,10 @@ class MenuWidget:
 
             for p in self.eventhandler_plugins:
                 if p.eventhandler(event=event, menuw=self):
-                    return
+                    return True
 
             _debug_('no eventhandler for event %s' % event, 2)
-            return
+            return True
 
         if event == MENU_UP:
             curr_selected = self.all_items.index(menu.selected)
@@ -439,10 +440,10 @@ class MenuWidget:
             curr_selected = max(curr_selected-self.cols, 0)
             menu.selected = self.all_items[curr_selected]
             self.refresh()
-            return
+            return True
 
 
-        elif event == MENU_DOWN:
+        if event == MENU_DOWN:
             curr_selected = self.all_items.index(menu.selected)
             if curr_selected+self.cols > len(self.all_items)-1 and \
                    menu.page_start + len(self.all_items) < len(menu.choices):
@@ -460,13 +461,13 @@ class MenuWidget:
             curr_selected = min(curr_selected+self.cols, len(self.all_items)-1)
             menu.selected = self.all_items[curr_selected]
             self.refresh()
-            return
+            return True
 
 
-        elif event == MENU_PAGEUP:
+        if event == MENU_PAGEUP:
             # Do nothing for an empty file list
             if not len(self.menu_items):
-                return
+                return True
             
             curr_selected = self.all_items.index(menu.selected)
 
@@ -478,16 +479,16 @@ class MenuWidget:
                 curr_selected = 0
                 menu.selected = self.all_items[curr_selected]
                 self.refresh()
-            return
+            return True
 
 
-        elif event == MENU_PAGEDOWN:
+        if event == MENU_PAGEDOWN:
             # Do nothing for an empty file list
             if not len(self.menu_items):
-                return
+                return True
 
             if menu.selected == menu.choices[-1]:
-                return
+                return True
             
             curr_selected = self.all_items.index(menu.selected)
             bottom_index = self.menu_items.index(self.menu_items[-1])
@@ -500,13 +501,13 @@ class MenuWidget:
                 curr_selected = bottom_index
                 menu.selected = self.all_items[curr_selected]
                 self.refresh()
-            return
+            return True
 
 
-        elif event == MENU_LEFT:
+        if event == MENU_LEFT:
             # Do nothing for an empty file list
             if not len(self.menu_items):
-                return
+                return True
 
             curr_selected = self.all_items.index(menu.selected)
             if curr_selected == 0:
@@ -520,13 +521,13 @@ class MenuWidget:
             curr_selected = max(curr_selected-1, 0)
             menu.selected = self.all_items[curr_selected]
             self.refresh()
-            return
+            return True
         
 
-        elif event == MENU_RIGHT:
+        if event == MENU_RIGHT:
             # Do nothing for an empty file list
             if not len(self.menu_items):
-                return
+                return True
 
             curr_selected = self.all_items.index(menu.selected)
             if curr_selected == len(self.all_items)-1:
@@ -541,13 +542,14 @@ class MenuWidget:
             curr_selected = min(curr_selected+1, len(self.all_items)-1)
             menu.selected = self.all_items[curr_selected]
             self.refresh()
-            return
+            return True
 
 
-        elif event == MENU_PLAY_ITEM and hasattr(menu.selected, 'play'):
+        if event == MENU_PLAY_ITEM and hasattr(menu.selected, 'play'):
             menu.selected.play(menuw=self)
-            
-        elif event == MENU_SELECT or event == MENU_PLAY_ITEM:
+            return True
+        
+        if event == MENU_SELECT or event == MENU_PLAY_ITEM:
             action = None
             arg    = None
 
@@ -567,12 +569,12 @@ class MenuWidget:
                 AlertBox(text=_('No action defined for this choice!')).show()
             else:
                 action( arg=arg, menuw=self )
-            return
+            return True
 
 
-        elif event == MENU_SUBMENU:
+        if event == MENU_SUBMENU:
             if hasattr(menu, 'is_submenu'):
-                return
+                return True
 
             actions = menu.selected.actions()
             force   = False
@@ -599,16 +601,16 @@ class MenuWidget:
                         
             if actions and (len(actions) > 1 or force):
                 self.make_submenu(menu.selected.name, actions, menu.selected)
-            return
+            return True
             
 
-        elif event == MENU_CALL_ITEM_ACTION:
+        if event == MENU_CALL_ITEM_ACTION:
             _debug_('calling action %s' % event.arg)
 
             for a in menu.selected.actions():
                 if not isinstance(a, Item) and len(a) > 2 and a[2] == event.arg:
                     a[0](arg=None, menuw=self)
-                    return
+                    return True
                 
             plugins = plugin.get('item') + plugin.get('item_%s' % menu.selected.type)
 
@@ -619,28 +621,27 @@ class MenuWidget:
                 for a in p.actions(menu.selected):
                     if not isinstance(a, MenuItem) and len(a) > 2 and a[2] == event.arg:
                         a[0](arg=None, menuw=self)
-                        return
+                        return True
             _debug_('action %s not found' % event.arg)
 
                     
-        elif event == MENU_CHANGE_STYLE and len(self.menustack) > 1:
+        if event == MENU_CHANGE_STYLE and len(self.menustack) > 1:
             # did the menu change?
             if skin.toggle_display_style(menu):
                 self.rebuild_page()
                 self.refresh()
-                return
+                return True
                 
-
-        elif hasattr(menu.selected, 'eventhandler') and menu.selected.eventhandler:
+        if hasattr(menu.selected, 'eventhandler') and menu.selected.eventhandler:
             if menu.selected.eventhandler(event = event, menuw=self):
-                return
+                return True
             
         for p in self.eventhandler_plugins:
             if p.eventhandler(event=event, menuw=self):
-                return
+                return True
 
         _debug_('no eventhandler for event %s' % str(event), 2)
-        return 0
+        return False
 
 
 
