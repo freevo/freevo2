@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2003/09/07 13:36:09  dischi
+# use ignore not replace for encode error handling
+#
 # Revision 1.33  2003/09/07 13:03:12  mikeruelle
 # Remove rating for now. System is optional, need code to store ratings in tuple
 #
@@ -284,7 +287,7 @@ def load_guide():
             return None     # No
         
         for chan in xmltv_channels:
-            id = chan['id'].encode('Latin-1', 'replace')
+            id = chan['id'].encode('Latin-1', 'ignore')
             c = epg_types.TvChannel()
             c.id = id
             if ' ' in id:
@@ -299,7 +302,7 @@ def load_guide():
 
     xmltv_programs = None
     if gotfile:
-        if DEBUG or 1:
+        if DEBUG:
             print 'reading xmltv data'
         xmltv_programs = xmltv.read_programmes(util.gzopen(config.XMLTV_FILE))
     
@@ -312,21 +315,21 @@ def load_guide():
     for chan in guide.chan_dict:
         needed_ids.append(chan)
 
-    if DEBUG or 1:
+    if DEBUG:
         print 'creating guide for %s' % needed_ids
 
     for p in xmltv_programs:
-        if not p['channel'].encode('Latin-1', 'replace') in needed_ids:
+        if not p['channel'].encode('Latin-1', 'ignore') in needed_ids:
             continue
         prog = epg_types.TvProgram()
-        prog.channel_id = p['channel'].encode('Latin-1', 'replace')
-        prog.title = p['title'][0][0].encode('Latin-1', 'replace')
+        prog.channel_id = p['channel'].encode('Latin-1', 'ignore')
+        prog.title = p['title'][0][0].encode('Latin-1', 'ignore')
         if p.has_key('category'):
-             prog.categories = [ cat[0].encode('Latin-1', 'replace') for cat in p['category'] ]
+             prog.categories = [ cat[0].encode('Latin-1', 'ignore') for cat in p['category'] ]
         if p.has_key('desc'):
-            prog.desc = util.format_text(p['desc'][0][0].encode('Latin-1', 'replace'))
+            prog.desc = util.format_text(p['desc'][0][0].encode('Latin-1', 'ignore'))
         if p.has_key('sub-title'):
-            prog.sub_title = p['sub-title'][0][0].encode('Latin-1', 'replace')
+            prog.sub_title = p['sub-title'][0][0].encode('Latin-1', 'ignore')
         try:
             prog.start = timestr2secs_utc(p['start'])
             try:

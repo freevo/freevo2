@@ -32,8 +32,8 @@
 
 # Changes for Freevo:
 # o change data_format to '%Y%m%d%H%M%S %Z'
-# o change encode to use 'replace' ro error:
-#   string.encode(locale) -> string.encode(locale, 'replace')
+# o change encode to use 'ignore' as error:
+#   string.encode(locale) -> string.encode(locale, 'ignore')
 # o add except AttributeError: for unhandled elements (line 250ff)
 
 
@@ -115,7 +115,7 @@ class _ProgrammeHandler:
         data = {}
         for attr in (u'src', u'width', u'height'):
             if node.attrs.has_key(('', attr)):
-                data[attr.encode(locale, 'replace')] = _getxmlattr(node, attr)
+                data[attr.encode(locale, 'ignore')] = _getxmlattr(node, attr)
         return data
 
     def url(self, node):
@@ -133,20 +133,20 @@ class _ProgrammeHandler:
     def video(self, node):
         result = {}
         for child in node.children:
-            result[child.name.encode(locale, 'replace')] = self._call(child)
+            result[child.name.encode(locale, 'ignore')] = self._call(child)
         return result
 
     def audio(self, node):
         result = {}
         for child in node.children:
-            result[child.name.encode(locale, 'replace')] = self._call(child)
+            result[child.name.encode(locale, 'ignore')] = self._call(child)
         return result
 
     def previously_shown(self, node):
         data = {}
         for attr in (u'start', u'channel'):
             if node.attrs.has_key(('', attr)):
-                data[attr.encode(locale, 'replace')] = node.attrs[('', attr)]
+                data[attr.encode(locale, 'ignore')] = node.attrs[('', attr)]
         return data
 
     def premiere(self, node):
@@ -263,7 +263,7 @@ class _ChannelHandler:
         data = {}
         for attr in (u'src', u'width', u'height'):
             if node.attrs.has_key(('', attr)):
-                data[attr.encode(locale, 'replace')] = _getxmlattr(node, attr)
+                data[attr.encode(locale, 'ignore')] = _getxmlattr(node, attr)
         return data
 
     def url(self, node):
@@ -293,8 +293,8 @@ def _extractNodes(node, handler):
     result = {}
     for child in node.children:
         if not result.has_key(child.name):
-            result[child.name.encode(locale, 'replace')] = []
-        result[child.name.encode(locale, 'replace')].append(handler._call(child))
+            result[child.name.encode(locale, 'ignore')] = []
+        result[child.name.encode(locale, 'ignore')].append(handler._call(child))
     return result
 
 def _getxmlattr(node, attr):
@@ -333,14 +333,14 @@ def _node_to_programme(node):
     programme = _extractNodes(node, handler)
 
     for attr in (u'start', u'channel'):
-        programme[attr.encode(locale, 'replace')] = node.attrs[(u'', attr)]
+        programme[attr.encode(locale, 'ignore')] = node.attrs[(u'', attr)]
     if (u'', u'stop') in node.attrs:
-        programme[u'stop'.encode(locale, 'replace')] = node.attrs[(u'', u'stop')]
+        programme[u'stop'.encode(locale, 'ignore')] = node.attrs[(u'', u'stop')]
     else:
         # Sigh. Make show zero-length. This will allow the show to appear in
         # searches, but it won't be seen in a grid, if the grid is drawn to
         # scale
-        programme[u'stop'.encode(locale, 'replace')] = node.attrs[(u'', u'start')]
+        programme[u'stop'.encode(locale, 'ignore')] = node.attrs[(u'', u'start')]
     return programme
 
 def _node_to_channel(node):
@@ -387,7 +387,7 @@ def read_data(fp):
     attrs = {}
 
     for key in doc.attrs.keys():
-        attrs[key[1].encode(locale, 'replace')] = doc.attrs[key]
+        attrs[key[1].encode(locale, 'ignore')] = doc.attrs[key]
 
     return attrs
 
