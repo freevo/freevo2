@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/10/22 15:38:34  mikeruelle
+# Apply Bart Heremans strptime patch for off by one hour
+#
 # Revision 1.2  2003/09/05 02:48:13  rshortt
 # Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
 #
@@ -45,6 +48,14 @@ import tv.epg_types
 import tv.record_client as ri
 from www.wap_types import WapResource, FreevoWapResource
 
+# Use the alternate strptime module which seems to handle time zones
+#
+# XXX Remove when we are ready to require Python 2.3
+if float(sys.version[0:3]) < 2.3:
+    import tv.strptime as strptime
+else:
+    import _strptime as strptime
+
 class WRecResource(FreevoWapResource):
 
     def _render(self, request):
@@ -69,8 +80,8 @@ class WRecResource(FreevoWapResource):
         # look for action to do an add
         if action:
            if action == 'add':
-              starttime = time.mktime(time.strptime(str(startdate)+" "+str(start)+":00",'%d/%m/%y %H:%M:%S'))
-              stoptime = time.mktime(time.strptime(str(startdate)+" "+str(stop)+":00",'%d/%m/%y %H:%M:%S'))
+              starttime = time.mktime(strptime.strptime(str(startdate)+" "+str(start)+":00",'%d/%m/%y %H:%M:%S'))
+              stoptime = time.mktime(strptime.strptime(str(startdate)+" "+str(stop)+":00",'%d/%m/%y %H:%M:%S'))
               if stoptime < starttime:
                   stoptime = stoptime + 86400
               prog = tv.epg_types.TvProgram()
