@@ -649,7 +649,6 @@
             </content>
         </layout>
 
-        <!-- mfr work -->
         <layout label="tv manual record info">
             <content x="0" y="0" type="text" spacing="20" font="default">
                 <item type="default">
