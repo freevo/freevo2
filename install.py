@@ -14,6 +14,12 @@ try:
 except ImportError:
 	print "Python XML module is missing."
 
+print "Checking for qp_xml:"
+try:
+	from xml.utils import qp_xml
+except ImportError:
+	print "qp_xml is missing."
+
 print "Checking for Python Imaging Library:"
 try:
 	import Image
