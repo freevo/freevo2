@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/09/06 21:13:39  mikeruelle
+# fix a crash reported by denRDC
+#
 # Revision 1.1  2003/08/30 17:09:10  dischi
 # o video bookmarks are now handled inside this plugin
 # o support for auto bookmark: save positon when you STOP the playback
@@ -88,7 +91,8 @@ class PluginInterface(plugin.ItemPlugin):
         ab = self.__get_auto_bookmark__(item)
         if ab:
             items.append((self.resume, 'Resume playback'))
-            
+        if item.type == 'dir' or item.type == 'playlist':
+            return items    
         if item.mode == 'file' and not item.variants and \
                not item.subitems and os.path.exists(util.get_bookmarkfile(item.filename)):
             items.append(( self.bookmark_menu, 'Bookmarks'))
