@@ -28,6 +28,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/10/20 18:26:01  outlyer
+# No CDDB data is a warning at best; sometimes a CD is just not listed there.
+# Convert the rest of the 'print' into _debug_ with errors getting 0
+#
 # Revision 1.21  2003/10/08 02:57:41  outlyer
 # Get rid of the global variables; keep the thread inside the class.
 #
@@ -214,7 +218,7 @@ class PluginInterface(plugin.ItemPlugin):
                                _('Rip the CD to the hard drive'),
                                _('Get CDs available for ripping')) ]
         except:
-            print 'Error: Item is not an AudioCD'
+            _debug_('[Error] - Item is not an AudioCD')
         return []
 
 
@@ -448,10 +452,8 @@ class main_backup_thread(threading.Thread):
         # So that subsequent CDs with no CDDB data found don't overwrite each other.
         if ((cd_info.title == None) and (cd_info.artist == None)):
 
-            print 'Error: No CDDB data returned from MMPYTHON'
+            _debug_('[Warning] - No CDDB data available to mmpython',2)
             current_time = time.strftime('%d-%b-%y-%I:%M%P')
-            
-            print 'The current time is: %s' %current_time
             
             artist ='Unknown Artist ' + current_time + ' - RENAME'
             album ='Unknown CD Album ' + current_time +  ' - RENAME'
@@ -520,5 +522,5 @@ class main_backup_thread(threading.Thread):
                 else:
                     (new_string, num) = re.subn(pattern, repl, new_string, count=0)
             except:
-                print 'Error: Problem trying to call re.subn'
+                _debug_('[Error] -  Problem trying to call re.subn')
         return new_string
