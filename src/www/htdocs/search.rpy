@@ -11,6 +11,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/07/13 18:08:53  rshortt
+# Change tv_util.get_chan_displayname() to accept channel_id instead of
+# a TvProgram object and also use config.TV_CHANNELS when available, which
+# is 99% of the time.
+#
 # Revision 1.9  2003/07/06 20:08:05  rshortt
 # Search now uses tv_util.get_chan_displayname(prog) for the display also.
 #
@@ -144,7 +149,7 @@ class SearchResource(FreevoResource):
                 fv.tableCell(time.strftime('%b %d %H:%M', time.localtime(prog.start)), 'class="'+status+'" align="left" colspan="1"')
                 fv.tableCell(time.strftime('%b %d %H:%M', time.localtime(prog.stop)), 'class="'+status+'" align="left" colspan="1"')
 
-                chan = tv_util.get_chan_displayname(prog)
+                chan = tv_util.get_chan_displayname(prog.channel_id)
                 if not chan: chan = 'UNKNOWN'
                 fv.tableCell(chan, 'class="'+status+'" align="left" colspan="1"')
 

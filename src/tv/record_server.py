@@ -8,6 +8,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/07/13 18:08:52  rshortt
+# Change tv_util.get_chan_displayname() to accept channel_id instead of
+# a TvProgram object and also use config.TV_CHANNELS when available, which
+# is 99% of the time.
+#
 # Revision 1.8  2003/07/06 20:04:27  rshortt
 # Change favorites to use tv_util.get_chan_displayname(prog) as
 # favorite.channel rather than channel_id.
@@ -465,7 +470,7 @@ class RecordServer(xmlrpc.XMLRPC):
         for fav in favs.values():
     
             if prog.title == fav.title:    
-                if fav.channel == tv_util.get_chan_displayname(prog) \
+                if fav.channel == tv_util.get_chan_displayname(prog.channel_id) \
                    or fav.channel == 'ANY':
                     if fav.dow == dow or fav.dow == 'ANY':
                         if fav.mod == min_of_day or fav.mod == 'ANY':

@@ -6,6 +6,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/07/13 18:08:51  rshortt
+# Change tv_util.get_chan_displayname() to accept channel_id instead of
+# a TvProgram object and also use config.TV_CHANNELS when available, which
+# is 99% of the time.
+#
 # Revision 1.2  2003/07/06 19:27:02  rshortt
 # Add a function to get the display name of a program's channel.  Using this
 # helps with recent xmltv changes.
@@ -43,8 +48,7 @@
 import sys, string, re
 import time, os, string
 
-import util
-import epg_xmltv
+import util, config, epg_xmltv
 
 DEBUG = 0
 
@@ -109,7 +113,15 @@ def descfsize(size):
         return "%.3f GB" % size
 
 
-def get_chan_displayname(prog):
+def get_chan_displayname(channel_id):
+
+    for vals in config.TV_CHANNELS:
+        tv_channel_id, tv_display_name, tv_tuner_id = vals[:3]
+        if tv_channel_id == channel_id:
+            return tv_display_name
+
     guide = epg_xmltv.get_guide()
-    return guide.chan_dict.get(prog.channel_id).displayname
+    return guide.chan_dict.get(channel_id).displayname
+
+    return None
 
