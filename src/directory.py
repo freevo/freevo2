@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.131  2004/06/10 09:19:12  dischi
+# only remove start strings => 10
+#
 # Revision 1.130  2004/06/09 20:09:09  dischi
 # cleanup
 #
@@ -645,7 +648,7 @@ class DirItem(Playlist):
             for i in self.play_items[1:]:
                 if len(i.name) > 5:
                     substr = util.find_start_string(i.name.lower(), substr)
-                    if not substr:
+                    if not substr or len(substr) < 10:
                         break
                 else:
                     break
