@@ -5,6 +5,7 @@ URL=ftp://ftp.mbus.org/tzi/dmn/mbus/python/
 all: optional_packages links
 
 links: lib/pyimlib2/_Imlib2module.so lib/$(PYMBUS) lib/$(PYNOTIFIER)
+	test -e site-packages || mkdir site-packages
 	@echo creating links in site-packages
 	@ln -sf ../lib/pyimlib2/_Imlib2module.so site-packages/_Imlib2module.so
 	@ln -sf ../lib/pyimlib2/Imlib2.py site-packages/Imlib2.py
