@@ -179,6 +179,8 @@ class OSD:
 
         self.screen = pygame.display.set_mode((width, height), 0, 32)
 
+        pygame.display.set_caption('Freevo')
+        
         self.clearscreen(self.COL_BLACK)
         self.update()
 
