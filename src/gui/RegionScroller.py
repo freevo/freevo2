@@ -1,6 +1,6 @@
 #if 0 /*
 # -----------------------------------------------------------------------
-# .py - stuff
+# RegionScroller.py - A class that will scroll another surface.
 # -----------------------------------------------------------------------
 # $Id$
 #
@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/02/23 18:21:50  rshortt
+# Some code cleanup, better OOP, influenced by creating a subclass of RegionScroller called ListBox.
+#
 # Revision 1.2  2003/02/19 00:58:18  rshortt
 # Added scrolldemo.py for a better demonstration.  Use my audioitem.py
 # to test.
@@ -67,14 +70,18 @@ class RegionScroller(GUIObject):
     border    Border
     bd_color  Border color (Color)
     bd_width  Border width Integer
+    show_h_scrollbar Integer
+    show_v_scrollbar Integer
     """
 
     
-    def __init__(self, surface, left=None, top=None, width=None, height=None, 
-                 border=None, bd_color=None, bd_width=None):
+    def __init__(self, surface=None, left=None, top=None, width=None, 
+                 height=None, border=None, bd_color=None, bd_width=None, 
+                 show_h_scrollbar=None, show_v_scrollbar=None):
 
         GUIObject.__init__(self)
 
+        self.surface        = surface
         self.border         = border
         self.h_margin       = 2
         self.v_margin       = 2
@@ -84,6 +91,8 @@ class RegionScroller(GUIObject):
         self.height         = height
         self.left           = left
         self.top            = top
+        self.show_h_scrollbar = show_h_scrollbar
+        self.show_v_scrollbar = show_v_scrollbar
 
 
         # XXX: Place a call to the skin object here then set the defaults
@@ -97,18 +106,15 @@ class RegionScroller(GUIObject):
         if not self.bd_width: self.bd_width = 2
         if not self.border:   self.border = Border(self, Border.BORDER_FLAT, 
                                                    self.bd_color, self.bd_width)
+        if self.show_h_scrollbar != 0 and not self.show_h_scrollbar: 
+            self.show_h_scrollbar = 1
+        if self.show_v_scrollbar != 0 and not self.show_v_scrollbar: 
+            self.show_v_scrollbar = 1
 
         self.set_surface(surface)
 
-        (None, None, self.s_w, self.s_h) = self.surface_rect = self.surface.get_rect()
-
-        self.v_x = 0
-        self.v_y = 0
-        self.max_x_offset = self.s_w - self.width
-        self.max_y_offset = self.s_h - self.height
         self.x_scroll_interval = 25
         self.y_scroll_interval = 25
-        self.show_scrollbars = 1
 
         self.v_scrollbar = Scrollbar(self, 'vertical')
         self.add_child(self.v_scrollbar)
@@ -122,9 +128,11 @@ class RegionScroller(GUIObject):
         self.filler.fill(fc_c)
         self.filler.set_alpha(fc_a)
 
-        if self.show_scrollbars:
-            if self.h_scrollbar: self.h_scrollbar.calculate_position()
+        if self.show_v_scrollbar:
             if self.v_scrollbar: self.v_scrollbar.calculate_position()
+
+        if self.show_h_scrollbar:
+            if self.h_scrollbar: self.h_scrollbar.calculate_position()
 
 
     def get_view_percent(self, orientation):
@@ -153,7 +161,7 @@ class RegionScroller(GUIObject):
 
 
     def scroll(self, direction):
-        print 'scrolldir: direction="%s"' % direction
+        if DEBUG: print 'scrolldir: direction="%s"' % direction
 
         if direction == "RIGHT":
             new_x = self.v_x + self.x_scroll_interval
@@ -175,13 +183,20 @@ class RegionScroller(GUIObject):
             if new_y < 0:
                 new_y = 0
             self.v_y = new_y
-        self.print_stuff()
+        if DEBUG: self.print_stuff()
         self._draw()
         self.osd.update()
 
 
     def set_surface(self, surface):
         self.surface = surface
+
+        (None, None, self.s_w, self.s_h) = self.surface_rect = self.surface.get_rect()
+
+        self.v_x = 0
+        self.v_y = 0
+        self.max_x_offset = self.s_w - self.width
+        self.max_y_offset = self.s_h - self.height
 
 
     def get_location(self):
@@ -202,14 +217,19 @@ class RegionScroller(GUIObject):
 
         self.osd.screen.blit(box, self.get_position())
 
-        if self.show_scrollbars:
-            if self.h_scrollbar: self.h_scrollbar._draw()
+        if self.show_v_scrollbar:
             if self.v_scrollbar: self.v_scrollbar._draw()
-            self.osd.screen.blit(self.filler, 
+
+        if self.show_h_scrollbar:
+            if self.h_scrollbar: self.h_scrollbar._draw()
+
+        if self.show_v_scrollbar and self.show_h_scrollbar:
+            self.osd.screen.blit(self.filler,
                              (self.left+self.width-self.v_scrollbar.thickness,
                               self.top+self.height-self.h_scrollbar.thickness))
 
         if self.border: self.border._draw()
+
     
 
     def set_border(self, bs):
@@ -238,8 +258,9 @@ class RegionScroller(GUIObject):
             if DEBUG: print "updating borders set_postion as well"
             self.border.set_position(left, top)
 
-        if self.show_scrollbars:
+        if self.show_h_scrollbars:
             if self.h_scrollbar: self.h_scrollbar.calculate_position()
+        if self.show_v_scrollbars:
             if self.v_scrollbar: self.v_scrollbar.calculate_position()
         
 

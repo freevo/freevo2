@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/02/23 18:21:50  rshortt
+# Some code cleanup, better OOP, influenced by creating a subclass of RegionScroller called ListBox.
+#
 # Revision 1.2  2003/02/18 13:40:52  rshortt
 # Reviving the src/gui code, allso adding some new GUI objects.  Event
 # handling will not work untill I make some minor modifications to main.py,
@@ -183,13 +186,14 @@ class Label(GUIObject):
         if not self.font: raise TypeError, 'Oops, no font.'
         if not self.text: raise TypeError, 'Oops, no text.'
         fgc = self.fg_color.get_color_sdl()
+        # print 'LABEL: fgc="%s,%s,%s,%s"' % fgc
         # self.surface = self.font.font.render(self.text, 1, fgc)
         self.surface = self.font.render(self.text, 1, fgc)
         self.set_size(self.surface.get_size())
         self.set_position(self.calc_position())
         
 
-    def _draw(self):
+    def _draw(self, surface=None):
         """
         Our default _draw function.
 
@@ -201,8 +205,13 @@ class Label(GUIObject):
             self.render()
 
         
+        # print 'LABEL._draw: "%s" parent x,y=%s' % (self.text, self.parent.get_position())
+        # print 'LABEL._draw: "%s" x,y=%s' % (self.text, self.get_position())
         # XXX Fix h_align and stuff.
-        self.osd.screen.blit(self.surface, self.get_position())
+        if surface:
+            surface.blit(self.surface, self.get_position())
+        else:
+            self.osd.screen.blit(self.surface, self.get_position())
         
  
     def _erase(self):

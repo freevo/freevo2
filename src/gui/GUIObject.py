@@ -7,6 +7,9 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/02/23 18:21:50  rshortt
+# Some code cleanup, better OOP, influenced by creating a subclass of RegionScroller called ListBox.
+#
 # Revision 1.2  2003/02/18 13:40:52  rshortt
 # Reviving the src/gui code, allso adding some new GUI objects.  Event
 # handling will not work untill I make some minor modifications to main.py,
@@ -79,7 +82,7 @@ import ZIndexRenderer
 
 from Color import *
 
-DEBUG = 0
+DEBUG = 1
 
 
 class GUIObject:
@@ -115,6 +118,7 @@ class GUIObject:
         self.enabled  = 1
         self.selected = 0
         self.label    = None
+        self.icon     = None
         
         if DEBUG: print "inside GUIOBJECT INIT"
 
@@ -313,6 +317,13 @@ class GUIObject:
         pass
 
 
+    def refresh(self):
+        """
+        At the moment not implemented.
+        """
+        pass
+
+
     def _draw(self):
         """
         This function should be overriden by those
@@ -336,7 +347,7 @@ class GUIObject:
         """
         self.children.append(child)
         child.set_parent(self)
-        child._draw()
+        # child._draw()
 
 
     def get_children(self):
@@ -348,14 +359,24 @@ class GUIObject:
 
 
     def destroy(self):
+        if DEBUG: print 'GUIObject.destroy(): %s' % self
+        if self.parent:
+            # self.parent.children.remove(self)
+            if DEBUG: print 'GUIObject.destroy(): %s has a parent' % self
+            if self.osd.focused_app == self:
+                if DEBUG: print 'GUIObject.destroy(): focused_app=%s' % self.osd.focused_app
+                self.osd.focused_app = self.parent
+                if DEBUG: print 'GUIObject.destroy(): focused_app=%s' % self.osd.focused_app
+            self.parent.refresh()
+            self.parent = None
         if self.children:
             for child in self.children:
                 child.destroy()
+                child = None
             self.children = []
-        if self.parent:
-            if self.osd.focused_app == self:
-                self.osd.focused_app = self.parent
         self.set_parent(None)
+        self = None
+        if DEBUG: print 'GUIObject.destroy(): %s should be gone' % self
 
 
     def get_h_align(self):

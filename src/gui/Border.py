@@ -7,6 +7,9 @@
 # Todo: o Make a get_thickness set_thickness function pair.
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/02/23 18:21:50  rshortt
+# Some code cleanup, better OOP, influenced by creating a subclass of RegionScroller called ListBox.
+#
 # Revision 1.2  2003/02/18 13:40:52  rshortt
 # Reviving the src/gui code, allso adding some new GUI objects.  Event
 # handling will not work untill I make some minor modifications to main.py,
@@ -151,7 +154,7 @@ class Border(GUIObject):
         else: raise TypeError, style
 
         
-    def _draw(self):
+    def _draw(self, surface=None):
         """
         Draws the border around the parent.
 
@@ -160,10 +163,15 @@ class Border(GUIObject):
         if DEBUG: print "  Inside Border._draw..."
         if DEBUG: print "  Border type: ", self.style
 
+        if surface:
+            draw_to = surface
+        else:
+            draw_to = self.osd.screen
+        
         # XXX Hack to make border draw inside the areas we expect.
         if self.style == self.BORDER_FLAT:
             c = self.color.get_color_sdl()
-            self.rect = pygame.draw.rect(self.osd.screen, c, self.get_rect(),
+            self.rect = pygame.draw.rect(draw_to, c, self.get_rect(),
                                          self.thickness)
 
         # if self.style == self.BORDER_SHADOW:

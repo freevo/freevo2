@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/02/23 18:21:50  rshortt
+# Some code cleanup, better OOP, influenced by creating a subclass of RegionScroller called ListBox.
+#
 # Revision 1.1  2003/02/18 13:40:53  rshortt
 # Reviving the src/gui code, allso adding some new GUI objects.  Event
 # handling will not work untill I make some minor modifications to main.py,
@@ -97,10 +100,10 @@ class Scrollbar(GUIObject):
     def get_handle_rect(self):
         (a, b, c) = self.parent.get_view_percent(self.orientation)
 
-        print 'a,b,c="%s,%s,%s"' % (a, b, c)
+        # print 'a,b,c="%s,%s,%s"' % (a, b, c)
 
         if a == 100 or b == 100 or c == 100:
-            return self.get_size()
+            return self.get_rect()
 
         if self.orientation == 'vertical':
             fg_width = self.width
@@ -118,13 +121,13 @@ class Scrollbar(GUIObject):
 
     def get_handle_size(self):
         (a, b, c, d) = self.get_handle_rect()
-        print 'get_handle_size: c,d="%s,%s"' % (c, d)
+        # print 'get_handle_size: c,d="%s,%s"' % (c, d)
         return (c, d)
 
 
     def get_handle_coords(self):
         (a, b, c, d) = self.get_handle_rect()
-        print 'get_handle_coords: a,b="%s,%s"' % (a, b)
+        # print 'get_handle_coords: a,b="%s,%s"' % (a, b)
         return (a, b)
 
 
@@ -133,13 +136,13 @@ class Scrollbar(GUIObject):
         if self.orientation == 'vertical':
             self.width = self.thickness
             self.height = self.parent.height
-            if self.parent.h_scrollbar:
+            if self.parent.show_h_scrollbar:
                 self.height = self.height - self.parent.h_scrollbar.thickness
             self.left = self.parent.left + self.parent.width - self.width
             self.top = self.parent.top
         else:
             self.width = self.parent.width
-            if self.parent.v_scrollbar:
+            if self.parent.show_v_scrollbar:
                 self.width = self.width - self.parent.v_scrollbar.thickness
             self.height = self.thickness
             self.left = self.parent.left
@@ -162,7 +165,7 @@ class Scrollbar(GUIObject):
         bg_box.set_alpha(bg_a)
 
         fg_c = self.fg_color.get_color_sdl()
-        print 'fg_c="%s,%s,%s,%s"' % fg_c
+        # print 'fg_c="%s,%s,%s,%s"' % fg_c
         fg_a = self.fg_color.get_alpha()
 
         fg_box = pygame.Surface(self.get_handle_size(), 0, 32)

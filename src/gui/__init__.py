@@ -19,6 +19,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/02/23 18:21:50  rshortt
+# Some code cleanup, better OOP, influenced by creating a subclass of RegionScroller called ListBox.
+#
 # Revision 1.3  2003/02/19 00:58:18  rshortt
 # Added scrolldemo.py for a better demonstration.  Use my audioitem.py
 # to test.
@@ -117,6 +120,7 @@ from gui.Scrollbar      import *
 from gui.InputBox       import *
 from gui.exceptions     import *
 from gui.scrolldemo     import *
+from gui.listboxdemo    import *
 
 
 if DEBUG:
