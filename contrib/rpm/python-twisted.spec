@@ -2,13 +2,14 @@
 
 Summary: Event-based framework for internet applications
 Name: python-twisted
-Version: 1.0.7
+Version: 1.1.0
 Release: 1_freevo
 Source0: Twisted-%{version}.tar.bz2
 License: LGPL
 Group: Development/Python
 URL: http://www.twistedmatrix.com/
 BuildRoot: %{_tmppath}/%{name}-buildroot
+Provides: python-Twisted
 Prefix: %{_prefix}
 
 %description

@@ -17,23 +17,32 @@
 ##########################################################################
 %define name freevo
 %define version 1.4
-%define release rc4
+%define release 1_rh9
 %define _cachedir /var/cache
 %define _logdir /var/log
+%define _contribdir /usr/share/freevo/contrib
+%define _docdir /usr/share/doc/%{name}-%{version}
 
 
 Summary:        Freevo
 Name: %{name}
 Version: %{version}
 Release: %{release}
-#Source0: %{name}-%{version}.tar.gz
-Source0: %{name}-%{version}%{release}.tar.gz
+Source0: %{name}-%{version}.tar.gz
+#Source0: %{name}-%{version}%{release}.tar.gz
 Source1: redhat-boot_config
-#Patch0: freevo-%{version}-%{release}-freevo_dep.patch
+Patch0: freevo-%{version}-xmms.patch
 Copyright: gpl
 Group: Applications/Multimedia
+BuildArch: noarch
 BuildRoot: %{_tmppath}/%{name}-buildroot
 #BuildRequires: docbook-utils, wget
+Requires: SDL >= 1.2.6, SDL_image >= 1.2.3, SDL_ttf >= 2.0.6, SDL_mixer >= 1.2.5
+Requires: smpeg >= 0.4.4, freetype >= 2.1.4, util-linux
+Requires: python >= 2.2, python-game >= 1.5.6, python-imaging >= 1.1.4, PyXML
+Requires: mmpython >= 0.3, python-mx-base >= 2.0.4,
+Requires: aumix >= 2.8, libjpeg >= 6b, libexif >= 0.5.10
+Requires: python-Twisted >= 1.1.0
 Prefix: %{_prefix}
 URL:            http://freevo.sourceforge.net/
 
@@ -68,10 +77,10 @@ Note: This installs the initscripts necessary for a standalone Freevo system.
 
 %prep
 rm -rf $RPM_BUILD_ROOT
-%setup -n freevo-%{version}%{release}
-#%setup -n freevo
+#%setup -n freevo-%{version}%{release}
+%setup -n freevo-%{version}
 
-#%patch0 -p1 
+%patch0 -p1 
 
 %build
 find . -name CVS | xargs rm -rf
@@ -111,9 +120,17 @@ chmod 777 %{buildroot}%{_logdir}/freevo
 python setup.py install %{?_without_compile_obj:--no-compile} \
 		--root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
 
+install -m 644 local_conf.py.example %{buildroot}%{_docdir}
+
+mkdir -p %{buildroot}%{_contribdir}/lirc
+cp -av contrib/lirc %{buildroot}%{_contribdir}
+
 cat >>INSTALLED_FILES <<EOF
-%doc BUGS COPYING ChangeLog FAQ INSTALL README TODO Docs local_conf.py.example
-%doc contrib/lirc 
+#%doc BUGS COPYING ChangeLog FAQ INSTALL README TODO Docs local_conf.py.example
+#%doc contrib/lirc 
+%attr(644,root,root) %{_docdir}/local_conf.py.example
+%attr(755,root,root) %dir %{_contribdir}/lirc
+%attr(644,root,root) %{_contribdir}/*
 %attr(755,root,root) %dir %{_sysconfdir}/freevo
 %attr(777,root,root) %dir %{_logdir}/freevo
 %attr(777,root,root) %dir %{_cachedir}/freevo
@@ -176,6 +193,9 @@ if [ "$1" = 0 ] ; then
 fi
 
 %changelog
+* Sat Nov 22 2003 TC Wan <tcwan@cs.usm.my>
+- Updated for 1.4 final
+
 * Tue Nov 11 2003 TC Wan <tcwan@cs.usm.my>
 - Updated for 1.4-rc4 
 

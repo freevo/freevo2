@@ -87,7 +87,7 @@ python-imaging / PIL 	http://dag.wieers.com/home-made/apt/	tcl, tk (comes with R
 			[PIL-1.1.4 RPMs available from freevo downloads]	*No tcl, tk dependencies*
 
 python-twisted		http://twistedmatrix.com/products/download
-			[1.0.7, RPMs available from freevo downloads]
+			[1.1.0, RPMs available from freevo downloads]
 
 libexif			http://freshrpms.net/
 			# libexif-0.5.10-1.fr.src.rpm

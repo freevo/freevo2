@@ -1,6 +1,6 @@
 %define freevoname freevo
 %define freevover 1.4
-%define freevorel 3_freevo
+%define freevorel 4_freevo
 ##############################################################################
 Summary: Meta-package for Freevo recording functionality
 Name: freevo-recording-suite
@@ -10,11 +10,12 @@ Copyright: GPL
 Group: Applications/Multimedia
 URL:   http://freevo.sourceforge.net/
 Requires: freevo-core-suite
-Requires: python-twisted >= 1.0.7 
+Requires: python-Twisted >= 1.1.0 
 Requires: vorbis-tools, libvorbis, lame, cdparanoia
 Requires: mp1e >= 1.9.3
 #Requires: ffmpeg >= 0.4.7
 Requires: %{freevoname}
+BuildArch: noarch
 
 
 %description
