@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/01/20 00:24:20  mikeruelle
+# update elapsed time for radio in a thread
+#
 # Revision 1.8  2004/01/14 20:54:02  mikeruelle
 # umm that's a little bit better
 #
@@ -58,6 +61,7 @@
 import time, os
 import string
 import re
+import thread
 
 import config     # Configuration handler. reads config file.
 import util       # Various utilities
@@ -87,6 +91,7 @@ class RadioPlayer:
         self.name = 'radioplayer'
         self.app_mode = 'audio'
         self.app = None
+	self.starttime = 0
 
     def rate(self, item):
         """
@@ -106,6 +111,8 @@ class RadioPlayer:
         """
         self.playerGUI = playerGUI
         self.item = item
+	self.item.elapsed = 0
+	self.starttime = time.time()
 
         print 'RadioPlayer.play() %s' % self.item.station
             
@@ -115,6 +122,7 @@ class RadioPlayer:
         mixer.setIgainVolume(config.TV_IN_VOLUME)
         mixer.setMicVolume(config.TV_IN_VOLUME)
         os.system('%s -qf %s' % (config.RADIO_CMD, self.item.station))
+	thread.start_new_thread(self.__update_thread, ())
         return None
     
 
@@ -138,6 +146,7 @@ class RadioPlayer:
 
     def refresh(self):
         print 'Radio Player refresh'
+	self.item.elapsed = int(time.time() - self.starttime)
         self.playerGUI.refresh()
         
 
@@ -154,3 +163,12 @@ class RadioPlayer:
         else:
             # everything else: give event to the items eventhandler
             return self.item.eventhandler(event)
+
+    def __update_thread(self):
+        """
+        OSD update thread
+        """
+        while self.is_playing():
+            self.refresh()
+            time.sleep(0.3)
+
