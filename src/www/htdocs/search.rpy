@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/03/17 15:56:54  outlyer
+# Add Episode field to search results...
+#
 # Revision 1.18  2004/03/10 20:33:40  rshortt
 # Fix selected tab.
 #
@@ -172,6 +175,7 @@ class SearchResource(FreevoResource):
             fv.tableCell(_('Stop Time'), 'class="guidehead" colspan="1"')
             fv.tableCell(_('Channel'), 'class="guidehead" colspan="1"')
             fv.tableCell(_('Title'), 'class="guidehead" colspan="1"')
+            fv.tableCell(_('Episode'),'class="guidehead" colspan="1"')
             fv.tableCell(_('Program Description'), 'class="guidehead" colspan="1"')
             fv.tableCell(_('Actions'), 'class="guidehead" colspan="1"')
             fv.tableRowClose()
@@ -202,6 +206,11 @@ class SearchResource(FreevoResource):
                 fv.tableCell(chan, 'class="'+status+'" colspan="1"')
 
                 fv.tableCell(prog.title, 'class="'+status+'" colspan="1"')
+                if prog.sub_title:
+                    fv.tableCell(prog.sub_title, 'class="'+status+'" colspan="1"')
+                else:
+                    fv.tableCell('&nbsp;', 'class="'+status+'" colspan="1"')
+                    
     
                 if prog.desc == '':
                     cell = _('Sorry, the program description for %s is unavailable.') % ('<b>'+prog.title+'</b>')
