@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2003/10/01 18:56:25  dischi
+# bugfix if no MOVIE_DATA_DIR is set
+#
 # Revision 1.38  2003/09/23 13:45:20  outlyer
 # Making more informational text quiet by default.
 #
@@ -488,17 +491,16 @@ def parse_movie(node, file, parent, duplicate_check):
     dir = os.path.dirname(file)
 
     # find the realdir in case this file is in MOVIE_DATA_DIR
-    if config.MOVIE_DATA_DIR:
-        if dir.find(config.MOVIE_DATA_DIR) == 0:
-            realdir = os.path.join('/', dir[len(config.MOVIE_DATA_DIR):])
-            if realdir.find('/disc/') == 0:
-                realdir = realdir[6:]
-                for c in config.REMOVABLE_MEDIA:
-                    if realdir.find(c.id) == 0:
-                        realdir = os.path.join(c.mountdir, realdir[len(c.id)+1:])
-                        break
-        else:
-            realdir = dir
+    if config.MOVIE_DATA_DIR and dir.find(config.MOVIE_DATA_DIR) == 0:
+        realdir = os.path.join('/', dir[len(config.MOVIE_DATA_DIR):])
+        if realdir.find('/disc/') == 0:
+            realdir = realdir[6:]
+            for c in config.REMOVABLE_MEDIA:
+                if realdir.find(c.id) == 0:
+                    realdir = os.path.join(c.mountdir, realdir[len(c.id)+1:])
+                    break
+    else:
+        realdir = dir
 
     for movie_child in node.children:
         if movie_child.name == u'video':
