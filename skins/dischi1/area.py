@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2003/03/22 22:26:46  dischi
+# added some exception handling
+#
 # Revision 1.31  2003/03/22 22:19:01  dischi
 # fixed a redraw bug
 #
@@ -747,6 +750,10 @@ class Skin_Area:
         draws an image ... or better stores the information about this call
         in a variable. The real drawing is done inside draw()
         """
+
+        if not image:
+            return
+        
         if isinstance(image, str):
             cname = '%s-%s-%s' % (image, val.width, val.height)
             cimage = self.imagecache[cname]
@@ -756,6 +763,9 @@ class Skin_Area:
             else:
                 image = cimage
                 
+        if not image:
+            return
+        
         if isinstance(val, tuple):
             draw = ( 'content', ('image', image, val[0], val[1], image.get_width(),
                                  image.get_height()) )
