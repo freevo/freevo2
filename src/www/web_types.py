@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/09/06 22:11:40  gsbarbieri
+# Rewoked Popup box so it looks better in Internet Exploder.
+# Guide now has configurable precision, defaults to 5 minutes.
+#
 # Revision 1.11  2003/09/02 22:41:08  mikeruelle
 # adding icecast if the user asks for it.
 #
@@ -169,12 +173,7 @@ class HTMLResource:
     def printSearchForm(self):
         self.res += """
     <form name="SearchForm" action="search.rpy" METHOD="GET">
-    <table>
-      <tr>
-        <td><font color="white"><b>Search:</b></font>&nbsp;</td>
-        <td><input type="text" name="find" size="20" onBlur="document.SearchForm.submit()" /></td>
-      </tr>
-    </table>
+    <div class="searchform"><b>Search:</b><input type="text" name="find" size="20" onBlur="document.SearchForm.submit()" /></div>
     </form>
     """
     

@@ -1056,7 +1056,8 @@ WWW_PORT = 8080
 WWW_USERS = { 0 : 0 }
 
 # The tv guide is divided into 30 minute intervals
-WWW_GUIDE_INTERVAL = 60*30
+WWW_GUIDE_INTERVAL = 30
+WWW_GUIDE_PRECISION = 5 # 5 minutes precision
 
 # Show this many blocks at once
 WWW_GUIDE_COLS = 6

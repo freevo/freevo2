@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/09/06 22:11:40  gsbarbieri
+# Rewoked Popup box so it looks better in Internet Exploder.
+# Guide now has configurable precision, defaults to 5 minutes.
+#
 # Revision 1.14  2003/09/06 18:00:13  mikeruelle
 # plugging a small gap
 #
@@ -165,7 +169,7 @@ class GuideResource(FreevoResource):
             if (abs(gstart - hrinc) < 60):
                 retval += ' SELECTED '
             retval += '>' + time.strftime('%H:%M', time.localtime(hrinc)) + '\n'
-            hrinc += config.WWW_GUIDE_INTERVAL
+            hrinc += config.WWW_GUIDE_INTERVAL * 60
         retval += '</select>\n'
         return retval
 
@@ -174,7 +178,9 @@ class GuideResource(FreevoResource):
         fv = HTMLResource()
         form = request.args
 
-        INTERVAL = config.WWW_GUIDE_INTERVAL
+        INTERVAL = config.WWW_GUIDE_INTERVAL * 60
+        PRECISION = config.WWW_GUIDE_PRECISION * 60
+        cpb = INTERVAL / PRECISION # cols per block/interval
         n_cols = config.WWW_GUIDE_COLS
 
         mfrguidestart = time.time()
@@ -216,8 +222,8 @@ class GuideResource(FreevoResource):
         fv.tableRowClose()
         fv.tableClose()
 
-        fv.tableOpen('border="0" cellpadding="4" cellspacing="1" cols=\"%d\" width="100%%"' % ( n_cols + 1) )
-
+        fv.tableOpen('border="0" cellpadding="4" cellspacing="0" cols=\"%d\" width="100%%" ' % \
+                     ( n_cols*cpb + 1 ) )
         showheader = 0
         for chan in guide.chan_list:
             #put guidehead every X rows
@@ -231,14 +237,15 @@ class GuideResource(FreevoResource):
                         datime = time.strftime('%H:%M', time.localtime(headerstart))
                         if i == n_cols-1:
                             dacell = datime + '&nbsp;&nbsp;<a href="guide.rpy?stime=%i"><img src="images/RightArrow.png" border="0"></a>' % mfrnextguide
-                        else:
+                        else:                            
                             if mfrprevguide > 0:
                                 dacell = '<a href="guide.rpy?stime=%i"><img src="images/LeftArrow.png" border="0"></a>&nbsp;&nbsp;' % mfrprevguide + datime
                             else:
                                 dacell = datime
-                        fv.tableCell(dacell, 'class="guidehead"')
+                        fv.tableCell(dacell, 'class="guidehead"  style="text-align: left;"  colspan="%d"' % cpb)
                     else:
-                        fv.tableCell(time.strftime('%H:%M', time.localtime(headerstart)), 'class="guidehead"')
+                        fv.tableCell(time.strftime('%H:%M', time.localtime(headerstart)),
+                                     'class="guidehead" style="text-align: left;" colspan="%d"' % cpb)
                     headerstart += INTERVAL
                 fv.tableRowClose()
             showheader+= 1
@@ -247,10 +254,10 @@ class GuideResource(FreevoResource):
             fv.tableRowOpen('class="chanrow"')
             # chan.displayname = string.replace(chan.displayname, "&", "SUB")
             fv.tableCell(chan.displayname, 'class="channel"')
-            c_left = n_cols
+            c_left = n_cols * cpb
 
             if not chan.programs:
-                fv.tableCell('&lt;&lt; NO DATA &gt;&gt;', 'class="programnodata" colspan="%s"' % n_cols)
+                fv.tableCell('&lt;&lt; NO DATA &gt;&gt;', 'class="programnodata" colspan="%s"' % (n_cols* cpb) )
 
             for prog in chan.programs:
                 if prog.stop > mfrguidestart and \
@@ -271,48 +278,98 @@ class GuideResource(FreevoResource):
 
                     if prog.start <= now and prog.stop >= now:
                         cell = ""
-                        if prog.start <= now - INTERVAL:
+                        if prog.start <= now - PRECISION:
                             # show started earlier than the guide start,
                             # insert left arrows
                             cell += '&lt;&lt; '
                         showtime_left = int(prog.stop - now)
-                        intervals = showtime_left / INTERVAL
+                        intervals = showtime_left / PRECISION
                         colspan = intervals + 1
                         # prog.title = string.replace(prog.title, "&", "SUB")
                         # prog.desc = string.replace(prog.desc, "&", "SUB")
                         cell += '%s' % prog.title
-                        if colspan > c_left:
+                        if colspan > c_left:                            
                             # show extends past visible range,
                             # insert right arrows
                             cell += '  &gt;&gt;'
                             colspan = c_left
                         popid = '%s:%s' % (prog.channel_id, prog.start)
-                        pops += '<div id="%s"  class="proginfo" >\n' % popid
-                        pops += '  <div class="move" onmouseover="focusPop(\'%s\');" onmouseout="unfocusPop(\'%s\');" style="cursor:move">%s</div>\n' % (popid, popid, prog.title)
+
                         if prog.desc == '':
-                            desc = 'Sorry, the program description for %s is unavailable.' % prog.title
+                            desc = ( 'Sorry, the program description for ' + \
+                                     '<b>%s</b> is unavailable.' ) % prog.title
                         else:
                             desc = prog.desc
-                        pops += '  <div class="progdesc"><br /><font color="black">%s</font><br /><br /></div>\n' % desc
-                        pops += '  <div class="poplinks" style="cursor:hand">\n' 
-                        pops += '    <table width="100%" border="0" cellpadding="4" cellspacing="0">\n'
-                        pops += '      <tr>\n'
-                        pops += '        <td class="popbottom" '
-                        pops += 'onClick="document.location=\'record.rpy?chan=%s&start=%s&action=add\'">Record</td>\n' % (prog.channel_id, prog.start)
-                        pops += '        <td class="popbottom" '
-                        pops += 'onClick="document.location=\'edit_favorite.rpy?chan=%s&start=%s&action=add\'">Add to Favorites</td>\n' % (prog.channel_id, prog.start)
-                        pops += '        <td class="popbottom" '
-                        pops += 'onClick="javascript:closePop(\'%s\');">Close Window</td>\n' % popid
-                        pops += '      </tr>\n'
-                        pops += '    </table>\n'
-                        pops += '  </div>\n'
-                        pops += '</div>\n'
+
+                        pops += """
+<div id="%s" class="proginfo">
+   <table width="100%%"
+          cellpadding="0"
+          cellspacing="0"
+          class="popup"
+          onmouseover="focusPop('%s');"
+          onmouseout="unfocusPop('%s');">
+      <thead>
+         <tr>
+            <td>
+               %s
+            </td>
+         </tr>
+      </thead>
+      <tbody>
+         <tr>
+            <td class="progdesc">
+               %s
+            </td>            
+         </tr>
+         <tr>
+         <td class="progtime">
+            <b>Start:</b> %s, 
+            <b>Stop:</b> %s,
+            <b>Runtime:</b> %smin
+            </td>
+         </td>
+      </tbody>
+      <tfoot>
+         <tr>
+            <td>
+               <table width="100%%"
+                      class="popupbuttons"
+                      border="0"
+                      cellpadding="0"
+                      cellspacing="4">
+                  <tbody>
+                     <tr>
+                        <td onclick="document.location='record.rpy?chan=%s&start=%s&action=add'">
+                           Record
+                        </td>
+                        <td onclick="document.location='edit_favorite.rpy?chan=%s&start=%s&action=add'">
+                           Add to Favorites
+                        </td>
+                        <td onclick="javascript:closePop('%s');">
+                           Close Window
+                        </td>
+                     </tr>
+                  </tbody>
+               </table>
+            </td>
+         </tr>
+      </tfoot>
+   </table>
+</div>
+                        """ % ( popid, popid, popid, prog.title, desc,
+                                time.strftime('%H:%M', time.localtime( prog.start ) ),
+                                time.strftime('%H:%M', time.localtime( prog.stop ) ),
+                                int( ( prog.stop - prog.start ) / 60 ),
+                                prog.channel_id, prog.start,
+                                prog.channel_id, prog.start, popid )
+                        
                         style = ''
-                        if colspan == n_cols:
+                        if colspan == n_cols * cpb:
                             style += 'text-align: center; '
                         
                         fv.tableCell(cell, 'class="'+status+'" onclick="showPop(\'%s\', this)" colspan="%s" style="%s"' % (popid, colspan, style))
-                        now += INTERVAL*colspan
+                        now += colspan * PRECISION
                         c_left -= colspan
 
             fv.tableRowClose()
