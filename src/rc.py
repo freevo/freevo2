@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/02/24 04:21:40  krister
+# Mathieu Weber's bugfix for multipart movies
+#
 # Revision 1.7  2003/02/20 18:31:02  dischi
 # except on IOError if config.LIRCRC doesn't exists
 #
@@ -156,6 +159,7 @@ class RemoteControl:
     
     # Application generated codes
     PLAY_END = 'PLAY_END'     # Reached end of song, movie, etc
+    USER_END = 'USER_END'     # User ended the song, etc
     IDENTIFY_MEDIA = 'IDENTIFY_MEDIA'
     REFRESH_SCREEN = 'REFRESH_SCREEN'
     REBUILD_SCREEN = 'REBUILD_SCREEN'

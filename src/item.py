@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/02/24 04:21:39  krister
+# Mathieu Weber's bugfix for multipart movies
+#
 # Revision 1.6  2003/02/12 06:33:21  krister
 # Cosmetic changes.
 #
@@ -155,7 +158,7 @@ class Item(MenuItem):
             return self.parent.eventhandler(event, menuw)
 
         else:
-            if event == rc.PLAY_END:
+            if event == rc.PLAY_END or event == rc.USER_END:
                 menuwidget = menu.get_singleton()
                 menuwidget.refresh()
                 return TRUE

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/02/24 04:21:40  krister
+# Mathieu Weber's bugfix for multipart movies
+#
 # Revision 1.15  2003/02/17 18:32:24  dischi
 # Added the infos from the xml file to VideoItem
 #
@@ -489,15 +492,18 @@ class VideoItem(Item):
         """
         
         # PLAY_END: do have have to play another file?
-        if event == rc.PLAY_END and self.subitems:
-            try:
-                pos = self.subitems.index(self.current_subitem)
-                if pos < len(self.subitems)-1:
-                    self.current_subitem = self.subitems[pos+1]
-                    print "playing next item"
-                    self.current_subitem.play(menuw=menuw)
-                    return TRUE
-            except:
+        if self.subitems:
+            if event == rc.PLAY_END:
+                try:
+                    pos = self.subitems.index(self.current_subitem)
+                    if pos < len(self.subitems)-1:
+                        self.current_subitem = self.subitems[pos+1]
+                        print "playing next item"
+                        self.current_subitem.play(menuw=menuw)
+                        return TRUE
+                except:
+                    pass
+            elif event == rc.USER_END:
                 pass
 
         # show configure menu

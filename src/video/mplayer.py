@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/02/24 04:21:40  krister
+# Mathieu Weber's bugfix for multipart movies
+#
 # Revision 1.21  2003/02/22 07:13:19  krister
 # Set all sub threads to daemons so that they die automatically if the main thread dies.
 #
@@ -368,7 +371,7 @@ class MPlayer:
             menuwidget.refresh(reload=1)
             return TRUE
         
-        if event == rc.PLAY_END:
+        if event == rc.PLAY_END or event == rc.USER_END:
             self.stop()
             rc.app = None
             return self.item.eventhandler(event)
@@ -454,7 +457,7 @@ class MPlayerParser:
         self.RE_SUBTITLE = re.compile("^\[open\] subtitle.*: ([0-9]) language: "+\
                                       "([a-z][a-z])").match
         self.RE_CHAPTER = re.compile("^There are ([0-9]*) chapters in this DVD title.").match
-
+        self.RE_EXIT = re.compile("^Exiting\.\.\. \((.*)\)$").match
 
     def parse(self, line):
         m = self.RE_AUDIO(line)
@@ -466,6 +469,9 @@ class MPlayerParser:
         m = self.RE_CHAPTER(line)
         if m: self.item.available_chapters = int(m.group(1))
 
+    def end_type(self, str):
+        m = self.RE_EXIT(str)
+        if m: return m.group(1)
         
 
 class MPlayerApp(childapp.ChildApp):
@@ -494,8 +500,8 @@ class MPlayerApp(childapp.ChildApp):
         self.item = item
         self.parser = MPlayerParser(item)
         childapp.ChildApp.__init__(self, app)
-
-
+        self.exit_type = None
+        
     def kill(self):
         # Use SIGINT instead of SIGKILL to make sure MPlayer shuts
         # down properly and releases all resources before it gets
@@ -511,7 +517,6 @@ class MPlayerApp(childapp.ChildApp):
             self.log_stdout.close()
             self.log_stderr.close()
 
-
     def stdout_cb(self, line):
 
         if config.MPLAYER_DEBUG:
@@ -522,6 +527,9 @@ class MPlayerApp(childapp.ChildApp):
                      
         if line.find("A:") == 0:
             self.item.elapsed = line
+
+        elif line.find("Exiting...") == 0:
+            self.exit_type = self.parser.end_type(line)
 
         # this is the first start of the movie, parse infos
         elif not self.item.elapsed:
@@ -588,7 +596,10 @@ class MPlayer_Thread(threading.Thread):
                 self.app.kill()
 
                 if self.mode == 'play':
-                    rc.post_event(rc.PLAY_END)
+                    if self.app.exit_type == "End of file":
+                        rc.post_event(rc.PLAY_END)
+                    elif self.app.exit_type == "Quit":
+                        rc.post_event(rc.USER_END)
 
                 # Ok, we can use the OSD again.
                 if osd.sdl_driver == 'dxr3' or config.CONF.display == 'dfbmga':

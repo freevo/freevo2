@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/02/24 04:21:40  krister
+# Mathieu Weber's bugfix for multipart movies
+#
 # Revision 1.9  2003/01/12 17:57:52  dischi
 # Renamed SUFFIX_MPLAYER_FILES to SUFFIX_VIDEO_FILES because we also play
 # audio files with mplayer. Also renamed SUFFIX_FREEVO_FILES to
@@ -309,8 +312,8 @@ class Playlist(Item):
 
 
     def eventhandler(self, event, menuw=None):
-        if (event == rc.DOWN or event == rc.PLAY_END) and self.current_item \
-           and self.playlist:
+        if (event == rc.DOWN or event == rc.PLAY_END or event == rc.USER_END) \
+           and self.current_item and self.playlist:
             pos = self.playlist.index(self.current_item)
             pos = (pos+1) % len(self.playlist)
 
@@ -322,7 +325,7 @@ class Playlist(Item):
                 return TRUE
 
         # end and no next item
-        if event == rc.PLAY_END:
+        if event == rc.PLAY_END or event == rc.USER_END:
             self.current_item = None
             menuwidget = menu.get_singleton()
             menuwidget.refresh(reload=1)
