@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/02/14 19:18:31  mikeruelle
+# move the icecast changer into icecast.py
+#
 # Revision 1.10  2003/09/30 16:51:22  mikeruelle
 # add some default options
 #
@@ -58,8 +61,9 @@ import sys
 import traceback
 import signal
 import time
-
 import plugin
+import rc
+import event as em
 
 class PluginInterface(plugin.DaemonPlugin):
     """
@@ -87,7 +91,7 @@ class PluginInterface(plugin.DaemonPlugin):
         plugin.DaemonPlugin.__init__(self)
         self.icecast_pid = None
         self.ices_pid = None
-        plugin.activate('icecastchanger')
+        plugin.activate('icecast.IcecastChanger')
 
         try:
             # start icecast
@@ -153,3 +157,27 @@ class PluginInterface(plugin.DaemonPlugin):
         os.kill(self.icecast_pid, signal.SIGTERM)
         os.waitpid(self.icecast_pid, 0)
 
+class IcecastChanger(plugin.ItemPlugin):
+    """
+    This plugin is automatically included by the icecast plugin. There
+    should be no need to activate it yourself. It's purpose is to add
+    the extra action to m3u files to use them as playlists for icecast. 
+    """
+    def __init__(self):
+        plugin.ItemPlugin.__init__(self)
+
+    def change2m3u(self, arg=None, menuw=None):
+        myfile = file(os.path.join(config.FREEVO_CACHEDIR, 'changem3u.txt'), 'wb')
+        myfile.write(self.item.filename)
+        myfile.flush()
+        myfile.close()
+        rc.post_event(em.MENU_BACK_ONE_MENU)
+        
+    def actions(self, item):
+        self.item = item
+        if item.type == 'playlist':
+            fsuffix = os.path.splitext(item.filename)[1].lower()[1:]
+            if fsuffix == 'm3u':
+                return [ (self.change2m3u,
+                          _('Set as icecast playlist')) ]
+        return []
