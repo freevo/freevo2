@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/04/22 19:34:12  dischi
+# mplayer and tvtime are now plugins
+#
 # Revision 1.3  2003/04/20 12:43:34  dischi
 # make the rc events global in rc.py to avoid get_singleton. There is now
 # a function app() to get/set the app. Also the events should be passed to
@@ -18,9 +21,10 @@
 # it, especialy the mixer functions.
 #
 # Revision 1.2  2003/03/27 03:43:50  rshortt
-# Moved as much information as I could into freevo_config.py.  Also fixed a couple bugs, chanup and chandown were backwards, the channel wasn't getting set when you start to watch tv, and the RESET command for the timeshifter was in lower case.
-#
-#
+# Moved as much information as I could into freevo_config.py.  Also fixed a
+# couple bugs, chanup and chandown were backwards, the channel wasn't getting
+# set when you start to watch tv, and the RESET command for the timeshifter
+# was in lower case.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -53,7 +57,8 @@ import signal
 import time
 import tv
 import rc
-from mplayer import MPlayer_Thread
+
+from plugins.mplayer import MPlayer_Thread
 
 DEBUG = 1
 

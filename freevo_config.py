@@ -196,18 +196,22 @@ SHUTDOWN_SYS_CMD = 'shutdown -h now'  # set this to 'sudo shutdown -h now' if
 # ======================================================================
 
 # you can remove all plugins later in your local_conf.py by setting
-# plugin.remove(code).
+# plugin.remove(code). You can also use the name to remove a plugin. But
+# if you do that, all instances of this plugin will be removed.
 #
 # Examples:
-# plugin.remove(plugin_tv) will remove the tv module from the main menu
+# plugin.remove(plugin_tv) or
+# plugin.remove('tv') will remove the tv module from the main menu
 # plugin.remove(rom_plugins['image']) will remove the rom drives from the
-#   image main menu
+#   image main menu,
+# plugin.remove('rom_drives.rom_items') will remove the rom drives from all
+#   menus
 
 
 # ROM drive support
 
 # autostarter when inserting roms while Freevo is in the MAIN MENU
-autostart_plugin = plugin.activate('rom_drives.autostart')
+plugin.activate('rom_drives.autostart')
 
 # add the rom drives to each sub main menu
 rom_plugins = {}
@@ -228,13 +232,19 @@ if CONF.xmame_SDL or CONF.snes:
     plugin_games = plugin.activate('mediamenu', level=45, args=('games', ))
 
 # mixer
-mixer_plugin = plugin.activate('mixer')
+plugin.activate('mixer')
 
 # use mplayer for audio playpack
-audio_player = plugin.activate('audio.mplayer')
+plugin.activate('audio.mplayer')
 
 # make it possible to detach the player
-audio_detach = plugin.activate('audio.detach', level=20)
+plugin.activate('audio.detach', level=20)
+
+# use mplayer for tv
+# to use tvtime, put the following two lines in your local_conf.py:
+# plugin.remove('tv.mplayer')
+# plugin.activate('tv.tvtime')
+plugin.activate('tv.mplayer')
 
 
 # ======================================================================

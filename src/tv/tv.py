@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/04/22 19:34:12  dischi
+# mplayer and tvtime are now plugins
+#
 # Revision 1.10  2003/04/21 18:20:44  dischi
 # make tv itself and not tv.tv the plugin (using __init__.py)
 #
@@ -61,10 +64,6 @@ import menu
 # sends commands to
 import rc
 
-# The TV application
-import mplayer
-import tvtime
-
 # The Electronic Program Guide
 import epg_xmltv as epg
 
@@ -82,12 +81,7 @@ DEBUG = config.DEBUG
 TRUE = 1
 FALSE = 0
 
-# Set up the TV application
-# Select MPlayer by default, tvtime is work in progress
-if 1:
-    tvapp = mplayer.get_singleton()
-else:
-    tvapp = tvtime.get_singleton()
+import plugin
 
 
 def get_tunerid(channel_id):
@@ -104,7 +98,7 @@ def get_tunerid(channel_id):
 def start_tv(mode=None, channel_id=None):
     tuner_id = get_tunerid(channel_id)
     print 'mode=%s    channel=%s  tuner=%s' % (mode, channel_id, tuner_id)
-    tvapp.Play(mode, tuner_id)
+    plugin.getbyname(plugin.TV).Play(mode, tuner_id)
 
 
 
