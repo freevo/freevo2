@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/10/18 21:34:19  rshortt
+# recordserver now handles events like main.
+#
 # Revision 1.2  2003/10/18 17:56:58  dischi
 # more childapp fixes
 #
@@ -56,12 +59,9 @@ class child_handler:
 
 
 def Popen3(program):
-    if config.IS_RECORDSERVER:
-        # add handling for recordserver here
-        return popen2.Popen3(program, 1, 100)
 
     # do not use this for helpers
-    if config.HELPER:
+    if config.HELPER and not config.IS_RECORDSERVER:
         return popen2.Popen3(program, 1, 100)
 
     # do not use this for the main thread
