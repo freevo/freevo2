@@ -5,10 +5,13 @@
 # $Id$
 #
 # Notes: This file handles the Freevo plugin interface
-# Todo:        
+# Todo:  Maybe split plugin class definitions into an extra file
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.74  2004/09/27 18:41:06  dischi
+# add input plugin class
+#
 # Revision 1.73  2004/08/29 18:38:15  dischi
 # make cache helper work again
 #
@@ -232,7 +235,44 @@ class MimetypePlugin(Plugin):
         """
         return []
 
-    
+
+class InputPlugin(Plugin):
+    """
+    Plugin for input devices such as keyboard and lirc. A plugin of this
+    type should be in input/plugins
+    """
+    def __init__(self):
+        Plugin.__init__(self)
+        # FIXME: this is ugly -- very ugly
+        # But we can't import at the beginning of the file because this
+        # file is imported from config
+        import config
+        import eventhandler
+        self._eventhandler = eventhandler.get_singleton()
+        self.config = config
+
+
+    def post_key(self, key):
+        """
+        Send a keyboard event to the event queue
+        """
+        if not key:
+            return None
+
+        for c in (self._eventhandler.context, 'global'):
+            try:
+                e = self.config.EVENTS[c][key]
+                e.context = self._eventhandler.context
+                self._eventhandler.queue.append(e)
+                break
+            except KeyError:
+                pass
+        else:
+            print 'no event mapping for key %s in context %s' % \
+                  (key, self._eventhandler.context)
+            print 'send button event BUTTON arg=%s' % key
+
+
 #
 # Some plugin names to avoid typos
 #
