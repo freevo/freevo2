@@ -97,7 +97,7 @@
 
 
 import plugin
-import event
+from event import *
 
 ########################################################################
 # If you want to change some things for your personal setup, please
@@ -205,12 +205,12 @@ SHUTDOWN_SYS_CMD = 'shutdown -h now'  # set this to 'sudo shutdown -h now' if
                                       # shutdown
 
 EVENTS = {
-    'menu'    : event.MENU_EVENTS,
-    'input'   : event.INPUT_EVENTS,
-    'video'   : event.VIDEO_EVENTS,
-    'audio'   : event.AUDIO_EVENTS,
-    'games'   : event.GAMES_EVENTS,
-    'image'   : event.IMAGE_EVENTS
+    'menu'    : MENU_EVENTS,
+    'input'   : INPUT_EVENTS,
+    'video'   : VIDEO_EVENTS,
+    'audio'   : AUDIO_EVENTS,
+    'games'   : GAMES_EVENTS,
+    'image'   : IMAGE_EVENTS
     }
 
 # ======================================================================
