@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/11/23 16:57:36  dischi
+# move xml help stuff to new fxdparser
+#
 # Revision 1.5  2003/11/22 20:34:08  dischi
 # use new vfs
 #
@@ -347,86 +350,6 @@ def htmlenties2txt(string):
     return string
 
 
-
-
-
-class XMLnode:
-    """
-    One node for the FXDtree
-    """
-    def __init__(self, name, attr = [], first_cdata=None, following_cdata=None):
-        self.name = name
-        self.attr_list = []
-        for name, val in attr:
-            self.attr_list.append(((None, name), val))
-        self.attrs = self
-        self.children = []
-        self.first_cdata = first_cdata
-        self.following_cdata = following_cdata
-        
-    def items(self):
-        return self.attr_list
-
-
-class FXDtree(qp_xml.Parser):
-    """
-    class to parse and write fxd files
-    """
-    def __init__(self, filename):
-        qp_xml.Parser.__init__(self)
-        self.filename = filename
-        if not vfs.isfile(filename):
-            self.tree = XMLnode('freevo')
-        else:
-            f = vfs.open(filename)
-            self.tree = self.parse(f)
-            f.close()
-        
-    def add(self, node, parent=None, pos=None):
-        if not parent:
-            parent = self.tree
-        if pos == None:
-            parent.children.append(node)
-        else:
-            parent.children.insert(pos, node)
-
-    def save(self, filename=None):
-        if not filename:
-            filename = self.filename
-        if vfs.isfile(filename):
-            vfs.unlink(filename)
-        f = vfs.codecs_open(filename, 'w', encoding='utf-8')
-        f.write('<?xml version="1.0" ?>\n')
-        self._dump_recurse(f, self.tree)
-        f.write('\n')
-        f.close()
-        
-    def _dump_recurse(self, f, elem, depth=0):
-        f.write('<' + elem.name)
-        for (ns, name), value in elem.attrs.items():
-            f.write(' %s="%s"' % (name, value))
-        if elem.children or elem.first_cdata:
-            if elem.first_cdata == None:
-                f.write('>\n  ')
-                for i in range(depth):
-                    f.write('  ')
-            else:
-                f.write('>' + elem.first_cdata)
-
-            for child in elem.children:
-                self._dump_recurse(f, child, depth=depth+1)
-                if child.following_cdata == None:
-                    if child == elem.children[-1]:
-                        f.write('\n')
-                    else:
-                        f.write('\n  ')
-                    for i in range(depth):
-                        f.write('  ')
-                else:
-                    f.write(child.following_cdata)
-            f.write('</%s>' % elem.name)
-        else:
-            f.write('/>')
 
 
 #
