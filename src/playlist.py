@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2003/12/08 20:40:57  dischi
+# add doc
+#
 # Revision 1.40  2003/12/08 20:37:33  dischi
 # merged Playlist and RandomPlaylist into one class
 #
@@ -78,6 +81,13 @@ class Playlist(Item):
                  random=False, build=False, autoplay=False, repeat=False):
         """
         Init the playlist
+
+        playlist: a) a filename to a playlist file (e.g. m3u)
+                  b) a list of items to play, this list can include
+                     1) Items
+                     2) filenames
+                     3) a list (directoryname, recursive=0|1)
+        build:    create the playlist. This means unfold the directories
         """
         Item.__init__(self, parent)
 
@@ -86,7 +96,7 @@ class Playlist(Item):
         self.name     = name
         
         if (isinstance(playlist, str) or isinstance(playlist, unicode)) and not name:
-            self.name = playlist
+            self.name = util.getname(playlist)
             
         # variables only for Playlist
         self.current_item = None
