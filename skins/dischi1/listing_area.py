@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/03/23 11:38:49  dischi
+# fixed some alignments
+#
 # Revision 1.14  2003/03/22 22:20:22  dischi
 # fixed a redraw bug
 #
@@ -244,8 +247,16 @@ class Listing_Area(Skin_Area):
         cols, rows, hspace, vspace, hskip, vskip, width = \
               self.get_items_geometry(settings, menu, self.display_style)
 
-        item_x0 = content.x
-        item_y0 = content.y
+
+        if content.align == 'center':
+            item_x0 = content.x + (content.width - cols * hspace) / 2
+        else:
+            item_x0 = content.x
+
+        if content.valign == 'center':
+            item_y0 = content.y + (content.height - rows * vspace) / 2
+        else:
+            item_y0 = content.y
 
         current_col = 1
         
@@ -265,16 +276,6 @@ class Listing_Area(Skin_Area):
                 else:
                     val = content.types['default']
 
-            if content.align == 'center':
-                x0 = item_x0 + (hspace - val.width) / 2
-            else:
-                x0 = item_x0
-                
-            if content.valign == 'center':
-                y0 = item_y0 + (vspace - val.height) / 2
-            else:
-                y0 = item_y0
-                
             text = choice.name
             if not text:
                 text = "unknown"
@@ -287,6 +288,8 @@ class Listing_Area(Skin_Area):
                 text = '[%s]' % text
 
             if content.type == 'text':
+                x0 = item_x0
+                y0 = item_y0
                 icon_x = 0
                 if choice.icon:
                     cname = '%s-%s-%s' % (choice.icon, vspace-content.spacing,
@@ -313,15 +316,23 @@ class Listing_Area(Skin_Area):
 
 
             elif content.type == 'image' or content.type == 'image+text':
+                rec_h = val.height
+                if content.type == 'image+text':
+                    rec_h += int(1.1 * val.font.h)
+
+                if val.align == 'center':
+                    x0 = item_x0 + (hspace - val.width) / 2
+                else:
+                    x0 = item_x0 + hskip
+
+                if val.valign == 'center':
+                    y0 = item_y0 + (vspace - rec_h) / 2
+                else:
+                    y0 = item_y0 + vskip
+
                 if val.rectangle:
-                    rec_h = val.height
-                    if content.type == 'image+text':
-                        rec_h += int(val.font.h * 1.1)
-
                     r = self.get_item_rectangle(val.rectangle, val.width, rec_h)[2]
-                    self.drawroundbox(x0 + hskip + r.x, y0 + vskip + r.y,
-                                      r.width, r.height, r)
-
+                    self.drawroundbox(x0 + r.x, y0 + r.y, r.width, r.height, r)
 
                 image = format_image(settings, choice, val.width, val.height, force=TRUE)
                 if image:
@@ -329,30 +340,33 @@ class Listing_Area(Skin_Area):
 
                     addx = 0
                     addy = 0
-                    if content.align == 'center' and i_w < val.width:
+                    if val.align == 'center' and i_w < val.width:
                         addx = (val.width - i_w) / 2
 
-                    if content.align == 'right' and i_w < val.width:
+                    if val.align == 'right' and i_w < val.width:
                         addx = val.width - i_w
             
-                    if content.valign == 'center' and i_h < val.height:
+                    if val.valign == 'center' and i_h < val.height:
                         addy = (val.height - i_h) / 2
                         
-                    if content.valign == 'bottom' and i_h < val.height:
+                    if val.valign == 'bottom' and i_h < val.height:
                         addy = val.height - i_h
 
-                    self.draw_image(image, (x0 + hskip + addx, y0 + vskip + addy))
+                    self.draw_image(image, (x0 + addx, y0 + addy))
                     
                 if content.type == 'image+text':
-                    self.write_text(choice.name, val.font, content, x=x0 + hskip,
-                                    y=y0 + vskip + val.height, width=val.width, height=-1,
+                    self.write_text(choice.name, val.font, content, x=x0,
+                                    y=y0 + val.height, width=val.width, height=-1,
                                     align_h=val.align, mode='hard', ellipses='')
                     
             else:
                 print 'no support for content type %s' % content.type
 
             if current_col == cols:
-                item_x0 = content.x
+                if content.align == 'center':
+                    item_x0 = content.x + (content.width - cols * hspace) / 2
+                else:
+                    item_x0 = content.x
                 item_y0 += vspace
                 current_col = 1
             else:
@@ -360,8 +374,13 @@ class Listing_Area(Skin_Area):
                 current_col += 1
                 
         # print arrow:
-        if menuw.menu_items[0] != menu.choices[0] and area.images['uparrow']:
-            self.draw_image(area.images['uparrow'].filename, area.images['uparrow'])
-        if menuw.menu_items[-1] != menu.choices[-1] and area.images['downarrow']:
-            self.draw_image(area.images['downarrow'].filename, area.images['downarrow'])
+        try:
+            if menuw.menu_items[0] != menu.choices[0] and area.images['uparrow']:
+                self.draw_image(area.images['uparrow'].filename, area.images['uparrow'])
+            if menuw.menu_items[-1] != menu.choices[-1] and area.images['downarrow']:
+                self.draw_image(area.images['downarrow'].filename, area.images['downarrow'])
+        except IndexError:
+            # empty menu
+            pass
+        
         self.last_choices = (menu.selected, copy.copy(menuw.menu_items))
