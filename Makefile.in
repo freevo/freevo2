@@ -6,7 +6,12 @@
 
 CC=gcc
 
-SUBDIRS = matrox_g400 rc_client osd_server plugins/cddb
+# XXX plugins/cddb breaks the compile on my (Krister) machine 
+# XXX since it cannot find Python.h. We should have some way of 
+# XXX autogenerating a config.mak or something during ./configure
+#SUBDIRS = matrox_g400 rc_client osd_server plugins/cddb
+
+SUBDIRS = matrox_g400 rc_client osd_server
 
 all: subdirs runapp
 
