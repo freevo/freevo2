@@ -34,6 +34,7 @@
 import time
 import os
 import string
+import logging
 
 # notifier
 import notifier
@@ -45,6 +46,8 @@ import childapp
 # record imports
 from record.recorder import Plugin
 
+# get logging object
+log = logging.getLogger('record')
 
 class Childapp(childapp.Instance):
     """
@@ -79,7 +82,7 @@ class PluginInterface(Plugin):
         # set a nice name for debug
         if not hasattr(self, 'name'):
             self.name = 'generic'
-        print 'plugin: activating %s record' % self.name
+        log.info('plugin: activating %s record' % self.name)
         # childapp running the external program
         self.app  = None
         # recording item
@@ -141,7 +144,7 @@ class PluginInterface(Plugin):
             self.rec_timer = None
 
         if not self.recordings:
-            print '%s.schedule: nothing scheduled' % self.name
+            log.info('%s.schedule: nothing scheduled' % self.name)
             return
         
         # sort by start time
@@ -150,7 +153,7 @@ class PluginInterface(Plugin):
             # the first one is running right now, so the timer
             # should be set to the next one
             if len(self.recordings) == 1:
-                print '%s.schedule: scheduled already recording' % self.name
+                log.info('%s.schedule: scheduled already recording' % self.name)
                 return
             rec0 = recordings[0]
             rec1 = recordings[1]
@@ -168,7 +171,7 @@ class PluginInterface(Plugin):
             start = rec.start - rec.start_padding
             
         secs = max(0, int(start - time.time()))
-        print '%s.schedule: next in %s sec' % (self.name, secs)
+        log.info('%s.schedule: next in %s sec' % (self.name, secs))
         
         self.rec_timer = notifier.addTimer(secs * 1000, self.record)
 
@@ -184,8 +187,8 @@ class PluginInterface(Plugin):
         self.rec_timer = None
 
         if self.item:
-            print '%s.record: there is something running, stopping it' % \
-                  self.name
+            log.info('%s.record: there is something running, stopping it' % \
+                     self.name)
             self.stop()
             # return here, this function gets called by notifier using the
             # new rec_timer at once because stop() called schedule again.
@@ -225,7 +228,7 @@ class PluginInterface(Plugin):
         if self.stop_timer:
             notifier.removeTimer(self.stop_timer)
         timer = max(0, int(rec.stop + rec.stop_padding + 10 - time.time()))
-        print '%s.record: add stop timer for %s seconds' % (self.name, timer)
+        log.info('%s.record: add stop timer for %s seconds' % (self.name, timer))
         self.stop_timer = notifier.addTimer(timer * 1000, self.stop)
 
         # Create fxd file now, even if we don't know if it is working. It
@@ -245,7 +248,7 @@ class PluginInterface(Plugin):
         if not self.item:
             # nothing to stop here
             return False
-        print '%s.stop: stop recording' % self.name
+        log.info('%s.stop: stop recording' % self.name)
         # remove the stop timer, we don't need it anymore
         notifier.removeTimer(self.stop_timer)
         self.stop_timer = None
@@ -270,8 +273,8 @@ class PluginInterface(Plugin):
                 self.delete_fxd(self.item)
         else:
             self.item.status = 'done'
-        print '%s.stopped: recording finished, new status' % self.name
-        print self.item
+        log.info('%s.stopped: recording finished, new status' % self.name)
+        log.info(str(self.item))
         self.server.save()
         self.item.recorder = None
         self.item = None

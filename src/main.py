@@ -407,7 +407,7 @@ try:
 
     
 except KeyboardInterrupt:
-    print 'Shutdown by keyboard interrupt'
+    log.info('Shutdown by keyboard interrupt')
     # Shutdown Freevo
     shutdown()
 
@@ -415,7 +415,7 @@ except SystemExit:
     pass
 
 except:
-    print 'Crash!'
+    log.exception('Crash!')
     try:
         tb = sys.exc_info()[2]
         fname, lineno, funcname, text = traceback.extract_tb(tb)[-1]
@@ -439,7 +439,6 @@ except:
         #     time.sleep(1)
     except:
         pass
-    traceback.print_exc()
 
     # Shutdown freevo
     shutdown()

@@ -36,7 +36,7 @@ import copy
 import os
 import sys
 import time
-import traceback
+import logging
 
 # notifier
 import notifier
@@ -58,6 +58,9 @@ import recorder
 from recording import Recording
 from favorite import Favorite
 import conflict
+
+# get logging object
+log = logging.getLogger('record')
 
 # FIXME: move to config file
 EPGDB = os.path.join(config.FREEVO_CACHEDIR, 'epgdb')
@@ -110,12 +113,10 @@ class RecordServer(RPCServer):
         Wrapper for __check_recordings to avoid recursive calling
         """
         if not self.check_running:
-            print 'start timer'
             self.check_timer   = notifier.addTimer(0, self.__check_recordings)
             self.check_running = True
             self.check_needed  = False
         else:
-            print 'foo'
             self.check_needed  = True
 
 
@@ -152,23 +153,20 @@ class RecordServer(RPCServer):
             except KeyError:
                 r.recorder = None, None
                 r.status   = CONFLICT
-                print 'no recorder for recording'
-                print r
+                log.error('no recorder for recording:\n  %s', str(r))
 
         conflict.resolve(next_recordings)
 
-        # print current schedule
-        print
-        print 'recordings:'
+        info = 'recordings:\n'
         for r in self.recordings:
-            print r
-        print
-        print 'favorites:'
+            info += '%s\n' % r
+        log.info(info)
+        info = 'favorites:\n'
         for f in self.favorites:
-            print f
-        print
-        print 'next ids: record=%s favorite=%s' % (self.rec_id, self.fav_id)
-
+            info += '%s\n' % f
+        log.info(info)
+        log.info('next ids: record=%s favorite=%s' % (self.rec_id, self.fav_id))
+        
         # save status
         self.save()
 
@@ -177,8 +175,8 @@ class RecordServer(RPCServer):
             p.schedule(filter(lambda x: x.recorder[0] == p, next_recordings),
                        self)
 
-        print 'checking took %s seconds' % \
-              (float(int((time.time() - ctime) * 100)) / 100)
+        log.info('checking took %s seconds' % \
+                 (float(int((time.time() - ctime) * 100)) / 100))
 
         # check if something requested a new check while this function was
         # running. If so, call the check_recordings functions again
@@ -193,7 +191,7 @@ class RecordServer(RPCServer):
         Check favorites against the database and add them to the list of
         recordings
         """
-        print 'recordserver.check_favorites'
+        log.info('recordserver.check_favorites')
         for f in copy.copy(self.favorites):
             for entry in self.epgdb.search_programs(f.name):
                 dbid, channel, title, subtitle, descr, episode, \
@@ -207,8 +205,8 @@ class RecordServer(RPCServer):
                     # also prevents from added a deleted favorite as active
                     # again.
                     continue
-                print '  added %s: %s (%s)' % (String(channel),
-                                               String(title), start)
+                log.info('added %s: %s (%s)' % (String(channel),
+                                                String(title), start))
                 f.add_data(r)
                 self.recordings.append(r)
                 self.rec_id += 1
@@ -233,7 +231,7 @@ class RecordServer(RPCServer):
             self.recordings.append(r)
             self.rec_id = max(self.rec_id, r.id + 1)
         except Exception, e:
-            print 'recordserver.load_recording:', e
+            log.exception('recordserver.load_recording')
 
 
     def __load_favorite(self, parser, node):
@@ -246,7 +244,7 @@ class RecordServer(RPCServer):
             self.favorites.append(f)
             self.fav_id = max(self.fav_id, f.id + 1)
         except Exception, e:
-            print 'recordserver.load_favorite:', e
+            log.exception('recordserver.load_favorite:')
 
 
     def load(self, rebuild=False):
@@ -263,8 +261,7 @@ class RecordServer(RPCServer):
             fxd.set_handler('favorite', self.__load_favorite)
             fxd.parse()
         except Exception, e:
-            print 'recordserver.load: %s corrupt:' % self.fxdfile
-            print e
+            log.exception('recordserver.load: %s corrupt:' % self.fxdfile)
 
         if rebuild:
             for r in self.recordings:
@@ -340,7 +337,7 @@ class RecordServer(RPCServer):
             name, channel, priority, start, stop, info = \
                   self.parse_parameter(val, ( unicode, unicode, int, int, int,
                                               dict ) )
-        print 'recording.add: %s' % String(name)
+        log.info('recording.add: %s' % String(name))
         r = Recording(self.rec_id, name, channel, priority, start, stop,
                       info = info)
         if r in self.recordings:
@@ -363,7 +360,7 @@ class RecordServer(RPCServer):
         parameter: id
         """
         id = self.parse_parameter(val, ( int, ))
-        print 'recording.remove: %s' % id
+        log.info('recording.remove: %s' % id)
         for r in self.recordings:
             if r.id == id:
                 if r.status == RECORDING:
@@ -381,7 +378,7 @@ class RecordServer(RPCServer):
         parameter: id [ ( var val ) (...) ]
         """
         id, key_val = self.parse_parameter(val, ( int, dict ))
-        print 'recording.modify: %s' % id
+        log.info('recording.modify: %s' % id)
         for r in self.recordings:
             if r.id == id:
                 if r.status == RECORDING:
@@ -417,7 +414,7 @@ class RecordServer(RPCServer):
         name, channels, priority, days, times, once = \
               self.parse_parameter(val, ( unicode, list, int, list, list,
                                           bool ))
-        print 'favorite.add: %s' % String(name)
+        log.info('favorite.add: %s' % String(name))
         f = Favorite(self.fav_id, name, channels, priority, days, times, once)
         if f in self.favorites:
             return RPCError('Already scheduled')
