@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/11/28 20:23:43  dischi
+# renamed more config variables
+#
 # Revision 1.12  2003/10/15 12:57:16  rshortt
 # Patch from Eirik Meland to add 'ivtv' MPLAYER_ARGS.  This is now only used
 # by the ivtv_basic_tv.py plugin.
@@ -356,7 +359,7 @@ class MPlayer_Thread(threading.Thread):
                 self.mode_flag.clear()
                 
             elif self.mode == 'play':
-                if config.STOP_OSD_WHEN_PLAYING:
+                if config.OSD_STOP_WHEN_PLAYING:
                     osd.stopdisplay()			
 
                 if DEBUG:
@@ -373,7 +376,7 @@ class MPlayer_Thread(threading.Thread):
                 self.app.kill()
 
                 # Ok, we can use the OSD again.
-                if config.STOP_OSD_WHEN_PLAYING:
+                if config.OSD_STOP_WHEN_PLAYING:
                     osd.restartdisplay()
                     osd.update()
 

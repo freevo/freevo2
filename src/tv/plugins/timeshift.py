@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/11/28 20:23:43  dischi
+# renamed more config variables
+#
 # Revision 1.12  2003/09/03 17:54:38  dischi
 # Put logfiles into LOGDIR not $FREEVO_STARTDIR because this variable
 # doesn't exist anymore.
@@ -381,7 +384,7 @@ class MPlayer_Thread(threading.Thread):
                 self.mode_flag.clear()
                 
             elif self.mode == 'play':
-                if config.STOP_OSD_WHEN_PLAYING:
+                if config.OSD_STOP_WHEN_PLAYING:
                     osd.stopdisplay()			
                 if DEBUG:
                     print 'MPlayer_Thread.run(): Started, cmd=%s' % self.command
@@ -407,7 +410,7 @@ class MPlayer_Thread(threading.Thread):
                     os.unlink('%s' % config.TIMESHIFT_BUFFER)
 
                 # Ok, we can use the OSD again.
-                if config.STOP_OSD_WHEN_PLAYING:
+                if config.OSD_STOP_WHEN_PLAYING:
                     osd.restartdisplay()
                     osd.update()
 

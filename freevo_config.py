@@ -302,6 +302,11 @@ CHILDAPP_DEBUG = 0
 #
 OVERLAY_DIR = ''
 
+#
+# suffix for playlist files
+#
+PLAYLIST_SUFFIX = [ 'm3u' ]
+
 # ======================================================================
 # Plugins:
 # ======================================================================
@@ -484,7 +489,6 @@ DIRECTORY_USE_MEDIAID_TAG_NAMES = 1
 # Make all items a playlist. So when one is finished, the next one will
 # start. It's also possible to browse through the list with UP and DOWN
 #
-
 DIRECTORY_CREATE_PLAYLIST      = [ 'audio', 'image' ]
 
 #
@@ -503,41 +507,6 @@ DIRECTORY_ADD_RANDOM_PLAYLIST  = [ 'audio' ]
 #
 DIRECTORY_AUTOPLAY_ITEMS       = [ ]
 
-
-# ======================================================================
-# Freevo cache dir:
-# ======================================================================
-
-#
-# Under Linux, use /var/cache. Under FreeBSD, use /var/db.
-#
-if os.uname()[0] == 'FreeBSD':
-    OS_CACHEDIR = '/var/db'
-else:
-    OS_CACHEDIR = '/var/cache'
-
-FREEVO_CACHEDIR = OS_CACHEDIR + '/freevo'
-if not os.path.isdir(FREEVO_CACHEDIR):
-    try:
-        os.makedirs(FREEVO_CACHEDIR)
-        
-    except OSError:
-        print 'Warning: %s does not exists and can\'t be created' % FREEVO_CACHEDIR
-        print 'Please create this directory as root and set permissions for the'
-        print 'Freevo user to write to it.'
-        OS_CACHEDIR = '/tmp'        
-        FREEVO_CACHEDIR = OS_CACHEDIR + '/freevo'
-        
-        if not os.path.isdir( FREEVO_CACHEDIR ):
-            try:
-                os.makedirs( FREEVO_CACHEDIR )
-            except OSError:
-                OS_CACHEDIR = '/tmp/'
-                FREEVO_CACHEDIR = OS_CACHEDIR + '/freevo-' + os.getuid()
-                if not os.path.isdir( FREEVO_CACHEDIR ):
-                    os.makedirs( FREEVO_CACHEDIR )
-        print 'Using %s as cache directory, but this is a bad idea' % FREEVO_CACHEDIR
-        print
 
 # ======================================================================
 # Freevo movie settings:
@@ -592,9 +561,6 @@ VIDEO_ONLY_SCAN_DATADIR = 1
 
 #
 # Where the Audio (mp3, ogg) files can be found.
-# Format: [ ('Title1', 'directory1', 'mplayer options'),
-#           ('Title2', 'directory2'), ... ]
-# The 'mplayer options' field can be omitted.
 #
 AUDIO_ITEMS = None
 
@@ -603,7 +569,6 @@ AUDIO_ITEMS = None
 # are played as audio.
 # 
 AUDIO_SUFFIX     = [ 'mp3', 'ogg', 'wav','m4a', 'wma', 'aac', 'flac']
-PLAYLIST_SUFFIX = [ 'm3u' ]
 
 #
 # This regexp should recognize filenames which are likely to be covers
@@ -639,14 +604,6 @@ IMAGE_SUFFIX = [ 'jpg','gif','png', 'jpeg','bmp','tiff','psd' ]
 
 IMAGE_SSHOW_SUFFIX = [ 'ssr' ]
 
-# This defines the file extensions of slideshow playlists. When IMAGE_ITEMS
-# is parsed, it will look for entries that match the IMAGE_SSHOW_SUFFIX
-# patterns. If it finds a match, then it will classify that entry as a
-# slideshow playlist instead of a directory of images. For example:
-
-# IMAGE_ITEMS = [ ('Arizona 2002', '/video/SlideShows/arizona-2002.ssr'),
-#                ('Carmel 2002',  '/video/SlideShows/carmel.ssr'),
-#                ('Pics',  '/video/SlideShows') ]
 
 # XXX Set this to 0 to select the new style blending controls
 if 1:
@@ -803,10 +760,10 @@ if CONF.display == 'mga':
 
 # Stop the osd before playing a movie with xine or mplayer. Some output
 # devices need this. After playback, the osd will be restored
-STOP_OSD_WHEN_PLAYING = 0
+OSD_STOP_WHEN_PLAYING = 0
 
 if CONF.display in ( 'dfbmga', 'dxr3', 'dga' ):
-    STOP_OSD_WHEN_PLAYING = 1
+    OSD_STOP_WHEN_PLAYING = 1
     
 # ======================================================================
 # Remote control section
@@ -825,7 +782,6 @@ if CONF.display in ( 'dfbmga', 'dxr3', 'dga' ):
 # Check contrib/lirc for examples and helpers/freevo2lirc.pl for a converter
 # script.
 #
-
 LIRCRC = '/etc/freevo/lircrc'
 
 #
@@ -859,10 +815,6 @@ TVTIME_CMD = CONF.tvtime
 # ======================================================================
 # MPlayer section:
 # ======================================================================
-
-# Set to 1 to log mplayer output to ./mplayer_stdout.log and
-# ./mplayer_stderr.log
-MPLAYER_DEBUG = 0
 
 MPLAYER_CMD = CONF.mplayer
     
@@ -1301,6 +1253,9 @@ WWW_STYLESHEET = 'styles/main.css'
 WWW_JAVASCRIPT = 'scripts/display_prog-head.js'
 
 
+
+
+
 # ======================================================================
 # Internal stuff, you shouldn't change anything here unless you know
 # what you are doing
@@ -1356,5 +1311,7 @@ FREEVO_EVENTHANDLER_SANDBOX = 1
 
 DIRECTORY_USE_STAT_FOR_CHANGES = True
 
-
+# Set to 1 to log mplayer output to ./mplayer_stdout.log and
+# ./mplayer_stderr.log
+MPLAYER_DEBUG = 0
 

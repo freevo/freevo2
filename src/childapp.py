@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2003/11/28 20:23:43  dischi
+# renamed more config variables
+#
 # Revision 1.42  2003/11/22 15:30:33  dischi
 # childapp can now log. Please remove the MPLAYER_DEBUG from the players
 #
@@ -495,7 +498,7 @@ class ChildThread(threading.Thread):
             
             elif self.mode == 'play':
 
-                if self.stop_osd and config.STOP_OSD_WHEN_PLAYING:
+                if self.stop_osd and config.OSD_STOP_WHEN_PLAYING:
                     osd.stop()
 
                 self.app = self.app.app_name(self.app.parameter)
@@ -526,7 +529,7 @@ class ChildThread(threading.Thread):
                     self.app.kill()
 
                     # Ok, we can use the OSD again.
-                    if self.stop_osd and config.STOP_OSD_WHEN_PLAYING:
+                    if self.stop_osd and config.OSD_STOP_WHEN_PLAYING:
                         osd.restart()
 
                     if self.stop_osd:       # Implies a video file

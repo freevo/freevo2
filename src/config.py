@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.78  2003/11/28 20:23:43  dischi
+# renamed more config variables
+#
 # Revision 1.77  2003/11/28 20:08:54  dischi
 # renamed some config variables
 #
@@ -427,6 +430,40 @@ for program, valname, needed in setup_freevo.EXTERNAL_PROGRAMS:
         setup_freevo.check_program(CONF, program, valname, needed, verbose=0)
     if not hasattr(CONF, valname) or not getattr(CONF, valname):
         setattr(CONF, valname, '')
+
+#
+# Freevo cache dir:
+#
+# Under Linux, use /var/cache. Under FreeBSD, use /var/db.
+#
+if os.uname()[0] == 'FreeBSD':
+    OS_CACHEDIR = '/var/db'
+else:
+    OS_CACHEDIR = '/var/cache'
+
+FREEVO_CACHEDIR = OS_CACHEDIR + '/freevo'
+if not os.path.isdir(FREEVO_CACHEDIR):
+    try:
+        os.makedirs(FREEVO_CACHEDIR)
+        
+    except OSError:
+        print 'Warning: %s does not exists and can\'t be created' % FREEVO_CACHEDIR
+        print 'Please create this directory as root and set permissions for the'
+        print 'Freevo user to write to it.'
+        OS_CACHEDIR = '/tmp'        
+        FREEVO_CACHEDIR = OS_CACHEDIR + '/freevo'
+        
+        if not os.path.isdir( FREEVO_CACHEDIR ):
+            try:
+                os.makedirs( FREEVO_CACHEDIR )
+            except OSError:
+                OS_CACHEDIR = '/tmp/'
+                FREEVO_CACHEDIR = OS_CACHEDIR + '/freevo-' + os.getuid()
+                if not os.path.isdir( FREEVO_CACHEDIR ):
+                    os.makedirs( FREEVO_CACHEDIR )
+        print 'Using %s as cache directory, but this is a bad idea' % FREEVO_CACHEDIR
+        print
+
 
 #
 # fall back to x11 if display is mga or fb and DISPLAY ist set
