@@ -6,6 +6,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2004/01/09 06:30:49  outlyer
+# Two fixes:
+#
+# o the 'str2XML' function is a method of the FxdImdb() class, so call it as
+#     part of the object
+# o Don't say "Image downloading failed" since an image url isn't always
+#     provided. If it actually is provided and fails, show the message.
+#
 # Revision 1.23  2004/01/09 05:09:12  outlyer
 # I know that the str2XML call is supposed to happen in fxdimdb, but I kept
 # running into this problem when trying to record a show with an '&' in the
@@ -807,7 +815,7 @@ class RecordServer(xmlrpc.XMLRPC):
 
 
     def create_fxd(self,rec_prog):
-        from util.fxdimdb import FxdImdb, makeVideo, str2XML
+        from util.fxdimdb import FxdImdb, makeVideo
         fxd = FxdImdb()
         fxd.setFxdFile(config.TV_RECORD_DIR + '/' + rec_prog.filename)
         video = makeVideo('file', 'f1', os.path.basename(rec_prog.filename) + '.mpeg')
@@ -816,7 +824,7 @@ class RecordServer(xmlrpc.XMLRPC):
         fxd.info['plot'] = rec_prog.desc
         fxd.info['runtime'] = None
         fxd.info['year'] = time.strftime('%m-%d %I:%M', time.localtime(rec_prog.start))
-        fxd.title = str2XML(rec_prog.title)     # I don't know why this has to be done twice?
+        fxd.title = fxd.str2XML(rec_prog.title)     # I don't know why this has to be done twice?
         fxd.writeFxd()
         # Maybe we should call util.videothumb.snapshot to make a snapshot too, but
         # we'd have to do it after a few minutes of recording

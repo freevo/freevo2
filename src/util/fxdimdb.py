@@ -11,6 +11,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/01/09 06:30:49  outlyer
+# Two fixes:
+#
+# o the 'str2XML' function is a method of the FxdImdb() class, so call it as
+#     part of the object
+# o Don't say "Image downloading failed" since an image url isn't always
+#     provided. If it actually is provided and fails, show the message.
+#
 # Revision 1.1  2004/01/08 17:33:15  outlyer
 # Moved fxdimdb.py to util; it doesn't use the OSD, and having in video
 # makes it import video/__init__...
@@ -741,6 +749,10 @@ class FxdImdb:
     def fetch_image(self):
         """Fetch the best image"""
         image_len = 0
+
+        if (len(self.image_urls) == 0): # No images
+            return
+
         for image in self.image_urls:
             try:
                 # get sizes of images
