@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2005/01/09 10:29:39  dischi
+# make imdb work again
+#
 # Revision 1.9  2004/11/20 18:23:04  dischi
 # use python logger module for debug
 #
@@ -171,15 +174,15 @@ class FxdImdb:
 
         regexp_imdb_list_entry = re.compile(r'''
         <A[ ]HREF="/(?:Title\?|title/tt)     # match both old and new style
-        (?P<id>      \d+)/">                  # imdb id
-        (?P<title>   .*?)\s*                  # imdb movie title
+        (?P<id>      \d+)/.*">               # imdb id
+        (?P<title>   .*?)</A>\s*             # imdb movie title
         \(
-        (?P<year>    \d{4}.*?)                # year and possibly /I, /II etc.
-        \)</A>
+        (?P<year>    \d{4}.*?)               # year and possibly /I, /II etc.
+        \)
         ''', re.VERBOSE | re.IGNORECASE)
 
         type = ''
-        for line in response.read().split("\n"):
+        for line in response.read().split("<li>"):
             m = regexp_type.match(line)
             if m:
                 type = m.group('type')
