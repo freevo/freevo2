@@ -469,20 +469,37 @@ class Guide:
         return self.channel_list[self.selected_index]
 
 
-    def search(self, title, by_chan=None):
+    def search(self, searchstr, by_chan=None, search_title=True,
+               search_subtitle=True, search_description=True):
         """
         Return a list of programs with a title similar to the given parameter.
-        If by_chan is given, it has no by a valid channel id and only programs
-        from this channel will be returned. Result is a list of 'Program's.
+        If by_chan is given, it has to be a valid channel id and only programs
+        from this channel will be returned. Result is a list of Programs.
         This function will only return programs with a stop time greater the
         current time.
         """
+        if not (search_title or search_subtitle or search_description):
+            return []
+
         now = time.time()
         clause = 'where stop > %d' % now
         if by_chan:
             clause = '%s and channel_id="%s"' % (clause, by_chan)
 
-        clause = '%s and title like "%%%s%%"' % (clause, title)
+        clause += ' and ('
+
+        if search_title:
+            clause = '%s title like "%%%s%%"' % (clause, searchstr)
+
+        if search_subtitle:
+            if search_title: clause += ' or'
+            clause = '%s subtitle like "%%%s%%"' % (clause, searchstr)
+
+        if search_description:
+            if search_title or se: clause += ' or'
+            clause = '%s description like "%%%s%%"' % (clause, searchstr)
+
+        clause += ' )'
 
         query = 'select * from programs %s order by channel_id, start' % clause
         result = []
