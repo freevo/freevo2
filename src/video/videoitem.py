@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.111  2004/01/04 17:20:20  dischi
+# check for .raw file as image
+#
 # Revision 1.110  2004/01/04 13:06:52  dischi
 # make it possible to call thumbnail creation with MENU_CALL_ITEM_ACTION
 #
@@ -167,7 +170,11 @@ class VideoItem(Item):
         if url.startswith('dvd://') or url.startswith('vcd://'):
             self.network_play = False
             self.mimetype = self.url[:self.url.find('://')].lower()
-            
+        if not self.image or (self.parent and self.image == self.parent.image):
+           image = vfs.getoverlay(self.filename + '.raw')
+           if os.path.exists(image):
+               self.image = image
+               self.files.image = image
         
         
     def id(self):
@@ -315,7 +322,8 @@ class VideoItem(Item):
         import util.videothumb
         pop = PopupBox(text=_('Please wait....'))
         pop.show()
-        util.videothumb.snapshot(self.filename, os.path.splitext(self.filename)[0] + '.png')
+
+        util.videothumb.snapshot(self.filename)
         pop.destroy()
         if menuw.menustack[-1].selected != self:
             menuw.back_one_menu()
