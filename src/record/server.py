@@ -78,6 +78,7 @@ class RecordServer(RPCServer):
     """
     def __init__(self):
         RPCServer.__init__(self, 'recordserver')
+        self.initialized = False
         self.clients = []
         config.detect('tvcards', 'channels')
         # file to load / save the recordings and favorites
@@ -87,18 +88,19 @@ class RecordServer(RPCServer):
         # init the recorder
         plugin.init(exclusive = [ 'record' ])
         # get list of best recorder for each channel
-        self.check_recorder(False)
+        self.check_recorder()
         # variables for check_recordings
         self.check_timer = None
         self.check_running = False
         self.check_needed = False
+        # wait 2 seconds for external plugins
+        log.info('waiting for external plugins')
+        notifier.addTimer(2000, self.check_favorites)
         # add notify callback
         self.mbus_instance.register_entity_notification(self.__entity_update)
-        # check everything
-        self.check_favorites()
 
 
-    def check_recorder(self, update=True):
+    def check_recorder(self):
         """
         Check all possible recorders. If 'update' is True, all recordings
         will be re-checked.
@@ -118,9 +120,8 @@ class RecordServer(RPCServer):
                             self.best_recorder[c] = rating, p, dev
         for c in self.best_recorder:
             self.best_recorder[c] = self.best_recorder[c][1:]
-        if update:
-            # update recordings
-            self.check_recordings()
+        # update recordings (won't work on startup)
+        self.check_recordings()
 
 
     def send_update(self):
@@ -171,6 +172,8 @@ class RecordServer(RPCServer):
         """
         Wrapper for __check_recordings to avoid recursive calling
         """
+        if not self.initialized:
+            return
         if not self.check_running:
             self.check_timer   = notifier.addTimer(0, self.__check_recordings)
             self.check_running = True
@@ -300,6 +303,8 @@ class RecordServer(RPCServer):
                 if f.once:
                     self.favorites.remove(f)
                     break
+        # initialized now
+        self.initialized = True
         # now check the schedule again
         self.check_recordings()
 
@@ -524,7 +529,8 @@ class RecordServer(RPCServer):
         """
         updates favorites with data from the database
         """
-        self.check_favorites()
+        if self.initialized:
+            self.check_favorites()
         return RPCReturn()
 
 
