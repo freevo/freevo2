@@ -16,6 +16,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.57  2002/09/01 18:12:46  dischi
+# mplayer can play movs, too. The current CVS version is very good at
+# it, only one file from my ten I tried is not playable.
+#
 # Revision 1.56  2002/09/01 05:15:55  krister
 # Switched to the new freely distributable fonts.
 #
@@ -163,7 +167,8 @@ SUFFIX_MPLAYER_FILES = [ '/*.[aA][vV][iI]',
                          '/*.[dD][iI][vV][xX]',
                          '/*.[oO][gG][mM]',
                          '/*.[vV][oO][bB]',
-                         '/*.[aA][sS][fF]' ]
+                         '/*.[aA][sS][fF]',
+                         '/*.[mM][oO][vV]']
 
 
 # ======================================================================
