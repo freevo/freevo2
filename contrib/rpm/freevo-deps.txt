@@ -2,7 +2,7 @@ Freevo Dependency List
 ----------------------
 $Id$
 
-Version 0.60 2004/01/30	TC Wan (tcwan at cs dot usm dot my)
+Version 0.61 2004/03/04	TC Wan (tcwan at cs dot usm dot my)
 
 > Contributed by Jorn A Hansen (jornh at person dot dk)
 >
@@ -117,13 +117,6 @@ ffmpeg-0.4.7		Dag/Freshrpms				imlib2					Freshrpms
 													# imlib2-1.0.6-fr3.src.rpm
 													# imlib2-1.0.6-fr3.i386.rpm
 
-sqlite			http://www.hwaci.com/sw/sqlite/download.html
-			# sqlite-2.8.11-1.src.rpm
-			# sqlite-2.8.11-1.i386.rpm
-			# sqlite-devel-2.8.11-1.i386.rpm
-			
-pysqlite		http://sourceforge.net/projects/pysqlite/
-													# imlib2-devel-1.0.6-fr3.i386.rpm
 
 
 [Runtime - TV Schedules]
@@ -151,6 +144,14 @@ libgphoto2		http://www.gphoto.org/
 
 expat			expat-1.95.5 (comes with RH 9)
 swig			swig-1.1p5 (comes with RH 9)
+
+sqlite			http://www.hwaci.com/sw/sqlite/download.html
+			# sqlite-2.8.11-1.src.rpm
+			# sqlite-2.8.11-1.i386.rpm
+			# sqlite-devel-2.8.11-1.i386.rpm
+			
+pysqlite		http://sourceforge.net/projects/pysqlite/
+													# imlib2-devel-1.0.6-fr3.i386.rpm
 
 
 [Apps-Core]
