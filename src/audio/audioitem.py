@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.52  2004/05/29 12:32:57  dischi
+# use advanced sort for audio items (by trackno)
+#
 # Revision 1.51  2004/02/08 05:35:02  outlyer
 # Remove debug
 #
@@ -127,6 +130,9 @@ class AudioItem(Item):
         if mode == 'date':
             if self.filename:
                 return '%s%s' % (os.stat(self.filename).st_ctime, self.filename)
+        if mode == 'advanced':
+            # sort by track number
+            return '%s-%s' % (self['trackno'], self.url)
         return self.url
 
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.128  2004/05/29 12:32:57  dischi
+# use advanced sort for audio items (by trackno)
+#
 # Revision 1.127  2004/05/09 14:18:20  dischi
 # remove comments
 #
@@ -654,6 +657,10 @@ class DirItem(Playlist):
         if self.DIRECTORY_SORT_BY_DATE:
             self.play_items.sort(lambda l, o: cmp(l.sort('date').upper(),
                                                   o.sort('date').upper()))
+        elif self['%s_advanced_sort' % display_type]:
+            print 'adv'
+            self.play_items.sort(lambda l, o: cmp(l.sort('advanced').upper(),
+                                                  o.sort('advanced').upper()))
         else:
             self.play_items.sort(lambda l, o: cmp(l.sort().upper(), o.sort().upper()))
 
