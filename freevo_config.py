@@ -474,7 +474,7 @@ AUDIO_BACKUP_DIR = DIR_AUDIO[ 0 ][ 1 ] # or a path, like /home/user/mp3/
 # The list of filename suffixes that are used to match the files that
 # are played as audio.
 # 
-SUFFIX_AUDIO_FILES     = [ 'mp3', 'ogg', 'wav','m4a' ,'fxd', 'wma', 'aac']
+SUFFIX_AUDIO_FILES     = [ 'mp3', 'ogg', 'wav','m4a' ,'fxd', 'wma', 'aac', 'flac']
 SUFFIX_AUDIO_PLAYLISTS = [ 'm3u' ]
 
 #
