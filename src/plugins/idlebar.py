@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2003/10/18 11:16:37  dischi
+# patch from Cyril Lacoux to support locale for the clock
+#
 # Revision 1.43  2003/10/14 18:11:22  dischi
 # patches from Magus Schmidt
 #
@@ -74,6 +77,8 @@ import pymetar
 
 import re
 
+import locale
+
 class PluginInterface(plugin.DaemonPlugin):
     """
     global idlebar plugin.
@@ -87,6 +92,11 @@ class PluginInterface(plugin.DaemonPlugin):
         self.plugins = None
         plugin.register(self, 'idlebar')
         self.visible = True
+	# Getting current LOCALE
+        try:
+            locale.resetlocale()
+        except ValueError:
+            pass
         
     def draw(self, (type, object), osd):
         """
