@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/08/02 09:08:14  dischi
+# support different versions of xine, check version at startup
+#
 # Revision 1.4  2003/08/01 17:55:45  dischi
 # Make xine_cvs the normal xine plugin. We don't support older versions
 # of xine, it was a very bad hack. You need xine-ui > 0.9.21 to use the
@@ -64,6 +67,7 @@
 
 import time, os
 import threading, signal
+import popen2, re
 
 import config     # Configuration handler. reads config file.
 import util       # Various utilities
@@ -87,23 +91,56 @@ xine = None
 
 class PluginInterface(plugin.Plugin):
     """
-    Xine plugin for the video player. Use xine to play all video
-    files.
+    Xine plugin for the video player.
     """
     def __init__(self, dvd=TRUE, vcd=FALSE):
         global xine
 
         plugin.Plugin.__init__(self)
 
+        if xine:
+            return
+
         try:
             config.XINE_COMMAND
         except:
-            print 'XINE_COMMAND not defined, plugin deactivated'
-            print 'please check the xine section in freevo_config.py'
+            print '\nERROR:\nXINE_COMMAND not defined, plugin deactivated'
+            print 'please check the xine section in freevo_config.py\n'
             return
 
+        if config.XINE_COMMAND.find('fbxine') >= 0:
+            type = 'fb'
+        else:
+            type = 'X'
+
+        xine_version = 0
+        xine_cvs     = 0
+        
+        x = popen2.Popen3('%s --version' % config.XINE_COMMAND, 1, 100)
+        while(1):
+            data = x.fromchild.readline()
+            if not data:
+                break
+            m = re.match('^.* v?([0-9])\.([0-9]+)\.([0-9]*).*', data)
+            if m:
+                if data.find('cvs') >= 0:
+                    xine_cvs = 1
+                xine_version =int('%02d%02d%02d' % (int(m.group(1)), int(m.group(2)),
+                                                    int(m.group(3))))
+
+        if xine_cvs:
+            xine_version += 1
+            
+        if xine_version < 922:
+            if type == 'fb':
+                print '\nERROR:\nfbxine version to old, plugin deactivated'
+                print 'You need xine-ui > 0.9.21\n'
+                return
+            print '\nWARNING:\nxine version to old, plugin in fallback mode'
+            print 'You need xine-ui > 0.9.21 to use all features of the xine plugin\n'
+            
         # create the xine object
-        xine = util.SynchronizedObject(Xine())
+        xine = util.SynchronizedObject(Xine(type, xine_version))
 
         # register it as the object to play
         plugin.register(xine, plugin.DVD_PLAYER)
@@ -116,13 +153,23 @@ class Xine:
     the main class to control xine
     """
     
-    def __init__(self):
+    def __init__(self, type, version):
         self.thread = Xine_Thread()
         self.thread.setDaemon(1)
         self.thread.start()
         self.mode = None
         self.app_mode = ''
-            
+        self.xine_type    = type
+        self.xine_version = version
+
+        command = config.XINE_COMMAND
+        if self.xine_version > 921:
+            if self.xine_type == 'X':
+                command = '%s --no-splash' % config.XINE_COMMAND
+            command = '%s --no-lirc --stdctl' % command
+        self.command = '%s -V %s -A %s' % (command, config.XINE_VO_DEV, config.XINE_AO_DEV)
+
+        
     def play(self, item):
         """
         play a dvd with xine
@@ -140,11 +187,11 @@ class Xine:
             print 'Xine.play(): Starting thread, cmd=%s' % command
         rc.app(self)
 
-        command = '%s -V %s -A %s --no-lirc --stdctl' % \
-                  (config.XINE_COMMAND, config.XINE_VO_DEV, config.XINE_AO_DEV)
-
+        command = self.command
+        
         if item.deinterlace:
-            if self.command.find('vidix') > 0 or self.command.find('fbxine') >= 0:
+            if (config.XINE_VO_DEV == 'vidix' or self.xine_type == 'fb') and \
+                   self.version > 021:
                 command = '%s --post tvtime' % command
             else:
                 command = '%s -D' % command
@@ -183,6 +230,14 @@ class Xine:
         eventhandler for xine control. If an event is not bound in this
         function it will be passed over to the items eventhandler
         """
+        if event in ( PLAY_END, USER_END ):
+            self.stop()
+            return self.item.eventhandler(event)
+
+        # fallback for older versions of xine
+        if self.xine_version < 922:
+            return TRUE
+        
         if event == PAUSE or event == PLAY:
             self.thread.app.write('pause\n')
             return TRUE
@@ -264,7 +319,7 @@ class Xine:
                 time.sleep(0.1)
             else:
                 # bad hack to warp around
-                if self.command.find('fbxine'):
+                if self.xine_type == 'fb':
                     self.thread.app.write('AudioChannelDefault\n')
                     time.sleep(0.1)
                 for i in range(self.max_audio):
@@ -273,10 +328,6 @@ class Xine:
                 self.current_audio = -1
             return TRUE
             
-        if event in ( PLAY_END, USER_END ):
-            self.stop()
-            return self.item.eventhandler(event)
-
         # nothing found? Try the eventhandler of the object who called us
         return self.item.eventhandler(event)
 
