@@ -10,7 +10,9 @@ Q: How do I play (S)VCD?
 
 A: Make sure freevo_config.py is properly setup (MPLAYER_ARGS_VCD).
    Test the same commandline from the shell to make sure it can be 
-   played. Use "VCD" in Freevo to play it.
+   played. Use "VCD" in Freevo to play it. You need to use the 
+   Freevo function for opening and closing the tray to mount the  
+   disk.
 
 ----------------------------------------------------------------------
 Q: How do I play CD audio disks?
@@ -40,13 +42,14 @@ Q: I have a board other than a matrox G400 will that work with freevo?
 
 A: Yes. Versions >= 1.2.5 of Freevo supports all boards that SDL 
    do (www.libsdl.org) for the menus and framework, and all boards
-   that MPlayer supports for video playback.
+   that MPlayer supports for video playback. This means most 
+   graphics boards are supported now!
 
 ----------------------------------------------------------------------
 
 Q: I'm using distribution X will that work with freevo?
 
-A: Most any distribution should work with freevo. As long as the the
+A: Most distributions should work with freevo. As long as the the
    requirements are met (listed on the main page) and you have a
    compiler (GCC) that is either 2.95 or 3.xx (redhat 7.3 and lower and
    mandrake 8.2 and lower come with 2.96 which doesn't seem to work
@@ -64,8 +67,8 @@ Q: I'm running Freevo on a Matrox G400 in framebuffer mode. Why
    is the screen "squeezed together" horizontally. I have black bars
    about 1" (3 cm) on either side of the TV screen!
 
-A: SDL that Freevo uses resets the framebuffer settings. This is 
-   fixed by re-running the "fbset" command, which is done using the 
-   scripts in matrox_g400/mga_[ntsc|pal]_*. There is an option
-   to run a script like this automatically after startup, 
-   see OSD_SDL_EXEC_AFTER_STARTUP in freevo_config.py
+A: The SDL library that Freevo uses resets the framebuffer settings. 
+   This is fixed by re-running the "fbset" command, which is done
+   using the scripts in matrox_g400/mga_[ntsc|pal]_*. There is an
+   option to run a script like this automatically after startup, see
+   OSD_SDL_EXEC_AFTER_STARTUP in freevo_config.py.
