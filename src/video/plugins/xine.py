@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/11/30 19:41:57  dischi
+# enhance interlacing, needs xine cvs to work as it should
+#
 # Revision 1.26  2003/11/29 18:37:30  dischi
 # build config.VIDEO_SUFFIX in config on startup
 #
@@ -195,14 +198,12 @@ class Xine:
 
         command = self.command
 
-        if item.deinterlace or \
-           (hasattr(config, 'XINE_ALWAYS_DEINTERLACE') and config.XINE_ALWAYS_DEINTERLACE):
-            if (config.XINE_VO_DEV == 'vidix' or self.xine_type == 'fb') and \
-                   self.xine_version > 921:
-                command = '%s --post tvtime' % command
-            else:
-                command = '%s -D' % command
+        if item.deinterlace and (self.xine_type == 'X' or self.xine_version > 922):
+            command = '%s -D' % command
 
+        if self.xine_version > 922:
+            command = '%s --post=pp:quality=10,expand' % command
+            
         command = command.split(' ')
 
         self.max_audio = 0
@@ -291,6 +292,10 @@ class Xine:
 
         if event == TOGGLE_OSD:
             self.thread.app.write('OSDStreamInfos\n')
+            return True
+
+        if event == VIDEO_TOGGLE_INTERLACE:
+            self.thread.app.write('ToggleInterleave\n')
             return True
 
         if event == NEXT:
