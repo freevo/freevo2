@@ -36,6 +36,7 @@ def data_finder(result, dirname, names):
             files.append(os.path.join(dirname, name))
     if files and dirname.find('/CVS') == -1:
         result.append((dirname.replace('./share', 'share/freevo').
+                       replace('./src/www', 'share/freevo').\
                        replace('./contrib', 'share/freevo/contrib').\
                        replace('./helpers', 'share/freevo/helpers'), files))
     return result
@@ -51,6 +52,7 @@ data_files = []
 os.path.walk('./share', data_finder, data_files)
 os.path.walk('./contrib/fbcon', data_finder, data_files)
 os.path.walk('./contrib/xmltv', data_finder, data_files)
+os.path.walk('./src/www/htdocs', data_finder, data_files)
 
 # copy freevo_config.py to share/freevo. It's the best place to put it
 # for now, but the location should be changed
