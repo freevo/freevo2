@@ -81,7 +81,8 @@ function ebuild_upload {
     cd /usr/local/portage
 
     tar --atime-preserve -zcvf /tmp/freevo-ebuild.tgz media-video/freevo \
-	dev-python/mmpython dev-python/pylirc >/dev/null
+	media-video/freevo-snapshot dev-python/mmpython dev-python/mmpython-snapshot \
+	dev-python/pylirc >/dev/null
     scp -r /tmp/freevo-ebuild.tgz dischi@freevo.sf.net:/home/groups/f/fr/freevo/htdocs/gentoo
     rm /tmp/freevo-ebuild.tgz
 }
