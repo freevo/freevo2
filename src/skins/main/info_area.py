@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/02/23 16:34:27  dischi
+# better skin i18n support
+#
 # Revision 1.18  2004/02/19 04:57:57  gsbarbieri
 # Support Web Interface i18n.
 # To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
@@ -389,7 +392,8 @@ class Info_Area(Skin_Area):
                 # text position is the current position:
                 element.x = x
                 element.y = y
-
+                element.text = _(element.text)
+                
                 # Calculate the geometry
                 r = Geometry( x, y, element.width, element.height)
                 r = self.get_item_rectangle(r, self.content.width - x,
@@ -399,7 +403,7 @@ class Info_Area(Skin_Area):
                 else:
                     height = -1
 
-                size = osd.drawstringframed( _(element.text), 0, 0,
+                size = osd.drawstringframed( element.text, 0, 0,
                                              r.width, r.height,
                                              element.font, None, None,
                                              element.align, element.valign,

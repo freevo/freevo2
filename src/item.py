@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.71  2004/02/23 16:34:26  dischi
+# better skin i18n support
+#
 # Revision 1.70  2004/02/15 15:23:55  dischi
 # some attr fixes/movements
 #
@@ -222,7 +225,7 @@ class Item:
         if not hasattr(self, 'type'):
             self.type     = None            # e.g. video, audio, dir, playlist
 
-        self.name         = ''              # name in menu
+        self.name         = u''             # name in menu
         self.parent       = parent          # parent item to pass unmapped event
         self.icon         = None
         if info and isinstance(info, mediainfo.Info):
@@ -264,7 +267,7 @@ class Item:
             imagedir  = settings.mainmenu.imagedir
             if skin_info.has_key(skin_type):
                 skin_info  = skin_info[skin_type]
-                self.name  = Unicode(skin_info.name)
+                self.name  = _(skin_info.name)
                 self.image = skin_info.image
                 if skin_info.icon:
                     self.icon = os.path.join(settings.icon_dir, skin_info.icon)
