@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2005/01/23 16:33:24  dischi
+# prevent playing a file again with xine
+#
 # Revision 1.44  2005/01/01 15:06:19  dischi
 # add MPLAYER_RESAMPLE_AUDIO
 #
@@ -294,7 +297,8 @@ class MPlayerApp( childapp.Instance ):
                 
 
     def stderr_cb(self, line):
-        if line.startswith('Failed to open'):
+        if line.startswith('Failed to open') and \
+               (not self.item or not self.item.elapsed):
             self.stop_reason = line
         for p in self.stdout_plugins:
             p.stdout(line)
