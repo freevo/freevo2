@@ -48,12 +48,12 @@ from util.fileops import find_file_in_path
 from util.popen import Process
 
 # basic recorder
-import generic
+from record.process import Recorder
 
 # get logging object
 log = logging.getLogger('record')
 
-class PluginInterface(generic.PluginInterface):
+class PluginInterface(Recorder):
     """
     Plugin for dvb recording
     """
@@ -86,7 +86,7 @@ class PluginInterface(generic.PluginInterface):
 	    self.reason = 'no channels configuration found'
 	    return
 
-        generic.PluginInterface.__init__(self)
+        Recorder.__init__(self)
         self.replex = find_file_in_path( 'replex' )
 
         if self.replex:
@@ -149,7 +149,7 @@ class PluginInterface(generic.PluginInterface):
         """
         Callback when the recording has stopped
         """
-        generic.PluginInterface.stopped(self)
+        Recorder.stopped(self)
         if self.program == 'tzap' and self.replex:
             # cleanup for tzap + replex
             if self.record_fifo:

@@ -37,15 +37,16 @@
 import os
 import time
 import config
-import generic
+
+from record.process import Recorder
 
 
-class PluginInterface(generic.PluginInterface):
+class PluginInterface(Recorder):
 
     def __init__(self, device='dvb0', rating=7):
         self.name = device
         self.device = config.TV_CARDS[device]
-        generic.PluginInterface.__init__(self)
+        recorder.__init__(self)
 
         self.suffix = '.mpeg'
 

@@ -1,6 +1,6 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# generic.py - plugin for recording one program with a specific command
+# process.py - template for plugins based on starting external processes
 # -----------------------------------------------------------------------------
 # $Id$
 #
@@ -71,7 +71,7 @@ class Childapp(Process):
 
 
 
-class PluginInterface(Plugin):
+class Recorder(Plugin):
     """
     Generic plugin. This plugin is sometimes too generic, so other plugins
     like dvb inherit from it. This plugin can only handle recording one
@@ -110,7 +110,7 @@ class PluginInterface(Plugin):
         raise Exception('generic: get_channel_list() missing')
     
 
-    def schedule(self, recordings, server=None):
+    def schedule(self, recordings):
         """
         Function called from the server. This function updates the
         recordings scheduled by the plugin.
@@ -125,8 +125,6 @@ class PluginInterface(Plugin):
             return False
 
         self.recordings = recordings
-        if server:
-            self.server = server
 
         if self.rec_timer:
             notifier.removeTimer(self.rec_timer)
@@ -187,33 +185,8 @@ class PluginInterface(Plugin):
 
         rec = self.recordings[0]
         rec.status = 'recording'
-            
-        # create a filename if it is missing
-        if not rec.url:
-            filename_array = { 'progname': String(rec.name),
-                               'title'   : String(rec.subtitle) }
 
-            filemask = config.TV_RECORD_FILEMASK % filename_array
-            filename = ''
-            for letter in time.strftime(filemask, time.localtime(rec.start)):
-                if letter in string.ascii_letters + string.digits:
-                    filename += letter
-                elif filename and filename[-1] != '_':
-                    filename += '_'
-            filename = filename.rstrip(' -_:') + self.suffix
-            rec.url = 'file:' + os.path.join(config.TV_RECORD_DIR, filename)
-        else:
-            # check filename
-            if rec.url.startswith('file:'):
-                rec.url = os.path.join(config.TV_RECORD_DIR, rec.url[5:])
-                if rec.url.endswith('.suffix'):
-                    rec.url = os.path.splitext(rec.url)[0] + self.suffix
-                rec.url = 'file:' + rec.url
-        if rec.url.startswith('file:'):
-            # check if target dir exists
-            d = os.path.dirname(rec.url[5:])
-            if not os.path.isdir(d):
-                os.makedirs(d)
+        rec.url = self.get_url(rec)
 
         log.info('start new recording')
         log.info(str(self.item))
@@ -280,7 +253,10 @@ class PluginInterface(Plugin):
                 self.item.status = FAILED
                 self.delete_fxd(self.item)
         else:
-            self.item.status = 'done'
+            self.item.status = SAVED
+        if time.time() - 10 > self.item.stop + self.item.stop_padding:
+            # something went wrong
+            self.item.status = FAILED
         log.info('%s.stopped: recording finished, new status' % self.name)
         log.info(str(self.item))
         if self.server:

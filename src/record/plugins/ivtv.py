@@ -41,17 +41,18 @@
 import os
 import time
 import config
-import generic
+from record.process import Recorder
+
 from tv.freq import get_frequency
 from config.tvcards import IVTVCard
 
 
-class PluginInterface(generic.PluginInterface):
+class PluginInterface(Recorder):
 
     def __init__(self, device='ivtv0', rating=7):
         self.name = device
         self.device = config.TV_CARDS[device]
-        generic.PluginInterface.__init__(self)
+        Recorder.__init__(self)
 
         if not isinstance(self.device, IVTVCard):
             self.reason = 'Device %s is not of class IVTVCard'
