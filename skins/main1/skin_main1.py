@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.52  2002/10/24 22:03:50  outlyer
+# Changed the DrawTextFramed line to use a hard line height based on the
+# actual height of the displayed string. This way, it's font, skin and
+# screen size independent.
+#
 # Revision 1.51  2002/10/24 21:34:12  outlyer
 # Changed to use two digits if track is specified. I still can't get Python
 # to accept string = '%0.2(n)s' % int(a) without crashing.
@@ -654,17 +659,17 @@ class Skin:
 
             top = iv.y
             DrawText('Title: ', iv, x=left, y=top, align='right')
-            DrawTextFramed('%s ' % info.title, iv, x=left, y=top, width=500, height=-1, mode='soft')
+            DrawTextFramed('%s ' % info.title, iv, x=left, y=top, width=500, height=(str_h_title+5), mode='soft')
 
             if info.artist:
                 top += spacing
                 DrawText('Artist: ', iv, x=left, y=top, align='right')
-                DrawTextFramed('%s ' % info.artist, iv, x=left, y=top, width=500,height=-1, mode='soft')
+                DrawTextFramed('%s ' % info.artist, iv, x=left, y=top, width=500,height=(str_h_artist+5), mode='soft')
 
             if info.album:
                 top += spacing
                 DrawText('Album: ', iv, x=left, y=top, align='right')
-                DrawTextFramed('%s ' % info.album, iv, x=left, y=top, width=500,height=-1, mode='soft')
+                DrawTextFramed('%s ' % info.album, iv, x=left, y=top, width=500,height=(str_h_album+5), mode='soft')
 
             if info.year:
                 top += spacing
