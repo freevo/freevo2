@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/08/25 18:44:31  dischi
+# Moved HOURS_PER_PAGE into the skin fxd file, default=2
+#
 # Revision 1.3  2003/08/23 12:51:43  dischi
 # removed some old CVS log messages
 #
@@ -417,7 +420,8 @@ class Skin:
             return
         
         if type == 'tv':
-            return self.tvlisting.get_items_geometry(self.settings, object)[4]
+            info = self.tvlisting.get_items_geometry(self.settings, object)
+            return (info[4], info[-1])
 
         if object.skin_settings:
             settings = object.skin_settings

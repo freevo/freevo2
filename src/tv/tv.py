@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/08/25 18:44:32  dischi
+# Moved HOURS_PER_PAGE into the skin fxd file, default=2
+#
 # Revision 1.18  2003/08/23 12:51:43  dischi
 # removed some old CVS log messages
 #
@@ -59,7 +62,6 @@ from tvguide import TVGuide
 from directory import DirItem
 
 from gui.AlertBox import AlertBox
-from gui.PopupBox import PopupBox
 
 import record_schedule
 
@@ -150,21 +152,4 @@ class TVMenu(Item):
             start_tv(None, ('record', None))
             return
 
-        guide = epg.get_guide(PopupBox(text='Preparing the program guide'))
-
-        start_time = self.get_start_time()
-        stop_time = self.get_start_time() + config.TVGUIDE_HOURS_PER_PAGE * 60 * 60
-
-        channels = guide.GetPrograms(start=start_time+1, stop=stop_time-1)
-
-        if not channels:
-            AlertBox(text='TV Guide is corrupt!').show()
-            return
-
-        prg = None
-        for chan in channels:
-            if chan.programs:
-                prg = chan.programs[0]
-                break
-
-        TVGuide(start_time, stop_time, guide.chan_list[0].id, prg, start_tv, menuw)
+        TVGuide(self.get_start_time(), start_tv, menuw)

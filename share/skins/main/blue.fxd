@@ -462,7 +462,7 @@
 
     <!-- tv listing area -->
     <layout label="tv listing">
-      <content type="text" spacing="0">
+      <content type="text" spacing="0" hours_per_page="2">
 
 	<item type="label" font="tv" width="80">
 	  <rectangle bgcolor="tv label" size="1" color="0x000000" x="-5" y="-5"

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/08/25 18:44:32  dischi
+# Moved HOURS_PER_PAGE into the skin fxd file, default=2
+#
 # Revision 1.8  2003/08/24 19:12:31  gsbarbieri
 # Added:
 #   * support for different icons in main menu (final part)
@@ -285,6 +288,7 @@ XML_types = {
     'width'    : ('int',  1),
     'height'   : ('int',  2),
     'spacing'  : ('int',  3),
+    'hours_per_page': ('int',  3),
     'color'    : ('col',  0),
     'bgcolor'  : ('col',  0),
     'size'     : ('int',  3),
@@ -520,9 +524,11 @@ class XML_content(XML_data):
     """
     def __init__(self):
         XML_data.__init__(self, ('type', 'spacing', 'x', 'y', 'width',
-                                 'height', 'font', 'align', 'valign', 'color'))
+                                 'height', 'font', 'align', 'valign', 'color',
+                                 'hours_per_page'))
         self.types = {}
         self.cdata = ''
+        self.hours_per_page = 2
         
     def parse(self, node, scale, current_dir):
         XML_data.parse(self, node, scale, current_dir)

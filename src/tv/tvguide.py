@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/08/25 18:44:32  dischi
+# Moved HOURS_PER_PAGE into the skin fxd file, default=2
+#
 # Revision 1.11  2003/08/23 12:51:43  dischi
 # removed some old CVS log messages
 #
@@ -43,11 +46,16 @@
 import gui.GUIObject
 import skin
 import event as em
+import config
+
 
 # The Electronic Program Guide
 import epg_xmltv as epg, epg_types
 
 import record_video
+
+from gui.PopupBox import PopupBox
+from gui.AlertBox import AlertBox
 
 skin = skin.get_singleton() # Create the Skin object
 
@@ -60,17 +68,33 @@ CHAN_NO_DATA = 'This channel has no data loaded'
 
 
 class TVGuide(gui.GUIObject):
-    def __init__(self, start_time, stop_time, start_channel, selected, player, menuw):
+    def __init__(self, start_time, player, menuw):
         gui.GUIObject.__init__(self)
+
+        self.n_items, hours_per_page = skin.items_per_page(('tv', self))
+        stop_time = start_time + hours_per_page * 60 * 60
+
+        guide = epg.get_guide(PopupBox(text='Preparing the program guide'))
+        channels = guide.GetPrograms(start=start_time+1, stop=stop_time-1)
+
+        if not channels:
+            AlertBox(text='TV Guide is corrupt!').show()
+            return
+
+        selected = None
+        for chan in channels:
+            if chan.programs:
+                selected = chan.programs[0]
+                break
+
         self.col_time = 30 # each col represents 30 minutes 
         self.n_cols  = (stop_time - start_time) / 60 / self.col_time
         self.player = player
 
-        self.n_items = skin.items_per_page(('tv', self))
         self.type = 'tv'
         self.menuw = menuw
 
-        self.rebuild(start_time, stop_time, start_channel, selected)
+        self.rebuild(start_time, stop_time, guide.chan_list[0].id, selected)
         menuw.pushmenu(self)
 
 

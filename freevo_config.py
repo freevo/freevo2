@@ -844,13 +844,6 @@ TV_TIMEFORMAT = '%H:%M' # Hour-Minute 14:05
 
 
 #
-# Number of hours displayed in the tv guide
-# Set this value to 1, 2 or 3. 4 and greater doesn't look good
-#
-TVGUIDE_HOURS_PER_PAGE = 2
-
-
-#
 # XXX Recording is still work in progress. You need to change
 # XXX the entire string below to fit your local settings.
 # XXX Eventually TV norm (PAL/NTSC) etc will be taken from the

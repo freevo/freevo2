@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/08/25 18:44:31  dischi
+# Moved HOURS_PER_PAGE into the skin fxd file, default=2
+#
 # Revision 1.5  2003/08/24 16:36:25  dischi
 # add support for y=max-... in listing area arrows
 #
@@ -142,7 +145,8 @@ class TVListing_Area(Skin_Area):
         content_h = content.height + content.y - content_y
 
         self.last_items_geometry = font_h, label_width, label_txt_width, content_y,\
-                                   content_h / item_h, item_h, head_h
+                                   content_h / item_h, item_h, head_h, \
+                                   content.hours_per_page
         return self.last_items_geometry
     
         
@@ -166,7 +170,7 @@ class TVListing_Area(Skin_Area):
         col_time = 30
 
         font_h, label_width, label_txt_width, y0, num_rows, item_h, head_h = \
-                self.get_items_geometry(settings, menu)
+                self.get_items_geometry(settings, menu)[:-1]
 
         label_val, label_font, head_val, head_font, selected_val, \
                    selected_font, default_val, default_font = self.all_vals
