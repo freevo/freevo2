@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/08/06 19:32:40  dischi
+# removed freevo_xwin support. Most users have problems with it and it works without it
+#
 # Revision 1.8  2003/08/05 17:25:58  dischi
 # fixed event name
 #
@@ -350,27 +353,6 @@ class MPlayer:
         elif mpl.find(' -framedrop ') == -1 and mpl.find(' -framedrop ') == -1:
             mpl += (' ' + config.MPLAYER_SOFTWARE_SCALER )
             
-        # XXX Some testcode by Krister:
-        if (os.path.isfile('./freevo_xwin') and osd.sdl_driver == 'x11' and 
-            config.MPLAYER_USE_WID):
-            if DEBUG: print 'Got freevo_xwin and x11'
-            if os.path.exists('/tmp/freevo.wid'): os.unlink('/tmp/freevo.wid')
-            os.system('./runapp ./freevo_xwin  0 0 %s %s > /tmp/freevo.wid &' %
-                      (osd.width, osd.height))
-            time.sleep(1)
-            if os.path.isfile('/tmp/freevo.wid'):
-                if DEBUG: print 'Got freevo.wid'
-                try:
-                    f = open('/tmp/freevo.wid')
-                    wid = int(f.read().strip(), 16)
-                    f.close()
-                    mpl += ' -wid 0x%08x -xy %s -monitoraspect 4:3' % \
-                           (wid, osd.width)
-                    if DEBUG: print 'Got WID = 0x%08x' % wid
-                except:
-                    pass
-
-
         command = mpl + ' "' + filename + '"'
 
         if config.MPLAYER_AUTOCROP and command.find('crop=') == -1:
@@ -606,8 +588,6 @@ class MPlayerApp(childapp.ChildApp):
 
         # XXX Krister testcode for proper X11 video
         if DEBUG: print 'Killing mplayer'
-        util.killall('freevo_xwin')
-        if os.path.exists('/tmp/freevo.wid'): os.unlink('/tmp/freevo.wid')
 
         if config.MPLAYER_DEBUG:
             self.log_stdout.close()

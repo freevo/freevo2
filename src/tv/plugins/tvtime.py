@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/08/06 19:32:40  dischi
+# removed freevo_xwin support. Most users have problems with it and it works without it
+#
 # Revision 1.13  2003/07/13 19:35:45  rshortt
 # Change osd.focused_app to a function that returns the last object in
 # app_list.  Maintaining this list is helpfull for managing 'toplevel'
@@ -373,8 +376,6 @@ class TVTimeApp(childapp.ChildApp):
 
         # XXX Krister testcode for proper X11 video
         if DEBUG: print 'Killing tvtime'
-        util.killall('freevo_xwin')
-        if os.path.exists('/tmp/freevo.wid'): os.unlink('/tmp/freevo.wid')
         if config.MPLAYER_DEBUG:
             self.log_stdout.close()
             self.log_stderr.close()

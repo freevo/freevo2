@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/08/06 19:32:40  dischi
+# removed freevo_xwin support. Most users have problems with it and it works without it
+#
 # Revision 1.13  2003/08/05 18:37:02  dischi
 # fix mplayer plugin to work with dfbmga, too
 #
@@ -242,43 +245,6 @@ class MPlayer:
             print 'Mode "%s" is not implemented' % mode  # XXX ui.message()
             return
 
-        # Support for X11, getting the keyboard events
-        if (os.path.isfile('./freevo_xwin') and osd.sdl_driver == 'x11' and
-            config.MPLAYER_USE_WID):
-            if DEBUG: print 'Got freevo_xwin and x11'
-            if os.path.exists('/tmp/freevo.wid'): os.unlink('/tmp/freevo.wid')
-            os.system('./runapp ./freevo_xwin  0 0 %s %s > /tmp/freevo.wid &' %
-                      (osd.width, osd.height))
-
-            # Wait until freevo_xwin signals us, but have a timeout so we
-            # don't hang here if something goes wrong!
-            delay_ms = 50
-            timeout_ms = 5000
-            while 1:
-                if os.path.isfile('/tmp/freevo.wid'):
-                    # Check if the whole line has been written yet
-                    f = open('/tmp/freevo.wid')
-                    val = f.read()
-                    f.close()
-                    if len(val) > 5 and val[-1] == '\n':
-                        break
-                time.sleep(delay_ms / 1000.0)
-                timeout_ms -= delay_ms
-                if timeout_ms < 0.0:
-                    print 'Could not start freevo_xwin!'  # XXX ui.message()
-                    return
-
-            if DEBUG: print 'Got freevo.wid'
-            try:
-                f = open('/tmp/freevo.wid')
-                wid = int(f.read().strip(), 16)
-                f.close()
-                mpl += ' -wid 0x%08x -xy %s -monitoraspect 4:3' % (wid, osd.width)
-                if DEBUG: print 'Got WID = 0x%08x' % wid
-            except:
-                print 'Cannot access freevo_xwin data!'   # XXX ui.message()
-                pass
-
         command = mpl
         self.mode = mode
 
@@ -424,8 +390,6 @@ class MPlayerApp(childapp.ChildApp):
 
         # XXX Krister testcode for proper X11 video
         if DEBUG: print 'Killing mplayer'
-        util.killall('freevo_xwin')
-        if os.path.exists ('/tmp/freevo.wid'): os.unlink('/tmp/freevo.wid')
         if config.MPLAYER_DEBUG:
             self.log_stdout.close()
             self.log_stderr.close()
