@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/12/07 11:06:45  dischi
+# small bugfix
+#
 # Revision 1.2  2003/11/23 16:57:08  dischi
 # small fixes
 #
@@ -56,8 +59,8 @@ import config
 def getoverlay(item):
     if not config.OVERLAY_DIR:
         return ''
-    
-    if isinstance(item, str):
+
+    if isinstance(item, str) or isinstance(item, unicode):
         # it's a directory, return it
         directory = os.path.abspath(item)
         for media in config.REMOVABLE_MEDIA:
