@@ -16,6 +16,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.61  2002/09/04 19:24:51  dischi
+# Added a 3rd parameter to ROM_DRIVES: mountpoint, device, name. I also
+# named the drives CD-1 and CD-2 to avoid missunderstandings about the
+# name DVD.
+#
 # Revision 1.60  2002/09/04 05:32:32  krister
 # Added some helptext for the remote control config.
 #
@@ -131,8 +136,8 @@ DEV_MIXER           = '/dev/mixer'    # mixer device
 # Physical ROM drives, multiple ones can be specified
 # by adding comma-seperated and quoted entries.
 #
-ROM_DRIVES = [ ('/mnt/cdrom', 'CD'),
-               ('/mnt/dvd', 'DVD') ]
+ROM_DRIVES = [ ('/mnt/cdrom', '/dev/cdrom', 'CD-1'),
+               ('/mnt/dvd', '/dev/dvd', 'CD-2') ]
 
 
 # ======================================================================
@@ -547,3 +552,4 @@ JOY_CMDS = {
     'button 3'       : 'STOP',
     'button 4'       : 'ENTER',
     }
+
