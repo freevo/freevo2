@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2003/04/19 21:27:24  dischi
+# small fix
+#
 # Revision 1.35  2003/04/14 14:14:14  gsbarbieri
 # Fix crash when using "Change Play Settings" with files instead of VCD/DVD/...
 #
@@ -685,7 +688,7 @@ class VideoItem(Item):
                     if pos < len(self.subitems)-1:
                         self.current_subitem = self.subitems[pos+1]
                         print "playing next item"
-                        self.current_subitem.play(menuw=self.menuw)
+                        self.current_subitem.play(menuw=menuw)
                         return TRUE
                 except:
                     pass
@@ -695,9 +698,9 @@ class VideoItem(Item):
         # show configure menu
         if event == rc.MENU:
             self.video_player.stop()
-            self.settings(menuw=self.menuw)
-            self.menuw.show()
+            self.settings(menuw=menuw)
+            menuw.show()
             return TRUE
         
         # give the event to the next eventhandler in the list
-        return Item.eventhandler(self, event, self.menuw)
+        return Item.eventhandler(self, event, menuw)
