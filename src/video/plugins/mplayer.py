@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.63  2004/02/11 20:13:46  dischi
+# do not seek beyond file length
+#
 # Revision 1.62  2004/02/06 19:28:51  dischi
 # fix/cleanup dvd on hd handling
 #
@@ -93,6 +96,7 @@
 import os, re
 import threading
 import popen2
+import mmpython
 
 import config     # Configuration handler. reads config file.
 import util       # Various utilities
@@ -198,9 +202,15 @@ class MPlayer:
         mode         = item.mode
         url          = item.url
 
+        self.item_info   = None
+        self.item_length = -1
+        
         if mode == 'file':
             url = item.url[6:]
-
+            self.item_info = mmpython.parse(url)
+            if hasattr(self.item_info, 'get_length'):
+                self.item_length = self.item_info.get_length()
+                
         if url.startswith('dvd://') and url[-1] == '/':
             url += '1'
             
@@ -443,6 +453,17 @@ class MPlayer:
             return True
 
         if event == SEEK:
+            if event.arg > 0 and self.item_length != -1:
+                # check if seek is allowed
+                if self.item_length <= self.item.elapsed + event.arg:
+                    # recheck size
+                    self.item_length = self.item_info.get_length()
+                if self.item_length <= self.item.elapsed + event.arg:
+                    _debug_('unable to seek %s secs at time %s, length %s' % \
+                            (event.arg, self.item.elapsed, self.item_length))
+                    self.app.write('osd_show_text "%s"\n' % _('Seeking not possible'))
+                    return False
+                
             self.app.write('seek %s\n' % event.arg)
             return True
 
