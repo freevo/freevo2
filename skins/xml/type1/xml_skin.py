@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2002/11/12 06:36:31  krister
+# Changed the default font from Arial to a builtin font.
+#
 # Revision 1.17  2002/10/26 14:51:25  dischi
 # better location-finder of included files
 #
@@ -156,7 +159,7 @@ from xml.utils import qp_xml
 # XXX Shouldn't this be moved to the config file?
 
 OSD_FONT_DIR = 'skins/fonts/'
-OSD_DEFAULT_FONT = 'skins/fonts/arialbd.ttf'
+OSD_DEFAULT_FONT = 'skins/fonts/kimberly_alt.ttf'
 
 
 
