@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/02/14 02:51:50  krister
+# Added fix for decimal point vs. comma.
+#
 # Revision 1.5  2003/02/11 04:37:29  krister
 # Added an empty local_conf.py template for new users. It is now an error if freevo_config.py is found in /etc/freevo etc. Changed DVD protection to use a flag. MPlayer stores debug logs in FREEVO_STARTDIR, and stops with an error if they cannot be written.
 #
@@ -263,7 +266,7 @@ class MPlayerApp(childapp.ChildApp):
         self.item = item
         self.elapsed = 0
         childapp.ChildApp.__init__(self, app)
-        self.RE_TIME = re.compile("^A: +([0-9]+)\.").match
+        self.RE_TIME = re.compile("^A: +([0-9]+)").match
 
               
     def kill(self):
@@ -284,7 +287,7 @@ class MPlayerApp(childapp.ChildApp):
                 pass # File closed
                      
         if line.find("A:") == 0:         # get current time
-            m = self.RE_TIME(line)
+            m = self.RE_TIME(line) # Convert decimal 
             if m:
                 self.item.elapsed = int(m.group(1))
                 if self.item.elapsed != self.elapsed:
