@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.122  2004/09/12 21:20:57  mikeruelle
+# for non v4l2 speaking devices
+#
 # Revision 1.121  2004/08/28 17:16:19  dischi
 # support empty ITEM variables
 #
@@ -408,6 +411,9 @@ for i in range(10):
             del v
         except OSError: 
             # likely no device attached
+            continue
+        except IOError: 
+            # found something that doesn't speak v4l2
             continue
         except: 
             traceback.print_exc()
