@@ -21,6 +21,7 @@
 #include "readpng.h"
 #include "osd.h"
 #include "fs.h"
+#include "ft.h"
 #include "fb.h"
 #include "x11.h"
 
@@ -34,7 +35,7 @@
 #endif
 #endif
 
-#define TRANSP(t,col) ((t << 24) | col)
+#define TRANSP(t,col) (((t) << 24) | col)
 
 #define COL_RED     0xff0000
 #define COL_GREEN   0x00ff00
@@ -54,8 +55,8 @@ void osd_drawbitmap (char *filename, uint16 x0, uint16 y0);
 void osd_drawline (int x0, int y0, int x1, int y1, int width, uint32 color);
 void osd_drawbox (int x0, int y0, int x1, int y1, int width, uint32 color);
 void osd_clearscreen (int color);
-void osd_drawstring (font_t *pFont, char str[], int x, int y,
-                     uint32 fgcol, uint32 bgcol, int *width);
+void osd_drawstring (char *pFont, int ptsize, char str[], int x, int y,
+                     uint32 fgcol, int *width);
 
 
 void
@@ -151,7 +152,7 @@ executecommand (char command[], char args[][1000], int argc)
 
   if (!strcmp ("drawstring", command)) {
     printf ("Exec: drawstring\n");
-    osd_drawstring (stdfont, args[1], atoi (args[2]),
+    osd_drawstring (args[0], atoi (args[1]), args[2],
                     atoi (args[3]), atoi (args[4]), atoi (args[5]), &tmp);
   }
   
@@ -196,8 +197,9 @@ udpserver (int port)
   }
 
   osd_clearscreen (0x006d9bff);
-  osd_drawstring (stdfont, "Waiting for client...",
-                  300, 280, TRANSP(48, 0), TRANSP(255,0), &tmp);
+  osd_drawstring ("osd_server/osd_fb/fonts/RUBTTS__.TTF", 64,
+                  "Waiting for client...",
+                  50, 250, COL_BLACK, &tmp);
   
   osd_update ();
   
@@ -245,7 +247,7 @@ osd_update (void)
 
 
 /* Alpha blending algorithm. Uses fixedpoint math. */
-#define ALPHA_BLEND(old, new, transp) (((old * transp) + (new*(255-transp))) >> 8)
+#define ALPHA_BLEND(old, new, transp) (((old * transp) + ((new+1)*(256-transp))) >> 8)
 
 
 void
@@ -445,11 +447,12 @@ osd_clearscreen (int color)
 
 
 void
-osd_drawstring (font_t *pFont, char str[], int x, int y,
-            uint32 fgcol, uint32 bgcol, int *width)
+osd_drawstring (char *pFont, int ptsize, char str[], int x, int y,
+                uint32 fgcol, int *width)
 {
 
-   fs_puts (pFont, x, y, fgcol, bgcol, str);
+   /*  fs_puts (pFont, x, y, fgcol, bgcol, str); */
+   ft_puts (pFont, ptsize, x, y, fgcol, str);
 
    if (width != (int *) NULL) {
       *width = 0;
@@ -514,7 +517,7 @@ main (int ac, char *av[])
       getchar ();
    }  
 #endif
-  
+
    udpserver (16480);           /* XXX get config info from central file */
    
    osd_close ();
