@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.123  2004/11/02 20:17:16  dischi
+# add check if the program is still active
+#
 # Revision 1.122  2004/10/18 01:43:54  rshortt
 # Make "freevo prompt" work.
 #
@@ -286,10 +289,13 @@ def start(name, arg, bg, store=1):
             try:
                 os.waitpid(uid, 0)
             except KeyboardInterrupt:
-                os.kill(uid, SIGTERM)
                 try:
-                    os.waitpid(uid, 0)
-                except KeyboardInterrupt:
+                    os.kill(uid, SIGTERM)
+                    try:
+                        os.waitpid(uid, 0)
+                    except KeyboardInterrupt:
+                        pass
+                except OSError:
                     pass
                 if store and os.path.isfile(f.name):
                     os.unlink(f.name)
