@@ -429,6 +429,11 @@ plugin.activate('tiny_osd')
 
 # For recording tv
 #
+
+plugin.activate('record.fxdfile')
+plugin.activate('record.thumbnail')
+
+
 #
 # Use ivtv_record instead if you have an ivtv based card (PVR-250/350)
 # and want freevo to do everthing for you.  To use you need to set the 

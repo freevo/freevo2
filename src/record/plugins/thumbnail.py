@@ -1,6 +1,6 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# __init__.py - Recordserver plugin interface
+# thumbnail.py - Plugin to generated thumbnails for recordings
 # -----------------------------------------------------------------------------
 # $Id$
 #
@@ -30,30 +30,22 @@
 #
 # -----------------------------------------------------------------------------
 
-# freevo plugin interface
-import plugin
+# freevo imports
+from util.videothumb import snapshot
+from record.plugins import Plugin
+from record.types import *
 
-# internal list of plugins
-list = []
-
-class Plugin(plugin.Plugin):
+class PluginInterface(Plugin):
     """
-    Recordserver plugin.
+    Plugin to generated thumbnails for recordings.
     """
-    def __init__(self):
-        plugin.Plugin.__init__(self)
-        list.append(self)
-
-
-    def start_recording(self, recording):
-        """
-        This function is called when the recording is started.
-        """
-        pass
-
-
     def stop_recording(self, recording):
         """
-        This function is called when the recording is stopped.
+        Create a thumbnail for the recording
         """
-        pass
+        if recording.status != SAVED:
+            return
+        if not recording.url.startswith('file:'):
+            return
+        filename = recording.url[5:]
+        snapshot(filename)
