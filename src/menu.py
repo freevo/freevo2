@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.56  2003/08/03 14:24:57  dischi
+# cosmetic fix
+#
 # Revision 1.55  2003/08/02 10:08:46  dischi
 # make it possible to return MenuItems in the list of actions()
 #
@@ -338,8 +341,11 @@ class MenuWidget(GUIObject):
             xml_file = item.xml_file
 
         for i in items:
-            if not i.image:
-                i.image = item.image
+            try:
+                if not i.image and item.image.find('skins/images/watermarks/'):
+                    i.image = item.image
+            except:
+                pass
             if hasattr(item, 'display_type'):
                 i.display_type = item.display_type
             elif hasattr(item, 'type'):
