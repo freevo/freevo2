@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2004/07/11 11:32:47  dischi
+# move mplayer dvb args to config
+#
 # Revision 1.37  2004/07/10 12:33:42  dischi
 # header cleanup
 #
@@ -142,7 +145,7 @@ class MPlayer:
             elif vg.group_type == 'dvb':
                 self.fc.chanSet(tuner_channel, app='mplayer')
                 tvcmd = ''
-                args += ('"dvb://%s" -vf pp=de/fd -cache 1024' % tuner_channel,)
+                args += ('"dvb://%s" %s' % (tuner_channel, config.MPLAYER_ARGS['dvb']),)
 
             else:
                 freq_khz = self.fc.chanSet(tuner_channel, app='mplayer')
