@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/03/13 18:34:19  rshortt
+# Refresh the list of favorites from the server properly.
+#
 # Revision 1.2  2004/03/13 03:28:06  rshortt
 # More favorites support... almost there!
 #
@@ -52,6 +55,7 @@ class ViewFavoritesItem(Item):
     def __init__(self, parent):
         Item.__init__(self, parent, skin_type='tv')
         self.name = _('View Favorites')
+        self.menuw = None
 
 
     def actions(self):
@@ -59,13 +63,45 @@ class ViewFavoritesItem(Item):
 
 
     def view_favorites(self, arg=None, menuw=None):
+        items = self.get_items()
+        if not len(items):
+            AlertBox(_('No favorites.')).show()
+            return
+
+        favorite_menu = menu.Menu(_( 'View Favorites'), items,
+                                  reload_func = self.reload,
+                                  item_types = 'tv favorite menu')
+        self.menuw = menuw
+        rc.app(None)
+        menuw.pushmenu(favorite_menu)
+        menuw.refresh()
+
+
+    def reload(self):
+        menuw = self.menuw
+
+        menu = menuw.menustack[-1]
+
+        new_choices = self.get_items()
+        if not menu.selected in new_choices and len(new_choices):
+            sel = menu.choices.index(menu.selected)
+            if len(new_choices) <= sel:
+                menu.selected = new_choices[-1]
+            else:
+                menu.selected = new_choices[sel]
+
+        menu.choices = new_choices
+
+        return menu
+
+
+    def get_items(self):
         items = []
 
         (server_available, msg) = record_client.connectionTest()
         if not server_available:
-            AlertBox(_('Recording server is unavailable.')+(': %s' % msg),
-                     self, Align.CENTER).show()
-            return
+            AlertBox(_('Recording server is unavailable.')+(': %s' % msg)).show()
+            return []
 
         (result, favorites) = record_client.getFavorites()
         if result:
@@ -77,15 +113,11 @@ class ViewFavoritesItem(Item):
                 items.append(FavoriteItem(self, fav))
 
         else:
-            AlertBox(_('Get favorites failed')+(': %s' % favorites),
-                     self, Align.CENTER).show()
-            return
+            AlertBox(_('Get favorites failed')+(': %s' % favorites)).show()
+            return []
 
-        favorite_menu = menu.Menu(_( 'View Favorites'), items,
-                                  item_types = 'tv favorite menu')
-        rc.app(None)
-        menuw.pushmenu(favorite_menu)
-        menuw.refresh()
+        return items
+
 
 
 class PluginInterface(plugin.MainMenuPlugin):
