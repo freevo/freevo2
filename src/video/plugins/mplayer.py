@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.65  2004/02/23 19:17:53  dischi
+# bugfix
+#
 # Revision 1.64  2004/02/19 04:57:58  gsbarbieri
 # Support Web Interface i18n.
 # To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
@@ -569,8 +572,6 @@ class MPlayerApp(childapp.ChildApp2):
         elif self.exit_type == "Quit":
             return USER_END
         else:
-            print String(_( 'ERROR' )) + ': ' + String(self.exit_type) + \
-                  String(_( 'unknow error while playing file' ))
             return PLAY_END
                         
 
