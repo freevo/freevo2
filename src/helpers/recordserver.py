@@ -7,6 +7,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.64  2004/11/07 16:42:33  dischi
+# activate child dispatcher and move plugin init to server.py
+#
 # Revision 1.63  2004/11/06 17:56:21  dischi
 # Current status of the recordserver:
 # o add/delete/modify/list recordings
@@ -55,7 +58,7 @@ import pwd
 import traceback
 import config
 import plugin
-
+import childapp
 import notifier
 import record.server
 
@@ -69,12 +72,10 @@ try:
 except Exception, e:
     print e
 
-# load record plugins
-plugin.init(exclusive=['record'])
-
 while 1:
     try:
         notifier.init(notifier.GENERIC)
+        notifier.addDispatcher( childapp.watcher.step )
         record.server.RecordServer()
         notifier.loop()
     except KeyboardInterrupt:
