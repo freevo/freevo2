@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2003/03/31 03:04:46  rshortt
+# Make the delete file confirm box default to 'cancel'.
+#
 # Revision 1.28  2003/03/31 03:02:35  rshortt
 # Inside the item menu added the option to delete the file.  This pops up
 # a confirm box to make sure.
@@ -309,7 +312,7 @@ class VideoItem(Item):
     def confirm_delete(self, arg=None, menuw=None):
         confirm = ConfirmBox(menuw,
                              'Do you wish to delete %s?' % self.name,
-                             self.delete_file)
+                             self.delete_file, default_choice=1)
         confirm.show()
         self.menuw = menuw
 
