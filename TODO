@@ -58,6 +58,8 @@ o Website:
   o Make a sidebar with quick links
   o Logo
   o New favicon
+o Rename config.py freevo_config.py.
+  o Search for it in /etc/ and ~/.freevo/ before the current dir.
  
 
 Mid-term
