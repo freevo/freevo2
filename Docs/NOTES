@@ -147,7 +147,7 @@ o Tag a release/checkpoint:
 cvs -z3 -d:ext:SF_USERNAME@cvs.freevo.sourceforge.net:/cvsroot/freevo tag REL-1_2_0
 
 o Make a .tar.gz file from the tagged version using anonymous export
-cvs -d:pserver:anonymous:dummy@cvs.freevo.sourceforge.net:/cvsroot/freevo login
+cvs -d:pserver:anonymous@cvs.freevo.sourceforge.net:/cvsroot/freevo login
 cvs -z3 -d:pserver:anonymous@cvs.freevo.sourceforge.net:/cvsroot/freevo export -r REL-1_2_0 freevo
 mv freevo freevo-1.2.0
 tar cvzf freevo-1.2.0.tar.gz freevo-1.2.0
@@ -173,6 +173,31 @@ o Make a new release
   o Paste in the "File Release Notes" from below
   o Paste in the "Changes" for this version from the Changelog file
   o Select "Preserve preformatted text"
+
+
+CVS Admin:
+
+cvs -z3 -d:ext:krister@cvs.freevo.sourceforge.net:/cvsroot/freevo co CVSROOT
+
+----------------------------------------------------------------------
+Website maintenance:
+
+o Use CVS to check out the website module.
+cvs -z3 -d:ext:SF_USERNAME@cvs.freevo.sourceforge.net:/cvsroot/freevo co website
+
+o Use CVS as described above
+
+o Export to a temporary directory
+
+cvs -d:pserver:anonymous@cvs.freevo.sourceforge.net:/cvsroot/freevo login
+cvs -z3 -d:pserver:anonymous@cvs.freevo.sourceforge.net:/cvsroot/freevo export -kv -r HEAD website
+
+o Upload to the tentative directory
+scp *html *.gif *jpg *ico *css krister@freevo.sf.net:/home/groups/f/fr/freevo/htdocs/tentative
+
+o Test the webpage (http://freevo.sourceforge.net/tentative)!!!
+
+o Upload to the real path
 
 ----------------------------------------------------------------------
 File release notes:
