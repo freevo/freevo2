@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/12/14 17:39:52  dischi
+# Change TRUE and FALSE to True and False; vfs fixes
+#
 # Revision 1.21  2003/12/06 13:43:03  dischi
 # more cleanup
 #
@@ -163,7 +166,7 @@ def attr_col(node, attr, default):
 
 def attr_visible(node, attr, default):
     """
-    return TRUE or FALSE based in the attribute values 'yes' or 'no'
+    return True or False based in the attribute values 'yes' or 'no'
     """
     if node.attrs.has_key(('', attr)):
         if node.attrs[('', attr)] == "no":
@@ -207,14 +210,16 @@ def attr_font(node, attr, default):
 
 def search_file(file, search_dirs):
     for s_dir in search_dirs:
-        dfile=vfs.join(s_dir, file)
+        dfile=os.path.join(s_dir, file)
 
         if vfs.isfile(dfile):
-            return dfile
+            return vfs.abspath(dfile)
+        
         if vfs.isfile("%s.png" % dfile):
-            return "%s.png" % dfile
+            return vfs.abspath("%s.png" % dfile)
+        
         if vfs.isfile("%s.jpg" % dfile):
-            return "%s.jpg" % dfile
+            return vfs.abspath("%s.jpg" % dfile)
 
     _debug_('can\'t find image %s' % file)
     return ''
@@ -532,7 +537,7 @@ class Content(XML_data):
                 if type:
                     self.types[type].parse(subnode, scale, current_dir)
                     self.types[type].cdata = subnode.textof()
-                    delete_fcontent = TRUE
+                    delete_fcontent = True
                     for rnode in subnode.children:
                         if rnode.name == u'rectangle':
                             self.types[type].rectangle = Rectangle()
@@ -542,7 +547,7 @@ class Content(XML_data):
                             if (not hasattr( self.types[ type ], 'fcontent' )) or \
                                    delete_fcontent:
                                 self.types[ type ].fcontent = [ ]
-                            delete_fcontent = FALSE
+                            delete_fcontent = False
                             child = None
                             if rnode.name == u'if':
                                 child = FormatIf()
@@ -1013,9 +1018,9 @@ class XMLSkin:
                 self.skindirs = []
             self.load(include, copy_content, prepare=False)
 
-        self.parse(node, scale, vfs.dirname(file), copy_content)
-        if not vfs.dirname(file) in self.skindirs:
-            self.skindirs = [ vfs.dirname(file) ] + self.skindirs
+        self.parse(node, scale, os.path.dirname(file), copy_content)
+        if not os.path.dirname(file) in self.skindirs:
+            self.skindirs = [ os.path.dirname(file) ] + self.skindirs
         if not prepare:
             return
             
@@ -1034,8 +1039,10 @@ class XMLSkin:
         if not vfs.isfile(file):
             if vfs.isfile(file+".fxd"):
                 file += ".fxd"
+
             elif vfs.isfile(vfs.join(config.SKIN_DIR, '%s/%s.fxd' % (file, file))):
                 file = vfs.join(config.SKIN_DIR, '%s/%s.fxd' % (file, file))
+
             else:
                 file = vfs.join(config.SKIN_DIR, 'main/%s' % file)
                 if vfs.isfile(file+".fxd"):

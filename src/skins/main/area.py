@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/12/14 17:39:52  dischi
+# Change TRUE and FALSE to True and False; vfs fixes
+#
 # Revision 1.21  2003/12/14 17:04:40  dischi
 # move SkinObjects to screen.py
 #
@@ -127,7 +130,7 @@ class Skin_Area:
     def __init__(self, name, imagecachesize=5):
         self.area_name = name
         self.area_val  = None
-        self.redraw    = TRUE
+        self.redraw    = True
         self.layout    = None
         self.name      = name
         self.screen    = screen.get_singleton()
@@ -363,7 +366,7 @@ class Skin_Area:
                 if config.SKIN_FORCE_TEXTVIEW_STYLE == 1 and \
                        i.type == 'dir' and not i.media:
                     # directory with few items and folder:
-                    self.use_text_view = FALSE
+                    self.use_text_view = False
                     return
                     
                 if image and i.image != image:
@@ -540,7 +543,7 @@ class Skin_Area:
         if self.area_name == 'plugin':
             if not self.area_val:
                 self.area_val = xml_skin.Area(self.area_name)
-                self.area_val.visible = TRUE
+                self.area_val.visible = True
                 self.area_val.r = (0, 0, osd.width, osd.height)
             return True
         else:
@@ -642,7 +645,7 @@ class Skin_Area:
     # drawimage
     # drawstring
 
-    def drawroundbox(self, x, y, width, height, rect, redraw=TRUE):
+    def drawroundbox(self, x, y, width, height, rect, redraw=True):
         """
         draw a round box ... or better stores the information about this call
         in a variable. The real drawing is done inside draw()
@@ -695,7 +698,7 @@ class Skin_Area:
                                             align_h, align_v, mode, ellipses))
 
 
-    def loadimage(self, image, val, redraw=TRUE):
+    def loadimage(self, image, val, redraw=True):
         """
         load an image (use self.imagecache)
         """

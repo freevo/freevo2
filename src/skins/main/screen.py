@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/12/14 17:39:52  dischi
+# Change TRUE and FALSE to True and False; vfs fixes
+#
 # Revision 1.4  2003/12/14 17:05:23  dischi
 # speed up drawing when drawing over images (splashscreen is 120% faster)
 #
@@ -117,7 +120,7 @@ class Screen:
         if full:
             for ux1, uy1, ux2, uy2 in update_area:
                 # if the area is not complete inside the area but is inside on
-                # some pixels, return FALSE
+                # some pixels, return False
                 if (not (ux1 >= x1 and uy1 >= y1 and ux2 <= x2 and uy2 <= y2)) and \
                    (not (x2 < ux1 or y2 < uy1 or x1 > ux2 or y1 > uy2)):
                     return False
@@ -129,7 +132,7 @@ class Screen:
         return False
 
 
-    def show(self, force_redraw=FALSE):
+    def show(self, force_redraw=False):
         """
         the main drawing function
         """
@@ -163,7 +166,7 @@ class Screen:
                     # if the radius and the border is not inside the update area,
                     # use drawbox, it's faster
                     if self.in_update(x1+size+radius, y1+size+radius, x2-size-radius,
-                                      y2-size-radius, update_area, full=TRUE):
+                                      y2-size-radius, update_area, full=True):
                         osd.drawroundbox(x1, y1, x2, y2, color=bgcolor,
                                          layer=self.s_alpha)
                     else:

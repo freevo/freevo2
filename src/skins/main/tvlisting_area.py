@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/12/14 17:39:52  dischi
+# Change TRUE and FALSE to True and False; vfs fixes
+#
 # Revision 1.13  2003/12/06 13:43:03  dischi
 # more cleanup
 #
@@ -68,7 +71,7 @@ class TVListing_Area(Skin_Area):
         """
         check if the content needs an update
         """
-        return TRUE
+        return True
 
 
     def get_items_geometry(self, settings, obj, display_style=0):
@@ -83,7 +86,7 @@ class TVListing_Area(Skin_Area):
         
         layout    = self.layout
         area      = self.area_val
-        content   = self.calc_geometry(layout.content, copy_object=TRUE)
+        content   = self.calc_geometry(layout.content, copy_object=True)
 
         label_val     = content.types['label']
         head_val      = content.types['head']
@@ -151,7 +154,7 @@ class TVListing_Area(Skin_Area):
         settings  = self.settings
         layout    = self.layout
         area      = self.area_val
-        content   = self.calc_geometry(layout.content, copy_object=TRUE)
+        content   = self.calc_geometry(layout.content, copy_object=True)
 
         recordingshows = self.check_schedule()
         recnow = 0

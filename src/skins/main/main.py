@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/12/14 17:39:52  dischi
+# Change TRUE and FALSE to True and False; vfs fixes
+#
 # Revision 1.26  2003/12/06 13:43:02  dischi
 # more cleanup
 #
@@ -158,32 +161,34 @@ class Skin:
         exec('del self.%s_areas' % type)
 
         
-    def load(self, dir, copy_content = 1):
+    def load(self, filename, copy_content = 1):
         """
         return an object with new skin settings
         """
-        if dir and vfs.isfile(vfs.join(dir, 'folder.fxd')):
-            file = vfs.join(dir, 'folder.fxd')
+        if filename and vfs.isfile(vfs.join(filename, 'folder.fxd')):
+            filename = vfs.abspath(os.path.join(filename, 'folder.fxd'))
 
-        elif dir and vfs.isfile(dir):
-            file = dir
+        elif filename and vfs.isfile(filename):
+            filename = vfs.abspath(filename)
+
         else:
             return None
 
         if copy_content:
-            cname = '%s%s%s' % (str(self.settings), file, vfs.stat(file)[stat.ST_MTIME])
+            cname = '%s%s%s' % (str(self.settings), filename,
+                                os.stat(filename)[stat.ST_MTIME])
             settings = self.xml_cache[cname]
             if not settings:
                 settings = copy.copy(self.settings)
-                if not settings.load(file, copy_content, clear=True):
+                if not settings.load(filename, copy_content, clear=True):
                     return None
                 self.xml_cache[cname] = settings
         else:
-            cname = '%s%s' % (file, vfs.stat(file)[stat.ST_MTIME])
+            cname = '%s%s' % (filename, os.stat(filename)[stat.ST_MTIME])
             settings = self.xml_cache[cname]
             if not settings:
                 settings = xml_skin.XMLSkin()
-                if not settings.load(file, copy_content, clear=True):
+                if not settings.load(filename, copy_content, clear=True):
                     return None
                 self.xml_cache[cname] = settings
 

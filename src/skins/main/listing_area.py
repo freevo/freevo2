@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/12/14 17:39:52  dischi
+# Change TRUE and FALSE to True and False; vfs fixes
+#
 # Revision 1.14  2003/12/06 13:43:02  dischi
 # more cleanup
 #
@@ -94,7 +97,7 @@ class Listing_Area(Skin_Area):
         self.scan_for_text_view(menu)
         self.init_vars(settings, menu.item_types)
 
-        content   = self.calc_geometry(self.layout.content, copy_object=TRUE)
+        content   = self.calc_geometry(self.layout.content, copy_object=True)
 
         self.last_get_items_geometry[0] = ( menu, settings, display_style )
         
@@ -202,16 +205,16 @@ class Listing_Area(Skin_Area):
         check if the content needs an update
         """
         if self.last_choices[0] != self.menu.selected:
-            return TRUE
+            return True
 
         i = 0
         for choice in self.menuw.menu_items:
             try:
                 if self.last_choices[1][i] != choice:
-                    return TRUE
+                    return True
                 i += 1
             except IndexError:
-                return TRUE
+                return True
             
         
     def update_content(self):
@@ -224,7 +227,7 @@ class Listing_Area(Skin_Area):
         settings  = self.settings
         layout    = self.layout
         area      = self.area_val
-        content   = self.calc_geometry(layout.content, copy_object=TRUE)
+        content   = self.calc_geometry(layout.content, copy_object=True)
 
         cols, rows, hspace, vspace, hskip, vskip, width = \
               self.get_items_geometry(settings, menu, self.display_style)
@@ -252,7 +255,7 @@ class Listing_Area(Skin_Area):
             height = vspace - content.spacing
             
         last_tvs = ('', 0)
-        all_tvs  = TRUE
+        all_tvs  = True
 
                 
         for choice in menuw.menu_items:
@@ -359,7 +362,7 @@ class Listing_Area(Skin_Area):
                                 season  = max(season, font.stringsize(c.show_name[1]))
                                 episode = max(episode, font.stringsize(c.show_name[2]))
                             else:
-                                all_tvs = FALSE
+                                all_tvs = False
 
                         if all_tvs and choice.image:
                             tvs_w = font.stringsize('x') + season + episode
@@ -434,7 +437,7 @@ class Listing_Area(Skin_Area):
                     self.drawroundbox(x0 + r.x, y0 + r.y, r.width, r.height, r)
 
                 image, i_w, i_h = format_image(settings, choice, val.width,
-                                               val.height, force=TRUE)
+                                               val.height, force=True)
                 if image:
                     addx = 0
                     addy = 0

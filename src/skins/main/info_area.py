@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/12/14 17:39:52  dischi
+# Change TRUE and FALSE to True and False; vfs fixes
+#
 # Revision 1.7  2003/12/06 13:43:02  dischi
 # more cleanup
 #
@@ -77,10 +80,10 @@ class Info_Area(Skin_Area):
         update = 0
     
         if self.layout_content is not self.layout.content:
-            return TRUE
+            return True
 
         if self.last_item != self.infoitem:
-            return TRUE
+            return True
         
         update += self.set_content()    # set self.content
         update += self.set_list(update) # set self.list
@@ -155,7 +158,7 @@ class Info_Area(Skin_Area):
         
         if self.layout_content is not self.layout.content or update:
             types = self.layout.content.types
-            self.content = self.calc_geometry( self.layout.content, copy_object=TRUE )
+            self.content = self.calc_geometry( self.layout.content, copy_object=True )
             # backup types, which have the previously calculated fcontent
             self.content.types = types 
             self.layout_content = self.layout.content
