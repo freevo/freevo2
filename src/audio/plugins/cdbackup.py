@@ -1,24 +1,24 @@
-#if 0 /*
+# if 0 /*
 # -----------------------------------------------------------------------
 # cdbackup.py - CD Backup plugin for ripping/backing up CDs to 
 # your hard drive
 # -----------------------------------------------------------------------
 # $Id$
-#
+# 
 # Revision 1.1  2003/06/25 17:53:35  cornejo
 # Changed from MainMenuPlugin to be an ItemPlugin
 # When ripping to .mp3, made the temporary .wav file reside in /tmp instead of user defined directory
 # Changed get_formatted_cd_info to use mmpython instead of my own function.
-#
-#
+# 
+# 
 # Notes: This is the cdbackup module which can be accessed from the audio menu 
 # by hitting 'e' or enter (not return) whilst a CD is selected.
-#
+# 
 # It allows you to backup CDs as .wav files or as .mp3s.
-#
+# 
 # To Activate Plugin, add the following to local_conf.py: 
 # plugin.activate('audio.cdbackup') 
-#
+# 
 # Todo:      
 # Add a status bar showing progress
 # Parse the output of cdparanoia and lame to determine status of rip, mp3 conversion
@@ -33,26 +33,30 @@
 # Albums with more than one Artist aren't handled very well.
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/07/01 04:31:48  outlyer
+# Cleanup comments, add 'if DEBUG:' to most print statements and change
+# os.system(rm ...) to os.unlink(...)
+#
 # Revision 1.1  2003/07/01 03:52:41  outlyer
 # Added a working cd backup plugin.
-#
+# 
 # I was able to rip songs succesfully after making some minor changes.
-#
+# 
 # From the submitted code I made the following changes:
-#
+# 
 # o Moved all command-line tools to config
 # o Put defaults in freevo_config for encoding parameters.
 # o Removed all CDDB code, we only use mmpython now.
-#
+# 
 # Current issues:
-#
+# 
 # o As far as I can tell, mmpython is swapping the artist and the album
 # o No progress or information of any kind. I'll probably put something into
 #    the idle bar to at least make it clear something is happening.
-#
+# 
 # Still, it's very complete and works very well so far.  I put --preset standard as the
 # default encoding style for lame, which is reasonable, though not what I would use.
-#
+# 
 # Revision 1.0  2003/06/09 21:12:58  cornejo
 # o Initial Revision - currently only supports ripping a CD to the hard drive 
 # o in either .wav or .mp3.
@@ -64,72 +68,55 @@
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002 Krister Lagerstrom, et al.
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
-#
+# 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-#
+# 
 # This program is distributed in the hope that it will be useful, but
 # WITHOUT ANY WARRANTY; without even the implied warranty of MER-
 # CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 # Public License for more details.
-#
+# 
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-#
+# 
 # ----------------------------------------------------------------------- */
-#endif
+# endif
 
 import os
 import time
 import string
 
-# Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
 
-# The menu widget class
 import menu
 
-# The RemoteControl class, sets up a UDP daemon that the remote control client
-# sends commands to
 import rc
 
 from gui.AlertBox import AlertBox
 from gui.PopupBox import PopupBox
 from gui.ConfirmBox import ConfirmBox
 
-#from plugin import MainMenuPlugin
-#from plugin import ItemPlugin
 import plugin
 from item import Item
 
-#Import utitlity for it's directory/filename handling functions
 import util
 
 import skin
 skin = skin.get_singleton()
 
-#os has functions to execute files, e.g. to be used for running "cdparanoia" to rip CDs and lame to encode.
 import os
 import sys
 
-#used after getting the file descriptor???
-from fcntl import ioctl
-
-#Used to call cdrom open def
-#Need this to prevent the long CD ripping time from stalling Freevo until the rip is finished.
-#See URL below for learning to use threads
-#http://starship.python.net/crew/aahz/OSCON2001/threads.pdf
 import threading
 
-#Import re (regular exprssion) to be able to search strings, and split strings, etc...
 import re
 
-#Included to be able to access the info for Audio CDs
+# Included to be able to access the info for Audio CDs
 import mmpython
-
 
 # Set to 1 for debug output
 DEBUG = config.DEBUG
@@ -142,6 +129,8 @@ menuwidget = menu.get_singleton()
 killflag = 0
 
 song_names = []
+
+
 
 class main_backup_thread(threading.Thread):
     device = None
@@ -158,7 +147,7 @@ class main_backup_thread(threading.Thread):
             self.cd_backup_threaded(self.device, rip_format='wav')        
     
     def cd_backup_threaded(self, device, rip_format='mp3'):  
-        print 'cd_backup_threaded function, rip_format = %s' %rip_format   
+        if DEBUG: print 'cd_backup_threaded function, rip_format = %s' %rip_format   
         rip_format = rip_format
         album = 'default_album'
         artist = 'default_artist'
@@ -166,14 +155,14 @@ class main_backup_thread(threading.Thread):
         dir_audio_default = "dir_audio_default"        
         path_head = ''
         
-        #Get the artist, album and song_names	
+        # Get the artist, album and song_names	
         (artist, album, genre, song_names) = self.get_formatted_cd_info(device)
                
-        print 'artist = %s' %artist        
-        print 'album = %s' %album
-        print 'genre = %s' %genre
+        if DEBUG: print 'artist = %s' %artist        
+        if DEBUG: print 'album = %s' %album
+        if DEBUG: print 'genre = %s' %genre
         
-        #Figuring out this little rascal took me  a while, 
+        # Figuring out this little rascal took me  a while, 
         # the pleasures of learning a new language.
         # Anyhow, Python is a really kick butt language as I'm quickly finding out.
         dir_audio = config.DIR_AUDIO[0][1]
@@ -184,48 +173,49 @@ class main_backup_thread(threading.Thread):
         
         path_list = re.split("\\/", config.CD_RIP_PN_PREF)
         
-        #CD_RIP_PN_PREF = '%(genre)s/%(artist)s/%(album)s/%(song)s'                
-        #Get everything up to the last "/"
+        # Get everything up to the last "/"
         if len(path_list) != 0:
-            print 'path_list != 0'
+            if DEBUG: print 'path_list != 0'
             for i in range (0, len(path_list)-1 ):
                 path_head +=  '/' + path_list[i]
-            print 'This is path_head : %s' %path_head                     
+            if DEBUG: print 'This is path_head : %s' %path_head                     
         
-        #path_tail_temp is everything to the right of the last '/' which is the last
-        #element in path_list.
-        print 'len(path_list)=%i' %len(path_list)
+        # path_tail_temp is everything to the right of the last '/' which is the last
+        # element in path_list.
+        if DEBUG: print 'len(path_list)=%i' %len(path_list)
         path_tail_temp = '/' + path_list[len(path_list)-1]
         
-        #If no directory structure preferences were given use default dir structure
+        # If no directory structure preferences were given use default dir structure
         if len(path_list) == 0:
              pathname = dir_audio + "/" + artists + "/" + album + "/"
-        #Else use the preferences given by user
+        # Else use the preferences given by user
         else:
             path_temp  =  dir_audio + path_head
             pathname = path_temp % user_rip_path_prefs
-            print 'This is path_temp : %s' %path_temp                        
-            print 'This is pathname : %s' %pathname
+            if DEBUG: print 'This is path_temp : %s' %path_temp                        
+            if DEBUG: print 'This is pathname : %s' %pathname
              
         try: 
             os.makedirs(pathname, 0777)
         except:
-             print 'Directory %s already exists' %pathname
-             #pass
+             if DEBUG: print 'Directory %s already exists' %pathname
+             # pass
       
-        print 'Starting cd_backup_wav'
+        if DEBUG: print 'Starting cd_backup_wav'
         cdparanoia_command = []
         length=len(song_names)
-        print 'Length of songnames = %s' %length 
+        if DEBUG: print 'Length of songnames = %s' %length 
 
         for i in range (0, len(song_names)):
-            #Keep track of track#
+            # Keep track of track# 
             track = i +1        
             # CD_RIP_PATH = '%(artist)s/%(album)/%(song)s'
 
-            #Add the song and track key back into user_rip_path_prefs to be used in the song name
-            #as specified in CD_RIP_PN_PREF.  The song name was previously not set
-            #so had to wait until here to add it in.
+            # Add the song and track key back into user_rip_path_prefs to be used in the song name
+            # as specified in CD_RIP_PN_PREF.  The song name was previously not set
+            # so had to wait until here to add it in.
+
+            track = '%0.2d' % int(track)
             user_rip_path_prefs = {  'artist': artist,
                                                  'album': album,
                                                  'genre': genre,
@@ -233,22 +223,22 @@ class main_backup_thread(threading.Thread):
                                                  'song': song_names[i] }
                                                                                              
             path_tail = path_tail_temp % user_rip_path_prefs 
-            print 'path_tail %s' % path_tail                                                
-            print 'Before Command = %s' %cdparanoia_command
-            print 'stri(i)= %s' %i
+            if DEBUG: print 'path_tail %s' % path_tail                                                
+            if DEBUG: print 'Before Command = %s' %cdparanoia_command
+            if DEBUG: print 'stri(i)= %s' %i
             
-            #If rip_format is mp3, then copy the file to /temp/track_being_ripped.wav
+            # If rip_format is mp3, then copy the file to /temp/track_being_ripped.wav
             if rip_format=='mp3' or rip_format== 'MP3':
                 pathname_cdparanoia = '/tmp'
                 path_tail_cdparanoia   = '/track_being_rippped'
-            #Otherwise if it's going to be a .wav  just use the the users preferred directory and filename.
-            #i.e. don't bother putting into /tmp directory, just use directory and filename of final destination.    
+            # Otherwise if it's going to be a .wav  just use the the users preferred directory and filename.
+            # i.e. don't bother putting into /tmp directory, just use directory and filename of final destination.    
             else: 
                 pathname_cdparanoia = pathname
                 path_tail_cdparanoia   = path_tail
                             
-            #Build the cdparanoia command to be run
-            #cdparanoia_command = '/usr/local/freevo/runtime/apps/cdparanoia -s '  \
+            # Build the cdparanoia command to be run
+            # cdparanoia_command = '/usr/local/freevo/runtime/apps/cdparanoia -s '  \
             cdparanoia_command = config.CDPAR_CMD + ' -s '  \
                                                 + str(i+1) \
                                                 +' "'  \
@@ -256,13 +246,13 @@ class main_backup_thread(threading.Thread):
                                                 + path_tail_cdparanoia \
                                                 + '.wav"' \
 
-            print 'After Command = %s' %cdparanoia_command
+            if DEBUG: print 'After Command = %s' %cdparanoia_command
     
-            #Have the OS execute the CD Paranoia rip command            
+            # Have the OS execute the CD Paranoia rip command            
             os.system(cdparanoia_command)
              
-            #Build the cdparanoia command to be run if mp3 format is selected
-            print 'rip_format = %s' %rip_format
+            # Build the cdparanoia command to be run if mp3 format is selected
+            if DEBUG: print 'rip_format = %s' %rip_format
             if rip_format=='mp3' or rip_format== 'MP3':
                 artist_quoted = '\"' + artist + '\"'
                 album_quoted = '\"' + album + '\"'
@@ -281,7 +271,7 @@ class main_backup_thread(threading.Thread):
                 id3_tag_opts  += id3_tag_opts_temp % user_rip_path_prefs_quoted
                 id3_tag_opts += ' '
                 
-                print 'The id3_tag_opts = %s' %id3_tag_opts
+                if DEBUG: print 'The id3_tag_opts = %s' %id3_tag_opts
             
                 lame_command =  config.LAME_CMD + ' -h ' \
                                           + config.CD_RIP_LAME_OPTS \
@@ -295,15 +285,15 @@ class main_backup_thread(threading.Thread):
                                           + path_tail \
                                           + '.mp3\'' \
                                           
-                print 'lame_command = %s' %lame_command                          
+                if DEBUG: print 'lame_command = %s' %lame_command                          
                 os.system(lame_command)
                 
-                #Remove the .wav file.
-                rm_command = 'rm \'' +  pathname_cdparanoia + path_tail_cdparanoia + '.wav' + '\''
-                print 'rm_command = %s' %rm_command
-                os.system(rm_command)           
+                # Remove the .wav file.
+                rm_command = '%s%s.wav' % (pathname_cdparanoia, path_tail_cdparanoia)
+                if DEBUG: print 'rm_command = os.unlink(%s)' % rm_command
+                os.unlink(rm_command)
         
-        #Flash a popup window indicating copying is done
+        # Flash a popup window indicating copying is done
         popup_string="Finished Copying CD"
         pop = PopupBox(text=popup_string)
         pop.show()
@@ -340,8 +330,8 @@ MUSICCORE = ['trackno', 'trackof', 'album', 'genre']
         """
         
         """
-        #Get the Artist's name(could be more than one) and Album name 
-        #Also, get rid of the space at the end of the Artists name, and before the Album name
+        # Get the Artist's name(could be more than one) and Album name 
+        # Also, get rid of the space at the end of the Artists name, and before the Album name
         # Artist name and album are returned as "Artist / Album"
         # -note the "space slash space" between Artist and Album
         artist_album = re.split(" \\/ ", cd_info)
@@ -349,28 +339,28 @@ MUSICCORE = ['trackno', 'trackof', 'album', 'genre']
         album =''
 
         if (cd_info != ''):
-            #Is there more than one Artist on this CD?
+            # Is there more than one Artist on this CD?
             artist_album_length = len(artist_album)
             if  artist_album_length > 1:
                 for  i in range (0, len(artist_album) - 1):
-                    #Are we at the last Artist on the album
+                    # Are we at the last Artist on the album
                     if (i == (len(artist_album) - 2)):
                         artist += artist_album[i]                   
                     else :
                         artist += artist_album[i] + '-'
-                #The album is the last element in the list       
+                # The album is the last element in the list       
                 album = artist_album[len(artist_album)-1]
-            #If there is only 1 Artist, then the list is only 2 elements
+            # If there is only 1 Artist, then the list is only 2 elements
             elif (artist_album_length == 1 ):
                 artist = artist_album[0]
                 album = artist_album[1]       
         """            
-        print 'cd_info.title : %s' %cd_info.title
-        #Check if CDDB data failed -is there a better way to do this?
-        #Give some defaults with a timestamp to uniqueify artist and album names.
-        #So that subsequent CDs with no CDDB data found don't overwrite each other.
+        if DEBUG: print 'cd_info.title : %s' %cd_info.title
+        # Check if CDDB data failed -is there a better way to do this?
+        # Give some defaults with a timestamp to uniqueify artist and album names.
+        # So that subsequent CDs with no CDDB data found don't overwrite each other.
         if ((cd_info.title == None) and (cd_info.artist == None)):
-            print '*************No CDDB data returned from MMPYTHON'
+            print 'Error: No CDDB data returned from MMPYTHON'
             # Creates a string which looks like "28-Jun-03-10:16am"
             # http://www.python.org/doc/current/lib/module-time.html
             current_time = time.strftime('%d-%b-%y-%I:%M%P')
@@ -379,54 +369,54 @@ MUSICCORE = ['trackno', 'trackof', 'album', 'genre']
             artist ='Unknown Artist ' + current_time + ' - RENAME'
             album ='Unknown CD Album ' + current_time +  ' - RENAME'
             genre ='Other'
-            #Flash a popup window indicating copying is done
+            # Flash a popup window indicating copying is done
             popup_string="CD info not found!\nMust manually rename files\nwhen finished ripping"
             pop = PopupBox(text=popup_string)
             pop.show()
             time.sleep(7)
             pop.destroy()
-        #If  valid data was returned from mmpython/CDDB
+        # If  valid data was returned from mmpython/CDDB
         else:
             album   = self.replace_special_char(cd_info.title, '-')
             artist     = self.replace_special_char(cd_info.artist, '-')
             genre    = self.replace_special_char(cd_info.tracks[0].genre, '-')
 
         song_names = []                        
-        print 'About to print all tracks info'
+        if DEBUG: print 'About to print all tracks info'
         for track in cd_info.tracks:
-            print 'track = %s' %track
+            if DEBUG: print 'track = %s' %track
             song_names.append(self.replace_special_char(track.title, '-'))
             
-        print 'album_temp : %s'  %album
-        print 'artist_temp   : %s'  %artist
-        print 'genre_temp  : %s'  %genre
+        if DEBUG: print 'album_temp : %s'  %album
+        if DEBUG: print 'artist_temp   : %s'  %artist
+        if DEBUG: print 'genre_temp  : %s'  %genre
         for song in song_names:
-            print 'song_name : %s' %song
+            if DEBUG: print 'song_name : %s' %song
         return [artist, album, genre, song_names]                
     
-    #This function gets rid of the slash, '/', in a string, and replaces it  with join_string    
+    # This function gets rid of the slash, '/', in a string, and replaces it  with join_string    
     def slash_split(self, string, join_string = '-'):
         split_string= re.split(" \\/ ", string)
         rejoined_string = ''
-        #Were there any splits on '/'?
+        # Were there any splits on '/'?
         if len(split_string) > 1:
             for  i in range (0, len(split_string)):
-                #Are we at the last slash
+                # Are we at the last slash
                 if (i == (len(split_string) - 1)):
                     rejoined_string += split_string[i]
-                #if not at the last slash, keep adding to string the join_string                        
+                # if not at the last slash, keep adding to string the join_string                        
                 else :
                     rejoined_string += split_string[i] + join_string
-        #If there are no slashes , then the list is only 1 element long and there is nothing to do.
+        # If there are no slashes , then the list is only 1 element long and there is nothing to do.
         else:
             rejoined_string = string
         
         return rejoined_string               
 
-    #Function to get rid of funky characters that exist in a string
-    #so that when for example writing a file to disk, the filename 
-    #doesn't contain any special reserved characters.
-    #This list of special_chars probably contains some characters that are okay.            
+    # Function to get rid of funky characters that exist in a string
+    # so that when for example writing a file to disk, the filename 
+    # doesn't contain any special reserved characters.
+    # This list of special_chars probably contains some characters that are okay.            
     def replace_special_char(self, string, repl='-'):
         # Regular Expression Special Chars =  . ^ $ * + ? { [ ] \ | ( )
         special_chars = [ '\"',  '\`', '\\\\', '/' ]
@@ -437,10 +427,10 @@ MUSICCORE = ['trackno', 'trackof', 'album', 'genre']
                                  '\"', '\\?',  '\`', '\\\\',  \
                                   ';', "\'", '/' ]
         """                                  
-                                #'~', '!', '@', '#', '\\$', '%', '\\^', '&', \
-                                #'\\*', '\\(', '\\)', '\\[', '\\]', '\\+', '\\|', '\\{', '}', ':',  \
-                                 #'\"', '<', '>', '\\?',  '\`', '=', '\\\\',  \
-                                 #';', "\'", '/' ]                                  
+                                # '~', '!', '@', '# ', '\\$', '%', '\\^', '&', \
+                                # '\\*', '\\(', '\\)', '\\[', '\\]', '\\+', '\\|', '\\{', '}', ':',  \
+                                 # '\"', '<', '>', '\\?',  '\`', '=', '\\\\',  \
+                                 # ';', "\'", '/' ]                                  
                                   
         new_string = string
         num = 0
@@ -448,62 +438,18 @@ MUSICCORE = ['trackno', 'trackof', 'album', 'genre']
         for j in special_chars:
             pattern = j
             try: 
-                #A few of the special characters get automatically converted to a different char,
-                #rather than what is passed in as repl
+                # A few of the special characters get automatically converted to a different char,
+                # rather than what is passed in as repl
                 if (pattern == '\''):
                     (new_string, num) = re.subn(pattern, '', new_string, count=0)
                 elif (pattern == '/'):
                     (new_string, num) = re.subn(pattern, '\\\\', new_string, count=0)                    
-                #elif: (pattern == '('):
-                #    (new_string, num) = re.subn(pattern, '<', new_string, count=0)    
-                #elif: (pattern == ')'):
-                #    (new_string, num) = re.subn(pattern, '>', new_string, count=0)                        
                 else:
                     (new_string, num) = re.subn(pattern, repl, new_string, count=0)
             except:
-                print 'excepted trying to call re.subn'
+                print 'Error: Problem trying to call re.subn'
         return new_string    
         
-        
-# See the following for how to use DiscID and CDDB.py
-# http://cddb-py.sourceforge.net/CDDB/README            
-
-    """DiscID return variables 
-    ---------------------------------       
-    DiscID.disc_id()
-        disc_id
-            disc_id[0] = DiscID
-            disc_id[1] = # of Songs on CD
-    
-    CDDB return variables
-        query()
-            
-            status = 200
-            category = classical, etc....
-            disc-id = DiscID
-            title = Title of CD
-            
-    ...or for multiple matches....
-    ...
-    An Array of the following is returned -each element is the info for a different CD
-    status = 210 or 211 (210, 211 are for multiple matches)
-            category = classical, etc....
-            disc-id = DiscID
-            title = Title of CD
-        
-        read()
-        status = 210 (success), !210 = Access Denied or No Match
-        info = cd_info, Access Denied response, or nothing
-            cd_info = Includes Track Titles, can access as 
-            cd_info[TTITLE] upto
-            cd_info[TTITLE + # of songs) 
-"""
-
-# The following ss needed in local_conf.py  to get this plugin to show up
-# plugin.activate('audio.cdbackup')
-#
-
-#
 class PluginInterface(plugin.ItemPlugin):
     """
     Plugin to rip and burn MP3s/CDs/Movies 
@@ -513,35 +459,28 @@ class PluginInterface(plugin.ItemPlugin):
     song_names = []
     device = ''
 
-    #def __init__(self):
-    #    plugin.ItemPlugin.__init__(self)
-            
     def actions(self, item):
         self.item = item
         
         try:
             if (self.item.display_type == 'audio'):
                 self.device = self.item.devicename
-                print 'devicename = %s' %self.device
+                if DEBUG: print 'devicename = %s' %self.device
                 return [ ( self.create_backup_menu, 'Rip the CD to the hard drive', 'Get CDs available for ripping') ]
         except:
-            print 'Can not rip, item is not an AudioCD'
+            print 'Error: Item is not an AudioCD'
         return []
 
     def create_backup_menu(self, arg=None, menuw=None):
-        print 'CD Backup: create_backup_menu'    
         mm_menu = self.create_backup_items(self.device, menuw=None)
         menuwidget.pushmenu(mm_menu)
         menuwidget.refresh()
-        print 'create_backup_menu: %s' %arg
 
     def create_backup_items(self, arg, menuw):   
-        print 'CD Backup: create_backup_items'
         items = []
         items += [menu.MenuItem('Backup CD to hard drive in .wav format',
                                 self.cd_backup_wav, arg=arg)]
 
-        print 'create_backup_items: arg = %s' %arg
         items += [menu.MenuItem('Backup CD to hard drive in .mp3 format',
                                 self.cd_backup_mp3, arg=arg)]
 
@@ -559,20 +498,11 @@ class PluginInterface(plugin.ItemPlugin):
         rc.app(None)
         return backupmenu
         
-    #CD .wav backup function, starts the main_backup_thread (media manager thread)    
     def cd_backup_wav(self, arg, menuw=None):         
         device = arg
-        #print 'cd_backup_wav: devicename = %s' %devicename
-        print 'cd_backup_wav: arg = %s' %arg        
-        print 'About to create rip_thread object in .wav def'
         rip_thread = main_backup_thread(device=device, rip_format='wav')        
-        print 'About to start .wav thread'
         rip_thread.start()
-        print 'Started .wav thread'
-        #while rip_thread.isAlive():
-            #time.sleep(1)
 
-    #CD .mp3 backup function, starts the main_backup_thread
     def cd_backup_mp3(self, arg,  menuw=None):            
         device = arg
         rip_thread = main_backup_thread(device=device, rip_format='mp3')        
