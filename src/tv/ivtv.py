@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/07/11 00:27:23  rshortt
+# Added a mspSetMatrix which is currently not used by anything.
+#
+# This was previously needed to correct an audio problem that is now fixed
+# by specifying standard as a msp3400 modprobe option.
+#
 # Revision 1.2  2003/07/07 01:59:06  rshortt
 # Updating for current ivtv CVS, added bitrate_mode and use constant bitrate
 # by default.
@@ -47,6 +53,7 @@ import v4l2
 # ioctls
 IVTV_IOC_G_CODEC = 0xFFEE7703
 IVTV_IOC_S_CODEC = 0xFFEE7704
+MSP_SET_MATRIX =   0x40086D11
 
 # Stream types 
 IVTV_STREAM_PS     = 0
@@ -59,6 +66,7 @@ IVTV_STREAM_DVD    = 10
 
 # structs
 CODEC_ST = '15I'
+MSP_MATRIX_ST = '2i'
 
 
 class IVTV(v4l2.Videodev):
@@ -92,6 +100,13 @@ class IVTV(v4l2.Videodev):
         r = fcntl.ioctl(self.device, IVTV_IOC_G_CODEC, val)
         codec_list = struct.unpack(CODEC_ST, r)
         return IVTVCodec(codec_list)
+
+    def mspSetMatrix(self, input=None, output=None):
+        if not input: input = 3
+        if not output: output = 1
+
+        val = struct.pack(MSP_MATRIX_ST, input, output)
+        r = fcntl.ioctl(self.device, MSP_SET_MATRIX, val)
 
 
 class IVTVCodec:
