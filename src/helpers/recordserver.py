@@ -6,6 +6,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2004/06/22 01:15:15  rshortt
+# Make checkToRecord() void, start the recording plugin from there, call it
+# from multiple places.
+#
+# Also make movie search work again, using ratings instead of the date property
+# which totally blew up using zap2it datadirect (everything had date).  Right
+# now we just look for 'MPAA' rating for movies but if anyone knows of other
+# movies only rating systems we can add please speak up.
+#
 # Revision 1.43  2004/06/20 21:51:38  dischi
 # do call minutecheck, check yourself
 #
@@ -186,11 +195,8 @@ class RecordServer(xmlrpc.XMLRPC):
         self.saveScheduledRecordings(scheduledRecordings)
 
         # check, maybe we need to start right now
-        rec_prog = self.checkToRecord()
-        if rec_prog:
-            _debug_('start recording')
-            self.record_app = plugin.getbyname('RECORD')
-            self.record_app.Record(rec_prog)
+        self.checkToRecord()
+
         return (TRUE, 'recording scheduled')
     
 
@@ -241,10 +247,10 @@ class RecordServer(xmlrpc.XMLRPC):
 
         for ch in guide.chan_list:
             if chan == ch.id:
-                _debug_('CHANNEL MATCH')
+                _debug_('CHANNEL MATCH: %s' % ch.id)
                 for prog in ch.programs:
                     if start == '%s' % prog.start:
-                        _debug_('PROGRAM MATCH')
+                        _debug_('PROGRAM MATCH: %s' % prog.decode().title)
                         return (TRUE, prog.decode())
 
         return (FALSE, 'prog not found')
@@ -256,6 +262,7 @@ class RecordServer(xmlrpc.XMLRPC):
         _debug_('findMatches: %s' % find)
     
         matches = []
+        max_results = 500
 
         if not find and not movies_only:
             _debug_('nothing to find')
@@ -273,16 +280,21 @@ class RecordServer(xmlrpc.XMLRPC):
                     continue
                 if not find or regex.match(prog.title) or regex.match(prog.desc) \
                    or regex.match(prog.sub_title):
-                    _debug_('PROGRAM MATCH: %s' % prog.decode())
                     if movies_only:
-                        if hasattr(prog, 'date') and prog.date:
+                        # We can do better here than just look for the MPAA 
+                        # rating.  Suggestions are welcome.
+                        if 'MPAA' in prog.decode().getattr('ratings').keys():
                             matches.append(prog.decode())
+                            _debug_('PROGRAM MATCH: %s' % prog.decode())
                     else:
                         # We should never get here if not find and not 
                         # movies_only.
                         matches.append(prog.decode())
+                        _debug_('PROGRAM MATCH: %s' % prog.decode())
+                if len(matches) >= max_results:
+                    break
 
-        _debug_('return: %s' % str(matches))
+        _debug_('Found %d matches.' % len(matches))
 
         if matches:
             return (TRUE, matches)
@@ -336,7 +348,7 @@ class RecordServer(xmlrpc.XMLRPC):
                 # and how much they overlap, or chop one short
                 duration = int((prog.stop + config.TV_RECORD_PADDING ) - now - 10)
                 if duration < 10:
-                    return FALSE
+                    return 
 
                 if currently_recording:
                     # Hey, something is already recording!
@@ -389,9 +401,11 @@ class RecordServer(xmlrpc.XMLRPC):
         if rec_prog or cleaned:
             sr.setProgramList(progs)
             self.saveScheduledRecordings(sr)
-            return rec_prog
 
-        return FALSE
+        if rec_prog:
+            _debug_('start recording')
+            self.record_app = plugin.getbyname('RECORD')
+            self.record_app.Record(rec_prog)
 
 
     def addFavorite(self, name, prog, exactchan=FALSE, exactdow=FALSE, exacttod=FALSE):
@@ -797,12 +811,9 @@ class RecordServer(xmlrpc.XMLRPC):
             reactor.callLater(next_minute, self.minuteCheck)
         else:
             reactor.callLater(60, self.minuteCheck)
-        rec_prog = self.checkToRecord()
-        if rec_prog:
-            _debug_('start recording')
-            self.record_app = plugin.getbyname('RECORD')
-            self.record_app.Record(rec_prog)
-            
+
+        self.checkToRecord()
+
 
     def eventNotice(self):
         print 'RECORDSERVER GOT EVENT NOTICE'
