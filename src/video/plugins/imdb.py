@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/09/10 19:30:08  dischi
+# add deactivation when something is wrong
+#
 # Revision 1.18  2003/08/23 12:51:43  dischi
 # removed some old CVS log messages
 #
@@ -56,6 +59,12 @@ FALSE = 0
 TRUE = 1
 
 class PluginInterface(plugin.ItemPlugin):
+    def __init__(self, license=None):
+        if not config.USE_NETWORK:
+            self.reason = 'no network'
+            return
+        plugin.ItemPlugin.__init__(self)
+
     
     def imdb_get_disc_searchstring(self, item):
         name  = item.media.label

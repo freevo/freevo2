@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/09/10 19:30:08  dischi
+# add deactivation when something is wrong
+#
 # Revision 1.18  2003/09/09 18:54:59  dischi
 # Add some doc
 #
@@ -96,7 +99,8 @@ from xml.dom import minidom # ParseError used by amazon module
 from gui.PopupBox import PopupBox
 from gui.AlertBox import AlertBox
 
-SHOW_WARNING=1
+import amazon
+
 
 class PluginInterface(plugin.ItemPlugin):
     """
@@ -120,13 +124,23 @@ class PluginInterface(plugin.ItemPlugin):
     plugin.activate( 'audio.coversearch', args=('YOUR_KEY',) ) 
     """
     def __init__(self, license=None):
+        if not config.USE_NETWORK:
+            self.reason = 'no network'
+            return
+        
+        if license:
+            amazon.setLicense(license)
+        try:
+            amazon.getLicense()
+        except amazon.NoLicenseKey:
+            print 'To search for covers you need an Amazon.com Web Services'
+            print 'license key. You can get yours from:'
+            print 'https://associates.amazon.com/exec/panama/associates/join/'\
+                  'developer/application.html'
+            self.reason = 'no amazon key'
+            return
+            
         plugin.ItemPlugin.__init__(self)
-
-	# You must get your own key!
-	if license:
-	    self.license = license
-        else:
-	    self.license = None
 
 
     def actions(self, item):
@@ -148,7 +162,7 @@ class PluginInterface(plugin.ItemPlugin):
                     return [ ( self.cover_search_file, 'Find a cover for this music',
                                'imdb_search_or_cover_search') ]
                 else:
-                    if SHOW_WARNING:
+                    if config.DEBUG:
                         print "WARNING: coversearch disabled for this item! " + \
                               "coversearch needs an item with " + \
                               "Artist and Album (if it's a mp3 or ogg) or " + \
@@ -156,7 +170,7 @@ class PluginInterface(plugin.ItemPlugin):
                               "So you need a file with a ID3 tag (mp3) or an Ogg Info. " + \
                               "Maybe you must fix this file (%s) tag?" % item.filename 
             except KeyError:
-                if SHOW_WARNING:
+                if config.DEBUG:
                     print "WARNING: coversearch disabled for this item! " + \
                           "coversearch needs an item with " + \
                           "Artist and Album (if it's a mp3 or ogg) or " + \
@@ -164,7 +178,7 @@ class PluginInterface(plugin.ItemPlugin):
                           "So you need a file with a ID3 tag (mp3) or an Ogg Info. " + \
                           "Maybe you must fix this file (%s) tag?" % item.filename
             except AttributeError:
-                if SHOW_WARNING:
+                if config.DEBUG:
                     print "WARNING: Unknown CD, cover searching is disabled"
         return []
 
@@ -173,8 +187,6 @@ class PluginInterface(plugin.ItemPlugin):
         """
         search imdb for this item
         """
-        import amazon
-
         box = PopupBox(text='searching Amazon...')
         box.show()
 
@@ -185,8 +197,6 @@ class PluginInterface(plugin.ItemPlugin):
 
         artist = self.item.info['artist']
 
-        if self.license:
-            amazon.setLicense(self.license)
         search_string = '%s %s' % (artist,album)
         search_string = re.sub('[\(\[].*[\)\]]', '', search_string)
         try:
@@ -207,15 +217,6 @@ class PluginInterface(plugin.ItemPlugin):
             box.destroy()
             return
 
-        except amazon.NoLicenseKey:
-            box.destroy()
-            text='To search for covers you need an ' + \
-                  'Amazon.com Web Services license key. You can get yours from: https://associates.amazon.com/exec/panama/associates/join/developer/application.html'
-            box = AlertBox(text=text)
-            print "ERROR: coversearch: %s" % text
-            box.show()
-            return
-        
         items = []
         
         # Check if they're valid before presenting the list to the user
