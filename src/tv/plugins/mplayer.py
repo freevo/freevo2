@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/06/23 20:15:25  the_krow
+# Trivial Fix for mplayer command line with the new runtime. Thanks to
+# mikeruelle in irc for the bugfix.
+#
 # Revision 1.7  2003/06/13 01:06:46  outlyer
 # Now using the URL format for channel specification in mplayer...
 #
@@ -182,7 +186,7 @@ class MPlayer:
             w, h = config.TV_VIEW_SIZE
             outfmt = 'outfmt=%s' % config.TV_VIEW_OUTFMT
 
-            tvcmd = ('tv://%s -tv on:driver=v4l:%s:%s:%s:'
+            tvcmd = ('tv://%s -tv driver=v4l:%s:%s:%s:'
                      '%s:width=%s:height=%s:%s' %
                      (tuner_channel, device, input, norm, chanlist, w, h, outfmt))
             
