@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/03/19 11:00:22  dischi
+# cache images inside the area and some bugfixes to speed up things
+#
 # Revision 1.25  2003/03/18 09:37:00  dischi
 # Added viewitem and infoitem to the menu to set an item which image/info
 # to take (only for the new skin)
@@ -285,7 +288,7 @@ class Skin_Area:
     def update_content
     """
 
-    def __init__(self, name, screen):
+    def __init__(self, name, screen, imagecachesize=5):
         self.area_name = name
         self.area_val  = None
         self.redraw    = TRUE
@@ -298,7 +301,8 @@ class Skin_Area:
         self.content_objects      = []
         self.last_content_objects = []
         
-        self.imagecache = objectcache.ObjectCache(5, desc='%s_image' % self.name)
+        self.imagecache = objectcache.ObjectCache(imagecachesize,
+                                                  desc='%s_image' % self.name)
         self.dummy_layer = pygame.Surface((osd.width, osd.height), 1, 32)
 
 
@@ -423,7 +427,11 @@ class Skin_Area:
 
         if bg_rect[0] < bg_rect[2]:
             self.screen.update('background', bg_rect)
-        if c_rect[0] < c_rect[2]:
+            if c_rect[0] < c_rect[2] and \
+               not (c_rect[0] >= bg_rect[0] and c_rect[1] >= bg_rect[1] and \
+                    c_rect[2] <= bg_rect[2] and c_rect[3] <= bg_rect[3]):
+                self.screen.update('content', c_rect)
+        elif c_rect[0] < c_rect[2]:
             self.screen.update('content', c_rect)
         
         self.last_bg_objects = self.bg_objects
@@ -657,7 +665,7 @@ class Skin_Area:
 
         height2 = height
         if height2 == -1:
-            height2 = font.h + 10
+            height2 = font.h + 2
 
         self.screen.draw('content', ('text', text, font, x, y, width, height, height2,
                                      align_h, align_v, mode, ellipses ))

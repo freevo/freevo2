@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/03/19 11:00:29  dischi
+# cache images inside the area and some bugfixes to speed up things
+#
 # Revision 1.6  2003/03/15 17:25:24  dischi
 # don't scale forced images
 #
@@ -58,10 +61,19 @@
 import pygame
 import osd
 import os
+import objectcache
 
 osd = osd.get_singleton()
 
+format_imagecache = objectcache.ObjectCache(20, desc='fomat_image')
+
 def format_image(settings, item, width, height, force=0):
+    cname = '%s-%s-%s-%s' % (item, width, height, force)
+    cimage = format_imagecache[cname]
+
+    if cimage:
+        return cimage
+    
     if hasattr(item, 'display_type'):
         type = item.display_type
     else:
@@ -118,5 +130,7 @@ def format_image(settings, item, width, height, force=0):
         else:
             height = int(float(width * i_h) / i_w)
 
-    return pygame.transform.scale(image, (width, height))
+    cimage = pygame.transform.scale(image, (width, height))
+    format_imagecache[cname] = cimage
+    return cimage
     

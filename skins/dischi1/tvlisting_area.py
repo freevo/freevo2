@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/03/19 11:00:31  dischi
+# cache images inside the area and some bugfixes to speed up things
+#
 # Revision 1.6  2003/03/16 19:36:07  dischi
 # Adjustments to the new xml_parser, added listing type 'image+text' to
 # the listing area and blue2, added grey skin. It only looks like grey1
@@ -80,7 +83,7 @@ class TVListing_Area(Skin_Area):
     """
 
     def __init__(self, parent, screen):
-        Skin_Area.__init__(self, 'listing', screen)
+        Skin_Area.__init__(self, 'listing', screen, imagecachesize=20)
         self.last_choices = ( None, None )
         self.last_settings = None
         self.last_items_geometry = None
@@ -215,7 +218,7 @@ class TVListing_Area(Skin_Area):
             x0 = int(x_contents + (float(w_contents) / n_cols) * i)
             x1 = int(x_contents + (float(w_contents) / n_cols) * (i+1))
             ty0 = content.y
-           
+
             if head_val.rectangle:
                 r = self.get_item_rectangle(head_val.rectangle, x1-x0, head_font.h)[2]
                 if r.x < 0:
@@ -244,13 +247,6 @@ class TVListing_Area(Skin_Area):
             ty0 = y0
             tx0 = content.x
 
-            channel_logo = config.TV_LOGOS + '/' + to_listing[i].id + '.png'
-            if os.path.isfile(channel_logo):
-                channel_logo = osd.loadbitmap(channel_logo)
-            else:
-                channel_logo = None
-
-
             logo_geo = [ tx0, ty0, label_width, font_h ]
             
             if label_val.rectangle:
@@ -264,19 +260,33 @@ class TVListing_Area(Skin_Area):
                             
                 self.drawroundbox(tx0 + r.x, ty0 + r.y, r.width, r.height, r)
                 
-                if channel_logo:
-                    logo_geo =[ tx0+r.x+r.size, ty0+r.y+r.size, r.width-2*r.size,
-                                r.height-2*r.size ]
+                logo_geo =[ tx0+r.x+r.size, ty0+r.y+r.size, r.width-2*r.size,
+                            r.height-2*r.size ]
                     
 
-            if channel_logo:
-                i_w, i_h = channel_logo.get_size()
-                if int(float(logo_geo[2] * i_h) / i_w) > logo_geo[3]:
-                    logo_geo[2] = int(float(logo_geo[3] * i_w) / i_h)
+            channel_logo = config.TV_LOGOS + '/' + to_listing[i].id + '.png'
+            if os.path.isfile(channel_logo):
+                image = self.imagecache[to_listing[i].id]
+                if image:
+                    channel_logo = image
                 else:
-                    logo_geo[3] = int(float(logo_geo[2] * i_h) / i_w)
+                    image = osd.loadbitmap(channel_logo)
+                    if image:
+                        i_w, i_h = image.get_size()
+                        if int(float(logo_geo[2] * i_h) / i_w) > logo_geo[3]:
+                            logo_geo[2] = int(float(logo_geo[3] * i_w) / i_h)
+                        else:
+                            logo_geo[3] = int(float(logo_geo[2] * i_h) / i_w)
                     
-                channel_logo = pygame.transform.scale(channel_logo, logo_geo[2:])
+                        channel_logo = pygame.transform.scale(image, logo_geo[2:])
+                        self.imagecache[to_listing[i].id] = channel_logo
+                    else:
+                        channel_logo = None
+            else:
+                channel_logo = None
+
+
+            if channel_logo:
                 self.draw_image(channel_logo, (logo_geo[0], logo_geo[1]))
 
 

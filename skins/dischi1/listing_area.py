@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/03/19 11:00:24  dischi
+# cache images inside the area and some bugfixes to speed up things
+#
 # Revision 1.10  2003/03/16 19:36:05  dischi
 # Adjustments to the new xml_parser, added listing type 'image+text' to
 # the listing area and blue2, added grey skin. It only looks like grey1
@@ -78,8 +81,8 @@ class Listing_Area(Skin_Area):
     def __init__(self, parent, screen):
         Skin_Area.__init__(self, 'listing', screen)
         self.last_choices = ( None, None )
-
-
+        self.last_get_items_geometry = [ None, None ]
+        
     def get_items_geometry(self, settings, menu, display_style):
         """
         get the geometry of the items. How many items per row/col, spaces
@@ -92,10 +95,13 @@ class Listing_Area(Skin_Area):
         self.display_style = display_style
         self.init_vars(settings, menu.item_types)
 
-        layout    = self.layout
-        area      = self.area_val
-        content   = self.calc_geometry(layout.content, copy_object=TRUE)
+        content   = self.calc_geometry(self.layout.content, copy_object=TRUE)
 
+        if self.last_get_items_geometry[0] == ( menu, content, display_style ):
+            return self.last_get_items_geometry[1]
+        
+        self.last_get_items_geometry[0] = ( menu, content, display_style )
+        
         if content.type == 'text':
             items_w = content.width
             items_h = 0
@@ -180,8 +186,11 @@ class Listing_Area(Skin_Area):
             rows += 1
 
         # return cols, rows, item_w, item_h, content.width
-        return (cols, rows, items_w + content.spacing,
-                items_h + content.spacing, -hskip, -vskip, width)
+        self.last_get_items_geometry[1] = (cols, rows, items_w + content.spacing,
+                                           items_h + content.spacing, -hskip, -vskip,
+                                           width)
+
+        return self.last_get_items_geometry[1]
 
 
 
@@ -248,10 +257,16 @@ class Listing_Area(Skin_Area):
 
             if content.type == 'text':
                 if choice.icon:
-                    image = osd.loadbitmap(choice.icon)
+                    cname = '%s-%s-%s' % (choice.icon, vspace-content.spacing,
+                                          vspace-content.spacing)
+                    image = self.imagecache[cname]
+                    if not image:
+                        image = osd.loadbitmap(choice.icon)
+                        if image:
+                            image = pygame.transform.scale(image, (vspace-content.spacing,
+                                                                   vspace-content.spacing))
+                            self.imagecache[cname] = image
                     if image:
-                        image = pygame.transform.scale(image, (vspace-content.spacing,
-                                                               vspace-content.spacing))
                         self.draw_image(image, (x0, y0))
                         icon_x = vspace
                 else:
