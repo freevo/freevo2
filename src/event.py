@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2003/11/09 12:01:25  dischi
+# add subtitle selection and osd info support for xine
+#
 # Revision 1.28  2003/10/23 02:26:52  outlyer
 # Bugfix for missing 'menu' button; it was here before, and it was removed
 # for some reason.
@@ -183,6 +186,7 @@ TOGGLE_OSD             = Event('TOGGLE_OSD')
 VIDEO_SEND_MPLAYER_CMD = Event('VIDEO_SEND_MPLAYER_CMD')
 VIDEO_MANUAL_SEEK      = Event('VIDEO_MANUAL_SEEK')
 VIDEO_NEXT_AUDIOLANG   = Event('VIDEO_NEXT_AUDIOLANG')
+VIDEO_NEXT_SUBTITLE    = Event('VIDEO_NEXT_SUBTITLE')
 STORE_BOOKMARK         = Event('STORE_BOOKMARK')
 MENU                   = Event('MENU')
 
@@ -365,6 +369,8 @@ DVD_EVENTS = {
     'RIGHT'     : DVDNAV_RIGHT,
     'ENTER'     : DVDNAV_SELECT,
     'SELECT'    : DVDNAV_SELECT,
+    'DISPLAY'   : TOGGLE_OSD,
+    'SUBTITLE'  : VIDEO_NEXT_SUBTITLE,
     'REW'       : Event(SEEK, arg=-10),
     'FFWD'      : Event(SEEK, arg=10),
     'GUIDE'     : DVDNAV_TITLEMENU,
@@ -386,6 +392,8 @@ VCD_EVENTS = {
     'REW'       : Event(SEEK, arg=-10),
     'FFWD'      : Event(SEEK, arg=10),
     'MENU'      : MENU,
+    'DISPLAY'   : TOGGLE_OSD,
+    'SUBTITLE'  : VIDEO_NEXT_SUBTITLE,
     '1'         : INPUT_1,
     '2'         : INPUT_2,
     '3'         : INPUT_3,
