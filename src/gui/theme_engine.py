@@ -1393,7 +1393,7 @@ def init_module():
     cachefile = os.path.join(config.FREEVO_CACHEDIR, 'skin-%s' % os.getuid())
     storage = {}
     if vfs.isfile(cachefile):
-        storage = util.read_pickle(cachefile)
+        storage = util.cache.load(cachefile)
         if not storage.has_key('GUI_XML_FILE'):
             # storage file too old
             storage = {}

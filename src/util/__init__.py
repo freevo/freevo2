@@ -38,3 +38,4 @@ from fileops import *
 from weakref import *
 import objectcache
 import fxdparser
+import cache

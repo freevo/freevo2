@@ -7,9 +7,6 @@
 # This module provides some file operation utils needed by Freevo. This
 # includes basic functions for removable media handling
 #
-# TODO: remove read_pickle and save_pickle, this functions are now in
-#       cache.py.
-#
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
@@ -386,15 +383,3 @@ def check_media(media_id):
         if media_id == media.id:
             return media
     return None
-
-
-
-# FIXME: remove this!!!
-
-import cache
-
-def read_pickle(file):
-    return cache.load(file)
-
-def save_pickle(data, file):
-    return cache.save(file, data)

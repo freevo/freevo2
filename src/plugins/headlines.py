@@ -15,6 +15,9 @@
 # for a full list of tested sites see Docs/plugins/headlines.txt
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2005/01/08 15:09:26  dischi
+# replace read_pickle and save_pickle with util.cache functions
+#
 # Revision 1.23  2004/10/06 18:59:52  dischi
 # remove import rc
 #
@@ -171,7 +174,7 @@ class HeadlinesSiteItem(Item):
             headlines = self.fetchheadlinesfromurl()
         else:
             #print 'Cache Headlines'
-            headlines = util.read_pickle(pfile)
+            headlines = util.cache.load(pfile)
         return headlines
 
 
@@ -212,7 +215,7 @@ class HeadlinesSiteItem(Item):
         #write the file
         if len(headlines) > 0:
             pfile = os.path.join(self.cachedir, 'headlines-%i' % self.location_index)
-            util.save_pickle(headlines, pfile)
+            util.cache.save(pfile, headlines)
 
         popup.destroy()
         return headlines

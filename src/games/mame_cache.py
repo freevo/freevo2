@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2005/01/08 15:09:25  dischi
+# replace read_pickle and save_pickle with util.cache functions
+#
 # Revision 1.20  2004/07/22 21:21:48  dischi
 # small fixes to fit the new gui code
 #
@@ -74,7 +77,7 @@ def getMameRomList():
     mameRomList = None
 
     if os.path.isfile(config.GAMES_MAME_CACHE):
-        mameRomList = util.read_pickle(config.GAMES_MAME_CACHE)
+        mameRomList = util.cache.read(config.GAMES_MAME_CACHE)
 
         try:
             file_ver = mameRomList.TYPES_VERSION
@@ -103,7 +106,7 @@ def saveMameRomList(mameRomList):
     if not mameRomList or mameRomList == None:
         mameRomList = mame_types.MameRomList()
 
-    util.save_pickle(mameRomList, config.GAMES_MAME_CACHE)
+    util.cache.save(config.GAMES_MAME_CACHE, mameRomList)
 
 
 #

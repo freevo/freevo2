@@ -129,7 +129,7 @@ class _Cache:
         else:
             if os.path.isfile(cachefile):
                 self.current_objects = cache.load(cachefile)
-                # maybe the cache file is broken and read_pickle returns None
+                # maybe the cache file is broken and cache returns None
                 if not self.current_objects:
                     self.current_objects = {}
             else:

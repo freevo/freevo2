@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2005/01/08 15:09:26  dischi
+# replace read_pickle and save_pickle with util.cache functions
+#
 # Revision 1.41  2004/11/13 15:56:13  dischi
 # do not import mediainfo in util.__init__
 #
@@ -144,11 +147,11 @@ def delete_old_files_2():
         if filename.startswith(config.OVERLAY_DIR + '/disc'):
             continue
         dirname = os.path.dirname(filename)[len(config.OVERLAY_DIR):]
-        data    = util.read_pickle(filename)
+        data    = util.cache.load(filename)
         for key in copy.copy(data):
             if not os.path.exists(dirname + '/' + key):
                 del data[key]
-        util.save_pickle(data, filename)
+        util.cache.save(filename, data)
     print 'done'
     
 
@@ -391,7 +394,7 @@ if __name__ == "__main__":
         info = None
         cachefile = os.path.join(config.FREEVO_CACHEDIR, 'mediainfo')
         if os.path.isfile(cachefile):
-            info = util.read_pickle(cachefile)
+            info = util.cache.load(cachefile)
         if not info:
             print
             print 'Unable to detect last complete rebuild, forcing rebuild'
@@ -457,8 +460,8 @@ mediainfo.sync()
 # save cache info
 try:
     import mmpython.version
-    util.save_pickle((mmpython.version.CHANGED, VERSION,
-                      int(time.time()), complete_update), cachefile)
+    util.cache.save(cachefile, (mmpython.version.CHANGED, VERSION,
+                                int(time.time()), complete_update))
 except ImportError:
     print 'WARNING: please update mmpython'
 
