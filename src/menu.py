@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.91  2004/03/14 19:43:27  dischi
+# make it possible to create a submenu inside a plugin
+#
 # Revision 1.90  2004/02/25 17:44:30  dischi
 # add special event mapping for tvmenu
 #
@@ -598,14 +601,17 @@ class MenuWidget(GUIObject):
                         actions.append(a)
                     else:
                         actions.append(a[:2])
-
+                        if len(a) == 3 and a[2] == 'MENU_SUBMENU':
+                            a[0](menuw=self)
+                            return
+                        
             if actions and (len(actions) > 1 or force):
                 self.make_submenu(menu.selected.name, actions, menu.selected)
             return
             
 
         elif event == MENU_CALL_ITEM_ACTION:
-            _debug_('calling action %s', event.arg)
+            _debug_('calling action %s' % event.arg)
 
             for a in menu.selected.actions():
                 if not isinstance(a, MenuItem) and len(a) > 2 and a[2] == event.arg:
