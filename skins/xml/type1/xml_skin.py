@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2002/09/23 18:59:00  dischi
+# Added alignment to font, some cleanups in xml_skin.py
+#
 # Revision 1.8  2002/09/23 18:18:52  dischi
 # remove shadow_mode stuff
 #
@@ -96,6 +99,9 @@ OSD_DEFAULT_FONT = 'skins/fonts/arialbd.ttf'
 # data structures
 #
 
+
+# This contains all the stuff a node can have, if it makes sence with
+# this special node or not
 class XML_data:
     color = bgcolor = 0
     x = y = 0
@@ -110,6 +116,7 @@ class XML_data:
     shadow_pad_x = shadow_pad_y = 1
     border_color = 0
     border_size = 0
+    align = 'left'
 
 
 class XML_menuitem(XML_data):
@@ -121,6 +128,7 @@ class XML_menuitems:
     dir = XML_menuitem()
     pl = XML_menuitem()
     
+
     
 class XML_menu:
     bgbitmap = ''
@@ -133,11 +141,9 @@ class XML_menu:
     submenu = XML_menuitem()
 
     
-class XML_mp3:
+class XML_mp3(XML_data):
     bgbitmap = ''
     progressbar = XML_data()
-    shadow = XML_data()
-    font = XML_data()
     title = XML_data()    
     
 class XML_mainmenuitem:
@@ -221,11 +227,14 @@ class XMLSkin:
         data.visible = self.attr_bool(node, "visible", data.visible)
         data.bgcolor = self.attr_hex(node, "bgcolor", data.bgcolor)
         data.color = self.attr_hex(node, "color", data.color) # will be overrided by font
+        data.border_color = self.attr_hex(node, "border_color", data.border_color)
+        data.border_size = self.attr_int(node, "border_size", data.border_size)
         for subnode in node.children:
             if subnode.name == u'font':
                 data.color = self.attr_hex(subnode, "color", data.color)
                 data.size = self.attr_int(subnode, "size", data.size)
                 data.font = self.attr_font(subnode, "name", data.font)
+                data.align = self.attr_str(subnode, "align", data.align)
             if subnode.name == u'selection':
                 data.selection = copy.copy(data.selection)
                 self.parse_node(subnode, data.selection)
@@ -309,26 +318,13 @@ class XMLSkin:
 
 
     #
-    # parse one mp3 node
-    #
-    def parse_mp3node(self, node, data):
-        data.x = self.attr_int(node, "x", data.x)
-        data.y = self.attr_int(node, "y", data.y)
-        data.height = self.attr_int(node, "height", data.height)
-        data.width = self.attr_int(node, "width", data.width)
-        data.visible = self.attr_bool(node, "visible", data.visible)
-        data.mode = self.attr_str(node, "mode", data.mode)
-        data.bgcolor = self.attr_hex(node, "bgcolor", data.bgcolor)
-        data.color = self.attr_hex(node, "color", data.color)
-        data.border_color = self.attr_hex(node, "border_color", data.border_color)
-        data.border_size = self.attr_int(node, "border_size", data.border_size)
-
-
-    #
     # read the skin informations for the mp3 player
     #
     def read_mp3(self, file, menu_node, copy_content):
         if copy_content: self.mp3 = copy.copy(self.mp3)
+
+        self.parse_node(menu_node, self.mp3)
+
         for node in menu_node.children:
             if node.name == u'bgbitmap':
                 self.mp3.bgbitmap = os.path.join(os.path.dirname(file), node.textof())
@@ -337,19 +333,9 @@ class XMLSkin:
                 if copy_content: self.mp3.title = copy.copy(self.mp3.title)
                 self.parse_node(node, self.mp3.title)
 
-            elif node.name == u'shadow':
-                if copy_content: self.mp3.shadow = copy.copy(self.mp3.shadow)
-                self.parse_mp3node(node, self.mp3.shadow)
-
             elif node.name == u'progressbar':
                 if copy_content: self.mp3.progressbar = copy.copy(self.mp3.progressbar)
-                self.parse_mp3node(node, self.mp3.progressbar)
-
-            elif node.name == u'font':
-                if copy_content: self.mp3.font = copy.copy(self.mp3.font)
-                self.mp3.font.font = self.attr_font(node, "name", self.mp3.font.font)
-                self.mp3.font.color = self.attr_hex(node, "color", self.mp3.font.color)
-                self.mp3.font.size = self.attr_int(node, "size", self.mp3.font.size)
+                self.parse_node(node, self.mp3.progressbar)
 
 
     #

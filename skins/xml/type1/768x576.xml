@@ -32,8 +32,8 @@
 
       <bgbitmap>../../images/aubin_bg1.png</bgbitmap>
 
-      <title visible="yes" x="-1" y="18">
-	<font name="oliversb" size="34" color="0x000000"/>
+      <title visible="yes" x="384" y="18">
+	<font name="oliversb" size="34" color="0x000000" align="center"/>
       </title>
 
       <items x="60" y="105" height="370" width="620">
@@ -80,8 +80,8 @@
 
     <!-- Settings for the mp3 player -->
     <mp3>
-      <title visible="yes" x="-1" y="15">
-	<font name="oliversb" size="38" color="0x000000"/>
+      <title visible="yes" x="384" y="15">
+	<font name="oliversb" size="38" color="0x000000" align="center"/>
       </title>
       <bgbitmap>../../images/aubin_bg1.png</bgbitmap>
       <font name="neuropol" size="18" color="0x58677c"/>
