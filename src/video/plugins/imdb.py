@@ -4,30 +4,19 @@
 # -----------------------------------------------------------------------
 # $Id$
 #
-# Notes: This is an example how plugins work
-# Todo:        
+# Notes: IMDB plugin. You can add IMDB informations for video items
+#        with the plugin
+#        activate with plugin.activate('video.imdb')
+#        You can also set imdb_search on a key (e.g. '1') by setting
+#        EVENTS['menu']['1'] = Event(MENU_CALL_ITEM_ACTION, arg='imdb_search')
+#
+# Todo:  - function to add to an existing fxd file
+#        - DVD/VCD support
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.6  2003/02/12 10:29:55  dischi
-# deactivated it because imdb.py in helpers isn't ready for the new xml
-# file format
-#
-# Revision 1.5  2003/01/14 20:35:10  dischi
-# small bugfix
-#
-# Revision 1.4  2003/01/07 20:43:39  dischi
-# Small fixes, the actions get the item as arg
-#
-# Revision 1.3  2003/01/07 19:44:29  dischi
-# small bugfix
-#
-# Revision 1.2  2002/12/30 15:57:06  dischi
-# Added search for DVD/VCD to the item menu. You can only search the disc
-# label and you can't insert your own search text
-#
-# Revision 1.1  2002/12/07 13:33:08  dischi
-# plugin example: add discs to imdb.py xml files
+# Revision 1.7  2003/06/07 11:32:48  dischi
+# reactivated the plugin
 #
 #
 # -----------------------------------------------------------------------
@@ -54,93 +43,87 @@
 
 import os
 
-import config
 import menu
-import skin
-import osd
+import plugin
+import re
 
-skin = skin.get_singleton()
-osd  = osd.get_singleton()
+from gui.PopupBox import PopupBox
 
-def actions(item):
-    if (not item.type == 'video') or item.mode == 'file' or item.rom_id or item.rom_label:
+
+def point_maker(matching):
+    """
+    small help function to split a movie name into parts
+    """
+    return '%s.%s' % (matching.groups()[0], matching.groups()[1])
+
+
+
+class PluginInterface(plugin.ItemPlugin):
+    def actions(self, item):
+        self.item = item
+
+        if item.type == 'video' and item.mode == 'file' and not item.info:
+            return [ ( self.imdb_search_file, 'Search IMDB for this file', 'imdb_search') ]
         return []
-    return []
-    return [ (imdb_search_disc, 'Search IMDB for [%s]' % item.label),
-             (imdb_add_disc_menu, 'Add disc to existing entry in database') ]
-
-# -------------------------------------------
-
-def imdb_search_disc(arg=None, menuw=None):
-    """
-    search imdb for this disc
-    """
-    import helpers.imdb
-
-    skin.PopupBox('searching IMDB, be patient...')
-    osd.update()
-
-    items = []
-    for id,name,year,type in helpers.imdb.search(arg.label):
-        items += [ menu.MenuItem('%s (%s, %s)' % (name, year, type),
-                                 imdb_create_disc, (id, year)) ]
-    moviemenu = menu.Menu('IMDB QUERY', items)
-    menuw.pushmenu(moviemenu)
 
 
-def imdb_create_disc(arg=None, menuw=None):
-    """
-    get imdb informations and store them
-    """
-    import helpers.imdb
+    def imdb_search_file(self, arg=None, menuw=None):
+        """
+        search imdb for this item
+        """
+        import helpers.imdb
 
-    skin.PopupBox('getting data, be patient...')
-    osd.update()
-    menuw.delete_menu()
-    menuw.delete_menu()
+        box = PopupBox(text='searching IMDB...')
+        box.show()
+        
+        name = self.item.filename
+        
+        name  = os.path.basename(os.path.splitext(name)[0])
+        name  = re.sub('([a-z])([A-Z])', point_maker, name)
+        name  = re.sub('([a-zA-Z])([0-9])', point_maker, name)
+        name  = re.sub('([0-9])([a-zA-Z])', point_maker, name.lower())
+        parts = re.split('[\._ -]', name)
+        
+        name = ''
+        for p in parts:
+            name += '%s ' % p
+        
+        items = []
+        for id,name,year,type in helpers.imdb.search(name):
+            items += [ menu.MenuItem('%s (%s, %s)' % (name, year, type),
+                                     self.imdb_create_fxd, (id, year)) ]
+        moviemenu = menu.Menu('IMDB QUERY', items)
 
-    disc_id = helpers.imdb.getCDID(arg.media.devicename)
-    filename = ('%s/%s_%s' % (config.MOVIE_DATA_DIR, arg.label, \
-                              arg[1])).lower()
-    if os.path.isfile('%s.xml' % filename):
-        filename = '%s_%s' % (filename, disc_id)
-
-    helpers.imdb.get_data_and_write_xml(arg[0], filename, disc_id,
-                                        arg.mode,None)
-    
-# -------------------------------------------
-
-def imdb_add_disc(arg=None, menuw=None):
-    """
-    call imdb.py to add this disc to the database
-    """
-    import helpers.imdb
-
-    skin.PopupBox('adding to database, be patient...')
-    osd.update()
-    menuw.delete_menu()
-    menuw.delete_menu()
-
-    helpers.imdb.add_id(arg.media.devicename, arg.xml_file)
+        box.destroy()
+        menuw.pushmenu(moviemenu)
 
 
-def imdb_add_disc_menu(arg=None, menuw=None):
-    """
-    make a list of all movies in config.MOVIE_DATA_DIR to select
-    one item
-    """
-    items = []
-    for m in config.MOVIE_INFORMATIONS:
-        # add all items with a name and when the name is not made to be
-        # a label regexp
-        if m.name and m.name.find('\\') == -1:
-            m.media = arg.media
-            i = menu.MenuItem(m.name, imdb_add_disc, m)
-            if m.image:
-                i.handle_type  = m.type
-                i.image = m.image
-            items += [ i ]
+    def imdb_create_fxd(self, arg=None, menuw=None):
+        """
+        create fxd file for the item
+        """
+        import helpers.imdb
+        import directory
+        
+        box = PopupBox(text='getting data...')
+        box.show()
+        
+        filename = os.path.splitext(self.item.filename)[0]
+        helpers.imdb.get_data_and_write_fxd(arg[0], filename, None, None,
+                                            (self.item.filename, ), None)
 
-    items.sort(lambda l, o: cmp(l.name.upper(), o.name.upper()))
-    moviemenu = menu.Menu('DVD/VCD DATABASE', items)
-    menuw.pushmenu(moviemenu)
+        # check if we have to go one menu back (called directly) or
+        # two (called from the item menu)
+        back = 1
+        if menuw.menustack[-2].selected != self.item:
+            back = 2
+            
+        # update the directory
+        if directory.dirwatcher_thread:
+            directory.dirwatcher_thread.scan()
+
+        # go back in menustack
+        for i in range(back):
+            menuw.delete_menu()
+        
+        box.destroy()
