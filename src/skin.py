@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/12/06 16:49:09  dischi
+# do not create a skin object for helpers
+#
 # Revision 1.8  2003/11/28 19:26:36  dischi
 # renamed some config variables
 #
@@ -74,8 +77,13 @@ def get_singleton():
     """
     global _singleton
     if _singleton == None:
+        # we don't need this for helpers
+        if config.HELPER:
+            return None
+    
         # Loads the skin implementation defined in freevo_config.py
-        exec('import skins.' + config.SKIN_MODULE  + '.' + config.SKIN_MODULE  + ' as skinimpl')
+        exec('import skins.' + config.SKIN_MODULE  + '.' + config.SKIN_MODULE  + \
+             ' as skinimpl')
 
         _debug_('Imported skin %s' % config.SKIN_MODULE,2)
     
