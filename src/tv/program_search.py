@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/02/23 08:22:10  gsbarbieri
+# i18n: help translators job.
+#
 # Revision 1.13  2004/02/21 19:33:56  dischi
 # use eventhandler from letter box
 #
@@ -93,7 +96,9 @@ class ProgramSearch(PopupBox):
 
         (self.server_available, msg) = record_client.connectionTest()
         if not self.server_available:
-            errormsg = Label(_('Record server unavailable: %s\n\nFeel free to impliment this function inside the main guide.') % msg, 
+            errormsg = Label(_('Recording server is unavailable.') + \
+                             ( ': %s\n\n' % msg ) + \
+                             _('Feel free to implement this function inside the main guide.'), 
                              self, Align.CENTER)
             return 
 
@@ -120,7 +125,7 @@ class ProgramSearch(PopupBox):
         
 
     def searchProg(self, find):
-        if DEBUG: print 'SEARCHING FOR: %s' % find
+        if DEBUG: print String('SEARCHING FOR: %s' % find)
         pop = PopupBox(parent=self, text=_('Searching, please wait...'))
         pop.show()
 

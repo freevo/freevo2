@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/02/23 08:22:10  gsbarbieri
+# i18n: help translators job.
+#
 # Revision 1.9  2004/02/19 04:57:57  gsbarbieri
 # Support Web Interface i18n.
 # To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
@@ -241,7 +244,7 @@ class EditFavorite(PopupBox):
                    self.osd.update()
        else:
            AlertBox(parent=self,
-                    text=_('Remove Failed: %s') % msg).show()
+                    text=_('Remove Failed')+(': %s' % msg)).show()
 
     def eventhandler(self, event, menuw=None):
         #print 'SELECTED CHILD: %s' % self.get_selected_child()

@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/02/23 08:24:25  gsbarbieri
+# i18n: help translators job.
+#
 # Revision 1.13  2003/12/01 20:01:21  dischi
 # fix crash for missing infos
 #
@@ -74,8 +77,9 @@ class PluginInterface(plugin.ItemPlugin):
         show info for this item
         """
         text='%s\n \n \n  %s\n \n \n----\n' % (self.item.name, self.item.getattr('plot'))
-        text += _(' Year: %s\n Genre: %s\n Rating: %s\n Runtime: %s') % \
-                (self.item.getattr('year'), self.item.getattr('genre'),
-                 self.item.getattr('rating'),self.item.getattr('length'))
+        text += ' ' + _('Year') + ( ': %s\n' % self.item.getattr('year') )
+        text += ' ' + _('Genre') + ( ': %s\n' % self.item.getattr('genre') )
+        text += ' ' + _('Rating') + ( ': %s\n' % self.item.getattr('rating') )
+        text += ' ' + _('Runtime') + ( ': %s\n' % self.item.getattr('length') )
         
         AlertBox(icon=self.item.image, width=550, height=400, text=text).show()

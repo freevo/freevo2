@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2004/02/23 08:22:10  gsbarbieri
+# i18n: help translators job.
+#
 # Revision 1.27  2004/02/23 03:43:23  rshortt
 # Ditch the popup-gui style in favour of a faster and more freevo-like menu.
 #
@@ -85,7 +88,7 @@ class ProgramItem(Item):
 
 
     def actions(self):
-        return [( self.display_program , 'Display program' )]
+        return [( self.display_program , _('Display program') )]
 
 
     def display_program(self, arg=None, menuw=None):
@@ -119,7 +122,7 @@ class ProgramItem(Item):
     def find_more(self, arg=None, menuw=None):
         # XXX: The searching part of this function could probably be moved
 	#      into a util module or record_client itself.
-        _debug_('searching for: %s' % self.prog.title)
+        _debug_(String('searching for: %s' % self.prog.title))
 
         pop = PopupBox(text=_('Searching, please wait...'))
         pop.show()
@@ -157,7 +160,7 @@ class ProgramItem(Item):
             if menuw:  
                 menuw.back_one_menu(arg='reload')
         else:
-            AlertBox(text=_('Scheduling Failed: %s') % msg).show()
+            AlertBox(text=_('Scheduling Failed')+(': %s' % msg)).show()
         # then menu back one or refresh the menu with remove option
 	# instead of schedule
 
@@ -173,7 +176,7 @@ class ProgramItem(Item):
                 menuw.back_one_menu(arg='reload')
 
         else:
-            AlertBox(text=_('Remove Failed: %s') % msg).show()
+            AlertBox(text=_('Remove Failed')+(': %s' % msg)).show()
 
 
 

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/02/23 08:22:10  gsbarbieri
+# i18n: help translators job.
+#
 # Revision 1.1  2004/02/23 03:48:14  rshortt
 # A plugin to view a list of scheduled recordings instead of hardcoding it
 # into tvmenu.py.  This uses ProgramItem and blurr2 will present an info area
@@ -56,7 +59,7 @@ class ScheduledRecordingsItem(Item):
 
 
     def actions(self):
-        return [ ( self.display_schedule , 'Display Scheduled Recordings' ) ]
+        return [ ( self.display_schedule , _('Display Scheduled Recordings') ) ]
 
 
     def display_schedule(self, arg=None, menuw=None):
@@ -64,7 +67,7 @@ class ScheduledRecordingsItem(Item):
 
         (server_available, msg) = record_client.connectionTest()
         if not server_available:
-            AlertBox(_('Record server unavailable: %s') % msg, 
+            AlertBox(_('Recording server is unavailable.')+(': %s' % msg),
                      self, Align.CENTER).show()
             return
 
@@ -78,7 +81,7 @@ class ScheduledRecordingsItem(Item):
             for prog in progs:
                 items.append(ProgramItem(self, prog, context='schedule'))
         else:
-            AlertBox(_('Get recordings failed: %s') % recordings,
+            AlertBox(_('Get recordings failed')+(': %s' % recordings),
                      self, Align.CENTER).show()
             return
 

@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/02/23 08:22:10  gsbarbieri
+# i18n: help translators job.
+#
 # Revision 1.8  2004/02/18 21:55:11  dischi
 # update to new gui code
 #
@@ -98,7 +101,7 @@ class ViewFavorites(PopupBox):
 
         (self.server_available, msg) = record_client.connectionTest()
         if not self.server_available:
-            errormsg = Label(_('Record server unavailable: %s') % msg, 
+            errormsg = Label(_('Recording server is unavailable.')+(': %s' % msg),
                              self, Align.CENTER)
             return 
 
@@ -123,7 +126,7 @@ class ViewFavorites(PopupBox):
     def refreshList(self):
         (self.result, favorites) = record_client.getFavorites()
         if not self.result:
-            errormsg = Label(_('Get favorites failed: %s') % recordings,
+            errormsg = Label(_('Get favorites failed')+(': %s' % recordings),
                              self, Align.CENTER)
             return
 
@@ -142,16 +145,16 @@ class ViewFavorites(PopupBox):
             for fav in favorites:
                 i += 1
                 if fav.channel == 'ANY':
-                    chan = 'any channel'
+                    chan = _('ANY CHANNEL')
                 else:
                     chan = fav.channel
                 if fav.dow == 'ANY':
-                    dow = 'any day'
+                    dow = _('ANY DAY')
                 else:
-                    week_days = ('Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat', 'Sun')
+                    week_days = (_('Mon'), _('Tue'), _('Wed'), _('Thu'), _('Fri'), _('Sat'), _('Sun'))
                     dow = week_days[int(fav.dow)]
                 if fav.mod == 'ANY':
-                    mod = 'any time'
+                    mod = _('ANY TIME')
                 else:
                     mod = strftime(config.TV_TIMEFORMAT, gmtime(float(fav.mod * 60)))
                 self.results.add_item(text='%s: %s (%s, %s, %s)' % \

@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/02/23 08:22:10  gsbarbieri
+# i18n: help translators job.
+#
 # Revision 1.2  2004/02/18 23:57:05  mikeruelle
 # reflect dischi's changes
 #
@@ -90,7 +93,7 @@ class PluginInterface(plugin.Plugin):
 
     def items(self, parent):
         self.parent = parent
-        return [menu.MenuItem('Manual Record', action=self.show_manual_record)]
+        return [menu.MenuItem(_('Manual Record'), action=self.show_manual_record)]
 
     def show_manual_record(self, menuw=None, arg=None):
         ManualRecord(parent=self.parent).show()
@@ -121,16 +124,16 @@ class ManualRecord(PopupBox):
         # check the record server and see if up
         (self.server_available, msg) = record_client.connectionTest()
         if not self.server_available:
-            errormsg = Label(_('Record server unavailable: %s') % msg,
+            errormsg = Label(_('Recording server is unavailable.')+(': %s' % msg),
                              self, Align.CENTER)
             return
 
-        name = Label(_('Name:'), self, Align.LEFT)
+        name = Label(_('Name')+':', self, Align.LEFT)
         self.name_input = LetterBoxGroup(text='Test')
         self.name_input.h_align = Align.NONE
         self.add_child(self.name_input)
 
-        chan = Label(_('Channel:'), self, Align.LEFT)
+        chan = Label(_('Channel')+':', self, Align.LEFT)
 
         self.chan_box = OptionBox('ANY')
         self.chan_box.h_align = Align.NONE
@@ -145,12 +148,12 @@ class ManualRecord(PopupBox):
         self.add_child(self.chan_box)
 
         # date 1
-        toda1 = Label(_('Start Day:'), self, Align.LEFT)
+        toda1 = Label(_('Start Day')+':', self, Align.LEFT)
 	#month box
         self.todm_box1 = OptionBox('ANY')
         self.todm_box1.h_align = Align.NONE
 	todm_index1 = 0
-        mymonths = [ 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' ]
+        mymonths = [ _('Jan'), _('Feb'), _('Mar'), _('Apr'), _('May'), _('Jun'), _('Jul'), _('Aug'), _('Sep'), _('Oct'), _('Nov'), _('Dec') ]
         for m in range(0, 12):
             self.todm_box1.add_item(text=mymonths[m], value=m+1)
         self.todm_box1.toggle_selected_index(todm_index1)
@@ -167,7 +170,7 @@ class ManualRecord(PopupBox):
         self.add_child(self.todd_box1)
 
         # time 1
-        tod1 = Label(_('Start Time:'), self, Align.LEFT)
+        tod1 = Label(_('Start Time')+':', self, Align.LEFT)
         self.tod_box1 = OptionBox('ANY')
         self.tod_box1.h_align = Align.NONE
 
@@ -184,7 +187,7 @@ class ManualRecord(PopupBox):
         self.add_child(self.tod_box1)
 
         # date 2
-        toda2 = Label(_('Stop Day:'), self, Align.LEFT)
+        toda2 = Label(_('Stop Day')+':', self, Align.LEFT)
 	#month box
         self.todm_box2 = OptionBox('ANY')
         self.todm_box2.h_align = Align.NONE
@@ -206,7 +209,7 @@ class ManualRecord(PopupBox):
 
 
         # time 2
-        tod2 = Label(_('End Time:'), self, Align.LEFT)
+        tod2 = Label(_('End Time')+':', self, Align.LEFT)
         self.tod_box2 = OptionBox('ANY')
         self.tod_box2.h_align = Align.NONE
 
@@ -469,7 +472,7 @@ class ManualRecord(PopupBox):
         if abs(stoptime - starttime) < (MAXDAYS * 86400): 
             if starttime < stoptime:
                 if stoptime < curtime_epoch + MINPICKUP:
-                    self.errormsg = "Sorry, the stop time does not give enough time for cron to pickup the change.  Please set it to record for a few minutes longer."
+                    self.errormsg = _("Sorry, the stop time does not give enough time for scheduler to pickup the change.  Please set it to record for a few minutes longer.")
                 else:
                     # assign attributes to object
                     prog = TvProgram()
@@ -477,13 +480,16 @@ class ManualRecord(PopupBox):
                     if title:
                         prog.title = title
                     else:
-                        prog.title = "Manual Recorded"
+                        prog.title = _("Manual Recorded")
                     prog.start = starttime
                     prog.stop = stoptime
             else:
-                self.errormsg = "start time is not before stop time." 
+                self.errormsg = _("start time is not before stop time." )
         else:
-            self.errormsg = "Program would record for more than " + str(MAXDAYS) + " day(s)!"
+            if MAXDAYS > 1:
+                errormsg = _("Program would record for more than %d days!") % MAXDAYS
+            else:
+                errormsg = _("Program would record for more than 1 day!") % MAXDAYS
         return prog
 
     def schedule_recording(self,prog):
