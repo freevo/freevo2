@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/02/21 04:59:55  krister
+# Bugfix for downarrow on last page.
+#
 # Revision 1.7  2003/02/19 14:54:01  dischi
 # Some cleanups:
 # utils has a function to return a preview image based on the item and
@@ -89,8 +92,8 @@ class Skin_Image:
         val = settings.e_menu['image']
 
         up = menu.page_start            # 0 if first page
-        if menu.page_start + (self.getCols(val) * self.getRows(val)) > \
-           len(menu.choices):
+        if (menu.page_start + (self.getCols(val) * self.getRows(val)) >=
+            len(menu.choices)):
             down = 0
         else:
             down = 1
