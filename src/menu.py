@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2003/04/19 21:28:39  dischi
+# identifymedia.py is now a plugin and handles everything related to
+# rom drives (init, autostarter, items in menus)
+#
 # Revision 1.37  2003/04/19 19:03:38  dischi
 # bugfix
 #
@@ -88,6 +92,8 @@ import traceback
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
+
+import plugin
 
 from item import Item
 
@@ -230,7 +236,7 @@ class MenuWidget(GUIObject):
         self.rows = 0
         self.cols = 0
         self.visible = 1
-
+        self.eventhandler_plugins = None
 
     def show(self):
         if not self.visible:
@@ -551,8 +557,16 @@ class MenuWidget(GUIObject):
                 
 
         elif hasattr(menu.selected, 'eventhandler') and menu.selected.eventhandler:
-            menu.selected.eventhandler(event = event, menuw=self)
+            if menu.selected.eventhandler(event = event, menuw=self):
+                return
+            
+        if self.eventhandler_plugins == None:
+            self.eventhandler_plugins = plugin.get('daemon_eventhandler')
 
+        for p in self.eventhandler_plugins:
+            if p.eventhandler(event=event, menuw=self):
+                return
+        
         return 0
 
 

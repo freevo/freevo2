@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2003/04/19 21:28:39  dischi
+# identifymedia.py is now a plugin and handles everything related to
+# rom drives (init, autostarter, items in menus)
+#
 # Revision 1.37  2003/04/18 15:01:36  dischi
 # support more types of plugins and removed the old item plugin support
 #
@@ -105,9 +109,6 @@ import skin    # The skin class
 import mixer   # The mixer class
 import rc      # The RemoteControl class.
 
-from gui.PopupBox import PopupBox
-
-import identifymedia
 import signal
 
 from item import Item
@@ -154,11 +155,6 @@ osd = osd.get_singleton()
 
 # Create the MenuWidget object
 menuwidget = menu.get_singleton()
-
-# Identify_Thread
-im_thread = None
-
-
 
 
 def shutdown(menuw=None, arg=None, allow_sys_shutdown=1):
@@ -277,19 +273,6 @@ class MainMenu(Item):
         Automatically perform actions depending on the event, e.g. play DVD
         """
 
-        global im_thread
-        
-        # if we are at the main menu and there is an IDENTIFY_MEDIA event,
-        # try to autorun the media
-        if event == rc.IDENTIFY_MEDIA and im_thread and im_thread.last_media and \
-           menuw and len(menuw.menustack) == 1:
-            media = im_thread.last_media
-            if media.info and media.info.actions():
-                media.info.actions()[0][0](menuw=menuw)
-            else:
-                menuw.refresh()
-            return TRUE
-
         # pressing DISPLAY on the main menu will open a skin selector
         # (only for the new skin code)
         if event == rc.DISPLAY:
@@ -298,82 +281,11 @@ class MainMenu(Item):
                 items += [ SkinSelectItem(self, name, image, skinfile) ]
 
             menuwidget.pushmenu(menu.Menu('SKIN SELECTOR', items))
+            return TRUE
 
-        print 'main.py:eventhandler(): event=%s, arg=%s' % (event, arg)
-    
-
-class RemovableMedia:
-
-    def __init__(self, mountdir='', devicename='', drivename=''):
-        # This is read-only stuff for the drive itself
-        self.mountdir = mountdir
-        self.devicename = devicename
-        self.drivename = drivename
-
-        # Dynamic stuff
-        self.tray_open = 0
-        self.drive_status = None  # return code from ioctl for DRIVE_STATUS
-
-        self.id        = ''
-        self.label     = ''
-        self.info      = None
-        self.videoinfo = None
-        self.type      = 'empty_cdrom'
-
-    def is_tray_open(self):
-        return self.tray_open
-
-    def move_tray(self, dir='toggle', notify=1):
-        """Move the tray. dir can be toggle/open/close
-        """
-
-        if dir == 'toggle':
-            if self.tray_open:
-                dir = 'close'
-            else:
-                dir = 'open'
-
-        if dir == 'open':
-            if DEBUG: print 'Ejecting disc in drive %s' % self.drivename
-            if notify:
-                pop = PopupBox(text='Ejecting disc in drive %s' % self.drivename) 
-                pop.show()
-            os.system('eject %s' % self.devicename)
-            self.tray_open = 1
-            if notify:
-                pop.destroy()
-
+        # give the event to the next eventhandler in the list
+        return Item.eventhandler(self, event, menuw)
         
-        elif dir == 'close':
-            if DEBUG: print 'Inserting %s' % self.drivename
-            if notify:
-                pop = PopupBox(text='Reading disc in drive %s' % self.drivename)
-                pop.show()
-
-            # close the tray, identifymedia does the rest,
-            # including refresh screen
-            os.system('eject -t %s' % self.devicename)
-            self.tray_open = 0
-            if notify:
-                pop.destroy()
-
-    
-    def mount(self):
-        """Mount the media
-        """
-
-        if DEBUG: print 'Mounting disc in drive %s' % self.drivename
-        util.mount(self.mountdir)
-        return
-
-    
-    def umount(self):
-        """Mount the media
-        """
-
-        if DEBUG: print 'Unmounting disc in drive %s' % self.drivename
-        util.umount(self.mountdir)
-        return
     
 
 def signal_handler(sig, frame):
@@ -397,35 +309,12 @@ def main_func():
     import plugin
     plugin.init()
     
-    # Add the drives to the config.removable_media list. There doesn't have
-    # to be any drives defined.
-    if config.ROM_DRIVES != None: 
-        for i in range(len(config.ROM_DRIVES)):
-            (dir, device, name) = config.ROM_DRIVES[i]
-            media = RemovableMedia(mountdir=dir, devicename=device,
-                                   drivename=name)
-            # close the tray without popup message
-            media.move_tray(dir='close', notify=0)
-            osd.clearscreen(color=osd.COL_BLACK)
-            osd.update()
-            config.REMOVABLE_MEDIA.append(media)
-
-    # Remove the ROM_DRIVES member to make sure it is not used by
-    # legacy code!
-    del config.ROM_DRIVES   # XXX Remove later
-    
     signal.signal(signal.SIGTERM, signal_handler)
 
-    # Start identifymedia thread
-    global im_thread
-    im_thread = identifymedia.Identify_Thread()
-    im_thread.setDaemon(1)
-    im_thread.start()
-    
     main = MainMenu()
     main.getcmd()
 
-    daemon_plugins = plugin.get('daemon')
+    poll_plugins = plugin.get('daemon_poll')
 
     # Kick off the main menu loop
     print 'Main loop starting...'
@@ -442,15 +331,13 @@ def main_func():
             if event:
                 break
             if not rc.func:
-                for p in daemon_plugins:
-                    if p.poll:
-                        p.poll()
+                for p in poll_plugins:
+                    p.poll()
             time.sleep(0.1)
 
         if not rc.func:
-            for p in daemon_plugins:
-                if p.poll:
-                    p.poll()
+            for p in poll_plugins:
+                p.poll()
 
         # Handle volume control   XXX move to the skin
         if event == rc.VOLUP:
@@ -481,16 +368,6 @@ def main_func():
                     mainVolume = mixer.getPcmVolume()
                     mixer.setPcmVolume(0)
                 muted = 1
-
-        # Handle the EJECT key for the main menu
-        elif event == rc.EJECT and len(menuwidget.menustack) == 1:
-
-            # Are there any drives defined?
-            if not config.REMOVABLE_MEDIA: continue
-
-            # The default is the first drive in the list
-            media = config.REMOVABLE_MEDIA[0]  
-            media.move_tray(dir='toggle')
 
         # Send events to either the current app or the menu handler
         if rc.app:

@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.51  2003/04/19 21:28:39  dischi
+# identifymedia.py is now a plugin and handles everything related to
+# rom drives (init, autostarter, items in menus)
+#
 # Revision 1.50  2003/04/18 15:01:36  dischi
 # support more types of plugins and removed the old item plugin support
 #
@@ -203,34 +207,6 @@ class MediaMenu(Item):
         for p in plugins:
             items += p.items(self)
 
-        # add rom drives
-        for media in config.REMOVABLE_MEDIA:
-            if media.info:
-                # if this is a video item (e.g. DVD) and we are not in video
-                # mode, deactivate it
-                if media.info.type == 'video' and self.display_type != 'video':
-                    m = Item(self)
-                    m.type = media.info.type
-                    m.copy(media.info)
-                    m.media = media
-                    items += [ m ]
-
-                elif self.display_type == 'video' and media.videoinfo:
-                    media.videoinfo.parent = self
-                    items += [ media.videoinfo ]
-                    
-                else:
-                    media.info.parent = self
-                    if media.info.type == 'dir':
-                        media.info.display_type = self.display_type
-                    items += [ media.info ]
-            else:
-                m = Item(self)
-                m.name = 'Drive %s (no disc)' % media.drivename
-                m.media = media
-                media.info = m
-                items += [ m ]
-
         return items
 
 
@@ -262,7 +238,7 @@ class MediaMenu(Item):
         eventhandler for the main menu. The menu must be regenerated
         when a disc in a rom drive changes
         """
-        if event == rc.IDENTIFY_MEDIA:
+        if plugin.isevent(event):
             if not menuw:               # this shouldn't happen
                 menuw = menu_module.get_singleton() 
 
@@ -270,7 +246,8 @@ class MediaMenu(Item):
 
             sel = menu.choices.index(menu.selected)
             menuw.menustack[1].choices = self.main_menu_generate()
-            menu.selected = menu.choices[sel]
+            if not menu.selected in menu.choices:
+                menu.selected = menu.choices[sel]
 
             if menu == menuw.menustack[-1] and not rc.app:
                 menuw.init_page()
@@ -278,7 +255,7 @@ class MediaMenu(Item):
             return TRUE
 
         if event in (rc.PLAY_END, rc.USER_END, rc.EXIT, rc.STOP):
-            self.menuw.show()
+            menuw.show()
             return TRUE
 
         # give the event to the next eventhandler in the list

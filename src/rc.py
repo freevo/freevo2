@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/04/19 21:28:39  dischi
+# identifymedia.py is now a plugin and handles everything related to
+# rom drives (init, autostarter, items in menus)
+#
 # Revision 1.9  2003/04/06 21:12:56  dischi
 # o Switched to the new main skin
 # o some cleanups (removed unneeded inports)
@@ -134,10 +138,10 @@ class RemoteControl:
     # Application generated codes
     PLAY_END = 'PLAY_END'     # Reached end of song, movie, etc
     USER_END = 'USER_END'     # User ended the song, etc
-    IDENTIFY_MEDIA = 'IDENTIFY_MEDIA'
+
     REFRESH_SCREEN = 'REFRESH_SCREEN'
     REBUILD_SCREEN = 'REBUILD_SCREEN'
-    DVD_PROTECTED = 'DVD_PROTECTED' # Cannot play prot. DVDs
+    DVD_PROTECTED  = 'DVD_PROTECTED' # Cannot play prot. DVDs
 
     def __init__(self, port=config.REMOTE_CONTROL_PORT):
         self.pylirc = PYLIRC

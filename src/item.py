@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/04/19 21:28:39  dischi
+# identifymedia.py is now a plugin and handles everything related to
+# rom drives (init, autostarter, items in menus)
+#
 # Revision 1.10  2003/04/15 20:00:17  dischi
 # make MenuItem inherit from Item
 #
@@ -65,7 +69,7 @@ class Item:
         self.parent   = parent          # parent item to pass unmapped event
         self.xml_file = None            # skin informationes etc.
         self.menuw    = None
-        
+        self.eventhandler_plugins = []
         # possible variables for an item.
         # some or only needed for video or image or audio
         # these variables are copied by the copy function
@@ -133,21 +137,23 @@ class Item:
         
     # eventhandler for this item
     def eventhandler(self, event, menuw=None):
-        if event == rc.EJECT and self.media and menuw and \
-           menuw.menustack[1] == menuw.menustack[-1]:
-            self.media.move_tray(dir='toggle')
-            return TRUE
+        if not menuw:
+            menuw = self.menuw
 
+        for p in self.eventhandler_plugins:
+            if p(event, self, menuw):
+                return TRUE
+            
         # give the event to the next eventhandler in the list
         if self.parent:
             return self.parent.eventhandler(event, menuw)
 
         else:
-            if event == rc.PLAY_END or event == rc.USER_END and self.menuw:
-                if self.menuw.visible:
+            if event == rc.PLAY_END or event == rc.USER_END and menuw:
+                if menuw.visible:
                     menuw.refresh()
                 else:
-                    self.menuw.show()
+                    menuw.show()
                 return TRUE
 
         print 'no eventhandler for event %s menuw %s' % (event, menuw)

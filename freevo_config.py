@@ -187,11 +187,34 @@ SHUTDOWN_SYS_CMD = 'shutdown -h now'  # set this to 'sudo shutdown -h now' if
                                       # you don't have the permissions to
                                       # shutdown
 
+
+# ======================================================================
+# Plugins:
+# ======================================================================
+
+# you can remove all plugins later in your local_conf.py by setting
+# plugin.remove(code).
+#
+# Examples:
+# plugin.remove(plugin_tv) will remove the tv module from the main menu
+# plugin.remove(rom_plugins['image']) will remove the rom drives from the
+#   image main menu
+
+
+# ROM drive support
+
+# autostarter when inserting roms while Freevo is in the MAIN MENU
+autostart_plugin = plugin.activate('identifymedia.autostart')
+
+# add the rom drives to each sub main menu
+rom_plugins = {}
+for type in ('video', 'audio', 'image', 'games'):
+    rom_plugins[type] = plugin.activate('identifymedia.rom_items',
+                                        type='mainmenu_%s' % type, level=50)
+
+
+
 # Items in the main menu.
-
-# e.g. to remove the tv module, put plugin.remove(plugin_tv) in
-# your local_conf.py
-
 plugin_tv       = plugin.activate('tv.tv', level=10)
 plugin_video    = plugin.activate('mediamenu', level=20, args=('video', ))
 plugin_audio    = plugin.activate('mediamenu', level=30, args=('audio', ))

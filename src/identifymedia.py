@@ -1,6 +1,6 @@
 #if 0 /*
 # -----------------------------------------------------------------------
-# identifymedia.py - the Freevo identifymedia/automount module
+# identifymedia.py - the Freevo identifymedia/automount plugin
 # -----------------------------------------------------------------------
 # $Id$
 #
@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/04/19 21:28:38  dischi
+# identifymedia.py is now a plugin and handles everything related to
+# rom drives (init, autostarter, items in menus)
+#
 # Revision 1.24  2003/04/12 18:27:29  dischi
 # special video item handling
 #
@@ -28,29 +32,6 @@
 # Revision 1.19  2003/03/10 07:09:48  outlyer
 # Added an uppercase /VIDEO_TS/ for DVDs in identifymedia. I couldn't verify
 # this works since I lack a cdrom drive.
-#
-# Revision 1.18  2003/02/25 05:31:47  krister
-# Made CD audio playing use -cdrom-device for mplayer.
-#
-# Revision 1.17  2003/02/19 06:42:57  krister
-# Thomas Schuppels latest CDDA fixes. I changed some info formatting, made it possible to play unknown disks, added MPlayer 1MB caching (important) of CD tracks.
-#
-# Revision 1.16  2003/02/17 21:14:02  dischi
-# Bugfix. CD detection now works again
-#
-# Revision 1.15  2003/02/17 06:03:58  krister
-# Disable CDDB is the runtime is used, there's some problem with that right now.
-#
-# Revision 1.14  2003/02/17 03:27:10  outlyer
-# Added Thomas' CDDB support patch. I don't have a CD-rom drive in my machine,
-# so I can't verify it works; code looks good though.
-#
-# I only had to make one change from the original submitted patch, which was
-# to make sure we don't crash in audiodiskitem if the system lacks CDDB, the
-# check was already performed in identifymedia.
-#
-# Revision 1.13  2003/02/15 04:03:02  krister
-# Joakim Berglunds patch for finding music/movie cover pics.
 #
 #
 # -----------------------------------------------------------------------
@@ -79,14 +60,20 @@ import time, os
 from fcntl import ioctl
 import re
 import threading
-import config
-import util
-import rc
 import string
 import copy
 
+import config
+import util
+import rc
+import plugin
+
 from audio.audiodiskitem import AudioDiskItem
 from video.videoitem import VideoItem
+from item import Item
+
+TRUE  = 1
+FALSE = 0
 
 # CDDB Stuff
 try:
@@ -97,6 +84,9 @@ except:
 
 from video import xml_parser, videoitem
 from mediamenu import DirItem
+
+rc = rc.get_singleton()
+
 
 DEBUG = config.DEBUG   # 1 = regular debug, 2 = more verbose
 
@@ -112,13 +102,227 @@ CDS_AUDIO=100
 CDROM_SELECT_SPEED=0x5322
 
 
+# Identify_Thread
+im_thread = None
+
+from gui.PopupBox import PopupBox
+
+
+def init():
+    # Add the drives to the config.removable_media list. There doesn't have
+    # to be any drives defined.
+    if config.ROM_DRIVES != None: 
+        for i in range(len(config.ROM_DRIVES)):
+            (dir, device, name) = config.ROM_DRIVES[i]
+            media = RemovableMedia(mountdir=dir, devicename=device,
+                                   drivename=name)
+            # close the tray without popup message
+            media.move_tray(dir='close', notify=0)
+            config.REMOVABLE_MEDIA.append(media)
+
+    # Remove the ROM_DRIVES member to make sure it is not used by
+    # legacy code!
+    del config.ROM_DRIVES   # XXX Remove later
+    
+    # Start identifymedia thread
+    global im_thread
+    im_thread = Identify_Thread()
+    im_thread.setDaemon(1)
+    im_thread.start()
+
+
+class autostart(plugin.DaemonPlugin):
+    """
+    Plugin to autostart if a new medium is inserted while Freevo shows
+    the main menu
+    """
+    def __init__(self):
+        plugin.DaemonPlugin.__init__(self)
+        global im_thread
+        if not im_thread:
+            init()
+            
+    def eventhandler(self, event = None, menuw=None, arg=None):
+        """
+        eventhandler to handle the IDENTIFY_MEDIA plugin event and the
+        EJECT event
+        """
+        global im_thread
+        
+        # if we are at the main menu and there is an IDENTIFY_MEDIA event,
+        # try to autorun the media
+        if plugin.isevent(event) == 'IDENTIFY_MEDIA' and im_thread.last_media and \
+           menuw and len(menuw.menustack) == 1:
+            media = im_thread.last_media
+            if media.info:
+                media.info.parent = menuw.menustack[0].selected
+            if media.info and media.info.actions():
+                media.info.actions()[0][0](menuw=menuw)
+            else:
+                menuw.refresh()
+            return TRUE
+
+        # Handle the EJECT key for the main menu
+        elif event == rc.EJECT and len(menuw.menustack) == 1:
+
+            # Are there any drives defined?
+            if config.REMOVABLE_MEDIA:
+                # The default is the first drive in the list
+                media = config.REMOVABLE_MEDIA[0]  
+                media.move_tray(dir='toggle')
+                return TRUE
+            
+
+
+class rom_items(plugin.MainMenuPlugin):
+    """
+    Plugin to add the rom drives to a main menu. This can be the global main menu
+    or most likely the video/audio/image/games main menu
+    """
+    def __init__(self):
+        plugin.MainMenuPlugin.__init__(self)
+        self.parent = None
+        global im_thread
+        if not im_thread:
+            init()
+        
+    def items(self, parent):
+        """
+        return the list of rom drives
+        """
+        self.parent = parent
+        items = []
+        for media in config.REMOVABLE_MEDIA:
+            if media.info:
+                # if this is a video item (e.g. DVD) and we are not in video
+                # mode, deactivate it
+                if media.info.type == 'video' and parent.display_type != 'video':
+                    m = Item(parent)
+                    m.type = media.info.type
+                    m.copy(media.info)
+                    m.media = media
+
+                elif parent.display_type == 'video' and media.videoinfo:
+                    m = media.videoinfo
+                    
+                else:
+                    if media.info.type == 'dir':
+                        media.info.display_type = parent.display_type
+                    m = media.info
+
+            else:
+                m = Item(parent)
+                m.name = 'Drive %s (no disc)' % media.drivename
+                m.media = media
+                media.info = m
+
+            # hack: now make self the parent to get the events
+            m.parent = parent
+            m.eventhandler_plugins.append(self.items_eventhandler)
+            items.append(m)
+            
+        return items
+
+
+    def items_eventhandler(self, event, item, menuw):
+        """
+        handle EJECT for the rom drives
+        """
+        if event == rc.EJECT and item.media and menuw and \
+           menuw.menustack[1] == menuw.menustack[-1]:
+            item.media.move_tray(dir='toggle')
+            return TRUE
+        return FALSE
+    
+
+class RemovableMedia:
+    """
+    Object about one drive
+    """
+    def __init__(self, mountdir='', devicename='', drivename=''):
+        # This is read-only stuff for the drive itself
+        self.mountdir = mountdir
+        self.devicename = devicename
+        self.drivename = drivename
+
+        # Dynamic stuff
+        self.tray_open = 0
+        self.drive_status = None  # return code from ioctl for DRIVE_STATUS
+
+        self.id        = ''
+        self.label     = ''
+        self.info      = None
+        self.videoinfo = None
+        self.type      = 'empty_cdrom'
+
+    def is_tray_open(self):
+        return self.tray_open
+
+    def move_tray(self, dir='toggle', notify=1):
+        """Move the tray. dir can be toggle/open/close
+        """
+
+        if dir == 'toggle':
+            if self.tray_open:
+                dir = 'close'
+            else:
+                dir = 'open'
+
+        if dir == 'open':
+            if DEBUG: print 'Ejecting disc in drive %s' % self.drivename
+            if notify:
+                pop = PopupBox(text='Ejecting disc in drive %s' % self.drivename) 
+                pop.show()
+            os.system('eject %s' % self.devicename)
+            self.tray_open = 1
+            if notify:
+                pop.destroy()
+
+        
+        elif dir == 'close':
+            if DEBUG: print 'Inserting %s' % self.drivename
+            if notify:
+                pop = PopupBox(text='Reading disc in drive %s' % self.drivename)
+                pop.show()
+
+            # close the tray, identifymedia does the rest,
+            # including refresh screen
+            os.system('eject -t %s' % self.devicename)
+            self.tray_open = 0
+            if notify:
+                pop.destroy()
+
+    
+    def mount(self):
+        """Mount the media
+        """
+
+        if DEBUG: print 'Mounting disc in drive %s' % self.drivename
+        util.mount(self.mountdir)
+        return
+
+    
+    def umount(self):
+        """Mount the media
+        """
+
+        if DEBUG: print 'Unmounting disc in drive %s' % self.drivename
+        util.umount(self.mountdir)
+        return
+    
+
+
+
 class Identify_Thread(threading.Thread):
-
-    # magic!
-    # Try to find out as much as possible about the disc in the
-    # rom drive: title, image, play options, ...
+    """
+    Thread to watch the rom drives for changes
+    """
     def identify(self, media):
-
+        """
+        magic!
+        Try to find out as much as possible about the disc in the
+        rom drive: title, image, play options, ...
+        """
         # Check drive status (tray pos, disc ready)
         try:
             fd = os.open(media.devicename, os.O_RDONLY | os.O_NONBLOCK)
@@ -366,8 +570,6 @@ class Identify_Thread(threading.Thread):
 
 
     def check_all(self):
-        rclient = rc.get_singleton()
-        
         for media in config.REMOVABLE_MEDIA:
             last_status = media.drive_status
             self.identify(media)
@@ -378,7 +580,7 @@ class Identify_Thread(threading.Thread):
                     print 'Posting IDENTIFY_MEDIA event'
                 if last_status:
                     self.last_media = media
-                rclient.post_event(rclient.IDENTIFY_MEDIA)
+                rc.post_event(plugin.event('IDENTIFY_MEDIA'))
             else:
                 if DEBUG > 1:
                     print 'MEDIA: Status=%s' % media.drive_status
