@@ -4,6 +4,7 @@ from mevas.util import *
 from mevas.canvas import *
 from mevas.image import *
 from mevas.text import *
+from mevas import rect
 
 class BitmapCanvas(Canvas):
 	"""
