@@ -9,6 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/02/19 14:54:02  dischi
+# Some cleanups:
+# utils has a function to return a preview image based on the item and
+# possible files in mimetypes. image and video now use this and the
+# extend function is gone -- it should be an extra section in the skin xml
+# file.
+#
 # Revision 1.11  2003/02/18 07:27:23  gsbarbieri
 # Corrected the misspelled 'elipses' -> 'ellipses'
 # Now, main1_video uses osd.drawtext(mode='soft') to render text, so it should be better displayed
@@ -83,6 +90,7 @@
 import osd
 import util
 import pygame
+import os
 
 # Create the OSD object
 osd = osd.get_singleton()
@@ -262,3 +270,31 @@ def drawroundbox(x0, y0, x1, y1, color=None, border_size=0, border_color=None, r
         osd.drawroundbox(x0, y0, x1, y1, color, border_size, border_color, radius)
 
     
+def getPreview(item, settings, w, h):
+    if not settings.icon_dir:
+        return ""
+
+    if item.image:
+        image = osd.loadbitmap('thumb://%s' % item.image)
+        return pygame.transform.scale(image, (w,h))
+
+    image = None
+    
+    if item.type == 'dir':
+        if os.path.isfile('%s/mimetypes/folder_%s.png' % \
+                          (settings.icon_dir, item.display_type)):
+            image = '%s/mimetypes/folder_%s.png' % \
+                    (settings.icon_dir, item.display_type)
+        else:
+            image = '%s/mimetypes/folder.png' % settings.icon_dir
+    
+    elif os.path.isfile('%s/mimetypes/%s.png' % (settings.icon_dir, item.type)):
+        image = '%s/mimetypes/%s.png' % (settings.icon_dir, item.type)
+
+    if image:
+        image = osd.loadbitmap('thumb://%s' % image)
+        i_w, i_h = image.get_size()
+        scale = min(float(w)/i_w, float(h)/i_h)
+        image = osd.zoomsurface(image,scale)
+
+    return image

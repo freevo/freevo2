@@ -9,6 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/02/19 14:54:02  dischi
+# Some cleanups:
+# utils has a function to return a preview image based on the item and
+# possible files in mimetypes. image and video now use this and the
+# extend function is gone -- it should be an extra section in the skin xml
+# file.
+#
 # Revision 1.4  2003/02/18 07:27:23  gsbarbieri
 # Corrected the misspelled 'elipses' -> 'ellipses'
 # Now, main1_video uses osd.drawtext(mode='soft') to render text, so it should be better displayed
@@ -73,23 +80,22 @@ FALSE = 0
 
 class Skin_Video:
 
-    expand = 0
-
     def __call__(self, menuw, settings):
         menu = menuw.menustack[-1]
-        settings = settings.e_menu[menu.item_types]
+        val = settings.e_menu[menu.item_types]
 
         up = menu.page_start            # 0 if first page
-        if menu.page_start + (self.getCols(settings) * self.getRows(settings)) > \
+        if menu.page_start + (self.getCols(val) * self.getRows(val)) > \
            len(menu.choices):
             down = 0
         else:
             down = 1
         
-        self.Clear(settings)
+        self.Clear(val)
         self.Listing((menu.selected, menuw.menu_items, (up, down)), settings)
         self.View(menu.selected, settings)
-        self.Info(menu.selected, settings)
+        self.Info(menu.selected, val)
+
 
     def Clear(self, settings):
         InitScreen(settings, (settings.background.mask, ))
@@ -97,52 +103,9 @@ class Skin_Video:
         # Show title
         DrawTextFramed('Video Browser', settings.header)
 
-    def getFormatedVideo(self, filename, w, h):
-        image = osd.loadbitmap('thumb://%s' % filename)
-
-        if not image:
-            return None
-        
-        i_w, i_h = image.get_size()
-
-        # rotate:
-        if h > w:
-            orientation='vertical'
-        else:
-            orientation='horizontal'
-
-        rotation = 0
-        if i_h > i_w:
-            i_orientation='vertical'
-        else:
-            i_orientation='horizontal'
-            
-        if orientation != i_orientation:
-            rotation=90.0
-
-        if rotation != 0:
-            video = osd.zoomsurface(image,rotation=rotation)
-            i_w, i_h = image.get_size()
-
-        # scale:
-        scale_y = float(h)/i_h
-        scale_x = float(w)/i_w
-
-        scale = min(scale_x, scale_y)
-        
-        image = osd.zoomsurface(image,scale)
-    
-        return image
-
-
-    def getExpand(self, settings):
-        return self.expand
-
-    def setExpand(self, expand, settings):
-        self.expand = expand
 
     def View(self, item, settings):
-        val = settings.view
+        val = settings.e_menu['video'].view 
 
         if not val.visible:
             return
@@ -151,19 +114,8 @@ class Skin_Video:
                          color=val.bgcolor, radius=val.radius)
 
         if item:
-            orientation = None
-            if item.type == 'video':
-                filename = item.image
-                if not filename:
-                    filename = val.img['default']
-            elif item.type == 'dir':
-                filename = val.img['dir']
-            elif item.type == 'playlist':
-                filename = val.img['playlist']
-            
-            preview = self.getFormatedVideo(filename,
-                                            val.width - 2*val.spacing,
-                                            val.height - 2*val.spacing)
+            preview = getPreview(item, settings, val.width - 2*val.spacing,
+                                 val.height - 2*val.spacing)
             if not preview:
                 return
             
@@ -240,10 +192,11 @@ class Skin_Video:
                     y+=str_h                
 
                 if 'plot' in item.info:
-                    DrawTextFramed('Plot: %s' % item.info['plot'], val, x, y, w, (val.height-h), mode='soft')
+                    DrawTextFramed('Plot: %s' % item.info['plot'], val, x, y,
+                                   w, (val.height-h), mode='soft')
                                     
                     
-                                
+                    
             elif item.type == 'dir':
                 DrawTextFramed('Folder: %s' %  item.name[1:-1], val, x, y, w, h)
                 y += str_h
@@ -255,6 +208,7 @@ class Skin_Video:
                 y += str_h
                 DrawTextFramed('There are %d videos in this playlist' %
                                len(item.playlist), val, x, y, w, h)
+
 
 
     def getCols(self, settings):
@@ -282,19 +236,13 @@ class Skin_Video:
                            ( video_height + str_h + val.spacing ))
         return int(items)
 
+
     def EmptyDir(self, settings):
         val = settings.listing
-        if self.getExpand(settings) == 0:
-            conf_x = val.x
-            conf_y = val.y
-            conf_w = val.width
-            conf_h = val.height
-        else:
-            conf_x = val.expand.x
-            conf_y = val.expand.y
-            conf_w = val.expand.width
-            conf_h = val.expand.height
-
+        conf_x = val.x
+        conf_y = val.y
+        conf_w = val.width
+        conf_h = val.height
         DrawTextFramed('This directory is empty', val, conf_x, conf_y, conf_w, conf_h)
         if val.border_size > 0:
             osd.drawbox(conf_x, conf_y, conf_x +conf_w, conf_y + conf_h,
@@ -302,29 +250,13 @@ class Skin_Video:
         
 
     def Listing(self, to_listing, settings):
-        val = settings.listing 
+        val = settings.e_menu['video'].listing 
 
         if not val.visible:
             return
 
-        if self.getExpand(settings) == 0:
-            conf_x = val.x
-            conf_y = val.y
-            conf_w = val.width
-            conf_h = val.height
-        else:
-            conf_x = val.expand.x
-            conf_y = val.expand.y
-            conf_w = val.expand.width
-            conf_h = val.expand.height
-
         video_width = val.preview_width
         video_height = val.preview_height
-
-        dir_preview = self.getFormatedVideo(val.img['dir'],
-                                                      video_width, video_height)
-        pl_preview = self.getFormatedVideo(val.img['playlist'],
-                                                     video_width, video_height)
 
         str_w_selection, str_h_selection = \
                          osd.stringsize('Ajg', val.selection.font, val.selection.size)
@@ -332,9 +264,14 @@ class Skin_Video:
 
         str_h = max( str_h_normal, str_h_selection )
 
+        conf_x = val.x
+        conf_y = val.y
+        conf_w = val.width
+        conf_h = val.height
 
-        n_cols = self.getCols(settings)
-        n_rows = self.getRows(settings)
+
+        n_cols = self.getCols(settings.e_menu['video'])
+        n_rows = self.getRows(settings.e_menu['video'])
 
         spacing_x = int((conf_w - ( video_width * n_cols )) / (n_cols+1))
         spacing_y = int((conf_h - ( (video_height + str_h) * n_rows )) / (n_rows+1))
@@ -342,31 +279,16 @@ class Skin_Video:
         y0 = conf_y + spacing_y
 
         if not to_listing:
-            self.EmptyDir(settings)
+            self.EmptyDir(settings.e_menu['video'])
             return
 
-        cols = self.getCols(settings)
-        rows = self.getRows(settings)
+        cols = self.getCols(settings.e_menu['video'])
+        rows = self.getRows(settings.e_menu['video'])
 
         item_pos = 0
         for i in to_listing[1]:
-            preview = None
-            text = None
-
-            if i.type == 'dir':
-                preview = dir_preview
-                text = i.name
-
-            elif i.type == 'video':
-                filename = i.image
-                if not filename:
-                    filename = val.img['default']
-                preview = self.getFormatedVideo(filename, video_width, video_height)
-                text = i.name
-
-            elif i.type == 'playlist':
-                preview = pl_preview
-                text = i.name
+            preview = getPreview(i, settings, video_width, video_height)
+            text = i.name
                     
             cur_val = val
 
@@ -375,7 +297,8 @@ class Skin_Video:
                 pad = val.spacing
                 drawroundbox(x0 - pad, y0 - pad,
                              x0 + video_width + pad, y0 + video_height + str_h + pad,
-                             cur_val.bgcolor, 1, cur_val.border_color, radius=cur_val.radius)
+                             cur_val.bgcolor, 1, cur_val.border_color,
+                             radius=cur_val.radius)
                     
 
             if preview:
@@ -384,7 +307,8 @@ class Skin_Video:
                 ch = y0 + (video_height - i_h) /2
                 osd.drawsurface(preview, cx, ch)
             if text:
-                DrawTextFramed(text, cur_val, x0, y0 + video_height, video_width, str_h, ellipses=None)
+                DrawTextFramed(text, cur_val, x0, y0 + video_height, video_width,
+                               str_h, ellipses=None)
                     
             x0 = x0 + video_width + spacing_x
 
