@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2002/12/07 11:32:59  dischi
+# Added interface.py into video/audio/image/games. The file contains a
+# function cwd to return the items for the list of files. games support
+# is still missing
+#
 # Revision 1.4  2002/11/28 19:55:42  dischi
 # add function to make a nice name from a filename
 #
@@ -172,7 +177,11 @@ def match_files(dirname, suffix_list):
     
     return matches
 
-    
+
+def find_matches(files, suffix_list):
+    return [ fname for fname in files if match_suffix(fname, suffix_list) ]
+
+
 def match_files_recursively_helper(result, dirname, names):
     for name in names:
 	fullpath = os.path.join(dirname, name)

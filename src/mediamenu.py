@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2002/12/07 11:32:59  dischi
+# Added interface.py into video/audio/image/games. The file contains a
+# function cwd to return the items for the list of files. games support
+# is still missing
+#
 # Revision 1.8  2002/12/03 19:17:05  dischi
 # Added arg to all menu callback function
 #
@@ -68,16 +73,17 @@ import rc
 import string
 import skin
 
-from video import xml_parser
-import games.mame_cache as mame_cache
-
 from item import Item
-from video.videoitem import VideoItem
-from audio.audioitem import AudioItem
-from image.imageitem import ImageItem
-from games.mameitem import MameItem
-
 from playlist import Playlist
+
+import video.interface
+import audio.interface
+import image.interface
+import games.interface
+
+# XXX remove this when the games interface is finished
+import games.mame_cache as mame_cache
+from games.mameitem import MameItem
 
 # Add support for bins album files
 from image import bins
@@ -159,7 +165,7 @@ class MediaMenu(Item):
         if self.display_type == 'video':
             title = 'MOVIE'
         elif self.display_type == 'audio':
-            title = 'MOVIE'
+            title = 'AUDIO'
         elif self.display_type == 'image':
             title = 'IMAGE'
         elif self.display_type == 'game':
@@ -258,43 +264,52 @@ class DirItem(Playlist):
         """
         
         items = []
-        play_items = []
-        
+
         # are we on a ROM_DRIVE and have to mount it first?
         for media in config.REMOVABLE_MEDIA:
             if string.find(self.dir, media.mountdir) == 0:
                 util.mount(self.dir)
                 self.media = media
 
-        # add subdirs
-        for dir in util.getdirnames(self.dir):
-            items += [ DirItem(dir, self, display_type = self.display_type) ]
+        try:
+            files = [ os.path.join(self.dir, fname) for fname in os.listdir(self.dir) ]
+        except OSError:
+            print 'util:match_files(): Got error on dir = "%s"' % dirname
+            return
+            
+
+        # build play_items for video, audio, image, games
+        # the interface functions must remove the files they cover, they
+        # can also remove directories
+
+        play_items = []
+        for t in ( 'video', 'audio', 'image', 'games' ):
+            if not self.display_type or self.display_type == t:
+                play_items += eval(t + '.interface.cwd(self, files)')
+        play_items.sort(lambda l, o: cmp(l.name.upper(), o.name.upper()))
 
 
-        # video items
-        if not self.display_type or self.display_type == 'video':
-            video_files = util.match_files(self.dir, config.SUFFIX_MPLAYER_FILES)
-
-            for file in util.match_files(self.dir, config.SUFFIX_FREEVO_FILES):
-                x = xml_parser.parseMovieFile(file, self, video_files)
-                if x:
-                    play_items += x
-
-            for file in video_files:
-                play_items += [ VideoItem(file, self) ]
-
-
-        # audio items and audio playlists
-        if not self.display_type or self.display_type == 'audio':
-            for pl in util.match_files(self.dir, config.SUFFIX_AUDIO_PLAYLISTS):
-                items += [ Playlist(pl, self) ]
-
-            audio_files = util.match_files(self.dir, config.SUFFIX_AUDIO_FILES)
-
-            for file in audio_files:
-                play_items += [ AudioItem(file, self) ]
-
+        # XXX BEGIN remove this when games interface is finished
+        if not self.display_type or self.display_type == 'game':
+            mame_list = mame_cache.getMameItemInfoList(self.dir)
+            for ml in mame_list:
+                play_items += [ MameItem(ml[0], ml[1], ml[2], self) ]
             self.playlist = play_items
+        # XXX END remove this when games interface is finished
+
+
+        # add sub-directories
+        for dir in files:
+            if os.path.isdir(dir):
+                items += [ DirItem(dir, self, display_type = self.display_type) ]
+
+
+        # playlists (only active for images and audio)
+        if not self.display_type or self.display_type == 'audio':
+            self.playlist = play_items
+
+            for pl in util.find_matches(files, config.SUFFIX_AUDIO_PLAYLISTS):
+                items += [ Playlist(pl, self) ]
 
             # random playlist
             if len(play_items) > 1 and self.display_type:
@@ -303,32 +318,15 @@ class DirItem(Playlist):
                 pl.autoplay = TRUE
                 items += [ pl ]
 
-
-        # image items and image slideshows
         if not self.display_type or self.display_type == 'image':
-            for file in util.match_files(self.dir, config.SUFFIX_IMAGE_FILES):
-                play_items += [ ImageItem(file, self) ]
             self.playlist = play_items
-            
-            for file in util.match_files(self.dir, config.SUFFIX_IMAGE_SSHOW):
+
+            for file in util.find_matches(files, config.SUFFIX_IMAGE_SSHOW):
                 pl = Playlist(file, self)
                 pl.autoplay = TRUE
                 items += [ pl ]
 
-         
-        # games, right now just mame items
-        if not self.display_type or self.display_type == 'game':
- 
-            mame_list = mame_cache.getMameItemInfoList(self.dir)
- 
-            print "mame_list: %s" % mame_list
-            for ml in mame_list:
-                # ml contains: title, file, image
-                play_items += [ MameItem(ml[0], ml[1], ml[2], self) ]
- 
-            self.playlist = play_items
-             
-       
+        # add play_items to items
         items += play_items
 
         title = self.name
