@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.48  2004/06/06 06:52:37  dischi
+# cache updates
+#
 # Revision 1.47  2004/06/06 06:41:47  dischi
 # delete cache on mmpython update
 #
@@ -737,7 +740,8 @@ def del_cache():
         os.unlink(f)
     for f in util.match_files(config.OVERLAY_DIR + '/disc/metadata', ['mmpython']):
         os.unlink(f)
-    
+    cachefile = os.path.join(config.FREEVO_CACHEDIR, 'mediainfo')
+    util.save_pickle((mmpython.version.CHANGED, 0, 0, 0), cachefile)
 
 #
 # setup mmpython
@@ -776,7 +780,11 @@ if __freevo_app__ == 'main':
             else:
                 mmchanged, freevo_changed, part_update, complete_update = info
             # let's warn about some updates
-            if freevo_changed < 3:
+            if freevo_changed == 0:
+                print
+                print 'Please run \'freevo cache\''
+                print
+            elif freevo_changed < 3:
                 print
                 print 'Warning: Freevo cache helper/informations updated.'
                 print 'Please rerun \'freevo cache\' to speed up Freevo'
