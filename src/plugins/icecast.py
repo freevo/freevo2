@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/09/22 20:28:46  mikeruelle
+# adding help document strings for the web interface
+#
 # Revision 1.8  2003/09/14 20:09:36  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
@@ -56,6 +59,27 @@ import time
 import plugin
 
 class PluginInterface(plugin.DaemonPlugin):
+    """
+    A plugin to start an icecast server in the background
+    please remeber to install/compile icecast yourself and
+    adjust paths and passwords appropriately.
+
+    To activate, put the following lines in local_conf.py:
+    plugin.activate('icecast') 
+     
+    ICECAST_WWW_PAGE = 1 
+    ICECAST_CMD = '/usr/local/icecast/bin/icecast' 
+    ICECAST_CONF_DIR = '/usr/local/icecast/conf' 
+    ICES_CMD = '/usr/local/icecast/bin/ices' 
+    ICES_OPTIONS = [ '-d', 'FreevoIcecast', 
+                     '-g', 'Rock', 
+                     '-m', '/freevo', 
+                     '-n', 'Freevo_Music_Collection', 
+                     '-P', 'hackme', 
+                     '-s', 
+                     '-r' ] 
+    ICES_DEF_LIST = '/usr/local/freevo_data/Music/ROCK/mymix.m3u' 
+    """
     def __init__(self):
         plugin.DaemonPlugin.__init__(self)
         self.icecast_pid = None

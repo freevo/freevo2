@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/09/22 20:28:46  mikeruelle
+# adding help document strings for the web interface
+#
 # Revision 1.1  2003/08/30 15:17:10  mikeruelle
 # We can now change icecast playlists from inside freevo
 #
@@ -47,6 +50,11 @@ import rc
 import event as em
 
 class PluginInterface(plugin.ItemPlugin):
+    """
+    This plugin is automatically included by the icecast plugin. There
+    should be no need to activate it yourself. It's purpose is to add
+    the extra action to m3u files to use them as playlists for icecast. 
+    """
     def __init__(self):
         plugin.ItemPlugin.__init__(self)
 
