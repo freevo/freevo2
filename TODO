@@ -6,6 +6,7 @@ $Id$
 
 Short-term
 ----------
+o Replace mpg123 with mplayer
 o Check that the applications exist in startup.py, now it will
   just loop forever trying to start them
 o Add rcs id to all files!
