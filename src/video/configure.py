@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2004/01/31 16:39:03  dischi
+# fix function to check if we have to show configure
+#
 # Revision 1.22  2004/01/17 20:30:19  dischi
 # use new metainfo
 #
@@ -175,9 +178,7 @@ def get_items(item):
     next_start = 0
     items = []
 
-    if not ((not item.filename or item.filename == '0') and \
-            item.mode in ('dvd', 'vcd') and item.player_rating >= 20):
-
+    if item.filename or (item.mode in ('dvd', 'vcd') and item.player_rating >= 20):
         if item.info.has_key('audio') and len(item.info['audio']) > 1:
             items.append(menu.MenuItem(_('Audio selection'), audio_selection_menu, item))
         if item.info.has_key('subtitles') and len(item.info['subtitles']) > 1:
