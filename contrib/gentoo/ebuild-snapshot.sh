@@ -6,9 +6,11 @@
 # $Id$
 
 
-version=`echo $1 | sed 's/[-]/_/g'`
+version=`echo $1 | sed 's/-/_/g' | sed 's/_r[0-9]//'`
+ebuild_version=`echo $1 | sed 's/-/_/g' | sed 's/_\(r[0-9]\)/-\1/'`
 tag=REL-`echo $1 | sed 's/[\.-]/_/g' | sed 'y/prerc/PRERC/'` 
 echo src name: freevo-$version and freevo-src-$version
+echo ebuild: freevo-$ebuild_version
 echo cvs tag:  $tag
 
 read
@@ -34,7 +36,7 @@ function pack {
     echo cleaning up
     cd /tmp/freevo-$version
     make clean
-    rm freevo.conf*
+    rm freevo.conf* local_*
     find /tmp/freevo-$version -type d -name CVS | xargs rm -rf
     find /tmp/freevo-$version -name .cvsignore  | xargs rm -rf
     find /tmp/freevo-$version -name '.#*'       | xargs rm -rf
@@ -50,14 +52,17 @@ function pack {
 
 function ebuild {
     sudo cp `dirname $0`/freevo.ebuild \
-	/usr/local/portage/media-video/freevo/freevo-$version.ebuild
+	/usr/local/portage/media-video/freevo/freevo-$ebuild_version.ebuild
 
     cd /usr/local/portage/media-video/freevo
     sudo rm -f files/digest-freevo-$version
     sudo chown -R root.root .
-    sudo ebuild freevo-$version.ebuild digest 
+    sudo ebuild freevo-$ebuild_version.ebuild digest 
+}
 
-    cd ..
+function ebuild_upload {
+    cd /usr/local/portage/media-video
+
     tar -zcvf /tmp/ebuild.tgz freevo freevo_runtime
     scp -r /tmp/ebuild.tgz dischi@freevo.sf.net:/home/groups/f/fr/freevo/htdocs/gentoo
     rm /tmp/ebuild.tgz
