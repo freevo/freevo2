@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/12/21 18:31:10  dischi
+# Sometimes mplayer won't die. Now childapp will kill -9 the child after
+# it refuses 2 seconds to die.
+#
 # Revision 1.1  2002/11/24 13:58:44  dischi
 # code cleanup
 #
@@ -98,13 +102,21 @@ class ChildApp:
 
         try:
             if signal:
-                if DEBUG: print 'childapp: killing pid %s' % self.child.pid
+                if DEBUG: print 'childapp: killing pid %s signal %s' % \
+                   (self.child.pid, signal)
                 os.kill(self.child.pid, signal)
             
             # Wait for the child to exit
             try:
                 if DEBUG: print 'childapp: Before wait(%s)' % self.child.pid
-                self.child.wait()
+                for i in range(20):
+                    if os.waitpid(self.child.pid, os.WNOHANG)[0] == self.child.pid:
+                        break
+                    time.sleep(0.1)
+                else:
+                    print 'force killing with signal 9'
+                    os.kill(self.child.pid, 9)
+                    self.child.wait()
                 if DEBUG: print 'childapp: After wait()'
             except:
                 pass
