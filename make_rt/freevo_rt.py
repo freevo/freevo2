@@ -21,13 +21,16 @@ if __name__ == '__main__':
         print 'Usage: %s <filename.py>' % sys.argv[0]
         sys.exit(0)
 
-    print 'Running from %s' % sys.executable
+    #print 'Running from %s' % sys.executable
     pildir = os.path.dirname(sys.executable) + '/PIL'
     maindir = os.path.dirname(sys.argv[1]) + './'
-    
+
+    # The Installer iu.py module isn't very clever about
+    # finding python modules that weren't compiled into the
+    # executable. So it was patched a little to keep track
+    # of updates to sys.path.
     sys.path = ['.', pildir, maindir] + sys.path
     
-    print 'Will try to run "%s"' % sys.argv
+    print 'Starting "%s"' % sys.argv[1]
     fd = open(sys.argv[1], 'r')
     mod = imp.load_source('__main__', sys.argv[1], fd)
-    print 'Done in %s' % sys.argv[1]
