@@ -1,21 +1,19 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
-# util/weakref.py - weak reference
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# weakref.py - weak reference
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes:
-# Todo:        
+# This file contains a wrapper for weakref that the weak reference can
+# be used the same way the real object would be used.
 #
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.1  2004/08/26 15:24:07  dischi
-# helper class for weak refs
-#
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -32,8 +30,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
-
+# -----------------------------------------------------------------------------
 
 from _weakref import ref
 
