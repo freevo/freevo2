@@ -319,11 +319,6 @@ SUFFIX_VIDEO_FILES = [ 'avi', 'mpg', 'mpeg', 'wmv', 'bin', 'rm',
 # ======================================================================
 
 #
-# The program to play audiofiles. Currently supports MPLAYER and XMMS
-#
-MUSICPLAYER          = 'MPLAYER'   # Must be 'XMMS' or 'MPLAYER'
-
-#
 # Where the Audio (mp3, ogg) files can be found.
 # Format: [ ('Title1', 'directory1', 'mplayer options'),
 #           ('Title2', 'directory2'), ... ]
@@ -460,19 +455,20 @@ OSD_DEFAULT_FONTSIZE = 18
 OSD_FONT_ALIASES = { 'arial_bold.ttf' : 'kimberly_alt.ttf' }
 
 OSD_SDL_EXEC_AFTER_STARTUP = ""
+OVERSCAN_X = 0
+OVERSCAN_Y = 0
 
 # Exec a script after the osd startup. Matrox G400 users who wants to
 # use the framebuffer and have a PAL tv may set this to
 # './matrox_g400/mga_pal_768x576.sh' OSD_SDL_EXEC_AFTER_STARTUP=''
 if CONF.display == 'mga':
     OSD_SDL_EXEC_AFTER_STARTUP='./fbcon/mga_%s_%s.sh' % (CONF.tv, CONF.geometry)
-
-OVERSCAN_X = 0
-OVERSCAN_Y = 0
+    OVERSCAN_X = 20
+    OVERSCAN_Y = 20
 
 if CONF.display == 'dfbmga' or CONF.display == 'dxr3':
-    OVERSCAN_X = 30
-    OVERSCAN_Y = 30
+    OVERSCAN_X = 50
+    OVERSCAN_Y = 50
 
 
 # ======================================================================
@@ -594,16 +590,6 @@ MPLAYER_DVD_PROTECTION = 1
 # this many seconds
 #
 MPLAYER_SEEK_TIMEOUT = 8
-
-# ======================================================================
-# XMMS section:
-# ======================================================================
-
-# Priority of xmms process. 0 is unchanged, <0 is higher prio, >0 lower prio.
-# prio <0 has no effect unless run as root.
-XMMS_NICE            = -20
-XMMS_CMD             = 'xmms'
-
 
 # ======================================================================
 # TV:
