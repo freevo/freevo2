@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.125  2004/02/15 15:22:42  dischi
+# better dvd disc support
+#
 # Revision 1.124  2004/02/12 12:28:38  dischi
 # prevent a crash
 #
@@ -133,7 +136,6 @@ class VideoItem(Item):
 
         self.selected_subtitle = None
         self.selected_audio    = None
-        self.num_titles        = 0
         self.elapsed           = 0
         
         self.possible_player   = []
@@ -185,13 +187,15 @@ class VideoItem(Item):
             self.mimetype = self.url[:self.url.find('://')].lower()
             if self.url.find('/VIDEO_TS/') > 0:
                 # dvd on harddisc
-                self.filename   = self.url[5:self.url.rfind('/VIDEO_TS/')]
-                self.info       = util.mediainfo.get(self.filename)
-                self.files      = FileInformation()
-                self.num_titles = len(self.info['tracks'])
+                self.filename = self.url[5:self.url.rfind('/VIDEO_TS/')]
+                self.info     = util.mediainfo.get(self.filename)
+                self.files    = FileInformation()
+                self.name     = self.info['title:filename']
+                if not self.name:
+                    self.name = util.getname(self.filename)
                 self.files.append(self.filename)
             else:
-                self.filename   = ''
+                self.filename = ''
             
         if not self.image or (self.parent and self.image == self.parent.image):
            image = vfs.getoverlay(self.filename + '.raw')
@@ -219,28 +223,38 @@ class VideoItem(Item):
         """
         return the specific attribute
         """
-        if key == 'item_id':
-            if self.media:
-                filename = self.filename[len(self.media.mountdir):]
-                id = 'cd://%s-%s' % (self.media.id, filename)
-            else:
-                id = 'file://%s' % self.filename
-            if self.subitems:
-                for s in self.subitems:
-                    id += s.getattr(key)
-            if self.variants:
-                for v in self.variants:
-                    id += v.getattr(key)
-                    
-            return util.hexify(md5.new(id).digest())
-        
-        if key in ('geometry', 'aspect') and self.info:
-            if key == 'geometry' and self.info['width'] and self.info['height']:
-                return '%sx%s' % (self.info['width'], self.info['height'])
-            if key == 'aspect' and self.info['aspect']:
-                aspect = self.info['aspect']
-                return aspect[:aspect.find(' ')].replace('/', ':')
+        if key == 'geometry' and self.info['width'] and self.info['height']:
+            return '%sx%s' % (self.info['width'], self.info['height'])
+
+        if key == 'aspect' and self.info['aspect']:
+            aspect = self.info['aspect']
+            return aspect[:aspect.find(' ')].replace('/', ':')
             
+        if key == 'runtime':
+            length = None
+
+            if self.info['runtime'] and self.info['runtime'] != 'None':
+                length = self.info['runtime']
+            elif self.info['length'] and self.info['length'] != 'None':
+                length = self.info['length']
+            if not length and hasattr(self, 'length'):
+                length = self.length
+            if not length:
+                return ''
+
+            if isinstance(length, int) or isinstance(length, float) or \
+                   isinstance(length, long):
+                length = str(int(round(length) / 60))
+            if length.find('min') == -1:
+                length = '%s min' % length
+            if length.find('/') > 0:
+                length = length[:length.find('/')].rstrip()
+            if length.find(':') > 0:
+                length = length[length.find(':')+1:]
+            if length == '0 min':
+                return ''
+            return length
+
         return Item.__getitem__(self, key)
 
     
@@ -530,8 +544,11 @@ class VideoItem(Item):
         if not self.menuw:
             self.menuw = menuw
 
+        # delete the submenu that got us here
+        self.menuw.delete_submenu(False)
+        
         # only one track, play it
-        if self.num_titles == 1:
+        if len(self.info['tracks']) == 1:
             i=copy.copy(self)
             i.possible_player = []
             i.set_url(self.url + '1', False)
@@ -540,21 +557,17 @@ class VideoItem(Item):
 
         # build a menu
         items = []
-        for title in range(1,self.num_titles+1):
+        for title in range(len(self.info['tracks'])):
             i = copy.copy(self)
-            i.set_url(self.url + str(title), False)
+            i.set_url(self.url + str(title+1), False)
             i.info = copy.copy(self.info)
             # copy the attributes from mmpython about this track
-            if self.info.has_key('tracks'):
-                i.info.mmdata = self.info.mmdata['tracks'][title-1]
-                i.info.set_variables(self.info.get_variables())
-                i.info['audio']     = i.info.mmdata.audio 
-                i.info['subtitles'] = i.info.mmdata.subtitles 
-                i.info['chapters']  = i.info.mmdata.chapters 
+            i.info.mmdata = self.info.mmdata['tracks'][title]
+            i.info.set_variables(self.info.get_variables())
             i.info_type       = 'track'
             i.possible_player = []
             i.files           = None
-            i.name            = _('Play Title %s') % title
+            i.name            = _('Play Title %s') % (title+1)
             items.append(i)
 
         moviemenu = menu.Menu(self.name, items, umount_all = 1, fxd_file=self.skin_fxd)

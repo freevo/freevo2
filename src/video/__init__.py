@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2004/02/15 15:22:42  dischi
+# better dvd disc support
+#
 # Revision 1.27  2004/02/03 20:51:12  dischi
 # fix/enhance dvd on disc
 #
@@ -120,16 +123,6 @@ class PluginInterface(plugin.MimetypePlugin):
         """
         items = []
 
-        for i in copy.copy(files):
-            if os.path.isdir(i+'/VIDEO_TS'):
-                # DVD Image
-                x = VideoItem('', None)
-                # Trailing slash is important for Xine
-                x.set_url('dvd://' + i[1:] + '/VIDEO_TS/')  
-                x.name = os.path.basename(i)
-                items += [ x ]
-                files.remove(i)
-
         for file in util.find_matches(files, config.VIDEO_SUFFIX):
             if parent and parent.type == 'dir' and \
                    parent.VIDEO_DIRECTORY_AUTOBUILD_THUMBNAILS:
@@ -145,6 +138,12 @@ class PluginInterface(plugin.MimetypePlugin):
                     pass
             items += [ x ]
             files.remove(file)
+
+        for i in copy.copy(files):
+            if os.path.isdir(i+'/VIDEO_TS'):
+                # DVD Image, trailing slash is important for Xine
+                items.append(VideoItem('dvd://' + i[1:] + '/VIDEO_TS/', parent))
+                files.remove(i)
 
         return items
 
