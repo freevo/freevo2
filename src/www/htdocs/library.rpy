@@ -11,6 +11,9 @@
 #       -stream tv, video and music somehow
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2004/06/09 01:53:09  rshortt
+# Small cleanup.
+#
 # Revision 1.25  2004/06/09 01:46:30  rshortt
 # Finally add confirm delete.
 #
@@ -265,7 +268,7 @@ class LibraryResource(FreevoResource):
                     file_loc_fxd = os.path.splitext(file_loc)[0] + '.fxd'
                     if os.path.exists(file_loc_fxd): 
                         os.unlink(file_loc_fxd)
-                        messages += [ _('Delete %s.') % file_loc_fxd ]
+                        messages += [ _('Delete %s.') % ('<b>'+file_loc_fxd+'</b>') ]
 
                 elif action == 'download':
                     sys.stderr.write('download %s\n' % String(file_loc))
@@ -291,7 +294,6 @@ class LibraryResource(FreevoResource):
             fv.res += '   okdelete=window.confirm("Do you wish to delete "+file+" and its fxd?");' + "\n"
             fv.res += '   if(!okdelete) return;' + "\n"
             fv.res += '   document.location="' + action_script +'?action=delete&file=" + escape(file) + "&dir=" + basedir + "&media=" + mediatype;' + "\n"
-                    #filelink = '<a href="'+action_script+'?media=%s&dir=%s&action=%s&file=%s">%s</a>'
             fv.res += '}' + "\n"
 
             fv.res += 'function renameFile(basedir, file, mediatype) {' + "\n"
@@ -464,8 +466,6 @@ class LibraryResource(FreevoResource):
                 else:
                     file_esc = urllib.quote(String(file))
                     dllink = ('<a href="'+action_script+'%s">'+_('Download')+'</a>') %  Unicode(os.path.join(basedir,file))
-                    #filelink = '<a href="'+action_script+'?media=%s&dir=%s&action=%s&file=%s">%s</a>'
-                    # delete = filelink % (action_mediatype, basedir, 'delete', file_esc,_('Delete'))
                     delete = ('<a href="javascript:deleteFile(\'%s\',\'%s\',\'%s\')">'+_("Delete")+'</a>') % (basedir, file_esc, action_mediatype)
                     rename = ('<a href="javascript:renameFile(\'%s\',\'%s\',\'%s\')">'+_("Rename")+'</a>') % (basedir, file_esc, action_mediatype)
                     fv.tableCell(rename + '&nbsp;&nbsp;' + delete + '&nbsp;&nbsp;' + dllink, 'class="'+status+'" colspan="1"')
