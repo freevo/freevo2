@@ -262,10 +262,8 @@
 	    </if>
 	  </if>
 	  <if expression="not tv_show_name">
-	    <if expression="name">
-	      <text font="info tagline" width="max" expression="name"/>
-	      <newline/>
-	    </if>
+	    <text font="info tagline" width="max" expression="name"/>
+	    <newline/>
 	  </if>
 	  <if expression="tagline">
             <text font="info tagline">"</text>
@@ -293,6 +291,8 @@
 	</item>
 
 	<item type="dir">
+	  <text font="info tagline" width="max" expression="name"/>
+	  <newline/>
 	  <if expression="tagline">
 	    <text font="info tagline" width="max" expression="tagline"/>
 	    <newline/>
@@ -308,6 +308,11 @@
 	    <text font="info plot" height="max" mode="soft" 
 	      align="justified" expression="content"/>
 	    <newline/>
+	  </if>
+	  <if expression="not content and not plot">
+	    <text font="info value" width="max" expression="num_items"/>
+	    <text font="info value"> Items</text>
+	    <!-- other values are num_play_items and num_dir_items -->
 	  </if>
 	  <newline/>
 	</item>
@@ -372,19 +377,11 @@
       <content x="10" y="10" type="text" height="max-20" width="max-20"
 	spacing="20" font="default">
         <item type="dir">
-        <!-- DES -->
-            <text font="info tagline" width="max" expression="name"/>
-            <text font="info tagline" width="max" expression="description"/>
-            <if expression="plot">
-              <text font="info plot" height="max" mode="soft" 
-                align="justified" expression="plot"/>
-              <newline/>
-            </if>
-            <if expression="content and not plot">
-              <text font="info plot" height="max" mode="soft" 
-                align="justified" expression="content"/>
-              <newline/>
-            </if>
+	  <text font="info tagline" width="max" expression="name"/>
+	  <newline/>
+	  <text font="info value" width="max" expression="num_items"/>
+	  <text font="info value"> Items</text>
+	  <!-- other values are num_play_items and num_dir_items -->
         </item> 
         <item type="image">
 	  <text width="300" font="info value" expression="name"/>
