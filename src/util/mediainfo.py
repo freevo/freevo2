@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.58  2004/07/27 09:24:38  dischi
+# rename application to eventhandler
+#
 # Revision 1.57  2004/07/26 18:10:19  dischi
 # move global event handling to eventhandler.py
 #
@@ -64,7 +67,7 @@ from mmpython.disc.discinfo import cdrom_disc_id
 
 import config
 import util
-import application
+import eventhandler
 import rc
 
 class FileOutdatedException(Exception):
@@ -710,7 +713,7 @@ def check_cache_status():
     check if cache got updated with helper while freevo is running
     """
     global __last_status_check__
-    if not application.is_menu():
+    if not eventhandler.is_menu():
         return
     try:
         cachefile = os.path.join(config.FREEVO_CACHEDIR, 'mediainfo')
