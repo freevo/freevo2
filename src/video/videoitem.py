@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.109  2004/01/04 11:17:10  dischi
+# add create thumbnail
+#
 # Revision 1.108  2004/01/01 19:36:46  dischi
 # do not inherit players to child
 #
@@ -285,6 +288,9 @@ class VideoItem(Item):
         if self.variants and len(self.variants) > 1:
             items = [ (self.show_variants, _('Show variants')) ] + items
 
+        if not self.image and self.filename and not self.variants and not self.subitems:
+            items.append((self.create_thumbnail, _('Create Thumbnail')))
+            
         return items
 
 
@@ -297,6 +303,18 @@ class VideoItem(Item):
         m = menu.Menu(self.name, self.variants, reload_func=None, fxd_file=self.fxd_file)
         m.item_types = 'video'
         self.menuw.pushmenu(m)
+
+
+    def create_thumbnail(self, arg=None, menuw=None):
+        """
+        create a thumbnail as image icon
+        """
+        import util.videothumb
+        pop = PopupBox(text=_('Please wait....'))
+        pop.show()
+        util.videothumb.snapshot(self.filename, os.path.splitext(self.filename)[0] + '.png')
+        pop.destroy()
+        menuw.back_one_menu()
 
 
     def play_max_cache(self, arg=None, menuw=None):
