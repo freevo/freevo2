@@ -112,7 +112,7 @@ def main_menu(arg, menuw):
     hh = time.localtime(time.time())[3]
     mm = time.localtime(time.time())[4]
     
-    mp3menu = menu.Menu('TV MENU  %2d:%02d' % (hh, mm), items)
+    mp3menu = menu.Menu('TV MENU  %02d:%02d' % (hh, mm), items)
     menuw.pushmenu(mp3menu)
 
     return
