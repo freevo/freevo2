@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/05/14 12:31:05  rshortt
+# Added the standard Freevo graphic and title.
+#
 # Revision 1.2  2003/05/14 01:11:20  rshortt
 # More error handling and notice if the record server is down.
 #
@@ -55,9 +58,15 @@ class IndexResource(FreevoResource):
         fv = HTMLResource()
 
         fv.printHeader('Freevo Web Interface', 'styles/main.css')
+        fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
+        fv.tableRowOpen('class="chanrow"')
+        fv.tableCell('<img src="images/logo_200x100.png" />', 'align="left"')
+        fv.tableCell('Home', 'class="heading" align="left"')
+        fv.tableRowClose()
+        fv.tableClose()
 
-        fv.res += '<h2>Someone please design a nice index page. :)</h2>'
         fv.res += '<hr />'
+        fv.res += '<h2>Someone please design a nice index page. :)</h2>'
     
         (server_available, schedule) = record_client.connectionTest()
         if not server_available:
