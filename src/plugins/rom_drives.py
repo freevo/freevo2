@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.67  2004/09/13 19:36:47  dischi
+# adjust to new audio interface
+#
 # Revision 1.66  2004/08/28 17:17:04  dischi
 # force rechecking if it seems a dvd but is not detected as one
 #
@@ -98,8 +101,10 @@ from event import *
 from directory import DirItem
 from gui import PopupBox
 from item import Item
-from audio import AudioDiskItem
-from video import VideoItem
+
+# FIXME: use Mimetype for this
+from audio.audiodiskitem import AudioDiskItem
+from video.videoitem import VideoItem
 
 LABEL_REGEXP = re.compile("^(.*[^ ]) *$").match
 
