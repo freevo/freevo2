@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/09/25 05:08:11  rshortt
+# Disable some now-broken code.
+#
 # Revision 1.10  2004/09/15 20:47:07  dischi
 # better handling of registered events
 #
@@ -434,7 +437,10 @@ class Eventhandler:
             raise SystemExit
 
         except:
-            if config.FREEVO_EVENTHANDLER_SANDBOX:
+            # XXX FIXME: this whole statement is broken (new gui code,
+            #            references to osd)
+            if 0 and config.FREEVO_EVENTHANDLER_SANDBOX:
+
                 import gui
                 from plugins.shutdown import shutdown
 
