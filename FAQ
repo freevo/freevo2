@@ -4,6 +4,20 @@ FAQ for Freevo
 $Id$
 
 
+----------------------------------------------------------------------
+Q: I downloaded Freevo and tried running it, but it crashes with
+   [some exception]. What version of Python does Freevo require?
+
+A: Try using the freevo-runtime instead. Development and testing is
+   done using that. Report the problem if it still occurs.
+
+   To run Freevo without the runtime you need Python 2.2 with a number
+   of additional libraries installed. Just use the runtime unless you
+   want to spend a significant amount of time installing and patching
+   stuff. There's some docs (INSTALL.deps) about doing it, but we put
+   together the runtime just so that people wouldn't have to struggle
+   with it (and us spending too much time answering the same questions
+   over and over)...
 
 ----------------------------------------------------------------------
 Q: How do I play (S)VCD?
