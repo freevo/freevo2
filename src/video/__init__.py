@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2004/03/22 03:04:28  krister
+# Fixed a typo
+#
 # Revision 1.28  2004/02/15 15:22:42  dischi
 # better dvd disc support
 #
@@ -172,7 +175,7 @@ class PluginInterface(plugin.MimetypePlugin):
         """
         return [ ('VIDEO_DIRECTORY_AUTOBUILD_THUMBNAILS',
                   _('Directory Autobuild Thumbnails '),
-                  _('Build video thumbnails for all items (may yake a while when entering).'),
+                  _('Build video thumbnails for all items (may take a while when entering).'),
                   False) ]
 
 
