@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.77  2002/10/08 12:19:27  krister
+# Added more remote control info
+#
 # Revision 1.76  2002/10/08 04:32:36  krister
 # Reformatted comments.
 #
@@ -526,12 +529,17 @@ else:
 #
 # Remote control commands translation table. Replace this with the commands that
 # lirc sends for your remote. NB: The .lircrc file is not used.
+#
 # Change the commands in the *LEFT* column, the right column is what Freevo
 # expects to see!
 #
 # Universal remote "ONE FOR ALL", model "Cinema 7" (URC-7201B00 on the back),
 # bought from Walmart ($17.00).
 # Programmed to code TV "0150". (VCR needs to be programmed too?)
+#
+# There is a config file for lirc for this remote in freevo/boot/URC-7201B00.
+# Please see the Freevo website for infor about buying or building a remote
+# control receiver.
 #
 RC_CMDS = {
     'sleep'       : 'SLEEP',
