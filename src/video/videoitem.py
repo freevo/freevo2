@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.110  2004/01/04 13:06:52  dischi
+# make it possible to call thumbnail creation with MENU_CALL_ITEM_ACTION
+#
 # Revision 1.109  2004/01/04 11:17:10  dischi
 # add create thumbnail
 #
@@ -289,7 +292,7 @@ class VideoItem(Item):
             items = [ (self.show_variants, _('Show variants')) ] + items
 
         if not self.image and self.filename and not self.variants and not self.subitems:
-            items.append((self.create_thumbnail, _('Create Thumbnail')))
+            items.append((self.create_thumbnail, _('Create Thumbnail'), 'create_thumbnail'))
             
         return items
 
@@ -314,7 +317,8 @@ class VideoItem(Item):
         pop.show()
         util.videothumb.snapshot(self.filename, os.path.splitext(self.filename)[0] + '.png')
         pop.destroy()
-        menuw.back_one_menu()
+        if menuw.menustack[-1].selected != self:
+            menuw.back_one_menu()
 
 
     def play_max_cache(self, arg=None, menuw=None):
