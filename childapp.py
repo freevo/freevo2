@@ -57,6 +57,12 @@ class ChildApp:
     
     def kill(self, signal=9):
             os.kill(self.child.pid, signal)
+            
+            # Wait for the child to exit
+            try:
+                self.child.wait()
+            except:
+                pass
 
         
 class Read_Thread(threading.Thread):
@@ -73,7 +79,7 @@ class Read_Thread(threading.Thread):
             self._handle_input()
         except IOError:
             pass
-        
+
 
     def _handle_input(self):
         
