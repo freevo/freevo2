@@ -49,7 +49,7 @@ from item import FileInformation
 
 # video imports
 from videoitem import VideoItem
-from database import *
+import database
 import fxdhandler
 
 class PluginInterface(plugin.MimetypePlugin):
@@ -145,7 +145,7 @@ class PluginInterface(plugin.MimetypePlugin):
                 file_id = parent.media.id + \
                           file[len(os.path.join(parent.media.mountdir,"")):]
                 try:
-                    x.mplayer_options = discset_informations[file_id]
+                    x.mplayer_options = database.discset[file_id]
                 except KeyError:
                     pass
             items.append(x)
@@ -165,14 +165,13 @@ class PluginInterface(plugin.MimetypePlugin):
         """
         set informations for a diritem based on the content, etc.
         """
-        global tv_show_informations
         if not diritem.image and config.VIDEO_SHOW_DATA_DIR:
             base = vfs.basename(diritem.dir).lower()
             name = vfs.join(config.VIDEO_SHOW_DATA_DIR, base)
             diritem.image = util.getimage(name)
 
-        if tv_show_informations.has_key(vfs.basename(diritem.dir).lower()):
-            tvinfo = tv_show_informations[vfs.basename(diritem.dir).lower()]
+        if database.tv_shows.has_key(vfs.basename(diritem.dir).lower()):
+            tvinfo = database.tv_shows[vfs.basename(diritem.dir).lower()]
             diritem.info.set_variables(tvinfo[1])
             if not diritem.image:
                 diritem.image = tvinfo[0]
@@ -188,3 +187,8 @@ class PluginInterface(plugin.MimetypePlugin):
                   _('Directory Autobuild Thumbnails '),
                   _('Build video thumbnails for all items'),
                   False) ]
+
+
+    def database(self):
+        return database
+

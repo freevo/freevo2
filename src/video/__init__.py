@@ -1,7 +1,7 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
-# __init__.py
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# __init__.py - interface to video
+# -----------------------------------------------------------------------------
 # $Id$
 #
 # This file imports everything needed to use this video module.
@@ -12,18 +12,13 @@
 #
 # Video plugins are also allowed to use VideoItem to create a new VideoItem
 #
-# Notes:
-# Todo:
-#
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.36  2004/09/14 20:05:19  dischi
-# split __init__ into interface.py and database.py
-#
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al.
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -40,12 +35,9 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
 from interface import *
-
-# special database imports (please fix)
-from database import *
 
 # used by video plugins
 from videoitem import VideoItem

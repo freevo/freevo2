@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.80  2004/12/18 18:08:39  dischi
+# add 'database()' function to mimetypes
+#
 # Revision 1.79  2004/12/18 13:41:28  dischi
 # call notifier.step() on init
 #
@@ -240,6 +243,13 @@ class MimetypePlugin(Plugin):
         return []
 
 
+    def database(self):
+        """
+        returns a database object
+        """
+        return None
+
+    
 class InputPlugin(Plugin):
     """
     Plugin for input devices such as keyboard and lirc. A plugin of this
@@ -455,7 +465,7 @@ def getall():
     return ret
 
 
-def mimetype(display_type):
+def mimetype(display_type=None):
     """
     return all MimetypePlugins for the given display_type. If display_type is
     None, return all MimetypePlugins.
