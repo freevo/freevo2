@@ -15,6 +15,9 @@
 # for a full list of tested sites see Docs/plugins/headlines.txt
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2004/08/05 17:39:17  dischi
+# deactivate
+#
 # Revision 1.21  2004/08/01 10:49:47  dischi
 # deactivate plugin
 #
@@ -66,16 +69,14 @@ from xml.dom.ext.reader import Sax2
 import urllib
 
 #freevo modules
-import config, menu, rc, plugin, skin, osd, util
+import config, menu, rc, plugin, util
 from gui import PopupBox
 from item import Item
 import eventhandler
 
 #get the singletons so we get skin info and access the osd
-skin = skin.get_singleton()
-osd  = osd.get_singleton()
 
-skin.register('headlines', ('screen', 'title', 'info', 'plugin'))
+# skin.register('headlines', ('screen', 'title', 'info'))
               
 #check every 30 minutes
 MAX_HEADLINE_AGE = 1800
