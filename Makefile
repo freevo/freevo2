@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2003/02/27 05:53:20  krister
+# Avoid merge problems for CVS updates, couldn't do some straight updates!
+#
 # Revision 1.28  2003/02/25 06:34:08  krister
 # Quick fix for the TV recording menu problem. Added makefile target for CVS update.
 #
@@ -110,7 +113,7 @@ $(SUBDIRS):
 
 
 cvsup:
-	cvs update -r LATEST_ALPHA
+	cvs update -C -r LATEST_ALPHA
 
 clean:
 	find . -name "*.pyo" -exec rm {} \;
