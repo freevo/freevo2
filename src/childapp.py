@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.61  2004/09/15 20:47:42  dischi
+# avoid duplicate events
+#
 # Revision 1.60  2004/08/23 20:38:56  dischi
 # fix osd stop/restart
 #
@@ -368,6 +371,8 @@ class ChildApp2(ChildApp):
     Enhanced version of ChildApp handling most playing stuff
     """
     def __init__(self, app, debugname=None, doeslogging=0, stop_osd=2):
+        self._is_stopped      = False
+        
         rc.register(self.poll, True, 10)
         rc.register(self.stop, True, rc.SHUTDOWN)
         
@@ -418,6 +423,9 @@ class ChildApp2(ChildApp):
         """
         stop the child
         """
+        if self._is_stopped:
+            return
+        self._is_stopped = True
         rc.unregister(self.poll)
         rc.unregister(self.stop)
 
@@ -445,7 +453,6 @@ class ChildApp2(ChildApp):
         """
         stop everything when child is dead
         """
-        if not self.isAlive():
+        if not self.isAlive() and not self._is_stopped:
             eventhandler.post(self.stop_event())
             self.stop()
-            
