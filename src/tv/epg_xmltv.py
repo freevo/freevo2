@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/01/07 07:36:09  krister
+# Removed the hack to scrub 8-bit chars from the guide.
+#
 # Revision 1.5  2003/01/05 12:47:35  dischi
 # The pickled file now has the uid in the name to avoid conflicts when you
 # start freevo with different users
@@ -166,22 +169,23 @@ def load_guide():
     if os.path.isfile(config.XMLTV_FILE):
         gotfile = 1
 
-        # XXX Hack to fix a bug where qp_xml barfs on 8-bit chars.
+        if 0:
+            # XXX Hack to fix a bug where qp_xml barfs on 8-bit chars.
 
-        # Read the current file
-        print 'XMLTV: XXX Hack to fix a bug where qp_xml barfs on 8-bit chars.'
-        fd = open(config.XMLTV_FILE)
-        data_8bit = fd.read()
-        fd.close()
-        
-        # Translate to 7-bit data, replacing 8-bit chars with spaces
-        table = ''.join(map(lambda v:chr(v), (range(0,127) + [32] * 128)))
-        data_7bit = data_8bit.translate(table)
-        
-        # Write to the file
-        fd = open(config.XMLTV_FILE, 'w')
-        fd.write(data_7bit)
-        fd.close()
+            # Read the current file
+            print 'XMLTV: XXX Hack to fix a bug where qp_xml barfs on 8-bit chars.'
+            fd = open(config.XMLTV_FILE)
+            data_8bit = fd.read()
+            fd.close()
+
+            # Translate to 7-bit data, replacing 8-bit chars with spaces
+            table = ''.join(map(lambda v:chr(v), (range(0,127) + [32] * 128)))
+            data_7bit = data_8bit.translate(table)
+
+            # Write to the file
+            fd = open(config.XMLTV_FILE, 'w')
+            fd.write(data_7bit)
+            fd.close()
         
         guide.timestamp = os.path.getmtime(config.XMLTV_FILE)
     else:
