@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/05/29 23:13:26  rshortt
+# The guide looked wierd squished to the right, but now I'm not sure if I like
+# it taking up the entire width either.
+#
 # Revision 1.7  2003/05/25 21:40:53  outlyer
 # Round edges for the toolbar.
 #
@@ -144,7 +148,7 @@ class HTMLResource:
         self.tableRowClose()
         self.tableClose()
         self.res += '<!-- Main Content -->'
-        self.res+=('<ul>')
+        self.res+=('<br />')
 
 
 
@@ -181,7 +185,7 @@ class HTMLResource:
 
 
     def printFooter(self):
-        self.res += '</ul>\n'
+        # self.res += '</ul>\n'
         self.res += "</body></html>\n"
     
     
