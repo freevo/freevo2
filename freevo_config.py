@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.90  2002/11/14 01:31:35  krister
+# Cleaned up default skin def and mga fbcon init.
+#
 # Revision 1.89  2002/11/13 14:34:21  krister
 # Fixed a bug in music playing (the file type was mistaken for video for songs without an absolute path) by changing the way file suffixes are handled. The format of suffixes in freevo_config.py changed, local_conf.py must be updated!
 #
@@ -269,7 +272,7 @@ OSD_SKIN = 'skins/main1/skin_main1.py'
 #
 # XML file for the skin
 #
-SKIN_XML_FILE = 'skins/xml/type1/blue_round1_%s.xml' % CONF.geometry
+SKIN_XML_FILE = 'blue_round1'
 
 # XXX The options to disable TV and Images have been removed. This must be
 # XXX done in the skin instead (visible="no").
@@ -293,7 +296,7 @@ OSD_SDL_EXEC_AFTER_STARTUP = ""
 # use the framebuffer and have a PAL tv may set this to
 # './matrox_g400/mga_pal_768x576.sh' OSD_SDL_EXEC_AFTER_STARTUP=''
 if CONF.display == 'mga':
-    OSD_SDL_EXEC_AFTER_STARTUP='cd fbcon ; ./mga_%s_%s.sh ; cd ..' % (CONF.tv, CONF.geometry)
+    OSD_SDL_EXEC_AFTER_STARTUP='./fbcon/mga_%s_%s.sh' % (CONF.tv, CONF.geometry)
 
 
 # ======================================================================
