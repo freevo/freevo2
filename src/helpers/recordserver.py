@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2004/01/13 15:17:02  outlyer
+# Appending won't work in this case anyway, so skip the error message.
+#
 # Revision 1.25  2004/01/09 18:57:06  dischi
 # stop on normal exit
 #
@@ -820,7 +823,7 @@ class RecordServer(xmlrpc.XMLRPC):
     def create_fxd(self,rec_prog):
         from util.fxdimdb import FxdImdb, makeVideo
         fxd = FxdImdb()
-        fxd.setFxdFile(config.TV_RECORD_DIR + '/' + rec_prog.filename)
+        fxd.setFxdFile(config.TV_RECORD_DIR + '/' + rec_prog.filename, overwrite = True)
         video = makeVideo('file', 'f1', os.path.basename(rec_prog.filename) + '.mpeg')
         fxd.setVideo(video)
         fxd.info['tagline'] = rec_prog.sub_title
