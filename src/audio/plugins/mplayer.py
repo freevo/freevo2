@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/11/11 18:01:44  dischi
+# fix playback problems with fxd files (and transform to list app style)
+#
 # Revision 1.24  2003/11/08 13:21:18  dischi
 # network m3u support, added AUDIOCD plugin register
 #
@@ -159,12 +162,16 @@ class MPlayer:
         if network_play and filename.endswith('m3u') and \
                extra_opts.find('-playlist') == -1:
             extra_opts += ' -playlist'
-        command = '%s -vo null -ao %s %s %s "%s"' % (mpl, config.MPLAYER_AO_DEV,
-                                                     demux, extra_opts, filename)
 
         if network_play:
-            command = '%s -cache 100' % command
-            
+            extra_opts += ' -cache 100'
+
+        command = '%s -vo null -ao %s %s %s' % (mpl, config.MPLAYER_AO_DEV, demux,
+                                                extra_opts)
+        
+        command = command.replace('\n', '').split(' ')
+        command.append(filename)
+        
         if plugin.getbyname('MIXER'):
             plugin.getbyname('MIXER').reset()
 
