@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/09/18 00:50:12  rshortt
+# FutureWarning isn't a class of python 2.2, is there another one we can use?  This one crashes.
+#
 # Revision 1.7  2003/09/11 14:16:21  outlyer
 # Filter out the warnings about the ioctl's. We can't do much with it just yet.
 #
@@ -43,8 +46,8 @@ import freq
 import os
 import struct
 import fcntl
-import warnings
-warnings.filterwarnings("ignore", category=FutureWarning, module=__name__)
+# import warnings
+# warnings.filterwarnings("ignore", category=FutureWarning, module=__name__)
 
 
 import config
