@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2003/04/02 11:54:35  dischi
+# And speedups again. Background images are only loaded when necessary
+#
 # Revision 1.36  2003/03/31 19:00:37  dischi
 # Removed all the lists in lists and list += [ blah ] stuff. I think it is
 # faster now, at least not slower ;-)
@@ -61,109 +64,6 @@
 # o some layout changes in blue2 (experimenting with the skin)
 # o the skin searches for images in current dir, skins/images and icon dir
 # o bugfixes
-#
-# Revision 1.29  2003/03/21 19:44:44  dischi
-# only draw images when needed
-#
-# Revision 1.28  2003/03/20 18:55:45  dischi
-# Correct the rectangle drawing
-#
-# Revision 1.27  2003/03/20 15:44:59  dischi
-# faster now
-#
-# Revision 1.26  2003/03/19 11:00:22  dischi
-# cache images inside the area and some bugfixes to speed up things
-#
-# Revision 1.25  2003/03/18 09:37:00  dischi
-# Added viewitem and infoitem to the menu to set an item which image/info
-# to take (only for the new skin)
-#
-# Revision 1.24  2003/03/16 19:33:12  dischi
-# adjustments to the new xml_parser
-#
-# Revision 1.23  2003/03/14 19:38:02  dischi
-# Support the new <menu> and <menuset> structure. See the blue2 skins
-# for example
-#
-# Revision 1.22  2003/03/14 03:08:58  outlyer
-# A fix for a crash problem I had with Dischi's version of my skin.
-#
-# Revision 1.21  2003/03/13 21:02:03  dischi
-# misc cleanups
-#
-# Revision 1.20  2003/03/11 20:38:47  dischi
-# some speed ups
-#
-# Revision 1.19  2003/03/11 20:25:59  dischi
-# Small fixes
-#
-# Revision 1.18  2003/03/08 17:36:47  dischi
-# integration of the tv guide
-#
-# Revision 1.17  2003/03/07 17:27:46  dischi
-# added support for extended menus
-#
-# Revision 1.16  2003/03/05 22:14:06  dischi
-# Bugfix: one enhancement doesn't work right
-#
-# Revision 1.15  2003/03/05 21:57:02  dischi
-# Added audio player. The info area is empty right now, but this skin
-# can player audio files
-#
-# Revision 1.14  2003/03/05 20:08:17  dischi
-# More speed enhancements. It's now faster than the keyboard control :-)
-#
-# Revision 1.13  2003/03/05 19:20:45  dischi
-# cleanip
-#
-# Revision 1.12  2003/03/04 22:46:32  dischi
-# VERY fast now (IMHO as fast as we can get it). There are some cleanups
-# necessary, but it's working. area.py only blits the parts of the screen
-# that changed, Aubins idle bar won't blink at all anymore (except you change
-# the background below it)
-#
-# Revision 1.11  2003/03/02 22:00:13  dischi
-# bugfix
-#
-# Revision 1.10  2003/03/02 21:56:36  dischi
-# Redraw bugfix for items that turn invisible
-#
-# Revision 1.9  2003/03/02 21:35:19  dischi
-# Don't print the warning when the area is invisible
-#
-# Revision 1.8  2003/03/02 19:31:35  dischi
-# split the draw function in two parts
-#
-# Revision 1.7  2003/03/02 15:04:08  dischi
-# Added forced_redraw after Clear()
-#
-# Revision 1.6  2003/03/01 00:12:17  dischi
-# Some bug fixes, some speed-ups. blue_round2 has a correct main menu,
-# but on the main menu the idle bar still flickers (stupid watermarks),
-# on other menus it's ok.
-#
-# Revision 1.5  2003/02/27 22:39:49  dischi
-# The view area is working, still no extended menu/info area. The
-# blue_round1 skin looks like with the old skin, blue_round2 is the
-# beginning of recreating aubin_round1. tv and music player aren't
-# implemented yet.
-#
-# Revision 1.4  2003/02/26 19:59:25  dischi
-# title area in area visible=(yes|no) is working
-#
-# Revision 1.3  2003/02/26 19:18:52  dischi
-# Added blue1_small and changed the coordinates. Now there is no overscan
-# inside the skin, it's only done via config.OVERSCAN_[XY]. The background
-# images for the screen area should have a label "background" to override
-# the OVERSCAN resizes.
-#
-# Revision 1.2  2003/02/25 23:27:36  dischi
-# changed max usage
-#
-# Revision 1.1  2003/02/25 22:56:00  dischi
-# New version of the new skin. It still looks the same (except that icons
-# are working now), but the internal structure has changed. Now it will
-# be easier to do the next steps.
 #
 #
 # -----------------------------------------------------------------------
@@ -222,22 +122,23 @@ class Screen:
     """
 
     def __init__(self):
-        self.s_bg       = pygame.Surface((osd.width, osd.height), 1, 32)
-        self.s_alpha    = self.s_bg.convert_alpha()
-        self.s_content  = self.s_bg.convert()
+        self.s_content  = osd.screen.convert()
+        self.s_alpha    = self.s_content.convert_alpha()
+        self.s_bg       = self.s_content.convert()
 
         self.s_alpha.fill((0,0,0,0))
 
-        self.updatelist = {}
-        self.updatelist['background'] = []
-        self.updatelist['content']    = []
+        self.update_bg      = None
+        self.update_alpha   = []
+        self.update_content = []
 
         self.drawlist = []
 
         
     def clear(self):
-        self.updatelist['background'] = []
-        self.updatelist['content']    = []
+        self.update_bg      = None
+        self.update_alpha   = []
+        self.update_content = []
 
         self.drawlist = []
 
@@ -247,12 +148,32 @@ class Screen:
 
 
     def update(self, layer, rect):
-        self.updatelist[layer] += [ rect ]
+        if layer == 'content':
+            self.update_content.append(rect)
+        elif layer == 'alpha':
+            self.update_alpha.append(rect)
+        else:
+            if self.update_bg:
+                self.update_bg = ( min(self.update_bg[0], rect[0]),
+                                   min(self.update_bg[1], rect[1]),
+                                   max(self.update_bg[2], rect[2]),
+                                   max(self.update_bg[3], rect[3]) )
+            else:
+                self.update_bg = rect
 
-
-    def in_update(self, x1, y1, x2, y2, update_area):
-        for u in update_area:
-            if not (x2 < u[0] or y2 < u[1] or x1 > u[2] or y1 > u[3]):
+            
+    def in_update(self, x1, y1, x2, y2, update_area, full=FALSE):
+        if full:
+            for ux1, uy1, ux2, uy2 in update_area:
+                # if the area is not complete inside the area but is inside on
+                # some pixels, return FALSE
+                if (not (ux1 >= x1 and uy1 >= y1 and ux2 <= x2 and uy2 <= y2)) and \
+                   (not (x2 < ux1 or y2 < uy1 or x1 > ux2 or y1 > uy2)):
+                    return FALSE
+            return TRUE
+        
+        for ux1, uy1, ux2, uy2 in update_area:
+            if not (x2 < ux1 or y2 < uy1 or x1 > ux2 or y1 > uy2):
                 return TRUE
         return FALSE
 
@@ -270,31 +191,38 @@ class Screen:
             objects.text       += area.text
             
         if force_redraw:
-            self.updatelist['background'] = [ (0,0,osd.width, osd.height) ]
-            self.updatelist['content']    = []
+            self.update_bg      = (0,0,osd.width, osd.height)
+            self.update_alpha   = []
+            self.update_content = []
 
-
-        update_area = self.updatelist['background']
+        update_area = self.update_alpha
 
         # if the background has some changes ...
-        if update_area:
-            # ... clear it ...
-            self.s_alpha.fill((0,0,0,0))
-
-            # and redraw all items
+        if self.update_bg:
+            ux1, uy1, ux2, uy2 = self.update_bg 
             for x1, y1, x2, y2, image in objects.bgimages:
-                # redraw only the changed parts of the image (BROKEN)
-                # for x0, y0, x1, y1 in self.updatelist['background']:
-                # self.s_bg.blit(o[1], (x0, y0), (x0-o[2], y0-o[3], x1-x0, y1-y0))
-                if self.in_update(x1, y1, x2, y2, update_area):
-                    self.s_bg.blit(image, (x1, y1))
+                if not (x2 < ux1 or y2 < uy1 or x1 > ux2 or y1 > uy2):
+                    self.s_bg.blit(image, (ux1, uy1), (ux1-x1, uy1-y1, ux2-ux1, uy2-uy1))
+
+            update_area.append(self.update_bg)
+            
+        if update_area:
+            # clear it
+            self.s_alpha.fill((0,0,0,0))
 
             for x1, y1, x2, y2, bgcolor, size, color, radius in objects.rectangles:
                 # only redraw if necessary
                 if self.in_update(x1, y1, x2, y2, update_area):
-                    osd.drawroundbox(x1, y1, x2, y2, color=bgcolor,
-                                     border_size=size, border_color=color,
-                                     radius=radius, layer=self.s_alpha)
+                    # if the radius and the border is not inside the update area,
+                    # use drawbox, it's faster
+                    if self.in_update(x1+size+radius, y1+size+radius, x2-size-radius,
+                                      y2-size-radius, update_area, full=TRUE):
+                        osd.drawbox(x1, y1, x2, y2, color=bgcolor, fill=1,
+                                    layer=self.s_alpha)
+                    else:
+                        osd.drawroundbox(x1, y1, x2, y2, color=bgcolor,
+                                         border_size=size, border_color=color,
+                                         radius=radius, layer=self.s_alpha)
 
             # and than blit only the changed parts of the screen
             for x0, y0, x1, y1 in update_area:
@@ -303,23 +231,18 @@ class Screen:
                 osd.screen.blit(self.s_content, (x0, y0), (x0, y0, x1-x0, y1-y0))
 
 
-        update_area = self.updatelist['content']
-            
         # if the content has changed ...
-        if update_area:
+        if self.update_content:
             # ... blit back the alphabg surface
-            for x0, y0, x1, y1 in update_area:
+            for x0, y0, x1, y1 in self.update_content:
                 osd.screen.blit(self.s_content, (x0, y0), (x0, y0, x1-x0, y1-y0))
 
 
-        update_area = self.updatelist['background'] + self.updatelist['content']
+        update_area += self.update_content
 
         # if something changed redraw all content objects
         if update_area:
             for x1, y1, x2, y2, image in objects.images:
-                # redraw only the changed parts of the image (BROKEN)
-                # for x0, y0, x1, y1 in self.updatelist['background']:
-                # self.s_bg.blit(o[1], (x0, y0), (x0-o[2], y0-o[3], x1-x0, y1-y0))
                 if self.in_update(x1, y1, x2, y2, update_area):
                     osd.screen.blit(image, (x1, y1))
 
@@ -449,6 +372,7 @@ class Skin_Area:
         self.update_content()
 
         bg_rect = ( osd.width, osd.height, 0, 0 )
+        a_rect  = ( osd.width, osd.height, 0, 0 )
         c_rect  = ( osd.width, osd.height, 0, 0 )
 
 
@@ -470,13 +394,13 @@ class Skin_Area:
             try:
                 self.objects.rectangles.remove(b)
             except ValueError:
-                bg_rect = ( min(bg_rect[0], b[0]), min(bg_rect[1], b[1]),
-                            max(bg_rect[2], b[2]), max(bg_rect[3], b[3]) )
+                a_rect = ( min(a_rect[0], b[0]), min(a_rect[1], b[1]),
+                           max(a_rect[2], b[2]), max(a_rect[3], b[3]) )
 
         for b in self.objects.rectangles:
             if not b in self.tmp_objects.rectangles:
-                bg_rect = ( min(bg_rect[0], b[0]), min(bg_rect[1], b[1]),
-                            max(bg_rect[2], b[2]), max(bg_rect[3], b[3]) )
+                a_rect = ( min(a_rect[0], b[0]), min(a_rect[1], b[1]),
+                           max(a_rect[2], b[2]), max(a_rect[3], b[3]) )
 
 
 
@@ -510,10 +434,14 @@ class Skin_Area:
 
         if bg_rect[0] < bg_rect[2]:
             self.screen.update('background', bg_rect)
+
+        if a_rect[0] < a_rect[2]:
+            self.screen.update('alpha', a_rect)
             if c_rect[0] < c_rect[2] and \
-               not (c_rect[0] >= bg_rect[0] and c_rect[1] >= bg_rect[1] and \
-                    c_rect[2] <= bg_rect[2] and c_rect[3] <= bg_rect[3]):
+               not (c_rect[0] >= a_rect[0] and c_rect[1] >= a_rect[1] and \
+                    c_rect[2] <= a_rect[2] and c_rect[3] <= a_rect[3]):
                 self.screen.update('content', c_rect)
+
         elif c_rect[0] < c_rect[2]:
             self.screen.update('content', c_rect)
 
@@ -630,8 +558,6 @@ class Skin_Area:
                     area = area.style[0]
                 except IndexError:
                     print 'index error for %s %s' % (display_style, widget_type)
-                    print area
-                    print area.style
                     raise
                 
             # get image or text view
