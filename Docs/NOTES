@@ -202,8 +202,7 @@ o Make a .tar.gz file from the tagged version using anonymous export
   cvs -d:pserver:anonymous@cvs.freevo.sourceforge.net:/cvsroot/freevo login
   cvs -z3 -d:pserver:anonymous@cvs.freevo.sourceforge.net:/cvsroot/freevo export \
     -r HEAD freevo
-  mv freevo freevo-1.2.0
-  tar cvzf freevo-1.2.0.tar.gz freevo-1.2.0
+  tar cvzf freevo-1.2.0.tar.gz freevo
 
 o Upload the tar file to Sourceforge
   ftp upload.sourceforge.net
