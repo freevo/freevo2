@@ -15,14 +15,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.3  2003/10/04 18:37:29  dischi
-# i18n changes and True/False usage
-#
-# Revision 1.2  2003/09/21 18:17:50  dischi
-# only update skin when something changes
-#
-# Revision 1.1  2003/09/21 13:14:00  dischi
-# a small osd to display messages on screen
+# Revision 1.4  2003/11/21 11:45:02  dischi
+# render option for appliactions (not perfect)
 #
 #
 # -----------------------------------------------------------------------
@@ -50,6 +44,7 @@
 import os
 import sys
 import copy
+import rc
 
 import config
 import skin
@@ -80,8 +75,9 @@ class PluginInterface(plugin.DaemonPlugin):
         # set to 2 == we have no idea right now if
         # we have an idlebar
         self.idlebar_visible = 2
-
+        self.poll_menu_only  = False
         
+
     def draw(self, (type, object), renderer):
         """
         draw current message
@@ -92,17 +88,35 @@ class PluginInterface(plugin.DaemonPlugin):
         # check for the idlebar plugin
         if self.idlebar_visible == 2:
             self.idlebar_visible = plugin.getbyname('idlebar')
-            
-        font  = renderer.get_font('osd')
+
+        try:
+            font  = renderer.get_font('osd')
+        except AttributeError:
+            try:
+                font  = skin.get_singleton().settings.font['osd']
+            except:
+                font  = skin.get_singleton().settings.font['default']
+
         w = font.font.stringsize(self.message)
 
-        y = renderer.y + 10
-        if self.idlebar_visible:
-            y += 60
+        if type == 'osd':
+            x = config.OVERSCAN_X
+            y = config.OVERSCAN_Y
 
-        renderer.write_text(self.message, font, None,
-                            (renderer.x + renderer.width-w - 10), y,
-                            w, -1, 'right', 'center')
+            renderer.drawstringframed(self.message, config.OVERSCAN_X,
+                                      config.OVERSCAN_Y + 10,
+                                      renderer.width - 2 * config.OVERSCAN_X, -1,
+                                      font.font, fgcolor=0xffffff, bgcolor=0xa0000000,
+                                      align_h='right', mode='hard')
+
+        else:
+            y = renderer.y + 10
+            if self.idlebar_visible:
+                y += 60
+
+            renderer.write_text(self.message, font, None,
+                                (renderer.x + renderer.width-w - 10), y,
+                                w, -1, 'right', 'center')
 
 
 
@@ -114,7 +128,10 @@ class PluginInterface(plugin.DaemonPlugin):
         if event == OSD_MESSAGE:
             self.poll_counter = 1
             self.message = event.arg
-            skin.get_singleton().redraw()
+            if not rc.app():
+                skin.get_singleton().redraw()
+            elif hasattr(rc.app(), 'im_self') and hasattr(rc.app().im_self, 'redraw'):
+                rc.app().im_self.redraw()
         return False
 
     
@@ -124,7 +141,7 @@ class PluginInterface(plugin.DaemonPlugin):
         """
         if self.message:
             self.message = ''
-            skin.get_singleton().redraw()
-        
-
-
+            if not rc.app():
+                skin.get_singleton().redraw()
+            elif hasattr(rc.app(), 'im_self') and hasattr(rc.app().im_self, 'redraw'):
+                rc.app().im_self.redraw()
