@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.74  2003/09/21 10:50:37  dischi
+# shutdown children, too
+#
 # Revision 1.73  2003/09/14 20:09:36  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
@@ -102,7 +105,7 @@ def shutdown(menuw=None, arg=None, allow_sys_shutdown=1):
     function to shut down freevo or the whole system
     """
     import plugin
-
+    import childapp
     osd.clearscreen(color=osd.COL_BLACK)
     osd.drawstring(_('shutting down...'), osd.width/2 - 90, osd.height/2 - 10,
                    fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
@@ -127,8 +130,9 @@ def shutdown(menuw=None, arg=None, allow_sys_shutdown=1):
                           os.environ['FREEVO_SCRIPT'])
                 time.sleep(1)
 
-            osd.shutdown()
             plugin.shutdown()
+            childapp.shutdown()
+            osd.shutdown()
 
             os.system(config.SHUTDOWN_SYS_CMD)
             # let freevo be killed by init, looks nicer for mga
@@ -136,17 +140,20 @@ def shutdown(menuw=None, arg=None, allow_sys_shutdown=1):
                 time.sleep(1)
             return
 
-    # SDL must be shutdown to restore video modes etc
-    osd.shutdown()
-
     #
     # Exit Freevo
     #
     
     # Shutdown any daemon plugins that need it.
     plugin.shutdown()
+
+    # Shutdown all chilfren still running
+    childapp.shutdown()
+
+    # SDL must be shutdown to restore video modes etc
     osd.clearscreen(color=osd.COL_BLACK)
     osd.shutdown()
+
     os.system('%s stop' % os.environ['FREEVO_SCRIPT'])
 
     # Just wait until we're dead. SDL cannot be polled here anyway.
@@ -233,13 +240,7 @@ class MainMenu(Item):
 def signal_handler(sig, frame):
     import plugin
     if sig in (signal.SIGTERM, signal.SIGINT):
-        osd.clearscreen(color=osd.COL_BLACK)
-        osd.shutdown() # SDL must be shutdown to restore video modes etc
-
-        # Shutdown any daemon plugins that need it.
-        plugin.shutdown()
-        os.system('%s stop' % os.environ['FREEVO_SCRIPT'])
-
+        shutdown(allow_sys_shutdown=0)
 
 #
 # Main init
