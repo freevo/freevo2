@@ -138,6 +138,14 @@ class OSD:
                 str(bbh), str(zoom)]
         self._send('drawbitmap;' + ';'.join(args))
 
+
+    def bitmapsize(self, file):
+        if not os.path.isfile(file):
+            return 0,0
+        import Image
+        image = Image.open(file)
+        return image.size
+
         
     def drawline(self, x0, y0, x1, y1, width=None, color=None):
         if width == None:
