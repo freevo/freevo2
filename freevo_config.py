@@ -15,6 +15,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.107  2003/01/12 17:57:52  dischi
+# Renamed SUFFIX_MPLAYER_FILES to SUFFIX_VIDEO_FILES because we also play
+# audio files with mplayer. Also renamed SUFFIX_FREEVO_FILES to
+# SUFFIX_VIDEO_DEF_FILES because we use this for movie xml files.
+#
 # Revision 1.106  2003/01/10 05:32:35  krister
 # Ooops, autosync for mplayer isn't supported until recently. Wait until it is in freevo_apps.
 #
@@ -150,9 +155,9 @@ MOVIE_PLAYLISTS = 0
 # The list of filename suffixes that are used to match the files that
 # are played wih MPlayer.
 # 
-SUFFIX_MPLAYER_FILES = [ 'avi', 'mpg', 'mpeg', 'wmv', 'bin', 'rm',
-                         'divx', 'ogm', 'vob', 'asf', 'm2v', 'm2p',
-                         'mp4', 'viv', 'nuv', 'mov' ]
+SUFFIX_VIDEO_FILES = [ 'avi', 'mpg', 'mpeg', 'wmv', 'bin', 'rm',
+                       'divx', 'ogm', 'vob', 'asf', 'm2v', 'm2p',
+                       'mp4', 'viv', 'nuv', 'mov' ]
 
 # ======================================================================
 # Freevo audio settings:
@@ -607,7 +612,7 @@ VIDREC_HQ = ''
 # Config for xml support in the movie browser
 # the regexp has to be with ([0-9]|[0-9][0-9]) so we can get the numbers
 #
-SUFFIX_FREEVO_FILES = [ 'xml' ]
+SUFFIX_VIDEO_DEF_FILES = [ 'xml' ]
 TV_SHOW_REGEXP = "s?([0-9]|[0-9][0-9])[xe]([0-9]|[0-9][0-9])[^0-9]"
 
 

@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/01/12 17:57:52  dischi
+# Renamed SUFFIX_MPLAYER_FILES to SUFFIX_VIDEO_FILES because we also play
+# audio files with mplayer. Also renamed SUFFIX_FREEVO_FILES to
+# SUFFIX_VIDEO_DEF_FILES because we use this for movie xml files.
+#
 # Revision 1.5  2003/01/09 18:56:18  dischi
 # Make the autostart work again. If you close a cd tray while you are at the
 # main menu, the disc will be autostart (show dir or play dvd)
@@ -190,7 +195,7 @@ class Identify_Thread(threading.Thread):
 
         
         # Check for movies/audio/images on the disc
-        mplayer_files = util.match_files(media.mountdir, config.SUFFIX_MPLAYER_FILES)
+        mplayer_files = util.match_files(media.mountdir, config.SUFFIX_VIDEO_FILES)
         mp3_files = util.match_files(media.mountdir, config.SUFFIX_AUDIO_FILES)
         image_files = util.match_files(media.mountdir, config.SUFFIX_IMAGE_FILES)
 

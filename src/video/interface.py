@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/01/12 17:57:52  dischi
+# Renamed SUFFIX_MPLAYER_FILES to SUFFIX_VIDEO_FILES because we also play
+# audio files with mplayer. Also renamed SUFFIX_FREEVO_FILES to
+# SUFFIX_VIDEO_DEF_FILES because we use this for movie xml files.
+#
 # Revision 1.3  2003/01/12 13:51:51  dischi
 # Added the feature to remove items for videos, too. For that the interface
 # was modified (update instead of remove).
@@ -50,13 +55,13 @@ def cwd(parent, files):
     """
     items = []
 
-    for file in util.find_matches(files, config.SUFFIX_FREEVO_FILES):
+    for file in util.find_matches(files, config.SUFFIX_VIDEO_DEF_FILES):
         x = xml_parser.parseMovieFile(file, parent, files)
         if x:
             files.remove(file)
             items += x
 
-    for file in util.find_matches(files, config.SUFFIX_MPLAYER_FILES):
+    for file in util.find_matches(files, config.SUFFIX_VIDEO_FILES):
         items += [ VideoItem(file, parent) ]
         files.remove(file)
 
@@ -72,9 +77,8 @@ def update(parent, new_files, del_files, new_items, del_items, current_items):
     for item in current_items:
 
         # remove xml files
-        for file in util.find_matches(del_files, config.SUFFIX_FREEVO_FILES):
-            if item.type == 'video' and item.xml_file == file and \
-               util.match_suffix(file, config.SUFFIX_FREEVO_FILES):
+        for file in util.find_matches(del_files, config.SUFFIX_VIDEO_DEF_FILES):
+            if item.type == 'video' and item.xml_file == file:
                 
                 del_items += [ item ]
                 del_files.remove(file)
@@ -91,7 +95,7 @@ def update(parent, new_files, del_files, new_items, del_items, current_items):
                 
             
         # remove 'normal' files
-        for file in util.find_matches(del_files, config.SUFFIX_MPLAYER_FILES):
+        for file in util.find_matches(del_files, config.SUFFIX_VIDEO_FILES):
             if item.type == 'video' and item.filename == file and not \
                item in del_items:
                 del_items += [ item ]
@@ -100,7 +104,7 @@ def update(parent, new_files, del_files, new_items, del_items, current_items):
 
 
     # add new xml files
-    for file in util.find_matches(new_files, config.SUFFIX_FREEVO_FILES):
+    for file in util.find_matches(new_files, config.SUFFIX_VIDEO_DEF_FILES):
         x = xml_parser.parseMovieFile(file, parent, new_files)
         if x:
             new_files.remove(file)
@@ -118,6 +122,6 @@ def update(parent, new_files, del_files, new_items, del_items, current_items):
                     
 
     # add new 'normal' files
-    for file in util.find_matches(new_files, config.SUFFIX_MPLAYER_FILES):
+    for file in util.find_matches(new_files, config.SUFFIX_VIDEO_FILES):
         new_items += [ VideoItem(file, parent) ]
         new_files.remove(file)

@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/01/12 17:57:52  dischi
+# Renamed SUFFIX_MPLAYER_FILES to SUFFIX_VIDEO_FILES because we also play
+# audio files with mplayer. Also renamed SUFFIX_FREEVO_FILES to
+# SUFFIX_VIDEO_DEF_FILES because we use this for movie xml files.
+#
 # Revision 1.8  2003/01/11 10:55:56  dischi
 # Call refresh with reload=1 when the menu was disabled during playback
 #
@@ -117,7 +122,7 @@ class Playlist(Item):
         for line in playlist_lines:
             if util.match_suffix(line, config.SUFFIX_AUDIO_FILES):
                 self.playlist += [ AudioItem(os.path.join(curdir, line), self) ]
-            elif util.match_suffix(line, config.SUFFIX_MPLAYER_FILES):
+            elif util.match_suffix(line, config.SUFFIX_VIDEO_FILES):
                 self.playlist += [ VideoItem(os.path.join(curdir, line), self) ]
             
 
@@ -149,7 +154,7 @@ class Playlist(Item):
         for line in playlist_lines:
             if util.match_suffix(line, config.SUFFIX_AUDIO_FILES):
                 self.playlist += [ AudioItem(os.path.join(curdir, line), self) ]
-            elif util.match_suffix(line, config.SUFFIX_MPLAYER_FILES):
+            elif util.match_suffix(line, config.SUFFIX_VIDEO_FILES):
                 self.playlist += [ VideoItem(os.path.join(curdir, line), self) ]
             
 
