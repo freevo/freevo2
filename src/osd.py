@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.126  2004/01/18 16:49:22  dischi
+# more verbose
+#
 # Revision 1.125  2004/01/16 12:19:09  dischi
 # fix crash when filename already is an image object
 #
@@ -1334,7 +1337,7 @@ class OSD:
                     image = i
                     
         except:
-            print 'Unknown Problem while loading image'
+            print 'Unknown Problem while loading image %s' % url
             if config.DEBUG:
                 traceback.print_exc()
             return None

@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/01/18 16:47:16  dischi
+# more verbose
+#
 # Revision 1.11  2004/01/09 19:03:39  dischi
 # make it possible to exclude dot files and overlay dir
 #
@@ -221,7 +224,8 @@ def listdir(directory, handle_exception=True, include_dot_files=False,
         return files
     
     except OSError:
-        _debug_('Error in dir')
+        _debug_('Error in dir %s' % directory)
+        traceback.print_exc()
         if not handle_exception:
             raise OSError
         return []
