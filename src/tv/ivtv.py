@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/08/13 15:25:28  rshortt
+# Remove TV_IVTV_OPTIONS in favour of new TV_SETTINGS.
+#
 # Revision 1.14  2004/08/12 16:52:49  rshortt
 # Work on autodetecting tv cards.
 #
@@ -106,34 +109,34 @@ class IVTV(tv.v4l2.Videodev):
         r = fcntl.ioctl(self.device, MSP_SET_MATRIX, val)
 
 
-    def init_settings(self, which, opts=None):
-        if not opts:
-            opts = config.TV_IVTV_OPTIONS
-
+    def init_settings(self, which):
         tv.v4l2.Videodev.init_settings(self, which)
 
-        (width, height) = string.split(opts['resolution'], 'x')
+        settings = config.TV_SETTINGS.get(which)
+        if not settings:
+            return
+
+
+        (width, height) = string.split(settings.resolution, 'x')
         self.setfmt(int(width), int(height))
 
         codec = self.getCodecInfo()
 
-        codec.aspect        = opts['aspect']
-        codec.audio_bitmask = opts['audio_bitmask']
-        codec.bframes       = opts['bframes']
-        codec.bitrate_mode  = opts['bitrate_mode']
-        codec.bitrate       = opts['bitrate']
-        codec.bitrate_peak  = opts['bitrate_peak']
-        codec.dnr_mode      = opts['dnr_mode']
-        codec.dnr_spatial   = opts['dnr_spatial']
-        codec.dnr_temporal  = opts['dnr_temporal']
-        codec.dnr_type      = opts['dnr_type']
-        # XXX: Ignore framerate for now, use the card's initialized default.
-        # codec.framerate     = opts['framerate']
-        # XXX: Ignore framespergop for now, use the card's initialized default.
-        # codec.framespergop  = opts['framespergop']
-        codec.gop_closure   = opts['gop_closure']
-        codec.pulldown      = opts['pulldown']
-        codec.stream_type   = opts['stream_type']
+        codec.aspect        = settings.aspect
+        codec.audio_bitmask = settings.audio_bitmask
+        codec.bframes       = settings.bframes
+        codec.bitrate_mode  = settings.bitrate_mode
+        codec.bitrate       = settings.bitrate
+        codec.bitrate_peak  = settings.bitrate_peak
+        codec.dnr_mode      = settings.dnr_mode
+        codec.dnr_spatial   = settings.dnr_spatial
+        codec.dnr_temporal  = settings.dnr_temporal
+        codec.dnr_type      = settings.dnr_type
+        codec.framerate     = settings.framerate
+        codec.framespergop  = settings.framespergop
+        codec.gop_closure   = settings.gop_closure
+        codec.pulldown      = settings.pulldown
+        codec.stream_type   = settings.stream_type
 
         self.setCodecInfo(codec)
 

@@ -792,35 +792,6 @@ IMAGEVIEWER_BLEND_MODE = -1
 
 
 #
-# Settings for ivtv based cards such as the WinTV PVR-250/350.
-#
-# XXX TODO: Add descriptions and valid settings for each option.
-# bitrate in bps
-# stream type
-# Options are: 0 (mpeg2_ps), 1 (mpeg2_ts), 2 (mpeg1), 3 (mpeg2_pes_av),
-#              5 (mpeg2_pes_v), 7 (mpeg2_pes_a), 10 (dvd)
-
-# TV_IVTV_OPTIONS = {
-#     'input'         : 4,
-#     'resolution'    : '720x480',
-#     'aspect'        : 2,
-#     'audio_bitmask' : 233,
-#     'bframes'       : 3,
-#     'bitrate_mode'  : 1,
-#     'bitrate'       : 4000000,
-#     'bitrate_peak'  : 4000000,
-#     'dnr_mode'      : 0,
-#     'dnr_spatial'   : 0,
-#     'dnr_temporal'  : 0,
-#     'dnr_type'      : 0,
-#     'framerate'     : 0,
-#     'framespergop'  : 15,
-#     'gop_closure'   : 1,
-#     'pulldown'      : 0,
-#     'stream_type'   : 10,
-# }
-
-#
 # FREQUENCY_TABLE - This is only used when Freevo changes the channel natively.
 # This is only the case if you are using V4L2 and any of the following plugins:
 # timeshift, ivtv_record, ivtv_basic_tv.
