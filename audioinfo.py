@@ -16,6 +16,12 @@
 #          * Add support for Ogg-Vorbis
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/07/29 06:21:27  outlyer
+# Fixed a minor regression. Added code to get the cover image, as per
+# previous behaviour. I've noticed that the mplayer mp3 player takes remarkably
+# little CPU on my Celeron 400; less than 1%, so it definitely smokes mpg123
+# and mpg321.
+#
 # Revision 1.1  2002/07/29 05:24:35  outlyer
 # Lots and lots of changes for new mplayer-based audio playing code.
 # o You'll need to modify your config file, as well as setup the new mplayer
@@ -90,6 +96,7 @@ class AudioInfo:
         else:
             if DEBUG: print "Got something else..."
 
+	temp = self.get_cover_image ( self.filename )
         if DEBUG:
             print "DEBUG:"
             print "  Album: " + str(self.album)
@@ -97,9 +104,21 @@ class AudioInfo:
             print "  Title: " + str(self.title)
             print "  Track: " + str(self.track)
             print "   Year: " + str(self.year)
-            print " length: " + str(self.length)
+            print " Length: " + str(self.length)
+	    print "  Image: " + str(temp)
 
-    def get_cover_image( self ):
+    def get_cover_image( self, filename ):
+    	cover_logo = os.path.dirname(filename)
+	cover_logo += '/cover.png'
+	print cover_logo
+	# Only draw the cover if the file exists. We'll
+	# use the standard imghdr function to check if
+	# it's a real png, and not a lying one :)
+	if os.path.isfile(cover_logo):
+		self.image = cover_logo
+	# Allow per mp3 covers. As per Chris' request ;)
+	if os.path.isfile(os.path.splitext(filename)[0] + '.png'):
+	        self.image = os.path.splitext(filename)[0] + '.png'
         return self.image
 
     def set_cover_image( self, str ):
