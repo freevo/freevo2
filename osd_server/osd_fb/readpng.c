@@ -6,7 +6,7 @@
 
 
 /* Returns OK or ERROR */
-int read_png (char *file_name, uint32 **ppBitmap,
+int read_png (char *file_name, uint8 **ppBitmap,
               uint16 *pWidth, uint16 *pHeight) 
 {
    png_structp png_ptr;
@@ -19,7 +19,7 @@ int read_png (char *file_name, uint32 **ppBitmap,
    int rowbytes;
    png_bytep *row_pointers;
    int i;
-   uint32 *pTmp;
+   uint8 *pTmp;
    
    
    if ((fp = fopen (file_name, "r")) == NULL)
@@ -84,16 +84,16 @@ int read_png (char *file_name, uint32 **ppBitmap,
 
    /* Copy image to a malloc()'ed buffer that is free()'d by the
     * caller */
-   pTmp = (uint32 *) malloc (width*4*height);
+   pTmp = (uint8 *) malloc (width*4*height);
 
    printf ("Storing at %p\n", pTmp);
    
    for (i = 0; i < height; i++) {
-      uint32 *src, *dst;
+      uint8 *src, *dst;
       
       
-      dst = &(pTmp[i*width]);
-      src = (uint32 *) row_pointers[i];
+      dst = &(pTmp[i*width*4]);
+      src = (uint8 *) row_pointers[i];
 
       memcpy (dst, src, width*4);
    }
@@ -118,7 +118,7 @@ int read_png (char *file_name, uint32 **ppBitmap,
 int
 main (int ac, char *av[])
 {
-   uint32 *pBitmap;
+   uint8 *pBitmap;
    uint16 w, h;
    
    

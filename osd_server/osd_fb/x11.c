@@ -18,13 +18,14 @@ static int xres, yres;
 int
 main (int ac, char *av[])
 {
-   uint32 *pBitmap;
+   uint8 *pBitmap;
    uint16 w, h;
    int i;
    
    
    printf ("open()\n");
    x11_open (768, 576);
+   x11_clearscreen (0);
 
 #if 0
    printf ("clearscreen()\n");
@@ -48,7 +49,7 @@ main (int ac, char *av[])
       printf ("read png %s\n", av[i]);
       read_png (av[i], &pBitmap, &w, &h);
 
-      x11_drawbitmap (10, 10, w, h, (uint32 *) pBitmap);
+      x11_drawbitmap (10, 10, w, h, pBitmap);
 
       x11_flush ();
 
@@ -160,42 +161,44 @@ x11_setpixel (int x, int y, uint32 color)
 }
 
 
+#define APPLY_ALPHA(c, a) (c = ((int) (((float) c) * a)) & 0xff)
+
 void
-x11_drawbitmap (int x, int y, int width, int height, uint32 *pBitmap)
+x11_drawbitmap (int x, int y, int width, int height, uint8 *pBitmap)
 {
    int i, j;
    uint32 color;
-
+   uint8 r, g, b, a;
+   
    
    printf ("Got ptr = %p\n", pBitmap);
    
    for (i = 0; i < height; i++) {
       for (j = 0; j < width; j++) {
-         color = *pBitmap++;
+         b = pBitmap[i*width*4+j*4+0];
+         g = pBitmap[i*width*4+j*4+1];
+         r = pBitmap[i*width*4+j*4+2];
+         a = pBitmap[i*width*4+j*4+3];
 
-         if (color & 0xff000000) {
-            int r, g, b;
-            float alpha = 1.0 - (float) ((color & 0xff000000 >> 24) / 255.0);
+         /*  printf ("%3d %3d   %3d   %3d   %3d     %3d", i, j, r, g, b, a); */
+         
+         if (a) {
+            float alpha = (float) (((float) a) / 255.0);
 
-            
-            b = (color & 0xff0000) >> 16;
-            g = (color & 0xff00) >> 8;
-            r = color & 0xff;
-            r *= alpha;
-            g *= alpha;
-            b *= alpha; 
-            color = ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff);
+            APPLY_ALPHA(r, alpha);
+            APPLY_ALPHA(g, alpha);
+            APPLY_ALPHA(b, alpha);
+            color = (r << 16) | (g << 8) | (b & 0xff);
 #if 0
-            printf ("%3d %3d   %3d  %3d  %3d\n",
-                    j, i, color & 0xff0000 >> 16,
-                    color & 0xff00 >> 8, color & 0xff);
+            printf ("0x%08x", color);
 #endif
             XSetForeground (dpy, gc, color);
             XDrawPoint (dpy, w, gc, x+j, y+i);
          }
+         /*  printf ("\n"); */
       }
 
-      printf ("\n");
+      /*  printf ("\n\n"); */
       
    }
    

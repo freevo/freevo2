@@ -1,4 +1,4 @@
-CFLAGS = -O2 -g
+CFLAGS = -O2 -g -Wall
 
 all: osd_x11 osd_fb fstest x11test pngtest
 
@@ -9,7 +9,7 @@ osd_x11: main.c fs.c fs.h x11.c x11.h
 	gcc -DOSD_X11 $(CFLAGS) -Wall main.c fs.c x11.c -o osd_x11 -lm -L/usr/X11/lib -lX11
 
 x11test: x11.c x11.h readpng.c readpng.h
-	gcc -g -Wall -DTEST x11.c readpng.c -o x11test -lm -L/usr/X11/lib -lX11 -lpng -lz
+	gcc $(CFLAGS) -DTEST x11.c readpng.c -o x11test -lm -L/usr/X11/lib -lX11 -lpng -lz
 
 jpegtest: jpeg.c jpeg.h
 	gcc $(CFLAGS) -Wall -DJPEGTEST jpeg.c -o jpegtest -lm -ljpeg

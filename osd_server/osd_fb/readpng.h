@@ -11,7 +11,7 @@
 #endif
 
 /* Returns OK or ERROR */
-extern int read_png (char *file_name, uint32 **ppBitmap,
+extern int read_png (char *file_name, uint8 **ppBitmap,
                      uint16 *pWidth, uint16 *pHeight);
 
 #endif /* _INC_READPNG_H_ */
