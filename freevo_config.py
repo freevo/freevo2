@@ -498,7 +498,7 @@ DIRECTORY_CREATE_PLAYLIST      = [ 'audio', 'image' ]
 #
 # Add playlist files ('m3u') to the directory
 #
-DIRECTORY_ADD_PLAYLIST_FILES   = [ 'audio' ]
+DIRECTORY_ADD_PLAYLIST_FILES   = [ 'audio', 'image' ]
 
 #
 # Add an item 'Random Playlist' to the directory
