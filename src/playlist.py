@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.64  2004/02/13 18:32:57  dischi
+# add event to toggle playlist repeat
+#
 # Revision 1.63  2004/02/08 17:39:39  dischi
 # small cosmetic fixes
 #
@@ -494,7 +497,14 @@ class Playlist(Item):
 
         if not menuw:
             menuw = self.menuw
-            
+
+        if event == PLAYLIST_TOGGLE_REPEAT:
+            self.repeat = not self.repeat
+            if self.repeat:
+                rc.post_event(Event(OSD_MESSAGE, arg=_('playlist repeat on')))
+            else:
+                rc.post_event(Event(OSD_MESSAGE, arg=_('playlist repeat off')))
+
         if event in ( PLAYLIST_NEXT, PLAY_END, USER_END) \
                and self.current_item and self.playlist:
             pos = self.playlist.index(self.current_item)

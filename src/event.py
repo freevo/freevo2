@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2004/02/13 18:32:57  dischi
+# add event to toggle playlist repeat
+#
 # Revision 1.39  2004/02/06 01:10:23  mikeruelle
 # it is nice to have zero in tvtime
 #
@@ -157,6 +160,7 @@ MIXER_MUTE             = Event('MIXER_MUTE')
 
 PLAYLIST_NEXT          = Event('PLAYLIST_NEXT')
 PLAYLIST_PREV          = Event('PLAYLIST_PREV')
+PLAYLIST_TOGGLE_REPEAT = Event('PLAYLIST_TOGGLE_REPEAT')
                        
 EJECT                  = Event('EJECT')
                        
