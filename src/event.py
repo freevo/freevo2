@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2003/12/10 19:10:35  dischi
+# AUDIO_PLAY_END is not needed anymore
+#
 # Revision 1.32  2003/12/10 19:01:04  dischi
 # add handler for events who know the needed eventhandler
 #
@@ -546,7 +549,6 @@ DEFAULT_KEYMAP = {
 PLAY_END         = Event('PLAY_END')
 USER_END         = Event('USER_END')
 DVD_PROTECTED    = Event('DVD_PROTECTED')
-AUDIO_PLAY_END   = Event('AUDIO_PLAY_END')
 PLAY_START       = Event('PLAY_START')
 
 OSD_MESSAGE      = Event('OSD_MESSAGE')

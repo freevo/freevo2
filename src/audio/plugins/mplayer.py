@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2003/12/10 19:10:35  dischi
+# AUDIO_PLAY_END is not needed anymore
+#
 # Revision 1.28  2003/12/10 19:02:38  dischi
 # move to new ChildApp2 and remove the internal thread
 #
@@ -209,12 +212,10 @@ class MPlayer:
         function it will be passed over to the items eventhandler
         """
 
-        if event == AUDIO_PLAY_END:
-            if event.arg:
-                self.stop()
-                if self.playerGUI.try_next_player():
-                    return True
-            event = PLAY_END
+        if event == PLAY_END and event.arg:
+            self.stop()
+            if self.playerGUI.try_next_player():
+                return True
             
         if event == AUDIO_SEND_MPLAYER_CMD:
             self.app.write('%s\n' % event.arg)

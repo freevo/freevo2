@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/12/10 19:10:35  dischi
+# AUDIO_PLAY_END is not needed anymore
+#
 # Revision 1.4  2003/09/22 20:36:18  mikeruelle
 # more web interface help descriptions
 #
@@ -117,10 +120,6 @@ class PluginInterface(plugin.Plugin):
         function it will be passed over to the items eventhandler
         """
         print 'Radio Player event handler %s' % event
-
-        if event == AUDIO_PLAY_END or event == MENU_BACK_ONE_MENU:
-            event = PLAY_END
-
         if event in ( STOP, PLAY_END, USER_END ):
             self.playerGUI.stop()
             return self.item.eventhandler(event)
