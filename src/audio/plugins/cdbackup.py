@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2004/01/02 14:20:10  dischi
+# send OSD_MESSAGE when ripping is complete
+#
 # Revision 1.28  2003/11/28 19:26:36  dischi
 # renamed some config variables
 #
@@ -125,8 +128,10 @@ import config
 import menu
 import util
 import plugin
+import rc
 
 from gui.AlertBox import AlertBox
+from event import *
 
 # Included to be able to access the info for Audio CDs
 import mmpython
@@ -228,7 +233,8 @@ class PluginInterface(plugin.ItemPlugin):
                 ('CD_RIP_LAME_OPTS', '--preset standard', ''),
                 ('CD_RIP_OGG_OPTS', '-m 128', ''),
                 ('FLAC_OPTS', '-8', '8==Best, but slowest compression'),
-                ('RIP_TITLE_CASE','0','Autoconvert all track/album/artist names to title case'))
+                ('RIP_TITLE_CASE','0',
+                 'Autoconvert all track/album/artist names to title case'))
 
     def actions(self, item):
         self.item = item
@@ -322,7 +328,8 @@ class main_backup_thread(threading.Thread):
         dir_audio_default = "dir_audio_default"        
         path_head = ''
         for media in config.REMOVABLE_MEDIA:
-            media.info.handle_type = 'cdrip'
+            if media.devicename == device:
+                media.info.handle_type = 'cdrip'
         
         # Get the artist, album and song_names	
         (discid, artist, album, genre, song_names) = self.get_formatted_cd_info(device)
@@ -470,9 +477,11 @@ class main_backup_thread(threading.Thread):
                 if os.path.exists (rm_command): os.unlink(rm_command)
         
         for media in config.REMOVABLE_MEDIA:
-            media.info.handle_type = 'audio'
+            if media.devicename == device:
+                media.info.handle_type = 'audio'
 
         # done
+        rc.post_event(Event(OSD_MESSAGE, arg=_('Ripping complete')))
         self.current_track = -1
 
 
