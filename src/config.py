@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.73  2003/11/24 19:23:07  dischi
+# remove the MOVIE_XXX variables, they are in video/__init__ now
+#
 # Revision 1.72  2003/11/23 19:12:22  rshortt
 # Make sure VideoGroup gets the norm as upper case.
 #
@@ -771,17 +774,6 @@ def detect_channels():
 if TV_CHANNELS == None and plugin.is_active('tv'):
     # auto detect them
     TV_CHANNELS = detect_channels()
-
-#
-# Movie information database.
-# The database is built at startup in the identifymedia thread,
-# and also if the file '/tmp/freevo-rebuild-database' is created.
-#
-
-MOVIE_INFORMATIONS       = []
-MOVIE_INFORMATIONS_ID    = {}
-MOVIE_INFORMATIONS_LABEL = []
-TV_SHOW_INFORMATIONS     = {}
 
 #
 # compile the regexp
