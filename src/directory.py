@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.105  2004/01/27 19:17:48  dischi
+# fix crash when an item is added to an empty menu
+#
 # Revision 1.104  2004/01/26 20:56:24  dischi
 # do not crash when deleting last item
 #
@@ -148,11 +151,9 @@ class DirItem(Playlist):
     class for handling directories
     """
     def __init__(self, directory, parent, name = '', display_type = None, add_args = None):
-        Playlist.__init__(self, parent=parent)
+        Playlist.__init__(self, parent=parent, display_type=display_type)
         self.type = 'dir'
-        self.menuw = None
         self.menu  = None
-        self.name  = os.path.basename(directory)
 
         # store FileInformation for moving/copying
         self.files = FileInformation()
@@ -162,12 +163,11 @@ class DirItem(Playlist):
         
         if name:
             self.name = name
-        
-        # variables only for DirItem
-        self.dir           = os.path.abspath(directory)
-        self.display_type  = display_type
-        self.info          = mediainfo.get(directory)
-        self.mountpoint    = None
+        else:
+            self.name = os.path.basename(directory)
+            
+        self.dir  = os.path.abspath(directory)
+        self.info = mediainfo.get(directory)
         
         if add_args == None and hasattr(parent, 'add_args'): 
             add_args = parent.add_args
@@ -234,7 +234,7 @@ class DirItem(Playlist):
         '''
 
         if node.name == 'skin':
-            self.folder_fxd = self.folder_fxd
+            self.skin_fxd = self.folder_fxd
             return
         
         global all_variables
@@ -449,9 +449,6 @@ class DirItem(Playlist):
                 util.mount(self.dir)
                 self.media = media
 
-        if self.mountpoint:
-            util.mount(self.mountpoint)
-            
 	if vfs.isfile(self.dir + '/.password'):
 	    print 'password protected dir'
             self.arg   = arg
@@ -666,7 +663,7 @@ class DirItem(Playlist):
                         self.menu.selected = items[pos]
                     else:
                         self.menu.selected = None
-            if self.menu.selected:
+            if self.menu.selected and selected_pos != -1:
                 self.menuw.rebuild_page()
             else:
                 self.menuw.init_page()
