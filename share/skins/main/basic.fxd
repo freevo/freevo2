@@ -715,7 +715,7 @@
 	    <view layout="view" x="10" y="460" width="180" height="130"/>
 	    <info layout="running video info" x="210" y="490" width="580"
 		height="100"/>
-	    <content layout="progressbar" x="210" y="460" width="580"
+	    <progress layout="progressbar" x="210" y="460" width="580"
 		height="20"/>
 	</menuset>
 
@@ -724,7 +724,7 @@
 	    <view visible="no"/>
 	    <info layout="running video info" x="10" y="560" width="190"
 		height="30"/>
-	    <content layout="progressbar" x="210" y="560" width="580"
+	    <progress layout="progressbar" x="210" y="560" width="580"
 		height="20"/>
 	</menuset>
 
