@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/09/24 18:13:44  outlyer
+# Fix hex constant (endian independent as per Python >= 2.3 requirement)
+#
 # Revision 1.13  2003/09/23 13:42:01  outlyer
 # Removed more chatter.
 #
@@ -289,7 +292,7 @@ class Splashscreen(BlankScreen):
         pos = 0
         if self.pos:
             pos = round(float((x1 - x0 - 2)) / (float(100) / self.pos))
-        osd.drawbox(x0, y1-130, x0 + pos, y1-110, color=0xa0000000, fill=TRUE)
+        osd.drawbox(x0, y1-130, x0 + pos, y1-110, color=0xa0000000L, fill=TRUE)
         osd.drawbox(x0, y1-130, x1, y1-110, 2)
 
 
