@@ -109,7 +109,7 @@ from event import *
 # of the config file doesn't match, Freevo won't start. If the minor version
 # is different, there will be only a warning
 
-LOCAL_CONF_VERSION  = 3.91
+LOCAL_CONF_VERSION  = 4.00
 
 # Description of changes in each new version
 FREEVO_CONF_CHANGES = [
@@ -117,37 +117,6 @@ FREEVO_CONF_CHANGES = [
      '''Changed xmame_SDL to just xmame'''), ]
 
 LOCAL_CONF_CHANGES = [
-    (1.1,
-     '''ROM_DRIVES are autodetected if left empty.
-    Added AUDIO_RANDOM_PLAYLIST (default on).
-    Added COVER_DIR for covers for files on CDs etc.
-    Added AUDIO_COVER_REGEXP for selection of covers for music files.
-    Changed MPlayer default args.
-    Changed TV_SETTINGS to /dev/video0.'''),
-    (2.0,
-     '''Remote control config has changed from Freevo Python files to the
-     standard Lirc program config files, see freevo_config.py for
-     more info.'''),
-    (2.1,
-     '''Added MPLAYER_ARGS_AUDIOCD for audio cd playback settings.'''),
-    (3.0,
-     '''New skin engine. The new engine has no automatic TV overscan support,
-     you need to set OVERSCAN_X and OVERSCAN_Y. There are also new variables
-     for this engine: MAIN_MENU_ITEMS and FORCE_SKIN_LAYOUT. The games menu
-     will be activated automaticly if setup.py found mame or snes'''),
-    (3.1,
-     '''Renamed TV_SHOW_IMAGE_DIR to TV_SHOW_DATA_DIR. This directory now can
-     also contain fxd files with gloabl informations and mplayer options'''),
-    (3.2,
-     '''Removed MPLAYER_ARGS_* and added a hash MPLAYER_ARGS to set args for
-     all different kinds of files. Also added MPLAYER_SOFTWARE_SCALER to use
-     the software scaler for fast CPUs'''),
-    (3.3,
-     '''Added AUDIO_FORMAT_STRING to customize the audio item title generation'''),
-    (3.4,
-     '''Removed RC_MPLAYER_CMDS for video and audio. Set special handling (and
-     other key mappings with the variable EVENTS. See event.py for possible
-     events'''),
     (3.5,
      '''Added xine support (see xine section in freevo_config.py),
      MPLAYER_AUTOCROP for 16:9 tv sets, ONLY_SCAN_DATADIR to make freevo start
@@ -163,7 +132,15 @@ LOCAL_CONF_CHANGES = [
      '''Add MPLAYER_SET_AUDIO_DELAY to correct AV sync problems'''),
     (3.91,
      '''Add SKIN_FORCE_TEXTVIEW_STYLE and SKIN_MEDIAMENU_FORCE_TEXTVIEW to add
-     more control when to switch to text view.''') ]
+     more control when to switch to text view.'''),
+    (4.00,
+     '''Reworked the directory settings: MOVIE_PLAYLISTS and AUDIO_RANDOM_PLAYLIST
+     are removed, the new variables to control a directory style are
+     DIRECTORY_CREATE_PLAYLIST, DIRECTORY_ADD_PLAYLIST_FILES,
+     DIRECTORY_ADD_RANDOM_PLAYLIST and DIRECTORY_AUTOPLAY_ITEMS. The directory
+     updated now uses stat, set DIRECTORY_USE_STAT_FOR_CHANGES = 0 if you have
+     problems with it. Also new: IMAGEVIEWER_BLEND_SPEED to control blending
+     one image to the next in the image viewer.''')]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -376,17 +353,6 @@ plugin_record = plugin.activate('tv.generic_record')
 # </freevo>
 
 #
-# Should playlists be available for movies, and all movies in a directory
-# be played in succession (unless you press STOP/EXIT)?
-#
-MOVIE_PLAYLISTS = 0
-
-#
-# Should a Random Playlist be generated for Music?
-#
-AUDIO_RANDOM_PLAYLIST = 1
-
-#
 # Should directories sorted by date instead of filename
 # 0 = no, 1 = yes, 2 = no for normal menus, yes for DIR_RECORD
 #
@@ -429,6 +395,39 @@ AUDIO_FORMAT_STRING = '%(t)s'
 # 1 all the time and only be disabled in directories with broken tags
 #
 USE_MEDIAID_TAG_NAMES = 1
+
+#
+# The next varibales are a list of types in which the feature should be
+# enabled (video, audio, image, games). E.g. to enable audoplay for
+# audio and images set DIRECTORY_AUTOPLAY_ITEMS = [ 'audio', 'image' ]
+#
+# If you set this variable in a folder.fxd, the value is 1 (enabled)
+# or 0 (disabled).
+#
+
+#
+# Make all items a playlist. So when one is finished, the next one will
+# start. It's also possible to browse through the list with UP and DOWN
+#
+
+DIRECTORY_CREATE_PLAYLIST      = [ 'audio', 'image' ]
+
+#
+# Add playlist files ('m3u') to the directory
+#
+DIRECTORY_ADD_PLAYLIST_FILES   = [ 'audio' ]
+
+#
+# Add an item 'Random Playlist' to the directory
+#
+DIRECTORY_ADD_RANDOM_PLAYLIST  = [ 'audio' ]
+
+#
+# Make 'Play' not 'Browse' the default action when only items and not
+# subdirectories are in the directory
+#
+DIRECTORY_AUTOPLAY_ITEMS       = [ ]
+
 
 # ======================================================================
 # Freevo cache dir:
@@ -576,6 +575,11 @@ SUFFIX_IMAGE_SSHOW = [ 'ssr' ]
 #                ('Carmel 2002',  '/video/SlideShows/carmel.ssr'),
 #                ('Pics',  '/video/SlideShows') ]
 
+
+# Speed for blending one picture into the new one. Set it to 0 to
+# disable, or to 25, 10, 5 too make the blend slower.
+
+IMAGEVIEWER_BLEND_SPEED = 50
 
 # ======================================================================
 # Freevo games settings:
@@ -1229,3 +1233,12 @@ else:
 LOCALE='latin-1'
 
 FREEVO_EVENTHANDLER_SANDBOX = 1
+
+
+# Use stat to check if a directory has changed. This is faster and should
+# work with all kinds of filesystems. No need to change it I guess
+
+DIRECTORY_USE_STAT_FOR_CHANGES = True
+
+
+
