@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.139  2004/02/12 12:37:14  dischi
+# fix alternative font loading
+#
 # Revision 1.138  2004/02/12 03:32:41  outlyer
 # Fixes for OSD_EXTRA_FONT:
 #
@@ -332,8 +335,9 @@ class OSDFont:
             _debug_('Couldnt load font "%s"' % os.path.basename(filename).lower())
 
             # Ok, see if there is an alternate font to use
-            if fontname in config.OSD_FONT_ALIASES:
-                alt_fname = os.path.join(config.FONT_DIR, config.OSD_FONT_ALIASES[fontname])
+            if fontname.lower() in config.OSD_FONT_ALIASES:
+                alt_fname = os.path.join(config.FONT_DIR,
+                                         config.OSD_FONT_ALIASES[fontname.lower()])
                 _debug_('trying alternate: %s' % os.path.basename(alt_fname).lower())
                 font = self.__loadfont__(alt_fname, ptsize)
 
