@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.54  2003/07/03 21:58:10  dischi
+# small fixes for very short strings in dsf
+#
 # Revision 1.53  2003/07/03 21:27:21  dischi
 # Created a new drawstringframed. Please test it. The old code is still there
 # if there are major problems, but I tested it good, and it worked
@@ -1641,7 +1644,12 @@ class OSD:
             ellipses_size = font.stringsize(ellipses)
             if ellipses_size > max_width:
                 # if not even the ellipses fit, we have not enough space
-                # for the text, try to shorten the ellipses until they fit
+                # until the text is shorter than the ellipses
+                width = font.stringsize(string)
+                if width <= max_width:
+                    # ok, text fits
+                    return (width, string, '')
+                # ok, only draw the ellipses, shorten them first
                 while(ellipses_size > max_width):
                     ellipses = ellipses[:-1]
                     ellipses_size = font.stringsize(ellipses)
