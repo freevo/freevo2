@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/02/18 04:54:05  krister
+# runtime builder updates.
+#
 # Revision 1.6  2003/02/14 05:10:14  krister
 # Updated for a fresh mplayer version
 #
@@ -52,11 +55,17 @@
 #endif
 
 
-TARGETS = mplayer_fonts mplayer
+TARGETS = mplayer_fonts mplayer aumix
+
+.PHONY: all copy clean
+
 
 # Build all libs and apps
 all: Archive $(TARGETS)
 
+
+# Copy the generated files to the parent directory
+copy: aumix_copy
 
 # Remove all copied libraries, programs etc
 # The build directory is not touched
@@ -292,3 +301,26 @@ mplayer_fonts: Archive/font-arial-iso-8859-1.tar.bz2
 Archive/font-arial-iso-8859-1.tar.bz2:
 	wget -O $@ http://www1.mplayerhq.hu/MPlayer/releases/fonts/font-arial-iso-8859-1.tar.bz2
 
+
+################################################################################
+#
+# aumix
+#
+################################################################################
+AUMIX_CONF = --without-ncurses --without-gpm --without-sysmouse --without-gtk \
+		--without-gtk1 --disable-nls --with-alsa
+
+.PHONY: aumix aumix_copy
+
+aumix: aumix-2.8
+
+aumix-2.8: Archive/aumix-2.8.tar.bz2 
+	@echo Building $@
+	tar xvjf $<
+	(cd aumix-2.8 ; ./configure $(AUMIX_CONF); make)
+
+Archive/aumix-2.8.tar.bz2:
+	wget -O $@ http://www.jpj.net/~trevor/aumix/aumix-2.8.tar.bz2
+
+aumix_copy: aumix-2.8
+	cp -f $</src/aumix ../apps
