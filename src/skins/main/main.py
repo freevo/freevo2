@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/08/31 14:17:16  dischi
+# added Splashscreen support
+#
 # Revision 1.4  2003/08/25 18:44:31  dischi
 # Moved HOURS_PER_PAGE into the skin fxd file, default=2
 #
@@ -51,6 +54,7 @@ import util
 
 # The OSD class, used to communicate with the OSD daemon
 import osd
+import pygame
 
 import stat
 import objectcache
@@ -78,7 +82,6 @@ from view_area import View_Area
 from info_area import Info_Area
 
 import plugin
-
 
 class Screen_Area(Skin_Area):
     """
@@ -217,6 +220,36 @@ class Skin:
     main skin class
     """
     
+    class Splashscreen:
+        """
+        Splashscreen on startup
+        TODO: move image filename, colors and positions into the xml file
+        """
+        def __init__(self):
+            self.x0 = config.OVERSCAN_X + 20
+            self.x1 = osd.width - 2 * (config.OVERSCAN_X + 20)
+            self.y0 = osd.height - 100 - config.OVERSCAN_Y
+            self.y1 = self.y0 + 30
+
+            osd.clearscreen(color=osd.COL_BLACK)
+            image = osd.loadbitmap(os.path.join(config.IMAGE_DIR, 'splashscreen.jpg'))
+            image = pygame.transform.scale(image, (osd.width, osd.height))
+            osd.drawbitmap(image, 0, 0)
+            osd.update()
+            self.bg = pygame.Surface((self.x1 - self.x0, self.y1 - self.y0))
+            self.bg.blit(osd.screen, (0, 0), (self.x0, self.y0, self.x1 - self.x0,
+                                              self.y1 - self.y0))
+
+        def progress(self, pos):
+            pos = round(float((self.x1 - self.x0 - 2)) / (float(100) / pos))
+            osd.screen.blit(self.bg, (self.x0, self.y0))
+            osd.drawbox(self.x0, self.y0, self.x1, self.y1, 1)
+            osd.drawbox(self.x0+1, self.y0+1, self.x0 + 1 + pos, self.y1-1,
+                        color=0xa0000000, fill=TRUE)
+            osd.update()
+
+
+
     def __init__(self):
         self.display_style = config.SKIN_START_LAYOUT
         self.force_redraw = TRUE
