@@ -1,5 +1,37 @@
-from program import Program
+# -*- coding: iso-8859-1 -*-
+# -----------------------------------------------------------------------------
+# channel.py - an epg channel
+# -----------------------------------------------------------------------------
+# $Id$
+#
+# -----------------------------------------------------------------------------
+# Freevo - A Home Theater PC framework
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#                Rob Shortt <rob@infointeractive.com>
+#
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# -----------------------------------------------------------------------------
 
+
+from program import Program
 
 
 class Channel:
@@ -19,7 +51,7 @@ class Channel:
         self.name = self.title = display_name
 
 
-    def sort_programs(self):
+    def __sort_programs(self):
         f = lambda a, b: cmp(a.start, b.start)
         self.programs.sort(f)
 
@@ -100,7 +132,7 @@ class Channel:
             if not i in self.programs:
                 self.programs.append(i)
 
-        self.sort_programs()
+        self.__sort_programs()
 
 
     def get(self, start, stop=0):
@@ -158,6 +190,6 @@ class Channel:
             self.__import_programs(last.stop, last.stop+3*3600)
             return self.get_relative(pos, prog)
         return self.programs[new_pos]
-    
+
 
 

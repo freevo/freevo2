@@ -1,6 +1,6 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# program.py - an epg program
+# db_sqlite.py - interface to sqlite
 # -----------------------------------------------------------------------------
 # $Id$
 #
@@ -9,6 +9,7 @@
 # Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dmeyer@tzi.de>
+#                Rob Shortt <rob@infointeractive.com>
 # Maintainer:    Dirk Meyer <dmeyer@tzi.de>
 #                Rob Shortt <rob@infointeractive.com>
 #
@@ -30,28 +31,51 @@
 #
 # -----------------------------------------------------------------------------
 
+# python imports
+import os
+import logging
 
-class Program:
+# notifier
+import notifier
+
+# sqlite
+import sqlite
+from sqlite import IntegrityError, OperationalError
+
+# get logging object
+log = logging.getLogger('pyepg')
+
+
+class Database:
     """
-    A tv program item for the tv guide and other parts of the tv submenu.
+    Database class for sqlite usage
     """
-    def __init__(self, id, title, start, stop, episode, subtitle,
-                 description, channel):
-        self.title = title
-        self.name  = self.title
-        self.start = start
-        self.stop  = stop
+    def __init__(self, dbpath):
+        if not os.path.isfile(dbpath):
+            log.warning('epg database missing, creating it')
+            scheme = os.path.join(os.path.dirname(__file__), 'epg_schema.sql')
+            os.system('sqlite %s < %s 2>/dev/null >/dev/null' % \
+                      (dbpath, scheme))
+        while 1:
+            try:
+                self.db = sqlite.connect(dbpath, client_encoding='utf-8',
+                                         timeout=10)
+                break
+            except OperationalError, e:
+                notifier.step(False, False)
+        self.cursor = self.db.cursor()
 
-        self.channel     = channel
-        self.id          = id
-        self.subtitle    = subtitle
-        self.description = description
-        self.episode     = episode
 
-        # FIXME: remove that information
-        self.scheduled = False
+    def commit(self):
+        self.db.commit()
 
-        # TODO: add category support (from epgdb)
-        self.categories = ''
-        # TODO: add ratings support (from epgdb)
-        self.ratings = ''
+    def close(self):
+        self.db.close()
+
+    def execute(self, query):
+        while 1:
+            try:
+                self.cursor.execute(query)
+                return self.cursor.fetchall()
+            except OperationalError, e:
+                notifier.step(False, False)

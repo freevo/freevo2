@@ -1,10 +1,10 @@
-from guide import EPGDB
+from guide import Guide
 from program import Program
 
-guide = EPGDB()
+guide = Guide()
 
 connect = guide.connect
-load    = guide.init
+load    = guide.load
 
 channels = guide.channel_list
 
