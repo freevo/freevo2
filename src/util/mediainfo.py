@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/01/19 20:25:08  dischi
+# do not store every time, use sync
+#
 # Revision 1.4  2004/01/18 16:47:51  dischi
 # smaller improvements
 #
@@ -110,12 +113,15 @@ class Cache:
             for key in copy.copy(self.current_objects):
                 if not self.current_objects[key][0]:
                     del self.current_objects[key]
+                    self.cache_modified = True
             if not self.current_objects:
                 if os.path.isfile(self.current_cachefile):
                     os.unlink(self.current_cachefile)
+                self.cache_modified = False
                 return
-        util.save_pickle(self.current_objects, self.current_cachefile)
-        self.cache_modified    = False
+        if self.cache_modified:
+            util.save_pickle(self.current_objects, self.current_cachefile)
+            self.cache_modified = False
 
 
     def fileDB_load_cache(self, dirname):
@@ -277,6 +283,8 @@ class MMCache(Cache):
         return mmpython.Factory().create(filename, ext_only=True)
 
 
+
+
 class MetaCache(Cache):
     """
     cache for other freevo metadata
@@ -352,13 +360,6 @@ class Info:
         return False
 
 
-    def __save__(self):
-        if self.disc:
-            util.save_pickle(self.metadata, self.filename)
-        else:
-            meta_cache.save_cache()
-
-        
     def store(self, key, value):
         """
         store the key/value in metadata and save the cache
@@ -366,13 +367,13 @@ class Info:
         self.metadata[key] = value
         if self.disc:
             self.metadata[key] = value
+            util.save_pickle(self.metadata, self.filename)
         elif not self.filename:
             print 'unable to store info, no filename'
             return
         else:
             meta_cache.set(os.path.basename(self.filename), os.path.dirname(self.filename),
                            self.filename, self.metadata)
-        self.__save__()
         
 
     def delete(self, key):
@@ -382,6 +383,7 @@ class Info:
         if self.disc:
             if self.metadata.has_key(key):
                 del self.metadata[key]
+                util.save_pickle(self.metadata, self.filename)
         elif not self.filename:
             print 'unable to delete info, no filename'
             return
@@ -389,7 +391,6 @@ class Info:
             del self.metadata[key]
             meta_cache.set(os.path.basename(self.filename), os.path.dirname(self.filename),
                            self.filename, self.metadata)
-        self.__save__()
 
         
     def set_variables(self, variables):
@@ -413,7 +414,7 @@ class Info:
         """
         return mmdata
     
-    
+
 # Interface to the rest of Freevo:
 
 def check_cache(dirname):
@@ -505,5 +506,12 @@ def set(filename, key, value):
     dirname   = os.path.dirname(filename)
     filename  = os.path.basename(filename)
     meta_cache.set(filename, dirname, fullname, info)
-    meta_cache.save_cache()
 
+
+def sync():
+    """
+    sync database to disc (force writing)
+    """
+    mmpython_cache.save_cache()
+    meta_cache.save_cache()
+    
