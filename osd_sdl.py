@@ -14,7 +14,8 @@ import config
 # The PyGame Python SDL interface.
 # Dependencies: Freetype2 (already in Freevo!), SDL, SDL_ttf, SDL_image, PyGame
 # The PyGame+SDL websites has good install instructions.
-
+import pygame
+from pygame.locals import *
 
 # RPMs are available for most stuff (XXX devel needed too?):
 # 
@@ -26,15 +27,95 @@ import config
 #    python setup.py build
 #    python setup.py install
 
-
-
-import pygame
-from pygame.locals import *
-
 # Set to 1 for debug output
 DEBUG = 1
 
 print 'XXXXXX LOADING TEST OSD'
+
+help_text = """
+F1      SLEEP
+HOME    MENU
+g       GUIDE
+ESCAPE  EXIT
+UP      UP
+DOWN    DOWN
+LEFT    LEFT
+RIGHT   RIGHT
+SPACE   SELECT
+F2      POWER
+F3      MUTE
+PLUS    VOL+
+MINUS   VOL-
+c       CH+
+v       CH-
+1       1
+2       2
+3       3
+4       4
+5       5
+6       6
+7       7
+8       8
+9       9
+0       0
+d       DISPLAY
+e       ENTER
+_       PREV_CH
+o       PIP_ONOFF
+w       PIP_SWAP
+i       PIP_MOVE
+F4      TV_VCR
+r       REW
+p       PLAY
+f       FFWD
+u       PAUSE
+s       STOP
+F6      REC
+PERIOD  EJECT
+"""
+
+
+cmds_sdl = {
+    K_F1          : 'SLEEP',
+    K_HOME        : 'MENU',
+    K_g           : 'GUIDE',
+    K_ESCAPE      : 'EXIT',
+    K_UP          : 'UP',
+    K_DOWN        : 'DOWN',
+    K_LEFT        : 'LEFT',
+    K_RIGHT       : 'RIGHT',
+    K_SPACE       : 'SELECT',
+    K_F2          : 'POWER',
+    K_F3          : 'MUTE',
+    K_PLUS        : 'VOL+',
+    K_MINUS       : 'VOL-',
+    K_c           : 'CH+',
+    K_v           : 'CH-',
+    K_1           : '1',
+    K_2           : '2',
+    K_3           : '3',
+    K_4           : '4',
+    K_5           : '5',
+    K_6           : '6',
+    K_7           : '7',
+    K_8           : '8',
+    K_9           : '9',
+    K_0           : '0',
+    K_d           : 'DISPLAY',
+    K_e           : 'ENTER',
+    K_UNDERSCORE  : 'PREV_CH',
+    K_o           : 'PIP_ONOFF',
+    K_w           : 'PIP_SWAP',
+    K_i           : 'PIP_MOVE',
+    K_F4          : 'TV_VCR',
+    K_r           : 'REW',
+    K_p           : 'PLAY',
+    K_f           : 'FFWD',
+    K_u           : 'PAUSE',
+    K_s           : 'STOP',
+    K_F6           : 'REC',
+    K_PERIOD      : 'EJECT'
+    }
 
 # Module variable that contains an initialized OSD() object
 _singleton = None
@@ -48,7 +129,7 @@ def get_singleton():
         
     return _singleton
 
-
+        
 class Font:
 
     filename = ''
@@ -58,6 +139,8 @@ class Font:
     
 class OSD:
 
+    _started = 0
+    
     # The colors
     # XXX Add more
     COL_RED = 0xff0000
@@ -78,6 +161,7 @@ class OSD:
     def __init__(self, width=768, height=576):
 
         self.fontcache = []
+        self.bitmapcache = []
         
         self.default_fg_color = self.COL_BLACK
         self.default_bg_color = self.COL_WHITE
@@ -90,8 +174,27 @@ class OSD:
         self.clearscreen(self.COL_WHITE)
         self.update()
 
+        self._started = 1
+        self._help = 0  # Is the helpscreen displayed or not
+        self._help_saved = pygame.Surface((width, height), 0, 32)
+        self._help_last = 0
+        
 
+    def _cb(self):
+        event = pygame.event.poll()
+        if event.type == NOEVENT:
+            return None
+        
+        #print 'SDL: Got event %s' % event
 
+        #if event.type == MOUSEBUTTONDOWN:
+        #    self._helpscreen()
+            
+        if event.type == KEYDOWN:
+            if event.key in cmds_sdl:
+                return cmds_sdl[event.key]
+
+    
     def _send(arg1, *arg, **args): # XXX remove
         pass
 
@@ -132,7 +235,7 @@ class OSD:
 
     # Caches a bitmap in the OSD without displaying it.
     def loadbitmap(self, filename):
-        pass # XXX Fix later
+        self._getbitmap(filename)
     
 
     # Loads and zooms a bitmap without copying it to the OSD drawing
@@ -147,12 +250,15 @@ class OSD:
     def drawbitmap(self, filename, x=0, y=0, scaling=None,   # XXX scale, zoom, tile not supported yet!
                    bbx=0, bby=0, bbw=0, bbh=0):
 
-        try:
-            image = pygame.image.load(filename).convert_alpha()  # XXX Cannot load everything
-        except:
-            print 'SDL image load problem!'
-            return
+        image = self._getbitmap(filename)
 
+        if not image: return
+
+        if bbx or bby:
+            imbb = pygame.Surface((bbw, bbh), 0, 32)
+            imbb.blit(image, (0, 0), (bbx, bby, bbw, bbh))
+            image = imbb
+            
         if scaling:
             w, h = image.get_size()
             w = int(w*scaling)
@@ -175,33 +281,40 @@ class OSD:
 
 
     def drawbox(self, x0, y0, x1, y1, width=None, color=None, fill=0):
-        print 'drawbox: %s 0x%08x %s' % (width, color, fill)
         
+        if color == None:
+            color = self.default_fg_color
+            
         if width == None:
             width = 1
 
-        if width == -1:
-            fill = 1
-            width = 4 # XXX TEST for now!
-            
-        if color == None:
-            color = self.default_fg_color
-
-        r = (x0, y0, x1-x0, y1-y0)
-        #c = self._sdlcol(color)
-        c = (0, 0, 255, 5)
-        if fill:
-            #self.screen.fill(c, r)
+        if width == -1 or fill:
+            r,g,b,a = self._sdlcol(color)
+            w = x1 - x0
+            h = y1 - y0
+            box = pygame.Surface((w, h), 0, 32)
+            box.fill((r,g,b))
+            box.set_alpha(a)
+            self.screen.blit(box, (x0, y0))
+        else:
+            r = (x0, y0, x1-x0, y1-y0)
+            c = self._sdlcol(color)
             pygame.draw.rect(self.screen, c, r, width)
             
-        
+
     def drawstring(self, string, x, y, fgcolor=None, bgcolor=None,
                    font=None, ptsize=0):
         if fgcolor == None:
             fgcolor = self.default_fg_color
         if font == None:
             font = config.OSD_DEFAULT_FONTNAME
+
+        if not ptsize:
             ptsize = config.OSD_DEFAULT_FONTSIZE
+
+        ptsize = int(ptsize * 1.3333)  # XXX The osd_sdl.py fonts are smaller,
+        # I think that is because the osd_server screenres is 100 dpi, and here
+        # it is 75.
 
         f = self._getfont(font, ptsize)
 
@@ -232,6 +345,73 @@ class OSD:
         self.fontcache.append(f)
 
         return f.font
+
+        
+    def _getbitmap(self, filename):
+        for i in range(len(self.bitmapcache)):
+            fname, image = self.bitmapcache[i]
+            if fname == filename:
+                # Move to front of FIFO
+                del self.bitmapcache[i]
+                self.bitmapcache.append((fname, image))
+                return image
+
+        try:
+            image = pygame.image.load(filename).convert_alpha()  # XXX Cannot load everything
+        except:
+            print 'SDL image load problem!'
+            return None
+
+        # 30 deep FIFO for images
+        self.bitmapcache.append((filename, image))
+        if len(self.bitmapcache) > 30:
+            del self.bitmapcache[0]
+
+        return image
+
+    
+    def _helpscreen(self):
+
+        if time.time() > self._help_last + 1:
+            self._help = {0:1, 1:0}[self._help]
+        else:
+            return
+
+        self._help_last = time.time()
+        
+        if self._help:
+            if DEBUG: print 'Help on'
+            # Save current display
+            self._help_saved.blit(self.screen, (0, 0))
+            self.clearscreen(self.COL_WHITE)
+            self.drawstring('FREEVO keyboard commands will be added here later on....', 10, 10)
+
+            self.update()
+            return # XXX Test, crashes below
+            lines = help_text.split('\n')
+
+            row = 0
+            col = 0
+            for line in lines:
+                x = 30 + col*200
+                y = 50 + row*30
+
+                ks = line[:8]
+                cmd = line[8:]
+                
+                print '"%s" "%s" %s %s' % (ks, cmd, x, y)
+                if ks: self.drawstring(ks, x, y)
+                if cmd: self.drawstring(cmd, x+100, y)
+                row += 1
+                if row >= 15:
+                    row = 0
+                    col += 1
+
+            self.update()
+        else:
+            if DEBUG: print 'Help off'
+            self.screen.blit(self._help_saved, (0, 0))
+            self.update()
 
         
     # Convert a 32-bit TRGB color to a 4 element tuple for SDL
