@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/03/30 20:49:59  rshortt
+# Improvements in how we get skin properties.
+#
 # Revision 1.7  2003/03/30 15:54:07  rshortt
 # Added 'parent' as a constructor argument for PopupBox and all of its
 # derivatives.
@@ -118,7 +121,6 @@ class ConfirmBox(PopupBox):
         bleft = self.left + self.width/2 - (self.b0.width + button_spacing/2)
         btop = self.top + self.height - self.b0.height - 25
         self.b0.set_position(bleft, btop) 
-        # self.b0.toggle_selected()
         self.add_child(self.b0)
 
         self.b1 = Button('CANCEL')

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/03/30 20:50:00  rshortt
+# Improvements in how we get skin properties.
+#
 # Revision 1.7  2003/03/30 18:19:53  rshortt
 # Adding self to the other GetPopupBoxStyle calls.
 #
@@ -102,6 +105,8 @@ class LetterBoxGroup(GUIObject):
                  left=None, top=None, width=None, height=None, bg_color=None, 
                  fg_color=None, border=None, bd_color=None, bd_width=None):
 
+        GUIObject.__init__(self, left, top, width, height)
+
         # XXX: text not supported yet
         self.text     = text
         self.handler  = handler
@@ -114,37 +119,28 @@ class LetterBoxGroup(GUIObject):
         self.numboxes = numboxes
         self.boxes    = []
 
-        self.skin = skin.get_singleton()
-
-        (BLAH, BLAH, BLAH, BLAH,
-         button_default, BLAH) = \
-         self.skin.GetPopupBoxStyle(self)
 
         if not self.bg_color:
-            if button_default.rectangle.bgcolor:
-                self.bg_color = Color(button_default.rectangle.bgcolor)
+            if self.skin_info_widget.rectangle.bgcolor:
+                self.bg_color = Color(self.skin_info_widget.rectangle.bgcolor)
             else:
                 self.bg_color = Color(self.osd.default_bg_color)
 
         if not self.fg_color:
-            if button_default.font.color:
-                self.fg_color = Color(button_default.font.color)
+            if self.skin_info_widget.font.color:
+                self.fg_color = Color(self.skin_info_widget.font.color)
             else:
                 self.fg_color = Color(self.osd.default_fg_color)
 
-        GUIObject.__init__(self, left, top, width, height, 
-                           self.bg_color, self.fg_color)
-
-
         if not self.bd_color: 
-            if button_default.rectangle.color:
-                self.bd_color = Color(button_default.rectangle.color)
+            if self.skin_info_widget.rectangle.color:
+                self.bd_color = Color(self.skin_info_widget.rectangle.color)
             else:
                 self.bd_color = Color(self.osd.default_fg_color)
 
         if not self.bd_width: 
-            if button_default.rectangle.size:
-                self.bd_width = button_default.rectangle.size
+            if self.skin_info_widget.rectangle.size:
+                self.bd_width = self.skin_info_widget.rectangle.size
             else:
                 self.bd_width = 1
 

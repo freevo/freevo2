@@ -7,6 +7,9 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/03/30 20:50:00  rshortt
+# Improvements in how we get skin properties.
+#
 # Revision 1.14  2003/03/30 18:04:18  dischi
 # do not override parent and use self to get skin informations
 #
@@ -187,8 +190,14 @@ class GUIObject:
         # XXX: skin settings
         # This if/else should be removed when the new skin is in place.
         if config.NEW_SKIN:
-            ((bg_type, skin_bg), skin_spacing, skin_color, BLAH, BLAH, BLAH) = \
-             self.skin.GetPopupBoxStyle(self)
+            self.skin_info                 = self.skin.GetPopupBoxStyle(self)
+            self.skin_info_background      = self.skin_info[0]
+            self.skin_info_spacing         = self.skin_info[1]
+            self.skin_info_color           = self.skin_info[2]
+            self.skin_info_font            = self.skin_info[3]
+            self.skin_info_widget          = self.skin_info[4]
+            self.skin_info_widget_selected = self.skin_info[5]
+
         else:
             skin_spacing = None
             if not self.bg_color:
@@ -197,22 +206,23 @@ class GUIObject:
                 self.fg_color = Color(self.osd.default_fg_color)
 
 
-        if skin_spacing:
-            self.h_margin = skin_spacing
-            self.v_margin = skin_spacing
+        if self.skin_info_spacing:
+            self.h_margin = self.skin_info_spacing
+            self.v_margin = self.skin_info_spacing
         else:
             self.h_margin = 10
             self.v_margin = 10
 
         if not self.bg_color:
-            if skin_bg.bgcolor:
-                self.bg_color = Color(skin_bg.bgcolor)
+            if self.skin_info_background[0] == 'rectangle' \
+                and self.skin_info_background[1].bgcolor:
+                self.bg_color = Color(self.skin_info_background[1].bgcolor)
             else:
                 self.bg_color = Color(self.osd.default_bg_color)
 
         if not self.fg_color:
-            if skin_color:
-                self.fg_color = Color(skin_color)
+            if self.skin_info_color:
+                self.fg_color = Color(self.skin_info_color)
             else:
                 self.fg_color = Color(self.osd.default_fg_color)
 

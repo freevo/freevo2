@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/03/30 20:50:00  rshortt
+# Improvements in how we get skin properties.
+#
 # Revision 1.5  2003/03/30 18:19:53  rshortt
 # Adding self to the other GetPopupBoxStyle calls.
 #
@@ -82,57 +85,45 @@ class ListItem(GUIObject):
                  selected_fg_color=None, border=None, bd_color=None, 
                  bd_width=None):
 
-        self.text           = text
-        self.value          = value
+        GUIObject.__init__(self, None, None, width, height)
 
-        self.border         = border
-        self.bd_color       = bd_color
-        self.bd_width       = bd_width
+        self.text              = text
+        self.value             = value
+        self.border            = border
+        self.bd_color          = bd_color
+        self.bd_width          = bd_width
         self.bg_color          = bg_color
         self.fg_color          = fg_color
         self.selected_fg_color = selected_fg_color
         self.selected_bg_color = selected_bg_color
+        self.h_margin          = 20
+        self.v_margin          = 2
 
-        self.skin = skin.get_singleton()
-
-        (BLAH, BLAH, BLAH, BLAH,
-         button_default, button_selected) = \
-         self.skin.GetPopupBoxStyle(self)
 
         if not self.bg_color:
-            if button_default.rectangle.bgcolor:
-                self.bg_color = Color(button_default.rectangle.bgcolor)
+            if self.skin_info_widget.rectangle.bgcolor:
+                self.bg_color = Color(self.skin_info_widget.rectangle.bgcolor)
             else:
                 self.bg_color = Color(self.osd.default_bg_color)
 
         if not self.fg_color:
-            if button_default.font.color:
-                self.fg_color = Color(button_default.font.color)
+            if self.skin_info_widget.font.color:
+                self.fg_color = Color(self.skin_info_widget.font.color)
             else:
                 self.fg_color = Color(self.osd.default_fg_color)
 
         if not self.selected_bg_color:
-            if button_selected.rectangle.bgcolor:
-                self.selected_bg_color = Color(button_selected.rectangle.bgcolor)
+            if self.skin_info_widget_selected.rectangle.bgcolor:
+                self.selected_bg_color = Color(self.skin_info_widget_selected.rectangle.bgcolor)
             else:
                 self.selected_bg_color = Color((0,255,0,128))
 
         if not self.selected_fg_color:
-            if button_selected.font.color:
-                self.selected_fg_color = Color(button_selected.font.color)
+            if self.skin_info_widget_selected.font.color:
+                self.selected_fg_color = Color(self.skin_info_widget_selected.font.color)
             else:
                 self.selected_fg_color = Color(self.osd.default_fg_color)
 
-
-        GUIObject.__init__(self, None, None, width, height, 
-                           self.bg_color, self.fg_color)
-
-
-        self.h_margin       = 20
-        self.v_margin       = 2
-
-        # XXX: Place a call to the skin object here then set the defaults
-        #      acodringly. self.skin is set in the superclass.
 
         # No border by default.
         # if not self.bd_color: self.bd_color = Color(self.osd.default_fg_color) 
@@ -148,26 +139,25 @@ class ListItem(GUIObject):
         else:
             raise TypeError, text
 
-        if button_default.font:       
+        if self.skin_info_widget.font:       
             self.set_font(self.label,
-                          button_default.font.name, 
-                          button_default.font.size, 
-                          Color(button_default.font.color))
+                          self.skin_info_widget.font.name, 
+                          self.skin_info_widget.font.size, 
+                          Color(self.skin_info_widget.font.color))
         else:
             self.set_font(self.label,
                           config.OSD_DEFAULT_FONTNAME,
                           config.OSD_DEFAULT_FONTSIZE)
 
-        if button_selected.font:       
+        if self.skin_info_widget_selected.font:       
             self.set_font(self.selected_label,
-                          button_selected.font.name, 
-                          button_selected.font.size, 
-                          Color(button_selected.font.color))
+                          self.skin_info_widget_selected.font.name, 
+                          self.skin_info_widget_selected.font.size, 
+                          Color(self.skin_info_widget_selected.font.color))
         else:
             self.set_font(self.selected_label,
                           config.OSD_DEFAULT_FONTNAME,
                           config.OSD_DEFAULT_FONTSIZE)
-
 
 
     def _draw(self, surface=None):
@@ -196,12 +186,6 @@ class ListItem(GUIObject):
             surface.blit(box, self.get_position())
         else:
             self.osd.screen.blit(box, self.get_position())
-
-        # XXX: need to fix support for 'selected label'
-        # if self.selected and self.selected_label:  
-        #     print 'self.selected and self.selected_label'
-        #     self.selected_label.draw(surface)
-        # else:  self.label.draw(surface)
 
         if self.selected:
             self.selected_label.draw(surface)

@@ -10,6 +10,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/03/30 20:50:00  rshortt
+# Improvements in how we get skin properties.
+#
 # Revision 1.11  2003/03/30 18:02:31  dischi
 # set parent before calling the parent constructor
 #
@@ -158,23 +161,21 @@ class PopupBox(GUIObject):
         # will destroy() after x seconds.
         self.duration = 0
 
-        # XXX: skin settings
-        ((bg_type, skin_bg), BLAH, BLAH, skin_font, BLAH, BLAH) = \
-         self.skin.GetPopupBoxStyle(self)
-
         if not self.left:     self.left   = self.osd.width/2 - self.width/2
         if not self.top:      self.top    = self.osd.height/2 - self.height/2
 
 
         if not self.bd_color: 
-            if skin_bg.color:
-                self.bd_color = Color(skin_bg.color)
+            # XXX TODO: background type 'image' is not supported here yet
+            if self.skin_info_background[0] == 'rectangle':
+                self.bd_color = Color(self.skin_info_background[1].color)
             else:
                 self.bd_color = Color(self.osd.default_fg_color)
 
         if not self.bd_width: 
-            if skin_bg.size:
-                self.bd_width = skin_bg.size
+            if self.skin_info_background[0] == 'rectangle' \
+                and self.skin_info_background[1].size:
+                self.bd_width = self.skin_info_background[1].size
             else:
                 self.bd_width = 2
 
@@ -190,10 +191,10 @@ class PopupBox(GUIObject):
         else:
             raise TypeError, text
 
-        if skin_font:       
-            self.set_font(skin_font.name, 
-                          skin_font.size, 
-                          Color(skin_font.color))
+        if self.skin_info_font:       
+            self.set_font(self.skin_info_font.name, 
+                          self.skin_info_font.size, 
+                          Color(self.skin_info_font.color))
         else:
             self.set_font(config.OSD_DEFAULT_FONTNAME,
                           config.OSD_DEFAULT_FONTSIZE)

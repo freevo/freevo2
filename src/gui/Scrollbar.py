@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/03/30 20:50:00  rshortt
+# Improvements in how we get skin properties.
+#
 # Revision 1.5  2003/03/30 18:19:53  rshortt
 # Adding self to the other GetPopupBoxStyle calls.
 #
@@ -83,6 +86,8 @@ class Scrollbar(GUIObject):
         if orientation != "vertical" and orientation != "horizontal":
             raise TypeError, 'orientation'
         
+        GUIObject.__init__(self, left, top, width, height)
+
         self.orientation = orientation
         self.bg_color    = bg_color
         self.fg_color    = fg_color
@@ -91,32 +96,22 @@ class Scrollbar(GUIObject):
         self.bd_color    = bd_color
         self.bd_width    = bd_width
 
-        self.skin = skin.get_singleton()
-
-        (BLAH, BLAH, BLAH, BLAH,
-         button_default, BLAH) = \
-         self.skin.GetPopupBoxStyle(self)
 
         if not self.bg_color:
-            if button_default.rectangle.bgcolor:
-                self.bg_color = Color(button_default.rectangle.bgcolor)
+            if self.skin_info_widget.rectangle.bgcolor:
+                self.bg_color = Color(self.skin_info_widget.rectangle.bgcolor)
             else:
                 self.bg_color = Color(self.osd.default_bg_color)
 
         if not self.fg_color:
-            if button_default.font.color:
-                self.fg_color = Color(button_default.font.color)
+            if self.skin_info_widget.font.color:
+                self.fg_color = Color(self.skin_info_widget.font.color)
             else:
                 self.fg_color = Color(self.osd.default_fg_color)
 
-
-        GUIObject.__init__(self, left, top, width, height, 
-                           self.bg_color, self.fg_color)
-
-
         if not self.bd_color: 
-            if button_default.rectangle.color:
-                self.bd_color = Color(button_default.rectangle.color)
+            if self.skin_info_widget.rectangle.color:
+                self.bd_color = Color(self.skin_info_widget.rectangle.color)
             else:
                 self.bd_color = Color(self.osd.default_fg_color)
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/03/30 20:50:00  rshortt
+# Improvements in how we get skin properties.
+#
 # Revision 1.4  2003/03/30 18:19:53  rshortt
 # Adding self to the other GetPopupBoxStyle calls.
 #
@@ -85,6 +88,8 @@ class OptionBox(GUIObject):
                  selected_fg_color=None, border=None, bd_color=None, 
                  bd_width=None):
 
+        GUIObject.__init__(self, left, top, width, height)
+
         self.border            = border
         self.bd_color          = bd_color
         self.bd_width          = bd_width
@@ -93,53 +98,43 @@ class OptionBox(GUIObject):
         self.selected_fg_color = selected_fg_color
         self.selected_bg_color = selected_bg_color
         self.max_visible       = 5
+        self.h_margin          = 6
+        self.v_margin          = 2
 
-        self.skin = skin.get_singleton()
-
-        (BLAH, BLAH, BLAH, BLAH,
-         button_default, button_selected) = \
-         self.skin.GetPopupBoxStyle(self)
 
         if not self.bg_color:
-            if button_default.rectangle.bgcolor:
-                self.bg_color = Color(button_default.rectangle.bgcolor)
+            if self.skin_info_widget.rectangle.bgcolor:
+                self.bg_color = Color(self.skin_info_widget.rectangle.bgcolor)
             else:
                 self.bg_color = Color(self.osd.default_bg_color)
 
         if not self.fg_color:
-            if button_default.font.color:
-                self.fg_color = Color(button_default.font.color)
+            if self.skin_info_widget.font.color:
+                self.fg_color = Color(self.skin_info_widget.font.color)
             else:
                 self.fg_color = Color(self.osd.default_fg_color)
 
         if not self.selected_bg_color:
-            if button_selected.rectangle.bgcolor:
-                self.selected_bg_color = Color(button_selected.rectangle.bgcolor)
+            if self.skin_info_widget_selected.rectangle.bgcolor:
+                self.selected_bg_color = Color(self.skin_info_widget_selected.rectangle.bgcolor)
             else:
                 self.selected_bg_color = Color((0,255,0,128))
 
         if not self.selected_fg_color:
-            if button_selected.font.color:
-                self.selected_fg_color = Color(button_selected.font.color)
+            if self.skin_info_widget_selected.font.color:
+                self.selected_fg_color = Color(self.skin_info_widget_selected.font.color)
             else:
                 self.selected_fg_color = Color(self.osd.default_fg_color)
 
-
-        GUIObject.__init__(self, left, top, width, height, 
-                           self.bg_color, self.fg_color)
-
-        self.h_margin = 6
-        self.v_margin = 2
-
         if not self.bd_color: 
-            if button_default.rectangle.color:
-                self.bd_color = Color(button_default.rectangle.color)
+            if self.skin_info_widget.rectangle.color:
+                self.bd_color = Color(self.skin_info_widget.rectangle.color)
             else:
                 self.bd_color = Color(self.osd.default_fg_color)
 
         if not self.bd_width: 
-            if button_default.rectangle.size:
-                self.bd_width = button_default.rectangle.size
+            if self.skin_info_widget.rectangle.size:
+                self.bd_width = self.skin_info_widget.rectangle.size
             else:
                 self.bd_width = 2
 
@@ -155,20 +150,20 @@ class OptionBox(GUIObject):
         else:
            raise TypeError, text
 
-        if button_default.font:       
+        if self.skin_info_widget.font:       
             self.set_font(self.label,
-                          button_default.font.name, 
-                          button_default.font.size, 
-                          Color(button_default.font.color))
+                          self.skin_info_widget.font.name, 
+                          self.skin_info_widget.font.size, 
+                          Color(self.skin_info_widget.font.color))
         else:
             self.set_font(config.OSD_DEFAULT_FONTNAME,
                           config.OSD_DEFAULT_FONTSIZE)
 
-        if button_selected.font:       
+        if self.skin_info_widget_selected.font:       
             self.set_font(self.selected_label,
-                          button_selected.font.name, 
-                          button_selected.font.size, 
-                          Color(button_selected.font.color))
+                          self.skin_info_widget_selected.font.name, 
+                          self.skin_info_widget_selected.font.size, 
+                          Color(self.skin_info_widget_selected.font.color))
         else:
             self.set_font(self.selected_label,
                           config.OSD_DEFAULT_FONTNAME,

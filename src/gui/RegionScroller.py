@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/03/30 20:50:00  rshortt
+# Improvements in how we get skin properties.
+#
 # Revision 1.7  2003/03/30 18:19:53  rshortt
 # Adding self to the other GetPopupBoxStyle calls.
 #
@@ -113,20 +116,15 @@ class RegionScroller(GUIObject):
                            self.bg_color, self.fg_color)
 
 
-        self.skin = skin.get_singleton()
-
-        (BLAH, BLAH, BLAH, BLAH,
-         button_default, BLAH) = self.skin.GetPopupBoxStyle(self)
-
         if not self.bd_color: 
-            if button_default.rectangle.color:
-                self.bd_color = Color(button_default.rectangle.color)
+            if self.skin_info_widget.rectangle.color:
+                self.bd_color = Color(self.skin_info_widget.rectangle.color)
             else:
                 self.bd_color = Color(self.osd.default_fg_color)
 
         if not self.bd_width: 
-            if button_default.rectangle.size:
-                self.bd_width = button_default.rectangle.size
+            if self.skin_info_widget.rectangle.size:
+                self.bd_width = self.skin_info_widget.rectangle.size
             else:
                 self.bd_width = 2
 

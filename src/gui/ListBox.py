@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/03/30 20:50:00  rshortt
+# Improvements in how we get skin properties.
+#
 # Revision 1.8  2003/03/30 18:19:53  rshortt
 # Adding self to the other GetPopupBoxStyle calls.
 #
@@ -106,6 +109,8 @@ class ListBox(RegionScroller):
                  selected_fg_color=None, border=None, bd_color=None, 
                  bd_width=None, show_h_scrollbar=None, show_v_scrollbar=None):
 
+        GUIObject.__init__(self, None, None, width, height)
+
         self.items             = items
         self.width             = width
         self.height            = height
@@ -122,40 +127,27 @@ class ListBox(RegionScroller):
 
         self.set_surface(pygame.Surface(self.get_size(), 0, 32))
 
-        self.skin = skin.get_singleton()
-        self.osd  = osd.get_singleton()
-    
-        (BLAH, BLAH, BLAH, BLAH,
-         button_default, button_selected) = \
-         self.skin.GetPopupBoxStyle(self)
-    
-        # I am commenting a lot of this out until I get alpha
-        # transparencies working correctly.
         if not self.bg_color:
-            # self.bg_color = Color(self.osd.default_bg_color)
-            if button_default.rectangle.bgcolor:
-                self.bg_color = Color(button_default.rectangle.bgcolor)
+            if self.skin_info_widget.rectangle.bgcolor:
+                self.bg_color = Color(self.skin_info_widget.rectangle.bgcolor)
             else:
                 self.bg_color = Color(self.osd.default_bg_color)
 
         if not self.fg_color:
-            # self.fg_color = Color(self.osd.default_fg_color)
-            if button_default.font.color:
-                self.fg_color = Color(button_default.font.color)
+            if self.skin_info_widget.font.color:
+                self.fg_color = Color(self.skin_info_widget.font.color)
             else:
                 self.fg_color = Color(self.osd.default_fg_color)
 
         if not self.selected_bg_color:
-            # self.selected_bg_color = Color((0,255,0,128))
-            if button_selected.rectangle.bgcolor:
-                self.selected_bg_color = Color(button_selected.rectangle.bgcolor)
+            if self.skin_info_widget_selected.rectangle.bgcolor:
+                self.selected_bg_color = Color(self.skin_info_widget_selected.rectangle.bgcolor)
             else:
                 self.selected_bg_color = Color((0,255,0,128))
 
         if not self.selected_fg_color:
-            # self.fg_color = Color(self.osd.default_fg_color)
-            if button_selected.font.color:
-                self.selected_fg_color = Color(button_selected.font.color)
+            if self.skin_info_widget_selected.font.color:
+                self.selected_fg_color = Color(self.skin_info_widget_selected.font.color)
             else:
                 self.selected_fg_color = Color(self.osd.default_fg_color)
 
