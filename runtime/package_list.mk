@@ -1,5 +1,5 @@
-PYTHON=Python-2.2.2
-PYTHON_GET=http://www.python.org/ftp/python/2.2.2/$(PYTHON).tgz
+PYTHON=Python-2.2.3
+PYTHON_GET=http://www.python.org/ftp/python/2.2.3/$(PYTHON).tgz
 
 EXPAT=expat-1.95.5
 EXPAT_GET=http://unc.dl.sourceforge.net/sourceforge/expat/$(EXPAT).tar.gz 
@@ -10,7 +10,7 @@ PYXML_GET=http://unc.dl.sourceforge.net/sourceforge/pyxml/$(PYXML).tar.gz
 EGENIX=egenix-mx-base-2.0.4
 EGENIX_GET=http://www.egenix.com/files/python/$(EGENIX).tar.gz 
 
-FREETYPE=freetype-2.1.3
+FREETYPE=freetype-2.1.4
 FREETYPE_GET=http://unc.dl.sourceforge.net/sourceforge/freetype/$(FREETYPE).tar.gz 
 
 ZLIB=zlib-1.1.4
@@ -51,7 +51,7 @@ SMPEG_GET=http://freevo.sourceforge.net/runtime/$(SMPEG).tar.gz
 PYNUMERIC=Numeric-22.0
 PYNUMERIC_GET=http://unc.dl.sourceforge.net/sourceforge/numpy/$(PYNUMERIC).tar.gz 
 
-PYGAME=pygame-1.5.5
+PYGAME=pygame-1.5.6
 PYGAME_GET=http://www.pygame.org/ftp/$(PYGAME).tar.gz 
 
 LIBAO=libao-0.8.3
