@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/09/22 20:36:18  mikeruelle
+# more web interface help descriptions
+#
 # Revision 1.3  2003/09/20 09:42:32  dischi
 # cleanup
 #
@@ -53,8 +56,11 @@ from event import *
 
 class PluginInterface(plugin.Plugin):
     """
-    player plugin for the radio player. Use radio player to play all radio
-    stations.
+    This is the player plugin for the radio. Basically it tunes all the
+    radio stations set in the radio plugin and does the interaction
+    between the radio command line program and freevo. please see the
+    audio.radio plugin for setup information  
+
     """
     def __init__(self):
         # create the mplayer object

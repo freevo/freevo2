@@ -18,6 +18,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/09/22 20:36:17  mikeruelle
+# more web interface help descriptions
+#
 # Revision 1.2  2003/09/20 09:42:32  dischi
 # cleanup
 #
@@ -60,7 +63,6 @@ from item import Item
 # hope to add actions for different ways of running commands
 # and for displaying stdout and stderr of last command run.
 class RadioItem(Item):
-
     def actions(self):
         """
         return a list of actions for this item
@@ -123,6 +125,25 @@ class RadioMainMenuItem(Item):
 
 # our plugin wrapper, just creates the main menu item and adds it.
 class PluginInterface(plugin.MainMenuPlugin):
+    """
+    This plugin uses the command line program radio to tune a
+    bttv card with a radio tuner to a radio station to listen
+    to. You need to also use the RadioPlayer plugin to actually
+    listen to the station.
+
+    need to have radio installed before using this plugin.
+    radio is availble in binary form for most linux distros.
+
+    to activate put the following in your local_conf.py:
+    plugin.activate('audio.radioplayer')
+    plugin.activate('audio.radio')
+    RADIO_CMD='/usr/bin/radio'
+    RADIO_STATIONS = [ ('Sea FM', '90.9'),
+                       ('Kiss 108', '108'),
+                       ('Mix 98.5', '98.5'),
+                       ('Magic 106', '106.7') ]
+
+    """
     def items(self, parent):
         menu_items = skin.get_singleton().settings.mainmenu.items
 
