@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/06/06 17:23:37  mikeruelle
+# remove bad kill command
+#
 # Revision 1.14  2004/01/14 18:29:49  mikeruelle
 # .
 #
@@ -133,7 +136,3 @@ class Game:
 class GameApp(childapp.ChildApp2):
     def stop_event(self):
         return em.STOP
-        
-    def kill(self):
-        childapp.ChildApp.kill(self, signal.SIGINT)
-
