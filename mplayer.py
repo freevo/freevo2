@@ -72,8 +72,11 @@ class MPlayer:
         self.thread.start()
 
 
-    def play(self, mode, filename, playlist):
+    def play(self, mode, filename, playlist, repeat=0):
 
+        # Repeat playlist setting
+        self.repeat = repeat
+        
         if mode == 'video':
 
             # Mplayer command and standard arguments
@@ -172,12 +175,13 @@ class MPlayer:
                 self.thread.app.write('H')
             else:
                 self.stop()
-                if self.playlist == []:
+                pos = self.playlist.index(self.filename)
+                last_file = (pos == len(self.playlist)-1)
+                if self.playlist == [] or (last_file and not self.repeat):
                     rc.app = None
                     menuwidget.refresh()
                 else:
                     # Go to the next song in the list
-                    pos = self.playlist.index(self.filename)
                     pos = (pos+1) % len(self.playlist)
                     filename = self.playlist[pos]
                     self.play(self.mode, filename, self.playlist)
