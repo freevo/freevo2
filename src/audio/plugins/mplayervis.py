@@ -8,6 +8,9 @@
 # Todo:  - Much
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/12/19 11:07:19  dischi
+# seems to work, activate it
+#
 # Revision 1.14  2004/11/20 18:23:00  dischi
 # use python logger module for debug
 #
@@ -59,8 +62,8 @@
 REASON = None
 try:
     from libvisual import bin
-except:
-    REASON = '[audio.mplayervis]: libvisual not available'
+except ImportError:
+    REASON = 'libvisual not available'
 
 
 
@@ -95,8 +98,6 @@ class PluginInterface(plugin.Plugin):
             self.reason = REASON
             return
 
-        self.reason = 'needs more work'
-        return
         plugin.Plugin.__init__(self)
         self._type    = 'mplayer_audio'
         self.app_mode = 'audio'
@@ -115,14 +116,17 @@ class PluginInterface(plugin.Plugin):
         """
         return command + [ "-af", "export" ]
 
+
     def eventhandler(self, event, arg=None):
         return False
+
 
     def change_vis(self):
         """
         Changes the visualization to the next in list
         """
         self.visual.next()
+
 
     def dock(self):
         """
@@ -153,6 +157,7 @@ class PluginInterface(plugin.Plugin):
             self.dock()
         except Exception, e:
             print e
+
 
     def stop(self):
         """
@@ -226,6 +231,7 @@ class libvisualAnimation(BaseAnimation):
         self.size = (width, height)
         self.pos  = (x, y)
         self.update()
+
 
     def next(self):
         """
