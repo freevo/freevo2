@@ -9,7 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/10/22 00:01:38  mikeruelle
+# found another 4suite probelm, gonna look at minidom instead
+#
 # Revision 1.18  2003/10/15 20:17:07  mikeruelle
+#
 # new in this release:
 # -use new childthread
 # -writes tvtime.xml and stationlist.xml files to keep in sync
@@ -273,6 +277,8 @@ class PluginInterface(plugin.Plugin):
 	mystr = strIO.getvalue()
 	myindex = mystr.find('</stationlist>')
 	mystr = mystr[:myindex+15]
+	# how can 4suite be so stupid and still survive?
+	mystr = mystr.replace('<!DOCTYPE stationlist PUBLIC "http://tvtime.sourceforge.net/DTD/stationlist1.dtd" "-//tvtime//DTD stationlist 1.0//EN">','<!DOCTYPE stationlist PUBLIC "-//tvtime//DTD stationlist 1.0//EN" "http://tvtime.sourceforge.net/DTD/stationlist1.dtd">')
         fp = open(tvtimefile,'wb')
 	fp.write(mystr)
         fp.close()
