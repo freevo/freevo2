@@ -135,6 +135,7 @@
 	</item>
 	<item type="track">
 	  Runtime:   \t@length@ min.
+	  @len_audio@ Audiotracks, @len_subtitles@ Subtitles, @chapters@ Chapter
 	</item>
       </content>
     </layout>
