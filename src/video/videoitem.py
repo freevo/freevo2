@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.95  2003/11/22 21:23:29  dischi
+# force scan for dvd/vcd title menu
+#
 # Revision 1.94  2003/11/22 20:35:50  dischi
 # use new vfs
 #
@@ -240,13 +243,13 @@ class VideoItem(Item):
         return self.name
 
 
-    def scan(self, final=True):
+    def scan(self, final=True, force=False):
         """
         Scan meta info to add some more varibales. This can't be done in
         __init__ because sometomes filename and other variables are added
         later.
         """
-        if hasattr(self, '__final_seetings__'):
+        if not force and hasattr(self, '__final_seetings__'):
            return
 
         # don't know if we need this in the future
@@ -483,13 +486,13 @@ class VideoItem(Item):
         items = []
         for title in range(1,self.num_titles+1):
             file = copy.copy(self)
-
             # copy the attributes from mmpython about this track
             if self.info.has_key('tracks'):
                 file.info = self.info.tracks[title-1]
             file.info_type = 'track'
             file.filename = '%s' % title
             file.name = _('Play Title %s') % title
+            file.scan(force=True)
             items += [file]
 
         moviemenu = menu.Menu(self.name, items, umount_all = 1, xml_file=self.xml_file)
