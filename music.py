@@ -14,6 +14,10 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2002/08/05 00:53:41  tfmalt
+# o Added support for ejecting and mounting CD's in the Music menu aswell.
+#   It uses the same osd.popup_box() as main.py
+#
 # Revision 1.3  2002/08/03 11:23:47  krister
 # Quick&dirty fix for playlists.
 #
@@ -67,6 +71,7 @@ import util    # Various utilities defined for freevo.
 import menu    # The menu widget class
 import mplayer # Module for running mplayer.
 import rc      # The remote controller class
+import osd     # Yes.. we use the GUI for printing stuff.
 
 # Set to 1 for debug output
 DEBUG = 1
@@ -76,13 +81,12 @@ FALSE = 0
 
 mplayer = mplayer.get_singleton()
 rc      = rc.get_singleton()
+osd     = osd.get_singleton()
 
 def play( arg=None, menuw=None ):
     """
     calls the play function of mplayer to play audio.
 
-    old comment:
-    Play an MP3 file using the slave mode interface.
     The argument is a tuple containing the file to
     be played and a list of the entire playlist so that the player can
     start on the next one.
@@ -109,7 +113,7 @@ def main_menu(arg=None, menuw=None):
     """
 
     items = []    
-    for (title, file ) in config.DIR_MP3:
+    for (title, file ) in config.DIR_AUDIO:
         if os.path.isdir:
             type = 'dir'
         elif os.path.isfile:
@@ -119,7 +123,16 @@ def main_menu(arg=None, menuw=None):
                                   handle_config, (type, file),
                                   None, None, None ) ]
                                   
-    
+    for (drive) in config.ROM_DRIVES:
+        dir = drive[0]
+        (media,label,image,play_options) = util.identifymedia(dir)
+        print("What is identify: " + str(media) + ',' + str(label) +
+              ',' + str(image) + ',' + str(play_options))
+
+        if media == 'AUDIO':
+            items += [menu.MenuItem(dir, parse_entry, (label,dir),
+                                    handle_config, ('dir', dir))]
+            
     mp3menu = menu.Menu('MUSIC MAIN MENU', items)
     menuw.pushmenu(mp3menu)
 
@@ -136,7 +149,7 @@ def parse_entry( arg=None, menuw=None ):
                Got crash on playlist handling.
     """
     (new_title, dir) = arg
-
+    
     items = []
     if os.path.isdir( dir ):
         dirnames  = util.getdirnames(dir)
@@ -212,7 +225,23 @@ def handle_config( event=None, menuw=None, arg=None ):
     
     print( 'inside handle_config actually. type = ' + type + ' file = ' +
            file + ' event = ' + event )
-    
+
+    if event == rc.EJECT and config.ROM_DRIVES:
+        # XXX This only ejects first drive if you have several.
+        (rom_dir, name, tray) = config.ROM_DRIVES[0]
+        tray_open = tray
+        config.ROM_DRIVES[0] = (rom_dir, name, (tray+1)%2)
+        if tray_open:
+            osd.popup_box( 'mounting %s' % rom_dir )
+            osd.update()
+            # close the tray and mount the cd
+            os.system('eject -t %s' % rom_dir)
+            os.system('mount %s' % rom_dir)
+            menuw.refresh()
+            main_menu( None, menuw )
+        else:
+            os.system('eject %s' % rom_dir)
+            
 
         
 #
