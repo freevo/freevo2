@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.76  2003/08/31 11:02:37  dischi
+# support "freevo start" to start in background
+#
 # Revision 1.75  2003/08/31 09:17:25  dischi
 # support for start-stop helper scripts
 #
@@ -164,11 +167,11 @@ if [ "$1" = "--help" -o "$1" = "-" ] ; then
     echo "options:"
     echo "  -fs            start freevo in a new x session in fullscreen"
     echo "  setup          run freevo setup to scan your environment"
-    echo "  execute [file] execute a script inside the freevo environment"
+    echo "  start          start freevo as daemon in background"
     echo "  stop           stop the current freevo process"
     echo
     echo "freevo can start the following scripts, use --help on these"
-    echo "scripts to get more informations about options"
+    echo "scripts to get more informations about options."
     echo
 
     for i in $FREEVO_HELPERS/*.py; do
@@ -178,9 +181,15 @@ if [ "$1" = "--help" -o "$1" = "-" ] ; then
 	fi
     done
     echo
+    echo "Example: freevo imdb --help"
+    echo "         freevo webserver start"
+    echo
     echo "You can also create a symbolic link to free with the name of the"
     echo "script you want to execute. E.g. put a link imdb pointing to freevo"
     echo "in your patch to access the imdb helper script"
+    echo 
+    echo "Example: ln -s path-to-freevo imdb"
+    echo "         imdb --help"
     echo
     echo "Before running freevo the first time, you need to run 'freevo setup'"
     echo "After that, you can run freevo without parameter."
@@ -292,6 +301,17 @@ if [ -e /etc/gentoo-release ]; then
     fi
 else
     OPTIMZE="-OO"
+fi
+
+if [ "$1" == "start" ]; then
+    shift
+
+    # Start the main freevo application
+    $RUNAPP python $OPTIMZE $FREEVO_PYTHON/main.py $@ >/dev/null 2>/dev/null&
+    
+    echo $! > $PID_FILE
+    disown
+    exit 0
 fi
 
 # Start the main freevo application
