@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/07/07 20:18:56  dischi
+# bugfix
+#
 # Revision 1.7  2003/07/05 09:25:00  dischi
 # use new osd font class for stringsize
 #
@@ -312,7 +315,7 @@ class Listing_Area(Skin_Area):
                     else:
                         season  = 0
                         episode = 0
-                        font = osd.getFontInfo(val.font.name, val.font.size)
+                        font = val.font.font
                         for c in menuw.menu_items:
                             if c.type == 'video' and hasattr(c,'tv_show') and \
                                c.tv_show and c.show_name[0] == sn[0]:
