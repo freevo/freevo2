@@ -9,32 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.32  2003/10/22 17:22:36  dischi
-# better stop() exception handling
+# Revision 1.33  2003/11/21 11:43:58  dischi
+# send event if there is not next playlist event
 #
-# Revision 1.31  2003/10/21 21:17:41  gsbarbieri
-# Some more i18n improvements.
-#
-# Revision 1.30  2003/10/18 17:56:28  dischi
-# ignore next/prev track request on OSError
-#
-# Revision 1.29  2003/10/18 08:13:35  dischi
-# add recursive _not_ random playlist
-#
-# Revision 1.28  2003/10/17 18:50:10  dischi
-# random playlist can now be non-recursive, too
-#
-# Revision 1.27  2003/10/17 17:29:03  dischi
-# do not include games in playlist
-#
-# Revision 1.26  2003/10/04 18:37:29  dischi
-# i18n changes and True/False usage
-#
-# Revision 1.25  2003/09/19 22:07:15  dischi
-# TRUE/True/FALSE/False changes
-#
-# Revision 1.24  2003/09/14 20:09:36  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -65,7 +42,8 @@ import copy
 import menu
 import util
 import config
-import event as em
+from event import *
+import rc
 
 from item import Item
 
@@ -304,7 +282,7 @@ class Playlist(Item):
         if not menuw:
             menuw = self.menuw
             
-        if event in ( em.PLAYLIST_NEXT, em.PLAY_END, em.USER_END) \
+        if event in ( PLAYLIST_NEXT, PLAY_END, USER_END) \
                and self.current_item and self.playlist:
             pos = self.playlist.index(self.current_item)
             pos = (pos+1) % len(self.playlist)
@@ -319,16 +297,18 @@ class Playlist(Item):
                 self.current_item = self.playlist[pos]
                 self.play(menuw=menuw, arg='next')
                 return True
-
+            elif event == PLAYLIST_NEXT:
+                rc.post_event(Event(OSD_MESSAGE, arg=_('no next item in playlist')))
+                
         # end and no next item
-        if event in (em.PLAY_END, em.USER_END, em.STOP):
+        if event in (PLAY_END, USER_END, STOP):
             self.current_item = None
             if menuw:
                 menuw.show()
             return True
             
 
-        if event == em.PLAYLIST_PREV and self.current_item and self.playlist:
+        if event == PLAYLIST_PREV and self.current_item and self.playlist:
             pos = self.playlist.index(self.current_item)
             if pos:
                 if hasattr(self.current_item, 'stop'):
@@ -341,6 +321,8 @@ class Playlist(Item):
                 self.current_item = self.playlist[pos]
                 self.play(menuw=menuw, arg='next')
                 return True
+            else:
+                rc.post_event(Event(OSD_MESSAGE, arg=_('no previous item in playlist')))
 
         # give the event to the next eventhandler in the list
         return Item.eventhandler(self, event, menuw)
@@ -419,7 +401,7 @@ class RandomPlaylist(Playlist):
         if not menuw:
             menuw = self.menuw
 
-        if (event == em.PLAYLIST_NEXT or event == em.PLAY_END) and self.unplayed:
+        if (event == PLAYLIST_NEXT or event == PLAY_END) and self.unplayed:
             if self.current_item:
                 self.current_item.parent = self.parent
                 if hasattr(self.current_item, 'stop'):
@@ -431,7 +413,7 @@ class RandomPlaylist(Playlist):
             return self.play_next(menuw=menuw)
         
         # end and no next item
-        if event == em.PLAY_END:
+        if event == PLAY_END:
             if self.current_item:
                 self.current_item.parent = self.parent
             self.current_item = None
@@ -439,7 +421,7 @@ class RandomPlaylist(Playlist):
                 menuw.show()
             return True
             
-        if event == em.PLAYLIST_PREV:
+        if event == PLAYLIST_PREV:
             print 'random playlist up: not implemented yet'
 
         # give the event to the next eventhandler in the list
