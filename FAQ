@@ -123,3 +123,9 @@ Q: My G400's TV Out is really dim, can I fix that?
 
 A: Yes, see Docs/G400Notes for information on adjusting the card's 
 registers for optimum picture quality.
+
+----------------------------------------------------------------------
+Q: MPlayer doesn't work under X11.
+
+A: Try setting MPLAYER_USE_WID to 0 in freevo_config.py, this 
+   disables the freevo_xwin application which doesn't always work.
