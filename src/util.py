@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.51  2003/09/20 08:48:11  dischi
+# fixed rmrf to work with python < 2.3
+#
 # Revision 1.50  2003/09/05 20:08:32  dischi
 # o Move getXMLTVChannels to config.py
 # o add encode function to handle non ascii chars
@@ -614,18 +617,34 @@ def touch(file):
         pass
     return 0
 
+
+def rmrf_helper(result, dirname, names):
+    for name in names:
+	fullpath = os.path.join(dirname, name)
+        if os.path.isfile(fullpath):
+            result[0].append(fullpath)
+    result[1] = [dirname] + result[1]
+    return result
+
+
 def rmrf(top=None):
     """
     Pure python version of 'rm -rf'
     """
     if not top == '/' and not top == '' and not top == ' ' and top:
-        for root, dirs, files in os.path.walk(top, topdown=False):
-            for name in files:
-                os.remove(os.path.join(root, name))
-            for name in dirs:
-                os.rmdir(os.path.join(root, name))
-        os.rmdir(top)
-
+        files = [[],[]]
+        path_walk = os.path.walk(top, rmrf_helper, files)
+        for f in files[0]:
+            try:
+                os.remove(f)
+            except IOError:
+                pass
+        for d in files[1]:
+            try:
+                os.rmdir(d)
+            except IOError:
+                pass
+            
 
 def encode(str, code):
     try:
