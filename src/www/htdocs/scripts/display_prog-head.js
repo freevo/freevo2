@@ -9,7 +9,7 @@ function
 guide_click(item, event)
 {
 	var iframe = document.getElementById("hidden");
-	iframe.src="proginfo.rpy?id=" + item.id;
+	iframe.src="proginfo?id=" + item.id;
 	document.getElementById("program-waiting").style.display = "";
 	document.getElementById("program-info").style.visibility = "hidden";
 	var popup = document.getElementById("popup");
@@ -28,7 +28,7 @@ guide_click(item, event)
 	page_top = N ? window.pageYOffset : document.body.scrollTop;
 
 	// We can't use popup.clientHeight because it's not valud until
-	// after proginfo.rpy gets executed, so we guess that it'll be
+	// after proginfo gets executed, so we guess that it'll be
 	// about 175.  Someone else can fix this. :)
 	if (event.clientY + 175 > h)
 		y = page_top + (h - 175) - 20;

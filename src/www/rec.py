@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.1  2004/12/28 00:38:45  rshortt
+# Reactivating web guide and scheduling recordings, this is still a major work
+# in progress and there are still missing pieces.
+#
 # Revision 1.19  2004/08/23 00:15:29  rshortt
 # Prevent crash if removing a program that has already ended.
 #
@@ -117,33 +121,32 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import sys, time
-import util.tv_util as tv_util
+import sys
+import time
+import traceback
 
-import tv.record_client as ri
+from record.client import recordings
 
-from www.web_types import HTMLResource, FreevoResource
+from www.base import HTMLResource, FreevoResource
 
 import config
+import pyepg
 
-TRUE = 1
-FALSE = 0
 
 class RecordResource(FreevoResource):
 
     def _render(self, request):
         fv = HTMLResource()
-        form = request.args
+        form = request.query
 
-        chan = Unicode(fv.formValue(form, 'chan'))
-        if isinstance( chan, str ):
-            chan = Unicode( chan, 'latin-1' )
+        chan = form.get('chan')
+        #if isinstance( chan, str ):
+        #    chan = Unicode( chan, 'latin-1' )
         
-        start = fv.formValue(form, 'start')
-        action = fv.formValue(form, 'action')
+        start = form.get('start')
+        action = form.get('action')
 
-        (server_available, message) = ri.connectionTest()
-        if not server_available:
+        if not recordings.server:
             fv.printHeader('Scheduled Recordings', 'styles/main.css')
             fv.printMessagesFinish(
                 [ '<b>'+_('ERROR')+'</b>: '+_('Recording server is unavailable.') ]
@@ -152,21 +155,22 @@ class RecordResource(FreevoResource):
             return String( fv.res )
 
         if action == 'remove':
-            (status, recordings) = ri.getScheduledRecordings()
-            progs = recordings.getProgramList()
+            progs = recordings.list()
     
             prog = None
-            for what in progs.values():
-                if start == '%s' % what.start and chan == '%s' % what.channel_id:
+            for p in progs:
+                if start == '%s' % p.start and chan == '%s' % p.channel:
                     prog = what
 
             if prog:
                 print 'want to remove prog: %s' % String(prog)
-                ri.removeScheduledRecording(prog)
+                recordings.remove(prog.id)
         elif action == 'add':
-            (status, prog) = ri.findProg(chan, start)
-
-	    if not status:
+            # (status, prog) = ri.findProg(chan, start)
+            # prog = pyepg.get_channel(chan)[start]
+            try:
+                prog = pyepg.get_channel(chan)[int(start)]
+            except:
                 fv.printHeader('Scheduled Recordings', 'styles/main.css')
                 fv.printMessagesFinish(
                     [ '<b>'+_('ERROR') + '</b>: ' + \
@@ -177,19 +181,16 @@ class RecordResource(FreevoResource):
                           '</b>'
                           )
                            )+\
-                      ( ' <i>(%s)</i>' % String(prog) ) ] )
+                      ( ' <i>(%s:%s)</i><br>%s' % (chan, start, traceback.print_exc()) ) ] )
 
                 return String(fv.res)
 
             
-            #print 'RESULT: %s' % status
-            #print 'PROG: %s' % String(prog)
-            ri.scheduleRecording(prog)
+            recordings.schedule(prog)
 
 
-        (status, recordings) = ri.getScheduledRecordings()
-        progs = recordings.getProgramList()
-        (status, favs) = ri.getFavorites()
+        progs = recordings.list()
+        # (status, favs) = ri.getFavorites()
 
         fv.printHeader(_('Scheduled Recordings'), 'styles/main.css', selected=_('Scheduled Recordings'))
 
@@ -207,44 +208,50 @@ class RecordResource(FreevoResource):
         fv.tableRowClose()
 
         f = lambda a, b: cmp(a.start, b.start)
-        progl = progs.values()
-        progl.sort(f)
-        for prog in progl:
+        progs.sort(f)
+        for prog in progs:
+            p = pyepg.get_channel(prog.channel)[prog.start]
             status = 'basic'
 
-            (isFav, junk) = ri.isProgAFavorite(prog, favs)
-            if isFav:
-                status = 'favorite'
-            try:
-                if prog.isRecording == TRUE:
-                    status = 'recording'
-            except:
-                # sorry, have to pass without doing anything.
-                pass
+            #(isFav, junk) = ri.isProgAFavorite(prog, favs)
+            #if isFav:
+            #    status = 'favorite'
+            #try:
+            #    if prog.isRecording == TRUE:
+            #        status = 'recording'
+            #except:
+            #    # sorry, have to pass without doing anything.
+            #    pass
 
             fv.tableRowOpen('class="chanrow"')
-            fv.tableCell(time.strftime('%b %d ' + config.TV_TIMEFORMAT, time.localtime(prog.start)), 'class="'+status+'" colspan="1"')
-            fv.tableCell(time.strftime('%b %d ' + config.TV_TIMEFORMAT, time.localtime(prog.stop)), 'class="'+status+'" colspan="1"')
+            fv.tableCell(time.strftime('%b %d ' + config.TV_TIMEFORMAT, time.localtime(p.start)), 'class="'+status+'" colspan="1"')
+            fv.tableCell(time.strftime('%b %d ' + config.TV_TIMEFORMAT, time.localtime(p.stop)), 'class="'+status+'" colspan="1"')
 
-            chan = tv_util.get_chan_displayname(prog.channel_id)
-            if not chan: chan = _('UNKNOWN')
-            fv.tableCell(chan, 'class="'+status+'" colspan="1"')
-            fv.tableCell(Unicode(prog.title), 'class="'+status+'" colspan="1"')
-
-            if prog.sub_title == '':
-                cell = '&nbsp;'
+            chan = pyepg.get_channel(p.channel)
+            if not chan: 
+                chan_name = _('UNKNOWN')
             else:
-                cell = Unicode(prog.sub_title)
+                chan_name = chan.name
+
+            fv.tableCell(chan_name, 'class="'+status+'" colspan="1"')
+            fv.tableCell(Unicode(p.title), 'class="'+status+'" colspan="1"')
+
+            #if p.sub_title == '':
+            #    cell = '&nbsp;'
+            #else:
+            #    cell = Unicode(p.sub_title)
+            cell = '&nbsp;'
             fv.tableCell(cell,'class="'+status+'" colspan="1"')
 
     
-            if prog.desc == '':
-                cell = _('Sorry, the program description for %s is unavailable.') % ('<b>'+prog.title+'</b>')
+            # if p.desc == '':
+            if 1:
+                cell = _('Sorry, the program description for %s is unavailable.') % ('<b>'+p.title+'</b>')
             else:
-                cell = Unicode(prog.desc)
+                cell = Unicode(p.desc)
             fv.tableCell(cell, 'class="'+status+'" colspan="1"')
     
-            cell = ('<a href="record.rpy?chan=%s&amp;start=%s&amp;action=remove" title="Remove Scheduled Recording">'+_('Remove')+'</a>'+'<br/>' + '<a href="search.rpy?find=%s" title="Search for other airings">' + _('Search') + '</a>') % (prog.channel_id, prog.start, Unicode(prog.title))
+            cell = ('<a href="rec?chan=%s&amp;start=%s&amp;action=remove" title="Remove Scheduled Recording">'+_('Remove')+'</a>'+'<br/>' + '<a href="search?find=%s" title="Search for other airings">' + _('Search') + '</a>') % (p.channel.id, p.start, Unicode(p.title))
             fv.tableCell(cell, 'class="'+status+'" colspan="1"')
 
             fv.tableRowClose()
@@ -252,7 +259,6 @@ class RecordResource(FreevoResource):
         fv.tableClose()
     
         fv.printSearchForm()
-        #fv.printLinks()
         fv.printFooter()
 
         return String( fv.res )

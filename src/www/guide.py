@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.1  2004/12/28 00:38:45  rshortt
+# Reactivating web guide and scheduling recordings, this is still a major work
+# in progress and there are still missing pieces.
+#
 # Revision 1.30  2004/08/14 01:30:21  rshortt
 # Change guide access a bit.
 #
@@ -98,21 +102,21 @@
 
 import sys, string
 import time
+import config
+import logging
 
-from www.web_types import HTMLResource, FreevoResource
-from twisted.web.woven import page
+from www.base import HTMLResource, FreevoResource
 
 import util.tv_util as tv_util
 import util
 import config 
-import tv.record_client as ri
-from tv.channels import get_channels
-from twisted.web import static
+import record.client
 
-DEBUG = 0
+import pyepg
 
-TRUE = 1
-FALSE = 0
+# get logging object
+log = logging.getLogger('www')
+
 
 class GuideResource(FreevoResource):
 
@@ -142,7 +146,8 @@ class GuideResource(FreevoResource):
         gstart_t = time.localtime(gstart)
         myt = time.mktime((myt_t[0], myt_t[1], myt_t[2], 0, 0, 5, 
                            myt_t[6], myt_t[7], -1))
-        listh = tv_util.when_listings_expire()
+        # listh = tv_util.when_listings_expire()
+        listh = 0
         if listh == 0:
             return retval + '</select>\n'
         listd = int((listh/24)+2)
@@ -180,7 +185,8 @@ class GuideResource(FreevoResource):
 
     def _render(self, request):
         fv = HTMLResource()
-        form = request.args
+        log.debug(dir(request))
+        form = request.query
 
         INTERVAL = config.WWW_GUIDE_INTERVAL * 60
         PRECISION = config.WWW_GUIDE_PRECISION * 60
@@ -188,9 +194,9 @@ class GuideResource(FreevoResource):
         n_cols = config.WWW_GUIDE_COLS
 
         mfrguidestart = time.time()
-        mfrguideinput = fv.formValue(form, 'stime')
-        mfrguideinputday = fv.formValue(form, 'day')
-        mfrguideinputoff = fv.formValue(form, 'offset')
+        mfrguideinput = form.get('stime')
+        mfrguideinputday = form.get('day')
+        mfrguideinputoff = form.get('offset')
         if mfrguideinput:
             mfrguidestart = int(mfrguideinput)
         elif mfrguideinputday and mfrguideinputoff:
@@ -204,7 +210,9 @@ class GuideResource(FreevoResource):
         if mfrprevguide < now2:
             mfrprevguide = 0
 
-        (got_schedule, schedule) = ri.getScheduledRecordings()
+        # (got_schedule, schedule) = ri.getScheduledRecordings()
+        got_schedule = False
+        schedule = 'no schedule'
         if got_schedule:
             schedule = schedule.getProgramList()
 
@@ -221,17 +229,19 @@ class GuideResource(FreevoResource):
         fv.tableOpen()
         fv.tableRowOpen('class="chanrow"')
         fv.tableCell('<form>'+_('Time')+':&nbsp;' + self.maketimejumpboxday(now) + self.maketimejumpboxoffset(now) + '<input type=submit value="'+_('View')+'"></form>', 'class="utilhead"')
-        categorybox =  self.makecategorybox(get_channels().get_all())
+        # categorybox =  self.makecategorybox(get_channels().get_all())
+        categorybox = 0
         if categorybox:
-            fv.tableCell('<form action="genre.rpy">'+_('Show')+'&nbsp;'+_('Category')+':&nbsp;'+categorybox+'<input type=submit value="'+_('Change')+'"></form>', 'class="utilhead"')
+            fv.tableCell('<form action="genre">'+_('Show')+'&nbsp;'+_('Category')+':&nbsp;'+categorybox+'<input type=submit value="'+_('Change')+'"></form>', 'class="utilhead"')
         fv.tableRowClose()
         fv.tableClose()
 
         fv.tableOpen('id="guide" cols=\"%d\"' % \
                      ( n_cols*cpb + 1 ) )
         showheader = 0
-        for chan in get_channels().get_all():
-            chan = chan.epg
+        # for chan in get_channels().get_all():
+        for chan in pyepg.channels:
+            #chan = chan.epg
             #put guidehead every X rows
             if showheader % 15 == 0:
                 fv.tableRowOpen('class="chanrow"')
@@ -242,10 +252,10 @@ class GuideResource(FreevoResource):
                         dacell = ''
                         datime = time.strftime(config.TV_TIMEFORMAT, time.localtime(headerstart))
                         if i == n_cols-1:
-                            dacell = datime + '&nbsp;&nbsp;<a href="guide.rpy?stime=%i">&raquo;</a>' % mfrnextguide
+                            dacell = datime + '&nbsp;&nbsp;<a href="guide?stime=%i">&raquo;</a>' % mfrnextguide
                         else:                            
                             if mfrprevguide > 0:
-                                dacell = '<a href="guide.rpy?stime=%i">&laquo;</a>&nbsp;&nbsp;' % mfrprevguide + datime
+                                dacell = '<a href="guide?stime=%i">&laquo;</a>&nbsp;&nbsp;' % mfrprevguide + datime
                             else:
                                 dacell = datime
                         fv.tableCell(dacell, 'class="guidehead"  colspan="%d"' % cpb)
@@ -259,59 +269,62 @@ class GuideResource(FreevoResource):
             rowdata = []
             now = mfrguidestart
             # chan.displayname = string.replace(chan.displayname, "&", "SUB")
-            rowdata.append("<tr class='chanrow'>")
-            rowdata.append("<td class='channel'>%s</td>" % chan.displayname)
+            rowdata.append(u'<tr class="chanrow">')
+            rowdata.append(u'<td class="channel">%s</td>' % chan.title)
             c_left = n_cols * cpb
 
-            if not chan.programs:
-                rowdata.append('<td class="programnodata" colspan="%s">&laquo; ' % (n_cols*cpb) + _('This channel has no data loaded') + ' &raquo;' )
+            progs = chan[mfrguidestart:mfrnextguide]
+            if not len(progs):
+                rowdata.append(u'<td class="programnodata" colspan="%s">&laquo; ' % (n_cols*cpb) + _('This channel has no data loaded') + ' &raquo;' )
 
-            for prog in chan.programs:
+            for prog in progs:
                 if prog.stop > mfrguidestart and \
                    prog.start < mfrnextguide and \
                    c_left > 0:
 
-                    status = 'program'
+                    status = u'program'
 
                     if got_schedule:
-                        (result, message) = ri.isProgScheduled(prog, schedule)
+                        # (result, message) = ri.isProgScheduled(prog, schedule)
+                        result = False
+                        message = 'no message'
                         if result:
-                            status = 'scheduled'
+                            status = u'scheduled'
                             really_now = time.time()
                             if prog.start <= really_now and prog.stop >= really_now:
                                 # in the future we should REALLY see if it is 
                                 # recording instead of just guessing
-                                status = 'recording'
+                                status = u'recording'
 
                     if prog.start <= now and prog.stop >= now:
-                        cell = ""
+                        cell = u''
                         if prog.start <= now - INTERVAL:
                             # show started earlier than the guide start,
                             # insert left arrows
-                            cell += '&laquo; '
+                            cell += u'&laquo; '
                         showtime_left = int(prog.stop - now + ( now % INTERVAL ) )
                         intervals = showtime_left / PRECISION
                         colspan = intervals
                         # prog.title = string.replace(prog.title, "&", "SUB")
                         # prog.desc = string.replace(prog.desc, "&", "SUB")
-                        cell += '%s' % prog.title
+                        cell += u'%s' % Unicode(prog.title)
                         if colspan > c_left:                            
                             # show extends past visible range,
                             # insert right arrows
-                            cell += '   &raquo;'
+                            cell += u'   &raquo;'
                             colspan = c_left
-                        popid = '%s:%s' % (prog.channel_id, prog.start)
+                        popid = u'%s:%s' % (chan.id, prog.start)
 
-                        style = ''
+                        style = u''
                         if colspan == n_cols * cpb:
-                            style += 'text-align: center; '
+                            style += u'text-align: center; '
 
-                        rowdata.append('<td class="%s" onclick="guide_click(this, event)" id="%s" colspan="%s" style="%s">%s</td>' % (status, popid, colspan, style, cell))
+                        rowdata.append(u'<td class="%s" onclick="guide_click(this, event)" id="%s" colspan="%s" style="%s">%s</td>' % (status, popid, colspan, style, cell))
                         now += colspan * PRECISION
                         c_left -= colspan
 
-            rowdata.append("</tr>")
-            fv.res += string.join(rowdata, "\n")
+            rowdata.append(u"</tr>")
+            fv.res += string.join(rowdata, u"\n")
         fv.tableClose()
         
         fv.printSearchForm()

@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/12/28 00:38:45  rshortt
+# Reactivating web guide and scheduling recordings, this is still a major work
+# in progress and there are still missing pieces.
+#
 # Revision 1.2  2004/12/18 18:18:39  dischi
 # small update, still not working
 #
@@ -132,8 +136,8 @@ class HTMLResource:
         self.res += '<div id="titlebar"><span class="name"><a href="http://freevo.sourceforge.net/" target="_blank">Freevo</a></span></div>\n'
      
         items = [(_('Home'),_('Home'),'%sindex' % str(strprefix)),
-#                  (_('TV Guide'),_('View TV Listings'),'%sguide.rpy' % str(strprefix)),
-#                  (_('Scheduled Recordings'),_('View Scheduled Recordings'),'%srecord.rpy' % str(strprefix)),
+                 (_('TV Guide'),_('View TV Listings'),'%sguide' % str(strprefix)),
+                 (_('Scheduled Recordings'),_('View Scheduled Recordings'),'%srec' % str(strprefix)),
 #                  (_('Favorites'),_('View Favorites'),'%sfavorites.rpy' % str(strprefix)),
 #                  (_('Media Library'),_('View Media Library'),'%slibrary.rpy' % str(strprefix)),
 #                  (_('Manual Recording'),_('Schedule a Manual Recording'),'%smanualrecord.rpy' % str(strprefix)),

@@ -44,6 +44,7 @@ import os
 import traceback
 import logging
 
+import config
 import notifier
 import util.fsocket as fsocket
 
@@ -229,6 +230,7 @@ class Server:
         self.socket.bind((ip, port))
         self.socket.listen(5)
         notifier.addSocket( self.socket, self.accept )
+        config.detect('channels')
 
 
     def accept (self, socket):

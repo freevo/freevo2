@@ -28,14 +28,11 @@
 import sys, string
 import time
 
-from www.web_types import HTMLResource, FreevoResource
-from twisted.web.woven import page
+from www.base import HTMLResource, FreevoResource
 
 import util
 import config 
-import tv.record_client as ri
-from tv.channels import get_channels
-from twisted.web import static
+import pyepg
 
 MAX_DESCRIPTION_CHAR = 1000
 
@@ -43,30 +40,30 @@ class ProgInfoResource(FreevoResource):
 
     def _render(self, request):
         fv = HTMLResource()
-        form = request.args
-        id = fv.formValue(form, 'id')
+        form = request.query
+        id = form.get('id')
         chanid = id[:id.find(":")]
         starttime = int( id[id.find(":")+1:] )
 
-        for chan in get_channels().get_all():
-            if chan.id == chanid:
-                for prog in chan.epg.programs:
-                    if prog.start == starttime:
-                        break
-                break
+        chan = pyepg.guide.channel_dict.get(chanid)
+        if not chan:
+            fv.res += u'no such channel %s' % chanid
+            return String(fv.res)
 
-        if prog.desc == '':
+        prog = chan[starttime]
+
+        if prog.description == '':
             desc = (_('Sorry, the program description for ' \
                       '%s is unavailable.')) % ('<b>'+prog.title+'</b>')
         else:
-            desc = prog.desc
+            desc = prog.description
                                                                                                                                    
         desc = desc.lstrip()
         if MAX_DESCRIPTION_CHAR and len(desc) > MAX_DESCRIPTION_CHAR:
             desc=desc[:desc[:MAX_DESCRIPTION_CHAR].rfind('.')] + '. [...]'
 
-        if prog.sub_title:
-            desc = '"%s"<br/>%s' % (prog.sub_title,desc)
+        if prog.subtitle:
+            desc = '"%s"<br/>%s' % (prog.subtitle, desc)
 
         fv.res += (
            u"<script>\n" \
@@ -87,8 +84,8 @@ class ProgInfoResource(FreevoResource):
               time.strftime(config.TV_TIMEFORMAT,
                             time.localtime( prog.stop ) ),
               int( ( prog.stop - prog.start ) / 60 ),
-              "function() { doc.location=\"record.rpy?chan=%s&start=%s&action=add\"; }" % (chanid, starttime),
-              "function() { doc.location=\"edit_favorite.rpy?chan=%s&start=%s&action=add\"; }" % (chanid, starttime),
+              "function() { doc.location=\"rec?chan=%s&start=%s&action=add\"; }" % (chanid, starttime),
+              "function() { doc.location=\"edit_favorite?chan=%s&start=%s&action=add\"; }" % (chanid, starttime),
 
         )
 
