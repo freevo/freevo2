@@ -11,6 +11,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/09/05 02:32:46  rshortt
+# Getting rid of the hack to strip out "tv." because it is now safe to import the tv namespace.
+#
+# This hack also messed up any new xmltv data that had "tv." in a channel id.
+#
 # Revision 1.8  2003/08/23 12:51:43  dischi
 # removed some old CVS log messages
 #
@@ -38,7 +43,6 @@
 #endif
 
 import config
-import epg_types
 
 import time, sys, socket, traceback, string
 import xmlrpclib
@@ -94,15 +98,8 @@ def scheduleRecording(prog=None):
     if prog.stop < time.time():
         return (FALSE, 'ERROR: cannot record it if it is over')
         
-    progxml = marmalade.jellyToXML(prog)
-    # A CRUDE HACK because importing tv.anything causes skin to be
-    # imported which actually creates a freevo window!!
-    # The real problem here will need to be addressed.
-    progxml = string.replace(progxml,'tv.','')
-
     try:
-        # (status, message) = server.scheduleRecording(marmalade.jellyToXML(prog))
-        (status, message) = server.scheduleRecording(progxml)
+        (status, message) = server.scheduleRecording(marmalade.jellyToXML(prog))
     except:
         traceback.print_exc()
         return (FALSE, 'record_client: connection error')
