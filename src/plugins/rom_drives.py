@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/05/28 15:11:43  dischi
+# small bugfix
+#
 # Revision 1.7  2003/05/27 17:53:35  dischi
 # Added new event handler module
 #
@@ -572,6 +575,7 @@ class Identify_Thread(threading.Thread):
         if len(mplayer_files) == 1:
             media.videoinfo = VideoItem(mplayer_files[0], None)
             media.videoinfo.media = media
+            media.videoinfo.media_id = media_id
             
             if movie_info:
                 media.videoinfo.copy(movie_info)
