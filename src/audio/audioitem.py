@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/02/10 15:42:32  dischi
+# small bugfix
+#
 # Revision 1.8  2003/01/12 17:06:25  dischi
 # Add possibility to extract the id tags from the AudioItem (dump) and to
 # init an AudioItem with that informations. If you create an AudioItem
@@ -337,11 +340,10 @@ class AudioItem(Item):
         Give information to the skin..
         """
         # Calculate some new values
-        self.elapsed = self.elapsed
         if not self.length:
             self.remain = 0
         else:
-            self.remain = self.length = self.elapsed
+            self.remain = self.length - self.elapsed
         skin.DrawMP3(self)
         return
 
