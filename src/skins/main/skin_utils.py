@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/01/25 20:16:54  dischi
+# fix mime handling
+#
 # Revision 1.12  2004/01/17 20:28:47  dischi
 # renamed media.info to media.item
 #
@@ -89,7 +92,7 @@ def format_image(settings, item, width, height, shadow=None, force=0):
         type = item.display_type
     except:
         try:
-            type = item.info.mime.replace('/', '_')
+            type = item.info['mime'].replace('/', '_')
         except:
             type = item.type
 
