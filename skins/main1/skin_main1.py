@@ -9,6 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.50  2002/10/24 21:19:58  outlyer
+# No visible change, but now, we have a function called:
+# skin.format_trackr() which takes in the array of id3 tag data and generates
+# the track names for the mp3 browser. By default, it just shows the track
+# name as it did before, but by editing the formatstr (currently IN the
+# function) you can set it to show any combination of artist, album, year,
+# track number, and title.
+#
 # Revision 1.49  2002/10/24 20:20:50  dischi
 # Set height to -1 (font height) to avoid non showing because of the
 # fixed height. If no one is working on the width=500 thing I will fix
@@ -760,3 +768,30 @@ class Skin:
     def DrawTVGuide_Listing(self, to_listing):
         if 'tv' in self.settings.e_menu:
             return self.tv.DrawTVGuide_Listing(to_listing, self.settings.e_menu['tv'])
+
+    def format_track (self, array):
+        """ Return a formatted string for use in music.py """
+	# This is the default - track name only
+	formatstr = '%(t)s'
+       	# This will show the track number as well 
+	#formatstr = '%(n)d - %(t)s'
+        
+        # Before we begin, make sure track is an integer
+    
+        if array.track:
+            try:
+    	        mytrack = int(array.track)
+            except:
+    	        mytrack = None
+        else:
+           mytrack = None
+    
+        song_info = {  'a'  : array.artist,
+       	               'l'  : array.album,
+    	               'n'  : mytrack,
+    	               't'  : array.title,
+    	               'y'  : array.year }
+   
+	print formatstr % (song_info)
+
+        return formatstr % song_info

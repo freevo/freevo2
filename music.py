@@ -13,6 +13,14 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2002/10/24 21:19:57  outlyer
+# No visible change, but now, we have a function called:
+# skin.format_trackr() which takes in the array of id3 tag data and generates
+# the track names for the mp3 browser. By default, it just shows the track
+# name as it did before, but by editing the formatstr (currently IN the
+# function) you can set it to show any combination of artist, album, year,
+# track number, and title.
+#
 # Revision 1.24  2002/10/24 20:16:46  dischi
 # bugfix
 #
@@ -393,11 +401,11 @@ def parse_entry(arg=None, menuw=None):
             # if the files have different artists and we have
             # artist informations, display it in the title
             if a.artist and a.title and not artist:
-                title = "%s - %s" % (a.artist, a.title)
+                title = skin.format_track(a) # "%s - %s" % (a.artist, a.title)
 
             # display the title as menu item title
             elif a.title:
-                title = a.title
+                title = skin.format_track(a) #a.title
 
             # take the filename
             else:
