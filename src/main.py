@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.109  2004/01/24 18:53:54  dischi
+# add mmpython md5 disc id support
+#
 # Revision 1.108  2004/01/19 20:29:11  dischi
 # cleanup, reduce cache size
 #
@@ -322,6 +325,7 @@ else:
     mmpython.factory.DEBUG   = 0
 
 mmpython.USE_NETWORK = config.USE_NETWORK
+mmpython.disc.discinfo.CREATE_MD5_ID = config.MMPYTHON_CREATE_MD5_ID
 
 if not os.path.isfile(os.path.join(config.OVERLAY_DIR, 'cachetime')):
     print '\nWARNING: no pre-cached data'
