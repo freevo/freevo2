@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/01/14 20:35:10  dischi
+# small bugfix
+#
 # Revision 1.4  2003/01/07 20:43:39  dischi
 # Small fixes, the actions get the item as arg
 #
@@ -126,6 +129,7 @@ def imdb_add_disc_menu(arg=None, menuw=None):
         # add all items with a name and when the name is not made to be
         # a label regexp
         if m.name and m.name.find('\\') == -1:
+            m.media = arg.media
             i = menu.MenuItem(m.name, imdb_add_disc, m)
             if m.image:
                 i.handle_type  = m.type
