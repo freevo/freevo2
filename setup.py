@@ -44,12 +44,13 @@ data_files.append(('share/freevo', [ 'freevo_config.py' ]))
 scripts = ['freevo']
 
 # now start the python magic
-setup (name = "freevo",
-       version = version.__version__,
-       description = "Freevo",
-       author = "Krister Lagerstrom, et al.",
-       author_email = "",
-       url = "http://freevo.sf.net",
+setup (name         = "freevo",
+       version      = version.__version__,
+       description  = "Freevo",
+       author       = "Krister Lagerstrom, et al.",
+       author_email = "freevo-devel@lists.sourceforge.net",
+       url          = "http://www.freevo.org",
+       licence      = "GPL",
 
        scripts=scripts,
        package_dir = util.distutils.package_dir,
