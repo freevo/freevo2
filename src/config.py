@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/02/11 06:07:59  krister
+# Improved CV/DVD autodetection. Use mad for mp3 playing, fixes a decoding bug.
+#
 # Revision 1.11  2003/02/11 04:37:29  krister
 # Added an empty local_conf.py template for new users. It is now an error if freevo_config.py is found in /etc/freevo etc. Changed DVD protection to use a flag. MPlayer stores debug logs in FREEVO_STARTDIR, and stops with an error if they cannot be written.
 #
@@ -274,6 +277,42 @@ else:
     print 'No overrides loaded'
     
 
+# Autodetect the CD/DVD drives in the system if not given in local_conf.py
+if not ROM_DRIVES:
+    if os.path.isfile('/etc/fstab'):
+        fd_fstab = open('/etc/fstab')
+        for line in fd_fstab:
+            # Match on the devices /dev/cdrom, /dev/dvd, and fstype iso9660
+            match_cd = re.compile('^(/dev/cdrom)[ \t]+([^ \t]+)[ \t]+', re.I).match(line)
+            match_dvd = re.compile('^(/dev/dvd)[ \t]+([^ \t]+)[ \t]+', re.I).match(line)
+            match_iso = re.compile('^([^ \t]+)[ \t]+([^ \t]+)[ \t]+iso9660', re.I).match(line)
+            mntdir = devname = ''
+            if match_cd:
+                mntdir = match_cd.group(2)
+                devname = match_cd.group(1)
+                dispname = 'CD-%s' % (len(ROM_DRIVES)+1)
+            elif match_dvd:
+                mntdir = match_dvd.group(2)
+                devname = match_dvd.group(1)
+                dispname = 'DVD-%s' % (len(ROM_DRIVES)+1)
+            elif match_iso:
+                mntdir = match_iso.group(2)
+                devname = match_iso.group(1)
+                dispname = 'CD-%s' % (len(ROM_DRIVES)+1)
+
+            # Weed out duplicates
+            for rd_mntdir, rd_devname, rd_dispname in ROM_DRIVES:
+                if os.path.realpath(rd_devname) == os.path.realpath(devname):
+                    print (('ROM_DRIVES: Autodetected that %s is the same ' +
+                            'device as %s, skipping') % (devname, rd_devname))
+                    break
+            else:
+                # This was not a duplicate of another device
+                if mntdir and devname and dispname:
+                    ROM_DRIVES += [ (mntdir, devname, dispname) ]
+                    print 'ROM_DRIVES: Auto-detected and added "%s"' % (ROM_DRIVES[-1], )
+        fd_fstab.close()
+                
 #
 # The runtime version of MPlayer/MEncoder are patched to disable DVD
 # protection override (a.k.a decss) by using the flag

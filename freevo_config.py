@@ -100,15 +100,8 @@ START_FULLSCREEN_X  = 0               # Start in fullscreen mode if using x11 or
 # Format [ ('mountdir1', 'devicename1', 'displayed name1'),
 #          ('mountdir2', 'devicename2', 'displayed name2'), ...]
 #
-
+# Leave empty to autodetect drives in during startup from /etc/fstab
 ROM_DRIVES = []
-
-if os.path.isfile('/etc/fstab'):
-    for line in open('/etc/fstab').readlines():
-        match = re.compile('^([^ \t]+)[ \t]+([^ \t]+)[ \t]+iso9660', re.I).match(line)
-        if match:
-            ROM_DRIVES += [ ( match.group(2), match.group(1),
-                              'CD-%s' % (len(ROM_DRIVES)+1)) ]
 
 ROM_SPEED = 0                         # try to set the drive speed of the rom
                                       # drive a good value for playing movies
@@ -432,9 +425,9 @@ DVD_SUBTITLE_PREF    = ''              # Order of preferred subtitles on DVD.
 MPLAYER_NICE         = -20             
 
 if CONF.display == 'dfbmga':
-    MPLAYER_ARGS_DEF     = '-nobps -nolirc -autoq 100 -fs -vsync -double'
+    MPLAYER_ARGS_DEF     = '-ac mad, -nobps -nolirc -autoq 100 -fs -vsync -double'
 else:
-    MPLAYER_ARGS_DEF     = (('-nobps -nolirc -autoq 100 -screenw %s '
+    MPLAYER_ARGS_DEF     = (('-ac mad, -nobps -nolirc -autoq 100 -screenw %s '
                              + '-screenh %s -fs') % (CONF.width, CONF.height))
 
 MPLAYER_ARGS_DVD     = '-cache 8192 -dvd %s'
