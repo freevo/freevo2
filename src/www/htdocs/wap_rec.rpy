@@ -1,0 +1,104 @@
+#!/usr/bin/python
+
+#if 0 /*
+# -----------------------------------------------------------------------
+# wap_rec.rpy - Wap shedule recording page.
+# ----------------------------------------------------------------------- */
+#endif
+
+import sys, time
+
+import epg_xmltv
+import epg_types
+import record_client as ri
+from wap_types import WapResource, FreevoWapResource
+
+class WRecResource(FreevoWapResource):
+
+    def _render(self, request):
+
+        fv = WapResource()
+        form = request.args
+        fv.session = request.getSession()
+        fv.validate(request)
+        start = fv.formValue(form, 'start')
+        stop = fv.formValue(form, 'stop')
+        startdate = fv.formValue(form, 'date')
+        stopdate = startdate
+        channel = fv.formValue(form, 'channel')
+        action = fv.formValue(form, 'action')
+        errormsg = ''
+
+        if fv.session.validated <> 'yes':
+            errormsg = 'not validated'
+
+        fv.printHeader()
+
+        # look for action to do an add
+        if action:
+           if action == 'add':
+              starttime = time.mktime(time.strptime(str(startdate)+" "+str(start)+":00",'%d/%m/%y %H:%M:%S'))
+              stoptime = time.mktime(time.strptime(str(startdate)+" "+str(stop)+":00",'%d/%m/%y %H:%M:%S'))
+              if stoptime < starttime:
+                  stoptime = stoptime + 86400
+              prog = epg_types.TvProgram()
+              prog.channel_id = channel
+              prog.title = "Wap Recorded"
+              prog.start = starttime
+              prog.stop = stoptime
+              ri.scheduleRecording(prog)
+              fv.res += '  <card id="card3" title="Freevo">\n'
+              fv.res += '   <p><strong>Rec. Sheduled</strong><br/>\n'
+              fv.res += '          Date : %s<br/>\n' % startdate
+              fv.res += '          Start : %s<br/>\n' % start
+              fv.res += '          Stop : %s<br/>\n' % stop
+              fv.res += '          Chan.: %s</p>\n' % channel
+              fv.res += '  </card>\n'
+              
+        else:
+
+            if errormsg == 'not validated':
+                fv.res += '  <card id="card9" title="Freevo">\n'
+                fv.res += '   <p> Please login!<br/>\n'
+                fv.res += '     <anchor>Go to login\n'
+                fv.res += '       <go href="wap_login.rpy"/>\n'
+                fv.res += '     </anchor></p>\n'
+                fv.res += '  </card>\n'
+            else:
+                guide = epg_xmltv.get_guide()
+
+                fv.res += '  <card id="card1" title="Freevo" ontimer="#card2">\n'
+                fv.res += '  <timer value="30"/>\n'
+                fv.res += '   <p><big><strong>Freevo WAP Sheduler</strong></big></p>\n'
+
+                (server_available, message) = ri.connectionTest()
+                if not server_available:
+                    fv.res += '<p>ERROR: Record Server offline</p>\n'
+                else:
+                    fv.res += '   <p>Record Server online!</p>\n'
+
+                fv.res += '  </card>\n'
+                fv.res += '  <card id="card2" title="Freevo">\n'
+                fv.res += '       <p>Date: <input  name="date" title="Date (dd/mm/yy)" format="NN/NN/NN" size="6" value="%s" /><br/>\n' % time.strftime("%d/%m/%y", time.localtime(time.time()))
+                fv.res += '          Start Time: <input  name="start" title="Start Time (hh:mm)" format="NN:NN" size="4" value="%s" /><br/>\n' % time.strftime("%H:%M", time.localtime(time.time()))
+                fv.res += '          Stop Time: <input  name="stop" title="Stop Time (hh:mm)" format="NN:NN" size="4" value="%s" /><br/>\n' % time.strftime("%H:%M", time.localtime(time.time() + 3600))
+                fv.res += '          Channel: <select  name="channel">\n'
+                for ch in guide.chan_list:
+                    fv.res += '                   <option value="'+ch.id+'">'+ch.displayname+"</option>\n"
+                fv.res += '                  </select></p>\n'         
+                fv.res += '   <do type="accept" label="Record">\n'
+                fv.res += '     <go href="wap_rec.rpy" method="post">\n'
+                fv.res += '       <postfield name="action" value="add"/>\n'
+                fv.res += '       <postfield name="date" value="$date"/>\n'
+                fv.res += '       <postfield name="start" value="$start"/>\n'
+                fv.res += '       <postfield name="stop" value="$stop"/>\n'
+                fv.res += '       <postfield name="channel" value="$channel"/>\n'
+                fv.res += '     </go>\n'
+                fv.res += '   </do>\n'
+                fv.res += '  </card>\n'
+
+        fv.printFooter()
+
+        return fv.res
+
+resource = WRecResource()
