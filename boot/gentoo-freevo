@@ -3,9 +3,9 @@
 # Distributed under the terms of the GNU General Public License v2
 
 depend() {
-	need net
-	need xfs
-	need lircd
+	use net
+	use xfs
+	use lircd
 }
 
 checkconfig() {
