@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/01/21 14:16:54  dischi
+# Fix to avoid a crash if bins fails (xml parser broken or invalid xml file)
+#
 # Revision 1.6  2002/12/22 12:59:34  dischi
 # Added function sort() to (audio|video|games|image) item to set the sort
 # mode. Default is alphabetical based on the name. For mp3s and images
@@ -77,10 +80,12 @@ class ImageItem(Item):
 
         # This should check for bins compatable info
 	if os.path.isfile(filename + '.xml'):
-	    binsinfo = bins.get_bins_desc(filename)
-	    self.binsdesc = binsinfo['desc']
-	    self.binsexif = binsinfo['exif']
-
+            try:
+                binsinfo = bins.get_bins_desc(filename)
+                self.binsdesc = binsinfo['desc']
+                self.binsexif = binsinfo['exif']
+            except:
+                pass
         # set name
         if name:
             self.name = name

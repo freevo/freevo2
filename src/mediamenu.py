@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/01/21 14:16:53  dischi
+# Fix to avoid a crash if bins fails (xml parser broken or invalid xml file)
+#
 # Revision 1.21  2003/01/18 10:27:45  dischi
 # Go up one menu when freevo can't read the current directory anymore. Since
 # it may be inside a thread or it happens when freevo rebuilds the menu, scan
@@ -256,7 +259,10 @@ class DirItem(Playlist):
         if name:
             self.name = name
 	elif os.path.isfile(dir + '/album.xml'):
-	    self.name = '[' + bins.get_bins_desc(dir)['desc']['title'] + ']'
+            try:
+                self.name = '[' + bins.get_bins_desc(dir)['desc']['title'] + ']'
+            except:
+                self.name = '[' + os.path.basename(dir) + ']'
         else:
             self.name = '[' + os.path.basename(dir) + ']'
         
