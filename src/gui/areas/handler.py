@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/08/23 20:37:02  dischi
+# cleanup fading code
+#
 # Revision 1.7  2004/08/23 15:52:58  dischi
 # fix area hide/show/fade code
 #
@@ -79,35 +82,26 @@ class AreaScreen:
             self.layer.append(c)
             display.add_child(c)
         self.imagelib  = imagelib
-        self.visible   = True
         self.display   = display
         self.width     = display.width
         self.height    = display.height
-        self.frames_per_fade = 3
 
         
     def show(self):
         """
         show the layer on the display
         """
-        if self.visible:
-            return
         for l in self.layer:
             l.set_alpha(255)
             l.show()
-        self.visible = True
 
 
     def hide(self):
         """
         hide all layers
         """
-        if not self.visible:
-            return
         for l in self.layer:
             l.hide()
-        self.visible = False
-        self.canvas  = None
 
 
     def destroy(self):
@@ -116,27 +110,24 @@ class AreaScreen:
         """
         for l in self.layer:
             l.unparent()
+
         
-    def fade_out(self):
+    def fade_out(self, frames):
         """
         fade out layer and hide them
         """
-        if not self.visible:
-            return
-        a = animation.Fade(self.layer, self.frames_per_fade, 255, 0)
+        a = animation.Fade(self.layer, frames, 255, 0)
+        a.application = True
         a.start()
-        a.wait()
 
         
-    def fade_in(self, canvas):
+    def fade_in(self, frames):
         """
         show layers again and fade them in
         """
-        if not self.visible:
-            return
-        a = animation.Fade(self.layer, self.frames_per_fade, 0, 255)
+        a = animation.Fade(self.layer, frames, 0, 255)
+        a.application = True
         a.start()
-        a.wait()
 
         
 class AreaHandler:
@@ -152,10 +143,11 @@ class AreaHandler:
         self.settings      = settings
         self.display_style = { 'menu' : 0 }
         self.areas         = []
-        self.visible       = True
+        self.visible       = False
 
         self.canvas = screen
         self.screen = AreaScreen(screen, imagelib)
+        self.screen.hide()
         
         # load default areas
         from listing_area   import Listing_Area
@@ -327,25 +319,27 @@ class AreaHandler:
 
 
 
-    def hide(self, fade=True):
+    def hide(self, fade=0):
         """
         hide the screen
         """
         if self.visible:
             if fade:
-                self.screen.fade_out()
-            self.screen.hide()
+                self.screen.fade_out(fade)
+            else:
+                self.screen.hide()
         self.visible = False
         
 
-    def show(self, fade=True):
+    def show(self, fade=0):
         """
         hide the screen
         """
         if not self.visible:
-            self.screen.show()
             if fade:
-                self.screen.fade_in(self.canvas)
+                self.screen.fade_in(fade)
+            else:
+                self.screen.show()
         self.visible = True
         
 
