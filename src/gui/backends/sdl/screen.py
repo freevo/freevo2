@@ -16,7 +16,7 @@ class Screen:
         self.layer['bg']      = Layer('bg', self)
         self.layer['widget']  = Layer('widget', self, True)
         self.complete_bg      = self.renderer.screen.convert()
-
+        self.old_surface      = None
         
 
     def clear(self):
@@ -48,6 +48,10 @@ class Screen:
             return self.layer['alpha'].remove(object)
         return self.layer['content'].remove(object)
 
+
+    def get_objects(self):
+        return self.layer['bg'].objects + self.layer['alpha'].objects + \
+               self.layer['content'].objects
 
 
     def update(self):
@@ -99,5 +103,29 @@ class Screen:
         if self.renderer.must_lock:
             self.s_alpha.unlock()
 
-        if update_area:
+        if self.old_surface:
+            # move test
+            self.new_surface = self.renderer.screen.convert()
+            step = 20
+            if self.direction == 1:
+                for i in range(self.width / step):
+                    self.renderer.screen.blit(self.old_surface, (-i * step, 0))
+                    self.renderer.screen.blit(self.new_surface, (self.width-i*step, 0))
+                    self.renderer.update()
+            else:
+                for i in range(self.width / step):
+                    self.renderer.screen.blit(self.new_surface, (-self.width + i * step, 0))
+                    self.renderer.screen.blit(self.old_surface, ( i * step, 0))
+                    self.renderer.update()
+            self.renderer.screen.blit(self.new_surface, (0, 0))
+            self.renderer.update()
+            self.old_surface = None
+            self.new_surface = None
+        elif update_area:
             self.renderer.update([rect[0], rect[1], rect[2] - rect[0], rect[3] - rect[1]])
+
+
+    def prepare_for_move(self, direction):
+        return
+        self.old_surface = self.renderer.screen.convert()
+        self.direction   = direction

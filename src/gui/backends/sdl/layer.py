@@ -91,7 +91,7 @@ class Layer:
         
         
     def drawbox(self, x0, y0, x1, y1, color=None, border_size=0,
-                border_color=None, radius=0):
+                border_color=None, radius=0, force_alpha=False):
         """
         Draw a round box
         """
@@ -102,7 +102,7 @@ class Layer:
         w = x1 - x0
         h = y1 - y0
 
-        if self.alpha:
+        if self.alpha and not force_alpha:
             x = x0
             y = y0
             box = self.screen
@@ -141,7 +141,7 @@ class Layer:
             pygame.draw.rect(box, c, (x+radius, y, w-2*radius, h))
         pygame.draw.rect(box, c, (x, y+radius, w, h-2*radius))
 
-        if not self.alpha:
+        if not self.alpha or force_alpha:
             self.screen.blit(box, (x0, y0))
 
 

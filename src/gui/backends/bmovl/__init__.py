@@ -1,6 +1,6 @@
 # reuse some sdl backend stuff
-from gui.backends.sdl.renderer import Renderer
-from gui.backends.sdl.font import Font
-from gui.backends.sdl.keyboard import Keyboard
-
+from gui.backends.sdl import get_renderer
 from screen import Screen
+
+def get_screen(*args):
+    return Screen(*args)

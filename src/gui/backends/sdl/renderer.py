@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/08/01 10:35:31  dischi
+# update to changed interface
+#
 # Revision 1.3  2004/07/25 18:15:57  dischi
 # interface updates
 #
@@ -73,6 +76,7 @@ class Renderer:
         """
         init the osd
         """
+        print '****** NEW RENDERER *****************************'
         import util
         self.fullscreen = 0 # Keep track of fullscreen state
 

@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/08/01 10:34:52  dischi
+# update to changed interface
+#
 # Revision 1.2  2004/07/27 18:52:30  dischi
 # support more layer (see README.txt in backends for details
 #
@@ -63,29 +66,30 @@ class Screen(SDLScreen):
         SDLScreen.__init__(self, renderer)
         self.layer = Layer('content', self, True)
 
-        print
-        print 'Activating skin bmovl output'
-        print 'THIS IS A TEST, DO NOT USE ANYTHING EXCEPT MENUS'
-        print
-        MPLAYER_SOFTWARE_SCALER = "-subfont-text-scale 15 -sws 2 -vf scale=%s:-2,"\
-                                  "expand=%s:%s,bmovl=1:0:/tmp/bmovl "\
-                                  "-font /usr/share/mplayer/fonts/"\
-                                  "font-arial-28-iso-8859-2/font.desc" % \
-                                  ( self.width, self.width, self.height )
+        if hasattr(config, 'BMOVL_OSD_VIDEO'):
+            print
+            print 'Activating skin bmovl output'
+            print 'THIS IS A TEST, DO NOT USE ANYTHING EXCEPT MENUS'
+            print
+            MPLAYER_SOFTWARE_SCALER = "-subfont-text-scale 15 -sws 2 -vf scale=%s:-2,"\
+                                      "expand=%s:%s,bmovl=1:0:/tmp/bmovl "\
+                                      "-font /usr/share/mplayer/fonts/"\
+                                      "font-arial-28-iso-8859-2/font.desc" % \
+                                      ( self.width, self.width, self.height )
+            
+            import childapp
+            childapp.ChildApp2([config.MPLAYER_CMD] + 
+                               MPLAYER_SOFTWARE_SCALER.split(' ') +
+                               [config.BMOVL_OSD_VIDEO])
 
-        import childapp
-        childapp.ChildApp2([config.MPLAYER_CMD] + 
-                           MPLAYER_SOFTWARE_SCALER.split(' ') +
-                           [config.BMOVL_OSD_VIDEO])
-
-        self.fifo  = os.open('/tmp/bmovl', os.O_WRONLY)
-        try:
-            os.write(self.fifo, 'SHOW\n')
-        except OSError, e:
-            print e
-            pass
+        self.fifo    = os.open('/tmp/bmovl', os.O_WRONLY)
+        self.visible = False
 
 
+    def get_objects(self):
+        return self.layer.objects
+
+    
     def add(self, object):
         """
         Add an object to a specific layer.
@@ -138,10 +142,26 @@ class Screen(SDLScreen):
 
         blitrect = rect[0], rect[1], rect[2] - rect[0], rect[3] - rect[1]
         surface  = self.layer.screen.subsurface(blitrect)
+        _debug_('update area: %s,%s,%s,%s' % rect)
+
         try:
+            if not self.layer.objects and self.visible:
+                _debug_('hide')
+                os.write(self.fifo, 'CLEAR %s %s %s %s' % (self.width, self.height, 0, 0))
+                os.write(self.fifo, 'HIDE\n')
+                self.visible = False
+                return
+
             os.write(self.fifo, 'RGBA32 %d %d %d %d %d %d\n' % \
                      (surface.get_width(), surface.get_height(),
                       blitrect[0], blitrect[1], 0, 0))
             os.write(self.fifo, pygame.image.tostring(surface, 'RGBA'))
+
+            if self.layer.objects and not self.visible:
+                _debug_('show')
+                os.write(self.fifo, 'SHOW\n')
+                self.visible = True
         except OSError, e:
             print e
+
+            
