@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/08/28 18:02:22  dischi
+# fix guide correction for unsorted listings
+#
 # Revision 1.9  2003/08/24 18:28:39  mikeruelle
 # add space to store ratings and categories
 #
@@ -175,8 +178,8 @@ class TvGuide:
         # The channel must be present, or the program is
         # silently dropped
         if self.chan_dict.has_key(program.channel_id):
-            if len(self.chan_dict[program.channel_id].programs) and \
-                   self.chan_dict[program.channel_id].programs[-1].stop > program.start:
+            p = self.chan_dict[program.channel_id].programs
+            if len(p) and p[-1].start < program.stop and p[-1].stop > program.start:
                 # the tv guide is corrupt, the last entry has a stop time higher than
                 # the next start time. Correct that by reducing the stop time of
                 # the last entry
