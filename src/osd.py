@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.70  2003/07/14 17:09:49  rshortt
+# Start in fullscreen mode with xv too.
+#
 # Revision 1.69  2003/07/13 19:35:44  rshortt
 # Change osd.focused_app to a function that returns the last object in
 # app_list.  Maintaining this list is helpfull for managing 'toplevel'
@@ -379,7 +382,8 @@ class OSD:
         self.depth = self.screen.get_bitsize()
         self.must_lock = self.screen.mustlock()
         
-        if config.CONF.display == 'x11' and config.START_FULLSCREEN_X == 1:
+        if (config.CONF.display == 'x11' or config.CONF.display == 'xv') \
+           and config.START_FULLSCREEN_X == 1:
             self.toggle_fullscreen()
 
         help = ['z = Toggle Fullscreen']
