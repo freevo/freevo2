@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2002/08/30 02:30:21  krister
+# Added an SDL option for the display. Untested!
+#
 # Revision 1.13  2002/08/30 02:05:15  krister
 # Fixed a bug for configuring TV for other than NTSC.
 #
@@ -60,7 +63,7 @@ Configure Freevo for your specific environment.
                                   WIDTHxHEIGHT can be 800x600 or 768x576
 
    --display=DISP               set the display
-                                  DISP can be xv, x11, fbdev, mga
+                                  DISP can be xv, x11, fbdev, mga or sdl
                                   
    --tv=NORM                    set the TV standard
                                   NORM can be ntsc, pal or secam
@@ -144,7 +147,7 @@ def main():
     sys.exit()
 
 vals_geometry = ['800x600', '768x576']
-vals_display = ['xv', 'x11', 'fbdev', 'mga']
+vals_display = ['xv', 'x11', 'fbdev', 'mga', 'sdl']
 vals_tv = ['ntsc', 'pal', 'secam']
 vals_chanlist = ['us-bcast', 'us-cable', 'us-cable-hrc',
                  'japan-bcast', 'japan-cable', 'europe-west',
