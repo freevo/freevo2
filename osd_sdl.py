@@ -181,9 +181,12 @@ class OSD:
 
         self.screen = pygame.display.set_mode((width, height), 0, 32)
 
-        self.clearscreen(self.COL_WHITE)
+        self.clearscreen(self.COL_BLACK)
         self.update()
 
+        if config.OSD_SDL_EXEC_AFTER_STARTUP:
+            os.system(config.OSD_SDL_EXEC_AFTER_STARTUP)
+        
         self._started = 1
         self._help = 0  # Is the helpscreen displayed or not
         self._help_saved = pygame.Surface((width, height), 0, 32)

@@ -16,6 +16,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2002/08/10 17:44:20  dischi
+# Added OSD_SDL_EXEC_AFTER_STARTUP. The script in this variable will
+# be executed after the SDL interface is started. You can use this to
+# correct the fbset settings on framebuffer
+#
 # Revision 1.42  2002/08/08 06:05:32  outlyer
 # Small changes:
 #  o Made Images menu a config file option "ENABLE_IMAGES"
@@ -405,3 +410,10 @@ RC_CMDS = {
     'eject'       : 'EJECT'
     }
 
+
+
+# Exec a script after the osd startup. This only works with the OSD_SDL
+# osd server. Matrox G400 users who wants to use the framebuffer and have
+# a PAL tv may set this to './matrox_g400/mga_pal_768x576.sh'
+
+OSD_SDL_EXEC_AFTER_STARTUP=""
