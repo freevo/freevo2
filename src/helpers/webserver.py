@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/09/05 16:20:11  dischi
+# take care for installed version
+#
 # Revision 1.1  2003/08/31 09:18:41  dischi
 # Move webserver start script to helpers. Use 'freevo webserver start'
 # and 'freevo webserver stop'.
@@ -61,8 +64,11 @@ if len(sys.argv)>1 and sys.argv[1] == '--help':
 logfile = '%s/internal-webserver-%s.log' % (config.LOGDIR, os.getuid())
 log.startLogging(open(logfile, 'a'))
 
-docRoot = os.path.join(os.environ['FREEVO_PYTHON'], 'www/htdocs')
-
+if os.path.isfile(os.path.join(os.environ['FREEVO_PYTHON'], 'www/htdocs')):
+    docRoot = os.path.join(os.environ['FREEVO_PYTHON'], 'www/htdocs')
+else:
+    docRoot = os.path.join(config.SHARE_DIR, 'htdocs')
+    
 root = static.File(docRoot)
 root.processors = { '.rpy': script.ResourceScript, }
 
