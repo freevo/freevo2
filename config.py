@@ -1,6 +1,8 @@
 #
 # config.py
 #
+# $Id$
+#
 # System configuration, e.g. where to look for MP3:s, AVI files, etc.
 # XXX Change this to a regular config file, not a Python source file
 
