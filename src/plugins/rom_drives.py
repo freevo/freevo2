@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.57  2004/02/15 15:29:47  dischi
+# remove old stuff
+#
 # Revision 1.56  2004/02/12 12:20:55  dischi
 # some media info fixes for directory
 #
@@ -539,15 +542,6 @@ class Identify_Thread(threading.Thread):
             media.type  = data['mime'][6:]
 
             media.item.info.mmdata = data
-
-            # copy configure options from track[0] to main item
-            # for playback
-            for k in ('audio', 'subtitles', 'chapters' ):
-                if data['tracks'][0].has_key(k):
-                    if not data.has_key(k):
-                        data[k] = data['tracks'][0][k]
-
-            media.item.num_titles = len(data['tracks'])
             return
 
         # Disc is data of some sort. Mount it to get the file info
