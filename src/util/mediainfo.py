@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/01/25 14:50:39  dischi
+# add attribute getting from mmpython
+#
 # Revision 1.6  2004/01/24 19:15:20  dischi
 # clean up autovar handling
 #
@@ -343,6 +346,8 @@ class Info:
                     result = val
                 if result != None and result != '':
                     return result
+        if self.mmdata and hasattr(self.mmdata, key):
+            return getattr(self.mmdata, key)
         return result
 
         
@@ -360,6 +365,8 @@ class Info:
         for var in self.dicts:
             if var and var.has_key(key):
                 return True
+        if self.mmdata and hasattr(self.mmdata, key):
+            return True
         return False
 
 
