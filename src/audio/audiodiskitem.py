@@ -145,7 +145,8 @@ class AudioDiskItem(Playlist):
                 title = '(Track %s)' % (i+1)
             item = AudioItem('cdda://%d' % (i+1), self, None, title)
             item.set_info('', self.name, title, i+1, self.disc_id[1], '')
-            item.mplayer_options = '-cache 1000 -cdrom-device %s' % self.devicename
+            item.mplayer_options = '-cdda speed=1 -cache 1000 -cdrom-device %s' % \
+                                   self.devicename
             if self.devicename:
                 item.mplayer_options += ' -cdrom-device %s' % self.devicename
             play_items.append(item)
