@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/11/22 20:34:08  dischi
+# use new vfs
+#
 # Revision 1.5  2003/11/04 11:26:07  dischi
 # fix runtime install -- arg
 #
@@ -84,8 +87,8 @@ def getdirnames(dirname):
     """
 
     try:
-        dirnames = [ os.path.join(dirname, dname) for dname in os.listdir(dirname)
-                     if os.path.isdir(os.path.join(dirname, dname)) ]
+        dirnames = [ vfs.join(dirname, dname) for dname in os.listdir(dirname)
+                     if vfs.isdir(vfs.join(dirname, dname)) ]
     except OSError:
         return []
     
@@ -158,8 +161,8 @@ def rmrf_helper(result, dirname, names):
     help function for rm -rf
     """
     for name in names:
-        fullpath = os.path.join(dirname, name)
-        if os.path.isfile(fullpath):
+        fullpath = vfs.join(dirname, name)
+        if vfs.isfile(fullpath):
             result[0].append(fullpath)
     result[1] = [dirname] + result[1]
     return result
@@ -195,7 +198,7 @@ def match_suffix(filename, suffixlist):
     Check if a filename ends in a given suffix, case is ignored.
     """
 
-    fsuffix = os.path.splitext(filename)[1].lower()[1:]
+    fsuffix = vfs.splitext(filename)[1].lower()[1:]
 
     for suffix in suffixlist:
         if fsuffix == suffix:
@@ -211,8 +214,8 @@ def match_files(dirname, suffix_list):
     """
 
     try:
-        files = [ os.path.join(dirname, fname) for fname in os.listdir(dirname) if
-                  os.path.isfile(os.path.join(dirname, fname)) ]
+        files = [ vfs.join(dirname, fname) for fname in os.listdir(dirname) if
+                  vfs.isfile(vfs.join(dirname, fname)) ]
     except OSError:
         print 'util:match_files(): Got error on dir = "%s"' % dirname
         return []
@@ -236,7 +239,7 @@ def match_files_recursively_helper(result, dirname, names):
     help function for match_files_recursively
     """
     for name in names:
-        fullpath = os.path.join(dirname, name)
+        fullpath = vfs.join(dirname, name)
         result.append(fullpath)
     return result
 
@@ -285,19 +288,19 @@ def recursefolders(root, recurse=0, pattern='*', return_folders=0):
 
     # check each file
     for name in names:
-        fullname = os.path.normpath(os.path.join(root, name))
+        fullname = os.path.normpath(vfs.join(root, name))
 
         # grab if it matches our pattern and entry type
         for pat in pat_list:
             if fnmatch.fnmatch(name, pat):
-                if os.path.isfile(fullname) or \
-                   (return_folders and os.path.isdir(fullname)):
+                if vfs.isfile(fullname) or \
+                   (return_folders and vfs.isdir(fullname)):
                     result.append(fullname)
                 continue
 
         # recursively scan other folders, appending results
         if recurse:
-            if os.path.isdir(fullname) and not os.path.islink(fullname):
+            if vfs.isdir(fullname) and not vfs.islink(fullname):
                 result = result + recursefolders( fullname, recurse,
                                                   pattern, return_folders )
 
@@ -356,7 +359,7 @@ def resolve_media_mountdir(media_id, file):
         if media_id == media.id:
             # Then set the filename
             mountdir = media.mountdir
-            full_filename = os.path.join(media.mountdir, file)
+            full_filename = vfs.join(media.mountdir, file)
             break
 
     return mountdir, full_filename
@@ -384,7 +387,7 @@ def read_pickle(file):
     read a file with pickle
     """
     try:
-        f = open(file, 'r')
+        f = vfs.open(file, 'r')
         try:
             data = cPickle.load(f)
         except:
@@ -404,14 +407,12 @@ def save_pickle(data, file):
     save the data with pickle to the given file
     """
     try:
-        if os.path.isfile(file):
-            os.unlink(file)
-        f = open(file, 'w')
+        if vfs.isfile(file):
+            vfs.unlink(file)
+        f = vfs.open(file, 'w')
         cPickle.dump(data, f, PICKLE_PROTOCOL)
         f.close()
     except IOError:
         print 'unable to save to cachefile %s' % file
 
-
-            
 

@@ -10,18 +10,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/11/22 20:34:08  dischi
+# use new vfs
+#
 # Revision 1.4  2003/11/08 23:15:42  outlyer
 # Hyphenated words and abbreviations should be upper case in a title.
-#
-# Revision 1.3  2003/10/26 17:57:26  dischi
-# do not use tmp as default
-#
-# Revision 1.2  2003/10/14 17:03:38  dischi
-# add smartsort patch from Eirik Meland
-#
-# Revision 1.1  2003/10/11 11:20:11  dischi
-# move util.py into a directory and split it into two files
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -53,7 +46,6 @@ import Image # PIL
 import copy
 import htmlentitydefs
 from xml.utils import qp_xml
-import codecs
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
@@ -162,10 +154,9 @@ def getimage(base, default=None):
     return the image base+'.png' or base+'.jpg' if one of them exists.
     If not return the default
     """
-    if os.path.isfile(base+'.png'):
-        return base+'.png'
-    if os.path.isfile(base+'.jpg'):
-        return base+'.jpg'
+    for suffix in ('png', 'jpg', 'gif'):
+        if vfs.abspath(base+'.'+suffix):
+            return vfs.abspath(base+'.'+suffix)
     return default
 
 
@@ -173,13 +164,13 @@ def getname(file):
     """
     make a nicer display name from file
     """
-    if not os.path.exists(file):
+    if not vfs.exists(file):
         return file
-    name = os.path.splitext(os.path.basename(file))[0]
+    name = vfs.splitext(vfs.basename(file))[0]
 
     if not name:
         # Bugfix for empty stem
-        return os.path.basename(file)
+        return vfs.basename(file)
     
     name = name[0].upper() + name[1:]
     while FILENAME_REGEXP.match(name):
@@ -206,7 +197,7 @@ def killall(appname, sig=9):
     for cmdline_filename in cmdline_filenames:
 
         try:
-            fd = open(cmdline_filename)
+            fd = vfs.open(cmdline_filename)
             cmdline = fd.read()
             fd.close()
         except IOError:
@@ -247,7 +238,7 @@ def title_case(phrase):
 
  
 def get_bookmarkfile(filename):
-    myfile = os.path.basename(filename) 
+    myfile = vfs.basename(filename) 
     myfile = config.FREEVO_CACHEDIR + "/" + str(myfile) + '.bookmark'
     return myfile
 
@@ -275,8 +266,8 @@ def smartsort(x,y): # A compare function for use in list.sort()
     Compares strings after stripping off 'The' and 'A' to be 'smarter'
     Also obviously ignores the full path when looking for 'The' and 'A' 
     """
-    m = os.path.basename(x)
-    n = os.path.basename(y)
+    m = vfs.basename(x)
+    n = vfs.basename(y)
     
     for word in ('The', 'A'):
         word += ' '
@@ -287,7 +278,8 @@ def smartsort(x,y): # A compare function for use in list.sort()
 
     return cmp(m.upper(),n.upper()) # be case insensitive
 
-def tagmp3 (filename, title=None, artist=None, album=None, track=None, tracktotal=None, year=None):
+def tagmp3 (filename, title=None, artist=None, album=None, track=None,
+            tracktotal=None, year=None):
     """
     use eyeD3 directly from inside mmpython to
     set the tag. We default to 2.3 since even
@@ -306,21 +298,6 @@ def tagmp3 (filename, title=None, artist=None, album=None, track=None, tracktota
     tag.update()
     return
 
-
-def getdatadir(item):
-    base = config.MOVIE_DATA_DIR
-    if not config.MOVIE_DATA_DIR:
-        base = '/tmp/freevo-movie-data-dir'
-    directory = item.dir
-    if item.media:
-        directory = directory[len(item.media.mountdir):]
-        if len(directory) and directory[0] == '/':
-            directory = directory[1:]
-        return os.path.join(base, 'disc', item.media.id, directory)
-    else:
-        if len(directory) and directory[0] == '/':
-            directory = directory[1:]
-        return os.path.join(base, directory)
 
 def encode(str, code):
     try:
@@ -398,10 +375,10 @@ class FXDtree(qp_xml.Parser):
     def __init__(self, filename):
         qp_xml.Parser.__init__(self)
         self.filename = filename
-        if not os.path.isfile(filename):
+        if not vfs.isfile(filename):
             self.tree = XMLnode('freevo')
         else:
-            f = open(filename)
+            f = vfs.open(filename)
             self.tree = self.parse(f)
             f.close()
         
@@ -416,9 +393,9 @@ class FXDtree(qp_xml.Parser):
     def save(self, filename=None):
         if not filename:
             filename = self.filename
-        if os.path.isfile(filename):
-            os.unlink(filename)
-        f = codecs.open(filename , 'w', encoding='utf-8')
+        if vfs.isfile(filename):
+            vfs.unlink(filename)
+        f = vfs.codecs_open(filename, 'w', encoding='utf-8')
         f.write('<?xml version="1.0" ?>\n')
         self._dump_recurse(f, self.tree)
         f.write('\n')

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.94  2003/11/22 20:35:50  dischi
+# use new vfs
+#
 # Revision 1.93  2003/11/22 15:31:34  dischi
 # renamed config.PREFERED_VIDEO_PLAYER to config.VIDEO_PREFERED_PLAYER
 #
@@ -137,11 +140,7 @@ class VideoItem(Item):
                 self.show_name = show_name
             
         # find image for this file
-        # First check in COVER_DIR
-        if config.COVER_DIR:
-            self.image = util.getimage(config.COVER_DIR+self.basename, self.image)
-
-        # Then check for episode in TV_SHOW_DATA_DIR
+        # check for episode in TV_SHOW_DATA_DIR
         self.image = util.getimage(os.path.splitext(filename)[0], self.image)
 
         # variables only for VideoItem

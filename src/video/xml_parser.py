@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2003/11/22 20:35:50  dischi
+# use new vfs
+#
 # Revision 1.42  2003/11/04 11:49:09  dischi
 # only parse existing files with mmpython
 #
@@ -17,29 +20,6 @@
 #
 # Revision 1.40  2003/10/03 16:46:13  dischi
 # moved the encoding type (latin-1) to the config file config.LOCALE
-#
-# Revision 1.39  2003/10/01 18:56:25  dischi
-# bugfix if no MOVIE_DATA_DIR is set
-#
-# Revision 1.38  2003/09/23 13:45:20  outlyer
-# Making more informational text quiet by default.
-#
-# Revision 1.37  2003/09/20 15:08:26  dischi
-# some adjustments to the missing testfiles
-#
-# Revision 1.36  2003/09/14 20:09:37  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.35  2003/08/30 19:00:56  dischi
-# multi movie files fixed
-#
-# Revision 1.34  2003/08/30 12:20:10  dischi
-# Respect the given parent for parsing. This avoids calling mmpython again
-# with maybe wrong informations (disc or not). Also restructured the code
-#
-# Revision 1.33  2003/08/23 12:51:43  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -146,7 +126,6 @@ def xml_parseVideo(video_node):
             pass
 
         i['data'] = util.format_text(node.textof().encode(config.LOCALE))
-            
         video['items'][id] = i
         video['items-list'] += [ id ]
 
@@ -271,7 +250,7 @@ def make_videoitem(video, variant, parent):
             for part in variant['parts']:
                 part_ref = part['ref']
                 f = video['items'][part_ref]['data']
-                if os.path.isfile(f):
+                if vfs.isfile(f):
                     subitem = VideoItem(f, vitem)
                 else:
                     subitem = VideoItem(f, vitem, parse=False)
@@ -299,7 +278,7 @@ def make_videoitem(video, variant, parent):
         elif len(variant['parts']) == 1:
             part_ref = variant['parts'][0]['ref']
             f = video['items'][part_ref]['data']
-            if os.path.isfile(f):
+            if vfs.isfile(f):
                 vitem = VideoItem(f, parent)
             else:
                 vitem = VideoItem(f, parent, parse=False)
@@ -336,7 +315,7 @@ def make_videoitem(video, variant, parent):
             vitem = VideoItem('', parent, parse=False)
             for v in video['items-list']:
                 f = video['items'][v]['data']
-                if os.path.isfile(f):
+                if vfs.isfile(f):
                     subitem = VideoItem(f, vitem)
                 else:
                     subitem = VideoItem(f, vitem, parse=False)
@@ -355,7 +334,7 @@ def make_videoitem(video, variant, parent):
         else:
             ref = video['items-list'][0]
             f = video['items'][ref]['data']
-            if os.path.isfile(f):
+            if vfs.isfile(f):
                 vitem = VideoItem(f, parent)
             else:
                 vitem = VideoItem(f, parent, parse=False)
@@ -415,7 +394,7 @@ def parse_disc_set(node, file, parent, duplicate_check):
     except KeyError:
         pass
 
-    dir = os.path.dirname(file)
+    dir = vfs.dirname(file)
 
     for disc_set_child in node.children:
         if disc_set_child.name == 'disc':
@@ -476,8 +455,8 @@ def parse_disc_set(node, file, parent, duplicate_check):
         elif disc_set_child.name == u'cover-img':
             # disc_child == /freevo/disc_set/disc/cover-img
             img = disc_set_child.textof().encode('ascii')
-            if os.path.isfile(os.path.join(dir, img)):
-                disc_set['cover'] = os.path.join(dir,img)
+            if vfs.isfile(vfs.join(dir, img)):
+                disc_set['cover'] = vfs.join(dir,img)
 
         elif disc_set_child.name == u'info':
             # disc_child == /freevo/disc_set/info
@@ -515,19 +494,9 @@ def parse_movie(node, file, parent, duplicate_check):
     info = {}
     image = ""
 
-    dir = os.path.dirname(file)
+    dir = vfs.dirname(file)
 
-    # find the realdir in case this file is in MOVIE_DATA_DIR
-    if config.MOVIE_DATA_DIR and dir.find(config.MOVIE_DATA_DIR) == 0:
-        realdir = os.path.join('/', dir[len(config.MOVIE_DATA_DIR):])
-        if realdir.find('/disc/') == 0:
-            realdir = realdir[6:]
-            for c in config.REMOVABLE_MEDIA:
-                if realdir.find(c.id) == 0:
-                    realdir = os.path.join(c.mountdir, realdir[len(c.id)+1:])
-                    break
-    else:
-        realdir = dir
+    realdir = vfs.normalize(dir)
 
     for movie_child in node.children:
         if movie_child.name == u'video':
@@ -544,8 +513,8 @@ def parse_movie(node, file, parent, duplicate_check):
             img = movie_child.textof().encode('ascii')
             # the image file must be stored in the same
             # directory than that XML file
-            if os.path.isfile(os.path.join(dir, img)):
-                image = os.path.join(dir, img)
+            if vfs.isfile(vfs.join(dir, img)):
+                image = vfs.join(dir, img)
 
     title = None
     try:
@@ -558,15 +527,15 @@ def parse_movie(node, file, parent, duplicate_check):
             if video['items'][p]['type'] == 'file':
                 filename = video['items'][p]['data']
                 if filename.find('://') == -1 and not video['items'][p]['media-id']:
-                    video['items'][p]['data'] = os.path.join(realdir, filename)
+                    video['items'][p]['data'] = vfs.join(realdir, filename)
                 for i in range(len(duplicate_check)):
                     try:
                         if (unicode(duplicate_check[i], 'latin1', 'ignore') == \
-                            os.path.join(realdir, filename)):
+                            vfs.join(realdir, filename)):
                             del duplicate_check[i]
                             break
                     except:
-                        if duplicate_check[i] == os.path.join(realdir, filename):
+                        if duplicate_check[i] == vfs.join(realdir, filename):
                             del duplicate_check[i]
                             break
 
@@ -577,8 +546,8 @@ def parse_movie(node, file, parent, duplicate_check):
                 for i in ( 'audio', 'subtitle' ):
                     if p.has_key( i )  and p[ i ].has_key( 'file' ):
                         filename = p[ i ][ 'file' ]
-                        filename = os.path.join( realdir, filename )
-                        if os.path.isfile( filename ):
+                        filename = vfs.join( realdir, filename )
+                        if vfs.isfile( filename ):
                             p[ i ][ 'file' ] = filename
 
         mitem = make_videoitem(video, variants[0], parent)
@@ -629,7 +598,7 @@ def parseMovieFile(file, parent=None, duplicate_check=[]):
 
         parser = qp_xml.Parser()
         # Let's name node variables after their XML names
-        f = open(file)
+        f = vfs.open(file)
         freevo = parser.parse(f.read())
         f.close()
 
@@ -638,11 +607,12 @@ def parseMovieFile(file, parent=None, duplicate_check=[]):
                 movies += parse_disc_set(freevo_child, file, parent, duplicate_check)
 
             elif freevo_child.name == 'movie':
+                file = vfs.normalize(file)
                 movies += parse_movie(freevo_child, file, parent, duplicate_check)
 
         for m in movies:
             m.fxd_file = file
-
+        
         return movies
     except:
         print 'Error parsing %s' % file
@@ -662,7 +632,7 @@ def hash_xml_database():
     config.DISC_SET_INFORMATIONS_ID = {}
     config.TV_SHOW_INFORMATIONS     = {}
     
-    if os.path.exists("/tmp/freevo-rebuild-database"):
+    if vfs.exists("/tmp/freevo-rebuild-database"):
         try:
             os.remove('/tmp/freevo-rebuild-database')
         except OSError:
@@ -690,9 +660,12 @@ def hash_xml_database():
                             l_re = re.compile(l)
                             config.MOVIE_INFORMATIONS_LABEL += [(l_re, info)]
                 
-    if config.MOVIE_DATA_DIR:
-        for file in util.recursefolders(config.MOVIE_DATA_DIR,1,
-                                        '*'+config.SUFFIX_VIDEO_DEF_FILES[0],1):
+    if config.OVERLAY_DIR:
+        files = []
+        for subdir in ('disc', 'disc-set'):
+            files += util.recursefolders(vfs.join(config.OVERLAY_DIR, 'disc'),
+                                         1, '*'+config.SUFFIX_VIDEO_DEF_FILES[0],1)
+        for file in files:
             infolist = parseMovieFile(file)
             for info in infolist:
                 config.MOVIE_INFORMATIONS += [ info ]
@@ -712,7 +685,7 @@ def hash_xml_database():
                                         '*'+config.SUFFIX_VIDEO_DEF_FILES[0],1):
             infolist = parseMovieFile(file)
             for info in infolist:
-                k = os.path.splitext(os.path.basename(file))[0]
+                k = vfs.splitext(vfs.basename(file))[0]
                 config.TV_SHOW_INFORMATIONS[k] = (info.image, info.info,
                                                   info.mplayer_options, file)
             

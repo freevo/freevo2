@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.62  2003/11/22 20:34:44  dischi
+# use new vfs
+#
 # Revision 1.61  2003/11/22 02:31:15  gsbarbieri
 # Please don't use:
 #     _( "string A" + \
@@ -110,7 +113,6 @@ all_variables = [('DIRECTORY_SORT_BY_DATE', _('Directory Sort By Date'),
                  ('DIRECTORY_REVERSE_SORT', _('Directory Reverse Sort'),
                   _('Show the items in the list in reverse order.')),
 
-                 ('COVER_DIR', '', ''),
                  ('AUDIO_FORMAT_STRING', '', ''),
 
                  ('DIRECTORY_CREATE_PLAYLIST', _('Directory Create Playlist'),
@@ -168,34 +170,27 @@ class DirItem(Playlist):
 
         if name:
             self.name = name
-	elif os.path.isfile(directory + '/album.xml'):
+	elif vfs.isfile(directory + '/album.xml'):
             try:
                 self.name = bins.get_bins_desc(directory)['desc']['title']
             except:
-                self.name = os.path.basename(directory)
+                self.name = vfs.basename(directory)
         else:
-            self.name = os.path.basename(directory)
+            self.name = vfs.basename(directory)
 
         
         # check for image in album.xml
-        if os.path.isfile(directory + '/album.xml'):
+        if vfs.isfile(directory + '/album.xml'):
             try:
                 image = bins.get_bins_desc(directory)['desc']['sampleimage']
-                image = os.path.join(directory, image)
-                if os.path.isfile(image):
+                image = vfs.join(directory, image)
+                if vfs.isfile(image):
                     self.image = image
                     self.handle_type = self.display_type
             except:
                 pass
 
-        # Check for cover in COVER_DIR
-        if config.COVER_DIR:
-            image = util.getimage(config.COVER_DIR+os.path.basename(directory))
-            if image:
-                self.image = image
-                self.handle_type = self.display_type
-
-        # Check for a cover in current dir, overide COVER_DIR if needed
+        # Check for a cover in current dir
         image = util.getimage(directory+'/cover')
         if image:
             self.image = image
@@ -213,33 +208,33 @@ class DirItem(Playlist):
             # Pick an image if it is the only image in this dir, or it matches
             # the configurable regexp
             try:
-                files = os.listdir(directory)
+                files = vfs.listdir(directory)
             except OSError:
                 print "oops, os.listdir() error"
                 traceback.print_exc()
             images = filter(image_filter, files)
             image = None
             if len(images) == 1:
-                image = os.path.join(directory, images[0])
+                image = vfs.join(directory, images[0])
             elif len(images) > 1:
                 covers = filter(cover_filter, images)
                 if covers:
-                    image = os.path.join(directory, covers[0])
+                    image = vfs.join(directory, covers[0])
             self.image = image
 
         if not self.image and config.TV_SHOW_DATA_DIR:
-            self.image = util.getimage(os.path.join(config.TV_SHOW_DATA_DIR,
-                                                    os.path.basename(directory).lower()))
+            self.image = util.getimage(vfs.join(config.TV_SHOW_DATA_DIR,
+                                                    vfs.basename(directory).lower()))
 
-            if config.TV_SHOW_INFORMATIONS.has_key(os.path.basename(directory).lower()):
-                tvinfo = config.TV_SHOW_INFORMATIONS[os.path.basename(directory).lower()]
+            if config.TV_SHOW_INFORMATIONS.has_key(vfs.basename(directory).lower()):
+                tvinfo = config.TV_SHOW_INFORMATIONS[vfs.basename(directory).lower()]
                 self.info = tvinfo[1]
                 if not self.image:
                     self.image = tvinfo[0]
                 if not self.xml_file:
                     self.xml_file = tvinfo[3]
 
-        if os.path.isfile(directory+'/folder.fxd'): 
+        if vfs.isfile(directory+'/folder.fxd'): 
             self.xml_file = directory+'/folder.fxd'
 
         if self.xml_file:
@@ -254,10 +249,10 @@ class DirItem(Playlist):
         Set self.xml_file and parse it
         """
         self.xml_file = file
-        if self.xml_file and os.path.isfile(self.xml_file):
+        if self.xml_file and vfs.isfile(self.xml_file):
             try:
                 parser = qp_xml.Parser()
-                f = open(self.xml_file)
+                f = vfs.open(self.xml_file)
                 var_def = parser.parse(f.read())
                 f.close()
                 for node in var_def.children:
@@ -295,15 +290,15 @@ class DirItem(Playlist):
 
             try:
                 image = node.attrs[('', 'cover-img')].encode(config.LOCALE)
-                if image and os.path.isfile(os.path.join(self.dir, image)):
-                    self.image = os.path.join(self.dir, image)
+                if image and vfs.isfile(vfs.join(self.dir, image)):
+                    self.image = vfs.join(self.dir, image)
             except KeyError:
                 pass
 
             try:
                 import_xml = node.attrs[('', 'import')].encode(config.LOCALE)
-                if os.path.isfile(os.path.join(self.dir, import_xml + '.fxd')):
-                    info = parseMovieFile(os.path.join(self.dir, import_xml + '.fxd'),
+                if vfs.isfile(vfs.join(self.dir, import_xml + '.fxd')):
+                    info = parseMovieFile(vfs.join(self.dir, import_xml + '.fxd'),
                                           self, [])
                     if info:
                         self.name      = info[0].name
@@ -343,7 +338,7 @@ class DirItem(Playlist):
         """
         save the modified fxd file
         """
-        self.xml_file = os.path.join(self.dir, 'folder.fxd')
+        self.xml_file = vfs.join(self.dir, 'folder.fxd')
 
         try:
             fxd = util.FXDtree(self.xml_file)
@@ -481,7 +476,7 @@ class DirItem(Playlist):
         if self.mountpoint:
             util.mount(self.mountpoint)
             
-	if os.path.isfile(self.dir + '/.password'):
+	if vfs.isfile(self.dir + '/.password'):
 	    print 'password protected dir'
             self.arg   = arg
             self.menuw = menuw
@@ -494,7 +489,7 @@ class DirItem(Playlist):
     def pass_cmp_cb(self, word=None):
 	# read the contents of self.dir/.passwd and compare to word
 	try:
-	    pwfile = open(self.dir + '/.password')
+	    pwfile = vfs.open(self.dir + '/.password')
 	    line = pwfile.readline()
 	except IOError, e:
 	    print 'error %d (%s) reading password file for %s' % \
@@ -517,21 +512,9 @@ class DirItem(Playlist):
         display_type = self.display_type
         if self.display_type == 'tv':
             display_type = 'video'
-        
-        datadir = util.getdatadir(self)
-        try:
-            files = ([ os.path.join(self.dir, fname)
-                       for fname in os.listdir(self.dir) ])
-            if os.path.isdir(datadir):
-                for f in ([ os.path.join(datadir, fname)
-                            for fname in os.listdir(datadir) ]):
-                    if not os.path.isdir(f):
-                        files.append(f)
-                        
-            self.all_files = copy.copy(files)
-        except OSError:
-            print 'util:match_files(): Got error on dir = "%s"' % self.dir
-            return
+
+        files = vfs.listdir(self.dir)
+        self.all_files = copy.copy(files)
 
         # build play_items for video, audio, image, games
         # the interface functions must remove the files they cover, they
@@ -599,11 +582,11 @@ class DirItem(Playlist):
         # build items for sub-directories
         dir_items = []
         for filename in files:
-            if (os.path.isdir(filename) and
-                os.path.basename(filename) != 'CVS' and
-                os.path.basename(filename) != '.xvpics' and
-                os.path.basename(filename) != '.thumbnails' and
-                os.path.basename(filename) != '.pics'):
+            if (vfs.isdir(filename) and
+                vfs.basename(filename) != 'CVS' and
+                vfs.basename(filename) != '.xvpics' and
+                vfs.basename(filename) != '.thumbnails' and
+                vfs.basename(filename) != '.pics'):
                 dir_items += [ DirItem(filename, self, display_type =
                                        self.display_type) ]
 
@@ -677,7 +660,7 @@ class DirItem(Playlist):
                 menuw.pushmenu(item_menu)
 
             plugin.getbyname('Dirwatcher').cwd(menuw, self, item_menu, self.dir,
-                                               datadir, self.all_files)
+                                               self.all_files)
             self.menu  = item_menu
             self.menuw = menuw
         return items
@@ -687,9 +670,8 @@ class DirItem(Playlist):
         """
         called when we return to this menu
         """
-        datadir = util.getdatadir(self)
         plugin.getbyname('Dirwatcher').cwd(self.menuw, self, self.menu, self.dir,
-                                           datadir, self.all_files)
+                                           self.all_files)
         plugin.getbyname('Dirwatcher').scan(force=True)
 
         # we changed the menu, don't build a new one
@@ -754,11 +736,11 @@ class DirItem(Playlist):
         # add new dir items to the menu
         new_dir_items = []
         for dir in new_files:
-            if (os.path.isdir(dir) and
-                os.path.basename(dir) != 'CVS' and
-                os.path.basename(dir) != '.xvpics' and
-                os.path.basename(dir) != '.thumbnails' and
-                os.path.basename(dir) != '.pics'):
+            if (vfs.isdir(dir) and
+                vfs.basename(dir) != 'CVS' and
+                vfs.basename(dir) != '.xvpics' and
+                vfs.basename(dir) != '.thumbnails' and
+                vfs.basename(dir) != '.pics'):
                 new_dir_items += [ DirItem(dir, self,
                                            display_type = self.display_type) ]
 
@@ -973,32 +955,29 @@ class Dirwatcher(plugin.DaemonPlugin):
         self.menuw         = None
         self.item_menu     = None
         self.dir           = None
-        self.datadir       = None
         self.files         = None
         self.poll_interval = 100
 
         plugin.register(self, 'Dirwatcher')
 
 
-    def cwd(self, menuw, item, item_menu, dir, datadir, files):
+    def cwd(self, menuw, item, item_menu, dir, files):
         self.menuw     = menuw
         self.item      = item
         self.item_menu = item_menu
         self.dir       = dir
-        self.datadir   = datadir
         self.files     = files
-        self.last_time = os.stat(self.dir)[stat.ST_MTIME]
+        self.last_time = vfs.stat(self.dir)[stat.ST_MTIME]
         
     def scan(self, force=False):
         if not self.dir:
             return
         if not force and config.DIRECTORY_USE_STAT_FOR_CHANGES and \
-               os.stat(self.dir)[stat.ST_MTIME] == self.last_time:
+               vfs.stat(self.dir)[stat.ST_MTIME] == self.last_time:
             return True
 
         try:
-            files = ([ os.path.join(self.dir, fname)
-                       for fname in os.listdir(self.dir) ])
+            files = vfs.listdir(self.dir, False)
         except OSError:
             # the directory is gone
             _debug_('Dirwatcher: unable to read directory %s' % self.dir,1)
@@ -1006,14 +985,6 @@ class Dirwatcher(plugin.DaemonPlugin):
             # send EXIT to go one menu up:
             rc.post_event(MENU_BACK_ONE_MENU)
             return
-        
-        try:
-            for f in ([ os.path.join(self.datadir, fname)
-                        for fname in os.listdir(self.datadir) ]):
-                if not os.path.isdir(f):
-                    files.append(f)
-        except OSError:
-            pass
         
         new_files = []
         del_files = []
@@ -1028,7 +999,7 @@ class Dirwatcher(plugin.DaemonPlugin):
         if new_files or del_files:
             _debug_('directory has changed')
             self.item.update(new_files, del_files, files)
-            self.last_time = os.stat(self.dir)[stat.ST_MTIME]
+            self.last_time = vfs.stat(self.dir)[stat.ST_MTIME]
                     
         self.files = files
 

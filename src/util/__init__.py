@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/11/22 20:34:08  dischi
+# use new vfs
+#
 # Revision 1.4  2003/11/02 10:50:40  dischi
 # remove debug
 #
@@ -52,5 +55,10 @@ import sys
 # with util in only one file
 
 if sys.argv[0].find('setup.py') == -1 and sys.argv[0].find('install.py') == -1:
+    import vfs
+    import __builtin__
+    __builtin__.__dict__['vfs'] = vfs
+    
     from misc import *
     from fileops import *
+

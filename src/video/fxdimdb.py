@@ -11,29 +11,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/11/22 20:35:50  dischi
+# use new vfs
+#
 # Revision 1.20  2003/11/09 12:51:21  dischi
 # fix poster download
 #
 # Revision 1.19  2003/10/03 16:46:13  dischi
 # moved the encoding type (latin-1) to the config file config.LOCALE
-#
-# Revision 1.18  2003/09/23 21:13:00  dischi
-# adjust to mmpython change
-#
-# Revision 1.17  2003/09/23 20:05:29  dischi
-# imdb patch from Eirik Meland
-#
-# Revision 1.16  2003/09/20 15:46:01  dischi
-# adjust to new imdb webpage
-#
-# Revision 1.15  2003/09/20 15:08:26  dischi
-# some adjustments to the missing testfiles
-#
-# Revision 1.14  2003/09/20 09:50:07  dischi
-# cleanup
-#
-# Revision 1.13  2003/09/14 20:09:37  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -267,28 +252,21 @@ class FxdImdb:
         (data will be added) unless overwrite = True
         """
         
-        datadir = config.MOVIE_DATA_DIR
-        if not datadir:
-            datadir = '/tmp/'
-
         if fxdfilename: 
-            if os.path.splitext(fxdfilename)[1] == '.fxd':
-                self.fxdfile = os.path.splitext(fxdfilename)[0]
+            if vfs.splitext(fxdfilename)[1] == '.fxd':
+                self.fxdfile = vfs.splitext(fxdfilename)[0]
             else: self.fxdfile = fxdfilename
         
         else:
             if self.isdiscset == True:
-                self.fxdfile = os.path.join(datadir, 'disc-set',
+                self.fxdfile = vfs.join(config.OVERLAY_DIR, 'disc-set',
                                             self.getmedia_id(self.device))
             else:
-                #unwrap first video tuple
-                type, none, device, none, file = self.video[0]
-                if type == 'file' and device == None: self.fxdfile = os.path.splitext(file)[0]
-                else: self.fxdfile = os.path.join(datadir, self.getmedia_id(device))
+                self.fxdfile = vfs.splitext(file)[0]
         
         if overwrite == False:
             try:
-                open(self.fxdfile + '.fxd')
+                vfs.open(self.fxdfile + '.fxd')
                 self.append = True
             except: 
                 pass
@@ -298,9 +276,9 @@ class FxdImdb:
            parseMovieFile(self.fxdfile + '.fxd', None, []) == []:
             raise FxdImdb_XML_Error("FXD file to be updated is invalid, please correct it.")
 
-        if not os.path.isdir(os.path.dirname(self.fxdfile)):
-            if os.path.dirname(self.fxdfile):
-                os.makedirs(os.path.dirname(self.fxdfile))
+        if not vfs.isdir(vfs.dirname(self.fxdfile)):
+            if vfs.dirname(self.fxdfile):
+                os.makedirs(vfs.dirname(self.fxdfile))
             
     
     def setVideo(self, *videos, **mplayer_opt):
@@ -361,29 +339,7 @@ class FxdImdb:
                 raise FxdImdb_XML_Error("""FXD file generated is invalid, please "+
                                         "post bugreport, tracebacks and fxd file.""")
         except (IOError, FxdImdb_IO_Error), error:
-            if not config.MOVIE_DATA_DIR:
-                raise FxdImdb_IO_Error('error saving the file: %s' % str(error))
-
-            self.fxdfile = os.path.abspath(self.fxdfile)
-
-            # could not save, try new directory
-            if self.fxdfile.find(config.MOVIE_DATA_DIR) == 0:
-                # can't write in MOVIE_DATA_DIR
-                raise FxdImdb_IO_Error('error saving the file: %s' % str(error))
-
-            # find new filename inside MOVIE_DATA_DIR
-            for item in config.REMOVABLE_MEDIA:
-                if self.fxdfile.find(item.mountdir) == 0:
-                    self.fxdfile = os.path.join(config.MOVIE_DATA_DIR, 'disc',
-                                                self.getmedia_id(item.devicename),
-                                                relative_path(self.fxdfile))
-                    break
-                
-            else:
-                self.fxdfile = os.path.join(config.MOVIE_DATA_DIR, self.fxdfile[1:])
-            if not os.path.isdir(os.path.dirname(self.fxdfile)):
-                os.makedirs(os.path.dirname(self.fxdfile))
-            self.writeFxd()
+            raise FxdImdb_IO_Error('error saving the file: %s' % str(error))
             
     
     def setDiscset(self, device, regexp, *file_opts, **mpl_global_opt):
@@ -414,7 +370,7 @@ class FxdImdb:
         """Check if fxd file describes a disc-set, returns 1 for true, 0 for false
         None for invalid file"""
         try:
-            file = open(self.fxdfile + '.fxd')
+            file = vfs.open(self.fxdfile + '.fxd')
         except IOError:
             return None
             
@@ -429,7 +385,7 @@ class FxdImdb:
 
         name = filename
         
-        name  = os.path.basename(os.path.splitext(name)[0])
+        name  = vfs.basename(vfs.splitext(name)[0])
         name  = re.sub('([a-z])([A-Z])', point_maker, name)
         name  = re.sub('([a-zA-Z])([0-9])', point_maker, name)
         name  = re.sub('([0-9])([a-zA-Z])', point_maker, name.lower())
@@ -456,7 +412,7 @@ class FxdImdb:
         """Write a <disc-set> to a fresh file"""        
     
         try:
-            i = codecs.open( (self.fxdfile + '.fxd') , 'w', encoding='utf-8')
+            i = vfs.codecs_open( (self.fxdfile + '.fxd') , 'w', encoding='utf-8')
         except IOError, error:
             raise FxdImdb_IO_Error("Writing FXD file failed : " + str(error))
             return 
@@ -508,7 +464,7 @@ class FxdImdb:
         """Write <movie> to fxd file"""
         
         try:
-            i = codecs.open( (self.fxdfile + '.fxd') , 'w', encoding='utf-8')
+            i = vfs.codecs_open( (self.fxdfile + '.fxd') , 'w', encoding='utf-8')
         except IOError, error:
             raise FxdImdb_IO_Error("Writing FXD file failed : " + str(error))
             return 
@@ -556,7 +512,7 @@ class FxdImdb:
         passedvid = False
         #read existing file in memory
         try:
-            file = open(self.fxdfile + '.fxd')
+            file = vfs.open(self.fxdfile + '.fxd')
         except IOError, error:
             raise FxdImdb_IO_Error("Updating FXD file failed : " + str(error))
             return
@@ -571,7 +527,7 @@ class FxdImdb:
         regexp_variant_end = re.compile(' *</variants>', re.I)
         regexp_video_end  = re.compile(' *</video>', re.I)
     
-        file = open(self.fxdfile + '.fxd', 'w')
+        file = vfs.open(self.fxdfile + '.fxd', 'w')
     
 
         for line in content.split('\n'):
@@ -607,7 +563,7 @@ class FxdImdb:
         
         #read existing file in memory
         try:
-            file = open(self.fxdfile + '.fxd')
+            file = vfs.open(self.fxdfile + '.fxd')
         except IOError, error:
             raise FxdImdb_IO_Error("Updating FXD file failed : " + str(error))
             return
@@ -620,7 +576,7 @@ class FxdImdb:
             
         regexp_discset_end  = re.compile(' *</disc-set>', re.I)
     
-        file = open(self.fxdfile + '.fxd', 'w')
+        file = vfs.open(self.fxdfile + '.fxd', 'w')
     
         for line in content.split('\n'):
                 
@@ -791,7 +747,7 @@ class FxdImdb:
         
         req = urllib2.Request(self.image_url, txdata, txheaders)
         r = urllib2.urlopen(req)
-        i = open(self.image, 'w')
+        i = vfs.open(self.image, 'w')
         i.write(r.read())
         i.close()
         r.close()
@@ -805,7 +761,7 @@ class FxdImdb:
         except:
             pass
         
-        self.image = os.path.basename(self.image)
+        self.image = vfs.basename(self.image)
 
         print "Downloaded cover image from %s" % self.image_url
         print "Freevo knows nothing about the copyright of this image, please"
@@ -836,7 +792,7 @@ class FxdImdb:
         """drive (device string)
         return a unique identifier for the disc"""
 
-        if not os.path.exists(drive): return drive
+        if not vfs.exists(drive): return drive
         return cdrom_disc_id(drive)[1]
         
     def print_info(self):

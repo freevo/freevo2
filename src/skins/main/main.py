@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/11/22 20:34:23  dischi
+# use new vfs
+#
 # Revision 1.18  2003/11/22 12:02:11  dischi
 # make the skin blankscreen a real plugin area
 #
@@ -428,16 +431,16 @@ class Skin:
         """
         return an object with new skin settings
         """
-        if dir and os.path.isfile(os.path.join(dir, 'folder.fxd')):
-            file = os.path.join(dir, 'folder.fxd')
+        if dir and vfs.isfile(vfs.join(dir, 'folder.fxd')):
+            file = vfs.join(dir, 'folder.fxd')
 
-        elif dir and os.path.isfile(dir):
+        elif dir and vfs.isfile(dir):
             file = dir
         else:
             return None
 
         if copy_content:
-            cname = '%s%s%s' % (str(self.settings), file, os.stat(file)[stat.ST_MTIME])
+            cname = '%s%s%s' % (str(self.settings), file, vfs.stat(file)[stat.ST_MTIME])
             settings = self.xml_cache[cname]
             if not settings:
                 settings = copy.copy(self.settings)
@@ -445,7 +448,7 @@ class Skin:
                     return None
                 self.xml_cache[cname] = settings
         else:
-            cname = '%s%s' % (file, os.stat(file)[stat.ST_MTIME])
+            cname = '%s%s' % (file, vfs.stat(file)[stat.ST_MTIME])
             settings = self.xml_cache[cname]
             if not settings:
                 settings = xml_skin.XMLSkin()

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2003/11/22 20:36:34  dischi
+# use new vfs
+#
 # Revision 1.38  2003/09/21 13:15:56  dischi
 # handle audio fxd files correctly
 #
@@ -106,11 +109,6 @@ class AudioItem(Item):
         # Only draw the cover if the file exists. We'll
         # use the standard imghdr function to check if
         # it's a real png, and not a lying one :)
-
-        # Check for cover in COVER_DIR
-        if config.COVER_DIR:
-            base = os.path.join(config.COVER_DIR, os.path.basename(file))
-            self.image = util.getimage(base, self.image)
 
         # Check for cover in local dir
         if os.path.isfile(cover_logo+'png') and imghdr.what(cover_logo+'png'):

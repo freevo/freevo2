@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2003/11/22 20:36:04  dischi
+# use new vfs
+#
 # Revision 1.40  2003/11/09 16:17:32  dischi
 # fix mmpython info parsing for movies on disc
 #
@@ -542,8 +545,8 @@ class Identify_Thread(threading.Thread):
                 media.info = copy.copy(movie_info)
             else:
                 media.info = videoitem.VideoItem('0', None)
-                if config.MOVIE_DATA_DIR:
-                    media.info.image = util.getimage(os.path.join(config.MOVIE_DATA_DIR,
+                if config.OVERLAY_DIR:
+                    media.info.image = util.getimage(os.path.join(config.OVERLAY_DIR,
                                                                   'disc-set', media.id))
 
             media.info.name = title
@@ -565,9 +568,6 @@ class Identify_Thread(threading.Thread):
                     if not media.info.info.has_key(k):
                         media.info.info.keys.append(k)
                         media.info.info[k] = media.info.info.tracks[0][k]
-
-            if config.COVER_DIR and os.path.isfile(config.COVER_DIR+label+'.jpg'):
-                media.info.image = config.COVER_DIR+label+'.jpg'
 
             media.info.num_titles = len(data.tracks)
             # Hack to avoid rescan, remove this when mmpython is used
@@ -643,7 +643,7 @@ class Identify_Thread(threading.Thread):
                             start_ep = end_ep
                         volumes += show[1] + "x" + show[2]
 
-                if show_name and the_same and TV_SHOW_DATA_DIR:
+                if show_name and the_same and config.TV_SHOW_DATA_DIR:
                     if end_ep > 0:
                         volumes = '%dx%02d - %dx%02d' % (start_ep / 100, start_ep % 100,
                                                          end_ep / 100, end_ep % 100)
@@ -663,10 +663,6 @@ class Identify_Thread(threading.Thread):
                         
                 elif (not show_name) and len(mplayer_files) == 1:
                     movie = mplayer_files[0]
-                    if config.COVER_DIR:
-                        base = os.path.splitext(os.path.basename(movie))[0]
-                        base = os.path.join(config.COVER_DIR, base)
-                        image = util.getimage(base, image)
                     title = os.path.splitext(os.path.basename(movie))[0]
 
             # nothing found, give up: return the label
