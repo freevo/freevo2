@@ -98,9 +98,8 @@ def cwd(arg=None, menuw=None):
         items += [menu.MenuItem(title, cwd, dirname, type = 'dir')]
     
     number = 0
-    print files
+
     for file in files:
-        print file
         title = os.path.splitext(os.path.basename(file))[0]
         m = menu.MenuItem(title, view_image, (file, number, files))
 
