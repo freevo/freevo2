@@ -7,6 +7,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/08/01 10:37:08  dischi
+# smaller changes to stuff I need
+#
 # Revision 1.7  2004/07/27 18:52:31  dischi
 # support more layer (see README.txt in backends for details
 #
@@ -55,7 +58,7 @@ class Window(GUIObject):
     def __init__(self, x1=None, y1=None, width=None, height=None):
         self.screen_width  = gui.get_screen().width
         self.screen_height = gui.get_screen().height
-        self.app_mode = 'input'
+        self.evt_context   = 'input'
 
         self.center_on_screen = False
 
@@ -90,16 +93,16 @@ class Window(GUIObject):
 
         
     def add(self, object):
-        object.position = 100
+        object.layer = 100
         self.objects.append(object)
         if self.screen:
-            self.screen.add('content', object)
+            self.screen.add(object)
             
 
     def remove(self, object):
         self.objects.remove(object)
         if self.screen:
-            self.screen.remove('content', object)
+            self.screen.remove(object)
 
 
     def draw(self, rect=None):
@@ -138,7 +141,7 @@ class Window(GUIObject):
         self.screen = gui.get_screen()
 
         for o in self.objects:
-            self.screen.add('content', o)
+            self.screen.add(o)
         self.screen.update()
         
 
@@ -146,8 +149,8 @@ class Window(GUIObject):
         eventhandler.remove(self)
 
         for o in self.objects:
-            self.screen.remove('content', o)
-        self.screen.update()
+            o.screen.remove(o)
+        gui.get_screen().update()
         self.screen = None
         
 

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/08/01 10:37:08  dischi
+# smaller changes to stuff I need
+#
 # Revision 1.2  2004/07/25 18:14:05  dischi
 # make some widgets and boxes work with the new gui interface
 #
@@ -94,7 +97,7 @@ class ConfirmBox(PopupBox):
             else:
                 self.b0.set_style(self.button_normal)
                 self.b1.set_style(self.button_selected)
-            self.update()
+            self.screen.update()
             return
 
         
@@ -114,7 +117,7 @@ class ConfirmBox(PopupBox):
                     # remove buttons
                     self.remove(self.b0)
                     self.remove(self.b1)
-                    self.update()
+                    self.screen.update()
                 else:
                     self.destroy()
 

@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/08/01 10:37:08  dischi
+# smaller changes to stuff I need
+#
 # Revision 1.2  2004/07/27 18:52:31  dischi
 # support more layer (see README.txt in backends for details
 #
@@ -43,13 +46,16 @@ class Text(GUIObject):
     """
     A text object that can be drawn onto a layer
     """
-    def __init__(self, x1, y1, x2, y2, text, font, height, align_h='left',
+    def __init__(self, x1, y1, x2, y2, text, font, height=0, align_h='left',
                  align_v='top', mode='hard', ellipses = '...', dim=True,
                  fgcolor=None, bgcolor=None):
         GUIObject.__init__(self, x1, y1, x2, y2)
         self.text     = text
         self.font     = font
-        self.height   = height
+        if height:
+            self.height = height
+        else:
+            self.height = x2 - x1
         self.align_h  = align_h
         self.align_v  = align_v
         self.mode     = mode

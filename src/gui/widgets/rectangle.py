@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/08/01 10:37:08  dischi
+# smaller changes to stuff I need
+#
 # Revision 1.2  2004/07/27 18:52:31  dischi
 # support more layer (see README.txt in backends for details
 #
@@ -55,7 +58,7 @@ class Rectangle(GUIObject):
             raise TypeError, 'no screen defined for %s' % self
         self.screen.drawbox(self.x1, self.y1, self.x2, self.y2, color=self.bgcolor,
                             border_size=self.size, border_color=self.color,
-                            radius=self.radius)
+                            radius=self.radius, force_alpha=self.layer>= 0)
 
             
     def __cmp__(self, o):
