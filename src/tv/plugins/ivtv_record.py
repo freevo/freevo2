@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/07/11 02:16:51  rshortt
+# Removing audio problem workaround because it is no longer needed.
+#
 # Revision 1.6  2003/07/07 01:59:06  rshortt
 # Updating for current ivtv CVS, added bitrate_mode and use constant bitrate
 # by default.
@@ -137,14 +140,6 @@ class Record_Thread(threading.Thread):
                 
                 (v_norm, v_input, v_clist, v_dev) = config.TV_SETTINGS.split()
                 v_norm = string.upper(v_norm)
-
-                # A temporary workaround to fix a problem where the first
-                # capture after loading the modules has the correct audio
-                # properties but is silent.  Capture a chunk and close.
-                v_in  = open(v_dev, 'r')
-                buf = v_in.read(2*1024*1024)
-                v_in.close()
-                time.sleep(3)
 
                 v = ivtv.IVTV(v_dev)
 
