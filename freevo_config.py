@@ -142,6 +142,13 @@ DEV_MIXER = '/dev/mixer'
 CD_MOUNT_POINT = '/mnt/cdrom'
 
 #
+# Physical ROM drives, multiple ones can be specified
+# by adding comma-seperated and quoted entries.
+
+CD_DRIVES = ('/mnt/cdrom')
+DVD_DRIVES = ('/mnt/dvdrom')
+
+#
 # The list of filename suffixes that are used to match the files that
 # are played wih mpg123. They are used as the argument to glob.glob()
 # 
