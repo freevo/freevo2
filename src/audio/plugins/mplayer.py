@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2004/07/09 04:08:50  outlyer
+# Fixed webradio support for shoutcast streams using the 'pls' extension. Most
+# use m3u, but some (including ones in the webradio.fxd file) use pls.
+#
 # Revision 1.35  2004/02/19 04:37:21  gsbarbieri
 # MPlayer Audio Visualization support.
 # Get mpav from http://gsbarbieri.sytes.net/mpav/
@@ -167,8 +171,8 @@ class MPlayer:
         is_playlist = False
         if hasattr(item, 'is_playlist') and item.is_playlist:
             is_playlist = True
-            
-        if item.network_play and filename.endswith('m3u'):
+        
+        if item.network_play and ( str(filename).endswith('m3u') or str(filename).endswith('pls')):
             is_playlist = True
 
         if item.network_play:
