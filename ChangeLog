@@ -9,15 +9,18 @@ Release 1.3.2 (TBD):
  * Plugin interface
   * Converted some functions into plugins
   * detach plugin to listen to music in the background
-  * Experimental tvtime plugin
+  * IMDB search and XML generation plugin
  * New skin engine
  * Reactivated and fixed GUI code
  * Bugfixes
- * Added support for tvtime (>= 0.9.8) for TV viewing. tvtime supports
-   Xvideo (sorry, no FG/G400 yet), with good deinterlacing, smoother
-   picture and better audio sync than MPlayer TV viewing.
+ * Added experimental support for tvtime (>= 0.9.8.3) for TV viewing. 
+   tvtime supports Xvideo, directfb, and mga_vid with good deinterlacing, 
+   smoother picture, better audio sync, OSD and reduced CPU usage when 
+   compared to Mplayer for TV viewing.
  * Support for more formats in the Image Viewer
  * Daylight Saving Time fixes
+ * Shout/Icecast playback/bookmarks
+ * Preliminary TV Recording schedule editor
 	
 
 Release 1.3.2-pre2
