@@ -115,6 +115,7 @@ mkdir -p %{_cachedir}/freevo
 mkdir -p %{_cachedir}/xmltv/logos
 mkdir -p %{_logdir}/freevo
 chmod 777 %{_cachedir}/{freevo,xmltv,xmltv/logos}
+chmod 777 %{_logdir}/freevo
 
 %preun 
 rm -rf %{_logdir}/freevo

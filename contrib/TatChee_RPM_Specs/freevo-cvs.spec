@@ -2,7 +2,7 @@
 %define display  sdl
 %define tv_norm  pal
 %define chanlist europe-west
-%define _cvsdate 20021024
+%define _cvsdate 20021026
 Summary:	Freevo
 Name:		freevo
 Version:	1.3.0
@@ -10,6 +10,9 @@ Release:	CVS%{_cvsdate}
 License:	GPL
 Group:		Applications/Multimedia
 Source:		http://freevo.sourceforge.net/%{name}-%{version}-%{_cvsdate}.tar.gz
+#Patch0:		%{name}-%{version}-setup_build.py.patch
+#Patch1:		%{name}-%{version}-configure.patch
+#Patch2:		%{name}-%{version}-freevo_config.py.patch
 URL:		http://freevo.sourceforge.net/
 Requires:	freevo_runtime >= 3
 BuildRequires:	freevo_runtime
@@ -27,6 +30,9 @@ and audio.
 
 %prep
 %setup  -n %{name}
+#%patch0 -p0
+#%patch1 -p0
+#%patch2 -p0
 
 ./configure --geometry=%{geometry} --display=%{display} \
 	--tv=%{tv_norm} --chanlist=%{chanlist}
@@ -112,6 +118,7 @@ mkdir -p %{_cachedir}/freevo
 mkdir -p %{_cachedir}/xmltv/logos
 mkdir -p %{_logdir}/freevo
 chmod 777 %{_cachedir}/{freevo,xmltv,xmltv/logos}
+chmod 777 %{_logdir}/freevo
 
 %preun 
 rm -rf %{_logdir}/freevo
@@ -124,6 +131,7 @@ find %{_prefix} -name "*.pyc" |xargs rm -f
 %attr(755,root,root) %dir %{_prefix}/fbcon
 %attr(755,root,root) %dir %{_prefix}/gui
 %attr(755,root,root) %dir %{_prefix}/helpers
+%attr(755,root,root) %dir %{_prefix}/icons
 %attr(755,root,root) %dir %{_prefix}/plugins
 %attr(755,root,root) %dir %{_prefix}/plugins/cddb
 %attr(755,root,root) %dir %{_prefix}/plugins/weather
@@ -153,7 +161,7 @@ find %{_prefix} -name "*.pyc" |xargs rm -f
 %attr(644,root,root) %{_prefix}/gui/*
 %attr(644,root,root) %{_prefix}/tv/*
 %attr(644,root,root) %{_prefix}/helpers/*
-%attr(755,root,root) %{_prefix}/icons
+%attr(644,root,root) %{_prefix}/icons/*
 %attr(755,root,root) %{_prefix}/plugins/cddb/cdrom.so
 %attr(644,root,root) %{_prefix}/plugins/cddb/*.py
 %attr(644,root,root) %{_prefix}/plugins/weather/librarydoc.txt
@@ -208,9 +216,6 @@ ln -sf %{_cachedir}/freevo/testfiles %{_prefix}
 rm -f %{_prefix}/testfiles
 
 %changelog
-* Sat Oct 26 2002 TC Wan <tcwan@cs.usm.my>
-- Fixed permissions problem for icons/64x64 directory
-
 * Tue Oct 15 2002 TC Wan <tcwan@cs.usm.my>
 - Moved freevo.conf to /etc/freevo where freevo_config.py resides
 - Defaulted TV settings to ntsc, us-cable to match TV guide
