@@ -6,7 +6,6 @@ $Id$
 
 Short-term
 ----------
-o Make DVD/CD easier to use.
 o Better movie XML file mplayer options
 o Remove the .mplayer stuff
 o TV live pause
@@ -19,7 +18,7 @@ o MP3 playing:
 o TV Channel guide layout
   o 1/4 size TV playing the channel that is currently selected on the guide.
   o Set recording from the TV guide
-o Add basic DVD navigation (titles, chapters, languages, subtitles),
+o Add basic DVD navigation (chapters, languages, subtitles),
   also DVD-nav if it works better now.
 o DVD backups. Settings for bitrate etc.
 o CD backups, CDDB support.
