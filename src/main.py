@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/01/02 19:57:34  dischi
+# Delete LD_PRELOAD after freevo is running to avoid problems with
+# programs freevo will start (e.g. shutdown with gentoo linux)
+#
 # Revision 1.4  2002/12/07 13:30:21  dischi
 # Add plugin support
 #
@@ -395,6 +399,7 @@ def main_func():
 #
 if __name__ == "__main__":
     try:
+        os.environ['LD_PRELOAD'] = ''
         main_func()
     except KeyboardInterrupt:
         print 'Shutdown by keyboard interrupt'
