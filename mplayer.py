@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2002/08/08 03:15:57  krister
+# Tidied up some code.
+#
 # Revision 1.23  2002/08/05 00:50:33  tfmalt
 # o Split eventhandler into eventhandler_audio and eventhandler. This should
 #   make the code easier to maintain.
@@ -156,9 +159,11 @@ class MPlayer:
             # XXX probably be put at start of the function.
             return 0
        
-        # build mplayer comand
-        mpl = config.NICE + " -" + config.MPLAYER_NICE + " " + config.MPLAYER_CMD + ' -vo ' + config.MPLAYER_VO_DEV + \
-	      ' -ao ' +  config.MPLAYER_AO_DEV + ' ' + config.MPLAYER_ARGS_DEF
+        # build mplayer command
+        mpl = (config.NICE + " -" + config.MPLAYER_NICE + " " +
+               config.MPLAYER_CMD + ' -vo ' + config.MPLAYER_VO_DEV + 
+               ' -ao ' +  config.MPLAYER_AO_DEV + ' ' +
+               config.MPLAYER_ARGS_DEF)
 
         if mode == 'video':
 
