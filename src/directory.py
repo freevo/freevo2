@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.64  2003/11/23 19:21:55  dischi
+# some cleanup
+#
 # Revision 1.63  2003/11/23 17:04:53  dischi
 # directory.py now handles fxd files itself based on the new fxd parser
 #
@@ -375,6 +378,35 @@ class DirItem(Playlist):
         
         return Item.getattr(self, attr)
 
+
+    # eventhandler for this item
+    def eventhandler(self, event, menuw=None):
+        if event == DIRECTORY_CHANGE_DISPLAY_TYPE and menuw.menustack[-1] == self.menu:
+            try:
+                pos = possible_display_types.index(self.display_type)
+                type = possible_display_types[(pos+1) % len(possible_display_types)]
+
+                menuw.delete_menu(allow_reload = False)
+
+                newdir = DirItem(self.dir, self.parent, self.name, type, self.add_args)
+                newdir.DIRECTORY_AUTOPLAY_SINGLE_ITEM = False
+                newdir.cwd(menuw=menuw)
+
+                menuw.menustack[-2].selected = newdir
+                pos = menuw.menustack[-2].choices.index(self)
+                menuw.menustack[-2].choices[pos] = newdir
+                rc.post_event(Event(OSD_MESSAGE, arg='%s view' % type))
+                return True
+            except (IndexError, ValueError):
+                pass
+        
+        return Playlist.eventhandler(self, event, menuw)
+        
+
+
+    # ======================================================================
+    # actions
+    # ======================================================================
 
     def actions(self):
         """
@@ -876,12 +908,36 @@ class DirItem(Playlist):
                         break
                     
         # reload the menu, use an event to avoid problems because this function
-        # was called by a thread
+        # was called by a thread (not anymore, but why change it)
         if hasattr(self.menu,'skin_force_text_view'):
             del self.menu.skin_force_text_view
         rc.post_event('MENU_REBUILD')
 
 
+    # ======================================================================
+    # configure submenu
+    # ======================================================================
+
+
+    def configure_set_name(self, name):
+        """
+        return name for the configure menu
+        """
+        if name in self.modified_vars:
+            if name == 'FORCE_SKIN_LAYOUT':
+                return 'ICON_RIGHT_%s_%s' % (str(getattr(self, arg)),
+                                             str(getattr(self, arg)))
+            elif getattr(self, name):
+                return 'ICON_RIGHT_ON_' + _('on')
+            else:
+                return 'ICON_RIGHT_OFF_' + _('off')
+        else:
+            if name == 'FORCE_SKIN_LAYOUT':
+                return 'ICON_RIGHT_OFF_' + _('off')
+            else:
+                return 'ICON_RIGHT_AUTO_' + _('auto')
+
+        
     def configure_set_var(self, arg=None, menuw=None):
         """
         Update the variable in arg and change the menu. This function is used by
@@ -933,21 +989,7 @@ class DirItem(Playlist):
 
         # create new item with updated name
         item = copy.copy(menuw.menustack[-1].selected)
-        item.name = item.name[:item.name.find('\t') + 1]
-        if arg in self.modified_vars:
-            if arg == 'FORCE_SKIN_LAYOUT':
-                item.name += 'ICON_RIGHT_%s_%s' % (str(getattr(self, arg)),
-                                                   str(getattr(self, arg)))
-            elif getattr(self, arg):
-                item.name += 'ICON_RIGHT_ON_' + _('on')
-            else:
-                item.name += 'ICON_RIGHT_OFF_' + _('off')
-        else:
-            if arg == 'FORCE_SKIN_LAYOUT':
-                item.name += 'ICON_RIGHT_OFF_' + _('off')
-            else:
-                item.name += 'ICON_RIGHT_AUTO_' + _('auto')
-
+        item.name = item.name[:item.name.find('\t') + 1] + self.configure_set_name(arg)
 
         # write folder.fxd
         self.xml_file = vfs.join(self.dir, 'folder.fxd')
@@ -975,24 +1017,7 @@ class DirItem(Playlist):
         for i, name, descr in all_variables:
             if name == '':
                 continue
-            if (self.display_type and not self.display_type == 'audio') and \
-                   i == 'AUDIO_RANDOM_PLAYLIST':
-                continue
-
-            name += '\t'
-            if i in self.modified_vars:
-                if i == 'FORCE_SKIN_LAYOUT':
-                    name += 'ICON_RIGHT_%s_%s' % (str(getattr(self, i)),
-                                                  str(getattr(self, i)))
-                elif getattr(self, i):
-                    name += 'ICON_RIGHT_ON_' + _('on')
-                else:
-                    name += 'ICON_RIGHT_OFF_' + _('off')
-            else:
-                if i == 'FORCE_SKIN_LAYOUT':
-                    name += 'ICON_RIGHT_OFF_' + _('off')
-                else:
-                    name += 'ICON_RIGHT_AUTO_' + _('auto')
+            name += '\t'  + self.configure_set_name(i)
             mi = menu_module.MenuItem(name, self.configure_set_var, i)
             mi.description = descr
             items.append(mi)
@@ -1002,31 +1027,6 @@ class DirItem(Playlist):
         menuw.pushmenu(m)
 
         
-    # eventhandler for this item
-    def eventhandler(self, event, menuw=None):
-        if event == DIRECTORY_CHANGE_DISPLAY_TYPE and menuw.menustack[-1] == self.menu:
-            try:
-                pos = possible_display_types.index(self.display_type)
-                type = possible_display_types[(pos+1) % len(possible_display_types)]
-
-                menuw.delete_menu(allow_reload = False)
-
-                newdir = DirItem(self.dir, self.parent, self.name, type, self.add_args)
-                newdir.DIRECTORY_AUTOPLAY_SINGLE_ITEM = False
-                newdir.cwd(menuw=menuw)
-
-                menuw.menustack[-2].selected = newdir
-                pos = menuw.menustack[-2].choices.index(self)
-                menuw.menustack[-2].choices[pos] = newdir
-                rc.post_event(Event(OSD_MESSAGE, arg='%s view' % type))
-                return True
-            except (IndexError, ValueError):
-                pass
-        
-        return Playlist.eventhandler(self, event, menuw)
-        
-
-
 
 
 # ======================================================================
