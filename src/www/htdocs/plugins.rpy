@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/09/12 20:56:04  dischi
+# again small cosmetic changes
+#
 # Revision 1.1  2003/09/12 20:34:16  dischi
 # start internal help system
 #
@@ -84,6 +87,7 @@ class PluginResource(FreevoResource):
 
         all_plugins = parse_plugins()
 
+        fv.res += '<a name="head"></a>'
         fv.res += '<p><b>Index</b><ol>'
         
         for p in all_plugins:
@@ -93,7 +97,7 @@ class PluginResource(FreevoResource):
         for p in all_plugins:
             fv.res +=  '<a name="%s"></a>' % p[0]
             fv.res += info_html(p[0], [p])
-
+            fv.res += '<a href="#head">plugin index</a><hr>\n'
         fv.res += '<br><br>'
         fv.printLinks()
         fv.printFooter()

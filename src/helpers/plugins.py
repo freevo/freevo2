@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/09/12 20:56:03  dischi
+# again small cosmetic changes
+#
 # Revision 1.4  2003/09/12 20:40:04  dischi
 # cosmetic change
 #
@@ -153,59 +156,64 @@ def info_html(plugin_name, all_plugins):
         if name == plugin_name:
             ret += '<h2>%s</h2>' % name
             ret += '<b>Type: %s</b><br>' % type
-            ret += '<b>File: %s</b><br><br><br>' % file
+            ret += '<b>File: %s</b><br>' % file
             ret += '\n'
-            ret += '<b>Description</b>:'
-            ret += '<p>'
-            tmp  = desc
-            desc = []
-            for block in tmp.split('\n\n'):
-                for line in block.split('\n'):
-                    desc.append(line)
-                desc.append('')
+            if not desc:
+                ret += '<p>The plugin has no description. You can help by ' + \
+                       'writing a small description and send it to the Freevo '\
+                       'mailinglist.</p>\n'
+            else:
+                ret += '<br><b>Description</b>:'
+                ret += '<p>'
+                tmp  = desc
+                desc = []
+                for block in tmp.split('\n\n'):
+                    for line in block.split('\n'):
+                        desc.append(line)
+                    desc.append('')
 
-            code = 0
-            for i in range(len(desc)):
-                line = desc[i]
-                if iscode(line):
-                    if not code:
-                        ret += '<br><pre class="code">\n'
-                    ret += line+'\n'
-                    code = 1
+                code = 0
+                for i in range(len(desc)):
+                    line = desc[i]
+                    if iscode(line):
+                        if not code:
+                            ret += '<br><pre class="code">\n'
+                        ret += line+'\n'
+                        code = 1
 
-                    try:
-                        if (desc[i+1] and not iscode(desc[i+1])) or \
-                               (desc[i+2] and not iscode(desc[i+2])):
+                        try:
+                            if (desc[i+1] and not iscode(desc[i+1])) or \
+                                   (desc[i+2] and not iscode(desc[i+2])):
+                                ret += '</pre>'
+                                code = 0
+                        except IndexError:
                             ret += '</pre>'
                             code = 0
-                    except IndexError:
-                        ret += '</pre>'
-                        code = 0
-                elif line:
-                    ret += line
-                elif code:
-                    ret += '\n'
-                else:
-                    ret += '<br>'
+                    elif line:
+                        ret += line + '\n'
+                    elif code:
+                        ret += '\n'
+                    else:
+                        ret += '<br>\n'
 
-            if code:
-                ret += '</pre>'
-                code = 0
-            ret += '</p>'
-            ret += '\n'
+                if code:
+                    ret += '</pre>'
+                    code = 0
+                ret += '</p>'
+                ret += '\n'
 
             if status == 'active':
-                ret += '<p>The plugin is loaded with the following settings:<br>'
+                ret += '<p>The plugin is loaded with the following settings:'
                 for p in plugin.__all_plugins__:
                     if p[0] == name:
                         type = p[1]
                         if not type:
                             type = 'default'
-                        ret += 'type=%s, level=%s, args=%s<br>' % (type, p[2], p[3])
-                ret += '</p><br>'
+                        ret += '<br>type=%s, level=%s, args=%s' % (type, p[2], p[3])
+                ret += '</p>'
             else:
                 ret += '<p>The plugin is not activated in the current setting</p>'
-
+            return ret
     return ret
     
 
