@@ -9,38 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.59  2004/08/01 10:44:40  dischi
+# make the viewer an "Application"
+#
 # Revision 1.58  2004/07/27 18:53:07  dischi
 # switch to new layer code and add basic animation support
 #
 # Revision 1.57  2004/07/26 18:10:18  dischi
 # move global event handling to eventhandler.py
-#
-# Revision 1.56  2004/07/25 19:47:38  dischi
-# use application and not rc.app
-#
-# Revision 1.55  2004/07/25 18:18:30  dischi
-# use new gui code
-#
-# Revision 1.54  2004/07/24 12:24:02  dischi
-# reflect gui changes
-#
-# Revision 1.53  2004/07/22 21:21:48  dischi
-# small fixes to fit the new gui code
-#
-# Revision 1.52  2004/07/11 10:39:45  dischi
-# replaced AlertBox with normal warning on screen
-#
-# Revision 1.51  2004/07/10 12:33:39  dischi
-# header cleanup
-#
-# Revision 1.50  2004/06/03 18:23:31  dischi
-# put image viewer osd into config
-#
-# Revision 1.49  2004/05/31 10:45:27  dischi
-# update to new callback handling in rc
-#
-# Revision 1.48  2004/05/12 18:56:36  dischi
-# add keys to move inside a zoom image in image viewer
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -64,37 +40,39 @@
 # ----------------------------------------------------------------------- */
 
 
-import signal
 import os
 
 import config 
 import util
-
-import eventhandler
+import rc
+import plugin
+import gui
 
 from event import *
-
-import time
-# from gui.animation import render, Transition
-import gui
+from eventhandler import Application
 from gui.animation import render, Move
 
-# Module variable that contains an initialized ImageViewer() object
+
 _singleton = None
 
 def get_singleton():
     global _singleton
-
-    # One-time init
     if _singleton == None:
         _singleton = ImageViewer()
-        
     return _singleton
 
 
-class ImageViewer:
 
+class ImageViewer(Application):
+    """
+    Full screen image viewer for imageitems
+    """
     def __init__(self):
+        """
+        create an image viewer application
+        """
+        Application.__init__(self, 'image viewer', 'image', True)
+
         self.osd_mode = 0    # Draw file info on the image
         self.zoom = 0   # Image zoom
         self.zoom_btns = { str(IMAGE_NO_ZOOM):0, str(IMAGE_ZOOM_GRID1):1,
@@ -103,11 +81,9 @@ class ImageViewer:
                            str(IMAGE_ZOOM_GRID6):6, str(IMAGE_ZOOM_GRID7):7,
                            str(IMAGE_ZOOM_GRID8):8, str(IMAGE_ZOOM_GRID9):9 }
 
-        self.slideshow   = True  # currently in slideshow mode
-        self.app_mode    = 'image'
+        self.slideshow   = False
         self.last_image  = (None, None)
-        self.parent      = None
-        self.free_cache()
+        self.bitmapcache = util.objectcache.ObjectCache(3, desc='viewer')
         self.osd_text    = None
         self.osd_box     = None
 
@@ -116,35 +92,37 @@ class ImageViewer:
         self.zomm        = None
 
 
-    def free_cache(self):
+    def destroy(self):
         """
-        free the current cache to save memory
+        Destroy the viewer. This clears the cache and removes the application
+        from the eventhandler stack. It is still possible to show() this
+        object again.
         """
+        Application.destroy(self)
+        _debug_('destroy image viewer')
         self.bitmapcache = util.objectcache.ObjectCache(3, desc='viewer')
-        if self.parent and self.free_cache in self.parent.show_callbacks: 
-            self.parent.show_callbacks.remove(self.free_cache)
-
         
-
+        
     def view(self, item, zoom=0, rotation=0):
+        """
+        Show the image
+        """
         if zoom:
-            self.app_mode    = 'image_zoom'
+            self.evt_context = 'image_zoom'
         else:
-            self.app_mode    = 'image'
+            self.evt_context = 'image'
 
-        eventhandler.append(self)
-
-        swidth  = gui.get_screen().width
-        sheight = gui.get_screen().height
-            
+        swidth        = gui.get_screen().width
+        sheight       = gui.get_screen().height
         filename      = item.filename
-        self.fileitem = item
-        self.parent   = item.menuw
         screen        = gui.get_screen()
+        self.fileitem = item
 
-        if not self.free_cache in item.menuw.show_callbacks: 
-            item.menuw.show_callbacks.append(self.free_cache)
-        
+        self.show()
+
+        if not self.last_image[0]:
+            screen.update()
+
         # only load new image when the image changed
         if self.filename == filename and self.zoom == zoom and \
            self.rotation == rotation and len(filename) > 0:
@@ -313,9 +291,9 @@ class ImageViewer:
         
         # start timer
         if self.fileitem.duration:
-            signal.signal(signal.SIGALRM, self.signalhandler)
-            signal.alarm(self.fileitem.duration)
-
+            rc.register(self.signalhandler, False, self.fileitem.duration)
+            self.slideshow = True
+            
         self.last_image = (item, image)
 
         # XXX Hack to move the selected item to the current showing image
@@ -337,37 +315,39 @@ class ImageViewer:
         return None
 
 
-    def redraw(self):
-        self.view(self.fileitem, zoom=self.zoom, rotation=self.rotation)
-
-        
     def cache(self, fileitem):
-        # cache the next image (most likely we need this)
+        """
+        cache the next image (most likely we need this)
+        """
         gui.get_renderer().loadbitmap(fileitem.filename, cache=self.bitmapcache)
         
 
-    def signalhandler(self, signum, frame):
-        print 'signal'
-        if eventhandler.get() == self and self.slideshow:
-            eventhandler.remove(self)
-            self.eventhandler(PLAY_END)
-
+    def signalhandler(self):
+        """
+        time is up for slideshow
+        """
+        self.hide()
+        self.eventhandler(PLAY_END)
+        self.slideshow = False
+        
 
     def eventhandler(self, event, menuw=None):
+        """
+        handle incoming events
+        """
         if event == PAUSE or event == PLAY:
             if self.slideshow:
-                eventhandler.post(Event(OSD_MESSAGE, arg=_('pause')))
+                self.post_event(Event(OSD_MESSAGE, arg=_('pause')))
                 self.slideshow = False
-                signal.alarm(0)
+                rc.unregister(self.signalhandler)
             else:
-                eventhandler.post(Event(OSD_MESSAGE, arg=_('play')))
+                self.post_event(Event(OSD_MESSAGE, arg=_('play')))
                 self.slideshow = True
-                signal.alarm(1)
+                rc.register(self.signalhandler, False, 100)
             return True
         
-        elif event == STOP:
-            print 'clear image viewer'
-            
+        if event == STOP:
+            _debug_('event == STOP: clear image viewer')
             screen = gui.get_screen()
             if self.last_image[1]:
                 screen.remove(self.last_image[1])
@@ -380,64 +360,63 @@ class ImageViewer:
                 screen.remove(self.osd_box)
                 self.osd_box = None
 
+            self.destroy()
             self.filename = None
-            eventhandler.remove(self)
-            signal.alarm(0)
-            self.fileitem.eventhandler(event)
+            self.slideshow = False
+            rc.unregister(self.signalhandler)
             return True
 
 
         # up and down will stop the slideshow and pass the
         # event to the playlist
-        elif event == PLAYLIST_NEXT or event == PLAYLIST_PREV:
+        if event == PLAYLIST_NEXT or event == PLAYLIST_PREV:
             self.slideshow = False
-            signal.alarm(0)
+            rc.unregister(self.signalhandler)
             self.fileitem.eventhandler(event)
             return True
             
         # rotate image
-        elif event == IMAGE_ROTATE:
+        if event == IMAGE_ROTATE:
             if event.arg == 'left':
-                self.rotation = (self.rotation + 270) % 360
+                rotation = (self.rotation + 270) % 360
             else:
-                self.rotation = (self.rotation + 90) % 360
-            self.fileitem['rotation'] = self.rotation
-            self.view(self.fileitem, zoom=self.zoom, rotation=self.rotation)
+                rotation = (self.rotation + 90) % 360
+            self.fileitem['rotation'] = rotation
+            self.view(self.fileitem, zoom=self.zoom, rotation=rotation)
             return True
 
-        # print image information
-        elif event == TOGGLE_OSD:
+        # show/hide image information
+        if event == TOGGLE_OSD:
             self.osd_mode = (self.osd_mode + 1) % (len(config.IMAGEVIEWER_OSD) + 1)
-            # Redraw
-            self.view(self.fileitem, zoom=self.zoom, rotation = self.rotation)
+            self.drawosd()
+            gui.get_screen().update()
             return True
 
         # zoom to one third of the image
         # 1 is upper left, 9 is lower right, 0 zoom off
-        elif str(event) in self.zoom_btns:
-            self.zoom = self.zoom_btns[str(event)]
-                
-            if self.zoom:
+        if str(event) in self.zoom_btns:
+            zoom = self.zoom_btns[str(event)]
+            if zoom:
                 # Zoom one third of the image, don't load the next
                 # image in the list
-                self.view(self.fileitem, zoom=self.zoom, rotation = self.rotation)
+                self.view(self.fileitem, zoom=zoom, rotation=self.rotation)
             else:
                 # Display entire picture, don't load next image in case
                 # the user wants to zoom around some more.
-                self.view(self.fileitem, zoom=0, rotation = self.rotation)
+                self.view(self.fileitem, zoom=0, rotation=self.rotation)
             return True                
 
-        elif event == IMAGE_MOVE:
+        if event == IMAGE_MOVE:
             coord = event.arg
             if isinstance(self.zoom, int):
-                self.zoom = self.zoom, coord[0], coord[1]
+                zoom = self.zoom, coord[0], coord[1]
             else:
-                self.zoom = self.zoom[0], self.zoom[1] + coord[0], self.zoom[2] + coord[1]
-            self.view(self.fileitem, zoom=self.zoom, rotation = self.rotation)
+                zoom = self.zoom[0], self.zoom[1] + coord[0], self.zoom[2] + coord[1]
+            self.view(self.fileitem, zoom=zoom, rotation=self.rotation)
             return True
         
         # save the image with the current rotation
-        elif event == IMAGE_SAVE:
+        if event == IMAGE_SAVE:
             if self.rotation and os.path.splitext(self.filename)[1] == ".jpg":
                 cmd = 'jpegtran -copy all -rotate %s -outfile /tmp/freevo-iview %s' \
                       % ((self.rotation + 180) % 360, self.filename)
@@ -445,10 +424,9 @@ class ImageViewer:
                 os.system('mv /tmp/freevo-iview %s' % self.filename)
                 self.rotation = 0
                 gui.get_renderer().bitmapcache.__delitem__(self.filename)
-                return True                
+            return True                
 
-        else:
-            return self.fileitem.eventhandler(event)
+        return self.fileitem.eventhandler(event)
 
             
     def drawosd(self):
@@ -470,6 +448,7 @@ class ImageViewer:
             if self.osd_box:
                 screen.remove(self.osd_box)
                 self.osd_box = None
+            plugin.getbyname('idlebar').hide()
             return
 
         swidth  = gui.get_screen().width
@@ -522,7 +501,8 @@ class ImageViewer:
 
         # FIXME: better integration, just a performance test
         if newosd:
-            print 'let us animate the osd input'
+            plugin.getbyname('idlebar').show()
+            _debug_('Test code: animate the osd input')
             max_height = self.osd_box.height
 
             for o in (self.osd_box, self.osd_text):
