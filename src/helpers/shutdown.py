@@ -178,9 +178,7 @@ class Shutdown:
                 continue
             idle = min(idle, int(timer[0]) * 60 + int(timer[1]))
         child.wait()
-        if idle < USER_IDLETIME:
-            log.info('user idle time: %s minutes' % idle)
-        return idle >= USER_IDLETIME
+        return idle
 
 
     def rpcreturn(self, return_list):
@@ -249,23 +247,28 @@ class Shutdown:
             self.__last_wakeuptime = self.wakeuptime
             util.popen.Process(config.SHUTDOWN_WAKEUP_CMD % self.wakeuptime)
 
+        # internal varibale how long to wait next
         wait = 0
+
+        # check idle time
         if self.idletime < MAX_ENTITY_IDLETIME:
-            log.info('Entity idletime is %s, waiting %s minutes' % \
-                     (self.idletime, 30 - self.idletime))
+            log.info('Entity idletime is %s' % self.idletime)
             wait = 30 - self.idletime
-        else:
-            log.info('Minimum idletime is %s, continue' % self.idletime)
-            
+        elif self.idletime < 1000:
+            # there is an idle entity, print some debug
+            log.info('Entity idletime is %s, continue' % self.idletime)
+
+        # check busy time
         if self.busytime:
             log.info('Entity is busy at least %s minutes' % self.busytime)
             wait = max(wait, self.busytime)
 
+        # check wakeup time
         wakeup = int((self.wakeuptime - time.time()) / 60)
         if wakeup < 0:
             log.error('Correct buggy wakeup time from %s minutes' % wakeup)
             wakeup = 10
-            
+
         if wakeup < 30:
             log.info('Wakeup time is in %s minutes, do not shutdown' % wakeup)
             wait = max(wait, wakeup + 5)
@@ -280,25 +283,36 @@ class Shutdown:
             self.shutdown_counter = 6
             return False
 
-        # Wakeup seems possible based on the mbus entities, check other
-        # stuff like external logins and important programs
-        possible = True
+        # Wakeup seems possible based on the mbus entities, check important
+        # programs next and wait 5 minutes if one is running
         if not self.check_programs():
-            possible = False
-        else:
-            try:
-                if not self.check_login():
-                    possible = False
-            except:
-                # maybe the 'who' parser is buggy
-                log.exception('who checking, please report this trace')
-
-        if not possible:
+            # an important program is running
+            log.info('Next check in 5 minutes')
             # reschedule checking
-            self.timer = notifier.addTimer(POLL_INTERVALL, self.check_mbus)
+            self.timer = notifier.addTimer(5 * POLL_INTERVALL, self.check_mbus)
             # reset counter
             self.shutdown_counter = 6
             return False
+
+        # check logins based on 'who' next
+        try:
+            idle = self.check_login()
+            if idle < 1000:
+                # there is a login, print idle time for debug
+                log.info('user idle time: %s minutes' % idle)
+            if idle <= USER_IDLETIME:
+                # user not idle, sleep until the idletime may be reached
+                wait = USER_IDLETIME + 1 - idle
+                log.info('Next check in %s minutes' % wait)
+                # set a new timer
+                self.timer = notifier.addTimer(wait * 60000, self.check_mbus)
+                # reset counter
+                self.shutdown_counter = 6
+                return False
+        except:
+            # maybe the 'who' parser is buggy
+            log.exception('who checking, please report this trace')
+
 
         # looks like shutdown is possible
         log.info('shutdown possible')
