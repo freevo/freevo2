@@ -196,7 +196,7 @@ plugin.activate('mediamenu',     'mainmenu', 40, ('image', ))
 plugin.activate('base.shutdown', 'mainmenu', 50, None)
 
 if CONF.xmame_SDL or CONF.snes:
-    plugin.activate('mainmenu.media', 'mainmenu', 45, ('games', ))
+    plugin.activate('mediamenu', 'mainmenu', 45, ('games', ))
 
 # ======================================================================
 # Freevo directory settings:
