@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2003/06/30 20:05:35  outlyer
+# Don't print stuff for every call of md5.
+#
 # Revision 1.31  2003/06/30 05:07:09  outlyer
 # Optionally use fchksum for md5's for a increase in speed.
 #
@@ -269,10 +272,8 @@ def md5file(filename):
         # Try and use fchksum if installed
         try:
             import fchksum
-            if config.DEBUG: print "Using Optimized MD5 Routines from fchksum"
             return fchksum.fmd5t(filename)[0]
         except ImportError:
-            if config.DEBUG: print "Falling back to Python MD5 routines"
             m = md5.new()
             try:
                 f = open(filename, 'r')
