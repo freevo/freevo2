@@ -42,7 +42,7 @@ UP      UP
 DOWN    DOWN
 LEFT    LEFT
 RIGHT   RIGHT
-RETURN  SELECT
+SPACE   SELECT
 F2      POWER
 F3      MUTE
 PLUS    VOL+
@@ -85,7 +85,7 @@ cmds_sdl = {
     K_DOWN        : 'DOWN',
     K_LEFT        : 'LEFT',
     K_RIGHT       : 'RIGHT',
-    K_RETURN      : 'SELECT',
+    K_SPACE       : 'SELECT',
     K_F2          : 'POWER',
     K_F3          : 'MUTE',
     K_PLUS        : 'VOL+',
@@ -182,8 +182,13 @@ class OSD:
 
         self.screen = pygame.display.set_mode((self.width, self.height), 0, 32)
 
-        pygame.display.set_caption('Freevo      z = Toggle Fullscreen'
-                                   '      Arrow Keys = Move      Return = Select')
+        help = ['z = Toggle Fullscreen']
+        help += ['Arrow Keys = Move']
+        help += ['Spacebar = Select']
+        help += ['Escape = Stop/Prev. Menu']
+        help += ['h = Help']
+        help_str = '    '.join(help)
+        pygame.display.set_caption('Freevo' + ' '*7 + help_str)
         icon = pygame.image.load('icons/freevo_app.png').convert()
         pygame.display.set_icon(icon)
         
