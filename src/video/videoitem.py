@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.141  2004/07/11 10:14:12  dischi
+# reset current_subitem on play start
+#
 # Revision 1.140  2004/07/10 12:33:43  dischi
 # header cleanup
 #
@@ -437,7 +440,9 @@ class VideoItem(Item):
         # we start playing the first that is physically available
         if self.subitems:
             self.error_in_subitem = 0
-            self.last_error_msg = ''
+            self.last_error_msg   = ''
+            self.current_subitem  = None
+
             result = self.set_next_available_subitem()
             if self.current_subitem: # 'result' is always 1 in this case
                 # The media is available now for playing
@@ -605,7 +610,7 @@ class VideoItem(Item):
         if self.subitems:
             if event == PLAY_END:
                 self.set_next_available_subitem()
-                # Loop untli we find a subitem which plays without error
+                # Loop until we find a subitem which plays without error
                 while self.current_subitem: 
                     _debug_('playing next item')
                     error = self.current_subitem.play(menuw=menuw)
