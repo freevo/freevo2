@@ -7,6 +7,7 @@
 import re
 import httplib, urllib
 import sys
+import string
 
 try:
     imdb_number = sys.argv[1]
@@ -14,6 +15,7 @@ try:
 except IndexError:
     print "Usage: imdb.py [IMDB-NUMBER] [OUTPUT_FILE] [MOVIEFILE(S)]"
     print "       imdb.py -s [SEARCH_STRING]"
+    print "       imdb.py -id [DRIVE] [XML_FILE]"
     print
     print "Generate XML data that stores extra IMDB information for use"
     print "in the movie browser."
@@ -33,8 +35,36 @@ except IndexError:
     print
     print "-s [SEARCH_STRING]"
     print "  Search IMDB to get the IMDB_NUMBER"
+    print
+    print "-id [DRIVE] [XML_FILE]"
+    print "  Stores the DVD/VCD/CD id to the XML file"
     sys.exit(1)
 
+
+# add ID tag
+if imdb_number == '-id':
+    img = open(filename)
+    img.seek(0x0000832d)
+    id = img.read(16)
+    img.seek(32808, 0)
+    label = img.read(32)
+    m = re.compile("^(.*[^ ]) *$").match(label)
+    if m:
+        label = m.group(1)
+    img.close()
+    print 'adding id=id%s' % id
+    print label
+
+    x = open(sys.argv[3])
+    content = x.read()
+    x.close()
+
+    content = string.replace(content, "</title>", "</title>\n    <id>%s</id>" % id)
+    x = open(sys.argv[3], 'w')
+    x.write(content)
+    x.close()
+    sys.exit(0)
+    
 # connect to imdb 
 conn = httplib.HTTPConnection("us.imdb.com")
 
