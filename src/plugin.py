@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2003/09/03 20:10:13  dischi
+# Make sure a plugin is only loaded once with the same args and type
+#
 # Revision 1.35  2003/09/01 18:45:28  dischi
 # update doc
 #
@@ -175,6 +178,12 @@ def activate(name, type=None, level=10, args=None):
 
     __plugin_number__ += 1
 
+    for p in __all_plugins__:
+        if p[0] == name and p[1] == type and p[3] == args:
+            print 'WARNING: duplicate plugin activation, ignoring:'
+            print '<%s %s %s>' % (name, type, args)
+            print
+            return
     if __initialized__:
         __load_plugin__(name, type, level, args, __plugin_number__)
         __sort_plugins__()
