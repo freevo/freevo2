@@ -40,6 +40,8 @@ src_install() {
  	install -d ${D}/etc/freevo
  	install -m 644 local_conf.py.example ${D}/etc/freevo
 
+	use lircd || perl -pi -e 's/use lircd//' boot/gentoo-freevo
+
  	# install boot scripts
  	install -d ${D}/etc/init.d
  	install -m 755 boot/gentoo-freevo ${D}/etc/init.d/freevo
