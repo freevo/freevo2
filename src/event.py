@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/10/19 16:15:51  rshortt
+# Added OS_EVENT_KILL.  recordserver will now kill and wait.
+#
 # Revision 1.26  2003/10/19 14:19:44  rshortt
 # Added OS_EVENT_WAITPID event for popen3.waitpid() to post so that recordserver
 # can pick it up and wait on its own child.  Child processes from recordserver
@@ -511,3 +514,4 @@ VIDEO_END        = Event('VIDEO_END')
 
 OS_EVENT_POPEN2  = Event('OS_EVENT_POPEN2')
 OS_EVENT_WAITPID = Event('OS_EVENT_WAITPID')
+OS_EVENT_KILL    = Event('OS_EVENT_KILL')

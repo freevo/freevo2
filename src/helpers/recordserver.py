@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/10/19 16:15:52  rshortt
+# Added OS_EVENT_KILL.  recordserver will now kill and wait.
+#
 # Revision 1.15  2003/10/19 14:19:44  rshortt
 # Added OS_EVENT_WAITPID event for popen3.waitpid() to post so that recordserver
 # can pick it up and wait on its own child.  Child processes from recordserver
@@ -756,9 +759,56 @@ class RecordServer(xmlrpc.XMLRPC):
             if event == OS_EVENT_POPEN2:
                 print 'popen %s' % event.arg[1]
                 event.arg[0].child = util.popen3.Popen3(event.arg[1])
+
             elif event == OS_EVENT_WAITPID:
-                print 'waiting on pid %s' % event.arg[0]
-                os.waitpid(event.arg[0], os.WNOHANG)
+                pid = event.arg[0]
+                print 'waiting on pid %s' % pid
+
+                for i in range(20):
+                    try:
+                        wpid = os.waitpid(pid, os.WNOHANG)[0]
+                    except OSError:
+                        # forget it
+                        continue
+                    if wpid == pid:
+                        break
+                    time.sleep(0.1)
+
+            elif event == OS_EVENT_KILL:
+                pid = event.arg[0]
+                sig = event.arg[1]
+
+                print 'killing pid %s with sig %s' % (pid, sig)
+                try:
+                    os.kill(pid, sig)
+                except OSError:
+                    pass
+
+                for i in range(20):
+                    try:
+                        wpid = os.waitpid(pid, os.WNOHANG)[0]
+                    except OSError:
+                        # forget it
+                        continue
+                    if wpid == pid:
+                        break
+                    time.sleep(0.1)
+                else:
+                    print 'force killing with signal 9'
+                    try:
+                        os.kill(pid, 9)
+                    except OSError:
+                        pass
+                    for i in range(20):
+                        try:
+                            wpid = os.waitpid(pid, os.WNOHANG)[0]
+                        except OSError:
+                            # forget it
+                            continue
+                        if wpid == pid:
+                            break
+                        time.sleep(0.1)
+                print 'recorderver: After wait()'
             else:
                 print 'not handling event %s' % str(event)
                 return
