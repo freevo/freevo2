@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/07/16 19:39:00  dischi
+# smaller cleanups, still alpha
+#
 # Revision 1.14  2004/07/11 19:39:47  dischi
 # reflect mmpython changes
 #
@@ -72,6 +75,18 @@ from event import *
 
 osd = osd.get_singleton()
 
+class Surface:
+    def __init__(self, x, y, width, height):
+        self.screen = pygame.Surface((width, height), pygame.SRCALPHA)
+        self.pos    = x, y
+        self.width  = width
+        self.height = height
+
+        
+    def blit(self, *arg1, **arg2):
+        self.screen.blit(*arg1, **arg2)
+
+
 class OSDbmovl(OSD):
     """
     an OSD class for bmovl
@@ -122,12 +137,15 @@ class OSDbmovl(OSD):
     def drawbox(self, x0, y0, x1, y1, width=None, color=None, fill=0, layer=None):
         if layer == None:
             self.calc_update_area(x0, y0, x1, y1)
-        return OSD.drawbox(self, x0, y0, x1, y1, width, color, fill, layer)
+            return OSD.drawbox(self, x0, y0, x1, y1, width, color, fill, layer)
+        return OSD.drawbox(self, x0, y0, x1, y1, width, color, fill, layer.screen)
 
 
     def drawstringframed(self, string, x, y, width, height, font, fgcolor=None,
                          bgcolor=None, align_h='left', align_v='top', mode='hard',
                          layer=None, ellipses='...', dim=True):
+        if layer:
+            layer = layer.screen
         ret = OSD.drawstringframed(self, string, x, y, width, height, font, fgcolor,
                                    bgcolor, align_h, align_v, mode, layer, ellipses, dim)
         if not layer:
@@ -204,11 +222,12 @@ class PluginInterface(plugin.Plugin):
         print 'Activating video.bmovl plugin'
         print 'Warning: this plugin is only an example and not working in any'
         print 'cases. If Freevo crashes, deactivate this plugin. Don\'t send'
-        print 'bug reports for this plugin, we know it\'s broekn.'
+        print 'bug reports for this plugin, we know it\'s broken.'
         print
         plugin.Plugin.__init__(self)
         self._type  = 'mplayer_video'
         self.status = 'waiting'
+        self.background = None
 
         
     def play(self, command, player):
@@ -245,52 +264,40 @@ class PluginInterface(plugin.Plugin):
         return command
 
 
-    def show_osd(self):
-        """
-        bmovl: init bmovl osd and show it
-        """
-        _debug_('show osd')
-
-        if not skin.get_singleton().settings.images.has_key('background'):
-            _debug_('no background')
-            return
-
-        bg = self.bmovl.loadbitmap(skin.get_singleton().settings.images['background'])
-        if bg:
-            bg = pygame.transform.scale(bg, (self.bmovl.width, self.bmovl.height))
+    def create_background(self, x, y, width, height):
+        self.background = Surface(x, y, width, height)
+        
+        wallpaper = skin.get_singleton().settings.images['background']
+        if wallpaper:
+            wallpaper = self.bmovl.loadbitmap(wallpaper)
+        if wallpaper:
+            wallpaper = pygame.transform.scale(wallpaper, (self.bmovl.width,
+                                                           self.bmovl.height))
+            self.background.blit(wallpaper, (0, 0), (x, y, width, height))
         else:
             print 'Strange, no background, this will look bad!'
 
         self.clockfont = skin.get_singleton().get_font('bmovl timer')
 
-        # bar at the bottom
-        self.height  = config.OSD_OVERSCAN_Y + 100 + self.clockfont.height
-        self.y0      = self.bmovl.height - self.height
-        self.x0      = config.OSD_OVERSCAN_X + 10
-        self.width   = self.bmovl.width - 2 * self.x0
+        self.bmovl.drawbox(0, 1, self.background.width, 1, width=1, color=0x000000,
+                           layer=self.background)
+
+        self.bmovl.drawbox(0, self.clockfont.height + 4, self.background.width,
+                           self.clockfont.height + 4, width=1, color=0x000000,
+                           layer=self.background)
+
+        self.y0     = self.clockfont.height + 10
+        self.x0     = config.OSD_OVERSCAN_X
+        self.height = self.background.height - config.OSD_OVERSCAN_Y - self.y0
+        self.width  = self.background.width  - 2 * config.OSD_OVERSCAN_X
         
-        if bg:
-            self.bmovl.screenblit(bg, (0, self.y0), (0, self.y0, self.bmovl.width,
-                                                     self.bmovl.height - self.y0))
-
-        self.bmovl.drawbox(0, self.y0 + 1, self.bmovl.width, self.y0 + 1,
-                           width=1, color=0x000000)
-
-        self.bmovl.drawbox(0, self.y0 + self.clockfont.height + 4, self.bmovl.width,
-                           self.y0 + self.clockfont.height + 4, width=1, color=0x000000)
-
-
-        # draw movie image
-        f = os.path.join(config.IMAGE_DIR, 'gant/movie.png')
-        i = self.bmovl.load_scaled_image(f, 90, 90)
-        if i:
-            self.bmovl.screenblit(i, (self.x0 + self.width - i.get_width(), self.y0 + 30))
-
         # draw movie image
         f = skin.get_singleton().settings.images['logo']
-        i = self.bmovl.load_scaled_image(f, 200, 90)
+        i = self.bmovl.load_scaled_image(f, self.width / 4, self.height)
         if i:
-            self.bmovl.screenblit(i, (self.x0, self.y0 + 30))
+            self.background.blit(i, (self.x0, self.y0))
+            self.x0   += i.get_width() + 10
+            self.width = self.background.width - self.x0 - config.OSD_OVERSCAN_X
 
         title   = self.item.name
         
@@ -299,17 +306,27 @@ class PluginInterface(plugin.Plugin):
             title    = String(show[0]) + " " + String(show[1]) + "x" + \
                        String(show[2]) + ' - ' + String(show[3])
 
-        offset = 20 + i.get_width()
-
         font = skin.get_singleton().get_font('bmovl title')
-        pos  = self.bmovl.drawstringframed(title, self.x0 + offset, self.y0 + 40,
-                                           self.width - offset, -1, font)
+        pos  = self.bmovl.drawstringframed(title, self.x0, self.y0, self.width, -1,
+                                           font, layer=self.background)
 
+        self.y0 += font.height * 1.5
+        
         font = skin.get_singleton().get_font('bmovl text')
         pos  = self.bmovl.drawstringframed('%s min.' % (self.length / 60),
-                                           self.x0 + offset, self.y0 + 80,
-                                           self.width - offset, -1, font)
+                                           self.x0, self.y0 , self.width, -1, font,
+                                           layer=self.background)
 
+        
+
+    def show_osd(self):
+        """
+        bmovl: init bmovl osd and show it
+        """
+        _debug_('show osd')
+
+        self.bmovl.screenblit(self.background.screen, self.background.pos)
+        
         self.elapsed(self.last_timer, update=False)
 
         self.bmovl.update()
@@ -385,50 +402,51 @@ class PluginInterface(plugin.Plugin):
         """
         if not self.bmovl and self.status == 'playing' and self.height and self.width:
             self.bmovl = OSDbmovl(self.width, self.height)
-            
-        if self.osd_visible:
-            start = self.start
-            end   = self.start + self.length
+            self.create_background(0, self.height - self.height / 5 - config.OSD_OVERSCAN_Y,
+                                   self.width, self.height / 5 + config.OSD_OVERSCAN_Y)
 
-            if not self.bg:
-                self.bg = pygame.Surface((self.width, 30))
-                self.bg.blit(self.bmovl.screen, (0, 0), (self.x0, self.y0, self.width, 30))
-            else:
-                self.bmovl.screenblit(self.bg, (self.x0, self.y0))
+
+        if self.osd_visible and self.bmovl:
+            start = self.start
+            end   = max(self.start + self.length, timer)
+
+            self.bmovl.screenblit(self.background.screen, self.background.pos,
+                                  (0, 0, self.background.width, self.clockfont.height + 6))
 
             # new calc the bar
-            pos = (max(timer - start, 0) * (self.width - 200)) / (end - start)
+            box  = (self.background.width - 2 * config.OSD_OVERSCAN_X) / 4
+            x0   = config.OSD_OVERSCAN_X
+            y0   = self.background.pos[1]
 
-            self.bmovl.drawbox(self.x0 + 120, self.y0 + 1,
-                               self.x0 + self.width - 120,
-                               self.y0 + self.clockfont.height + 4,
+            mpos = self.background.width - 2 * (x0 + box)
+            pos  = (max(timer - start, 0) * (mpos)) / (end - start)
+
+            self.bmovl.drawbox(x0 + box - 1, y0 + 1, self.background.width - x0 - box + 1,
+                               y0 + self.clockfont.height + 4,
+                               fill=0, color=0x000000)
+            
+            self.bmovl.drawbox(x0 + box, y0 + 2, self.background.width - x0 - box,
+                               y0 + self.clockfont.height + 3,
                                fill=1, color=0xa0ffffff)
             
-            self.bmovl.drawbox(self.x0 + 120, self.y0 + 1,
-                               self.x0 + 120 + pos,
-                               self.y0 + self.clockfont.height + 4,
+            self.bmovl.drawbox(x0 + box, y0 + 2, x0 + box + pos,
+                               y0 + self.clockfont.height + 3,
                                fill=1, color=0x164668)
-
-            self.bmovl.drawbox(self.x0 + 120, self.y0 + 1,
-                               self.x0 + self.width - 120,
-                               self.y0 + self.clockfont.height + 4,
-                               width=1, color=0x000000)
-
-
+            
             font = self.clockfont
+            y0   = self.background.pos[1] + 3
+            
             self.bmovl.drawstringframed('%s' % self.time2str(start),
-                                        self.x0, self.y0 + 3, 120, -1, font,
+                                        x0, y0, box, -1, font,
                                         align_v='center', align_h='center')
 
             self.bmovl.drawstringframed('%s' % self.time2str(timer),
-                                        self.x0 + (self.width / 2) - 60,
-                                        self.y0 + 3, 120, -1, font,
-                                        align_v='center', align_h='center')
+                                        (self.background.width / 2) - box, y0, 2*box,
+                                        -1, font, align_v='center', align_h='center')
 
             self.bmovl.drawstringframed('%s' % self.time2str(end),
-                                        self.x0 + self.width - 120,
-                                        self.y0 + 3, 120, -1, font,
-                                        align_v='center', align_h='center')
+                                        self.background.width - config.OSD_OVERSCAN_X - box,
+                                        y0, box, -1, font, align_v='center', align_h='center')
 
             if update:
                 self.bmovl.update()
@@ -439,16 +457,21 @@ class PluginInterface(plugin.Plugin):
             else:
                 format ='%a %I:%M %P'
 
-            if not self.cbg:
-                self.cbg = pygame.Surface((200, 30))
-                self.cbg.blit(self.bmovl.screen, (0, 0),
-                              (self.x0 + self.width - 200, self.y0 + 78, 200, 30))
-            else:
-                self.bmovl.screenblit(self.cbg, (self.x0 + self.width - 200, self.y0 + 78))
+            format = time.strftime(format)
 
-            self.bmovl.drawstringframed(time.strftime(format),
-                                        self.x0 + self.width - 200, self.y0 + 80,
-                                        200, -1, font, align_h='right')
+            x0 = self.background.width - 2 * config.OSD_OVERSCAN_X
+            s  = font.stringsize(format) * 5
+
+            self.bmovl.screenblit(self.background.screen,
+                                  (self.background.pos[0] + x0 - s - 10,
+                                   self.background.pos[1] + self.y0),
+                                  (x0 - s - 10, self.y0,
+                                   s, self.clockfont.height + 6))
+
+            self.bmovl.drawstringframed(format,
+                                        self.background.pos[0] + x0 - s - 10,
+                                        self.background.pos[1] + self.y0, s,
+                                        -1, font, align_h='right')
 
             if update:
                 self.bmovl.update()
