@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.94  2004/06/02 21:38:02  dischi
+# fix crash
+#
 # Revision 1.93  2004/05/09 09:58:43  dischi
 # make it possible to force a page rebuild
 #
@@ -627,7 +630,7 @@ class MenuWidget(GUIObject):
             _debug_('calling action %s' % event.arg)
 
             for a in menu.selected.actions():
-                if not isinstance(a, MenuItem) and len(a) > 2 and a[2] == event.arg:
+                if not isinstance(a, Item) and len(a) > 2 and a[2] == event.arg:
                     a[0](arg=None, menuw=self)
                     return
                 
