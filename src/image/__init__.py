@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/03/14 17:32:39  dischi
+# unicode fix
+#
 # Revision 1.18  2004/03/13 09:23:46  dischi
 # fix doc
 #
@@ -165,7 +168,7 @@ class PluginInterface(plugin.MimetypePlugin):
         for child in children:
             try:
                 citems = []
-                fname  = os.path.join(dirname, fxd.gettext(child))
+                fname  = os.path.join(dirname, String(fxd.gettext(child)))
                 if child.name == 'directory':
                     if fxd.getattr(child, 'recursive', 0):
                         f = util.match_files_recursively(fname, self.suffix())
