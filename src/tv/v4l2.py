@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/01/13 15:08:22  outlyer
+# Removed an extraneous 'print'
+#
 # Revision 1.13  2003/10/11 15:09:41  rshortt
 # Make sure channel is a string.
 #
@@ -159,7 +162,7 @@ class Videodev:
         if self.device < 0:
             sys.exit("Error: %d\n" %self.device)
         else:
-            print "Video Opened at %s" % device
+            if DEBUG: print "Video Opened at %s" % device
 
         results           = self.querycap()
         self.driver       = results[0]
