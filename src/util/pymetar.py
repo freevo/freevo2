@@ -34,6 +34,7 @@ import math
 import re
 import string
 import urllib2
+import sys
 if float(sys.version[0:3]) >= 2.3:
     import socket
     socket.setdefaulttimeout(10)
