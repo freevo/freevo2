@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/07/25 18:17:34  dischi
+# interface update
+#
 # Revision 1.4  2004/07/24 17:18:18  dischi
 # rename show to update
 #
@@ -73,6 +76,7 @@ class AreaHandler:
         self.screen        = None
         self.areas         = {}
         self.all_areas     = []
+        self.active        = False
         
         # load default areas
         from listing_area   import Listing_Area
@@ -213,8 +217,9 @@ class AreaHandler:
         """
         clean the screen
         """
-        self.screen.clear()
+        self.active = False
         for a in self.all_areas:
+            print 'clear area', a
             a.clear()
         if osd_update:
             self.screen.update()
@@ -238,20 +243,6 @@ class AreaHandler:
         if not self.screen:
             return
         
-        # FIXME: 
-        from gui import GUIObject
-        if isinstance(object, GUIObject):
-            # handling for gui objects: are they visible? what about children?
-            if not object.visible:
-                return
-
-            draw_allowed = True
-            for child in object.children:
-                draw_allowed = draw_allowed and not child.visible
-
-            if not draw_allowed:
-                return
-
         settings = self.settings
             
         if type == 'menu':
@@ -282,6 +273,7 @@ class AreaHandler:
             
 
         self.last_draw = type, object, menu
+        self.active = True
 
         try:
             for a in self.all_areas:

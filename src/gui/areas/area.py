@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/07/25 18:17:34  dischi
+# interface update
+#
 # Revision 1.3  2004/07/24 17:49:05  dischi
 # interface cleanup
 #
@@ -145,6 +148,7 @@ class Skin_Area:
 
     def clear(self):
         if not self.screen:
+            _debug_('ERROR in area %s: no screen defined' % self.name)
             return
         try:
             for o in self.objects.bgimages:
@@ -155,8 +159,9 @@ class Skin_Area:
                 self.screen.remove('content', o)
             for o in self.objects.text:
                 self.screen.remove('content', o)
-        except:
-            pass
+        except Exception, e:
+            print e
+            
         self.objects = SkinObjects()
             
 

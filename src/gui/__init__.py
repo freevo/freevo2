@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/07/25 18:17:09  dischi
+# interface update
+#
 # Revision 1.18  2004/07/24 12:21:05  dischi
 # move renderer into backend subdir
 #
@@ -39,8 +42,10 @@
 
 import config
 
-# the objects that can be drawn
-from base import Image, Rectangle, Text
+# basic objects
+from widgets.image import Image
+from widgets.text import Text
+from widgets.rectangle import Rectangle
 
 _screen   = None
 _skin     = None
@@ -135,24 +140,25 @@ import fxdparser
 settings = fxdparser.Settings()
 
 
-# include all the widgets
-# FIXME: needs cleanup!
+# High level widgets
+from widgets.label             import Label
+from widgets.button            import Button
+from widgets.progressbar       import Progressbar
 
-from widgets.Border            import *
-from widgets.Color             import *
-from widgets.GUIObject         import *
-from widgets.Container         import *
-from widgets.PopupBox          import *
-from widgets.AlertBox          import *
-from widgets.ConfirmBox        import *
-from widgets.Label             import *
-from widgets.Button            import *
-from widgets.LetterBoxGroup    import *
-from widgets.RegionScroller    import *
-from widgets.Scrollbar         import *
-from widgets.InputBox          import *
-from widgets.LayoutManagers    import *
-from widgets.exceptions        import *
-from widgets.ProgressBox       import *
-from widgets.ListBox           import *
 
+# dialog boxes
+from widgets.Window            import Window
+from widgets.PopupBox          import PopupBox
+from widgets.AlertBox          import AlertBox
+from widgets.ConfirmBox        import ConfirmBox
+from widgets.ProgressBox       import ProgressBox
+
+# broken boxes
+from widgets.InputBox          import InputBox
+from widgets.ListBox           import ListBox
+
+# from widgets.LetterBoxGroup    import *
+# from widgets.RegionScroller    import *
+# from widgets.Scrollbar         import *
+# from widgets.LayoutManagers    import *
+# from widgets.exceptions        import *
