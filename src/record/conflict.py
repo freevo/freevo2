@@ -160,8 +160,9 @@ def rate(devices, best_rating):
 
         for d in devices[:-1]:
             for r in d.rec:
-                r.status   = 'scheduled'
-                r.recorder = d.plugin, d.id
+                if r.status != 'recording':
+                    r.status = 'scheduled'
+                    r.recorder = d.plugin, d.id
         for r in devices[-1].rec:
             r.status   = 'conflict'
             r.recorder = None, None

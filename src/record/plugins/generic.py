@@ -155,6 +155,7 @@ class PluginInterface(Plugin):
             if len(self.recordings) == 1:
                 log.info('%s.schedule: scheduled already recording' % self.name)
                 return
+            log.info('%s.schedule: currently recording' % self.name)
             rec0 = recordings[0]
             rec1 = recordings[1]
             # get end time of current recording incl. padding

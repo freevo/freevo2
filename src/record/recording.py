@@ -35,10 +35,14 @@
 import time
 import copy
 import re
+import logging
 
 # freevo imports
 import config
 import util.fxdparser as fxdparser
+
+# get logging object
+log = logging.getLogger('record')
 
 
 def _int2time(i):
@@ -81,9 +85,9 @@ class Recording:
             if i in ('subtitle', 'url'):
                 setattr(self, i, info[i])
             elif i == 'start-padding':
-                i.start_padding = int(info[i])
+                self.start_padding = int(info[i])
             elif i == 'stop-padding':
-                i.stop_padding = int(info[i])
+                self.stop_padding = int(info[i])
             else:
                 self.info[i] = info[i]
         self.recorder = None
@@ -130,7 +134,12 @@ class Recording:
                 self.start = _time2int(parser.getattr(child, 'start'))
                 self.stop  = _time2int(parser.getattr(child, 'stop'))
         parser.parse_info(node, self)
-
+        if self.status == 'recording':
+            log.warning('recording in status \'recording\'')
+            # Oops, we are in 'recording' status and this was saved.
+            # That means we are stopped while recording, set status to
+            # missed
+            self.status = 'missed'
 
     def __str__(self):
         """
