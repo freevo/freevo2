@@ -533,8 +533,9 @@ DIRECTORY_USE_MEDIAID_TAG_NAMES = 1
 
 #
 # The next varibales are a list of types in which the feature should be
-# enabled (video, audio, image, games). E.g. to enable audoplay for
-# audio and images set DIRECTORY_AUTOPLAY_ITEMS = [ 'audio', 'image' ]
+# enabled (video, audio, image, games). E.g. to enable autoplay for
+# audio and images set DIRECTORY_AUTOPLAY_ITEMS = [ 'audio', 'image' ],
+# to disable it set it to [].
 #
 # If you set this variable in a folder.fxd, the value is 1 (enabled)
 # or 0 (disabled).
