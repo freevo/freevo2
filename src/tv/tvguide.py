@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2004/08/14 12:52:31  rshortt
+# Used cached channal list/epg.
+#
 # Revision 1.45  2004/08/10 19:37:23  dischi
 # better pyepg integration
 #
@@ -67,7 +70,7 @@ import gui
 from event import *
 from menu import MenuApplication
 
-from channels import ChannelList
+from channels import get_channels
 
 from program_display import ProgramItem
 import record_client as ri
@@ -110,7 +113,7 @@ class TVGuide(MenuApplication):
         box.show()
 
         try:
-            channels = ChannelList()
+            channels = get_channels()
         except Exception, e:
             box.destroy()
             gui.AlertBox(text=_('TV Guide is corrupt!')).show()
