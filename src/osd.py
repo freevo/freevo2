@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.156  2004/05/13 12:33:42  dischi
+# animation damage patch from Viggo Fredriksen
+#
 # Revision 1.155  2004/05/09 14:17:44  dischi
 # do use a SynchronizedObject for the osd
 #
@@ -715,19 +718,19 @@ class OSD:
         """
         blit the source to the screen
         """
-        if self.render:
-            r = source.get_rect()
-            w = r[2]
-            h = r[3]
-            if sourcerect:
-                w = sourcerect[2]
-                h = sourcerect[3]
-            self.render.damage( [(destpos[0], destpos[0], w, h)] )
-
-        if sourcerect != None:
-            return self.screen.blit(source, destpos, sourcerect)
+        if sourcerect:
+            w = sourcerect[2]
+            h = sourcerect[3]
+            ret = self.screen.blit(source, destpos, sourcerect)
         else:
-            return self.screen.blit(source, destpos)
+            w, h = source.get_size()
+            ret = self.screen.blit(source, destpos)
+
+        if self.render:
+            self.render.damage( [(destpos[0], destpos[1], w, h)] )
+
+        return ret
+
 
 
     def getfont(self, font, ptsize):

@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/05/13 12:33:42  dischi
+# animation damage patch from Viggo Fredriksen
+#
 # Revision 1.1  2004/04/25 11:23:58  dischi
 # Added support for animations. Most of the code is from Viggo Fredriksen
 #
@@ -105,16 +108,25 @@ class BaseAnimation:
             self.background = osd.get_singleton().getsurface(rect=self.rect)
             self.updates = []
 
-        else:
-            # check for damages done on osd.screen
-            while len(self.updates) > 0:
+        elif len(self.updates) > 0:
 
-                update = self.updates.pop()
-                x      = update[0] - self.rect.left
-                y      = update[1] - self.rect.top
-                bg_tmp = osd.get_singleton().getsurface(rect=update)
+            # find the topleft corner
+            x = self.rect.right
+            y = self.rect.bottom
+            for i in self.updates:
+                x = min(x, i.left)
+                y = min(y, i.top)
 
-                self.background.blit(bg_tmp, (x, y))
+            # find the total rect of the collisions
+            upd = Rect(x, y, 0, 0)
+            upd.unionall_ip(self.updates)
+            self.updates = []
+
+            x      = upd[0] - self.rect.left
+            y      = upd[1] - self.rect.top
+            bg_tmp = osd.get_singleton().getsurface(rect=upd)
+
+            self.background.blit(bg_tmp, (x, y))
 
         self.surface.blit(self.background, (0,0))
 
