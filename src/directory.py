@@ -561,12 +561,11 @@ class DirItem(Playlist):
                 # store the current selected item
                 selected_id  = self.menu.selected.__id__()
                 selected_pos = self.menu.choices.index(self.menu.selected)
-            if hasattr(self.menu, 'skin_default_has_description'):
-                del self.menu.skin_default_has_description
-            if hasattr(self.menu, 'skin_default_no_images'):
-                del self.menu.skin_default_no_images
-            if hasattr(self.menu, 'skin_force_text_view'):
-                del self.menu.skin_force_text_view
+            # warning: self.menu is a weakref!
+            self.menu.delattr('skin_default_has_description')
+            self.menu.delattr('skin_default_no_images')
+            self.menu.delattr('skin_force_text_view')
+
         elif not os.path.exists(self.dir):
 	    AlertBox(text=_('Directory does not exist')).show()
             return

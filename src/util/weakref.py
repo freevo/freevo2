@@ -71,3 +71,8 @@ class weakref:
             return str(self.__dict__['ref']())
         else:
             return 'weak reference to None'
+
+    def delattr(self, attr):
+        if hasattr(self.__dict__['ref'](), attr):
+            ref = self.__dict__['ref']()
+            exec('del ref.%s' % attr)
