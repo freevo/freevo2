@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2002/09/01 05:15:55  krister
+# Switched to the new freely distributable fonts.
+#
 # Revision 1.17  2002/09/01 04:12:04  krister
 # Added error checking for font rendering.
 #
@@ -590,9 +593,9 @@ class OSD:
                 cmd = line[8:]
                 
                 print '"%s" "%s" %s %s' % (ks, cmd, x, y)
-                fname = 'skins/fonts/SF Arborcrest Medium.ttf'
-                if ks: self.drawstring(ks, x, y, font=fname, ptsize=11)
-                if cmd: self.drawstring(cmd, x+80, y, font=fname, ptsize=11)
+                fname = 'skins/fonts/bluehigh.ttf'
+                if ks: self.drawstring(ks, x, y, font=fname, ptsize=14)
+                if cmd: self.drawstring(cmd, x+80, y, font=fname, ptsize=14)
                 row += 1
                 if row >= 15:
                     row = 0
@@ -624,7 +627,7 @@ s = ("/hdc/krister_mp3/mp3/rage_against_the_machine-the_battle_of_los_angeles" +
 if __name__ == '__main__':
     osd = OSD()
     osd.clearscreen()
-    osd.drawstring(s, 10, 10, font='skins/fonts/Cultstup.ttf', ptsize=14)
+    osd.drawstring(s, 10, 10, font='skins/fonts/bluehigh.ttf', ptsize=14)
     osd.update()
     time.sleep(5)
 

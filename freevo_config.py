@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.56  2002/09/01 05:15:55  krister
+# Switched to the new freely distributable fonts.
+#
 # Revision 1.55  2002/08/30 02:29:53  krister
 # Added joystick support from Dan Eriksen. Untested!
 #
@@ -223,8 +226,8 @@ ENABLE_IMAGES = 1        # Disable this if you don't want/use the Image Browser
 # OSD default font. It is only used for debug/error stuff, not regular   XXX remove
 # skinning.
 #
-OSD_DEFAULT_FONTNAME = 'skins/fonts/Cultstup.ttf'
-OSD_DEFAULT_FONTSIZE = 14
+OSD_DEFAULT_FONTNAME = 'skins/fonts/bluehigh.ttf'
+OSD_DEFAULT_FONTSIZE = 18
 
 
 #
