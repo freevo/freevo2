@@ -57,7 +57,7 @@ class SearchResource(FreevoResource):
         if not searchstr:
             programs = []
         else:
-            programs = pyepg.search(searchstr, 
+            programs = pyepg.search(Unicode(searchstr), 
                                     by_chan,
                                     form.get('search_title'), 
                                     form.get('search_subtitle'), 

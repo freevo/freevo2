@@ -8,7 +8,7 @@ import config
 import util
 
 # www imports
-from base import HTMLResource, FreevoResource
+from www.base import HTMLResource, FreevoResource
 
 re_link = re.compile('(href *= *")([^:]*?.html)"')
 

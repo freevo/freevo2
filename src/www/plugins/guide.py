@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.1  2005/02/13 18:42:09  dischi
+# move pages into plugins and pages subdir
+#
 # Revision 1.5  2005/02/03 16:05:38  rshortt
 # Minor cosmetics fix.
 #
