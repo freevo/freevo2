@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/07/03 23:13:46  dischi
+# moved mmpython parsing to audioinfo to support playlists
+#
 # Revision 1.27  2003/06/29 20:42:14  dischi
 # changes for mmpython support
 #
@@ -80,6 +83,7 @@ import rc
 
 from player import PlayerGUI
 from item import Item
+import mmpython
 
 
 DEBUG = config.DEBUG
@@ -92,8 +96,14 @@ class AudioItem(Item):
     This is the common class to get information about audiofiles.
     """
     
-    def __init__(self, file, parent, info = None, name = None):
-        Item.__init__(self, parent, info)
+    def __init__(self, file, parent, name = None):
+        if parent and parent.media:
+            url = 'cd://%s:%s:%s' % (parent.media.devicename, parent.media.mountdir,
+                                     file[len(parent.media.mountdir)+1:])
+        else:
+            url = file
+
+        Item.__init__(self, parent, mmpython.parse(url))
         self.filename   = file[:]
         self.url        = None
         if name:

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/07/03 23:13:46  dischi
+# moved mmpython parsing to audioinfo to support playlists
+#
 # Revision 1.4  2003/06/29 20:42:14  dischi
 # changes for mmpython support
 #
@@ -43,7 +46,6 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import mmpython
 import config
 import util
 
@@ -57,12 +59,7 @@ def cwd(parent, files):
     items = []
 
     for file in util.find_matches(files, config.SUFFIX_AUDIO_FILES):
-        if parent.media:
-            url = 'cd://%s:%s:%s' % (parent.media.devicename, parent.media.mountdir,
-                                     file[len(parent.media.mountdir)+1:])
-        else:
-            url = file
-        items.append(AudioItem(file, parent, mmpython.parse(url)))
+        items.append(AudioItem(file, parent))
         files.remove(file)
 
     return items
