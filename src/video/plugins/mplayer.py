@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.80  2004/08/23 14:30:38  dischi
+# support bmovl2
+#
 # Revision 1.79  2004/08/23 12:40:24  dischi
 # add bmovl osd info
 #
@@ -70,6 +73,7 @@
 import os, re
 import popen2
 import mmpython
+from mevas.bmovl2 import MPlayerOverlay
 
 import config     # Configuration handler. reads config file.
 import util       # Various utilities
@@ -333,8 +337,12 @@ class MPlayer(Application):
             util.mount(d)
             command += ['-audiofile', f]
 
-        command += [ '-vf', 'bmovl=1:0:/tmp/bmovl' ]
-        
+        if config.MPLAYER_BMOVL2_POSSIBLE:
+            self.overlay = MPlayerOverlay()
+            command += [ '-vf', 'bmovl2=%s' % self.overlay.fifo_fname ]
+        else:
+            command += [ '-vf', 'bmovl=1:0:/tmp/bmovl' ]
+
         self.plugins = plugin.get('mplayer_video')
 
         for p in self.plugins:
@@ -586,7 +594,6 @@ class MPlayerApp(childapp.ChildApp2):
         # init the child (== start the threads)
         childapp.ChildApp2.__init__(self, app)
 
-
                 
     def stop_event(self):
         """
@@ -598,7 +605,29 @@ class MPlayerApp(childapp.ChildApp2):
             return USER_END
         else:
             return PLAY_END
-                        
+
+
+    def start_bmovl(self):
+        """
+        start bmovl or bmovl2 output
+        """
+        if config.MPLAYER_BMOVL2_POSSIBLE:
+            _debug_('starting Bmovl2')
+            self.mplayer.overlay.set_can_write(True)
+            while not self.mplayer.overlay.can_write():
+                pass
+            _debug_('activating overlay')
+            self.screen = gui.set_display('Bmovl2', (self.width, self.height))
+            self.screen.set_overlay(self.mplayer.overlay)
+        else:
+            _debug_('starting Bmovl')
+            self.screen = gui.set_display('Bmovl', (self.width, self.height))
+        self.area_handler = gui.AreaHandler('video', ['screen', 'view', 'info',
+                                                      Progressbar()])
+        self.area_handler.screen.frames_per_fade = 10
+        #self.area_handler.hide()
+        self.area_handler.draw(self.item)
+        
 
     def stdout_cb(self, line):
         """
@@ -627,11 +656,7 @@ class MPlayerApp(childapp.ChildApp2):
         # current elapsed time
         if line.find("A:") == 0:
             if self.width and self.height and not self.screen:
-                _debug_('starting Bmovl')
-                self.screen  = gui.set_display('Bmovl', (self.width, self.height))
-                self.area_handler = gui.AreaHandler('video', ['screen', 'view', 'info', Progressbar()])
-                #self.area_handler.hide()
-                self.area_handler.draw(self.item)
+                self.start_bmovl()
             m = self.RE_TIME(line)
             if hasattr(m,'group') and self.item.elapsed != int(m.group(1))+1:
                 self.item.elapsed = int(m.group(1))+1
