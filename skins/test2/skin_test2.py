@@ -125,7 +125,12 @@ class Skin(skin_test1.Skin):
                             color=((160 << 24) | osd.COL_BLUE))
 
                 if choice.image != None:
-                    image = util.resize(choice.image, 200, 280)
+                    (w, h) = util.pngsize(choice.image)
+                    if w > h:
+                        # no cover image maybe thumbnail, don't resize
+                        image = choice.image
+                    else:
+                        image = util.resize(choice.image, 200, 280)
 
 		if choice.icon != None and choice.popup:
 			(w, h) = util.pngsize(choice.icon)

@@ -321,7 +321,6 @@ RC_CMDS = {
     'pause'       : 'PAUSE',
     'stop'        : 'STOP',
     'rec'         : 'REC',
-    'eject'       : 'EJECT',
-    'osd'         : 'OSD'
+    'eject'       : 'EJECT'
     }
 

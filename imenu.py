@@ -22,6 +22,8 @@ import menu
 # The Freevo image viewer
 import iview
 
+# EXIF parser
+import exif
 
 # Set to 1 for debug output
 DEBUG = 1
@@ -65,6 +67,10 @@ def main_menu(arg=None, menuw=None):
 def cwd(arg=None, menuw=None):
     dir = arg
 
+    # remove old cache and thumbnail files
+    for file in util.match_files(config.FREEVO_CACHEDIR, [ '/image-viewer-[0-9]*' ]):
+        os.remove(file)
+
     dirnames = util.getdirnames(dir)
     files = util.match_files(dir, config.SUFFIX_IMAGE_FILES)
 
@@ -77,12 +83,23 @@ def cwd(arg=None, menuw=None):
     number = 0
     for file in files:
         title = os.path.splitext(os.path.basename(file))[0]
-        items += [menu.MenuItem(title, view_image, (file, number, files))]
+        m = menu.MenuItem(title, view_image, (file, number, files))
+
+        f=open(file, 'rb')
+        tags=exif.process_file(f)
+
+        if tags.has_key('JPEGThumbnail'):
+            thumb_name='%s/image-viewer-%s-thumb.jpg' % (config.FREEVO_CACHEDIR, number)
+            open(thumb_name, 'wb').write(tags['JPEGThumbnail'])
+            m.setImage(thumb_name)
+
+        if tags.has_key('TIFFThumbnail'):
+            print "TIFF thumbnail not supported yet"
+
+        items += [m]
+
         number += 1
 
-    # remove old cache files
-    for file in util.match_files(config.FREEVO_CACHEDIR, [ '/image-viewer-[0-9]*.png' ]):
-        os.remove(file)
         
     imagemenu = menu.Menu('IMAGE MENU', items)
     menuw.pushmenu(imagemenu)
