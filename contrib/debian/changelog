@@ -5,7 +5,7 @@ freevo (1.4rc2) unstable; urgency=medium
   * Includes init scripts and Debian-specific boot_config
   * Uses debconf to provide initial configuration. 
 
- -- Aubin Paul <debian@outlyer.org>  Wed, 22 Oct 2003 14:08:24 -0400
+ -- Aubin Paul <debian@outlyer.org>  Sun, 02 Nov 2003 08:38:58 -0500
 
 freevo (1.4rc1-freevo1) unstable; urgency=low
 

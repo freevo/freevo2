@@ -16,17 +16,14 @@ configure-stamp:
 build: configure-stamp build-stamp
 build-stamp:
 	dh_testdir
-	#python2.3 setup.py build
 	touch build-stamp
 
 clean:
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp configure-stamp
-	mkdir `pwd`/Docs/howto || true
 	-python2.3 setup.py clean
 	rm -f `find . | grep freevo.mo`
-	rm -rf `pwd`/Docs/howto 
 	rm -rf src/www/htdocs/help/wiki
 	rm -f `pwd`/src/util/distutils.pyc
 	rm -f `pwd`/src/util/__init__.pyc
@@ -42,7 +39,6 @@ install: build
 	dh_clean -k
 	dh_installdirs
 	./autogen.sh nodocs
-	mkdir Docs/howto || true	# Kludge to build without howto sgml
 	python2.3 setup.py install --no-compile --root=`pwd`/debian/freevo
 	# Move the files in to the data package
 	mv `pwd`/debian/freevo/usr/share/freevo/fonts  `pwd`/debian/freevo-media/usr/share/freevo/
