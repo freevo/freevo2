@@ -9,91 +9,20 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/02/04 14:11:18  outlyer
+# Cleanup and fixup:
+#
+# o Now uses the mplayer OSD to show channel information when changing channels,
+#     or you press the 'display' key.
+# o Removed many old CVS log messages
+# o Removed many debug-related 'print' statements
+#
 # Revision 1.12  2004/01/11 15:44:01  dischi
 # changed menu display type to 'x main menu'
 #
 # Revision 1.11  2004/01/09 02:10:00  rshortt
 # Patch from Matthieu Weber to revive add/edit favorites support from the
 # TV interface.
-#
-# Revision 1.10  2003/12/31 16:10:30  rshortt
-# Make it possible to have a tv mainmenu plugin.
-#
-# Revision 1.9  2003/11/28 19:26:37  dischi
-# renamed some config variables
-#
-# Revision 1.8  2003/11/06 06:08:38  krister
-# Added testcode for viewing the VCR/Composite1 input on the TV card
-#
-# Revision 1.7  2003/10/20 01:41:55  rshortt
-# Moving tv_util from src/tv/ to src/util/.
-#
-# Revision 1.6  2003/09/13 10:08:23  dischi
-# i18n support
-#
-# Revision 1.5  2003/09/05 20:07:08  dischi
-# don't show tv guide item when there are no channels
-#
-# Revision 1.4  2003/09/05 02:06:36  rshortt
-# renaming tv.py to tvmenu.py because it is already in the 'tv.' namespace
-# and that breaks things. also added tv. namespace usage.
-#
-# This file is from tv.py on the new_record branch which I am merging to the head.
-#
-# Revision 1.13.2.4  2003/08/21 00:52:36  rshortt
-# Minor update from the main branch.
-#
-# Revision 1.13.2.3  2003/08/11 19:37:26  rshortt
-# Adding changes from the main branch.  Preparing to merge.
-#
-# Revision 1.17  2003/08/20 22:29:37  gsbarbieri
-# UPPER CASE TEXT IS UGLY! :)
-#
-# Revision 1.16  2003/08/03 11:10:26  dischi
-# Added TVGUIDE_HOURS_PER_PAGE
-#
-# Revision 1.15  2003/07/13 19:46:21  rshortt
-# Move the work portion of get_friendly_channel() into tv_util.
-#
-# Revision 1.14  2003/06/29 15:01:31  outlyer
-# Display the channel's friendly (display name) in the tuner popupbox.
-#
-# Since XMLTV 0.6.11 uses what they call "RFC" channel names which are
-# very long and don't reveal much about the channel.
-#
-# This will obviously have no regressive effect, since users had the
-# friendly name before.
-#
-# Revision 1.13.2.2  2003/07/13 19:38:02  rshortt
-# Remove the 'View Favorites' screen until I fix some nasties with regard
-# to the edit favorites screen.
-#
-# Revision 1.13.2.1  2003/06/03 02:11:48  rshortt
-# Committing to a branch tag: new_record
-# These changes enable the new program recording / informations popups which
-# use record_server.
-#
-# Revision 1.13  2003/06/02 21:29:22  outlyer
-# Changed the "Schedule Editor" to show up in the TV Submenu, along with "Guide" and
-# "Recorded Shows" which makes a lot more sense then where it was before, which was
-# also exceptionally well hidden.
-#
-# To do this properly, I also had to move record_schedule into a class, subclassing
-# from Item, and so problems may and possibly will arise. I've tested it a little,
-# but please bang on this, because while it's a relatively minor change, it does
-# get things working inside the properly model, at least for a start.
-#
-# Bug reports are expected and welcome :)
-#
-# Revision 1.12  2003/04/24 19:56:42  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.11  2003/04/22 19:34:12  dischi
-# mplayer and tvtime are now plugins
-#
-# Revision 1.10  2003/04/21 18:20:44  dischi
-# make tv itself and not tv.tv the plugin (using __init__.py)
-#
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002 Krister Lagerstrom, et al. 
@@ -175,7 +104,6 @@ def get_friendly_channel(channel_id):
 
 def start_tv(mode=None, channel_id=None):
     tuner_id = get_tunerid(channel_id)
-    print 'mode=%s    channel=%s  tuner=%s' % (mode, channel_id, tuner_id)
     plugin.getbyname(plugin.TV).Play(mode, tuner_id)
 
 

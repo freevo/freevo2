@@ -9,53 +9,20 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/02/04 14:11:19  outlyer
+# Cleanup and fixup:
+#
+# o Now uses the mplayer OSD to show channel information when changing channels,
+#     or you press the 'display' key.
+# o Removed many old CVS log messages
+# o Removed many debug-related 'print' statements
+#
 # Revision 1.11  2003/12/31 16:08:08  rshortt
 # Use a fifth field in TV_CHANNELS to specify an optional VideoGroup
 # (VIDEO_GROUPS index).  Also fix a frequency bug in channels.py.
 #
 # Revision 1.10  2003/11/25 16:32:33  rshortt
 # Make plugin_external_tuner work again.
-#
-# Revision 1.9  2003/11/25 09:34:07  krister
-# Changed the frequency returned to be kHz instead of a scaled value
-#
-# Revision 1.8  2003/11/24 17:16:40  rshortt
-# Bugfixes.
-#
-# Revision 1.7  2003/11/24 04:41:14  krister
-# Commented out a part that crashes the TV viewer plugin. Please fix!
-#
-# Revision 1.6  2003/11/23 21:19:57  rshortt
-# Bugfix - it returned to early if using an external tuner with the v4l
-# tuner as the input.
-#
-# Revision 1.5  2003/11/23 20:47:13  rshortt
-# Another typo!
-#
-# Revision 1.4  2003/11/23 20:46:07  rshortt
-# Dumb typo.
-#
-# Revision 1.3  2003/11/23 19:21:49  rshortt
-# Add getChannelInfo, taken from a method of the mplayer tv plugin.  I have
-# some changes to that as well which will use this one instead.
-#
-# Revision 1.2  2003/11/16 17:38:48  dischi
-# i18n patch from David Sagnol
-#
-# Revision 1.1  2003/10/11 14:55:29  rshortt
-# A new module to handle all of the channel requirements of Freevo from
-# one place.  This will also be used as a layer between Freevo's channel
-# list, frequency table, and custom frequencies and childapps like mplayer
-# or tvtime.
-#
-# This is not used by anything by default and requires further work.
-#
-# Revision 1.2  2003/10/06 02:57:21  rshortt
-# Almost in action...
-#
-# Revision 1.1  2003/09/19 02:22:20  rshortt
-# thinking out loud
-#
 #
 #
 # -----------------------------------------------------------------------
@@ -83,6 +50,7 @@
 import config, plugin
 import tv.freq, tv.v4l2
 import epg_xmltv
+import time
 
 DEBUG = config.DEBUG
 
