@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.93  2002/11/15 02:49:15  krister
+# Added a config option for saving MPlayer output to a logfile.
+#
 # Revision 1.92  2002/11/15 02:11:37  krister
 # Applied Bob Pauwes latest image slideshow patches.
 #
@@ -325,6 +328,10 @@ if CONF.display == 'mga':
 # ======================================================================
 # MPlayer section:
 # ======================================================================
+
+# Set to 1 to log mplayer output to ./mplayer_stdout.log and
+# ./mplayer_stderr.log
+MPLAYER_DEBUG = 0
 
 if os.path.isfile('../freevo_apps/mplayer/mplayer'):
     MPLAYER_CMD = '../freevo_apps/mplayer/mplayer' # Binary dist

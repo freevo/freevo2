@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.50  2002/11/15 02:49:15  krister
+# Added a config option for saving MPlayer output to a logfile.
+#
 # Revision 1.49  2002/11/14 13:34:31  krister
 # Adjust the SDL/DXR3 patch.
 #
@@ -540,6 +543,12 @@ class MPlayerApp(childapp.ChildApp):
 
 
     def stdout_cb(self, str):
+
+        if config.MPLAYER_DEBUG:
+            fd = open('./mplayer_stdout.log', 'a')
+            fd.write(str + '\n')
+            fd.close()
+                     
         if str.find("A:") == 0:
             # seek for the right position on startup
             #
@@ -573,6 +582,15 @@ class MPlayerApp(childapp.ChildApp):
         # this is the first start of the movie, parse infos
         elif not self.mpinfo.time:
             self.mpinfo.parse(str)
+
+
+    def stderr_cb(self, str):
+
+        if config.MPLAYER_DEBUG:
+            fd = open('./mplayer_stderr.log', 'a')
+            fd.write(str + '\n')
+            fd.close()
+                     
 
 # ======================================================================
 class MPlayer_Thread(threading.Thread):

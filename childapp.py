@@ -51,14 +51,14 @@ class ChildApp:
         
 
     # Override this method to receive stdout from the child app
+    # The function receives complete lines
     def stdout_cb(self, str):
-        #print str.replace('\n', '<CR>').replace('\r', '<LF>')
         pass
 
 
     # Override this method to receive stderr from the child app
+    # The function receives complete lines
     def stderr_cb(self, str):
-        #print str.replace('\n', '<CR>').replace('\r', '<LF>')
         pass
 
 
