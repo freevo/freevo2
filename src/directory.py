@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.100  2004/01/20 09:58:09  dischi
+# fix directory update problem
+#
 # Revision 1.99  2004/01/19 20:29:11  dischi
 # cleanup, reduce cache size
 #
@@ -849,8 +852,8 @@ class Dirwatcher(plugin.DaemonPlugin):
         except AttributeError:
             self.last_time = vfs.mtime(self.dir)
             self.files     = self.listoverlay()
-            self.item.__dirwatcher_last_time__ = self.last_time
-
+            self.item.__dirwatcher_last_time__  = self.last_time
+            self.item.__dirwatcher_last_files__ = self.files
 
     def scan(self, force=False):
         if not self.dir:
