@@ -43,7 +43,7 @@ import time
 import config
 import generic
 from tv.freq import get_frequency
-from system.tvcards import IVTVCard
+from config.tvcards import IVTVCard
 
 
 class PluginInterface(generic.PluginInterface):
