@@ -258,7 +258,7 @@ plugin_audio    = plugin.activate('mediamenu', level=30, args=('audio', ))
 plugin_image    = plugin.activate('mediamenu', level=40, args=('image', TRUE))
 plugin_shutdown = plugin.activate('base.shutdown', level=50)
 
-if CONF.xmame_SDL or CONF.snes:
+if CONF.xmame or CONF.snes:
     plugin_games = plugin.activate('mediamenu', level=45, args=('games', ))
 
 # mixer
@@ -477,7 +477,7 @@ DIR_GAMES = [ ('Test Games', './testfiles/Mame') ]
 SUFFIX_MAME_FILES = [ 'zip' ]
 SUFFIX_SNES_FILES = [ 'smc', 'fig' ]
 
-MAME_CMD         = CONF.xmame_SDL
+MAME_CMD         = CONF.xmame
 SNES_CMD         = CONF.snes
 
 MAME_SHOTS = './testfiles/Mame'

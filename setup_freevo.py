@@ -12,6 +12,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/06/20 01:50:14  rshortt
+# Look for xmame.x11 as well, but override with xmame.SDL.  Changed xmame_SDL
+# to just xmame.
+#
 # Revision 1.3  2003/04/24 19:58:20  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -156,7 +160,8 @@ def main():
     
     check_program(conf, "mplayer", "mplayer", 1, sysfirst)
     check_program(conf, "jpegtran", "jpegtran", 0, sysfirst)
-    check_program(conf, "xmame.SDL", "xmame_SDL", 0, sysfirst)
+    check_program(conf, "xmame.x11", "xmame", 0, sysfirst)
+    check_program(conf, "xmame.SDL", "xmame", 0, sysfirst)
     check_program(conf, "ssnes9x", "snes", 0, sysfirst)
     check_program(conf, "zsnes", "snes", 0, sysfirst)
 
