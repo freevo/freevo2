@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/11/20 14:06:01  dischi
+# add i18n support
+#
 # Revision 1.11  2003/11/16 17:41:04  dischi
 # i18n patch from David Sagnol
 #
@@ -72,6 +75,16 @@ import string
 
 CONFIG_VERSION = 2.1
 
+# For Internationalization purpose
+# an exception is raised with Python 2.1 if LANG is unavailable.
+import gettext
+try:
+    gettext.install('freevo', os.environ['FREEVO_LOCALE'])
+except: # unavailable, define '_' for all modules
+    import __builtin__
+    __builtin__.__dict__['_']= lambda m: m
+
+
 EXTERNAL_PROGRAMS = (("mplayer", "mplayer", 1),
                      ("mencoder", "mencoder", 0),
                      ("tvtime", "tvtime", 0),
@@ -112,9 +125,6 @@ Set up Freevo for your specific environment.
                                   europe-east, italy, newzealand, australia,
                                   ireland, france, china-bcast, southafrica,
                                   argentina, canada-cable
-
-   --sysfirst                   look in the system path for applications before checking
-                                ./runtime/apps.
 
    --help                       display this help and exit
 
@@ -199,7 +209,7 @@ def check_program(conf, name, variable, necessary, sysfirst=1, verbose=1):
         search_dirs = search_dirs_runtime + os.environ['PATH'].split(':')
         
     if verbose:
-        print 'checking for %-13s' % (name+'...'),
+        print _('checking for %-13s') % (name+'...'),
 
     for dirname in search_dirs:
         filename = os.path.join(dirname, name)
@@ -210,16 +220,17 @@ def check_program(conf, name, variable, necessary, sysfirst=1, verbose=1):
             break
     else:
         if necessary:
+            print
             print "********************************************************************"
-            print "ERROR: can't find %s" % name
-            print "Please install the application respectively put it in your path."
-            print "Freevo won't work without it."
+            print _('ERROR: can\'t find %s') % name
+            print _('Please install the application respectively put it in your path.')
+            print _('Freevo won\'t work without it.')
             print "********************************************************************"
             print
             print
             sys.exit(1)
         elif verbose:
-            print "not found (deactivated)"
+            print _('not found (deactivated)')
 
 
 
@@ -282,7 +293,7 @@ if __name__ == '__main__':
             sys.exit(0)
 
 
-    print 'System path first=%s' % ( ['NO','YES'][sysfirst])
+    print _('System path first=%s') % ( [_('No'), _('Yes')][sysfirst])
 
     for program, valname, needed in EXTERNAL_PROGRAMS:
         check_program(conf, program, valname, needed, sysfirst)
@@ -298,7 +309,7 @@ if __name__ == '__main__':
 
     print
     print
-    print 'Settings:'
+    print _('Settings:')
     print '  %20s = %s' % ('geometry', conf.geometry)
     print '  %20s = %s' % ('display', conf.display)
     print '  %20s = %s' % ('tv', conf.tv)
