@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/12/09 20:31:58  dischi
+# keep track of current player
+#
 # Revision 1.13  2003/12/06 13:43:34  dischi
 # expand the <audio> parsing in fxd files
 #
@@ -54,6 +57,11 @@ import event
 skin = skin.get_singleton()
 skin.register('player', ('screen', 'title', 'view', 'info', 'plugin'))
 
+_player_ = None
+
+def get():
+    global _player_
+    return _player_
 
 class PlayerGUI(GUIObject):
     def __init__(self, item, menuw):
@@ -71,7 +79,12 @@ class PlayerGUI(GUIObject):
 
         
     def play(self, player=None):
+        global _player_
+        if _player_ and _player_.player and _player_.player.is_playing():
+            _player_.stop()
 
+        _player_ = self
+        
         if self.player and self.player.is_playing():
             self.stop()
 
@@ -109,6 +122,7 @@ class PlayerGUI(GUIObject):
                 rc.app(self.player)
             self.refresh()
 
+
     def try_next_player(self):
         self.stop()
         _debug_('error, try next player')
@@ -126,8 +140,12 @@ class PlayerGUI(GUIObject):
             return 1
         _debug_('no more players found')
         return 0
+
         
     def stop(self):
+        global _player_
+        _player_ = None
+
         self.player.stop()
         self.running = False
         if self.visible:
