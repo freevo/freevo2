@@ -1,39 +1,3 @@
-# -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
-# pygame_renderer.py - interface to output using pygame
-# -----------------------------------------------------------------------
-# $Id$
-#
-# Note: Work in Progress
-#
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.1  2004/07/22 21:16:01  dischi
-# add first draft of new gui code
-#
-#
-# -----------------------------------------------------------------------
-# Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
-# Please see the file freevo/Docs/CREDITS for a complete list of authors.
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
-# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
-# Public License for more details.
-#
-# You should have received a copy of the GNU General Public License along
-# with this program; if not, write to the Free Software Foundation, Inc.,
-# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-#
-# -----------------------------------------------------------------------
-
-
 import copy
 
 
@@ -63,6 +27,13 @@ class Layer:
         self.height      = self.renderer.height
         
 
+    def __str__(self):
+        """
+        Debug output for this layer
+        """
+        return '%s layer [%s]' % (self.name, len(self.objects))
+
+    
     def blit(self, layer, *arg1, **arg2):
         """
         Interface for the objects to blit something on the layer
@@ -171,6 +142,7 @@ class Layer:
             rect = ( min(x0, rect[0]), min(y0, rect[1]),
                      max(x1, rect[2]), max(y1, rect[3]))
             
+        self.objects.sort(lambda  l, o: cmp(l.position, o.position))
         for o in self.objects:
             if self.in_update(o.x1, o.y1, o.x2, o.y2, self.update_rect):
                 o.draw(rect)
@@ -181,88 +153,3 @@ class Layer:
     
         
 
-
-class Screen:
-    """
-    The screen implementation for pygame
-    """
-    def __init__(self):
-        import osd
-        self.renderer = osd.get_singleton()
-        self.layer          = {}
-        self.layer['content'] = Layer('content', self.renderer)
-        self.layer['alpha']   = Layer('alpha', self.renderer, True)
-        self.layer['bg']      = Layer('bg', self.renderer)
-        self.complete_bg      = self.renderer.screen.convert()
-
-        self.width  = self.renderer.width
-        self.height = self.renderer.height
-        
-
-    def clear(self):
-        """
-        Clear the complete screen
-        """
-        for l in self.layer:
-            self.layer[l].clear()
-        self.layer['bg'].add_to_update_rect(0, 0, 800, 600)
-
-
-    def add(self, layer, object):
-        """
-        Add object to a specific layer. Right now, this screen has
-        only three layers: bg, alpha and content
-        """
-        return self.layer[layer].add(object)
-    
-            
-    def remove(self, layer, object):
-        """
-        Remove an object from the screen
-        """
-        return self.layer[layer].remove(object)
-
-
-
-    def show(self):
-        """
-        Show the screen using pygame
-        """
-        if self.renderer.must_lock:
-            # only lock s_alpha layer, because only there
-            # are pixel operations (round rectangle)
-            self.layer['alpha'].lock()
-
-        bg    = self.layer['bg']
-        alpha = self.layer['alpha']
-
-        update_area = bg.draw()[0]
-
-        update_area = alpha.expand_update_rect(update_area)
-
-        if update_area:
-            alpha.screen.fill((0,0,0,0))
-            alpha.draw()
-
-        # and than blit only the changed parts of the screen
-        for x0, y0, x1, y1 in update_area:
-            self.complete_bg.blit(bg.screen, (x0, y0), (x0, y0, x1-x0, y1-y0))
-            self.complete_bg.blit(alpha.screen, (x0, y0), (x0, y0, x1-x0, y1-y0))
-
-        content = self.layer['content']
-
-        update_area = content.expand_update_rect(update_area)
-
-        for x0, y0, x1, y1 in update_area:
-            content.blit(self.complete_bg, (x0, y0), (x0, y0, x1-x0, y1-y0))
-
-        rect = content.draw()[1]
-
-        for x0, y0, x1, y1 in update_area:
-            self.renderer.screenblit(content.screen, (x0, y0), (x0, y0, x1-x0, y1-y0))
-
-        if self.renderer.must_lock:
-            self.s_alpha.unlock()
-
-        if update_area:
-            self.renderer.update([rect[0], rect[1], rect[2] - rect[0], rect[3] - rect[1]])

@@ -6,12 +6,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/07/24 12:21:05  dischi
+# move renderer into backend subdir
+#
 # Revision 1.17  2004/07/23 19:43:30  dischi
 # move most of the settings code out of the skin engine
 #
 # Revision 1.16  2004/07/22 21:16:01  dischi
 # add first draft of new gui code
-#
 #
 # -----------------------------------------------------------------------
 #
@@ -35,35 +37,44 @@
 #
 # ----------------------------------------------------------------------
 
-# include all the widgets
-# FIXME: needs cleanup!
-
-from widgets.Border            import *
-from widgets.Color             import *
-from widgets.GUIObject         import *
-from widgets.Container         import *
-from widgets.PopupBox          import *
-from widgets.AlertBox          import *
-from widgets.ConfirmBox        import *
-from widgets.Label             import *
-from widgets.Button            import *
-from widgets.LetterBoxGroup    import *
-from widgets.RegionScroller    import *
-from widgets.Scrollbar         import *
-from widgets.InputBox          import *
-from widgets.LayoutManagers    import *
-from widgets.exceptions        import *
-from widgets.ProgressBox       import *
-from widgets.ListBox           import *
+import config
 
 # the objects that can be drawn
 from base import Image, Rectangle, Text
 
 _screen   = None
 _skin     = None
+_renderer = None
+_keyboard = None
 
-import fxdparser
-settings = fxdparser.Settings()
+if hasattr(config, 'BMOVL_OSD_VIDEO'):
+    import backends.bmovl
+    backend = backends.bmovl
+else:
+    import backends.sdl
+    backend = backends.sdl
+
+    
+def get_keyboard():
+    """
+    return the screen object
+    """
+    global _keyboard
+    if not _keyboard:
+        _keyboard = backend.Keyboard()
+        print _keyboard
+    return _keyboard
+
+
+def get_renderer():
+    """
+    return the screen object
+    """
+    global _renderer
+    if not _renderer:
+        _renderer = backend.Renderer()
+    return _renderer
+
 
 def get_screen():
     """
@@ -71,13 +82,7 @@ def get_screen():
     """
     global _screen
     if not _screen:
-        # some test code here
-        if hasattr(config, 'BMOVL_OSD_VIDEO'):
-            import bmovl_renderer
-            _screen = bmovl_renderer.Screen()
-        else:
-            import pygame_renderer
-            _screen = pygame_renderer.Screen()
+        _screen = backend.Screen(get_renderer())
     return _screen
 
 
@@ -88,7 +93,7 @@ def get_skin():
     global _skin
     if not _skin:
         import areas
-        _skin = areas.Skin(get_settings())
+        _skin = areas.AreaHandler(get_settings())
         _skin.set_screen(get_screen())
     return _skin
 
@@ -124,4 +129,30 @@ def get_image(name):
 
 def get_icon(name):
     return settings.settings.get_icon(name)
+
+
+import fxdparser
+settings = fxdparser.Settings()
+
+
+# include all the widgets
+# FIXME: needs cleanup!
+
+from widgets.Border            import *
+from widgets.Color             import *
+from widgets.GUIObject         import *
+from widgets.Container         import *
+from widgets.PopupBox          import *
+from widgets.AlertBox          import *
+from widgets.ConfirmBox        import *
+from widgets.Label             import *
+from widgets.Button            import *
+from widgets.LetterBoxGroup    import *
+from widgets.RegionScroller    import *
+from widgets.Scrollbar         import *
+from widgets.InputBox          import *
+from widgets.LayoutManagers    import *
+from widgets.exceptions        import *
+from widgets.ProgressBox       import *
+from widgets.ListBox           import *
 

@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.1  2004/07/24 12:21:06  dischi
+# move renderer into backend subdir
+#
 # Revision 1.1  2004/07/22 21:16:01  dischi
 # add first draft of new gui code
 #
@@ -43,21 +46,22 @@
 
 import config
 import pygame
-import pygame_renderer
 import os
 
+from gui.backends.sdl.screen import Screen as SDLScreen
+from gui.backends.sdl.layer import Layer
 
-class Screen(pygame_renderer.Screen):
+class Screen(SDLScreen):
     """
     This is the Screen implementation for bmovl.
     It depends on the pygame renderer for now
     """
-    def __init__(self):
-        pygame_renderer.Screen.__init__(self)
+    def __init__(self, renderer):
+        SDLScreen.__init__(self, renderer)
 
-        self.layer['content'] = pygame_renderer.Layer('content', self.renderer, True)
-        self.layer['alpha']   = pygame_renderer.Layer('alpha', self.renderer, True)
-        self.layer['bg']      = pygame_renderer.Layer('bg', self.renderer, True)
+        self.layer['content'] = Layer('content', self.renderer, True)
+        self.layer['alpha']   = Layer('alpha', self.renderer, True)
+        self.layer['bg']      = Layer('bg', self.renderer, True)
         self.complete_bg      = self.renderer.screen.convert_alpha()
 
         print
@@ -91,7 +95,7 @@ class Screen(pygame_renderer.Screen):
         if object.x1 == 0 and object.y1 == 0 and object.x2 == self.width and \
            object.y2 == self.height:
             return
-        pygame_renderer.Screen.add(self, layer, object)
+        SDLScreen.add(self, layer, object)
 
         
     def show(self):
