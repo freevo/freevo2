@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/07/11 19:49:23  dischi
+# use pickle wrapper
+#
 # Revision 1.9  2003/06/20 03:28:03  rshortt
 # Added a mention of pyrecade.
 #
@@ -67,7 +70,6 @@
 import sys
 import random
 import time, os, string
-import cPickle as pickle
 
 # Classes to keep track of our roms
 import mame_types
@@ -99,7 +101,7 @@ def getMameRomList():
     mameRomList = None
 
     if os.path.isfile(config.MAME_CACHE):
-        mameRomList = pickle.load(open(config.MAME_CACHE, 'r'))
+        mameRomList = util.read_pickle(config.MAME_CACHE)
 
         try:
             file_ver = mameRomList.TYPES_VERSION
@@ -128,13 +130,7 @@ def saveMameRomList(mameRomList):
     if not mameRomList or mameRomList == None:
         mameRomList = mame_types.MameRomList()
 
-    try: 
-        pickle.dump(mameRomList, open(config.MAME_CACHE, 'w'), 1)
-    except:
-        print 'strange cPickle error...try pickle'
-	import pickle as pypickle
-	pypickle.dump(mameRomList, open(config.MAME_CACHE, 'w'), 1)
-
+    util.save_pickle(mameRomList)
     
 
 #
