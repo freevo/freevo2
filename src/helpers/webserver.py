@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/09/08 19:58:21  dischi
+# run servers in endless loop in case of a crash
+#
 # Revision 1.3  2003/09/06 14:59:38  gsbarbieri
 # Fixed to work in non system-wide installs
 #
@@ -62,23 +65,36 @@ if len(sys.argv)>1 and sys.argv[1] == '--help':
     print 'usage freevo webserver [ start | stop ]'
     sys.exit(0)
 
-# the start and stop stuff will be handled from the freevo script
 
-logfile = '%s/internal-webserver-%s.log' % (config.LOGDIR, os.getuid())
-log.startLogging(open(logfile, 'a'))
+def main():
+    # the start and stop stuff will be handled from the freevo script
 
-if os.path.isdir(os.path.join(os.environ['FREEVO_PYTHON'], 'www/htdocs')):
-    docRoot = os.path.join(os.environ['FREEVO_PYTHON'], 'www/htdocs')
-else:
-    docRoot = os.path.join(config.SHARE_DIR, 'htdocs')
+    logfile = '%s/internal-webserver-%s.log' % (config.LOGDIR, os.getuid())
+    log.startLogging(open(logfile, 'a'))
 
-root = static.File(docRoot)
-root.processors = { '.rpy': script.ResourceScript, }
+    if os.path.isdir(os.path.join(os.environ['FREEVO_PYTHON'], 'www/htdocs')):
+        docRoot = os.path.join(os.environ['FREEVO_PYTHON'], 'www/htdocs')
+    else:
+        docRoot = os.path.join(config.SHARE_DIR, 'htdocs')
 
-root.putChild('vhost', vhost.VHostMonsterResource())
-site = server.Site(root)
+    root = static.File(docRoot)
+    root.processors = { '.rpy': script.ResourceScript, }
+    
+    root.putChild('vhost', vhost.VHostMonsterResource())
+    site = server.Site(root)
+    
+    application = app.Application('web')
+    application.listenTCP(config.WWW_PORT, site)
+    
+    application.run(save=0)
 
-application = app.Application('web')
-application.listenTCP(config.WWW_PORT, site)
 
-application.run(save=0)
+if __name__ == '__main__':
+    import traceback
+    while 1:
+        try:
+            main()
+        except:
+            traceback.print_exc()
+            pass
+

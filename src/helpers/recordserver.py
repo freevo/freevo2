@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/09/08 19:58:21  dischi
+# run servers in endless loop in case of a crash
+#
 # Revision 1.5  2003/09/06 15:12:53  rshortt
 # Now using plugin.init_special_plugin() to load the recording plugin.
 #
@@ -696,6 +699,11 @@ def main():
     
 
 if __name__ == '__main__':
-    main()
-
+    import traceback
+    while 1:
+        try:
+            main()
+        except:
+            traceback.print_exc()
+            pass
 
