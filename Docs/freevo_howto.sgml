@@ -81,10 +81,26 @@ If you are having problems installing Freevo or configuring your hardware you sh
 
 <revhistory>
   <revision>
-    <revnumber>v0.25</revnumber>
+    <revnumber>v0.25.0</revnumber>
     <date>2003-05-21</date>
     <authorinitials>JCS</authorinitials>
     <revremark>Initial Release</revremark>
+  </revision>
+</revhistory>
+<revhistory>
+  <revision>
+    <revnumber>v0.50.0</revnumber>
+    <date>2003-08-18</date>
+    <authorinitials>JCS</authorinitials>
+    <revremark>Added tvtime section and updated FAQ</revremark>
+  </revision>
+</revhistory>
+<revhistory>
+  <revision>
+    <revnumber>v0.50.1</revnumber>
+    <date>2003-08-18</date>
+    <authorinitials>JCS</authorinitials>
+    <revremark>Update TV Guide Time Format section and moved to a three point version number</revremark>
   </revision>
 </revhistory>
 
@@ -216,6 +232,60 @@ rm -f /tmp/TV.xml
 ln -s /usr/local/freevo/xmltv/listings_$todayis.xml /tmp/TV.xml
       </screen>
       </para>
+    </sect2>
+    <sect2 id="tvtime">
+      <title>tvtime</title>
+      <para>
+When I first started working on my Freevo box I was unable to get MPlayer to work properly with live TV. Basically, my audio and video were out of sync, which made watching live TV like watching an old crappy version of Godzilla. Luckily, someone created a tvtime plugin, which works perfectly for me.      
+      </para>
+      <para>
+The first thing you need to do is is download and install tvtime, which can be found at <ulink url="http://tvtime.sourceforge.net">tvtime.sourceforge.net</ulink>. Follow the instructions to install tvtime. When you are done open up your freevo.conf file and change the tvtime variable to the path of your newly installed tvtime. 
+      </para>
+      <para>
+After you have tvtime set up in your freevo.conf file you will want to open up freevo_config.py and enable the tv.tvtime plugin and disable the tv.mplayer plugin. Search for 'tvtime' and you will see what I'm talking about.
+      </para>
+      <sect3>
+        <title>stationlist.xml</title>
+        <para>
+tvtime installs all of its configuration files in $HOME by default. If you wish to change it's default behavior you will need to go into the home directory of the user which Freevo runs as. My configuration runs as root so changing to /root/.tvtime did it for me. In there you will find a file called stationlist.xml, which defines how stations are shown onscreen in tvtime. A sample line follows.
+        </para>
+        <para>
+        <screen>
+    &lt;station name="CNN" active="1" position="18"
+             band="US Cable" channel="18"/&gt;
+        </screen>
+        </para>
+        <para>
+The name attribute defines what text shows up on the onscreen display when tvtime changes to that specific channel. As far as I can tell there isn't any real limit as to what you can place in this field.
+        </para>
+      </sect3>
+      <sect3>
+        <title>VBI Support</title>
+        <para>
+VBI stands for vertical blanking interval and is the standard for NTSC which allows data besides video to be sent to your TV. Such data includes closed captioning, station information, show information and ratings, etc. If you want tvtime's onscreen display to show such information (such as TV show names, ratings, time start and time stop) you will need to turn this on in your $HOME/.tvtime/tvtime.xml file. Below is an example.
+        </para>
+        <para>
+        <screen>
+  &lt;!--
+    Set this to 1 to enable VBI decoding.  tvtime supports decoding of
+    closed captions and XDS channel information data.  Both of these
+    standards are specific to NTSC regions, since that's what the
+    tvtime authors use. :)
+  --&gt;
+  &lt;option name="UseVBI" value="0"/&gt;
+
+  &lt;!--
+    This sets which device to use for VBI decoding.
+  --&gt;
+  &lt;option name="VBIDevice" value="/dev/vbi0"/&gt;
+ 
+         </screen>
+        </para>
+        <para>
+This information is completely independend of your TV.xml listings and is read
+directly from data coming from your cable provider.
+        </para>
+      </sect3>
     </sect2>
     <sect2>
       <title>MPlayer</title>
@@ -436,13 +506,10 @@ It's pretty easy to change the icons. There are a few ways to change it. You can
     <sect1>
       <title>Changing TV Guide Time Format</title>
       <para>
-By default Freevo uses a 24 hour military format. This is great if your dad was in the military, but quite confusing for us civilian folks. From the mailing list it was suggested you could change this by altering skins/main1/tv_listings.py. Line 192 (may differ depending on your release) is a line that looks something like this: 
+By default Freevo uses a 24 hour military format. This is great if your dad was in the military, but quite confusing for us civilian folks. As of version 1.3.2 this is defined in freevo_config.py with the TV_TIMEFORMAT variable. By default it is set to '%H:%M'. To change it to a 12 hour format change it to '%I:%M'.
       </para>
       <para>
-self.write_text(time.strftime("%H:%M",time.localtime(to_listing[0][i+1])),
-      </para>
-      <para>
-You will want to check out <ulink url="http://www.python.org/doc/current/lib/module-time.html">Python's strftime documentation</ulink> to format it exactly how you want it. Something along the lines of "%I:%M" should work.
+You will want to check out <ulink url="http://www.python.org/doc/current/lib/module-time.html">Python's strftime documentation</ulink> to format it exactly how you want it. 
       </para>
     </sect1>
 
@@ -538,21 +605,27 @@ There are a number of websites and documents that are directly related to this o
     <qandaentry>
       <question><para>Does Freevo support DVD menus?</para></question>
       <answer><para>
-Freevo does not currently support DVD menus, but it is in the works for future versions.
+There is initial support as of Freevo 1.3.2, which allows you to browse to
+different chapters on the DVD, however actual DVD menus are not currently 
+supported. Xine does support DVD menus are there is currently a plugin in 
+development that may work with DVD menus, however I have not tried it.
       </para>
       </answer>
     </qandaentry>
     <qandaentry>
       <question><para>Does Freevo rip/encode CD's?</para></question>
       <answer><para>
-Freevo does not currently support this feature, but does plan on including it in future releases. For now you could rip MP3's using any of the many MP3 rippers and then copy them to your MP3/Music folder.
+There is a CD ripping plugin that should be available in CVS. For more information regarding this plugin you may wish to consult the mailing list.
       </para>
       </answer> 
     </qandaentry>
     <qandaentry>
       <question><para>Why are the audio and video out of sync while watching live TV?</para></question>
       <answer><para>
-Apparently, this is an MPlayer problem. Currently, the Freevo team is looking int possible fixes to the problem. The problem is that MPlayer reads video directly from your captuer card (usually /dev/video0) and sound from your sound card. The sound however, is routed through your sound card from your TV tuner card, resulting in a/v sync problems. A possible solution that is being suggested on the list is to use v4l2, grab the a/v with mp1e and then watch the resulting buffered stream with mplayer.
+Apparently, this is an MPlayer problem. Currently, the Freevo team is looking int possible fixes to the problem. The problem is that MPlayer reads video directly from your captuer card (usually /dev/video0) and sound from your sound card. The sound however, is routed through your sound card from your TV tuner card, resulting in a/v sync problems. 
+      </para>
+      <para>
+The solution that works for me is outlined in <link linkend="tvtime">the tvtime section</link>. The tvtime plugin works perfectly for me. It also offers VBI support and other onscreen display goodies.
       </para>
       </answer> 
     </qandaentry>
