@@ -9,6 +9,10 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/01/09 02:10:00  rshortt
+# Patch from Matthieu Weber to revive add/edit favorites support from the
+# TV interface.
+#
 # Revision 1.5  2003/11/16 17:38:48  dischi
 # i18n patch from David Sagnol
 #
@@ -44,7 +48,7 @@
 #
 # ----------------------------------------------------------------------
 
-import time
+from time import gmtime, strftime
 
 import config, tv.epg_xmltv, tv.view_favorites
 import tv.record_client as record_client
@@ -53,6 +57,7 @@ import event as em
 from tv.record_types import Favorite
 import tv.record_types
 from tv.epg_types import TvProgram
+from tv.view_favorites  import ViewFavorites
 
 from gui.GUIObject      import *
 from gui.Border         import *
@@ -60,6 +65,7 @@ from gui.Label          import *
 from gui.AlertBox       import *
 from gui.OptionBox      import *
 from gui.LetterBoxGroup import *
+from gui.ConfirmBox     import ConfirmBox
 
 DEBUG = 1
 TRUE = 1
@@ -73,15 +79,20 @@ class EditFavorite(PopupBox):
     top       y coordinate. Integer
     width     Integer
     height    Integer
+    context   Context in which the object is instanciated
     """
     
     def __init__(self, parent=None, subject=None, left=None, top=None, width=500,
-                 height=350):
+                 height=350, context=None):
 
         self.oldname = None
+        if context:
+            self.context = context
+        else:
+            context = 'guide'
 
-        print 'DEBUG::subject: %s' % dir(subject)
-        print 'DEBUG::subject::__module__ %s' % subject.__module__
+        #print 'DEBUG::subject: %s' % dir(subject)
+        #print 'DEBUG::subject::__module__ %s' % subject.__module__
         #if isinstance(subject, tv.record_types.Favorite):
         #    print 'DEBUG::subject: FUCK'
         #    self.fav = subject
@@ -116,110 +127,114 @@ class EditFavorite(PopupBox):
 
         guide = tv.epg_xmltv.get_guide()
 
-        name = Label(_('Name:\t'), self, Align.LEFT)
+        name = Label(_('Name:'), self, Align.LEFT)
         self.name_input = LetterBoxGroup(text=self.fav.name)
         self.name_input.h_align = Align.NONE
         self.add_child(self.name_input)
 
 
-        title = Label(_('Title:\t%s') % self.fav.title, self, Align.LEFT)
+        title = Label(_('Title:%s') % self.fav.title, self, Align.LEFT)
 
-        chan = Label(_('Channel:\t'), self, Align.LEFT)
+        chan = Label(_('Channel:'), self, Align.LEFT)
 
         self.chan_box = OptionBox('ANY')
         self.chan_box.h_align = Align.NONE
         self.chan_box.add_item(text='ANY', value='ANY')
       
-        i = 0
+        i = 1
         chan_index = 0
         for ch in guide.chan_list:
-            if ch.id == self.fav.channel_id:
+            #if ch.id == self.fav.channel_id:
+            if ch.displayname == self.fav.channel:
                 chan_index = i
             i += 1
-            self.chan_box.add_item(text=ch.id, value=ch.id)
+            self.chan_box.add_item(text=ch.displayname, value=ch.displayname)
 
 
         self.chan_box.toggle_selected_index(chan_index)
+        # This is a hack for setting the OptionBox's label to the current
+        # value. It should be done by OptionBox when drawing, but it doesn't
+        # work :(
+        self.chan_box.change_item(None)
         self.add_child(self.chan_box)
 
-        dow = Label(_('Day of Week:\t'), self, Align.LEFT)
+        dow = Label(_('Day of Week:'), self, Align.LEFT)
         self.dow_box = OptionBox('ANY DAY')
         self.dow_box.h_align = Align.NONE
 
         self.dow_box.add_item(text=_('ANY DAY'), value='ANY')
-        self.dow_box.add_item(text=_('Mon'), value=0)
-        self.dow_box.add_item(text=_('Tues'), value=1)
-        self.dow_box.add_item(text=_('Wed'), value=2)
-        self.dow_box.add_item(text=_('Thurs'), value=3)
-        self.dow_box.add_item(text=_('Fri'), value=4)
-        self.dow_box.add_item(text=_('Sat'), value=5)
-        self.dow_box.add_item(text=_('Sun'), value=6)
 
-        self.dow_box.toggle_selected_index(0)
+        i=1
+        dow_index = 0
+        for dow in ('Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat', 'Sun'):
+            val = "%d" % (i-1)
+            self.dow_box.add_item(text=_(dow), value=val )
+            if val == self.fav.dow:
+                dow_index = i
+            i += 1
+        self.dow_box.toggle_selected_index(dow_index)
+        # This is a hack for setting the OptionBox's label to the current
+        # value. It should be done by OptionBox when drawing, but it doesn't
+        # work :(
+        self.dow_box.change_item(None)
         self.add_child(self.dow_box)
 
-        tod = Label(_('Time of Day:\t'), self, Align.LEFT)
+        tod = Label(_('Time of Day:'), self, Align.LEFT)
         self.tod_box = OptionBox('ANY')
         self.tod_box.h_align = Align.NONE
         self.tod_box.add_item(text=_('ANY TIME'), value='ANY')
-        self.tod_box.add_item(text='12:00 AM', value=0)
-        self.tod_box.add_item(text='11:30 AM', value=30)
-        self.tod_box.add_item(text='1:00 AM', value=60)
-        self.tod_box.add_item(text='1:30 AM', value=90)
-        self.tod_box.add_item(text='2:00 AM', value=120)
-        self.tod_box.add_item(text='2:30 AM', value=150)
-        self.tod_box.add_item(text='3:00 AM', value=180)
-        self.tod_box.add_item(text='3:30 AM', value=210)
-        self.tod_box.add_item(text='4:00 AM', value=240)
-        self.tod_box.add_item(text='4:30 AM', value=270)
-        self.tod_box.add_item(text='5:00 AM', value=300)
-        self.tod_box.add_item(text='5:30 AM', value=330)
-        self.tod_box.add_item(text='6:00 AM', value=360)
-        self.tod_box.add_item(text='6:30 AM', value=390)
-        self.tod_box.add_item(text='7:00 AM', value=420)
-        self.tod_box.add_item(text='7:30 AM', value=450)
-        self.tod_box.add_item(text='8:00 AM', value=480)
-        self.tod_box.add_item(text='8:30 AM', value=510)
-        self.tod_box.add_item(text='9:00 AM', value=540)
-        self.tod_box.add_item(text='9:30 AM', value=570)
-        self.tod_box.add_item(text='10:00 AM', value=600)
-        self.tod_box.add_item(text='10:30 AM', value=630)
-        self.tod_box.add_item(text='11:00 AM', value=660)
-        self.tod_box.add_item(text='11:30 AM', value=690)
-        self.tod_box.add_item(text='12:00 PM', value=720)
-        self.tod_box.add_item(text='12:30 PM', value=750)
-        self.tod_box.add_item(text='1:00 PM', value=780)
-        self.tod_box.add_item(text='1:30 PM', value=810)
-        self.tod_box.add_item(text='2:00 PM', value=840)
-        self.tod_box.add_item(text='2:30 PM', value=870)
-        self.tod_box.add_item(text='3:00 PM', value=900)
-        self.tod_box.add_item(text='3:30 PM', value=930)
-        self.tod_box.add_item(text='4:00 PM', value=960)
-        self.tod_box.add_item(text='4:30 PM', value=990)
-        self.tod_box.add_item(text='5:00 PM', value=1020)
-        self.tod_box.add_item(text='5:30 PM', value=1050)
-        self.tod_box.add_item(text='6:00 PM', value=1080)
-        self.tod_box.add_item(text='6:30 PM', value=1110)
-        self.tod_box.add_item(text='7:00 PM', value=1140)
-        self.tod_box.add_item(text='7:30 PM', value=1170)
-        self.tod_box.add_item(text='8:00 PM', value=1200)
-        self.tod_box.add_item(text='8:30 PM', value=1230)
-        self.tod_box.add_item(text='9:00 PM', value=1260)
-        self.tod_box.add_item(text='9:30 PM', value=1290)
-        self.tod_box.add_item(text='10:00 PM', value=1320)
-        self.tod_box.add_item(text='10:30 PM', value=1350)
-        self.tod_box.add_item(text='11:00 PM', value=1380)
-        self.tod_box.add_item(text='11:30 PM', value=1410)
-      
-        self.tod_box.toggle_selected_index(0)
+
+        i = 0
+        tod_index = 0
+        
+        for h in range(0,24):
+            for m in (00, 30):
+                val = i*30
+                # Little hack: we calculate the hours from Jan 1st, 1970 GMT,
+                # and then use strftime to get the string representation
+                text = strftime(config.TV_TIMEFORMAT, gmtime(h * 3600 + 60 * m))
+                self.tod_box.add_item(text=text, value=val)
+                if val == self.fav.mod:
+                    tod_index = i+1
+                i += 1
+        self.tod_box.toggle_selected_index(tod_index)
+        # This is a hack for setting the OptionBox's label to the current
+        # value. It should be done by OptionBox when drawing, but it doesn't
+        # work :(
+        self.tod_box.change_item(None)
         self.add_child(self.tod_box)
 
         self.save = Button(_('Save'))
         self.add_child(self.save)
+        if self.oldname:
+            self.remove = Button(_('Remove'))
+            self.add_child(self.remove)
+        else:
+            self.remove = None
+        self.cancel = Button(_('CANCEL'))
+        self.add_child(self.cancel)
 
+    def removeFavorite(self):
+       (result, msg) = record_client.removeFavorite(self.oldname) 
+       if result:
+           searcher = None
+           if self.parent and self.context == 'favorites':
+               for child in self.parent.children:
+                   if isinstance(child, ViewFavorites):
+                       searcher = child
+                       break 
+               if searcher:
+                   searcher.refreshList()
+               self.destroy()
+               if searcher:
+                   searcher.draw()
+                   self.osd.update()
+       else:
+           AlertBox(parent=self,
+                    text=_('Remove Failed: %s') % msg).show()
 
     def eventhandler(self, event, menuw=None):
-        print 'SELECTED CHILD: %s' % self.get_selected_child()
+        #print 'SELECTED CHILD: %s' % self.get_selected_child()
         if self.get_selected_child() == self.name_input:
             if event == em.INPUT_LEFT:
                 self.name_input.change_selected_box('left')
@@ -262,7 +277,7 @@ class EditFavorite(PopupBox):
                 self.draw()
             elif event == em.INPUT_ENTER:
                 if self.chan_box.selected or self.chan_box.list.is_visible():
-                    if DEBUG: print '  Want to toggle_box'
+                    #if DEBUG: print '  Want to toggle_box'
                     self.chan_box.toggle_box()
                     self.draw()
             elif event in (em.INPUT_LEFT, em.MENU_PAGEUP):
@@ -330,24 +345,66 @@ class EditFavorite(PopupBox):
                 (result, msg) = record_client.addEditedFavorite(
                              self.name_input.get_word(), 
                              self.fav.title, 
-                             self.fav.channel_id, 
+                             self.chan_box.list.get_selected_item().value,
                              self.dow_box.list.get_selected_item().value, 
                              self.tod_box.list.get_selected_item().value, 
                              self.fav.priority)
                 if result:
-                    tv.view_favorites.ViewFavorites(parent=self.parent, text='Favorites').show()
+                    #tv.view_favorites.ViewFavorites(parent=self.parent, text='Favorites').show()
                     self.destroy()
+                    AlertBox(parent='osd', text=_('Favorite %s has been saved') % self.name_input.get_word()).show()
                 else:
-                    AlertBox(parent=self, text=_('Failed: %s') % msg)
+                    AlertBox(parent=self, text=_('Failed: %s') % msg).show()
                 return
             elif event in (em.INPUT_LEFT, em.MENU_PAGEUP):
                 self.save.toggle_selected()
                 self.tod_box.toggle_selected()
                 self.draw()
+            elif event in (em.INPUT_RIGHT, em.MENU_PAGEDOWN):
+                self.save.toggle_selected()
+                if self.remove:
+                    self.remove.toggle_selected()
+                else:
+                    self.cancel.toggle_selected()
+                self.draw()
             elif event == em.INPUT_EXIT:
                 self.destroy()
                 return
+            self.osd.update(self.get_rect())
+            return
 
+        elif self.get_selected_child() == self.remove:
+            if event == em.INPUT_ENTER:
+                ConfirmBox(text=_('Do you want to remove %s?') % self.name_input.get_word(),
+                           handler=self.removeFavorite).show()
+                return
+            elif event in (em.INPUT_LEFT, em.MENU_PAGEUP):
+                self.save.toggle_selected()
+                self.remove.toggle_selected()
+                self.draw()
+            elif event in (em.INPUT_RIGHT, em.MENU_PAGEDOWN):
+                self.remove.toggle_selected()
+                self.cancel.toggle_selected()
+                self.draw()
+            elif event in (em.INPUT_ENTER, em.INPUT_EXIT):
+                self.destroy()
+                return
+            self.osd.update(self.get_rect())
+            return
+        
+        elif self.get_selected_child() == self.cancel:
+            if event in (em.INPUT_LEFT, em.MENU_PAGEUP):
+                if self.remove:
+                    self.remove.toggle_selected()
+                else:
+                    self.save.toggle_selected()
+                self.cancel.toggle_selected()
+                self.draw()
+            elif event in (em.INPUT_ENTER, em.INPUT_EXIT):
+                self.destroy()
+                return
+            self.osd.update(self.get_rect())
+            return
         if event == em.INPUT_EXIT:
             self.destroy()
             return

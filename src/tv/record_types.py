@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/01/09 02:10:00  rshortt
+# Patch from Matthieu Weber to revive add/edit favorites support from the
+# TV interface.
+#
 # Revision 1.6  2003/10/20 01:41:55  rshortt
 # Moving tv_util from src/tv/ to src/util/.
 #
@@ -142,7 +146,27 @@ class Favorite:
     def __init__(self, name=None, prog=None, exactchan=FALSE, exactdow=FALSE, 
                  exacttod=FALSE, priority=0):
         self.TYPES_VERSION = TYPES_VERSION
+        translation_table = \
+                            '                ' \
+                            + '                ' \
+                            + ' !"#$%&' + "'" + '()*+,-./' \
+                            + '0123456789:;<=>?' \
+                            + '@ABCDEFGHIJKLMNO' \
+                            + 'PQRSTUVWXYZ[\]^_' \
+                            + '`abcdefghijklmno' \
+                            + 'pqrstuvwxyz{|}~ ' \
+                            + '                ' \
+                            + '                ' \
+                            + '                ' \
+                            + '                ' \
+                            + 'AAAAAAACEEEEIIII' \
+                            + 'DNOOOOOxOUUUUYPS' \
+                            + 'aaaaaaaceeeeiiii' \
+                            + 'dnooooo/ouuuuypy'
+
         self.name = name
+        if name:
+            self.name = name.translate(translation_table)
         self.priority = priority
 
         if prog:

@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/01/09 02:10:00  rshortt
+# Patch from Matthieu Weber to revive add/edit favorites support from the
+# TV interface.
+#
 # Revision 1.5  2003/11/16 17:38:48  dischi
 # i18n patch from David Sagnol
 #
@@ -43,7 +47,7 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import time
+from time import gmtime, strftime
 
 import config, record_client, edit_favorite
 import event as em
@@ -75,7 +79,7 @@ class ViewFavorites(PopupBox):
 
         
     def __init__(self, parent='osd', text=None, search=None, handler=None, 
-                 left=None, top=None, width=600, height=520, bg_color=None, 
+                 left=None, top=None, width=600, height=400, bg_color=None, 
                  fg_color=None, icon=None, border=None, bd_color=None, 
                  bd_width=None):
 
@@ -93,10 +97,11 @@ class ViewFavorites(PopupBox):
 
         self.internal_h_align = Align.CENTER
 
-        legend = Label(_('Name\tTitle\tChannel\tDOW\tTOD'), self, Align.CENTER)
+        #legend = Label(_('Name Title Channel DOW TOD'), self, Align.CENTER)
 
-        items_height = 40
-        self.num_shown_items = 7
+        #items_height = 40
+        items_height = Button('foo').height + 2
+        self.num_shown_items = 8
         self.results = ListBox(width=(self.width-2*self.h_margin),
                                height=self.num_shown_items*items_height,
                                show_v_scrollbar=0)
@@ -106,10 +111,18 @@ class ViewFavorites(PopupBox):
         self.results.set_h_align(Align.CENTER)
         self.add_child(self.results)
 
-        (result, favorites) = record_client.getFavorites()
+        self.refreshList()
 
-        if result:
+    def refreshList(self):
+        (self.result, favorites) = record_client.getFavorites()
+        if not self.result:
+            errormsg = Label(_('Get favorites failed: %s') % recordings,
+                             self, Align.CENTER)
+            return
+
+        if self.result:
             i = 0
+            self.results.items = []
 
             if len(favorites) > self.num_shown_items:
                 self.results.show_v_scrollbar = 1
@@ -121,12 +134,26 @@ class ViewFavorites(PopupBox):
             favorites.sort(f)
             for fav in favorites:
                 i += 1
-                self.results.add_item(text='%s : %s : %s : %s : %s' % \
+                if fav.channel == 'ANY':
+                    chan = 'any channel'
+                else:
+                    chan = fav.channel
+                if fav.dow == 'ANY':
+                    dow = 'any day'
+                else:
+                    week_days = ('Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat', 'Sun')
+                    dow = week_days[int(fav.dow)]
+                if fav.mod == 'ANY':
+                    mod = 'any time'
+                else:
+                    mod = strftime(config.TV_TIMEFORMAT, gmtime(fav.mod * 60))
+                self.results.add_item(text='%s: %s (%s, %s, %s)' % \
                                         (fav.name, 
                                          fav.title,
-                                         fav.channel_id,
-                                         fav.dow,
-                                         fav.mod),
+                                         #fav.channel_id,
+                                         chan,
+                                         dow,
+                                         mod),
                                       value=fav)
 
             space_left = self.num_shown_items - i
@@ -145,9 +172,11 @@ class ViewFavorites(PopupBox):
         if event in (em.INPUT_UP, em.INPUT_DOWN, em.INPUT_LEFT, em.INPUT_RIGHT):
             return self.results.eventhandler(event)
         elif event == em.INPUT_ENTER:
-            edit_favorite.EditFavorite(parent=self.parent,
-                           subject=self.results.get_selected_item().value).show()
-            # self.destroy()
+            subject = self.results.get_selected_item().value
+            if subject == ' ': subject = None
+            if subject:
+                edit_favorite.EditFavorite(parent=self, subject=subject,
+                context='favorites').show()
             return
         elif event == em.INPUT_EXIT:
             self.destroy()

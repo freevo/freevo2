@@ -9,6 +9,10 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2004/01/09 02:10:00  rshortt
+# Patch from Matthieu Weber to revive add/edit favorites support from the
+# TV interface.
+#
 # Revision 1.23  2003/11/28 20:08:58  dischi
 # renamed some config variables
 #
@@ -177,22 +181,29 @@ class ProgramDisplay(PopupBox):
 
         used_height += chan.font.height + start.font.height + stop.font.height + \
                        (4 *self.v_spacing)
-
-        if self.context == 'guide':
-            self.b0 = Button(_('Record'), width=(width-60)/2)
-            # self.options.add_item(text='Search for more of this program', value=2)
-            # self.options.add_item(text='Add "%s" to favorites' % prog.title, value=3)
-        else:
-            self.b0 = Button(_('Remove'), width=(width-60)/2)
-
-        self.b0.set_h_align(Align.CENTER)
-        self.add_child(self.b0)
-        self.b0.toggle_selected()
         
-        self.b1 = Button(_('CANCEL'), width=(width-60)/2)
-        self.b1.set_h_align(Align.CENTER)
-        self.add_child(self.b1)
+        self.buttons = []
+        all_buttons = { 'record': 'Record',
+                        'search': 'Search for more of this program',
+                        'favorites': 'Add to favorites',
+                        'remove': 'Remove',
+                        'cancel': 'CANCEL',
+                      }
+        self.button_config = []
+        if self.context == 'guide':
+            self.button_config = ['record', 'favorites', 'cancel']
+        else:
+            self.button_config = ['remove', 'cancel']
+            
+        for bname in self.button_config:
+            b = Button(_(all_buttons[bname]), width=(width-60)/2)
+            b.set_h_align(Align.CENTER)
+            self.add_child(b)
+            self.buttons.append(b)
 
+        self.buttons[0].toggle_selected()
+        self.current_button = 0
+        
         if desc:
             desc.width  = self.width - 30
             desc.height = self.height - used_height - 100
@@ -217,9 +228,21 @@ class ProgramDisplay(PopupBox):
         #    return
 
 
-        if event in (em.INPUT_UP, em.INPUT_DOWN):
-            self.b0.toggle_selected()
-            self.b1.toggle_selected()
+        #if event in (em.INPUT_UP, em.INPUT_DOWN):
+        if event == em.INPUT_UP:
+            if self.current_button > 0:
+                self.buttons[self.current_button].toggle_selected()
+                self.current_button -= 1
+                self.buttons[self.current_button].toggle_selected()
+            self.draw()
+            self.osd.update(self.get_rect())
+            return
+
+        elif event == em.INPUT_DOWN:
+            if self.current_button < len(self.buttons) - 1:
+                self.buttons[self.current_button].toggle_selected()
+                self.current_button += 1
+                self.buttons[self.current_button].toggle_selected()
             self.draw()
             self.osd.update(self.get_rect())
             return
@@ -235,7 +258,7 @@ class ProgramDisplay(PopupBox):
         #        return
 
         elif event == em.INPUT_ENTER:
-            if self.b0.selected and self.context == 'guide':
+            if self.button_config[self.current_button] == 'record' and self.context == 'guide':
                 (result, msg) = record_client.scheduleRecording(self.prog)
                 if result:
                     AlertBox(parent=self, 
@@ -251,12 +274,13 @@ class ProgramDisplay(PopupBox):
                                              search=self.prog.title).show()
 
             # XXX: add to favorites - should go to an edit favorites screen
-            elif 0:
+            elif self.button_config[self.current_button] == 'favorites' and self.context == 'guide':
+                self.destroy()
                 tv.edit_favorite.EditFavorite(parent=self, 
                                            subject=self.prog).show()
 
             # next will only happen if we are not viewing from the guide
-            elif self.b0.selected:
+            elif self.button_config[self.current_button] == 'remove':
                 (result, msg) = record_client.removeScheduledRecording(self.prog)
                 if result:
                     # This is confusing, I wanted to click but it's no
@@ -288,7 +312,7 @@ class ProgramDisplay(PopupBox):
                     AlertBox(parent=self, 
                              text=_('Remove Failed: %s') % msg).show()
 
-            elif self.b1.selected:
+            elif self.button_config[self.current_button] == 'cancel':
                 self.destroy()
 
         elif event == em.INPUT_EXIT:

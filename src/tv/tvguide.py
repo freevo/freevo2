@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2004/01/09 02:10:00  rshortt
+# Patch from Matthieu Weber to revive add/edit favorites support from the
+# TV interface.
+#
 # Revision 1.21  2003/12/04 21:48:11  dischi
 # also add the plugin area
 #
@@ -197,7 +201,12 @@ class TVGuide(gui.GUIObject):
             self.event_PageDown()
             self.menuw.refresh()
 
-        elif event == em.MENU_SUBMENU or event == em.TV_START_RECORDING:
+        #elif event == em.MENU_SUBMENU or event == em.TV_START_RECORDING:
+        elif event == em.MENU_SUBMENU:
+            
+            pass
+
+        elif event == em.TV_START_RECORDING:
             if self.selected.scheduled:
                 program_display.ProgramDisplay(parent=self, context='recording',
                                                   prog=self.selected).show()
