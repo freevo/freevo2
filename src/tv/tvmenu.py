@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2004/12/04 01:23:55  rshortt
+# Update comment.
+#
 # Revision 1.21  2004/10/18 01:17:32  rshortt
 # Changes to allow people to have unset TV_CHANNELS since we're heading
 # towards autodetecting everything we can.
@@ -129,9 +132,7 @@ class TVMenu(Item):
 
     def start_tvguide(self, arg, menuw):
 
-        # FIXME: we should be able to run without TV_CHANNELS set because
-        #        we're trying to autodetect everything.
-        # if not config.TV_CHANNELS:
+        # Should we check the validity of the guide here or remove this?
         if False:
             msg  = _('The list of TV channels is invalid!\n')
             msg += _('Please check the config file.')
