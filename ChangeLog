@@ -18,7 +18,9 @@ o Changed the "freevo" script so that it can be used to execute
 o Changed runapp to support priority settings of the new app,
   /usr/bin/nice is no longer needed.
 o Rewritten ID3v1 and new ID3v2.3/2.4 support
+o Added DXR3 support using SDL.
 
+	
 Release 1.2.6 (2002-10-12):
 ---------------------------
 Features, bugfixes:
