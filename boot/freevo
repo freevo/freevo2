@@ -19,8 +19,12 @@ test -f $DAEMON || exit 0
 
 case "$1" in
   start)
+        echo -n "Setting up RTC: "
+        sysctl -w dev.rtc.max-user-freq=1024 > /dev/null
+        echo "sysctl."
 	echo -n "Starting $DESC: "
 	export SDL_NOKEYBOARD=true
+        export SDL_NOMOUSE=true
 	export SDL_VIDEODRIVER=fbcon
 	(cd /tmp && $DAEMON >> $FREEVO_LOG 2>&1 &)
 	echo "$NAME."
@@ -38,6 +42,9 @@ case "$1" in
 	echo -n "Releasing the VT: "
 	$VTRELEASE
 	echo "vtrelease"
+        echo -n "Hard kill to be sure: "
+        ps aux | grep python | grep main.py | awk '{ print "kill -9 " $2 }' | sh
+        echo "kill."
 	;;
   #reload)
   #;;
