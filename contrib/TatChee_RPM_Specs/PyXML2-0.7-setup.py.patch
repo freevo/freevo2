@@ -1,0 +1,9 @@
+--- PyXML-0.7/setup.py.orig	Tue Jul 16 09:29:13 2002
++++ PyXML-0.7/setup.py	Tue Jul 16 09:29:27 2002
+@@ -259,5 +259,5 @@
+ 
+        ext_modules = ext_modules,
+ 
+-       scripts = ['scripts/xmlproc_parse', 'scripts/xmlproc_val']
++       scripts = ['scripts/xmlproc_parse2', 'scripts/xmlproc_val2']
+        )
