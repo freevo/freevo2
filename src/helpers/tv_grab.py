@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/10/14 02:44:11  rshortt
+# Adding an option for tv_grab to use tv_sort on the listings and also to
+# update your favorites schedule.
+#
 # Revision 1.1  2003/09/08 19:44:00  dischi
 # *** empty log message ***
 #
@@ -67,8 +71,14 @@ if len(sys.argv)>1 and sys.argv[1] == '-query':
     QUERY = 1
     
 if not os.path.isfile(config.XMLTV_FILE) or not QUERY:
+    print 'Grabbing listings.'
     os.system('%s --output %s --days %s' % ( config.XMLTV_GRABBER, config.XMLTV_FILE,
                                              config.XMLTV_DAYS ))
+
+if os.path.isfile(config.XMLTV_SORT):
+    print 'Sorting listings.'
+    os.system('%s --output %s %s' % ( config.XMLTV_SORT, config.XMLTV_FILE,
+                                             config.XMLTV_FILE ))
 
 print
 print 'searching for station information'
@@ -90,3 +100,11 @@ print 'caching data, this may take a while'
 
 import tv.epg_xmltv
 tv.epg_xmltv.get_guide()
+
+import tv.record_client as rc
+
+print 'Scheduling favorites for recording:  '
+
+(result, response) = rc.updateFavoritesSchedule()
+print '    %s' % response
+

@@ -1121,6 +1121,12 @@ TV_CHANNELS = None
 
 XMLTV_GRABBER = ''
 
+# If you want to run tv_sort on your listings add the path to tv_sort here.
+# tv_sort will make sure all your programs have proper stop times, otherwise
+# programs might get cut off at midnight.
+
+XMLTV_SORT = ''
+
 # Number of days the grabber should get
 
 XMLTV_DAYS = 3
