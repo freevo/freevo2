@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/03/13 20:12:40  rshortt
+# Remove debug.
+#
 # Revision 1.3  2004/03/13 18:34:19  rshortt
 # Refresh the list of favorites from the server properly.
 #
@@ -109,7 +112,6 @@ class ViewFavoritesItem(Item):
             favorites = favorites.values()
             favorites.sort(f)
             for fav in favorites:
-                print 'FAV: name=%s mod=%s' % (fav.name, fav.mod)
                 items.append(FavoriteItem(self, fav))
 
         else:
