@@ -147,7 +147,7 @@ def main_menu_generate():
 
 
 def main_menu(arg=None, menuw=None):
-    imagemenu = menu.Menu('IMAGE VIEWER MAIN MENU', main_menu_generate(), umount_all=1)
+    imagemenu = menu.Menu('VIEWER MAIN MENU', main_menu_generate(), umount_all=1)
     menuw.pushmenu(imagemenu)
 
 
