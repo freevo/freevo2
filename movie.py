@@ -11,6 +11,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2002/09/08 18:26:03  krister
+# Applied Andrew Drummond's MAME patch. It seems to work OK on X11, but still needs some work before it is ready for prime-time...
+#
 # Revision 1.28  2002/09/07 06:19:45  krister
 # Improved removable media support.
 #
@@ -299,7 +302,7 @@ def main_menu_generate():
 
 
 def main_menu(arg=None, menuw=None):
-    moviemenu = menu.Menu('MOVIE MAIN MENU', main_menu_generate(), umount_all = 1)
+    moviemenu = menu.Menu('MOVIE MAIN MENU', main_menu_generate(), umount_all=1)
     menuw.pushmenu(moviemenu)
 
 
@@ -328,7 +331,6 @@ def cwd(arg=None, menuw=None):
             m.setImage(('movie', (dirname+'/cover.jpg')))
 
         items += [m]
-
     
     files = []
 

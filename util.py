@@ -58,9 +58,13 @@ def hexify(str):
 
 # Python's bundled MD5 class only acts on strings, so
 # we have to calculate it in this loop
-def md5file(file):
+def md5file(filename):
         m = md5.new()
-        f = open(file, 'r')
+        try:
+            f = open(filename, 'r')
+        except IOError:
+            print 'Cannot find file "%s"!' % filename
+            return ''
         for line in f.readlines():
                 m.update(line)
         f.close()
@@ -81,6 +85,10 @@ def pngsize(file):
 
 def resize(file, x0=25, y0=25):
         import Image
+
+        if not os.path.isfile(file):
+            return ''
+        
         # Since the filenames are not unique we need
         # to cache them by content, not name.
         mythumb = (config.FREEVO_CACHEDIR + '/' +

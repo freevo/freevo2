@@ -8,7 +8,8 @@
       <item pos="1" name="Movies"   action="movie.main_menu" arg="" visible="yes" icon="icons/movies.png"  />
       <item pos="2" name="Music"    action="music.main_menu" arg="" visible="yes" icon="icons/mp3.png"  />
       <item pos="3" name="Images"   action="imenu.main_menu" arg="" visible="yes" icon="icons/images.png"  />
-      <item pos="4" name="Shutdown" action="shutdown" arg="" visible="yes" icon="icons/shutdown2.png"  />
+      <item pos="4" name="Video Games" action="videogame.main_menu" arg="" visible="no" icon="icons/mame.png"  />
+      <item pos="5" name="Shutdown" action="shutdown" arg="" visible="yes" icon="icons/shutdown2.png"  />
     </main>
     
     <!-- Settings for a normal menu -->

@@ -31,6 +31,7 @@ class ChildApp:
         self.t2 = Read_Thread('stderr', self.errfile, self.stderr_cb)
         self.t2.start()
 
+
         if DEBUG:
             time.sleep(0.5)
             print 'ChildApp.__init__(), pid=%s, app=%s, poll=%s' % (self.child.pid, app, self.child.poll())
@@ -67,7 +68,6 @@ class ChildApp:
                 self.child.wait()
             except:
                 pass
-
         
 class Read_Thread(threading.Thread):
 

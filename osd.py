@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2002/09/08 18:26:03  krister
+# Applied Andrew Drummond's MAME patch. It seems to work OK on X11, but still needs some work before it is ready for prime-time...
+#
 # Revision 1.19  2002/09/07 06:16:51  krister
 # Cleanup.
 #
@@ -249,6 +252,9 @@ class OSD:
 
     def _cb(self):
 
+        if not pygame.display.get_init():
+            return None
+
         # Check if mouse should be visible or hidden
         mouserel = pygame.mouse.get_rel()
         mousedist = (mouserel[0]**2 + mouserel[1]**2) ** 0.5
@@ -289,8 +295,19 @@ class OSD:
     def shutdown(self):
         pygame.quit()
 
+    def restartdisplay(self):
+	pygame.display.init()
+        self.width = config.CONF.width
+        self.height = config.CONF.height
+        self.screen = pygame.display.set_mode((self.width, self.height), 0, 32)
+
+    def stopdisplay(self):
+	pygame.display.quit()
 
     def clearscreen(self, color=None):
+        if not pygame.display.get_init():
+            return None
+
         if color == None:
             color = self.default_bg_color
         self.screen.fill(self._sdlcol(color))
@@ -328,6 +345,9 @@ class OSD:
     # Loads and zooms a bitmap and return the surface. A cache is currently
     # missing, but maybe we don't need it, it's fast enough.
     def zoombitmap(self, filename, scaling=None, bbx=0, bby=0, bbw=0, bbh=0, rotation = 0):
+        if not pygame.display.get_init():
+            return None
+
         image = self._getbitmap(filename)
 
         if not image: return
@@ -358,19 +378,24 @@ class OSD:
     # be used to "pipeline" bitmap loading/drawing.
     def drawbitmap(self, filename, x=0, y=0, scaling=None,
                    bbx=0, bby=0, bbw=0, bbh=0, rotation = 0):
-
+        if not pygame.display.get_init():
+            return None
         image = self.zoombitmap(filename, scaling, bbx, bby, bbw, bbh, rotation)
         if not image: return
         self.screen.blit(image, (x, y))
 
 
     def bitmapsize(self, filename):
+        if not pygame.display.get_init():
+            return None
         image = self._getbitmap(filename)
         if not image: return 0,0
         return image.get_size()
 
 
     def drawline(self, x0, y0, x1, y1, width=None, color=None):
+        if not pygame.display.get_init():
+            return None
         if width == None:
             width = 1
 
@@ -383,6 +408,8 @@ class OSD:
 
 
     def drawbox(self, x0, y0, x1, y1, width=None, color=None, fill=0):
+        if not pygame.display.get_init():
+            return None
 
         # Make sure the order is top left, bottom right
         x0, x1 = min(x0, x1), max(x0, x1)
@@ -410,6 +437,9 @@ class OSD:
 
     def drawstring(self, string, x, y, fgcolor=None, bgcolor=None,
                    font=None, ptsize=0, align='left'):
+
+        if not pygame.display.get_init():
+            return None
 
         # XXX Krister: Workaround for new feature that is only possible in the new
         # XXX SDL OSD, line up columns delimited by tabs. Here the tabs are just
@@ -446,6 +476,9 @@ class OSD:
     # Render a string to an SDL surface. Uses a cache for speedup.
     def _renderstring(self, string, font, ptsize, fgcolor, bgcolor):
 
+        if not pygame.display.get_init():
+            return None
+
         f = self._getfont(font, ptsize)
 
         if not f:
@@ -480,6 +513,10 @@ class OSD:
 
         
     def popup_box(self, text):
+
+        if not pygame.display.get_init():
+            return None
+
         """
         Trying to make a standard popup/dialog box for various usages.
         Currently it just draws itself in the middle of the screen.
@@ -508,6 +545,9 @@ class OSD:
 
     # Return a (width, height) tuple for the given string, font, size
     def stringsize(self, string, font=None, ptsize=0):
+        if not pygame.display.get_init():
+            return None
+
         if not ptsize:
             ptsize = config.OSD_DEFAULT_FONTSIZE
 
@@ -522,10 +562,17 @@ class OSD:
         
 
     def update(self):
+
+        if not pygame.display.get_init():
+            return None
+
         pygame.display.flip()
 
 
     def _getfont(self, filename, ptsize):
+        if not pygame.display.get_init():
+            return None
+
         for font in self.fontcache:
             if font.filename == filename and font.ptsize == ptsize:
                 return font.font
@@ -543,6 +590,8 @@ class OSD:
 
         
     def _getbitmap(self, filename):
+        if not pygame.display.get_init():
+            return None
 
         if not os.path.isfile(filename):
             print 'Bitmap file "%s" doesnt exist!' % filename
@@ -578,6 +627,9 @@ class OSD:
                 del self.bitmapcache[i]
         
     def _helpscreen(self):
+        if not pygame.display.get_init():
+            return None
+
         self._help = {0:1, 1:0}[self._help]
         
         if self._help:

@@ -4,6 +4,9 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.64  2002/09/08 18:26:03  krister
+# Applied Andrew Drummond's MAME patch. It seems to work OK on X11, but still needs some work before it is ready for prime-time...
+#
 # Revision 1.63  2002/09/07 06:19:44  krister
 # Improved removable media support.
 #
@@ -124,6 +127,8 @@ import movie   # The Movie module
 import tv      # The TV module
 import imenu   # The Image viewer module
 import mplayer
+import videogame      # The VideoGame Module
+import mame           # The Mame Module
 
 import identifymedia
 

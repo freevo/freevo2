@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.64  2002/09/08 18:26:03  krister
+# Applied Andrew Drummond's MAME patch. It seems to work OK on X11, but still needs some work before it is ready for prime-time...
+#
 # Revision 1.63  2002/09/08 16:40:33  krister
 # Added some docs for the new ROM_DRIVES format.
 #
@@ -229,6 +232,43 @@ DIR_IMAGES = [ ('Test Images', './testfiles/Images') ]
 # are used for the image viewer. They are used as the argument to glob.glob()
 # 
 SUFFIX_IMAGE_FILES = [ '/*.[jJ][pP][gG]' ]
+
+# ======================================================================
+# Freevo mame settings:
+# ======================================================================
+
+#
+# MAME is an emulator for old arcade video games. It supports almost
+# 2000 different games! The actual emulator is not included in Freevo,
+# you'll need to download and install it separately. The main MAME
+# website is at http://www.mame.net, but the version that is used here
+# is at http://x.mame.net since the regular MAME is for Windows.
+#
+
+#
+# Where the mame files can be found.
+#
+# Note: You must have the "rominfo" app from rominfosrc compiled and
+# placed in the main freevo dir first. This is not done by the regular
+# Makefile, you must do it by hand. Read the rominfosrc/rominfo.txt
+# for further instructions on more steps that are required to use MAME!
+#
+DIR_MAME = [ ('Test Games', './testfiles/Mame') ]
+
+#
+# The list of filename suffixes that are used to match the files that
+# are used for the image viewer. They are used as the argument to glob.glob()
+# 
+SUFFIX_MAME_FILES = [ '/*.[zZ][iI][pP]' ]
+
+MAME_CMD	 = 'xmame.SDL'
+
+MAME_NICE        = '0'             # Priority of mplayer process. 0 is unchanged,
+                                      # <0 is higher prio, >0 lower prio. You must run
+                                      # freevo as root to use prio <0 !
+
+# XXX Removed '-ef 1', doesn't work on my older version of mame...
+MAME_ARGS_DEF     = ('-nosound -fullscreen -modenumber 6 ')
 
 
 
