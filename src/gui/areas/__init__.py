@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/08/01 10:37:39  dischi
+# remove some functions
+#
 # Revision 1.5  2004/07/25 18:17:34  dischi
 # interface update
 #
@@ -51,6 +54,7 @@ import traceback
 
 import config
 import util
+from event import *
 
 from area import Skin_Area
 
@@ -95,7 +99,6 @@ class AreaHandler:
             self.display_style['menu'] = self.storage[config.SKIN_XML_FILE]
         else:
             self.display_style['menu'] = 0
-        
         
 
     def set_screen(self, screen):
@@ -213,25 +216,15 @@ class AreaHandler:
 
 
 
-    def clear(self, osd_update=True):
+    def clear(self, type):
         """
         clean the screen
         """
-        self.active = False
-        for a in self.all_areas:
-            print 'clear area', a
-            a.clear()
-        if osd_update:
-            self.screen.update()
-
-
-    def redraw(self):
-        """
-        redraw the current screen
-        """
-        _debug_('redraw', 2)
-        if self.last_draw[0] and self.last_draw[1]:
-            self.draw(self.last_draw[0], self.last_draw[1], self.last_draw[2])
+        if self.last_draw and self.last_draw[0] == type:
+            _debug_('clear skin (%s)' % type)
+            self.active = False
+            for a in self.all_areas:
+                a.clear()
 
 
     def draw(self, type, object, menu=None):
