@@ -40,7 +40,7 @@ case "$1" in
             echo "Recordserver."
         fi
         if [ "$WEBSERVER" == "yes" ]; then
-            echo -n "Starting Freevo Webserver "
+            echo -n "Starting Freevo Webserver: "
             freevoserver "webserver" "start"
             echo "Webserver."
         fi
