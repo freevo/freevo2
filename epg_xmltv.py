@@ -143,7 +143,7 @@ def load_guide():
         xmltv_channels = None
         if gotfile:
             # Don't read the channel info unless we have to, takes a long time!
-            xmltv_channels = xmltv.read_channels(open(config.XMLTV_FILE))
+            xmltv_channels = xmltv.read_channels(util.gzopen(config.XMLTV_FILE))
         
         # Was the guide read successfully?
         if not xmltv_channels:
@@ -159,7 +159,7 @@ def load_guide():
 
     xmltv_programs = None
     if gotfile:
-        xmltv_programs = xmltv.read_programmes(open(config.XMLTV_FILE))
+        xmltv_programs = xmltv.read_programmes(util.gzopen(config.XMLTV_FILE))
     
     # Was the guide read successfully?
     if not xmltv_programs:

@@ -9,6 +9,17 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.48  2002/11/24 16:21:49  outlyer
+# Added transparant gzip support to the epg parser. If you have a compressed
+# TV.xml (with or without the .gz extension, since we use the magic number)
+# it will transparently decompress when processing. The speed difference
+# is neglible on my Celeron 400, so why not save 75% of the disk space.
+#
+# I added a function called util.gzopen, it acts just like the open() function,
+# in that it returns a file object, but it first verifies if the file is
+# gzipped or not, then uses the gzip module to return a file object, or the
+# standard open()
+#
 # Revision 1.47  2002/11/23 19:32:27  dischi
 # We don't need that
 #
@@ -340,3 +351,14 @@ def umount(dir):
 def mount(dir):
     if not proc_mount(dir):
         os.system("mount %s 2>/dev/null" % dir)
+
+def gzopen(file):
+    import gzip
+    m = open(file)
+    magic = m.read(2)
+    m.close
+    if magic == '\037\213':
+         f = gzip.open(file)
+    else:
+         f = open(file)
+    return f
