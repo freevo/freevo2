@@ -88,6 +88,30 @@ Video4Linux1 API docs:
 http://www.linuxhq.com/kernel/v2.4/doc/video4linux/API.html
 
 ----------------------------------------------------------------------
+
+Aspect ratio resolutions:
+1.33  576x432
+1.78  688x384
+
+XviD encoder for DVDs:
+/usr/local/bin/mencoder -ovc divx4 -divx4opts br=800:key=300:q=5 -oac mp3lame -lameopts br=80:cbr -sws 2 -vop scale=576:432 -o moviename.avi -dvd 1 -alang en
+
+
+FFMPEG encoder for DVDs
+/usr/local/bin/mencoder -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=800:keyint=300:vhq -oac mp3lame -lameopts br=80:cbr -sws 2 -vop scale=576:432 -o tst.avi -dvd 1 -ffourcc divx -alang en
+
+Scale and crop a 2.35:1 DVD
+usr/local/bin/mencoder -ovc divx4 -divx4opts br=800:key=300:q=5 -oac mp3lame -lameopts br=80:cbr -sws 2 -vop scale=848:336,crop=720:336:0:72 -o tst.avi -dvd 1 -alang en
+
+----------------------------------------------------------------------
+
+btaudio notes:
+use the analog channel, /dev/dsp2,mixer1 for a system with 1 soundcard and 1 bttv card
+input levels seem high, set a low recgain
+the samplerate cannot be set to exactly 44100, it becomes 44800 instead. 32000 works
+NUVrec cannot do samplerates other than 44100, stereo, 16 bits.
+
+----------------------------------------------------------------------
 CVS and releases on Sourceforge:
 
 o Generate a public key using ssh-keygen and upload it to Sourceforge
