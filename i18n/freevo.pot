@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-05-29 15:09+0200\n"
+"POT-Creation-Date: 2004-05-31 12:48+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -49,7 +49,7 @@ msgid "Get CDs available for ripping"
 msgstr ""
 
 #: audio/plugins/cdbackup.py:266 audio/plugins/cdbackup.py:623
-#: audio/plugins/xine.py:88 audio/plugins/xine.py:107 childapp.py:337
+#: audio/plugins/xine.py:88 audio/plugins/xine.py:107 childapp.py:291
 #: plugins/lcd.py:110 plugins/lcd.py:731 plugins/lcd.py:933 plugins/lcd.py:944
 #: plugins/lcd.py:955 skins/main/info_area.py:155 tv/channels.py:149
 #: tv/channels.py:186 tv/channels.py:189 tv/record_client.py:133
@@ -299,21 +299,21 @@ msgstr ""
 msgid "You need software %s"
 msgstr ""
 
-#: childapp.py:334
+#: childapp.py:288
 #, python-format
 msgid "logging child to \"%s\""
 msgstr ""
 
-#: childapp.py:338
+#: childapp.py:292
 #, python-format
 msgid "Cannot open \"%s\" for logging!"
 msgstr ""
 
-#: childapp.py:339
+#: childapp.py:293
 msgid "Set CHILDAPP_DEBUG=0 in local_conf.py, "
 msgstr ""
 
-#: childapp.py:340
+#: childapp.py:294
 #, python-format
 msgid "or make %s writable!"
 msgstr ""
@@ -481,23 +481,15 @@ msgstr ""
 msgid "Browse list"
 msgstr ""
 
-#: main.py:198
+#: main.py:177
 msgid "Freevo Main Menu"
 msgstr ""
 
-#: main.py:214
+#: main.py:193
 msgid "Skin Selector"
 msgstr ""
 
-#: main.py:366
-msgid "Starting Freevo, please wait ..."
-msgstr ""
-
-#: main.py:386
-msgid "Reading cache, please wait ..."
-msgstr ""
-
-#: main.py:474
+#: main.py:308
 #, python-format
 msgid ""
 "Event '%s' crashed\n"
@@ -510,56 +502,64 @@ msgid ""
 "\n"
 msgstr ""
 
-#: main.py:510
+#: main.py:434
+msgid "Starting Freevo, please wait ..."
+msgstr ""
+
+#: main.py:454
+msgid "Reading cache, please wait ..."
+msgstr ""
+
+#: main.py:492
 msgid "Freevo crashed!"
 msgstr ""
 
-#: main.py:511
+#: main.py:493
 #, python-format
 msgid "Filename: %s"
 msgstr ""
 
-#: main.py:512
+#: main.py:494
 #, python-format
 msgid "Lineno: %s"
 msgstr ""
 
-#: main.py:513
+#: main.py:495
 #, python-format
 msgid "Function: %s"
 msgstr ""
 
-#: main.py:514
+#: main.py:496
 #, python-format
 msgid "Text: %s"
 msgstr ""
 
-#: main.py:516
+#: main.py:498
 msgid "Please see the logfiles for more info"
 msgstr ""
 
-#: main.py:518
+#: main.py:500
 #, python-format
 msgid "Exit in %s seconds"
 msgstr ""
 
-#: osd.py:392
+#: osd.py:395
 msgid "z = Toggle Fullscreen"
 msgstr ""
 
-#: osd.py:393
+#: osd.py:396
 msgid "Arrow Keys = Move"
 msgstr ""
 
-#: osd.py:394
+#: osd.py:397
 msgid "Spacebar = Select"
 msgstr ""
 
-#: osd.py:395
+#: osd.py:398
 msgid "Escape = Stop/Prev. Menu"
 msgstr ""
 
-#: osd.py:396
+#: osd.py:399
 msgid "h = Help"
 msgstr ""
 
@@ -572,7 +572,7 @@ msgstr ""
 msgid "Browse Playlist"
 msgstr ""
 
-#: playlist.py:300 video/configure.py:220 video/videoitem.py:295
+#: playlist.py:300 video/configure.py:220 video/videoitem.py:298
 msgid "Play"
 msgstr ""
 
@@ -685,7 +685,7 @@ msgstr ""
 msgid "Generating MAME cache, please wait."
 msgstr ""
 
-#: gui/AlertBox.py:87 gui/ConfirmBox.py:100 plugins/command.py:177
+#: gui/AlertBox.py:87 gui/ConfirmBox.py:100 plugins/command.py:181
 msgid "OK"
 msgstr ""
 
@@ -726,49 +726,49 @@ msgstr ""
 msgid "View Image"
 msgstr ""
 
-#: image/viewer.py:146
+#: image/viewer.py:149
 #, python-format
 msgid ""
 "Can't Open Image\n"
 "'%s'"
 msgstr ""
 
-#: image/viewer.py:347
+#: image/viewer.py:350
 msgid "pause"
 msgstr ""
 
-#: image/viewer.py:351
+#: image/viewer.py:354
 msgid "play"
 msgstr ""
 
-#: image/viewer.py:438 image/viewer.py:449 tv/edit_favorite.py:143
+#: image/viewer.py:441 image/viewer.py:452 tv/edit_favorite.py:143
 #: www/htdocs/manualrecord.rpy:222 www/htdocs/record.rpy:191
 #: www/htdocs/search.rpy:184
 msgid "Title"
 msgstr ""
 
-#: image/viewer.py:439 plugins/lcd.py:150 plugins/lcd.py:152
+#: image/viewer.py:442 plugins/lcd.py:150 plugins/lcd.py:152
 #: plugins/lcd.py:329
 msgid "Description"
 msgstr ""
 
-#: image/viewer.py:440
+#: image/viewer.py:443
 msgid "Author"
 msgstr ""
 
-#: image/viewer.py:450 plugins/lcd.py:149
+#: image/viewer.py:453 plugins/lcd.py:149
 msgid "Date"
 msgstr ""
 
-#: image/viewer.py:453
+#: image/viewer.py:456
 msgid "Model"
 msgstr ""
 
-#: image/viewer.py:454
+#: image/viewer.py:457
 msgid "Software"
 msgstr ""
 
-#: image/viewer.py:475
+#: image/viewer.py:478
 msgid "No information available"
 msgstr ""
 
@@ -782,43 +782,43 @@ msgstr ""
 msgid "%s%%"
 msgstr ""
 
-#: plugins/command.py:163
+#: plugins/command.py:167
 msgid "Command finished"
 msgstr ""
 
-#: plugins/command.py:179
+#: plugins/command.py:183
 msgid "Show Stderr"
 msgstr ""
 
-#: plugins/command.py:181
+#: plugins/command.py:185
 msgid "Show Stdout"
 msgstr ""
 
-#: plugins/command.py:199
+#: plugins/command.py:203
 msgid "Stdout File"
 msgstr ""
 
-#: plugins/command.py:203
+#: plugins/command.py:207
 msgid "Stderr File"
 msgstr ""
 
-#: plugins/command.py:236
+#: plugins/command.py:244
 msgid "Run Command"
 msgstr ""
 
-#: plugins/command.py:247
+#: plugins/command.py:255
 msgid "Running Command..."
 msgstr ""
 
-#: plugins/command.py:267
+#: plugins/command.py:275
 msgid "Command Failed"
 msgstr ""
 
-#: plugins/command.py:269
+#: plugins/command.py:277
 msgid "Command Completed"
 msgstr ""
 
-#: plugins/command.py:302 plugins/command.py:340
+#: plugins/command.py:310 plugins/command.py:348
 msgid "Commands"
 msgstr ""
 
@@ -1088,31 +1088,31 @@ msgstr ""
 msgid "Delete Cart"
 msgstr ""
 
-#: plugins/shutdown.py:79
+#: plugins/shutdown.py:82
 msgid "shutting down..."
 msgstr ""
 
-#: plugins/shutdown.py:149 plugins/shutdown.py:153 plugins/shutdown.py:158
+#: plugins/shutdown.py:152 plugins/shutdown.py:156 plugins/shutdown.py:161
 msgid "Shutdown Freevo"
 msgstr ""
 
-#: plugins/shutdown.py:150 plugins/shutdown.py:154 plugins/shutdown.py:157
+#: plugins/shutdown.py:153 plugins/shutdown.py:157 plugins/shutdown.py:160
 msgid "Shutdown system"
 msgstr ""
 
-#: plugins/shutdown.py:151 plugins/shutdown.py:155 plugins/shutdown.py:159
+#: plugins/shutdown.py:154 plugins/shutdown.py:158 plugins/shutdown.py:162
 msgid "Restart system"
 msgstr ""
 
-#: plugins/shutdown.py:169
+#: plugins/shutdown.py:172
 msgid "Do you really want to shut down Freevo?"
 msgstr ""
 
-#: plugins/shutdown.py:178
+#: plugins/shutdown.py:181
 msgid "Do you really want to shut down the system?"
 msgstr ""
 
-#: plugins/shutdown.py:186
+#: plugins/shutdown.py:189
 msgid "Do you really want to restart the system?"
 msgstr ""
 
@@ -1215,11 +1215,11 @@ msgstr ""
 msgid "Display record item"
 msgstr ""
 
-#: tv/plugins/manual_record.py:122 tv/program_display.py:273
+#: tv/plugins/manual_record.py:122 tv/program_display.py:276
 msgid "Modify name"
 msgstr ""
 
-#: tv/plugins/manual_record.py:123 tv/program_display.py:274
+#: tv/plugins/manual_record.py:123 tv/program_display.py:277
 msgid "Modify channel"
 msgstr ""
 
@@ -1256,22 +1256,22 @@ msgstr ""
 msgid "Record Item Menu"
 msgstr ""
 
-#: tv/plugins/manual_record.py:141 tv/program_display.py:297
+#: tv/plugins/manual_record.py:141 tv/program_display.py:300
 msgid "Alter Name"
 msgstr ""
 
-#: tv/plugins/manual_record.py:151 tv/program_display.py:319
+#: tv/plugins/manual_record.py:151 tv/program_display.py:322
 msgid "Modify Channel"
 msgstr ""
 
 #: tv/plugins/manual_record.py:167 tv/plugins/manual_record.py:183
 #: tv/plugins/manual_record.py:216 tv/plugins/manual_record.py:232
-#: tv/program_display.py:369
+#: tv/program_display.py:372
 msgid "Modify Day"
 msgstr ""
 
 #: tv/plugins/manual_record.py:200 tv/plugins/manual_record.py:249
-#: tv/program_display.py:389
+#: tv/program_display.py:392
 msgid "Modify Time"
 msgstr ""
 
@@ -1380,42 +1380,42 @@ msgstr ""
 msgid "Day of Week"
 msgstr ""
 
-#: tv/edit_favorite.py:172 tv/program_display.py:254
+#: tv/edit_favorite.py:172 tv/program_display.py:257
 #: www/htdocs/edit_favorite.rpy:238
 msgid "ANY DAY"
 msgstr ""
 
-#: tv/edit_favorite.py:176 tv/program_display.py:247
+#: tv/edit_favorite.py:176 tv/program_display.py:250
 #: www/htdocs/edit_favorite.rpy:239
 msgid "Mon"
 msgstr ""
 
-#: tv/edit_favorite.py:176 tv/program_display.py:247
+#: tv/edit_favorite.py:176 tv/program_display.py:250
 #: www/htdocs/edit_favorite.rpy:240
 msgid "Tue"
 msgstr ""
 
-#: tv/edit_favorite.py:176 tv/program_display.py:247
+#: tv/edit_favorite.py:176 tv/program_display.py:250
 #: www/htdocs/edit_favorite.rpy:241
 msgid "Wed"
 msgstr ""
 
-#: tv/edit_favorite.py:176 tv/program_display.py:247
+#: tv/edit_favorite.py:176 tv/program_display.py:250
 #: www/htdocs/edit_favorite.rpy:242
 msgid "Thu"
 msgstr ""
 
-#: tv/edit_favorite.py:176 tv/program_display.py:247
+#: tv/edit_favorite.py:176 tv/program_display.py:250
 #: www/htdocs/edit_favorite.rpy:243
 msgid "Fri"
 msgstr ""
 
-#: tv/edit_favorite.py:176 tv/program_display.py:247
+#: tv/edit_favorite.py:176 tv/program_display.py:250
 #: www/htdocs/edit_favorite.rpy:244
 msgid "Sat"
 msgstr ""
 
-#: tv/edit_favorite.py:176 tv/program_display.py:247
+#: tv/edit_favorite.py:176 tv/program_display.py:250
 #: www/htdocs/edit_favorite.rpy:245
 msgid "Sun"
 msgstr ""
@@ -1424,7 +1424,7 @@ msgstr ""
 msgid "Time of Day"
 msgstr ""
 
-#: tv/edit_favorite.py:192 tv/program_display.py:258
+#: tv/edit_favorite.py:192 tv/program_display.py:261
 #: www/htdocs/edit_favorite.rpy:251
 msgid "ANY TIME"
 msgstr ""
@@ -1434,7 +1434,7 @@ msgstr ""
 msgid "Remove"
 msgstr ""
 
-#: tv/edit_favorite.py:241 tv/program_display.py:235 tv/program_display.py:434
+#: tv/edit_favorite.py:241 tv/program_display.py:238 tv/program_display.py:437
 msgid "Remove Failed"
 msgstr ""
 
@@ -1466,102 +1466,102 @@ msgstr ""
 msgid "REPLACE WITH TUNERID FOR %s"
 msgstr ""
 
-#: tv/program_display.py:122
+#: tv/program_display.py:125
 msgid "Display program"
 msgstr ""
 
-#: tv/program_display.py:136
+#: tv/program_display.py:139
 msgid "Remove from schedule"
 msgstr ""
 
-#: tv/program_display.py:139
+#: tv/program_display.py:142
 msgid "Schedule for recording"
 msgstr ""
 
-#: tv/program_display.py:143
+#: tv/program_display.py:146
 msgid "Search for more of this program"
 msgstr ""
 
-#: tv/program_display.py:153
+#: tv/program_display.py:156
 msgid "Remove from favorites"
 msgstr ""
 
-#: tv/program_display.py:156
+#: tv/program_display.py:159
 msgid "Add to favorites"
 msgstr ""
 
-#: tv/program_display.py:159
+#: tv/program_display.py:162
 msgid "Program Menu"
 msgstr ""
 
-#: tv/program_display.py:181 tv/program_search.py:129
+#: tv/program_display.py:184 tv/program_search.py:129
 msgid "Searching, please wait..."
 msgstr ""
 
-#: tv/program_display.py:197
+#: tv/program_display.py:200
 #, python-format
 msgid "No matches found for %s"
 msgstr ""
 
-#: tv/program_display.py:199
+#: tv/program_display.py:202
 #, python-format
 msgid "findMatches failed: %s"
 msgstr ""
 
-#: tv/program_display.py:202 www/htdocs/search.rpy:144
+#: tv/program_display.py:205 www/htdocs/search.rpy:144
 msgid "Search Results"
 msgstr ""
 
-#: tv/program_display.py:216
+#: tv/program_display.py:219
 #, python-format
 msgid "\"%s\" has been scheduled for recording"
 msgstr ""
 
-#: tv/program_display.py:219
+#: tv/program_display.py:222
 msgid "Scheduling Failed"
 msgstr ""
 
-#: tv/program_display.py:250 www/htdocs/edit_favorite.rpy:225
+#: tv/program_display.py:253 www/htdocs/edit_favorite.rpy:225
 msgid "ANY CHANNEL"
 msgstr ""
 
-#: tv/program_display.py:267
+#: tv/program_display.py:270
 msgid "Display favorite"
 msgstr ""
 
-#: tv/program_display.py:275
+#: tv/program_display.py:278
 msgid "Modify day of week"
 msgstr ""
 
-#: tv/program_display.py:276
+#: tv/program_display.py:279
 msgid "Modify time of day"
 msgstr ""
 
-#: tv/program_display.py:282
+#: tv/program_display.py:285
 msgid "Modify priority"
 msgstr ""
 
-#: tv/program_display.py:285
+#: tv/program_display.py:288
 msgid "Save changes"
 msgstr ""
 
-#: tv/program_display.py:286
+#: tv/program_display.py:289
 msgid "Remove favorite"
 msgstr ""
 
-#: tv/program_display.py:288
+#: tv/program_display.py:291
 msgid "Favorite Menu"
 msgstr ""
 
-#: tv/program_display.py:410
+#: tv/program_display.py:413
 msgid "Save Failed, favorite was lost"
 msgstr ""
 
-#: tv/program_display.py:417
+#: tv/program_display.py:420
 msgid "Save Failed"
 msgstr ""
 
-#: tv/program_display.py:422
+#: tv/program_display.py:425
 msgid "Favorite not added yet."
 msgstr ""
 
@@ -1810,60 +1810,60 @@ msgstr ""
 msgid "Config Menu"
 msgstr ""
 
-#: video/videoitem.py:281
+#: video/videoitem.py:284
 msgid "Play DVD"
 msgstr ""
 
-#: video/videoitem.py:282 video/videoitem.py:284
+#: video/videoitem.py:285 video/videoitem.py:287
 msgid "DVD title list"
 msgstr ""
 
-#: video/videoitem.py:285 video/videoitem.py:293
+#: video/videoitem.py:288 video/videoitem.py:296
 msgid "Play default track"
 msgstr ""
 
-#: video/videoitem.py:289
+#: video/videoitem.py:292
 msgid "Play VCD"
 msgstr ""
 
-#: video/videoitem.py:290 video/videoitem.py:292
+#: video/videoitem.py:293 video/videoitem.py:295
 msgid "VCD title list"
 msgstr ""
 
-#: video/videoitem.py:297
+#: video/videoitem.py:300
 msgid "Play with alternate player"
 msgstr ""
 
-#: video/videoitem.py:300
+#: video/videoitem.py:303
 msgid "Play with maximum cache"
 msgstr ""
 
-#: video/videoitem.py:305
+#: video/videoitem.py:308
 msgid "Show variants"
 msgstr ""
 
-#: video/videoitem.py:308
+#: video/videoitem.py:311
 msgid "Create Thumbnail"
 msgstr ""
 
-#: video/videoitem.py:329
+#: video/videoitem.py:332
 msgid "Please wait...."
 msgstr ""
 
-#: video/videoitem.py:460 video/videoitem.py:474 video/videoitem.py:488
+#: video/videoitem.py:463 video/videoitem.py:477 video/videoitem.py:491
 #, python-format
 msgid "No media found for \"%s\".\n"
 msgstr ""
 
-#: video/videoitem.py:461 video/videoitem.py:475 video/videoitem.py:489
+#: video/videoitem.py:464 video/videoitem.py:478 video/videoitem.py:492
 msgid "Please insert the media."
 msgstr ""
 
-#: video/videoitem.py:494
+#: video/videoitem.py:497
 msgid "No player for this item found"
 msgstr ""
 
-#: video/videoitem.py:569
+#: video/videoitem.py:572
 #, python-format
 msgid "Play Title %s"
 msgstr ""
