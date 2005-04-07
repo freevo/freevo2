@@ -2,7 +2,7 @@
 drop table versioning;
 create table versioning (
     thing text primary key,
-    version text,
+    version text
 );
 insert into versioning (thing, version) values ("sql", "0.1.1");
 
