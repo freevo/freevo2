@@ -34,6 +34,7 @@
 # python imports
 import os
 import logging
+import traceback
 
 # notifier
 import notifier
@@ -52,15 +53,32 @@ class Database:
     Database class for sqlite usage
     """
     def __init__(self, dbpath):
-        if os.path.isfile(dbpath) and os.path.getsize(dbpath) == 0:
-            log.error('EPG database is zero size (invalid), removing it')
-            os.system('rm %s' % dbath)
+        try:
+            if os.path.getsize(dbpath) == 0:
+                log.error('EPG database is zero size (invalid), removing it')
+                os.system('rm %s' % dbath)
+        except OSError:
+            if os.path.isfile(dbpath):
+                log.error('Problem reading %s, check permissions' % dbpath)
+                traceback.print_exc()
+                raise OSError
+
         if not os.path.isfile(dbpath):
-            # TODO: try to find sqlite in the path, error if not
-            log.warning('EPG database missing, creating it')
-            scheme = os.path.join(os.path.dirname(__file__), 'epg_schema.sql')
-            os.system('sqlite %s < %s 2>/dev/null >/dev/null' % \
-                      (dbpath, scheme))
+
+            # try to find sqlite in the path, error if not
+            for dirname in os.environ['PATH'].split(':'):
+                sqlite_path = os.path.join(dirname, 'sqlite')
+                if os.path.exists(sqlite_path) and os.path.isfile(sqlite_path):
+                    break
+            else:
+                log.error('sqlite not found, please check your installation')
+                raise RuntimeError
+
+            log.warning('EPG database missing, creating it: %s' % sqlite_path)
+            schema = os.path.join(os.path.dirname(__file__), 'epg_schema.sql')
+            os.system('%s %s < %s 2>/dev/null >/dev/null' % \
+                      (sqlite_path, dbpath, schema))
+
         while 1:
             try:
                 self.db = sqlite.connect(dbpath, client_encoding='utf-8',
@@ -68,7 +86,9 @@ class Database:
                 break
             except OperationalError, e:
                 notifier.step(False, False)
+
         self.cursor = self.db.cursor()
+
         ver = self.get_version()
         log.info('EPG database version %s' % ver)
         if ver != latest_version:
@@ -78,9 +98,6 @@ class Database:
 
 
     def upgrade_db(self, ver):
-        # TODO: finish this or change it 
-        # Here's a quick hack for the current upgrade:
-
         if ver == "0.0.0" and latest_version == "0.1.1":
             log.info('Upgrading EPG database from %s to %s.' % \
                      (ver, latest_version))
@@ -111,6 +128,7 @@ class Database:
         if self.check_table('versioning'):
             return self.execute('select version from versioning where thing="sql"')[0][0]
         else:
+            log.warning('EPG database version check failed, using 0.0.0')
             return "0.0.0"
 
 
