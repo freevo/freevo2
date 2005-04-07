@@ -52,7 +52,11 @@ class Database:
     Database class for sqlite usage
     """
     def __init__(self, dbpath):
+        if os.path.getsize(dbpath) == 0:
+            log.error('EPG database is zero size (invalid), removing it')
+            os.system('rm %s' % dbath)
         if not os.path.isfile(dbpath):
+            # TODO: try to find sqlite in the path, error if not
             log.warning('EPG database missing, creating it')
             scheme = os.path.join(os.path.dirname(__file__), 'epg_schema.sql')
             os.system('sqlite %s < %s 2>/dev/null >/dev/null' % \
