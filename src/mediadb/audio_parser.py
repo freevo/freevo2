@@ -90,8 +90,8 @@ def check_info(dirinfo):
             # no changes in here. Do not parse everything again
             return False
 
-    # get a new listing again
-    listing = Listing(dirinfo.filename)
+    # reset listing
+    listing.reset()
 
     # variables to scan
     length = 0

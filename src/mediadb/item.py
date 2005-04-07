@@ -46,6 +46,8 @@ class ItemInfo:
     def __init__(self, basename, dirname, attr, cache=None):
         if not attr:
             attr = {}
+            if basename:
+                attr['ext'] = basename[basename.rfind('.')+1:].lower()
         self.attr = attr
         self.basename = basename
         self.tmp = {}

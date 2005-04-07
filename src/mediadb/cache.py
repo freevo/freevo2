@@ -75,9 +75,9 @@ msg = 'scanning directory structure..........................'
 print msg,
 sys.__stdout__.flush()
 
-# config.AUDIO_ITEMS = [ ( 'foo', '/local/mp3/Artists/Dixie Chicks' ) ]
-# config.VIDEO_ITEMS = [ ( 'foo', '/local/video/movie' ) ]
-# config.IMAGE_ITEMS = [ ( 'foo', '/local/images/fotos/misc' ) ]
+config.AUDIO_ITEMS = [ ( 'foo', '/local/mp3/Artists/Dixie Chicks' ) ]
+config.VIDEO_ITEMS = [ ( 'foo', '/local/video/incoming' ) ]
+config.IMAGE_ITEMS = [ ( 'foo', '/local/images/fotos/misc' ) ]
 
 directories = []
 for d in config.VIDEO_ITEMS + config.AUDIO_ITEMS + config.IMAGE_ITEMS:

@@ -62,10 +62,13 @@ class Listing:
         self.visible = self.data
 
 
-    def update(self, callback=None):
+    def update(self, callback=None, quick=False):
         if self.num_changes == 0:
             return
-        self.cache.parse(callback)
+        if quick:
+            self.cache.add_missing()
+        else:
+            self.cache.parse(callback)
         dirname = self.dirname
         cache = self.cache
         for basename, item in self.cache.list():
@@ -109,7 +112,7 @@ class Listing:
         return ret
 
 
-    def match_type(self, type_list):
+    def match_type(self, type):
         visible = self.visible
         self.visible = []
         ret = []
@@ -121,6 +124,11 @@ class Listing:
                 self.visible.append(v)
         return ret
 
+
+    def reset(self):
+        self.visible = self.data
+
+        
     def __iter__(self):
         return self.visible.__iter__()
     

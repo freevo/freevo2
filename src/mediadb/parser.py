@@ -11,6 +11,9 @@ import config
 import util.fxdparser
 import util.vfs as vfs
 
+# mediadb imports
+import db
+
 # list of external parser
 _parser = []
 
@@ -104,12 +107,15 @@ def cover_filter(x):
 
 
 
-def parse(filename, object):
+def parse(basename, filename, object, quick=False):
     """
     Add additional informations to filename, object.
     """
+    if object.has_key('type'):
+        del object['url']
+        del object['type']
     mminfo = None
-    if not object['ext'] in [ 'xml', 'fxd' ]:
+    if not quick and not object['ext'] in [ 'xml', 'fxd' ]:
         mminfo = mmpython.parse(filename)
     title = getname(filename)
     object['title:filename'] = title
@@ -129,33 +135,48 @@ def parse(filename, object):
 
     if os.path.isdir(filename):
         object['isdir'] = True
-        listing = vfs.listdir(filename, include_overlay=True)
-        # get directory cover
-        for l in listing:
-            if l.endswith('/cover.png') or l.endswith('/cover.jpg') or \
-                   l.endswith('/cover.gif'):
-                object['cover'] = l
-                break
-        else:
-            if object.has_key('cover'):
-                del object['cover']
-            if object.has_key('audiocover'):
-                del object['audiocover']
-            files = util.find_matches(listing, ('jpg', 'gif', 'png' ))
-            if len(files) == 1:
-                object['audiocover'] = files[0]
-            elif len(files) > 1 and len(files) < 10:
-                files = filter(cover_filter, files)
-                if files:
+        if vfs.abspath(filename + '/' + basename + '.fxd'):
+            # directory is covering a fxd file
+            object['type'] = 'fxd'
+        if not quick:
+            # Create a simple (quick) cache of subdirs to get some basic idea
+            # about the files inside the directory
+            c = db.Cache(filename)
+            if c.num_changes():
+                c.add_missing()
+            listing = vfs.listdir(filename, include_overlay=True)
+            # get directory cover
+            for l in listing:
+                if l.endswith('/cover.png') or l.endswith('/cover.jpg') or \
+                       l.endswith('/cover.gif'):
+                    object['cover'] = l
+                    break
+            else:
+                if object.has_key('cover'):
+                    del object['cover']
+                if object.has_key('audiocover'):
+                    del object['audiocover']
+                files = util.find_matches(listing, ('jpg', 'gif', 'png' ))
+                if len(files) == 1:
                     object['audiocover'] = files[0]
+                elif len(files) > 1 and len(files) < 10:
+                    files = filter(cover_filter, files)
+                    if files:
+                        object['audiocover'] = files[0]
 
-        # save directory overlay mtime
-        overlay = vfs.getoverlay(filename)
-        if os.path.isdir(overlay):
-            mtime = os.stat(overlay)[stat.ST_MTIME]
-            object['overlay_mtime'] = mtime
-        else:
-            object['overlay_mtime'] = 0
+            # check for fxd files in the directory
+            fxd = vfs.abspath(filename + '/folder.fxd')
+            if fxd:
+                object['fxd'] = fxd
+            elif object.has_key('fxd'):
+                del object['fxd']
+            # save directory overlay mtime
+            overlay = vfs.getoverlay(filename)
+            if os.path.isdir(overlay):
+                mtime = os.stat(overlay)[stat.ST_MTIME]
+                object['overlay_mtime'] = mtime
+            else:
+                object['overlay_mtime'] = 0
     else:
         if object.has_key('isdir'):
             del object['isdir']

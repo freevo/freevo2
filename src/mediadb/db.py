@@ -39,7 +39,6 @@ import re
 import logging
 
 # freevo imports
-import config
 import util.vfs as vfs
 import util.cache as cache
 from util.callback import *
@@ -110,7 +109,7 @@ class Cache:
             self.save()
         # 'normal' files
         self.items   = self.data['items']
-        # file sin the overlay dir
+        # files in the overlay dir
         self.overlay = self.data['overlay']
         # internal stuff about changes
         self.__added   = []
@@ -249,7 +248,7 @@ class Cache:
                      'mtime'    : os.stat(filename)[stat.ST_MTIME],
                      'mtime_dep': []
                      }
-            parser.parse(filename, info)
+            parser.parse(basename, filename, info)
 
             prefix = basename[:-len(ext)]
             if ext in ('png', 'jpg', 'gif'):
@@ -276,7 +275,7 @@ class Cache:
         for basename, filename, info in self.__changed:
             # check changed files
             log.debug('changed: %s' % filename)
-            parser.parse(filename, info)
+            parser.parse(basename, filename, info)
             log.debug(info['mtime_dep'])
             for key in info['mtime_dep']:
                 del info[key]
@@ -323,6 +322,29 @@ class Cache:
         self.__changed = []
         self.__check_global = False
         self.reduce_files = []
+
+
+    def add_missing(self):
+        """
+        Add the new files still missing in the databse with
+        basic attributes.
+        """
+        if not self.__added:
+            return
+
+        for basename, filename in self.__added:
+            ext = basename[basename.rfind('.')+1:].lower()
+            if ext == basename:
+                ext = ''
+            info = { 'ext'      : ext,
+                     'mtime'    : 1,
+                     'mtime_dep': []
+                     }
+            parser.parse(basename, filename, info, True)
+            if vfs.isoverlay(filename):
+                self.overlay[basename] = info
+            else:
+                self.items[basename] = info
 
 
     def list(self):
@@ -377,7 +399,8 @@ class FileCache:
             # process and to avoid directory changes just because the cache
             # is saved to a new file.
             self.changed = True
-            parser.parse(filename, self.data)
+            basename = filename[filename.rfind('/'):]
+            parser.parse(basename, filename, self.data)
             self.save()
 
 
