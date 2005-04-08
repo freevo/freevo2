@@ -56,7 +56,7 @@ class Database:
         try:
             if os.path.getsize(dbpath) == 0:
                 log.error('EPG database is zero size (invalid), removing it')
-                os.system('rm %s' % dbath)
+                os.system('rm %s' % dbpath)
         except OSError:
             if os.path.isfile(dbpath):
                 log.error('Problem reading %s, check permissions' % dbpath)
