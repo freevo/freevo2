@@ -290,6 +290,7 @@ class Cache:
             log.debug(info['mtime_dep'])
             for key in info['mtime_dep']:
                 del info[key]
+            info['mtime_dep'] = []
             if callback:
                 callback()
 
