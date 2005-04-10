@@ -136,8 +136,6 @@ def escape(sql):
 
 
 
-FILENAME_REGEXP = re.compile("^(.*?)_(.)(.*)$")
-
 def getimage(base, default=None):
     """
     return the image base+'.png' or base+'.jpg' if one of them exists.
@@ -148,35 +146,6 @@ def getimage(base, default=None):
         if image:
             return image
     return default
-
-
-def getname(file, skip_ext=True):
-    """
-    make a nicer display name from file
-    """
-    if len(file) < 2:
-        return Unicode(file)
-
-    # basename without ext
-    if file.rfind('/') < file.rfind('.') and skip_ext:
-        name = file[file.rfind('/')+1:file.rfind('.')]
-    else:
-        name = file[file.rfind('/')+1:]
-    if not name:
-        # Strange, it is a dot file, return the complete
-        # filename, I don't know what to do here. This should
-        # never happen
-        return Unicode(file)
-
-    name = name[0].upper() + name[1:]
-
-    while file.find('_') > 0 and FILENAME_REGEXP.match(name):
-        m = FILENAME_REGEXP.match(name)
-        if m:
-            name = m.group(1) + ' ' + m.group(2).upper() + m.group(3)
-    if name.endswith('_'):
-        name = name[:-1]
-    return Unicode(name)
 
 
 def smartsort(x,y):
