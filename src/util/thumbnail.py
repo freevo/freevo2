@@ -38,110 +38,76 @@ __all__ = ( 'create', 'get_name', 'load' )
 # python imports
 import os
 import logging
-
-# the logging object
-log = logging.getLogger('util')
+import stat
 
 # mevas for imlib2 support
 import mevas
 
 # freevo utils
 import fileops
-import cache
 import vfs
+from callback import *
 
+# the logging object
+log = logging.getLogger('util')
 
-def read_raw_thumbnail(filename):
-    """
-    Read a Freevo 'raw' thumbnail. The thumbnail itself is raw data, no
-    compression is used. This functions uses a lot of disc space, but is
-    very fast.
-    """
-    f = open(filename)
-    header = f.read(10)
-    if not header[:3] == 'FRI':
-        # raw data is a pickled imaged
-        return cache.load(filename)
-    data = f.read(), (ord(header[3]), ord(header[4])), header[5:].strip(' ')
-    f.close()
-    return mevas.imagelib.new(data[1], data[0], data[2])
-
-
-def create_raw_thumbnail(source, thumbnail):
-    """
-    Create a 'raw' thumbnail for the given source and store it to thumbnail.
-    Return the image object.
-    """
-    image = mevas.imagelib.open(source)
-    if image.width > 255 or image.height > 255:
-        image.scale_preserve_aspect((255,255))
-    f = open(thumbnail, 'w')
-    if image.has_alpha:
-        mode = 'RGBA'
-    else:
-        mode = 'RGB'
-    f.write('FRI%s%s%5s' % (chr(image.width), chr(image.height), mode))
-    f.write(str(image.get_raw_data(mode)))
-    f.close()
-    return image
+# list for thumbnails to create in bg
+_create_jobs = []
 
 
 def get_name(filename):
     """
     Returns the filename of the thumbnail if it exists. None if not.
     """
-    if filename.endswith('.raw') or filename.endswith('.thumb.jpg'):
+    s = os.stat(filename)
+    if s[stat.ST_SIZE] < 30000:
         return filename
-    thumb = vfs.getoverlay(filename + '.raw')
-    try:
-        if fileops.mtime(thumb) > fileops.mtime(filename):
-            return thumb
-        os.unlink(thumb)
-    except (IOError, OSError):
-        pass
-    if not filename.endswith('.jpg'):
+    base = filename[:filename.rfind('.')]
+    if base.endswith('.thumb'):
+        return filename
+    thumb = vfs.getoverlay(base + '.thumb' + filename[filename.rfind('.'):])
+    if not os.path.isfile(thumb):
         return None
-    thumb = vfs.getoverlay(filename[:-3] + 'thumb.jpg')
-    try:
-        if fileops.mtime(thumb) > fileops.mtime(filename):
-            return thumb
-        os.unlink(thumb)
-    except (IOError, OSError):
-        pass
+
+    if os.stat(thumb)[stat.ST_MTIME] > s[stat.ST_MTIME]:
+        return thumb
+    os.unlink(thumb)
     return None
 
 
-def create(filename):
+def create(filename, check_overlay=True):
     """
     Create a thumbnail for the given filename in the vfs.
     """
-    if not os.path.isdir(os.path.dirname(vfs.getoverlay(filename))):
+    if check_overlay and \
+           not os.path.isdir(os.path.dirname(vfs.getoverlay(filename))):
         os.makedirs(os.path.dirname(vfs.getoverlay(filename)))
-    if filename.endswith('.jpg'):
-        thumb = vfs.getoverlay(filename[:-3] + 'thumb.jpg')
-        # epeg support for fast jpg thumbnailing
-        return mevas.imagelib.thumbnail(filename, thumb, (255, 255))
-
-    thumb = vfs.getoverlay(filename + '.raw')
+    base  = filename[:filename.rfind('.')]
+    thumb = vfs.getoverlay(base + '.thumb' + filename[filename.rfind('.'):])
+    if filename in _create_jobs:
+        _create_jobs.remove(filename)
+        if _create_jobs:
+            call_later(10, create, _create_jobs[0])
     try:
-        return create_raw_thumbnail(filename, thumb)
-    except Exception, e:
-        log.error('thumbnail.create error:\n%s' % e)
-        fileops.touch(thumb)
+        return mevas.imagelib.thumbnail(filename, thumb, (255, 255))
+    except:
         return None
 
 
-def load(filename):
+def load(filename, bg=False):
     """
     Return the thumbnail. Create one, if it doesn't exists.
     """
-    thumb = get_name(filename)
+    try:
+        thumb = get_name(filename)
+    except OSError:
+        return None
     if thumb:
-        if thumb.endswith('raw'):
-            try:
-                return read_raw_thumbnail(thumb)
-            except:
-                return None
         return mevas.imagelib.open(thumb)
-    return create(filename)
-
+    if not bg:
+        return create(filename)
+    if filename in _create_jobs:
+        return
+    _create_jobs.append(filename)
+    call_later(10, create, _create_jobs[0])
+    return None
