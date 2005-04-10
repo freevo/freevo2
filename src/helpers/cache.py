@@ -1,49 +1,16 @@
-#!/usr/bin/env python
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
-# cache.py - delete old cache files and update the cache
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# cache.py - caching helper for faster mediadb usage
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes:
-#
-# Todo:        
-#
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.42  2005/01/08 15:09:26  dischi
-# replace read_pickle and save_pickle with util.cache functions
-#
-# Revision 1.41  2004/11/13 15:56:13  dischi
-# do not import mediainfo in util.__init__
-#
-# Revision 1.40  2004/09/07 18:57:10  dischi
-# use new thumbnail util
-#
-# Revision 1.39  2004/08/29 18:38:15  dischi
-# make cache helper work again
-#
-# Revision 1.38  2004/07/21 11:33:34  dischi
-# support one file thumbnailing
-#
-# Revision 1.37  2004/07/10 12:33:39  dischi
-# header cleanup
-#
-# Revision 1.36  2004/06/06 08:31:37  dischi
-# fix crash
-#
-# Revision 1.35  2004/06/06 06:41:47  dischi
-# delete cache on mmpython update
-#
-# Revision 1.34  2004/05/12 20:07:01  dischi
-# do not delete raw files for discs
-#
-# Revision 1.33  2004/05/02 11:46:13  dischi
-# make it possible to turn off image caching
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -60,29 +27,87 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
-
-import sys
+# python imports
 import os
-
-import config
-import util
-import stat
+import sys
 import time
 import copy
 
-import util.mediainfo as mediainfo
+import notifier
+import mmpython.version
+
+# freevo imports
+import config
+import util
+import mediadb
 import util.thumbnail as thumbnail
+import util.videothumb
+import util.fileops as fileops
 
-import plugin
-import directory
-import playlist
-import fxditem
+# use this number to keep track of changes in this helper
+VERSION = 4
 
-# use this number to keep track of changes in
-# this helper. Check this against util/mediainfo
-VERSION = 3
+class ProgressBox:
+    def __init__(self, msg, max):
+        self.msg = msg
+        self.max = max
+        self.pos = 0
+        print '\r%-70s   0%%' % msg,
+        sys.__stdout__.flush()
+        
+    def callback(self):
+        self.pos += 1
+        progress = '%3d%%' % (self.pos * 100 / self.max)
+        print '\r%-70s %s' % (self.msg, progress),
+        sys.__stdout__.flush()
+
+
+def cache_directories(directories):
+    """
+    cache all directories
+    """
+    print 'checking database files...............................',
+    sys.__stdout__.flush()
+    listings = []
+    for d in directories:
+        if d.num_changes:
+            listings.append(d)
+    print '%s changes' % len(listings)
+    
+    # cache all dirs
+    for l in listings:
+        name = l.dirname
+        if len(name) > 55:
+            name = name[:15] + ' [...] ' + name[-35:]
+        msg = ProgressBox('  %4d/%-4d %s' % (listings.index(l) + 1,
+                                             len(listings), name),
+                          l.num_changes)
+        l.update(msg.callback)
+        l.cache.save()
+        print
+
+
+def get_directory_listings(dirlist, msg):
+    """
+    Get a list of Listings recursive of all given directories.
+    """
+    subdirs  = []
+    listings = []
+    for dir in dirlist:
+        progress = '%3d%%' % (dirlist.index(dir) * 100 / len(dirlist))
+        print '\r%s %s' % (msg, progress),
+        sys.__stdout__.flush()
+        for dirname in fileops.get_subdirs_recursively(dir):
+            if not dirname in subdirs:
+                subdirs.append(dirname)
+                listings.append(mediadb.Listing(dirname))
+        if not dir in subdirs:
+            subdirs.append(dir)
+            listings.append(mediadb.Listing(dir))
+    return listings
+
 
 def delete_old_files_1():
     """
@@ -93,12 +118,13 @@ def delete_old_files_1():
     sys.__stdout__.flush()
     del_list = []
 
-    for name in ('image-viewer-thumb.jpg', 'thumbnails', 'audio', 'mmpython', 'disc'):
+    for name in ('image-viewer-thumb.jpg', 'thumbnails', 'audio', 'mmpython',
+                 'disc'):
         if os.path.exists(os.path.join(config.FREEVO_CACHEDIR, name)):
             del_list.append(os.path.join(config.FREEVO_CACHEDIR, name))
-
     del_list += util.recursefolders(config.OVERLAY_DIR,1,'mmpython',1)
-    del_list += util.match_files(config.OVERLAY_DIR+'/disc', ['mmpython', 'freevo'])
+    del_list += util.match_files(config.OVERLAY_DIR+'/disc',
+                                 ['mmpython', 'freevo'])
 
     for file in util.match_files_recursively(config.OVERLAY_DIR, ['png']):
         if file.endswith('.fvt.png'):
@@ -133,52 +159,17 @@ def delete_old_files_2():
     for file in subdirs:
         if not os.path.isdir(file[len(config.OVERLAY_DIR):]) and not \
                file.startswith(config.OVERLAY_DIR + '/disc'):
-            for metafile in ('cover.png', 'cover.png.raw', 'cover.jpg', 'cover.jpg.raw',
-                             'mmpython.cache', 'freevo.cache'):
+            for metafile in ('cover.png', 'cover.png.raw', 'cover.jpg',
+                             'cover.jpg.raw', 'mmpython.cache',
+                             'freevo.cache', 'freevo.db'):
                 if os.path.isfile(os.path.join(file, metafile)):
                     os.unlink(os.path.join(file, metafile))
             if not os.listdir(file):
                 os.rmdir(file)
     print 'done'
-
-    print 'deleting old entries in metainfo......................',
-    sys.__stdout__.flush()
-    for filename in util.recursefolders(config.OVERLAY_DIR,1,'freevo.cache',1):
-        if filename.startswith(config.OVERLAY_DIR + '/disc'):
-            continue
-        dirname = os.path.dirname(filename)[len(config.OVERLAY_DIR):]
-        data    = util.cache.load(filename)
-        for key in copy.copy(data):
-            if not os.path.exists(dirname + '/' + key):
-                del data[key]
-        util.cache.save(filename, data)
-    print 'done'
     
 
-def cache_directories(rebuild):
-    """
-    cache all directories with mmpython
-    rebuild:
-    0   no rebuild
-    1   rebuild all files on disc
-    2   like 1, but also delete discinfo data
-    """
-    if rebuild:
-        print 'deleting cache files..................................',
-        sys.__stdout__.flush()
-        mediainfo.del_cache()
-        print 'done'
-
-    all_dirs = []
-    print 'checking mmpython cache files.........................',
-    sys.__stdout__.flush()
-    for d in config.VIDEO_ITEMS + config.AUDIO_ITEMS + config.IMAGE_ITEMS:
-        if os.path.isdir(d[1]):
-            all_dirs.append(d[1])
-    mediainfo.cache_recursive(all_dirs, verbose=True)
-    
-
-def cache_thumbnails():
+def cache_thumbnails(directories):
     """
     cache all image files by creating thumbnails
     """
@@ -189,28 +180,23 @@ def cache_thumbnails():
     sys.__stdout__.flush()
 
     files = []
-    for d in config.VIDEO_ITEMS + config.AUDIO_ITEMS + config.IMAGE_ITEMS:
-        try:
-            d = d[1]
-        except:
-            pass
-        if not os.path.isdir(d):
-            continue
-        files += util.match_files_recursively(d, config.IMAGE_SUFFIX) + \
-                 util.match_files_recursively(vfs.getoverlay(d), config.IMAGE_SUFFIX)
+    for d in directories:
+        files += util.match_files_recursively(d, config.IMAGE_SUFFIX)
 
     files = util.misc.unique(files)
     for filename in copy.copy(files):
         if thumbnail.get_name(filename):
             files.remove(filename)
-        for bad_dir in ('.xvpics', '.thumbnails', '.pics'):
-            if filename.find('/' + bad_dir + '/') > 0:
-                try:
+        elif filename.find('.thumb.') > 0:
+            files.remove(filename)
+        else:
+            for bad_dir in ('.xvpics', '.thumbnails', '.pics'):
+                if filename.find('/' + bad_dir + '/') > 0:
                     files.remove(filename)
-                except:
-                    pass
-                
+
+    
     print '%s file(s)' % len(files)
+    files.sort(lambda l, o: cmp(l, o))
         
     for filename in files:
         fname = filename
@@ -223,247 +209,127 @@ def cache_thumbnails():
         print
 
     
-def create_metadata():
-    """
-    scan files and create metadata
-    """
-    import util.extendedmeta
-    print 'creating audio metadata...............................',
-    sys.__stdout__.flush()
-    for dir in config.AUDIO_ITEMS:
-        if os.path.isdir(dir[1]):
-            util.extendedmeta.AudioParser(dir[1], rescan=True)
-    print 'done'
 
-    print 'creating playlist metadata............................',
-    sys.__stdout__.flush()
-    pl  = []
-    fxd = []
-    for dir in config.AUDIO_ITEMS:
-        if os.path.isdir(dir[1]):
-            pl  += util.match_files_recursively(dir[1], playlist.mimetype.suffix())
-            fxd += util.match_files_recursively(dir[1], fxditem.mimetype.suffix())
-        elif isinstance(dir, list) or isinstance(dir, tuple):
-            print
-            print 'bad path: %s   ' % dir[1] ,
-            sys.__stdout__.flush()
-        elif util.match_suffix(dir, playlist.mimetype.suffix()):
-            pl.append(dir)
-        elif util.match_suffix(dir, fxditem.mimetype.suffix()):
-            fxd.append(dir)
-        elif util.match_suffix(dir[1], playlist.mimetype.suffix()):
-            pl.append(dir[1])
-        elif util.match_suffix(dir[1], fxditem.mimetype.suffix()):
-            fxd.append(dir[1])
+# init the notifier
+notifier.init( notifier.GENERIC )
 
-    
-    items = playlist.mimetype.get(None, util.misc.unique(pl))
-
-    # ignore fxd files for now, they can't store metainfo
-    # for f in fxditem.mimetype.get(None, util.misc.unique(fxd)):
-    #     if f.type == 'playlist':
-    #         items.append(f)
-
-    for i in items:
-        util.extendedmeta.PlaylistParser(i)
-    print 'done'
-
-    print 'checking database.....................................',
-    sys.__stdout__.flush()
-    try:
-        # The DB stuff
-        import sqlite
-
-        for dir in config.AUDIO_ITEMS:
-            if os.path.isdir(dir[1]):
-                util.extendedmeta.addPathDB(dir[1], dir[0], verbose=False)
-        print 'done'
-    except ImportError:
-        print 'skipping'
-        pass
-
-
-    print 'creating directory metadata...........................',
-    sys.__stdout__.flush()
-
-    subdirs = { 'all': [] }
-
-    # get all subdirs for each type
-    for type in activate_plugins:
-        subdirs[type] = []
-        for d in getattr(config, '%s_ITEMS' % type.upper()):
-            try:
-                d = d[1]
-            except:
-                pass
-            if not os.path.isdir(d):
-                continue
-            rec = util.get_subdirs_recursively(d)
-            subdirs['all'] += rec
-            subdirs[type]  += rec
-                
-    subdirs['all'] = util.misc.unique(subdirs['all'])
-    subdirs['all'].sort(lambda l, o: cmp(l.upper(), o.upper()))
-
-    # walk though each directory
-    for s in subdirs['all']:
-        if s.find('/.') > 0:
-            continue
-
-        # create the DirItems
-        d = directory.DirItem(s, None)
-
-        # rebuild metainfo
-        d.create_metainfo()
-        for type in activate_plugins:
-            if subdirs.has_key(type) and s in subdirs[type]:
-                d.display_type = type
-                # scan again with display_type
-                d.create_metainfo()
-
-    print 'done'
-
-
-
-def create_tv_pickle():
-    print 'caching xmltv database................................',
-    sys.__stdout__.flush()
-
-    import tv.epg_xmltv
-    tv.epg_xmltv.get_guide(verbose=False)
-    print 'done'
-    
-    
-if __name__ == "__main__":
-    os.umask(config.UMASK)
-    if len(sys.argv)>1 and sys.argv[1] == '--help':
-        print 'freevo cache helper to delete unused cache entries and to'
-        print 'cache all files in your data directories.'
-        print
-        print 'usage "freevo cache [--rebuild]"'
-        print 'If the --rebuild option is given, Freevo will delete the cache first'
-        print 'to rebuild the cache from start. Caches from discs won\'t be affected'
-        print
-        print 'or "freevo cache --thumbnail [ --recursive ] dir"'
-        print 'This will create thumbnails of your _video_ files'
-        print
-        print 'WARNING:'
-        print 'Caching needs a lot free space in OVERLAY_DIR. The space is also'
-        print 'needed when Freevo generates the files during runtime. Image'
-        print 'caching is the worst. So make sure you have several hundred MB'
-        print 'free! OVERLAY_DIR is set to %s' % config.OVERLAY_DIR
-        print
-        print 'It may be possible to turn off image caching in future versions'
-        print 'of Freevo (but this will slow things down).'
-        print
-        sys.exit(0)
-
-    if len(sys.argv)>1 and sys.argv[1] == '--thumbnail':
-        import util.videothumb
-        if sys.argv[2] == '--recursive':
-            dirname = os.path.abspath(sys.argv[3])
-            files = util.match_files_recursively(dirname, config.VIDEO_SUFFIX)
-        elif os.path.isdir(sys.argv[2]):
-            dirname = os.path.abspath(sys.argv[2])
-            files = util.match_files(dirname, config.VIDEO_SUFFIX)
-        else:
-            files = [ os.path.abspath(sys.argv[2]) ]
-        print 'creating video thumbnails....'
-        for filename in files:
-            print '  %4d/%-4d %s' % (files.index(filename)+1, len(files),
-                                     os.path.basename(filename))
-            util.videothumb.snapshot(filename, update=False)
-        print
-        sys.exit(0)
-
-
-    print 'Freevo cache'
+os.umask(config.UMASK)
+if len(sys.argv)>1 and sys.argv[1] == '--help':
+    print 'freevo cache helper to delete unused cache entries and to'
+    print 'cache all files in your data directories.'
     print
-    print 'Freevo will now generate a metadata cache for all your files and'
-    print 'create thumbnails from images for faster access.'
+    print 'usage "freevo cache [--rebuild]"'
+    print 'If the --rebuild option is given, Freevo will delete the cache'
+    print 'first to rebuild the cache from start. Caches from discs won\'t be'
+    print 'affected'
     print
+    print 'or "freevo cache --thumbnail [ --recursive ] dir"'
+    print 'This will create thumbnails of your _video_ files'
+    print
+    print 'WARNING:'
+    print 'Caching needs a lot free space in OVERLAY_DIR. The space is also'
+    print 'needed when Freevo generates the files during runtime. Image'
+    print 'caching is the worst. So make sure you have several hundred MB'
+    print 'free! OVERLAY_DIR is set to %s' % config.OVERLAY_DIR
+    print
+    print 'It may be possible to turn off image caching in future versions'
+    print 'of Freevo (but this will slow things down).'
+    print
+    sys.exit(0)
 
-    # check for current cache informations
-    if (len(sys.argv)>1 and sys.argv[1] == '--rebuild'):
-        rebuild = 1
+if len(sys.argv)>1 and sys.argv[1] == '--thumbnail':
+    if sys.argv[2] == '--recursive':
+        dirname = os.path.abspath(sys.argv[3])
+        files = util.match_files_recursively(dirname, config.VIDEO_SUFFIX)
+    elif os.path.isdir(sys.argv[2]):
+        dirname = os.path.abspath(sys.argv[2])
+        files = util.match_files(dirname, config.VIDEO_SUFFIX)
     else:
-        rebuild = 0
-    try:
-        import mmpython.version
+        files = [ os.path.abspath(sys.argv[2]) ]
+    print 'creating video thumbnails....'
+    for filename in files:
+        print '  %4d/%-4d %s' % (files.index(filename)+1, len(files),
+                                 os.path.basename(filename))
+        util.videothumb.snapshot(filename, update=False)
+    print
+    sys.exit(0)
 
-        info = None
-        cachefile = os.path.join(config.FREEVO_CACHEDIR, 'mediainfo')
-        if os.path.isfile(cachefile):
-            info = util.cache.load(cachefile)
-        if not info:
-            print
-            print 'Unable to detect last complete rebuild, forcing rebuild'
-            rebuild = 2
-            complete_update = int(time.time())
-        else:
-            if len(info) == 3:
-                mmchanged, part_update, complete_update = info
-                freevo_changed = 0
-            else:
-                mmchanged, freevo_changed, part_update, complete_update = info
 
-            # let's warn about some updates
-            if freevo_changed < VERSION or mmpython.version.CHANGED > mmchanged:
-                print 'Cache too old, forcing rebuild'
-                rebuild = 2
-                complete_update = int(time.time())
-                
-    except ImportError:
-        print
-        print 'Error: unable to read mmpython version information'
-        print 'Please update mmpython to the latest release or if you use'
-        print 'Freevo CVS versions, please also use mmpython CVS.'
-        print
-        print 'Some functions in Freevo may not work or even crash!'
-        print
-        print
+print 'Freevo cache'
+print
+print 'Freevo will now generate a metadata cache for all your files and'
+print 'create thumbnails from images for faster access.'
+print
 
-    start = time.clock()
-    
-    activate_plugins = []
-    for type in ('video', 'audio', 'image', 'games'):
-        if plugin.is_active(type):
-            # activate all mimetype plugins
-            plugin.init_special_plugin(type)
-            activate_plugins.append(type)
-            
-    for type in 'VIDEO', 'AUDIO', 'IMAGE':
-        for d in copy.copy(getattr(config, '%s_ITEMS' % type)):
-            if not isstring(d):
-                d = d[1]
-            if d == '/':
-                print 'ERROR: %s_ITEMS contains root directory, skipped.' % type
-                setattr(config, '%s_ITEMS' % type, [])
+# check for current cache informations
+if (len(sys.argv)>1 and sys.argv[1] == '--rebuild'):
+    rebuild = 1
+else:
+    rebuild = 0
 
-    if os.path.isdir('%s/playlists' % config.FREEVO_CACHEDIR):
-        config.AUDIO_ITEMS.append(('Playlists', '%s/playlists' % config.FREEVO_CACHEDIR))
-    delete_old_files_1()
-    delete_old_files_2()
+info = None
+cachefile = os.path.join(config.FREEVO_CACHEDIR, 'mediainfo')
+if os.path.isfile(cachefile):
+    info = util.cache.load(cachefile)
+if not info:
+    print
+    print 'Unable to detect last complete rebuild, forcing rebuild'
+    rebuild = 1
+    complete_update = int(time.time())
+else:
+    if len(info) == 3:
+        mmchanged, part_update, complete_update = info
+        freevo_changed = 0
+    else:
+        mmchanged, freevo_changed, part_update, complete_update = info
 
-    # we have time here, don't use exif thumbnails
-    config.IMAGE_USE_EXIF_THUMBNAIL = 0
-    
-    cache_directories(rebuild)
-    if config.CACHE_IMAGES:
-        cache_thumbnails()
-    create_metadata()
-#     create_tv_pickle()
-    
-# close db
-mediainfo.sync()
+    # let's warn about some updates
+    if freevo_changed < VERSION or \
+           mmpython.version.CHANGED > mmchanged:
+        print 'Cache too old, forcing rebuild'
+        rebuild = 1
+        complete_update = int(time.time())
+
+
+start = time.clock()
+
+delete_old_files_1()
+delete_old_files_2()
+
+msg = 'scanning directory structure..........................'
+print msg,
+sys.__stdout__.flush()
+
+directories = []
+for d in config.VIDEO_ITEMS + config.AUDIO_ITEMS + config.IMAGE_ITEMS:
+    if os.path.isdir(d[1]) and d[1] != '/':
+        directories.append(d[1])
+listings = get_directory_listings(directories, msg)
+print '\r%s done' % msg
+
+if rebuild:
+    print 'deleting cache files..................................',
+    sys.__stdout__.flush()
+    for d in directories:
+        for f in util.match_files_recursively(vfs.getoverlay(d), ['db']):
+            if f.endswith('/freevo.db'):
+                pass
+                #os.unlink(f)
+    print 'done'
+
+cache_thumbnails(directories)
+cache_directories(listings)
+
+l = mediadb.FileListing(directories)
+if l.num_changes:
+    l.update()
+
+mediadb.cache(l)
+mediadb.save()
 
 # save cache info
-try:
-    import mmpython.version
-    util.cache.save(cachefile, (mmpython.version.CHANGED, VERSION,
-                                int(time.time()), complete_update))
-except ImportError:
-    print 'WARNING: please update mmpython'
+util.cache.save(cachefile, (mmpython.version.CHANGED, VERSION,
+                            int(time.time()), complete_update))
 
 print
 print 'caching complete after %s seconds' % (time.clock() - start)
