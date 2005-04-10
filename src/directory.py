@@ -34,11 +34,12 @@ import os
 import stat
 import copy
 import logging
+import time
 
 # freevo imports
 import config
 import util
-import util.mediainfo as mediainfo
+import mediadb
 
 import menu
 import plugin
@@ -105,31 +106,36 @@ class DirItem(Playlist):
     class for handling directories
     """
     def __init__(self, directory, parent, name = '', display_type = None,
-                 add_args = None, create_metainfo=True):
-        self.autovars = [ ('num_dir_items', 0), ('show_all_items', False) ]
+                 add_args = None):
         Playlist.__init__(self, parent=parent, display_type=display_type)
         self.type = 'dir'
         self.menu  = None
 
+        if isinstance(directory, mediadb.ItemInfo):
+            self.info = directory
+            directory = directory.filename
+        else:
+            directory = os.path.abspath(directory)
+            self.info = mediadb.get(directory)
+
+        # get cover from cache
+        self.image = self.info['cover']
+        
         # store FileInformation for moving/copying
         self.files = FileInformation()
         if self.media:
             self.files.read_only = True
         self.files.append(directory)
 
-        self.dir  = os.path.abspath(directory)
-        self.info = mediainfo.get_dir(directory)
-
+        self.dir = directory
+        
         if name:
             self.name = Unicode(name)
-        elif self.info['title:filename']:
-            self.name = self.info['title:filename']
         else:
-            self.name = util.getname(directory, skip_ext=False)
+            self.name = self.info['title:filename']
 
         if add_args == None and hasattr(parent, 'add_args'):
             add_args = parent.add_args
-
         self.add_args = add_args
 
         if self.parent and hasattr(parent, 'skin_display_type'):
@@ -164,11 +170,6 @@ class DirItem(Playlist):
 
         self.modified_vars = []
 
-        # Check for a cover in current dir
-        image = util.getimage(os.path.join(directory, 'cover'))
-        if image:
-            self.image = image
-            self.files.image = image
         self.folder_fxd = directory+'/folder.fxd'
         if vfs.isfile(self.folder_fxd):
             self.set_fxd_file(self.folder_fxd)
@@ -179,11 +180,6 @@ class DirItem(Playlist):
 
         if self.DIRECTORY_SORT_BY_DATE == 2 and self.display_type != 'tv':
             self.DIRECTORY_SORT_BY_DATE = 0
-
-        # create some extra info
-        if create_metainfo:
-            self.create_metainfo()
-
 
 
     def set_fxd_file(self, file):
@@ -291,12 +287,14 @@ class DirItem(Playlist):
             return _('Directory')
 
         if key == 'num_items':
+            self.create_info()
             display_type = self.display_type or 'all'
             if self.display_type == 'tv':
                 display_type = 'video'
             return self['num_%s_items' % display_type] + self['num_dir_items']
 
         if key == 'num_play_items':
+            self.create_info()
             display_type = self.display_type
             if self.display_type == 'tv':
                 display_type = 'video'
@@ -352,62 +350,49 @@ class DirItem(Playlist):
     # metainfo
     # ======================================================================
 
-    def create_metainfo(self):
+    def create_info(self):
         """
         create some metainfo for the directory
         """
-        display_type   = self.display_type
+        display_type = self.display_type
 
         if self.display_type == 'tv':
             display_type = 'video'
 
         name = display_type or 'all'
 
-        # check autovars
-        for var, val in self.autovars:
-            if var == 'num_%s_timestamp' % name:
-                break
-        else:
-            self.autovars += [ ( 'num_%s_timestamp' % name, 0 ),
-                               ( 'num_%s_items' % name, 0 ) ]
+        if self.info['num_%s_items' % name] != None:
+            # info is already stored, no new data
+            return False
+        
+        log.info('create metainfo for %s', self.dir)
+        need_umount = False
+        if self.media:
+            need_umount = not self.media.is_mounted()
+            self.media.mount()
 
-        try:
-            timestamp     = os.stat(self.dir)[stat.ST_MTIME]
-        except OSError:
-            return
+        # get listing
+        listing = mediadb.Listing(self.dir)
+        if listing.num_changes:
+            listing.update(quick=True)
 
-        num_timestamp = self.info['num_%s_timestamp' % name]
+        # play items and playlists
+        num_play_items = 0
+        for p in plugin.mimetype(display_type):
+            num_play_items += p.count(self, listing)
 
-        if not num_timestamp or num_timestamp < timestamp:
-            log.debug('create metainfo for %s', self.dir)
-            need_umount = False
-            if self.media:
-                need_umount = not self.media.is_mounted()
-                self.media.mount()
+        # normal DirItems
+        num_dir_items = len(listing.get_dir())
 
-            num_dir_items  = 0
-            num_play_items = 0
-            files          = vfs.listdir(self.dir, include_overlay=True)
+        # store info
+        self.info.store_with_mtime('num_%s_items' % name, num_play_items)
+        self.info.store_with_mtime('num_dir_items', num_dir_items)
 
-            # play items and playlists
-            for p in plugin.mimetype(display_type):
-                num_play_items += p.count(self, files)
+        if need_umount:
+            self.media.umount()
 
-            # normal DirItems
-            for filename in files:
-                if os.path.isdir(filename):
-                    num_dir_items += 1
-
-            # store info
-            if num_play_items != self['num_%s_items' % name]:
-                self['num_%s_items' % name] = num_play_items
-            if self['num_dir_items'] != num_dir_items:
-                self['num_dir_items'] = num_dir_items
-            self['num_%s_timestamp' % name] = timestamp
-
-            if need_umount:
-                self.media.umount()
-
+        return True
+    
 
     # ======================================================================
     # actions
@@ -426,14 +411,14 @@ class DirItem(Playlist):
 
         items = [ ( self.cwd, _('Browse directory')) ]
 
-        if self['num_%s_items' % display_type]:
+        if self.info['num_%s_items' % display_type]:
             items.append((self.play, _('Play all files in directory')))
 
         if display_type in self.DIRECTORY_AUTOPLAY_ITEMS and \
                not self['num_dir_items']:
             items.reverse()
 
-        if self['num_%s_items' % display_type]:
+        if self.info['num_%s_items' % display_type]:
             items.append((self.play_random, _('Random play all items')))
         if self['num_dir_items']:
             items += [ (self.play_random_recursive,
@@ -442,8 +427,9 @@ class DirItem(Playlist):
 
         items.append((self.configure, _('Configure directory'), 'configure'))
 
-        if self.folder_fxd:
-            items += fxditem.mimetype.get(self, [self.folder_fxd])
+        # FIXME: add this function again
+        # if self.folder_fxd:
+        #   items += fxditem.mimetype.get(self, [self.folder_fxd])
 
         if self.media:
             self.media.umount()
@@ -543,6 +529,7 @@ class DirItem(Playlist):
         """
         build the items for the directory
         """
+        t0 = time.time()
         self.playlist   = []
         self.play_items = []
         self.dir_items  = []
@@ -550,9 +537,6 @@ class DirItem(Playlist):
 
         if self.media:
             self.media.mount()
-
-        if hasattr(self, '__dirwatcher_last_time'):
-            del self.__dirwatcher_last_time
 
         if arg == 'update':
             if not self.menu.choices:
@@ -567,6 +551,7 @@ class DirItem(Playlist):
             self.menu.delattr('skin_force_text_view')
 
         elif not os.path.exists(self.dir):
+            # FIXME: better handling!!!!!
 	    AlertBox(text=_('Directory does not exist')).show()
             return
 
@@ -589,41 +574,28 @@ class DirItem(Playlist):
             pl.play(menuw=menuw)
             return
 
-        # if config.GUI_BUSYICON_TIMER:
-        # osd.get_singleton().busyicon.wait(config.GUI_BUSYICON_TIMER[0])
-
-        files       = vfs.listdir(self.dir, include_overlay=True)
-        num_changes = mediainfo.check_cache(self.dir)
-
-        pop = None
-        callback=None
-        if (num_changes > 10) or (num_changes and self.media):
+        t1 = time.time()
+        listing = mediadb.Listing(self.dir)
+        t2 = time.time()
+        if listing.num_changes > 5:
+            dirwatcher.cwd(None, None, None)
             if self.media:
-                pop = ProgressBox(text=_('Scanning disc, be patient...'),
-                                  full=num_changes)
+                text = _('Scanning disc, be patient...')
             else:
-                pop = ProgressBox(text=_('Scanning directory, be patient...'),
-                                  full=num_changes)
-            pop.show()
-            callback=pop.tick
-
-
-            # elif config.GUI_BUSYICON_TIMER and len(files) > \
-            #    config.GUI_BUSYICON_TIMER[1]:
-            # # many files, just show the busy icon now
-            # osd.get_singleton().busyicon.wait(0)
-
-
-        if num_changes > 0:
-            mediainfo.cache_dir(self.dir, callback=callback)
-
-
+                text = _('Scanning directory, be patient...')
+            popup = ProgressBox(text, full=listing.num_changes)
+            popup.show()
+            listing.update(popup.tick)
+            popup.destroy()
+        elif listing.num_changes:
+            listing.update()
+        t3 = time.time()
         #
         # build items
         #
         # build play_items, pl_items and dir_items
         for p in plugin.mimetype(display_type):
-            for i in p.get(self, files):
+            for i in p.get(self, listing):
                 if i.type == 'playlist':
                     self.pl_items.append(i)
                 elif i.type == 'dir':
@@ -631,14 +603,14 @@ class DirItem(Playlist):
                 else:
                     self.play_items.append(i)
 
+        t4 = time.time()
         # normal DirItems
-        for filename in files:
-            if os.path.split(filename)[1] in ['lost+found',]:
-                continue
+        for item in listing.get_dir():
+            d = DirItem(item, self, display_type = self.display_type)
+            self.dir_items.append(d)
 
-            if os.path.isdir(filename):
-                d = DirItem(filename, self, display_type = self.display_type)
-                self.dir_items.append(d)
+        # remember listing
+        self.listing = listing
 
         # remove same beginning from all play_items
         substr = ''
@@ -654,6 +626,8 @@ class DirItem(Playlist):
             else:
                 for i in self.play_items:
                     i.name = util.remove_start_string(i.name, substr)
+
+        t5 = time.time()
 
         #
         # sort all items
@@ -676,16 +650,19 @@ class DirItem(Playlist):
             self.play_items.sort(lambda l, o: cmp(l.sort('advanced').upper(),
                                                   o.sort('advanced').upper()))
         else:
-            self.play_items.sort(lambda l, o: cmp(l.sort().upper(),
-                                                  o.sort().upper()))
+            self.play_items.sort(lambda l, o: cmp(l.name.upper(),
+                                                  o.name.upper()))
+
+
+        t6 = time.time()
 
         if self['num_dir_items'] != len(self.dir_items):
             self['num_dir_items'] = len(self.dir_items)
 
-        if self['num_%s_items' % display_type] != \
+        if self.info['num_%s_items' % display_type] != \
                len(self.play_items) + len(self.pl_items):
-            self['num_%s_items' % display_type] = len(self.play_items) + \
-                                                  len(self.pl_items)
+            self.info['num_%s_items' % display_type] = len(self.play_items) + \
+                                                       len(self.pl_items)
 
         if self.DIRECTORY_REVERSE_SORT:
             self.dir_items.reverse()
@@ -715,20 +692,6 @@ class DirItem(Playlist):
                           random=True)
             pl.autoplay = True
             items = [ pl ] + items
-
-
-        if pop:
-            pop.destroy()
-            # closing the poup will rebuild the menu which may umount
-            # the drive
-            if self.media:
-                self.media.mount()
-
-            # if config.GUI_BUSYICON_TIMER:
-            # # stop the timer. If the icons is drawn, it will stay there
-            # # until the osd is redrawn, if not, we don't need it to pop
-            # # up the next milliseconds
-            # osd.get_singleton().busyicon.stop()
 
 
         #
@@ -788,9 +751,12 @@ class DirItem(Playlist):
 
             menuw.pushmenu(item_menu)
 
-            self.menu  = util.weakref(item_menu)
-            dirwatcher.cwd(menuw, self, self.menu, self.dir)
+            self.menu = util.weakref(item_menu)
+            dirwatcher.cwd(menuw, self, self.menu)
             self.menuw = menuw
+
+        t7 = time.time()
+        # print t2 - t1, t4 - t3, t5 - t4, t6 - t5, t7 - t6, t7 - t0
 
 
 
@@ -798,7 +764,7 @@ class DirItem(Playlist):
         """
         called when we return to this menu
         """
-        dirwatcher.cwd(self.menuw, self, self.menu, self.dir)
+        dirwatcher.cwd(self.menuw, self, self.menu)
         dirwatcher.scan()
 
         # we changed the menu, don't build a new one
@@ -986,94 +952,64 @@ class Dirwatcher(plugin.DaemonPlugin):
         self.item          = None
         self.menuw         = None
         self.item_menu     = None
-        self.dir           = None
-        self.files         = None
         self.poll_interval = 1000
 
         plugin.register(self, 'Dirwatcher')
 
 
-    def listoverlay(self):
-        """
-        Get listing of overlay dir for change checking.
-        Do not count *.cache, directories and *.raw (except videofiles.raw)
-        """
-        if not os.path.isdir(vfs.getoverlay(self.dir)):
-            # dir does not exist. Strange, there should be at least an
-            # mmpython cache file in there
-            return []
-        ret = []
-        for f in os.listdir(vfs.getoverlay(self.dir)):
-            # ignore .raw and .cache files
-            if not f.endswith('.raw') and not f.endswith('.cache') and not \
-                   os.path.isdir(os.path.join(self.dir, f)):
-                ret.append(f)
-        return ret
-
-
-    def cwd(self, menuw, item, item_menu, dir):
+    def cwd(self, menuw, item, item_menu):
         self.menuw     = menuw
         self.item      = item
         self.item_menu = item_menu
-        self.dir       = dir
-        try:
-            self.last_time = item.__dirwatcher_last_time
-            self.files     = item.__dirwatcher_last_files
-        except AttributeError:
-            self.last_time = vfs.mtime(self.dir)
-            self.files     = self.listoverlay()
-            self.item.__dirwatcher_last_time  = self.last_time
-            self.item.__dirwatcher_last_files = self.files
 
 
-    def scan(self):
-        if not self.dir:
-            return
-        try:
-            if vfs.mtime(self.dir) <= self.last_time:
-                return True
-        except (OSError, IOError):
-            # the directory is gone
-            log.info('Dirwatcher: unable to read directory %s' % self.dir)
-
-            # send EXIT to go one menu up:
-            eventhandler.post(MENU_BACK_ONE_MENU)
-            self.dir = None
-            return False
-
-        changed = False
-        if os.stat(self.dir)[stat.ST_MTIME] <= self.last_time:
-            # changes are in overlay dir, just check for new/deleted files,
-            log.info('overlay change')
-            new_files = self.listoverlay()
-            for f in self.files:
-                if not f in new_files:
-                    # deleted a file
-                    changed = True
-                    break
-            else:
-                for f in new_files:
-                    if not f in self.files:
-                        # added a file
-                        changed = True
-                        break
+    def fast_check(self, overlay = False):
+        cache = self.item.listing.cache
+        if overlay:
+            dirname = cache.overlay_file
+            listing = cache.overlay
+            mtime   = 'overlay_mtime'
         else:
-            changed = True
+            dirname = cache.dirname
+            listing = cache.items
+            mtime   = 'items_mtime'
 
-        self.last_time = vfs.mtime(self.dir)
-        self.item.__dirwatcher_last_time  = self.last_time
-        self.files = self.listoverlay()
+        data_mtime = os.stat(dirname)[stat.ST_MTIME]
+        if data_mtime != cache.data[mtime]:
+            return True
 
-        if changed:
+        for basename, info in listing.items():
+            if info['ext'] != 'fxd' and not info.has_key('isdir'):
+                continue
+            filename = dirname + '/' + basename
+            mtime = os.stat(filename)[stat.ST_MTIME]
+            if mtime != info['mtime']:
+                return True
+            if info.has_key('isdir'):
+                overlay = vfs.getoverlay(filename)
+                if os.path.isdir(overlay):
+                    mtime = os.stat(overlay)[stat.ST_MTIME]
+                    if mtime != info['overlay_mtime']:
+                        return True
+        if overlay:
+            return False
+        return self.fast_check(True)
+
+        
+    def scan(self):
+        if not self.item.listing:
+            return
+        if self.fast_check():
             log.info('directory has changed')
-            self.item.build(menuw=self.menuw, arg='update')
-
-        self.item.__dirwatcher_last_files = self.files
+            item = self.item
+            self.item = None
+            item.build(menuw=self.menuw, arg='update')
+            self.item = item
         return True
 
 
     def poll(self):
-        if self.dir and self.menuw and \
+        if self.item and self.item.listing and self.menuw and \
                self.menuw.menustack[-1] == self.item_menu and \
                eventhandler.is_menu():
             self.scan()

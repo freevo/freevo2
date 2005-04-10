@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2005/04/10 18:08:05  dischi
+# switch to new mediainfo module
+#
 # Revision 1.4  2004/12/18 13:39:08  dischi
 # wait using the notifier, stop popen children
 #
@@ -77,12 +80,12 @@ def shutdown(menuw=None, argshutdown=None, argrestart=None, exit=False):
     else only Freevo will be stopped.
     """
     import util.popen
-    import util.mediainfo
+    import mediadb
     import gui
 
     global _callbacks
     
-    util.mediainfo.sync()
+    mediadb.save()
     if not gui.displays.active():
         # this function is called from the signal handler, but
         # we are dead already.

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.80  2005/04/10 18:08:13  dischi
+# switch to new mediainfo module
+#
 # Revision 1.79  2004/11/20 18:22:59  dischi
 # use python logger module for debug
 #
@@ -71,9 +74,11 @@ import menu
 import util
 import eventhandler
 import plugin
+from mediadb import FileListing
 
 from event import *
 from item import Item, MediaItem
+from gui import ProgressBox
 
 import logging
 log = logging.getLogger()
@@ -96,9 +101,6 @@ class Playlist(MediaItem):
         self.menuw    = None
         self.name     = Unicode(name)
 
-        if isstring(playlist) and not name:
-            self.name = util.getname(playlist)
-            
         # variables only for Playlist
         self.current_item = None
         self.playlist     = playlist
@@ -249,20 +251,27 @@ class Playlist(MediaItem):
             self.get_plugins.append(p)
                 
         if isstring(playlist):
-            # it's a filename with a playlist
-            try:
-                f=open(playlist, "r")
-                line = f.readline()
-                f.close
-                if line.find("[playlist]") > -1:
-                    self.read_pls(playlist)
-                elif line.find("[Slides]") > -1:
-                    self.read_ssr(playlist)
-                else:
-                    self.read_m3u(playlist)
-            except (OSError, IOError), e:
-                log.error('playlist error: %s' % e)
             self.set_url(playlist)
+            if self.info['playlist'] != None:
+                log.info('use cached playlist for %s' % playlist)
+                self.playlist = self.info['playlist']
+            else:
+                log.info('create playlist for %s' % playlist)
+                # it's a filename with a playlist
+                try:
+                    f=open(playlist, "r")
+                    line = f.readline()
+                    f.close
+                    if line.find("[playlist]") > -1:
+                        self.read_pls(playlist)
+                    elif line.find("[Slides]") > -1:
+                        self.read_ssr(playlist)
+                    else:
+                        self.read_m3u(playlist)
+                except (OSError, IOError), e:
+                    log.error('playlist error: %s' % e)
+                # store the playlist for later use
+                self.info.store_with_mtime('playlist', self.playlist)
 
         # self.playlist is a list of Items or strings (filenames)
         if not isstring(playlist):
@@ -277,9 +286,11 @@ class Playlist(MediaItem):
                      len(i) == 2 and vfs.isdir(i[0]):
                     # (directory, recursive=True|False)
                     if i[1]:
-                        self.playlist += util.match_files_recursively(i[0], self.suffixlist)
+                        self.playlist += util.match_files_recursively\
+                                         (i[0], self.suffixlist)
                     else:
-                        self.playlist += util.match_files(i[0], self.suffixlist)
+                        self.playlist += util.match_files\
+                                         (i[0], self.suffixlist)
                     # set autoplay to True on such big lists
                     self.autoplay = True
 
@@ -327,12 +338,32 @@ class Playlist(MediaItem):
         show the playlist in the menu
         """
         self.build()
+
+        files = []
+        for item in self.playlist:
+            if not callable(item):
+                files.append(item)
+
+        listing = FileListing(files)
+        if listing.num_changes > 10:
+            text = _('Scanning playlist, be patient...')
+            popup = ProgressBox(text, full=listing.num_changes)
+            popup.show()
+            listing.update(popup.tick)
+            popup.destroy()
+        elif listing.num_changes:
+            listing.update()
+        
         items = []
+
         for item in self.playlist:
             if not callable(item):
                 # get a real item
+                listing = FileListing([item])
+                if listing.num_changes:
+                    listing.update()
                 for p in self.get_plugins:
-                    items += p.get(self, [ item ])
+                    items += p.get(self, listing)
             else:
                 items.append(item)
 
@@ -535,7 +566,7 @@ class Mimetype(plugin.MimetypePlugin):
         return config.PLAYLIST_SUFFIX + config.IMAGE_SSHOW_SUFFIX
 
     
-    def get(self, parent, files):
+    def get(self, parent, listing):
         """
         return a list of items based on the files
         """
@@ -544,12 +575,10 @@ class Mimetype(plugin.MimetypePlugin):
             display_type = parent.display_type
         else:
             display_type = None
-            
-        for filename in util.find_matches(files, self.suffix()):
-            items.append(Playlist(playlist=filename, parent=parent,
-                                  display_type=display_type, build=True))
-            files.remove(filename)
 
+        for filename in listing.match_suffix(self.suffix()):
+            items.append(Playlist(playlist=filename.filename, parent=parent,
+                                  display_type=display_type, build=True))
         return items
 
 

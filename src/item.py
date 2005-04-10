@@ -47,7 +47,7 @@ import util
 
 from sysconfig import Unicode
 from util import vfs
-import util.mediainfo as mediainfo
+import mediadb
 
 # get logging object
 log = logging.getLogger()
@@ -166,10 +166,10 @@ class Item:
     It's a template for MenuItem and for other info items like
     VideoItem, AudioItem and ImageItem
     """
-    def __init__(self, parent=None, info=None):
+    def __init__(self, parent=None, info=True):
         """
         Init the item. Sets all needed variables, if parent is given also
-        inherit some settings from there. Set self.info to info if given.
+        inherit some settings from there.
         """
         if not hasattr(self, 'type'):
             self.type     = None            # e.g. video, audio, dir, playlist
@@ -177,24 +177,20 @@ class Item:
         self.name         = u''             # name in menu
         self.parent       = parent          # parent item
         self.icon         = None
-        if info and isinstance(info, mediainfo.Info):
-            self.info     = copy.copy(info)
-        else:
-            self.info     = mediainfo.Info(None, None, info)
+        self.info         = None
         self.menuw        = None
         self.description  = ''
 
         self.eventhandler_plugins = []
 
+        if info:
+            # create a basic info object
+            self.info = mediadb.ItemInfo('', '', {})
+            
         if not hasattr(self, 'autovars'):
-            self.autovars = []
-
+            self.autovars = {}
+            
         if parent:
-            if info and hasattr(parent, 'DIRECTORY_USE_MEDIAID_TAG_NAMES') \
-                   and parent.DIRECTORY_USE_MEDIAID_TAG_NAMES and \
-                   self.info.has_key('title'):
-                self.name = self.info['title']
-
             self.image = parent.image
             if hasattr(parent, 'is_mainmenu_item'):
                 self.image = None
@@ -213,15 +209,6 @@ class Item:
         """
         set the value of 'key' to 'val'
         """
-        for var, val in self.autovars:
-            if key == var:
-                if val == value:
-                    if not self.delete_info(key):
-                        log.warning( u'unable to store info for \'%s\'' % \
-                                     self.name )
-                else:
-                    self.store_info(key, value)
-                return
         self.info[key] = value
 
 
@@ -229,21 +216,15 @@ class Item:
         """
         store the key/value in metadata
         """
-        if isinstance(self.info, mediainfo.Info):
-            if not self.info.store(key, value):
-                log.warning( u'unable to store info for \'%s\'' % self.name)
-        else:
-            log.warning( u'unable to store info for item \'%s\'' % self.name)
+        if not self.info.store(key, value):
+            log.warning( u'unable to store info for \'%s\'' % self.name)
 
 
     def delete_info(self, key):
         """
         delete entry for metadata
         """
-        if isinstance(self.info, mediainfo.Info):
-            return self.info.delete(key)
-        else:
-            log.warning('unable to delete info for that kind of item')
+        return self.info.delete(key)
 
 
     def __id__(self):
@@ -372,10 +353,6 @@ class Item:
                 r = getattr(self,attr)
             if r != None:
                 return r
-            if hasattr(self, 'autovars'):
-                for var, val in self.autovars:
-                    if var == attr:
-                        return val
         return ''
 
 
@@ -402,28 +379,35 @@ class MediaItem(Item):
     """
     def __init__(self, type, parent):
         self.type = type
-        Item.__init__(self, parent)
+        Item.__init__(self, parent, False)
 
 
-    def set_url(self, url, info=True, search_image=True):
+    def set_url(self, url, search_cover=True):
         """
         Set a new url to the item and adjust all attributes depending
         on the url. Each MediaItem has to call this function. If info
-        is True, search for additional information in mediainfo.
+        is True, search for additional information in mediadb.
         """
-        self.url = url                  # the url itself
+        if isinstance(url, mediadb.ItemInfo):
+            self.info = url
+            url = url.url
+        else:
+            if url:
+                log.error('please fix this for %s' % url)
+                self.info = mediadb.get(url[url.find('://')+3:])
+            else:
+                self.info = mediadb.ItemInfo('', '', {})
 
-        if not url:
-            self.network_play = True    # network url, like http
-            self.filename     = ''      # filename if it's a file:// url
-            self.mode         = ''      # the type (file, http, dvd...)
-            self.files        = None    # FileInformation
-            self.mimetype     = ''      # extention or mode
-            return
+                self.url = url              # the url itself
+                self.network_play = True    # network url, like http
+                self.filename     = ''      # filename if it's a file:// url
+                self.mode         = ''      # the type (file, http, dvd...)
+                self.files        = None    # FileInformation
+                self.mimetype     = ''      # extention or mode
+                self.name         = u''
+                return
 
-        if url.find('://') == -1:
-            self.url = 'file://' + url
-
+        self.url = url
         self.files = FileInformation()
         if self.media:
             self.files.read_only = True
@@ -436,31 +420,27 @@ class MediaItem(Item):
             self.network_play = False
             self.filename     = self.url[7:]
             self.files.append(self.filename)
-            if search_image:
-                image = util.getimage(self.filename[:self.filename.rfind('.')])
-                if image:
-                    # there is an image with the same filename except
-                    # the suffix is an image
-                    self.image = image
-                    self.files.image = image
-                elif self.parent and self.parent.type != 'dir':
-                    # search for cover.[png|jpg] the the current dir
-                    cover = os.path.dirname(self.filename) + '/cover'
-                    self.image = util.getimage(cover, self.image)
+
             # set the suffix of the file as mimetype
             self.mimetype = self.filename[self.filename.rfind('.')+1:].lower()
-            if info:
-                self.info = mediainfo.get(self.filename)
-                try:
-                    if self.parent.DIRECTORY_USE_MEDIAID_TAG_NAMES:
-                        self.name = self.info['title'] or self.name
-                except:
-                    pass
-                if not self.name:
-                    self.name = self.info['title:filename']
-            # Set a name for the item based on the filename
+
+            self.info.set_permanent_variables(self.autovars)
+            try:
+                if self.parent.DIRECTORY_USE_MEDIAID_TAG_NAMES:
+                    self.name = self.info['title'] or self.name
+            except:
+                pass
             if not self.name:
-                self.name = util.getname(self.filename)
+                self.name = self.info['title:filename']
+
+            if search_cover:
+                cover = self.info['cover']
+                if cover:
+                    self.image = cover
+                    if cover != self.filename and \
+                           cover[cover.rfind('/')+1:] == \
+                           self.filename[self.filename.rfind('/')+1:]:
+                        self.files.image = cover
 
         else:
             # Mode is not file, it has to be a network url. Other
@@ -469,7 +449,10 @@ class MediaItem(Item):
             self.filename     = ''
             self.mimetype     = self.type
             if not self.name:
-                self.name     = Unicode(self.url)
+                self.name = self.info['title:filename']
+            if not self.name:
+                self.name = Unicode(self.url)
+            self.image = self.info['cover']
 
 
     def play(self, arg=None, menuw=None):

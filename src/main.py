@@ -147,7 +147,6 @@ except Exception, e:
 import eventhandler
 import gui
 import util
-import util.mediainfo
 import plugin
 import mcomm
 
@@ -270,29 +269,6 @@ try:
     rpc = RPCHandler()
     # load plugins
     plugin.init(splash.progress)
-
-    # Fire up splashscreen and load the cache
-    if config.MEDIAINFO_USE_MEMORY == 2:
-        # delete previous splash screen object
-        splash.destroy()
-        splash = Splashscreen(_('Reading cache, please wait ...'), 1)
-
-        cachefiles = []
-        for type in ('video', 'audio', 'image', 'games'):
-            if plugin.is_active(type):
-                n = 'config.%s_ITEMS' % type.upper()
-                x = eval(n)
-                for item in x:
-                    if os.path.isdir(item[1]):
-                        cachefiles += [ item[1] ] + \
-                                      util.get_subdirs_recursively(item[1])
-
-        cachefiles = util.unique(cachefiles)
-        splash.bar.set_max_value(len(cachefiles))
-
-        for f in cachefiles:
-            splash.progress()
-            util.mediainfo.load_cache(f)
 
     # fade out the splash screen
     splash.hide()

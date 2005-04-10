@@ -45,7 +45,7 @@ import config
 import cleanup
 from event import Event
 import eventhandler
-
+import util
 
 # get logging object
 log = logging.getLogger('config')
@@ -168,7 +168,7 @@ class MimetypePlugin(Plugin):
         import util
         Plugin.__init__(self)
         self.display_type = []
-        self.find_matches = util.find_matches
+
 
     def suffix(self):
         """
@@ -184,11 +184,11 @@ class MimetypePlugin(Plugin):
         return []
 
 
-    def count(self, parent, files):
+    def count(self, parent, listing):
         """
         return how many items will be build on files
         """
-        return len(self.find_matches(files, self.suffix()))
+        return len(listing.match_suffix(self.suffix()))
 
 
     def dirinfo(self, diritem):

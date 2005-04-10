@@ -53,6 +53,7 @@ import util
 import item
 import plugin
 import os
+import mediadb
 
 # get logging object
 log = logging.getLogger()
@@ -62,31 +63,18 @@ class Mimetype(plugin.MimetypePlugin):
     """
     class to handle fxd files in directories
     """
-    def get(self, parent, files):
+    def get(self, parent, listing):
         """
-        return a list of items based on the files
+        return a list of items based on the listing
         """
-        # get the list of fxd files
-        fxd_files = util.find_matches(files, ['fxd'])
-
-        # removed covered files from the list
-        for f in fxd_files:
-            try:
-                files.remove(f)
-            except:
-                pass
-
-        # check of directories with a fxd covering it
-        for d in copy.copy(files):
-            if os.path.isdir(d):
-                f = os.path.join(d, os.path.basename(d) + '.fxd')
-                if vfs.isfile(f):
-                    fxd_files.append(f)
-                    files.remove(d)
+        # Get the list of fxd files. Get by extention (.fxd) and
+        # by type (fxd file with the same name as the dir inside it)
+        fxd_files = listing.match_suffix(['fxd']) + \
+                    listing.match_type('fxd')
 
         # return items
         if fxd_files:
-            return self.parse(parent, fxd_files, files)
+            return self.parse(parent, fxd_files, listing)
         else:
             return []
 
@@ -98,14 +86,14 @@ class Mimetype(plugin.MimetypePlugin):
         return [ 'fxd' ]
 
 
-    def count(self, parent, files):
+    def count(self, parent, listing):
         """
         return how many items will be build on files
         """
-        return len(self.get(parent, files))
+        return len(self.get(parent, listing))
 
 
-    def parse(self, parent, fxd_files, duplicate_check=[], display_type=None):
+    def parse(self, parent, fxd_files, listing, display_type=None):
         """
         return a list of items that belong to a fxd files
         """
@@ -119,13 +107,13 @@ class Mimetype(plugin.MimetypePlugin):
         for fxd_file in fxd_files:
             try:
                 # create a basic fxd parser
-                parser = util.fxdparser.FXD(fxd_file)
+                parser = util.fxdparser.FXD(fxd_file.filename)
 
                 # create items attr for return values
                 parser.setattr(None, 'items', [])
                 parser.setattr(None, 'parent', parent)
-                parser.setattr(None, 'filename', fxd_file)
-                parser.setattr(None, 'duplicate_check', duplicate_check)
+                parser.setattr(None, 'filename', fxd_file.filename)
+                parser.setattr(None, 'listing', listing)
                 parser.setattr(None, 'display_type', display_type)
 
                 for types, tag, handler in callbacks:
@@ -139,7 +127,7 @@ class Mimetype(plugin.MimetypePlugin):
                 items += parser.getattr(None, 'items')
 
             except:
-                log.exception("fxd file %s corrupt" % fxd_file)
+                log.exception("fxd file %s corrupt" % fxd_file.filename)
         return items
 
 
