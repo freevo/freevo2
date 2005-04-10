@@ -57,9 +57,13 @@ class Callback:
         """
         Call the callback function.
         """
+        if not self.name in _callbacks:
+            # FIXME: notifier bug???
+            pass
+        else:
+            del _callbacks[self.name]
         # remove from callback
         notifier.removeTimer(self.timer)
-        del _callbacks[self.name]
         # call callback function
         self.function(*self.args, **self.kwargs)
         return False

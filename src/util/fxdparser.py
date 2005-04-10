@@ -72,26 +72,28 @@ class FXDtree(qp_xml.Parser):
     """
     Class to parse and write fxd files
     """
-    def __init__(self, filename):
+    def __init__(self, filename, use_cache=True):
         """
         Load the file and parse it. If the file does not exists, create
         an empty <freevo> node.
         """
         qp_xml.Parser.__init__(self)
+        self.use_cache = use_cache
         self.filename = filename
         if not vfs.isfile(filename):
             self.tree = XMLnode('freevo')
         else:
             self.tree = None
-            cachename = vfs.getoverlay(filename + '.raw')
-            if os.path.isfile(filename) and os.path.isfile(cachename) and \
-                   fileops.mtime(cachename) >= fileops.mtime(filename):
-                self.tree = cache.load(cachename)
+            if use_cache:
+                cachename = vfs.getoverlay(filename + '.raw')
+                if os.path.isfile(filename) and os.path.isfile(cachename) and \
+                       fileops.mtime(cachename) >= fileops.mtime(filename):
+                    self.tree = cache.load(cachename)
             if not self.tree:
                 f = vfs.open(filename)
                 self.tree = self.parse(f)
                 f.close()
-                if self.tree:
+                if self.tree and use_cache:
                     cache.save(cachename, self.tree)
 
 
@@ -127,7 +129,7 @@ class FXDtree(qp_xml.Parser):
         f = vfs.open(filename)
         self.tree = self.parse(f)
         f.close()
-        if self.tree:
+        if self.tree and self.use_cache:
             cache.save(vfs.getoverlay(filename + '.raw'), self.tree)
 
 
@@ -179,11 +181,11 @@ class FXD:
 
     def __init__(self, filename):
         self.tree = FXDtree(filename)
+        self.filename = filename
         self.read_callback  = {}
         self.write_callback = {}
         self.user_data      = {}
         self.is_skin_fxd    = False
-        self.filename       = filename
 
 
     def set_handler(self, name, callback, mode='r', force=False):

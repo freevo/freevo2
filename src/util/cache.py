@@ -90,16 +90,20 @@ def save(file, data, version=None):
     version parameter must also be used when loading the data again.
     """
     try:
+        f = _open(file, 'w')
+    except (OSError, IOError):
         if _isfile(file):
             _unlink(file)
-        f = _open(file, 'w')
-        if version:
-            cPickle.dump((version, data), f, PICKLE_PROTOCOL)
-        else:
-            cPickle.dump(data, f, PICKLE_PROTOCOL)
-        f.close()
-    except IOError, e:
-        print 'cache.save: %s' % e
+        try:
+            f = _open(file, 'w')
+        except (OSError, IOError), e:
+            print 'cache.save: %s' % e
+            return
+    if version:
+        cPickle.dump((version, data), f, PICKLE_PROTOCOL)
+    else:
+        cPickle.dump(data, f, PICKLE_PROTOCOL)
+    f.close()
 
 
 
