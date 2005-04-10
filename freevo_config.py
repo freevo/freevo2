@@ -316,19 +316,6 @@ PLAYLIST_SUFFIX = [ 'm3u' ]
 MMPYTHON_CREATE_MD5_ID = 0
 
 #
-# Keep metadata in memory
-# Setting this variable will keep all cache files in memory. Startup will be
-# slower, but for large directories, this will speed up the display.
-# 0 = Only keep current dir in memory. Use this if you have too much data
-#     and not enough RAM
-# 1 = Once loaded, keep cachefile for directory in memory
-# 2 = Load all cachefiles on startup
-#
-# WARNING: you should not run 'freevo cache' when freevo is running.
-#
-MEDIAINFO_USE_MEMORY   = 1
-
-#
 # Cache images. This uses a lot of disc space but it's a huge speed
 # enhancement. The images will be cached in the vfs
 #
