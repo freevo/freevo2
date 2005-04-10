@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.61  2005/04/10 17:58:12  dischi
+# switch to new mediainfo module
+#
 # Revision 1.60  2005/04/01 18:04:14  rshortt
 # Add support for df_xine.
 #
@@ -203,12 +206,14 @@ class Xine(Application):
         self.current_subtitle = -1
 
         if item.mode == 'dvd':
-            for track in item.info['tracks']:
-                self.max_audio = max(self.max_audio, len(track['audio']))
-
-            for track in item.info['tracks']:
-                self.max_subtitle = max(self.max_subtitle, len(track['subtitles']))
-
+            if item.info['tracks']:
+                for track in item.info['tracks']:
+                    self.max_audio = max(self.max_audio, len(track['audio']))
+                    self.max_subtitle = max(self.max_subtitle, len(track['subtitles']))
+            else:
+                self.max_audio = len(item.info['audio'])
+                self.max_subtitle = len(item.info['subtitles'])
+                
         if item.mode == 'dvd' and hasattr(item, 'filename') and item.filename and \
                item.filename.endswith('.iso'):
             # dvd:///full/path/to/image.iso/

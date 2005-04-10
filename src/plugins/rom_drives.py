@@ -53,7 +53,7 @@ import plugin
 import util
 import util.ioctl
 import util.fthread
-import util.mediainfo
+import mediadb
 
 from event import *
 from directory import DirItem
@@ -181,7 +181,6 @@ class rom_items(plugin.MainMenuPlugin):
                     if media.item.type == 'dir':
                         media.item.display_type = parent.display_type
                         media.item.skin_display_type = parent.display_type
-                        media.item.create_metainfo()
                     m = media.item
 
             else:
@@ -373,7 +372,7 @@ class Watcher:
 
 
 
-    def identify(self, media, force_rebuild=False):
+    def identify(self, media):
         """
         magic!
         Try to find out as much as possible about the disc in the
@@ -428,43 +427,45 @@ class Watcher:
 
         # if there is a disc, the tray can't be open
         media.tray_open = False
-        disc_info = util.fthread.call(util.mediainfo.disc_info, media,
-                                      force_rebuild)
+        disc_info = util.fthread.call(mediadb.get, media)
+
         if not disc_info:
             # bad disc, e.g. blank disc.
             os.close(fd)
             return
 
-        data = disc_info.mmdata
+        # FXIME:
+        disc_info = disc_info
 
         # try to set the speed
-        if config.ROM_SPEED and data and not data['mime'] == 'video/dvd':
+        if config.ROM_SPEED and disc_info and not \
+               disc_info['mime'] == 'video/dvd':
             try:
                 ioctl(fd, CDROM_SELECT_SPEED, config.ROM_SPEED)
             except:
                 pass
 
-        if data and data['mime'] == 'audio/cd':
+        if disc_info and disc_info['mime'] == 'audio/cd':
             os.close(fd)
-            disc_id = data['id']
+            disc_id = disc_info['id']
             media.item = AudioDiskItem(disc_id, parent=None,
                                        devicename=media.devicename,
                                        display_type='audio')
             media.type = media.item.type
             media.item.media = media
-            if data['title']:
-                media.item.name = data['title']
+            if disc_info['title']:
+                media.item.name = disc_info['title']
             media.item.info = disc_info
             return
 
         os.close(fd)
         image = title = movie_info = more_info = fxd_file = None
 
-        media.id    = data['id']
-        media.label = data['label']
+        media.id    = disc_info['id']
+        media.label = disc_info['label']
         media.type  = 'cdrom'
 
-        label = data['label']
+        label = disc_info['label']
 
         # is the id in the database?
         for mimetype in plugin.mimetype():
@@ -477,11 +478,11 @@ class Watcher:
                 break
 
         # DVD/VCD/SVCD:
-        # There is data from mmpython for these three types
-        if data['mime'] in ('video/vcd', 'video/dvd'):
+        # There is disc_info from mmpython for these three types
+        if disc_info['mime'] in ('video/vcd', 'video/dvd'):
             if not title:
                 title = media.label.replace('_', ' ').lstrip().rstrip()
-                title = '%s [%s]' % (data['mime'][6:].upper(), title)
+                title = '%s [%s]' % (disc_info['mime'][6:].upper(), title)
 
             if movie_info:
                 media.item = copy.copy(movie_info)
@@ -489,43 +490,26 @@ class Watcher:
                 media.item = VideoItem('', None)
                 f = os.path.join(config.OVERLAY_DIR, 'disc-set', media.id)
                 media.item.image = util.getimage(f)
-            variables = media.item.info.variables
-            media.item.info = disc_info
-            media.item.info.set_variables(variables)
-
+            variables = media.item.info.get_variables()
             media.item.name  = title
-            media.item.set_url(data['mime'][6:] + '://')
             media.item.media = media
-
-            media.type  = data['mime'][6:]
-
-            media.item.info.mmdata = data
+            media.item.set_url(disc_info)
+            media.item.info.set_variables(variables)
+            media.type = disc_info['mime'][6:]
             return
 
-        # Disc is data of some sort. Mount it to get the file info
-        util.mount(media.mountdir, force=True)
-        if os.path.isdir(os.path.join(media.mountdir, 'VIDEO_TS')) or \
-               os.path.isdir(os.path.join(media.mountdir, 'video_ts')):
-            if force_rebuild:
-                log.info('Double check without success')
-            else:
-                log.info('Undetected DVD, checking again')
-                media.drive_status = CDS_NO_DISC
-                util.umount(media.mountdir)
-                return self.identify(media, True)
-
         # Check for movies/audio/images on the disc
-        num_video = disc_info['disc_num_video']
-        num_audio = disc_info['disc_num_audio']
-        num_image = disc_info['disc_num_image']
+        video_files = util.find_matches(disc_info['listing'],
+                                        config.VIDEO_SUFFIX)
+        num_video = len(video_files)
 
-        video_files = util.match_files(media.mountdir, config.VIDEO_SUFFIX)
-
-        log.debug('identifymedia: mplayer = "%s"' % video_files)
-
-        media.item = DirItem(media.mountdir, None, create_metainfo=False)
+        num_audio = len(util.find_matches(disc_info['listing'],
+                                          config.AUDIO_SUFFIX))
+        num_image = len(util.find_matches(disc_info['listing'],
+                                          config.IMAGE_SUFFIX))
+        
+        media.item = DirItem(disc_info, None)
         media.item.info = disc_info
-        util.umount(media.mountdir)
 
         # if there is a video file on the root dir of the disc, we guess
         # it's a video disc. There may also be audio files and images, but

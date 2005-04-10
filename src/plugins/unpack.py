@@ -101,11 +101,11 @@ class PluginInterface(plugin.MimetypePlugin):
         return _cmdlines.keys()
 
 
-    def get(self, parent, files):
+    def get(self, parent, listing):
         """
         Return a list of items based on the files
         """
         items = []
-        for file in util.find_matches(files, self.suffix()):
-            items.append(ArchiveItem(file, parent))
+        for file in listing.match_suffix(self.suffix()):
+            items.append(ArchiveItem(file.filename, parent))
         return items

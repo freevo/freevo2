@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2005/04/10 17:58:45  dischi
+# switch to new mediainfo module
+#
 # Revision 1.6  2004/09/13 19:32:46  dischi
 # move the fxdhandler into an extra file
 #
@@ -82,14 +85,13 @@ class PluginInterface(plugin.MimetypePlugin):
         return config.IMAGE_SUFFIX
 
 
-    def get(self, parent, files):
+    def get(self, parent, listing):
         """
         return a list of items based on the files
         """
         items = []
-        for file in util.find_matches(files, config.IMAGE_SUFFIX):
+        for file in listing.match_suffix(config.IMAGE_SUFFIX):
             items.append(ImageItem(file, parent))
-            files.remove(file)
         return items
 
 

@@ -81,15 +81,16 @@ class PluginInterface(plugin.MimetypePlugin):
         return config.VIDEO_SUFFIX
 
 
-    def get(self, parent, files):
+    def get(self, parent, listing):
         """
         return a list of items based on the files
         """
         items = []
 
-        all_files = util.find_matches(files, config.VIDEO_SUFFIX)
+        all_files = listing.match_suffix(config.VIDEO_SUFFIX)
         # sort all files to make sure 1 is before 2 for auto-join
-        all_files.sort(lambda l, o: cmp(l.upper(), o.upper()))
+        all_files.sort(lambda l, o: cmp(l.basename.upper(),
+                                        o.basename.upper()))
 
         hidden_files = []
 
@@ -97,68 +98,63 @@ class PluginInterface(plugin.MimetypePlugin):
             if parent and parent.type == 'dir' and \
                    hasattr(parent,'VIDEO_DIRECTORY_AUTOBUILD_THUMBNAILS') and \
                    parent.VIDEO_DIRECTORY_AUTOBUILD_THUMBNAILS:
-                util.videothumb.snapshot(file, update=False)
+                util.videothumb.snapshot(file.filename, update=False)
 
-            if file in hidden_files:
-                files.remove(file)
-                continue
+#             if file in hidden_files:
+#                 files.remove(file)
+#                 continue
             
             x = VideoItem(file, parent)
 
             # join video files
-            if config.VIDEO_AUTOJOIN and file.find('1') > 0:
-                pos = 0
-                for count in range(file.count('1')):
-                    # only count single digests
-                    if file[pos+file[pos:].find('1')-1] in string.digits or \
-                           file[pos+file[pos:].find('1')+1] in string.digits:
-                        pos += file[pos:].find('1') + 1
-                        continue
-                    add_file = []
-                    missing  = 0
-                    for i in range(2, 6):
-                        current = file[:pos]+file[pos:].replace('1', str(i), 1)
-                        if current in all_files:
-                            add_file.append(current)
-                            end = i
-                        elif not missing:
-                            # one file missing, stop searching
-                            missing = i
+#             if config.VIDEO_AUTOJOIN and file.find('1') > 0:
+#                 pos = 0
+#                 for count in range(file.count('1')):
+#                     # only count single digests
+#                     if file[pos+file[pos:].find('1')-1] in string.digits or \
+#                            file[pos+file[pos:].find('1')+1] in string.digits:
+#                         pos += file[pos:].find('1') + 1
+#                         continue
+#                     add_file = []
+#                     missing  = 0
+#                     for i in range(2, 6):
+#                         current = file[:pos]+file[pos:].replace('1', str(i), 1)
+#                         if current in all_files:
+#                             add_file.append(current)
+#                             end = i
+#                         elif not missing:
+#                             # one file missing, stop searching
+#                             missing = i
                         
-                    if add_file and missing > end:
-                        if len(add_file) > 3:
-                            # more than 4 files, I don't belive it
-                            break
-                        # create new name
-                        name = file[:pos] + \
-                               file[pos:].replace('1', '1-%s' % end, 1)
-                        x = VideoItem(name, parent)
-                        x.files = FileInformation()
-                        for f in [ file ] + add_file:
-                            x.files.append(f)
-                            x.subitems.append(VideoItem(f, x))
-                            hidden_files.append(f)
-                        break
-                    else:
-                        pos += file[pos:].find('1') + 1
+#                     if add_file and missing > end:
+#                         if len(add_file) > 3:
+#                             # more than 4 files, I don't belive it
+#                             break
+#                         # create new name
+#                         name = file[:pos] + \
+#                                file[pos:].replace('1', '1-%s' % end, 1)
+#                         x = VideoItem(name, parent)
+#                         x.files = FileInformation()
+#                         for f in [ file ] + add_file:
+#                             x.files.append(f)
+#                             x.subitems.append(VideoItem(f, x))
+#                             hidden_files.append(f)
+#                         break
+#                     else:
+#                         pos += file[pos:].find('1') + 1
                         
-            if parent.media:
-                file_id = parent.media.id + \
-                          file[len(os.path.join(parent.media.mountdir,"")):]
-                try:
-                    x.mplayer_options = database.discset[file_id]
-                except KeyError:
-                    pass
+#             if parent.media:
+#                 file_id = parent.media.id + \
+#                           file[len(os.path.join(parent.media.mountdir,"")):]
+#                 try:
+#                     x.mplayer_options = database.discset[file_id]
+#                 except KeyError:
+#                     pass
             items.append(x)
-            files.remove(file)
 
-        for i in copy.copy(files):
-            if os.path.isdir(i+'/VIDEO_TS'):
-                # DVD Image, trailing slash is important for Xine
-                dvd = VideoItem('dvd://' + i[1:] + '/VIDEO_TS/', parent)
-                items.append(dvd)
-                files.remove(i)
-
+        for dvd in listing.match_type('DVD'):
+            # DVD Image
+            items.append(VideoItem(dvd, parent))
         return items
 
 

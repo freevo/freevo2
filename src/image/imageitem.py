@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2005/04/10 17:58:45  dischi
+# switch to new mediainfo module
+#
 # Revision 1.30  2004/09/13 18:00:49  dischi
 # last cleanups for the image module in Freevo
 #
@@ -58,24 +61,22 @@ import config
 from item import MediaItem
 from event import *
 from viewer import *
-
+import util.thumbnail
 
 class ImageItem(MediaItem):
     """
     An item for image files
     """
-    def __init__(self, url, parent, name = None,
-                 duration = config.IMAGEVIEWER_DURATION):
+    def __init__(self, url, parent, duration = config.IMAGEVIEWER_DURATION):
         # set autovars to 'rotation' so that this value is
         # stored between Freevo sessions
-        self.autovars = [ ( 'rotation', 0 ) ]
+        self.autovars = { 'rotation': 0 }
         MediaItem.__init__(self, 'image', parent)
-        if name:
-            self.name = name
-        self.set_url(url, search_image=False)
-        if self.mode == 'file':
-            self.image = self.filename
+        # set url and parse the name
+        self.set_url(url, search_cover=False)
         self.duration = duration
+        if self.url.startswith('file://'):
+            self.image = self.filename
 
 
     def __getitem__(self, key):
@@ -106,7 +107,7 @@ class ImageItem(MediaItem):
         if mode == 'date':
             return u'%s%s' % (os.stat(self.filename).st_ctime,
                               Unicode(self.filename))
-        return Unicode(self.filename)
+        return Unicode(self.name)
 
 
     def actions(self):

@@ -51,7 +51,7 @@ import eventhandler
 import menu
 import plugin
 import util.videothumb
-import util.mediainfo
+import mediadb
 
 from gui   import PopupBox, AlertBox, ConfirmBox
 from item  import MediaItem, FileInformation, Action
@@ -65,10 +65,10 @@ import database
 log = logging.getLogger('video')
 
 class VideoItem(MediaItem):
-    def __init__(self, url, parent, info=None, parse=True):
-        self.autovars = [ ('deinterlace', 0) ]
+    def __init__(self, url, parent):
+        self.autovars = { 'deinterlace': 0 }
         MediaItem.__init__(self, 'video', parent)
-        
+
         self.variants          = []         # if this item has variants
         self.subitems          = []         # more than one file/track to play
         self.current_subitem   = None
@@ -89,11 +89,7 @@ class VideoItem(MediaItem):
         self.possible_player   = []
 
         # set url and parse the name
-        self.set_url(url, info=parse)
-
-        if info:
-            # set info variables
-            self.info.set_variables(info)
+        self.set_url(url)
 
         # extra infos in database.discset
         if parent and parent.media:
@@ -108,14 +104,17 @@ class VideoItem(MediaItem):
         Set the item name and parse additional informations after title and
         filename is set.
         """
-        self.name = name
+        if name:
+            self.name = name
+        else:
+            self.name = ''
         show_name = None
         self.tv_show = False
 
         if self.name.find(u"The ") == 0:
             self.sort_name = self.name[4:]
         self.sort_name = self.name
-        
+
         if self.info['episode'] and self.info['subtitle']:
             # get informations for recordings
             show_name = (self.name, '', self.info['episode'], \
@@ -131,7 +130,7 @@ class VideoItem(MediaItem):
                             show_name[2] + u" - " + show_name[3]
             else:
                 show_name = None
-                
+
         if show_name:
             # This matches a tv show with a show name, an epsiode and
             # a title of the specific episode
@@ -155,25 +154,22 @@ class VideoItem(MediaItem):
             self.tv_show_name = show_name[0]
             self.tv_show_ep   = show_name[3]
 
-        
-    def set_url(self, url, info=True):
+
+    def set_url(self, url):
         """
         Sets a new url to the item. Always use this function and not set 'url'
         directly because this functions also changes other attributes, like
         filename, mode and network_play
         """
-        MediaItem.set_url(self, url, info)
-        if url.startswith('dvd://') or url.startswith('vcd://'):
+        MediaItem.set_url(self, url)
+        if self.url.startswith('dvd://') or self.url.startswith('vcd://'):
             self.network_play = False
             self.mimetype = self.url[:self.url.find('://')].lower()
-            if self.url.find('/VIDEO_TS/') > 0:
-                # dvd on harddisc
-                self.filename = self.url[5:self.url.rfind('/VIDEO_TS/')]
-                self.info     = util.mediainfo.get(self.filename)
+            if self.info.filename:
+                # dvd on harddisc, add '/' for xine
+                self.url = self.url + '/'
+                self.filename = self.info.filename
                 self.files    = FileInformation()
-                self.name     = self.info['title:filename']
-                if not self.name:
-                    self.name = util.getname(self.filename)
                 self.files.append(self.filename)
             elif self.url.rfind('.iso') + 4 == self.url.rfind('/'):
                 # dvd or vcd iso
@@ -182,18 +178,12 @@ class VideoItem(MediaItem):
                 # normal dvd or vcd
                 self.filename = ''
 
-        elif url.endswith('.iso') and self.info['mime'] == 'video/dvd':
+        elif self.url.endswith('.iso') and self.info['mime'] == 'video/dvd':
             # dvd iso
             self.mimetype = 'dvd'
             self.mode     = 'dvd'
             self.url      = 'dvd' + self.url[4:] + '/'
-
-        if not self.image or (self.parent and self.image == self.parent.image):
-           image = vfs.getoverlay(self.filename + '.raw')
-           if os.path.exists(image):
-               self.image = image
-               self.files.image = image
-
+            
         if config.VIDEO_INTERLACING and self.info['interlaced'] \
                and not self['deinterlace']:
             # force deinterlacing
@@ -201,7 +191,7 @@ class VideoItem(MediaItem):
 
         # start name parser by setting name to itself
         self.set_name(self.name)
-        
+
 
     def __id__(self):
         """
@@ -235,7 +225,8 @@ class VideoItem(MediaItem):
                 # FIXME: overflow
                 elapsed = elapsed - self.info['start']
             if elapsed / 3600:
-                return '%d:%02d:%02d' % ( elapsed / 3600, (elapsed % 3600) / 60,
+                return '%d:%02d:%02d' % ( elapsed / 3600,
+                                          (elapsed % 3600) / 60,
                                           elapsed % 60)
             else:
                 return '%d:%02d' % (int(elapsed / 60), int(elapsed % 60))
@@ -334,7 +325,7 @@ class VideoItem(MediaItem):
         return not from_start
 
 
-    def _get_possible_player(self):
+    def __get_possible_player(self):
         """
         return a list of possible player for this item
         """
@@ -358,7 +349,7 @@ class VideoItem(MediaItem):
         """
         return a list of possible actions on this item.
         """
-        self.possible_player = self._get_possible_player()
+        self.possible_player = self.__get_possible_player()
 
         if not self.possible_player:
             self.player = None
@@ -436,15 +427,20 @@ class VideoItem(MediaItem):
         for title in range(len(self.info['tracks'])):
             i = copy.copy(self)
             i.parent = self
-            i.set_url(self.url + str(title+1), False)
-            i.info = copy.copy(self.info)
+            # get info
+            i.info = self.info.get_subitem(title)
+            # set url
+            i.info.url = self.info.url
+            i.set_url(i.info)
+            i.url = i.url + '/' + str(title+1)
             # copy the attributes from mmpython about this track
-            i.info.mmdata = self.info.mmdata['tracks'][title]
+            i.info.mminfo = self.info.mminfo['tracks'][title]
             i.info.set_variables(self.info.get_variables())
-            i.info_type       = 'track'
+            # set attributes
+            i.info_type = 'track'
             i.possible_player = []
-            i.files           = None
-            i.name            = Unicode(_('Play Title %s')) % (title+1)
+            i.files = None
+            i.name = Unicode(_('Play Title %s')) % (title+1)
             items.append(i)
 
         moviemenu = menu.Menu(self.name, items, umount_all = 1,
@@ -564,7 +560,7 @@ class VideoItem(MediaItem):
         # get the correct player for this item and check the
         # rating if the player can play this item or not
         if not self.possible_player:
-            self.possible_player = self._get_possible_player()
+            self.possible_player = self.__get_possible_player()
 
         if not self.possible_player:
             return

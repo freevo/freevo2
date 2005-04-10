@@ -41,6 +41,7 @@ import copy
 # freevo imports
 import config
 import util
+from mediadb import Listing
 
 import logging
 log = logging.getLogger('video')
@@ -92,22 +93,25 @@ def update():
             for name,dir in config.VIDEO_ITEMS:
                 files += util.recursefolders(dir,1,'*.fxd',1)
 
-    for subdir in ('disc', 'disc-set'):
-        files += util.recursefolders(vfs.join(config.OVERLAY_DIR, subdir),
-                                     1, '*.fxd', 1)
+#     for subdir in ('disc', 'disc-set'):
+#         files += util.recursefolders(vfs.join(config.OVERLAY_DIR, subdir),
+#                                      1, '*.fxd', 1)
 
-    for info in fxditem.mimetype.parse(None, files, display_type='video'):
-        if hasattr(info, '__fxd_rom_info__'):
-            for i in info.__fxd_rom_id__:
-                fxd['id'][i] = info
-            for l in info.__fxd_rom_label__:
-                fxd['label'].append((re.compile(l), info))
-            for fo in info.__fxd_files_options__:
-                discset[fo['file-id']] = fo['mplayer-options']
+#     for info in fxditem.mimetype.parse(None, files, display_type='video'):
+#         if hasattr(info, '__fxd_rom_info__'):
+#             for i in info.__fxd_rom_id__:
+#                 fxd['id'][i] = info
+#             for l in info.__fxd_rom_label__:
+#                 fxd['label'].append((re.compile(l), info))
+#             for fo in info.__fxd_files_options__:
+#                 discset[fo['file-id']] = fo['mplayer-options']
 
     if config.VIDEO_SHOW_DATA_DIR:
-        files = util.recursefolders(config.VIDEO_SHOW_DATA_DIR,1, '*.fxd',1)
-        for info in fxditem.mimetype.parse(None, files, display_type='video'):
+        listing = Listing(config.VIDEO_SHOW_DATA_DIR)
+        if listing.num_changes:
+            listing.update()
+        for info in fxditem.mimetype.parse(None, listing.match_suffix(['fxd']), [],
+                                           display_type='video'):
             if info.type != 'video':
                 continue
             k = vfs.splitext(vfs.basename(info.files.fxd_file))[0]

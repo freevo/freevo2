@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.99  2005/04/10 17:58:12  dischi
+# switch to new mediainfo module
+#
 # Revision 1.98  2005/01/02 13:08:01  dischi
 # make it possible to set video filter for mplayer
 #
@@ -648,7 +651,7 @@ class MPlayerApp( childapp.Instance ):
                     # OK, audio is broken, restart without -alang
                     self.check_audio = 2
                     self.item.mplayer_audio_broken = True
-                    self.post_event(Event('AUDIO_ERROR_START_AGAIN'))
+                    self.mplayer.post_event(Event('AUDIO_ERROR_START_AGAIN'))
                 
                 if self.RE_START(line):
                     if self.check_audio == 1:
