@@ -53,10 +53,16 @@ log = logging.getLogger('mediadb')
 VERSION = 0.1
 
 class CacheList:
+    """
+    Internal list of all cache objects.
+    """
     def __init__(self):
         self.caches = {}
 
     def get(self, dirname):
+        """
+        Get Cache object for dirname.
+        """
         if dirname in self.caches:
             cache = self.caches[dirname]
             mtime = os.stat(cache.file)[stat.ST_MTIME]
@@ -66,9 +72,14 @@ class CacheList:
         self.caches[dirname] = c
         return c
 
+
     def save(self):
+        """
+        Save all cache files.
+        """
         for cache in self.caches.values():
             cache.save()
+
 
 
 # global object
@@ -76,7 +87,7 @@ _cache_list = CacheList()
 
 class Cache:
     """
-    A cache object for the mediainfo holding one directory.
+    A cache object for the mediadb holding one directory.
     """
     def __init__(self, dirname):
         self.dirname = dirname
@@ -418,9 +429,14 @@ class FileCache:
 
 
 def save():
+    """
+    Save all cache files.
+    """
     _cache_list.save()
 
 
 def get(dirname):
+    """
+    Get cache object for the given dirname.
+    """
     return _cache_list.get(dirname)
-

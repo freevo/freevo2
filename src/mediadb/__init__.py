@@ -4,12 +4,9 @@
 # -----------------------------------------------------------------------------
 # $Id$
 #
-# TODO: o remove old functions (see below)
-#       o include extendedmeta
-#       o add SQLListing
+# TODO: o add SQLListing
 #       o maybe preload whole cache? Expire cache?
 #       o add InfoItem for / and network url
-#       o add InfoItem for subditems
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -36,54 +33,14 @@
 #
 # -----------------------------------------------------------------------------
 
-# python imports
-import os
-import logging
+__all__ = [ 'Cache', 'FileCache', 'save', 'ItemInfo', 'Listing', 'FileListing',
+            'cache', 'get' ]
 
-# mmpython
-from mmpython.disc.discinfo import cdrom_disc_id
-
-# freevo imports
-import sysconfig
-
-# mediadb imports
 from db import Cache, FileCache, save
 from item import ItemInfo
 from listing import Listing, FileListing
 from parser import cache, init
-
-# get logging object
-log = logging.getLogger('mediadb')
+from generic import get
 
 # init parsing module
 init()
-
-def disc_info(media, force=False):
-    """
-    Return information for the media
-    """
-    type, id  = cdrom_disc_id(media.devicename)
-    if not id:
-        # bad disc, e.g. blank disc
-        return ItemInfo(None, None, None)
-    cachefile = os.path.join(sysconfig.VFS_DIR, 'disc/metadata/%s.db' % id)
-    if force and os.path.isfile(cachefile):
-        os.unlink(cachefile)
-    cache = FileCache(media.devicename, cachefile)
-    info = ItemInfo('', '', cache.data, cache)
-    info.filename = info['mime'][6:] + '://'
-    return info
-
-
-#
-# FIXME: the following function will be removed in the future
-# also missing the attribute mmdata used by videoitem.py
-#
-
-def get(filename):
-    # used by directory.py, item.py
-    log.warning('get simple info %s', filename)
-    listing = FileListing( [ filename ] )
-    if listing.num_changes:
-        listing.update()
-    return listing.get_by_name(os.path.basename(filename))

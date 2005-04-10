@@ -1,3 +1,34 @@
+# -*- coding: iso-8859-1 -*-
+# -----------------------------------------------------------------------------
+# parser.py - parsing functions to get informations about a file
+# -----------------------------------------------------------------------------
+# $Id$
+#
+# -----------------------------------------------------------------------------
+# Freevo - A Home Theater PC framework
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# -----------------------------------------------------------------------------
+
 # python imports
 import os
 import stat
@@ -89,8 +120,15 @@ def getname(file):
         return Unicode(file)
 
     name = name[0].upper() + name[1:]
-
-    while file.find('_') > 0 and _FILENAME_REGEXP.match(name):
+    # check which char is the space
+    if name.count('_') == 0 and name.count(' ') == 0:
+        if name.count('.') > 4:
+            # looks like '.' is the space here
+            name = name.replace('.', '_')
+        elif name.count('-') > 4:
+            # looks like '-' is the space here
+            name = name.replace('-', '_')
+    while name.find('_') != -1 and _FILENAME_REGEXP.match(name):
         m = _FILENAME_REGEXP.match(name)
         if m:
             name = m.group(1) + ' ' + m.group(2).upper() + m.group(3)
@@ -107,7 +145,7 @@ def cover_filter(x):
 
 
 
-def parse(basename, filename, object, quick=False):
+def parse(basename, filename, object, fast_scan=False):
     """
     Add additional informations to filename, object.
     """
@@ -115,7 +153,7 @@ def parse(basename, filename, object, quick=False):
         del object['url']
         del object['type']
     mminfo = None
-    if not quick and not object['ext'] in [ 'xml', 'fxd' ]:
+    if not fast_scan and not object['ext'] in [ 'xml', 'fxd' ]:
         mminfo = mmpython.parse(filename)
     title = getname(filename)
     object['title:filename'] = title
@@ -138,8 +176,8 @@ def parse(basename, filename, object, quick=False):
         if vfs.abspath(filename + '/' + basename + '.fxd'):
             # directory is covering a fxd file
             object['type'] = 'fxd'
-        if not quick:
-            # Create a simple (quick) cache of subdirs to get some basic idea
+        if not fast_scan:
+            # Create a simple (fast) cache of subdirs to get some basic idea
             # about the files inside the directory
             c = db.Cache(filename)
             if c.num_changes():
@@ -192,4 +230,3 @@ def cache(listing):
     """
     for p in _parser:
         p.cache(listing)
-        

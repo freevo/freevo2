@@ -85,7 +85,7 @@ def check_info(dirinfo):
             break
     else:
         # no changes in all subdirs, looks good
-        if dirinfo['length'] != None and 0:
+        if dirinfo['length'] != None:
             # Since 'length' is not None and the info is stored with mtime,
             # no changes in here. Do not parse everything again
             return False

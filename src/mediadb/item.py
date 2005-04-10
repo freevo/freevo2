@@ -1,6 +1,6 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# item.py -
+# item.py - an item returned in listings
 # -----------------------------------------------------------------------------
 # $Id$
 #
@@ -40,32 +40,50 @@ import logging
 from util.callback import *
 
 # get logging object
-log = logging.getLogger('mediainfo')
+log = logging.getLogger('mediadb')
 
 class ItemInfo:
+    """
+    Objcets of this class are returned in the different listing functions.
+    They store mediadb data and extra data only valid in the current session.
+    """
     def __init__(self, basename, dirname, attr, cache=None):
         if not attr:
+            # make sure attr is set to something valid
             attr = {}
             if basename:
                 attr['ext'] = basename[basename.rfind('.')+1:].lower()
+        # attr is the dict that will be stored in the mediadb
         self.attr = attr
-        self.basename = basename
+        # tmp data only valid in the current session
         self.tmp = {}
+        # mmpython data for the item
         self.mminfo = None
+        # hidden variables (FIXME)
         self.hidden_variables = {}
+        # some basic attributes
+        self.basename = basename
         self.dirname = dirname
         self.filename = self.dirname + '/' + self.basename
+        # cache this item belongs to (needed for saving)
         self.cache = cache
         if self.attr.has_key('url'):
             self.url = self.attr['url']
         else:
             self.url = 'file://' + self.filename
 
+
     def __str__(self):
+        """
+        String function for debugging.
+        """
         return self.basename
 
 
     def __getitem__(self, key):
+        """
+        Get the itnformation 'key' from the item.
+        """
         if key in ('cover', 'audiocover'):
             if self.attr.has_key(key):
                 return self.attr[key]
@@ -79,9 +97,10 @@ class ItemInfo:
             return self.attr[key]
         if self.hidden_variables.has_key(key):
             return self.hidden_variables[key]
-        if not self.attr.has_key('mminfo'):
-            return None
         if self.mminfo == None:
+            # unpickle mmpython data
+            if not self.attr.has_key('mminfo'):
+                return None
             log.debug('unpickle %s' % self.basename)
             self.mminfo = cPickle.loads(self.attr['mminfo'])
         log.debug('mmget %s (%s)' % (self.basename, key))
@@ -91,6 +110,11 @@ class ItemInfo:
 
 
     def __setitem__(self, key, value):
+        """
+        Set information. If the key is in attr, the data will be stored in
+        the mediadb, else the tmp dict will be used and the information is
+        valid only in this object and won't be saved.
+        """
         if self.attr.has_key(key):
             self.attr[key] = value
             if self.cache:
@@ -101,6 +125,9 @@ class ItemInfo:
 
 
     def has_key(self, key):
+        """
+        Check if 'key' is in the item somewhere.
+        """
         if key in ('cover', 'audiocover'):
             return True
         if self.tmp.has_key(key):
@@ -109,9 +136,10 @@ class ItemInfo:
             return True
         if self.hidden_variables.has_key(key):
             return True
-        if not self.attr.has_key('mminfo'):
-            return False
         if self.mminfo == None:
+            # unpickle mmpython data
+            if not self.attr.has_key('mminfo'):
+                return False
             log.debug('unpickle %s' % self.basename)
             self.mminfo = cPickle.loads(self.attr['mminfo'])
         log.debug('mmget %s (%s)' % (self.basename, key))
@@ -121,6 +149,9 @@ class ItemInfo:
 
 
     def keys(self):
+        """
+        Return a list of valid keys.
+        """
         ret = [ 'cover', 'audiocover' ]
         if self.mminfo == None:
             if self.attr.has_key('mminfo'):
@@ -136,6 +167,9 @@ class ItemInfo:
 
 
     def store(self, key, value):
+        """
+        Store key/value in the mediadb for later use.
+        """
         self.attr[key] = value
         if self.cache:
             self.cache.changed = True
@@ -144,6 +178,11 @@ class ItemInfo:
 
 
     def store_with_mtime(self, key, value):
+        """
+        Store key/value in the mediadb for later use. The storage depends on
+        the modification of the item. If the item is modified on disc, the
+        data will be deleted.
+        """
         self.attr[key] = value
         if self.cache:
             self.cache.changed = True
@@ -164,5 +203,19 @@ class ItemInfo:
     def set_permanent_variables(self, variables):
         self.hidden_variables = variables
 
+
     def delete(self, key):
         pass
+
+
+    def get_subitem(self, id):
+        """
+        Get a subitem if the given id.
+        """
+        if not self.attr.has_key('subitems'):
+            # create 'subitems' info
+            self.store_with_mtime('subitems', {})
+        if not self.attr['subitems'].has_key(id):
+            self.attr['subitems'][id] = {}
+        info = self.attr['subitems'][id]
+        return ItemInfo(self.basename, self.dirname, info, self.cache)

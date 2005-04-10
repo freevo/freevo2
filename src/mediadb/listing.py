@@ -1,6 +1,6 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# mediainfo.py - 
+# listing.py -
 # -----------------------------------------------------------------------------
 # $Id$
 #
@@ -42,6 +42,11 @@ from item import ItemInfo
 log = logging.getLogger('mediadb')
 
 class Listing:
+    """
+    A directory listing with items from the mediadb. After creating a listing,
+    check the 'num_changes' variable. If it is greater zero, the listing is
+    invalid until update() is called.
+    """
     def __init__(self, dirname):
         try:
             self.cache = db.get(dirname)
@@ -62,10 +67,16 @@ class Listing:
         self.visible = self.data
 
 
-    def update(self, callback=None, quick=False):
+    def update(self, callback=None, fast=False):
+        """
+        Update the directory listing. This means parsing all changed / new
+        files. If fast is True, only new files will be updated and mmpython
+        checking is disabled. The listing is still not correct then. If
+        callback not not None, callback will be called on each item.
+        """
         if self.num_changes == 0:
             return
-        if quick:
+        if fast:
             self.cache.add_missing()
         else:
             self.cache.parse(callback)
@@ -78,6 +89,9 @@ class Listing:
 
 
     def get_dir(self):
+        """
+        Return all directory items.
+        """
         ret = filter(lambda x: x.attr.has_key('isdir'), self.visible)
         self.visible = filter(lambda x: not x.attr.has_key('isdir'),
                               self.visible)
@@ -85,6 +99,9 @@ class Listing:
 
 
     def remove(self, item_or_name):
+        """
+        Remove the given item from the list of visible items.
+        """
         if isinstance(item_or_name, ItemInfo):
             self.visible.remove(item_or_name)
             return
@@ -96,13 +113,20 @@ class Listing:
 
 
     def get_by_name(self, name):
+        """
+        Get an item by name.
+        """
         for item in self.visible:
             if item.basename == name:
+                self.visible.remove(item)
                 return item
         return None
 
 
     def match_suffix(self, suffix_list):
+        """
+        Return all items with a suffix in the suffix list.
+        """
         visible = self.visible
         self.visible = []
         ret = []
@@ -113,6 +137,11 @@ class Listing:
 
 
     def match_type(self, type):
+        """
+        Return all items with the given type. Note: most items have no type
+        set and can't be returned by this function. Use match_suffix in this
+        case.
+        """
         visible = self.visible
         self.visible = []
         ret = []
@@ -126,14 +155,25 @@ class Listing:
 
 
     def reset(self):
+        """
+        Reset listing by setting all items in the directory visible again.
+        """
         self.visible = self.data
 
-        
+
     def __iter__(self):
+        """
+        Walk through all visible items.
+        """
         return self.visible.__iter__()
-    
+
+
+
 
 class FileListing(Listing):
+    """
+    A listing containing files from different directories.
+    """
     def __init__(self, files):
         self.caches = {}
         for f in files:
@@ -160,12 +200,12 @@ class FileListing(Listing):
         for cache, files in self.caches.values():
             cache.reduce(files)
             self.num_changes += cache.num_changes()
-            
+
         self.data = []
         if self.num_changes > 0:
             self.visible = []
             return
-            
+
         for dirname, ( cache, all_files ) in self.caches.items():
             for basename, item in cache.list():
                 if basename in all_files:
@@ -174,6 +214,9 @@ class FileListing(Listing):
 
 
     def update(self, callback=None):
+        """
+        Update the listing.
+        """
         for dirname, ( cache, all_files ) in self.caches.items():
             cache.parse(callback)
             for basename, item in cache.list():

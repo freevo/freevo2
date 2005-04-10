@@ -1,6 +1,6 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# mediainfo.py - 
+# debug.py -
 # -----------------------------------------------------------------------------
 # $Id$
 #
@@ -29,29 +29,10 @@
 #
 # -----------------------------------------------------------------------------
 
-import time
 import sys
-import os
-import stat
-import mmpython
-import pickle
 import cPickle
-import re
-import logging
-import copy
 
-from mmpython.disc.discinfo import cdrom_disc_id
-
-import sysconfig
-import config
-import util.fxdparser
-import util.vfs as vfs
-import util.cache as cache
-from util.callback import *
-from listing import Listing
-
-log = logging.getLogger('mediainfo')
-
+from mediadb import *
 
 def print_data(data, space='    '):
     for key, info in data.items():
@@ -73,15 +54,9 @@ def print_data(data, space='    '):
     print_data(mminfo, '      ')
     print
 
-
-# XXX MEDIAINFO UPDATE XXX
-t1 = time.time()
 l = Listing(sys.argv[1])
-t2 = time.time()
-l.update()
-t3 = time.time()
-print 'time: %s %s' % (t2 - t1, t3 - t1)
-print
+if l.num_changes:
+    l.update()
 print
 print 'Listing for %s' % l.cache.dirname
 for key in l.cache.data:
