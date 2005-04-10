@@ -177,7 +177,7 @@ def load(url, size=None, cache=False, vfs_save=False):
 
 
 
-def item_image(item, size, icon_dir, force=False, cache=True):
+def item_image(item, size, icon_dir, force=False, cache=True, bg=False):
     """
     Return the image for an item. This function uses internal caches and
     can also return a mimetype image if no image is found and force is True
@@ -189,15 +189,15 @@ def item_image(item, size, icon_dir, force=False, cache=True):
     try:
         type = item.display_type
     except:
-        try:
-            type = item.info['mime'].replace('/', '_')
-        except:
-            type = item.type
+        type = item.type
 
-    if isinstance(item.image, (str, unicode)):
+    try:
+        mtime = os.stat(item.image)[stat.ST_MTIME]
+    except:
+        item.image = ''
+    if isinstance(item.image, (str, unicode)) and item.image:
         key = '%s-%s-%s-%s-%s-%s-%s-%s' \
-              % (icon_dir, item.image, type, item.type, width, height, force,
-                 os.stat(item.image)[stat.ST_MTIME])
+              % (icon_dir, item.image, type, item.type, width, height, force, mtime)
 
         if item['rotation']:
             key = '%s-%s' % (key, item['rotation'])
@@ -216,7 +216,7 @@ def item_image(item, size, icon_dir, force=False, cache=True):
     if item.image:
         try:
             # load the thumbnail
-            image = util.thumbnail.load(item.image)
+            image = util.thumbnail.load(item.image, bg)
         except:
             # maybe image is something else (like already an image object)
             image = load(item.image)
@@ -228,6 +228,8 @@ def item_image(item, size, icon_dir, force=False, cache=True):
         if not force:
             return None
 
+        item.image = None
+        
         if hasattr(item, 'media') and item.media and \
                item.media.item == item and \
                os.path.isfile('%s/mimetypes/%s.png' % \
@@ -252,14 +254,20 @@ def item_image(item, size, icon_dir, force=False, cache=True):
             else:
                 imagefile = '%s/mimetypes/playlist.png' % icon_dir
 
-        elif os.path.isfile('%s/mimetypes/%s.png' % (icon_dir, type)):
-            imagefile = '%s/mimetypes/%s.png' % (icon_dir, type)
+        else:
+            try:
+                type = item.info['mime'].replace('/', '_')
+            except:
+                pass
+            
+            if os.path.isfile('%s/mimetypes/%s.png' % (icon_dir, type)):
+                imagefile = '%s/mimetypes/%s.png' % (icon_dir, type)
 
-        elif os.path.isfile('%s/mimetypes/%s.png' % (icon_dir, item.type)):
-            imagefile = '%s/mimetypes/%s.png' % (icon_dir, item.type)
+            elif os.path.isfile('%s/mimetypes/%s.png' % (icon_dir, item.type)):
+                imagefile = '%s/mimetypes/%s.png' % (icon_dir, item.type)
 
-        elif os.path.isfile('%s/mimetypes/unknown.png' % icon_dir):
-            imagefile = '%s/mimetypes/unknown.png' % icon_dir
+            elif os.path.isfile('%s/mimetypes/unknown.png' % icon_dir):
+                imagefile = '%s/mimetypes/unknown.png' % icon_dir
 
         if not imagefile:
             return None
@@ -294,6 +302,6 @@ def item_image(item, size, icon_dir, force=False, cache=True):
         height = int(float(width * i_h) / i_w)
 
     image.scale((width, height))
-    if isinstance(item.image, (str, unicode)):
+    if isinstance(item.image, (str, unicode)) and item.image:
         cache[key] = image
     return image

@@ -473,7 +473,7 @@ class ListingArea(Area):
 
         image = self.imagelib.item_image(choice, (val.width, val.height),
                                          self.settings.icon_dir, force=True,
-                                         cache=self.imagecache)
+                                         cache=self.imagecache, bg=True)
         if image:
             i_w, i_h = image.width, image.height
 
@@ -526,7 +526,7 @@ class ListingArea(Area):
                                  (self.__default_val.width,
                                   self.__default_val.height),
                                  self.settings.icon_dir, force=False,
-                                 cache=self.imagecache)
+                                 cache=self.imagecache, bg=True)
         if len(self.__cache_listing) == 1:
             # Nothing more to cache, return False to stop this callback
             self.__cache_listing = []
@@ -543,8 +543,8 @@ class ListingArea(Area):
         Update the listing area. This function will be called from Area to
         do the real update.
         """
-        menu      = self.menu
-        settings   = self.settings
+        menu     = self.menu
+        settings = self.settings
 
         if not len(menu.choices):
             if not self.empty_listing:
@@ -591,7 +591,7 @@ class ListingArea(Area):
         self.__cache_listing = []
         if settings.type != 'text' and end < len(menu.choices):
             self.__cache_listing = menu.choices[end:end + cols * rows]
-            notifier.addTimer(0, notifier.Callback(self.__cache_next_image))
+            notifier.addTimer(100, notifier.Callback(self.__cache_next_image))
 
         # do some checking if we have to redraw everything
         # or only update because the selection changed
@@ -609,26 +609,27 @@ class ListingArea(Area):
             # delete all current gui objects
             self.clear(keep_settings=True)
 
-        for choice in listing:
+        for index, choice in enumerate(listing):
             draw_this_item = True
 
             #
             # check if this items needs to be drawn or not
             #
             if redraw:
-                self.last_listing.append((choice.name, choice.image, []))
-                gui_objects = self.last_listing[-1][2]
+                gui_objects  = []
+                listing_info = [ choice.name, None, gui_objects ]
+                self.last_listing.append(listing_info)
             else:
-                index = listing.index(choice)
                 # check if the item is still the same
-                if self.last_listing[index][:2] != (choice.name, choice.image):
+                if self.last_listing[index][:2] != [choice.name, choice.image]:
                     for o in self.last_listing[index][2]:
                         o.unparent()
                     gui_objects = []
-                    self.last_listing[index] = choice.name, choice.image, \
-                                               gui_objects
+                    listing_info = [ choice.name, None, gui_objects ]
+                    self.last_listing[index] = listing_info
                 elif choice == self.last_selection or choice == menu.selected:
-                    gui_objects = self.last_listing[index][2]
+                    listing_info = self.last_listing[index]
+                    gui_objects  = listing_info[2]
                     while len(gui_objects):
                         o = gui_objects.pop()
                         o.unparent()
@@ -654,18 +655,22 @@ class ListingArea(Area):
                     val = n_val
                     self.__default_val = val
 
-            if draw_this_item and settings.type == 'text':
-                # draw item for text listing
-                self.__draw_text_listing_item(choice, (x,y), settings, val,
-                                              hspace, vspace, gui_objects,
-                                              width, hskip, vskip)
+            if draw_this_item:
+                if settings.type == 'text':
+                    # draw item for text listing
+                    self.__draw_text_listing_item(choice, (x,y), settings, val,
+                                                  hspace, vspace, gui_objects,
+                                                  width, hskip, vskip)
 
-            if draw_this_item and settings.type == 'image' or \
-                   settings.type == 'image+text':
-                # draw item for image listing
-                self.__draw_image_listing_item(choice, (x,y), settings, val,
-                                               hspace, vspace, gui_objects)
+                elif settings.type == 'image' or \
+                         settings.type == 'image+text':
+                    # draw item for image listing
+                    self.__draw_image_listing_item(choice, (x,y), settings,
+                                                   val, hspace, vspace,
+                                                   gui_objects)
 
+                listing_info[1] = choice.image
+                
             # calculate next item position
             if current_col == cols:
                 # max number of cols reached, skip to next row
