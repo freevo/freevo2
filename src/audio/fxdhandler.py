@@ -36,6 +36,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2005/04/10 17:49:46  dischi
+# switch to new mediainfo module, remove old code now in mediadb
+#
 # Revision 1.1  2004/09/13 19:34:24  dischi
 # move interface/fxdhandler into extra file
 #
@@ -69,7 +72,8 @@ def fxdhandler(fxd, node):
     """
     parse audio specific stuff from fxd files
     """
-    a = AudioItem('', fxd.getattr(None, 'parent', None), scan=False)
+    # XXX MEDIAINFO UPDATE XXX no parsing????
+    a = AudioItem('', fxd.getattr(None, 'parent', None))
 
     a.name     = fxd.getattr(node, 'title', a.name)
     a.image    = fxd.childcontent(node, 'cover-img')

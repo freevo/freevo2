@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.65  2005/04/10 17:49:46  dischi
+# switch to new mediainfo module, remove old code now in mediadb
+#
 # Revision 1.64  2004/11/20 18:23:00  dischi
 # use python logger module for debug
 #
@@ -79,64 +82,20 @@ from player import *
 import logging
 log = logging.getLogger('audio')
 
-def _image_filter(x):
-    """
-    filter used to find cover images
-    """
-    return re.match('.*(jpg|png)$', x, re.IGNORECASE)
-
-def _cover_filter(x):
-    """
-    filter used to find cover images
-    """
-    return re.search(config.AUDIO_COVER_REGEXP, x, re.IGNORECASE)
-
-
 class AudioItem(MediaItem):
     """
     This is the common class to get information about audiofiles.
     """
-    def __init__(self, url, parent, name=None, scan=True):
+    def __init__(self, url, parent):
         MediaItem.__init__(self, 'audio', parent)
-        self.set_url(url, info=scan)
-        if name:
-            self.name   = name
+        self.set_url(url)
         self.start      = 0
         self.elapsed    = 0
         self.remain     = 0
         self.pause      = 0
         self.mplayer_options = ''
+        self.length     = 0
             
-        try:
-            self.length = int(self.info['length'])
-        except:
-            self.length = 0
-            
-        # Let's try to find if there is any image in the current directory
-        # that could be used as a cover
-        if self.filename and not self.image and not \
-           (self.parent and self.parent.type == 'dir'):
-            images = ()
-            covers = ()
-            files =()
-
-            # Pick an image if it is the only image in this dir, or it matches
-            # the configurable regexp
-            dirname = os.path.dirname(self.filename)
-            try:
-                files = os.listdir(dirname)
-            except OSError:
-                log.error('os.listdir() error')
-            images = filter(_image_filter, files)
-            image = None
-            if len(images) == 1:
-                image = os.path.join(dirname, images[0])
-            elif len(images) > 1:
-                covers = filter(_cover_filter, images)
-                if covers:
-                    image = os.path.join(dirname, covers[0])
-            self.image = image
-
 
     def sort(self, mode=None):
         """
@@ -156,27 +115,37 @@ class AudioItem(MediaItem):
         return Unicode(self.url)
 
 
-    def set_url(self, url, info=True):
+    def set_url(self, url):
         """
         Sets a new url to the item. Always use this function and not set 'url'
         directly because this functions also changes other attributes, like
         filename, mode and network_play
         """
-        MediaItem.set_url(self, url, info)
-        if url.startswith('cdda://'):
+        MediaItem.set_url(self, url)
+        if self.url.startswith('cdda://'):
             self.network_play = False
             self.mimetype = 'cdda'
 
 
+    def __calc_length(self):
+        try:
+            self.length = int(self.info['length'])
+        except:
+            self.length = 0
+
+        
     def __getitem__(self, key):
         """
         return the specific attribute as string or an empty string
         """
-        if key  == 'length' and self.length:
-            # maybe the length was wrong
-            if self.length < self.elapsed:
-                self.length = self.elapsed
-            return '%d:%02d' % (int(self.length / 60), int(self.length % 60))
+        if key  == 'length':
+            if not self.length:
+                self.__calc_length()
+            if self.length:
+                # maybe the length was wrong
+                if self.length < self.elapsed:
+                    self.length = self.elapsed
+                return '%d:%02d' % (int(self.length / 60), int(self.length % 60))
 
         if key  == 'elapsed':
             return '%d:%02d' % (int(self.elapsed / 60), int(self.elapsed % 60))
@@ -188,6 +157,8 @@ class AudioItem(MediaItem):
         """
         return a list of possible actions on this item
         """
+        if not self.length:
+            self.__calc_length()
         return [ ( self.play, 'Play' ) ]
 
 
@@ -195,6 +166,8 @@ class AudioItem(MediaItem):
         """
         Start playing the item
         """
+        if not self.length:
+            self.__calc_length()
         self.parent.current_item = self
         self.elapsed = 0
         audioplayer().play(self)

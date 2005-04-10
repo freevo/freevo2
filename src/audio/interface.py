@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2005/04/10 17:49:46  dischi
+# switch to new mediainfo module, remove old code now in mediadb
+#
 # Revision 1.8  2004/11/27 14:59:04  dischi
 # bugfix
 #
@@ -85,25 +88,14 @@ class PluginInterface(plugin.MimetypePlugin):
         return config.AUDIO_SUFFIX
 
 
-    def get(self, parent, files):
+    def get(self, parent, listing):
         """
         return a list of items based on the files
         """
         items = []
-
-        for file in util.find_matches(files, config.AUDIO_SUFFIX):
-            a = AudioItem(file, parent)
-            items.append(a)
-            files.remove(file)
-
+        for file in listing.match_suffix(config.AUDIO_SUFFIX):
+            items.append(AudioItem(file, parent))
         return items
-
-
-    def _cover_filter(self, x):
-        """
-        filter function to get valid cover names
-        """
-        return re.search(config.AUDIO_COVER_REGEXP, x, re.IGNORECASE)
 
 
     def dirinfo(self, diritem):
@@ -111,23 +103,7 @@ class PluginInterface(plugin.MimetypePlugin):
         set informations for a diritem based on the content, etc.
         """
         if not diritem.image:
-            timestamp = os.stat(diritem.dir)[stat.ST_MTIME]
-            if not diritem['coversearch_timestamp'] or \
-                   timestamp > diritem['coversearch_timestamp']:
-                # Pick an image if it is the only image in this dir, or it
-                # matches the configurable regexp
-                listing = vfs.listdir(diritem.dir, include_overlay=True)
-                files = util.find_matches(listing, ('jpg', 'gif', 'png' ))
-                if len(files) == 1:
-                    diritem.image = os.path.join(diritem.dir, files[0])
-                elif len(files) > 1:
-                    covers = filter(self._cover_filter, files)
-                    if covers:
-                        diritem.image = os.path.join(diritem.dir, covers[0])
-                diritem.store_info('coversearch_timestamp', timestamp)
-                diritem.store_info('coversearch_result', diritem.image)
-            else:
-                diritem.image = diritem['coversearch_result']
+            diritem.image = diritem.info['audiocover']
                 
         if not diritem.info.has_key('title') and diritem.parent:
             # ok, try some good name creation
