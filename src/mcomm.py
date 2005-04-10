@@ -67,7 +67,7 @@ import config
 import mbus.types
 mbus.types.encoding = sysconfig.ENCODING
 
-# get loggin object
+# get logging object
 log = logging.getLogger()
 
 # dict of all our mbus instances
