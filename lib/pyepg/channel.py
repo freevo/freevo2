@@ -93,15 +93,15 @@ class Channel:
         self.__epg     = epg
         self.name      = display_name
         self.title     = display_name
-        if notifier and notifier.addTimer:
-            # add random timer 100-500ms to fill the
-            # database with init values
-            notifier.addTimer(random.randint(1, 5) * 100,
-                              self.__precache)
+#         if notifier and notifier.addTimer:
+#             # add random timer 100-500ms to fill the
+#             # database with init values
+#             notifier.addTimer(random.randint(1, 5) * 100,
+#                               self.__precache)
 
     def __precache(self):
         ctime = int(time.time())
-        self.__import_programs(ctime - 3600 * 4, ctime + 366 * 10)
+        self.__import_programs(ctime - 3600 * 4, ctime + 3600 * 10)
         return False
 
 
@@ -228,7 +228,7 @@ class Channel:
             # see if we're missing programs before start
             p = self.programs[0]
             if p.start > start - 60:
-                self.__import_programs(start - 60, p.start)
+                self.__import_programs(start - 60 - 2 * 3600, p.start)
             # see if we're missing programs after end
             p = self.programs[-1]
             if stop == None:
@@ -236,7 +236,7 @@ class Channel:
             elif stop == 0 and p.stop < start + 60:
                 self.__import_programs(p.stop, start + 60)
             elif p.stop < stop:
-                self.__import_programs(p.stop, stop + 60)
+                self.__import_programs(p.stop, stop + 60 + 2 * 3600)
         else:
             if stop == 0:
                 self.__import_programs(start - 60, start + 60)
