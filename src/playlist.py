@@ -1,50 +1,16 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
-# playlist.py - This is the Freevo playlist reading module. 
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# playlist.py - This is the Freevo playlist reading module.
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes:
-# Todo:        
-#
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.80  2005/04/10 18:08:13  dischi
-# switch to new mediainfo module
-#
-# Revision 1.79  2004/11/20 18:22:59  dischi
-# use python logger module for debug
-#
-# Revision 1.78  2004/11/01 20:14:14  dischi
-# fix debug
-#
-# Revision 1.77  2004/08/29 18:37:30  dischi
-# make playlist an mediaitem
-#
-# Revision 1.76  2004/08/26 15:26:49  dischi
-# add code to do some memory debugging
-#
-# Revision 1.75  2004/08/23 20:36:42  dischi
-# rework application handling
-#
-# Revision 1.74  2004/08/01 10:55:08  dischi
-# do not show the menu, it can do that itself
-#
-# Revision 1.73  2004/07/26 18:10:16  dischi
-# move global event handling to eventhandler.py
-#
-# Revision 1.72  2004/07/10 12:33:36  dischi
-# header cleanup
-#
-# Revision 1.71  2004/06/28 15:51:21  dischi
-# catch IOError
-#
-# Revision 1.70  2004/05/09 16:44:13  dischi
-# fix crash in m3u parsing
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -61,30 +27,36 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
-
+# python imports
 import random
 import os
 import re
 import copy
+import logging
 
+# freevo imports
 import config
 import menu
 import util
 import eventhandler
 import plugin
-from mediadb import FileListing
+import mediadb
 
 from event import *
 from item import Item, MediaItem
 from gui import ProgressBox
 
-import logging
+# get logging object
 log = logging.getLogger()
 
-class Playlist(MediaItem):
 
+class Playlist(MediaItem):
+    """
+    Class for playlists. A playlist can be created with a list of items or a
+    filename containing the playlist.
+    """
     def __init__(self, name='', playlist=[], parent=None, display_type=None,
                  random=False, build=False, autoplay=False, repeat=False):
         """
@@ -113,10 +85,13 @@ class Playlist(MediaItem):
         self.get_plugins  = []
 
         self.background_playlist = None
+        self.random = random
+
         if build:
             self.build()
-
-        self.random = random
+        else:
+            # create a basic info object
+            self.info = mediadb.ItemInfo('', '', {})
 
 
     def read_m3u(self, plsname):
@@ -134,18 +109,18 @@ class Playlist(MediaItem):
 
         try:
             playlist_lines_dos = map(lambda l: l.strip(), lines)
-            playlist_lines     = filter(lambda l: l[0] != '#', playlist_lines_dos)
+            playlist_lines = filter(lambda l: l[0] != '#', playlist_lines_dos)
         except IndexError:
             log.warning('Bad m3u playlist file "%s"' % plsname)
             return 0
-        
+
         (curdir, playlistname) = os.path.split(plsname)
         for line in playlist_lines:
             if line.endswith('\r\n'):
                 line = line.replace('\\', '/') # Fix MSDOS slashes
             if os.path.exists(os.path.join(curdir,line)):
                 self.playlist.append(os.path.join(curdir,line))
-            
+
 
     def read_pls(self, plsname):
         """
@@ -175,7 +150,7 @@ class Playlist(MediaItem):
                 line = line.replace('\\', '/') # Fix MSDOS slashes
             if os.path.exists(os.path.join(curdir,line)):
                 self.playlist.append(os.path.join(curdir,line))
-            
+
 
 
     def read_ssr(self, ssrname):
@@ -205,7 +180,7 @@ class Playlist(MediaItem):
 
 
         """
-        Here's where we parse the line.  See the format above.  
+        Here's where we parse the line.  See the format above.
         TODO:  Make the search case insensitive
         """
         for line in playlist_lines:
@@ -249,7 +224,7 @@ class Playlist(MediaItem):
             # XXX This is a short-term fix I guess
             self.suffixlist += p.suffix()
             self.get_plugins.append(p)
-                
+
         if isstring(playlist):
             self.set_url(playlist)
             if self.info['playlist'] != None:
@@ -275,6 +250,9 @@ class Playlist(MediaItem):
 
         # self.playlist is a list of Items or strings (filenames)
         if not isstring(playlist):
+            # create a basic info object
+            self.info = mediadb.ItemInfo('', '', {})
+
             for i in playlist:
                 if isinstance(i, Item):
                     # Item object, correct parent
@@ -299,7 +277,7 @@ class Playlist(MediaItem):
                     self.playlist.append(i)
 
         self.__build__ = True
-                
+
 
     def randomize(self):
         """
@@ -312,7 +290,7 @@ class Playlist(MediaItem):
             old.remove(element)
             self.playlist += [ element ]
 
-        
+
     def actions(self):
         """
         return the actions for this item: play and browse
@@ -321,7 +299,7 @@ class Playlist(MediaItem):
         items = [ ( self.browse, _('Browse Playlist') ) ]
 
         play_item = ( self.play, _('Play') )
-        
+
         if self.autoplay:
             items = [ play_item ] + items
         else:
@@ -331,7 +309,7 @@ class Playlist(MediaItem):
             items.append((self.random_play, _('Random play all items')))
 
         return items
-    
+
 
     def browse(self, arg=None, menuw=None):
         """
@@ -344,7 +322,7 @@ class Playlist(MediaItem):
             if not callable(item):
                 files.append(item)
 
-        listing = FileListing(files)
+        listing = mediadb.FileListing(files)
         if listing.num_changes > 10:
             text = _('Scanning playlist, be patient...')
             popup = ProgressBox(text, full=listing.num_changes)
@@ -353,13 +331,13 @@ class Playlist(MediaItem):
             popup.destroy()
         elif listing.num_changes:
             listing.update()
-        
+
         items = []
 
         for item in self.playlist:
             if not callable(item):
                 # get a real item
-                listing = FileListing([item])
+                listing = mediadb.FileListing([item])
                 if listing.num_changes:
                     listing.update()
                 for p in self.get_plugins:
@@ -368,13 +346,13 @@ class Playlist(MediaItem):
                 items.append(item)
 
         self.playlist = items
-        
+
         if self.random:
             self.randomize()
 
         moviemenu = menu.Menu(self.name, self.playlist)
         menuw.pushmenu(moviemenu)
-        
+
 
     def random_play(self, arg=None, menuw=None):
         """
@@ -384,7 +362,7 @@ class Playlist(MediaItem):
                  display_type=self.display_type, random=True,
                  repeat=self.repeat).play(arg,menuw)
 
-        
+
     def play(self, arg=None, menuw=None):
         """
         play the playlist
@@ -396,7 +374,7 @@ class Playlist(MediaItem):
             # XXX PopupBox please
             log.warning('empty playlist')
             return False
-        
+
         if not arg or arg != 'next':
             # first start
             Playlist.build(self)
@@ -424,7 +402,8 @@ class Playlist(MediaItem):
                 self.playlist[pos] = play_items[0]
 
 
-        if not hasattr(self.current_item, 'actions') or not self.current_item.actions():
+        if not hasattr(self.current_item, 'actions') or \
+               not self.current_item.actions():
             # skip item
             pos = self.playlist.index(self.current_item)
             pos = (pos+1) % len(self.playlist)
@@ -441,7 +420,7 @@ class Playlist(MediaItem):
             self.current_item.play(menuw=menuw)
         else:
             self.current_item.actions()[0][0](menuw=menuw)
-        
+
 
     def cache_next(self):
         """
@@ -466,7 +445,7 @@ class Playlist(MediaItem):
                     self.current_item.stop()
                 except OSError:
                     pass
-        
+
 
     def eventhandler(self, event, menuw=None):
         """
@@ -476,12 +455,15 @@ class Playlist(MediaItem):
         # That doesn't belong here! It should be part of the player!!!
         if event == PLAY_END:
             if self.current_item and self.current_item.type == 'audio':
-                eventhandler.post(Event(AUDIO_LOG, arg=self.current_item.filename))
+                e = Event(AUDIO_LOG, arg=self.current_item.filename)
+                eventhandler.post(e)
 
         if event in (INPUT_1, INPUT_2, INPUT_3, INPUT_4, INPUT_5) and \
-               event.arg and self.current_item and hasattr(self.current_item,'type'):
+               event.arg and self.current_item and \
+               hasattr(self.current_item,'type'):
             if (self.current_item.type == 'audio'):
-                eventhandler.post(Event(RATING,(event.arg,self.current_item.filename)))
+                e = Event(RATING,(event.arg, self.current_item.filename))
+                eventhandler.post(e)
 
 
         if not menuw:
@@ -490,9 +472,10 @@ class Playlist(MediaItem):
         if event == PLAYLIST_TOGGLE_REPEAT:
             self.repeat = not self.repeat
             if self.repeat:
-                eventhandler.post(Event(OSD_MESSAGE, arg=_('playlist repeat on')))
+                arg = _('playlist repeat on')
             else:
-                eventhandler.post(Event(OSD_MESSAGE, arg=_('playlist repeat off')))
+                arg = arg=_('playlist repeat off')
+            eventhandler.post(Event(OSD_MESSAGE, arg=arg))
 
         if event in ( PLAYLIST_NEXT, PLAY_END, USER_END) \
                and self.current_item and self.playlist:
@@ -506,16 +489,17 @@ class Playlist(MediaItem):
                 self.play(menuw=menuw, arg='next')
                 return True
             elif event == PLAYLIST_NEXT:
-                eventhandler.post(Event(OSD_MESSAGE, arg=_('no next item in playlist')))
+                e = Event(OSD_MESSAGE, arg=_('no next item in playlist'))
+                eventhandler.post(e)
 
-                
+
         # end and no next item
         if event in (PLAY_END, USER_END, STOP):
             if self.background_playlist:
                 self.background_playlist.stop()
             self.current_item = None
             return True
-            
+
 
         if event == PLAYLIST_PREV and self.current_item and self.playlist:
             pos = self.playlist.index(self.current_item)
@@ -531,7 +515,8 @@ class Playlist(MediaItem):
                 self.play(menuw=menuw, arg='next')
                 return True
             else:
-                eventhandler.post(Event(OSD_MESSAGE, arg=_('no previous item in playlist')))
+                e = Event(OSD_MESSAGE, arg=_('no previous item in playlist'))
+                eventhandler.post(e)
 
         # give the event to the next eventhandler in the list
         return MediaItem.eventhandler(self, event, menuw)
@@ -543,9 +528,9 @@ class Playlist(MediaItem):
         """
         MediaItem.delete(self)
         self.playlist = []
-        
 
-    
+
+
 
 
 class Mimetype(plugin.MimetypePlugin):
@@ -565,7 +550,7 @@ class Mimetype(plugin.MimetypePlugin):
         """
         return config.PLAYLIST_SUFFIX + config.IMAGE_SSHOW_SUFFIX
 
-    
+
     def get(self, parent, listing):
         """
         return a list of items based on the files
