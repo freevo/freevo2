@@ -119,7 +119,9 @@ class DirItem(Playlist):
             self.info = mediadb.get(directory)
 
         # get cover from cache
-        self.image = self.info['cover']
+        image = self.info['cover']
+        if image:
+            self.image = image
         
         # store FileInformation for moving/copying
         self.files = FileInformation()
