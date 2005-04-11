@@ -162,7 +162,7 @@ def parse(basename, filename, object, fast_scan=False):
         object['mminfo'] = cPickle.dumps(simplify(mminfo),
                                          pickle.HIGHEST_PROTOCOL)
         if mminfo.title:
-            object['title'] = mminfo.title
+            object['title'] = mminfo.title.replace('\0', '').strip()
         else:
             object['title'] = title
     elif object.has_key('mminfo'):
