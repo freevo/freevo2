@@ -296,16 +296,10 @@ start = time.clock()
 delete_old_files_1()
 delete_old_files_2()
 
-msg = 'scanning directory structure..........................'
-print msg,
-sys.__stdout__.flush()
-
 directories = []
 for d in config.VIDEO_ITEMS + config.AUDIO_ITEMS + config.IMAGE_ITEMS:
     if os.path.isdir(d[1]) and d[1] != '/':
         directories.append(d[1])
-listings = get_directory_listings(directories, msg)
-print '\r%s done' % msg
 
 if rebuild:
     print 'deleting cache files..................................',
@@ -313,9 +307,14 @@ if rebuild:
     for d in directories:
         for f in util.match_files_recursively(vfs.getoverlay(d), ['db']):
             if f.endswith('/freevo.db'):
-                pass
-                #os.unlink(f)
+                os.unlink(f)
     print 'done'
+
+msg = 'scanning directory structure..........................'
+print msg,
+sys.__stdout__.flush()
+listings = get_directory_listings(directories, msg)
+print '\r%s done' % msg
 
 cache_thumbnails(directories)
 cache_directories(listings)
