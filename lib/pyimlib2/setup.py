@@ -1,3 +1,31 @@
+# -*- coding: iso-8859-1 -*-
+# -----------------------------------------------------------------------------
+# setup.py - Setup script for pyimlib2
+# -----------------------------------------------------------------------------
+# $Id$
+#
+# -----------------------------------------------------------------------------
+# Copyright (C) 2004-2005 Jason Tackaberry <tack@sault.org>
+#
+# First Edition: Jason Tackaberry <tack@sault.org>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# -----------------------------------------------------------------------------
+
 from distutils.core import setup, Extension
 import os
 import sys
@@ -69,19 +97,16 @@ if check_config('epeg', '0.9'):
     config_h.write('#define USE_EPEG\n')
 else:
     print 'epeg extention disabled'
-    
 
 config_h.close()
 
-setup(name="_Imlib2", version="0.0.7", 
-	ext_modules=[ 
-		Extension("_Imlib2module", 
-			files,
-			library_dirs=library_dirs,
+setup(name="_Imlib2", version="0.0.7",
+    ext_modules=[
+        Extension("_Imlib2module",
+            files,
+            library_dirs=library_dirs,
                         include_dirs=include_dirs,
-			libraries=libraries)
-	],
-	py_modules=["Imlib2"]
+            libraries=libraries)
+    ],
+    py_modules=["Imlib2"]
 )
-
-# vim: ts=4

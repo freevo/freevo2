@@ -114,10 +114,10 @@ class Image:
     def get_raw_data(self, format = "BGRA", type = "buffer" ):
         """
         Returns raw image data for read only access.
-        
+
         Please free the raw data later and do not delete the object while
         the data is still needed.
-        
+
         Arguments:
           format: pixel format of the raw data to be returned.  If 'format' is
               not a supported format, ValueError is raised.  Format
@@ -609,6 +609,7 @@ class Font:
              and vertical advance of the text when rendered.
         """
         return self._font.get_text_size(utf8(text))
+
 
     def set_color(self, color):
         """
