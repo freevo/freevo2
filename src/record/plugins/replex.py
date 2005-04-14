@@ -72,7 +72,13 @@ class PluginInterface(Plugin):
         dest = proc.dest
         # get length of both files
         slen = mmpython.parse(source).length
-        dlen = mmpython.parse(dest).length
+        destinfo = mmpython.parse(dest)
+        if not destinfo:
+            # replex didn't work
+            dlen = 0
+        else:
+            # get dest file length
+            dlen = destinfo.length
 
         log.info('%s finished' % String(dest))
 
