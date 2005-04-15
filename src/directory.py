@@ -376,7 +376,7 @@ class DirItem(Playlist):
         # get listing
         listing = mediadb.Listing(self.dir)
         if listing.num_changes:
-            listing.update(quick=True)
+            listing.update(fast=True)
 
         # play items and playlists
         num_play_items = 0
