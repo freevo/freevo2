@@ -55,7 +55,6 @@ PyObject *epeg_thumbnail(PyObject *self, PyObject *args)
     if (!im)
         return PyErr_SetString(PyExc_IOError, "unable to load image"), NULL;
 
-    epeg_thumbnail_comments_get (im, &info);
     epeg_size_get(im, &w, &h);
 
     if (w > dest_w || h > dest_h) {
@@ -69,7 +68,7 @@ PyObject *epeg_thumbnail(PyObject *self, PyObject *args)
     }
 
     epeg_decode_size_set(im, dest_w, dest_h);
-    epeg_quality_set(im, 100);
+    epeg_quality_set(im, 80);
     epeg_thumbnail_comments_enable(im, 1);
 
     epeg_file_output_set(im, dest);
