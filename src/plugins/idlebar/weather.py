@@ -8,7 +8,6 @@
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
 #
-# First Edition: ?
 # Maintainer:    Viggo Fredriksen <viggo@katatonic.org>
 #
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
@@ -36,6 +35,7 @@ import time
 # freevo modules
 import gui
 import config
+import plugin
 from plugins.idlebar import IdleBarPlugin
 
 # grabber module
@@ -49,16 +49,16 @@ class PluginInterface(IdleBarPlugin):
     plugin.activate('idlebar.weather', level=30,
                     args=('4-letter code', metric))
 
-    For weather station codes check: http://www.nws.noaa.gov/tg/siteloc.shtml
+    For weather station codes check:
+    http://www.msnbc.com/news/WEA_Front.asp?cp1=1
     You can also set the metric to True if you want metric units (celcius).
     """
-    def __init__(self, zone='CYYZ', metric=False):
+    def __init__(self, zone='GMXX0014', metric=False):
         if not config.USE_NETWORK:
             self.reason = 'Not using network, weather plugin disabled'
             return
 
         IdleBarPlugin.__init__(self)
-        
 
         self.metric    = metric
         self.metarcode = zone
@@ -66,7 +66,7 @@ class PluginInterface(IdleBarPlugin):
 
         # check every 10 minutes
         self.cache_keep  = 60*10
-        
+
         self.cache_icon  = None
         self.cache_temp  = None
         self.cache_check = -1
@@ -84,7 +84,7 @@ class PluginInterface(IdleBarPlugin):
             # not a valid result
             return
 
-        if self.cache_temp == result.temp and\
+        if self.cache_temp == result.temp and \
               self.cache_icon == result.icon:
             # valid result, but equal to old
             return
@@ -92,7 +92,10 @@ class PluginInterface(IdleBarPlugin):
         # update on next pass
         self.new_temp = result.temp
         self.new_icon = result.icon
-    	
+
+        # update the idlebar
+        self.update()
+
 
     def draw(self, width, height):
         """
@@ -112,11 +115,11 @@ class PluginInterface(IdleBarPlugin):
             if not self.cache_icon:
                 # no icon available
                 self.cache_icon = 'unknown.png'
-            
+
             if not self.cache_temp:
                 # no temperature available
                 self.cache_temp = _('na')
-            
+
             icon = os.path.join(config.IMAGE_DIR, 'weather', self.cache_icon)
             font = gui.get_font('small0')
             temp = Unicode('%s\xb0' % self.cache_temp)
@@ -142,15 +145,14 @@ class PluginInterface(IdleBarPlugin):
             self.objects.append(txt)
 
             return width
-        
+
         if (time.time() - self.cache_check) < self.cache_keep:
             # don't check for changes
             return self.NO_CHANGE
-        
+
 
         # Fetch the information we want with the grabber.
         self.cache_check = time.time()
         grabber          = WeatherGrabber(cb_result=self.cb_weather)
         grabber.search(self.metarcode, self.metric, False)
         return self.NO_CHANGE
-
