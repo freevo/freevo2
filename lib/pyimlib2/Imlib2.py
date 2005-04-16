@@ -26,12 +26,33 @@
 #
 # -----------------------------------------------------------------------------
 
+import types
+import math
+import os
+import glob
+import md5
 
-import _Imlib2, types, math, os
+import _Imlib2
 
 # Counter for auto-generated shared memory names.
 _imlib2_shmem_ctr = 0
 
+# thumbnail image dir
+_thumbnail_dir = os.path.join(os.environ['HOME'], '.thumbnails/large/')
+if not os.path.isdir(_thumbnail_dir):
+    # create the 'large' dir. Set permissions to user only. All files
+    # inside should also be user only, but who cares when the dir is save?
+    # Yes, I know, it's ugly :)
+    os.makedirs(_thumbnail_dir, 0700)
+
+# dir for failed thumbnails
+_failed_dir = os.path.join(os.environ['HOME'], '.thumbnails/fail/pyimlib2/')
+if not os.path.isdir(_failed_dir):
+    # create the 'fail' dir. Set permissions to user only. All files
+    # inside should also be user only, but who cares when the dir is save?
+    # Yes, I know, it's ugly :)
+    os.makedirs(_failed_dir, 0700)
+    
 def utf8(text):
     """
     Returns a UTF-8 string, converting from latin-1 if necessary.  This does a
@@ -127,8 +148,8 @@ class Image:
               made it up.)
 
         Returns: If type is 'buffer', return a buffer object containing the raw
-                 image data. If type is 'raw', return the pointer and len of the
-                 raw image data.
+                 image data. If type is 'raw', return the pointer and len of
+                 the raw image data.
         """
         if type == 'raw':
             # create raw data
@@ -733,22 +754,59 @@ def clean_stale_shmem():
     Must test the existence of pid before deleting the shmem object.
     It's not perfect, but it's better.
     """
-    import glob, os
     for file in  glob.glob("/dev/shm/pyimlib2*"):
         path, file = os.path.split(file)
         _Imlib2._shm_unlink(file)
 
 
+def thumbnail_create(src):
+    """
+    Create a freedesktop.org thumbnail.
+    """
+    dst = _thumbnail_dir + md5.md5('file://' + src).hexdigest() + '.'
+    if src.lower().endswith('jpg'):
+        try:
+            _Imlib2.epeg_thumbnail(src, dst + 'jpg', (256,256))
+            return dst + 'jpg'
+        except IOError:
+            pass
+    try:
+        _Imlib2.png_thumbnail(src, dst + 'png', (256,256))
+        return dst + 'png'
+    except:
+        # image is broken
+        dst = _failed_dir + md5.md5('file://' + src).hexdigest() + '.png'
+        _Imlib2.fail_thumbnail(src, dst)
+        return dst
+
+
+def thumbnail_check(file):
+    """
+    Check if a freedesktop.org thumbnail exists. Return is either the filename,
+    False when the thumbnail can't be created or None is no information is
+    available.
+    """
+    dst = _thumbnail_dir + md5.md5('file://' + file).hexdigest() + '.'
+    if os.path.isfile(dst + 'jpg'):
+        return dst + 'jpg'
+    if os.path.isfile(dst + 'png'):
+        return dst + 'png'
+    dst = _failed_dir + md5.md5('file://' + file).hexdigest() + '.png'
+    if os.path.isfile(dst):
+        return False
+    return None
+
+    
 def thumbnail(src, dst, size):
     """
     Create a thumbnail from file src to dst with the given size. If the
     image is smaller, do not scale the image.
     """
-    if src.endswith('jpg'):
+    if src.lower().endswith('jpg'):
         try:
             _Imlib2.epeg_thumbnail(src, dst, size)
             return open(dst)
-        except Exception, e:
+        except IOError:
             pass
     image = open(src)
     if image.width > size[0] or image.height > size[1]:

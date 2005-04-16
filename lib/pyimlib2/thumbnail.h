@@ -33,6 +33,8 @@
 #include <Python.h>
 
 PyObject * epeg_thumbnail(PyObject *self, PyObject *args);
+PyObject * png_thumbnail(PyObject *self, PyObject *args);
+PyObject * fail_thumbnail(PyObject *self, PyObject *args);
 
 #endif
 

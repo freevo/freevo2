@@ -30,11 +30,12 @@ from distutils.core import setup, Extension
 import os
 import sys
 
-files = ["imlib2.c", "image.c", "font.c", "rawformats.c", "epeg.c" ]
+files = ["imlib2.c", "image.c", "font.c", "rawformats.c", "thumbnail.c",
+         "png.c" ]
 
 include_dirs = []
 library_dirs = []
-libraries    = ['rt']
+libraries    = ['rt', 'png']
 
 def check_config(name, minver):
     """
