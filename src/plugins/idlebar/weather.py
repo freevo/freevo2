@@ -1,16 +1,16 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
-# weather.py - IdleBarPlugin for showing weatcher status
-# -----------------------------------------------------------------------
-# $Id:
+# -----------------------------------------------------------------------------
+# weather.py - idlebarplugin for showing weather information
+# -----------------------------------------------------------------------------
+# $Id$
 #
-# -----------------------------------------------------------------------
-# $Log:
-#
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al.
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: ?
+# Maintainer:    Viggo Fredriksen <viggo@katatonic.org>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -27,118 +27,130 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
+# python modules
 import os
 import time
-import string
 
+# freevo modules
 import gui
 import config
-import util.pymetar as pymetar
 from plugins.idlebar import IdleBarPlugin
+
+# grabber module
+from pywebinfo.weather import WeatherGrabber
 
 class PluginInterface(IdleBarPlugin):
     """
-    Shows the current weather.
+    Shows the current weather on the idlebar.
 
     Activate with:
-    plugin.activate('idlebar.weather', level=30, args=('4-letter code', ))
+    plugin.activate('idlebar.weather', level=30,
+                    args=('4-letter code', metric))
 
-    For weather station codes see: http://www.nws.noaa.gov/tg/siteloc.shtml
-    You can also set the unit as second parameter in args ('C', 'F', or 'K')
+    For weather station codes check: http://www.nws.noaa.gov/tg/siteloc.shtml
+    You can also set the metric to True if you want metric units (celcius).
     """
-    def __init__(self, zone='CYYZ', units='C'):
-        self.current = None, None
+    def __init__(self, zone='CYYZ', metric=False):
+        if not config.USE_NETWORK:
+            self.reason = 'Not using network, weather plugin disabled'
+            return
 
         IdleBarPlugin.__init__(self)
-        self.TEMPUNITS = units
-        self.METARCODE = zone
-        self.WEATHERCACHE = config.FREEVO_CACHEDIR + '/weather'
-        print
-        print 'WARNING: the idlebar.weather plugin downloads new weather'
-        print 'information inside the main loop. This bug makes all menu'
-        print 'actions _very_ slow. Consider not using this plugin for higher'
-        print 'speed.'
-        print
+        
+
+        self.metric    = metric
+        self.metarcode = zone
+        self.active    = False
+
+        # check every 10 minutes
+        self.cache_keep  = 60*10
+        
+        self.cache_icon  = None
+        self.cache_temp  = None
+        self.cache_check = -1
+
+        self.new_icon  = None
+        self.new_temp  = None
 
 
-    def checkweather(self):
-        # We don't want to do this every 30 seconds, so we need
-        # to cache the date somewhere.
-        #
-        # First check the age of the cache.
-        #
-        if (os.path.isfile(self.WEATHERCACHE) == 0 or \
-            (abs(time.time() - os.path.getmtime(self.WEATHERCACHE)) > 3600)):
-            try:
-                rf=pymetar.ReportFetcher(self.METARCODE)
-                rep=rf.FetchReport()
-                rp=pymetar.ReportParser()
-                pr=rp.ParseReport(rep)
-                if (pr.getTemperatureCelsius()):
-                    if self.TEMPUNITS == 'F':
-                        temperature = '%2d' % pr.getTemperatureFahrenheit()
-                    elif self.TEMPUNITS == 'K':
-                        ktemp = pr.getTemperatureCelsius() + 273
-                        temperature = '%3d' % ktemp
-                    else:
-                        temperature = '%2d' % pr.getTemperatureCelsius()
-                else:
-                    temperature = '?'  # Make it a string to match above.
-                if pr.getPixmap():
-                    icon = pr.getPixmap() + '.png'
-                else:
-                    icon = 'sun.png'
-                cachefile = open(self.WEATHERCACHE,'w+')
-                cachefile.write(temperature + '\n')
-                cachefile.write(icon + '\n')
-                cachefile.close()
-            except:
-                try:
-                    # HTTP Problems, use cache. Wait till next try.
-                    cachefile = open(self.WEATHERCACHE,'r')
-                    newlist = map(string.rstrip, cachefile.readlines())
-                    temperature,icon = newlist
-                    cachefile.close()
-                except IOError:
-                    print 'WEATHER: error reading cache. Using fake weather.'
-                    try:
-                        cachefile = open(self.WEATHERCACHE,'w+')
-                        cachefile.write('?' + '\n')
-                        cachefile.write('sun.png' + '\n')
-                        cachefile.close()
-                    except IOError:
-                        print 'You have no permission to write %s' % self.WEATHERCACHE
-                    return '0', 'sun.png'
 
+    def cb_weather(self, result):
+        """
+        Result callback from the weather grabber.
+        """
+        if not result:
+            # not a valid result
+            return
 
-        else:
-            cachefile = open(self.WEATHERCACHE,'r')
-            newlist = map(string.rstrip, cachefile.readlines())
-            temperature,icon = newlist
-            cachefile.close()
-        return temperature, icon
+        if self.cache_temp == result.temp and\
+              self.cache_icon == result.icon:
+            # valid result, but equal to old
+            return
+
+        # update on next pass
+        self.new_temp = result.temp
+        self.new_icon = result.icon
+    	
 
     def draw(self, width, height):
-        t, ic = self.current
-        temp,icon = self.checkweather()
+        """
+        Draw the information on the idlebar
+        """
+        if self.new_temp or self.new_icon:
+            # new results are available, we know these
+            # are different then before, so there is
+            # a point in re-drawing it on the screen.
+            self.cache_icon = self.new_icon
+            self.cache_temp = self.new_temp
+            self.new_temp   = None
+            self.new_icon   = None
 
-        if temp == t and ic == icon:
+            self.clear()
+
+            if not self.cache_icon:
+                # no icon available
+                self.cache_icon = 'unknown.png'
+            
+            if not self.cache_temp:
+                # no temperature available
+                self.cache_temp = _('na')
+            
+            icon = os.path.join(config.IMAGE_DIR, 'weather', self.cache_icon)
+            font = gui.get_font('small0')
+            temp = Unicode('%s\xb0' % self.cache_temp)
+
+            # icon object
+            img = gui.Image(icon, pos=(5, 5))
+            (iw, ih) = img.get_size()
+
+            # scale it to fit
+            height = 50 - 10
+            width  = int( (float(iw)/float(ih)) * float(height) )
+            img.scale((width, height))
+
+            # text object
+            txt_size = (width, 50)
+            txt_pos  = (5, 0)
+            txt = gui.Text(temp, txt_pos, txt_size, font, 'center', 'center')
+
+            (tw, th) = img.get_size()
+
+            # add to objects
+            self.objects.append(img)
+            self.objects.append(txt)
+
+            return width
+        
+        if (time.time() - self.cache_check) < self.cache_keep:
+            # don't check for changes
             return self.NO_CHANGE
+        
 
-        self.clear()
-        self.current = temp, icon
+        # Fetch the information we want with the grabber.
+        self.cache_check = time.time()
+        grabber          = WeatherGrabber(cb_result=self.cb_weather)
+        grabber.search(self.metarcode, self.metric, False)
+        return self.NO_CHANGE
 
-        icon = os.path.join(config.ICON_DIR, 'weather', icon)
-        font  = gui.get_font('small0')
-        i = gui.imagelib.load(icon, (None, None))
-        self.objects.append(gui.Image(i, (0, 15)))
-
-        temp = u'%s\xb0' % temp
-        width = font.stringsize(temp)
-
-        self.objects.append(gui.Text(temp, (15, 55-font.height), (width, font.height),
-                                     font, 'left', 'top'))
-
-        return width + 15
