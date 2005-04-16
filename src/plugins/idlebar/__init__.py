@@ -1,81 +1,16 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # idlebar.py - IdleBar plugin
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.36  2005/02/06 16:59:12  dischi
-# small bugfixes from Viggo Fredriksen
-#
-# Revision 1.35  2004/12/31 11:57:44  dischi
-# renamed SKIN_* and OSD_* variables to GUI_*
-#
-# Revision 1.34  2004/11/28 15:46:24  dischi
-# fix poll intervall
-#
-# Revision 1.33  2004/11/20 18:23:03  dischi
-# use python logger module for debug
-#
-# Revision 1.32  2004/10/12 13:55:23  dischi
-# fix plugin position handling
-#
-# Revision 1.31  2004/10/07 14:02:48  dischi
-# fix redraw when one plugin changes the width
-#
-# Revision 1.30  2004/09/14 14:00:39  dischi
-# move plugins intro seperate files
-#
-# Revision 1.29  2004/09/08 08:33:13  dischi
-# patch from Viggo Fredriksen to reactivate the plugins
-#
-# Revision 1.28  2004/08/27 14:27:54  dischi
-# change to new animation class name
-#
-# Revision 1.27  2004/08/24 16:42:42  dischi
-# Made the fxdsettings in gui the theme engine and made a better
-# integration for it. There is also an event now to let the plugins
-# know that the theme is changed.
-#
-# Revision 1.26  2004/08/23 20:41:47  dischi
-# fade support
-#
-# Revision 1.25  2004/08/23 15:53:41  dischi
-# do not remove from display, only hide
-#
-# Revision 1.24  2004/08/22 20:10:38  dischi
-# changes to new mevas based gui code
-#
-# Revision 1.23  2004/08/05 17:39:34  dischi
-# remove skin dep
-#
-# Revision 1.22  2004/08/01 10:48:21  dischi
-# Move idlebar to new gui code:
-# o it is not drawn inside the area (a.k.a skin) code anymore
-# o it updates/removes itself if needed
-#
-# Some plugins are not changed to the new draw interface of the
-# idlebar. They are deactivated. Feel free to send an updated version.
-#
-# Revision 1.21  2004/07/25 18:22:27  dischi
-# changes to reflect gui update
-#
-# Revision 1.20  2004/07/24 17:49:48  dischi
-# rename or deactivate some stuff for gui update
-#
-# Revision 1.19  2004/07/10 12:33:41  dischi
-# header cleanup
-#
-# Revision 1.18  2004/06/24 08:37:20  dischi
-# add speed warning
-#
-# Revision 1.17  2004/05/31 10:43:20  dischi
-# redraw not only in main, redraw when skin is active
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al.
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -92,21 +27,24 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
-# python modules
+
+# python imports
 import time
 import locale
+import logging
 
-# freevo modules
+# freevo imports
 import config
 import plugin
 import gui
 import eventhandler
 from event import *
 
-import logging
+# get logging object
 log = logging.getLogger()
+
 
 class PluginInterface(plugin.DaemonPlugin):
     """
@@ -227,7 +165,8 @@ class PluginInterface(plugin.DaemonPlugin):
         if not self.background:
             # FIXME: respect fxd settings changes!!!
             s = gui.get_display()
-            self.background = gui.imagelib.load('background', (s.width, s.height))
+            size = (s.width, s.height)
+            self.background = gui.imagelib.load('background', size)
             if self.background:
                 size = (s.width, config.GUI_OVERSCAN_Y + 60)
                 self.background.crop((0,0), size)
@@ -334,3 +273,12 @@ class IdleBarPlugin(plugin.Plugin):
             o.move_relative(((x - self.__x), (y - self.__y)))
         self.__x = x
         self.__y = y
+
+
+    def update(self):
+        """
+        Force idlebar update.
+        """
+        bar = plugin.getbyname('idlebar')
+        if bar:
+            bar.poll()
