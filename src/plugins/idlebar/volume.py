@@ -1,24 +1,16 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
-# volume.py - IdleBarplugin for showing volume
-# Author: Viggo Fredriksen <viggo@katatonic.org>
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# weather.py - idlebarplugin for showing volume
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.4  2004/10/06 19:19:56  dischi
-# remove pygame dep
-#
-# Revision 1.3  2004/08/01 10:48:47  dischi
-# deactivate plugin because of interface change
-#
-# Revision 1.2  2004/07/10 12:33:41  dischi
-# header cleanup
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2003 Krister Lagerstrom, et al.
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Viggo Fredriksen <viggo@katatonic.org>
+# Maintainer:    Viggo Fredriksen <viggo@katatonic.org>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -35,17 +27,16 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
-
+# -----------------------------------------------------------------------------
 
 # python modules
 import os
 
-import gui
-
 # freevo modules
+import gui
 from plugins.idlebar import IdleBarPlugin
 import plugin, config
+
 
 class PluginInterface(IdleBarPlugin):
     """
@@ -67,9 +58,12 @@ class PluginInterface(IdleBarPlugin):
         self.muted    = False
         self.volume   = -1
 
+
     def getimage(self, image, osd, cache=False):
-        if image.find(config.ICON_DIR) == 0 and image.find(osd.settings.icon_dir) == -1:
-            new_image = os.path.join(osd.settings.icon_dir, image[len(config.ICON_DIR)+1:])
+        if image.find(config.ICON_DIR) == 0 and \
+               image.find(osd.settings.icon_dir) == -1:
+            new_image = os.path.join(osd.settings.icon_dir,
+                                     image[len(config.ICON_DIR)+1:])
             if os.path.isfile(new_image):
                 image = new_image
         if cache:
@@ -78,6 +72,7 @@ class PluginInterface(IdleBarPlugin):
             return self.cacheimg[image]
 
         return gui.imagelib.load(image)
+
 
     def draw(self, (type, object), x, osd):
         mixer = plugin.getbyname('MIXER')
@@ -104,7 +99,3 @@ class PluginInterface(IdleBarPlugin):
 
             w =  osd.drawimage(volout, (x, osd.y + 10, -1, -1) )[0]
         return w
-
-    def update(self):
-        bar = plugin.getbyname('idlebar')
-        if bar: bar.poll()
