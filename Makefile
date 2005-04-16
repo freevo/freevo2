@@ -11,7 +11,7 @@ all: extra_packages lib/$(PYMBUS) lib/$(PYNOTIFIER)
 	@-(test -e lib/mmpython && ln -sf ../lib/mmpython site-packages)
 	@-(test -e lib/pylibvisual/libvisual.so && \
 		ln -sf ../lib/pylibvisual/libvisual.so site-packages)
-	@ln -sf ../lib/mevas/mevas ../lib/pyepg site-packages
+	@ln -sf ../lib/mevas/mevas ../lib/pyepg ../lib/pywebinfo site-packages
 	@ln -sf ../src site-packages/freevo
 	@ln -sf ../lib/$(PYMBUS)/mbus site-packages
 	@ln -sf ../lib/$(PYNOTIFIER)/notifier site-packages
@@ -41,7 +41,7 @@ lib/$(PYNOTIFIER):
 		tar -zxf $(PYNOTIFIER).tar.gz && rm $(PYNOTIFIER).tar.gz )
 
 install:
-	for package in $(PYNOTIFIER) $(PYMBUS) pyepg pyimlib2 mevas; do \
+	for package in $(PYNOTIFIER) $(PYMBUS) pyepg pyimlib2 mevas pywebinfo; do \
 		(cd lib/$$package; \
 		 rm -rf build ; \
 		 python setup.py install; \
