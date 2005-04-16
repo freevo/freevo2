@@ -11,7 +11,8 @@ all: extra_packages lib/$(PYMBUS) lib/$(PYNOTIFIER)
 	@-(test -e lib/mmpython && ln -sf ../lib/mmpython site-packages)
 	@-(test -e lib/pylibvisual/libvisual.so && \
 		ln -sf ../lib/pylibvisual/libvisual.so site-packages)
-	@ln -sf ../lib/mevas/mevas ../lib/pyepg ../lib/pywebinfo site-packages
+	@ln -sf ../lib/mevas/mevas ../lib/pyepg site-packages
+	@ln -sf ../lib/pywebinfo/src site-packages/pywebinfo
 	@ln -sf ../src site-packages/freevo
 	@ln -sf ../lib/$(PYMBUS)/mbus site-packages
 	@ln -sf ../lib/$(PYNOTIFIER)/notifier site-packages
