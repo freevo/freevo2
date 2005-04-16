@@ -129,6 +129,19 @@ PyObject *png_thumbnail(PyObject *self, PyObject *args)
                 th = (ih * tw) / iw;
             else
                 tw = (iw * th) / ih;
+
+	    /* scale image down to thumbnail size */
+	    imlib_context_set_cliprect (0, 0, tw, th);
+	    src = imlib_create_cropped_scaled_image (0, 0, iw, ih, tw, th);
+	    if (!src) {
+	        imlib_free_image_and_decache ();
+	        PyErr_SetString(PyExc_IOError, "pyimlib2 scale error");
+		return NULL;
+	    }
+	    /* free original image and set context to new one */
+	    imlib_free_image_and_decache ();
+	    imlib_context_set_image (src);
+	      
         } else {
             tw = iw;
             th = ih;
@@ -138,21 +151,14 @@ PyObject *png_thumbnail(PyObject *self, PyObject *args)
         return NULL;
     }
     
-    imlib_context_set_cliprect (0, 0, tw, th);
-            
-    if ((src = imlib_create_cropped_scaled_image (0, 0, iw, ih, tw, th))) {
-        imlib_free_image_and_decache ();
-        imlib_context_set_image (src);
-        imlib_image_set_has_alpha (1);
-        imlib_image_set_format ("argb");
-        snprintf (uri, PATH_MAX, "file://%s", source);
-        if (_png_write (dest, imlib_image_get_data (), tw, th, iw, ih,
-                        format, mtime, uri)) {
-            imlib_free_image_and_decache ();
-            Py_INCREF(Py_None);
-            return Py_None;
-        }
-        imlib_free_image_and_decache ();
+    imlib_image_set_has_alpha (1);
+    imlib_image_set_format ("argb");
+    snprintf (uri, PATH_MAX, "file://%s", source);
+    if (_png_write (dest, imlib_image_get_data (), tw, th, iw, ih,
+		    format, mtime, uri)) {
+      imlib_free_image_and_decache ();
+      Py_INCREF(Py_None);
+      return Py_None;
     }
 
     PyErr_SetString(PyExc_ValueError, "pyimlib2: unable to save image");
