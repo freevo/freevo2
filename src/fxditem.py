@@ -149,7 +149,7 @@ class Container(item.Item):
 
         self.image    = fxd.childcontent(node, 'cover-img')
         if self.image:
-            self.image = vfs.join(vfs.dirname(fxd_file), self.image)
+            self.image = os.path.join(vfs.dirname(fxd_file), self.image)
 
         parent_items  = fxd.getattr(None, 'items', [])
         display_type  = fxd.getattr(None, 'display_type', None)
