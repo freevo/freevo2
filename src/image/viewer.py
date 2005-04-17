@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.74  2005/04/17 18:34:51  dischi
+# fix getattr call for osd
+#
 # Revision 1.73  2004/12/31 11:57:42  dischi
 # renamed SKIN_* and OSD_* variables to GUI_*
 #
@@ -444,7 +447,7 @@ class ImageViewer(Application):
         # create the osdstring to write
         osdstring = u''
         for strtag in config.IMAGEVIEWER_OSD[self.osd_mode-1]:
-            i = self.fileitem.getattr(strtag[1])
+            i = str(self.fileitem[strtag[1]])
             if i:
                 osdstring += u' %s %s' % (Unicode(strtag[0]), Unicode(i))
 
@@ -493,7 +496,7 @@ class ImageViewer(Application):
             self.osd_box = gui.Image(background, pos)
             self.osd_box.set_alpha(230)
         if not background:
-            self.osd_box = gui.Rectangle(pos, size, 0xaa000000)
+            self.osd_box = gui.Rectangle(pos, size, 0xaa000000L)
 
         # put the rectangle on the screen and set the zindex to 1
         # (between image and text)
