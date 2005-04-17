@@ -118,6 +118,11 @@ class DirItem(Playlist):
             directory = os.path.abspath(directory)
             self.info = mediadb.get(directory)
 
+        # create full path
+        directory = os.path.normpath(directory)
+        # remove softlinks from path
+        directory = os.path.realpath(directory) + '/'
+
         # get cover from cache
         image = self.info['cover']
         if image:

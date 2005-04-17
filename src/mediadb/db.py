@@ -90,6 +90,10 @@ class Cache:
     A cache object for the mediadb holding one directory.
     """
     def __init__(self, dirname):
+        # create full path
+        dirname = os.path.normpath(os.path.abspath(dirname))
+        # remove softlinks from path
+        dirname = os.path.realpath(dirname) + '/'
         self.dirname = dirname
         self.overlay_file = vfs.getoverlay(dirname)
         self.file = self.overlay_file + '/freevo.db'
