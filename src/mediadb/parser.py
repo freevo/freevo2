@@ -101,7 +101,7 @@ def simplify(object):
 # regexp for filenames used in getname
 _FILENAME_REGEXP = re.compile("^(.*?)_(.)(.*)$")
 
-def getname(file):
+def getname(file, keep_ext):
     """
     make a nicer display name from file
     """
@@ -109,7 +109,7 @@ def getname(file):
         return Unicode(file)
 
     # basename without ext
-    if file.rfind('/') < file.rfind('.'):
+    if not keep_ext and file.rfind('/') < file.rfind('.'):
         name = file[file.rfind('/')+1:file.rfind('.')]
     else:
         name = file[file.rfind('/')+1:]
@@ -155,7 +155,9 @@ def parse(basename, filename, object, fast_scan=False):
     mminfo = None
     if not fast_scan and not object['ext'] in [ 'xml', 'fxd' ]:
         mminfo = mmpython.parse(filename)
-    title = getname(filename)
+
+    is_dir = os.path.isdir(filename)
+    title = getname(filename, is_dir)
     object['title:filename'] = title
     if mminfo:
         # store mmpython data as pickle for faster loading
@@ -171,7 +173,7 @@ def parse(basename, filename, object, fast_scan=False):
     else:
         object['title'] = title
 
-    if os.path.isdir(filename):
+    if is_dir:
         object['isdir'] = True
         if vfs.abspath(filename + '/' + basename + '.fxd'):
             # directory is covering a fxd file
