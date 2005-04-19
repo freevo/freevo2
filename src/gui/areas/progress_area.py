@@ -70,8 +70,13 @@ class ProgressArea(Area):
         try:
             length = int(self.infoitem.info['length'])
         except Exception, e:
-            log.error(e)
-            length = 0
+            try:
+                # FIXME: bad hack. Better have runtime and length
+                # in different keys
+                length = int(self.infoitem.info['video'][0]['length'])
+            except Exception, e:
+                log.error(e)
+                length = 0
         start = 0
         if self.infoitem.info['start']:
             start = int(self.infoitem.info['start'])
