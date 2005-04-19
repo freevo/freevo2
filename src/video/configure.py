@@ -235,11 +235,7 @@ def get_items(item):
         items.append(menu.MenuItem(_('Chapter selection'),
                                    subitem_selection_menu, item))
 
-    if item.mode in ('dvd', 'vcd') or \
-           (item.filename and item.info.has_key('type') and \
-            item.info['type'] and \
-            item.info['type'].lower().find('mpeg') != -1):
-        items += [ add_toogle(_('deinterlacing'), item, 'deinterlace') ]
+    items += [ add_toogle(_('deinterlacing'), item, 'deinterlace') ]
     return items
 
 
