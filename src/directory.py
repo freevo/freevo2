@@ -657,9 +657,8 @@ class DirItem(Playlist):
             self.play_items.sort(lambda l, o: cmp(l.sort('advanced').upper(),
                                                   o.sort('advanced').upper()))
         else:
-            self.play_items.sort(lambda l, o: cmp(l.name.upper(),
-                                                  o.name.upper()))
-
+            self.play_items.sort(lambda l, o: cmp(l.sort().upper(),
+                                                  o.sort().upper()))
 
         t6 = time.time()
 
