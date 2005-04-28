@@ -79,7 +79,7 @@ def grab_vdr():
     print 'Fetching guide from VDR.'
 
     pyepg.update('vdr', config.VDR_DIR, config.VDR_CHANNELS, config.VDR_EPG,
-                 config.VDR_HOST, config.VDR_PORT, config.VDR_ACCESS_ID)
+                 config.VDR_HOST, config.VDR_PORT, config.VDR_ACCESS_ID, 'both')
 
 
 def main():

@@ -31,11 +31,13 @@
 
 
 import os
+import string
 from vdr.vdr import VDR
 
 
 def update(guide, vdr_dir=None, channels_file=None, epg_file=None,
-             host=None, port=None, access_by='sid', verbose=1):
+           host=None, port=None, access_by='sid', limit_channels='', 
+           verbose=1):
 
     exclude_channels = guide.exclude_channels
     if not (isinstance(exclude_channels, list) or \
@@ -68,6 +70,16 @@ def update(guide, vdr_dir=None, channels_file=None, epg_file=None,
     chans = vdr.channels.values()
     for c in chans:
         if c.id in exclude_channels:  continue
+
+        if string.lower(limit_channels) == 'epg' and not c.in_epg:
+            continue
+        elif string.lower(limit_channels) == 'conf' and not c.in_conf:  
+            continue
+        elif string.lower(limit_channels) == 'both' and \
+             not (c.in_conf and c.in_epg):  
+            continue
+
+
         if access_by == 'name':
             access_id = c.name
         elif access_by == 'rid':
