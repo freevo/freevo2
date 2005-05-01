@@ -628,8 +628,15 @@ class CanvasContainer(CanvasObject):
                 # ignore this child, it is empty
                 continue
 
-            child_x, child_y = child._backing_store_info["pos"]
-
+            # Use the backing store position if it exists.
+            # Note: I don't know why a child can't have one, but it
+            # happens :(
+            if hasattr(child, "_backing_store_info") and \
+                   "pos" in child._backing_store_info:
+                child_x, child_y = child._backing_store_info["pos"]
+            else:
+                child_x, child_y = child.get_pos()
+                
             if isinstance(child, CanvasContainer):
                 r = child._get_drawing_rect()
                 if not r:
