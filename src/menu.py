@@ -381,7 +381,10 @@ class MenuWidget(Application):
                 self.menustack[-1] = new_menu
 
         if self.visible:
-            self.engine.draw(self.menustack[-1])
+            menu = self.menustack[-1]
+            if menu.selected:
+                menu.selected.__init_info__()
+            self.engine.draw(menu)
 
 
     def make_submenu(self, menu_name, actions, item):
