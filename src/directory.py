@@ -36,10 +36,13 @@ import copy
 import logging
 import time
 
+import notifier
+
 # freevo imports
 import config
 import util
 import mediadb
+from mediadb.globals import *
 
 import menu
 import plugin
@@ -110,6 +113,7 @@ class DirItem(Playlist):
         Playlist.__init__(self, parent=parent, display_type=display_type)
         self.type = 'dir'
         self.menu  = None
+        self.needs_update = False
 
         if isinstance(directory, mediadb.ItemInfo):
             self.info = directory
@@ -124,7 +128,7 @@ class DirItem(Playlist):
         directory = os.path.realpath(directory) + '/'
 
         # get cover from cache
-        image = self.info['cover']
+        image = self.info[COVER]
         if image:
             self.image = image
         
@@ -139,7 +143,7 @@ class DirItem(Playlist):
         if name:
             self.name = Unicode(name)
         else:
-            self.name = self.info['title:filename']
+            self.name = self.info[FILETITLE]
 
         if add_args == None and hasattr(parent, 'add_args'):
             add_args = parent.add_args
@@ -177,9 +181,11 @@ class DirItem(Playlist):
 
         self.modified_vars = []
 
-        self.folder_fxd = directory+'/folder.fxd'
-        if vfs.isfile(self.folder_fxd):
+        self.folder_fxd = self.info['fxd']
+        if self.folder_fxd:
             self.set_fxd_file(self.folder_fxd)
+        else:
+            self.folder_fxd = directory+'/folder.fxd'
 
         # Check mimetype plugins if they want to add something
         for p in plugin.mimetype(display_type):
@@ -194,7 +200,7 @@ class DirItem(Playlist):
         Set self.folder_fxd and parse it
         """
         self.folder_fxd = file
-        if self.folder_fxd and vfs.isfile(self.folder_fxd):
+        if self.folder_fxd and os.path.isfile(self.folder_fxd):
             if self.display_type == 'tv':
                 display_type = 'video'
             try:
@@ -294,14 +300,12 @@ class DirItem(Playlist):
             return _('Directory')
 
         if key == 'num_items':
-            self.create_info()
             display_type = self.display_type or 'all'
             if self.display_type == 'tv':
                 display_type = 'video'
             return self['num_%s_items' % display_type] + self['num_dir_items']
 
         if key == 'num_play_items':
-            self.create_info()
             display_type = self.display_type
             if self.display_type == 'tv':
                 display_type = 'video'
@@ -357,10 +361,14 @@ class DirItem(Playlist):
     # metainfo
     # ======================================================================
 
-    def create_info(self):
+    def __init_info__(self):
         """
         create some metainfo for the directory
         """
+        if not Playlist.__init_info__(self):
+            # nothing new
+            return False
+        
         display_type = self.display_type
 
         if self.display_type == 'tv':
@@ -492,8 +500,8 @@ class DirItem(Playlist):
             self.menuw = menuw
 
         # are we on a ROM_DRIVE and have to mount it first?
-        for media in config.REMOVABLE_MEDIA:
-            if self.dir.find(media.mountdir) == 0:
+        for media in vfs.mountpoints:
+            if self.dir.startswith(media.mountdir):
                 util.mount(self.dir)
                 self.media = media
 
@@ -536,6 +544,13 @@ class DirItem(Playlist):
         """
         build the items for the directory
         """
+        if arg == 'update' and not (self.listing and self.menuw and \
+                                    self.menuw.menustack[-1] == self.menu and \
+                                    eventhandler.is_menu()):
+            # not visible right now, do not update
+            self.needs_update = True
+            return
+
         t0 = time.time()
         self.playlist   = []
         self.play_items = []
@@ -562,6 +577,7 @@ class DirItem(Playlist):
 	    AlertBox(text=_('Directory does not exist')).show()
             return
 
+        self.needs_update = False
         display_type = self.display_type
         if self.display_type == 'tv':
             display_type = 'video'
@@ -584,16 +600,17 @@ class DirItem(Playlist):
         t1 = time.time()
         listing = mediadb.Listing(self.dir)
         t2 = time.time()
+
         if listing.num_changes > 5:
-            dirwatcher.cwd(None, None, None)
             if self.media:
                 text = _('Scanning disc, be patient...')
             else:
                 text = _('Scanning directory, be patient...')
-            popup = ProgressBox(text, full=listing.num_changes)
-            popup.show()
-            listing.update(popup.tick)
-            popup.destroy()
+            #popup = ProgressBox(text, full=listing.num_changes)
+            #popup.show()
+            #listing.update(popup.tick)
+            #popup.destroy()
+            listing.update(fast=True)
         elif listing.num_changes:
             listing.update()
         t3 = time.time()
@@ -758,7 +775,9 @@ class DirItem(Playlist):
             menuw.pushmenu(item_menu)
 
             self.menu = util.weakref(item_menu)
-            dirwatcher.cwd(menuw, self, self.menu)
+
+            callback = notifier.Callback(self.build, 'update', self.menuw)
+            mediadb.watcher.cwd(listing, callback)
             self.menuw = menuw
 
         t7 = time.time()
@@ -770,9 +789,13 @@ class DirItem(Playlist):
         """
         called when we return to this menu
         """
-        dirwatcher.cwd(self.menuw, self, self.menu)
-        dirwatcher.scan()
-
+        callback = notifier.Callback(self.build, 'update', self.menuw)
+        if self.needs_update:
+            log.info('directory needs update')
+            callback()
+        else:
+            mediadb.watcher.cwd(self.listing, callback)
+            mediadb.watcher.check()
         # we changed the menu, don't build a new one
         return None
 
@@ -945,83 +968,3 @@ class DirItem(Playlist):
         m.table = (80, 20)
         m.back_one_menu = 2
         menuw.pushmenu(m)
-
-
-
-
-# ======================================================================
-
-class Dirwatcher(plugin.DaemonPlugin):
-
-    def __init__(self):
-        plugin.DaemonPlugin.__init__(self)
-        self.item          = None
-        self.menuw         = None
-        self.item_menu     = None
-        self.poll_interval = 1000
-
-        plugin.register(self, 'Dirwatcher')
-
-
-    def cwd(self, menuw, item, item_menu):
-        self.menuw     = menuw
-        self.item      = item
-        self.item_menu = item_menu
-
-
-    def fast_check(self, overlay = False):
-        cache = self.item.listing.cache
-        if overlay:
-            dirname = cache.overlay_file
-            listing = cache.overlay
-            mtime   = 'overlay_mtime'
-        else:
-            dirname = cache.dirname
-            listing = cache.items
-            mtime   = 'items_mtime'
-
-        data_mtime = os.stat(dirname)[stat.ST_MTIME]
-        if data_mtime != cache.data[mtime]:
-            return True
-
-        for basename, info in listing.items():
-            if info['ext'] != 'fxd' and not info.has_key('isdir'):
-                continue
-            filename = dirname + '/' + basename
-            mtime = os.stat(filename)[stat.ST_MTIME]
-            if mtime != info['mtime']:
-                return True
-            if info.has_key('isdir'):
-                overlay = vfs.getoverlay(filename)
-                if os.path.isdir(overlay):
-                    mtime = os.stat(overlay)[stat.ST_MTIME]
-                    if mtime != info['overlay_mtime']:
-                        return True
-        if overlay:
-            return False
-        return self.fast_check(True)
-
-        
-    def scan(self):
-        if not self.item.listing:
-            return
-        if self.fast_check():
-            log.info('directory has changed')
-            item = self.item
-            self.item = None
-            item.build(menuw=self.menuw, arg='update')
-            self.item = item
-        return True
-
-
-    def poll(self):
-        if self.item and self.item.listing and self.menuw and \
-               self.menuw.menustack[-1] == self.item_menu and \
-               eventhandler.is_menu():
-            self.scan()
-        return True
-
-
-# and activate that DaemonPlugin
-dirwatcher = Dirwatcher()
-plugin.activate(dirwatcher)
