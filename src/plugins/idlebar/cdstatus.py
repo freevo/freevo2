@@ -67,7 +67,7 @@ class PluginInterface(IdleBarPlugin):
         self.rem_media  = []
 
         # collect all the media types
-        for media in config.REMOVABLE_MEDIA:
+        for media in vfs.mountpoints:
             self.rem_media.append(media.type)
 
     def draw(self, width, height):
@@ -78,7 +78,7 @@ class PluginInterface(IdleBarPlugin):
         changed = False
         i       = 0
 
-        for media in config.REMOVABLE_MEDIA:
+        for media in vfs.mountpoints:
             # check if there has been any changes
             if media.type != self.rem_media[i] or self.init:
                 self.rem_media[i] = media.type
@@ -97,7 +97,7 @@ class PluginInterface(IdleBarPlugin):
         x0        = 5
 
         # iterate through the removable medias
-        for media in config.REMOVABLE_MEDIA:
+        for media in vfs.mountpoints:
 
             if media.type == 'empty_cdrom' and not self.draw_empty:
                 # don't draw empty if configured

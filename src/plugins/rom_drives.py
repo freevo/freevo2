@@ -102,6 +102,8 @@ LABEL_REGEXP = re.compile("^(.*[^ ]) *$").match
 # Watcher
 watcher = None
 
+# list of rom drives
+rom_drives = []
 
 def ioctl(*args, **kwargs):
     """
@@ -154,9 +156,9 @@ class autostart(plugin.DaemonPlugin):
         # Handle the EJECT key for the main menu
         elif event == EJECT and menuw and len(menuw.menustack) == 1:
             # Are there any drives defined?
-            if config.REMOVABLE_MEDIA:
+            if rom_drives:
                 # The default is the first drive in the list
-                media = config.REMOVABLE_MEDIA[0]
+                media = rom_drives[0]
                 media.move_tray(dir='toggle')
                 return True
 
@@ -171,7 +173,7 @@ class rom_items(plugin.MainMenuPlugin):
         return the list of rom drives
         """
         items = []
-        for media in config.REMOVABLE_MEDIA:
+        for media in rom_drives:
             if media.item:
                 if parent.display_type == 'video' and media.videoitem:
                     m = media.videoitem
@@ -208,25 +210,23 @@ class rom_items(plugin.MainMenuPlugin):
         return False
 
 
-class RemovableMedia:
+class RemovableMedia(vfs.Mountpoint):
     """
     Object about one drive
     """
     def __init__(self, mountdir='', devicename='', drivename=''):
         # This is read-only stuff for the drive itself
-        self.mountdir = mountdir
-        self.devicename = devicename
+        vfs.Mountpoint.__init__(self, mountdir, devicename, 'empty_cdrom')
         self.drivename = drivename
-
+        rom_drives.append(self)
+        
         # Dynamic stuff
         self.tray_open = 0
         self.drive_status = None  # return code from ioctl for DRIVE_STATUS
 
-        self.id        = ''
         self.label     = ''
         self.item      = None
         self.videoitem = None
-        self.type      = 'empty_cdrom'
         self.cached   = False
 
 
@@ -361,7 +361,6 @@ class Watcher:
                                        drivename=name)
                 # close the tray without popup message
                 media.move_tray(dir='close', notify=0)
-                config.REMOVABLE_MEDIA.append(media)
 
         # Remove the ROM_DRIVES member to make sure it is not used by
         # legacy code!
@@ -413,7 +412,7 @@ class Watcher:
 
         media.drive_status = s
 
-        media.id        = ''
+        media.set_id('')
         media.label     = ''
         media.type      = 'empty_cdrom'
         media.item      = None
@@ -461,7 +460,7 @@ class Watcher:
         os.close(fd)
         image = title = movie_info = more_info = fxd_file = None
 
-        media.id    = disc_info['id']
+        media.set_id(disc_info['id'])
         media.label = disc_info['label']
         media.type  = 'cdrom'
 
@@ -657,7 +656,7 @@ class Watcher:
             # Some app is running, do not scan, it's not necessary
             return
 
-        for media in config.REMOVABLE_MEDIA:
+        for media in rom_drives:
             last_status = media.drive_status
             self.identify(media)
 
@@ -688,7 +687,7 @@ class Watcher:
                         # something is wrong, deactivate this feature
                         self.rebuild_file = '/this/file/should/not/exist'
 
-            for media in config.REMOVABLE_MEDIA:
+            for media in rom_drives:
                 media.drive_status = None
 
         if eventhandler.is_menu():
