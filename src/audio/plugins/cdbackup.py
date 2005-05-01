@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2005/05/01 17:36:24  dischi
+# use vfs.mountpoints and not config.REMOVABLE_MEDIA
+#
 # Revision 1.42  2004/11/20 19:35:45  rshortt
 # Typo bugfix.
 #
@@ -380,7 +383,7 @@ class main_backup_thread(threading.Thread):
         genre      = 'default_genre'
         dir_audio_default = "dir_audio_default"
         path_head = ''
-        for media in config.REMOVABLE_MEDIA:
+        for media in vfs.mountpoints:
             if media.devicename == device:
                 media.type = 'cdrip'
 
@@ -559,7 +562,7 @@ class main_backup_thread(threading.Thread):
                     os.unlink(output)
                 return
 
-        for media in config.REMOVABLE_MEDIA:
+        for media in vfs.mountpoints:
             if media.devicename == device:
                 media.type = 'audio'
 
