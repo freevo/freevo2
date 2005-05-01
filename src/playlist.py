@@ -91,7 +91,7 @@ class Playlist(MediaItem):
             self.build()
         else:
             # create a basic info object
-            self.info = mediadb.ItemInfo('', '', {})
+            self.info = mediadb.item()
 
 
     def read_m3u(self, plsname):
@@ -251,7 +251,7 @@ class Playlist(MediaItem):
         # self.playlist is a list of Items or strings (filenames)
         if not isstring(playlist):
             # create a basic info object
-            self.info = mediadb.ItemInfo('', '', {})
+            self.info = mediadb.item()
 
             for i in playlist:
                 if isinstance(i, Item):
@@ -261,7 +261,7 @@ class Playlist(MediaItem):
                     self.playlist.append(i)
 
                 elif isinstance(i, list) or isinstance(i, tuple) and \
-                     len(i) == 2 and vfs.isdir(i[0]):
+                     len(i) == 2 and os.path.isdir(i[0]):
                     # (directory, recursive=True|False)
                     if i[1]:
                         self.playlist += util.match_files_recursively\
@@ -607,7 +607,7 @@ class Mimetype(plugin.MimetypePlugin):
         pl.name     = fxd.getattr(node, 'title')
         pl.image    = fxd.childcontent(node, 'cover-img')
         if pl.image:
-            pl.image = vfs.join(vfs.dirname(fxd.filename), pl.image)
+            pl.image = os.path.join(os.path.dirname(fxd.filename), pl.image)
 
         fxd.parse_info(fxd.get_children(node, 'info', 1), pl)
         fxd.getattr(None, 'items', []).append(pl)
