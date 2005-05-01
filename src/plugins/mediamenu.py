@@ -191,18 +191,18 @@ class MediaMenu(Item):
                             log.exception('Error parsing %s' % filename)
                             raise e
                 if reachable:
-                    if vfs.isdir(filename):
+                    if os.path.isdir(filename):
                         # directory
                         files.append(filename)
                         additional_data[filename] = ( title, add_args, True )
                     else:
-                        if not vfs.isfile(filename) and \
+                        if not os.path.isfile(filename) and \
                                filename.startswith(os.getcwd()):
                             # file is in share dir
                             filename = filename[len(os.getcwd()):]
                             if filename[0] == '/':
                                 filename = filename[1:]
-                            filename = vfs.join(config.SHARE_DIR, filename)
+                            filename = os.path.join(config.SHARE_DIR, filename)
                         # add files
                         files.append(filename)
                         additional_data[filename] = ( title, [], False )

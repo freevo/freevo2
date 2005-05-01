@@ -36,6 +36,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2005/05/01 17:36:41  dischi
+# remove some vfs calls were they are not needed
+#
 # Revision 1.2  2005/04/10 17:49:46  dischi
 # switch to new mediainfo module, remove old code now in mediadb
 #
@@ -79,7 +82,7 @@ def fxdhandler(fxd, node):
     a.image    = fxd.childcontent(node, 'cover-img')
     a.url      = fxd.childcontent(node, 'url')
     if a.image:
-        a.image = vfs.join(vfs.dirname(fxd.filename), a.image)
+        a.image = os.path.join(os.path.dirname(fxd.filename), a.image)
 
     a.mplayer_options  = fxd.childcontent(node, 'mplayer_options')
     if fxd.get_children(node, 'player'):

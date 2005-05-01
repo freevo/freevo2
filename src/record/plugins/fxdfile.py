@@ -90,5 +90,7 @@ class PluginInterface(Plugin):
         if not recording.url.startswith('file:'):
             return
         filename = os.path.splitext(recording.url[5:])[0] + '.fxd'
-        if vfs.isfile(filename):
-            vfs.unlink(filename)
+        if os.path.isfile(filename):
+            # fxd file must be in real not in overlay dir, without
+            # that, the recorder couldn't even store the file
+            os.unlink(filename)

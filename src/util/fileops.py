@@ -196,7 +196,7 @@ def match_suffix(filename, suffixlist):
     """
     Check if a filename ends in a given suffix, case is ignored.
     """
-    fsuffix = vfs.splitext(filename)[1].lower()[1:]
+    fsuffix = os.path.splitext(filename)[1].lower()[1:]
     for suffix in suffixlist:
         if fsuffix == suffix:
             return 1
@@ -209,8 +209,8 @@ def match_files(dirname, suffix_list):
     Returns a list that is case insensitive sorted.
     """
     try:
-        files = [ vfs.join(dirname, fname) for fname in os.listdir(dirname) if
-                  vfs.isfile(vfs.join(dirname, fname)) ]
+        files = [ os.path.join(dirname, fname) for fname in os.listdir(dirname) if
+                  vfs.isfile(os.path.join(dirname, fname)) ]
     except OSError, e:
         print 'fileops:match_files: %s' % e
         return []
@@ -241,7 +241,7 @@ def _match_files_recursively_helper(result, dirname, names):
     for name in names:
         if not name in ('CVS', '.xvpics', '.thumbnails', '.pics',
                         'folder.fxd', 'lost+found'):
-            fullpath = os.path.abspath(vfs.join(dirname, name))
+            fullpath = os.path.abspath(os.path.join(dirname, name))
             result.append(fullpath)
     return result
 
@@ -298,17 +298,17 @@ def recursefolders(root, recurse=0, pattern='*', return_folders=0):
 
     # check each file
     for name in names:
-        fullname = os.path.normpath(vfs.join(root, name))
+        fullname = os.path.normpath(os.path.join(root, name))
         # grab if it matches our pattern and entry type
         for pat in pat_list:
             if fnmatch.fnmatch(name, pat):
                 if vfs.isfile(fullname) or \
-                   (return_folders and vfs.isdir(fullname)):
+                   (return_folders and os.path.isdir(fullname)):
                     result.append(fullname)
                 continue
         # recursively scan other folders, appending results
         if recurse:
-            if vfs.isdir(fullname) and not vfs.islink(fullname):
+            if os.path.isdir(fullname) and not os.path.islink(fullname):
                 result = result + recursefolders( fullname, recurse,
                                                   pattern, return_folders )
     return result
@@ -389,11 +389,11 @@ def resolve_media_mountdir(*arg):
 
     mountdir = ''
     # Find on what media it is located
-    for media in sysconfig.REMOVABLE_MEDIA:
+    for media in vfs.mountpoints:
         if media_id == media.id:
             # Then set the filename
             mountdir = media.mountdir
-            file     = vfs.join(media.mountdir, file)
+            file     = os.path.join(media.mountdir, file)
             break
 
     return mountdir, file
@@ -403,7 +403,7 @@ def check_media(media_id):
     """
     check if media_id is a valid media in one of the drives
     """
-    for media in sysconfig.REMOVABLE_MEDIA:
+    for media in vfs.mountpoints:
         if media_id == media.id:
             return media
     return None

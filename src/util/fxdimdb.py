@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2005/05/01 17:44:24  dischi
+# remove some vfs calls were they are not needed
+#
 # Revision 1.10  2005/01/09 10:29:39  dischi
 # make imdb work again
 #
@@ -258,16 +261,16 @@ class FxdImdb:
         """
         
         if fxdfilename: 
-            if vfs.splitext(fxdfilename)[1] == '.fxd':
-                self.fxdfile = vfs.splitext(fxdfilename)[0]
+            if os.path.splitext(fxdfilename)[1] == '.fxd':
+                self.fxdfile = os.path.splitext(fxdfilename)[0]
             else: self.fxdfile = fxdfilename
         
         else:
             if self.isdiscset == True:
-                self.fxdfile = vfs.join(config.OVERLAY_DIR, 'disc-set',
-                                        self.getmedia_id(self.device))
+                self.fxdfile = os.path.join(config.OVERLAY_DIR, 'disc-set',
+                                            self.getmedia_id(self.device))
             else:
-                self.fxdfile = vfs.splitext(file)[0]
+                self.fxdfile = os.path.splitext(file)[0]
         
         if overwrite == False:
             try:
@@ -283,9 +286,9 @@ class FxdImdb:
         #    parseMovieFile(self.fxdfile + '.fxd', None, []) == []:
         #     raise FxdImdb_XML_Error("FXD file to be updated is invalid, please correct it.")
 
-        if not vfs.isdir(vfs.dirname(self.fxdfile)):
-            if vfs.dirname(self.fxdfile):
-                os.makedirs(vfs.dirname(self.fxdfile))
+        if not os.path.isdir(os.path.dirname(self.fxdfile)):
+            if os.path.dirname(self.fxdfile):
+                os.makedirs(os.path.dirname(self.fxdfile))
             
     
     def setVideo(self, *videos, **mplayer_opt):
@@ -394,7 +397,7 @@ class FxdImdb:
 
         name = filename
         
-        name  = vfs.basename(vfs.splitext(name)[0])
+        name  = os.path.basename(os.path.splitext(name)[0])
         name  = re.sub('([a-z])([A-Z])', point_maker, name)
         name  = re.sub('([a-zA-Z])([0-9])', point_maker, name)
         name  = re.sub('([0-9])([a-zA-Z])', point_maker, name.lower())
@@ -774,7 +777,7 @@ class FxdImdb:
         except:
             pass
         
-        self.image = vfs.basename(self.image)
+        self.image = os.path.basename(self.image)
 
         print "Downloaded cover image from %s" % self.image_url
         print "Freevo knows nothing about the copyright of this image, please"
@@ -806,7 +809,7 @@ class FxdImdb:
         """drive (device string)
         return a unique identifier for the disc"""
 
-        if not vfs.exists(drive): return drive
+        if not os.path.exists(drive): return drive
         return cdrom_disc_id(drive)[1]
 
         
@@ -945,7 +948,7 @@ def relative_path(filename):
     
     if not isabs(filename) and not ismount(filename): return filename
     drivepaths = []
-    for item in config.REMOVABLE_MEDIA:
+    for item in vfs.mountpoints:
         drivepaths.append(item.mountdir)
     for path in drivepaths:
         if filename.find(path) != -1:

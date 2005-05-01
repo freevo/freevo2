@@ -72,7 +72,7 @@ def update():
 
     rebuild_file = os.path.join(config.FREEVO_CACHEDIR,
                                 'freevo-rebuild-database')
-    if vfs.exists(rebuild_file):
+    if os.path.exists(rebuild_file):
         try:
             os.remove(rebuild_file)
         except OSError:
@@ -93,19 +93,6 @@ def update():
             for name,dir in config.VIDEO_ITEMS:
                 files += util.recursefolders(dir,1,'*.fxd',1)
 
-#     for subdir in ('disc', 'disc-set'):
-#         files += util.recursefolders(vfs.join(config.OVERLAY_DIR, subdir),
-#                                      1, '*.fxd', 1)
-
-#     for info in fxditem.mimetype.parse(None, files, display_type='video'):
-#         if hasattr(info, '__fxd_rom_info__'):
-#             for i in info.__fxd_rom_id__:
-#                 fxd['id'][i] = info
-#             for l in info.__fxd_rom_label__:
-#                 fxd['label'].append((re.compile(l), info))
-#             for fo in info.__fxd_files_options__:
-#                 discset[fo['file-id']] = fo['mplayer-options']
-
     if config.VIDEO_SHOW_DATA_DIR:
         listing = Listing(config.VIDEO_SHOW_DATA_DIR)
         if listing.num_changes:
@@ -114,7 +101,7 @@ def update():
                                            display_type='video'):
             if info.type != 'video':
                 continue
-            k = vfs.splitext(vfs.basename(info.files.fxd_file))[0]
+            k = os.path.splitext(os.path.basename(info.files.fxd_file))[0]
             tv_shows[k] = (info.image, info.info,
                                        info.mplayer_options, info.skin_fxd)
             if hasattr(info, '__fxd_rom_info__'):

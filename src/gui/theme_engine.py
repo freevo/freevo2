@@ -93,7 +93,7 @@ def set_theme(new):
         # based on the current theme
         log.info('loading new theme %s', new)
         filename = new
-        if new and vfs.isfile(vfs.join(new, 'folder.fxd')):
+        if new and vfs.isfile(os.path.join(new, 'folder.fxd')):
             new = vfs.abspath(os.path.join(new, 'folder.fxd'))
         elif new and vfs.isfile(new):
             new = vfs.abspath(new)
@@ -1326,12 +1326,12 @@ class FXDSettings:
             if vfs.isfile(file+".fxd"):
                 file += ".fxd"
 
-            elif vfs.isfile(vfs.join(config.SKIN_DIR, '%s/%s.fxd' % \
+            elif vfs.isfile(os.path.join(config.SKIN_DIR, '%s/%s.fxd' % \
                                      (file, file))):
-                file = vfs.join(config.SKIN_DIR, '%s/%s.fxd' % (file, file))
+                file = os.path.join(config.SKIN_DIR, '%s/%s.fxd' % (file, file))
 
             else:
-                file = vfs.join(config.SKIN_DIR, 'main/%s' % file)
+                file = os.path.join(config.SKIN_DIR, 'main/%s' % file)
                 if vfs.isfile(file+".fxd"):
                     file += ".fxd"
 

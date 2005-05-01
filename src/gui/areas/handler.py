@@ -108,7 +108,7 @@ class AreaHandler:
         self.storage_file = os.path.join(config.FREEVO_CACHEDIR,
                                          'skin-%s' % os.getuid())
         self.display_style['menu'] = 0
-        if vfs.isfile(self.storage_file):
+        if os.path.isfile(self.storage_file):
             self.storage = util.cache.load(self.storage_file)
             if self.storage and self.storage.has_key(config.GUI_XML_FILE):
                 self.display_style['menu'] = self.storage[config.GUI_XML_FILE]

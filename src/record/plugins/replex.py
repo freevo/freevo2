@@ -86,14 +86,16 @@ class PluginInterface(Plugin):
             # different length, looks something went wrong, keep
             # ts and remove mpg file
             log.error('replex failed, remove replex file')
-            if vfs.isfile(dest):
-                vfs.unlink(dest)
+            if os.path.isfile(dest):
+                os.unlink(dest)
             return
 
         # delete ts
-        vfs.unlink(source)
+        os.unlink(source)
         fxd = os.path.splitext(source)[0] + '.fxd'
-        if not vfs.isfile(fxd):
+        if not os.path.isfile(fxd):
+            # fxd file must be in real not in overlay dir, without
+            # that, replex couldn't even store the file
             log.info('no fxd file to change')
             return
 

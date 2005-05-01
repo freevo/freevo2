@@ -90,8 +90,6 @@ class VideoChild:
         if self.mode == 'file':
             if not self.media_id:
                 fullname = os.path.join(dirname, self.filename)
-                if vfs.isoverlay(fullname):
-                    filename = vfs.normalize(fullname)
             if fullname and not fullname in files:
                 files.append(fullname)
         if self.mode == 'url':
@@ -255,7 +253,6 @@ def parse_movie(fxd, node):
         # only one file, this is directly for the item
         video = video_list[0]
         video.set_to_item(item)
-        
         variables = item.info.get_variables()
         item.set_url(video.get_url(listing))
         item.info.set_variables(variables)

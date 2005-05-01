@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2005/05/01 17:46:15  dischi
+# remove some vfs calls were they are not needed
+#
 # Revision 1.17  2004/11/20 18:23:05  dischi
 # use python logger module for debug
 #
@@ -81,7 +84,7 @@ import logging
 log = logging.getLogger('video')
 
 def get_bookmarkfile(filename):
-    myfile = vfs.basename(filename)
+    myfile = os.path.basename(filename)
     myfile = sysconfig.CACHEDIR + "/" + myfile + '.bookmark'
     return myfile
 

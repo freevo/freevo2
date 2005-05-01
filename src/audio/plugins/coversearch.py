@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2005/05/01 17:36:41  dischi
+# remove some vfs calls were they are not needed
+#
 # Revision 1.38  2005/01/02 11:49:05  dischi
 # use fthread to be non blocking
 #
@@ -151,8 +154,7 @@ class PluginInterface(plugin.ItemPlugin):
 
         # do don't call this when we have an image
         if item.type == 'audio' and item.filename and \
-           vfs.isfile(os.path.join(os.path.join(os.path.dirname(item.filename),
-                                                'cover.jpg'))):
+           vfs.isfile(os.path.join(os.path.dirname(item.filename), 'cover.jpg')):
             return []
         
         if item.type in ('audio', 'audiocd', 'dir'):

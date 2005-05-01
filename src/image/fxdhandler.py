@@ -30,6 +30,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2005/05/01 17:40:47  dischi
+# remove some vfs calls were they are not needed
+#
 # Revision 1.1  2004/09/13 19:32:46  dischi
 # move the fxdhandler into an extra file
 #
@@ -134,7 +137,7 @@ def fxdhandler(fxd, node):
     pl.name = fxd.getattr(node, 'title')
     pl.image = fxd.childcontent(node, 'cover-img')
     if pl.image:
-        pl.image = vfs.join(vfs.dirname(fxd.filename), pl.image)
+        pl.image = os.path.join(os.path.dirname(fxd.filename), pl.image)
 
 
     # background music

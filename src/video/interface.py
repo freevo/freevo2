@@ -163,12 +163,12 @@ class PluginInterface(plugin.MimetypePlugin):
         set informations for a diritem based on the content, etc.
         """
         if not diritem.image and config.VIDEO_SHOW_DATA_DIR:
-            base = vfs.basename(diritem.dir).lower()
-            name = vfs.join(config.VIDEO_SHOW_DATA_DIR, base)
+            base = os.path.basename(diritem.dir).lower()
+            name = os.path.join(config.VIDEO_SHOW_DATA_DIR, base)
             diritem.image = util.getimage(name)
 
-        if database.tv_shows.has_key(vfs.basename(diritem.dir).lower()):
-            tvinfo = database.tv_shows[vfs.basename(diritem.dir).lower()]
+        if database.tv_shows.has_key(os.path.basename(diritem.dir).lower()):
+            tvinfo = database.tv_shows[os.path.basename(diritem.dir).lower()]
             diritem.info.set_variables(tvinfo[1])
             if not diritem.image:
                 diritem.image = tvinfo[0]

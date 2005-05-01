@@ -196,7 +196,7 @@ class Process:
 
             for cmdline_filename in cmdline_filenames:
                 try:
-                    fd = vfs.open(cmdline_filename)
+                    fd = open(cmdline_filename)
                     cmdline = fd.read()
                     fd.close()
                 except IOError:

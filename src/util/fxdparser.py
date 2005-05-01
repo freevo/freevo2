@@ -118,7 +118,7 @@ class FXDtree(qp_xml.Parser):
         if not filename:
             filename = self.filename
         if vfs.isfile(filename):
-            vfs.unlink(filename)
+            os.unlink(vfs.abspath(filename))
         f = vfs.codecs_open(filename, 'wb', sysconfig.ENCODING)
         f.write('<?xml version="1.0" encoding="%s" ?>\n' % sysconfig.ENCODING)
         self._dump_recurse(f, self.tree)

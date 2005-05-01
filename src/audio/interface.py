@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2005/05/01 17:36:41  dischi
+# remove some vfs calls were they are not needed
+#
 # Revision 1.9  2005/04/10 17:49:46  dischi
 # switch to new mediainfo module, remove old code now in mediadb
 #
@@ -58,6 +61,7 @@ import stat
 import config
 import util
 import plugin
+from mediadb.globals import *
 
 # AudioItem
 from audioitem import AudioItem
@@ -103,7 +107,7 @@ class PluginInterface(plugin.MimetypePlugin):
         set informations for a diritem based on the content, etc.
         """
         if not diritem.image:
-            diritem.image = diritem.info['audiocover']
+            diritem.image = diritem.info[EXTRA_COVER]
                 
         if not diritem.info.has_key('title') and diritem.parent:
             # ok, try some good name creation

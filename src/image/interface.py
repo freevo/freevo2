@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2005/05/01 17:40:47  dischi
+# remove some vfs calls were they are not needed
+#
 # Revision 1.7  2005/04/10 17:58:45  dischi
 # switch to new mediainfo module
 #
@@ -48,10 +51,13 @@
 # by using plugin.mimetype()
 __all__ = [ 'PluginInterface' ]
 
+# python imports
+import os
+
 # Add support for bins album files
 from mmpython.image import bins
 
-# Freevo imports
+# freevo imports
 import config
 import util
 import plugin
@@ -99,7 +105,7 @@ class PluginInterface(plugin.MimetypePlugin):
         """
         set informations for a diritem based on album.xml
         """
-        if vfs.isfile(diritem.dir + '/album.xml'):
+        if os.path.isfile(diritem.dir + '/album.xml'):
             # Add album.xml information from bins to the
             # directory informations
             info  = bins.get_bins_desc(diritem.dir)
@@ -110,8 +116,8 @@ class PluginInterface(plugin.MimetypePlugin):
             if info.has_key('sampleimage') and info['sampleimage']:
                 # Check if the album.xml defines a sampleimage.
                 # If so, use it as image for the directory
-                image = vfs.join(diritem.dir, info['sampleimage'])
-                if vfs.isfile(image):
+                image = os.path.join(diritem.dir, info['sampleimage'])
+                if os.path.isfile(image):
                     diritem.image = image
 
             # set the title from album.xml
