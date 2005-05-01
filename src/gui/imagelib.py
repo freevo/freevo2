@@ -50,9 +50,6 @@ import theme_engine
 # get logging object
 log = logging.getLogger('gui')
 
-# internal imagecache
-_item_imagecache = util.objectcache.ObjectCache(30, desc='item_image')
-
 def _resize(image, width=None, height=None):
     """
     Resize an image (internal use)
@@ -81,13 +78,11 @@ def scale(*arg1, **arg2):
     return mevas.imagelib.scale(*arg1, **arg2)
 
 
-def load(url, size=None, cache=False, vfs_save=False):
+def load(url, size=None, cache=False):
     """
     Load a bitmap and return the image object.
     If width and height are given, the image is scaled to that. Setting
     only width or height will keep aspect ratio.
-    If vfs_save is true, the so scaled bitmap will be stored in the vfs for
-    future use.
     """
     if size == None:
         width, height = None, None
@@ -123,25 +118,8 @@ def load(url, size=None, cache=False, vfs_save=False):
         if s:
             return s
 
-    if vfs_save and (width == None or height == None):
-        vfs_save = False
-
     # not in cache, load it
     filename = os.path.abspath(url)
-
-    if vfs_save:
-        vfs_save = vfs.getoverlay('%s.raw-%sx%s' % (filename, width, height))
-        try:
-            if os.stat(vfs_save)[stat.ST_MTIME] > \
-                   os.stat(filename)[stat.ST_MTIME]:
-                f = open(vfs_save, 'r')
-                image = mevas.imagelib.new((width, height), f.read(), 'RGBA')
-                f.close()
-                if cache:
-                    cache[key] = image
-                return image
-        except:
-            pass
 
     if not os.path.isfile(filename):
         filename = os.path.join(config.IMAGE_DIR, url[8:])
@@ -166,25 +144,18 @@ def load(url, size=None, cache=False, vfs_save=False):
     if width != None or height != None:
         image = _resize(image, width, height)
 
-    if vfs_save:
-        f = vfs.open(vfs_save, 'w')
-        f.write(image.get_raw_data('RGBA'))
-        f.close()
-
     if cache:
         cache[key] = image
     return image
 
 
 
-def item_image(item, size, icon_dir, force=False, cache=True, bg=False):
+def item_image(item, size, icon_dir, force=False, cache=True, bg=False, callback=None):
     """
     Return the image for an item. This function uses internal caches and
     can also return a mimetype image if no image is found and force is True
+    Return: image object, cache key, forced
     """
-    if cache == True:
-        cache = _item_imagecache
-
     width, height = size
     try:
         type = item.display_type
@@ -206,30 +177,31 @@ def item_image(item, size, icon_dir, force=False, cache=True, bg=False):
             key = '%s-%s' % (key, item.media)
 
         image = cache[key]
-
+            
         if image:
-            return image
-
+            return image, key, False
+    else:
+        key = ''
+        
     image     = None
     imagefile = None
 
     if item.image:
         try:
             # load the thumbnail
-            image = util.thumbnail.load(item.image, bg)
+            image = util.thumbnail.load(item.image, bg, callback)
         except:
             # maybe image is something else (like already an image object)
             image = load(item.image)
-
+        
     if image:
         if item['rotation']:
             image.rotate(item['rotation'])
+        force = False
     else:
         if not force:
-            return None
+            return None, key, False
 
-        item.image = None
-        
         if hasattr(item, 'media') and item.media and \
                item.media.item == item and \
                os.path.isfile('%s/mimetypes/%s.png' % \
@@ -270,13 +242,13 @@ def item_image(item, size, icon_dir, force=False, cache=True, bg=False):
                 imagefile = '%s/mimetypes/unknown.png' % icon_dir
 
         if not imagefile:
-            return None
+            return None, key, True
 
         # load the thumbnail
         image = util.thumbnail.load(imagefile)
 
         if not image:
-            return None
+            return None, key, True
 
     if type and len(type) > 4:
         type = type[:5]
@@ -304,4 +276,4 @@ def item_image(item, size, icon_dir, force=False, cache=True, bg=False):
     image.scale((width, height))
     if isinstance(item.image, (str, unicode)) and item.image:
         cache[key] = image
-    return image
+    return image, key, force

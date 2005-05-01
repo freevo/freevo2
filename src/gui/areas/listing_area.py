@@ -54,6 +54,40 @@ from gui import Image
 import logging
 log = logging.getLogger('gui')
 
+
+class _Redraw:
+    """
+    Class handling redrawings in the listing area when a thumbnail
+    was created.
+    """
+    def __init__(self, function, gui_objects, screen, *args):
+        self.function = function
+        self.args = args
+        self.gui_objects = gui_objects
+        self.screen = screen
+        self.cache = None
+        self.cache_key = None
+        
+    def redraw(self, filename, thumb):
+        # clear image cache because there is a new image
+        if self.cache and self.cache_key:
+            del self.cache[self.cache_key]
+        if not self.gui_objects:
+            # no gui objects, must be cleaned
+            return
+        elif not self.gui_objects[0].get_parent():
+            # object is hidden, so we shouldn't update
+            return
+        # delete current objects
+        while len(self.gui_objects):
+            o = self.gui_objects.pop()
+            o.unparent()
+        # call redraw function
+        self.function(*self.args)
+        # update the screen
+        self.screen.canvas.update()
+
+        
 class ListingArea(Area):
     """
     This class defines the ListingArea to draw menu listings for the area
@@ -71,7 +105,7 @@ class ListingArea(Area):
         self.last_max_len      = -1
         self.empty_listing     = None
         self.arrows            = []
-        self.imagecache        = ObjectCache(100, desc='item_image')
+        self.imagecache        = ObjectCache(100)
         self.__default_val     = None
 
 
@@ -442,12 +476,15 @@ class ListingArea(Area):
 
 
     def __draw_image_listing_item(self, choice, (x, y), settings, val, hspace,
-                                  vspace, gui_objects):
+                                  vspace, gui_objects, use_cache = True):
         """
         Draw an item for the image menu. This function is called from update
         and is only used once to split the huge update function into smaller
         once.
         """
+        cb = _Redraw(self.__draw_image_listing_item, gui_objects, self.screen,
+                     choice, (x, y), settings, val, hspace, vspace, gui_objects, False)
+
         height = val.height
         if settings.type == 'image+text':
             height += int(1.1 * val.font.height)
@@ -471,9 +508,14 @@ class ListingArea(Area):
             b = self.drawbox(x + r.x, y + r.y, r.width, r.height, r)
             gui_objects.append(b)
 
-        image = self.imagelib.item_image(choice, (val.width, val.height),
-                                         self.settings.icon_dir, force=True,
-                                         cache=self.imagecache, bg=True)
+        ret = self.imagelib.item_image(choice, (val.width, val.height),
+                                       self.settings.icon_dir, force=True,
+                                       cache=self.imagecache, bg=True,
+                                       callback=cb.redraw)
+        image, key, forced = ret
+        if forced:
+            cb.cache = self.imagecache
+            cb.cache_key = key
         if image:
             i_w, i_h = image.width, image.height
 

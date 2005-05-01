@@ -42,6 +42,7 @@ import stat
 
 # mevas for imlib2 support
 import mevas
+import Imlib2
 
 # freevo utils
 import fileops
@@ -54,20 +55,24 @@ log = logging.getLogger('util')
 # list for thumbnails to create in bg
 _create_jobs = []
 
-
 def get_name(filename):
     """
-    Returns the filename of the thumbnail if it exists. None if not.
+    Returns the filename of the thumbnail if it exists. None if not or
+    False if it is impossible to create one.
     """
     s = os.stat(filename)
     if s[stat.ST_SIZE] < 30000:
+        # do not create thumbnails of small files
         return filename
-    base = filename[:filename.rfind('.')]
-    if base.endswith('.thumb'):
-        return filename
-    thumb = vfs.getoverlay(base + '.thumb' + filename[filename.rfind('.'):])
-    if not os.path.isfile(thumb):
-        return None
+
+    # use ~/.thumbnails
+    mp = vfs.get_mountpoint(filename)
+    if mp:
+        thumb = Imlib2.thumbnail_check(filename, mp.thumbnails)
+    else:
+        thumb = Imlib2.thumbnail_check(filename)
+    if not thumb:
+        return thumb
 
     if os.stat(thumb)[stat.ST_MTIME] > s[stat.ST_MTIME]:
         return thumb
@@ -75,26 +80,45 @@ def get_name(filename):
     return None
 
 
-def create(filename, check_overlay=True):
+def create(filename):
     """
     Create a thumbnail for the given filename in the vfs.
     """
-    if check_overlay and \
-           not os.path.isdir(os.path.dirname(vfs.getoverlay(filename))):
-        os.makedirs(os.path.dirname(vfs.getoverlay(filename)))
-    base  = filename[:filename.rfind('.')]
-    thumb = vfs.getoverlay(base + '.thumb' + filename[filename.rfind('.'):])
-    if filename in _create_jobs:
-        _create_jobs.remove(filename)
-        if _create_jobs:
-            call_later(10, create, _create_jobs[0])
-    try:
-        return mevas.imagelib.thumbnail(filename, thumb, (255, 255))
-    except:
-        return None
+    callbacks = []
+    for job in _create_jobs:
+        if job[0] == filename:
+            callbacks = job[1]
+            _create_jobs.remove(job)
+            if _create_jobs:
+                call_later(10, create, _create_jobs[0][0])
+
+    log.debug('create %s', filename)
+
+    mp = vfs.get_mountpoint(filename)
+    if mp:
+        thumb = Imlib2.thumbnail_check(filename, mp.thumbnails)
+    else: 
+        thumb = Imlib2.thumbnail_check(filename)
+       
+    if thumb == False:
+        thumb = None
+    elif not thumb:
+        if mp:
+            thumb = Imlib2.thumbnail_create(filename, mp.thumbnails)
+        else:
+            thumb = Imlib2.thumbnail_create(filename)
+    if thumb:
+        thumb = mevas.imagelib.open(thumb)
+
+    # call all callbacks when the thumbnail is done and a valid
+    # one is loaded.
+    if thumb and callbacks:
+        for c in callbacks:
+            c(filename, thumb)
+    return thumb
 
 
-def load(filename, bg=False):
+def load(filename, bg=False, callback=None):
     """
     Return the thumbnail. Create one, if it doesn't exists.
     """
@@ -104,10 +128,21 @@ def load(filename, bg=False):
         return None
     if thumb:
         return mevas.imagelib.open(thumb)
+    if thumb == False:
+        # unable to create thumbnail
+        return None
     if not bg:
         return create(filename)
-    if filename in _create_jobs:
-        return
-    _create_jobs.append(filename)
-    call_later(10, create, _create_jobs[0])
+
+    for f, c in _create_jobs:
+        if f == filename:
+            # already in queue
+            if callback and not callback in c:
+                c.append(callback)
+            return
+    if callback:
+        _create_jobs.append((filename, [ callback ]))
+    else:
+        _create_jobs.append((filename, []))
+    call_later(10, create, _create_jobs[0][0])
     return None
