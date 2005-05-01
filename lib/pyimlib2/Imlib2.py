@@ -759,11 +759,17 @@ def clean_stale_shmem():
         _Imlib2._shm_unlink(file)
 
 
-def thumbnail_create(src):
+def thumbnail_create(src, thumbnail_dir = ''):
     """
     Create a freedesktop.org thumbnail.
     """
-    dst = _thumbnail_dir + md5.md5('file://' + src).hexdigest() + '.'
+    if thumbnail_dir:
+        dst = thumbnail_dir + '/large/'
+        if not os.path.isdir(dst):
+            os.makedirs(dst, 0700)
+        dst = dst + md5.md5('file://' + src).hexdigest() + '.'
+    else:
+        dst = _thumbnail_dir + md5.md5('file://' + src).hexdigest() + '.'
     if src.lower().endswith('jpg'):
         try:
             _Imlib2.epeg_thumbnail(src, dst + 'jpg', (256,256))
@@ -775,44 +781,39 @@ def thumbnail_create(src):
         return dst + 'png'
     except:
         # image is broken
-        dst = _failed_dir + md5.md5('file://' + src).hexdigest() + '.png'
+        if thumbnail_dir:
+            dst = thumbnail_dir + '/failed/pyimlib/'
+            if not os.path.isdir(dst):
+                os.makedirs(dst, 0700)
+            dst = dst + md5.md5('file://' + src).hexdigest() + '.png'
+        else:
+            dst = _failed_dir + md5.md5('file://' + src).hexdigest() + '.png'
         _Imlib2.fail_thumbnail(src, dst)
         return dst
 
 
-def thumbnail_check(file):
+def thumbnail_check(file, thumbnail_dir = ''):
     """
     Check if a freedesktop.org thumbnail exists. Return is either the filename,
     False when the thumbnail can't be created or None is no information is
     available.
     """
-    dst = _thumbnail_dir + md5.md5('file://' + file).hexdigest() + '.'
+    if thumbnail_dir:
+        dst = thumbnail_dir + '/large/' + md5.md5('file://' + file).hexdigest() + '.'
+    else:
+        dst = _thumbnail_dir + md5.md5('file://' + file).hexdigest() + '.'
     if os.path.isfile(dst + 'jpg'):
         return dst + 'jpg'
     if os.path.isfile(dst + 'png'):
         return dst + 'png'
-    dst = _failed_dir + md5.md5('file://' + file).hexdigest() + '.png'
+    if thumbnail_dir:
+        dst = thumbnail_dir + '/failed/pyimlib/'
+        dst = dst + md5.md5('file://' + file).hexdigest() + '.'
+    else:
+        dst = _failed_dir + md5.md5('file://' + file).hexdigest() + '.png'
     if os.path.isfile(dst):
         return False
     return None
 
     
-def thumbnail(src, dst, size):
-    """
-    Create a thumbnail from file src to dst with the given size. If the
-    image is smaller, do not scale the image.
-    """
-    if src.lower().endswith('jpg'):
-        try:
-            _Imlib2.epeg_thumbnail(src, dst, size)
-            return open(dst)
-        except IOError:
-            pass
-    image = open(src)
-    if image.width > size[0] or image.height > size[1]:
-        image = image.scale_preserve_aspect(size)
-    image.save(dst)
-    return image
-
-
 clean_stale_shmem()
