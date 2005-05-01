@@ -294,13 +294,6 @@ if not VIDEO_SHOW_DATA_DIR and __freevo_app__ == 'main':
     
 
 #
-# List of objects representing removable media, e.g. CD-ROMs,
-# DVDs, etc.
-#
-REMOVABLE_MEDIA = sysconfig.REMOVABLE_MEDIA
-
-
-#
 # compile the regexp
 #
 VIDEO_SHOW_REGEXP_MATCH = re.compile("^.*" + VIDEO_SHOW_REGEXP).match
