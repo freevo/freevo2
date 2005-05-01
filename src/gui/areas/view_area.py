@@ -38,6 +38,7 @@ __all__ = [ 'ViewArea' ]
 
 # area imports
 from area import Area
+from util.objectcache import ObjectCache
 
 class ViewArea(Area):
     """
@@ -47,6 +48,7 @@ class ViewArea(Area):
         Area.__init__(self, 'view')
         self.info = (None, None, None)
         self.gui_objects = []
+        self.imagecache = ObjectCache(10)
 
 
     def clear(self):
@@ -116,9 +118,9 @@ class ViewArea(Area):
         addx = settings.x + settings.spacing
         addy = settings.y + settings.spacing
 
-        # FIXME: use cache here.
         image = self.imagelib.item_image(item, (width, height),
-                                         self.settings.icon_dir)
+                                         self.settings.icon_dir,
+                                         cache=self.imagecache)[0]
 
         if not image:
             return
