@@ -108,7 +108,7 @@ from event import *
 # of the config file doesn't match, Freevo won't start. If the minor version
 # is different, there will be only a warning
 
-LOCAL_CONF_VERSION  = 6.00
+LOCAL_CONF_VERSION  = 7.00
 
 # Description of changes in each new version
 FREEVO_CONF_CHANGES = [
@@ -181,6 +181,13 @@ LOCAL_CONF_CHANGES = [
     the freevo_config.py for details. Also add three mplayer filter
     MPLAYER_RESAMPLE_AUDIO, MPLAYER_VF_INTERLACED, MPLAYER_VF_PROGRESSIVE.
     ''' ),
+    (7.00, '''
+    Reworked the vfs/mediadb code. You should either start with a clean vfs
+    or run the cache helper to clean up the old stuff (you can stop the helper
+    when it starts to scan the directories). If you also want to use an older
+    version of freevo, you should create a new vfs for Freevo 2.0. To do so,
+    set vfs_dir = /path/to/vfs in your freevo.conf.
+    ''' )
     ]
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
