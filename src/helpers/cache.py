@@ -122,14 +122,23 @@ def delete_old_files_1():
                  'disc'):
         if os.path.exists(os.path.join(config.FREEVO_CACHEDIR, name)):
             del_list.append(os.path.join(config.FREEVO_CACHEDIR, name))
-    del_list += util.recursefolders(config.OVERLAY_DIR,1,'mmpython',1)
     del_list += util.match_files(config.OVERLAY_DIR+'/disc',
                                  ['mmpython', 'freevo'])
 
-    for file in util.match_files_recursively(config.OVERLAY_DIR, ['png']):
-        if file.endswith('.fvt.png'):
+    for file in util.match_files_recursively(config.OVERLAY_DIR, ['raw']):
+        if not file.endswith('.fxd.raw'):
             del_list.append(file)
 
+    for file in util.match_files_recursively(config.OVERLAY_DIR,
+                                             config.IMAGE_SUFFIX):
+        if file.find('.thumb.') > 0:
+            del_list.append(file)
+
+    for db in ('freevo.cache', 'freevo.db', 'mmpython.cache', '*.raw.tmp',
+               '*.raw-[0-9][0-9][0-9]x[0-9][0-9][0-9]', '*.fvt.png',
+               'mmpython'):
+        del_list += util.recursefolders(config.OVERLAY_DIR,1,db,1)
+    
     for f in del_list:
         if os.path.isdir(f):
             util.rmrf(f)
@@ -159,13 +168,11 @@ def delete_old_files_2():
     for file in subdirs:
         if not os.path.isdir(file[len(config.OVERLAY_DIR):]) and not \
                file.startswith(config.OVERLAY_DIR + '/disc'):
-            for metafile in ('cover.png', 'cover.png.raw', 'cover.jpg',
-                             'cover.jpg.raw', 'mmpython.cache',
-                             'freevo.cache', 'freevo.db'):
+            for metafile in ('cover.png', 'cover.jpg'):
                 if os.path.isfile(os.path.join(file, metafile)):
                     os.unlink(os.path.join(file, metafile))
-            if not os.listdir(file):
-                os.rmdir(file)
+        if not os.listdir(file):
+            os.rmdir(file)
     print 'done'
     
 
@@ -185,9 +192,7 @@ def cache_thumbnails(directories):
 
     files = util.misc.unique(files)
     for filename in copy.copy(files):
-        if thumbnail.get_name(filename):
-            files.remove(filename)
-        elif filename.find('.thumb.') > 0:
+        if thumbnail.get_name(filename) != None:
             files.remove(filename)
         else:
             for bad_dir in ('.xvpics', '.thumbnails', '.pics'):
