@@ -46,8 +46,8 @@ import plugin
 import util
 
 from sysconfig import Unicode
-from util import vfs
 import mediadb
+from mediadb.globals import *
 
 # get logging object
 log = logging.getLogger()
@@ -91,13 +91,9 @@ class FileInformation:
         """
         for f in self.files + [ self.fxd_file, self.image ]:
             if f:
-                if vfs.isoverlay(f):
-                    d = vfs.getoverlay(destdir)
-                else:
-                    d = destdir
-                if not os.path.isdir(d):
-                    os.makedirs(d)
-                shutil.copy(f, d)
+                if not os.path.isdir(destdir):
+                    os.makedirs(destdir)
+                shutil.copy(f, destdir)
 
 
     def move_possible(self):
@@ -113,13 +109,9 @@ class FileInformation:
         """
         for f in self.files + [ self.fxd_file, self.image ]:
             if f:
-                if vfs.isoverlay(f):
-                    d = vfs.getoverlay(destdir)
-                else:
-                    d = destdir
-                if not os.path.isdir(d):
-                    os.makedirs(d)
-                os.system('mv "%s" "%s"' % (f, d))
+                if not os.path.isdir(destdir):
+                    os.makedirs(destdir)
+                os.system('mv "%s" "%s"' % (f, destdir))
 
 
     def delete_possible(self):
@@ -137,6 +129,7 @@ class FileInformation:
             if not f:
                 continue
             util.unlink(f)
+
 
 
 class Action:
@@ -185,7 +178,7 @@ class Item:
 
         if info:
             # create a basic info object
-            self.info = mediadb.ItemInfo('', '', {})
+            self.info = mediadb.item()
             
         if not hasattr(self, 'autovars'):
             self.autovars = {}
@@ -202,7 +195,7 @@ class Item:
             self.media        = None
 
         self.fxd_file = None
-
+        self.__initialized = False
 
 
     def __setitem__(self, key, value):
@@ -370,6 +363,16 @@ class Item:
         _mem_debug_('item', self.name)
 
 
+    def __init_info__(self):
+        """
+        Init the info attribute.
+        """
+        if self.__initialized:
+            return False
+        self.__initialized = True
+        if self.info and self.info[mediadb.NEEDS_UPDATE]:
+            self.info.cache.parse_item(self.info)
+        return True
 
 
 class MediaItem(Item):
@@ -394,9 +397,12 @@ class MediaItem(Item):
         else:
             if url:
                 log.error('please fix this for %s' % url)
-                self.info = mediadb.get(url[url.find('://')+3:])
+                if url.find('://') > 0:
+                    url = url[url.find('://')+3:]
+                self.info = mediadb.get(url)
+                url = self.info.url
             else:
-                self.info = mediadb.ItemInfo('', '', {})
+                self.info = mediadb.item()
 
                 self.url = url              # the url itself
                 self.network_play = True    # network url, like http
@@ -431,10 +437,10 @@ class MediaItem(Item):
             except:
                 pass
             if not self.name:
-                self.name = self.info['title:filename']
+                self.name = self.info[FILETITLE]
 
             if search_cover:
-                cover = self.info['cover']
+                cover = self.info[COVER]
                 if cover:
                     self.image = cover
                     if cover != self.filename and \
@@ -449,10 +455,10 @@ class MediaItem(Item):
             self.filename     = ''
             self.mimetype     = self.type
             if not self.name:
-                self.name = self.info['title:filename']
+                self.name = self.info[FILETITLE]
             if not self.name:
                 self.name = Unicode(self.url)
-            self.image = self.info['cover']
+            self.image = self.info[COVER]
 
 
     def play(self, arg=None, menuw=None):
