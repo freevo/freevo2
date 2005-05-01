@@ -45,14 +45,76 @@ import sysconfig
 # the logging object
 log = logging.getLogger('vfs')
 
+# vfs directory on disc
 _VFS_DIR = sysconfig.VFS_DIR
 
+# list of mount points
+mountpoints = []
+
+class Mountpoint:
+    """
+    Base object for a mount point.
+    """
+    def __init__(self, mountdir, devicename, type, id=""):
+        self.mountdir = mountdir
+        self.devicename = devicename
+        self.type = type
+
+        self.set_id(id)
+        
+        # add to global list
+        mountpoints.append(self)
+
+        
+    def set_id(self, id):
+        """
+        Set media id. May be called more than once when the
+        id changes (e.g. rom drives)
+        """
+        self.id = id
+        self.cache = os.path.join(_VFS_DIR, 'disc/metadata/%s.db' % id)
+        vfs = os.path.join(_VFS_DIR, 'disc', id)
+        self.mediadb = os.path.join(vfs, '.metadata')
+        self.thumbnails = os.path.join(vfs, '.thumbnails')
+        
+
+    def get_overlay(self, filename):
+        """
+        Get overlay for filename.
+        """
+        filename = filename[len(self.mountdir):]
+        return '%s/disc/%s%s' % (_VFS_DIR, self.id, filename)
+
+
+    def get_root(self):
+        """
+        Get root dir for the vfs.
+        """
+        return '%s/disc/%s' % (_VFS_DIR, self.id)
+
+
+    def get_relative_path(self, filename):
+        """
+        Get relative path for filename at this mountpoint.
+        """
+        return filename[len(self.mountdir)+1:]
+        
+
+def get_mountpoint(filename):
+    if not filename.startswith('/'):
+        filename = os.path.abspath(filename)
+    for media in mountpoints:
+        if filename.startswith(media.mountdir):
+            return media
+    return None
+
+    
 def getoverlay(directory):
     if not directory.startswith('/'):
         directory = os.path.abspath(directory)
     if directory.startswith(_VFS_DIR):
         return directory
-    for media in sysconfig.REMOVABLE_MEDIA:
+    for media in mountpoints:
         if directory.startswith(media.mountdir):
             directory = directory[len(media.mountdir):]
             return '%s/disc/%s%s' % (_VFS_DIR, media.id, directory)
@@ -81,33 +143,6 @@ def isfile(name):
         return True
     overlay = getoverlay(name)
     return overlay and os.path.isfile(overlay)
-
-
-def unlink(name):
-    absname = abspath(name)
-    if not absname:
-        raise IOError, 'file %s not found' % name
-    os.unlink(absname)
-
-
-def stat(name):
-    absname = abspath(name)
-    if not absname:
-        raise IOError, 'file %s not found' % name
-    return os.stat(absname)
-
-
-def mtime(name):
-    """
-    Return the modification time of the file. If the files also exists
-    in VFS_DIR, return the max of both. If the file does not exist
-    in the normal directory, OSError is raised.
-    """
-    t = os.stat(name)[ST_MTIME]
-    try:
-        return max(os.stat(getoverlay(name))[ST_MTIME], t)
-    except (OSError, IOError):
-        return t
 
 
 def open(name, mode='r'):
@@ -156,81 +191,3 @@ def codecs_open(name, mode, encoding):
         except IOError, e:
             log.error('vfs.codecs_open: error opening file %s' % overlay)
             raise IOError, e
-
-
-def listdir(directory, handle_exception=True, include_dot_files=False,
-            include_overlay=False):
-    """
-    get a directory listing (including VFS_DIR)
-    """
-    try:
-        if not directory.endswith('/'):
-            directory = directory + '/'
-
-        files = []
-
-        if include_dot_files:
-            for f in os.listdir(directory):
-                if not f in ('CVS', '.xvpics', '.thumbnails', '.pics',
-                             'folder.fxd', 'lost+found'):
-                    files.append(directory + f)
-        else:
-            for f in os.listdir(directory):
-                if not f.startswith('.') and not f in ('CVS', 'folder.fxd'):
-                    files.append(directory + f)
-
-        if not include_overlay:
-            return files
-
-        overlay = getoverlay(directory)
-        if overlay and overlay != directory and os.path.isdir(overlay):
-            for fname in os.listdir(overlay):
-                if fname.endswith('.fxd'):
-                    files.append(overlay + fname)
-        return files
-
-    except OSError:
-        log.exception('vfs.listdir: Error in dir %s' % directory)
-        if not handle_exception:
-            raise OSError
-        return []
-
-
-def isoverlay(name):
-    """
-    return if the name is in the overlay dir
-    """
-    return name.startswith(_VFS_DIR)
-
-
-def normalize(name):
-    """
-    remove VFS_DIR if it's in the path
-    """
-    if isoverlay(name):
-        name = name[len(_VFS_DIR):]
-        if name.startswith('disc-set'):
-            # revert it, disc-sets have no real dir
-            return os.path.join(_VFS_DIR, name)
-        if name.startswith('disc'):
-            name = name[5:]
-            id = name[:name.find('/')]
-            name = name[name.find('/')+1:]
-            for media in sysconfig.REMOVABLE_MEDIA:
-                if media.id == id:
-                    name = os.path.join(media.mountdir, name)
-        return name
-    return name
-
-
-# some other os functions (you don't need to use them)
-basename = os.path.basename
-join     = os.path.join
-splitext = os.path.splitext
-basename = os.path.basename
-dirname  = os.path.dirname
-exists   = os.path.exists
-isdir    = os.path.isdir
-islink   = os.path.islink
-
-
