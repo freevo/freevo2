@@ -42,7 +42,6 @@ from mmpython.disc.discinfo import cdrom_disc_id
 
 # freevo imports
 import sysconfig
-import util
 
 # mediadb imports
 from db import FileCache
@@ -69,7 +68,7 @@ def disc_info(media):
         return info
 
     # Disc is data of some sort. Mount it to get the file info
-    util.mount(media.mountdir, force=True)
+    media.mount()
     if os.path.isdir(os.path.join(media.mountdir, 'VIDEO_TS')) or \
            os.path.isdir(os.path.join(media.mountdir, 'video_ts')):
         # looks like a DVD but is not detected as one, check again
@@ -78,11 +77,11 @@ def disc_info(media):
         info = ItemInfo('', '', cache.data, cache)
         info.filename = info['mime'][6:] + '://'
         if info['mime'] in ('video/vcd', 'video/dvd'):
-            util.umount(media.mountdir)
+            media.umount()
             return info
     # save directory listing in item
     info['listing'] = os.listdir(media.mountdir)
-    util.umount(media.mountdir)
+    media.umount()
     # set correct dirname / filename
     info.dirname = media.mountdir
     info.filename = info.dirname + '/' + info.basename

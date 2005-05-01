@@ -38,6 +38,8 @@ import logging
 import db
 from db import Cache, FileCache
 from item import ItemInfo
+import parser
+from globals import *
 
 log = logging.getLogger('mediadb')
 
@@ -62,7 +64,7 @@ class Listing:
         if self.num_changes > 0:
             self.visible = []
             return
-        for basename, item in self.cache.list():
+        for basename, item in self.cache.items():
             self.data.append(ItemInfo(basename, dirname, item, self.cache))
         self.visible = self.data
 
@@ -76,24 +78,21 @@ class Listing:
         """
         if self.num_changes == 0:
             return
-        if fast:
-            self.cache.add_missing()
-        else:
-            self.cache.parse(callback)
+        self.cache.parse(callback, fast)
         dirname = self.dirname
         cache = self.cache
-        for basename, item in self.cache.list():
+        for basename, item in self.cache.items():
             self.data.append(ItemInfo(basename, dirname, item, cache))
         self.num_changes = 0
         self.visible = self.data
-
+            
 
     def get_dir(self):
         """
         Return all directory items.
         """
-        ret = filter(lambda x: x.attr.has_key('isdir'), self.visible)
-        self.visible = filter(lambda x: not x.attr.has_key('isdir'),
+        ret = filter(lambda x: x.attr.has_key(ISDIR), self.visible)
+        self.visible = filter(lambda x: not x.attr.has_key(ISDIR),
                               self.visible)
         return ret
 
@@ -131,7 +130,7 @@ class Listing:
         self.visible = []
         ret = []
         for v in visible:
-            if v.attr['ext'] in suffix_list: ret.append(v)
+            if v.attr[EXTENTION] in suffix_list: ret.append(v)
             else: self.visible.append(v)
         return ret
 
@@ -146,8 +145,8 @@ class Listing:
         self.visible = []
         ret = []
         for v in visible:
-            if v.attr.has_key('type') and \
-                   v.attr['type'].lower() == type.lower():
+            if v.attr.has_key(TYPE) and \
+                   v.attr[TYPE].lower() == type.lower():
                 ret.append(v)
             else:
                 self.visible.append(v)
@@ -207,7 +206,7 @@ class FileListing(Listing):
             return
 
         for dirname, ( cache, all_files ) in self.caches.items():
-            for basename, item in cache.list():
+            for basename, item in cache.items():
                 if basename in all_files:
                     self.data.append(ItemInfo(basename, dirname, item, cache))
         self.visible = self.data
@@ -219,7 +218,7 @@ class FileListing(Listing):
         """
         for dirname, ( cache, all_files ) in self.caches.items():
             cache.parse(callback)
-            for basename, item in cache.list():
+            for basename, item in cache.items():
                 if basename in all_files:
                     self.data.append(ItemInfo(basename, dirname, item, cache))
         self.num_changes = 0

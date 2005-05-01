@@ -42,6 +42,9 @@ from listing import Listing, FileListing
 # Interface
 #
 
+# internal version of the file
+VERSION = 0.1
+
 def cache(listing):
     """
     Function for the 'cache' helper.
@@ -183,16 +186,17 @@ def extract_image(listing):
             id3 = eyeD3.Mp3AudioFile( item.filename )
         except:
             continue
-        myname = vfs.getoverlay(os.path.join(path, 'cover.jpg'))
+        myname = vfs.getoverlay(os.path.join(item.dirname, 'cover.jpg'))
         if id3.tag:
             images = id3.tag.getImages();
             for img in images:
-                if vfs.isfile(myname) and (get_md5(vfs.open(myname,'rb')) == \
-                                           get_md5(img.imageData)):
+                if os.path.isfile(myname) and \
+                       (get_md5(vfs.open(myname,'rb')) == \
+                        get_md5(img.imageData)):
                     # Image already there and has identical md5, skip
                     pass
-                elif not vfs.isfile(myname):
-                    f = vfs.open(myname, "wb")
+                elif not os.path.isfile(myname):
+                    f = open(myname, "wb")
                     f.write(img.imageData)
                     f.flush()
                     f.close()
@@ -200,8 +204,8 @@ def extract_image(listing):
                     # image exists, but sums are different, write a unique
                     # cover
                     iname = os.path.splitext(os.path.basename(i))[0]+'.jpg'
-                    myname = vfs.getoverlay(os.path.join(path, iname))
-                    f = vfs.open(myname, "wb")
+                    myname = vfs.getoverlay(os.path.join(item.dirname, iname))
+                    f = open(myname, "wb")
                     f.write(img.imageData)
                     f.flush()
                     f.close()

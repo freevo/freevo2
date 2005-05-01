@@ -1,6 +1,6 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# debug.py -
+# globals - Global variables used by the mediadb
 # -----------------------------------------------------------------------------
 # $Id$
 #
@@ -29,54 +29,25 @@
 #
 # -----------------------------------------------------------------------------
 
-import sys
-import cPickle
-import notifier
+DATA_VERSION  = '_V'
+ITEMS         = '_I'
+ITEMS_MTIME   = '_IM'
+OVERLAY_ITEMS = '_O'
+OVERLAY_MTIME = '_OM'
+NEW_FILE      = '_NF'
+NEEDS_UPDATE  = '_NU'
+EXTENTION     = '_E'
+ISDIR         = '_D'
+MMINFO        = '_M'
+MTIME         = '_T'
+MTIME_DEP     = '_TD'
 
-from mediadb import *
-from mediadb.globals import *
+TITLE         = 'title'
+FILETITLE     = 'filetitle'
+COVER         = 'cover'
+EXTRA_COVER   = 'extra_cover'
+TYPE          = 'type'
+URL           = 'url'
+FXD           = 'fxd'
 
-# init the notifier
-notifier.init( notifier.GENERIC )
-
-def print_data(data, space='    '):
-    for key, info in data.items():
-        if key.startswith('_'):
-            continue
-        if isinstance(info, (list, tuple)):
-            print '%s%s: [' % (space, key)
-            for i in info:
-                if isinstance(i, dict):
-                    print_data(i, space + '  ')
-                    print
-                else:
-                    print '%s  %s' % (space, i)
-            print '%s  ]' % (space)
-
-        else:
-            print '%s%s: %s' % (space, key, info)
-    if not data.has_key(MMINFO):
-        return
-    mminfo = cPickle.loads(data[MMINFO])
-    print_data(mminfo, '      ')
-    print
-
-l = Listing(sys.argv[1])
-if l.num_changes:
-    print 'update listing', l.num_changes
-    l.update(fast=False)
-
-print
-print 'Listing for %s' % l.cache.dirname
-for key in l.cache.data:
-    if not key.startswith('_'):
-        print '  %s: %s' % (key, l.cache.data[key])
-print
-for file, info in l.cache.files.items():
-    print '  %s' % file
-    print_data(info)
-print
-for file, info in l.cache.overlay.items():
-    print '  %s' % file
-    print_data(info)
-print
+COVER_EXT     = ('png', 'jpg', 'gif')

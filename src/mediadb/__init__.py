@@ -41,6 +41,13 @@ from item import ItemInfo
 from listing import Listing, FileListing
 from parser import cache, init
 from generic import get
+from watcher import Watcher as _Watcher
+from globals import *
+
+watcher = _Watcher()
 
 # init parsing module
 init()
+
+def item():
+    return ItemInfo('', '', {})

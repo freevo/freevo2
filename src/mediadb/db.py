@@ -4,6 +4,8 @@
 # -----------------------------------------------------------------------------
 # $Id$
 #
+# TODO: check for images of files
+#
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
@@ -34,17 +36,20 @@ __all__ = [ 'Cache', 'FileCache', 'save', 'get' ]
 # python imports
 import time
 import os
-import stat
 import re
+import md5
 import logging
+from stat import *
 
 # freevo imports
+import sysconfig
 import util.vfs as vfs
 import util.cache as cache
 from util.callback import *
 
 # mediadb imports
 import parser
+from globals import *
 
 # get logging object
 log = logging.getLogger('mediadb')
@@ -52,6 +57,12 @@ log = logging.getLogger('mediadb')
 # internal format version
 VERSION = 0.1
 
+# cache dir for metadata
+CACHE_DIR = sysconfig.VFS_DIR + '/metadata'
+
+if not os.path.isdir(CACHE_DIR):
+    os.makedirs(CACHE_DIR)
+    
 class CacheList:
     """
     Internal list of all cache objects.
@@ -65,7 +76,7 @@ class CacheList:
         """
         if dirname in self.caches:
             cache = self.caches[dirname]
-            mtime = os.stat(cache.file)[stat.ST_MTIME]
+            mtime = os.stat(cache.cachefile)[ST_MTIME]
             if mtime == cache.mtime:
                 return cache
         c = Cache(dirname)
@@ -93,41 +104,49 @@ class Cache:
         # create full path
         dirname = os.path.normpath(os.path.abspath(dirname))
         # remove softlinks from path
-        dirname = os.path.realpath(dirname) + '/'
+        dirname = os.path.realpath(dirname)
+        if not dirname.endswith('/'):
+            dirname = dirname + '/'
         self.dirname = dirname
-        self.overlay_file = vfs.getoverlay(dirname)
-        self.file = self.overlay_file + '/freevo.db'
+
+        for mp in vfs.mountpoints:
+            if dirname.startswith(mp.mountdir):
+                self.overlay_dir = mp.get_overlay(dirname)
+                digest = md5.md5(mp.get_relative_path(dirname)).hexdigest()
+                self.cachefile = mp.mediadb + '/' + digest + '.db'
+                break
+        else:
+            self.overlay_dir = sysconfig.VFS_DIR + dirname
+            digest = md5.md5(dirname).hexdigest()
+            self.cachefile = CACHE_DIR + '/' + digest + '.db'
+
         self.data = None
         self.changed = False
         self.check_time = 0
-        if os.path.isfile(self.file):
+        if os.path.isfile(self.cachefile):
             # load cache file
-            self.data = cache.load(self.file, VERSION)
-            self.mtime = os.stat(self.file)[stat.ST_MTIME]
-        elif not os.path.isdir(os.path.dirname(self.overlay_file)):
-            # create vfs overlay dir; we will need it anyway for
-            # storing the db file
-            os.makedirs(os.path.dirname(self.overlay_file))
+            self.data = cache.load(self.cachefile, VERSION)
+            self.mtime = os.stat(self.cachefile)[ST_MTIME]
+
         if not self.data:
             # create a new cache data dict
-            self.data  = {'items_mtime': 0,
-                          'items': {},
-                          'overlay_mtime': {},
-                          'overlay': {},
-                          'cover': '',
-                          'audiocover': '',
+            self.data  = { DATA_VERSION:  parser.VERSION,
+                           ITEMS_MTIME:   0,
+                           ITEMS:         {},
+                           OVERLAY_MTIME: {},
+                           OVERLAY_ITEMS: {},
+                           COVER:         '',
+                           EXTRA_COVER:   '',
                           }
             # save file to make sure the file itself exist in the future
-            # process and to avoid directory changes just because the cache
-            # is saved to a new file.
+            # process.
             self.changed = True
             self.save()
         # 'normal' files
-        self.items   = self.data['items']
+        self.files   = self.data[ITEMS]
         # files in the overlay dir
-        self.overlay = self.data['overlay']
+        self.overlay = self.data[OVERLAY_ITEMS]
         # internal stuff about changes
-        self.__added   = []
         self.__changed = []
         self.__check_global = False
         # a hidden list of files only to check when checking the cache
@@ -141,25 +160,35 @@ class Cache:
         self.reduce_files = files
 
 
-    def check(self, overlay = False):
+    def check(self, overlay = False, complete_check = False):
         """
         Check the directory for changes.
         """
         if overlay:
             # handling the overlay dir
-            dirname = self.overlay_file
+            dirname = self.overlay_dir
             listing = self.overlay
-            mtime   = 'overlay_mtime'
+            mtime   = OVERLAY_MTIME
         else:
             # handling the 'normal' dir
             dirname = self.dirname
-            listing = self.items
-            mtime   = 'items_mtime'
+            listing = self.files
+            mtime   = ITEMS_MTIME
 
         deleted = []
-        # get mtime (may be 0 for devices)
-        data_mtime = os.stat(dirname)[stat.ST_MTIME]
-        if data_mtime != self.data[mtime] or not data_mtime:
+        added = []
+        try:
+            # get mtime (may be 0 for devices)
+            data_mtime = os.stat(dirname)[ST_MTIME]
+        except OSError:
+            # no overlay dir
+            self.check_time = time.time()
+            if self.changed:
+                call_later(self.save)
+            return
+
+        if data_mtime != self.data[mtime] or not data_mtime or complete_check:
+            complete_check = True
             log.debug('check %s' % dirname)
             # mtime differs, check directory for added and deleted files
             if not self.reduce_files:
@@ -188,40 +217,70 @@ class Cache:
                 if f in ('CVS', 'lost+found') or f.startswith('.'):
                     # ignore such files
                     continue
-                if overlay and (f == 'freevo.db' or f.find('.thumb.') > 0 or \
-                                f.endswith('.raw') or f.endswith('.cache')):
+                if overlay and f.endswith('.raw'):
                     # ignore such files in overlay
                     continue
-                fullname = dirname + '/' + f
-                if overlay and os.path.isdir(fullname):
+                filename = dirname + f
+                stat  = os.stat(filename)
+                isdir = S_ISDIR(stat[ST_MODE])
+                if overlay and isdir:
                     # ignore directories in overlay
                     continue
-                # add as added
-                self.__added.append((f, fullname))
+                # add file
+                ext = f[f.rfind('.')+1:].lower()
+                title = parser.getname(f, isdir)
+                info = { EXTENTION : ext,
+                         MTIME     : stat[ST_MTIME],
+                         MTIME_DEP : [],
+                         TITLE     : title,
+                         FILETITLE : title,
+                         NEW_FILE  : True
+                         }
+                if isdir:
+                    info[ISDIR] = True
+                added.append((f, info))
+                self.__changed.append((f, filename, info))
 
-        for basename, info in listing.items():
-            # check all files for changes (compare mtime)
-            if self.reduce_files and not basename in self.reduce_files:
-                continue
-            filename = dirname + '/' + basename
-            mtime = os.stat(filename)[stat.ST_MTIME]
-            if mtime != info['mtime']:
-                # changed
-                info['mtime'] = mtime
-                self.__changed.append((basename, filename, info))
-            elif info.has_key('isdir'):
-                # For directories also check the overlay directory. A change
-                # in the overlay will change the directory, too
-                overlay = vfs.getoverlay(filename)
-                if os.path.isdir(overlay):
-                    mtime = os.stat(overlay)[stat.ST_MTIME]
-                    if mtime != info['overlay_mtime']:
-                        info['overlay_mtime'] = mtime
-                        self.__changed.append((basename, filename, info))
 
-        if deleted and len(self.__added):
+        try:
+            for basename, info in listing.items():
+                # check all files for changes (compare mtime)
+                if self.reduce_files and not basename in self.reduce_files:
+                    continue
+                filename = dirname + basename
+                if info.has_key(NEEDS_UPDATE):
+                    self.__changed.append((basename, filename, info))
+                    continue
+                mtime = os.stat(filename)[ST_MTIME]
+                if mtime != info[MTIME]:
+                    # changed
+                    info[MTIME] = mtime
+                    self.__changed.append((basename, filename, info))
+                elif info.has_key(ISDIR):
+                    # For directories also check the overlay directory. A
+                    # change in the overlay will change the directory, too
+                    overlay_dir = vfs.getoverlay(filename)
+                    if os.path.isdir(overlay_dir):
+                        mtime = os.stat(overlay_dir)[ST_MTIME]
+                        if mtime != info[OVERLAY_MTIME]:
+                            info[OVERLAY_MTIME] = mtime
+                            self.__changed.append((basename, filename, info))
+        except OSError, e:
+            # that shouldn't mappen, but it does on fat partitions when
+            # an item is removed and nothing new is added. So if this is the
+            # case, we start everything again.
+            if complete_check:
+                # Oops, no, that's expected at all, raise the error again
+                log.exception('strange OSError, please report')
+                raise e
+            return self.check(overlay, True)
+        
+        if deleted or added:
             self.__check_global = True
             self.changed = True
+        if added:
+            for filename, info in added:
+                listing[filename] = info
         if overlay:
             self.check_time = time.time()
             if self.changed:
@@ -236,140 +295,135 @@ class Cache:
         """
         if not self.changed:
             return
-        log.debug('save %s' % self.file)
-        cache.save(self.file, self.data, VERSION)
-        self.mtime = os.stat(self.file)[stat.ST_MTIME]
+        log.debug('save %s' % self.cachefile)
+        cache.save(self.cachefile, self.data, VERSION)
+        self.mtime = os.stat(self.cachefile)[ST_MTIME]
         self.changed = False
 
 
-    def parse(self, callback):
+    def parse_next(self):
+        """
+        Parse the next item in the changed list. Return True if more
+        items are in the list, otherwise return False. This function
+        should be called from the notifier to parse all items in the
+        background.
+        """
+        if not self.__changed:
+            return False
+        basename, filename, info = self.__changed.pop()
+        log.debug('parse_next: %s' % basename)
+        parser.parse(basename, filename, info, self, self.items())
+        self.changed = True
+        if not self.__changed:
+            return False
+        return True
+    
+
+    def parse_item(self, item):
+        """
+        Parse the info for the given file if it is in the changed list.
+        """
+        for c in self.__changed:
+            if c[2] == item.attr:
+                basename, filename, info = c
+                log.debug('parse_item: %s' % basename)
+                parser.parse(basename, filename, info, self, self.items())
+                self.changed = True
+                self.__changed.remove(c)
+                return True
+        return False
+        
+                
+    def parse(self, callback, fast_scan=False):
         """
         Parse added and changed files. If callback is not None, the callback
         will be called after each file.
         """
-        if not self.__added and not self.__changed and \
-               not self.__check_global:
+        if not self.__changed and not self.__check_global:
             return
 
         self.changed = True
 
-        for basename, filename in self.__added:
-            # check new files
-            log.debug('new: %s' % basename)
-            ext = basename[basename.rfind('.')+1:].lower()
-            if ext == basename:
-                ext = ''
-            info = { 'ext'      : ext,
-                     'mtime'    : os.stat(filename)[stat.ST_MTIME],
-                     'mtime_dep': []
-                     }
-            parser.parse(basename, filename, info)
+        items = self.items()
+        
+        if fast_scan:
+            for basename, filename, info in self.__changed:
+                info[NEEDS_UPDATE] = True
 
-            prefix = basename[:-len(ext)]
-            if ext in ('png', 'jpg', 'gif'):
-                # the new item is an image, search all items for a similar
-                # name to add the file as cover
-                for i_basename, i_info in self.items.items():
-                    if i_basename[:-len(i_info['ext'])] == prefix:
-                        i_info['cover'] = filename
-            else:
-                # search the items in the list for covers matching the
-                # basename of the new item
-                for ext in ('png', 'jpg', 'gif'):
-                    if prefix + ext in self.items:
-                        info['cover'] = self.dirname + '/' + prefix + ext
-                    if prefix + ext in self.overlay:
-                        info['cover'] = self.overlay_file + '/' + prefix + ext
-            if vfs.isoverlay(filename):
-                self.overlay[basename] = info
-            else:
-                self.items[basename] = info
-            if callback:
-                callback()
-
-        for basename, filename, info in self.__changed:
-            # check changed files
-            log.debug('changed: %s' % filename)
-            parser.parse(basename, filename, info)
-            log.debug(info['mtime_dep'])
-            for key in info['mtime_dep']:
-                del info[key]
-            info['mtime_dep'] = []
-            if callback:
-                callback()
+        else:
+            for basename, filename, info in self.__changed:
+                # check changed files
+                log.debug('changed: %s' % filename)
+                parser.parse(basename, filename, info, self, items)
+                if callback:
+                    callback()
+            self.__changed = []
 
         if self.__check_global:
             # check global data when files are added or deleted
             for cover in ('cover.png', 'cover.jpg', 'cover.gif'):
-                if self.items.has_key(cover):
+                if self.files.has_key(cover):
                     # directory cover image
-                    self.data['cover'] = self.dirname + '/' + cover
-                    self.data['audiocover'] = self.data['cover']
+                    self.data[COVER] = self.dirname + '/' + cover
+                    self.data[EXTRA_COVER] = self.data[COVER]
                     break
                 if self.overlay.has_key(cover):
                     # cover in overlay
-                    self.data['cover'] = self.overlay_file + '/' + cover
-                    self.data['audiocover'] = self.data['cover']
+                    self.data[COVER] = self.overlay_dir + '/' + cover
+                    self.data[EXTRA_COVER] = self.data[COVER]
                     break
             else:
                 # no cover, try to find at least some image that can be used
                 # as cover for audio items
-                self.data['cover'] = ''
-                self.data['audiocover'] = ''
+                self.data[COVER] = ''
+                self.data[EXTRA_COVER] = ''
                 cover = []
-                for f, i in self.items.items():
-                    if i['ext'] in ('png', 'jpg', 'gif'):
+                for f, i in self.files.items():
+                    if i[EXTENTION] in ('png', 'jpg', 'gif'):
                         cover.append(f)
                         if len(cover) > 10:
                             cover = []
                             break
                 if len(cover) == 1:
-                    self.data['audiocover'] = cover[0]
+                    self.data[EXTRA_COVER] = cover[0]
                 else:
                     cover = filter(parser.cover_filter, cover)
                     if cover:
-                        self.data['audiocover'] = cover[0]
+                        self.data[EXTRA_COVER] = cover[0]
 
             if callback:
                 callback()
 
         self.save()
-        self.__added   = []
-        self.__changed = []
         self.__check_global = False
         self.reduce_files = []
 
 
-    def add_missing(self):
-        """
-        Add the new files still missing in the databse with
-        basic attributes.
-        """
-        if not self.__added:
-            return
-
-        for basename, filename in self.__added:
-            ext = basename[basename.rfind('.')+1:].lower()
-            if ext == basename:
-                ext = ''
-            info = { 'ext'      : ext,
-                     'mtime'    : 1,
-                     'mtime_dep': []
-                     }
-            parser.parse(basename, filename, info, True)
-            if vfs.isoverlay(filename):
-                self.overlay[basename] = info
-            else:
-                self.items[basename] = info
-
-
-    def list(self):
+    def items(self):
         """
         Return all items.
         """
-        return self.items.items() + self.overlay.items()
+        return self.files.items() + self.overlay.items()
 
 
+    def keys(self):
+        """
+        Return all keys.
+        """
+        return self.files.keys() + self.overlay.keys()
+
+
+    def filename(self, basename):
+        """
+        Return full filename of the basename (handles overlay).
+        """
+        if basename in self.files:
+            return self.dirname + basename
+        if basename in self.overlay:
+            return self.overlay_dir + basename
+        raise OSError('No key "%s" in cache' % basename)
+
+    
     def num_changes(self):
         """
         Return the number of changes in the directory. If the number is
@@ -377,7 +431,7 @@ class Cache:
         """
         if self.reduce_files or self.check_time + 2 < time.time():
             self.check()
-        changes = len(self.__added) + len(self.__changed)
+        changes = len(self.__changed)
         if self.__check_global:
             return changes + 1
         if not changes:
@@ -397,26 +451,27 @@ class FileCache:
     Cache for one file
     """
     def __init__(self, filename, db):
-        self.file = db
+        self.cachefile = db
         self.data = None
-        if os.path.isfile(self.file):
+        if os.path.isfile(self.cachefile):
             # load cache file
-            self.data = cache.load(self.file, VERSION)
-            self.mtime = os.stat(self.file)[stat.ST_MTIME]
+            self.data = cache.load(self.cachefile, VERSION)
+            self.mtime = os.stat(self.cachefile)[ST_MTIME]
         if not self.data:
             # create a new cache data dict
-            self.data  = { 'ext': '',
-                           'cover': '',
-                           'audiocover': '',
-                           'mtime'    : os.stat(filename)[stat.ST_MTIME],
-                           'mtime_dep': []
+            self.data  = { DATA_VERSION: parser.VERSION,
+                           EXTENTION   : '',
+                           COVER       : '',
+                           EXTRA_COVER : '',
+                           MTIME       : os.stat(filename)[ST_MTIME],
+                           MTIME_DEP   : []
                            }
             # save file to make sure the file itself exist in the future
             # process and to avoid directory changes just because the cache
             # is saved to a new file.
             self.changed = True
             basename = filename[filename.rfind('/'):]
-            parser.parse(basename, filename, self.data)
+            parser.parse(basename, filename, self.data, self, [])
             self.save()
 
 
@@ -426,9 +481,9 @@ class FileCache:
         """
         if not self.changed:
             return
-        log.info('save %s' % self.file)
-        cache.save(self.file, self.data, VERSION)
-        self.mtime = os.stat(self.file)[stat.ST_MTIME]
+        log.debug('save %s' % self.cachefile)
+        cache.save(self.cachefile, self.data, VERSION)
+        self.mtime = os.stat(self.cachefile)[ST_MTIME]
         self.changed = False
 
 

@@ -39,6 +39,9 @@ import logging
 # freevo imports
 from util.callback import *
 
+# mediadb globals
+from globals import *
+
 # get logging object
 log = logging.getLogger('mediadb')
 
@@ -52,7 +55,7 @@ class ItemInfo:
             # make sure attr is set to something valid
             attr = {}
             if basename:
-                attr['ext'] = basename[basename.rfind('.')+1:].lower()
+                attr[EXTENTION] = basename[basename.rfind('.')+1:].lower()
         # attr is the dict that will be stored in the mediadb
         self.attr = attr
         # tmp data only valid in the current session
@@ -67,8 +70,8 @@ class ItemInfo:
         self.filename = self.dirname + '/' + self.basename
         # cache this item belongs to (needed for saving)
         self.cache = cache
-        if self.attr.has_key('url'):
-            self.url = self.attr['url']
+        if self.attr.has_key(URL):
+            self.url = self.attr[URL]
         else:
             self.url = 'file://' + self.filename
 
@@ -84,7 +87,7 @@ class ItemInfo:
         """
         Get the itnformation 'key' from the item.
         """
-        if key in ('cover', 'audiocover'):
+        if key in (COVER, EXTRA_COVER):
             if self.attr.has_key(key):
                 return self.attr[key]
             elif self.cache:
@@ -95,14 +98,16 @@ class ItemInfo:
             return self.tmp[key]
         if self.attr.has_key(key):
             return self.attr[key]
+        elif key == TITLE and self.attr.has_key(FILETITLE):
+            return self.attr[FILETITLE]
         if self.hidden_variables.has_key(key):
             return self.hidden_variables[key]
         if self.mminfo == None:
             # unpickle mmpython data
-            if not self.attr.has_key('mminfo'):
+            if not self.attr.has_key(MMINFO):
                 return None
             log.debug('unpickle %s' % self.basename)
-            self.mminfo = cPickle.loads(self.attr['mminfo'])
+            self.mminfo = cPickle.loads(self.attr[MMINFO])
         log.debug('mmget %s (%s)' % (self.basename, key))
         if self.mminfo.has_key(key):
             return self.mminfo[key]
@@ -128,7 +133,7 @@ class ItemInfo:
         """
         Check if 'key' is in the item somewhere.
         """
-        if key in ('cover', 'audiocover'):
+        if key in (COVER, EXTRA_COVER):
             return True
         if self.tmp.has_key(key):
             return True
@@ -138,32 +143,14 @@ class ItemInfo:
             return True
         if self.mminfo == None:
             # unpickle mmpython data
-            if not self.attr.has_key('mminfo'):
+            if not self.attr.has_key(MMINFO):
                 return False
             log.debug('unpickle %s' % self.basename)
-            self.mminfo = cPickle.loads(self.attr['mminfo'])
+            self.mminfo = cPickle.loads(self.attr[MMINFO])
         log.debug('mmget %s (%s)' % (self.basename, key))
         if self.mminfo.has_key(key):
             return True
         return False
-
-
-    def keys(self):
-        """
-        Return a list of valid keys.
-        """
-        ret = [ 'cover', 'audiocover' ]
-        if self.mminfo == None:
-            if self.attr.has_key('mminfo'):
-                log.debug('unpickle %s' % self.basename)
-                self.mminfo = cPickle.loads(self.attr['mminfo'])
-            else:
-                self.mminfo = {}
-        for vardict in self.tmp, self.attr, self.hidden_variables, self.mminfo:
-            for key in vardict:
-                if not key in ret:
-                    ret.append(key)
-        return ret
 
 
     def store(self, key, value):
@@ -187,8 +174,8 @@ class ItemInfo:
         if self.cache:
             self.cache.changed = True
             call_later(self.cache.save)
-        if not key in self.attr['mtime_dep']:
-            self.attr['mtime_dep'].append(key)
+        if not key in self.attr[MTIME_DEP]:
+            self.attr[MTIME_DEP].append(key)
         return True
 
 

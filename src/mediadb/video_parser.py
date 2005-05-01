@@ -29,13 +29,18 @@
 #
 # -----------------------------------------------------------------------------
 
+# internal version of the file
+VERSION = 0.1
+
+from globals import *
+
 def parse(filename, object, mminfo):
     """
     Parse additional data for video files.
     """
     if mminfo and mminfo.type == 'DVD':
-        object['url']  = 'dvd://' + filename
-        object['type'] = 'dvd'
+        object[URL]  = 'dvd://' + filename
+        object[TYPE] = 'dvd'
 
 
 def cache(listing):

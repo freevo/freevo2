@@ -32,6 +32,7 @@
 # python imports
 import os
 import stat
+import time
 import mmpython
 import pickle
 import cPickle
@@ -39,23 +40,30 @@ import re
 
 # freevo imports
 import config
-import util.fxdparser
 import util.vfs as vfs
+import util
 
 # mediadb imports
 import db
+from globals import *
 
 # list of external parser
 _parser = []
+
+# internal version of the file
+VERSION = 0.1
 
 def init():
     """
     Init the parser module
     """
+    global VERSION
+    VERSION += mmpython.version.CHANGED
     for f in os.listdir(os.path.dirname(__file__)):
         if f.endswith('_parser.py'):
             exec('import %s' % f[:-3])
             _parser.append(eval(f[:-3]))
+            VERSION += eval(f[:-3]).VERSION
 
 
 def simplify(object):
@@ -66,7 +74,7 @@ def simplify(object):
     """
     ret = {}
     for k in object.keys:
-        if not k in [ 'thumbnail', 'url' ] and getattr(object,k) != None:
+        if not k in [ 'thumbnail', URL ] and getattr(object,k) != None:
             value = getattr(object,k)
             if isstring(value):
                 value = Unicode(value.replace('\0', '').lstrip().rstrip())
@@ -145,81 +153,116 @@ def cover_filter(x):
 
 
 
-def parse(basename, filename, object, fast_scan=False):
+def parse(basename, filename, object, cache, listing):
     """
     Add additional informations to filename, object.
     """
-    if object.has_key('type'):
-        del object['url']
-        del object['type']
+    for key in object[MTIME_DEP]:
+        del object[key]
+    object[MTIME_DEP] = []
+
+    for key in [ URL, TYPE, NEEDS_UPDATE ]:
+        if object.has_key(key):
+            del object[key]
+
+    if object.has_key(NEW_FILE):
+        added = True
+        del object[NEW_FILE]
+    else:
+        added = False
+        
     mminfo = None
-    if not fast_scan and not object['ext'] in [ 'xml', 'fxd' ]:
+    ext = object[EXTENTION]
+    if not ext in [ 'xml', 'fxd' ]:
         mminfo = mmpython.parse(filename)
 
     is_dir = os.path.isdir(filename)
     title = getname(filename, is_dir)
-    object['title:filename'] = title
+    object[FILETITLE] = title
+
     if mminfo:
         # store mmpython data as pickle for faster loading
-        object['mminfo'] = cPickle.dumps(simplify(mminfo),
+        object[MMINFO] = cPickle.dumps(simplify(mminfo),
                                          pickle.HIGHEST_PROTOCOL)
-        if mminfo.title:
-            object['title'] = mminfo.title.replace('\0', '').strip()
+        if hasattr(mminfo, TITLE) and mminfo.title:
+            object[TITLE] = mminfo.title.replace('\0', '').strip()
         else:
-            object['title'] = title
-    elif object.has_key('mminfo'):
-        del object['mminfo']
-        object['title'] = title
+            object[TITLE] = title
+    elif object.has_key(MMINFO):
+        del object[MMINFO]
+        object[TITLE] = title
     else:
-        object['title'] = title
+        object[TITLE] = title
 
     if is_dir:
-        object['isdir'] = True
+        object[ISDIR] = True
         if vfs.abspath(filename + '/' + basename + '.fxd'):
             # directory is covering a fxd file
-            object['type'] = 'fxd'
-        if not fast_scan:
-            # Create a simple (fast) cache of subdirs to get some basic idea
-            # about the files inside the directory
-            c = db.Cache(filename)
-            if c.num_changes():
-                c.add_missing()
-            listing = vfs.listdir(filename, include_overlay=True)
-            # get directory cover
-            for l in listing:
-                if l.endswith('/cover.png') or l.endswith('/cover.jpg') or \
-                       l.endswith('/cover.gif'):
-                    object['cover'] = l
-                    break
-            else:
-                if object.has_key('cover'):
-                    del object['cover']
-                if object.has_key('audiocover'):
-                    del object['audiocover']
-                files = util.find_matches(listing, ('jpg', 'gif', 'png' ))
-                if len(files) == 1:
-                    object['audiocover'] = files[0]
-                elif len(files) > 1 and len(files) < 10:
-                    files = filter(cover_filter, files)
-                    if files:
-                        object['audiocover'] = files[0]
+            object[TYPE] = 'fxd'
 
-            # check for fxd files in the directory
-            fxd = vfs.abspath(filename + '/folder.fxd')
-            if fxd:
-                object['fxd'] = fxd
-            elif object.has_key('fxd'):
-                del object['fxd']
-            # save directory overlay mtime
-            overlay = vfs.getoverlay(filename)
-            if os.path.isdir(overlay):
-                mtime = os.stat(overlay)[stat.ST_MTIME]
-                object['overlay_mtime'] = mtime
-            else:
-                object['overlay_mtime'] = 0
+        # Create a simple (fast) cache of subdirs to get some basic idea
+        # about the files inside the directory
+        c = db.Cache(filename)
+        if c.num_changes():
+            c.parse(None, True)
+
+        listing = c.keys()
+
+        # get directory cover
+        for fname in listing:
+            if fname in ( 'cover.png', 'cover.jpg', 'cover.gif'):
+                object[COVER] = c.filename(fname)
+                object[EXTRA_COVER] = c.filename(fname)
+                break
+        else:
+            if object.has_key(COVER):
+                del object[COVER]
+            if object.has_key(EXTRA_COVER):
+                del object[EXTRA_COVER]
+            files = util.find_matches(listing, COVER_EXT)
+            if len(files) == 1:
+                object[EXTRA_COVER] = files[0]
+            elif len(files) > 1 and len(files) < 10:
+                files = filter(cover_filter, files)
+                if files:
+                    object[EXTRA_COVER] = files[0]
+
+        # get folder fxd
+        for fname in listing:
+            if fname == 'folder.fxd':
+                object[FXD] = c.filename(fname)
+                break
+        else:
+            if object.has_key(FXD):
+                del object[FXD]
+            
+        # save directory overlay mtime
+        overlay = vfs.getoverlay(filename)
+        if os.path.isdir(overlay):
+            mtime = os.stat(overlay)[stat.ST_MTIME]
+            object[OVERLAY_MTIME] = mtime
+        else:
+            object[OVERLAY_MTIME] = 0
     else:
-        if object.has_key('isdir'):
-            del object['isdir']
+        if object.has_key(ISDIR):
+            del object[ISDIR]
+
+        if ext in COVER_EXT:
+            # find items that could have this file as cover
+            splitext = basename[:-len(ext)]
+            for key, value in listing:
+                if key.startswith(splitext) and \
+                       not value[EXTENTION] in COVER_EXT:
+                    value[COVER] = filename
+        else:
+            # search for a cover for this file
+            if object.has_key(COVER):
+                del object[COVER]
+            splitext = basename[:-len(ext)]
+            for key, value in listing:
+                if key.startswith(splitext) and value[EXTENTION] in COVER_EXT:
+                    object[COVER] = cache.filename(key)
+    
 
     # call external parser
     for p in _parser:
