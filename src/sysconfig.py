@@ -79,11 +79,6 @@ class struct:
 
 CONF = struct()
 
-# Removable media list. This is used by the vfs and should be filled
-# with objects after startup. If not, the vfs will have no support
-# for removable media.
-REMOVABLE_MEDIA = []
-
 # find the currect encoding
 try:
     CONF.default_encoding = locale.getdefaultlocale()[1]
