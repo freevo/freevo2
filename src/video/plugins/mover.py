@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2005/05/01 17:45:32  dischi
+# small ending / bugfix
+#
 # Revision 1.10  2004/11/20 18:23:05  dischi
 # use python logger module for debug
 #
@@ -100,12 +103,13 @@ class PluginInterface(plugin.ItemPlugin):
              and item.mode == 'file' 
              and item.parent.type == 'dir' 
              # don't bother moving to current-dir
-             and self.to_dir != os.path.dirname(self.item.filename) 
+             and self.to_dir != os.path.dirname(self.item.filename)
              # recursive
              and ( ( self.recursive 
                      and os.path.commonprefix( ( item.parent.dir, self.from_dir)) == self.from_dir )
                    # or absolute
-                   or ( item.parent.dir == self.from_dir))):
+                   or ( item.parent.dir == self.from_dir)
+                   or ( item.parent.dir == self.from_dir + '/'))):
             return [ (self.mover_to_series,
                       _('Move to [%s]') % os.path.basename(self.to_dir)) ]
         return []
