@@ -132,6 +132,10 @@ class PluginInterface(Plugin):
             log.info('%s is no mpeg ts' % String(source))
             return
 
+        if not mmpython.parse(source):
+            log.info('%s is failed' % String(source))
+            return
+        
         dest = os.path.splitext(source)[0] + '.mpg'
         log.info('replex %s' % String(source))
         Process([ self.nice, '-n', '19', self.replex, '-x', '-k', '-t', 'DVD',
