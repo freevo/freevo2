@@ -502,7 +502,7 @@ class DirItem(Playlist):
         # are we on a ROM_DRIVE and have to mount it first?
         for media in vfs.mountpoints:
             if self.dir.startswith(media.mountdir):
-                util.mount(self.dir)
+                media.mount()
                 self.media = media
 
         # FIXME: add support again when InputBox is working

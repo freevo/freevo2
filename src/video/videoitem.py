@@ -311,10 +311,10 @@ class VideoItem(MediaItem):
             if si:
                 if (si.media_id or si.media):
                     # If the file is on a removeable media
-                    if util.check_media(si.media_id):
+                    if vfs.get_mountpoint_by_id(si.media_id):
                         self.current_subitem = si
                         return 1
-                    elif si.media and util.check_media(si.media.id):
+                    elif si.media and vfs.get_mountpoint_by_id(si.media.id):
                         self.current_subitem = si
                         return 1
                 else:
@@ -526,10 +526,10 @@ class VideoItem(MediaItem):
             if self.media_id:
                 # This file is on a media with media_id as id. Check
                 # if this media is inserted somewere
-                mountdir,file = util.resolve_media_mountdir(self.media_id,file)
-                if mountdir:
+                mp, file = util.resolve_media_mountdir(self.media_id,file)
+                if mp:
                     # Found, mount the disc
-                    util.mount(mountdir)
+                    mp.mount()
                 else:
                     # Not found, show box so the user can insert the
                     # correct disc. Callback is this function again
@@ -540,13 +540,13 @@ class VideoItem(MediaItem):
 
             elif self.media:
                 # mount 'our' media
-                util.mount(os.path.dirname(self.filename))
+                self.media.mount()
 
         elif self.mode in ('dvd', 'vcd') and not self.filename and \
                  not self.media:
             # DVD/VCD playing a no media defined. We need to search if the
             # disc is inserted somewere.
-            media = util.check_media(self.media_id)
+            media = vfs.get_mountpoint_by_id(self.media_id)
             if media:
                 self.media = media
             else:

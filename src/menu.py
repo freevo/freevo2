@@ -373,7 +373,8 @@ class MenuWidget(Application):
             return
 
         if self.menustack[-1].umount_all == 1:
-            util.umount_all()
+            for mp in vfs.mountpoints:
+                mp.umount()
 
         if reload and menu.reload_func:
             new_menu = menu.reload_func()

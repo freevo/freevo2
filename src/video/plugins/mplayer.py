@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.100  2005/05/05 10:26:55  dischi
+# use vfs mount functions
+#
 # Revision 1.99  2005/04/10 17:58:12  dischi
 # switch to new mediainfo module
 #
@@ -319,13 +322,15 @@ class MPlayer(Application):
             child.wait()
 
         if item.subtitle_file:
-            d, f = util.resolve_media_mountdir(item.subtitle_file)
-            util.mount(d)
+            mp, f = util.resolve_media_mountdir(item.subtitle_file)
+            if mp:
+                mp.mount()
             command += ['-sub', f]
 
         if item.audio_file:
-            d, f = util.resolve_media_mountdir(item.audio_file)
-            util.mount(d)
+            mp, f = util.resolve_media_mountdir(item.audio_file)
+            if mp:
+                mp.mount()
             command += ['-audiofile', f]
 
         if self.use_bmovl:
