@@ -100,6 +100,33 @@ class Mountpoint:
         return filename[len(self.mountdir)+1:]
         
 
+    def mount(self):
+        """
+        Mount the media
+        """
+        if not os.path.ismount(self.mountdir):
+            log.info('Mounting %s' % self.mountdir)
+            os.system('mount "%s"' % self.mountdir)
+        return
+
+
+    def umount(self):
+        """
+        Mount the media
+        """
+        if os.path.ismount(self.mountdir):
+            log.info('Unmounting %s' % self.mountdir)
+            os.system('umount "%s"' % self.mountdir)
+
+
+    def is_mounted(self):
+        """
+        Check if the media is mounted
+        """
+        return os.path.ismount(self.mountdir)
+
+
+
 def get_mountpoint(filename):
     if not filename.startswith('/'):
         filename = os.path.abspath(filename)
@@ -108,6 +135,13 @@ def get_mountpoint(filename):
             return media
     return None
 
+
+def get_mountpoint_by_id(id):
+    for mp in mountpoints:
+        if id == mp.id:
+            return mp
+    return None
+    
     
 def getoverlay(directory):
     if not directory.startswith('/'):

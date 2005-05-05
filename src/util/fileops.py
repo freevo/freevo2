@@ -78,21 +78,6 @@ def getdirnames(dirname, softlinks=True, sort=True):
 
 
 
-def gzopen(file):
-    """
-    open a gzip file and return the fd. If it's not a gzip file, try
-    to open it as plain text file.
-    """
-    m = open(file)
-    magic = m.read(2)
-    m.close
-    if magic == '\037\213':
-         f = gzip.open(file)
-    else:
-         f = open(file)
-    return f
-
-
 def readfile(filename):
     """
     return the complete file as list
@@ -234,7 +219,7 @@ def _match_files_recursively_helper(result, dirname, names):
     """
     help function for match_files_recursively
     """
-    if dirname != '/' and dirname[dirname.rfind('/'):][1] == '.':
+    if dirname.find('/') != -1 and dirname[dirname.rfind('/'):][1] == '.':
         # ignore directories starting with a dot
         # Note: subdirectories of that dir will still be searched
         return result
@@ -251,6 +236,8 @@ def match_files_recursively(dir, suffix_list):
     get all files matching suffix_list in the dir and in it's subdirectories
     """
     all_files = []
+    if dir.endswith('/'):
+        dir = dir[:-1]
     os.path.walk(dir, _match_files_recursively_helper, all_files)
     matches = misc.unique([f for f in all_files if \
                            match_suffix(f, suffix_list) ])
@@ -263,6 +250,8 @@ def get_subdirs_recursively(dir):
     get all subdirectories recursively in the given directory
     """
     all_files = []
+    if dir.endswith('/'):
+        dir = dir[:-1]
     os.path.walk(dir, _match_files_recursively_helper, all_files)
     matches = misc.unique([f for f in all_files if os.path.isdir(f) ])
     matches.sort(lambda l, o: cmp(l.upper(), o.upper()))
@@ -331,49 +320,6 @@ def find_file_in_path( file, path = None ):
 # Media stuff
 #
 
-_mounted_dirs = []
-
-def umount(dir):
-    """
-    umount a directory
-    """
-    if not dir:
-        return
-    if os.path.ismount(dir):
-        os.system("umount %s" % dir)
-        if not os.path.ismount(dir) and dir in _mounted_dirs:
-            _mounted_dirs.remove(dir)
-
-
-def mount(dir, force=0):
-    """
-    mount a directory
-    """
-    if not dir:
-        return
-    if not os.path.ismount(dir):
-        os.system("mount %s 2>/dev/null" % dir)
-        if os.path.ismount(dir) and not dir in _mounted_dirs:
-            _mounted_dirs.append(dir)
-    if force and not dir in _mounted_dirs:
-        _mounted_dirs.append(dir)
-
-
-def umount_all():
-    """
-    umount all mounted directories
-    """
-    for d in copy.copy(_mounted_dirs):
-        umount(d)
-
-
-def is_mounted(dir):
-    """
-    return if the dir is mounted
-    """
-    return dir in _mounted_dirs
-
-
 def resolve_media_mountdir(*arg):
     """
     get the mount point of the media with media_id
@@ -387,23 +333,13 @@ def resolve_media_mountdir(*arg):
     else:
         raise KeyError
 
-    mountdir = ''
+    mountpoint = ''
     # Find on what media it is located
     for media in vfs.mountpoints:
         if media_id == media.id:
             # Then set the filename
-            mountdir = media.mountdir
-            file     = os.path.join(media.mountdir, file)
+            mountpoint = media
+            file = os.path.join(media.mountdir, file)
             break
 
-    return mountdir, file
-
-
-def check_media(media_id):
-    """
-    check if media_id is a valid media in one of the drives
-    """
-    for media in vfs.mountpoints:
-        if media_id == media.id:
-            return media
-    return None
+    return mountpoint, file
