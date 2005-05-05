@@ -1,24 +1,16 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # transition.py - Update the screen my moving/fading objects in and out
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes:
-# Todo:
-#
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.8  2004/11/20 18:23:01  dischi
-# use python logger module for debug
-#
-# Revision 1.7  2004/08/27 14:15:25  dischi
-# split animations into different files
-#
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al.
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -35,19 +27,24 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
-
-import random
-from move import *
-from fade import *
-import render
-
-import logging
-log = logging.getLogger('gui')
+# -----------------------------------------------------------------------------
 
 __all__ = [ 'RANDOM', 'ALPHA_BLENDING', 'VERTICAL_WIPE', 'HORIZONAL_WIPE',
             'ALPHA_VERTICAL_WIPE', 'ALPHA_HORIZONAL_WIPE', 'Transition' ]
 
+# python imports
+import random
+import logging
+
+# animation imports
+from move import *
+from fade import *
+import render
+
+# get logging object
+log = logging.getLogger('gui')
+
+# settings
 RANDOM = -1
 ALPHA_BLENDING = 0
 VERTICAL_WIPE = 1

@@ -1,59 +1,16 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # base.py - The basic animation class for freevo
-# Author: Viggo Fredriksen <viggo@katatonic.org>
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes:
-# Todo:        
-#
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.9  2004/10/12 11:31:58  dischi
-# make animation frame selection timer based
-#
-# Revision 1.8  2004/08/27 14:15:25  dischi
-# split animations into different files
-#
-# Revision 1.7  2004/08/23 20:35:33  dischi
-# o support for displays too slow to do the animation.
-# o add wait function to wait until an animation is finshed, or
-#   until application fadinf animations are done
-#
-# Revision 1.6  2004/08/23 15:10:34  dischi
-# remove callback and add wait function
-#
-# Revision 1.5  2004/08/23 14:28:23  dischi
-# fix animation support when changing displays
-#
-# Revision 1.4  2004/08/23 12:37:13  dischi
-# remove osd import
-#
-# Revision 1.3  2004/08/22 20:06:17  dischi
-# Switch to mevas as backend for all drawing operations. The mevas
-# package can be found in lib/mevas. This is the first version using
-# mevas, there are some problems left, some popup boxes and the tv
-# listing isn't working yet.
-#
-# Revision 1.2  2004/07/27 18:52:30  dischi
-# support more layer (see README.txt in backends for details
-#
-# Revision 1.1  2004/07/22 21:11:40  dischi
-# move the animation into gui, code needs update later
-#
-# Revision 1.3  2004/07/10 12:33:36  dischi
-# header cleanup
-#
-# Revision 1.2  2004/05/13 12:33:42  dischi
-# animation damage patch from Viggo Fredriksen
-#
-# Revision 1.1  2004/04/25 11:23:58  dischi
-# Added support for animations. Most of the code is from Viggo Fredriksen
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Viggo Fredriksen <viggo@katatonic.org>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -70,8 +27,11 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
+__all__ = [ 'BaseAnimation' ]
+
+# animation imports
 import render
 
 class BaseAnimation:
@@ -94,6 +54,7 @@ class BaseAnimation:
         self.application  = False  # True when it's for app show/hide
         self.__start_time = 0
 
+
     def set_fps(self, fps):
         """
         Sets the desired fps
@@ -107,7 +68,7 @@ class BaseAnimation:
         """
         render.get_singleton().add_animation(self)
         self.active = True
-        
+
 
     def stop(self):
         """
@@ -122,7 +83,7 @@ class BaseAnimation:
         """
         return self.active
 
-    
+
     def remove(self):
         """
         Flags the animation to be removed from the animation list
@@ -141,7 +102,7 @@ class BaseAnimation:
             return True
         return False
 
-    
+
     def update(self, frame):
         """
         Overload to do stuff with the surface
