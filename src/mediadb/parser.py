@@ -215,10 +215,8 @@ def parse(basename, filename, object, cache, listing):
                 object[EXTRA_COVER] = c.filename(fname)
                 break
         else:
-            if object.has_key(COVER):
-                del object[COVER]
-            if object.has_key(EXTRA_COVER):
-                del object[EXTRA_COVER]
+            object[COVER] = ''
+            object[EXTRA_COVER] = ''
             files = util.find_matches(listing, COVER_EXT)
             if len(files) == 1:
                 object[EXTRA_COVER] = files[0]
@@ -256,8 +254,7 @@ def parse(basename, filename, object, cache, listing):
                     value[COVER] = filename
         else:
             # search for a cover for this file
-            if object.has_key(COVER):
-                del object[COVER]
+            object[COVER] = ''
             splitext = basename[:-len(ext)]
             for key, value in listing:
                 if key.startswith(splitext) and value[EXTENTION] in COVER_EXT:
