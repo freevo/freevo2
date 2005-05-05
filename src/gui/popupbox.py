@@ -92,9 +92,9 @@ class WaitBox(Window):
         text_width  = self.widget_normal.font.stringsize(text)
         text_height = int(self.widget_normal.font.height * 1.2)
         w = max(min(int(math.sqrt(text_height * text_width * 4 / 3)),
-                    displays.get_display().width - 60 - \
+                    displays.get().width - 60 - \
                     2 * config.GUI_OVERSCAN_X), width)
-        h = displays.get_display().height - 100 - 2 * config.GUI_OVERSCAN_Y
+        h = displays.get().height - 100 - 2 * config.GUI_OVERSCAN_Y
 
         # now create the label
         self.label = Textbox(text, self.get_content_pos(), (w, h),

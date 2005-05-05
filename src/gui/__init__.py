@@ -33,103 +33,63 @@
 # -----------------------------------------------------------------------------
 
 # The theme engine
+# FIXME: remove global import
 from theme_engine import *
 
 # Image library
+# FIXME: remove global import
 import imagelib
 
 # Basic widgets
+# FIXME: remove global import
 from widgets import *
 
 # Dialog boxes
+# FIXME: remove global import
 from window   import Window
 from popupbox import *
 
 # The animation module
-import animation
-
+# import animation
 
 # -----------------------------------------------------------------------------
 # Display engine control module. Based on the different display engines
 # in the display subdirectory it is possible to change the display on
 # runtime and get some basic display informations.
+# import gui.displays
 #
-# provided functions:
-#
-# get_display()
+# get()
 #      Returns the current active display object
 #
-# set_display(name, size)
+# create()
+#      Create initial display
+#
+# set(name, size)
 #      Create a display based on the display type name with the given size.
 #      The new display will be returned. This will also create a new animation
 #      render class for this display.
 #
-# remove_display(name)
+# remove(name)
 #      Remove the display name and stop all animations for it. The function
 #      will return the new active display.
 # -----------------------------------------------------------------------------
 
-import displays as _displays
 
-get_display = _displays.get_display
-
-def set_display(name, size, *args, **kwargs):
-    """
-    set a new output display
-    """
-    animation.render().killall()
-    display = _displays.set_display(name, size, *args, **kwargs)
-    width   = display.width
-    height  = display.height
-    animation.create(display)
-    return display
-
-
-def remove_display(name):
-    """
-    remove the output display
-    """
-    animation.render().killall()
-    display = _displays.remove_display(name)
-    width   = display.width
-    height  = display.height
-    animation.create(display)
-    return display
-
-
-if __freevo_app__ == 'main':
-    # create default display and set gui width and height
-    # in case some part of Freevo needs this
-    display = get_display()
-    width   = display.width
-    height  = display.height
-    animation.create(display)
-else:
-    # set width and height to fake values
-    width   = 0
-    height  = 0
-
+# set width, height and display to fake values
+# Call gui.displays.create() to setup the display
+width   = 0
+height  = 0
+display = None
 
 # -----------------------------------------------------------------------------
 # Area module.
+# import gui.areas
 #
 # provided classes:
 #
-# AreaHandler(type, area_list)
-#      AreaHandler based on the area/handler.py code. This is only a wrapper
-#      class to give basic gui information to the subclass
+# Handler(type, area_list)
+#      Create an area handler with areas
 #
 # Area(name)
 #      Template for an Area to add to the AreaHandler
 # -----------------------------------------------------------------------------
-
-from areas import AreaHandler as _AreaHandler
-from areas import Area
-
-class AreaHandler(_AreaHandler):
-    """
-    Create an AreaHandler
-    """
-    def __init__(self, type, area_list):
-        _AreaHandler.__init__(self, type, area_list, get_theme,
-                              get_display(), imagelib)

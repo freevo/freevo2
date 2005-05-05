@@ -4,6 +4,8 @@
 # -----------------------------------------------------------------------------
 # $Id$
 #
+# Note: This module needs no freevo imports
+#
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.

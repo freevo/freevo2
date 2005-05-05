@@ -5,7 +5,7 @@
 # $Id$
 #
 # This file is the interface to the area handling code in Freevo. Please
-# see the documentation for AreaHandler in handler.py how to use this and
+# see the documentation for Handler in handler.py how to use this and
 # Area in area.py how to define your own area.
 #
 # -----------------------------------------------------------------------------
@@ -32,5 +32,5 @@
 #
 # -----------------------------------------------------------------------------
 
-from handler import AreaHandler
+from handler import Handler
 from area import Area

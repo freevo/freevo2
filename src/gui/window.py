@@ -42,7 +42,7 @@ import copy
 import eventhandler
 
 # gui imports
-from displays import get_display
+import displays
 from theme_engine import get_theme
 from widgets import Rectangle, Container
 
@@ -63,14 +63,14 @@ class Window(Container):
         self.__display  = None
 
         # setting the size
-        width  = size[0] or get_display().width / 2
-        height = size[1] or get_display().height / 4
+        width  = size[0] or displays.get().width / 2
+        height = size[1] or displays.get().height / 4
         self.set_size((width, height))
 
         # setting the position
         x, y = pos
-        if x == None: x = get_display().width/2 - width/2
-        if y == None: y = get_display().height/2 - height/2
+        if x == None: x = displays.get().width/2 - width/2
+        if y == None: y = displays.get().height/2 - height/2
         self.set_pos((x, y))
 
         # get theme values how the window should look like
@@ -133,7 +133,7 @@ class Window(Container):
         if self.__display:
             return
         eventhandler.add_window(self)
-        self.__display = get_display()
+        self.__display = displays.get()
         self.__create_background(self.__display)
         self.__display.add_child(self)
         self.__display.update()

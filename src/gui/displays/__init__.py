@@ -36,6 +36,10 @@ import logging
 # freevo imports
 import config
 
+# gui imports
+import gui
+from gui import animation
+
 # get logging object
 log = logging.getLogger('gui')
 
@@ -43,22 +47,32 @@ log = logging.getLogger('gui')
 display_stack  = []
 
 
-def get_display():
+def get():
     """
     return current display output or create the default one
     if no display is currently set
     """
-    if not display_stack:
-        exec('from %s import Display' % config.GUI_DISPLAY.lower())
-        size = (config.CONF.width, config.CONF.height)
-        display_stack.append(Display(size, True))
-    return display_stack[-1]
+    if display_stack:
+        return display_stack[-1]
+    exec('from %s import Display' % config.GUI_DISPLAY.lower())
+    size = (config.CONF.width, config.CONF.height)
+    display = Display(size, True)
+    display_stack.append(display)
+    animation.create(display)
+    # set global gui width / height
+    gui.width   = display.width
+    gui.height  = display.height
+    gui.display = display
+    return display
 
+# create a display (== get first one)
+create = get
 
-def set_display(name, size, *args, **kwargs):
+def set(name, size, *args, **kwargs):
     """
     set a new output display
     """
+    animation.render().killall()
     old = display_stack[-1]
 
     # remove all children add update old display
@@ -71,22 +85,29 @@ def set_display(name, size, *args, **kwargs):
 
     # create a new display
     exec('from %s import Display' % name.lower())
-    new = Display(size, False, *args, **kwargs)
-    display_stack.append(new)
+    display = Display(size, False, *args, **kwargs)
+    display_stack.append(display)
 
     # move all children to new display
     for c in children:
         if not hasattr(c, 'sticky') or not c.sticky:
-            new.add_child(c)
-    new.update()
-    return display_stack[-1]
+            display.add_child(c)
+    display.update()
+
+    animation.create(display)
+    # set global gui width / height
+    gui.width   = display.width
+    gui.height  = display.height
+    gui.display = display
+    return display
 
 
-def remove_display(screen):
+def remove(screen):
     """
     remove the output display
     """
     global display_stack
+    animation.render().killall()
     if screen != display_stack[-1]:
         log.error('removing screen not on top')
         print screen
@@ -103,8 +124,14 @@ def remove_display(screen):
     # stop old display, reactivate new one
     # warning: no update() is called
     screen.stop()
-    display_stack[-1].show()
-    return display_stack[-1]
+    display = display_stack[-1]
+    display.show()
+    animation.create(display)
+    # set global gui width / height
+    gui.width   = display.width
+    gui.height  = display.height
+    gui.display = display
+    return display
 
 
 def shutdown():

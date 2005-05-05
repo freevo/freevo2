@@ -45,14 +45,6 @@ import copy
 # notifier import
 import notifier
 
-# freevo imports
-import config
-import util
-
-# gui imports
-import gui
-
-
 # global render object
 _render = None
 

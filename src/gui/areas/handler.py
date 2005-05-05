@@ -4,12 +4,12 @@
 # -----------------------------------------------------------------------------
 # $Id$
 #
-# The AreaHandler can be used to draw application on the screen. It uses
+# The Handler can be used to draw application on the screen. It uses
 # different areas also defined in this directory for the real drawing.
 #
 # The handler itself checks the theme and calls the draw function of the areas
 #
-# TODO: o more documentation how to use the AreaHandler
+# TODO: o more documentation how to use the Handler
 #       o remove CanvasContainer definition in this file
 #       o do not add various stuff to the item object, use a specific dict
 #         for that
@@ -39,7 +39,7 @@
 #
 # -----------------------------------------------------------------------------
 
-__all__ = [ 'AreaHandler' ]
+__all__ = [ 'Handler' ]
 
 # python imports
 import os
@@ -55,8 +55,11 @@ import util.cache
 from util.weakref import weakref
 
 # gui imports
+import gui
 import gui.animation as animation 
 from gui.widgets import Container
+import gui.theme_engine as theme_engine
+import gui.imagelib as imagelib
 
 # areas
 from default_areas  import *
@@ -65,24 +68,23 @@ for f in os.listdir(os.path.dirname(__file__)):
         exec('from %s import *' % f[:-3])
 
 
-class AreaHandler:
+class Handler:
     """
     Handler for the areas used to draw an application on the screen.
     """
-    def __init__(self, type, areas, get_theme, screen, imagelib):
+    def __init__(self, type, areas):
         """
         Init the handler by laoding all areas
         """
         self.type          = type
-        self.get_theme     = get_theme
         self.display_style = { 'menu' : 0 }
         self.areas         = []
         self.visible       = False
 
-        self.canvas = screen
+        self.canvas = gui.display
         
-        self.layer = (Container('AreaHandler: Background'),
-                      Container('AreaHandler: Content'))
+        self.layer = (Container('Handler: Background'),
+                      Container('Handler: Content'))
         self.layer[0].set_zindex(-10)
 
         for c in self.layer:
@@ -120,7 +122,7 @@ class AreaHandler:
         """
         Delete an area handler
         """
-        _mem_debug_('AreaHandler', self.type)
+        _mem_debug_('Handler', self.type)
         while self.areas:
             self.areas[0].clear_all()
             del self.areas[0]
@@ -134,7 +136,7 @@ class AreaHandler:
         """
         Toggle display style
         """
-        theme = self.get_theme()
+        theme = theme_engine.get_theme()
 
         if isinstance(menu, str):
             if not self.display_style.has_key(menu):
@@ -303,7 +305,7 @@ class AreaHandler:
         object may be a menu, a table for the tv menu are an audio item for
         the audio player
         """
-        theme = self.get_theme()
+        theme = theme_engine.get_theme()
         
         if self.type == 'menu':
             style = self.__get_display_style__(object)
