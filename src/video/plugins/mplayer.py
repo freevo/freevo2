@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.101  2005/05/05 17:34:01  dischi
+# adjust to new gui submodule imports
+#
 # Revision 1.100  2005/05/05 10:26:55  dischi
 # use vfs mount functions
 #
@@ -83,6 +86,8 @@ import util       # Various utilities
 import childapp
 import plugin
 import gui
+import gui.displays
+import gui.areas
 
 from application import Application
 from event import *
@@ -377,7 +382,7 @@ class MPlayer(Application):
         """
         if not self.osd_visible and self.app and self.app.area_handler:
             self.app.area_handler.hide()
-            gui.get_display().update()
+            gui.displays.get().update()
         self._timer_id = None
         return False
         
@@ -431,7 +436,7 @@ class MPlayer(Application):
                 self.app.area_handler.show()
             else:
                 self.app.area_handler.hide()
-                gui.get_display().update()
+                gui.displays.get().update()
                 self.app.area_handler.display_style['video'] = 0
                 self.app.area_handler.draw(self.item)
             return True
@@ -574,14 +579,14 @@ class MPlayerApp( childapp.Instance ):
             while not self.mplayer.overlay.can_write():
                 pass
             log.info('activating overlay')
-            self.screen = gui.set_display('Bmovl2', (self.width, self.height))
+            self.screen = gui.displays.set('Bmovl2', (self.width, self.height))
             self.screen.set_overlay(self.mplayer.overlay)
         else:
             log.info('activating bmovl')
-            self.screen = gui.set_display('Bmovl', (self.width, self.height),
-                                          self.mplayer.fifoname)
-        self.area_handler = gui.AreaHandler('video', ['screen', 'view', 'info',
-                                                      'progress'])
+            self.screen = gui.displays.set('Bmovl', (self.width, self.height),
+                                           self.mplayer.fifoname)
+        self.area_handler = gui.areas.Handler('video', ['screen', 'view',
+                                                        'info', 'progress'])
         self.area_handler.hide(False)
         self.area_handler.draw(self.item)
         self.write('osd 0\n')
@@ -676,7 +681,7 @@ class MPlayerApp( childapp.Instance ):
 
     def stop(self, cmd=''):
         if self.screen:
-            gui.remove_display(self.screen)
+            gui.displays.remove(self.screen)
             del self.area_handler
             self.area_handler = None
             self.screen = None

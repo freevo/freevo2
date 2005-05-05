@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2005/05/05 17:34:00  dischi
+# adjust to new gui submodule imports
+#
 # Revision 1.19  2005/02/06 16:59:12  dischi
 # small bugfixes from Viggo Fredriksen
 #
@@ -96,7 +99,7 @@ class PluginInterface(plugin.DaemonPlugin):
         """
         update the display
         """
-        display = gui.get_display()
+        display = gui.display
         if self.gui_object:
             # remove the current text from the display
             self.gui_object.unparent()

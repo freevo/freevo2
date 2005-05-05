@@ -39,6 +39,7 @@ import pyepg
 
 # freevo imports
 import gui
+import gui.areas
 
 from event import *
 from application import MenuApplication
@@ -72,8 +73,8 @@ class TVGuide(MenuApplication):
 
 
     def start(self, parent):
-        self.engine = gui.AreaHandler('tv', ('screen', 'title', 'subtitle',
-                                             'view', 'tvlisting', 'info'))
+        self.engine = gui.areas.Handler('tv', ('screen', 'title', 'subtitle',
+                                               'view', 'tvlisting', 'info'))
         self.parent = parent
         self.current_time = int(time.time())
 

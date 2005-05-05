@@ -271,7 +271,7 @@ class PluginInterface(IdleBarPlugin):
                 # update the idlebar
                 idlebar.update()
 
-            gui.get_display().update()
+            gui.display.update()
             return True
 
         elif event == PLAY_START and isinstance(event.arg, AudioItem) and \

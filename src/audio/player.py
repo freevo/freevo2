@@ -39,6 +39,7 @@ __all__ = [ 'audioplayer' ]
 # Freevo imports
 import config
 import gui
+import gui.areas
 import plugin
 import eventhandler
 
@@ -77,7 +78,7 @@ class AudioPlayer(Application):
 
         # register player to the skin
         areas = ('screen', 'title', 'view', 'info')
-        self.draw_engine = gui.AreaHandler('player', areas)
+        self.draw_engine = gui.areas.Handler('player', areas)
 
 
     def play(self, item, player=None):

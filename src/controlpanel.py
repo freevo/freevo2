@@ -36,6 +36,7 @@
 # -----------------------------------------------------------------------------
 
 import gui
+
 import plugin
 import eventhandler
 import config
@@ -72,7 +73,7 @@ class ControlManager:
         self.container       = gui.CanvasContainer()
         self.container.set_zindex(80)
 
-        gui.get_display().add_child(self.container)
+        gui.display.add_child(self.container)
 
         # listen for TOGGLE_CONTROL events
         eventhandler.register(self, TOGGLE_CONTROL)
@@ -105,7 +106,7 @@ class ControlManager:
         """
         Shows the currently selected control widget
         """
-        display = gui.get_display()
+        display = gui.display
         control = self.plugins[self.p_ctrl]
 
         # add controlmanager as a window
@@ -151,7 +152,7 @@ class ControlManager:
 
         # clear the objects and update the display
         self.container.hide()
-        gui.get_display().update()
+        gui.display.update()
         self.container.clear()
         self.plugins[self.p_ctrl].clear()
 
@@ -198,12 +199,12 @@ class ControlManager:
                     # hide the plugin
                     self.hide()
                     self.p_ctrl = -1
-                    gui.get_display().update()
+                    gui.display.update()
                     return True
 
                 # pass the event to the plugin
                 elif plugin.eventhandler(event):
-                    gui.get_display().update()
+                    gui.display.update()
                     return True
 
         return False

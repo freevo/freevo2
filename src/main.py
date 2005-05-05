@@ -146,6 +146,9 @@ except Exception, e:
 # freevo imports
 import eventhandler
 import gui
+import gui.displays
+import gui.areas
+import gui.animation
 import util
 import plugin
 import mcomm
@@ -158,16 +161,16 @@ from mainmenu import MainMenu
 import fxditem
 
 
-class Splashscreen(gui.Area):
+class Splashscreen(gui.areas.Area):
     """
     A simple splash screen for osd startup
     """
     def __init__(self, text, max_value):
-        gui.Area.__init__(self, 'content')
+        gui.areas.Area.__init__(self, 'content')
         self.max_value = max_value
         self.text      = text
         self.bar       = None
-        self.engine    = gui.AreaHandler('splashscreen', ('screen', self))
+        self.engine    = gui.areas.Handler('splashscreen', ('screen', self))
         self.engine.show()
 
 
@@ -262,6 +265,9 @@ try:
     signal.signal(signal.SIGTERM, signal_handler)
     signal.signal(signal.SIGINT, signal_handler)
 
+    # create gui
+    gui.displays.create()
+    
     # Fire up splashscreen and load the plugins
     splash = Splashscreen(_('Starting Freevo, please wait ...'),
                           plugin.get_number()-1)

@@ -15,6 +15,9 @@
 # for a full list of tested sites see Docs/plugins/headlines.txt
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2005/05/05 17:33:59  dischi
+# adjust to new gui submodule imports
+#
 # Revision 1.25  2005/01/09 17:35:53  dischi
 # make headlines work again (thanks to Eric Bus)
 #
@@ -80,6 +83,7 @@ import urllib
 #freevo modules
 import config, menu, plugin, util
 import gui
+import gui.areas
 from item import Item
 
 from mainmenu import MainMenuItem
@@ -139,7 +143,7 @@ class ShowHeadlineDetails(MenuApplication):
         
         
     def start(self, parent):
-        self.engine = gui.AreaHandler('headlines', ('screen','title','info'))
+        self.engine = gui.areas.Handler('headlines', ('screen','title','info'))
         self.parent = parent
         
         return True

@@ -41,6 +41,7 @@ import config
 import plugin
 import util
 import gui
+import gui.areas
 
 from event import *
 from item import Item, Action
@@ -173,8 +174,8 @@ class MenuWidget(Application):
         Application.__init__(self, 'menu widget', 'menu', False, True)
         self.menustack = []
         if not engine:
-            engine = gui.AreaHandler('menu', ('screen', 'title', 'subtitle',
-                                              'view', 'listing', 'info'))
+            engine = gui.areas.Handler('menu', ('screen', 'title', 'subtitle',
+                                                'view', 'listing', 'info'))
         self.engine = engine
         self.inside_menu = False
 

@@ -299,7 +299,7 @@ class LibvisualAnimation(BaseAnimation):
 
         # add it to the display
         self.image.set_zindex(1)
-        gui.get_display().add_child(self.image)
+        gui.display.add_child(self.image)
 
         # start baseanimation
         BaseAnimation.start(self)
@@ -341,14 +341,14 @@ class LibvisualAnimation(BaseAnimation):
         if move == 0:
             # should not draw
             # remove from gui
-            gui.get_display().remove_child(self.image)
+            gui.display.remove_child(self.image)
             self.hidden = True
             return
 
         elif self.hidden:
             # should draw
             # add to gui
-            gui.get_display().add_child(self.image)
+            gui.display.add_child(self.image)
 
 
         self.hidden = False
@@ -379,7 +379,7 @@ class LibvisualAnimation(BaseAnimation):
         Finish the animation
         """
         BaseAnimation.finish(self)
-        gui.get_display().remove_child(self.image)
+        gui.display.remove_child(self.image)
         self.started = False
 
         # delete stuff that uses mem.    

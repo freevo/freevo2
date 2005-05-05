@@ -63,9 +63,10 @@ class PluginInterface(plugin.InputPlugin):
                              config.KEYBOARD_MAP[ key ]
             else:
                 log.error('unable to find key code for %s' % key)
-        gui.get_display()._display.input_callback = self.handle
-        notifier.addSocket( gui.get_display()._display.socket,
-                            gui.get_display()._display.update )
+        display = gui.display._display
+        display.input_callback = self.handle
+        notifier.addSocket( display.socket, display.update )
+
  
     def handle( self, keycode ):
         """

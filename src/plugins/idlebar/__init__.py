@@ -39,6 +39,8 @@ import logging
 import config
 import plugin
 import gui
+
+import gui.animation
 import eventhandler
 from event import *
 
@@ -85,7 +87,7 @@ class PluginInterface(plugin.DaemonPlugin):
         """
         draw a background and all idlebar plugins
         """
-        screen  = gui.get_display()
+        screen  = gui.display
         changed = False
 
         w = screen.width
@@ -146,7 +148,7 @@ class PluginInterface(plugin.DaemonPlugin):
         self.visible = True
         self.update()
         if update:
-            gui.get_display().update()
+            gui.display.update()
 
 
     def hide(self, update=True, fade=0):
@@ -155,7 +157,7 @@ class PluginInterface(plugin.DaemonPlugin):
         gui.animation.FadeAnimation([self.container], fade, 255, 0).start()
         self.visible = False
         if update:
-            gui.get_display().update()
+            gui.display.update()
 
 
     def add_background(self):
@@ -164,7 +166,7 @@ class PluginInterface(plugin.DaemonPlugin):
         """
         if not self.background:
             # FIXME: respect fxd settings changes!!!
-            s = gui.get_display()
+            s = gui.display
             size = (s.width, s.height)
             self.background = gui.imagelib.load('background', size)
             if self.background:
@@ -223,7 +225,7 @@ class PluginInterface(plugin.DaemonPlugin):
             self.update()
         if plugin.isevent(event) == 'IDENTIFY_MEDIA':
             if self.update():
-                gui.get_display().update()
+                gui.display.update()
         return False
 
 
@@ -234,7 +236,7 @@ class PluginInterface(plugin.DaemonPlugin):
         if not self.visible:
             return
         if self.update():
-            gui.get_display().update()
+            gui.display.update()
 
 
 
