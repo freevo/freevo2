@@ -225,9 +225,10 @@ class RemovableMedia(vfs.Mountpoint):
         self.drive_status = None  # return code from ioctl for DRIVE_STATUS
 
         self.label     = ''
+        self.info      = None
         self.item      = None
         self.videoitem = None
-        self.cached   = False
+        self.locked    = False
 
 
     def is_tray_open(self):
@@ -263,7 +264,6 @@ class RemovableMedia(vfs.Mountpoint):
                 else:
                     ioctl(fd, CDROMEJECT)
                 os.close(fd)
-                print 2
             except Exception, e:
                 try:
                     log.exception('eject cdrom')
@@ -317,30 +317,76 @@ class RemovableMedia(vfs.Mountpoint):
                 pop.destroy()
 
 
-    def mount(self):
+    def check_status(self):
         """
-        Mount the media
+        Return True if the status has changed (new disc / removed disc).
         """
-        log.debug('Mounting disc in drive %s' % self.drivename)
-        util.mount(self.mountdir, force=True)
-        return
+        # Check drive status (tray pos, disc ready)
+        try:
+            CDSL_CURRENT = ( (int ) ( ~ 0 >> 1 ) )
+            fd = os.open(self.devicename, os.O_RDONLY | os.O_NONBLOCK)
+            if os.uname()[0] == 'FreeBSD':
+                try:
+                    data = array.array('c', '\000'*4096)
+                    (address, length) = data.buffer_info()
+                    buf = struct.pack('BBHP', CD_MSF_FORMAT, 0,
+                                      length, address)
+                    # use unthreader ioctl here, it is fast
+                    s = util.ioctl.ioctl(fd, CDIOREADTOCENTRYS, buf)
+                    s = CDS_DISC_OK
+                except:
+                    s = CDS_NO_DISC
+            else:
+                # use unthreader ioctl here, it is fast
+                s = util.ioctl.ioctl(fd, CDROM_DRIVE_STATUS, CDSL_CURRENT)
+        except:
+            # maybe we need to close the fd if ioctl fails, maybe
+            # open fails and there is no fd
+            try:
+                os.close(fd)
+            except:
+                pass
+            self.drive_status = None
+            return False
+
+        # Same as last time? If so we're done
+        if s == self.drive_status:
+            os.close(fd)
+            return False
+
+        self.drive_status = s
+
+        self.set_id('')
+        self.label     = ''
+        self.type      = 'empty_cdrom'
+        self.item      = None
+        self.videoitem = None
+
+        # Is there a disc present?
+        if s != CDS_DISC_OK:
+            os.close(fd)
+            return False
+
+        # if there is a disc, the tray can't be open
+        self.tray_open = False
+        return True
 
 
-    def umount(self):
+    def scan(self):
         """
-        Mount the media
+        Scan the disc (running in a thread)
         """
-        log.debug('Unmounting disc in drive %s' % self.drivename)
-        util.umount(self.mountdir)
-        return
-
-
-    def is_mounted(self):
-        """
-        Check if the media is mounted
-        """
-        return util.is_mounted(self.mountdir)
-
+        self.info = mediadb.get(self)
+        if config.ROM_SPEED and not self.info['mime'] == 'video/dvd':
+            # try to set the speed
+            fd = os.open(self.devicename, os.O_RDONLY | os.O_NONBLOCK)
+            try:
+                ioctl(fd, CDROM_SELECT_SPEED, config.ROM_SPEED)
+            except:
+                pass
+            os.close(fd)
+        return self
+    
 
 
 
@@ -370,6 +416,17 @@ class Watcher:
         notifier.addTimer(2000, self.poll)
 
 
+    def unlock_and_send_update(self, media):
+        log.debug('MEDIA: Status=%s' % media.drive_status)
+        log.debug('Posting IDENTIFY_MEDIA event')
+        if hasattr(media, 'already_scanned'):
+            arg = (media, False)
+        else:
+            media.already_scanned = True
+            arg = (media, True)
+        eventhandler.post(plugin.event('IDENTIFY_MEDIA', arg=arg))
+        media.locked = False
+        
 
     def identify(self, media):
         """
@@ -377,75 +434,12 @@ class Watcher:
         Try to find out as much as possible about the disc in the
         rom drive: title, image, play options, ...
         """
-        # Check drive status (tray pos, disc ready)
-        try:
-            CDSL_CURRENT = ( (int ) ( ~ 0 >> 1 ) )
-            fd = os.open(media.devicename, os.O_RDONLY | os.O_NONBLOCK)
-            if os.uname()[0] == 'FreeBSD':
-                try:
-                    data = array.array('c', '\000'*4096)
-                    (address, length) = data.buffer_info()
-                    buf = struct.pack('BBHP', CD_MSF_FORMAT, 0,
-                                      length, address)
-                    # use unthreader ioctl here, it is fast
-                    s = util.ioctl.ioctl(fd, CDIOREADTOCENTRYS, buf)
-                    s = CDS_DISC_OK
-                except:
-                    s = CDS_NO_DISC
-            else:
-                # use unthreader ioctl here, it is fast
-                s = util.ioctl.ioctl(fd, CDROM_DRIVE_STATUS, CDSL_CURRENT)
-        except:
-            # maybe we need to close the fd if ioctl fails, maybe
-            # open fails and there is no fd
-            try:
-                os.close(fd)
-            except:
-                pass
-            media.drive_status = None
-            return
-
-        # Same as last time? If so we're done
-        if s == media.drive_status:
-            os.close(fd)
-            return
-
-        media.drive_status = s
-
-        media.set_id('')
-        media.label     = ''
-        media.type      = 'empty_cdrom'
-        media.item      = None
-        media.videoitem = None
-        media.cached    = False
-
-        # Is there a disc present?
-        if s != CDS_DISC_OK:
-            os.close(fd)
-            return
-
-        # if there is a disc, the tray can't be open
-        media.tray_open = False
-        disc_info = util.fthread.call(mediadb.get, media)
-
-        if not disc_info:
+        disc_info = media.info
+        if not disc_info.disc_ok:
             # bad disc, e.g. blank disc.
-            os.close(fd)
             return
 
-        # FXIME:
-        disc_info = disc_info
-
-        # try to set the speed
-        if config.ROM_SPEED and disc_info and not \
-               disc_info['mime'] == 'video/dvd':
-            try:
-                ioctl(fd, CDROM_SELECT_SPEED, config.ROM_SPEED)
-            except:
-                pass
-
-        if disc_info and disc_info['mime'] == 'audio/cd':
-            os.close(fd)
+        if disc_info['mime'] == 'audio/cd':
             disc_id = disc_info['id']
             media.item = AudioDiskItem(disc_id, parent=None,
                                        devicename=media.devicename,
@@ -455,9 +449,8 @@ class Watcher:
             if disc_info['title']:
                 media.item.name = disc_info['title']
             media.item.info = disc_info
-            return
+            self.unlock_and_send_update(media)
 
-        os.close(fd)
         image = title = movie_info = more_info = fxd_file = None
 
         media.set_id(disc_info['id'])
@@ -495,8 +488,9 @@ class Watcher:
             media.item.set_url(disc_info)
             media.item.info.set_variables(variables)
             media.type = disc_info['mime'][6:]
+            self.unlock_and_send_update(media)
             return
-
+        
         # Check for movies/audio/images on the disc
         video_files = util.find_matches(disc_info['listing'],
                                         config.VIDEO_SUFFIX)
@@ -622,12 +616,12 @@ class Watcher:
         # movie on it. Save the information about it and autostart will
         # play this.
         if len(video_files) == 1 and media.item['num_dir_items'] == 0:
-            util.mount(media.mountdir)
+            media.mount()
             if movie_info:
                 media.videoitem = copy.deepcopy(movie_info)
             else:
                 media.videoitem = VideoItem(video_files[0], None)
-            util.umount(media.mountdir)
+            media.umount()
             media.videoitem.media    = media
             media.videoitem.media_id = media.id
 
@@ -645,7 +639,8 @@ class Watcher:
                 media.videoitem.fxd_file = fxd_file
 
         media.item.media = media
-        return
+        self.unlock_and_send_update(media)
+        return True
 
 
     def check_all(self):
@@ -657,18 +652,24 @@ class Watcher:
             return
 
         for media in rom_drives:
+            if media.locked:
+                # scan waiting in thread
+                continue
+            media.locked = True
             last_status = media.drive_status
-            self.identify(media)
+            if last_status == None:
+                first_scan = True
+            else:
+                first_scan = False
+            if media.check_status():
+                util.fthread.Thread(self.identify, media.scan).start()
+                continue
 
+            # release the lock again
+            media.locked = False
+                
             if last_status != media.drive_status:
-                log.debug('MEDIA: Status=%s' % media.drive_status)
-                log.debug('Posting IDENTIFY_MEDIA event')
-                if last_status == None:
-                    eventhandler.post(plugin.event('IDENTIFY_MEDIA',
-                                                   arg=(media, True)))
-                else:
-                    eventhandler.post(plugin.event('IDENTIFY_MEDIA',
-                                                   arg=(media, False)))
+                self.unlock_and_send_update(media)
 
 
     def poll(self):
