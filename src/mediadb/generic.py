@@ -52,6 +52,22 @@ from listing import FileListing
 log = logging.getLogger('mediadb')
 
 
+class DiscInfo(ItemInfo):
+    """
+    Item for a disc.
+    """
+    def __init__(self, disc_ok, media, cache=None):
+        if cache:
+            ItemInfo.__init__(self, '', '', cache.data, cache)
+        else:
+            ItemInfo('', '', None)
+        self.disc_ok = disc_ok
+        self.filename = media.mountdir
+        
+    def __str__(self):
+        return 'mediadb.DiscInfo() object for %s' % self.filename
+
+            
 def disc_info(media):
     """
     Return information for the media
@@ -59,10 +75,10 @@ def disc_info(media):
     type, id  = cdrom_disc_id(media.devicename)
     if not id:
         # bad disc, e.g. blank disc
-        return ItemInfo(None, None, None)
+        return DiscInfo(False, media)
     cachefile = os.path.join(sysconfig.VFS_DIR, 'disc/metadata/%s.db' % id)
     cache = FileCache(media.devicename, cachefile)
-    info = ItemInfo('', '', cache.data, cache)
+    info = DiscInfo(True, media, cache)
     info.filename = info['mime'][6:] + '://'
     if info['mime'] in ('video/vcd', 'video/dvd'):
         return info
@@ -74,7 +90,7 @@ def disc_info(media):
         # looks like a DVD but is not detected as one, check again
         log.info('Undetected DVD, checking again')
         cache = FileCache(media.devicename, cachefile)
-        info = ItemInfo('', '', cache.data, cache)
+        info = DiscInfo(True, media, cache)
         info.filename = info['mime'][6:] + '://'
         if info['mime'] in ('video/vcd', 'video/dvd'):
             media.umount()
