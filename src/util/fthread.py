@@ -44,6 +44,12 @@ __all__ = [ 'call' ]
 
 import threading
 import notifier
+import logging
+
+from callback import *
+
+# get logging object
+log = logging.getLogger()
 
 class _FThread(threading.Thread):
     """
@@ -87,3 +93,70 @@ def call(function, *args, **kargs):
     if thread.exception:
         raise thread.exception
     return thread.result
+
+
+class Thread(threading.Thread):
+    """
+    Notifier aware wrapper for threads.
+    """
+    def __init__(self, callback, function, *args, **kargs):
+        threading.Thread.__init__(self)
+        self.callback  = callback
+        self.function  = function
+        self.args      = args
+        self.kargs     = kargs
+        self.result    = None
+        self.finished  = False
+        self.exception = None
+
+
+    def start(self):
+        _watcher.append(self)
+        threading.Thread.start(self)
+
+        
+    def run(self):
+        """
+        Call the function and store the result
+        """
+        try:
+            self.result = self.function(*self.args, **self.kargs)
+        except Exception, e:
+            log.exception('Thread crashed:')
+            self.exception = e
+        self.finished = True
+
+
+class Watcher:
+    """
+    Watcher for running threads.
+    """
+    def __init__(self):
+        self.threads = []
+        self.__timer = None
+
+        
+    def append(self, thread):
+        self.threads.append(thread)
+        if not self.__timer:
+            self.__timer = notifier.addTimer( 10, self.check )
+
+    
+    def check(self):
+        dead = []
+        for t in self.threads:
+            if t.finished:
+                dead.append(t)
+        if not dead:
+            return True
+        for t in dead:
+            self.threads.remove(t)
+            if t.callback and not t.exception:
+                call_later(t.callback, t.result)
+            t.join()
+        if not self.threads:
+            self.__timer = None
+            return False
+        return True
+    
+_watcher = Watcher()
