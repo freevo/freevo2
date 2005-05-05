@@ -473,7 +473,8 @@ class FileCache:
             basename = filename[filename.rfind('/'):]
             parser.parse(basename, filename, self.data, self, [])
             self.save()
-
+        self.filename = filename
+        
 
     def save(self):
         """
@@ -485,6 +486,14 @@ class FileCache:
         cache.save(self.cachefile, self.data, VERSION)
         self.mtime = os.stat(self.cachefile)[ST_MTIME]
         self.changed = False
+
+
+    def __str__(self):
+        """
+        Return string for debugging.
+        """
+        return 'mediadb.db.FileCache for %s' % self.filename
+
 
 
 
