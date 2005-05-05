@@ -392,8 +392,11 @@ class Playlist(MediaItem):
             play_items = []
 
             # get a real item
+            l = mediadb.FileListing([self.current_item])
+            if l.num_changes:
+                l.update()
             for p in self.get_plugins:
-                for i in p.get(self, [ self.current_item ]):
+                for i in p.get(self, l):
                     play_items.append(i)
 
             if play_items:
