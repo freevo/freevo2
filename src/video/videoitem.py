@@ -153,6 +153,8 @@ class VideoItem(MediaItem):
             self.show_name    = show_name
             self.tv_show_name = show_name[0]
             self.tv_show_ep   = show_name[3]
+        if self.mode == 'file' and os.path.isfile(self.filename):
+            self.sort_name += u'  ' + Unicode(os.stat(self.filename).st_ctime)
 
 
     def set_url(self, url):
