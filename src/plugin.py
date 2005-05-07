@@ -41,11 +41,9 @@ import logging
 import notifier
 
 # freevo imports
-import config
 import cleanup
 from event import Event
 import eventhandler
-import util
 
 # get logging object
 log = logging.getLogger('config')
@@ -65,7 +63,12 @@ class Plugin:
         self._level  = 10
         self._number = 0
         self.plugin_name   = ''
+
+        # FIXME: bad coding style
+        import config
+        
         for var, val, desc in self.config():
+            log.debug('FIXME: %s' % var)
             if not hasattr(config, var):
                 setattr(config, var, val)
 
@@ -165,7 +168,6 @@ class MimetypePlugin(Plugin):
     should be displayed, [] for always.
     """
     def __init__(self):
-        import util
         Plugin.__init__(self)
         self.display_type = []
 
@@ -211,36 +213,6 @@ class MimetypePlugin(Plugin):
         """
         return None
 
-
-class InputPlugin(Plugin):
-    """
-    Plugin for input devices such as keyboard and lirc. A plugin of this
-    type should be in input/plugins
-    """
-    def __init__(self):
-        Plugin.__init__(self)
-        self._eventhandler = eventhandler.get_singleton()
-        self.config = config
-
-
-    def post_key(self, key):
-        """
-        Send a keyboard event to the event queue
-        """
-        if not key:
-            return None
-
-        for c in (self._eventhandler.context, 'global'):
-            try:
-                e = self.config.EVENTS[c][key]
-                e.context = self._eventhandler.context
-                self._eventhandler.queue.append(e)
-                break
-            except KeyError:
-                pass
-        else:
-            log.warning('no event mapping for key %s in context %s' % \
-                        (key, self._eventhandler.context))
 
 #
 # Some plugin names to avoid typos
@@ -370,33 +342,6 @@ def init(callback = None, reject=['record', 'www'], exclusive=[]):
             else:
                 _load_plugin(name, type, level, args, number)
 
-
-    # sort plugins in extra function (exec doesn't like to be
-    # in the same function is 'lambda'
-    _sort_plugins()
-
-
-
-def init_special_plugin(id):
-    """
-    load only the plugin 'id'
-    """
-    global _all_plugins
-    global _initialized
-    global _plugin_basedir
-
-    _plugin_basedir = os.environ['FREEVO_PYTHON']
-
-    try:
-        id = int(id)
-    except ValueError:
-        pass
-    for i in range(len(_all_plugins)):
-        name, type, level, args, number = _all_plugins[i]
-        if number == id or name == id:
-            _load_plugin(name, type, level, args, number)
-            del _all_plugins[i]
-            break
 
     # sort plugins in extra function (exec doesn't like to be
     # in the same function is 'lambda'
