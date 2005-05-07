@@ -42,7 +42,7 @@ import signal
 import logging
 import logging.config
 
-#logging.config.fileConfig('log.ini')
+# get logging object
 log = logging.getLogger()
 
 #
@@ -58,7 +58,6 @@ except Exception, e:
     print 'To download and install pyNotifier to ./site-packages run \'make\''
     sys.exit(0)
 
-
 #
 # imlib2 checking
 #
@@ -68,6 +67,7 @@ except:
     print 'The python Imlib2 bindings could not be loaded!'
     print 'To compile pyimlib run \'make\''
     sys.exit(1)
+
 
 
 try:
@@ -87,7 +87,6 @@ try:
     import sqlite
 
     import config
-
     if config.GUI_DISPLAY == 'SDL':
         import pygame
 
