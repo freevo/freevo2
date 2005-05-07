@@ -40,7 +40,6 @@ from xml.dom.minidom import getDOMImplementation
 from xml.dom.ext import PrettyPrint
 
 # freevo imports
-import config
 import mcomm
 
 # get logging object
@@ -626,7 +625,7 @@ class RuntimeXML:
 
         self.rtxp = RuntimeXMLParser(self)
 
-        tpl_file = os.path.join(config.SHARE_DIR, 'fxd/runtime_config.tpl.fxd')
+        tpl_file = os.path.join(conf_globs['SHARE_DIR'], 'fxd/runtime_config.tpl.fxd')
         if os.path.isfile(tpl_file):
             if not self.load_template(tpl_file):
                 return

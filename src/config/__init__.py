@@ -47,14 +47,28 @@ import sys
 import os
 import re
 import pwd
-import setup_freevo
 import __builtin__
+import gettext
 import logging
 
 # freevo imports
 import sysconfig
 import version
+
+# FIXME: setup freevo stuff
+import setup_freevo
+
+# input inputs variables for the input system
+# and event.py (which has no more deps)
 import input
+
+# FIXME: plugin imports eventhandler which imports config again.
+# It also includes cleanup.py, but this file imports other freevo code
+# only when the shutdown function is called (bad coding style)
+import plugin
+
+# import event names (no deps)
+from event import *
 
 # get logging object
 log = logging.getLogger('config')
@@ -63,11 +77,9 @@ log = logging.getLogger('config')
 VERSION = version.__version__
 
 # For Internationalization purpose
-import gettext
 try:
     gettext.install('freevo', os.environ['FREEVO_LOCALE'], 1)
 except: # unavailable, define '_' for all modules
-    import __builtin__
     __builtin__.__dict__['_']= lambda m: m
 
 
