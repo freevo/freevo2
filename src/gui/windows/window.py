@@ -42,9 +42,9 @@ import copy
 import eventhandler
 
 # gui imports
-import displays
-from theme_engine import get_theme
-from widgets import Rectangle, Container
+import gui.displays as displays
+from gui.theme_engine import get_theme
+from gui.widgets import Rectangle, Container
 
 
 class Window(Container):

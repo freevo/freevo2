@@ -44,10 +44,9 @@ import imagelib
 # FIXME: remove global import
 from widgets import *
 
-# Dialog boxes
+# Windows / PopupBoxes
 # FIXME: remove global import
-from window   import Window
-from popupbox import *
+from windows import *
 
 # The animation module
 # import animation
