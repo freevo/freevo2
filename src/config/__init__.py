@@ -190,6 +190,12 @@ elif CONF.display == 'dxr3':
 #
 execfile(os.path.join(os.path.dirname(__file__), 'configfile.py'))
 
+#
+# load additional runtime settings from the runtime configuration
+#
+from runtimexml import RuntimeXML
+rtXML = RuntimeXML( globals() )
+
 # set the umask
 os.umask(UMASK)
 
