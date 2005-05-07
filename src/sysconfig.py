@@ -190,6 +190,11 @@ for key in CONF.__dict__:
 # settings.
 logger = logging.getLogger()
 
+# remove handler, we want to set the look and avoid
+# duplicate handlers
+for l in logger.handlers:
+    logger.removeHandler(l)
+
 # set stdout logging
 # TODO: find a way to shut down that logger later when the user
 # wants to visible debug in the terminal
