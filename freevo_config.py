@@ -96,9 +96,6 @@
 # -----------------------------------------------------------------------
 
 
-import plugin
-from event import *
-
 ########################################################################
 # If you want to change some things for your personal setup, please
 # write this in a file called local_conf.py, see that file for more info.
