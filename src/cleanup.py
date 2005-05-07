@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2005/05/07 19:13:09  dischi
+# move config import (FIXME)
+#
 # Revision 1.5  2005/04/10 18:08:05  dischi
 # switch to new mediainfo module
 #
@@ -51,7 +54,6 @@ import time
 import sys
 import copy
 import notifier
-import config
 
 import logging
 log = logging.getLogger()
@@ -79,9 +81,13 @@ def shutdown(menuw=None, argshutdown=None, argrestart=None, exit=False):
     shut down when argshutdown is True, restarted when argrestart is true,
     else only Freevo will be stopped.
     """
+    # Import all this stuff now we need for shutdown. It is not possible
+    # to do this on startup (recursive imports)
+    # FIXME: this is bad coding style
     import util.popen
     import mediadb
     import gui
+    import config
 
     global _callbacks
     
