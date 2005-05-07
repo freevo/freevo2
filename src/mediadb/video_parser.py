@@ -32,6 +32,10 @@
 # internal version of the file
 VERSION = 0.1
 
+# python imports
+import os
+
+# mediadb imports
 from globals import *
 
 def parse(filename, object, mminfo):
@@ -39,7 +43,12 @@ def parse(filename, object, mminfo):
     Parse additional data for video files.
     """
     if mminfo and mminfo.type == 'DVD':
-        object[URL]  = 'dvd://' + filename
+        if os.path.isfile(filename) or os.path.isdir(filename):
+            # a real file / dir
+            object[URL]  = 'dvd://' + filename
+        else:
+            # a device
+            object[URL]  = 'dvd://'
         object[TYPE] = 'dvd'
 
 

@@ -62,10 +62,11 @@ class DiscInfo(ItemInfo):
         else:
             ItemInfo('', '', None)
         self.disc_ok = disc_ok
-        self.filename = media.mountdir
+        self.media = media
+        self.filename = ''
         
     def __str__(self):
-        return 'mediadb.DiscInfo() object for %s' % self.filename
+        return 'mediadb.DiscInfo() object for %s' % self.media.mountdir
 
             
 def disc_info(media):
@@ -79,7 +80,7 @@ def disc_info(media):
     cachefile = os.path.join(sysconfig.VFS_DIR, 'disc/metadata/%s.db' % id)
     cache = FileCache(media.devicename, cachefile)
     info = DiscInfo(True, media, cache)
-    info.filename = info['mime'][6:] + '://'
+    info.url = info['mime'][6:] + '://'
     if info['mime'] in ('video/vcd', 'video/dvd'):
         return info
 

@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.62  2005/05/07 17:33:36  dischi
+# fix dvd handling
+#
 # Revision 1.61  2005/04/10 17:58:12  dischi
 # switch to new mediainfo module
 #
@@ -221,7 +224,8 @@ class Xine(Application):
 
         elif item.mode == 'dvd' and hasattr(item.media, 'devicename'):
             # dvd:///dev/dvd/2
-            command.append('dvd://%s/%s' % (item.media.devicename, item.url[6:]))
+            url = 'dvd://%s/%s' % (item.media.devicename, item.url[6:])
+            command.append(url.strip('/'))
 
         elif item.mode == 'dvd': # no devicename? Probably a mirror image on the HD
             command.append(item.url)
