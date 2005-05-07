@@ -1,5 +1,5 @@
-PYMBUS=pyMbus-0.8.5pre9
-PYNOTIFIER=pyNotifier-0.3.3pre1
+PYMBUS=pyMbus-0.8.6
+PYNOTIFIER=pyNotifier-0.3.5
 URL=ftp://ftp.mbus.org/tzi/dmn/mbus/python/
 
 all: extra_packages lib/$(PYMBUS) lib/$(PYNOTIFIER)
