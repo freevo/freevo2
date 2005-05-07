@@ -39,7 +39,6 @@ import notifier
 
 # freevo imports
 import sysconfig
-import config
 import plugin
 
 from event import *
@@ -49,6 +48,9 @@ log = logging.getLogger()
 
 GENERIC_HANDLER = 'GENERIC_HANDLER'
 EVENT_LISTENER  = 'EVENT_LISTENER'
+
+# debug stuff
+_TIME_DEBUG = False
 
 _singleton = None
 
@@ -326,7 +328,7 @@ class Eventhandler:
         
         log.debug('handling event %s' % str(event))
         
-        if config.TIME_DEBUG:
+        if _TIME_DEBUG:
             t1 = time.clock()
 
         # each event resets the idle time
@@ -394,7 +396,7 @@ class Eventhandler:
                 self.stack_change = current, previous
                 self.set_focus()
 
-            if config.TIME_DEBUG:
+            if _TIME_DEBUG:
                 print time.clock() - t1
             return True
 
@@ -402,11 +404,14 @@ class Eventhandler:
             raise SystemExit
 
         except:
+            # Crash. Now import some stuff to know what do to
+            # and classes to do it. This is bad coding style, but
+            # it is not possible to import it earlier.
+            import config
+            import gui
+            import cleanup
+
             if config.FREEVO_EVENTHANDLER_SANDBOX:
-
-                import gui
-                import cleanup
-
                 log.exception('eventhandler')
                 msg=_('Event \'%s\' crashed\n\nPlease take a ' \
                       'look at the logfile and report the bug to ' \
@@ -415,7 +420,6 @@ class Eventhandler:
                       'could cause more errors until you restart '\
                       'Freevo.\n\nLogfile: %s') % \
                       (event, sysconfig.syslogfile)
-
                 pop = gui.ConfirmBox(msg, handler=cleanup.shutdown,
                                      handler_message = _('shutting down...'),
                                      button0_text = _('Shutdown'),
