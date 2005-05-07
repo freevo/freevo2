@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2005/05/07 18:09:41  dischi
+# move InputPlugin definition to input.interface
+#
 # Revision 1.8  2005/01/22 13:28:46  dischi
 # remove unneeded imports
 #
@@ -84,19 +87,19 @@ import logging
 from time import sleep
 
 import config
-import plugin
 
 import input.linux_input as li
 import input.evdev_keymaps as ek
+from input.interface import InputPlugin
 
 from event import *
 
 log = logging.getLogger('input')
 
-class PluginInterface(plugin.InputPlugin):
+class PluginInterface(InputPlugin):
 
     def __init__(self):
-        plugin.InputPlugin.__init__(self)
+        InputPlugin.__init__(self)
 
         self.plugin_name = 'EVDEV'
         self.device_name = config.EVDEV_DEVICE

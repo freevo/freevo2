@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2005/05/07 18:09:41  dischi
+# move InputPlugin definition to input.interface
+#
 # Revision 1.6  2005/01/22 13:28:47  dischi
 # remove unneeded imports
 #
@@ -71,15 +74,15 @@ import struct
 from time import sleep
 
 import config
-import plugin
+from input.interface import InputPlugin
 
 import logging
 log = logging.getLogger('input')
 
-class PluginInterface(plugin.InputPlugin):
+class PluginInterface(InputPlugin):
 
     def __init__(self):
-        plugin.InputPlugin.__init__(self)
+        InputPlugin.__init__(self)
 
         self.reason = config.REDESIGN_FIXME
         return

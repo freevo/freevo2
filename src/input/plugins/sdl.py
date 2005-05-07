@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2005/05/07 18:09:41  dischi
+# move InputPlugin definition to input.interface
+#
 # Revision 1.4  2004/11/20 18:23:03  dischi
 # use python logger module for debug
 #
@@ -56,17 +59,18 @@ from pygame import locals
 
 # Freevo imports
 import config
-import plugin
+
+from input.interface import InputPlugin
 
 import logging
 log = logging.getLogger('input')
 
-class PluginInterface(plugin.InputPlugin):
+class PluginInterface(InputPlugin):
     """
     Plugin for pygame input events
     """
     def __init__(self):
-        plugin.InputPlugin.__init__(self)
+        InputPlugin.__init__(self)
 
         self.keymap = {}
         for key in config.KEYBOARD_MAP:

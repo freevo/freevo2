@@ -28,20 +28,20 @@
 import notifier
 
 import gui
-import plugin
 import config
 
 from input import linux_input
+from input.interface import InputPlugin
 
 import logging
 log = logging.getLogger('input')
 
-class PluginInterface(plugin.InputPlugin):
+class PluginInterface(InputPlugin):
     """
     Plugin for pygame input events
     """
     def __init__(self):
-        plugin.InputPlugin.__init__(self)
+        InputPlugin.__init__(self)
 
         self.keymap = {}
         for key in config.KEYBOARD_MAP:

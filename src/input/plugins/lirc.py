@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2005/05/07 18:09:41  dischi
+# move InputPlugin definition to input.interface
+#
 # Revision 1.5  2004/10/13 20:08:25  dischi
 # fix handle to match notifier callback
 #
@@ -48,9 +51,10 @@
 import notifier
 
 import config
-import plugin
 import time
 import os
+
+from input.interface import InputPlugin
 
 try:
     import pylirc
@@ -59,12 +63,12 @@ except ImportError:
     raise Exception
 
 
-class PluginInterface(plugin.InputPlugin):
+class PluginInterface(InputPlugin):
     """
     Input plugin for lirc
     """
     def __init__(self):
-        plugin.InputPlugin.__init__(self)
+        InputPlugin.__init__(self)
         self.plugin_name = 'LIRC'
         self.__fd = None
         try:
