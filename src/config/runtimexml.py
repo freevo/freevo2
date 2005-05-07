@@ -478,7 +478,7 @@ class RuntimeXML:
             self.tpl_doc = minidom.parse(filename)
         except:
             log.error('Error while parsing runtime configuration template %s'%\
-                      self.xmlfile)
+                      filename)
             impl = getDOMImplementation()
             self.tpl_doc = impl.createDocument(None, "freevo", None)
             return False
@@ -625,7 +625,7 @@ class RuntimeXML:
 
         self.rtxp = RuntimeXMLParser(self)
 
-        tpl_file = os.path.join(conf_globs['SHARE_DIR'], 'fxd/runtime_config.tpl.fxd')
+        tpl_file = os.path.join(conf_globs['SHARE_DIR'], 'fxd/config.tpl.fxd')
         if os.path.isfile(tpl_file):
             if not self.load_template(tpl_file):
                 return
