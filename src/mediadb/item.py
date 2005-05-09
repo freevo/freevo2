@@ -93,7 +93,7 @@ class ItemInfo:
             if self.attr.has_key(key):
                 return self.attr[key]
             elif self.cache:
-                if self.cache.data.has_key(key)
+                if self.cache.data.has_key(key):
                     return self.cache.data[key]
             return ''
 
