@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.102  2005/05/10 18:44:49  dischi
+# fix crash for bad detections
+#
 # Revision 1.101  2005/05/05 17:34:01  dischi
 # adjust to new gui submodule imports
 #
@@ -264,7 +267,7 @@ class MPlayer(Application):
             command.append('-playlist')
 
         if config.MPLAYER_RESAMPLE_AUDIO and self.item_info and \
-               self.item_info.audio and \
+               hasattr(self.item_info, 'audio') and self.item_info.audio and \
                hasattr(self.item_info.audio[0], 'samplerate') and \
                self.item_info.audio[0].samplerate and \
                self.item_info.audio[0].samplerate < 40000:
