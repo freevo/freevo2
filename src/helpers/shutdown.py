@@ -273,7 +273,7 @@ class Shutdown:
             log.error('Correct buggy wakeup time from %s minutes' % wakeup)
             wakeup = 10
 
-        if wakeup < 30:
+        if self.wakeuptime and wakeup < 30:
             log.info('Wakeup time is in %s minutes, do not shutdown' % wakeup)
             wait = max(wait, wakeup + 5)
 
