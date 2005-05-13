@@ -790,11 +790,11 @@ class DirItem(Playlist):
         called when we return to this menu
         """
         callback = notifier.Callback(self.build, 'update', self.menuw)
+        mediadb.watcher.cwd(self.listing, callback)
         if self.needs_update:
             log.info('directory needs update')
             callback()
         else:
-            mediadb.watcher.cwd(self.listing, callback)
             mediadb.watcher.check()
         # we changed the menu, don't build a new one
         return None
