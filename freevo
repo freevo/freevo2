@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.126  2005/05/17 23:28:07  rshortt
+# Don't check for running instance if doing "freevo prompt" because in that
+# case it compares against freevo main.
+#
 # Revision 1.125  2004/12/12 17:05:12  dischi
 # new variable for doc dir
 #
@@ -463,6 +467,7 @@ elif arg == 'setup':
 elif arg == 'prompt':
     # only run python inside the freevo env
     proc = []
+    check = 0
 
 
 elif arg == 'runapp':
