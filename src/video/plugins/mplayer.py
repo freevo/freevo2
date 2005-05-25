@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.103  2005/05/25 19:23:56  dischi
+# fix crash
+#
 # Revision 1.102  2005/05/10 18:44:49  dischi
 # fix crash for bad detections
 #
@@ -481,7 +484,7 @@ class MPlayer(Application):
                 if self._timer_id != None:
                     notifier.removeTimer( self._timer_id )
                     self._timer_id = None
-                else:
+                elif self.app.area_handler:
                     self.app.area_handler.show()
                 cb = notifier.Callback( self.hide_osd )
                 self._timer_id = notifier.addTimer( 2000, cb )

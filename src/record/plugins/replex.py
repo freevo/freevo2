@@ -130,13 +130,13 @@ class PluginInterface(Plugin):
         """
         Replex mpeg ts into dvd mpegs
         """
+        source = recording.url[5:]
         if recording.status != SAVED:
             log.info('%s is failed' % String(source))
             return
         if not recording.url.startswith('file:'):
             log.info('%s is no file' % String(source))
             return
-        source = recording.url[5:]
         if not source.endswith('.ts'):
             log.info('%s is no mpeg ts' % String(source))
             return
