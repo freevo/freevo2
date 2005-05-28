@@ -35,7 +35,9 @@ import time
 import copy
 import logging
 import mbus
+from types import *
 
+import notifier
 import mcomm
 import config
 
@@ -107,6 +109,7 @@ class Recordings:
         mcomm.register_event('record.list.update', self.__list_update)
         self.comingup = ''
         self.running = ''
+        self.updating = 0
 
     def __entity_update(self, entity):
         if not entity.present and entity == self.server:
@@ -135,6 +138,7 @@ class Recordings:
             
         self.last_update = time.time()
         self.__recordings = {}
+        self.updating = 1
         for l in result.arguments:
             self.__recordings['%s-%s-%s' % (l[1], l[3], l[4])] = Recording(*l)
         log.info('got recording list')
@@ -142,8 +146,10 @@ class Recordings:
 
 
     def __list_update(self, result):
+        self.updating = 1
         log.info('got recording list update')
         for l in result.payload[0].args:
+            if not type(l) is ListType: continue
             key = '%s-%s-%s' % (l[1], l[3], l[4])
             if key in self.__recordings:
                 log.debug('update: %s: %s', l[0], l[5])
@@ -177,13 +183,18 @@ class Recordings:
 
     def __request_description(self):
         if not self.server:
+            self.updating = 0
             return
+
+        self.updating = 2
+
         for key in self.__recordings:
             if not self.__recordings[key].description:
                 cb = self.__describe_callback
                 self.server.call('recording.describe', cb,
                                  self.__recordings[key].id)
                 return
+
         log.info('got all recording descriptions')
 
 
@@ -199,6 +210,8 @@ class Recordings:
             if rec.status == RECORDING:
                 self.running += u'%s\n' % Unicode(rec)
 
+        self.updating = 0
+
 
     def get(self, channel, start, stop):
         key = '%s-%s-%s' % (channel, start, stop)
@@ -208,6 +221,22 @@ class Recordings:
 
 
     def list(self):
+        return self.__recordings.values()
+
+
+    def wait_on_list(self, timeout=5):
+        self.updating = 1
+        wait_start = time.time()
+
+        while self.updating:
+            if time.time() > wait_start + timeout:
+                log.warning('timed out waiting for list update')
+                self.updating = 0
+                break
+
+            time.sleep(0.01)
+            notifier.step()
+
         return self.__recordings.values()
 
 
