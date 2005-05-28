@@ -37,10 +37,13 @@ import logging
 
 # freevo imports
 import config
-import record.client as rc
+import record.client
 from www.base import HTMLResource, FreevoResource
 
 import pyepg
+
+# get logging object
+log = logging.getLogger('www')
 
 
 class SearchResource(FreevoResource):
@@ -79,20 +82,25 @@ class SearchResource(FreevoResource):
             fv.tableCell(_('Actions'), 'class="guidehead" colspan="1"')
             fv.tableRowClose()
 
+            rec_progs = record.client.recordings.list()
+
             for p in programs:
                 status = 'basic'
 
-# XXX TODO: fix scheduled or favorites status
-#                for rp in rec_progs.values():
-#
-#                    if rp.start == prog.start and rp.channel_id == prog.channel_id:
-#                        status = 'scheduled'
-#                        try:
-#                            if rp.isRecording == True:
-#                                status = 'recording'
-#                        except:
-#                            sys.stderr.write('isRecording not set')
-#    
+                for rp in rec_progs:
+                    if p.channel.id == rp.channel and rp.start == p.start:
+                        if rp.status == u'recording':
+                           status = 'recording'
+                        elif rp.status == u'conflict':
+                           # TODO: css class for conflict
+                           status = 'basic'
+                        elif rp.status == u'saved':
+                           # TODO: css class for saved
+                           status = 'basic'
+                        elif rp.status != u'deleted':
+                           status = 'scheduled'
+
+#    FIXME:
 #                if rc.isProgAFavorite(prog, favs):
 #                    status = 'favorite'
    
@@ -122,7 +130,7 @@ class SearchResource(FreevoResource):
                     cell = ('<a href="recordings?chan=%s&start=%s&action=remove">'+
                             _('Remove')+'</a>') % (p.channel.id, p.start)
                 elif status == 'recording':
-                    cell = ('<a href="recordings?chan=%s&start=%s&action=add">'+
+                    cell = ('<a href="recordings?chan=%s&start=%s&action=remove">'+
                            _('Record')+'</a>') % (p.channel.id, p.start)
                 else:
                     cell = ('<a href="recordings?chan=%s&start=%s&action=add">'+
