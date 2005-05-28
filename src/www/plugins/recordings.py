@@ -64,6 +64,7 @@ class RecordResource(FreevoResource):
         chan   = form.get('chan')
         start  = form.get('start')
         action = form.get('action')
+        progs = []
 
         if not recordings.server:
             fv.printHeader('Scheduled Recordings', 'styles/main.css')
@@ -78,12 +79,14 @@ class RecordResource(FreevoResource):
 
             prog = None
             for p in progs:
-                if start == '%s' % p.start and chan == '%s' % p.channel:
-                    prog = what
+                if Unicode(chan) == pyepg.get_channel_by_id(p.channel).title \
+                   and int(start) == p.start:
+                    prog = p
 
             if prog:
-                log.info('want to remove prog: %s' % String(prog))
+                log.info('remove prog: %s' % String(prog))
                 recordings.remove(prog.id)
+                progs = recordings.wait_on_list()
 
         elif action == 'add':
             try:
@@ -104,8 +107,11 @@ class RecordResource(FreevoResource):
                 return String(fv.res)
             recordings.schedule(prog)
 
+            progs = recordings.wait_on_list()
 
-        progs = recordings.list()
+
+        if not len(progs):
+            progs = recordings.list()
 
         fv.printHeader(_('Scheduled Recordings'), 'styles/main.css',
                        selected=_('Scheduled Recordings'))
@@ -129,6 +135,8 @@ class RecordResource(FreevoResource):
 
         for prog in progs:
             if not prog.has_key('title'):
+                continue
+            if not prog.status != u'deleted':
                 continue
 
             status  = 'basic'
