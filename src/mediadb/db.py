@@ -160,7 +160,7 @@ class Cache:
         self.reduce_files = files
 
 
-    def check(self, overlay = False, complete_check = False):
+    def check(self, overlay = False):
         """
         Check the directory for changes.
         """
@@ -187,8 +187,7 @@ class Cache:
                 call_later(self.save)
             return
 
-        if data_mtime != self.data[mtime] or not data_mtime or complete_check:
-            complete_check = True
+        if data_mtime != self.data[mtime] or not data_mtime:
             log.debug('check %s' % dirname)
             # mtime differs, check directory for added and deleted files
             if not self.reduce_files:
@@ -221,7 +220,12 @@ class Cache:
                     # ignore such files in overlay
                     continue
                 filename = dirname + f
-                stat  = os.stat(filename)
+                try:
+                    stat  = os.stat(filename)
+                except OSError:
+                    # unable to call stat, maybe it's a broken link
+                    log.error('unable to check %s, skipping' % filename)
+                    continue
                 isdir = S_ISDIR(stat[ST_MODE])
                 if overlay and isdir:
                     # ignore directories in overlay
@@ -241,46 +245,46 @@ class Cache:
                 added.append((f, info))
                 self.__changed.append((f, filename, info))
 
-
-        try:
-            for basename, info in listing.items():
-                # check all files for changes (compare mtime)
-                if self.reduce_files and not basename in self.reduce_files:
-                    continue
-                filename = dirname + basename
-                if info.has_key(NEEDS_UPDATE):
-                    self.__changed.append((basename, filename, info))
-                    continue
+        broken = []
+        for basename, info in listing.items():
+            # check all files for changes (compare mtime)
+            if self.reduce_files and not basename in self.reduce_files:
+                continue
+            filename = dirname + basename
+            if info.has_key(NEEDS_UPDATE):
+                self.__changed.append((basename, filename, info))
+                continue
+            try:
                 mtime = os.stat(filename)[ST_MTIME]
-                if mtime != info[MTIME]:
-                    # changed
-                    info[MTIME] = mtime
-                    self.__changed.append((basename, filename, info))
-                elif info.has_key(ISDIR):
-                    # For directories also check the overlay directory. A
-                    # change in the overlay will change the directory, too
-                    overlay_dir = vfs.getoverlay(filename)
-                    if os.path.isdir(overlay_dir):
-                        mtime = os.stat(overlay_dir)[ST_MTIME]
-                        if mtime != info[OVERLAY_MTIME]:
-                            info[OVERLAY_MTIME] = mtime
-                            self.__changed.append((basename, filename, info))
-        except OSError, e:
-            # that shouldn't mappen, but it does on fat partitions when
-            # an item is removed and nothing new is added. So if this is the
-            # case, we start everything again.
-            if complete_check:
-                # Oops, no, that's expected at all, raise the error again
-                log.exception('strange OSError, please report')
-                raise e
-            return self.check(overlay, True)
-        
-        if deleted or added:
+            except OSError:
+                # unable to call stat, maybe it's a broken link
+                log.error('unable to check %s, skipping' % filename)
+                broken.append(basename)
+                continue
+            if mtime != info[MTIME]:
+                # changed
+                info[MTIME] = mtime
+                self.__changed.append((basename, filename, info))
+            elif info.has_key(ISDIR):
+                # For directories also check the overlay directory. A
+                # change in the overlay will change the directory, too
+                overlay_dir = vfs.getoverlay(filename)
+                if os.path.isdir(overlay_dir):
+                    mtime = os.stat(overlay_dir)[ST_MTIME]
+                    if mtime != info[OVERLAY_MTIME]:
+                        info[OVERLAY_MTIME] = mtime
+                        self.__changed.append((basename, filename, info))
+
+        for key in broken:
+            del listing[key]
+
+        if deleted or added or broken:
             self.__check_global = True
             self.changed = True
-        if added:
-            for filename, info in added:
-                listing[filename] = info
+
+        for filename, info in added:
+            listing[filename] = info
+
         if overlay:
             self.check_time = time.time()
             if self.changed:
