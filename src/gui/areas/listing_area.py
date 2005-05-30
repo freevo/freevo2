@@ -450,9 +450,9 @@ class ListingArea(Area):
                                               table_w, val.font)
                     x_mod, table_text[i] = toi
                     if not isstring(table_text[i]):
-                        i = self.drawimage(table_text[i],
-                                           (table_x + x_mod, y + vskip))
-                        gui_objects.append(i)
+                        img = self.drawimage(table_text[i],
+                                             (table_x + x_mod, y + vskip))
+                        gui_objects.append(img)
                         table_text[i] = ''
 
                 if table_text[i]:
