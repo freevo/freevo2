@@ -102,6 +102,8 @@ CONF.cachedir = OS_CACHEDIR + '/' + application
 CONF.datadir  = '/var/lib/' + application
 CONF.logdir   = '/var/log/' + application
 
+CONFIGFILE = ''
+
 # read the config file, if no file is found, the default values
 # are used.
 for dirname in _cfgfilepath:
@@ -121,6 +123,7 @@ for dirname in _cfgfilepath:
             CONF.__dict__[name] = val
 
         c.close()
+        CONFIGFILE = conf
         break
 
 
