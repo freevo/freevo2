@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2005/05/30 17:46:38  dischi
+# remove runtime
+#
 # Revision 1.18  2004/07/10 12:33:36  dischi
 # header cleanup
 #
@@ -175,15 +178,9 @@ def create_config(conf):
     print 'wrote %s' % outfile
 
 
-def check_program(conf, name, variable, necessary, sysfirst=1, verbose=1):
+def check_program(conf, name, variable, necessary, verbose=1):
 
-    # Check for programs both in the path and the runtime apps dir
-    search_dirs_runtime = ['./runtime/apps', './runtime/apps/mplayer',
-                           './runtime/apps/tvtime']
-    if sysfirst:
-        search_dirs = os.environ['PATH'].split(':') + search_dirs_runtime
-    else:
-        search_dirs = search_dirs_runtime + os.environ['PATH'].split(':')
+    search_dirs = os.environ['PATH'].split(':')
         
     if verbose:
         print _('checking for %-13s') % (name+'...'),
@@ -222,11 +219,10 @@ if __name__ == '__main__':
     conf.tv = 'ntsc'
     conf.chanlist = 'us-cable'
     conf.version = CONFIG_VERSION
-    sysfirst = 0 # Check the system path for apps first, then the runtime
     
     # Parse commandline options
     try:
-        long_opts = 'help compile= geometry= display= tv= chanlist= sysfirst'.split()
+        long_opts = 'help compile= geometry= display= tv= chanlist= '.split()
         opts, args = getopt.getopt(sys.argv[1:], 'h', long_opts)
     except getopt.GetoptError:
         # print help information and exit:
@@ -250,9 +246,6 @@ if __name__ == '__main__':
         if o == '--chanlist':
             conf.chanlist = a
 
-        if o == '--sysfirst':
-            sysfirst = 1
-
         # this is called by the Makefile, don't call it directly
         if o == '--compile':
             # Compile python files:
@@ -270,10 +263,8 @@ if __name__ == '__main__':
             sys.exit(0)
 
 
-    print _('System path first=%s') % ( [_('No'), _('Yes')][sysfirst])
-
     for program, valname, needed in EXTERNAL_PROGRAMS:
-        check_program(conf, program, valname, needed, sysfirst)
+        check_program(conf, program, valname, needed)
 
     check_config(conf)
 
