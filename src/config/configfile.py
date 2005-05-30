@@ -34,7 +34,7 @@
 # -----------------------------------------------------------------------------
 
 
-def _print_config_changes(conf_version, file_version, changelist):
+def print_config_changes(conf_version, file_version, changelist):
     """
     print changes made between version on the screen
     """
@@ -64,6 +64,14 @@ cfgfilepath = [ '.', os.path.expanduser('~/.freevo'), '/etc/freevo',
                 '/usr/local/etc/freevo' ]
 
 
+#
+# Check if freevo.conf was found
+#
+
+if not sysconfig.CONFIGFILE:
+    log.critical('freevo.conf not found, please run \'freevo setup\'')
+    sys.exit(1)
+    
 #
 # Check that freevo_config.py is not found in the config file dirs
 #
@@ -123,7 +131,7 @@ for dirname in cfgfilepath:
             print 'Please check freevo_config.py for changes and set'
             print 'CONFIG_VERSION in %s to %s' % \
                   (overridefile, LOCAL_CONF_VERSION)
-            _print_config_changes(LOCAL_CONF_VERSION, CONFIG_VERSION,
+            print_config_changes(LOCAL_CONF_VERSION, CONFIG_VERSION,
                                   LOCAL_CONF_CHANGES)
             sys.exit(1)
 
@@ -131,8 +139,8 @@ for dirname in cfgfilepath:
            int(str(LOCAL_CONF_VERSION).split('.')[1]):
             log.warning('freevo_config.py was changed.\n' +
                         'Please check your local_config.py')
-            _print_config_changes(LOCAL_CONF_VERSION, CONFIG_VERSION, 
-                                  LOCAL_CONF_CHANGES)
+            print_config_changes(LOCAL_CONF_VERSION, CONFIG_VERSION, 
+                                 LOCAL_CONF_CHANGES)
         break
 
 else:

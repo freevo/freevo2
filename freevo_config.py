@@ -190,7 +190,7 @@ LOCAL_CONF_CHANGES = [
 # NOW check if freevo.conf is up-to-date. An older version may break the next
 # steps
 
-FREEVO_CONF_VERSION = setup_freevo.CONFIG_VERSION
+FREEVO_CONF_VERSION = setup.CONFIG_VERSION
 
 if int(str(CONF.version).split('.')[0]) != \
    int(str(FREEVO_CONF_VERSION).split('.')[0]):

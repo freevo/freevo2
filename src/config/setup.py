@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.1  2005/05/30 18:01:02  dischi
+# move setup_freevo to config/setup
+#
 # Revision 1.19  2005/05/30 17:46:38  dischi
 # remove runtime
 #

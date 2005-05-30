@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.127  2005/05/30 18:00:44  dischi
+# move setup_freevo to config/setup
+#
 # Revision 1.126  2005/05/17 23:28:07  rshortt
 # Don't check for running instance if doing "freevo prompt" because in that
 # case it compares against freevo main.
@@ -461,7 +464,7 @@ elif arg == 'execute':
 
 elif arg == 'setup':
     # run setup
-    proc = [ os.path.join(freevo_python, 'setup_freevo.py') ] + sys.argv[2:]
+    proc = [ os.path.join(freevo_python, 'config/setup.py') ] + sys.argv[2:]
 
 
 elif arg == 'prompt':
@@ -529,6 +532,8 @@ if python[0].find('python') != -1:
     python = [ python[0] , '-OO' ] + python[1:]
 
 if len(proc) and not os.path.isfile(proc[0]):
-    print 'Error: please run \'make\' first'
+    print 'Error: unable to start \'%s\'' % proc[0]
+    print 'Either the helper does not exist or you need to run \'make\' first'
     sys.exit(0)
+    
 start(name, python + proc , bg, check)

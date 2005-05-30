@@ -55,8 +55,8 @@ import logging
 import sysconfig
 import version
 
-# FIXME: setup freevo stuff
-import setup_freevo
+# config imports
+import setup
 
 # input inputs variables for the input system
 # and event.py (which has no more deps)
@@ -161,9 +161,9 @@ FONT_DIR  = os.path.join(SHARE_DIR, 'fonts')
 #
 # search missing programs at runtime
 #
-for program, valname, needed in setup_freevo.EXTERNAL_PROGRAMS:
+for program, valname, needed in setup.EXTERNAL_PROGRAMS:
     if not hasattr(CONF, valname) or not getattr(CONF, valname):
-        setup_freevo.check_program(CONF, program, valname, needed, verbose=0)
+        setup.check_program(CONF, program, valname, needed, verbose=0)
     if not hasattr(CONF, valname) or not getattr(CONF, valname):
         setattr(CONF, valname, '')
 
