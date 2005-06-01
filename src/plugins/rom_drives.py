@@ -662,7 +662,8 @@ class Watcher:
             else:
                 first_scan = False
             if media.check_status():
-                util.fthread.Thread(self.identify, media.scan).start()
+                thread = util.fthread.Thread(media.scan)
+                thread.start(self.identify)
                 continue
 
             # release the lock again
