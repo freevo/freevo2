@@ -67,7 +67,7 @@ if __name__ != "__main__":
         """
         def __init__( self, app, imagefile):
             self.imagefile = imagefile
-            Process.__init__(self, app)
+            Process.__init__(self, app, callback=self.finished)
 
 
         def stdout_cb(self, line):

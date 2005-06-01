@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2005/06/01 19:01:25  dischi
+# adjust to popen changes
+#
 # Revision 1.23  2004/11/21 10:12:46  dischi
 # improve system detect, use config.detect now
 #
@@ -122,7 +125,7 @@ class Xine:
     
 
     def is_playing(self):
-        return self.app.isAlive()
+        return self.app.is_alive()
 
 
     def stop(self):

@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2005/06/01 19:01:24  dischi
+# adjust to popen changes
+#
 # Revision 1.20  2004/12/31 11:57:43  dischi
 # renamed SKIN_* and OSD_* variables to GUI_*
 #
@@ -259,7 +262,7 @@ class CommandItem(Item):
             pop.show()
 
 	workapp = CommandChild(self.cmd, 'command', 1, self.stoposd)
-	while workapp.isAlive():
+	while workapp.is_alive():
             # make sure all callbacks in rc are running
             rc.poll()
             # wait some time

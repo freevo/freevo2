@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2005/06/01 19:01:24  dischi
+# adjust to popen changes
+#
 # Revision 1.45  2005/01/23 16:33:24  dischi
 # prevent playing a file again with xine
 #
@@ -196,7 +199,7 @@ class MPlayer:
 
 
     def is_playing(self):
-        return self.app.isAlive()
+        return self.app.is_alive()
 
 
     def eventhandler(self, event, menuw=None):

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2005/06/01 19:01:25  dischi
+# adjust to popen changes
+#
 # Revision 1.6  2004/10/17 02:45:19  outlyer
 # Small changes...
 #
@@ -182,7 +185,7 @@ class MPlayer:
 
 
     def is_playing(self):
-        return self.app.isAlive()
+        return self.app.is_alive()
 
 
     def eventhandler(self, event, menuw=None):

@@ -82,7 +82,7 @@ class ArchiveItem(Item):
         Process(app, callback=self.__finished)
 
 
-    def __finished(self, child):
+    def __finished(self):
         """
         Callback when the external program is finsihed.
         """

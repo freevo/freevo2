@@ -82,7 +82,8 @@ class Instance(util.popen.Process):
         if debugname:
 	    debugname = sysconfig.logfile(debugname)
 	
-        util.popen.Process.__init__(self, app, debugname)
+        util.popen.Process.__init__(self, app, debugname,
+                                    callback=self.finished)
 
         if prio and config.CONF.renice:
             os.system('%s %s -p %s 2>/dev/null >/dev/null' % \
