@@ -63,13 +63,10 @@ class PluginInterface(Plugin):
         log.info('add replex plugin')
 
 
-    def replex_stop(self, proc):
+    def replex_stop(self, source, dest):
         """
         The replex program has stopped, check the result.
         """
-        # get source and dest
-        source = proc.source
-        dest = proc.dest
         # get length of both files
         srcinfo = mmpython.parse(source)
         if not srcinfo:
@@ -147,7 +144,6 @@ class PluginInterface(Plugin):
         
         dest = os.path.splitext(source)[0] + '.mpg'
         log.info('replex %s' % String(source))
+        cb = notifier.Callback(self.replex_stop, source, dest)
         Process([ self.nice, '-n', '19', self.replex, '-x', '-k', '-t', 'DVD',
-                  '--of', dest, source ], callback = self.replex_stop)
-        Process.source = source
-        Process.dest = dest
+                  '--of', dest, source ], callback = cb)
