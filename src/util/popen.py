@@ -4,6 +4,19 @@
 # -----------------------------------------------------------------------------
 # $Id$
 #
+# This module defines a process class similar to the once defined in popen2
+# except that this class is aware of the notifier loop.
+#
+# When creating a Process object you can add files for logging the stdout and
+# stderr of the process, you can send data to it and add a callback to be
+# called when the process is dead. See the class member functions for more
+# details.
+#
+# By inherting from the class you can also override the functions stdout_cb
+# and stderr_cb to process stdout and stderr line by line.
+#
+# The killall function of this class can be called at the end of the programm
+# to stop all running processes.
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -12,6 +25,7 @@
 # First Edition: Dirk Meyer <dmeyer@tzi.de>
 # Maintainer:    Dirk Meyer <dmeyer@tzi.de>
 #
+# Based on code by Krister Lagerstrom and Andreas Büsching
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -35,7 +49,6 @@ __all__ = [ 'Process', 'killall' ]
 # python imports
 import os
 import fcntl
-import copy
 import popen2
 import glob
 import re
@@ -44,18 +57,8 @@ import logging
 # notifier
 import notifier
 
+# get logging object
 log = logging.getLogger('popen')
-
-# the global watcher object
-watcher = None
-
-
-def killall():
-    """
-    killall running processes
-    """
-    if watcher:
-        watcher.killall()
 
 
 class Process:
@@ -68,6 +71,8 @@ class Process:
         of arguments (similar to popen2). If debugname is given, the stdout
         and stderr will also be written. To get the stdout and stderr, you
         need to inherit from this class and override stdout_cb and stderr_cb.
+        If callback is set, the given function will be called after the child
+        is dead.
         """
         if isinstance(app, str):
             # app is a string to execute. It will be executed by 'sh -c '
@@ -85,7 +90,7 @@ class Process:
 
         self.__kill_timer = None
         self.stopping = False
-        self.dead = False
+        self.__dead = False
         self.callback = callback
         self.child = popen2.Popen3( start_str, True, 100 )
 
@@ -93,22 +98,13 @@ class Process:
 
         # IO_Handler for stdout
         self.stdout = IO_Handler( 'stdout', self.child.fromchild,
-                                    self.stdout_cb, debugname )
+                                  self.stdout_cb, debugname )
         # IO_Handler for stderr
         self.stderr = IO_Handler( 'stderr', self.child.childerr,
-                                    self.stderr_cb, debugname )
-
-        global watcher
-        if not watcher:
-            # init global watcher object
-            watcher = _Watcher()
-
-            # add checking for dead children to the notifier
-            notifier.addDispatcher( watcher.step )
+                                  self.stderr_cb, debugname )
 
         # add child to watcher
-        watcher.add( self, self.__child_died )
-
+        _watcher.append( self, self.__child_died )
 
 
     def write( self, line ):
@@ -122,44 +118,45 @@ class Process:
             pass
 
 
-    def isAlive( self ):
+    def is_alive( self ):
         """
         Return True if the app is still running
         """
-        return not self.dead
+        return not self.__dead
 
 
-    def stop( self, cmd = '' ):
+    def stop( self, cmd = '', wait = True ):
         """
         Stop the child. If 'cmd' is given, this stop command will send to
         the app to stop itself. If this is not working, kill -15 and kill -9
-        will be used to kill the app.
+        will be used to kill the app. If wait is True, this function will
+        call notifier.step until the child is dead.
         """
         if self.stopping:
             return
 
         self.stopping = True
 
-        if self.isAlive() and not self.__kill_timer:
+        if self.is_alive() and not self.__kill_timer:
             if cmd:
                 log.info('sending exit command to app')
                 self.write(cmd)
-                cb = notifier.Callback( self._kill, 15 )
+                cb = notifier.Callback( self.__kill, 15 )
                 self.__kill_timer = notifier.addTimer( 3000, cb )
             else:
-                cb = notifier.Callback( self._kill, 15 )
+                cb = notifier.Callback( self.__kill, 15 )
                 self.__kill_timer = notifier.addTimer( 0, cb )
 
-            while not self.dead:
+            while wait and not self.__dead:
                 notifier.step()
 
 
-    def _kill( self, signal ):
+    def __kill( self, signal ):
         """
         Internal kill helper function
         """
-        if not self.isAlive():
-            self.dead = True
+        if not self.is_alive():
+            self.__dead = True
             return False
         # child needs some assistance with dying ...
         try:
@@ -168,21 +165,20 @@ class Process:
             pass
 
         if signal == 15:
-            cb = notifier.Callback( self._kill, 9 )
+            cb = notifier.Callback( self.__kill, 9 )
         else:
-            cb = notifier.Callback( self._killall, 15 )
+            cb = notifier.Callback( self.__killall, 15 )
 
         self.__kill_timer = notifier.addTimer( 3000, cb )
-
         return False
 
 
-    def _killall( self, signal ):
+    def __killall( self, signal ):
         """
         Internal killall helper function
         """
-        if not self.isAlive():
-            self.dead = True
+        if not self.is_alive():
+            self.__dead = True
             return False
         # child needs some assistance with dying ...
         try:
@@ -213,7 +209,7 @@ class Process:
 
         log.info('kill -%d %s' % ( signal, self.binary ))
         if signal == 15:
-            cb = notifier.Callback( self._killall, 9 )
+            cb = notifier.Callback( self.__killall, 9 )
             self.__kill_timer = notifier.addTimer( 2000, cb )
         else:
             log.critical('PANIC %s' % self.binary)
@@ -225,23 +221,15 @@ class Process:
         """
         Callback from watcher when the child died.
         """
-        self.dead = True
-        # cleanup IO handler and kill timer
-        self.stdout.cleanup()
-        self.stderr.cleanup()
+        self.__dead = True
+        # close IO handler and kill timer
+        self.stdout.close()
+        self.stderr.close()
         if self.__kill_timer:
             notifier.removeTimer( self.__kill_timer )
-        self.finished()
         if self.callback:
-            self.callback(self)
-
-
-    def finished(self):
-        """
-        Override this method to handle cleanup / notifications after the child
-        is dead.
-        """
-        pass
+            # call external callback on stop
+            self.callback()
 
 
     def stdout_cb( self, line ):
@@ -286,74 +274,84 @@ class IO_Handler:
 
 
     def close( self ):
+        """
+        Close the IO to the child.
+        """
         notifier.removeSocket( self.fp )
         self.fp.close()
         if self.logger:
             self.logger.close()
-
-
-    def cleanup( self ):
-        notifier.removeSocket( self.fp )
-
+            self.logger = None
 
     def _handle_input( self, socket ):
+        """
+        Handle data input from socket.
+        """
         data = self.fp.read( 10000 )
         if not data:
-            log.debug( '%s: No data, stopping (pid %s)!' % \
-                       ( self.name, os.getpid() ) )
+            log.info('No data on %s for pid %s.' % ( self.name, os.getpid()))
             notifier.removeSocket( self.fp )
             self.fp.close()
             if self.logger:
                 self.logger.close()
-        else:
-            data  = data.replace('\r', '\n')
-            lines = data.split('\n')
+            return False
 
-            # Only one partial line?
-            if len(lines) == 1:
-                self.saved += data
-            else:
-                # Combine saved data and first line, send to app
+        data  = data.replace('\r', '\n')
+        lines = data.split('\n')
+
+        # Only one partial line?
+        if len(lines) == 1:
+            self.saved += data
+            return True
+
+        # Combine saved data and first line, send to app
+        if self.logger:
+            self.logger.write( self.saved + lines[ 0 ] + '\n' )
+        self.callback( self.saved + lines[ 0 ] )
+        self.saved = ''
+
+        # There's one or more lines + possibly a partial line
+        if lines[ -1 ] != '':
+            # The last line is partial, save it for the next time
+            self.saved = lines[ -1 ]
+
+            # Send all lines except the last partial line to the app
+            for line in lines[ 1 : -1 ]:
+                if not line:
+                    continue
                 if self.logger:
-                    self.logger.write( self.saved + lines[ 0 ] + '\n' )
-                self.callback( self.saved + lines[ 0 ] )
-                self.saved = ''
-
-                # There's one or more lines + possibly a partial line
-                if lines[ -1 ] != '':
-                    # The last line is partial, save it for the next time
-                    self.saved = lines[ -1 ]
-
-                    # Send all lines except the last partial line to the app
-                    for line in lines[ 1 : -1 ]:
-                        if self.logger:
-                            self.logger.write( line + '\n' )
-                        self.callback( line )
-                else:
-                    # Send all lines to the app
-                    for line in lines[ 1 : ]:
-                        if self.logger:
-                            self.logger.write( line + '\n' )
-                        self.callback( line )
+                    self.logger.write( line + '\n' )
+                self.callback( line )
+        else:
+            # Send all lines to the app
+            for line in lines[ 1 : ]:
+                if not line:
+                    continue
+                if self.logger:
+                    self.logger.write( line + '\n' )
+                self.callback( line )
         return True
 
 
-class _Watcher:
+class Watcher:
     def __init__( self ):
         log.info('new process watcher instance')
         self.__processes = {}
+        self.__timer = None
 
 
-    def add( self, proc, cb ):
+    def append( self, proc, cb ):
         self.__processes[ proc ] = cb
+        if not self.__timer:
+            log.info('starting process watching')
+            self.__timer = notifier.addTimer(50, self.check)
 
-    def remove( self, proc ):
-        if self.__processes.has_key( proc ):
-            del self.__processes[ proc ]
 
-    def step( self ):
+    def check( self ):
         remove_proc = []
-        for p in copy.copy( self.__processes ):
+
+        # check all processes
+        for p in self.__processes:
             try:
                 if isinstance( p.child, popen2.Popen3 ):
                     pid, status = os.waitpid( p.child.pid, os.WNOHANG )
@@ -362,8 +360,9 @@ class _Watcher:
             except OSError:
                 remove_proc.append( p )
                 continue
-            if not pid: continue
-            log.info('DEAD CHILD: %s (%s)' % ( pid, status ))
+            if not pid:
+                continue
+            log.info('Dead child: %s (%s)' % ( pid, status ))
             if status == -1:
                 log.error('error retrieving process information from %d' % p)
             elif os.WIFEXITED( status ) or os.WIFSIGNALED( status ) or \
@@ -372,10 +371,34 @@ class _Watcher:
 
         # remove dead processes
         for p in remove_proc:
-            if p in copy.copy(self.__processes):
+            if p in self.__processes:
+                # call stopped callback
 	    	self.__processes[ p ]()
-                self.remove( p )
+                del self.__processes[ p ]
+
+        # check if this function needs to be called again
+        if not self.__processes:
+            # no process left, remove timer
+            self.__timer = None
+            log.info('stopping process watching')
+            return False
+        
+        # return True to be called again
+        return True
+
 
     def killall( self ):
-        for p in copy.copy(self.__processes):
-            p.stop()
+        # stop all childs without waiting
+        for p in self.__processes:
+            p.stop(wait=False)
+
+        # now wait until all childs are dead
+        while self.__processes:
+            notifier.step()
+        
+
+# global watcher instance
+_watcher = Watcher()
+
+# global killall function
+killall = _watcher.killall
