@@ -7,13 +7,28 @@
 # This module contains some wrapper classes for threading in Freevo. It should
 # only be used when non blocking handling is not possible. Freevo itself is not
 # thread save, the the function called in the thread should not touch any
-# variables inside Freevo. Since the main loop needs to be kept alive and some
-# Python functions may block too long, the function call can we wrapped in a
-# Freevo thread. Only add the blocking function to the thread and remeber that
-# the Freevo main loop is alive during the call (e.g. timer can expire).
+# variables inside Freevo which are not protected by by a lock.
+#
+# There are two ways of using threads with this module:
+#
+# 1. Using the Thread class. You can create a Thread object with the function
+#    and it's arguments. After that you can call the start function to start
+#    the thread. This function has an optional parameter with a callback which
+#    will be called from the main loop once the thread is finished. The result
+#    of the thread function is the parameter for the callback.
+#
+# 2. Using the 'call' function. The function will call the given function and
+#    it's parameter in a thread while keeping the main loop alive. Once the
+#    thread is finsihed, the 'call' function returns. Remeber that the main
+#    loop is alive during the call (e.g. timer can expire).
 #
 # In most cases this module is not needed, please add a good reason why you
-# wrap a function in a thread.
+# wrap a function in a thread. If a thread is used, variant 1 is the prefered
+# way of handling threads.
+#
+# If a thread needs to call a function from the main loop the helper function
+# call_from_main can be used. It will schedule the function call in the main
+# loop. It is not possible to get the return value of that call.
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -40,38 +55,62 @@
 #
 # -----------------------------------------------------------------------------
 
-__all__ = [ 'call' ]
+__all__ = [ 'Thread', 'call', 'call_from_main' ]
 
+# python imports
+import copy
+import thread
 import threading
 import notifier
 import logging
 
-from callback import *
-
 # get logging object
-log = logging.getLogger()
+log = logging.getLogger('fthread')
 
-class _FThread(threading.Thread):
+# internal list of callbacks that needs to be called from the main loop
+_callbacks = []
+# lock for adding / removing callbacks from _callbacks
+_lock = thread.allocate_lock()
+
+
+class Thread(threading.Thread):
     """
-    Thread to handle the function with *args, **kargs.
+    Notifier aware wrapper for threads.
     """
     def __init__(self, function, *args, **kargs):
         threading.Thread.__init__(self)
+        self.callback  = None
         self.function  = function
         self.args      = args
         self.kargs     = kargs
         self.result    = None
         self.finished  = False
         self.exception = None
-        
+
+
+    def start(self, callback=None):
+        """
+        Start the thread.
+        """
+        # append object to list of threads in watcher
+        _watcher.append(self)
+        # register callback
+        self.callback = callback
+        # start the thread
+        threading.Thread.start(self)
+
+
     def run(self):
         """
         Call the function and store the result
         """
         try:
+            # run thread function
             self.result = self.function(*self.args, **self.kargs)
         except Exception, e:
+            log.exception('Thread crashed:')
             self.exception = e
+        # set finished flag
         self.finished = True
 
 
@@ -80,51 +119,25 @@ def call(function, *args, **kargs):
     Run function(*args, **kargs) in a thread and return the result. Keep
     the main loop alive during that time.
     """
-    thread = _FThread(function, *args, **kargs)
+    thread = Thread(function, *args, **kargs)
     thread.start()
     while not thread.finished:
-        # Calling notifier.step with the first argument True could block Freevo
-        # forever. But we know that there are many timers running so this will
-        # return.
-        # FIXME: maybe add a max timer to pyNotifier to be sure that the step
-        # function will return at some point.
+        # step notifier
         notifier.step()
-    thread.join()
     if thread.exception:
         raise thread.exception
     return thread.result
 
 
-class Thread(threading.Thread):
+def call_from_main(function, *args, **kargs):
     """
-    Notifier aware wrapper for threads.
+    Call a function from the main loop. The function isn't called when this
+    function is called, it is called when the watcher in the main loop is
+    called by the notifier.
     """
-    def __init__(self, callback, function, *args, **kargs):
-        threading.Thread.__init__(self)
-        self.callback  = callback
-        self.function  = function
-        self.args      = args
-        self.kargs     = kargs
-        self.result    = None
-        self.finished  = False
-        self.exception = None
-
-
-    def start(self):
-        _watcher.append(self)
-        threading.Thread.start(self)
-
-        
-    def run(self):
-        """
-        Call the function and store the result
-        """
-        try:
-            self.result = self.function(*self.args, **self.kargs)
-        except Exception, e:
-            log.exception('Thread crashed:')
-            self.exception = e
-        self.finished = True
+    _lock.acquire()
+    _callbacks.append(function, args, kwargs)
+    _lock.release()
 
 
 class Watcher:
@@ -132,31 +145,66 @@ class Watcher:
     Watcher for running threads.
     """
     def __init__(self):
-        self.threads = []
+        self.__threads = []
         self.__timer = None
 
-        
+
     def append(self, thread):
-        self.threads.append(thread)
+        """
+        Append a thread to the watcher.
+        """
+        self.__threads.append(thread)
         if not self.__timer:
             self.__timer = notifier.addTimer( 10, self.check )
 
-    
+
     def check(self):
-        dead = []
-        for t in self.threads:
-            if t.finished:
-                dead.append(t)
-        if not dead:
+        """
+        Check for finished threads and callbacks that needs to be called from
+        the main loop.
+        """
+        finished = []
+        # check if callbacks needs to be called from the main loop
+        if _callbacks:
+            # acquire lock
+            _lock.acquire()
+            # copy callback list
+            cb = copy.copy(_callbacks)
+            while _callbacks:
+                # delete callbacks
+                _callbacks.pop()
+            # release lock
+            _lock.release()
+
+            # call callback functions
+            for function, args, kwargs in cb:
+                function(*args, **kwargs)
+
+        for thread in self.__threads:
+            # check all threads
+            if thread.finished:
+                finished.append(thread)
+
+        if not finished:
+            # no finished thread, return
             return True
-        for t in dead:
-            self.threads.remove(t)
-            if t.callback and not t.exception:
-                call_later(t.callback, t.result)
-            t.join()
-        if not self.threads:
+
+        # check all finished threads
+        for thread in finished:
+            # remove thread from list
+            self.__threads.remove(thread)
+            if thread.callback and not thread.exception:
+                # call callback
+                thread.callback(thread.result)
+            # join thread
+            thread.join()
+
+        if not self.__threads:
+            # remove watcher from notifier
             self.__timer = None
             return False
         return True
-    
+
+
+# the global watcher object
 _watcher = Watcher()
