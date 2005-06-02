@@ -114,12 +114,12 @@ class Thread(threading.Thread):
         self.finished = True
 
 
-def call(function, *args, **kargs):
+def call(function, *args, **kwargs):
     """
     Run function(*args, **kargs) in a thread and return the result. Keep
     the main loop alive during that time.
     """
-    thread = Thread(function, *args, **kargs)
+    thread = Thread(function, *args, **kwargs)
     thread.start()
     while not thread.finished:
         # step notifier
@@ -129,14 +129,14 @@ def call(function, *args, **kargs):
     return thread.result
 
 
-def call_from_main(function, *args, **kargs):
+def call_from_main(function, *args, **kwargs):
     """
     Call a function from the main loop. The function isn't called when this
     function is called, it is called when the watcher in the main loop is
     called by the notifier.
     """
     _lock.acquire()
-    _callbacks.append(function, args, kwargs)
+    _callbacks.append((function, args, kwargs))
     _lock.release()
 
 
