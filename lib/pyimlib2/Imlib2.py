@@ -268,7 +268,7 @@ class Image:
         if self.width < w and self.height < h:
             return
 
-        self._image = self.scale_preserve_aspect( (w, h) )
+        self._image = self.scale_preserve_aspect( (w, h) )._image
 
 
     def copy_rect(self, src_pos, size, dst_pos):

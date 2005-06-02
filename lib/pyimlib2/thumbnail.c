@@ -48,7 +48,7 @@ extern int _png_write (const char *file, DATA32 * ptr,
 
 PyObject *epeg_thumbnail(PyObject *self, PyObject *args)
 {
-    int iw, ih, tw, th;
+    int iw, ih, tw, th, ret;
     char *source;
     char *dest;
     
@@ -63,6 +63,7 @@ PyObject *epeg_thumbnail(PyObject *self, PyObject *args)
 
     im = epeg_file_open(source);
     if (im) {
+        Py_BEGIN_ALLOW_THREADS
         epeg_size_get(im, &iw, &ih);
 
         if (iw > tw || ih > th) {
@@ -80,7 +81,9 @@ PyObject *epeg_thumbnail(PyObject *self, PyObject *args)
         epeg_thumbnail_comments_enable(im, 1);
     
         epeg_file_output_set(im, dest);
-        if(!epeg_encode (im)) {
+        ret = epeg_encode (im);
+        Py_END_ALLOW_THREADS
+        if (!ret) {
             epeg_close(im);
             Py_INCREF(Py_None);
             return Py_None;
