@@ -4,10 +4,20 @@
 # -----------------------------------------------------------------------------
 # $Id$
 #
-# Note: this file uses threads. All calls are wrapped around the fthread util
-# to make it look like a normal function call. The reason for this is that
-# ioctls and simple reads on rom drives may take a long time and we need to
-# keep the notifier alive. Setting the fd to non blovk also doesn't help here.
+# Note: this file uses threads. This can't be done in a better way because
+# some calls like ioctl block until they are done (even setting the fd to
+# non blocking doesn't help). When moving the tray this tackes too much time.
+# And while the tray is moving, other calls like a simple os.open for the
+# scanner also blocks.
+#
+# Because of all this the scanner is in a thread and so is the tray moving.
+# Both use a lock variable to make sure nothing bad happens. Faster stuff like
+# 'identify' on a changed media uses other non thread safe parts of Freevo,
+# they are called from the main loop.
+#
+# Since threads can mess up everything, the thread and lock parts should have
+# a good documentation. Do not change anything here without knowing what
+# effect it may have on the threads.
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -42,6 +52,7 @@ import copy
 import struct
 import array
 import logging
+import thread
 
 import notifier
 
@@ -51,7 +62,7 @@ import config
 import eventhandler
 import plugin
 import util
-import util.ioctl
+from util.ioctl import ioctl
 import util.fthread
 import mediadb
 
@@ -104,14 +115,6 @@ watcher = None
 
 # list of rom drives
 rom_drives = []
-
-def ioctl(*args, **kwargs):
-    """
-    Ioctl wrapper using fthread because ioctls on rom drives block
-    for unknown time.
-    """
-    return util.fthread.call(util.ioctl.ioctl, *args, **kwargs)
-
 
 
 class autostart(plugin.DaemonPlugin):
@@ -219,111 +222,107 @@ class RemovableMedia(vfs.Mountpoint):
         vfs.Mountpoint.__init__(self, mountdir, devicename, 'empty_cdrom')
         self.drivename = drivename
         rom_drives.append(self)
-        
+
         # Dynamic stuff
         self.tray_open = 0
         self.drive_status = None  # return code from ioctl for DRIVE_STATUS
 
-        self.label     = ''
-        self.info      = None
-        self.item      = None
-        self.videoitem = None
-        self.locked    = False
-
-
-    def is_tray_open(self):
-        """
-        return tray status
-        """
-        return self.tray_open
+        self.label       = ''
+        self.info        = None
+        self.item        = None
+        self.videoitem   = None
+        self.lock        = thread.allocate_lock()
 
 
     def move_tray(self, dir='toggle', notify=1):
         """
         Move the tray. dir can be toggle/open/close
         """
+        if not self.lock.acquire(0):
+            # unable to acquire the lock, looks like a move tray or
+            # a media change identification is in progress
+            log.info('media locked')
+            return
+
+        # At this point we have a lock and no scan or move again will
+        # do some nasty things with the media
+
         if dir == 'toggle':
-            if self.is_tray_open():
+            if self.tray_open:
                 dir = 'close'
             else:
                 dir = 'open'
-
+        pop = None
         if dir == 'open':
             log.debug('Ejecting disc in drive %s' % self.drivename)
-
-            if notify:
-                pop = PopupBox(text=_('Ejecting disc in drive %s') % \
-                               self.drivename)
-                pop.show()
-
-            try:
-                fd = os.open(self.devicename, os.O_RDWR | os.O_NONBLOCK)
-
-                if os.uname()[0] == 'FreeBSD':
-                    ioctl(fd, CDIOCEJECT, 0)
-                else:
-                    ioctl(fd, CDROMEJECT)
-                os.close(fd)
-            except Exception, e:
-                try:
-                    log.exception('eject cdrom')
-                except IOError:
-                    # believe it or not, this sometimes causes an IOError if
-                    # you've got a music track playing in the background
-                    # (detached)
-                    pass
-                # maybe we need to close the fd if ioctl fails, maybe
-                # open fails and there is no fd
-                try:
-                    os.close(fd)
-                except:
-                    pass
-
-            self.tray_open = 1
-            if notify:
-                pop.destroy()
-
-
+            msg = _('Ejecting disc in drive %s')
         elif dir == 'close':
             log.debug('Inserting %s' % self.drivename)
+            msg = _('Reading disc in drive %s')
+        if notify:
+            pop = PopupBox(text= msg % self.drivename)
+            pop.show()
 
-            if notify:
-                pop = PopupBox(text=_('Reading disc in drive %s') % \
-                               self.drivename)
-                pop.show()
+        # Start tray moving thread. This thread will release the lock
+        # when the tray is moved
+        util.fthread.Thread(self.__move_tray_thread, dir, pop).start()
 
+
+    def __move_tray_thread(self, dir, popup):
+        """
+        The real tray moving (called in a thread).
+        """
+        # open fd to the drive
+        fd = os.open(self.devicename, os.O_RDONLY | os.O_NONBLOCK)
+        if dir == 'open':
+            # open the tray
+            if os.uname()[0] == 'FreeBSD':
+                cmd = CDIOCEJECT
+            else:
+                cmd = CDROMEJECT
+            self.tray_open = 1
+
+        elif dir == 'close':
             # close the tray, identifymedia does the rest,
             # including refresh screen
-            try:
-                fd = os.open(self.devicename, os.O_RDONLY | os.O_NONBLOCK)
-                if os.uname()[0] == 'FreeBSD':
-                    s = ioctl(fd, CDIOCCLOSE, 0)
-                else:
-                    s = ioctl(fd, CDROMCLOSETRAY)
-                os.close(fd)
-            except Exception, e:
-                log.exception('close tray')
-                # maybe we need to close the fd if ioctl fails, maybe
-                # open fails and there is no fd
-                try:
-                    os.close(fd)
-                except:
-                    pass
-
+            if os.uname()[0] == 'FreeBSD':
+                cmd = CDIOCCLOSE
+            else:
+                cmd = CDROMCLOSETRAY
             self.tray_open = 0
-            if watcher:
-                watcher.check_all()
-            if notify:
-                pop.destroy()
+
+        try:
+            # try to move the tray
+            s = ioctl(fd, cmd, 0)
+        except Exception, e:
+            log.exception('move tray error')
+        try:
+            # close the fd to the drive
+            os.close(fd)
+        except:
+            log.exception('close fd')
+
+        # release the lock
+        self.lock.release()
+        if watcher and not self.tray_open:
+            # call watcher for update from main
+            util.fthread.call_from_main(watcher.poll)
+        if popup:
+            # delete popup (from main)
+            util.fthread.call_from_main(popup.destroy)
 
 
-    def check_status(self):
+    def check_status_thread(self):
         """
         Return True if the status has changed (new disc / removed disc).
+        Note: This functions blocks, so it needs to be called in a thread.
         """
+        if self.lock.locked():
+            # locked for some reasons, return
+            return False
+
         # Check drive status (tray pos, disc ready)
         try:
-            CDSL_CURRENT = ( (int ) ( ~ 0 >> 1 ) )
             fd = os.open(self.devicename, os.O_RDONLY | os.O_NONBLOCK)
             if os.uname()[0] == 'FreeBSD':
                 try:
@@ -331,14 +330,13 @@ class RemovableMedia(vfs.Mountpoint):
                     (address, length) = data.buffer_info()
                     buf = struct.pack('BBHP', CD_MSF_FORMAT, 0,
                                       length, address)
-                    # use unthreader ioctl here, it is fast
-                    s = util.ioctl.ioctl(fd, CDIOREADTOCENTRYS, buf)
+                    s = ioctl(fd, CDIOREADTOCENTRYS, buf)
                     s = CDS_DISC_OK
                 except:
                     s = CDS_NO_DISC
             else:
-                # use unthreader ioctl here, it is fast
-                s = util.ioctl.ioctl(fd, CDROM_DRIVE_STATUS, CDSL_CURRENT)
+                CDSL_CURRENT = ( (int ) ( ~ 0 >> 1 ) )
+                s = ioctl(fd, CDROM_DRIVE_STATUS, CDSL_CURRENT)
         except:
             # maybe we need to close the fd if ioctl fails, maybe
             # open fails and there is no fd
@@ -354,6 +352,18 @@ class RemovableMedia(vfs.Mountpoint):
             os.close(fd)
             return False
 
+        # Lock the media now. It is not possible to call this function
+        # again from the watcher or move the tray until the checking is done.
+        if not self.lock.acquire(0):
+            # Oops, the lock isn't free. This shouldn't happen in normal
+            # cases but it may be that the user wanted to move the tray
+            # between the beginning of this function and now. So we can't
+            # scan the media, return without doing anything.
+            return False
+
+        # Now the media is locked and we can do some stuff without anyone
+        # doing something else with it.
+
         self.drive_status = s
 
         self.set_id('')
@@ -365,150 +375,131 @@ class RemovableMedia(vfs.Mountpoint):
         # Is there a disc present?
         if s != CDS_DISC_OK:
             os.close(fd)
+            # send media changed event and unlock the media
+            util.fthread.call_from_main(self.send_event)
             return False
 
         # if there is a disc, the tray can't be open
         self.tray_open = False
-        return True
 
-
-    def scan(self):
-        """
-        Scan the disc (running in a thread)
-        """
+        # scan the disc
         self.info = mediadb.get(self)
         if config.ROM_SPEED and not self.info['mime'] == 'video/dvd':
             # try to set the speed
-            fd = os.open(self.devicename, os.O_RDONLY | os.O_NONBLOCK)
             try:
                 ioctl(fd, CDROM_SELECT_SPEED, config.ROM_SPEED)
             except:
                 pass
-            os.close(fd)
-        return self
-    
+        os.close(fd)
+        # call identity from main loop
+        util.fthread.call_from_main(self.identify)
+        # Note: the lock is still in place. It will be released by
+        # identify later from the main loop when everything is done.
+        return True
 
 
-
-class Watcher:
-    """
-    Object to watch the rom drives for changes
-    """
-    def __init__(self):
-        self.rebuild_file = sysconfig.cachefile('freevo-rebuild-database')
-        self.locked = False
-
-        # Add the drives to the config.removable_media list. There doesn't have
-        # to be any drives defined.
-        if config.ROM_DRIVES != None:
-            for i in range(len(config.ROM_DRIVES)):
-                (dir, device, name) = config.ROM_DRIVES[i]
-                media = RemovableMedia(mountdir=dir, devicename=device,
-                                       drivename=name)
-                # close the tray without popup message
-                media.move_tray(dir='close', notify=0)
-
-        # Remove the ROM_DRIVES member to make sure it is not used by
-        # legacy code!
-        del config.ROM_DRIVES
-
-        # register callback
-        notifier.addTimer(2000, self.poll)
-
-
-    def unlock_and_send_update(self, media):
-        log.debug('MEDIA: Status=%s' % media.drive_status)
-        log.debug('Posting IDENTIFY_MEDIA event')
-        if hasattr(media, 'already_scanned'):
-            arg = (media, False)
-        else:
-            media.already_scanned = True
-            arg = (media, True)
+    def send_event(self):
+        """
+        Send a changed notification and release the lock.
+        """
+        log.info('MEDIA: Status=%s' % self.drive_status)
+        log.info('Posting IDENTIFY_MEDIA event')
+        arg = (self, not hasattr(self, 'already_scanned'))
+        self.already_scanned = True
         eventhandler.post(plugin.event('IDENTIFY_MEDIA', arg=arg))
-        media.locked = False
-        
+        # release the lock
+        self.lock.release()
 
-    def identify(self, media):
+
+    def identify(self):
         """
         magic!
         Try to find out as much as possible about the disc in the
         rom drive: title, image, play options, ...
+        This function is called by the main loop but the call itself was
+        requested by a thread. The lock of the media is still active, so
+        it must be released. Since this function is only called on changes
+        we have to call send_event which will unlock the lock.
         """
-        disc_info = media.info
-        if not disc_info.disc_ok:
+        if not self.info.disc_ok:
             # bad disc, e.g. blank disc.
+            # send disc change event
+            self.send_event()
             return
 
-        if disc_info['mime'] == 'audio/cd':
-            disc_id = disc_info['id']
-            media.item = AudioDiskItem(disc_id, parent=None,
-                                       devicename=media.devicename,
+        if self.info['mime'] == 'audio/cd':
+            disc_id = self.info['id']
+            self.item = AudioDiskItem(disc_id, parent=None,
+                                       devicename=self.devicename,
                                        display_type='audio')
-            media.type = media.item.type
-            media.item.media = media
-            if disc_info['title']:
-                media.item.name = disc_info['title']
-            media.item.info = disc_info
-            self.unlock_and_send_update(media)
+            self.type = self.item.type
+            self.item.media = self
+            if self.info['title']:
+                self.item.name = self.info['title']
+            self.item.info = self.info
+            # send disc change event
+            self.send_event()
+            return
 
         image = title = movie_info = more_info = fxd_file = None
 
-        media.set_id(disc_info['id'])
-        media.label = disc_info['label']
-        media.type  = 'cdrom'
+        self.set_id(self.info['id'])
+        self.label = self.info['label']
+        self.type  = 'cdrom'
 
-        label = disc_info['label']
+        label = self.info['label']
 
         # is the id in the database?
         for mimetype in plugin.mimetype():
             if not mimetype.database():
                 continue
-            movie_info = mimetype.database().get_media(media)
+            movie_info = mimetype.database().get_media(self)
             if movie_info:
                 title = movie_info.name
                 image = movie_info.image
                 break
 
         # DVD/VCD/SVCD:
-        # There is disc_info from mmpython for these three types
-        if disc_info['mime'] in ('video/vcd', 'video/dvd'):
+        # There is self.info from mmpython for these three types
+        if self.info['mime'] in ('video/vcd', 'video/dvd'):
             if not title:
-                title = media.label.replace('_', ' ').lstrip().rstrip()
-                title = '%s [%s]' % (disc_info['mime'][6:].upper(), title)
+                title = self.label.replace('_', ' ').lstrip().rstrip()
+                title = '%s [%s]' % (self.info['mime'][6:].upper(), title)
 
             if movie_info:
-                media.item = copy.copy(movie_info)
+                self.item = copy.copy(movie_info)
             else:
-                media.item = VideoItem('', None)
-                f = os.path.join(config.OVERLAY_DIR, 'disc-set', media.id)
-                media.item.image = util.getimage(f)
-            variables = media.item.info.get_variables()
-            media.item.name  = title
-            media.item.media = media
-            media.item.set_url(disc_info)
-            media.item.info.set_variables(variables)
-            media.type = disc_info['mime'][6:]
-            self.unlock_and_send_update(media)
+                self.item = VideoItem('', None)
+                f = os.path.join(config.OVERLAY_DIR, 'disc-set', self.id)
+                self.item.image = util.getimage(f)
+            variables = self.item.info.get_variables()
+            self.item.name  = title
+            self.item.media = self
+            self.item.set_url(self.info)
+            self.item.info.set_variables(variables)
+            self.type = self.info['mime'][6:]
+            # send disc change event
+            self.send_event()
             return
-        
+
         # Check for movies/audio/images on the disc
-        video_files = util.find_matches(disc_info['listing'],
+        video_files = util.find_matches(self.info['listing'],
                                         config.VIDEO_SUFFIX)
         num_video = len(video_files)
 
-        num_audio = len(util.find_matches(disc_info['listing'],
+        num_audio = len(util.find_matches(self.info['listing'],
                                           config.AUDIO_SUFFIX))
-        num_image = len(util.find_matches(disc_info['listing'],
+        num_image = len(util.find_matches(self.info['listing'],
                                           config.IMAGE_SUFFIX))
-        
-        media.item = DirItem(disc_info, None)
-        media.item.info = disc_info
+
+        self.item = DirItem(self.info, None)
+        self.item.info = self.info
 
         # if there is a video file on the root dir of the disc, we guess
         # it's a video disc. There may also be audio files and images, but
         # they only belong to the movie
         if video_files:
-            media.type = 'video'
+            self.type = 'video'
 
             # try to find out if it is a series cd
             if not title:
@@ -579,107 +570,100 @@ class Watcher:
         # If there are no videos and only audio files (and maybe images)
         # it is an audio disc (autostart will auto play everything)
         elif not num_video and num_audio:
-            media.type = 'audio'
-            title = '%s [%s]' % (media.drivename, label)
+            self.type = 'audio'
+            title = '%s [%s]' % (self.drivename, label)
 
         # Only images? OK than, make it an image disc
         elif not num_video and not num_audio and num_image:
-            media.type = 'image'
-            title = '%s [%s]' % (media.drivename, label)
+            self.type = 'image'
+            title = '%s [%s]' % (self.drivename, label)
 
         # Mixed media?
         elif num_video or num_audio or num_image:
-            media.type = None
-            title = '%s [%s]' % (media.drivename, label)
+            self.type = None
+            title = '%s [%s]' % (self.drivename, label)
 
         # Strange, no useable files
         else:
-            media.type = None
-            title = '%s [%s]' % (media.drivename, label)
+            self.type = None
+            title = '%s [%s]' % (self.drivename, label)
 
 
         # set the infos we have now
         if title:
-            media.item.name = title
+            self.item.name = title
 
         if image:
-            media.item.image = image
+            self.item.image = image
 
         if more_info:
-            media.item.info.set_variables(more_info)
+            self.item.info.set_variables(more_info)
 
-        if fxd_file and not media.item.fxd_file:
-            media.item.set_fxd_file(fxd_file)
+        if fxd_file and not self.item.fxd_file:
+            self.item.set_fxd_file(fxd_file)
 
 
         # One video in the root dir. This sounds like a disc with one
         # movie on it. Save the information about it and autostart will
         # play this.
-        if len(video_files) == 1 and media.item['num_dir_items'] == 0:
-            media.mount()
+        if len(video_files) == 1 and self.item['num_dir_items'] == 0:
+            self.mount()
             if movie_info:
-                media.videoitem = copy.deepcopy(movie_info)
+                self.videoitem = copy.deepcopy(movie_info)
             else:
-                media.videoitem = VideoItem(video_files[0], None)
-            media.umount()
-            media.videoitem.media    = media
-            media.videoitem.media_id = media.id
+                self.videoitem = VideoItem(video_files[0], None)
+            self.umount()
+            self.videoitem.media    = self
+            self.videoitem.media_id = self.id
 
             # set the infos we have
             if title:
-                media.videoitem.name = title
+                self.videoitem.name = title
 
             if image:
-                media.videoitem.image = image
+                self.videoitem.image = image
 
             if more_info:
-                media.videoitem.set_variables(more_info)
+                self.videoitem.set_variables(more_info)
 
             if fxd_file:
-                media.videoitem.fxd_file = fxd_file
+                self.videoitem.fxd_file = fxd_file
 
-        media.item.media = media
-        self.unlock_and_send_update(media)
+        self.item.media = self
+        # send disc change event
+        self.send_event()
         return True
 
 
-    def check_all(self):
-        """
-        check all drives
-        """
-        if not eventhandler.is_menu():
-            # Some app is running, do not scan, it's not necessary
-            return
+class Watcher:
+    """
+    Object to watch the rom drives for changes
+    """
+    def __init__(self):
+        self.rebuild_file = sysconfig.cachefile('freevo-rebuild-database')
 
-        for media in rom_drives:
-            if media.locked:
-                # scan waiting in thread
-                continue
-            media.locked = True
-            last_status = media.drive_status
-            if last_status == None:
-                first_scan = True
-            else:
-                first_scan = False
-            if media.check_status():
-                thread = util.fthread.Thread(media.scan)
-                thread.start(self.identify)
-                continue
+        # Add the drives to the config.removable_media list. There doesn't have
+        # to be any drives defined.
+        if config.ROM_DRIVES != None:
+            for i in range(len(config.ROM_DRIVES)):
+                (dir, device, name) = config.ROM_DRIVES[i]
+                media = RemovableMedia(mountdir=dir, devicename=device,
+                                       drivename=name)
+                # close the tray without popup message
+                media.move_tray(dir='close', notify=0)
 
-            # release the lock again
-            media.locked = False
-                
-            if last_status != media.drive_status:
-                self.unlock_and_send_update(media)
+        # Remove the ROM_DRIVES member to make sure it is not used by
+        # legacy code!
+        del config.ROM_DRIVES
+
+        # register callback
+        notifier.addTimer(2000, self.poll)
 
 
     def poll(self):
         """
         Poll function
         """
-        if self.locked:
-            return True
-        self.locked = True
         # Check if we need to update the database
         # This is a simple way for external apps to signal changes
         if os.path.exists(self.rebuild_file):
@@ -694,12 +678,14 @@ class Watcher:
 
         if eventhandler.is_menu():
             # check only in the menu
-            self.check_all()
-
-        self.locked = False
-        # check if we need to stop
-        if hasattr(self, 'stop'):
-            return False
+            for media in rom_drives:
+                if media.lock.locked():
+                    # scan waiting in thread
+                    continue
+                # Start a thread for the scanning. This is not a perfect
+                # solution because it will create a thread for each drive
+                # every 2 seconds, but it works well.
+                util.fthread.Thread(media.check_status_thread).start()
         return True
 
 
