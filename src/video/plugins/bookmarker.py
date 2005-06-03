@@ -62,7 +62,7 @@ class PluginInterface(plugin.ItemPlugin):
     """
     class to handle auto bookmarks
     """
-    def get_bookmarkfile(filename):
+    def get_bookmarkfile(self, filename):
         """
         Get the bookmark file for the given filename.
         """
