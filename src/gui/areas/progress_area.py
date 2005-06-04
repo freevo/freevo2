@@ -36,7 +36,7 @@
 __all__ = [ 'ProgressArea' ]
 
 from area import Area
-from gui import Progressbar
+from gui.widgets import Progressbar
 
 import logging
 log = logging.getLogger('gui')

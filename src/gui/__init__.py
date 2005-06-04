@@ -32,21 +32,17 @@
 #
 # -----------------------------------------------------------------------------
 
-# The theme engine
-# FIXME: remove global import
-from theme_engine import *
+# Imagelib
+# import imagelib
 
-# Image library
-# FIXME: remove global import
-import imagelib
+# The theme engine
+# import theme
 
 # Basic widgets
-# FIXME: remove global import
-from widgets import *
+# import widgets
 
 # Windows / PopupBoxes
-# FIXME: remove global import
-from windows import *
+# import windows
 
 # The animation module
 # import animation

@@ -10,7 +10,7 @@
 # The handler itself checks the theme and calls the draw function of the areas
 #
 # TODO: o more documentation how to use the Handler
-#       o remove CanvasContainer definition in this file
+#       o remove Container definition in this file
 #       o do not add various stuff to the item object, use a specific dict
 #         for that
 #       o cleanup and internal documentation
@@ -58,7 +58,7 @@ from util.weakref import weakref
 import gui
 import gui.animation as animation 
 from gui.widgets import Container
-import gui.theme_engine as theme_engine
+import gui.theme
 import gui.imagelib as imagelib
 
 # areas
@@ -136,7 +136,7 @@ class Handler:
         """
         Toggle display style
         """
-        theme = theme_engine.get_theme()
+        theme = gui.theme.get()
 
         if isinstance(menu, str):
             if not self.display_style.has_key(menu):
@@ -305,7 +305,7 @@ class Handler:
         object may be a menu, a table for the tv menu are an audio item for
         the audio player
         """
-        theme = theme_engine.get_theme()
+        theme = gui.theme.get()
         
         if self.type == 'menu':
             style = self.__get_display_style__(object)

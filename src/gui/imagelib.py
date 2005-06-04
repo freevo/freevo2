@@ -45,7 +45,7 @@ import mevas
 import config
 import util
 import util.thumbnail
-import theme_engine
+import theme
 
 # get logging object
 log = logging.getLogger('gui')
@@ -103,7 +103,7 @@ def load(url, size=None, cache=False):
 
     if url.find('/') == -1 and url.find('.') == -1:
         # this looks like a 'theme' image
-        surl = theme_engine.get_theme().get_image(url)
+        surl = theme.image(url)
         if surl:
             url = surl
     if cache:

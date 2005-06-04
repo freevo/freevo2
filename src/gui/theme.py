@@ -39,7 +39,7 @@
 # -----------------------------------------------------------------------------
 
 # list of functions this module provides
-__all__ = [ 'get_theme', 'set_theme', 'get_font', 'get_image', 'get_icon' ]
+__all__ = [ 'get', 'set', 'font', 'image', 'icon', 'set_base_fxd' ]
 
 # python imports
 import os
@@ -54,7 +54,7 @@ import eventhandler
 from event import Event, THEME_CHANGE
 
 # gui imports
-import font
+from font import get as get_font_object
 
 import logging
 log = logging.getLogger('gui')
@@ -67,7 +67,7 @@ FXD_FORMAT_VERSION = 2
 
 current_theme = None
 
-def get_theme():
+def get():
     """
     get current fxd theme
     """
@@ -77,7 +77,7 @@ def get_theme():
     return current_theme
 
 
-def set_theme(new):
+def set(new):
     """
     set current fxd theme
     """
@@ -116,7 +116,7 @@ def set_theme(new):
     return current_theme
 
 
-def get_font(name):
+def font(name):
     """
     Get the font with the given name. If the font is not found,
     the default font will be returned
@@ -124,7 +124,7 @@ def get_font(name):
     return current_theme.get_font(name)
 
 
-def get_image(name):
+def image(name):
     """
     Get the image filename with the given name. If no image is found
     this function will return None.
@@ -132,7 +132,7 @@ def get_image(name):
     return current_theme.get_image(name)
 
 
-def get_icon(name):
+def icon(name):
     """
     Get the icon filename with the given name. This function will
     search the icon in the theme icon directory. If no icon is found
@@ -1000,7 +1000,7 @@ class Font(XML_data):
             self.color = color[self.color]
         self.color = int2col(self.color)
         self.size = int(float(self.size) * scale)
-        self.font = font.get(self.name, self.size)
+        self.font = get_font_object(self.name, self.size)
         self.height = self.font.height
         if self.shadow.visible:
             if color.has_key(self.shadow.color):

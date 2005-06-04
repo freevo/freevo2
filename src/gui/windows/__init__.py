@@ -35,11 +35,3 @@ from messagebox  import *
 from confirmbox  import *
 from progressbox import *
 from inputbox    import *
-
-# compability classes
-# FIXME: remove this
-class PopupBox(WaitBox):
-    pass
-
-class AlertBox(MessageBox):
-    pass

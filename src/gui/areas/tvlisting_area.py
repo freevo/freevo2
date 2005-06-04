@@ -41,13 +41,13 @@ __all__ = [ 'TvlistingArea' ]
 import copy
 import os
 import pyepg
-import gui
+import gui.imagelib
 import math
 import time
 import config
 
 from area import Area
-from gui import Rectangle
+from gui.widgets import Rectangle
 from record.client import recordings
 from record.record_types import *
 

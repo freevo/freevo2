@@ -42,8 +42,8 @@ import copy
 import eventhandler
 
 # gui imports
-import gui.displays as displays
-from gui.theme_engine import get_theme
+from gui import displays
+from gui import theme
 from gui.widgets import Rectangle, Container
 
 
@@ -74,7 +74,7 @@ class Window(Container):
         self.set_pos((x, y))
 
         # get theme values how the window should look like
-        layout = get_theme().popup.content
+        layout = theme.get().popup.content
         self.widget_normal   = layout.types['widget']
         self.widget_selected = layout.types['selected']
         self.button_normal   = layout.types['button']
@@ -93,7 +93,7 @@ class Window(Container):
         Draw the background and border of the window based on the theme
         settings.
         """
-        objects = get_theme().popup.background
+        objects = theme.get().popup.background
         for r in filter(lambda x: x.type == 'rectangle', objects):
             # calculate size of the rectangle
             width  = eval(str(r.width),  { 'MAX' : self.width })

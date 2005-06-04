@@ -49,7 +49,7 @@ from util.objectcache import ObjectCache
 
 # gui import
 from area import Area
-from gui import Image
+from gui.widgets import Image
 
 import logging
 log = logging.getLogger('gui')

@@ -35,9 +35,6 @@
 
 __all__ = [ 'ScreenArea', 'TitleArea', 'SubtitleArea' ]
 
-# gui imports
-from gui import Progressbar
-
 # area imports
 from area import Area
 

@@ -9,6 +9,18 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2005/06/04 17:17:16  dischi
+# Clean import for gui system. There are no gui imports in the __init__
+# anymore because this caused recursive imports: gui imports e.g.
+# windows and in windows gui is imported again to get to the widgets.
+#
+# So if a gui module like windows or widgets is needed, the correct
+# submodule needs to be imported. This is also needed for simple modules
+# like theme (renamed from theme_engine) and imagelib.
+#
+# The only variables still direct in gui are width, weight and display, I
+# don't know were else to put them.
+#
 # Revision 1.3  2004/10/09 16:22:24  dischi
 # create Container class inside widgets
 #
@@ -43,14 +55,14 @@
 # ----------------------------------------------------------------------
 
 # Container for widgets
-from mevas       import CanvasContainer
+import mevas
 
-class Container(CanvasContainer):
+class Container(mevas.CanvasContainer):
     """
     A CanvasContainer with an optional name for debugging
     """
     def __init__(self, name=''):
-        CanvasContainer.__init__(self)
+        mevas.CanvasContainer.__init__(self)
         self.__name = name
 
     def __str__(self):

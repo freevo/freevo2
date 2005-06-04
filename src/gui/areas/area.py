@@ -60,7 +60,7 @@ import config
 import util
 
 # gui imports
-from gui import Rectangle, Text, Textbox, Image
+from gui.widgets import Rectangle, Text, Textbox, Image
 
 import logging
 log = logging.getLogger('gui')

@@ -32,6 +32,7 @@
 #
 # -----------------------------------------------------------------------------
 
+import gui.imagelib
 from mevas.image import CanvasImage
 
 class Image(CanvasImage):
@@ -44,7 +45,7 @@ class Image(CanvasImage):
         """
         Create the image.
         Parameter description:
-        image    an imagelib image or string
+        image    an imagelib image, string or list (image, (width, height))
         pos      postion of the image on the parent
         size     if set, the image will be scalled the given size. If width or
                  height is None or -1, the image will be scalled to keep the
@@ -52,6 +53,14 @@ class Image(CanvasImage):
         shadow   a tripple x,y,color defining the attributes of the shadow
                  that will be added behind the image
         """
+        if isinstance(image, (str, unicode)):
+            # load image
+            image = gui.imagelib.load(image)
+
+        if isinstance(image, (list, tuple)):
+            # load image
+            image = gui.imagelib.load(image[0], image[1])
+
         if not image:
             # invalid image, return 1x1 empty space
             CanvasImage.__init__(self, (1,1))

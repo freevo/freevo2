@@ -44,7 +44,7 @@ import record.client
 
 # gui imports
 from area import Area
-from gui import InfoText
+from gui.widgets import InfoText
 
 def current_time():
     if time.strftime('%P') =='':
