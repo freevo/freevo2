@@ -1,14 +1,55 @@
+# -*- coding: iso-8859-1 -*-
+# -----------------------------------------------------------------------------
+# font.py - Freevo font module
+# -----------------------------------------------------------------------------
+# $Id$
+#
+# -----------------------------------------------------------------------------
+# Freevo - A Home Theater PC framework
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# -----------------------------------------------------------------------------
+
+__all__ = [ 'get' ]
+
+# python imports
+import logging
 import mevas
+
+# freevo imports
 import config
 
-import logging
+# get logging object
 log = logging.getLogger('gui')
 
+# list of fonts already known to be not found
 font_warning = []
 
 class Font:
+    """
+    Freevo GUI font object based on the mevas font.
+    """
     def __init__(self, name, ptsize):
-        self.font   = self.__getfont__(name, ptsize)
+        self.font   = self.__getfont(name, ptsize)
         self.height = self.font.get_text_size('')[3]
         self.chars  = {}
         self.name   = name
@@ -16,6 +57,9 @@ class Font:
 
 
     def charsize(self, c):
+        """
+        Return the width of the given char.
+        """
         try:
             return self.chars[c]
         except:
@@ -23,12 +67,19 @@ class Font:
             self.chars[c] = w
             return w
 
+
     def stringsize(self, s):
+        """
+        Return the width of the given string.
+        """
         s = self.font.get_text_size(s)
         return max(s[0], s[2])
-        
 
-    def __getfont__(self, name, ptsize):
+
+    def __getfont(self, name, ptsize):
+        """
+        Load font into this object.
+        """
         log.debug('Loading font "%s:%s"' % (name, ptsize))
         try:
             return mevas.imagelib.load_font(name, ptsize)
@@ -43,23 +94,23 @@ class Font:
                     return mevas.imagelib.load_font(alt_fname, ptsize)
                 except IOError:
                     # not good
-                    global font_warning
                     if not name in font_warning:
                         print 'WARNING: No alternate found in the alias list!'
-                        print 'Falling back to default font, this may look very ugly'
+                        print 'Falling back to default font, this looks ugly'
                         font_warning.append(name)
-                    return mevas.imagelib.load_font(config.GUI_FONT_DEFAULT_NAME, ptsize)
+                    name = config.GUI_FONT_DEFAULT_NAME
+                    return mevas.imagelib.load_font(name, ptsize)
 
-        
 
-
-# init
+# init mevas font (imlib2)
 mevas.imagelib.add_font_path(config.FONT_DIR)
+
+# the font cache object for 'get'
 font_info_cache = {}
 
 def get(font, ptsize):
     """
-    return cached font
+    Return the (cached) font
     """
     key = (font, ptsize)
     try:
