@@ -52,9 +52,6 @@ __all__ = [ 'Area' ]
 import copy
 import os
 
-# external modules
-import mevas
-
 # freevo imports
 import config
 import util
