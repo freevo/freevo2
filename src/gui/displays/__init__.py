@@ -29,6 +29,8 @@
 #
 # -----------------------------------------------------------------------------
 
+__all__ = [ 'get', 'set', 'remove', 'shutdown', 'active' ]
+
 # python imports
 import copy
 import logging
