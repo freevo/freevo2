@@ -35,7 +35,7 @@ files = ["imlib2.c", "image.c", "font.c", "rawformats.c", "thumbnail.c",
 
 include_dirs = []
 library_dirs = []
-libraries    = ['rt', 'png']
+libraries    = ['png']
 
 def check_config(name, minver):
     """

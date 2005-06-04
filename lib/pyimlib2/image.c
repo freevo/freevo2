@@ -421,43 +421,9 @@ PyObject *Image_PyObject__get_pixel(PyObject *self, PyObject *args)
 }
 
 
-PyObject *Image_PyObject__move_to_shmem(PyObject *self, PyObject *args)
-{
-    char *shmem_name, *buf, *format = "BGRA";
-    unsigned long size;
-    int fd;
-
-    if (!PyArg_ParseTuple(args, "|ss", &format, &shmem_name))
-        return NULL;
-
-    imlib_context_set_image(((Image_PyObject *)self)->image);
-    size = get_raw_bytes_size(format);
-
-    fd = shm_open(shmem_name, O_RDWR|O_CREAT, 0777);
-    if (fd == -1) {
-        Py_INCREF(Py_None);
-        return Py_None;
-    }
-    ftruncate(fd, size);
-    buf = mmap(0, size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
-    if (!buf) {
-        Py_INCREF(Py_None);
-        return Py_None;
-    }
-
-    get_raw_bytes(format, buf);
-
-    // FIXME: need some error checking here.
-
-    close(fd);
-    munmap(buf, size);
-    return Py_BuildValue("s", shmem_name);
-}
-
-
 PyObject *Image_PyObject__get_raw_data(PyObject *self_object, PyObject *args)
 {
-    unsigned char *format = "BGRA";
+    char *format = "BGRA";
     unsigned char *buffer;
     Image_PyObject *self = (Image_PyObject *)self_object;
 
@@ -520,7 +486,7 @@ PyObject *Image_PyObject__to_sdl_surface(PyObject *self, PyObject *args)
 
 PyObject *Image_PyObject__save(PyObject *self, PyObject *args)
 {
-    unsigned char *filename, *ext;
+    char *filename, *ext;
 
     if (!PyArg_ParseTuple(args, "ss", &filename, &ext))
         return NULL;
@@ -551,7 +517,6 @@ PyMethodDef Image_PyObject_methods[] = {
     { "flip", Image_PyObject__flip, METH_VARARGS },
     { "blend", Image_PyObject__blend, METH_VARARGS },
     { "set_alpha", Image_PyObject__set_alpha, METH_VARARGS },
-    { "move_to_shmem", Image_PyObject__move_to_shmem, METH_VARARGS },
     { "get_raw_data", Image_PyObject__get_raw_data, METH_VARARGS },
     { "free_raw_data", Image_PyObject__free_raw_data, METH_VARARGS },
     { "get_pixel", Image_PyObject__get_pixel, METH_VARARGS },

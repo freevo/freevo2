@@ -44,7 +44,8 @@
 PyObject *imlib2_create(PyObject *self, PyObject *args)
 {
     int w, h, num_bytes;
-    unsigned char *bytes = NULL, *from_format = "BGRA";
+    unsigned char *bytes = NULL;
+	char *from_format = "BGRA";
     Imlib_Image *image;
     Image_PyObject *o;
 
@@ -155,19 +156,6 @@ PyObject *imlib2_new_display(PyObject *self, PyObject *args)
 } 
 
 
-PyObject *imlib2__shm_unlink(PyObject *self, PyObject *args)
-{
-    char *name;
-
-    if (!PyArg_ParseTuple(args, "s", &name))
-        return NULL;
-
-    shm_unlink(name);
-    Py_INCREF(Py_None);
-    return Py_None;
-} 
-
-
 PyMethodDef Imlib2_methods[] = {
     { "new_display", imlib2_new_display, METH_VARARGS }, 
     { "add_font_path", imlib2_add_font_path, METH_VARARGS }, 
@@ -177,7 +165,6 @@ PyMethodDef Imlib2_methods[] = {
     { "epeg_thumbnail", epeg_thumbnail, METH_VARARGS }, 
     { "png_thumbnail", png_thumbnail, METH_VARARGS }, 
     { "fail_thumbnail", fail_thumbnail, METH_VARARGS }, 
-    { "_shm_unlink", imlib2__shm_unlink, METH_VARARGS }, 
     { NULL }
 };
 

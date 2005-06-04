@@ -34,9 +34,6 @@ import md5
 
 import _Imlib2
 
-# Counter for auto-generated shared memory names.
-_imlib2_shmem_ctr = 0
-
 # thumbnail image dir
 _thumbnail_dir = os.path.join(os.environ['HOME'], '.thumbnails/large/')
 if not os.path.isdir(_thumbnail_dir):
@@ -491,28 +488,6 @@ class Image:
         return self._image.get_pixel((x,y))
 
 
-    def move_to_shmem(self, format = "BGRA", id = None):
-        """
-        Creates a POSIX shared memory object and copy the image's raw data.
-
-        Arguments:
-          format: the format of the raw data to copy to shared memory.  If
-              the specified format is not supported, raises ValueError.
-              id: the name of the shared memory object (as passed to
-              shm_open(3)).  If id is None, a suitable unique id is
-              generated.
-
-        Returns: the id of the shared memory object.
-        """
-
-        if not id:
-            global _imlib2_shmem_ctr
-            id = "pyimlib2-image-%d-%d" % (os.getpid(), _imlib2_shmem_ctr)
-            _imlib2_shmem_ctr += 1
-
-        return self._image.move_to_shmem(format, id)
-
-
     def set_alpha(self, has_alpha):
         """
         Enable / disable the alpha layer.
@@ -743,22 +718,6 @@ def load_font(font, size):
     return Font(font + "/" + str(size))
 
 
-def clean_stale_shmem():
-    """
-    Clean stale shmem segments left over from processes that might have
-    crashed.
-
-    FIXME: this is actually broken, because it could end up deleting shmem
-    objects from processes that are still running.
-
-    Must test the existence of pid before deleting the shmem object.
-    It's not perfect, but it's better.
-    """
-    for file in  glob.glob("/dev/shm/pyimlib2*"):
-        path, file = os.path.split(file)
-        _Imlib2._shm_unlink(file)
-
-
 def thumbnail_create(src, thumbnail_dir = ''):
     """
     Create a freedesktop.org thumbnail.
@@ -815,5 +774,3 @@ def thumbnail_check(file, thumbnail_dir = ''):
         return False
     return None
 
-    
-clean_stale_shmem()

@@ -16,7 +16,8 @@ int _png_write (const char *file, DATA32 * ptr, int tw, int th, int sw,
 		int sh, char *imformat, int mtime, char *uri)
 {
   FILE *fp = NULL;
-  char mtimebuf[32], widthbuf[10], heightbuf[10];
+  // Big enough to hold 64 bit integer plus NULL.
+  char mtimebuf[21], widthbuf[21], heightbuf[21];
   int i, j, k, has_alpha = 1, ret = 0;
 
   png_infop info_ptr;
@@ -50,17 +51,17 @@ int _png_write (const char *file, DATA32 * ptr, int tw, int th, int sw,
       text_ptr[0].text = uri;
       text_ptr[0].compression = PNG_TEXT_COMPRESSION_NONE;
 
-      snprintf (mtimebuf, 32, "%d", mtime);
+      snprintf (mtimebuf, sizeof(mtimebuf), "%d", mtime);
       text_ptr[1].key = "Thumb::MTime";
       text_ptr[1].text = mtimebuf;
       text_ptr[1].compression = PNG_TEXT_COMPRESSION_NONE;
 
-      snprintf (widthbuf, PATH_MAX, "%d", sw);
+      snprintf (widthbuf, sizeof(widthbuf), "%d", sw);
       text_ptr[2].key = "Thumb::Image::Width";
       text_ptr[2].text = widthbuf;
       text_ptr[2].compression = PNG_TEXT_COMPRESSION_NONE;
 
-      snprintf (heightbuf, PATH_MAX, "%d", sh);
+      snprintf (heightbuf, sizeof(heightbuf), "%d", sh);
       text_ptr[3].key = "Thumb::Image::Height";
       text_ptr[3].text = heightbuf;
       text_ptr[3].compression = PNG_TEXT_COMPRESSION_NONE;
