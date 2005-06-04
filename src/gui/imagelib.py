@@ -30,6 +30,8 @@
 #
 # -----------------------------------------------------------------------------
 
+__all__ = [ 'rotate', 'scale', 'load', 'item_image' ]
+
 # python imports
 import os
 import stat
@@ -150,7 +152,8 @@ def load(url, size=None, cache=False):
 
 
 
-def item_image(item, size, icon_dir, force=False, cache=True, bg=False, callback=None):
+def item_image(item, size, icon_dir, force=False, cache=True, bg=False,
+               callback=None):
     """
     Return the image for an item. This function uses internal caches and
     can also return a mimetype image if no image is found and force is True
@@ -167,9 +170,9 @@ def item_image(item, size, icon_dir, force=False, cache=True, bg=False, callback
     except:
         item.image = ''
     if isinstance(item.image, (str, unicode)) and item.image:
-        key = '%s-%s-%s-%s-%s-%s-%s-%s' \
-              % (icon_dir, item.image, type, item.type, width, height, force, mtime)
-
+        key = '%s-%s-%s-%s-%s-%s-%s-%s' % (icon_dir, item.image, type,
+                                           item.type, width, height, force,
+                                           mtime)
         if item['rotation']:
             key = '%s-%s' % (key, item['rotation'])
 
@@ -177,12 +180,12 @@ def item_image(item, size, icon_dir, force=False, cache=True, bg=False, callback
             key = '%s-%s' % (key, item.media)
 
         image = cache[key]
-            
+
         if image:
             return image, key, False
     else:
         key = ''
-        
+
     image     = None
     imagefile = None
 
@@ -193,7 +196,7 @@ def item_image(item, size, icon_dir, force=False, cache=True, bg=False, callback
         except:
             # maybe image is something else (like already an image object)
             image = load(item.image)
-        
+
     if image:
         if item['rotation']:
             image.rotate(item['rotation'])
@@ -231,7 +234,7 @@ def item_image(item, size, icon_dir, force=False, cache=True, bg=False, callback
                 type = item.info['mime'].replace('/', '_')
             except:
                 pass
-            
+
             if os.path.isfile('%s/mimetypes/%s.png' % (icon_dir, type)):
                 imagefile = '%s/mimetypes/%s.png' % (icon_dir, type)
 
