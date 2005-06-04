@@ -53,6 +53,8 @@ import os
 import plugin
 import config
 import gui
+import gui.widgets
+import gui.theme
 import eventhandler
 
 from event import *
@@ -136,11 +138,11 @@ class PluginInterface(plugin.Plugin):
 
     def dock(self):
         """
-        Get the rect to draw in from the theme_engine
+        Get the rect to draw in from the theme
         """
         # calculate pos and size
         # FIXME: does this work for all skins?
-        t = gui.theme_engine.get_theme()
+        t = gui.theme.get()
         view = t.sets['player'].areas['view']
 
         x = view.x
@@ -294,7 +296,7 @@ class LibvisualAnimation(BaseAnimation):
         self.bin.sync()
         
         # this is the image we are drawing to
-        self.image  = gui.Image(CanvasImage(self.size), self.pos)
+        self.image  = gui.widgets.Image(CanvasImage(self.size), self.pos)
         self.image.draw_rectangle((0, 0), self.size,(0,0,0,255), 1)
 
         # add it to the display

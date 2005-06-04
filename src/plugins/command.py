@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2005/06/04 17:18:13  dischi
+# adjust to gui changes
+#
 # Revision 1.21  2005/06/01 19:01:24  dischi
 # adjust to popen changes
 #
@@ -70,7 +73,8 @@
 
 
 #python modules
-import os, time
+import os
+import time
 import pygame
 
 #freevo modules
@@ -85,7 +89,7 @@ from event import *
 from item import Item
 # from gui import ListBox
 # from gui import RegionScroller
-from gui import PopupBox
+from gui.windows import WaitBox
 
 def islog(name):
     f = open(os.path.join(config.LOGDIR,'command-std%s.log' % name))
@@ -96,7 +100,7 @@ def islog(name):
     return data
     
     
-class LogScroll(PopupBox):
+class LogScroll(WaitBox):
     """
     left      x coordinate. Integer
     top       y coordinate. Integer
@@ -119,7 +123,7 @@ class LogScroll(PopupBox):
         self.file = file
         self.filetext = open(self.file, 'rb').read()
 
-        PopupBox.__init__(self, text, handler, top, left, width, height,
+        WaitBox.__init__(self, text, handler, top, left, width, height,
                           icon, None, None, parent)
 
         myfont = self.osd.getfont(config.GUI_FONT_DEFAULT_NAME, config.GUI_FONT_DEFAULT_SIZE)
@@ -159,7 +163,7 @@ class LogScroll(PopupBox):
 
 
 
-class CommandOptions(PopupBox):
+class CommandOptions(WaitBox):
     """
     Show the command results
     """
@@ -171,8 +175,8 @@ class CommandOptions(PopupBox):
         if not text:
             text = _('Command finished')
         
-        #PopupBox.__init__(self, text, handler=handler, x=top, y=left, width=width, height=height)
-        PopupBox.__init__(self, text, handler, top, left, width, height,
+        #WaitBox.__init__(self, text, handler=handler, x=top, y=left, width=width, height=height)
+        WaitBox.__init__(self, text, handler, top, left, width, height,
                           icon, vertical_expansion, None, parent)
 
         items_height = 40
@@ -258,7 +262,7 @@ class CommandItem(Item):
 	        os.system(self.spawnwm)
 	else:
             popup_string=_("Running Command...")
-            pop = PopupBox(text=popup_string)
+            pop = WaitBox(text=popup_string)
             pop.show()
 
 	workapp = CommandChild(self.cmd, 'command', 1, self.stoposd)

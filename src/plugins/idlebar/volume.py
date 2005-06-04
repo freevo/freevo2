@@ -33,7 +33,7 @@
 import os
 
 # freevo modules
-import gui
+import gui.imagelib
 from plugins.idlebar import IdleBarPlugin
 import plugin, config
 

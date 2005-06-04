@@ -41,6 +41,9 @@ import mevas.image
 
 # freevo modules
 import gui
+import gui.imagelib
+import gui.widgets
+import gui.theme
 import plugin
 import config
 import eventhandler
@@ -184,8 +187,8 @@ class PluginInterface(IdleBarPlugin):
 
         textinfo, image, item = self.format_info()
 
-        ft  = gui.get_font('detached player time')
-        fi  = gui.get_font('detached player info')
+        ft  = gui.theme.font('detached player time')
+        fi  = gui.theme.font('detached player info')
         fth = ft.height
         fih = fi.height
 
@@ -194,7 +197,7 @@ class PluginInterface(IdleBarPlugin):
         if not image:
             image = os.path.join(config.IMAGE_DIR, 'gant', 'music.png')
 
-        cover = gui.Image(gui.imagelib.load(image, (None, height)),(x1, y1))
+        cover = gui.widgets.Image((image, (None, height)),(x1, y1))
         iw,ih = cover.get_size()
         self.objects.append(cover)
 
@@ -206,12 +209,9 @@ class PluginInterface(IdleBarPlugin):
         # iteminfo on the detachbar
         tobjs = []
         for string in textinfo:
-            tobjs.append(gui.Text(string,
-                                  (0, 0),
-                                  (fi.stringsize(string), fih),
-                                  fi,
-                                  align_v='top',
-                                  align_h='left') )
+            tobjs.append(gui.widgets.Text(string, (0, 0),
+                                          (fi.stringsize(string), fih),
+                                          fi, align_v='top', align_h='left') )
 
         self.objects.append(info)
 
@@ -387,7 +387,7 @@ class DetachbarAnimation(BaseAnimation):
                      self.elapsed_font.height )
 
             # create the text image
-            txt = gui.Text(elapsed, (0, 0), size, self.elapsed_font)
+            txt = gui.widgets.Text(elapsed, (0, 0), size, self.elapsed_font)
 
             # blit text to the itemcanvas
             self.itemcanvas.set_image(txt)

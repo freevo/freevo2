@@ -33,6 +33,9 @@ import os
 import time
 
 import gui
+import gui.imagelib
+import gui.widgets
+import gui.theme
 import config
 from tv.channels import when_listings_expire
 from plugins.idlebar import IdleBarPlugin
@@ -100,9 +103,9 @@ class PluginInterface(IdleBarPlugin):
 
         self.clear()
         self.status = status
-        icon = gui.get_icon('status/television_%s' % status)
+        icon = gui.theme.icon('status/television_%s' % status)
         i = gui.imagelib.load(icon, (None, None))
 
 
-        self.objects.append(gui.Image(i, (0, (height-i.height)/2)))
+        self.objects.append(gui.widgets.Image(i, (0, (height-i.height)/2)))
         return i.width

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2005/06/04 17:18:13  dischi
+# adjust to gui changes
+#
 # Revision 1.24  2005/01/31 20:00:30  dischi
 # delete files in the background
 #
@@ -53,7 +56,7 @@ import config
 import plugin
 import util
 
-from gui import ConfirmBox
+from gui.windows import ConfirmBox
 
 import logging
 log = logging.getLogger()

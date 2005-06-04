@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2005/06/04 17:18:13  dischi
+# adjust to gui changes
+#
 # Revision 1.20  2005/05/05 17:34:00  dischi
 # adjust to new gui submodule imports
 #
@@ -69,6 +72,8 @@ import notifier
 import config
 import plugin
 import gui
+import gui.widgets
+import gui.theme
 
 from event import OSD_MESSAGE
 
@@ -112,7 +117,7 @@ class PluginInterface(plugin.DaemonPlugin):
             return
 
         # get the osd from from the settings
-        font = gui.get_font('osd')
+        font = gui.theme.font('osd')
 
         over_x = config.GUI_OVERSCAN_X
         over_y = config.GUI_OVERSCAN_Y
@@ -123,11 +128,10 @@ class PluginInterface(plugin.DaemonPlugin):
             y += 60
 
 
-        self.gui_object = gui.Text(self.message,
-                                   (over_x, y),
-                                   (display.width - 10 - 2 * over_x,
-                                    over_y + 10 + font.height),
-                                   font, align_h='right')
+        self.gui_object = gui.widgets.Text(self.message, (over_x, y),
+                                           (display.width - 10 - 2 * over_x,
+                                            over_y + 10 + font.height),
+                                           font, align_h='right')
 
         # make sure the object is on top of everything else
         self.gui_object.set_zindex(200)

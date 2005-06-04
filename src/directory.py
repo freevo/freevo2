@@ -54,7 +54,8 @@ from playlist import Playlist
 from event import *
 
 import gui
-from gui import InputBox, AlertBox, ProgressBox
+import gui.theme
+from gui.windows import InputBox, MessageBox, ProgressBox
 
 # get logging object
 log = logging.getLogger()
@@ -535,7 +536,7 @@ class DirItem(Playlist):
 	if word == password:
 	    self.build(self.arg, self.menuw)
 	else:
-	    pb = AlertBox(text=_('Password incorrect'))
+	    pb = MessageBox(text=_('Password incorrect'))
 	    pb.show()
             return
 
@@ -574,7 +575,7 @@ class DirItem(Playlist):
 
         elif not os.path.exists(self.dir):
             # FIXME: better handling!!!!!
-	    AlertBox(text=_('Directory does not exist')).show()
+	    MessageBox(text=_('Directory does not exist')).show()
             return
 
         self.needs_update = False
@@ -865,10 +866,10 @@ class DirItem(Playlist):
         # for DIRECTORY_FORCE_SKIN_LAYOUT max = number of styles in the menu
         if arg == 'FORCE_SKIN_LAYOUT':
             if self.display_type and \
-                   gui.get_theme().menu.has_key(self.display_type):
-                area = gui.get_theme().menu[self.display_type]
+                   gui.theme.get().menu.has_key(self.display_type):
+                area = gui.theme.get().menu[self.display_type]
             else:
-                area = gui.get_theme().menu['default']
+                area = gui.theme.get().menu['default']
             max = len(area.style) - 1
 
         # switch from no settings to 0

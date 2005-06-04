@@ -5,7 +5,7 @@
 # $Id$
 #
 # TODO: Freevo will hang when the sub process is waiting for input in stdin.
-#       Maybe replace the PopupBox with an AlertBox and a button to stop the
+#       Maybe replace the WaitBox with an MessageBox and a button to stop the
 #       process.
 #
 # -----------------------------------------------------------------------------
@@ -42,7 +42,7 @@ import plugin
 import util
 
 from item import Item
-from gui import PopupBox
+from gui.windows import WaitBox
 from util.popen import Process
 
 # possible archives and how to unpack them
@@ -77,7 +77,7 @@ class ArchiveItem(Item):
         for param in _cmdlines[os.path.splitext(self.fname)[1][1:]]:
             app.append(param.replace('__filename__', self.fname).\
                        replace('__dirname__', os.path.dirname(self.fname)))
-        self.pop = PopupBox(text=_('unpacking...'))
+        self.pop = WaitBox(text=_('unpacking...'))
         self.pop.show()
         Process(app, callback=self.__finished)
 

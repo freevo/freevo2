@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2005/06/04 17:18:15  dischi
+# adjust to gui changes
+#
 # Revision 1.11  2005/01/08 10:27:18  dischi
 # remove unneeded skin_type parameter
 #
@@ -57,7 +60,7 @@ import os
 import config, plugin, menu
 import tv.record_client as record_client
 
-from gui import AlertBox
+from gui.windows import MessageBox
 from item import Item
 from tv.program_display import ProgramItem
 
@@ -76,7 +79,7 @@ class ScheduledRecordingsItem(Item):
     def display_schedule(self, arg=None, menuw=None):
         items = self.get_items()
         if not len(items):
-            AlertBox(_('Nothing scheduled.')).show()
+            MessageBox(_('Nothing scheduled.')).show()
             return
 
         schedule_menu = menu.Menu(_( 'Scheduled Recordings'), items,
@@ -110,7 +113,7 @@ class ScheduledRecordingsItem(Item):
 
         (server_available, msg) = record_client.connectionTest()
         if not server_available:
-            AlertBox(_('Recording server is unavailable.')+(': %s' % msg)).show()
+            MessageBox(_('Recording server is unavailable.')+(': %s' % msg)).show()
             return []
 
         (result, recordings) = record_client.getScheduledRecordings()
@@ -123,7 +126,7 @@ class ScheduledRecordingsItem(Item):
             for prog in progs:
                 items.append(ProgramItem(self, prog, context='schedule'))
         else:
-            AlertBox(_('Get recordings failed')+(': %s' % recordings)).show()
+            MessageBox(_('Get recordings failed')+(': %s' % recordings)).show()
             return []
 
         return items

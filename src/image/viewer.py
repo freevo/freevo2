@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.75  2005/06/04 17:18:12  dischi
+# adjust to gui changes
+#
 # Revision 1.74  2005/04/17 18:34:51  dischi
 # fix getattr call for osd
 #
@@ -75,6 +78,9 @@ import config
 import util
 import plugin
 import gui
+import gui.widgets
+import gui.imagelib
+import gui.theme
 
 # Transition/Move/VERTICAL
 from gui.animation import *
@@ -268,11 +274,11 @@ class ImageViewer(Application):
 
         if zoom:
             # position image at bbx and bby
-            image = gui.Image(image, (x-bbx, y-bby))
+            image = gui.widgets.Image(image, (x-bbx, y-bby))
             zoom = bbx, bby
         else:
             # position image at x/y value
-            image = gui.Image(image, (x, y))
+            image = gui.widgets.Image(image, (x, y))
 
         if (self.last_image and self.last_item != item and
             config.IMAGEVIEWER_BLEND_MODE != None):
@@ -462,9 +468,9 @@ class ImageViewer(Application):
         pos = (config.GUI_OVERSCAN_X + 10, config.GUI_OVERSCAN_Y + 10)
         size = (gui.width - 2 * config.GUI_OVERSCAN_X - 20,
                 gui.height - 2 * config.GUI_OVERSCAN_Y - 20)
-        self.osd_text = gui.Textbox(osdstring, pos, size,
-                                    gui.get_font('default'),
-                                    'left', 'bottom', mode='soft')
+        self.osd_text = gui.widgets.Textbox(osdstring, pos, size,
+                                            gui.theme.font('default'),
+                                            'left', 'bottom', mode='soft')
         # add the text widget to the screen, make sure the zindex
         # is 2 (== above the image and the box)
         self.osd_text.set_zindex(2)
@@ -493,10 +499,10 @@ class ImageViewer(Application):
         background = gui.imagelib.load('background', (gui.width, gui.height))
         if background:
             background.crop(pos, size)
-            self.osd_box = gui.Image(background, pos)
+            self.osd_box = gui.widgets.Image(background, pos)
             self.osd_box.set_alpha(230)
         if not background:
-            self.osd_box = gui.Rectangle(pos, size, 0xaa000000L)
+            self.osd_box = gui.widgets.Rectangle(pos, size, 0xaa000000L)
 
         # put the rectangle on the screen and set the zindex to 1
         # (between image and text)

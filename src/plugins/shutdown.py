@@ -33,7 +33,7 @@
 # freevo imports
 import config
 
-from gui import ConfirmBox
+from gui.windows import ConfirmBox
 from mainmenu import MainMenuItem
 from plugin import MainMenuPlugin
 from cleanup import shutdown

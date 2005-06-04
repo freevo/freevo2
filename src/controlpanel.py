@@ -36,6 +36,8 @@
 # -----------------------------------------------------------------------------
 
 import gui
+import gui.widgets
+import gui.theme
 
 import plugin
 import eventhandler
@@ -70,7 +72,7 @@ class ControlManager:
         self.p_ctrl          = -1
         self.event_context   = 'input'
 
-        self.container       = gui.CanvasContainer()
+        self.container = gui.widgets.Container()
         self.container.set_zindex(80)
 
         gui.display.add_child(self.container)
@@ -123,8 +125,8 @@ class ControlManager:
         h += 10
 
         # add a background
-        bg = gui.Rectangle((0, 0), (w, h), (0,0,0,100), 1,
-                           (255,255,255,100), 4)
+        bg = gui.widgets.Rectangle((0, 0), (w, h), (0,0,0,100), 1,
+                                   (255,255,255,100), 4)
         bg.set_zindex(-1)
         self.container.add_child(bg)
 
@@ -296,7 +298,7 @@ class ButtonPanel:
         t_w = (w * hl) + (self.spacing * (hl-1))
 
         # width of the description test
-        font = gui.get_font('small0')
+        font = gui.theme.font('small0')
         txt_w = font.stringsize(self.name)
 
         # final width of the bar
@@ -310,9 +312,9 @@ class ButtonPanel:
         # add control description text (centered)
         t_x = (w - txt_w) / 2 + pos[0]
 
-        descr = gui.Text(self.name, (t_x, y),
-                         (txt_w, font.height),
-                         font, dim=False)
+        descr = gui.widgets.Text(self.name, (t_x, y),
+                                 (txt_w, font.height),
+                                 font, dim=False)
         descr.set_zindex(1)
         self.objects.append(descr)
 
@@ -348,7 +350,7 @@ class ButtonPanel:
 
 
 
-class ControlButton(gui.Image):
+class ControlButton(gui.widgets.Image):
         """
         A simple icon-based button which can be selected or deselected.
         @icon    : Image or filename to an image
@@ -374,13 +376,14 @@ class ControlButton(gui.Image):
             self.sel_pos  = (sx, sy)
             self.sel_size = (sh, sw)
 
-            gui.Image.__init__(self, self.icon, self.pos, self.size)
+            gui.widgets.Image.__init__(self, self.icon, self.pos, self.size)
 
         def select(self):
             """
             Select the button
             """
-            self.set_image(gui.Image(self.icon, self.sel_pos, self.sel_size))
+            i = gui.widgets.Image(self.icon, self.sel_pos, self.sel_size)
+            self.set_image(i)
             self.set_pos(self.sel_pos)
 
 
@@ -388,7 +391,7 @@ class ControlButton(gui.Image):
             """
             Deselect the button
             """
-            self.set_image(gui.Image(self.icon, self.pos, self.size))
+            self.set_image(gui.widgets.Image(self.icon, self.pos, self.size))
             self.set_pos(self.pos)
 
 
@@ -402,6 +405,6 @@ class ControlButton(gui.Image):
                 #        to do this properly
                 self.handler[0](self.handler[1])
             except Exception, e:
-                # XXX Maybe use a PopupBox here?
+                # XXX Maybe use a WaitBox here?
                 print 'Handling failed on the controlbutton:'
                 print e

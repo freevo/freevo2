@@ -34,7 +34,7 @@
 # freevo imports
 import menu
 from item import Item
-from gui import AlertBox
+from gui.windows import MessageBox
 
 # tv imports
 import record.client
@@ -91,7 +91,7 @@ class FavoriteItem(Item):
     def add(self, arg=None, menuw=None):
         (result, msg) = record.client.favorites.add(self)
         if result:
-            AlertBox(text=_('"%s" has been scheduled as favorite') % \
-                     self.title).show()
+            MessageBox(text=_('"%s" has been scheduled as favorite') % \
+                       self.title).show()
         else:
-            AlertBox(text=_('Scheduling Failed')+(': %s' % msg)).show()
+            MessageBox(text=_('Scheduling Failed')+(': %s' % msg)).show()

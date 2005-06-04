@@ -47,7 +47,7 @@ from directory import DirItem
 from mainmenu import MainMenuItem
 from menu import Menu
 from mediadb import FileListing
-from gui import ProgressBox
+from gui.windows import ProgressBox
 
 # get logging object
 log = logging.getLogger()

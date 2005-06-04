@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.104  2005/06/04 17:18:16  dischi
+# adjust to gui changes
+#
 # Revision 1.103  2005/05/25 19:23:56  dischi
 # fix crash
 #
@@ -94,6 +97,7 @@ import plugin
 import gui
 import gui.displays
 import gui.areas
+import gui.windows
 
 from application import Application
 from event import *
@@ -405,8 +409,7 @@ class MPlayer(Application):
                 return True
 
         if event == VIDEO_MANUAL_SEEK:
-            from gui import PopupBox
-            PopupBox('Seek disabled, press QUIT').show()
+            gui.windows.WaitBox('Seek disabled, press QUIT').show()
             
         if event == STOP:
             self.stop()

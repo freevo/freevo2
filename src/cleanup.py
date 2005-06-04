@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2005/06/04 17:18:10  dischi
+# adjust to gui changes
+#
 # Revision 1.6  2005/05/07 19:13:09  dischi
 # move config import (FIXME)
 #
@@ -87,6 +90,8 @@ def shutdown(menuw=None, argshutdown=None, argrestart=None, exit=False):
     import util.popen
     import mediadb
     import gui
+    import gui.widgets
+    import gui.theme
     import config
 
     global _callbacks
@@ -98,8 +103,9 @@ def shutdown(menuw=None, argshutdown=None, argrestart=None, exit=False):
         sys.exit(0)
 
     gui.display.clear()
-    msg = gui.Text(_('shutting down...'), (0, 0), (gui.width, gui.height),
-                   gui.get_font('default'), align_h='center', align_v='center')
+    msg = gui.widgets.Text(_('shutting down...'), (0, 0),
+                           (gui.width, gui.height), gui.theme.font('default'),
+                           align_h='center', align_v='center')
     gui.display.add_child(msg)
     gui.display.update()
     time.sleep(0.5)

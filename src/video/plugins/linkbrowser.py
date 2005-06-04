@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2005/06/04 17:18:16  dischi
+# adjust to gui changes
+#
 # Revision 1.8  2004/07/22 21:21:50  dischi
 # small fixes to fit the new gui code
 #
@@ -54,8 +57,7 @@ import util
 
 from item import Item
 from video.videoitem import VideoItem
-from gui import AlertBox
-from gui import PopupBox
+from gui.windows import MessageBox, WaitBox
 
 class Link(Item):
     """
@@ -148,14 +150,14 @@ class Link(Item):
             'Accept-Language': 'en-us',
             }
         
-        popup = PopupBox(text=_('Downloading link list...'))
+        popup = WaitBox(text=_('Downloading link list...'))
         popup.show()
         try:
             req = urllib2.Request(self.url, txdata, txheaders)
             response = urllib2.urlopen(req)
         except:
             popup.destroy()
-            box = AlertBox(text=_('Failed to download %s') % self.url)
+            box = MessageBox(text=_('Failed to download %s') % self.url)
             box.show()
             return
 

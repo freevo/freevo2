@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2005/06/04 17:18:16  dischi
+# adjust to gui changes
+#
 # Revision 1.9  2005/01/08 10:27:18  dischi
 # remove unneeded skin_type parameter
 #
@@ -58,7 +61,7 @@ import tv.record_client as record_client
 
 from item import Item
 from tv.program_display import FavoriteItem
-from gui import AlertBox
+from gui.windows import MessageBox
 
 
 class ViewFavoritesItem(Item):
@@ -75,7 +78,7 @@ class ViewFavoritesItem(Item):
     def view_favorites(self, arg=None, menuw=None):
         items = self.get_items()
         if not len(items):
-            AlertBox(_('No favorites.')).show()
+            MessageBox(_('No favorites.')).show()
             return
 
         favorite_menu = menu.Menu(_( 'View Favorites'), items,
@@ -109,7 +112,7 @@ class ViewFavoritesItem(Item):
 
         (server_available, msg) = record_client.connectionTest()
         if not server_available:
-            AlertBox(_('Recording server is unavailable.')+(': %s' % msg)).show()
+            MessageBox(_('Recording server is unavailable.')+(': %s' % msg)).show()
             return []
 
         (result, favorites) = record_client.getFavorites()
@@ -121,7 +124,7 @@ class ViewFavoritesItem(Item):
                 items.append(FavoriteItem(self, fav))
 
         else:
-            AlertBox(_('Get favorites failed')+(': %s' % favorites)).show()
+            MessageBox(_('Get favorites failed')+(': %s' % favorites)).show()
             return []
 
         return items

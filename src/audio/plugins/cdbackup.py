@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2005/06/04 17:18:11  dischi
+# adjust to gui changes
+#
 # Revision 1.43  2005/05/01 17:36:24  dischi
 # use vfs.mountpoints and not config.REMOVABLE_MEDIA
 #
@@ -103,7 +106,7 @@ import util
 import plugin
 import eventhandler
 
-from gui import AlertBox
+from gui.windows import MessageBox
 from event import *
 
 # Included to be able to access the info for Audio CDs
@@ -243,7 +246,7 @@ class PluginInterface(plugin.ItemPlugin):
     def show_status(self, arg=None, menuw=None):
         t = self.rip_thread
         if t.current_track != -1:
-            pop = AlertBox(text=_( 'Ripping in progress\nTrack %d of %d' ) % \
+            pop = MessageBox(text=_( 'Ripping in progress\nTrack %d of %d' ) % \
                            (t.current_track, t.max_track))
             pop.show()
 
@@ -590,7 +593,7 @@ class main_backup_thread(threading.Thread):
            # Flash a popup window indicating copying is done
             popup_string=_( "CD info not found!\nMust manually rename files\nwhen finished ripping" )
 
-            pop = AlertBox(text=popup_string)
+            pop = MessageBox(text=popup_string)
             time.sleep(7)
 
         # If  valid data was returned from mmpython/CDDB

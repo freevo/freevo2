@@ -68,7 +68,7 @@ import mediadb
 
 from event import *
 from directory import DirItem
-from gui import PopupBox
+from gui.windows import WaitBox
 from item import Item
 
 # FIXME: use Mimetype for this
@@ -260,7 +260,7 @@ class RemovableMedia(vfs.Mountpoint):
             log.debug('Inserting %s' % self.drivename)
             msg = _('Reading disc in drive %s')
         if notify:
-            pop = PopupBox(text= msg % self.drivename)
+            pop = WaitBox(text= msg % self.drivename)
             pop.show()
 
         # Start tray moving thread. This thread will release the lock

@@ -40,6 +40,7 @@ import os
 # freevo imports
 import config
 import gui
+import gui.theme
 import menu
 import util
 import plugin
@@ -62,7 +63,7 @@ class MainMenuItem(menu.MenuItem):
             return
         
         # load extra informations for the skin fxd file
-        theme     = gui.get_theme()
+        theme     = gui.theme.get()
         skin_info = theme.mainmenu.items
         imagedir  = theme.mainmenu.imagedir
         if skin_info.has_key(skin_type):
@@ -103,7 +104,7 @@ class SkinSelectItem(Item):
         Load the new skin and rebuild the main menu
         """
         # load new theme
-        theme = gui.theme_engine.set_base_fxd(self.skin)
+        theme = gui.theme.set_base_fxd(self.skin)
         # set it to the main menu as used theme
         pos = menuw.menustack[0].theme = theme
         # and go back
@@ -131,7 +132,7 @@ class MainMenu(Item):
         mainmenu = menu.Menu(_('Freevo Main Menu'), items, item_types='main',
                              umount_all = 1)
         mainmenu.item_types = 'main'
-        mainmenu.theme = gui.get_theme()
+        mainmenu.theme = gui.theme.get()
         menuw.pushmenu(mainmenu)
         menuw.show()
 

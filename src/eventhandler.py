@@ -84,7 +84,7 @@ def append(application):
 
 def add_window(window):
     """
-    Add a window above all applications (PopupBox)
+    Add a window above all applications (WaitBox)
     """
     return get_singleton().add_window(window)
 
@@ -113,7 +113,7 @@ def unregister(application, event):
 def get():
     """
     Return the application which has the focus or the
-    PopupBox that is active
+    WaitBox that is active
     """
     return get_singleton().get()
 
@@ -242,7 +242,7 @@ class Eventhandler:
 
     def add_window(self, window):
         """
-        Add a window above all applications (PopupBox)
+        Add a window above all applications (WaitBox)
         """
         self.popups.append(window)
         self.context = window.event_context
@@ -408,9 +408,9 @@ class Eventhandler:
             # and classes to do it. This is bad coding style, but
             # it is not possible to import it earlier.
             import config
-            import gui
             import cleanup
-
+            from gui.windows import ConfirmBox
+            
             if config.FREEVO_EVENTHANDLER_SANDBOX:
                 log.exception('eventhandler')
                 msg=_('Event \'%s\' crashed\n\nPlease take a ' \
@@ -420,9 +420,9 @@ class Eventhandler:
                       'could cause more errors until you restart '\
                       'Freevo.\n\nLogfile: %s') % \
                       (event, sysconfig.syslogfile)
-                pop = gui.ConfirmBox(msg, handler=cleanup.shutdown,
-                                     handler_message = _('shutting down...'),
-                                     button0_text = _('Shutdown'),
-                                     button1_text = _('Continue')).show()
+                pop = ConfirmBox(msg, handler=cleanup.shutdown,
+                                 handler_message = _('shutting down...'),
+                                 button0_text = _('Shutdown'),
+                                 button1_text = _('Continue')).show()
             else:
                 raise 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2005/06/04 17:18:12  dischi
+# adjust to gui changes
+#
 # Revision 1.22  2005/01/08 15:40:51  dischi
 # remove TRUE, FALSE, DEBUG and HELPER
 #
@@ -62,7 +65,7 @@ import util
 # RegExp
 import re
 
-from gui import PopupBox
+from gui.windows import WaitBox
 
 #
 # Lets get a MameRomList if one is available from disk.  If not 
@@ -164,7 +167,7 @@ def getMameItemInfoList(mame_files, mame_cmd):
     print "Call MAME command : %s" % mame_cmd
     # Only build the cache if it doesn't exis.
     if not os.path.isfile(config.GAMES_MAME_CACHE):
-        waitmsg = PopupBox(text=_('Generating MAME cache, please wait.'))
+        waitmsg = WaitBox(text=_('Generating MAME cache, please wait.'))
 	waitmsg.show()
         mame_ok = updateMameRomList(mame_cmd)
 	waitmsg.destroy()

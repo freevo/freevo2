@@ -15,6 +15,9 @@
 # for a full list of tested sites see Docs/plugins/headlines.txt
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2005/06/04 17:18:13  dischi
+# adjust to gui changes
+#
 # Revision 1.26  2005/05/05 17:33:59  dischi
 # adjust to new gui submodule imports
 #
@@ -82,8 +85,8 @@ import urllib
 
 #freevo modules
 import config, menu, plugin, util
-import gui
 import gui.areas
+from gui.windows import WaitBox, MessageBox
 from item import Item
 
 from mainmenu import MainMenuItem
@@ -255,7 +258,7 @@ class HeadlinesSiteItem(Item):
         # create Reader object
         reader = Sax2.Reader()
 
-        popup = gui.PopupBox(text=_('Fetching headlines...'))
+        popup = WaitBox(text=_('Fetching headlines...'))
         popup.show()
 
         # parse the document
@@ -270,14 +273,14 @@ class HeadlinesSiteItem(Item):
                 self.parse_atom_feed(doc, headlines)
             else:
                 popup.destroy()
-                gui.AlertBox(text=_('Unsupported RSS feed')).show()
+                MessageBox(text=_('Unsupported RSS feed')).show()
                 log.error('unsupported RSS feed with rootNode %s' % rootName)
                 return None
 
         except:
             # unreachable or url error
             popup.destroy()
-            gui.AlertBox(text=_('Freevo could not fetch the requested headlines')).show()
+            MessageBox(text=_('Freevo could not fetch the requested headlines')).show()
             log.error('could not open %s' % self.url)
             return None
 

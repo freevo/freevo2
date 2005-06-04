@@ -32,6 +32,8 @@
 import time
 
 import gui
+import gui.widgets
+import gui.theme
 from plugins.idlebar import IdleBarPlugin
 
 class PluginInterface(IdleBarPlugin):
@@ -65,11 +67,11 @@ class PluginInterface(IdleBarPlugin):
 
         self.clear()
 
-        font  = gui.get_font('clock')
+        font  = gui.theme.font('clock')
         width = min(width, font.stringsize(clock))
 
-        txt = gui.Text(clock, (0, 0), (width, height), font,
-                       align_v='center', align_h='right')
+        txt = gui.widgets.Text(clock, (0, 0), (width, height), font,
+                               align_v='center', align_h='right')
         self.objects.append(txt)
         self.text = clock
         return width

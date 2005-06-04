@@ -32,7 +32,8 @@
 import os
 import mailbox
 
-import gui
+import gui.widgets
+import gui.imagelib
 import config
 from plugins.idlebar import IdleBarPlugin
 
@@ -79,6 +80,6 @@ class PluginInterface(IdleBarPlugin):
         else:
             m = gui.imagelib.load(self.NO_MAILIMAGE, (None, None))
 
-        self.objects.append(gui.Image(m, (0, (height-m.height)/2)))
+        self.objects.append(gui.widgets.Image(m, (0, (height-m.height)/2)))
 
         return m.width

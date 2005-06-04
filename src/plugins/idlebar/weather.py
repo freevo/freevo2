@@ -34,6 +34,8 @@ import time
 
 # freevo modules
 import gui
+import gui.widgets
+import gui.theme
 import config
 import plugin
 from plugins.idlebar import IdleBarPlugin
@@ -121,11 +123,11 @@ class PluginInterface(IdleBarPlugin):
                 self.cache_temp = _('na')
 
             icon = os.path.join(config.IMAGE_DIR, 'weather', self.cache_icon)
-            font = gui.get_font('small0')
+            font = gui.theme.font('small0')
             temp = Unicode('%s\xb0' % self.cache_temp)
 
             # icon object
-            img = gui.Image(icon, pos=(5, 5))
+            img = gui.widgets.Image(icon, pos=(5, 5))
             (iw, ih) = img.get_size()
 
             # scale it to fit
@@ -136,7 +138,7 @@ class PluginInterface(IdleBarPlugin):
             # text object
             txt_size = (width, 50)
             txt_pos  = (5, 0)
-            txt = gui.Text(temp, txt_pos, txt_size, font, 'center', 'center')
+            txt = gui.widgets.Text(temp, txt_pos, txt_size, font, 'center', 'center')
 
             (tw, th) = img.get_size()
 

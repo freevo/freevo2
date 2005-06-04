@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2005/06/04 17:18:12  dischi
+# adjust to gui changes
+#
 # Revision 1.21  2004/08/01 10:50:08  dischi
 # deactivate plugin
 #
@@ -56,7 +59,7 @@ from mameitem import MameItem
 from snesitem import SnesItem, snesromExtensions
 from genesisitem import GenesisItem, genesisromExtensions
 from genericitem import GenericItem
-from gui import PopupBox
+from gui.windows import WaitBox
 
 
 class PluginInterface(plugin.MimetypePlugin):
@@ -88,7 +91,7 @@ class PluginInterface(plugin.MimetypePlugin):
         items = []
 
         if not hasattr(parent, 'add_args') or type(parent.add_args) is not types.TupleType: 
-            pop = PopupBox(text=_('please update GAMES_ITEMS in local_conf.py'))
+            pop = WaitBox(text=_('please update GAMES_ITEMS in local_conf.py'))
             pop.show()
             time.sleep(2)
             pop.destroy()

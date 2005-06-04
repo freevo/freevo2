@@ -39,8 +39,10 @@ import logging
 import config
 import plugin
 import gui
-
+import gui.imagelib
+import gui.widgets
 import gui.animation
+import gui.theme
 import eventhandler
 from event import *
 
@@ -72,7 +74,8 @@ class PluginInterface(plugin.DaemonPlugin):
         self.bar            = None
         self.barfile        = ''
         self.background     = None
-        self.container      = gui.CanvasContainer()
+
+        self.container = gui.widgets.Container()
         self.container.set_zindex(10)
         gui.display.add_child(self.container)
 
@@ -93,13 +96,13 @@ class PluginInterface(plugin.DaemonPlugin):
         w = screen.width
         h = config.GUI_OVERSCAN_Y + 60
 
-        f = gui.get_image('idlebar')
+        f = gui.theme.image('idlebar')
 
         if self.barfile != f:
             if self.bar:
                 self.container.remove_child(self.bar)
             self.barfile = f
-            self.bar = gui.Image(self.barfile, (0,0), (w, h))
+            self.bar = gui.widgets.Image(self.barfile, (0,0), (w, h))
             self.container.add_child(self.bar)
             changed = True
 
@@ -172,7 +175,7 @@ class PluginInterface(plugin.DaemonPlugin):
             if self.background:
                 size = (s.width, config.GUI_OVERSCAN_Y + 60)
                 self.background.crop((0,0), size)
-                self.background = gui.Image(self.background, (0,0))
+                self.background = gui.widgets.Image(self.background, (0,0))
                 self.background.set_alpha(230)
                 self.background.set_zindex(-1)
                 self.container.add_child(self.background)

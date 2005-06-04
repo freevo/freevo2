@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2005/06/04 17:18:14  dischi
+# adjust to gui changes
+#
 # Revision 1.8  2004/11/20 18:23:03  dischi
 # use python logger module for debug
 #
@@ -52,6 +55,9 @@ import mailbox
 import threading
 import time
 import gui
+import gui.imagelib
+import gui.widgets
+import gui.theme
 
 from plugins.idlebar import IdleBarPlugin
 
@@ -97,17 +103,17 @@ class MultiMail(IdleBarPlugin):
 
         if self.unread > 0:
             i = gui.imagelib.load(self.MAILIMAGE, (None, None))
-            self.objects.append(gui.Image(i, (0, 2)))
-            font  = gui.get_font('weather')
+            self.objects.append(gui.widgets.Image(i, (0, 2)))
+            font  = gui.theme.font('weather')
             str_unread = '%3s' % self.unread
             text_width = font.stringsize(str_unread)
-            t = gui.Text(str_unread, (0, 55-font.height), (text_width, font.height),
+            t = gui.widgets.Text(str_unread, (0, 55-font.height), (text_width, font.height),
                          font, 'left', 'top')
             self.objects.append(t)
             return max(i.width, t.width)
 
         i = gui.imagelib.load(self.NO_MAILIMAGE, (None, None))
-        self.objects.append(gui.Image(i, (0, 10)))
+        self.objects.append(gui.widgets.Image(i, (0, 10)))
         return i.width
 
 class Imap(MultiMail):

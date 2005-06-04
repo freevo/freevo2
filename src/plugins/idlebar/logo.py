@@ -32,6 +32,8 @@
 import os
 
 import gui
+import gui.widgets
+import gui.theme
 import config
 from plugins.idlebar import IdleBarPlugin
 
@@ -48,7 +50,7 @@ class PluginInterface(IdleBarPlugin):
 
     def draw(self, width, height):
         if not self.image:
-            image = gui.get_image('logo')
+            image = gui.theme.image('logo')
         else:
             image = os.path.join(config.IMAGE_DIR, self.image)
 
@@ -58,10 +60,7 @@ class PluginInterface(IdleBarPlugin):
         self.file = image
         self.clear()
 
-        i = gui.imagelib.load(image, (None, height + 10))
-        if not i:
-            return 0
-
-        self.objects.append(gui.Image(i, (0, 0)))
+        i = gui.widgets.Image((image, (None, height + 10)), (0, 0))
+        self.objects.append(i)
 
         return i.width

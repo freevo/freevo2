@@ -38,7 +38,7 @@ import plugin
 import util
 import gui
 
-from gui import InputBox
+from gui.windows import InputBox
 from item import Item
 from config import rtXML
 

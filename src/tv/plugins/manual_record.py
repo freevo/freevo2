@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2005/06/04 17:18:15  dischi
+# adjust to gui changes
+#
 # Revision 1.12  2005/01/08 15:40:53  dischi
 # remove TRUE, FALSE, DEBUG and HELPER
 #
@@ -76,8 +79,7 @@ import tv.record_client as record_client
 import event as em
 
 from item import Item
-from gui import AlertBox
-from gui import InputBox
+from gui.windows import MessageBox, InputBox
 from tv.record_types import Favorite
 # from tv.epg_types import TvProgram
 
@@ -355,7 +357,7 @@ class ManualRecordItem(Item):
             (result, msg) = record_client.scheduleRecording(self.prog)
 
             if not result:
-                AlertBox(text=_('Save Failed, recording was lost')+(': %s' % msg)).show()
+                MessageBox(text=_('Save Failed, recording was lost')+(': %s' % msg)).show()
             else:
                 if menuw:
                     menuw.back_one_menu(arg='reload')
@@ -384,20 +386,20 @@ class ManualRecordItem(Item):
             if self.MAXDAYS > 1:
                 isgood = False
                 msg = _("Program would record for more than %d days!") % self.MAXDAYS
-                AlertBox(text=_('Save Failed, recording was lost')+(': %s' % msg)).show()
+                MessageBox(text=_('Save Failed, recording was lost')+(': %s' % msg)).show()
             else:
                 isgood = False
                 msg = _("Program would record for more than 1 day!") % self.MAXDAYS
-                AlertBox(text=_('Save Failed, recording was lost')+(': %s' % msg)).show()
+                MessageBox(text=_('Save Failed, recording was lost')+(': %s' % msg)).show()
 
         elif not starttime < stoptime:
             isgood = False
             msg = _("start time is not before stop time." )
-            AlertBox(text=_('Save Failed, recording was lost')+(': %s' % msg)).show()
+            MessageBox(text=_('Save Failed, recording was lost')+(': %s' % msg)).show()
         elif stoptime < curtime_epoch + self.MINPICKUP:
             isgood = False
             msg = _("Sorry, the stop time does not give enough time for scheduler to pickup the change.  Please set it to record for a few minutes longer.")
-            AlertBox(text=_('Save Failed, recording was lost')+(': %s' % msg)).show()
+            MessageBox(text=_('Save Failed, recording was lost')+(': %s' % msg)).show()
         else:
             self.prog.start = starttime
             self.prog.stop = stoptime

@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2005/06/04 17:18:11  dischi
+# adjust to gui changes
+#
 # Revision 1.39  2005/05/01 17:36:41  dischi
 # remove some vfs calls were they are not needed
 #
@@ -87,7 +90,7 @@ import Image
 import cStringIO
 from xml.dom import minidom # ParseError used by amazon module
 
-from gui import PopupBox, AlertBox
+from gui.windows import WaitBox
 
 from util import amazon
 import util.fthread as fthread
@@ -180,7 +183,7 @@ class PluginInterface(plugin.ItemPlugin):
         """
         search imdb for this item
         """
-        box = PopupBox(text=_( 'searching Amazon...' ) )
+        box = WaitBox(text=_( 'searching Amazon...' ) )
         box.show()
 
         album = self.item.getattr('album')
@@ -196,7 +199,7 @@ class PluginInterface(plugin.ItemPlugin):
         except amazon.AmazonError:
             box.destroy()
             dict_tmp = { "artist": String(artist), "album": String(album) }
-            box = PopupBox(text=_('No matches for %(artist)s - %(album)s') \
+            box = WaitBox(text=_('No matches for %(artist)s - %(album)s') \
                            % dict_tmp )
             box.show()
             time.sleep(2)
@@ -205,7 +208,7 @@ class PluginInterface(plugin.ItemPlugin):
 
         except:
             box.destroy()
-            box = PopupBox(text=_( 'Unknown error while searching.' ) )
+            box = WaitBox(text=_( 'Unknown error while searching.' ) )
             box.show()
             time.sleep(2)
             box.destroy()
@@ -276,7 +279,7 @@ class PluginInterface(plugin.ItemPlugin):
             menuw.pushmenu(moviemenu)
             return
 
-        box = PopupBox(text= _( 'No covers available from Amazon' ) )
+        box = WaitBox(text= _( 'No covers available from Amazon' ) )
         box.show()
         time.sleep(2)
         box.destroy()
@@ -289,7 +292,7 @@ class PluginInterface(plugin.ItemPlugin):
         """
         import directory
         
-        box = PopupBox(text= _( 'getting data...' ) )
+        box = WaitBox(text= _( 'getting data...' ) )
         box.show()
         
         #filename = os.path.splitext(self.item.filename)[0]

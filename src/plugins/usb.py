@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2005/06/04 17:18:13  dischi
+# adjust to gui changes
+#
 # Revision 1.14  2004/11/20 18:23:03  dischi
 # use python logger module for debug
 #
@@ -62,7 +65,7 @@ import config
 import plugin
 import util
 import eventhandler
-from gui import PopupBox
+from gui.windows import WaitBox
 
 import logging
 log = logging.getLogger()
@@ -117,7 +120,7 @@ class PluginInterface(plugin.DaemonPlugin):
                 log.error('new device %s' %d)
                 for device, message, action in config.USB_HOTPLUG:
                     if d == device:
-                        pop = PopupBox(message)
+                        pop = WaitBox(message)
                         pop.show()
                         os.system(action)
                         pop.destroy()

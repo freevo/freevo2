@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2005/06/04 17:18:13  dischi
+# adjust to gui changes
+#
 # Revision 1.9  2005/01/08 10:27:17  dischi
 # remove unneeded skin_type parameter
 #
@@ -59,7 +62,7 @@ import re
 
 from item import Item
 from image.imageitem import ImageItem
-from gui import AlertBox, PopupBox
+from gui.windows import MessageBox, WaitBox
 
 class ApodMainMenuItem(Item):
     """
@@ -105,7 +108,7 @@ class ApodMainMenuItem(Item):
     def fetchCurrentPicture(self, arg=None, menuw=None):
         url = 'http://antwrp.gsfc.nasa.gov/apod/%s'
         apodpichref = ''
-        box = PopupBox(text=_('Getting picture, please wait'))
+        box = WaitBox(text=_('Getting picture, please wait'))
         box.show()
         try:
             myfile=urllib.urlopen(url % 'index.html')
@@ -117,7 +120,7 @@ class ApodMainMenuItem(Item):
             realurl = url % 'index.html'
             print 'APOD ERROR: could not open %s: %s' % (realurl, e)
             box.destroy()
-            AlertBox(text=_('Unable to open URL')).show()
+            MessageBox(text=_('Unable to open URL')).show()
             return
 
         apodfile = os.path.join(self.apoddir,os.path.basename(apodpichref))
@@ -132,7 +135,7 @@ class ApodMainMenuItem(Item):
             realurl = url % apodpichref
             print 'APOD ERROR: could not open %s: %s' % (realurl, e)
             box.destroy()
-            AlertBox(text=_('Unable to open URL')).show()
+            MessageBox(text=_('Unable to open URL')).show()
             return
 
 class PluginInterface(plugin.MainMenuPlugin):

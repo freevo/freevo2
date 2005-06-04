@@ -46,7 +46,7 @@ import mediadb
 
 from event import *
 from item import Item, MediaItem
-from gui import ProgressBox
+from gui.windows import ProgressBox
 
 # get logging object
 log = logging.getLogger()
@@ -371,7 +371,7 @@ class Playlist(MediaItem):
             self.menuw = menuw
 
         if not self.playlist:
-            # XXX PopupBox please
+            # XXX WaitBox please
             log.warning('empty playlist')
             return False
 

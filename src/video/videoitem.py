@@ -53,8 +53,8 @@ import plugin
 import util.videothumb
 import mediadb
 
-from gui   import PopupBox, AlertBox, ConfirmBox
-from item  import MediaItem, FileInformation, Action
+from gui.windows import MessageBox, ConfirmBox
+from item import MediaItem, FileInformation, Action
 from event import *
 
 # video imports
@@ -573,7 +573,7 @@ class VideoItem(MediaItem):
             # get the best possible player
             self.player_rating, self.player = self.possible_player[0]
             if self.player_rating < 10:
-                AlertBox(text=_('No player for this item found')).show()
+                MessageBox(text=_('No player for this item found')).show()
                 return
 
         # put together the mplayer options for this file
@@ -600,7 +600,7 @@ class VideoItem(MediaItem):
             if hasattr(self.parent, 'subitems') and self.parent.subitems:
                 return error
             else:
-                AlertBox(text=error, handler=self.error_handler).show()
+                MessageBox(text=error, handler=self.error_handler).show()
 
 
     def error_handler(self):
@@ -643,7 +643,7 @@ class VideoItem(MediaItem):
                         return True
                 if self.error_in_subitem:
                     # No more subitems to play, and an error occured
-                    AlertBox(text=self.last_error_msg).show()
+                    MessageBox(text=self.last_error_msg).show()
 
             elif event == USER_END:
                 pass

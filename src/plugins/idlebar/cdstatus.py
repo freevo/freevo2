@@ -30,7 +30,8 @@
 # -----------------------------------------------------------------------------
 
 import os
-import gui
+import gui.widgets
+import gui.imagelib
 import config
 
 from plugins.idlebar import IdleBarPlugin
@@ -111,7 +112,7 @@ class PluginInterface(IdleBarPlugin):
                 image = gui.imagelib.load(self.cdimages['mixed'], (None, None))
 
             y0 = int((height-image.height)/2)
-            self.objects.append(gui.Image(image, (x0, y0)))
+            self.objects.append(gui.widgets.Image(image, (x0, y0)))
 
             w  += image.width + 10
             x0 += image.width + 5

@@ -42,6 +42,8 @@ import plugin
 import util
 import gui
 import gui.areas
+import gui.theme
+from gui.windows import MessageBox
 
 from event import *
 from item import Item, Action
@@ -300,7 +302,7 @@ class MenuWidget(Application):
 
         # the the theme
         if isinstance(menu, Menu):
-            gui.set_theme(menu.theme)
+            gui.theme.set(menu.theme)
         if arg == 'reload':
             self.refresh(reload=1)
         else:
@@ -313,7 +315,7 @@ class MenuWidget(Application):
         """
         self.menustack = [ self.menustack[0] ]
         menu = self.menustack[0]
-        gui.set_theme(menu.theme)
+        gui.theme.set(menu.theme)
         self.refresh()
 
 
@@ -343,8 +345,8 @@ class MenuWidget(Application):
                 if menu.theme == previous.theme.filename:
                     menu.theme = previous.theme
                 else:
-                    menu.theme = gui.set_theme(menu.theme)
-            gui.set_theme(menu.theme)
+                    menu.theme = gui.theme.set(menu.theme)
+            gui.theme.set(menu.theme)
             if previous and not isinstance(previous, Menu):
                 # Current showing is no Menu, we are hidden.
                 self.show()
@@ -518,7 +520,7 @@ class MenuWidget(Application):
             actions = menu.selected.actions()
             if not actions:
                 msg = _('No action defined for this choice!')
-                gui.AlertBox(text=msg).show()
+                MessageBox(text=msg).show()
             else:
                 if not isinstance(actions[0], (Item, Action)):
                     actions[0][0](menuw=self)

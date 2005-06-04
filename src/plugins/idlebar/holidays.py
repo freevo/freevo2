@@ -32,7 +32,8 @@
 import os
 import time
 
-import gui
+import gui.widgets
+import gui.imagelib
 import config
 from plugins.idlebar import IdleBarPlugin
 
@@ -94,7 +95,7 @@ class PluginInterface(IdleBarPlugin):
             self.icon = icon
             self.clear()
             i = gui.imagelib.load(icon, (None, None))
-            self.objects.append(gui.Image(i, (0, (height-i.height)/2)))
+            self.objects.append(gui.widgets.Image(i, (0, (height-i.height)/2)))
 
             return i.width
 

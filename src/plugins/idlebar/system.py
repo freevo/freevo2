@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2005/06/04 17:18:14  dischi
+# adjust to gui changes
+#
 # Revision 1.15  2004/11/20 18:23:03  dischi
 # use python logger module for debug
 #
@@ -61,6 +64,9 @@ import string
 import types
 import re
 import gui
+import gui.imagelib
+import gui.widgets
+import gui.theme
 
 import config
 
@@ -163,7 +169,7 @@ class procstats(IdleBarPlugin):
             log.warning('[procstats]: Not working, this plugin is only tested with 2.4 and 2.6 kernels')
 
 
-        font = gui.get_font('small0')
+        font = gui.theme.font('small0')
 
         width = 0
 
@@ -173,8 +179,8 @@ class procstats(IdleBarPlugin):
             tw = font.stringsize(self.currentCpu)
             icon = os.path.join(config.ICON_DIR, 'misc','cpu.png')
             i = gui.imagelib.load(icon, (None, None))
-            self.objects.append(gui.Image(i, (0, 7)))
-            t = gui.Text(self.currentCpu, (0, 55-font.height), (tw, font.height),
+            self.objects.append(gui.widgets.Image(i, (0, 7)))
+            t = gui.widgets.Text(self.currentCpu, (0, 55-font.height), (tw, font.height),
                          font, 'left', 'top')
             self.objects.append(t)
 
@@ -184,9 +190,9 @@ class procstats(IdleBarPlugin):
             text_width = font.stringsize(self.currentMem)
             icon = os.path.join(config.ICON_DIR, 'misc','memory.png')
             i = gui.imagelib.load(icon, (None, None))
-            self.objects.append(gui.Image(i, (width+15, 7)))
+            self.objects.append(gui.widgets.Image(i, (width+15, 7)))
 
-            t = gui.Text(self.currentMem, (width+15, 55-font.height), (text_width, font.height),
+            t = gui.widgets.Text(self.currentMem, (width+15, 55-font.height), (text_width, font.height),
                          font, 'left', 'top')
             self.objects.append(t)
 
@@ -357,7 +363,7 @@ class sensors(IdleBarPlugin):
         widthcase = 0
         widthram  = 0
 
-        font  = gui.get_font('small0')
+        font  = gui.theme.font('small0')
         if self.hotstack != 0:
             font.color = 0xff0000
         elif font.color == 0xff0000 and self.hotstack == 0:
@@ -367,9 +373,9 @@ class sensors(IdleBarPlugin):
         widthcpu = font.stringsize(cputemp)
 
         i = gui.imagelib.load(os.path.join(config.ICON_DIR, 'misc','cpu.png'), (None, None))
-        self.objects.append(gui.Image(i, (0, 8)))
+        self.objects.append(gui.widgets.Image(i, (0, 8)))
 
-        t = gui.Text(cputemp, (15, 55-font.height),
+        t = gui.widgets.Text(cputemp, (15, 55-font.height),
                      (widthcpu, font.height), font, 'left', 'top')
         self.objects.append(t)
 
@@ -380,9 +386,9 @@ class sensors(IdleBarPlugin):
             widthcase = font.stringsize(casetemp)
 
             i = gui.imagelib.load(os.path.join(config.ICON_DIR, 'misc','case.png'), (None, None))
-            self.objects.append(gui.Image(i, (15 + widthcpu, 7)))
+            self.objects.append(gui.widgets.Image(i, (15 + widthcpu, 7)))
 
-            t = gui.Text(casetemp, (40+widthcpu, 55-font.height),
+            t = gui.widgets.Text(casetemp, (40+widthcpu, 55-font.height),
                         (widthcase, font.height), font, 'left', 'top')
             self.objects.append(t)
 
@@ -397,9 +403,9 @@ class sensors(IdleBarPlugin):
                 img_width = 15 + widthcpu
 
             i = gui.imagelib.load(os.path.join(config.ICON_DIR, 'misc','memory.png'), (None, None))
-            self.objects.append(gui.Image(i, (img_width, 7)))
+            self.objects.append(gui.widgets.Image(i, (img_width, 7)))
 
-            t = gui.Text(casetemp, (img_width+15, 55-font.height),
+            t = gui.widgets.Text(casetemp, (img_width+15, 55-font.height),
                         (widthram, font.height), font, 'left', 'top')
 
 

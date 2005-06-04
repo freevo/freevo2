@@ -42,7 +42,7 @@ import config
 import menu
 import plugin
 from item import Item
-from gui import AlertBox
+from gui.windows import MessageBox
 
 # tv imports
 from record.client import recordings
@@ -178,20 +178,20 @@ class ProgramItem(Item):
     def schedule(self, arg=None, menuw=None):
         (result, msg) = recordings.schedule(self)
         if result:
-            AlertBox(text=_('"%s" has been scheduled for recording') % \
+            MessageBox(text=_('"%s" has been scheduled for recording') % \
                          self.title).show()
         else:
-            AlertBox(text=_('Scheduling Failed')+(': %s' % msg)).show()
+            MessageBox(text=_('Scheduling Failed')+(': %s' % msg)).show()
         menuw.delete_submenu
 
 
     def remove(self, arg=None, menuw=None):
         (result, msg) = recordings.remove(self.scheduled.id)
         if result:
-            AlertBox(text=_('"%s" has been removed as recording') % \
+            MessageBox(text=_('"%s" has been removed as recording') % \
                          self.title).show()
         else:
-            AlertBox(text=_('Scheduling Failed')+(': %s' % msg)).show()
+            MessageBox(text=_('Scheduling Failed')+(': %s' % msg)).show()
         menuw.delete_submenu
 
 
@@ -220,11 +220,11 @@ class ProgramItem(Item):
 
 
     def watch_recording(self, arg=None, menuw=None):
-        AlertBox(text='Not implemented yet').show()
+        MessageBox(text='Not implemented yet').show()
 
 
     def search_similar(self, arg=None, menuw=None):
-        AlertBox(text='Not implemented yet').show()
+        MessageBox(text='Not implemented yet').show()
 
 
     def create_favorite(self, arg=None, menuw=None):
@@ -233,4 +233,4 @@ class ProgramItem(Item):
 
 
     def remove_favorite(self, arg=None, menuw=None):
-        AlertBox(text='Not implemented yet').show()
+        MessageBox(text='Not implemented yet').show()

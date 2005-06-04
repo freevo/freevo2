@@ -18,6 +18,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2005/06/04 17:18:12  dischi
+# adjust to gui changes
+#
 # Revision 1.11  2005/01/08 10:27:17  dischi
 # remove unneeded skin_type parameter
 #
@@ -64,6 +67,7 @@ import audio.player
 from item import Item
 import eventhandler
 from event import *
+from gui.windows import MessageBox
 
 class RadioItem(Item):
     """
@@ -91,7 +95,7 @@ class RadioItem(Item):
         error = self.player.play()
 
         if error and menuw:
-            AlertBox(text=error).show()
+            MessageBox(text=error).show()
             eventhandler.post(PLAY_END)
 
     def stop(self, arg=None, menuw=None):

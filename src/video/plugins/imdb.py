@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2005/06/04 17:18:16  dischi
+# adjust to gui changes
+#
 # Revision 1.37  2004/07/22 21:21:50  dischi
 # small fixes to fit the new gui code
 #
@@ -55,7 +58,7 @@ import re
 import time
 from util.fxdimdb import FxdImdb, makeVideo, makePart, point_maker
 
-from gui import PopupBox
+from gui.windows import WaitBox
 from util import htmlenties2txt
 
 class PluginInterface(plugin.ItemPlugin):
@@ -118,7 +121,7 @@ class PluginInterface(plugin.ItemPlugin):
         """
         fxd = FxdImdb()
 
-        box = PopupBox(text=_('searching IMDB...'))
+        box = WaitBox(text=_('searching IMDB...'))
         box.show()
 
         items = []
@@ -142,7 +145,7 @@ class PluginInterface(plugin.ItemPlugin):
                                            self.imdb_create_fxd, (id, year)))
         except:
             box.destroy()
-            box = PopupBox(text=_('Unknown error while connecting to IMDB'))
+            box = WaitBox(text=_('Unknown error while connecting to IMDB'))
             box.show()
             time.sleep(2)
             box.destroy()
@@ -164,7 +167,7 @@ class PluginInterface(plugin.ItemPlugin):
             menuw.pushmenu(moviemenu)
             return
 
-        box = PopupBox(text=_('No information available from IMDB'))
+        box = WaitBox(text=_('No information available from IMDB'))
         box.show()
         time.sleep(2)
         box.destroy()
@@ -203,7 +206,7 @@ class PluginInterface(plugin.ItemPlugin):
         """
         fxd = FxdImdb()
         
-        box = PopupBox(text=_('getting data...'))
+        box = WaitBox(text=_('getting data...'))
         box.show()
 
         #if this exists we got a cdrom/dvdrom

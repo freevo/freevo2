@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2005/06/04 17:18:13  dischi
+# adjust to gui changes
+#
 # Revision 1.8  2004/07/26 18:10:18  dischi
 # move global event handling to eventhandler.py
 #
@@ -54,10 +57,10 @@ import plugin
 import config
 import shutil
 import util
-from gui import PopupBox
 import eventhandler
 import event as em
 import menu
+from gui.windows import WaitBox
 
 class PluginInterface(plugin.ItemPlugin):
     """
@@ -74,7 +77,7 @@ class PluginInterface(plugin.ItemPlugin):
         self.cart = []
 
     def moveHere(self, arg=None, menuw=None):
-        popup = PopupBox(text=_('Moving files...'))
+        popup = WaitBox(text=_('Moving files...'))
         popup.show()
         for cartfile in self.cart:
             cartfile.files.move(self.item.dir)
@@ -84,7 +87,7 @@ class PluginInterface(plugin.ItemPlugin):
 
 
     def copyHere(self, arg=None, menuw=None):
-        popup = PopupBox(text=_('Copying files...'))
+        popup = WaitBox(text=_('Copying files...'))
         popup.show()
         for cartfile in self.cart:
             cartfile.files.copy(self.item.dir)

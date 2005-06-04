@@ -148,6 +148,8 @@ import gui
 import gui.displays
 import gui.areas
 import gui.animation
+import gui.widgets
+import gui.theme
 import util
 import plugin
 import mcomm
@@ -194,9 +196,9 @@ class Splashscreen(gui.areas.Area):
 
         self.text = self.drawstring(self.text, settings.font, settings,
                                     height=-1, align_h='center')
-        self.bar = gui.Progressbar((x0, y), (x1-x0, 20), 2, (0,0,0),
-                                   None, 0, None, (0,0,0,95), 0,
-                                   self.max_value)
+        self.bar = gui.widgets.Progressbar((x0, y), (x1-x0, 20), 2, (0,0,0),
+                                           None, 0, None, (0,0,0,95), 0,
+                                           self.max_value)
         self.layer.add_child(self.bar)
 
 
@@ -279,7 +281,7 @@ try:
     splash.hide()
 
     # prepare again, now that all plugins are loaded
-    gui.get_theme().prepare()
+    gui.theme.get().prepare()
 
     # start menu
     MainMenu().getcmd()

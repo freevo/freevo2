@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2005/06/04 17:18:15  dischi
+# adjust to gui changes
+#
 # Revision 1.25  2005/01/09 16:42:36  dischi
 # add some debug for find a timing problem
 #
@@ -87,7 +90,7 @@ from item import Item
 import tvguide
 from record.client import recordings
 from directory import DirItem
-from gui import AlertBox
+from gui.windows import MessageBox
 
 import logging
 log = logging.getLogger('tv')
@@ -142,7 +145,7 @@ class TVMenu(Item):
         if False:
             msg  = _('The list of TV channels is invalid!\n')
             msg += _('Please check the config file.')
-            AlertBox(text=msg).show()
+            MessageBox(text=msg).show()
             return
 
         guide = plugin.getbyname('tvguide')
