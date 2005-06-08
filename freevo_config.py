@@ -588,7 +588,7 @@ VIDEO_SHOW_DATA_DIR = None
 VIDEO_MPLAYER_SUFFIX = [ 'avi', 'mpg', 'mpeg', 'wmv', 'bin', 'rm',
                          'divx', 'ogm', 'vob', 'asf', 'm2v', 'm2p',
                          'mp4', 'viv', 'nuv', 'mov', 'iso',
-                         'nsv', 'mkv', 'ts' ]
+                         'nsv', 'mkv', 'ts', 'rmvb' ]
 
 #
 # The list of filename suffixes that are used to match the files that
@@ -596,7 +596,7 @@ VIDEO_MPLAYER_SUFFIX = [ 'avi', 'mpg', 'mpeg', 'wmv', 'bin', 'rm',
 # 
 VIDEO_XINE_SUFFIX = [ 'avi', 'mpg', 'mpeg', 'rm', 'divx', 'ogm',
                       'asf', 'm2v', 'm2p', 'mp4', 'mov', 'cue',
-                      'ts', 'iso', 'vob' ]
+                      'ts', 'iso', 'vob', 'rmvb' ]
 
 #
 # Preferred video player
