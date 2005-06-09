@@ -48,6 +48,8 @@ import eventhandler
 # get logging object
 log = logging.getLogger('config')
 
+# status of the plugin module
+initialized = False
 
 #
 # Some basic plugins known to Freevo.
@@ -256,7 +258,7 @@ def activate(name, type=None, level=10, args=None):
             log.warning('duplicate plugin activation, ignoring:\n' + \
                         '  <%s %s %s>' % (name, type, args))
             return
-    if _initialized:
+    if initialized:
         _load_plugin(name, type, level, args, _plugin_number)
         _sort_plugins()
     else:
@@ -269,7 +271,7 @@ def remove(id):
     remove a plugin from the list. This can only be done in local_config.py
     and not while Freevo is running
     """
-    if _initialized:
+    if initialized:
         return
 
     # remove by plugin id
@@ -317,11 +319,8 @@ def init(callback = None, reject=['record', 'www'], exclusive=[]):
     """
     load and init all the plugins
     """
-    global _initialized
-    global _plugin_basedir
-
-    _initialized = True
-    _plugin_basedir = os.environ['FREEVO_PYTHON']
+    global initialized
+    initialized = True
 
     current = 0
     for name, type, level, args, number in _all_plugins:
@@ -410,25 +409,6 @@ def register(plugin, name, multiple_choises=0):
         _named_plugins[name] = plugin
 
 
-def register_callback(name, *args):
-    """
-    register a callback to the callback handler 'name'. The format of
-    *args depends on the callback
-    """
-    if not _callbacks.has_key(name):
-        _callbacks[name] = []
-    _callbacks[name].append(args)
-
-
-def get_callbacks(name):
-    """
-    return all callbacks registered with 'name'
-    """
-    if not _callbacks.has_key(name):
-        _callbacks[name] = []
-    return _callbacks[name]
-
-
 def event(name, arg=None):
     """
     create plugin event
@@ -451,13 +431,10 @@ def isevent(event):
 # internal stuff
 #
 
-_initialized        = False
 _all_plugins        = []
 _plugin_number      = 0
 _plugin_type_list   = {}
 _named_plugins      = {}
-_callbacks          = {}
-_plugin_basedir     = ''
 
 
 def _add_to_ptl(type, object):
@@ -471,7 +448,7 @@ def _add_to_ptl(type, object):
 
 
 def _find_plugin_file(filename):
-    full_filename = os.path.join(_plugin_basedir, filename)
+    full_filename = os.path.join(os.environ['FREEVO_PYTHON'], filename)
 
     if os.path.isfile(full_filename + '.py'):
         return filename.replace('/', '.'), None
@@ -479,7 +456,8 @@ def _find_plugin_file(filename):
     if os.path.isdir(full_filename):
         return filename.replace('/', '.'), None
 
-    full_filename = os.path.join(_plugin_basedir, 'plugins', filename)
+    full_filename = os.path.join(os.environ['FREEVO_PYTHON'],
+                                 'plugins', filename)
 
     if os.path.isfile(full_filename + '.py'):
         return 'plugins.' + filename.replace('/', '.'), None
@@ -491,7 +469,7 @@ def _find_plugin_file(filename):
         special = filename[:filename.find('/')]
         filename = os.path.join(special, 'plugins',
                                 filename[filename.find('/')+1:])
-        full_filename = os.path.join(_plugin_basedir, filename)
+        full_filename = os.path.join(os.environ['FREEVO_PYTHON'], filename)
 
         if os.path.isfile(full_filename + '.py'):
             return filename.replace('/', '.'), special
