@@ -122,7 +122,7 @@ class autostart(plugin.DaemonPlugin):
     Plugin to autostart if a new medium is inserted while Freevo shows
     the main menu
     """
-    def eventhandler(self, event = None):
+    def eventhandler(self, event):
         """
         eventhandler to handle the IDENTIFY_MEDIA plugin event and the
         EJECT event
@@ -196,21 +196,9 @@ class rom_items(plugin.MainMenuPlugin):
                 media.item = m
 
             m.parent = parent
-            m.eventhandler_plugins.append(self.items_eventhandler)
             items.append(m)
 
         return items
-
-
-    def items_eventhandler(self, event, item, menuw):
-        """
-        handle EJECT for the rom drives
-        """
-        if event == EJECT and item.media and menuw and \
-           menuw.menustack[1] == menuw.menustack[-1]:
-            item.media.move_tray(dir='toggle')
-            return True
-        return False
 
 
 class RemovableMedia(vfs.Mountpoint):

@@ -15,6 +15,9 @@
 # for a full list of tested sites see Docs/plugins/headlines.txt
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2005/06/09 19:43:53  dischi
+# clean up eventhandler usage
+#
 # Revision 1.27  2005/06/04 17:18:13  dischi
 # adjust to gui changes
 #
@@ -157,7 +160,7 @@ class ShowHeadlineDetails(MenuApplication):
         MenuApplication.show(self)
         
 
-    def eventhandler(self, event, menuw=None):
+    def eventhandler(self, event):
         if MenuApplication.eventhandler(self, event):
             return True
             

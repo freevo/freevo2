@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2005/06/09 19:43:54  dischi
+# clean up eventhandler usage
+#
 # Revision 1.5  2004/12/31 11:57:44  dischi
 # renamed SKIN_* and OSD_* variables to GUI_*
 #
@@ -171,7 +174,7 @@ class PluginInterface(plugin.DaemonPlugin):
                     self.osd.display(self.message, pyosd.TYPE_STRING, line=0)
                     self.osd.display('', pyosd.TYPE_STRING, line=1)
 
-    def eventhandler(self, event, menuw=None):
+    def eventhandler(self, event):
         """
         Do something when receiving an event
         """

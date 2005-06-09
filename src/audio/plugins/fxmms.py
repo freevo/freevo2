@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2005/06/09 19:43:53  dischi
+# clean up eventhandler usage
+#
 # Revision 1.6  2004/08/01 10:41:03  dischi
 # deactivate plugin
 #
@@ -246,7 +249,7 @@ class FXMMS:
         self.elapsed = self.item.elapsed = curtime
         self.playerGUI.refresh()
 
-    def eventhandler(self, event, menuw=None):
+    def eventhandler(self, event):
         """
         eventhandler for xmms. If an event is not bound in this
         function it will be passed over to the items eventhandler

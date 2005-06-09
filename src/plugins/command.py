@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2005/06/09 19:43:53  dischi
+# clean up eventhandler usage
+#
 # Revision 1.22  2005/06/04 17:18:13  dischi
 # adjust to gui changes
 #
@@ -150,7 +153,7 @@ class LogScroll(WaitBox):
         self.add_child(self.pb)
 
 
-    def eventhandler(self, event, menuw=None):
+    def eventhandler(self, event):
 
         if event in (INPUT_UP, INPUT_DOWN, INPUT_LEFT, INPUT_RIGHT ):
            return self.pb.eventhandler(event)
@@ -196,7 +199,7 @@ class CommandOptions(WaitBox):
         
 
 
-    def eventhandler(self, event, menuw=None):
+    def eventhandler(self, event):
         """
         eventhandler to browse the result popup
         """

@@ -249,7 +249,7 @@ class PluginInterface(IdleBarPlugin):
         self.visible   = False
 
 
-    def eventhandler(self, event, menuw=None):
+    def eventhandler(self, event):
         """
         Catches the play events
         """

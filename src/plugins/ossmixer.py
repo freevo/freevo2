@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2005/06/09 19:43:53  dischi
+# clean up eventhandler usage
+#
 # Revision 1.13  2005/01/20 16:37:36  dischi
 # fix crash
 #
@@ -126,7 +129,7 @@ class PluginInterface(plugin.DaemonPlugin):
             self.setMicVolume(0)
 
 
-    def eventhandler(self, event = None, menuw=None, arg=None):
+    def eventhandler(self, event):
         """
         eventhandler to handle the VOL events
         """

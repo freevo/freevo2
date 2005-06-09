@@ -151,7 +151,7 @@ class Window(Container):
         self.__display = None
 
 
-    def eventhandler(self):
+    def eventhandler(self, event):
         """
         Eventhandler for the window, this raw window has nothing to do
         """

@@ -589,7 +589,8 @@ class VideoItem(MediaItem):
             mplayer_options += arg.split(' ')
 
         # call all our plugins to let them know we will play
-        self.plugin_eventhandler(PLAY, menuw)
+        # FIXME: use a global PLAY event here
+        # self.plugin_eventhandler(PLAY, menuw)
 
         # call the player to play the item
         error = self.player.play(mplayer_options, self)
@@ -624,9 +625,6 @@ class VideoItem(MediaItem):
         """
         eventhandler for this item
         """
-        if self.plugin_eventhandler(event):
-            return True
-
         # PLAY_END: do we have to play another file?
         if self.subitems and not self.variants:
             if event == PLAY_END:

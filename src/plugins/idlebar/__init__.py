@@ -191,7 +191,7 @@ class PluginInterface(plugin.DaemonPlugin):
             self.background.hide()
 
 
-    def eventhandler(self, event, menuw=None):
+    def eventhandler(self, event):
         """
         catch the IDENTIFY_MEDIA event to redraw the skin (maybe the cd status
         plugin wants to redraw). Also catch SCREEN_CONTENT_CHANGE in case we

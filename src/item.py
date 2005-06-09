@@ -44,9 +44,10 @@ import logging
 # freevo imports
 import plugin
 import util
-
-from sysconfig import Unicode
 import mediadb
+
+from event import *
+from sysconfig import Unicode
 from mediadb.globals import *
 
 # get logging object
@@ -174,8 +175,6 @@ class Item:
         self.menuw        = None
         self.description  = ''
 
-        self.eventhandler_plugins = []
-
         if info:
             # create a basic info object
             self.info = mediadb.item()
@@ -257,33 +256,24 @@ class Item:
         """
         simple eventhandler for an item
         """
+        # EJECT event handling
+        if self.media and self.media.item == self and event == EJECT and menuw:
+            self.media.move_tray(dir='toggle')
+            return True
 
+        # FIXME: evil hack to get the menuw, even when it is not there
         if not menuw:
             menuw = self.menuw
 
-        for p in self.eventhandler_plugins:
-            if p(event, self, menuw):
+        # call eventhandler from plugins
+        for p in plugin.get('item') + plugin.get('item_%s' % self.type):
+            if p.eventhandler(self, event, menuw):
                 return True
 
         # give the event to the next eventhandler in the list
         if self.parent:
             return self.parent.eventhandler(event, menuw)
 
-        return False
-
-
-    def plugin_eventhandler(self, event, menuw=None):
-        """
-        eventhandler for special pligins for this item
-        """
-        if not hasattr(self, '__plugin_eventhandler__'):
-            self.__plugin_eventhandler__ = []
-            for p in plugin.get('item') + plugin.get('item_%s' % self.type):
-                if hasattr(p, 'eventhandler'):
-                    self.__plugin_eventhandler__.append(p.eventhandler)
-        for e in self.__plugin_eventhandler__:
-            if e(self, event, menuw):
-                return True
         return False
 
 

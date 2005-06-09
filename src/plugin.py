@@ -115,8 +115,6 @@ class ItemPlugin(Plugin):
     now (each item type must support it directly). If the function returns
     True, the event won't be passed to other eventhandlers and also not to
     the item itself.
-
-    def eventhandler(self, item, event, menuw=None):
     """
     def __init__(self):
         Plugin.__init__(self)
@@ -130,19 +128,17 @@ class ItemPlugin(Plugin):
         return []
 
 
+    def eventhandler(self, item, event, menuw=None):
+        """
+        Additional eventhandler for this item.
+        """
+        return False
+
+    
 class DaemonPlugin(Plugin):
     """
     Plugin class for daemon objects who will be activate in the
     background while Freevo is running
-
-    A DaemonPlugin can have the following functions:
-    def poll(self):
-        this function will be called every poll_interval milliseconds
-    def eventhandler(self, event, menuw=None):
-        events no one else wants will be passed to this functions, when
-        you also set the variable event_listener to True, the object will
-        get all events. Setting self.events to a list of event names will]
-        register only that events to the eventhandler.
     """
     def __init__(self):
         Plugin.__init__(self)
@@ -150,6 +146,14 @@ class DaemonPlugin(Plugin):
         self.poll_menu_only = True      # poll only when menu is active
         self.event_listener = False     # process all events
         self.events         = []        # events to register to ([] == all)
+
+
+    def poll(self):
+        """
+        This function will be called every poll_interval milliseconds.
+        """
+        pass
+
 
     def _poll(self):
         """
@@ -161,6 +165,16 @@ class DaemonPlugin(Plugin):
         return True
 
 
+    def eventhandler(self, event):
+        """
+        Events no one else wants will be passed to this functions, when
+        you also set the variable event_listener to True, the object will
+        get all events. Setting self.events to a list of event names will]
+        register only that events to the eventhandler.
+        """
+        return False
+
+    
 class MimetypePlugin(Plugin):
     """
     Plugin class for mimetypes handled in a directory/playlist.
@@ -234,9 +248,6 @@ def activate(name, type=None, level=10, args=None):
     activate a plugin
     """
     global _plugin_number
-    global _all_plugins
-    global _initialized
-
     _plugin_number += 1
 
     for p in _all_plugins:
@@ -258,9 +269,6 @@ def remove(id):
     remove a plugin from the list. This can only be done in local_config.py
     and not while Freevo is running
     """
-    global _all_plugins
-    global _initialized
-
     if _initialized:
         return
 
@@ -283,7 +291,6 @@ def is_active(name, arg=None):
     search the list if the given plugin is active. If arg is set,
     check arg, too.
     """
-    global _all_plugins
     for p in _all_plugins:
         if p[0] == name:
             if not arg:
@@ -303,7 +310,6 @@ def is_active(name, arg=None):
 
 
 def get_number():
-    global _all_plugins
     return len(_all_plugins)
 
 
@@ -311,7 +317,6 @@ def init(callback = None, reject=['record', 'www'], exclusive=[]):
     """
     load and init all the plugins
     """
-    global _all_plugins
     global _initialized
     global _plugin_basedir
 
@@ -353,11 +358,8 @@ def get(type):
     """
     get the plugin list 'type'
     """
-    global _plugin_type_list
-
     if not _plugin_type_list.has_key(type):
         _plugin_type_list[type] = []
-
     return _plugin_type_list[type]
 
 
@@ -365,7 +367,6 @@ def getall():
     """
     return a list of all plugins
     """
-    global _all_plugins
     ret = []
     for t in _all_plugins:
         ret.append(t[0])
@@ -390,7 +391,6 @@ def getbyname(name, multiple_choises=0):
     """
     get a plugin by it's name
     """
-    global _named_plugins
     if _named_plugins.has_key(name):
         return _named_plugins[name]
     if multiple_choises:
@@ -402,7 +402,6 @@ def register(plugin, name, multiple_choises=0):
     """
     register an object as a named plugin
     """
-    global _named_plugins
     if multiple_choises:
         if not _named_plugins.has_key(name):
             _named_plugins[name] = []
@@ -416,7 +415,6 @@ def register_callback(name, *args):
     register a callback to the callback handler 'name'. The format of
     *args depends on the callback
     """
-    global _callbacks
     if not _callbacks.has_key(name):
         _callbacks[name] = []
     _callbacks[name].append(args)
@@ -426,7 +424,6 @@ def get_callbacks(name):
     """
     return all callbacks registered with 'name'
     """
-    global _callbacks
     if not _callbacks.has_key(name):
         _callbacks[name] = []
     return _callbacks[name]
@@ -450,9 +447,6 @@ def isevent(event):
         return None
 
 
-
-
-
 #
 # internal stuff
 #
@@ -470,7 +464,6 @@ def _add_to_ptl(type, object):
     """
     small helper function to add a plugin to the PluginTypeList
     """
-    global _plugin_type_list
     if not _plugin_type_list.has_key(type):
         _plugin_type_list[type] = []
     _plugin_type_list[type].append(object)
@@ -478,7 +471,6 @@ def _add_to_ptl(type, object):
 
 
 def _find_plugin_file(filename):
-    global _plugin_basedir
     full_filename = os.path.join(_plugin_basedir, filename)
 
     if os.path.isfile(full_filename + '.py'):
@@ -515,12 +507,6 @@ def _load_plugin(name, type, level, args, number):
     """
     load the plugin and add it to the lists
     """
-
-
-    global _plugin_type_list
-    global _named_plugins
-    global _plugin_basedir
-
     # fallback
     module  = name
     object  = '%s.PluginInterface' % module
@@ -586,16 +572,19 @@ def _load_plugin(name, type, level, args, number):
         else:
             special = ''
 
-        # special plugin type (e.g. idlebar)
         if p._type:
+            # special plugin type (e.g. idlebar)
             _add_to_ptl(p._type, p)
 
         else:
             if isinstance(p, DaemonPlugin):
-                if hasattr(p, 'poll'):
-                    notifier.addTimer( p.poll_interval,
-                                       notifier.Callback( p._poll ) )
-                if hasattr(p, 'eventhandler'):
+                # plugin is a DaemonPlugin
+                if p.__class__.poll != DaemonPlugin.poll:
+                    # plugin has a self defined poll function, register it
+                    notifier.addTimer( p.poll_interval, p._poll )
+
+                if p.__class__.eventhandler != DaemonPlugin.eventhandler:
+                    # plugin has a self defined eventhandler
                     if p.events:
                         for e in p.events:
                             eventhandler.register(p, e)
@@ -607,18 +596,21 @@ def _load_plugin(name, type, level, args, number):
                         eventhandler.register(p, handler)
 
             if isinstance(p, MainMenuPlugin):
+                # plugin is a MainMenuPlugin
                 _add_to_ptl('mainmenu%s' % special, p)
-                if hasattr(p, 'eventhandler'):
-                    eventhandler.register(p, eventhandler.GENERIC_HANDLER)
 
             if isinstance(p, ItemPlugin):
+                # plugin is an ItemPlugin
                 _add_to_ptl('item%s' % special, p)
 
             if isinstance(p, MimetypePlugin):
+                # plugin is a MimetypePlugin
                 _add_to_ptl('mimetype', p)
 
         # register shutdown handler
-        cleanup.register( p.shutdown )
+        if p.__class__.shutdown != Plugin.shutdown:
+            # plugin has a self defined shutdown function
+            cleanup.register( p.shutdown )
 
         if p.plugin_name:
             _named_plugins[p.plugin_name] = p

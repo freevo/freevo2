@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.63  2005/06/09 19:43:55  dischi
+# clean up eventhandler usage
+#
 # Revision 1.62  2005/05/07 17:33:36  dischi
 # fix dvd handling
 #
@@ -257,7 +260,7 @@ class Xine(Application):
             self.app.stop('quit\n')
             self.app = None
 
-    def eventhandler(self, event, menuw=None):
+    def eventhandler(self, event):
         """
         eventhandler for xine control. If an event is not bound in this
         function it will be passed over to the items eventhandler

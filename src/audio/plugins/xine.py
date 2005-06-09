@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2005/06/09 19:43:53  dischi
+# clean up eventhandler usage
+#
 # Revision 1.24  2005/06/01 19:01:25  dischi
 # adjust to popen changes
 #
@@ -135,7 +138,7 @@ class Xine:
         self.app.stop('quit\n')
             
 
-    def eventhandler(self, event, menuw=None):
+    def eventhandler(self, event):
         """
         eventhandler for xine control. If an event is not bound in this
         function it will be passed over to the items eventhandler

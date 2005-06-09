@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2005/06/09 19:43:53  dischi
+# clean up eventhandler usage
+#
 # Revision 1.4  2004/11/20 18:23:03  dischi
 # use python logger module for debug
 #
@@ -81,10 +84,10 @@ class PluginInterface(plugin.DaemonPlugin):
         self.before = before
         self.after = after
         
-    def eventhandler(self, event, menuw=None):
+    def eventhandler(self, event):
         """
-        catch VIDEO_START/VIDEOEND and run a command, return False, maybe someone
-        else is watching for the event.
+        catch VIDEO_START/VIDEOEND and run a command, return False, maybe
+        someone else is watching for the event.
         """
 
 

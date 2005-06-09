@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2005/06/09 19:43:53  dischi
+# clean up eventhandler usage
+#
 # Revision 1.11  2004/08/01 10:41:52  dischi
 # deactivate plugin
 #
@@ -134,7 +137,7 @@ class RadioPlayer:
         self.playerGUI.refresh()
         
 
-    def eventhandler(self, event, menuw=None):
+    def eventhandler(self, event):
         """
         eventhandler for mplayer control. If an event is not bound in this
         function it will be passed over to the items eventhandler

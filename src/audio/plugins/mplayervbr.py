@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2005/06/09 19:43:53  dischi
+# clean up eventhandler usage
+#
 # Revision 1.7  2005/06/01 19:01:25  dischi
 # adjust to popen changes
 #
@@ -188,7 +191,7 @@ class MPlayer:
         return self.app.is_alive()
 
 
-    def eventhandler(self, event, menuw=None):
+    def eventhandler(self, event):
         """
         eventhandler for mplayer control. If an event is not bound in this
         function it will be passed over to the items eventhandler

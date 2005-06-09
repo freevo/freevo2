@@ -161,7 +161,7 @@ class MainMenu(Item):
         return ret
 
 
-    def eventhandler(self, event = None, menuw=None, arg=None):
+    def eventhandler(self, event, menuw=None):
         """
         Automatically perform actions depending on the event, e.g. play DVD
         """

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2005/06/09 19:43:53  dischi
+# clean up eventhandler usage
+#
 # Revision 1.6  2005/01/08 15:40:52  dischi
 # remove TRUE, FALSE, DEBUG and HELPER
 #
@@ -100,7 +103,6 @@ class PluginInterface(plugin.DaemonPlugin):
         self.screensaver_showing = False
 	self.vitem = None
 	self.pl = None
-	self.menuw = None
 	self.poll_interval = 1000 * config.SSAVER_POLL
 	self.saver_delay = config.SSAVER_DELAY
 	self.saver_type = sstype
@@ -111,14 +113,12 @@ class PluginInterface(plugin.DaemonPlugin):
         return [ ('SSAVER_DELAY', 300, '# of seconds to wait to start saver.'),
 	         ('SSAVER_POLL', 600, '# of seconds to wait between polling.') ]
 
-    def eventhandler(self, event = None, menuw=None, arg=None):
+    def eventhandler(self, event):
         """
         eventhandler to handle the events. Always return false since we
 	are just a listener and really can't send back true.
         """
         log.info("Saver saw %s" % event.name)
-	if menuw:
-	    self.menuw = menuw
 
         if event.name == 'SCREENSAVER_START':
 	    self.start_saver()
@@ -155,7 +155,7 @@ class PluginInterface(plugin.DaemonPlugin):
             os.system('%s' % self.arg1)
         elif self.saver_type == 'ssr':
             self.pl = Playlist('ScreenSaver', playlist=self.arg1, display_type='image', repeat=True)
-            self.pl.play(menuw=self.menuw)
+            self.pl.play()
         elif self.saver_type == 'fxd':
             mylist = fxditem.mimetype.parse(None, [self.arg1], display_type=self.arg2)
             if len(mylist) > 0:
@@ -165,7 +165,7 @@ class PluginInterface(plugin.DaemonPlugin):
                     self.pl.repeat = 1
                 elif self.arg2 == 'video':
                     arg = '-nosound -loop 0'
-                self.pl.play(arg=arg, menuw=self.menuw)
+                self.pl.play(arg=arg)
             else:
                 log.warning("saver thinks fxd blew up trying to parse?")
         else:

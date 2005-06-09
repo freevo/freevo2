@@ -279,7 +279,7 @@ class MediaMenu(Item):
         return menu
 
 
-    def eventhandler(self, event = None, menuw=None):
+    def eventhandler(self, event, menuw=None):
         """
         Eventhandler for the media main menu. The menu must be regenerated
         when a disc in a rom drive changes

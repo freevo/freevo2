@@ -466,7 +466,7 @@ class MenuWidget(Application):
             menu = self.menustack[-2]
             if hasattr(menu.selected, 'eventhandler') and \
                    menu.selected.eventhandler:
-                if menu.selected.eventhandler(event = event, menuw=self):
+                if menu.selected.eventhandler(event, self):
                     return True
             return False
 
@@ -599,7 +599,7 @@ class MenuWidget(Application):
 
         if hasattr(menu.selected, 'eventhandler') and \
                menu.selected.eventhandler:
-            if menu.selected.eventhandler(event = event, menuw=self):
+            if menu.selected.eventhandler(event, self):
                 return True
 
         return False

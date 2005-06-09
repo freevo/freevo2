@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2005/06/09 19:43:54  dischi
+# clean up eventhandler usage
+#
 # Revision 1.21  2005/06/04 17:18:13  dischi
 # adjust to gui changes
 #
@@ -141,7 +144,7 @@ class PluginInterface(plugin.DaemonPlugin):
         display.update()
 
 
-    def eventhandler(self, event, menuw=None):
+    def eventhandler(self, event):
         """
         catch OSD_MESSAGE and display it, return False, maybe someone
         else is watching for the event.

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.105  2005/06/09 19:43:55  dischi
+# clean up eventhandler usage
+#
 # Revision 1.104  2005/06/04 17:18:16  dischi
 # adjust to gui changes
 #
@@ -396,7 +399,7 @@ class MPlayer(Application):
         self._timer_id = None
         return False
         
-    def eventhandler(self, event, menuw=None):
+    def eventhandler(self, event):
         """
         eventhandler for mplayer control. If an event is not bound in this
         function it will be passed over to the items eventhandler

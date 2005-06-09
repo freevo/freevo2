@@ -4,6 +4,36 @@
 # -----------------------------------------------------------------------------
 # $Id$
 #
+# FIXME: add documentation about this module
+#
+# Note on eventhandler functions:
+#
+# Many different objects can have an eventhandler function and the parameters
+# differs based on the object itself. There are three different kinds of
+# eventhandlers:
+#
+# 1. Global eventhandlers registered to this module
+#    def eventhandler(self, event)
+#    This eventhandler simply gets the current event and may process it. This
+#    kind of eventhandlers can be found in a DaemonPlugin, an Application
+#    or a Window.
+#
+# 2. Menu eventhandlers
+#    def eventhandler(self, event, menuw=None)
+#    This eventhandlers are called by the menu widget, e.g. all Items have such
+#    an eventhandler. It should use menuw=None because the eventhandler may
+#    also be called from an application which doesn't know about menuw
+#
+# 3. Plugin eventhandlers for items
+#    def eventhandler(self, item, event, menuw=None)
+#    This eventhandlers are defined in ItemPlugins and will be called from
+#    inside the item if the item itself doesn't handle the event.
+#
+# Thie basic idea is that the event is passed to an application or window by
+# this module. It doesn't know about a menuw or item. The application may pass
+# the event to an item, menuw will add itself to it, other applications don't
+# do this. The item itself will call the plugins and add itself to the list
+# of parameters.
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -125,13 +155,6 @@ def is_menu():
     return get_singleton().is_menu()
 
 
-def set_context(context):
-    """
-    Set context (you should never call this function)
-    """
-    return get_singleton().set_context(context)
-
-
 def post(event):
     """
     Send an event to the event queue
@@ -151,7 +174,6 @@ class Eventhandler:
         self.applications = []
         self.context      = None
         
-        self.eventhandler_plugins = None
         self.queue = []
         self.registered = { EVENT_LISTENER : [], GENERIC_HANDLER : []}
         self.stack_change = None
@@ -296,13 +318,6 @@ class Eventhandler:
         return len(self.applications) == 1
     
 
-    def set_context(self, context):
-        """
-        Set context
-        """
-        self.context = context
-
-        
     def post(self, event):
         """
         Send an event to the event queue

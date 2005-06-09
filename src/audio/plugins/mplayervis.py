@@ -111,7 +111,7 @@ class PluginInterface(plugin.Plugin):
         return command + [ "-af", "export" ]
 
 
-    def eventhandler(self, event, menuw=None):
+    def eventhandler(self, event):
         """
         Eventhandler for catching audio events
         """

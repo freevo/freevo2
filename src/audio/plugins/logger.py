@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2005/06/09 19:43:53  dischi
+# clean up eventhandler usage
+#
 # Revision 1.9  2005/01/08 15:40:51  dischi
 # remove TRUE, FALSE, DEBUG and HELPER
 #
@@ -93,7 +96,7 @@ class PluginInterface(plugin.DaemonPlugin):
                      util.escape(os.path.basename(filename)) )
             self.runquery(query)
 
-    def eventhandler(self, event, menuw=None):
+    def eventhandler(self, event):
         if event == AUDIO_LOG:
             self.log_track(event.arg)
         if event == RATING and str(event.arg[0]) in '12345':

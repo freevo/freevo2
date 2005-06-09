@@ -13,6 +13,9 @@
 #    3) Better (and more) LCD screens.
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2005/06/09 19:43:53  dischi
+# clean up eventhandler usage
+#
 # Revision 1.23  2005/01/08 15:40:53  dischi
 # remove TRUE, FALSE, DEBUG and HELPER
 #
@@ -940,7 +943,7 @@ class PluginInterface( plugin.DaemonPlugin ):
             self.lcd.widget_add( s, w, type )
 
         
-    def eventhandler( self, event, menuw=None ):
+    def eventhandler(self, event):
         if event == PLAY_START:
             self.playitem = event.arg
         elif event == PLAY_END or event == STOP:

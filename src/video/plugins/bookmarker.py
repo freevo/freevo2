@@ -138,7 +138,7 @@ class PluginInterface(plugin.ItemPlugin):
         return
 
 
-    def eventhandler(self, item, event, menuw):
+    def eventhandler(self, item, event, menuw=None):
         """
         Handle video events for bookmark support.
         """
