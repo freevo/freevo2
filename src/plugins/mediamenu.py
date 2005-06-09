@@ -165,7 +165,7 @@ class MediaMenu(Item):
             try:
                 # split the list on dir/file, title and add_args
                 add_args = None
-                if isstring(item):
+                if isinstance(item, (str, unicode)):
                     # only a filename is given
                     title, filename = u'', item
                 else:

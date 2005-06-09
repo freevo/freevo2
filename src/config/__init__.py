@@ -73,23 +73,13 @@ from event import *
 # get logging object
 log = logging.getLogger('config')
 
-
-VERSION = version.__version__
-
 # For Internationalization purpose
 try:
     gettext.install('freevo', os.environ['FREEVO_LOCALE'], 1)
 except: # unavailable, define '_' for all modules
     __builtin__.__dict__['_']= lambda m: m
 
-
-# String helper function. Always use this function to detect if the
-# object is a string or not. It checks against str and unicode
-def __isstring__(s):
-    return isinstance(s, str) or isinstance(s, unicode)
-        
-__builtin__.__dict__['isstring'] = __isstring__
-
+# set global app name
 app = os.path.splitext(os.path.basename(sys.argv[0]))[0]
 __builtin__.__dict__['__freevo_app__'] = app
 
@@ -275,7 +265,7 @@ for type in ('video', 'audio', 'image', 'games'):
         # The algorithm doesn't work for GAMES_ITEMS, so we leave it out
         abs = []
         for d in x:
-            if isstring(d):
+            if isinstance(d, (str, unicode)):
                 pos = d.find(':')
                 if pos == -1:
                     abs.append(os.path.abspath(d))

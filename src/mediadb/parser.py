@@ -76,7 +76,7 @@ def simplify(object):
     for k in object.keys:
         if not k in [ 'thumbnail', URL ] and getattr(object,k) != None:
             value = getattr(object,k)
-            if isstring(value):
+            if isinstance(value, (str, unicode)):
                 value = Unicode(value.replace('\0', '').lstrip().rstrip())
             if value:
                 ret[k] = value

@@ -449,7 +449,7 @@ class ListingArea(Area):
                     toi = self.__text_or_icon(table_text[i], table_x,
                                               table_w, val.font)
                     x_mod, table_text[i] = toi
-                    if not isstring(table_text[i]):
+                    if not isinstance(table_text[i], (str, unicode)):
                         img = self.drawimage(table_text[i],
                                              (table_x + x_mod, y + vskip))
                         gui_objects.append(img)

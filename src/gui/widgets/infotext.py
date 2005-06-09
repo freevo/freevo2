@@ -122,7 +122,7 @@ class InfoText(CanvasContainer):
                     # evaluate the expression:
                     exp = eval(expression.expression, {'attr': self.__getattr},
                                function_calls)
-                    if not isstring(exp):
+                    if not isinstance(exp, (str, unicode)):
                         exp = str(exp)
                     if exp:
                         ret_list.append((expression, exp))

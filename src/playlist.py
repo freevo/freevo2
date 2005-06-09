@@ -226,7 +226,7 @@ class Playlist(MediaItem):
             self.suffixlist += p.suffix()
             self.get_plugins.append(p)
 
-        if isstring(playlist):
+        if isinstance(playlist, (str, unicode)):
             self.set_url(playlist)
             if self.info['playlist'] != None:
                 log.info('use cached playlist for %s' % playlist)
@@ -250,7 +250,7 @@ class Playlist(MediaItem):
                 self.info.store_with_mtime('playlist', self.playlist)
 
         # self.playlist is a list of Items or strings (filenames)
-        if not isstring(playlist):
+        if not isinstance(playlist, (str, unicode)):
             # create a basic info object
             self.info = mediadb.item()
 
