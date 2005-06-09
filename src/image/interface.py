@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2005/06/09 20:04:02  dischi
+# move fxditem node parser from plugin to fxditem
+#
 # Revision 1.8  2005/05/01 17:40:47  dischi
 # remove some vfs calls were they are not needed
 #
@@ -61,6 +64,7 @@ from mmpython.image import bins
 import config
 import util
 import plugin
+import fxditem
 
 # ImageItem
 from imageitem import ImageItem
@@ -77,7 +81,7 @@ class PluginInterface(plugin.MimetypePlugin):
         self.display_type = [ 'image' ]
 
         # register the callbacks
-        plugin.register_callback('fxditem', ['image'], 'slideshow', fxdhandler)
+        fxditem.add_parser(['image'], 'slideshow', fxdhandler)
 
         # activate the mediamenu for image
         level = plugin.is_active('image')[2]

@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2005/06/09 20:04:03  dischi
+# move fxditem node parser from plugin to fxditem
+#
 # Revision 1.23  2005/06/09 19:43:53  dischi
 # clean up eventhandler usage
 #
@@ -388,7 +391,7 @@ class PluginInterface(plugin.MainMenuPlugin):
 
         # register command to normal fxd item parser
         # to enable <command> tags in fxd files in every menu
-        plugin.register_callback('fxditem', [], 'command', fxdparser)
+        fxditem.add_parser([], 'command', fxdparser)
         plugin.MainMenuPlugin.__init__(self)
         
     def items(self, parent):
@@ -429,7 +432,7 @@ class fxdhandler(plugin.Plugin):
     def __init__(self):
         # register command to normal fxd item parser
         # to enable <command> tags in fxd files in every menu
-        plugin.register_callback('fxditem', [], 'command', fxdparser)
+        fxditem.add_parser([], 'command', fxdparser)
         plugin.Plugin.__init__(self)
         
 class CommandMainMenuItem(plugin.MainMenuPlugin):

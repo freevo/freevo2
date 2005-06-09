@@ -43,6 +43,7 @@ import util
 import eventhandler
 import plugin
 import mediadb
+import fxditem
 
 from event import *
 from item import Item, MediaItem
@@ -543,8 +544,8 @@ class Mimetype(plugin.MimetypePlugin):
     def __init__(self):
         plugin.MimetypePlugin.__init__(self)
 
-        # register the callback
-        plugin.register_callback('fxditem', [], 'playlist', self.fxdhandler)
+        # add fxd parser callback
+        fxditem.add_parser([], 'playlist', self.fxdhandler)
 
 
     def suffix(self):

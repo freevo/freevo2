@@ -45,6 +45,7 @@ import config
 import util
 import util.videothumb
 import plugin
+import fxditem
 from item import FileInformation
 
 # video imports
@@ -63,10 +64,9 @@ class PluginInterface(plugin.MimetypePlugin):
             self.display_type = [ 'video', 'audio' ]
 
         # load the fxd part of video
-        plugin.register_callback('fxditem', ['video'], 'movie',
-                                 fxdhandler.parse_movie)
-        plugin.register_callback('fxditem', ['video'], 'disc-set',
-                                 fxdhandler.parse_disc_set)
+        fxditem.add_parser(['video'], 'movie', fxdhandler.parse_movie)
+        fxditem.add_parser(['video'], 'disc-set', fxdhandler.parse_disc_set)
+
         # update the database based on the current mimetypes
         database.update()
         # activate the mediamenu for video

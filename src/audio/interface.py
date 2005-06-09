@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2005/06/09 20:04:02  dischi
+# move fxditem node parser from plugin to fxditem
+#
 # Revision 1.10  2005/05/01 17:36:41  dischi
 # remove some vfs calls were they are not needed
 #
@@ -61,6 +64,7 @@ import stat
 import config
 import util
 import plugin
+import fxditem
 from mediadb.globals import *
 
 # AudioItem
@@ -77,8 +81,8 @@ class PluginInterface(plugin.MimetypePlugin):
         plugin.MimetypePlugin.__init__(self)
         self.display_type = [ 'audio' ]
 
-        # register the callbacks
-        plugin.register_callback('fxditem', ['audio'], 'audio', fxdhandler)
+        # add fxd parser callback
+        fxditem.add_parser(['audio'], 'audio', fxdhandler)
 
         # activate the mediamenu for audio
         level = plugin.is_active('audio')[2]

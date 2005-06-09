@@ -58,7 +58,16 @@ import mediadb
 # get logging object
 log = logging.getLogger()
 
+# the parser for fxd nodes
+callbacks = []
 
+def add_parser(types, node, callback):
+    """
+    Add a node parser for fxd files.
+    """
+    callbacks.append((types, node, callback))
+
+    
 class Mimetype(plugin.MimetypePlugin):
     """
     class to handle fxd files in directories
@@ -102,7 +111,6 @@ class Mimetype(plugin.MimetypePlugin):
             if display_type == 'tv':
                 display_type = 'video'
 
-        callbacks = plugin.get_callbacks('fxditem')
         items = []
         for fxd_file in fxd_files:
             try:
@@ -157,8 +165,6 @@ class Container(item.Item):
         # set variables new for the subtitems
         fxd.setattr(None, 'parent', self)
         fxd.setattr(None, 'items', self.items)
-
-        callbacks = plugin.get_callbacks('fxditem')
 
         for child in node.children:
             for types, tag, handler in callbacks:
@@ -216,6 +222,8 @@ def container_callback(fxd, node):
 
 
 # register the plugin as mimetype for fxd files
-plugin.register_callback('fxditem', None, 'container', container_callback)
 mimetype = Mimetype()
 plugin.activate(mimetype, level=0)
+
+# add fxd parser
+add_parser(None, 'container', container_callback)
