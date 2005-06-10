@@ -120,6 +120,9 @@ class ItemPlugin(Plugin):
     """
     def __init__(self):
         Plugin.__init__(self)
+        # FIXME: remove this
+        self.defined_actions = self.actions
+        self.actions = self.actions_wrapper
 
 
     def actions(self, item):
@@ -128,6 +131,26 @@ class ItemPlugin(Plugin):
         (function, 'name-in-the-menu')
         """
         return []
+
+
+    def actions_wrapper(self, item):
+        """
+        Bad warpper for actions used while actions is restructured.
+        FIXME: remove this function.
+        """
+        from menu.action import ActionWrapper
+        items = []
+        for a in self.defined_actions(item):
+            if isinstance(a, (list, tuple)):
+                if len(a) > 3:
+                    items.append(ActionWrapper(a[1], a[0], a[2], a[3]))
+                elif len(a) > 2:
+                    items.append(ActionWrapper(a[1], a[0], a[2]))
+                else:
+                    items.append(ActionWrapper(a[1], a[0]))
+            else:
+                items.append(a)
+        return items
 
 
     def eventhandler(self, item, event, menuw=None):
