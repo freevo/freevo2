@@ -29,6 +29,7 @@
 from distutils.core import setup, Extension
 import os
 import sys
+import re
 
 files = ["imlib2.c", "image.c", "font.c", "rawformats.c", "thumbnail.c",
          "png.c" ]
@@ -74,9 +75,7 @@ config_h = open('config.h', 'w')
 
 try:
     import pygame
-    inc = pygame.__path__[0]
-    inc = inc[:inc.rfind('site-packages')] + 'pygame'
-    inc = inc[:inc.rfind('/lib/')] + '/include' + inc[inc.rfind('/lib/')+4:]
+    inc = re.sub("/(lib|lib64)/", "/include/", pygame.__path__[0]).replace("site-packages/", "")
     if not os.path.isdir(inc):
         raise ImportError
     if not check_config('sdl', '1.2.5'):
