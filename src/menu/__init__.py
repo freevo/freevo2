@@ -1,15 +1,16 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# item.py - Deprecated
+# menu.py - freevo menu handling system
 # -----------------------------------------------------------------------------
 # $Id$
-#
-# This file will be removed in the future.
-# Please use the menu module to access Item and related classes
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First edition: Krister Lagerstrom <krister-freevo@kmlager.com>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -28,10 +29,36 @@
 #
 # -----------------------------------------------------------------------------
 
-__all__ = [ 'FileInformation', 'Action', 'Item', 'MediaItem' ]
+# menu imports
+from file import FileInformation
+from item import Item
+from mediaitem import MediaItem
+from action import Action
+from menu import Menu
+from widget import MenuWidget
 
-# add stuff here that was here before
-from menu import Item
-from menu import MediaItem
-from menu import Action
-from menu import FileInformation
+class MenuItem(Item):
+    """
+    Default item for the menu. It includes one action.
+    WARNING: this class may be deleted in the future!
+    """
+    def __init__( self, name, action=None, arg=None, type=None, image=None,
+                  icon=None, parent=None):
+        Item.__init__(self, parent)
+        if name:
+            self.name = Unicode(name)
+        if icon:
+            self.icon = icon
+        if image:
+            self.image = image
+
+        self.type = type
+        self.action = Action(name, action)
+        self.action.parameter(arg=arg)
+
+
+    def actions(self):
+        """
+        return the default action
+        """
+        return [ self.action ]

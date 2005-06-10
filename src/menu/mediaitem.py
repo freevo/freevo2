@@ -1,0 +1,149 @@
+# -*- coding: iso-8859-1 -*-
+# -----------------------------------------------------------------------------
+# mediaitem.py - Item class for items based on media (files)
+# -----------------------------------------------------------------------------
+# $Id$
+#
+# -----------------------------------------------------------------------------
+# Freevo - A Home Theater PC framework
+#
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# -----------------------------------------------------------------------------
+
+__all__ = [ 'MediaItem' ]
+
+# python imports
+import logging
+
+# freevo imports
+import mediadb
+
+from event import *
+from sysconfig import Unicode
+from mediadb.globals import *
+
+# menu imports
+from item import Item
+from file import FileInformation
+
+# get logging object
+log = logging.getLogger()
+
+
+class MediaItem(Item):
+    """
+    This item is for a media. It's only a template for image, video
+    or audio items
+    """
+    def __init__(self, type, parent):
+        self.type = type
+        Item.__init__(self, parent, False)
+
+
+    def set_url(self, url, search_cover=True):
+        """
+        Set a new url to the item and adjust all attributes depending
+        on the url. Each MediaItem has to call this function. If info
+        is True, search for additional information in mediadb.
+        """
+        if isinstance(url, mediadb.ItemInfo):
+            self.info = url
+            url = url.url
+        else:
+            if url:
+                log.error('please fix this for %s' % url)
+                if url.find('://') > 0:
+                    url = url[url.find('://')+3:]
+                self.info = mediadb.get(url)
+                url = self.info.url
+            else:
+                self.info = mediadb.item()
+
+                self.url = url              # the url itself
+                self.network_play = True    # network url, like http
+                self.filename     = ''      # filename if it's a file:// url
+                self.mode         = ''      # the type (file, http, dvd...)
+                self.files        = None    # FileInformation
+                self.mimetype     = ''      # extention or mode
+                self.name         = u''
+                return
+
+        self.url = url
+        self.files = FileInformation()
+        if self.media:
+            self.files.read_only = True
+
+        self.mode = self.url[:self.url.find('://')]
+
+        if self.mode == 'file':
+            # The url is based on a file. We can search for images
+            # and extra attributes here
+            self.network_play = False
+            self.filename     = self.url[7:]
+            self.files.append(self.filename)
+
+            # set the suffix of the file as mimetype
+            self.mimetype = self.filename[self.filename.rfind('.')+1:].lower()
+
+            self.info.set_permanent_variables(self.autovars)
+            try:
+                if self.parent.DIRECTORY_USE_MEDIAID_TAG_NAMES:
+                    self.name = self.info['title'] or self.name
+            except:
+                pass
+            if not self.name:
+                self.name = self.info[FILETITLE]
+
+            if search_cover:
+                cover = self.info[COVER]
+                if cover:
+                    self.image = cover
+                    if cover != self.filename and \
+                           cover[cover.rfind('/')+1:] == \
+                           self.filename[self.filename.rfind('/')+1:]:
+                        self.files.image = cover
+
+        else:
+            # Mode is not file, it has to be a network url. Other
+            # types like dvd are handled inside the derivated class
+            self.network_play = True
+            self.filename     = ''
+            self.mimetype     = self.type
+            if not self.name:
+                self.name = self.info[FILETITLE]
+            if not self.name:
+                self.name = Unicode(self.url)
+            self.image = self.info[COVER]
+
+
+    def play(self, menuw=None, arg=None):
+        """
+        play the item
+        """
+        pass
+
+
+    def stop(self, menuw=None, arg=None):
+        """
+        stop playing
+        """
+        pass

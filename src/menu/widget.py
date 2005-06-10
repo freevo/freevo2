@@ -1,9 +1,8 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# menu.py - freevo menu handling system
+# widget.py - Menu widget for Freevo
 # -----------------------------------------------------------------------------
 # $Id$
-#
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -30,142 +29,27 @@
 #
 # -----------------------------------------------------------------------------
 
-__all__ = [ 'MenuItem', 'Menu', 'MenuWidget' ]
+__all__ = [ 'MenuWidget' ]
+
 
 # python imports
-import copy
 import logging
 
 # freevo imports
 import config
 import plugin
-import util
-import gui
 import gui.areas
 import gui.theme
 from gui.windows import MessageBox
 
 from event import *
-from item import Item, Action
 from application import Application
 
+# menu imports
+from menu import Menu
+
 # get logging object
-log = logging.getLogger()
-
-
-class MenuItem(Item):
-    """
-    Default item for the menu. It includes one action
-    """
-    def __init__( self, name, action=None, arg=None, type=None, image=None,
-                  icon=None, parent=None):
-        Item.__init__(self, parent)
-        if name:
-            self.name  = Unicode(name)
-        if icon:
-            self.icon  = icon
-        if image:
-            self.image = image
-
-        self.function = action
-        self.arg      = arg
-        self.type     = type
-
-
-    def actions(self):
-        """
-        return the default action
-        """
-        return [ ( self.select, self.name ) ]
-
-
-    def select(self, arg=None, menuw=None):
-        """
-        call the function
-        """
-        if self.function:
-            self.function(arg=self.arg, menuw=menuw)
-
-
-    def __call__(self, menuw=None):
-        """
-        call the function
-        """
-        if self.function:
-            self.function(arg=self.arg, menuw=menuw)
-
-class Menu:
-    """
-    a Menu with Items for the MenuWidget
-    """
-    def __init__(self, heading, choices=[], theme=None, umount_all = 0,
-                 reload_func = None, item_types = None,
-                 force_skin_layout = -1):
-
-        self.heading = heading          # name of the menu
-        self.choices = choices          # List of MenuItem:s
-        if len(self.choices):
-            self.selected     = self.choices[0]
-            self.selected_pos = 0
-        else:
-            self.selected     = None
-            self.selected_pos = -1
-
-        self.umount_all = umount_all    # umount all ROM drives on display?
-        self.theme = None               # skin theme for this menu
-        if theme:
-            self.theme = theme
-
-        # special items for the new skin to use in the view or info
-        # area. If None, menu.selected will be taken
-        self.infoitem = None
-        self.viewitem = None
-
-        # Called when a child menu returns. This function returns a new menu
-        # or None and the old menu will be reused
-        self.reload_func       = reload_func
-        self.item_types        = item_types
-        self.force_skin_layout = force_skin_layout
-
-        # How many menus to go back when 'BACK_ONE_MENU' is called
-        self.back_one_menu = 1
-
-        # how many rows and cols does the menu has
-        # (will be changed by the skin code)
-        self.cols = 1
-        self.rows = 1
-
-
-    def change_selection(self, rel):
-        """
-        select a new item relative to current selected
-        """
-        self.selected_pos = min(max(0, self.selected_pos + rel),
-                                len(self.choices) - 1)
-        self.selected = self.choices[self.selected_pos]
-
-
-    def set_selection(self, item):
-        """
-        set the selection to a specific item in the list
-        """
-        if item:
-            self.selected     = item
-            self.selected_pos = self.choices.index(item)
-        else:
-            self.selected     = None
-            self.selected_pos = -1
-
-
-    def __del__(self):
-        """
-        delete function of memory debugging
-        """
-        _mem_debug_('menu', self.heading)
-        map(lambda a: a.delete(), self.choices)
-
-
-
+log = logging.getLogger('menu')
 
 
 class MenuWidget(Application):
@@ -397,14 +281,7 @@ class MenuWidget(Application):
         """
         items = []
         for a in actions:
-            if isinstance(a, Item):
-                items.append(a)
-            elif isinstance(a, Action):
-                mi = MenuItem(a.name, a.function, a.arg)
-                mi.description = a.description
-                items.append(mi)
-            else:
-                items.append(MenuItem(a[1], a[0]))
+            items.append(a)
         theme = None
 
         if item.skin_fxd:
@@ -522,10 +399,7 @@ class MenuWidget(Application):
                 msg = _('No action defined for this choice!')
                 MessageBox(text=msg).show()
             else:
-                if not isinstance(actions[0], (Item, Action)):
-                    actions[0][0](menuw=self)
-                else:
-                    actions[0](menuw=self)
+                actions[0](menu.selected, self)
             return True
 
 
@@ -536,7 +410,6 @@ class MenuWidget(Application):
             actions = menu.selected.actions()
             force   = False
             if not actions:
-                actions = []
                 force   = True
 
             plugins = plugin.get('item') + \
@@ -549,14 +422,7 @@ class MenuWidget(Application):
 
             for p in plugins:
                 for a in p.actions(menu.selected):
-                    if isinstance(a, (MenuItem, Action)):
-                        actions.append(a)
-                    else:
-                        actions.append(a[:2])
-                        if len(a) == 3 and a[2] == 'MENU_SUBMENU':
-                            a[0](menuw=self)
-                            return
-
+                    actions.append(a)
             if actions and (len(actions) > 1 or force):
                 self.make_submenu(menu.selected.name, actions, menu.selected)
             return True
@@ -566,14 +432,13 @@ class MenuWidget(Application):
             log.info('calling action %s' % event.arg)
 
             for a in menu.selected.actions():
-                if isinstance(a, Action) and a.shortcut == event.arg:
-                    a(menuw=menuw)
+                if not hasattr(a, 'shortcut'):
+                    # FIXME: this shouldn't happen after restructuring
+                    pass
+                elif a.shortcut == event.arg:
+                    a(menu.selected, self)
                     return True
-                if not isinstance(a, (Item, Action)) and len(a) > 2 and \
-                       a[2] == event.arg:
-                    a[0](arg=None, menuw=self)
-                    return True
-
+                    
             plugins = plugin.get('item') + \
                       plugin.get('item_%s' % menu.selected.type)
 
@@ -582,12 +447,11 @@ class MenuWidget(Application):
 
             for p in plugins:
                 for a in p.actions(menu.selected):
-                    if isinstance(a, Action) and a.shortcut == event.arg:
-                        a(menuw=menuw)
-                        return True
-                    if not isinstance(a, (Item, Action)) and len(a) > 2 and \
-                           a[2] == event.arg:
-                        a[0](arg=None, menuw=self)
+                    if not hasattr(a, 'shortcut'):
+                        # FIXME: this shouldn't happen after restructuring
+                        pass
+                    elif a.shortcut == event.arg:
+                        a(menu.selected, self)
                         return True
             log.info('action %s not found' % event.arg)
 
