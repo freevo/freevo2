@@ -741,7 +741,7 @@ def thumbnail_create(src, thumbnail_dir = ''):
     except:
         # image is broken
         if thumbnail_dir:
-            dst = thumbnail_dir + '/failed/pyimlib/'
+            dst = thumbnail_dir + '/failed/pyimlib2/'
             if not os.path.isdir(dst):
                 os.makedirs(dst, 0700)
             dst = dst + md5.md5('file://' + src).hexdigest() + '.png'
@@ -766,7 +766,7 @@ def thumbnail_check(file, thumbnail_dir = ''):
     if os.path.isfile(dst + 'png'):
         return dst + 'png'
     if thumbnail_dir:
-        dst = thumbnail_dir + '/failed/pyimlib/'
+        dst = thumbnail_dir + '/failed/pyimlib2/'
         dst = dst + md5.md5('file://' + file).hexdigest() + '.'
     else:
         dst = _failed_dir + md5.md5('file://' + file).hexdigest() + '.png'
