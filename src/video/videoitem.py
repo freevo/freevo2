@@ -48,13 +48,12 @@ import logging
 import config
 import util
 import eventhandler
-import menu
 import plugin
 import util.videothumb
 import mediadb
 
 from gui.windows import MessageBox, ConfirmBox
-from item import MediaItem, FileInformation, Action
+from menu import Menu, MediaItem, FileInformation, Action
 from event import *
 
 # video imports
@@ -382,13 +381,14 @@ class VideoItem(MediaItem):
             items = []
             # Add all possible players to the action list
             for r, player in self.possible_player:
-                items.append(Action(_('Play with %s') % player.name,
-                                    self.play, player))
+                a = Action(_('Play with %s') % player.name, self.play)
+                a.parameter(arg=player)
+                items.append(a)
 
         # Network play can get a larger cache
         if self.network_play:
-            items.append(Action(_('Play with maximum cache'),
-                                self.play, '-cache 65536'))
+            a = Action(_('Play with maximum cache'), self.play)
+            a.parameter(arg='-cache 65536')
 
         # Add the configure stuff (e.g. set audio language)
         items += configure.get_items(self)
@@ -411,8 +411,8 @@ class VideoItem(MediaItem):
         """
         show a list of variants in a menu
         """
-        m = menu.Menu(self.name, self.variants, reload_func=None,
-                      theme=self.skin_fxd)
+        m = Menu(self.name, self.variants, reload_func=None,
+                 theme=self.skin_fxd)
         m.item_types = 'video'
         menuw.pushmenu(m)
 
@@ -447,8 +447,8 @@ class VideoItem(MediaItem):
             i.name = Unicode(_('Play Title %s')) % (title+1)
             items.append(i)
 
-        moviemenu = menu.Menu(self.name, items, umount_all = 1,
-                              theme=self.skin_fxd)
+        moviemenu = Menu(self.name, items, umount_all = 1,
+                         theme=self.skin_fxd)
         moviemenu.item_types = 'video'
         menuw.pushmenu(moviemenu)
 
@@ -462,7 +462,7 @@ class VideoItem(MediaItem):
             menuw.back_one_menu()
 
 
-    def play(self, arg=None, menuw=None):
+    def play(self, menuw=None, arg=None):
         """
         Play the item. The argument 'arg' can either be a player or
         extra mplayer arguments.
