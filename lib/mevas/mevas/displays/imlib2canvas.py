@@ -39,6 +39,7 @@ class Imlib2Canvas(BitmapCanvas):
     def __init__(self, size, dither = True, blend = False):
         super(Imlib2Canvas, self).__init__(size, preserve_alpha = blend)
         self._display = Imlib2.Display(size, dither, blend)
+        self._display.set_cursor_hide_timeout(1)
 
     def _blit(self, img, r):
         pos, size = r

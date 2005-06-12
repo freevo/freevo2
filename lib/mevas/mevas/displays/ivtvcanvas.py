@@ -31,6 +31,7 @@ import time, os, fcntl, struct, math
 import mevas
 
 from bitmapcanvas import *
+from mevas import imagelib
 
 IVTVFB_IOCTL_SET_STATE = 1074282498
 IVTVFB_IOCTL_PREP_FRAME = 1074544643
