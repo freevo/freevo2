@@ -157,11 +157,13 @@ PyObject *imlib2_new_display(PyObject *self, PyObject *args)
 
 
 PyMethodDef Imlib2_methods[] = {
-    { "new_display", imlib2_new_display, METH_VARARGS }, 
     { "add_font_path", imlib2_add_font_path, METH_VARARGS }, 
     { "load_font", imlib2_load_font, METH_VARARGS }, 
     { "create", imlib2_create, METH_VARARGS }, 
     { "open", imlib2_open, METH_VARARGS }, 
+
+    // These functions are PyImlib2 extensions that are not part of Imlib2.
+    { "new_display", imlib2_new_display, METH_VARARGS }, 
     { "epeg_thumbnail", epeg_thumbnail, METH_VARARGS }, 
     { "png_thumbnail", png_thumbnail, METH_VARARGS }, 
     { "fail_thumbnail", fail_thumbnail, METH_VARARGS }, 

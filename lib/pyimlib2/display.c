@@ -108,8 +108,9 @@ PyObject *Display_PyObject__render( Display_PyObject *self, PyObject *args)
 PyObject *Display_PyObject__update( Display_PyObject *self, PyObject *args )
 {
   XEvent ev;
+  time_t now = time(NULL);
 
-  do {
+  while ( XPending( self->display ) ) {
     XNextEvent( self->display, &ev );
 
     if ( ( ev.type == KeyPress ) &&
@@ -122,8 +123,15 @@ PyObject *Display_PyObject__update( Display_PyObject *self, PyObject *args )
              Py_BuildValue( "((ii)(ii))",
                     ev.xexpose.x, ev.xexpose.y,
                     ev.xexpose.width, ev.xexpose.height ) );
+    } else if (ev.type == MotionNotify) {
+       self->last_mousemove_time = now;
+       XUndefineCursor(self->display, self->window);
     }
-  } while ( XPending( self->display ) );
+  }
+  if (self->last_mousemove_time && now - self->last_mousemove_time >= 1) {
+    self->last_mousemove_time = 0;
+    XDefineCursor(self->display, self->window, self->invisible_cursor);
+  }
 
   /* always return true as this function is used as a callback for
      pyNotifier */
@@ -193,6 +201,11 @@ PyObject *display_new(int w, int h)
 
     Display_PyObject *o;
     int screen;
+    // For hidden cursor
+    Pixmap pix;
+    static char bits[] = {0, 0, 0, 0, 0, 0, 0, 0};
+    XColor cfg;
+
 
     o = PyObject_NEW(Display_PyObject, &Display_PyObject_Type);
     o->display = XOpenDisplay(NULL);
@@ -210,7 +223,13 @@ PyObject *display_new(int w, int h)
     Py_INCREF(Py_None);
     o->expose_callback = Py_None;
 
-    XSelectInput( o->display, o->window, ExposureMask | KeyPressMask );
+    // Construct an invisible cursor for mouse hiding.
+    cfg.red = cfg.green = cfg.blue = 0;
+    pix = XCreateBitmapFromData(o->display, o->window, bits, 8, 8);
+    o->invisible_cursor = XCreatePixmapCursor(o->display, pix, pix, &cfg, &cfg, 0, 0);
+    XFreePixmap(o->display, pix);
+
+    XSelectInput( o->display, o->window, ExposureMask | KeyPressMask | PointerMotionMask);
     XMapWindow(o->display, o->window);
 
     if ( XPending( o->display ) )
