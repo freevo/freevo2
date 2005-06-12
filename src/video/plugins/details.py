@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2005/06/12 18:49:53  dischi
+# adjust to new menu code
+#
 # Revision 1.5  2004/08/14 15:11:11  dischi
 # deactivate plugin
 #
@@ -115,5 +118,5 @@ class PluginInterface(plugin.ItemPlugin):
         m.infoitem   = self.item
         m.viewitem   = self.item
         m.item_types = 'video details'
-        m.is_submenu = True
+        m.submenu = True
         menuw.pushmenu(m)

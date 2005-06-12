@@ -28,10 +28,8 @@
 #
 # -----------------------------------------------------------------------------
 
-__all__ = [ 'FileInformation', 'Action', 'Item', 'MediaItem' ]
+__all__ = [ 'Action', 'Item' ]
 
 # add stuff here that was here before
 from menu import Item
-from menu import MediaItem
 from menu import Action
-from menu import FileInformation

@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2005/06/12 18:49:53  dischi
+# adjust to new menu code
+#
 # Revision 1.11  2005/05/01 17:45:32  dischi
 # small ending / bugfix
 #
@@ -129,7 +132,7 @@ class PluginInterface(plugin.ItemPlugin):
                     os.makedirs(local_to_dir)
                 else:
                     log.info("Path doesn't exist, and makedirs=%s" % self.makedirs)
-                    menuw.delete_menu(menuw=menuw)
+                    menuw.delete_menu()
                     return
         elif not os.path.isdir(local_to_dir):
             log.info("%s is not a dir" % local_to_dir)
@@ -138,4 +141,4 @@ class PluginInterface(plugin.ItemPlugin):
         if self.item.files:
             self.item.files.move(local_to_dir)
 
-        menuw.delete_menu(menuw=menuw)
+        menuw.delete_menu()

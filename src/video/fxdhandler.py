@@ -66,7 +66,7 @@ import logging
 
 # freevo imports
 from videoitem import VideoItem
-from item import FileInformation
+from menu import Files
 
 # get logging object
 log = logging.getLogger('video')
@@ -279,7 +279,7 @@ def parse_movie(fxd, node):
         item.set_name(title)
 
     if not item.files:
-        item.files = FileInformation()
+        item.files = Files()
 
     item.files.files     = files
     item.files.fxd_file  = fxd.filename
@@ -356,7 +356,7 @@ def parse_disc_set(fxd, node):
             item.mplayer_options = ''
 
     if not item.files:
-        item.files = FileInformation()
+        item.files = Files()
     item.files.fxd_file  = fxd.filename
     if fxd.is_skin_fxd:
         item.skin_fxd = fxd.filename

@@ -46,7 +46,7 @@ import util
 import util.videothumb
 import plugin
 import fxditem
-from item import FileInformation
+from menu import Files
 
 # video imports
 from videoitem import VideoItem
@@ -134,7 +134,7 @@ class PluginInterface(plugin.MimetypePlugin):
 #                         name = file[:pos] + \
 #                                file[pos:].replace('1', '1-%s' % end, 1)
 #                         x = VideoItem(name, parent)
-#                         x.files = FileInformation()
+#                         x.files = Files()
 #                         for f in [ file ] + add_file:
 #                             x.files.append(f)
 #                             x.subitems.append(VideoItem(f, x))

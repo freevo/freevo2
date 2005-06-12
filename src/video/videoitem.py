@@ -53,7 +53,7 @@ import util.videothumb
 import mediadb
 
 from gui.windows import MessageBox, ConfirmBox
-from menu import Menu, MediaItem, FileInformation, Action
+from menu import Menu, MediaItem, Files, Action
 from event import *
 
 # video imports
@@ -66,7 +66,7 @@ log = logging.getLogger('video')
 class VideoItem(MediaItem):
     def __init__(self, url, parent):
         self.autovars = { 'deinterlace': 0 }
-        MediaItem.__init__(self, 'video', parent)
+        MediaItem.__init__(self, parent, type='video')
 
         self.variants          = []         # if this item has variants
         self.subitems          = []         # more than one file/track to play
@@ -170,7 +170,7 @@ class VideoItem(MediaItem):
                 # dvd on harddisc, add '/' for xine
                 self.url = self.url + '/'
                 self.filename = self.info.filename
-                self.files    = FileInformation()
+                self.files    = Files()
                 self.files.append(self.filename)
             elif self.url.rfind('.iso') + 4 == self.url.rfind('/'):
                 # dvd or vcd iso
@@ -447,8 +447,7 @@ class VideoItem(MediaItem):
             i.name = Unicode(_('Play Title %s')) % (title+1)
             items.append(i)
 
-        moviemenu = Menu(self.name, items, umount_all = 1,
-                         theme=self.skin_fxd)
+        moviemenu = Menu(self.name, items, theme=self.skin_fxd)
         moviemenu.item_types = 'video'
         menuw.pushmenu(moviemenu)
 

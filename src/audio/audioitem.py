@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.66  2005/06/12 18:49:53  dischi
+# adjust to new menu code
+#
 # Revision 1.65  2005/04/10 17:49:46  dischi
 # switch to new mediainfo module, remove old code now in mediadb
 #
@@ -74,7 +77,7 @@ import re
 
 # Freevo imports
 import config
-from item import MediaItem
+from menu import MediaItem
 from event import *
 
 from player import *
@@ -87,7 +90,7 @@ class AudioItem(MediaItem):
     This is the common class to get information about audiofiles.
     """
     def __init__(self, url, parent):
-        MediaItem.__init__(self, 'audio', parent)
+        MediaItem.__init__(self, parent, type='audio')
         self.set_url(url)
         self.start      = 0
         self.elapsed    = 0

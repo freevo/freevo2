@@ -38,7 +38,6 @@ import logging
 
 # freevo imports
 import config
-import menu
 import util
 import eventhandler
 import plugin
@@ -46,7 +45,7 @@ import mediadb
 import fxditem
 
 from event import *
-from item import Item, MediaItem
+from menu import Item, MediaItem, Menu
 from gui.windows import ProgressBox
 
 # get logging object
@@ -70,7 +69,7 @@ class Playlist(MediaItem):
                      3) a list (directoryname, recursive=0|1)
         build:    create the playlist. This means unfold the directories
         """
-        MediaItem.__init__(self, 'playlist', parent)
+        MediaItem.__init__(self, parent, type='playlist')
         self.menuw    = None
         self.name     = Unicode(name)
 

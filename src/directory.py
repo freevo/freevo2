@@ -49,7 +49,7 @@ import plugin
 import fxditem
 import eventhandler
 
-from item import Item, FileInformation
+from menu import Item, Files
 from playlist import Playlist
 from event import *
 
@@ -133,8 +133,8 @@ class DirItem(Playlist):
         if image:
             self.image = image
         
-        # store FileInformation for moving/copying
-        self.files = FileInformation()
+        # store Files information for moving/copying
+        self.files = Files()
         if self.media:
             self.files.read_only = True
         self.files.append(directory)
@@ -382,9 +382,8 @@ class DirItem(Playlist):
             return False
         
         log.info('create metainfo for %s', self.dir)
-        need_umount = False
         if self.media:
-            need_umount = not self.media.is_mounted()
+            umount = not self.media.is_mounted()
             self.media.mount()
 
         # get listing
@@ -404,7 +403,7 @@ class DirItem(Playlist):
         self.info.store_with_mtime('num_%s_items' % name, num_play_items)
         self.info.store_with_mtime('num_dir_items', num_dir_items)
 
-        if need_umount:
+        if self.media and umount:
             self.media.umount()
 
         return True
@@ -419,6 +418,7 @@ class DirItem(Playlist):
         return a list of actions for this item
         """
         if self.media:
+            umount = not self.media.is_mounted()
             self.media.mount()
 
         display_type = self.display_type
@@ -447,7 +447,7 @@ class DirItem(Playlist):
         # if self.folder_fxd:
         #   items += fxditem.mimetype.get(self, [self.folder_fxd])
 
-        if self.media:
+        if self.media and umount:
             self.media.umount()
 
         return items
@@ -558,7 +558,7 @@ class DirItem(Playlist):
         self.dir_items  = []
         self.pl_items   = []
 
-        if self.media:
+        if self.media and not self.media.is_mounted():
             self.media.mount()
 
         if arg == 'update':

@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2005/06/12 18:49:53  dischi
+# adjust to new menu code
+#
 # Revision 1.31  2005/04/10 17:58:45  dischi
 # switch to new mediainfo module
 #
@@ -58,7 +61,7 @@ import time
 
 # freevo imports
 import config
-from item import MediaItem
+from menu import MediaItem
 from event import *
 from viewer import *
 import util.thumbnail
@@ -71,7 +74,7 @@ class ImageItem(MediaItem):
         # set autovars to 'rotation' so that this value is
         # stored between Freevo sessions
         self.autovars = { 'rotation': 0 }
-        MediaItem.__init__(self, 'image', parent)
+        MediaItem.__init__(self, parent, type='image')
         # set url and parse the name
         self.set_url(url, search_cover=False)
         self.duration = duration
