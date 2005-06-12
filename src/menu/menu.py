@@ -1,6 +1,6 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# menu.py - a page for the menu widget
+# menu.py - a page for the menu stack
 # -----------------------------------------------------------------------------
 # $Id$
 #
@@ -31,18 +31,11 @@
 
 __all__ = [ 'Menu' ]
 
-# python imports
-import logging
-
-# get logging object
-log = logging.getLogger('menu')
-
-
 class Menu:
     """
-    A Menu page with Items for the MenuWidget
+    A Menu page with Items for the MenuStack
     """
-    def __init__(self, heading, choices=[], theme=None, umount_all = 0,
+    def __init__(self, heading, choices=[], theme=None,
                  reload_func = None, item_types = None,
                  force_skin_layout = -1):
 
@@ -55,7 +48,6 @@ class Menu:
             self.selected = None
             self.selected_pos = -1
 
-        self.umount_all = umount_all    # umount all ROM drives on display?
         self.theme = None               # skin theme for this menu
         if theme:
             self.theme = theme
@@ -73,6 +65,9 @@ class Menu:
 
         # How many menus to go back when 'BACK_ONE_MENU' is called
         self.back_one_menu = 1
+
+        # Menu type
+        self.submenu = False
 
         # how many rows and cols does the menu has
         # (will be changed by the skin code)
