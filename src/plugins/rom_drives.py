@@ -159,7 +159,7 @@ class autostart(plugin.DaemonPlugin):
                 if media.type == 'audio':
                     # disc marked as audio, play everything
                     if media.item.type == 'dir':
-                        media.item.play_recursive(menuw=menuw)
+                        media.item.play(menuw, recursive=True)
                     elif media.item.type == 'audiocd':
                         media.item.play(menuw=menuw)
                     else:
