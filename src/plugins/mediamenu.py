@@ -46,7 +46,7 @@ from item import Item
 from directory import DirItem
 from mainmenu import MainMenuItem
 from menu import Menu
-from mediadb import FileListing
+from mediadb import FileListing, watcher
 from gui.windows import ProgressBox
 
 # get logging object
@@ -107,6 +107,9 @@ class MediaMenu(Item):
         generating the menu and if something changes by pressing the EJECT
         button
         """
+        # stop mediadb.watcher
+        watcher.cwd(None)
+        
         # copy the "normal" items and add plugin data
         items = copy.copy(self.normal_items)
 
@@ -256,7 +259,7 @@ class MediaMenu(Item):
             return
 
         type = '%s main menu' % self.display_type
-        item_menu = Menu(menutitle, items, item_types = type, umount_all=1,
+        item_menu = Menu(menutitle, items, item_types = type,
                          reload_func = self.reload)
         item_menu.skin_force_text_view = force_text_view
         menuw.pushmenu(item_menu)
