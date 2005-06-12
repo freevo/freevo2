@@ -4,11 +4,13 @@
 # -----------------------------------------------------------------------------
 # $Id$
 #
+# This module depends on the following parts of Freevo
+# sysconfig, config, util, event, plugin and mediadb
+#
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
 #
-# First edition: Krister Lagerstrom <krister-freevo@kmlager.com>
 # Maintainer:    Dirk Meyer <dmeyer@tzi.de>
 #
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
@@ -29,13 +31,14 @@
 #
 # -----------------------------------------------------------------------------
 
-# menu imports
-from file import FileInformation
+# import the submodules
+from files import Files
 from item import Item
 from mediaitem import MediaItem
 from action import Action
 from menu import Menu
-from widget import MenuWidget
+from stack import MenuStack
+
 
 class MenuItem(Item):
     """
