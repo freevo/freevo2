@@ -41,10 +41,11 @@ import os
 import config
 import gui
 import gui.theme
+import mediadb
 import menu
 import util
 import plugin
-
+from application.menuw import MenuWidget
 from item import Item
 from event import *
 
@@ -121,7 +122,7 @@ class MainMenu(Item):
         """
         Setup the main menu and handle events (remote control, etc)
         """
-        menuw = menu.MenuWidget()
+        menuw = MenuWidget()
         items = []
         for p in plugin.get('mainmenu'):
             items += p.items(self)
@@ -130,13 +131,18 @@ class MainMenu(Item):
             i.is_mainmenu_item = True
 
         mainmenu = menu.Menu(_('Freevo Main Menu'), items, item_types='main',
-                             umount_all = 1)
+                             reload_func=self.reload)
         mainmenu.item_types = 'main'
         mainmenu.theme = gui.theme.get()
         menuw.pushmenu(mainmenu)
         menuw.show()
 
 
+    def reload(self):
+        # stop mediadb.watcher
+        mediadb.watcher.cwd(None)
+
+        
     def get_skins(self):
         """
         return a list of all possible skins with name, image and filename
