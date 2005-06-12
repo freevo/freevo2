@@ -108,7 +108,7 @@ class Watcher:
                     self.callback()
                 return True
         except OSError:
-            # no ovrlay
+            # no overlay
             pass
         if self.notifier_scan:
             # scanning in progress, do not check changes
