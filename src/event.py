@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.56  2005/06/12 18:51:59  dischi
+# remove old event
+#
 # Revision 1.55  2004/09/27 18:42:10  dischi
 # move default event mapping to input/
 #
@@ -160,7 +163,6 @@ MENU_UP                = Event('MENU_UP')
 MENU_DOWN              = Event('MENU_DOWN')
 MENU_PAGEUP            = Event('MENU_PAGEUP')
 MENU_PAGEDOWN          = Event('MENU_PAGEDOWN')
-MENU_REBUILD           = Event('MENU_REBUILD')
                        
 MENU_GOTO_MAINMENU     = Event('MENU_GOTO_MAINMENU')
 MENU_BACK_ONE_MENU     = Event('MENU_BACK_ONE_MENU')
