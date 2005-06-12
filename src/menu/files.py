@@ -29,7 +29,7 @@
 #
 # -----------------------------------------------------------------------------
 
-__all__ = [ 'FileInformation' ]
+__all__ = [ 'Files' ]
 
 # python imports
 import os
@@ -42,7 +42,7 @@ import util
 # get logging object
 log = logging.getLogger()
 
-class FileInformation:
+class Files:
     """
     File operations for an item.
     """
