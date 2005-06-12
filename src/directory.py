@@ -49,7 +49,7 @@ import plugin
 import fxditem
 import eventhandler
 
-from menu import Item, Files
+from menu import Item, Files, Action
 from playlist import Playlist
 from event import *
 
@@ -418,6 +418,7 @@ class DirItem(Playlist):
         return a list of actions for this item
         """
         if self.media:
+            # mount media if not mounted
             umount = not self.media.is_mounted()
             self.media.mount()
 
@@ -425,23 +426,33 @@ class DirItem(Playlist):
         if self.display_type == 'tv':
             display_type = 'video'
 
-        items = [ ( self.cwd, _('Browse directory')) ]
+        browse = Action(_('Browse directory'), self.browse)
+        play = Action(_('Play all files in directory'), self.play)
 
         if self.info['num_%s_items' % display_type]:
-            items.append((self.play, _('Play all files in directory')))
-
-        if display_type in self.DIRECTORY_AUTOPLAY_ITEMS and \
-               not self['num_dir_items']:
-            items.reverse()
-
+            if display_type in self.DIRECTORY_AUTOPLAY_ITEMS and \
+                   not self['num_dir_items']:
+                items = [ play, browse ]
+            else:
+                items = [ browse, play ]
+        else:
+            items = [ play ]
+            
         if self.info['num_%s_items' % display_type]:
-            items.append((self.play_random, _('Random play all items')))
+            a = Action(_('Random play all items'), self.play)
+            a.parameter(random=True)
+            items.append(a)
+
         if self['num_dir_items']:
-            items += [ (self.play_random_recursive,
-                        _('Recursive random play all items')),
-                       (self.play_recursive, _('Recursive play all items')) ]
+            a = Action(_('Recursive random play all items'), self.play)
+            a.parameter(random=True, recursive=True)
+            items.append(a)
+            a = Action(_('Recursive play all items'), self.play)
+            a.parameter(recursive=True)
+            items.append(a)
 
-        items.append((self.configure, _('Configure directory'), 'configure'))
+        a = Action(_('Configure directory'), self.configure, 'configure')
+        items.append(a)
 
         # FIXME: add this function again
         # if self.folder_fxd:
@@ -454,44 +465,24 @@ class DirItem(Playlist):
 
 
 
-    def cwd(self, arg=None, menuw=None):
-        """
-        browse directory
-        """
-        self.check_password_and_build(arg=None, menuw=menuw)
-
-
-    def play(self, arg=None, menuw=None):
+    def play(self, menuw=None, random=False, recursive=False):
         """
         play directory
         """
-        if arg == 'next':
-            Playlist.play(self, arg=arg, menuw=menuw)
-        else:
-            self.check_password_and_build(arg='play', menuw=menuw)
-
-
-    def play_random(self, arg=None, menuw=None):
-        """
-        play in random order
-        """
-        self.check_password_and_build(arg='playlist:random', menuw=menuw)
-
-
-    def play_recursive(self, arg=None, menuw=None):
-        """
-        play recursive
-        """
-        self.check_password_and_build(arg='playlist:recursive', menuw=menuw)
-
-
-    def play_random_recursive(self, arg=None, menuw=None):
-        """
-        play recursive in random order
-        """
-        self.check_password_and_build(arg='playlist:random_recursive',
-                                      menuw=menuw)
-
+        # FIXME: add password checking here
+        if self.media and not self.media.is_mounted():
+            self.media.mount()
+        if not os.path.exists(self.dir):
+	    MessageBox(text=_('Directory does not exist')).show()
+            return
+        display_type = self.display_type
+        if self.display_type == 'tv':
+            display_type = 'video'
+        pl = Playlist(playlist = [ (self.dir, recursive) ], parent = self,
+                      display_type=display_type, random=random)
+        pl.play(menuw=menuw)
+        return
+        
 
     def check_password_and_build(self, arg=None, menuw=None):
         """
@@ -541,13 +532,14 @@ class DirItem(Playlist):
             return
 
 
-    def build(self, arg=None, menuw=None):
+    def browse(self, menuw, update=False):
         """
         build the items for the directory
         """
-        if arg == 'update' and not (self.listing and self.menuw and \
-                                    self.menuw.menustack[-1] == self.menu and \
-                                    eventhandler.is_menu()):
+        # FIXME: add password checking here
+        if update and not (self.listing and self.menuw and \
+                           self.menuw.menustack[-1] == self.menu and \
+                           eventhandler.is_menu()):
             # not visible right now, do not update
             self.needs_update = True
             return
@@ -561,7 +553,7 @@ class DirItem(Playlist):
         if self.media and not self.media.is_mounted():
             self.media.mount()
 
-        if arg == 'update':
+        if update:
             if not self.menu.choices:
                 selected_pos = -1
             else:
@@ -583,21 +575,6 @@ class DirItem(Playlist):
         if self.display_type == 'tv':
             display_type = 'video'
 
-        if arg and arg.startswith('playlist:'):
-            if arg.endswith(':random'):
-                pl = Playlist(playlist = [ (self.dir, 0) ], parent = self,
-                              display_type=display_type, random=True)
-            elif arg.endswith(':recursive'):
-                pl = Playlist(playlist = [ (self.dir, 1) ], parent = self,
-                              display_type=display_type, random=False)
-            elif arg.endswith(':random_recursive'):
-                pl = Playlist(playlist = [ (self.dir, 1) ], parent = self,
-                              display_type=display_type, random=True)
-            else:
-                return
-            pl.play(menuw=menuw)
-            return
-
         t1 = time.time()
         listing = mediadb.Listing(self.dir)
         t2 = time.time()
@@ -607,10 +584,6 @@ class DirItem(Playlist):
                 text = _('Scanning disc, be patient...')
             else:
                 text = _('Scanning directory, be patient...')
-            #popup = ProgressBox(text, full=listing.num_changes)
-            #popup.show()
-            #listing.update(popup.tick)
-            #popup.destroy()
             listing.update(fast=True)
         elif listing.num_changes:
             listing.update()
@@ -722,7 +695,7 @@ class DirItem(Playlist):
         # action
         #
 
-        if arg == 'update':
+        if update:
             # update because of dirwatcher changes
             self.menu.choices = items
 
@@ -758,11 +731,6 @@ class DirItem(Playlist):
 	    else:
 	    	action(menuw=menuw)
 
-        elif arg=='play' and self.play_items:
-            # called by play function
-            self.playlist = self.play_items
-            Playlist.play(self, menuw=menuw)
-
         else:
             # normal menu build
             item_menu = menu.Menu(self.name, items, reload_func=self.reload,
@@ -777,7 +745,7 @@ class DirItem(Playlist):
 
             self.menu = util.weakref(item_menu)
 
-            callback = notifier.Callback(self.build, 'update', self.menuw)
+            callback = notifier.Callback(self.browse, self.menuw, True)
             mediadb.watcher.cwd(listing, callback)
             self.menuw = menuw
 
@@ -790,7 +758,7 @@ class DirItem(Playlist):
         """
         called when we return to this menu
         """
-        callback = notifier.Callback(self.build, 'update', self.menuw)
+        callback = notifier.Callback(self.browse, self.menuw, True)
         mediadb.watcher.cwd(self.listing, callback)
         if self.needs_update:
             log.info('directory needs update')
@@ -829,8 +797,8 @@ class DirItem(Playlist):
         """
         if name in self.modified_vars:
             if name == 'FORCE_SKIN_LAYOUT':
-                return 'ICON_RIGHT_%s_%s' % (str(getattr(self, arg)),
-                                             str(getattr(self, arg)))
+                return 'ICON_RIGHT_%s_%s' % (str(getattr(self, name)),
+                                             str(getattr(self, name)))
             elif getattr(self, name):
                 return 'ICON_RIGHT_ON_' + _('on')
             else:
@@ -842,21 +810,21 @@ class DirItem(Playlist):
                 return 'ICON_RIGHT_AUTO_' + _('auto')
 
 
-    def configure_set_var(self, arg=None, menuw=None):
+    def configure_set_var(self, menuw, var):
         """
-        Update the variable in arg and change the menu. This function is used
+        Update the variable in var and change the menu. This function is used
         by 'configure'
         """
 
         # get current value, None == no special settings
-        if arg in self.modified_vars:
-            if self.__is_type_list_var(arg):
-                if getattr(self, arg):
+        if var in self.modified_vars:
+            if self.__is_type_list_var(var):
+                if getattr(self, var):
                     current = 1
                 else:
                     current = 0
             else:
-                current = getattr(self, arg)
+                current = getattr(self, var)
         else:
             current = None
 
@@ -864,7 +832,7 @@ class DirItem(Playlist):
         max = 1
 
         # for DIRECTORY_FORCE_SKIN_LAYOUT max = number of styles in the menu
-        if arg == 'FORCE_SKIN_LAYOUT':
+        if var == 'FORCE_SKIN_LAYOUT':
             if self.display_type and \
                    gui.theme.get().menu.has_key(self.display_type):
                 area = gui.theme.get().menu[self.display_type]
@@ -874,33 +842,33 @@ class DirItem(Playlist):
 
         # switch from no settings to 0
         if current == None:
-            self.modified_vars.append(arg)
-            if self.__is_type_list_var(arg):
-                setattr(self, arg, [])
+            self.modified_vars.append(var)
+            if self.__is_type_list_var(var):
+                setattr(self, var, [])
             else:
-                setattr(self, arg, 0)
+                setattr(self, var, 0)
 
         # inc variable
         elif current < max:
-            if self.__is_type_list_var(arg):
-                setattr(self, arg, [self.display_type])
+            if self.__is_type_list_var(var):
+                setattr(self, var, [self.display_type])
             else:
-                setattr(self, arg, current+1)
+                setattr(self, var, current+1)
 
         # back to no special settings
         elif current == max:
-            if self.parent and hasattr(self.parent, arg):
-                setattr(self, arg, getattr(self.parent, arg))
-            if hasattr(config, arg):
-                setattr(self, arg, getattr(config, arg))
+            if self.parent and hasattr(self.parent, var):
+                setattr(self, var, getattr(self.parent, var))
+            if hasattr(config, var):
+                setattr(self, var, getattr(config, var))
             else:
-                setattr(self, arg, False)
-            self.modified_vars.remove(arg)
+                setattr(self, var, False)
+            self.modified_vars.remove(var)
 
         # create new item with updated name
         item = copy.copy(menuw.menustack[-1].selected)
         item.name = item.name[:item.name.find(u'\t') + 1] + \
-                    self.configure_set_name(arg)
+                    self.configure_set_name(var)
 
         try:
             parser = util.fxdparser.FXD(self.folder_fxd)
@@ -916,7 +884,7 @@ class DirItem(Playlist):
         menuw.refresh(reload=1)
 
 
-    def configure_set_display_type(self, arg=None, menuw=None):
+    def configure_set_display_type(self, menuw):
         """
         change display type from specific to all
         """
@@ -940,7 +908,7 @@ class DirItem(Playlist):
         menuw.refresh(reload=1)
 
 
-    def configure(self, arg=None, menuw=None):
+    def configure(self, menuw):
         """
         show the configure dialog for folder specific settings in folder.fxd
         """
@@ -949,9 +917,9 @@ class DirItem(Playlist):
             if name == '':
                 continue
             name += '\t'  + self.configure_set_name(i)
-            mi = menu.MenuItem(name, self.configure_set_var, i)
-            mi.description = descr
-            items.append(mi)
+            action = Action(name, self.configure_set_var, description=descr)
+            action.parameter(var=i)
+            items.append(Item(self, action=action))
 
         if self.parent and self.parent.display_type:
             if self.display_type:
@@ -959,13 +927,15 @@ class DirItem(Playlist):
             else:
                 name = u'\tICON_RIGHT_ON_' + _('on')
 
-            mi = menu.MenuItem(_('Show all kinds of items') + name,
-                               self.configure_set_display_type)
             descr = _('Show video, audio and image items in this directory')
-            mi.description = descr
-            items.append(mi)
+            action = Action(_('Show all kinds of items') + name,
+                            self.configure_set_display_type,
+                            description=descr)
+            action.parameter(var=i)
+            items.append(Item(self, action=action))
 
         m = menu.Menu(_('Configure'), items)
         m.table = (80, 20)
         m.back_one_menu = 2
+        m.item = self
         menuw.pushmenu(m)

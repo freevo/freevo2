@@ -4,6 +4,9 @@
 # -----------------------------------------------------------------------------
 # $Id$
 #
+# TODO: o fix MEMCHECKER comments
+#       o remove the menuw stuff when all play items are converted
+#
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
@@ -45,7 +48,7 @@ import mediadb
 import fxditem
 
 from event import *
-from menu import Item, MediaItem, Menu
+from menu import Action, Item, MediaItem, Menu
 from gui.windows import ProgressBox
 
 # get logging object
@@ -80,7 +83,6 @@ class Playlist(MediaItem):
         self.repeat       = repeat
         self.display_type = display_type
 
-        self.__build__    = False
         self.suffixlist   = []
         self.get_plugins  = []
 
@@ -214,7 +216,7 @@ class Playlist(MediaItem):
             # we called this function before
             return
 
-        playlist      = self.playlist
+        playlist = self.playlist
         self.playlist = []
 
         for p in plugin.mimetype(self.display_type):
@@ -247,36 +249,33 @@ class Playlist(MediaItem):
                     log.error('playlist error: %s' % e)
                 # store the playlist for later use
                 self.info.store_with_mtime('playlist', self.playlist)
-
+            return
+        
         # self.playlist is a list of Items or strings (filenames)
-        if not isinstance(playlist, (str, unicode)):
-            # create a basic info object
-            self.info = mediadb.item()
+        # create a basic info object
+        self.info = mediadb.item()
 
-            for i in playlist:
-                if isinstance(i, Item):
-                    # Item object, correct parent
-                    i = copy.copy(i)
-                    i.parent = self
-                    self.playlist.append(i)
+        for i in playlist:
+            if isinstance(i, Item):
+                # Item object, correct parent
+                i = copy.copy(i)
+                i.parent = self
+                self.playlist.append(i)
 
-                elif isinstance(i, list) or isinstance(i, tuple) and \
-                     len(i) == 2 and os.path.isdir(i[0]):
-                    # (directory, recursive=True|False)
-                    if i[1]:
-                        self.playlist += util.match_files_recursively\
-                                         (i[0], self.suffixlist)
-                    else:
-                        self.playlist += util.match_files\
-                                         (i[0], self.suffixlist)
-                    # set autoplay to True on such big lists
-                    self.autoplay = True
-
+            elif isinstance(i, list) or isinstance(i, tuple) and \
+                 len(i) == 2 and os.path.isdir(i[0]):
+                # (directory, recursive=True|False)
+                if i[1]:
+                    match_files = util.match_files_recursively
                 else:
-                    # filename
-                    self.playlist.append(i)
+                    match_files = util.match_files
+                self.playlist += match_files(i[0], self.suffixlist)
+                # set autoplay to True on such big lists
+                self.autoplay = True
 
-        self.__build__ = True
+            else:
+                # filename
+                self.playlist.append(i)
 
 
     def randomize(self):
@@ -296,22 +295,21 @@ class Playlist(MediaItem):
         return the actions for this item: play and browse
         """
         self.build()
-        items = [ ( self.browse, _('Browse Playlist') ) ]
-
-        play_item = ( self.play, _('Play') )
+        browse = Action(_('Browse Playlist'), self.browse)
+        play = Action(_('Play'), self.play)
 
         if self.autoplay:
-            items = [ play_item ] + items
+            items = [ play, browse ]
         else:
-            items.append(play_item)
+            items = [ browse, play ]
 
         if not self.random:
-            items.append((self.random_play, _('Random play all items')))
+            items.append(Action(_('Random play all items'), self.random_play))
 
         return items
 
 
-    def browse(self, arg=None, menuw=None):
+    def browse(self, menuw):
         """
         show the playlist in the menu
         """
@@ -319,7 +317,7 @@ class Playlist(MediaItem):
 
         files = []
         for item in self.playlist:
-            if not callable(item):
+            if not isinstance(item, Item):
                 files.append(item)
 
         listing = mediadb.FileListing(files)
@@ -335,7 +333,8 @@ class Playlist(MediaItem):
         items = []
 
         for item in self.playlist:
-            if not callable(item):
+            if not isinstance(item, Item):
+                print item
                 # get a real item
                 listing = mediadb.FileListing([item])
                 if listing.num_changes:
@@ -343,6 +342,10 @@ class Playlist(MediaItem):
                 for p in self.get_plugins:
                     items += p.get(self, listing)
             else:
+                # MEMCHECKER: why is this needed? It is deleted by
+                # menu/item.py in the delete function but this there
+                # a better way to do this?
+                item.parent = self
                 items.append(item)
 
         self.playlist = items
@@ -350,20 +353,24 @@ class Playlist(MediaItem):
         if self.random:
             self.randomize()
 
-        moviemenu = menu.Menu(self.name, self.playlist)
-        menuw.pushmenu(moviemenu)
+        display_type = self.display_type
+        if self.display_type == 'tv':
+            display_type = 'video'
+
+        menu = Menu(self.name, self.playlist, item_types = display_type)
+        menuw.pushmenu(menu)
 
 
-    def random_play(self, arg=None, menuw=None):
+    def random_play(self, menuw):
         """
         play the playlist in random order
         """
         Playlist(playlist=self.playlist, parent=self.parent,
                  display_type=self.display_type, random=True,
-                 repeat=self.repeat).play(arg,menuw)
+                 repeat=self.repeat).play(menuw)
 
 
-    def play(self, arg=None, menuw=None):
+    def play(self, menuw, next=False):
         """
         play the playlist
         """
@@ -375,7 +382,7 @@ class Playlist(MediaItem):
             log.warning('empty playlist')
             return False
 
-        if not arg or arg != 'next':
+        if not next:
             # first start
             Playlist.build(self)
             if self.random:
@@ -387,7 +394,7 @@ class Playlist(MediaItem):
             self.current_item = self.playlist[0]
 
 
-        if not callable(self.current_item):
+        if not isinstance(self.current_item, Item):
             # element is a string, make a correct item
             play_items = []
 
@@ -413,7 +420,7 @@ class Playlist(MediaItem):
 
             if pos:
                 self.current_item = self.playlist[pos]
-                self.play(menuw=menuw, arg='next')
+                Playlist.play(self, menuw, True)
             else:
                 # no repeat
                 self.current_item = None
@@ -489,7 +496,7 @@ class Playlist(MediaItem):
                 if self.current_item:
                     self.current_item.stop()
                 self.current_item = self.playlist[pos]
-                self.play(menuw=menuw, arg='next')
+                Playlist.play(self, menuw, True)
                 return True
             elif event == PLAYLIST_NEXT:
                 e = Event(OSD_MESSAGE, arg=_('no next item in playlist'))
@@ -515,7 +522,7 @@ class Playlist(MediaItem):
                         return True
                 pos = (pos-1) % len(self.playlist)
                 self.current_item = self.playlist[pos]
-                self.play(menuw=menuw, arg='next')
+                Playlist.play(self, menuw, True)
                 return True
             else:
                 e = Event(OSD_MESSAGE, arg=_('no previous item in playlist'))
