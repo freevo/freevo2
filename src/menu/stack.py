@@ -338,7 +338,10 @@ class MenuStack:
                 msg = _('No action defined for this choice!')
                 eventhandler.post_event(Event(OSD_MESSAGE, arg=msg))
             else:
-                actions[0](menu.selected, self)
+                if menu.submenu:
+                    actions[0](menu.selected.parent, self)
+                else:
+                    actions[0](menu.selected, self)
             return True
 
 
