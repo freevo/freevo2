@@ -32,6 +32,16 @@
 #include <Imlib2.h>
 #include "image.h"
 
+double get_curtime()
+{
+    struct timeval curtime;
+    struct timezone tz;
+
+    gettimeofday(&curtime, &tz);
+    return curtime.tv_sec + (curtime.tv_usec/(1000.0*1000));
+}
+
+
 PyTypeObject Display_PyObject_Type = {
     PyObject_HEAD_INIT(NULL)
     0,                         /*ob_size*/
@@ -108,7 +118,12 @@ PyObject *Display_PyObject__render( Display_PyObject *self, PyObject *args)
 PyObject *Display_PyObject__update( Display_PyObject *self, PyObject *args )
 {
   XEvent ev;
-  time_t now = time(NULL);
+  double now = get_curtime();
+  float cursor_timeout;
+  PyObject *retval = Py_False;
+
+  if (!PyArg_ParseTuple(args, "f", &cursor_timeout))
+     return NULL;
 
   while ( XPending( self->display ) ) {
     XNextEvent( self->display, &ev );
@@ -125,18 +140,20 @@ PyObject *Display_PyObject__update( Display_PyObject *self, PyObject *args )
                     ev.xexpose.width, ev.xexpose.height ) );
     } else if (ev.type == MotionNotify) {
        self->last_mousemove_time = now;
-       XUndefineCursor(self->display, self->window);
+       if (cursor_timeout != 0)
+          XUndefineCursor(self->display, self->window);
     }
+	retval = Py_True;
   }
-  if (self->last_mousemove_time && now - self->last_mousemove_time >= 1) {
+  if (self->last_mousemove_time && now - self->last_mousemove_time >= cursor_timeout) {
     self->last_mousemove_time = 0;
-    XDefineCursor(self->display, self->window, self->invisible_cursor);
+    if (cursor_timeout >= 0)
+       XDefineCursor(self->display, self->window, self->invisible_cursor);
   }
 
-  /* always return true as this function is used as a callback for
-     pyNotifier */
-  Py_INCREF( Py_True );
-  return Py_True;
+  // Returns True if an event was handled, or False otherwise.
+  Py_INCREF(retval);
+  return retval;
 }
 
 

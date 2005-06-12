@@ -40,7 +40,7 @@ typedef struct {
     Colormap cmap;
     int      depth;
     Cursor   invisible_cursor;
-    time_t   last_mousemove_time;
+    double   last_mousemove_time;
 
     PyObject * input_callback;
     PyObject * expose_callback;

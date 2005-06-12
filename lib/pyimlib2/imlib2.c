@@ -144,7 +144,7 @@ PyObject *imlib2_load_font(PyObject *self, PyObject *args)
 PyObject *imlib2_new_display(PyObject *self, PyObject *args)
 {
 #ifdef USE_IMLIB2_DISPLAY
-    int w, h;
+    int w, h, hide_cursor;
 
     if (!PyArg_ParseTuple(args, "ii", &w, &h))
         return NULL;

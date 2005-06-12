@@ -540,7 +540,15 @@ class Display:
         self.height = h
         self.blend = blend
         self.dither = dither
+        self.set_cursor_hide_timeout(-1)
 
+    def set_cursor_hide_timeout(self, timeout):
+        """
+        Hides mouse cursor after the specified timeout in seconds after no
+        motion has occured.  A value of 0 makes the cursor permanently
+        hidden, and -1 is permanently visible.)
+        """
+        self.cursor_timeout = timeout
 
     def render(self, image, dst_pos = (0, 0), src_pos = (0, 0),
           src_size = (-1, -1), dither = None, blend = None):
@@ -554,6 +562,9 @@ class Display:
         return self._display.render(image._image, dst_pos, src_pos, src_size,
 				    dither, blend)
 
+    def update(self):
+        return self._display.update(self.cursor_timeout)
+
     def __setattr__( self, key, value ):
         if key in ( 'input_callback', 'expose_callback' ):
             return setattr( self.__dict__[ '_display' ],
@@ -562,8 +573,7 @@ class Display:
             self.__dict__[ key ] = value
 
     def __getattr__( self, key ):
-        if key in ( 'input_callback', 'expose_callback', 'socket',
-                'update', 'flush' ):
+        if key in ( 'input_callback', 'expose_callback', 'socket', 'flush' ):
             return getattr( self.__dict__[ '_display' ], key )
         else:
             return self.__dict__[ key ]
