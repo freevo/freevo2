@@ -4,6 +4,21 @@
 # -----------------------------------------------------------------------------
 # $Id$
 #
+# This file contains an action for items inside the menu. An action has a
+# name and a function to call. Optional parameter is a shortcut name to be
+# placed into the config for mapping an action to a button. It also has
+# an optional description.
+#
+# To set parameters for the function call, use the parameter function of the
+# action object. The function itself has always one or two parameters. If
+# the function is defined inside the item, the first parameter is always menuw
+# as reference to the current menu widget. If it is outside the item, the
+# first two parameters are item and menuw.
+#
+# Note: Right now there are some fallbacks in Action and also the fake class
+# ActionWrapper to support the old style while changing all plugins. This will
+# be removed later.
+#
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
@@ -29,29 +44,28 @@
 #
 # -----------------------------------------------------------------------------
 
-# menu imports
-from item import Item
-
-
-class Action(Item):
+class Action:
     """
     Action for item.actions()
+
+    An action has a
+    name and a function to call. Optional parameter is a shortcut name to be
+    placed into the config for mapping an action to a button. It also has
+    an optional description.
+
+    To set parameters for the function call, use the parameter function of the
+    action object. The function itself has always one or two parameters. If
+    the function is defined inside the item, the first parameter is always
+    menuw as reference to the current menu widget. If it is outside the item,
+    the first two parameters are item and menuw.
     """
     def __init__(self, name, function, shortcut=None, description=None):
-        Item.__init__(self)
         self.name = name
         self.function = function
         self.shortcut = shortcut
         self.description = description
         self.args = []
         self.kwargs = {}
-
-
-    def actions(self):
-        """
-        Return possible actions when this is handled as item.
-        """
-        return [ self ]
 
 
     def __call__(self, item, menuw):
