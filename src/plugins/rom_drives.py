@@ -122,18 +122,36 @@ class autostart(plugin.DaemonPlugin):
     Plugin to autostart if a new medium is inserted while Freevo shows
     the main menu
     """
+    def __init__(self):
+        plugin.DaemonPlugin.__init__(self)
+        self.event_listener = True
+
+
     def eventhandler(self, event):
         """
         eventhandler to handle the IDENTIFY_MEDIA plugin event and the
-        EJECT event
+        EJECT event. Also take care of the umounting when going back to
+        the main menu.
         """
         if not eventhandler.is_menu():
             return False
+
+        if event == MENU_GOTO_MAINMENU:
+            # going to main menu, umount all media
+            for media in rom_drives:
+                if media.is_mounted():
+                    media.umount()
+            # return False, this event is needed later
+            return False
+        
         menuw = eventhandler.get()
+        if not menuw or len(menuw.menustack) > 1:
+            # not in main menu
+            return False
+        
         # if we are at the main menu and there is an IDENTIFY_MEDIA event,
         # try to autorun the media
-        if plugin.isevent(event) == 'IDENTIFY_MEDIA' and menuw and \
-               len(menuw.menustack) == 1 and not event.arg[1]:
+        if plugin.isevent(event) == 'IDENTIFY_MEDIA' and not event.arg[1]:
             media = event.arg[0]
             if media.item:
                 media.item.parent = menuw.menustack[0].selected
@@ -157,7 +175,7 @@ class autostart(plugin.DaemonPlugin):
             return True
 
         # Handle the EJECT key for the main menu
-        elif event == EJECT and menuw and len(menuw.menustack) == 1:
+        elif event == EJECT:
             # Are there any drives defined?
             if rom_drives:
                 # The default is the first drive in the list
@@ -166,17 +184,26 @@ class autostart(plugin.DaemonPlugin):
                 return True
 
 
-class rom_items(plugin.MainMenuPlugin):
+class rom_items(plugin.MainMenuPlugin, plugin.DaemonPlugin):
     """
     Plugin to add the rom drives to a main menu. This can be the global main
     menu or most likely the video/audio/image/games main menu
     """
+    def __init__(self):
+        plugin.MainMenuPlugin.__init__(self)
+        plugin.DaemonPlugin.__init__(self)
+        self.event_listener = True
+
+
     def items(self, parent):
         """
         return the list of rom drives
         """
         items = []
         for media in rom_drives:
+            if media.is_mounted():
+                # umount media when creating the items
+                media.umount()
             if media.item:
                 if parent.display_type == 'video' and media.videoitem:
                     m = media.videoitem
@@ -201,6 +228,20 @@ class rom_items(plugin.MainMenuPlugin):
         return items
 
 
+    def eventhandler(self, event):
+        """
+        eventhandler to handle the umount
+        """
+        if event == MENU_GOTO_MAINMENU:
+            # going to main menu, umount all media
+            for media in rom_drives:
+                if media.is_mounted():
+                    media.umount()
+            # return False, this event is needed later
+            return False
+        return False
+
+    
 class RemovableMedia(vfs.Mountpoint):
     """
     Object about one drive
