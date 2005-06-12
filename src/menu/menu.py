@@ -69,6 +69,9 @@ class Menu:
         # Menu type
         self.submenu = False
 
+        # Item that menu is based on
+        self.item = None
+        
         # how many rows and cols does the menu has
         # (will be changed by the skin code)
         self.cols = 1
