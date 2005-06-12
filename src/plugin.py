@@ -146,6 +146,8 @@ class ItemPlugin(Plugin):
                     items.append(ActionWrapper(a[1], a[0], a[2], a[3]))
                 elif len(a) > 2:
                     items.append(ActionWrapper(a[1], a[0], a[2]))
+                elif hasattr(a, 'action'):
+                    items.append(a.action)
                 else:
                     items.append(ActionWrapper(a[1], a[0]))
             else:
@@ -591,9 +593,9 @@ def _load_plugin(name, type, level, args, number):
                             eventhandler.register(p, e)
                     else:
                         if p.event_listener:
-                            handler = eventhandler.GENERIC_HANDLER
-                        else:
                             handler = eventhandler.EVENT_LISTENER
+                        else:
+                            handler = eventhandler.GENERIC_HANDLER
                         eventhandler.register(p, handler)
 
             if isinstance(p, MainMenuPlugin):
