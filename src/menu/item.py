@@ -42,8 +42,11 @@ import logging
 import plugin
 import mediadb
 
-from event import *
-from mediadb.globals import *
+# events covered by item
+from event import EJECT
+
+# menu imports (remove this later)
+from action import ActionWrapper
 
 # get logging object
 log = logging.getLogger()
@@ -54,41 +57,21 @@ class Item:
     It's a template for MenuItem and for other info items like
     VideoItem, AudioItem and ImageItem
     """
-    def __init__(self, parent=None, info=True):
+    def __init__(self, parent=None, action=None, type=None):
         """
         Init the item. Sets all needed variables, if parent is given also
         inherit some settings from there.
         """
-        if not hasattr(self, 'type'):
-            self.type = None
-
         self.name = u''
         self.icon = None
-        self.info = None
+        self.info = {}
         self.menuw = None
         self.description  = ''
-
-        if info:
-            # create a basic info object
-            self.info = mediadb.item()
+        self.type = type
 
         if not hasattr(self, 'autovars'):
             self.autovars = {}
 
-        self.set_parent(parent)
-        self.fxd_file = None
-        self.__initialized = False
-
-        # FIXME: remove this
-        self.defined_actions = self.actions
-        self.actions = self.actions_wrapper
-
-
-
-    def set_parent(self, parent):
-        """
-        Set parent for the item.
-        """
         self.parent = parent
         if parent:
             self.image = parent.image
@@ -100,6 +83,18 @@ class Item:
             self.image = None
             self.skin_fxd = None
             self.media = None
+
+        self.fxd_file = None
+        self.__initialized = False
+
+        self.action = action
+        if action:
+            self.name = action.name
+            self.description = action.description
+
+        # FIXME: remove this
+        self.defined_actions = self.actions
+        self.actions = self.actions_wrapper
 
 
     def __setitem__(self, key, value):
@@ -113,7 +108,8 @@ class Item:
         """
         store the key/value in metadata
         """
-        if not self.info.store(key, value):
+        if isinstance(self.info, mediadb.ItemInfo) and \
+               not self.info.store(key, value):
             log.warning( u'unable to store info for \'%s\'' % self.name)
 
 
@@ -121,7 +117,9 @@ class Item:
         """
         delete entry for metadata
         """
-        return self.info.delete(key)
+        if isinstance(self.info, mediadb.ItemInfo):
+            return self.info.delete(key)
+        return False
 
 
     def __id__(self):
@@ -129,8 +127,6 @@ class Item:
         Return a unique id of the item. This id should be the same when the
         item is rebuild later with the same informations
         """
-        if hasattr(self, 'url'):
-            return self.url
         return self.name
 
 
@@ -146,6 +142,8 @@ class Item:
         returns a list of possible actions on this item. The first
         one is autoselected by pressing SELECT
         """
+        if self.action:
+            return [ self.action ]
         return []
 
 
@@ -154,7 +152,6 @@ class Item:
         Bad warpper for actions used while actions is restructured.
         FIXME: remove this function.
         """
-        from action import ActionWrapper
         items = []
         for a in self.defined_actions():
             if isinstance(a, (list, tuple)):
@@ -164,6 +161,8 @@ class Item:
                     items.append(ActionWrapper(a[1], a[0], a[2]))
                 else:
                     items.append(ActionWrapper(a[1], a[0]))
+            elif hasattr(a, 'action'):
+                items.append(a.action)
             else:
                 items.append(a)
         return items
@@ -198,39 +197,6 @@ class Item:
         """
         return the specific attribute
         """
-        if attr == 'length':
-            try:
-                length = int(self.info['length'])
-            except ValueError:
-                return self.info['length']
-            except:
-                try:
-                    length = int(self.length)
-                except:
-                    return ''
-            if length == 0:
-                return ''
-            if length / 3600:
-                return '%d:%02d:%02d' % ( length / 3600, (length % 3600) / 60,
-                                          length % 60)
-            else:
-                return '%d:%02d' % (length / 60, length % 60)
-
-
-        if attr == 'length:min':
-            try:
-                length = int(self.info['length'])
-            except ValueError:
-                return self.info['length']
-            except:
-                try:
-                    length = int(self.length)
-                except:
-                    return ''
-            if length == 0:
-                return ''
-            return '%d min' % (length / 60)
-
         if attr[:7] == 'parent(' and attr[-1] == ')' and self.parent:
             return self.parent[attr[7:-1]]
 

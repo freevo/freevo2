@@ -43,7 +43,7 @@ from mediadb.globals import *
 
 # menu imports
 from item import Item
-from file import FileInformation
+from files import Files
 
 # get logging object
 log = logging.getLogger()
@@ -54,11 +54,6 @@ class MediaItem(Item):
     This item is for a media. It's only a template for image, video
     or audio items
     """
-    def __init__(self, type, parent):
-        self.type = type
-        Item.__init__(self, parent, False)
-
-
     def set_url(self, url, search_cover=True):
         """
         Set a new url to the item and adjust all attributes depending
@@ -82,13 +77,13 @@ class MediaItem(Item):
                 self.network_play = True    # network url, like http
                 self.filename     = ''      # filename if it's a file:// url
                 self.mode         = ''      # the type (file, http, dvd...)
-                self.files        = None    # FileInformation
+                self.files        = None    # Files
                 self.mimetype     = ''      # extention or mode
                 self.name         = u''
                 return
 
         self.url = url
-        self.files = FileInformation()
+        self.files = Files()
         if self.media:
             self.files.read_only = True
 
@@ -133,6 +128,53 @@ class MediaItem(Item):
             if not self.name:
                 self.name = Unicode(self.url)
             self.image = self.info[COVER]
+
+
+    def __getitem__(self, attr):
+        """
+        return the specific attribute
+        """
+        if attr == 'length':
+            try:
+                length = int(self.info['length'])
+            except ValueError:
+                return self.info['length']
+            except:
+                try:
+                    length = int(self.length)
+                except:
+                    return ''
+            if length == 0:
+                return ''
+            if length / 3600:
+                return '%d:%02d:%02d' % ( length / 3600, (length % 3600) / 60,
+                                          length % 60)
+            else:
+                return '%d:%02d' % (length / 60, length % 60)
+
+
+        if attr == 'length:min':
+            try:
+                length = int(self.info['length'])
+            except ValueError:
+                return self.info['length']
+            except:
+                try:
+                    length = int(self.length)
+                except:
+                    return ''
+            if length == 0:
+                return ''
+            return '%d min' % (length / 60)
+        return Item.__getitem__(self, attr)
+
+
+    def __id__(self):
+        """
+        Return a unique id of the item. This id should be the same when the
+        item is rebuild later with the same informations
+        """
+        return self.url
 
 
     def play(self, menuw=None, arg=None):
