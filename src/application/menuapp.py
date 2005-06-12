@@ -22,14 +22,9 @@ class MenuApplication(Application):
         """
         if not self.menuw:
             return False
-        if event == MENU_GOTO_MAINMENU:
+        if event in (MENU_GOTO_MAINMENU, MENU_BACK_ONE_MENU):
             self.stop()
-            self.menuw.goto_main_menu()
-            return True
-        if event == MENU_BACK_ONE_MENU:
-            self.stop()
-            self.menuw.back_one_menu()
-            return True
+            return self.menuw.eventhandler(event)
         return False
 
 
