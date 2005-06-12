@@ -170,7 +170,7 @@ class ProgramItem(Item):
                                    self.create_favorite))
 
         s = menu.Menu(self, items, item_types = 'tv program menu')
-        s.is_submenu = True
+        s.submenu = True
         s.infoitem = self
         menuw.pushmenu(s)
 

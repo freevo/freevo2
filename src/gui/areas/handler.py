@@ -189,7 +189,7 @@ class Handler:
         menu.skin_default_has_images      = False
         menu.skin_default_has_description = False
 
-        if hasattr(menu, 'is_submenu'):
+        if menu.submenu:
             menu.skin_default_has_images = True
             
         for i in menu.choices:
