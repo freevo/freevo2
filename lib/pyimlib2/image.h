@@ -32,8 +32,7 @@
 typedef struct {
     PyObject_HEAD
     Imlib_Image *image;
-    unsigned char *raw_data;
-    unsigned long raw_data_size;
+    void *raw_data;
 } Image_PyObject;
 
 extern PyTypeObject Image_PyObject_Type;

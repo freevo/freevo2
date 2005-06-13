@@ -120,21 +120,15 @@ class Image:
 
     # Functions for pickling.
     def __getstate__(self):
-        s = str(self.get_raw_data())
-        self.free_raw_data()
-        return (self.size, s)
-
+        return self.size, str(self.get_raw_data())
 
     def __setstate__(self, state):
         self._image = _Imlib2.create(state[0], state[1])
 
 
-    def get_raw_data(self, format = "BGRA", type = "buffer" ):
+    def get_raw_data(self, format = "BGRA", write = False):
         """
         Returns raw image data for read only access.
-
-        Please free the raw data later and do not delete the object while
-        the data is still needed.
 
         Arguments:
           format: pixel format of the raw data to be returned.  If 'format' is
@@ -144,23 +138,20 @@ class Image:
               alpha plane.  (YV12A isn't a fourcc notation; I just
               made it up.)
 
-        Returns: If type is 'buffer', return a buffer object containing the raw
-                 image data. If type is 'raw', return the pointer and len of
-                 the raw image data.
+        Returns: A buffer object representing the raw pixel data.  The buffer
+                 will be a writable buffer if 'write' was True or if the
+                 'format' was non-native (i.e. something other than BGRA).  If
+                 'format' was BGRA and 'write' was True, you'll need to call
+                 put_back_raw_data() when you're done writing to the buffer.
         """
-        if type == 'raw':
-            # create raw data
-            self._image.get_raw_data(format)
-            return self._image.raw_data_addr, self._image.raw_data_size
-        return self._image.get_raw_data(format)
+        return self._image.get_raw_data(format, write)
 
 
-    def free_raw_data(self):
+    def put_back_raw_data(self, data):
         """
-        Free the raw image data. Please call this function after calling
-        get_raw_data and before changing the image.
+        Puts back the writable buffer that was obtained with get_raw_data().
         """
-        self._image.free_raw_data()
+        self._image.put_back_raw_data(data)
 
 
     def scale(self, (w, h), src_pos = (0, 0), src_size = (-1, -1)):

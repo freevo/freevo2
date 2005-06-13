@@ -40,6 +40,16 @@
 #include <fcntl.h>
 #include "config.h"
 
+int Image_PyObject_Buffer__get_read_buffer(PyObject *, int, void **);
+int Image_PyObject_Buffer__get_readwrite_buffer(PyObject *, int, void **);
+int Image_PyObject_Buffer__get_seg_count(PyObject *, int *);
+
+PyBufferProcs buffer_procs = {
+	Image_PyObject_Buffer__get_read_buffer, 
+	Image_PyObject_Buffer__get_readwrite_buffer, 
+	Image_PyObject_Buffer__get_seg_count, 
+	NULL
+};
 
 PyTypeObject Image_PyObject_Type = {
     PyObject_HEAD_INIT(NULL)
@@ -61,24 +71,61 @@ PyTypeObject Image_PyObject_Type = {
     0,                         /*tp_str*/
     0,                         /*tp_getattro*/
     0,                         /*tp_setattro*/
-    0,                         /*tp_as_buffer*/
+    &buffer_procs,             /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT,        /*tp_flags*/
     "Imlib2 Image Object"      /* tp_doc */
 };
 
+// Exported _C_API function
 Imlib_Image *imlib_image_from_pyobject(Image_PyObject *pyimg)
 {
 	return pyimg->image;
 }
 
+int Image_PyObject_Buffer__get_read_buffer(PyObject *self, int segment, void **ptr)
+{
+    imlib_context_set_image(((Image_PyObject *)self)->image);
+	if (ptr)
+    	*ptr = (void *)imlib_image_get_data_for_reading_only();
+	return imlib_image_get_width() * imlib_image_get_height() * 4;
+}
+
+int Image_PyObject_Buffer__get_readwrite_buffer(PyObject *self, int segment, void **ptr)
+{
+	Image_PyObject *o = (Image_PyObject *)self;
+    imlib_context_set_image(o->image);
+	if (segment > 0) {
+		PyErr_Format(PyExc_SystemError, "Invalid segment for read/write buffer.");
+		return -1;
+	}
+	if (ptr) {
+		if (o->raw_data)
+    		*ptr = o->raw_data;
+		else 
+    		*ptr = o->raw_data = (void *)imlib_image_get_data();
+	}
+	return imlib_image_get_width() * imlib_image_get_height() * 4;
+}
+
+int Image_PyObject_Buffer__get_seg_count(PyObject *self, int *lenp)
+{
+	if (lenp) {
+	    imlib_context_set_image(((Image_PyObject *)self)->image);
+		*lenp = imlib_image_get_width() * imlib_image_get_height() * 4;
+	}
+	return 1;
+}
+
+Image_PyObject *_new_image_pyobject(Imlib_Image *image)
+{
+    Image_PyObject *o = PyObject_NEW(Image_PyObject, &Image_PyObject_Type);
+    o->image = image;
+    o->raw_data = NULL;
+	return o;
+}
 
 void Image_PyObject__dealloc(Image_PyObject *self)
 {
-    if (self->raw_data) {
-      free(self->raw_data);
-      self->raw_data = NULL;
-    }
-
     imlib_context_set_image(self->image);
     imlib_free_image();
     PyMem_DEL(self);
@@ -103,7 +150,7 @@ PyObject *Image_PyObject__clear(PyObject *self, PyObject *args)
     if (x+w > max_w) w = max_w-x;
     if (y+h > max_h) h = max_h-y;
 
-    /* FIXME: make it faster */
+    /* FIXME: make it faster (optimize for slices; memcpy might be faster) */
     for (cur_y = y; cur_y < y + h; cur_y++)
         memset(&data[cur_y*max_w*4+(x*4)], 0, 4*w);
     imlib_image_put_back_data((DATA32 *)data);
@@ -132,9 +179,7 @@ PyObject *Image_PyObject__scale(PyObject *self, PyObject *args)
         return NULL;
     }
 
-    o = PyObject_NEW(Image_PyObject, &Image_PyObject_Type);
-    o->raw_data = NULL;
-    o->image = image;
+	o = _new_image_pyobject(image);
     return (PyObject *)o;
 }
 
@@ -157,9 +202,7 @@ PyObject *Image_PyObject__rotate(PyObject *self, PyObject *args)
         return NULL;
     }
 
-    o = PyObject_NEW(Image_PyObject, &Image_PyObject_Type);
-    o->image = image;
-    o->raw_data = NULL;
+	o = _new_image_pyobject(image);
     return (PyObject *)o;
 }
 
@@ -205,9 +248,7 @@ PyObject *Image_PyObject__clone(PyObject *self, PyObject *args)
 	return NULL;
     }
 
-    o = PyObject_NEW(Image_PyObject, &Image_PyObject_Type);
-    o->image = image;
-    o->raw_data = NULL;
+	o = _new_image_pyobject(image);
     return (PyObject *)o;
 }
 
@@ -293,24 +334,24 @@ PyObject *Image_PyObject__draw_mask(PyObject *self, PyObject *args)
             dst_pos = ((dst_x + xpos) << 2) + ((dst_y + ypos) * dst_w << 2);
 
             mask_chunk = &mask_data[mask_pos];
-	    dst_chunk = &dst_data[dst_pos];
+            dst_chunk = &dst_data[dst_pos];
 
-	    // Any way to optimize this?
-	    avg = (mask_chunk[0] + mask_chunk[1] + mask_chunk[2]) / 3;
+            // Any way to optimize this?
+            avg = (mask_chunk[0] + mask_chunk[1] + mask_chunk[2]) / 3;
 
             // Blend average (grayscale) pixel from the mask with the
             // alpha channel of the image
-#if 0
-	    // This is the code from Tack, but it doesn't work
-	    // like it should ...
-	    int temp = (dst_chunk[3] * avg); // + 0x80;
+#if 1
+            // This is the code from Tack, but it doesn't work
+            // like it should ... -- Dischi
+            // (tack) Well, should work like this:
+            int temp = (dst_chunk[3] * avg) + 0x80;
             dst_chunk[3] = ((temp + (temp >> 8)) >> 8);
-            dst_chunk[3] = dst_chunk[3] >> 1;
 #else
-	    /// ... so this is my guess -- Dischi
+            // ... so this is my guess -- Dischi
             dst_chunk[3] = (dst_chunk[3] * avg) / 255;
 #endif
-	}
+        }
     }
     imlib_image_put_back_data((DATA32 *)dst_data);
 
@@ -422,40 +463,55 @@ PyObject *Image_PyObject__get_pixel(PyObject *self, PyObject *args)
 }
 
 
-PyObject *Image_PyObject__get_raw_data(PyObject *self_object, PyObject *args)
+PyObject *Image_PyObject__get_raw_data(PyObject *self, PyObject *args)
 {
-    char *format = "BGRA";
-    unsigned char *buffer;
-    Image_PyObject *self = (Image_PyObject *)self_object;
+    char *format;
+	int len, write;
+    Image_PyObject *o = (Image_PyObject *)self;
 
-    if (self->raw_data) {
-        return Py_BuildValue("O", PyBuffer_FromMemory(self->raw_data,
-						      self->raw_data_size));
-    }
 
-    if (!PyArg_ParseTuple(args, "|s", &format))
+    if (!PyArg_ParseTuple(args, "si", &format, &write))
         return NULL;
 
-    imlib_context_set_image(((Image_PyObject *)self)->image);
-    self->raw_data_size = get_raw_bytes_size(format);
-    if (strcmp(format, "BGRA")) {
-        self->raw_data = get_raw_bytes(format, NULL);
-        return Py_BuildValue("O", PyBuffer_FromMemory(self->raw_data,
-						      self->raw_data_size));
-    }
+    imlib_context_set_image(o->image);
+	if (!strcmp(format, "BGRA")) {
+		// Requested native format, so create a buffer directly from the
+		// Image pyobject.
+		if (write)
+			return PyBuffer_FromReadWriteObject(self, 0, Py_END_OF_BUFFER);
+		else
+			return PyBuffer_FromObject(self, 0, Py_END_OF_BUFFER);
+	} else {
+		// Requested different format, create a new buffer.
+		PyObject *buffer;
+    	unsigned char *data;
 
-    buffer = (unsigned char *)imlib_image_get_data_for_reading_only();
-    return Py_BuildValue("O", PyBuffer_FromMemory(buffer,
-						  self->raw_data_size));
+		buffer = PyBuffer_New(get_raw_bytes_size(format));
+		PyObject_AsWriteBuffer(buffer, (void **)&data, &len);
+        get_raw_bytes(format, data);
+		return buffer;
+	}
 }
 
 
-PyObject *Image_PyObject__free_raw_data(PyObject *self, PyObject *args)
+PyObject *Image_PyObject__put_back_raw_data(PyObject *self, PyObject *args)
 {
-    if (((Image_PyObject *)self)->raw_data) {
-      free(((Image_PyObject *)self)->raw_data);
-      ((Image_PyObject *)self)->raw_data = NULL;
-    }
+	Image_PyObject *o = (Image_PyObject *)self;
+	PyObject *buffer_object;
+    unsigned char *buffer;
+	int len;
+	
+    if (!PyArg_ParseTuple(args, "O!", &PyBuffer_Type, &buffer_object))
+        return NULL;
+
+	imlib_context_set_image(o->image);
+	PyObject_AsWriteBuffer(buffer_object, (void **)&buffer, &len);
+	if (buffer != o->raw_data) {
+		PyErr_Format(PyExc_ValueError, "Putting back a buffer that wasn't gotten with get_raw_data()!");
+		return NULL;
+	}
+	imlib_image_put_back_data((DATA32 *)buffer);
+	o->raw_data = NULL;
     Py_INCREF(Py_None);
     return Py_None;
 }
@@ -495,7 +551,7 @@ PyMethodDef Image_PyObject_methods[] = {
     { "blend", Image_PyObject__blend, METH_VARARGS },
     { "set_alpha", Image_PyObject__set_alpha, METH_VARARGS },
     { "get_raw_data", Image_PyObject__get_raw_data, METH_VARARGS },
-    { "free_raw_data", Image_PyObject__free_raw_data, METH_VARARGS },
+    { "put_back_raw_data", Image_PyObject__put_back_raw_data, METH_VARARGS },
     { "get_pixel", Image_PyObject__get_pixel, METH_VARARGS },
     { "save", Image_PyObject__save, METH_VARARGS },
     { NULL, NULL }
@@ -518,14 +574,6 @@ PyObject *Image_PyObject__getattr(Image_PyObject *self, char *name)
         return Py_BuildValue("s", "BGRA");
     else if (!strcmp(name, "filename"))
         return Py_BuildValue("s", imlib_image_get_filename());
-    else if (!strcmp(name, "raw_data_addr")) {
-        if (self->raw_data)
-	    return Py_BuildValue("l", self->raw_data);
-	else
-	    return Py_BuildValue("l", imlib_image_get_data_for_reading_only());
-    }
-    else if (!strcmp(name, "raw_data_size"))
-        return Py_BuildValue("l", self->raw_data_size);
 
     return Py_FindMethod(Image_PyObject_methods, (PyObject *)self, name);
 }
