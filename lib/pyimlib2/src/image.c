@@ -462,7 +462,12 @@ PyObject *Image_PyObject__get_pixel(PyObject *self, PyObject *args)
     return Py_BuildValue("(iiii)", col.red, col.green, col.blue, col.alpha);
 }
 
-
+// This function returns a buffer object that contains the requested
+// raw pixel data.  If native pixel format (BGRA) is requested, it
+// will return a buffer object of the Image_PyObject itself (which
+// implements the buffer interface above).  If it's a non-native pixel
+// format, it will create a new buffer object from new memory (the buffer
+// object maintains its own memory) and memcpy the pixel data to that object.
 PyObject *Image_PyObject__get_raw_data(PyObject *self, PyObject *args)
 {
     char *format;

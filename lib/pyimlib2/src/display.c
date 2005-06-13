@@ -115,12 +115,12 @@ PyObject *Display_PyObject__render( Display_PyObject *self, PyObject *args)
 }
 
 
-PyObject *Display_PyObject__update( Display_PyObject *self, PyObject *args )
+PyObject *Display_PyObject__handle_events( Display_PyObject *self, PyObject *args )
 {
   XEvent ev;
   double now = get_curtime();
   float cursor_timeout;
-  PyObject *retval = Py_False;
+  PyObject *retval = Py_False, *regions = NULL, *val;
 
   if (!PyArg_ParseTuple(args, "f", &cursor_timeout))
      return NULL;
@@ -128,16 +128,17 @@ PyObject *Display_PyObject__update( Display_PyObject *self, PyObject *args )
   while ( XPending( self->display ) ) {
     XNextEvent( self->display, &ev );
 
-    if ( ( ev.type == KeyPress ) &&
-     PyCallable_Check( self->input_callback ) ) {
-      PyEval_CallObject( self->input_callback,
-             Py_BuildValue( "(i)", ev.xkey.keycode ) );
-    } else if ( ( ev.type == Expose ) &&
-        PyCallable_Check( self->expose_callback ) ) {
-      PyEval_CallObject( self->expose_callback,
-             Py_BuildValue( "((ii)(ii))",
-                    ev.xexpose.x, ev.xexpose.y,
-                    ev.xexpose.width, ev.xexpose.height ) );
+    if ( ( ev.type == KeyPress ) && PyCallable_Check( self->input_callback ) ) {
+      val = Py_BuildValue( "(i)", ev.xkey.keycode);
+      PyEval_CallObject(self->input_callback, val);
+      Py_DECREF(val);
+    } else if ( ( ev.type == Expose ) && PyCallable_Check( self->expose_callback ) ) {
+        if (!regions)
+            regions = PyList_New(0);
+        val = Py_BuildValue("((ii)(ii))", ev.xexpose.x, ev.xexpose.y, 
+                            ev.xexpose.width, ev.xexpose.height);
+        PyList_Append(regions, val);
+        Py_DECREF(val);
     } else if (ev.type == MotionNotify) {
        self->last_mousemove_time = now;
        if (cursor_timeout != 0)
@@ -151,6 +152,12 @@ PyObject *Display_PyObject__update( Display_PyObject *self, PyObject *args )
        XDefineCursor(self->display, self->window, self->invisible_cursor);
   }
 
+  if (regions) {
+      val = Py_BuildValue("(O)", regions);
+      PyEval_CallObject( self->expose_callback, val);
+      Py_DECREF(val);
+      Py_DECREF(regions);
+    }
   // Returns True if an event was handled, or False otherwise.
   Py_INCREF(retval);
   return retval;
@@ -159,7 +166,7 @@ PyObject *Display_PyObject__update( Display_PyObject *self, PyObject *args )
 
 PyMethodDef Display_PyObject_methods[] = {
     { "render", ( PyCFunction ) Display_PyObject__render, METH_VARARGS },
-    { "update", ( PyCFunction ) Display_PyObject__update, METH_VARARGS },
+    { "handle_events", ( PyCFunction ) Display_PyObject__handle_events, METH_VARARGS },
     { NULL, NULL }
 };
 
@@ -213,19 +220,22 @@ int Display_PyObject__setattr( Display_PyObject *self, char *name,
 
 PyObject *display_new(int w, int h)
 {
-    /*   XGrabKeyboard( self->display, self->window, True, */
-    /*          GrabModeAsync, GrabModeAsync, CurrentTime ); */
-
     Display_PyObject *o;
+    Display *display;
     int screen;
     // For hidden cursor
     Pixmap pix;
     static char bits[] = {0, 0, 0, 0, 0, 0, 0, 0};
     XColor cfg;
 
+    display = XOpenDisplay(NULL);
+    if (!display) {
+        PyErr_Format( PyExc_RuntimeError, "Can't open X11 display\n");
+        return NULL;
+    }
 
     o = PyObject_NEW(Display_PyObject, &Display_PyObject_Type);
-    o->display = XOpenDisplay(NULL);
+    o->display = display;
     screen = DefaultScreen(o->display);
 
     o->visual = DefaultVisual(o->display, screen);
@@ -250,7 +260,7 @@ PyObject *display_new(int w, int h)
     XMapWindow(o->display, o->window);
 
     if ( XPending( o->display ) )
-      Display_PyObject__update( o, NULL );
+      Display_PyObject__handle_events( o, NULL );
 
     return (PyObject *)o;
 }
