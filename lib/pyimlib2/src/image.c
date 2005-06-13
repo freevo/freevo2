@@ -459,7 +459,7 @@ PyObject *Image_PyObject__get_pixel(PyObject *self, PyObject *args)
     imlib_context_set_image(((Image_PyObject *)self)->image);
     imlib_image_query_pixel(x, y, &col);
 
-    return Py_BuildValue("(iiii)", col.red, col.green, col.blue, col.alpha);
+    return Py_BuildValue("(iiii)", col.blue, col.green, col.red, col.alpha);
 }
 
 // This function returns a buffer object that contains the requested
