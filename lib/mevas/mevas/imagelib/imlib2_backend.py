@@ -67,9 +67,7 @@ class Image(base.Image):
 
 
     def get_raw_data(self, format = "BGRA"):
-        s = str(self._image.get_raw_data(format))
-        self._image.free_raw_data()
-        return s
+        return self._image.get_raw_data(format)
 
 
     def rotate(self, angle):

@@ -89,11 +89,11 @@ class DirectFBCanvas(BitmapCanvas):
         pos, size = r
 
         self._rect = rect.optimize_for_rendering(self._rect)
-	# get the raw data from the imlib2 image as buffer
+        # get the raw data from the imlib2 image as buffer
         data = img._image.get_raw_data()
-	# create a new surface
+        # create a new surface
+        # XXX: Does overlay() handle buffer objects for data?  If not, 
+        # pass str(data).
         self._surface.overlay(DSPF_ARGB, data)
-	# delete the raw data
-	img._image.free_raw_data()
         self._surface.flip(DSFLIP_WAIT)
         return
