@@ -1,6 +1,6 @@
 Summary: Python wrapper for Imlib2
 Name: pyimlib2
-Version: 0.0.6
+Version: 0.0.7
 Release: 1
 License: LGPL
 Group: System Environment/Libraries
@@ -9,7 +9,7 @@ Source: http://sault.org/mebox/downloads/pyimlib2/%{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/root-%{name}-%{version}
 Prefix: %{_prefix}
 
-BuildRequires: imlib2-devel >= 1.1.0
+BuildRequires: imlib2-devel >= 1.1.1
 BuildRequires: python >= 2.2
 
 %description
@@ -42,5 +42,7 @@ EOF
 
 
 %changelog
+* Mon Jun 13 2005 Jason Tackaberry <tack@sault.org> - 0.0.7-1
+- Update to new directory structure
 * Tue Feb 24 2004 Jason Tackaberry <tack@sault.org> - 0.0.1-1
 - Initial package

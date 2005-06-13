@@ -31,8 +31,8 @@ import os
 import sys
 import re
 
-files = ["imlib2.c", "image.c", "font.c", "rawformats.c", "thumbnail.c",
-         "png.c" ]
+files = ["src/imlib2.c", "src/image.c", "src/font.c", "src/rawformats.c", 
+         "src/thumbnail.c", "src/png.c" ]
 
 include_dirs = []
 library_dirs = []
@@ -68,16 +68,17 @@ def check_config(name, minver):
 
 
 if not check_config('imlib2', '1.1.1'):
+    print "Imlib2 >= 1.1.1 not found; download from http://enlightenment.freedesktop.org/"
     sys.exit(1)
 
 
-config_h = open('config.h', 'w')
+config_h = open('src/config.h', 'w')
 
 if 'X11' in libraries:
-    files.append('display.c')
+    files.append('src/display.c')
     config_h.write('#define USE_IMLIB2_DISPLAY\n')
 else:
-    print 'Imlib2 compiled without X11, deactivation imlib2 display'
+    print 'Imlib2 compiled without X11, not building pyimlib2 display'
 
 if check_config('epeg', '0.9'):
     print 'epeg extention enabled'
@@ -87,13 +88,14 @@ else:
 
 config_h.close()
 
-setup(name="_Imlib2", version="0.0.7",
+setup(name="pyimlib2", version="0.0.7",
     ext_modules=[
         Extension("_Imlib2module",
             files,
             library_dirs=library_dirs,
-                        include_dirs=include_dirs,
+            include_dirs=include_dirs,
             libraries=libraries)
     ],
-    py_modules=["Imlib2"]
+    py_modules=["Imlib2"],
+    package_dir = {"": "src" }
 )
