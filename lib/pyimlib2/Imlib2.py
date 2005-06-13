@@ -518,19 +518,6 @@ class Image:
         return self._image.save(filename, format)
 
 
-    def to_sdl_surface(self, sdl_surface):
-        """
-        Copy the image into a pygame surface.
-        Warning: there is neither a size nor a color depth check, make sure
-        the Image and the Surface have the same size and pixel format.
-
-        Arguments:
-          surface: the pygame surface to image is copied to.
-
-        Returns: None
-        """
-        return self._image.to_sdl_surface(sdl_surface)
-
 
 class Display:
     def __init__(self, (w, h), dither = True, blend = False):

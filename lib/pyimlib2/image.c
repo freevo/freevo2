@@ -40,10 +40,6 @@
 #include <fcntl.h>
 #include "config.h"
 
-#ifdef USE_PYGAME
-#include <pygame.h>
-#endif
-
 
 PyTypeObject Image_PyObject_Type = {
     PyObject_HEAD_INIT(NULL)
@@ -69,6 +65,11 @@ PyTypeObject Image_PyObject_Type = {
     Py_TPFLAGS_DEFAULT,        /*tp_flags*/
     "Imlib2 Image Object"      /* tp_doc */
 };
+
+Imlib_Image *imlib_image_from_pyobject(Image_PyObject *pyimg)
+{
+	return pyimg->image;
+}
 
 
 void Image_PyObject__dealloc(Image_PyObject *self)
@@ -460,30 +461,6 @@ PyObject *Image_PyObject__free_raw_data(PyObject *self, PyObject *args)
 }
 
 
-PyObject *Image_PyObject__to_sdl_surface(PyObject *self, PyObject *args)
-{
-#ifdef USE_PYGAME
-    PySurfaceObject *pysurf;
-        static int init = 0;
-
-    if (init == 0) {
-        import_pygame_surface();
-        init = 1;
-    }
-
-    if (!PyArg_ParseTuple(args, "O!", &PySurface_Type, &pysurf))
-        return NULL;
-
-    imlib_context_set_image(((Image_PyObject *)self)->image);
-    get_raw_bytes("BGRA", pysurf->surf->pixels);
-    Py_INCREF(Py_None);
-    return Py_None;
-#else
-    PyErr_SetString(PyExc_ValueError, "pygame support missing");
-    return NULL;
-#endif
-}
-
 PyObject *Image_PyObject__save(PyObject *self, PyObject *args)
 {
     char *filename, *ext;
@@ -520,7 +497,6 @@ PyMethodDef Image_PyObject_methods[] = {
     { "get_raw_data", Image_PyObject__get_raw_data, METH_VARARGS },
     { "free_raw_data", Image_PyObject__free_raw_data, METH_VARARGS },
     { "get_pixel", Image_PyObject__get_pixel, METH_VARARGS },
-    { "to_sdl_surface", Image_PyObject__to_sdl_surface, METH_VARARGS },
     { "save", Image_PyObject__save, METH_VARARGS },
     { NULL, NULL }
 };

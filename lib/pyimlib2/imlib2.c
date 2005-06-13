@@ -173,7 +173,8 @@ PyMethodDef Imlib2_methods[] = {
 
 void init_Imlib2()
 {
-    PyObject *m;
+    PyObject *m, *c_api;
+    static void *api_ptrs[2];
 
     init_rgb2yuv_tables();
     m = Py_InitModule("_Imlib2", Imlib2_methods);
@@ -183,4 +184,11 @@ void init_Imlib2()
     PyModule_AddObject(m, "Image", (PyObject *)&Image_PyObject_Type);
     imlib_set_cache_size(1024*1024*4);
     imlib_set_font_cache_size(1024*1024*2);
+
+    // Export a simple API for other extension modules to be able to access
+    // and manipulate Image objects.
+    api_ptrs[0] = (void *)imlib_image_from_pyobject;
+    api_ptrs[1] = (void *)&Image_PyObject_Type;
+    c_api = PyCObject_FromVoidPtr((void *)api_ptrs, NULL);
+    PyModule_AddObject(m, "_C_API", c_api);
 }

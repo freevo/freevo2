@@ -39,3 +39,7 @@ typedef struct {
 extern PyTypeObject Image_PyObject_Type;
 void Image_PyObject__dealloc(Image_PyObject *);
 PyObject *Image_PyObject__getattr(Image_PyObject *, char *);
+
+// Exported
+Imlib_Image *imlib_image_from_pyobject(Image_PyObject *pyimg);
+

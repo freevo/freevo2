@@ -73,19 +73,6 @@ if not check_config('imlib2', '1.1.1'):
 
 config_h = open('config.h', 'w')
 
-try:
-    import pygame
-    inc = re.sub("/(lib|lib64)/", "/include/", pygame.__path__[0]).replace("site-packages/", "")
-    if not os.path.isdir(inc):
-        raise ImportError
-    if not check_config('sdl', '1.2.5'):
-        raise ImportError
-    print 'pygame extention enabled'
-    include_dirs.append(inc)
-    config_h.write('#define USE_PYGAME\n')
-except ImportError:
-    print 'pygame extention disabled'
-
 if 'X11' in libraries:
     files.append('display.c')
     config_h.write('#define USE_IMLIB2_DISPLAY\n')
