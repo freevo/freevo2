@@ -32,6 +32,7 @@ import mevas.rect as rect
 
 import pygame
 import time
+from mevas_pygame import image_to_surface
 
 from bitmapcanvas import *
 from pygame.locals import *
@@ -60,11 +61,11 @@ class PygameCanvas(BitmapCanvas):
         if not self._rect:
             return
         if hasattr(self, '_surface'):
-            self._backing_store._image.to_sdl_surface(self._surface)
+            image_to_surface(self._backing_store._image._image, self._surface)
             for pos, size in self._rect:
                 self._screen.blit(self._surface, pos, pos + size)
         else:
-            self._backing_store._image.to_sdl_surface(self._screen)
+            image_to_surface(self._backing_store._image._image, self._screen)
         pygame.display.update(self._rect)
         self._rect = []
 
