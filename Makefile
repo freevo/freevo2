@@ -2,7 +2,7 @@ PYMBUS=pyMbus-0.8.6
 PYNOTIFIER=pyNotifier-0.3.5
 URL=ftp://ftp.mbus.org/tzi/dmn/mbus/python/
 
-all: extra_packages lib/$(PYMBUS) lib/$(PYNOTIFIER)
+all: pyimlib2 mevas pylibvisual lib/$(PYMBUS) lib/$(PYNOTIFIER)
 	test -e site-packages || mkdir site-packages
 	@echo creating links in site-packages
 	@ln -sf ../lib/pyimlib2/_Imlib2module.so site-packages/_Imlib2module.so
@@ -19,14 +19,21 @@ all: extra_packages lib/$(PYMBUS) lib/$(PYNOTIFIER)
 	@echo make successfull
 
 
-extra_packages:
-	(cd lib/pyimlib2 ; make)
-	-(cd lib/pylibvisual ; make)
+pyimlib2:
+	( cd lib/pyimlib2 ; make )
+
+mevas:
+	( cd lib/mevas ; python setup.py build ; \
+	  cp -f build/lib*/mevas/displays/mevas_pygame.so mevas/displays )
+
+pylibvisual:
+	-( cd lib/pylibvisual ; make )
 
 
 clean:
-	(cd lib/pyimlib2 ; make clean)
-	-(cd lib/pylibvisual ; make clean )
+	find . -name *.pyo -exec rm {} \;
+	find . -name *.so -exec rm {} \;
+	find . -type d -name build -exec rm -rf {} 2>/dev/null \; || true
 	rm -rf site-packages
 
 
