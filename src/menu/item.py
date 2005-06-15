@@ -42,6 +42,8 @@ import logging
 import plugin
 import mediadb
 
+from util.weakref import weakref
+
 # events covered by item
 from event import EJECT
 
@@ -50,6 +52,29 @@ from action import ActionWrapper
 
 # get logging object
 log = logging.getLogger()
+
+
+def _actions_wrapper(actions):
+    """
+    Bad actions wrapper while porting the menu code.
+    This function will be removed later.
+    """
+    items = []
+    for a in actions:
+        if isinstance(a, (list, tuple)):
+            if len(a) > 3:
+                items.append(ActionWrapper(a[1], a[0], a[2], a[3]))
+            elif len(a) > 2:
+                items.append(ActionWrapper(a[1], a[0], a[2]))
+            else:
+                items.append(ActionWrapper(a[1], a[0]))
+        elif hasattr(a, 'action'):
+            items.append(a.action)
+        else:
+            items.append(a)
+    return items
+
+
 
 class Item:
     """
@@ -65,14 +90,14 @@ class Item:
         self.name = u''
         self.icon = None
         self.info = {}
-        self.menuw = None
+        self.menu = None
         self.description  = ''
         self.type = type
 
         if not hasattr(self, 'autovars'):
             self.autovars = {}
 
-        self.parent = parent
+        self.parent = weakref(parent)
         if parent:
             self.image = parent.image
             if hasattr(parent, 'is_mainmenu_item'):
@@ -91,10 +116,6 @@ class Item:
         if action:
             self.name = action.name
             self.description = action.description
-
-        # FIXME: remove this
-        self.defined_actions = self.actions
-        self.actions = self.actions_wrapper
 
 
     def __setitem__(self, key, value):
@@ -147,24 +168,21 @@ class Item:
         return []
 
 
-    def actions_wrapper(self):
+    def get_actions(self):
         """
-        Bad warpper for actions used while actions is restructured.
-        FIXME: remove this function.
+        Get all actions for the item. Do not override this function,
+        override 'actions' instead.
         """
-        items = []
-        for a in self.defined_actions():
-            if isinstance(a, (list, tuple)):
-                if len(a) > 3:
-                    items.append(ActionWrapper(a[1], a[0], a[2], a[3]))
-                elif len(a) > 2:
-                    items.append(ActionWrapper(a[1], a[0], a[2]))
-                else:
-                    items.append(ActionWrapper(a[1], a[0]))
-            elif hasattr(a, 'action'):
-                items.append(a.action)
-            else:
-                items.append(a)
+        # get actions defined by the item
+        items = _actions_wrapper(self.actions())
+        # get actions defined by plugins
+        plugins = plugin.get('item') + plugin.get('item_%s' % self.type)
+        plugins.sort(lambda l, o: cmp(l._level, o._level))
+        for p in plugins:
+            items += _actions_wrapper(p.actions(self))
+        # set item for the action
+        for i in items:
+            i.item = self
         return items
 
 
@@ -173,22 +191,18 @@ class Item:
         simple eventhandler for an item
         """
         # EJECT event handling
-        if self.media and self.media.item == self and event == EJECT and menuw:
+        if self.media and self.media.item == self and event == EJECT:
             self.media.move_tray(dir='toggle')
             return True
 
-        # FIXME: evil hack to get the menuw, even when it is not there
-        if not menuw:
-            menuw = self.menuw
-
         # call eventhandler from plugins
         for p in plugin.get('item') + plugin.get('item_%s' % self.type):
-            if p.eventhandler(self, event, menuw):
+            if p.eventhandler(self, event):
                 return True
 
         # give the event to the next eventhandler in the list
         if self.parent:
-            return self.parent.eventhandler(event, menuw)
+            return self.parent.eventhandler(event)
 
         return False
 
@@ -220,20 +234,6 @@ class Item:
             if r != None:
                 return r
         return ''
-
-
-    def delete(self):
-        """
-        callback when this item is deleted from the menu
-        """
-        self.parent = None
-
-
-    def __del__(self):
-        """
-        delete function of memory debugging
-        """
-        _mem_debug_('item', self.name)
 
 
     def __init_info__(self):
