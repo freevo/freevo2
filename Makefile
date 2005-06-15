@@ -2,32 +2,38 @@ PYMBUS=pyMbus-0.8.6
 PYNOTIFIER=pyNotifier-0.3.5
 URL=ftp://ftp.mbus.org/tzi/dmn/mbus/python/
 
-all: pyimlib2 mevas pylibvisual lib/$(PYMBUS) lib/$(PYNOTIFIER)
-	test -e site-packages || mkdir site-packages
+all: pyimlib2 mevas pylibvisual pynotifier pymbus
 	@echo creating links in site-packages
-	@ln -sf ../lib/pyimlib2/_Imlib2module.so site-packages/_Imlib2module.so
-	@ln -sf ../lib/pyimlib2/Imlib2.py site-packages/Imlib2.py
-	@test -e site-packages || mkdir site-packages
-	@-(test -e lib/mmpython && ln -sf ../lib/mmpython site-packages)
-	@-(test -e lib/pylibvisual/libvisual.so && \
-		ln -sf ../lib/pylibvisual/libvisual.so site-packages)
-	@ln -sf ../lib/mevas/mevas ../lib/pyepg site-packages
-	@ln -sf ../lib/pywebinfo/src site-packages/pywebinfo
+	@(test -e lib/mmpython && ln -sf ../lib/mmpython site-packages) || true
 	@ln -sf ../src site-packages/freevo
-	@ln -sf ../lib/$(PYMBUS)/mbus site-packages
-	@ln -sf ../lib/$(PYNOTIFIER)/notifier site-packages
 	@echo make successfull
 
 
-pyimlib2:
-	( cd lib/pyimlib2 ; make )
-
-mevas:
-	( cd lib/mevas ; python setup.py build ; \
-	  cp -f build/lib*/mevas/displays/mevas_pygame.so mevas/displays )
+pyimlib2 mevas:
+	@echo installing $@
+	@( cd lib/$@ ; \
+	  python setup.py install --install-lib=../../site-packages )
 
 pylibvisual:
-	-( cd lib/pylibvisual ; make )
+	@echo installing $@
+	@-( cd lib/$@ ; \
+	  python setup.py install --install-lib=../../site-packages )
+
+pymbus: lib/$(PYMBUS).tar.gz
+	@echo installing $@
+	@( cd lib/$(PYMBUS) ; \
+	    PYTHONPATH=../../site-packages python setup.py install \
+	    --install-lib=../../site-packages )
+
+
+pynotifier: lib/$(PYNOTIFIER).tar.gz
+	@echo installing $@
+	@( cd lib/$(PYNOTIFIER) ; \
+	    python setup.py install --install-lib=../../site-packages )
+
+%.tar.gz:
+	@echo downloading $@
+	@(cd lib && test \! -e $@ && wget --passive-ftp $(URL)$@ && tar -zxf $@ )
 
 
 clean:
@@ -36,20 +42,9 @@ clean:
 	find . -type d -name build -exec rm -rf {} 2>/dev/null \; || true
 	rm -rf site-packages
 
-
-lib/$(PYMBUS):
-	@echo installing $(PYMBUS)
-	@(cd lib && wget --passive-ftp $(URL)$(PYMBUS).tar.gz && \
-		tar -zxf $(PYMBUS).tar.gz && rm $(PYMBUS).tar.gz )
-
-
-lib/$(PYNOTIFIER):
-	@echo installing $(PYNOTIFIER)
-	@(cd lib && wget --passive-ftp $(URL)$(PYNOTIFIER).tar.gz && \
-		tar -zxf $(PYNOTIFIER).tar.gz && rm $(PYNOTIFIER).tar.gz )
-
 install:
-	for package in $(PYNOTIFIER) $(PYMBUS) pyepg pyimlib2 mevas pywebinfo; do \
+	for package in $(PYNOTIFIER) $(PYMBUS) pyepg pyimlib2 mevas \
+		pywebinfo pylibvisual; do \
 		(cd lib/$$package; \
 		 rm -rf build ; \
 		 python setup.py install; \
