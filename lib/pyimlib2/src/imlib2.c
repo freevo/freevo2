@@ -31,6 +31,8 @@
 #define X_DISPLAY_MISSING
 #include <Imlib2.h>
 
+#include <fcntl.h>
+
 #include "image.h"
 #include "rawformats.h"
 #include "font.h"
@@ -82,31 +84,90 @@ PyObject *imlib2_create(PyObject *self, PyObject *args)
     return (PyObject *)o;
 }
 
-
-PyObject *imlib2_open(PyObject *self, PyObject *args)
+static
+Image_PyObject *_imlib2_open(char *filename)
 {
-    char *file;
     Imlib_Image *image;
     Image_PyObject *o;
     Imlib_Load_Error error_return;
 
-    if (!PyArg_ParseTuple(args, "s", &file))
-        return NULL;
-        
-    image = imlib_load_image_with_error_return(file, &error_return);
+    image = imlib_load_image_with_error_return(filename, &error_return);
     if (!image) {
-        PyErr_Format(PyExc_IOError, "Could not open %s: %d", file, 
-		     error_return);
         if (error_return == IMLIB_LOAD_ERROR_NO_LOADER_FOR_FILE_FORMAT)
             PyErr_Format(PyExc_IOError, "no loader for file format");
+        else
+            PyErr_Format(PyExc_IOError, "Could not open %s: %d", filename, 
+	    	     error_return);
         return NULL;
     }
     o = PyObject_NEW(Image_PyObject, &Image_PyObject_Type);
     o->image = image;
     o->raw_data = NULL;
-    return (PyObject *)o;
-} 
+    return o;
+}
 
+PyObject *imlib2_open(PyObject *self, PyObject *args)
+{
+    char *file;
+    Image_PyObject *image;
+
+    if (!PyArg_ParseTuple(args, "s", &file))
+        return NULL;
+ 
+    image = _imlib2_open(file);
+    if (!image)
+        return NULL;
+}
+
+PyObject *imlib2_open_from_memory(PyObject *self, PyObject *args)
+{
+    Image_PyObject *image = NULL;
+    PyObject *buffer;
+    void *data;
+    int len, fd;
+    char filename[PATH_MAX], path[PATH_MAX];
+
+    if (!PyArg_ParseTuple(args, "O!", &PyBuffer_Type, &buffer))
+        return NULL;
+
+    // Using pid in the file should be good enough.  It means this function
+    // isn't reentrant, but because we have the global interpreter lock at
+    // this point, we shouldn't need to be reentrant.
+    sprintf(filename, "pyimlib2-img-%d", getpid());
+    PyObject_AsReadBuffer(buffer, (const void **)&data, &len);
+
+#ifdef HAVE_POSIX_SHMEM
+    sprintf(path, "/dev/shm/%s", filename);
+    fd = shm_open(filename, O_RDWR | O_CREAT, 0600);
+    if (fd != -1) {
+        if (write(fd, data, len) == len)
+            image = _imlib2_open(path);
+        close(fd);
+        shm_unlink(filename);
+        if (image)
+            return (PyObject *)image;
+    }
+    // Shmem failed, fall back to file system
+#endif
+    sprintf(path, "/tmp/%s", filename);
+    fd = open(path, O_RDWR | O_CREAT, 0600);
+    if (fd == -1) {
+        PyErr_Format(PyExc_IOError, "Unable to save temporary file: %s", path);
+        return NULL;
+    }
+    if (write(fd, data, len) == len)
+        image = _imlib2_open(path);
+    close(fd);
+    unlink(path);
+
+    if (!image) {
+        if (!PyErr_Occurred())
+            PyErr_Format(PyExc_IOError, "Failed writing to temporary file: %s", path);
+        return NULL;
+    }
+
+    return image;
+}
 
 PyObject *imlib2_add_font_path(PyObject *self, PyObject *args)
 {
@@ -161,6 +222,7 @@ PyMethodDef Imlib2_methods[] = {
     { "load_font", imlib2_load_font, METH_VARARGS }, 
     { "create", imlib2_create, METH_VARARGS }, 
     { "open", imlib2_open, METH_VARARGS }, 
+    { "open_from_memory", imlib2_open_from_memory, METH_VARARGS }, 
 
     // These functions are PyImlib2 extensions that are not part of Imlib2.
     { "new_display", imlib2_new_display, METH_VARARGS }, 

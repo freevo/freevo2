@@ -772,6 +772,15 @@ def open(file):
 
     return image
 
+def open_from_memory(buf):
+    """
+    Create a new image object from a memory buffer.
+    """
+    if type(buf) == str:
+        buf = buffer(buf)
+    img = _Imlib2.open_from_memory(buf)
+    return Image(img)
+
 
 def new(size, bytes = None, from_format = "BGRA"):
     """

@@ -45,10 +45,10 @@ int Image_PyObject_Buffer__get_readwrite_buffer(PyObject *, int, void **);
 int Image_PyObject_Buffer__get_seg_count(PyObject *, int *);
 
 PyBufferProcs buffer_procs = {
-	Image_PyObject_Buffer__get_read_buffer, 
-	Image_PyObject_Buffer__get_readwrite_buffer, 
-	Image_PyObject_Buffer__get_seg_count, 
-	NULL
+    Image_PyObject_Buffer__get_read_buffer, 
+    Image_PyObject_Buffer__get_readwrite_buffer, 
+    Image_PyObject_Buffer__get_seg_count, 
+    NULL
 };
 
 PyTypeObject Image_PyObject_Type = {
@@ -79,41 +79,41 @@ PyTypeObject Image_PyObject_Type = {
 // Exported _C_API function
 Imlib_Image *imlib_image_from_pyobject(Image_PyObject *pyimg)
 {
-	return pyimg->image;
+    return pyimg->image;
 }
 
 int Image_PyObject_Buffer__get_read_buffer(PyObject *self, int segment, void **ptr)
 {
     imlib_context_set_image(((Image_PyObject *)self)->image);
-	if (ptr)
-    	*ptr = (void *)imlib_image_get_data_for_reading_only();
-	return imlib_image_get_width() * imlib_image_get_height() * 4;
+    if (ptr)
+        *ptr = (void *)imlib_image_get_data_for_reading_only();
+    return imlib_image_get_width() * imlib_image_get_height() * 4;
 }
 
 int Image_PyObject_Buffer__get_readwrite_buffer(PyObject *self, int segment, void **ptr)
 {
-	Image_PyObject *o = (Image_PyObject *)self;
+    Image_PyObject *o = (Image_PyObject *)self;
     imlib_context_set_image(o->image);
-	if (segment > 0) {
-		PyErr_Format(PyExc_SystemError, "Invalid segment for read/write buffer.");
-		return -1;
-	}
-	if (ptr) {
-		if (o->raw_data)
-    		*ptr = o->raw_data;
-		else 
-    		*ptr = o->raw_data = (void *)imlib_image_get_data();
-	}
-	return imlib_image_get_width() * imlib_image_get_height() * 4;
+    if (segment > 0) {
+        PyErr_Format(PyExc_SystemError, "Invalid segment for read/write buffer.");
+        return -1;
+    }
+    if (ptr) {
+        if (o->raw_data)
+            *ptr = o->raw_data;
+        else 
+            *ptr = o->raw_data = (void *)imlib_image_get_data();
+    }
+    return imlib_image_get_width() * imlib_image_get_height() * 4;
 }
 
 int Image_PyObject_Buffer__get_seg_count(PyObject *self, int *lenp)
 {
-	if (lenp) {
-	    imlib_context_set_image(((Image_PyObject *)self)->image);
-		*lenp = imlib_image_get_width() * imlib_image_get_height() * 4;
-	}
-	return 1;
+    if (lenp) {
+        imlib_context_set_image(((Image_PyObject *)self)->image);
+        *lenp = imlib_image_get_width() * imlib_image_get_height() * 4;
+    }
+    return 1;
 }
 
 Image_PyObject *_new_image_pyobject(Imlib_Image *image)
@@ -121,7 +121,7 @@ Image_PyObject *_new_image_pyobject(Imlib_Image *image)
     Image_PyObject *o = PyObject_NEW(Image_PyObject, &Image_PyObject_Type);
     o->image = image;
     o->raw_data = NULL;
-	return o;
+    return o;
 }
 
 void Image_PyObject__dealloc(Image_PyObject *self)
@@ -167,19 +167,19 @@ PyObject *Image_PyObject__scale(PyObject *self, PyObject *args)
     Image_PyObject *o;
 
     if (!PyArg_ParseTuple(args, "iiiiii", &x, &y, &src_w, &src_h, &dst_w,
-			  &dst_h))
+              &dst_h))
         return NULL;
 
     imlib_context_set_image(((Image_PyObject *)self)->image);
     image = imlib_create_cropped_scaled_image(x, y, src_w, src_h,
-					      dst_w, dst_h);
+                          dst_w, dst_h);
     if (!image) {
         PyErr_Format(PyExc_RuntimeError, "Failed scaling image (%d, %d)",
-		     dst_w, dst_h);
+             dst_w, dst_h);
         return NULL;
     }
 
-	o = _new_image_pyobject(image);
+    o = _new_image_pyobject(image);
     return (PyObject *)o;
 }
 
@@ -198,11 +198,11 @@ PyObject *Image_PyObject__rotate(PyObject *self, PyObject *args)
     image = imlib_create_rotated_image(angle);
     if (!image) {
         PyErr_Format(PyExc_RuntimeError, "Failed rotating image (%f) degrees",
-		     angle);
+             angle);
         return NULL;
     }
 
-	o = _new_image_pyobject(image);
+    o = _new_image_pyobject(image);
     return (PyObject *)o;
 }
 
@@ -245,10 +245,10 @@ PyObject *Image_PyObject__clone(PyObject *self, PyObject *args)
     image = imlib_clone_image();
     if (!image) {
         PyErr_Format(PyExc_RuntimeError, "Failed to clone image");
-	return NULL;
+    return NULL;
     }
 
-	o = _new_image_pyobject(image);
+    o = _new_image_pyobject(image);
     return (PyObject *)o;
 }
 
@@ -262,8 +262,8 @@ PyObject *Image_PyObject__blend(PyObject *self, PyObject *args)
     Imlib_Color_Modifier cmod;
 
     if (!PyArg_ParseTuple(args, "O!(ii)(ii)(ii)(ii)ii", &Image_PyObject_Type,
-			  &src, &src_x, &src_y, &src_w, &src_h, &dst_x, &dst_y,
-			  &dst_w, &dst_h, &src_alpha, &merge_alpha))
+              &src, &src_x, &src_y, &src_w, &src_h, &dst_x, &dst_y,
+              &dst_w, &dst_h, &src_alpha, &merge_alpha))
         return NULL;
 
 
@@ -311,7 +311,7 @@ PyObject *Image_PyObject__draw_mask(PyObject *self, PyObject *args)
     unsigned char *mask_chunk, *dst_chunk, avg;
 
     if (!PyArg_ParseTuple(args, "O!ii", &Image_PyObject_Type, &mask, &dst_x,
-			  &dst_y))
+              &dst_y))
         return NULL;
 
     imlib_context_set_image(((Image_PyObject *)mask)->image);
@@ -367,7 +367,7 @@ PyObject *Image_PyObject__draw_text(PyObject *self, PyObject *args)
     Font_PyObject *font;
 
     if (!PyArg_ParseTuple(args, "O!iis(iiii)", &Font_PyObject_Type, &font, &x,
-			  &y, &text, &r, &g, &b, &a))
+              &y, &text, &r, &g, &b, &a))
         return NULL;
 
     imlib_context_set_image(((Image_PyObject *)self)->image);
@@ -375,7 +375,7 @@ PyObject *Image_PyObject__draw_text(PyObject *self, PyObject *args)
 
     imlib_context_set_color(r, g, b, a);
     imlib_text_draw_with_return_metrics(x, y, text, &w, &h, &advance_w,
-					&advance_h);
+                    &advance_h);
     return Py_BuildValue("(llll)", w, h, advance_w, advance_h);
 }
 
@@ -385,7 +385,7 @@ PyObject *Image_PyObject__draw_rectangle(PyObject *self, PyObject *args)
     int x, y, w, h, r, g, b, a, fill = 0;
 
     if (!PyArg_ParseTuple(args, "iiii(iiii)|i", &x, &y, &w, &h, &r, &g, &b, &a,
-			  &fill))
+              &fill))
         return NULL;
 
     imlib_context_set_image(((Image_PyObject *)self)->image);
@@ -406,7 +406,7 @@ PyObject *Image_PyObject__draw_ellipse(PyObject *self, PyObject *args)
     int xc, yc, ea, eb, r, g, b, a, fill = 0;
 
     if (!PyArg_ParseTuple(args, "iiii(iiii)|i", &xc, &yc, &ea, &eb, &r, &g, &b,
-			  &a, &fill))
+              &a, &fill))
         return NULL;
 
     imlib_context_set_image(((Image_PyObject *)self)->image);
@@ -439,7 +439,7 @@ PyObject *Image_PyObject__copy_rect(PyObject *self, PyObject *args)
 {
     int src_x, src_y, w, h, dst_x, dst_y;
     if (!PyArg_ParseTuple(args, "(ii)(ii)(ii)", &src_x, &src_y, &w, &h, &dst_x,
-			  &dst_y))
+              &dst_y))
         return NULL;
 
     imlib_context_set_image(((Image_PyObject *)self)->image);
@@ -471,7 +471,7 @@ PyObject *Image_PyObject__get_pixel(PyObject *self, PyObject *args)
 PyObject *Image_PyObject__get_raw_data(PyObject *self, PyObject *args)
 {
     char *format;
-	int len, write;
+    int len, write;
     Image_PyObject *o = (Image_PyObject *)self;
 
 
@@ -479,44 +479,44 @@ PyObject *Image_PyObject__get_raw_data(PyObject *self, PyObject *args)
         return NULL;
 
     imlib_context_set_image(o->image);
-	if (!strcmp(format, "BGRA")) {
-		// Requested native format, so create a buffer directly from the
-		// Image pyobject.
-		if (write)
-			return PyBuffer_FromReadWriteObject(self, 0, Py_END_OF_BUFFER);
-		else
-			return PyBuffer_FromObject(self, 0, Py_END_OF_BUFFER);
-	} else {
-		// Requested different format, create a new buffer.
-		PyObject *buffer;
-    	unsigned char *data;
+    if (!strcmp(format, "BGRA")) {
+        // Requested native format, so create a buffer directly from the
+        // Image pyobject.
+        if (write)
+            return PyBuffer_FromReadWriteObject(self, 0, Py_END_OF_BUFFER);
+        else
+            return PyBuffer_FromObject(self, 0, Py_END_OF_BUFFER);
+    } else {
+        // Requested different format, create a new buffer.
+        PyObject *buffer;
+        unsigned char *data;
 
-		buffer = PyBuffer_New(get_raw_bytes_size(format));
-		PyObject_AsWriteBuffer(buffer, (void **)&data, &len);
+        buffer = PyBuffer_New(get_raw_bytes_size(format));
+        PyObject_AsWriteBuffer(buffer, (void **)&data, &len);
         get_raw_bytes(format, data);
-		return buffer;
-	}
+        return buffer;
+    }
 }
 
 
 PyObject *Image_PyObject__put_back_raw_data(PyObject *self, PyObject *args)
 {
-	Image_PyObject *o = (Image_PyObject *)self;
-	PyObject *buffer_object;
+    Image_PyObject *o = (Image_PyObject *)self;
+    PyObject *buffer_object;
     unsigned char *buffer;
-	int len;
-	
+    int len;
+    
     if (!PyArg_ParseTuple(args, "O!", &PyBuffer_Type, &buffer_object))
         return NULL;
 
-	imlib_context_set_image(o->image);
-	PyObject_AsWriteBuffer(buffer_object, (void **)&buffer, &len);
-	if (buffer != o->raw_data) {
-		PyErr_Format(PyExc_ValueError, "Putting back a buffer that wasn't gotten with get_raw_data()!");
-		return NULL;
-	}
-	imlib_image_put_back_data((DATA32 *)buffer);
-	o->raw_data = NULL;
+    imlib_context_set_image(o->image);
+    PyObject_AsWriteBuffer(buffer_object, (void **)&buffer, &len);
+    if (buffer != o->raw_data) {
+        PyErr_Format(PyExc_ValueError, "Putting back a buffer that wasn't gotten with get_raw_data()!");
+        return NULL;
+    }
+    imlib_image_put_back_data((DATA32 *)buffer);
+    o->raw_data = NULL;
     Py_INCREF(Py_None);
     return Py_None;
 }

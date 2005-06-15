@@ -36,7 +36,7 @@ files = ["src/imlib2.c", "src/image.c", "src/font.c", "src/rawformats.c",
 
 include_dirs = []
 library_dirs = []
-libraries    = ['png']
+libraries    = ['png', "rt"]
 
 def check_config(name, minver):
     """
@@ -66,6 +66,20 @@ def check_config(name, minver):
         print 'WARNING: "%s-config" failed: %s' % (name, e)
         return False
 
+def check_link(code, args):
+    outfile = "/tmp/a.out.%d" % os.getpid()
+    f = os.popen("cc -x c - -o %s %s &>/dev/null" % (outfile, args), "w")
+    if not f:
+        return False
+
+    f.write(code)
+    result = f.close()
+
+    if os.path.exists(outfile):
+        os.unlink(outfile)
+
+    return result == None
+
 
 if not check_config('imlib2', '1.1.1'):
     print "Imlib2 >= 1.1.1 not found; download from http://enlightenment.freedesktop.org/"
@@ -85,6 +99,13 @@ if check_config('epeg', '0.9'):
     config_h.write('#define USE_EPEG\n')
 else:
     print 'epeg extention disabled'
+
+if check_link("#include <fcntl.h>\nvoid main() {shm_open(\"foobar\");}", "-lrt"):
+    config_h.write('#define HAVE_POSIX_SHMEM\n')
+    print "POSIX shared memory enabled"
+else:
+    print "POSIX shared memory disabled"
+    
 
 config_h.close()
 
