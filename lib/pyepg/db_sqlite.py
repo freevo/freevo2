@@ -66,8 +66,9 @@ class Database:
         if not os.path.isfile(dbpath):
 
             # try to find sqlite in the path, error if not
-            for dirname in os.environ['PATH'].split(':'):
-                sqlite_path = os.path.join(dirname, 'sqlite')
+            dirs = os.environ['PATH'].split(':')
+            for dirname, fname in zip(dirs*2, ("sqlite", "sqlite3")*len(dirs)):
+                sqlite_path = os.path.join(dirname, fname)
                 if os.path.exists(sqlite_path) and os.path.isfile(sqlite_path):
                     break
             else:
