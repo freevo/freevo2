@@ -19,21 +19,19 @@ pylibvisual:
 	@-( cd lib/$@ ; \
 	  python setup.py install --install-lib=../../site-packages )
 
-pymbus: lib/$(PYMBUS).tar.gz
-	@echo installing $@
+pymbus: $(PYMBUS).tar.gz
 	@( cd lib/$(PYMBUS) ; \
 	    PYTHONPATH=../../site-packages python setup.py install \
 	    --install-lib=../../site-packages )
 
 
-pynotifier: lib/$(PYNOTIFIER).tar.gz
-	@echo installing $@
+pynotifier: $(PYNOTIFIER).tar.gz
 	@( cd lib/$(PYNOTIFIER) ; \
 	    python setup.py install --install-lib=../../site-packages )
 
 %.tar.gz:
-	@echo downloading $@
-	@(cd lib && test \! -e $@ && wget --passive-ftp $(URL)$@ && tar -zxf $@ )
+	@echo installing $@
+	@(cd lib && test \! -e $@ && wget --passive-ftp $(URL)$@ && tar -zxf $@ ) || true
 
 
 clean:
