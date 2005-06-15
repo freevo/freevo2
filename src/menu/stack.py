@@ -42,6 +42,7 @@ import logging
 import config
 import plugin
 
+from util.weakref import weakref
 from event import *
 
 # menu imports
@@ -129,7 +130,7 @@ class MenuStack:
             eventhandler.post_event(Event(OSD_MESSAGE, arg=osd_message))
 
 
-    def back_one_menu(self, arg=None, menuw=None):
+    def back_one_menu(self):
         """
         Go back on menu. Or if the current menu has a variable called
         'back_one_menu' it is the real number of menus to go back
@@ -141,13 +142,16 @@ class MenuStack:
             self.menustack = self.menustack[:-previous.back_one_menu]
         else:
             self.menustack = self.menustack[:-1]
-        return self.refresh(arg == 'reload')
+        return self.refresh(True)
 
 
     def pushmenu(self, menu):
         """
         Add a new Menu to the stack and show it
         """
+        # set stack (self) pointer to menu
+        menu.stack = weakref(self)
+
         if len(self.menustack) > 0:
             previous = self.menustack[-1]
         else:
@@ -176,13 +180,18 @@ class MenuStack:
                 # Current showing is no Menu, we are hidden.
                 self.show()
         else:
-            # The current Menu is a MenuApplication, set menuw
-            # to it so it can reference back to us. Also set
+            # The current Menu is a MenuApplication, set
             # theme and 'inside_menu'.
-            menu.menuw = self
             menu.theme = previous.theme
             self.inside_menu = True
             menu.inside_menu = True
+
+        if isinstance(menu, Menu) and menu.autoselect and \
+               len(menu.choices) == 1:
+            log.info('autoselect action')
+            # autoselect only item in the menu
+            menu.choices[0].get_actions()[0]()
+            return
 
         # refresh will do the update
         self.refresh()
@@ -190,10 +199,17 @@ class MenuStack:
 
     def refresh(self, reload=False):
         """
-        Refresh the menuwidget.
+        Refresh the stack and redraw it.
         """
         menu = self.menustack[-1]
-
+        
+        if isinstance(menu, Menu) and menu.autoselect and \
+               len(menu.choices) == 1:
+            # do not show a menu with only one item. Go back to
+            # the previous page
+            log.info('delete menu with only one item')
+            return self.back_one_menu()
+            
         if not isinstance(menu, Menu):
             # The new menu is no 'Menu', it is a 'MenuApplication'
             # Mark both the previous shown Menu (app or self) and the
@@ -245,6 +261,20 @@ class MenuStack:
         self.redraw()
         return
 
+
+    def __getitem__(self, attr):
+        """
+        Return menustack item.
+        """
+        return self.menustack[attr]
+    
+
+    def __setitem__(self, attr, value):
+        """
+        Set menustack item.
+        """
+        self.menustack[attr] = value
+    
 
     def eventhandler(self, event):
         """
@@ -327,21 +357,18 @@ class MenuStack:
 
 
         if event == MENU_PLAY_ITEM and hasattr(menu.selected, 'play'):
-            menu.selected.play(menuw=self)
+            menu.selected.play()
             self.refresh()
             return True
 
 
         if event == MENU_SELECT or event == MENU_PLAY_ITEM:
-            actions = menu.selected.actions()
+            actions = menu.selected.get_actions()
             if not actions:
                 msg = _('No action defined for this choice!')
                 eventhandler.post_event(Event(OSD_MESSAGE, arg=msg))
             else:
-                if menu.item:
-                    actions[0](menu.item, self)
-                else:
-                    actions[0](menu.selected, self)
+                actions[0]()
             return True
 
 
@@ -349,23 +376,8 @@ class MenuStack:
             if menu.submenu:
                 return True
 
-            actions = menu.selected.actions()
-            force   = False
-            if not actions:
-                force   = True
-
-            plugins = plugin.get('item') + \
-                      plugin.get('item_%s' % menu.selected.type)
-
-            if hasattr(menu.selected, 'display_type'):
-                plugins += plugin.get('item_%s' % menu.selected.display_type)
-
-            plugins.sort(lambda l, o: cmp(l._level, o._level))
-
-            for p in plugins:
-                for a in p.actions(menu.selected):
-                    actions.append(a)
-            if actions and (len(actions) > 1 or force):
+            actions = menu.selected.get_actions()
+            if actions and len(actions) > 1:
                 items = []
                 for a in actions:
                     items.append(Item(menu.selected, a))
@@ -391,26 +403,10 @@ class MenuStack:
 
         if event == MENU_CALL_ITEM_ACTION:
             log.info('calling action %s' % event.arg)
-
-            for a in menu.selected.actions():
-                if not hasattr(a, 'shortcut'):
-                    # FIXME: this shouldn't happen after restructuring
-                    pass
-                elif a.shortcut == event.arg:
+            for a in menu.selected.get_actions():
+                if a.shortcut == event.arg:
                     a(menu.selected, self)
                     return True
-
-            plugins = plugin.get('item') + \
-                      plugin.get('item_%s' % menu.selected.type)
-
-            if hasattr(menu.selected, 'display_type'):
-                plugins += plugin.get('item_%s' % menu.selected.display_type)
-
-            for p in plugins:
-                for a in p.actions(menu.selected):
-                    if a.shortcut == event.arg:
-                        a(menu.selected, self)
-                        return True
             log.info('action %s not found' % event.arg)
 
 
