@@ -1,52 +1,16 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # viewer.py - Freevo image viewer
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes:
-# Todo:
-#
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.75  2005/06/04 17:18:12  dischi
-# adjust to gui changes
-#
-# Revision 1.74  2005/04/17 18:34:51  dischi
-# fix getattr call for osd
-#
-# Revision 1.73  2004/12/31 11:57:42  dischi
-# renamed SKIN_* and OSD_* variables to GUI_*
-#
-# Revision 1.72  2004/11/20 18:23:02  dischi
-# use python logger module for debug
-#
-# Revision 1.71  2004/10/06 19:24:01  dischi
-# switch from rc.py to pyNotifier
-#
-# Revision 1.70  2004/09/13 18:00:50  dischi
-# last cleanups for the image module in Freevo
-#
-# Revision 1.69  2004/09/12 21:19:36  mikeruelle
-# for those of us without idlebars
-#
-# Revision 1.68  2004/09/07 18:57:43  dischi
-# image viwer auto slideshow
-#
-# Revision 1.67  2004/08/27 14:22:01  dischi
-# The complete image code is working again and should not crash. The zoom
-# handling got a complete rewrite. Only the gphoto plugin is not working
-# yet because my camera is a storage device.
-#
-# Revision 1.66  2004/08/25 12:51:45  dischi
-# moved Application for eventhandler into extra dir for future templates
-#
-# Revision 1.65  2004/08/23 20:36:42  dischi
-# rework application handling
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al.
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -63,7 +27,8 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
+
 
 __all__ = [ 'imageviewer' ]
 

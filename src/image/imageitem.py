@@ -1,40 +1,19 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # imageitem.py - Item for image files
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
 # An ImageItem is an Item handling image files for Freevo. It will
 # use the viewer in viewer.py to display the image
 #
-# Notes:
-# Todo:
-#
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.32  2005/06/12 18:49:53  dischi
-# adjust to new menu code
-#
-# Revision 1.31  2005/04/10 17:58:45  dischi
-# switch to new mediainfo module
-#
-# Revision 1.30  2004/09/13 18:00:49  dischi
-# last cleanups for the image module in Freevo
-#
-# Revision 1.29  2004/09/07 18:57:43  dischi
-# image viwer auto slideshow
-#
-# Revision 1.28  2004/08/27 14:22:01  dischi
-# The complete image code is working again and should not crash. The zoom
-# handling got a complete rewrite. Only the gphoto plugin is not working
-# yet because my camera is a storage device.
-#
-# Revision 1.27  2004/08/23 20:36:42  dischi
-# rework application handling
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al.
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -51,20 +30,19 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
+__all__ = [ 'ImageItem' ]
 
 # python imports
-import util
 import os
 import time
 
 # freevo imports
 import config
-from menu import MediaItem
+from menu import MediaItem, Action
 from event import *
 from viewer import *
-import util.thumbnail
 
 class ImageItem(MediaItem):
     """
@@ -117,7 +95,7 @@ class ImageItem(MediaItem):
         """
         return a list of possible actions on this item.
         """
-        return [ ( self.play, _('View Image') ) ]
+        return [ Action(_('View Image'), self.play) ]
 
 
     def cache(self):
@@ -127,12 +105,10 @@ class ImageItem(MediaItem):
         imageviewer().cache(self)
 
 
-    def play(self, arg=None, menuw=None):
+    def play(self):
         """
         view the image
         """
-        if not self.menuw:
-            self.menuw = menuw
         self.parent.current_item = self
 
         imageviewer().view(self, rotation=self['rotation'])
@@ -141,7 +117,7 @@ class ImageItem(MediaItem):
             self.parent.cache_next()
 
 
-    def stop(self, arg=None, menuw=None):
+    def stop(self):
         """
         stop viewing this item
         """

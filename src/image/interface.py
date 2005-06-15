@@ -1,36 +1,20 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # interface.py - interface between mediamenu and image
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
 # This file defines the PluginInterface for the image module
 # of Freevo. It is loaded by __init__.py and will activate the
 # mediamenu for images.
 #
-# Notes:
-# Todo:
-#
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.9  2005/06/09 20:04:02  dischi
-# move fxditem node parser from plugin to fxditem
-#
-# Revision 1.8  2005/05/01 17:40:47  dischi
-# remove some vfs calls were they are not needed
-#
-# Revision 1.7  2005/04/10 17:58:45  dischi
-# switch to new mediainfo module
-#
-# Revision 1.6  2004/09/13 19:32:46  dischi
-# move the fxdhandler into an extra file
-#
-# Revision 1.5  2004/09/13 18:00:50  dischi
-# last cleanups for the image module in Freevo
-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al.
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -47,7 +31,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
 # only export 'PluginInterface' to the outside. This will be used
 # with plugin.activate('image') and everything else should be handled
