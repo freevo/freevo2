@@ -84,8 +84,7 @@ class BitmapCanvas(Canvas):
         img, dirty_rects = self._get_backing_store(update = True,
 						   update_object = child,
 						   clip = True,
-						   preserve_alpha = \
-						   self._preserve_alpha)
+						   preserve_alpha = self._preserve_alpha)
         if len(dirty_rects) == 0:
             return
 

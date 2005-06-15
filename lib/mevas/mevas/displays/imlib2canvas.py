@@ -43,6 +43,21 @@ class Imlib2Canvas(BitmapCanvas):
 
     def _blit(self, img, r):
         pos, size = r
+        if not self._display.backing_store:
+            # Sets the backing store for the Imlib2 display for default
+            # expose handler.
+            # FIXME: this requires app to call canvas._display.handle_events()
+            # Need to offer an API within mevas for this.
+            if self.alpha < 255:
+                bs = self._backing_store_with_alpha
+            else:
+                bs = self._backing_store
+
+            # We can only use the canvas backing store image if it's an
+            # Imlib2 image.
+            if isinstance(bs, mevas.imagelib.get_backend("imlib2").Image):
+                self._display.set_backing_store(self._backing_store._image)
+
         if isinstance(img, mevas.imagelib.get_backend("imlib2").Image):
             self._display.render(img._image, pos, pos, size)
         else:
