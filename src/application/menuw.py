@@ -65,7 +65,7 @@ class MenuWidget(Application, MenuStack):
         Show the menu on the screen
         """
         Application.show(self)
-        self.refresh(reload=1)
+        self.refresh(True)
         if self.inside_menu:
             self.engine.show(0)
             self.inside_menu = False

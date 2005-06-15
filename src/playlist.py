@@ -5,7 +5,6 @@
 # $Id$
 #
 # TODO: o fix MEMCHECKER comments
-#       o remove the menuw stuff when all play items are converted
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -73,7 +72,6 @@ class Playlist(MediaItem):
         build:    create the playlist. This means unfold the directories
         """
         MediaItem.__init__(self, parent, type='playlist')
-        self.menuw    = None
         self.name     = Unicode(name)
 
         # variables only for Playlist
@@ -309,7 +307,7 @@ class Playlist(MediaItem):
         return items
 
 
-    def browse(self, menuw):
+    def browse(self):
         """
         show the playlist in the menu
         """
@@ -334,7 +332,6 @@ class Playlist(MediaItem):
 
         for item in self.playlist:
             if not isinstance(item, Item):
-                print item
                 # get a real item
                 listing = mediadb.FileListing([item])
                 if listing.num_changes:
@@ -358,38 +355,39 @@ class Playlist(MediaItem):
             display_type = 'video'
 
         menu = Menu(self.name, self.playlist, item_types = display_type)
-        menuw.pushmenu(menu)
+        self.menu.stack.pushmenu(menu)
 
 
-    def random_play(self, menuw):
+    def random_play(self):
         """
         play the playlist in random order
         """
         Playlist(playlist=self.playlist, parent=self.parent,
                  display_type=self.display_type, random=True,
-                 repeat=self.repeat).play(menuw)
+                 repeat=self.repeat).play()
 
 
-    def play(self, menuw, next=False):
+    def play(self, next=False):
         """
         play the playlist
         """
-        if not self.menuw:
-            self.menuw = menuw
-
         if not self.playlist:
-            # XXX WaitBox please
             log.warning('empty playlist')
             return False
 
         if not next:
             # first start
             Playlist.build(self)
+
             if self.random:
                 self.randomize()
 
             if self.background_playlist:
                 self.background_playlist.play()
+
+            if not self.playlist:
+                log.warning('empty playlist')
+                return False
 
             self.current_item = self.playlist[0]
 
@@ -413,23 +411,23 @@ class Playlist(MediaItem):
 
 
         if not hasattr(self.current_item, 'actions') or \
-               not self.current_item.actions():
+               not self.current_item.get_actions():
             # skip item
             pos = self.playlist.index(self.current_item)
             pos = (pos+1) % len(self.playlist)
 
             if pos:
                 self.current_item = self.playlist[pos]
-                Playlist.play(self, menuw, True)
+                Playlist.play(self, True)
             else:
                 # no repeat
                 self.current_item = None
             return True
 
         if hasattr(self.current_item, 'play'):
-            self.current_item.play(menuw=menuw)
+            self.current_item.play()
         else:
-            self.current_item.actions()[0][0](menuw=menuw)
+            self.current_item.get_actions()[0]()
 
 
     def cache_next(self):
@@ -476,9 +474,6 @@ class Playlist(MediaItem):
                 eventhandler.post(e)
 
 
-        if not menuw:
-            menuw = self.menuw
-
         if event == PLAYLIST_TOGGLE_REPEAT:
             self.repeat = not self.repeat
             if self.repeat:
@@ -496,7 +491,7 @@ class Playlist(MediaItem):
                 if self.current_item:
                     self.current_item.stop()
                 self.current_item = self.playlist[pos]
-                Playlist.play(self, menuw, True)
+                Playlist.play(self, True)
                 return True
             elif event == PLAYLIST_NEXT:
                 e = Event(OSD_MESSAGE, arg=_('no next item in playlist'))
@@ -522,22 +517,14 @@ class Playlist(MediaItem):
                         return True
                 pos = (pos-1) % len(self.playlist)
                 self.current_item = self.playlist[pos]
-                Playlist.play(self, menuw, True)
+                Playlist.play(self, True)
                 return True
             else:
                 e = Event(OSD_MESSAGE, arg=_('no previous item in playlist'))
                 eventhandler.post(e)
 
         # give the event to the next eventhandler in the list
-        return MediaItem.eventhandler(self, event, menuw)
-
-
-    def delete(self):
-        """
-        callback when this item is deleted from the menu
-        """
-        MediaItem.delete(self)
-        self.playlist = []
+        return MediaItem.eventhandler(self, event)
 
 
 

@@ -382,13 +382,13 @@ class VideoItem(MediaItem):
             # Add all possible players to the action list
             for r, player in self.possible_player:
                 a = Action(_('Play with %s') % player.name, self.play)
-                a.parameter(arg=player)
+                a.parameter(player=player)
                 items.append(a)
 
         # Network play can get a larger cache
         if self.network_play:
             a = Action(_('Play with maximum cache'), self.play)
-            a.parameter(arg='-cache 65536')
+            a.parameter(mplayer_options='-cache 65536')
 
         # Add the configure stuff (e.g. set audio language)
         items += configure.get_items(self)
@@ -407,22 +407,22 @@ class VideoItem(MediaItem):
         return items
 
 
-    def show_variants(self, arg=None, menuw=None):
+    def show_variants(self, arg=None):
         """
         show a list of variants in a menu
         """
         m = Menu(self.name, self.variants, reload_func=None,
                  theme=self.skin_fxd)
         m.item_types = 'video'
-        menuw.pushmenu(m)
+        self.menu.stack.pushmenu(m)
 
 
-    def dvd_vcd_title_menu(self, arg=None, menuw=None):
+    def dvd_vcd_title_menu(self):
         """
         Generate special menu for DVD/VCD/SVCD content
         """
         # delete the submenu that got us here
-        menuw.delete_submenu(False)
+        self.menu.stack.delete_submenu(False)
 
         # build a menu
         items = []
@@ -449,19 +449,19 @@ class VideoItem(MediaItem):
 
         moviemenu = Menu(self.name, items, theme=self.skin_fxd)
         moviemenu.item_types = 'video'
-        menuw.pushmenu(moviemenu)
+        self.menu.stack.pushmenu(moviemenu)
 
 
-    def create_thumbnail(self, arg=None, menuw=None):
+    def create_thumbnail(self):
         """
         create a thumbnail as image icon
         """
         util.videothumb.snapshot(self.filename)
-        if menuw.menustack[-1].selected != self:
-            menuw.back_one_menu()
+        if self.menu.stack.menustack[-1].selected != self:
+            self.menu.stack.back_one_menu()
 
 
-    def play(self, menuw=None, arg=None):
+    def play(self, player=None, mplayer_options=''):
         """
         Play the item. The argument 'arg' can either be a player or
         extra mplayer arguments.
@@ -471,17 +471,9 @@ class VideoItem(MediaItem):
 	if self.parent:
             self.parent.current_item = self
 
-        # make sure we have a menuw and a self.menuw. This bad code
-        # is needed because of all the subitems and variants and they
-        # can be called without a menuw sometimes.
-        if menuw:
-            self.menuw = menuw
-        else:
-            menuw = self.menuw
-
         if self.variants:
             # if we have variants, play the first one as default
-            self.variants[0].play(arg, menuw)
+            self.variants[0].play()
             return
 
         if self.subitems:
@@ -508,7 +500,7 @@ class VideoItem(MediaItem):
                 # PLAY_END/USER_END event is not forwarded to the parent
                 # videoitem.
                 # And besides, we don't need the menu between two subitems.
-                self.last_error_msg=self.current_subitem.play(arg, menuw)
+                self.last_error_msg=self.current_subitem.play()
                 if self.last_error_msg:
                     self.error_in_subitem = 1
                     # Go to the next playable subitem, using the loop in
@@ -576,20 +568,15 @@ class VideoItem(MediaItem):
                 return
 
         # put together the mplayer options for this file
-        mplayer_options = self.mplayer_options.split(' ')
-        if not mplayer_options:
-            mplayer_options = []
+        mplayer_options = self.mplayer_options.split(' ') + \
+                              mplayer_options.split(' ')
 
-        if hasattr(arg, 'play'):
-            # arg is a player, use it
-            self.player = arg
-        elif arg:
-            # arg is mplayer options
-            mplayer_options += arg.split(' ')
+        if player:
+            self.player = player
 
         # call all our plugins to let them know we will play
         # FIXME: use a global PLAY event here
-        # self.plugin_eventhandler(PLAY, menuw)
+        # self.plugin_eventhandler(PLAY)
 
         # call the player to play the item
         error = self.player.play(mplayer_options, self)
@@ -612,7 +599,7 @@ class VideoItem(MediaItem):
         self.stop()
 
 
-    def stop(self, arg=None, menuw=None):
+    def stop(self):
         """
         stop playing
         """
@@ -649,8 +636,8 @@ class VideoItem(MediaItem):
         if event == MENU:
             if self.player:
                 self.player.stop()
-            confmenu = configure.get_menu(self, self.menuw)
-            self.menuw.pushmenu(confmenu)
+            confmenu = configure.get_menu(self)
+            self.menu.stack.pushmenu(confmenu)
             return True
 
         return MediaItem.eventhandler(self, event)

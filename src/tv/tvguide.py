@@ -66,7 +66,7 @@ class TVGuide(MenuApplication):
     """
     TVGuide application. It is _inside_ the menu, so it is a
     MenuApplication. When inside the menuw, there is also a variable
-    self.menuw.
+    self.stack.
     """
     def __init__(self):
         MenuApplication.__init__(self, 'tvguide', 'tvmenu', False)
@@ -152,19 +152,19 @@ class TVGuide(MenuApplication):
             return True
 
         if event == TV_SHOW_CHANNEL:
-            self.selected.channel_details(menuw=self.menuw)
+            self.selected.channel_details(menuw=self.stack)
             return True
         
         if event == MENU_SUBMENU:
-            self.selected.submenu(menuw=self.menuw, additional_items=True)
+            self.selected.submenu(menuw=self.stack, additional_items=True)
             return True
             
         if event == TV_START_RECORDING:
-            self.selected.submenu(menuw=self.menuw, additional_items=True)
+            self.selected.submenu(menuw=self.stack, additional_items=True)
             return True
  
         if event == PLAY:
-            self.selected.watch_channel(menuw=self.menuw)
+            self.selected.watch_channel(menuw=self.stack)
             return True
 
         if event == MENU_SELECT or event == PLAY:
@@ -172,9 +172,9 @@ class TVGuide(MenuApplication):
             # if so, bring up the submenu
             now = time.time() + (7*60)
             if self.selected.start > now:
-                self.selected.submenu(menuw=self.menuw, additional_items=True)
+                self.selected.submenu(menuw=self.stack, additional_items=True)
             else:
-                self.selected.watch_channel(menuw=self.menuw)
+                self.selected.watch_channel(menuw=self.stack)
             return True
         
         if event == PLAY_END:
@@ -186,10 +186,3 @@ class TVGuide(MenuApplication):
 
     def refresh(self):
         self.engine.draw(self)
-
-
-    def __del__(self):
-        """
-        delete function of memory debugging
-        """
-        _mem_debug_('tvguide')

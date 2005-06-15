@@ -11,7 +11,7 @@ class MenuApplication(Application):
     """
     def __init__(self, name, event_context, fullscreen):
         Application.__init__(self, name, event_context, fullscreen)
-        self.menuw  = None
+        self.stack  = None
         self.engine = None # draw engine based on area
         self.inside_menu = False
         
@@ -20,11 +20,9 @@ class MenuApplication(Application):
         """
         Eventhandler for basic menu functions
         """
-        if not self.menuw:
-            return False
         if event in (MENU_GOTO_MAINMENU, MENU_BACK_ONE_MENU):
             self.stop()
-            return self.menuw.eventhandler(event)
+            return self.stack.eventhandler(event)
         return False
 
 
@@ -62,7 +60,3 @@ class MenuApplication(Application):
         refresh display
         """
         pass
-
-
-    def __del__(self):
-        log.info('delete menu application %s' % self)

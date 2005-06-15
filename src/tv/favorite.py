@@ -80,7 +80,7 @@ class FavoriteItem(Item):
         show a submenu for this item
         """
         items = []
-        for function, title in self.actions():
+        for function, title in self.get_actions():
             items.append(menu.MenuItem(title, function))
         s = menu.Menu(self, items, item_types = 'tv favorite menu')
         s.submenu = True

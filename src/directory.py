@@ -113,7 +113,7 @@ class DirItem(Playlist):
                  add_args = None):
         Playlist.__init__(self, parent=parent, display_type=display_type)
         self.type = 'dir'
-        self.menu  = None
+        self.item_menu  = None
         self.needs_update = False
 
         if isinstance(directory, mediadb.ItemInfo):
@@ -327,7 +327,7 @@ class DirItem(Playlist):
     # eventhandler for this item
     def eventhandler(self, event, menuw=None):
         if event == DIRECTORY_CHANGE_DISPLAY_TYPE and \
-               menuw.menustack[-1] == self.menu:
+               self.menu.stack.menustack[-1] == self.item_menu:
             possible_display_types = [ ]
 
             for p in plugin.get('mimetype'):
@@ -340,22 +340,22 @@ class DirItem(Playlist):
                 type = possible_display_types[(pos+1) % \
                                               len(possible_display_types)]
 
-                menuw.delete_menu(allow_reload = False)
+                self.menu.stack.delete_menu(allow_reload = False)
 
                 newdir = DirItem(self.dir, self.parent, self.name, type,
                                  self.add_args)
                 newdir.DIRECTORY_AUTOPLAY_SINGLE_ITEM = False
-                newdir.cwd(menuw=menuw)
+                newdir.cwd()
 
-                menuw.menustack[-2].selected = newdir
-                pos = menuw.menustack[-2].choices.index(self)
-                menuw.menustack[-2].choices[pos] = newdir
+                self.menu.stack[-2].selected = newdir
+                pos = self.menu.stack[-2].choices.index(self)
+                self.menu.stack[-2].choices[pos] = newdir
                 eventhandler.post(Event(OSD_MESSAGE, arg='%s view' % type))
                 return True
             except (IndexError, ValueError):
                 pass
 
-        return Playlist.eventhandler(self, event, menuw)
+        return Playlist.eventhandler(self, event)
 
 
     # ======================================================================
@@ -436,7 +436,7 @@ class DirItem(Playlist):
             else:
                 items = [ browse, play ]
         else:
-            items = [ play ]
+            items = [ browse ]
             
         if self.info['num_%s_items' % display_type]:
             a = Action(_('Random play all items'), self.play)
@@ -465,7 +465,7 @@ class DirItem(Playlist):
 
 
 
-    def play(self, menuw=None, random=False, recursive=False):
+    def play(self, random=False, recursive=False):
         """
         play directory
         """
@@ -480,17 +480,14 @@ class DirItem(Playlist):
             display_type = 'video'
         pl = Playlist(playlist = [ (self.dir, recursive) ], parent = self,
                       display_type=display_type, random=random)
-        pl.play(menuw=menuw)
+        pl.play()
         return
         
 
-    def check_password_and_build(self, arg=None, menuw=None):
+    def check_password_and_build(self):
         """
         password checker
         """
-        if not self.menuw:
-            self.menuw = menuw
-
         # are we on a ROM_DRIVE and have to mount it first?
         for media in vfs.mountpoints:
             if self.dir.startswith(media.mountdir):
@@ -501,12 +498,11 @@ class DirItem(Playlist):
 	if vfs.isfile(self.dir + '/.password') and 0:
 	    log.warning('password protected dir')
             self.arg   = arg
-            self.menuw = menuw
 	    pb = InputBox(text=_('Enter Password'), handler=self.pass_cmp_cb,
                           type='password')
 	    pb.show()
 	else:
-	    self.build(arg=arg, menuw=menuw)
+	    self.build()
 
 
     def pass_cmp_cb(self, word=None):
@@ -525,20 +521,20 @@ class DirItem(Playlist):
 	pwfile.close()
 	password = line.strip()
 	if word == password:
-	    self.build(self.arg, self.menuw)
+	    self.build()
 	else:
 	    pb = MessageBox(text=_('Password incorrect'))
 	    pb.show()
             return
 
 
-    def browse(self, menuw, update=False):
+    def browse(self, update=False):
         """
         build the items for the directory
         """
         # FIXME: add password checking here
-        if update and not (self.listing and self.menuw and \
-                           self.menuw.menustack[-1] == self.menu and \
+        if update and not (self.listing and \
+                           self.menu.stack[-1] == self.item_menu and \
                            eventhandler.is_menu()):
             # not visible right now, do not update
             self.needs_update = True
@@ -546,24 +542,25 @@ class DirItem(Playlist):
 
         t0 = time.time()
         self.playlist   = []
-        self.play_items = []
-        self.dir_items  = []
-        self.pl_items   = []
+        play_items = []
+        dir_items  = []
+        pl_items   = []
 
         if self.media and not self.media.is_mounted():
             self.media.mount()
 
         if update:
-            if not self.menu.choices:
+            if not self.item_menu.choices:
                 selected_pos = -1
             else:
                 # store the current selected item
-                selected_id  = self.menu.selected.__id__()
-                selected_pos = self.menu.choices.index(self.menu.selected)
-            # warning: self.menu is a weakref!
-            self.menu.delattr('skin_default_has_description')
-            self.menu.delattr('skin_default_no_images')
-            self.menu.delattr('skin_force_text_view')
+                selected_id  = self.item_menu.selected.__id__()
+                s = self.item_menu.selected
+                selected_pos = self.item_menu.choices.index(s)
+            # warning: self.item_menu is a weakref!
+            self.item_menu.delattr('skin_default_has_description')
+            self.item_menu.delattr('skin_default_no_images')
+            self.item_menu.delattr('skin_force_text_view')
 
         elif not os.path.exists(self.dir):
             # FIXME: better handling!!!!!
@@ -595,26 +592,26 @@ class DirItem(Playlist):
         for p in plugin.mimetype(display_type):
             for i in p.get(self, listing):
                 if i.type == 'playlist':
-                    self.pl_items.append(i)
+                    pl_items.append(i)
                 elif i.type == 'dir':
-                    self.dir_items.append(i)
+                    dir_items.append(i)
                 else:
-                    self.play_items.append(i)
+                    play_items.append(i)
 
         t4 = time.time()
         # normal DirItems
         for item in listing.get_dir():
             d = DirItem(item, self, display_type = self.display_type)
-            self.dir_items.append(d)
+            dir_items.append(d)
 
         # remember listing
         self.listing = listing
 
         # remove same beginning from all play_items
         substr = ''
-        if len(self.play_items) > 4 and len(self.play_items[0].name) > 5:
-            substr = self.play_items[0].name[:-5].lower()
-            for i in self.play_items[1:]:
+        if len(play_items) > 4 and len(play_items[0].name) > 5:
+            substr = play_items[0].name[:-5].lower()
+            for i in play_items[1:]:
                 if len(i.name) > 5:
                     substr = util.find_start_string(i.name.lower(), substr)
                     if not substr or len(substr) < 10:
@@ -622,7 +619,7 @@ class DirItem(Playlist):
                 else:
                     break
             else:
-                for i in self.play_items:
+                for i in play_items:
                     i.name = util.remove_start_string(i.name, substr)
 
         t5 = time.time()
@@ -633,59 +630,59 @@ class DirItem(Playlist):
 
         # sort directories
         if self.DIRECTORY_SMART_SORT:
-            self.dir_items.sort(lambda l, o: util.smartsort(l.dir,o.dir))
+            dir_items.sort(lambda l, o: util.smartsort(l.dir,o.dir))
         else:
-            self.dir_items.sort(lambda l, o: cmp(l.dir.upper(), o.dir.upper()))
+            dir_items.sort(lambda l, o: cmp(l.dir.upper(), o.dir.upper()))
 
         # sort playlist
-        self.pl_items.sort(lambda l, o: cmp(l.name.upper(), o.name.upper()))
+        pl_items.sort(lambda l, o: cmp(l.name.upper(), o.name.upper()))
 
         # sort normal items
         if self.DIRECTORY_SORT_BY_DATE:
-            self.play_items.sort(lambda l, o: cmp(l.sort('date').upper(),
+            play_items.sort(lambda l, o: cmp(l.sort('date').upper(),
                                                   o.sort('date').upper()))
         elif self['%s_advanced_sort' % display_type]:
-            self.play_items.sort(lambda l, o: cmp(l.sort('advanced').upper(),
+            play_items.sort(lambda l, o: cmp(l.sort('advanced').upper(),
                                                   o.sort('advanced').upper()))
         else:
-            self.play_items.sort(lambda l, o: cmp(l.sort().upper(),
+            play_items.sort(lambda l, o: cmp(l.sort().upper(),
                                                   o.sort().upper()))
 
         t6 = time.time()
 
-        if self['num_dir_items'] != len(self.dir_items):
-            self['num_dir_items'] = len(self.dir_items)
+        if self['num_dir_items'] != len(dir_items):
+            self['num_dir_items'] = len(dir_items)
 
         if self.info['num_%s_items' % display_type] != \
-               len(self.play_items) + len(self.pl_items):
-            self.info['num_%s_items' % display_type] = len(self.play_items) + \
-                                                       len(self.pl_items)
+               len(play_items) + len(pl_items):
+            self.info['num_%s_items' % display_type] = len(play_items) + \
+                                                       len(pl_items)
 
         if self.DIRECTORY_REVERSE_SORT:
-            self.dir_items.reverse()
-            self.play_items.reverse()
-            self.pl_items.reverse()
+            dir_items.reverse()
+            play_items.reverse()
+            pl_items.reverse()
 
         # delete pl_items if they should not be displayed
         if self.display_type and not self.display_type in \
                self.DIRECTORY_ADD_PLAYLIST_FILES:
-            self.pl_items = []
+            pl_items = []
 
         # add all playable items to the playlist of the directory
         # to play one files after the other
         if not self.display_type or self.display_type in \
                self.DIRECTORY_CREATE_PLAYLIST:
-            self.playlist = self.play_items
+            self.playlist = play_items
 
 
         # build a list of all items
-        items = self.dir_items + self.pl_items + self.play_items
+        items = dir_items + pl_items + play_items
 
         # random playlist (only active for audio)
         if self.display_type and self.display_type in \
                self.DIRECTORY_ADD_RANDOM_PLAYLIST \
-               and len(self.play_items) > 1:
-            pl = Playlist(_('Random playlist'), self.play_items, self,
+               and len(play_items) > 1:
+            pl = Playlist(_('Random playlist'), play_items, self,
                           random=True)
             pl.autoplay = True
             items = [ pl ] + items
@@ -697,39 +694,30 @@ class DirItem(Playlist):
 
         if update:
             # update because of dirwatcher changes
-            self.menu.choices = items
+            self.item_menu.choices = items
 
             if selected_pos != -1:
                 # we had a selection before, try to find it again
                 for i in items:
                     if Unicode(i.__id__()) == Unicode(selected_id):
-                        self.menu.set_selection(i)
+                        self.item_menu.set_selection(i)
                         break
                 else:
                     # item is gone now, try to the selection close
                     # to the old item
                     pos = max(0, min(selected_pos-1, len(items)-1))
                     if items:
-                        self.menu.set_selection(items[pos])
+                        self.item_menu.set_selection(items[pos])
                     else:
-                        self.menu.set_selection(None)
+                        self.item_menu.set_selection(None)
             else:
                 # nothing was selected, select first item if possible
                 if len(items):
-                    self.menu.set_selection(items[0])
+                    self.item_menu.set_selection(items[0])
                 else:
-                    self.menu.set_selection(None)
-            self.menuw.refresh()
+                    self.item_menu.set_selection(None)
+            self.menu.stack.refresh()
 
-
-        elif len(items) == 1 and items[0].actions() and \
-                 self.DIRECTORY_AUTOPLAY_SINGLE_ITEM:
-            # autoplay
-	    action = items[0].actions()[0]
-	    if isinstance( action, tuple ):
-	    	action[ 0 ](menuw=menuw)
-	    else:
-	    	action(menuw=menuw)
 
         else:
             # normal menu build
@@ -740,14 +728,12 @@ class DirItem(Playlist):
 
             if self.skin_fxd:
                 item_menu.theme = self.skin_fxd
+            item_menu.autoselect = self.DIRECTORY_AUTOPLAY_SINGLE_ITEM
+            self.menu.stack.pushmenu(item_menu)
 
-            menuw.pushmenu(item_menu)
-
-            self.menu = util.weakref(item_menu)
-
-            callback = notifier.Callback(self.browse, self.menuw, True)
+            self.item_menu = util.weakref(item_menu)
+            callback = notifier.Callback(self.browse, True)
             mediadb.watcher.cwd(listing, callback)
-            self.menuw = menuw
 
         t7 = time.time()
         # print t2 - t1, t4 - t3, t5 - t4, t6 - t5, t7 - t6, t7 - t0
@@ -758,7 +744,7 @@ class DirItem(Playlist):
         """
         called when we return to this menu
         """
-        callback = notifier.Callback(self.browse, self.menuw, True)
+        callback = notifier.Callback(self.browse, True)
         mediadb.watcher.cwd(self.listing, callback)
         if self.needs_update:
             log.info('directory needs update')
@@ -767,23 +753,6 @@ class DirItem(Playlist):
             mediadb.watcher.check()
         # we changed the menu, don't build a new one
         return None
-
-
-    def delete(self):
-        """
-        delete function for this item
-        """
-        Playlist.delete(self)
-        self.play_items = []
-        self.dir_items  = []
-        self.pl_items   = []
-
-
-    def __del__(self):
-        """
-        delete function of memory debugging
-        """
-        _mem_debug_('dir ', self.name, 2)
 
 
     # ======================================================================
@@ -810,7 +779,7 @@ class DirItem(Playlist):
                 return 'ICON_RIGHT_AUTO_' + _('auto')
 
 
-    def configure_set_var(self, menuw, var):
+    def configure_set_var(self, var):
         """
         Update the variable in var and change the menu. This function is used
         by 'configure'
@@ -866,7 +835,7 @@ class DirItem(Playlist):
             self.modified_vars.remove(var)
 
         # create new item with updated name
-        item = copy.copy(menuw.menustack[-1].selected)
+        item = copy.copy(self.menu.stack[-1].selected)
         item.name = item.name[:item.name.find(u'\t') + 1] + \
                     self.configure_set_name(var)
 
@@ -878,13 +847,13 @@ class DirItem(Playlist):
             log.exception("fxd file %s corrupt" % self.folder_fxd)
 
         # rebuild menu
-        menuw.menustack[-1].choices[menuw.menustack[-1].choices.\
-                                    index(menuw.menustack[-1].selected)] = item
-        menuw.menustack[-1].selected = item
-        menuw.refresh(reload=1)
+        self.menu.stack[-1].choices[self.menu.stack[-1].choices.\
+                                    index(self.menu.stack[-1].selected)] = item
+        self.menu.stack[-1].selected = item
+        self.menu.stack.refresh(True)
 
 
-    def configure_set_display_type(self, menuw):
+    def configure_set_display_type(self):
         """
         change display type from specific to all
         """
@@ -898,17 +867,17 @@ class DirItem(Playlist):
             name = u'\tICON_RIGHT_OFF_' + _('off')
 
         # create new item with updated name
-        item = copy.copy(menuw.menustack[-1].selected)
+        item = copy.copy(self.menu.stack[-1].selected)
         item.name = item.name[:item.name.find(u'\t')]  + name
 
         # rebuild menu
-        menuw.menustack[-1].choices[menuw.menustack[-1].choices.\
-                                    index(menuw.menustack[-1].selected)] = item
-        menuw.menustack[-1].selected = item
-        menuw.refresh(reload=1)
+        self.menu.stack[-1].choices[self.menu.stack[-1].choices.\
+                                    index(self.menu.stack[-1].selected)] = item
+        self.menu.stack[-1].selected = item
+        self.menu.stack.refresh(True)
 
 
-    def configure(self, menuw):
+    def configure(self):
         """
         show the configure dialog for folder specific settings in folder.fxd
         """
@@ -938,4 +907,4 @@ class DirItem(Playlist):
         m.table = (80, 20)
         m.back_one_menu = 2
         m.item = self
-        menuw.pushmenu(m)
+        self.menu.stack.pushmenu(m)

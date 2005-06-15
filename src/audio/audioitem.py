@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.67  2005/06/15 20:43:39  dischi
+# adjust to new menu code
+#
 # Revision 1.66  2005/06/12 18:49:53  dischi
 # adjust to new menu code
 #
@@ -77,7 +80,7 @@ import re
 
 # Freevo imports
 import config
-from menu import MediaItem
+from menu import MediaItem, Action
 from event import *
 
 from player import *
@@ -130,7 +133,8 @@ class AudioItem(MediaItem):
             self.mimetype = 'cdda'
 
 
-    def __calc_length(self):
+    def __init_info__(self):
+        MediaItem.__init_info__(self)
         try:
             self.length = int(self.info['length'])
         except:
@@ -142,13 +146,12 @@ class AudioItem(MediaItem):
         return the specific attribute as string or an empty string
         """
         if key  == 'length':
-            if not self.length:
-                self.__calc_length()
             if self.length:
                 # maybe the length was wrong
                 if self.length < self.elapsed:
                     self.length = self.elapsed
-                return '%d:%02d' % (int(self.length / 60), int(self.length % 60))
+                return '%d:%02d' % (int(self.length / 60), \
+                                    int(self.length % 60))
 
         if key  == 'elapsed':
             return '%d:%02d' % (int(self.elapsed / 60), int(self.elapsed % 60))
@@ -160,23 +163,19 @@ class AudioItem(MediaItem):
         """
         return a list of possible actions on this item
         """
-        if not self.length:
-            self.__calc_length()
-        return [ ( self.play, 'Play' ) ]
+        return [ Action('Play',  self.play) ]
 
 
-    def play(self, arg=None, menuw=None):
+    def play(self):
         """
         Start playing the item
         """
-        if not self.length:
-            self.__calc_length()
         self.parent.current_item = self
         self.elapsed = 0
         audioplayer().play(self)
 
 
-    def stop(self, arg=None, menuw=None):
+    def stop(self):
         """
         Stop the current playing
         """

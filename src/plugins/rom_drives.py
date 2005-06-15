@@ -155,21 +155,21 @@ class autostart(plugin.DaemonPlugin):
             media = event.arg[0]
             if media.item:
                 media.item.parent = menuw.menustack[0].selected
-            if media.item and media.item.actions():
+            if media.item and media.item.get_actions():
                 if media.type == 'audio':
                     # disc marked as audio, play everything
                     if media.item.type == 'dir':
-                        media.item.play(menuw, recursive=True)
+                        media.item.play(recursive=True)
                     elif media.item.type == 'audiocd':
-                        media.item.play(menuw=menuw)
+                        media.item.play()
                     else:
-                        media.item.actions()[0][0](menuw=menuw)
+                        media.item.get_actions()[0]()
                 elif media.videoitem:
                     # disc has one video file, play it
-                    media.videoitem.actions()[0][0](menuw=menuw)
+                    media.videoitem.get_actions()[0]()
                 else:
                     # ok, do whatever this item has to offer
-                    media.item.actions()[0][0](menuw=menuw)
+                    media.item.get_actions()[0]()
             else:
                 menuw.refresh()
             return True
