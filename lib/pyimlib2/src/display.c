@@ -122,7 +122,7 @@ PyObject *Display_PyObject__handle_events( Display_PyObject *self, PyObject *arg
   float cursor_timeout;
   PyObject *retval = Py_False, *regions = NULL, *val;
 
-  if (!PyArg_ParseTuple(args, "f", &cursor_timeout))
+  if (args && !PyArg_ParseTuple(args, "f", &cursor_timeout))
      return NULL;
 
   while ( XPending( self->display ) ) {

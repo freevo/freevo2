@@ -166,7 +166,7 @@ PyObject *imlib2_open_from_memory(PyObject *self, PyObject *args)
         return NULL;
     }
 
-    return image;
+    return (PyObject *)image;
 }
 
 PyObject *imlib2_add_font_path(PyObject *self, PyObject *args)
