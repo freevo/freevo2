@@ -122,7 +122,7 @@ class Handler:
         """
         Delete an area handler
         """
-        _mem_debug_('Handler', self.type)
+        log.info('Delete AreaHandler %s' % self.type)
         while self.areas:
             self.areas[0].clear_all()
             del self.areas[0]

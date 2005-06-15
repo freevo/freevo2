@@ -392,4 +392,4 @@ class Area:
         """
         delete function of memory debugging
         """
-        _mem_debug_('Area', self.area_name)
+        log.info('Delete Area %s' % self.area_name)

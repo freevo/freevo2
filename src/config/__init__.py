@@ -93,14 +93,6 @@ __builtin__.__dict__['__freevo_app__'] = app
 # use sysconfig code
 FREEVO_CACHEDIR = sysconfig.CONF.cachedir
 
-# use special logger
-def _mem_debug_function_(type, name='', level=1):
-    if MEMORY_DEBUG < level:
-        return
-    print '<mem> %s: %s' % (type, name)
-
-__builtin__.__dict__['_mem_debug_']= _mem_debug_function_
-
 # XXX ************************************************************
 
 #
