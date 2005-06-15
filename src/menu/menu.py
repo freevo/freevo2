@@ -31,6 +31,16 @@
 
 __all__ = [ 'Menu' ]
 
+# python imports
+import gc
+import logging
+
+# Freevo imports
+from util.weakref import weakref
+
+# get logging object
+log = logging.getLogger()
+
 class Menu:
     """
     A Menu page with Items for the MenuStack
@@ -41,6 +51,7 @@ class Menu:
 
         self.heading = heading
         self.choices = choices
+        self.stack   = None
         if len(self.choices):
             self.selected = self.choices[0]
             self.selected_pos = 0
@@ -48,7 +59,13 @@ class Menu:
             self.selected = None
             self.selected_pos = -1
 
-        self.theme = None               # skin theme for this menu
+        # set menu (self) pointer to the items
+        sref = weakref(self)
+        for c in choices:
+            c.menu = sref
+
+        # skin theme for this menu
+        self.theme = None
         if theme:
             self.theme = theme
 
@@ -69,9 +86,9 @@ class Menu:
         # Menu type
         self.submenu = False
 
-        # Item that menu is based on
-        self.item = None
-        
+        # Autoselect menu if it has only one item
+        self.autoselect = False
+
         # how many rows and cols does the menu has
         # (will be changed by the skin code)
         self.cols = 1
@@ -103,5 +120,13 @@ class Menu:
         """
         delete function of memory debugging
         """
-        _mem_debug_('menu', self.heading)
-        map(lambda a: a.delete(), self.choices)
+        log.info('Delete menu %s' % self.heading)
+        # run gc (for debugging)
+        gc.collect()
+        # check for more garbage
+        g = gc.collect()
+        if g:
+            log.warning('Garbage: %s' % gc.collect())
+            for g in gc.garbage:
+                log.warning(' %s' % g)
+
