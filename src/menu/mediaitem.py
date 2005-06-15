@@ -177,14 +177,14 @@ class MediaItem(Item):
         return self.url
 
 
-    def play(self, menuw=None, arg=None):
+    def play(self):
         """
         play the item
         """
         pass
 
 
-    def stop(self, menuw=None, arg=None):
+    def stop(self):
         """
         stop playing
         """
