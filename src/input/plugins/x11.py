@@ -65,7 +65,7 @@ class PluginInterface(InputPlugin):
                 log.error('unable to find key code for %s' % key)
         display = gui.display._display
         display.input_callback = self.handle
-        notifier.addSocket( display.socket, display.update )
+        notifier.addSocket( display.socket, display.handle_events )
 
  
     def handle( self, keycode ):
