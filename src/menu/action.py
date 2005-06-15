@@ -11,9 +11,8 @@
 #
 # To set parameters for the function call, use the parameter function of the
 # action object. The function itself has always one or two parameters. If
-# the function is defined inside the item, the first parameter is always menuw
-# as reference to the current menu widget. If it is outside the item, the
-# first two parameters are item and menuw.
+# the function is defined inside the item, no extra parameters are used.
+# If it is outside the item, the first parameter is the item.
 #
 # Note: Right now there are some fallbacks in Action and also the fake class
 # ActionWrapper to support the old style while changing all plugins. This will
@@ -55,9 +54,8 @@ class Action:
 
     To set parameters for the function call, use the parameter function of the
     action object. The function itself has always one or two parameters. If
-    the function is defined inside the item, the first parameter is always
-    menuw as reference to the current menu widget. If it is outside the item,
-    the first two parameters are item and menuw.
+    the function is defined inside the item, no extra parameters are used.
+    If it is outside the item, the first parameter is the item.
     """
     def __init__(self, name, function, shortcut=None, description=None):
         self.name = name
@@ -68,7 +66,7 @@ class Action:
         self.kwargs = {}
 
 
-    def __call__(self, item, menuw):
+    def __call__(self):
         """
         call the function
         """
@@ -76,10 +74,16 @@ class Action:
             return
         # FIXME: remove this when everything is ported
         if self.kwargs.has_key('arg'):
-            return self.function(menuw=menuw, arg=self.kwargs['arg'])
-        if hasattr(self.function, 'im_self') and self.function.im_self == item:
-            return self.function(menuw, *self.args, **self.kwargs)
-        return self.function(item, menuw, *self.args, **self.kwargs)
+            return self.function(menuw=self.item.menu.stack,
+                                 arg=self.kwargs['arg'])
+        # check if the function is a member function of an item
+        check_item = self.item
+        while check_item:
+            if hasattr(self.function, 'im_self') and \
+                   self.function.im_self == check_item:
+                return self.function(*self.args, **self.kwargs)
+            check_item = check_item.parent
+        return self.function(self.item, *self.args, **self.kwargs)
 
 
     def parameter(self, *args, **kwargs):
@@ -102,10 +106,10 @@ class ActionWrapper(Action):
         self.function = function
 
 
-    def __call__(self, item, menuw):
+    def __call__(self):
         """
         call the function
         """
         if self.function:
-            self.function(menuw=menuw, arg=None)
+            self.function(menuw=self.item.menu.stack, arg=None)
 
