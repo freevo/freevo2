@@ -2,14 +2,14 @@ PYMBUS=pyMbus-0.8.6
 PYNOTIFIER=pyNotifier-0.3.5
 URL=ftp://ftp.mbus.org/tzi/dmn/mbus/python/
 
-all: pyimlib2 mevas pylibvisual pynotifier pymbus
+all: pyimlib2 mevas pylibvisual pynotifier pymbus pyepg pywebinfo
 	@echo creating links in site-packages
 	@(test -e lib/mmpython && ln -sf ../lib/mmpython site-packages) || true
 	@ln -sf ../src site-packages/freevo
 	@echo make successfull
 
 
-pyimlib2 mevas:
+pyimlib2 mevas pyepg pywebinfo:
 	@echo installing $@
 	@( cd lib/$@ ; \
 	  python setup.py install --install-lib=../../site-packages )
