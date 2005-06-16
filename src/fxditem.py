@@ -50,10 +50,11 @@ import copy
 import logging
 
 import util
-import item
 import plugin
 import os
 import mediadb
+
+from menu import Item, Action, Menu
 
 # get logging object
 log = logging.getLogger()
@@ -142,13 +143,13 @@ class Mimetype(plugin.MimetypePlugin):
 
 
 
-class Container(item.Item):
+class Container(Item):
     """
     a simple container containing for items parsed from the fxd
     """
     def __init__(self, fxd, node):
         fxd_file = fxd.filename
-        item.Item.__init__(self, fxd.getattr(None, 'parent', None))
+        Item.__init__(self, fxd.getattr(None, 'parent', None))
 
         self.items    = []
         self.name     = fxd.getattr(node, 'title', 'no title')
@@ -195,17 +196,15 @@ class Container(item.Item):
         """
         actions for this item
         """
-        return [ ( self.browse, _('Browse list')) ]
+        return [ Action(_('Browse list'), self.browse) ]
 
 
-    def browse(self, arg=None, menuw=None):
+    def browse(self):
         """
         show all items
         """
-        import menu
-        moviemenu = menu.Menu(self.name, self.items,
-                              item_types=self.display_type)
-        menuw.pushmenu(moviemenu)
+        moviemenu = Menu(self.name, self.items, item_types=self.display_type)
+        self.pushmenu(moviemenu)
 
 
 
