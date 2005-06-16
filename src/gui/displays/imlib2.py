@@ -36,7 +36,7 @@ import plugin
 
 # mevas imports
 from mevas.displays.imlib2canvas import Imlib2Canvas
-
+from mevas.rect import optimize_for_rendering
 # display imports
 from display import Display as Base
 
@@ -53,9 +53,10 @@ class Display(Imlib2Canvas, Base):
         self._display.expose_callback = self.__expose
 
 
-    def __expose( self, pos, size ):
+    def __expose( self, regions_list ):
         """
         Callback for expose events from X11
         """
-        self._display.render( self._backing_store._image, pos, pos, size )
+        for pos, size in optimize_for_rendering(regions_list):
+            self._display.render( self._backing_store._image, pos, pos, size )
 

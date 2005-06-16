@@ -63,11 +63,18 @@ class PluginInterface(InputPlugin):
                              config.KEYBOARD_MAP[ key ]
             else:
                 log.error('unable to find key code for %s' % key)
-        display = gui.display._display
-        display.input_callback = self.handle
-        notifier.addSocket( display.socket, display.handle_events )
+        self.__display = gui.display._display
+        self.__display.input_callback = self.handle
+        notifier.addSocket( self.__display.socket, self.__handle_events )
 
- 
+
+    def __handle_events(self, *args):
+        """
+        Wrapper for the display handle_events function.
+        """
+        return self.__display.handle_events()
+
+        
     def handle( self, keycode ):
         """
         Callback to handle the pygame events.
