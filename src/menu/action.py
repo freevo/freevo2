@@ -64,19 +64,22 @@ class Action:
         self.description = description
         self.args = []
         self.kwargs = {}
+        self.item = None
 
 
     def __call__(self):
         """
         call the function
         """
-        if not self.function:
+        if not self.function or not self.item:
             return
         # FIXME: remove this when everything is ported
         if self.kwargs.has_key('arg'):
             return self.function(menuw=self.item.menu.stack,
                                  arg=self.kwargs['arg'])
-        # check if the function is a member function of an item
+        # Check if the function is a member function of an item.
+        # If it is, do not pass the current item here, it is some
+        # sort of comlex submenu
         check_item = self.item
         while check_item:
             if hasattr(self.function, 'im_self') and \
