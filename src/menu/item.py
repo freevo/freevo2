@@ -87,13 +87,19 @@ class Item:
         Init the item. Sets all needed variables, if parent is given also
         inherit some settings from there.
         """
-        self.name = u''
         self.icon = None
         self.info = {}
         self.menu = None
-        self.description  = ''
         self.type = type
 
+        self.action = action
+        if action:
+            self.name = action.name
+            self.description = action.description
+        else:
+            self.name = u''
+            self.description  = ''
+            
         if not hasattr(self, 'autovars'):
             self.autovars = {}
 
@@ -111,11 +117,6 @@ class Item:
 
         self.fxd_file = None
         self.__initialized = False
-
-        self.action = action
-        if action:
-            self.name = action.name
-            self.description = action.description
 
 
     def __setitem__(self, key, value):
@@ -158,9 +159,9 @@ class Item:
         return u'0%s' % self.name
 
 
-    def actions(self):
+    def __actions__(self):
         """
-        returns a list of possible actions on this item. The first
+        Returns a list of possible actions on this item. The first
         one is autoselected by pressing SELECT
         """
         if self.action:
@@ -168,6 +169,13 @@ class Item:
         return []
 
 
+    def actions(self):
+        """
+        Wrapper for __actions__ while porting to the new menu style.
+        """
+        return self.__actions__()
+
+    
     def get_actions(self):
         """
         Get all actions for the item. Do not override this function,
@@ -207,6 +215,13 @@ class Item:
         self.get_menustack().pushmenu(menu)
 
 
+    def replace(self, item):
+        """
+        Replace this item in the menu with the given one.
+        """
+        self.menu.change_item(self, item)
+
+        
     def eventhandler(self, event, menuw=None):
         """
         simple eventhandler for an item
