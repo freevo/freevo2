@@ -86,9 +86,16 @@ class Menu:
         # Menu type
         self.submenu = False
 
+        # Reference to the item that created this menu
+        self.item = None
+        
         # Autoselect menu if it has only one item
         self.autoselect = False
 
+        # If the menu is the current visible and the menu stack itself is
+        # visible, this variable is True
+        self.visible= False
+        
         # how many rows and cols does the menu has
         # (will be changed by the skin code)
         self.cols = 1
