@@ -39,6 +39,15 @@ from action import Action
 from menu import Menu
 from stack import MenuStack
 
+class ActionItem(Item, Action):
+    """
+    A simple item with one action.
+    """
+    def __init__(self, name, parent, function, description=''):
+        Action.__init__(self, name, function, description=description)
+        Item.__init__(self, parent, self)
+        self.item = self
+
 
 class MenuItem(Item):
     """
@@ -58,10 +67,3 @@ class MenuItem(Item):
         self.type = type
         self.action = Action(name, action)
         self.action.parameter(arg=arg)
-
-
-    def actions(self):
-        """
-        return the default action
-        """
-        return [ self.action ]
