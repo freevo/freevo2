@@ -68,14 +68,20 @@ class MenuStack:
         """
         Show the menu on the screen
         """
-        raise AttributeError('MenuStack.show not defined')
+        if len(self.menustack) == 0:
+            return
+        if isinstance(self.menustack[-1], Menu):
+            self.menustack[-1].visible = True
 
 
     def hide(self):
         """
         Hide the menu
         """
-        raise AttributeError('MenuStack.hide not defined')
+        if len(self.menustack) == 0:
+            return
+        if isinstance(self.menustack[-1], Menu):
+            self.menustack[-1].visible = False
 
 
     def redraw(self):
@@ -101,13 +107,19 @@ class MenuStack:
             return
         if hasattr(self.menustack[-1], 'hide'):
             self.menustack[-1].hide()
-        del self.menustack[-1]
+        # delete last item and set it to invisible
+        previous = self.menustack.pop()
+        if isinstance(previous, Menu):
+            previous.visible = False
+
+        # get last item
         menu = self.menustack[-1]
 
         if not isinstance(menu, Menu):
             return True
 
         if menu.reload_func and allow_reload:
+            menu.visible = True
             reload = menu.reload_func()
             if reload:
                 self.menustack[-1] = reload
@@ -138,10 +150,14 @@ class MenuStack:
         if len(self.menustack) == 1:
             return
         previous = self.menustack[-1]
+        num_back = 1
         if previous and hasattr(previous, 'back_one_menu'):
-            self.menustack = self.menustack[:-previous.back_one_menu]
-        else:
-            self.menustack = self.menustack[:-1]
+            num_back = previous.back_one_menu
+        for i in range(num_back):
+            # delete last item and set it to invisible
+            previous = self.menustack.pop()
+            if isinstance(previous, Menu):
+                previous.visible = False
         return self.refresh(True)
 
 
@@ -159,15 +175,20 @@ class MenuStack:
         # If the current shown menu is no Menu but a MenuApplication
         # hide it from the screen. Mark 'inside_menu' to avoid a
         # fade effect for hiding
-        if previous and not isinstance(previous, Menu):
-            self.inside_menu = True
-            previous.inside_menu = True
-            previous.hide()
+        if previous:
+            if isinstance(previous, Menu):
+                previous.visible = False
+            else:
+                self.inside_menu = True
+                previous.inside_menu = True
+                previous.hide()
+
         self.menustack.append(menu)
         # Check the new menu. Maybe we need to set 'inside_menu' if we
         # switch between MenuApplication(s) and also set a new theme
         # for the global Freevo look
         if isinstance(menu, Menu):
+            menu.visible = True
             if not menu.theme:
                 menu.theme = previous.theme
             if isinstance(menu.theme, str):
@@ -241,7 +262,8 @@ class MenuStack:
             if new_menu:
                 self.menustack[-1] = new_menu
                 menu = new_menu
-
+                menu.visible = True
+                
         # set the theme
         if isinstance(menu, Menu):
             self.set_theme(menu.theme)
@@ -296,7 +318,11 @@ class MenuStack:
                     event = MENU_PAGEDOWN
 
         if event == MENU_GOTO_MAINMENU:
-            self.menustack = self.menustack[:1]
+            while len(self.menustack > 1):
+                menu = self.menustack.pop()
+                if isinstance(menu, Menu):
+                    menu.visible = False
+            self.menustack[0].visible = True
             self.refresh()
             return True
 
@@ -387,7 +413,7 @@ class MenuStack:
                     theme = menu.selected.skin_fxd
 
                 for i in items:
-                    if not hasattr(menu.selected, 'is_mainmenu_item'):
+                    if not menu.selected.type == 'main':
                         i.image = menu.selected.image
                     if hasattr(menu.selected, 'display_type'):
                         i.display_type = menu.selected.display_type
