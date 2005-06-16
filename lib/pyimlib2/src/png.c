@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <stdlib.h>
 
 #ifndef PATH_MAX
 #define PATH_MAX 4096
@@ -124,7 +125,7 @@ int _png_write (const char *file, DATA32 * ptr, int tw, int th, int sw,
       ret = 1;
   }
   else
-      printf ("pyimlib2: Unable to open \"%s\" for writing\n", tmpfile);
+      printf ("pyimlib2: Unable to open \"%s\" for writing\n", file);
 
   fflush (fp);
   if (fp)

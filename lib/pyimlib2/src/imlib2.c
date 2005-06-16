@@ -27,17 +27,21 @@
  * ----------------------------------------------------------------------------
  */
 
+#include "config.h"
+
 #include <Python.h>
 #define X_DISPLAY_MISSING
 #include <Imlib2.h>
 
 #include <fcntl.h>
+#ifdef HAVE_POSIX_SHMEM
+#include <sys/mman.h>
+#endif
 
 #include "image.h"
 #include "rawformats.h"
 #include "font.h"
 #include "thumbnail.h"
-#include "config.h"
 
 #ifdef USE_IMLIB2_DISPLAY
 #include "display.h"

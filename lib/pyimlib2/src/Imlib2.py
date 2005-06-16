@@ -139,10 +139,7 @@ class Image:
         Arguments:
           format: pixel format of the raw data to be returned.  If 'format' is
                   not a supported format, ValueError is raised.  Format
-                  can be any combination of RGB or RGBA.  YV12A is also
-                  supported, which returns a planar 4:2:0 plus a 8bpp
-                  alpha plane.  (YV12A isn't a fourcc notation; I just
-                  made it up.)
+                  can be any combination of RGB or RGBA.
 
         Returns: A buffer object representing the raw pixel data.  The buffer
                  will be a writable buffer if 'write' was True or if the
@@ -150,6 +147,8 @@ class Image:
                  'format' was BGRA and 'write' was True, you'll need to call
                  put_back_raw_data() when you're done writing to the buffer.
         """
+        if False in map(lambda x: x in "RGBA", list(format)):
+            raise ValueError, "Converting from unsupported format: " + format
         return self._image.get_raw_data(format, write)
 
 
@@ -795,10 +794,10 @@ def new(size, bytes = None, from_format = "BGRA"):
             raise ValueError, "Invalid image size %s" % repr(size)
     if bytes:
         if False in map(lambda x: x in "RGBA", list(from_format)):
-            raise ValueError, "Converting from unsupported format:",\
+            raise ValueError, "Converting from unsupported format: " + \
 		  from_format
         if len(bytes) < size[0]*size[1]*len(from_format):
-            raise ValueError, "Not enough bytes for converted format: "+\
+            raise ValueError, "Not enough bytes for converted format: " + \
 		  "expected %d, got %d" % (size[0]*size[1]*len(from_format),
 					   len(bytes))
         return Image(_Imlib2.create(size, bytes, from_format))

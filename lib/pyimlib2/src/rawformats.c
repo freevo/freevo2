@@ -90,6 +90,10 @@ unsigned char* convert_raw_rgba_bytes(char *from_format, char *to_format,
     return to_buf;
     } 
 
+    // Initialize these values to shut the compiler up during -Wall.  We
+    // don't bother checking the validity of to_format and from_format
+    // because the python wrapper ensures they're valid.
+    tr = tg = tb = ta = fr = fg = fb = fa = 0;
 
     for (i = 0; i < to_bpp; i ++) {
         if (to_format[i] == 'R') tr = i;

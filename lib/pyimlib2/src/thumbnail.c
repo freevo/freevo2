@@ -48,16 +48,14 @@ extern int _png_write (const char *file, DATA32 * ptr,
 
 PyObject *epeg_thumbnail(PyObject *self, PyObject *args)
 {
+#ifdef USE_EPEG
     int iw, ih, tw, th, ret;
     char *source;
     char *dest;
-    
-#ifdef USE_EPEG
+
     Epeg_Image *im;
     Epeg_Thumbnail_Info info;
-#endif
-
-#ifdef USE_EPEG
+    
     if (!PyArg_ParseTuple(args, "ss(ii)", &source, &dest, &tw, &th))
         return NULL;
 
