@@ -2,9 +2,8 @@ PYMBUS=pyMbus-0.8.6
 PYNOTIFIER=pyNotifier-0.3.5
 URL=ftp://ftp.mbus.org/tzi/dmn/mbus/python/
 
-all: pyimlib2 mevas pylibvisual pynotifier pymbus pyepg pywebinfo
+all: pyimlib2 mevas pylibvisual pynotifier pymbus pyepg pywebinfo mmpython
 	@echo creating links in site-packages
-	@(test -e lib/mmpython && ln -sf ../lib/mmpython site-packages) || true
 	@ln -sf ../src site-packages/freevo
 	@echo make successfull
 
@@ -12,22 +11,24 @@ all: pyimlib2 mevas pylibvisual pynotifier pymbus pyepg pywebinfo
 pyimlib2 mevas pyepg pywebinfo:
 	@echo installing $@
 	@( cd lib/$@ ; \
-	  python setup.py install --install-lib=../../site-packages )
+	  python setup.py install --install-lib=$(PWD)/site-packages )
 
-pylibvisual:
-	@echo installing $@
-	@-( cd lib/$@ ; \
-	  python setup.py install --install-lib=../../site-packages )
+pylibvisual mmpython:
+	echo $(PWD)
+	@( test -e lib/$@ && cd lib/$@ && echo installing $@ && \
+	  python setup.py install --install-lib=$(PWD)/site-packages \
+		--install-scripts=$(PWD)/site-packages/scripts ) || \
+	  echo skip $@
 
 pymbus: $(PYMBUS).tar.gz
 	@( cd lib/$(PYMBUS) ; \
-	    PYTHONPATH=../../site-packages python setup.py install \
-	    --install-lib=../../site-packages )
+	    PYTHONPATH=$(PWD)/site-packages python setup.py install \
+	    --install-lib=$(PWD)/site-packages )
 
 
 pynotifier: $(PYNOTIFIER).tar.gz
 	@( cd lib/$(PYNOTIFIER) ; \
-	    python setup.py install --install-lib=../../site-packages )
+	    python setup.py install --install-lib=$(PWD)/site-packages )
 
 %.tar.gz:
 	@echo installing $@
