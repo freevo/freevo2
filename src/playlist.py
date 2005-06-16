@@ -54,13 +54,17 @@ from gui.windows import ProgressBox
 log = logging.getLogger()
 
 
+REPEAT_OFF      = 0
+REPEAT_ITEM     = 1
+REPEAT_PLAYLIST = 2
+
 class Playlist(MediaItem):
     """
     Class for playlists. A playlist can be created with a list of items or a
     filename containing the playlist.
     """
     def __init__(self, name='', playlist=[], parent=None, display_type=None,
-                 random=False, build=False, autoplay=False, repeat=False):
+                 random=False, build=False, autoplay=False, repeat=REPEAT_OFF):
         """
         Init the playlist
 
@@ -475,26 +479,34 @@ class Playlist(MediaItem):
 
 
         if event == PLAYLIST_TOGGLE_REPEAT:
-            self.repeat = not self.repeat
-            if self.repeat:
-                arg = _('playlist repeat on')
+            self.repeat += 1
+            if self.repeat == REPEAT_ITEM:
+                arg = _('Repeat Item')
+            elif self.repeat == REPEAT_PLAYLIST:
+                arg = _('Repeat Playlist')
             else:
-                arg = arg=_('playlist repeat off')
+                self.repeat = REPEAT_OFF
+                arg = _('Repeat Off')
             eventhandler.post(Event(OSD_MESSAGE, arg=arg))
-
+            return True
+        
+        if event in ( PLAY_END, USER_END ) and self.repeat == REPEAT_ITEM:
+            self.current_item.play()
+            return True
+        
         if event in ( PLAYLIST_NEXT, PLAY_END, USER_END) \
                and self.current_item and self.playlist:
             pos = self.playlist.index(self.current_item)
             pos = (pos+1) % len(self.playlist)
 
-            if pos or self.repeat:
+            if pos or self.repeat == REPEAT_PLAYLIST:
                 if self.current_item:
                     self.current_item.stop()
                 self.current_item = self.playlist[pos]
                 Playlist.play(self, True)
                 return True
             elif event == PLAYLIST_NEXT:
-                e = Event(OSD_MESSAGE, arg=_('no next item in playlist'))
+                e = Event(OSD_MESSAGE, arg=_('No Next Item In Playlist'))
                 eventhandler.post(e)
 
 
