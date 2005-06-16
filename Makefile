@@ -1,5 +1,5 @@
 PYMBUS=pyMbus-0.8.6
-PYNOTIFIER=pyNotifier-0.3.5
+PYNOTIFIER=pyNotifier-0.3.8
 URL=ftp://ftp.mbus.org/tzi/dmn/mbus/python/
 
 all: pyimlib2 mevas pylibvisual pynotifier pymbus pyepg pywebinfo mmpython
@@ -32,7 +32,8 @@ pynotifier: $(PYNOTIFIER).tar.gz
 
 %.tar.gz:
 	@echo installing $@
-	@(cd lib && test \! -e $@ && wget --passive-ftp $(URL)$@ && tar -zxf $@ ) || true
+	@(cd lib && test \! -e $@ && wget --passive-ftp $(URL)$@ && \
+		tar -zxf $@ ) || true
 
 
 clean:
