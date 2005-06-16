@@ -94,7 +94,7 @@ class MainMenuItem(Item):
         Actions for this item.
         """
         a = Action(self.name, self.function[0])
-        a.parameter(menwu=self.get_menustack(), arg=self.function[1])
+        a.parameter(menuw=self.get_menustack(), arg=self.function[1])
         return [ a ]
 
     
