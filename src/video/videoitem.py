@@ -346,7 +346,7 @@ class VideoItem(MediaItem):
     # actions:
 
 
-    def actions(self):
+    def __actions__(self):
         """
         return a list of possible actions on this item.
         """
@@ -364,19 +364,19 @@ class VideoItem(MediaItem):
         # If not, we need to show the title menu.
         if self.url.startswith('dvd://') and self.url[-1] == '/':
             if self.player_rating >= 20:
-                items = [ (self.play, _('Play DVD')),
-                          (self.dvd_vcd_title_menu, _('DVD title list')) ]
+                items = [ Action(_('Play DVD'), self.play),
+                          Action(_('DVD title list'), self.dvd_vcd_title_menu) ]
             else:
-                items = [ (self.dvd_vcd_title_menu, _('DVD title list')),
-                          (self.play, _('Play default track')) ]
+                items = [ Action(_('DVD title list'), self.dvd_vcd_title_menu),
+                          Action(_('Play default track'), self.play) ]
 
         elif self.url == 'vcd://':
             if self.player_rating >= 20:
-                items = [ (self.play, _('Play VCD')),
-                          (self.dvd_vcd_title_menu, _('VCD title list')) ]
+                items = [ Action(_('Play VCD'), self.play),
+                          Action(_('VCD title list'), self.dvd_vcd_title_menu) ]
             else:
-                items = [ (self.dvd_vcd_title_menu, _('VCD title list')),
-                          (self.play, _('Play default track')) ]
+                items = [ Action(_('VCD title list'), self.dvd_vcd_title_menu),
+                          Action(_('Play default track'), self.play) ]
         else:
             items = []
             # Add all possible players to the action list
@@ -396,14 +396,14 @@ class VideoItem(MediaItem):
         # If there are variants, make it possible to show them. This is
         # always the default action then.
         if self.variants and len(self.variants) > 1:
-            items = [ (self.show_variants, _('Show variants')) ] + items
+            items = [ Action(_('Show variants'), self.show_variants) ] + items
 
         # Add thumbnail option
         if self.mode == 'file' and not self.variants and \
                not self.subitems and \
                (not self.image or not self.image.endswith('raw')):
-            items.append((self.create_thumbnail, _('Create Thumbnail'),
-                          'create_thumbnail'))
+            items.append(Action(_('Create Thumbnail'), self.create_thumbnail,
+                                'create_thumbnail'))
         return items
 
 
@@ -587,16 +587,7 @@ class VideoItem(MediaItem):
             if hasattr(self.parent, 'subitems') and self.parent.subitems:
                 return error
             else:
-                MessageBox(text=error, handler=self.error_handler).show()
-
-
-    def error_handler(self):
-        """
-        error handler if play doesn't work to send the end event and stop
-        the player
-        """
-        eventhandler.post(PLAY_END)
-        self.stop()
+                MessageBox(text=error, handler=self.stop).show()
 
 
     def stop(self):
