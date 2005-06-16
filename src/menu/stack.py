@@ -298,6 +298,13 @@ class MenuStack:
         self.menustack[attr] = value
     
 
+    def get_selected(self):
+        """
+        Return the current selected item in the current menu.
+        """
+        return self.menustack[-1].selected
+
+    
     def eventhandler(self, event):
         """
         Eventhandler for menu control
