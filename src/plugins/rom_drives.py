@@ -212,7 +212,6 @@ class rom_items(plugin.MainMenuPlugin, plugin.DaemonPlugin):
                 else:
                     if media.item.type == 'dir':
                         media.item.display_type = parent.display_type
-                        media.item.skin_display_type = parent.display_type
                     m = media.item
 
             else:
