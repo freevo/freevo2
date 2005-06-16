@@ -100,7 +100,7 @@ class Item:
         self.parent = weakref(parent)
         if parent:
             self.image = parent.image
-            if hasattr(parent, 'is_mainmenu_item'):
+            if parent.type == 'main':
                 self.image = None
             self.skin_fxd = parent.skin_fxd
             self.media = parent.media
@@ -184,6 +184,27 @@ class Item:
         for i in items:
             i.item = self
         return items
+
+
+    def get_menustack(self):
+        """
+        Return the menustack this item is associated with. If the item has no
+        menu, this function will search the parent to get a possible menustack.
+        """
+        if self.menu and self.menu.stack:
+            return self.menu.stack
+        if self.parent:
+            return self.parent.get_menustack()
+        return None
+
+
+    def pushmenu(self, menu):
+        """
+        Append the given menu to the menu stack this item is associated with
+        and set some internal variables.
+        """
+        menu.item = weakref(self)
+        self.get_menustack().pushmenu(menu)
 
 
     def eventhandler(self, event, menuw=None):
