@@ -140,6 +140,7 @@ class DirItem(Playlist):
         self.files.append(directory)
 
         self.dir = directory
+        self.url = directory
         
         if name:
             self.name = Unicode(name)
@@ -149,13 +150,6 @@ class DirItem(Playlist):
         if add_args == None and hasattr(parent, 'add_args'):
             add_args = parent.add_args
         self.add_args = add_args
-
-        if self.parent and hasattr(parent, 'skin_display_type'):
-            self.skin_display_type = parent.skin_display_type
-        elif parent:
-            self.skin_display_type = parent.display_type
-        else:
-            self.skin_display_type = display_type
 
         if self['show_all_items']:
             self.display_type = None
@@ -327,32 +321,33 @@ class DirItem(Playlist):
     # eventhandler for this item
     def eventhandler(self, event, menuw=None):
         if event == DIRECTORY_CHANGE_DISPLAY_TYPE and self.item_menu.visible:
-            possible_display_types = [ ]
+            possible = [ ]
 
             for p in plugin.get('mimetype'):
                 for t in p.display_type:
-                    if not t in possible_display_types:
-                        possible_display_types.append(t)
+                    if not t in possible:
+                        possible.append(t)
 
             try:
-                pos = possible_display_types.index(self.display_type)
-                type = possible_display_types[(pos+1) % \
-                                              len(possible_display_types)]
+                pos = possible.index(self.display_type)
+                type = possible[(pos+1) % len(possible)]
+            except (IndexError, ValueError), e:
+                return Playlist.eventhandler(self, event)
 
-                self.get_menustack().delete_menu(allow_reload = False)
-
-                newdir = DirItem(self.dir, self.parent, self.name, type,
-                                 self.add_args)
-                newdir.DIRECTORY_AUTOPLAY_SINGLE_ITEM = False
-                newdir.cwd()
-
-                self.get_menustack()[-2].selected = newdir
-                pos = self.get_menustack()[-2].choices.index(self)
-                self.get_menustack()[-2].choices[pos] = newdir
-                eventhandler.post(Event(OSD_MESSAGE, arg='%s view' % type))
-                return True
-            except (IndexError, ValueError):
-                pass
+            # delete current menu (showing the directory)
+            self.get_menustack().delete_menu(allow_reload = False)
+            
+            # create a new directory item
+            d = DirItem(self.dir, self.parent, self.name, type, self.add_args)
+            # deactivate autoplay
+            d.DIRECTORY_AUTOPLAY_SINGLE_ITEM = False
+            # replace current item with the new one
+            self.replace(d)
+            # build new dir (this will add a new menu)
+            d.browse()
+            # show message
+            eventhandler.post(Event(OSD_MESSAGE, '%s view' % type))
+            return True
 
         return Playlist.eventhandler(self, event)
 
@@ -719,7 +714,7 @@ class DirItem(Playlist):
         else:
             # normal menu build
             item_menu = menu.Menu(self.name, items, reload_func=self.reload,
-                                  item_types = self.skin_display_type,
+                                  item_types = display_type,
                                   force_skin_layout = \
                                   self.DIRECTORY_FORCE_SKIN_LAYOUT)
 
@@ -831,8 +826,8 @@ class DirItem(Playlist):
                 setattr(self, var, False)
             self.modified_vars.remove(var)
 
-        # create new item with updated name
-        item = copy.copy(self.get_menustack()[-1].selected)
+        # change name
+        item = self.get_menustack().get_selected()
         item.name = item.name[:item.name.find(u'\t') + 1] + \
                     self.configure_set_name(var)
 
@@ -844,9 +839,6 @@ class DirItem(Playlist):
             log.exception("fxd file %s corrupt" % self.folder_fxd)
 
         # rebuild menu
-        m = self.get_menustack()[-1]
-        m.choices[m.choices.index(m.selected)] = item
-        m.selected = item
         self.get_menustack().refresh(True)
 
 
@@ -863,14 +855,11 @@ class DirItem(Playlist):
             self.display_type = self.parent.display_type
             name = u'\tICON_RIGHT_OFF_' + _('off')
 
-        # create new item with updated name
-        item = copy.copy(self.get_menustack()[-1].selected)
+        # change name
+        item = self.get_menustack().get_selected()
         item.name = item.name[:item.name.find(u'\t')]  + name
-
+        
         # rebuild menu
-        m = self.get_menustack()[-1]
-        m.choices[m.choices.index(m.selected)] = item
-        m.selected = item
         self.get_menustack().refresh(True)
 
 
