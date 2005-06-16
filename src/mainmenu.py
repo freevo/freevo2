@@ -39,27 +39,35 @@ import os
 
 # freevo imports
 import config
-import gui
 import gui.theme
 import mediadb
-import menu
 import util
 import plugin
+
+from menu import Item, Action, Menu
 from application.menuw import MenuWidget
-from item import Item
 from event import *
 
 
-class MainMenuItem(menu.MenuItem):
+class MainMenuItem(Item):
     """
-    This class is a main menu item
+    This class is a main menu item. Items of this type can be returned by
+    a MainMenuPlugin.
     """
-    def __init__( self, name, action=None, arg=None, type=None, image=None,
+    def __init__( self, name='', action=None, arg=None, type=None, image=None,
                   icon=None, parent=None, skin_type=None):
 
-        menu.MenuItem.__init__( self, name, action, arg, type, image, icon,
-                                parent)
+        Item.__init__(self, parent)
+        self.name = Unicode(name)
+        self.icon = icon
+        self.image = image
+        self.type = type
+        self.function = action, arg
 
+        if not type and not parent.parent:
+            # this is the first page, force type to 'main'
+            self.type = 'main'
+            
         if not skin_type:
             return
         
@@ -81,7 +89,15 @@ class MainMenuItem(menu.MenuItem):
             self.image = util.getimage(os.path.join(imagedir, skin_type))
 
 
+    def actions(self):
+        """
+        Actions for this item.
+        """
+        a = Action(self.name, self.function[0])
+        a.parameter(menwu=self.get_menustack(), arg=self.function[1])
+        return [ a ]
 
+    
 class SkinSelectItem(Item):
     """
     Item for the skin selector
@@ -97,47 +113,43 @@ class SkinSelectItem(Item):
         """
         Return the select function to load that skin
         """
-        return [ ( self.select, '' ) ]
+        return [ Action(self.name, self.select) ]
 
 
-    def select(self, arg=None, menuw=None):
+    def select(self):
         """
         Load the new skin and rebuild the main menu
         """
         # load new theme
         theme = gui.theme.set_base_fxd(self.skin)
         # set it to the main menu as used theme
-        pos = menuw.menustack[0].theme = theme
+        pos = self.get_menustack()[0].theme = theme
         # and go back
-        menuw.back_one_menu()
+        self.get_menustack().back_one_menu()
 
 
 
 
 class MainMenu(Item):
     """
-    This class handles the main menu
+    This class handles the main menu. It will start the main menu widget
+    and the first menu page based on the main menu plugins.
     """
-    def getcmd(self):
+    def __init__(self):
         """
         Setup the main menu and handle events (remote control, etc)
         """
-        menuw = MenuWidget()
+        Item.__init__(self)
         items = []
         for p in plugin.get('mainmenu'):
             items += p.items(self)
+        menu = Menu(_('Freevo Main Menu'), items, item_types='main',
+                    theme = gui.theme.get(), reload_func=self.reload)
+        self.menuw = MenuWidget()
+        self.menuw.pushmenu(menu)
+        self.menuw.show()
 
-        for i in items:
-            i.is_mainmenu_item = True
-
-        mainmenu = menu.Menu(_('Freevo Main Menu'), items, item_types='main',
-                             reload_func=self.reload)
-        mainmenu.item_types = 'main'
-        mainmenu.theme = gui.theme.get()
-        menuw.pushmenu(mainmenu)
-        menuw.show()
-
-
+        
     def reload(self):
         # stop mediadb.watcher
         mediadb.watcher.cwd(None)
@@ -167,6 +179,14 @@ class MainMenu(Item):
         return ret
 
 
+    def get_menustack(self):
+        """
+        Get the menustack. This item needs to override this function
+        because it is not bound to a menupage.
+        """
+        return self.menuw
+
+
     def eventhandler(self, event, menuw=None):
         """
         Automatically perform actions depending on the event, e.g. play DVD
@@ -178,7 +198,7 @@ class MainMenu(Item):
             for name, image, skinfile in self.get_skins():
                 items += [ SkinSelectItem(self, name, image, skinfile) ]
 
-            menuw.pushmenu(menu.Menu(_('Skin Selector'), items))
+            self.pushmenu(Menu(_('Skin Selector'), items))
             return True
 
         # give the event to the next eventhandler in the list

@@ -284,7 +284,7 @@ try:
     gui.theme.get().prepare()
 
     # start menu
-    MainMenu().getcmd()
+    MainMenu()
 
     # Wait for the startup animation. This is a bad hack but we won't
     # be able to remove our splashscreen otherwise. Big FIXME!
