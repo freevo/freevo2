@@ -117,6 +117,7 @@ PyObject *imlib2_open(PyObject *self, PyObject *args)
     image = _imlib2_open(file);
     if (!image)
         return NULL;
+    return (PyObject *)image;
 }
 
 PyObject *imlib2_open_from_memory(PyObject *self, PyObject *args)
