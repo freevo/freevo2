@@ -123,6 +123,17 @@ class Menu:
             self.selected_pos = -1
 
 
+    def change_item(self, old, new):
+        """
+        Replace the item 'old' with the 'new'.
+        """
+        self.choices[self.choices.index(old)] = new
+        if self.selected == old:
+            self.selected = new
+        old.menu = None
+        new.menu = weakref(self)
+
+        
     def __del__(self):
         """
         delete function of memory debugging
