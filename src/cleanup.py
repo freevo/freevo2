@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2005/06/16 15:54:36  dischi
+# update system exit
+#
 # Revision 1.7  2005/06/04 17:18:10  dischi
 # adjust to gui changes
 #
@@ -78,6 +81,8 @@ def unregister( function ):
             _callbacks.remove( c )
 
 
+_exit = False
+
 def shutdown(menuw=None, argshutdown=None, argrestart=None, exit=False):
     """
     Function to shut down freevo or the whole system. This system will be
@@ -95,6 +100,14 @@ def shutdown(menuw=None, argshutdown=None, argrestart=None, exit=False):
     import config
 
     global _callbacks
+    global _exit
+
+    # FIXME: this is bad. The whole shutdown stuff needs a cleanup.
+    # There are four ways of shutdown: exit(1) somewhere, an exception,
+    # a signal (e.g. C-c) and a normal shutdown.
+    if _exit:
+        sys.exit(0)
+    _exit = True
     
     mediadb.save()
     if not gui.displays.active():

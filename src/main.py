@@ -306,8 +306,9 @@ except KeyboardInterrupt:
     # Shutdown Freevo
     shutdown()
 
-except SystemExit:
-    pass
+except SystemExit, e:
+    # Shutdown Freevo
+    shutdown()
 
 except:
     log.exception('Crash!')
