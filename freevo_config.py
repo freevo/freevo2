@@ -195,7 +195,7 @@ FREEVO_CONF_VERSION = setup.CONFIG_VERSION
 if int(str(CONF.version).split('.')[0]) != \
    int(str(FREEVO_CONF_VERSION).split('.')[0]):
     print "\nERROR: The version information in freevo_config.py does't"
-    print 'match the version in %s.' % freevoconf
+    print 'match the version in %s.' % sysconfig.CONFIGFILE
     print 'please rerun "freevo setup" to generate a new freevo.conf'
     print_config_changes(FREEVO_CONF_VERSION, CONF.version,
                          FREEVO_CONF_CHANGES)
