@@ -65,6 +65,7 @@ class MenuWidget(Application, MenuStack):
         Show the menu on the screen
         """
         Application.show(self)
+        MenuStack.show(self)
         self.refresh(True)
         if self.inside_menu:
             self.engine.show(0)
@@ -78,6 +79,7 @@ class MenuWidget(Application, MenuStack):
         Hide the menu
         """
         Application.hide(self)
+        MenuStack.hide(self)
         if self.inside_menu:
             self.engine.hide(0)
             self.inside_menu = False
