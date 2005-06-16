@@ -253,14 +253,10 @@ class MediaMenu(Item):
         # generate all other items
         items = self.main_menu_generate()
 
-        # autoselect one item
-        if len(items) == 1:
-            items[0](menuw=menuw)
-            return
-
         type = '%s main menu' % self.display_type
         item_menu = Menu(menutitle, items, item_types = type,
                          reload_func = self.reload)
+        item_menu.autoselect = True
         item_menu.skin_force_text_view = force_text_view
         menuw.pushmenu(item_menu)
 
