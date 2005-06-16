@@ -359,7 +359,7 @@ class Playlist(MediaItem):
             display_type = 'video'
 
         menu = Menu(self.name, self.playlist, item_types = display_type)
-        self.menu.stack.pushmenu(menu)
+        self.pushmenu(menu)
 
 
     def random_play(self):

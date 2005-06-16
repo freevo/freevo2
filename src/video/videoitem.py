@@ -414,7 +414,7 @@ class VideoItem(MediaItem):
         m = Menu(self.name, self.variants, reload_func=None,
                  theme=self.skin_fxd)
         m.item_types = 'video'
-        self.menu.stack.pushmenu(m)
+        self.pushmenu(m)
 
 
     def dvd_vcd_title_menu(self):
@@ -422,7 +422,7 @@ class VideoItem(MediaItem):
         Generate special menu for DVD/VCD/SVCD content
         """
         # delete the submenu that got us here
-        self.menu.stack.delete_submenu(False)
+        self.get_menustack().delete_submenu(False)
 
         # build a menu
         items = []
@@ -449,7 +449,7 @@ class VideoItem(MediaItem):
 
         moviemenu = Menu(self.name, items, theme=self.skin_fxd)
         moviemenu.item_types = 'video'
-        self.menu.stack.pushmenu(moviemenu)
+        self.pushmenu(moviemenu)
 
 
     def create_thumbnail(self):
@@ -457,8 +457,8 @@ class VideoItem(MediaItem):
         create a thumbnail as image icon
         """
         util.videothumb.snapshot(self.filename)
-        if self.menu.stack.menustack[-1].selected != self:
-            self.menu.stack.back_one_menu()
+        # delete the submenu that got us here
+        self.get_menustack().delete_submenu()
 
 
     def play(self, player=None, mplayer_options=''):
@@ -637,7 +637,7 @@ class VideoItem(MediaItem):
             if self.player:
                 self.player.stop()
             confmenu = configure.get_menu(self)
-            self.menu.stack.pushmenu(confmenu)
+            self.pushmenu(confmenu)
             return True
 
         return MediaItem.eventhandler(self, event)
