@@ -49,7 +49,7 @@ import plugin
 import fxditem
 import eventhandler
 
-from menu import Item, Files, Action
+from menu import Item, Files, Action, ActionItem
 from playlist import Playlist
 from event import *
 
@@ -883,9 +883,9 @@ class DirItem(Playlist):
             if name == '':
                 continue
             name += '\t'  + self.configure_set_name(i)
-            action = Action(name, self.configure_set_var, description=descr)
+            action = ActionItem(name, self, self.configure_set_var, descr)
             action.parameter(var=i)
-            items.append(Item(self, action=action))
+            items.append(action)
 
         if self.parent and self.parent.display_type:
             if self.display_type:
@@ -894,11 +894,10 @@ class DirItem(Playlist):
                 name = u'\tICON_RIGHT_ON_' + _('on')
 
             descr = _('Show video, audio and image items in this directory')
-            action = Action(_('Show all kinds of items') + name,
-                            self.configure_set_display_type,
-                            description=descr)
+            action = ActionItem(_('Show all kinds of items') + name, self,
+                                self.configure_set_display_type, descr)
             action.parameter(var=i)
-            items.append(Item(self, action=action))
+            items.append(action)
 
         m = menu.Menu(_('Configure'), items)
         m.table = (80, 20)
