@@ -194,6 +194,15 @@ class VideoItem(MediaItem):
         self.set_name(self.name)
 
 
+    def copy(self):
+        """
+        Create a copy of the VideoItem.
+        """
+        c = MediaItem.copy(self)
+        c.tv_show = False
+        return c
+    
+
     def __id__(self):
         """
         Return a unique id of the item. This id should be the same when the
@@ -365,7 +374,8 @@ class VideoItem(MediaItem):
         if self.url.startswith('dvd://') and self.url[-1] == '/':
             if self.player_rating >= 20:
                 items = [ Action(_('Play DVD'), self.play),
-                          Action(_('DVD title list'), self.dvd_vcd_title_menu) ]
+                          Action(_('DVD title list'),
+                                 self.dvd_vcd_title_menu) ]
             else:
                 items = [ Action(_('DVD title list'), self.dvd_vcd_title_menu),
                           Action(_('Play default track'), self.play) ]
@@ -373,7 +383,8 @@ class VideoItem(MediaItem):
         elif self.url == 'vcd://':
             if self.player_rating >= 20:
                 items = [ Action(_('Play VCD'), self.play),
-                          Action(_('VCD title list'), self.dvd_vcd_title_menu) ]
+                          Action(_('VCD title list'),
+                                 self.dvd_vcd_title_menu) ]
             else:
                 items = [ Action(_('VCD title list'), self.dvd_vcd_title_menu),
                           Action(_('Play default track'), self.play) ]
@@ -395,11 +406,11 @@ class VideoItem(MediaItem):
 
         # If there are variants, make it possible to show them. This is
         # always the default action then.
-        if self.variants and len(self.variants) > 1:
+        if not self.iscopy and self.variants and len(self.variants) > 1:
             items = [ Action(_('Show variants'), self.show_variants) ] + items
 
         # Add thumbnail option
-        if self.mode == 'file' and not self.variants and \
+        if not self.iscopy and self.mode == 'file' and not self.variants and \
                not self.subitems and \
                (not self.image or not self.image.endswith('raw')):
             items.append(Action(_('Create Thumbnail'), self.create_thumbnail,
