@@ -103,7 +103,7 @@ class MenuWidget(Application, MenuStack):
 
         if event == MENU_CHANGE_STYLE and len(self.menustack) > 1:
             # did the menu change?
-            self.engine.toggle_display_style(menu)
+            self.engine.toggle_display_style(self.menustack[-1])
             self.refresh()
             return True
 
