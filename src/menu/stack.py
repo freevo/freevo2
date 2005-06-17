@@ -40,7 +40,6 @@ import logging
 
 # freevo imports
 import config
-import plugin
 
 from util.weakref import weakref
 from event import *
