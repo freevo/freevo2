@@ -65,27 +65,25 @@ class Action:
         self.args = []
         self.kwargs = {}
         self.item = None
-
+        # FIXME: delete this!
+        self.menuw = None
 
     def __call__(self):
         """
         call the function
         """
-        if not self.function or not self.item:
+        if not self.function:
             return
         # FIXME: remove this when everything is ported
         if self.kwargs.has_key('arg'):
-            return self.function(menuw=self.item.menu.stack,
-                                 arg=self.kwargs['arg'])
-        # Check if the function is a member function of an item.
-        # If it is, do not pass the current item here, it is some
-        # sort of comlex submenu
-        check_item = self.item
-        while check_item:
-            if hasattr(self.function, 'im_self') and \
-                   self.function.im_self == check_item:
-                return self.function(*self.args, **self.kwargs)
-            check_item = check_item.parent
+            return self.function(menuw=self.menuw, arg=self.kwargs['arg'])
+        # If self.item is set, pass it to the function as first parameter.
+        # Check if the function is a member function of that item. If it
+        # is, don't pass the item.
+        if not self.item or (hasattr(self.function, 'im_self') and \
+                             self.function.im_self == self.item):
+            return self.function(*self.args, **self.kwargs)
+        # pass item as first parameter
         return self.function(self.item, *self.args, **self.kwargs)
 
 
@@ -108,11 +106,13 @@ class ActionWrapper(Action):
         Action.__init__(self, name, function, shortcut, description)
         self.function = function
 
-
     def __call__(self):
         """
         call the function
         """
         if self.function:
-            self.function(menuw=self.item.menu.stack, arg=None)
-
+            if self.item and self.item.menu:
+                self.function(menuw=self.item.menu.stack, arg=None)
+            else:
+                self.function(menuw=None, arg=None)
+                

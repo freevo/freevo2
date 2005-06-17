@@ -159,7 +159,7 @@ class Item:
         return u'0%s' % self.name
 
 
-    def __actions__(self):
+    def actions(self):
         """
         Returns a list of possible actions on this item. The first
         one is autoselected by pressing SELECT
@@ -167,13 +167,6 @@ class Item:
         if self.action:
             return [ self.action ]
         return []
-
-
-    def actions(self):
-        """
-        Wrapper for __actions__ while porting to the new menu style.
-        """
-        return self.__actions__()
 
     
     def get_actions(self):
@@ -187,10 +180,13 @@ class Item:
         plugins = plugin.get('item') + plugin.get('item_%s' % self.type)
         plugins.sort(lambda l, o: cmp(l._level, o._level))
         for p in plugins:
-            items += _actions_wrapper(p.actions(self))
-        # set item for the action
+            for a in _actions_wrapper(p.actions(self)):
+                # set item for the action
+                a.item = self
+                items.append(a)
+        # FIXME: delete this!
         for i in items:
-            i.item = self
+            i.menuw = self.get_menustack()
         return items
 
 
