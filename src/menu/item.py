@@ -37,6 +37,7 @@ __all__ = [ 'Item' ]
 
 # python imports
 import logging
+import copy
 
 # freevo imports
 import plugin
@@ -115,6 +116,7 @@ class Item:
             self.skin_fxd = None
             self.media = None
 
+        self.iscopy = False
         self.fxd_file = None
         self.__initialized = False
 
@@ -144,6 +146,21 @@ class Item:
         return False
 
 
+    def copy(self):
+        """
+        Create a copy of the item. This item can be used in submenus of an
+        item action. Items like this have self.iscopy = True and the
+        original item can be accessed with self.original.
+        """
+        c = copy.copy(self)
+        c.iscopy = True
+        if hasattr(self, 'original'):
+            c.original = self.original
+        else:
+            c.original = self
+        return c
+
+    
     def __id__(self):
         """
         Return a unique id of the item. This id should be the same when the
