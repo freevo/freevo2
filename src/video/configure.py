@@ -42,7 +42,7 @@ __all__ = [ 'get_items', 'get_menu' ]
 from menu import *
 
 
-def play_movie(selected, item, mplayer_options=None):
+def play_movie(item, mplayer_options=None):
     """
     play the movie (again)
     """
@@ -50,7 +50,7 @@ def play_movie(selected, item, mplayer_options=None):
     item.play(mplayer_options=mplayer_options)
 
 
-def set_variable(selected, item, variable, value):
+def set_variable(item, variable, value):
     """
     Set a variable for the item.
     """
@@ -59,24 +59,24 @@ def set_variable(selected, item, variable, value):
     item.get_menustack().refresh()
 
 
-def start_chapter(selected, item, mplayer_options):
+def start_chapter(item, mplayer_options):
     """
     Handle chapter selection.
     """
     item.get_menustack().delete_menu()
-    play_movie(selected, item, mplayer_options)
+    play_movie(item, mplayer_options)
 
 
-def start_subitem(selected, item, pos):
+def start_subitem(item, pos):
     """
     Handle subitem selection.
     """
     item.conf_select_this_item = item.subitems[pos]
     item.get_menustack().delete_menu()
-    play_movie(selected, item)
+    play_movie(item)
 
 
-def audio_selection(selected, item):
+def audio_selection(item):
     """
     Submenu for audio selection.
     """
@@ -92,26 +92,26 @@ def audio_selection(selected, item):
             continue
         name = '%s (channels=%s)' % (a['language'], a['channels'])
         action = ActionItem(name, item, set_variable)
-        action.parameter(item, 'selected_audio', a['id'])
+        action.parameter('selected_audio', a['id'])
         menu_items.append(action)
     item.pushmenu(Menu(_('Audio Menu'), menu_items, theme=item.skin_fxd))
 
 
-def subtitle_selection(selected, item):
+def subtitle_selection(item):
     """
     Submenu for subtitle selection.
     """
     action = ActionItem(_('no subtitles'), item, set_variable)
-    action.parameter(item, 'selected_subtitle', -1)
+    action.parameter('selected_subtitle', -1)
     menu_items = [ action ]
     for s in range(len(item.info['subtitles'])):
         action = ActionItem(item.info['subtitles'][s], item, set_variable)
-        action.parameter(item, 'selected_subtitle', s)
+        action.parameter('selected_subtitle', s)
         menu_items.append(action)
     item.pushmenu(Menu(_('Subtitle Menu'), menu_items, theme=item.skin_fxd))
 
 
-def chapter_selection(selected, item):
+def chapter_selection(item):
     """
     Submenu for chapter selection.
     """
@@ -119,35 +119,37 @@ def chapter_selection(selected, item):
     if isinstance(item.info['chapters'], int):
         for c in range(1, item.info['chapters']):
             a = ActionItem(_('Play chapter %s') % c, item, start_chapter)
-            a.parameter(item, ' -chapter %s' % c)
+            a.parameter('-chapter %s' % c)
             menu_items.append(a)
     elif item.info['chapters']:
         for c in item.info['chapters']:
             a = ActionItem(c.name, item, start_chapter)
-            a.parameter(item, ' -ss %s' % c.pos)
+            a.parameter('-ss %s' % c.pos)
             menu_items.append(a)
     item.pushmenu(Menu(_('Chapter Menu'), menu_items, theme=item.skin_fxd))
 
 
-def subitem_selection(selected, item):
+def subitem_selection(item):
     """
     Submenu for subitem selection.
     """
     menu_items = []
     for pos in range(len(item.subitems)):
         a = ActionItem(_('Play chapter %s') % (pos+1), item, start_subitem)
-        a.parameter(item, pos)
+        a.parameter(pos)
         menu_items.append(a)
     item.pushmenu(Menu(_('Chapter Menu'), menu_items, theme=item.skin_fxd))
 
 
-def toggle(selected, item, name, variable):
+def toggle(item, name, variable):
     """
     Basic toggle function.
     """
+    print item
     item[variable] = not item[variable]
     # replace item
-    selected.replace(add_toggle(item, name, variable))
+    menuitem = item.get_menustack().get_selected()
+    menuitem.replace(add_toggle(item, name, variable))
     # update menu
     item.get_menustack().refresh()
 
@@ -160,7 +162,7 @@ def add_toggle(item, name, var):
         action = ActionItem(_('Turn off %s') % name, item, toggle)
     else:
         action = ActionItem(_('Turn on %s') % name, item, toggle)
-    action.parameter(item, name, var)
+    action.parameter(name, var)
     return action
 
 
@@ -174,20 +176,16 @@ def get_items(item):
                          item.player_rating >= 20):
         if item.info.has_key('audio') and len(item.info['audio']) > 1:
             a = ActionItem(_('Audio selection'), item, audio_selection)
-            a.parameter(item)
             items.append(a)
         if item.info.has_key('subtitles') and len(item.info['subtitles']) > 1:
             a = ActionItem(_('Subtitle selection'), item, subtitle_selection)
-            a.parameter(item)
             items.append(a)
         if item.info.has_key('chapters') and item.info['chapters'] > 1:
             a = ActionItem(_('Chapter selection'), item, chapter_selection)
-            a.parameter(item)
             items.append(a)
     if item.subitems:
         # show subitems as chapter
         a = ActionItem(_('Chapter selection'), item, subitem_selection)
-        a.parameter(item)
         items.append(a)
 
     items.append(add_toggle(item, _('deinterlacing'), 'deinterlace'))
@@ -198,6 +196,5 @@ def get_menu(item):
     """
     Return a complete menu for configure options.
     """
-    p = ActionItem(_('Play'), play_movie)
-    p.parameter(item)
+    p = ActionItem(_('Play'), item, play_movie)
     return Menu(_('Config Menu'), get_items(item) + [ p ], theme=item.skin_fxd)

@@ -62,27 +62,24 @@ class PluginInterface(plugin.MainMenuPlugin):
     def __init__(self, type=None, force_text_view=False):
         plugin.MainMenuPlugin.__init__(self)
         self.type = type
-        self.force_text_view = force_text_view or \
-                               config.GUI_MEDIAMENU_FORCE_TEXTVIEW
-
+        self.ftv  = force_text_view or config.GUI_MEDIAMENU_FORCE_TEXTVIEW
 
     def items(self, parent):
-        return [ MainMenuItem('', action=MediaMenu().main_menu,
-                              arg=(self.type,self.force_text_view),
-                              type='main', parent=parent,
-                              skin_type = self.type) ]
+        return [ MediaMenu(parent, self.type, self.ftv) ]
 
 
 
-class MediaMenu(Item):
+class MediaMenu(MainMenuItem):
     """
     This is the main menu for audio, video and images. It displays the default
     directories and the ROM_DRIVES
     """
 
-    def __init__(self):
-        Item.__init__(self)
-        self.type = 'mediamenu'
+    def __init__(self, parent, type, force_text_view):
+        MainMenuItem.__init__(self, '', self.main_menu, type='main',
+                              parent=parent, skin_type=type)
+        self.force_text_view = force_text_view
+        self.display_type = type
 
         # init the style how to handle discs
         if config.HIDE_UNUSABLE_DISCS:
@@ -109,7 +106,7 @@ class MediaMenu(Item):
         """
         # stop mediadb.watcher
         watcher.cwd(None)
-        
+
         # copy the "normal" items and add plugin data
         items = copy.copy(self.normal_items)
 
@@ -135,14 +132,11 @@ class MediaMenu(Item):
         return items
 
 
-    def main_menu(self, arg=None, menuw=None):
+    def main_menu(self):
         """
         display the (IMAGE|VIDEO|AUDIO|GAMES) main menu
         """
-        self.display_type, force_text_view = arg
         title = _('Media')
-
-        self.menuw = menuw
 
         if self.display_type == 'video':
             title = _('Movie')
@@ -257,16 +251,15 @@ class MediaMenu(Item):
         item_menu = Menu(menutitle, items, item_types = type,
                          reload_func = self.reload)
         item_menu.autoselect = True
-        item_menu.skin_force_text_view = force_text_view
-        menuw.pushmenu(item_menu)
+        item_menu.skin_force_text_view = self.force_text_view
+        self.pushmenu(item_menu)
 
 
     def reload(self):
         """
         Reload the menu. maybe a disc changed or some other plugin.
         """
-        menu = self.menuw.menustack[1]
-
+        menu = self.get_menustack()[1]
         sel = menu.choices.index(menu.selected)
         new_choices = self.main_menu_generate()
         if not menu.selected in new_choices:
