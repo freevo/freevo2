@@ -277,12 +277,10 @@ class MediaMenu(MainMenuItem):
         when a disc in a rom drive changes
         """
         if plugin.isevent(event):
-            if not menuw:
-                # nothing to do when no menuw is shown
+            if not menuw or len(menuw.menustack) != 2:
                 return False
 
             menu = menuw.menustack[1]
-
             sel = menu.choices.index(menu.selected)
             menuw.menustack[1].choices = self.main_menu_generate()
             if not menu.selected in menu.choices:

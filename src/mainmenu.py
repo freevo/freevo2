@@ -158,9 +158,14 @@ class MainMenu(Item):
             items += p.items(self)
         menu = Menu(_('Freevo Main Menu'), items, item_types='main',
                     theme = gui.theme.get(), reload_func=self.reload)
+        print 1
         self.menuw = MenuWidget()
+        print 2
         self.menuw.pushmenu(menu)
+        print self.menuw.menustack
+        print 3
         self.menuw.show()
+        print 4
 
         
     def reload(self):
