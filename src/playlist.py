@@ -413,25 +413,25 @@ class Playlist(MediaItem):
                 self.current_item = play_items[0]
                 self.playlist[pos] = play_items[0]
 
-
-        if not hasattr(self.current_item, 'actions') or \
-               not self.current_item.get_actions():
-            # skip item
-            pos = self.playlist.index(self.current_item)
-            pos = (pos+1) % len(self.playlist)
-
-            if pos:
-                self.current_item = self.playlist[pos]
-                Playlist.play(self, True)
-            else:
-                # no repeat
-                self.current_item = None
-            return True
-
         if hasattr(self.current_item, 'play'):
+            # play the item
             self.current_item.play()
+            return True
+        
+        # The item has no play function. It would be possible to just
+        # get all actions and select the first one, but this won't be
+        # right. Maybe this action opens a menu and nothing more. So
+        # it is play or skip.
+        pos = self.playlist.index(self.current_item)
+        pos = (pos+1) % len(self.playlist)
+
+        if pos:
+            self.current_item = self.playlist[pos]
+            Playlist.play(self, True)
         else:
-            self.current_item.get_actions()[0]()
+            # no repeat
+            self.current_item = None
+        return True
 
 
     def cache_next(self):
