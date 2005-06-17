@@ -63,7 +63,9 @@ class MainMenuItem(Item):
         self.image = image
         self.type = type
         self.function = action, arg
-
+        self.args = []
+        self.kwargs = {}
+        
         if not type and not parent.parent:
             # this is the first page, force type to 'main'
             self.type = 'main'
@@ -89,12 +91,23 @@ class MainMenuItem(Item):
             self.image = util.getimage(os.path.join(imagedir, skin_type))
 
 
+    def parameter(self, *args, **kwargs):
+        """
+        Set parameter for the function call.
+        """
+        self.args = args
+        self.kwargs = kwargs
+
+
     def actions(self):
         """
         Actions for this item.
         """
         a = Action(self.name, self.function[0])
-        a.parameter(menuw=self.get_menustack(), arg=self.function[1])
+        if self.args or self.kwargs or not self.function[1]:
+            a.parameter(*self.args, **self.kwargs)
+        else:
+            a.parameter(menuw=self.get_menustack(), arg=self.function[1])
         return [ a ]
 
     
