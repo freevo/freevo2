@@ -346,7 +346,7 @@ class VideoItem(MediaItem):
     # actions:
 
 
-    def __actions__(self):
+    def actions(self):
         """
         return a list of possible actions on this item.
         """
