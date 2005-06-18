@@ -177,15 +177,26 @@ class MediaItem(Item):
         return self.url
 
 
+    def __init_info__(self):
+        """
+        Init the info attribute.
+        """
+        if not Item.__init_info__(self):
+            return False
+        if self.info and self.info[mediadb.NEEDS_UPDATE]:
+            self.info.cache.parse_item(self.info)
+        return True
+
+
     def play(self):
         """
-        play the item
+        Play the item
         """
         pass
 
 
     def stop(self):
         """
-        stop playing
+        Stop playing
         """
         pass
