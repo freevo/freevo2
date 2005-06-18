@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2005/06/18 12:07:02  dischi
+# use new menu memeber function
+#
 # Revision 1.44  2005/06/04 17:18:11  dischi
 # adjust to gui changes
 #
@@ -281,9 +284,9 @@ class PluginInterface(plugin.ItemPlugin):
         self.rip_thread = main_backup_thread(device=device, rip_format=type)
         self.rip_thread.start()
         # delete the choose format menu
-        menuw.delete_menu()
+        menuw.back_one_menu(False)
         # delete submenu
-        menuw.delete_submenu()
+        menuw.delete_submenu(False)
         # show message
         eventhandler.post(Event(OSD_MESSAGE, _( 'Ripping started' )))
 

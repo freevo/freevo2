@@ -280,7 +280,7 @@ class ImageViewer(Application):
         # XXX Hack to move the selected item to the current showing image
         if item.parent and hasattr(item.parent, 'menu') and \
                item.parent.menu and item in item.parent.menu.choices:
-            item.parent.menu.set_selection(item)
+            item.parent.menu.select(item)
         self.zoom = zoom
         return None
 

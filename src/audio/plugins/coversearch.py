@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2005/06/18 12:07:02  dischi
+# use new menu memeber function
+#
 # Revision 1.40  2005/06/04 17:18:11  dischi
 # adjust to gui changes
 #
@@ -344,7 +347,7 @@ class PluginInterface(plugin.ItemPlugin):
 
         # go back in menustack
         for i in range(back):
-            menuw.delete_menu()
+            menuw.back_one_menu(False)
 
         box.destroy()
         menuw.refresh()
