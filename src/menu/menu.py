@@ -38,32 +38,30 @@ import logging
 # Freevo imports
 from util.weakref import weakref
 
+# menu imports
+from item import Item
+
 # get logging object
 log = logging.getLogger()
 
 class Menu:
     """
-    A Menu page with Items for the MenuStack
+    A Menu page with Items for the MenuStack. It is not allowed to change
+    the selected item or the internal choices directly, use 'select',
+    'set_items' or 'change_item' to do this.
     """
     def __init__(self, heading, choices=[], theme=None,
                  reload_func = None, item_types = None,
                  force_skin_layout = -1):
 
         self.heading = heading
-        self.choices = choices
         self.stack   = None
-        if len(self.choices):
-            self.selected = self.choices[0]
-            self.selected_pos = 0
-        else:
-            self.selected = None
-            self.selected_pos = -1
 
-        # set menu (self) pointer to the items
-        sref = weakref(self)
-        for c in choices:
-            c.menu = sref
-
+        # set items
+        self.choices = []
+        self.selected = None
+        self.set_items(choices, False)
+        
         # skin theme for this menu
         self.theme = None
         if theme:
@@ -79,9 +77,6 @@ class Menu:
         self.reload_func       = reload_func
         self.item_types        = item_types
         self.force_skin_layout = force_skin_layout
-
-        # How many menus to go back when 'BACK_ONE_MENU' is called
-        self.back_one_menu = 1
 
         # Menu type
         self.submenu = False
@@ -102,41 +97,115 @@ class Menu:
         self.rows = 1
 
 
-    def change_selection(self, rel):
+    def show(self):
         """
+        Show the menu. This will be called when this menu is on top of the
+        menu stack.
+        """
+        self.visible = True
+
+
+    def hide(self):
+        """
+        Hide the menu. A different menu is on top or the stack itself is not
+        visible.
+        """
+        self.visible = False
+
+        
+    def set_items(self, items, refresh=True):
+        """
+        Set/replace the items in this menu. If refresh is True, the menu
+        stack will be refreshed and redrawn.
+        """
+        # delete ref to menu for old choices
+        for c in self.choices:
+            c.menu = None
+
+        # set new choices and selection
+        self.choices = items
+
+        # set menu (self) pointer to the items
+        sref = weakref(self)
+        for c in self.choices:
+            c.menu = sref
+
+        # try to reset selection in case we had one
+        if not self.selected:
+            # no old selection
+            if len(self.choices):
+                self.select(self.choices[0])
+            else:
+                self.select(None)
+
+        elif self.selected in self.choices:
+            # item is still there, reuse it
+            self.select(self.selected)
+
+        else:
+            for c in self.choices:
+                if c.__id__() == self.selected_id:
+                    # item with the same id is there, use it
+                    self.select(c)
+                    break
+            else:
+                # item is gone now, try to the selection close
+                # to the old item
+                pos = max(0, min(self.selected_pos-1, len(self.choices)-1))
+                self.select(self.choices[pos])
+
+        if refresh and self.stack:
+            self.stack.refresh()
+            
+        
+    def select(self, item):
+        """
+        Set the selection to a specific item in the list. If item in an int
         select a new item relative to current selected
         """
-        self.selected_pos = min(max(0, self.selected_pos + rel),
-                                len(self.choices) - 1)
-        self.selected = self.choices[self.selected_pos]
-
-
-    def set_selection(self, item):
-        """
-        set the selection to a specific item in the list
-        """
-        if item:
+        if isinstance(item, Item):
+            # select item
             self.selected     = item
             self.selected_pos = self.choices.index(item)
-        else:
+            self.selected_id  = self.selected.__id__()
+        elif item == None:
+            # nothing to select
             self.selected     = None
             self.selected_pos = -1
+        else:
+            # select relative
+            p = min(max(0, self.selected_pos + item), len(self.choices) - 1)
+            self.select(self.choices[p])
 
 
+    def get_items(self):
+        """
+        Return the list of items in this menu.
+        """
+        return self.choices
+
+
+    def get_selection(self):
+        """
+        Return current selected item.
+        """
+        return self.selected
+
+    
     def change_item(self, old, new):
         """
         Replace the item 'old' with the 'new'.
         """
         self.choices[self.choices.index(old)] = new
         if self.selected == old:
-            self.selected = new
+            self.selected(new)
         old.menu = None
         new.menu = weakref(self)
 
         
     def __del__(self):
         """
-        delete function of memory debugging
+        Delete function of memory debugging
         """
         log.info('Delete menu %s' % self.heading)
         # run gc (for debugging)
@@ -147,4 +216,3 @@ class Menu:
             log.warning('Garbage: %s' % gc.collect())
             for g in gc.garbage:
                 log.warning(' %s' % g)
-
