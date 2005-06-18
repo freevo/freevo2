@@ -54,6 +54,11 @@ class MediaItem(Item):
     This item is for a media. It's only a template for image, video
     or audio items
     """
+    def __init__(self, parent=None, type=None):
+        Item.__init__(self, parent, type=type)
+        self.url = 'unknown:' + str(self)
+
+        
     def set_url(self, url, search_cover=True):
         """
         Set a new url to the item and adjust all attributes depending
