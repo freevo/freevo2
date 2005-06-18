@@ -225,7 +225,10 @@ class Item:
         and set some internal variables.
         """
         menu.item = weakref(self)
-        self.get_menustack().pushmenu(menu)
+        stack = self.get_menustack()
+        if not stack:
+            raise AttributeError('Item is not bound to a menu stack')
+        stack.pushmenu(menu)
 
 
     def replace(self, item):
@@ -237,7 +240,7 @@ class Item:
         
     def eventhandler(self, event, menuw=None):
         """
-        simple eventhandler for an item
+        Simple eventhandler for an item
         """
         # EJECT event handling
         if self.media and self.media.item == self and event == EJECT:
@@ -258,30 +261,24 @@ class Item:
 
     def __getitem__(self, attr):
         """
-        return the specific attribute
+        Return the specific attribute
         """
         if attr[:7] == 'parent(' and attr[-1] == ')' and self.parent:
             return self.parent[attr[7:-1]]
 
         if attr[:4] == 'len(' and attr[-1] == ')':
-            r = None
-            if self.info.has_key(attr[4:-1]):
-                r = self.info[attr[4:-1]]
+            value = self[attr[4:-1]]
+            if r == None or r == '':
+                return 0
+            return len(r)
 
-            if (r == None or r == '') and hasattr(self, attr[4:-1]):
-                r = getattr(self,attr[4:-1])
-            if r != None:
-                return len(r)
-            return 0
-
-        else:
-            r = None
-            if self.info.has_key(attr):
-                r = self.info[attr]
-            if (r == None or r == '') and hasattr(self, attr):
-                r = getattr(self,attr)
-            if r != None:
-                return r
+        r = None
+        if self.info.has_key(attr):
+            r = self.info[attr]
+        if (r == None or r == '') and hasattr(self, attr):
+            r = getattr(self,attr)
+        if r != None:
+            return r
         return ''
 
 
@@ -292,6 +289,4 @@ class Item:
         if self.__initialized:
             return False
         self.__initialized = True
-        if self.info and self.info[mediadb.NEEDS_UPDATE]:
-            self.info.cache.parse_item(self.info)
         return True
