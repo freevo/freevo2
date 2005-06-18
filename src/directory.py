@@ -335,7 +335,7 @@ class DirItem(Playlist):
                 return Playlist.eventhandler(self, event)
 
             # delete current menu (showing the directory)
-            self.get_menustack().delete_menu(allow_reload = False)
+            self.get_menustack().back_one_menu(False)
             
             # create a new directory item
             d = DirItem(self.dir, self.parent, self.name, type, self.add_args)
@@ -531,7 +531,6 @@ class DirItem(Playlist):
             # not visible right now, do not update
             self.needs_update = True
             return
-
         t0 = time.time()
         self.playlist   = []
         play_items = []
@@ -542,13 +541,6 @@ class DirItem(Playlist):
             self.media.mount()
 
         if update:
-            if not self.item_menu.choices:
-                selected_pos = -1
-            else:
-                # store the current selected item
-                selected_id  = self.item_menu.selected.__id__()
-                s = self.item_menu.selected
-                selected_pos = self.item_menu.choices.index(s)
             # warning: self.item_menu is a weakref!
             self.item_menu.delattr('skin_default_has_description')
             self.item_menu.delattr('skin_default_no_images')
@@ -686,30 +678,7 @@ class DirItem(Playlist):
 
         if update:
             # update because of dirwatcher changes
-            self.item_menu.choices = items
-
-            if selected_pos != -1:
-                # we had a selection before, try to find it again
-                for i in items:
-                    if Unicode(i.__id__()) == Unicode(selected_id):
-                        self.item_menu.set_selection(i)
-                        break
-                else:
-                    # item is gone now, try to the selection close
-                    # to the old item
-                    pos = max(0, min(selected_pos-1, len(items)-1))
-                    if items:
-                        self.item_menu.set_selection(items[pos])
-                    else:
-                        self.item_menu.set_selection(None)
-            else:
-                # nothing was selected, select first item if possible
-                if len(items):
-                    self.item_menu.set_selection(items[0])
-                else:
-                    self.item_menu.set_selection(None)
-            self.item_menu.stack.refresh()
-
+            self.item_menu.set_items(items)
 
         else:
             # normal menu build
@@ -737,13 +706,14 @@ class DirItem(Playlist):
         called when we return to this menu
         """
         callback = notifier.Callback(self.browse, True)
-        mediadb.watcher.cwd(self.listing, callback)
+        if mediadb.watcher.cwd(self.listing, callback):
+            # some files changed
+            self.needs_update = True
         if self.needs_update:
+            # update directory
             log.info('directory needs update')
             callback()
-        else:
-            mediadb.watcher.check()
-        # we changed the menu, don't build a new one
+        # we (may) changed the menu, don't build a new one
         return None
 
 
@@ -888,7 +858,7 @@ class DirItem(Playlist):
             action.parameter(var=i)
             items.append(action)
 
+        self.get_menustack().delete_submenu(False)
         m = menu.Menu(_('Configure'), items)
         m.table = (80, 20)
-        m.back_one_menu = 2
         self.pushmenu(m)
