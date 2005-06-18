@@ -545,6 +545,8 @@ class DirItem(Playlist):
             self.item_menu.delattr('skin_default_has_description')
             self.item_menu.delattr('skin_default_no_images')
             self.item_menu.delattr('skin_force_text_view')
+            # maybe the cover changed
+            self.image = self.info['image']
 
         elif not os.path.exists(self.dir):
             # FIXME: better handling!!!!!
