@@ -79,7 +79,7 @@ class Thread(threading.Thread):
     """
     def __init__(self, function, *args, **kargs):
         threading.Thread.__init__(self)
-        self.callback  = None
+        self.callbacks = [ None, None ]
         self.function  = function
         self.args      = args
         self.kargs     = kargs
@@ -88,14 +88,14 @@ class Thread(threading.Thread):
         self.exception = None
 
 
-    def start(self, callback=None):
+    def start(self, callback=None, exception_callback = None):
         """
         Start the thread.
         """
         # append object to list of threads in watcher
         _watcher.append(self)
         # register callback
-        self.callback = callback
+        self.callbacks = [ callback, exception_callback ]
         # start the thread
         threading.Thread.start(self)
 
@@ -112,6 +112,16 @@ class Thread(threading.Thread):
             self.exception = e
         # set finished flag
         self.finished = True
+
+
+    def callback(self):
+        """
+        Run the callback.
+        """
+        if self.exception and self.callbacks[1]:
+            self.callbacks[1](self.exception)
+        elif not self.exception and self.callbacks[0]:
+            self.callbacks[0](self.result)
 
 
 def call(function, *args, **kwargs):
@@ -193,9 +203,8 @@ class Watcher:
         for thread in finished:
             # remove thread from list
             self.__threads.remove(thread)
-            if thread.callback and not thread.exception:
-                # call callback
-                thread.callback(thread.result)
+            # call callback
+            thread.callback()
             # join thread
             thread.join()
 
