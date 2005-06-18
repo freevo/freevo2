@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2005/06/18 12:08:19  dischi
+# cosmetic update
+#
 # Revision 1.4  2004/11/20 18:22:59  dischi
 # use python logger module for debug
 #
@@ -90,15 +93,17 @@ class Application:
         if not self._animated:
             log.info('no show animation for %s -- waiting' % self)
             gui.animation.render().wait()
-        if traceback.extract_stack(limit = 2)[0][3] != 'Application.show(self)':
+        s = traceback.extract_stack(limit = 2)[0][3]
+        if s != 'Application.show(self)':
             gui.display.update()
         return True
 
         
     def hide(self):
         """
-        Hide this application. This can be either because a different application
-        has started or that the application was stopped and is no longer needed.
+        Hide this application. This can be either because a different
+        application has started or that the application was stopped and is no
+        longer needed.
         """
         if self.visible:
             # wait until all application change animations are
