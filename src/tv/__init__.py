@@ -52,5 +52,4 @@ class PluginInterface(plugin.MainMenuPlugin):
         # detect channels
         config.detect('tvcards', 'channels')
 
-        return [ MainMenuItem('', action=TVMenu().main_menu, type='main',
-                              parent=parent, skin_type='tv') ]
+        return [ TVMenu(parent) ]
