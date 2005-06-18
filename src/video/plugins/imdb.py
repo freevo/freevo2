@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2005/06/18 11:54:21  dischi
+# use new menustack memeber functions
+#
 # Revision 1.38  2005/06/04 17:18:16  dischi
 # adjust to gui changes
 #
@@ -197,7 +200,7 @@ class PluginInterface(plugin.ItemPlugin):
 
         # go back in menustack
         for i in range(back):
-            menuw.delete_menu()
+            menuw.back_one_menu(False)
         
         
     def imdb_create_fxd(self, arg=None, menuw=None):
