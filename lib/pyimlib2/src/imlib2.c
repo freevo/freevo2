@@ -89,13 +89,17 @@ PyObject *imlib2_create(PyObject *self, PyObject *args)
 }
 
 static
-Image_PyObject *_imlib2_open(char *filename)
+Image_PyObject *_imlib2_open(char *filename, int use_cache)
 {
     Imlib_Image *image;
     Image_PyObject *o;
-    Imlib_Load_Error error_return;
+    Imlib_Load_Error error_return = IMLIB_LOAD_ERROR_NONE;
 
-    image = imlib_load_image_with_error_return(filename, &error_return);
+    if (use_cache)
+      image = imlib_load_image_with_error_return(filename, &error_return);
+    else
+      image = imlib_load_image_immediately_without_cache(filename);
+
     if (!image) {
         if (error_return == IMLIB_LOAD_ERROR_NO_LOADER_FOR_FILE_FORMAT)
             PyErr_Format(PyExc_IOError, "no loader for file format");
@@ -118,7 +122,7 @@ PyObject *imlib2_open(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "s", &file))
         return NULL;
  
-    image = _imlib2_open(file);
+    image = _imlib2_open(file, 1);
     if (!image)
         return NULL;
     return (PyObject *)image;
@@ -146,7 +150,7 @@ PyObject *imlib2_open_from_memory(PyObject *self, PyObject *args)
     fd = shm_open(filename, O_RDWR | O_CREAT, 0600);
     if (fd != -1) {
         if (write(fd, data, len) == len)
-            image = _imlib2_open(path);
+            image = _imlib2_open(path, 0);
         close(fd);
         shm_unlink(filename);
         if (image)
@@ -161,7 +165,7 @@ PyObject *imlib2_open_from_memory(PyObject *self, PyObject *args)
         return NULL;
     }
     if (write(fd, data, len) == len)
-        image = _imlib2_open(path);
+        image = _imlib2_open(path, 0);
     close(fd);
     unlink(path);
 
