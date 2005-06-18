@@ -78,7 +78,8 @@ class Watcher:
                 self.notifier_scan = notifier.addTimer(0, self.scan)
         if not self.notifier_check:
             self.notifier_check = notifier.addTimer(1000, self.check)
-            
+        return num_changes
+    
 
     def scan(self):
         if self.listing.cache.parse_next():
