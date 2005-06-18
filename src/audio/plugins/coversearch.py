@@ -1,67 +1,22 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # coverserarch.py - Plugin for album cover support
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes: This plugin will allow you to find album covers. At first, only
-#        Amazon is supported. Someone could easily add allmusic.com support
-#        which is more complete, but lacks a general interface like amazon's
-#        web services.
+# This plugin will allow you to find album covers. At first, only Amazon is
+# supported. Someone could easily add allmusic.com support which is more
+# complete, but lacks a general interface like amazon's web services.
 #
-#        You also need an Amazon developer key.
+# You also need an Amazon developer key.
 #
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.41  2005/06/18 12:07:02  dischi
-# use new menu memeber function
-#
-# Revision 1.40  2005/06/04 17:18:11  dischi
-# adjust to gui changes
-#
-# Revision 1.39  2005/05/01 17:36:41  dischi
-# remove some vfs calls were they are not needed
-#
-# Revision 1.38  2005/01/02 11:49:05  dischi
-# use fthread to be non blocking
-#
-# Revision 1.37  2004/11/20 18:23:00  dischi
-# use python logger module for debug
-#
-# Revision 1.36  2004/10/02 11:44:09  dischi
-# reactivate plugin
-#
-# Revision 1.35  2004/08/01 10:41:03  dischi
-# deactivate plugin
-#
-# Revision 1.34  2004/07/22 21:21:47  dischi
-# small fixes to fit the new gui code
-#
-# Revision 1.33  2004/07/10 12:33:37  dischi
-# header cleanup
-#
-# Revision 1.32  2004/07/09 11:09:56  dischi
-# use vfs.open to make sure we can write the image
-#
-# Revision 1.31  2004/05/15 18:01:13  outlyer
-# Trap a potential crash if the "guessed" filename doesn't exist.
-#
-# Revision 1.3  2003/06/12 16:47:04  outlyer
-# Tried to make the Amazon search more intelligent.
-#
-# Problem:
-#     If a cover is not available, Amazon returns an 807b GIF file instead
-#     of saying so
-#
-# Solution:
-#     What we do now is check the content length of the file
-#     before downloading and remove those entries from the list.
-#
-# I've also removed the example, since the plugin itself works better.
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Aubin Paul <aubin@outlyer.org>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -78,29 +33,31 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
-
+# python imports
 import os
-
-import menu
-import plugin
 import re
 import urllib2
 import time
-import config
-import Image
-import cStringIO
-from xml.dom import minidom # ParseError used by amazon module
-
-from gui.windows import WaitBox
-
-from util import amazon
-import util.fthread as fthread
-
 import logging
+import notifier
+import Imlib2
+
+# freevo imports
+import plugin
+import config
+
+from menu import ItemPlugin, Action, ActionItem, Menu
+from gui.windows import WaitBox, MessageBox
+from util import amazon
+from util.fthread import Thread
+
+# get logging object
 log = logging.getLogger('audio')
 
+# shortcut for the actions
+SHORTCUT = 'imdb_search_or_cover_search'
 
 class PluginInterface(plugin.ItemPlugin):
     """
@@ -123,8 +80,12 @@ class PluginInterface(plugin.ItemPlugin):
 
     Or this one if you want to pass the key to the plugin directly:
     plugin.activate( 'audio.coversearch', args=('YOUR_KEY',) ) 
+
+    You can also specify the amazon locale. Possible settings are us, uk,
+    de and jp. This is a limitation from the Amazon web service. Default is
+    us.
     """
-    def __init__(self, license=None):
+    def __init__(self, license=None, locale='us'):
         if not config.USE_NETWORK:
             self.reason = 'no network'
             return
@@ -140,12 +101,18 @@ class PluginInterface(plugin.ItemPlugin):
                   'developer/application.html'
             self.reason = 'no amazon key'
             return
-            
+
+        self.locales = [ 'us', 'uk' ]
+        if locale in self.locales:
+            self.locales.remove(locale)
+        self.locales = [ locale ] + self.locales
         plugin.ItemPlugin.__init__(self)
 
 
     def actions(self, item):
-        self.item = item
+        """
+        Return possible actions for the item.
+        """
         # don't allow this for items on an audio cd, only on the disc itself
         if item.type == 'audio' and item.parent.type == 'audiocd':
             return []
@@ -159,195 +126,142 @@ class PluginInterface(plugin.ItemPlugin):
             return []
 
         # do don't call this when we have an image
+        c = os.path.dirname(item.filename)
         if item.type == 'audio' and item.filename and \
-           vfs.isfile(os.path.join(os.path.dirname(item.filename), 'cover.jpg')):
+           vfs.isfile(os.path.join(c, 'cover.jpg')):
             return []
         
         if item.type in ('audio', 'audiocd', 'dir'):
             try:
                 # use title for audicds and album for normal data
-                if self.item.getattr('artist') and \
-                   ((self.item.getattr('album') and \
-                     item.type in ('audio', 'dir')) or \
-                    (self.item.getattr('title') and item.type == 'audiocd')):
-                    return [ ( self.cover_search_file,
-                               _( 'Find a cover for this music' ),
-                               'imdb_search_or_cover_search') ]
+                if (item['artist'] and item['album'] and \
+                    item.type in ('audio', 'dir') or \
+                    (item['title'] and item.type == 'audiocd')):
+
+                    return [ Action(_( 'Find a cover for this music' ),
+                                    self.search, SHORTCUT) ]
                 else:
                     log.info('no artist or album')
             except KeyError:
                 log.warning('no artist or album')
-            except AttributeError:
-                log.warning('unknown disc')
+            except AttributeError, e:
+                log.exception('coversearch')
         return []
 
 
-    def cover_search_file(self, arg=None, menuw=None):
+    def handle_exception(self, item, box, exception):
         """
-        search imdb for this item
+        Exception while getting data.
+        """
+        box.destroy()
+        if isinstance(exception, amazon.AmazonError):
+            text = _('No matches for %s - %s') % \
+                   (item['artist'], item['album'])
+        else:
+            text = _('Unknown error: %s' % exception)
+        MessageBox(text).show()
+        item.show_menu()
+
+
+    def __get_data_thread(self, search):
+        """
+        Get the cover data in a thread.
+        """
+        for locale in self.locales:
+            log.info('trying amazon locale %s' % locale)
+            amazon.setLocale(locale)
+            try:
+                cover = amazon.searchByKeyword(search, product_line="music")
+                # there are results, break from the loop
+                break
+            except AmazonError:
+                # nothing found
+                pass
+        else:
+            raise AmazonError('No results found')
+        
+        results = []
+        
+        # Check if they're valid before presenting the list to the user
+        # Grrr I wish Amazon wouldn't return an empty gif (807b)
+        for c in cover:
+            for url in c.ImageUrlLarge, c.ImageUrlMedium, \
+                    c.ImageUrlLarge.replace('.01.', '.03.'):
+                try:
+                    data = urllib2.urlopen(url)
+                    if data.info()['Content-Length'] == '807':
+                        continue
+                    image = Imlib2.open_from_memory(data.read())
+                    image = image.crop((2,2), (image.width-4, image.height-4))
+                    break
+                except urllib2.HTTPError:
+                    # Amazon returned a 404 or bad image
+                    pass
+                except:
+                    # Bad image
+                    log.exception('create image data')
+                    
+            else:
+                # no image found
+                log.info('No image for %s' % c.ProductName)
+                continue
+
+            name = Unicode(c.ProductName)
+            if url == c.ImageUrlMedium:
+                name += _('[small]')
+            results.append((name, image))
+            
+        # end of thread
+        return results
+
+
+    def search(self, item):
+        """
+        Search for the cover.
         """
         box = WaitBox(text=_( 'searching Amazon...' ) )
         box.show()
 
-        album = self.item.getattr('album')
+        album = item['album']
         if not album:
-            album = self.item.getattr('title')
+            album = item['title']
 
-        artist = self.item.getattr('artist')
+        artist = item['artist']
         search_string = '%s %s' % (String(artist), String(album))
         search_string = re.sub('[\(\[].*[\)\]]', '', search_string)
-        try:
-            cover = fthread.call(amazon.searchByKeyword, search_string,
-                                 product_line="music")
-        except amazon.AmazonError:
-            box.destroy()
-            dict_tmp = { "artist": String(artist), "album": String(album) }
-            box = WaitBox(text=_('No matches for %(artist)s - %(album)s') \
-                           % dict_tmp )
-            box.show()
-            time.sleep(2)
-            box.destroy()
-            return
 
-        except:
-            box.destroy()
-            box = WaitBox(text=_( 'Unknown error while searching.' ) )
-            box.show()
-            time.sleep(2)
-            box.destroy()
-            return
+        log.info('searching for \'%s\'' % search_string)
+        cb = notifier.Callback(self.cover_menu, item, box)
+        ex = notifier.Callback(self.handle_exception, item, box)
+        Thread(self.__get_data_thread, search_string).start(cb, ex)
 
+
+    def cover_menu(self, item, box, cover):
+        """
+        Show cover images. 
+        """
+        box.destroy()
         items = []
-        
-        # Check if they're valid before presenting the list to the user
-        # Grrr I wish Amazon wouldn't return an empty gif (807b)
-
-        MissingFile = False
-        m = None
-        n = None
-
-        for i in range(len(cover)):
-            try:
-                m = fthread.call(urllib2.urlopen, cover[i].ImageUrlLarge)
-            except urllib2.HTTPError:
-                # Amazon returned a 404
-                MissingFile = True
-            if not MissingFile and not (m.info()['Content-Length'] == '807'):
-                image = Image.open(cStringIO.StringIO(m.read()))
-                items += [ menu.MenuItem('%s' % cover[i].ProductName,
-                                         self.cover_create,
-                                         cover[i].ImageUrlLarge,
-                                         image=image) ]
-                m.close()
-            else:
-                if m: m.close()
-                MissingFile = False
-                # see if a small one is available
-                try:
-                    n = fthread.call(urllib2.urlopen, cover[i].ImageUrlMedium)
-                except urllib2.HTTPError:
-                    MissingFile = True
-                if not MissingFile and \
-                       not (n.info()['Content-Length'] == '807'):
-                    image = Image.open(cStringIO.StringIO(n.read()))
-                    items.append(menu.MenuItem(('%s [' + _( 'small' ) + ']')%\
-                                               cover[i].ProductName,
-                                               self.cover_create,
-                                               cover[i].ImageUrlMedium))
-                    n.close()
-                else:
-                    if n: n.close()
-                    # maybe the url is wrong, try to change '.01.' to '.03.'
-                    large = cover[i].ImageUrlLarge.replace('.01.', '.03.')
-                    cover[i].ImageUrlLarge = large
-                    try:
-                        n = fthread.call(urllib2.urlopen, cover[i].ImageUrlLarge)
-
-                        if not (n.info()['Content-Length'] == '807'):
-                            image = Image.open(cStringIO.StringIO(n.read()))
-                            name = ('%s [' + _( 'small' ) + ']' ) % \
-                                   cover[i].ProductName
-                            items.append(menu.MenuItem(name, self.cover_create,
-                                                       cover[i].ImageUrlLarge))
-                        n.close()
-                    except urllib2.HTTPError:
-                        pass
-
-        box.destroy()
-        if len(items) == 1:
-            self.cover_create(arg=items[0].arg, menuw=menuw)
-            return
-        if items: 
-            moviemenu = menu.Menu( _( 'Cover Search Results' ), items)
-            menuw.pushmenu(moviemenu)
-            return
-
-        box = WaitBox(text= _( 'No covers available from Amazon' ) )
-        box.show()
-        time.sleep(2)
-        box.destroy()
-        return
+        for name, image in cover:
+            a = ActionItem(name, item, self.save)
+            a.image = image
+            a.parameter(image)
+            items.append(a)
+        item.pushmenu(Menu( _( 'Cover Search Results' ), items))
 
 
-    def cover_create(self, arg=None, menuw=None):
+    def save(self, item, image):
         """
         create cover file for the item
         """
-        import directory
-        
-        box = WaitBox(text= _( 'getting data...' ) )
-        box.show()
-        
-        #filename = os.path.splitext(self.item.filename)[0]
-        if self.item.type == 'audiocd':
+        if item.type == 'audiocd':
             filename = '%s/disc/metadata/%s.jpg' % (config.OVERLAY_DIR,
-                                                    self.item.info['id'])
-        elif self.item.type == 'dir':
-            filename = os.path.join(self.item.dir, 'cover.jpg')
+                                                    item.info['id'])
+        elif item.type == 'dir':
+            filename = os.path.join(item.dir, 'cover.jpg')
         else:
-            filename = '%s/cover.jpg' % (os.path.dirname(self.item.filename))
+            filename = '%s/cover.jpg' % (os.path.dirname(item.filename))
 
-        fp = fthread.call(urllib2.urlopen, str(arg))
-        m = vfs.open(filename,'wb')
-        m.write(fp.read())
-        m.close()
-        fp.close()
-
-        # try to crop the image to avoid ugly borders
-        try:
-            import Image
-            image = Image.open(filename)
-            width, height = image.size
-            image.crop((2,2,width-4, height-4)).save(filename)
-        except:
-            pass
-
-        if self.item.type in ('audiocd', 'dir'):
-            self.item.image = filename
-        elif self.item.parent.type == 'dir':
-            # set the new cover to all items
-            self.item.parent.image = filename
-            for i in self.item.parent.menu.choices:
-                i.image = filename
-
-        # check if we have to go one menu back (called directly) or
-        # two (called from the item menu)
-        back = 1
-        if menuw.menustack[-2].selected != self.item:
-            back = 2
-
-        # maybe we called the function directly because there was only one
-        # cover and we called it with an event
-        if menuw.menustack[-1].selected == self.item:
-            back = 0
-            
-        # update the directory
-        if directory.dirwatcher:
-            directory.dirwatcher.scan()
-
-        # go back in menustack
-        for i in range(back):
-            menuw.back_one_menu(False)
-
-        box.destroy()
-        menuw.refresh()
+        log.info('save to cover to %s' % filename)
+        image.save(filename)
+        item.show_menu()
