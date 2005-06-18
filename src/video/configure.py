@@ -46,7 +46,7 @@ def play_movie(item, mplayer_options=None):
     """
     play the movie (again)
     """
-    item.get_menustack().back_to_menu(item, False)
+    item.show_menu(False)
     item.play(mplayer_options=mplayer_options)
 
 
@@ -55,14 +55,14 @@ def set_variable(item, variable, value):
     Set a variable for the item.
     """
     setattr(item, variable, value)
-    item.get_menustack().back_to_menu()
+    item.get_menustack().back_one_menu()
 
 
 def start_chapter(item, mplayer_options):
     """
     Handle chapter selection.
     """
-    item.get_menustack().back_to_menu(item, False)
+    item.show_menu(False)
     play_movie(item, mplayer_options)
 
 
@@ -71,7 +71,7 @@ def start_subitem(item, pos):
     Handle subitem selection.
     """
     item.conf_select_this_item = item.subitems[pos]
-    item.get_menustack().back_to_menu(item, False)
+    item.show_menu(False)
     play_movie(item)
 
 

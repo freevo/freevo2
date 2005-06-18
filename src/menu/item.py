@@ -231,6 +231,16 @@ class Item:
         stack.pushmenu(menu)
 
 
+    def show_menu(self, refresh=True):
+        """
+        Go back in the menu stack to the menu showing the item.
+        """
+        stack = self.get_menustack()
+        if not stack or not self.menu:
+            raise AttributeError('Item is not bound to a menu stack')
+        stack.back_to_menu(self.menu, refresh)
+        
+        
     def replace(self, item):
         """
         Replace this item in the menu with the given one.

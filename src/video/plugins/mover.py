@@ -144,4 +144,4 @@ class PluginInterface(ItemPlugin):
         else:
             log.info("no files to move")
 
-        item.get_menustack().back_to_menu(item)
+        item.show_menu()

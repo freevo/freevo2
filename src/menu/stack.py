@@ -97,15 +97,11 @@ class MenuStack:
         raise AttributeError('MenuStack.set_theme not defined')
 
 
-    def back_to_menu(self, menu_or_item, refresh=True):
+    def back_to_menu(self, menu, refresh=True):
         """
-        Go back to the given menu or item. If the parameter is a Menu, go
-        back to the given menu. If it is an item, go back to the menu were
-        this item is show.
+        Go back to the given menu.
         """
-        if isinstance(menu_or_item, Item):
-            menu_or_item = menu_or_item.menu
-        while len(self.menustack) > 1 and self.menustack[-1] != menu_or_item:
+        while len(self.menustack) > 1 and self.menustack[-1] != menu:
             self.menustack.pop()
         if refresh:
             self.refresh(True)
