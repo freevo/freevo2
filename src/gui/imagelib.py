@@ -37,10 +37,6 @@ import os
 import stat
 import logging
 
-# python imagelib (PIL)
-# please remove this dependency
-import Image
-
 # mevas imagelib
 import mevas
 
@@ -91,17 +87,14 @@ def load(url, size=None, cache=False):
     else:
         width, height = size
 
-    try:
-        # maybe the image is an image object from PIL
-        image = mevas.imagelib.new(url.size, url.tostring(), url.mode)
+    if not isinstance(url, (str, unicode)):
+        # image already is an image object
+        image = mevas.imagelib.open(url)
 
         # scale the image if needed
         if width != None or height != None:
             image = _resize(image, width, height)
         return image
-    except:
-        # no, it is not
-        pass
 
     if url.find('/') == -1 and url.find('.') == -1:
         # this looks like a 'theme' image
@@ -131,13 +124,7 @@ def load(url, size=None, cache=False):
         return None
 
     try:
-        try:
-            image = mevas.imagelib.open(filename)
-        except Exception, e:
-            log.info('imagelib load problem: %s - trying Imaging' % e)
-            i = Image.open(filename)
-            image = mevas.imagelib.new(i.tostring(), i.size, i.mode)
-
+        image = mevas.imagelib.open(filename)
     except:
         log.exception('Unknown Problem while loading image %s' % String(url))
         return None
@@ -166,7 +153,10 @@ def item_image(item, size, icon_dir, force=False, cache=True, bg=False,
         type = item.type
 
     try:
-        mtime = os.stat(item.image)[stat.ST_MTIME]
+        if isinstance(item.image, (str, unicode)):
+            mtime = os.stat(item.image)[stat.ST_MTIME]
+        else:
+            mtime = 0
     except:
         item.image = ''
     if isinstance(item.image, (str, unicode)) and item.image:
