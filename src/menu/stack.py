@@ -70,7 +70,7 @@ class MenuStack:
         if len(self.menustack) == 0:
             return
         if isinstance(self.menustack[-1], Menu):
-            self.menustack[-1].visible = True
+            self.menustack[-1].show()
 
 
     def hide(self):
@@ -80,7 +80,7 @@ class MenuStack:
         if len(self.menustack) == 0:
             return
         if isinstance(self.menustack[-1], Menu):
-            self.menustack[-1].visible = False
+            self.menustack[-1].hide()
 
 
     def redraw(self):
@@ -96,32 +96,30 @@ class MenuStack:
         """
         raise AttributeError('MenuStack.set_theme not defined')
 
-    
-    def delete_menu(self, allow_reload=True):
+
+    def back_to_menu(self, menu_or_item, refresh=True):
         """
-        Delete last menu from the stack, no redraw. If allow_reload is
-        False, even the internal reload function won't be called.
+        Go back to the given menu or item. If the parameter is a Menu, go
+        back to the given menu. If it is an item, go back to the menu were
+        this item is show.
+        """
+        if isinstance(menu_or_item, Item):
+            menu_or_item = menu_or_item.menu
+        while len(self.menustack) > 1 and self.menustack[-1] != menu_or_item:
+            self.menustack.pop()
+        if refresh:
+            self.refresh(True)
+
+            
+    def back_one_menu(self, refresh=True):
+        """
+        Go back one menu page.
         """
         if len(self.menustack) == 1:
             return
-        if hasattr(self.menustack[-1], 'hide'):
-            self.menustack[-1].hide()
-        # delete last item and set it to invisible
-        previous = self.menustack.pop()
-        if isinstance(previous, Menu):
-            previous.visible = False
-
-        # get last item
-        menu = self.menustack[-1]
-
-        if not isinstance(menu, Menu):
-            return True
-
-        if menu.reload_func and allow_reload:
-            menu.visible = True
-            reload = menu.reload_func()
-            if reload:
-                self.menustack[-1] = reload
+        self.menustack.pop()
+        if refresh:
+            self.refresh(True)
 
 
     def delete_submenu(self, refresh=True, reload=False, osd_message=''):
@@ -131,33 +129,9 @@ class MenuStack:
         this message will be send if the current menu is no submenu
         """
         if len(self.menustack) > 1 and self.menustack[-1].submenu:
-            if refresh and reload:
-                self.back_one_menu(arg='reload')
-            elif refresh:
-                self.back_one_menu()
-            else:
-                self.delete_menu()
+            self.back_one_menu(refresh)
         elif len(self.menustack) > 1 and osd_message:
             eventhandler.post_event(Event(OSD_MESSAGE, arg=osd_message))
-
-
-    def back_one_menu(self):
-        """
-        Go back on menu. Or if the current menu has a variable called
-        'back_one_menu' it is the real number of menus to go back
-        """
-        if len(self.menustack) == 1:
-            return
-        previous = self.menustack[-1]
-        num_back = 1
-        if previous and hasattr(previous, 'back_one_menu'):
-            num_back = previous.back_one_menu
-        for i in range(num_back):
-            # delete last item and set it to invisible
-            previous = self.menustack.pop()
-            if isinstance(previous, Menu):
-                previous.visible = False
-        return self.refresh(True)
 
 
     def pushmenu(self, menu):
@@ -175,19 +149,15 @@ class MenuStack:
         # hide it from the screen. Mark 'inside_menu' to avoid a
         # fade effect for hiding
         if previous:
-            if isinstance(previous, Menu):
-                previous.visible = False
-            else:
+            if not isinstance(previous, Menu):
                 self.inside_menu = True
                 previous.inside_menu = True
-                previous.hide()
 
         self.menustack.append(menu)
         # Check the new menu. Maybe we need to set 'inside_menu' if we
         # switch between MenuApplication(s) and also set a new theme
         # for the global Freevo look
         if isinstance(menu, Menu):
-            menu.visible = True
             if not menu.theme:
                 menu.theme = previous.theme
             if isinstance(menu.theme, str):
@@ -196,9 +166,6 @@ class MenuStack:
                 else:
                     menu.theme = self.set_theme(menu.theme)
             self.set_theme(menu.theme)
-            if previous and not isinstance(previous, Menu):
-                # Current showing is no Menu, we are hidden.
-                self.show()
         else:
             # The current Menu is a MenuApplication, set
             # theme and 'inside_menu'.
@@ -215,6 +182,11 @@ class MenuStack:
 
         # refresh will do the update
         self.refresh()
+
+        if previous and not isinstance(previous, Menu):
+            # Current showing was no Menu, we are hidden.
+            # So make menu stack visible again
+            self.show()
 
 
     def refresh(self, reload=False):
@@ -240,6 +212,9 @@ class MenuStack:
                 self.inside_menu = True
             elif self.previous:
                 self.previous.inside_menu = True
+            # hide previous menu page
+            if self.previous and isinstance(self.previous, Menu):
+                self.previous.hide()
             # set last menu to the current one visible
             self.previous = menu
             if self.visible:
@@ -253,6 +228,18 @@ class MenuStack:
             self.previous.inside_menu = True
             self.inside_menu = True
 
+        if self.visible and menu != self.previous:
+            # show the current page and hide the old one
+            if self.previous:
+                self.previous.hide()
+            menu.show()
+        elif not self.visible and self.previous:
+            # hide the previous menu
+            self.previous.hide()
+
+        # set last menu to the current one visible
+        self.previous = menu
+
         if reload and menu.reload_func:
             # The menu has a reload function. Call it to rebuild
             # this menu. If the functions returns something, replace
@@ -261,14 +248,10 @@ class MenuStack:
             if new_menu:
                 self.menustack[-1] = new_menu
                 menu = new_menu
-                menu.visible = True
                 
         # set the theme
         if isinstance(menu, Menu):
             self.set_theme(menu.theme)
-
-        # set last menu to the current one visible
-        self.previous = menu
 
         if not self.visible:
             # nothing to do anymore
@@ -326,9 +309,6 @@ class MenuStack:
         if event == MENU_GOTO_MAINMENU:
             while len(self.menustack > 1):
                 menu = self.menustack.pop()
-                if isinstance(menu, Menu):
-                    menu.visible = False
-            self.menustack[0].visible = True
             self.refresh()
             return True
 
@@ -353,37 +333,37 @@ class MenuStack:
             return False
 
         if event == MENU_UP:
-            menu.change_selection(-menu.cols)
+            menu.select(-menu.cols)
             self.refresh()
             return True
 
 
         if event == MENU_DOWN:
-            menu.change_selection(menu.cols)
+            menu.select(menu.cols)
             self.refresh()
             return True
 
 
         if event == MENU_PAGEUP:
-            menu.change_selection(-(menu.rows * menu.cols))
+            menu.select(-(menu.rows * menu.cols))
             self.refresh()
             return True
 
 
         if event == MENU_PAGEDOWN:
-            menu.change_selection(menu.rows * menu.cols)
+            menu.select(menu.rows * menu.cols)
             self.refresh()
             return True
 
 
         if event == MENU_LEFT:
-            menu.change_selection(-1)
+            menu.select(-1)
             self.refresh()
             return True
 
 
         if event == MENU_RIGHT:
-            menu.change_selection(1)
+            menu.select(1)
             self.refresh()
             return True
 
