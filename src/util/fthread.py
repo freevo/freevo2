@@ -124,20 +124,6 @@ class Thread(threading.Thread):
             self.callbacks[0](self.result)
 
 
-def call(function, *args, **kwargs):
-    """
-    Run function(*args, **kargs) in a thread and return the result. Keep
-    the main loop alive during that time.
-    """
-    thread = Thread(function, *args, **kwargs)
-    thread.start()
-    while not thread.finished:
-        # step notifier
-        notifier.step()
-    if thread.exception:
-        raise thread.exception
-    return thread.result
-
 
 def call_from_main(function, *args, **kwargs):
     """
