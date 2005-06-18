@@ -278,9 +278,9 @@ class Item:
 
         if attr[:4] == 'len(' and attr[-1] == ')':
             value = self[attr[4:-1]]
-            if r == None or r == '':
+            if value == None or value == '':
                 return 0
-            return len(r)
+            return len(value)
 
         r = None
         if self.info.has_key(attr):
