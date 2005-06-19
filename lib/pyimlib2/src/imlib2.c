@@ -32,6 +32,7 @@
 #include <Python.h>
 #define X_DISPLAY_MISSING
 #include <Imlib2.h>
+#include <errno.h>
 
 #include <fcntl.h>
 #ifdef HAVE_POSIX_SHMEM
@@ -134,20 +135,28 @@ PyObject *imlib2_open_from_memory(PyObject *self, PyObject *args)
     PyObject *buffer;
     void *data;
     int len, fd;
-    char filename[PATH_MAX], path[PATH_MAX];
+    static int prng_seeded = 0;
+    char filename[30], path[PATH_MAX];
 
     if (!PyArg_ParseTuple(args, "O!", &PyBuffer_Type, &buffer))
         return NULL;
 
-    // Using pid in the file should be good enough.  It means this function
-    // isn't reentrant, but because we have the global interpreter lock at
-    // this point, we shouldn't need to be reentrant.
-    sprintf(filename, "pyimlib2-img-%d", getpid());
     PyObject_AsReadBuffer(buffer, (const void **)&data, &len);
 
+    // Seed PRNG for generating sufficiently unique filenames.  We only need
+    // a filename which is extremely unlikely to exist.  Files are opened with
+    // O_EXCL so this code should not be vulnerable to symlink attacks.  (It
+    // will fail, but won't leak data to the attacker.)
+    if (!prng_seeded) {
+        prng_seeded = 1;
+        srand((unsigned int)time(0)*getpid());
+    }
+    sprintf(filename, "pyimlib2-img-%d", rand());
+
 #ifdef HAVE_POSIX_SHMEM
+    // Faster to use shared memory, if available ...
     sprintf(path, "/dev/shm/%s", filename);
-    fd = shm_open(filename, O_RDWR | O_CREAT, 0600);
+    fd = shm_open(filename, O_RDWR | O_CREAT | O_EXCL, 0600);
     if (fd != -1) {
         if (write(fd, data, len) == len)
             image = _imlib2_open(path, 0);
@@ -159,9 +168,9 @@ PyObject *imlib2_open_from_memory(PyObject *self, PyObject *args)
     // Shmem failed, fall back to file system
 #endif
     sprintf(path, "/tmp/%s", filename);
-    fd = open(path, O_RDWR | O_CREAT, 0600);
+    fd = open(path, O_RDWR | O_CREAT | O_EXCL, 0600);
     if (fd == -1) {
-        PyErr_Format(PyExc_IOError, "Unable to save temporary file: %s", path);
+        PyErr_Format(PyExc_IOError, "Unable to save temporary file '%s': %s", path, strerror(errno));
         return NULL;
     }
     if (write(fd, data, len) == len)
@@ -171,7 +180,7 @@ PyObject *imlib2_open_from_memory(PyObject *self, PyObject *args)
 
     if (!image) {
         if (!PyErr_Occurred())
-            PyErr_Format(PyExc_IOError, "Failed writing to temporary file: %s", path);
+            PyErr_Format(PyExc_IOError, "Failed writing to temporary file '%s': %s", path, strerror(errno));
         return NULL;
     }
 
