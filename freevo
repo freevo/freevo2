@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.128  2005/06/19 12:07:06  dischi
+# remove main.py to helper
+#
 # Revision 1.127  2005/05/30 18:00:44  dischi
 # move setup_freevo to config/setup
 #
@@ -417,7 +420,7 @@ if not os.environ.has_key('USER') or not os.environ['USER']:
 
 # now check what and how we should start freevo
 bg    = 0 # start in background
-proc  = [ os.path.abspath(os.path.join(freevo_python, 'main.py')) ]
+proc  = [ os.path.abspath(os.path.join(freevo_python, 'helpers/main.py')) ]
 name  = os.path.splitext(os.path.basename(os.path.abspath(sys.argv[0])))[0]
 check = 1 # check running instance
 

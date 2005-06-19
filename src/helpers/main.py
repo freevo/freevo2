@@ -69,6 +69,16 @@ except:
     sys.exit(1)
 
 
+#
+# check if a plugin.py* is in the current dir
+#
+
+p = os.path.join(os.path.dirname(__file__), 'plugins.')
+for ext in ('py', 'pyc', 'pyo'):
+    if os.path.isfile(p + ext):
+        print 'Error: Old plugin helper detected. Please remove'
+        print p + ext
+        sys.exit(1)
 
 try:
     # i18n support
