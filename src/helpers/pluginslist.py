@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.1  2005/06/19 12:06:46  dischi
+# rename plugin.py to pluginlist.py to avoid naming conflict
+#
 # Revision 1.12  2004/10/28 19:39:09  dischi
 # adhust to internal plugin.py changes
 #
