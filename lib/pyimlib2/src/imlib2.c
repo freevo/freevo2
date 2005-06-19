@@ -151,11 +151,11 @@ PyObject *imlib2_open_from_memory(PyObject *self, PyObject *args)
         prng_seeded = 1;
         srand((unsigned int)time(0)*getpid());
     }
-    sprintf(filename, "pyimlib2-img-%d", rand());
+    snprintf(filename, sizeof(filename), "pyimlib2-img-%d", rand());
 
 #ifdef HAVE_POSIX_SHMEM
     // Faster to use shared memory, if available ...
-    sprintf(path, "/dev/shm/%s", filename);
+    snprintf(path, sizeof(path), "/dev/shm/%s", filename);
     fd = shm_open(filename, O_RDWR | O_CREAT | O_EXCL, 0600);
     if (fd != -1) {
         if (write(fd, data, len) == len)
@@ -167,7 +167,7 @@ PyObject *imlib2_open_from_memory(PyObject *self, PyObject *args)
     }
     // Shmem failed, fall back to file system
 #endif
-    sprintf(path, "/tmp/%s", filename);
+    snprintf(path, sizeof(path), "/tmp/%s", filename);
     fd = open(path, O_RDWR | O_CREAT | O_EXCL, 0600);
     if (fd == -1) {
         PyErr_Format(PyExc_IOError, "Unable to save temporary file '%s': %s", path, strerror(errno));
