@@ -218,17 +218,16 @@ class Eventhandler:
         else:
             previous, app = None, self.applications[-1]
         if not self.popups:
-            self.context = app._evt_context
+            self.context = app.get_eventmap()
         else:
             self.context = self.popups[-1].event_context
 
-        fade = app._animated
+        fade = app.animated
         if previous:
             if previous.visible:
                 previous.hide()
-            fade = fade or previous._animated
-        self.notify(Event(SCREEN_CONTENT_CHANGE,
-                          arg=(app, app._evt_fullscreen, fade)))
+            fade = fade or previous.animated
+        self.notify(Event(SCREEN_CONTENT_CHANGE, (app, app.fullscreen, fade)))
         self.stack_change = None
         if not app.visible:
             app.show()
@@ -239,7 +238,7 @@ class Eventhandler:
         Add app the list of applications and set the focus
         """
         # make sure the app is not stopped
-        app._evt_stopped = False
+        app.stopped = False
         # do will have a stack or is this the first application?
         if len(self.applications) == 0:
             # just add the application
@@ -249,12 +248,12 @@ class Eventhandler:
         # or if it is the same application as before
         previous = self.applications[-1]
         if previous == app:
-            previous._evt_stopped = False
+            previous.stopped = False
         else:
             # hide the application and mark the application change
             previous.hide()
             self.stack_change = previous, app
-            if previous._evt_stopped:
+            if previous.stopped:
                 # the previous application is stopped, remove it
                 self.applications.remove(previous)
             self.stack_change = previous, app
@@ -283,7 +282,7 @@ class Eventhandler:
         if self.popups:
             self.context = self.popups[-1].event_context
         else:
-            self.context = self.applications[-1]._evt_context
+            self.context = self.applications[-1].get_eventmap()
                 
 
     def register(self, application, event):
@@ -401,7 +400,7 @@ class Eventhandler:
             if self.stack_change:
                 # our stack has changed, reset the focus
                 self.set_focus()
-            elif self.applications[-1]._evt_stopped or \
+            elif self.applications[-1].stopped or \
                      not self.applications[-1].visible:
                 # the current application wants to be removed, either
                 # because stop() is called or the hide() function was

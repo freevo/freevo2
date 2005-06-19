@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.64  2005/06/19 16:30:28  dischi
+# adjust to application/base.py changes
+#
 # Revision 1.63  2005/06/09 19:43:55  dischi
 # clean up eventhandler usage
 #
@@ -182,9 +185,9 @@ class Xine(Application):
         play a dvd with xine
         """
         self.item        = item
-        self.set_event_context('video')
+        self.set_eventmap('video')
         if config.EVENTS.has_key(item.mode):
-            self.set_event_context(item.mode)
+            self.set_eventmap(item.mode)
 
         if plugin.getbyname('MIXER'):
             plugin.getbyname('MIXER').reset()
@@ -239,7 +242,7 @@ class Xine(Application):
 
         elif item.mimetype == 'cue':
             command.append('vcd://%s' % item.filename)
-            self.set_event_context('vcd')
+            self.set_eventmap('vcd')
             
         else:
             command.append(item.url)

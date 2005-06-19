@@ -132,9 +132,9 @@ class ImageViewer(Application):
         Show the image
         """
         if zoom:
-            self.set_event_context('image_zoom')
+            self.set_eventmap('image_zoom')
         else:
-            self.set_event_context('image')
+            self.set_eventmap('image')
 
         filename      = item.filename
         self.fileitem = item
