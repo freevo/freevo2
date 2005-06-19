@@ -33,8 +33,7 @@ __all__ = [ 'MenuWidget' ]
 
 # freevo imports
 import config
-import gui.areas
-import gui.theme
+import gui
 
 from event import *
 from menu import MenuStack
@@ -74,7 +73,7 @@ class MenuWidget(Application, MenuStack):
             self.engine.show(config.GUI_FADE_STEPS)
 
 
-    def hide(self, clear=True):
+    def hide(self):
         """
         Hide the menu
         """
@@ -102,7 +101,7 @@ class MenuWidget(Application, MenuStack):
             return True
 
         if event == MENU_CHANGE_STYLE and len(self.menustack) > 1:
-            # did the menu change?
+            # change the menu style
             self.engine.toggle_display_style(self.menustack[-1])
             self.refresh()
             return True
