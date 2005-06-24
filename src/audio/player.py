@@ -85,13 +85,12 @@ class AudioPlayer(Application):
         """
         play an item
         """
-        self.item    = item
+        # FIXME: handle starting something when self.player.is_playing()
         if self.player and self.player.is_playing():
-            log.info('stop playing')
-            self.stop()
+            return
 
         self.item = item
-        
+
         if player:
             self.player = player
         else:
@@ -106,7 +105,7 @@ class AudioPlayer(Application):
                 self.possible_player.append((rating, p))
             self.possible_player.sort(lambda l, o: -cmp(l[0], o[0]))
             self.player = self.possible_player[0][1]
-        
+
         self.running = True
 
         if self.bg_playing:
@@ -114,47 +113,24 @@ class AudioPlayer(Application):
         else:
             self.show()
 
-        if plugin.getbyname('MIXER'):
-            plugin.getbyname('MIXER').reset()
-
         error = self.player.play(self.item, self)
         if error:
             self.running = False
             self.item.eventhandler(PLAY_END)
-            
+
         else:
             self.refresh()
 
 
-    def try_next_player(self):
-        """
-        try next possible player because the last one didn't work
-        """
-        self.stop()
-        log.info('error, try next player')
-        player = None
-        next   = False
-        for r, p in self.possible_player:
-            if next:
-                player = p
-                break
-            if p == self.player:
-                next = True
-
-        if player:
-            self.play(self.item, player=player)
-            return 1
-        log.info('no more players found')
-        return 0
-
-        
     def stop(self):
         """
-        stop playing
+        Stop playing.
         """
-        Application.stop(self)
+        # This function doesn't use the Application.stop() code here. It will
+        # be called when the playing stopped (PLAY_END)
         if self.player:
             self.player.stop()
+            self.player = None
         self.running = False
 
 
@@ -182,23 +158,20 @@ class AudioPlayer(Application):
 
         # post event for hiding visualizations
         eventhandler.post(AUDIO_VISUAL_HIDE)
-            
+
 
     def refresh(self):
         """
         update the screen
         """
-        if not self.visible:
+        if not self.visible or not self.running:
             return
-
-        if not self.running:
-            return
-        
         # Calculate some new values
         if not self.item.length:
             self.item.remain = 0
         else:
             self.item.remain = self.item.length - self.item.elapsed
+        # redraw
         self.draw_engine.draw(self.item)
 
 
@@ -207,14 +180,21 @@ class AudioPlayer(Application):
         React on some events or send them to the real player or the
         item belongig to the player
         """
-        if event == PLAY_END and event.arg:
-            self.player.stop()
-            if self.try_next_player():
-                return True
-            
-        if event in ( STOP, PLAY_END, USER_END ):
+        # FIXME: handle next player on PLAY_END when there was an error
+
+        if event == STOP:
+            # Stop the player and pass the event to the item
             self.stop()
-            return self.item.eventhandler(event)
+            self.item.eventhandler(event)
+            return True
+
+        if event == PLAY_END:
+            # Now the player has stopped. Here, at this point and not when
+            # self.stop() is called. So now we have to do the stop() stuff
+            # from Application.stop()
+            Application.stop(self)
+            self.item.eventhandler(event)
+            return True
 
         # try the real player
         if self.player.eventhandler(event):
@@ -222,4 +202,3 @@ class AudioPlayer(Application):
 
         # give it to the item
         return self.item.eventhandler(event)
-
