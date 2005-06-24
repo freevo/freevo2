@@ -62,27 +62,50 @@ class Application(base.Application):
         """
         base.Application.__init__(self, name, eventmap, fullscreen, animated)
         self.__child = None
+        self.__stop_cmd = ''
         self.has_display = has_display
-        
 
-    def child_start(self, cmd, prio=0):
+
+    def stop(self):
+        """
+        Stop the Application.
+        """
+        if hasattr(self, 'item') and self.has_child():
+            self.child_stop()
+        else:
+            base.Application.stop(self)
+
+
+    def eventhandler(self, event):
+        """
+        Simple eventhandler acting on PLAY_END.
+        """
+        if event == PLAY_END and hasattr(self, 'item') and self.item and \
+               event.arg == self.item:
+            base.Application.stop(self)
+            
+
+    def child_start(self, cmd, prio=0, stop_cmd=''):
         """
         Run the given command as child.
         """
         if self.__child:
             log.error('child already running')
             return False
-        self.__child = Process(cmd, self, prio, has_display)
+        if self.fullscreen and self.has_display:
+            self.show()
+        self.__child = Process(cmd, self, prio, self.has_display)
+        self.__stop_cmd = stop_cmd
         return True
 
 
-    def child_stop(self, cmd=''):
+    def child_stop(self):
         """
         Stop the child process
         """
         if not self.__child:
             return False
-        self.__child.stop(cmd)
+        self.__child.stop(self.__stop_cmd)
         self.__child = None
         return True
 
@@ -93,6 +116,13 @@ class Application(base.Application):
         """
         return self.__child and self.__child.is_alive()
 
+
+    def has_child(self):
+        """
+        Return True if the application has a child.
+        """
+        return self.__child
+    
 
     def child_stdin(self, line):
         """
@@ -131,13 +161,13 @@ class Process(util.popen.Process):
     Process wrapping popen into the application callback. Also takes care
     of basic event sending on start and stop.
     """
-    def __init__(self, cmd, handler, prio = 0, has_display = False):
+    def __init__(self, cmd, handler, prio=0, has_display=False):
         """
         Init the object and start the process.
         """
         self.handler = handler
         self.has_display = has_display
-
+        
         if self.has_display:
             gui.display.hide()
         
