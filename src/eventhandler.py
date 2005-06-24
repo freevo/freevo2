@@ -173,7 +173,7 @@ class Eventhandler:
         self.popups       = []
         self.applications = []
         self.context      = None
-        
+        self.locked       = False
         self.queue = []
         self.registered = { EVENT_LISTENER : [], GENERIC_HANDLER : []}
         self.stack_change = None
@@ -227,6 +227,7 @@ class Eventhandler:
             if previous.visible:
                 previous.hide()
             fade = fade or previous.animated
+        log.info('SCREEN_CONTENT_CHANGE')
         self.notify(Event(SCREEN_CONTENT_CHANGE, (app, app.fullscreen, fade)))
         self.stack_change = None
         if not app.visible:
@@ -334,8 +335,13 @@ class Eventhandler:
         """
         # search for events in the queue
         if not event and not len(self.queue):
-            return
+            return True
 
+        if self.locked:
+            # already in this function
+            return True
+        self.locked = True
+        
         if not event:
             event = self.queue[0]
             del self.queue[0]
@@ -374,7 +380,7 @@ class Eventhandler:
                 # function and do not pass it on the the normal
                 # handling
                 event.handler(event=event)
-
+                
             elif used:
                 # used by registered plugin
                 pass
@@ -412,6 +418,8 @@ class Eventhandler:
 
             if _TIME_DEBUG:
                 print time.clock() - t1
+            # unlock eventhandler
+            self.locked = False
             return True
 
         except SystemExit:
