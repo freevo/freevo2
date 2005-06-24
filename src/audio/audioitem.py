@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.68  2005/06/24 20:51:39  dischi
+# remove USER_END and self.parent.current_item
+#
 # Revision 1.67  2005/06/15 20:43:39  dischi
 # adjust to new menu code
 #
@@ -170,7 +173,6 @@ class AudioItem(MediaItem):
         """
         Start playing the item
         """
-        self.parent.current_item = self
         self.elapsed = 0
         audioplayer().play(self)
 

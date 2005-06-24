@@ -345,19 +345,22 @@ class MPlayer(mplayer.Application):
 
         if event == VIDEO_MANUAL_SEEK:
             gui.windows.WaitBox('Seek disabled, press QUIT').show()
+            return True
 
         if event == STOP:
             self.stop()
-            return self.item.eventhandler(event)
+            self.item.eventhandler(event)
+            return True
 
         if event == 'AUDIO_ERROR_START_AGAIN':
             self.stop()
             self.play(self.options, self.item)
             return True
 
-        if event in ( PLAY_END, USER_END ):
+        if event == PLAY_END:
             self.stop()
-            return self.item.eventhandler(event)
+            self.item.eventhandler(event)
+            return True
 
         if event == VIDEO_SEND_MPLAYER_CMD:
             self.send_command('%s\n' % event.arg)

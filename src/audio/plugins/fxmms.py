@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2005/06/24 20:51:39  dischi
+# remove USER_END and self.parent.current_item
+#
 # Revision 1.7  2005/06/09 19:43:53  dischi
 # clean up eventhandler usage
 #
@@ -263,7 +266,7 @@ class FXMMS:
             if self.playerGUI.try_next_player():
                 return True
         
-        if event in ( STOP, PLAY_END, USER_END ):
+        if event in ( STOP, PLAY_END ):
             self.playerGUI.stop()
             return self.item.eventhandler(event)
             

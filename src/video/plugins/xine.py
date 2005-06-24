@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.65  2005/06/24 20:51:40  dischi
+# remove USER_END and self.parent.current_item
+#
 # Revision 1.64  2005/06/19 16:30:28  dischi
 # adjust to application/base.py changes
 #
@@ -271,9 +274,10 @@ class Xine(Application):
         if not self.app:
             return self.item.eventhandler(event)
             
-        if event in ( PLAY_END, USER_END ):
+        if event == PLAY_END:
             self.stop()
-            return self.item.eventhandler(event)
+            self.item.eventhandler(event)
+            return True
 
         if event == PAUSE or event == PLAY:
             self.app.write('pause\n')
@@ -281,7 +285,8 @@ class Xine(Application):
 
         if event == STOP:
             self.stop()
-            return self.item.eventhandler(event)
+            self.item.eventhandler(event)
+            return True
 
         if event == SEEK:
             pos = int(event.arg)

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2005/06/24 20:51:39  dischi
+# remove USER_END and self.parent.current_item
+#
 # Revision 1.12  2005/06/09 19:43:53  dischi
 # clean up eventhandler usage
 #
@@ -143,7 +146,7 @@ class RadioPlayer:
         function it will be passed over to the items eventhandler
         """
         print 'Radio Player event handler %s' % event
-        if event in ( STOP, PLAY_END, USER_END ):
+        if event in ( STOP, PLAY_END ):
             self.playerGUI.stop()
             return self.item.eventhandler(event)
 

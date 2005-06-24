@@ -136,7 +136,7 @@ class PluginInterface(ItemPlugin):
         Handle video events for bookmark support.
         """
         # auto bookmark store
-        if event in (STOP, USER_END):
+        if event == STOP:
             if item.mode == 'file' and not item.variants and \
                    not item.subitems and item.elapsed:
                 item.store_info(RESUME, item.elapsed)

@@ -109,12 +109,7 @@ class ImageItem(MediaItem):
         """
         view the image
         """
-        self.parent.current_item = self
-
         imageviewer().view(self, rotation=self['rotation'])
-
-        if self.parent and hasattr(self.parent, 'cache_next'):
-            self.parent.cache_next()
 
 
     def stop(self):

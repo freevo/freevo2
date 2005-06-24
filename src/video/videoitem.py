@@ -477,11 +477,6 @@ class VideoItem(MediaItem):
         Play the item. The argument 'arg' can either be a player or
         extra mplayer arguments.
         """
-        # set the current_item of the parent to this one
-        # to make playlists possible
-	if self.parent:
-            self.parent.current_item = self
-
         if self.variants:
             # if we have variants, play the first one as default
             self.variants[0].play()
@@ -508,7 +503,7 @@ class VideoItem(MediaItem):
                     self.current_subitem.mplayer_options = self.mplayer_options
                 # When playing a subitem, the menu must be hidden. If it is
                 # not, the playing will stop after the first subitem, since the
-                # PLAY_END/USER_END event is not forwarded to the parent
+                # PLAY_END event is not forwarded to the parent
                 # videoitem.
                 # And besides, we don't need the menu between two subitems.
                 self.last_error_msg=self.current_subitem.play()
@@ -630,9 +625,6 @@ class VideoItem(MediaItem):
                 if self.error_in_subitem:
                     # No more subitems to play, and an error occured
                     MessageBox(text=self.last_error_msg).show()
-
-            elif event == USER_END:
-                pass
 
         # show configure menu
         if event == MENU:
