@@ -42,6 +42,7 @@
 
 # python imports
 import os
+import logging
 import mmpython
 
 # freevo imports
@@ -51,6 +52,9 @@ import eventhandler
 
 from menu import Action, Menu, ItemPlugin
 from event import *
+
+# the logging object
+log = logging.getLogger()
 
 # variable to store the auto resume
 RESUME = 'autobookmark_resume'
