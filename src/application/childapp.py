@@ -1,0 +1,204 @@
+# -*- coding: iso-8859-1 -*-
+# -----------------------------------------------------------------------------
+# childapp.py - application with a child process
+# -----------------------------------------------------------------------------
+# $Id$
+#
+# -----------------------------------------------------------------------------
+# Freevo - A Home Theater PC framework
+# Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# -----------------------------------------------------------------------------
+
+__all__ = [ 'Application' ]
+
+# Python imports
+import os
+import logging
+
+# Freevo imports
+import sysconfig
+import config
+import eventhandler
+import util.popen
+import gui
+
+from event import *
+
+# application imports
+import base
+
+# get logging object
+log = logging.getLogger()
+
+
+class Application(base.Application):
+    """
+    Basic application controlling one child process.
+    """
+    def __init__(self, name, eventmap, fullscreen, animated = False,
+                 has_display = False):
+        """
+        Init the application object.
+        """
+        base.Application.__init__(self, name, eventmap, fullscreen, animated)
+        self.__child = None
+        self.has_display = has_display
+        
+
+    def child_start(self, cmd, prio=0):
+        """
+        Run the given command as child.
+        """
+        if self.__child:
+            log.error('child already running')
+            return False
+        self.__child = Process(cmd, self, prio, has_display)
+        return True
+
+
+    def child_stop(self, cmd=''):
+        """
+        Stop the child process
+        """
+        if not self.__child:
+            return False
+        self.__child.stop(cmd)
+        self.__child = None
+        return True
+
+
+    def child_running(self):
+        """
+        Return True if a child is running right now.
+        """
+        return self.__child and self.__child.is_alive()
+
+
+    def child_stdin(self, line):
+        """
+        Send line to child.
+        """
+        if self.__proc:
+            self.__proc.write(cmd)
+
+
+    def child_stdout(self, line):
+        """
+        A line from stdout of the child. Override this method to handle
+        stdout from the child process.
+        """
+        pass
+
+
+    def child_stderr(self, line):
+        """
+        A line from stdout of the child. Override this method to handle
+        stderr from the child process.
+        """
+        pass
+
+
+    def child_finished(self):
+        """
+        Callback when the child is finished. Override this method to react
+        when the child is finished.
+        """
+        pass
+
+
+class Process(util.popen.Process):
+    """
+    Process wrapping popen into the application callback. Also takes care
+    of basic event sending on start and stop.
+    """
+    def __init__(self, cmd, handler, prio = 0, has_display = False):
+        """
+        Init the object and start the process.
+        """
+        self.handler = handler
+        self.has_display = has_display
+
+        if self.has_display:
+            gui.display.hide()
+        
+        if hasattr(handler, 'item'):
+            # send PLAY_START event
+            eventhandler.post(Event(PLAY_START, handler.item))
+
+        # get a name for debug logging of the process
+        logname = cmd[0]
+        if logname.rfind('/') > 0:
+            logname = logname[ logname.rfind( '/' ) + 1 : ]
+        logname = sysconfig.logfile(logname)
+
+	# start the process
+        util.popen.Process.__init__(self, cmd, logname,
+                                    callback=self.finished)
+
+        # renice the process
+        if prio and config.CONF.renice:
+            os.system('%s %s -p %s 2>/dev/null >/dev/null' % \
+                      (config.CONF.renice, prio, self.child.pid))
+
+
+    def stdout_cb(self, line):
+        """
+        Handle child stdout (send to handler).
+        """
+        self.handler.child_stdout(line)
+
+
+    def stderr_cb(self, line):
+        """
+        Handle child stderr (send to handler).
+        """
+        self.handler.child_stderr(line)
+
+
+    def stop(self, cmd=''):
+        """
+        Stop the child (no wait)
+        """
+        util.popen.Process.stop(self, cmd, False)
+
+        
+    def stop_event(self):
+        """
+        Event to send on stop.
+        """
+        if hasattr(self.handler, 'item'):
+            event = Event(PLAY_END, self.handler.item)
+            eventhandler.post(event)
+        return None
+
+
+    def finished(self):
+        """
+        Send stop event when child is finished.
+        """
+        event = self.stop_event()
+        if event:
+            eventhandler.post(event)
+        if self.has_display:
+            gui.display.show()
+        self.handler.child_finished()

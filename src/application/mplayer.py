@@ -39,14 +39,13 @@ import re
 
 # freevo imports
 import config
-import childapp
 import plugin
-import event
+from event import *
 
 # application imports
-import base
+import childapp
 
-class Application(base.Application):
+class Application(childapp.Application):
     """
     Basic application for controlling mplayer inside Freevo.
     """
@@ -54,7 +53,7 @@ class Application(base.Application):
         """
         init the mplayer object
         """
-        base.Application.__init__(self, 'mplayer', type, has_video)
+        childapp.Application.__init__(self, 'mplayer', type, has_video)
         self.name = 'mplayer'
         self.__proc = None
         self.has_video = has_video
@@ -76,11 +75,7 @@ class Application(base.Application):
             plugin.getbyname('MIXER').reset()
 
         cmd = self.correct_filter_chain(cmd)
-        if self.has_video:
-            stop_osd = 2
-        else:
-            stop_osd = 0
-        self.__proc = Process(cmd, self, stop_osd)
+        self.__proc = Process(cmd, self, self.has_video)
 
 
     def correct_filter_chain(self, command):
@@ -109,12 +104,13 @@ class Application(base.Application):
         """
         Stop mplayer
         """
-        base.Application.stop(self)
         for p in self.plugins:
             p.stop()
         self.plugins = []
         if not self.__proc:
             return
+        # proc will send a PLAY_END when it's done. At this point we
+        # will call childapp.Application.stop(self)
         self.__proc.stop('quit\n')
         self.__proc = None
 
@@ -159,6 +155,10 @@ class Application(base.Application):
         """
         Eventhandler function.
         """
+        if event == PLAY_END:
+            childapp.Application.stop(self)
+            return False
+
         if not self.has_process():
             return False
 
@@ -220,26 +220,24 @@ class Plugin(plugin.Plugin):
         return False
 
 
-class Process(childapp.Instance):
+class Process(childapp.Process):
     """
     Internal childapp instance for the mplayer process.
     """
-    def __init__(self, cmd, handler, stop_osd):
-        self.handler = handler
+    def __init__(self, cmd, handler, has_display):
         self.elapsed = 0
         self.stop_reason = ''
-        self.RE_TIME   = re.compile("^A: *([0-9]+)").match
-        self.RE_EXIT   = re.compile("^Exiting\.\.\. \((.*)\)$").match
-        childapp.Instance.__init__( self, cmd, stop_osd = stop_osd,
-                                    prio = config.MPLAYER_NICE )
+        self.RE_TIME = re.compile("^A: *([0-9]+)").match
+        childapp.Process.__init__(self, cmd, handler, config.MPLAYER_NICE,
+                                  has_display)
 
 
     def stop_event(self):
         """
         Return the stop event send through the eventhandler
         """
-        return event.Event(event.PLAY_END, self.stop_reason,
-                           handler=self.handler.eventhandler)
+        return Event(PLAY_END, self.stop_reason,
+                     handler=self.handler.eventhandler)
 
 
     def stdout_cb(self, line):
