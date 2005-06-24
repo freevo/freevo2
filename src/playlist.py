@@ -79,7 +79,8 @@ class Playlist(MediaItem):
         self.name     = Unicode(name)
 
         # variables only for Playlist
-        self.current_item = None
+        self.__current = None
+        self.__next    = None
         self.playlist     = playlist
         self.autoplay     = autoplay
         self.repeat       = repeat
@@ -252,7 +253,7 @@ class Playlist(MediaItem):
                 # store the playlist for later use
                 self.info.store_with_mtime('playlist', self.playlist)
             return
-        
+
         # self.playlist is a list of Items or strings (filenames)
         # create a basic info object
         self.info = mediadb.item()
@@ -261,6 +262,7 @@ class Playlist(MediaItem):
             if isinstance(i, Item):
                 # Item object, correct parent
                 i = copy.copy(i)
+                # FIXME: use weakref here
                 i.parent = self
                 self.playlist.append(i)
 
@@ -346,6 +348,7 @@ class Playlist(MediaItem):
                 # MEMCHECKER: why is this needed? It is deleted by
                 # menu/item.py in the delete function but this there
                 # a better way to do this?
+                # FIXME: use weakref?
                 item.parent = self
                 items.append(item)
 
@@ -393,15 +396,17 @@ class Playlist(MediaItem):
                 log.warning('empty playlist')
                 return False
 
-            self.current_item = self.playlist[0]
+            self.__current = self.playlist[0]
+            # Send a PLAY_START event for ourself
+            eventhandler.post(Event(PLAY_START, self))
 
 
-        if not isinstance(self.current_item, Item):
+        if not isinstance(self.__current, Item):
             # element is a string, make a correct item
             play_items = []
 
             # get a real item
-            l = mediadb.FileListing([self.current_item])
+            l = mediadb.FileListing([self.__current])
             if l.num_changes:
                 l.update()
             for p in self.get_plugins:
@@ -409,74 +414,80 @@ class Playlist(MediaItem):
                     play_items.append(i)
 
             if play_items:
-                pos = self.playlist.index(self.current_item)
-                self.current_item = play_items[0]
+                pos = self.playlist.index(self.__current)
+                self.__current = play_items[0]
                 self.playlist[pos] = play_items[0]
 
-        if hasattr(self.current_item, 'play'):
+        # get next item
+        pos = self.playlist.index(self.__current)
+        pos = (pos+1) % len(self.playlist)
+        if pos or REPEAT_PLAYLIST:
+            self.__next = self.playlist[pos]
+        else:
+            self.__next = None
+
+        if hasattr(self.__current, 'play'):
             # play the item
-            self.current_item.play()
+            self.__current.play()
             return True
-        
+
         # The item has no play function. It would be possible to just
         # get all actions and select the first one, but this won't be
         # right. Maybe this action opens a menu and nothing more. So
         # it is play or skip.
-        pos = self.playlist.index(self.current_item)
-        pos = (pos+1) % len(self.playlist)
-
-        if pos:
-            self.current_item = self.playlist[pos]
-            Playlist.play(self, True)
-        else:
-            # no repeat
-            self.current_item = None
+        if self.__next:
+            return Playlist.play(self, True)
         return True
-
-
-    def cache_next(self):
-        """
-        cache next item, usefull for image playlists
-        """
-        pos = self.playlist.index(self.current_item)
-        pos = (pos+1) % len(self.playlist)
-        if pos and hasattr(self.playlist[pos], 'cache'):
-            self.playlist[pos].cache()
 
 
     def stop(self):
         """
         stop playling
         """
+        self.__next = None
         if self.background_playlist:
             self.background_playlist.stop()
-        if self.current_item:
-            self.current_item.parent = self.parent
-            if hasattr(self.current_item, 'stop'):
-                try:
-                    self.current_item.stop()
-                except OSError:
-                    pass
+            self.background_playlist = None
+        if self.__current:
+            item = self.__current
+            self.__current = None
+            item.stop()
 
 
     def eventhandler(self, event, menuw=None):
         """
         Handle playlist specific events
         """
+        if event == PLAY_START and event.arg in self.playlist:
+            # a new item started playing, set internal current one
+            self.__current = event.arg
+            pos = self.playlist.index(self.__current)
+            pos = (pos+1) % len(self.playlist)
+            if pos or REPEAT_PLAYLIST:
+                self.__next = self.playlist[pos]
+                # cache next item (imageviewer)
+                if hasattr(self.__next, 'cache'):
+                    self.__next.cache()
+            else:
+                self.__next = None
+            return True
+
+        # give the event to the next eventhandler in the list
+        if not self.__current:
+            return MediaItem.eventhandler(self, event)
 
         # That doesn't belong here! It should be part of the player!!!
-        if event == PLAY_END:
-            if self.current_item and self.current_item.type == 'audio':
-                e = Event(AUDIO_LOG, arg=self.current_item.filename)
-                eventhandler.post(e)
-
-        if event in (INPUT_1, INPUT_2, INPUT_3, INPUT_4, INPUT_5) and \
-               event.arg and self.current_item and \
-               hasattr(self.current_item,'type'):
-            if (self.current_item.type == 'audio'):
-                e = Event(RATING,(event.arg, self.current_item.filename))
-                eventhandler.post(e)
-
+        # if event == PLAY_END:
+        #     if self.__current and self.__current.type == 'audio':
+        #         e = Event(AUDIO_LOG, arg=self.__current.filename)
+        #         eventhandler.post(e)
+        #
+        # if event in (INPUT_1, INPUT_2, INPUT_3, INPUT_4, INPUT_5) and \
+        #        event.arg and self.__current and \
+        #        hasattr(self.__current,'type'):
+        #     if (self.__current.type == 'audio'):
+        #         e = Event(RATING,(event.arg, self.__current.filename))
+        #         eventhandler.post(e)
 
         if event == PLAYLIST_TOGGLE_REPEAT:
             self.repeat += 1
@@ -489,51 +500,53 @@ class Playlist(MediaItem):
                 arg = _('Repeat Off')
             eventhandler.post(Event(OSD_MESSAGE, arg=arg))
             return True
-        
-        if event in ( PLAY_END, USER_END ) and self.repeat == REPEAT_ITEM:
-            self.current_item.play()
-            return True
-        
-        if event in ( PLAYLIST_NEXT, PLAY_END, USER_END) \
-               and self.current_item and self.playlist:
-            pos = self.playlist.index(self.current_item)
-            pos = (pos+1) % len(self.playlist)
 
-            if pos or self.repeat == REPEAT_PLAYLIST:
-                if self.current_item:
-                    self.current_item.stop()
-                self.current_item = self.playlist[pos]
+
+        if event == PLAY_END:
+            if self.repeat == REPEAT_ITEM:
+                # Repeat current item
+                self.__current.play()
+            elif self.__next:
+                # Play next item
+                self.__current = self.__next
                 Playlist.play(self, True)
+            else:
+                # Nothing to play
+                self.stop()
+                # Send a PLAY_END event for ourself
+                eventhandler.post(Event(PLAY_END, self))
+            return True
+
+
+        if event == PLAYLIST_NEXT:
+            if self.__next:
+                # Stop current item, the next one will start when the
+                # current one sends the stop event
+                self.__current.stop()
                 return True
-            elif event == PLAYLIST_NEXT:
+            else:
+                # No next item
                 e = Event(OSD_MESSAGE, arg=_('No Next Item In Playlist'))
                 eventhandler.post(e)
 
 
-        # end and no next item
-        if event in (PLAY_END, USER_END, STOP):
-            if self.background_playlist:
-                self.background_playlist.stop()
-            self.current_item = None
-            return True
-
-
-        if event == PLAYLIST_PREV and self.current_item and self.playlist:
-            pos = self.playlist.index(self.current_item)
+        if event == PLAYLIST_PREV:
+            pos = self.playlist.index(self.__current)
             if pos:
-                if hasattr(self.current_item, 'stop'):
-                    try:
-                        self.current_item.stop()
-                    except OSError:
-                        log.info('ignore playlist event')
-                        return True
-                pos = (pos-1) % len(self.playlist)
-                self.current_item = self.playlist[pos]
-                Playlist.play(self, True)
+                # This is not the first item. Set next item to previous
+                # one and stop the current item
+                self.__next = self.playlist[pos-1]
+                self.__current.stop()
                 return True
             else:
+                # No previous item
                 e = Event(OSD_MESSAGE, arg=_('no previous item in playlist'))
                 eventhandler.post(e)
+
+
+        if event == STOP:
+            # Stop playing and send event to parent item
+            self.stop()
 
         # give the event to the next eventhandler in the list
         return MediaItem.eventhandler(self, event)
