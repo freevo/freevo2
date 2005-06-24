@@ -325,7 +325,7 @@ class MPlayer(mplayer.Application):
         """
         Hide the seek osd. This is a rc callback after pressing seek
         """
-        if not self.osd_visible and self.has_process() and self.area_handler:
+        if not self.osd_visible and self.has_child() and self.area_handler:
             self.area_handler.hide()
             gui.displays.get().update()
         self._timer_id = None
@@ -340,7 +340,7 @@ class MPlayer(mplayer.Application):
         if mplayer.Application.eventhandler(self, event):
             return True
 
-        if not self.has_process():
+        if not self.has_child():
             return self.item.eventhandler(event)
 
         if event == VIDEO_MANUAL_SEEK:

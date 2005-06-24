@@ -55,8 +55,8 @@ class Application(childapp.Application):
         """
         childapp.Application.__init__(self, 'mplayer', type, has_video)
         self.name = 'mplayer'
-        self.__proc = None
-        self.has_video = has_video
+        self.__child = None
+        self.__has_video = has_video
         self.plugins = []
         self.plugin_key = 'mplayer_' + type
 
@@ -70,12 +70,8 @@ class Application(childapp.Application):
         for p in self.plugins:
             cmd = p.play(cmd, self)
 
-        # FIXME: do we really need to reset the mixer all the time?
-        if plugin.getbyname('MIXER'):
-            plugin.getbyname('MIXER').reset()
-
         cmd = self.correct_filter_chain(cmd)
-        self.__proc = Process(cmd, self, self.has_video)
+        self.__child = Process(cmd, self, self.__has_video)
 
 
     def correct_filter_chain(self, command):
@@ -107,34 +103,34 @@ class Application(childapp.Application):
         for p in self.plugins:
             p.stop()
         self.plugins = []
-        if not self.__proc:
+        if not self.__child:
             return
         # proc will send a PLAY_END when it's done. At this point we
         # will call childapp.Application.stop(self)
-        self.__proc.stop('quit\n')
-        self.__proc = None
+        self.__child.stop('quit\n')
+        self.__child = None
 
 
     def is_playing(self):
         """
         Return True if mplayer is playing right now.
         """
-        return self.__proc and self.__proc.is_alive()
+        return self.__child and self.__child.is_alive()
 
 
-    def has_process(self):
+    def has_child(self):
         """
         Return True if the application is still connected to a process
         """
-        return self.__proc
+        return self.__child
 
 
     def send_command(self, cmd):
         """
         Send a command to mplayer.
         """
-        if self.__proc:
-            self.__proc.write(cmd)
+        if self.__child:
+            self.__child.write(cmd)
 
 
     def elapsed(self, sec):
@@ -159,7 +155,7 @@ class Application(childapp.Application):
             childapp.Application.stop(self)
             return False
 
-        if not self.has_process():
+        if not self.has_child():
             return False
 
         for p in self.plugins:
