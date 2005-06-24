@@ -137,7 +137,7 @@ class ImageViewer(Application):
             self.set_eventmap('image')
 
         filename      = item.filename
-        self.fileitem = item
+        self.item = item
 
         self.show()
 
@@ -269,18 +269,18 @@ class ImageViewer(Application):
         gui.display.update()
 
         # start timer
-        if self.fileitem.duration and self.slideshow and \
+        if self.item.duration and self.slideshow and \
                self._timer_id == None:
-            cb = notifier.Callback( self.fileitem.duration * 1000 )
+            cb = notifier.Callback( self.item.duration * 1000 )
             self._timer_id = notifier.addTimer( self.signalhandler, cb )
+
+        # Notify everyone about the viewing
+        if self.last_item != item:
+            self.post_event(Event(PLAY_START, item))
 
         self.last_image = image
         self.last_item  = item
 
-        # XXX Hack to move the selected item to the current showing image
-        if item.parent and hasattr(item.parent, 'menu') and \
-               item.parent.menu and item in item.parent.menu.choices:
-            item.parent.menu.select(item)
         self.zoom = zoom
         return None
 
@@ -289,15 +289,18 @@ class ImageViewer(Application):
         """
         Stop the current viewing
         """
-        Application.stop(self)
+        # Don't stop the viewer application, just send a PLAY_END
+        # event and do the Application.stop() later
+        self.post_event(Event(PLAY_END, self.item,
+                              handler = self.eventhandler))
 
 
-    def cache(self, fileitem):
+    def cache(self, item):
         """
         Cache the next image (most likely we need this)
         """
-        if fileitem.filename and len(fileitem.filename) > 0:
-            gui.imagelib.load(fileitem.filename, cache=self.bitmapcache)
+        if item.filename and len(item.filename) > 0:
+            gui.imagelib.load(item.filename, cache=self.bitmapcache)
 
 
     def signalhandler(self):
@@ -307,9 +310,9 @@ class ImageViewer(Application):
         """
         self.hide()
         self._timer_id = None
-        self.eventhandler(PLAY_END)
-
+        self.stop()
         return False
+
 
     def eventhandler(self, event, menuw=None):
         """
@@ -330,6 +333,7 @@ class ImageViewer(Application):
 
         if event == STOP:
             self.stop()
+            self.item.eventhandler(event)
             return True
 
         if event == PLAYLIST_NEXT or event == PLAYLIST_PREV:
@@ -337,17 +341,23 @@ class ImageViewer(Application):
             # event to the playlist
             notifier.removeTimer( self._timer_id )
             self._timer_id = None
-            self.fileitem.eventhandler(event)
+            self.item.eventhandler(event)
             return True
 
+        if event == PLAY_END:
+            # Viewing is done, stop the Application.
+            Application.stop(self)
+            self.item.eventhandler(event)
+            return True
+        
         if event == IMAGE_ROTATE:
             # rotate image
             if event.arg == 'left':
                 rotation = (self.rotation + 270) % 360
             else:
                 rotation = (self.rotation + 90) % 360
-            self.fileitem['rotation'] = rotation
-            self.view(self.fileitem, zoom=self.zoom, rotation=rotation)
+            self.item['rotation'] = rotation
+            self.view(self.item, zoom=self.zoom, rotation=rotation)
             return True
 
         if event == TOGGLE_OSD:
@@ -364,18 +374,18 @@ class ImageViewer(Application):
             if zoom:
                 # Zoom one third of the image, don't load the next
                 # image in the list
-                self.view(self.fileitem, zoom=zoom, rotation=self.rotation)
+                self.view(self.item, zoom=zoom, rotation=self.rotation)
             else:
                 # Display entire picture, don't load next image in case
                 # the user wants to zoom around some more.
-                self.view(self.fileitem, zoom=0, rotation=self.rotation)
+                self.view(self.item, zoom=0, rotation=self.rotation)
             return True
 
         if event == IMAGE_MOVE:
             # move inside a zoomed image
             coord = event.arg   # arg are absolute x,y positions
             zoom = self.zoom[0] + coord[0], self.zoom[1] + coord[1]
-            self.view(self.fileitem, zoom=zoom, rotation=self.rotation)
+            self.view(self.item, zoom=zoom, rotation=self.rotation)
             return True
 
         if event == IMAGE_SAVE:
@@ -389,7 +399,7 @@ class ImageViewer(Application):
             return True
 
         # pass not handled event to the item
-        return self.fileitem.eventhandler(event)
+        return self.item.eventhandler(event)
 
 
     def drawosd(self):
@@ -418,7 +428,7 @@ class ImageViewer(Application):
         # create the osdstring to write
         osdstring = u''
         for strtag in config.IMAGEVIEWER_OSD[self.osd_mode-1]:
-            i = str(self.fileitem[strtag[1]])
+            i = str(self.item[strtag[1]])
             if i:
                 osdstring += u' %s %s' % (Unicode(strtag[0]), Unicode(i))
 
