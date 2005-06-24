@@ -79,23 +79,6 @@ class MPlayer(mplayer.Application):
         return 2
 
 
-    def get_demuxer(self, filename):
-        """
-        Get the correct demuxer for mp3 or ogg
-        """
-        DEMUXER_MP3 = 17
-        DEMUXER_OGG = 18
-        extension = os.path.splitext(filename)[1]
-        if extension.lower() == '.mp3':
-            return "-demuxer " + str(DEMUXER_MP3)
-        if extension.lower() == '.ogg':
-            return "-demuxer " + str(DEMUXER_OGG)
-        if extension.lower() == '.ac3':
-            return "-ac hwac3 -rawaudio on:format=0x2000"
-        else:
-            return ''
-
-
     def play(self, item, player):
         """
         Play a AudioItem with mplayer
@@ -110,12 +93,6 @@ class MPlayer(mplayer.Application):
 
         # Build the MPlayer command
         mpl = '%s -slave %s' % ( config.MPLAYER_CMD, config.MPLAYER_ARGS_DEF )
-
-        if not item.network_play:
-            demux = ' %s ' % self.get_demuxer(filename)
-        else:
-            # Don't include demuxer for network files
-            demux = ''
 
         extra_opts = item.mplayer_options
 
@@ -135,7 +112,7 @@ class MPlayer(mplayer.Application):
 
         # build the mplayer command
         command = '%s -vo null -ao %s %s %s' % \
-                  (mpl, config.MPLAYER_AO_DEV, demux, extra_opts)
+                  (mpl, config.MPLAYER_AO_DEV, extra_opts)
         if command.find('-playlist') > 0:
             command = command.replace('-playlist', '')
         command = command.replace('\n', '').split(' ')
