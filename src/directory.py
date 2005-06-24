@@ -349,6 +349,10 @@ class DirItem(Playlist):
             eventhandler.post(Event(OSD_MESSAGE, '%s view' % type))
             return True
 
+        if event == PLAY_START and event.arg in self.item_menu.choices:
+            # update selection and pass the event to playlist after that
+            self.item_menu.select(event.arg)
+            
         return Playlist.eventhandler(self, event)
 
 
