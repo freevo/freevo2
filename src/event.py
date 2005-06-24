@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.57  2005/06/24 20:54:55  dischi
+# remove USER_END
+#
 # Revision 1.56  2005/06/12 18:51:59  dischi
 # remove old event
 #
@@ -297,7 +300,6 @@ RATING                 = Event('RATING')
 #
 
 PLAY_END         = Event('PLAY_END')
-USER_END         = Event('USER_END')
 DVD_PROTECTED    = Event('DVD_PROTECTED')
 PLAY_START       = Event('PLAY_START')
 
