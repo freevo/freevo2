@@ -62,7 +62,7 @@ except Exception, e:
 # imlib2 checking
 #
 try:
-    import kaa3
+    import kaa
 except:
     d = os.path.dirname(__file__)[:-15]
     print 'The kaa module repository could not be loaded!'
