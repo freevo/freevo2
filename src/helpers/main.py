@@ -62,10 +62,10 @@ except Exception, e:
 # imlib2 checking
 #
 try:
-    import Imlib2
+    import kaa
 except:
-    print 'The python Imlib2 bindings could not be loaded!'
-    print 'To compile pyimlib run \'make\''
+    print 'The kaa module repository could not be loaded!'
+    print 'Please check out the kaa repository from Freevo cvs'
     sys.exit(1)
 
 
