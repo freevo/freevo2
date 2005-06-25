@@ -46,7 +46,7 @@ void initmevas_pygame()
     void **api_ptrs;
     m = Py_InitModule("mevas_pygame", Imlib2_methods);
 
-    pyimlib2_module = PyImport_ImportModule("_Imlib2");
+    pyimlib2_module = PyImport_ImportModule("kaa._Imlib2");
     if (pyimlib2_module == NULL)
        return;
 
