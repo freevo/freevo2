@@ -1,5 +1,6 @@
-import types, time, math, Imlib2
+import types, time, math
 from mevas.util import *
+from kaa import Imlib2
 
 from mevas.canvas import *
 from mevas.image import *

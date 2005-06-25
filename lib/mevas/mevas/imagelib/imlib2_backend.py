@@ -28,7 +28,8 @@
 # -----------------------------------------------------------------------------
 
 import copy
-import Imlib2, types
+import types
+from kaa import Imlib2
 import base
 
 _capabilities =  {

@@ -30,7 +30,7 @@
 
 import time
 import mevas
-import Imlib2
+from kaa import Imlib2
 
 from bitmapcanvas import *
 
