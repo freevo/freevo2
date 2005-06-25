@@ -34,7 +34,7 @@ __all__ = [ 'BaseAnimation' ]
 # animation imports
 import render
 
-class BaseAnimation:
+class BaseAnimation(object):
     """
     Base class for animations, this should perhaps be changed to use sprites
     in the future (if one decides to go with a RenderGroup model)

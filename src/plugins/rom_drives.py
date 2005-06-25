@@ -663,7 +663,7 @@ class RemovableMedia(vfs.Mountpoint):
         return True
 
 
-class Watcher:
+class Watcher(object):
     """
     Object to watch the rom drives for changes
     """

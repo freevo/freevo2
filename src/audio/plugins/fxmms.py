@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2005/06/25 08:52:24  dischi
+# switch to new style python classes
+#
 # Revision 1.8  2005/06/24 20:51:39  dischi
 # remove USER_END and self.parent.current_item
 #
@@ -112,7 +115,7 @@ class PluginInterface(plugin.Plugin):
 		 ('FXMMS_SUFFIX', ['mp3','wav','ogg', 'mod'], 'xmms suffixes to play')]
 
 
-class FXMMS:
+class FXMMS(object):
     """
     the main class to control xmms
     """

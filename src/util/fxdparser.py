@@ -49,7 +49,7 @@ import fileops
 import cache
 import sysconfig
 
-class XMLnode:
+class XMLnode(object):
     """
     One node for the FXDtree
     """
@@ -168,7 +168,7 @@ class FXDtree(qp_xml.Parser):
             f.write('/>')
 
 
-class FXD:
+class FXD(object):
     """
     class to help parsing fxd files
     """

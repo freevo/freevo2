@@ -55,7 +55,7 @@ initialized = False
 # Some basic plugins known to Freevo.
 #
 
-class Plugin:
+class Plugin(object):
     """
     Basic plugin class. All plugins should inherit from this
     class

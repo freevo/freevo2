@@ -51,7 +51,7 @@ from xml.dom.ext import PrettyPrint
 # get logging object
 log = logging.getLogger('config')
 
-class RuntimeXMLParser:
+class RuntimeXMLParser(object):
     """
     class to parse complex structures from the configuration file
     """
@@ -290,7 +290,7 @@ class RuntimeXMLParser:
         return node
 
 
-class RuntimeXML:
+class RuntimeXML(object):
     """
     class to load the runtime configuration file
     """

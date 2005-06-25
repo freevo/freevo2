@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2005/06/25 08:52:29  dischi
+# switch to new style python classes
+#
 # Revision 1.11  2005/05/01 17:44:24  dischi
 # remove some vfs calls were they are not needed
 #
@@ -94,7 +97,7 @@ txheaders = {
 
 #Begin class
 
-class FxdImdb:
+class FxdImdb(object):
     """Class for creating fxd files and fetching imdb information"""
     
     def __init__(self):

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2005/06/25 08:52:28  dischi
+# switch to new style python classes
+#
 # Revision 1.27  2005/01/08 15:40:53  dischi
 # remove TRUE, FALSE, DEBUG and HELPER
 #
@@ -132,7 +135,7 @@ NORMS = { 'NTSC'  : 0x3000,
           'SECAM' : 0x7f0000  }
 
 
-class Videodev:
+class Videodev(object):
     def __init__(self, which=None, device=None):
         self.devfd = None
         self.settings = None

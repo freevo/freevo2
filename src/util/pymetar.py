@@ -376,7 +376,7 @@ _WeatherConditions = {
                              }),
                     }
 
-class WeatherReport:
+class WeatherReport(object):
     """Incorporates both the unparsed textual representation of the
     weather report and the parsed values as soon as they are filled 
     in by ReportParser."""
@@ -647,7 +647,7 @@ class WeatherReport:
         return self.pixmap
 
 
-class ReportParser:
+class ReportParser(object):
     """Parse raw METAR data from a WeatherReport object into actual 
     values and return the object with the values filled in."""
 
@@ -920,7 +920,7 @@ class ReportParser:
 
         return self.Report
 
-class ReportFetcher:
+class ReportFetcher(object):
     """Fetches a report from a given METAR id, optionally taking into
        account a different baseurl and using environment var-specified 
        proxies."""

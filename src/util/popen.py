@@ -61,7 +61,7 @@ import notifier
 log = logging.getLogger('popen')
 
 
-class Process:
+class Process(object):
     """
     Base class for started child processes
     """
@@ -248,7 +248,7 @@ class Process:
         pass
 
 
-class IO_Handler:
+class IO_Handler(object):
     """
     Reading data from socket (stdout or stderr)
     """
@@ -333,7 +333,7 @@ class IO_Handler:
         return True
 
 
-class Watcher:
+class Watcher(object):
     def __init__( self ):
         log.info('new process watcher instance')
         self.__processes = {}

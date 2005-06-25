@@ -44,7 +44,7 @@ import util.ioctl as ioctl
 log = logging.getLogger('config')
 
 
-class TVCard:
+class TVCard(object):
     """
     Class handling an analog tv card
     """
@@ -91,7 +91,7 @@ class IVTVCard(TVCard):
         self.stream_type = 14
 
 
-class DVBCard:
+class DVBCard(object):
     """
     Class handling a DVB card
     """

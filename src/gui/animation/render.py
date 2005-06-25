@@ -58,7 +58,7 @@ def create(display):
     _render = Render(display)
 
 
-class Render:
+class Render(object):
     """
     This class/interface handles updating animation sprites
 

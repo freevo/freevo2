@@ -43,7 +43,7 @@
 #
 # -----------------------------------------------------------------------------
 
-class Action:
+class Action(object):
     """
     Action for item.actions()
 

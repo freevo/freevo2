@@ -44,7 +44,7 @@ log = logging.getLogger('gui')
 # list of fonts already known to be not found
 font_warning = []
 
-class Font:
+class Font(object):
     """
     Freevo GUI font object based on the mevas font.
     """

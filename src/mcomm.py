@@ -143,7 +143,7 @@ class RPCError(mbus.RPCReturn):
 
 
 
-class RemoteEntity:
+class RemoteEntity(object):
     """
     Wrapper class for an Entity. It is possible to act with this object like
     it is a real class, only that the calls are handled by the remote
@@ -221,7 +221,7 @@ class RemoteEntity:
         return '%s present:%s' % (self.addr, self.present)
     
 
-class RPCServer:
+class RPCServer(object):
     """
     A base class for a RPC Server. All functions starting with __rpc and
     ending with __ are registered for the specific command.

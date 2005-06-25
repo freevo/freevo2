@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2005/06/25 08:52:29  dischi
+# switch to new style python classes
+#
 # Revision 1.5  2005/01/08 15:40:55  dischi
 # remove TRUE, FALSE, DEBUG and HELPER
 #
@@ -52,7 +55,7 @@ class FreevoWapResource(Resource):
         request.setHeader('Content-Type', 'text/vnd.wap.wml')            
         return self._render(request)
 
-class WapResource:
+class WapResource(object):
 
     def __init__(self):
         self.res = ''

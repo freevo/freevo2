@@ -71,7 +71,7 @@ from menu import Files
 # get logging object
 log = logging.getLogger('video')
 
-class VideoChild:
+class VideoChild(object):
     """
     Objects of this class contain a parsed a subitem from <video>
     """

@@ -165,7 +165,7 @@ def _getScriptDir():
     else:
         return os.path.abspath(os.path.dirname(sys.modules[__name__].__file__))
 
-class Bag: pass
+class Bag(object): pass
 
 def unmarshal(element):
     rc = Bag()

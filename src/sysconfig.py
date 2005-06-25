@@ -74,7 +74,7 @@ _cfgfilepath = [ '.', os.path.expanduser('~/.' + application),
                  '/etc/' + application, '/usr/local/etc/' + application]
 
 # Dummy class for the CONF
-class struct:
+class struct(object):
     pass
 
 CONF = struct()

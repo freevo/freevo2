@@ -37,7 +37,7 @@ import notifier
 # internal dict of callbacks
 _callbacks = {}
 
-class Callback:
+class Callback(object):
     """
     Internal class handling a callback by name.
     """

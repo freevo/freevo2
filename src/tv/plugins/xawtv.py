@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2005/06/25 08:52:29  dischi
+# switch to new style python classes
+#
 # Revision 1.10  2005/01/08 15:40:54  dischi
 # remove TRUE, FALSE, DEBUG and HELPER
 #
@@ -97,7 +100,7 @@ class PluginInterface(plugin.Plugin):
         # create the xawtv object and register it
         plugin.register(Xawtv(app, remote), plugin.TV)
 
-class Xawtv:
+class Xawtv(object):
 
     __muted    = 0
     __igainvol = 0

@@ -52,7 +52,7 @@ from item import Item
 log = logging.getLogger('menu')
 
 
-class MenuStack:
+class MenuStack(object):
     """
     The MenuStack handles a stack of Menus
     """

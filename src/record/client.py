@@ -46,7 +46,7 @@ log = logging.getLogger('record')
 
 from record_types import *
 
-class Recording:
+class Recording(object):
     """
     A recording object from the recordserver.
     """
@@ -96,7 +96,7 @@ class Recording:
         
 
 
-class Recordings:
+class Recordings(object):
     """
     Handling of recordings from the recordserver. The object will auto sync
     with the recordserver to keep the list up to date.
@@ -276,7 +276,7 @@ class Recordings:
 
 
 
-class Favorite:
+class Favorite(object):
     """
     A favorite object from the recordserver.
     """
@@ -297,7 +297,7 @@ class Favorite:
         self.description = {}
 
 
-class Favorites:
+class Favorites(object):
     """
     Handling of favorites from the recordserver. The object will auto sync with
     the recordserver to keep the list up to date.

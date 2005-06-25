@@ -302,7 +302,7 @@ def get_expression(expression):
 
 # ======================================================================
 
-class MainMenuItem:
+class MainMenuItem(object):
     def __init__(self):
         self.label   = ''
         self.name    = ''
@@ -324,7 +324,7 @@ class MainMenuItem:
 
 # ======================================================================
 
-class MainMenu:
+class MainMenu(object):
     def __init__(self):
         self.items    = {}
         self.imagedir = ''
@@ -391,7 +391,7 @@ def int2col(col):
 
 
 
-class XML_data:
+class XML_data(object):
     """
     a basic data element for parsing the attributes
     """
@@ -483,7 +483,7 @@ class XML_data:
 # ======================================================================
 
 
-class Menu:
+class Menu(object):
     """
     the menu style definitions
     """
@@ -508,7 +508,7 @@ class Menu:
 
 
 
-class MenuSet:
+class MenuSet(object):
     """
     the complete menu with the areas screen, title, subtitle, view, listing
     and info in it
@@ -608,7 +608,7 @@ class Area(XML_data):
 
 # ======================================================================
 
-class Layout:
+class Layout(object):
     """
     layout tag
     """
@@ -806,7 +806,7 @@ class FormatGotopos(XML_data):
         pass
 
 
-class FormatNewline:
+class FormatNewline(object):
     def __init__( self ):
         self.type = 'newline'
         pass
@@ -836,7 +836,7 @@ class FormatImg( XML_data ):
 
 
 
-class FormatIf:
+class FormatIf(object):
     def __init__( self ):
         self.expression = ''
         self.content = [ ]
@@ -1016,7 +1016,7 @@ class Font(XML_data):
 # ======================================================================
 
 
-class AreaSet:
+class AreaSet(object):
     """
     A tag with different area pointer in it, e.g. used for <player>
     """
@@ -1046,7 +1046,7 @@ class AreaSet:
 # ======================================================================
 
 
-class FXDSettings:
+class FXDSettings(object):
     """
     skin main settings class
     """

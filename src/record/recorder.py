@@ -39,7 +39,7 @@ import string
 import config
 import plugin
 
-class RecorderList:
+class RecorderList(object):
     def __init__(self):
         self.recorder = []
         self.best_recorder = {}

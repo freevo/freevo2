@@ -69,7 +69,7 @@ def utf8(text):
     return text
 
 
-class Image:
+class Image(object):
     """
     Imlib2 Image class.  The constructor can be called directly, or a new
     Image object may be created via the new() and open() module functions.
@@ -546,7 +546,7 @@ class Image:
 
 
 
-class Display:
+class Display(object):
     """
     Although not part of Imlib2, this class is here as a convenience, and
     provides very basic X11 display support.
@@ -664,7 +664,7 @@ class Display:
             return self.__dict__[ key ]
 
 
-class Font:
+class Font(object):
     def __init__(self, fontdesc, color=(255,255,255,255)):
         """
         Create a new Font object.

@@ -60,7 +60,7 @@ def _time2int(s):
     return int(time.mktime(time.strptime(s, '%Y%m%d.%H:%M')))
 
 
-class Recording:
+class Recording(object):
     """
     Base class for a recording.
     """

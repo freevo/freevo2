@@ -61,7 +61,7 @@ XML_BADCHARS = re.compile(u'[^\x09\x0A\x0D\x20-\uD7FF\uE000-\uFFFD\u10000-\u10FF
 # special handling for certain elements. If 'desc' changed one day then
 # ProgrammeHandler.desc() can be modified to reflect it
 
-class _ProgrammeHandler:
+class _ProgrammeHandler(object):
     """
     Handles XMLTV programme elements
     """
@@ -245,7 +245,7 @@ class _ProgrammeHandler:
         except AttributeError:
             return '**Unhandled Element**'
 
-class _ChannelHandler:
+class _ChannelHandler(object):
     """
     Handles XMLTV channel elements
     """
@@ -403,7 +403,7 @@ def read_channels(fp):
 
 
 
-class Writer:
+class Writer(object):
     """
     A class for generating XMLTV data
 

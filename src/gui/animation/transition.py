@@ -53,7 +53,7 @@ ALPHA_VERTICAL_WIPE = 3
 ALPHA_HORIZONAL_WIPE = 4
 
 
-class Transition:
+class Transition(object):
     """
     Class that contains different animations for full screen transition
     effects. It has the same functions like an animation class from the

@@ -49,7 +49,7 @@ import util.fileops as fileops
 # use this number to keep track of changes in this helper
 VERSION = 4
 
-class ProgressBox:
+class ProgressBox(object):
     def __init__(self, msg, max):
         self.msg = msg
         self.max = max

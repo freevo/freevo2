@@ -55,7 +55,7 @@ def controlpanel():
     return _cpmgr_
 
 
-class ControlManager:
+class ControlManager(object):
     """
     A class for showing different controlpanels
     on the screen.
@@ -214,7 +214,7 @@ class ControlManager:
 
 
 
-class ButtonPanel:
+class ButtonPanel(object):
     """
     This is an example ControlBar widget, it simply shows
     a buttonpanel on the screen.

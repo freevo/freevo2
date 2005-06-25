@@ -45,7 +45,7 @@ from globals import *
 # get logging object
 log = logging.getLogger('mediadb')
 
-class ItemInfo:
+class ItemInfo(object):
     """
     Objcets of this class are returned in the different listing functions.
     They store mediadb data and extra data only valid in the current session.

@@ -47,7 +47,7 @@ log = logging.getLogger('record')
 # internal regexp for time format
 _time_re = re.compile('([0-9]*):([0-9]*)-([0-9]*):([0-9]*)')
 
-class Favorite:
+class Favorite(object):
     """
     Base class for a favorite.
     """

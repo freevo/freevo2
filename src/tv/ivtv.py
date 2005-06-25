@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2005/06/25 08:52:28  dischi
+# switch to new style python classes
+#
 # Revision 1.18  2004/12/05 13:01:12  dischi
 # delete old tv variables, rename some and fix detection
 #
@@ -180,7 +183,7 @@ class IVTV(tv.v4l2.Videodev):
         print 'CODEC::stream_type: %s' % codec.stream_type
 
 
-class IVTVCodec:
+class IVTVCodec(object):
     def __init__(self, args):
         self.aspect        = args[0]
         self.audio_bitmask = args[1]

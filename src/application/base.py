@@ -43,7 +43,7 @@ import gui.animation
 log = logging.getLogger()
 
 
-class Application:
+class Application(object):
     """
     A basic application
     """

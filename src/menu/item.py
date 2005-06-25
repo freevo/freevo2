@@ -77,7 +77,7 @@ def _actions_wrapper(actions):
 
 
 
-class Item:
+class Item(object):
     """
     Item class. This is the base class for all items in the menu.
     It's a template for MenuItem and for other info items like

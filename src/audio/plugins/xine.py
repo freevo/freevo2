@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2005/06/25 08:52:24  dischi
+# switch to new style python classes
+#
 # Revision 1.25  2005/06/09 19:43:53  dischi
 # clean up eventhandler usage
 #
@@ -85,7 +88,7 @@ class PluginInterface(plugin.Plugin):
         plugin.register(Xine(), plugin.AUDIO_PLAYER, True)
 
 
-class Xine:
+class Xine(object):
     """
     The main class to control xine for audio playback
     """

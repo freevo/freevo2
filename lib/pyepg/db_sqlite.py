@@ -48,7 +48,7 @@ log = logging.getLogger('pyepg')
 
 latest_version = "0.1.1"
 
-class Database:
+class Database(object):
     """
     Database class for sqlite usage
     """

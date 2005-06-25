@@ -36,7 +36,7 @@ import copy
 import htmlentitydefs
 from types import StringTypes
 
-class GrabberItem:
+class GrabberItem(object):
 
     def __init__(self):
         pass

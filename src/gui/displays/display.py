@@ -36,7 +36,7 @@
 # Freevo imports
 import config
 
-class Display:
+class Display(object):
     """
     Template for Freevo based displays. A real display needs to inherit
     from this class and a mevas display.

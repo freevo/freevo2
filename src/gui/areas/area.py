@@ -62,7 +62,7 @@ from gui.widgets import Rectangle, Text, Textbox, Image
 import logging
 log = logging.getLogger('gui')
 
-class Area:
+class Area(object):
     """
     The base call for all areas. Each class inheriting from Area needs
     to define the update and the clear function.

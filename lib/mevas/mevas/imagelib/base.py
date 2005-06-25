@@ -347,7 +347,7 @@ class Image(object):
 
 
 
-class Font:
+class Font(object):
 
     def __init__(self, fontdesc, color = (255, 255, 255, 255)):
         """

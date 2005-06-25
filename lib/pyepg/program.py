@@ -31,7 +31,7 @@
 # -----------------------------------------------------------------------------
 
 
-class Program:
+class Program(object):
     """
     A Program with informations from the EPG.
     """

@@ -55,7 +55,7 @@ import logging
 log = logging.getLogger('gui')
 
 
-class _Geometry:
+class _Geometry(object):
     """
     Simple object with x, y, with, height values
     """

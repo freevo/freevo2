@@ -42,7 +42,7 @@ import util
 # get logging object
 log = logging.getLogger()
 
-class Files:
+class Files(object):
     """
     File operations for an item.
     """

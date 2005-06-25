@@ -222,7 +222,7 @@ def _ebcdic_to_ascii(s):
             "".join(map(chr, range(256))), "".join(map(chr, emap)))
     return s.translate(_ebcdic_to_ascii_map)
 
-class _FeedParserMixin:
+class _FeedParserMixin(object):
     namespaces = {"": "",
                   "http://backend.userland.com/rss": "",
                   "http://blogs.law.harvard.edu/tech/rss": "",

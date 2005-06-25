@@ -6,7 +6,7 @@ import cStringIO
 import fcntl
 import notifier
 
-class Socket:
+class Socket(object):
     def __init__(self, socket):
         self.socket     = socket
         if isinstance(self.socket, int):

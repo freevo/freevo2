@@ -37,7 +37,7 @@
 
 import sysconfig
 
-class ObjectCache:
+class ObjectCache(object):
     """
     Provides a cache for objects indexed by a string. It should
     be slow for a large number of objects, since searching takes

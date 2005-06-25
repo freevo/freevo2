@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2005/06/25 08:52:24  dischi
+# switch to new style python classes
+#
 # Revision 1.8  2005/06/09 19:43:53  dischi
 # clean up eventhandler usage
 #
@@ -82,7 +85,7 @@ class PluginInterface(plugin.Plugin):
         plugin.register(MPlayer(), plugin.AUDIO_PLAYER, True)
 
 
-class MPlayer:
+class MPlayer(object):
     """
     The main class to control mplayer for audio playback
     """

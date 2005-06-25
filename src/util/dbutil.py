@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2005/06/25 08:52:29  dischi
+# switch to new style python classes
+#
 # Revision 1.6  2004/07/10 12:33:42  dischi
 # header cleanup
 #
@@ -90,7 +93,7 @@ except:
     print "Python SQLite not installed!"
 
 
-class MetaDatabase:
+class MetaDatabase(object):
     """ Class for working with the database """
     def __init__(self):
         # Private Variables

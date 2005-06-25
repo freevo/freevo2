@@ -75,7 +75,7 @@ from record_types import *
 log = logging.getLogger('conflict')
 
 
-class Device:
+class Device(object):
     def __init__(self, information=None):
         self.plugin       = None
         self.id           = 'null'

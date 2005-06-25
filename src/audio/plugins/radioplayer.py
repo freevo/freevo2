@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2005/06/25 08:52:24  dischi
+# switch to new style python classes
+#
 # Revision 1.13  2005/06/24 20:51:39  dischi
 # remove USER_END and self.parent.current_item
 #
@@ -74,7 +77,7 @@ class PluginInterface(plugin.Plugin):
         # register it as the object to play audio
         plugin.register(RadioPlayer(), plugin.AUDIO_PLAYER, True)
 
-class RadioPlayer:
+class RadioPlayer(object):
 
     def __init__(self):
         self.mode = 'idle'

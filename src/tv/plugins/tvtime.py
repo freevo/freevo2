@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2005/06/25 08:52:28  dischi
+# switch to new style python classes
+#
 # Revision 1.44  2005/01/08 15:40:54  dischi
 # remove TRUE, FALSE, DEBUG and HELPER
 #
@@ -380,7 +383,7 @@ class PluginInterface(plugin.Plugin):
 	self.chans2band=dict(chans_list)
 
 
-class TVTime:
+class TVTime(object):
 
     __muted    = 0
     __igainvol = 0

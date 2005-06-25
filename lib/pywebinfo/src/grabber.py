@@ -49,7 +49,7 @@ except ImportError:
 
 
 
-class Grabber:
+class Grabber(object):
     """
     Basic grabber template
     """
@@ -215,7 +215,7 @@ class Grabber:
             HTTPReader(url, self, self.language)
 
 
-class _ImageGrabber:
+class _ImageGrabber(object):
     """
     Generic image grabber, do not use directly. This is used
     by the Grabber.get_image() method.

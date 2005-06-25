@@ -68,7 +68,7 @@ for f in os.listdir(os.path.dirname(__file__)):
         exec('from %s import *' % f[:-3])
 
 
-class Handler:
+class Handler(object):
     """
     Handler for the areas used to draw an application on the screen.
     """

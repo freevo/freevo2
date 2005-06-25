@@ -64,7 +64,7 @@ import locale
 import __builtin__
 
 # Dummy class for the CONF
-class struct:
+class struct(object):
     pass
 
 CONF = struct()

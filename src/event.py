@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.58  2005/06/25 08:52:24  dischi
+# switch to new style python classes
+#
 # Revision 1.57  2005/06/24 20:54:55  dischi
 # remove USER_END
 #
@@ -80,7 +83,7 @@
 # ----------------------------------------------------------------------- */
 
 
-class Event:
+class Event(object):
     """
     an event is passed to the different eventhandlers in Freevo to
     activate some action.

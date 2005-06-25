@@ -112,7 +112,7 @@ if 0:
     MAX_ENTITY_IDLETIME = 1        # 1 minute
 
 
-class Shutdown:
+class Shutdown(object):
     """
     Class handling system shutdown.
     """

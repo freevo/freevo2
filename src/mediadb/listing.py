@@ -43,7 +43,7 @@ from globals import *
 
 log = logging.getLogger('mediadb')
 
-class Listing:
+class Listing(object):
     """
     A directory listing with items from the mediadb. After creating a listing,
     check the 'num_changes' variable. If it is greater zero, the listing is

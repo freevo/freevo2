@@ -252,7 +252,7 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
 
 
-class Server:
+class Server(object):
     def __init__ (self, ip, port, handler, scripts, htdocs):
         self.handler   = handler
         self.htdocs    = htdocs

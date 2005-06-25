@@ -65,7 +65,7 @@ IN_PROGRESS = -2
 DAEMON = {'type': 'home-theatre', 'module': 'record-daemon'}
 
 
-class RemoteRecording:
+class RemoteRecording(object):
     """
     Wrapper for recordings to add 'id' and 'valid' for internal use inside
     the recorder.

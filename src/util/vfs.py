@@ -51,7 +51,7 @@ _VFS_DIR = sysconfig.VFS_DIR
 # list of mount points
 mountpoints = []
 
-class Mountpoint:
+class Mountpoint(object):
     """
     Base object for a mount point.
     """

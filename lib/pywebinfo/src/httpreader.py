@@ -54,7 +54,7 @@ except ImportError:
         socket.setdefaulttimeout(1)
 
 
-class HTTPReader:
+class HTTPReader(object):
     """
     This class fetches documents with HTTP. This is done by
     using callbacks to the registered handler. The handler must

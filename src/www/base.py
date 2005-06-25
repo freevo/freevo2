@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2005/06/25 08:52:29  dischi
+# switch to new style python classes
+#
 # Revision 1.9  2005/02/13 18:42:59  dischi
 # rename recordings page
 #
@@ -85,13 +88,13 @@ import crypt
 import config
 
 
-class FreevoResource:
+class FreevoResource(object):
 
     def render(self, request):
         pass
 
 
-class HTMLResource:
+class HTMLResource(object):
 
     def __init__(self):
         self.res = ''

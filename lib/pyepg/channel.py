@@ -68,7 +68,7 @@ START_TIME = 0
 STOP_TIME  = 2147483647
 
 
-class Channel:
+class Channel(object):
     """
     Information about one specific channel, also containing
     epg informations.

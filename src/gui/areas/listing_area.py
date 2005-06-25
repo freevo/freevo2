@@ -55,7 +55,7 @@ import logging
 log = logging.getLogger('gui')
 
 
-class _Redraw:
+class _Redraw(object):
     """
     Class handling redrawings in the listing area when a thumbnail
     was created.

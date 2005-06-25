@@ -63,7 +63,7 @@ CACHE_DIR = sysconfig.VFS_DIR + '/metadata'
 if not os.path.isdir(CACHE_DIR):
     os.makedirs(CACHE_DIR)
     
-class CacheList:
+class CacheList(object):
     """
     Internal list of all cache objects.
     """
@@ -96,7 +96,7 @@ class CacheList:
 # global object
 _cache_list = CacheList()
 
-class Cache:
+class Cache(object):
     """
     A cache object for the mediadb holding one directory.
     """
@@ -450,7 +450,7 @@ class Cache:
         return 'mediadb.db.Cache for %s' % self.dirname
 
 
-class FileCache:
+class FileCache(object):
     """
     Cache for one file
     """

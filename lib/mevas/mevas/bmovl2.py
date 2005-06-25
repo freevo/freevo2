@@ -40,7 +40,7 @@ import imagelib
 
 DEBUG = 2
 
-class MPlayerOverlay:
+class MPlayerOverlay(object):
 
     fifo_id = 0
 

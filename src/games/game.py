@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2005/06/25 08:52:25  dischi
+# switch to new style python classes
+#
 # Revision 1.20  2005/01/08 15:40:51  dischi
 # remove TRUE, FALSE, DEBUG and HELPER
 #
@@ -76,7 +79,7 @@ def get_singleton():
         
     return _singleton
 
-class Game:
+class Game(object):
 
     def __init__(self):
         self.mode = None

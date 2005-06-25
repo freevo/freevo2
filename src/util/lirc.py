@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2005/06/25 08:52:29  dischi
+# switch to new style python classes
+#
 # Revision 1.2  2004/07/10 12:33:42  dischi
 # header cleanup
 #
@@ -133,7 +136,7 @@ def dump_remotes(remotes):
             print '               %s: %s' % (code, remote.codes[code])
 
 
-class LircRemote:
+class LircRemote(object):
 
     def __init__(self):
         self.name = 'undefined'

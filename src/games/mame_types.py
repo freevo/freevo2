@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2005/06/25 08:52:25  dischi
+# switch to new style python classes
+#
 # Revision 1.7  2005/01/08 15:40:51  dischi
 # remove TRUE, FALSE, DEBUG and HELPER
 #
@@ -55,7 +58,7 @@ import config
 # changes are made to the file format.
 TYPES_VERSION = 2
 
-class MameRom:
+class MameRom(object):
 
     def __init__(self):
         self.filename = ''
@@ -111,7 +114,7 @@ class MameRom:
         self.trashme = t
 
 
-class MameRomList:
+class MameRomList(object):
     # We are using a dictionary that will be keyed on the
     # absolute filename of the actual rom.
     mameRoms = {}

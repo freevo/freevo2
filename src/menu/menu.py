@@ -44,7 +44,7 @@ from item import Item
 # get logging object
 log = logging.getLogger()
 
-class Menu:
+class Menu(object):
     """
     A Menu page with Items for the MenuStack. It is not allowed to change
     the selected item or the internal choices directly, use 'select',

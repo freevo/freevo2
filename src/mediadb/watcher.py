@@ -43,7 +43,7 @@ log = logging.getLogger('mediadb')
 # mediadb imports
 from globals import *
 
-class Watcher:
+class Watcher(object):
 
     def __init__(self):
         self.listing = ''

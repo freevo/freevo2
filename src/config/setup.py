@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2005/06/25 08:52:24  dischi
+# switch to new style python classes
+#
 # Revision 1.1  2005/05/30 18:01:02  dischi
 # move setup_freevo to config/setup
 #
@@ -118,7 +121,7 @@ Please report bugs to <freevo-users@lists.sourceforge.net>.
     print usage
     
     
-class Struct:
+class Struct(object):
     pass
 
 

@@ -289,7 +289,7 @@ def toBarometer(baro):
     return '%.1f' % (float(baro) * 3.386)
 
 ############# WEATHER DATA #############
-class WeatherType:
+class WeatherType(object):
     _types = {
     '1'   : 'Cloudy,cloudy.png',
     '3'   : 'Mostly Cloudy,mcloudy.png',

@@ -100,7 +100,7 @@ def save(file, data, version=None):
 
 
 
-class Cache:
+class Cache(object):
     """
     Class to cache data from a given module to a file. This is usefull when
     using the freevo config or sysconfig module as 'module' to store data.

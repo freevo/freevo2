@@ -61,7 +61,7 @@ def timer_report(msg):
     log.debug('TIMER: %s took %f' % (msg, time.time()-_timer))
 
 
-class Guide:
+class Guide(object):
     """
     Class for working with the EPG database
     """

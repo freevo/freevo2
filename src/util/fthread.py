@@ -136,7 +136,7 @@ def call_from_main(function, *args, **kwargs):
     _lock.release()
 
 
-class Watcher:
+class Watcher(object):
     """
     Watcher for running threads.
     """

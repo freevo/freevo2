@@ -164,7 +164,7 @@ def post(event):
 
 # -----------------------------------------------------------------------------
 
-class Eventhandler:
+class Eventhandler(object):
     """
     This is the main application for Freevo, handling applications
     with an event handler and the event mapping.
