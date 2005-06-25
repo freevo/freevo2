@@ -62,10 +62,25 @@ except Exception, e:
 # imlib2 checking
 #
 try:
-    import kaa
+    import kaa3
 except:
+    d = os.path.dirname(__file__)[:-15]
     print 'The kaa module repository could not be loaded!'
+    print
     print 'Please check out the kaa repository from Freevo cvs'
+    print 'cvs -d:pserver:anonymous@cvs.sf.net:/cvsroot/freevo login'
+    print 'cvs -z3 -d:pserver:anonymous@cvs.sf.net:/cvsroot/freevo co -P kaa'
+    print
+    print 'Please install it as root into your system or into the Freevo'
+    print 'site-lisp directory be running setup in the kaa root directory:'
+    print 'python setup.py install --install-lib=%s \\' % d
+    print '    --install-scripts=%s/bin' % d
+    print 'When using the command above, you need to reinstall kaa every time'
+    print 'you run \'make clean\' in the freevo directory.'
+    print
+    print 'Kaa is under development right now. Make sure you update the kaa'
+    print 'directory every time you update freevo cvs.'
+    print
     sys.exit(1)
 
 
