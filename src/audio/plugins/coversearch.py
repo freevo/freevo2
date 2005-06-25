@@ -42,7 +42,7 @@ import urllib2
 import time
 import logging
 import notifier
-import Imlib2
+from kaa import Imlib2
 
 # freevo imports
 import plugin
