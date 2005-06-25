@@ -34,7 +34,7 @@
 
 from _weakref import ref
 
-class weakref(object):
+class weakref:
     """
     This class represents a weak reference based on the python
     module weakref. The difference between weakref.ref and this class
