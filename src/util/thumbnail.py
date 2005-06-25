@@ -42,7 +42,7 @@ import stat
 
 # mevas for imlib2 support
 import mevas
-import Imlib2
+import kaa.thumb
 
 # freevo utils
 import fileops
@@ -68,9 +68,9 @@ def get_name(filename):
     # use ~/.thumbnails
     mp = vfs.get_mountpoint(filename)
     if mp:
-        thumb = Imlib2.thumbnail_check(filename, mp.thumbnails)
+        thumb = kaa.thumb.check(filename, mp.thumbnails)
     else:
-        thumb = Imlib2.thumbnail_check(filename)
+        thumb = kaa.thumb.check(filename)
     if not thumb:
         return thumb
 
@@ -96,17 +96,17 @@ def create(filename):
 
     mp = vfs.get_mountpoint(filename)
     if mp:
-        thumb = Imlib2.thumbnail_check(filename, mp.thumbnails)
+        thumb = kaa.thumb.check(filename, mp.thumbnails)
     else: 
-        thumb = Imlib2.thumbnail_check(filename)
+        thumb = kaa.thumb.check(filename)
        
     if thumb == False:
         thumb = None
     elif not thumb:
         if mp:
-            thumb = Imlib2.thumbnail_create(filename, mp.thumbnails)
+            thumb = kaa.thumb.create(filename, mp.thumbnails)
         else:
-            thumb = Imlib2.thumbnail_create(filename)
+            thumb = kaa.thumb.create(filename)
     if thumb:
         thumb = mevas.imagelib.open(thumb)
 
