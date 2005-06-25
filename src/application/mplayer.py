@@ -44,6 +44,7 @@ from event import *
 
 # application imports
 import childapp
+import base
 
 class Application(childapp.Application):
     """
@@ -152,7 +153,7 @@ class Application(childapp.Application):
         Eventhandler function.
         """
         if event == PLAY_END:
-            childapp.Application.stop(self)
+            base.Application.stop(self)
             return False
 
         if not self.has_child():
