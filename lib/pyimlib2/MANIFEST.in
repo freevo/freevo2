@@ -1,7 +1,0 @@
-include AUTHORS
-include pyimlib2.spec
-include src/display.h
-include src/font.h
-include src/image.h
-include src/rawformats.h
-include src/thumbnail.h
