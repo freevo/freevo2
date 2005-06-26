@@ -2,13 +2,13 @@ PYMBUS=pyMbus-0.8.6
 PYNOTIFIER=pyNotifier-0.3.8
 URL=ftp://ftp.mbus.org/tzi/dmn/mbus/python/
 
-all: mevas pylibvisual pynotifier pymbus pyepg pywebinfo mmpython
+all: mevas pylibvisual pynotifier pymbus pywebinfo mmpython
 	@echo creating links in site-packages
 	@ln -sf ../src site-packages/freevo
 	@echo make successfull
 
 
-mevas pyepg pywebinfo:
+mevas pywebinfo:
 	@echo installing $@
 	@( cd lib/$@ ; \
 	  python setup.py install --install-lib=$(PWD)/site-packages )
@@ -43,7 +43,7 @@ clean:
 	rm -rf site-packages
 
 install:
-	for package in $(PYNOTIFIER) $(PYMBUS) pyepg mevas \
+	for package in $(PYNOTIFIER) $(PYMBUS) mevas \
 		pywebinfo pylibvisual; do \
 		(cd lib/$$package; \
 		 rm -rf build ; \
