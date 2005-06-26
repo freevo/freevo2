@@ -38,7 +38,7 @@ import stat
 import logging
 
 # mevas imagelib
-import mevas
+import kaa.mevas
 
 import config
 import util
@@ -59,21 +59,21 @@ def _resize(image, width=None, height=None):
     if height == None:
         # calculate width
         height = (width * float(image_h)) / float(image_w)
-    return mevas.imagelib.scale(image, (width, height))
+    return kaa.mevas.imagelib.scale(image, (width, height))
 
 
 def rotate(*arg1, **arg2):
     """
     Rotate an image
     """
-    return mevas.imagelib.rotate(*arg1, **arg2)
+    return kaa.mevas.imagelib.rotate(*arg1, **arg2)
 
 
 def scale(*arg1, **arg2):
     """
     Scale an image
     """
-    return mevas.imagelib.scale(*arg1, **arg2)
+    return kaa.mevas.imagelib.scale(*arg1, **arg2)
 
 
 def load(url, size=None, cache=False):
@@ -89,7 +89,7 @@ def load(url, size=None, cache=False):
 
     if not isinstance(url, (str, unicode)):
         # image already is an image object
-        image = mevas.imagelib.open(url)
+        image = kaa.mevas.imagelib.open(url)
 
         # scale the image if needed
         if width != None or height != None:
@@ -124,7 +124,7 @@ def load(url, size=None, cache=False):
         return None
 
     try:
-        image = mevas.imagelib.open(filename)
+        image = kaa.mevas.imagelib.open(filename)
     except:
         log.exception('Unknown Problem while loading image %s' % String(url))
         return None

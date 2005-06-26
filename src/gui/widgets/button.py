@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2005/06/26 17:04:19  dischi
+# adjust to mevas - kaa.mevas move
+#
 # Revision 1.5  2004/10/05 19:50:55  dischi
 # Cleanup gui/widgets:
 # o remove unneeded widgets
@@ -56,7 +59,7 @@
 
 
 from rectangle import Rectangle
-from mevas.image import CanvasImage
+from kaa.mevas.image import CanvasImage
 from text import Text
 
 class Button(CanvasImage):

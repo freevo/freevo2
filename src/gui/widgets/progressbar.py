@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2005/06/26 17:04:19  dischi
+# adjust to mevas - kaa.mevas move
+#
 # Revision 1.6  2004/10/30 18:46:33  dischi
 # only redraw when needed, fix typo
 #
@@ -56,7 +59,7 @@
 # ----------------------------------------------------------------------- */
 
 
-from mevas.container import CanvasContainer
+from kaa.mevas.container import CanvasContainer
 from rectangle import Rectangle
 
 class Progressbar(CanvasContainer):

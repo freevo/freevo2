@@ -38,7 +38,7 @@
 __all__ = [ 'Display' ]
 
 # mevas imports
-from mevas.displays.directfbcanvas import DirectFBCanvas
+from kaa.mevas.displays.directfbcanvas import DirectFBCanvas
 
 # freevo imports
 import config

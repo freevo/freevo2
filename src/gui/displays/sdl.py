@@ -38,7 +38,7 @@ import pygame
 import os
 
 # mevas imports
-from mevas.displays.pygamecanvas import PygameCanvas
+from kaa.mevas.displays.pygamecanvas import PygameCanvas
 
 # Freevo imports
 import config

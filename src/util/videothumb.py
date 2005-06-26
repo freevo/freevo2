@@ -41,7 +41,7 @@ import os
 import mmpython
 import glob
 import popen2
-import mevas
+from kaa import mevas
 import tempfile
 import logging
 

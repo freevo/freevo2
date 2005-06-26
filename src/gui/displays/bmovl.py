@@ -41,7 +41,7 @@ __all__ = [ 'Display' ]
 import logging
 
 # mevas imports
-from mevas.displays.bmovlcanvas import BmovlCanvas
+from kaa.mevas.displays.bmovlcanvas import BmovlCanvas
 
 # freevo imports
 import config

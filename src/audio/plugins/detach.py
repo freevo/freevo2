@@ -37,7 +37,7 @@
 
 # python modules
 import os.path
-import mevas.image
+import kaa.mevas.image
 
 # freevo modules
 import gui
@@ -202,7 +202,7 @@ class PluginInterface(IdleBarPlugin):
         self.objects.append(cover)
 
         # create a marquee for showing item info
-        info = mevas.image.CanvasImage( (width - iw - 6, fih) )
+        info = kaa.mevas.image.CanvasImage( (width - iw - 6, fih) )
         info.set_pos( (x1 + iw + 4, y1 + ih - fih - 2) )
 
         # create text objects to be shown as
@@ -217,7 +217,7 @@ class PluginInterface(IdleBarPlugin):
 
         # create canvas for showing elapsed time
         w = ft.stringsize(u'00:00')
-        elapsed = mevas.image.CanvasImage((w, fth))
+        elapsed = kaa.mevas.image.CanvasImage((w, fth))
         elapsed.set_pos( (x1 + width - w, y1) )
         self.objects.append(elapsed)
 

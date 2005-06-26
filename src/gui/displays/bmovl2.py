@@ -43,9 +43,8 @@ import time
 import logging
 
 # mevas imports
-import mevas
-from mevas.displays.mplayercanvas import MPlayerCanvas
-from mevas.bmovl2 import MPlayerOverlay
+from kaa.mevas.displays.mplayercanvas import MPlayerCanvas
+from kaa.mevas.bmovl2 import MPlayerOverlay
 
 # Freevo imports
 import config

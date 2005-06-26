@@ -39,7 +39,7 @@ import logging
 import notifier
 import mmpython
 
-from mevas.displays import bmovlcanvas
+from kaa.mevas.displays import bmovlcanvas
 
 # freevo imports
 import config

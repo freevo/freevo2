@@ -60,8 +60,8 @@ import eventhandler
 from event import *
 from audio.player import *
 from gui.animation.base import BaseAnimation
-from mevas.image import CanvasImage
-from mevas.imagelib import *
+from kaa.mevas.image import CanvasImage
+from kaa.mevas.imagelib import *
 from controlpanel import *
 
 import logging

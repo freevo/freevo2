@@ -37,8 +37,8 @@ import os
 import logging
 
 # mevas imports
-import mevas
-from mevas.image import CanvasImage
+import kaa.mevas
+from kaa.mevas.image import CanvasImage
 
 # get logging object
 log = logging.getLogger('gui')
@@ -121,7 +121,7 @@ class Text(CanvasImage):
                 image_data = ''
                 for i in range(250, 9, -10):
                     image_data += '%c%c%c' % (chr(i), chr(i), chr(i))
-                _dim_image = mevas.imagelib.new((25, 1), image_data, 'RGB')
+                _dim_image = kaa.mevas.imagelib.new((25, 1), image_data, 'RGB')
                 _dim_image.scale((25, 1000))
             self.image.draw_mask(_dim_image, (stringsize - 25, 0))
 

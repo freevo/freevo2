@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2005/06/26 17:04:19  dischi
+# adjust to mevas - kaa.mevas move
+#
 # Revision 1.8  2005/01/22 11:57:32  dischi
 # make sure height is an int
 #
@@ -61,7 +64,7 @@
 #
 # -----------------------------------------------------------------------
 
-from mevas.image import CanvasImage
+from kaa.mevas.image import CanvasImage
 import text
 
 import logging

@@ -35,8 +35,8 @@ __all__ = [ 'Display' ]
 import plugin
 
 # mevas imports
-from mevas.displays.imlib2canvas import Imlib2Canvas
-from mevas.rect import optimize_for_rendering
+from kaa.mevas.displays.imlib2canvas import Imlib2Canvas
+from kaa.mevas.rect import optimize_for_rendering
 # display imports
 from display import Display as Base
 

@@ -37,7 +37,7 @@
 __all__ = [ 'Display' ]
 
 # mevas imports
-from mevas.displays.ivtvcanvas import IvtvCanvas
+from kaa.mevas.displays.ivtvcanvas import IvtvCanvas
 
 # display imports
 from display import Display as Base

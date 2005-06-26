@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2005/06/26 17:04:19  dischi
+# adjust to mevas - kaa.mevas move
+#
 # Revision 1.7  2004/11/20 18:23:02  dischi
 # use python logger module for debug
 #
@@ -59,7 +62,7 @@
 import logging
 log = logging.getLogger('gui')
 
-from mevas.image import CanvasImage
+from kaa.mevas.image import CanvasImage
 
 class Rectangle(CanvasImage):
     """

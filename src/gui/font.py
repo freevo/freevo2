@@ -33,7 +33,7 @@ __all__ = [ 'get' ]
 
 # python imports
 import logging
-import mevas
+import kaa.mevas
 
 # freevo imports
 import config
@@ -82,7 +82,7 @@ class Font(object):
         """
         log.debug('Loading font "%s:%s"' % (name, ptsize))
         try:
-            return mevas.imagelib.load_font(name, ptsize)
+            return kaa.mevas.imagelib.load_font(name, ptsize)
         except IOError:
             log.debug('Couldn\'t load font "%s"' % name)
 
@@ -91,7 +91,7 @@ class Font(object):
                 alt_fname = config.GUI_FONT_ALIASES[name]
                 log.debug('trying alternate: %s' % alt_fname)
                 try:
-                    return mevas.imagelib.load_font(alt_fname, ptsize)
+                    return kaa.mevas.imagelib.load_font(alt_fname, ptsize)
                 except IOError:
                     # not good
                     if not name in font_warning:
@@ -99,11 +99,11 @@ class Font(object):
                         print 'Falling back to default font, this looks ugly'
                         font_warning.append(name)
                     name = config.GUI_FONT_DEFAULT_NAME
-                    return mevas.imagelib.load_font(name, ptsize)
+                    return kaa.mevas.imagelib.load_font(name, ptsize)
 
 
 # init mevas font (imlib2)
-mevas.imagelib.add_font_path(config.FONT_DIR)
+kaa.mevas.imagelib.add_font_path(config.FONT_DIR)
 
 # the font cache object for 'get'
 font_info_cache = {}

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2005/06/26 17:04:19  dischi
+# adjust to mevas - kaa.mevas move
+#
 # Revision 1.4  2005/06/04 17:17:16  dischi
 # Clean import for gui system. There are no gui imports in the __init__
 # anymore because this caused recursive imports: gui imports e.g.
@@ -55,14 +58,14 @@
 # ----------------------------------------------------------------------
 
 # Container for widgets
-import mevas
+import kaa.mevas
 
-class Container(mevas.CanvasContainer):
+class Container(kaa.mevas.CanvasContainer):
     """
     A CanvasContainer with an optional name for debugging
     """
     def __init__(self, name=''):
-        mevas.CanvasContainer.__init__(self)
+        kaa.mevas.CanvasContainer.__init__(self)
         self.__name = name
 
     def __str__(self):

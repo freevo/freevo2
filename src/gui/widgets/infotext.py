@@ -37,7 +37,7 @@ __all__ = [ 'InfoText' ]
 import logging
 
 # gui imports
-from mevas.container import CanvasContainer
+from kaa.mevas.container import CanvasContainer
 from text import Text
 from textbox import Textbox
 

@@ -41,7 +41,7 @@ import logging
 import stat
 
 # mevas for imlib2 support
-import mevas
+import kaa.mevas
 import kaa.thumb
 
 # freevo utils
@@ -108,7 +108,7 @@ def create(filename):
         else:
             thumb = kaa.thumb.create(filename)
     if thumb:
-        thumb = mevas.imagelib.open(thumb)
+        thumb = kaa.mevas.imagelib.open(thumb)
 
     # call all callbacks when the thumbnail is done and a valid
     # one is loaded.
@@ -127,7 +127,7 @@ def load(filename, bg=False, callback=None):
     except OSError:
         return None
     if thumb:
-        return mevas.imagelib.open(thumb)
+        return kaa.mevas.imagelib.open(thumb)
     if thumb == False:
         # unable to create thumbnail
         return None

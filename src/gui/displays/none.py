@@ -35,7 +35,7 @@
 __all__ = [ 'Display' ]
 
 # mevas imports
-from mevas.displays.bitmapcanvas import BitmapCanvas
+from kaa.mevas.displays.bitmapcanvas import BitmapCanvas
 
 # display imports
 from display import Display as Base

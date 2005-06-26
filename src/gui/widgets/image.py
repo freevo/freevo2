@@ -33,7 +33,7 @@
 # -----------------------------------------------------------------------------
 
 import gui.imagelib
-from mevas.image import CanvasImage
+from kaa.mevas.image import CanvasImage
 
 class Image(CanvasImage):
     """
