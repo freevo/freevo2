@@ -10,8 +10,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2005/06/26 10:52:59  dischi
+# use kaa.epg instead of pyepg
+#
 # Revision 1.4  2004/11/08 21:28:38  dischi
-# fix to use pyepg (maybe move this in pyepg?)
+# fix to use kaa.epg (maybe move this in kaa.epg?)
 #
 # Revision 1.3  2004/07/10 12:33:39  dischi
 # header cleanup
@@ -48,7 +51,7 @@ import cStringIO
 import Image
 
 import config
-from pyepg import xmltv_parser as xmltv
+from kaa.epg import xmltv_parser as xmltv
 
 # Check if the logos directory exists, if not, make it before
 # proceeding

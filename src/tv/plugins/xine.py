@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2005/06/26 10:53:00  dischi
+# use kaa.epg instead of pyepg
+#
 # Revision 1.11  2004/12/28 18:07:34  dischi
 # fix for missing pyvdr
 #
@@ -34,7 +37,7 @@
 #
 # Revision 1.5  2004/08/05 17:27:17  dischi
 # Major (unfinished) tv update:
-# o the epg is now taken from pyepg in lib
+# o the epg is now taken from kaa.epg in lib
 # o all player should inherit from player.py
 # o VideoGroups are replaced by channels.py
 # o the recordserver plugins are in an extra dir
@@ -82,7 +85,7 @@ import plugin
 from event import *
 from tv.player import TVPlayer
 
-import pyepg
+import kaa.epg
 if config.XINE_USE_VDR:
     from vdr.vdr import VDR
 
@@ -252,14 +255,14 @@ class Xine(TVPlayer):
 
         if event == TV_CHANNEL_UP:
             if config.XINE_USE_VDR:
-                self.channel = pyepg.get_channel(self.channel, 1)
+                self.channel = kaa.epg.get_channel(self.channel, 1)
                 uri = self.channel.get_uri(self.channel, self.device)
                 self.vdr.svdrp.chan(String(uri))
                 return True
 
         if event == TV_CHANNEL_DOWN:
             if config.XINE_USE_VDR:
-                self.channel = pyepg.get_channel(self.channel, -1)
+                self.channel = kaa.epg.get_channel(self.channel, -1)
                 uri = self.channel.get_uri(self.channel, self.device)
                 self.vdr.svdrp.chan(String(uri))
                 return True

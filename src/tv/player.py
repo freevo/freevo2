@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2005/06/26 10:53:00  dischi
+# use kaa.epg instead of pyepg
+#
 # Revision 1.5  2004/12/13 01:46:33  rshortt
 # remove old channel changing code and add some logging
 #
@@ -23,7 +26,7 @@
 #
 # Revision 1.1  2004/08/05 17:27:16  dischi
 # Major (unfinished) tv update:
-# o the epg is now taken from pyepg in lib
+# o the epg is now taken from kaa.epg in lib
 # o all player should inherit from player.py
 # o VideoGroups are replaced by channels.py
 # o the recordserver plugins are in an extra dir

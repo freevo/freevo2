@@ -40,7 +40,7 @@ import config
 import record.client
 from www.base import HTMLResource, FreevoResource
 
-import pyepg
+import kaa.epg
 
 # get logging object
 log = logging.getLogger('www')
@@ -60,7 +60,7 @@ class SearchResource(FreevoResource):
         if not searchstr:
             programs = []
         else:
-            programs = pyepg.search(Unicode(searchstr), 
+            programs = kaa.epg.search(Unicode(searchstr), 
                                     by_chan,
                                     form.get('search_title'), 
                                     form.get('search_subtitle'), 

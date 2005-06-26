@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2005/06/26 10:53:16  dischi
+# use kaa.epg instead of pyepg
+#
 # Revision 1.1  2005/02/13 18:42:09  dischi
 # move pages into plugins and pages subdir
 #
@@ -20,9 +23,9 @@
 # Revision 1.4  2005/01/14 22:41:45  rshortt
 # More fixes: variable guide start time, category box, recordserver message.
 # TODO:
-#   -find out from pyepg when our last program is scheduled to let us better
+#   -find out from kaa.epg when our last program is scheduled to let us better
 #    determine how far forward to let users skip
-#   -find out from pyepg which program categories it has (ie: news, sports)
+#   -find out from kaa.epg which program categories it has (ie: news, sports)
 #
 # Revision 1.3  2005/01/13 20:19:33  rshortt
 # Place the authentication into www/server.py to protect mote than just
@@ -131,7 +134,7 @@ import util
 import config 
 import record.client
 
-import pyepg
+import kaa.epg
 
 # get logging object
 log = logging.getLogger('www')
@@ -140,7 +143,7 @@ log = logging.getLogger('www')
 class GuideResource(FreevoResource):
 
     def makecategorybox(self):
-        # TODO: get the categories from pyepg (from the DB)
+        # TODO: get the categories from kaa.epg (from the DB)
         allcategories = ['Sports', 'News']
         allcategories.sort()
         retval = '<select name="category">' + "\n"
@@ -254,7 +257,7 @@ class GuideResource(FreevoResource):
                      ( n_cols*cpb + 1 ) )
         showheader = 0
         # for chan in get_channels().get_all():
-        for chan in pyepg.channels:
+        for chan in kaa.epg.channels:
             #chan = chan.epg
             #put guidehead every X rows
             if showheader % 15 == 0:

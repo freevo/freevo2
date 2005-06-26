@@ -40,7 +40,7 @@ __all__ = [ 'TvlistingArea' ]
 
 import copy
 import os
-import pyepg
+import kaa.epg
 import gui.imagelib
 import math
 import time
@@ -371,8 +371,8 @@ class TvlistingArea(Area):
 
         # get selected program and channel list:
         selected_prog = menu.selected
-        start_channel = pyepg.channels.index(menu.channel)/num_rows*num_rows
-        channel_list  = pyepg.channels[start_channel:start_channel+num_rows]
+        start_channel = kaa.epg.channels.index(menu.channel)/num_rows*num_rows
+        channel_list  = kaa.epg.channels[start_channel:start_channel+num_rows]
 
         # draw the channel list
         if self.last_channels != channel_list:
@@ -471,7 +471,7 @@ class TvlistingArea(Area):
             self.up_arrow.unparent()
             self.up_arrow = None
 
-        if len(pyepg.channels) >= start_channel+num_rows and \
+        if len(kaa.epg.channels) >= start_channel+num_rows and \
                settings.images['downarrow']:
             if not self.down_arrow:
                 # down arrow needed

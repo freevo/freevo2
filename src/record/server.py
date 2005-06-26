@@ -39,8 +39,8 @@ import time
 import logging
 import notifier
 
-# pyepg
-import pyepg
+# kaa.epg
+import kaa.epg
 
 # freevo imports
 import sysconfig
@@ -135,8 +135,8 @@ class RecordServer(RPCServer):
         # get first recording to check
         rec = recordings[0]
         # search epg for that recording
-        results = pyepg.search(rec.name, rec.channel, search_subtitle=False, 
-                               search_description=False, exact_match=True)
+        results = kaa.epg.search(rec.name, rec.channel, search_subtitle=False, 
+                                 search_description=False, exact_match=True)
         epginfo = None
         for p in results:
             # check all results
@@ -306,8 +306,9 @@ class RecordServer(RPCServer):
 
         update = []
         for f in copy.copy(self.favorites):
-            for p in pyepg.search(f.name, search_subtitle=False, 
-                                  search_description=False, exact_match=True):
+            for p in kaa.epg.search(f.name, search_subtitle=False, 
+                                    search_description=False,
+                                    exact_match=True):
                 if not f.match(p.title, p.channel.id, p.start):
                     continue
                 r = Recording(self.rec_id, p.title, p.channel.id, f.priority,
@@ -511,7 +512,7 @@ class RecordServer(RPCServer):
             # add by dbid
             dbid, priority, info = \
                   self.parse_parameter(val, ( int, int, dict ))
-            prog = pyepg.guide.get_program_by_id(dbid)
+            prog = kaa.epg.guide.get_program_by_id(dbid)
             if not prog:
                 return RPCError('Unknown id')
             channel = prog.channel.id

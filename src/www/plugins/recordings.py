@@ -36,7 +36,7 @@ import traceback
 import logging
 
 # epg support
-import pyepg
+import kaa.epg
 
 # freevo imports
 import config
@@ -79,7 +79,8 @@ class RecordResource(FreevoResource):
 
             prog = None
             for p in progs:
-                if Unicode(chan) == pyepg.get_channel_by_id(p.channel).title \
+                if Unicode(chan) == \
+                       kaa.epg.get_channel_by_id(p.channel).title \
                    and int(start) == p.start:
                     prog = p
 
@@ -90,7 +91,7 @@ class RecordResource(FreevoResource):
 
         elif action == 'add':
             try:
-                prog = pyepg.get_channel(chan)[int(start)]
+                prog = kaa.epg.get_channel(chan)[int(start)]
             except:
                 fv.printHeader('Scheduled Recordings', 'styles/main.css')
                 fv.printMessagesFinish(
@@ -142,7 +143,7 @@ class RecordResource(FreevoResource):
             status  = 'basic'
             colspan = 'class="' + status + '" colspan="1"'
         
-            channel = pyepg.get_channel_by_id(prog.channel).title
+            channel = kaa.epg.get_channel_by_id(prog.channel).title
 
             fv.tableRowOpen('class="chanrow"')
             t = time.strftime('%b %d ' + config.TV_TIMEFORMAT,

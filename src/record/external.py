@@ -46,7 +46,7 @@ import copy
 import logging
 import time
 
-import pyepg
+import kaa.epg
 import mbus
 import notifier
 
@@ -90,9 +90,9 @@ class Recorder(recorder.Plugin):
         self.devices = []
         self.recordings = []
         self.check_timer = None
-        # FIXME: use pyepg for this during runtime
+        # FIXME: use kaa.epg for this during runtime
         self.channels = {}
-        for channel in pyepg.channels:
+        for channel in kaa.epg.channels:
             self.channels[channel.id] = channel.access_id
         self.suffix = '.mpg'
         self.entity.call('devices.list', self.__devices_list)
@@ -134,7 +134,7 @@ class Recorder(recorder.Plugin):
         for b in result.arguments[2]:
             bouquet = []
             for dvb_name in b:
-                for channel in pyepg.channels:
+                for channel in kaa.epg.channels:
                     if channel.access_id == dvb_name:
                         bouquet.append(channel.id)
                         break

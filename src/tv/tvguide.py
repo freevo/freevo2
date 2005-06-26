@@ -34,8 +34,7 @@ import os
 import time
 import logging
 
-# pyepg
-import pyepg
+import kaa.epg
 
 # freevo imports
 import gui
@@ -79,7 +78,7 @@ class TVGuide(MenuApplication):
         self.current_time = int(time.time())
 
         # current channel is the first one
-        self.channel  = pyepg.channels[0]
+        self.channel  = kaa.epg.channels[0]
 
         # current program is the current running
         self.selected = ProgramItem(self.channel[self.current_time])
@@ -91,7 +90,7 @@ class TVGuide(MenuApplication):
         """
         show the guide
         """
-        self.channel = pyepg.get_channel()
+        self.channel = kaa.epg.get_channel()
         self.selected = ProgramItem(self.channel[self.current_time])
         self.refresh()
         MenuApplication.show(self)
@@ -112,13 +111,13 @@ class TVGuide(MenuApplication):
             return True
             
         if event == MENU_UP:
-            self.channel = pyepg.get_channel(self.channel, -1)
+            self.channel = kaa.epg.get_channel(self.channel, -1)
             self.selected = ProgramItem(self.channel[self.current_time])
             self.refresh()
             return True
 
         if event == MENU_DOWN:
-            self.channel = pyepg.get_channel(self.channel, 1)
+            self.channel = kaa.epg.get_channel(self.channel, 1)
             self.selected = ProgramItem(self.channel[self.current_time])
             self.refresh()
             return True
@@ -140,13 +139,13 @@ class TVGuide(MenuApplication):
             return True
 
         if event == MENU_PAGEUP:
-            self.channel = pyepg.get_channel(self.channel, -9)
+            self.channel = kaa.epg.get_channel(self.channel, -9)
             self.selected = ProgramItem(self.channel[self.current_time])
             self.refresh()
             return True
 
         if event == MENU_PAGEDOWN:
-            self.channel = pyepg.get_channel(self.channel, 9)
+            self.channel = kaa.epg.get_channel(self.channel, 9)
             self.selected = ProgramItem(self.channel[self.current_time])
             self.refresh()
             return True

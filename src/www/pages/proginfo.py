@@ -32,7 +32,7 @@ from www.base import HTMLResource, FreevoResource
 
 import util
 import config 
-import pyepg
+import kaa.epg
 
 MAX_DESCRIPTION_CHAR = 1000
 
@@ -45,7 +45,7 @@ class ProgInfoResource(FreevoResource):
         chanid = id[:id.find(":")]
         starttime = int( id[id.find(":")+1:] )
 
-        chan = pyepg.guide.channel_dict.get(chanid)
+        chan = kaa.epg.guide.channel_dict.get(chanid)
         if not chan:
             fv.res += u'no such channel %s' % chanid
             return String(fv.res)

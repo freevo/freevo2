@@ -36,11 +36,12 @@ import os
 import shutil
 from optparse import OptionParser
 
+import kaa.epg
+
 import config
 import sysconfig
 import mcomm
 
-import pyepg
 
 
 def grab_xmltv():
@@ -56,7 +57,6 @@ def grab_xmltv():
     os.system('%s --output %s --days %s' % ( config.XMLTV_GRABBER, 
                                              xmltvtmp,
                                              config.XMLTV_DAYS ))
-
     if os.path.exists(xmltvtmp):
         if os.path.isfile(config.XMLTV_SORT):
             print 'Sorting listings.'
@@ -72,41 +72,43 @@ def grab_xmltv():
         print 'Loading data into epgdb, this may take a while'
 
         shutil.move(xmltvtmp, config.XMLTV_FILE)
-        pyepg.update('xmltv', config.XMLTV_FILE)
+
+    kaa.epg.update('xmltv', config.XMLTV_FILE)
 
 
 def grab_vdr():
     print 'Fetching guide from VDR.'
 
-    pyepg.update('vdr', config.VDR_DIR, config.VDR_CHANNELS, config.VDR_EPG,
-                 config.VDR_HOST, config.VDR_PORT, config.VDR_ACCESS_ID, 'both')
+    kaa.epg.update('vdr', config.VDR_DIR, config.VDR_CHANNELS, config.VDR_EPG,
+                   config.VDR_HOST, config.VDR_PORT, config.VDR_ACCESS_ID,
+                   'both')
 
 
 def main():
     parser = OptionParser()
 
     parser.add_option('-s', '--source', dest='source', default='xmltv',
-                      help='set the source for the guide: xmltv (default), ' + \
-                            'xmltv_nofetch, vdr, or none')
+                      help='set the source for the guide: xmltv (default), ' +\
+                      'xmltv_nofetch, vdr, or none')
     parser.add_option('-q', '--query', action="store_true", dest='query', 
                       default=False,
                       help='print a list that can be used to set TV_CHANNELS')
-    parser.add_option('-e', '--query-exclude', action="store_true", dest='exclude',
-                      default=False,
+    parser.add_option('-e', '--query-exclude', action="store_true",
+                      dest='exclude', default=False,
                       help='print a list that can be used to set ' + \
                            'TV_CHANNELS_EXCLUDE')
 
     (options, args) = parser.parse_args()
 
-    pyepg.connect('sqlite', sysconfig.datafile('epgdb'))
-    pyepg.load(config.TV_CHANNELS, config.TV_CHANNELS_EXCLUDE)
+    kaa.epg.connect('sqlite', sysconfig.datafile('epgdb'))
+    kaa.epg.load(config.TV_CHANNELS, config.TV_CHANNELS_EXCLUDE)
 
 
     if options.query:
-        chanlist = pyepg.guide.sql_get_channels()
+        chanlist = kaa.epg.guide.sql_get_channels()
 
         print
-        print 'Possible list of tv channels. If you want to change the name or '
+        print 'Possible list of tv channels. If you want to change the name or'
         print 'acess id copy the next statement into your local_conf.py and '
         print 'edit it.'
         print
@@ -122,7 +124,7 @@ def main():
 
 
     if options.exclude:
-        chanlist = pyepg.guide.sql_get_channels()
+        chanlist = kaa.epg.guide.sql_get_channels()
 
         print
         print 'Possible list of tv channels to exclude from Freevo.  Any '
@@ -141,7 +143,7 @@ def main():
     if options.source == 'xmltv':
         grab_xmltv()
     elif options.source == 'xmltv_nofetch':
-        pyepg.update('xmltv', config.XMLTV_FILE)
+        kaa.epg.update('xmltv', config.XMLTV_FILE)
     elif options.source == 'vdr':
         grab_vdr()
     elif options.source == 'none':

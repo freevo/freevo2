@@ -33,6 +33,7 @@
 
 # python imports
 import time
+import kaa.epg
 
 # notifier
 import notifier
@@ -47,7 +48,6 @@ from gui.windows import MessageBox
 # tv imports
 from record.client import recordings
 import favorite
-import pyepg
 
 class ProgramItem(Item):
     """
@@ -99,7 +99,7 @@ class ProgramItem(Item):
         """
         compare function, return 0 if the objects are identical, 1 otherwise
         """
-        if not isinstance(other, (ProgramItem, pyepg.Program)):
+        if not isinstance(other, (ProgramItem, kaa.epg.Program)):
             return 1
 
         return Unicode(self.title) != Unicode(other.title) or \

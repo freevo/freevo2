@@ -33,7 +33,7 @@
 # -----------------------------------------------------------------------------
 
 import logging
-import pyepg
+import kaa.epg
 
 import sysconfig
 import config
@@ -118,10 +118,10 @@ def player(channel):
 def refresh():
     log.info('Detecting TV channels.')
 
-    pyepg.connect('sqlite', sysconfig.datafile('epgdb'))
-    pyepg.load(config.TV_CHANNELS, config.TV_CHANNELS_EXCLUDE)
+    kaa.epg.connect('sqlite', sysconfig.datafile('epgdb'))
+    kaa.epg.load(config.TV_CHANNELS, config.TV_CHANNELS_EXCLUDE)
     
-    for c in pyepg.channels:
+    for c in kaa.epg.channels:
         c.uri = []
         c.get_uri = get_uri
         c.player  = player
@@ -144,7 +144,7 @@ def refresh():
     # add all possible channels to the cards
     for card in config.TV_CARDS:
         channels = {}
-        for chan in pyepg.channels:
+        for chan in kaa.epg.channels:
             for u in chan.uri:
                 if u.find(':') == -1:
                     continue  # safeguard, shouldn't happen

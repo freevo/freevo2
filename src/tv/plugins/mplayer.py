@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2005/06/26 10:53:00  dischi
+# use kaa.epg instead of pyepg
+#
 # Revision 1.45  2005/01/08 15:40:54  dischi
 # remove TRUE, FALSE, DEBUG and HELPER
 #
@@ -20,7 +23,7 @@
 #
 # Revision 1.42  2004/08/05 17:27:16  dischi
 # Major (unfinished) tv update:
-# o the epg is now taken from pyepg in lib
+# o the epg is now taken from kaa.epg in lib
 # o all player should inherit from player.py
 # o VideoGroups are replaced by channels.py
 # o the recordserver plugins are in an extra dir

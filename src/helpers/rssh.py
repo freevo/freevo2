@@ -5,7 +5,7 @@ import os
 import time
 
 import notifier
-import pyepg
+import kaa.epg
 import config
 import mcomm
 
@@ -100,7 +100,7 @@ def user_input( socket ):
         print '\rcalling epg command'
         try:
             print 
-            result = eval('pyepg.guide' + String(input[3:]))
+            result = eval('kaa.epg.guide' + String(input[3:]))
             print_result(result)
         except Exception, e:
             print e
