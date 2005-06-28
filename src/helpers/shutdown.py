@@ -78,14 +78,15 @@ import logging
 import popen2
 import time
 
-# notifier and mbus
-import notifier
+# mbus
 import mbus
+
+# kaa imports
+import kaa.notifier
 
 # freevo imports
 import config
 import mcomm
-import util.popen
 
 # get logging object
 log = logging.getLogger()
@@ -117,7 +118,7 @@ class Shutdown(object):
     Class handling system shutdown.
     """
     def __init__(self):
-        notifier.addTimer(FIRST_START, self.check_mbus)
+        kaa.notifier.addTimer(FIRST_START, self.check_mbus)
         # notifier check timer, not set by first FIRST_START waiting
         self.timer = None
         # counter how often the shutdown function warns before real
@@ -138,8 +139,8 @@ class Shutdown(object):
             return
         log.warning('entity change, set timer %s seconds' % \
                     (POLL_INTERVALL / 1000))
-        notifier.removeTimer(self.timer)
-        self.timer = notifier.addTimer(POLL_INTERVALL, self.check_mbus)
+        kaa.notifier.removeTimer(self.timer)
+        self.timer = kaa.notifier.addTimer(POLL_INTERVALL, self.check_mbus)
 
 
     def check_programs(self):
@@ -221,7 +222,7 @@ class Shutdown(object):
             # looks like we came out of hibernate
             log.info('reset all shutdown timer')
             self.shutdown_counter = 6
-            notifier.addTimer(FIRST_START, self.check_mbus)
+            kaa.notifier.addTimer(FIRST_START, self.check_mbus)
             return False
 
         log.info('checking for possible system shutdown')
@@ -237,7 +238,7 @@ class Shutdown(object):
             log.info('send status rpc to %s' % entity)
             entity.call('status', self.rpcreturn)
         # set timer for shutdown in 5 seconds
-        self.timer = notifier.addTimer(5000, self.check_shutdown)
+        self.timer = kaa.notifier.addTimer(5000, self.check_shutdown)
         return False
 
 
@@ -249,7 +250,7 @@ class Shutdown(object):
             # there is a new wakeup time
             log.info('set wakeup time: %s' % self.wakeuptime)
             self.__last_wakeuptime = self.wakeuptime
-            util.popen.Process(config.SHUTDOWN_WAKEUP_CMD % self.wakeuptime)
+            kaa.notifier.Process(config.SHUTDOWN_WAKEUP_CMD % self.wakeuptime)
 
         # internal varibale how long to wait next
         wait = 0
@@ -282,7 +283,7 @@ class Shutdown(object):
             wait = min(30, wait)
             log.info('Next check in %s minutes' % wait)
             # set a new timer
-            self.timer = notifier.addTimer(wait * 60000, self.check_mbus)
+            self.timer = kaa.notifier.addTimer(wait * 60000, self.check_mbus)
             # reset counter
             self.shutdown_counter = max(self.shutdown_counter, 6)
             return False
@@ -293,7 +294,8 @@ class Shutdown(object):
             # an important program is running
             log.info('Next check in 5 minutes')
             # reschedule checking
-            self.timer = notifier.addTimer(5 * POLL_INTERVALL, self.check_mbus)
+            self.timer = kaa.notifier.addTimer(5 * POLL_INTERVALL,
+                                               self.check_mbus)
             # set counter to 31 ( == 30 minutes after important the program
             # has quit)
             self.shutdown_counter = 31
@@ -310,7 +312,7 @@ class Shutdown(object):
                 wait = USER_IDLETIME + 1 - idle
                 log.info('Next check in %s minutes' % wait)
                 # set a new timer
-                self.timer = notifier.addTimer(wait * 60000, self.check_mbus)
+                self.timer = kaa.notifier.addTimer(wait * 60000, self.check_mbus)
                 # reset counter
                 self.shutdown_counter = max(self.shutdown_counter, 6)
                 return False
@@ -328,19 +330,19 @@ class Shutdown(object):
             # let's warn this time
             log.warning('system shutdown system in %s minutes' % \
                         self.shutdown_counter)
-            self.timer = notifier.addTimer(POLL_INTERVALL, self.check_mbus)
+            self.timer = kaa.notifier.addTimer(POLL_INTERVALL, self.check_mbus)
             return False
 
         # ok, do the real shutdown
         log.warning('shutdown system')
 
         # shutdown the system
-        util.popen.Process(config.SHUTDOWN_SYS_CMD)
+        kaa.notifier.Process(config.SHUTDOWN_SYS_CMD)
 
         # set new timer in case we hibernate, set self.timer so it looks like
         # the normal startup timer
         self.timer = None
-        notifier.addTimer(FIRST_START, self.check_mbus)
+        kaa.notifier.addTimer(FIRST_START, self.check_mbus)
         return False
 
 

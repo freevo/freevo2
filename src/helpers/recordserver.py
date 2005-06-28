@@ -35,7 +35,8 @@ import os
 import pwd
 import logging
 
-import notifier
+# kaa imports
+import kaa.notifier
 
 # create logger objects in sysconfig
 import sysconfig
@@ -60,21 +61,17 @@ except Exception, e:
     log.warning('unable to set uid: %s' % e)
 
 # init the notifier
-notifier.init(notifier.GENERIC)
+kaa.notifier.init(kaa.notifier.GENERIC)
 
 # import recordserver
 import record.server
 
-# import popen for process managment
-import util.popen
+# start recordserver
+record.server.RecordServer()
 
 try:
-    record.server.RecordServer()
-    notifier.loop()
-except KeyboardInterrupt:
-    pass
+    kaa.notifier.loop()
 except:
     log.exception('recordserver crash')
 
-# kill all running recorder
-util.popen.killall()
+kaa.notifier.shutdown()

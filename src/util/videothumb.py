@@ -40,12 +40,15 @@ import sys
 import os
 import mmpython
 import glob
-import popen2
-from kaa import mevas
 import tempfile
 import logging
+import popen2
 
 from stat import *
+
+# kaa imports
+import kaa.notifier
+from kaa import mevas
 
 # freevo imports
 import vfs
@@ -58,16 +61,15 @@ _runqueue = []
 
 # do not import freevo stuff when running this file
 if __name__ != "__main__":
-    from util.popen import Process
     import config
 
-    class MplayerThumbnail(Process):
+    class MplayerThumbnail(kaa.notifier.Process):
         """
         Mplayer thumbnailing process
         """
         def __init__( self, app, imagefile):
             self.imagefile = imagefile
-            Process.__init__(self, app, callback=self.finished)
+            kaa.notifier.Process.__init__(self, app, callback=self.finished)
 
 
         def stdout_cb(self, line):

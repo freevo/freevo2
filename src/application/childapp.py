@@ -35,11 +35,13 @@ __all__ = [ 'Application' ]
 import os
 import logging
 
+# kaa imports
+import kaa.notifier
+
 # Freevo imports
 import sysconfig
 import config
 import eventhandler
-import util.popen
 import gui
 
 from event import *
@@ -156,10 +158,10 @@ class Application(base.Application):
         pass
 
 
-class Process(util.popen.Process):
+class Process(kaa.notifier.Process):
     """
-    Process wrapping popen into the application callback. Also takes care
-    of basic event sending on start and stop.
+    Process wrapping a kaa notifier process into an application.
+    Also takes care of basic event sending on start and stop.
     """
     def __init__(self, cmd, handler, prio=0, has_display=False):
         """
@@ -182,8 +184,8 @@ class Process(util.popen.Process):
         logname = sysconfig.logfile(logname)
 
 	# start the process
-        util.popen.Process.__init__(self, cmd, logname,
-                                    callback=self.finished)
+        kaa.notifier.Process.__init__(self, cmd, logname,
+                                      callback=self.finished)
 
         # renice the process
         if prio and config.CONF.renice:
@@ -205,13 +207,6 @@ class Process(util.popen.Process):
         self.handler.child_stderr(line)
 
 
-    def stop(self, cmd=''):
-        """
-        Stop the child (no wait)
-        """
-        util.popen.Process.stop(self, cmd, False)
-
-        
     def stop_event(self):
         """
         Event to send on stop.

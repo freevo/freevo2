@@ -37,13 +37,15 @@
 # python imports
 import os
 
+# kaa imports
+import kaa.notifier
+
 # freevo imports
 import plugin
 import util
 
 from item import Item
 from gui.windows import WaitBox
-from util.popen import Process
 
 # possible archives and how to unpack them
 _cmdlines = {
@@ -79,7 +81,7 @@ class ArchiveItem(Item):
                        replace('__dirname__', os.path.dirname(self.fname)))
         self.pop = WaitBox(text=_('unpacking...'))
         self.pop.show()
-        Process(app, callback=self.__finished)
+        kaa.notifier.Process(app, callback=self.__finished)
 
 
     def __finished(self):

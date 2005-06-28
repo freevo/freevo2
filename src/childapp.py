@@ -4,12 +4,8 @@
 # -----------------------------------------------------------------------------
 # $Id$
 #
-# Run a child application inside Freevo. The class is based util.popen and
-# send events on start/stop. It is also possible to shut down the gui when
-# the child is starting.
-#
-# TODO: o remove doeslogging, debugname
-#       o better handling of stop_osd and is_video
+# Run a child application inside Freevo. This file will be removed. Please
+# use application.ChildApp.
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -42,16 +38,18 @@ __all__ = [ 'Instance' ]
 # Python imports
 import os
 
+# kaa imports
+import kaa.notifier
+
 # Freevo imports
 import sysconfig
 import config
 import eventhandler
-import util.popen
 import gui
 
 from event import *
 
-class Instance(util.popen.Process):
+class Instance(kaa.notifier.Process):
     def __init__( self, app, debugname = None, doeslogging = 0, prio = 0,
                   stop_osd = 2 ):
         self.is_video = 0
@@ -82,13 +80,21 @@ class Instance(util.popen.Process):
         if debugname:
 	    debugname = sysconfig.logfile(debugname)
 	
-        util.popen.Process.__init__(self, app, debugname,
-                                    callback=self.finished)
+        kaa.notifier.Process.__init__(self, app, debugname,
+                                      callback=self.finished)
 
         if prio and config.CONF.renice:
             os.system('%s %s -p %s 2>/dev/null >/dev/null' % \
                       (config.CONF.renice, prio, self.child.pid))
-            
+
+
+    def stop(self, cmd = ''):
+        """
+        Stop child and wait.
+        """
+        kaa.notifier.Process.stop(self, cmd)
+        while self.is_alive():
+            notifier.step()
         
 
     def stop_event(self):

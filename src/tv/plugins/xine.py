@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2005/06/28 15:56:09  dischi
+# use popen from notifier and remove util.popen
+#
 # Revision 1.12  2005/06/26 10:53:00  dischi
 # use kaa.epg instead of pyepg
 #
@@ -78,7 +81,7 @@ import time, os, re
 import copy
 
 import config     # Configuration handler. reads config file.
-from util.popen import Process
+from kaa.notifier import Process
 import util
 import plugin
 

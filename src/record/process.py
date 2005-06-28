@@ -36,9 +36,11 @@ import os
 import string
 import logging
 
+# kaa imports
+import kaa.notifier
+
 # freevo imports
 import config
-from util.popen import Process
 from util.callback import *
 
 # record imports
@@ -158,7 +160,7 @@ class Recorder(Plugin):
 
         # get the cmd for the childapp
         cmd = self.get_cmd(rec)
-        self.app = Process(cmd, callback = self.stopped)
+        self.app = kaa.notifier.Process(cmd, callback = self.stopped)
         return False
 
 

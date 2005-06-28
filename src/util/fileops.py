@@ -44,11 +44,13 @@ import gzip
 import stat
 import logging
 
+# kaa imports
+import kaa.notifier
+
 # freevo imports
 import sysconfig
 import misc
 import vfs
-import popen
 
 # get logging object
 log = logging.getLogger()
@@ -166,7 +168,7 @@ def unlink(filename):
             base = '.' + os.path.basename(filename) + '.freevo~'
             name = os.path.join(os.path.dirname(filename), base)
             os.rename(filename, name)
-            popen.Process(['rm', '-rf', name])
+            kaa.notifier.Process(['rm', '-rf', name])
         else:
             os.unlink(filename)
     except (OSError, IOError), e:

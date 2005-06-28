@@ -9,30 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2005/06/28 15:56:07  dischi
+# use popen from notifier and remove util.popen
+#
 # Revision 1.8  2005/06/16 15:54:36  dischi
 # update system exit
-#
-# Revision 1.7  2005/06/04 17:18:10  dischi
-# adjust to gui changes
-#
-# Revision 1.6  2005/05/07 19:13:09  dischi
-# move config import (FIXME)
-#
-# Revision 1.5  2005/04/10 18:08:05  dischi
-# switch to new mediainfo module
-#
-# Revision 1.4  2004/12/18 13:39:08  dischi
-# wait using the notifier, stop popen children
-#
-# Revision 1.3  2004/11/20 18:22:58  dischi
-# use python logger module for debug
-#
-# Revision 1.2  2004/10/08 20:18:52  dischi
-# plugins register to cleanup, no need to call plugin.cleanup()
-#
-# Revision 1.1  2004/10/06 18:44:51  dischi
-# move shutdown code from plugin to cleanup.py
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -59,9 +40,10 @@ import os
 import time
 import sys
 import copy
-import notifier
-
 import logging
+
+import kaa.notifier
+
 log = logging.getLogger()
 
 _callbacks = []
@@ -92,7 +74,6 @@ def shutdown(menuw=None, argshutdown=None, argrestart=None, exit=False):
     # Import all this stuff now we need for shutdown. It is not possible
     # to do this on startup (recursive imports)
     # FIXME: this is bad coding style
-    import util.popen
     import mediadb
     import gui
     import gui.widgets
@@ -137,7 +118,10 @@ def shutdown(menuw=None, argshutdown=None, argrestart=None, exit=False):
         for c in _callbacks:
             log.debug('shutting down %s' % c[ 0 ])
             c[ 0 ]( *c[ 1 ] )
-        util.popen.killall()
+
+        # shutdown processes
+        kaa.notifier.shutdown()
+
         _callbacks = []
         gui.displays.shutdown()
 
@@ -146,7 +130,7 @@ def shutdown(menuw=None, argshutdown=None, argrestart=None, exit=False):
         elif argrestart and not argshutdown:
             os.system(config.RESTART_SYS_CMD)
         # let freevo be killed by init, looks nicer for mga
-        notifier.loop()
+        kaa.notifier.loop()
         return
 
     #
@@ -159,7 +143,8 @@ def shutdown(menuw=None, argshutdown=None, argrestart=None, exit=False):
         c[ 0 ]( *c[ 1 ] )
     _callbacks = []
 
-    util.popen.killall()
+    # shutdown processes
+    kaa.notifier.shutdown()
 
     # Shutdown the display
     gui.displays.shutdown()
@@ -171,4 +156,4 @@ def shutdown(menuw=None, argshutdown=None, argrestart=None, exit=False):
     os.system('%s stop' % os.environ['FREEVO_SCRIPT'])
 
     # Just wait until we're dead. SDL cannot be polled here anyway.
-    notifier.loop()
+    kaa.notifier.loop()

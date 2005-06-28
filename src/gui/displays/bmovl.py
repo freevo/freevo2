@@ -42,10 +42,10 @@ import logging
 
 # mevas imports
 from kaa.mevas.displays.bmovlcanvas import BmovlCanvas
+import kaa.notifier
 
 # freevo imports
 import config
-import util.popen
 import util.fsocket
 
 # display imports
@@ -83,7 +83,7 @@ class Display(BmovlCanvas, Base):
         """
         Base.restart(self)
         if self.start_video and not self.child:
-            self.child = util.popen.Process( self.cmd )
+            self.child = kaa.notifier.Process( self.cmd )
             self.child.stdout.close()
             self.child.stderr.close()
             if hasattr(self, 'fifo') and not self.fifo:

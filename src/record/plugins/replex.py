@@ -33,11 +33,12 @@
 # python imports
 import os
 import mmpython
-import notifier
 import logging
 
+# kaa imports
+import kaa.notifier
+
 # freevo imports
-from util.popen import Process
 from util.fileops import find_file_in_path
 from record.plugins import Plugin
 from record.record_types import *
@@ -144,6 +145,7 @@ class PluginInterface(Plugin):
         
         dest = os.path.splitext(source)[0] + '.mpg'
         log.info('replex %s' % String(source))
-        cb = notifier.Callback(self.replex_stop, source, dest)
-        Process([ self.nice, '-n', '19', self.replex, '-x', '-k', '-t', 'DVD',
-                  '--of', dest, source ], callback = cb)
+        cb = kaa.notifier.Callback(self.replex_stop, source, dest)
+        kaa.notifier.Process([ self.nice, '-n', '19', self.replex, '-x', '-k',
+                               '-t', 'DVD', '--of', dest, source ],
+                             callback = cb)
