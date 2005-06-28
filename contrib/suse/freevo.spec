@@ -34,7 +34,7 @@ Authors:
     Aubin Paul <aubin@outlyer.org>
     Dirk Meyer <dmeyer@tzi.de>
     Gustavo Sverzut Barbieri <gsbarbieri@yahoo.com.br>
-    Rob Shortt <rob@infointeractive.com>
+    Rob Shortt <rob@tvcentric.com>
     Jason Ball <jason.ball@ce.com.au>
     Thomas Malt <thomas@malt.no>
 

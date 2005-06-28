@@ -9,9 +9,9 @@
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
 #
-# First Edition: Rob Shortt <rob@infointeractive.com>
+# First Edition: Rob Shortt <rob@tvcentric.com>
 # Maintainer:    Dirk Meyer <dmeyer@tzi.de>
-#                Rob Shortt <rob@infointeractive.com>
+#                Rob Shortt <rob@tvcentric.com>
 #
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #

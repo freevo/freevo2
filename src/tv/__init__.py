@@ -10,7 +10,7 @@
 # Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
 #
 # Maintainer:    Dirk Meyer <dmeyer@tzi.de>
-#                Rob Shortt <rob@infointeractive.com>
+#                Rob Shortt <rob@tvcentric.com>
 #
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
