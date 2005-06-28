@@ -41,8 +41,10 @@ import re
 import urllib2
 import time
 import logging
-import notifier
-from kaa import Imlib2
+
+# kaa imports
+import kaa.Imlib2
+import kaa.notifier
 
 # freevo imports
 import plugin
@@ -51,7 +53,6 @@ import config
 from menu import ItemPlugin, Action, ActionItem, Menu
 from gui.windows import WaitBox, MessageBox
 from util import amazon
-from util.fthread import Thread
 
 # get logging object
 log = logging.getLogger('audio')
@@ -191,7 +192,7 @@ class PluginInterface(plugin.ItemPlugin):
                     data = urllib2.urlopen(url)
                     if data.info()['Content-Length'] == '807':
                         continue
-                    image = Imlib2.open_from_memory(data.read())
+                    image = kaa.Imlib2.open_from_memory(data.read())
                     image = image.crop((2,2), (image.width-4, image.height-4))
                     break
                 except urllib2.HTTPError:
@@ -231,9 +232,10 @@ class PluginInterface(plugin.ItemPlugin):
         search_string = re.sub('[\(\[].*[\)\]]', '', search_string)
 
         log.info('searching for \'%s\'' % search_string)
-        cb = notifier.Callback(self.cover_menu, item, box)
-        ex = notifier.Callback(self.handle_exception, item, box)
-        Thread(self.__get_data_thread, search_string).start(cb, ex)
+        cb = kaa.notifier.Callback(self.cover_menu, item, box)
+        ex = kaa.notifier.Callback(self.handle_exception, item, box)
+        thread = kaa.notifier.Thread(self.__get_data_thread, search_string)
+        thread.start(cb, ex)
 
 
     def cover_menu(self, item, box, cover):

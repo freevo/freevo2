@@ -39,7 +39,9 @@
 import os
 import re
 import time
-import notifier
+
+# kaa imports
+import kaa.notifier
 
 # freevo imports
 import config
@@ -48,7 +50,6 @@ from menu import Action, ActionItem, Menu, ItemPlugin
 from util.fxdimdb import FxdImdb, makeVideo, makePart, point_maker
 from gui.windows import WaitBox, MessageBox
 from util import htmlenties2txt
-from util.fthread import Thread
 
 # shortcut for the actions
 SHORTCUT = 'imdb_search_or_cover_search'
@@ -147,11 +148,11 @@ class PluginInterface(ItemPlugin):
             searchstring = item.name
 
         # create callback to handle the results
-        cb = notifier.Callback(self.parse_results, item, disc_set, box)
+        cb = kaa.notifier.Callback(self.parse_results, item, disc_set, box)
         # create callback for a possible exception
-        ex = notifier.Callback(self.handle_exception, item, box)
+        ex = kaa.notifier.Callback(self.handle_exception, item, box)
         # start search in thread
-        thread = Thread(fxd.guessImdb, searchstring, disc_set)
+        thread = kaa.notifier.Thread(fxd.guessImdb, searchstring, disc_set)
         thread.start(cb, ex)
             
 
@@ -210,11 +211,12 @@ class PluginInterface(ItemPlugin):
             devicename = None
 
         # create callback to handle the data
-        cb = notifier.Callback(self.save, item, fxd, box, disc_set, devicename)
+        cb = kaa.notifier.Callback(self.save, item, fxd, box, disc_set,
+                                   devicename)
         # create callback for a possible exception
-        ex = notifier.Callback(self.handle_exception, item, box)
+        ex = kaa.notifier.Callback(self.handle_exception, item, box)
         # start download in thread
-        thread = Thread(fxd.setImdbId, id)
+        thread = kaa.notifier.Thread(fxd.setImdbId, id)
         thread.start(cb, ex)
         
 

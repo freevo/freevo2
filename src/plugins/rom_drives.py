@@ -54,7 +54,8 @@ import array
 import logging
 import thread
 
-import notifier
+# kaa imports
+import kaa.notifier
 
 # freevo imports
 import sysconfig
@@ -63,7 +64,6 @@ import eventhandler
 import plugin
 import util
 from util.ioctl import ioctl
-import util.fthread
 import mediadb
 
 from event import *
@@ -293,7 +293,7 @@ class RemovableMedia(vfs.Mountpoint):
 
         # Start tray moving thread. This thread will release the lock
         # when the tray is moved
-        util.fthread.Thread(self.__move_tray_thread, dir, pop).start()
+        kaa.notifier.Thread(self.__move_tray_thread, dir, pop).start()
 
 
     def __move_tray_thread(self, dir, popup):
@@ -334,10 +334,10 @@ class RemovableMedia(vfs.Mountpoint):
         self.lock.release()
         if watcher and not self.tray_open:
             # call watcher for update from main
-            util.fthread.call_from_main(watcher.poll)
+            kaa.notifier.call_from_main(watcher.poll)
         if popup:
             # delete popup (from main)
-            util.fthread.call_from_main(popup.destroy)
+            kaa.notifier.call_from_main(popup.destroy)
 
 
     def check_status_thread(self):
@@ -404,7 +404,7 @@ class RemovableMedia(vfs.Mountpoint):
         if s != CDS_DISC_OK:
             os.close(fd)
             # send media changed event and unlock the media
-            util.fthread.call_from_main(self.send_event)
+            kaa.notifier.call_from_main(self.send_event)
             return False
 
         # if there is a disc, the tray can't be open
@@ -420,7 +420,7 @@ class RemovableMedia(vfs.Mountpoint):
                 pass
         os.close(fd)
         # call identity from main loop
-        util.fthread.call_from_main(self.identify)
+        kaa.notifier.call_from_main(self.identify)
         # Note: the lock is still in place. It will be released by
         # identify later from the main loop when everything is done.
         return True
@@ -713,7 +713,7 @@ class Watcher(object):
                 # Start a thread for the scanning. This is not a perfect
                 # solution because it will create a thread for each drive
                 # every 2 seconds, but it works well.
-                util.fthread.Thread(media.check_status_thread).start()
+                kaa.notifier.Thread(media.check_status_thread).start()
         return True
 
 
