@@ -504,6 +504,7 @@ class RemovableMedia(vfs.Mountpoint):
             self.item.name  = title
             self.item.media = self
             self.item.set_url(self.info)
+            self.item.image = image
             self.item.info.set_variables(variables)
             self.type = self.info['mime'][6:]
             # send disc change event
