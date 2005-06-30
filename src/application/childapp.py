@@ -130,8 +130,8 @@ class Application(base.Application):
         """
         Send line to child.
         """
-        if self.__proc:
-            self.__proc.write(cmd)
+        if self.__child:
+            self.__child.write(line)
 
 
     def child_stdout(self, line):
