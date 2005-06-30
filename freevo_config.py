@@ -604,15 +604,6 @@ VIDEO_XINE_SUFFIX = [ 'avi', 'mpg', 'mpeg', 'rm', 'divx', 'ogm',
 VIDEO_PREFERED_PLAYER = 'mplayer'
 
 #
-# Only scan OVERLAY_DIR and VIDEO_SHOW_DATA_DIR for fxd files containing
-# information about a disc. If you only have the fxd files for discs in
-# one of this directories (and subdirectories), set this to 1, it will
-# speed up startup, 0 may be needed if you have fxd files with disc links
-# in your normal movie tree.
-#
-VIDEO_ONLY_SCAN_DATADIR = 1
-
-#
 # try to detect a movie with more than one file and join them as one
 # item
 #

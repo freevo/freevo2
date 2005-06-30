@@ -237,8 +237,6 @@ for type in ('video', 'audio', 'image', 'games'):
         exec('%s = x' % n)
         if __freevo_app__ == 'main' and plugin.is_active('mediamenu', type):
             log.warning('%s not set, set it to Home directory' % n)
-        if type == 'video':
-            VIDEO_ONLY_SCAN_DATADIR = True
 
     elif type == 'games':
         abs = []
