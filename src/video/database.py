@@ -88,26 +88,35 @@ def update():
     log.info("Building the xml hash database...")
 
     files = []
-    if not config.VIDEO_ONLY_SCAN_DATADIR:
-        if len(config.VIDEO_ITEMS) == 2:
-            for name,dir in config.VIDEO_ITEMS:
-                files += util.recursefolders(dir,1,'*.fxd',1)
+
+    discset = config.OVERLAY_DIR + '/disc-set'
+    if os.path.isdir(discset):
+        listing = Listing(discset)
+        if listing.num_changes:
+            listing.update()
+        files += listing.match_suffix(['fxd'])
 
     if config.VIDEO_SHOW_DATA_DIR:
         listing = Listing(config.VIDEO_SHOW_DATA_DIR)
         if listing.num_changes:
             listing.update()
-        for info in fxditem.mimetype.parse(None, listing.match_suffix(['fxd']), [],
-                                           display_type='video'):
-            if info.type != 'video':
-                continue
-            k = os.path.splitext(os.path.basename(info.files.fxd_file))[0]
-            tv_shows[k] = (info.image, info.info,
-                                       info.mplayer_options, info.skin_fxd)
-            if hasattr(info, '__fxd_rom_info__'):
-                for fo in info.__fxd_files_options__:
-                    discset[fo['file-id']] = fo['mplayer-options']
-            
+        files += listing.match_suffix(['fxd'])
+
+    for info in fxditem.mimetype.parse(None, files, [], display_type='video'):
+        if info.type != 'video':
+            continue
+        k = os.path.splitext(os.path.basename(info.files.fxd_file))[0]
+        tv_shows[k] = (info.image, info.info,
+                                   info.mplayer_options, info.skin_fxd)
+        if hasattr(info, '__fxd_rom_info__'):
+            for fo in info.__fxd_files_options__:
+                discset[fo['file-id']] = fo['mplayer-options']
+        if hasattr(info, '__fxd_rom_label__'):
+            # FIXME: add to fxd['label']
+            pass
+        if hasattr(info, '__fxd_rom_id__'):
+            for id in info.__fxd_rom_id__:
+                fxd['id'][id] = info
     log.info('done')
     return 1
 
