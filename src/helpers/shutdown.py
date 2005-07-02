@@ -422,4 +422,4 @@ if not hasattr(config, 'SHUTDOWN_IMPORTANT_PROGRAMS'):
 s = Shutdown()
 
 # start notifier loop
-notifier.loop()
+kaa.notifier.loop()
