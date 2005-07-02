@@ -124,7 +124,7 @@ except ImportError, i:
 
 
 #
-# checking for lsdvd to be used in mmpython
+# checking for lsdvd to be used in kaa.metadata
 #
 if not config.CONF.lsdvd:
     print
@@ -138,16 +138,14 @@ else:
 
 
 #
-# mmpython version checking
+# kaa.metadata version checking
 #
 try:
-    import mmpython.version
-    if mmpython.version.CHANGED < 20040629:
-        raise ImportError('found version %s' % mmpython.version.VERSION)
+    import kaa.metadata.version
+    if kaa.metadata.version.CHANGED < 20040629:
+        raise ImportError('found version %s' % kaa.metadata.version.VERSION)
 except ImportError:
-    print 'Error: This version of Freevo requires mmpython >= 0.4.3'
-    print 'You can download the latest release from'
-    print 'http://sourceforge.net/project/showfiles.php?group_id=75590'
+    print 'Error: This version of Freevo requires kaa.metadata >= 0.4.3'
     print
     sys.exit(0)
 

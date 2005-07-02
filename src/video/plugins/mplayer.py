@@ -37,7 +37,7 @@ import logging
 
 # external imports
 import notifier
-import mmpython
+import kaa.metadata
 
 from kaa.mevas.displays import bmovlcanvas
 
@@ -123,7 +123,7 @@ class MPlayer(mplayer.Application):
 
         if mode == 'file':
             url = item.url[6:]
-            self.item_info = mmpython.parse(url)
+            self.item_info = kaa.metadata.parse(url)
             if hasattr(self.item_info, 'get_length'):
                 self.item_length = self.item_info.get_endpos()
                 self.dynamic_seek_control = True
@@ -250,7 +250,7 @@ class MPlayer(mplayer.Application):
             command += config.MPLAYER_SOFTWARE_SCALER.split(' ')
             self.use_bmovl = True
 
-        # correct avi delay based on mmpython settings
+        # correct avi delay based on kaa.metadata settings
         if config.MPLAYER_SET_AUDIO_DELAY and item.info.has_key('delay') and \
                item.info['delay'] > 0:
             command += [ '-mc', str(int(item.info['delay'])+1), '-delay',

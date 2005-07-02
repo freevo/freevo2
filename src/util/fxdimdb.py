@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2005/07/02 16:46:27  dischi
+# use kaa.metadata instead of mmpython
+#
 # Revision 1.12  2005/06/25 08:52:29  dischi
 # switch to new style python classes
 #
@@ -74,7 +77,7 @@ import os
 import config 
 import util
 
-from mmpython.disc.discinfo import cdrom_disc_id
+from kaa.metadata.disc.discinfo import cdrom_disc_id
 #Constants
 
 import logging

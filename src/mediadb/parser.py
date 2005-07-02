@@ -33,7 +33,7 @@
 import os
 import stat
 import time
-import mmpython
+import kaa.metadata
 import pickle
 import cPickle
 import re
@@ -58,7 +58,7 @@ def init():
     Init the parser module
     """
     global VERSION
-    VERSION += mmpython.version.CHANGED
+    VERSION += kaa.metadata.version.CHANGED
     for f in os.listdir(os.path.dirname(__file__)):
         if f.endswith('_parser.py'):
             exec('import %s' % f[:-3])
@@ -68,7 +68,7 @@ def init():
 
 def simplify(object):
     """
-    mmpython has huge objects to cache, we don't need them.
+    Kaa.metadata has huge objects to cache, we don't need them.
     This function simplifies them to be only string, integer, dict or
     list of one of those above. This makes the caching much faster
     """
@@ -174,14 +174,14 @@ def parse(basename, filename, object, cache, listing):
     mminfo = None
     ext = object[EXTENTION]
     if not ext in [ 'xml', 'fxd' ]:
-        mminfo = mmpython.parse(filename)
+        mminfo = kaa.metadata.parse(filename)
 
     is_dir = os.path.isdir(filename)
     title = getname(filename, is_dir)
     object[FILETITLE] = title
 
     if mminfo:
-        # store mmpython data as pickle for faster loading
+        # store kaa.metadata data as pickle for faster loading
         object[MMINFO] = cPickle.dumps(simplify(mminfo),
                                          pickle.HIGHEST_PROTOCOL)
         if hasattr(mminfo, TITLE) and mminfo.title:

@@ -448,7 +448,7 @@ class VideoItem(MediaItem):
             i.set_url(i.info)
             i.url = i.url + str(title+1)
 
-            # copy the attributes from mmpython about this track
+            # copy the attributes from kaa.metadata about this track
             i.info.mminfo = self.info.mminfo['tracks'][title]
             i.info.set_variables(self.info.get_variables())
             # set attributes

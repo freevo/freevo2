@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2005/07/02 16:46:27  dischi
+# use kaa.metadata instead of mmpython
+#
 # Revision 1.7  2005/06/25 08:52:29  dischi
 # switch to new style python classes
 #
@@ -50,7 +53,7 @@ import config
 
 def tracknum(track):
     """ 
-    Extract the track numbers from a mmpython result
+    Extract the track numbers from a kaa.metadata result
     """
 
     trackno = -1

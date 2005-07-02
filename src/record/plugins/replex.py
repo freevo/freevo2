@@ -32,7 +32,7 @@
 
 # python imports
 import os
-import mmpython
+import kaa.metadata
 import logging
 
 # kaa imports
@@ -69,7 +69,7 @@ class PluginInterface(Plugin):
         The replex program has stopped, check the result.
         """
         # get length of both files
-        srcinfo = mmpython.parse(source)
+        srcinfo = kaa.metadata.parse(source)
         if not srcinfo:
             # this shoudln't happen
             log.error('unable to parse %s' % source)
@@ -78,7 +78,7 @@ class PluginInterface(Plugin):
         else:
             slen = srcinfo.length
 
-        destinfo = mmpython.parse(dest)
+        destinfo = kaa.metadata.parse(dest)
         if not destinfo:
             # replex didn't work
             log.error('unable to parse %s' % dest)
@@ -139,7 +139,7 @@ class PluginInterface(Plugin):
             log.info('%s is no mpeg ts' % String(source))
             return
 
-        if not mmpython.parse(source):
+        if not kaa.metadata.parse(source):
             log.info('%s is failed' % String(source))
             return
         

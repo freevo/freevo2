@@ -60,7 +60,7 @@ class ItemInfo(object):
         self.attr = attr
         # tmp data only valid in the current session
         self.tmp = {}
-        # mmpython data for the item
+        # kaa.metadata data for the item
         self.mminfo = None
         # hidden variables (FIXME)
         self.hidden_variables = {}
@@ -106,7 +106,7 @@ class ItemInfo(object):
         if self.hidden_variables.has_key(key):
             return self.hidden_variables[key]
         if self.mminfo == None:
-            # unpickle mmpython data
+            # unpickle kaa.metadata data
             if not self.attr.has_key(MMINFO):
                 return None
             log.debug('unpickle %s' % self.basename)
@@ -145,7 +145,7 @@ class ItemInfo(object):
         if self.hidden_variables.has_key(key):
             return True
         if self.mminfo == None:
-            # unpickle mmpython data
+            # unpickle kaa.metadata data
             if not self.attr.has_key(MMINFO):
                 return False
             log.debug('unpickle %s' % self.basename)

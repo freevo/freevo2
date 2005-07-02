@@ -43,7 +43,7 @@
 # python imports
 import os
 import logging
-import mmpython
+import kaa.metadata
 
 # freevo imports
 import sysconfig
@@ -93,7 +93,7 @@ class PluginInterface(ItemPlugin):
         Resume playback
         """
         t = max(0, item[RESUME] - 10)
-        info = mmpython.parse(item.filename)
+        info = kaa.metadata.parse(item.filename)
         if hasattr(info, 'seek') and t:
             mplayer_options = '-sb %s' % info.seek(t)
         else:

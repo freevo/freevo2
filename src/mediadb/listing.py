@@ -72,7 +72,7 @@ class Listing(object):
     def update(self, callback=None, fast=False):
         """
         Update the directory listing. This means parsing all changed / new
-        files. If fast is True, only new files will be updated and mmpython
+        files. If fast is True, only new files will be updated and metadata
         checking is disabled. The listing is still not correct then. If
         callback not not None, callback will be called on each item.
         """

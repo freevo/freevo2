@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2005/07/02 16:46:24  dischi
+# use kaa.metadata instead of mmpython
+#
 # Revision 1.45  2005/06/18 12:07:02  dischi
 # use new menu memeber function
 #
@@ -113,7 +116,7 @@ from gui.windows import MessageBox
 from event import *
 
 # Included to be able to access the info for Audio CDs
-import mmpython
+import kaa.metadata
 
 import logging
 log = logging.getLogger('audio')
@@ -299,7 +302,7 @@ def tagmp3 (filename, title=None, artist=None, album=None, track=None,
     though 2.4 is the accepted standard now, more
     players support 2.3
     """
-    import mmpython.audio.eyeD3 as eyeD3
+    import kaa.metadata.audio.eyeD3 as eyeD3
 
     tag = eyeD3.Tag(String(filename))
     tag.header.setVersion(eyeD3.ID3_V2_3)
@@ -579,7 +582,7 @@ class main_backup_thread(threading.Thread):
 
 
     def get_formatted_cd_info(self, device):
-        cd_info = mmpython.parse(device)
+        cd_info = kaa.metadata.parse(device)
 
         # Check if getting CDDB data failed -is there a better way to do this?
         # Give some defaults with a timestamp to uniqueify artist and album names.

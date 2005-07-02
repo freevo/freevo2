@@ -37,8 +37,8 @@ __all__ = [' get' ]
 import os
 import logging
 
-# mmpython
-from mmpython.disc.discinfo import cdrom_disc_id
+# kaa.metadata
+from kaa.metadata.disc.discinfo import cdrom_disc_id
 
 # freevo imports
 import sysconfig

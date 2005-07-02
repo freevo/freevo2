@@ -36,7 +36,7 @@ import time
 import copy
 
 import notifier
-import mmpython.version
+import kaa.metadata.version
 
 # freevo imports
 import config
@@ -290,7 +290,7 @@ else:
 
     # let's warn about some updates
     if freevo_changed < VERSION or \
-           mmpython.version.CHANGED > mmchanged:
+           kaa.metadata.version.CHANGED > mmchanged:
         print 'Cache too old, forcing rebuild'
         rebuild = 1
         complete_update = int(time.time())
@@ -332,7 +332,7 @@ mediadb.cache(l)
 mediadb.save()
 
 # save cache info
-util.cache.save(cachefile, (mmpython.version.CHANGED, VERSION,
+util.cache.save(cachefile, (kaa.metadata.version.CHANGED, VERSION,
                             int(time.time()), complete_update))
 
 print

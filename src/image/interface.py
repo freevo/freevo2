@@ -42,7 +42,7 @@ __all__ = [ 'PluginInterface' ]
 import os
 
 # Add support for bins album files
-from mmpython.image import bins
+from kaa.metadata.image import bins
 
 # freevo imports
 import config

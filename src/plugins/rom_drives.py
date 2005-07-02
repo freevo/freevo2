@@ -488,7 +488,7 @@ class RemovableMedia(vfs.Mountpoint):
                 break
 
         # DVD/VCD/SVCD:
-        # There is self.info from mmpython for these three types
+        # There is self.info from kaa.metadata for these three types
         if self.info['mime'] in ('video/vcd', 'video/dvd'):
             if not title:
                 title = self.label.replace('_', ' ').lstrip().rstrip()
