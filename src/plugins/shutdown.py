@@ -30,13 +30,20 @@
 #
 # -----------------------------------------------------------------------------
 
+# python imports
+import sys
+
+# kaa imports
+import kaa.notifier
+
 # freevo imports
 import config
+import gui
+import gui.widgets
 
 from gui.windows import ConfirmBox
 from mainmenu import MainMenuItem
 from plugin import MainMenuPlugin
-from cleanup import shutdown
 
 
 class ShutdownItem(MainMenuItem):
@@ -95,25 +102,40 @@ class ShutdownItem(MainMenuItem):
                    default_choice=1).show()
 
 
+    def show_gui_message(self, text):
+        """
+        Clear the screen and show the message.
+        """
+        msg = gui.widgets.Text(text, (0, 0), (gui.width, gui.height),
+                               gui.theme.font('default'), align_h='center',
+                               align_v='center')
+        gui.display.clear()
+        gui.display.add_child(msg)
+        gui.display.update()
+
+        
     def shutdown_freevo(self, arg=None, menuw=None):
         """
         shutdown freevo, don't shutdown the system
         """
-        shutdown(menuw=menuw, argshutdown=False, argrestart=False)
+        self.show_gui_message(_('shutting down...'))
+        kaa.notifier.addTimer(1000, sys.exit, 0)
 
 
     def shutdown_system(self, arg=None, menuw=None):
         """
         shutdown the complete system
         """
-        shutdown(menuw=menuw, argshutdown=True, argrestart=False)
+        self.show_gui_message(_('shutting down system...'))
+        kaa.notifier.addTimer(1000, os.system, config.SHUTDOWN_SYS_CMD)
 
 
     def shutdown_system_restart(self, arg=None, menuw=None):
         """
         restart the complete system
         """
-        shutdown(menuw=menuw, argshutdown=False, argrestart=True)
+        self.show_gui_message(_('restarting system...'))
+        kaa.notifier.addTimer(1000, os.system, config.RESTART_SYS_CMD)
 
 
 

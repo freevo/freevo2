@@ -61,11 +61,12 @@
 # -----------------------------------------------------------------------------
 
 # python imports
+import sys
 import time
 import logging
 
 # notifier
-import notifier
+import kaa.notifier
 
 # freevo imports
 import sysconfig
@@ -180,7 +181,7 @@ class Eventhandler(object):
         # idle timer variable
         self.__idle_time = 0
         # callback to inherit idle time every minute
-        notifier.addTimer(60000, self.__update_idle_time)
+        kaa.notifier.addTimer(60000, self.__update_idle_time)
         
 
     def __update_idle_time(self):
@@ -430,7 +431,6 @@ class Eventhandler(object):
             # and classes to do it. This is bad coding style, but
             # it is not possible to import it earlier.
             import config
-            import cleanup
             from gui.windows import ConfirmBox
             
             if config.FREEVO_EVENTHANDLER_SANDBOX:
@@ -442,7 +442,8 @@ class Eventhandler(object):
                       'could cause more errors until you restart '\
                       'Freevo.\n\nLogfile: %s') % \
                       (event, sysconfig.syslogfile)
-                pop = ConfirmBox(msg, handler=cleanup.shutdown,
+                handler = kaa.notifier.Callback(sys.exit, 0)
+                pop = ConfirmBox(msg, handler=handler,
                                  handler_message = _('shutting down...'),
                                  button0_text = _('Shutdown'),
                                  button1_text = _('Continue')).show()

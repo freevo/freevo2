@@ -34,6 +34,7 @@ __all__ = [ 'get', 'set', 'remove', 'shutdown', 'active' ]
 # python imports
 import copy
 import logging
+import kaa.notifier
 
 # freevo imports
 import config
@@ -156,3 +157,7 @@ def active():
     active
     """
     return True
+
+
+# stop the display on shutdown
+kaa.notifier.addShutdown(shutdown)

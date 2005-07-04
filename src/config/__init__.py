@@ -63,8 +63,6 @@ import setup
 import input
 
 # FIXME: plugin imports eventhandler which imports config again.
-# It also includes cleanup.py, but this file imports other freevo code
-# only when the shutdown function is called (bad coding style)
 import plugin
 
 # import event names (no deps)

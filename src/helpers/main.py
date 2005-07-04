@@ -177,7 +177,6 @@ import util
 import plugin
 import mcomm
 
-from cleanup import shutdown
 from mainmenu import MainMenu
 
 # load the fxditem to make sure it's the first in the
@@ -262,15 +261,6 @@ class RPCHandler(mcomm.RPCServer):
         return mcomm.RPCReturn(status)
 
 
-def signal_handler(sig, frame):
-    """
-    the signal handler to shut down freevo
-    """
-    if sig in (signal.SIGTERM, signal.SIGINT):
-        shutdown(exit=True)
-
-
-
 #
 # Freevo main function
 #
@@ -285,10 +275,6 @@ if len(sys.argv) >= 2:
         config.START_FULLSCREEN_X = 1
 
 try:
-    # signal handler
-    signal.signal(signal.SIGTERM, signal_handler)
-    signal.signal(signal.SIGINT, signal_handler)
-
     # create gui
     gui.displays.create()
     
@@ -323,41 +309,6 @@ try:
     # start main loop
     kaa.notifier.loop()
 
-
-except KeyboardInterrupt:
-    log.info('Shutdown by keyboard interrupt')
-    # Shutdown Freevo
-    shutdown()
-
-except SystemExit, e:
-    # Shutdown Freevo
-    shutdown()
-
 except:
     log.exception('Crash!')
-    try:
-        tb = sys.exc_info()[2]
-        fname, lineno, funcname, text = traceback.extract_tb(tb)[-1]
-
-        if config.FREEVO_EVENTHANDLER_SANDBOX:
-            secs = 5
-        else:
-            secs = 1
-        # for i in range(secs, 0, -1):
-        #     osd.clearscreen(color=osd.COL_BLACK)
-        #     osd.drawstring(_('Freevo crashed!'), 70, 70)
-        #     osd.drawstring(_('Filename: %s') % fname, 70, 130)
-        #     osd.drawstring(_('Lineno: %s') % lineno, 70, 160)
-        #     osd.drawstring(_('Function: %s') % funcname, 70, 190)
-        #     osd.drawstring(_('Text: %s') % text, 70, 220)
-        #     osd.drawstring(str(sys.exc_info()[1]), 70, 280)
-        #     osd.drawstring(_('Please see the logfiles for more info'),
-        #                    70, 350)
-        #     osd.drawstring(_('Exit in %s seconds') % i, 70, 410)
-        #     osd.update()
-        #     time.sleep(1)
-    except:
-        pass
-
-    # Shutdown freevo
-    shutdown()
+    kaa.notifier.shutdown()

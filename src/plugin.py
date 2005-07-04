@@ -38,10 +38,9 @@ import os
 import copy
 import logging
 
-import notifier
+import kaa.notifier
 
 # freevo imports
-import cleanup
 from event import Event
 import eventhandler
 
@@ -324,8 +323,8 @@ def init(callback = None, reject=['record', 'www'], exclusive=[]):
 
     current = 0
     for name, type, level, args, number in _all_plugins:
-        if notifier.step:
-            notifier.step(False, False)
+        if kaa.notifier.step:
+            kaa.notifier.step(False, False)
         current += 1
         if callback:
             callback()
@@ -559,7 +558,7 @@ def _load_plugin(name, type, level, args, number):
                 # plugin is a DaemonPlugin
                 if p.__class__.poll != DaemonPlugin.poll:
                     # plugin has a self defined poll function, register it
-                    notifier.addTimer( p.poll_interval, p._poll )
+                    kaa.notifier.addTimer( p.poll_interval, p._poll )
 
                 if p.__class__.eventhandler != DaemonPlugin.eventhandler:
                     # plugin has a self defined eventhandler
@@ -588,7 +587,7 @@ def _load_plugin(name, type, level, args, number):
         # register shutdown handler
         if p.__class__.shutdown != Plugin.shutdown:
             # plugin has a self defined shutdown function
-            cleanup.register( p.shutdown )
+            kaa.notifier.addShutdown( p.shutdown )
 
         if p.plugin_name:
             _named_plugins[p.plugin_name] = p

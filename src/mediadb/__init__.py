@@ -51,3 +51,7 @@ init()
 
 def item():
     return ItemInfo('', '', {})
+
+# make sure we save the db on exit
+import kaa.notifier
+kaa.notifier.addShutdown(save)
