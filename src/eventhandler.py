@@ -433,6 +433,7 @@ class Eventhandler(object):
             import config
             from gui.windows import ConfirmBox
             
+            self.locked = False
             if config.FREEVO_EVENTHANDLER_SANDBOX:
                 log.exception('eventhandler')
                 msg=_('Event \'%s\' crashed\n\nPlease take a ' \
