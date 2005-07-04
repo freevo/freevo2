@@ -37,6 +37,7 @@ import copy
 
 import notifier
 import kaa.metadata.version
+import kaa.thumb
 
 # freevo imports
 import config
@@ -192,7 +193,8 @@ def cache_thumbnails(directories):
 
     files = util.misc.unique(files)
     for filename in copy.copy(files):
-        if thumbnail.get_name(filename) != None:
+        if thumbnail.get_name(filename)[0] in \
+               (kaa.thumb.LARGE, kaa.thumb.FAILED):
             files.remove(filename)
         else:
             for bad_dir in ('.xvpics', '.thumbnails', '.pics'):

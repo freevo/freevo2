@@ -8,6 +8,8 @@
 # image access. The thumbnails are stored in the vfs and have a max size
 # of 255x255 pixel. 
 #
+# TODO: move this file and it's logic into kaa.thumb
+#
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
@@ -60,24 +62,12 @@ def get_name(filename):
     Returns the filename of the thumbnail if it exists. None if not or
     False if it is impossible to create one.
     """
-    s = os.stat(filename)
-    if s[stat.ST_SIZE] < 30000:
-        # do not create thumbnails of small files
-        return filename
-
     # use ~/.thumbnails
     mp = vfs.get_mountpoint(filename)
     if mp:
-        thumb = kaa.thumb.check(filename, mp.thumbnails)
+        return kaa.thumb.check(filename, kaa.thumb.LARGE, mp.thumbnails)
     else:
-        thumb = kaa.thumb.check(filename)
-    if not thumb:
-        return thumb
-
-    if os.stat(thumb)[stat.ST_MTIME] > s[stat.ST_MTIME]:
-        return thumb
-    os.unlink(thumb)
-    return None
+        return kaa.thumb.check(filename, kaa.thumb.LARGE)
 
 
 def create(filename):
@@ -91,22 +81,24 @@ def create(filename):
             _create_jobs.remove(job)
             if _create_jobs:
                 call_later(10, create, _create_jobs[0][0])
-
+            break
+        
     log.debug('create %s', filename)
 
-    mp = vfs.get_mountpoint(filename)
-    if mp:
-        thumb = kaa.thumb.check(filename, mp.thumbnails)
-    else: 
-        thumb = kaa.thumb.check(filename)
-       
-    if thumb == False:
-        thumb = None
-    elif not thumb:
+    type, thumb = get_name(filename)
+
+    if type == kaa.thumb.FAILED:
+        # unable to create thumbnail
+        return None
+
+    if type != kaa.thumb.LARGE:
+        # create a large thumbnail
+        mp = vfs.get_mountpoint(filename)
         if mp:
-            thumb = kaa.thumb.create(filename, mp.thumbnails)
+            thumb = kaa.thumb.create(filename, kaa.thumb.LARGE, mp.thumbnails)
         else:
-            thumb = kaa.thumb.create(filename)
+            thumb = kaa.thumb.create(filename, kaa.thumb.LARGE)
+
     if thumb:
         thumb = kaa.mevas.imagelib.open(thumb)
 
@@ -122,27 +114,37 @@ def load(filename, bg=False, callback=None):
     """
     Return the thumbnail. Create one, if it doesn't exists.
     """
-    try:
-        thumb = get_name(filename)
-    except OSError:
-        return None
-    if thumb:
-        return kaa.mevas.imagelib.open(thumb)
-    if thumb == False:
+    type, thumb = get_name(filename)
+    if type == kaa.thumb.FAILED:
         # unable to create thumbnail
         return None
+    if type == kaa.thumb.LARGE:
+        # load image and return
+        return kaa.mevas.imagelib.open(thumb)
+
     if not bg:
+        # create thumbnail now
         return create(filename)
 
+    # add thumbnail to background queue
     for f, c in _create_jobs:
         if f == filename:
             # already in queue
             if callback and not callback in c:
                 c.append(callback)
-            return
-    if callback:
-        _create_jobs.append((filename, [ callback ]))
+            break
     else:
-        _create_jobs.append((filename, []))
-    call_later(10, create, _create_jobs[0][0])
+        if callback:
+            _create_jobs.append((filename, [ callback ]))
+        else:
+            _create_jobs.append((filename, []))
+        call_later(10, create, _create_jobs[0][0])
+
+    # If type is NORMAL, we have a thumbnail but want a better one.
+    # But still, for now, a small one is better than nothing
+    if type == kaa.thumb.NORMAL:
+        # load image and return
+        return kaa.mevas.imagelib.open(thumb)
+
+    # no image
     return None
