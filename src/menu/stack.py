@@ -128,7 +128,7 @@ class MenuStack(object):
         if len(self.menustack) > 1 and self.menustack[-1].submenu:
             self.back_one_menu(refresh)
         elif len(self.menustack) > 1 and osd_message:
-            eventhandler.post_event(Event(OSD_MESSAGE, arg=osd_message))
+            eventhandler.post(Event(OSD_MESSAGE, arg=osd_message))
 
 
     def pushmenu(self, menu):
@@ -375,7 +375,7 @@ class MenuStack(object):
             actions = menu.selected.get_actions()
             if not actions:
                 msg = _('No action defined for this choice!')
-                eventhandler.post_event(Event(OSD_MESSAGE, arg=msg))
+                eventhandler.post(Event(OSD_MESSAGE, arg=msg))
             else:
                 actions[0]()
             return True
@@ -414,7 +414,7 @@ class MenuStack(object):
             log.info('calling action %s' % event.arg)
             for a in menu.selected.get_actions():
                 if a.shortcut == event.arg:
-                    a(menu.selected, self)
+                    a()
                     return True
             log.info('action %s not found' % event.arg)
 
