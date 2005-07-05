@@ -149,11 +149,15 @@ class Menu(object):
                     self.select(c)
                     break
             else:
-                # item is gone now, try to the selection close
-                # to the old item
-                pos = max(0, min(self.selected_pos-1, len(self.choices)-1))
-                self.select(self.choices[pos])
-
+                if self.choices:
+                    # item is gone now, try to the selection close
+                    # to the old item
+                    pos = max(0, min(self.selected_pos-1, len(self.choices)-1))
+                    self.select(self.choices[pos])
+                else:
+                    # no item in the list
+                    self.select(None)
+                
         if refresh and self.stack:
             self.stack.refresh()
             
