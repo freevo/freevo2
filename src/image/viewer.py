@@ -167,7 +167,10 @@ class ImageViewer(Application):
         self.rotation = rotation
 
         if filename and len(filename) > 0:
-            image = gui.imagelib.load(filename, cache=self.bitmapcache)
+            image = self.bitmapcache[filename]
+            if not image:
+                image = gui.imagelib.load(filename)
+                self.bitmapcache[filename] = image
         else:
             # Using Container-Image
             image = item.loadimage()
@@ -299,8 +302,10 @@ class ImageViewer(Application):
         """
         Cache the next image (most likely we need this)
         """
-        if item.filename and len(item.filename) > 0:
-            gui.imagelib.load(item.filename, cache=self.bitmapcache)
+        if item.filename and len(item.filename) > 0 and \
+               not self.bitmapcache[item.filename]:
+            image = gui.imagelib.load(item.filename)
+            self.bitmapcache[item.filename] = image
 
 
     def signalhandler(self):
