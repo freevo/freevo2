@@ -76,7 +76,7 @@ def scale(*arg1, **arg2):
     return kaa.mevas.imagelib.scale(*arg1, **arg2)
 
 
-def load(url, size=None, cache=False):
+def load(url, size=None):
     """
     Load a bitmap and return the image object.
     If width and height are given, the image is scaled to that. Setting
@@ -101,21 +101,9 @@ def load(url, size=None, cache=False):
         surl = theme.image(url)
         if surl:
             url = surl
-    if cache:
-        # first check the cache
-        if width != None or height != None:
-            key = 'scaled://%s-%s-%s' % (url, width, height)
-        else:
-            key = url
-        key += str(os.stat(url)[stat.ST_MTIME])
 
-        s = cache[key]
-        if s:
-            return s
-
-    # not in cache, load it
     filename = os.path.abspath(url)
-
+    
     if not os.path.isfile(filename):
         filename = os.path.join(config.IMAGE_DIR, url[8:])
 
@@ -133,48 +121,22 @@ def load(url, size=None, cache=False):
     if width != None or height != None:
         image = _resize(image, width, height)
 
-    if cache:
-        cache[key] = image
     return image
 
 
 
-def item_image(item, size, icon_dir, force=False, cache=True, bg=False,
-               callback=None):
+def item_image(item, size, icon_dir, force=False, bg=False, callback=None):
     """
-    Return the image for an item. This function uses internal caches and
-    can also return a mimetype image if no image is found and force is True
-    Return: image object, cache key, forced
+    Return the image for an item. This function can also return a mimetype
+    image if no image is found and force is True.
+    Return: image object or None
     """
     width, height = size
+
     try:
         type = item.display_type
     except:
         type = item.type
-
-    try:
-        if isinstance(item.image, (str, unicode)):
-            mtime = os.stat(item.image)[stat.ST_MTIME]
-        else:
-            mtime = 0
-    except:
-        item.image = ''
-    if isinstance(item.image, (str, unicode)) and item.image:
-        key = '%s-%s-%s-%s-%s-%s-%s-%s' % (icon_dir, item.image, type,
-                                           item.type, width, height, force,
-                                           mtime)
-        if item['rotation']:
-            key = '%s-%s' % (key, item['rotation'])
-
-        if item.media and item.media.item == item:
-            key = '%s-%s' % (key, item.media)
-
-        image = cache[key]
-
-        if image:
-            return image, key, False
-    else:
-        key = ''
 
     image     = None
     imagefile = None
@@ -190,10 +152,9 @@ def item_image(item, size, icon_dir, force=False, cache=True, bg=False,
     if image:
         if item['rotation']:
             image.rotate(item['rotation'])
-        force = False
     else:
         if not force:
-            return None, key, False
+            return None
 
         if hasattr(item, 'media') and item.media and \
                item.media.item == item and \
@@ -235,13 +196,13 @@ def item_image(item, size, icon_dir, force=False, cache=True, bg=False,
                 imagefile = '%s/mimetypes/unknown.png' % icon_dir
 
         if not imagefile:
-            return None, key, True
+            return None
 
         # load the thumbnail
         image = util.thumbnail.load(imagefile)
 
         if not image:
-            return None, key, True
+            return None
 
     if type and len(type) > 4:
         type = type[:5]
@@ -267,6 +228,4 @@ def item_image(item, size, icon_dir, force=False, cache=True, bg=False,
         height = int(float(width * i_h) / i_w)
 
     image.scale((width, height))
-    if isinstance(item.image, (str, unicode)) and item.image:
-        cache[key] = image
-    return image, key, force
+    return image

@@ -48,7 +48,6 @@ class ViewArea(Area):
         Area.__init__(self, 'view')
         self.info = (None, None, None)
         self.gui_objects = []
-        self.imagecache = ObjectCache(10)
 
 
     def clear(self):
@@ -119,8 +118,7 @@ class ViewArea(Area):
         addy = settings.y + settings.spacing
 
         image = self.imagelib.item_image(item, (width, height),
-                                         self.settings.icon_dir,
-                                         cache=self.imagecache)[0]
+                                         self.settings.icon_dir)
 
         if not image:
             return

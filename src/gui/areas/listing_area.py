@@ -46,6 +46,7 @@ import notifier
 # freevo imports
 import util
 from util.objectcache import ObjectCache
+import util.thumbnail
 
 # gui import
 from area import Area
@@ -65,13 +66,8 @@ class _Redraw(object):
         self.args = args
         self.gui_objects = gui_objects
         self.screen = screen
-        self.cache = None
-        self.cache_key = None
         
     def redraw(self, filename, thumb):
-        # clear image cache because there is a new image
-        if self.cache and self.cache_key:
-            del self.cache[self.cache_key]
         if not self.gui_objects:
             # no gui objects, must be cleaned
             return
@@ -105,7 +101,6 @@ class ListingArea(Area):
         self.last_max_len      = -1
         self.empty_listing     = None
         self.arrows            = []
-        self.imagecache        = ObjectCache(100)
         self.__default_val     = None
 
 
@@ -483,7 +478,8 @@ class ListingArea(Area):
         once.
         """
         cb = _Redraw(self.__draw_image_listing_item, gui_objects, self.screen,
-                     choice, (x, y), settings, val, hspace, vspace, gui_objects, False)
+                     choice, (x, y), settings, val, hspace, vspace,
+                     gui_objects, False)
 
         height = val.height
         if settings.type == 'image+text':
@@ -508,14 +504,9 @@ class ListingArea(Area):
             b = self.drawbox(x + r.x, y + r.y, r.width, r.height, r)
             gui_objects.append(b)
 
-        ret = self.imagelib.item_image(choice, (val.width, val.height),
-                                       self.settings.icon_dir, force=True,
-                                       cache=self.imagecache, bg=True,
-                                       callback=cb.redraw)
-        image, key, forced = ret
-        if forced:
-            cb.cache = self.imagecache
-            cb.cache_key = key
+        image = self.imagelib.item_image(choice, (val.width, val.height),
+                                         self.settings.icon_dir, force=True,
+                                         bg=True, callback=cb.redraw)
         if image:
             i_w, i_h = image.width, image.height
 
@@ -562,13 +553,12 @@ class ListingArea(Area):
         if not self.__cache_listing:
             return False
 
-        # Load the image. It will be stored in the cache. Since we don't use
-        # the image at this point, we just drop it.
-        self.imagelib.item_image(self.__cache_listing[0],
-                                 (self.__default_val.width,
-                                  self.__default_val.height),
-                                 self.settings.icon_dir, force=False,
-                                 cache=self.imagecache, bg=True)
+        image = self.__cache_listing[0].image
+        
+        if image and util.thumbnail.need_thumbnailing(image):
+            # create thumbnail
+            util.thumbnail.load(image)
+
         if len(self.__cache_listing) == 1:
             # Nothing more to cache, return False to stop this callback
             self.__cache_listing = []
