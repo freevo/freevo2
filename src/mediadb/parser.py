@@ -34,6 +34,7 @@ import os
 import stat
 import time
 import kaa.metadata
+import kaa.metadata.version
 import pickle
 import cPickle
 import re
