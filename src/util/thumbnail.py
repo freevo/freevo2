@@ -110,6 +110,14 @@ def create(filename):
     return thumb
 
 
+def need_thumbnailing(filename, bg=False):
+    """
+    Return True if it could be possible to create a thumbnail.
+    """
+    type, thumb = get_name(filename)
+    return type in (kaa.thumb.MISSING, kaa.thumb.FAILED)
+
+    
 def load(filename, bg=False, callback=None):
     """
     Return the thumbnail. Create one, if it doesn't exists.
