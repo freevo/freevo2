@@ -32,6 +32,7 @@
 
 # python imports
 import sys
+import os
 
 # kaa imports
 import kaa.notifier
