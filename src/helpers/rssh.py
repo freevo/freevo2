@@ -4,7 +4,7 @@ import sys
 import os
 import time
 
-import notifier
+import kaa.notifier
 import kaa.epg
 import config
 import mcomm
@@ -113,10 +113,10 @@ def user_input( socket ):
     return True
 
 mcomm.register_entity_notification(notification)
-notifier.addSocket( sys.stdin, user_input )
+kaa.notifier.addSocket( sys.stdin, user_input )
 
 print 'rssh - recordserver shell'
 print '-------------------------'
 print
 print 'waiting for recordserver'
-notifier.loop()
+kaa.notifier.loop()

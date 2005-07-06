@@ -60,18 +60,11 @@ try:
 except Exception, e:
     log.warning('unable to set uid: %s' % e)
 
-# init the notifier
-kaa.notifier.init(kaa.notifier.GENERIC)
-
 # import recordserver
 import record.server
 
 # start recordserver
 record.server.RecordServer()
 
-try:
-    kaa.notifier.loop()
-except:
-    log.exception('recordserver crash')
-
+kaa.notifier.loop()
 kaa.notifier.shutdown()

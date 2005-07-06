@@ -56,7 +56,7 @@ import traceback
 import logging
 
 # notifier / mbus import
-import notifier
+import kaa.notifier
 import mbus
 
 # freevo imports
@@ -195,7 +195,7 @@ class RemoteEntity(object):
         
         # wait for return
         while not self.result:
-            notifier.step(True, False)
+            kaa.notifier.step(True, False)
 
         # check for error / exception and raise it
         if isinstance(self.result, mbus.types.MError):
@@ -397,7 +397,7 @@ class Instance(mbus.Guides):
                     return e
             if t1 + float(timeout) / 1000 < time.time():
                 return None
-            notifier.step(True, False)
+            kaa.notifier.step(True, False)
 
 
     def register_event(self, mcommand, function):
@@ -466,8 +466,3 @@ if not os.path.isfile(mbus_config):
     tmp.close()
     cfg.close()
     os.chmod(mbus_config, 0600)
-
-
-if __freevo_app__ != 'main' and not notifier.loop:
-    # init the notifier (not done yet)
-    notifier.init( notifier.GENERIC )

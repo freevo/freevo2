@@ -35,7 +35,6 @@ import sys
 import time
 import copy
 
-import notifier
 import kaa.metadata.version
 import kaa.thumb
 
@@ -216,9 +215,6 @@ def cache_thumbnails(directories):
         print
 
     
-
-# init the notifier
-notifier.init( notifier.GENERIC )
 
 os.umask(config.UMASK)
 if len(sys.argv)>1 and sys.argv[1] == '--help':

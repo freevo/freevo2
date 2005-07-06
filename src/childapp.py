@@ -94,7 +94,7 @@ class Instance(kaa.notifier.Process):
         """
         kaa.notifier.Process.stop(self, cmd)
         while self.is_alive():
-            notifier.step()
+            kaa.notifier.step()
         
 
     def stop_event(self):

@@ -32,7 +32,7 @@
 
 # python imports
 import os
-import notifier
+import kaa.notifier
 import logging
 
 # get logging object
@@ -47,9 +47,6 @@ import config
 # import webserver
 from www.server import Server, RequestHandler
 
-# init notifier
-notifier.init( notifier.GENERIC )
-
 # import record.client to attach to the mbus
 import record.client
 
@@ -58,16 +55,11 @@ htdocs  = [ os.path.join(cgi_dir, 'htdocs'),
             os.path.join(config.SHARE_DIR, 'htdocs'),
             os.path.join(config.DOC_DIR, 'html') ]
 
-try:
-    # launch the server on port 8080
-    Server('', config.WWW_PORT, RequestHandler,
-           [ (os.path.join(cgi_dir, 'plugins'), 'www.plugins'),
-             (os.path.join(cgi_dir, 'pages'), 'www.pages') ] , htdocs)
-    log.info("HTTPServer running on port %s" % str(config.WWW_PORT))
-    
-    # loop
-    notifier.loop()
-except KeyboardInterrupt:
-    pass
-except:
-    log.exception('webserver crash')
+# launch the server on port 8080
+Server('', config.WWW_PORT, RequestHandler,
+       [ (os.path.join(cgi_dir, 'plugins'), 'www.plugins'),
+         (os.path.join(cgi_dir, 'pages'), 'www.pages') ] , htdocs)
+log.info("HTTPServer running on port %s" % str(config.WWW_PORT))
+
+# loop
+kaa.notifier.loop()

@@ -46,19 +46,6 @@ import logging.config
 log = logging.getLogger()
 
 #
-# notifier version checking
-#
-try:
-    import kaa.notifier
-    if kaa.notifier.VERSION < '0.3.0':
-        raise ImportError('found version %s' % kaa.notifier.VERSION)
-    kaa.notifier.init(kaa.notifier.GENERIC)
-except Exception, e:
-    print 'Error: This version of Freevo requires pyNotifier >= 0.3.0'
-    print 'To download and install pyNotifier to ./site-packages run \'make\''
-    sys.exit(0)
-
-#
 # imlib2 checking
 #
 try:
@@ -164,6 +151,9 @@ except Exception, e:
     print
     sys.exit(0)
 
+
+# more kaa imports
+import kaa.notifier
 
 # freevo imports
 import eventhandler

@@ -31,13 +31,10 @@
 
 import sys
 import cPickle
-import notifier
+import kaa.notifier
 
 from mediadb import *
 from mediadb.globals import *
-
-# init the notifier
-notifier.init( notifier.GENERIC )
 
 def print_data(data, space='    '):
     for key, info in data.items():
