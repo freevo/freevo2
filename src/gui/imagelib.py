@@ -108,14 +108,14 @@ def load(url, size=None):
         filename = os.path.join(config.IMAGE_DIR, url[8:])
 
     if not os.path.isfile(filename):
-        log.error('osd.py: Bitmap file "%s" doesnt exist!' % filename)
+        log.error('Image file "%s" doesn\'t exist!' % filename)
         return None
 
     try:
         image = kaa.mevas.imagelib.open(filename)
     except:
-        log.exception('Unknown Problem while loading image %s' % String(url))
-        return None
+        log.exception('Problem while loading image %s' % String(url))
+        image = None
 
     # scale the image if needed
     if width != None or height != None:
