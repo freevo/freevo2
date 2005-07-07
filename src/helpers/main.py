@@ -125,19 +125,6 @@ else:
 
 
 #
-# kaa.metadata version checking
-#
-try:
-    import kaa.metadata.version
-    if kaa.metadata.version.CHANGED < 20040629:
-        raise ImportError('found version %s' % kaa.metadata.version.VERSION)
-except ImportError:
-    print 'Error: This version of Freevo requires kaa.metadata >= 0.4.3'
-    print
-    sys.exit(0)
-
-
-#
 # mbus version checking
 #
 try:
