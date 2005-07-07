@@ -43,7 +43,7 @@ import time
 import logging
 
 # kaa imports
-import kaa.Imlib2
+import kaa.imlib2
 import kaa.notifier
 
 # freevo imports
@@ -192,7 +192,7 @@ class PluginInterface(plugin.ItemPlugin):
                     data = urllib2.urlopen(url)
                     if data.info()['Content-Length'] == '807':
                         continue
-                    image = kaa.Imlib2.open_from_memory(data.read())
+                    image = kaa.imlib2.open_from_memory(data.read())
                     image = image.crop((2,2), (image.width-4, image.height-4))
                     break
                 except urllib2.HTTPError:
