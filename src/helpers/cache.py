@@ -288,7 +288,7 @@ else:
 
     # let's warn about some updates
     if freevo_changed < VERSION or \
-           kaa.metadata.version.INT_VERSION > mmchanged:
+           kaa.metadata.version.VERSION > mmchanged:
         print 'Cache too old, forcing rebuild'
         rebuild = 1
         complete_update = int(time.time())
@@ -330,7 +330,7 @@ mediadb.cache(l)
 mediadb.save()
 
 # save cache info
-util.cache.save(cachefile, (kaa.metadata.version.INT_VERSION, VERSION,
+util.cache.save(cachefile, (str(kaa.metadata.version.VERSION), VERSION,
                             int(time.time()), complete_update))
 
 print

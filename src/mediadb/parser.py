@@ -59,7 +59,7 @@ def init():
     Init the parser module
     """
     global VERSION
-    VERSION += kaa.metadata.version.INT_VERSION
+    VERSION += float(kaa.metadata.version.VERSION)
     for f in os.listdir(os.path.dirname(__file__)):
         if f.endswith('_parser.py'):
             exec('import %s' % f[:-3])
