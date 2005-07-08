@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.59  2005/07/08 14:45:35  dischi
+# add some extra events for mouse support
+#
 # Revision 1.58  2005/06/25 08:52:24  dischi
 # switch to new style python classes
 #
@@ -174,6 +177,7 @@ MENU_GOTO_MAINMENU     = Event('MENU_GOTO_MAINMENU')
 MENU_BACK_ONE_MENU     = Event('MENU_BACK_ONE_MENU')
                        
 MENU_SELECT            = Event('MENU_SELECT')
+MENU_CHANGE_SELECTION  = Event('MENU_CHANGE_SELECTION')
 MENU_PLAY_ITEM         = Event('MENU_PLAY_ITEM')
 MENU_SUBMENU           = Event('MENU_SUBMENU')
 MENU_CALL_ITEM_ACTION  = Event('MENU_CALL_ITEM_ACTION')

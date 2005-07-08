@@ -371,7 +371,15 @@ class MenuStack(object):
             return True
 
 
+        if event == MENU_CHANGE_SELECTION:
+            menu.select(event.arg)
+            self.refresh()
+            return True
+        
         if event == MENU_SELECT or event == MENU_PLAY_ITEM:
+            if event.arg:
+                # Event as an item as argument, select it first
+                menu.select(event.arg)
             actions = menu.selected.get_actions()
             if not actions:
                 msg = _('No action defined for this choice!')
@@ -384,6 +392,10 @@ class MenuStack(object):
         if event == MENU_SUBMENU:
             if menu.submenu:
                 return True
+
+            if event.arg:
+                # Event as an item as argument, select it first
+                menu.select(event.arg)
 
             actions = menu.selected.get_actions()
             if actions and len(actions) > 1:
