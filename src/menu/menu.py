@@ -170,8 +170,15 @@ class Menu(object):
         if isinstance(item, Item):
             # select item
             self.selected     = item
-            self.selected_pos = self.choices.index(item)
-            self.selected_id  = self.selected.__id__()
+            try:
+                self.selected_pos = self.choices.index(item)
+                self.selected_id  = self.selected.__id__()
+            except ValueError, e:
+                log.exception('crash by select %s in %s' (item, self.choices))
+                if self.choices:
+                    self.select(self.choices[0])
+                else:
+                    self.select(None)
         elif item == None:
             # nothing to select
             self.selected     = None
