@@ -111,7 +111,7 @@ class MPlayer(mplayer.Application):
             extra_opts += ' -loop 0'
 
         # build the mplayer command
-        command = '%s -vo null -ao %s %s %s' % \
+        command = '%s -vo null -ao %s %s' % \
                   (mpl, config.MPLAYER_AO_DEV, extra_opts)
         if command.find('-playlist') > 0:
             command = command.replace('-playlist', '')
