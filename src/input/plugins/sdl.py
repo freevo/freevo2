@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2005/07/08 14:46:06  dischi
+# add basic mouse support
+#
 # Revision 1.5  2005/05/07 18:09:41  dischi
 # move InputPlugin definition to input.interface
 #
@@ -51,6 +54,7 @@
 
 # external imports
 import notifier
+import weakref
 
 # python imports
 import time
@@ -59,7 +63,9 @@ from pygame import locals
 
 # Freevo imports
 import config
-
+import gui
+from menu import Item
+from event import *
 from input.interface import InputPlugin
 
 import logging
@@ -69,9 +75,10 @@ class PluginInterface(InputPlugin):
     """
     Plugin for pygame input events
     """
-    def __init__(self):
+    def __init__(self, use_mouse = False):
         InputPlugin.__init__(self)
-
+        self.use_mouse = use_mouse
+        
         self.keymap = {}
         for key in config.KEYBOARD_MAP:
             if hasattr(locals, 'K_%s' % key):
@@ -82,7 +89,8 @@ class PluginInterface(InputPlugin):
                 self.keymap[code] = config.KEYBOARD_MAP[key]
             else:
                 log.error('unable to find key code for %s' % key)
-        self.mousehidetime = time.time()
+        if not self.use_mouse:
+            self.mousehidetime = time.time()
         pygame.key.set_repeat(500, 30)
         notifier.addTimer( 20, self.handle )
 
@@ -94,16 +102,18 @@ class PluginInterface(InputPlugin):
         if not pygame.display.get_init():
             return True
 
-        # Check if mouse should be visible or hidden
-        mouserel = pygame.mouse.get_rel()
-        mousedist = (mouserel[0]**2 + mouserel[1]**2) ** 0.5
+        if not self.use_mouse:
+            # Check if mouse should be visible or hidden
+            mouserel = pygame.mouse.get_rel()
+            mousedist = (mouserel[0]**2 + mouserel[1]**2) ** 0.5
 
-        if mousedist > 4.0:
-            pygame.mouse.set_visible(1)
-            self.mousehidetime = time.time() + 1.0  # Hide the mouse in 2s
-        else:
-            if time.time() > self.mousehidetime:
-                pygame.mouse.set_visible(0)
+            if mousedist > 4.0:
+                pygame.mouse.set_visible(1)
+                # Hide the mouse in 2s
+                self.mousehidetime = time.time() + 1.0
+            else:
+                if time.time() > self.mousehidetime:
+                    pygame.mouse.set_visible(0)
 
         # Return the next key event, or None if the queue is empty.
         # Everything else (mouse etc) is discarded.
@@ -116,5 +126,57 @@ class PluginInterface(InputPlugin):
             if event.type == locals.KEYDOWN:
                 if event.key in self.keymap:
                     self.post_key(self.keymap[event.key])
+
+            if not self.use_mouse:
+                continue
+            
+            if event.type in (locals.MOUSEBUTTONDOWN, locals.MOUSEBUTTONUP):
+                # Mouse button event handling.
+                # This code is in an very early stage and may fail. It also
+                # only works with the menu right now, going back one menu
+                # is not working, there is a visible button the the screen
+                # missing to do that.
+                # A bigger eventmap should be created somewhere to make this
+                # work for the player as well.
+                action = None
+                for widget in gui.display.get_childs_at(event.pos):
+                    if hasattr(widget, 'action'):
+                        action = widget.action
+                        break
+                else:
+                    # no widget with an action found
+                    continue
+                
+                if isinstance(action, weakref.ReferenceType):
+                    # follow the weakref
+                    action = action()
+
+                # event to be posted to the eventhandler
+                post_event = None
+                
+                if event.type == locals.MOUSEBUTTONDOWN:
+                    # Handle mouse button down
+                    if isinstance(action, Item):
+                        # Action is an item, do some menu code here.
+                        post_event = Event(MENU_CHANGE_SELECTION, action)
+
+                if event.type == locals.MOUSEBUTTONUP:
+                    # Handle mouse button up
+                    if isinstance(action, str):
+                        if action == 'UP':
+                            # Action 'UP' is defined in the listing_area
+                            post_event = MENU_PAGEUP
+                        elif action == 'DOWN':
+                            # Action 'DOWN' is defined in the listing_area
+                            post_event = MENU_PAGEDOWN
+                    elif isinstance(action, Item):
+                        # Action is an item, do some menu code here.
+                        if event.button == 1:
+                            post_event = Event(MENU_SELECT, action)
+                        elif event.button == 3:
+                            post_event = Event(MENU_SUBMENU, action)
+
+                if post_event:
+                    self.post_event(post_event)
 
         return True

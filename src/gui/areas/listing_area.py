@@ -39,6 +39,7 @@ __all__ = [ 'ListingArea' ]
 # python imports
 import copy
 import os
+import weakref
 
 # external modules
 import notifier
@@ -687,7 +688,6 @@ class ListingArea(Area):
                     val = n_val
                     self.__default_val = val
 
-            if draw_this_item:
                 if settings.type == 'text':
                     # draw item for text listing
                     self.__draw_text_listing_item(choice, (x,y), settings, val,
@@ -702,7 +702,11 @@ class ListingArea(Area):
                                                    gui_objects)
 
                 listing_info[1] = choice.image
-                
+
+                # Add item as weakref for mouse usage
+                for g in gui_objects:
+                    g.action = weakref.ref(choice)
+                    
             # calculate next item position
             if current_col == cols:
                 # max number of cols reached, skip to next row
@@ -727,6 +731,8 @@ class ListingArea(Area):
                 if start > 0 and settings.images['uparrow']:
                     i = settings.images['uparrow'].filename
                     i = self.drawimage(i, settings.images['uparrow'])
+                    # FIXME: Action for mouse usage
+                    i.action = 'PAGE_DOWN'
                     self.arrows.append(i)
                 if end < len(menu.choices):
                     if isinstance(settings.images['downarrow'].y, str):
@@ -736,6 +742,8 @@ class ListingArea(Area):
                         v = settings.images['downarrow']
                     i = settings.images['downarrow'].filename
                     i = self.drawimage(i, v)
+                    # FIXME: Action for mouse usage
+                    i.action = 'PAGE_UP'
                     self.arrows.append(i)
             except Exception, e:
                 log.error(e)

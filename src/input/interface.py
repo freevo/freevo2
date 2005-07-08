@@ -68,3 +68,11 @@ class InputPlugin(plugin.Plugin):
         else:
             log.warning('no event mapping for key %s in context %s' % \
                         (key, self._eventhandler.context))
+
+
+    def post_event(self, event):
+        """
+        Send an event to the eventhandler.
+        """
+        self._eventhandler.post(event)
+        
