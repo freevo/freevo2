@@ -87,7 +87,6 @@ class PluginInterface(plugin.Plugin):
             return
 
         plugin.Plugin.__init__(self)
-        self._type    = 'mplayer_audio'
         self.app_mode = 'audio'
         self.poll_menu_only = False
         self.event_listener = True

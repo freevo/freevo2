@@ -83,8 +83,8 @@ class RecordServer(RPCServer):
         self.fxdfile = sysconfig.datafile('recordserver.fxd')
         # load the recordings file
         self.load(True)
-        # init the recorder
-        plugin.init(exclusive = [ 'record' ])
+        # init the recorder, start only 'record.' plugins
+        plugin.init(os.environ['FREEVO_PYTHON'], plugins = [ 'record' ])
 
         # add external event handling
         mbus = self.mbus_instance

@@ -50,6 +50,7 @@ import pwd
 import __builtin__
 import gettext
 import logging
+import copy
 
 # freevo imports
 import sysconfig
@@ -62,8 +63,7 @@ import setup
 # and event.py (which has no more deps)
 import input
 
-# FIXME: plugin imports eventhandler which imports config again.
-import plugin
+import plugin_loader as plugin
 
 # import event names (no deps)
 from event import *
@@ -209,16 +209,13 @@ GUI_FONT_DEFAULT_NAME = os.path.join(FONT_DIR, GUI_FONT_DEFAULT_NAME)
 #
 VIDEO_SUFFIX = []
 
-for p in plugin.getall():
-    if p.startswith('video'):
-        try:
-            for s in eval('VIDEO_%s_SUFFIX' % p[6:].upper()):
+for v in copy.copy(globals()):
+    if v.startswith('VIDEO_') and v.endswith('_SUFFIX') and v[6:-7]:
+        if plugin.is_active('video.' + v[6:-7].lower()):
+            for s in globals()[v]:
                 if not s in VIDEO_SUFFIX:
                     VIDEO_SUFFIX.append(s)
-        except:
-            pass
 
-            
 #
 # set data dirs
 # if not set, set it to root and home dir

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2005/07/08 18:59:46  dischi
+# adjust to new plugin interface
+#
 # Revision 1.2  2004/07/10 12:33:42  dischi
 # header cleanup
 #
@@ -49,7 +52,7 @@ class PluginInterface(plugin.Plugin):
         normal plugin init, but sets _type to 'mainmenu_tv'
         """
         plugin.Plugin.__init__(self)
-        self._type = 'mainmenu_tv'
+        self.plugin_type = 'mainmenu_tv'
         self.parent = None
                                                                                 
     def items(self, parent):

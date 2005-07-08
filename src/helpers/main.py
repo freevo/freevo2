@@ -256,12 +256,13 @@ try:
     gui.displays.create()
     
     # Fire up splashscreen and load the plugins
-    splash = Splashscreen(_('Starting Freevo, please wait ...'),
-                          plugin.get_number()-1)
+    num = len(plugin.get(None))-1
+    splash = Splashscreen(_('Starting Freevo, please wait ...'), num)
+                          
     # laod mbus interface
     rpc = RPCHandler()
     # load plugins
-    plugin.init(splash.progress)
+    plugin.init(os.environ['FREEVO_PYTHON'], splash.progress)
 
     # fade out the splash screen
     splash.hide()

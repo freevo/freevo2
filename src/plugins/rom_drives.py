@@ -116,6 +116,12 @@ watcher = None
 # list of rom drives
 rom_drives = []
 
+class PluginInterface(plugin.Plugin):
+    """
+    Basic class to allow subplugins to be loaded.
+    """
+    pass
+
 
 class autostart(plugin.DaemonPlugin):
     """

@@ -246,7 +246,7 @@ class PluginInterface(plugin.DaemonPlugin):
 class IdleBarPlugin(plugin.Plugin):
     def __init__(self):
         plugin.Plugin.__init__(self)
-        self._type     = 'idlebar'
+        self.plugin_type = 'idlebar'
         self.objects   = []
         self.NO_CHANGE = -1
         self.align     = 'left'

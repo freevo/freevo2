@@ -341,6 +341,8 @@ CACHE_IMAGES = 1
 # plugin.remove('rom_drives.rom_items') will remove the rom drives from all
 #   menus
 
+# basic input
+plugin.activate('input')
 
 # Items in the main menu.
 plugin.activate('tv', level=10)
@@ -354,6 +356,7 @@ if CONF.xmame or CONF.snes:
 
 
 # ROM drive support
+plugin.activate('rom_drives')
 
 # autostarter when inserting roms while Freevo is in the MAIN MENU
 plugin.activate('rom_drives.autostart')
