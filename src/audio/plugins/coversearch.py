@@ -47,6 +47,7 @@ import kaa.imlib2
 import kaa.notifier
 
 # freevo imports
+import sysconfig
 import plugin
 import config
 
@@ -257,7 +258,7 @@ class PluginInterface(plugin.ItemPlugin):
         create cover file for the item
         """
         if item.type == 'audiocd':
-            filename = '%s/disc/metadata/%s.jpg' % (config.OVERLAY_DIR,
+            filename = '%s/disc/metadata/%s.jpg' % (sysconfig.VFS_DIR,
                                                     item.info['id'])
         elif item.type == 'dir':
             filename = os.path.join(item.dir, 'cover.jpg')

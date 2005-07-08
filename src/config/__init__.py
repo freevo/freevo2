@@ -294,25 +294,6 @@ VIDEO_SHOW_REGEXP_SPLIT = re.compile("[\.\- ]*" + \
                                      VIDEO_SHOW_REGEXP + "[\.\- ]*").split
 
 
-try:
-    LOCALE
-    log.critical('LOCALE is deprecated. Set encoding in freevo.conf.')
-    sys.exit(0)
-except NameError, e:
-    pass
-    
-encoding = LOCALE = sysconfig.CONF.encoding
-
-try:
-    OVERLAY_DIR
-    log.critical('OVERLAY_DIR is deprecated. Set vfs_dir in freevo.conf' +\
-                 '  to change the location of the virtual file system')
-    sys.exit(0)
-except NameError, e:
-    pass
-
-OVERLAY_DIR = sysconfig.VFS_DIR
-
 # auto detect function
 def detect(*what):
     for module in what:
@@ -324,6 +305,30 @@ os.environ['USER'] = pwd.getpwuid(os.getuid())[0]
 os.environ['HOME'] = pwd.getpwuid(os.getuid())[5]
 
 
+#
+# Some code for users converting from older versions of Freevo
+#
+
+try:
+    LOCALE
+    log.critical('LOCALE is deprecated. Set encoding in freevo.conf.')
+    sys.exit(0)
+except NameError, e:
+    pass
+    
+try:
+    OVERLAY_DIR
+    log.critical('OVERLAY_DIR is deprecated. Set vfs_dir in freevo.conf' +\
+                 '  to change the location of the virtual file system')
+    sys.exit(0)
+except NameError, e:
+    pass
+
+
+# Please do not use the variables anymore
+encoding = LOCALE = sysconfig.CONF.encoding
+
+# Some warnings used in development
 REDESIGN_MAINLOOP = 'not working while mainloop redesign'
 REDESIGN_BROKEN   = 'not working while gui redesign'
 REDESIGN_FIXME    = 'not working since gui redesign, feel free to fix this'

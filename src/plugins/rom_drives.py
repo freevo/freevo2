@@ -504,7 +504,7 @@ class RemovableMedia(vfs.Mountpoint):
                 self.item = copy.copy(movie_info)
             else:
                 self.item = VideoItem('', None)
-                f = os.path.join(config.OVERLAY_DIR, 'disc-set', self.id)
+                f = os.path.join(sysconfig.VFS_DIR, 'disc-set', self.id)
                 self.item.image = util.getimage(f)
             variables = self.item.info.get_variables()
             self.item.name  = title

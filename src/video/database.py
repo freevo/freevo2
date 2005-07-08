@@ -39,6 +39,7 @@ import re
 import copy
 
 # freevo imports
+import sysconfig
 import config
 import util
 from mediadb import Listing
@@ -89,7 +90,7 @@ def update():
 
     files = []
 
-    discset = config.OVERLAY_DIR + '/disc-set'
+    discset = sysconfig.VFS_DIR + '/disc-set'
     if os.path.isdir(discset):
         listing = Listing(discset)
         if listing.num_changes:

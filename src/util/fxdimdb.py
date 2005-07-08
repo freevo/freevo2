@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2005/07/08 19:15:56  dischi
+# some config cleanup
+#
 # Revision 1.13  2005/07/02 16:46:27  dischi
 # use kaa.metadata instead of mmpython
 #
@@ -74,6 +77,7 @@ import sys
 import codecs
 import os
 
+import sysconfig
 import config 
 import util
 
@@ -273,7 +277,7 @@ class FxdImdb(object):
         
         else:
             if self.isdiscset == True:
-                self.fxdfile = os.path.join(config.OVERLAY_DIR, 'disc-set',
+                self.fxdfile = os.path.join(sysconfig.VFS_DIR, 'disc-set',
                                             self.getmedia_id(self.device))
             else:
                 self.fxdfile = os.path.splitext(file)[0]

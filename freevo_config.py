@@ -297,11 +297,6 @@ USE_NETWORK = 1
 HOST_ALIVE_CHECK = 'ping -c 1 -W 1 %s > /dev/null 2>&1'
 
 #
-# store output of started processes for debug
-#
-CHILDAPP_DEBUG = 0
-
-#
 # Umask setting for all files.
 # 022 means only the user has write access. If you share your Freevo
 # installation with different users, set this to 002
@@ -316,14 +311,9 @@ PLAYLIST_SUFFIX = [ 'm3u' ]
 #
 # Use md5 in mmpython to create unique disc ids. Enable this if you have
 # problems with different discs having the same id.
+# FIXME: Why is this not used anymore?
 #
 MMPYTHON_CREATE_MD5_ID = 0
-
-#
-# Cache images. This uses a lot of disc space but it's a huge speed
-# enhancement. The images will be cached in the vfs
-#
-CACHE_IMAGES = 1
 
 # ======================================================================
 # Plugins:
@@ -351,8 +341,9 @@ plugin.activate('audio', level=30)
 plugin.activate('image', level=40)
 plugin.activate('shutdown', level=50)
 
-if CONF.xmame or CONF.snes:
-    plugin.activate('games', level=45)
+# FIXME: games is broken
+# if CONF.xmame or CONF.snes:
+#     plugin.activate('games', level=45)
 
 
 # ROM drive support
@@ -723,12 +714,6 @@ IMAGEVIEWER_OSD = [
 #
 IMAGEVIEWER_DURATION = 0
 
-#
-# use exif thumbnail your thumbnail review. The quality is lower but
-# it's much faster
-#
-IMAGE_USE_EXIF_THUMBNAIL = 1
-
 
 # ======================================================================
 # Freevo games settings:
@@ -810,16 +795,6 @@ GUI_FONT_PATH  = [ '/usr/X11R6/lib/X11/fonts/truetype/' ]
 GUI_FONT_ALIASES = { 'Arial_Bold' : 'VeraBd' }
 
 #
-# Number of seconds to wait until the busy icon is shown in the menu.
-# Busy icon can also be shown right away when there is more than a certain
-# number of files in a directory.
-# 
-# Set this to None to disable this.
-# (seconds, files)
-#
-# GUI_BUSYICON_TIMER = (0.7, 200)
-
-#
 # Execute a script on GUI startup.
 #
 GUI_SDL_EXEC_AFTER_STARTUP = ""
@@ -867,27 +842,20 @@ if CONF.display in ( 'directfb', 'dfbmga', 'dxr3', 'dga' ):
     GUI_STOP_WHEN_PLAYING = 1
 
 #
-# Dim text that doesn't fit instead of using ellipses. 
-#
-# OSD_DIM_TEXT = 1
-#
-# Make a complete screen redraw every time. This is necessary sometimes
-#
-# OSD_UPDATE_COMPLETE_REDRAW = 0
-# 
-# if CONF.display in ( 'dxr3', 'dga' ):
-#     OSD_UPDATE_COMPLETE_REDRAW = 1
-
-#
 # Output display to use. Possible values are SDL (using pygame),
-# Imlib2 (X only), Bmovl and Bmovl2. The two Bmovl displays also need
-# a background video set in GUI_BACKGROUND_VIDEO. If you want to use
-# mplayer in mplayer, set MPLAYER_BMOVL2_POSSIBLE to 1.
+# Imlib2 (X only) and Bmovl. The Bmovl displays also need
+# a background video set in GUI_BACKGROUND_VIDEO.
 #
 GUI_DISPLAY = 'SDL'
-GUI_BACKGROUND_VIDEO = ''
-MPLAYER_BMOVL2_POSSIBLE = 0
 
+#
+# Video file for bmovl display
+#
+GUI_BACKGROUND_VIDEO = ''
+
+#
+# Fade steps on application change.
+#
 GUI_FADE_STEPS = 10
 
 #
@@ -1414,14 +1382,3 @@ else:
 #
 FREEVO_EVENTHANDLER_SANDBOX = 1
 
-#
-# Use stat to check if a directory has changed. This is faster and should
-# work with all kinds of filesystems. No need to change it I guess
-#
-DIRECTORY_USE_STAT_FOR_CHANGES = True
-
-#
-# internal debugging
-#
-TIME_DEBUG   = 0                        # log timing
-MEMORY_DEBUG = 0                        # log __del__ calls

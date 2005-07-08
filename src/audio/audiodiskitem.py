@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2005/07/08 19:15:52  dischi
+# some config cleanup
+#
 # Revision 1.31  2004/09/13 19:35:26  dischi
 # replace player.get_singleton() with audioplayer()
 #
@@ -48,6 +51,7 @@ __all__ = [ 'AudioDiskItem' ]
 import os
 
 # Freevo imports
+import sysconfig
 import config
 import menu
 
@@ -75,7 +79,7 @@ class AudioDiskItem(Playlist):
         # variables only for DirItem
         self.display_type = display_type
 
-        cover = '%s/disc/metadata/%s.jpg' % (config.OVERLAY_DIR, disc_id)
+        cover = '%s/disc/metadata/%s.jpg' % (sysconfig.VFS_DIR, disc_id)
         if os.path.isfile(cover):
             self.image = cover
             
