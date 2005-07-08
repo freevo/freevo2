@@ -1,4 +1,4 @@
-from plugin import Plugin
+from plugin_loader import Plugin
 
 class PluginInterface(Plugin):
     """
