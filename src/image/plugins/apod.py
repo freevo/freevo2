@@ -1,39 +1,16 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # apod.py - download the Astronomy Picture of the Day
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes:
-#
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.10  2005/06/04 17:18:13  dischi
-# adjust to gui changes
-#
-# Revision 1.9  2005/01/08 10:27:17  dischi
-# remove unneeded skin_type parameter
-#
-# Revision 1.8  2004/08/27 14:22:01  dischi
-# The complete image code is working again and should not crash. The zoom
-# handling got a complete rewrite. Only the gphoto plugin is not working
-# yet because my camera is a storage device.
-#
-# Revision 1.7  2004/08/01 10:43:13  dischi
-# deactivate plugin
-#
-# Revision 1.6  2004/07/22 21:21:49  dischi
-# small fixes to fit the new gui code
-#
-# Revision 1.5  2004/07/10 12:33:40  dischi
-# header cleanup
-#
-# Revision 1.4  2004/06/29 01:39:20  mikeruelle
-# added some userproofing to apod
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al.
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Michael Ruelle <mikeruelle@comcast.net>
+# Maintainer:    Michael Ruelle <mikeruelle@comcast.net>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -50,93 +27,141 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
-
+# python imports
 import os
-
-import plugin
-import menu
 import urllib
 import re
 
-from item import Item
-from image.imageitem import ImageItem
+# kaa imports
+from kaa.notifier import Thread, Callback
+
+# freevo imports
+import plugin
+import menu
+import mediadb
+
+from menu import Item, Action, ActionItem, Menu
+from image import ImageItem
+
 from gui.windows import MessageBox, WaitBox
+
 
 class ApodMainMenuItem(Item):
     """
-    this is the item for the main menu and creates the list
+    This is the item for the main menu and creates the list
     of commands in a submenu.
     """
-    def __init__(self, parent, apoddir):
+    def __init__(self, parent, imagedir):
         Item.__init__(self, parent)
         self.name = _( 'APOD' )
-        self.title = _( 'APOD' )
-        self.apoddir = apoddir
-        self.info = { 'name' : 'APOD',
-                      'description' : 'Astronomy Picture of the day',
-                      'title' : 'APOD' }
-        self.type = 'image'
+        self.info = { 'title'       : 'APOD',
+                      'description' : 'Astronomy Picture of the day' }
+        self.imagedir = imagedir
+
 
     def actions(self):
-        return [ ( self.create_apod_menu , 'APOD Pictures' ) ]
+        """
+        Return actions for the item.
+        """
+        return [ Action(_('APOD Pictures'), self.create_menu) ]
 
-    def create_apod_menu(self, arg=None, menuw=None):
-        current = menu.MenuItem(_('Current Picture'), self.fetchCurrentPicture)
+
+    def create_menu(self):
+        """
+        Create a menu for APOD.
+        """
+        # current image
+        current = ActionItem(_('Current Picture'), self,
+                             self.fetch_current_picture)
         current.description = _('Download the current picture')
-        previous = menu.MenuItem(_('Previous Pictures'), self.browsePictureDir)
+
+        # previous images
+        previous = ActionItem(_('Previous Pictures'), self,
+                              self.browse_pictures)
         previous.description = _('Browse all previously downloaded images')
-        apodmenuitems = [ current, previous ]
-        apod_menu = menu.Menu( _( 'Apod Pictures' ), apodmenuitems)
-        menuw.pushmenu(apod_menu)
 
-    def browsePictureDir(self, arg=None, menuw=None):
-        apodpic_items = []
-        apodpics = os.listdir(self.apoddir)
-        apodpics.sort(lambda l, o: cmp(l.upper(), o.upper()))
-        for apodpic in apodpics:
-            img_item = ImageItem(os.path.join(self.apoddir,apodpic), self)
-            apodpic_items += [ img_item ]
-        if (len(apodpic_items) == 0):
-            apodpic_items.append(menu.MenuItem(_('No Images found'),
-                                               menuw.back_one_menu, 0))
-        apodpic_menu = menu.Menu(_('Apod Pictures'), apodpic_items,
-                                 reload_func=menuw.back_one_menu )
-        menuw.pushmenu(apodpic_menu)
+        # add menu
+        self.pushmenu(Menu( _( 'Apod Pictures' ), [ current, previous ]))
 
-    def fetchCurrentPicture(self, arg=None, menuw=None):
-        url = 'http://antwrp.gsfc.nasa.gov/apod/%s'
-        apodpichref = ''
+
+    def browse_pictures(self):
+        """
+        Show a list of all APOD.
+        """
+        listing = mediadb.Listing(self.imagedir)
+        if listing.num_changes:
+            listing.update(fast=True)
+
+        # get items
+        items = []
+        for p in plugin.mimetype('image'):
+            items += p.get(self, listing)
+
+        if items:
+            self.pushmenu(Menu(_('Apod Pictures'), items))
+        else:
+            MessageBox(_('No Images found')).show()
+
+
+    def fetch_current_picture(self):
+        """
+        Fetch current picture.
+        """
         box = WaitBox(text=_('Getting picture, please wait'))
         box.show()
+        # callback for success
+        cb = Callback(self.__fetch_current_picture_finished, box)
+        # callback for exception
+        ex = Callback(self.__fetch_current_picture_error, box)
+        # start thread
+        Thread(self.__fetch_current_picture_thread).start(cb, ex)
+
+
+    def __fetch_current_picture_thread(self):
+        """
+        Fetch current picture.
+        """
+        url = 'http://antwrp.gsfc.nasa.gov/apod/'
+
         try:
-            myfile=urllib.urlopen(url % 'index.html')
+            myfile=urllib.urlopen(url + 'index.html')
             apodpage=myfile.read()
             result = re.search("a href=\"(image.*)\"", apodpage)
-            apodpichref = result.group(1)
+            ref = result.group(1)
         except Exception, e:
-            #unreachable or url error
-            realurl = url % 'index.html'
-            print 'APOD ERROR: could not open %s: %s' % (realurl, e)
-            box.destroy()
-            MessageBox(text=_('Unable to open URL')).show()
-            return
+            raise 'Could not open %sindex.html: %s' % (url, e)
 
-        apodfile = os.path.join(self.apoddir,os.path.basename(apodpichref))
+        filename = os.path.join(self.imagedir, os.path.basename(ref))
 
         try:
-            urllib.urlretrieve(url % apodpichref, apodfile)
-            imgitem = ImageItem(apodfile, self)
-            box.destroy()
-            imgitem.view(menuw=menuw)
+            urllib.urlretrieve(url + ref, filename)
+            return filename
         except Exception, e:
-            #unreachable or url error
-            realurl = url % apodpichref
-            print 'APOD ERROR: could not open %s: %s' % (realurl, e)
-            box.destroy()
-            MessageBox(text=_('Unable to open URL')).show()
-            return
+            raise 'Could not open %s%s: %s' % (url, ref, e)
+
+
+    def __fetch_current_picture_error(self, error, box):
+        """
+        Handle error for the thread in the main loop.
+        """
+        box.destroy()
+        if not isinstance(error, (str, unicode)):
+            error = 'Exception: %s' % error
+        MessageBox(error).show()
+
+
+    def __fetch_current_picture_finished(self, filename, box):
+        """
+        Download finished.
+        """
+        box.destroy()
+        ImageItem(filename, self, duration=0).play()
+
+
+
+
 
 class PluginInterface(plugin.MainMenuPlugin):
     """
@@ -147,26 +172,33 @@ class PluginInterface(plugin.MainMenuPlugin):
     plugin.activate('image.apod', args=('/dir_for_apod',))
 
     """
-    def __init__(self, apoddir=None):
-        if not apoddir:
+    def __init__(self, imagedir=None):
+        """
+        Init plugin and check if imagedir is a valid directory.
+        """
+        if not imagedir:
             self.reason = _('Need a directory to store APOD pictures.')
             return
 
-        if not os.path.isdir(apoddir):
-            self.reason = _('directory %s does not exist.') % apoddir
+        if not os.path.isdir(imagedir):
+            self.reason = _('Directory %s does not exist.') % imagedir
             return
 
-        if not os.access(apoddir, os.R_OK|os.W_OK|os.X_OK):
-            self.reason = _('directory %s must be able to be read, ' + \
+        if not os.access(imagedir, os.R_OK|os.W_OK|os.X_OK):
+            self.reason = _('Directory %s must be able to be read, ' + \
                             'written to and executed by the user running ' + \
-                            'freevo.') % apoddir
+                            'freevo.') % imagedir
             return
 
-        self.apoddir = apoddir
+        self.imagedir = imagedir
 
         # init the plugin
         plugin.MainMenuPlugin.__init__(self)
 
-    def items(self, parent):
-        return [ ApodMainMenuItem(parent, self.apoddir) ]
 
+
+    def items(self, parent):
+        """
+        Return the main menu item.
+        """
+        return [ ApodMainMenuItem(parent, self.imagedir) ]
