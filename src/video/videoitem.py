@@ -65,7 +65,6 @@ log = logging.getLogger('video')
 
 class VideoItem(MediaItem):
     def __init__(self, url, parent):
-        self.autovars = { 'deinterlace': 0 }
         MediaItem.__init__(self, parent, type='video')
 
         self.variants          = []         # if this item has variants
@@ -192,6 +191,9 @@ class VideoItem(MediaItem):
 
         # start name parser by setting name to itself
         self.set_name(self.name)
+        # set 'deinterlace' so that this value is stored between Freevo
+        # sessions. FIXME: this needs a cleanup
+        self.info.set_permanent_variables({ 'deinterlace': 0 })
 
 
     def copy(self):
