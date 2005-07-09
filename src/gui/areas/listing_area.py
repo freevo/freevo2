@@ -45,6 +45,7 @@ import weakref
 import notifier
 
 # freevo imports
+import config
 import util
 from util.objectcache import ObjectCache
 import util.thumbnail
@@ -703,9 +704,9 @@ class ListingArea(Area):
 
                 listing_info[1] = choice.image
 
-                # Add item as weakref for mouse usage
-                for g in gui_objects:
-                    g.action = weakref.ref(choice)
+                if config.INPUT_MOUSE_SUPPORT:
+                    for g in gui_objects:
+                        g.action = weakref.ref(choice)
                     
             # calculate next item position
             if current_col == cols:
@@ -731,8 +732,8 @@ class ListingArea(Area):
                 if start > 0 and settings.images['uparrow']:
                     i = settings.images['uparrow'].filename
                     i = self.drawimage(i, settings.images['uparrow'])
-                    # FIXME: Action for mouse usage
-                    i.action = 'PAGE_DOWN'
+                    if config.INPUT_MOUSE_SUPPORT:
+                        i.action = 'PAGE_UP'
                     self.arrows.append(i)
                 if end < len(menu.choices):
                     if isinstance(settings.images['downarrow'].y, str):
@@ -742,8 +743,8 @@ class ListingArea(Area):
                         v = settings.images['downarrow']
                     i = settings.images['downarrow'].filename
                     i = self.drawimage(i, v)
-                    # FIXME: Action for mouse usage
-                    i.action = 'PAGE_UP'
+                    if config.INPUT_MOUSE_SUPPORT:
+                        i.action = 'PAGE_DOWN'
                     self.arrows.append(i)
             except Exception, e:
                 log.error(e)

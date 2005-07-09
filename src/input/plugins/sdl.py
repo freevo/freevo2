@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2005/07/09 09:08:39  dischi
+# update mouse support
+#
 # Revision 1.6  2005/07/08 14:46:06  dischi
 # add basic mouse support
 #
@@ -75,9 +78,8 @@ class PluginInterface(InputPlugin):
     """
     Plugin for pygame input events
     """
-    def __init__(self, use_mouse = False):
+    def __init__(self):
         InputPlugin.__init__(self)
-        self.use_mouse = use_mouse
         
         self.keymap = {}
         for key in config.KEYBOARD_MAP:
@@ -89,7 +91,7 @@ class PluginInterface(InputPlugin):
                 self.keymap[code] = config.KEYBOARD_MAP[key]
             else:
                 log.error('unable to find key code for %s' % key)
-        if not self.use_mouse:
+        if not config.INPUT_MOUSE_SUPPORT:
             self.mousehidetime = time.time()
         pygame.key.set_repeat(500, 30)
         notifier.addTimer( 20, self.handle )
@@ -102,7 +104,7 @@ class PluginInterface(InputPlugin):
         if not pygame.display.get_init():
             return True
 
-        if not self.use_mouse:
+        if not config.INPUT_MOUSE_SUPPORT:
             # Check if mouse should be visible or hidden
             mouserel = pygame.mouse.get_rel()
             mousedist = (mouserel[0]**2 + mouserel[1]**2) ** 0.5
@@ -127,7 +129,7 @@ class PluginInterface(InputPlugin):
                 if event.key in self.keymap:
                     self.post_key(self.keymap[event.key])
 
-            if not self.use_mouse:
+            if not config.INPUT_MOUSE_SUPPORT:
                 continue
             
             if event.type in (locals.MOUSEBUTTONDOWN, locals.MOUSEBUTTONUP):
@@ -163,19 +165,26 @@ class PluginInterface(InputPlugin):
                 if event.type == locals.MOUSEBUTTONUP:
                     # Handle mouse button up
                     if isinstance(action, str):
-                        if action == 'UP':
+                        if action == 'PAGE_UP':
                             # Action 'UP' is defined in the listing_area
                             post_event = MENU_PAGEUP
-                        elif action == 'DOWN':
+                        elif action == 'PAGE_DOWN':
                             # Action 'DOWN' is defined in the listing_area
                             post_event = MENU_PAGEDOWN
                     elif isinstance(action, Item):
-                        # Action is an item, do some menu code here.
-                        if event.button == 1:
-                            post_event = Event(MENU_SELECT, action)
-                        elif event.button == 3:
-                            post_event = Event(MENU_SUBMENU, action)
-
+                        if action.menu and action.menu.selected == action:
+                            # Action is an item, do some menu code here.
+                            if event.button == 1:
+                                post_event = MENU_SELECT
+                            elif event.button == 3:
+                                post_event = MENU_SUBMENU
+                        else:
+                            # mouse moved to much
+                            pass
+                    elif callable(action):
+                        # Action can be called
+                        action()
+                        
                 if post_event:
                     self.post_event(post_event)
 
