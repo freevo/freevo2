@@ -1,7 +1,7 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
-# __init__.py
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# __init__.py - Image interface
+# -----------------------------------------------------------------------------
 # $Id$
 #
 # This file imports everything needed to use this image module.
@@ -11,23 +11,15 @@
 # <slideshow> tag.
 #
 # Image plugins are also allowed to use ImageItem to create a new ImageItem
-# and imageviewer, a function to return the viewer application
+# and viewer, the viewer application
 #
-# Notes:
-# Todo:
-#
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.23  2004/09/13 19:32:46  dischi
-# move the fxdhandler into an extra file
-#
-# Revision 1.22  2004/09/13 18:00:49  dischi
-# last cleanups for the image module in Freevo
-#
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al.
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -44,10 +36,11 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
+# image imports
 from interface import *
 
 # used by image plugins
 from imageitem import ImageItem
-from viewer import imageviewer
+from viewer import viewer
