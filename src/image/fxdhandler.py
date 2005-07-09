@@ -57,34 +57,17 @@ import os
 # Freevo imports
 import config
 import plugin
-import util
+
+from util.fileops import match_files
 from playlist import Playlist
 
 # ImageItem
 from imageitem import ImageItem
 
 
-def _suffix():
-    """
-    return the list of suffixes this class handles
-    """
-    return config.IMAGE_SUFFIX
-
-
-def _get_items(files):
-    """
-    return a list of items based on the files
-    """
-    items = []
-    for file in files:
-        items.append(ImageItem(file, None))
-    return items
-
-
-
 def fxdhandler(fxd, node):
     """
-    parse image specific stuff from fxd files
+    Parse image specific stuff from fxd files
     """
     items = []
     dirname = os.path.dirname(fxd.getattr(None, 'filename', ''))
@@ -95,26 +78,23 @@ def fxdhandler(fxd, node):
     # Create a list of all images for the slideshow
     for child in children:
         try:
-            citems = []
             fname  = os.path.join(dirname, String(fxd.gettext(child)))
+            files  = []
             if child.name == 'directory':
                 # for directories add all files in it
-                if fxd.getattr(child, 'recursive', 0):
-                    f = util.match_files_recursively(fname, _suffix())
-                else:
-                    f = util.match_files(fname, _suffix())
-                citems = _get_items(f)
+                recursive = fxd.getattr(child, 'recursive', 0)
+                files = match_files(fname, config.IMAGE_SUFFIX, recursive)
 
             elif child.name == 'file':
                 # add the given filename
-                citems = _get_items([ fname ])
+                files = [ fname ]
 
-            # set duration until the next images comes up
-            duration = fxd.getattr(child, 'duration', 0)
-            if duration:
-                for i in citems:
-                    i.duration = duration
-            items += citems
+            # get duration until the next images comes up
+            duration = fxd.getattr(child, 'duration', 0) or \
+                       config.IMAGEVIEWER_DURATION
+
+            for file in files:
+                items.append(ImageItem(file, None, duration))
 
         except OSError, e:
             print 'slideshow error:'
@@ -146,10 +126,8 @@ def fxdhandler(fxd, node):
         try:
             fname  = os.path.join(dirname, fxd.gettext(child))
             if child.name == 'directory':
-                if fxd.getattr(child, 'recursive', 0):
-                    files += util.match_files_recursively(fname, suffix)
-                else:
-                    files += util.match_files(fname, suffix)
+                recursive = fxd.getattr(child, 'recursive', 0)
+                files += match_files(fname, suffix, recursive)
             elif child.name == 'file':
                 files.append(fname)
         except OSError, e:
