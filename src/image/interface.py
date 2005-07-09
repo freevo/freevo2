@@ -38,15 +38,8 @@
 # by using plugin.mimetype()
 __all__ = [ 'PluginInterface' ]
 
-# python imports
-import os
-
-# Add support for bins album files
-from kaa.metadata.image import bins
-
 # freevo imports
 import config
-import util
 import plugin
 import fxditem
 
@@ -74,40 +67,16 @@ class PluginInterface(plugin.MimetypePlugin):
 
     def suffix(self):
         """
-        return the list of suffixes this class handles
+        Return the list of suffixes this class handles
         """
         return config.IMAGE_SUFFIX
 
 
     def get(self, parent, listing):
         """
-        return a list of items based on the files
+        Return a list of items based on the files
         """
         items = []
         for file in listing.match_suffix(config.IMAGE_SUFFIX):
             items.append(ImageItem(file, parent))
         return items
-
-
-    def dirinfo(self, diritem):
-        """
-        set informations for a diritem based on album.xml
-        """
-        if os.path.isfile(diritem.dir + '/album.xml'):
-            # Add album.xml information from bins to the
-            # directory informations
-            info  = bins.get_bins_desc(diritem.dir)
-            if not info.has_key('desc'):
-                return
-
-            info = info['desc']
-            if info.has_key('sampleimage') and info['sampleimage']:
-                # Check if the album.xml defines a sampleimage.
-                # If so, use it as image for the directory
-                image = os.path.join(diritem.dir, info['sampleimage'])
-                if os.path.isfile(image):
-                    diritem.image = image
-
-            # set the title from album.xml
-            if info.has_key('title') and info['title']:
-                diritem.name = info['title']
