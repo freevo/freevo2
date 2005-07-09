@@ -132,7 +132,6 @@ class autostart(plugin.DaemonPlugin):
         plugin.DaemonPlugin.__init__(self)
         self.event_listener = True
 
-
     def eventhandler(self, event):
         """
         eventhandler to handle the IDENTIFY_MEDIA plugin event and the
@@ -196,8 +195,8 @@ class rom_items(plugin.MainMenuPlugin, plugin.DaemonPlugin):
     menu or most likely the video/audio/image/games main menu
     """
     def __init__(self):
-        plugin.MainMenuPlugin.__init__(self)
         plugin.DaemonPlugin.__init__(self)
+        plugin.MainMenuPlugin.__init__(self)
         self.event_listener = True
 
 
