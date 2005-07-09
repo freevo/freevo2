@@ -190,13 +190,17 @@ def match_suffix(filename, suffixlist):
     return 0
 
 
-def match_files(dirname, suffix_list):
+def match_files(dirname, suffix_list, recursive = False):
     """
     Find all files in a directory that has matches a list of suffixes.
     Returns a list that is case insensitive sorted.
     """
+    if recursive:
+        return match_files_recursively(dirname, suffix_list)
+    
     try:
-        files = [ os.path.join(dirname, fname) for fname in os.listdir(dirname) if
+        files = [ os.path.join(dirname, fname) \
+                  for fname in os.listdir(dirname) if
                   vfs.isfile(os.path.join(dirname, fname)) ]
     except OSError, e:
         print 'fileops:match_files: %s' % e
