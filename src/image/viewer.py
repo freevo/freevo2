@@ -30,22 +30,25 @@
 # -----------------------------------------------------------------------------
 
 
-__all__ = [ 'imageviewer' ]
-
-# external imports
-import notifier
+__all__ = [ 'viewer' ]
 
 # python imports
 import os
+import logging
+
+# kaa imports
+import kaa.notifier
 
 # freevo imports
 import config
-import util
 import plugin
 import gui
 import gui.widgets
 import gui.imagelib
 import gui.theme
+
+# cache for loading images
+from util.objectcache import ObjectCache
 
 # Transition/Move/VERTICAL
 from gui.animation import *
@@ -53,20 +56,11 @@ from gui.animation import *
 from event import *
 from application import Application
 
-import logging
+# get logging object
 log = logging.getLogger('image')
 
-_singleton = None
-
-def imageviewer():
-    """
-    return the global image viewer object
-    """
-    global _singleton
-    if _singleton == None:
-        _singleton = ImageViewer()
-    return _singleton
-
+# global viewer, will be set to the ImageViewer
+viewer = None
 
 
 class ImageViewer(Application):
@@ -86,7 +80,7 @@ class ImageViewer(Application):
                            str(IMAGE_ZOOM_GRID4):4, str(IMAGE_ZOOM_GRID5):5,
                            str(IMAGE_ZOOM_GRID6):6, str(IMAGE_ZOOM_GRID7):7,
                            str(IMAGE_ZOOM_GRID8):8, str(IMAGE_ZOOM_GRID9):9 }
-        self.bitmapcache = util.objectcache.ObjectCache(3, desc='viewer')
+        self.bitmapcache = ObjectCache(3, desc='viewer')
         self.slideshow   = True
         self.last_image  = None
         self.last_item   = None
@@ -95,7 +89,7 @@ class ImageViewer(Application):
         self.filename    = None
         self.rotation    = None
         self.zomm        = None
-        self._timer_id   = None
+        self.sshow_timer = None
 
 
     def hide(self):
@@ -121,10 +115,11 @@ class ImageViewer(Application):
         self.osd_mode = 0
         self.filename = None
         # we don't need the signalhandler anymore
-        notifier.removeTimer( self._timer_id )
-        self._timer_id = None
+        if self.sshow_timer:
+            self.sshow_timer.remove()
+            self.sshow_timer = None
         # reset bitmap cache
-        self.bitmapcache = util.objectcache.ObjectCache(3, desc='viewer')
+        self.bitmapcache = ObjectCache(3, desc='viewer')
 
 
     def view(self, item, zoom=0, rotation=0):
@@ -273,9 +268,9 @@ class ImageViewer(Application):
 
         # start timer
         if self.item.duration and self.slideshow and \
-               self._timer_id == None:
-            cb = notifier.Callback( self.item.duration * 1000 )
-            self._timer_id = notifier.addTimer( self.signalhandler, cb )
+               self.sshow_timer == None:
+            d = self.item.duration * 1000
+            self.sshow_timer = kaa.notifier.timer(d, self.signalhandler)
 
         # Notify everyone about the viewing
         if self.last_item != item:
@@ -314,26 +309,26 @@ class ImageViewer(Application):
         the duration is over.
         """
         self.hide()
-        self._timer_id = None
+        self.sshow_timer = None
         self.stop()
         return False
 
 
     def eventhandler(self, event, menuw=None):
         """
-        handle incoming events
+        Handle incoming events
         """
         if event == PAUSE or event == PLAY:
             if self.slideshow:
                 self.post_event(Event(OSD_MESSAGE, arg=_('pause')))
                 self.slideshow = False
-                notifier.removeTimer( self._timer_id )
-                self._timer_id = None
+                if self.sshow_timer:
+                    self.sshow_timer.remove()
+                    self.sshow_timer = None
             else:
                 self.post_event(Event(OSD_MESSAGE, arg=_('play')))
                 self.slideshow = True
-                cb = notifier.Callback( 1000 )
-                self._timer_id = notifier.addTimer( self.signalhandler, cb )
+                self.sshow_timer = kaa.notifier.timer(1000, self.signalhandler)
             return True
 
         if event == STOP:
@@ -344,8 +339,9 @@ class ImageViewer(Application):
         if event == PLAYLIST_NEXT or event == PLAYLIST_PREV:
             # up and down will stop the slideshow and pass the
             # event to the playlist
-            notifier.removeTimer( self._timer_id )
-            self._timer_id = None
+            if self.sshow_timer:
+                self.sshow_timer.remove()
+                self.sshow_timer = None
             self.item.eventhandler(event)
             return True
 
@@ -354,7 +350,7 @@ class ImageViewer(Application):
             Application.stop(self)
             self.item.eventhandler(event)
             return True
-        
+
         if event == IMAGE_ROTATE:
             # rotate image
             if event.arg == 'left':
@@ -503,3 +499,6 @@ class ImageViewer(Application):
             a = MoveAnimation(objects, VERTICAL, 20, -move_y)
             a.start()
             a.wait()
+
+# set viewer object
+viewer = ImageViewer()
