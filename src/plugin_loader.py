@@ -332,9 +332,10 @@ class PluginLoader(object):
 
             if p.plugin_type:
                 if p.plugin_special and special:
-                    key = p.plugin_type + '_' + special, p
+                    key = p.plugin_type + '_' + special
                 else:
                     key = p.plugin_type
+
                 if not self.types.has_key(key):
                     self.types[key] = []
                 self.types[key].append(p)
