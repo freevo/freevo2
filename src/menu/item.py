@@ -101,9 +101,6 @@ class Item(object):
             self.name = u''
             self.description  = ''
             
-        if not hasattr(self, 'autovars'):
-            self.autovars = {}
-
         self.parent = weakref(parent)
         if parent:
             self.image = parent.image
@@ -169,7 +166,7 @@ class Item(object):
         return self.name
 
 
-    def sort(self, mode=None):
+    def sort(self, mode='name'):
         """
         Returns the string how to sort this item
         """

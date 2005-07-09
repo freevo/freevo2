@@ -32,6 +32,7 @@
 __all__ = [ 'MediaItem' ]
 
 # python imports
+import os
 import logging
 
 # freevo imports
@@ -57,7 +58,7 @@ class MediaItem(Item):
     def __init__(self, parent=None, type=None):
         Item.__init__(self, parent, type=type)
         self.url = 'unknown:' + str(self)
-
+        self.filename = None
         
     def set_url(self, url, search_cover=True):
         """
@@ -104,7 +105,6 @@ class MediaItem(Item):
             # set the suffix of the file as mimetype
             self.mimetype = self.filename[self.filename.rfind('.')+1:].lower()
 
-            self.info.set_permanent_variables(self.autovars)
             try:
                 if self.parent.DIRECTORY_USE_MEDIAID_TAG_NAMES:
                     self.name = self.info['title'] or self.name
@@ -191,6 +191,24 @@ class MediaItem(Item):
         if self.info and self.info[mediadb.NEEDS_UPDATE]:
             self.info.cache.parse_item(self.info)
         return True
+
+
+    def sort(self, mode='name'):
+        """
+        Returns the string how to sort this item
+        """
+        if mode == 'date' and self.filename:
+            uf = unicode(self.filename, errors = 'replace')
+            return u'%s%s' % (os.stat(self.filename).st_ctime, uf)
+        
+        return u'0%s' % self.name
+
+
+    def cache(self):
+        """
+        Caches (loads) the next item
+        """
+        pass
 
 
     def play(self):
