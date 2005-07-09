@@ -35,41 +35,39 @@
 __all__ = [ 'ImageItem' ]
 
 # python imports
-import os
 import time
 
 # freevo imports
 import config
 from menu import MediaItem, Action
-from event import *
-from viewer import *
+from viewer import viewer
 
 class ImageItem(MediaItem):
     """
     An item for image files
     """
     def __init__(self, url, parent, duration = config.IMAGEVIEWER_DURATION):
-        # set autovars to 'rotation' so that this value is
-        # stored between Freevo sessions
-        self.autovars = { 'rotation': 0 }
         MediaItem.__init__(self, parent, type='image')
         # set url and parse the name
         self.set_url(url, search_cover=False)
         self.duration = duration
         if self.url.startswith('file://'):
             self.image = self.filename
+        # set 'rotation' so that this value is stored between Freevo sessions
+        # FIXME: this needs a cleanup
+        self.info.set_permanent_variables({ 'rotation': 0 })
 
 
     def __getitem__(self, key):
         """
-        return the specific attribute as string or an empty string
+        Return the specific attribute as string or an empty string
         """
-        if key == "geometry":
+        if key == 'geometry':
             if self['width'] and self['height']:
                 return '%sx%s' % (self['width'], self['height'])
             return ''
 
-        if key == "date":
+        if key == 'date':
             try:
                 t = str(MediaItem.__getitem__(self, key))
                 if t:
@@ -81,39 +79,29 @@ class ImageItem(MediaItem):
         return MediaItem.__getitem__(self, key)
 
 
-    def sort(self, mode=None):
-        """
-        Returns the string how to sort this item
-        """
-        if mode == 'date':
-            return u'%s%s' % (os.stat(self.filename).st_ctime,
-                              Unicode(self.filename))
-        return Unicode(self.name)
-
-
     def actions(self):
         """
-        return a list of possible actions on this item.
+        Return a list of possible actions on this item.
         """
         return [ Action(_('View Image'), self.play) ]
 
 
     def cache(self):
         """
-        caches (loads) the next image
+        Caches (loads) the next image
         """
-        imageviewer().cache(self)
+        viewer.cache(self)
 
 
     def play(self):
         """
-        view the image
+        View the image
         """
-        imageviewer().view(self, rotation=self['rotation'])
+        viewer.view(self, rotation=self['rotation'])
 
 
     def stop(self):
         """
-        stop viewing this item
+        Stop viewing this item
         """
-        imageviewer().stop()
+        viewer.stop()
