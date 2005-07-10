@@ -36,7 +36,7 @@ import plugin
 
 # mevas imports
 from kaa.mevas.displays.imlib2canvas import Imlib2Canvas
-from kaa.mevas.rect import optimize_for_rendering
+
 # display imports
 from display import Display as Base
 
@@ -49,14 +49,3 @@ class Display(Imlib2Canvas, Base):
         Imlib2Canvas.__init__(self, size)
         Base.__init__(self)
         plugin.activate( 'input.x11' )
-
-        self._display.expose_callback = self.__expose
-
-
-    def __expose( self, regions_list ):
-        """
-        Callback for expose events from X11
-        """
-        for pos, size in optimize_for_rendering(regions_list):
-            self._display.render( self._backing_store._image, pos, pos, size )
-
