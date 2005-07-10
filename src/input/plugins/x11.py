@@ -63,16 +63,16 @@ class PluginInterface(InputPlugin):
                              config.KEYBOARD_MAP[ key ]
             else:
                 log.error('unable to find key code for %s' % key)
-        self.__display = gui.display._display
+        self.__display = gui.display._window
         self.__display.input_callback = self.handle
-        notifier.addSocket( self.__display.socket, self.__handle_events )
+        notifier.addSocket( self.__display.get_display().socket, self.__handle_events )
 
 
     def __handle_events(self, *args):
         """
         Wrapper for the display handle_events function.
         """
-        return self.__display.handle_events()
+        return self.__display.get_display().handle_events()
 
         
     def handle( self, keycode ):
