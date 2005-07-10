@@ -64,8 +64,9 @@ class PluginInterface(InputPlugin):
             else:
                 log.error('unable to find key code for %s' % key)
         self.__display = gui.display._window
-        self.__display.input_callback = self.handle
-        notifier.addSocket( self.__display.get_display().socket, self.__handle_events )
+        self.__display.signals["key_press_event"].connect(self.handle)
+        # This isn't needed anymore because X11Display does this itself, right?
+        #notifier.addSocket( self.__display.get_display().socket, self.__handle_events )
 
 
     def __handle_events(self, *args):
