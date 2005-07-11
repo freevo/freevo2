@@ -304,7 +304,7 @@ class MenuStack(object):
                     event = MENU_PAGEDOWN
 
         if event == MENU_GOTO_MAINMENU:
-            while len(self.menustack > 1):
+            while len(self.menustack) > 1:
                 menu = self.menustack.pop()
             self.refresh()
             return True
