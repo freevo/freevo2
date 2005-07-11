@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2005/07/11 17:54:15  tack
+# Fixed variable name problem.  (kaarpo <kaarpo@jubii.dk>)
+#
 # Revision 1.28  2005/06/25 08:52:28  dischi
 # switch to new style python classes
 #
@@ -181,11 +184,11 @@ class Videodev(object):
 
     def setchannel(self, channel):
         if self.settings:
-            frequency = get_frequency(channel, self.settings.chanlist)
+            freq = get_frequency(channel, self.settings.chanlist)
         else:
-            frequency = get_frequency(channel)
+            freq = get_frequency(channel)
 
-        if not frequency:
+        if not freq:
             print 'ERROR: unable to get frequency for %s' % channel
             return
 
