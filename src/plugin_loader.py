@@ -84,6 +84,8 @@ class PluginLoader(object):
         self.path = None
         # list of all plugins
         self.plugins = []
+        self.loaded_plugins = []
+        
         # next id for a plugin
         self.next_id = 0
         # plugins sorted by type
@@ -343,7 +345,8 @@ class PluginLoader(object):
             if p.plugin_name:
                 self.names[p.plugin_name] = p
 
-
+            self.loaded_plugins.append(p)
+            
         except:
             log.exception('failed to load plugin %s' % name)
 
