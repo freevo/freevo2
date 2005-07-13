@@ -156,7 +156,7 @@ class PluginInterface(ItemPlugin):
         thread.start(cb, ex)
             
 
-    def handle_exception(self, item, box, exception):
+    def handle_exception(self, exception, item, box):
         """
         Exception while getting data from IMDB.
         """
@@ -165,7 +165,7 @@ class PluginInterface(ItemPlugin):
         item.show_menu()
 
         
-    def parse_results(self, item, disc_set, box, results):
+    def parse_results(self, results, item, disc_set, box):
         """
         Handle IMDB search results. This function is called after the search
         thread is finished.
@@ -220,7 +220,7 @@ class PluginInterface(ItemPlugin):
         thread.start(cb, ex)
         
 
-    def save(self, item, fxd, box, disc_set, devicename, result):
+    def save(self, result, item, fxd, box, disc_set, devicename):
         """
         Create fxd file for the item.
         """

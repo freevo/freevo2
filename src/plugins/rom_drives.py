@@ -691,7 +691,7 @@ class Watcher(object):
         del config.ROM_DRIVES
 
         # register callback
-        kaa.notifier.addTimer(2000, self.poll)
+        kaa.notifier.Timer(self.poll).start(2000)
 
 
     def poll(self):

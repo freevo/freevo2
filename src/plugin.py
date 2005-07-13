@@ -86,7 +86,7 @@ class Plugin(plugin_loader.Plugin):
         # register shutdown handler
         if self.__class__.shutdown != Plugin.shutdown:
             # plugin has a self defined shutdown function
-            kaa.notifier.addShutdown( self.shutdown )
+            kaa.notifier.signals['shutdown'].connect( self.shutdown )
 
 
 
@@ -176,7 +176,7 @@ class DaemonPlugin(Plugin):
         Plugin.plugin_activate(self)
         if self.__class__.poll != DaemonPlugin.poll:
             # plugin has a self defined poll function, register it
-            kaa.notifier.addTimer( self.poll_interval, self.__poll )
+            self.__timer = kaa.notifier.Timer(self.__poll).start(self.poll_interval)
 
         if self.__class__.eventhandler != DaemonPlugin.eventhandler:
             # plugin has a self defined eventhandler

@@ -118,9 +118,10 @@ class Shutdown(object):
     Class handling system shutdown.
     """
     def __init__(self):
-        kaa.notifier.addTimer(FIRST_START, self.check_mbus)
-        # notifier check timer, not set by first FIRST_START waiting
-        self.timer = None
+        # notifier check timer
+        self.timer = kaa.notifier.OneShotTimer(self.check_mbus)
+        self.timer.start(FIRST_START)
+        self.timer.first_start = True
         # counter how often the shutdown function warns before real
         # shutdown (6 == 5 minutes)
         self.shutdown_counter = 6
@@ -134,13 +135,13 @@ class Shutdown(object):
         """
         An entity was added/removed from the mbus.
         """
-        if not self.timer:
+        if self.timer.first_start:
             # we are in the startup mode (30 minutes wait)
             return
         log.warning('entity change, set timer %s seconds' % \
                     (POLL_INTERVALL / 1000))
-        kaa.notifier.removeTimer(self.timer)
-        self.timer = kaa.notifier.addTimer(POLL_INTERVALL, self.check_mbus)
+        # reset timer to POLL_INTERVALL
+        self.timer.start(POLL_INTERVALL)
 
 
     def check_programs(self):
@@ -218,13 +219,16 @@ class Shutdown(object):
         """
         Send a status request to all mbus entities to get the status.
         """
-        if not self.timer and not self.shutdown_counter:
+        if not self.shutdown_counter:
             # looks like we came out of hibernate
             log.info('reset all shutdown timer')
             self.shutdown_counter = 6
-            kaa.notifier.addTimer(FIRST_START, self.check_mbus)
+            self.timer.start(FIRST_START)
+            self.timer.first_start = True
             return False
 
+        # now the plugin is running
+        self.timer.first_start = False
         log.info('checking for possible system shutdown')
         # next wakeup
         self.wakeuptime = 0
@@ -237,8 +241,8 @@ class Shutdown(object):
             # ask entity status
             log.info('send status rpc to %s' % entity)
             entity.call('status', self.rpcreturn)
-        # set timer for shutdown in 5 seconds
-        self.timer = kaa.notifier.addTimer(5000, self.check_shutdown)
+        # set a timer for check_shutdown in 5 seconds
+        kaa.notifier.OneShotTimer(self.check_shutdown).start(5000)
         return False
 
 
@@ -283,7 +287,7 @@ class Shutdown(object):
             wait = min(30, wait)
             log.info('Next check in %s minutes' % wait)
             # set a new timer
-            self.timer = kaa.notifier.addTimer(wait * 60000, self.check_mbus)
+            self.timer.start(wait * 60000)
             # reset counter
             self.shutdown_counter = max(self.shutdown_counter, 6)
             return False
@@ -294,8 +298,7 @@ class Shutdown(object):
             # an important program is running
             log.info('Next check in 5 minutes')
             # reschedule checking
-            self.timer = kaa.notifier.addTimer(5 * POLL_INTERVALL,
-                                               self.check_mbus)
+            self.timer.start(5 * POLL_INTERVALL)
             # set counter to 31 ( == 30 minutes after important the program
             # has quit)
             self.shutdown_counter = 31
@@ -312,7 +315,7 @@ class Shutdown(object):
                 wait = USER_IDLETIME + 1 - idle
                 log.info('Next check in %s minutes' % wait)
                 # set a new timer
-                self.timer = kaa.notifier.addTimer(wait * 60000, self.check_mbus)
+                self.timer.start(wait * 60000)
                 # reset counter
                 self.shutdown_counter = max(self.shutdown_counter, 6)
                 return False
@@ -330,7 +333,7 @@ class Shutdown(object):
             # let's warn this time
             log.warning('system shutdown system in %s minutes' % \
                         self.shutdown_counter)
-            self.timer = kaa.notifier.addTimer(POLL_INTERVALL, self.check_mbus)
+            self.timer.start(POLL_INTERVALL)
             return False
 
         # ok, do the real shutdown
@@ -341,8 +344,8 @@ class Shutdown(object):
 
         # set new timer in case we hibernate, set self.timer so it looks like
         # the normal startup timer
-        self.timer = None
-        kaa.notifier.addTimer(FIRST_START, self.check_mbus)
+        self.timer.start(FIRST_START)
+        self.timer.first_start = True
         return False
 
 

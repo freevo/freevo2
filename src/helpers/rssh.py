@@ -35,8 +35,8 @@ def print_result(result):
         print result
 
         
-def user_input( socket ):
-    input = socket.readline().strip()
+def user_input():
+    input = sys.stdin.readline().strip()
     if input == 'help':
         print '\rpossible commands:'
         print
@@ -113,7 +113,7 @@ def user_input( socket ):
     return True
 
 mcomm.register_entity_notification(notification)
-kaa.notifier.addSocket( sys.stdin, user_input )
+kaa.notifier.SocketDispatcher(user_input).register(sys.stdin)
 
 print 'rssh - recordserver shell'
 print '-------------------------'

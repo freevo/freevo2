@@ -151,7 +151,7 @@ class PluginInterface(plugin.ItemPlugin):
         return []
 
 
-    def handle_exception(self, item, box, exception):
+    def handle_exception(self, exception, item, box):
         """
         Exception while getting data.
         """
@@ -239,7 +239,7 @@ class PluginInterface(plugin.ItemPlugin):
         thread.start(cb, ex)
 
 
-    def cover_menu(self, item, box, cover):
+    def cover_menu(self, cover, item, box):
         """
         Show cover images. 
         """

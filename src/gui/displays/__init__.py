@@ -160,4 +160,4 @@ def active():
 
 
 # stop the display on shutdown
-kaa.notifier.addShutdown(shutdown)
+kaa.notifier.signals['shutdown'].connect(shutdown)

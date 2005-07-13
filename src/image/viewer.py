@@ -89,7 +89,7 @@ class ImageViewer(Application):
         self.filename    = None
         self.rotation    = None
         self.zomm        = None
-        self.sshow_timer = None
+        self.sshow_timer = kaa.notifier.OneShotTimer(self.signalhandler)
 
 
     def hide(self):
@@ -115,9 +115,7 @@ class ImageViewer(Application):
         self.osd_mode = 0
         self.filename = None
         # we don't need the signalhandler anymore
-        if self.sshow_timer:
-            self.sshow_timer.remove()
-            self.sshow_timer = None
+        self.sshow_timer.stop()
         # reset bitmap cache
         self.bitmapcache = ObjectCache(3, desc='viewer')
 
@@ -268,9 +266,8 @@ class ImageViewer(Application):
 
         # start timer
         if self.item.duration and self.slideshow and \
-               self.sshow_timer == None:
-            d = self.item.duration * 1000
-            self.sshow_timer = kaa.notifier.timer(d, self.signalhandler)
+               not self.sshow_timer.active():
+            self.sshow_timer.start(self.item.duration * 1000)
 
         # Notify everyone about the viewing
         if self.last_item != item:
@@ -309,7 +306,6 @@ class ImageViewer(Application):
         the duration is over.
         """
         self.hide()
-        self.sshow_timer = None
         self.stop()
         return False
 
@@ -322,13 +318,11 @@ class ImageViewer(Application):
             if self.slideshow:
                 self.post_event(Event(OSD_MESSAGE, arg=_('pause')))
                 self.slideshow = False
-                if self.sshow_timer:
-                    self.sshow_timer.remove()
-                    self.sshow_timer = None
+                self.sshow_timer.stop()
             else:
                 self.post_event(Event(OSD_MESSAGE, arg=_('play')))
                 self.slideshow = True
-                self.sshow_timer = kaa.notifier.timer(1000, self.signalhandler)
+                self.sshow_timer.start(1000)
             return True
 
         if event == STOP:
@@ -339,9 +333,7 @@ class ImageViewer(Application):
         if event == PLAYLIST_NEXT or event == PLAYLIST_PREV:
             # up and down will stop the slideshow and pass the
             # event to the playlist
-            if self.sshow_timer:
-                self.sshow_timer.remove()
-                self.sshow_timer = None
+            self.sshow_timer.stop()
             self.item.eventhandler(event)
             return True
 
