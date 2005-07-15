@@ -41,7 +41,6 @@ import logging
 # freevo imports
 import config
 import util
-import eventhandler
 import plugin
 import mediadb
 import fxditem
@@ -398,7 +397,7 @@ class Playlist(MediaItem):
 
             self.__current = self.playlist[0]
             # Send a PLAY_START event for ourself
-            eventhandler.post(Event(PLAY_START, self))
+            PLAY_START.post(self)
 
 
         if not isinstance(self.__current, Item):
@@ -498,7 +497,7 @@ class Playlist(MediaItem):
             else:
                 self.repeat = REPEAT_OFF
                 arg = _('Repeat Off')
-            eventhandler.post(Event(OSD_MESSAGE, arg=arg))
+            OSD_MESSAGE.post(arg)
             return True
 
 
@@ -514,7 +513,7 @@ class Playlist(MediaItem):
                 # Nothing to play
                 self.stop()
                 # Send a PLAY_END event for ourself
-                eventhandler.post(Event(PLAY_END, self))
+                PLAY_END.post(self)
             return True
 
 
@@ -526,8 +525,7 @@ class Playlist(MediaItem):
                 return True
             else:
                 # No next item
-                e = Event(OSD_MESSAGE, arg=_('No Next Item In Playlist'))
-                eventhandler.post(e)
+                OSD_MESSAGE.post(_('No Next Item In Playlist'))
 
 
         if event == PLAYLIST_PREV:
@@ -540,9 +538,7 @@ class Playlist(MediaItem):
                 return True
             else:
                 # No previous item
-                e = Event(OSD_MESSAGE, arg=_('no previous item in playlist'))
-                eventhandler.post(e)
-
+                OSD_MESSAGE.post(_('no previous item in playlist'))
 
         if event == STOP:
             # Stop playing and send event to parent item

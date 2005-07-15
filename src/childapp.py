@@ -44,7 +44,6 @@ import kaa.notifier
 # Freevo imports
 import sysconfig
 import config
-import eventhandler
 import gui
 
 from event import *
@@ -55,7 +54,7 @@ class Instance(kaa.notifier.Process):
         self.is_video = 0
         if stop_osd == 2: 
             self.is_video = 1
-            eventhandler.post( Event( VIDEO_START ) )
+            VIDEO_START.post()
             stop_osd = 1
 
         self.stop_osd = stop_osd
@@ -63,7 +62,7 @@ class Instance(kaa.notifier.Process):
             gui.display.hide()
         
         if hasattr(self, 'item'):
-            eventhandler.post( Event( PLAY_START, arg = self.item ) )
+            PLAY_START.post(self.item)
 
         if isinstance( app, unicode ):
             app = String(app)
@@ -111,7 +110,7 @@ class Instance(kaa.notifier.Process):
 
         if not self.stopping:
             if self.is_video:
-                eventhandler.post( Event( VIDEO_END ) )
-            eventhandler.post( self.stop_event() )
+                VIDEO_END.post()
+            self.stop_event().post()
 
         

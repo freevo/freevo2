@@ -47,7 +47,6 @@ from mediadb.globals import *
 import menu
 import plugin
 import fxditem
-import eventhandler
 
 from menu import Item, Files, Action, ActionItem
 from playlist import Playlist
@@ -346,7 +345,7 @@ class DirItem(Playlist):
             # build new dir (this will add a new menu)
             d.browse()
             # show message
-            eventhandler.post(Event(OSD_MESSAGE, '%s view' % type))
+            OSD_MESSAGE.post('%s view' % type)
             return True
 
         if event == PLAY_START and event.arg in self.item_menu.choices:
