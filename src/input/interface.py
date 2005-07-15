@@ -30,6 +30,7 @@
 # -----------------------------------------------------------------------------
 
 # python imports
+import copy
 import logging
 
 # freevo imports
@@ -59,9 +60,9 @@ class InputPlugin(plugin.Plugin):
 
         for c in (self._eventhandler.context, 'global'):
             try:
-                e = config.EVENTS[c][key]
+                e = copy.copy(config.EVENTS[c][key])
                 e.context = self._eventhandler.context
-                self._eventhandler.queue.append(e)
+                e.post()
                 break
             except KeyError:
                 pass
