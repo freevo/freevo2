@@ -282,7 +282,7 @@ try:
     del splash
 
     # kick off the main menu loop
-    kaa.notifier.signals['idle'].connect( eventhandler.get_singleton().handle )
+    kaa.notifier.EventHandler( eventhandler.get_singleton().handle ).register()
 
     # start main loop
     kaa.notifier.loop()
