@@ -59,7 +59,7 @@ except:
     print 'cvs -z3 -d:pserver:anonymous@cvs.sf.net:/cvsroot/freevo co -P kaa'
     print
     print 'Please install it as root into your system or into the Freevo'
-    print 'site-pacakges directory by running setup in the kaa root directory:'
+    print 'site-packages directory by running setup in the kaa root directory:'
     print 'python setup.py install --install-lib=%s \\' % d
     print '    --install-scripts=%s/bin' % d
     print 'When using the command above, you need to reinstall kaa every time'
