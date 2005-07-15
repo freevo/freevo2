@@ -13,6 +13,9 @@
 #    3) Better (and more) LCD screens.
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2005/07/15 20:42:53  dischi
+# remove variable event_listener, not needed anymore
+#
 # Revision 1.24  2005/06/09 19:43:53  dischi
 # clean up eventhandler usage
 #
@@ -714,9 +717,6 @@ class PluginInterface( plugin.DaemonPlugin ):
         self.generate_screens()
         if self.disable:            
             return
-        else:
-            self.event_listener = 1
-            
         plugin.register( self, "lcd" )
 
 

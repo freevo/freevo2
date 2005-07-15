@@ -89,7 +89,6 @@ class PluginInterface(plugin.Plugin):
         plugin.Plugin.__init__(self)
         self.app_mode = 'audio'
         self.poll_menu_only = False
-        self.event_listener = True
         self.visual = None
         self.plugin_name = 'audio.mplayervis'
         self.running = False

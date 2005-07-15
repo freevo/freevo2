@@ -128,9 +128,6 @@ class autostart(plugin.DaemonPlugin):
     Plugin to autostart if a new medium is inserted while Freevo shows
     the main menu
     """
-    def __init__(self):
-        plugin.DaemonPlugin.__init__(self)
-        self.event_listener = True
 
     def eventhandler(self, event):
         """
@@ -197,7 +194,6 @@ class rom_items(plugin.MainMenuPlugin, plugin.DaemonPlugin):
     def __init__(self):
         plugin.DaemonPlugin.__init__(self)
         plugin.MainMenuPlugin.__init__(self)
-        self.event_listener = True
 
 
     def items(self, parent):

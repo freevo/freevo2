@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2005/07/15 20:42:53  dischi
+# remove variable event_listener, not needed anymore
+#
 # Revision 1.7  2005/06/09 19:43:53  dischi
 # clean up eventhandler usage
 #
@@ -97,7 +100,6 @@ class PluginInterface(plugin.DaemonPlugin):
     def __init__(self, sstype, ssarg1, ssarg2=None):
         plugin.DaemonPlugin.__init__(self)
         self.plugin_name = 'SCREENSAVER'
-        self.event_listener = True
 	self.poll_menu_only = True
 	self.last_event = 0
         self.screensaver_showing = False
