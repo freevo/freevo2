@@ -148,7 +148,6 @@ class DaemonPlugin(Plugin):
         Plugin.__init__(self)
         self.poll_interval  = 100       # poll every x milliseconds
         self.poll_menu_only = True      # poll only when menu is active
-        self.event_listener = False     # process all events
         self.events         = []        # events to register to ([] == all)
 
 
@@ -180,23 +179,12 @@ class DaemonPlugin(Plugin):
 
         if self.__class__.eventhandler != DaemonPlugin.eventhandler:
             # plugin has a self defined eventhandler
-            if self.events:
-                for e in self.events:
-                    eventhandler.register(self, e)
-            else:
-                if self.event_listener:
-                    handler = eventhandler.EVENT_LISTENER
-                else:
-                    handler = eventhandler.GENERIC_HANDLER
-                eventhandler.register(self, handler)
+            kaa.notifier.EventHandler(self.eventhandler).register(self.events)
 
 
     def eventhandler(self, event):
         """
-        Events no one else wants will be passed to this functions, when
-        you also set the variable event_listener to True, the object will
-        get all events. Setting self.events to a list of event names will]
-        register only that events to the eventhandler.
+        Handle events passed to the eventhandler.
         """
         return False
 
