@@ -12,24 +12,7 @@
 # differs based on the object itself. There are three different kinds of
 # eventhandlers:
 #
-# 1. Global eventhandlers registered to this module
-#    def eventhandler(self, event)
-#    This eventhandler simply gets the current event and may process it. This
-#    kind of eventhandlers can be found in a DaemonPlugin, an Application
-#    or a Window.
-#
-# 2. Menu eventhandlers
-#    def eventhandler(self, event, menuw=None)
-#    This eventhandlers are called by the menu widget, e.g. all Items have such
-#    an eventhandler. It should use menuw=None because the eventhandler may
-#    also be called from an application which doesn't know about menuw
-#
-# 3. Plugin eventhandlers for items
-#    def eventhandler(self, item, event, menuw=None)
-#    This eventhandlers are defined in ItemPlugins and will be called from
-#    inside the item if the item itself doesn't handle the event.
-#
-# Thie basic idea is that the event is passed to an application or window by
+# The basic idea is that the event is passed to an application or window by
 # this module. It doesn't know about a menuw or item. The application may pass
 # the event to an item, menuw will add itself to it, other applications don't
 # do this. The item itself will call the plugins and add itself to the list
@@ -65,7 +48,7 @@ import sys
 import time
 import logging
 
-# notifier
+# kaa imports
 import kaa.notifier
 
 # freevo imports
@@ -76,9 +59,6 @@ from event import *
 
 # the logging object
 log = logging.getLogger()
-
-GENERIC_HANDLER = 'GENERIC_HANDLER'
-EVENT_LISTENER  = 'EVENT_LISTENER'
 
 # debug stuff
 _TIME_DEBUG = False
@@ -134,13 +114,6 @@ def register(application, event):
     return get_singleton().register(application, event)
 
     
-def unregister(application, event):
-    """
-    Register for a specific event
-    """
-    return get_singleton().unregister(application, event)
-
-    
 def get():
     """
     Return the application which has the focus or the
@@ -174,9 +147,6 @@ class Eventhandler(object):
         self.popups       = []
         self.applications = []
         self.context      = None
-        self.locked       = False
-        self.queue = []
-        self.registered = { EVENT_LISTENER : [], GENERIC_HANDLER : []}
         self.stack_change = None
         # idle timer variable
         self.__idle_time = 0
@@ -202,14 +172,6 @@ class Eventhandler(object):
         return self.__idle_time
 
         
-    def notify(self, event):
-        """
-        Notify registered plugins for the given event
-        """
-        if str(event) in self.registered:
-            map(lambda c: c.eventhandler(event), self.registered[str(event)])
-                
-        
     def set_focus(self):
         """
         change the focus
@@ -229,7 +191,7 @@ class Eventhandler(object):
                 previous.hide()
             fade = fade or previous.animated
         log.info('SCREEN_CONTENT_CHANGE')
-        self.notify(Event(SCREEN_CONTENT_CHANGE, (app, app.fullscreen, fade)))
+        Event(SCREEN_CONTENT_CHANGE, (app, app.fullscreen, fade)).post()
         self.stack_change = None
         if not app.visible:
             app.show()
@@ -291,18 +253,10 @@ class Eventhandler(object):
         """
         Register for a specific event
         """
-        event = str(event)
-        if not event in self.registered:
-            self.registered[event] = []
-        if not application in self.registered[event]:
-            self.registered[event].append(application)
-
-    
-    def unregister(self, application, event):
-        """
-        Register for a specific event
-        """
-        self.registered[str(event)].remove(application)
+        if hasattr(application, 'eventhandler'):
+            application = application.eventhandler
+        handler = kaa.notifier.EventHandler(application)
+        handler.register(event)
 
     
     def get(self):
@@ -324,29 +278,14 @@ class Eventhandler(object):
         Send an event to the event queue
         """
         if not isinstance(event, Event):
-            self.queue += [ Event(event, context=self.context) ]
-        else:
-            self.queue += [ event ]
+            event = Event(event)
+        event.post()
 
 
-
-    def handle(self, event=None):
+    def handle(self, event):
         """
         event handling function
         """
-        # search for events in the queue
-        if not event and not len(self.queue):
-            return True
-
-        if self.locked:
-            # already in this function
-            return True
-        self.locked = True
-        
-        if not event:
-            event = self.queue[0]
-            del self.queue[0]
-        
         log.debug('handling event %s' % str(event))
         
         if _TIME_DEBUG:
@@ -356,21 +295,6 @@ class Eventhandler(object):
         self.__idle_time = 0
 
         try:
-            for p in self.registered[EVENT_LISTENER]:
-                p.eventhandler(event=event)
-
-            used = False
-            if str(event) in self.registered:
-                # event is in the list of registered events. This
-                # events are special and should go to the callbacks
-                # registered. If at least one of them uses the event
-                # (returns True), do not send this event in the event
-                # queue (e.g. the detach plugin needs PLAY_END, but
-                # will only use it for the audio end and this should
-                # not go to the video player)
-                for c in self.registered[str(event)]:
-                    used = c.eventhandler(event=event) or used
-
             if event == FUNCTION_CALL:
                 # event is a direct function call, call it and do not
                 # pass it on the the normal handling
@@ -382,26 +306,13 @@ class Eventhandler(object):
                 # handling
                 event.handler(event=event)
                 
-            elif used:
-                # used by registered plugin
-                pass
-            
             elif len(self.popups) and \
                      self.popups[-1].eventhandler(event=event):
                 # handled by the current popup
                 pass
                 
-            elif not self.applications[-1].eventhandler(event=event):
-                # pass event to the current application
-                for p in self.registered[GENERIC_HANDLER]:
-                    # pass it to all plugins when the application
-                    # didn't use it
-                    if p.eventhandler(event=event):
-                        break
-                else:
-                    # nothing found for this event
-                    log.debug( 'no eventhandler for event %s (app: %s)' \
-                               % (event, self.applications[-1]))
+            else:
+                self.applications[-1].eventhandler(event=event)
 
             # now do some checking if the focus needs to be changed
             if self.stack_change:
@@ -419,8 +330,6 @@ class Eventhandler(object):
 
             if _TIME_DEBUG:
                 print time.clock() - t1
-            # unlock eventhandler
-            self.locked = False
             return True
 
         except SystemExit:
@@ -433,7 +342,6 @@ class Eventhandler(object):
             import config
             from gui.windows import ConfirmBox
             
-            self.locked = False
             if config.FREEVO_EVENTHANDLER_SANDBOX:
                 log.exception('eventhandler')
                 msg=_('Event \'%s\' crashed\n\nPlease take a ' \
