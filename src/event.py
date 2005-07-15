@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.60  2005/07/15 20:40:44  dischi
+# base Event on kaa.notifier.Event
+#
 # Revision 1.59  2005/07/08 14:45:35  dischi
 # add some extra events for mouse support
 #
@@ -85,58 +88,36 @@
 #
 # ----------------------------------------------------------------------- */
 
+import kaa.notifier
 
-class Event(object):
+class Event(kaa.notifier.Event):
     """
     an event is passed to the different eventhandlers in Freevo to
     activate some action.
     """
-    def __init__(self, name, arg=None, context=None, handler=None):
+    def __init__(self, name, arg=None, handler=None):
         if isinstance(name, Event):
             self.name    = name.name
             self.arg     = name.arg
-            self.context = name.context
             self.handler = name.handler
         else:
             self.name    = name
             self.arg     = None
-            self.context = None
             self.handler = None
         
         if arg or arg == 0:
             self.arg = arg
 
-        if context:
-            self.context = context
-
         if handler:
             self.handler = handler
 
             
-    def __str__(self):
-        """
-        return the event as string
-        """
-        return self.name
-
-
     def __int__(self):
         """
         return the event as int (the last char of the name will be returned
         as integer value
         """
         return int(self.name[-1])
-
-    
-    def __cmp__(self, other):
-        """
-        compare function, return 0 if the objects are identical, 1 otherwise
-        """
-        if not other:
-            return 1
-        if isinstance(other, Event):
-            return self.name != other.name
-        return self.name != other
 
 
 
