@@ -1,5 +1,5 @@
 PYMBUS=pyMbus-0.8.6
-PYNOTIFIER=pyNotifier-0.3.8
+PYNOTIFIER=pyNotifier-0.3.9
 URL=ftp://ftp.mbus.org/tzi/dmn/mbus/python/
 
 all: pylibvisual pynotifier pymbus pywebinfo mmpython
