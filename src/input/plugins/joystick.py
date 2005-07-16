@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2005/07/16 09:48:23  dischi
+# adjust to new event interface
+#
 # Revision 1.7  2005/05/07 18:09:41  dischi
 # move InputPlugin definition to input.interface
 #
@@ -143,7 +146,7 @@ class PluginInterface(InputPlugin):
             log.info('Translation: "%s" -> "%s"' % (button, command))
             command = rc.key_event_mapper(command)
             if command:
-                eventhandler.post(command)
+                command.post()
 
         return True
 

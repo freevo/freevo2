@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2005/07/16 09:48:21  dischi
+# adjust to new event interface
+#
 # Revision 1.10  2005/06/09 19:43:53  dischi
 # clean up eventhandler usage
 #
@@ -60,7 +63,6 @@ import plugin
 import config
 from event import *
 from util.dbutil import *
-import eventhandler
 import util
 import os
 import time
@@ -101,4 +103,4 @@ class PluginInterface(plugin.DaemonPlugin):
             self.log_track(event.arg)
         if event == RATING and str(event.arg[0]) in '12345':
             self.log_rating(event.arg[1],event.arg[0])
-            eventhandler.post(Event(OSD_MESSAGE,'Rated: %s' % str(event.arg[0])))
+            OSD_MESSAGE.post('Rated: %s' % str(event.arg[0]))

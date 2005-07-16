@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2005/07/16 09:48:23  dischi
+# adjust to new event interface
+#
 # Revision 1.20  2005/06/09 19:43:53  dischi
 # clean up eventhandler usage
 #
@@ -63,7 +66,6 @@ import struct
 import os
 
 import config
-import eventhandler
 import plugin
 from event import *
 
@@ -142,27 +144,27 @@ class PluginInterface(plugin.DaemonPlugin):
         if event == MIXER_VOLUP:
             if config.MAJOR_AUDIO_CTRL == 'VOL':
                 self.incMainVolume(event.arg)
-                eventhandler.post(Event(OSD_MESSAGE, arg=_('Volume: %s%%') % self.getVolume()))
+                OSD_MESSAGE.post(_('Volume: %s%%') % self.getVolume())
             elif config.MAJOR_AUDIO_CTRL == 'PCM':
                 self.incPcmVolume(event.arg)
-                eventhandler.post(Event(OSD_MESSAGE, arg=_('Volume: %s%%') % self.getVolume()))
+                OSD_MESSAGE.post(_('Volume: %s%%') % self.getVolume())
             return True
         
         elif event == MIXER_VOLDOWN:
             if( config.MAJOR_AUDIO_CTRL == 'VOL' ):
                 self.decMainVolume(event.arg)
-                eventhandler.post(Event(OSD_MESSAGE, arg=_('Volume: %s%%') % self.getVolume()))
+                OSD_MESSAGE.post(_('Volume: %s%%') % self.getVolume())
             elif( config.MAJOR_AUDIO_CTRL == 'PCM' ):
                 self.decPcmVolume(event.arg)
-                eventhandler.post(Event(OSD_MESSAGE, arg=_('Volume: %s%%') % self.getVolume()))
+                OSD_MESSAGE.post(_('Volume: %s%%') % self.getVolume())
             return True
 
         elif event == MIXER_MUTE:
             if self.getMuted() == 1:
-                eventhandler.post(Event(OSD_MESSAGE, arg=_('Volume: %s%%') % self.getVolume()))
+                OSD_MESSAGE.post(_('Volume: %s%%') % self.getVolume())
                 self.setMuted(0)
             else:
-                eventhandler.post(Event(OSD_MESSAGE, arg=_('Mute')))
+                OSD_MESSAGE.post(_('Mute'))
                 self.setMuted(1)
             return True
 

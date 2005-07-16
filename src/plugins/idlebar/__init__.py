@@ -35,6 +35,8 @@ import time
 import locale
 import logging
 
+import kaa.notifier
+
 # freevo imports
 import config
 import plugin
@@ -43,7 +45,6 @@ import gui.imagelib
 import gui.widgets
 import gui.animation
 import gui.theme
-import eventhandler
 from event import *
 
 # get logging object
@@ -65,8 +66,11 @@ class PluginInterface(plugin.DaemonPlugin):
         """
         plugin.DaemonPlugin.__init__(self)
         plugin.register(self, 'idlebar')
-        eventhandler.register(self, SCREEN_CONTENT_CHANGE)
-        eventhandler.register(self, THEME_CHANGE)
+
+        # register for events
+        handler = kaa.notifier.EventHandler(self.eventhandler)
+        handler.register(SCREEN_CONTENT_CHANGE, THEME_CHANGE)
+
         self.poll_interval  = 3000
         self.poll_menu_only = False
         self.plugins        = None

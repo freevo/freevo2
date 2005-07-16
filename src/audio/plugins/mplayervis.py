@@ -49,13 +49,14 @@ except ImportError:
 # python modules
 import os
 
+import kaa.notifier
+
 # freevo modules
 import plugin
 import config
 import gui
 import gui.widgets
 import gui.theme
-import eventhandler
 
 from event import *
 from audio.player import *
@@ -98,8 +99,9 @@ class PluginInterface(plugin.Plugin):
  
         plugin.register(self, self.plugin_name)
 
-        eventhandler.register(self, AUDIO_VISUAL_SHOW)
-        eventhandler.register(self, AUDIO_VISUAL_HIDE)
+        # register for events
+        handler = kaa.notifier.EventHandler(self.eventhandler)
+        handler.register(AUDIO_VISUAL_SHOW, AUDIO_VISUAL_HIDE)
 
 
     def play( self, command, player ):
@@ -370,8 +372,7 @@ class LibvisualAnimation(BaseAnimation):
         self.bin.sync()
 
         # send osd notification
-        msg = Event(OSD_MESSAGE, arg=_('Visualization: %s') % actor)
-        eventhandler.post(msg)
+        OSD_MESSAGE.post(_('Visualization: %s') % actor)
 
 
     def finish(self):

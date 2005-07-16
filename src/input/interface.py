@@ -83,10 +83,3 @@ class InputPlugin(plugin.Plugin):
             return config.EVENTS[c][key].post()
 
         log.warning('no event mapping for key %s in %s' % (key, _mapping))
-
-
-    def post_event(self, event):
-        """
-        Send an event to the eventhandler.
-        """
-        self._eventhandler.post(event)

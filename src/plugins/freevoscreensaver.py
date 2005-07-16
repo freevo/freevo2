@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2005/07/16 09:48:23  dischi
+# adjust to new event interface
+#
 # Revision 1.8  2005/07/15 20:42:53  dischi
 # remove variable event_listener, not needed anymore
 #
@@ -60,7 +63,6 @@ import os
 import config
 import plugin
 from playlist import Playlist
-import eventhandler
 import event as em
 import fxditem
 
@@ -145,7 +147,7 @@ class PluginInterface(plugin.DaemonPlugin):
     def poll(self):
         log.info("Saver got polled %f" % time.time())
 	if not self.screensaver_showing and (time.time() - self.last_event) > self.saver_delay :
-	    eventhandler.post(em.Event("SCREENSAVER_START"))
+	    em.Event("SCREENSAVER_START").post()
 
     def start_saver (self):
         log.info("start screensaver")
@@ -182,9 +184,9 @@ class PluginInterface(plugin.DaemonPlugin):
         elif self.saver_type == 'script':
             os.system('%s' % self.arg2)
         elif self.saver_type == 'ssr':
-            eventhandler.post(em.STOP)
+            em.STOP.post()
         elif self.saver_type == 'fxd':
-            eventhandler.post(em.STOP)
+            em.STOP.post()
         else:
             log.error("Unknown saver type to stop.")
 

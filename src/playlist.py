@@ -478,15 +478,13 @@ class Playlist(MediaItem):
         # That doesn't belong here! It should be part of the player!!!
         # if event == PLAY_END:
         #     if self.__current and self.__current.type == 'audio':
-        #         e = Event(AUDIO_LOG, arg=self.__current.filename)
-        #         eventhandler.post(e)
+        #         AUDIO_LOG.post(self.__current.filename)
         #
         # if event in (INPUT_1, INPUT_2, INPUT_3, INPUT_4, INPUT_5) and \
         #        event.arg and self.__current and \
         #        hasattr(self.__current,'type'):
         #     if (self.__current.type == 'audio'):
-        #         e = Event(RATING,(event.arg, self.__current.filename))
-        #         eventhandler.post(e)
+        #         RATING.post(event.arg, self.__current.filename)
 
         if event == PLAYLIST_TOGGLE_REPEAT:
             self.repeat += 1

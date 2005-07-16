@@ -38,6 +38,7 @@
 # python modules
 import os.path
 import kaa.mevas.image
+import kaa.notifier
 
 # freevo modules
 import gui
@@ -46,7 +47,6 @@ import gui.widgets
 import gui.theme
 import plugin
 import config
-import eventhandler
 
 from gui.animation.base import BaseAnimation
 from plugins.idlebar    import IdleBarPlugin
@@ -67,13 +67,12 @@ class PluginInterface(IdleBarPlugin):
         init the idlebar
         """
         IdleBarPlugin.__init__(self)
-        config.EVENTS['audio']['DISPLAY'] = Event(FUNCTION_CALL,
-                                                  arg=self.detach)
+        config.EVENTS['audio']['DISPLAY'] = Event(FUNCTION_CALL, self.detach)
         plugin.register(self, 'audio.detach')
 
         # register for events
-        eventhandler.register(self, PLAY_START)
-        eventhandler.register(self, DETACH_AUDIO_STOP)
+        handler = kaa.notifier.EventHandler(self.eventhandler)
+        handler.register(PLAY_START, DETACH_AUDIO_STOP)
 
         self.visible    = False
         self.detached   = False
@@ -152,7 +151,7 @@ class PluginInterface(IdleBarPlugin):
         handlers = [ ( _('Prev'), '%sprev.png' % path,
                        a_handler, PLAYLIST_PREV),
                      ( _('Rew'), '%srew.png'  % path,
-                       a_handler, Event(SEEK, arg=-10)),
+                       a_handler, Event(SEEK, -10)),
                      ( _('Pause'), '%spause.png'% path,
                        a_handler, PAUSE ),
                      ( _('Play'), '%splay.png' % path,
@@ -160,7 +159,7 @@ class PluginInterface(IdleBarPlugin):
                      ( _('Stop'), '%sstop.png' % path,
                        self.eventhandler, STOP ),
                      ( _('FFwd'), '%sffwd.png' % path,
-                       a_handler, Event(SEEK,arg=10)),
+                       a_handler, Event(SEEK, 10)),
                      ( _('Next'), '%snext.png' % path,
                        a_handler, PLAYLIST_NEXT),
                      ( _('Show Player'), '%sshow.png' % path,
@@ -351,7 +350,8 @@ class DetachbarAnimation(BaseAnimation):
         """
         if not audioplayer().running:
             # not running, stop
-            eventhandler.post(DETACH_AUDIO_STOP)
+            # FIXME: maybe this is a Signal
+            DETACH_AUDIO_STOP.post()
 
         self.frame += 1
 

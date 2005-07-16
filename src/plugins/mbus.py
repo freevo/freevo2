@@ -14,18 +14,15 @@ class PluginInterface(plugin.Plugin, mcomm.RPCServer):
         if not eventhandler.is_menu():
             return mcomm.RPCError('freevo not in menu mode')
 
-        menuw  = eventhandler.get()
-        parent = menuw.menustack[-1].selected
-        
         for p in plugin.mimetype(None):
-            i = p.get(parent, [ file ] )
+            i = p.get(None, [ file ] )
             if i and hasattr(i[0], 'play'):
-                i[0].play(menuw=menuw)
+                i[0].play()
                 return mcomm.RPCReturn()
 
         return mcomm.RPCError('no player found')
 
 
     def __rpc_stop__(self, addr, val):
-        eventhandler.post(event.STOP)
+        event.STOP.post()
         return mcomm.RPCReturn()

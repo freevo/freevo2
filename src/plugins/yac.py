@@ -43,7 +43,6 @@
 import socket, time, sys
 import plugin
 from event import *
-import eventhandler
 
 class PluginInterface (plugin.DaemonPlugin):
     """
@@ -67,9 +66,9 @@ class PluginInterface (plugin.DaemonPlugin):
             data = conn.recv(300)               # 300 is max in specification
             if data:
                 if data[:5] == '@CALL':
-                    eventhandler.post(Event(OSD_MESSAGE, arg=_('Call: %s') % data[5:-1]))
+                    OSD_MESSAGE.post(_('Call: %s') % data[5:-1])
                 else:
-                    eventhandler.post(Event(OSD_MESSAGE, arg=_('Message: %s') % data[:-1]))
+                    OSD_MESSAGE.post(_('Message: %s') % data[:-1])
             conn.close()
         except:
             pass

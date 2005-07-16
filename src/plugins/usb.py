@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2005/07/16 09:48:24  dischi
+# adjust to new event interface
+#
 # Revision 1.15  2005/06/04 17:18:13  dischi
 # adjust to gui changes
 #
@@ -133,6 +136,6 @@ class PluginInterface(plugin.DaemonPlugin):
             log.warning('removed device %s' % d)
 
         if changes:
-            eventhandler.post(plugin.event('USB'))
+            plugin.event('USB').post()
             
         self.devices = current_devices

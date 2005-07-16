@@ -41,7 +41,6 @@ import kaa.notifier
 # Freevo imports
 import sysconfig
 import config
-import eventhandler
 import gui
 
 from event import *
@@ -175,7 +174,7 @@ class Process(kaa.notifier.Process):
         
         if hasattr(handler, 'item'):
             # send PLAY_START event
-            eventhandler.post(Event(PLAY_START, handler.item))
+            PLAY_START.post(handler.item)
 
         # get a name for debug logging of the process
         logname = cmd[0]
@@ -212,8 +211,7 @@ class Process(kaa.notifier.Process):
         Event to send on stop.
         """
         if hasattr(self.handler, 'item'):
-            event = Event(PLAY_END, self.handler.item)
-            eventhandler.post(event)
+            PLAY_END.post(self.handler.item)
         return None
 
 
@@ -223,7 +221,7 @@ class Process(kaa.notifier.Process):
         """
         event = self.stop_event()
         if event:
-            eventhandler.post(event)
+            event.post()
         if self.has_display:
             gui.display.show()
         self.handler.child_finished()

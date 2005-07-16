@@ -47,7 +47,6 @@ import logging
 # freevo imports
 import config
 import util
-import eventhandler
 import plugin
 import util.videothumb
 import mediadb

@@ -271,7 +271,7 @@ class ImageViewer(Application):
 
         # Notify everyone about the viewing
         if self.last_item != item:
-            self.post_event(Event(PLAY_START, item))
+            PLAY_START.post(item)
 
         self.last_image = image
         self.last_item  = item
@@ -286,8 +286,9 @@ class ImageViewer(Application):
         """
         # Don't stop the viewer application, just send a PLAY_END
         # event and do the Application.stop() later
-        self.post_event(Event(PLAY_END, self.item,
-                              handler = self.eventhandler))
+        event = Event(PLAY_END, self.item)
+        event.set_handler(self.eventhandler)
+        event.post()
 
 
     def cache(self, item):
@@ -316,11 +317,11 @@ class ImageViewer(Application):
         """
         if event == PAUSE or event == PLAY:
             if self.slideshow:
-                self.post_event(Event(OSD_MESSAGE, arg=_('pause')))
+                OSD_MESSAGE.post(_('pause'))
                 self.slideshow = False
                 self.sshow_timer.stop()
             else:
-                self.post_event(Event(OSD_MESSAGE, arg=_('play')))
+                OSD_MESSAGE.post(_('play'))
                 self.slideshow = True
                 self.sshow_timer.start(1000)
             return True

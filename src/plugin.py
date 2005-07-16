@@ -254,11 +254,11 @@ TV             = 'TV'
 RECORD         = 'RECORD'
 
 
-def event(name, arg=None):
+def event(name, *args):
     """
     create plugin event
     """
-    return Event('PLUGIN_EVENT %s' % name, arg=arg)
+    return Event('PLUGIN_EVENT %s' % name, *args)
 
 
 def isevent(event):

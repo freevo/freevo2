@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2005/07/16 09:51:27  dischi
+# adjust to new event interface
+#
 # Revision 1.26  2005/06/25 08:52:24  dischi
 # switch to new style python classes
 #
@@ -184,8 +187,9 @@ class XineApp(childapp.Instance):
 
 
     def stop_event(self):
-        return Event(PLAY_END, self.stop_reason,
-                     handler=self.player.eventhandler)
+        event = Event(PLAY_END, self.stop_reason)
+        event.set_handler(self.player.eventhandler)
+        return event
 
 
     def stdout_cb(self, line):

@@ -108,13 +108,6 @@ def remove_window(window):
     return get_singleton().remove_window(window)
 
 
-def register(application, event):
-    """
-    Register for a specific event
-    """
-    return get_singleton().register(application, event)
-
-    
 def get():
     """
     Return the application which has the focus or the
@@ -129,13 +122,6 @@ def is_menu():
     """
     return get_singleton().is_menu()
 
-
-def post(event):
-    """
-    Send an event to the event queue
-    """
-    return get_singleton().post(event)
-    
 
 # -----------------------------------------------------------------------------
 
@@ -249,16 +235,6 @@ class Eventhandler(object):
             input.set_mapping(self.applications[-1].get_eventmap())
                 
 
-    def register(self, application, event):
-        """
-        Register for a specific event
-        """
-        if hasattr(application, 'eventhandler'):
-            application = application.eventhandler
-        handler = kaa.notifier.EventHandler(application)
-        handler.register(event)
-
-    
     def get(self):
         """
         Return the application
@@ -272,15 +248,6 @@ class Eventhandler(object):
         """
         return len(self.applications) == 1
     
-
-    def post(self, event):
-        """
-        Send an event to the event queue
-        """
-        if not isinstance(event, Event):
-            event = Event(event)
-        event.post()
-
 
     def handle(self, event):
         """

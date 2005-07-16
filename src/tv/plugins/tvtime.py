@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2005/07/16 09:48:24  dischi
+# adjust to new event interface
+#
 # Revision 1.45  2005/06/25 08:52:28  dischi
 # switch to new style python classes
 #
@@ -519,7 +522,7 @@ class TVTime(object):
         log.info('%s: %s app got %s event' % (time.time(), self.mode, event))
         if event == em.STOP or event == em.PLAY_END:
             self.Stop()
-            eventhandler.post(em.PLAY_END)
+            em.PLAY_END.post()
             return True
         
         elif event == em.TV_CHANNEL_UP or event == em.TV_CHANNEL_DOWN:
@@ -595,7 +598,7 @@ class TVTimeApp( childapp.Instance ):
                    'v' : em.TV_CHANNEL_DOWN,
                    'Escape' : em.STOP,
                    'd' : em.TOGGLE_OSD,
-                   '_' : em.Event(em.BUTTON, arg='PREV_CHAN'),
+                   '_' : em.Event(em.BUTTON, 'PREV_CHAN'),
                    '0' : em.INPUT_0,
                    '1' : em.INPUT_1,
                    '2' : em.INPUT_2,
@@ -621,7 +624,7 @@ class TVTimeApp( childapp.Instance ):
         else:
             event = events.get(line, None)
             if event is not None:
-                eventhandler.post(event)
+                event.post()
                 log.info('posted translated tvtime event "%s"' % event)
             else:
                 log.info('tvtime cmd "%s" not found!' % line)

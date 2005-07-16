@@ -62,7 +62,6 @@ class Application(object):
         self.__handler  = eventhandler.get_singleton()
 
         self.animated   = animated
-        self.post_event = self.__handler.post
         self.visible    = False
         self.stopped    = False
         self.fullscreen = fullscreen

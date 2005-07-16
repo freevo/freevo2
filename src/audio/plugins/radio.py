@@ -18,6 +18,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2005/07/16 09:48:22  dischi
+# adjust to new event interface
+#
 # Revision 1.12  2005/06/04 17:18:12  dischi
 # adjust to gui changes
 #
@@ -65,7 +68,6 @@ import os, popen2, fcntl, select, time
 import config, menu, plugin, util
 import audio.player
 from item import Item
-import eventhandler
 from event import *
 from gui.windows import MessageBox
 
@@ -96,7 +98,7 @@ class RadioItem(Item):
 
         if error and menuw:
             MessageBox(text=error).show()
-            eventhandler.post(PLAY_END)
+            PLAY_END.post()
 
     def stop(self, arg=None, menuw=None):
         """

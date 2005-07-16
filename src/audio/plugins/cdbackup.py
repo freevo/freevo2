@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2005/07/16 09:48:21  dischi
+# adjust to new event interface
+#
 # Revision 1.46  2005/07/02 16:46:24  dischi
 # use kaa.metadata instead of mmpython
 #
@@ -110,7 +113,6 @@ import config
 import menu
 import util
 import plugin
-import eventhandler
 
 from gui.windows import MessageBox
 from event import *
@@ -291,7 +293,7 @@ class PluginInterface(plugin.ItemPlugin):
         # delete submenu
         menuw.delete_submenu(False)
         # show message
-        eventhandler.post(Event(OSD_MESSAGE, _( 'Ripping started' )))
+        OSD_MESSAGE.post(_( 'Ripping started' ))
 
 
 def tagmp3 (filename, title=None, artist=None, album=None, track=None,
@@ -440,7 +442,7 @@ class main_backup_thread(threading.Thread):
         self.max_track = len(song_names)
         for i in range (0, len(song_names)):
             if self.abort:
-                eventhandler.post(Event(OSD_MESSAGE, arg=_('Ripping aborted')))
+                OSD_MESSAGE.post(_('Ripping aborted'))
                 self.current_track = -1
                 return
 
@@ -493,7 +495,7 @@ class main_backup_thread(threading.Thread):
             # Have the OS execute the CD Paranoia rip command
             run(cdparanoia_command, self, 9)
             if self.abort:
-                eventhandler.post(Event(OSD_MESSAGE, arg=_('Ripping aborted')))
+                OSD_MESSAGE.post(_('Ripping aborted'))
                 self.current_track = -1
 
                 # Remove the .wav file.
@@ -563,7 +565,7 @@ class main_backup_thread(threading.Thread):
 
             # abort set?
             if self.abort:
-                eventhandler.post(Event(OSD_MESSAGE, arg=_('Ripping aborted')))
+                OSD_MESSAGE.post(_('Ripping aborted'))
                 self.current_track = -1
 
                 # Remove the unfinished output file.
@@ -576,7 +578,7 @@ class main_backup_thread(threading.Thread):
                 media.type = 'audio'
 
         # done
-        eventhandler.post(Event(OSD_MESSAGE, arg=_('Ripping complete')))
+        OSD_MESSAGE.post(_('Ripping complete'))
         self.current_track = -1
 
 

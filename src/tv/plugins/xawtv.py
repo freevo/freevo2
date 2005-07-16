@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2005/07/16 09:48:24  dischi
+# adjust to new event interface
+#
 # Revision 1.11  2005/06/25 08:52:29  dischi
 # switch to new style python classes
 #
@@ -256,7 +259,7 @@ class Xawtv(object):
             self.app.sendcmd('quit')
             time.sleep(1)
             self.Stop()
-            eventhandler.post(em.PLAY_END)
+            em.PLAY_END.post()
             return True
         
         elif event == em.TV_CHANNEL_UP or event == em.TV_CHANNEL_DOWN:

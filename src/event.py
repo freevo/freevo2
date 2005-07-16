@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.62  2005/07/16 09:48:20  dischi
+# adjust to new event interface
+#
 # Revision 1.61  2005/07/16 08:56:07  dischi
 # add function to set the handler
 #
@@ -98,21 +101,9 @@ class Event(kaa.notifier.Event):
     an event is passed to the different eventhandlers in Freevo to
     activate some action.
     """
-    def __init__(self, name, arg=None, handler=None):
-        if isinstance(name, Event):
-            self.name    = name.name
-            self.arg     = name.arg
-            self.handler = name.handler
-        else:
-            self.name    = name
-            self.arg     = None
-            self.handler = None
-        
-        if arg or arg == 0:
-            self.arg = arg
-
-        if handler:
-            self.handler = handler
+    def __init__(self, name, *args):
+        kaa.notifier.Event.__init__(self, name, *args)
+        self.handler = None
 
 
     def set_handler(self, handler):
@@ -124,8 +115,8 @@ class Event(kaa.notifier.Event):
         
     def __int__(self):
         """
-        return the event as int (the last char of the name will be returned
-        as integer value
+        Return the event as int (the last char of the name will be returned
+        as integer value. FIXME: remove this function!
         """
         return int(self.name[-1])
 
@@ -136,15 +127,15 @@ class Event(kaa.notifier.Event):
 # Default actions Freevo knows
 #
 
-MIXER_VOLUP            = Event('MIXER_VOLUP', arg=5)
-MIXER_VOLDOWN          = Event('MIXER_VOLDOWN', arg=5)
+MIXER_VOLUP            = Event('MIXER_VOLUP', 5)
+MIXER_VOLDOWN          = Event('MIXER_VOLDOWN', 5)
 MIXER_MUTE             = Event('MIXER_MUTE')
 TOGGLE_CONTROL         = Event('TOGGLE_CONTROL')
 
 # To change the step size, but the following code in your
 # local_conf.py (setting VOL+ step size to 2)
 #
-# EVENTS['global']['VOL+'] = Event('MIXER_VOLUP', arg=2)
+# EVENTS['global']['VOL+'] = Event('MIXER_VOLUP', 2)
 
 
 PLAYLIST_NEXT          = Event('PLAYLIST_NEXT')
@@ -268,16 +259,16 @@ INPUT_LEFT             = Event('INPUT_LEFT')
 INPUT_RIGHT            = Event('INPUT_RIGHT')
 INPUT_UP               = Event('INPUT_UP')
 INPUT_DOWN             = Event('INPUT_DOWN')
-INPUT_1                = Event('INPUT_1', arg=1)
-INPUT_2                = Event('INPUT_2', arg=2)
-INPUT_3                = Event('INPUT_3', arg=3)
-INPUT_4                = Event('INPUT_4', arg=4)
-INPUT_5                = Event('INPUT_5', arg=5)
-INPUT_6                = Event('INPUT_6', arg=6)
-INPUT_7                = Event('INPUT_7', arg=7)
-INPUT_8                = Event('INPUT_8', arg=8)
-INPUT_9                = Event('INPUT_9', arg=9)
-INPUT_0                = Event('INPUT_0', arg=0)
+INPUT_1                = Event('INPUT_1', 1)
+INPUT_2                = Event('INPUT_2', 2)
+INPUT_3                = Event('INPUT_3', 3)
+INPUT_4                = Event('INPUT_4', 4)
+INPUT_5                = Event('INPUT_5', 5)
+INPUT_6                = Event('INPUT_6', 6)
+INPUT_7                = Event('INPUT_7', 7)
+INPUT_8                = Event('INPUT_8', 8)
+INPUT_9                = Event('INPUT_9', 9)
+INPUT_0                = Event('INPUT_0', 0)
 
 INPUT_ALL_NUMBERS = (INPUT_0, INPUT_1, INPUT_2, INPUT_3, INPUT_4, INPUT_5,
                      INPUT_6, INPUT_7, INPUT_8, INPUT_9, INPUT_0 )

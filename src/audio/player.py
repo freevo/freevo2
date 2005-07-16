@@ -41,7 +41,6 @@ import config
 import gui
 import gui.areas
 import plugin
-import eventhandler
 
 from event import *
 from application import Application
@@ -144,7 +143,8 @@ class AudioPlayer(Application):
         self.draw_engine.show(config.GUI_FADE_STEPS)
 
         # post event for showing visualizations
-        eventhandler.post(AUDIO_VISUAL_SHOW)
+        # FIXME: maybe this is a Signal
+        AUDIO_VISUAL_SHOW.post()
 
 
     def hide(self):
@@ -157,7 +157,8 @@ class AudioPlayer(Application):
             self.bg_playing = True
 
         # post event for hiding visualizations
-        eventhandler.post(AUDIO_VISUAL_HIDE)
+        # FIXME: maybe this is a Signal
+        AUDIO_VISUAL_HIDE.post()
 
 
     def refresh(self):

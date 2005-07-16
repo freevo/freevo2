@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2005/07/16 09:48:23  dischi
+# adjust to new event interface
+#
 # Revision 1.13  2004/07/26 18:10:18  dischi
 # move global event handling to eventhandler.py
 #
@@ -48,7 +51,6 @@ import traceback
 import signal
 import time
 import plugin
-import eventhandler
 import event as em
 
 class PluginInterface(plugin.DaemonPlugin):
@@ -157,7 +159,7 @@ class IcecastChanger(plugin.ItemPlugin):
         myfile.write(self.item.filename)
         myfile.flush()
         myfile.close()
-        eventhandler.post(em.MENU_BACK_ONE_MENU)
+        em.MENU_BACK_ONE_MENU.post()
         
     def actions(self, item):
         self.item = item

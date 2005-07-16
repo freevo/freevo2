@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2005/07/16 09:48:23  dischi
+# adjust to new event interface
+#
 # Revision 1.3  2004/10/06 19:24:02  dischi
 # switch from rc.py to pyNotifier
 #
@@ -41,11 +44,8 @@
 # ----------------------------------------------------------------------- */
 
 import notifier
-
 import socket
-
 import config
-import eventhandler
 
 
 class PluginInterface(plugin.Plugin):

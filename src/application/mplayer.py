@@ -233,9 +233,10 @@ class Process(childapp.Process):
         """
         Return the stop event send through the eventhandler
         """
-        return Event(PLAY_END, self.stop_reason,
-                     handler=self.handler.eventhandler)
-
+        event = Event(PLAY_END, self.stop_reason)
+        event.set_handler(self.handler.eventhandler)
+        return event
+    
 
     def stdout_cb(self, line):
         """

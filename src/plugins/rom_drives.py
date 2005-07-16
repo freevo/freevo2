@@ -435,7 +435,7 @@ class RemovableMedia(vfs.Mountpoint):
         log.info('Posting IDENTIFY_MEDIA event')
         arg = (self, not hasattr(self, 'already_scanned'))
         self.already_scanned = True
-        eventhandler.post(plugin.event('IDENTIFY_MEDIA', arg=arg))
+        plugin.event('IDENTIFY_MEDIA', arg).post()
         # release the lock
         self.lock.release()
 

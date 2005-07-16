@@ -113,7 +113,7 @@ class PluginInterface(InputPlugin):
 
         if isinstance(action, Item):
             # Action is an item, do some menu code here.
-            self.post_event(Event(MENU_CHANGE_SELECTION, action))
+            MENU_CHANGE_SELECTION.post(action)
         return True
 
 
@@ -134,18 +134,18 @@ class PluginInterface(InputPlugin):
         if isinstance(action, str):
             if action == 'PAGE_UP':
                 # Action 'UP' is defined in the listing_area
-                self.post_event(MENU_PAGEUP)
+                MENU_PAGEUP.post()
             elif action == 'PAGE_DOWN':
                 # Action 'DOWN' is defined in the listing_area
-                self.post_event(MENU_PAGEDOWN)
+                MENU_PAGEDOWN.post()
 
         elif isinstance(action, Item):
             if action.menu and action.menu.selected == action:
                 # Action is an item, do some menu code here.
                 if button == 1:
-                    self.post_event(MENU_SELECT)
+                    MENU_SELECT.post()
                 elif button == 3:
-                    self.post_event(MENU_SUBMENU)
+                    MENU_SUBMENU.post()
             else:
                 # mouse moved to much
                 pass

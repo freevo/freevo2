@@ -40,7 +40,6 @@ import logging
 
 # freevo imports
 import config
-import eventhandler
 
 from util.weakref import weakref
 from event import *
@@ -128,7 +127,7 @@ class MenuStack(object):
         if len(self.menustack) > 1 and self.menustack[-1].submenu:
             self.back_one_menu(refresh)
         elif len(self.menustack) > 1 and osd_message:
-            eventhandler.post(Event(OSD_MESSAGE, arg=osd_message))
+            OSD_MESSAGE.post(osd_message)
 
 
     def pushmenu(self, menu):
@@ -379,8 +378,7 @@ class MenuStack(object):
         if event == MENU_SELECT or event == MENU_PLAY_ITEM:
             actions = menu.selected.get_actions()
             if not actions:
-                msg = _('No action defined for this choice!')
-                eventhandler.post(Event(OSD_MESSAGE, arg=msg))
+                OSD_MESSAGE.post(_('No action defined for this choice!'))
             else:
                 actions[0]()
             return True

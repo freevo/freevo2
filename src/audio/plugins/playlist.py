@@ -66,8 +66,8 @@ class PluginInterface(plugin.ItemPlugin):
 
     Add something like this to your local_conf.py
 
-    EVENTS['menu']['REC']  = Event(MENU_CALL_ITEM_ACTION, arg='queue_a_track')
-    EVENTS['menu']['SAVE'] = Event(MENU_CALL_ITEM_ACTION, arg='close_playlist')
+    EVENTS['menu']['REC']  = Event(MENU_CALL_ITEM_ACTION, 'queue_a_track')
+    EVENTS['menu']['SAVE'] = Event(MENU_CALL_ITEM_ACTION, 'close_playlist')
 
     """
     

@@ -48,7 +48,6 @@ import kaa.metadata
 # freevo imports
 import sysconfig
 import util
-import eventhandler
 
 from menu import Action, Menu, ItemPlugin
 from event import *
@@ -157,7 +156,7 @@ class PluginInterface(ItemPlugin):
             handle.write(str(item.elapsed))
             handle.write('\n')
             handle.close()
-            eventhandler.post(Event(OSD_MESSAGE, 'Added Bookmark'))
+            OSD_MESSAGE.post(_('Added Bookmark'))
             return True
 
         return False

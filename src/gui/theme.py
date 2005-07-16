@@ -50,8 +50,7 @@ import re
 import config
 import util
 import plugin
-import eventhandler
-from event import Event, THEME_CHANGE
+from event import THEME_CHANGE
 
 # gui imports
 from font import get as get_font_object
@@ -110,7 +109,8 @@ def set(new):
         # set the global theme variable
         current_theme = new
     # notify other parts of Freevo about the theme change
-    eventhandler.get_singleton().notify(Event(THEME_CHANGE))
+    # FIXME: maybe this is a signal.
+    THEME_CHANGE.post()
     # return new theme in case the new one was given to this
     # function as string and the caller wants the object
     return current_theme
