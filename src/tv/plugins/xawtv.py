@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2005/07/16 10:03:46  dischi
+# deactivate broken plugins
+#
 # Revision 1.12  2005/07/16 09:48:24  dischi
 # adjust to new event interface
 #
@@ -75,7 +78,6 @@ import event as em
 from tv.channels import FreevoChannels
 
 import plugin
-import eventhandler
 
 import logging
 log = logging.getLogger('tv')
@@ -96,6 +98,8 @@ class PluginInterface(plugin.Plugin):
     """
     def __init__(self, app, remote):
         plugin.Plugin.__init__(self)
+        self.reason = config.REDESIGN_UNKNOWN
+        return
 
 	#XXX might want to check to see if .xawtv present.
 	# we really don't have much of a prayer if it isn't

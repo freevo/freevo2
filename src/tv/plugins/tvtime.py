@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2005/07/16 10:03:44  dischi
+# deactivate broken plugins
+#
 # Revision 1.46  2005/07/16 09:48:24  dischi
 # adjust to new event interface
 #
@@ -90,7 +93,6 @@ import event as em
 from tv.channels import FreevoChannels
 
 import plugin
-import eventhandler
 
 import logging
 log = logging.getLogger('tv')
@@ -101,6 +103,8 @@ class PluginInterface(plugin.Plugin):
     Plugin to watch tv with tvtime.
     """
     def __init__(self):
+        self.reason = config.REDESIGN_UNKNOWN
+        return
         plugin.Plugin.__init__(self)
 
         # get config locations and mod times so we can check if we need
