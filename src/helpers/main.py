@@ -259,7 +259,7 @@ try:
     num = len(plugin.get(None))-1
     splash = Splashscreen(_('Starting Freevo, please wait ...'), num)
                           
-    # laod mbus interface
+    # load mbus interface
     rpc = RPCHandler()
     # load plugins
     plugin.init(os.environ['FREEVO_PYTHON'], splash.progress)
@@ -280,10 +280,6 @@ try:
     # delete splash screen
     splash.destroy()
     del splash
-
-    # kick off the main menu loop
-    handle = application.eventhandler.get_singleton().handle
-    kaa.notifier.EventHandler( handle ).register()
 
     # start main loop
     kaa.notifier.loop()

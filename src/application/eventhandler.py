@@ -138,6 +138,8 @@ class Eventhandler(object):
         self.__idle_time = 0
         # callback to inherit idle time every minute
         kaa.notifier.Timer(self.__update_idle_time).start(60000)
+        # callback for events
+        kaa.notifier.EventHandler(self.handle).register()
         
 
     def __update_idle_time(self):
