@@ -120,7 +120,10 @@ def is_menu():
     """
     Return true if the focused appliaction is the menu
     """
-    return get_singleton().is_menu()
+    app = get()
+    if not app:
+        return False
+    return app.get_name() == 'menu'
 
 
 # -----------------------------------------------------------------------------
@@ -241,16 +244,11 @@ class Eventhandler(object):
         """
         Return the application
         """
+        if not self.applications:
+            return None
         return self.applications[-1]
 
     
-    def is_menu(self):
-        """
-        Return true if the focused appliaction is the menu
-        """
-        return len(self.applications) == 1
-    
-
     def handle(self, event):
         """
         event handling function

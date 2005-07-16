@@ -142,3 +142,11 @@ class Application(object):
         Return the eventmap for the application.
         """
         return self.__eventmap
+
+
+    def get_name(self):
+        """
+        Get the name of the application.
+        """
+        return self.__name
+    

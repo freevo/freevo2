@@ -48,7 +48,7 @@ class MenuWidget(Application, MenuStack):
     an instance of MenuStack defined in menu.stack.
     """
     def __init__(self):
-        Application.__init__(self, 'menu widget', 'menu', False, True)
+        Application.__init__(self, 'menu', 'menu', False, True)
         MenuStack.__init__(self)
 
         # define areas
