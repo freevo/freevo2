@@ -35,6 +35,8 @@
 #
 # -----------------------------------------------------------------------------
 
+import kaa.notifier
+
 import gui
 import gui.widgets
 import gui.theme
@@ -77,7 +79,7 @@ class ControlManager(object):
         gui.display.add_child(self.container)
 
         # listen for TOGGLE_CONTROL events
-        eventhandler.register(self, TOGGLE_CONTROL)
+        kaa.notifier.EventHandler(self.eventhandler).register(TOGGLE_CONTROL)
 
 
     def register(self, controlbar):
@@ -265,8 +267,7 @@ class ButtonPanel(object):
                 self.buttons[self.p_action].select()
 
                 # show what was selected
-                descr = self.handlers[self.p_action][0]
-                eventhandler.post(Event(OSD_MESSAGE, arg=descr))
+                OSD_MESSAGE.post(self.handlers[self.p_action][0])
 
             return True
 
@@ -277,7 +278,7 @@ class ButtonPanel(object):
 
             if self.hide_when_run:
                 # hide the control if configured
-                eventhandler.post(TOGGLE_CONTROL)
+                TOGGLE_CONTROL.post()
 
             return True
 
