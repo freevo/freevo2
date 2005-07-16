@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2005/07/16 15:00:41  dischi
+# more eventhandler cleanups
+#
 # Revision 1.18  2005/07/16 11:40:28  dischi
 # remove poll_menu_only
 #
@@ -74,7 +77,7 @@ import config
 import plugin
 import util
 from gui.windows import WaitBox
-import application.eventhandler
+import application
 
 import logging
 log = logging.getLogger()
@@ -119,7 +122,8 @@ class PluginInterface(plugin.DaemonPlugin):
         """
         poll to check for devices
         """
-        if not application.eventhandler.is_menu():
+        menuw = application.get_active()
+        if not menuw or menuw.get_name() != 'menu':
             return False
 
         changes = False

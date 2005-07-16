@@ -143,7 +143,6 @@ except Exception, e:
 import kaa.notifier
 
 # freevo imports
-import application.eventhandler
 import gui
 import gui.displays
 import gui.areas
@@ -152,7 +151,6 @@ import gui.widgets
 import gui.theme
 import util
 import plugin
-import mcomm
 
 from mainmenu import MainMenu
 
@@ -225,19 +223,6 @@ class Splashscreen(gui.areas.Area):
         del self.engine
 
 
-class RPCHandler(mcomm.RPCServer):
-    """
-    Handle some basic rpc commands.
-    """
-    def __rpc_status__(self, addr, val):
-        """
-        Send status on rpc status request.
-        """
-        idle = application.eventhandler.idle_time()
-        status = { 'idle': idle }
-        return mcomm.RPCReturn(status)
-
-
 #
 # Freevo main function
 #
@@ -259,8 +244,6 @@ try:
     num = len(plugin.get(None))-1
     splash = Splashscreen(_('Starting Freevo, please wait ...'), num)
                           
-    # load mbus interface
-    rpc = RPCHandler()
     # load plugins
     plugin.init(os.environ['FREEVO_PYTHON'], splash.progress)
 

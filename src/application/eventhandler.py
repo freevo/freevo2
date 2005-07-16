@@ -79,13 +79,6 @@ def get_singleton():
     return _singleton
 
 
-def append(application):
-    """
-    Add app the list of applications and set the focus
-    """
-    return get_singleton().append(application)
-
-
 def add_window(window):
     """
     Add a window above all applications (WaitBox)
@@ -100,22 +93,12 @@ def remove_window(window):
     return get_singleton().remove_window(window)
 
 
-def get():
+def get_active():
     """
     Return the application which has the focus or the
     WaitBox that is active
     """
-    return get_singleton().get()
-
-
-def is_menu():
-    """
-    Return true if the focused appliaction is the menu
-    """
-    app = get()
-    if not app:
-        return False
-    return app.get_name() == 'menu'
+    return get_singleton().get_active()
 
 
 # -----------------------------------------------------------------------------
@@ -210,7 +193,7 @@ class Eventhandler(object):
             input.set_mapping(self.applications[-1].get_eventmap())
                 
 
-    def get(self):
+    def get_active(self):
         """
         Return the application
         """

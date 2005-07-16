@@ -2,7 +2,7 @@ from kaa.notifier import EventHandler, Timer
 
 import mcomm
 import plugin
-import application.eventhandler
+import application
 import event
 
 class PluginInterface(plugin.Plugin, mcomm.RPCServer):
@@ -26,7 +26,8 @@ class PluginInterface(plugin.Plugin, mcomm.RPCServer):
     def __rpc_play__(self, addr, val):
         file = self.parse_parameter(val, ( str, ))
 
-        if not application.eventhandler.is_menu():
+        menuw = application.get_active()
+        if not menuw or menuw.get_name() != 'menu':
             return mcomm.RPCError('freevo not in menu mode')
 
         for p in plugin.mimetype(None):
@@ -47,7 +48,8 @@ class PluginInterface(plugin.Plugin, mcomm.RPCServer):
         """
         Send status on rpc status request.
         """
-        if not application.eventhandler.is_menu():
+        menuw = application.get_active()
+        if not menuw or menuw.get_name() != 'menu':
             self.idle_time = 0
         status = { 'idle': self.idle_time }
         return mcomm.RPCReturn(status)

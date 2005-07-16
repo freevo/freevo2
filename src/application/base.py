@@ -131,7 +131,7 @@ class Application(object):
         Set a new eventmap for the event handler
         """
         self.__eventmap = eventmap
-        if self.__handler.get() == self:
+        if self.__handler.get_active() == self:
             # We are the current application with the focus,
             # so set eventmap of the eventhandler to the new eventmap
             input.set_mapping(eventmap)
