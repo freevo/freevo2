@@ -13,6 +13,9 @@
 #    3) Better (and more) LCD screens.
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2005/07/16 11:40:28  dischi
+# remove poll_menu_only
+#
 # Revision 1.25  2005/07/15 20:42:53  dischi
 # remove variable event_listener, not needed anymore
 #
@@ -709,7 +712,6 @@ class PluginInterface( plugin.DaemonPlugin ):
         #     print ""
             
         self.poll_interval = 10
-        self.poll_menu_only = 0
         self.disable = 0
         self.height = self.lcd.d_height
         self.width  = self.lcd.d_width

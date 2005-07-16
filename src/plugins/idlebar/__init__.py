@@ -72,7 +72,6 @@ class PluginInterface(plugin.DaemonPlugin):
         handler.register(SCREEN_CONTENT_CHANGE, THEME_CHANGE)
 
         self.poll_interval  = 3000
-        self.poll_menu_only = False
         self.plugins        = None
         self.visible        = False
         self.bar            = None

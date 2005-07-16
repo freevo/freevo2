@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2005/07/16 11:40:28  dischi
+# remove poll_menu_only
+#
 # Revision 1.5  2005/06/09 19:43:53  dischi
 # clean up eventhandler usage
 #
@@ -78,7 +81,6 @@ class PluginInterface(plugin.DaemonPlugin):
         init the autocolor plugin
         """
         plugin.DaemonPlugin.__init__(self)
-        self.poll_interval   = 200
         self.plugins = None
         plugin.register(self, 'autocolor')
         self.before = before

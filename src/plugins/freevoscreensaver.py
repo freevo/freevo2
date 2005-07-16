@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2005/07/16 11:40:28  dischi
+# remove poll_menu_only
+#
 # Revision 1.9  2005/07/16 09:48:23  dischi
 # adjust to new event interface
 #
@@ -102,7 +105,6 @@ class PluginInterface(plugin.DaemonPlugin):
     def __init__(self, sstype, ssarg1, ssarg2=None):
         plugin.DaemonPlugin.__init__(self)
         self.plugin_name = 'SCREENSAVER'
-	self.poll_menu_only = True
 	self.last_event = 0
         self.screensaver_showing = False
 	self.vitem = None

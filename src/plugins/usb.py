@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2005/07/16 11:40:28  dischi
+# remove poll_menu_only
+#
 # Revision 1.17  2005/07/16 10:07:25  dischi
 # move eventhandler.py into applications subdir
 #
@@ -71,6 +74,7 @@ import config
 import plugin
 import util
 from gui.windows import WaitBox
+import application.eventhandler
 
 import logging
 log = logging.getLogger()
@@ -115,6 +119,9 @@ class PluginInterface(plugin.DaemonPlugin):
         """
         poll to check for devices
         """
+        if not application.eventhandler.is_menu():
+            return False
+
         changes = False
 
         current_devices = self.list_usb_devices()

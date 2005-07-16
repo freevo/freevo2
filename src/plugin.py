@@ -38,7 +38,6 @@ import kaa.notifier
 # freevo imports
 import config
 from event import Event
-import application.eventhandler
 
 # plugin loader
 from plugin_loader import *
@@ -147,7 +146,6 @@ class DaemonPlugin(Plugin):
     def __init__(self):
         Plugin.__init__(self)
         self.poll_interval  = 100       # poll every x milliseconds
-        self.poll_menu_only = True      # poll only when menu is active
         self.events         = []        # events to register to ([] == all)
 
 
@@ -158,16 +156,6 @@ class DaemonPlugin(Plugin):
         pass
 
 
-    def __poll(self):
-        """
-        wrapper for the poll function
-        """
-        if self.poll_menu_only and not application.eventhandler.is_menu():
-            return True
-        self.poll()
-        return True
-
-
     def plugin_activate(self):
         """
         Execute on activation of the plugin.
@@ -175,7 +163,8 @@ class DaemonPlugin(Plugin):
         Plugin.plugin_activate(self)
         if self.__class__.poll != DaemonPlugin.poll:
             # plugin has a self defined poll function, register it
-            self.__timer = kaa.notifier.Timer(self.__poll).start(self.poll_interval)
+            self.__timer = kaa.notifier.Timer(self.poll)
+            self.__timer.start(self.poll_interval)
 
         if self.__class__.eventhandler != DaemonPlugin.eventhandler:
             # plugin has a self defined eventhandler
