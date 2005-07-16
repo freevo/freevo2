@@ -189,7 +189,6 @@ class ControlManager(object):
 
             return True
 
-        print event
         # pass events to selected plugin
         plugin = self.plugins[self.p_ctrl]
 
@@ -211,6 +210,11 @@ class ControlManager(object):
         return False
 
 
+    def get_eventmap(self):
+        """
+        Return event mapping for ControlManager.
+        """
+        return 'input'
 
 
 class ButtonPanel(object):
