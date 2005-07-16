@@ -79,14 +79,6 @@ def get_singleton():
     return _singleton
 
 
-def idle_time():
-    """
-    Return the idle time of Freevo. If an application is running, the idle
-    time is always 0.
-    """
-    return get_singleton().idle_time()
-
-    
 def append(application):
     """
     Add app the list of applications and set the focus
@@ -137,32 +129,10 @@ class Eventhandler(object):
         self.popups       = []
         self.applications = []
         self.stack_change = None
-        # idle timer variable
-        self.__idle_time = 0
-        # callback to inherit idle time every minute
-        kaa.notifier.Timer(self.__update_idle_time).start(60000)
         # callback for events
         kaa.notifier.EventHandler(self.handle).register()
         
 
-    def __update_idle_time(self):
-        """
-        Notifier callback to inherit the idle time
-        """
-        self.__idle_time += 1
-        return True
-    
-
-    def idle_time(self):
-        """
-        Return the idle time of Freevo. If an application is running, the idle
-        time is always 0.
-        """
-        if len(self.applications) > 1:
-            return 0
-        return self.__idle_time
-
-        
     def set_focus(self):
         """
         change the focus
@@ -257,9 +227,6 @@ class Eventhandler(object):
         
         if _TIME_DEBUG:
             t1 = time.clock()
-
-        # each event resets the idle time
-        self.__idle_time = 0
 
         try:
             if event == FUNCTION_CALL:
