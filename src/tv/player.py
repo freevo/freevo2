@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2005/07/16 08:41:12  dischi
+# move context handling from eventhandler to input
+#
 # Revision 1.6  2005/06/26 10:53:00  dischi
 # use kaa.epg instead of pyepg
 #
@@ -78,11 +81,11 @@ class TVPlayer(Application):
     """
     template for tv player application
     """
-    def __init__(self, name, event_context='tv', fullscreen=True):
+    def __init__(self, name, eventmap='tv', fullscreen=True):
         """
         init the player
         """
-        Application.__init__(self, name, event_context, fullscreen)
+        Application.__init__(self, name, eventmap, fullscreen)
 
 
     def rate(self, type):

@@ -9,8 +9,8 @@ class MenuApplication(Application):
     """
     An application inside the menu
     """
-    def __init__(self, name, event_context, fullscreen):
-        Application.__init__(self, name, event_context, fullscreen)
+    def __init__(self, name, eventmap, fullscreen):
+        Application.__init__(self, name, eventmap, fullscreen)
         self.stack  = None
         self.engine = None # draw engine based on area
         self.inside_menu = False

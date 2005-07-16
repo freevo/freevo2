@@ -70,7 +70,6 @@ class ControlManager(object):
     def __init__(self):
         self.plugins = []
         self.p_ctrl          = -1
-        self.event_context   = 'input'
 
         self.container = gui.widgets.Container()
         self.container.set_zindex(80)
@@ -190,24 +189,24 @@ class ControlManager(object):
 
             return True
 
-        elif event.context == self.event_context:
-            # pass events to selected plugin
-            plugin = self.plugins[self.p_ctrl]
+        print event
+        # pass events to selected plugin
+        plugin = self.plugins[self.p_ctrl]
 
-            if plugin and plugin.visible:
-                # okay, visible -- check event
+        if plugin and plugin.visible:
+            # okay, visible -- check event
 
-                if event == INPUT_EXIT:
-                    # hide the plugin
-                    self.hide()
-                    self.p_ctrl = -1
-                    gui.display.update()
-                    return True
+            if event == INPUT_EXIT:
+                # hide the plugin
+                self.hide()
+                self.p_ctrl = -1
+                gui.display.update()
+                return True
 
-                # pass the event to the plugin
-                elif plugin.eventhandler(event):
-                    gui.display.update()
-                    return True
+            # pass the event to the plugin
+            elif plugin.eventhandler(event):
+                gui.display.update()
+                return True
 
         return False
 

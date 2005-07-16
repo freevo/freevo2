@@ -54,6 +54,7 @@ import kaa.notifier
 # freevo imports
 import sysconfig
 import plugin
+import input
 
 from event import *
 
@@ -146,7 +147,6 @@ class Eventhandler(object):
     def __init__(self):
         self.popups       = []
         self.applications = []
-        self.context      = None
         self.stack_change = None
         # idle timer variable
         self.__idle_time = 0
@@ -181,9 +181,9 @@ class Eventhandler(object):
         else:
             previous, app = None, self.applications[-1]
         if not self.popups:
-            self.context = app.get_eventmap()
+            input.set_mapping(app.get_eventmap())
         else:
-            self.context = self.popups[-1].event_context
+            input.set_mapping(self.popups[-1].get_eventmap())
 
         fade = app.animated
         if previous:
@@ -230,7 +230,7 @@ class Eventhandler(object):
         Add a window above all applications (WaitBox)
         """
         self.popups.append(window)
-        self.context = window.event_context
+        input.set_mapping(window.get_eventmap())
 
         
     def remove_window(self, window):
@@ -244,9 +244,9 @@ class Eventhandler(object):
             return
         self.popups.remove(window)
         if self.popups:
-            self.context = self.popups[-1].event_context
+            input.set_mapping(self.popups[-1].get_eventmap())
         else:
-            self.context = self.applications[-1].get_eventmap()
+            input.set_mapping(self.applications[-1].get_eventmap())
                 
 
     def register(self, application, event):

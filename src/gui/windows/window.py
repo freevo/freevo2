@@ -59,7 +59,6 @@ class Window(Container):
     def __init__(self, pos=(None, None), size=(None, None)):
         Container.__init__(self)
         self.set_zindex(100)
-        self.event_context = 'input'
         self.__display  = None
 
         # setting the size
@@ -156,3 +155,10 @@ class Window(Container):
         Eventhandler for the window, this raw window has nothing to do
         """
         return False
+
+
+    def get_eventmap(self):
+        """
+        Return the eventmap for the window
+        """
+        return 'input'

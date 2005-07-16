@@ -6,5 +6,8 @@ class PluginInterface(Plugin):
     """
     pass
 
+
 from keymap import KEYBOARD_MAP, REMOTE_MAP
 from eventmap import EVENTMAP
+
+from interface import set_mapping, get_mapping, InputPlugin

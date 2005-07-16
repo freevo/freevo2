@@ -29,6 +29,9 @@
 #
 # -----------------------------------------------------------------------------
 
+__all__ = [ 'set_mapping', 'get_mapping', 'InputPlugin' ]
+
+
 # python imports
 import copy
 import logging
@@ -36,20 +39,33 @@ import logging
 # freevo imports
 import config
 import plugin
-import eventhandler
 
 # get logging object
-log = logging.getLogger('config')
+log = logging.getLogger('input')
+
+# set key mapping for input
+_mapping = None
+
+def set_mapping(mapping):
+    """
+    Set new key mapping.
+    """
+    global _mapping
+    _mapping = mapping
+
+
+def get_mapping():
+    """
+    Get current key mapping.
+    """
+    return _mapping
+
 
 class InputPlugin(plugin.Plugin):
     """
     Plugin for input devices such as keyboard and lirc. A plugin of this
     type should be in input/plugins
     """
-    def __init__(self):
-        plugin.Plugin.__init__(self)
-        self._eventhandler = eventhandler.get_singleton()
-
 
     def post_key(self, key):
         """
@@ -58,17 +74,15 @@ class InputPlugin(plugin.Plugin):
         if not key:
             return None
 
-        for c in (self._eventhandler.context, 'global'):
-            try:
-                e = copy.copy(config.EVENTS[c][key])
-                e.context = self._eventhandler.context
-                e.post()
-                break
-            except KeyError:
-                pass
-        else:
-            log.warning('no event mapping for key %s in context %s' % \
-                        (key, self._eventhandler.context))
+        for c in (_mapping, 'global'):
+            if not config.EVENTS.has_key(c):
+                continue
+            if not config.EVENTS[c].has_key(key):
+                continue
+
+            return config.EVENTS[c][key].post()
+
+        log.warning('no event mapping for key %s in %s' % (key, _mapping))
 
 
     def post_event(self, event):
@@ -76,4 +90,3 @@ class InputPlugin(plugin.Plugin):
         Send an event to the eventhandler.
         """
         self._eventhandler.post(event)
-        

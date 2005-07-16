@@ -35,6 +35,7 @@ __all__ = [ 'Application' ]
 import logging
 
 # freevo imports
+import input
 import eventhandler
 import gui
 import gui.animation 
@@ -52,7 +53,7 @@ class Application(object):
         Init the Application object.
 
         @param name       : internal name of the application
-        @param eventmap   : context for the event handler mapping
+        @param eventmap   : name of the event handler mapping
         @param fullscreen : if the application uses the whole screen
         @param animated   : use fade in/out animation
         """
@@ -134,7 +135,7 @@ class Application(object):
         if self.__handler.get() == self:
             # We are the current application with the focus,
             # so set eventmap of the eventhandler to the new eventmap
-            self.__handler.context = eventmap
+            input.set_mapping(eventmap)
 
 
     def get_eventmap(self):
