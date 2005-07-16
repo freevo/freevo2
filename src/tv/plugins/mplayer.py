@@ -5,23 +5,26 @@
 # $Id$
 #
 # Notes:
-# Todo:        
+# Todo:        
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.46  2005/06/26 10:53:00  dischi
+# Revision 1.47  2005/07/16 09:18:28  dischi
+# add modified version from Henrik aka KaarPo
+#
+# Revision 1.46  2005/06/26 10:53:00  dischi
 # use kaa.epg instead of pyepg
 #
-# Revision 1.45  2005/01/08 15:40:54  dischi
+# Revision 1.45  2005/01/08 15:40:54  dischi
 # remove TRUE, FALSE, DEBUG and HELPER
 #
-# Revision 1.44  2004/10/28 19:43:52  dischi
+# Revision 1.44  2004/10/28 19:43:52  dischi
 # remove broken imports
 #
-# Revision 1.43  2004/10/06 19:01:33  dischi
+# Revision 1.43  2004/10/06 19:01:33  dischi
 # use new childapp interface
 #
-# Revision 1.42  2004/08/05 17:27:16  dischi
+# Revision 1.42  2004/08/05 17:27:16  dischi
 # Major (unfinished) tv update:
 # o the epg is now taken from kaa.epg in lib
 # o all player should inherit from player.py
@@ -30,17 +33,17 @@
 #
 # Bugs:
 # o The listing area in the tv guide is blank right now, some code
-#   needs to be moved to gui but it's not done yet.
+#   needs to be moved to gui but it's not done yet.
 # o The only player working right now is xine with dvb
 # o channels.py needs much work to support something else than dvb
 # o recording looks broken, too
 #
-# Revision 1.41  2004/07/26 18:10:19  dischi
+# Revision 1.41  2004/07/26 18:10:19  dischi
 # move global event handling to eventhandler.py
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002 Krister Lagerstrom, et al.
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -60,231 +63,215 @@
 # ----------------------------------------------------------------------- */
 
 
+# Modified by Henrik aka KaarPo
+# Handles ONLY ivtv at the moment...
+
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
+from kaa.notifier import Process
 
 import time, os
 
-import util    # Various utilities
+import util    # Various utilities
 
 import event as em
 import childapp # Handle child applications
 import tv.ivtv as ivtv
 import plugin
 import eventhandler
+import notifier
+
+from config.tvcards import IVTVCard
+from tv.freq import get_frequency
+import kaa.epg
 
 from tv.player import TVPlayer
 
+import logging
+log = logging.getLogger('tv')
 
 class PluginInterface(plugin.Plugin):
-    """
-    Plugin to watch tv with mplayer.
-    """
-    def __init__(self):
-        plugin.Plugin.__init__(self)
+    """
+    Plugin to watch tv with mplayer.
+    """
+    def __init__(self):
+        plugin.Plugin.__init__(self)
 
-        # create the mplayer object and register it
-        plugin.register(MPlayer(), plugin.TV)
+        # create the mplayer object and register it
+        plugin.register(MPlayer(), plugin.TV, True)
 
 
 class MPlayer(TVPlayer):
 
-    def __init__(self):
-        TVPlayer.__init__(self, 'mplayer')
-        
+    def __init__(self):
+        TVPlayer.__init__(self, 'mplayer')
+        
+    def rate(self, channel, device, uri):
+        """
+        for now, just handle ivtv
+        """
+        log.info('MPlayer.rate(): channel=[%s] device=[%s] uri=[%s]' %
+        (channel, device, uri))
+        if device.startswith('ivtv'):
+            log.info('MPlayer.rate(): Returning 2: MPlayer handles this!')
+            return 2
 
-    def rate(self):
-        pass
-    
-    def Play(self, mode, tuner_channel=None):
+        return 0
 
-        if not tuner_channel:
-            tuner_channel = self.fc.getChannel()
-            
-        vg = self.current_vg = self.fc.getVideoGroup(tuner_channel)
-
-        # Convert to MPlayer TV setting strings
-        norm = 'norm=%s' % vg.tuner_norm
-        input = 'input=%s' % vg.input_num
-        device= 'device=%s' % vg.vdev
-            
-        w, h = config.TV_VIEW_SIZE
-        outfmt = 'outfmt=%s' % config.TV_VIEW_OUTFMT
-
-        # Build the MPlayer command
-        args = ( config.MPLAYER_CMD, config.MPLAYER_VO_DEV,
-                 config.MPLAYER_VO_DEV_OPTS, config.MPLAYER_ARGS_DEF )
-
-        if mode == 'tv':
-            if vg.group_type == 'ivtv':
-                ivtv_dev = ivtv.IVTV(vg.vdev)
-                ivtv_dev.init_settings()
-                ivtv_dev.setinput(vg.input_num)
-                #ivtv_dev.print_settings()
-                self.fc.chanSet(tuner_channel)
-            
-                tvcmd = vg.vdev
-
-                if config.MPLAYER_ARGS.has_key('ivtv'):
-                    args += (config.MPLAYER_ARGS['ivtv'],)
-
-            elif vg.group_type == 'webcam':
-                self.fc.chanSet(tuner_channel, app='mplayer')
-                tvcmd = ''
-
-                if config.MPLAYER_ARGS.has_key('webcam'):
-                    args += (config.MPLAYER_ARGS['webcam'],)
-
-            elif vg.group_type == 'dvb':
-                self.fc.chanSet(tuner_channel, app='mplayer')
-                tvcmd = ''
-                args += ( '"dvb://%s" %s' % ( tuner_channel,
-                                              config.MPLAYER_ARGS[ 'dvb' ] ) , )
-
-            else:
-                freq_khz = self.fc.chanSet(tuner_channel, app='mplayer')
-                tuner_freq = '%1.3f' % (freq_khz / 1000.0)
-
-                tvcmd = ('tv:// -tv driver=%s:freq=%s:%s:%s:'
-                         '%s:width=%s:height=%s:%s %s' %
-                         (config.TV_DRIVER, tuner_freq, device, input, norm, 
-                          w, h, outfmt, config.TV_OPTS))
-
-                if config.MPLAYER_ARGS.has_key('tv'):
-                    args += (config.MPLAYER_ARGS['tv'],)
+    def tune(self, uri):
+        log.info('MPlayer.play(): Tuning [%s] to chan [%s]' %
+        (self.device.vdev, uri))
+        import tv.v4l2
+        v = tv.v4l2.Videodev(device=self.device.vdev)
+    v.setchannel(uri)
+    del v
 
 
-        elif mode == 'vcr':
-            tvcmd = ('tv:// -tv driver=%s:%s:%s:'
-                     '%s:width=%s:height=%s:%s %s' %
-                     (config.TV_DRIVER, device, input, norm, 
-                      w, h, outfmt, config.TV_OPTS))
+    def play(self, channel, device, uri):
 
-            if config.MPLAYER_ARGS.has_key('tv'):
-                args += (config.MPLAYER_ARGS['tv'],)
+        log.info('MPlayer.play(): channel=[%s] device=[%s] uri=[%s]' %
+        (channel, device, uri))
 
-        else:
-            print 'Mode "%s" is not implemented' % mode  # XXX ui.message()
-            return
+    self.channel = channel
+        self.device = config.TV_CARDS[device]
+        if not isinstance(self.device, IVTVCard):
+            self.reason = 'Device %s is not of class IVTVCard' % device
+        log.error('MPlayer.play(): ' + self.reason)
+            return
 
-        args += (tvcmd,)
+        log.debug('MPlayer.play(): driver=[%s] vdev=[%s] chanlist=[%s]' %
+        (self.device.driver, self.device.vdev, self.device.chanlist))
 
-        mpl = '%s -vo %s%s -fs %s -slave %s %s' % args
+        self.tune(uri)
 
-        command = mpl
-        self.mode = mode
+    command = 'mplayer -nolirc -slave '
+    command += config.MPLAYER_ARGS_DEF + ' '
+        if config.MPLAYER_ARGS.has_key('ivtv'):
+            command += config.MPLAYER_ARGS['ivtv'] + ' '
+        command += '-ao ' + config.MPLAYER_AO_DEV + ' '
+        command += '-vo ' + config.MPLAYER_VO_DEV + \
+             config.MPLAYER_VO_DEV_OPTS + ' '
+    command += self.device.vdev
 
+        log.info('mplayer.play(): Starting cmd=%s' % command)
 
-        # XXX Mixer manipulation code.
-        # TV is on line in
-        # VCR is mic in
-        # btaudio (different dsp device) will be added later
-        mixer = plugin.getbyname('MIXER')
-        
-        if mixer and config.MAJOR_AUDIO_CTRL == 'VOL':
-            mixer_vol = mixer.getMainVolume()
-            mixer.setMainVolume(0)
-        elif mixer and config.MAJOR_AUDIO_CTRL == 'PCM':
-            mixer_vol = mixer.getPcmVolume()
-            mixer.setPcmVolume(0)
+        self.show()
+        self.app = Process( command )
 
-        # Start up the TV task
-        self.app = childapp.Instance( command, prio = config.MPLAYER_NICE )
-        
-        eventhandler.append(self)
-
-        # Suppress annoying audio clicks
-        time.sleep(0.4)
-        # XXX Hm.. This is hardcoded and very unflexible.
-        if mixer and mode == 'vcr':
-            mixer.setMicVolume(config.VCR_IN_VOLUME)
-        elif mixer:
-            mixer.setLineinVolume(config.TV_IN_VOLUME)
-            mixer.setIgainVolume(config.TV_IN_VOLUME)
-            
-        if mixer and config.MAJOR_AUDIO_CTRL == 'VOL':
-            mixer.setMainVolume(mixer_vol)
-        elif mixer and config.MAJOR_AUDIO_CTRL == 'PCM':
-            mixer.setPcmVolume(mixer_vol)
+    return
 
 
+    def stop(self, channel_change=0):
+        """
+        Stop mplayer
+        """
+        log.info('MPlayer.stop(): Stopping mplayer')
+        TVPlayer.stop(self)
+        if self.app:
+            self.app.stop('quit\n')
 
-    def Stop(self, channel_change=0):
-        mixer = plugin.getbyname('MIXER')
-        if mixer and not channel_change:
-            mixer.setLineinVolume(0)
-            mixer.setMicVolume(0)
-            mixer.setIgainVolume(0) # Input on emu10k cards.
+    def osd_channel(self):
+        # Display the channel info message
+        #tuner_id, chan_name, prog_info = self.fc.getChannelInfo()
+        now = time.strftime('%H:%M')
+    program = self.channel[time.time()]
+        #msg = '%s %s (%s): %s' % (now, chan_name, tuner_id, prog_info)
+    msg = '%s [%s]: %s' % ( self.channel.title, now, program.title)
+        cmd = 'osd_show_text "%s"\n' % msg
+        self.app.write(cmd)
+        return False # this removes the timer...
 
-        self.app.stop('quit\n')
+    def osd_updown(self):
+        cmd = 'osd_show_text "Changing to [%s]"\n' % self.channel.title
+        self.app.write(cmd)
+    # wait three seconds for the tuner to tune in...
+        cb = notifier.Callback( self.osd_channel )
+        notifier.addTimer( 3000, cb )
+    return False
 
-        eventhandler.remove(self)
+    def eventhandler(self, event, menuw=None):
+    """
+    MPlayer event handler.
+    If an event is not bound in this
+        function it will be passed over to the items eventhandler.
+    """
 
-#         if rc.focused_app() and not channel_change:
-#             rc.focused_app().show()
+        s_event = '%s' % event
+        log.debug('MPlayer.eventhandler(): Got event [%s]' % s_event)
 
-        if os.path.exists('/tmp/freevo.wid'): os.unlink('/tmp/freevo.wid')
+        if event == em.STOP or event == em.PLAY_END:
+            self.stop()
+            eventhandler.post(em.PLAY_END)
+            return True
+
+        if event == em.TV_CHANNEL_UP:
+            self.channel = kaa.epg.get_channel(self.channel, 1)
+            uri = self.channel.get_uri(self.channel, self.device)
+            self.tune(String(uri))
+            self.osd_updown()
+            return True
+
+        if event == em.TV_CHANNEL_DOWN:
+            self.channel = kaa.epg.get_channel(self.channel, -1)
+            uri = self.channel.get_uri(self.channel, self.device)
+            self.tune(String(uri))
+            self.osd_updown()
+            return True
+
+    elif event == em.OSD_MESSAGE:
+            cmd = 'osd_show_text "%s"\n' % event.arg
+            self.app.write(cmd)
+            return True
 
 
-    def eventhandler(self, event, menuw=None):
-        s_event = '%s' % event
+    # not changed by HKP yet...
+        elif False and s_event.startswith('INPUT_'):
+            if event == em.TV_CHANNEL_UP:
+                nextchan = self.fc.getNextChannel()
+            elif event == em.TV_CHANNEL_DOWN:
+                nextchan = self.fc.getPrevChannel()
+            else:
+                chan = int( s_event[6] )
+                nextchan = self.fc.getManChannel(chan)
 
-        if event == em.STOP or event == em.PLAY_END:
-            self.Stop()
-            eventhandler.post(em.PLAY_END)
-            return True
+            nextvg = self.fc.getVideoGroup(nextchan)
 
-        elif event in [ em.TV_CHANNEL_UP, em.TV_CHANNEL_DOWN] or s_event.startswith('INPUT_'):
-            if event == em.TV_CHANNEL_UP:
-                nextchan = self.fc.getNextChannel()
-            elif event == em.TV_CHANNEL_DOWN:
-                nextchan = self.fc.getPrevChannel()
-            else:
-                chan = int( s_event[6] )
-                nextchan = self.fc.getManChannel(chan)
+            if self.current_vg != nextvg:
+                self.Stop(channel_change=1)
+                self.Play('tv', nextchan)
+                return True
 
-            nextvg = self.fc.getVideoGroup(nextchan)
+            if self.mode == 'vcr':
+                return True
+            
+            elif self.current_vg.group_type == 'dvb':
+                self.Stop(channel_change=1)
+                self.Play('tv', nextchan)
+                return True
 
-            if self.current_vg != nextvg:
-                self.Stop(channel_change=1)
-                self.Play('tv', nextchan)
-                return True
+            elif self.current_vg.group_type == 'ivtv':
+                self.fc.chanSet(nextchan)
+                self.app.write('seek 999999 0\n')
 
-            if self.mode == 'vcr':
-                return True
-            
-            elif self.current_vg.group_type == 'dvb':
-                self.Stop(channel_change=1)
-                self.Play('tv', nextchan)
-                return True
+            else:
+                freq_khz = self.fc.chanSet(nextchan, app=self.app)
+                new_freq = '%1.3f' % (freq_khz / 1000.0)
+                self.app.write('tv_set_freq %s\n' % new_freq)
 
-            elif self.current_vg.group_type == 'ivtv':
-                self.fc.chanSet(nextchan)
-                self.app.write('seek 999999 0\n')
+            self.current_vg = self.fc.getVideoGroup(self.fc.getChannel())
 
-            else:
-                freq_khz = self.fc.chanSet(nextchan, app=self.app)
-                new_freq = '%1.3f' % (freq_khz / 1000.0)
-                self.app.write('tv_set_freq %s\n' % new_freq)
+            # Display a channel changed message
+            tuner_id, chan_name, prog_info = self.fc.getChannelInfo()
+            now = time.strftime('%H:%M')
+            msg = '%s %s (%s): %s' % (now, chan_name, tuner_id, prog_info)
+            cmd = 'osd_show_text "%s"\n' % msg
+            self.app.write(cmd)
+            return True
 
-            self.current_vg = self.fc.getVideoGroup(self.fc.getChannel())
+        elif event == em.TOGGLE_OSD:
+        self.osd_channel()
+        return True
 
-            # Display a channel changed message
-            tuner_id, chan_name, prog_info = self.fc.getChannelInfo()
-            now = time.strftime('%H:%M')
-            msg = '%s %s (%s): %s' % (now, chan_name, tuner_id, prog_info)
-            cmd = 'osd_show_text "%s"\n' % msg
-            self.app.write(cmd)
-            return True
+        log.debug('MPlayer.eventhandler(): No handler for event [%s]' % s_event)
+        return False
 
-        elif event == em.TOGGLE_OSD:
-            # Display the channel info message
-            tuner_id, chan_name, prog_info = self.fc.getChannelInfo()
-            now = time.strftime('%H:%M')
-            msg = '%s %s (%s): %s' % (now, chan_name, tuner_id, prog_info)
-            cmd = 'osd_show_text "%s"\n' % msg
-            self.app.write(cmd)
-            return True
-            
-        return False
-    
