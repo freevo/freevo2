@@ -211,7 +211,7 @@ class Process(kaa.notifier.Process):
         Event to send on stop.
         """
         if hasattr(self.handler, 'item'):
-            PLAY_END.post(self.handler.item)
+            return Event(PLAY_END, self.handler.item)
         return None
 
 
