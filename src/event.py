@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.61  2005/07/16 08:56:07  dischi
+# add function to set the handler
+#
 # Revision 1.60  2005/07/15 20:40:44  dischi
 # base Event on kaa.notifier.Event
 #
@@ -111,7 +114,14 @@ class Event(kaa.notifier.Event):
         if handler:
             self.handler = handler
 
-            
+
+    def set_handler(self, handler):
+        """
+        Set a specific handler for the event.
+        """
+        self.handler = handler
+
+        
     def __int__(self):
         """
         return the event as int (the last char of the name will be returned
