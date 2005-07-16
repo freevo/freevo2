@@ -143,7 +143,7 @@ except Exception, e:
 import kaa.notifier
 
 # freevo imports
-import eventhandler
+import application.eventhandler
 import gui
 import gui.displays
 import gui.areas
@@ -233,7 +233,7 @@ class RPCHandler(mcomm.RPCServer):
         """
         Send status on rpc status request.
         """
-        idle = eventhandler.idle_time()
+        idle = application.eventhandler.idle_time()
         status = { 'idle': idle }
         return mcomm.RPCReturn(status)
 
@@ -282,7 +282,8 @@ try:
     del splash
 
     # kick off the main menu loop
-    kaa.notifier.EventHandler( eventhandler.get_singleton().handle ).register()
+    handle = application.eventhandler.get_singleton().handle
+    kaa.notifier.EventHandler( handle ).register()
 
     # start main loop
     kaa.notifier.loop()

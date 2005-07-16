@@ -1,6 +1,6 @@
 import mcomm
 import plugin
-import eventhandler
+import application.eventhandler
 import event
 
 class PluginInterface(plugin.Plugin, mcomm.RPCServer):
@@ -11,7 +11,7 @@ class PluginInterface(plugin.Plugin, mcomm.RPCServer):
     def __rpc_play__(self, addr, val):
         file = self.parse_parameter(val, ( str, ))
 
-        if not eventhandler.is_menu():
+        if not application.eventhandler.is_menu():
             return mcomm.RPCError('freevo not in menu mode')
 
         for p in plugin.mimetype(None):

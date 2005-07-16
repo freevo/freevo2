@@ -38,7 +38,7 @@ import kaa.notifier
 # freevo imports
 import config
 from event import Event
-import eventhandler
+import application.eventhandler
 
 # plugin loader
 from plugin_loader import *
@@ -162,7 +162,7 @@ class DaemonPlugin(Plugin):
         """
         wrapper for the poll function
         """
-        if self.poll_menu_only and not eventhandler.is_menu():
+        if self.poll_menu_only and not application.eventhandler.is_menu():
             return True
         self.poll()
         return True

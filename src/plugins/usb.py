@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2005/07/16 10:07:25  dischi
+# move eventhandler.py into applications subdir
+#
 # Revision 1.16  2005/07/16 09:48:24  dischi
 # adjust to new event interface
 #
@@ -67,7 +70,6 @@ import os
 import config
 import plugin
 import util
-import eventhandler
 from gui.windows import WaitBox
 
 import logging

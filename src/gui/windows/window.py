@@ -39,7 +39,7 @@
 import copy
 
 # freevo imports
-import eventhandler
+import application
 
 # gui imports
 from gui import displays
@@ -131,7 +131,7 @@ class Window(Container):
         """
         if self.__display:
             return
-        eventhandler.add_window(self)
+        application.add_window(self)
         self.__display = displays.get()
         self.__create_background(self.__display)
         self.__display.add_child(self)
@@ -142,7 +142,7 @@ class Window(Container):
         """
         Destroy (close) the window
         """
-        eventhandler.remove_window(self)
+        application.remove_window(self)
         if not self.__display:
             return
         self.__display.remove_child(self)

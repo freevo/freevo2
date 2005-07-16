@@ -60,7 +60,7 @@ import kaa.notifier
 # freevo imports
 import sysconfig
 import config
-import eventhandler
+import application.eventhandler
 import plugin
 import util
 from util.ioctl import ioctl
@@ -135,7 +135,7 @@ class autostart(plugin.DaemonPlugin):
         EJECT event. Also take care of the umounting when going back to
         the main menu.
         """
-        if not eventhandler.is_menu():
+        if not application.eventhandler.is_menu():
             return False
 
         if event == MENU_GOTO_MAINMENU:
@@ -146,7 +146,7 @@ class autostart(plugin.DaemonPlugin):
             # return False, this event is needed later
             return False
         
-        menuw = eventhandler.get()
+        menuw = application.eventhandler.get()
         if not menuw or len(menuw.menustack) > 1:
             # not in main menu
             return False
@@ -706,7 +706,7 @@ class Watcher(object):
             for media in rom_drives:
                 media.drive_status = None
 
-        if eventhandler.is_menu():
+        if application.eventhandler.is_menu():
             # check only in the menu
             for media in rom_drives:
                 if media.lock.locked():

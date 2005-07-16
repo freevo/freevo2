@@ -42,7 +42,7 @@ import gui.widgets
 import gui.theme
 
 import plugin
-import eventhandler
+import application
 import config
 
 from event import *
@@ -113,7 +113,7 @@ class ControlManager(object):
         control = self.plugins[self.p_ctrl]
 
         # add controlmanager as a window
-        eventhandler.add_window(self)
+        application.add_window(self)
 
         # clear the container and set it visible
         self.container.clear()
@@ -151,7 +151,7 @@ class ControlManager(object):
         Hides the currently selected control widget
         """
         # remove controlmanager as a window
-        eventhandler.remove_window(self)
+        application.remove_window(self)
 
         # clear the objects and update the display
         self.container.hide()
