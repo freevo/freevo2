@@ -209,7 +209,7 @@ class Menu(object):
         """
         self.choices[self.choices.index(old)] = new
         if self.selected == old:
-            self.selected(new)
+            self.select(new)
         old.menu = None
         new.menu = weakref(self)
 
