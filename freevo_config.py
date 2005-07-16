@@ -105,7 +105,7 @@
 # of the config file doesn't match, Freevo won't start. If the minor version
 # is different, there will be only a warning
 
-LOCAL_CONF_VERSION  = 7.00
+LOCAL_CONF_VERSION  = 8.00
 
 # Description of changes in each new version
 FREEVO_CONF_CHANGES = [
@@ -184,6 +184,11 @@ LOCAL_CONF_CHANGES = [
     when it starts to scan the directories). If you also want to use an older
     version of freevo, you should create a new vfs for Freevo 2.0. To do so,
     set vfs_dir = /path/to/vfs in your freevo.conf.
+    ''' ),
+    (8.00, '''
+    Reworked event handling. The Event class has no parameter arg anymore.
+    The args are now auto-detected based on the arguments of the init call.
+    So instead if using Event(FOO, arg=1), you now need to use Event(FOO, 1).
     ''' )
     ]
 
@@ -264,7 +269,7 @@ ENABLE_SHUTDOWN_SYS = 0  # Performs a whole system shutdown at SHUTDOWN!
 # e.g. If you want to send 'contrast -100' to mplayer by pressing the '1' key, 
 # just add the following line: 
 #
-# EVENTS['video']['1'] = Event(VIDEO_SEND_MPLAYER_CMD, arg='contrast -100')
+# EVENTS['video']['1'] = Event(VIDEO_SEND_MPLAYER_CMD, 'contrast -100')
 #
 # See src/event.py for a list of all possible events.
 #
