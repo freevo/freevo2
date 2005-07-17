@@ -305,7 +305,7 @@ class Cache(object):
         if later:
             self.__save_timer.start(0)
             return
-        log.info('save %s' % self.cachefile)
+        log.debug('save %s' % self.cachefile)
         cache.save(self.cachefile, self.data, VERSION)
         self.mtime = os.stat(self.cachefile)[ST_MTIME]
         self.changed = False
