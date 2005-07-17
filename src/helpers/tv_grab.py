@@ -100,7 +100,13 @@ def main():
 
     (options, args) = parser.parse_args()
 
-    kaa.epg.connect('sqlite', sysconfig.datafile('epgdb'))
+    if config.EPG_DATABASE == 'sqlite':
+        kaa.epg.connect('sqlite', sysconfig.datafile('epgdb'))
+    elif config.EPG_DATABASE == 'sqlite2':
+        kaa.epg.connect('sqlite2', sysconfig.datafile('epgdb2'))
+    else:
+        raise 'unknown database backend %s' % config.EPG_DATABASE
+
     kaa.epg.load(config.TV_CHANNELS, config.TV_CHANNELS_EXCLUDE)
 
 

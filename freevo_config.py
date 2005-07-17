@@ -1264,6 +1264,10 @@ XMLTV_SORT = ''
 #
 XMLTV_DAYS = 3
 
+#
+# EPG database backend (possible values are 'sqlite' and 'sqlite2')
+#
+EPG_DATABASE = 'sqlite'
 
 # ======================================================================
 # VDR settings for Freevo plugins and programs that interface to VDR.
