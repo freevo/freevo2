@@ -37,11 +37,10 @@ import string
 import logging
 
 # kaa imports
-import kaa.notifier
+from kaa.notifier import Process, OneShotTimer
 
 # freevo imports
 import config
-from util.callback import *
 
 # record imports
 from record.recorder import Plugin
@@ -73,8 +72,12 @@ class Recorder(Plugin):
         self.recordings = []
         # suffix for filename
         self.suffix = '.suffix'
+        # timer for scheduling
+        self.schedule_timer = OneShotTimer(self.schedule)
+        self.start_timer = OneShotTimer(self.start)
+        self.stop_timer = OneShotTimer(self.stop)
 
-
+        
     def get_cmd(self, rec):
         """
         Build the command to record. A class which inherits from the plugin
@@ -96,7 +99,7 @@ class Recorder(Plugin):
 
     def record(self, recording, device, start, stop):
         self.recordings.append(recording)
-        call_later(self.schedule)
+        self.schedule(True)
 
 
     def remove(self, recording):
@@ -104,7 +107,7 @@ class Recorder(Plugin):
         if recording == self.current_recording:
             log.info('%s: remove running recording' % self.name)
             self.stop()
-        call_later(self.schedule)
+        self.schedule(True)
 
 
     def get_time(self, timer, msg):
@@ -115,7 +118,11 @@ class Recorder(Plugin):
         return sec * 1000
     
 
-    def schedule(self):
+    def schedule(self, later=False):
+        if later:
+            self.schedule_timer.start(0)
+            return
+        
         # sort by start time
         self.recordings.sort(self.__sort)
 
@@ -134,12 +141,12 @@ class Recorder(Plugin):
         else:
             # schedule first recording
             msecs = self.get_time(rec.scheduled_start, 'next recording')
-            call_later(msecs, self.start)
+            self.start_timer.start(msecs)
 
         # get stop timer
         msecs = self.get_time(rec.scheduled_stop, 'stop timer')
         # schedule stop timer
-        call_later(msecs, self.stop)
+        self.stop_timer.start(msecs)
         return False
 
 
@@ -160,7 +167,7 @@ class Recorder(Plugin):
 
         # get the cmd for the childapp
         cmd = self.get_cmd(rec)
-        self.app = kaa.notifier.Process(cmd, callback = self.stopped)
+        self.app = Process(cmd, callback = self.stopped)
         return False
 
 
@@ -182,7 +189,7 @@ class Recorder(Plugin):
         """
         # maybe the app stopped without 'stop' being called, remove
         # the callback, just in case
-        remove_callback(self.stop)
+        self.stop_timer.stop()
 
         # get current recording
         rec = self.recordings[0]
@@ -197,4 +204,4 @@ class Recorder(Plugin):
         self.app = None
 
         # schedule next recording
-        call_later(self.schedule)
+        self.schedule(True)
