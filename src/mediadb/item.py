@@ -36,9 +36,6 @@ import pickle
 import cPickle
 import logging
 
-# freevo imports
-from util.callback import *
-
 # mediadb globals
 from globals import *
 
@@ -127,7 +124,7 @@ class ItemInfo(object):
             self.attr[key] = value
             if self.cache:
                 self.cache.changed = True
-                call_later(self.cache.save)
+                self.cache.save()
         else:
             self.tmp[key] = value
 
@@ -163,7 +160,7 @@ class ItemInfo(object):
         self.attr[key] = value
         if self.cache:
             self.cache.changed = True
-            call_later(self.cache.save)
+            self.cache.save()
         return True
 
 
@@ -176,7 +173,7 @@ class ItemInfo(object):
         self.attr[key] = value
         if self.cache:
             self.cache.changed = True
-            call_later(self.cache.save)
+            self.cache.save()
         if not key in self.attr[MTIME_DEP]:
             self.attr[MTIME_DEP].append(key)
         return True

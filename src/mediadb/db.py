@@ -41,11 +41,13 @@ import md5
 import logging
 from stat import *
 
+# kaa imports
+from kaa.notifier import OneShotTimer
+
 # freevo imports
 import sysconfig
 import util.vfs as vfs
 import util.cache as cache
-from util.callback import *
 
 # mediadb imports
 import parser
@@ -89,7 +91,7 @@ class CacheList(object):
         Save all cache files.
         """
         for cache in self.caches.values():
-            cache.save()
+            cache.save(False)
 
 
 
@@ -101,6 +103,9 @@ class Cache(object):
     A cache object for the mediadb holding one directory.
     """
     def __init__(self, dirname):
+        # save timer
+        self.__save_timer = OneShotTimer(self.save, False)
+        self.__save_timer.restart_when_active = False
         # create full path
         dirname = os.path.normpath(os.path.abspath(dirname))
         # remove softlinks from path
@@ -141,7 +146,7 @@ class Cache(object):
             # save file to make sure the file itself exist in the future
             # process.
             self.changed = True
-            self.save()
+            self.save(False)
         # 'normal' files
         self.files   = self.data[ITEMS]
         # files in the overlay dir
@@ -183,8 +188,7 @@ class Cache(object):
         except OSError:
             # no overlay dir
             self.check_time = time.time()
-            if self.changed:
-                call_later(self.save)
+            self.save()
             return
 
         if data_mtime != self.data[mtime] or not data_mtime:
@@ -287,19 +291,21 @@ class Cache(object):
 
         if overlay:
             self.check_time = time.time()
-            if self.changed:
-                call_later(self.save)
+            self.save()
             return
         self.check(True)
 
 
-    def save(self):
+    def save(self, later=True):
         """
         Save the cache.
         """
         if not self.changed:
             return
-        log.debug('save %s' % self.cachefile)
+        if later:
+            self.__save_timer.start(0)
+            return
+        log.info('save %s' % self.cachefile)
         cache.save(self.cachefile, self.data, VERSION)
         self.mtime = os.stat(self.cachefile)[ST_MTIME]
         self.changed = False
@@ -398,7 +404,7 @@ class Cache(object):
             if callback:
                 callback()
 
-        self.save()
+        self.save(False)
         self.__check_global = False
         self.reduce_files = []
 
@@ -455,6 +461,9 @@ class FileCache(object):
     Cache for one file
     """
     def __init__(self, filename, db):
+        # save timer
+        self.__save_timer = OneShotTimer(self.save, False)
+        self.__save_timer.restart_when_active = False
         self.cachefile = db
         self.data = None
         if os.path.isfile(self.cachefile):
@@ -476,15 +485,18 @@ class FileCache(object):
             self.changed = True
             basename = filename[filename.rfind('/'):]
             parser.parse(basename, filename, self.data, self, [])
-            self.save()
+            self.save(False)
         self.filename = filename
         
 
-    def save(self):
+    def save(self, later=True):
         """
         Save the cache.
         """
         if not self.changed:
+            return
+        if later:
+            self.__save_timer.start(0)
             return
         log.debug('save %s' % self.cachefile)
         cache.save(self.cachefile, self.data, VERSION)
