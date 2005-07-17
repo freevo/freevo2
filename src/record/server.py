@@ -41,6 +41,7 @@ import notifier
 
 # kaa.epg
 import kaa.epg
+import kaa.notifier
 
 # freevo imports
 import sysconfig
@@ -107,78 +108,6 @@ class RecordServer(RPCServer):
 
         # save fxd file
         self.save()
-
-
-    def check_epg(self, recordings = [], changed = False):
-        """
-        Update the recording list with the epg
-        """
-        if not recordings and changed:
-            # callback for a finished check and with changed schedule.
-            # This is a fake, we really want to call check_recordings
-            self.check_recordings()
-            return
-        
-        if not recordings:
-            # get list of recordings to check. Only check recordings with
-            # a start time greater 15 minutes from now to avoid
-            # changing running recordings
-            ctime = time.time() + 60 * 15
-            recordings = filter(lambda r: r.start - r.start_padding > ctime \
-                                and r.status in (CONFLICT, SCHEDULED),
-                                self.recordings)
-
-        if not recordings:
-            # no recordings
-            return
-        
-        # get first recording to check
-        rec = recordings[0]
-        # search epg for that recording
-        results = kaa.epg.search(rec.name, rec.channel, search_subtitle=False, 
-                                 search_description=False, exact_match=True)
-        epginfo = None
-        for p in results:
-            # check all results
-            if p.start == rec.start and p.stop == rec.stop:
-                # found the recording
-                epginfo = p
-                break
-        else:
-            # try to find it
-            for p in results:
-                if rec.start - 20 * 60 < p.start < rec.start + 20 * 60:
-                    # found it again, set new start and stop time
-                    old_info = str(rec)
-                    rec.start = p.start
-                    rec.stop = p.stop
-                    log.info('changed schedule\n%s\n%s' % (old_info, rec))
-                    changed = True
-                    epginfo = p
-                    break
-            else:
-                log.info('unable to find recording in epg:\n%s' % rec)
-
-        if epginfo:
-            # check if attributes changed
-            if String(rec.description) != String(epginfo.description):
-                log.info('description changed for %s' % \
-                         String(rec.name))
-                rec.description = epginfo.description
-            if String(rec.episode) != String(epginfo.episode):
-                log.info('episode changed for %s' % String(rec.name))
-                rec.episode = epginfo.episode
-            if String(rec.subtitle) != String(epginfo.subtitle):
-                log.info('subtitle changed for %s' % String(rec.name))
-                rec.subtitle = epginfo.subtitle
-
-        if len(recordings) > 1:
-            # check the rest later
-            call_later(self.check_epg, recordings[1:], changed)
-        elif changed:
-            # check recordings again
-            call_later(self.check_epg, [], True)
-        return False
 
 
     def print_schedule(self):
@@ -299,22 +228,80 @@ class RecordServer(RPCServer):
         Check favorites against the database and add them to the list of
         recordings
         """
-        log.info('recordserver.check_favorites')
+        log.info('check_favorites')
+        t1 = time.time()
+        
+        # Check current scheduled recordings if the start time has changed.
+        # Only check recordings with start time greater 15 minutes from now
+        # to avoid changing running recordings
+        ctime = time.time() + 60 * 15
+        recordings = filter(lambda r: r.start - r.start_padding > ctime \
+                            and r.status in (CONFLICT, SCHEDULED),
+                            self.recordings)
 
-        # check epg if something changed
-        call_later(self.check_epg)
-
+        # list of changes
         update = []
+        for rec in recordings:
+            # This could block the main loop. But we guess that there is
+            # a reasonable number of future recordings, not 1000 recordings
+            # that would block us here. Still, we need to find out if a very
+            # huge database with over 100 channels will slow the database
+            # down.
+
+            # Search epg for that recording. The recording should be at the
+            # same time, maybe it has moved +- 20 minutes. If the program
+            # moved a larger time interval, it won't be found again.
+            interval = (rec.start - 20 * 60, rec.start + 20 * 60)
+            results = kaa.epg.search(rec.name, rec.channel, exact_match=True,
+                                     interval = interval)
+            epginfo = None
+            changed = False
+            for p in results:
+                # check all results
+                if p.start == rec.start and p.stop == rec.stop:
+                    # found the recording
+                    epginfo = p
+                    break
+            else:
+                # try to find it
+                for p in results:
+                    if rec.start - 20 * 60 < p.start < rec.start + 20 * 60:
+                        # found it again, set new start and stop time
+                        old_info = str(rec)
+                        rec.start = p.start
+                        rec.stop = p.stop
+                        log.info('changed schedule\n%s\n%s' % (old_info, rec))
+                        changed = True
+                        epginfo = p
+                        break
+                else:
+                    log.info('unable to find recording in epg:\n%s' % rec)
+
+            if epginfo:
+                # check if attributes changed
+                if String(rec.description) != String(epginfo.description):
+                    log.info('description changed for %s' % String(rec.name))
+                    rec.description = epginfo.description
+                if String(rec.episode) != String(epginfo.episode):
+                    log.info('episode changed for %s' % String(rec.name))
+                    rec.episode = epginfo.episode
+                if String(rec.subtitle) != String(epginfo.subtitle):
+                    log.info('subtitle changed for %s' % String(rec.name))
+                    rec.subtitle = epginfo.subtitle
+
+            if changed:
+                update.append(rec.short_list())
+                
         for f in copy.copy(self.favorites):
-            for p in kaa.epg.search(f.name, search_subtitle=False, 
-                                    search_description=False,
-                                    exact_match=True):
+            # Now check all the favorites. Again, this could block but we
+            # assume a reasonable number of favorites.
+            for p in kaa.epg.search(f.name, exact_match=True):
                 if not f.match(p.title, p.channel.id, p.start):
                     continue
                 r = Recording(self.rec_id, p.title, p.channel.id, f.priority,
                               p.start, p.stop)
                 if r in self.recordings:
-                    # This does not only avoids adding recordings twice, it
+                    # This does not only avoid adding recordings twice, it
                     # also prevents from added a deleted favorite as active
                     # again.
                     continue
@@ -330,6 +317,10 @@ class RecordServer(RPCServer):
                 if f.once:
                     self.favorites.remove(f)
                     break
+
+        t2 = time.time()
+        log.info('check_favorites finished after %s seconds' % (t2-t1))
+        
         # send update about the new recordings
         self.send_update(update)
         # now check the schedule again
