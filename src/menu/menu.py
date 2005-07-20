@@ -174,7 +174,7 @@ class Menu(object):
                 self.selected_pos = self.choices.index(item)
                 self.selected_id  = self.selected.__id__()
             except ValueError, e:
-                log.exception('crash by select %s in %s' (item, self.choices))
+                log.exception('crash by select %s in %s' % (item, self.choices))
                 if self.choices:
                     self.select(self.choices[0])
                 else:
