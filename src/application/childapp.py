@@ -224,4 +224,5 @@ class Process(kaa.notifier.Process):
             event.post()
         if self.has_display:
             gui.display.show()
+        self.handler.child_stop()
         self.handler.child_finished()
