@@ -115,6 +115,7 @@
     <color label="selected" value="0xffffff"/>
     
     <color label="selection bar" value="0xa0000000"/>
+    <color label="background" value="0xa0ffffff"/>
 
   </skin>
 </freevo>
