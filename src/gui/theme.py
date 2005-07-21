@@ -14,6 +14,8 @@
 #       o respect coding guidelines
 #       o make it faster
 #
+# Latest updates made the preparing faster from 0.3256 to 0.0905 secs.
+#
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
@@ -165,7 +167,7 @@ def attr_int(node, attr, default, scale=0.0):
                 return -1
             if not scale:
                 return int(val)
-            
+
             new_val = ''
 
             while val:
@@ -308,12 +310,19 @@ def get_expression(expression):
 # ======================================================================
 
 class MainMenuItem(object):
-    def __init__(self):
-        self.label   = ''
-        self.name    = ''
-        self.icon    = ''
-        self.image   = ''
-        self.outicon = ''
+    def __init__(self, source=None):
+        if source:
+            self.label   = source.label
+            self.name    = source.name
+            self.icon    = source.icon
+            self.image   = source.image
+            self.outicon = source.outicon
+        else:
+            self.label   = ''
+            self.name    = ''
+            self.icon    = ''
+            self.image   = ''
+            self.outicon = ''
 
     def parse(self, node, scale, c_dir=''):
         self.label    = attr_str(node, "label", self.label)
@@ -322,10 +331,13 @@ class MainMenuItem(object):
         self.image    = attr_str(node, "image", self.image)
         self.outicon  = attr_str(node, "outicon",  self.outicon)
 
-    def prepare(self, search_dirs, image_names):
-        if self.image:
-            self.image = search_file(self.image, search_dirs)
 
+    def prepare_copy(self, search_dirs, image_names):
+        if not self.image:
+            return self
+        ret = MainMenuItem(self)
+        ret.image = search_file(self.image, search_dirs)
+        return ret
 
 # ======================================================================
 
@@ -342,10 +354,14 @@ class MainMenu(object):
                 item.parse(node, scale, c_dir)
                 self.items[item.label] = item
 
-    def prepare(self, search_dirs, image_names):
-        self.imagedir = os.path.join(config.IMAGE_DIR, self.imagedir)
-        for i in self.items:
-            self.items[i].prepare(search_dirs, image_names)
+
+    def prepare_copy(self, search_dirs, image_names):
+        ret = MainMenu()
+        ret.imagedir = os.path.join(config.IMAGE_DIR, self.imagedir)
+        for key, template in self.items.items():
+            ret.items[key] = template.prepare_copy(search_dirs, image_names)
+        return ret
+
 
 # ======================================================================
 # ======================================================================
@@ -396,16 +412,21 @@ def int2col(col):
 
 
 
-class XML_data(object):
+class XMLData(object):
     """
     a basic data element for parsing the attributes
     """
 
-    def __init__(self, content):
+    def __init__(self, content, source=None):
         """
         create all object variables for this type
         """
         self.content = content
+        if source:
+            for c in content:
+                setattr(self, c, getattr(source, c))
+            return
+
         for c in content:
             if XML_types[c][0] in ('str', 'file', 'font'):
                 setattr(self, c, '')
@@ -485,6 +506,11 @@ class XML_data(object):
             pass
 
 
+    def prepare_copy(self, font_dict=None, color_dict=None):
+        ret = XMLData(self.content, self)
+        ret.prepare(font_dict, color_dict)
+        return ret
+
 # ======================================================================
 
 
@@ -494,7 +520,7 @@ class Menu(object):
     """
     def __init__(self):
         self.style = []
-        pass
+
 
     def parse(self, node, scale, current_dir):
         for subnode in node.children:
@@ -502,15 +528,17 @@ class Menu(object):
                 self.style += [ [ attr_str(subnode, 'image', ''),
                                   attr_str(subnode, 'text', '') ] ]
 
-    def prepare(self, menuset, layout):
-        for s in self.style:
+    def prepare_copy(self, menuset, layout):
+        ret = Menu()
+        for style in self.style:
+            new_style = []
             for i in range(2):
-                if s[i]:
-                    s[i] = copy.deepcopy(menuset[s[i]])
-                    s[i].prepare(layout)
+                if style[i]:
+                    new_style.append(menuset[style[i]].prepare_copy(layout))
                 else:
-                    s[i] = None
-
+                    new_style.append(None)
+            ret.style.append(new_style)
+        return ret
 
 
 class MenuSet(object):
@@ -533,24 +561,28 @@ class MenuSet(object):
             getattr(self, subnode.name).parse(subnode, scale, current_dir)
 
 
-    def prepare(self, layout):
+    def prepare_copy(self, layout):
+        ret= MenuSet()
         for c in self.areas:
-            getattr(self, c).prepare(layout)
+            setattr(ret, c, getattr(self, c).prepare_copy(layout))
+        return ret
 
 
-class Area(XML_data):
+class Area(XMLData):
     """
     area class (inside menu)
     """
-    def __init__(self, name):
-        XML_data.__init__(self, ('visible', 'layout', 'x', 'y', 'width',
-                                 'height'))
+    VARS = ('visible', 'layout', 'x', 'y', 'width', 'height')
+
+    def __init__(self, name, source=None):
+        XMLData.__init__(self, self.VARS, source)
         self.name = name
         if name == 'listing':
             self.images = {}
-        self.x = -1
-        self.y = -1
-        self.visible = False
+        if not source:
+            self.x = -1
+            self.y = -1
+            self.visible = False
         self.images = {}
 
     def parse(self, node, scale, current_dir):
@@ -559,7 +591,7 @@ class Area(XML_data):
 
         x = self.x
         y = self.y
-        XML_data.parse(self, node, scale, current_dir)
+        XMLData.parse(self, node, scale, current_dir)
         if x != self.x:
             try:
                 self.x += config.GUI_OVERSCAN_X
@@ -589,12 +621,16 @@ class Area(XML_data):
                         except TypeError:
                             pass
 
-    def prepare(self, layout):
-        XML_data.prepare(self)
-        if self.visible:
-            self.layout = layout[self.layout]
+
+    def prepare_copy(self, layout):
+        ret = Area(self.name, self)
+        ret.images = self.images
+        if ret.visible:
+            ret.layout = layout[ret.layout]
         else:
-            self.layout = None
+            ret.layout = None
+        return ret
+
 
     def rect(self, type):
         if type == 'screen':
@@ -603,6 +639,7 @@ class Area(XML_data):
                     self.width + 2 * config.GUI_OVERSCAN_X,
                     self.height + 2 * config.GUI_OVERSCAN_X)
         return (self.x, self.y, self.width, self.height)
+
 
     def pos(self, type):
         if type == 'screen':
@@ -617,10 +654,11 @@ class Layout(object):
     """
     layout tag
     """
-    def __init__(self, label):
+    def __init__(self, label, source=None):
         self.label = label
-        self.background = ()
-        self.content = Content()
+        self.background = []
+        if not source:
+            self.content = Content()
 
     def parse(self, node, scale, current_dir):
         for subnode in node.children:
@@ -639,39 +677,47 @@ class Layout(object):
             if subnode.name == u'content':
                 self.content.parse(subnode, scale, current_dir)
 
-    def prepare(self, font, color, search_dirs, image_names):
-        self.content.prepare(font, color, search_dirs)
+    def prepare_copy(self, font, color, search_dirs, image_names):
+        ret = Layout(self.label, self)
+        ret.content = self.content.prepare_copy(font, color, search_dirs)
+        ret.background = []
         for b in self.background:
-            b.prepare(color, search_dirs, image_names)
+            b = b.prepare_copy(color, search_dirs, image_names)
+            ret.background.append(b)
+        return ret
 
 
-class ContentItem(XML_data):
+class ContentItem(XMLData):
     """
     class for <item> inside content
     """
-    def __init__(self):
-        XML_data.__init__(self, ('font', 'align', 'valign', 'height',
-                                 'width', 'icon'))
+    VARS = ('font', 'align', 'valign', 'height', 'width', 'icon')
+    def __init__(self, source=None):
+        XMLData.__init__(self, self.VARS, source)
         self.rectangle = None
         self.shadow    = None
         self.cdata     = ''
         self.fcontent  = []
-        
 
-class Content(XML_data):
+
+class Content(XMLData):
     """
     content inside a layout
     """
-    def __init__(self):
-        XML_data.__init__(self, ('type', 'spacing', 'x', 'y', 'width',
-                                 'height', 'font', 'align', 'valign', 'color',
-                                 'hours_per_page'))
+    VAR = ('type', 'spacing', 'x', 'y', 'width', 'height', 'font', 'align',
+           'valign', 'color', 'hours_per_page')
+
+    def __init__(self, source = None):
+        XMLData.__init__(self, self.VAR, source)
         self.types = {}
-        self.cdata = ''
-        self.hours_per_page = 2
+        if source:
+            self.cdata = source.cdata
+        else:
+            self.cdata = ''
+            self.hours_per_page = 2
 
     def parse(self, node, scale, current_dir):
-        XML_data.parse(self, node, scale, current_dir)
+        XMLData.parse(self, node, scale, current_dir)
         self.cdata = node.textof()
         for subnode in node.children:
             if subnode.name == u'item':
@@ -688,7 +734,7 @@ class Content(XML_data):
                             self.types[type].rectangle.parse(rnode, scale,
                                                              current_dir)
                         if rnode.name == u'shadow':
-                            self.types[type].shadow = XML_data(('visible',
+                            self.types[type].shadow = XMLData(('visible',
                                                                 'color', 'x',
                                                                 'y'))
                             self.types[type].shadow.parse(rnode, scale,
@@ -719,20 +765,24 @@ class Content(XML_data):
             self.types['default'] = ContentItem()
 
 
-    def prepare(self, font, color, search_dirs):
-        XML_data.prepare(self, font, color)
-        for type in self.types:
-            if self.types[type].font:
-                self.types[type].font = font[self.types[type].font]
+    def prepare_copy(self, font, color, search_dirs):
+        ret = Content(self)
+        ret.prepare(font, color)
+        ret.types = {}
+        for key, type in self.types.items():
+            ci = ContentItem(type)
+            if type.font:
+                ci.font = font[type.font]
             else:
-                self.types[type].font = None
-            if self.types[type].rectangle:
-                self.types[type].rectangle.prepare(color)
-            if self.types[type].shadow:
-                self.types[type].shadow.prepare(None, color)
-            for i in self.types[type].fcontent:
-                i.prepare( font, color, search_dirs )
-
+                ci.font = None
+            if type.rectangle:
+                ci.rectangle = type.rectangle.prepare_copy(color)
+            if type.shadow:
+                ci.shadow = type.shadow.prepare_copy(None, color)
+            for i in type.fcontent:
+                ci.fcontent.append(i.prepare_copy(font, color, search_dirs))
+            ret.types[key] = ci
+        return ret
 
 
 # ======================================================================
@@ -740,20 +790,24 @@ class Content(XML_data):
 
 i18n_re = re.compile('^( ?)(.*?)([:,]?)( ?)$')
 
-class FormatText(XML_data):
-    def __init__( self ):
-        XML_data.__init__( self, ( 'align', 'valign', 'font', 'width',
-                                   'height', 'ellipses', 'dim') )
-        self.mode     = 'hard'
-        self.align    = 'left'
-        self.ellipses = '...'
-        self.dim      = True
-        self.height   = -1
-        self.text     = ''
-        self.expression = None
-        self.x = 0
-        self.y = 0
+class FormatText(XMLData):
+    VARS = ( 'align', 'valign', 'font', 'width', 'height', 'ellipses', 'dim')
+
+    def __init__(self, source=None):
+        XMLData.__init__( self, self.VARS, source )
         self.type = 'text'
+        if source:
+            self.mode     = source.mode
+            self.text     = source.text
+            self.expression = source.expression
+        else:
+            self.mode     = 'hard'
+            self.align    = 'left'
+            self.ellipses = '...'
+            self.dim      = True
+            self.height   = -1
+            self.text     = ''
+            self.expression = None
 
     def __str__( self ):
         str = "FormatText( Text: '%s', Expression: '%s', "+\
@@ -766,7 +820,7 @@ class FormatText(XML_data):
 
 
     def parse( self, node, scale, c_dir = '' ):
-        XML_data.parse( self, node, scale, c_dir )
+        XMLData.parse( self, node, scale, c_dir )
         self.text = node.textof()
         if self.text:
             m = i18n_re.match(self.text).groups()
@@ -780,65 +834,65 @@ class FormatText(XML_data):
             self.expression = get_expression(self.expression.strip())
 
 
-
-    def prepare(self, font, color, search_dirs):
+    def prepare_copy(self, font, color, search_dirs):
+        ret = FormatText(self)
         if self.font:
             if font.has_key(self.font):
-                self.font = font[self.font]
+                ret.font = font[self.font]
             else:
                 log.error('skin error: can\'t find font %s' % self.font)
-                self.font = font['default']
+                ret.font = font['default']
         else:
-            self.font = font['default']
+            ret.font = font['default']
+        return ret
 
 
+class FormatGotopos(XMLData):
+    VARS = ('x', 'y')
 
-class FormatGotopos(XML_data):
-    def __init__( self ):
-        XML_data.__init__( self, ( 'x', 'y' ) )
-        self.mode = 'relative'
-        self.x = None
-        self.y = None
+    def __init__(self):
+        XMLData.__init__( self, self.VARS)
         self.type = 'goto'
+        self.mode = 'relative'
 
     def parse( self, node, scale, c_dir = '' ):
-        XML_data.parse( self, node, scale, c_dir )
+        XMLData.parse( self, node, scale, c_dir )
         self.mode = attr_str( node, 'mode', self.mode )
         if self.mode != 'relative' and self.mode != 'absolute':
             self.mode = 'relative'
 
-    def prepare(self, font, color, search_dirs):
-        pass
+    def prepare_copy(self, font, color, search_dirs):
+        return self
 
 
 class FormatNewline(object):
-    def __init__( self ):
+    def __init__(self):
         self.type = 'newline'
         pass
 
     def parse( self, node, scale, c_dir = '' ):
         pass
 
-    def prepare(self, font, color, search_dirs):
-        pass
+    def prepare_copy(self, font, color, search_dirs):
+        return self
 
-class FormatImg( XML_data ):
-    def __init__( self ):
-        XML_data.__init__( self, ( 'x', 'y', 'width', 'height' ) )
-        self.x = None
-        self.y = None
-        self.width = None
-        self.height = None
-        self.src = ''
+
+class FormatImg( XMLData ):
+    VARS = ( 'x', 'y', 'width', 'height' )
+
+    def __init__(self, source=None):
+        XMLData.__init__( self, self.VARS, source )
+        self.src  = ''
         self.type = 'image'
 
     def parse( self, node, scale, c_dir = '' ):
-        XML_data.parse( self, node, scale, c_dir )
+        XMLData.parse( self, node, scale, c_dir )
         self.src = attr_str( node, 'src', self.src )
 
-    def prepare(self, font, color, search_dirs ):
-        self.src = search_file( self.src, search_dirs )
-
+    def prepare_copy(self, font, color, search_dirs):
+        ret = FormatImg(self)
+        ret.src = search_file(self.src, search_dirs)
+        return ret
 
 
 class FormatIf(object):
@@ -867,61 +921,58 @@ class FormatIf(object):
             child.parse( subnode, scale, c_dir )
             self.content += [ child ]
 
-    def prepare(self, font, color, search_dirs):
-        for i in self.content:
-            i.prepare( font, color, search_dirs )
-
-
+    def prepare_copy(self, font, color, search_dirs):
+        ret = FormatIf()
+        ret.expression = self.expression
+        for c in self.content:
+            ret.content.append(c.prepare_copy(font, color, search_dirs))
+        return ret
 
 # ======================================================================
 
-class Image(XML_data):
+class Image(XMLData):
     """
     an image
     """
-    def __init__(self):
+    VARS = ('x', 'y', 'width', 'height', 'image', 'filename', 'label',
+            'visible', 'alpha')
+
+    def __init__(self, source=None):
         self.type = 'image'
-        XML_data.__init__(self, ('x', 'y', 'width', 'height', 'image',
-                                 'filename', 'label', 'visible', 'alpha'))
+        XMLData.__init__(self, self.VARS, source)
         self.alpha = None
 
-        
-    def prepare(self, color, search_dirs, image_names):
-        """
-        try to guess the image localtion
-        """
-        XML_data.prepare(self)
-        if self.image:
-            if image_names.has_key(self.image):
-                self.filename = image_names[self.image]
+
+    def prepare_copy(self, color, search_dirs, image_names):
+        ret = Image(self)
+        ret.prepare()
+        if ret.image:
+            if image_names.has_key(ret.image):
+                ret.filename = image_names[ret.image]
             else:
                 log.error('skin error: can\'t find image definition %s' % \
-                          self.image)
+                          ret.image)
 
-        if self.filename:
-            self.filename = search_file(self.filename, search_dirs)
+        if ret.filename:
+            ret.filename = search_file(ret.filename, search_dirs)
+        return ret
 
 
-class Rectangle(XML_data):
+class Rectangle(XMLData):
     """
     a Rectangle
     """
-    def __init__(self, color=None, bgcolor=None, size=None, radius = None):
+    VARS = ('x', 'y', 'width', 'height', 'color', 'bgcolor', 'size', 'radius' )
+
+    def __init__(self, source=None):
         self.type = 'rectangle'
-        XML_data.__init__(self, ('x', 'y', 'width', 'height', 'color',
-                                 'bgcolor', 'size', 'radius' ))
-        if not color == None:
-            self.color = color
-        if not bgcolor == None:
-            self.bgcolor = bgcolor
-        if not size == None:
-            self.size = size
-        if not radius == None:
-            self.radius = radius
+        XMLData.__init__(self, self.VARS, source)
 
 
-    def prepare(self, color, search_dirs=None, image_names=None):
-        XML_data.prepare(self, None, color)
+    def prepare_copy(self, color, search_dirs=None, image_names=None):
+        ret = Rectangle(self)
+        ret.prepare(None, color)
+        return ret
 
 
     def calculate(self, width, height):
@@ -970,21 +1021,27 @@ class Rectangle(XML_data):
 
 
 
-class Font(XML_data):
+class Font(XMLData):
     """
     Font tag. The prepared object is a font object that can
     be used in the text widgets for drawing texts.
     """
-    def __init__(self, label):
-        XML_data.__init__(self, ('name', 'size', 'color', 'bgcolor'))
+    VARS = ('name', 'size', 'color', 'bgcolor')
+    SHADOW_VARS = ('visible', 'color', 'x', 'y', 'border')
+
+    def __init__(self, label, source=None):
+        XMLData.__init__(self, self.VARS, source)
         self.label = label
-        self.shadow = XML_data(('visible', 'color', 'x', 'y', 'border'))
-        self.shadow.visible = False
-        self.shadow.border = False
+        if source:
+            self.shadow = XMLData(self.SHADOW_VARS, source.shadow)
+        else:
+            self.shadow = XMLData(self.SHADOW_VARS)
+            self.shadow.visible = False
+            self.shadow.border = False
 
 
     def parse(self, node, scale, current_dir):
-        XML_data.parse(self, node, scale, current_dir)
+        XMLData.parse(self, node, scale, current_dir)
         for subnode in node.children:
             if subnode.name == u'shadow':
                 self.shadow.parse(subnode, scale, current_dir)
@@ -1000,22 +1057,24 @@ class Font(XML_data):
         return size
 
 
-    def prepare(self, color, search_dirs=None, image_names=None, scale=1.0):
-        if color.has_key(self.color):
-            self.color = color[self.color]
-        self.color = int2col(self.color)
-        self.size = int(float(self.size) * scale)
-        self.font = get_font_object(self.name, self.size)
-        self.height = self.font.height
-        if self.shadow.visible:
-            if color.has_key(self.shadow.color):
-                self.shadow.color = color[self.shadow.color]
-            if self.shadow.border:
-                self.height += (self.size / 10) * 2
+    def prepare_copy(self, color, search_dirs=None, image_names=None,
+                     scale=1.0):
+        ret = Font(self.label, self)
+        if color.has_key(ret.color):
+            ret.color = color[ret.color]
+        ret.color = int2col(ret.color)
+        ret.size = int(float(ret.size) * scale)
+        ret.font = get_font_object(ret.name, ret.size)
+        ret.height = ret.font.height
+        if ret.shadow.visible:
+            if color.has_key(ret.shadow.color):
+                ret.shadow.color = color[ret.shadow.color]
+            if ret.shadow.border:
+                ret.height += (ret.size / 10) * 2
             else:
-                self.height += abs(self.shadow.y)
-            self.shadow.color = int2col(self.shadow.color)
-
+                ret.height += abs(ret.shadow.y)
+            ret.shadow.color = int2col(ret.shadow.color)
+        return ret
 
 
 # ======================================================================
@@ -1041,11 +1100,11 @@ class AreaSet(object):
                 a.parse(subnode, scale, current_dir)
                 self.areas[subnode.name] = a
 
-    def prepare(self, layout):
-        """
-        prepare all areas
-        """
-        map(lambda a: a[1].prepare(layout), self.areas.items())
+    def prepare_copy(self, layout):
+        ret = AreaSet()
+        for key, template in self.areas.items():
+            ret.areas[key] = template.prepare_copy(layout)
+        return ret
 
 
 # ======================================================================
@@ -1175,48 +1234,49 @@ class FXDSettings(object):
     def prepare(self):
         log.info('preparing skin settings')
         t1 = time.time()
-        
-        self.prepared = True
 
-        # copy internal structures to prepare the copy
-        self.sets = copy.deepcopy(self.__sets)
-        all_menus = copy.deepcopy(self.__menu)
-        self.font = copy.deepcopy(self.__font)
-        layout    = copy.deepcopy(self.__layout)
+        self.prepared = True
 
         if not os.path.isdir(self.icon_dir):
             self.icon_dir = os.path.join(config.ICON_DIR, 'themes',
                                          self.icon_dir)
+
         search_dirs = self.skindirs + [ config.IMAGE_DIR, self.icon_dir, '.' ]
 
-        for f in self.font:
-            self.font[f].prepare(self.__color, scale=self.font_scale)
+        # prepare font objects
+        self.font = {}
+        for key, template in self.__font.items():
+            self.font[key] = template.prepare_copy(self.__color,
+                                                   scale=self.font_scale)
 
-        for l in layout:
-            layout[l].prepare(self.font, self.__color, search_dirs,
-                              self.__images)
+        # prepare layouts
+        layout = {}
+        for key, template in self.__layout.items():
+            layout[key] = template.prepare_copy(self.font, self.__color,
+                                                search_dirs, self.__images)
 
-        for menu in all_menus:
-            all_menus[menu].prepare(self.__menuset, layout)
+        # prepare menus
+        self.menu = {}
+        for key, template in self.__menu.items():
+            self.menu[key] = template.prepare_copy(self.__menuset, layout)
 
             # prepare listing area images
-            for s in all_menus[menu].style:
+            for s in self.menu[key].style:
                 for i in range(2):
                     if s[i] and hasattr(s[i], 'listing'):
                         for image in s[i].listing.images:
-                            s[i].listing.images[image].prepare(None,
-                                                               search_dirs,
-                                                               self.__images)
+                            foo = s[i].listing.images[image]
+                            s[i].listing.images[image] = foo.prepare_copy(None, search_dirs, self.__images)
 
         # menu structures
         self.default_menu = {}
         self.special_menu = {}
 
-        for k in all_menus:
+        for k in self.menu:
             if k.startswith('default'):
-                self.default_menu[k] = all_menus[k]
+                self.default_menu[k] = self.menu[k]
             else:
-                self.special_menu[k] = all_menus[k]
+                self.special_menu[k] = self.menu[k]
 
         types = []
         for k in self.special_menu:
@@ -1235,29 +1295,37 @@ class FXDSettings(object):
         if not self.default_menu.has_key(t + ' no image'):
             self.default_menu[t + ' no image'] = self.default_menu[t]
 
-        for s in self.sets:
-            if isinstance(self.sets[s], AreaSet):
+
+        # prepare area sets
+        self.sets = {}
+        for key, template in self.__sets.items():
+            if isinstance(template, AreaSet):
                 # prepare an areaset
-                self.sets[s].prepare(layout)
+                self.sets[key] = template.prepare_copy(layout)
             else:
                 # prepare a menu
-                self.sets[s].prepare(self.__menuset, layout)
-                for s in self.sets[s].style:
+                ms = template.prepare_copy(self.__menuset, layout)
+                self.sets[key] = ms
+                for s in ms.style:
                     for i in range(2):
                         if s[i] and hasattr(s[i], 'listing'):
                             sli = s[i].listing.images
                             for image in sli:
-                                sli[image].prepare(None, search_dirs,
+                                sli[image] = sli[image].prepare_copy(None, search_dirs,
                                                    self.__images)
 
+        # prepare popup style
         self.popup = layout[self.__popup]
 
-        self.mainmenu = copy.deepcopy(self.__mainmenu)
-        self.mainmenu.prepare(search_dirs, self.__images)
+        # prepare mainmenu
+        self.mainmenu = self.__mainmenu.prepare_copy(search_dirs,
+                                                     self.__images)
 
+        # prepare images
         self.images = {}
         for name in self.__images:
             self.images[name] = search_file(self.__images[name], search_dirs)
+
         t2 = time.time()
         log.info('preparing took %s seconds' % (t2 - t1))
 
