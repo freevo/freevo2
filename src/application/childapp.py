@@ -154,7 +154,9 @@ class Application(base.Application):
         Callback when the child is finished. Override this method to react
         when the child is finished.
         """
-        pass
+        self.__child = None
+        if hasattr(self, 'item') and self.item:
+            PLAY_END.post(self.item)
 
 
 class Process(kaa.notifier.Process):
@@ -206,23 +208,10 @@ class Process(kaa.notifier.Process):
         self.handler.child_stderr(line)
 
 
-    def stop_event(self):
-        """
-        Event to send on stop.
-        """
-        if hasattr(self.handler, 'item'):
-            return Event(PLAY_END, self.handler.item)
-        return None
-
-
     def finished(self):
         """
-        Send stop event when child is finished.
+        Callback when child is finished.
         """
-        event = self.stop_event()
-        if event:
-            event.post()
         if self.has_display:
             gui.display.show()
-        self.handler.child_stop()
         self.handler.child_finished()
