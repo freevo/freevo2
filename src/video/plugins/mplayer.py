@@ -311,16 +311,6 @@ class MPlayer(mplayer.Application):
         return None
 
 
-    def stop(self):
-        if self.screen:
-            gui.displays.remove(self.screen)
-            self.area_handler = None
-            self.screen = None
-            self.width  = 0
-            self.height = 0
-        mplayer.Application.stop(self)
-
-
     def hide_osd(self):
         """
         Hide the seek osd. This is a rc callback after pressing seek
@@ -337,7 +327,16 @@ class MPlayer(mplayer.Application):
         eventhandler for mplayer control. If an event is not bound in this
         function it will be passed over to the items eventhandler
         """
-        if mplayer.Application.eventhandler(self, event):
+        mplayer.Application.eventhandler(self, event)
+
+        if event == PLAY_END:
+            if self.screen:
+                gui.displays.remove(self.screen)
+                self.area_handler = None
+                self.screen = None
+                self.width  = 0
+                self.height = 0
+            self.item.eventhandler(event)
             return True
 
         if not self.has_child():
@@ -345,11 +344,6 @@ class MPlayer(mplayer.Application):
 
         if event == VIDEO_MANUAL_SEEK:
             gui.windows.WaitBox('Seek disabled, press QUIT').show()
-            return True
-
-        if event == STOP:
-            self.stop()
-            self.item.eventhandler(event)
             return True
 
         if event == 'AUDIO_ERROR_START_AGAIN':
