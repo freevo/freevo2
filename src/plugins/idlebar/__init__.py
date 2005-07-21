@@ -45,6 +45,7 @@ import gui.imagelib
 import gui.widgets
 import gui.animation
 import gui.theme
+import application
 from event import *
 
 # get logging object
@@ -69,7 +70,11 @@ class PluginInterface(plugin.DaemonPlugin):
 
         # register for events
         handler = kaa.notifier.EventHandler(self.eventhandler)
-        handler.register(SCREEN_CONTENT_CHANGE, THEME_CHANGE)
+        handler.register()
+
+        # register for signals
+        application.signals['application change'].connect(self.app_change)
+        gui.theme.signals['theme change'].connect(self.theme_change)
 
         self.poll_interval  = 3000
         self.plugins        = None
@@ -93,25 +98,14 @@ class PluginInterface(plugin.DaemonPlugin):
         """
         draw a background and all idlebar plugins
         """
-        screen  = gui.display
         changed = False
 
-        w = screen.width
+        w = gui.display.width
         h = config.GUI_OVERSCAN_Y + 60
-
-        f = gui.theme.image('idlebar')
-
-        if self.barfile != f:
-            if self.bar:
-                self.container.remove_child(self.bar)
-            self.barfile = f
-            self.bar = gui.widgets.Image(self.barfile, (0,0), (w, h))
-            self.container.add_child(self.bar)
-            changed = True
 
         x1 = config.GUI_OVERSCAN_X
         y1 = config.GUI_OVERSCAN_Y
-        x2 = screen.width - config.GUI_OVERSCAN_X
+        x2 = w - config.GUI_OVERSCAN_X
         y2 = h
 
         for p in plugin.get('idlebar'):
@@ -194,41 +188,62 @@ class PluginInterface(plugin.DaemonPlugin):
             self.background.hide()
 
 
+    def app_change(self, app, fullscreen, fade):
+        """
+        React on toggle fullscreen, hide or show the bar, but not update
+        the screen itself, this is done by the app later.
+        """
+        # get theme informations
+        self.theme_change()
+        
+        if fade:
+            fade = config.GUI_FADE_STEPS
+        else:
+            fade = 0
+        if fullscreen:
+            # add the background behind the bar
+            self.add_background()
+        else:
+            # remove the background again, it's done by the
+            # 'not in fullscreen' app.
+            self.remove_background()
+        if fullscreen == self.visible:
+            log.info('set visible %s' % (not fullscreen))
+            if not self.visible:
+                self.show(False, fade=fade)
+            else:
+                self.hide(False, fade=fade)
+        return True
+
+
+    def theme_change(self):
+        """
+        Signal handler for gui theme changes.
+        """
+        w = gui.display.width
+        h = config.GUI_OVERSCAN_Y + 60
+
+        f = gui.theme.image('idlebar')
+
+        if self.barfile != f:
+            if self.bar:
+                self.container.remove_child(self.bar)
+            self.barfile = f
+            self.bar = gui.widgets.Image(self.barfile, (0,0), (w, h))
+            self.container.add_child(self.bar)
+            changed = True
+
+        self.update()
+
+        
     def eventhandler(self, event):
         """
         catch the IDENTIFY_MEDIA event to redraw the skin (maybe the cd status
-        plugin wants to redraw). Also catch SCREEN_CONTENT_CHANGE in case we
-        need to hide/show the bar.
+        plugin wants to redraw).
         """
-        if event == SCREEN_CONTENT_CHANGE:
-            # react on toggle fullscreen, hide or show the bar, but not update
-            # the screen itself, this is done by the app later
-            app, fullscreen, fade = event.arg
-            if fade:
-                fade = config.GUI_FADE_STEPS
-            else:
-                fade = 0
-            if fullscreen:
-                # add the background behind the bar
-                self.add_background()
-            else:
-                # remove the background again, it's done by the
-                # 'not in fullscreen' app.
-                self.remove_background()
-            if fullscreen == self.visible:
-                log.info('set visible %s' % (not fullscreen))
-                if not self.visible:
-                    self.show(False, fade=fade)
-                else:
-                    self.hide(False, fade=fade)
-                self.update()
-            return
-
         if not self.visible:
             return False
 
-        if event == THEME_CHANGE:
-            self.update()
         if plugin.isevent(event) == 'IDENTIFY_MEDIA':
             if self.update():
                 gui.display.update()

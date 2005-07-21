@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.63  2005/07/21 18:56:07  dischi
+# use signals for theme and applicatio change
+#
 # Revision 1.62  2005/07/16 09:48:20  dischi
 # adjust to new event interface
 #
@@ -54,9 +57,6 @@
 # Revision 1.50  2004/08/08 18:56:37  rshortt
 # Add some quick recordserver events.  I'm planning on reviewing them and
 # adding more with names that make sense.
-#
-# Revision 1.49  2004/08/01 10:56:17  dischi
-# add SCREEN_CONTENT_CHANGE
 #
 # Revision 1.48  2004/07/21 11:32:31  dischi
 # fix dvd events for language settings
@@ -305,7 +305,3 @@ RECORD           = Event('RECORD')
 STOP_RECORDING   = Event('STOP_RECORDING')
 RECORD_START     = Event('RECORD_START')
 RECORD_STOP      = Event('RECORD_STOP')
-
-
-SCREEN_CONTENT_CHANGE = Event('SCREEN_CONTENT_CHANGE')
-THEME_CHANGE          = Event('THEME_CHANGE')
