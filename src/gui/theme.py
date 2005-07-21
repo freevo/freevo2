@@ -12,6 +12,7 @@
 # TODO: o major cleanup
 #       o make fxd parsing faster
 #       o respect coding guidelines
+#       o make it faster
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -39,18 +40,21 @@
 # -----------------------------------------------------------------------------
 
 # list of functions this module provides
-__all__ = [ 'get', 'set', 'font', 'image', 'icon', 'set_base_fxd' ]
+__all__ = [ 'get', 'set', 'font', 'image', 'icon', 'set_base_fxd', 'signals' ]
 
 # python imports
 import os
 import copy
 import re
+import time
+
+# kaa imports
+import kaa.notifier
 
 # freevo imports
 import config
 import util
 import plugin
-from event import THEME_CHANGE
 
 # gui imports
 from font import get as get_font_object
@@ -61,6 +65,8 @@ log = logging.getLogger('gui')
 # Internal fxd file version
 FXD_FORMAT_VERSION = 2
 
+# signals
+signals = { 'theme change': kaa.notifier.Signal() }
 
 # -------------- Interface for Freevo ---------------------------------------
 
@@ -109,8 +115,7 @@ def set(new):
         # set the global theme variable
         current_theme = new
     # notify other parts of Freevo about the theme change
-    # FIXME: maybe this is a signal.
-    THEME_CHANGE.post()
+    signals['theme change'].emit()
     # return new theme in case the new one was given to this
     # function as string and the caller wants the object
     return current_theme
@@ -1169,7 +1174,8 @@ class FXDSettings(object):
 
     def prepare(self):
         log.info('preparing skin settings')
-
+        t1 = time.time()
+        
         self.prepared = True
 
         # copy internal structures to prepare the copy
@@ -1252,6 +1258,8 @@ class FXDSettings(object):
         self.images = {}
         for name in self.__images:
             self.images[name] = search_file(self.__images[name], search_dirs)
+        t2 = time.time()
+        log.info('preparing took %s seconds' % (t2 - t1))
 
 
     def fxd_callback(self, fxd, node):
