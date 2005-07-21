@@ -101,6 +101,9 @@ def get_active():
     return get_singleton().get_active()
 
 
+# Signals
+app_change_signal = kaa.notifier.Signal()
+
 # -----------------------------------------------------------------------------
 
 class Eventhandler(object):
@@ -111,19 +114,15 @@ class Eventhandler(object):
     def __init__(self):
         self.popups       = []
         self.applications = []
-        self.stack_change = None
         # callback for events
         kaa.notifier.EventHandler(self.handle).register()
         
 
-    def set_focus(self):
+    def set_focus(self, previous, app):
         """
         change the focus
         """
-        if self.stack_change:
-            previous, app = self.stack_change
-        else:
-            previous, app = None, self.applications[-1]
+        log.info('set focus from %s to %s' % (previous, app))
         if not self.popups:
             input.set_mapping(app.get_eventmap())
         else:
@@ -132,12 +131,15 @@ class Eventhandler(object):
         fade = app.animated
         if previous:
             if previous.visible:
+                log.info('hide previous app')
                 previous.hide()
             fade = fade or previous.animated
-        log.info('SCREEN_CONTENT_CHANGE')
-        Event(SCREEN_CONTENT_CHANGE, (app, app.fullscreen, fade)).post()
-        self.stack_change = None
+
+        log.info('signal screen content change')
+        app_change_signal.emit(app, app.fullscreen, fade)
+
         if not app.visible:
+            log.info('make current app visible')
             app.show()
         
 
@@ -145,28 +147,29 @@ class Eventhandler(object):
         """
         Add app the list of applications and set the focus
         """
+        log.info('new application %s' % app)
         # make sure the app is not stopped
         app.stopped = False
         # do will have a stack or is this the first application?
         if len(self.applications) == 0:
             # just add the application
             self.applications.append(app)
-            return self.set_focus()
+            self.set_focus(None, app)
+            return True
         # check about the old app if it is marked as removed
         # or if it is the same application as before
         previous = self.applications[-1]
         if previous == app:
+            # It is the same app, just remove the stopped flag
             previous.stopped = False
         else:
             # hide the application and mark the application change
             previous.hide()
-            self.stack_change = previous, app
             if previous.stopped:
                 # the previous application is stopped, remove it
                 self.applications.remove(previous)
-            self.stack_change = previous, app
             self.applications.append(app)
-            self.set_focus()
+            self.set_focus(previous, app)
 
 
     def add_window(self, window):
@@ -232,18 +235,15 @@ class Eventhandler(object):
                 self.applications[-1].eventhandler(event=event)
 
             # now do some checking if the focus needs to be changed
-            if self.stack_change:
-                # our stack has changed, reset the focus
-                self.set_focus()
-            elif self.applications[-1].stopped or \
-                     not self.applications[-1].visible:
+            if self.applications[-1].stopped or \
+                   not self.applications[-1].visible:
+                log.info('current application is stopped')
                 # the current application wants to be removed, either
                 # because stop() is called or the hide() function was
                 # called from the event handling
                 previous, current = self.applications[-2:]
                 self.applications.remove(current)
-                self.stack_change = current, previous
-                self.set_focus()
+                self.set_focus(current, previous)
 
             if _TIME_DEBUG:
                 print time.clock() - t1

@@ -63,7 +63,7 @@ class Application(object):
 
         self.animated   = animated
         self.visible    = False
-        self.stopped    = False
+        self.stopped    = True
         self.fullscreen = fullscreen
 
 
@@ -71,7 +71,8 @@ class Application(object):
         """
         Eventhandler for this application
         """
-        print 'Error, no eventhandler defined for %s' % self.application
+        error = 'Error, no eventhandler defined for %s' % self.application
+        raise AttributeError(error)
 
 
     def show(self):
@@ -81,13 +82,14 @@ class Application(object):
         In case it is not overloaded, this function will also update the
         display.
         """
-        self.stopped = False
         if self.visible:
             # already visible
             return False
         # Set visible and append to the eventhandler
         self.visible = True
-        self.__handler.append(self)
+        if self.stopped:
+            self.__handler.append(self)
+            self.stopped = False
         # Check if the new app uses animation to show itself
         if not self.animated:
             # This application has no animation for showing. But the old one
@@ -150,3 +152,10 @@ class Application(object):
         """
         return self.__name
     
+
+    def __str__(self):
+        """
+        String for debugging.
+        """
+        return self.__name
+        

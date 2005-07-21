@@ -54,12 +54,13 @@ class Application(childapp.Application):
         """
         init the mplayer object
         """
-        childapp.Application.__init__(self, 'mplayer', type, has_video)
+        self.__elapsed = 0
+        self.__stop_reason = ''
+        self.RE_TIME = re.compile("^A: *([0-9]+)").match
         self.name = 'mplayer'
-        self.__child = None
-        self.__has_video = has_video
         self.plugins = []
         self.plugin_key = 'mplayer_' + type
+        childapp.Application.__init__(self, 'mplayer', type, has_video)
 
 
     def play(self, cmd):
@@ -72,7 +73,7 @@ class Application(childapp.Application):
             cmd = p.play(cmd, self)
 
         cmd = self.correct_filter_chain(cmd)
-        self.__child = Process(cmd, self, self.__has_video)
+        self.child_start(cmd, prio=config.MPLAYER_NICE, stop_cmd='quit')
 
 
     def correct_filter_chain(self, command):
@@ -104,34 +105,21 @@ class Application(childapp.Application):
         for p in self.plugins:
             p.stop()
         self.plugins = []
-        if not self.__child:
-            return
-        # proc will send a PLAY_END when it's done. At this point we
-        # will call childapp.Application.stop(self)
-        self.__child.stop('quit\n')
-        self.__child = None
+        self.child_stop(self)
 
 
     def is_playing(self):
         """
         Return True if mplayer is playing right now.
         """
-        return self.__child and self.__child.is_alive()
-
-
-    def has_child(self):
-        """
-        Return True if the application is still connected to a process
-        """
-        return self.__child
+        return self.child_running()
 
 
     def send_command(self, cmd):
         """
         Send a command to mplayer.
         """
-        if self.__child:
-            self.__child.write(cmd)
+        return self.child_stdin(cmd)
 
 
     def elapsed(self, sec):
@@ -148,6 +136,48 @@ class Application(childapp.Application):
         pass
 
 
+    def child_stdout(self, line):
+        """
+        A line from stdout of mplayer.
+        """
+        if line.find("A:") == 0:
+            m = self.RE_TIME(line)
+            if hasattr(m,'group') and self.__elapsed != int(m.group(1))+1:
+                self.__elapsed = int(m.group(1))+1
+                for p in self.plugins:
+                    p.elapsed(sec)
+                self.elapsed(self.__elapsed)
+
+        # startup messages
+        elif not self.__elapsed:
+            for p in self.plugins:
+                p.message(sec)
+            self.message(line)
+
+
+    def child_stderr(self, line):
+        """
+        A line from stdout of mplayer.
+        """
+        if line.startswith('Failed to open') and not self.__elapsed:
+            self.__stop_reason = line
+        else:
+            for p in self.plugins:
+                p.message(sec)
+            self.message(line)
+
+
+    def child_finished(self):
+        """
+        Callback when the child is finished. Override this method to react
+        when the child is finished.
+        """
+        childapp.Application.child_finished(self)
+        event = Event(PLAY_END, self.__stop_reason)
+        event.set_handler(self.eventhandler)
+        event.post()
+
+
     def eventhandler(self, event):
         """
         Eventhandler function.
@@ -160,8 +190,7 @@ class Application(childapp.Application):
             return False
 
         for p in self.plugins:
-            if p.eventhandler(event):
-                return True
+            p.eventhandler(event)
 
         return False
 
@@ -215,55 +244,3 @@ class Plugin(plugin.Plugin):
         Eventhandler for events passed to the application.
         """
         return False
-
-
-class Process(childapp.Process):
-    """
-    Internal childapp instance for the mplayer process.
-    """
-    def __init__(self, cmd, handler, has_display):
-        self.elapsed = 0
-        self.stop_reason = ''
-        self.RE_TIME = re.compile("^A: *([0-9]+)").match
-        childapp.Process.__init__(self, cmd, handler, config.MPLAYER_NICE,
-                                  has_display)
-
-
-    def stop_event(self):
-        """
-        Return the stop event send through the eventhandler
-        """
-        event = Event(PLAY_END, self.stop_reason)
-        event.set_handler(self.handler.eventhandler)
-        return event
-    
-
-    def stdout_cb(self, line):
-        """
-        Handle mplayer stdout lines.
-        """
-        if line.find("A:") == 0:
-            m = self.RE_TIME(line)
-            if hasattr(m,'group') and self.elapsed != int(m.group(1))+1:
-                self.elapsed = int(m.group(1))+1
-                for p in self.handler.plugins:
-                    p.elapsed(sec)
-                self.handler.elapsed(self.elapsed)
-
-        # startup messages
-        elif not self.elapsed:
-            for p in self.handler.plugins:
-                p.message(sec)
-            self.handler.message(line)
-
-
-    def stderr_cb(self, line):
-        """
-        Handle mplayer stderr lines.
-        """
-        if line.startswith('Failed to open') and not self.elapsed:
-            self.stop_reason = line
-        else:
-            for p in self.handler.plugins:
-                p.message(sec)
-            self.handler.message(line)
