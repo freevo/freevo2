@@ -465,7 +465,7 @@ class XMLData(object):
         """
         basic prepare function
         """
-        try:
+        if 'visible' in self.content and isinstance(self.visible, str):
             if self.visible not in ('', 'yes'):
                 if len(self.visible) > 4 and self.visible[:4] == 'not ':
                     p = plugin.getbyname(self.visible[4:])
@@ -475,35 +475,25 @@ class XMLData(object):
                     self.visible = not p
                 else:
                     self.visible = p
-        except (TypeError, AttributeError):
-            pass
-        # Brute force, maybe this item has no font or color attributes.
-        # But catching exceptions is faster than searching first
-        if font_dict:
-            try:
-                self.font = font_dict[self.font]
-            except (TypeError, KeyError):
-                self.font = font_dict['default']
-            except AttributeError:
-                pass
-        if color_dict:
-            try:
-                self.color = color_dict[self.color]
-            except (TypeError, KeyError, AttributeError):
-                pass
-            try:
-                self.bgcolor = color_dict[self.bgcolor]
-            except (TypeError, KeyError, AttributeError):
-                pass
 
-        try:
+        # Try to find a font definition
+        if 'font' in self.content and font_dict:
+            if font_dict.has_key(self.font):
+                self.font = font_dict[self.font]
+            else:
+                self.font = font_dict['default']
+
+        # Try to find a color definition
+        if 'color' in self.content:
+            if color_dict and color_dict.has_key(self.color):
+                self.color = color_dict[self.color]
             self.color = int2col(self.color)
-        except (TypeError, AttributeError):
-            pass
-        try:
+
+        # Try to find a bgcolor definition
+        if 'bgcolor' in self.content:
+            if color_dict and color_dict.has_key(self.bgcolor):
+                self.bgcolor = color_dict[self.bgcolor]
             self.bgcolor = int2col(self.bgcolor)
-        except (TypeError, AttributeError):
-            pass
 
 
     def prepare_copy(self, font_dict=None, color_dict=None):
@@ -624,6 +614,7 @@ class Area(XMLData):
 
     def prepare_copy(self, layout):
         ret = Area(self.name, self)
+        ret.prepare()
         ret.images = self.images
         if ret.visible:
             ret.layout = layout[ret.layout]
@@ -1196,7 +1187,7 @@ class FXDSettings(object):
                     value = attr_col(node, 'value', '')
                     self.__color[node.attrs[('', 'label')]] = int2col(value)
                 except KeyError:
-                    pass
+                    self.__color[node.attrs[('', 'label')]] = value
 
 
             elif node.name == u'image':
