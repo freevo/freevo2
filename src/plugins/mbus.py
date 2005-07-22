@@ -58,7 +58,7 @@ class PluginInterface(plugin.Plugin, mcomm.RPCServer):
     def eventhandler(self, event):
         # each event resets the idle time
         self.idle_time = 0
-        return False
+        return True
 
 
     def update_idle_time(self):

@@ -242,12 +242,12 @@ class PluginInterface(plugin.DaemonPlugin):
         plugin wants to redraw).
         """
         if not self.visible:
-            return False
+            return True
 
         if plugin.isevent(event) == 'IDENTIFY_MEDIA':
             if self.update():
                 gui.display.update()
-        return False
+        return True
 
 
     def poll(self):

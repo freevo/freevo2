@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2005/07/22 19:30:24  dischi
+# fix event handling
+#
 # Revision 1.6  2005/06/09 19:43:54  dischi
 # clean up eventhandler usage
 #
@@ -185,3 +188,4 @@ class PluginInterface(plugin.DaemonPlugin):
         if event == OSD_MESSAGE :
             self.message = event.arg
             self.draw_osd()
+        return True

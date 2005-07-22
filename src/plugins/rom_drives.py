@@ -128,28 +128,31 @@ class autostart(plugin.DaemonPlugin):
     Plugin to autostart if a new medium is inserted while Freevo shows
     the main menu
     """
+    def __init__(self):
+        plugin.DaemonPlugin.__init__(self)
+        self.events = [ MENU_GOTO_MAINMENU, EJECT ]
 
     def eventhandler(self, event):
         """
-        eventhandler to handle the IDENTIFY_MEDIA plugin event and the
+        Eventhandler to handle the IDENTIFY_MEDIA plugin event and the
         EJECT event. Also take care of the umounting when going back to
         the main menu.
         """
         menuw = application.get_active()
         if not menuw or menuw.get_name() != 'menu':
-            return False
+            return True
         
         if event == MENU_GOTO_MAINMENU:
             # going to main menu, umount all media
             for media in rom_drives:
                 if media.is_mounted():
                     media.umount()
-            # return False, this event is needed later
-            return False
+            # return
+            return True
         
         if not menuw or len(menuw.menustack) > 1:
             # not in main menu
-            return False
+            return True
         
         # if we are at the main menu and there is an IDENTIFY_MEDIA event,
         # try to autorun the media
@@ -184,6 +187,7 @@ class autostart(plugin.DaemonPlugin):
                 media = rom_drives[0]
                 media.move_tray(dir='toggle')
                 return True
+        return True
 
 
 class rom_items(plugin.MainMenuPlugin, plugin.DaemonPlugin):
@@ -194,6 +198,7 @@ class rom_items(plugin.MainMenuPlugin, plugin.DaemonPlugin):
     def __init__(self):
         plugin.DaemonPlugin.__init__(self)
         plugin.MainMenuPlugin.__init__(self)
+        self.events = [ MENU_GOTO_MAINMENU ]
 
 
     def items(self, parent):
@@ -230,16 +235,13 @@ class rom_items(plugin.MainMenuPlugin, plugin.DaemonPlugin):
 
     def eventhandler(self, event):
         """
-        eventhandler to handle the umount
+        Eventhandler to handle the umount. It only reacts on MENU_GOTO_MAINMENU
         """
-        if event == MENU_GOTO_MAINMENU:
-            # going to main menu, umount all media
-            for media in rom_drives:
-                if media.is_mounted():
-                    media.umount()
-            # return False, this event is needed later
-            return False
-        return False
+        # going to main menu, umount all media
+        for media in rom_drives:
+            if media.is_mounted():
+                media.umount()
+        return True
 
     
 class RemovableMedia(vfs.Mountpoint):

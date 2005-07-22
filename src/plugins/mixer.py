@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2005/07/22 19:30:24  dischi
+# fix event handling
+#
 # Revision 1.21  2005/07/16 09:48:23  dischi
 # adjust to new event interface
 #
@@ -168,7 +171,7 @@ class PluginInterface(plugin.DaemonPlugin):
                 self.setMuted(1)
             return True
 
-        return False
+        return True
 
 
 

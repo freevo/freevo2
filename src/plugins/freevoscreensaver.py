@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2005/07/22 19:30:24  dischi
+# fix event handling
+#
 # Revision 1.10  2005/07/16 11:40:28  dischi
 # remove poll_menu_only
 #
@@ -128,15 +131,15 @@ class PluginInterface(plugin.DaemonPlugin):
 
         if event.name == 'SCREENSAVER_START':
 	    self.start_saver()
-	    return False
+	    return True
 
         if event.name == 'SCREENSAVER_STOP' and self.screensaver_showing :
 	    self.stop_saver()
-	    return False
+	    return True
 
         # gotta ignore these or video screensavers shutoff before they begin
 	if event.name == 'VIDEO_START' or event.name == 'PLAY_START' or event.name == 'VIDEO_END' or event.name == 'PLAY_END':
-	    return False
+	    return True
 
         if self.screensaver_showing :
 	    self.stop_saver()
@@ -144,7 +147,7 @@ class PluginInterface(plugin.DaemonPlugin):
 	if not event.name == 'IDENTIFY_MEDIA':
 	    self.last_event = time.time()
 
-        return False
+        return True
 
     def poll(self):
         log.info("Saver got polled %f" % time.time())

@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2005/07/22 19:30:24  dischi
+# fix event handling
+#
 # Revision 1.6  2005/07/16 11:40:28  dischi
 # remove poll_menu_only
 #
@@ -101,4 +104,4 @@ class PluginInterface(plugin.DaemonPlugin):
             log.debug('Recieved VIDEO_STOP event')
             os.system(self.after)
 
-        return False
+        return True

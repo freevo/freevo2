@@ -13,6 +13,9 @@
 #    3) Better (and more) LCD screens.
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2005/07/22 19:30:24  dischi
+# fix event handling
+#
 # Revision 1.26  2005/07/16 11:40:28  dischi
 # remove poll_menu_only
 #
@@ -951,7 +954,7 @@ class PluginInterface( plugin.DaemonPlugin ):
         elif event == PLAY_END or event == STOP:
             self.playitem = None
 
-        return 0
+        return True
 
     def get_sepstrmscroll( self, mscrolldata ):
         """

@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2005/07/22 19:30:24  dischi
+# fix event handling
+#
 # Revision 1.22  2005/06/09 19:43:54  dischi
 # clean up eventhandler usage
 #
@@ -158,7 +161,7 @@ class PluginInterface(plugin.DaemonPlugin):
             self._timer_id = notifier.addTimer( 2000,
                                                 notifier.Callback( self.hide ) )
             self.update()
-        return False
+        return True
 
 
     def hide(self):

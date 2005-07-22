@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2005/07/22 19:31:24  dischi
+# fix event handling
+#
 # Revision 1.11  2005/07/16 09:48:21  dischi
 # adjust to new event interface
 #
@@ -104,3 +107,4 @@ class PluginInterface(plugin.DaemonPlugin):
         if event == RATING and str(event.arg[0]) in '12345':
             self.log_rating(event.arg[1],event.arg[0])
             OSD_MESSAGE.post('Rated: %s' % str(event.arg[0]))
+        return True
