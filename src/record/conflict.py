@@ -64,9 +64,6 @@ import time
 # objectcache
 from util.objectcache import ObjectCache
 
-# call_later
-from util.callback import *
-
 # record imports
 import recorder
 from record_types import *
@@ -131,7 +128,7 @@ class Device(object):
         return True
 
 
-def scan(recordings, include_padding, all=True):
+def scan(recordings, include_padding):
     """
     Scan the schedule for conflicts. A conflict is a list of recordings
     with overlapping times.
@@ -157,9 +154,6 @@ def scan(recordings, include_padding, all=True):
         if r in scanned:
             # Already marked as conflict
             continue
-        if not all and r.start > ctime + SCHEDULE_TIMER:
-            # That's enough for now
-            break
         current = []
         # Set stop time for the conflict area to current stop time. The
         # start time doesn't matter since the recordings are sorted by
@@ -238,11 +232,6 @@ def rate(devices, best_rating):
             rating += (0.1 * d.rating + 1) * r.priority
             if len(r.conflict_padding):
                 rating += rate_conflict([[ r ] + r.conflict_padding])
-#                 padding = r.priority
-#                 for c in r.conflict_padding:
-#                     padding += c.priority
-#                 # overlapping padding gives minus points
-#                 rating -= (1 + 0.03 * padding) / (len(r.conflict_padding) + 1)
 
     if rating > best_rating:
         # remember
@@ -273,7 +262,7 @@ def rate(devices, best_rating):
 def check(devices, fixed, to_check, best_rating, dropped=1000):
     """
     Check all possible combinations from the recordings in to_check on all
-    devives. Call recursive again.
+    devices. Call recursive again.
     """
     if not dropped and len(devices[-1].rec):
         # There was a solution without any recordings dropped.
@@ -294,16 +283,30 @@ def check(devices, fixed, to_check, best_rating, dropped=1000):
     return best_rating, dropped
 
 
-# interface
-
+# internal cache
 _conflict_cache = ObjectCache(30, 'conflict')
 
-def _resolve(conflicts, resolve_now):
+# list of devices
+_devices          = []
+
+def resolve(recordings):
     """
-    Resolve conflicts. If resolve_now is True, everything will be
-    resolved now, else timer will used to resolve the conflicts
-    later.
+    Find and resolve conflicts in recordings.
     """
+    t1 = time.time()
+    if not _devices:
+        # create 'devices'
+        _devices.append(Device())
+        for p in recorder.recorder:
+            for d in p.get_channel_list():
+                _devices.append(Device(([ p, ] + d)))
+        _devices.sort(lambda l, o: cmp(o.rating,l.rating))
+
+    # sort recordings
+    recordings.sort(lambda l, o: cmp(l.start,o.start))
+
+    # resolve recordings
+    conflicts = scan(recordings, True)
     for c in conflicts:
         info = 'found conflict:\n'
         conflict_id = ''
@@ -326,69 +329,9 @@ def _resolve(conflicts, resolve_now):
         log.debug(info)
         # store cache result
         _conflict_cache[conflict_id] = result
+    t2 = time.time()
+    log.info('resolve conflict took %s secs' % (t2-t1))
 
-        if not resolve_now and len(conflicts) > 1:
-            # schedule again for the other conflicts
-            call_later('conflict:resolve', _resolve, conflicts[1:], False)
-            return False
-
-    if not resolve_now:
-        log.debug('no more conflicts')
-        _resolve_callback()
-    return False
-
-
-def _resolve_next(recordings):
-    """
-    Resolve the next conflicts in recordings based on SCHEDULE_TIMER
-    now and return.
-    """
-    conflicts = scan(recordings, True, False)
-    if conflicts:
-        _resolve(conflicts, True)
-    return False
-
-    
-def _resolve_all(recordings):
-    """
-    Resolve all conflicts in recordings using timer. After calling
-    the function, the conflicts won't be resolved, it will take some time
-    (10 msec for each conflict).
-    """
-    conflicts = scan(recordings, True, True)
-    if conflicts:
-        _resolve(conflicts, False)
-    else:
-        _resolve_callback()
-    return False
-
-
-# callback to call after resolving all conflicts
-_resolve_callback = None
-# list of devices
-_devices          = []
-
-def resolve(recordings, callback):
-    """
-    Find and resolve conflicts in recordings.
-    """
-    global _resolve_callback
-    _resolve_callback = callback
-    if not _devices:
-        # create 'devices'
-        _devices.append(Device())
-        for p in recorder.recorder:
-            for d in p.get_channel_list():
-                _devices.append(Device(([ p, ] + d)))
-        _devices.sort(lambda l, o: cmp(o.rating,l.rating))
-
-    # sort recordings
-    recordings.sort(lambda l, o: cmp(l.start,o.start))
-    # resolve next recordings based in SCHEDULE_TIMER
-    _resolve_next(recordings)
-    # set callback to resolve all conflicts
-    call_later('conflict:resolve', _resolve_all, recordings)
-    
 
 def clear_cache():
     """

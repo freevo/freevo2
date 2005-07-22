@@ -87,17 +87,26 @@ class RecordServer(RPCServer):
         # init the recorder, start only 'record.' plugins
         plugin.init(os.environ['FREEVO_PYTHON'], plugins = [ 'record' ])
 
+        # timer to handle save and print debug in background
+        self.save_timer = kaa.notifier.OneShotTimer(self.save, False)
+        self.ps_timer = kaa.notifier.OneShotTimer(self.print_schedule, False)
+
         # add external event handling
         mbus = self.mbus_instance
         mbus.register_event('vdr.started', external.start_event)
         mbus.register_event('vdr.stopped', external.stop_event)
+
         # add notify callback
         mbus.register_entity_notification(self.entity_update)
 
+        # start by checking the favorites
         self.check_favorites()
         recorder.recorder.connect(self)
 
+        # add schedule timer for SCHEDULE_TIMER / 3 seconds
+        kaa.notifier.Timer(self.schedule).start(SCHEDULE_TIMER / 3)
 
+        
     def send_update(self, update):
         """
         Send and updated list to the clients
@@ -105,15 +114,19 @@ class RecordServer(RPCServer):
         for c in self.clients:
             log.info('send update to %s' % c)
             self.mbus_instance.send_event(c, 'record.list.update', update)
-
         # save fxd file
         self.save()
 
 
-    def print_schedule(self):
+    def print_schedule(self, schedule=True):
         """
         Print current schedule (for debug only)
         """
+        if schedule:
+            if not self.ps_timer.active():
+                self.ps_timer.start(10)
+            return
+
         if hasattr(self, 'only_print_current'):
             # print only latest recordings
             all = False
@@ -180,16 +193,8 @@ class RecordServer(RPCServer):
             
         # Resolve conflicts. This will resolve the conflicts for the
         # next recordings now, the others will be resolved with a timer
-        conflict.resolve(next_recordings, self.check_recordings_callback)
+        conflict.resolve(next_recordings)
 
-        # sort by start time
-        self.recordings.sort(lambda l, o: cmp(l.start,o.start))
-
-        # schedule recordings in recorder
-        self.schedule()
-
-
-    def check_recordings_callback(self):
         # send update
         sending = []
         listing = []
@@ -203,7 +208,12 @@ class RecordServer(RPCServer):
 
         # print some debug
         self.print_schedule()
+        
+        # sort by start time
+        self.recordings.sort(lambda l, o: cmp(l.start,o.start))
 
+        # schedule recordings in recorder
+        self.schedule()
 
 
     def schedule(self):
@@ -219,8 +229,7 @@ class RecordServer(RPCServer):
                 r.schedule(r.recorder[0], r.recorder[1])
             if r.status in (DELETED, CONFLICT):
                 r.remove()
-        call_later(SCHEDULE_TIMER / 2, self.schedule)
-        return False
+        return True
     
         
     def check_favorites(self):
@@ -228,7 +237,6 @@ class RecordServer(RPCServer):
         Check favorites against the database and add them to the list of
         recordings
         """
-        log.info('check_favorites')
         t1 = time.time()
         
         # Check current scheduled recordings if the start time has changed.
@@ -319,13 +327,17 @@ class RecordServer(RPCServer):
                     break
 
         t2 = time.time()
-        log.info('check_favorites finished after %s seconds' % (t2-t1))
+        log.info('check favorites took %s secs' % (t2-t1))
         
         # send update about the new recordings
         self.send_update(update)
+
         # now check the schedule again
         self.check_recordings()
 
+        t2 = time.time()
+        log.info('everything scheduled after %s secs' % (t2-t1))
+        
 
     #
     # load / save fxd file with recordings and favorites
@@ -380,10 +392,15 @@ class RecordServer(RPCServer):
                 f.id = self.favorites.index(f)
 
 
-    def save(self):
+    def save(self, schedule=True):
         """
         save the fxd file
         """
+        if schedule:
+            if not self.save_timer.active():
+                self.save_timer.start(10)
+            return
+        
         if not len(self.recordings) and not len(self.favorites):
             # do not save here, it is a bug I havn't found yet
             log.info('do not save fxd file')
