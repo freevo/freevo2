@@ -36,7 +36,9 @@ import copy
 import logging
 import time
 
-import notifier
+# kaa imports
+import kaa.base
+import kaa.notifier
 
 # freevo imports
 import config
@@ -544,10 +546,14 @@ class DirItem(Playlist):
             self.media.mount()
 
         if update:
-            # warning: self.item_menu is a weakref!
-            self.item_menu.delattr('skin_default_has_description')
-            self.item_menu.delattr('skin_default_no_images')
-            self.item_menu.delattr('skin_force_text_view')
+            # Delete possible skin settings
+            # FIXME: This is a very bad handling, maybe signals?
+            if hasattr(self.item_menu, 'skin_default_has_description'):
+                del self.item_menu.skin_default_has_description
+            if hasattr(self.item_menu, 'skin_default_no_images'):
+                del self.item_menu.skin_default_no_images
+            if hasattr(self.item_menu, 'skin_force_text_view'):
+                del self.item_menu.skin_force_text_view
             # maybe the cover changed
             self.image = self.info['image']
 
@@ -697,8 +703,8 @@ class DirItem(Playlist):
             item_menu.autoselect = self.DIRECTORY_AUTOPLAY_SINGLE_ITEM
             self.pushmenu(item_menu)
 
-            self.item_menu = util.weakref(item_menu)
-            callback = notifier.Callback(self.browse, True)
+            self.item_menu = kaa.base.weakref(item_menu)
+            callback = kaa.notifier.Callback(self.browse, True)
             mediadb.watcher.cwd(listing, callback)
 
         t7 = time.time()
@@ -710,7 +716,7 @@ class DirItem(Playlist):
         """
         called when we return to this menu
         """
-        callback = notifier.Callback(self.browse, True)
+        callback = kaa.notifier.Callback(self.browse, True)
         if mediadb.watcher.cwd(self.listing, callback):
             # some files changed
             self.needs_update = True
