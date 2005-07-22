@@ -168,7 +168,7 @@ class DaemonPlugin(Plugin):
 
         if self.__class__.eventhandler != DaemonPlugin.eventhandler:
             # plugin has a self defined eventhandler
-            kaa.notifier.EventHandler(self.eventhandler).register(self.events)
+            kaa.notifier.EventHandler(self.eventhandler).register(*self.events)
 
 
     def eventhandler(self, event):
