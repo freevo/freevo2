@@ -35,7 +35,6 @@ __builtin__.__dict__['vfs'] = vfs
 
 from misc import *
 from fileops import *
-from weakref import *
 import objectcache
 import fxdparser
 import cache
