@@ -198,7 +198,7 @@ class AudioPlayer(Application):
             return True
 
         # try the real player
-        if if self.player and self.player.eventhandler(event):
+        if self.player and self.player.eventhandler(event):
             return True
 
         # give it to the item
