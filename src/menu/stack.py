@@ -38,10 +38,11 @@ __all__ = [ 'MenuStack' ]
 # python imports
 import logging
 
+# kaa imports
+from kaa.base import weakref
+
 # freevo imports
 import config
-
-from util.weakref import weakref
 from event import *
 
 # menu imports

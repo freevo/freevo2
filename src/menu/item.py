@@ -39,11 +39,12 @@ __all__ = [ 'Item' ]
 import logging
 import copy
 
+# kaa imports
+from kaa.base import weakref
+
 # freevo imports
 import plugin
 import mediadb
-
-from util.weakref import weakref
 
 # events covered by item
 from event import EJECT
@@ -100,15 +101,16 @@ class Item(object):
         else:
             self.name = u''
             self.description  = ''
-            
-        self.parent = weakref(parent)
+
         if parent:
+            self.parent = weakref(parent)
             self.image = parent.image
             if parent.type == 'main':
                 self.image = None
             self.skin_fxd = parent.skin_fxd
             self.media = parent.media
         else:
+            self.parent = None
             self.image = None
             self.skin_fxd = None
             self.media = None

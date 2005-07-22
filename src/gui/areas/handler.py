@@ -52,7 +52,7 @@ log = logging.getLogger('gui')
 # freevo imports
 import config
 import util.cache
-from util.weakref import weakref
+from kaa.base.weakref import weakref
 
 # gui imports
 import gui
@@ -164,7 +164,7 @@ class Handler(object):
 
 
 
-    def __scan_for_text_view__(self, menu):
+    def __scan_for_text_view(self, menu):
         """
         scan if we have to fall back to text view. This will be done if some
         items have images and all images are the same. And the number of items
@@ -251,7 +251,7 @@ class Handler(object):
         self.use_text_view        = True
 
     
-    def __get_display_style__(self, menu=None):
+    def __get_display_style(self, menu=None):
         """
         return current display style
         """
@@ -308,7 +308,7 @@ class Handler(object):
         theme = gui.theme.get()
         
         if self.type == 'menu':
-            style = self.__get_display_style__(object)
+            style = self.__get_display_style(object)
 
             if object.force_skin_layout != -1:
                 style = object.force_skin_layout
@@ -318,7 +318,7 @@ class Handler(object):
                    theme.special_menu.has_key(object.item_types):
                 area_definitions = theme.special_menu[object.item_types]
             else:
-                self.__scan_for_text_view__(object)
+                self.__scan_for_text_view(object)
 
                 name = 'default'
                 if self.use_description:
@@ -334,7 +334,7 @@ class Handler(object):
                 area_definitions = area_definitions.style[0]
 
             if area_definitions[0] and area_definitions[1]:
-                self.__scan_for_text_view__(object)
+                self.__scan_for_text_view(object)
                 if not self.use_text_view:
                     area_definitions = area_definitions[0]
                 else:
@@ -348,7 +348,7 @@ class Handler(object):
             infoitem = object.infoitem or object.selected
                 
         else:
-            style = self.__get_display_style__(self.type)
+            style = self.__get_display_style(self.type)
             area_definitions  = theme.sets[self.type]
             if hasattr(area_definitions, 'style'):
                 try:

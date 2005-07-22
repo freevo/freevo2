@@ -35,8 +35,8 @@ __all__ = [ 'Menu' ]
 import gc
 import logging
 
-# Freevo imports
-from util.weakref import weakref
+# kaa imports
+from kaa.base import weakref
 
 # menu imports
 from item import Item
