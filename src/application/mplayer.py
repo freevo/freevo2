@@ -73,7 +73,7 @@ class Application(childapp.Application):
             cmd = p.play(cmd, self)
 
         cmd = self.correct_filter_chain(cmd)
-        self.child_start(cmd, prio=config.MPLAYER_NICE, stop_cmd='quit')
+        self.child_start(cmd, prio=config.MPLAYER_NICE, stop_cmd='quit\n')
 
 
     def correct_filter_chain(self, command):
