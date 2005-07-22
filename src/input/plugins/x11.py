@@ -42,27 +42,6 @@ class PluginInterface(InputPlugin):
     """
     def __init__(self):
         InputPlugin.__init__(self)
-
-        self.keymap = {}
-        for key in config.KEYBOARD_MAP:
-            if hasattr(linux_input, 'KEY_%s' % key):
-                code = getattr(linux_input, 'KEY_%s' % key)
-                self.keymap[code] = config.KEYBOARD_MAP[key]
-            elif key == 'ESCAPE':
-                self.keymap[ linux_input.KEY_ESC ] = config.KEYBOARD_MAP[ key ]
-            elif key == 'RETURN':
-                self.keymap[ linux_input.KEY_ENTER ] = \
-                             config.KEYBOARD_MAP[ key ]
-            elif key == 'PERIOD':
-                self.keymap[ linux_input.KEY_DOT ] = config.KEYBOARD_MAP[ key ]
-            elif key == 'KP_MINUS':
-                self.keymap[ linux_input.KEY_KPMINUS ] = \
-                             config.KEYBOARD_MAP[ key ]
-            elif key == 'KP_PLUS':
-                self.keymap[ linux_input.KEY_KPPLUS ] = \
-                             config.KEYBOARD_MAP[ key ]
-            else:
-                log.error('unable to find key code for %s' % key)
         gui.display._window.signals["key_press_event"].connect(self.handle)
 
 
@@ -70,11 +49,11 @@ class PluginInterface(InputPlugin):
         """
         Callback to handle the pygame events.
         """
-        # DO NOT ASK!!!!
-        if keycode > 96: keycode += 5
-        else: keycode -= 8
-        if keycode > 105: keycode -= 1
-        
-        if keycode in self.keymap:
-            self.post_key( self.keymap[ keycode ] )
+        if isinstance(keycode, int):
+            log.debug('Bad keycode %s' % keycode)
+            return True
+        if config.KEYBOARD_MAP.has_key(keycode.upper()):
+            self.post_key( config.KEYBOARD_MAP[keycode.upper()] )
+        else:
+            log.debug('No mapping for key %s' % keycode.upper())
         return True
