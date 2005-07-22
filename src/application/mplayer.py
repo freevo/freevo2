@@ -105,7 +105,7 @@ class Application(childapp.Application):
         for p in self.plugins:
             p.stop()
         self.plugins = []
-        self.child_stop(self)
+        self.child_stop()
 
 
     def is_playing(self):
