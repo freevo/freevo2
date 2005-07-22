@@ -83,7 +83,8 @@ class Application(object):
         display.
         """
         if self.visible:
-            # already visible
+            # Already visible. But maybe stopped, correct that
+            self.stopped = False
             return False
         # Set visible and append to the eventhandler
         self.visible = True
