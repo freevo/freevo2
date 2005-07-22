@@ -42,20 +42,58 @@ import os
 import logging
 import stat
 
-# mevas for imlib2 support
+# kaa import
 import kaa.mevas
 import kaa.thumb
+import kaa.notifier
 
 # freevo utils
 import fileops
 import vfs
-from callback import *
 
 # the logging object
 log = logging.getLogger('util')
 
 # list for thumbnails to create in bg
 _create_jobs = []
+
+class Queue(kaa.notifier.Timer):
+    """
+    Timer handling the thumbaniling in a queue.
+    """
+    def __init__(self):
+        kaa.notifier.Timer.__init__(self, self.create)
+        self.jobs = []
+        self.restart_when_active = False
+
+    def append(self, filename, callback):
+        for j, c in self.jobs:
+            if j == filename:
+                if callback:
+                    c.append(callback)
+                return
+        self.jobs.append((filename, [ callback ]))
+        if not self.active():
+            self.start(10)
+            
+    def handle(self, filename):
+        for job in self.jobs:
+            if job[0] == filename:
+                self.jobs.remove(job)
+                return job[1]
+        return []
+
+    def create(self):
+        log.info(self.jobs[0][0])
+        create(self.jobs[0][0])
+        if self.jobs:
+            return True
+        else:
+            return False
+
+
+# internal queue
+_queue = Queue()
 
 def get_name(filename):
     """
@@ -74,15 +112,7 @@ def create(filename):
     """
     Create a thumbnail for the given filename in the vfs.
     """
-    callbacks = []
-    for job in _create_jobs:
-        if job[0] == filename:
-            callbacks = job[1]
-            _create_jobs.remove(job)
-            if _create_jobs:
-                call_later(10, create, _create_jobs[0][0])
-            break
-        
+    callbacks = _queue.handle(filename)
     log.debug('create %s', filename)
 
     type, thumb = get_name(filename)
@@ -135,18 +165,7 @@ def load(filename, bg=False, callback=None):
         return create(filename)
 
     # add thumbnail to background queue
-    for f, c in _create_jobs:
-        if f == filename:
-            # already in queue
-            if callback and not callback in c:
-                c.append(callback)
-            break
-    else:
-        if callback:
-            _create_jobs.append((filename, [ callback ]))
-        else:
-            _create_jobs.append((filename, []))
-        call_later(10, create, _create_jobs[0][0])
+    _queue.append(filename, callback)
 
     # If type is NORMAL, we have a thumbnail but want a better one.
     # But still, for now, a small one is better than nothing
