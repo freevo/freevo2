@@ -84,7 +84,7 @@ class Queue(kaa.notifier.Timer):
         return []
 
     def create(self):
-        log.info(self.jobs[0][0])
+        log.debug(self.jobs[0][0])
         create(self.jobs[0][0])
         if self.jobs:
             return True
