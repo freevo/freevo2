@@ -61,6 +61,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2005/07/23 14:46:19  dischi
+# remove contrib from installer
+#
 # Revision 1.10  2004/07/10 12:33:42  dischi
 # header cleanup
 #
@@ -145,7 +148,6 @@ def data_finder(result, dirname, names):
         result.append((dirname.replace('./share', 'share/freevo').
                        replace('./src/www', 'share/freevo').\
                        replace('./i18n', 'share/locale').\
-                       replace('./contrib', 'share/freevo/contrib').\
                        replace('./Docs', 'share/doc/freevo-%s' % version.__version__).\
                        replace('./helpers', 'share/freevo/helpers'), files))
     return result
@@ -370,8 +372,6 @@ def setup(**attrs):
     # create list of data files (share)
     data_files = []
     os.path.walk('./share', data_finder, data_files)
-    os.path.walk('./contrib/fbcon', data_finder, data_files)
-    os.path.walk('./contrib/xmltv', data_finder, data_files)
     os.path.walk('./src/www/htdocs', data_finder, data_files)
     os.path.walk('./i18n', data_finder, data_files)
 
