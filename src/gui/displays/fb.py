@@ -4,6 +4,9 @@
 # -----------------------------------------------------------------------------
 # $Id$
 #
+# This display also has internal support for matrox g400 cards by setting
+# the fb to tv resolutions and activate the second head for tv out.
+#
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
@@ -33,7 +36,6 @@ __all__ = [ 'Display' ]
 
 # python imports
 import os
-import tempfile
 
 # mevas imports
 from kaa.mevas.displays.fbcanvas import FramebufferCanvas
@@ -44,17 +46,29 @@ import config
 # display imports
 from display import Display as Base
 
-# get logging object
-log = logging.getLogger('gui')
-
 class Display(FramebufferCanvas, Base):
     """
-    Display class for SDL output
+    Display class for framebuffer output
     """
     def __init__(self, size, default=False):
-        if config.GUI_FB_EXEC_AFTER_STARTUP:
-            os.system(config.GUI_FB_EXEC_AFTER_STARTUP)
-        FramebufferCanvas.__init__(self, size)
+        if config.CONF.display == 'mga':
+            # switch heads
+            os.system('matroxset -f /dev/fb1 -m 0')
+            os.system('matroxset -f /dev/fb0 -m 3')
+            if config.CONF.tv == 'pal':
+                # switch to PAL
+                os.system('matroxset 1')
+            else:
+                # switch to NTSC
+                os.system('matroxset -f /dev/fb0 2 2')
+            # activate framebuffer with tv norm
+            FramebufferCanvas.__init__(self, size, config.CONF.tv)
+
+        else:
+            # activate framebuffer without changing the resolution
+            FramebufferCanvas.__init__(self, size)
+
+        # init base display
         Base.__init__(self)
 
 
@@ -63,6 +77,8 @@ class Display(FramebufferCanvas, Base):
         Stop the display
         """
         if Base.stop(self):
+            if config.CONF.display == 'mga':
+                # switch heads back
+                os.system('matroxset -f /dev/fb0 -m 1')
+                os.system('matroxset -f /dev/fb1 -m 0')
             del self._fb
-            if config.GUI_FB_EXEC_AFTER_CLOSE:
-                os.system(config.GUI_FB_EXEC_AFTER_CLOSE)
