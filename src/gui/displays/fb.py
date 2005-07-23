@@ -68,6 +68,9 @@ class Display(FramebufferCanvas, Base):
             # activate framebuffer without changing the resolution
             FramebufferCanvas.__init__(self, size)
 
+        # turn off screen blanking
+        os.system('setterm -blank 0')
+        
         # init base display
         Base.__init__(self)
 
