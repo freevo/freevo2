@@ -811,13 +811,11 @@ GUI_FONT_ALIASES = { 'Arial_Bold' : 'VeraBd' }
 # Execute a script on GUI startup.
 #
 GUI_SDL_EXEC_AFTER_STARTUP = ""
-GUI_FB_EXEC_AFTER_STARTUP = ""
 
 #
 # Execute a script on GUI close.
 #
 GUI_SDL_EXEC_AFTER_CLOSE = ""
-GUI_FB_EXEC_AFTER_CLOSE = ""
 
 #
 # Overscan on the tv output. Set this values if you can't see everything
@@ -826,26 +824,28 @@ GUI_FB_EXEC_AFTER_CLOSE = ""
 GUI_OVERSCAN_X = 0
 GUI_OVERSCAN_Y = 0
 
+#
+# Output display to use. Possible values are SDL (using pygame),
+# Imlib2 (X only), fb (framebuffer) and Bmovl. The Bmovl displays also need
+# a background video set in GUI_BACKGROUND_VIDEO.
+#
+GUI_DISPLAY = 'imlib2'
 
-# Exec a script after the osd startup. Matrox G400 users who wants to
-# use the framebuffer and have a PAL tv may set this to
-# './matrox_g400/mga_pal_768x576.sh' GUI_SDL_EXEC_AFTER_STARTUP=''
+# Some special settings for the different displays
 if CONF.display == 'mga':
-    mgafb = os.path.join(CONTRIB_DIR, 'fbcon/mgafb')
-    GUI_SDL_EXEC_AFTER_STARTUP = '%s %s %s' % (mgafb, CONF.tv, CONF.geometry)
-    GUI_FB_EXEC_AFTER_STARTUP  = GUI_SDL_EXEC_AFTER_STARTUP
-    GUI_SDL_EXEC_AFTER_CLOSE   = '%s restore' % mgafb
-    GUI_FB_EXEC_AFTER_CLOSE    = GUI_SDL_EXEC_AFTER_CLOSE
     GUI_OVERSCAN_X = 20
     GUI_OVERSCAN_Y = 10
+    GUI_DISPLAY = 'fb'
 
 if CONF.display in ( 'directfb', 'dfbmga' ):
     GUI_OVERSCAN_X = 50
     GUI_OVERSCAN_Y = 50
+    GUI_DISPLAY = 'sdl'
 
 if CONF.display == 'dxr3':
     GUI_OVERSCAN_X = 65
     GUI_OVERSCAN_Y = 45
+    GUI_DISPLAY = 'sdl'
     
 #
 # Stop the osd before playing a movie with xine or mplayer. Some output
@@ -855,13 +855,6 @@ GUI_STOP_WHEN_PLAYING = 0
 
 if CONF.display in ( 'directfb', 'dfbmga', 'dxr3', 'dga' ):
     GUI_STOP_WHEN_PLAYING = 1
-
-#
-# Output display to use. Possible values are SDL (using pygame),
-# Imlib2 (X only) and Bmovl. The Bmovl displays also need
-# a background video set in GUI_BACKGROUND_VIDEO.
-#
-GUI_DISPLAY = 'SDL'
 
 #
 # Video file for bmovl display
