@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.129  2005/07/23 14:45:25  dischi
+# remove contrib reference
+#
 # Revision 1.128  2005/06/19 12:07:06  dischi
 # remove main.py to helper
 #
@@ -338,7 +341,6 @@ if os.path.isdir(os.path.join(os.path.dirname(freevo_script), 'src/plugins')):
     freevo_locale  = os.path.join(dname, 'i18n')
     freevo_share   = os.path.join(dname, 'share')
     freevo_doc     = os.path.join(dname, 'Docs')
-    freevo_contrib = os.path.join(dname, 'contrib')
     freevo_config  = os.path.join(dname, 'freevo_config.py')
 
     # extend PYTHONPATH to internal site-packages
@@ -390,7 +392,6 @@ else:
     freevo_locale  = os.path.join(dname, 'share/locale')
     freevo_share   = os.path.join(dname, 'share/freevo')
     freevo_doc     = os.path.join(dname, 'share/doc/freevo-%s' % freevo.version.__version__)
-    freevo_contrib = os.path.join(freevo_share, 'contrib')
     freevo_config  = os.path.join(freevo_share, 'freevo_config.py')
     runapp         = ''
     python = [ python ]
@@ -405,7 +406,7 @@ else:
 
 # add the variables from above into environ so Freevo can use them, too
 for var in ('freevo_script', 'runapp', 'freevo_python', 'freevo_locale', 'freevo_doc',
-            'freevo_share', 'freevo_contrib', 'freevo_config', 'freevo_helpers'):
+            'freevo_share', 'freevo_config', 'freevo_helpers'):
     os.environ[var.upper()] = eval(var)
 
 # extend PATH to make sure the basics are there
