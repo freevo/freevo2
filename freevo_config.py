@@ -811,11 +811,13 @@ GUI_FONT_ALIASES = { 'Arial_Bold' : 'VeraBd' }
 # Execute a script on GUI startup.
 #
 GUI_SDL_EXEC_AFTER_STARTUP = ""
+GUI_FB_EXEC_AFTER_STARTUP = ""
 
 #
 # Execute a script on GUI close.
 #
 GUI_SDL_EXEC_AFTER_CLOSE = ""
+GUI_FB_EXEC_AFTER_CLOSE = ""
 
 #
 # Overscan on the tv output. Set this values if you can't see everything
@@ -829,11 +831,11 @@ GUI_OVERSCAN_Y = 0
 # use the framebuffer and have a PAL tv may set this to
 # './matrox_g400/mga_pal_768x576.sh' GUI_SDL_EXEC_AFTER_STARTUP=''
 if CONF.display == 'mga':
-    GUI_SDL_EXEC_AFTER_STARTUP='%s %s %s' % \
-                                (os.path.join(CONTRIB_DIR, 'fbcon/mgafb'),
-                                 CONF.tv, CONF.geometry)
-    GUI_SDL_EXEC_AFTER_CLOSE='%s restore' % \
-                              os.path.join(CONTRIB_DIR, 'fbcon/mgafb')
+    mgafb = os.path.join(CONTRIB_DIR, 'fbcon/mgafb')
+    GUI_SDL_EXEC_AFTER_STARTUP = '%s %s %s' % (mgafb, CONF.tv, CONF.geometry)
+    GUI_FB_EXEC_AFTER_STARTUP  = GUI_SDL_EXEC_AFTER_STARTUP
+    GUI_SDL_EXEC_AFTER_CLOSE   = '%s restore' % mgafb
+    GUI_FB_EXEC_AFTER_CLOSE    = GUI_SDL_EXEC_AFTER_CLOSE
     GUI_OVERSCAN_X = 20
     GUI_OVERSCAN_Y = 10
 
