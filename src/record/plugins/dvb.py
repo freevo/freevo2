@@ -42,7 +42,6 @@ import config
 
 # utils
 from util.fileops import find_file_in_path
-from util.callback import *
 
 # basic recorder
 from record.process import Recorder

@@ -50,8 +50,6 @@ import util
 import plugin
 import plugins
 
-from util.callback import *
-
 # mbus support
 from mcomm import RPCServer, RPCError, RPCReturn
 
