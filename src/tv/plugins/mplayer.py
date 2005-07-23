@@ -1,52 +1,16 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
-# mplayer.py - implementation of a TV function using MPlayer
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# mplayer.py - mplayer tv plugin
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes:
-# Todo:        
-#
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.48  2005/07/16 09:28:18  dischi
-# fix strange indend
-#
-# Revision 1.47  2005/07/16 09:18:28  dischi
-# add modified version from Henrik aka KaarPo
-#
-# Revision 1.46  2005/06/26 10:53:00  dischi
-# use kaa.epg instead of pyepg
-#
-# Revision 1.45  2005/01/08 15:40:54  dischi
-# remove TRUE, FALSE, DEBUG and HELPER
-#
-# Revision 1.44  2004/10/28 19:43:52  dischi
-# remove broken imports
-#
-# Revision 1.43  2004/10/06 19:01:33  dischi
-# use new childapp interface
-#
-# Revision 1.42  2004/08/05 17:27:16  dischi
-# Major (unfinished) tv update:
-# o the epg is now taken from kaa.epg in lib
-# o all player should inherit from player.py
-# o VideoGroups are replaced by channels.py
-# o the recordserver plugins are in an extra dir
-#
-# Bugs:
-# o The listing area in the tv guide is blank right now, some code
-#   needs to be moved to gui but it's not done yet.
-# o The only player working right now is xine with dvb
-# o channels.py needs much work to support something else than dvb
-# o recording looks broken, too
-#
-# Revision 1.41  2004/07/26 18:10:19  dischi
-# move global event handling to eventhandler.py
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al.
+# Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -63,34 +27,31 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
+# python imports
+import time
+import os
+import logging
 
-# Modified by Henrik aka KaarPo
-# Handles ONLY ivtv at the moment...
-
-# Configuration file. Determines where to look for AVI/MP3 files, etc
-import config
-from kaa.notifier import Process
-
-import time, os
-
-import util
-
-import event as em
-import childapp # Handle child applications
-import tv.ivtv as ivtv
-import plugin
-import notifier
-
-from config.tvcards import IVTVCard
-from tv.freq import get_frequency
+# kaa imports
+import kaa.notifier
 import kaa.epg
 
-from tv.player import TVPlayer
+# freevo imports
+import config
+import plugin
 
-import logging
+from application import mplayer
+from config.tvcards import IVTVCard, DVBCard
+from event import *
+
+import tv.ivtv as ivtv
+import tv.v4l2
+
+# get logging object
 log = logging.getLogger('tv')
+
 
 class PluginInterface(plugin.Plugin):
     """
@@ -103,74 +64,57 @@ class PluginInterface(plugin.Plugin):
         plugin.register(MPlayer(), plugin.TV, True)
 
 
-class MPlayer(TVPlayer):
+class MPlayer(mplayer.Application):
 
     def __init__(self):
-        TVPlayer.__init__(self, 'mplayer')
+        mplayer.Application.__init__(self, 'video', True)
+
         
     def rate(self, channel, device, uri):
         """
-        for now, just handle ivtv
+        For now, just handle ivtv and dvb
         """
-        log.info('MPlayer.rate(): channel=[%s] device=[%s] uri=[%s]' %
-        (channel, device, uri))
         if device.startswith('ivtv'):
-            log.info('MPlayer.rate(): Returning 2: MPlayer handles this!')
             return 2
-
+        if device.startswith('dvb'):
+            return 2
         return 0
 
+
     def tune(self, uri):
-        log.info('MPlayer.play(): Tuning [%s] to chan [%s]' %
-        (self.device.vdev, uri))
-        import tv.v4l2
+        log.info('Tuning [%s] to chan [%s]' % (self.device.vdev, uri))
         v = tv.v4l2.Videodev(device=self.device.vdev)
         v.setchannel(uri)
         del v
 
 
     def play(self, channel, device, uri):
-
-        log.info('MPlayer.play(): channel=[%s] device=[%s] uri=[%s]' %
-        (channel, device, uri))
-
         self.channel = channel
         self.device = config.TV_CARDS[device]
-        if not isinstance(self.device, IVTVCard):
-            self.reason = 'Device %s is not of class IVTVCard' % device
-            log.error('MPlayer.play(): ' + self.reason)
-            return
 
-        log.debug('MPlayer.play(): driver=[%s] vdev=[%s] chanlist=[%s]' %
-        (self.device.driver, self.device.vdev, self.device.chanlist))
+        # Build the MPlayer command
+        command = [ config.MPLAYER_CMD ] + \
+                  config.MPLAYER_ARGS_DEF.split(' ') + \
+                  [ '-slave', '-ao'] + \
+                  config.MPLAYER_AO_DEV.split(' ')
 
-        self.tune(uri)
+        if isinstance(self.device, IVTVCard):
+            self.tune(uri)
 
-        command = 'mplayer -nolirc -slave '
-        command += config.MPLAYER_ARGS_DEF + ' '
-        if config.MPLAYER_ARGS.has_key('ivtv'):
-            command += config.MPLAYER_ARGS['ivtv'] + ' '
-        command += '-ao ' + config.MPLAYER_AO_DEV + ' '
-        command += '-vo ' + config.MPLAYER_VO_DEV + \
-             config.MPLAYER_VO_DEV_OPTS + ' '
-        command += self.device.vdev
+            if config.MPLAYER_ARGS.has_key('ivtv'):
+                command += config.MPLAYER_ARGS['ivtv'].split(' ')
+            command += [ self.device.vdev ]
+
+        if isinstance(self.device, DVBCard):
+            if config.MPLAYER_ARGS.has_key('dvb'):
+                command += config.MPLAYER_ARGS['dvb'].split(' ')
+            command += [ 'dvb://' + uri ]
 
         log.info('mplayer.play(): Starting cmd=%s' % command)
 
         self.show()
-        self.app = Process( command )
+        mplayer.Application.play(self, command)
 
-        return
-
-
-    def stop(self, channel_change=0):
-        """
-        Stop mplayer
-        """
-        log.info('MPlayer.stop(): Stopping mplayer')
-        TVPlayer.stop(self)
-        if self.app:
-            self.app.stop('quit\n')
 
     def osd_channel(self):
         # Display the channel info message
@@ -180,100 +124,60 @@ class MPlayer(TVPlayer):
         #msg = '%s %s (%s): %s' % (now, chan_name, tuner_id, prog_info)
         msg = '%s [%s]: %s' % ( self.channel.title, now, program.title)
         cmd = 'osd_show_text "%s"\n' % msg
-        self.app.write(cmd)
+        self.send_command(cmd)
         return False # this removes the timer...
+
 
     def osd_updown(self):
         cmd = 'osd_show_text "Changing to [%s]"\n' % self.channel.title
-        self.app.write(cmd)
+        self.send_command(cmd)
         # wait three seconds for the tuner to tune in...
-        cb = notifier.Callback( self.osd_channel )
-        notifier.addTimer( 3000, cb )
+        cb = kaa.notifier.OneShotTimer(self.osd_channel).start(3000)
         return False
 
-    def eventhandler(self, event, menuw=None):
-        """
-        MPlayer event handler.
-        If an event is not bound in this
-        function it will be passed over to the items eventhandler.
-        """
 
-        s_event = '%s' % event
-        log.debug('MPlayer.eventhandler(): Got event [%s]' % s_event)
+    def eventhandler(self, event):
+        """
+        eventhandler for mplayer control.
+        """
+        mplayer.Application.eventhandler(self, event)
 
-        if event == em.STOP or event == em.PLAY_END:
+        if event == STOP:
             self.stop()
-            em.PLAY_END.post()
+            return True
+        
+        if event == PLAY_END:
             return True
 
-        if event == em.TV_CHANNEL_UP:
-            self.channel = kaa.epg.get_channel(self.channel, 1)
-            uri = self.channel.get_uri(self.channel, self.device)
-            self.tune(String(uri))
-            self.osd_updown()
+        if not self.has_child():
             return True
 
-        if event == em.TV_CHANNEL_DOWN:
-            self.channel = kaa.epg.get_channel(self.channel, -1)
-            uri = self.channel.get_uri(self.channel, self.device)
-            self.tune(String(uri))
-            self.osd_updown()
-            return True
-
-        elif event == em.OSD_MESSAGE:
-            cmd = 'osd_show_text "%s"\n' % event.arg
-            self.app.write(cmd)
-            return True
-
-
-        # not changed by HKP yet...
-        elif False and s_event.startswith('INPUT_'):
-            if event == em.TV_CHANNEL_UP:
-                nextchan = self.fc.getNextChannel()
-            elif event == em.TV_CHANNEL_DOWN:
-                nextchan = self.fc.getPrevChannel()
+        if event == TV_CHANNEL_UP:
+            if isinstance(self.device, IVTVCard):
+                self.channel = kaa.epg.get_channel(self.channel, 1)
+                uri = self.channel.get_uri(self.channel, self.device)
+                self.tune(String(uri))
+                self.osd_updown()
             else:
-                chan = int( s_event[6] )
-                nextchan = self.fc.getManChannel(chan)
-
-            nextvg = self.fc.getVideoGroup(nextchan)
-
-            if self.current_vg != nextvg:
-                self.Stop(channel_change=1)
-                self.Play('tv', nextchan)
-                return True
-
-            if self.mode == 'vcr':
-                return True
-            
-            elif self.current_vg.group_type == 'dvb':
-                self.Stop(channel_change=1)
-                self.Play('tv', nextchan)
-                return True
-
-            elif self.current_vg.group_type == 'ivtv':
-                self.fc.chanSet(nextchan)
-                self.app.write('seek 999999 0\n')
-
-            else:
-                freq_khz = self.fc.chanSet(nextchan, app=self.app)
-                new_freq = '%1.3f' % (freq_khz / 1000.0)
-                self.app.write('tv_set_freq %s\n' % new_freq)
-
-            self.current_vg = self.fc.getVideoGroup(self.fc.getChannel())
-
-            # Display a channel changed message
-            tuner_id, chan_name, prog_info = self.fc.getChannelInfo()
-            now = time.strftime('%H:%M')
-            msg = '%s %s (%s): %s' % (now, chan_name, tuner_id, prog_info)
-            cmd = 'osd_show_text "%s"\n' % msg
-            self.app.write(cmd)
+                self.send_command('osd_show_text unable to switch channel\n')
             return True
 
-        elif event == em.TOGGLE_OSD:
+        if event == TV_CHANNEL_DOWN:
+            if isinstance(self.device, IVTVCard):
+                self.channel = kaa.epg.get_channel(self.channel, -1)
+                uri = self.channel.get_uri(self.channel, self.device)
+                self.tune(String(uri))
+                self.osd_updown()
+            else:
+                self.send_command('osd_show_text unable to switch channel\n')
+            return True
+
+        elif event == OSD_MESSAGE:
+            self.send_command('osd_show_text "%s"\n' % event.arg)
+            return True
+
+        elif event == TOGGLE_OSD:
             self.osd_channel()
             return True
 
-        log.debug('MPlayer.eventhandler(): No handler for event [%s]' % s_event)
         return False
-
