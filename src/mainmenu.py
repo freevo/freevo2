@@ -158,6 +158,7 @@ class MainMenu(Item):
             items += p.items(self)
         menu = Menu(_('Freevo Main Menu'), items, item_types='main',
                     theme = gui.theme.get(), reload_func=self.reload)
+        menu.autoselect = True
         self.menuw = MenuWidget()
         self.menuw.pushmenu(menu)
         self.menuw.show()
