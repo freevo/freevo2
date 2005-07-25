@@ -72,7 +72,7 @@ class PluginInterface(IdleBarPlugin):
 
         # register for events
         handler = kaa.notifier.EventHandler(self.eventhandler)
-        handler.register(PLAY_START, DETACH_AUDIO_STOP)
+        handler.register((PLAY_START, DETACH_AUDIO_STOP))
 
         self.visible    = False
         self.detached   = False

@@ -101,7 +101,7 @@ class PluginInterface(plugin.Plugin):
 
         # register for events
         handler = kaa.notifier.EventHandler(self.eventhandler)
-        handler.register(AUDIO_VISUAL_SHOW, AUDIO_VISUAL_HIDE)
+        handler.register((AUDIO_VISUAL_SHOW, AUDIO_VISUAL_HIDE))
 
 
     def play( self, command, player ):
