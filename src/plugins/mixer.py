@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2005/07/25 18:58:24  dischi
+# make it work with python 2.4
+#
 # Revision 1.22  2005/07/22 19:30:24  dischi
 # fix event handling
 #
@@ -64,13 +67,13 @@
 """For manipulating the mixer.
 """
 
-import fcntl
 import struct
 import os
 
 import config
 import plugin
 from event import *
+from util.ioctl import ioctl
 
 import logging
 log = logging.getLogger()
@@ -79,11 +82,11 @@ class PluginInterface(plugin.DaemonPlugin):
     # These magic numbers were determined by writing a C-program using the
     # macros in /usr/include/linux/... and printing the values.
     # They seem to work on my machine. XXX Is there a real python interface?
-    SOUND_MIXER_WRITE_VOLUME = 0xc0044d00
-    SOUND_MIXER_WRITE_PCM = 0xc0044d04
-    SOUND_MIXER_WRITE_LINE = 0xc0044d06
-    SOUND_MIXER_WRITE_MIC = 0xc0044d07
-    SOUND_MIXER_WRITE_RECSRC = 0xc0044dff
+    SOUND_MIXER_WRITE_VOLUME = 0xc0044d00L
+    SOUND_MIXER_WRITE_PCM = 0xc0044d04L
+    SOUND_MIXER_WRITE_LINE = 0xc0044d06L
+    SOUND_MIXER_WRITE_MIC = 0xc0044d07L
+    SOUND_MIXER_WRITE_RECSRC = 0xc0044dffL
     SOUND_MIXER_LINE = 7
     SOUND_MASK_LINE = 64
     
@@ -113,7 +116,7 @@ class PluginInterface(plugin.DaemonPlugin):
             if self.mixfd:
                 data = struct.pack( 'L', self.SOUND_MASK_LINE )
                 try:
-                    fcntl.ioctl( self.mixfd.fileno(), self.SOUND_MIXER_WRITE_RECSRC, data )
+                    ioctl( self.mixfd.fileno(), self.SOUND_MIXER_WRITE_RECSRC, data )
                 except IOError:
                     log.error('IOError for ioctl')
                     pass
@@ -184,7 +187,7 @@ class PluginInterface(plugin.DaemonPlugin):
             vol = (volume << 8) | (volume)
             data = struct.pack('L', vol)
             try:
-                fcntl.ioctl(self.mixfd.fileno(), device, data)
+                ioctl(self.mixfd.fileno(), device, data)
             except IOError:
                 log.error('IOError for ioctl')
                 pass
