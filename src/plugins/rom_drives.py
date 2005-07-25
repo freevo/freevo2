@@ -337,10 +337,10 @@ class RemovableMedia(vfs.Mountpoint):
         self.lock.release()
         if watcher and not self.tray_open:
             # call watcher for update from main
-            kaa.notifier.call_from_main(watcher.poll)
+            kaa.notifier.MainThreadCallback(watcher.poll)()
         if popup:
             # delete popup (from main)
-            kaa.notifier.call_from_main(popup.destroy)
+            kaa.notifier.MainThreadCallback(popup.destroy)()
 
 
     def check_status_thread(self):
@@ -407,7 +407,7 @@ class RemovableMedia(vfs.Mountpoint):
         if s != CDS_DISC_OK:
             os.close(fd)
             # send media changed event and unlock the media
-            kaa.notifier.call_from_main(self.send_event)
+            kaa.notifier.MainThreadCallback(self.send_event)()
             return False
 
         # if there is a disc, the tray can't be open
@@ -423,7 +423,7 @@ class RemovableMedia(vfs.Mountpoint):
                 pass
         os.close(fd)
         # call identity from main loop
-        kaa.notifier.call_from_main(self.identify)
+        kaa.notifier.MainThreadCallback(self.identify)()
         # Note: the lock is still in place. It will be released by
         # identify later from the main loop when everything is done.
         return True
