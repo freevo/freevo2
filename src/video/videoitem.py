@@ -89,11 +89,12 @@ class VideoItem(MediaItem):
         self.set_url(url)
 
         # extra infos in database.discset
-        if parent and parent.media:
-            fid = parent.media.id + \
-                  self.filename[len(os.path.join(parent.media.mountdir,"")):]
-            if database.discset.has_key(fid):
-                self.mplayer_options = database.discset[fid]
+        # FIXME: This code is broken right now
+        # if parent and parent.media:
+        #     fid = parent.media.id + \
+        #           self.filename[len(os.path.join(parent.media.mountdir,"")):]
+        #     if database.discset.has_key(fid):
+        #         self.mplayer_options = database.discset[fid]
 
 
     def set_name(self, name):
