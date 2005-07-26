@@ -331,6 +331,7 @@ class MPlayer(mplayer.Application):
 
         if event == STOP:
             self.stop()
+            self.item.eventhandler(event)
             return True
         
         if event == PLAY_END:
