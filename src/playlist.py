@@ -420,7 +420,7 @@ class Playlist(MediaItem):
         # get next item
         pos = self.playlist.index(self.__current)
         pos = (pos+1) % len(self.playlist)
-        if pos or REPEAT_PLAYLIST:
+        if pos or self.repeat == REPEAT_PLAYLIST:
             self.__next = self.playlist[pos]
         else:
             self.__next = None
@@ -462,7 +462,7 @@ class Playlist(MediaItem):
             self.__current = event.arg
             pos = self.playlist.index(self.__current)
             pos = (pos+1) % len(self.playlist)
-            if pos or REPEAT_PLAYLIST:
+            if pos or self.repeat == REPEAT_PLAYLIST:
                 self.__next = self.playlist[pos]
                 # cache next item (imageviewer)
                 if hasattr(self.__next, 'cache'):
