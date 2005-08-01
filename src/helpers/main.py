@@ -95,7 +95,6 @@ try:
         raise ImportError('No module named pyxml')
 
     # now load other modules to check if all requirements are installed
-    import Image
     import sqlite
 
     import config
