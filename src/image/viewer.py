@@ -246,7 +246,7 @@ class ImageViewer(Application):
             # blend over to the new image
             gui.display.add_child(image)
             a = Transition([self.last_image], [image], 20,
-                           (gui.width, gui.height))
+                           (gui.width, gui.height), config.IMAGEVIEWER_BLEND_MODE)
             # start the animation and wait until it's done
             a.start()
             a.wait()
