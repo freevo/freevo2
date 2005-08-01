@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2005/08/01 18:49:11  dischi
+# remove python imaging dep
+#
 # Revision 1.14  2005/07/08 19:15:56  dischi
 # some config cleanup
 #
@@ -80,6 +83,7 @@ import os
 import sysconfig
 import config 
 import util
+import kaa.imlib2
 
 from kaa.metadata.disc.discinfo import cdrom_disc_id
 #Constants
@@ -157,6 +161,8 @@ class FxdImdb(object):
               urllib.quote(name)
         req = urllib2.Request(url, txdata, txheaders)
         searchstring = name
+
+        log.info('search imdb')
         
         try:
             response = urllib2.urlopen(req)
@@ -242,6 +248,7 @@ class FxdImdb(object):
                         new_list.append(result)
                         appended = True
             self.imdb_id_list = new_list
+        log.info('search imdb done')
         return self.imdb_id_list
     
     
@@ -250,6 +257,7 @@ class FxdImdb(object):
         Set an imdb_id number for object, and fetch data"""
         self.imdb_id = id
         
+        log.info('set imdb id')
         url = 'http://us.imdb.com/Title?%s' % id
         req = urllib2.Request(url, txdata, txheaders)
         
@@ -261,6 +269,7 @@ class FxdImdb(object):
     
         self.parsedata(idpage, id)
         idpage.close()
+        log.info('set imdb id done')
 
     
     def setFxdFile(self, fxdfilename = None, overwrite = False):
@@ -779,13 +788,11 @@ class FxdImdb(object):
         r.close()
         
         # try to crop the image to avoid borders by imdb 
-        try:
-            import Image
-            image = Image.open(filename)
-            width, height = image.size
-            image.crop((2,2,width-4, height-4)).save(filename)
-        except:
-            pass
+        if os.path.isfile(self.image):
+            image = kaa.imlib2.open(self.image)
+            if image:
+                width, height = image.size
+                image.crop((2,2), (width-4, height-4)).save(self.image)
         
         self.image = os.path.basename(self.image)
 
