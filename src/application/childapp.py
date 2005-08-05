@@ -171,10 +171,7 @@ class Process(kaa.notifier.Process):
         """
         Init the object and start the process.
         """
-        self.handler = handler
-        self.has_display = has_display
-        
-        if self.has_display:
+        if has_display:
             gui.display.hide()
         
         if hasattr(handler, 'item'):
@@ -188,33 +185,15 @@ class Process(kaa.notifier.Process):
         logname = sysconfig.logfile(logname)
 
 	# start the process
-        kaa.notifier.Process.__init__(self, cmd, logname,
-                                      callback=self.finished)
+        kaa.notifier.Process.__init__(self, cmd, logname)
+
+        self.signals["stdout"].connect(handler.child_stdout)
+        self.signals["stderr"].connect(handler.child_stderr)
+        if has_display:
+            self.signals["died"].connect(gui.display.show)
+        self.signals["died"].connect(handler.child_finished)
 
         # renice the process
         if prio and config.CONF.renice:
             os.system('%s %s -p %s 2>/dev/null >/dev/null' % \
                       (config.CONF.renice, prio, self.child.pid))
-
-
-    def stdout_cb(self, line):
-        """
-        Handle child stdout (send to handler).
-        """
-        self.handler.child_stdout(line)
-
-
-    def stderr_cb(self, line):
-        """
-        Handle child stderr (send to handler).
-        """
-        self.handler.child_stderr(line)
-
-
-    def finished(self):
-        """
-        Callback when child is finished.
-        """
-        if self.has_display:
-            gui.display.show()
-        self.handler.child_finished()

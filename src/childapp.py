@@ -79,8 +79,11 @@ class Instance(kaa.notifier.Process):
         if debugname:
 	    debugname = sysconfig.logfile(debugname)
 	
-        kaa.notifier.Process.__init__(self, app, debugname,
-                                      callback=self.finished)
+        kaa.notifier.Process.__init__(self, app, debugname)
+
+        self.signals["stdout"].connect(self.stdout_cb)
+        self.signals["stderr"].connect(self.stderr_cb)
+        self.signals["died"].connect(self.finished)
 
         if prio and config.CONF.renice:
             os.system('%s %s -p %s 2>/dev/null >/dev/null' % \
@@ -98,10 +101,24 @@ class Instance(kaa.notifier.Process):
 
     def stop_event(self):
         """
-        event to send on stop
+        Event to send on stop
         """
         return PLAY_END
 
+
+    def stdout_cb(self, line):
+        """
+        Handle stdout of the process.
+        """
+        pass
+
+
+    def stderr_cb(self, line):
+        """
+        Handle stderr of the process.
+        """
+        pass
+        
 
     def finished(self):
         # Ok, we can use the OSD again.

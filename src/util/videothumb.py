@@ -69,7 +69,10 @@ if __name__ != "__main__":
         """
         def __init__( self, app, imagefile):
             self.imagefile = imagefile
-            kaa.notifier.Process.__init__(self, app, callback=self.finished)
+            kaa.notifier.Process.__init__(self, app)
+            self.signals["stdout"].connect(self.stdout_cb)
+            self.signals["stderr"].connect(self.stderr_cb)
+            self.signals["died"].connect(self.finished)
 
 
         def stdout_cb(self, line):

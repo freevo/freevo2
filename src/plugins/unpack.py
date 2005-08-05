@@ -81,15 +81,8 @@ class ArchiveItem(Item):
                        replace('__dirname__', os.path.dirname(self.fname)))
         self.pop = WaitBox(text=_('unpacking...'))
         self.pop.show()
-        kaa.notifier.Process(app, callback=self.__finished)
-
-
-    def __finished(self):
-        """
-        Callback when the external program is finsihed.
-        """
-        self.pop.destroy()
-
+        child = kaa.notifier.Process(app)
+        child.signals["died"].coonect(self.pop.destroy)
 
 
 class PluginInterface(plugin.MimetypePlugin):

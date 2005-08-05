@@ -145,7 +145,7 @@ class PluginInterface(Plugin):
         
         dest = os.path.splitext(source)[0] + '.mpg'
         log.info('replex %s' % String(source))
-        cb = kaa.notifier.Callback(self.replex_stop, source, dest)
-        kaa.notifier.Process([ self.nice, '-n', '19', self.replex, '-x', '-k',
-                               '-t', 'DVD', '--of', dest, source ],
-                             callback = cb)
+        app = [ self.nice, '-n', '19', self.replex, '-x', '-k',
+                '-t', 'DVD', '--of', dest, source ]
+        child = kaa.notifier.Process(app)
+        child.signals["died"].connect(self.replex_stop, source, dest)

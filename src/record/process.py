@@ -167,7 +167,8 @@ class Recorder(Plugin):
 
         # get the cmd for the childapp
         cmd = self.get_cmd(rec)
-        self.app = Process(cmd, callback = self.stopped)
+        self.app = Process(cmd)
+        self.app.signals["died"].connect(self.stopped)
         return False
 
 
