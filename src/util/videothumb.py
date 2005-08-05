@@ -72,7 +72,7 @@ if __name__ != "__main__":
             kaa.notifier.Process.__init__(self, app)
             self.signals["stdout"].connect(self.stdout_cb)
             self.signals["stderr"].connect(self.stderr_cb)
-            self.signals["died"].connect(self.finished)
+            self.signals["completed"].connect(self.finished)
 
 
         def stdout_cb(self, line):

@@ -116,8 +116,8 @@ class Application(base.Application):
         self.__child.signals["stdout"].connect(self.child_stdout)
         self.__child.signals["stderr"].connect(self.child_stderr)
         if self.has_display:
-            self.__child.signals["died"].connect(gui.display.show)
-        self.__child.signals["died"].connect(self.child_finished)
+            self.__child.signals["completed"].connect(gui.display.show)
+        self.__child.signals["completed"].connect(self.child_finished)
 
         # renice the process
         if prio and config.CONF.renice:

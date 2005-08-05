@@ -83,7 +83,7 @@ class Instance(kaa.notifier.Process):
 
         self.signals["stdout"].connect(self.stdout_cb)
         self.signals["stderr"].connect(self.stderr_cb)
-        self.signals["died"].connect(self.finished)
+        self.signals["completed"].connect(self.finished)
 
         if prio and config.CONF.renice:
             os.system('%s %s -p %s 2>/dev/null >/dev/null' % \

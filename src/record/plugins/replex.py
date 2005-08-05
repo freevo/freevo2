@@ -148,4 +148,4 @@ class PluginInterface(Plugin):
         app = [ self.nice, '-n', '19', self.replex, '-x', '-k',
                 '-t', 'DVD', '--of', dest, source ]
         child = kaa.notifier.Process(app)
-        child.signals["died"].connect(self.replex_stop, source, dest)
+        child.signals["completed"].connect(self.replex_stop, source, dest)

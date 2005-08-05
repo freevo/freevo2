@@ -82,7 +82,7 @@ class ArchiveItem(Item):
         self.pop = WaitBox(text=_('unpacking...'))
         self.pop.show()
         child = kaa.notifier.Process(app)
-        child.signals["died"].coonect(self.pop.destroy)
+        child.signals["completed"].coonect(self.pop.destroy)
 
 
 class PluginInterface(plugin.MimetypePlugin):
