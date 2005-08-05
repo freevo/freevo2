@@ -73,6 +73,9 @@ class Application(childapp.Application):
             cmd = p.play(cmd, self)
 
         cmd = self.correct_filter_chain(cmd)
+        # reset some internal values
+        self.__elapsed = 0
+        self.__stop_reason = ''
         self.child_start(cmd, prio=config.MPLAYER_NICE, stop_cmd='quit\n')
 
 
@@ -154,6 +157,8 @@ class Application(childapp.Application):
                 p.message(sec)
             self.message(line)
 
+        return True
+
 
     def child_stderr(self, line):
         """
@@ -165,6 +170,7 @@ class Application(childapp.Application):
             for p in self.plugins:
                 p.message(sec)
             self.message(line)
+        return True
 
 
     def child_finished(self):
