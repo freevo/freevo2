@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2005/08/05 18:15:46  dischi
+# adjust to new plugin interface
+#
 # Revision 1.1  2005/06/19 12:06:46  dischi
 # rename plugin.py to pluginlist.py to avoid naming conflict
 #
@@ -67,7 +70,7 @@ def parse_plugins():
     all_plugins = []
     
     active = []
-    for p in plugin._all_plugins:
+    for p in plugin.get():
         active.append(p[0])
 
     for file in util.recursefolders(os.environ['FREEVO_PYTHON'],1, '*.py',1):
@@ -159,7 +162,7 @@ def print_info(plugin_name, all_plugins):
                     print
             if status == 'active':
                 print 'The plugin is loaded with the following settings:'
-                for p in plugin._all_plugins:
+                for p in plugin.get():
                     if p[0] == name:
                         type = p[1]
                         if not type:
