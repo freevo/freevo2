@@ -111,12 +111,11 @@ class ApodMainMenuItem(Item):
         """
         box = WaitBox(text=_('Getting picture, please wait'))
         box.show()
-        # callback for success
-        cb = Callback(self.__fetch_current_picture_finished, box)
-        # callback for exception
-        ex = Callback(self.__fetch_current_picture_error, box)
-        # start thread
-        Thread(self.__fetch_current_picture_thread).start(cb, ex)
+
+        thread = Thread(self.__fetch_current_picture_thread)
+        thread.signals['completed'].connect(self.__fetch_current_picture_finished, box)
+        thread.signals['exception'].connect(self.__fetch_current_picture_error, box)
+        thread.start()
 
 
     def __fetch_current_picture_thread(self):

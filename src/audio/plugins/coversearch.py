@@ -233,10 +233,10 @@ class PluginInterface(plugin.ItemPlugin):
         search_string = re.sub('[\(\[].*[\)\]]', '', search_string)
 
         log.info('searching for \'%s\'' % search_string)
-        cb = kaa.notifier.Callback(self.cover_menu, item, box)
-        ex = kaa.notifier.Callback(self.handle_exception, item, box)
         thread = kaa.notifier.Thread(self.__get_data_thread, search_string)
-        thread.start(cb, ex)
+        thread.signals['completed'].connect(self.cover_menu, item, box)
+        thread.signals['exception'].connect(self.handle_exception, item, box)
+        thread.start()
 
 
     def cover_menu(self, cover, item, box):

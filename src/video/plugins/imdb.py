@@ -147,13 +147,11 @@ class PluginInterface(ItemPlugin):
         else:
             searchstring = item.name
 
-        # create callback to handle the results
-        cb = kaa.notifier.Callback(self.parse_results, item, disc_set, box)
-        # create callback for a possible exception
-        ex = kaa.notifier.Callback(self.handle_exception, item, box)
         # start search in thread
         thread = kaa.notifier.Thread(fxd.guessImdb, searchstring, disc_set)
-        thread.start(cb, ex)
+        thread.signals['completed'].connect(self.parse_results, item, disc_set, box)
+        thread.signals['exception'].connect(self.handle_exception, item, box)
+        thread.start()
             
 
     def handle_exception(self, exception, item, box):
@@ -210,14 +208,11 @@ class PluginInterface(ItemPlugin):
         else:
             devicename = None
 
-        # create callback to handle the data
-        cb = kaa.notifier.Callback(self.save, item, fxd, box, disc_set,
-                                   devicename)
-        # create callback for a possible exception
-        ex = kaa.notifier.Callback(self.handle_exception, item, box)
         # start download in thread
         thread = kaa.notifier.Thread(fxd.setImdbId, id)
-        thread.start(cb, ex)
+        thread.signals['completed'].connect(self.save, item, fxd, box, disc_set, devicename)
+        thread.signals['exception'].connect(self.handle_exception, item, box)
+        thread.start()
         
 
     def save(self, result, item, fxd, box, disc_set, devicename):
