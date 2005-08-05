@@ -93,9 +93,37 @@ class Application(base.Application):
         if self.__child:
             log.error('child already running')
             return False
-        if self.fullscreen and self.has_display:
-            self.show()
-        self.__child = Process(cmd, self, prio, self.has_display)
+
+        if self.has_display:
+            if self.fullscreen:
+                self.show()
+            gui.display.hide()
+
+        if hasattr(self, 'item'):
+            # send PLAY_START event
+            PLAY_START.post(self.item)
+
+        # get a name for debug logging of the process
+        logname = cmd[0]
+        if logname.rfind('/') > 0:
+            logname = logname[ logname.rfind( '/' ) + 1 : ]
+        logname = sysconfig.logfile(logname)
+        
+	# start the process
+        self.__child = kaa.notifier.Process(cmd, logname)
+
+        # connect to signals
+        self.__child.signals["stdout"].connect(self.child_stdout)
+        self.__child.signals["stderr"].connect(self.child_stderr)
+        if self.has_display:
+            self.__child.signals["died"].connect(gui.display.show)
+        self.__child.signals["died"].connect(self.child_finished)
+
+        # renice the process
+        if prio and config.CONF.renice:
+            os.system('%s %s -p %s 2>/dev/null >/dev/null' % \
+                      (config.CONF.renice, prio, self.__child.child.pid))
+        
         self.__stop_cmd = stop_cmd
         return True
 
@@ -138,7 +166,7 @@ class Application(base.Application):
         A line from stdout of the child. Override this method to handle
         stdout from the child process.
         """
-        pass
+        return False
 
 
     def child_stderr(self, line):
@@ -146,7 +174,7 @@ class Application(base.Application):
         A line from stdout of the child. Override this method to handle
         stderr from the child process.
         """
-        pass
+        return False
 
 
     def child_finished(self):
@@ -160,40 +188,3 @@ class Application(base.Application):
             event.handler = self.eventhandler
             event.post(self.item)
         self.__child = None
-
-
-class Process(kaa.notifier.Process):
-    """
-    Process wrapping a kaa notifier process into an application.
-    Also takes care of basic event sending on start and stop.
-    """
-    def __init__(self, cmd, handler, prio=0, has_display=False):
-        """
-        Init the object and start the process.
-        """
-        if has_display:
-            gui.display.hide()
-        
-        if hasattr(handler, 'item'):
-            # send PLAY_START event
-            PLAY_START.post(handler.item)
-
-        # get a name for debug logging of the process
-        logname = cmd[0]
-        if logname.rfind('/') > 0:
-            logname = logname[ logname.rfind( '/' ) + 1 : ]
-        logname = sysconfig.logfile(logname)
-
-	# start the process
-        kaa.notifier.Process.__init__(self, cmd, logname)
-
-        self.signals["stdout"].connect(handler.child_stdout)
-        self.signals["stderr"].connect(handler.child_stderr)
-        if has_display:
-            self.signals["died"].connect(gui.display.show)
-        self.signals["died"].connect(handler.child_finished)
-
-        # renice the process
-        if prio and config.CONF.renice:
-            os.system('%s %s -p %s 2>/dev/null >/dev/null' % \
-                      (config.CONF.renice, prio, self.child.pid))
