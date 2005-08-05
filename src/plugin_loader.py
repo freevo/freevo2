@@ -201,11 +201,11 @@ class PluginLoader(object):
             self.types[key].sort(cmp_func)
 
 
-    def get(self, type):
+    def get(self, type=None):
         """
         Get the plugin list 'type' or all if type is None
         """
-        if not type:
+        if type == None:
             return self.plugins
         if not self.types.has_key(type):
             self.types[type] = []
