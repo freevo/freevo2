@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2005/08/05 17:50:30  dischi
+# fix fbxine version detection
+#
 # Revision 1.1  2004/11/28 17:31:24  dischi
 # merge system/ and config.py into config/, needs more cleanup
 #
@@ -84,6 +87,12 @@ if config.CONF.fbxine and os.path.exists(config.CONF.fbxine):
             if line.startswith('fbxine '):
                 cache['FBXINE_VERSION'] = line[7:line[8:].find(' ')+8]
         child.wait()
+        if not cache['FBXINE_VERSION']:
+            child = popen2.Popen3([config.CONF.fbxine, '--version'])
+            for line in child.fromchild.readlines():
+                if line.startswith('fbxine '):
+                    cache['FBXINE_VERSION'] = line[7:line[8:].find(' ')+8]
+            child.wait()
         cache['_FBXINE_TIMESTAMP'] = timestamp
 
 cache.save()
