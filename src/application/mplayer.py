@@ -173,12 +173,12 @@ class Application(childapp.Application):
         return True
 
 
-    def child_finished(self):
+    def child_finished(self, exit_code):
         """
         Callback when the child is finished. Override this method to react
         when the child is finished.
         """
-        childapp.Application.child_finished(self)
+        childapp.Application.child_finished(self, exit_code)
         event = Event(PLAY_END, self.__stop_reason)
         event.set_handler(self.eventhandler)
         event.post()

@@ -122,7 +122,7 @@ class Instance(kaa.notifier.Process):
         pass
         
 
-    def finished(self):
+    def finished(self, exit_code):
         # Ok, we can use the OSD again.
         if self.stop_osd:
             gui.display.show()

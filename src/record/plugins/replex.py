@@ -64,7 +64,7 @@ class PluginInterface(Plugin):
         log.info('add replex plugin')
 
 
-    def replex_stop(self, source, dest):
+    def replex_stop(self, source, dest, exit_code):
         """
         The replex program has stopped, check the result.
         """

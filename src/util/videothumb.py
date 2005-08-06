@@ -93,7 +93,7 @@ if __name__ != "__main__":
                 log.warning('>> %s' % line)
 
 
-        def finished(self):
+        def finished(self, exit_code):
             """
             Job finished, run next if there is more
             """

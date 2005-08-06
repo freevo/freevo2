@@ -82,9 +82,17 @@ class ArchiveItem(Item):
         self.pop = WaitBox(text=_('unpacking...'))
         self.pop.show()
         child = kaa.notifier.Process(app)
-        child.signals["completed"].coonect(self.pop.destroy)
+        child.signals["completed"].connect(self.finished)
         child.start()
 
+
+    def finished(self, exit_code):
+        """
+        Callback after the process is done.
+        """
+        self.pop.destroy()
+
+        
 class PluginInterface(plugin.MimetypePlugin):
     """
     A mimetype plugin for zip and rar archives.

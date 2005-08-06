@@ -185,7 +185,7 @@ class Recorder(Plugin):
         return False
 
 
-    def stopped(self):
+    def stopped(self, exit_code):
         """
         Callback when the recording has stopped
         """

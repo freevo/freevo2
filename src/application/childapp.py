@@ -115,8 +115,6 @@ class Application(base.Application):
         # connect to signals
         self.__child.signals["stdout"].connect(self.child_stdout)
         self.__child.signals["stderr"].connect(self.child_stderr)
-        if self.has_display:
-            self.__child.signals["completed"].connect(gui.display.show)
         self.__child.signals["completed"].connect(self.child_finished)
 
 	# start the process
@@ -180,11 +178,13 @@ class Application(base.Application):
         return False
 
 
-    def child_finished(self):
+    def child_finished(self, exit_code):
         """
         Callback when the child is finished. Override this method to react
         when the child is finished.
         """
+        if self.has_display:
+            gui.display.show()
         if self.__class__.child_finished == Application.child_finished and \
                hasattr(self, 'item') and self.item:
             event = Event(PLAY_END)
