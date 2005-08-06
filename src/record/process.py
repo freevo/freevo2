@@ -169,6 +169,7 @@ class Recorder(Plugin):
         cmd = self.get_cmd(rec)
         self.app = Process(cmd)
         self.app.signals["completed"].connect(self.stopped)
+        self.app.start()
         return False
 
 

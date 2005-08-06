@@ -168,7 +168,7 @@ def unlink(filename):
             base = '.' + os.path.basename(filename) + '.freevo~'
             name = os.path.join(os.path.dirname(filename), base)
             os.rename(filename, name)
-            kaa.notifier.Process(['rm', '-rf', name])
+            kaa.notifier.Process(['rm', '-rf', name]).start()
         else:
             os.unlink(filename)
     except (OSError, IOError), e:

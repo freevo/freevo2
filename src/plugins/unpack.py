@@ -83,7 +83,7 @@ class ArchiveItem(Item):
         self.pop.show()
         child = kaa.notifier.Process(app)
         child.signals["completed"].coonect(self.pop.destroy)
-
+        child.start()
 
 class PluginInterface(plugin.MimetypePlugin):
     """

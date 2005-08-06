@@ -84,6 +84,7 @@ class Display(BmovlCanvas, Base):
         Base.restart(self)
         if self.start_video and not self.child:
             self.child = kaa.notifier.Process( self.cmd )
+            self.child.start()
             self.child.stdout.close()
             self.child.stderr.close()
             if hasattr(self, 'fifo') and not self.fifo:

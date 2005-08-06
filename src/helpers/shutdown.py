@@ -254,7 +254,7 @@ class Shutdown(object):
             # there is a new wakeup time
             log.info('set wakeup time: %s' % self.wakeuptime)
             self.__last_wakeuptime = self.wakeuptime
-            kaa.notifier.Process(config.SHUTDOWN_WAKEUP_CMD % self.wakeuptime)
+            kaa.notifier.Process(config.SHUTDOWN_WAKEUP_CMD % self.wakeuptime).start()
 
         # internal varibale how long to wait next
         wait = 0
@@ -340,7 +340,7 @@ class Shutdown(object):
         log.warning('shutdown system')
 
         # shutdown the system
-        kaa.notifier.Process(config.SHUTDOWN_SYS_CMD)
+        kaa.notifier.Process(config.SHUTDOWN_SYS_CMD).start()
 
         # set new timer in case we hibernate, set self.timer so it looks like
         # the normal startup timer

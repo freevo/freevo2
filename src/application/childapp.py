@@ -109,7 +109,7 @@ class Application(base.Application):
             logname = logname[ logname.rfind( '/' ) + 1 : ]
         logname = sysconfig.logfile(logname)
         
-	# start the process
+	# create the process
         self.__child = kaa.notifier.Process(cmd, logname)
 
         # connect to signals
@@ -119,6 +119,9 @@ class Application(base.Application):
             self.__child.signals["completed"].connect(gui.display.show)
         self.__child.signals["completed"].connect(self.child_finished)
 
+	# start the process
+        self.__child.start()
+        
         # renice the process
         if prio and config.CONF.renice:
             os.system('%s %s -p %s 2>/dev/null >/dev/null' % \

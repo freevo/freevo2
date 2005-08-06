@@ -149,3 +149,4 @@ class PluginInterface(Plugin):
                 '-t', 'DVD', '--of', dest, source ]
         child = kaa.notifier.Process(app)
         child.signals["completed"].connect(self.replex_stop, source, dest)
+        child.start()

@@ -103,7 +103,7 @@ if __name__ != "__main__":
             if not vfs.isfile(self.imagefile):
                 log.warning('no imagefile found')
             if _runqueue:
-                MplayerThumbnail(*_runqueue[0])
+                MplayerThumbnail(*_runqueue[0]).start()
             
 
 
@@ -133,7 +133,7 @@ if __name__ != "__main__":
                  os.path.abspath(__file__) ] + args), imagefile)
         _runqueue.append(job)
         if len(_runqueue) == 1:
-            MplayerThumbnail(*_runqueue[0])
+            MplayerThumbnail(*_runqueue[0]).start()
 
         
 #

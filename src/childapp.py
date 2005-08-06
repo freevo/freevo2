@@ -80,11 +80,13 @@ class Instance(kaa.notifier.Process):
 	    debugname = sysconfig.logfile(debugname)
 	
         kaa.notifier.Process.__init__(self, app, debugname)
-
+ 
         self.signals["stdout"].connect(self.stdout_cb)
         self.signals["stderr"].connect(self.stderr_cb)
         self.signals["completed"].connect(self.finished)
 
+        kaa.notifier.Process.start(self)
+        
         if prio and config.CONF.renice:
             os.system('%s %s -p %s 2>/dev/null >/dev/null' % \
                       (config.CONF.renice, prio, self.child.pid))
