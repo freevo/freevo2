@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2005/08/06 14:50:32  dischi
+# adjust to kaa.notifier.Timer.start now using seconds
+#
 # Revision 1.11  2005/07/22 19:30:24  dischi
 # fix event handling
 #
@@ -112,7 +115,7 @@ class PluginInterface(plugin.DaemonPlugin):
         self.screensaver_showing = False
 	self.vitem = None
 	self.pl = None
-	self.poll_interval = 1000 * config.SSAVER_POLL
+	self.poll_interval = config.SSAVER_POLL
 	self.saver_delay = config.SSAVER_DELAY
 	self.saver_type = sstype
 	self.arg1 = ssarg1

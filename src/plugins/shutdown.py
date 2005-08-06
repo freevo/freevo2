@@ -120,7 +120,7 @@ class ShutdownItem(MainMenuItem):
         shutdown freevo, don't shutdown the system
         """
         self.show_gui_message(_('shutting down...'))
-        kaa.notifier.OneShotTimer(sys.exit, 0).start(1000)
+        kaa.notifier.OneShotTimer(sys.exit, 0).start(1)
 
 
     def shutdown_system(self, arg=None, menuw=None):
@@ -128,7 +128,7 @@ class ShutdownItem(MainMenuItem):
         shutdown the complete system
         """
         self.show_gui_message(_('shutting down system...'))
-        kaa.notifier.OneShotTimer(os.system, config.SHUTDOWN_SYS_CMD).start(1000)
+        kaa.notifier.OneShotTimer(os.system, config.SHUTDOWN_SYS_CMD).start(1)
 
 
     def shutdown_system_restart(self, arg=None, menuw=None):
@@ -136,7 +136,7 @@ class ShutdownItem(MainMenuItem):
         restart the complete system
         """
         self.show_gui_message(_('restarting system...'))
-        kaa.notifier.OneShotTimer(os.system, config.RESTART_SYS_CMD).start(1000)
+        kaa.notifier.OneShotTimer(os.system, config.RESTART_SYS_CMD).start(1)
 
 
 

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2005/08/06 14:50:32  dischi
+# adjust to kaa.notifier.Timer.start now using seconds
+#
 # Revision 1.19  2005/07/16 15:00:41  dischi
 # more eventhandler cleanups
 #
@@ -102,7 +105,7 @@ class PluginInterface(plugin.DaemonPlugin):
     def __init__(self):
         plugin.DaemonPlugin.__init__(self)
         self.devices = self.list_usb_devices()
-        self.poll_interval = 1000
+        self.poll_interval = 1
 
 
     def config(self):

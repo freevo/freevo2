@@ -99,18 +99,18 @@ _important_programs = [ 'wget', 'cdrecord', 'growisofs', 'cdparanoia', 'lame',
                         'ncftp', 'ftp', 'mkisofs' ]
 
 # internal variables
-POLL_INTERVALL          = 60000    #  1 minute
-FIRST_START             = 1200000  # 30 minutes
-USER_IDLETIME           = 30       # 30 minutes
-MAX_ENTITY_IDLETIME     = 30       # 30 minutes
+POLL_INTERVALL          = 60    #  1 minute
+FIRST_START             = 1200  # 30 minutes
+USER_IDLETIME           = 30    # 30 minutes
+MAX_ENTITY_IDLETIME     = 30    # 30 minutes
 
 
 if 0:
     # variables for testing
-    POLL_INTERVALL      = 1000     # 1 second
-    FIRST_START         = 1000     # 1 second
-    USER_IDLETIME       = 1        # 1 minute
-    MAX_ENTITY_IDLETIME = 1        # 1 minute
+    POLL_INTERVALL      = 1     # 1 second
+    FIRST_START         = 1     # 1 second
+    USER_IDLETIME       = 1     # 1 minute
+    MAX_ENTITY_IDLETIME = 1     # 1 minute
 
 
 class Shutdown(object):
@@ -138,8 +138,7 @@ class Shutdown(object):
         if self.timer.first_start:
             # we are in the startup mode (30 minutes wait)
             return
-        log.warning('entity change, set timer %s seconds' % \
-                    (POLL_INTERVALL / 1000))
+        log.warning('entity change, set timer %s seconds' % POLL_INTERVALL)
         # reset timer to POLL_INTERVALL
         self.timer.start(POLL_INTERVALL)
 
@@ -242,7 +241,7 @@ class Shutdown(object):
             log.info('send status rpc to %s' % entity)
             entity.call('status', self.rpcreturn)
         # set a timer for check_shutdown in 5 seconds
-        kaa.notifier.OneShotTimer(self.check_shutdown).start(5000)
+        kaa.notifier.OneShotTimer(self.check_shutdown).start(5)
         return False
 
 
@@ -287,7 +286,7 @@ class Shutdown(object):
             wait = min(30, wait)
             log.info('Next check in %s minutes' % wait)
             # set a new timer
-            self.timer.start(wait * 60000)
+            self.timer.start(wait * 60)
             # reset counter
             self.shutdown_counter = max(self.shutdown_counter, 6)
             return False
@@ -315,7 +314,7 @@ class Shutdown(object):
                 wait = USER_IDLETIME + 1 - idle
                 log.info('Next check in %s minutes' % wait)
                 # set a new timer
-                self.timer.start(wait * 60000)
+                self.timer.start(wait * 60)
                 # reset counter
                 self.shutdown_counter = max(self.shutdown_counter, 6)
                 return False

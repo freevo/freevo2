@@ -20,7 +20,7 @@ class PluginInterface(plugin.Plugin, mcomm.RPCServer):
         plugin.Plugin.plugin_activate(self)
         self.idle_time = 0
         self.__events.register()
-        self.__timer.start(60000)
+        self.__timer.start(60)
         
         
     def __rpc_play__(self, addr, val):

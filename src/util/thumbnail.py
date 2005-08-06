@@ -74,7 +74,7 @@ class Queue(kaa.notifier.Timer):
                 return
         self.jobs.append((filename, [ callback ]))
         if not self.active():
-            self.start(10)
+            self.start(0.01)
             
     def handle(self, filename):
         for job in self.jobs:

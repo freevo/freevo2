@@ -76,7 +76,7 @@ class PluginInterface(plugin.DaemonPlugin):
         application.signals['application change'].connect(self.app_change)
         gui.theme.signals['theme change'].connect(self.theme_change)
 
-        self.poll_interval  = 3000
+        self.poll_interval  = 30
         self.plugins        = None
         self.visible        = False
         self.bar            = None

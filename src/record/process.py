@@ -141,12 +141,12 @@ class Recorder(Plugin):
         else:
             # schedule first recording
             msecs = self.get_time(rec.scheduled_start, 'next recording')
-            self.start_timer.start(msecs)
+            self.start_timer.start(float(msecs) / 1000)
 
         # get stop timer
         msecs = self.get_time(rec.scheduled_stop, 'stop timer')
         # schedule stop timer
-        self.stop_timer.start(msecs)
+        self.stop_timer.start(float(msecs) / 1000)
         return False
 
 

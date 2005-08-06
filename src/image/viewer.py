@@ -267,7 +267,7 @@ class ImageViewer(Application):
         # start timer
         if self.item.duration and self.slideshow and \
                not self.sshow_timer.active():
-            self.sshow_timer.start(self.item.duration * 1000)
+            self.sshow_timer.start(self.item.duration)
 
         # Notify everyone about the viewing
         if self.last_item != item:
@@ -323,7 +323,7 @@ class ImageViewer(Application):
             else:
                 OSD_MESSAGE.post(_('play'))
                 self.slideshow = True
-                self.sshow_timer.start(1000)
+                self.sshow_timer.start(1)
             return True
 
         if event == STOP:

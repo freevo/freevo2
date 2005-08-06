@@ -13,6 +13,9 @@
 #    3) Better (and more) LCD screens.
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2005/08/06 14:50:32  dischi
+# adjust to kaa.notifier.Timer.start now using seconds
+#
 # Revision 1.27  2005/07/22 19:30:24  dischi
 # fix event handling
 #
@@ -714,7 +717,7 @@ class PluginInterface( plugin.DaemonPlugin ):
         #     self.lcd.getinfo()
         #     print ""
             
-        self.poll_interval = 10
+        self.poll_interval = 0.01
         self.disable = 0
         self.height = self.lcd.d_height
         self.width  = self.lcd.d_width

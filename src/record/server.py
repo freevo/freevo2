@@ -122,7 +122,7 @@ class RecordServer(RPCServer):
         """
         if schedule:
             if not self.ps_timer.active():
-                self.ps_timer.start(10)
+                self.ps_timer.start(0.01)
             return
 
         if hasattr(self, 'only_print_current'):
@@ -396,7 +396,7 @@ class RecordServer(RPCServer):
         """
         if schedule:
             if not self.save_timer.active():
-                self.save_timer.start(10)
+                self.save_timer.start(0.01)
             return
         
         if not len(self.recordings) and not len(self.favorites):

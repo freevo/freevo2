@@ -132,7 +132,7 @@ class MPlayer(mplayer.Application):
         cmd = 'osd_show_text "Changing to [%s]"\n' % self.channel.title
         self.send_command(cmd)
         # wait three seconds for the tuner to tune in...
-        cb = kaa.notifier.OneShotTimer(self.osd_channel).start(3000)
+        cb = kaa.notifier.OneShotTimer(self.osd_channel).start(3)
         return False
 
 
