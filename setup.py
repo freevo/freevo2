@@ -13,14 +13,8 @@ import time
 # Freevo distutils stuff
 sys.path.append('./src')
 import version
-from util.distribution import setup, Extension, check_libs, docbook_finder
+from util.distribution import setup, Extension, docbook_finder
 from distutils import core
-
-
-check_libs((('pygame', 'http://www.pygame.org'),
-            ('Image', 'http://www.pythonware.com/products/pil/'),
-            ('mbus', 'http://www.mbus.org/')))
-
 
 
 data_files = []
