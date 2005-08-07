@@ -35,6 +35,9 @@ import os
 import copy
 import logging
 
+# kaa imports
+from kaa.base import weakref
+
 # freevo imports
 import config
 
@@ -42,10 +45,9 @@ import plugin
 import plugins.rom_drives
 
 from event import *
-from item import Item
 from directory import DirItem
 from mainmenu import MainMenuItem
-from menu import Menu
+from menu import Menu, Item
 from mediadb import FileListing, watcher
 from gui.windows import ProgressBox
 
@@ -252,6 +254,7 @@ class MediaMenu(MainMenuItem):
                          reload_func = self.reload)
         item_menu.autoselect = True
         item_menu.skin_force_text_view = self.force_text_view
+        self.item_menu = weakref(item_menu)
         self.pushmenu(item_menu)
 
 
@@ -277,24 +280,12 @@ class MediaMenu(MainMenuItem):
         when a disc in a rom drive changes
         """
         if plugin.isevent(event):
-            if not menuw or len(menuw.menustack) != 2:
-                return False
+            print event
+            if not self.item_menu.visible:
+                return True
 
-            menu = menuw.menustack[1]
-            sel = menu.choices.index(menu.selected)
-            menuw.menustack[1].choices = self.main_menu_generate()
-            if not menu.selected in menu.choices:
-                if len( menu.choices ) > sel:
-                    menu.selected = menu.choices[sel]
-                elif menu.choices:
-                    menu.selected = menu.choices[ -1 ]
-                else:
-                    menu.selected = None
-
-            if menu == menuw.menustack[-1] and menuw.visible:
-                menuw.refresh()
-            # others may need this event, too
-            return False
+            self.item_menu.set_items(self.main_menu_generate())
+            return True
 
         # give the event to the next eventhandler in the list
         return Item.eventhandler(self, event, menuw)
