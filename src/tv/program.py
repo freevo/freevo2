@@ -177,20 +177,20 @@ class ProgramItem(Item):
     def schedule(self):
         (result, msg) = recordings.schedule(self)
         if result:
-            MessageBox(text=_('"%s" has been scheduled for recording') % \
-                         self.title).show()
+            MessageBox(_('"%s" has been scheduled for recording') % \
+                       self.title).show()
         else:
-            MessageBox(text=_('Scheduling Failed')+(': %s' % msg)).show()
+            MessageBox(_('Scheduling Failed')+(': %s' % msg)).show()
         self.get_menustack().delete_submenu()
 
 
     def remove(self):
         (result, msg) = recordings.remove(self.scheduled.id)
         if result:
-            MessageBox(text=_('"%s" has been removed as recording') % \
-                         self.title).show()
+            MessageBox(_('"%s" has been removed as recording') % \
+                       self.title).show()
         else:
-            MessageBox(text=_('Scheduling Failed')+(': %s' % msg)).show()
+            MessageBox(_('Scheduling Failed')+(': %s' % msg)).show()
         self.get_menustack().delete_submenu()
 
 
@@ -218,11 +218,11 @@ class ProgramItem(Item):
 
 
     def watch_recording(self):
-        MessageBox(text='Not implemented yet').show()
+        MessageBox('Not implemented yet').show()
 
 
     def search_similar(self):
-        MessageBox(text='Not implemented yet').show()
+        MessageBox('Not implemented yet').show()
 
 
     def create_favorite(self):
@@ -231,4 +231,4 @@ class ProgramItem(Item):
 
 
     def remove_favorite(self):
-        MessageBox(text='Not implemented yet').show()
+        MessageBox('Not implemented yet').show()

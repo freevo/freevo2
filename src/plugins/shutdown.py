@@ -80,8 +80,9 @@ class ShutdownItem(MainMenuItem):
         Pops up a ConfirmBox.
         """
         what = _('Do you really want to shut down Freevo?')
-        ConfirmBox(text=what, handler=self.shutdown_freevo,
-                   default_choice=1).show()
+        box = ConfirmBox(what, default_choice=1)
+        box.connect(0, self.shutdown_freevo)
+        box.show()
 
 
     def confirm_system(self):
@@ -89,8 +90,9 @@ class ShutdownItem(MainMenuItem):
         Pops up a ConfirmBox.
         """
         what = _('Do you really want to shut down the system?')
-        ConfirmBox(text=what, handler=self.shutdown_system,
-                   default_choice=1).show()
+        box = ConfirmBox(what, default_choice=1)
+        box.connect(0, self.shutdown_system)
+        box.show()
 
 
     def confirm_sys_restart(self):
@@ -98,8 +100,9 @@ class ShutdownItem(MainMenuItem):
         Pops up a ConfirmBox.
         """
         what = _('Do you really want to restart the system?')
-        ConfirmBox(text=what, handler=self.shutdown_sys_restart,
-                   default_choice=1).show()
+        box = ConfirmBox(what, default_choice=1)
+        box.connect(0, self.shutdown_sys_restart)
+        box.show()
 
 
     def show_gui_message(self, text):

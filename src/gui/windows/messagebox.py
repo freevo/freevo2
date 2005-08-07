@@ -52,13 +52,10 @@ log = logging.getLogger()
 
 class MessageBox(WaitBox):
     """
-    A box with a label and an OK button to close it. An additional handler can
-    be used to call a function when the button is pressed. INPUT_EXIT will
-    act like select.
+    A box with a label and an OK button to close it.
     """
-    def __init__(self, text, handler=None, button_text=_('OK')):
+    def __init__(self, text, button_text=_('OK')):
         WaitBox.__init__(self, text)
-        self.handler = handler
         self.button = Button(button_text, self.get_content_pos(),
                              self.get_content_size()[0],
                              self.button_selected)
@@ -73,7 +70,15 @@ class MessageBox(WaitBox):
         """
         if event in (INPUT_ENTER, INPUT_EXIT):
             self.destroy()
-            if self.handler:
-                self.handler()
+            if event == INPUT_ENTER:
+                self.button.select()
             return True
         return False
+
+
+    def connect(self, function, *args, **kwargs):
+        """
+        Connect to the selection of the button.
+        """
+        self.button.connect(function, *args, **kwargs)
+

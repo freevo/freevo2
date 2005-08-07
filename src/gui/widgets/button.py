@@ -1,51 +1,23 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Button.py - a simple button class
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes:
-# Todo:     o remove theme style dep
-#           o more doc
-#
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.6  2005/06/26 17:04:19  dischi
-# adjust to mevas - kaa.mevas move
-#
-# Revision 1.5  2004/10/05 19:50:55  dischi
-# Cleanup gui/widgets:
-# o remove unneeded widgets
-# o move window and boxes to the gui main level
-# o merge all popup boxes into one file
-# o rename popup boxes
-#
-# Revision 1.4  2004/10/03 15:54:00  dischi
-# make PopupBoxes work again as they should
-#
-# Revision 1.3  2004/08/22 20:06:21  dischi
-# Switch to mevas as backend for all drawing operations. The mevas
-# package can be found in lib/mevas. This is the first version using
-# mevas, there are some problems left, some popup boxes and the tv
-# listing isn't working yet.
-#
-# Revision 1.2  2004/07/27 18:52:31  dischi
-# support more layer (see README.txt in backends for details
-#
-# Revision 1.1  2004/07/25 18:14:05  dischi
-# make some widgets and boxes work with the new gui interface
-#
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2003 Krister Lagerstrom, et al.
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
-#   
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-#                
+#
 # This program is distributed in the hope that it will be useful, but
 # WITHOUT ANY WARRANTY; without even the implied warranty of MER-
 # CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
@@ -55,25 +27,33 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
+__all__ = [ 'Button' ]
 
-from rectangle import Rectangle
+# kaa imports
+from kaa.notifier import Signal
 from kaa.mevas.image import CanvasImage
+
+# gui imports
+from rectangle import Rectangle
 from text import Text
+
 
 class Button(CanvasImage):
     """
+    A button widget.
     """
     def __init__(self, text, pos, width, style):
         CanvasImage.__init__(self, (width, style.font.height+4))
         self.text = text
         self.set_style(style)
         self.set_pos(pos)
-
+        self.signal = Signal()
 
     def set_style(self, style):
         """
+        Set new gui style
         """
         self.draw_rectangle((0,0), self.get_size(), (0, 0, 0, 0), True)
         r = Rectangle((0,0), self.get_size(),
@@ -86,3 +66,17 @@ class Button(CanvasImage):
         text = Text(self.text, (0,0), (width - 20, style.font.height),
                     style.font, 'center', 'center', 'hard')
         self.draw_image(text, ((width - text.get_size()[0]) / 2, 2))
+
+
+    def connect(self, function, *args, **kwargs):
+        """
+        Connect a callback to the select function of the button.
+        """
+        self.signal.connect(function, *args, **kwargs)
+
+
+    def select(self):
+        """
+        Select the button. This will call the connected callback functions.
+        """
+        self.signal.emit()

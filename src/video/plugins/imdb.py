@@ -189,7 +189,7 @@ class PluginInterface(ItemPlugin):
             return
 
         # show error message
-        MessageBox(text=_('No information available from IMDB')).show()
+        MessageBox(_('No information available from IMDB')).show()
         return
 
         

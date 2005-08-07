@@ -57,76 +57,61 @@ class ConfirmBox(WaitBox):
     function should be called if Yes is selected. INPUT_EXIT will be close
     the box like pressing No.
     """
-    def __init__(self, text, handler=None, handler_message=None,
-                 button0_text = _('Yes'), button1_text = _('No'),
-                 default_choice=0):
+    def __init__(self, text, buttons=(_('Yes'), _('No')), default_choice=0):
         WaitBox.__init__(self, text)
-        self.handler = handler
 
         spacing = self.content_spacing
-        w = int((self.get_content_size()[0] - spacing) / 2)
+        w = int((self.get_content_size()[0] - spacing) / len(buttons))
         x, y = self.get_content_pos()
-        self.b0 = Button(button0_text, (x,y), w, self.button_normal)
-        x += w + spacing
-        self.b1 = Button(button1_text, (x, y), w, self.button_normal)
 
-        y = self.add_row(self.b0.get_size()[1])
+        self.buttons = []
+        for btext in buttons:
+            self.buttons.append(Button(btext, (x,y), w, self.button_normal))
+            x += w + spacing
+            
+        y = self.add_row(self.buttons[0].get_size()[1])
+        for b in self.buttons:
+            b.set_pos((b.get_pos()[0], y))
+            self.add_child(b)
 
-        self.b0.set_pos((self.b0.get_pos()[0], y))
-        self.add_child(self.b0)
+        self.selected = self.buttons[default_choice]
+        self.selected.set_style(self.button_selected)
+        
 
-        self.b1.set_pos((self.b1.get_pos()[0], y))
-        self.add_child(self.b1)
-
-        self.handler_message = handler_message
-        getattr(self, 'b%s' % default_choice).set_style(self.button_selected)
-        self.selected = default_choice
-
+    def connect(self, button, function, *args, **kwargs):
+        """
+        Connect a callback to a button by it's number. If nothing is sepcified
+        in the constructor, 0 is yes and 1 is no.
+        """
+        self.buttons[button].connect(function, *args, **kwargs)
+        
 
     def eventhandler(self, event):
         """
         Eventhandler to toggle the selection or press the button
         """
         if event in (INPUT_LEFT, INPUT_RIGHT):
-            self.selected = (self.selected + 1) % 2
-            if self.selected == 0:
-                self.b0.set_style(self.button_selected)
-                self.b1.set_style(self.button_normal)
+            # Toggle selection
+            self.selected.set_style(self.button_normal)
+            index = self.buttons.index(self.selected)
+            if event == INPUT_LEFT:
+                index = (index + 1) % len(self.buttons)
+            elif index == 0:
+                index = len(self.buttons) - 1
             else:
-                self.b0.set_style(self.button_normal)
-                self.b1.set_style(self.button_selected)
+                index = index - 1
+            self.selected = self.buttons[index]
+            self.selected.set_style(self.button_selected)
             self.update()
             return True
-
 
         elif event == INPUT_EXIT:
             self.destroy()
             return True
 
         elif event == INPUT_ENTER:
-            if self.selected == 0:
-                if self.handler and self.handler_message:
-                    # remove old content
-                    self.remove_child(self.label)
-                    self.remove_child(self.b0)
-                    self.remove_child(self.b1)
-
-                    # add new label
-                    self.label = Textbox(self.handler_message,
-                                         self.get_content_pos(),
-                                         self.get_content_size(),
-                                         self.widget_normal.font,
-                                         'center', 'center', 'soft')
-                    self.add_child(self.label)
-                    self.update()
-                else:
-                    self.destroy()
-
-                if self.handler:
-                    self.handler()
-                    if self.handler_message:
-                        self.destroy()
-            else:
-                self.destroy()
+            self.selected.select()
+            self.destroy()
             return True
+        
         return False

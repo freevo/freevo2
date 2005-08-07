@@ -472,7 +472,7 @@ class DirItem(Playlist):
         if self.media and not self.media.is_mounted():
             self.media.mount()
         if not os.path.exists(self.dir):
-	    MessageBox(text=_('Directory does not exist')).show()
+	    MessageBox(_('Directory does not exist')).show()
             return
         display_type = self.display_type
         if self.display_type == 'tv':
@@ -522,8 +522,7 @@ class DirItem(Playlist):
 	if word == password:
 	    self.build()
 	else:
-	    pb = MessageBox(text=_('Password incorrect'))
-	    pb.show()
+	    MessageBox(_('Password incorrect')).show()
             return
 
 
@@ -559,7 +558,7 @@ class DirItem(Playlist):
 
         elif not os.path.exists(self.dir):
             # FIXME: better handling!!!!!
-	    MessageBox(text=_('Directory does not exist')).show()
+	    MessageBox(_('Directory does not exist')).show()
             return
 
         self.needs_update = False

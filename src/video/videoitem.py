@@ -517,9 +517,12 @@ class VideoItem(MediaItem):
 
             elif not result:
                 # No media at all was found: error
-                ConfirmBox(text=(_('No media found for "%s".\n')+
-                                 _('Please insert the media.')) %
-                                 self.name, handler=self.play ).show()
+                txt = (_('No media found for "%s".\n')+
+                       _('Please insert the media.')) % self.name
+                box = ConfirmBox(txt, (_('Retry'), _('Abort')))
+                box.connect(0, self.play)
+                box.show()
+                
             # done, everything else is handled in 'play' of the subitem
             return
 
@@ -536,9 +539,11 @@ class VideoItem(MediaItem):
                 else:
                     # Not found, show box so the user can insert the
                     # correct disc. Callback is this function again
-                    ConfirmBox(text=(_('No media found for "%s".\n')+
-                                     _('Please insert the media.')) % file,
-                               handler=self.play ).show()
+                    txt = (_('No media found for "%s".\n')+
+                           _('Please insert the media.')) % file
+                    box = ConfirmBox(txt, (_('Retry'), _('Abort')))
+                    box.connect(0, self.play)
+                    box.show()
                     return
 
             elif self.media:
@@ -555,9 +560,11 @@ class VideoItem(MediaItem):
             else:
                 # Not found, show box so the user can insert the
                 # correct disc. Callback is this function again
-                ConfirmBox(text=(_('No media found for "%s".\n')+
-                                 _('Please insert the media.')) % self.url,
-                           handler=self.play).show()
+                txt = (_('No media found for "%s".\n')+
+                       _('Please insert the media.')) % self.url
+                box = ConfirmBox(txt, (_('Retry'), _('Abort')))
+                box.connect(0, self.play)
+                box.show()
                 return
 
         # get the correct player for this item and check the
@@ -572,7 +579,7 @@ class VideoItem(MediaItem):
             # get the best possible player
             self.player_rating, self.player = self.possible_player[0]
             if self.player_rating < 10:
-                MessageBox(text=_('No player for this item found')).show()
+                MessageBox(_('No player for this item found')).show()
                 return
 
         # put together the mplayer options for this file
@@ -595,7 +602,9 @@ class VideoItem(MediaItem):
             if hasattr(self.parent, 'subitems') and self.parent.subitems:
                 return error
             else:
-                MessageBox(text=error, handler=self.stop).show()
+                box = MessageBox(error)
+                box.connect(self.stop)
+                box.show()
 
 
     def stop(self):
@@ -626,7 +635,7 @@ class VideoItem(MediaItem):
                         return True
                 if self.error_in_subitem:
                     # No more subitems to play, and an error occured
-                    MessageBox(text=self.last_error_msg).show()
+                    MessageBox(self.last_error_msg).show()
 
         # show configure menu
         if event == MENU:

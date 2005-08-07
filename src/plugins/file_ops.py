@@ -85,21 +85,24 @@ class PluginInterface(plugin.ItemPlugin):
 
 
     def delete(self, item):
-        ConfirmBox(text=_('Do you wish to delete\n \'%s\'?') % item.name,
-                   handler=Callback(self.__delete, item),
-                   default_choice=1, handler_message=_('Deleting...')).show()
+        txt = _('Do you wish to delete\n \'%s\'?') % item.name
+        box = ConfirmBox(txt, default_choice=1)
+        box.connect(0, self.__delete, item)
+        box.show()
 
 
     def delete_info(self, item):
-        ConfirmBox(text=_('Delete info about\n \'%s\'?') % item.name,
-                   handler=Callback(self.__delete_info, item),
-                   default_choice=1).show()
+        txt = _('Delete info about\n \'%s\'?') % item.name
+        box = ConfirmBox(txt, default_choice=1)
+        box.connect(0, self.__delete_info, item)
+        box.show()
 
 
     def delete_image(self, item):
-        ConfirmBox(text=_('Delete image about\n \'%s\'?') % item.name,
-                   handler=Callback(self.__delete_image, item),
-                   default_choice=1).show()
+        txt = _('Delete image about\n \'%s\'?') % item.name
+        box = ConfirmBox(txt, default_choice=1)
+        box.connect(0, self.__delete_image, item)
+        box.show()
 
 
     def __delete(self, item):

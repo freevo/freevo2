@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2005/08/07 13:56:59  dischi
+# use Signal inside a gui button and add connect to the box
+#
 # Revision 1.28  2005/08/07 10:46:40  dischi
 # adjust to new menu interface
 #
@@ -108,7 +111,7 @@ class TVMenu(MainMenuItem):
         if False:
             msg  = _('The list of TV channels is invalid!\n')
             msg += _('Please check the config file.')
-            MessageBox(text=msg).show()
+            MessageBox(msg).show()
             return
 
         guide = plugin.getbyname('tvguide')

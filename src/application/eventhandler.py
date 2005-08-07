@@ -53,8 +53,10 @@ import kaa.notifier
 
 # freevo imports
 import sysconfig
+import config
 import plugin
 import input
+from gui.windows import ConfirmBox
 
 from event import *
 
@@ -75,7 +77,7 @@ def get_singleton():
     # One-time init
     if _singleton == None:
         _singleton = Eventhandler()
-        
+
     return _singleton
 
 
@@ -116,7 +118,7 @@ class Eventhandler(object):
         self.applications = []
         # callback for events
         kaa.notifier.EventHandler(self.handle).register()
-        
+
 
     def __iter__(self):
         """
@@ -124,7 +126,7 @@ class Eventhandler(object):
         """
         return self.applications.__iter__()
 
-    
+
     def set_focus(self, previous, app):
         """
         change the focus
@@ -148,7 +150,7 @@ class Eventhandler(object):
         if not app.visible:
             log.info('make current app visible')
             app.show()
-        
+
 
     def append(self, app):
         """
@@ -186,7 +188,7 @@ class Eventhandler(object):
         self.popups.append(window)
         input.set_mapping(window.get_eventmap())
 
-        
+
     def remove_window(self, window):
         """
         Remove window from window list and reset the focus
@@ -201,7 +203,7 @@ class Eventhandler(object):
             input.set_mapping(self.popups[-1].get_eventmap())
         else:
             input.set_mapping(self.applications[-1].get_eventmap())
-                
+
 
     def get_active(self):
         """
@@ -211,13 +213,13 @@ class Eventhandler(object):
             return None
         return self.applications[-1]
 
-    
+
     def handle(self, event):
         """
         event handling function
         """
         log.debug('handling event %s' % str(event))
-        
+
         if _TIME_DEBUG:
             t1 = time.clock()
 
@@ -232,12 +234,12 @@ class Eventhandler(object):
                 # function and do not pass it on the the normal
                 # handling
                 event.handler(event=event)
-                
+
             elif len(self.popups) and \
                      self.popups[-1].eventhandler(event=event):
                 # handled by the current popup
                 pass
-                
+
             else:
                 self.applications[-1].eventhandler(event=event)
 
@@ -256,18 +258,12 @@ class Eventhandler(object):
                 print time.clock() - t1
             return True
 
-        except SystemExit:
-            raise SystemExit
+        except SystemExit, e:
+            sys.exit(0)
 
-        except:
-            # Crash. Now import some stuff to know what do to
-            # and classes to do it. This is bad coding style, but
-            # it is not possible to import it earlier.
-            import config
-            from gui.windows import ConfirmBox
-            
+        except Exception, e:
+            log.exception('eventhandler')
             if config.FREEVO_EVENTHANDLER_SANDBOX:
-                log.exception('eventhandler')
                 msg=_('Event \'%s\' crashed\n\nPlease take a ' \
                       'look at the logfile and report the bug to ' \
                       'the Freevo mailing list. The state of '\
@@ -276,9 +272,8 @@ class Eventhandler(object):
                       'Freevo.\n\nLogfile: %s') % \
                       (event, sysconfig.syslogfile)
                 handler = kaa.notifier.Callback(sys.exit, 0)
-                pop = ConfirmBox(msg, handler=handler,
-                                 handler_message = _('shutting down...'),
-                                 button0_text = _('Shutdown'),
-                                 button1_text = _('Continue')).show()
+                pop = ConfirmBox(msg, (_('Shutdown'), _('Continue')))
+                pop.connect(0, sys.exit, 0)
+                pop.show()
             else:
-                raise 
+                sys.exit(1)

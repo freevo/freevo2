@@ -90,7 +90,7 @@ class FavoriteItem(Item):
     def add(self):
         (result, msg) = record.client.favorites.add(self)
         if result:
-            MessageBox(text=_('"%s" has been scheduled as favorite') % \
-                       self.title).show()
+            txt = _('"%s" has been scheduled as favorite') % self.title
         else:
-            MessageBox(text=_('Scheduling Failed')+(': %s' % msg)).show()
+            txt = _('Scheduling Failed') + (': %s' % msg)
+        MessageBox(txt).show()
