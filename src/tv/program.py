@@ -35,9 +35,6 @@
 import time
 import kaa.epg
 
-# notifier
-import notifier
-
 # freevo imports
 import config
 import plugin
@@ -196,14 +193,9 @@ class ProgramItem(Item):
 
     def channel_details(self):
         items = []
-        # keep the notifier alive
-        notifier_counter = 0
         for prog in self.channel[time.time():]:
             if not prog.id == -1:
                 items.append(ProgramItem(prog, self))
-            notifier_counter = (notifier_counter + 1) % 500
-            if not notifier_counter:
-                notifier.step(False, False)
         cmenu = Menu(self.channel.name, items, item_types = 'tv program menu')
         # FIXME: the percent values need to be calculated
         # cmenu.table = (15, 15, 70)
