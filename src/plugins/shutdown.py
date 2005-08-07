@@ -42,6 +42,7 @@ import config
 import gui
 import gui.widgets
 
+from menu import Action
 from gui.windows import ConfirmBox
 from mainmenu import MainMenuItem
 from plugin import MainMenuPlugin
@@ -53,7 +54,6 @@ class ShutdownItem(MainMenuItem):
     """
     def __init__(self, parent=None):
         MainMenuItem.__init__(self, parent=parent, skin_type='shutdown')
-        self.menuw = None
 
 
     def actions(self):
@@ -61,45 +61,44 @@ class ShutdownItem(MainMenuItem):
         return a list of actions for this item
         """
         if config.CONFIRM_SHUTDOWN:
-            items = [ (self.confirm_freevo, _('Shutdown Freevo') ),
-                      (self.confirm_system, _('Shutdown system') ),
-                      (self.confirm_system_restart, _('Restart system') ) ]
+            items = [ Action(_('Shutdown Freevo'), self.confirm_freevo),
+                      Action(_('Shutdown system'), self.confirm_system),
+                      Action(_('Restart system'), self.confirm_sys_restart) ]
         else:
-            items = [ (self.shutdown_freevo, _('Shutdown Freevo') ),
-                      (self.shutdown_system, _('Shutdown system') ),
-                      (self.shutdown_system_restart, _('Restart system') ) ]
+            items = [ Action(_('Shutdown Freevo'), self.shutdown_freevo),
+                      Action(_('Shutdown system'), self.shutdown_system),
+                      Action(_('Restart system'), self.shutdown_sys_restart) ]
+
         if config.ENABLE_SHUTDOWN_SYS:
             items = [ items[1], items[0], items[2] ]
 
         return items
 
 
-    def confirm_freevo(self, arg=None, menuw=None):
+    def confirm_freevo(self):
         """
         Pops up a ConfirmBox.
         """
-        self.menuw = menuw
         what = _('Do you really want to shut down Freevo?')
         ConfirmBox(text=what, handler=self.shutdown_freevo,
                    default_choice=1).show()
 
 
-    def confirm_system(self, arg=None, menuw=None):
+    def confirm_system(self):
         """
         Pops up a ConfirmBox.
         """
-        self.menuw = menuw
         what = _('Do you really want to shut down the system?')
         ConfirmBox(text=what, handler=self.shutdown_system,
                    default_choice=1).show()
 
-    def confirm_system_restart(self, arg=None, menuw=None):
+
+    def confirm_sys_restart(self):
         """
         Pops up a ConfirmBox.
         """
-        self.menuw = menuw
         what = _('Do you really want to restart the system?')
-        ConfirmBox(text=what, handler=self.shutdown_system_restart,
+        ConfirmBox(text=what, handler=self.shutdown_sys_restart,
                    default_choice=1).show()
 
 
@@ -115,7 +114,7 @@ class ShutdownItem(MainMenuItem):
         gui.display.update()
 
         
-    def shutdown_freevo(self, arg=None, menuw=None):
+    def shutdown_freevo(self):
         """
         shutdown freevo, don't shutdown the system
         """
@@ -123,7 +122,7 @@ class ShutdownItem(MainMenuItem):
         kaa.notifier.OneShotTimer(sys.exit, 0).start(1)
 
 
-    def shutdown_system(self, arg=None, menuw=None):
+    def shutdown_system(self):
         """
         shutdown the complete system
         """
@@ -131,7 +130,7 @@ class ShutdownItem(MainMenuItem):
         kaa.notifier.OneShotTimer(os.system, config.SHUTDOWN_SYS_CMD).start(1)
 
 
-    def shutdown_system_restart(self, arg=None, menuw=None):
+    def shutdown_sys_restart(self):
         """
         restart the complete system
         """
