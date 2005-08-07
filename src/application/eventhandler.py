@@ -118,6 +118,13 @@ class Eventhandler(object):
         kaa.notifier.EventHandler(self.handle).register()
         
 
+    def __iter__(self):
+        """
+        Iterate through applications.
+        """
+        return self.applications.__iter__()
+
+    
     def set_focus(self, previous, app):
         """
         change the focus

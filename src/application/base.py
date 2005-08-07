@@ -88,9 +88,9 @@ class Application(object):
             return False
         # Set visible and append to the eventhandler
         self.visible = True
-        if self.stopped:
+        self.stopped = False
+        if not self in self.__handler:
             self.__handler.append(self)
-            self.stopped = False
         # Check if the new app uses animation to show itself
         if not self.animated:
             # This application has no animation for showing. But the old one
