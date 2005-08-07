@@ -280,7 +280,6 @@ class MediaMenu(MainMenuItem):
         when a disc in a rom drive changes
         """
         if plugin.isevent(event):
-            print event
             if not self.item_menu.visible:
                 return True
 
