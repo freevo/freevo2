@@ -459,10 +459,7 @@ class RemovableMedia(vfs.Mountpoint):
             return
 
         if self.info['mime'] == 'audio/cd':
-            disc_id = self.info['id']
-            self.item = AudioDiskItem(disc_id, parent=None,
-                                       devicename=self.devicename,
-                                       display_type='audio')
+            self.item = AudioDiskItem(self, parent=None)
             self.type = self.item.type
             self.item.media = self
             if self.info['title']:
