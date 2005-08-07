@@ -145,7 +145,7 @@ class ConfigurationItem(Item):
                 configuration_values += [ configuration_item ]
 
         if (len(configuration_values) == 0):
-            mi = ActionItem(_('No configuration values'), None
+            mi = ActionItem(_('No configuration values'), None,
                             self.get_menustack().back_one_menu)
             configuration_values += [mi]
 
