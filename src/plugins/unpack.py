@@ -44,7 +44,7 @@ import kaa.notifier
 import plugin
 import util
 
-from item import Item
+from menu import Item, Action
 from gui.windows import WaitBox
 
 # possible archives and how to unpack them
@@ -68,10 +68,10 @@ class ArchiveItem(Item):
         """
         Return possible actions for this item.
         """
-        return [ (self.unpack, _('Unpack archive')) ]
+        return [ Action(_('Unpack archive'), self.unpack) ]
 
 
-    def unpack(self, args=None, menuw=None):
+    def unpack(self):
         """
         Unpack the archive in a sub process.
         """
