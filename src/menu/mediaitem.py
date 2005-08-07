@@ -71,11 +71,17 @@ class MediaItem(Item):
             url = url.url
         else:
             if url:
-                log.error('please fix this for %s' % url)
-                if url.find('://') > 0:
-                    url = url[url.find('://')+3:]
-                self.info = mediadb.get(url)
-                url = self.info.url
+                if url.find('://') > 0 and not url.startswith('file://') and \
+                       self.parent and self.parent.info:
+                    log.info('using subitem %s' % url)
+                    self.info = self.parent.info.get_subitem(url)
+                    self.info.url = url
+                else:
+                    log.error('please fix this for %s' % url)
+                    if url.find('://') == -1:
+                        url = 'file://' + url
+                    self.info = mediadb.get(url)
+                    url = self.info.url
             else:
                 self.info = mediadb.item()
 
