@@ -41,8 +41,8 @@ import copy
 import os
 import weakref
 
-# external modules
-import notifier
+# kaa imports
+from kaa.notifier import Timer
 
 # freevo imports
 import config
@@ -104,6 +104,7 @@ class ListingArea(Area):
         self.empty_listing     = None
         self.arrows            = []
         self.__default_val     = None
+        self.__cache_timer     = Timer(self.__cache_next_image)
 
 
     def clear(self, keep_settings=False):
@@ -625,7 +626,8 @@ class ListingArea(Area):
         self.__cache_listing = []
         if settings.type != 'text' and end < len(menu.choices):
             self.__cache_listing = menu.choices[end:end + cols * rows]
-            notifier.addTimer(100, notifier.Callback(self.__cache_next_image))
+            if not self.__cache_timer.active():
+                self.__cache_timer.start(0.1)
 
         # do some checking if we have to redraw everything
         # or only update because the selection changed

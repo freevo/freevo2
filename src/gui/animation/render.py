@@ -42,8 +42,8 @@
 import time
 import copy
 
-# notifier import
-import notifier
+# kaa imports
+from kaa.notifier import Timer, step
 
 # global render object
 _render = None
@@ -69,9 +69,9 @@ class Render(object):
     def __init__(self, display):
         # set the update handler to wait for osd
         self.display = display
+        self.update_timer = Timer(self.update)
         self.animations = []    # all animations
         self.suspended  = []    # suspended animations
-        self.__timer_id = None  # timer id
 
 
     def update(self):
@@ -83,8 +83,7 @@ class Render(object):
         remove  = self.animations.remove
         i = 0
 
-        notifier.removeTimer( self.__timer_id )
-        self.__timer_id = None
+        self.update_timer.stop()
         timer = time.time()
         next  = 0
 
@@ -111,8 +110,8 @@ class Render(object):
         if update_screen:
             self.display.update()
         if len( self.animations ):
-            next = max(0, int((next - time.time()) * 1000))
-            self.__timer_id = notifier.addTimer( next, self.update )
+            next = max(0, int((next - time.time())))
+            self.update_timer.start(next)
 
 
     def kill(self, anim_object):
@@ -127,8 +126,7 @@ class Render(object):
             pass
         if len( self.animations ) == 0:
             # no more animations, unregister ourself to the main loop:
-            notifier.removeTimer( self.__timer_id )
-            self.__timer_id = None
+            self.update_timer.stop()
 
 
     def killall(self):
@@ -137,9 +135,7 @@ class Render(object):
         """
         for a in copy.copy(self.animations):
             a.remove()
-
-        notifier.removeTimer( self.__timer_id )
-        self.__timer_id = None
+        self.update_timer.stop()
 
 
     def suspendall(self):
@@ -169,7 +165,7 @@ class Render(object):
         self.animations.append(anim_object)
         if len(self.animations) == 1:
             # first animation, register ourself to the main loop:
-            self.__timer_id = notifier.addTimer( 1, self.update )
+            self.update_timer.start(0)
 
 
     def wait(self, anim_objects=None):
@@ -180,4 +176,4 @@ class Render(object):
             # wait for all application show/hide animations
             anim_objects = filter(lambda a: a.application, self.animations)
         while filter(lambda a: a.running(), anim_objects):
-            notifier.step( True, False )
+            step( True, False )

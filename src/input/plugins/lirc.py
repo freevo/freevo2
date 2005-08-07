@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2005/08/07 14:26:36  dischi
+# replace pyNotifier with kaa.notifier
+#
 # Revision 1.6  2005/05/07 18:09:41  dischi
 # move InputPlugin definition to input.interface
 #
@@ -48,7 +51,8 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-import notifier
+
+import kaa.notifier
 
 import config
 import time
@@ -70,10 +74,10 @@ class PluginInterface(InputPlugin):
     def __init__(self):
         InputPlugin.__init__(self)
         self.plugin_name = 'LIRC'
-        self.__fd = None
         try:
             if os.path.isfile(config.LIRCRC):
-                self.__fd = pylirc.init('freevo', config.LIRCRC)
+                fd = pylirc.init('freevo', config.LIRCRC)
+                kaa.notifier.SocketDispatcher(self.handle).register(fd)
                 pylirc.blocking(0)
             else:
                 raise IOError
@@ -91,9 +95,6 @@ class PluginInterface(InputPlugin):
         self.firstkeystroke           = 0.0
         self.lastkeystroke            = 0.0
         self.lastkeycode              = ''
-
-        # FIXME: register socket to pynotifier
-        notifier.addSocket( self.__fd, self.handle )
 
 
     def config(self):
@@ -134,7 +135,7 @@ class PluginInterface(InputPlugin):
 
 
 
-    def handle( self, socket ):
+    def handle( self ):
         """
         return next event
         """

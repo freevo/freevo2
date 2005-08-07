@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2005/08/07 14:26:37  dischi
+# replace pyNotifier with kaa.notifier
+#
 # Revision 1.23  2005/07/22 19:30:24  dischi
 # fix event handling
 #
@@ -71,8 +74,8 @@
 #
 # ----------------------------------------------------------------------- */
 
-# external imports
-import notifier
+# kaa imports
+from kaa.notifier import OneShotTimer
 
 # freevo imports
 import config
@@ -103,7 +106,7 @@ class PluginInterface(plugin.DaemonPlugin):
         self.events = [ 'OSD_MESSAGE' ]
         self.message = ''
         self.gui_object = None
-        self._timer_id  = None
+        self.hide_timer = OneShotTimer(self.hide)
 
 
     def update(self):
@@ -154,12 +157,9 @@ class PluginInterface(plugin.DaemonPlugin):
         """
         if event == OSD_MESSAGE:
             self.message = event.arg
-            if self._timer_id != None:
-                # a not used callback is active, remove it
-                notifier.removeTimer( self._timer_id )
-            # register a callback in 2 seconds for hiding
-            self._timer_id = notifier.addTimer( 2000,
-                                                notifier.Callback( self.hide ) )
+            # Start hide timer for 2 seconds. If already active, the timer
+            # wil be reset.
+            self.hide_timer.start(2)
             self.update()
         return True
 
@@ -169,7 +169,5 @@ class PluginInterface(plugin.DaemonPlugin):
         Hide the osd
         """
         self.message = ''
-        self._timer_id = None
         self.update()
-
         return False

@@ -35,8 +35,8 @@ import re
 import popen2
 import logging
 
-# external imports
-import notifier
+# kaa imports
+from kaa.notifier import OneShotTimer
 import kaa.metadata
 
 from kaa.mevas.displays import bmovlcanvas
@@ -81,8 +81,7 @@ class MPlayer(mplayer.Application):
         """
         mplayer.Application.__init__(self, 'video', True)
         self.seek        = 0
-        self._timer_id   = None
-        self.hide_osd_cb = False
+        self.osd_timer   = OneShotTimer(self.hide_osd)
         self.use_bmovl   = True
 
         self.width  = 0
@@ -318,7 +317,6 @@ class MPlayer(mplayer.Application):
         if not self.osd_visible and self.has_child() and self.area_handler:
             self.area_handler.hide()
             gui.displays.get().update()
-        self._timer_id = None
         return False
 
 
@@ -411,13 +409,9 @@ class MPlayer(mplayer.Application):
                     return False
 
             if self.use_bmovl and not self.osd_visible:
-                if self._timer_id != None:
-                    notifier.removeTimer( self._timer_id )
-                    self._timer_id = None
-                elif self.area_handler:
+                if not self.osd_timer.active():
                     self.area_handler.show()
-                cb = notifier.Callback( self.hide_osd )
-                self._timer_id = notifier.addTimer( 2000, cb )
+                self.osd_timer.start(2)
 
             self.send_command('seek %s\n' % event.arg)
             return True

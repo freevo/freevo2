@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2005/08/07 14:26:36  dischi
+# replace pyNotifier with kaa.notifier
+#
 # Revision 1.9  2005/05/07 18:09:41  dischi
 # move InputPlugin definition to input.interface
 #
@@ -76,7 +79,7 @@
 #
 # ----------------------------------------------------------------------- */
 #endif
-import notifier
+import kaa.notifier
 
 import sys
 import os
@@ -140,7 +143,7 @@ class PluginInterface(InputPlugin):
         for s, k in keymap.items():
             log.debug('    0x%04x = %3d' % (s, k))
 
-        notifier.addSocket( self.fd, self.handle )
+        kaa.notifier.SocketDispatcher(self.handle).register(self.fd)
 
 
     def config(self):
@@ -158,7 +161,7 @@ class PluginInterface(InputPlugin):
                   'Time between consecutive repeats (miliseconds).' ), ]
 
 
-    def handle( self, socket ):
+    def handle( self ):
         S_EVDATA = '@llHHi'
         c = os.read(self.fd, 16)
         data = struct.unpack(S_EVDATA, c)
