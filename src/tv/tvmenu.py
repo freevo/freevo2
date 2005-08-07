@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2005/08/07 10:46:40  dischi
+# adjust to new menu interface
+#
 # Revision 1.27  2005/06/18 11:53:52  dischi
 # adjust to new menu code
 #
@@ -40,11 +43,10 @@
 import time
 
 import config
-import menu
 import plugin
 
 from mainmenu import MainMenuItem
-from menu import Item
+from menu import Item, ActionItem, Menu
 
 import tvguide
 from record.client import recordings
@@ -78,8 +80,7 @@ class TVMenu(MainMenuItem):
         items = []
         if True:
             # FIXME: change the tvguide into a plugin
-            items.append(menu.MenuItem(_('TV Guide'),
-                                       action=self.start_tvguide))
+            items.append(ActionItem(_('TV Guide'), self, self.start_tvguide))
 
         items.append(DirItem(config.TV_RECORD_DIR, None,
                              name = _('Recorded Shows'),
@@ -93,12 +94,12 @@ class TVMenu(MainMenuItem):
         for p in plugins_list:
             items += p.items(self)
 
-        m = menu.Menu(_('TV Main Menu'), items, item_types = 'tv main menu')
+        m = Menu(_('TV Main Menu'), items, item_types = 'tv main menu')
         m.infoitem = Info()
         self.pushmenu(m)
 
 
-    def start_tvguide(self, arg, menuw):
+    def start_tvguide(self):
 
         # FIXME: debug, remove me
         t1 = time.time()
@@ -115,8 +116,7 @@ class TVMenu(MainMenuItem):
             guide = tvguide.get_singleton()
 
         if guide.start(self):
-            menuw.pushmenu(guide)
-            menuw.refresh()
+            self.pushmenu(guide)
 
         # FIXME: debug, remove me
         t2 = time.time()

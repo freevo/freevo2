@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2005/08/07 10:42:42  dischi
+# adjust to new menu interface
+#
 # Revision 1.10  2005/01/09 10:47:53  dischi
 # gb patch
 #
@@ -42,7 +45,7 @@
 #
 # ----------------------------------------------------------------------- */
 
-
+from menu import Action
 import plugin
 import util
 
@@ -76,10 +79,10 @@ class PluginInterface(plugin.ItemPlugin):
                 diskfree = _('%i free of %i Mb total (%i%% free)') % \
                            ( ((freespace / 1024) / 1024),
                              ((totalspace / 1024) / 1024), (freespace*100.0/totalspace) )
-            return  [ ( self.dud, diskfree) ]
+            return  [ Action(diskfree, self.dud) ]
         else:
             return []
 
 
-    def dud(self, arg=None, menuw=None):
+    def dud(self):
         pass
