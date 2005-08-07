@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2005/08/07 09:51:51  dischi
+# deactivate plugins, they are broken
+#
 # Revision 1.10  2005/06/04 17:18:16  dischi
 # adjust to gui changes
 #
@@ -139,6 +142,8 @@ class PluginInterface(plugin.MainMenuPlugin):
 
     """
     def __init__(self):
+        self.reason = config.REDESIGN_BROKEN
+        return
         plugin.MainMenuPlugin.__init__(self)
 
     def items(self, parent):

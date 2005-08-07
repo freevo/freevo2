@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2005/08/07 09:51:51  dischi
+# deactivate plugins, they are broken
+#
 # Revision 1.14  2005/06/26 10:53:00  dischi
 # use kaa.epg instead of pyepg
 #
@@ -418,6 +421,8 @@ class PluginInterface(plugin.MainMenuPlugin):
 
     """
     def __init__(self):
+        self.reason = config.REDESIGN_BROKEN
+        return
         plugin.MainMenuPlugin.__init__(self)
 
     def items(self, parent):
