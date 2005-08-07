@@ -55,9 +55,8 @@ log = logging.getLogger()
 
 class Item(object):
     """
-    Item class. This is the base class for all items in the menu.
-    It's a template for MenuItem and for other info items like
-    VideoItem, AudioItem and ImageItem
+    Item class. This is the base class for all items in the menu. It's a
+    template for other info items like VideoItem, AudioItem and ImageItem
     """
     def __init__(self, parent=None, action=None, type=None):
         """

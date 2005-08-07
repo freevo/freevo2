@@ -13,6 +13,9 @@
 #    3) Better (and more) LCD screens.
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2005/08/07 14:04:12  dischi
+# remove MenuItem
+#
 # Revision 1.28  2005/08/06 14:50:32  dischi
 # adjust to kaa.notifier.Timer.start now using seconds
 #
@@ -72,7 +75,6 @@
 # ----------------------------------------------------------------------- */
 
 
-from menu import MenuItem
 import copy
 import time
 import plugin
@@ -781,8 +783,6 @@ class PluginInterface( plugin.DaemonPlugin ):
         if type == "menu":   
             menu  = object.menustack[ -1 ]
             title = String( menu.selected.name )
-            if isinstance( menu.selected, MenuItem ):
-                title = String( _( title ) )
             typeinfo = menu.selected.type
             info = ""
 

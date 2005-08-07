@@ -51,23 +51,3 @@ class ActionItem(Item, Action):
         Action.__init__(self, name, function, description=description)
         Item.__init__(self, parent, self)
         self.item = parent
-
-
-class MenuItem(Item):
-    """
-    Default item for the menu. It includes one action.
-    WARNING: this class may be deleted in the future!
-    """
-    def __init__( self, name, action=None, arg=None, type=None, image=None,
-                  icon=None, parent=None):
-        Item.__init__(self, parent)
-        if name:
-            self.name = Unicode(name)
-        if icon:
-            self.icon = icon
-        if image:
-            self.image = image
-
-        self.type = type
-        self.action = Action(name, action)
-        self.action.parameter(arg=arg)
