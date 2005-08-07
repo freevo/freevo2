@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2005/08/07 10:16:44  dischi
+# deactivate plugins, they are broken
+#
 # Revision 1.3  2005/07/08 18:59:46  dischi
 # adjust to new plugin interface
 #
@@ -51,6 +54,8 @@ class PluginInterface(plugin.Plugin):
         """
         normal plugin init, but sets _type to 'mainmenu_tv'
         """
+        self.reason = config.REDESIGN_BROKEN
+        return
         plugin.Plugin.__init__(self)
         self.plugin_type = 'mainmenu_tv'
         self.parent = None
