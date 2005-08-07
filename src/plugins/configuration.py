@@ -33,13 +33,12 @@ import logging
 
 #freevo modules
 import config
-import menu
 import plugin
 import util
 import gui
 
+from menu import Item, Action, ActionItem, Menu
 from gui.windows import InputBox
-from item import Item
 from config import rtXML
 
 from mainmenu import MainMenuItem
@@ -82,15 +81,13 @@ class ConfigurationItem(Item):
         self.path.append(ext)
 
 
-    def mod_string(self, arg=None, menuw=None):
-        self.menuw = menuw
+    def mod_string(self):
         InputBox(text=_('Change value:'),
             start_value=rtXML.get_value(self.base_path, self.var_name),
             handler=self.alter_string).show()
 
 
-    def mod_integer(self, arg=None, menuw=None):
-        self.menuw = menuw
+    def mod_integer(self):
         InputBox(text=_('Change value:'), type='integer',
             start_value=rtXML.get_value(self.base_path, self.var_name),
             increment=self.options['increment'],
@@ -107,25 +104,26 @@ class ConfigurationItem(Item):
                 return "Cannot set variable"
 
 
-    def edit_var(self, arg=None, menuw=None):
+    def edit_var(self):
         if self.var_type == 'string':
-            self.mod_string(arg, menuw)
+            self.mod_string()
         elif self.var_type == 'integer':
-            self.mod_integer(arg, menuw)
+            self.mod_integer()
         else:
             log.error('%s is not supported yet' % self.var_type)
 
+
     def actions(self):
         """
-        follow this option, show sub-options or edit the value
+        Follow this option, show sub-options or edit the value
         """
         if not self.is_var:
-            return [ ( self.create_config_menu , _('Show options' )) ]
+            return [ Action(_('Show options'), self.create_config_menu) ]
         else:
-            return [ ( self.edit_var, self.name ) ]
+            return [ Action(self.name, self.edit_var) ]
 
 
-    def create_config_menu(self, arg=None, menuw=None):
+    def create_config_menu(self):
         """
         Create a config menu for the given path
         """
@@ -147,14 +145,13 @@ class ConfigurationItem(Item):
                 configuration_values += [ configuration_item ]
 
         if (len(configuration_values) == 0):
-            mi = menu.MenuItem(_('No configuration values'),
-                               menuw.back_one_menu, 0)
+            mi = ActionItem(_('No configuration values'), None
+                            self.get_menustack().back_one_menu)
             configuration_values += [mi]
 
-        configuration_menu = menu.Menu(_('Configuration'),
-                                       configuration_values)
-        menuw.pushmenu(configuration_menu)
-        menuw.refresh()
+        configuration_menu = Menu(_('Configuration'), configuration_values)
+        self.pushmenu(configuration_menu)
+
 
 
 
@@ -172,6 +169,6 @@ class ConfigMainMenuItem(MainMenuItem, ConfigurationItem):
 
     def actions(self):
         """
-        return a list of actions for this item
+        Return a list of actions for this item
         """
-        return [ ( self.create_config_menu , _('Show options' )) ]
+        return [ Action(_('Show options'), self.create_config_menu) ]
