@@ -78,8 +78,8 @@ class ItemInfo(object):
         String function for debugging.
         """
         if not self.basename:
-            return 'mediadbItem() object'
-        return 'mediadbItem() object for %s' % basename
+            return 'mediadbItem() object for %s' % self.url
+        return 'mediadbItem() object for %s' % self.basename
 
 
     def __getitem__(self, key):
