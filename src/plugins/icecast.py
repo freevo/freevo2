@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2005/08/07 10:21:52  dischi
+# deactivate plugins, they are broken
+#
 # Revision 1.14  2005/07/16 09:48:23  dischi
 # adjust to new event interface
 #
@@ -76,6 +79,8 @@ class PluginInterface(plugin.DaemonPlugin):
     ICES_DEF_LIST = '/usr/local/freevo_data/Music/ROCK/mymix.m3u' 
     """
     def __init__(self):
+        self.reason = config.REDESIGN_BROKEN
+        return
         plugin.DaemonPlugin.__init__(self)
         self.icecast_pid = None
         self.ices_pid = None
@@ -152,6 +157,8 @@ class IcecastChanger(plugin.ItemPlugin):
     the extra action to m3u files to use them as playlists for icecast. 
     """
     def __init__(self):
+        self.reason = config.REDESIGN_BROKEN
+        return
         plugin.ItemPlugin.__init__(self)
 
     def change2m3u(self, arg=None, menuw=None):
