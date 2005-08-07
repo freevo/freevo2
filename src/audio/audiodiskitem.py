@@ -1,32 +1,18 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # audiodiskitem.py - Item for CD Audio Disks
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
 # This file handles and item for an audio cd. When selected it will either
 # play the whole disc or show a menu with all items. 
 #
-# Notes:
-# Todo:        
-#
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.32  2005/07/08 19:15:52  dischi
-# some config cleanup
-#
-# Revision 1.31  2004/09/13 19:35:26  dischi
-# replace player.get_singleton() with audioplayer()
-#
-# Revision 1.30  2004/07/10 12:33:37  dischi
-# header cleanup
-#
-# Revision 1.29  2004/01/25 14:55:05  dischi
-# use overlay dir for covers
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2003 Krister Lagerstrom, et al. 
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -43,7 +29,8 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
+
 
 __all__ = [ 'AudioDiskItem' ]
 
@@ -53,48 +40,46 @@ import os
 # Freevo imports
 import sysconfig
 import config
-import menu
 
+from menu import Action, Menu
 from audioitem import AudioItem
 from playlist import Playlist
 from directory import DirItem
 
+
 class AudioDiskItem(Playlist):
     """
-    class for handling audio disks
+    Class for handling audio disks.
     """
-    def __init__(self, disc_id, parent, devicename = None,
-                 display_type = None):
-
+    def __init__(self, device, parent):
         Playlist.__init__(self, parent=parent)
         self.type = 'audiocd'
         self.media = None
-        self.disc_id = disc_id
-        self.devicename = devicename
+        self.disc_id = device.info['id']
+        self.devicename = device.devicename
         self.name = _('Unknown CD Album')
         
         # variables only for Playlist
         self.autoplay = 0
 
         # variables only for DirItem
-        self.display_type = display_type
+        self.display_type = 'audio'
 
-        cover = '%s/disc/metadata/%s.jpg' % (sysconfig.VFS_DIR, disc_id)
+        cover = '%s/disc/metadata/%s.jpg' % (sysconfig.VFS_DIR, self.disc_id)
         if os.path.isfile(cover):
             self.image = cover
             
 
     def actions(self):
         """
-        return a list of actions for this item
+        Return a list of actions for this item
         """
-        items = [ ( self.cwd, _('Browse disc') ) ]
-        return items
+        return [ Action(_('Browse disc'), self.browse ) ]
 
     
-    def cwd(self, arg=None, menuw=None):
+    def browse(self):
         """
-        make a menu item for each file in the directory
+        Make a menu item for each file in the directory
         """
         play_items = []
         number = len(self.info['tracks'])
@@ -102,9 +87,9 @@ class AudioDiskItem(Playlist):
             number -= 1
 
         for i in range(0, number):
-            title=self.info['tracks'][i]['title']
-            item = AudioItem('cdda://%d' % (i+1), self, title, scan=False)
-            item.info = self.info['tracks'][i]
+            item = AudioItem('cdda://%d' % (i+1), self)
+            item.name = self.info['tracks'][i]['title']
+            item.info.set_variables(self.info['tracks'][i])
             item.length = item.info['length']
             if config.MPLAYER_ARGS.has_key('cd'):
                 item.mplayer_options += (' ' + config.MPLAYER_ARGS['cd'])
@@ -140,8 +125,5 @@ class AudioDiskItem(Playlist):
         if title[0] == '[' and title[-1] == ']':
             title = self.name[1:-1]
 
-        item_menu = menu.Menu(title, items, item_types = self.display_type)
-        if menuw:
-            menuw.pushmenu(item_menu)
-
-        return items
+        item_menu = Menu(title, items, item_types = self.display_type)
+        self.pushmenu(item_menu)
