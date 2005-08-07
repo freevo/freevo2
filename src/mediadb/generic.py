@@ -116,6 +116,9 @@ def get(filename):
         return disc_info(filename)
     if filename.startswith('file://'):
         filename = filename[7:]
+    elif filename.find('://')> 0:
+        # FIXME: some url we don't handle yet like cdda:// from AudioDiscItem
+        return ItemInfo('', '', None)
     if filename != '/':
         # get normal info using directory listing
         listing = FileListing( [ filename ] )
