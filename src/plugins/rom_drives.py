@@ -69,7 +69,7 @@ import mediadb
 from event import *
 from directory import DirItem
 from gui.windows import WaitBox
-from item import Item
+from menu import Item
 
 # FIXME: use Mimetype for this
 from audio.audiodiskitem import AudioDiskItem
