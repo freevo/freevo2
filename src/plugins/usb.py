@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2005/08/07 10:17:56  dischi
+# poll has no parameters
+#
 # Revision 1.20  2005/08/06 14:50:32  dischi
 # adjust to kaa.notifier.Timer.start now using seconds
 #
@@ -121,7 +124,7 @@ class PluginInterface(plugin.DaemonPlugin):
         fd.close()
         return devices
 
-    def poll(self, menuw=None, arg=None):
+    def poll(self):
         """
         poll to check for devices
         """
