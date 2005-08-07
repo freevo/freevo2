@@ -34,6 +34,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2005/08/07 09:49:36  dischi
+# change reason to broken
+#
 # Revision 1.5  2004/08/01 10:41:52  dischi
 # deactivate plugin
 #
@@ -88,7 +91,7 @@ class PluginInterface(plugin.ItemPlugin):
     """
     
     def __init__(self):
-        self.reason = config.REDESIGN_UNKNOWN
+        self.reason = config.REDESIGN_BROKEN
         return
 		
         plugin.ItemPlugin.__init__(self)

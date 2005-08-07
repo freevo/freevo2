@@ -72,7 +72,7 @@ class PluginInterface(plugin.ItemPlugin):
     """
     
     def __init__(self,playlist_folder=None, naming='Freevo Playlist - %m%d-%I%M'):
-        self.reason = config.REDESIGN_UNKNOWN
+        self.reason = config.REDESIGN_BROKEN
         return
         if playlist_folder == None:
             self.playlist_folder = ('%s/playlists' % config.FREEVO_CACHEDIR)
