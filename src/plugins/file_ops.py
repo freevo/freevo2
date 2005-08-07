@@ -96,7 +96,7 @@ class PluginInterface(plugin.ItemPlugin):
                    default_choice=1).show()
 
 
-    def delete_image(self, arg=None, menuw=None):
+    def delete_image(self, item):
         ConfirmBox(text=_('Delete image about\n \'%s\'?') % item.name,
                    handler=Callback(self.__delete_image, item),
                    default_choice=1).show()
