@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2005/08/07 13:00:22  dischi
+# remove all menuw in eventhandler and remove fallback for old code in menu
+#
 # Revision 1.7  2005/07/16 08:41:12  dischi
 # move context handling from eventhandler to input
 #
@@ -109,7 +112,7 @@ class TVPlayer(Application):
         raise Exception('not implemented in template')
     
 
-    def eventhandler(self, event, menuw=None):
+    def eventhandler(self, event):
         """
         handle some basic events
         """

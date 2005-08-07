@@ -67,7 +67,7 @@ class Application(object):
         self.fullscreen = fullscreen
 
 
-    def eventhandler(self, event, menuw=None):
+    def eventhandler(self, event):
         """
         Eventhandler for this application
         """

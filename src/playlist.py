@@ -453,7 +453,7 @@ class Playlist(MediaItem):
             item.stop()
 
 
-    def eventhandler(self, event, menuw=None):
+    def eventhandler(self, event):
         """
         Handle playlist specific events
         """

@@ -321,7 +321,7 @@ class MenuStack(object):
             menu = self.menustack[-2]
             if hasattr(menu.selected, 'eventhandler') and \
                    menu.selected.eventhandler:
-                if menu.selected.eventhandler(event, self):
+                if menu.selected.eventhandler(event):
                     return True
             return False
 
@@ -425,7 +425,7 @@ class MenuStack(object):
 
         if hasattr(menu.selected, 'eventhandler') and \
                menu.selected.eventhandler:
-            if menu.selected.eventhandler(event, self):
+            if menu.selected.eventhandler(event):
                 return True
 
         return False

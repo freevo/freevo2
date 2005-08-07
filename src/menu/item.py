@@ -49,33 +49,8 @@ import mediadb
 # events covered by item
 from event import EJECT
 
-# menu imports (remove this later)
-from action import ActionWrapper
-
 # get logging object
 log = logging.getLogger()
-
-
-def _actions_wrapper(actions):
-    """
-    Bad actions wrapper while porting the menu code.
-    This function will be removed later.
-    """
-    items = []
-    for a in actions:
-        if isinstance(a, (list, tuple)):
-            if len(a) > 3:
-                items.append(ActionWrapper(a[1], a[0], a[2], a[3]))
-            elif len(a) > 2:
-                items.append(ActionWrapper(a[1], a[0], a[2]))
-            else:
-                items.append(ActionWrapper(a[1], a[0]))
-        elif hasattr(a, 'action'):
-            items.append(a.action)
-        else:
-            items.append(a)
-    return items
-
 
 
 class Item(object):
@@ -191,18 +166,15 @@ class Item(object):
         override 'actions' instead.
         """
         # get actions defined by the item
-        items = _actions_wrapper(self.actions())
+        items = self.actions()
         # get actions defined by plugins
         plugins = plugin.get('item') + plugin.get('item_%s' % self.type)
         plugins.sort(lambda l, o: cmp(l.plugin_level, o.plugin_level))
         for p in plugins:
-            for a in _actions_wrapper(p.actions(self)):
+            for a in p.actions(self):
                 # set item for the action
                 a.item = self
                 items.append(a)
-        # FIXME: delete this!
-        for i in items:
-            i.menuw = self.get_menustack()
         return items
 
 
@@ -247,7 +219,7 @@ class Item(object):
         self.menu.change_item(self, item)
 
         
-    def eventhandler(self, event, menuw=None):
+    def eventhandler(self, event):
         """
         Simple eventhandler for an item
         """

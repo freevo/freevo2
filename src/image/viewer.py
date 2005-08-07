@@ -311,7 +311,7 @@ class ImageViewer(Application):
         return False
 
 
-    def eventhandler(self, event, menuw=None):
+    def eventhandler(self, event):
         """
         Handle incoming events
         """

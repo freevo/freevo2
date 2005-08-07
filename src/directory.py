@@ -320,7 +320,7 @@ class DirItem(Playlist):
 
 
     # eventhandler for this item
-    def eventhandler(self, event, menuw=None):
+    def eventhandler(self, event):
         if event == DIRECTORY_CHANGE_DISPLAY_TYPE and self.item_menu.visible:
             possible = [ ]
 

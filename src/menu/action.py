@@ -14,10 +14,6 @@
 # the function is defined inside the item, no extra parameters are used.
 # If it is outside the item, the first parameter is the item.
 #
-# Note: Right now there are some fallbacks in Action and also the fake class
-# ActionWrapper to support the old style while changing all plugins. This will
-# be removed later.
-#
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
@@ -65,8 +61,7 @@ class Action(object):
         self.args = []
         self.kwargs = {}
         self.item = None
-        # FIXME: delete this!
-        self.menuw = None
+
 
     def __call__(self):
         """
@@ -74,9 +69,6 @@ class Action(object):
         """
         if not self.function:
             return
-        # FIXME: remove this when everything is ported
-        if self.kwargs.has_key('arg'):
-            return self.function(menuw=self.menuw, arg=self.kwargs['arg'])
         # If self.item is set, pass it to the function as first parameter.
         # Check if the function is a member function of that item. If it
         # is, don't pass the item.
@@ -93,26 +85,3 @@ class Action(object):
         """
         self.args = args
         self.kwargs = kwargs
-
-
-
-class ActionWrapper(Action):
-    """
-    Action for item.actions()
-    Note: This will be removed later
-    """
-    def __init__(self, name, function=None, shortcut=None,
-                 description=None):
-        Action.__init__(self, name, function, shortcut, description)
-        self.function = function
-
-    def __call__(self):
-        """
-        call the function
-        """
-        if self.function:
-            if self.item and self.item.menu:
-                self.function(menuw=self.item.menu.stack, arg=None)
-            else:
-                self.function(menuw=None, arg=None)
-                

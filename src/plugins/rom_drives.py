@@ -138,8 +138,8 @@ class autostart(plugin.DaemonPlugin):
         EJECT event. Also take care of the umounting when going back to
         the main menu.
         """
-        menuw = application.get_active()
-        if not menuw or menuw.get_name() != 'menu':
+        app = application.get_active()
+        if not app or app.get_name() != 'menu':
             return True
         
         if event == MENU_GOTO_MAINMENU:
@@ -150,7 +150,7 @@ class autostart(plugin.DaemonPlugin):
             # return
             return True
         
-        if not menuw or len(menuw.menustack) > 1:
+        if not app or len(app.menustack) > 1:
             # not in main menu
             return True
         
@@ -159,7 +159,7 @@ class autostart(plugin.DaemonPlugin):
         if plugin.isevent(event) == 'IDENTIFY_MEDIA' and not event.arg[1]:
             media = event.arg[0]
             if media.item:
-                media.item.parent = menuw.menustack[0].selected
+                media.item.parent = app.menustack[0].selected
             if media.item and media.item.get_actions():
                 if media.type == 'audio':
                     # disc marked as audio, play everything
@@ -176,7 +176,7 @@ class autostart(plugin.DaemonPlugin):
                     # ok, do whatever this item has to offer
                     media.item.get_actions()[0]()
             else:
-                menuw.refresh()
+                app.refresh()
             return True
 
         # Handle the EJECT key for the main menu
@@ -705,8 +705,8 @@ class Watcher(object):
             for media in rom_drives:
                 media.drive_status = None
 
-        menuw = application.get_active()
-        if menuw and menuw.get_name() == 'menu':
+        app = application.get_active()
+        if app and app.get_name() == 'menu':
             # check only in the menu
             for media in rom_drives:
                 if media.lock.locked():

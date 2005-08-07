@@ -606,7 +606,7 @@ class VideoItem(MediaItem):
             self.player.stop()
 
 
-    def eventhandler(self, event, menuw=None):
+    def eventhandler(self, event):
         """
         eventhandler for this item
         """

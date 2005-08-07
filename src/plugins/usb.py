@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2005/08/07 13:00:22  dischi
+# remove all menuw in eventhandler and remove fallback for old code in menu
+#
 # Revision 1.21  2005/08/07 10:17:56  dischi
 # poll has no parameters
 #
@@ -128,8 +131,8 @@ class PluginInterface(plugin.DaemonPlugin):
         """
         poll to check for devices
         """
-        menuw = application.get_active()
-        if not menuw or menuw.get_name() != 'menu':
+        app = application.get_active()
+        if not app or app.get_name() != 'menu':
             return False
 
         changes = False

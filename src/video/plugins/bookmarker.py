@@ -130,7 +130,7 @@ class PluginInterface(ItemPlugin):
             item.pushmenu(moviemenu)
 
 
-    def eventhandler(self, item, event, menuw=None):
+    def eventhandler(self, item, event):
         """
         Handle video events for bookmark support.
         """

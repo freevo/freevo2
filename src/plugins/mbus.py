@@ -26,8 +26,8 @@ class PluginInterface(plugin.Plugin, mcomm.RPCServer):
     def __rpc_play__(self, addr, val):
         file = self.parse_parameter(val, ( str, ))
 
-        menuw = application.get_active()
-        if not menuw or menuw.get_name() != 'menu':
+        app = application.get_active()
+        if not app or app.get_name() != 'menu':
             return mcomm.RPCError('freevo not in menu mode')
 
         for p in plugin.mimetype(None):
@@ -48,8 +48,8 @@ class PluginInterface(plugin.Plugin, mcomm.RPCServer):
         """
         Send status on rpc status request.
         """
-        menuw = application.get_active()
-        if not menuw or menuw.get_name() != 'menu':
+        app = application.get_active()
+        if not app or app.get_name() != 'menu':
             self.idle_time = 0
         status = { 'idle': self.idle_time }
         return mcomm.RPCReturn(status)

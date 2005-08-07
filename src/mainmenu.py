@@ -104,10 +104,7 @@ class MainMenuItem(Item):
         Actions for this item.
         """
         a = Action(self.name, self.function[0])
-        if self.args or self.kwargs or not self.function[1]:
-            a.parameter(*self.args, **self.kwargs)
-        else:
-            a.parameter(menuw=self.get_menustack(), arg=self.function[1])
+        a.parameter(*self.args, **self.kwargs)
         return [ a ]
 
     
@@ -201,7 +198,7 @@ class MainMenu(Item):
         return self.menuw
 
 
-    def eventhandler(self, event, menuw=None):
+    def eventhandler(self, event):
         """
         Automatically perform actions depending on the event, e.g. play DVD
         """
@@ -216,4 +213,4 @@ class MainMenu(Item):
             return True
 
         # give the event to the next eventhandler in the list
-        return Item.eventhandler(self, event, menuw)
+        return Item.eventhandler(self, event)

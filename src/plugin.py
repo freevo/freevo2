@@ -131,7 +131,7 @@ class ItemPlugin(Plugin):
         return []
 
 
-    def eventhandler(self, item, event, menuw=None):
+    def eventhandler(self, item, event):
         """
         Additional eventhandler for this item.
         """

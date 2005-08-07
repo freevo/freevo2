@@ -82,7 +82,8 @@ class MediaMenu(MainMenuItem):
                               parent=parent, skin_type=type)
         self.force_text_view = force_text_view
         self.display_type = type
-
+        self.item_menu = None
+        
         # init the style how to handle discs
         if config.HIDE_UNUSABLE_DISCS:
             # set the disc types to be shown
@@ -274,17 +275,17 @@ class MediaMenu(MainMenuItem):
         return menu
 
 
-    def eventhandler(self, event, menuw=None):
+    def eventhandler(self, event):
         """
         Eventhandler for the media main menu. The menu must be regenerated
         when a disc in a rom drive changes
         """
         if plugin.isevent(event):
-            if not self.item_menu.visible:
+            if not self.item_menu or not self.item_menu.visible:
                 return True
 
             self.item_menu.set_items(self.main_menu_generate())
             return True
 
         # give the event to the next eventhandler in the list
-        return Item.eventhandler(self, event, menuw)
+        return Item.eventhandler(self, event)
