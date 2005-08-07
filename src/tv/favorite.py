@@ -32,8 +32,7 @@
 # -----------------------------------------------------------------------------
 
 # freevo imports
-import menu
-from item import Item
+from menu import Item, Action, Menu
 from gui.windows import MessageBox
 
 # tv imports
@@ -44,7 +43,7 @@ class FavoriteItem(Item):
     """
     A favorite item to add/delete/change a favorite for the recordserver.
     """
-    def __init__(self, name, start, parent=None):
+    def __init__(self, name, start, parent):
         Item.__init__(self, parent)
         self.name  = self.title = name
         self.start = start
@@ -72,23 +71,23 @@ class FavoriteItem(Item):
         """
         return a list of possible actions on this item.
         """
-        return [ (self.add, _('Add as favorite')) ]
+        return [ Action(_('Add as favorite'), self.add) ]
 
 
-    def submenu(self, arg=None, menuw=None):
+    def submenu(self):
         """
         show a submenu for this item
         """
         items = []
-        for function, title in self.get_actions():
-            items.append(menu.MenuItem(title, function))
-        s = menu.Menu(self, items, item_types = 'tv favorite menu')
+        for action in self.actions():
+            items.append(Item(self, action))
+        s = Menu(self, items, item_types = 'tv favorite menu')
         s.submenu = True
         s.infoitem = self
-        menuw.pushmenu(s)
+        self.pushmenu(s)
 
 
-    def add(self, arg=None, menuw=None):
+    def add(self):
         (result, msg) = record.client.favorites.add(self)
         if result:
             MessageBox(text=_('"%s" has been scheduled as favorite') % \

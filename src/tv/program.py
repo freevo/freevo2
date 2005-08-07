@@ -40,9 +40,8 @@ import notifier
 
 # freevo imports
 import config
-import menu
 import plugin
-from item import Item
+from menu import Item, Action, Menu, ActionItem
 from gui.windows import MessageBox
 
 # tv imports
@@ -53,7 +52,7 @@ class ProgramItem(Item):
     """
     A tv program item for the tv guide and other parts of the tv submenu.
     """
-    def __init__(self, program, parent=None):
+    def __init__(self, program, parent):
         Item.__init__(self, parent)
         self.program = program
         self.title = program.title
@@ -132,10 +131,10 @@ class ProgramItem(Item):
         """
         return a list of possible actions on this item.
         """
-        return [ (self.submenu, _('Show program menu') ) ]
+        return [ Action(_('Show program menu'), self.submenu) ]
 
 
-    def submenu(self, arg=None, menuw=None, additional_items=False):
+    def submenu(self, additional_items=False):
         """
         show a submenu for this item
         """
@@ -145,92 +144,91 @@ class ProgramItem(Item):
             print self.scheduled.status
             if self.start < time.time() + 10 and \
                    self.scheduled.status in ('recording', 'saved'):
-                items.append(menu.MenuItem(_('Watch recording'), \
-                                           self.watch_recording))
+                items.append(ActionItem(_('Watch recording'), self,
+                                        self.watch_recording))
             if self.stop > time.time():
                 if self.start < time.time():
-                    items.append(menu.MenuItem(_('Stop recording'), \
-                                               self.remove))
+                    items.append(ActionItem(_('Stop recording'), self,
+                                            self.remove))
                 else:
-                    items.append(menu.MenuItem(_('Remove recording'), \
-                                               self.remove))
+                    items.append(ActionItem(_('Remove recording'), self,
+                                            self.remove))
         elif self.stop > time.time():
-            items.append(menu.MenuItem(_('Schedule for recording'), \
-                                       self.schedule))
+            items.append(ActionItem(_('Schedule for recording'), self,
+                                    self.schedule))
         if additional_items:
-            items.append(menu.MenuItem(_('Show complete listing for %s') % \
-                                       self.channel.name,
-                                       self.channel_details))
-            items.append(menu.MenuItem(_('Watch %s') % self.channel.name,
-                                       self.watch_channel))
+            items.append(ActionItem(_('Show complete listing for %s') % \
+                                    self.channel.name, self,
+                                    self.channel_details))
+            items.append(ActionItem(_('Watch %s') % self.channel.name, self,
+                                    self.watch_channel))
             txt = _('Search for programs with a similar name')
-            items.append(menu.MenuItem(txt, self.search_similar))
+            items.append(ActionItem(txt, self, self.search_similar))
 
-        items.append(menu.MenuItem(_('Add to favorites'),
-                                   self.create_favorite))
+        items.append(ActionItem(_('Add to favorites'), self,
+                                self.create_favorite))
 
-        s = menu.Menu(self, items, item_types = 'tv program menu')
+        s = Menu(self, items, item_types = 'tv program menu')
         s.submenu = True
         s.infoitem = self
-        menuw.pushmenu(s)
+        self.pushmenu(s)
 
 
-    def schedule(self, arg=None, menuw=None):
+    def schedule(self):
         (result, msg) = recordings.schedule(self)
         if result:
             MessageBox(text=_('"%s" has been scheduled for recording') % \
                          self.title).show()
         else:
             MessageBox(text=_('Scheduling Failed')+(': %s' % msg)).show()
-        menuw.delete_submenu
+        self.get_menustack().delete_submenu()
 
 
-    def remove(self, arg=None, menuw=None):
+    def remove(self):
         (result, msg) = recordings.remove(self.scheduled.id)
         if result:
             MessageBox(text=_('"%s" has been removed as recording') % \
                          self.title).show()
         else:
             MessageBox(text=_('Scheduling Failed')+(': %s' % msg)).show()
-        menuw.delete_submenu
+        self.get_menustack().delete_submenu()
 
 
-    def channel_details(self, arg=None, menuw=None):
+    def channel_details(self):
         items = []
         # keep the notifier alive
         notifier_counter = 0
         for prog in self.channel[time.time():]:
             if not prog.id == -1:
-                items.append(ProgramItem(prog))
+                items.append(ProgramItem(prog, self))
             notifier_counter = (notifier_counter + 1) % 500
             if not notifier_counter:
                 notifier.step(False, False)
-        cmenu = menu.Menu(self.channel.name, items,
-                          item_types = 'tv program menu')
+        cmenu = Menu(self.channel.name, items, item_types = 'tv program menu')
         # FIXME: the percent values need to be calculated
         # cmenu.table = (15, 15, 70)
-        menuw.pushmenu(cmenu)
+        self.pushmenu(cmenu)
 
 
-    def watch_channel(self, arg=None, menuw=None):
+    def watch_channel(self):
         p = self.channel.player(self.channel)
         if p:
             app, device, uri = p
             app.play(self.channel.id, device, uri)
 
 
-    def watch_recording(self, arg=None, menuw=None):
+    def watch_recording(self):
         MessageBox(text='Not implemented yet').show()
 
 
-    def search_similar(self, arg=None, menuw=None):
+    def search_similar(self):
         MessageBox(text='Not implemented yet').show()
 
 
-    def create_favorite(self, arg=None, menuw=None):
+    def create_favorite(self):
         fav = favorite.FavoriteItem(self.name, self.start, self)
-        fav.submenu(menuw=menuw)
+        fav.submenu()
 
 
-    def remove_favorite(self, arg=None, menuw=None):
+    def remove_favorite(self):
         MessageBox(text='Not implemented yet').show()

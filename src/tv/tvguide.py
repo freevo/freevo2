@@ -42,6 +42,7 @@ import gui.areas
 
 from event import *
 from application import MenuApplication
+from menu import Item
 from program import ProgramItem
 
 # get logging object
@@ -64,24 +65,26 @@ def get_singleton():
 class TVGuide(MenuApplication):
     """
     TVGuide application. It is _inside_ the menu, so it is a
-    MenuApplication. When inside the menuw, there is also a variable
-    self.stack.
+    MenuApplication.
     """
     def __init__(self):
         MenuApplication.__init__(self, 'tvguide', 'tvmenu', False)
-
+        self.item = None
 
     def start(self, parent):
         self.engine = gui.areas.Handler('tv', ('screen', 'title', 'subtitle',
                                                'view', 'tvlisting', 'info'))
         self.parent = parent
+        # create fake parent item for ProgramItems
+        self.item = Item(parent, None, 'tv')
+        
         self.current_time = int(time.time())
 
         # current channel is the first one
         self.channel  = kaa.epg.channels[0]
 
         # current program is the current running
-        self.selected = ProgramItem(self.channel[self.current_time])
+        self.selected = ProgramItem(self.channel[self.current_time], self.item)
 
         return True
     
@@ -91,7 +94,7 @@ class TVGuide(MenuApplication):
         show the guide
         """
         self.channel = kaa.epg.get_channel()
-        self.selected = ProgramItem(self.channel[self.current_time])
+        self.selected = ProgramItem(self.channel[self.current_time], self.item)
         self.refresh()
         MenuApplication.show(self)
         
@@ -112,19 +115,21 @@ class TVGuide(MenuApplication):
             
         if event == MENU_UP:
             self.channel = kaa.epg.get_channel(self.channel, -1)
-            self.selected = ProgramItem(self.channel[self.current_time])
+            self.selected = ProgramItem(self.channel[self.current_time],
+                                        self.item)
             self.refresh()
             return True
 
         if event == MENU_DOWN:
             self.channel = kaa.epg.get_channel(self.channel, 1)
-            self.selected = ProgramItem(self.channel[self.current_time])
+            self.selected = ProgramItem(self.channel[self.current_time],
+                                        self.item)
             self.refresh()
             return True
 
         if event == MENU_LEFT:
             epg_prog = self.channel[self.selected.program.start - 1]
-            self.selected = ProgramItem(epg_prog)
+            self.selected = ProgramItem(epg_prog, self.item)
             if self.selected.start > 0:
                 self.current_time = self.selected.start + 1
             self.refresh()
@@ -132,7 +137,7 @@ class TVGuide(MenuApplication):
 
         if event == MENU_RIGHT:
             epg_prog = self.channel[self.selected.program.stop+1]
-            self.selected = ProgramItem(epg_prog)
+            self.selected = ProgramItem(epg_prog, self.item)
             if self.selected.start > 0:
                 self.current_time = self.selected.start + 1
             self.refresh()
@@ -140,30 +145,32 @@ class TVGuide(MenuApplication):
 
         if event == MENU_PAGEUP:
             self.channel = kaa.epg.get_channel(self.channel, -9)
-            self.selected = ProgramItem(self.channel[self.current_time])
+            self.selected = ProgramItem(self.channel[self.current_time],
+                                        self.item)
             self.refresh()
             return True
 
         if event == MENU_PAGEDOWN:
             self.channel = kaa.epg.get_channel(self.channel, 9)
-            self.selected = ProgramItem(self.channel[self.current_time])
+            self.selected = ProgramItem(self.channel[self.current_time],
+                                        self.item)
             self.refresh()
             return True
 
         if event == TV_SHOW_CHANNEL:
-            self.selected.channel_details(menuw=self.stack)
+            self.selected.channel_details()
             return True
         
         if event == MENU_SUBMENU:
-            self.selected.submenu(menuw=self.stack, additional_items=True)
+            self.selected.submenu(additional_items=True)
             return True
             
         if event == TV_START_RECORDING:
-            self.selected.submenu(menuw=self.stack, additional_items=True)
+            self.selected.submenu(additional_items=True)
             return True
  
         if event == PLAY:
-            self.selected.watch_channel(menuw=self.stack)
+            self.selected.watch_channel()
             return True
 
         if event == MENU_SELECT or event == PLAY:
@@ -171,9 +178,9 @@ class TVGuide(MenuApplication):
             # if so, bring up the submenu
             now = time.time() + (7*60)
             if self.selected.start > now:
-                self.selected.submenu(menuw=self.stack, additional_items=True)
+                self.selected.submenu(additional_items=True)
             else:
-                self.selected.watch_channel(menuw=self.stack)
+                self.selected.watch_channel()
             return True
         
         if event == PLAY_END:
