@@ -15,6 +15,9 @@
 # for a full list of tested sites see Docs/plugins/headlines.txt
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2005/08/07 09:49:20  dischi
+# deactivate plugin
+#
 # Revision 1.28  2005/06/09 19:43:53  dischi
 # clean up eventhandler usage
 #
@@ -114,6 +117,8 @@ class PluginInterface(plugin.MainMenuPlugin):
     """
     # make an init func that creates the cache dir if it don't exist
     def __init__(self):
+        self.reason = config.REDESIGN_BROKEN
+        return
         if not hasattr(config, 'MAX_HEADLINE_AGE'):
             #check every 30 minutes
             config.MAX_HEADLINE_AGE = 1800
