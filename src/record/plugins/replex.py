@@ -64,10 +64,12 @@ class PluginInterface(Plugin):
         log.info('add replex plugin')
 
 
-    def replex_stop(self, source, dest, exit_code):
+    def replex_stop(self, exit_code, source, dest):
         """
         The replex program has stopped, check the result.
         """
+        log.info('replex_stop args = %s,%s,%s' % (source, dest, exit_code))
+        
         # get length of both files
         srcinfo = kaa.metadata.parse(source)
         if not srcinfo:
@@ -147,6 +149,7 @@ class PluginInterface(Plugin):
         log.info('replex %s' % String(source))
         app = [ self.nice, '-n', '19', self.replex, '-x', '-k',
                 '-t', 'DVD', '--of', dest, source ]
+        log.info('replex_start args = %s' % str(app))
         child = kaa.notifier.Process(app)
         child.signals["completed"].connect(self.replex_stop, source, dest)
         child.start()
