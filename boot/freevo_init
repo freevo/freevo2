@@ -1,11 +1,14 @@
 #!/bin/bash
 #
-# A start script for the Freevo record server which may be used by init. Init
+# A start script for Freevo applications which may be used by init. Init
 # has the ability to watchdog processes and restart them if they fail.
 # To run this from init you may edit /etc/inittab and add a line with the 
 # syntax:  1-4 letter identifyer:runlevels to run at:respawn:command
 #
-# FV1:2345:respawn:/usr/local/freevo/boot/recordserver_init
+# Please read the inittab man page (man inittab) to understand this example:
+# FV1:2345:respawn:/path/to/freevo_init <helper_name>
+#
+# Using this script with no helper_name argument will start Freevo itself.
 #
 # Typing 'init q' will tell init to reread inittab so it can start this 
 # for you.
@@ -14,12 +17,12 @@
 # only need to kill the process and init will start it back up.  You may easily
 # kill the process by running the record_server script with the stop argument:
 #
-# ./record_server stop
-#
+# freevo <helper_name> stop
 #
 # There is a file called boot_config which can be found in the boot/ 
 # directory of Freevo.  This file should be copied to /etc/freevo/boot_config
-# and edited to suit your needs.
+# and edited to suit your needs.  It contains valuable environment variables
+# for Freevo applications.
 #
 # $Id$
 
@@ -29,6 +32,7 @@ test -f /etc/freevo/boot_config || exit 0
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin
 
-$FREEVO_HOME/freevo recordserver 2>&1 > /dev/null
+$FREEVO_HOME/freevo $1 2>&1 > /dev/null
 
+# Sleep for some seconds to keep things sane if Freevo fails to start.
 sleep 6
