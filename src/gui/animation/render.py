@@ -43,7 +43,7 @@ import time
 import copy
 
 # kaa imports
-from kaa.notifier import Timer, step
+from kaa.notifier import OneShotTimer, Timer, step
 
 # global render object
 _render = None
@@ -69,7 +69,7 @@ class Render(object):
     def __init__(self, display):
         # set the update handler to wait for osd
         self.display = display
-        self.update_timer = Timer(self.update)
+        self.update_timer = OneShotTimer(self.update)
         self.animations = []    # all animations
         self.suspended  = []    # suspended animations
 
@@ -83,7 +83,6 @@ class Render(object):
         remove  = self.animations.remove
         i = 0
 
-        self.update_timer.stop()
         timer = time.time()
         next  = 0
 
@@ -112,7 +111,7 @@ class Render(object):
         if len( self.animations ):
             next = max(0, int((next - time.time())))
             self.update_timer.start(next)
-
+    
 
     def kill(self, anim_object):
         """
