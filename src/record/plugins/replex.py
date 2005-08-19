@@ -68,8 +68,6 @@ class PluginInterface(Plugin):
         """
         The replex program has stopped, check the result.
         """
-        log.info('replex_stop args = %s,%s,%s' % (source, dest, exit_code))
-        
         # get length of both files
         srcinfo = kaa.metadata.parse(source)
         if not srcinfo:
@@ -108,8 +106,6 @@ class PluginInterface(Plugin):
             log.info('no fxd file to change')
             return
 
-        log.info('changing fxd file %s' % String(fxd))
-
         # read fxd file
         f = open(fxd)
         data = f.readlines()
@@ -120,10 +116,17 @@ class PluginInterface(Plugin):
 
         # write fxd file with source replaced with dest
         f = open(fxd, 'w')
+        made_change = False
         for line in data:
+            if line != line.replace(source, dest):
+                made_change = True
             f.write(line.replace(source, dest))
         f.close()
-
+        if made_change:
+            log.info('changed fxd file %s' % String(fxd))
+        else:
+            log.error('unable to change fxd file %s' % String(fxd))
+            
 
 
     def stop_recording(self, recording):
