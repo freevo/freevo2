@@ -30,7 +30,7 @@ def notification(entity):
 def print_result(result):
     if isinstance(result, (list, tuple)):
         for r in result:
-            print r
+            print String(unicode(r))
     else:
         print result
 
