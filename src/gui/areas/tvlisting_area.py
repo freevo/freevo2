@@ -349,8 +349,13 @@ class TvlistingArea(Area):
 
         start_time = self.last_start_time
         if menu.selected.start == 0:
-            start_time = self.last_start_time - 60 * col_time
-
+            if self.last_start_time:
+                start_time = self.last_start_time
+            else:
+                t = list(time.localtime())
+                t[4] = t[5] = 0
+                start_time = int(time.mktime(t))
+                
         elif menu.selected.start < self.last_start_time:
             if menu.selected.stop < self.last_start_time + \
                    (n_cols - 2) * col_time * 60:
