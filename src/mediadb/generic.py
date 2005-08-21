@@ -80,10 +80,14 @@ def disc_info(media):
     cachefile = os.path.join(sysconfig.VFS_DIR, 'disc/metadata/%s.db' % id)
     cache = FileCache(media.devicename, cachefile)
     info = DiscInfo(True, media, cache)
-    info.url = info['mime'][6:] + '://'
-    if info['mime'] in ('video/vcd', 'video/dvd'):
-        return info
 
+    try:
+        info.url = info['mime'][6:] + '://'
+        if info['mime'] in ('video/vcd', 'video/dvd'):
+            return info
+    except:
+        log.error('Please report this: mime=%s' % info['mime'])
+        info.url = ''
     # Disc is data of some sort. Mount it to get the file info
     media.mount()
     if os.path.isdir(os.path.join(media.mountdir, 'VIDEO_TS')) or \
