@@ -120,12 +120,12 @@ def main():
         print
         print 'TV_CHANNELS = ['
         for c in chanlist[:-1]:
-            print '    ( \'%s\', \'%s\', \'%s\' ), ' % (c['id'], 
-                                                        c['display_name'], 
-                                                        c['access_id'])
+            print '    ( \'%s\', \'%s\', \'%s\' ), ' % (c[kaa.epg.ID], 
+                                                        c[kaa.epg.DISPLAY_NAME], 
+                                                        c[kaa.epg.ACCESS_ID])
         print '    ( \'%s\', \'%s\', \'%s\' ) ] ' % \
-              (chanlist[-1]['id'], chanlist[-1]['display_name'], 
-               chanlist[-1]['access_id'])
+              (chanlist[-1][kaa.epg.ID], chanlist[-1][kaa.epg.DISPLAY_NAME], 
+               chanlist[-1][kaa.epg.ACCESS_ID])
         sys.exit(0)
 
 
@@ -141,8 +141,8 @@ def main():
         print
         print 'TV_CHANNELS_EXCLUDE = ['
         for c in chanlist[:-1]:
-            print '    \'%s\',' % c['id']
-        print '    \'%s\', ] ' % chanlist[-1]['id']
+            print '    \'%s\',' % c[kaa.epg.ID]
+        print '    \'%s\', ] ' % chanlist[-1][kaa.epg.ID]
         sys.exit(0)
 
 
