@@ -187,6 +187,8 @@ class FileListing(Listing):
                 dirname = f[:f.rfind('/')]
                 basename = f[f[:-1].rfind('/')+1:]
             try:
+                if len(dirname) == 0:
+                    dirname = '/'
                 if not dirname in self.caches:
                     cache = db.get(dirname)
                     self.caches[dirname] = ( cache, [ basename ] )
