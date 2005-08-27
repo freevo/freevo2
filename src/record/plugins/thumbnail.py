@@ -30,8 +30,10 @@
 #
 # -----------------------------------------------------------------------------
 
+# kaa imports
+import kaa.thumb
+
 # freevo imports
-from util.videothumb import snapshot
 from record.plugins import Plugin
 from record.record_types import *
 
@@ -48,4 +50,4 @@ class PluginInterface(Plugin):
         if not recording.url.startswith('file:'):
             return
         filename = recording.url[5:]
-        snapshot(filename)
+        kaa.thumb.videothumb(filename)

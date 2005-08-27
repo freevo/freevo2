@@ -44,7 +44,6 @@ import config
 import util
 import mediadb
 import util.thumbnail as thumbnail
-import util.videothumb
 import util.fileops as fileops
 
 # use this number to keep track of changes in this helper
@@ -254,7 +253,7 @@ if len(sys.argv)>1 and sys.argv[1] == '--thumbnail':
     for filename in files:
         print '  %4d/%-4d %s' % (files.index(filename)+1, len(files),
                                  os.path.basename(filename))
-        util.videothumb.snapshot(filename, update=False)
+        kaa.thumb.videothumb(filename, update=False)
     print
     sys.exit(0)
 

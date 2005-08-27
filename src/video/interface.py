@@ -40,10 +40,12 @@ import os
 import copy
 import string
 
+# kaa imports
+import kaa.thumb
+
 # freevo imports
 import config
 import util
-import util.videothumb
 import plugin
 import fxditem
 from menu import Files
@@ -98,7 +100,7 @@ class PluginInterface(plugin.MimetypePlugin):
             if parent and parent.type == 'dir' and \
                    hasattr(parent,'VIDEO_DIRECTORY_AUTOBUILD_THUMBNAILS') and \
                    parent.VIDEO_DIRECTORY_AUTOBUILD_THUMBNAILS:
-                util.videothumb.snapshot(file.filename, update=False)
+                kaa.thumb.videothumb(file.filename, update=False)
 
 #             if file in hidden_files:
 #                 files.remove(file)

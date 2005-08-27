@@ -44,11 +44,13 @@ import os
 import copy
 import logging
 
+# kaa imports
+import kaa.thumb
+
 # freevo imports
 import config
 import util
 import plugin
-import util.videothumb
 import mediadb
 
 from gui.windows import MessageBox, ConfirmBox
@@ -469,7 +471,7 @@ class VideoItem(MediaItem):
         """
         create a thumbnail as image icon
         """
-        util.videothumb.snapshot(self.filename)
+        kaa.thumb.videothumb(self.filename)
         # delete the submenu that got us here
         self.get_menustack().delete_submenu()
 
