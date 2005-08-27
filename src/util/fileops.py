@@ -60,26 +60,6 @@ log = logging.getLogger()
 # misc file ops
 #
 
-def getdirnames(dirname, softlinks=True, sort=True):
-    """
-    Get all subdirectories in the given directory.
-    Returns a list that is case insensitive sorted.
-    """
-    if not dirname.endswith('/'):
-        dirname += '/'
-
-    try:
-        dirnames = [ dirname + dname for dname in os.listdir(dirname) if \
-                     os.path.isdir(dirname + dname) and \
-                     (softlinks or not os.path.islink(dirname + dname))]
-    except OSError:
-        return []
-
-    dirnames.sort(lambda l, o: cmp(l.upper(), o.upper()))
-    return dirnames
-
-
-
 def readfile(filename):
     """
     return the complete file as list
@@ -121,13 +101,6 @@ def touch(file):
     except IOError:
         pass
     return 0
-
-
-def mtime(filename):
-    """
-    helper function to get the modification time of a file
-    """
-    return os.stat(filename)[stat.ST_MTIME]
 
 
 def _rmrf_helper(result, dirname, names):

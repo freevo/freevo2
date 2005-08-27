@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2005/08/27 15:36:20  dischi
+# remove some util functions
+#
 # Revision 1.11  2004/10/28 19:37:40  dischi
 # remove LD_PRELOAD handling
 #
@@ -61,6 +64,24 @@ def mkalldir(d):
         if not os.path.isdir(cd):
             os.mkdir(cd)
             
+def getdirnames(dirname, softlinks=True, sort=True):
+    """
+    Get all subdirectories in the given directory.
+    Returns a list that is case insensitive sorted.
+    """
+    if not dirname.endswith('/'):
+        dirname += '/'
+
+    try:
+        dirnames = [ dirname + dname for dname in os.listdir(dirname) if \
+                     os.path.isdir(dirname + dname) and \
+                     (softlinks or not os.path.islink(dirname + dname))]
+    except OSError:
+        return []
+
+    dirnames.sort(lambda l, o: cmp(l.upper(), o.upper()))
+    return dirnames
+
     
 if len(sys.argv) == 2 and os.path.isfile(sys.argv[1]):
     is_local = False
@@ -120,7 +141,7 @@ if len(sys.argv) == 2 and os.path.isfile(sys.argv[1]):
                     os.rename(file, new_file)
     else:
         # check package
-        d = util.fileops.getdirnames('tmp')
+        d = getdirnames('tmp')
         if len(d) != 1:
             print 'package is not a freevo theme or plugin, please contact the author'
         else:

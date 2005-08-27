@@ -87,7 +87,8 @@ class FXDtree(qp_xml.Parser):
             if use_cache:
                 cachename = vfs.getoverlay(filename + '.raw')
                 if os.path.isfile(filename) and os.path.isfile(cachename) and \
-                       fileops.mtime(cachename) >= fileops.mtime(filename):
+                       os.stat(cachename)[stat.ST_MTIME] >= \
+                       os.stat(filename)[stat.ST_MTIME]:
                     self.tree = cache.load(cachename)
             if not self.tree:
                 f = vfs.open(filename)
