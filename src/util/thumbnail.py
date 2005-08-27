@@ -48,7 +48,6 @@ import kaa.thumb
 import kaa.notifier
 
 # freevo utils
-import fileops
 import vfs
 
 # the logging object
