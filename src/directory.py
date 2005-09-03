@@ -483,7 +483,7 @@ class DirItem(Playlist):
         return
         
 
-    def check_password_and_build(self):
+    def check_password_then_browse(self):
         """
         password checker
         """
@@ -493,44 +493,49 @@ class DirItem(Playlist):
                 media.mount()
                 self.media = media
 
-        # FIXME: add support again when InputBox is working
-	if vfs.isfile(self.dir + '/.password') and 0:
-	    log.warning('password protected dir')
-            self.arg   = arg
-	    pb = InputBox(text=_('Enter Password'), handler=self.pass_cmp_cb,
+        if vfs.isfile(self.dir + '/.password'):
+            log.warning('password protected dir')
+            pb = InputBox(text=_('Enter Password'), handler=self.browse_pass_cb,
                           type='password')
-	    pb.show()
-	else:
-	    self.build()
+            pb.show()
+        else:
+            self.browse(authstatus=1)
 
 
-    def pass_cmp_cb(self, word=None):
+    def browse_pass_cb(self, word=None):
         """
         read the contents of self.dir/.passwd and compare to word
-        callback for check_password_and_build
+        callback for check_password_then_browse
         """
-	try:
-	    pwfile = vfs.open(self.dir + '/.password')
-	    line = pwfile.readline()
-	except IOError, e:
-	    log.error('error %d (%s) reading password file for %s' % \
-                      (e.errno, e.strerror, self.dir))
-	    return
-
-	pwfile.close()
-	password = line.strip()
-	if word == password:
-	    self.build()
-	else:
-	    MessageBox(_('Password incorrect')).show()
+        try:
+            pwfile = vfs.open(self.dir + '/.password')
+            line = pwfile.readline()
+        except IOError, e:
+            log.error('error %d (%s) reading password file for %s' % \
+                        (e.errno, e.strerror, self.dir))
             return
 
+        pwfile.close()
+        password = line.strip()
+        if word == password:
+            self.browse(authstatus=1)
+        else:
+            MessageBox(_('Password incorrect')).show()
+            self.browse(authstatus=-1)
 
-    def browse(self, update=False):
+
+    def browse(self, update=False, authstatus=0):
         """
         build the items for the directory
         """
-        # FIXME: add password checking here
+        # check for password
+	if authstatus == 0:
+	    self.check_password_then_browse()
+	elif authstatus == -1:
+	    log.info('authorization failed for browsing %s' % self.dir)
+	    return
+	    
+
         if update and not (self.listing and self.item_menu.visible):
             # not visible right now, do not update
             self.needs_update = True
