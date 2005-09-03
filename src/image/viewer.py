@@ -285,7 +285,7 @@ class ImageViewer(Application):
         Stop the current viewing
         """
         # Don't stop the viewer application, just send a PLAY_END
-        # event and do the Application.stop() later
+        # event.
         event = Event(PLAY_END, self.item)
         event.set_handler(self.eventhandler)
         event.post()
@@ -339,8 +339,8 @@ class ImageViewer(Application):
             return True
 
         if event == PLAY_END:
-            # Viewing is done, stop the Application.
-            Application.stop(self)
+            # Viewing is done, set application to stopped
+            self.stopped()
             self.item.eventhandler(event)
             return True
 

@@ -125,8 +125,8 @@ class AudioPlayer(Application):
         """
         Stop playing.
         """
-        # This function doesn't use the Application.stop() code here. It will
-        # be called when the playing stopped (PLAY_END)
+        # This function doesn't use the Application.stop() code here
+        # because we stop and it is stopped when the child is dead.
         if self.player:
             self.player.stop()
             self.player = None
@@ -190,10 +190,10 @@ class AudioPlayer(Application):
             return True
 
         if event == PLAY_END:
-            # Now the player has stopped. Here, at this point and not when
-            # self.stop() is called. So now we have to do the stop() stuff
-            # from Application.stop()
-            Application.stop(self)
+            # Now the player has stopped (either we called self.stop() or the
+            # player stopped by itself. So we need to set the application to
+            # to stopped.
+            self.stopped()
             self.item.eventhandler(event)
             return True
 
