@@ -1,44 +1,16 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
-# xine.py - the Freevo XINE module for audio
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# xine.py - the Freevo xine plugin and application for audio
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# This contains plugin, control and childapp classes for using xine as
-# audio player.
-#
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.27  2005/07/16 09:51:27  dischi
-# adjust to new event interface
-#
-# Revision 1.26  2005/06/25 08:52:24  dischi
-# switch to new style python classes
-#
-# Revision 1.25  2005/06/09 19:43:53  dischi
-# clean up eventhandler usage
-#
-# Revision 1.24  2005/06/01 19:01:25  dischi
-# adjust to popen changes
-#
-# Revision 1.23  2004/11/21 10:12:46  dischi
-# improve system detect, use config.detect now
-#
-# Revision 1.22  2004/10/06 19:13:41  dischi
-# use config auto detection for xine version
-#
-# Revision 1.21  2004/10/06 19:01:34  dischi
-# use new childapp interface
-#
-# Revision 1.20  2004/09/29 18:58:17  dischi
-# cleanup
-#
-# Revision 1.19  2004/09/29 18:48:41  dischi
-# fix xine lirc handling
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -55,21 +27,26 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
 # python imports
-import re
+import logging
 
 # freevo imports
 import config
-import childapp
 import plugin
+
 from event import *
+from application import ChildApp
+
+# the logging object
+log = logging.getLogger('audio')
 
 
 class PluginInterface(plugin.Plugin):
     """
-    Xine plugin for the audio player.
+    MPlayer plugin for the audio player. It will create an MPlayer object
+    and register it to the plugin interface as audio player.
     """
     def __init__(self):
         config.detect('xine')
@@ -91,11 +68,13 @@ class PluginInterface(plugin.Plugin):
         plugin.register(Xine(), plugin.AUDIO_PLAYER, True)
 
 
-class Xine(object):
+
+class Xine(ChildApp):
     """
     The main class to control xine for audio playback
     """
     def __init__(self):
+        ChildApp.__init__(self, 'xine', 'audio', False, False, False)
         self.name = 'xine'
         self.app = None
         self.command = '%s -V none -A %s --stdctl' % \
@@ -116,7 +95,7 @@ class Xine(object):
         return 2
 
 
-    def play(self, item, playerGUI):
+    def play(self, item, player):
         """
         play an audio file with xine
         """
@@ -130,27 +109,41 @@ class Xine(object):
                             item.media.devicename)
             
         command  = self.command.split(' ') + add_args + [ url ]
-        self.app = XineApp(command, playerGUI)
     
+        self.item = item
+        self.player = player
+
+        # start child
+        self.child_start(command, config.MPLAYER_NICE, 'quit\n')
+        return None
+
 
     def is_playing(self):
-        return self.app.is_alive()
-
-
-    def stop(self):
         """
-        Stop xine
+        Return True if mplayer is playing right now.
         """
-        self.app.stop('quit\n')
-            
+        return self.child_running()
+
 
     def eventhandler(self, event):
         """
         eventhandler for xine control. If an event is not bound in this
         function it will be passed over to the items eventhandler
         """
+        ChildApp.eventhandler(self, event)
+
+        if event == PLAY_END:
+            # Should to be passed to this handler. This happens because the
+            # mplayer application code thinks this is the real application
+            # shown by Freevo. But it is the player.py code using this object
+            # only in the background.
+            return self.player.eventhandler(event)
+
+        if not self.child_running():
+            return False
+
         if event == PAUSE or event == PLAY:
-            self.app.write('pause\n')
+            self.child_stdin('pause\n')
             return True
 
         if event == SEEK:
@@ -166,40 +159,7 @@ class Xine(object):
                 pos = 30
             else:
                 pos = 30
-            self.app.write('%s%s\n' % (action, pos))
+            self.child_stdin('%s%s\n' % (action, pos))
             return True
 
         return False
-
-        
-# ======================================================================
-
-class XineApp(childapp.Instance):
-    """
-    class controlling the in and output from the xine process
-    """
-    def __init__(self, app, player):
-        self.item        = player.item
-        self.player      = player
-        self.elapsed     = 0
-        self.stop_reason = 0 # 0 = ok, 1 = error
-        childapp.Instance.__init__(self, app, stop_osd=0)
-
-
-    def stop_event(self):
-        event = Event(PLAY_END, self.stop_reason)
-        event.set_handler(self.player.eventhandler)
-        return event
-
-
-    def stdout_cb(self, line):
-        if line.startswith("time: "):
-            self.item.elapsed = int(line[6:])
-            if self.item.elapsed != self.elapsed:
-                self.player.refresh()
-            self.elapsed = self.item.elapsed
-
-
-    def stderr_cb(self, line):
-        if line.startswith('Unable to open MRL'):
-            self.stop_reason = 1
