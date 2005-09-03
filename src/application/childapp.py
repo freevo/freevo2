@@ -71,19 +71,18 @@ class Application(base.Application):
         """
         Stop the Application.
         """
-        if hasattr(self, 'item') and self.has_child():
+        if self.has_child():
             self.child_stop()
-        else:
-            base.Application.stop(self)
 
 
     def eventhandler(self, event):
         """
         Simple eventhandler acting on PLAY_END.
         """
+        print event, self.item, event.arg
         if event == PLAY_END and hasattr(self, 'item') and self.item and \
                event.arg == self.item:
-            base.Application.stop(self)
+            self.stopped()
             
 
     def child_start(self, cmd, prio=0, stop_cmd=''):

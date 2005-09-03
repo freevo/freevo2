@@ -158,7 +158,7 @@ class Eventhandler(object):
         """
         log.info('new application %s' % app)
         # make sure the app is not stopped
-        app.stopped = False
+        app._stopped = False
         # do will have a stack or is this the first application?
         if len(self.applications) == 0:
             # just add the application
@@ -170,11 +170,11 @@ class Eventhandler(object):
         previous = self.applications[-1]
         if previous == app:
             # It is the same app, just remove the stopped flag
-            previous.stopped = False
+            previous._stopped = False
         else:
             # hide the application and mark the application change
             previous.hide()
-            if previous.stopped:
+            if previous._stopped:
                 # the previous application is stopped, remove it
                 self.applications.remove(previous)
             self.applications.append(app)
@@ -244,7 +244,7 @@ class Eventhandler(object):
                 self.applications[-1].eventhandler(event=event)
 
             # now do some checking if the focus needs to be changed
-            if self.applications[-1].stopped or \
+            if self.applications[-1]._stopped or \
                    not self.applications[-1].visible:
                 log.info('current application is stopped')
                 # the current application wants to be removed, either

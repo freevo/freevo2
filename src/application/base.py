@@ -63,7 +63,7 @@ class Application(object):
 
         self.animated   = animated
         self.visible    = False
-        self.stopped    = True
+        self._stopped   = True
         self.fullscreen = fullscreen
 
 
@@ -84,11 +84,11 @@ class Application(object):
         """
         if self.visible:
             # Already visible. But maybe stopped, correct that
-            self.stopped = False
+            self._stopped = False
             return False
         # Set visible and append to the eventhandler
         self.visible = True
-        self.stopped = False
+        self._stopped = False
         if not self in self.__handler:
             self.__handler.append(self)
         # Check if the new app uses animation to show itself
@@ -124,11 +124,20 @@ class Application(object):
     def stop(self):
         """
         Stop the application. If it is not shown again in the same cycle, the
-        hide() function will be called.
+        hide() function will be called. If the app isn't really stopped now
+        (e.g. a child needs to be stopped), do not call this function.
         """
-        self.stopped = True
+        self.stopped()
 
 
+    def stopped(self):
+        """
+        Set the application to status stopped. If it is not shown again in the same
+        cycle, the hide() function will be called.
+        """
+        self._stopped = True
+
+        
     def set_eventmap(self, eventmap):
         """
         Set a new eventmap for the event handler

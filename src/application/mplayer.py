@@ -189,7 +189,7 @@ class Application(childapp.Application):
         Eventhandler function.
         """
         if event == PLAY_END:
-            base.Application.stop(self)
+            self.stopped()
             return False
 
         if not self.has_child():
