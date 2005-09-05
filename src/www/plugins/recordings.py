@@ -80,7 +80,7 @@ class RecordResource(FreevoResource):
             prog = None
             for p in progs:
                 if Unicode(chan) == \
-                       kaa.epg.get_channel_by_id(p.channel).title \
+                       kaa.epg.get_channel_by_id(p.channel).id \
                    and int(start) == p.start:
                     prog = p
 
@@ -170,7 +170,7 @@ class RecordResource(FreevoResource):
                     'title="Remove Scheduled Recording">'+_('Remove')+'</a>'+\
                     '|' + '<a href="search?find=%s&search_title=on" ' +\
                     'title="Search for other airings">' + _('Search') +
-                    '</a>') % (channel, prog.start, Unicode(prog['title']))
+                    '</a>') % (prog.channel, prog.start, Unicode(prog['title']))
             fv.tableCell(cell, colspan)
             fv.tableRowClose()
 
