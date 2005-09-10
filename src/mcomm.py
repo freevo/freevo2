@@ -235,6 +235,7 @@ class RPCServer(object):
         for f in dir(self):
             if f.startswith('__rpc_'):
                 cmdname = 'home-theatre.' + f[6:-2].replace('_', '.')
+                log.info('register %s' % cmdname)
                 add_callback(cmdname, getattr(self, f))
 
 
