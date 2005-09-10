@@ -529,11 +529,15 @@ class DirItem(Playlist):
         build the items for the directory
         """
         # check for password
-	if authstatus == 0:
-	    self.check_password_then_browse()
-	elif authstatus == -1:
-	    log.info('authorization failed for browsing %s' % self.dir)
-	    return
+        if 0:
+            # This code breaks the menu. In some cases a directory
+            # menu is twice or even more often in the stack.
+            # So it is disabled until fixed!
+            if authstatus == 0:
+                self.check_password_then_browse()
+            elif authstatus == -1:
+                log.info('authorization failed for browsing %s' % self.dir)
+                return
 	    
 
         if update and not (self.listing and self.item_menu.visible):
