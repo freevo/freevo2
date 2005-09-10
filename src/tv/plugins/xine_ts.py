@@ -104,13 +104,10 @@ class Xine(ChildApp):
 
     def rate(self, channel, device, uri):
         """
-        For now, just handle dvb and ivtv.
+        FIXME: remove this function, every player can play everything
+        through the recordserver
         """
-        if device.startswith('ivtv'):
-            return 2
-        if device.startswith('dvb'):
-            return 2
-        return 0
+        return 2
 
     
     def play(self, channel, device, uri):
@@ -120,28 +117,16 @@ class Xine(ChildApp):
         self.channel = channel
         self.device  = config.TV_CARDS[device]
         self.item    = uri
-        
+
+        # FIMXE: dynamic url handling
+        destip = '224.224.244.244:12345'
+
         # request record on server
         rs = mcomm.find('recordserver', 0)
         if not rs:
             # FIXME: handle error
             return
-        rs.call('watch.start', self.__receive_url, uri)
-        self.show()
-        return None
-    
-
-    def __receive_url(self, result):
-        if isinstance(result, mbus.types.MError):
-            log.error(str(result))
-            self.stop()
-            return
-        if not result.appStatus:
-            log.error(str(result.appDescription))
-            self.stop()
-            return
-
-        print 
+        rs.call('watch.start', self.__receive_url, (uri, destip))
 
         # create command
         command = config.XINE_COMMAND.split(' ') + \
@@ -156,13 +141,26 @@ class Xine(ChildApp):
                config.FBXINE_USE_LIRC:
             command.append('--no-lirc')
 
-        self.id, url = result.arguments
-        command.append(url)
+        command.append('udp://%s#demux:mpeg_pes' % destip)
+
+        self.show()
 
         # start child
         log.info('Xine.play(): Starting cmd=%s' % command)
         self.child_start(command, config.MPLAYER_NICE, 'quit\n')
         return None
+    
+
+    def __receive_url(self, result):
+        if isinstance(result, mbus.types.MError):
+            log.error(str(result))
+            self.stop()
+            return
+        if not result.appStatus:
+            log.error(str(result.appDescription))
+            self.stop()
+            return
+        log.info('live recording started')
 
         
     def eventhandler(self, event):
