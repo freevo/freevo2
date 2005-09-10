@@ -117,6 +117,14 @@ class DVBCard(object):
         if name.find('\0') > 0:
             name = name[:name.find('\0')]
         self.name = name
+        for path in ('~/.freevo', '~/.mplayer', '~/.xine'):
+            conf = os.path.join(os.path.expanduser(path), 'channels.conf')
+            if os.path.isfile(conf):
+                self.channels_conf = conf
+                break
+        else:
+            log.error('channels conf not found')
+            self.channels_conf = ''
         log.debug('register dvb device %s' % self.adapter)
 
 
