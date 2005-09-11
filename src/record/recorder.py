@@ -50,7 +50,7 @@ class RecorderList(object):
         if not recorder in self.recorder:
             self.recorder.append(recorder)
             recorder.server = self.server
-            self.check()
+        self.check()
         
 
     def remove(self, recorder):
