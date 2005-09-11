@@ -119,14 +119,17 @@ class Xine(ChildApp):
         self.item    = uri
 
         # FIMXE: dynamic url handling
-        destip = '224.224.244.244:12345'
+        destip = '224.224.244.200:12345'
 
         # request record on server
         rs = mcomm.find('recordserver', 0)
         if not rs:
+            print 'no rs'
             # FIXME: handle error
             return
-        rs.call('watch.start', self.__receive_url, (uri, destip))
+                
+        print 'start'
+        rs.call('watch.start', self.__receive_url, channel, destip)
 
         # create command
         command = config.XINE_COMMAND.split(' ') + \
@@ -160,18 +163,31 @@ class Xine(ChildApp):
             log.error(str(result.appDescription))
             self.stop()
             return
+        self.id = result.arguments
         log.info('live recording started')
 
-        
+
+    def __stop_done(self, result):
+        if isinstance(result, mbus.types.MError):
+            log.error(str(result))
+            return
+        if not result.appStatus:
+            log.error(str(result.appDescription))
+            return
+        return
+
+    
     def eventhandler(self, event):
         """
         Eventhandler for xine control.
         """
         if event == PLAY_END:
             # stop recordserver live recording
+            print 'x'
             rs = mcomm.find('recordserver', 0)
             if rs and self.id != None:
-                rs.call('watch.stop', self.id)
+                print 'stop'
+                rs.call('watch.stop', self.__stop_done, self.id)
                 self.id = None
                 
         ChildApp.eventhandler(self, event)

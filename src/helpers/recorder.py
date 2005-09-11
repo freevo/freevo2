@@ -16,13 +16,11 @@ class Recorder(RPCServer):
         
         for id, card in config.TV_CARDS.items():
             if id.startswith('dvb'):
-                dev = kaa.record.DvbDevice(card.adapter, card.channels_conf, 0)
+                dev = kaa.record.DvbDevice(card.adapter, card.channels_conf)
                 dev.name = id
-                # FIXME:
-                dev.rating = 10
+                dev.rating = card.priority
                 self.cards.append(dev)
-
-                
+        
     def __rpc_devices_list__(self, addr, val):
         self.server = addr
         return RPCReturn([ x.name for x in self.cards ])
@@ -41,16 +39,25 @@ class Recorder(RPCServer):
         device, channel, start, stop, filename, options = \
                 self.parse_parameter(val, ( str, str, int, int, str, list ))
         for card in self.cards:
-            if card.name = id:
+            if card.name == device:
                 device = card
                 break
         else:
             return RPCError('%s invalid' % id)
+
+        chain = kaa.record.Chain()
+        if isinstance(device, kaa.record.DvbDevice):
+            chain.append(kaa.record.Remux())
+        if filename.startswith('file:/'):
+            filename = filename[5:]
+        if filename.startswith('udp://') > 0:
+            chain.append(kaa.record.UDPSend(filename[6:]))
+        else:
+            chain.append(kaa.record.Filewriter(filename))
             
-        output = kaa.record.Filewriter(filename, 0, kaa.record.Filewriter.FT_MPEG)
-        rec = kaa.record.Recording(start, stop, device, channel, output)
-        rec.signals['start'].connect(self.send_event, 'vdr_started', rec.id)
-        rec.signals['stop'].connect(self.send_event, 'vdr_stopped', rec.id)
+        rec = kaa.record.Recording(start, stop, device, channel, chain)
+        rec.signals['start'].connect(self.send_event, 'vdr.started', rec.id)
+        rec.signals['stop'].connect(self.send_event, 'vdr.stopped', rec.id)
         self.recordings[rec.id] = rec
         return RPCReturn(rec.id)
 
@@ -67,7 +74,7 @@ class Recorder(RPCServer):
     def send_event(self, event, id):
         if not self.server:
             return
-        self.send_event(self.server, event, id)
+        self.mbus_instance.send_event(self.server, event, (id,))
         
 r = Recorder()
 kaa.main()
