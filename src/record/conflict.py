@@ -94,6 +94,11 @@ class Device(object):
         Append recording to list of possible and return True. If not possible,
         do not append and return False.
         """
+        if not self.plugin:
+            # dummy recorder, it is always possible not record it
+            self.rec.append(recording)
+            return True
+
         recording.conflict_padding = []
         if recording.status == RECORDING:
             # the recording is running right now, do not move it to
@@ -105,10 +110,6 @@ class Device(object):
             else:
                 # not possible to use this recorder
                 return False
-        if not self.plugin:
-            # dummy recorder, it is always possible not record it
-            self.rec.append(recording)
-            return True
 
         if not recording.channel in self.all_channels:
             # channel not supported
@@ -363,8 +364,7 @@ def clear_cache():
     """
     Clear the global conflict resolve cache
     """
-    pass
 #     global _conflict_cache
-#     global _devices
+    global _devices
 #     _conflict_cache = ObjectCache(30, 'conflict')
-#     _devices = []
+    _devices = []
