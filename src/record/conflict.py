@@ -89,54 +89,63 @@ class Device(object):
                         self.all_channels.append(c)
 
 
-    def is_possible(self):
-        # Ideas from Sep. 02
-        #
-        # Possible (list_of_recs):
-        # is it possible at all to record list_of_recs[-1] on this device?
-        # delete all with no conflict to list_of_recs[-1] or that are on a different card
-        #   (the function is card specfic). Conflict means not only direct conflicts but
-        #   full conflict blocks.
-        # all remaining have to be in the same bouquet
-        #
-        latest = self.rec[-1]
-        latest.conflict_padding = []
-        if latest.status == RECORDING:
+    def append(self, recording):
+        """
+        Append recording to list of possible and return True. If not possible,
+        do not append and return False.
+        """
+        recording.conflict_padding = []
+        if recording.status == RECORDING:
             # the recording is running right now, do not move it to
             # a new plugin
-            if latest.recorder[0] == self.plugin:
+            if recording.recorder[0] == self.plugin:
                 # same recorder, everything ok
+                self.rec.append(recording)
                 return True
             else:
                 # not possible to use this recorder
                 return False
         if not self.plugin:
             # dummy recorder, it is always possible not record it
+            self.rec.append(recording)
             return True
-        if not latest.channel in self.all_channels:
+
+        if not recording.channel in self.all_channels:
             # channel not supported
             return False
-        conflict = scan(self.rec, True)
-        if not conflict:
-            # possible without conflict
+
+        if not len(self.rec):
+            # first recording, has to fit
+            self.rec.append(recording)
             return True
-        # we now know that it is a conflict, maybe removing the padding
-        # helps to solve it. The conflict list only contains one item (!)
-        # Note: the recordings are sorted by time
-        conflict = conflict[0]
-        for c in conflict:
-            if c == latest:
+
+        # get the bouquet where the current recordings are
+        bouquet = [ x for x in self.listing if recording.channel in x ][0]
+        
+        # Get all recordings conflicting with the current one by time. based on
+        # a sort listing, the others will start before or at the same time as
+        # the latest. So when the stop time of an other is before the new start
+        # time, it is no conflict. (ignoring padding here for once)
+        # If the conflict is only based on the padding, add it to conflict_padding
+        
+        for r in self.rec:
+            if r.channel in bouquet:
+                # same bouquet, will always work
                 continue
-            if c.stop + c.stop_padding < latest.start - latest.start_padding:
-                continue
-            if c.stop <= latest.start:
-                # works when removing padding
-                latest.conflict_padding.append(c)
-            else:
-                # will never work
+            if r.stop > recording.start:
+                # overlapping time, won't work
                 return False
+            if r.stop + r.stop_padding > recording.start - recording.start_padding:
+                # overlapping padding
+                recording.conflict_padding.append(r)
+
+        self.rec.append(recording)
         return True
 
+
+    def remove_last(self):
+        self.rec = self.rec[:-1]
+        
 
 def scan(recordings, include_padding):
     """
@@ -277,7 +286,7 @@ def rate(devices, best_rating):
 
 
 
-def check(devices, fixed, to_check, best_rating, dropped=1000):
+def check(devices, fixed, to_check, best_rating, dropped=1):
     """
     Check all possible combinations from the recordings in to_check on all
     devices. Call recursive again.
@@ -293,11 +302,10 @@ def check(devices, fixed, to_check, best_rating, dropped=1000):
 
     c = to_check[0]
     for d in devices:
-        d.rec.append(c)
-        if d.is_possible():
+        if d.append(c):
             best_rating, dropped = check(devices, fixed + [ c ], to_check[1:],
                                          best_rating, dropped)
-        d.rec.remove(c)
+            d.remove_last()
     return best_rating, dropped
 
 
@@ -327,15 +335,15 @@ def resolve(recordings):
     conflicts = scan(recordings, True)
     for c in conflicts:
         info = 'found conflict:\n'
-        conflict_id = ''
-        for r in c:
-            info += '%s\n' % str(r)[:str(r).rfind(' ')]
-            conflict_id += str(r)
-        result = _conflict_cache[conflict_id]
-        if result:
-            for r in c:
-                r.status, r.recorder = result[r.id]
-            continue
+#         conflict_id = ''
+#         for r in c:
+#             info += '%s\n' % str(r)[:str(r).rfind(' ')]
+#             conflict_id += str(r)
+#         result = _conflict_cache[conflict_id]
+#         if result:
+#             for r in c:
+#                 r.status, r.recorder = result[r.id]
+#             continue
         log.debug(info)
         check(_devices, [], c, 0)
         result = {}
@@ -346,7 +354,7 @@ def resolve(recordings):
             info += '%s\n' % str(r)
         log.debug(info)
         # store cache result
-        _conflict_cache[conflict_id] = result
+#         _conflict_cache[conflict_id] = result
     t2 = time.time()
     log.info('resolve conflict took %s secs' % (t2-t1))
 
@@ -355,7 +363,8 @@ def clear_cache():
     """
     Clear the global conflict resolve cache
     """
-    global _conflict_cache
-    global _devices
-    _conflict_cache = ObjectCache(30, 'conflict')
-    _devices = []
+    pass
+#     global _conflict_cache
+#     global _devices
+#     _conflict_cache = ObjectCache(30, 'conflict')
+#     _devices = []
