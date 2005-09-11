@@ -1,3 +1,5 @@
+import logging
+
 import config
 import kaa
 import kaa.record
@@ -5,6 +7,8 @@ import kaa.record
 # mbus support
 from mcomm import RPCServer, RPCError, RPCReturn
 
+# get logging object
+log = logging.getLogger()
 
 class Recorder(RPCServer):
     def __init__(self):
@@ -64,6 +68,7 @@ class Recorder(RPCServer):
         
     def __rpc_vdr_remove__(self, addr, val):
         id = self.parse_parameter(val, ( int, ))
+        log.info('stop recording %s' % id)
         if id in self.recordings:
             self.recordings[id].remove()
             del self.recordings[id]
