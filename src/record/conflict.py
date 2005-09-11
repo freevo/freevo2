@@ -29,6 +29,7 @@
 # people have a different oppinion what is the correct way to resolve the
 # conflict. Maybe it should also contain the number of seconds in a recording.
 #
+#
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
@@ -89,6 +90,15 @@ class Device(object):
 
 
     def is_possible(self):
+        # Ideas from Sep. 02
+        #
+        # Possible (list_of_recs):
+        # is it possible at all to record list_of_recs[-1] on this device?
+        # delete all with no conflict to list_of_recs[-1] or that are on a different card
+        #   (the function is card specfic). Conflict means not only direct conflicts but
+        #   full conflict blocks.
+        # all remaining have to be in the same bouquet
+        #
         latest = self.rec[-1]
         latest.conflict_padding = []
         if latest.status == RECORDING:
@@ -201,6 +211,14 @@ def rate_conflict(clist):
     ret      = 0
     if not clist:
         return 0
+    # Ideas from Sep. 02
+    #
+    # Rating (will be called when everything is set, for all devices except NULL)
+    # for r in recordings:
+    #    result += (0.1 * dev.prio) + 1 * (rec.prio + rec.length * 0.001) - cr
+    # and cr is based on all recordings starting incl. padding before r, overlap
+    # with r and are not in the same bouquet as r.
+    # so cr is AveragePrio * 0.01 + overlapping time in minutes
     for c in clist:
         for pos, r1 in enumerate(c[:-1]):
           # check all pairs of conflicts (stop from x with start from x + 1)
