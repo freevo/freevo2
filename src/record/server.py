@@ -602,28 +602,40 @@ class RecordServer(RPCServer):
         live recording
         parameter: channel
         """
-        channel, url = self.parse_parameter(val, ( str, str ))
-        # FIXME: maybe the recorder is busy!
-        rec = recorder.recorder.best_recorder[channel]
-        if not rec:
-            return RPCError('no recorder for %s found' % channel)
-
+        channel = self.parse_parameter(val, ( str, ))
         for c in kaa.epg.channels:
             if c.id == channel:
                 channel = c
                 break
         else:
             return RPCError('channel %s not found' % channel)
+
+        if channel.registered:
+            # Already sending a stream of this channel, reuse it
+            channel.registered.append(addr)
+
+            RecordServer.LIVE_TV_ID += 1
+            id = RecordServer.LIVE_TV_ID
+            self.live_tv_map[id] = channel
+
+            return RPCReturn((id, url))
+            
+        # Find a device for recording. The device should be not recording
+        # right now and for the next 5 minutes or recording on the same
+        # bouquet. And it should the recorder with the best priority.
         
+        # FIXME: right now we take one recorder no matter if it is
+        # recording right now.
+        rec = recorder.recorder.best_recorder[channel.id]
+        if not rec:
+            return RPCError('no recorder for %s found' % channel.id)
+
         url = 'udp://%s:%s' % (LIVETV_URL, channel.port)
 
-        if not channel.registered:
-            # no app is watching this channel right now, start recorder
-            rec_id = rec[0].start_livetv(rec[1], channel.id, url)
-            # save id and recorder in channel
-            channel.recorder = rec[0], rec_id
-
-        # add new watcher
+        # no app is watching this channel right now, start recorder
+        rec_id = rec[0].start_livetv(rec[1], channel.id, url)
+        # save id and recorder in channel
+        channel.recorder = rec[0], rec_id
         channel.registered.append(addr)
 
         RecordServer.LIVE_TV_ID += 1

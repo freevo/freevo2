@@ -78,6 +78,12 @@ class RemoteRecording(object):
         self.start = start
 
 
+class LiveTV(object):
+    def __init__(self, device, channel):
+        self.device = device
+        self.channel = channel
+        self.id = None
+        
 
 class Recorder(recorder.Plugin):
     """
@@ -89,10 +95,11 @@ class Recorder(recorder.Plugin):
         recorder.Plugin.__init__(self)
         self.entity = entity
         self.name = entity.addr['id']
-        self.devices = []
+        self.possible_bouquets = []
+        self.current_bouquets = []
         self.recordings = []
         self.check_timer = None
-        self.livetv_id = {}
+        self.livetv = {}
         # FIXME: use kaa.epg for this during runtime
         self.channels = {}
         for channel in kaa.epg.channels:
@@ -142,7 +149,8 @@ class Recorder(recorder.Plugin):
                         bouquet.append(channel.id)
                         break
             listing.append(bouquet)
-        self.devices.append(result.arguments[:2] + [listing])
+        self.possible_bouquets.append(result.arguments[:2] + [listing])
+        self.current_bouquets.append(result.arguments[:2] + [listing])
         # let the server recheck it's recorder, this one is updated
         log.info('%s: activate external plugin' % self.name)
         self.activate()
@@ -152,7 +160,7 @@ class Recorder(recorder.Plugin):
         """
         Return channel list to recordserver.
         """
-        return self.devices
+        return self.current_bouquets
 
 
     def __vdr_record(self, result):
@@ -174,16 +182,7 @@ class Recorder(recorder.Plugin):
                 remote.id = result.arguments
                 break
         else:
-            # FIXME: livetv, ugly ugly hack. We need to update
-            # the whole mbus stuff to make it look more like kaa
-            # callbacks
-            log.info('return for live tv')
-            for key, value in self.livetv_id.items():
-                if value == None:
-                    self.livetv_id[key] = result.arguments
-                    break
-            else:
-                log.error('key not found')
+            log.info('id not found')
                 
         # check more recordings
         self.check_recordings()
@@ -193,17 +192,53 @@ class Recorder(recorder.Plugin):
         """
         Callback for vdr.remove
         """
-        if 0 and isinstance(result, mbus.types.MError):
+        if isinstance(result, mbus.types.MError):
             log.error(str(result))
             self.deactivate()
             return
-        if 0 and not result.appStatus:
+        if not result.appStatus:
             log.error(str(result.appDescription))
             self.deactivate()
             return
         # check more recordings
         self.check_recordings()
 
+
+    def __livetv_start(self, result):
+        """
+        Callback for vdr.record for live tv
+        """
+        if isinstance(result, mbus.types.MError):
+            log.error(str(result))
+            self.deactivate()
+            return
+        if not result.appStatus:
+            log.error(str(result.appDescription))
+            self.deactivate()
+            return
+        log.info('return for live tv start')
+        for key, value in self.livetv.items():
+            self.livetv[key].id = result.arguments
+            break
+        else:
+            log.error('key not found')
+
+
+    def __livetv_stop(self, result):
+        """
+        Callback for vdr.remove for live tv
+        """
+        if isinstance(result, mbus.types.MError):
+            log.error(str(result))
+            self.deactivate()
+            return
+        if not result.appStatus:
+            log.error(str(result.appDescription))
+            self.deactivate()
+            return
+        log.info('return for live tv stop')
+        return
+    
 
     def check_recordings(self):
         """
@@ -228,18 +263,15 @@ class Recorder(recorder.Plugin):
                 filename = self.get_url(rec)
                 rec.url  = filename
                 log.info('%s: schedule %s' % (self.name, String(rec.name)))
-                self.entity.call('vdr.record', self.__vdr_record,
-                                 remote.device, channel,
-                                 remote.start, rec.stop + rec.stop_padding,
-                                 filename, ())
+                self.entity.call('vdr.record', self.__vdr_record, remote.device, channel,
+                                 remote.start, rec.stop + rec.stop_padding, filename, ())
                 remote.id = IN_PROGRESS
                 break
             if not remote.valid:
                 # remove the recording
                 log.info('%s: remove %s' % (self.name, String(remote.recording.name)))
                 try:
-                    self.entity.call('vdr.remove', self.__vdr_remove,
-                                     remote.id)
+                    self.entity.call('vdr.remove', self.__vdr_remove, remote.id)
                 except:
                     pass
                 self.recordings.remove(remote)
@@ -276,26 +308,48 @@ class Recorder(recorder.Plugin):
 
     def start_livetv(self, device, channel, url):
         log.info('start live tv')
-        self.entity.call('vdr.record', self.__vdr_record,
-                         device, self.channels[channel], 0, 2147483647, url, ())
+
+        self.entity.call('vdr.record', self.__livetv_start, device,
+                         self.channels[channel], 0, 2147483647, url, ())
         id = Recorder.next_livetv_id
         Recorder.next_livetv_id = id + 1
-        self.livetv_id[id] = None
+        self.livetv[id] = LiveTV(device, channel)
+        self.activate()
         return id
 
     
     def stop_livetv(self, id):
         log.info('stop live tv')
-        if not id in self.livetv_id:
+        if not id in self.livetv:
             # FIXME: handle error
+            log.error('id not in list')
             return
-        extid = self.livetv_id[id]
-        del self.livetv_id[id]
-        if extid != None:
-            # running
-            self.entity.call('vdr.remove', self.__vdr_remove, extid)
+        info = self.livetv[id]
+        del self.livetv[id]
+        if info.id != None:
+            self.entity.call('vdr.remove', self.__livetv_stop, info.id)
+        else:
+            log.error('remote id is None')
+        self.activate()
+            
 
+    def activate(self):
+        self.current_bouquets = []
+        used = {}
+        for info in self.livetv.values():
+            if not info.device in used:
+                used[info.device] = []
+            if not info.channel in used[info.device]:
+                used[info.device].append(info.channel)
 
+        for id, prio, channels in self.possible_bouquets:
+            if id in used:
+                # return the listing with the first channel in it
+                # (they all need to be in the same list, so no problem here)
+                channels = [ c for c in channels if used[id][0] in c ]
+            self.current_bouquets.append([id, prio, channels])
+        recorder.Plugin.activate(self)
+        
 def entity_update(entity):
     """
     Update external recorders on entity changes.
