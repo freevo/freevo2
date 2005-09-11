@@ -73,10 +73,13 @@ class RecordServer(RPCServer):
     schedule for recordings and favorites. The recordings itself are
     done by plugins in record/plugins.
     """
+    LIVE_TV_ID = 0
+    
     def __init__(self):
         RPCServer.__init__(self, 'recordserver')
         self.clients = []
         self.last_listing = []
+        self.live_tv_map = {}
         config.detect('tvcards', 'channels')
         # file to load / save the recordings and favorites
         self.fxdfile = sysconfig.datafile('recordserver.fxd')
@@ -422,6 +425,9 @@ class RecordServer(RPCServer):
     #
 
     def start_recording(self, recording):
+        if not recording:
+            log.info('live tv started')
+            return
         log.info('recording started')
         recording.status = RECORDING
         # send update to mbus entities
@@ -434,13 +440,16 @@ class RecordServer(RPCServer):
 
     
     def stop_recording(self, recording):
+        if not recording:
+            log.info('live tv stopped')
+            return
         log.info('recording stopped')
         if recording.url.startswith('file:'):
             filename = recording.url[5:]
             if os.path.isfile(filename):
                 recording.status = SAVED
             else:
-                log.info('failed: file not found')
+                log.info('failed: file not found %s' % recording.url)
                 recording.status = FAILED
         else:
             recording.status = SAVED
@@ -591,11 +600,12 @@ class RecordServer(RPCServer):
         rec = recorder.recorder.best_recorder[channel]
         if not rec:
             return RPCError('no recorder for %s found' % channel)
-        r = Recording(id, 'title', channel, f.priority,
-                              p.start, p.stop)
-        r = Recording(0
-        return RPCReturn()
-        
+        rec_id = rec[0].start_livetv(rec[1], channel, 'udp://' + url)
+        RecordServer.LIVE_TV_ID += 1
+        id = RecordServer.LIVE_TV_ID
+        self.live_tv_map[id] = rec, rec_id
+        return RPCReturn(id)
+
         
     def __rpc_watch_stop__(self, addr, val):
         """
@@ -603,7 +613,11 @@ class RecordServer(RPCServer):
         parameter: id
         """
         id = self.parse_parameter(val, ( int, ))
-        print id
+        log.info('stop live tv with id %s' % id)
+        rec, rec_id = self.live_tv_map[id]
+        del self.live_tv_map[id]
+        rec[0].stop_livetv(rec_id)
+        return RPCReturn()
         
         
     def __rpc_recording_modify__(self, addr, val):

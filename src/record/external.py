@@ -92,7 +92,7 @@ class Recorder(recorder.Plugin):
         self.devices = []
         self.recordings = []
         self.check_timer = None
-        self.livetv_id = []
+        self.livetv_id = {}
         # FIXME: use kaa.epg for this during runtime
         self.channels = {}
         for channel in kaa.epg.channels:
@@ -167,22 +167,20 @@ class Recorder(recorder.Plugin):
             log.error(str(result.appDescription))
             self.deactivate()
             return
-        if len(result.arguments) != 1:
-            log.error('RPC return invalid')
-            self.deactivate()
-            return
+
         # result is an unique id
         for remote in self.recordings:
             if remote.id == IN_PROGRESS:
-                remote.id = result.arguments[0]
+                remote.id = result.arguments
+                break
         else:
             # FIXME: livetv, ugly ugly hack. We need to update
             # the whole mbus stuff to make it look more like kaa
             # callbacks
             log.info('return for live tv')
-            for key, value in self.livetv_id:
+            for key, value in self.livetv_id.items():
                 if value == None:
-                    self.livetv_id[key] = result.arguments[0]
+                    self.livetv_id[key] = result.arguments
                     break
             else:
                 log.error('key not found')
@@ -228,6 +226,7 @@ class Recorder(recorder.Plugin):
                 rec      = remote.recording
                 channel  = self.channels[rec.channel]
                 filename = self.get_url(rec)
+                rec.url  = filename
                 log.info('%s: schedule %s' % (self.name, String(rec.name)))
                 self.entity.call('vdr.record', self.__vdr_record,
                                  remote.device, channel,
@@ -276,8 +275,9 @@ class Recorder(recorder.Plugin):
 
 
     def start_livetv(self, device, channel, url):
+        log.info('start live tv')
         self.entity.call('vdr.record', self.__vdr_record,
-                         device, channel, 0, 0, url, ())
+                         device, self.channels[channel], 0, 2147483647, url, ())
         id = Recorder.next_livetv_id
         Recorder.next_livetv_id = id + 1
         self.livetv_id[id] = None
@@ -285,6 +285,7 @@ class Recorder(recorder.Plugin):
 
     
     def stop_livetv(self, id):
+        log.info('stop live tv')
         if not id in self.livetv_id:
             # FIXME: handle error
             return
