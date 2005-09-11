@@ -64,7 +64,11 @@ except Exception, e:
 import record.server
 
 # start recordserver
-record.server.RecordServer()
+server = record.server.RecordServer()
+
+# start recorder for this machine
+if config.TV_RECORD_START_RECORDER:
+    kaa.notifier.Process([os.environ['FREEVO_SCRIPT'], 'recorder']).start()
 
 kaa.notifier.loop()
 kaa.notifier.shutdown()

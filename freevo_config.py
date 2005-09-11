@@ -1095,6 +1095,11 @@ XINE_USE_VDR = 0
 TV_RECORD_DIR = None
 
 #
+# Autostart recorder when starting the recordserver
+#
+TV_RECORD_START_RECORDER = False
+
+#
 # Size (in MB) of the timeshift buffer. (ie: how long you can pause tv for.)  
 # This is set to a low default because the default buffer location is 
 # under FREEVO_CACHEDIR and we don't want to blow /var or /tmp.
