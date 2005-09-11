@@ -108,10 +108,13 @@ class DVBCard(object):
         name = val[0]
         if val[1] == 0:
             self.type = 'DVB-S'
+            self.priority = 10
         elif val[1] == 1:
             self.type = 'DVB-C'
+            self.priority = 9
         elif val[1] == 2:
             self.type = 'DVB-T'
+            self.priority = 8
         else:
             self.type = 'unknown (%s)' % val[1]
         if name.find('\0') > 0:
