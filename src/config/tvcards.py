@@ -38,7 +38,7 @@ import logging
 
 # freevo imports
 import config
-import util.ioctl as ioctl
+from util.ioctl import ioctl, pack, unpack, IOR
 
 # get logging object
 log = logging.getLogger('config')
@@ -100,11 +100,11 @@ class DVBCard(object):
         self.adapter = '/dev/dvb/adapter' + number
 
         INFO_ST = '128s10i'
-        val = ioctl.pack( INFO_ST, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 )
+        val = pack( INFO_ST, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 )
         devfd = os.open(self.adapter + '/frontend0', os.O_TRUNC)
-        r = ioctl.ioctl(devfd, ioctl.IOR('o', 61, INFO_ST), val)
+        r = ioctl(devfd, IOR('o', 61, INFO_ST), val)
         os.close(devfd)
-        val = ioctl.unpack( INFO_ST, r )
+        val = unpack( INFO_ST, r )
         name = val[0]
         if val[1] == 0:
             self.type = 'DVB-S'
@@ -172,13 +172,20 @@ for i in range(10):
         type = 'tv'
         driver = None
         try:
-            import tv.v4l2
-            v = tv.v4l2.Videodev(device=vdev)
-            driver = v.driver
+            QUERYCAP_ST  = "16s32s32sLL16x"
+            QUERYCAP_NO  = IOR('V',  0, QUERYCAP_ST)
+
+            devfd = os.open(vdev, os.O_TRUNC)
+            val = pack(QUERYCAP_ST, "", "", "", 0, 0)
+            r = ioctl(devfd, QUERYCAP_NO, val)
+            os.close(devfd)
+            driver = unpack(QUERYCAP_ST, r)[0]
+
+            log.debug('detected driver: %s' % driver)
+
             if driver.find('ivtv') != -1:
                 type = 'ivtv'
-            v.close()
-            del v
+
         except OSError:
             # likely no device attached
             continue
@@ -187,6 +194,7 @@ for i in range(10):
             continue
         except:
             log.exception('tv detection')
+            continue
 
         if type == 'ivtv':
             key = '%s%s' % (type, _ivtv_number)
