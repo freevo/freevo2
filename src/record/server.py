@@ -66,6 +66,7 @@ log = logging.getLogger('record')
 
 # FIXME: move to config file
 EPGDB = sysconfig.datafile('epgdb')
+LIVETV_URL = '224.224.224.10'
 
 class RecordServer(RPCServer):
     """
@@ -81,6 +82,12 @@ class RecordServer(RPCServer):
         self.last_listing = []
         self.live_tv_map = {}
         config.detect('tvcards', 'channels')
+        # add port for channels and check if they are in live-tv mode
+        port = 6000
+        for index, channel in enumerate(kaa.epg.channels):
+            channel.port = port + index
+            channel.registered = []
+        
         # file to load / save the recordings and favorites
         self.fxdfile = sysconfig.datafile('recordserver.fxd')
         # load the recordings file
@@ -593,18 +600,38 @@ class RecordServer(RPCServer):
     def __rpc_watch_start__(self, addr, val):
         """
         live recording
-        parameter: id
+        parameter: channel
         """
         channel, url = self.parse_parameter(val, ( str, str ))
         # FIXME: maybe the recorder is busy!
         rec = recorder.recorder.best_recorder[channel]
         if not rec:
             return RPCError('no recorder for %s found' % channel)
-        rec_id = rec[0].start_livetv(rec[1], channel, 'udp://' + url)
+
+        for c in kaa.epg.channels:
+            if c.id == channel:
+                channel = c
+                break
+        else:
+            return RPCError('channel %s not found' % channel)
+        
+        url = 'udp://%s:%s' % (LIVETV_URL, channel.port)
+
+        if not channel.registered:
+            # no app is watching this channel right now, start recorder
+            rec_id = rec[0].start_livetv(rec[1], channel.id, url)
+            # save id and recorder in channel
+            channel.recorder = rec[0], rec_id
+
+        # add new watcher
+        channel.registered.append(addr)
+
         RecordServer.LIVE_TV_ID += 1
         id = RecordServer.LIVE_TV_ID
-        self.live_tv_map[id] = rec, rec_id
-        return RPCReturn(id)
+        self.live_tv_map[id] = channel
+
+        # return id and url
+        return RPCReturn((id, url))
 
         
     def __rpc_watch_stop__(self, addr, val):
@@ -614,9 +641,23 @@ class RecordServer(RPCServer):
         """
         id = self.parse_parameter(val, ( int, ))
         log.info('stop live tv with id %s' % id)
-        rec, rec_id = self.live_tv_map[id]
+        if not id in self.live_tv_map:
+            return RPCError('invalid id %s' % id)
+            
+        channel = self.live_tv_map[id]
         del self.live_tv_map[id]
-        rec[0].stop_livetv(rec_id)
+
+        # remove watcher
+        if not addr in channel.registered:
+            return RPCError('%s is not watching channel', addr)
+            
+        channel.registered.remove(addr)
+
+        if not channel.registered:
+            # channel is no longer watched
+            recorder, id = channel.recorder
+            recorder.stop_livetv(id)
+            
         return RPCReturn()
         
         

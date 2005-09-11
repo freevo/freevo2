@@ -322,14 +322,14 @@ def _find_recording(event):
         if isinstance(r, Recorder) and r.entity.addr == addr:
             break
     else:
-        log.error('unable to recorder for event')
+        log.error('unable to find recorder for event')
         return None, None
 
     for rec in r.recordings:
         if rec.id == args[0]:
             break
     else:
-        log.error('unable to recording for event')
+        log.error('unable to find recording for event')
         return None, r.server
     return rec.recording, r.server
     

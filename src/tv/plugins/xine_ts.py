@@ -131,6 +131,22 @@ class Xine(ChildApp):
         print 'start'
         rs.call('watch.start', self.__receive_url, channel, destip)
 
+        self.show()
+
+        return None
+    
+
+    def __receive_url(self, result):
+        if isinstance(result, mbus.types.MError):
+            log.error(str(result))
+            self.stop()
+            return
+        if not result.appStatus:
+            log.error(str(result.appDescription))
+            self.stop()
+            return
+
+        self.id, url = result.arguments
         # create command
         command = config.XINE_COMMAND.split(' ') + \
                   [ '--stdctl', '-V', config.XINE_VO_DEV, '-A',
@@ -144,26 +160,12 @@ class Xine(ChildApp):
                config.FBXINE_USE_LIRC:
             command.append('--no-lirc')
 
-        command.append('udp://%s#demux:mpeg_pes' % destip)
-
-        self.show()
+        command.append('%s#demux:mpeg_pes' % url)
 
         # start child
         log.info('Xine.play(): Starting cmd=%s' % command)
         self.child_start(command, config.MPLAYER_NICE, 'quit\n')
-        return None
-    
 
-    def __receive_url(self, result):
-        if isinstance(result, mbus.types.MError):
-            log.error(str(result))
-            self.stop()
-            return
-        if not result.appStatus:
-            log.error(str(result.appDescription))
-            self.stop()
-            return
-        self.id = result.arguments
         log.info('live recording started')
 
 
