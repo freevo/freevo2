@@ -102,6 +102,22 @@ class Xine(ChildApp):
         self.xine_type = type
         self.id = None
 
+        self.server = None
+        mcomm.register_entity_notification(self.__entity_update)
+
+
+    def __entity_update(self, entity):
+        if not entity.present and entity == self.server:
+            log.info('recordserver lost')
+            self.server = None
+            return
+
+        if entity.present and \
+               entity.matches(mcomm.get_address('recordserver')):
+            log.info('recordserver found')
+            self.server = entity
+
+
     def rate(self, channel, device, uri):
         """
         FIXME: remove this function, every player can play everything
@@ -114,36 +130,21 @@ class Xine(ChildApp):
         """
         Play with xine
         """
-        self.channel = channel
-        self.device  = config.TV_CARDS[device]
-        self.item    = uri
-
-        # FIMXE: dynamic url handling
-        destip = '224.224.244.200:12345'
-
-        # request record on server
-        rs = mcomm.find('recordserver', 0)
-        if not rs:
-            print 'no rs'
-            # FIXME: handle error
+        if not self.server:
+            log.error('FIXME: no server found')
             return
-                
-        print 'start'
-        rs.call('watch.start', self.__receive_url, channel, destip)
-
-        self.show()
-
+        
+        self.item    = uri
+        self.server.call('watch.start', self.__receive_url, channel)
         return None
     
 
     def __receive_url(self, result):
         if isinstance(result, mbus.types.MError):
             log.error(str(result))
-            self.stop()
             return
         if not result.appStatus:
             log.error(str(result.appDescription))
-            self.stop()
             return
 
         self.id, url = result.arguments
@@ -161,6 +162,8 @@ class Xine(ChildApp):
             command.append('--no-lirc')
 
         command.append('%s#demux:mpeg_pes' % url)
+
+        self.show()
 
         # start child
         log.info('Xine.play(): Starting cmd=%s' % command)
@@ -185,11 +188,13 @@ class Xine(ChildApp):
         """
         if event == PLAY_END:
             # stop recordserver live recording
-            print 'x'
-            rs = mcomm.find('recordserver', 0)
-            if rs and self.id != None:
-                print 'stop'
-                rs.call('watch.stop', self.__stop_done, self.id)
+            if not self.server:
+                log.error('FIXME: unable to stop without server')
+            else:
+                if not self.id:
+                    log.error('FIXME: unable to stop without id')
+                else:
+                    self.server.call('watch.stop', self.__stop_done, self.id)
                 self.id = None
                 
         ChildApp.eventhandler(self, event)
