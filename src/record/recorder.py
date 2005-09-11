@@ -158,4 +158,11 @@ class Plugin(plugin.Plugin):
         raise Exception('plugin has not defined remove()')
 
 
+    def start_livetv(self, device, channel, url):
+        raise Exception('plugin has not defined start_livetv()')
+        
+
+    def stop_livetv(self, id):
+        raise Exception('plugin has not defined stop_livetv()')
+        
 recorder = RecorderList()

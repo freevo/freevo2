@@ -581,6 +581,31 @@ class RecordServer(RPCServer):
         return RPCError('Recording not found')
 
 
+    def __rpc_watch_start__(self, addr, val):
+        """
+        live recording
+        parameter: id
+        """
+        channel, url = self.parse_parameter(val, ( str, str ))
+        # FIXME: maybe the recorder is busy!
+        rec = recorder.recorder.best_recorder[channel]
+        if not rec:
+            return RPCError('no recorder for %s found' % channel)
+        r = Recording(id, 'title', channel, f.priority,
+                              p.start, p.stop)
+        r = Recording(0
+        return RPCReturn()
+        
+        
+    def __rpc_watch_stop__(self, addr, val):
+        """
+        live recording
+        parameter: id
+        """
+        id = self.parse_parameter(val, ( int, ))
+        print id
+        
+        
     def __rpc_recording_modify__(self, addr, val):
         """
         modify a recording

@@ -83,6 +83,8 @@ class Recorder(recorder.Plugin):
     """
     External recorder plugin for one mbus entity
     """
+    next_livetv_id = 1
+    
     def __init__(self, entity):
         recorder.Plugin.__init__(self)
         self.entity = entity
@@ -90,6 +92,7 @@ class Recorder(recorder.Plugin):
         self.devices = []
         self.recordings = []
         self.check_timer = None
+        self.livetv_id = []
         # FIXME: use kaa.epg for this during runtime
         self.channels = {}
         for channel in kaa.epg.channels:
@@ -172,6 +175,18 @@ class Recorder(recorder.Plugin):
         for remote in self.recordings:
             if remote.id == IN_PROGRESS:
                 remote.id = result.arguments[0]
+        else:
+            # FIXME: livetv, ugly ugly hack. We need to update
+            # the whole mbus stuff to make it look more like kaa
+            # callbacks
+            log.info('return for live tv')
+            for key, value in self.livetv_id:
+                if value == None:
+                    self.livetv_id[key] = result.arguments[0]
+                    break
+            else:
+                log.error('key not found')
+                
         # check more recordings
         self.check_recordings()
 
@@ -259,6 +274,25 @@ class Recorder(recorder.Plugin):
             notifier.removeTimer(self.check_timer)
         self.check_timer = notifier.addTimer(100, self.check_recordings)
 
+
+    def start_livetv(self, device, channel, url):
+        self.entity.call('vdr.record', self.__vdr_record,
+                         device, channel, 0, 0, url, ())
+        id = Recorder.next_livetv_id
+        Recorder.next_livetv_id = id + 1
+        self.livetv_id[id] = None
+        return id
+
+    
+    def stop_livetv(self, id):
+        if not id in self.livetv_id:
+            # FIXME: handle error
+            return
+        extid = self.livetv_id[id]
+        del self.livetv_id[id]
+        if extid != None:
+            # running
+            self.entity.call('vdr.remove', self.__vdr_remove, extid)
 
 
 def entity_update(entity):
