@@ -83,3 +83,4 @@ class Recorder(RPCServer):
         
 r = Recorder()
 kaa.main()
+log.info('terminate')
