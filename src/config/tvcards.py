@@ -98,7 +98,7 @@ class DVBCard(object):
     def __init__(self, number):
         self.number  = number
         self.adapter = '/dev/dvb/adapter' + number
-        self.number = number
+
         INFO_ST = '128s10i'
         val = ioctl.pack( INFO_ST, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 )
         devfd = os.open(self.adapter + '/frontend0', os.O_TRUNC)
@@ -120,14 +120,21 @@ class DVBCard(object):
         if name.find('\0') > 0:
             name = name[:name.find('\0')]
         self.name = name
-        for path in ('~/.freevo', '~/.mplayer', '~/.xine'):
-            conf = os.path.join(os.path.expanduser(path), 'channels.conf')
-            if os.path.isfile(conf):
-                self.channels_conf = conf
-                break
+
+        if hasattr(config, 'DVB%s_PRIORITY' % number):
+            self.priority = getattr(config, 'DVB%s_PRIORITY' % number)
+
+        if hasattr(config, 'DVB%s_CHANNELS_CONF' % number):
+            self.channels_conf = getattr(config, 'DVB%s_CHANNELS_CONF' % number)
         else:
-            log.error('channels conf not found')
-            self.channels_conf = ''
+            for path in ('~/.freevo', '~/.mplayer', '~/.xine'):
+                conf = os.path.join(os.path.expanduser(path), 'channels.conf')
+                if os.path.isfile(conf):
+                    self.channels_conf = conf
+                    break
+            else:
+                log.error('channels conf not found')
+                self.channels_conf = ''
         log.debug('register dvb device %s' % self.adapter)
 
 

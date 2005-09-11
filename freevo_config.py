@@ -1238,6 +1238,20 @@ TV_CHANNELS_EXCLUDE = []
 #
 TV_DEFAULT_DEVICE = None
 
+#
+# Settings for tv cards
+# The variable starts with the card id followed by the variable.
+# The following settings can be made:
+# DVB[0-9]_CHANNELS_CONF: path the the channels.conf file. If not specified,
+#   Freevo will search in the .freevo, .mplayer and .xine dir of the user
+# DVB[0-9]_PRIORITY: priority of the card. The default is 8 for DVB-T, 9 for DVB-S
+#   and 10 for DVB-T.
+#
+# Example:
+#
+# DVB0_CHANNELS_CONF = '/path/to/channel.conf'
+# DVB0_PRIORITY      = 9
+
 
 #
 # Program to grab xmltv listings. To get a grabber, you need to download
