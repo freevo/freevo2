@@ -46,7 +46,6 @@ import copy
 import logging
 import time
 
-import kaa.epg
 import mbus
 import notifier
 
@@ -100,10 +99,6 @@ class Recorder(recorder.Plugin):
         self.recordings = []
         self.check_timer = None
         self.livetv = {}
-        # FIXME: use kaa.epg for this during runtime
-        self.channels = {}
-        for channel in kaa.epg.channels:
-            self.channels[channel.id] = channel.access_id
         self.suffix = '.mpg'
         self.entity.call('devices.list', self.__devices_list)
         log.info('%s: add external plugin' % self.name)
@@ -138,19 +133,8 @@ class Recorder(recorder.Plugin):
             self.deactivate()
             return
 
-        # transform external name into local channel ids
-        # FIXME: this code is ugly
-        listing = []
-        for b in result.arguments[2]:
-            bouquet = []
-            for dvb_name in b:
-                for channel in kaa.epg.channels:
-                    if channel.access_id == dvb_name:
-                        bouquet.append(channel.id)
-                        break
-            listing.append(bouquet)
-        self.possible_bouquets.append(result.arguments[:2] + [listing])
-        self.current_bouquets.append(result.arguments[:2] + [listing])
+        self.possible_bouquets.append(result.arguments)
+        self.current_bouquets.append(result.arguments)
         # let the server recheck it's recorder, this one is updated
         log.info('%s: activate external plugin' % self.name)
         self.activate()
@@ -259,7 +243,7 @@ class Recorder(recorder.Plugin):
             if remote.id == UNKNOWN_ID:
                 # add the recording
                 rec      = remote.recording
-                channel  = self.channels[rec.channel]
+                channel  = rec.channel
                 filename = self.get_url(rec)
                 rec.url  = filename
                 log.info('%s: schedule %s' % (self.name, String(rec.name)))
@@ -310,7 +294,7 @@ class Recorder(recorder.Plugin):
         log.info('start live tv')
 
         self.entity.call('vdr.record', self.__livetv_start, device,
-                         self.channels[channel], 0, 2147483647, url, ())
+                         channel, 0, 2147483647, url, ())
         id = Recorder.next_livetv_id
         Recorder.next_livetv_id = id + 1
         self.livetv[id] = LiveTV(device, channel)
