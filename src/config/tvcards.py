@@ -54,6 +54,7 @@ class TVCard(object):
         self.norm = config.CONF.tv.upper()
         self.chanlist = config.CONF.chanlist
         self.input = 0
+        self.resolution = None
         # TODO: autodetect input_name
         self.input_name = 'tuner'
         self.driver = 'unknown'
@@ -71,24 +72,26 @@ class IVTVCard(TVCard):
     def __init__(self, number):
         TVCard.__init__(self, number)
 
-        # XXX TODO: take care of proper PAL / NTSC defaults
         self.input = 4
-        self.resolution = '720x480'
-        self.aspect = 2
-        self.audio_bitmask = 0x00a9
-        self.bframes = 3
-        self.bitrate_mode = 1
-        self.bitrate = 4500000
-        self.bitrate_peak = 4500000
-        self.dnr_mode = 0
-        self.dnr_spatial = 0
-        self.dnr_temporal = 0
-        self.dnr_type = 0
-        self.framerate = 0
-        self.framespergop = 15
-        self.gop_closure = 1
-        self.pulldown = 0
-        self.stream_type = 14
+
+        self.codec = {
+            'aspect': None,
+            'audio_bitmask': 0x00a9,
+            'bframes': None,
+            'bitrate_mode': 1,
+            'bitrate': 4500000,
+            'bitrate_peak': 4500000,
+            'dnr_mode': None,
+            'dnr_spatial': None,
+            'dnr_temporal': None,
+            'dnr_type': None,
+            'framerate': None,
+            'framespergop': None,
+            'gop_closure': 1,
+            'pulldown': None,
+            'stream_type': 14
+        }
+
 
 
 class DVBCard(object):

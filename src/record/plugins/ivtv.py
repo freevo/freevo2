@@ -69,7 +69,7 @@ class PluginInterface(Recorder):
 
 
     def config(self):
-        return [ ( 'IVTV_ENCODER', '/usr/local/bin/encoder', 
+        return [ ( 'IVTV_ENCODER', '/usr/local/bin/ivtv-encoder', 
                    'Location of the encoder utility.' ), ]
 
         
@@ -89,24 +89,49 @@ class PluginInterface(Recorder):
         except:
             vport = 0
 
-        return [ config.IVTV_ENCODER, 
-                 '-vport',    String(vport),
-                 '-frate',    String(self.device.framerate),
-                 '-fpgop',    String(self.device.framespergop),
-                 '-bmode',    String(self.device.bitrate_mode),
-                 '-brate',    String(self.device.bitrate),
-                 '-bpeak',    String(self.device.bitrate_peak),
-                 '-audio',    String(self.device.audio_bitmask),
-                 '-dnrmode',  String(self.device.dnr_mode),
-                 '-dnrtype',  String(self.device.dnr_type),
-                 '-dnrspat',  String(self.device.dnr_spatial),
-                 '-dnrtemp',  String(self.device.dnr_temporal),
-                 '-stream',   String(self.device.stream_type),
-                 '-pulldown', String(self.device.pulldown),
-                 '-input',    String(self.device.input),
+        cmd = [ config.IVTV_ENCODER, '-vport', String(vport) ]
+        
+        if self.device.codec.get('framerate'):
+            cmd += [ '-frate', String(self.device.codec.get('framerate')), ]
+
+        if self.device.codec.get('framespergop'):
+            cmd += [ '-fpgop', String(self.device.codec.get('framespergop')), ]
+
+        if self.device.codec.get('bitrate_mode'):
+            cmd += [ '-bmode', String(self.device.codec.get('bitrate_mode')), ]
+
+        if self.device.codec.get('bitrate'):
+            cmd += [ '-brate', String(self.device.codec.get('bitrate')), ]
+
+        if self.device.codec.get('bitrate_peak'):
+            cmd += [ '-bpeak', String(self.device.codec.get('bitrate_peak')), ]
+
+        if self.device.codec.get('audio_bitmask'):
+            cmd += [ '-audio', String(self.device.codec.get('audio_bitmask')), ]
+
+        if self.device.codec.get('dnr_mode'):
+            cmd += [ '-dnrmode', String(self.device.codec.get('dnr_mode')), ]
+
+        if self.device.codec.get('dnr_type'):
+            cmd += [ '-dnrtype', String(self.device.codec.get('dnr_type')), ]
+
+        if self.device.codec.get('dnr_spatial'):
+            cmd += [ '-dnrspat', String(self.device.codec.get('dnr_spatial')), ]
+
+        if self.device.codec.get('dnr_temporal'):
+            cmd += [ '-dnrtemp', String(self.device.codec.get('dnr_temporal')), ]
+
+        if self.device.codec.get('stream_type'):
+            cmd += [ '-stream', String(self.device.codec.get('stream_type')), ]
+
+        if self.device.codec.get('pulldown'):
+            cmd += [ '-pulldown', String(self.device.codec.get('pulldown')), ]
+
+        cmd += [ '-input',    String(self.device.input),
                  '-f',        String(frequency), 
-                 String(duration), 
-                 filename ]
+                 String(duration), filename ]
+
+        return cmd
 
     
     def get_channel_list(self):
