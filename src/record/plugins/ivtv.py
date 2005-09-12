@@ -69,7 +69,7 @@ class PluginInterface(Recorder):
 
 
     def config(self):
-        return [ ( 'IVTV_ENCODER', '/usr/local/bin/ivtv-encoder', 
+        return [ ( 'IVTV_ENCODER', '/usr/local/bin/encoder', 
                    'Location of the encoder utility.' ), ]
 
         
