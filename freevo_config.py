@@ -1235,8 +1235,10 @@ TV_DEFAULT_DEVICE = None
 # The following settings can be made:
 # DVB[0-9]_CHANNELS_CONF: path the the channels.conf file. If not specified,
 #   Freevo will search in the .freevo, .mplayer and .xine dir of the user
-# DVB[0-9]_PRIORITY: priority of the card. The default is 8 for DVB-T, 9 for DVB-S
-#   and 10 for DVB-T.
+# DVB[0-9]_PRIORITY: priority of the card. The default is 8 for DVB-T, 9 for DVB-C
+#   and 10 for DVB-S.
+# TV[0-9]_PRIORITY and IVTV[0-9]_PRIORITY:  This is the same as the DVB 
+#   priority execpt the default is the card number.
 #
 # Example:
 #
