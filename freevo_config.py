@@ -602,8 +602,8 @@ VIDEO_MPLAYER_SUFFIX = [ 'avi', 'mpg', 'mpeg', 'wmv', 'bin', 'rm',
 # are played wih Xine.
 # 
 VIDEO_XINE_SUFFIX = [ 'avi', 'mpg', 'mpeg', 'rm', 'divx', 'ogm',
-                      'asf', 'm2v', 'm2p', 'mp4', 'mov', 'cue',
-                      'ts', 'iso', 'vob', 'rmvb' ]
+                      'asf', 'm2v', 'm2p', 'mkv', 'mp4', 'mov', 'cue',
+                      'ts', 'iso', 'vob', 'rmvb', 'wmv' ]
 
 #
 # Preferred video player
@@ -1163,20 +1163,6 @@ TV_REC_SIZE = (320, 240)   # Default for slower computers
 TV_VIEW_OUTFMT = 'yuy2'   # Better quality, slower on pure FB/X11
 TV_REC_OUTFMT  = 'yuy2'
 
-#
-# FREQUENCY_TABLE - This is only used when Freevo changes the channel natively.
-# This is only the case if you are using V4L2 and any of the following plugins:
-# timeshift, ivtv_record, ivtv_basic_tv.
-# For the standard frequancy tables see src/tv/freq.py.  To add your own just 
-# replace tuner_id in the following example with a valid tuner id (ie: '5' or
-# 'BBC1') and a frequency in KHz.  You may have as many entries as you like,
-# anything here will simply override a corresponding entry in your standard
-# frequency table and you can also have entries here that are not present in
-# there.
-#
-FREQUENCY_TABLE = {
-    'tuner_id'   :    55250,
-}
 
 #
 # TV Channels. This list contains a mapping from the displayed channel name
@@ -1257,6 +1243,33 @@ TV_DEFAULT_DEVICE = None
 # DVB0_CHANNELS_CONF = '/path/to/channel.conf'
 # DVB0_PRIORITY      = 9
 
+#
+# TV[0-9]_FREQUENCIES and IVTV[0-9]_FREQUENCIES:
+#   You only need to add channel: frequency mappings here if Freevo's standard 
+#   frequency tables don't fit your needs.  Also, make sure you are using the 
+#   correct chanlist for your area or the table will be wrong.
+#   To add your own just replace tuner_id in the following example with a valid 
+#   tuner id (ie: '5' or # 'BBC1') and a frequency in KHz.  You may have as many 
+#   entries as you like, anything here will simply override a corresponding 
+#   entry in your standard frequency table and you can also have entries here 
+#   that are not present there.
+#
+# Example:
+#
+# TV0_FREQUENCIES = { 
+#     'tuner_id'   :    55250, 
+# }
+
+#
+# IVTV[0-9]_CODEC:  Here you can override the driver codec options for your IVTV
+#   cards.  Where the value is None here that option will not be overridden and
+#   we only set a few predefined defaults.  Valid options are: 
+#
+# Example:
+#
+# IVTV0_CODEC['bitrate'] = 5000000
+# IVTV0_CODEC['bitrate_peak'] = 6000000
+#
 
 #
 # Program to grab xmltv listings. To get a grabber, you need to download
