@@ -52,7 +52,7 @@ class TVCard(object):
         self.vdev = '/dev/video' + number
         self.adev = None
         self.driver = 'unknown'
-        self.priority = getattr(config, 'TV%s_PRIORITY' % number, number)
+        self.priority = getattr(config, 'TV%s_PRIORITY' % number, 5)
 
         # TODO: Think about using something like TV[0-9]_CHANLIST and
         #       TV[0-9]_NORM, defaulting to (or we can remove) the CONF ones.
@@ -84,7 +84,7 @@ class IVTVCard(TVCard):
     def __init__(self, number):
         TVCard.__init__(self, number)
 
-        self.priority = getattr(config, 'IVTV%s_PRIORITY' % number, number)
+        self.priority = getattr(config, 'IVTV%s_PRIORITY' % number, 7)
         self.input = 4
         self.codec = {}
 
