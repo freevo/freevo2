@@ -125,6 +125,13 @@ class TVSettings(dict):
     
 TV_CARDS = TVSettings()
 
+# 
+# Variable initializations to make configuring some TV settings easier
+#
+
+IVTV0_CODEC = IVTV1_CODEC = IVTV2_CODEC = IVTV3_CODEC = IVTV4_CODEC = \
+IVTV5_CODEC = IVTV6_CODEC = IVTV7_CODEC = IVTV8_CODEC = IVTV9_CODEC = {}
+
 #
 # Read the environment set by the start script
 #
