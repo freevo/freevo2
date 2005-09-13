@@ -51,18 +51,29 @@ class TVCard(object):
     def __init__(self, number):
         self.vdev = '/dev/video' + number
         self.adev = None
+        self.driver = 'unknown'
+
+        # TODO: Think about using something like TV[0-9]_CHANLIST and
+        #       TV[0-9]_NORM, defaulting to (or we can remove) the CONF ones.
         self.norm = config.CONF.tv.upper()
         self.chanlist = config.CONF.chanlist
-        self.input = 0
+
+        # The capture resolution.  The driver should have a default and probably
+        # will only accept specific values.  This will be left up to the user
+        # to override.  It must be in "WIDTHxHEIGHT" format.
         self.resolution = None
-        # TODO: autodetect input_name
+
+        # TODO: autodetect input and input_name, setting the "tuner" as default
+        self.input = 0
         self.input_name = 'tuner'
-        self.driver = 'unknown'
 
         # If passthrough is set then we'll use that channel on the input to get
         # our signal.  For example someone may have an external cable box
         # connected and have to set the local tuner to channel 4 to get it.
         self.passthrough = None
+
+        # Save any user defined channel frequency mappings.
+        self.custom_frequencies = getattr(config, 'TV%s_FREQUENCIES' % number, {})
 
 
 class IVTVCard(TVCard):
@@ -73,8 +84,9 @@ class IVTVCard(TVCard):
         TVCard.__init__(self, number)
 
         self.input = 4
+        self.codec = {}
 
-        self.codec = {
+        default_codec = {
             'aspect': None,
             'audio_bitmask': 0x00a9,
             'bframes': None,
@@ -92,6 +104,18 @@ class IVTVCard(TVCard):
             'stream_type': 14
         }
 
+        # Check for user defines IVTV codec options or load good defaults
+        # for some attributes.
+        config_codec = getattr(config, 'IVTV%s_CODEC' % number, {})
+            
+        for k,v in default_codec.items():
+            if config_codec.has_key(k):
+                self.codec[k] = config_codec[k]
+            else:
+                self.codec[k] = v
+
+        # Save any user defined channel frequency mappings.
+        self.custom_frequencies = getattr(config, 'IVTV%s_FREQUENCIES' % number, {})
 
 
 class DVBCard(object):
