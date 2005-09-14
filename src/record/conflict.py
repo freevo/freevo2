@@ -100,16 +100,12 @@ class Device(object):
             return True
 
         recording.conflict_padding = []
-        if recording.status == RECORDING:
-            # the recording is running right now, do not move it to
-            # a new plugin
-            if recording.recorder[0] == self.plugin:
-                # same recorder, everything ok
-                self.rec.append(recording)
-                return True
-            else:
-                # not possible to use this recorder
-                return False
+
+        # Set status to False if the recording is currently recording
+        # but not on this device.
+        if recording.status == RECORDING and \
+               recording.recorder[0] != self.plugin:
+            return False
 
         if not recording.channel in self.all_channels:
             # channel not supported
