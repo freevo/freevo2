@@ -112,8 +112,6 @@ class DvbDevice(kaa.record.DvbDevice, Device):
     def __init__(self, id, card):
         kaa.record.DvbDevice.__init__(self, card.adapter, card.channels_conf)
         Device.__init__(self, id, card)
-        self.fdsplitter = None
-        self.recid2chainid = {}
         self.id2dvb = {}
         self.dvb2id = {}
 
@@ -142,12 +140,7 @@ class DvbDevice(kaa.record.DvbDevice, Device):
         chain.append(kaa.record.Remux())
         chain.append(output)
         channel = self.id2dvb[channel]
-        recording_id = kaa.record.DvbDevice.start_recording(self, channel, chain)
-        if self.fdsplitter == None:
-            self.fdsplitter = kaa.record.FDSplitter( self.get_fd() )
-            self.fdsplitter.set_input_type( "TS" )
-        self.recid2chainid[ recording_id ] = self.fdsplitter.add_filter_chain(chain)
-        return recording_id
+        return kaa.record.DvbDevice.start_recording(self, channel, chain)
 
 
 class Recorder(RPCServer):
