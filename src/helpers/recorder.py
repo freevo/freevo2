@@ -143,6 +143,42 @@ class DvbDevice(kaa.record.DvbDevice, Device):
         return kaa.record.DvbDevice.start_recording(self, channel, chain)
 
 
+class IVTVDevice(kaa.record.IVTVDevice, Device):
+    """
+    Class for handling an IVTV card, based on kaa.record.IVTVDevice.
+    """
+    def __init__(self, id, card):
+
+        kaa.record.IVTVDevice.__init__(self, card.vdev, card.norm, 
+            card.chanlist, card.input, card.custom_frequencies, card.resolution,
+            card.codec['aspect'], card.codec['audio_bitmask'], 
+            card.codec['bframes'], card.codec['bitrate_mode'], 
+            card.codec['bitrate'], card.codec['bitrate_peak'], 
+            card.codec['dnr_mode'], card.codec['dnr_spatial'], 
+            card.codec['dnr_temporal'], card.codec['dnr_type'], 
+            card.codec['framerate'], card.codec['framespergop'], 
+            card.codec['gop_closure'], card.codec['pulldown'], 
+            card.codec['stream_type'])
+
+        Device.__init__(self, id, card)
+
+        log.info(card.channels)
+        for c in card.channels.keys():
+            self.bouquets.append([])
+            self.bouquets[-1].append(c)
+
+
+    def start_recording(self, channel, output):
+        """
+        Start a recording, create the filter chain and add the filters we care
+        about.
+        """
+        log.info('we wish to record channel %s' % channel)
+        chain = kaa.record.Chain()
+        chain.append(output)
+        return kaa.record.IVTVDevice.start_recording(self, channel, chain)
+
+
 class Recorder(RPCServer):
     """
     Recorder handling the different devices.
@@ -156,6 +192,9 @@ class Recorder(RPCServer):
         for id, card in config.TV_CARDS.items():
             if id.startswith('dvb'):
                 self.cards.append(DvbDevice(id, card))
+
+            elif id.startswith('ivtv'):
+                self.cards.append(IVTVDevice(id, card))
 
 
     def __rpc_devices_list__(self, addr, val):
