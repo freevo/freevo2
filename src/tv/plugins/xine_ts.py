@@ -185,6 +185,8 @@ class Xine(ChildApp):
             tsfile = os.path.join(self.timeshift_dir, self.timeshift_file)
             if os.path.exists(tsfile):
                 os.remove(tsfile)
+
+            # we don't need to specify #demux when using a .mpeg in #save
             command.append('%s#save:%s' % (url, self.timeshift_file))
         else:
             command.append('%s#demux:mpeg_pes' % url)
@@ -231,10 +233,6 @@ class Xine(ChildApp):
         if event == PLAY_END:
             return True
 
-        if event == PAUSE or event == PLAY:
-            self.child_stdin('pause\n')
-            return True
-
         if event == STOP:
             self.stop()
             return True
@@ -247,27 +245,32 @@ class Xine(ChildApp):
             self.child_stdin('ToggleInterleave\n')
             return True
 
-        if event == SEEK:
-            pos = int(event.arg)
+        if self.timeshift:
+            if event == PAUSE or event == PLAY:
+                self.child_stdin('pause\n')
+                return True
 
-            if pos < 0:
-                action='SeekRelative-'
-                pos = 0 - pos
-            else:
-                action='SeekRelative+'
+            if event == SEEK:
+                pos = int(event.arg)
+    
+                if pos < 0:
+                    action='SeekRelative-'
+                    pos = 0 - pos
+                else:
+                    action='SeekRelative+'
 
-            if pos <= 15:
-                pos = 15
-            elif pos <= 30:
-                pos = 30
-            else:
-                pos = 30
+                if pos <= 15:
+                    pos = 15
+                elif pos <= 30:
+                    pos = 30
+                else:
+                    pos = 30
 
-            cmd = '%s%s\n' % (action, pos)
-            log.debug('seek command: %s' % cmd)
+                cmd = '%s%s\n' % (action, pos)
+                log.debug('seek command: %s' % cmd)
 
-            self.child_stdin(cmd)
-            return True
+                self.child_stdin(cmd)
+                return True
 
 
         # nothing found
