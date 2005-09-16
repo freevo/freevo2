@@ -1,6 +1,21 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
 # xine.py - xine tv plugin
+#
+# Notes:
+#     To test timeshifting with this plugin you must configure some items in
+#     Freevo and also ~/.xine/config.
+#
+#     In your local_conf.py you needi:
+#         TV_TIMESHIFT_ENABLE = 1
+#         TV_TIMESHIFT_DIR = '/dir/to/save/timeshift/file/'
+#
+#     In ~/.xine/config you need to configure the #save plugin with the same
+#     directory you used for TV_TIMESHIFT_DIR:
+#         # directory for saving streams
+#         # string, default: 
+#         media.capture.save_dir:/dir/to/save/timeshift/file
+#
 # -----------------------------------------------------------------------------
 # $Id$
 #
@@ -68,22 +83,22 @@ class PluginInterface(plugin.Plugin):
             self.reason = '\'XINE_COMMAND\' not defined'
             return
 
-        if config.XINE_VERSION < '0.99.1' and \
-               config.XINE_VERSION < '0.9.23':
-            self.reason = "'xine' version too old"
-            return
-
-        if config.FBXINE_VERSION < '0.99.1' and \
-               config.FBXINE_VERSION < '0.9.23':
-            self.reason = "'fbxine' version too old"
-            return
-
         if config.XINE_COMMAND.find('fbxine') >= 0:
             type = 'fb'
+            if config.FBXINE_VERSION < '0.99.1' and \
+                   config.FBXINE_VERSION < '0.9.23':
+                self.reason = "'fbxine' version too old"
+                return
+
         elif config.XINE_COMMAND.find('df_xine') >= 0:
             type = 'df'
+
         else:
             type = 'X'
+            if config.XINE_VERSION < '0.99.1' and \
+                   config.XINE_VERSION < '0.9.23':
+                self.reason = "'xine' version too old"
+                return
 
         plugin.Plugin.__init__(self)
 
@@ -101,6 +116,11 @@ class Xine(ChildApp):
         self.name = 'xine'
         self.xine_type = type
         self.id = None
+
+        self.timeshift = getattr(config, 'TV_TIMESHIFT_ENABLE', 0)
+        self.timeshift_dir = getattr(config, 'TV_TIMESHIFT_DIR', 
+                                     config.TV_RECORD_DIR)
+        self.timeshift_file = 'xine_ts.mpeg'
 
         self.server = None
         mcomm.register_entity_notification(self.__entity_update)
@@ -161,7 +181,13 @@ class Xine(ChildApp):
                config.FBXINE_USE_LIRC:
             command.append('--no-lirc')
 
-        command.append('%s#demux:mpeg_pes' % url)
+        if self.timeshift:
+            tsfile = os.path.join(self.timeshift_dir, self.timeshift_file)
+            if os.path.exists(tsfile):
+                os.remove(tsfile)
+            command.append('%s#save:%s' % (url, self.timeshift_file))
+        else:
+            command.append('%s#demux:mpeg_pes' % url)
 
         self.show()
 
@@ -205,6 +231,10 @@ class Xine(ChildApp):
         if event == PLAY_END:
             return True
 
+        if event == PAUSE or event == PLAY:
+            self.child_stdin('pause\n')
+            return True
+
         if event == STOP:
             self.stop()
             return True
@@ -216,6 +246,29 @@ class Xine(ChildApp):
         if event == VIDEO_TOGGLE_INTERLACE:
             self.child_stdin('ToggleInterleave\n')
             return True
+
+        if event == SEEK:
+            pos = int(event.arg)
+
+            if pos < 0:
+                action='SeekRelative-'
+                pos = 0 - pos
+            else:
+                action='SeekRelative+'
+
+            if pos <= 15:
+                pos = 15
+            elif pos <= 30:
+                pos = 30
+            else:
+                pos = 30
+
+            cmd = '%s%s\n' % (action, pos)
+            log.debug('seek command: %s' % cmd)
+
+            self.child_stdin(cmd)
+            return True
+
 
         # nothing found
         return False
