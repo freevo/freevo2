@@ -56,7 +56,7 @@ class ProgInfoResource(FreevoResource):
             desc = (_('Sorry, the program description for ' \
                       '%s is unavailable.')) % ('<b>'+prog.title+'</b>')
         else:
-            desc = prog.description
+            desc = prog.description.replace("\n","<br />")
                                                                                                                                    
         desc = desc.lstrip()
         if MAX_DESCRIPTION_CHAR and len(desc) > MAX_DESCRIPTION_CHAR:
