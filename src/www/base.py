@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2005/09/17 22:51:12  rshortt
+# add "extrahead" parameter for adding to the page header, useful for adding meta tags and such
+#
 # Revision 1.10  2005/06/25 08:52:29  dischi
 # switch to new style python classes
 #
@@ -105,7 +108,7 @@ class HTMLResource(object):
 
 
     def printHeader(self, title='unknown page', style=None, script=None,
-                    selected='Help',prefix=0):
+                    selected='Help', prefix=0, extrahead=''):
 
         strprefix = '../' * prefix
 
@@ -119,6 +122,7 @@ class HTMLResource(object):
             self.res += '\t<link rel="stylesheet" href="%sstyles/main.css" type="text/css" />\n' % strprefix
         if script != None:
             self.res += '\t<script language="JavaScript" src="'+script+'"></script>\n'
+        self.res += '\t%s\n' % extrahead
         self.res += '</head>\n'
         self.res += '\n\n\n\n<body>\n'
         # Header
