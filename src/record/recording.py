@@ -66,7 +66,7 @@ class Recording(object):
     """
     def __init__(self, id = -1, name = 'unknown', channel = 'unknown',
                  priority = 0, start = 0, stop = 0, info = {},
-                 status = 'scheduled' ):
+                 status = SCHEDULED ):
         self.id       = id
         self.name     = name
         self.channel  = channel
