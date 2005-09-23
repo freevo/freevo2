@@ -238,7 +238,7 @@ class Recorder(recorder.Plugin):
             if remote.id == UNKNOWN_ID and not remote.valid:
                 # remove it from the list, the external app still doesn't
                 # know about this
-                self.recordings.remove(remote.recording)
+                self.recordings.remove(remote)
                 continue
             if remote.id == UNKNOWN_ID:
                 # add the recording
