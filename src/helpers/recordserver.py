@@ -36,6 +36,7 @@ import pwd
 import logging
 
 # kaa imports
+import kaa
 import kaa.notifier
 
 # create logger objects in sysconfig
@@ -70,5 +71,11 @@ server = record.server.RecordServer()
 if config.TV_RECORD_START_RECORDER:
     kaa.notifier.Process([os.environ['FREEVO_SCRIPT'], 'recorder']).start()
 
-kaa.notifier.loop()
-kaa.notifier.shutdown()
+
+try:
+    kaa.main()
+except:
+    pass
+
+# print debug at the end
+log.info('terminate')
