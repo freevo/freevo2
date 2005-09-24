@@ -55,7 +55,7 @@ from mcomm import RPCServer, RPCError, RPCReturn
 
 # record imports
 import recorder
-import external
+
 from record_types import *
 from recording import Recording
 from favorite import Favorite
@@ -99,12 +99,8 @@ class RecordServer(RPCServer):
         self.save_timer = kaa.notifier.OneShotTimer(self.save, False)
         self.ps_timer = kaa.notifier.OneShotTimer(self.print_schedule, False)
 
-        # add external event handling
-        mbus = self.mbus_instance
-        mbus.register_event('vdr.started', external.start_event)
-        mbus.register_event('vdr.stopped', external.stop_event)
-
         # add notify callback
+        mbus = self.mbus_instance
         mbus.register_entity_notification(self.entity_update)
 
         # start by checking the favorites
@@ -229,6 +225,7 @@ class RecordServer(RPCServer):
         Schedule recordings on recorder for the next SCHEDULE_TIMER seconds.
         """
         ctime = time.time()
+        log.info('calling self.schedule')
         for r in self.recordings:
             if r.start > ctime + SCHEDULE_TIMER:
                 # do not schedule to much in the future
@@ -485,7 +482,6 @@ class RecordServer(RPCServer):
             log.info('lost client %s' % entity)
             self.clients.remove(entity)
             return
-        external.entity_update(entity)
         return
 
     

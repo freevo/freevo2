@@ -257,6 +257,7 @@ class Recording(object):
         self.scheduled_device   = device
         self.scheduled_start    = start
         self.scheduled_stop     = stop
+        log.info('schedule %s on %s' % (self.name, device))
         recorder.record(self, device, start, stop)
 
 
