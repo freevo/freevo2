@@ -103,9 +103,11 @@ class RecordServer(RPCServer):
         mbus = self.mbus_instance
         mbus.register_entity_notification(self.entity_update)
 
+        # create recorder
+        self.recorder = recorder.RecorderList(self)
+        
         # start by checking the favorites
         self.check_favorites()
-        recorder.recorder.connect(self)
 
         # add schedule timer for SCHEDULE_TIMER / 3 seconds
         kaa.notifier.Timer(self.schedule).start(SCHEDULE_TIMER / 3)
@@ -182,13 +184,13 @@ class RecordServer(RPCServer):
 
         for r in next_recordings:
             try:
-                r.recorder = recorder.recorder.best_recorder[r.channel]
+                r.recorder = self.recorder.best_recorder[r.channel]
                 if r.status != RECORDING:
                     r.status = SCHEDULED
                     r.respect_start_padding = True
                     r.respect_stop_padding  = True
             except KeyError:
-                r.recorder = None, None
+                r.recorder = None
                 r.status   = CONFLICT
 
         if force:
@@ -197,7 +199,7 @@ class RecordServer(RPCServer):
             
         # Resolve conflicts. This will resolve the conflicts for the
         # next recordings now, the others will be resolved with a timer
-        conflict.resolve(next_recordings)
+        conflict.resolve(next_recordings, self.recorder)
 
         # send update
         sending = []
@@ -231,7 +233,7 @@ class RecordServer(RPCServer):
                 # do not schedule to much in the future
                 break
             if r.status == SCHEDULED:
-                r.schedule(r.recorder[0], r.recorder[1])
+                r.schedule(r.recorder)
             if r.status in (DELETED, CONFLICT):
                 r.remove()
         return True
@@ -622,16 +624,16 @@ class RecordServer(RPCServer):
         
         # FIXME: right now we take one recorder no matter if it is
         # recording right now.
-        rec = recorder.recorder.best_recorder[channel.id]
+        rec = self.recorder.best_recorder[channel.id]
         if not rec:
             return RPCError('no recorder for %s found' % channel.id)
 
         url = 'udp://%s:%s' % (LIVETV_URL, channel.port)
 
         # no app is watching this channel right now, start recorder
-        rec_id = rec[0].start_livetv(rec[1], channel.id, url)
+        rec_id = rec.start_livetv(channel.id, url)
         # save id and recorder in channel
-        channel.recorder = rec[0], rec_id
+        channel.recorder = rec, rec_id
         channel.registered.append(addr)
 
         RecordServer.LIVE_TV_ID += 1

@@ -84,7 +84,6 @@ class Recording(object):
 
         # recorder where the recording is scheduled
         self.scheduled_recorder = None
-        self.scheduled_device   = None
         self.scheduled_start    = 0
         self.scheduled_stop     = 0
         
@@ -103,7 +102,7 @@ class Recording(object):
                 self.stop_padding = int(info[i])
             else:
                 self.info[i] = Unicode(info[i])
-        self.recorder = None, None
+        self.recorder = None
         self.respect_start_padding = True
         self.respect_stop_padding = True
 
@@ -177,8 +176,8 @@ class Recording(object):
             name = name[:20] + u'...'
         name = u'"' + name + u'"'
         status = self.status
-        if status == 'scheduled' and self.recorder[1]:
-            status = self.recorder[1]
+        if status == 'scheduled' and self.recorder:
+            status = self.recorder.device
 
         if self.respect_start_padding:
             start_padding = int(self.start_padding/60)
@@ -232,7 +231,7 @@ class Recording(object):
                self.start != obj.start or self.stop != obj.stop
 
 
-    def schedule(self, recorder, device):
+    def schedule(self, recorder):
         """
         Schedule the recording on the given recorder
         """
@@ -244,7 +243,6 @@ class Recording(object):
             stop += self.stop_padding
 
         if self.scheduled_recorder == recorder and \
-               self.scheduled_device == device and \
                self.scheduled_start == start and \
                (self.scheduled_stop == stop or \
                 self.status == RECORDING):
@@ -254,11 +252,10 @@ class Recording(object):
         if self.scheduled_recorder:
             self.scheduled_recorder.remove(self)
         self.scheduled_recorder = recorder
-        self.scheduled_device   = device
         self.scheduled_start    = start
         self.scheduled_stop     = stop
-        log.info('schedule %s on %s' % (self.name, device))
-        recorder.record(self, device, start, stop)
+        log.info('schedule %s on %s' % (self.name, recorder))
+        recorder.record(self, start, stop)
 
 
     def remove(self):
@@ -268,5 +265,4 @@ class Recording(object):
         if self.scheduled_recorder:
             self.scheduled_recorder.remove(self)
         self.scheduled_recorder = None
-        self.scheduled_device   = None
             

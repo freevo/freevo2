@@ -4,10 +4,6 @@
 # -----------------------------------------------------------------------------
 # $Id$
 #
-# This file needs cleanup. A Recorder should not handle one entity, it should
-# handle one device on an entity. It will be much easier if a recorder only
-# has one device.
-# 
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
@@ -43,12 +39,10 @@ import logging
 import mbus
 
 # kaa imports
-from kaa.notifier import OneShotTimer
+from kaa.notifier import OneShotTimer, Callback
 
 # freevo imports
 import config
-import plugin
-import mcomm
 
 # record imports
 from record_types import *
@@ -66,31 +60,32 @@ DAEMON = {'type': 'home-theatre', 'module': 'record-daemon'}
 
 
 class RecorderList(object):
-    def __init__(self):
+    def __init__(self, server):
         self.recorder = []
         self.best_recorder = {}
-        self.server = None
+        self.server = server
 
         # add notify callback
-        mcomm.register_entity_notification(self.entity_update)
-        mcomm.register_event('vdr.started', self.start_event)
-        mcomm.register_event('vdr.stopped', self.stop_event)
+        server.mbus_instance.register_entity_notification(self.mbus_entity_update)
+        server.mbus_instance.register_event('vdr.started', self.mbus_eventhandler)
+        server.mbus_instance.register_event('vdr.stopped', self.mbus_eventhandler)
 
 
 
     def append(self, recorder):
         if not recorder in self.recorder:
+            log.info('add %s' % recorder)
             self.recorder.append(recorder)
-            recorder.server = self.server
         self.check()
-        
+
 
     def remove(self, recorder):
         if recorder in self.recorder:
+            log.info('remove %s' % recorder)
             self.recorder.remove(recorder)
             self.check()
 
-        
+
     def check(self):
         """
         Check all possible recorders.
@@ -98,35 +93,22 @@ class RecorderList(object):
         # reset best recorder list
         self.best_recorder = {}
         for p in self.recorder:
-            for dev, rating, listing in p.get_channel_list():
-                for l in listing:
-                    for c in l:
-                        if not self.best_recorder.has_key(c):
-                            self.best_recorder[c] = -1, None
-                        if self.best_recorder[c][0] < rating:
-                            self.best_recorder[c] = rating, p, dev
+            for l in p.current_bouquets:
+                for c in l:
+                    if not self.best_recorder.has_key(c):
+                        self.best_recorder[c] = -1, None
+                    if self.best_recorder[c][0] < p.rating:
+                        self.best_recorder[c] = p.rating, p, p.device
         for c in self.best_recorder:
-            self.best_recorder[c] = self.best_recorder[c][1:]
+            self.best_recorder[c] = self.best_recorder[c][1]
+        self.server.check_recordings(True)
 
-        if self.server:
-            self.server.check_recordings(True)
-            
-
-    def best_recorder(self, channel):
-        return self.best_recorder[channel]
-    
 
     def __iter__(self):
         return self.recorder.__iter__()
 
 
-    def connect(self, server):
-        self.server = server
-        for p in self.recorder:
-            p.server = server
-        
-        
-    def entity_update(self, entity):
+    def mbus_entity_update(self, entity):
         """
         Update recorders on entity changes.
         """
@@ -135,44 +117,50 @@ class RecorderList(object):
             return
 
         if entity.present:
-            rec = Recorder(entity, self)
+            entity.call('devices.list', Callback(self.mbus_list_cb, entity))
             return
 
-        for r in self.recorder:
-            if isinstance(r, Recorder) and r.entity == entity:
-                log.info('lost recorder')
-                r.deactivate()
-                return
+        for r in self.recorder[:]:
+            if r.entity == entity:
+                log.info('lost recorder %s', r)
+                self.remove(r)
 
 
-    def _find_recording(self, event):
+    def mbus_list_cb(self, result, entity):
+        """
+        RPC return for device.list()
+        """
+        if isinstance(result, mbus.types.MError):
+            log.error(str(result))
+            return
+        if not result.appStatus:
+            log.error(str(result.appDescription))
+            return
+        for device in result.arguments:
+            Recorder(entity, self, device)
+
+
+    def mbus_eventhandler(self, event):
         addr = event.header.srcAdr
         args = event.payload[0].args
+        name = event.payload[0].name
         for r in self.recorder:
-            if isinstance(r, Recorder) and r.entity.addr == addr:
-                break
+            if r.entity.addr != addr:
+                continue
+            for rec in r.recordings:
+                if rec.id == args[0]:
+                    break
+            else:
+                continue
+            break
         else:
             log.error('unable to find recorder for event')
-            return None, None
+            return True
 
-        for rec in r.recordings:
-            if rec.id == args[0]:
-                break
+        if name.endswith('started'):
+            self.server.start_recording(rec.recording)
         else:
-            log.error('unable to find recording for event')
-            return None, r.server
-        return rec.recording, r.server
-    
-
-    def start_event(self, event):
-        rec, server = self._find_recording(event)
-        server.start_recording(rec)
-        return True
-
-
-    def stop_event(self, event):
-        rec, server = self._find_recording(event)
-        server.stop_recording(rec)
+            self.server.stop_recording(rec.recording)
         return True
 
 
@@ -181,19 +169,11 @@ class RemoteRecording(object):
     Wrapper for recordings to add 'id' and 'valid' for internal use inside
     the recorder.
     """
-    def __init__(self, recording, device, start):
+    def __init__(self, recording, start):
         self.recording = recording
-        self.device = device
         self.id = UNKNOWN_ID
         self.valid = True
         self.start = start
-
-
-class LiveTV(object):
-    def __init__(self, device, channel):
-        self.device = device
-        self.channel = channel
-        self.id = None
 
 
 class Recorder(object):
@@ -202,44 +182,53 @@ class Recorder(object):
     """
     next_livetv_id = 1
 
-    def __init__(self, entity, handler):
+    def __init__(self, entity, handler, device):
         self.type = 'recorder'
         # reference to the recordserver
-        self.server = None
         self.handler = handler
         self.entity = entity
-        self.name = entity.addr['id']
-        self.possible_bouquets = []
-        self.current_bouquets = []
+        self.device = device
+        self.name = '%s:%s' % (entity.addr['id'], device)
         self.recordings = []
         self.check_timer = OneShotTimer(self.check_recordings)
         self.livetv = {}
-        self.devices_info()
-        log.info('%s: add recorder' % self.name)
+        self.entity.call('device.describe', self.describe_cb, device)
+        self.rating = 0
 
 
-    def activate(self):
-        self.current_bouquets = []
-        used = {}
-        for info in self.livetv.values():
-            if not info.device in used:
-                used[info.device] = []
-            if not info.channel in used[info.device]:
-                used[info.device].append(info.channel)
+    def __str__(self):
+        return '<Recorder for %s>' % (self.name)
 
-        for id, prio, channels in self.possible_bouquets:
-            if id in used:
-                # return the listing with the first channel in it
-                # (they all need to be in the same list, so no problem here)
-                channels = [ c for c in channels if used[id][0] in c ]
-            self.current_bouquets.append([id, prio, channels])
+
+    def describe_cb(self, result):
+        """
+        RPC return for device.describe()
+        """
+        if isinstance(result, mbus.types.MError):
+            log.error(str(result))
+            self.handler.remove(self)
+            return
+        if not result.appStatus:
+            log.error(str(result.appDescription))
+            self.handler.remove(self)
+            return
+
+        self.possible_bouquets = result.arguments[2]
+        self.rating = result.arguments[1]
+        self.update()
+
+
+    def update(self):
+        if self.livetv:
+            # return the listing with the first channel in it
+            # (they all need to be in the same list, so no problem here)
+            self.current_bouquets = [ c for c in self.possible_bouquets \
+                                      if self.livetv.values()[0][0] in c ]
+        else:
+            self.current_bouquets = self.possible_bouquets
         self.handler.append(self)
 
 
-    def deactivate(self):
-        self.handler.remove(self)
-
-        
     def get_url(self, rec):
         """
         Return url (e.g. filename) for the given recording
@@ -273,70 +262,15 @@ class Recorder(object):
 
 
     # ****************************************************************************
-    # device information
-    # ****************************************************************************
-
-
-    def devices_info(self):
-        """
-        Get device information from the remote entiry.
-        """
-        self.entity.call('devices.list', self.devices_list_cb)
-
-        
-    def devices_list_cb(self, result):
-        """
-        RPC return for device.list()
-        """
-        if isinstance(result, mbus.types.MError):
-            log.error(str(result))
-            self.deactivate()
-            return
-        if not result.appStatus:
-            log.error(str(result.appDescription))
-            self.deactivate()
-            return
-        for device in result.arguments:
-            self.entity.call('device.describe', self.devices_describe_cb, device)
-
-
-    def devices_describe_cb(self, result):
-        """
-        RPC return for device.describe()
-        """
-        if isinstance(result, mbus.types.MError):
-            log.error(str(result))
-            self.deactivate()
-            return
-        if not result.appStatus:
-            log.error(str(result.appDescription))
-            self.deactivate()
-            return
-
-        self.possible_bouquets.append(result.arguments)
-        self.current_bouquets.append(result.arguments)
-        # let the server recheck it's recorder, this one is updated
-        log.info('%s: activate recorder' % self.name)
-        self.activate()
-
-
-    def get_channel_list(self):
-        """
-        Return channel list to recordserver.
-        """
-        return self.current_bouquets
-
-
-    # ****************************************************************************
     # add or remove a recording
     # ****************************************************************************
 
 
-    def record(self, recording, device, start, stop):
+    def record(self, recording, start, stop):
         """
         Add a recording.
         """
-        self.recordings.append(RemoteRecording(recording, device, start))
+        self.recordings.append(RemoteRecording(recording, start))
 
         # update recordings at the remote application
         self.check_timer.start(0.1)
@@ -349,7 +283,7 @@ class Recorder(object):
         for remote in self.recordings:
             if remote.recording == recording:
                 remote.valid = False
-                
+
         # update recordings at the remote application
         self.check_timer.start(0.1)
 
@@ -364,8 +298,8 @@ class Recorder(object):
                 # already checking
                 break
             if remote.id == UNKNOWN_ID and not remote.valid:
-                # remove it from the list, the app still doesn't
-                # know about this
+                # remove it from the list, looks like the recording
+                # was already removed and not yet scheduled
                 log.error('UNKNOWN_ID')
                 self.recordings.remove(remote)
                 continue
@@ -376,7 +310,7 @@ class Recorder(object):
                 filename = self.get_url(rec)
                 rec.url  = filename
                 log.info('%s: schedule %s' % (self.name, String(rec.name)))
-                self.entity.call('vdr.record', self.start_recording_cb, remote.device,
+                self.entity.call('vdr.record', self.start_recording_cb, self.device,
                                  channel, remote.start, rec.stop + rec.stop_padding,
                                  filename, ())
                 remote.id = IN_PROGRESS
@@ -392,7 +326,7 @@ class Recorder(object):
                 break
         # the function will be rescheduled by mbus return
         return False
-    
+
 
     def start_recording_cb(self, result):
         """
@@ -400,11 +334,11 @@ class Recorder(object):
         """
         if isinstance(result, mbus.types.MError):
             log.error(str(result))
-            self.deactivate()
+            self.handler.remove(self)
             return
         if not result.appStatus:
             log.error(str(result.appDescription))
-            self.deactivate()
+            self.handler.remove(self)
             return
 
         # result is an unique id
@@ -414,7 +348,7 @@ class Recorder(object):
                 break
         else:
             log.info('id not found')
-                
+
         # check more recordings
         self.check_recordings()
 
@@ -425,11 +359,11 @@ class Recorder(object):
         """
         if isinstance(result, mbus.types.MError):
             log.error(str(result))
-            self.deactivate()
+            self.handler.remove(self)
             return
         if not result.appStatus:
             log.error(str(result.appDescription))
-            self.deactivate()
+            self.handler.remove(self)
             return
         # check more recordings
         self.check_recordings()
@@ -440,33 +374,33 @@ class Recorder(object):
     # ****************************************************************************
 
 
-    def start_livetv(self, device, channel, url):
+    def start_livetv(self, channel, url):
         log.info('start live tv')
 
-        self.entity.call('vdr.record', self.start_livetv_cb, device,
+        self.entity.call('vdr.record', self.start_livetv_cb, self.device,
                          channel, 0, 2147483647, url, ())
         id = Recorder.next_livetv_id
         Recorder.next_livetv_id = id + 1
-        self.livetv[id] = LiveTV(device, channel)
-        self.activate()
+        self.livetv[id] = channel, None
+        self.update()
         return id
 
-    
+
     def start_livetv_cb(self, result):
         """
         Callback for vdr.record for live tv
         """
         if isinstance(result, mbus.types.MError):
             log.error(str(result))
-            self.deactivate()
+            self.handler.remove(self)
             return
         if not result.appStatus:
             log.error(str(result.appDescription))
-            self.deactivate()
+            self.handler.remove(self)
             return
         log.info('return for live tv start')
         for key, value in self.livetv.items():
-            self.livetv[key].id = result.arguments
+            self.livetv[key] = value[0], result.arguments
             break
         else:
             log.error('key not found')
@@ -478,29 +412,26 @@ class Recorder(object):
             # FIXME: handle error
             log.error('id not in list')
             return
-        info = self.livetv[id]
+        channel, remote_id = self.livetv[id]
         del self.livetv[id]
-        if info.id != None:
-            self.entity.call('vdr.remove', self.stop_livetv_cb, info.id)
+        if remote_id != None:
+            self.entity.call('vdr.remove', self.stop_livetv_cb, remote_id)
         else:
             log.error('remote id is None')
-        self.activate()
+        self.update()
 
-            
+
     def stop_livetv_cb(self, result):
         """
         Callback for vdr.remove for live tv
         """
         if isinstance(result, mbus.types.MError):
             log.error(str(result))
-            self.deactivate()
+            self.handler.remove(self)
             return
         if not result.appStatus:
             log.error(str(result.appDescription))
-            self.deactivate()
+            self.handler.remove(self)
             return
         log.info('return for live tv stop')
         return
-    
-
-recorder = RecorderList()

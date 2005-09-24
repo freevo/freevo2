@@ -74,19 +74,18 @@ log = logging.getLogger('conflict')
 
 
 class Device(object):
-    def __init__(self, information=None):
-        self.plugin       = None
-        self.id           = 'null'
+    def __init__(self, recorder=None):
+        self.recorder     = None
         self.rating       = 0
         self.listing      = []
         self.all_channels = []
         self.rec          = []
-        if information:
-            self.plugin, self.id, self.rating, self.listing = information
+        if recorder:
+            self.recorder = recorder
+            self.rating   = recorder.rating
+            self.listing  = recorder.current_bouquets
             for l in self.listing:
-                for c in l:
-                    if not c in self.all_channels:
-                        self.all_channels.append(c)
+                self.all_channels += l
 
 
     def append(self, recording):
@@ -94,7 +93,7 @@ class Device(object):
         Append recording to list of possible and return True. If not possible,
         do not append and return False.
         """
-        if not self.plugin:
+        if not self.recorder:
             # dummy recorder, it is always possible not record it
             self.rec.append(recording)
             return True
@@ -104,7 +103,7 @@ class Device(object):
         # Set status to False if the recording is currently recording
         # but not on this device.
         if recording.status == RECORDING and \
-               recording.recorder[0] != self.plugin:
+               recording.recorder != self.recorder:
             return False
 
         if not recording.channel in self.all_channels:
@@ -265,7 +264,7 @@ def rate(devices, best_rating):
             for r in d.rec:
                 if r.status != RECORDING:
                     r.status = SCHEDULED
-                    r.recorder = d.plugin, d.id
+                    r.recorder = d.recorder
                     r.respect_start_padding = True
                     r.respect_stop_padding = True
                     if r.conflict_padding:
@@ -278,7 +277,7 @@ def rate(devices, best_rating):
                             c.respect_stop_padding = False
         for r in devices[-1].rec:
             r.status   = CONFLICT
-            r.recorder = None, None
+            r.recorder = None
     return best_rating
 
 
@@ -306,13 +305,10 @@ def check(devices, fixed, to_check, best_rating, dropped=1):
     return best_rating, dropped
 
 
-# internal cache
-_conflict_cache = ObjectCache(30, 'conflict')
-
 # list of devices
-_devices          = []
+_devices = []
 
-def resolve(recordings):
+def resolve(recordings, recorder):
     """
     Find and resolve conflicts in recordings.
     """
@@ -320,9 +316,8 @@ def resolve(recordings):
     if not _devices:
         # create 'devices'
         _devices.append(Device())
-        for p in recorder.recorder:
-            for d in p.get_channel_list():
-                _devices.append(Device(([ p, ] + d)))
+        for p in recorder:
+            _devices.append(Device(p))
         _devices.sort(lambda l, o: cmp(o.rating,l.rating))
 
     # sort recordings
@@ -331,27 +326,15 @@ def resolve(recordings):
     # resolve recordings
     conflicts = scan(recordings, True)
     for c in conflicts:
-        info = 'found conflict:\n'
-#         conflict_id = ''
-#         for r in c:
-#             info += '%s\n' % str(r)[:str(r).rfind(' ')]
-#             conflict_id += str(r)
-#         result = _conflict_cache[conflict_id]
-#         if result:
-#             for r in c:
-#                 r.status, r.recorder = result[r.id]
-#             continue
-        log.debug(info)
+        if 0:
+            info = 'found conflict:\n'
+            log.info(info)
         check(_devices, [], c, 0)
-        result = {}
-        for r in c:
-            result[r.id] = (r.status, r.recorder)
-        info ='solved by setting:\n'
-        for r in c:
-            info += '%s\n' % str(r)
-        log.debug(info)
-        # store cache result
-#         _conflict_cache[conflict_id] = result
+        if 0:
+            info ='solved by setting:\n'
+            for r in c:
+                info += '%s\n' % str(r)
+            log.debug(info)
     t2 = time.time()
     log.info('resolve conflict took %s secs' % (t2-t1))
 
@@ -360,7 +343,5 @@ def clear_cache():
     """
     Clear the global conflict resolve cache
     """
-#     global _conflict_cache
     global _devices
-#     _conflict_cache = ObjectCache(30, 'conflict')
     _devices = []
