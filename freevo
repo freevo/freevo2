@@ -282,7 +282,7 @@ def stop(name, arg):
             os.unlink(fname)
         except OSError:
             pass
-        os.kill(uid, SIGTERM)
+        os.kill(uid, SIGINT)
         return 1
     except OSError:
         return 0
@@ -309,7 +309,7 @@ def start(name, arg, bg, store=1):
                 os.waitpid(uid, 0)
             except KeyboardInterrupt:
                 try:
-                    os.kill(uid, SIGTERM)
+                    os.kill(uid, SIGINT)
                     try:
                         os.waitpid(uid, 0)
                     except KeyboardInterrupt:
