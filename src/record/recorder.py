@@ -41,9 +41,6 @@ import mbus
 # kaa imports
 from kaa.notifier import OneShotTimer, Callback
 
-# freevo imports
-import config
-
 # record imports
 from record_types import *
 
@@ -237,7 +234,7 @@ class Recorder(object):
             filename_array = { 'progname': String(rec.name),
                                'title'   : String(rec.subtitle) }
 
-            filemask = config.TV_RECORD_FILEMASK % filename_array
+            filemask = TV_RECORD_FILEMASK % filename_array
             filename = ''
             for letter in time.strftime(filemask, time.localtime(rec.start)):
                 if letter in string.ascii_letters + string.digits:
@@ -245,11 +242,11 @@ class Recorder(object):
                 elif filename and filename[-1] != '_':
                     filename += '_'
             filename = filename.rstrip(' -_:') + '.mpg'
-            filename = 'file:' + os.path.join(config.TV_RECORD_DIR, filename)
+            filename = 'file:' + os.path.join(TV_RECORD_DIR, filename)
         else:
             # check filename
             if rec.url.startswith('file:'):
-                filename = os.path.join(config.TV_RECORD_DIR, rec.url[5:])
+                filename = os.path.join(TV_RECORD_DIR, rec.url[5:])
                 if filename.endswith('.suffix'):
                     filename = os.path.splitext(filename)[0] + '.mpg'
                 filename = 'file:' + filename

@@ -39,8 +39,9 @@ import re
 import logging
 
 # freevo imports
-import config
 import util.fxdparser as fxdparser
+
+# record imports
 from record_types import *
 
 # get logging object
@@ -87,8 +88,8 @@ class Recording(object):
         self.scheduled_start    = 0
         self.scheduled_stop     = 0
         
-        self.start_padding = config.TV_RECORD_START_PADDING
-        self.stop_padding  = config.TV_RECORD_STOP_PADDING
+        self.start_padding = TV_RECORD_START_PADDING
+        self.stop_padding  = TV_RECORD_STOP_PADDING
         for i in info:
             if i == 'subtitle':
                 self.subtitle = Unicode(info[i])

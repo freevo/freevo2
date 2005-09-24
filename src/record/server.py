@@ -41,19 +41,19 @@ import notifier
 
 # kaa.epg
 import kaa.epg
-import kaa.notifier
+from kaa.notifier import Timer, OneShotTimer
 
 # freevo imports
 import sysconfig
 import config
-import util
+import util.fxdparser
 import plugin
-import plugins
 
 # mbus support
 from mcomm import RPCServer, RPCError, RPCReturn
 
 # record imports
+import plugins
 import recorder
 
 from record_types import *
@@ -64,9 +64,6 @@ import conflict
 # get logging object
 log = logging.getLogger('record')
 
-# FIXME: move to config file
-EPGDB = sysconfig.datafile('epgdb')
-LIVETV_URL = '224.224.224.10'
 
 class RecordServer(RPCServer):
     """
@@ -81,23 +78,24 @@ class RecordServer(RPCServer):
         self.clients = []
         self.last_listing = []
         self.live_tv_map = {}
-        config.detect('tvcards', 'channels')
+        config.detect('channels')
         # add port for channels and check if they are in live-tv mode
         port = 6000
         for index, channel in enumerate(kaa.epg.channels):
             channel.port = port + index
             channel.registered = []
         
+        # init the recorder, start only 'record.' plugins
+        plugin.init(os.environ['FREEVO_PYTHON'], plugins = [ 'record' ])
+
         # file to load / save the recordings and favorites
         self.fxdfile = sysconfig.datafile('recordserver.fxd')
         # load the recordings file
         self.load(True)
-        # init the recorder, start only 'record.' plugins
-        plugin.init(os.environ['FREEVO_PYTHON'], plugins = [ 'record' ])
 
         # timer to handle save and print debug in background
-        self.save_timer = kaa.notifier.OneShotTimer(self.save, False)
-        self.ps_timer = kaa.notifier.OneShotTimer(self.print_schedule, False)
+        self.save_timer = OneShotTimer(self.save, False)
+        self.ps_timer = OneShotTimer(self.print_schedule, False)
 
         # add notify callback
         mbus = self.mbus_instance
@@ -110,7 +108,7 @@ class RecordServer(RPCServer):
         self.check_favorites()
 
         # add schedule timer for SCHEDULE_TIMER / 3 seconds
-        kaa.notifier.Timer(self.schedule).start(SCHEDULE_TIMER / 3)
+        Timer(self.schedule).start(SCHEDULE_TIMER / 3)
 
         
     def send_update(self, update):
@@ -469,8 +467,7 @@ class RecordServer(RPCServer):
         self.send_update([recording.short_list()])
         # call plugins
         for p in plugins.list:
-            cb = notifier.Callback(p.stop_recording, recording)
-            notifier.addTimer(0, cb)
+            OneShotTimer(p.stop_recording, recording).start(10)
         # print some debug
         self.print_schedule()
         

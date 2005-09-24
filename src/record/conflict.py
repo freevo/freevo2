@@ -62,9 +62,6 @@ __all__ = [ 'resolve', 'clear_cache' ]
 import logging
 import time
 
-# objectcache
-from util.objectcache import ObjectCache
-
 # record imports
 import recorder
 from record_types import *
@@ -143,15 +140,14 @@ class Device(object):
         self.rec = self.rec[:-1]
         
 
-def scan(recordings, include_padding):
+def scan(recordings):
     """
     Scan the schedule for conflicts. A conflict is a list of recordings
     with overlapping times.
     """
-    if include_padding:
-        for r in recordings:
-            r.start -= r.start_padding
-            r.stop  += r.stop_padding
+    for r in recordings:
+        r.start -= r.start_padding
+        r.stop  += r.stop_padding
     # Sort by start time
     recordings.sort(lambda l, o: cmp(l.start,o.start))
 
@@ -199,10 +195,9 @@ def scan(recordings, include_padding):
             # [] for the next scanning to get groups of conflicts
             conflicts.append([ r ] + current)
 
-    if include_padding:
-        for r in recordings:
-            r.start += r.start_padding
-            r.stop  -= r.stop_padding
+    for r in recordings:
+        r.start += r.start_padding
+        r.stop  -= r.stop_padding
     return conflicts
 
 
@@ -324,8 +319,7 @@ def resolve(recordings, recorder):
     recordings.sort(lambda l, o: cmp(l.start,o.start))
 
     # resolve recordings
-    conflicts = scan(recordings, True)
-    for c in conflicts:
+    for c in scan(recordings):
         if 0:
             info = 'found conflict:\n'
             log.info(info)
