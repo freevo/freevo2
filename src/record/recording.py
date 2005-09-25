@@ -37,9 +37,11 @@ import time
 import copy
 import re
 import logging
+import os
 
 # freevo imports
 import util.fxdparser as fxdparser
+from util.fxdimdb import FxdImdb, makeVideo
 
 # record imports
 from record_types import *
@@ -266,4 +268,39 @@ class Recording(object):
         if self.scheduled_recorder:
             self.scheduled_recorder.remove(self)
         self.scheduled_recorder = None
+
             
+    def create_fxd(self):
+        """
+        Create a fxd file for the recording.
+        """
+        if not self.url.startswith('file:'):
+            return
+        filename = self.url[5:]
+
+        fxd = FxdImdb()
+        (filebase, fileext) = os.path.splitext(filename)
+        fxd.setFxdFile(filebase, overwrite = True)
+
+        video = makeVideo('file', 'f1', os.path.basename(filename))
+        fxd.setVideo(video)
+        if self.episode:
+            fxd.info['episode'] = fxd.str2XML(self.episode)
+            if self.subtitle:
+                fxd.info['subtitle'] = fxd.str2XML(self.subtitle)
+        elif self.subtitle:
+            fxd.info['tagline'] = fxd.str2XML(self.subtitle)
+        if self.description:
+            fxd.info['plot'] = fxd.str2XML(self.description)
+        for i in self.info:
+            fxd.info[i] = fxd.str2XML(self.info[i])
+
+        fxd.info['runtime'] = '%s min.' % int((self.stop - self.start) / 60)
+        fxd.info['record-start'] = str(int(time.time()))
+        fxd.info['record-stop'] = str(self.stop + self.stop_padding)
+        fxd.info['year'] = time.strftime('%m-%d %H:%M', time.localtime(self.start))
+        if self.fxdname:
+            fxd.title = self.fxdname
+        else:
+            fxd.title = self.name
+        fxd.writeFxd()

@@ -41,19 +41,18 @@ import notifier
 
 # kaa.epg
 import kaa.epg
+import kaa.thumb
 from kaa.notifier import Timer, OneShotTimer
 
 # freevo imports
 import sysconfig
 import config
 import util.fxdparser
-import plugin
 
 # mbus support
 from mcomm import RPCServer, RPCError, RPCReturn
 
 # record imports
-import plugins
 import recorder
 
 from record_types import *
@@ -68,8 +67,7 @@ log = logging.getLogger('record')
 class RecordServer(RPCServer):
     """
     Class for the recordserver. It handles the rpc calls and checks the
-    schedule for recordings and favorites. The recordings itself are
-    done by plugins in record/plugins.
+    schedule for recordings and favorites.
     """
     LIVE_TV_ID = 0
     
@@ -85,9 +83,6 @@ class RecordServer(RPCServer):
             channel.port = port + index
             channel.registered = []
         
-        # init the recorder, start only 'record.' plugins
-        plugin.init(os.environ['FREEVO_PYTHON'], plugins = [ 'record' ])
-
         # file to load / save the recordings and favorites
         self.fxdfile = sysconfig.datafile('recordserver.fxd')
         # load the recordings file
@@ -436,9 +431,8 @@ class RecordServer(RPCServer):
         recording.status = RECORDING
         # send update to mbus entities
         self.send_update([recording.short_list()])
-        # call plugins
-        for p in plugins.list:
-            p.start_recording(recording)
+        # create fxd file
+        recording.create_fxd()
         # print some debug
         self.print_schedule()
 
@@ -452,9 +446,17 @@ class RecordServer(RPCServer):
             filename = recording.url[5:]
             if os.path.isfile(filename):
                 recording.status = SAVED
+                # create thumbnail
+                kaa.thumb.videothumb(filename)
             else:
                 log.info('failed: file not found %s' % recording.url)
                 recording.status = FAILED
+                # Without a recording file, the fxd file is useless
+                fxdfile = os.path.splitext(filename)[0] + '.fxd'
+                if os.path.isfile(fxdfile):
+                    # fxd file must be in real not in overlay dir, without
+                    # that, the recorder couldn't even store the file
+                    os.unlink(fxdfile)
         else:
             recording.status = SAVED
 
@@ -465,9 +467,6 @@ class RecordServer(RPCServer):
             recording.status = FAILED
         # send update to mbus entities
         self.send_update([recording.short_list()])
-        # call plugins
-        for p in plugins.list:
-            OneShotTimer(p.stop_recording, recording).start(10)
         # print some debug
         self.print_schedule()
         
