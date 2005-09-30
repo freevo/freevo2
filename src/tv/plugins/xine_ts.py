@@ -51,9 +51,6 @@ import copy
 import logging
 import mbus
 
-# kaa imports
-import kaa.epg
-
 # freevo imports
 import config
 import plugin
@@ -61,7 +58,6 @@ import mcomm
 
 from event import *
 from application import ChildApp
-from config.tvcards import DVBCard, IVTVCard
 
 # get logging object
 log = logging.getLogger('tv')

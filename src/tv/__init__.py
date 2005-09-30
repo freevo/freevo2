@@ -50,6 +50,6 @@ class PluginInterface(plugin.MainMenuPlugin):
         from mainmenu import MainMenuItem
 
         # detect channels
-        config.detect('tvcards', 'channels')
+        config.detect('channels')
 
         return [ TVMenu(parent) ]
