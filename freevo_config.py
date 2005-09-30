@@ -408,7 +408,7 @@ plugin.activate('audio.detach', level=20, args=(True,))
 # to use tvtime, put the following two lines in your local_conf.py:
 # plugin.remove('tv.mplayer')
 # plugin.activate('tv.tvtime')
-plugin.activate('tv.mplayer')
+plugin.activate('tv.xine')
 
 # control an external tv tuner using irsend or another command
 # to use this you must reassign plugin_external_tuner in local_conf.py:
