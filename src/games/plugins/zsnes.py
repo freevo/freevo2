@@ -1,11 +1,36 @@
-# ZSNES plugin
-# Daniel Casimiro <dan.casimiro@gmail.com>
-
+# -*- coding: iso-8859-1 -*-
+# -----------------------------------------------------------------------------
+# zsnes.py - the Freevo zsnes support
+# -----------------------------------------------------------------------------
+#
+# Add support for the zsnes emulator
+#
+# -----------------------------------------------------------------------------
+# Freevo - A Home Theater PC framework
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dan Casimiro <dan.casimiro@gmail.com>
+# Maintainer:    Dan Casimiro <dan.casimiro@gmail.com>
+#
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# -----------------------------------------------------------------------------
 import plugin
-import config
-from event import *
-
-from application import ChildApp
+from emulator import Emulator
 
 class PluginInterface(plugin.Plugin):
     """
@@ -15,27 +40,10 @@ class PluginInterface(plugin.Plugin):
     def __init__(self):
         plugin.Plugin.__init__(self)
         plugin.register(Zsnes(), plugin.GAMES, True)
-        print 'zsnes activated!'
 
-class Zsnes(ChildApp):
+class Zsnes(Emulator):
     """
     Use this interface to control zsnes.
     """
     def __init__(self):
-        ChildApp.__init__(self, 'zsnes', 'games', True, False, True)
-    
-
-    def play(self, item, player):
-        self.player = player
-        cmd = 'zsnes'
-        self.child_start([cmd, item.filename], stop_cmd='quit\n')
-
-    def eventhandler(self, event):
-        print 'zsnes eventhandler:', event
-
-        if event == PLAY_END:
-            self.stop()
-            self.player.eventhandler(event)
-            return True
-
-        return False
+        Emulator.__init__(self, 'zsnes', 'SNES')

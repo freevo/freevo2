@@ -8,7 +8,7 @@
 # Todo:        
 #
 # -----------------------------------------------------------------------
-# $Log$
+# $Log: __init__.py,v $
 # Revision 1.23  2005/09/03 08:01:54  dischi
 # make it work again (patch from dcasimiro@cox.net)
 #
@@ -49,4 +49,3 @@
 # ----------------------------------------------------------------------- */
 
 from interface import *
-from player import gamesplayer
