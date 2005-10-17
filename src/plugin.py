@@ -241,7 +241,7 @@ RADIO_PLAYER   = 'RADIO_PLAYER'
 VIDEO_PLAYER   = 'VIDEO_PLAYER'
 TV             = 'TV'
 RECORD         = 'RECORD'
-
+GAMES          = 'GAMES'
 
 def event(name, *args):
     """

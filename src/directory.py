@@ -316,6 +316,24 @@ class DirItem(Playlist):
                 space='%s,%s' % (space / 1000, space % 1000)
             return space
 
+        if key == 'length':
+            try:
+                length = int(self.info['length'])
+            except ValueError:
+                return self.info['length']
+            except:
+                try:
+                    length = int(self.length)
+                except:
+                    return ''
+            if length == 0:
+                return ''
+            if length / 3600:
+                return '%d:%02d:%02d' % ( length / 3600, (length % 3600) / 60,
+                                          length % 60)
+            else:
+                return '%d:%02d' % (length / 60, length % 60)
+
         return Item.__getitem__(self, key)
 
 
