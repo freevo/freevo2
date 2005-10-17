@@ -331,77 +331,33 @@ freevo_script = os.path.abspath(sys.argv[0])
 if os.path.islink(freevo_script):
     freevo_script = os.readlink(freevo_script)
 
-if os.path.isdir(os.path.join(os.path.dirname(freevo_script), 'src/plugins')):
-    #
-    # we start freevo from a directory
-    #
-    dname = os.path.dirname(freevo_script)
-    freevo_python  = os.path.join(dname, 'site-packages/freevo')
-    freevo_helpers = os.path.join(dname, 'site-packages/freevo/helpers')
-    freevo_locale  = os.path.join(dname, 'i18n')
-    freevo_share   = os.path.join(dname, 'share')
-    freevo_doc     = os.path.join(dname, 'Docs')
-    freevo_config  = os.path.join(dname, 'freevo_config.py')
+if not os.path.isfile(freevo_script):
+    for path in os.environ['PATH'].split(':'):
+        if os.path.isfile(os.path.join(path, freevo_script)):
+            freevo_script = os.path.join(path, freevo_script)
+import freevo.version
+python, freevo_python = get_python(1)
+if not python:
+    print 'can\'t find python version with installed freevo'
+    sys.exit(0)
+freevo_helpers = os.path.join(freevo_python, 'helpers')
+dname = os.path.abspath(os.path.join(os.path.dirname(freevo_script), '../'))
+freevo_locale  = os.path.join(dname, 'share/locale')
+freevo_share   = os.path.join(dname, 'share/freevo')
+freevo_doc     = os.path.join(dname, 'share/doc/freevo-%s' % freevo.version.__version__)
+freevo_config  = os.path.join(freevo_share, 'freevo_config.py')
+runapp         = ''
+python = [ python ]
 
-    # extend PYTHONPATH to internal site-packages
-    if os.environ.has_key('PYTHONPATH'):
-        os.environ['PYTHONPATH'] = '%s/site-packages:%s' % (dname, os.environ['PYTHONPATH'])
-    else:
-        os.environ['PYTHONPATH'] = '%s/site-packages' % dname
-
-    if os.path.isfile(os.path.join(dname, 'runtime/runapp')):
-        #
-        # there is a runtime, use it
-        #
-        runapp = os.path.join(dname, './runtime/runapp')
-        python = [ runapp, os.path.join(dname, './runtime/apps/freevo_python') ]
-        preload = ''
-        f = open(os.path.join(dname, './runtime/preloads'))
-        for lib in f.readline()[:-1].split(' '):
-            preload += os.path.join(dname, lib) + ':'
-        if preload:
-            preload = preload[:-1]
-        os.environ['FREEVO_PRELOADS'] = preload
-        # FIXME: use FREEVO_PRELOADS in runapp to avoid chdirs
-
-    else:
-        #
-        # no runtime, get best python version
-        #
-        python = get_python(0)
-        if not python:
-            print 'can\'t find python >= 2.2'
-            sys.exit(0)
-        python = [ python ]
-        runapp = ''
-else:
-    #
-    # installed version of freevo, get best python + freevo path
-    #
-    if not os.path.isfile(freevo_script):
-        for path in os.environ['PATH'].split(':'):
-            if os.path.isfile(os.path.join(path, freevo_script)):
-                freevo_script = os.path.join(path, freevo_script)
-    import freevo.version
-    python, freevo_python = get_python(1)
-    if not python:
-        print 'can\'t find python version with installed freevo'
-        sys.exit(0)
-    freevo_helpers = os.path.join(freevo_python, 'helpers')
-    dname = os.path.abspath(os.path.join(os.path.dirname(freevo_script), '../'))
-    freevo_locale  = os.path.join(dname, 'share/locale')
-    freevo_share   = os.path.join(dname, 'share/freevo')
-    freevo_doc     = os.path.join(dname, 'share/doc/freevo-%s' % freevo.version.__version__)
-    freevo_config  = os.path.join(freevo_share, 'freevo_config.py')
-    runapp         = ''
-    python = [ python ]
-
+__site__ = '../lib/python%s.%s/site-packages' % sys.version_info[:2]
+__site__ = os.path.normpath(os.path.join(os.path.dirname(__file__), __site__))
+__site__ = '%s:%s' % (freevo_python, __site__)
 
 # extend PYTHONPATH to freevo
 if os.environ.has_key('PYTHONPATH'):
-    os.environ['PYTHONPATH'] = '%s:%s' % (freevo_python, os.environ['PYTHONPATH'])
+    os.environ['PYTHONPATH'] = '%s:%s' % (__site__, os.environ['PYTHONPATH'])
 else:
-    os.environ['PYTHONPATH'] = freevo_python
+    os.environ['PYTHONPATH'] = __site__
 
 
 # add the variables from above into environ so Freevo can use them, too

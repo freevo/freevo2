@@ -98,23 +98,6 @@ def get_uri(channel, card):
     return channel.access_id
 
 
-def player(channel):
-    for u in channel.uri:
-        # try all internal URIs
-        device, uri = u.split(':')
-
-        tvp = plugin.getbyname(plugin.TV, True)
-        if not tvp or len(tvp) == 0: 
-            return None
-
-        for p in tvp:
-            # FIXME: better handling for rate == 1 or 2
-            if p.rate(channel, device, uri):
-                return p, device, uri
-
-    return None
-
-
 def refresh():
     log.info('Detecting TV channels.')
 
@@ -130,7 +113,6 @@ def refresh():
     for c in kaa.epg.channels:
         c.uri = []
         c.get_uri = get_uri
-        c.player  = player
 
         if isinstance(c.access_id, (list, tuple)):
             for a_id in c.access_id:

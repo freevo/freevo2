@@ -154,6 +154,10 @@ class MPlayer(mplayer.Application):
                   [ '-slave', '-ao'] + \
                   config.MPLAYER_AO_DEV.split(' ')
 
+        if self.item_info and self.item_info['corrupt']:
+            # bad avi, add '-forceidx' to help index generation
+            command.append('-forceidx')
+            
         additional_args = []
 
         if mode == 'dvd':

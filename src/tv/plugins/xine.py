@@ -99,7 +99,7 @@ class PluginInterface(plugin.Plugin):
         plugin.Plugin.__init__(self)
 
         # register xine as the object to play
-        plugin.register(Xine(type), plugin.TV, True)
+        plugin.register(Xine(type), plugin.TV)
 
 
 
@@ -142,7 +142,7 @@ class Xine(ChildApp):
         return 2
 
     
-    def play(self, channel, device, uri):
+    def play(self, channel):
         """
         Play with xine
         """
@@ -150,7 +150,7 @@ class Xine(ChildApp):
             log.error('FIXME: no server found')
             return
         
-        self.item    = uri
+        self.item = channel
         self.server.call('watch.start', self.__receive_url, channel)
         return None
     

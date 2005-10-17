@@ -28,13 +28,15 @@
 #
 # -----------------------------------------------------------------------------
 
+import sys
 
-import __builtin__
-import vfs
-__builtin__.__dict__['vfs'] = vfs
-
-from misc import *
-from fileops import *
-import objectcache
-import fxdparser
-import cache
+if sys.argv[0] != 'setup.py':
+    import __builtin__
+    import vfs
+    __builtin__.__dict__['vfs'] = vfs
+    
+    from misc import *
+    from fileops import *
+    import objectcache
+    import fxdparser
+    import cache

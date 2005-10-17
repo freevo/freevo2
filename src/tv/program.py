@@ -203,11 +203,10 @@ class ProgramItem(Item):
 
 
     def watch_channel(self):
-        p = self.channel.player(self.channel)
+        p = plugin.getbyname(plugin.TV)
         if p:
-            app, device, uri = p
-            app.play(self.channel.id, device, uri)
-
+            p.play(self.channel.id)
+        
 
     def watch_recording(self):
         MessageBox('Not implemented yet').show()
