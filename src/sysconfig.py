@@ -64,9 +64,9 @@ CONFIGFILE = ''
 # read the config file, if no file is found, the default values
 # are used.
 for dirname in conf.cfgfilepath:
-    conf = os.path.join(dirname, 'freevo.conf')
-    if os.path.isfile(conf):
-        c = open(conf)
+    conffile = os.path.join(dirname, 'freevo.conf')
+    if os.path.isfile(conffile):
+        c = open(conffile)
         for line in c.readlines():
             if line.startswith('#'):
                 continue
@@ -80,7 +80,7 @@ for dirname in conf.cfgfilepath:
             CONF.__dict__[name] = val
 
         c.close()
-        CONFIGFILE = conf
+        CONFIGFILE = conffile
         break
 
 
