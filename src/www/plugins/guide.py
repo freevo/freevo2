@@ -1,109 +1,17 @@
-#!/usr/bin/python
-
-#if 0 /*
-# -----------------------------------------------------------------------
-# guide.rpy - Web interface to the Freevo EPG.
-# -----------------------------------------------------------------------
+# -*- coding: iso-8859-1 -*-
+# -----------------------------------------------------------------------------
+# guide.py - Web interface to the Freevo EPG.
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes:
-# Todo:        
 #
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.2  2005/06/26 10:53:16  dischi
-# use kaa.epg instead of pyepg
-#
-# Revision 1.1  2005/02/13 18:42:09  dischi
-# move pages into plugins and pages subdir
-#
-# Revision 1.5  2005/02/03 16:05:38  rshortt
-# Minor cosmetics fix.
-#
-# Revision 1.4  2005/01/14 22:41:45  rshortt
-# More fixes: variable guide start time, category box, recordserver message.
-# TODO:
-#   -find out from kaa.epg when our last program is scheduled to let us better
-#    determine how far forward to let users skip
-#   -find out from kaa.epg which program categories it has (ie: news, sports)
-#
-# Revision 1.3  2005/01/13 20:19:33  rshortt
-# Place the authentication into www/server.py to protect mote than just
-# the .py files.
-#
-# Revision 1.2  2005/01/06 18:49:04  dischi
-# remove old tv_util
-#
-# Revision 1.1  2004/12/28 00:38:45  rshortt
-# Reactivating web guide and scheduling recordings, this is still a major work
-# in progress and there are still missing pieces.
-#
-# Revision 1.30  2004/08/14 01:30:21  rshortt
-# Change guide access a bit.
-#
-# Revision 1.29  2004/08/14 01:23:30  rshortt
-# Use the chanlist/epg from cache.
-#
-# Revision 1.28  2004/08/10 16:02:39  rshortt
-# Remove comma from between tag attributes.
-#
-# Revision 1.27  2004/08/10 12:54:22  outlyer
-# An impressive update to the guide code from Jason Tackaberry that
-# dramatically speeds up rendering and navigation of the guide.  I will be
-# applying this patch to future 1.5.x Debian packages, but I'm not applying
-# it to 1.5 branch of CVS unless people really want it.
-#
-# Revision 1.26  2004/08/08 19:07:55  rshortt
-# Use tv_util to cache the guide.
-#
-# Revision 1.25  2004/03/12 03:05:50  outlyer
-# Use the episode title where available.
-#
-# Revision 1.24  2004/02/23 08:33:21  gsbarbieri
-# i18n: help translators job.
-#
-# Revision 1.23  2004/02/22 06:25:15  gsbarbieri
-# Fix bugs introduced by i18n changes.
-#
-# Revision 1.22  2004/02/19 04:57:59  gsbarbieri
-# Support Web Interface i18n.
-# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
-#
-# Revision 1.21  2004/02/09 21:37:43  outlyer
-# Removed the rounded edges I was trying for the guide; they don't work
-# consistently and look very ugly in some browsers. I'll have to rethink
-# them.
-#
-# Revision 1.20  2004/02/09 21:23:42  outlyer
-# New web interface...
-#
-# * Removed as much of the embedded design as possible, 99% is in CSS now
-# * Converted most tags to XHTML 1.0 standard
-# * Changed layout tables into CSS; content tables are still there
-# * Respect the user configuration on time display
-# * Added lots of "placeholder" tags so the design can be altered pretty
-#   substantially without touching the code. (This means using
-#   span/div/etc. where possible and using 'display: none' if it's not in
-#   _my_ design, but might be used by someone else.
-# * Converted graphical arrows into HTML arrows
-# * Many minor cosmetic changes
-#
-# Revision 1.19  2003/10/20 02:24:17  rshortt
-# more tv_util fixes
-#
-# Revision 1.18  2003/09/07 18:50:56  dischi
-# make description shorter if it's too long
-#
-# Revision 1.17  2003/09/07 01:02:13  gsbarbieri
-# Fixed a bug in guide that appeared with the new PRECISION thing.
-#
-# Revision 1.16  2003/09/06 22:58:13  mikeruelle
-# fix something i don't think sould have a gap
-
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Rob Shortt <rshortt@users.sf.net>
+# Maintainer:    Rob Shortt <rshortt@users.sf.net>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -120,23 +28,23 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
-#endif
+# -----------------------------------------------------------------------------
 
-import sys, string
+# python imports
+import sys
+import string
 import time
-import config
 import logging
+
+# kaa imports
+import kaa.epg
 
 # freevo core imports
 import freevo.ipc.tvserver as tvserver
 
+# webserver includes
 from www.base import HTMLResource, FreevoResource
-
-import util
-import config 
-
-import kaa.epg
+from www import conf
 
 # get logging object
 log = logging.getLogger('www')
@@ -195,8 +103,8 @@ class GuideResource(FreevoResource):
             retval += '<option value="' + str(myoff) + '"'
             if (abs(gstart - hrinc) < 60):
                 retval += ' SELECTED '
-            retval += '>' + time.strftime(config.TV_TIMEFORMAT, time.localtime(hrinc)) + '\n'
-            hrinc += config.WWW_GUIDE_INTERVAL * 60
+            retval += '>' + time.strftime(conf.TIMEFORMAT, time.localtime(hrinc)) + '\n'
+            hrinc += conf.GUIDE_INTERVAL * 60
         retval += '</select>\n'
         return retval
 
@@ -206,10 +114,10 @@ class GuideResource(FreevoResource):
         log.debug(dir(request))
         form = request.query
 
-        INTERVAL = config.WWW_GUIDE_INTERVAL * 60
-        PRECISION = config.WWW_GUIDE_PRECISION * 60
+        INTERVAL = conf.GUIDE_INTERVAL * 60
+        PRECISION = conf.GUIDE_PRECISION * 60
         cpb = INTERVAL / PRECISION # cols per block/interval
-        n_cols = config.WWW_GUIDE_COLS
+        n_cols = conf.GUIDE_COLS
 
         mfrguidestart = time.time()
         mfrguideinput = form.get('stime')
@@ -232,7 +140,7 @@ class GuideResource(FreevoResource):
         if mfrprevguide < now2:
             mfrprevguide = 0
 
-        fv.printHeader(_('TV Guide'), config.WWW_STYLESHEET, config.WWW_JAVASCRIPT, selected=_('TV Guide'))
+        fv.printHeader(_('TV Guide'), conf.STYLESHEET, conf.JAVASCRIPT, selected=_('TV Guide'))
         fv.res += '<div id="content">\n';
 
         # Fool "is prog scheduled" until that is hooked up.
@@ -269,7 +177,7 @@ class GuideResource(FreevoResource):
                 for i in range(n_cols):
                     if i == n_cols-1 or i == 0:
                         dacell = ''
-                        datime = time.strftime(config.TV_TIMEFORMAT, time.localtime(headerstart))
+                        datime = time.strftime(conf.TIMEFORMAT, time.localtime(headerstart))
                         if i == n_cols-1:
                             dacell = datime + '&nbsp;&nbsp;<a href="guide?stime=%i">&raquo;</a>' % mfrnextguide
                         else:                            
@@ -279,7 +187,7 @@ class GuideResource(FreevoResource):
                                 dacell = datime
                         fv.tableCell(dacell, 'class="guidehead"  colspan="%d"' % cpb)
                     else:
-                        fv.tableCell(time.strftime(config.TV_TIMEFORMAT, time.localtime(headerstart)),
+                        fv.tableCell(time.strftime(conf.TIMEFORMAT, time.localtime(headerstart)),
                                      'class="guidehead" colspan="%d"' % cpb)
                     headerstart += INTERVAL
                 fv.tableRowClose()

@@ -38,9 +38,9 @@ import logging
 # freevo core imports
 import freevo.ipc.tvserver as tvserver
 
-# freevo imports
-import config
+# webserver includes
 from www.base import HTMLResource, FreevoResource
+from www import conf
 
 import kaa.epg
 
@@ -108,10 +108,10 @@ class SearchResource(FreevoResource):
    
 
                 fv.tableRowOpen('class="chanrow"')
-                fv.tableCell(time.strftime('%b %d ' + config.TV_TIMEFORMAT, 
+                fv.tableCell(time.strftime('%b %d ' + conf.TIMEFORMAT, 
                                            time.localtime(p.start)), 
                              'class="'+status+'" colspan="1"')
-                fv.tableCell(time.strftime('%b %d ' + config.TV_TIMEFORMAT, 
+                fv.tableCell(time.strftime('%b %d ' + conf.TIMEFORMAT, 
                                            time.localtime(p.stop)), 
                              'class="'+status+'" colspan="1"')
 

@@ -1,69 +1,17 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
-# web_types.py - Classes useful for the web interface.
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# guide.py - web interface basic classes
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes:
-# Todo:        
 #
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.11  2005/09/17 22:51:12  rshortt
-# add "extrahead" parameter for adding to the page header, useful for adding meta tags and such
-#
-# Revision 1.10  2005/06/25 08:52:29  dischi
-# switch to new style python classes
-#
-# Revision 1.9  2005/02/13 18:42:59  dischi
-# rename recordings page
-#
-# Revision 1.8  2005/02/03 16:05:38  rshortt
-# Minor cosmetics fix.
-#
-# Revision 1.7  2005/02/02 02:13:16  rshortt
-# Revive search page, add more search options.
-#
-# Revision 1.6  2005/01/13 20:19:33  rshortt
-# Place the authentication into www/server.py to protect mote than just
-# the .py files.
-#
-# Revision 1.5  2005/01/13 18:40:47  rshortt
-# Add support for encrypted passwords, which is actually now required, you may
-# use the passwd helper to generate crypted passwords for local_conf.py.
-#
-# Revision 1.4  2005/01/13 17:02:16  rshortt
-# Reactivate authentication.
-# TODO:
-#  - SSL
-#  - encrypted passwords
-#
-# Revision 1.3  2004/12/28 00:38:45  rshortt
-# Reactivating web guide and scheduling recordings, this is still a major work
-# in progress and there are still missing pieces.
-#
-# Revision 1.2  2004/12/18 18:18:39  dischi
-# small update, still not working
-#
-# Revision 1.1  2004/10/21 18:02:13  dischi
-# example resources for the webserver
-#
-# Revision 1.25  2004/07/10 12:33:43  dischi
-# header cleanup
-#
-# Revision 1.24  2004/03/09 00:14:35  rshortt
-# Add advanced search and link to search page.  Next will probably add genre
-# options.
-#
-# Revision 1.23  2004/02/23 08:31:55  gsbarbieri
-# Helper functions.
-# Please use them to print messages to user.
-# printMessagesFinish() should be used to generate the page ending stuff (links,
-# foot, ...)
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2003 Krister Lagerstrom, et al. 
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Rob Shortt <rshortt@users.sf.net>
+# Maintainer:    Rob Shortt <rshortt@users.sf.net>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -80,15 +28,17 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
+# python imports
 import base64
 import os
 import sys
 import time
 import crypt
 
-import config
+# webserver imports
+import conf
 
 
 class FreevoResource(object):
@@ -112,12 +62,12 @@ class HTMLResource(object):
 
         strprefix = '../' * prefix
 
-        self.res += '<?xml version="1.0" encoding="'+ config.encoding +'"?>\n'
+        self.res += '<?xml version="1.0" encoding="'+ conf.ENCODING +'"?>\n'
         self.res += '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"\n'
         self.res += '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">\n'
         self.res += '<html>\n<head>\n'
         self.res += '\t<title>Freevo | '+title+'</title>\n'
-        self.res += '\t<meta http-equiv="Content-Type" content= "text/html; charset='+ config.encoding +'" />\n'
+        self.res += '\t<meta http-equiv="Content-Type" content= "text/html; charset='+ conf.ENCODING +'" />\n'
         if style != None:
             self.res += '\t<link rel="stylesheet" href="%sstyles/main.css" type="text/css" />\n' % strprefix
         if script != None:
@@ -137,12 +87,6 @@ class HTMLResource(object):
 #                  (_('Manual Recording'),_('Schedule a Manual Recording'),'%smanualrecord.rpy' % str(strprefix)),
                  (_('Search'),_('Advanced Search Page'),'%ssearch' % str(strprefix)),
                  (_('Doc'),_('View Online Help and Documentation'),'%sdoc' % str(strprefix))]
-
-        try:
-            if config.ICECAST_WWW_PAGE:
-                items.append((_('Icecast List'),_('Change Icecast List'),'%siceslistchanger.rpy' % (strprefix)))
-        except AttributeError:
-            pass
 
         self.res += '<div id="header">\n<ul>'
 
@@ -272,10 +216,4 @@ class HTMLResource(object):
         self.printFooter()
         
     def printLinks(self, prefix=0):
-        #   
-        #try:
-        #    if config.ICECAST_WWW_PAGE:
-        #        self.res += '<a href="%siceslistchanger.rpy">Change Icecast List</a>' % strprefix
-        #except AttributeError:
-        #    pass
         return

@@ -41,11 +41,9 @@ import kaa.epg
 # freevo core imports
 from freevo.ipc.tvserver import recordings
 
-# freevo imports
-import config
-
-# webserver basics
+# webserver includes
 from www.base import HTMLResource, FreevoResource
+from www import conf
 
 # get logging object
 log = logging.getLogger('www')
@@ -146,10 +144,10 @@ class RecordResource(FreevoResource):
             channel = kaa.epg.get_channel_by_id(prog.channel).title
 
             fv.tableRowOpen('class="chanrow"')
-            t = time.strftime('%b %d ' + config.TV_TIMEFORMAT,
+            t = time.strftime('%b %d ' + conf.TIMEFORMAT,
                               time.localtime(prog.start))
             fv.tableCell(t, colspan)
-            t = time.strftime('%b %d ' + config.TV_TIMEFORMAT,
+            t = time.strftime('%b %d ' + conf.TIMEFORMAT,
                               time.localtime(prog.stop))
             fv.tableCell(t, colspan)
 
