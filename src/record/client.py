@@ -44,7 +44,14 @@ import config
 # get logging object
 log = logging.getLogger('record')
 
-from record_types import *
+# status values
+MISSED    = 'missed'
+SAVED     = 'saved'
+SCHEDULED = 'scheduled'
+RECORDING = 'recording'
+CONFLICT  = 'conflict'
+DELETED   = 'deleted'
+FAILED    = 'failed'
 
 class Recording(object):
     """
