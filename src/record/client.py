@@ -30,16 +30,21 @@
 #
 # -----------------------------------------------------------------------------
 
+# python imports
 import sys
 import time
 import copy
 import logging
-import mbus
+# FIXME: do we need this?
 from types import *
+import mbus
 
-import notifier
-import mcomm
-import config
+# kaa imports
+import kaa.epg
+import kaa.notifier
+
+# freevo core imports
+from freevo import mcomm
 
 # get logging object
 log = logging.getLogger('record')
@@ -242,7 +247,7 @@ class Recordings(object):
                 break
 
             time.sleep(0.01)
-            notifier.step()
+            kaa.notifier.step()
 
         return self.__recordings.values()
 
@@ -350,8 +355,8 @@ class Favorites(object):
         try:
             if prog.channel == 'ANY':
                 channel = []
-                for c in config.TV_CHANNELS:
-                    channel.append(c[0])
+                for c in kaa.epg.channels:
+                    channel.append(c.id)
             else:
                 channel = [ prog.channel.id ]
             days = (_('Mon'), _('Tue'), _('Wed'), _('Thu'), _('Fri'),
