@@ -335,11 +335,25 @@ if not os.path.isfile(freevo_script):
     for path in os.environ['PATH'].split(':'):
         if os.path.isfile(os.path.join(path, freevo_script)):
             freevo_script = os.path.join(path, freevo_script)
+
+
+# fix python path
+__site__ = '../lib/python%s.%s/site-packages' % sys.version_info[:2]
+__site__ = os.path.normpath(os.path.join(os.path.dirname(__file__), __site__))
+
+# extend PYTHONPATH to freevo
+if os.environ.has_key('PYTHONPATH'):
+    os.environ['PYTHONPATH'] = '%s:%s' % (__site__, os.environ['PYTHONPATH'])
+else:
+    os.environ['PYTHONPATH'] = __site__
+
+
 import freevo.version
 python, freevo_python = get_python(1)
 if not python:
     print 'can\'t find python version with installed freevo'
     sys.exit(0)
+
 freevo_helpers = os.path.join(freevo_python, 'helpers')
 dname = os.path.abspath(os.path.join(os.path.dirname(freevo_script), '../'))
 freevo_locale  = os.path.join(dname, 'share/locale')
@@ -349,16 +363,7 @@ freevo_config  = os.path.join(freevo_share, 'freevo_config.py')
 runapp         = ''
 python = [ python ]
 
-__site__ = '../lib/python%s.%s/site-packages' % sys.version_info[:2]
-__site__ = os.path.normpath(os.path.join(os.path.dirname(__file__), __site__))
-__site__ = '%s:%s' % (freevo_python, __site__)
-
-# extend PYTHONPATH to freevo
-if os.environ.has_key('PYTHONPATH'):
-    os.environ['PYTHONPATH'] = '%s:%s' % (__site__, os.environ['PYTHONPATH'])
-else:
-    os.environ['PYTHONPATH'] = __site__
-
+os.environ['PYTHONPATH'] = '%s:%s' % (freevo_python, os.environ['PYTHONPATH'])
 
 # add the variables from above into environ so Freevo can use them, too
 for var in ('freevo_script', 'runapp', 'freevo_python', 'freevo_locale', 'freevo_doc',
@@ -495,5 +500,5 @@ if len(proc) and not os.path.isfile(proc[0]):
     print 'Error: unable to start \'%s\'' % proc[0]
     print 'Either the helper does not exist or you need to run \'make\' first'
     sys.exit(0)
-    
+
 start(name, python + proc , bg, check)
