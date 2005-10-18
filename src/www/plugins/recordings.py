@@ -38,11 +38,11 @@ import logging
 # epg support
 import kaa.epg
 
+# freevo core imports
+from freevo.ipc.tvserver import recordings
+
 # freevo imports
 import config
-
-# recordserver bindings
-from record.client import recordings
 
 # webserver basics
 from www.base import HTMLResource, FreevoResource

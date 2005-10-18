@@ -35,6 +35,9 @@
 import time
 import kaa.epg
 
+# freevo core imports
+import freevo.ipc.tvserver as tvserver
+
 # freevo imports
 import config
 import plugin
@@ -42,7 +45,6 @@ from menu import Item, Action, Menu, ActionItem
 from gui.windows import MessageBox
 
 # tv imports
-from record.client import recordings
 import favorite
 
 class ProgramItem(Item):
@@ -63,7 +65,7 @@ class ProgramItem(Item):
         self.description = program.description
         self.episode = program.episode
         
-        self.scheduled = recordings.get(program.channel.id,
+        self.scheduled = tvserver.recordings.get(program.channel.id,
                                         program.start, program.stop)
 
         # TODO: add category support (from epgdb)
@@ -172,7 +174,7 @@ class ProgramItem(Item):
 
 
     def schedule(self):
-        (result, msg) = recordings.schedule(self)
+        (result, msg) = tvserver.recordings.schedule(self)
         if result:
             MessageBox(_('"%s" has been scheduled for recording') % \
                        self.title).show()
@@ -182,7 +184,7 @@ class ProgramItem(Item):
 
 
     def remove(self):
-        (result, msg) = recordings.remove(self.scheduled.id)
+        (result, msg) = tvserver.recordings.remove(self.scheduled.id)
         if result:
             MessageBox(_('"%s" has been removed as recording') % \
                        self.title).show()

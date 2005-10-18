@@ -40,7 +40,6 @@ import time
 
 # freevo imports
 import util
-import record.client
 
 # gui imports
 from area import Area

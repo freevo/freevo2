@@ -35,9 +35,11 @@ import sys
 import time
 import logging
 
+# freevo core imports
+import freevo.ipc.tvserver as tvserver
+
 # freevo imports
 import config
-import record.client
 from www.base import HTMLResource, FreevoResource
 
 import kaa.epg
@@ -82,7 +84,7 @@ class SearchResource(FreevoResource):
             fv.tableCell(_('Actions'), 'class="guidehead" colspan="1"')
             fv.tableRowClose()
 
-            rec_progs = record.client.recordings.list()
+            rec_progs = tvserver.recordings.list()
 
             for p in programs:
                 status = 'basic'

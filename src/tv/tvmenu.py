@@ -45,6 +45,9 @@
 
 import time
 
+# freevo core imports
+import freevo.ipc.tvserver as tvserver
+
 import config
 import plugin
 
@@ -52,7 +55,6 @@ from mainmenu import MainMenuItem
 from menu import Item, ActionItem, Menu
 
 import tvguide
-from record.client import recordings
 from directory import DirItem
 from gui.windows import MessageBox
 
@@ -62,9 +64,9 @@ log = logging.getLogger('tv')
 class Info(Item):
     def __getitem__(self, key):
         if key in ('comingup', 'running'):
-            return getattr(recordings, key)
+            return getattr(tvserver.recordings, key)
         if key == 'recordserver':
-            return recordings.server
+            return tvserver.recordings.server
         return Info.__getitem__(self, key)
 
 

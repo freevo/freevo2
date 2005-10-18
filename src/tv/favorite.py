@@ -31,13 +31,12 @@
 #
 # -----------------------------------------------------------------------------
 
+# freevo core imports
+import freevo.ipc.tvserver as tvserver
+
 # freevo imports
 from menu import Item, Action, Menu
 from gui.windows import MessageBox
-
-# tv imports
-import record.client
-
 
 class FavoriteItem(Item):
     """
@@ -88,7 +87,7 @@ class FavoriteItem(Item):
 
 
     def add(self):
-        (result, msg) = record.client.favorites.add(self)
+        (result, msg) = tvserver.favorites.add(self)
         if result:
             txt = _('"%s" has been scheduled as favorite') % self.title
         else:

@@ -128,11 +128,13 @@ import time
 import config
 import logging
 
+# freevo core imports
+import freevo.ipc.tvserver as tvserver
+
 from www.base import HTMLResource, FreevoResource
 
 import util
 import config 
-import record.client
 
 import kaa.epg
 
@@ -236,7 +238,7 @@ class GuideResource(FreevoResource):
         # Fool "is prog scheduled" until that is hooked up.
         got_schedule = False
 
-        if not record.client.recordings.server:
+        if not tvserver.recordings.server:
             fv.res += '<p class="alert"><b>'+_('Notice')+'</b>: ' \
                       +_('The recording server is down.')+'</p>\n'
 

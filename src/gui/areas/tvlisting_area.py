@@ -46,14 +46,14 @@ import math
 import time
 import config
 
+# freevo core imports
+import freevo.ipc.tvserver as tvserver
+
 from area import Area
 from gui.widgets import Rectangle
-from record.client import recordings
-from record.record_types import *
 
 import logging
 log = logging.getLogger('gui')
-
 
 class _Geometry(object):
     """
@@ -415,11 +415,12 @@ class TvlistingArea(Area):
                     if prg == selected_prog:
                         val = selected_val
                     else:
-                        rs = recordings.get(prg.channel.id, prg.start,
-                                            prg.stop)
-                        if rs and rs.status in (SCHEDULED, RECORDING, SAVED):
+                        rs = tvserver.recordings.get(prg.channel.id, prg.start,
+                                                     prg.stop)
+                        if rs and rs.status in (tvserver.SCHEDULED, tvserver.RECORDING,
+                                                tvserver.SAVED):
                             val = scheduled_val
-                        elif rs and rs.status == CONFLICT:
+                        elif rs and rs.status == tvserver.CONFLICT:
                             val = conflict_val
                         else:
                             val = default_val

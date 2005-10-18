@@ -41,14 +41,14 @@ log = logging.getLogger('www')
 # set basic recording debug to info
 log.setLevel(logging.INFO)
 
+# import ipc.tvserver to attach to the mbus
+from freevo.ipc.tvserver import recordings
+
 # import freevo config
 import config
 
 # import webserver
 from www.server import Server, RequestHandler
-
-# import record.client to attach to the mbus
-import record.client
 
 cgi_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../www'))
 htdocs  = [ os.path.join(cgi_dir, 'htdocs'),
