@@ -84,9 +84,11 @@ import mbus
 # kaa imports
 import kaa.notifier
 
-# freevo imports
+# freevo core imports
+from freevo import mcomm
+
+# freevo ui imports
 import config
-import mcomm
 
 # get logging object
 log = logging.getLogger()

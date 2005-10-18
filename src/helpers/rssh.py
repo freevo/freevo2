@@ -4,10 +4,15 @@ import sys
 import os
 import time
 
+# kaa imports
 import kaa.notifier
 import kaa.epg
+
+# freevo core imports
+from freevo import mcomm
+
+# freevo ui imports
 import config
-import mcomm
 
 server = None
 

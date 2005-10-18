@@ -51,10 +51,12 @@ import copy
 import logging
 import mbus
 
-# freevo imports
+# freevo core imports
+from freevo import mcomm
+
+# freevo ui imports
 import config
 import plugin
-import mcomm
 
 from event import *
 from application import ChildApp

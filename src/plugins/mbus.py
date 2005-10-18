@@ -1,6 +1,10 @@
+# kaa imports
 from kaa.notifier import EventHandler, Timer
 
-import mcomm
+# freevo core imports
+from freevo import mcomm
+
+# freevo ui imports
 import plugin
 import application
 import event

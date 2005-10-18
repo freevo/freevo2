@@ -1,6 +1,8 @@
 import sys
 import getopt
-import mcomm
+
+# freevo core imports
+from freevo import mcomm
 
 def usage():
     print '-p file'

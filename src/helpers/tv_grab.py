@@ -38,10 +38,12 @@ from optparse import OptionParser
 
 import kaa.epg
 
+# freevo core imports
+from freevo import mcomm
+
+# freevo ui imports
 import config
 import sysconfig
-import mcomm
-
 
 
 def grab_xmltv():
