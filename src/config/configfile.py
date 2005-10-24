@@ -161,12 +161,6 @@ file called 'local_conf.py'. You can overwrite the variables from
 'freevo_config.py' in here. There is an example for 'local_conf.py' called
 'local_conf.py.example' in the Freevo distribution.
     
-If you need more help, use the internal webserver to get more informations
-how to setup Freevo. To do this, you need to set
-WWW_USERS = { 'username' : 'password' }
-in your local_conf.py and then you can access the doc at
-http://localhost:8080/help/
-    
 The location of freevo_config.py is %s
 Freevo searches for freevo.conf and local_conf.py in the following locations:
 %s

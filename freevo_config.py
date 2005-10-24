@@ -1333,57 +1333,6 @@ VDR_ACCESS_ID = 'sid'
 
 
 # ======================================================================
-# Freevo builtin WWW server settings:
-# ======================================================================
-
-#
-# To activate the built in web server, please activate the www plugin
-# in your local_conf.py. You can also start the webserver as external
-# program by running 'freevo webserver'.
-#
-# plugin.activate('www')
-
-#
-# Web server port number. 80 is the standard port, but is often
-# taken already by apache, and cannot be used unless the server
-# runs as root. Port 8080 is the default, change to 80 if
-# needed.
-#
-WWW_PORT = 8080
-
-#
-# Username / Password combinations to login to the web interface.
-# These should be overridden in local_conf.py
-# 
-# WWW_USERS = { "user1" : "changeme", 
-#            "optional" : "changeme2" }
-#
-WWW_USERS = { 0 : 0 }
-
-#
-# Divide the TV guide into intervals of this length (in minutes)
-#
-WWW_GUIDE_INTERVAL = 30
-
-#
-# Precision for TV guide (in minutes)
-#
-WWW_GUIDE_PRECISION = 5
-
-#
-# Show this many blocks at once
-#
-WWW_GUIDE_COLS = 6
-
-WWW_STYLESHEET = 'styles/main.css'
-
-WWW_JAVASCRIPT = 'scripts/display_prog-head.js'
-
-
-
-
-
-# ======================================================================
 # Internal stuff, you shouldn't change anything here unless you know
 # what you are doing
 # ======================================================================
