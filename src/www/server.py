@@ -1,6 +1,6 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# server.py - a simple webserver for use with pyNotifier
+# server.py - a simple webserver for use with kaa.notifier
 # -----------------------------------------------------------------------------
 # $Id$
 #
@@ -36,6 +36,7 @@
 
 __all__ = [ 'RequestHandler', 'Server' ]
 
+# python imports
 import socket
 import SimpleHTTPServer
 import base64
@@ -46,9 +47,12 @@ import os
 import traceback
 import logging
 
-import config
-import notifier
-import util.fsocket as fsocket
+# kaa imports
+import kaa.notifier
+
+# freevo-webserver imports
+import conf
+import fsocket
 
 
 # get logging object
@@ -239,7 +243,7 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         if not auth: return False
 
         (username, password) = auth.split(':', 1)
-        cryptedpassword = config.WWW_USERS.get(username)
+        cryptedpassword = conf.USERS.get(username)
 
         if cryptedpassword:
             return crypt.crypt(password, cryptedpassword[:2]) == cryptedpassword
@@ -276,8 +280,7 @@ class Server(object):
         
         self.socket.bind((ip, port))
         self.socket.listen(5)
-        notifier.addSocket( self.socket, self.accept )
-        config.detect('channels')
+        kaa.notifier.SocketDisatcher(self.accept).register(self.socket)
 
 
     def accept (self, socket):
