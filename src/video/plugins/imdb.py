@@ -39,6 +39,8 @@
 import os
 import re
 import time
+import copy
+import htmlentitydefs
 
 # kaa imports
 import kaa.notifier
@@ -49,7 +51,6 @@ import config
 from menu import Action, ActionItem, Menu, ItemPlugin
 from util.fxdimdb import FxdImdb, makeVideo, makePart, point_maker
 from gui.windows import WaitBox, MessageBox
-from util import htmlenties2txt
 
 # shortcut for the actions
 SHORTCUT = 'imdb_search_or_cover_search'
@@ -128,6 +129,44 @@ class PluginInterface(ItemPlugin):
         return []
 
             
+    def htmlenties2txt(self, string):
+        """
+        Converts a string to a string with all html entities resolved.
+        Returns the result as Unicode object (that may conatin chars outside 256.
+        """
+        e = copy.deepcopy(htmlentitydefs.entitydefs)
+        e['ndash'] = "-";
+        e['bull'] = "-";
+        e['rsquo'] = "'";
+        e['lsquo'] = "`";
+        e['hellip'] = '...'
+
+        string = Unicode(string).replace("&#039", "'").replace("&#146;", "'")
+
+        i = 0
+        while i < len(string):
+            amp = string.find("&", i) # find & as start of entity
+            if amp == -1: # not found
+                break
+            i = amp + 1
+
+            semicolon = string.find(";", amp) # find ; as end of entity
+            if string[amp + 1] == "#": # numerical entity like "&#039;"
+                entity = string[amp:semicolon+1]
+                replacement = Unicode(unichr(int(entity[2:-1])))
+            else:
+                entity = string[amp:semicolon + 1]
+                if semicolon - amp > 7:
+                    continue
+                try:
+                    # the array has mappings like "Uuml" -> "ü"
+                    replacement = e[entity[1:-1]]
+                except KeyError:
+                    continue
+            string = string.replace(entity, replacement)
+        return string
+
+
     def imdb_search(self, item, disc_set):
         """
         Search imdb for the item
@@ -170,7 +209,7 @@ class PluginInterface(ItemPlugin):
         """
         items = []
         for id, name, year, type in results:
-            name = '%s (%s, %s)' % (htmlenties2txt(name), year, type)
+            name = '%s (%s, %s)' % (self.htmlenties2txt(name), year, type)
             a = ActionItem(name, item, self.download)
             a.parameter(id, disc_set)
             items.append(a)

@@ -106,6 +106,56 @@ all_variables = [('DIRECTORY_SORT_BY_DATE', _('Directory Sort By Date'),
 
 
 
+def smartsort(x,y):
+    """
+    Compares strings after stripping off 'The' and 'A' to be 'smarter'
+    Also obviously ignores the full path when looking for 'The' and 'A'
+    """
+    m = os.path.basename(x)
+    n = os.path.basename(y)
+
+    for word in ('The', 'A'):
+        word += ' '
+        if m.find(word) == 0:
+            m = m.replace(word, '', 1)
+        if n.find(word) == 0:
+            n = n.replace(word, '', 1)
+
+    return cmp(m.upper(),n.upper()) # be case insensitive
+
+
+def find_start_string(s1, s2):
+    """
+    Find similar start in both strings
+    """
+    ret = ''
+    tmp = ''
+    while True:
+        if len(s1) < 2 or len(s2) < 2:
+            return ret
+        if s1[0] == s2[0]:
+            tmp += s2[0]
+            if s1[1] in (u' ', u'-', u'_', u',', u':', '.') and \
+               s2[1] in (u' ', u'-', u'_', u',', u':', '.'):
+                ret += tmp + u' '
+                tmp = ''
+            s1 = s1[1:].lstrip(u' -_,:.')
+            s2 = s2[1:].lstrip(u' -_,:.')
+        else:
+            return ret
+
+
+def remove_start_string(string, start):
+    """
+    remove start from the beginning of string.
+    """
+    start = start.replace(u' ', '')
+    for i in range(len(start)):
+        string = string[1:].lstrip(' -_,:.')
+
+    return string[0].upper() + string[1:]
+
+
 class DirItem(Playlist):
     """
     class for handling directories
@@ -634,14 +684,14 @@ class DirItem(Playlist):
             substr = play_items[0].name[:-5].lower()
             for i in play_items[1:]:
                 if len(i.name) > 5:
-                    substr = util.find_start_string(i.name.lower(), substr)
+                    substr = find_start_string(i.name.lower(), substr)
                     if not substr or len(substr) < 10:
                         break
                 else:
                     break
             else:
                 for i in play_items:
-                    i.name = util.remove_start_string(i.name, substr)
+                    i.name = remove_start_string(i.name, substr)
 
         t5 = time.time()
 
@@ -651,7 +701,7 @@ class DirItem(Playlist):
 
         # sort directories
         if self.DIRECTORY_SMART_SORT:
-            dir_items.sort(lambda l, o: util.smartsort(l.dir,o.dir))
+            dir_items.sort(lambda l, o: smartsort(l.dir,o.dir))
         else:
             dir_items.sort(lambda l, o: cmp(l.dir.upper(), o.dir.upper()))
 

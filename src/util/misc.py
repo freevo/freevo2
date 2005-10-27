@@ -38,18 +38,7 @@
 #
 # -----------------------------------------------------------------------------
 
-# python imports
-import os
-import string
-import re
-import copy
-import htmlentitydefs
-
-# freevo imports
-import sysconfig
-
 # util imports
-import vfs
 from vfs import abspath as vfs_abspath
 
 # http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/52560
@@ -123,19 +112,6 @@ def unique(s):
     return u
 
 
-def escape(sql):
-    """
-    Escape a SQL query in a manner suitable for sqlite. Also convert
-    Unicode to normal string object.
-    """
-    if sql:
-        sql = sql.replace('\'','\'\'')
-        return String(sql)
-    else:
-        return 'null'
-
-
-
 def getimage(base, default=None):
     """
     return the image base+'.png' or base+'.jpg' if one of them exists.
@@ -148,88 +124,3 @@ def getimage(base, default=None):
     return default
 
 
-def smartsort(x,y):
-    """
-    Compares strings after stripping off 'The' and 'A' to be 'smarter'
-    Also obviously ignores the full path when looking for 'The' and 'A'
-    """
-    m = os.path.basename(x)
-    n = os.path.basename(y)
-
-    for word in ('The', 'A'):
-        word += ' '
-        if m.find(word) == 0:
-            m = m.replace(word, '', 1)
-        if n.find(word) == 0:
-            n = n.replace(word, '', 1)
-
-    return cmp(m.upper(),n.upper()) # be case insensitive
-
-
-def find_start_string(s1, s2):
-    """
-    Find similar start in both strings
-    """
-    ret = ''
-    tmp = ''
-    while True:
-        if len(s1) < 2 or len(s2) < 2:
-            return ret
-        if s1[0] == s2[0]:
-            tmp += s2[0]
-            if s1[1] in (u' ', u'-', u'_', u',', u':', '.') and \
-               s2[1] in (u' ', u'-', u'_', u',', u':', '.'):
-                ret += tmp + u' '
-                tmp = ''
-            s1 = s1[1:].lstrip(u' -_,:.')
-            s2 = s2[1:].lstrip(u' -_,:.')
-        else:
-            return ret
-
-def remove_start_string(string, start):
-    """
-    remove start from the beginning of string.
-    """
-    start = start.replace(u' ', '')
-    for i in range(len(start)):
-        string = string[1:].lstrip(' -_,:.')
-
-    return string[0].upper() + string[1:]
-
-
-def htmlenties2txt(string):
-    """
-    Converts a string to a string with all html entities resolved.
-    Returns the result as Unicode object (that may conatin chars outside 256.
-    """
-    e = copy.deepcopy(htmlentitydefs.entitydefs)
-    e['ndash'] = "-";
-    e['bull'] = "-";
-    e['rsquo'] = "'";
-    e['lsquo'] = "`";
-    e['hellip'] = '...'
-
-    string = Unicode(string).replace("&#039", "'").replace("&#146;", "'")
-
-    i = 0
-    while i < len(string):
-        amp = string.find("&", i) # find & as start of entity
-        if amp == -1: # not found
-            break
-        i = amp + 1
-
-        semicolon = string.find(";", amp) # find ; as end of entity
-        if string[amp + 1] == "#": # numerical entity like "&#039;"
-            entity = string[amp:semicolon+1]
-            replacement = Unicode(unichr(int(entity[2:-1])))
-        else:
-            entity = string[amp:semicolon + 1]
-            if semicolon - amp > 7:
-                continue
-            try:
-                # the array has mappings like "Uuml" -> "ü"
-                replacement = e[entity[1:-1]]
-            except KeyError:
-                continue
-        string = string.replace(entity, replacement)
-    return string
