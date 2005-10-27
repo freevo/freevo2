@@ -84,35 +84,8 @@ for dirname in conf.cfgfilepath:
         break
 
 
-# create the vfs
-if not CONF.vfs_dir or CONF.vfs_dir == '/':
-    print
-    print 'ERROR: bad vfs dir.'
-    print 'Set vfs dir it to a directory on the local filesystem.'
-    print 'Make sure this partition has about 100 MB free space'
-    sys.exit(0)
-
-# Make sure CONF.vfs_dir doesn't ends with a slash
-# With that, we don't need to use os.path.join, normal string
-# concat is much faster
-if CONF.vfs_dir.endswith('/'):
-    CONF.vfs_dir = CONF.vfs_dir[:-1]
-
-if not os.path.isdir(CONF.vfs_dir):
-    os.makedirs(CONF.vfs_dir)
-
-if not os.path.isdir(CONF.vfs_dir + '/disc'):
-    os.makedirs(CONF.vfs_dir + '/disc')
-
-if not os.path.isdir(CONF.vfs_dir + '/disc/metadata'):
-    os.makedirs(CONF.vfs_dir + '/disc/metadata')
-
-if not os.path.isdir(CONF.vfs_dir + '/disc-set'):
-    os.makedirs(CONF.vfs_dir + '/disc-set')
-
-
 # add everything in CONF to the module variable list (but in upper
-# case, so CONF.vfs_dir is VFS_DIR, too
+# case, so CONF.xxx is XXX, too
 for key in CONF.__dict__:
     exec('%s = CONF.%s' % (key.upper(), key))
 

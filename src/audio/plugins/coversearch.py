@@ -258,8 +258,7 @@ class PluginInterface(plugin.ItemPlugin):
         create cover file for the item
         """
         if item.type == 'audiocd':
-            filename = '%s/disc/metadata/%s.jpg' % (sysconfig.VFS_DIR,
-                                                    item.info['id'])
+            filename = '%s/disc/metadata/%s.jpg' % (vfs.BASE, item.info['id'])
         elif item.type == 'dir':
             filename = os.path.join(item.dir, 'cover.jpg')
         else:

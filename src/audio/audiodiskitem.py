@@ -65,7 +65,7 @@ class AudioDiskItem(Playlist):
         # variables only for DirItem
         self.display_type = 'audio'
 
-        cover = '%s/disc/metadata/%s.jpg' % (sysconfig.VFS_DIR, self.disc_id)
+        cover = '%s/disc/metadata/%s.jpg' % (vfs.BASE, self.disc_id)
         if os.path.isfile(cover):
             self.image = cover
             

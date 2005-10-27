@@ -42,6 +42,7 @@ from kaa.metadata.disc.discinfo import cdrom_disc_id
 
 # freevo imports
 import sysconfig
+import util.vfs as vfs
 
 # mediadb imports
 from db import FileCache
@@ -77,7 +78,7 @@ def disc_info(media):
     if not id:
         # bad disc, e.g. blank disc
         return DiscInfo(False, media)
-    cachefile = os.path.join(sysconfig.VFS_DIR, 'disc/metadata/%s.db' % id)
+    cachefile = os.path.join(vfs.BASE, 'disc/metadata/%s.db' % id)
     cache = FileCache(media.devicename, cachefile)
     info = DiscInfo(True, media, cache)
 

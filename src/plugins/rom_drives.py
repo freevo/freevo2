@@ -63,6 +63,7 @@ import config
 import application
 import plugin
 import util
+import util.vfs as vfs
 from util.ioctl import ioctl
 import mediadb
 
@@ -498,7 +499,7 @@ class RemovableMedia(vfs.Mountpoint):
                 self.item = copy.copy(movie_info)
             else:
                 self.item = VideoItem('', None)
-                f = os.path.join(sysconfig.VFS_DIR, 'disc-set', self.id)
+                f = os.path.join(vfs.BASE, 'disc-set', self.id)
                 self.item.image = util.getimage(f)
             variables = self.item.info.get_variables()
             self.item.name  = title

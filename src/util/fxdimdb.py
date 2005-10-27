@@ -286,7 +286,7 @@ class FxdImdb(object):
         
         else:
             if self.isdiscset == True:
-                self.fxdfile = os.path.join(sysconfig.VFS_DIR, 'disc-set',
+                self.fxdfile = os.path.join(vfs.BASE, 'disc-set',
                                             self.getmedia_id(self.device))
             else:
                 self.fxdfile = os.path.splitext(file)[0]

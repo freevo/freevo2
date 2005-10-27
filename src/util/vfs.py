@@ -46,7 +46,7 @@ import sysconfig
 log = logging.getLogger('vfs')
 
 # vfs directory on disc
-_VFS_DIR = sysconfig.VFS_DIR
+BASE = sysconfig.VFS_DIR
 
 # list of mount points
 mountpoints = []
@@ -72,8 +72,8 @@ class Mountpoint(object):
         id changes (e.g. rom drives)
         """
         self.id = id
-        self.cache = os.path.join(_VFS_DIR, 'disc/metadata/%s.db' % id)
-        vfs = os.path.join(_VFS_DIR, 'disc', id)
+        self.cache = os.path.join(BASE, 'disc/metadata/%s.db' % id)
+        vfs = os.path.join(BASE, 'disc', id)
         self.mediadb = os.path.join(vfs, '.metadata')
         self.thumbnails = os.path.join(vfs, '.thumbnails')
         
@@ -83,14 +83,14 @@ class Mountpoint(object):
         Get overlay for filename.
         """
         filename = filename[len(self.mountdir):]
-        return '%s/disc/%s%s' % (_VFS_DIR, self.id, filename)
+        return '%s/disc/%s%s' % (BASE, self.id, filename)
 
 
     def get_root(self):
         """
         Get root dir for the vfs.
         """
-        return '%s/disc/%s' % (_VFS_DIR, self.id)
+        return '%s/disc/%s' % (BASE, self.id)
 
 
     def get_relative_path(self, filename):
@@ -146,18 +146,18 @@ def get_mountpoint_by_id(id):
 def getoverlay(directory):
     if not directory.startswith('/'):
         directory = os.path.abspath(directory)
-    if directory.startswith(_VFS_DIR):
+    if directory.startswith(BASE):
         return directory
     for media in mountpoints:
         if directory.startswith(media.mountdir):
             directory = directory[len(media.mountdir):]
-            return '%s/disc/%s%s' % (_VFS_DIR, media.id, directory)
-    return _VFS_DIR + directory
+            return '%s/disc/%s%s' % (BASE, media.id, directory)
+    return BASE + directory
 
 
 def abspath(name):
     """
-    return the complete filename (including VFS_DIR)
+    return the complete filename (including vfs.BASE)
     """
     if os.path.exists(name):
         if not name.startswith('/'):
@@ -225,3 +225,33 @@ def codecs_open(name, mode, encoding):
         except IOError, e:
             log.error('vfs.codecs_open: error opening file %s' % overlay)
             raise IOError, e
+
+
+# Init VFS
+
+# Make sure BASE doesn't ends with a slash
+# With that, we don't need to use os.path.join, normal string
+# concat is much faster
+if BASE.endswith('/'):
+    BASE = BASE[:-1]
+
+# Check if BASE is valid
+if BASE == '/':
+    print
+    print 'ERROR: bad VFS dir.'
+    print 'Set vfs dir it to a directory on the local filesystem.'
+    print 'Make sure this partition has about 100 MB free space'
+    sys.exit(0)
+
+# create VFS dirs
+if not os.path.isdir(BASE):
+    os.makedirs(BASE)
+
+if not os.path.isdir(BASE + '/disc'):
+    os.makedirs(BASE + '/disc')
+
+if not os.path.isdir(BASE + '/disc/metadata'):
+    os.makedirs(BASE + '/disc/metadata')
+
+if not os.path.isdir(BASE + '/disc-set'):
+    os.makedirs(BASE + '/disc-set')

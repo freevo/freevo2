@@ -90,7 +90,7 @@ def update():
 
     files = []
 
-    discset = sysconfig.VFS_DIR + '/disc-set'
+    discset = vfs.BASE + '/disc-set'
     if os.path.isdir(discset):
         listing = Listing(discset)
         if listing.num_changes:

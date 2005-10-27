@@ -60,7 +60,7 @@ log = logging.getLogger('mediadb')
 VERSION = 0.1
 
 # cache dir for metadata
-CACHE_DIR = sysconfig.VFS_DIR + '/metadata'
+CACHE_DIR = vfs.BASE + '/metadata'
 
 if not os.path.isdir(CACHE_DIR):
     os.makedirs(CACHE_DIR)
@@ -121,7 +121,7 @@ class Cache(object):
                 self.cachefile = mp.mediadb + '/' + digest + '.db'
                 break
         else:
-            self.overlay_dir = sysconfig.VFS_DIR + dirname
+            self.overlay_dir = vfs.BASE + dirname
             digest = md5.md5(dirname).hexdigest()
             self.cachefile = CACHE_DIR + '/' + digest + '.db'
 

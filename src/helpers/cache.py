@@ -45,6 +45,7 @@ import util
 import mediadb
 import util.thumbnail as thumbnail
 import util.fileops as fileops
+import util.vfs as vfs
 
 # use this number to keep track of changes in this helper
 VERSION = 4
@@ -122,22 +123,20 @@ def delete_old_files_1():
                  'disc'):
         if os.path.exists(os.path.join(config.FREEVO_CACHEDIR, name)):
             del_list.append(os.path.join(config.FREEVO_CACHEDIR, name))
-    del_list += util.match_files(sysconfig.VFS_DIR+'/disc',
-                                 ['mmpython', 'freevo'])
+    del_list += util.match_files(vfs.BASE+'/disc', ['mmpython', 'freevo'])
 
-    for file in util.match_files_recursively(sysconfig.VFS_DIR, ['raw']):
+    for file in util.match_files_recursively(vfs.BASE, ['raw']):
         if not file.endswith('.fxd.raw'):
             del_list.append(file)
 
-    for file in util.match_files_recursively(sysconfig.VFS_DIR,
-                                             config.IMAGE_SUFFIX):
+    for file in util.match_files_recursively(vfs.BASE, config.IMAGE_SUFFIX):
         if file.find('.thumb.') > 0:
             del_list.append(file)
 
     for db in ('freevo.cache', 'freevo.db', 'mmpython.cache', '*.raw.tmp',
                '*.raw-[0-9][0-9][0-9]x[0-9][0-9][0-9]', '*.fvt.png',
                'mmpython'):
-        del_list += util.recursefolders(sysconfig.VFS_DIR,1,db,1)
+        del_list += util.recursefolders(vfs.BASE,1,db,1)
     
     for f in del_list:
         if os.path.isdir(f):
@@ -154,20 +153,20 @@ def delete_old_files_2():
     print 'deleting old cachefiles...............................',
     sys.__stdout__.flush()
     num = 0
-    for file in util.match_files_recursively(sysconfig.VFS_DIR, ['raw']):
-        if file.startswith(sysconfig.VFS_DIR + '/disc/'):
+    for file in util.match_files_recursively(vfs.BASE, ['raw']):
+        if file.startswith(vfs.BASE + '/disc/'):
             continue
-        if not vfs.isfile(file[len(sysconfig.VFS_DIR):-4]):
+        if not vfs.isfile(file[len(vfs.BASE):-4]):
             os.unlink(file)
             num += 1
     print 'deleted %s file(s)' % num
 
     print 'deleting cache for directories not existing anymore...',
-    subdirs = util.get_subdirs_recursively(sysconfig.VFS_DIR)
+    subdirs = util.get_subdirs_recursively(vfs.BASE)
     subdirs.reverse()
     for file in subdirs:
-        if not os.path.isdir(file[len(sysconfig.VFS_DIR):]) and not \
-               file.startswith(sysconfig.VFS_DIR + '/disc'):
+        if not os.path.isdir(file[len(vfs.BASE):]) and not \
+               file.startswith(vfs.BASE + '/disc'):
             for metafile in ('cover.png', 'cover.jpg'):
                 if os.path.isfile(os.path.join(file, metafile)):
                     os.unlink(os.path.join(file, metafile))
@@ -230,10 +229,10 @@ if len(sys.argv)>1 and sys.argv[1] == '--help':
     print 'This will create thumbnails of your _video_ files'
     print
     print 'WARNING:'
-    print 'Caching needs a lot free space in sysconfig.VFS_DIR. The space is'
+    print 'Caching needs a lot free space in vfs.BASE. The space is'
     print 'also needed when Freevo generates the files during runtime. Image'
     print 'caching is the worst. So make sure you have several hundred MB'
-    print 'free! The vfs is set to %s' % sysconfig.VFS_DIR
+    print 'free! The vfs is set to %s' % vfs.BASE
     print
     print 'It may be possible to turn off image caching in future versions'
     print 'of Freevo (but this will slow things down).'
