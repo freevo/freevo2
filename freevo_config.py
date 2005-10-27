@@ -761,22 +761,6 @@ IMAGEVIEWER_DURATION = 0
 
 GAMES_ITEMS = None
 
-#
-# These settings are used for the MAME arcade emulator:
-#
-
-# Priority of the game process
-# 0 = Don't change the priority
-# >0 - Lower priority
-# <0 - Higher priority
-#
-GAMES_NICE        = -20
- 
-# 
-# MAME cache directory
-#
-GAMES_MAME_CACHE = '%s/romlist-%s.pickled' % (FREEVO_CACHEDIR, os.getuid())
-
 
 # ======================================================================
 # Freevo GUI settings:
@@ -799,16 +783,6 @@ GUI_FONT_PATH  = [ '/usr/X11R6/lib/X11/fonts/truetype/' ]
 # All names must be lowercase! All alternate fonts must be in './share/fonts/'
 #
 GUI_FONT_ALIASES = { 'Arial_Bold' : 'VeraBd' }
-
-#
-# Execute a script on GUI startup.
-#
-GUI_SDL_EXEC_AFTER_STARTUP = ""
-
-#
-# Execute a script on GUI close.
-#
-GUI_SDL_EXEC_AFTER_CLOSE = ""
 
 #
 # Overscan on the tv output. Set this values if you can't see everything
@@ -929,17 +903,6 @@ JOY_CMDS = {
     'button 4'       : 'ENTER',
     }
 
-
-
-# ======================================================================
-# TVtime settings:
-# ======================================================================
-
-#
-# Location of the TV time program
-# Default: Use the value in freevo.conf
-# 
-TVTIME_CMD = CONF.tvtime
 
 
 # ======================================================================
@@ -1088,11 +1051,6 @@ XINE_USE_VDR = 0
 TV_RECORD_DIR = None
 
 #
-# Autostart recorder when starting the recordserver
-#
-TV_RECORD_START_RECORDER = False
-
-#
 # Size (in MB) of the timeshift buffer. (ie: how long you can pause tv for.)  
 # This is set to a low default because the default buffer location is 
 # under FREEVO_CACHEDIR and we don't want to blow /var or /tmp.
@@ -1100,62 +1058,6 @@ TV_RECORD_START_RECORDER = False
 TV_DATEFORMAT     = '%e-%b' # Day-Month: 11-Jun
 TV_TIMEFORMAT     = '%H:%M' # Hour-Minute 14:05
 TV_DATETIMEFORMAT = '%A %b %d %I:%M %p' # Thursday September 24 8:54 am
-
-#
-# This is the filename format for files recorded using Freevo.
-# You can use any of the strftime variables in it, provided you
-# put two '%%' at the beginning. 
-# 
-# Some examples:
-# %%A - Full weekday name.
-# %%H - Hour (24-hour clock) as a decimal number [00,23].
-# %%M - Minute as a decimal number [00,59].
-# %%m - Month as a decimal number [01,12].
-# %%d - Day of the month as a decimal number [01,31].
-# %%p - Locale's equivalent of either AM or PM.
-# 
-# More can be found at: http://www.python.org/doc/current/lib/module-time.html
-#
-TV_RECORD_FILEMASK = '%%m-%%d %%H:%%M %(progname)s - %(title)s'
-
-#
-# If the recordserver runs as root, set the uid to the given one
-# after startup. The gui must also match one of the users group ids
-#
-TV_RECORD_SERVER_UID = 0
-TV_RECORD_SERVER_GID = 0
-
-#
-# start every recording X minutes before scheduled,
-# and stop X minutes after scheduled - default to zero minutes.
-# This must be a value in seconds although at the moment only has
-# the percision of one minute.
-#
-TV_RECORD_START_PADDING = 2 * 60
-TV_RECORD_STOP_PADDING  = 5 * 60
-
-#
-# TV capture size for viewing and recording. Max 768x480 for NTSC,
-# 768x576 for PAL. Set lower if you have a slow computer!
-#
-# For the 'tvtime' TV viewing application, only the horizontal size is used.
-# Set the horizontal size to 400 or 480 if you have a slow (~500MHz) computer,
-# it still looks OK, and the picture will not be as jerky.
-# The vertical size is always either fullscreen or 480/576 (NTSC/PAL)
-# for tvtime.
-#
-TV_VIEW_SIZE = (640, 480)
-TV_REC_SIZE = (320, 240)   # Default for slower computers
-
-#
-# Input formats for viewing and recording. The format affect viewing
-# and recording performance. It is specific to your hardware, so read
-# the MPlayer docs and experiment with mplayer to see which one fits
-# your computer best.
-#
-TV_VIEW_OUTFMT = 'yuy2'   # Better quality, slower on pure FB/X11
-TV_REC_OUTFMT  = 'yuy2'
-
 
 #
 # TV Channels. This list contains a mapping from the displayed channel name

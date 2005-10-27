@@ -55,8 +55,6 @@ class Display(PygameCanvas, Base):
         PygameCanvas.__init__(self, size)
         Base.__init__(self)
         plugin.activate('input.sdl')
-        if config.GUI_SDL_EXEC_AFTER_STARTUP:
-            os.system(config.GUI_SDL_EXEC_AFTER_STARTUP)
 
 
     def stop(self):
@@ -65,8 +63,6 @@ class Display(PygameCanvas, Base):
         """
         if Base.stop(self):
             pygame.display.quit()
-            if config.GUI_SDL_EXEC_AFTER_CLOSE:
-                os.system(config.GUI_SDL_EXEC_AFTER_CLOSE)
 
 
     def restart(self):
