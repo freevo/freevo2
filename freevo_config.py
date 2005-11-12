@@ -228,8 +228,6 @@ TV_IN_VOLUME        = 60              # Set this to your preferred level 0-100.
 VCR_IN_VOLUME       = 90              # If you use different input from TV
 DEV_MIXER           = '/dev/mixer'    # mixer device 
 
-START_FULLSCREEN_X  = 0               # Start in fullscreen mode if using x11
-
 CONFIRM_SHUTDOWN    = 1               # ask before shutdown
 
 #
@@ -859,6 +857,8 @@ GUI_MEDIAMENU_FORCE_TEXTVIEW = 0
 
 GUI_DFB_LAYER = 0
 
+# start GUI in fullscreen mode
+GUI_FULLSCREEN = False
 
 # ======================================================================
 # Freevo remote control settings:

@@ -33,6 +33,7 @@ __all__ = [ 'Display' ]
 
 # python imports
 import plugin
+import config
 
 # mevas imports
 from kaa.mevas.displays.imlib2canvas import Imlib2Canvas
@@ -49,3 +50,7 @@ class Display(Imlib2Canvas, Base):
         Imlib2Canvas.__init__(self, size)
         Base.__init__(self)
         plugin.activate( 'input.x11' )
+        if config.GUI_FULLSCREEN:
+            # FIXME: use xrandr to set resolution if possible
+            self.update()
+            self._window.set_fullscreen()
