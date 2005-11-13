@@ -42,7 +42,7 @@ def show_help():
     show how to use this script
     """
     helper_list = ''
-    for helper in os.listdir(os.environ['FREEVO_HELPERS']):
+    for helper in os.listdir(os.path.join(os.environ['FREEVO_PYTHON'], 'helpers')):
         if helper.endswith('.py') and not helper == '__init__.py':
             helper_list += '  ' + helper[:-3] + '\n'
 
@@ -105,9 +105,8 @@ def getpid(name, arg):
             if '-OO' in proc_arg:
                 proc_arg.remove('-OO')
                 
-            if proc_arg and ((arg[0].find('runapp') == -1 and \
-                              len(proc_arg)>2 and arg[1] != proc_arg[1]) or \
-                             len(proc_arg)>3 and arg[2] != proc_arg[2]):
+            if proc_arg and ((len(proc_arg)>2 and arg[1] != proc_arg[1]) or \
+                             (len(proc_arg)>3 and arg[2] != proc_arg[2])):
                 # different proc I guess
                 try:
                     os.unlink(fname)
@@ -175,20 +174,10 @@ def start(name, arg, bg, store=1):
         os.execvp(arg[0], arg)
 
 
-freevo_script = os.path.abspath(sys.argv[0])
-if os.path.islink(freevo_script):
-    freevo_script = os.readlink(freevo_script)
-
-if not os.path.isfile(freevo_script):
-    for path in os.environ['PATH'].split(':'):
-        if os.path.isfile(os.path.join(path, freevo_script)):
-            freevo_script = os.path.join(path, freevo_script)
-
-
 # fix python path
 __site__ = '../lib/python%s.%s/site-packages' % sys.version_info[:2]
 __site__ = os.path.normpath(os.path.join(os.path.dirname(__file__), __site__))
-__site__ = os.path.join(__site__, 'ui')
+__site__ = os.path.join(__site__, 'freevo/ui')
 
 # extend PYTHONPATH to freevo
 if os.environ.has_key('PYTHONPATH'):
@@ -196,24 +185,8 @@ if os.environ.has_key('PYTHONPATH'):
 else:
     os.environ['PYTHONPATH'] = __site__
 
-
-import freevo.version
-freevo_python = os.path.join(os.path.dirname(freevo.__file__), 'ui')
-
-freevo_helpers = os.path.join(freevo_python, 'helpers')
-dname = os.path.abspath(os.path.join(os.path.dirname(freevo_script), '../'))
-freevo_share   = os.path.join(dname, 'share/freevo')
-freevo_doc     = os.path.join(dname, 'share/doc/freevo-%s' % freevo.version.VERSION)
-freevo_config  = os.path.join(freevo_share, 'freevo_config.py')
-runapp         = ''
-python = [ 'python' ]
-
-os.environ['PYTHONPATH'] = '%s:%s' % (freevo_python, os.environ['PYTHONPATH'])
-
-# add the variables from above into environ so Freevo can use them, too
-for var in ('freevo_script', 'runapp', 'freevo_python', 'freevo_doc',
-            'freevo_share', 'freevo_config', 'freevo_helpers'):
-    os.environ[var.upper()] = eval(var)
+os.environ['PYTHONPATH'] = '%s:%s' % (__site__, os.environ['PYTHONPATH'])
+os.environ['FREEVO_PYTHON'] = __site__
 
 # extend PATH to make sure the basics are there
 os.environ['PATH'] = '%s:/usr/bin:/bin:/usr/local/bin:' % os.environ['PATH'] + \
@@ -227,7 +200,7 @@ if not os.environ.has_key('USER') or not os.environ['USER']:
 
 # now check what and how we should start freevo
 bg    = 0 # start in background
-proc  = [ os.path.abspath(os.path.join(freevo_python, 'helpers/main.py')) ]
+proc  = [ os.path.abspath(os.path.join(__site__, 'helpers/main.py')) ]
 name  = os.path.splitext(os.path.basename(os.path.abspath(sys.argv[0])))[0]
 check = 1 # check running instance
 
@@ -246,7 +219,7 @@ if arg in ('--help', '-h'):
     
 if arg == 'stop':
     # stop running freevo
-    if not stop(name, python + proc):
+    if not stop(name, [ 'python' ] + proc):
         print 'freevo not running'
     sys.exit(0)
     
@@ -264,7 +237,7 @@ elif arg == '-fs':
             break
         server_num += 1
     sys.stdin.close()
-    os.execvp('xinit', [ 'xinit', freevo_script, '-force-fs',  '--', ':'+str(server_num) ])
+    os.execvp('xinit', [ 'xinit', sys.argv[0], '-force-fs',  '--', ':'+str(server_num) ])
 
     
 elif arg == 'execute':
@@ -274,7 +247,7 @@ elif arg == 'execute':
 
 elif arg == 'setup':
     # run setup
-    proc = [ os.path.join(freevo_python, 'config/setup.py') ] + sys.argv[2:]
+    proc = [ os.path.join(__site__, 'config/setup.py') ] + sys.argv[2:]
 
 
 elif arg == 'prompt':
@@ -283,21 +256,14 @@ elif arg == 'prompt':
     check = 0
 
 
-elif arg == 'runapp':
-    # Oops, runapp. We don't start python, we start sys.argv[1]
-    # with the rest as args
-    python[-1] = sys.argv[2]
-    proc       = sys.argv[3:]
-    check      = 0
-
 elif arg and name == 'freevo' and not arg.startswith('-'):
     # start a helper. arg is the name of the script in
     # the helpers directory
     name     = arg
-    proc     = [ os.path.join(freevo_python, 'helpers', name + '.py') ]
+    proc     = [ os.path.join(__site__, 'helpers', name + '.py') ]
     if len(sys.argv) >= 2:
         if len(sys.argv) > 2 and sys.argv[2] == 'stop':
-            if not stop(name, python + proc):
+            if not stop(name, [ 'python' ] + proc):
                 print '%s not running' % name
             sys.exit(0)
         if len(sys.argv) > 2 and sys.argv[2] == 'start':
@@ -321,29 +287,26 @@ else:
     
 
 if name != 'freevo':
-    proc = [ os.path.join(freevo_python, 'helpers', name + '.py') ] +  sys.argv[1:]
+    proc = [ os.path.join(__site__, 'helpers', name + '.py') ] +  sys.argv[1:]
     if not os.path.isfile(proc[0]):
         if os.path.isfile(name):
             name = os.path.splitext(os.path.basename(name))[0]
             proc = proc[1:]
         else:
-            proc = [ os.path.join(freevo_python, 'helpers', name + '.py') ] +  sys.argv[1:]
+            proc = [ os.path.join(__site__, 'helpers', name + '.py') ] +  sys.argv[1:]
             print 'can\'t find helper %s' % name
             sys.exit(1)
 
-if getpid(name, python + proc)[1] and check:
+if getpid(name, [ 'python' ] + proc)[1] and check:
     if name != 'freevo':
         print '%s still running, run \'freevo %s stop\' to stop' % (name, name)
     else:
         print 'freevo still running, run \'freevo stop\' to stop'
     sys.exit(0)
 
-if python[0].find('python') != -1:
-    python = [ python[0] , '-OO' ] + python[1:]
-
 if len(proc) and not os.path.isfile(proc[0]):
     print 'Error: unable to start \'%s\'' % proc[0]
     print 'Either the helper does not exist or you need to run \'make\' first'
     sys.exit(0)
 
-start(name, python + proc , bg, check)
+start(name, [ 'python' , '-OO' ] + proc , bg, check)

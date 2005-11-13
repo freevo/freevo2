@@ -72,7 +72,11 @@ if __name__ == "__main__":
         sys.exit(0)
 
         
+script = os.path.join(os.path.dirname(__file__), '../../../../../../bin/freevo')
+script = os.path.normpath(script)
+
 start()
+
 while 1:
     time.sleep(1)
     code = pylirc.nextcode();
@@ -83,6 +87,6 @@ while 1:
         else:
             options = ''
             
-        os.system('%s %s >/dev/null 2>/dev/null' % (os.environ['FREEVO_SCRIPT'], options))
+        os.system('%s %s >/dev/null 2>/dev/null' % (script, options))
         start()
         

@@ -51,6 +51,8 @@ import __builtin__
 import logging
 import copy
 
+import freevo.conf
+
 # freevo imports
 import sysconfig
 import version
@@ -128,8 +130,7 @@ IVTV5_CODEC = IVTV6_CODEC = IVTV7_CODEC = IVTV8_CODEC = IVTV9_CODEC = {}
 #
 # Read the environment set by the start script
 #
-SHARE_DIR   = os.path.abspath(os.environ['FREEVO_SHARE'])
-DOC_DIR     = os.path.abspath(os.environ['FREEVO_DOC'])
+SHARE_DIR   = freevo.conf.SHAREDIR
 
 SKIN_DIR  = os.path.join(SHARE_DIR, 'skins')
 ICON_DIR  = os.path.join(SHARE_DIR, 'icons')

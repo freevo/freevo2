@@ -33,6 +33,7 @@
 #
 # -----------------------------------------------------------------------------
 
+import freevo.conf
 
 def print_config_changes(conf_version, file_version, changelist):
     """
@@ -85,12 +86,13 @@ for dirname in cfgfilepath[1:]:
 #
 # Load freevo_config.py:
 #
-if os.path.isfile(os.environ['FREEVO_CONFIG']):
-    log.info('Loading cfg: %s' % os.environ['FREEVO_CONFIG'])
-    execfile(os.environ['FREEVO_CONFIG'], globals(), locals())
+FREEVO_CONFIG = os.path.join(freevo.conf.SHAREDIR, 'freevo_config.py')
+if os.path.isfile(FREEVO_CONFIG):
+    log.info('Loading cfg: %s' % FREEVO_CONFIG)
+    execfile(FREEVO_CONFIG, globals(), locals())
     
 else:
-    log.critical("Error: %s: no such file" % os.environ['FREEVO_CONFIG'])
+    log.critical("Error: %s: no such file" % FREEVO_CONFIG)
     sys.exit(1)
 
 
@@ -167,6 +169,6 @@ Freevo searches for freevo.conf and local_conf.py in the following locations:
 
 Since it's highly unlikly you want to start Freevo without further
 configuration, Freevo will exit now.
-"""  % (os.environ['FREEVO_CONFIG'], locations))
+"""  % (FREEVO_CONFIG, locations))
     sys.exit(0)
 
