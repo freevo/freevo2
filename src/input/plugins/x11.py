@@ -34,6 +34,8 @@ from input.interface import InputPlugin
 import logging
 log = logging.getLogger('input')
 
+SCREENSHOT = 0
+
 class PluginInterface(InputPlugin):
     """
     Plugin for pygame input events
@@ -47,6 +49,14 @@ class PluginInterface(InputPlugin):
         """
         Callback to handle the pygame events.
         """
+        if keycode == 353:
+            global SCREENSHOT
+            filename = 'screenshots/screenshot-%04d.png' % SCREENSHOT
+            log.info('screenshot %s' % filename)
+            gui.display._backing_store._image.save(filename)
+            SCREENSHOT += 1
+            return True
+        
         if isinstance(keycode, int):
             log.debug('Bad keycode %s' % keycode)
             return True
