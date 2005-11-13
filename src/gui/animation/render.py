@@ -17,7 +17,7 @@
 # Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
 #
 # First Edition: Viggo Fredriksen <viggo@katatonic.org>
-# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dischi@freevo.org>
 #
 # Please see the file doc/CREDITS for a complete list of authors.
 #

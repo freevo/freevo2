@@ -2,7 +2,7 @@
 
 # ebuild-snapshot.sh 
 #
-#   <dmeyer@tzi.de>
+#   <dischi@freevo.org>
 # $Id$
 
 

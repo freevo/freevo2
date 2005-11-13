@@ -32,7 +32,7 @@ Authors:
 --------
     Krister Lagerstrom <krister-freevo@kmlager.com>
     Aubin Paul <aubin@outlyer.org>
-    Dirk Meyer <dmeyer@tzi.de>
+    Dirk Meyer <dischi@freevo.org>
     Gustavo Sverzut Barbieri <gsbarbieri@yahoo.com.br>
     Rob Shortt <rob@tvcentric.com>
     Jason Ball <jason.ball@ce.com.au>

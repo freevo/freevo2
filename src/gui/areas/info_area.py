@@ -13,7 +13,7 @@
 # Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
 #
 # First Edition: Gustavo Sverzut Barbieri <gsbarbieri@yahoo.com.br>
-# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dischi@freevo.org>
 #
 # Please see the file doc/CREDITS for a complete list of authors.
 #

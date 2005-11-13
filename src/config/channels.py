@@ -11,7 +11,7 @@
 #
 # First Edition: Rob Shortt <rshortt@users.sf.net>
 # Maintainer:    Rob Shortt <rshortt@users.sf.net>
-#                Dirk Meyer <dmeyer@tzi.de>
+#                Dirk Meyer <dischi@freevo.org>
 #
 #
 # Please see the file doc/CREDITS for a complete list of authors.

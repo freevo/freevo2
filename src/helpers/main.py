@@ -10,7 +10,7 @@
 # It also contains the splashscreen.
 #
 # First edition: Krister Lagerstrom <krister-freevo@kmlager.com>
-# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dischi@freevo.org>
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

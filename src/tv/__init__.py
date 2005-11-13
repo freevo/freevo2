@@ -9,7 +9,7 @@
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
 #
-# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dischi@freevo.org>
 #                Rob Shortt <rob@tvcentric.com>
 #
 # Please see the file doc/CREDITS for a complete list of authors.

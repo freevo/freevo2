@@ -10,7 +10,7 @@
 # Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
 #
 # First Edition: Rob Shortt <rob@tvcentric.com>
-# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dischi@freevo.org>
 #                Rob Shortt <rob@tvcentric.com>
 #
 # Please see the file doc/CREDITS for a complete list of authors.
