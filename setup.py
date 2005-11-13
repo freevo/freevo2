@@ -1,52 +1,53 @@
-#!/usr/bin/env python
-
-"""Setup script for the freevo distribution."""
-
-
-__revision__ = "$Id$"
-
-# Python distutils stuff
-import os
-import sys
-import time
+# -*- coding: iso-8859-1 -*-
+# -----------------------------------------------------------------------------
+# setup.py - setup script for installing the freevo module
+# -----------------------------------------------------------------------------
+# $Id$
+#
+# -----------------------------------------------------------------------------
+# Freevo - A Home Theater PC framework
+# Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
+# Please see the file doc/CREDITS for a complete list of authors.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# -----------------------------------------------------------------------------
 
 # Freevo distutils stuff
-sys.path.append('./src')
-import version
-from util.distribution import setup, Extension, docbook_finder
-from distutils import core
-
+from freevo.distribution import setup, VERSION
 
 data_files = []
 # add some files to Docs
 for f in ('COPYING', 'ChangeLog', 'INSTALL', 'README'):
-    data_files.append(('share/doc/freevo-%s' % version.__version__,
-                       ['%s' % f ]))
-data_files.append(('share/doc/freevo-%s' % version.__version__,
-                   ['Docs/CREDITS' ]))
-data_files.append(('share/fxd', ['share/fxd/webradio.fxd']))
+    data_files.append(('share/doc/freevo-%s' % VERSION, ['%s' % f ]))
 
-# copy freevo_config.py to share/freevo. It's the best place to put it
-# for now, but the location should be changed
-data_files.append(('share/freevo', [ 'freevo_config.py' ]))
-
-# add docbook style howtos
-os.path.walk('./Docs/installation', docbook_finder, data_files)
-os.path.walk('./Docs/plugin_writing', docbook_finder, data_files)
-
-# start script
-scripts = ['freevo']
+data_files.append(('share/doc/freevo-%s' % VERSION, ['Docs/CREDITS' ]))
 
 # now start the python magic
-setup (name         = "freevo",
-       version      = version.__version__,
-       description  = "Freevo",
-       author       = "Krister Lagerstrom, et al.",
-       author_email = "freevo-devel@lists.sourceforge.net",
-       url          = "http://www.freevo.org",
-       license      = "GPL",
+setup (name         = 'freevo',
+       version      = VERSION,
+       description  = 'Freevo',
+       author       = 'Krister Lagerstrom, et al.',
+       author_email = 'freevo-devel@lists.sourceforge.net',
+       url          = 'http://www.freevo.org',
+       license      = 'GPL',
 
        i18n         = 'freevo',
-       scripts      = scripts,
        data_files   = data_files,
        )
