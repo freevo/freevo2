@@ -39,7 +39,7 @@
 #
 # Freevo - A Home Theater PC framework
 #
-# Copyright (C) 2002 Krister Lagerstrom, et al.
+# Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
