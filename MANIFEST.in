@@ -1,14 +1,14 @@
 recursive-include src *.py
 recursive-include src/www/htdocs *
 recursive-include share *
-recursive-include Docs *
+recursive-include doc *
 recursive-include boot *
 recursive-include contrib *
 recursive-include i18n *.pot
 recursive-include i18n *.po
 recursive-include i18n *.mo
 
-include local_conf.py.example setup.py COPYING FAQ README freevo share INSTALL
-include ChangeLog  MANIFEST freevo_config.py
+include local_conf.py.example setup.py COPYING FAQ README share INSTALL
+include ChangeLog MANIFEST
 
 
