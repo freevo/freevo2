@@ -81,7 +81,7 @@ metadata like plot, summary and so on. The metadata can be created
 using the imdb plugin or helper to get the data from IMDb.
 
 The video tag is very complex, for a detailed description see
-Docs/freevo_XML_data.dtd.
+doc/freevo_XML_data.dtd.
 
 You can also use the <movie> tag for making an item for url on the
 net:

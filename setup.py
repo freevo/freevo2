@@ -37,8 +37,6 @@ data_files = []
 for f in ('COPYING', 'ChangeLog', 'INSTALL', 'README'):
     data_files.append(('share/doc/freevo-%s' % VERSION, ['%s' % f ]))
 
-data_files.append(('share/doc/freevo-%s' % VERSION, ['Docs/CREDITS' ]))
-
 # now start the python magic
 setup (name         = 'freevo',
        version      = VERSION,
