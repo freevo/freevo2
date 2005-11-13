@@ -340,6 +340,7 @@ if not os.path.isfile(freevo_script):
 # fix python path
 __site__ = '../lib/python%s.%s/site-packages' % sys.version_info[:2]
 __site__ = os.path.normpath(os.path.join(os.path.dirname(__file__), __site__))
+__site__ = os.path.join(__site__, 'ui')
 
 # extend PYTHONPATH to freevo
 if os.environ.has_key('PYTHONPATH'):
