@@ -1,115 +1,18 @@
 #!/usr/bin/env python
-
-#if 0 /*
-# -----------------------------------------------------------------------
+# -*- coding: iso-8859-1 -*-
+# -----------------------------------------------------------------------------
 # freevo - the main entry point to the whole suite of applications
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes: This is a rewrite of the old shell script in Python
-# Todo:
-#
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.129  2005/07/23 14:45:25  dischi
-# remove contrib reference
-#
-# Revision 1.128  2005/06/19 12:07:06  dischi
-# remove main.py to helper
-#
-# Revision 1.127  2005/05/30 18:00:44  dischi
-# move setup_freevo to config/setup
-#
-# Revision 1.126  2005/05/17 23:28:07  rshortt
-# Don't check for running instance if doing "freevo prompt" because in that
-# case it compares against freevo main.
-#
-# Revision 1.125  2004/12/12 17:05:12  dischi
-# new variable for doc dir
-#
-# Revision 1.124  2004/11/27 19:12:54  dischi
-# turn off logging when started in bg
-#
-# Revision 1.123  2004/11/02 20:17:16  dischi
-# add check if the program is still active
-#
-# Revision 1.122  2004/10/18 01:43:54  rshortt
-# Make "freevo prompt" work.
-#
-# Revision 1.121  2004/10/09 16:26:54  dischi
-# remove unsupported parameter -trace and -doc
-#
-# Revision 1.120  2004/09/27 18:57:49  dischi
-# add make hint on startup
-#
-# Revision 1.119  2004/09/25 04:13:50  rshortt
-# Fix PYTHONPATH to get libs in site-packages dir.
-#
-# Revision 1.118  2004/09/15 21:07:02  dischi
-# better build handling
-#
-# Revision 1.117  2004/08/29 18:37:05  dischi
-# epeg support for fast jpg thumbnailing
-#
-# Revision 1.116  2004/08/15 14:53:27  dischi
-# add mevas and pyimlib2 to python path
-#
-# Revision 1.115  2004/08/11 20:52:30  rshortt
-# Bugfix.  Freevo was giving an invalid sys.argv[1] (from the helper's point of
-# view) when there were only two args when running a helper (freevo script and
-# helper name).
-#
-# Revision 1.114  2004/08/05 17:40:56  dischi
-# add lib to python path
-#
-# Revision 1.113  2004/06/08 19:34:12  dischi
-# fix bad freevo_script for installed version
-#
-# Revision 1.112  2004/06/08 19:11:56  dischi
-# support direct start without execute
-#
-# Revision 1.111  2004/04/12 05:34:14  dischi
-# extend PATH and set HOME and USER
-#
-# Revision 1.110  2004/02/10 00:17:52  rshortt
-# Use env from /usr/bin rather than /bin.  I beleive it is standard in /usr/bin,
-# looking in /bin breaks Debian and others while it is available in both places
-# (so I have been told) in RedHat and Gentoo.
-#
-# Also standardize the naming of pid files.
-#
-# Revision 1.109  2004/02/06 18:01:21  dischi
-# fix bug with helper softlinks
-#
-# Revision 1.108  2004/01/26 19:33:17  dischi
-# python 2.2 has no True/False
-#
-# Revision 1.107  2004/01/10 20:45:50  mikeruelle
-# can not start freevo -fs without this change
-#
-# Revision 1.106  2004/01/10 18:24:17  dischi
-# fix uid storage for execute and runapp calls
-#
-# Revision 1.105  2004/01/10 16:53:48  dischi
-# better shutdown
-#
-# Revision 1.104  2004/01/10 14:56:19  dischi
-# better KeyboardInterrupt handling
-#
-# Revision 1.103  2004/01/09 20:18:31  dischi
-# check if programm is still running
-#
-# Revision 1.102  2004/01/09 18:55:53  dischi
-# helper stop fixes
-#
-# Revision 1.101  2004/01/07 21:59:10  dischi
-# replace the shell script with a nice python version
-#
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2003 Krister Lagerstrom, et al.
-# Please see the file freevo/Docs/CREDITS for a complete list of authors.
+# Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
+# Please see the file doc/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -125,9 +28,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
-#endif
-
+# -----------------------------------------------------------------------------
 
 import os
 import sys
