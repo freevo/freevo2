@@ -76,59 +76,6 @@ After that, you can run freevo without parameter.
 
 
 
-def get_python(check_freevo):
-    """
-    get the newest version of python [ with freevo installed ]
-    """
-    if float(sys.version[0:3]) >= 2.3:
-        # python seems to be ok
-        search = ('python', 'python2')
-    elif float(sys.version[0:3]) >= 2.2:
-        # try python2.3, else take python
-        search = ('python2.3', 'python')
-    else:
-        # python is too old, try to find python2.3 or python2
-        search = ('python2.3', 'python2')
-
-    for python in search:
-        for path in os.environ['PATH'].split(':'):
-            if os.path.isfile(os.path.join(path, python)):
-                # we found the binary for python
-                if not check_freevo:
-                    # return if we don't check for an installed version
-                    # of freevo
-                    return python
-
-                # try to import freevo with this python and get
-                # the path
-                cmd = '%s -c "import freevo; print freevo.__path__[0]"' % python
-                child = popen2.Popen4(cmd)
-                while 1:
-                    data = child.fromchild.readline()
-                    if not data:
-                        break
-                    if os.path.isdir(data[:-1]):
-                        # ok, found it, close child and return
-                        child.wait()
-                        child.fromchild.close()
-                        if child.childerr:
-                            child.childerr.close()
-                        child.tochild.close()
-                        return python, data[:-1]
-
-                child.wait()
-                child.fromchild.close()
-                if child.childerr:
-                    child.childerr.close()
-                child.tochild.close()
-
-    # nothing found? That's bad!
-    if check_freevo:
-        return None, None
-    return None
-
-
-                
 def getpid(name, arg):
     """
     get pid of running 'name'
@@ -251,24 +198,20 @@ else:
 
 
 import freevo.version
-python, freevo_python = get_python(1)
-if not python:
-    print 'can\'t find python version with installed freevo'
-    sys.exit(0)
+freevo_python = os.path.join(os.path.dirname(freevo.__file__), 'ui')
 
 freevo_helpers = os.path.join(freevo_python, 'helpers')
 dname = os.path.abspath(os.path.join(os.path.dirname(freevo_script), '../'))
-freevo_locale  = os.path.join(dname, 'share/locale')
 freevo_share   = os.path.join(dname, 'share/freevo')
-freevo_doc     = os.path.join(dname, 'share/doc/freevo-%s' % freevo.version.__version__)
+freevo_doc     = os.path.join(dname, 'share/doc/freevo-%s' % freevo.version.VERSION)
 freevo_config  = os.path.join(freevo_share, 'freevo_config.py')
 runapp         = ''
-python = [ python ]
+python = [ 'python' ]
 
 os.environ['PYTHONPATH'] = '%s:%s' % (freevo_python, os.environ['PYTHONPATH'])
 
 # add the variables from above into environ so Freevo can use them, too
-for var in ('freevo_script', 'runapp', 'freevo_python', 'freevo_locale', 'freevo_doc',
+for var in ('freevo_script', 'runapp', 'freevo_python', 'freevo_doc',
             'freevo_share', 'freevo_config', 'freevo_helpers'):
     os.environ[var.upper()] = eval(var)
 

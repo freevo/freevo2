@@ -48,7 +48,6 @@ import os
 import re
 import pwd
 import __builtin__
-import gettext
 import logging
 import copy
 
@@ -70,12 +69,6 @@ from event import *
 
 # get logging object
 log = logging.getLogger('config')
-
-# For Internationalization purpose
-try:
-    gettext.install('freevo', os.environ['FREEVO_LOCALE'], 1)
-except: # unavailable, define '_' for all modules
-    __builtin__.__dict__['_']= lambda m: m
 
 # set global app name
 app = os.path.splitext(os.path.basename(sys.argv[0]))[0]

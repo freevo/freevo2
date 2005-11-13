@@ -57,17 +57,10 @@ import os
 import getopt
 import string
 
-CONFIG_VERSION = 2.1
-
 # For Internationalization purpose
-# an exception is raised with Python 2.1 if LANG is unavailable.
-import gettext
-try:
-    gettext.install('freevo', os.environ['FREEVO_LOCALE'])
-except: # unavailable, define '_' for all modules
-    import __builtin__
-    __builtin__.__dict__['_']= lambda m: m
+import freevo.conf
 
+CONFIG_VERSION = 2.1
 
 EXTERNAL_PROGRAMS = (("mplayer", "mplayer", 1),
                      ("mencoder", "mencoder", 0),
