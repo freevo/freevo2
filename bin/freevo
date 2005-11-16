@@ -177,13 +177,14 @@ def start(name, arg, bg, store=1):
 # fix python path
 __site__ = '../lib/python%s.%s/site-packages' % sys.version_info[:2]
 __site__ = os.path.normpath(os.path.join(os.path.dirname(__file__), __site__))
-__site__ = os.path.join(__site__, 'freevo/ui')
 
 # extend PYTHONPATH to freevo
 if os.environ.has_key('PYTHONPATH'):
     os.environ['PYTHONPATH'] = '%s:%s' % (__site__, os.environ['PYTHONPATH'])
 else:
     os.environ['PYTHONPATH'] = __site__
+
+__site__ = os.path.join(__site__, 'freevo/ui')
 
 os.environ['PYTHONPATH'] = '%s:%s' % (__site__, os.environ['PYTHONPATH'])
 os.environ['FREEVO_PYTHON'] = __site__
