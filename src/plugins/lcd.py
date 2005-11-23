@@ -698,7 +698,7 @@ class PluginInterface( plugin.DaemonPlugin ):
     __author_email__     = 'gustavo@linuxdicas.com.br'
     __maintainer__       = __author__
     __maintainer_email__ = __author_email__
-    __version__          = '$Revision$'
+    __version__          = '$Revision: 7791 $'
     
     def __init__( self ):
         """
