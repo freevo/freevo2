@@ -34,8 +34,10 @@
 __all__ = [ 'ProgressBox' ]
 
 # python imports
-import notifier
 import logging
+
+# kaa imports
+import kaa.notifier
 
 # gui imports
 from gui.widgets.progressbar import Progressbar
@@ -69,6 +71,6 @@ class ProgressBox(WaitBox):
         """
         increase the bar position
         """
-        notifier.step( False, False )
+        kaa.notifier.step( False, False )
         self.bar.tick()
         self.update()
