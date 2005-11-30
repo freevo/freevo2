@@ -113,8 +113,8 @@ def update():
             for fo in info.__fxd_files_options__:
                 discset[fo['file-id']] = fo['mplayer-options']
         if hasattr(info, '__fxd_rom_label__'):
-            # FIXME: add to fxd['label']
-            pass
+            for label in info.__fxd_rom_label__:
+                fxd['label'].append((re.compile(label), info))
         if hasattr(info, '__fxd_rom_id__'):
             for id in info.__fxd_rom_id__:
                 fxd['id'][id] = info
