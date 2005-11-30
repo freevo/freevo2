@@ -58,10 +58,10 @@ class Watcher(object):
         if not listing:
             if self.notifier_scan:
                 log.info('remove scanner')
-                notifier.removeTimer(self.notifier_scan)
+                notifier.timer_remove(self.notifier_scan)
                 self.notifier_scan = None
             if self.notifier_check:
-                notifier.removeTimer(self.notifier_check)
+                notifier.timer_remove(self.notifier_check)
             return
 
         num_changes = listing.cache.num_changes()
@@ -70,14 +70,14 @@ class Watcher(object):
         if not num_changes:
             if self.notifier_scan:
                 log.info('remove scanner')
-                notifier.removeTimer(self.notifier_scan)
+                notifier.timer_remove(self.notifier_scan)
                 self.notifier_scan = None
         else:
             if not self.notifier_scan:
                 log.info('add scanner')
-                self.notifier_scan = notifier.addTimer(0, self.scan)
+                self.notifier_scan = notifier.timer_add(0, self.scan)
         if not self.notifier_check:
-            self.notifier_check = notifier.addTimer(1000, self.check)
+            self.notifier_check = notifier.timer_add(1000, self.check)
         return num_changes
     
 

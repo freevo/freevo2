@@ -28,7 +28,7 @@ class Socket(object):
         if self.closed:
             return
         if not self.__write_nf:
-            notifier.addSocket(self.socket, self.__write_socket,
+            notifier.socket_add(self.socket, self.__write_socket,
                                notifier.IO_WRITE)
             self.__write_nf = True
         pos = self.out_buffer.tell()
@@ -53,7 +53,7 @@ class Socket(object):
         """
         self.out_fd = fd
         if not self.__write_nf:
-            notifier.addSocket(self.socket, self.__write_socket,
+            notifier.socket_add(self.socket, self.__write_socket,
                                notifier.IO_WRITE)
             self.__write_nf = True
         
@@ -74,7 +74,7 @@ class Socket(object):
             self.out_fd = None
         self.__read_nf  = False
         self.__write_nf = False
-        notifier.removeSocket(self.socket)
+        notifier.socket_remove(self.socket)
 
         
     def close(self):
@@ -93,7 +93,7 @@ class Socket(object):
         self.__condition = condition
         self.__callback  = callback
         if not self.__read_nf:
-            notifier.addSocket(self.socket, self.__read_socket)
+            notifier.socket_add(self.socket, self.__read_socket)
             self.__read_nf = True
 
 
@@ -112,7 +112,7 @@ class Socket(object):
 
         if len(data) == 0 or self.__condition(self.in_buffer.getvalue()):
             self.__read_nf = False
-            notifier.removeSocket(self.socket)
+            notifier.socket_remove(self.socket)
             self.__callback(self)
             return False
         return True
