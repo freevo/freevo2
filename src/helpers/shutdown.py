@@ -189,10 +189,7 @@ class Shutdown(object):
         """
         Handle status.return messages.
         """
-        if isinstance(result, mbus.types.MError):
-            # error, entity can't answer to that request
-            return
-        if not result.appStatus:
+        if isinstance(result, mcomm.RPCError):
             # error, entity can't answer to that request
             return
 

@@ -158,11 +158,8 @@ class Xine(ChildApp):
     
 
     def __receive_url(self, result):
-        if isinstance(result, mbus.types.MError):
+        if isinstance(result, mcomm.RPCError):
             log.error(str(result))
-            return
-        if not result.appStatus:
-            log.error(str(result.appDescription))
             return
 
         self.id, url = result.arguments
@@ -199,11 +196,8 @@ class Xine(ChildApp):
 
 
     def __stop_done(self, result):
-        if isinstance(result, mbus.types.MError):
+        if isinstance(result, mcomm.RPCError):
             log.error(str(result))
-            return
-        if not result.appStatus:
-            log.error(str(result.appDescription))
             return
         return
 
