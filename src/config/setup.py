@@ -27,9 +27,6 @@
 # Revision 1.17  2004/07/08 12:44:40  rshortt
 # Add directfb as a display option.
 #
-# Revision 1.16  2004/04/20 17:33:59  dischi
-# lsdvd check
-#
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al. 
@@ -67,7 +64,6 @@ EXTERNAL_PROGRAMS = (("mplayer", "mplayer", 1),
                      ("tvtime", "tvtime", 0),
                      ("xine", "xine", 0),
                      ("fbxine", "fbxine", 0),
-                     ("lsdvd", "lsdvd", 0),
                      ("jpegtran", "jpegtran", 0),
                      ("xmame.x11", "xmame", 0),
                      ("xmame.SDL", "xmame", 0),

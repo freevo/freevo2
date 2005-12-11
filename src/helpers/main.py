@@ -109,20 +109,6 @@ except ImportError, i:
 
 
 #
-# checking for lsdvd to be used in kaa.metadata
-#
-if not config.CONF.lsdvd:
-    print
-    print 'Can\'t find lsdvd. DVD support will be limited and maybe not'
-    print 'all discs are detected. Please install lsdvd, you can get it'
-    print 'from http://acidrip.thirtythreeandathird.net/lsdvd.html'
-    print
-    print 'After installing it, you should run \'freevo cache --rebuild\''
-else:
-    os.environ['LSDVD'] = config.CONF.lsdvd
-
-
-#
 # mbus version checking
 #
 try:
