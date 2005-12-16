@@ -85,7 +85,7 @@ import mbus
 import kaa.notifier
 
 # freevo core imports
-from freevo import mcomm
+import freevo.ipc
 
 # freevo ui imports
 import config
@@ -107,7 +107,7 @@ USER_IDLETIME           = 30    # 30 minutes
 MAX_ENTITY_IDLETIME     = 30    # 30 minutes
 
 
-if 0:
+if 1:
     # variables for testing
     POLL_INTERVALL      = 1     # 1 second
     FIRST_START         = 1     # 1 second
@@ -130,7 +130,9 @@ class Shutdown(object):
         # last wakeuptime
         self.__last_wakeuptime = 0
         # get entity change notifications
-        mcomm.register_entity_notification(self.entity_update)
+        mbus = freevo.ipc.Instance()
+        mbus.signals['new-entity'].connect(self.entity_update)
+        mbus.signals['lost-entity'].connect(self.entity_update)
 
 
     def entity_update(self, entity):
@@ -185,20 +187,20 @@ class Shutdown(object):
         return idle
 
 
-    def rpcreturn(self, result):
+    def rpcreturn(self, result, source):
         """
         Handle status.return messages.
         """
-        if isinstance(result, mcomm.RPCError):
+        if not result:
             # error, entity can't answer to that request
             return
 
         # some debug
-        log.info('Answer from %s' % result.source)
+        log.info('Answer from %s' % source)
 
         # get the attributes as dict
-        attributes = dict(result.arguments)
-
+        attributes = dict(result)
+        
         if attributes.has_key('idle'):
             # set minimum entity idletime
             self.idletime = min(self.idletime, attributes['idle'])
@@ -235,10 +237,10 @@ class Shutdown(object):
         # maximum busy time
         self.busytime   = 0
 
-        for entity in mcomm.instance().entities:
+        for entity in freevo.ipc.Instance().get_entities(None):
             # ask entity status
             log.info('send status rpc to %s' % entity)
-            entity.call('status', self.rpcreturn)
+            entity.rpc('home-theatre.status', self.rpcreturn, entity).call()
         # set a timer for check_shutdown in 5 seconds
         kaa.notifier.OneShotTimer(self.check_shutdown).start(5)
         return False

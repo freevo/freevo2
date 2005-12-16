@@ -36,15 +36,19 @@ import os
 import shutil
 from optparse import OptionParser
 
+# kaa imports
 import kaa.epg
+import kaa.notifier
 
 # freevo core imports
-from freevo import mcomm
+import freevo.ipc
 
 # freevo ui imports
 import config
 import sysconfig
 
+# tv server
+SERVER = {'type': 'home-theatre', 'module': 'tvserver'}
 
 def grab_xmltv():
 
@@ -84,6 +88,20 @@ def grab_vdr():
     kaa.epg.update('vdr', config.VDR_DIR, config.VDR_CHANNELS, config.VDR_EPG,
                    config.VDR_HOST, config.VDR_PORT, config.VDR_ACCESS_ID,
                    'both')
+
+
+def updated(result):
+    if result:
+        print 'updated favorites'
+    else:
+        print 'unable to update favorites'
+    sys.exit(0)
+
+
+def new_entity(entity):
+    if not entity.matches(SERVER):
+        return True
+    entity.rpc('home-theatre.favorite.update', updated).call()
 
 
 def main():
@@ -147,7 +165,6 @@ def main():
         print '    \'%s\', ] ' % chanlist[-1][kaa.epg.ID]
         sys.exit(0)
 
-
     if options.source == 'xmltv':
         grab_xmltv()
     elif options.source == 'xmltv_nofetch':
@@ -161,15 +178,13 @@ def main():
         sys.exit(0)
 
 
-    print 'connecting to recordserver'
-    rs = mcomm.find('recordserver')
-    if not rs:
-        print 'recordserver not running'
-        sys.exit(0)
-    print 'update favorites'
-    rs.call('favorite.update', None)
-
-
 if __name__ == '__main__':
     main()
+
+    print 'connecting to tvserver'
+    mbus = freevo.ipc.Instance()
+    mbus.signals['new-entity'].connect(new_entity)
+    kaa.notifier.OneShotTimer(updated, False).start(2)
+    kaa.notifier.loop()
+    
 

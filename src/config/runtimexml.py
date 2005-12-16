@@ -39,15 +39,6 @@ from xml.dom import minidom
 from xml.dom.minidom import getDOMImplementation
 from xml.dom.ext import PrettyPrint
 
-# FIXME: importing this would import config again.
-#
-# This is not only bad, it also causes two mbus entities for the
-# recordserver, both in one process but one without rpc registered.
-# Maybe the mcomm part here could move to a plugin or mcomm.py could
-# auto add it?
-#
-# import mcomm
-
 # get logging object
 log = logging.getLogger('config')
 
@@ -642,9 +633,6 @@ class RuntimeXML(object):
             return
 
         cfgfilepath = [ '.', os.path.expanduser('~/.freevo') ]
-
-        # FIXME: This would create a circular import
-        # mcomm.register_event('config.runtimexml.rescan', self.__rescan)
 
         # Make a copy of our configuration variables
         self.config_globals = conf_globs

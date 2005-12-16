@@ -52,7 +52,7 @@ import logging
 import mbus
 
 # freevo core imports
-from freevo import mcomm
+import freevo.ipc
 
 # freevo ui imports
 import config
@@ -63,6 +63,9 @@ from application import ChildApp
 
 # get logging object
 log = logging.getLogger('tv')
+
+# tv server
+SERVER = {'type': 'home-theatre', 'module': 'tvserver'}
 
 class PluginInterface(plugin.Plugin):
     """
@@ -121,19 +124,23 @@ class Xine(ChildApp):
         self.timeshift_file = 'xine_ts.mpeg'
 
         self.server = None
-        mcomm.register_entity_notification(self.__entity_update)
+
+        mbus = freevo.ipc.Instance()
+        mbus.signals['new-entity'].connect(self.new_entity)
+        mbus.signals['lost-entity'].connect(self.lost_entity)
 
 
-    def __entity_update(self, entity):
-        if not entity.present and entity == self.server:
+    def new_entity(self, entity):
+        if entity.matches(SERVER):
+            log.info('recordserver found')
+            self.server = entity
+            self.rpc = self.server.rpc
+
+    def lost_entity(self, entity):
+        if entity == self.server:
             log.info('recordserver lost')
             self.server = None
             return
-
-        if entity.present and \
-               entity.matches(mcomm.get_address('recordserver')):
-            log.info('recordserver found')
-            self.server = entity
 
 
     def rate(self, channel, device, uri):
@@ -153,16 +160,16 @@ class Xine(ChildApp):
             return
         
         self.item = channel
-        self.server.call('watch.start', self.__receive_url, channel)
+        self.rpc('home-theatre.watch.start', self.__receive_url).call(channel)
         return None
     
 
     def __receive_url(self, result):
-        if isinstance(result, mcomm.RPCError):
-            log.error(str(result))
+        if not result:
+            log.error(result)
             return
 
-        self.id, url = result.arguments
+        self.id, url = result
         # create command
         command = config.XINE_COMMAND.split(' ') + \
                   [ '--stdctl', '-V', config.XINE_VO_DEV, '-A',
@@ -196,8 +203,8 @@ class Xine(ChildApp):
 
 
     def __stop_done(self, result):
-        if isinstance(result, mcomm.RPCError):
-            log.error(str(result))
+        if not result:
+            log.error(result)
             return
         return
 
@@ -214,7 +221,7 @@ class Xine(ChildApp):
                 if not self.id:
                     log.error('FIXME: unable to stop without id')
                 else:
-                    self.server.call('watch.stop', self.__stop_done, self.id)
+                    self.rpc('home-theatre.watch.stop', self.__stop_done).call(self.id)
                 self.id = None
                 
         ChildApp.eventhandler(self, event)
