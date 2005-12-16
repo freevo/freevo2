@@ -1,8 +1,8 @@
 import sys
 import getopt
 
-# freevo core imports
-from freevo import mcomm
+print 'Broken right now, needs to be converted to new mbus wrapper'
+sys.exit(1)
 
 def usage():
     print '-p file'
@@ -22,7 +22,7 @@ cmd, arg = opts[0]
 if cmd == '-h':
     usage()
 
-freevo = mcomm.find('freevo')
+freevo = mbus.find('freevo')
 
 if not freevo:
     print 'freevo not running'
@@ -33,5 +33,5 @@ try:
         print freevo.call('play', None, arg)
     if cmd == '-s':
         print freevo.stop('stop', None)
-except mcomm.MException, e:
+except mbus.MException, e:
     print e

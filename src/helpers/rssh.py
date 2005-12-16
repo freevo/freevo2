@@ -8,13 +8,13 @@ import time
 import kaa.notifier
 import kaa.epg
 
-# freevo core imports
-from freevo import mcomm
-
 # freevo ui imports
 import config
 
 server = None
+
+print 'Broken right now, needs to be converted to new mbus wrapper'
+sys.exit(1)
 
 config.detect('channels')
 
@@ -25,7 +25,7 @@ def notification(entity):
         server = None
         return
 
-    if entity.present and entity.matches(mcomm.get_address('recordserver')):
+    if entity.present and entity.matches(mbus.get_address('recordserver')):
         print 'recordserver found'
         server = entity
         print 'type \'help\' to see possible commands'
@@ -117,7 +117,7 @@ def user_input():
     
     return True
 
-mcomm.register_entity_notification(notification)
+mbus.register_entity_notification(notification)
 kaa.notifier.SocketDispatcher(user_input).register(sys.stdin)
 
 print 'rssh - recordserver shell'
