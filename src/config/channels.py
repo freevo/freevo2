@@ -116,9 +116,9 @@ def refresh():
 
         if isinstance(c.access_id, (list, tuple)):
             for a_id in c.access_id:
-                add_uri(c, a_id)
+                add_uri(c, String(a_id))
         else:
-            add_uri(c, c.access_id)
+            add_uri(c, String(c.access_id))
 
         chan_display_opts = {
             'id' : c.id,
