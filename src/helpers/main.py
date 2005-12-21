@@ -54,15 +54,14 @@ except:
     d = os.path.dirname(__file__)[:-15]
     print 'The kaa module repository could not be loaded!'
     print
-    print 'Please check out the kaa repository from Freevo cvs'
-    print 'cvs -d:pserver:anonymous@cvs.sf.net:/cvsroot/freevo login'
-    print 'cvs -z3 -d:pserver:anonymous@cvs.sf.net:/cvsroot/freevo co -P kaa'
+    print 'Please check out the kaa repository from SVN'
+    print 'svn co svn://svn.freevo.org/kaa/trunk kaa'
     print
     print 'Please install it as root into your system or into the same'
     print 'directory you installed Freevo in'
     print
     print 'Kaa is under development right now. Make sure you update the kaa'
-    print 'directory every time you update freevo cvs.'
+    print 'directory every time you update freevo.'
     print
     sys.exit(1)
 
