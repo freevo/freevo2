@@ -237,7 +237,7 @@ class Shutdown(object):
         # maximum busy time
         self.busytime   = 0
 
-        for entity in freevo.ipc.Instance().get_entities(None):
+        for entity in freevo.ipc.Instance().get_entities():
             # ask entity status
             log.info('send status rpc to %s' % entity)
             entity.rpc('home-theatre.status', self.rpcreturn, entity).call()
