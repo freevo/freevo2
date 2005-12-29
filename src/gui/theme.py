@@ -1456,7 +1456,7 @@ def init_module():
     storage = {}
     if vfs.isfile(cachefile):
         storage = util.cache.load(cachefile)
-        if not storage.has_key('GUI_XML_FILE'):
+        if storage and not storage.has_key('GUI_XML_FILE'):
             # storage file too old
             storage = {}
     if storage:
