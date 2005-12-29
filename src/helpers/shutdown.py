@@ -107,7 +107,7 @@ USER_IDLETIME           = 30    # 30 minutes
 MAX_ENTITY_IDLETIME     = 30    # 30 minutes
 
 
-if 1:
+if 0:
     # variables for testing
     POLL_INTERVALL      = 1     # 1 second
     FIRST_START         = 1     # 1 second
