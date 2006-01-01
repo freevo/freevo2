@@ -132,13 +132,13 @@ class Xine(ChildApp):
 
     def new_entity(self, entity):
         if entity.matches(SERVER):
-            log.info('recordserver found')
+            log.info('tvserver found')
             self.server = entity
             self.rpc = self.server.rpc
 
     def lost_entity(self, entity):
         if entity == self.server:
-            log.info('recordserver lost')
+            log.info('tvserver lost')
             self.server = None
             return
 
@@ -146,7 +146,7 @@ class Xine(ChildApp):
     def rate(self, channel, device, uri):
         """
         FIXME: remove this function, every player can play everything
-        through the recordserver
+        through the tvserver
         """
         return 2
 
@@ -214,7 +214,7 @@ class Xine(ChildApp):
         Eventhandler for xine control.
         """
         if event == PLAY_END:
-            # stop recordserver live recording
+            # stop tvserver live recording
             if not self.server:
                 log.error('FIXME: unable to stop without server')
             else:
