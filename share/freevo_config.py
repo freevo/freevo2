@@ -224,8 +224,6 @@ MAJOR_AUDIO_CTRL    = 'VOL'           # Freevo takes control over audio ctrl
 CONTROL_ALL_AUDIO   = 1               # Freevo takes complete control of audio
 MAX_VOLUME          = 90              # Set maximum volume level.
 DEFAULT_VOLUME      = 40              # Set default volume level.
-TV_IN_VOLUME        = 60              # Set this to your preferred level 0-100.
-VCR_IN_VOLUME       = 90              # If you use different input from TV
 DEV_MIXER           = '/dev/mixer'    # mixer device 
 
 CONFIRM_SHUTDOWN    = 1               # ask before shutdown
@@ -1116,57 +1114,6 @@ TV_CHANNELS_DISPLAY_FORMAT = '%(name)s'
 # to explicitly remove from Freevo.
 #
 TV_CHANNELS_EXCLUDE = []
-
-#
-# Default device for TV_CHANNELS
-# Set to a device group like dvb, tv or ivtv or a special device like
-# dvb0 or dvb1. Set to None for auto detection
-#
-TV_DEFAULT_DEVICE = None
-
-#
-# Settings for tv cards
-# The variable starts with the card id followed by the variable.
-# The following settings can be made:
-# DVB[0-9]_CHANNELS_CONF: path the the channels.conf file. If not specified,
-#   Freevo will search in the .freevo, .mplayer and .xine dir of the user
-# DVB[0-9]_PRIORITY: priority of the card. The default is 8 for DVB-T, 9 for DVB-C
-#   and 10 for DVB-S.
-# TV[0-9]_PRIORITY and IVTV[0-9]_PRIORITY:  This is the same as the DVB 
-#   priority execpt the default is the card number.
-#
-# Example:
-#
-# DVB0_CHANNELS_CONF = '/path/to/channel.conf'
-# DVB0_PRIORITY      = 9
-
-#
-# TV[0-9]_FREQUENCIES and IVTV[0-9]_FREQUENCIES:
-#   You only need to add channel: frequency mappings here if Freevo's standard 
-#   frequency tables don't fit your needs.  Also, make sure you are using the 
-#   correct chanlist for your area or the table will be wrong.
-#   To add your own just replace tuner_id in the following example with a valid 
-#   tuner id (ie: '5' or # 'BBC1') and a frequency in KHz.  You may have as many 
-#   entries as you like, anything here will simply override a corresponding 
-#   entry in your standard frequency table and you can also have entries here 
-#   that are not present there.
-#
-# Example:
-#
-# TV0_FREQUENCIES = { 
-#     'tuner_id'   :    55250, 
-# }
-
-#
-# IVTV[0-9]_CODEC:  Here you can override the driver codec options for your IVTV
-#   cards.  Where the value is None here that option will not be overridden and
-#   we only set a few predefined defaults.  Valid options are: 
-#
-# Example:
-#
-# IVTV0_CODEC['bitrate'] = 5000000
-# IVTV0_CODEC['bitrate_peak'] = 6000000
-#
 
 #
 # Program to grab xmltv listings. To get a grabber, you need to download
