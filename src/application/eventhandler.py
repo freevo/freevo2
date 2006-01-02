@@ -269,8 +269,7 @@ class Eventhandler(object):
                       'the Freevo mailing list. The state of '\
                       'Freevo may be corrupt now and this error '\
                       'could cause more errors until you restart '\
-                      'Freevo.\n\nLogfile: %s') % \
-                      (event, sysconfig.syslogfile)
+                      'Freevo.') % event
                 handler = kaa.notifier.Callback(sys.exit, 0)
                 pop = ConfirmBox(msg, (_('Shutdown'), _('Continue')))
                 pop.connect(0, sys.exit, 0)
