@@ -1135,14 +1135,6 @@ XMLTV_SORT = ''
 #
 XMLTV_DAYS = 3
 
-#
-# EPG database backend (possible values are 'sqlite' and 'sqlite2')
-#
-try:
-    import pysqlite2
-    EPG_DATABASE = 'sqlite2'
-except ImportError:
-    EPG_DATABASE = 'sqlite'
 
 # ======================================================================
 # VDR settings for Freevo plugins and programs that interface to VDR.

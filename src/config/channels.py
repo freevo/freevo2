@@ -43,14 +43,8 @@ log = logging.getLogger('config')
 
 def refresh():
     log.info('Detecting TV channels.')
+    kaa.epg.connect('sqlite2', sysconfig.datafile('epg.db'))
 
-    if config.EPG_DATABASE == 'sqlite':
-        kaa.epg.connect('sqlite', sysconfig.datafile('epgdb'))
-    elif config.EPG_DATABASE == 'sqlite2':
-        kaa.epg.connect('sqlite2', sysconfig.datafile('epgdb2'))
-    else:
-        raise 'unknown database backend %s' % config.EPG_DATABASE
-    
     kaa.epg.load(config.TV_CHANNELS, config.TV_CHANNELS_EXCLUDE)
     
     for c in kaa.epg.channels:
