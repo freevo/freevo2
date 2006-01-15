@@ -4,7 +4,9 @@
 # -----------------------------------------------------------------------------
 # $Id$
 #
-# Just testing, needs doc
+# First draft of a bluetooth plugin, the keymap handling needs to be much
+# better, right now we use numbers to navigate, so when Freevo needs numbers
+# we can't provide them.
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -12,8 +14,6 @@
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
-#
-# Based on the bluetooth plugin for Freevo 1.5.x from Erik "ikea" Pettersson
 #
 # Please see the file doc/CREDITS for a complete list of authors.
 #
@@ -33,88 +33,19 @@
 #
 # -----------------------------------------------------------------------------
 
-# python imports
-import os
-import fcntl
-import re
-import logging
-
 # kaa imports
-import kaa
-import kaa.notifier
+from kaa.input.bluetooth import Bluetooth
+
+# freevo imports
+from event import OSD_MESSAGE
 
 # freevo input plugin core
 from input.interface import InputPlugin
 
-# get logging object
-log = logging.getLogger('bt')
-
-class BlueTooth(object):
-    """
-    A class handling the bluetooth serial connection.
-    """
-    def __init__(self):
-        self.fd = 0
-        self.signals = { 'key': kaa.notifier.Signal() }
-
-        # regexp for keys
-        self.regexp = re.compile(r"\+CKEV:\s+(\w+,\w+)")
-
-
-    def connect(self, device):
-        """
-        Connect to the device. This is handled in a thread because the
-        connection will take some time and will block the system.
-        """
-        kaa.notifier.Thread(self._connect, device).start()
-
-
-    def _connect(self, device):
-        """
-        Thread handling all the stuff needed to connect to a device.
-        """
-        log.info('connecting to %s', device)
-        self.fd = os.open(device, os.O_RDWR | os.O_NONBLOCK)
-        fcntl.fcntl(self.fd, fcntl.F_SETFL, os.O_NONBLOCK)
-        os.write(self.fd, "AT+CMER=3,2,0,0,0\r")
-        kaa.notifier.SocketDispatcher(self._read).register(self.fd)
-        log.info('connected')
-
-
-    def _read(self):
-        """
-        Read data from the remote device.
-        """
-        data = os.read(self.fd, 1024)
-        if self.regexp.search(data):
-            key = self.regexp.search(data).groups()[0]
-            if key.endswith(',0'):
-                return
-            self.signals['key'].emit(key.split(',')[0])
-        return True
-
-
-    def disconnect(self):
-        """
-        Disconnect the device.
-        """
-        if not self.fd:
-            return
-        os.write(self.fd, "AT+CMER=0,0,0,0\r")
-        self.fd = 0
-
-
-    def __del__(self):
-        """
-        Disconnect on __del__.
-        """
-        self.disconnect()
-
-
-
 class PluginInterface(InputPlugin):
     """
-    Input plugin for bluetooth
+    Input plugin for bluetooth. Parameters are device and a name with device
+    a list of hardware address and channel for the serial service.
     """
 
     KEYMAP = {
@@ -126,15 +57,17 @@ class PluginInterface(InputPlugin):
         '6' : 'RIGHT',
         '8' : 'DOWN' }
 
-    def __init__(self, device):
+    def __init__(self, device, name):
         """
         Init the plugin by connecting to the device and register the
         callback.
         """
         InputPlugin.__init__(self)
-        self.bt = BlueTooth()
+        self.btname = name
+        self.bt = Bluetooth(device)
         self.bt.signals['key'].connect(self.handle)
-        self.bt.connect(device)
+        self.bt.signals['connected'].connect(self.connected)
+        self.bt.signals['disconnected'].connect(self.disconnected)
 
 
     def handle(self, code):
@@ -146,8 +79,22 @@ class PluginInterface(InputPlugin):
         return True
 
 
+    def connected(self):
+        """
+        Handle new connection.
+        """
+        OSD_MESSAGE.post('Found %s' % self.btname)
+        
+
+    def disconnected(self):
+        """
+        Handle new disconnection.
+        """
+        OSD_MESSAGE.post('Lost %s' % self.btname)
+        
+
     def shutdown(self):
         """
         Shutdown plugin.
         """
-        self.bt.disconnect()
+        del self.bt
