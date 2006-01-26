@@ -36,7 +36,7 @@ import time
 import kaa.epg
 
 # freevo core imports
-import freevo.ipc.tvserver as tvserver
+import freevo.ipc
 
 # freevo imports
 import config
@@ -46,6 +46,9 @@ from gui.windows import MessageBox
 
 # tv imports
 import favorite
+
+# get tvserver interface
+tvserver = freevo.ipc.Instance('freevo').tvserver
 
 class ProgramItem(Item):
     """

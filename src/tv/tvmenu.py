@@ -46,7 +46,7 @@
 import time
 
 # freevo core imports
-import freevo.ipc.tvserver as tvserver
+import freevo.ipc
 
 import config
 import plugin
@@ -60,6 +60,9 @@ from gui.windows import MessageBox
 
 import logging
 log = logging.getLogger('tv')
+
+# get tvserver interface
+tvserver = freevo.ipc.Instance('freevo').tvserver
 
 class Info(Item):
     def __getitem__(self, key):

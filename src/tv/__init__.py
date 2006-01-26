@@ -30,6 +30,9 @@
 #
 # -----------------------------------------------------------------------------
 
+# freevo core plugins
+import freevo.ipc
+
 # freevo imports
 import plugin
 
@@ -38,18 +41,30 @@ class PluginInterface(plugin.MainMenuPlugin):
     """
     Plugin interface to integrate the tv module into Freevo
     """
-    def items(self, parent):
+    def __init__(self):
         """
-        return the tv menu
+        init the plugin.
         """
+        plugin.MainMenuPlugin.__init__(self)
+
         # import here to avoid importing all this when some helpers only
         # want to import something from iside the tv directory
 
         import config
-        from tvmenu import TVMenu
-        from mainmenu import MainMenuItem
-
+        
         # detect channels
         config.detect('channels')
 
-        return [ TVMenu(parent) ]
+        # connect to tvserver using freevo.ipc
+        mbus = freevo.ipc.Instance('freevo')
+        mbus.connect('freevo.ipc.tvserver')
+    
+        from tvmenu import TVMenu
+        self.TVMenu = TVMenu
+
+        
+    def items(self, parent):
+        """
+        return the tv menu
+        """
+        return [ self.TVMenu(parent) ]

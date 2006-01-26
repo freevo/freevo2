@@ -47,7 +47,7 @@ import time
 import config
 
 # freevo core imports
-import freevo.ipc.tvserver as tvserver
+import freevo.ipc
 
 from area import Area
 from gui.widgets import Rectangle
@@ -270,6 +270,9 @@ class TvlistingArea(Area):
         """
         menu      = self.menu
         settings  = self.settings
+
+        # get tvserver interface
+        tvserver = freevo.ipc.Instance('freevo').tvserver
 
         # FIXME: debug, remove me
         if self.__ONE_TIME_DEBUG:
