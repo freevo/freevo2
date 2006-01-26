@@ -17,10 +17,12 @@ class PluginInterface(plugin.Plugin):
         self.idle_time = 0
 
         mbus = freevo.ipc.Instance()
+        mbus.connect('freevo.ipc.status')
         mbus.connect_rpc(self.play, 'home-theatre.play')
         mbus.connect_rpc(self.stop, 'home-theatre.stop')
         mbus.connect_rpc(self.status, 'home-theatre.status')
 
+        self.status = mbus.status
         
     def plugin_activate(self):
         """
@@ -69,5 +71,8 @@ class PluginInterface(plugin.Plugin):
 
 
     def update_idle_time(self):
-        self.idle_time += 1
+        app = application.get_active()
+        if app and app.get_name() == 'menu':
+            self.idle_time += 1
+            self.status.set('idle', self.idle_time)
         return True

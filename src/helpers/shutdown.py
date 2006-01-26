@@ -131,10 +131,23 @@ class Shutdown(object):
         self.__last_wakeuptime = 0
         # get entity change notifications
         mbus = freevo.ipc.Instance()
+        mbus.connect('freevo.ipc.status')
+        mbus.status.signals['changed'].connect(self.status_change)
+        mbus.status.monitor()
         mbus.signals['new-entity'].connect(self.entity_update)
         mbus.signals['lost-entity'].connect(self.entity_update)
 
 
+    def status_change(self, entity):
+        """
+        Status change for an entity.
+        """
+        # This does nothing right, other parts of Freevo need to be updated
+        # to the new status ipc code
+        # print entity, entity.status
+        pass
+
+        
     def entity_update(self, entity):
         """
         An entity was added/removed from the mbus.
