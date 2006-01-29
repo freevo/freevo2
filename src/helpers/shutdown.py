@@ -101,19 +101,9 @@ _important_programs = [ 'wget', 'cdrecord', 'growisofs', 'cdparanoia', 'lame',
                         'ncftp', 'ftp', 'mkisofs' ]
 
 # internal variables
-POLL_INTERVALL          = 60    #  1 minute
-FIRST_START             = 1200  # 30 minutes
-USER_IDLETIME           = 30    # 30 minutes
-MAX_ENTITY_IDLETIME     = 30    # 30 minutes
-
-
-if 0:
-    # variables for testing
-    POLL_INTERVALL      = 1     # 1 second
-    FIRST_START         = 1     # 1 second
-    USER_IDLETIME       = 1     # 1 minute
-    MAX_ENTITY_IDLETIME = 1     # 1 minute
-
+POLL_INTERVALL = 60
+USER_IDLETIME  = 30
+APP_IDLETIME   = 30
 
 class Shutdown(object):
     """
@@ -121,45 +111,32 @@ class Shutdown(object):
     """
     def __init__(self):
         # notifier check timer
-        self.timer = kaa.notifier.OneShotTimer(self.check_mbus)
-        self.timer.start(FIRST_START)
-        self.timer.first_start = True
+        self.timer = kaa.notifier.Timer(self.check_shutdown)
+        self.timer.start(POLL_INTERVALL)
         # counter how often the shutdown function warns before real
-        # shutdown (6 == 5 minutes)
-        self.shutdown_counter = 6
+        # shutdown (31 == 30 minutes)
+        self.shutdown_counter = 31
         # last wakeuptime
-        self.__last_wakeuptime = 0
+        self.wakeuptime = 0
         # get entity change notifications
         mbus = freevo.ipc.Instance()
         mbus.connect('freevo.ipc.status')
-        mbus.status.signals['changed'].connect(self.status_change)
+        if 0:
+            # add for debugging
+            mbus.status.signals['changed'].connect(self.status_change)
         mbus.status.monitor()
-        mbus.signals['new-entity'].connect(self.entity_update)
-        mbus.signals['lost-entity'].connect(self.entity_update)
+
+        # helper function to get all entities
+        self.get_entities = mbus.get_entities
 
 
     def status_change(self, entity):
         """
-        Status change for an entity.
+        Status change for an entity (for debugging).
         """
-        # This does nothing right, other parts of Freevo need to be updated
-        # to the new status ipc code
-        # print entity, entity.status
-        pass
+        log.info('Entity %s: %s', entity, entity.status)
 
         
-    def entity_update(self, entity):
-        """
-        An entity was added/removed from the mbus.
-        """
-        if self.timer.first_start:
-            # we are in the startup mode (30 minutes wait)
-            return
-        log.warning('entity change, set timer %s seconds' % POLL_INTERVALL)
-        # reset timer to POLL_INTERVALL
-        self.timer.start(POLL_INTERVALL)
-
-
     def check_programs(self):
         """
         Check for running programs who could prevent a shutdown.
@@ -200,122 +177,63 @@ class Shutdown(object):
         return idle
 
 
-    def rpcreturn(self, result, source):
-        """
-        Handle status.return messages.
-        """
-        if not result:
-            # error, entity can't answer to that request
-            return
-
-        # some debug
-        log.info('Answer from %s' % source)
-
-        # get the attributes as dict
-        attributes = dict(result)
-        
-        if attributes.has_key('idle'):
-            # set minimum entity idletime
-            self.idletime = min(self.idletime, attributes['idle'])
-        if attributes.has_key('busy'):
-            # set maximum busy time
-            self.busytime = max(self.busytime, attributes['busy'])
-        if attributes.has_key('wakeup'):
-            # set minimum wakeup time
-            if self.wakeuptime:
-                self.wakeuptime = min(attributes['wakeup'], self.wakeuptime)
-            else:
-                self.wakeuptime = attributes['wakeup']
-
-
     def check_mbus(self):
         """
-        Send a status request to all mbus entities to get the status.
+        Check status of all mbus entities.
         """
-        if not self.shutdown_counter:
-            # looks like we came out of hibernate
-            log.info('reset all shutdown timer')
-            self.shutdown_counter = 6
-            self.timer.start(FIRST_START)
-            self.timer.first_start = True
-            return False
-
-        # now the plugin is running
-        self.timer.first_start = False
-        log.info('checking for possible system shutdown')
-        # next wakeup
-        self.wakeuptime = 0
-        # minimum idletime in minutes
-        self.idletime   = 1000
-        # maximum busy time
-        self.busytime   = 0
-
-        for entity in freevo.ipc.Instance().get_entities():
-            # ask entity status
-            log.info('send status rpc to %s' % entity)
-            entity.rpc('home-theatre.status', self.rpcreturn, entity).call()
-        # set a timer for check_shutdown in 5 seconds
-        kaa.notifier.OneShotTimer(self.check_shutdown).start(5)
-        return False
-
-
+        wakeup = 0
+        idle = 1000
+        busy = 0
+        
+        for entity in self.get_entities():
+            if entity.status.get('idle') != None:
+                idle = min(idle, entity.status.get('idle'))
+            if entity.status.get('busy'):
+                busy = max(busy, entity.status.get('busy'))
+            if entity.status.get('wakeup'):
+                wakeup = min(wakeup, entity.status.get('wakeup')) or \
+                         entity.status.get('wakeup')
+        return idle, busy, wakeup
+    
+    
     def check_shutdown(self):
         """
         Check if shutdown is possible and shutdown the system.
         """
-        if self.wakeuptime != self.__last_wakeuptime:
+        idletime, busytime, wakeuptime = self.check_mbus()
+
+        # check wakeuptime for changes
+        if wakeuptime != self.wakeuptime:
             # there is a new wakeup time
-            log.info('set wakeup time: %s' % self.wakeuptime)
-            self.__last_wakeuptime = self.wakeuptime
-            kaa.notifier.Process(config.SHUTDOWN_WAKEUP_CMD % self.wakeuptime).start()
+            log.info('Set wakeup time: %s' % wakeuptime)
+            self.wakeuptime = wakeuptime
+            kaa.notifier.Process(config.SHUTDOWN_WAKEUP_CMD % wakeuptime).start()
 
-        # internal varibale how long to wait next
-        wait = 0
-
-        # check idle time
-        if self.idletime < MAX_ENTITY_IDLETIME:
-            log.info('Entity idletime is %s' % self.idletime)
-            wait = 30 - self.idletime
-        elif self.idletime < 1000:
-            # there is an idle entity, print some debug
-            log.info('Entity idletime is %s, continue' % self.idletime)
-
+        # check idletime
+        if idletime < APP_IDLETIME:
+            log.info('Entity idletime is %s, continue' % idletime)
+            self.shutdown_counter = max(self.shutdown_counter, 6)
+            return True
+        
         # check busy time
-        if self.busytime:
-            log.info('Entity is busy at least %s minutes' % self.busytime)
-            wait = max(wait, self.busytime)
+        if busytime:
+            log.info('Entity is busy at least %s minutes' % busytime)
+            self.shutdown_counter = max(self.shutdown_counter, 6)
+            return True
 
         # check wakeup time
-        wakeup = int((self.wakeuptime - time.time()) / 60)
-        if self.wakeuptime and wakeup < 0:
-            log.error('Correct buggy wakeup time from %s minutes' % wakeup)
-            wakeup = 10
-
-        if self.wakeuptime and wakeup < 30:
+        wakeup = int((wakeuptime - time.time()) / 60)
+        if wakeuptime and wakeup < 30:
             log.info('Wakeup time is in %s minutes, do not shutdown' % wakeup)
-            wait = max(wait, wakeup + 5)
-
-        if wait:
-            # wait a maximum of 30 minutes
-            wait = min(30, wait)
-            log.info('Next check in %s minutes' % wait)
-            # set a new timer
-            self.timer.start(wait * 60)
-            # reset counter
             self.shutdown_counter = max(self.shutdown_counter, 6)
-            return False
-
+            return True
+        
         # Wakeup seems possible based on the mbus entities, check important
         # programs next and wait 5 minutes if one is running
         if not self.check_programs():
             # an important program is running
-            log.info('Next check in 5 minutes')
-            # reschedule checking
-            self.timer.start(5 * POLL_INTERVALL)
-            # set counter to 31 ( == 30 minutes after important the program
-            # has quit)
-            self.shutdown_counter = 31
-            return False
+            self.shutdown_counter = max(self.shutdown_counter, 6)
+            return True
 
         # check logins based on 'who' next
         try:
@@ -324,30 +242,21 @@ class Shutdown(object):
                 # there is a login, print idle time for debug
                 log.info('user idle time: %s minutes' % idle)
             if idle <= USER_IDLETIME:
-                # user not idle, sleep until the idletime may be reached
-                wait = USER_IDLETIME + 1 - idle
-                log.info('Next check in %s minutes' % wait)
-                # set a new timer
-                self.timer.start(wait * 60)
-                # reset counter
                 self.shutdown_counter = max(self.shutdown_counter, 6)
-                return False
+                return True
         except:
             # maybe the 'who' parser is buggy
             log.exception('who checking, please report this trace')
 
 
-        # looks like shutdown is possible
-        log.info('shutdown possible')
-        # decr. counter
+        # count down shutdown_counter
         self.shutdown_counter -= 1
-
+        
         if self.shutdown_counter:
             # let's warn this time
             log.warning('system shutdown system in %s minutes' % \
                         self.shutdown_counter)
-            self.timer.start(POLL_INTERVALL)
-            return False
+            return True
 
         # ok, do the real shutdown
         log.warning('shutdown system')
@@ -357,10 +266,8 @@ class Shutdown(object):
 
         # set new timer in case we hibernate, set self.timer so it looks like
         # the normal startup timer
-        self.timer.start(FIRST_START)
-        self.timer.first_start = True
-        return False
-
+        self.shutdown_counter = 31
+        return True
 
 
 
