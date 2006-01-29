@@ -7,7 +7,7 @@ import freevo.ipc
 # freevo ui imports
 import plugin
 import application
-import event
+from event import *
 
 class PluginInterface(plugin.Plugin):
     def __init__(self):
@@ -23,6 +23,9 @@ class PluginInterface(plugin.Plugin):
         mbus.connect_rpc(self.status, 'home-theatre.status')
 
         self.status = mbus.status
+        self.status.set('idle', 0)
+        self.status.set('playing', '')
+
         
     def plugin_activate(self):
         """
@@ -49,7 +52,7 @@ class PluginInterface(plugin.Plugin):
 
 
     def stop(self):
-        event.STOP.post()
+        STOP.post()
         return []
 
 
@@ -66,6 +69,10 @@ class PluginInterface(plugin.Plugin):
 
     def eventhandler(self, event):
         # each event resets the idle time
+        if event == PLAY_START and event.arg and hasattr(event.arg, 'url'):
+            self.status.set('playing', event.arg.url)
+        if event == PLAY_END:
+            self.status.set('playing', '')
         self.idle_time = 0
         return True
 
