@@ -141,7 +141,10 @@ def start(name, arg, bg, store=1):
     """
     start a process
     """
-    uid = os.fork()
+    if '-daemon' in arg:
+        uid = 0
+    else:
+        uid = os.fork()
     if uid:
         if store:
             try:
