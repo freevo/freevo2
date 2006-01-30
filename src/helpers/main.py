@@ -125,6 +125,35 @@ except Exception, e:
 # more kaa imports
 import kaa.notifier
 
+# parse arguments for daemon mode
+if len(sys.argv) >= 2 and sys.argv[1] == '-daemon':
+    from kaa.input import lirc
+
+    def handle_key(key):
+        if not key in ( 'EXIT', 'POWER' ):
+            return True
+        lirc.stop()
+        options = ''
+        if config.CONF.display in ( 'x11', 'dga' ) and not \
+               (os.environ.has_key('DISPLAY') and os.environ['DISPLAY']):
+            options = '-fs'
+        script = os.path.join(os.path.dirname(__file__), '../../../../../../bin/freevo')
+        script = os.path.normpath(script)
+        log.info('start %s %s', script, options)
+        os.system('%s %s >/dev/null 2>/dev/null' % (script, options))
+        lirc.init('freevo', config.LIRCRC)
+        log.info('freevo stopped')
+        return True
+
+    if not lirc.init('freevo', config.LIRCRC):
+        log.error('Could not initialize PyLirc!')
+        sys.exit(1)
+
+    kaa.notifier.signals['lirc'].connect(handle_key)
+    kaa.notifier.loop()
+    sys.exit(1)
+        
+    
 # freevo imports
 import gui
 import gui.displays

@@ -49,10 +49,11 @@ def show_help():
     print '''\
 freevo [ script | options]
 options:
-  -fs            start freevo in a new x session in fullscreen
-  setup          run freevo setup to scan your environment
-  start          start freevo as daemon in background
-  stop           stop the current freevo process
+  -fs        start freevo in a new x session in fullscreen
+  -daemon    start in daemin mode, use remote to really start freevo
+  setup      run freevo setup to scan your environment
+  start      start freevo as daemon in background
+  stop       stop the current freevo process
 
 freevo can start the following scripts, use --help on these
 scripts to get more informations about options.
@@ -274,13 +275,12 @@ elif arg and name == 'freevo' and not arg.startswith('-'):
             sys.argv = [ sys.argv[0] ] + sys.argv[2:]
 
 
-elif arg and name == 'freevo' and not (arg in ['-force-fs',]):
+elif arg and name == 'freevo' and not (arg in ['-force-fs', '-daemon']):
     # ok, don't know about that arg, freevo should be started, but
     # it's also no freevo arg
     print 'unknown command line option: %s' % sys.argv[1:]
     print
     show_help()
-
 
 else:
     # arg for freevo
@@ -297,6 +297,9 @@ if name != 'freevo':
             proc = [ os.path.join(__site__, 'helpers', name + '.py') ] +  sys.argv[1:]
             print 'can\'t find helper %s' % name
             sys.exit(1)
+
+if arg and name == 'freevo' and arg == '-daemon':
+    name = 'daemon'
 
 if getpid(name, [ 'python' ] + proc)[1] and check:
     if name != 'freevo':
