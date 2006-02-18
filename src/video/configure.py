@@ -87,9 +87,10 @@ def audio_selection(item):
             a['language'] = _('Stream %s') % a['id']
         if not a.has_key('channels') or not a['channels']:
             a['channels'] = 2 # wild guess :-)
+        if not a.has_key('codec') or not a['codec']:
+            name = '%s (channels=%s)' % (a['language'], a['channels'])
         else:
-            continue
-        name = '%s (channels=%s)' % (a['language'], a['channels'])
+            name = '%s (channels=%s %s)' % (a['language'], a['channels'], a['codec'])
         action = ActionItem(name, item, set_variable)
         action.parameter('selected_audio', a['id'])
         menu_items.append(action)
