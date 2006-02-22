@@ -219,11 +219,3 @@ class Menu(object):
         Delete function of memory debugging
         """
         log.info('Delete menu %s' % self.heading)
-        # run gc (for debugging)
-        gc.collect()
-        # check for more garbage
-        g = gc.collect()
-        if g:
-            log.warning('Garbage: %s' % gc.collect())
-            for g in gc.garbage:
-                log.warning(' %s' % g)
