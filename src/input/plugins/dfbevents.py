@@ -81,7 +81,7 @@ class PluginInterface(InputPlugin):
         log.debug(self.keymap)
         log.debug(self.fd)
 
-	kaa.notifier.SocketDispatcher(self.handle).register(self.fd)
+        kaa.notifier.SocketDispatcher(self.handle).register(self.fd)
 
 
     def handle(self):
