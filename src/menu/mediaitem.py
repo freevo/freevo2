@@ -177,6 +177,24 @@ class MediaItem(Item):
             if length == 0:
                 return ''
             return '%d min' % (length / 60)
+
+
+        if attr == 'elapsed:percent':
+            if not hasattr(self, 'elapsed'):
+                return 0
+
+            try:
+                length = int(self.info['length'])
+            except ValueError:
+                try:
+                    length = int(self.length)
+                except:
+                    return 0
+            if not length:
+                return 0
+            return 100 * self.elapsed / length
+
+
         return Item.__getitem__(self, attr)
 
 
