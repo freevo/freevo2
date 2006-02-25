@@ -145,7 +145,7 @@ def parse_movie(fxd, node):
     # create an item
     item = VideoItem('', fxd.getattr(None, 'parent', None))
     # add info from <info>
-    fxd.parse_info(node, item, {'runtime': 'length'})
+    fxd.parse_info(node, item, {'length': 'runtime'})
 
     video_list = []
     video = fxd.get_children(node, 'video')
@@ -317,7 +317,7 @@ def parse_disc_set(fxd, node):
     if item.image:
         item.image = vfs.abspath(os.path.join(dirname, item.image))
 
-    fxd.parse_info(node, item, {'runtime': 'length'})
+    fxd.parse_info(node, item, {'length': 'runtime'})
     item.__fxd_rom_info__      = True
     item.__fxd_rom_label__     = []
     item.__fxd_rom_id__        = []
