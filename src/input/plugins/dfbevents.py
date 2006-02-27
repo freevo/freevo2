@@ -75,9 +75,14 @@ class PluginInterface(InputPlugin):
 
         self.keymap = {}
         for key in config.KEYBOARD_MAP:
-            if hasattr(directfb, 'DIKI_%s' % key):
-                code = getattr(directfb, 'DIKI_%s' % key)
+            if hasattr(directfb, 'DIKS_%s' % key):
+                code = getattr(directfb, 'DIKS_%s' % key)
                 self.keymap[code] = config.KEYBOARD_MAP[key]
+        for key in config.REMOTE_MAP:
+            if hasattr(directfb, 'DIKS_%s' % key):
+                code = getattr(directfb, 'DIKS_%s' % key)
+                self.keymap[code] = config.REMOTE_MAP[key]
+
         log.debug(self.keymap)
         log.debug(self.fd)
 
@@ -104,9 +109,9 @@ class PluginInterface(InputPlugin):
         #print 'DFBEvent: modifiers=%s' % dfbevent.modifiers
         #print 'DFBEvent: type=%s' % dfbevent.type
                 
-        key = self.keymap.get(dfbevent.key_id)
+        key = self.keymap.get(dfbevent.key_symbol)
         if not key :
-            log.warning('unmapped key_id=%s' % dfbevent.key_id)
+            log.warning('unmapped key_symbol=%s' % dfbevent.key_symbol)
             return True
 
         log.debug('posting key: %s' % key)
