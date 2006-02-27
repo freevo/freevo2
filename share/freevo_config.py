@@ -282,6 +282,7 @@ MENU_ARROW_NAVIGATION = 0
 #
 KEYBOARD_MAP = input.KEYBOARD_MAP
 REMOTE_MAP   = input.REMOTE_MAP
+DIRECTFB_MAP = input.DIRECTFB_MAP
 
 #
 # Basic mouse support. It still needs much work and isn't working very
