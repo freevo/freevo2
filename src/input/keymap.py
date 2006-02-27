@@ -358,5 +358,5 @@ DIRECTFB_MAP = {
     'CUSTOM7'              : None,
     'CUSTOM8'              : None,
     'CUSTOM9'              : None
-]
+}
 
