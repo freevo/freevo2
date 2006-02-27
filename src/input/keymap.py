@@ -205,7 +205,7 @@ DIRECTFB_MAP = {
     'CURLY_BRACKET_RIGHT'  : None,
     'TILDE'                : None,
     'DELETE'               : None,
-    'ENTER'                : 'ENTER',
+    'ENTER'                : 'SELECT',
     'CURSOR_LEFT'          : 'LEFT',
     'CURSOR_RIGHT'         : 'RIGHT',
     'CURSOR_UP'            : 'UP',
