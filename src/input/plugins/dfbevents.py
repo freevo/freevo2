@@ -74,14 +74,10 @@ class PluginInterface(InputPlugin):
         log.info('Using DirectFB input.')
 
         self.keymap = {}
-        for key in config.KEYBOARD_MAP:
+        for key in config.DIRECTFB_MAP:
             if hasattr(directfb, 'DIKS_%s' % key):
                 code = getattr(directfb, 'DIKS_%s' % key)
-                self.keymap[code] = config.KEYBOARD_MAP[key]
-        for key in config.REMOTE_MAP:
-            if hasattr(directfb, 'DIKS_%s' % key):
-                code = getattr(directfb, 'DIKS_%s' % key)
-                self.keymap[code] = config.REMOTE_MAP[key]
+                self.keymap[code] = config.DIRECTFB_MAP[key]
 
         log.debug(self.keymap)
         log.debug(self.fd)
@@ -96,25 +92,26 @@ class PluginInterface(InputPlugin):
         if not dfbevent or dfbevent.type != directfb.DIET_KEYPRESS: 
             return True
 
-        print 'DFBEvent: %s' % dfbevent
-        print 'DFBEvent: %s' % dir(dfbevent)
-        print 'DFBEvent: button=%s' % dfbevent.button
-        print 'DFBEvent: buttons=%s' % dfbevent.buttons
-        #print 'DFBEvent: device_id=%s' % dfbevent.device_id
-        #print 'DFBEvent: flags=%s' % dfbevent.flags
-        #print 'DFBEvent: key_code=%s' % dfbevent.key_code
-        print 'DFBEvent: key_id=%s' % dfbevent.key_id
-        #print 'DFBEvent: key_symbol=%s' % dfbevent.key_symbol
-        #print 'DFBEvent: locks=%s' % dfbevent.locks
-        #print 'DFBEvent: modifiers=%s' % dfbevent.modifiers
-        #print 'DFBEvent: type=%s' % dfbevent.type
+        log.debug('DFBEvent: %s' % dfbevent)
+        log.debug('DFBEvent: %s' % dir(dfbevent))
+        log.debug('DFBEvent: button=%s' % dfbevent.button)
+        log.debug('DFBEvent: buttons=%s' % dfbevent.buttons)
+        #log.debug('DFBEvent: device_id=%s' % dfbevent.device_id)
+        #log.debug('DFBEvent: flags=%s' % dfbevent.flags)
+        #log.debug('DFBEvent: key_code=%s' % dfbevent.key_code)
+        log.debug('DFBEvent: key_id=%s' % dfbevent.key_id)
+        #log.debug('DFBEvent: key_symbol=%s' % dfbevent.key_symbol)
+        #log.debug('DFBEvent: locks=%s' % dfbevent.locks)
+        #log.debug('DFBEvent: modifiers=%s' % dfbevent.modifiers)
+        #log.debug('DFBEvent: type=%s' % dfbevent.type)
                 
         key = self.keymap.get(dfbevent.key_symbol)
         if not key :
-            log.warning('unmapped key_symbol=%s' % dfbevent.key_symbol)
+            log.error('unmapped key_symbol=%s' % dfbevent.key_symbol)
             return True
 
         log.debug('posting key: %s' % key)
         self.post_key(key)
 
         return True
+
