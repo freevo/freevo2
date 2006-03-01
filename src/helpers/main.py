@@ -170,6 +170,8 @@ from mainmenu import MainMenu
 # mimetypes list
 import fxditem
 
+# freevo core imports
+import freevo.ipc
 
 class Splashscreen(gui.areas.Area):
     """
@@ -249,6 +251,8 @@ if len(sys.argv) >= 2:
         config.START_FULLSCREEN_X = 1
 
 try:
+    freevo.ipc.Instance('freevo', **config.MBUS_ADDR)
+    
     # create gui
     gui.displays.create()
     

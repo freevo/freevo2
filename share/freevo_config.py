@@ -446,6 +446,9 @@ plugin.activate('tiny_osd')
 # control freevo over mbus
 plugin.activate('mbus')
 
+# special attributes for mbus address
+MBUS_ADDR = {}
+
 
 # ======================================================================
 # Freevo directory settings:
