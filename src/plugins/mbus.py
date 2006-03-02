@@ -11,6 +11,9 @@ from event import *
 from mediadb import FileListing
 from directory import DirItem
 
+import logging
+log = logging.getLogger('mbus')
+
 class PluginInterface(plugin.Plugin):
     def __init__(self):
         plugin.Plugin.__init__(self)
@@ -57,6 +60,7 @@ class PluginInterface(plugin.Plugin):
 
     @freevo.ipc.expose('home-theatre.play')
     def play(self, file, display_type=None):
+        log.info('play %s with %s', file, display_type)
         app = application.get_active()
         if not app or app.get_name() != 'menu':
             raise RuntimeError('freevo not in menu mode')
@@ -87,5 +91,6 @@ class PluginInterface(plugin.Plugin):
 
     @freevo.ipc.expose('home-theatre.stop')
     def stop(self):
+        log.info('stop')
         STOP.post()
         return []

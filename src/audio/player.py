@@ -153,8 +153,9 @@ class AudioPlayer(Application):
         """
         Application.hide(self)
         self.draw_engine.hide(config.GUI_FADE_STEPS)
-        if self.running:
-            self.bg_playing = True
+# DOES NOT WORK
+#         if self.running:
+#             self.bg_playing = True
 
         # post event for hiding visualizations
         # FIXME: maybe this is a Signal
