@@ -418,7 +418,8 @@ class DirItem(Playlist):
             OSD_MESSAGE.post('%s view' % type)
             return True
 
-        if event == PLAY_START and event.arg in self.item_menu.choices:
+        if event == PLAY_START and self.item_menu and \
+               event.arg in self.item_menu.choices:
             # update selection and pass the event to playlist after that
             self.item_menu.select(event.arg)
             
@@ -548,6 +549,10 @@ class DirItem(Playlist):
         pl = Playlist(playlist = [ (self.dir, recursive) ], parent = self,
                       display_type=display_type, random=random)
         pl.play()
+
+        # Now this is ugly. If we do nothing 'pl' will be deleted by the
+        # garbage collector, so we have to store it somehow
+        self.__pl_for_gc = pl
         return
         
 

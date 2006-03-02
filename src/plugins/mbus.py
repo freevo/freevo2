@@ -8,6 +8,8 @@ import freevo.ipc
 import plugin
 import application
 from event import *
+from mediadb import FileListing
+from directory import DirItem
 
 class PluginInterface(plugin.Plugin):
     def __init__(self):
@@ -17,6 +19,7 @@ class PluginInterface(plugin.Plugin):
         self.idle_time = 0
 
         mbus = freevo.ipc.Instance()
+        mbus.connect(self)
         mbus.connect('freevo.ipc.status')
 
         self.status = mbus.status
@@ -53,17 +56,32 @@ class PluginInterface(plugin.Plugin):
 
 
     @freevo.ipc.expose('home-theatre.play')
-    def play(self, file):
+    def play(self, file, display_type=None):
         app = application.get_active()
         if not app or app.get_name() != 'menu':
             raise RuntimeError('freevo not in menu mode')
 
-        for p in plugin.mimetype(None):
-            i = p.get(None, [ file ] )
+        listing = FileListing([file])
+        if listing.num_changes > 0:
+            # this shouldn't happen, but just in case
+            listing.update()
+
+        # normal file
+        for p in plugin.mimetype(display_type):
+            i = p.get(None, listing)
             if i and hasattr(i[0], 'play'):
                 i[0].play()
                 return []
-            
+
+        # directory
+        for i in listing.get_dir():
+            pl = DirItem(i, None, display_type=display_type)
+            pl.play()
+            # Now this is ugly. If we do nothing 'pl' will be deleted by the
+            # garbage collector, so we have to store it somehow
+            self.__pl_for_gc = pl
+            return []
+
         raise RuntimeError('no player found')
 
 
