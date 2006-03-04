@@ -65,6 +65,7 @@ class PluginInterface(plugin.Plugin):
         if not app or app.get_name() != 'menu':
             raise RuntimeError('freevo not in menu mode')
 
+        file = String(file)
         listing = FileListing([file])
         if listing.num_changes > 0:
             # this shouldn't happen, but just in case
