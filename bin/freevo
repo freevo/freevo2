@@ -278,7 +278,7 @@ elif arg and name == 'freevo' and not arg.startswith('-'):
             sys.argv = [ sys.argv[0] ] + sys.argv[2:]
 
 
-elif arg and name == 'freevo' and not (arg in ['-force-fs', '-daemon']):
+elif arg and name == 'freevo' and not (arg in ['-force-fs', '-daemon', '-c']):
     # ok, don't know about that arg, freevo should be started, but
     # it's also no freevo arg
     print 'unknown command line option: %s' % sys.argv[1:]
@@ -304,12 +304,12 @@ if name != 'freevo':
 if arg and name == 'freevo' and arg == '-daemon':
     name = 'daemon'
 
-if getpid(name, [ 'python' ] + proc)[1] and check:
-    if name != 'freevo':
-        print '%s still running, run \'freevo %s stop\' to stop' % (name, name)
-    else:
-        print 'freevo still running, run \'freevo stop\' to stop'
-    sys.exit(0)
+# if getpid(name, [ 'python' ] + proc)[1] and check:
+#     if name != 'freevo':
+#         print '%s still running, run \'freevo %s stop\' to stop' % (name, name)
+#     else:
+#         print 'freevo still running, run \'freevo stop\' to stop'
+#     sys.exit(0)
 
 if len(proc) and not os.path.isfile(proc[0]):
     print 'Error: unable to start \'%s\'' % proc[0]

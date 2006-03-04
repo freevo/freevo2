@@ -33,6 +33,7 @@
 #
 # -----------------------------------------------------------------------------
 
+import sys
 import freevo.conf
 
 def print_config_changes(conf_version, file_version, changelist):
@@ -99,8 +100,19 @@ else:
 #
 # Search for local_conf.py:
 #
+
+has_config = False
+for a in sys.argv:
+    if has_config == True:
+        has_config = a
+    if a == '-c':
+        has_config = True
+    
 for dirname in cfgfilepath:
-    overridefile = dirname + '/local_conf.py'
+    if isinstance(has_config, str):
+        overridefile = has_config
+    else:
+        overridefile = dirname + '/local_conf.py'
     if os.path.isfile(overridefile):
         log.info('Loading cfg overrides: %s' % overridefile)
         execfile(overridefile, globals(), locals())
