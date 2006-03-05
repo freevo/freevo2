@@ -44,6 +44,7 @@
 
 
 import time
+import kaa.notifier
 
 # freevo core imports
 import freevo.ipc
@@ -56,7 +57,7 @@ from menu import Item, ActionItem, Menu
 
 import tvguide
 from directory import DirItem
-from gui.windows import MessageBox
+from gui.windows import MessageBox, WaitBox
 
 import logging
 log = logging.getLogger('tv')
@@ -73,6 +74,39 @@ class Info(Item):
         return Info.__getitem__(self, key)
 
 
+class EPGUpdate(ActionItem):
+
+    def __init__(self, parent):
+        ActionItem.__init__(self, 'Update TV Guide', parent, self.update,
+                            description='Update TV Guide information')
+        self.msg = None
+        self.child = None
+
+
+    def debug(self, line):
+        log.debug(line)
+
+        
+    def completed(self, code):
+        self.msg.destroy()
+        self.msg = None
+        self.child = None
+        print code
+
+        
+    def update(self):
+        if self.msg or self.child:
+            return
+        self.msg = WaitBox('Updating Guide, please wait')
+        self.msg.show()
+        self.child = kaa.notifier.Process(['freevo', 'tv_grab'])
+        self.child.signals['stdout'].connect(self.debug)
+        self.child.signals['stderr'].connect(self.debug)
+        self.child.signals['completed'].connect(self.completed)
+        self.child.start()
+        
+
+        
 class TVMenu(MainMenuItem):
     """
     The tv main menu
@@ -93,6 +127,8 @@ class TVMenu(MainMenuItem):
         items.append(DirItem(config.TV_RECORD_DIR, None,
                              name = _('Recorded Shows'),
                              display_type='tv'))
+
+        items.append(EPGUpdate(None))
 
         # XXX: these are becomming plugins
         # items.append(menu.MenuItem(_('Search Guide'),
