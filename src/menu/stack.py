@@ -39,7 +39,7 @@ __all__ = [ 'MenuStack' ]
 import logging
 
 # kaa imports
-from kaa.base import weakref
+from kaa import weakref
 
 # freevo imports
 import config

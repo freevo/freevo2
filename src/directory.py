@@ -37,7 +37,7 @@ import logging
 import time
 
 # kaa imports
-import kaa.base
+import kaa
 import kaa.notifier
 
 # freevo imports
@@ -784,7 +784,7 @@ class DirItem(Playlist):
             item_menu.autoselect = self.DIRECTORY_AUTOPLAY_SINGLE_ITEM
             self.pushmenu(item_menu)
 
-            self.item_menu = kaa.base.weakref(item_menu)
+            self.item_menu = kaa.weakref(item_menu)
             callback = kaa.notifier.Callback(self.browse, True)
             mediadb.watcher.cwd(listing, callback)
 

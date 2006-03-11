@@ -52,7 +52,7 @@ log = logging.getLogger('gui')
 # freevo imports
 import config
 import util.cache
-from kaa.base.weakref import weakref
+from kaa.weakref import weakref
 
 # gui imports
 import gui
