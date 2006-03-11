@@ -90,10 +90,7 @@ try:
         raise ImportError('No module named pyxml')
 
     # now load other modules to check if all requirements are installed
-    try:
-        import pysqlite2
-    except ImportError:
-        import sqlite
+    import pysqlite2
 
     import config
     if config.GUI_DISPLAY == 'SDL':
