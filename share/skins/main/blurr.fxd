@@ -310,6 +310,10 @@
                         <text font="info value"> Items</text>
                         <newline/>
                     </if>
+		    <if expression="content">
+			<text font="info value" expression="content" 
+			    height="max" mode="soft"/>
+		    </if>
                 </item>
                 
                 <item type="audio">
