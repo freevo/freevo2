@@ -36,7 +36,7 @@ import gc
 import logging
 
 # kaa imports
-from kaa import weakref
+from kaa.weakref import weakref
 
 # menu imports
 from item import Item

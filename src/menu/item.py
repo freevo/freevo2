@@ -40,7 +40,7 @@ import logging
 import copy
 
 # kaa imports
-from kaa import weakref
+from kaa.weakref import weakref
 
 # freevo imports
 import plugin
