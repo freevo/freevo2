@@ -40,7 +40,6 @@ __all__ = [ 'TvlistingArea' ]
 
 import copy
 import os
-import kaa.epg
 import gui.imagelib
 import math
 import time
@@ -48,6 +47,7 @@ import config
 
 # freevo core imports
 import freevo.ipc
+from freevo.ipc.epg import connect as guide, cmp_channel
 
 from area import Area
 from gui.widgets import Rectangle
@@ -82,6 +82,15 @@ class TvlistingArea(Area):
         self.last_items_geometry = None
         self.last_start_time = 0
         self.last_channels = None
+
+        # TODO: it is ugly keeping a list of channels everywhere
+        #       it may be best to handle this in the guide object or
+        #       in the freevo epg module (there we can use config items
+        #       to determine sort order.
+        self.channels = guide().get_channels()
+        self.channels.sort(lambda a, b: cmp(a.name, b.name))
+        self.channels.sort(lambda a, b: cmp_channel(a, b))
+
 
         # objects on the area
         self.chan_obj   = []
@@ -247,13 +256,13 @@ class TvlistingArea(Area):
 
             channel_logo = None
 
-            channel_logo = config.TV_LOGOS + '/' + channel.id + '.png'
+            channel_logo = config.TV_LOGOS + '/' + channel.name + '.png'
             if os.path.isfile(channel_logo):
                 img = gui.imagelib.load(channel_logo, (None, None))
                 i = self.drawimage(img, (logo_geo[0], logo_geo[1]))
                 self.chan_obj.append(i)
             else:
-                self.chan_obj.append(self.drawstring(channel.title,
+                self.chan_obj.append(self.drawstring(channel.name,
                                                      label_val.font,
                                                      settings, x=tx0, y=ty0,
                                                      width=r.width+2*r.x,
@@ -379,8 +388,8 @@ class TvlistingArea(Area):
 
         # get selected program and channel list:
         selected_prog = menu.selected
-        start_channel = kaa.epg.channels.index(menu.channel)/num_rows*num_rows
-        channel_list  = kaa.epg.channels[start_channel:start_channel+num_rows]
+        start_channel = self.channels.index(menu.channel)/num_rows*num_rows
+        channel_list  = self.channels[start_channel:start_channel+num_rows]
 
         # draw the channel list
         if self.last_channels != channel_list:
@@ -394,7 +403,9 @@ class TvlistingArea(Area):
 
         for channel in channel_list:
             try:
-                for prg in channel[start_time:stop_time]:
+                #for prg in channel[start_time:stop_time]:
+                for prg in guide().search(channel=channel, 
+                                          time=(start_time, stop_time)):
                     flag_left   = 0
                     flag_right  = 0
 
@@ -418,7 +429,7 @@ class TvlistingArea(Area):
                     if prg == selected_prog:
                         val = selected_val
                     else:
-                        rs = tvserver.recordings.get(prg.channel.id, prg.start,
+                        rs = tvserver.recordings.get(prg.channel.name, prg.start,
                                                      prg.stop)
                         if rs and rs.status in (tvserver.SCHEDULED, tvserver.RECORDING,
                                                 tvserver.SAVED):
@@ -480,7 +491,7 @@ class TvlistingArea(Area):
             self.up_arrow.unparent()
             self.up_arrow = None
 
-        if len(kaa.epg.channels) >= start_channel+num_rows and \
+        if len(self.channels) >= start_channel+num_rows and \
                settings.images['downarrow']:
             if not self.down_arrow:
                 # down arrow needed

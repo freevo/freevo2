@@ -34,9 +34,8 @@ import os
 import time
 import logging
 
-import kaa.epg
-
 # freevo imports
+from freevo.ipc.epg import connect as guide, cmp_channel
 import gui
 import gui.areas
 
@@ -70,6 +69,39 @@ class TVGuide(MenuApplication):
     def __init__(self):
         MenuApplication.__init__(self, 'tvguide', 'tvmenu', False)
         self.item = None
+        self.channel_index = 0
+
+    def get_channel(self, offset=0):
+        co = self.channel_index + offset
+        channels = guide().get_channels()
+
+        # idea: make a guide().sort_channels() or something internal to the guide
+        #       so we get sorted channels when guide loads its data
+        channels.sort(lambda a, b: cmp(a.name, b.name))
+        channels.sort(lambda a, b: cmp_channel(a, b))
+
+        if co < 0:
+            co = len(channels)-1+co
+        elif co > len(channels)-1:
+            co = co-len(channels)-1
+
+        return channels[co]
+
+    def get_program(self, time=None):
+        """
+        return a program object based on time and the current channel.
+        """
+        # TODO: keep a cache of program objects for the current guide view
+        #       unless this happens to be fast enough
+
+        if not time:
+            time = self.current_time
+
+        log.debug('channel: %s', self.channel)
+        p = guide().search(channel=self.channel, time=time)[0]
+        # time = (time.time(), time.time()+7200)
+        #p = guide().search(channel=self.channel)[0]
+        return p
 
     def start(self, parent):
         self.engine = gui.areas.Handler('tv', ('screen', 'title', 'subtitle',
@@ -81,10 +113,10 @@ class TVGuide(MenuApplication):
         self.current_time = int(time.time())
 
         # current channel is the first one
-        self.channel  = kaa.epg.channels[0]
+        self.channel  = self.get_channel()
 
         # current program is the current running
-        self.selected = ProgramItem(self.channel[self.current_time], self.item)
+        self.selected = ProgramItem(self.get_program(), self.item)
 
         return True
     
@@ -93,8 +125,7 @@ class TVGuide(MenuApplication):
         """
         show the guide
         """
-        self.channel = kaa.epg.get_channel()
-        self.selected = ProgramItem(self.channel[self.current_time], self.item)
+        self.selected = ProgramItem(self.get_program(), self.item)
         self.refresh()
         MenuApplication.show(self)
         
@@ -114,21 +145,19 @@ class TVGuide(MenuApplication):
             return True
             
         if event == MENU_UP:
-            self.channel = kaa.epg.get_channel(self.channel, -1)
-            self.selected = ProgramItem(self.channel[self.current_time],
-                                        self.item)
+            self.channel  = self.get_channel(-1)
+            self.selected = ProgramItem(self.get_program(), self.item)
             self.refresh()
             return True
 
         if event == MENU_DOWN:
-            self.channel = kaa.epg.get_channel(self.channel, 1)
-            self.selected = ProgramItem(self.channel[self.current_time],
-                                        self.item)
+            self.channel  = self.get_channel(1)
+            self.selected = ProgramItem(self.get_program(), self.item)
             self.refresh()
             return True
 
         if event == MENU_LEFT:
-            epg_prog = self.channel[self.selected.program.start - 1]
+            epg_prog = self.get_program(self.selected.program.start - 1)
             self.selected = ProgramItem(epg_prog, self.item)
             if self.selected.start > 0:
                 self.current_time = self.selected.start + 1
@@ -136,7 +165,7 @@ class TVGuide(MenuApplication):
             return True
 
         if event == MENU_RIGHT:
-            epg_prog = self.channel[self.selected.program.stop+1]
+            epg_prog = self.get_program(self.selected.program.start + 1)
             self.selected = ProgramItem(epg_prog, self.item)
             if self.selected.start > 0:
                 self.current_time = self.selected.start + 1
@@ -144,16 +173,14 @@ class TVGuide(MenuApplication):
             return True
 
         if event == MENU_PAGEUP:
-            self.channel = kaa.epg.get_channel(self.channel, -9)
-            self.selected = ProgramItem(self.channel[self.current_time],
-                                        self.item)
+            self.channel = self.get_channel(-9)
+            self.selected = ProgramItem(self.get_program(), self.item)
             self.refresh()
             return True
 
         if event == MENU_PAGEDOWN:
-            self.channel = kaa.epg.get_channel(self.channel, 9)
-            self.selected = ProgramItem(self.channel[self.current_time],
-                                        self.item)
+            self.channel = self.get_channel(9)
+            self.selected = ProgramItem(self.get_program(), self.item)
             self.refresh()
             return True
 

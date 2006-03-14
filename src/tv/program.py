@@ -33,10 +33,13 @@
 
 # python imports
 import time
-import kaa.epg
+
+# kaa imports
+import kaa.epg2
 
 # freevo core imports
 import freevo.ipc
+from freevo.ipc.epg import connect as guide
 
 # freevo imports
 import config
@@ -63,17 +66,17 @@ class ProgramItem(Item):
         self.stop  = program.stop
 
         self.channel = program.channel
-        self.prog_id = program.id
+        self.prog_id = program.db_id
         self.subtitle = program.subtitle
         self.description = program.description
         self.episode = program.episode
         
-        self.scheduled = tvserver.recordings.get(program.channel.id,
+        self.scheduled = tvserver.recordings.get(program.channel.name,
                                         program.start, program.stop)
 
-        # TODO: add category support (from epgdb)
+        # TODO: add category support
         self.categories = ''
-        # TODO: add ratings support (from epgdb)
+        # TODO: add ratings support
         self.ratings = ''
 
 
@@ -100,13 +103,13 @@ class ProgramItem(Item):
         """
         compare function, return 0 if the objects are identical, 1 otherwise
         """
-        if not isinstance(other, (ProgramItem, kaa.epg.Program)):
+        if not isinstance(other, (ProgramItem, kaa.epg2.Program)):
             return 1
 
-        return Unicode(self.title) != Unicode(other.title) or \
+        return self.title != other.title or \
                self.start != other.start or \
                self.stop  != other.stop or \
-               Unicode(self.channel) != Unicode(other.channel)
+               self.channel != other.channel
 
 
     def __getitem__(self, key):
@@ -198,9 +201,8 @@ class ProgramItem(Item):
 
     def channel_details(self):
         items = []
-        for prog in self.channel[time.time():]:
-            if not prog.id == -1:
-                items.append(ProgramItem(prog, self))
+        for prog in guide().search(channel=self.channel):
+            items.append(ProgramItem(prog, self))
         cmenu = Menu(self.channel.name, items, item_types = 'tv program menu')
         # FIXME: the percent values need to be calculated
         # cmenu.table = (15, 15, 70)
