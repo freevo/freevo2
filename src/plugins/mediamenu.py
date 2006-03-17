@@ -36,7 +36,7 @@ import copy
 import logging
 
 # kaa imports
-from kaa import weakref
+from kaa.weakref import weakref
 
 # freevo imports
 import config
