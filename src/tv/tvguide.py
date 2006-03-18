@@ -31,8 +31,11 @@
 
 # python imports
 import os
+import sys
 import time
 import logging
+
+from kaa.epg.program import Program as EPGProgram
 
 # freevo imports
 from freevo.ipc.epg import connect as guide, cmp_channel
@@ -98,10 +101,30 @@ class TVGuide(MenuApplication):
             time = self.current_time
 
         log.debug('channel: %s', self.channel)
-        p = guide().search(channel=self.channel, time=time)[0]
-        # time = (time.time(), time.time()+7200)
-        #p = guide().search(channel=self.channel)[0]
-        return p
+        p = guide().search(channel=self.channel, time=time)
+        if p:
+            # one program found, return it
+            return p[0]
+        # Now we are in trouble, there is no program item. We need to create a fake
+        # one between the last stop and the next start time. This is very slow!!!
+        p = guide().search(channel=self.channel, time=(0, time))
+        p.sort(lambda x,y: cmp(x.start, y.start))
+        if p:
+            start = p[-1].stop
+        else:
+            start = 0
+
+        p = guide().search(channel=self.channel, time=(time, sys.maxint))
+        p.sort(lambda x,y: cmp(x.start, y.start))
+        if p:
+            stop = p[0].start
+        else:
+            stop = sys.maxint
+
+        prg = EPGProgram(self.channel, start, stop, _('No Program'), '')
+        prg.db_id = -1
+        return prg
+    
 
     def start(self, parent):
         self.engine = gui.areas.Handler('tv', ('screen', 'title', 'subtitle',
@@ -157,6 +180,8 @@ class TVGuide(MenuApplication):
             return True
 
         if event == MENU_LEFT:
+            if self.selected.start == 0:
+                return True
             epg_prog = self.get_program(self.selected.program.start - 1)
             self.selected = ProgramItem(epg_prog, self.item)
             if self.selected.start > 0:
@@ -165,9 +190,11 @@ class TVGuide(MenuApplication):
             return True
 
         if event == MENU_RIGHT:
+            if self.selected.stop == sys.maxint:
+                return True
             epg_prog = self.get_program(self.selected.program.stop + 1)
             self.selected = ProgramItem(epg_prog, self.item)
-            if self.selected.start > 0:
+            if self.selected.stop < sys.maxint:
                 self.current_time = self.selected.start + 1
             self.refresh()
             return True
