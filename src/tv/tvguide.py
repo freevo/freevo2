@@ -81,10 +81,10 @@ class TVGuide(MenuApplication):
         channels.sort(lambda a, b: cmp_channel(a, b))
 
         if co < 0:
-            co = len(channels)-1+co
+            co = len(channels)+co
         elif co > len(channels)-1:
-            co = co-len(channels)-1
-
+            co = co-len(channels)
+        self.channel_index = co
         return channels[co]
 
     def get_program(self, time=None):
@@ -165,7 +165,7 @@ class TVGuide(MenuApplication):
             return True
 
         if event == MENU_RIGHT:
-            epg_prog = self.get_program(self.selected.program.start + 1)
+            epg_prog = self.get_program(self.selected.program.stop + 1)
             self.selected = ProgramItem(epg_prog, self.item)
             if self.selected.start > 0:
                 self.current_time = self.selected.start + 1
@@ -173,12 +173,14 @@ class TVGuide(MenuApplication):
             return True
 
         if event == MENU_PAGEUP:
+            # FIXME: 9 is only a bad guess by Rob
             self.channel = self.get_channel(-9)
             self.selected = ProgramItem(self.get_program(), self.item)
             self.refresh()
             return True
 
         if event == MENU_PAGEDOWN:
+            # FIXME: 9 is only a bad guess by Rob
             self.channel = self.get_channel(9)
             self.selected = ProgramItem(self.get_program(), self.item)
             self.refresh()
