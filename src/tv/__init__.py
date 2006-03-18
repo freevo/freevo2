@@ -52,9 +52,6 @@ class PluginInterface(plugin.MainMenuPlugin):
 
         import config
         
-        # detect channels
-        config.detect('channels')
-
         # connect to tvserver using freevo.ipc
         mbus = freevo.ipc.Instance('freevo')
         mbus.connect('freevo.ipc.tvserver')
