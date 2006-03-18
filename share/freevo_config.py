@@ -113,83 +113,7 @@ FREEVO_CONF_CHANGES = [
      '''Changed xmame_SDL to just xmame'''), ]
 
 LOCAL_CONF_CHANGES = [
-    (5.00, '''
-    Changed some config variables. Use \'./freevo convert_config\' to
-    convert your local_conf.py to change the variable names
-    '''),
-    (5.01, '''
-    Add AUDIO_SHOW_VIDEOFILES to enable video files in the audio menu
-    '''),
-    (5.02, '''
-    Add XINE_ARGS_DEF to set xine arguments and GUI_BUSYICON_TIMER to show
-    a busy icon when the menu takes too much time building
-    '''),
-    (5.03, '''
-    Add UMASK to set umask for files in vfs
-    ''' ),
-    (5.04, '''
-    SKIN_XML_FILE set to nothing as default, SKIN_START_LAYOUT is removed.
-    When GUI_XML_FILE is not set, the skin will remember the last settings
-    '''),
-    (5.05, '''
-    Use MMPYTHON_CREATE_MD5_ID with current mmpython cvs to have a second
-    way to generate the disc ids in case they are not unique on your system
-    '''),
-    (5.06, '''
-    Add MEDIAINFO_USE_MEMORY. Setting this variable will keep all cache
-    files in memory. Startup will be slower, but for large directories, this
-    will speed up entering the dir
-    '''),
-    (5.07, '''
-    Add MENU_ARROW_NAVIGATION to change navigation style. New one is default
-    now. Also added GUI_FONT_PATH to search for fonts
-    '''),
-    (5.08, '''
-    Change MENU_ARROW_NAVIGATION to old style and make blurr the new default
-    skin. Also added RESTART_SYS_CMD, OSD_DIM_TEXT and
-    OSD_UPDATE_COMPLETE_REDRAW.
-    '''),
-    (5.09, '''
-    Add CACHE_IMAGES to turn off image caching. A new variable is
-    IMAGEVIEWER_BLEND_MODE to control the blending effect in the image viewer
-    '''),
-    (5.11, '''
-    Add IMAGEVIEWER_OSD to customize the osd and VIDEO_AUTOJOIN to auto join
-    movies with more than one file
-    '''),
-    (5.12, '''
-    Added TV_RECORD_SERVER_UID to set the uid for the recordserver and
-    TV_RECORDFILE_SUFFIX for the suffix. If your TV_RECORD_FILEMASK contains
-    the suffix, please remove it here
-    '''),
-    (5.13, '''
-    Added TV_RECORD_SERVER_GID to set the gid for the recordserver. If you
-    use TV_RECORD_SERVER_UID, the gui _must_ match one of the users gids
-    '''),
-    (5.14, '''
-    Add IMAGEVIEWER_DURATION for auto slideshows
-    ''' ),
-
-    (6.00, '''
-    Renamed all SKIN_* and OSD_* variables to GUI_*, removed the VideoGroups,
-    logic is now in TV_CHANNELS. Removed old not needed variables (please
-    check this file). The default audio device is now alsa not oss. 
-    Some record and tv variables changed (like padding). See this sections in
-    the freevo_config.py for details. Also add three mplayer filter
-    MPLAYER_RESAMPLE_AUDIO, MPLAYER_VF_INTERLACED, MPLAYER_VF_PROGRESSIVE.
-    ''' ),
-    (7.00, '''
-    Reworked the vfs/mediadb code. You should either start with a clean vfs
-    or run the cache helper to clean up the old stuff (you can stop the helper
-    when it starts to scan the directories). If you also want to use an older
-    version of freevo, you should create a new vfs for Freevo 2.0. To do so,
-    set vfs_dir = /path/to/vfs in your freevo.conf.
-    ''' ),
-    (8.00, '''
-    Reworked event handling. The Event class has no parameter arg anymore.
-    The args are now auto-detected based on the arguments of the init call.
-    So instead if using Event(FOO, arg=1), you now need to use Event(FOO, 1).
-    ''' )
+    (8.00, '''Major config changes for 2.0. Please check freevo_config.py''' )
     ]
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -407,41 +331,12 @@ plugin.activate('audio.detach', level=20, args=(True,))
 # plugin.activate('tv.tvtime')
 plugin.activate('tv.xine')
 
-# control an external tv tuner using irsend or another command
-# to use this you must reassign plugin_external_tuner in local_conf.py:
-# plugin_external_tuner = plugin.activate('tv.irsend_generic',
-#                                         args=('...', '...', ))
-# Please see each irsend plugin for individual arguments and be sure to
-# alter VIDEO_GROUPS to tell a VideoGroup to use it (tuner_type='external').
-plugin_external_tuner = 0
-
 # support for settings bookmarks (key RECORD) while playing. Also
 # auto bookmarking when playback is stopped
 plugin.activate('video.bookmarker', level=0)
 
 # show some messages on the screen
 plugin.activate('tiny_osd')
-
-#
-# Use ivtv_record instead if you have an ivtv based card (PVR-250/350)
-# and want freevo to do everthing for you.  To use you need to set the 
-# following two lines:
-#
-# plugin.remove('record.generic_record')
-# plugin.activate('record.ivtv_record')
-
-# TV menu plugin to view scheduled recordings
-# plugin.activate('tv.scheduled_recordings')
-
-# TV menu plugin to view and edit favorites
-# plugin.activate('tv.view_favorites')
-
-# TV menu plugin to manually schedule recordings
-# plugin.activate('tv.manual_record')
-
-#
-# Enable this for joystick support:
-# plugin.activate('joy')
 
 # control freevo over mbus
 plugin.activate('mbus')
@@ -886,26 +781,6 @@ LIRCRC = '/etc/freevo/lircrc'
 if os.path.exists('/dev/lircd'):
     plugin.activate('input.lirc')
     
-#
-# Set the Joy device to 0 to disable, 1 for js0, 2 for js1, etc...
-# Supports as many buttons as your controller has,
-# but make sure there is a corresponding entry in JOY_CMDS.
-# You will also need to plugin.activate('joy').
-# FYI: new kernels use /dev/input/jsX, but joy.py will fall back on /dev/jsX
-#
-JOY_DEV = 0
-JOY_CMDS = {
-    'up'             : 'UP',
-    'down'           : 'DOWN',
-    'left'           : 'LEFT',
-    'right'          : 'RIGHT',
-    'button 1'       : 'PLAY',
-    'button 2'       : 'PAUSE',
-    'button 3'       : 'STOP',
-    'button 4'       : 'ENTER',
-    }
-
-
 
 # ======================================================================
 # MPlayer settings:
@@ -1041,7 +916,6 @@ if XINE_COMMAND:
 if CONF.fbxine:
     plugin.activate('audio.xine')
 
-XINE_USE_VDR = 0
 
 # ======================================================================
 # Freevo TV settings:
@@ -1052,130 +926,9 @@ XINE_USE_VDR = 0
 #
 TV_RECORD_DIR = None
 
-#
-# Size (in MB) of the timeshift buffer. (ie: how long you can pause tv for.)  
-# This is set to a low default because the default buffer location is 
-# under FREEVO_CACHEDIR and we don't want to blow /var or /tmp.
-#
 TV_DATEFORMAT     = '%e-%b' # Day-Month: 11-Jun
 TV_TIMEFORMAT     = '%H:%M' # Hour-Minute 14:05
 TV_DATETIMEFORMAT = '%A %b %d %I:%M %p' # Thursday September 24 8:54 am
-
-#
-# TV Channels. This list contains a mapping from the displayed channel name
-# to the actual channel name as used by the TV watching application.
-# The display name must match the names from the XMLTV guide,
-# and the TV channel name must be what the tuner expects (usually a number).
-#
-# The TV menu is supposed to be supported by the XMLTV application for
-# up to date listings, but can be used without it to just display
-# the available channels.
-#
-# Format: [('xmltv channel id', 'freevo display name', 'tv channel name'), ...]
-#
-# If this variable is set to None (default), Freevo will try to auto-detect
-# the channel list based on the xmltv file. This doesn't work for all
-# xmltv grabber, e.g. the German list doesn't contain station lists. In this
-# case Freevo will output the possible list for you to add them manually.
-#
-# If auto-detection doesn't work or you want to edit the list, run
-# freevo tv_grab -query.
-#
-# If you don't have a tv card, you may also want to add plugin.remove('tv') to
-# remove the whole tv menu.
-#
-# All channels listed here will be displayed on the TV menu, even if they're
-# not present in the XMLTV listing.
-# 
-# The TV_CHANNELS-list can look like this:
-#
-# TV_CHANNELS = [('21', 'SVT1',              'E5'),
-#                ('22', 'SVT2',              'E3'),
-#                ('26', 'TV3',               'E10'),
-#                ('27', 'TV4',               'E6'),
-#                ('10', 'Kanal 5',           'E7'),
-#                ('14', 'MTV Europe',        'E11') ]
-#
-TV_CHANNELS = []
-
-#
-# If you would like to change the display format of your channels and prefer
-# not to list your entire TV_CHANNELS then you can apply rules using 
-# TV_CHANNELS_DISPLAY_FORMAT.  This defaults to the plain name of the channel
-# in order to not mess with TV_CHANNELS. 
-# Valid keywords are:
-#     %(id)s
-#     %(tunerid)s
-#     %(name)s
-# For example, if you prefer to see the channel number with the name you 
-# could use '%(tunerid)s %(name)s'.
-#
-TV_CHANNELS_DISPLAY_FORMAT = '%(name)s'
-
-#
-# Sometimes we can't control the contents of our XMLTV file and it may contain
-# channels we don't want.  Here you can specify a list of channel_id values
-# to explicitly remove from Freevo.
-#
-TV_CHANNELS_EXCLUDE = []
-
-#
-# Program to grab xmltv listings. To get a grabber, you need to download
-# xmltv. A possible value for users in the USA is tv_grab_na
-# Use the tv_grab helper to grab the listings and cache them. Start
-# 'freevo tv_grab --help' for more informations.
-#
-XMLTV_GRABBER = ''
-
-#
-# If you want to run tv_sort on your listings add the path to tv_sort here.
-# tv_sort will make sure all your programs have proper stop times, otherwise
-# programs might get cut off at midnight.
-#
-XMLTV_SORT = ''
-
-#
-# Number of days the grabber should get
-#
-XMLTV_DAYS = 3
-
-
-# ======================================================================
-# VDR settings for Freevo plugins and programs that interface to VDR.
-# You can read about VDR at http://www.cadsoft.de/vdr/.
-# ======================================================================
-
-#
-# The directory where the VDR config files can be found.
-#
-VDR_DIR = '/video'
-
-#
-# If VDR is on another host, which one.
-#
-VDR_HOST = 'localhost'
-
-#
-# The port (SVDRP) it is listening on.
-#
-VDR_PORT = 2001
-
-#
-# The EPG filename.
-#
-VDR_EPG = 'epg.data'
-
-#
-# The configuration file for VDR channels.
-#
-VDR_CHANNELS = 'channels.conf'
-
-#
-# The property of a channel we are going to access it with.  The options here
-# are 'name', 'sid', and 'rid'.
-#
-VDR_ACCESS_ID = 'sid'
-
 
 # ======================================================================
 # Internal stuff, you shouldn't change anything here unless you know
@@ -1187,17 +940,6 @@ VDR_ACCESS_ID = 'sid'
 # the regexp has to be with ([0-9]|[0-9][0-9]) so we can get the numbers
 #
 VIDEO_SHOW_REGEXP = "s?([0-9]|[0-9][0-9])[xe]([0-9]|[0-9][0-9])[^0-9]"
-
-#
-# XMLTV File
-#
-# This is the XMLTV file that can be optionally used for TV listings
-#
-# FIXME: OS_CACHEDIR is gone
-if os.uname()[0] == 'FreeBSD':
-    XMLTV_FILE = OS_CACHEDIR + '/xmltv/TV.xml'
-else:
-    XMLTV_FILE = '/tmp/TV.xml'
 
 #
 # XML TV Logo Location
@@ -1218,4 +960,3 @@ else:
 # catch errors
 #
 FREEVO_EVENTHANDLER_SANDBOX = 1
-
