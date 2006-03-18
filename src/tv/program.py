@@ -35,7 +35,7 @@
 import time
 
 # kaa imports
-import kaa.epg2
+import kaa.epg
 
 # freevo core imports
 import freevo.ipc
@@ -103,7 +103,7 @@ class ProgramItem(Item):
         """
         compare function, return 0 if the objects are identical, 1 otherwise
         """
-        if not isinstance(other, (ProgramItem, kaa.epg2.Program)):
+        if not isinstance(other, (ProgramItem, kaa.epg.Program)):
             return 1
 
         return self.title != other.title or \
