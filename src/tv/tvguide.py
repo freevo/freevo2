@@ -39,7 +39,6 @@ import kaa.epg
 
 # freevo core imports
 import freevo.ipc
-from freevo.ipc.epg import cmp_channel
 
 # freevo imports
 import gui
@@ -78,10 +77,7 @@ class TVGuide(MenuApplication):
 
     def get_channel(self, offset=0):
         co = self.channel_index + offset
-        channels = kaa.epg.get_channels()
-
-        channels.sort(lambda a, b: cmp(a.name, b.name))
-        channels.sort(lambda a, b: cmp_channel(a, b))
+        channels = kaa.epg.get_channels(sort=True)
 
         if co < 0:
             co = len(channels)+co

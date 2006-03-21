@@ -45,9 +45,11 @@ import math
 import time
 import config
 
+# kaa imports
+import kaa.epg
+
 # freevo core imports
 import freevo.ipc
-from freevo.ipc.epg import cmp_channel
 
 from area import Area
 from gui.widgets import Rectangle
@@ -76,8 +78,6 @@ class TvlistingArea(Area):
     """
 
     def __init__(self):
-        # get tvserver interface
-        tvserver = freevo.ipc.Instance('freevo').tvserver
 
         Area.__init__(self, 'listing')
         self.last_choices = ( None, None )
@@ -90,10 +90,7 @@ class TvlistingArea(Area):
         #       it may be best to handle this in the guide object or
         #       in the freevo epg module (there we can use config items
         #       to determine sort order.
-        self.channels = tvserver.epg.get_channels()
-        self.channels.sort(lambda a, b: cmp(a.name, b.name))
-        self.channels.sort(lambda a, b: cmp_channel(a, b))
-
+        self.channels = kaa.epg.get_channels(sort=True)
 
         # objects on the area
         self.chan_obj   = []
@@ -407,8 +404,8 @@ class TvlistingArea(Area):
         for channel in channel_list:
             try:
                 #for prg in channel[start_time:stop_time]:
-                for prg in tvserver.epg.search(channel=channel, 
-                                               time=(start_time, stop_time)):
+                for prg in kaa.epg.search(channel=channel, 
+                                          time=(start_time, stop_time)):
                     flag_left   = 0
                     flag_right  = 0
 
