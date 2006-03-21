@@ -35,10 +35,13 @@ import sys
 import time
 import logging
 
-from kaa.epg.program import Program as EPGProgram
+import kaa.epg
+
+# freevo core imports
+import freevo.ipc
+from freevo.ipc.epg import cmp_channel
 
 # freevo imports
-from freevo.ipc.epg import connect as guide, cmp_channel
 import gui
 import gui.areas
 
@@ -51,7 +54,6 @@ from program import ProgramItem
 log = logging.getLogger('tv')
 
 _guide = None
-
 
 def get_singleton():
     """
@@ -76,10 +78,8 @@ class TVGuide(MenuApplication):
 
     def get_channel(self, offset=0):
         co = self.channel_index + offset
-        channels = guide().get_channels()
+        channels = kaa.epg.get_channels()
 
-        # idea: make a guide().sort_channels() or something internal to the guide
-        #       so we get sorted channels when guide loads its data
         channels.sort(lambda a, b: cmp(a.name, b.name))
         channels.sort(lambda a, b: cmp_channel(a, b))
 
@@ -101,27 +101,27 @@ class TVGuide(MenuApplication):
             time = self.current_time
 
         log.debug('channel: %s', self.channel)
-        p = guide().search(channel=self.channel, time=time)
+        p = kaa.epg.search(channel=self.channel, time=time)
         if p:
             # one program found, return it
             return p[0]
         # Now we are in trouble, there is no program item. We need to create a fake
         # one between the last stop and the next start time. This is very slow!!!
-        p = guide().search(channel=self.channel, time=(0, time))
+        p = kaa.epg.search(channel=self.channel, time=(0, time))
         p.sort(lambda x,y: cmp(x.start, y.start))
         if p:
             start = p[-1].stop
         else:
             start = 0
 
-        p = guide().search(channel=self.channel, time=(time, sys.maxint))
+        p = kaa.epg.search(channel=self.channel, time=(time, sys.maxint))
         p.sort(lambda x,y: cmp(x.start, y.start))
         if p:
             stop = p[0].start
         else:
             stop = sys.maxint
 
-        prg = EPGProgram(self.channel, start, stop, _('No Program'), '')
+        prg = kaa.epg.Program(self.channel, start, stop, _('No Program'), '')
         prg.db_id = -1
         return prg
     

@@ -39,7 +39,6 @@ import kaa.epg
 
 # freevo core imports
 import freevo.ipc
-from freevo.ipc.epg import connect as guide
 
 # freevo imports
 import config
@@ -201,7 +200,7 @@ class ProgramItem(Item):
 
     def channel_details(self):
         items = []
-        for prog in guide().search(channel=self.channel):
+        for prog in kaa.epg.search(channel=self.channel):
             items.append(ProgramItem(prog, self))
         cmenu = Menu(self.channel.name, items, item_types = 'tv program menu')
         # FIXME: the percent values need to be calculated
