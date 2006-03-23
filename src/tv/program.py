@@ -65,7 +65,6 @@ class ProgramItem(Item):
         self.stop  = program.stop
 
         self.channel = program.channel
-        self.prog_id = program.db_id
         self.subtitle = program.subtitle
         self.description = program.description
         self.episode = program.episode
@@ -128,6 +127,7 @@ class ProgramItem(Item):
             return self['start'] + u' - ' + self['stop']
         if key == 'channel':
             return self.channel.name
+
         return Item.__getitem__(self, key)
 
 
