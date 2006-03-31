@@ -45,7 +45,6 @@ class PluginInterface(IdleBarPlugin):
         IdleBarPlugin.__init__(self)
         self.image  = image
         self.file   = file
-        self.object = None
 
 
     def draw(self, width, height):
