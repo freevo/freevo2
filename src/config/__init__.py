@@ -217,15 +217,21 @@ for type in ('video', 'audio', 'image', 'games'):
     elif type == 'games':
         abs = []
         for d in x:
-            pos = d[1].find(':')
-            if pos == -1:
-                abs.append((d[0], os.path.abspath(d[1]), d[2]))
-            else:
-                if pos > d[1].find('/'):                        
-                    abs.append((d[0], os.path.abspath(d[1]), d[2]))
+            dirs = []
+
+            for p in d[2]:
+                pos = p.find(':')
+
+                if pos == -1:
+                    dirs.append(os.path.abspath(p))
                 else:
-                    abs.append((d[0], d[1][0:pos+1] + \
-                                os.path.abspath(d[1][pos+1:]), d[2]))
+                    if pos > p.find('/'):
+                        dirs.append(os.path.abspath(p))
+                    else:
+                        dirs.append(p[0:pos + 1] + os.path.abspath(p[pos + 1:]))
+
+            abs.append(( d[0], d[1], dirs, d[3], d[4], d[5] ))
+
         exec ('%s = abs' % n)
     else:
         # The algorithm doesn't work for GAMES_ITEMS, so we leave it out

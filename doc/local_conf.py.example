@@ -190,7 +190,7 @@ CACHE_IMAGES = 1
 
 #
 # Enable this for joystick support:
-# plugin.activate('joy')
+# plugin.activate('input.joystick')
 
 # ======================================================================
 # Freevo directory settings:
@@ -408,45 +408,91 @@ IMAGEVIEWER_BLEND_MODE = -1
 # Freevo games settings:
 # ======================================================================
 
+# YET ANOTHER NEW GAMES SYSTEM : (as of Freevo 2)
+# ==============================
 #
-# MAME is an emulator for old arcade video games. It supports almost
-# 2000 different games! The actual emulator is not included in Freevo,
-# you'll need to download and install it separately. The main MAME
-# website is at http://www.mame.net, but the version that is used here
-# is at http://x.mame.net since the regular MAME is for Windows.
+# The GAMES_ITEMS structure is now built as follows :
 #
-# SNES stands for Super Nintendo Entertainment System. Freevo relies
-# on other programs that are not included in Freevo to play these games.
-# 
-# NEW GAMES SYSTEM :
-# =================
-# The GAMES_ITEMS structure is now build as follows :
-# <NAME>, <FOLDER>, (<TYPE>, <COMMAND_PATH>, <COMMAND_ARGS>, <IMAGE_PATH>, \
-# [<FILE_SUFFIX_FOR_GENERIC>])
+# ( <TYPE>, <LISTING NAME>, ( <ROMPATH1>, <ROMPATH2>, . . . <ROMPATHx> ),
+#   [ ( <EMU1_ID>, <EXECUTABLE>, <EMU1_ARGS> ),
+#     ( <EMU2_ID>, <EXECUTABLE>, <EMU2_ARGS> ),
+#     ( <EMUx_ID>, <EXECUTABLE>, <EMUx_ARGS> ) ],
+#   <SCREENSHOTS>, [ <EXT1>, <EXT2>, <EXTx> ] )
+#
 # where :
-#              - <TYPE> : Internal game types (MAME or SNES) or
-#                         generic one (GENERIC)
-#              - <COMMAND_PATH> : Emulator command
-#              - <COMMAND_ARGS> : Arguments for the emulator
-#              - <IMAGE_PATH>   : Optionnal path to the picture
-#              - <FILE_SUFFIX_FOR_GENERIC> : If the folder use the GENERIC
-#                                            type, then you must specify here
-#                                        the file suffix used by the emulator
-# GAMES_ITEMS = [ ('MAME', '/home/media/games/xmame/roms',     
-#                ('MAME', '/usr/local/bin/xmame.SDL', '-fullscreen -modenumber 6', 
-#                 '/home/media/games/xmame/shots', None)),
-#               ('SUPER NINTENDO', '/home/media/games/snes/roms', 
-#                ('SNES', '/usr/local/bin/zsnes', '-m -r 3 -k 100 -cs -u', '', None )),
-#               ('Visual Boy Advance', '/home/media/games/vba/roms/',
-#                ('GENERIC', '/usr/local/vba/VisualBoyAdvance', ' ', '', [ 'gba' ] )),
-#               ('MEGADRIVE', '/home/media/games/megadrive/roms', 
-#                ('GENESIS', '/usr/local/bin/generator-svgalib', '', '', '' )) ]
+#              - <TYPE> : Internal known game types:
+#                         NES  - Nintendo Entertainment System
+#                         SNES - Super Nintendo
+#                         N64  - Nintendo 64
+#                         GB   - Gameboy handheld
+#                         GBC  - Gameboy Color handheld
+#                         GBA  - Gameboy Advance handheld
+#                         VBOY - Virtual Boy (or 'that which shall not be
+#                                spoken of' at Nintendo HQ)
+#                         SMS  - Sega Master System
+#                         SMD  - Sega Megadrive (Genesis)
+#                         SG1K - Sega SG-1000/SC-3000
+#                         GG   - Sega Game Gear handheld
+#                         PCE  - NEC PC-Engine (Turbografx-16)
+#                         SGX  - NEC Supergrafx
+#                         2600 - Atari 2600
+#                         5200 - Atari 5200
+#                         7800 - Atari 7800
+#                         JAG  - Atari Jaguar
+#                         LYNX - Atari Lynx handheld
+#                         USER - Formerly GENERIC.  For user specified entries
+#              - <LISTING NAME> : What will be shown for a USER entry
+#                                 in the main games menu.  Ignored for known
+#                                 game types.
+#              - <ROMPATH>      : A comma seperated list of all the directories
+#                                 where games of TYPE can be found.
+# *IMPORTANT*  - <EMU_ID>       : This is a completely arbitrary name the user
+#                                 specifies for each emulator/argument set.
+#                                 The games database will store this value as
+#                                 the reference to your preferred emulator and
+#                                 command line on a per-rom basis.  This allows
+#                                 you to update command line options and even
+#                                 change the emulator used while hopefully
+#                                 maintaining a desired ability to play certain
+#                                 games a certain way.  See the example below
+#                                 for an idea of how this could be useful.
+#                                 Each EMU_ID needs to be unique per TYPE.
+#                                 You could use LIGHTGUN as your EMU_ID for
+#                                 both NES and SMS, but not have two LIGHTGUN
+#                                 entries for NES.
+#              - <EXECUTABLE>   : Emulator command.  May contain the path or
+#                                 just the binary if its within your path.
+#              - <EMU_ARGS>     : Arguments for the emulator
+#              - <SCREENSHOTS>  : Path to a directory containing either
+#                                 individual game screenshots in png form,
+#                                 named the same as what the game appears as
+#                                 within the menu (with .png of course), or
+#                                 the path can point directly to a zipfile
+#                                 containing all the screenshots for <TYPE>.
+#              - <EXT>          : If this is a USER type definition, then you
+#                                 must specify the file suffix used by the
+#                                 valid roms you need to emulate
+#
+# GAMES_ITEMS = [
+#                 ( 'NES', None, ( '/shared/roms/NES', '/home/user/Nintendo' ),
+#                   [ ( 'DEFAULT', 'mednafen', '-fs 1 -nes.stretch 1' ),
+#                     ( 'LIGHTGUN', 'mednafen', '-nes.input1 zapper' ),
+#                     ( 'FCE', 'fceu', '-somefceopt' ),
+#                     ( 'FAKE', 'fakenes', '-fakenesopt1 -fakenesopt2' ) ],
+#                   '/shared/roms/NES/.screens', None ),
+#
+#                 ( 'USER', 'Wanderswan', ( '/shared/roms/WS' ),
+#                   [ ( 'DEFAULT', 'xe', '-ws 1' ) ], '/shared/roms/WS/screens.zip',
+#                   [ 'ws', 'bws' ] ),
+#
+#                 # Changing the shell scripts for most linux games from game-name
+#                 # to game-name.sh would allow something like this easily enough.
+#                 ( 'USER', 'Native Games', ( '/usr/games/bin' ),
+#                   [ ( 'DEFAULT', 'bash', '' ) ], '/usr/games/share/screenshots.zip',
+#                   [ 'sh' ] )
+#               ]
 #
 # GAMES_ITEMS = None
-
-#
-# These settings are used for the MAME arcade emulator:
-#
 
 # Priority of the game process
 # 0 = Don't change the priority
@@ -454,11 +500,6 @@ IMAGEVIEWER_BLEND_MODE = -1
 # <0 - Higher priority
 #
 # GAMES_NICE = -20
-
-# 
-# MAME cache directory
-#
-# GAMES_MAME_CACHE = '%s/romlist-%s.pickled' % (FREEVO_CACHEDIR, os.getuid())
 
 # ======================================================================
 # Freevo SKIN settings:

@@ -50,6 +50,7 @@ from mainmenu import MainMenuItem
 from menu import Menu, Item
 from mediadb import FileListing, watcher
 from gui.windows import ProgressBox
+from games import machine
 
 # get logging object
 log = logging.getLogger()
@@ -168,6 +169,14 @@ class MediaMenu(MainMenuItem):
                 if isinstance(item, (str, unicode)):
                     # only a filename is given
                     title, filename = u'', item
+                elif self.display_type == 'games':
+                    # has to be handled specially
+                    if item[0] is 'USER':
+                        title, filename = item[1], item[2][0]
+                    else:
+                        title, filename = machine.title(item[0]), item[2][0]
+
+                    add_args = item[3:]
                 else:
                     # title and filename are given
                     (title, filename) = item[:2]

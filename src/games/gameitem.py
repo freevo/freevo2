@@ -31,39 +31,50 @@
 #
 # -----------------------------------------------------------------------------
 from menu import MediaItem, Action
+import machine
+import config
+import logging
+
+log = logging.getLogger('games')
+
 
 class GameItem(MediaItem):
     """
     This is a virtual representation of the rom.
     """
-    def __init__(self, parent, url, system):
+    def __init__(self, parent, url, gi_ind, imgpath):
         MediaItem.__init__(self, parent, type='games')
         self.set_url(url)
         self.__emu = None
-        self.__sys = system
+        self.__ind = gi_ind
 
         # try to load a screen shot if it is available...
         try:
-            import kaa.imlib2, zipfile, os.path
-            (path, name) = (url.dirname, url.basename)
-            # TODO: Change hard coded mame path to a more general case...
-            # TODO: cache screen shots ?
-            snaps = zipfile.ZipFile(os.path.join(path, '../snap/snap.zip'))
-            shotname = name.split('.')[0] + '.png'
-            self.image = kaa.imlib2.open_from_memory(snaps.read(shotname))
+            import kaa.imlib2, zipfile
+
+            shot = url.basename.split('.')[0] + '.png'
+
+            if '.zip' in imgpath[-4:]:
+                zf = zipfile.ZipFile(imgpath)
+                self.image = kaa.imlib2.open_from_memory(zf.read(shot))
+            else:
+                self.image = imgpath + '/' + shot
         except:
-            pass
+            self.image = None
+
 
     def actions(self):
         items = [Action(_('Play'), self.play)]
         return items
 
+
     def play(self):
-        from factory import Factory
-        self.__emu = Factory().player(self)
+        self.__emu = machine.emu(self)
         self.__emu.launch(self)
 
-    def get_system(self):
-        return self.__sys
 
-    system = property(get_system, None)
+    def get_ind(self):
+        return self.__ind
+
+
+    gi_ind = property(get_ind, None)

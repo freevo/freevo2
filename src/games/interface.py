@@ -31,7 +31,12 @@
 # -----------------------------------------------------------------------------
 import plugin
 import config
+import machine
 from gameitem import GameItem
+
+import logging
+log = logging.getLogger('games')
+
 
 class PluginInterface(plugin.MimetypePlugin):
     """
@@ -41,42 +46,57 @@ class PluginInterface(plugin.MimetypePlugin):
         plugin.MimetypePlugin.__init__(self)
         self.display_type = [ 'games' ]
 
-        import logging
-        self.__log = logging.getLogger('games')
-
         # activate the mediamenu for video
         plugin.activate('mediamenu', level=plugin.is_active('games')[2],
                         args='games')
 
-    def suffix(self):
+
+    def suffix(self, ind):
         """
         the suffixes are specified in the config file.
         """
-        suf = []
-        for item in config.GAMES_ITEMS:
-            suf += item[2][4]
 
-        self.__log.debug('The supported suffixes are %s' % suf)
+        if config.GAMES_ITEMS[ind][0] is 'USER':
+          suf = config.GAMES_ITEMS[ind][5]
+        else:
+          suf = machine.ext(config.GAMES_ITEMS[ind][0])
+
+        log.debug('The supported suffixes are %s' % suf)
         return suf
+
 
     def get(self, parent, listing):
         items = []
 
-        self.__log.info('Adding %s to menu' % listing)
+        try:
+            file = listing.visible[0]
+        except:
+            log.warning("Empty directory")
+            return items
 
-        systemmarker = None
-        dirname = listing.dirname[:-1]
+        log.info('Adding %s to menu' % file.dirname)
+
+        systemmarker = imgpath = None
+        dirname = file.dirname
+        ind, done = 0, 0
+
         for item in config.GAMES_ITEMS:
-            if item[1] == dirname:
-                systemmarker = item[2][0]
+            for dir in item[2]:
+                if dir in dirname:
+                    systemmarker = item[0]
+                    imgpath = item[4]
+                    done = 1
+                    break
+            if done:
                 break
+            ind = ind + 1
 
-        all_files = listing.match_suffix(self.suffix())
+        all_files = listing.match_suffix(self.suffix(ind))
         all_files.sort(lambda l, o: cmp(l.basename.upper(),
                                         o.basename.upper()))
 
         for file in all_files:
             # TODO: Build snapshots of roms.
-            items.append(GameItem(parent, file, systemmarker))
+            items.append(GameItem(parent, file, ind, imgpath))
             
         return items
