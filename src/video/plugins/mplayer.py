@@ -413,7 +413,7 @@ class MPlayer(mplayer.Application):
                     return False
 
             if self.use_bmovl and not self.osd_visible:
-                if not self.osd_timer.active():
+                if not self.osd_timer.active() and self.area_handler:
                     self.area_handler.show()
                 self.osd_timer.start(2)
 
