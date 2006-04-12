@@ -95,3 +95,8 @@ class PluginInterface(plugin.Plugin):
         log.info('stop')
         STOP.post()
         return []
+
+    @freevo.ipc.expose('home-theatre.message')
+    def message(self, msg):
+        OSD_MESSAGE.post(msg)
+        return []
