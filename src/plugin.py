@@ -125,8 +125,7 @@ class ItemPlugin(Plugin):
 
     def actions(self, item):
         """
-        return a list of actions to that item. Each actions is a tuple
-        (function, 'name-in-the-menu')
+        return a list of actions to that item. Each action is type Action
         """
         return []
 
