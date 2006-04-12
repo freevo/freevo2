@@ -212,7 +212,7 @@ class PluginLoader(object):
         return self.types[type]
 
 
-    def getbyname(self, name, multiple_choises=0):
+    def getbyname(self, name, multiple_choises=False):
         """
         Get a plugin by it's name
         """
@@ -223,7 +223,7 @@ class PluginLoader(object):
         return None
 
 
-    def register(self, plugin, name, multiple_choises=0):
+    def register(self, plugin, name, multiple_choises=False):
         """
         Register an object as a named plugin
         """
