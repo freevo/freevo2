@@ -1,62 +1,20 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
-# time_osd.py - An osd for Freevo
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# osd.py - An osd for Freevo
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes:
-#   This plugin is an osd for freevo. It displays the message send by the
-#   event OSD_MESSAGE
+# This plugin is an osd for freevo. It displays the message send by the
+# event OSD_MESSAGE
 #
-#   This file should be called osd.py, but this conflicts with the global
-#   osd.py. This global file should be renamed, because it's no osd, it's
-#   a render engine
-#
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.24  2005/08/07 14:26:37  dischi
-# replace pyNotifier with kaa.notifier
-#
-# Revision 1.23  2005/07/22 19:30:24  dischi
-# fix event handling
-#
-# Revision 1.22  2005/06/09 19:43:54  dischi
-# clean up eventhandler usage
-#
-# Revision 1.21  2005/06/04 17:18:13  dischi
-# adjust to gui changes
-#
-# Revision 1.20  2005/05/05 17:34:00  dischi
-# adjust to new gui submodule imports
-#
-# Revision 1.19  2005/02/06 16:59:12  dischi
-# small bugfixes from Viggo Fredriksen
-#
-# Revision 1.18  2004/12/31 11:57:44  dischi
-# renamed SKIN_* and OSD_* variables to GUI_*
-#
-# Revision 1.17  2004/11/20 18:23:03  dischi
-# use python logger module for debug
-#
-# Revision 1.16  2004/10/08 20:19:35  dischi
-# register to OSD_MESSAGE only
-#
-# Revision 1.15  2004/10/06 19:24:02  dischi
-# switch from rc.py to pyNotifier
-#
-# Revision 1.14  2004/08/22 20:12:16  dischi
-# changes to new mevas based gui code
-#
-# Revision 1.13  2004/08/01 10:49:06  dischi
-# move to new gui code
-#
-# Revision 1.12  2004/07/24 12:23:39  dischi
-# deactivate plugin
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
-# Please see the file doc/CREDITS for a complete list of authors.
+# Copyright (C) 2002-2006 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dischi@freevo.org>
+# Maintainer:    Dirk Meyer <dischi@freevo.org>
+#
+# Please see the file AUTHORS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -72,7 +30,10 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
+
+# python imports
+import logging
 
 # kaa imports
 from kaa.notifier import OneShotTimer
@@ -86,8 +47,9 @@ import gui.theme
 
 from event import OSD_MESSAGE
 
-import logging
+# get logging object
 log = logging.getLogger()
+
 
 class PluginInterface(plugin.DaemonPlugin):
     """
@@ -96,7 +58,7 @@ class PluginInterface(plugin.DaemonPlugin):
     This plugin shows messages send from other parts of Freevo on
     the screen for 2 seconds.
 
-    activate with plugin.activate('plugin.tiny_osd')
+    activate with plugin.activate('plugin.osd')
     """
     def __init__(self):
         """

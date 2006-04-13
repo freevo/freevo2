@@ -336,7 +336,7 @@ plugin.activate('tv.xine')
 plugin.activate('video.bookmarker', level=0)
 
 # show some messages on the screen
-plugin.activate('tiny_osd')
+plugin.activate('osd')
 
 # control freevo over mbus
 plugin.activate('mbus')
