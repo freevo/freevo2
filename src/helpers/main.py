@@ -280,6 +280,9 @@ try:
     # start main loop
     kaa.notifier.loop()
 
+except SystemExit:
+    kaa.notifier.shutdown()
+
 except:
     log.exception('Crash!')
     kaa.notifier.shutdown()
