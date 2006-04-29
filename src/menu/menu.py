@@ -50,6 +50,8 @@ class Menu(object):
     the selected item or the internal choices directly, use 'select',
     'set_items' or 'change_item' to do this.
     """
+    next_id = 0
+
     def __init__(self, heading, choices=[], theme=None,
                  reload_func = None, item_types = None,
                  force_skin_layout = -1):
@@ -57,6 +59,14 @@ class Menu(object):
         self.heading = heading
         self.stack   = None
 
+        # unique id of the menu object
+        Menu.next_id += 1
+        self.id = Menu.next_id
+        # state, will increase on every item change
+        self.state = 0
+        # position in the menu stack
+        self.pos = -1
+        
         # set items
         self.choices = []
         self.selected = None
@@ -118,6 +128,9 @@ class Menu(object):
         Set/replace the items in this menu. If refresh is True, the menu
         stack will be refreshed and redrawn.
         """
+        # increase state variable
+        self.state += 1
+
         # delete ref to menu for old choices
         for c in self.choices:
             c.menu = None
@@ -207,6 +220,10 @@ class Menu(object):
         """
         Replace the item 'old' with the 'new'.
         """
+        # increase state variable
+        self.state += 1
+
+        # change item
         self.choices[self.choices.index(old)] = new
         if self.selected == old:
             self.select(new)

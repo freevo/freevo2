@@ -150,7 +150,10 @@ class MenuStack(object):
                 self.inside_menu = True
                 previous.inside_menu = True
 
+        # set menu.pos and append
+        menu.pos = len(self.menustack)
         self.menustack.append(menu)
+        
         # Check the new menu. Maybe we need to set 'inside_menu' if we
         # switch between MenuApplication(s) and also set a new theme
         # for the global Freevo look
