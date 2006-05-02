@@ -306,6 +306,12 @@ class MenuStack(object):
                 elif event == MENU_RIGHT:
                     event = MENU_PAGEDOWN
 
+        if isinstance(menu, Menu) and menu.rows == 1:
+            if event == MENU_LEFT:
+                event = MENU_UP
+            if event == MENU_RIGHT:
+                event = MENU_DOWN
+            
         if event == MENU_GOTO_MAINMENU:
             while len(self.menustack) > 1:
                 menu = self.menustack.pop()
