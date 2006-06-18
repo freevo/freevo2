@@ -226,6 +226,7 @@ IMAGE_ZOOM_EVENTS = {
     }
 
 GAMES_EVENTS = {
+    'EXIT'      : STOP,
     'STOP'      : STOP,
     'SELECT'    : STOP,
     'MENU'      : MENU,
