@@ -224,7 +224,7 @@ if arg in ('--help', '-h'):
     
 if arg == 'stop':
     # stop running freevo
-    if not stop(name, [ 'python' ] + proc):
+    if not stop(name, [ sys.executable ] + proc):
         print 'freevo not running'
     sys.exit(0)
     
@@ -268,7 +268,7 @@ elif arg and name == 'freevo' and not arg.startswith('-'):
     proc     = [ os.path.join(__site__, 'helpers', name + '.py') ]
     if len(sys.argv) >= 2:
         if len(sys.argv) > 2 and sys.argv[2] == 'stop':
-            if not stop(name, [ 'python' ] + proc):
+            if not stop(name, [ sys.executable ] + proc):
                 print '%s not running' % name
             sys.exit(0)
         if len(sys.argv) > 2 and sys.argv[2] == 'start':
@@ -304,7 +304,7 @@ if name != 'freevo':
 if arg and name == 'freevo' and arg == '-daemon':
     name = 'daemon'
 
-# if getpid(name, [ 'python' ] + proc)[1] and check:
+# if getpid(name, [ sys.executable ] + proc)[1] and check:
 #     if name != 'freevo':
 #         print '%s still running, run \'freevo %s stop\' to stop' % (name, name)
 #     else:
@@ -316,4 +316,4 @@ if len(proc) and not os.path.isfile(proc[0]):
     print 'Either the helper does not exist or you need to run \'make\' first'
     sys.exit(0)
 
-start(name, [ 'python' , '-OO' ] + proc , bg, check)
+start(name, [ sys.executable , '-OO' ] + proc , bg, check)
