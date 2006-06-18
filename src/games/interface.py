@@ -45,21 +45,22 @@ class PluginInterface(plugin.MimetypePlugin):
     def __init__(self):
         plugin.MimetypePlugin.__init__(self)
         self.display_type = [ 'games' ]
+        self.index = 0
 
         # activate the mediamenu for video
         plugin.activate('mediamenu', level=plugin.is_active('games')[2],
                         args='games')
 
 
-    def suffix(self, ind):
+    def suffix(self):
         """
         the suffixes are specified in the config file.
         """
 
-        if config.GAMES_ITEMS[ind][0] is 'USER':
-          suf = config.GAMES_ITEMS[ind][5]
+        if config.GAMES_ITEMS[self.index][0] is 'USER':
+          suf = config.GAMES_ITEMS[self.index][5]
         else:
-          suf = machine.ext(config.GAMES_ITEMS[ind][0])
+          suf = machine.ext(config.GAMES_ITEMS[self.index][0])
 
         log.debug('The supported suffixes are %s' % suf)
         return suf
@@ -67,6 +68,8 @@ class PluginInterface(plugin.MimetypePlugin):
 
     def get(self, parent, listing):
         items = []
+
+        log.info('PARENT %s' % parent)
 
         try:
             file = listing.visible[0]
@@ -78,7 +81,7 @@ class PluginInterface(plugin.MimetypePlugin):
 
         systemmarker = imgpath = None
         dirname = file.dirname
-        ind, done = 0, 0
+        self.index, done = 0, 0
 
         for item in config.GAMES_ITEMS:
             for dir in item[2]:
@@ -89,14 +92,14 @@ class PluginInterface(plugin.MimetypePlugin):
                     break
             if done:
                 break
-            ind = ind + 1
+            self.index = self.index + 1
 
-        all_files = listing.match_suffix(self.suffix(ind))
+        all_files = listing.match_suffix(self.suffix())
         all_files.sort(lambda l, o: cmp(l.basename.upper(),
                                         o.basename.upper()))
 
         for file in all_files:
             # TODO: Build snapshots of roms.
-            items.append(GameItem(parent, file, ind, imgpath))
+            items.append(GameItem(parent, file, self.index, imgpath))
             
         return items
