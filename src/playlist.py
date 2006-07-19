@@ -38,16 +38,17 @@ import re
 import copy
 import logging
 
+# kaa imports
+import kaa.beacon
+
 # freevo imports
 import config
 import util
 import plugin
-import mediadb
 import fxditem
 
 from event import *
 from menu import Action, Item, MediaItem, Menu
-from gui.windows import ProgressBox
 
 # get logging object
 log = logging.getLogger()
@@ -78,12 +79,11 @@ class Playlist(MediaItem):
         self.name     = Unicode(name)
 
         # variables only for Playlist
-        self.__current = None
-        self.__next    = None
         self.playlist     = playlist
         self.autoplay     = autoplay
         self.repeat       = repeat
         self.display_type = display_type
+        self.next_pos     = None
 
         self.suffixlist   = []
         self.get_plugins  = []
@@ -91,11 +91,18 @@ class Playlist(MediaItem):
         self.background_playlist = None
         self.random = random
 
+        # Listing stuff, this makes it look like a Menu to the listing
+        # widget. That needs to be cleaned up, e.g. make a List class and
+        # let the listing widget check for it.
+        self.state    = 0
+        self.selected = None
+        self.selected_pos = None
+
         if build:
             self.build()
         else:
             # create a basic info object
-            self.info = mediadb.item()
+            self.info = {}
 
 
     def read_m3u(self, plsname):
@@ -219,7 +226,6 @@ class Playlist(MediaItem):
             return
 
         playlist = self.playlist
-        self.playlist = []
 
         for p in plugin.mimetype(self.display_type):
             #if self.display_type in p.display_type:
@@ -229,33 +235,30 @@ class Playlist(MediaItem):
             self.suffixlist += p.suffix()
             self.get_plugins.append(p)
 
+        # playlist is a filename, load the file and create playlist
         if isinstance(playlist, (str, unicode)):
             self.set_url(playlist)
-            if self.info['playlist'] != None:
-                log.info('use cached playlist for %s' % playlist)
-                self.playlist = self.info['playlist']
-            else:
-                log.info('create playlist for %s' % playlist)
-                # it's a filename with a playlist
-                try:
-                    f=open(playlist, "r")
-                    line = f.readline()
-                    f.close
-                    if line.find("[playlist]") > -1:
-                        self.read_pls(playlist)
-                    elif line.find("[Slides]") > -1:
-                        self.read_ssr(playlist)
-                    else:
-                        self.read_m3u(playlist)
-                except (OSError, IOError), e:
-                    log.error('playlist error: %s' % e)
-                # store the playlist for later use
-                self.info.store_with_mtime('playlist', self.playlist)
-            return
+            log.info('create playlist for %s' % playlist)
+            self.playlist = []
+            # it's a filename with a playlist
+            try:
+                f=open(playlist, "r")
+                line = f.readline()
+                f.close
+                if line.find("[playlist]") > -1:
+                    self.read_pls(playlist)
+                elif line.find("[Slides]") > -1:
+                    self.read_ssr(playlist)
+                else:
+                    self.read_m3u(playlist)
+            except (OSError, IOError), e:
+                log.error('playlist error: %s' % e)
+            playlist = self.playlist
 
         # self.playlist is a list of Items or strings (filenames)
         # create a basic info object
-        self.info = mediadb.item()
+        self.info = {}
+        self.playlist = []
 
         for i in playlist:
             if isinstance(i, Item):
@@ -264,21 +267,28 @@ class Playlist(MediaItem):
                 # FIXME: use weakref here
                 i.parent = self
                 self.playlist.append(i)
+                query = None
+
+            # FIXME: The following stuff depends on a fast media database
+            # Unless beacon is finished and integrated, this can be very
+            # slow. It should be fast later but it is still unclear what
+            # will happen on large directory trees.
 
             elif isinstance(i, list) or isinstance(i, tuple) and \
                  len(i) == 2 and os.path.isdir(i[0]):
                 # (directory, recursive=True|False)
+                query = { 'filename': i[0] }
                 if i[1]:
-                    match_files = util.match_files_recursively
-                else:
-                    match_files = util.match_files
-                self.playlist += match_files(i[0], self.suffixlist)
-                # set autoplay to True on such big lists
-                self.autoplay = True
-
+                    query['recursive'] = True
             else:
                 # filename
-                self.playlist.append(i)
+                query = { 'filename': i }
+
+            if query:
+                l = kaa.beacon.query(**query).get(filter='extmap')
+                for p in self.get_plugins:
+                    for i in p.get(self, l):
+                        self.playlist.append(i)
 
 
     def randomize(self):
@@ -317,42 +327,6 @@ class Playlist(MediaItem):
         show the playlist in the menu
         """
         self.build()
-
-        files = []
-        for item in self.playlist:
-            if not isinstance(item, Item):
-                files.append(item)
-
-        listing = mediadb.FileListing(files)
-        if listing.num_changes > 10:
-            text = _('Scanning playlist, be patient...')
-            popup = ProgressBox(text, full=listing.num_changes)
-            popup.show()
-            listing.update(popup.tick)
-            popup.destroy()
-        elif listing.num_changes:
-            listing.update()
-
-        items = []
-
-        for item in self.playlist:
-            if not isinstance(item, Item):
-                # get a real item
-                listing = mediadb.FileListing([item])
-                if listing.num_changes:
-                    listing.update()
-                for p in self.get_plugins:
-                    items += p.get(self, listing)
-            else:
-                # MEMCHECKER: why is this needed? It is deleted by
-                # menu/item.py in the delete function but this there
-                # a better way to do this?
-                # FIXME: use weakref?
-                item.parent = self
-                items.append(item)
-
-        self.playlist = items
-
         if self.random:
             self.randomize()
 
@@ -360,7 +334,7 @@ class Playlist(MediaItem):
         if self.display_type == 'tv':
             display_type = 'video'
 
-        menu = Menu(self.name, self.playlist, item_types = display_type)
+        menu = Menu(self.name, self.playlist, type = display_type)
         self.pushmenu(menu)
 
 
@@ -373,7 +347,7 @@ class Playlist(MediaItem):
                  repeat=self.repeat).play()
 
 
-    def play(self, next=False):
+    def play(self):
         """
         play the playlist
         """
@@ -381,110 +355,116 @@ class Playlist(MediaItem):
             log.warning('empty playlist')
             return False
 
-        if not next:
-            # first start
-            Playlist.build(self)
+        # First start playing. This is a bad hack and needs to
+        # be fixed when fixing the whole self.playlist stuff
 
-            if self.random:
-                self.randomize()
+        Playlist.build(self)
 
-            if self.background_playlist:
-                self.background_playlist.play()
+        if self.random:
+            self.randomize()
 
-            if not self.playlist:
-                log.warning('empty playlist')
-                return False
+        if self.background_playlist:
+            self.background_playlist.play()
 
-            self.__current = self.playlist[0]
-            # Send a PLAY_START event for ourself
-            PLAY_START.post(self)
+        if not self.playlist:
+            log.warning('empty playlist')
+            return False
+
+        # XXX looks like a menu now
+        self.choices = self.playlist
+
+        # FIXME: add random code
+        self.next_pos = 0
+        self.state += 1
+
+        # Send a PLAY_START event for ourself
+        PLAY_START.post(self)
+        self._play_next()
 
 
-        if not isinstance(self.__current, Item):
-            # element is a string, make a correct item
-            play_items = []
-
-            # get a real item
-            l = mediadb.FileListing([self.__current])
-            if l.num_changes:
-                l.update()
-            for p in self.get_plugins:
-                for i in p.get(self, l):
-                    play_items.append(i)
-
-            if play_items:
-                pos = self.playlist.index(self.__current)
-                self.__current = play_items[0]
-                self.playlist[pos] = play_items[0]
-
-        # get next item
-        pos = self.playlist.index(self.__current)
-        pos = (pos+1) % len(self.playlist)
-        if pos or self.repeat == REPEAT_PLAYLIST:
-            self.__next = self.playlist[pos]
-        else:
-            self.__next = None
-
-        if hasattr(self.__current, 'play'):
+    def _play_next(self):
+        self.select(self.choices[self.next_pos])
+        
+        if hasattr(self.selected, 'play'):
             # play the item
-            self.__current.play()
+            self.selected.play()
             return True
 
         # The item has no play function. It would be possible to just
         # get all actions and select the first one, but this won't be
         # right. Maybe this action opens a menu and nothing more. So
         # it is play or skip.
-        if self.__next:
-            return Playlist.play(self, True)
+        if self.next_pos is not None:
+            return self._play_next(self)
         return True
 
 
     def stop(self):
         """
-        stop playling
+        stop playing
         """
-        self.__next = None
+        self.next_pos = None
         if self.background_playlist:
             self.background_playlist.stop()
             self.background_playlist = None
-        if self.__current:
-            item = self.__current
-            self.__current = None
+        if self.selected:
+            item = self.selected
+            self.selected = None
             item.stop()
 
 
+    def select(self, item):
+        """
+        Select item that is playing right now.
+        """
+        if not self.playlist:
+            # no need to change stuff (video dir playing)
+            return True
+
+        if not hasattr(self, 'choices') or self.choices != self.playlist:
+            self.choices = self.playlist
+            self.state += 1
+
+        if self.selected == item:
+            return True
+
+        self.selected_pos = self.choices.index(item)
+        self.selected = item
+
+        if item.menu and item in item.menu.choices:
+            # update menu
+            item.menu.select(item)
+
+        # get next item
+        self.next_pos = (self.selected_pos+1) % len(self.choices)
+        if self.next_pos == 0 and not self.repeat == REPEAT_PLAYLIST:
+            self.next_pos = None
+
+
+    def get_playlist(self):
+        """
+        Return playlist object.
+        """
+        return self
+
+    
     def eventhandler(self, event):
         """
         Handle playlist specific events
         """
         if event == PLAY_START and event.arg in self.playlist:
-            # a new item started playing, set internal current one
-            self.__current = event.arg
-            pos = self.playlist.index(self.__current)
-            pos = (pos+1) % len(self.playlist)
-            if pos or self.repeat == REPEAT_PLAYLIST:
-                self.__next = self.playlist[pos]
-                # cache next item (imageviewer)
-                if hasattr(self.__next, 'cache'):
-                    self.__next.cache()
-            else:
-                self.__next = None
+            # a new item started playing, cache next (if supported)
+            if self.next_pos is not None and \
+                   hasattr(self.choices[self.next_pos], 'cache'):
+                self.choices[self.next_pos].cache()
             return True
 
         # give the event to the next eventhandler in the list
-        if not self.__current:
+        if not self.selected:
+            if event == PLAY_END:
+                event = Event(PLAY_END, self)
             return MediaItem.eventhandler(self, event)
 
-        # That doesn't belong here! It should be part of the player!!!
-        # if event == PLAY_END:
-        #     if self.__current and self.__current.type == 'audio':
-        #         AUDIO_LOG.post(self.__current.filename)
-        #
-        # if event in (INPUT_1, INPUT_2, INPUT_3, INPUT_4, INPUT_5) and \
-        #        event.arg and self.__current and \
-        #        hasattr(self.__current,'type'):
-        #     if (self.__current.type == 'audio'):
-        #         RATING.post(event.arg, self.__current.filename)
 
         if event == PLAYLIST_TOGGLE_REPEAT:
             self.repeat += 1
@@ -502,11 +482,11 @@ class Playlist(MediaItem):
         if event == PLAY_END:
             if self.repeat == REPEAT_ITEM:
                 # Repeat current item
-                self.__current.play()
-            elif self.__next:
+                self.selected.play()
+                return True
+            if self.next_pos is not None:
                 # Play next item
-                self.__current = self.__next
-                Playlist.play(self, True)
+                self._play_next()
             else:
                 # Nothing to play
                 self.stop()
@@ -514,12 +494,11 @@ class Playlist(MediaItem):
                 PLAY_END.post(self)
             return True
 
-
         if event == PLAYLIST_NEXT:
-            if self.__next:
+            if self.next_pos is not None:
                 # Stop current item, the next one will start when the
                 # current one sends the stop event
-                self.__current.stop()
+                self.selected.stop()
                 return True
             else:
                 # No next item
@@ -527,12 +506,11 @@ class Playlist(MediaItem):
 
 
         if event == PLAYLIST_PREV:
-            pos = self.playlist.index(self.__current)
-            if pos:
+            if self.selected_pos:
                 # This is not the first item. Set next item to previous
                 # one and stop the current item
-                self.__next = self.playlist[pos-1]
-                self.__current.stop()
+                self.next_pos = self.selected_pos - 1
+                self.selected.stop()
                 return True
             else:
                 # No previous item
@@ -540,12 +518,11 @@ class Playlist(MediaItem):
 
         if event == STOP:
             # Stop playing and send event to parent item
+            print 'playlist stop'
             self.stop()
 
         # give the event to the next eventhandler in the list
         return MediaItem.eventhandler(self, event)
-
-
 
 
 
@@ -577,9 +554,10 @@ class Mimetype(plugin.MimetypePlugin):
         else:
             display_type = None
 
-        for filename in listing.match_suffix(self.suffix()):
-            items.append(Playlist(playlist=filename.filename, parent=parent,
-                                  display_type=display_type, build=True))
+        for suffix in self.suffix():
+            for filename in listing.get(suffix):
+                items.append(Playlist(playlist=filename.filename, parent=parent,
+                                      display_type=display_type, build=True))
         return items
 
 

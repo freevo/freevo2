@@ -36,11 +36,11 @@ import re
 
 # kaa imports
 from kaa.notifier import Thread, Callback
+import kaa.beacon
 
 # freevo imports
 import plugin
 import menu
-import mediadb
 
 from menu import Item, Action, ActionItem, Menu
 from image import ImageItem
@@ -90,9 +90,7 @@ class ApodMainMenuItem(Item):
         """
         Show a list of all APOD.
         """
-        listing = mediadb.Listing(self.imagedir)
-        if listing.num_changes:
-            listing.update(fast=True)
+        listing = kaa.beacon.query(filename=self.imagedir).get(filter='extmap')
 
         # get items
         items = []

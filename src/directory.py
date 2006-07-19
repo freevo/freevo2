@@ -39,13 +39,12 @@ import time
 # kaa imports
 import kaa
 import kaa.notifier
+import kaa.beacon
 from kaa.weakref import weakref
 
 # freevo imports
 import config
 import util
-import mediadb
-from mediadb.globals import *
 
 import menu
 import plugin
@@ -70,11 +69,6 @@ all_variables = [('DIRECTORY_SORT_BY_DATE', _('Directory Sort By Date'),
                   _('Directory Autoplay Single Item'),
                   _('Don\'t show directory if only one item exists and ' \
                     'auto-select the item.'), False),
-
-                 ('DIRECTORY_FORCE_SKIN_LAYOUT', _('Force Skin Layout'),
-                  _('Force skin to a specific layout. This option doesn\'t ' \
-                    'work with all skins and the result may differ based on ' \
-                    'the skin.'), False),
 
                  ('DIRECTORY_SMART_SORT', _('Directory Smart Sort'),
                   _('Use a smarter way to sort the items.'), False),
@@ -168,36 +162,25 @@ class DirItem(Playlist):
         self.item_menu  = None
         self.needs_update = False
 
-        if isinstance(directory, mediadb.ItemInfo):
-            self.info = directory
-            directory = directory.filename
-        else:
-            directory = os.path.abspath(directory)
-            self.info = mediadb.get(directory)
+        if not isinstance(directory, kaa.beacon.Item):
+            log.warning('filename as directory is deprecated')
+            directory = kaa.beacon.get(directory)
 
-        # create full path
-        directory = os.path.normpath(directory)
-        # remove softlinks from path
-        directory = os.path.realpath(directory) + '/'
+        self.set_url(directory)
 
-        # get cover from cache
-        image = self.info[COVER]
-        if image:
-            self.image = image
-        
+        # BEACON_FIXME
         # store Files information for moving/copying
-        self.files = Files()
-        if self.media:
-            self.files.read_only = True
-        self.files.append(directory)
+        # self.files = Files()
+        # if ??:
+        #     self.files.read_only = True
+        # self.files.append(directory)
 
-        self.dir = directory
-        self.url = directory
-        
+        # FIXME: remove this
+        self.dir = directory.filename
+        self.url = directory.filename
+
         if name:
             self.name = Unicode(name)
-        else:
-            self.name = self.info[FILETITLE]
 
         if add_args == None and hasattr(parent, 'add_args'):
             add_args = parent.add_args
@@ -228,81 +211,12 @@ class DirItem(Playlist):
 
         self.modified_vars = []
 
-        self.folder_fxd = self.info['fxd']
-        if self.folder_fxd:
-            self.set_fxd_file(self.folder_fxd)
-        else:
-            self.folder_fxd = directory+'/folder.fxd'
-
         # Check mimetype plugins if they want to add something
         for p in plugin.mimetype(display_type):
             p.dirinfo(self)
 
         if self.DIRECTORY_SORT_BY_DATE == 2 and self.display_type != 'tv':
             self.DIRECTORY_SORT_BY_DATE = 0
-
-
-    def set_fxd_file(self, file):
-        """
-        Set self.folder_fxd and parse it
-        """
-        self.folder_fxd = file
-        if self.folder_fxd and os.path.isfile(self.folder_fxd):
-            if self.display_type == 'tv':
-                display_type = 'video'
-            try:
-                parser = util.fxdparser.FXD(self.folder_fxd)
-                parser.set_handler('folder', self.read_folder_fxd)
-                parser.set_handler('skin', self.read_folder_fxd)
-                parser.parse()
-            except:
-                log.exception("fxd file %s corrupt" % self.folder_fxd)
-
-
-    def read_folder_fxd(self, fxd, node):
-        '''
-        parse the xml file for directory settings
-
-	<?xml version="1.0" ?>
-	<freevo>
-	  <folder title="Incoming TV Shows" cover-img="foo.jpg">
-	    <setvar name="directory_autoplay_single_item" val="0"/>
-	    <info>
-	      <content>Episodes for current tv shows not seen yet</content>
-	    </info>
-	  </folder>
-	</freevo>
-        '''
-        if node.name == 'skin':
-            self.skin_fxd = self.folder_fxd
-            return
-
-        # read attributes
-        self.name = Unicode(fxd.getattr(node, 'title', self.name))
-
-        image = fxd.childcontent(node, 'cover-img')
-        if image and vfs.isfile(os.path.join(self.dir, image)):
-            self.image = os.path.join(self.dir, image)
-
-        # parse <info> tag
-        fxd.parse_info(fxd.get_children(node, 'info', 1), self,
-                       {'description': 'content', 'content': 'content' })
-
-        for child in fxd.get_children(node, 'setvar', 1):
-            # <setvar name="directory_smart_sort" val="1"/>
-            for v,n,d, type_list in self.all_variables:
-                if child.attrs[('', 'name')].upper() == v.upper():
-                    if type_list:
-                        if int(child.attrs[('', 'val')]):
-                            setattr(self, v, [self.display_type])
-                        else:
-                            setattr(self, v, [])
-                    else:
-                        try:
-                            setattr(self, v, int(child.attrs[('', 'val')]))
-                        except ValueError:
-                            setattr(self, v, child.attrs[('', 'val')])
-                    self.modified_vars.append(v)
 
 
     def __is_type_list_var(self, var):
@@ -315,35 +229,11 @@ class DirItem(Playlist):
         return False
 
 
-    def write_folder_fxd(self, fxd, node):
-        """
-        callback to save the modified fxd file
-        """
-        # remove old setvar
-        for child in copy.copy(node.children):
-            if child.name == 'setvar':
-                node.children.remove(child)
-
-        # add current vars as setvar
-        for v in self.modified_vars:
-            if self.__is_type_list_var(v):
-                if getattr(self, v):
-                    val = 1
-                else:
-                    val = 0
-            else:
-                val = getattr(self, v)
-            fxd.add(fxd.XMLnode('setvar', (('name', v.lower()),
-                                           ('val', val))), node, 0)
-
-
     def __getitem__(self, key):
         """
         return the specific attribute
         """
         if key == 'type':
-            if self.media:
-                return _('Directory on disc [%s]') % self.media.label
             return _('Directory')
 
         if key == 'num_items':
@@ -359,9 +249,6 @@ class DirItem(Playlist):
             return self['num_%s_items' % display_type]
 
         if key in ( 'freespace', 'totalspace' ):
-            if self.media:
-                return None
-
             space = getattr(util, key)(self.dir) / 1000000
             if space > 1000:
                 space='%s,%s' % (space / 1000, space % 1000)
@@ -406,7 +293,7 @@ class DirItem(Playlist):
 
             # delete current menu (showing the directory)
             self.get_menustack().back_one_menu(False)
-            
+
             # create a new directory item
             d = DirItem(self.dir, self.parent, self.name, type, self.add_args)
             # deactivate autoplay
@@ -423,7 +310,7 @@ class DirItem(Playlist):
                event.arg in self.item_menu.choices:
             # update selection and pass the event to playlist after that
             self.item_menu.select(event.arg)
-            
+
         return Playlist.eventhandler(self, event)
 
 
@@ -438,7 +325,7 @@ class DirItem(Playlist):
         if not Playlist.__init_info__(self):
             # nothing new
             return False
-        
+
         display_type = self.display_type
 
         if self.display_type == 'tv':
@@ -449,16 +336,12 @@ class DirItem(Playlist):
         if self.info['num_%s_items' % name] != None:
             # info is already stored, no new data
             return False
-        
+
         log.info('create metainfo for %s', self.dir)
-        if self.media:
-            umount = not self.media.is_mounted()
-            self.media.mount()
 
         # get listing
-        listing = mediadb.Listing(self.dir)
-        if listing.num_changes:
-            listing.update(fast=True)
+        query = kaa.beacon.query(parent=self.info)
+        listing = query.get(filter='extmap')
 
         # play items and playlists
         num_play_items = 0
@@ -466,17 +349,14 @@ class DirItem(Playlist):
             num_play_items += p.count(self, listing)
 
         # normal DirItems
-        num_dir_items = len(listing.get_dir())
+        num_dir_items = len(listing.get('beacon:dir'))
 
         # store info
-        self.info.store_with_mtime('num_%s_items' % name, num_play_items)
-        self.info.store_with_mtime('num_dir_items', num_dir_items)
-
-        if self.media and umount:
-            self.media.umount()
+        self['num_%s_items' % name] = num_play_items
+        self['num_dir_items'] = num_dir_items
 
         return True
-    
+
 
     # ======================================================================
     # actions
@@ -486,11 +366,6 @@ class DirItem(Playlist):
         """
         return a list of actions for this item
         """
-        if self.media:
-            # mount media if not mounted
-            umount = not self.media.is_mounted()
-            self.media.mount()
-
         display_type = self.display_type
         if self.display_type == 'tv':
             display_type = 'video'
@@ -506,7 +381,7 @@ class DirItem(Playlist):
                 items = [ browse, play ]
         else:
             items = [ browse ]
-            
+
         if self.info['num_%s_items' % display_type]:
             a = Action(_('Random play all items'), self.play)
             a.parameter(random=True)
@@ -523,13 +398,6 @@ class DirItem(Playlist):
         a = Action(_('Configure directory'), self.configure, 'configure')
         items.append(a)
 
-        # FIXME: add this function again
-        # if self.folder_fxd:
-        #   items += fxditem.mimetype.get(self, [self.folder_fxd])
-
-        if self.media and umount:
-            self.media.umount()
-
         return items
 
 
@@ -539,8 +407,6 @@ class DirItem(Playlist):
         play directory
         """
         # FIXME: add password checking here
-        if self.media and not self.media.is_mounted():
-            self.media.mount()
         if not os.path.exists(self.dir):
 	    MessageBox(_('Directory does not exist')).show()
             return
@@ -555,64 +421,13 @@ class DirItem(Playlist):
         # garbage collector, so we have to store it somehow
         self.__pl_for_gc = pl
         return
-        
-
-    def check_password_then_browse(self):
-        """
-        password checker
-        """
-        # are we on a ROM_DRIVE and have to mount it first?
-        for media in vfs.mountpoints:
-            if self.dir.startswith(media.mountdir):
-                media.mount()
-                self.media = media
-
-        if vfs.isfile(self.dir + '/.password'):
-            log.warning('password protected dir')
-            pb = InputBox(text=_('Enter Password'), handler=self.browse_pass_cb,
-                          type='password')
-            pb.show()
-        else:
-            self.browse(authstatus=1)
-
-
-    def browse_pass_cb(self, word=None):
-        """
-        read the contents of self.dir/.passwd and compare to word
-        callback for check_password_then_browse
-        """
-        try:
-            pwfile = vfs.open(self.dir + '/.password')
-            line = pwfile.readline()
-        except IOError, e:
-            log.error('error %d (%s) reading password file for %s' % \
-                        (e.errno, e.strerror, self.dir))
-            return
-
-        pwfile.close()
-        password = line.strip()
-        if word == password:
-            self.browse(authstatus=1)
-        else:
-            MessageBox(_('Password incorrect')).show()
-            self.browse(authstatus=-1)
 
 
     def browse(self, update=False, authstatus=0):
         """
         build the items for the directory
         """
-        # check for password
-        if 0:
-            # This code breaks the menu. In some cases a directory
-            # menu is twice or even more often in the stack.
-            # So it is disabled until fixed!
-            if authstatus == 0:
-                self.check_password_then_browse()
-            elif authstatus == -1:
-                log.info('authorization failed for browsing %s' % self.dir)
-                return
-	    
+        # FIXME: check for password
 
         if update and not (self.listing and self.item_menu.visible):
             # not visible right now, do not update
@@ -624,9 +439,6 @@ class DirItem(Playlist):
         dir_items  = []
         pl_items   = []
 
-        if self.media and not self.media.is_mounted():
-            self.media.mount()
-
         if update:
             # Delete possible skin settings
             # FIXME: This is a very bad handling, maybe signals?
@@ -636,8 +448,6 @@ class DirItem(Playlist):
                 del self.item_menu.skin_default_no_images
             if hasattr(self.item_menu, 'skin_force_text_view'):
                 del self.item_menu.skin_force_text_view
-            # maybe the cover changed
-            self.image = self.info['image']
 
         elif not os.path.exists(self.dir):
             # FIXME: better handling!!!!!
@@ -650,17 +460,10 @@ class DirItem(Playlist):
             display_type = 'video'
 
         t1 = time.time()
-        listing = mediadb.Listing(self.dir)
+        query = kaa.beacon.query(parent=self.info)
+        listing = query.get(filter='extmap')
         t2 = time.time()
 
-        if listing.num_changes > 5:
-            if self.media:
-                text = _('Scanning disc, be patient...')
-            else:
-                text = _('Scanning directory, be patient...')
-            listing.update(fast=True)
-        elif listing.num_changes:
-            listing.update()
         t3 = time.time()
         #
         # build items
@@ -677,7 +480,7 @@ class DirItem(Playlist):
 
         t4 = time.time()
         # normal DirItems
-        for item in listing.get_dir():
+        for item in listing.get('beacon:dir'):
             d = DirItem(item, self, display_type = self.display_type)
             dir_items.append(d)
 
@@ -776,18 +579,15 @@ class DirItem(Playlist):
         else:
             # normal menu build
             item_menu = menu.Menu(self.name, items, reload_func=self.reload,
-                                  item_types = display_type,
-                                  force_skin_layout = \
-                                  self.DIRECTORY_FORCE_SKIN_LAYOUT)
+                                  item_types = display_type)
 
-            if self.skin_fxd:
-                item_menu.theme = self.skin_fxd
             item_menu.autoselect = self.DIRECTORY_AUTOPLAY_SINGLE_ITEM
             self.pushmenu(item_menu)
 
             self.item_menu = weakref(item_menu)
             callback = kaa.notifier.Callback(self.browse, True)
-            mediadb.watcher.cwd(listing, callback)
+            # BEACON_FIXME
+            # watcher.cwd(listing, callback)
 
         t7 = time.time()
         # print t2 - t1, t4 - t3, t5 - t4, t6 - t5, t7 - t6, t7 - t0
@@ -799,9 +599,10 @@ class DirItem(Playlist):
         called when we return to this menu
         """
         callback = kaa.notifier.Callback(self.browse, True)
-        if mediadb.watcher.cwd(self.listing, callback):
-            # some files changed
-            self.needs_update = True
+        # BEACON_FIXME
+        # if watcher.cwd(self.listing, callback):
+        # some files changed
+        # self.needs_update = True
         if self.needs_update:
             # update directory
             log.info('directory needs update')
@@ -820,18 +621,12 @@ class DirItem(Playlist):
         return name for the configure menu
         """
         if name in self.modified_vars:
-            if name == 'FORCE_SKIN_LAYOUT':
-                return 'ICON_RIGHT_%s_%s' % (str(getattr(self, name)),
-                                             str(getattr(self, name)))
-            elif getattr(self, name):
+            if getattr(self, name):
                 return 'ICON_RIGHT_ON_' + _('on')
             else:
                 return 'ICON_RIGHT_OFF_' + _('off')
         else:
-            if name == 'FORCE_SKIN_LAYOUT':
-                return 'ICON_RIGHT_OFF_' + _('off')
-            else:
-                return 'ICON_RIGHT_AUTO_' + _('auto')
+            return 'ICON_RIGHT_AUTO_' + _('auto')
 
 
     def configure_set_var(self, var):
@@ -854,15 +649,6 @@ class DirItem(Playlist):
 
         # get the max value for toggle
         max = 1
-
-        # for DIRECTORY_FORCE_SKIN_LAYOUT max = number of styles in the menu
-        if var == 'FORCE_SKIN_LAYOUT':
-            if self.display_type and \
-                   gui.theme.get().menu.has_key(self.display_type):
-                area = gui.theme.get().menu[self.display_type]
-            else:
-                area = gui.theme.get().menu['default']
-            max = len(area.style) - 1
 
         # switch from no settings to 0
         if current == None:
@@ -894,12 +680,7 @@ class DirItem(Playlist):
         item.name = item.name[:item.name.find(u'\t') + 1] + \
                     self.configure_set_name(var)
 
-        try:
-            parser = util.fxdparser.FXD(self.folder_fxd)
-            parser.set_handler('folder', self.write_folder_fxd, 'w', True)
-            parser.save()
-        except:
-            log.exception("fxd file %s corrupt" % self.folder_fxd)
+        # BEACON_FIXME: store in db
 
         # rebuild menu
         self.get_menustack().refresh(True)
@@ -921,14 +702,14 @@ class DirItem(Playlist):
         # change name
         item = self.get_menustack().get_selected()
         item.name = item.name[:item.name.find(u'\t')]  + name
-        
+
         # rebuild menu
         self.get_menustack().refresh(True)
 
 
     def configure(self):
         """
-        show the configure dialog for folder specific settings in folder.fxd
+        show the configure dialog for folder specific settings
         """
         items = []
         for i, name, descr, type_list in self.all_variables:

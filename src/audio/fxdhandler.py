@@ -35,18 +35,6 @@
 # Todo:        
 #
 # -----------------------------------------------------------------------
-# $Log$
-# Revision 1.3  2005/05/01 17:36:41  dischi
-# remove some vfs calls were they are not needed
-#
-# Revision 1.2  2005/04/10 17:49:46  dischi
-# switch to new mediainfo module, remove old code now in mediadb
-#
-# Revision 1.1  2004/09/13 19:34:24  dischi
-# move interface/fxdhandler into extra file
-#
-#
-# -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al. 
 # Please see the file doc/CREDITS for a complete list of authors.

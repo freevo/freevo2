@@ -101,9 +101,11 @@ class Event(kaa.notifier.Event):
     an event is passed to the different eventhandlers in Freevo to
     activate some action.
     """
-    def __init__(self, name, *args):
+    def __init__(self, name, *args, **kwargs):
         kaa.notifier.Event.__init__(self, name, *args)
         self.handler = None
+        if 'handler' in kwargs:
+            self.handler = kwargs['handler']
 
 
     def set_handler(self, handler):

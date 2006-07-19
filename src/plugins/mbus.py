@@ -1,5 +1,6 @@
 # kaa imports
 from kaa.notifier import EventHandler, Timer
+import kaa.beacon
 
 # freevo core imports
 import freevo.ipc
@@ -8,7 +9,6 @@ import freevo.ipc
 import plugin
 import application
 from event import *
-from mediadb import FileListing
 from directory import DirItem
 
 import logging
@@ -65,11 +65,7 @@ class PluginInterface(plugin.Plugin):
         if not app or app.get_name() != 'menu':
             raise RuntimeError('freevo not in menu mode')
 
-        file = String(file)
-        listing = FileListing([file])
-        if listing.num_changes > 0:
-            # this shouldn't happen, but just in case
-            listing.update()
+        kaa.beacon.query(filename=String(file)).get(filter='extmap')
 
         # normal file
         for p in plugin.mimetype(display_type):

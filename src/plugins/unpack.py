@@ -109,6 +109,7 @@ class PluginInterface(plugin.MimetypePlugin):
         Return a list of items based on the files
         """
         items = []
-        for file in listing.match_suffix(self.suffix()):
-            items.append(ArchiveItem(file.filename, parent))
+        for suffix in self.suffix():
+            for file in listing.get(suffix):
+                items.append(ArchiveItem(file.filename, parent))
         return items

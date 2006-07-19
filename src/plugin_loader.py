@@ -173,7 +173,7 @@ class PluginLoader(object):
         self.path = plugin_path
         
         for name, type, level, args, number in self.plugins:
-            kaa.notifier.step(False, False)
+            kaa.notifier.step(False, True)
             if callback:
                 callback()
             if isinstance(name, Plugin):

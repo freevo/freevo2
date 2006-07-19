@@ -5,7 +5,7 @@
 # $Id$
 #
 # This module depends on the following parts of Freevo
-# sysconfig, config, util, event, plugin and mediadb
+# sysconfig, config, util, event and plugin
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

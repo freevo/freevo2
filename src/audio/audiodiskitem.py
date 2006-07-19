@@ -54,7 +54,6 @@ class AudioDiskItem(Playlist):
     def __init__(self, device, parent):
         Playlist.__init__(self, parent=parent)
         self.type = 'audiocd'
-        self.media = None
         self.disc_id = device.info['id']
         self.devicename = device.devicename
         self.name = _('Unknown CD Album')
@@ -65,9 +64,10 @@ class AudioDiskItem(Playlist):
         # variables only for DirItem
         self.display_type = 'audio'
 
-        cover = '%s/disc/metadata/%s.jpg' % (vfs.BASE, self.disc_id)
-        if os.path.isfile(cover):
-            self.image = cover
+        # BEACON_FIXME
+        # cover = '%s/disc/metadata/%s.jpg' % (??, self.disc_id)
+        # if os.path.isfile(cover):
+        #     self.image = cover
             
 
     def actions(self):
@@ -114,10 +114,11 @@ class AudioDiskItem(Playlist):
 
         items += play_items
 
-        if hasattr(self.info, 'mixed'):
-            d = DirItem(self.media.mountdir, self)
-            d.name = _('Data files on disc')
-            items.append(d)
+        # BEACON_FIXME
+        # if hasattr(self.info, 'mixed'):
+        #     d = DirItem(self.mountdir, self)
+        #     d.name = _('Data files on disc')
+        #     items.append(d)
             
         self.play_items = play_items
 

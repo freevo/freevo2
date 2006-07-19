@@ -163,17 +163,17 @@ class Xine(ChildApp):
             # dvd:///full/path/to/image.iso/
             command.append('dvd://%s/' % item.filename)
 
-        elif item.mode == 'dvd' and hasattr(item.media, 'devicename'):
-            # dvd:///dev/dvd/2
-            url = 'dvd://%s/%s' % (item.media.devicename, item.url[6:])
-            command.append(url.strip('/'))
+        # elif item.mode == 'dvd' and hasattr(??, 'devicename'):
+        #     # dvd:///dev/dvd/2
+        #     url = 'dvd://%s/%s' % (??.devicename, item.url[6:])
+        #     command.append(url.strip('/'))
 
         elif item.mode == 'dvd': # no devicename? Probably an image on the HD
             command.append(item.url)
 
-        elif item.mode == 'vcd':
-            # vcd:///dev/cdrom -- NO track support (?)
-            command.append('vcd://%s' % item.media.devicename)
+        # elif item.mode == 'vcd':
+        #     # vcd:///dev/cdrom -- NO track support (?)
+        #     command.append('vcd://%s' % ??.devicename)
 
         elif item.mimetype == 'cue':
             command.append('vcd://%s' % item.filename)

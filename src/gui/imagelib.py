@@ -42,7 +42,6 @@ import kaa.mevas
 
 import config
 import util
-import util.thumbnail
 import theme
 
 # get logging object
@@ -125,7 +124,7 @@ def load(url, size=None):
 
 
 
-def item_image(item, size, icon_dir, force=False, bg=False, callback=None):
+def item_image(item, size, icon_dir, force=False, bg=False):
     """
     Return the image for an item. This function can also return a mimetype
     image if no image is found and force is True.
@@ -142,28 +141,15 @@ def item_image(item, size, icon_dir, force=False, bg=False, callback=None):
     imagefile = None
 
     if item.image:
-        try:
-            # load the thumbnail
-            image = util.thumbnail.load(item.image, bg, callback)
-        except:
-            # maybe image is something else (like already an image object)
-            image = load(item.image)
-
-    if image:
+        image = load(item.image)
         if item['rotation']:
             image.rotate(item['rotation'])
-    else:
+
+    if not image:
         if not force:
             return None
 
-        if hasattr(item, 'media') and item.media and \
-               item.media.item == item and \
-               os.path.isfile('%s/mimetypes/%s.png' % \
-                              (icon_dir, item.media.type)):
-            imagefile = '%s/mimetypes/%s.png' % (icon_dir, item.media.type)
-
-
-        elif item.type == 'dir':
+        if item.type == 'dir':
             if os.path.isfile('%s/mimetypes/folder_%s.png' % \
                               (icon_dir, item.display_type)):
                 imagefile = '%s/mimetypes/folder_%s.png' % \
@@ -195,11 +181,7 @@ def item_image(item, size, icon_dir, force=False, bg=False, callback=None):
             elif os.path.isfile('%s/mimetypes/unknown.png' % icon_dir):
                 imagefile = '%s/mimetypes/unknown.png' % icon_dir
 
-        if not imagefile:
-            return None
-
-        # load the thumbnail
-        image = util.thumbnail.load(imagefile)
+        image = imagefile
 
         if not image:
             return None

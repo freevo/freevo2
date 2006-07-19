@@ -169,6 +169,7 @@ import fxditem
 
 # freevo core imports
 import freevo.ipc
+import beacon
 
 class Splashscreen(gui.areas.Area):
     """

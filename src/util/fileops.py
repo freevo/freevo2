@@ -50,7 +50,6 @@ import kaa.notifier
 # freevo imports
 import sysconfig
 import misc
-import vfs
 
 # get logging object
 log = logging.getLogger()
@@ -174,7 +173,7 @@ def match_files(dirname, suffix_list, recursive = False):
     try:
         files = [ os.path.join(dirname, fname) \
                   for fname in os.listdir(dirname) if
-                  vfs.isfile(os.path.join(dirname, fname)) ]
+                  os.path.isfile(os.path.join(dirname, fname)) ]
     except OSError, e:
         print 'fileops:match_files: %s' % e
         return []
@@ -224,65 +223,6 @@ def match_files_recursively(dir, suffix_list):
     return matches
 
 
-def get_subdirs_recursively(dir):
-    """
-    get all subdirectories recursively in the given directory
-    """
-    all_files = []
-    if dir.endswith('/'):
-        dir = dir[:-1]
-    os.path.walk(dir, _match_files_recursively_helper, all_files)
-    matches = misc.unique([f for f in all_files if os.path.isdir(f) ])
-    matches.sort(lambda l, o: cmp(l.upper(), o.upper()))
-    return matches
-
-
-def recursefolders(root, recurse=0, pattern='*', return_folders=0):
-    """
-    Before anyone asks why I didn't use os.path.walk; it's simple,
-    os.path.walk is difficult, clunky and doesn't work right in my
-    mind.
-
-    Here's how you use this function:
-
-    songs = recursefolders('/media/Music/Guttermouth',1,'*.mp3',1):
-    for song in songs:
-          print song
-
-    Should be easy to add to the mp3.py app.
-    """
-    # initialize
-    result = []
-
-    # must have at least root folder
-    try:
-        names = os.listdir(root)
-    except os.error:
-        return result
-
-    # expand pattern
-    pattern = pattern or '*'
-    pat_list = string.splitfields( pattern , ';' )
-
-    # check each file
-    for name in names:
-        fullname = os.path.normpath(os.path.join(root, name))
-        # grab if it matches our pattern and entry type
-        for pat in pat_list:
-            if fnmatch.fnmatch(name, pat):
-                if vfs.isfile(fullname) or \
-                   (return_folders and os.path.isdir(fullname)):
-                    result.append(fullname)
-                continue
-        # recursively scan other folders, appending results
-        if recurse:
-            if os.path.isdir(fullname) and not os.path.islink(fullname):
-                result = result + recursefolders( fullname, recurse,
-                                                  pattern, return_folders )
-    return result
-
-
-
 def find_file_in_path( file, path = None ):
     if not path and os.environ.has_key( 'PATH' ):
         path = os.environ[ 'PATH' ].split( ':' )
@@ -293,32 +233,3 @@ def find_file_in_path( file, path = None ):
             return abs
 
     return None
-
-
-#
-# Media stuff
-#
-
-def resolve_media_mountdir(*arg):
-    """
-    get the mount point of the media with media_id
-    """
-    if len(arg) == 1 and isinstance(arg[0], dict):
-        media_id = arg[0]['media_id']
-        file     = arg[0]['file']
-    elif len(arg) == 2:
-        media_id = arg[0]
-        file     = arg[1]
-    else:
-        raise KeyError
-
-    mountpoint = ''
-    # Find on what media it is located
-    for media in vfs.mountpoints:
-        if media_id == media.id:
-            # Then set the filename
-            mountpoint = media
-            file = os.path.join(media.mountdir, file)
-            break
-
-    return mountpoint, file

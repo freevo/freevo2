@@ -207,7 +207,10 @@ class MimetypePlugin(Plugin):
         """
         return how many items will be build on files
         """
-        return len(listing.match_suffix(self.suffix()))
+        c = 0
+        for t in self.suffix():
+            c += len(listing.get(t))
+        return c
 
 
     def dirinfo(self, diritem):

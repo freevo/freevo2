@@ -100,10 +100,8 @@ def set(new):
         # based on the current theme
         log.info('loading new theme %s', new)
         filename = new
-        if new and vfs.isfile(os.path.join(new, 'folder.fxd')):
-            new = vfs.abspath(os.path.join(new, 'folder.fxd'))
-        elif new and vfs.isfile(new):
-            new = vfs.abspath(new)
+        if new and os.path.isfile(os.path.join(new, 'folder.fxd')):
+            new = os.path.join(new, 'folder.fxd')
         theme = copy.copy(current_theme)
         try:
             theme.load(new)
@@ -257,14 +255,14 @@ def search_file(file, search_dirs):
     for s_dir in search_dirs:
         dfile=os.path.join(s_dir, file)
 
-        if vfs.isfile(dfile):
-            return vfs.abspath(dfile)
+        if os.path.isfile(dfile):
+            return dfile
 
-        if vfs.isfile("%s.png" % dfile):
-            return vfs.abspath("%s.png" % dfile)
+        if os.path.isfile("%s.png" % dfile):
+            return "%s.png" % dfile
 
-        if vfs.isfile("%s.jpg" % dfile):
-            return vfs.abspath("%s.jpg" % dfile)
+        if os.path.isfile("%s.jpg" % dfile):
+            return "%s.jpg" % dfile
 
     log.error('skin error: can\'t find image %s' % file)
     log.info('image search path is:')
@@ -1389,20 +1387,20 @@ class FXDSettings(object):
         """
         self.prepared = False
 
-        if not vfs.isfile(file):
-            if vfs.isfile(file+".fxd"):
+        if not os.path.isfile(file):
+            if os.path.isfile(file+".fxd"):
                 file += ".fxd"
 
-            elif vfs.isfile(os.path.join(config.SKIN_DIR, '%s/%s.fxd' % \
+            elif os.path.isfile(os.path.join(config.SKIN_DIR, '%s/%s.fxd' % \
                                      (file, file))):
                 file = os.path.join(config.SKIN_DIR, '%s/%s.fxd' % (file, file))
 
             else:
                 file = os.path.join(config.SKIN_DIR, 'main/%s' % file)
-                if vfs.isfile(file+".fxd"):
+                if os.path.isfile(file+".fxd"):
                     file += ".fxd"
 
-        if not vfs.isfile(file):
+        if not os.path.isfile(file):
             return 0
 
         parser = util.fxdparser.FXD(file)
@@ -1454,7 +1452,7 @@ def init_module():
     global current_theme
     cachefile = os.path.join(config.FREEVO_CACHEDIR, 'skin-%s' % os.getuid())
     storage = {}
-    if vfs.isfile(cachefile):
+    if os.path.isfile(cachefile):
         storage = util.cache.load(cachefile)
         if storage and not storage.has_key('GUI_XML_FILE'):
             # storage file too old

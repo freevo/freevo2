@@ -103,10 +103,11 @@ class Xine(ChildApp):
         add_args  = []
         
         url = item.url
-        if url.startswith('cdda://'):
-            url = url.replace('//', '/')
-            add_args.append('cfg:/input.cdda_device:%s' % \
-                            item.media.devicename)
+        # BEACON_FIXME:
+        # if url.startswith('cdda://'):
+        #     url = url.replace('//', '/')
+        #     add_args.append('cfg:/input.cdda_device:%s' % \
+        #                     item.devicename)
             
         command  = self.command.split(' ') + add_args + [ url ]
     

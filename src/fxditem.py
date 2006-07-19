@@ -52,7 +52,7 @@ import logging
 import util
 import plugin
 import os
-import mediadb
+import util.fxdparser2
 
 from menu import Item, Action, Menu
 
@@ -77,14 +77,8 @@ class Mimetype(plugin.MimetypePlugin):
         """
         return a list of items based on the listing
         """
-        # Get the list of fxd files. Get by extention (.fxd) and
-        # by type (fxd file with the same name as the dir inside it)
-        fxd_files = listing.match_suffix(['fxd']) + \
-                    listing.match_type('fxd')
-
-        # return items
-        if fxd_files:
-            return self.parse(parent, fxd_files, listing)
+        if listing.get('fxd'):
+            return self.parse(parent, listing.get('fxd'), listing)
         else:
             return []
 
@@ -115,28 +109,17 @@ class Mimetype(plugin.MimetypePlugin):
         items = []
         for fxd_file in fxd_files:
             try:
-                # create a basic fxd parser
-                parser = util.fxdparser.FXD(fxd_file.filename)
-
-                # create items attr for return values
-                parser.setattr(None, 'items', [])
-                parser.setattr(None, 'parent', parent)
-                parser.setattr(None, 'filename', fxd_file.filename)
-                parser.setattr(None, 'listing', listing)
-                parser.setattr(None, 'display_type', display_type)
-
-                for types, tag, handler in callbacks:
-                    if not display_type or not types or display_type in types:
-                        parser.set_handler(tag, handler)
-
-                # start the parsing
-                parser.parse()
-
-                # return the items
-                items += parser.getattr(None, 'items')
-
+                doc = util.fxdparser2.FXD(fxd_file.filename)
             except:
                 log.exception("fxd file %s corrupt" % fxd_file.filename)
+                continue
+            for name, title, image, info, node in doc.get_content():
+                for types, tag, handler in callbacks:
+                    if tag == name and (not display_type or not types or \
+                                        display_type in types):
+                        i = handler(name, title, image, info, node, parent, listing)
+                        if i is not None:
+                            items.append(i)
         return items
 
 

@@ -6,7 +6,6 @@
 #
 # This file handles the basic fxd fileparsing. It is possible to register
 # specific handlers for parsing the different subnodes after <freevo>.
-# The parsed fxd is stored in the vfs for faster access later.
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -44,7 +43,6 @@ import re
 from xml.utils import qp_xml
 
 # freevo utils
-import vfs
 import fileops
 import cache
 import sysconfig
@@ -78,24 +76,15 @@ class FXDtree(qp_xml.Parser):
         an empty <freevo> node.
         """
         qp_xml.Parser.__init__(self)
-        self.use_cache = use_cache
         self.filename = filename
-        if not vfs.isfile(filename):
+        if not os.path.isfile(filename):
             self.tree = XMLnode('freevo')
         else:
             self.tree = None
-            if use_cache:
-                cachename = vfs.getoverlay(filename + '.raw')
-                if os.path.isfile(filename) and os.path.isfile(cachename) and \
-                       os.stat(cachename)[stat.ST_MTIME] >= \
-                       os.stat(filename)[stat.ST_MTIME]:
-                    self.tree = cache.load(cachename)
             if not self.tree:
-                f = vfs.open(filename)
+                f = open(filename)
                 self.tree = self.parse(f)
                 f.close()
-                if self.tree and use_cache:
-                    cache.save(cachename, self.tree)
 
 
     def add(self, node, parent=None, pos=None):
@@ -118,21 +107,18 @@ class FXDtree(qp_xml.Parser):
         """
         if not filename:
             filename = self.filename
-        if vfs.isfile(filename):
-            os.unlink(vfs.abspath(filename))
-        f = vfs.codecs_open(filename, 'wb', sysconfig.ENCODING)
+        if os.path.isfile(filename):
+            os.unlink(filename)
+        f = codecs.open(filename, 'wb', sysconfig.ENCODING)
         f.write('<?xml version="1.0" encoding="%s" ?>\n' % sysconfig.ENCODING)
         self._dump_recurse(f, self.tree)
 
         f.write('\n')
         f.close()
 
-        f = vfs.open(filename)
+        f = open(filename)
         self.tree = self.parse(f)
         f.close()
-        if self.tree and self.use_cache:
-            cache.save(vfs.getoverlay(filename + '.raw'), self.tree)
-
 
 
     def _dump_recurse(self, f, elem, depth=0):

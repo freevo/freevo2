@@ -281,22 +281,26 @@ plugin.activate('shutdown', level=50)
 
 
 # ROM drive support
-plugin.activate('rom_drives')
+# BEACON_FIXME:
+# plugin.activate('rom_drives')
 
 # autostarter when inserting roms while Freevo is in the MAIN MENU
-plugin.activate('rom_drives.autostart')
+# BEACON_FIXME
+# plugin.activate('rom_drives.autostart')
 
 # add the rom drives to each sub main menu
-rom_plugins = {}
-for t in ('video', 'audio', 'image', 'games'):
-    rom_plugins[t] = plugin.activate('rom_drives.rom_items', type=t, level=50)
+# rom_plugins = {}
+# BEACON_FIXME
+# for t in ('video', 'audio', 'image', 'games'):
+#     rom_plugins[t] = plugin.activate('rom_drives.rom_items', type=t, level=50)
 
 
 # mixer
 plugin.activate('mixer')
 
 # add imdb search to the video item menu
-plugin.activate('video.imdb')
+# BEACON_FIXME:
+# plugin.activate('video.imdb')
 
 # list of regexp to be ignored on a disc label
 IMDB_REMOVE_FROM_LABEL = ('season[\._ -][0-9]+', 'disc[\._ -][0-9]+',

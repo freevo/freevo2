@@ -67,16 +67,17 @@ class PluginInterface(plugin.MimetypePlugin):
 
     def suffix(self):
         """
-        Return the list of suffixes this class handles
+        return the list of suffixes this class handles
         """
-        return config.IMAGE_SUFFIX
+        return [ 'beacon:image' ] + config.IMAGE_SUFFIX
 
 
     def get(self, parent, listing):
         """
-        Return a list of items based on the files
+        return a list of items based on the files
         """
         items = []
-        for file in listing.match_suffix(config.IMAGE_SUFFIX):
-            items.append(ImageItem(file, parent))
+        for suffix in self.suffix():
+            for file in listing.get(suffix):
+                items.append(ImageItem(file, parent))
         return items

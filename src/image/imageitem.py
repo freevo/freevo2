@@ -49,13 +49,13 @@ class ImageItem(MediaItem):
     def __init__(self, url, parent, duration = config.IMAGEVIEWER_DURATION):
         MediaItem.__init__(self, parent, type='image')
         # set url and parse the name
-        self.set_url(url, search_cover=False)
+        self.set_url(url)
         self.duration = duration
         if self.url.startswith('file://'):
             self.image = self.filename
         # set 'rotation' so that this value is stored between Freevo sessions
-        # FIXME: this needs a cleanup
-        self.info.set_permanent_variables({ 'rotation': 0 })
+        # BEACON_FIXME:
+        # self.info.set_permanent_variables({ 'rotation': 0 })
 
 
     def __getitem__(self, key):

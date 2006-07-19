@@ -5,12 +5,11 @@
 # $Id$
 #
 # This file contains a VideoItem. A VideoItem can not only hold a simple
-# video file, it can also store variants of the same video and subitems
-# if the video is splitted into several files. DVD and VCD are also
-# VideoItems.
+# video file, it can also store subitems if the video is splitted into several
+# files. DVD and VCD are also VideoItems.
 #
 # TODO: o maybe split this file into file/vcd/dvd or
-#         move subitem and variant handling to extra file
+#         move subitem to extra file
 #       o create better 'arg' handling in play
 #       o maybe xine options?
 #
@@ -44,14 +43,10 @@ import os
 import copy
 import logging
 
-# kaa imports
-import kaa.thumb
-
 # freevo imports
 import config
 import util
 import plugin
-import mediadb
 
 from gui.windows import MessageBox, ConfirmBox
 from menu import Menu, MediaItem, Files, Action
@@ -68,10 +63,8 @@ class VideoItem(MediaItem):
     def __init__(self, url, parent):
         MediaItem.__init__(self, parent, type='video')
 
-        self.variants          = []         # if this item has variants
         self.subitems          = []         # more than one file/track to play
         self.current_subitem   = None
-        self.media_id          = ''
 
         self.subtitle_file     = {}         # text subtitles
         self.audio_file        = {}         # audio dubbing
@@ -89,14 +82,6 @@ class VideoItem(MediaItem):
 
         # set url and parse the name
         self.set_url(url)
-
-        # extra infos in database.discset
-        # FIXME: This code is broken right now
-        # if parent and parent.media:
-        #     fid = parent.media.id + \
-        #           self.filename[len(os.path.join(parent.media.mountdir,"")):]
-        #     if database.discset.has_key(fid):
-        #         self.mplayer_options = database.discset[fid]
 
 
     def set_name(self, name):
@@ -186,16 +171,16 @@ class VideoItem(MediaItem):
             self.mode     = 'dvd'
             self.url      = 'dvd' + self.url[4:] + '/'
             
-        if config.VIDEO_INTERLACING and self.info['interlaced'] \
-               and not self['deinterlace']:
-            # force deinterlacing
-            self['deinterlace'] = 1
+	# BEACON_FIXME: interlaced vs. interlace
+        if config.VIDEO_INTERLACING and self.info.get('interlaced') \
+               and not self.info.get('deinterlace'):
+		# force deinterlacing
+		self['deinterlace'] = 1
+	elif self.info.get('interlace') is None:
+		self['deinterlace'] = 0
 
         # start name parser by setting name to itself
         self.set_name(self.name)
-        # set 'deinterlace' so that this value is stored between Freevo
-        # sessions. FIXME: this needs a cleanup
-        self.info.set_permanent_variables({ 'deinterlace': 0 })
 
 
     def copy(self):
@@ -216,9 +201,6 @@ class VideoItem(MediaItem):
         if self.subitems:
             for s in self.subitems:
                 ret += s.__id__()
-        if self.variants:
-            for v in self.variants:
-                ret += v.__id__()
         return ret
 
 
@@ -322,19 +304,6 @@ class VideoItem(MediaItem):
                     # No next subitem
                     si = None
                     cont = 0
-            if si:
-                if (si.media_id or si.media):
-                    # If the file is on a removeable media
-                    if vfs.get_mountpoint_by_id(si.media_id):
-                        self.current_subitem = si
-                        return 1
-                    elif si.media and vfs.get_mountpoint_by_id(si.media.id):
-                        self.current_subitem = si
-                        return 1
-                else:
-                    # if not, it is always available
-                    self.current_subitem = si
-                    return 1
         self.current_subitem = None
         return not from_start
 
@@ -407,29 +376,7 @@ class VideoItem(MediaItem):
 
         # Add the configure stuff (e.g. set audio language)
         items += configure.get_items(self)
-
-        # If there are variants, make it possible to show them. This is
-        # always the default action then.
-        if not self.iscopy and self.variants and len(self.variants) > 1:
-            items = [ Action(_('Show variants'), self.show_variants) ] + items
-
-        # Add thumbnail option
-        if not self.iscopy and self.mode == 'file' and not self.variants and \
-               not self.subitems and \
-               (not self.image or not self.image.endswith('raw')):
-            items.append(Action(_('Create Thumbnail'), self.create_thumbnail,
-                                'create_thumbnail'))
         return items
-
-
-    def show_variants(self, arg=None):
-        """
-        show a list of variants in a menu
-        """
-        m = Menu(self.name, self.variants, reload_func=None,
-                 theme=self.skin_fxd)
-        m.item_types = 'video'
-        self.pushmenu(m)
 
 
     def dvd_vcd_title_menu(self):
@@ -467,25 +414,11 @@ class VideoItem(MediaItem):
         self.pushmenu(moviemenu)
 
 
-    def create_thumbnail(self):
-        """
-        create a thumbnail as image icon
-        """
-        kaa.thumb.videothumb(self.filename)
-        # delete the submenu that got us here
-        self.get_menustack().delete_submenu()
-
-
     def play(self, player=None, mplayer_options=''):
         """
         Play the item. The argument 'arg' can either be a player or
         extra mplayer arguments.
         """
-        if self.variants:
-            # if we have variants, play the first one as default
-            self.variants[0].play()
-            return
-
         if self.subitems:
             # if we have subitems (a movie with more than one file),
             # we start playing the first that is physically available
@@ -531,43 +464,6 @@ class VideoItem(MediaItem):
         if self.url.startswith('file://'):
             # normal playback of one file
             file = self.filename
-            if self.media_id:
-                # This file is on a media with media_id as id. Check
-                # if this media is inserted somewere
-                mp, file = util.resolve_media_mountdir(self.media_id,file)
-                if mp:
-                    # Found, mount the disc
-                    mp.mount()
-                else:
-                    # Not found, show box so the user can insert the
-                    # correct disc. Callback is this function again
-                    txt = (_('No media found for "%s".\n')+
-                           _('Please insert the media.')) % file
-                    box = ConfirmBox(txt, (_('Retry'), _('Abort')))
-                    box.connect(0, self.play)
-                    box.show()
-                    return
-
-            elif self.media:
-                # mount 'our' media
-                self.media.mount()
-
-        elif self.mode in ('dvd', 'vcd') and not self.filename and \
-                 not self.media:
-            # DVD/VCD playing a no media defined. We need to search if the
-            # disc is inserted somewere.
-            media = vfs.get_mountpoint_by_id(self.media_id)
-            if media:
-                self.media = media
-            else:
-                # Not found, show box so the user can insert the
-                # correct disc. Callback is this function again
-                txt = (_('No media found for "%s".\n')+
-                       _('Please insert the media.')) % self.url
-                box = ConfirmBox(txt, (_('Retry'), _('Abort')))
-                box.connect(0, self.play)
-                box.show()
-                return
 
         # get the correct player for this item and check the
         # rating if the player can play this item or not
@@ -622,7 +518,7 @@ class VideoItem(MediaItem):
         eventhandler for this item
         """
         # PLAY_END: do we have to play another file?
-        if self.subitems and not self.variants:
+        if self.subitems:
             if event == PLAY_END:
                 self.__set_next_available_subitem()
                 # Loop until we find a subitem which plays without error

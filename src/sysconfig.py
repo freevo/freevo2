@@ -52,9 +52,6 @@ CONF = struct()
 CONF.default_encoding = conf.ENCODING
 CONF.encoding = CONF.default_encoding
 
-# set default vfs dir
-CONF.vfs_dir = os.path.expanduser('~/.freevo/vfs')
-
 CONF.cachedir = conf.CACHEDIR
 CONF.datadir  = conf.DATADIR
 CONF.logdir   = conf.LOGDIR

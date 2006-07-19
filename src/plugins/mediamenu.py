@@ -42,13 +42,11 @@ from kaa.weakref import weakref
 import config
 
 import plugin
-import plugins.rom_drives
 
 from event import *
 from directory import DirItem
 from mainmenu import MainMenuItem
 from menu import Menu, Item
-from mediadb import FileListing, watcher
 from gui.windows import ProgressBox
 from games import machine
 
@@ -108,8 +106,7 @@ class MediaMenu(MainMenuItem):
         generating the menu and if something changes by pressing the EJECT
         button
         """
-        # stop mediadb.watcher
-        watcher.cwd(None)
+        # BEACON_FIXME: stop watcher
 
         # copy the "normal" items and add plugin data
         items = copy.copy(self.normal_items)
@@ -126,13 +123,14 @@ class MediaMenu(MainMenuItem):
 
         # add all plugin data
         for p in plugins_list:
-            if isinstance( p, plugins.rom_drives.rom_items ):
-                # do not show media from other menus
-                for i in p.items( self ):
-                    if i.type in dir_type:
-                        items.append(i)
-            else:
-                items += p.items( self )
+            # BEACON_FIXME
+            # if isinstance( p, plugins.rom_drives.rom_items ):
+            #     # do not show media from other menus
+            #     for i in p.items( self ):
+            #         if i.type in dir_type:
+            #             items.append(i)
+            # else:
+            items += p.items( self )
         return items
 
 
@@ -218,31 +216,18 @@ class MediaMenu(MainMenuItem):
             except:
                 log.exception('Error parsing %s' % str(item))
 
-        # check and update the listing
-        listing = FileListing(files)
-        if listing.num_changes > 10:
-            text = _('Scanning menu, be patient...')
-            popup = ProgressBox(text, full=listing.num_changes)
-            popup.show()
-            listing.update(popup.tick)
-            popup.destroy()
-        elif listing.num_changes:
-            listing.update()
-
         # Generate the media menu, we need to create a new listing (that sucks)
         # But with the listing we have, the order will be mixed up.
         self.normal_items = []
         for f in files:
-            listing = FileListing([f])
-            if listing.num_changes > 0:
-                # this shouldn't happen, but just in case
-                listing.update()
+            query = kaa.beacon.query(filename=f)
+            listing = query.get(filter='extmap')
 
             # get additional_data for the file
             title, add_args, is_dir = additional_data[f]
             if is_dir:
                 # directory
-                for item in listing.get_dir():
+                for item in listing.get('beacon:dir'):
                     d = DirItem(item, self, name = title,
                                 display_type = self.display_type,
                                 add_args = add_args)

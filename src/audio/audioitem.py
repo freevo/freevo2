@@ -11,50 +11,6 @@
 # Todo:        
 #
 # -----------------------------------------------------------------------
-# $Log$
-# Revision 1.68  2005/06/24 20:51:39  dischi
-# remove USER_END and self.parent.current_item
-#
-# Revision 1.67  2005/06/15 20:43:39  dischi
-# adjust to new menu code
-#
-# Revision 1.66  2005/06/12 18:49:53  dischi
-# adjust to new menu code
-#
-# Revision 1.65  2005/04/10 17:49:46  dischi
-# switch to new mediainfo module, remove old code now in mediadb
-#
-# Revision 1.64  2004/11/20 18:23:00  dischi
-# use python logger module for debug
-#
-# Revision 1.63  2004/09/13 19:35:35  dischi
-# replace player.get_singleton() with audioplayer()
-#
-# Revision 1.62  2004/09/10 19:50:06  outlyer
-# Copy fix from 1.5.1 to HEAD branch.
-#
-# Revision 1.61  2004/08/27 14:24:25  dischi
-# AudioItem is now based on MediaItem
-#
-# Revision 1.60  2004/08/01 10:42:51  dischi
-# make the player an "Application"
-#
-# Revision 1.59  2004/07/26 18:10:16  dischi
-# move global event handling to eventhandler.py
-#
-# Revision 1.58  2004/07/21 16:14:42  outlyer
-# Typo. I'll put the fix into the stable branch in a second.
-#
-# Revision 1.57  2004/07/17 08:18:55  dischi
-# unicode fixes
-#
-# Revision 1.56  2004/07/10 13:36:07  outlyer
-# Handle the situation where track number can't be converted into an int()
-#
-# Revision 1.55  2004/07/10 12:33:37  dischi
-# header cleanup
-#
-# -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al. 
 # Please see the file doc/CREDITS for a complete list of authors.

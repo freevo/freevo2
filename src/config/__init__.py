@@ -305,8 +305,8 @@ except NameError, e:
     
 try:
     OVERLAY_DIR
-    log.critical('OVERLAY_DIR is deprecated. Set vfs_dir in freevo.conf' +\
-                 '  to change the location of the virtual file system')
+    log.critical('OVERLAY_DIR is deprecated. Set overlay dir on beacon' +\
+                 '  startup to change the location of the virtual file system')
     sys.exit(0)
 except NameError, e:
     pass

@@ -41,10 +41,10 @@ import copy
 
 # kaa imports
 from kaa.weakref import weakref
+import kaa.beacon
 
 # freevo imports
 import plugin
-import mediadb
 
 # events covered by item
 from event import EJECT
@@ -67,6 +67,7 @@ class Item(object):
         self.info = {}
         self.menu = None
         self.type = type
+        self._image = None
 
         self.action = action
         if action:
@@ -78,45 +79,35 @@ class Item(object):
 
         if parent:
             self.parent = weakref(parent)
-            self.image = parent.image
-            if parent.type == 'main':
-                self.image = None
             self.skin_fxd = parent.skin_fxd
-            self.media = parent.media
         else:
             self.parent = None
-            self.image = None
             self.skin_fxd = None
-            self.media = None
 
         self.iscopy = False
         self.fxd_file = None
         self.__initialized = False
+        
 
+    def _get_image(self):
+        if self._image:
+            return self._image
+        thumb = self.info.get('thumbnail')
+        if thumb:
+            return thumb.get()
+        return None
 
+    def _set_image(self, image):
+        self._image = image
+
+    image = property(_get_image, _set_image, None, 'image object')
+
+    
     def __setitem__(self, key, value):
         """
         set the value of 'key' to 'val'
         """
         self.info[key] = value
-
-
-    def store_info(self, key, value):
-        """
-        store the key/value in metadata
-        """
-        if isinstance(self.info, mediadb.ItemInfo) and \
-               not self.info.store(key, value):
-            log.warning( u'unable to store info for \'%s\'' % self.name)
-
-
-    def delete_info(self, key):
-        """
-        delete entry for metadata
-        """
-        if isinstance(self.info, mediadb.ItemInfo):
-            return self.info.delete(key)
-        return False
 
 
     def copy(self):
@@ -218,14 +209,20 @@ class Item(object):
         self.menu.change_item(self, item)
 
         
+    def get_playlist(self):
+        """
+        Return playlist object.
+        """
+        if self.parent:
+            return self.parent.get_playlist()
+        return None
+
+
     def eventhandler(self, event):
         """
         Simple eventhandler for an item
         """
-        # EJECT event handling
-        if self.media and self.media.item == self and event == EJECT:
-            self.media.move_tray(dir='toggle')
-            return True
+        # BEACON_FIXME: EJECT event handling
 
         # call eventhandler from plugins
         for p in plugin.get('item') + plugin.get('item_%s' % self.type):
@@ -268,5 +265,13 @@ class Item(object):
         """
         if self.__initialized:
             return False
+        if not hasattr(self.info, 'scanned'):
+            return False
+        if not self.info.scanned():
+            self.info._beacon_request(self.__init_info__)
+            return False
+        if self.info.get('mtime') == self.info.get('freevo:mtime'):
+            return False
+        self.info['freevo:mtime'] = self.info.get('mtime')
         self.__initialized = True
         return True

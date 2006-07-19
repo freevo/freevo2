@@ -35,12 +35,12 @@ __all__ = [ 'MediaItem' ]
 import os
 import logging
 
-# freevo imports
-import mediadb
+# kaa imports
+import kaa.beacon
 
+# freevo imports
 from event import *
 from sysconfig import Unicode
-from mediadb.globals import *
 
 # menu imports
 from item import Item
@@ -59,45 +59,32 @@ class MediaItem(Item):
         Item.__init__(self, parent, type=type)
         self.url = 'unknown:' + str(self)
         self.filename = None
-        
-    def set_url(self, url, search_cover=True):
+
+
+    def set_url(self, url):
         """
         Set a new url to the item and adjust all attributes depending
-        on the url. Each MediaItem has to call this function. If info
-        is True, search for additional information in mediadb.
+        on the url. Each MediaItem has to call this function.
         """
-        if isinstance(url, mediadb.ItemInfo):
+        if isinstance(url, kaa.beacon.Item):
             self.info = url
             url = url.url
         else:
-            if url:
-                if url.find('://') > 0 and not url.startswith('file://') and \
-                       self.parent and self.parent.info:
-                    log.info('using subitem %s' % url)
-                    self.info = self.parent.info.get_subitem(url)
-                    self.info.url = url
-                else:
-                    log.error('please fix this for %s' % url)
-                    if url.find('://') == -1:
-                        url = 'file://' + url
-                    self.info = mediadb.get(url)
-                    url = self.info.url
-            else:
-                self.info = mediadb.item()
+            log.error('FIXME: bad url %s', url)
+            self.info = {}
 
-                self.url = url              # the url itself
-                self.network_play = True    # network url, like http
-                self.filename     = ''      # filename if it's a file:// url
-                self.mode         = ''      # the type (file, http, dvd...)
-                self.files        = None    # Files
-                self.mimetype     = ''      # extention or mode
-                self.name         = u''
-                return
+            self.url = url              # the url itself
+            self.network_play = True    # network url, like http
+            self.filename     = ''      # filename if it's a file:// url
+            self.mode         = ''      # the type (file, http, dvd...)
+            self.files        = None    # Files
+            self.mimetype     = ''      # extention or mode
+            self.name         = u''
+            return
 
         self.url = url
         self.files = Files()
-        if self.media:
-            self.files.read_only = True
+        # BEACON_FIXME: self.files.read_only = True
 
         self.mode = self.url[:self.url.find('://')]
 
@@ -112,21 +99,13 @@ class MediaItem(Item):
             self.mimetype = self.filename[self.filename.rfind('.')+1:].lower()
 
             try:
-                if self.parent.DIRECTORY_USE_MEDIAID_TAG_NAMES:
-                    self.name = self.info['title'] or self.name
+                if self.parent.DIRECTORY_USE_MEDIAID_TAG_NAMES and \
+                       self.info.get('title'):
+                    self.name = self.info.get('title')
             except:
                 pass
             if not self.name:
-                self.name = self.info[FILETITLE]
-
-            if search_cover:
-                cover = self.info[COVER]
-                if cover:
-                    self.image = cover
-                    if cover != self.filename and \
-                           cover[cover.rfind('/')+1:] == \
-                           self.filename[self.filename.rfind('/')+1:]:
-                        self.files.image = cover
+                self.name = self.info.get('name')
 
         else:
             # Mode is not file, it has to be a network url. Other
@@ -135,10 +114,9 @@ class MediaItem(Item):
             self.filename     = ''
             self.mimetype     = self.type
             if not self.name:
-                self.name = self.info[FILETITLE]
+                self.name = self.info.get('title')
             if not self.name:
                 self.name = Unicode(self.url)
-            self.image = self.info[COVER]
 
 
     def __getitem__(self, attr):
@@ -147,9 +125,9 @@ class MediaItem(Item):
         """
         if attr == 'length':
             try:
-                length = int(self.info['length'])
+                length = int(self.info.get('length'))
             except ValueError:
-                return self.info['length']
+                return self.info.get('length')
             except:
                 try:
                     length = int(self.length)
@@ -166,9 +144,9 @@ class MediaItem(Item):
 
         if attr == 'length:min':
             try:
-                length = int(self.info['length'])
+                length = int(self.info.get('length'))
             except ValueError:
-                return self.info['length']
+                return self.info.get('length')
             except:
                 try:
                     length = int(self.length)
@@ -184,7 +162,7 @@ class MediaItem(Item):
                 return 0
 
             try:
-                length = int(self.info['length'])
+                length = int(self.info.get('length'))
             except ValueError:
                 try:
                     length = int(self.length)
@@ -212,8 +190,6 @@ class MediaItem(Item):
         """
         if not Item.__init_info__(self):
             return False
-        if self.info and self.info[mediadb.NEEDS_UPDATE]:
-            self.info.cache.parse_item(self.info)
         return True
 
 
@@ -224,7 +200,7 @@ class MediaItem(Item):
         if mode == 'date' and self.filename:
             uf = unicode(self.filename, errors = 'replace')
             return u'%s%s' % (os.stat(self.filename).st_ctime, uf)
-        
+
         return u'0%s' % self.name
 
 

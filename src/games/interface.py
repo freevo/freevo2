@@ -94,9 +94,9 @@ class PluginInterface(plugin.MimetypePlugin):
                 break
             self.index = self.index + 1
 
-        all_files = listing.match_suffix(self.suffix())
-        all_files.sort(lambda l, o: cmp(l.basename.upper(),
-                                        o.basename.upper()))
+        all_files = []
+        for suffix in self.suffix():
+            all_files.extend(listing.get(suffix))
 
         for file in all_files:
             # TODO: Build snapshots of roms.

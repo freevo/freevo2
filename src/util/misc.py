@@ -38,8 +38,7 @@
 #
 # -----------------------------------------------------------------------------
 
-# util imports
-from vfs import abspath as vfs_abspath
+import os
 
 # http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/52560
 def unique(s):
@@ -118,9 +117,8 @@ def getimage(base, default=None):
     If not return the default
     """
     for suffix in ('.png', '.jpg', '.gif'):
-        image = vfs_abspath(base+suffix)
-        if image:
-            return image
+        if os.path.isfile(base+suffix):
+            return base+suffix
     return default
 
 

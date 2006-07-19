@@ -42,7 +42,6 @@ import copy
 import sysconfig
 import config
 import util
-from mediadb import Listing
 
 import logging
 log = logging.getLogger('video')
@@ -90,18 +89,15 @@ def update():
 
     files = []
 
-    discset = vfs.BASE + '/disc-set'
-    if os.path.isdir(discset):
-        listing = Listing(discset)
-        if listing.num_changes:
-            listing.update()
-        files += listing.match_suffix(['fxd'])
-
-    if config.VIDEO_SHOW_DATA_DIR:
-        listing = Listing(config.VIDEO_SHOW_DATA_DIR)
-        if listing.num_changes:
-            listing.update()
-        files += listing.match_suffix(['fxd'])
+    # BEACON_FIXME
+    # discset2 = ?? + '/disc-set'
+    # if os.path.isdir(discset2):
+    #     listing = Listing(discset)
+    #     files += listing.get('fxd')
+    # 
+    # if config.VIDEO_SHOW_DATA_DIR:
+    #     listing = Listing(config.VIDEO_SHOW_DATA_DIR)
+    #     files += listing.get('fxd')
 
     for info in fxditem.mimetype.parse(None, files, [], display_type='video'):
         if info.type != 'video':

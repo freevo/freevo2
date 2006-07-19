@@ -40,7 +40,6 @@ import os
 # freevo imports
 import config
 import gui.theme
-import mediadb
 import util
 import plugin
 
@@ -162,8 +161,8 @@ class MainMenu(Item):
 
         
     def reload(self):
-        # stop mediadb.watcher
-        mediadb.watcher.cwd(None)
+        # BEACON_FIXME: stop watcher
+        pass
 
         
     def get_skins(self):

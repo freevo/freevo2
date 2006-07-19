@@ -178,16 +178,17 @@ class MPlayer(mplayer.Application):
                 # if defined
                 additional_args += [ '-slang', config.DVD_SUBTITLE_PREF ]
 
-        if hasattr(item.media, 'devicename') and mode != 'file':
-            additional_args += [ '-dvd-device', item.media.devicename ]
-
-        elif mode == 'dvd':
-            # dvd on harddisc
-            additional_args += [ '-dvd-device', item.filename ]
-            url = url[:6] + url[url.rfind('/')+1:]
-
-        if item.media and hasattr(item.media,'devicename'):
-            additional_args += [ '-cdrom-device', item.media.devicename ]
+        # BEACON_FIXME
+        # if hasattr(??, 'devicename') and mode != 'file':
+        #     additional_args += [ '-dvd-device', ??.devicename ]
+        # 
+        # elif mode == 'dvd':
+        #     # dvd on harddisc
+        #     additional_args += [ '-dvd-device', item.filename ]
+        #     url = url[:6] + url[url.rfind('/')+1:]
+        # 
+        # if item.media and hasattr(??,'devicename'):
+        #     additional_args += [ '-cdrom-device', ??.devicename ]
 
         if item.selected_subtitle == -1:
             additional_args += [ '-noautosub' ]
@@ -290,17 +291,12 @@ class MPlayer(mplayer.Application):
 
             child.wait()
 
-        if item.subtitle_file:
-            mp, f = util.resolve_media_mountdir(item.subtitle_file)
-            if mp:
-                mp.mount()
-            command += ['-sub', f]
-
-        if item.audio_file:
-            mp, f = util.resolve_media_mountdir(item.audio_file)
-            if mp:
-                mp.mount()
-            command += ['-audiofile', f]
+        # BEACON_FIXME
+        # if item.subtitle_file:
+        #     command += ['-sub', ??? ]
+        # 
+        # if item.audio_file:
+        #     command += ['-audiofile', ??? ]
 
         if self.use_bmovl:
             self.fifoname = bmovlcanvas.create_fifo()

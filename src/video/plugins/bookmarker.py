@@ -81,7 +81,7 @@ class PluginInterface(ItemPlugin):
         actions = []
         if item[RESUME]:
             actions.append(Action(_('Resume playback'), self.resume))
-        if item.mode == 'file' and not item.variants and not item.subitems \
+        if item.mode == 'file' and not item.subitems \
                and os.path.exists(self.get_bookmarkfile(item.filename)):
             actions.append(Action(_('Bookmarks'), self.bookmark_menu))
         return actions
@@ -136,16 +136,16 @@ class PluginInterface(ItemPlugin):
         """
         # auto bookmark store
         if event == STOP:
-            if item.mode == 'file' and not item.variants and \
-                   not item.subitems and item.elapsed:
-                item.store_info(RESUME, item.elapsed)
+            if item.mode == 'file' and not item.subitems and item.elapsed:
+                # this will store in kaa.beacon
+                item[RESUME]= item.elapsed
             else:
                 log.info('auto-bookmark not supported for this item')
             return False
 
         # auto bookmark delete
         if event == PLAY_END:
-            item.delete_info(RESUME)
+            item[RESUME] = None
             return False
 
         # bookmark the current time into a file

@@ -12,24 +12,6 @@
 # Todo:
 #
 # -----------------------------------------------------------------------
-# $Log$
-# Revision 1.11  2005/06/09 20:04:02  dischi
-# move fxditem node parser from plugin to fxditem
-#
-# Revision 1.10  2005/05/01 17:36:41  dischi
-# remove some vfs calls were they are not needed
-#
-# Revision 1.9  2005/04/10 17:49:46  dischi
-# switch to new mediainfo module, remove old code now in mediadb
-#
-# Revision 1.8  2004/11/27 14:59:04  dischi
-# bugfix
-#
-# Revision 1.7  2004/09/13 19:34:24  dischi
-# move interface/fxdhandler into extra file
-#
-#
-# -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
 # Please see the file doc/CREDITS for a complete list of authors.
@@ -65,7 +47,6 @@ import config
 import util
 import plugin
 import fxditem
-from mediadb.globals import *
 
 # AudioItem
 from audioitem import AudioItem
@@ -93,7 +74,7 @@ class PluginInterface(plugin.MimetypePlugin):
         """
         return the list of suffixes this class handles
         """
-        return config.AUDIO_SUFFIX
+        return [ 'beacon:audio' ] + config.AUDIO_SUFFIX
 
 
     def get(self, parent, listing):
@@ -101,8 +82,9 @@ class PluginInterface(plugin.MimetypePlugin):
         return a list of items based on the files
         """
         items = []
-        for file in listing.match_suffix(config.AUDIO_SUFFIX):
-            items.append(AudioItem(file, parent))
+        for suffix in self.suffix():
+            for file in listing.get(suffix):
+                items.append(AudioItem(file, parent))
         return items
 
 
@@ -110,9 +92,6 @@ class PluginInterface(plugin.MimetypePlugin):
         """
         set informations for a diritem based on the content, etc.
         """
-        if not diritem.image:
-            diritem.image = diritem.info[EXTRA_COVER]
-                
         if not diritem.info.has_key('title') and diritem.parent:
             # ok, try some good name creation
             p_album  = diritem.parent['album']

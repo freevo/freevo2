@@ -48,7 +48,6 @@ from kaa.notifier import Timer
 import config
 import util
 from util.objectcache import ObjectCache
-import util.thumbnail
 
 # gui import
 from area import Area
@@ -58,34 +57,6 @@ import logging
 log = logging.getLogger('gui')
 
 
-class _Redraw(object):
-    """
-    Class handling redrawings in the listing area when a thumbnail
-    was created.
-    """
-    def __init__(self, function, gui_objects, screen, *args):
-        self.function = function
-        self.args = args
-        self.gui_objects = gui_objects
-        self.screen = screen
-        
-    def redraw(self, filename, thumb):
-        if not self.gui_objects:
-            # no gui objects, must be cleaned
-            return
-        elif not self.gui_objects[0].get_parent():
-            # object is hidden, so we shouldn't update
-            return
-        # delete current objects
-        while len(self.gui_objects):
-            o = self.gui_objects.pop()
-            o.unparent()
-        # call redraw function
-        self.function(*self.args)
-        # update the screen
-        self.screen.canvas.update()
-
-        
 class ListingArea(Area):
     """
     This class defines the ListingArea to draw menu listings for the area
@@ -480,10 +451,6 @@ class ListingArea(Area):
         and is only used once to split the huge update function into smaller
         once.
         """
-        cb = _Redraw(self.__draw_image_listing_item, gui_objects, self.screen,
-                     choice, (x, y), settings, val, hspace, vspace,
-                     gui_objects, False)
-
         height = val.height
         if settings.type == 'image+text':
             height += int(1.1 * val.font.height)
@@ -509,7 +476,7 @@ class ListingArea(Area):
 
         image = self.imagelib.item_image(choice, (val.width, val.height),
                                          self.settings.icon_dir, force=True,
-                                         bg=True, callback=cb.redraw)
+                                         bg=True)
         if image:
             i_w, i_h = image.width, image.height
 
@@ -558,10 +525,6 @@ class ListingArea(Area):
 
         image = self.__cache_listing[0].image
         
-        if image and util.thumbnail.need_thumbnailing(image):
-            # create thumbnail
-            util.thumbnail.load(image)
-
         if len(self.__cache_listing) == 1:
             # Nothing more to cache, return False to stop this callback
             self.__cache_listing = []
