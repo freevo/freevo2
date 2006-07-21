@@ -69,7 +69,6 @@
 # -----------------------------------------------------------------------
 #
 # Changes:
-#    o Generate ROM_DRIVES from /etc/fstab on startup
 #    o Added FREEVO_CONF_VERSION and LOCAL_CONF_VERSION to keep the three
 #      different files on sync
 #
@@ -151,18 +150,6 @@ DEFAULT_VOLUME      = 40              # Set default volume level.
 DEV_MIXER           = '/dev/mixer'    # mixer device 
 
 CONFIRM_SHUTDOWN    = 1               # ask before shutdown
-
-#
-# Physical ROM drives, multiple ones can be specified
-# by adding comma-seperated and quoted entries.
-#
-# Format [ ('mountdir1', 'devicename1', 'displayed name1'),
-#          ('mountdir2', 'devicename2', 'displayed name2'), ...]
-#
-# Set to None to autodetect drives in during startup from /etc/fstab,
-# set to [] to disable rom drive support at all
-#
-ROM_DRIVES = None
 
 #
 # hide discs from the wrong menu (e.g. VCDs in audio menu) and empty discs
@@ -260,10 +247,6 @@ MMPYTHON_CREATE_MD5_ID = 0
 # Examples:
 # plugin.remove(plugin_tv) or
 # plugin.remove('tv') will remove the tv module from the main menu
-# plugin.remove(rom_plugins['image']) will remove the rom drives from the
-#   image main menu,
-# plugin.remove('rom_drives.rom_items') will remove the rom drives from all
-#   menus
 
 # basic input
 plugin.activate('input')
@@ -278,22 +261,6 @@ plugin.activate('shutdown', level=50)
 # FIXME: games is broken
 # if CONF.xmame or CONF.snes:
 #     plugin.activate('games', level=45)
-
-
-# ROM drive support
-# BEACON_FIXME:
-# plugin.activate('rom_drives')
-
-# autostarter when inserting roms while Freevo is in the MAIN MENU
-# BEACON_FIXME
-# plugin.activate('rom_drives.autostart')
-
-# add the rom drives to each sub main menu
-# rom_plugins = {}
-# BEACON_FIXME
-# for t in ('video', 'audio', 'image', 'games'):
-#     rom_plugins[t] = plugin.activate('rom_drives.rom_items', type=t, level=50)
-
 
 # mixer
 plugin.activate('mixer')
