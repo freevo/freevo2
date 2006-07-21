@@ -107,7 +107,7 @@ class MenuStack(object):
         if refresh:
             self.refresh(True)
 
-            
+
     def back_one_menu(self, refresh=True):
         """
         Go back one menu page.
@@ -153,7 +153,7 @@ class MenuStack(object):
         # set menu.pos and append
         menu.pos = len(self.menustack)
         self.menustack.append(menu)
-        
+
         # Check the new menu. Maybe we need to set 'inside_menu' if we
         # switch between MenuApplication(s) and also set a new theme
         # for the global Freevo look
@@ -194,14 +194,14 @@ class MenuStack(object):
         Refresh the stack and redraw it.
         """
         menu = self.menustack[-1]
-        
+
         if isinstance(menu, Menu) and menu.autoselect and \
                len(menu.choices) == 1:
             # do not show a menu with only one item. Go back to
             # the previous page
             log.info('delete menu with only one item')
             return self.back_one_menu()
-            
+
         if not isinstance(menu, Menu):
             # The new menu is no 'Menu', it is a 'MenuApplication'
             # Mark both the previous shown Menu (app or self) and the
@@ -248,7 +248,7 @@ class MenuStack(object):
             if new_menu:
                 self.menustack[-1] = new_menu
                 menu = new_menu
-                
+
         # set the theme
         if isinstance(menu, Menu):
             self.set_theme(menu.theme)
@@ -271,20 +271,27 @@ class MenuStack(object):
         Return menustack item.
         """
         return self.menustack[attr]
-    
+
 
     def __setitem__(self, attr, value):
         """
         Set menustack item.
         """
         self.menustack[attr] = value
-    
+
 
     def get_selected(self):
         """
         Return the current selected item in the current menu.
         """
         return self.menustack[-1].selected
+
+
+    def get_menu(self):
+        """
+        Return the current menu.
+        """
+        return self.menustack[-1]
 
     
     def eventhandler(self, event):
@@ -293,25 +300,6 @@ class MenuStack(object):
         """
         menu = self.menustack[-1]
 
-        if isinstance(menu, Menu) and menu.cols == 1:
-            if config.MENU_ARROW_NAVIGATION:
-                if event == MENU_LEFT:
-                    event = MENU_BACK_ONE_MENU
-                elif event == MENU_RIGHT:
-                    event = MENU_SELECT
-
-            else:
-                if event == MENU_LEFT:
-                    event = MENU_PAGEUP
-                elif event == MENU_RIGHT:
-                    event = MENU_PAGEDOWN
-
-        if isinstance(menu, Menu) and menu.rows == 1:
-            if event == MENU_LEFT:
-                event = MENU_UP
-            if event == MENU_RIGHT:
-                event = MENU_DOWN
-            
         if event == MENU_GOTO_MAINMENU:
             while len(self.menustack) > 1:
                 menu = self.menustack.pop()
@@ -322,119 +310,23 @@ class MenuStack(object):
             self.back_one_menu()
             return True
 
+        if menu.eventhandler(event):
+            self.refresh()
+            return True
+            
         # handle empty menus
         if not menu.choices:
             if event in ( MENU_SELECT, MENU_SUBMENU, MENU_PLAY_ITEM):
                 self.back_one_menu()
                 return True
-            menu = self.menustack[-2]
-            if hasattr(menu.selected, 'eventhandler') and \
-                   menu.selected.eventhandler:
-                if menu.selected.eventhandler(event):
-                    return True
             return False
 
         # handle menu not instance of class Menu
+        # APP_FIXME: make tvguide a Menu
         if not isinstance(menu, Menu):
             return False
 
-        if event == MENU_UP:
-            menu.select(-menu.cols)
-            self.refresh()
+        if menu.selected and menu.selected.eventhandler(event):
             return True
-
-
-        if event == MENU_DOWN:
-            menu.select(menu.cols)
-            self.refresh()
-            return True
-
-
-        if event == MENU_PAGEUP:
-            menu.select(-(menu.rows * menu.cols))
-            self.refresh()
-            return True
-
-
-        if event == MENU_PAGEDOWN:
-            menu.select(menu.rows * menu.cols)
-            self.refresh()
-            return True
-
-
-        if event == MENU_LEFT:
-            menu.select(-1)
-            self.refresh()
-            return True
-
-
-        if event == MENU_RIGHT:
-            menu.select(1)
-            self.refresh()
-            return True
-
-
-        if event == MENU_PLAY_ITEM and hasattr(menu.selected, 'play'):
-            menu.selected.play()
-            self.refresh()
-            return True
-
-
-        if event == MENU_CHANGE_SELECTION:
-            menu.select(event.arg)
-            self.refresh()
-            return True
-        
-        if event == MENU_SELECT or event == MENU_PLAY_ITEM:
-            actions = menu.selected.get_actions()
-            if not actions:
-                OSD_MESSAGE.post(_('No action defined for this choice!'))
-            else:
-                actions[0]()
-            return True
-
-
-        if event == MENU_SUBMENU:
-            if menu.submenu:
-                return True
-
-            actions = menu.selected.get_actions()
-            if actions and len(actions) > 1:
-                items = []
-                for a in actions:
-                    items.append(Item(menu.selected, a))
-                theme = None
-
-                if menu.selected.skin_fxd:
-                    theme = menu.selected.skin_fxd
-
-                for i in items:
-                    if not menu.selected.type == 'main':
-                        i.image = menu.selected.image
-                    if hasattr(menu.selected, 'display_type'):
-                        i.display_type = menu.selected.display_type
-                    else:
-                        i.display_type = menu.selected.type
-
-                s = Menu(menu.selected.name, items, theme=theme)
-                s.submenu = True
-                s.item = menu.selected
-                self.pushmenu(s)
-            return True
-
-
-        if event == MENU_CALL_ITEM_ACTION:
-            log.info('calling action %s' % event.arg)
-            for a in menu.selected.get_actions():
-                if a.shortcut == event.arg:
-                    a()
-                    return True
-            log.info('action %s not found' % event.arg)
-
-
-        if hasattr(menu.selected, 'eventhandler') and \
-               menu.selected.eventhandler:
-            if menu.selected.eventhandler(event):
-                return True
 
         return False

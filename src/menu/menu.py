@@ -38,8 +38,12 @@ import logging
 # kaa imports
 from kaa.weakref import weakref
 
+# freevo imports
+import config
+
 # menu imports
 from item import Item
+from event import *
 
 # get logging object
 log = logging.getLogger()
@@ -66,12 +70,12 @@ class Menu(object):
         self.state = 0
         # position in the menu stack
         self.pos = -1
-        
+
         # set items
         self.choices = []
         self.selected = None
         self.set_items(choices, False)
-        
+
         # skin theme for this menu
         self.theme = None
         if theme:
@@ -93,14 +97,14 @@ class Menu(object):
 
         # Reference to the item that created this menu
         self.item = None
-        
+
         # Autoselect menu if it has only one item
         self.autoselect = False
 
         # If the menu is the current visible and the menu stack itself is
         # visible, this variable is True
         self.visible= False
-        
+
         # how many rows and cols does the menu has
         # (will be changed by the skin code)
         self.cols = 1
@@ -122,7 +126,7 @@ class Menu(object):
         """
         self.visible = False
 
-        
+
     def set_items(self, items, refresh=True):
         """
         Set/replace the items in this menu. If refresh is True, the menu
@@ -170,11 +174,11 @@ class Menu(object):
                 else:
                     # no item in the list
                     self.select(None)
-                
+
         if refresh and self.stack:
             self.stack.refresh()
-            
-        
+
+
     def select(self, item):
         """
         Set the selection to a specific item in the list. If item in an int
@@ -215,7 +219,7 @@ class Menu(object):
         """
         return self.selected
 
-    
+
     def change_item(self, old, new):
         """
         Replace the item 'old' with the 'new'.
@@ -230,7 +234,114 @@ class Menu(object):
         old.menu = None
         new.menu = weakref(self)
 
-        
+
+    def eventhandler(self, event):
+        """
+        Handle events for this menu page.
+        """
+
+        if not self.choices:
+            return False
+
+        if self.cols == 1:
+            if config.MENU_ARROW_NAVIGATION:
+                if event == MENU_LEFT:
+                    event = MENU_BACK_ONE_MENU
+                elif event == MENU_RIGHT:
+                    event = MENU_SELECT
+            else:
+                if event == MENU_LEFT:
+                    event = MENU_PAGEUP
+                elif event == MENU_RIGHT:
+                    event = MENU_PAGEDOWN
+
+        if self.rows == 1:
+            if event == MENU_LEFT:
+                event = MENU_UP
+            if event == MENU_RIGHT:
+                event = MENU_DOWN
+
+        if event == MENU_UP:
+            self.select(-self.cols)
+            return True
+
+        if event == MENU_DOWN:
+            self.select(self.cols)
+            return True
+
+        if event == MENU_PAGEUP:
+            self.select(-(self.rows * self.cols))
+            return True
+
+        if event == MENU_PAGEDOWN:
+            self.select(self.rows * self.cols)
+            return True
+
+        if event == MENU_LEFT:
+            self.select(-1)
+            return True
+
+        if event == MENU_RIGHT:
+            self.select(1)
+            return True
+
+        if event == MENU_PLAY_ITEM and hasattr(self.selected, 'play'):
+            self.selected.play()
+            return True
+
+        if event == MENU_CHANGE_SELECTION:
+            self.select(event.arg)
+            return True
+
+        if event == MENU_SELECT or event == MENU_PLAY_ITEM:
+            actions = self.selected.get_actions()
+            if not actions:
+                OSD_MESSAGE.post(_('No action defined for this choice!'))
+            else:
+                actions[0]()
+            return True
+
+        if event == MENU_SUBMENU:
+            if self.submenu or not self.stack:
+                return False
+
+            actions = self.selected.get_actions()
+            if not actions or len(actions) <= 1:
+                return False
+            items = []
+            for a in actions:
+                items.append(Item(self.selected, a))
+            theme = None
+
+            if self.selected.skin_fxd:
+                theme = self.selected.skin_fxd
+
+            for i in items:
+                if not self.selected.type == 'main':
+                    i.image = self.selected.image
+                if hasattr(self.selected, 'display_type'):
+                    i.display_type = self.selected.display_type
+                else:
+                    i.display_type = self.selected.type
+
+            s = Menu(self.selected.name, items, theme=theme)
+            s.submenu = True
+            s.item = self.selected
+            self.stack.pushmenu(s)
+            return True
+
+        if event == MENU_CALL_ITEM_ACTION:
+            log.info('calling action %s' % event.arg)
+            for action in self.selected.get_actions():
+                if action.shortcut == event.arg:
+                    action()
+                    return True
+            log.info('action %s not found' % event.arg)
+            return True
+
+        return False
+
+
     def __del__(self):
         """
         Delete function of memory debugging
