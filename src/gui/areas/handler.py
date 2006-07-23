@@ -145,9 +145,6 @@ class Handler(object):
                                        len(theme.sets[menu].style)
             return
             
-        if menu.force_skin_layout != -1:
-            return
-        
         if theme.special_menu.has_key(menu.item_types):
             area = theme.special_menu[menu.item_types]
         else:
@@ -259,9 +256,6 @@ class Handler(object):
                 self.display_style[menu] = 0
             return self.display_style[menu]
         
-        if menu:            
-            if menu.force_skin_layout != -1:
-                return menu.force_skin_layout
         return self.display_style['menu']
 
 
@@ -308,9 +302,6 @@ class Handler(object):
         
         if self.type == 'menu':
             style = self.__get_display_style(object)
-
-            if object.force_skin_layout != -1:
-                style = object.force_skin_layout
 
             # get the correct <menu>
             if object.item_types and \

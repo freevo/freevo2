@@ -57,8 +57,7 @@ class Menu(object):
     next_id = 0
 
     def __init__(self, heading, choices=[], theme=None,
-                 reload_func = None, item_types = None,
-                 force_skin_layout = -1):
+                 reload_func = None, item_types = None):
 
         self.heading = heading
         self.stack   = None
@@ -90,7 +89,6 @@ class Menu(object):
         # or None and the old menu will be reused
         self.reload_func       = reload_func
         self.item_types        = item_types
-        self.force_skin_layout = force_skin_layout
 
         # Menu type
         self.submenu = False
