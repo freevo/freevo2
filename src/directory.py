@@ -583,7 +583,7 @@ class DirItem(Playlist):
         else:
             # normal menu build
             item_menu = menu.Menu(self.name, items, reload_func=self.reload,
-                                  item_types = display_type)
+                                  type = display_type)
 
             item_menu.autoselect = self.DIRECTORY_AUTOPLAY_SINGLE_ITEM
             self.pushmenu(item_menu)

@@ -251,7 +251,7 @@ class MediaMenu(MainMenuItem):
         items = self.main_menu_generate()
 
         type = '%s main menu' % self.display_type
-        item_menu = Menu(menutitle, items, item_types = type,
+        item_menu = Menu(menutitle, items, type = type,
                          reload_func = self.reload)
         item_menu.autoselect = True
         item_menu.skin_force_text_view = self.force_text_view

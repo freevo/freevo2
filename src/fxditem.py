@@ -186,7 +186,7 @@ class Container(Item):
         """
         show all items
         """
-        moviemenu = Menu(self.name, self.items, item_types=self.display_type)
+        moviemenu = Menu(self.name, self.items, type=self.display_type)
         self.pushmenu(moviemenu)
 
 

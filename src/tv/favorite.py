@@ -83,7 +83,7 @@ class FavoriteItem(Item):
         items = []
         for action in self.actions():
             items.append(Item(self, action))
-        s = Menu(self, items, item_types = 'tv favorite menu')
+        s = Menu(self, items, type = 'tv favorite menu')
         s.submenu = True
         s.infoitem = self
         self.pushmenu(s)

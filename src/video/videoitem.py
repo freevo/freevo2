@@ -410,7 +410,7 @@ class VideoItem(MediaItem):
             items.append(i)
 
         moviemenu = Menu(self.name, items, theme=self.skin_fxd)
-        moviemenu.item_types = 'video'
+        moviemenu.type = 'video'
         self.pushmenu(moviemenu)
 
 

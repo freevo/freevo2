@@ -152,7 +152,7 @@ class MainMenu(Item):
         items = []
         for p in plugin.get('mainmenu'):
             items += p.items(self)
-        menu = Menu(_('Freevo Main Menu'), items, item_types='main',
+        menu = Menu(_('Freevo Main Menu'), items, type='main',
                     theme = gui.theme.get(), reload_func=self.reload)
         menu.autoselect = True
         self.menuw = MenuWidget()

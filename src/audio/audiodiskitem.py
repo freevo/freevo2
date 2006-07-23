@@ -126,5 +126,5 @@ class AudioDiskItem(Playlist):
         if title[0] == '[' and title[-1] == ']':
             title = self.name[1:-1]
 
-        item_menu = Menu(title, items, item_types = self.display_type)
+        item_menu = Menu(title, items, type = self.display_type)
         self.pushmenu(item_menu)

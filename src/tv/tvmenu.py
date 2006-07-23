@@ -138,7 +138,7 @@ class TVMenu(MainMenuItem):
         for p in plugins_list:
             items += p.items(self)
 
-        m = Menu(_('TV Main Menu'), items, item_types = 'tv main menu')
+        m = Menu(_('TV Main Menu'), items, type = 'tv main menu')
         m.infoitem = Info()
         self.pushmenu(m)
 

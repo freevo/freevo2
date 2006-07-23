@@ -172,7 +172,7 @@ class ProgramItem(Item):
         items.append(ActionItem(_('Add to favorites'), self,
                                 self.create_favorite))
 
-        s = Menu(self, items, item_types = 'tv program menu')
+        s = Menu(self, items, type = 'tv program menu')
         s.submenu = True
         s.infoitem = self
         self.pushmenu(s)
@@ -202,7 +202,7 @@ class ProgramItem(Item):
         items = []
         for prog in kaa.epg.search(channel=self.channel):
             items.append(ProgramItem(prog, self))
-        cmenu = Menu(self.channel.name, items, item_types = 'tv program menu')
+        cmenu = Menu(self.channel.name, items, type = 'tv program menu')
         # FIXME: the percent values need to be calculated
         # cmenu.table = (15, 15, 70)
         self.pushmenu(cmenu)

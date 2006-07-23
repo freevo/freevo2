@@ -145,8 +145,8 @@ class Handler(object):
                                        len(theme.sets[menu].style)
             return
             
-        if theme.special_menu.has_key(menu.item_types):
-            area = theme.special_menu[menu.item_types]
+        if theme.special_menu.has_key(menu.type):
+            area = theme.special_menu[menu.type]
         else:
             area = theme.default_menu['default']
 
@@ -304,9 +304,9 @@ class Handler(object):
             style = self.__get_display_style(object)
 
             # get the correct <menu>
-            if object.item_types and \
-                   theme.special_menu.has_key(object.item_types):
-                area_definitions = theme.special_menu[object.item_types]
+            if object.type and \
+                   theme.special_menu.has_key(object.type):
+                area_definitions = theme.special_menu[object.type]
             else:
                 self.__scan_for_text_view(object)
 

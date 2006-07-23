@@ -57,7 +57,7 @@ class Menu(object):
     next_id = 0
 
     def __init__(self, heading, choices=[], theme=None,
-                 reload_func = None, item_types = None):
+                 reload_func = None, type = None):
 
         self.heading = heading
         self.stack   = None
@@ -87,8 +87,8 @@ class Menu(object):
 
         # Called when a child menu returns. This function returns a new menu
         # or None and the old menu will be reused
-        self.reload_func       = reload_func
-        self.item_types        = item_types
+        self.reload_func = reload_func
+        self.type = type
 
         # Menu type
         self.submenu = False
