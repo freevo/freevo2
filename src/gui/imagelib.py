@@ -181,7 +181,7 @@ def item_image(item, size, icon_dir, force=False, bg=False):
             elif os.path.isfile('%s/mimetypes/unknown.png' % icon_dir):
                 imagefile = '%s/mimetypes/unknown.png' % icon_dir
 
-        image = imagefile
+        image = load(imagefile)
 
         if not image:
             return None
