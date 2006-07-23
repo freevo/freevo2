@@ -36,6 +36,7 @@ import copy
 import logging
 
 # kaa imports
+import kaa.beacon
 from kaa.weakref import weakref
 
 # freevo imports
@@ -82,6 +83,9 @@ class MediaMenu(MainMenuItem):
         self.force_text_view = force_text_view
         self.display_type = type
         self.item_menu = None
+
+        kaa.beacon.signals['media.add'].connect(self.media_change)
+        kaa.beacon.signals['media.remove'].connect(self.media_change)
         
         # init the style how to handle discs
         if config.HIDE_UNUSABLE_DISCS:
@@ -121,15 +125,17 @@ class MediaMenu(MainMenuItem):
         # get the dir_type
         dir_type = self.dir_types.get( self.display_type, [] )
 
+        for media in kaa.beacon.media:
+            if media.mountpoint == '/':
+                continue
+            listing = kaa.beacon.wrap(media.root, filter='extmap')
+            for p in plugin.mimetype(self.display_type):
+                items.extend(p.get(self, listing))
+            for d in listing.get('beacon:dir'):
+                items.append(DirItem(d, self, name=media.label,
+                                     display_type = self.display_type))
         # add all plugin data
         for p in plugins_list:
-            # BEACON_FIXME
-            # if isinstance( p, plugins.rom_drives.rom_items ):
-            #     # do not show media from other menus
-            #     for i in p.items( self ):
-            #         if i.type in dir_type:
-            #             items.append(i)
-            # else:
             items += p.items( self )
         return items
 
@@ -268,6 +274,11 @@ class MediaMenu(MainMenuItem):
         menu.choices = new_choices
         return menu
 
+
+    def media_change(self, media):
+        if self.item_menu:
+            self.item_menu.set_items(self.main_menu_generate())
+        
 
     def eventhandler(self, event):
         """

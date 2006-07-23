@@ -270,8 +270,12 @@ class Item(object):
         if not self.info.scanned():
             self.info._beacon_request(self.__init_info__)
             return False
-        if self.info.get('mtime') == self.info.get('freevo:mtime'):
+
+        key = 'freevo:mtime'
+        if hasattr(self, 'display_type'):
+            key += ':' + self.display_type
+        if self.info.get('mtime') == self.info.get(key):
             return False
-        self.info['freevo:mtime'] = self.info.get('mtime')
+        self.info[key] = self.info.get('mtime')
         self.__initialized = True
         return True

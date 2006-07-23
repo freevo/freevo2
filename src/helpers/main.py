@@ -160,6 +160,7 @@ import gui.widgets
 import gui.theme
 import util
 import plugin
+import beacon
 
 from mainmenu import MainMenu
 
@@ -169,7 +170,6 @@ import fxditem
 
 # freevo core imports
 import freevo.ipc
-import beacon
 
 class Splashscreen(gui.areas.Area):
     """

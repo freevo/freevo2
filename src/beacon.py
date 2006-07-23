@@ -1,3 +1,4 @@
+import sys
 import kaa.beacon
 
 class ExtMap(dict):
@@ -30,3 +31,8 @@ def extmap_filter(results):
     return extmap
 
 kaa.beacon.register_filter('extmap', extmap_filter)
+try:
+    kaa.beacon.connect()
+except kaa.beacon.ConnectError:
+    print 'unable to connect to beacon server'
+    sys.exit(1)

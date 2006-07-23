@@ -240,12 +240,16 @@ class DirItem(Playlist):
             display_type = self.display_type or 'all'
             if self.display_type == 'tv':
                 display_type = 'video'
+            if not self.info['freevo:mtime:%s' % display_type]:
+                return 0
             return self['num_%s_items' % display_type] + self['num_dir_items']
 
         if key == 'num_play_items':
             display_type = self.display_type
             if self.display_type == 'tv':
                 display_type = 'video'
+            if not self.info['freevo:mtime:%s' % display_type]:
+                return 0
             return self['num_%s_items' % display_type]
 
         if key in ( 'freespace', 'totalspace' ):
