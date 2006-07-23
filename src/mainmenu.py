@@ -107,38 +107,6 @@ class MainMenuItem(Item):
         return [ a ]
 
     
-class SkinSelectItem(Item):
-    """
-    Item for the skin selector
-    """
-    def __init__(self, parent, name, image, skin):
-        Item.__init__(self, parent)
-        self.name  = name
-        self.image = image
-        self.skin  = skin
-
-
-    def actions(self):
-        """
-        Return the select function to load that skin
-        """
-        return [ Action(self.name, self.select) ]
-
-
-    def select(self):
-        """
-        Load the new skin and rebuild the main menu
-        """
-        # load new theme
-        theme = gui.theme.set_base_fxd(self.skin)
-        # set it to the main menu as used theme
-        pos = self.get_menustack()[0].theme = theme
-        # and go back
-        self.get_menustack().back_one_menu()
-
-
-
-
 class MainMenu(Item):
     """
     This class handles the main menu. It will start the main menu widget
@@ -152,8 +120,7 @@ class MainMenu(Item):
         items = []
         for p in plugin.get('mainmenu'):
             items += p.items(self)
-        menu = Menu(_('Freevo Main Menu'), items, type='main',
-                    theme = gui.theme.get(), reload_func=self.reload)
+        menu = Menu(_('Freevo Main Menu'), items, type='main', reload_func=self.reload)
         menu.autoselect = True
         self.menuw = MenuWidget()
         self.menuw.pushmenu(menu)
@@ -201,15 +168,5 @@ class MainMenu(Item):
         """
         Automatically perform actions depending on the event, e.g. play DVD
         """
-        # pressing DISPLAY on the main menu will open a skin selector
-        # (only for the new skin code)
-        if event == MENU_CHANGE_STYLE:
-            items = []
-            for name, image, skinfile in self.get_skins():
-                items += [ SkinSelectItem(self, name, image, skinfile) ]
-
-            self.pushmenu(Menu(_('Skin Selector'), items))
-            return True
-
         # give the event to the next eventhandler in the list
         return Item.eventhandler(self, event)

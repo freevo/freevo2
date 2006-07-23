@@ -74,7 +74,6 @@ class PluginInterface(plugin.DaemonPlugin):
 
         # register for signals
         application.signals['application change'].connect(self.app_change)
-        gui.theme.signals['theme change'].connect(self.theme_change)
 
         self.poll_interval  = 30
         self.plugins        = None
@@ -193,8 +192,18 @@ class PluginInterface(plugin.DaemonPlugin):
         React on toggle fullscreen, hide or show the bar, but not update
         the screen itself, this is done by the app later.
         """
-        # get theme informations
-        self.theme_change()
+        # get gui informations
+        w = gui.display.width
+        h = config.GUI_OVERSCAN_Y + 60
+
+        f = gui.theme.image('idlebar')
+
+        if self.barfile != f:
+            if self.bar:
+                self.container.remove_child(self.bar)
+            self.barfile = f
+            self.bar = gui.widgets.Image(self.barfile, (0,0), (w, h))
+            self.container.add_child(self.bar)
         
         if fade:
             fade = config.GUI_FADE_STEPS
@@ -216,26 +225,6 @@ class PluginInterface(plugin.DaemonPlugin):
         return True
 
 
-    def theme_change(self):
-        """
-        Signal handler for gui theme changes.
-        """
-        w = gui.display.width
-        h = config.GUI_OVERSCAN_Y + 60
-
-        f = gui.theme.image('idlebar')
-
-        if self.barfile != f:
-            if self.bar:
-                self.container.remove_child(self.bar)
-            self.barfile = f
-            self.bar = gui.widgets.Image(self.barfile, (0,0), (w, h))
-            self.container.add_child(self.bar)
-            changed = True
-
-        self.update()
-
-        
     def eventhandler(self, event):
         """
         catch the IDENTIFY_MEDIA event to redraw the skin (maybe the cd status

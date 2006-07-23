@@ -103,8 +103,7 @@ def update():
         if info.type != 'video':
             continue
         k = os.path.splitext(os.path.basename(info.files.fxd_file))[0]
-        tv_shows[k] = (info.image, info.info,
-                                   info.mplayer_options, info.skin_fxd)
+        tv_shows[k] = (info.image, info.info, info.mplayer_options)
         if hasattr(info, '__fxd_rom_info__'):
             for fo in info.__fxd_files_options__:
                 discset[fo['file-id']] = fo['mplayer-options']

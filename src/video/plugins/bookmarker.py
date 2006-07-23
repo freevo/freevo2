@@ -126,7 +126,7 @@ class PluginInterface(ItemPlugin):
             items.append(copy)
 
         if items:
-            moviemenu = Menu(item.name, items, theme=item.skin_fxd)
+            moviemenu = Menu(item.name, items)
             item.pushmenu(moviemenu)
 
 

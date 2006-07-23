@@ -79,10 +79,8 @@ class Item(object):
 
         if parent:
             self.parent = weakref(parent)
-            self.skin_fxd = parent.skin_fxd
         else:
             self.parent = None
-            self.skin_fxd = None
 
         self.iscopy = False
         self.fxd_file = None

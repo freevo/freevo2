@@ -94,7 +94,7 @@ def audio_selection(item):
         action = ActionItem(name, item, set_variable)
         action.parameter('selected_audio', a['id'])
         menu_items.append(action)
-    item.pushmenu(Menu(_('Audio Menu'), menu_items, theme=item.skin_fxd))
+    item.pushmenu(Menu(_('Audio Menu'), menu_items))
 
 
 def subtitle_selection(item):
@@ -108,7 +108,7 @@ def subtitle_selection(item):
         action = ActionItem(item.info['subtitles'][s], item, set_variable)
         action.parameter('selected_subtitle', s)
         menu_items.append(action)
-    item.pushmenu(Menu(_('Subtitle Menu'), menu_items, theme=item.skin_fxd))
+    item.pushmenu(Menu(_('Subtitle Menu'), menu_items))
 
 
 def chapter_selection(item):
@@ -126,7 +126,7 @@ def chapter_selection(item):
             a = ActionItem(c.name, item, start_chapter)
             a.parameter('-ss %s' % c.pos)
             menu_items.append(a)
-    item.pushmenu(Menu(_('Chapter Menu'), menu_items, theme=item.skin_fxd))
+    item.pushmenu(Menu(_('Chapter Menu'), menu_items))
 
 
 def subitem_selection(item):
@@ -138,7 +138,7 @@ def subitem_selection(item):
         a = ActionItem(_('Play chapter %s') % (pos+1), item, start_subitem)
         a.parameter(pos)
         menu_items.append(a)
-    item.pushmenu(Menu(_('Chapter Menu'), menu_items, theme=item.skin_fxd))
+    item.pushmenu(Menu(_('Chapter Menu'), menu_items))
 
 
 def toggle(item, name, variable):
@@ -197,4 +197,4 @@ def get_menu(item):
     Return a complete menu for configure options.
     """
     p = ActionItem(_('Play'), item, play_movie)
-    return Menu(_('Config Menu'), get_items(item) + [ p ], theme=item.skin_fxd)
+    return Menu(_('Config Menu'), get_items(item) + [ p ])

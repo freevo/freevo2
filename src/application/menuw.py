@@ -55,8 +55,6 @@ class MenuWidget(Application, MenuStack):
         areas = ('screen', 'title', 'subtitle', 'view', 'listing', 'info')
         # create engine
         self.engine = gui.areas.Handler('menu', areas)
-        # set gui theme engine
-        self.set_theme = gui.theme.set
 
 
     def show(self):

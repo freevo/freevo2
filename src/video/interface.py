@@ -105,9 +105,6 @@ class PluginInterface(plugin.MimetypePlugin):
             diritem.info.set_variables(tvinfo[1])
             if not diritem.image:
                 diritem.image = tvinfo[0]
-            if not diritem.skin_fxd:
-                diritem.skin_fxd = tvinfo[3]
-
 
     def database(self):
         return database

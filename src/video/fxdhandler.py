@@ -172,6 +172,4 @@ def parse_disc_set(fxd, node):
     if not item.files:
         item.files = Files()
     item.files.fxd_file  = fxd.filename
-    if fxd.is_skin_fxd:
-        item.skin_fxd = fxd.filename
     fxd.getattr(None, 'items', []).append(item)

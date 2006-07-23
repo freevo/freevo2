@@ -172,7 +172,6 @@ class FXD(object):
         self.read_callback  = {}
         self.write_callback = {}
         self.user_data      = {}
-        self.is_skin_fxd    = False
 
 
     def set_handler(self, name, callback, mode='r', force=False):
@@ -209,7 +208,6 @@ class FXD(object):
             return
         for node in self.tree.tree.children:
             if node.name == 'skin':
-                self.is_skin_fxd = True
                 break
         for node in self.tree.tree.children:
             if node.name in self.read_callback:

@@ -6,7 +6,7 @@
 #
 # This file defines a menu stack. It is not connected to the GUI so the real
 # menu widget must inherit from this class and override the basic GUI functions
-# show, hide, set_theme and redraw.
+# show, hide and redraw.
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -91,13 +91,6 @@ class MenuStack(object):
         raise AttributeError('MenuStack.redraw not defined')
 
 
-    def set_theme(self, theme):
-        """
-        Set the theme for menu drawing.
-        """
-        raise AttributeError('MenuStack.set_theme not defined')
-
-
     def back_to_menu(self, menu, refresh=True):
         """
         Go back to the given menu.
@@ -155,21 +148,10 @@ class MenuStack(object):
         self.menustack.append(menu)
 
         # Check the new menu. Maybe we need to set 'inside_menu' if we
-        # switch between MenuApplication(s) and also set a new theme
-        # for the global Freevo look
-        if isinstance(menu, Menu):
-            if not menu.theme:
-                menu.theme = previous.theme
-            if isinstance(menu.theme, str):
-                if menu.theme == previous.theme.filename:
-                    menu.theme = previous.theme
-                else:
-                    menu.theme = self.set_theme(menu.theme)
-            self.set_theme(menu.theme)
-        else:
+        # switch between MenuApplication(s)
+        if not isinstance(menu, Menu):
             # The current Menu is a MenuApplication, set
-            # theme and 'inside_menu'.
-            menu.theme = previous.theme
+            # 'inside_menu'.
             self.inside_menu = True
             menu.inside_menu = True
 
@@ -248,10 +230,6 @@ class MenuStack(object):
             if new_menu:
                 self.menustack[-1] = new_menu
                 menu = new_menu
-
-        # set the theme
-        if isinstance(menu, Menu):
-            self.set_theme(menu.theme)
 
         if not self.visible:
             # nothing to do anymore

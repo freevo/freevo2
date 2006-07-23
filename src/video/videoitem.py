@@ -132,7 +132,6 @@ class VideoItem(MediaItem):
                 self.info.set_variables(tvinfo[1])
                 if not self.image:
                     self.image = tvinfo[0]
-                self.skin_fxd = tvinfo[3]
                 self.mplayer_options = tvinfo[2]
             self.tv_show      = True
             self.show_name    = show_name
@@ -409,7 +408,7 @@ class VideoItem(MediaItem):
             i.name = Unicode(_('Play Title %s')) % (title+1)
             items.append(i)
 
-        moviemenu = Menu(self.name, items, theme=self.skin_fxd)
+        moviemenu = Menu(self.name, items)
         moviemenu.type = 'video'
         self.pushmenu(moviemenu)
 

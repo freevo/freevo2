@@ -56,8 +56,7 @@ class Menu(object):
     """
     next_id = 0
 
-    def __init__(self, heading, choices=[], theme=None,
-                 reload_func = None, type = None):
+    def __init__(self, heading, choices=[], reload_func = None, type = None):
 
         self.heading = heading
         self.stack   = None
@@ -74,11 +73,6 @@ class Menu(object):
         self.choices = []
         self.selected = None
         self.set_items(choices, False)
-
-        # skin theme for this menu
-        self.theme = None
-        if theme:
-            self.theme = theme
 
         # special items for the new skin to use in the view or info
         # area. If None, menu.selected will be taken
@@ -309,10 +303,6 @@ class Menu(object):
             items = []
             for a in actions:
                 items.append(Item(self.selected, a))
-            theme = None
-
-            if self.selected.skin_fxd:
-                theme = self.selected.skin_fxd
 
             for i in items:
                 if not self.selected.type == 'main':
@@ -322,7 +312,7 @@ class Menu(object):
                 else:
                     i.display_type = self.selected.type
 
-            s = Menu(self.selected.name, items, theme=theme)
+            s = Menu(self.selected.name, items)
             s.submenu = True
             s.item = self.selected
             self.stack.pushmenu(s)
