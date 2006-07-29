@@ -120,16 +120,11 @@ class MainMenu(Item):
         items = []
         for p in plugin.get('mainmenu'):
             items += p.items(self)
-        menu = Menu(_('Freevo Main Menu'), items, type='main', reload_func=self.reload)
+        menu = Menu(_('Freevo Main Menu'), items, type='main')
         menu.autoselect = True
         self.menuw = MenuWidget()
         self.menuw.pushmenu(menu)
         self.menuw.show()
-
-        
-    def reload(self):
-        # BEACON_FIXME: stop watcher
-        pass
 
         
     def get_skins(self):
