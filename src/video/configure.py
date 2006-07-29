@@ -145,7 +145,6 @@ def toggle(item, name, variable):
     """
     Basic toggle function.
     """
-    print item
     item[variable] = not item[variable]
     # replace item
     menuitem = item.get_menustack().get_selected()
@@ -188,7 +187,7 @@ def get_items(item):
         a = ActionItem(_('Chapter selection'), item, subitem_selection)
         items.append(a)
 
-    items.append(add_toggle(item, _('deinterlacing'), 'deinterlace'))
+    items.append(add_toggle(item, _('deinterlacing'), 'interlaced'))
     return items
 
 

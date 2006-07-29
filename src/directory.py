@@ -54,8 +54,6 @@ from menu import Item, Files, Action, ActionItem
 from playlist import Playlist
 from event import *
 
-import gui
-import gui.theme
 from gui.windows import InputBox, MessageBox, ProgressBox
 
 # get logging object
@@ -160,7 +158,6 @@ class DirItem(Playlist):
         Playlist.__init__(self, parent=parent, display_type=display_type)
         self.type = 'dir'
         self.item_menu  = None
-        self.needs_update = False
 
         if not isinstance(directory, kaa.beacon.Item):
             log.warning('filename as directory is deprecated')
@@ -281,7 +278,7 @@ class DirItem(Playlist):
 
     # eventhandler for this item
     def eventhandler(self, event):
-        if event == DIRECTORY_CHANGE_DISPLAY_TYPE and self.item_menu.visible:
+        if event == DIRECTORY_CHANGE_DISPLAY_TYPE:
             possible = [ ]
 
             for p in plugin.get('mimetype'):
@@ -433,11 +430,6 @@ class DirItem(Playlist):
         """
         # FIXME: check for password
 
-        if update and not (self.listing and self.item_menu.visible):
-            # not visible right now, do not update
-            self.needs_update = True
-            return
-        t0 = time.time()
         self.playlist   = []
         play_items = []
         dir_items  = []
@@ -458,17 +450,16 @@ class DirItem(Playlist):
 	    MessageBox(_('Directory does not exist')).show()
             return
 
-        self.needs_update = False
         display_type = self.display_type
         if self.display_type == 'tv':
             display_type = 'video'
 
-        t1 = time.time()
-        query = kaa.beacon.query(parent=self.info)
-        listing = query.get(filter='extmap')
-        t2 = time.time()
+        if not update:
+            self.query = kaa.beacon.query(parent=self.info)
+            self.query.signals['changed'].connect_weak(self.browse, update=True)
+            self.query.monitor()
+        listing = self.query.get(filter='extmap')
 
-        t3 = time.time()
         #
         # build items
         #
@@ -482,7 +473,6 @@ class DirItem(Playlist):
                 else:
                     play_items.append(i)
 
-        t4 = time.time()
         # normal DirItems
         for item in listing.get('beacon:dir'):
             d = DirItem(item, self, display_type = self.display_type)
@@ -505,8 +495,6 @@ class DirItem(Playlist):
             else:
                 for i in play_items:
                     i.name = remove_start_string(i.name, substr)
-
-        t5 = time.time()
 
         #
         # sort all items
@@ -531,8 +519,6 @@ class DirItem(Playlist):
         else:
             play_items.sort(lambda l, o: cmp(l.sort().upper(),
                                                   o.sort().upper()))
-
-        t6 = time.time()
 
         if self['num_dir_items'] != len(dir_items):
             self['num_dir_items'] = len(dir_items)
@@ -576,43 +562,15 @@ class DirItem(Playlist):
         # action
         #
 
-        if update:
-            # update because of dirwatcher changes
+        if update and self.item_menu:
             self.item_menu.set_items(items)
+            return
 
-        else:
-            # normal menu build
-            item_menu = menu.Menu(self.name, items, reload_func=self.reload,
-                                  type = display_type)
-
-            item_menu.autoselect = self.DIRECTORY_AUTOPLAY_SINGLE_ITEM
-            self.pushmenu(item_menu)
-
-            self.item_menu = weakref(item_menu)
-            callback = kaa.notifier.Callback(self.browse, True)
-            # BEACON_FIXME
-            # watcher.cwd(listing, callback)
-
-        t7 = time.time()
-        # print t2 - t1, t4 - t3, t5 - t4, t6 - t5, t7 - t6, t7 - t0
-
-
-
-    def reload(self):
-        """
-        called when we return to this menu
-        """
-        callback = kaa.notifier.Callback(self.browse, True)
-        # BEACON_FIXME
-        # if watcher.cwd(self.listing, callback):
-        # some files changed
-        # self.needs_update = True
-        if self.needs_update:
-            # update directory
-            log.info('directory needs update')
-            callback()
-        # we (may) changed the menu, don't build a new one
-        return None
+        # normal menu build
+        item_menu = menu.Menu(self.name, items, type = display_type)
+        item_menu.autoselect = self.DIRECTORY_AUTOPLAY_SINGLE_ITEM
+        self.pushmenu(item_menu)
+        self.item_menu = weakref(item_menu)
 
 
     # ======================================================================

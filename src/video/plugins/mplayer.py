@@ -205,9 +205,10 @@ class MPlayer(mplayer.Application):
         if item.selected_audio != None:
             additional_args += [ '-aid', str(item.selected_audio) ]
 
-        if item['deinterlace'] and config.MPLAYER_VF_INTERLACED:
+        if item['interlaced'] and config.VIDEO_INTERLACING and \
+               config.MPLAYER_VF_INTERLACED:
             additional_args += [ '-vf-pre',  config.MPLAYER_VF_INTERLACED ]
-        elif not item['deinterlace'] and config.MPLAYER_VF_PROGRESSIVE:
+        elif config.MPLAYER_VF_PROGRESSIVE:
             additional_args += [ '-vf-pre',  config.MPLAYER_VF_PROGRESSIVE ]
 
         mode = item.mimetype

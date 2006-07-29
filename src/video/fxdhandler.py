@@ -100,7 +100,7 @@ def parse_movie(name, title, image, info, node, parent, listing):
         files = [ files[0] ]
 
     if len(files) == 0:
-        log.error('BEACON_FIXME: VideoItem with bad file \n%s', node)
+#         log.error('BEACON_FIXME: VideoItem with bad file \n%s', node)
         return None
 
     item = VideoItem(files[0], parent)

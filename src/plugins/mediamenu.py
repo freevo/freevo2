@@ -48,7 +48,6 @@ from event import *
 from directory import DirItem
 from mainmenu import MainMenuItem
 from menu import Menu, Item
-from gui.windows import ProgressBox
 from games import machine
 
 # get logging object
@@ -87,63 +86,6 @@ class MediaMenu(MainMenuItem):
         kaa.beacon.signals['media.add'].connect(self.media_change)
         kaa.beacon.signals['media.remove'].connect(self.media_change)
         
-        # init the style how to handle discs
-        if config.HIDE_UNUSABLE_DISCS:
-            # set the disc types to be shown
-            self.dir_types = {
-                'audio': [ 'dir', 'audiocd', 'audio', 'empty_cdrom' ],
-                'video': [ 'dir', 'video', 'vcd', 'dvd', 'empty_cdrom' ],
-                'image': [ 'dir', 'empty_cdrom' ],
-                'games': [ 'dir', 'empty_cdrom' ],
-                }
-        else:
-            # show all discs in all mediamenus
-            self.dir_types = {}
-            for type in ('audio', 'video', 'image', 'games'):
-                self.dir_types[type] = [ 'dir', 'audiocd', 'audio', 'video',
-                                         'vcd', 'dvd', 'empty_cdrom' ]
-
-
-    def main_menu_generate(self):
-        """
-        generate the items for the main menu. This is needed when first
-        generating the menu and if something changes by pressing the EJECT
-        button
-        """
-        # BEACON_FIXME: stop watcher
-
-        # copy the "normal" items and add plugin data
-        items = copy.copy(self.normal_items)
-
-        if self.display_type:
-            # get display type based plugins
-            plugins_list = plugin.get('mainmenu_%s' % self.display_type)
-        else:
-            # no plugins
-            plugins_list = []
-
-        # get the dir_type
-        dir_type = self.dir_types.get( self.display_type, [] )
-
-        for media in kaa.beacon.media:
-            if media.mountpoint == '/':
-                continue
-            listing = kaa.beacon.wrap(media.root, filter='extmap')
-            for p in plugin.mimetype(self.display_type):
-                items.extend(p.get(self, listing))
-            for d in listing.get('beacon:dir'):
-                items.append(DirItem(d, self, name=media.label,
-                                     display_type = self.display_type))
-        # add all plugin data
-        for p in plugins_list:
-            items += p.items( self )
-        return items
-
-
-    def main_menu(self):
-        """
-        display the (IMAGE|VIDEO|AUDIO|GAMES) main menu
-        """
         title = _('Media')
 
         if self.display_type == 'video':
@@ -155,18 +97,25 @@ class MediaMenu(MainMenuItem):
         if self.display_type == 'games':
             title = _('Games')
 
-        menutitle = _('%s Main Menu') % title
+        self.menutitle = _('%s Main Menu') % title
 
+        self.config_items = []
         if self.display_type:
-            items = getattr(config, '%s_ITEMS' % self.display_type.upper())
-        else:
-            items = []
+            self.config_items = getattr(config, '%s_ITEMS' % self.display_type.upper())
 
-        files = []
-        additional_data = {}
+
+    def main_menu_generate(self):
+        """
+        generate the items for the main menu. This is needed when first
+        generating the menu and if something changes by pressing the EJECT
+        button
+        """
+        # Generate the media menu, we need to create a new listing (that sucks)
+        # But with the listing we have, the order will be mixed up.
+        items = []
 
         # add default items
-        for item in items:
+        for item in self.config_items:
             try:
                 # split the list on dir/file, title and add_args
                 add_args = None
@@ -188,70 +137,62 @@ class MediaMenu(MainMenuItem):
                         # ... and add_args
                         add_args = item[2:]
 
-                # is the dir / file reachable?
-                reachable = 1
-                pos = filename.find(':/')
-                if pos > 0:
-                    # it is an url
-                    if filename.find(':/') < filename.find('/'):
-                        hostname = filename[0:pos]
-                        filename = filename[pos+1:]
-                        try:
-                            alive = config.HOST_ALIVE_CHECK % hostname
-                            if os.system(alive) != 0:
-                                reachable = 0
-                        except Exception, e:
-                            log.exception('Error parsing %s' % filename)
-                            raise e
-                if reachable:
-                    if os.path.isdir(filename):
-                        # directory
-                        files.append(filename)
-                        additional_data[filename] = ( title, add_args, True )
-                    else:
-                        if not os.path.isfile(filename) and \
-                               filename.startswith(os.getcwd()):
-                            # file is in share dir
-                            filename = filename[len(os.getcwd()):]
-                            if filename[0] == '/':
-                                filename = filename[1:]
-                            filename = os.path.join(config.SHARE_DIR, filename)
-                        # add files
-                        files.append(filename)
-                        additional_data[filename] = ( title, [], False )
+                if os.path.isdir(filename):
+                    query = kaa.beacon.query(filename=filename)
+                    for d in query.get(filter='extmap').get('beacon:dir'):
+                        items.append(DirItem(d, self, name = title,
+                                             display_type = self.display_type,
+                                             add_args = add_args))
+                    continue
+
+                # normal file
+                if not os.path.isfile(filename) and \
+                       filename.startswith(os.getcwd()):
+                    # file is in share dir
+                    filename = filename[len(os.getcwd()):]
+                    if filename[0] == '/':
+                        filename = filename[1:]
+                    filename = os.path.join(config.SHARE_DIR, filename)
+
+                query = kaa.beacon.query(filename=filename)
+                listing = query.get(filter='extmap')
+                for p in plugin.mimetype(self.display_type):
+                    p_items = p.get(self, listing)
+                    if title:
+                        for i in p_items:
+                            i.name = title
+                    items += p_items
+
             except:
                 log.exception('Error parsing %s' % str(item))
+                continue
 
-        # Generate the media menu, we need to create a new listing (that sucks)
-        # But with the listing we have, the order will be mixed up.
-        self.normal_items = []
-        for f in files:
-            query = kaa.beacon.query(filename=f)
-            listing = query.get(filter='extmap')
+        for media in kaa.beacon.media:
+            if media.mountpoint == '/':
+                continue
+            listing = kaa.beacon.wrap(media.root, filter='extmap')
+            for p in plugin.mimetype(self.display_type):
+                items.extend(p.get(self, listing))
+            for d in listing.get('beacon:dir'):
+                items.append(DirItem(d, self, name=media.label,
+                                     display_type = self.display_type))
+        # add all plugin data
+        if self.display_type:
+            for p in plugin.get('mainmenu_%s' % self.display_type):
+                items += p.items( self )
 
-            # get additional_data for the file
-            title, add_args, is_dir = additional_data[f]
-            if is_dir:
-                # directory
-                for item in listing.get('beacon:dir'):
-                    d = DirItem(item, self, name = title,
-                                display_type = self.display_type,
-                                add_args = add_args)
-                    self.normal_items.append(d)
-            else:
-                # normal file
-                for p in plugin.mimetype(self.display_type):
-                    items = p.get(self, listing)
-                    if title:
-                        for i in items:
-                            i.name = title
-                    self.normal_items += items
+        return items
 
+
+    def main_menu(self):
+        """
+        display the (IMAGE|VIDEO|AUDIO|GAMES) main menu
+        """
         # generate all other items
         items = self.main_menu_generate()
 
         type = '%s main menu' % self.display_type
-        item_menu = Menu(menutitle, items, type = type,
+        item_menu = Menu(self.menutitle, items, type = type,
                          reload_func = self.reload)
         item_menu.autoselect = True
         item_menu.skin_force_text_view = self.force_text_view
@@ -263,34 +204,13 @@ class MediaMenu(MainMenuItem):
         """
         Reload the menu. maybe a disc changed or some other plugin.
         """
-        menu = self.get_menustack()[1]
-        sel = menu.choices.index(menu.selected)
-        new_choices = self.main_menu_generate()
-        if not menu.selected in new_choices:
-            if len(new_choices) <= sel:
-                menu.selected = new_choices[-1]
-            else:
-                menu.selected = new_choices[sel]
-        menu.choices = new_choices
-        return menu
+        if self.item_menu:
+            self.item_menu.set_items(self.main_menu_generate())
 
 
     def media_change(self, media):
+        """
+        Media change from kaa.beacon
+        """
         if self.item_menu:
             self.item_menu.set_items(self.main_menu_generate())
-        
-
-    def eventhandler(self, event):
-        """
-        Eventhandler for the media main menu. The menu must be regenerated
-        when a disc in a rom drive changes
-        """
-        if plugin.isevent(event):
-            if not self.item_menu or not self.item_menu.visible:
-                return True
-
-            self.item_menu.set_items(self.main_menu_generate())
-            return True
-
-        # give the event to the next eventhandler in the list
-        return Item.eventhandler(self, event)

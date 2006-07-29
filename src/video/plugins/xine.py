@@ -132,7 +132,7 @@ class Xine(ChildApp):
                   [ '--stdctl', '-V', config.XINE_VO_DEV, '-A',
                     config.XINE_AO_DEV ] + config.XINE_ARGS_DEF.split(' ')
 
-        if item['deinterlace']:
+        if item['interlaced'] and config.VIDEO_INTERLACING:
             command.append('-D')
 
         if config.XINE_COMMAND.startswith(config.CONF.xine) and \
@@ -232,7 +232,7 @@ class Xine(ChildApp):
 
         if event == VIDEO_TOGGLE_INTERLACE:
             self.child_stdin('ToggleInterleave\n')
-            self.item['deinterlace'] = not self.item['deinterlace']
+            self.item['interlaced'] = not self.item['interlaced']
             return True
 
         if event == NEXT:

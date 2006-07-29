@@ -170,14 +170,6 @@ class VideoItem(MediaItem):
             self.mode     = 'dvd'
             self.url      = 'dvd' + self.url[4:] + '/'
             
-	# BEACON_FIXME: interlaced vs. interlace
-        if config.VIDEO_INTERLACING and self.info.get('interlaced') \
-               and not self.info.get('deinterlace'):
-		# force deinterlacing
-		self['deinterlace'] = 1
-	elif self.info.get('interlace') is None:
-		self['deinterlace'] = 0
-
         # start name parser by setting name to itself
         self.set_name(self.name)
 
