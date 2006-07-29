@@ -102,6 +102,12 @@ class MediaMenu(MainMenuItem):
         self.config_items = []
         if self.display_type:
             self.config_items = getattr(config, '%s_ITEMS' % self.display_type.upper())
+            for filename in self.config_items:
+                if not isinstance(filename, (str, unicode)):
+                    filename = filename[1]
+                if os.path.isdir(filename) and not os.environ.get('NO_CRAWLER') and \
+                       not filename == os.environ.get('HOME'):
+                    kaa.beacon.monitor(filename)
 
 
     def main_menu_generate(self):

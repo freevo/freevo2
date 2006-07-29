@@ -562,8 +562,9 @@ class DirItem(Playlist):
         # action
         #
 
-        if update and self.item_menu:
-            self.item_menu.set_items(items)
+        if update:
+            if self.item_menu:
+                self.item_menu.set_items(items)
             return
 
         # normal menu build
