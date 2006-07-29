@@ -69,6 +69,9 @@ def fxdhandler(fxd, node):
     """
     Parse image specific stuff from fxd files
     """
+    # BEACON_FIXME
+    return None
+
     items = []
     dirname = os.path.dirname(fxd.getattr(None, 'filename', ''))
     children = fxd.get_children(node, 'files')

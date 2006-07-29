@@ -63,6 +63,9 @@ def fxdhandler(fxd, node):
     """
     parse audio specific stuff from fxd files
     """
+    # BEACON_FIXME
+    return None
+
     # XXX MEDIAINFO UPDATE XXX no parsing????
     a = AudioItem('', fxd.getattr(None, 'parent', None))
 
