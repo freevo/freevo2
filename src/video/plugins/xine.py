@@ -148,39 +148,41 @@ class Xine(ChildApp):
         self.max_subtitle     = 0
         self.current_subtitle = -1
 
-        if item.mode == 'dvd':
-            if item.info['tracks']:
-                for track in item.info['tracks']:
-                    self.max_audio = max(self.max_audio, len(track['audio']))
-                    self.max_subtitle = max(self.max_subtitle,
-                                            len(track['subtitles']))
-            else:
-                self.max_audio = len(item.info['audio'])
-                self.max_subtitle = len(item.info['subtitles'])
-
-        if item.mode == 'dvd' and hasattr(item, 'filename') and \
-               item.filename and item.filename.endswith('.iso'):
-            # dvd:///full/path/to/image.iso/
-            command.append('dvd://%s/' % item.filename)
-
+        # KAA.PLAYER FIXME
+        # if item.mode == 'dvd':
+        #     if item.info['tracks']:
+        #         for track in item.info['tracks']:
+        #             self.max_audio = max(self.max_audio, len(track['audio']))
+        #             self.max_subtitle = max(self.max_subtitle,
+        #                                     len(track['subtitles']))
+        #     else:
+        #         self.max_audio = len(item.info['audio'])
+        #         self.max_subtitle = len(item.info['subtitles'])
+        # 
+        # if item.mode == 'dvd' and hasattr(item, 'filename') and \
+        #        item.filename and item.filename.endswith('.iso'):
+        #     # dvd:///full/path/to/image.iso/
+        #     command.append('dvd://%s/' % item.filename)
+        #     
         # elif item.mode == 'dvd' and hasattr(??, 'devicename'):
         #     # dvd:///dev/dvd/2
         #     url = 'dvd://%s/%s' % (??.devicename, item.url[6:])
         #     command.append(url.strip('/'))
-
-        elif item.mode == 'dvd': # no devicename? Probably an image on the HD
-            command.append(item.url)
-
+        # 
+        # elif item.mode == 'dvd': # no devicename? Probably an image on the HD
+        #     command.append(item.url)
+        # 
         # elif item.mode == 'vcd':
         #     # vcd:///dev/cdrom -- NO track support (?)
         #     command.append('vcd://%s' % ??.devicename)
+        #
+        # elif item.mimetype == 'cue':
+        #     command.append('vcd://%s' % item.filename)
+        #     self.set_eventmap('vcd')
+        #
+        # else:
 
-        elif item.mimetype == 'cue':
-            command.append('vcd://%s' % item.filename)
-            self.set_eventmap('vcd')
-
-        else:
-            command.append(item.url)
+        command.append(item.url)
 
         # start child
         self.child_start(command, config.MPLAYER_NICE, 'quit\n')

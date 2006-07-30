@@ -130,12 +130,13 @@ class MPlayer(mplayer.Application):
         if url.startswith('dvd://') and url[-1] == '/':
             url += '1'
 
-        if url == 'vcd://':
-            c_len = 0
-            for i in range(len(item.info.tracks)):
-                if item.info.tracks[i].length > c_len:
-                    c_len = item.info.tracks[i].length
-                    url = item.url + str(i+1)
+#         BEACON_FIXME
+#         if url == 'vcd://':
+#             c_len = 0
+#             for i in range(len(item.info.tracks)):
+#                 if item.info.tracks[i].length > c_len:
+#                     c_len = item.info.tracks[i].length
+#                     url = item.url + str(i+1)
 
         try:
             log.info('MPlayer.play(): mode=%s, url=%s' % (mode, url))
@@ -182,14 +183,12 @@ class MPlayer(mplayer.Application):
         # if hasattr(??, 'devicename') and mode != 'file':
         #     additional_args += [ '-dvd-device', ??.devicename ]
         # 
-        # elif mode == 'dvd':
-        #     # dvd on harddisc
-        #     additional_args += [ '-dvd-device', item.filename ]
-        #     url = url[:6] + url[url.rfind('/')+1:]
-        # 
-        # if item.media and hasattr(??,'devicename'):
-        #     additional_args += [ '-cdrom-device', ??.devicename ]
 
+        if mode == 'dvd':
+            # FIXME: dvd on harddisc
+            additional_args += [ '-dvd-device', url[6:url.rfind('/')] ]
+            url = url[:6] + url[url.rfind('/')+1:]
+            
         if item.selected_subtitle == -1:
             additional_args += [ '-noautosub' ]
 
