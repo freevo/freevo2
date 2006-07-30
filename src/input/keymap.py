@@ -43,7 +43,7 @@ KEYBOARD_MAP = {
     'U'           : 'PAUSE',
     'S'           : 'STOP',
     'F6'          : 'REC',
-    'PERIOD'      : 'EJECT',
+    '.'           : 'EJECT',
     'L'           : 'SUBTITLE',
     'A'           : 'LANG',
     'T'           : 'TOGGLE_CONTROL'

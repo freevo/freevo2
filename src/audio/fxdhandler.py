@@ -59,7 +59,7 @@ __all__ = [ 'fxdhandler' ]
 
 from audioitem import AudioItem
 
-def fxdhandler(fxd, node):
+def fxdhandler(name, title, image, info, node, parent, listing):
     """
     parse audio specific stuff from fxd files
     """

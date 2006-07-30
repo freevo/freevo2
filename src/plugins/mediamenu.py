@@ -220,3 +220,11 @@ class MediaMenu(MainMenuItem):
         """
         if self.item_menu:
             self.item_menu.set_items(self.main_menu_generate())
+
+
+    def eventhandler(self, event):
+        if event == 'EJECT' and self.item_menu and \
+           self.item_menu.selected.info['parent'] == \
+           self.item_menu.selected.info['media']:
+            self.item_menu.selected.info['media'].eject()
+            

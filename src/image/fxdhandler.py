@@ -65,7 +65,7 @@ from playlist import Playlist
 from imageitem import ImageItem
 
 
-def fxdhandler(fxd, node):
+def fxdhandler(name, title, image, info, node, parent, listing):
     """
     Parse image specific stuff from fxd files
     """

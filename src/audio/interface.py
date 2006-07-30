@@ -50,6 +50,7 @@ import fxditem
 
 # AudioItem
 from audioitem import AudioItem
+from audiodiskitem import AudioDiskItem
 
 # fxdhandler for <audio> tags
 from fxdhandler import fxdhandler
@@ -84,7 +85,10 @@ class PluginInterface(plugin.MimetypePlugin):
         items = []
         for suffix in self.suffix():
             for file in listing.get(suffix):
-                items.append(AudioItem(file, parent))
+                if not file.isfile() and not file.isdir():
+                    items.append(AudioDiskItem(file, parent))
+                else:
+                    items.append(AudioItem(file, parent))
         return items
 
 

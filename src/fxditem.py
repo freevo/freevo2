@@ -191,11 +191,13 @@ class Container(Item):
 
 
 
-def container_callback(fxd, node):
+def container_callback(name, title, image, info, node, parent, listing):
     """
     handle <container> tags. Inside this tag all other base level tags
     like <audio>, <movie> and <container> itself will be parsed as normal.
     """
+    # BEACON_FIXME
+    return None
     c = Container(fxd, node)
     if c.items:
         fxd.getattr(None, 'items', []).append(c)

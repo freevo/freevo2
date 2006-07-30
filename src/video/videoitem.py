@@ -379,27 +379,10 @@ class VideoItem(MediaItem):
 
         # build a menu
         items = []
-        for title in range(len(self.info['tracks'])):
-            i = copy.copy(self)
-            i.parent = self
-            # get info
-            i.info = self.info.get_subitem(title)
-            i.info.filename = self.info.filename
-            i.info.url = self.info.url
-
-            i.set_url(i.info)
-            i.url = i.url + str(title+1)
-
-            # copy the attributes from kaa.metadata about this track
-            i.info.mminfo = self.info.mminfo['tracks'][title]
-            i.info.set_variables(self.info.get_variables())
-            # set attributes
-            i.info_type = 'track'
-            i.possible_player = []
-            i.files = None
-            i.name = Unicode(_('Play Title %s')) % (title+1)
-            items.append(i)
-
+        for track in self.info.list().get():
+            track = VideoItem(track, self)
+            track.name = _('Play Title %s') % track.info.get('name')
+            items.append(track)
         moviemenu = Menu(self.name, items)
         moviemenu.type = 'video'
         self.pushmenu(moviemenu)

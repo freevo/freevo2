@@ -54,20 +54,14 @@ class AudioDiskItem(Playlist):
     def __init__(self, device, parent):
         Playlist.__init__(self, parent=parent)
         self.type = 'audiocd'
-        self.disc_id = device.info['id']
-        self.devicename = device.devicename
-        self.name = _('Unknown CD Album')
+        self.info = device
+        self.name = device.get('title')
         
         # variables only for Playlist
         self.autoplay = 0
 
         # variables only for DirItem
         self.display_type = 'audio'
-
-        # BEACON_FIXME
-        # cover = '%s/disc/metadata/%s.jpg' % (??, self.disc_id)
-        # if os.path.isfile(cover):
-        #     self.image = cover
             
 
     def actions(self):
@@ -82,21 +76,8 @@ class AudioDiskItem(Playlist):
         Make a menu item for each file in the directory
         """
         play_items = []
-        number = len(self.info['tracks'])
-        if hasattr(self.info, 'mixed'):
-            number -= 1
-
-        for i in range(0, number):
-            item = AudioItem('cdda://%d' % (i+1), self)
-            item.name = self.info['tracks'][i]['title']
-            item.info.set_variables(self.info['tracks'][i])
-            item.length = item.info['length']
-            if config.MPLAYER_ARGS.has_key('cd'):
-                item.mplayer_options += (' ' + config.MPLAYER_ARGS['cd'])
-
-            if self.devicename:
-                item.mplayer_options += ' -cdrom-device %s' % self.devicename
-            play_items.append(item)
+        for track in self.info.list().get():
+            play_items.append(AudioItem(track, self))
 
         # add all playable items to the playlist of the directory
         # to play one files after the other
@@ -120,11 +101,5 @@ class AudioDiskItem(Playlist):
         #     d.name = _('Data files on disc')
         #     items.append(d)
             
-        self.play_items = play_items
-
-        title = self.name
-        if title[0] == '[' and title[-1] == ']':
-            title = self.name[1:-1]
-
-        item_menu = Menu(title, items, type = self.display_type)
+        item_menu = Menu(self.name, items, type = self.display_type)
         self.pushmenu(item_menu)

@@ -61,6 +61,8 @@ def update():
     global discset
     global fxd
 
+    return
+
     # import fxditem here, we may get in trouble doing it at the
     # beginning (maybe, maybe not). FIXME!
     import fxditem
