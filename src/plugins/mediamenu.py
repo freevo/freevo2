@@ -106,7 +106,7 @@ class MediaMenu(MainMenuItem):
                 if not isinstance(filename, (str, unicode)):
                     filename = filename[1]
                 if os.path.isdir(filename) and not os.environ.get('NO_CRAWLER') and \
-                       not filename == os.environ.get('HOME'):
+                       not filename == os.environ.get('HOME') and not filename == '/':
                     kaa.beacon.monitor(filename)
 
 
