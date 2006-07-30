@@ -62,6 +62,11 @@ class PluginInterface(ItemPlugin):
     """
     class to handle auto bookmarks
     """
+
+    def __init__(self):
+        ItemPlugin.__init__(self)
+        self._ignore_end = False
+        
     def get_bookmarkfile(self, filename):
         """
         Get the bookmark file for the given filename.
@@ -139,13 +144,17 @@ class PluginInterface(ItemPlugin):
             if item.mode == 'file' and not item.subitems and item.elapsed:
                 # this will store in kaa.beacon
                 item[RESUME]= item.elapsed
+                self._ignore_end = True
             else:
                 log.info('auto-bookmark not supported for this item')
             return False
 
         # auto bookmark delete
         if event == PLAY_END:
-            item[RESUME] = None
+            if self._ignore_end:
+                self._ignore_end = False
+            else:
+                item[RESUME] = None
             return False
 
         # bookmark the current time into a file
