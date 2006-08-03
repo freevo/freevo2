@@ -165,12 +165,10 @@ class DirItem(Playlist):
 
         self.set_url(directory)
 
-        # BEACON_FIXME
-        # store Files information for moving/copying
-        # self.files = Files()
-        # if ??:
-        #     self.files.read_only = True
-        # self.files.append(directory)
+        self.files = Files()
+        if directory.get('read_only'):
+            self.files.read_only = True
+        self.files.append(directory)
 
         # FIXME: remove this
         self.dir = directory.filename
@@ -245,7 +243,6 @@ class DirItem(Playlist):
                 display_type = 'video'
             if not self.info.scanned() or \
                    self.info.get('%s:mtime' % self._dbprefix) != self.info.get('mtime'):
-                print self.info._beacon_data
                 # create information
                 log.info('create metainfo for %s', self.dir)
                 listing = kaa.beacon.query(parent=self.info).get(filter='extmap')
@@ -255,15 +252,7 @@ class DirItem(Playlist):
                 self['%s:play' % self._dbprefix] = num_play_items
                 self['%s:dir' % self._dbprefix] = len(listing.get('beacon:dir'))
                 if self.info.scanned():
-                    # BEACON_FIXME: this will result in a changed signal
-                    # from beacon and a recreation of everything here. There are
-                    # several solutions:
-                    # 1. check if only items changed and no new items or items with
-                    #    changed title / image are there
-                    # 2. check if the changes are "new" changes or based on our
-                    #    own changes send to the server
-                    # 2. do not store this in the database
-                    # 3. create a beacon plugin
+                    # FIXME: put this somewhere into beacon as a plugin
                     self.info['%s:mtime' % self._dbprefix] = self.info.get('mtime')
 
             if key == 'num_items':

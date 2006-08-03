@@ -84,7 +84,8 @@ class MediaItem(Item):
 
         self.url = url
         self.files = Files()
-        # BEACON_FIXME: self.files.read_only = True
+        if self.info.get('read_only'):
+            self.files.read_only = True
 
         self.mode = self.url[:self.url.find('://')]
 

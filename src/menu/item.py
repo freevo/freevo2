@@ -220,8 +220,6 @@ class Item(object):
         """
         Simple eventhandler for an item
         """
-        # BEACON_FIXME: EJECT event handling
-
         # call eventhandler from plugins
         for p in plugin.get('item') + plugin.get('item_%s' % self.type):
             if p.eventhandler(self, event):
