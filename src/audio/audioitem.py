@@ -59,7 +59,10 @@ class AudioItem(MediaItem):
         self.remain     = 0
         self.pause      = 0
         self.mplayer_options = ''
-        self.length     = 0
+        try:
+            self.length = int(self.info['length'])
+        except:
+            self.length = 0
             
 
     def sort(self, mode=None):
@@ -92,14 +95,6 @@ class AudioItem(MediaItem):
             self.mimetype = 'cdda'
 
 
-    def __init_info__(self):
-        MediaItem.__init_info__(self)
-        try:
-            self.length = int(self.info['length'])
-        except:
-            self.length = 0
-
-        
     def __getitem__(self, key):
         """
         return the specific attribute as string or an empty string

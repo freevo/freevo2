@@ -215,6 +215,10 @@ class DirItem(Playlist):
         if self.DIRECTORY_SORT_BY_DATE == 2 and self.display_type != 'tv':
             self.DIRECTORY_SORT_BY_DATE = 0
 
+        # special database key for extra arguments
+        display_type = display_type or 'all'
+        self._dbprefix = 'freevo:directory:%s' % display_type
+
 
     def __is_type_list_var(self, var):
         """
@@ -233,21 +237,41 @@ class DirItem(Playlist):
         if key == 'type':
             return _('Directory')
 
-        if key == 'num_items':
-            display_type = self.display_type or 'all'
-            if self.display_type == 'tv':
-                display_type = 'video'
-            if not self.info['freevo:mtime:%s' % display_type]:
-                return 0
-            return self['num_%s_items' % display_type] + self['num_dir_items']
-
-        if key == 'num_play_items':
+        if key.startswith('num_'):
+            # special keys to get number of playable items or the
+            # sum of all items in that directory
             display_type = self.display_type
             if self.display_type == 'tv':
                 display_type = 'video'
-            if not self.info['freevo:mtime:%s' % display_type]:
-                return 0
-            return self['num_%s_items' % display_type]
+            if not self.info.scanned() or \
+                   self.info.get('%s:mtime' % self._dbprefix) != self.info.get('mtime'):
+                print self.info._beacon_data
+                # create information
+                log.info('create metainfo for %s', self.dir)
+                listing = kaa.beacon.query(parent=self.info).get(filter='extmap')
+                num_play_items = 0
+                for p in plugin.mimetype(display_type):
+                    num_play_items += p.count(self, listing)
+                self['%s:play' % self._dbprefix] = num_play_items
+                self['%s:dir' % self._dbprefix] = len(listing.get('beacon:dir'))
+                if self.info.scanned():
+                    # BEACON_FIXME: this will result in a changed signal
+                    # from beacon and a recreation of everything here. There are
+                    # several solutions:
+                    # 1. check if only items changed and no new items or items with
+                    #    changed title / image are there
+                    # 2. check if the changes are "new" changes or based on our
+                    #    own changes send to the server
+                    # 2. do not store this in the database
+                    # 3. create a beacon plugin
+                    self.info['%s:mtime' % self._dbprefix] = self.info.get('mtime')
+
+            if key == 'num_items':
+                return self.info['%s:play' % self._dbprefix] + \
+                       self.info['%s:dir' % self._dbprefix]
+
+            if key == 'num_play_items':
+                return self.info['%s:play' % self._dbprefix]
 
         if key in ( 'freespace', 'totalspace' ):
             space = getattr(util, key)(self.dir) / 1000000
@@ -313,50 +337,6 @@ class DirItem(Playlist):
             self.item_menu.select(event.arg)
 
         return Playlist.eventhandler(self, event)
-
-
-    # ======================================================================
-    # metainfo
-    # ======================================================================
-
-    def __init_info__(self):
-        """
-        create some metainfo for the directory
-        """
-        if not Playlist.__init_info__(self):
-            # nothing new
-            return False
-
-        display_type = self.display_type
-
-        if self.display_type == 'tv':
-            display_type = 'video'
-
-        name = display_type or 'all'
-
-        if self.info['num_%s_items' % name] != None:
-            # info is already stored, no new data
-            return False
-
-        log.info('create metainfo for %s', self.dir)
-
-        # get listing
-        query = kaa.beacon.query(parent=self.info)
-        listing = query.get(filter='extmap')
-
-        # play items and playlists
-        num_play_items = 0
-        for p in plugin.mimetype(display_type):
-            num_play_items += p.count(self, listing)
-
-        # normal DirItems
-        num_dir_items = len(listing.get('beacon:dir'))
-
-        # store info
-        self['num_%s_items' % name] = num_play_items
-        self['num_dir_items'] = num_dir_items
-
-        return True
 
 
     # ======================================================================
@@ -520,13 +500,10 @@ class DirItem(Playlist):
             play_items.sort(lambda l, o: cmp(l.sort().upper(),
                                                   o.sort().upper()))
 
-        if self['num_dir_items'] != len(dir_items):
-            self['num_dir_items'] = len(dir_items)
-
-        if self.info['num_%s_items' % display_type] != \
-               len(play_items) + len(pl_items):
-            self.info['num_%s_items' % display_type] = len(play_items) + \
-                                                       len(pl_items)
+        if self['%s:dir' % self._dbprefix] != len(dir_items):
+            self['%s:dir' % self._dbprefix] = len(dir_items)
+        if self['%s:play' % self._dbprefix] != len(play_items) + len(pl_items):
+            self['%s:play' % self._dbprefix] = len(play_items) + len(pl_items)
 
         if self.DIRECTORY_REVERSE_SORT:
             dir_items.reverse()
@@ -644,7 +621,7 @@ class DirItem(Playlist):
                     self.configure_set_name(var)
 
         # BEACON_FIXME: store in db
-
+        
         # rebuild menu
         self.get_menustack().refresh(True)
 

@@ -184,15 +184,6 @@ class MediaItem(Item):
         return self.url
 
 
-    def __init_info__(self):
-        """
-        Init the info attribute.
-        """
-        if not Item.__init_info__(self):
-            return False
-        return True
-
-
     def sort(self, mode='name'):
         """
         Returns the string how to sort this item

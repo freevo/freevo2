@@ -235,10 +235,6 @@ class MenuStack(object):
             # nothing to do anymore
             return
 
-        if menu.selected:
-            # init the selected item
-            menu.selected.__init_info__()
-
         # redraw the menu
         self.redraw()
         return

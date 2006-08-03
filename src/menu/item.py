@@ -255,25 +255,3 @@ class Item(object):
         if r != None:
             return r
         return ''
-
-
-    def __init_info__(self):
-        """
-        Init the info attribute.
-        """
-        if self.__initialized:
-            return False
-        if not hasattr(self.info, 'scanned'):
-            return False
-        if not self.info.scanned():
-            self.info._beacon_request(self.__init_info__)
-            return False
-
-        key = 'freevo:mtime'
-        if hasattr(self, 'display_type'):
-            key += ':' + self.display_type
-        if self.info.get('mtime') == self.info.get(key):
-            return False
-        self.info[key] = self.info.get('mtime')
-        self.__initialized = True
-        return True
