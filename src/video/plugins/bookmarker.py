@@ -44,6 +44,7 @@
 import os
 import logging
 import kaa.metadata
+import kaa.beacon
 
 # freevo imports
 import sysconfig
@@ -57,6 +58,9 @@ log = logging.getLogger()
 
 # variable to store the auto resume
 RESUME = 'autobookmark_resume'
+
+kaa.beacon.register_file_type_attrs('video',
+    autobookmark_resume = (int, kaa.beacon.ATTR_SIMPLE))
 
 class PluginInterface(ItemPlugin):
     """

@@ -98,6 +98,9 @@ all_variables = [('DIRECTORY_SORT_BY_DATE', _('Directory Sort By Date'),
                     'contains only files and no directories' ), True)]
 
 
+kaa.beacon.register_file_type_attrs('dir',
+       freevo_num_items = (dict, kaa.beacon.ATTR_SIMPLE))
+
 
 def smartsort(x,y):
     """
@@ -212,11 +215,7 @@ class DirItem(Playlist):
 
         if self.DIRECTORY_SORT_BY_DATE == 2 and self.display_type != 'tv':
             self.DIRECTORY_SORT_BY_DATE = 0
-
-        # special database key for extra arguments
-        display_type = display_type or 'all'
-        self._dbprefix = 'freevo:directory:%s' % display_type
-
+        
 
     def __is_type_list_var(self, var):
         """
@@ -241,26 +240,29 @@ class DirItem(Playlist):
             display_type = self.display_type
             if self.display_type == 'tv':
                 display_type = 'video'
-            if not self.info.scanned() or \
-                   self.info.get('%s:mtime' % self._dbprefix) != self.info.get('mtime'):
-                # create information
+
+            # get number of items info from beacon
+            num_items_all = self.info.get('freevo_num_items') or {}
+            num_items = num_items_all.get(display_type)
+            if num_items and num_items[0] != self.info.get('mtime'):
+                num_items = None
+
+            if not num_items:
                 log.info('create metainfo for %s', self.dir)
                 listing = kaa.beacon.query(parent=self.info).get(filter='extmap')
-                num_play_items = 0
+                num_items = [ self.info.get('mtime'), 0 ]
                 for p in plugin.mimetype(display_type):
-                    num_play_items += p.count(self, listing)
-                self['%s:play' % self._dbprefix] = num_play_items
-                self['%s:dir' % self._dbprefix] = len(listing.get('beacon:dir'))
+                    num_items[1] += p.count(self, listing)
+                num_items.append(len(listing.get('beacon:dir')))
                 if self.info.scanned():
-                    # FIXME: put this somewhere into beacon as a plugin
-                    self.info['%s:mtime' % self._dbprefix] = self.info.get('mtime')
+                    num_items_all[display_type] = num_items
+                    self.info['freevo_num_items'] = copy.copy(num_items_all)
 
             if key == 'num_items':
-                return self.info['%s:play' % self._dbprefix] + \
-                       self.info['%s:dir' % self._dbprefix]
+                return num_items[1] + num_items[2]
 
             if key == 'num_play_items':
-                return self.info['%s:play' % self._dbprefix]
+                return num_items[1]
 
         if key in ( 'freespace', 'totalspace' ):
             space = getattr(util, key)(self.dir) / 1000000
@@ -481,18 +483,22 @@ class DirItem(Playlist):
         # sort normal items
         if self.DIRECTORY_SORT_BY_DATE:
             play_items.sort(lambda l, o: cmp(l.sort('date').upper(),
-                                                  o.sort('date').upper()))
+                                             o.sort('date').upper()))
         elif self['%s_advanced_sort' % display_type]:
             play_items.sort(lambda l, o: cmp(l.sort('advanced').upper(),
-                                                  o.sort('advanced').upper()))
+                                             o.sort('advanced').upper()))
         else:
             play_items.sort(lambda l, o: cmp(l.sort().upper(),
-                                                  o.sort().upper()))
+                                             o.sort().upper()))
 
-        if self['%s:dir' % self._dbprefix] != len(dir_items):
-            self['%s:dir' % self._dbprefix] = len(dir_items)
-        if self['%s:play' % self._dbprefix] != len(play_items) + len(pl_items):
-            self['%s:play' % self._dbprefix] = len(play_items) + len(pl_items)
+        # update num_items information if needed
+        num_items_all = self.info.get('freevo_num_items') or {}
+        num_items = num_items_all.get(display_type)
+        if num_items and (num_items[1] != len(play_items) + len(pl_items) or \
+                          num_items[2] != len(dir_items)):
+            num_items[1] = len(play_items) + len(pl_items)
+            num_items[2] = len(dir_items)
+            self.info['freevo_num_items'] = copy.copy(num_items_all)
 
         if self.DIRECTORY_REVERSE_SORT:
             dir_items.reverse()
