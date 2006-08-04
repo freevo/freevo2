@@ -220,13 +220,6 @@ class MimetypePlugin(Plugin):
         pass
 
 
-    def dirconfig(self, diritem):
-        """
-        adds configure variables to the directory
-        """
-        return []
-
-
     def database(self):
         """
         returns a database object

@@ -100,8 +100,9 @@ class MediaItem(Item):
             self.mimetype = self.filename[self.filename.rfind('.')+1:].lower()
 
             try:
-                if self.parent.DIRECTORY_USE_MEDIAID_TAG_NAMES and \
-                       self.info.get('title'):
+                # FIXME: this is slow
+                use_tags = self.parent['config:use_mediaid_tag_names']
+                if use_tags in (None, True) and self.info.get('title'):
                     self.name = self.info.get('title')
             except:
                 pass

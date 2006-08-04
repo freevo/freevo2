@@ -60,47 +60,30 @@ from gui.windows import InputBox, MessageBox, ProgressBox
 log = logging.getLogger()
 
 # variables for 'configure' submenu
-all_variables = [('DIRECTORY_SORT_BY_DATE', _('Directory Sort By Date'),
-                  _('Sort directory by date and not by name.'), False),
-
-                 ('DIRECTORY_AUTOPLAY_SINGLE_ITEM',
-                  _('Directory Autoplay Single Item'),
-                  _('Don\'t show directory if only one item exists and ' \
-                    'auto-select the item.'), False),
-
-                 ('DIRECTORY_SMART_SORT', _('Directory Smart Sort'),
-                  _('Use a smarter way to sort the items.'), False),
-
-                 ('DIRECTORY_USE_MEDIAID_TAG_NAMES',
-                  _('Use MediaID Tag Names'),
-                  _('Use the names from the media files tags as display ' \
-                    'name.'), False),
-
-                 ('DIRECTORY_REVERSE_SORT', _('Directory Reverse Sort'),
-                  _('Show the items in the list in reverse order.'), False),
-
-                 ('DIRECTORY_AUDIO_FORMAT_STRING', '', '', False),
-
-                 ('DIRECTORY_CREATE_PLAYLIST', _('Directory Create Playlist'),
-                  _('Handle the directory as playlist. After one file is '\
-                    'played, the next one will be started.'), True) ,
-
-                 ('DIRECTORY_ADD_PLAYLIST_FILES',
-                  _('Directory Add Playlist Files'),
-                  _('Add playlist files to the list of items'), True) ,
-
-                 ('DIRECTORY_ADD_RANDOM_PLAYLIST',
-                  _('Directory Add Random Playlist'),
-                  _('Add an item for a random playlist'), True) ,
-
-                 ('DIRECTORY_AUTOPLAY_ITEMS', _('Directory Autoplay Items'),
-                  _('Autoplay the whole directory (as playlist) when it '\
-                    'contains only files and no directories' ), True)]
+_variables = [
+    ('SORT_BY_DATE', _('Sort By Date'),
+     _('Sort directory by date and not by name.')),
+    ('AUTOPLAY_SINGLE_ITEM', _('Autoplay Single Item'),
+     _('Don\'t show directory if only one item exists and auto select the item.')),
+    ('USE_MEDIAID_TAG_NAMES', _('Use Tag Names'),
+     _('Use the names from the media files tags as display name.')),
+    ('REVERSE_SORT', _('Reverse Sort'),
+     _('Show the items in the list in reverse order.')),
+    ('CREATE_PLAYLIST', _('Create Playlist'),
+     _('Handle the directory as playlist and play the next item when ine is done.')) ,
+    ('AUTOPLAY_ITEMS', _('Autoplay Items'),
+     _('Autoplay the whole directory (as playlist) when it contains only files.'))]
 
 
 kaa.beacon.register_file_type_attrs('dir',
-       freevo_num_items = (dict, kaa.beacon.ATTR_SIMPLE))
-
+    freevo_num_items = (dict, kaa.beacon.ATTR_SIMPLE),
+    freevo_sort_by_date = (str, kaa.beacon.ATTR_SIMPLE),
+    freevo_autoplay_single_item = (str, kaa.beacon.ATTR_SIMPLE),
+    freevo_use_mediadb_tag_names = (str, kaa.beacon.ATTR_SIMPLE),
+    freevo_reverse_sort = (str, kaa.beacon.ATTR_SIMPLE),
+    freevo_create_playlist = (str, kaa.beacon.ATTR_SIMPLE),
+    freevo_autoplay_items = (str, kaa.beacon.ATTR_SIMPLE),
+)
 
 def smartsort(x,y):
     """
@@ -185,47 +168,17 @@ class DirItem(Playlist):
         self.add_args = add_args
 
         if self['show_all_items']:
+            # FIXME: no way to set this
             self.display_type = None
 
         # set tv to video now
         if self.display_type == 'tv':
             display_type = 'video'
 
-        # set directory variables to default
-        self.all_variables = copy.copy(all_variables)
-
-        # Check mimetype plugins if they want to add something
-        for p in plugin.mimetype(display_type):
-            self.all_variables += p.dirconfig(self)
-
-        # set the variables to the default values
-        for var in self.all_variables:
-            if hasattr(parent, var[0]):
-                setattr(self, var[0], getattr(parent, var[0]))
-            elif hasattr(config, var[0]):
-                setattr(self, var[0], getattr(config, var[0]))
-            else:
-                setattr(self, var[0], False)
-
-        self.modified_vars = []
-
         # Check mimetype plugins if they want to add something
         for p in plugin.mimetype(display_type):
             p.dirinfo(self)
-
-        if self.DIRECTORY_SORT_BY_DATE == 2 and self.display_type != 'tv':
-            self.DIRECTORY_SORT_BY_DATE = 0
         
-
-    def __is_type_list_var(self, var):
-        """
-        return if this variable to be saved is a type_list
-        """
-        for v,n,d, type_list in self.all_variables:
-            if v == var:
-                return type_list
-        return False
-
 
     def __getitem__(self, key):
         """
@@ -288,6 +241,20 @@ class DirItem(Playlist):
             else:
                 return '%d:%02d' % (length / 60, length % 60)
 
+        if key.startswith('config:'):
+            value = self.info.get('freevo_%s' % key[7:])
+            if value and not value == 'auto':
+                return value == 'yes'
+            value = self.parent[key]
+            if value:
+                return value == 'yes'
+            value = getattr(config, 'DIRECTORY_%s' % key[7:].upper())
+            if not isinstance(value, (list, tuple)):
+                return value
+            if self.display_type == 'tv':
+                return 'video' in value
+            return self.display_type in value
+            
         return Item.__getitem__(self, key)
 
 
@@ -313,7 +280,7 @@ class DirItem(Playlist):
             # create a new directory item
             d = DirItem(self.dir, self.parent, self.name, type, self.add_args)
             # deactivate autoplay
-            d.DIRECTORY_AUTOPLAY_SINGLE_ITEM = False
+            d['tmp:autoplay_single_item'] = False
             # replace current item with the new one
             self.replace(d)
             # build new dir (this will add a new menu)
@@ -338,23 +305,18 @@ class DirItem(Playlist):
         """
         return a list of actions for this item
         """
-        display_type = self.display_type
-        if self.display_type == 'tv':
-            display_type = 'video'
-
         browse = Action(_('Browse directory'), self.browse)
         play = Action(_('Play all files in directory'), self.play)
 
-        if self.info['num_%s_items' % display_type]:
-            if display_type in self.DIRECTORY_AUTOPLAY_ITEMS and \
-                   not self['num_dir_items']:
+        if self['num_items']:
+            if self['config:autoplay_items'] and not self['num_dir_items']:
                 items = [ play, browse ]
             else:
                 items = [ browse, play ]
         else:
             items = [ browse ]
 
-        if self.info['num_%s_items' % display_type]:
+        if self.info['num_items']:
             a = Action(_('Random play all items'), self.play)
             a.parameter(random=True)
             items.append(a)
@@ -472,7 +434,7 @@ class DirItem(Playlist):
         #
 
         # sort directories
-        if self.DIRECTORY_SMART_SORT:
+        if config.DIRECTORY_SMART_SORT:
             dir_items.sort(lambda l, o: smartsort(l.dir,o.dir))
         else:
             dir_items.sort(lambda l, o: cmp(l.dir.upper(), o.dir.upper()))
@@ -481,12 +443,12 @@ class DirItem(Playlist):
         pl_items.sort(lambda l, o: cmp(l.name.upper(), o.name.upper()))
 
         # sort normal items
-        if self.DIRECTORY_SORT_BY_DATE:
+        sort_by_date = self['config:sort_by_date']
+        if sort_by_date == 2 and not self.display_type == 'tv':
+            sort_by_date = False
+        if sort_by_date:
             play_items.sort(lambda l, o: cmp(l.sort('date').upper(),
                                              o.sort('date').upper()))
-        elif self['%s_advanced_sort' % display_type]:
-            play_items.sort(lambda l, o: cmp(l.sort('advanced').upper(),
-                                             o.sort('advanced').upper()))
         else:
             play_items.sort(lambda l, o: cmp(l.sort().upper(),
                                              o.sort().upper()))
@@ -500,20 +462,19 @@ class DirItem(Playlist):
             num_items[2] = len(dir_items)
             self.info['freevo_num_items'] = copy.copy(num_items_all)
 
-        if self.DIRECTORY_REVERSE_SORT:
+        if self['config:reverse_sort']:
             dir_items.reverse()
             play_items.reverse()
             pl_items.reverse()
 
         # delete pl_items if they should not be displayed
         if self.display_type and not self.display_type in \
-               self.DIRECTORY_ADD_PLAYLIST_FILES:
+               config.DIRECTORY_ADD_PLAYLIST_FILES:
             pl_items = []
 
         # add all playable items to the playlist of the directory
         # to play one files after the other
-        if not self.display_type or self.display_type in \
-               self.DIRECTORY_CREATE_PLAYLIST:
+        if self['config:create_playlist']:
             self.playlist = play_items
 
 
@@ -522,7 +483,7 @@ class DirItem(Playlist):
 
         # random playlist (only active for audio)
         if self.display_type and self.display_type in \
-               self.DIRECTORY_ADD_RANDOM_PLAYLIST \
+               config.DIRECTORY_ADD_RANDOM_PLAYLIST \
                and len(play_items) > 1:
             pl = Playlist(_('Random playlist'), play_items, self,
                           random=True)
@@ -541,7 +502,8 @@ class DirItem(Playlist):
 
         # normal menu build
         item_menu = menu.Menu(self.name, items, type = display_type)
-        item_menu.autoselect = self.DIRECTORY_AUTOPLAY_SINGLE_ITEM
+        # BEACON FIXME: handle tmp:autoplay_single_item
+        item_menu.autoselect = self['autoplay_single_item']
         self.pushmenu(item_menu)
         self.item_menu = weakref(item_menu)
 
@@ -551,17 +513,16 @@ class DirItem(Playlist):
     # ======================================================================
 
 
-    def configure_set_name(self, name):
+    def configure_get_status(self, var):
         """
         return name for the configure menu
         """
-        if name in self.modified_vars:
-            if getattr(self, name):
-                return 'ICON_RIGHT_ON_' + _('on')
-            else:
-                return 'ICON_RIGHT_OFF_' + _('off')
-        else:
-            return 'ICON_RIGHT_AUTO_' + _('auto')
+        value = self.info.get('freevo_%s' % var.lower())
+        if value == 'yes':
+            return 'ICON_RIGHT_ON_' + _('on')
+        if value == 'no':
+            return 'ICON_RIGHT_OFF_' + _('off')
+        return 'ICON_RIGHT_AUTO_' + _('auto')
 
 
     def configure_set_var(self, var):
@@ -569,74 +530,19 @@ class DirItem(Playlist):
         Update the variable in var and change the menu. This function is used
         by 'configure'
         """
-
-        # get current value, None == no special settings
-        if var in self.modified_vars:
-            if self.__is_type_list_var(var):
-                if getattr(self, var):
-                    current = 1
-                else:
-                    current = 0
-            else:
-                current = getattr(self, var)
+        dbvar = 'freevo_%s' % var.lower()
+        current = self.info.get(dbvar) or 'auto'
+        if current == 'auto':
+            self.info[dbvar] = 'yes'
+        elif current == 'yes':
+            self.info[dbvar] = 'no'
         else:
-            current = None
-
-        # get the max value for toggle
-        max = 1
-
-        # switch from no settings to 0
-        if current == None:
-            self.modified_vars.append(var)
-            if self.__is_type_list_var(var):
-                setattr(self, var, [])
-            else:
-                setattr(self, var, 0)
-
-        # inc variable
-        elif current < max:
-            if self.__is_type_list_var(var):
-                setattr(self, var, [self.display_type])
-            else:
-                setattr(self, var, current+1)
-
-        # back to no special settings
-        elif current == max:
-            if self.parent and hasattr(self.parent, var):
-                setattr(self, var, getattr(self.parent, var))
-            if hasattr(config, var):
-                setattr(self, var, getattr(config, var))
-            else:
-                setattr(self, var, False)
-            self.modified_vars.remove(var)
+            self.info[dbvar] = 'auto'
 
         # change name
         item = self.get_menustack().get_selected()
         item.name = item.name[:item.name.find(u'\t') + 1] + \
-                    self.configure_set_name(var)
-
-        # BEACON_FIXME: store in db
-        
-        # rebuild menu
-        self.get_menustack().refresh(True)
-
-
-    def configure_set_display_type(self):
-        """
-        change display type from specific to all
-        """
-        if self.display_type:
-            self['show_all_items'] = True
-            self.display_type = None
-            name = u'\tICON_RIGHT_ON_' + _('on')
-        else:
-            self['show_all_items'] = False
-            self.display_type = self.parent.display_type
-            name = u'\tICON_RIGHT_OFF_' + _('off')
-
-        # change name
-        item = self.get_menustack().get_selected()
-        item.name = item.name[:item.name.find(u'\t')]  + name
+                    self.configure_get_status(var)
 
         # rebuild menu
         self.get_menustack().refresh(True)
@@ -647,26 +553,11 @@ class DirItem(Playlist):
         show the configure dialog for folder specific settings
         """
         items = []
-        for i, name, descr, type_list in self.all_variables:
-            if name == '':
-                continue
-            name += '\t'  + self.configure_set_name(i)
+        for i, name, descr in _variables:
+            name += '\t'  + self.configure_get_status(i)
             action = ActionItem(name, self, self.configure_set_var, descr)
             action.parameter(var=i)
             items.append(action)
-
-        if self.parent and self.parent.display_type:
-            if self.display_type:
-                name = u'\tICON_RIGHT_OFF_' + _('off')
-            else:
-                name = u'\tICON_RIGHT_ON_' + _('on')
-
-            descr = _('Show video, audio and image items in this directory')
-            action = ActionItem(_('Show all kinds of items') + name, self,
-                                self.configure_set_display_type, descr)
-            action.parameter(var=i)
-            items.append(action)
-
         self.get_menustack().delete_submenu(False)
         m = menu.Menu(_('Configure'), items)
         m.table = (80, 20)
