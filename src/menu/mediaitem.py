@@ -34,6 +34,7 @@ __all__ = [ 'MediaItem' ]
 # python imports
 import os
 import logging
+import time
 
 # kaa imports
 import kaa.beacon
@@ -216,3 +217,12 @@ class MediaItem(Item):
         Stop playing
         """
         pass
+
+
+    def eventhandler(self, event):
+        """
+        eventhandler for this item
+        """
+        if event == PLAY_START:
+            self['last_played'] = int(time.time())
+        return Item.eventhandler(self, event)

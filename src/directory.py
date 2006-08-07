@@ -72,7 +72,9 @@ _variables = [
     ('CREATE_PLAYLIST', _('Create Playlist'),
      _('Handle the directory as playlist and play the next item when ine is done.')) ,
     ('AUTOPLAY_ITEMS', _('Autoplay Items'),
-     _('Autoplay the whole directory (as playlist) when it contains only files.'))]
+     _('Autoplay the whole directory (as playlist) when it contains only files.')),
+    ('HIDE_PLAYED', _('Hide Played Items'),
+     _('Hide items already played.'))]
 
 
 kaa.beacon.register_file_type_attrs('dir',
@@ -83,6 +85,7 @@ kaa.beacon.register_file_type_attrs('dir',
     freevo_reverse_sort = (str, kaa.beacon.ATTR_SIMPLE),
     freevo_create_playlist = (str, kaa.beacon.ATTR_SIMPLE),
     freevo_autoplay_items = (str, kaa.beacon.ATTR_SIMPLE),
+    freevo_hide_played = (str, kaa.beacon.ATTR_SIMPLE),
 )
 
 def smartsort(x,y):
@@ -242,13 +245,16 @@ class DirItem(Playlist):
                 return '%d:%02d' % (length / 60, length % 60)
 
         if key.startswith('config:'):
+            value = self.info.get('tmp:%s' % key[7:])
+            if value is not None:
+                return value
             value = self.info.get('freevo_%s' % key[7:])
             if value and not value == 'auto':
                 return value == 'yes'
             value = self.parent[key]
             if value:
                 return value == 'yes'
-            value = getattr(config, 'DIRECTORY_%s' % key[7:].upper())
+            value = getattr(config, 'DIRECTORY_%s' % key[7:].upper(), False)
             if not isinstance(value, (list, tuple)):
                 return value
             if self.display_type == 'tv':
@@ -274,20 +280,20 @@ class DirItem(Playlist):
             except (IndexError, ValueError), e:
                 return Playlist.eventhandler(self, event)
 
-            # delete current menu (showing the directory)
-            self.get_menustack().back_one_menu(False)
-
-            # create a new directory item
-            d = DirItem(self.dir, self.parent, self.name, type, self.add_args)
-            # deactivate autoplay
-            d['tmp:autoplay_single_item'] = False
-            # replace current item with the new one
-            self.replace(d)
-            # build new dir (this will add a new menu)
-            d.browse()
-            # show message
+            self.display_type = type
+            self['tmp:autoplay_single_item'] = False
+            self.browse(update=True)
             OSD_MESSAGE.post('%s view' % type)
             return True
+
+        if event == DIRECTORY_TOGGLE_HIDE_PLAYED:
+            self['tmp:hide_played'] = not self['config:hide_played']
+            self['tmp:autoplay_single_item'] = False
+            self.browse(update=True)
+            if self['config:hide_played']:
+                OSD_MESSAGE.post('Hide played items')
+            else:
+                OSD_MESSAGE.post('Show all items')
 
         if event == PLAY_START and self.item_menu and \
                event.arg in self.item_menu.choices:
@@ -414,6 +420,10 @@ class DirItem(Playlist):
         # remember listing
         self.listing = listing
 
+        # handle hide_played
+        if self['config:hide_played']:
+            play_items = [ p for p in play_items if not p.info.get('last_played') ]
+
         # remove same beginning from all play_items
         substr = ''
         if len(play_items) > 4 and len(play_items[0].name) > 5:
@@ -428,6 +438,7 @@ class DirItem(Playlist):
             else:
                 for i in play_items:
                     i.name = remove_start_string(i.name, substr)
+
 
         #
         # sort all items
@@ -502,8 +513,7 @@ class DirItem(Playlist):
 
         # normal menu build
         item_menu = menu.Menu(self.name, items, type = display_type)
-        # BEACON FIXME: handle tmp:autoplay_single_item
-        item_menu.autoselect = self['autoplay_single_item']
+        item_menu.autoselect = self['config:autoplay_single_item']
         self.pushmenu(item_menu)
         self.item_menu = weakref(item_menu)
 

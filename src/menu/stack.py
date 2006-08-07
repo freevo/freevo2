@@ -293,6 +293,9 @@ class MenuStack(object):
             if event in ( MENU_SELECT, MENU_SUBMENU, MENU_PLAY_ITEM):
                 self.back_one_menu()
                 return True
+            selected = getattr(self.menustack[-2], 'selected', None)
+            if selected and selected.eventhandler(event):
+                return True
             return False
 
         # handle menu not instance of class Menu

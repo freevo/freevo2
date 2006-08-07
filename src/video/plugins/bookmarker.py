@@ -147,7 +147,9 @@ class PluginInterface(ItemPlugin):
         if event == STOP:
             if item.mode == 'file' and not item.subitems and item.elapsed:
                 # this will store in kaa.beacon
+                log.info('auto-bookmark store')
                 item[RESUME]= item.elapsed
+                item['last_played'] = 0
                 self._ignore_end = True
             else:
                 log.info('auto-bookmark not supported for this item')

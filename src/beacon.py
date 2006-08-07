@@ -35,3 +35,9 @@ try:
     kaa.beacon.connect()
 except kaa.beacon.ConnectError:
     kaa.beacon.launch(verbose='all', autoshutdown=True, wait=True)
+
+kaa.beacon.register_file_type_attrs('video',
+    last_played = (int, kaa.beacon.ATTR_SEARCHABLE))
+
+kaa.beacon.register_file_type_attrs('audio',
+    last_played = (int, kaa.beacon.ATTR_SEARCHABLE))
