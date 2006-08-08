@@ -85,7 +85,7 @@ class Item(object):
         self.iscopy = False
         self.fxd_file = None
         self.__initialized = False
-        
+
 
     def _get_image(self):
         if self._image:
@@ -100,7 +100,7 @@ class Item(object):
 
     image = property(_get_image, _set_image, None, 'image object')
 
-    
+
     def __setitem__(self, key, value):
         """
         set the value of 'key' to 'val'
@@ -122,7 +122,7 @@ class Item(object):
             c.original = self
         return c
 
-    
+
     def __id__(self):
         """
         Return a unique id of the item. This id should be the same when the
@@ -147,7 +147,7 @@ class Item(object):
             return [ self.action ]
         return []
 
-    
+
     def get_actions(self):
         """
         Get all actions for the item. Do not override this function,
@@ -198,15 +198,15 @@ class Item(object):
         if not stack or not self.menu:
             raise AttributeError('Item is not bound to a menu stack')
         stack.back_to_menu(self.menu, refresh)
-        
-        
+
+
     def replace(self, item):
         """
         Replace this item in the menu with the given one.
         """
         self.menu.change_item(self, item)
 
-        
+
     def get_playlist(self):
         """
         Return playlist object.
@@ -247,12 +247,9 @@ class Item(object):
 
         if attr == 'name':
             return self.name
-            
-        r = None
-        if self.info.has_key(attr):
-            r = self.info[attr]
-        if (r == None or r == '') and hasattr(self, attr):
-            r = getattr(self,attr)
-        if r != None:
-            return r
-        return ''
+
+        r = self.info.get(attr)
+        if r in (None, ''):
+            r = getattr(self, attr, None)
+
+        return r
