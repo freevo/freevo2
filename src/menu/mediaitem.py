@@ -60,6 +60,7 @@ class MediaItem(Item):
         Item.__init__(self, parent, type=type)
         self.url = 'unknown:' + str(self)
         self.filename = None
+        self.fxdinfo = {}
 
 
     def set_url(self, url):
@@ -172,6 +173,9 @@ class MediaItem(Item):
                 return 0
             return 100 * self.elapsed / length
 
+
+        if attr in self.fxdinfo:
+            return self.fxdinfo.get(attr)
 
         return Item.__getitem__(self, attr)
 

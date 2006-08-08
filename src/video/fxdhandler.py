@@ -92,7 +92,7 @@ def parse_movie(name, title, image, info, node, parent, listing):
                         if f.get('name') == filename:
                             files.append(f)
                             break
-                            
+
                     # Remove from listing to hide in VideoItem
                     # FIXME: make this faster
                     ext = os.path.splitext(filename)[1][1:]
@@ -101,7 +101,7 @@ def parse_movie(name, title, image, info, node, parent, listing):
                             if f.get('name') == filename:
                                 listing.get(key).remove(f)
                                 break
-                            
+
     if len(files) > 1:
         log.error('BEACON_FIXME: VideoItem with more than one file')
         files = [ files[0] ]
@@ -111,7 +111,12 @@ def parse_movie(name, title, image, info, node, parent, listing):
         return None
 
     item = VideoItem(files[0], parent)
-    # BEACON_FIXME: add info from <info>
+    # Bad hack but works. We can't use the tmp: variables in beacon because
+    # multiple items based n the same file can have different info. Or maybe
+    # we just ignore this. In that case, the fxdinfo code will be replaced by
+    # an in beacon solution.
+    item.fxdinfo = dict(info)
+
     if title:
         item.set_name(title)
 
