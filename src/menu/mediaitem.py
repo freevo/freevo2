@@ -100,13 +100,10 @@ class MediaItem(Item):
             # set the suffix of the file as mimetype
             self.mimetype = self.filename[self.filename.rfind('.')+1:].lower()
 
-            try:
-                # FIXME: this is slow
-                use_tags = self.parent['config:use_mediaid_tag_names']
-                if use_tags in (None, True) and self.info.get('title'):
-                    self.name = self.info.get('title')
-            except:
-                pass
+            # FIXME: this is slow. Maybe handle this in the gui code
+            # and choose to print self.info.get('name')
+            if self.parent['config:use_mediaid_tag_names'] in (None, True):
+                self.name = self.info.get('title')
             if not self.name:
                 self.name = self.info.get('name')
 

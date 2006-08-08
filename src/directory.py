@@ -256,7 +256,9 @@ class DirItem(Playlist):
                 return value == 'yes'
             value = getattr(config, 'DIRECTORY_%s' % key[7:].upper(), False)
             if not isinstance(value, (list, tuple)):
-                return value
+                if value:
+                    return True
+                return False
             if self.display_type == 'tv':
                 return 'video' in value
             return self.display_type in value
