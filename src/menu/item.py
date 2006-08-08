@@ -245,6 +245,9 @@ class Item(object):
                 return 0
             return len(value)
 
+        if attr == 'name':
+            return self.name
+            
         r = None
         if self.info.has_key(attr):
             r = self.info[attr]
