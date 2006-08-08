@@ -77,10 +77,23 @@ class Mimetype(plugin.MimetypePlugin):
         """
         return a list of items based on the listing
         """
-        if listing.get('fxd'):
-            return self.parse(parent, listing.get('fxd'), listing)
-        else:
+        fxd_files = listing.get('fxd')
+        if not fxd_files:
             return []
+
+        display_type = parent.display_type
+        if display_type == 'tv':
+            display_type = 'video'
+
+        items = []
+        for fxd_file in fxd_files:
+            try:
+                doc = util.fxdparser2.FXD(fxd_file.filename)
+                items.extend(self._parse(doc, doc, parent, listing, display_type))
+            except:
+                log.exception("fxd file %s corrupt" % fxd_file.filename)
+                continue
+        return items
 
 
     def suffix(self):
@@ -97,32 +110,20 @@ class Mimetype(plugin.MimetypePlugin):
         return len(self.get(parent, listing))
 
 
-    def parse(self, parent, fxd_files, listing, display_type=None):
-        """
-        return a list of items that belong to a fxd files
-        """
-        if not display_type and hasattr(parent, 'display_type'):
-            display_type = parent.display_type
-            if display_type == 'tv':
-                display_type = 'video'
-
+    def _parse(self, doc, node, parent, listing, display_type):
         items = []
-        for fxd_file in fxd_files:
-            try:
-                doc = util.fxdparser2.FXD(fxd_file.filename)
-            except:
-                log.exception("fxd file %s corrupt" % fxd_file.filename)
-                continue
-            for name, title, image, info, node in doc.get_content():
-                for types, tag, handler in callbacks:
-                    if tag == name and (not display_type or not types or \
-                                        display_type in types):
-                        i = handler(name, title, image, info, node, parent, listing)
-                        if i is not None:
-                            items.append(i)
+        for name, title, image, info, node in doc.get_content(node):
+            for types, tag, handler in callbacks:
+                if tag == name and \
+                       (not display_type or not types or display_type in types):
+                    i = handler(name, title, image, info, node, parent, listing)
+                    if i is not None:
+                        items.append(i)
+            if name == 'container':
+                c = Container(name, title, image, info, parent)
+                c.items = self._parse(doc, node, c, listing, display_type)
+                items.append(c)
         return items
-
-
 
 
 
@@ -130,48 +131,20 @@ class Container(Item):
     """
     a simple container containing for items parsed from the fxd
     """
-    def __init__(self, fxd, node):
-        fxd_file = fxd.filename
-        Item.__init__(self, fxd.getattr(None, 'parent', None))
-
-        self.items    = []
-        self.name     = fxd.getattr(node, 'title', 'no title')
-        self.type     = fxd.getattr(node, 'type', '')
-        self.fxd_file = fxd_file
-
-        self.image    = fxd.childcontent(node, 'cover-img')
-        if self.image:
-            self.image = os.path.join(os.path.dirname(fxd_file), self.image)
-
-        parent_items  = fxd.getattr(None, 'items', [])
-        display_type  = fxd.getattr(None, 'display_type', None)
-
-        # set variables new for the subtitems
-        fxd.setattr(None, 'parent', self)
-        fxd.setattr(None, 'items', self.items)
-
-        for child in node.children:
-            for types, tag, handler in callbacks:
-                if (not display_type or not types or display_type in types) \
-                       and child.name == tag:
-                    handler(fxd, child)
-                    break
-
-        fxd.parse_info(fxd.get_children(node, 'info', 1), self)
-
-        # restore settings
-        fxd.setattr(None, 'parent', self.parent)
-        fxd.setattr(None, 'items', parent_items)
-
-        self.display_type = display_type
-
+    def __init__(self, name, title, image, info, parent):
+        Item.__init__(self, parent)
+        self.items = []
+        self.name = title
+        self.image = image
+        self.display_type = parent.display_type
+        
 
     def sort(self, mode=None):
         """
         Returns the string how to sort this item
         """
         if mode == 'date':
-            return '%s%s' % (os.stat(self.fxd_file).st_ctime, self.fxd_file)
+            return '0'
         return self.name
 
 
@@ -191,23 +164,6 @@ class Container(Item):
 
 
 
-def container_callback(name, title, image, info, node, parent, listing):
-    """
-    handle <container> tags. Inside this tag all other base level tags
-    like <audio>, <movie> and <container> itself will be parsed as normal.
-    """
-    # BEACON_FIXME
-    return None
-    c = Container(fxd, node)
-    if c.items:
-        fxd.getattr(None, 'items', []).append(c)
-
-
-
-
 # register the plugin as mimetype for fxd files
 mimetype = Mimetype()
 plugin.activate(mimetype, level=0)
-
-# add fxd parser
-add_parser(None, 'container', container_callback)

@@ -11,7 +11,7 @@ class FXD(kaa.xml.Document):
         self._dirname = os.path.dirname(filename)
         
     def parse_content(self, node):
-        title = node.getattr('title')
+        title = node.getattr('title') or ''
         image = None
         info = {}
         for attr in node:

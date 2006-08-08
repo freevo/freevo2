@@ -86,12 +86,19 @@ def parse_movie(name, title, image, info, node, parent, listing):
             for f in c.children:
                 if f.name == 'file':
                     filename = unicode_to_str(f.content)
-                    ext = os.path.splitext(filename)[1]
+
+                    # FIXME: make this faster
+                    for f in listing.get('beacon:all'):
+                        if f.get('name') == filename:
+                            files.append(f)
+                            break
+                            
+                    # Remove from listing to hide in VideoItem
+                    # FIXME: make this faster
+                    ext = os.path.splitext(filename)[1][1:]
                     for key in (ext, 'beacon:video'):
                         for f in listing.get(key):
-                            # FIXME: ugly, this has to be faster!
                             if f.get('name') == filename:
-                                files.append(f)
                                 listing.get(key).remove(f)
                                 break
                             
@@ -100,7 +107,7 @@ def parse_movie(name, title, image, info, node, parent, listing):
         files = [ files[0] ]
 
     if len(files) == 0:
-#         log.error('BEACON_FIXME: VideoItem with bad file \n%s', node)
+        log.error('BEACON_FIXME: VideoItem with bad file \n%s', node)
         return None
 
     item = VideoItem(files[0], parent)

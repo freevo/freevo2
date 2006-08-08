@@ -14,6 +14,7 @@ def extmap_filter(results):
     extmap = ExtMap()
     if not isinstance(results, (list, tuple)):
         results = [ results ]
+    extmap.get('beacon:all').extend(results)
     for r in results:
         t = r.get('type')
         if t and t != 'file':
