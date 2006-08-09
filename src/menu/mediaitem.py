@@ -104,7 +104,7 @@ class MediaItem(Item):
             # FIXME: this is slow. Maybe handle this in the gui code
             # and choose to print self.info.get('name')
             if self.parent and \
-                   self.parent['config:use_mediaid_tag_names'] in (None, True):
+                   self.parent['config:use_mediadb_names'] in (None, True):
                 self.name = self.info.get('title')
             if not self.name:
                 self.name = self.info.get('name')

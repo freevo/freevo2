@@ -381,7 +381,7 @@ DIRECTORY_AUDIO_FORMAT_STRING = '%(t)s'
 # enabled all the time. It should only be disabled for directories with 
 # broken tags.
 #
-DIRECTORY_USE_MEDIAID_TAG_NAMES = 1
+DIRECTORY_USE_MEDIADB_NAMES = 1
 
 #
 # The following settings determine which features are available for
