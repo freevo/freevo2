@@ -107,7 +107,7 @@ class MediaItem(Item):
                    self.parent['config:use_mediadb_names'] in (None, True):
                 self.name = self.info.get('title')
             if not self.name:
-                self.name = self.info.get('name')
+                self.name = Unicode(self.info.get('name'))
 
         else:
             # Mode is not file, it has to be a network url. Other
