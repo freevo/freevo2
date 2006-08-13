@@ -147,10 +147,12 @@ if len(sys.argv) >= 2 and sys.argv[1] == '-daemon':
         sys.exit(1)
 
     kaa.notifier.signals['lirc'].connect(handle_key)
+    log.info('daemon running')
     kaa.notifier.loop()
+    log.info('daemon done')
     sys.exit(1)
-        
-    
+
+
 # freevo imports
 import gui
 import gui.displays
@@ -250,14 +252,14 @@ if len(sys.argv) >= 2:
 
 try:
     freevo.ipc.Instance('freevo', **config.MBUS_ADDR)
-    
+
     # create gui
     gui.displays.create()
-    
+
     # Fire up splashscreen and load the plugins
     num = len(plugin.get(None))-1
     splash = Splashscreen(_('Starting Freevo, please wait ...'), num)
-                          
+
     # load plugins
     plugin.init(os.environ['FREEVO_PYTHON'], splash.progress)
 
