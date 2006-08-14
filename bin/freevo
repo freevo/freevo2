@@ -1,17 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# freevo - the main entry point to the whole suite of applications
+# main.py - This is the Freevo main application code
 # -----------------------------------------------------------------------------
 # $Id$
+#
+# This file is the python start file for Freevo. It handles the init phase like
+# checking the python modules, loading the plugins and starting the main menu.
+#
+# It also contains the splashscreen.
+#
+# TODO: o add background mode
+#       o add --start, --stop and --restart
+#
+# First edition: Krister Lagerstrom <krister-freevo@kmlager.com>
+# Maintainer:    Dirk Meyer <dischi@freevo.org>
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
-#
-# First Edition: Dirk Meyer <dischi@freevo.org>
-# Maintainer:    Dirk Meyer <dischi@freevo.org>
-#
 # Please see the file doc/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -30,211 +37,120 @@
 #
 # -----------------------------------------------------------------------------
 
+# python imports
 import os
-import sys
-import popen2
+import sys, time
+import traceback
+import signal
 
-from signal import *
+import logging
+import logging.config
 
+# get logging object
+log = logging.getLogger()
 
-def show_help():
-    """
-    show how to use this script
-    """
-    helper_list = ''
-    for helper in os.listdir(os.path.join(os.environ['FREEVO_PYTHON'], 'helpers')):
-        if helper.endswith('.py') and not helper == '__init__.py':
-            helper_list += '  ' + helper[:-3] + '\n'
-
-    print '''\
-freevo [ script | options]
-options:
-  -fs        start freevo in a new x session in fullscreen
-  -daemon    start in daemin mode, use remote to really start freevo
-  setup      run freevo setup to scan your environment
-  start      start freevo as daemon in background
-  stop       stop the current freevo process
-
-freevo can start the following scripts, use --help on these
-scripts to get more informations about options.
-
-%s
-
-Example: freevo imdb --help"
-         freevo webserver start"
-
-You can also create a symbolic link to freevo with the name of the
-script you want to execute. E.g. put a link imdb pointing to freevo
-in your path to access the imdb helper script
-
-Example: ln -s path-to-freevo imdb
-         imdb --help
-
-Before running freevo the first time, you need to run \'freevo setup\'
-After that, you can run freevo without parameter.
-    ''' % helper_list
-    sys.exit(0)
-
-
-
-def getpid(name, arg):
-    """
-    get pid of running 'name'
-    """
-    for fname in ('/var/run/' + name  + '-%s.pid' % os.getuid(), 
-                  '/tmp/' + name + '-%s.pid' % os.getuid()):
-        if os.path.isfile(fname):
-            f = open(fname)
-            uid = int(f.readline()[:-1])
-            f.close()
-
-            proc = '/proc/' + str(uid) + '/cmdline'
-            # FIXME: BSD support missing here
-            try:
-                if os.path.isfile(proc):
-                    f = open(proc)
-                    proc_arg = f.readline().split('\0')[:-1]
-                    f.close()
-                else:
-                    # process not running
-                    return fname, 0
-
-            except (OSError, IOError):
-                # running, but not freevo (because not mine)
-                return fname, 0
-
-            if '-OO' in proc_arg:
-                proc_arg.remove('-OO')
-                
-            if proc_arg and ((len(proc_arg)>2 and arg[1] != proc_arg[1]) or \
-                             (len(proc_arg)>3 and arg[2] != proc_arg[2])):
-                # different proc I guess
-                try:
-                    os.unlink(fname)
-                except OSError:
-                    pass
-                return fname, 0
-            return fname, uid
-    return fname, 0
-
-
-def stop(name, arg):
-    """
-    stop running process 'name'
-    """
-    fname, uid = getpid(name, arg)
-    if not uid:
-        return 0
-    try:
-        try:
-            os.unlink(fname)
-        except OSError:
-            pass
-        os.kill(uid, SIGINT)
-        return 1
-    except OSError:
-        return 0
-
-
-
-def start(name, arg, bg, store=1):
-    """
-    start a process
-    """
-    if '-daemon' in arg:
-        uid = 0
-    else:
-        uid = os.fork()
-    if uid:
-        if store:
-            try:
-                f = open('/var/run/' + name + '-%s.pid' % os.getuid(), 'w')
-            except (OSError, IOError):
-                f = open('/tmp/' + name + '-%s.pid' % os.getuid(), 'w')
-
-            f.write(str(uid)+'\n')
-            f.close()
-
-        if not bg:
-            try:
-                os.waitpid(uid, 0)
-            except KeyboardInterrupt:
-                try:
-                    os.kill(uid, SIGINT)
-                    try:
-                        os.waitpid(uid, 0)
-                    except KeyboardInterrupt:
-                        pass
-                except OSError:
-                    pass
-                if store and os.path.isfile(f.name):
-                    os.unlink(f.name)
-    else:
-        if bg:
-            # close logging fd
-            os.close(2)
-            os.open('/dev/null', os.O_WRONLY)
-            
-        os.execvp(arg[0], arg)
-
-
-# fix python path
+# insert freevo path information
 __site__ = '../lib/python%s.%s/site-packages' % sys.version_info[:2]
 __site__ = os.path.normpath(os.path.join(os.path.dirname(__file__), __site__))
+if not __site__ in sys.path:
+    sys.path.insert(0, __site__)
 
-# extend PYTHONPATH to freevo
-if os.environ.has_key('PYTHONPATH'):
-    os.environ['PYTHONPATH'] = '%s:%s' % (__site__, os.environ['PYTHONPATH'])
-else:
-    os.environ['PYTHONPATH'] = __site__
-
-__site__ = os.path.join(__site__, 'freevo/ui')
-
-os.environ['PYTHONPATH'] = '%s:%s' % (__site__, os.environ['PYTHONPATH'])
-os.environ['FREEVO_PYTHON'] = __site__
-
-# extend PATH to make sure the basics are there
-os.environ['PATH'] = '%s:/usr/bin:/bin:/usr/local/bin:' % os.environ['PATH'] + \
-                     '/usr/X11R6/bin/:/sbin:/usr/sbin'
-
-# set basic env variables
-if not os.environ.has_key('HOME') or not os.environ['HOME']:
-    os.environ['HOME'] = '/root'
-if not os.environ.has_key('USER') or not os.environ['USER']:
-    os.environ['USER'] = 'root'
-
-# now check what and how we should start freevo
-bg    = 0 # start in background
-proc  = [ os.path.abspath(os.path.join(__site__, 'helpers/main.py')) ]
-name  = os.path.splitext(os.path.basename(os.path.abspath(sys.argv[0])))[0]
-check = 1 # check running instance
-
-if len(sys.argv) > 1:
-    arg = sys.argv[1]
-else:
-    arg = ''
+#
+# kaa checking
+#
+try:
+    import kaa
+    import kaa.notifier
+except ImportError:
+    d = os.path.dirname(__file__)[:-15]
+    print 'The kaa module repository could not be loaded!'
+    print
+    print 'Please check out the kaa repository from SVN'
+    print 'svn co svn://svn.freevo.org/kaa/trunk kaa'
+    print
+    print 'Please install it as root into your system or into the same'
+    print 'directory you installed Freevo in'
+    print
+    print 'Kaa is under development right now. Make sure you update the kaa'
+    print 'directory every time you update freevo.'
+    print
+    sys.exit(1)
 
 
-# check the arg
+try:
+    # i18n support
 
-if arg in ('--help', '-h'):
-    # show help
-    show_help()
+    # First load the xml module. It's not needed here but it will mess
+    # up with the domain we set (set it from freevo 4Suite). By loading it
+    # first, Freevo will override the 4Suite setting to freevo
+    try:
+        from xml.utils import qp_xml
+        from xml.dom import minidom
+    except ImportError:
+        raise ImportError('No module named pyxml')
 
-    
-if arg == 'stop':
-    # stop running freevo
-    if not stop(name, [ sys.executable ] + proc):
-        print 'freevo not running'
+    # now load other modules to check if all requirements are installed
+    import pysqlite2
+
+    # import ui path (ugly)
+    import freevo
+
+    FREEVO_PATH = os.path.join(os.path.dirname(freevo.__file__), 'ui')
+    sys.path.insert(0, FREEVO_PATH)
+
+    import config
+    if config.GUI_DISPLAY == 'SDL':
+        import pygame
+
+except ImportError, i:
+    print 'ImportError: %s' % i
+    print 'Not all requirements of Freevo are installed on your system.'
+    print 'Please check the INSTALL file for more informations.'
+    print
     sys.exit(0)
-    
-elif arg == 'start':
-    # start freevo in background
-    sys.argv = [ sys.argv[0] ]
-    bg = 1
 
 
-elif arg == '-fs':
+#
+# daemon mode
+#
+# start freevo with --daemon and it will only start a small helper that
+# will wait for an ir command to start freevo
+#
+
+if len(sys.argv) == 2 and sys.argv[1] in ('-daemon', '--daemon', '-d'):
+    from kaa.input import lirc
+
+    def handle_key(key):
+        if not key in ( 'EXIT', 'POWER' ):
+            return True
+        lirc.stop()
+        options = ''
+        if config.CONF.display in ( 'x11', 'dga' ) and not \
+               (os.environ.has_key('DISPLAY') and os.environ['DISPLAY']):
+            options = '-fs'
+        log.info('start freevo %s', script, options)
+        os.system('%s %s >/dev/null 2>/dev/null' % (sys.argv[0], options))
+        lirc.init('freevo', config.LIRCRC)
+        log.info('freevo stopped')
+        return True
+
+    if not lirc.init('freevo', config.LIRCRC):
+        log.error('Could not initialize PyLirc!')
+        sys.exit(1)
+
+    kaa.notifier.signals['lirc'].connect(handle_key)
+    log.info('daemon running')
+    kaa.notifier.loop()
+    log.info('daemon done')
+    sys.exit(1)
+
+#
+# Fullscreen X mode
+#
+# Start a new X server and run Freevo as windowmanager in fullscreen mode. This
+# could require xrandr in the future to have a better effect
+#
+if len(sys.argv) == 2 and sys.argv[1] in ('-fs', '--fullscreen', '-f'):
     # start X server and run freevo, ignore everything else for now
     server_num = 0
     while 1:
@@ -244,76 +160,139 @@ elif arg == '-fs':
     sys.stdin.close()
     os.execvp('xinit', [ 'xinit', sys.argv[0], '-force-fs',  '--', ':'+str(server_num) ])
 
-    
-elif arg == 'execute':
-    # execute a python script
-    proc  = sys.argv[2:]
-    check = 0
+# freevo imports
+import gui
+import gui.displays
+import gui.areas
+import gui.animation
+import gui.widgets
+import gui.theme
+import util
+import plugin
+import beacon
 
-elif arg == 'setup':
-    # run setup
-    proc = [ os.path.join(__site__, 'config/setup.py') ] + sys.argv[2:]
+from mainmenu import MainMenu
+
+# load the fxditem to make sure it's the first in the
+# mimetypes list
+import fxditem
+
+# freevo core imports
+import freevo.ipc
+
+class Splashscreen(gui.areas.Area):
+    """
+    A simple splash screen for osd startup
+    """
+    def __init__(self, text, max_value):
+        gui.areas.Area.__init__(self, 'content')
+        self.max_value = max_value
+        self.text      = text
+        self.bar       = None
+        self.engine    = gui.areas.Handler('splashscreen', ('screen', self))
+        self.engine.show()
 
 
-elif arg == 'prompt':
-    # only run python inside the freevo env
-    proc = []
-    check = 0
+    def clear(self):
+        """
+        clear all content objects
+        """
+        self.bar.unparent()
+        self.text.unparent()
 
 
-elif arg and name == 'freevo' and not arg.startswith('-'):
-    # start a helper. arg is the name of the script in
-    # the helpers directory
-    name     = arg
-    proc     = [ os.path.join(__site__, 'helpers', name + '.py') ]
-    if len(sys.argv) >= 2:
-        if len(sys.argv) > 2 and sys.argv[2] == 'stop':
-            if not stop(name, [ sys.executable ] + proc):
-                print '%s not running' % name
-            sys.exit(0)
-        if len(sys.argv) > 2 and sys.argv[2] == 'start':
-            bg = 1
-            sys.argv = [ sys.argv[0] ]
-        else:
-            sys.argv = [ sys.argv[0] ] + sys.argv[2:]
+    def update(self):
+        """
+        update the splashscreen
+        """
+        if self.bar:
+            return
+
+        settings = self.settings
+        x0, x1 = settings.x, settings.x + settings.width
+        y = settings.y + settings.font.font.height + settings.spacing
+
+        self.text = self.drawstring(self.text, settings.font, settings,
+                                    height=-1, align_h='center')
+        self.bar = gui.widgets.Progressbar((x0, y), (x1-x0, 20), 2, (0,0,0),
+                                           None, 0, None, (0,0,0,95), 0,
+                                           self.max_value)
+        self.layer.add_child(self.bar)
 
 
-elif arg and name == 'freevo' and not (arg in ['-force-fs', '-daemon', '-c']):
-    # ok, don't know about that arg, freevo should be started, but
-    # it's also no freevo arg
-    print 'unknown command line option: %s' % sys.argv[1:]
-    print
-    show_help()
+    def progress(self):
+        """
+        set the progress position and refresh the screen
+        """
+        if self.bar:
+            self.bar.tick()
+        if self.engine:
+            self.engine.draw(None)
 
-else:
-    # arg for freevo
-    proc += sys.argv[1:]
-    
 
-if name != 'freevo':
-    proc = [ os.path.join(__site__, 'helpers', name + '.py') ] +  sys.argv[1:]
-    if not os.path.isfile(proc[0]):
-        if os.path.isfile(name):
-            name = os.path.splitext(os.path.basename(name))[0]
-            proc = proc[1:]
-        else:
-            proc = [ os.path.join(__site__, 'helpers', name + '.py') ] +  sys.argv[1:]
-            print 'can\'t find helper %s' % name
-            sys.exit(1)
+    def hide(self):
+        """
+        fade out
+        """
+        self.engine.hide(config.GUI_FADE_STEPS)
 
-if arg and name == 'freevo' and arg == '-daemon':
-    name = 'daemon'
 
-# if getpid(name, [ sys.executable ] + proc)[1] and check:
-#     if name != 'freevo':
-#         print '%s still running, run \'freevo %s stop\' to stop' % (name, name)
-#     else:
-#         print 'freevo still running, run \'freevo stop\' to stop'
-#     sys.exit(0)
+    def destroy(self):
+        """
+        destroy the object
+        """
+        del self.engine
 
-if len(proc) and not os.path.isfile(proc[0]):
-    print 'Error: unable to start \'%s\'' % proc[0]
-    print 'Either the helper does not exist or you need to run \'make\' first'
-    sys.exit(0)
 
-start(name, [ sys.executable , '-OO' ] + proc , bg, check)
+#
+# Freevo main function
+#
+
+# parse arguments
+if len(sys.argv) >= 2:
+
+    # force fullscreen mode
+    # deactivate screen blanking and set osd to fullscreen
+    if sys.argv[1] == '-force-fs':
+        os.system('xset -dpms s off')
+        config.START_FULLSCREEN_X = 1
+
+try:
+    freevo.ipc.Instance('freevo', **config.MBUS_ADDR)
+
+    # create gui
+    gui.displays.create()
+
+    # Fire up splashscreen and load the plugins
+    num = len(plugin.get(None))-1
+    splash = Splashscreen(_('Starting Freevo, please wait ...'), num)
+
+    # load plugins
+    plugin.init(FREEVO_PATH, splash.progress)
+
+    # fade out the splash screen
+    splash.hide()
+
+    # prepare again, now that all plugins are loaded
+    gui.theme.get().prepare()
+
+    # start menu
+    MainMenu()
+
+    # Wait for the startup animation. This is a bad hack but we won't
+    # be able to remove our splashscreen otherwise. Big FIXME!
+    gui.animation.render().wait()
+
+    # delete splash screen
+    splash.destroy()
+    del splash
+
+    # start main loop
+    kaa.notifier.loop()
+
+except SystemExit:
+    kaa.notifier.shutdown()
+
+except:
+    log.exception('Crash!')
+    kaa.notifier.shutdown()
