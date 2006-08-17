@@ -251,9 +251,8 @@ class DirItem(Playlist):
             value = self.info.get('freevo_%s' % key[7:])
             if value and not value == 'auto':
                 return value == 'yes'
-            value = self.parent[key]
-            if value:
-                return value == 'yes'
+            if isinstance(self.parent, DirItem):
+                return self.parent[key]
             value = getattr(config, 'DIRECTORY_%s' % key[7:].upper(), False)
             if not isinstance(value, (list, tuple)):
                 if value in (1, True):
