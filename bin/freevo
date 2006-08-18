@@ -128,7 +128,7 @@ if len(sys.argv) == 2 and sys.argv[1] in ('-daemon', '--daemon', '-d'):
         if config.CONF.display in ( 'x11', 'dga' ) and not \
                (os.environ.has_key('DISPLAY') and os.environ['DISPLAY']):
             options = '-fs'
-        log.info('start freevo %s', script, options)
+        log.info('start freevo %s', options)
         os.system('%s %s >/dev/null 2>/dev/null' % (sys.argv[0], options))
         lirc.init('freevo', config.LIRCRC)
         log.info('freevo stopped')
