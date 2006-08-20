@@ -453,6 +453,8 @@ class Playlist(MediaItem):
         Handle playlist specific events
         """
         if event == PLAY_START and event.arg in self.playlist:
+            # FIXME: remove this after application update
+            self.select(event.arg)
             # a new item started playing, cache next (if supported)
             if self.next_pos is not None and \
                    hasattr(self.choices[self.next_pos], 'cache'):
