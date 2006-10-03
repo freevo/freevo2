@@ -51,8 +51,6 @@ class ImageItem(MediaItem):
         # set url and parse the name
         self.set_url(url)
         self.duration = duration
-        if self.url.startswith('file://'):
-            self.image = self.filename
 
 
     def __getitem__(self, key):
