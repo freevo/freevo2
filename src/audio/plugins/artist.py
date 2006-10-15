@@ -42,7 +42,7 @@ from kaa.strutils import str_to_unicode
 # Freevo imports
 from plugin import MainMenuPlugin
 from menu import Item, ActionItem, Menu, Action
-from audio import AudioItem
+from playlist import Playlist
 
 class AlbumItem(Item):
     """
@@ -68,7 +68,8 @@ class AlbumItem(Item):
         else:
             query = kaa.beacon.query(artist=self.artist)
         # FIXME: monitor query for live update
-        self.pushmenu(Menu(title, [ AudioItem(item, self) for item in query ]))
+        self.playlist = Playlist(title, query, self)
+        self.playlist.browse()
 
 
     def actions(self):

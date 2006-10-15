@@ -260,6 +260,13 @@ class Playlist(MediaItem):
         self.info = {}
         self.playlist = []
 
+        if isinstance(playlist, kaa.beacon.Query):
+            playlist = playlist.get(filter='extmap')
+            for p in self.get_plugins:
+                for i in p.get(self, playlist):
+                    self.playlist.append(i)
+            return
+        
         for i in playlist:
             if isinstance(i, Item):
                 # Item object, correct parent
@@ -267,15 +274,15 @@ class Playlist(MediaItem):
                 # FIXME: use weakref here
                 i.parent = self
                 self.playlist.append(i)
-                query = None
+                continue
 
             # FIXME: The following stuff depends on a fast media database
             # Unless beacon is finished and integrated, this can be very
             # slow. It should be fast later but it is still unclear what
             # will happen on large directory trees.
 
-            elif isinstance(i, list) or isinstance(i, tuple) and \
-                 len(i) == 2 and os.path.isdir(i[0]):
+            if isinstance(i, list) or isinstance(i, tuple) and \
+                   len(i) == 2 and os.path.isdir(i[0]):
                 # (directory, recursive=True|False)
                 query = { 'filename': i[0] }
                 if i[1]:
@@ -284,11 +291,10 @@ class Playlist(MediaItem):
                 # filename
                 query = { 'filename': i }
 
-            if query:
-                l = kaa.beacon.query(**query).get(filter='extmap')
-                for p in self.get_plugins:
-                    for i in p.get(self, l):
-                        self.playlist.append(i)
+            l = kaa.beacon.query(**query).get(filter='extmap')
+            for p in self.get_plugins:
+                for i in p.get(self, l):
+                    self.playlist.append(i)
 
 
     def randomize(self):
