@@ -63,7 +63,7 @@ class Playlist(MediaItem):
     Class for playlists. A playlist can be created with a list of items or a
     filename containing the playlist.
     """
-    def __init__(self, name='', playlist=[], parent=None, display_type=None,
+    def __init__(self, name='', playlist=[], parent=None, type=None,
                  random=False, build=False, autoplay=False, repeat=REPEAT_OFF):
         """
         Init the playlist
@@ -82,7 +82,7 @@ class Playlist(MediaItem):
         self.playlist     = playlist
         self.autoplay     = autoplay
         self.repeat       = repeat
-        self.display_type = display_type
+        self.display_type = type
         self.next_pos     = None
 
         self.suffixlist   = []

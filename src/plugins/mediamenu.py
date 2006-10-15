@@ -147,7 +147,7 @@ class MediaMenu(MainMenuItem):
                     query = kaa.beacon.query(filename=filename)
                     for d in query.get(filter='extmap').get('beacon:dir'):
                         items.append(DirItem(d, self, name = title,
-                                             display_type = self.display_type,
+                                             type = self.display_type,
                                              add_args = add_args))
                     continue
 
@@ -181,7 +181,7 @@ class MediaMenu(MainMenuItem):
                 items.extend(p.get(self, listing))
             for d in listing.get('beacon:dir'):
                 items.append(DirItem(d, self, name=media.label,
-                                     display_type = self.display_type))
+                                     type = self.display_type))
         # add all plugin data
         if self.display_type:
             for p in plugin.get('mainmenu_%s' % self.display_type):

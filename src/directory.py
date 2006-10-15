@@ -142,9 +142,9 @@ class DirItem(Playlist):
     """
     class for handling directories
     """
-    def __init__(self, directory, parent, name = '', display_type = None,
+    def __init__(self, directory, parent, name = '', type = None,
                  add_args = None):
-        Playlist.__init__(self, parent=parent, display_type=display_type)
+        Playlist.__init__(self, parent=parent, type=type)
         self.type = 'dir'
         self.item_menu  = None
 
@@ -176,10 +176,10 @@ class DirItem(Playlist):
 
         # set tv to video now
         if self.display_type == 'tv':
-            display_type = 'video'
+            type = 'video'
 
         # Check mimetype plugins if they want to add something
-        for p in plugin.mimetype(display_type):
+        for p in plugin.mimetype(type):
             p.dirinfo(self)
         
 
@@ -357,7 +357,7 @@ class DirItem(Playlist):
         if self.display_type == 'tv':
             display_type = 'video'
         pl = Playlist(playlist = [ (self.dir, recursive) ], parent = self,
-                      display_type=display_type, random=random)
+                      type=display_type, random=random)
         pl.play()
 
         # Now this is ugly. If we do nothing 'pl' will be deleted by the
@@ -421,7 +421,7 @@ class DirItem(Playlist):
 
         # normal DirItems
         for item in listing.get('beacon:dir'):
-            d = DirItem(item, self, display_type = self.display_type)
+            d = DirItem(item, self, type = self.display_type)
             dir_items.append(d)
 
         # remember listing

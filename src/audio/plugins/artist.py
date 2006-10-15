@@ -68,7 +68,7 @@ class AlbumItem(Item):
         else:
             query = kaa.beacon.query(artist=self.artist)
         # FIXME: monitor query for live update
-        self.playlist = Playlist(title, query, self, display_type='audio')
+        self.playlist = Playlist(title, query, self, type='audio')
         self.playlist.browse()
 
 

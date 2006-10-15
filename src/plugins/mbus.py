@@ -59,8 +59,8 @@ class PluginInterface(plugin.Plugin):
 
 
     @freevo.ipc.expose('home-theatre.play')
-    def play(self, file, display_type=None):
-        log.info('play %s with %s', file, display_type)
+    def play(self, file, type=None):
+        log.info('play %s with %s', file, type)
         app = application.get_active()
         if not app or app.get_name() != 'menu':
             raise RuntimeError('freevo not in menu mode')
@@ -68,7 +68,7 @@ class PluginInterface(plugin.Plugin):
         kaa.beacon.query(filename=String(file)).get(filter='extmap')
 
         # normal file
-        for p in plugin.mimetype(display_type):
+        for p in plugin.mimetype(type):
             i = p.get(None, listing)
             if i and hasattr(i[0], 'play'):
                 i[0].play()
@@ -76,7 +76,7 @@ class PluginInterface(plugin.Plugin):
 
         # directory
         for i in listing.get_dir():
-            pl = DirItem(i, None, display_type=display_type)
+            pl = DirItem(i, None, type=type)
             pl.play()
             # Now this is ugly. If we do nothing 'pl' will be deleted by the
             # garbage collector, so we have to store it somehow

@@ -52,7 +52,7 @@ class AudioDiskItem(Playlist):
     Class for handling audio disks.
     """
     def __init__(self, device, parent):
-        Playlist.__init__(self, parent=parent)
+        Playlist.__init__(self, parent=parent, type='audio')
         self.type = 'audiocd'
         self.info = device
         self.name = device.get('title')
@@ -60,9 +60,6 @@ class AudioDiskItem(Playlist):
         # variables only for Playlist
         self.autoplay = 0
 
-        # variables only for DirItem
-        self.display_type = 'audio'
-            
 
     def actions(self):
         """

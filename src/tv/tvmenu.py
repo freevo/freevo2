@@ -126,7 +126,7 @@ class TVMenu(MainMenuItem):
 
         items.append(DirItem(config.TV_RECORD_DIR, None,
                              name = _('Recorded Shows'),
-                             display_type='tv'))
+                             type='tv'))
 
         items.append(EPGUpdate(None))
 

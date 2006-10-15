@@ -166,7 +166,7 @@ class PluginInterface(plugin.DaemonPlugin):
         elif self.saver_type == 'script':
             os.system('%s' % self.arg1)
         elif self.saver_type == 'ssr':
-            self.pl = Playlist('ScreenSaver', playlist=self.arg1, display_type='image', repeat=True)
+            self.pl = Playlist('ScreenSaver', playlist=self.arg1, type='image', repeat=True)
             self.pl.play()
         elif self.saver_type == 'fxd':
             mylist = fxditem.mimetype.parse(None, [self.arg1], display_type=self.arg2)
