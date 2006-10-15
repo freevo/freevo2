@@ -519,6 +519,8 @@ AUDIO_PREFERED_PLAYER = 'mplayer'
 #
 AUDIO_SHOW_VIDEOFILES = False
 
+plugin.activate('audio.artist')
+
 # ======================================================================
 # Freevo image viewer settings:
 # ======================================================================
