@@ -68,7 +68,7 @@ class AlbumItem(Item):
         else:
             query = kaa.beacon.query(artist=self.artist)
         # FIXME: monitor query for live update
-        self.playlist = Playlist(title, query, self)
+        self.playlist = Playlist(title, query, self, display_type='audio')
         self.playlist.browse()
 
 
@@ -104,7 +104,7 @@ class ArtistItem(Item):
         items = [ AlbumItem(self.artist, None, self) ]
         for album in query:
             items.append(AlbumItem(self.artist, album, self))
-        self.pushmenu(Menu(_('Album'), items))
+        self.pushmenu(Menu(_('Album'), items, type='audio'))
 
 
     def actions(self):
@@ -127,7 +127,7 @@ class PluginInterface(MainMenuPlugin):
         items = []
         for artist in kaa.beacon.query(attr='artist', type='audio'):
             items.append(ArtistItem(artist, parent))
-        parent.pushmenu(Menu(_('Artists'), items))
+        parent.pushmenu(Menu(_('Artists'), items, type='audio'))
 
 
     def items(self, parent):
