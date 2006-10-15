@@ -204,7 +204,7 @@ def check_program(conf, name, variable, necessary, verbose=1):
 
 
 
-if __name__ == '__main__':
+def run_as_main():
     # Default opts
 
     # XXX Make this OO and also use the Optik lib
@@ -214,11 +214,11 @@ if __name__ == '__main__':
     conf.tv = 'ntsc'
     conf.chanlist = 'us-cable'
     conf.version = CONFIG_VERSION
-    
+
     # Parse commandline options
     try:
         long_opts = 'help compile= geometry= display= tv= chanlist= '.split()
-        opts, args = getopt.getopt(sys.argv[1:], 'h', long_opts)
+        opts, args = getopt.getopt(sys.argv[2:], 'h', long_opts)
     except getopt.GetoptError:
         # print help information and exit:
         print_usage()

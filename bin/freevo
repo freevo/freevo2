@@ -76,6 +76,12 @@ except ImportError:
     print
     sys.exit(1)
 
+if len(sys.argv) >= 2 and sys.argv[1] in ('setup'):
+
+    # XXX setup call, remove me
+    sys.path.insert(0, __site__ + '/freevo/ui/config')
+    import setup
+    setup.run_as_main()
 
 try:
     # i18n support
