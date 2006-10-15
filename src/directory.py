@@ -377,6 +377,8 @@ class DirItem(Playlist):
         dir_items  = []
         pl_items   = []
 
+        t1 = time.time()
+        
         if update:
             # Delete possible skin settings
             # FIXME: This is a very bad handling, maybe signals?
@@ -396,11 +398,13 @@ class DirItem(Playlist):
         if self.display_type == 'tv':
             display_type = 'video'
 
+        t2 = time.time()
         if not update:
             self.query = kaa.beacon.query(parent=self.info)
             self.query.signals['changed'].connect_weak(self.browse, update=True)
             self.query.monitor()
         listing = self.query.get(filter='extmap')
+        t3 = time.time()
 
         #
         # build items
@@ -422,6 +426,8 @@ class DirItem(Playlist):
 
         # remember listing
         self.listing = listing
+
+        t4 = time.time()
 
         # handle hide_played
         if self['config:hide_played']:
@@ -517,9 +523,15 @@ class DirItem(Playlist):
         # normal menu build
         item_menu = menu.Menu(self.name, items, type = display_type)
         item_menu.autoselect = self['config:autoplay_single_item']
+
+        t5 = time.time()
         self.pushmenu(item_menu)
+        t6 = time.time()
+
         self.item_menu = weakref(item_menu)
 
+        if False:
+            print t2 - t1, t3 - t2, t4 - t3, t5 - t4, t6 - t5
 
     # ======================================================================
     # configure submenu
