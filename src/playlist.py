@@ -349,7 +349,7 @@ class Playlist(MediaItem):
         play the playlist in random order
         """
         Playlist(playlist=self.playlist, parent=self.parent,
-                 display_type=self.display_type, random=True,
+                 type=self.display_type, random=True,
                  repeat=self.repeat).play()
 
 
@@ -565,7 +565,7 @@ class Mimetype(plugin.MimetypePlugin):
         for suffix in self.suffix():
             for filename in listing.get(suffix):
                 items.append(Playlist(playlist=filename.filename, parent=parent,
-                                      display_type=display_type, build=True))
+                                      type=display_type, build=True))
         return items
 
 
@@ -602,7 +602,7 @@ class Mimetype(plugin.MimetypePlugin):
                 items.append(fname)
 
         pl = Playlist('', items, fxd.getattr(None, 'parent', None),
-                      display_type=fxd.getattr(None, 'display_type'),
+                      type=fxd.getattr(None, 'display_type'),
                       build=True, random=fxd.getattr(node, 'random', 0),
                       repeat=fxd.getattr(node, 'repeat', 0))
 
