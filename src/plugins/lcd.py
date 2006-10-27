@@ -12,48 +12,6 @@
 #    2) Have Movie Player, TV Player and Image viewer to use LCD
 #    3) Better (and more) LCD screens.
 # -----------------------------------------------------------------------
-# $Log$
-# Revision 1.29  2005/08/07 14:04:12  dischi
-# remove MenuItem
-#
-# Revision 1.28  2005/08/06 14:50:32  dischi
-# adjust to kaa.notifier.Timer.start now using seconds
-#
-# Revision 1.27  2005/07/22 19:30:24  dischi
-# fix event handling
-#
-# Revision 1.26  2005/07/16 11:40:28  dischi
-# remove poll_menu_only
-#
-# Revision 1.25  2005/07/15 20:42:53  dischi
-# remove variable event_listener, not needed anymore
-#
-# Revision 1.24  2005/06/09 19:43:53  dischi
-# clean up eventhandler usage
-#
-# Revision 1.23  2005/01/08 15:40:53  dischi
-# remove TRUE, FALSE, DEBUG and HELPER
-#
-# Revision 1.22  2004/11/27 19:11:29  dischi
-# fix bad log statement
-#
-# Revision 1.21  2004/11/20 18:23:03  dischi
-# use python logger module for debug
-#
-# Revision 1.20  2004/08/11 17:56:09  gsbarbieri
-# Improve unicode support using String() everywhere.
-#
-# Revision 1.19  2004/07/11 11:14:53  dischi
-# lcd detach fixes from Magnus Schmidt
-#
-# Revision 1.18  2004/07/10 12:33:40  dischi
-# header cleanup
-#
-# Revision 1.17  2004/02/23 05:30:28  gsbarbieri
-# Better i18n support. Changed a lot of strings to cooperate with translators
-# and made the menu items (not dirs, audio or video ones!) to use translations.
-#
-# -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al. 
 # Please see the file doc/CREDITS for a complete list of authors.
@@ -77,6 +35,9 @@
 
 import copy
 import time
+
+from kaa.strutils import to_str
+
 import plugin
 from event import *
 import config
@@ -88,7 +49,7 @@ log = logging.getLogger()
 try:
     import pylcd
 except:
-    print String(_("ERROR")+": "+_("You need pylcd to run \"lcd\" plugin."))
+    print to_str(_("ERROR")+": "+_("You need pylcd to run \"lcd\" plugin."))
 
 
 # Configuration: (Should move to freevo_conf.py?)
@@ -184,7 +145,7 @@ layouts = { 4 : # 4 lines display
                                  "Freevo",
                                  None ),
                   "calendar" : ( "scroller",
-                                 "1 2 %d 2 m 3 \"" + String(_( "Today is %s." )) + "%s\"",
+                                 "1 2 %d 2 m 3 \"" + to_str(_( "Today is %s." )) + "%s\"",
                                  "( self.width, time.strftime('%A, %d-%B'), self.get_sepstrmscroll(time.strftime('%A, %d-%B')) )" ),
                   "clock"    : ( "string",
                                  "%d 3 \"%s\"",
@@ -194,16 +155,16 @@ layouts = { 4 : # 4 lines display
                 
                 "menu"    :
                 { "title_l"  : ( "string",
-                                 "1 1 '" + rjust( String(_( "Menu" )), 4 ) + ": '",
+                                 "1 1 '" + rjust( to_str(_( "Menu" )), 4 ) + ": '",
                                  None ),
                   "item_l"   : ( "string",
-                                 "1 2 '" + rjust( String(_( "Item" )), 4 ) + ": '",
+                                 "1 2 '" + rjust( to_str(_( "Item" )), 4 ) + ": '",
                                  None ),
                   "type_l"   : ( "string",
-                                 "1 3 '" + rjust( String(_( "Type" )), 4 ) + ": '",
+                                 "1 3 '" + rjust( to_str(_( "Type" )), 4 ) + ": '",
                                  None ),
                   "info_l"   : ( "string",
-                                 "1 4 '" + rjust( String(_( "Information" )), 4 ) + ": '",
+                                 "1 4 '" + rjust( to_str(_( "Information" )), 4 ) + ": '",
                                  None ),                
                   "title_v"  : ( "scroller",
                                  "7 1 %d 1 m 3 \"%s%s\"",
@@ -221,13 +182,13 @@ layouts = { 4 : # 4 lines display
                 
                 "audio_player"  :
                 { "music_l"   : ( "string",
-                                  "1 1 '" + rjust( String(_( "Music" )), 5 ) + ": '",
+                                  "1 1 '" + rjust( to_str(_( "Music" )), 5 ) + ": '",
                                   None ),
                   "album_l"   : ( "string",
-                                  "1 2 '" + rjust( String(_( "Album" )), 5 ) + ": '",
+                                  "1 2 '" + rjust( to_str(_( "Album" )), 5 ) + ": '",
                                   None ),
                   "artist_l"  : ( "string",
-                                  "1 3 '" + rjust( String(_( "Artist" )), 5 ) + ": '",
+                                  "1 3 '" + rjust( to_str(_( "Artist" )), 5 ) + ": '",
                                   None ),
                   "music_v"   : ( "scroller",
                                   "9 1 %d 1 m 3 \"%s%s\"",
@@ -259,13 +220,13 @@ layouts = { 4 : # 4 lines display
 
                 "video_player"  :
                 { "video_l"   : ( "string",
-                                  "2 1 '" + rjust( String(_( "Video" )), 5 ) + ": '",
+                                  "2 1 '" + rjust( to_str(_( "Video" )), 5 ) + ": '",
                                   None ),
                   "tag_l"     : ( "string",
-                                  "2 2 '" + rjust( String(_( "Tagline" )), 5 ) + ": '",
+                                  "2 2 '" + rjust( to_str(_( "Tagline" )), 5 ) + ": '",
                                   None ),
                   "genre_l"   : ( "string",
-                                  "1 3 '" + rjust( String(_( "Genre" )), 5 ) + ": '",
+                                  "1 3 '" + rjust( to_str(_( "Genre" )), 5 ) + ": '",
                                   None ),
                   "video_v"   : ( "scroller",
                                   "9 1 %d 1 m 3 \"%s%s\"",
@@ -298,16 +259,16 @@ layouts = { 4 : # 4 lines display
                 
                 "tv"            :
                 { "chan_l"   : ( "string",
-                                 "1 1 '" + rjust( String(_( "Channel" )), 4 ) + ": '",
+                                 "1 1 '" + rjust( to_str(_( "Channel" )), 4 ) + ": '",
                                  None ),
                   "prog_l"   : ( "string",
-                                 "1 2 '" + rjust( String(_( "Program" )), 4 ) + ": '",
+                                 "1 2 '" + rjust( to_str(_( "Program" )), 4 ) + ": '",
                                  None ),
                   "time_l"  : ( "string",
-                                "1 3 '" + rjust( String(_( "Time" )), 4 ) + ": '",
+                                "1 3 '" + rjust( to_str(_( "Time" )), 4 ) + ": '",
                                 None ),
                   "desc_l"  : ( "string",
-                                "1 4 '" + rjust( String(_( "Description" )), 4 ) + ": '",
+                                "1 4 '" + rjust( to_str(_( "Description" )), 4 ) + ": '",
                                 None ),                
                   "chan_v"   : ( "scroller",
                                  "7 1 %d 1 m 3 \"%s%s\"",
@@ -332,7 +293,7 @@ layouts = { 4 : # 4 lines display
                                  "Freevo",
                                  None ),
                   "calendar" : ( "scroller",
-                                 "1 2 %d 2 m 3 \"" + String(_( "Today is %s." )) + "%s\"",
+                                 "1 2 %d 2 m 3 \"" + to_str(_( "Today is %s." )) + "%s\"",
                                  "( self.width, time.strftime('%A, %d-%B'), self.get_sepstrmscroll(time.strftime('%A, %d-%B')) )" ),
                   "clock"    : ( "string",
                                  "%d 3 \"%s\"",
@@ -553,10 +514,10 @@ layouts = { 4 : # 4 lines display
 
                  "menu":
                  { "title_l"  : ( "string",
-                                 "1 1 '" + rjust( String(_( "Menu" )), 4 ) + ": '",
+                                 "1 1 '" + rjust( to_str(_( "Menu" )), 4 ) + ": '",
                                  None ),
                   "item_l"   : ( "string",
-                                 "1 2 '" + rjust( String(_( "Item" )), 4 ) + ": '",
+                                 "1 2 '" + rjust( to_str(_( "Item" )), 4 ) + ": '",
                                  None ),
                    "title_v"  : ( "scroller",
                                   "7 1 %d 1 m 3 \"%s%s\"",
@@ -568,7 +529,7 @@ layouts = { 4 : # 4 lines display
 
                  "audio_player":
                  { "music_l"   : ( "string",
-                                  "1 1 '" + rjust( String(_( "Music" )), 5 ) + ": '",
+                                  "1 1 '" + rjust( to_str(_( "Music" )), 5 ) + ": '",
                                   None ),
                   "music_v"   : ( "scroller",
                                   "8 1 %d 1 m 3 \"%s%s\"",
@@ -595,7 +556,7 @@ layouts = { 4 : # 4 lines display
 
                 "video_player"  :
                 { "video_l"   : ( "string",
-                                  "2 1 '" + rjust( String(_( "Video" )), 5 ) + ": '",
+                                  "2 1 '" + rjust( to_str(_( "Video" )), 5 ) + ": '",
                                   None ),
                   "video_v"   : ( "scroller",
                                   "9 1 %d 1 m 3 \"%s%s\"",
@@ -623,10 +584,10 @@ layouts = { 4 : # 4 lines display
 
                 "tv":
                 { "chan_l"   : ( "string",
-                                 "1 1 '" + rjust( String(_( "Channel" )), 4 ) + ": '",
+                                 "1 1 '" + rjust( to_str(_( "Channel" )), 4 ) + ": '",
                                  None ),
                   "prog_l"   : ( "string",
-                                 "1 2 '" + rjust( String(_( "Program" )), 4 ) + ": '",
+                                 "1 2 '" + rjust( to_str(_( "Program" )), 4 ) + ": '",
                                  None ),
                   "chan_v"   : ( "scroller",
                                  "7 1 %d 1 m 3 \"%s%s\"",
@@ -709,13 +670,13 @@ class PluginInterface( plugin.DaemonPlugin ):
             self.lcd = pylcd.client()
             cm = self.lcd.connect()
         except:
-            print String(_( "ERROR" )) + ":" + String(_( "LCD plugin will not load! Maybe you don't have LCDd (lcdproc daemon) running?" ))
+            print to_str(_( "ERROR" )) + ":" + to_str(_( "LCD plugin will not load! Maybe you don't have LCDd (lcdproc daemon) running?" ))
             self.disable = 1
             return
         
         # if 1:
-        #     print String(_( "Connecting to LCD: %s" )) % cm
-        #     print String(_( "Info as know by the LCD module:" ))
+        #     print to_str(_( "Connecting to LCD: %s" )) % cm
+        #     print to_str(_( "Info as know by the LCD module:" ))
         #     self.lcd.getinfo()
         #     print ""
             
@@ -736,7 +697,7 @@ class PluginInterface( plugin.DaemonPlugin ):
             type, param, val = self.screens[ "welcome" ][ w ]            
             if val: param = param % eval( val )
 
-            self.lcd.widget_set( "welcome", String( w ), String( param ) )
+            self.lcd.widget_set( "welcome", to_str( w ), to_str( param ) )
         
         self.lcd.screen_set( "welcome", "-priority 192 -duration 2 -heartbeat off" )
         self.last_screen = "welcome"
@@ -782,7 +743,7 @@ class PluginInterface( plugin.DaemonPlugin ):
 
         if type == "menu":   
             menu  = object.menustack[ -1 ]
-            title = String( menu.selected.name )
+            title = to_str( menu.selected.name )
             typeinfo = menu.selected.type
             info = ""
 
@@ -802,21 +763,21 @@ class PluginInterface( plugin.DaemonPlugin ):
             if menu.selected.type == "audio":
                 title = menu.selected.getattr( "title" )
                 if not title:
-                    title = String( menu.selected.getattr( "name" ) )
+                    title = to_str( menu.selected.getattr( "name" ) )
                 if menu.selected.getattr( "trackno" ):
                     title = "%s - %s" % ( menu.selected.getattr( "trackno" ),
-                                          String( title ) )
+                                          to_str( title ) )
                     
         elif type == "player":
             player = object
-            title  = String( player.getattr( "title" ) )
+            title  = to_str( player.getattr( "title" ) )
             if not title:
-                title = String( player.getattr( "name" ) )
+                title = to_str( player.getattr( "name" ) )
                 
             if player.type == "audio":
                 if player.getattr( "trackno" ):
                     title = "%s - %s" % ( player.getattr( "trackno" ),
-                                          String( title ) )
+                                          to_str( title ) )
                     
             elif player.type == "video":
                 length = player.getattr( "length" )
@@ -855,7 +816,7 @@ class PluginInterface( plugin.DaemonPlugin ):
             except:
                 param = None
 
-            k = "%s %s" % ( sname, String( w ) )
+            k = "%s %s" % ( sname, to_str( w ) )
             try:
                 if self.lsv[ k ] == param:
                     continue # nothing changed in this widget
@@ -864,8 +825,8 @@ class PluginInterface( plugin.DaemonPlugin ):
 
             self.lsv[ k ] = param
             if param:
-                self.lcd.widget_set( sname, String( w ),
-                                     String( param ) )
+                self.lcd.widget_set( sname, to_str( w ),
+                                     to_str( param ) )
                                      
         if self.last_screen != sname:
             self.lcd.screen_set( self.last_screen, "-priority 128" )
@@ -892,7 +853,7 @@ class PluginInterface( plugin.DaemonPlugin ):
 
                 if val: param = param % eval( val )
                 
-                self.lcd.widget_set( s, String( w ), String( param ) )
+                self.lcd.widget_set( s, to_str( w ), to_str( param ) )
         
 
     def generate_screens( self ):
@@ -908,7 +869,7 @@ class PluginInterface( plugin.DaemonPlugin ):
                 log.warning( 'Could not find screens for %d lines LCD!' % l )
                 l -= 1
                 if l < 1:
-                    print String(_( "ERROR" )) + ": " + String(_( "No screens found for this LCD (%dx%d)!" )) % ( self.height, self.width )
+                    print to_str(_( "ERROR" )) + ": " + to_str(_( "No screens found for this LCD (%dx%d)!" )) % ( self.height, self.width )
                     self.disable = 1
                     return
         # find a display with 'l' line and 'c' columns
@@ -919,7 +880,7 @@ class PluginInterface( plugin.DaemonPlugin ):
                 log.warning( 'Could not find screens for %d lines and %d columns LCD!' % ( l, c ) )
                 c -= 1
                 if c < 1:
-                    print String(_( "ERROR" )) + ": " + String(_( "No screens found for this LCD (%dx%d)!" )) % ( self.height, self.width )
+                    print to_str(_( "ERROR" )) + ": " + to_str(_( "No screens found for this LCD (%dx%d)!" )) % ( self.height, self.width )
                     self.disable = 1
                     return
 
@@ -930,7 +891,7 @@ class PluginInterface( plugin.DaemonPlugin ):
             self.screens = screens = layouts[ l ][ c ]
         except KeyError:
             log.warning('Could not find screens for %d lines and %d columns LCD!' % ( self.height, self.width ))
-            print String(_( "ERROR" )) + ": " + String(_( "No screens found for this LCD (%dx%d)!" )) % ( self.height, self.width )
+            print to_str(_( "ERROR" )) + ": " + to_str(_( "No screens found for this LCD (%dx%d)!" )) % ( self.height, self.width )
             self.disable = 1
             return
         

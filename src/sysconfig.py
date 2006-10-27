@@ -31,7 +31,7 @@
 #
 # -----------------------------------------------------------------------------
 
-__all__ = [ 'CONF', 'Unicode', 'String', 'cachefile', 'datafile' ]
+__all__ = [ 'CONF', 'Unicode', 'cachefile', 'datafile' ]
 
 # Python imports
 import os
@@ -89,7 +89,6 @@ for key in CONF.__dict__:
 
 # encoding helper functions
 Unicode = conf.Unicode
-String  = conf.String
 
 # helper functions to get dirs
 cachefile = conf.cachefile

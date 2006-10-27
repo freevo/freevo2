@@ -1,5 +1,6 @@
 # kaa imports
 from kaa.notifier import EventHandler, Timer
+from kaa.strutils import unicode_to_str
 import kaa.beacon
 
 # freevo core imports
@@ -65,7 +66,7 @@ class PluginInterface(plugin.Plugin):
         if not app or app.get_name() != 'menu':
             raise RuntimeError('freevo not in menu mode')
 
-        kaa.beacon.query(filename=String(file)).get(filter='extmap')
+        kaa.beacon.query(filename=unicode_to_str(file)).get(filter='extmap')
 
         # normal file
         for p in plugin.mimetype(type):

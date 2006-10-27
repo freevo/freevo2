@@ -54,6 +54,9 @@ __all__ = [ 'fxdhandler' ]
 # python imports
 import os
 
+# kaa imports
+from kaa.strutils import unicode_to_str
+
 # Freevo imports
 import config
 import plugin
@@ -81,7 +84,7 @@ def fxdhandler(name, title, image, info, node, parent, listing):
     # Create a list of all images for the slideshow
     for child in children:
         try:
-            fname  = os.path.join(dirname, String(fxd.gettext(child)))
+            fname  = os.path.join(dirname, unicode_to_str(fxd.gettext(child)))
             files  = []
             if child.name == 'directory':
                 # for directories add all files in it

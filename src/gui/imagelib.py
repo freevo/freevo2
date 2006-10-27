@@ -113,7 +113,7 @@ def load(url, size=None):
     try:
         image = kaa.mevas.imagelib.open(filename)
     except:
-        log.exception('Problem while loading image %s' % String(url))
+        log.exception('Problem while loading image %s', url)
         image = None
 
     # scale the image if needed

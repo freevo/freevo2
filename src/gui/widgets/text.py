@@ -36,6 +36,8 @@ __all__ = [ 'Text' ]
 import os
 import logging
 
+from kaa.strutils import to_str
+
 # mevas imports
 import kaa.mevas
 from kaa.mevas.image import CanvasImage
@@ -248,5 +250,5 @@ class Text(CanvasImage):
             t = self.text[:20]
         else:
             t = self.text
-        return 'Text: "%s", zindex=%s' % (String(t), self.get_zindex())
+        return 'Text: "%s", zindex=%s' % (to_str(t), self.get_zindex())
     
