@@ -151,17 +151,6 @@ DEV_MIXER           = '/dev/mixer'    # mixer device
 
 CONFIRM_SHUTDOWN    = 1               # ask before shutdown
 
-#
-# hide discs from the wrong menu (e.g. VCDs in audio menu) and empty discs
-#
-HIDE_UNUSABLE_DISCS = 1               
-
-#
-# Attempt to set the speed of the ROM drive. A good value for keeping the
-# drive silent while playing movies is 8.
-#
-ROM_SPEED = 0                
-
 SHUTDOWN_SYS_CMD = 'shutdown -h now'  # set this to 'sudo shutdown -h now' if
                                       # you don't have the permissions to
                                       # shutdown
@@ -212,12 +201,6 @@ INPUT_MOUSE_SUPPORT = 0
 USE_NETWORK = 1
 
 #
-# HOST_ALIVE_CHECK tests if the given host is online.
-# Will be used to avoid extremely long automounter timeouts.
-#
-HOST_ALIVE_CHECK = 'ping -c 1 -W 1 %s > /dev/null 2>&1'
-
-#
 # Umask setting for all files.
 # 022 means only the user has write access. If you share your Freevo
 # installation with different users, set this to 002
@@ -228,13 +211,6 @@ UMASK = 022
 # Suffix for playlist files
 #
 PLAYLIST_SUFFIX = [ 'm3u' ]
-
-#
-# Use md5 in mmpython to create unique disc ids. Enable this if you have
-# problems with different discs having the same id.
-# FIXME: Why is this not used anymore?
-#
-MMPYTHON_CREATE_MD5_ID = 0
 
 # ======================================================================
 # Plugins:
@@ -268,19 +244,6 @@ plugin.activate('mixer')
 # add imdb search to the video item menu
 # BEACON_FIXME:
 # plugin.activate('video.imdb')
-
-# list of regexp to be ignored on a disc label
-IMDB_REMOVE_FROM_LABEL = ('season[\._ -][0-9]+', 'disc[\._ -][0-9]+',
-                          'd[\._ -][0-9]+', 'german')
-
-# list of words to ignore when searching based on a filename
-IMDB_REMOVE_FROM_SEARCHSTRING = ('the', 'a')
-
-# When searching for a movie title in imdb, should the result be
-# autoaccepted if it is only one hit?
-# 0 = show menu even if it is only one hit (gives you an opportunity to cancel)
-# 1 = autoaccept
-IMDB_AUTOACCEPT_SINGLE_HIT = True
 
 # delete file in menu
 plugin.activate('file_ops', level=20)
@@ -470,12 +433,6 @@ VIDEO_XINE_SUFFIX = [ 'avi', 'mpg', 'mpeg', 'rm', 'divx', 'ogm',
 VIDEO_PREFERED_PLAYER = 'mplayer'
 
 #
-# try to detect a movie with more than one file and join them as one
-# item
-#
-VIDEO_AUTOJOIN = 1
-
-#
 # try to find out if deinterlacing is needed or not
 #
 VIDEO_INTERLACING = 1
@@ -500,14 +457,6 @@ AUDIO_ITEMS = None
 # 
 AUDIO_SUFFIX     = [ 'mp3', 'ogg', 'wav','m4a', 'wma', 'aac', 'flac', 'mka',
                      'ac3' ]
-
-#
-# Regular expression used to recognize filenames which are likely to be 
-# covers for an album 
-#
-# This will match front.jpg and cover-f.jpg, but not back.jpg nor cover-b.jpg
-#
-AUDIO_COVER_REGEXP = 'front|-f'
 
 #
 # Preferred audio player
@@ -792,7 +741,7 @@ else:
 # as mplayer option, the software scaler will also not be used.
 # The bmovl plugin depends on a software scaler, so you should give it a try
 #
-MPLAYER_SOFTWARE_SCALER = "-subfont-text-scale 15 -sws 2 -vf scale=%s:-2,"\
+MPLAYER_SOFTWARE_SCALER = "-sws 2 -vf scale=%s:-2,"\
                           "expand=%s:%s -font /usr/share/mplayer/fonts/"\
                           "font-arial-28-iso-8859-2/font.desc" % \
                           ( CONF.width, CONF.width, CONF.height )
