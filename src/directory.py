@@ -41,6 +41,7 @@ import kaa
 import kaa.notifier
 import kaa.beacon
 from kaa.weakref import weakref
+from kaa.strutils import str_to_unicode
 
 # freevo imports
 import config
@@ -164,7 +165,7 @@ class DirItem(Playlist):
         self.url = directory.filename
 
         if name:
-            self.name = Unicode(name)
+            self.name = str_to_unicode(name)
 
         if add_args == None and hasattr(parent, 'add_args'):
             add_args = parent.add_args

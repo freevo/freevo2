@@ -90,8 +90,7 @@ class TitleArea(Area):
                     sn   = item.show_name
                     text = sn[1] + "x" + sn[2] + " - " + sn[3]
                 elif item.parent and len(item.parent.name) > 5 and \
-                         Unicode(item.name).\
-                         startswith(Unicode(item.parent.name)):
+                         item.name.startswith(item.parent.name):
                     text = item.name[len(item.parent.name):].strip(' -_')
                     if not text:
                         text = item.name

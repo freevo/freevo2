@@ -129,7 +129,7 @@ class PluginInterface(ItemPlugin):
             time = '%0.2d:%0.2d:%0.2d' % (hour,min,sec)
 
             # set a new title
-            copy.name = Unicode(_('Jump to %s') % (time))
+            copy.name = _('Jump to %s') % (time)
             if not copy.mplayer_options:
                 copy.mplayer_options = ''
             copy.mplayer_options += ' -ss %s' % time

@@ -124,7 +124,7 @@ class PluginInterface(IdleBarPlugin):
 
             icon = os.path.join(config.IMAGE_DIR, 'weather', self.cache_icon)
             font = gui.theme.font('small0')
-            temp = Unicode('%s\xb0' % self.cache_temp)
+            temp = unicode('%s\xb0' % self.cache_temp)
 
             # icon object
             img = gui.widgets.Image(icon, pos=(5, 5))

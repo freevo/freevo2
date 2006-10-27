@@ -31,7 +31,7 @@
 #
 # -----------------------------------------------------------------------------
 
-__all__ = [ 'CONF', 'Unicode', 'cachefile', 'datafile' ]
+__all__ = [ 'CONF', 'cachefile', 'datafile' ]
 
 # Python imports
 import os
@@ -86,9 +86,6 @@ for dirname in conf.cfgfilepath:
 for key in CONF.__dict__:
     exec('%s = CONF.%s' % (key.upper(), key))
 
-
-# encoding helper functions
-Unicode = conf.Unicode
 
 # helper functions to get dirs
 cachefile = conf.cachefile

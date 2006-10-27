@@ -38,6 +38,7 @@ import logging
 
 # kaa imports
 import kaa.notifier
+from kaa.strutils import to_unicode
 
 # freevo imports
 import config
@@ -424,7 +425,7 @@ class ImageViewer(Application):
         for strtag in config.IMAGEVIEWER_OSD[self.osd_mode-1]:
             i = str(self.item[strtag[1]])
             if i:
-                osdstring += u' %s %s' % (Unicode(strtag[0]), Unicode(i))
+                osdstring += u' %s %s' % (to_unicode(strtag[0]), to_unicode(i))
 
 	if osdstring == '':
             # If after all that there is nothing then tell the users that

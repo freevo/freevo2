@@ -116,13 +116,13 @@ class ProgramItem(Item):
         return the specific attribute as string or an empty string
         """
         if key == 'start':
-            return Unicode(time.strftime(config.TV_TIMEFORMAT,
+            return unicode(time.strftime(config.TV_TIMEFORMAT,
                                          time.localtime(self.start)))
         if key == 'stop':
-            return Unicode(time.strftime(config.TV_TIMEFORMAT,
+            return unicode(time.strftime(config.TV_TIMEFORMAT,
                                          time.localtime(self.stop)))
         if key == 'date':
-            return Unicode(time.strftime(config.TV_DATEFORMAT,
+            return unicode(time.strftime(config.TV_DATEFORMAT,
                                          time.localtime(self.start)))
         if key == 'time':
             return self['start'] + u' - ' + self['stop']

@@ -86,7 +86,7 @@ class MPlayer(mplayer.Application):
         filename = item.filename
 
         if filename and not os.path.isfile(filename):
-            return _('%s\nnot found!') % Unicode(item.url)
+            return _('file not found')
 
         if not filename:
             filename = item.url

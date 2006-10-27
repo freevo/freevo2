@@ -44,7 +44,7 @@ import copy
 import logging
 
 # kaa imports
-from kaa.strutils import unicode_to_str
+from kaa.strutils import unicode_to_str, str_to_unicode
 
 # freevo imports
 import config
@@ -141,7 +141,7 @@ class VideoItem(MediaItem):
             self.tv_show_name = show_name[0]
             self.tv_show_ep   = show_name[3]
         if self.mode == 'file' and os.path.isfile(self.filename):
-            self.sort_name += u'  ' + Unicode(os.stat(self.filename).st_ctime)
+            self.sort_name += u'  ' + str_to_unicode(str(os.stat(self.filename).st_ctime))
 
 
     def set_url(self, url):
@@ -256,7 +256,7 @@ class VideoItem(MediaItem):
         if mode == 'date' and self.mode == 'file' and \
                os.path.isfile(self.filename):
             return u'%s%s' % (os.stat(self.filename).st_ctime,
-                              Unicode(self.filename))
+                              str_to_unicode(self.filename))
         return self.sort_name
 
 

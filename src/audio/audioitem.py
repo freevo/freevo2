@@ -37,6 +37,9 @@ __all__ = [ 'AudioItem' ]
 import os
 import re
 
+# kaa imports
+from kaa.strutils import str_to_unicode
+
 # Freevo imports
 import config
 from menu import MediaItem, Action
@@ -72,15 +75,15 @@ class AudioItem(MediaItem):
         if mode == 'date':
             if self.filename:
                 return u'%s%s' % (os.stat(self.filename).st_ctime,
-                                  Unicode(self.filename))
+                                  str_to_unicode(self.filename))
         if mode == 'advanced':
             # sort by track number
             try:
                 return '%s %0.3i-%s' % (self['discs'], int(self['trackno']),
-                                        Unicode(self.url))
+                                        str_to_unicode(self.url))
             except ValueError:
-                return '%s-%s' % (Unicode(self['trackno']), Unicode(self.url))
-        return Unicode(self.url)
+                return '%s-%s' % (unicode(self['trackno']), str_to_unicode(self.url))
+        return str_to_unicode(self.url)
 
 
     def set_url(self, url):

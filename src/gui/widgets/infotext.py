@@ -36,6 +36,9 @@ __all__ = [ 'InfoText' ]
 # python imports
 import logging
 
+# kaa imports
+from kaa.strutils import to_unicode
+
 # gui imports
 from kaa.mevas.container import CanvasContainer
 from text import Text
@@ -87,7 +90,7 @@ class InfoText(CanvasContainer):
         r = self.__item[attr]
         if r == None:
             return ''
-        return Unicode(r)
+        return to_unicode(r)
 
 
     def __eval(self, item, expression_list, function_calls):

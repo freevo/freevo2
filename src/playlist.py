@@ -40,6 +40,7 @@ import logging
 
 # kaa imports
 import kaa.beacon
+from kaa.strutils import str_to_unicode
 
 # freevo imports
 import config
@@ -76,7 +77,7 @@ class Playlist(MediaItem):
         build:    create the playlist. This means unfold the directories
         """
         MediaItem.__init__(self, parent, type='playlist')
-        self.name     = Unicode(name)
+        self.name = str_to_unicode(name)
 
         # variables only for Playlist
         self.playlist     = playlist
@@ -215,7 +216,7 @@ class Playlist(MediaItem):
                 for p in self.get_plugins:
                     for i in p.get(self, [os.path.join(curdir, ss_name[0])]):
                         if i.type == 'image':
-                            i.name     = Unicode(ss_caption[0])
+                            i.name = str_to_unicode(ss_caption[0])
                             i.duration = int(ss_delay[0])
                             self.playlist.append(i)
                             break

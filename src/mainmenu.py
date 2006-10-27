@@ -53,11 +53,11 @@ class MainMenuItem(Item):
     This class is a main menu item. Items of this type can be returned by
     a MainMenuPlugin.
     """
-    def __init__( self, name='', action=None, arg=None, type=None, image=None,
+    def __init__( self, name=u'', action=None, arg=None, type=None, image=None,
                   icon=None, parent=None, skin_type=None):
 
         Item.__init__(self, parent)
-        self.name = Unicode(name)
+        self.name = name
         self.icon = icon
         self.image = image
         self.type = type
