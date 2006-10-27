@@ -103,54 +103,7 @@ class FXDtree(qp_xml.Parser):
         """
         Save the tree
         """
-        if not filename:
-            filename = self.filename
-        if os.path.isfile(filename):
-            os.unlink(filename)
-        f = codecs.open(filename, 'wb', sysconfig.ENCODING)
-        f.write('<?xml version="1.0" encoding="%s" ?>\n' % sysconfig.ENCODING)
-        self._dump_recurse(f, self.tree)
-
-        f.write('\n')
-        f.close()
-
-        f = open(filename)
-        self.tree = self.parse(f)
-        f.close()
-
-
-    def _dump_recurse(self, f, elem, depth=0):
-        """
-        Help function to dump all elements
-        """
-        if not elem:
-            return
-        f.write('<' + elem.name)
-        for (ns, name), value in elem.attrs.items():
-            f.write(u' ' + Unicode(name) + u'="' + Unicode(value) + '"')
-        if elem.children != [] or elem.first_cdata != None:
-            if elem.first_cdata == None:
-                f.write('>\n  ')
-                for i in range(depth):
-                    f.write('  ')
-            else:
-                data = Unicode(elem.first_cdata).replace(u'&', u'&amp;')
-                f.write(u'>' + data)
-
-            for child in elem.children:
-                self._dump_recurse(f, child, depth=depth+1)
-                if child.following_cdata == None:
-                    if child == elem.children[-1]:
-                        f.write('\n')
-                    else:
-                        f.write('\n  ')
-                    for i in range(depth):
-                        f.write('  ')
-                else:
-                    f.write(child.following_cdata.replace('&', '&amp;'))
-            f.write('</%s>' % elem.name)
-        else:
-            f.write('/>')
+        raise RuntimeError('fxd save not supported for themes')
 
 
 class FXD(object):
