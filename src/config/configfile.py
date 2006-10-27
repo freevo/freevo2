@@ -67,14 +67,6 @@ cfgfilepath = [ '.', os.path.expanduser('~/.freevo'), '/etc/freevo',
 
 
 #
-# Check if freevo.conf was found
-#
-
-if not CONFIGFILE:
-    log.critical('freevo.conf not found, please run \'freevo setup\'')
-    sys.exit(1)
-    
-#
 # Check that freevo_config.py is not found in the config file dirs
 #
 for dirname in cfgfilepath[1:]:

@@ -72,28 +72,20 @@ from event import *
 # get logging object
 log = logging.getLogger('config')
 
-# set app name
-freevo_app = os.path.splitext(os.path.basename(sys.argv[0]))[0]
-
 #
-# Default settings
-# These will be overwritten by the contents of 'freevo.conf'
+# freevo.conf parser
 #
 
-# Dummy class for the CONF
 class struct(object):
     pass
 
 CONF = struct()
+CONF.geometry = '800x600'
+CONF.display = 'x11'
+CONF.tv = 'ntsc'
+CONF.chanlist = 'us-cable'
+CONF.version = 0
 
-CONF.cachedir = freevo.conf.CACHEDIR
-CONF.datadir  = freevo.conf.DATADIR
-CONF.logdir   = freevo.conf.LOGDIR
-
-CONFIGFILE = ''
-
-# read the config file, if no file is found, the default values
-# are used.
 for dirname in freevo.conf.cfgfilepath:
     conffile = os.path.join(dirname, 'freevo.conf')
     if os.path.isfile(conffile):
@@ -111,29 +103,19 @@ for dirname in freevo.conf.cfgfilepath:
             CONF.__dict__[name] = val
 
         c.close()
-        CONFIGFILE = conffile
         break
+else:
+    log.critical('freevo.conf not found, please run \'freevo setup\'')
+    sys.exit(1)
+    
 
-if not hasattr(CONF, 'geometry'):
-    CONF.geometry = '800x600'
 w, h = CONF.geometry.split('x')
 CONF.width, CONF.height = int(w), int(h)
-
-if not hasattr(CONF, 'display'):
-    CONF.display = 'x11'
-if not hasattr(CONF, 'tv'):
-    CONF.tv = 'ntsc'
-if not hasattr(CONF, 'chanlist'):
-    CONF.chanlist = 'us-cable'
-if not hasattr(CONF, 'version'):
-    CONF.version = 0
-
 
 #
 # Read the environment set by the start script
 #
-SHARE_DIR   = freevo.conf.SHAREDIR
-
+SHARE_DIR = freevo.conf.SHAREDIR
 SKIN_DIR  = os.path.join(SHARE_DIR, 'skins')
 ICON_DIR  = os.path.join(SHARE_DIR, 'icons')
 IMAGE_DIR = os.path.join(SHARE_DIR, 'images')
@@ -153,30 +135,24 @@ for program, valname, needed in setup.EXTERNAL_PROGRAMS:
 # fall back to x11 if display is mga or fb and DISPLAY ist set
 # or switch to fbdev if we have no DISPLAY and x11 or dga is used
 #
-if freevo_app == 'main':
-    if os.environ.has_key('DISPLAY') and os.environ['DISPLAY']:
-        if CONF.display in ('mga', 'fbdev'):
-            print
-            print 'Warning: display is set to %s, but the environment ' % \
-                  CONF.display + \
-                  'has DISPLAY=%s.' % os.environ['DISPLAY']
-            print 'this could mess up your X display, setting display to x11.'
-            print 'If you really want to do this, start \'DISPLAY="" freevo\''
-            print
-            CONF.display='x11'
-    else:
-        if CONF.display == 'x11':
-            print
-            print 'Warning: display is set to %s, but the environment ' % \
-                  CONF.display + \
-                  'has no DISPLAY set. Setting display to fbdev.'
-            print
-            CONF.display='fbdev'
-
-elif CONF.display == 'dxr3':
-    # don't use dxr3 for helpers. They don't use the osd anyway, but
-    # it may mess up the dxr3 output (don't ask why).
-    CONF.display='fbdev'
+if os.environ.has_key('DISPLAY') and os.environ['DISPLAY']:
+    if CONF.display in ('mga', 'fbdev'):
+        print
+        print 'Warning: display is set to %s, but the environment ' % \
+              CONF.display + \
+              'has DISPLAY=%s.' % os.environ['DISPLAY']
+        print 'this could mess up your X display, setting display to x11.'
+        print 'If you really want to do this, start \'DISPLAY="" freevo\''
+        print
+        CONF.display='x11'
+else:
+    if CONF.display == 'x11':
+        print
+        print 'Warning: display is set to %s, but the environment ' % \
+              CONF.display + \
+              'has no DISPLAY set. Setting display to fbdev.'
+        print
+        CONF.display='fbdev'
 
 
 #
@@ -226,7 +202,7 @@ for type in ('video', 'audio', 'image', 'games'):
             x.append(('Home', os.environ['HOME']))
         x.append(('Root', '/'))
         exec('%s = x' % n)
-        if freevo_app == 'main' and plugin.is_active('mediamenu', type):
+        if plugin.is_active('mediamenu', type):
             log.warning('%s not set, set it to Home directory' % n)
 
     elif type == 'games':
@@ -281,13 +257,9 @@ if not TV_RECORD_DIR:
            '  Please set TV_RECORD_DIR to the directory, where recordings\n' +
            '  should be stored or remove the tv plugin. Autoset variable\n' +
            '  to %s.') % TV_RECORD_DIR
-    if freevo_app == 'main' and plugin.is_active('tv'):
+    if plugin.is_active('tv'):
         log.warning(msg)
         
-if not VIDEO_SHOW_DATA_DIR and freevo_app == 'main':
-    log.warning('VIDEO_SHOW_DATA_DIR not found')
-    
-
 #
 # compile the regexp
 #
