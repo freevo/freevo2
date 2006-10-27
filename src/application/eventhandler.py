@@ -52,7 +52,6 @@ import logging
 import kaa.notifier
 
 # freevo imports
-import sysconfig
 import config
 import plugin
 import input

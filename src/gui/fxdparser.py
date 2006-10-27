@@ -42,9 +42,6 @@ import re
 # xml support
 from xml.utils import qp_xml
 
-# freevo utils
-import sysconfig
-
 class XMLnode(object):
     """
     One node for the FXDtree

@@ -39,7 +39,7 @@ import logging
 import kaa.notifier
 
 # Freevo imports
-import sysconfig
+import freevo.conf
 import config
 import gui
 
@@ -106,7 +106,7 @@ class Application(base.Application):
         logname = cmd[0]
         if logname.rfind('/') > 0:
             logname = logname[ logname.rfind( '/' ) + 1 : ]
-        logname = sysconfig.logfile(logname)
+        logname = freevo.conf.logfile(logname)
         
 	# create the process
         self.__child = kaa.notifier.Process(cmd, logname)

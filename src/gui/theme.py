@@ -52,8 +52,10 @@ import time
 
 # kaa imports
 import kaa.notifier
+import kaa.strutils
 
 # freevo imports
+import freevo.conf
 import config
 import util
 import plugin
@@ -226,7 +228,7 @@ def attr_col(node, attr, default):
             if node.attrs[('', attr)][:2] == '0x':
                 return long(node.attrs[('', attr)], 16)
             else:
-                return node.attrs[('', attr)].encode(config.LOCALE)
+                return node.attrs[('', attr)].encode(kaa.strutils.ENCODING)
     except ValueError:
         pass
     return default
@@ -239,7 +241,7 @@ def attr_visible(node, attr, default):
     if node.attrs.has_key(('', attr)):
         if node.attrs[('', attr)] == "no":
             return ''
-        return node.attrs[('', attr)].encode(config.LOCALE)
+        return node.attrs[('', attr)].encode(kaa.strutils.ENCODING)
     return default
 
 
@@ -248,7 +250,7 @@ def attr_str(node, attr, default):
     return the attribute as string
     """
     if node.attrs.has_key(('', attr)):
-        return node.attrs[('', attr)].encode(config.LOCALE)
+        return node.attrs[('', attr)].encode(kaa.strutils.ENCODING)
     return default
 
 
@@ -1451,7 +1453,7 @@ def init_module():
     from the public functions at the top of this file
     """
     global current_theme
-    cachefile = os.path.join(config.FREEVO_CACHEDIR, 'skin-%s' % os.getuid())
+    cachefile = freevo.conf.cachefile('skin', True)
     storage = {}
     if os.path.isfile(cachefile):
         storage = util.cache.load(cachefile)

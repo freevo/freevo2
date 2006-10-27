@@ -47,7 +47,7 @@ import kaa.metadata
 import kaa.beacon
 
 # freevo imports
-import sysconfig
+import freevo.conf
 
 from menu import Action, Menu
 from plugin import ItemPlugin
@@ -76,7 +76,7 @@ class PluginInterface(ItemPlugin):
         Get the bookmark file for the given filename.
         """
         myfile = os.path.basename(filename)
-        myfile = sysconfig.CACHEDIR + "/" + myfile + '.bookmark'
+        myfile = freevo.conf.cachefile(myfile + '.bookmark')
         return myfile
 
 

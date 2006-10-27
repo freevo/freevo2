@@ -39,7 +39,6 @@ import re
 import copy
 
 # freevo imports
-import sysconfig
 import config
 import util
 
@@ -71,21 +70,6 @@ def update():
     fxd['label'] = []
     discset      = {}
     tv_shows     = {}
-
-    rebuild_file = os.path.join(config.FREEVO_CACHEDIR,
-                                'freevo-rebuild-database')
-    if os.path.exists(rebuild_file):
-        try:
-            os.remove(rebuild_file)
-        except OSError:
-            print '*********************************************************'
-            print
-            print '*********************************************************'
-            print 'ERROR: unable to remove %s' % rebuild_file
-            print 'please fix permissions'
-            print '*********************************************************'
-            print
-            return 0
 
     log.info("Building the xml hash database...")
 

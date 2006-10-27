@@ -46,6 +46,8 @@ import os
 import traceback
 import time
 
+import freevo.conf
+
 import logging
 log = logging.getLogger('gui')
 
@@ -107,8 +109,7 @@ class Handler(object):
             # Use a weakref to avoid memory problems.
             a.set_screen(weakref(self))
             
-        self.storage_file = os.path.join(config.FREEVO_CACHEDIR,
-                                         'skin-%s' % os.getuid())
+        self.storage_file = freevo.conf.cachefile('skin', True)
         self.display_style['menu'] = 0
         if os.path.isfile(self.storage_file):
             self.storage = util.cache.load(self.storage_file)

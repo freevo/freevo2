@@ -47,14 +47,14 @@ import sys
 import os
 import re
 import pwd
-import __builtin__
 import logging
 import copy
+
+import kaa.strutils
 
 import freevo.conf
 
 # freevo imports
-import sysconfig
 import version
 
 # config imports
@@ -72,27 +72,48 @@ from event import *
 # get logging object
 log = logging.getLogger('config')
 
-# set global app name
-app = os.path.splitext(os.path.basename(sys.argv[0]))[0]
-__builtin__.__dict__['__freevo_app__'] = app
-
-
-# XXX ************************************************************
-
-# XXX The following code will be removed before the next release
-# XXX Please do NOT use this varaibles anymore and fix code were it
-# XXX is used.
-
-# use sysconfig code
-FREEVO_CACHEDIR = sysconfig.CONF.cachedir
-
-# XXX ************************************************************
+# set app name
+freevo_app = os.path.splitext(os.path.basename(sys.argv[0]))[0]
 
 #
 # Default settings
 # These will be overwritten by the contents of 'freevo.conf'
 #
-CONF = sysconfig.CONF
+
+# Dummy class for the CONF
+class struct(object):
+    pass
+
+CONF = struct()
+
+CONF.cachedir = freevo.conf.CACHEDIR
+CONF.datadir  = freevo.conf.DATADIR
+CONF.logdir   = freevo.conf.LOGDIR
+
+CONFIGFILE = ''
+
+# read the config file, if no file is found, the default values
+# are used.
+for dirname in freevo.conf.cfgfilepath:
+    conffile = os.path.join(dirname, 'freevo.conf')
+    if os.path.isfile(conffile):
+        c = open(conffile)
+        for line in c.readlines():
+            if line.startswith('#'):
+                continue
+            if line.find('=') == -1:
+                continue
+            vals = line.strip().split('=')
+            if not len(vals) == 2:
+                print 'invalid config entry: %s' % line
+                continue
+            name, val = vals[0].strip(), vals[1].strip()
+            CONF.__dict__[name] = val
+
+        c.close()
+        CONFIGFILE = conffile
+        break
+
 if not hasattr(CONF, 'geometry'):
     CONF.geometry = '800x600'
 w, h = CONF.geometry.split('x')
@@ -132,7 +153,7 @@ for program, valname, needed in setup.EXTERNAL_PROGRAMS:
 # fall back to x11 if display is mga or fb and DISPLAY ist set
 # or switch to fbdev if we have no DISPLAY and x11 or dga is used
 #
-if __freevo_app__ == 'main':
+if freevo_app == 'main':
     if os.environ.has_key('DISPLAY') and os.environ['DISPLAY']:
         if CONF.display in ('mga', 'fbdev'):
             print
@@ -205,7 +226,7 @@ for type in ('video', 'audio', 'image', 'games'):
             x.append(('Home', os.environ['HOME']))
         x.append(('Root', '/'))
         exec('%s = x' % n)
-        if __freevo_app__ == 'main' and plugin.is_active('mediamenu', type):
+        if freevo_app == 'main' and plugin.is_active('mediamenu', type):
             log.warning('%s not set, set it to Home directory' % n)
 
     elif type == 'games':
@@ -260,10 +281,10 @@ if not TV_RECORD_DIR:
            '  Please set TV_RECORD_DIR to the directory, where recordings\n' +
            '  should be stored or remove the tv plugin. Autoset variable\n' +
            '  to %s.') % TV_RECORD_DIR
-    if __freevo_app__ == 'main' and plugin.is_active('tv'):
+    if freevo_app == 'main' and plugin.is_active('tv'):
         log.warning(msg)
         
-if not VIDEO_SHOW_DATA_DIR and __freevo_app__ == 'main':
+if not VIDEO_SHOW_DATA_DIR and freevo_app == 'main':
     log.warning('VIDEO_SHOW_DATA_DIR not found')
     
 
@@ -292,7 +313,7 @@ os.environ['HOME'] = pwd.getpwuid(os.getuid())[5]
 
 try:
     LOCALE
-    log.critical('LOCALE is deprecated. Set encoding in freevo.conf.')
+    log.critical('LOCALE is deprecated.')
     sys.exit(0)
 except NameError, e:
     pass
@@ -304,14 +325,3 @@ try:
     sys.exit(0)
 except NameError, e:
     pass
-
-
-# Please do not use the variables anymore
-encoding = LOCALE = sysconfig.CONF.encoding
-
-# Some warnings used in development
-REDESIGN_MAINLOOP = 'not working while mainloop redesign'
-REDESIGN_BROKEN   = 'not working while gui redesign'
-REDESIGN_FIXME    = 'not working since gui redesign, feel free to fix this'
-REDESIGN_UNKNOWN  = 'plugin may be broken after gui redesign, please check'
-

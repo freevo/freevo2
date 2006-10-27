@@ -51,11 +51,11 @@ import popen2
 import os
 import stat
 
-import sysconfig
+import freevo.conf
 import config
 import util.cache
 
-cache = util.cache.Cache(sysconfig.cachefile('xine', True), config, 1)
+cache = util.cache.Cache(freevo.conf.cachefile('xine', True), config, 1)
 
 if config.CONF.xine and os.path.exists(config.CONF.xine):
     timestamp = os.stat(config.CONF.xine)[stat.ST_MTIME]

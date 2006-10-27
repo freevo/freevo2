@@ -38,7 +38,6 @@ __all__ = [ 'AudioDiskItem' ]
 import os
 
 # Freevo imports
-import sysconfig
 import config
 
 from menu import Action, Menu
