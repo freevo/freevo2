@@ -38,7 +38,6 @@ __all__ = [ 'ViewArea' ]
 
 # area imports
 from area import Area
-from util.objectcache import ObjectCache
 
 class ViewArea(Area):
     """

@@ -28,13 +28,5 @@
 #
 # -----------------------------------------------------------------------------
 
-import sys
-
-if sys.argv[0] != 'setup.py':
-    import __builtin__
-    
-    from misc import *
-    from fileops import *
-    import objectcache
-    import fxdparser
-    import cache
+from misc import *
+import cache

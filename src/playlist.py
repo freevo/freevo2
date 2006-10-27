@@ -113,7 +113,9 @@ class Playlist(MediaItem):
         Returns:   The list of interesting lines in the playlist
         """
         try:
-            lines = util.readfile(plsname)
+            fd = open(plsname)
+            lines = fd.readlines()
+            fd.close()
         except IOError:
             log.error('Cannot open file "%s"' % plsname)
             return 0
@@ -141,7 +143,9 @@ class Playlist(MediaItem):
         Returns:   The list of interesting lines in the playlist
         """
         try:
-            lines = util.readfile(plsname)
+            fd = open(plsname)
+            lines = fd.readlines()
+            fd.close()
         except IOError:
             log.error('Cannot open file "%s"' % list)
             return 0
@@ -181,7 +185,9 @@ class Playlist(MediaItem):
         (curdir, playlistname) = os.path.split(ssrname)
         out_lines = []
         try:
-            lines = util.readfile(ssrname)
+            fd = open(ssrname)
+            lines = fd.readlines()
+            fd.close()
         except IOError:
             log.error( 'Cannot open file "%s"' % list)
             return 0

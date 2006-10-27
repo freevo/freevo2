@@ -48,9 +48,9 @@ import kaa.beacon
 
 # freevo imports
 import sysconfig
-import util
 
-from menu import Action, Menu, ItemPlugin
+from menu import Action, Menu
+from plugin import ItemPlugin
 from event import *
 
 # the logging object
@@ -118,7 +118,8 @@ class PluginInterface(ItemPlugin):
         item.get_menustack().delete_submenu(False)
 
         items = []
-        for line in util.readfile(bookmarkfile):
+        fd = open(bookmarkfile, 'r')
+        for line in fd.readline():
             copy = item.copy()
 
             sec  = int(line)
@@ -133,7 +134,8 @@ class PluginInterface(ItemPlugin):
                 copy.mplayer_options = ''
             copy.mplayer_options += ' -ss %s' % time
             items.append(copy)
-
+        fd.close()
+        
         if items:
             moviemenu = Menu(item.name, items)
             item.pushmenu(moviemenu)

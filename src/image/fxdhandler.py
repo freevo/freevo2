@@ -58,7 +58,7 @@ import os
 import config
 import plugin
 
-from util.fileops import match_files
+from util import match_files
 from playlist import Playlist
 
 # ImageItem

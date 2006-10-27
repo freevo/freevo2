@@ -55,7 +55,7 @@
 #
 # ----------------------------------------------------------------------- */
 
-from util.ioctl import *
+from kaa.ioctl import *
 
 
 #struct input_event {

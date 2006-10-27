@@ -6,7 +6,7 @@
 #
 # If you want to expand the fxd file with a new tag below <freevo>, you
 # can register a callback here. Create a class based on FXDItem (same
-# __init__ signature). The 'parser' is something from util.fxdparser, which
+# __init__ signature). The 'parser' is something from freevo.fxdparser, which
 # gets the real callback. After parsing, the variable 'items' from the
 # objects will be returned.
 #
@@ -52,7 +52,7 @@ import logging
 import util
 import plugin
 import os
-import util.fxdparser2
+import freevo.fxdparser
 
 from menu import Item, Action, Menu
 
@@ -88,7 +88,7 @@ class Mimetype(plugin.MimetypePlugin):
         items = []
         for fxd_file in fxd_files:
             try:
-                doc = util.fxdparser2.FXD(fxd_file.filename)
+                doc = freevo.fxdparser.FXD(fxd_file.filename)
                 items.extend(self._parse(doc, doc, parent, listing, display_type))
             except:
                 log.exception("fxd file %s corrupt" % fxd_file.filename)

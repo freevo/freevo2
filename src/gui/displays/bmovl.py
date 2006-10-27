@@ -46,7 +46,7 @@ import kaa.notifier
 
 # freevo imports
 import config
-import util.fsocket
+import fsocket
 
 # display imports
 from display import Display as Base
@@ -99,7 +99,7 @@ class Display(BmovlCanvas, Base):
         Create and open the fifo and create notifier aware fd wrapper
         """
         BmovlCanvas.open_fifo(self)
-        self.nbsocket = util.fsocket.Socket(self.fifo)
+        self.nbsocket = fsocket.Socket(self.fifo)
         self.send = self.nbsocket.write
 
 

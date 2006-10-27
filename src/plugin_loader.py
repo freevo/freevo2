@@ -162,7 +162,7 @@ class PluginLoader(object):
         return False
 
 
-    def init(self, plugin_path, callback = None, plugins=[]):
+    def init(self, plugin_path, callback = None):
         """
         Load and init all the plugins. The function takes the path were the
         plugins are searched in. Optional is a callback, called after a
@@ -180,20 +180,7 @@ class PluginLoader(object):
                 # plugin already an object
                 self.__load_plugin(name, type, level, args)
                 continue
-
-            if plugins:
-                # load only plugins from exclusive list
-                for p in plugins:
-                    if name.startswith('%s.' % p):
-                        self.__load_plugin(name, type, level, args)
-            else:
-                parent = name[:name.rfind('.')]
-                if name.find('.') > 0 and not self.is_active(parent):
-                    # Parent plugin is not active. So this plugin is
-                    # deactivated by default.
-                    log.info('skip plugin %s' % name)
-                    continue
-                self.__load_plugin(name, type, level, args)
+            self.__load_plugin(name, type, level, args)
 
         # sort plugins
         cmp_func = lambda l, o: cmp(l.plugin_level, o.plugin_level)

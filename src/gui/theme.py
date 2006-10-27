@@ -60,6 +60,7 @@ import plugin
 
 # gui imports
 from font import get as get_font_object
+import fxdparser
 
 import logging
 log = logging.getLogger('gui')
@@ -1403,7 +1404,7 @@ class FXDSettings(object):
         if not os.path.isfile(file):
             return 0
 
-        parser = util.fxdparser.FXD(file)
+        parser = fxdparser.FXD(file)
         parser.setattr(None, 'args', (file))
         parser.set_handler('skin', self.fxd_callback)
         parser.parse()

@@ -38,7 +38,21 @@
 #
 # -----------------------------------------------------------------------------
 
+
+
+# python imports
 import os
+import statvfs
+import stat
+import logging
+
+# kaa imports
+import kaa.notifier
+from kaa.strutils import str_to_unicode
+
+# get logging object
+log = logging.getLogger()
+
 
 # http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/52560
 def unique(s):
@@ -122,3 +136,164 @@ def getimage(base, default=None):
     return default
 
 
+
+class ObjectCache(object):
+    """
+    Provides a cache for objects indexed by a string. It should
+    be slow for a large number of objects, since searching takes
+    O(n) time. The cachesize given in the constructor is the
+    maximum number of objects in the cache. Objects that have not
+    been accessed for the longest time get deleted first.
+    """
+
+    def __init__(self, cachesize = 30, desc='noname'):
+        self.cache = {}
+        self.lru = []  # Least recently used (lru) list, index 0 is lru
+        self.cachesize = cachesize
+        self.desc = desc
+
+
+    def __getitem__(self, key):
+        if isinstance(key, str):
+            key = str_to_unicode(key)
+
+        try:
+            del self.lru[self.lru.index(key)]
+            self.lru.append(key)
+            return self.cache[key]
+        except:
+            return None
+        
+
+    def __setitem__(self, key, object):
+        if isinstance(key, str):
+            key = str_to_unicode(key)
+
+        try:
+            # remove old one if key is already in cache
+            del self.lru[self.lru.index(key)]
+        except:
+            pass
+            
+        # Do we need to delete the oldest item?
+        if len(self.cache) > self.cachesize:
+            # Yes
+            lru_key = self.lru[0]
+            del self.cache[lru_key]
+            del self.lru[0]
+            
+        self.cache[key] = object
+        self.lru.append(key)
+        
+
+    def __delitem__(self, key):
+        if isinstance(key, str):
+            key = str_to_unicode(key)
+
+        if not key in self.cache:
+            return
+
+        del self.cache[key]
+        del self.lru[self.lru.index(key)]
+        
+#
+# misc file ops
+#
+
+def freespace(path):
+    """
+    freespace(path) -> integer
+    Return the number of bytes available to the user on the file system
+    pointed to by path.
+    """
+    s = os.statvfs(path)
+    return s[statvfs.F_BAVAIL] * long(s[statvfs.F_BSIZE])
+
+
+def totalspace(path):
+    """
+    totalspace(path) -> integer
+    Return the number of total bytes available on the file system
+    pointed to by path.
+    """
+
+    s = os.statvfs(path)
+    return s[statvfs.F_BLOCKS] * long(s[statvfs.F_BSIZE])
+
+
+def unlink(filename):
+    try:
+        if os.path.isdir(filename) or \
+               os.stat(filename)[stat.ST_SIZE] > 1000000:
+            base = '.' + os.path.basename(filename) + '.freevo~'
+            name = os.path.join(os.path.dirname(filename), base)
+            os.rename(filename, name)
+            kaa.notifier.Process(['rm', '-rf', name]).start()
+        else:
+            os.unlink(filename)
+    except (OSError, IOError), e:
+        log.error('can\'t delete %s: %s' % (filename, e))
+        
+
+#
+# find files by pattern or suffix
+#
+
+def match_suffix(filename, suffixlist):
+    """
+    Check if a filename ends in a given suffix, case is ignored.
+    """
+    fsuffix = os.path.splitext(filename)[1].lower()[1:]
+    for suffix in suffixlist:
+        if fsuffix == suffix:
+            return 1
+    return 0
+
+
+def match_files(dirname, suffix_list, recursive = False):
+    """
+    Find all files in a directory that has matches a list of suffixes.
+    Returns a list that is case insensitive sorted.
+    """
+    if recursive:
+        return match_files_recursively(dirname, suffix_list)
+    
+    try:
+        files = [ os.path.join(dirname, fname) \
+                  for fname in os.listdir(dirname) if
+                  os.path.isfile(os.path.join(dirname, fname)) ]
+    except OSError, e:
+        print 'fileops:match_files: %s' % e
+        return []
+    matches = [ fname for fname in files if match_suffix(fname, suffix_list) ]
+    matches.sort(lambda l, o: cmp(l.upper(), o.upper()))
+    return matches
+
+
+def _match_files_recursively_helper(result, dirname, names):
+    """
+    help function for match_files_recursively
+    """
+    if dirname.find('/') != -1 and dirname[dirname.rfind('/'):][1] == '.':
+        # ignore directories starting with a dot
+        # Note: subdirectories of that dir will still be searched
+        return result
+    for name in names:
+        if not name in ('CVS', '.xvpics', '.thumbnails', '.pics',
+                        'folder.fxd', 'lost+found'):
+            fullpath = os.path.abspath(os.path.join(dirname, name))
+            result.append(fullpath)
+    return result
+
+
+def match_files_recursively(dir, suffix_list):
+    """
+    get all files matching suffix_list in the dir and in it's subdirectories
+    """
+    all_files = []
+    if dir.endswith('/'):
+        dir = dir[:-1]
+    os.path.walk(dir, _match_files_recursively_helper, all_files)
+    matches = unique([f for f in all_files if match_suffix(f, suffix_list) ])
+    matches.sort(lambda l, o: cmp(l.upper(), o.upper()))
+    return matches

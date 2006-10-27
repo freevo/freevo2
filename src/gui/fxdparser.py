@@ -43,8 +43,6 @@ import re
 from xml.utils import qp_xml
 
 # freevo utils
-import fileops
-import cache
 import sysconfig
 
 class XMLnode(object):

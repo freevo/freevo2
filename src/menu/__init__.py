@@ -39,9 +39,6 @@ from action import Action
 from menu import Menu
 from stack import MenuStack
 
-# plugin interface to the menu
-from plugin import ItemPlugin
-
 class ActionItem(Item, Action):
     """
     A simple item with one action. The first parameter of the function

@@ -38,10 +38,10 @@ import time
 
 # kaa imports
 import kaa.beacon
+from kaa.strutils import str_to_unicode
 
 # freevo imports
-from event import *
-from sysconfig import Unicode
+from event import PLAY_START
 
 # menu imports
 from item import Item
@@ -107,7 +107,7 @@ class MediaItem(Item):
                    self.parent['config:use_mediadb_names'] in (None, True):
                 self.name = self.info.get('title')
             if not self.name:
-                self.name = Unicode(self.info.get('name'))
+                self.name = str_to_unicode(self.info.get('name'))
 
         else:
             # Mode is not file, it has to be a network url. Other
@@ -118,7 +118,7 @@ class MediaItem(Item):
             if not self.name:
                 self.name = self.info.get('title')
             if not self.name:
-                self.name = Unicode(self.url)
+                self.name = str_to_unicode(self.url)
 
 
     def __getitem__(self, attr):

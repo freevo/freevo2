@@ -46,9 +46,6 @@ import kaa.beacon
 # freevo imports
 import plugin
 
-# events covered by item
-from event import EJECT
-
 # get logging object
 log = logging.getLogger()
 

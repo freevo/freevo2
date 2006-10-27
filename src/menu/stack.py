@@ -42,7 +42,6 @@ import logging
 from kaa.weakref import weakref
 
 # freevo imports
-import config
 from event import *
 
 # menu imports

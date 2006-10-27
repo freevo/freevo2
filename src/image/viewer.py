@@ -48,7 +48,7 @@ import gui.imagelib
 import gui.theme
 
 # cache for loading images
-from util.objectcache import ObjectCache
+from util import ObjectCache
 
 # Transition/Move/VERTICAL
 from gui.animation import *

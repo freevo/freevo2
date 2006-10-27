@@ -40,10 +40,10 @@ from kaa.weakref import weakref
 
 # freevo imports
 import config
+from event import *
 
 # menu imports
 from item import Item
-from event import *
 
 # get logging object
 log = logging.getLogger()

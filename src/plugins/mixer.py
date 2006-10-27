@@ -73,7 +73,7 @@ import os
 import config
 import plugin
 from event import *
-from util.ioctl import ioctl
+from kaa.ioctl import *
 
 import logging
 log = logging.getLogger()
