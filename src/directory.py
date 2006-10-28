@@ -290,6 +290,7 @@ class DirItem(Playlist):
 
             self.display_type = type
             self['tmp:autoplay_single_item'] = False
+            self.item_menu.autoselect = False
             self.browse(update=True)
             OSD_MESSAGE.post('%s view' % type)
             return True
@@ -297,6 +298,7 @@ class DirItem(Playlist):
         if event == DIRECTORY_TOGGLE_HIDE_PLAYED:
             self['tmp:hide_played'] = not self['config:hide_played']
             self['tmp:autoplay_single_item'] = False
+            self.item_menu.autoselect = False
             self.browse(update=True)
             if self['config:hide_played']:
                 OSD_MESSAGE.post('Hide played items')
