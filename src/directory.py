@@ -270,6 +270,10 @@ class DirItem(Playlist):
 
     # eventhandler for this item
     def eventhandler(self, event):
+
+        if self.item_menu == None:
+            return Playlist.eventhandler(self, event)
+
         if event == DIRECTORY_CHANGE_DISPLAY_TYPE:
             possible = [ ]
 
@@ -299,8 +303,7 @@ class DirItem(Playlist):
             else:
                 OSD_MESSAGE.post('Show all items')
 
-        if event == PLAY_START and self.item_menu and \
-               event.arg in self.item_menu.choices:
+        if event == PLAY_START and event.arg in self.item_menu.choices:
             # update selection and pass the event to playlist after that
             self.item_menu.select(event.arg)
 
