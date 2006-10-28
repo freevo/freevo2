@@ -92,6 +92,7 @@ MENU_PAGEUP            = Event('MENU_PAGEUP')
 MENU_PAGEDOWN          = Event('MENU_PAGEDOWN')
                        
 MENU_GOTO_MAINMENU     = Event('MENU_GOTO_MAINMENU')
+MENU_GOTO_MEDIA        = Event('MENU_GOTO_MEDIA')
 MENU_BACK_ONE_MENU     = Event('MENU_BACK_ONE_MENU')
                        
 MENU_SELECT            = Event('MENU_SELECT')
