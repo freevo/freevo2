@@ -37,7 +37,6 @@ import kaa.notifier
 
 # freevo imports
 import config
-from event import Event
 
 # plugin loader
 from plugin_loader import *
@@ -195,26 +194,7 @@ AUDIO_PLAYER   = 'AUDIO_PLAYER'
 RADIO_PLAYER   = 'RADIO_PLAYER'
 VIDEO_PLAYER   = 'VIDEO_PLAYER'
 TV             = 'TV'
-RECORD         = 'RECORD'
 GAMES          = 'GAMES'
-
-def event(name, *args):
-    """
-    create plugin event
-    """
-    return Event('PLUGIN_EVENT %s' % name, *args)
-
-
-def isevent(event):
-    """
-    plugin event parsing
-    """
-    event = str(event)
-    if event[:12] == 'PLUGIN_EVENT':
-        return event[13:]
-    else:
-        return None
-
 
 def mimetype(display_type=None):
     """

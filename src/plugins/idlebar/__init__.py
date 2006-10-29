@@ -68,10 +68,6 @@ class PluginInterface(plugin.Plugin):
         plugin.Plugin.__init__(self)
         plugin.register(self, 'idlebar')
 
-        # register for events
-        handler = kaa.notifier.EventHandler(self.eventhandler)
-        handler.register()
-
         # register for signals
         application.signals['application change'].connect(self.app_change)
 
@@ -224,20 +220,6 @@ class PluginInterface(plugin.Plugin):
                 self.show(False, fade=fade)
             else:
                 self.hide(False, fade=fade)
-        return True
-
-
-    def eventhandler(self, event):
-        """
-        catch the IDENTIFY_MEDIA event to redraw the skin (maybe the cd status
-        plugin wants to redraw).
-        """
-        if not self.visible:
-            return True
-
-        if plugin.isevent(event) == 'IDENTIFY_MEDIA':
-            if self.update():
-                gui.display.update()
         return True
 
 
