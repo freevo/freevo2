@@ -75,7 +75,7 @@ from menu import Files
 # get logging object
 log = logging.getLogger('video')
 
-def parse_movie(name, title, image, info, node, parent, listing):
+def parse_movie(name, title, image, info, node, parent, listing, dirname):
     """
     Callback for VideoItem <movie>
     """

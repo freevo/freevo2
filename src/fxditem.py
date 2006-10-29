@@ -116,7 +116,8 @@ class Mimetype(plugin.MimetypePlugin):
             for types, tag, handler in callbacks:
                 if tag == name and \
                        (not display_type or not types or display_type in types):
-                    i = handler(name, title, image, info, node, parent, listing)
+                    i = handler(name, title, image, info, node, parent, listing,
+                                doc._dirname)
                     if i is not None:
                         items.append(i)
             if name == 'container':
