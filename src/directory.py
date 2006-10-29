@@ -221,6 +221,9 @@ class DirItem(Playlist):
             if key == 'num_play_items':
                 return num_items[1]
 
+            if key == 'num_dir_items':
+                return num_items[2]
+
         if key in ( 'freespace', 'totalspace' ):
             space = getattr(util, key)(self.dir) / 1000000
             if space > 1000:
@@ -362,7 +365,9 @@ class DirItem(Playlist):
         display_type = self.display_type
         if self.display_type == 'tv':
             display_type = 'video'
-        pl = Playlist(playlist = [ (self.dir, recursive) ], parent = self,
+
+        query = kaa.beacon.query(parent=self.info, recursive=recursive)
+        pl = Playlist(playlist = query, parent = self,
                       type=display_type, random=random)
         pl.play()
 
