@@ -58,6 +58,8 @@ import os
 import sys
 import copy
 
+from kaa.notifier import EventHandler
+
 import config
 import plugin
 
@@ -66,7 +68,7 @@ from event import *
 import logging
 log = logging.getLogger()
 
-class PluginInterface(plugin.DaemonPlugin):
+class PluginInterface(plugin.Plugin):
     """
     autocolor plugin.
 
@@ -83,15 +85,18 @@ class PluginInterface(plugin.DaemonPlugin):
         """
         init the autocolor plugin
         """
-        plugin.DaemonPlugin.__init__(self)
+        plugin.Plugin.__init__(self)
         self.plugins = None
         plugin.register(self, 'autocolor')
         self.before = before
         self.after = after
+
+        EventHandler(self.eventhandler).register([VIDEO_START, VIDEO_END])
+
         
     def eventhandler(self, event):
         """
-        catch VIDEO_START/VIDEOEND and run a command, return False, maybe
+        catch VIDEO_START/VIDEO_END and run a command, return False, maybe
         someone else is watching for the event.
         """
 

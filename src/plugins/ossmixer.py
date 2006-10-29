@@ -84,12 +84,13 @@ import config
 import plugin
 from event import *
 
+from kaa.notifier import EventHandler
 import ossaudiodev
 
 import logging
 log = logging.getLogger()
 
-class PluginInterface(plugin.DaemonPlugin):
+class PluginInterface(plugin.Plugin):
     SOUND_MIXER_LINE = 7
     SOUND_MASK_LINE = 64
     
@@ -107,7 +108,11 @@ class PluginInterface(plugin.DaemonPlugin):
                 log.error('Couldn\'t open mixer %s' % config.DEV_MIXER)
                 return
 
-        plugin.DaemonPlugin.__init__(self)
+        plugin.Plugin.__init__(self)
+
+        events = [MIXER_VOLUP, MIXER_VOLDOWN, MIXER_MUTE]
+        EventHandler(self.eventhandler).register(events)
+
         if 0:
             self.mainVolume   = 0
             self.pcmVolume    = 0

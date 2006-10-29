@@ -36,7 +36,7 @@
 import logging
 
 # kaa imports
-from kaa.notifier import OneShotTimer
+from kaa.notifier import OneShotTimer, EventHandler
 
 # freevo imports
 import config
@@ -51,7 +51,7 @@ from event import OSD_MESSAGE
 log = logging.getLogger()
 
 
-class PluginInterface(plugin.DaemonPlugin):
+class PluginInterface(plugin.Plugin):
     """
     osd plugin.
 
@@ -64,8 +64,8 @@ class PluginInterface(plugin.DaemonPlugin):
         """
         init the osd
         """
-        plugin.DaemonPlugin.__init__(self)
-        self.events = [ 'OSD_MESSAGE' ]
+        plugin.Plugin.__init__(self)
+        EventHandler(self.eventhandler).register([ 'OSD_MESSAGE' ])
         self.message = ''
         self.gui_object = None
         self.hide_timer = OneShotTimer(self.hide)

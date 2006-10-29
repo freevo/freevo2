@@ -52,7 +52,7 @@ from event import *
 log = logging.getLogger()
 
 
-class PluginInterface(plugin.DaemonPlugin):
+class PluginInterface(plugin.Plugin):
     """
     To activate the idle bar, put the following in your local_conf.py:
         plugin.activate('idlebar')
@@ -65,7 +65,7 @@ class PluginInterface(plugin.DaemonPlugin):
         """
         init the idlebar
         """
-        plugin.DaemonPlugin.__init__(self)
+        plugin.Plugin.__init__(self)
         plugin.register(self, 'idlebar')
 
         # register for events
@@ -75,7 +75,6 @@ class PluginInterface(plugin.DaemonPlugin):
         # register for signals
         application.signals['application change'].connect(self.app_change)
 
-        self.poll_interval  = 30
         self.plugins        = None
         self.visible        = False
         self.bar            = None
@@ -85,6 +84,9 @@ class PluginInterface(plugin.DaemonPlugin):
         self.container = gui.widgets.Container()
         self.container.set_zindex(10)
         gui.display.add_child(self.container)
+
+        self._timer = kaa.notifier.Timer(self.poll)
+        self._timer.start(30)
 
         # Getting current LOCALE
         try:

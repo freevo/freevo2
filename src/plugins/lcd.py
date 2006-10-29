@@ -37,6 +37,7 @@ import copy
 import time
 
 from kaa.strutils import to_str
+import kaa.notifier
 
 import plugin
 from event import *
@@ -630,7 +631,7 @@ def get_info( item, list ):
     return info
 
     
-class PluginInterface( plugin.DaemonPlugin ):
+class PluginInterface( plugin.Plugin ):
     """
     Display context info in LCD using lcdproc daemon.
 
@@ -665,7 +666,7 @@ class PluginInterface( plugin.DaemonPlugin ):
         """
         init the lcd
         """
-        plugin.DaemonPlugin.__init__( self )
+        plugin.Plugin.__init__( self )
         try:
             self.lcd = pylcd.client()
             cm = self.lcd.connect()
@@ -680,7 +681,6 @@ class PluginInterface( plugin.DaemonPlugin ):
         #     self.lcd.getinfo()
         #     print ""
             
-        self.poll_interval = 0.01
         self.disable = 0
         self.height = self.lcd.d_height
         self.width  = self.lcd.d_width
@@ -690,7 +690,9 @@ class PluginInterface( plugin.DaemonPlugin ):
             return
         plugin.register( self, "lcd" )
 
-
+        self._timer = kaa.notifier.Timer(self.poll)
+        self._timer.start(0.01)
+        kaa.notifier.EventHandler(self.eventhandler).register()
         
         # Show welcome screen:
         for w in self.screens[ "welcome" ]:

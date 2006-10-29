@@ -137,46 +137,6 @@ class ItemPlugin(Plugin):
         return False
 
 
-class DaemonPlugin(Plugin):
-    """
-    Plugin class for daemon objects who will be activate in the
-    background while Freevo is running
-    """
-    def __init__(self):
-        Plugin.__init__(self)
-        self.poll_interval  = 100       # poll every x milliseconds
-        self.events         = []        # events to register to ([] == all)
-
-
-    def poll(self):
-        """
-        This function will be called every poll_interval milliseconds.
-        """
-        pass
-
-
-    def plugin_activate(self):
-        """
-        Execute on activation of the plugin.
-        """
-        Plugin.plugin_activate(self)
-        if self.__class__.poll != DaemonPlugin.poll:
-            # plugin has a self defined poll function, register it
-            self.__timer = kaa.notifier.Timer(self.poll)
-            self.__timer.start(self.poll_interval)
-
-        if self.__class__.eventhandler != DaemonPlugin.eventhandler:
-            # plugin has a self defined eventhandler
-            kaa.notifier.EventHandler(self.eventhandler).register(self.events)
-
-
-    def eventhandler(self, event):
-        """
-        Handle events passed to the eventhandler.
-        """
-        return False
-
-
 class MimetypePlugin(Plugin):
     """
     Plugin class for mimetypes handled in a directory/playlist.

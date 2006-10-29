@@ -74,11 +74,12 @@ import config
 import plugin
 from event import *
 from kaa.ioctl import *
+from kaa.notifier import EventHandler
 
 import logging
 log = logging.getLogger()
 
-class PluginInterface(plugin.DaemonPlugin):
+class PluginInterface(plugin.Plugin):
     # These magic numbers were determined by writing a C-program using the
     # macros in /usr/include/linux/... and printing the values.
     # They seem to work on my machine. XXX Is there a real python interface?
@@ -104,7 +105,11 @@ class PluginInterface(plugin.DaemonPlugin):
                 log.error('Couldn\'t open mixer %s' % config.DEV_MIXER)
                 return
 
-        plugin.DaemonPlugin.__init__(self)
+        plugin.Plugin.__init__(self)
+
+        events = [MIXER_VOLUP, MIXER_VOLDOWN, MIXER_MUTE]
+        EventHandler(self.eventhandler).register(events)
+
         if 0:
             self.mainVolume   = 0
             self.pcmVolume    = 0
