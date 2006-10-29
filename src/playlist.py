@@ -40,7 +40,8 @@ import logging
 
 # kaa imports
 import kaa.beacon
-from kaa.strutils import str_to_unicode
+from kaa.strutils import str_to_unicode, unicode_to_str
+from kaa.weakref import weakref
 
 # freevo imports
 import config
@@ -61,11 +62,11 @@ REPEAT_PLAYLIST = 2
 
 class Playlist(MediaItem):
     """
-    Class for playlists. A playlist can be created with a list of items or a
-    filename containing the playlist.
+    Class for playlists. A playlist can be created with a list of items, a
+    filename containing the playlist or a (list of) beacon query(s).
     """
     def __init__(self, name='', playlist=[], parent=None, type=None,
-                 random=False, build=False, autoplay=False, repeat=REPEAT_OFF):
+                 random=False, autoplay=False, repeat=REPEAT_OFF):
         """
         Init the playlist
 
@@ -74,7 +75,6 @@ class Playlist(MediaItem):
                      1) Items
                      2) filenames
                      3) a list (directoryname, recursive=0|1)
-        build:    create the playlist. This means unfold the directories
         """
         MediaItem.__init__(self, parent, type='playlist')
         self.name = str_to_unicode(name)
@@ -85,10 +85,8 @@ class Playlist(MediaItem):
         self.repeat       = repeat
         self.display_type = type
         self.next_pos     = None
-
-        self.suffixlist   = []
-        self.get_plugins  = []
-
+        self.__playlist_valid = False
+        
         self.background_playlist = None
         self.random = random
 
@@ -99,209 +97,109 @@ class Playlist(MediaItem):
         self.selected = None
         self.selected_pos = None
 
-        if build:
-            self.build()
-        else:
-            # create a basic info object
-            self.info = {}
+        # create a basic info object
+        self.info = {}
 
 
-    def read_m3u(self, plsname):
+    def _read_m3u(self, plsname, content):
         """
         This is the (m3u) playlist reading function.
-
-        Arguments: plsname  - the playlist filename
-        Returns:   The list of interesting lines in the playlist
         """
-        try:
-            fd = open(plsname)
-            lines = fd.readlines()
-            fd.close()
-        except IOError:
-            log.error('Cannot open file "%s"' % plsname)
-            return 0
+        pl_lines = [ l for l in content if not l.startswith('#') ]
+        curdir = os.path.split(plsname)[0]
 
-        try:
-            playlist_lines_dos = map(lambda l: l.strip(), lines)
-            playlist_lines = filter(lambda l: l[0] != '#', playlist_lines_dos)
-        except IndexError:
-            log.warning('Bad m3u playlist file "%s"' % plsname)
-            return 0
-
-        (curdir, playlistname) = os.path.split(plsname)
-        for line in playlist_lines:
+        playlist = []
+        for line in pl_lines:
             if line.endswith('\r\n'):
                 line = line.replace('\\', '/') # Fix MSDOS slashes
             if os.path.exists(os.path.join(curdir,line)):
-                self.playlist.append(os.path.join(curdir,line))
+                playlist.append(os.path.join(curdir,line))
+        return playlist
+    
 
-
-    def read_pls(self, plsname):
+    def _read_pls(self, plsname, content):
         """
         This is the (pls) playlist reading function.
 
         Arguments: plsname  - the playlist filename
         Returns:   The list of interesting lines in the playlist
         """
-        try:
-            fd = open(plsname)
-            lines = fd.readlines()
-            fd.close()
-        except IOError:
-            log.error('Cannot open file "%s"' % list)
-            return 0
-
-        playlist_lines_dos = map(lambda l: l.strip(), lines)
-        playlist_lines = filter(lambda l: l[0:4] == 'File', playlist_lines_dos)
-
-        for line in playlist_lines:
+        pl_lines = filter(lambda l: l[0:4] == 'File', content)
+        for pos, line in enumerate(pl_lines):
             numchars=line.find("=")+1
             if numchars > 0:
-                playlist_lines[playlist_lines.index(line)] = \
-                                                line[numchars:]
+                pl_lines[pos] = line[numchars:]
+        curdir = os.path.split(plsname)[0]
 
-        (curdir, playlistname) = os.path.split(plsname)
-        for line in playlist_lines:
+        playlist = []
+        for line in pl_lines:
             if line.endswith('\r\n'):
                 line = line.replace('\\', '/') # Fix MSDOS slashes
             if os.path.exists(os.path.join(curdir,line)):
-                self.playlist.append(os.path.join(curdir,line))
+                playlist.append(os.path.join(curdir,line))
+        return playlist
 
 
-
-    def read_ssr(self, ssrname):
-        """
-        This is the (ssr) slideshow reading function.
-
-        Arguments: ssrname - the slideshow filename
-        Returns:   The list of interesting lines in the slideshow
-
-        File line format:
-
-            FileName: "image file name"; Caption: "caption text"; Delay: "sec"
-
-        The caption and delay are optional.
-        """
-
-        (curdir, playlistname) = os.path.split(ssrname)
-        out_lines = []
-        try:
-            fd = open(ssrname)
-            lines = fd.readlines()
-            fd.close()
-        except IOError:
-            log.error( 'Cannot open file "%s"' % list)
-            return 0
-
-        playlist_lines_dos = map(lambda l: l.strip(), lines)
-        playlist_lines     = filter(lambda l: l[0] != '#', lines)
-
-
-        """
-        Here's where we parse the line.  See the format above.
-        TODO:  Make the search case insensitive
-        """
-        for line in playlist_lines:
-            tmp_list = []
-            ss_name = re.findall('FileName: \"(.*?)\"', line)
-            ss_caption = re.findall('Caption: \"(.*?)\"', line)
-            ss_delay = re.findall('Delay: \"(.*?)\"', line)
-
-            if ss_name != []:
-                if ss_caption == []:
-                    ss_caption += [""]
-                if ss_delay == []:
-                    ss_delay += [5]
-
-                for p in self.get_plugins:
-                    for i in p.get(self, [os.path.join(curdir, ss_name[0])]):
-                        if i.type == 'image':
-                            i.name = str_to_unicode(ss_caption[0])
-                            i.duration = int(ss_delay[0])
-                            self.playlist.append(i)
-                            break
-        self.autoplay = True
-
-
-    def build(self):
+    def __create_playlist_items(self):
         """
         Build the playlist. Create a list of items and filenames. This function
         will load the playlist file or expand directories
         """
-        if self.suffixlist:
+        if self.__playlist_valid:
             # we called this function before
             return
+        self.__playlist_valid = True
 
-        playlist = self.playlist
-
-        for p in plugin.mimetype(self.display_type):
-            #if self.display_type in p.display_type:
-            # XXX self.display_type seems to be set to None
-            # XXX Which prevents the str->Item from occuring
-            # XXX This is a short-term fix I guess
-            self.suffixlist += p.suffix()
-            self.get_plugins.append(p)
-
-        # playlist is a filename, load the file and create playlist
-        if isinstance(playlist, (str, unicode)):
-            self.set_url(playlist)
-            log.info('create playlist for %s' % playlist)
-            self.playlist = []
-            # it's a filename with a playlist
-            try:
-                f=open(playlist, "r")
-                line = f.readline()
-                f.close
-                if line.find("[playlist]") > -1:
-                    self.read_pls(playlist)
-                elif line.find("[Slides]") > -1:
-                    self.read_ssr(playlist)
-                else:
-                    self.read_m3u(playlist)
-            except (OSError, IOError), e:
-                log.error('playlist error: %s' % e)
-            playlist = self.playlist
-
-        # self.playlist is a list of Items or strings (filenames)
         # create a basic info object
         self.info = {}
+        playlist = self.playlist
         self.playlist = []
 
+        if isinstance(playlist, (str, unicode)):
+            # playlist is a filename, load the file and create playlist
+            self.set_url(playlist)
+            log.info('create playlist for %s' % playlist)
+            try:
+                f=open(playlist, "r")
+                content = map(lambda l: l.strip(' \n\r'), f.readlines())
+                f.close
+                if content and content[0].find("[playlist]") > -1:
+                    playlist = self._read_pls(playlist, content)
+                else:
+                    playlist = self._read_m3u(playlist, content)
+            except (OSError, IOError), e:
+                log.error('playlist error: %s' % e)
+                playlist = []
+
         if isinstance(playlist, kaa.beacon.Query):
-            playlist = playlist.get(filter='extmap')
-            for p in self.get_plugins:
-                for i in p.get(self, playlist):
-                    self.playlist.append(i)
-            return
-        
-        for i in playlist:
-            if isinstance(i, Item):
+            playlist = [ playlist ]
+            
+        # Note: playlist is a list of Items, strings (filenames) or a
+        # beacon queries now.
+
+        plugins = plugin.mimetype(self.display_type)
+        for item in playlist:
+
+            if isinstance(item, Item):
                 # Item object, correct parent
-                i = copy.copy(i)
-                # FIXME: use weakref here
-                i.parent = self
-                self.playlist.append(i)
+                item = copy.copy(item)
+                item.parent = weakref(self)
+                self.playlist.append(item)
                 continue
 
-            # FIXME: The following stuff depends on a fast media database
-            # Unless beacon is finished and integrated, this can be very
-            # slow. It should be fast later but it is still unclear what
-            # will happen on large directory trees.
+            if not isinstance(item, kaa.beacon.Query):
+                # make item a beacon query
+                item = kaa.beacon.query(filename=item)
 
-            if isinstance(i, list) or isinstance(i, tuple) and \
-                   len(i) == 2 and os.path.isdir(i[0]):
-                # (directory, recursive=True|False)
-                query = { 'filename': i[0] }
-                if i[1]:
-                    query['recursive'] = True
-            else:
-                # filename
-                query = { 'filename': i }
+            _playlist = []
+            items = item.get(filter='extmap')
+            for p in plugins:
+                _playlist.extend(p.get(self, items))
 
-            l = kaa.beacon.query(**query).get(filter='extmap')
-            for p in self.get_plugins:
-                for i in p.get(self, l):
-                    self.playlist.append(i)
+            # sort beacon query on url
+            _playlist.sort(lambda x,y: cmp(x.url, y.url))
+            # add to playlist
+            self.playlist.extend(_playlist)
 
 
     def randomize(self):
@@ -316,11 +214,22 @@ class Playlist(MediaItem):
             self.playlist += [ element ]
 
 
+    def __getitem__(self, attr):
+        """
+        return the specific attribute
+        """
+        if not self.__playlist_valid:
+            self.__create_playlist_items()
+        return MediaItem.__getitem__(self, attr)
+
+        
     def actions(self):
         """
         return the actions for this item: play and browse
         """
-        self.build()
+        if not self.__playlist_valid:
+            self.__create_playlist_items()
+
         browse = Action(_('Browse Playlist'), self.browse)
         play = Action(_('Play'), self.play)
 
@@ -339,7 +248,8 @@ class Playlist(MediaItem):
         """
         show the playlist in the menu
         """
-        self.build()
+        if not self.__playlist_valid:
+            self.__create_playlist_items()
         if self.random:
             self.randomize()
 
@@ -371,7 +281,8 @@ class Playlist(MediaItem):
         # First start playing. This is a bad hack and needs to
         # be fixed when fixing the whole self.playlist stuff
 
-        Playlist.build(self)
+        if not self.__playlist_valid:
+            self.__create_playlist_items()
 
         if self.random:
             self.randomize()
@@ -572,13 +483,13 @@ class Mimetype(plugin.MimetypePlugin):
         for suffix in self.suffix():
             for filename in listing.get(suffix):
                 items.append(Playlist(playlist=filename.filename, parent=parent,
-                                      type=display_type, build=True))
+                                      type=display_type))
         return items
 
 
-    def fxdhandler(self, fxd, node):
+    def fxdhandler(self, name, title, image, info, node, parent, listing, dirname):
         """
-        parse audio specific stuff from fxd files
+        parse playlist specific stuff from fxd files
 
         <?xml version="1.0" ?>
         <freevo>
@@ -594,32 +505,26 @@ class Mimetype(plugin.MimetypePlugin):
           </playlist>
         </freevo>
         """
-        children = fxd.get_children(node, 'files')
-        dirname  = os.path.dirname(fxd.getattr(None, 'filename', ''))
-        if children:
-            children = children[0].children
-
         items = []
-        for child in children:
-            fname  = os.path.join(dirname, fxd.gettext(child))
-            if child.name == 'directory':
-                items.append((fname, fxd.getattr(child, 'recursive', 0)))
+        for c in node.children:
+            if not c.name == 'files':
+                continue
+            for file in c.children:
+                if file.name in ('file', 'directory'):
+                    filename = os.path.join(dirname, unicode_to_str(file.content))
+                    query = kaa.beacon.query(filename=filename)
+                if file.name == 'directory':
+                    recursive = file.getattr('recursive') == '1'
+                    query = query.get().list(recursive=recursive)
+                items.append(query)
 
-            elif child.name == 'file':
-                items.append(fname)
-
-        pl = Playlist('', items, fxd.getattr(None, 'parent', None),
-                      type=fxd.getattr(None, 'display_type'),
-                      build=True, random=fxd.getattr(node, 'random', 0),
-                      repeat=fxd.getattr(node, 'repeat', 0))
-
-        pl.name     = fxd.getattr(node, 'title')
-        pl.image    = fxd.childcontent(node, 'cover-img')
-        if pl.image:
-            pl.image = os.path.join(os.path.dirname(fxd.filename), pl.image)
-
-        fxd.parse_info(fxd.get_children(node, 'info', 1), pl)
-        fxd.getattr(None, 'items', []).append(pl)
+        # create playlist object
+        pl = Playlist(title, items, parent, parent.display_type,
+                      random=node.getattr('random') == '1',
+                      repeat=node.getattr('repeat') == '1')
+        pl.image = image
+        pl.info = info
+        return pl
 
 
 # load the MimetypePlugin
