@@ -95,7 +95,6 @@ class PluginInterface(plugin.Plugin):
     SOUND_MASK_LINE = 64
     
     def __init__(self):
-        self.plugin_name = 'MIXER'
         self.mixfd = None
         self.muted = 0
         
@@ -108,7 +107,7 @@ class PluginInterface(plugin.Plugin):
                 log.error('Couldn\'t open mixer %s' % config.DEV_MIXER)
                 return
 
-        plugin.Plugin.__init__(self)
+        plugin.Plugin.__init__(self, 'MIXER')
 
         events = [MIXER_VOLUP, MIXER_VOLDOWN, MIXER_MUTE]
         EventHandler(self.eventhandler).register(events)

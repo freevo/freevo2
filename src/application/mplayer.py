@@ -210,8 +210,7 @@ class Plugin(plugin.Plugin):
         """
         Init the plugin.
         """
-        plugin.Plugin.__init__(self)
-        self.plugin_name = 'mplayer_' + type
+        plugin.Plugin.__init__(self, 'mplayer_' + type)
 
 
     def play(self, command, application):

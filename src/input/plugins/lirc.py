@@ -73,7 +73,7 @@ class PluginInterface(InputPlugin):
     """
     def __init__(self):
         InputPlugin.__init__(self)
-        self.plugin_name = 'LIRC'
+
         try:
             if os.path.isfile(config.LIRCRC):
                 fd = pylirc.init('freevo', config.LIRCRC)

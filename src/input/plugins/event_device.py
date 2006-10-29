@@ -104,7 +104,6 @@ class PluginInterface(InputPlugin):
     def __init__(self):
         InputPlugin.__init__(self)
 
-        self.plugin_name = 'EVDEV'
         self.device_name = config.EVDEV_DEVICE
         self._ignore_until = 0
         self.repeat_ignore = config.EVDEV_REPEAT_IGNORE

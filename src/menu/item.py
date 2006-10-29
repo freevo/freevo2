@@ -154,7 +154,7 @@ class Item(object):
         items = self.actions()
         # get actions defined by plugins
         plugins = plugin.get('item') + plugin.get('item_%s' % self.type)
-        plugins.sort(lambda l, o: cmp(l.plugin_level, o.plugin_level))
+        plugins.sort(lambda l, o: cmp(l._plugin_level, o._plugin_level))
         for p in plugins:
             for a in p.actions(self):
                 # set item for the action

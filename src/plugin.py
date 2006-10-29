@@ -51,14 +51,14 @@ class Plugin(plugin_loader.Plugin):
     """
     Basic plugin class.
     """
-    def __init__(self):
+    def __init__(self, name=''):
         """
         Execute on activation of the plugin.
         """
         for var, val, desc in self.config():
             if not hasattr(config, var):
                 setattr(config, var, val)
-        plugin_loader.Plugin.__init__(self)
+        plugin_loader.Plugin.__init__(self, name)
 
 
     def config(self):
@@ -92,10 +92,10 @@ class MainMenuPlugin(Plugin):
     """
     Plugin class for plugins to add something to the main menu
     """
-    def __init__(self):
-        Plugin.__init__(self)
-        self.plugin_type = 'mainmenu'
-        self.plugin_special = True
+    def __init__(self, name=''):
+        Plugin.__init__(self, name)
+        self._plugin_type = 'mainmenu'
+        self._plugin_special = True
 
 
     def items(self, parent):
@@ -116,10 +116,10 @@ class ItemPlugin(Plugin):
     True, the event won't be passed to other eventhandlers and also not to
     the item itself.
     """
-    def __init__(self):
-        Plugin.__init__(self)
-        self.plugin_type = 'item'
-        self.plugin_special = True
+    def __init__(self, name=''):
+        Plugin.__init__(self, name)
+        self._plugin_type = 'item'
+        self._plugin_special = True
 
 
     def actions(self, item):
@@ -142,10 +142,10 @@ class MimetypePlugin(Plugin):
     self.display_type is a list of display types where this mimetype
     should be displayed, [] for always.
     """
-    def __init__(self):
-        Plugin.__init__(self)
+    def __init__(self, name=''):
+        Plugin.__init__(self, name)
         self.display_type = []
-        self.plugin_type = 'mimetype'
+        self._plugin_type = 'mimetype'
 
 
     def suffix(self):

@@ -50,11 +50,11 @@ class Plugin(object):
     """
     Basic plugin class. All plugins should inherit from this class
     """
-    def __init__(self):
-        self.plugin_type = None
-        self.plugin_level  = 10
-        self.plugin_name = ''
-        self.plugin_special = False
+    def __init__(self, name=''):
+        self._plugin_type = None
+        self._plugin_level  = 10
+        self._plugin_name = name
+        self._plugin_special = False
 
 
     def plugin_activate(self):
@@ -111,7 +111,7 @@ class PluginLoader(object):
         if self.__initialized:
             self.__load_plugin(name, type, level, args)
             # sort plugins again
-            cmp_func = lambda l, o: cmp(l.plugin_level, o.plugin_level)
+            cmp_func = lambda l, o: cmp(l._plugin_level, o._plugin_level)
             for key in self.types:
                 self.types[key].sort(cmp_func)
         else:
@@ -183,7 +183,7 @@ class PluginLoader(object):
             self.__load_plugin(name, type, level, args)
 
         # sort plugins
-        cmp_func = lambda l, o: cmp(l.plugin_level, o.plugin_level)
+        cmp_func = lambda l, o: cmp(l._plugin_level, o._plugin_level)
         for key in self.types:
             self.types[key].sort(cmp_func)
 
@@ -300,7 +300,7 @@ class PluginLoader(object):
                 else:
                     p = eval(object)(args)
 
-                if not hasattr(p, 'plugin_type'):
+                if not hasattr(p, '_plugin_type'):
                     if hasattr(p, 'reason'):
                         reason = p.reason
                     else:
@@ -314,23 +314,23 @@ class PluginLoader(object):
                 p = name
 
             p.plugin_activate()
-            p.plugin_level = level
+            p._plugin_level = level
 
             if type:
                 special = type
 
-            if p.plugin_type:
-                if p.plugin_special and special:
-                    key = p.plugin_type + '_' + special
+            if p._plugin_type:
+                if p._plugin_special and special:
+                    key = p._plugin_type + '_' + special
                 else:
-                    key = p.plugin_type
+                    key = p._plugin_type
 
                 if not self.types.has_key(key):
                     self.types[key] = []
                 self.types[key].append(p)
 
-            if p.plugin_name:
-                self.names[p.plugin_name] = p
+            if p._plugin_name:
+                self.names[p._plugin_name] = p
 
             self.loaded_plugins.append(p)
             

@@ -237,7 +237,7 @@ class PluginInterface(plugin.Plugin):
 class IdleBarPlugin(plugin.Plugin):
     def __init__(self):
         plugin.Plugin.__init__(self)
-        self.plugin_type = 'idlebar'
+        self._plugin_type = 'idlebar'
         self.objects   = []
         self.NO_CHANGE = -1
         self.align     = 'left'
