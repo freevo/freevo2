@@ -487,7 +487,7 @@ class Mimetype(plugin.MimetypePlugin):
         return items
 
 
-    def fxdhandler(self, name, title, image, info, node, parent, listing, dirname):
+    def fxdhandler(self, node, parent, listing):
         """
         parse playlist specific stuff from fxd files
 
@@ -511,7 +511,8 @@ class Mimetype(plugin.MimetypePlugin):
                 continue
             for file in c.children:
                 if file.name in ('file', 'directory'):
-                    filename = os.path.join(dirname, unicode_to_str(file.content))
+                    f = unicode_to_str(file.content)
+                    filename = os.path.join(node.dirname, f)
                     query = kaa.beacon.query(filename=filename)
                 if file.name == 'directory':
                     recursive = file.getattr('recursive') == '1'
@@ -519,11 +520,11 @@ class Mimetype(plugin.MimetypePlugin):
                 items.append(query)
 
         # create playlist object
-        pl = Playlist(title, items, parent, parent.display_type,
+        pl = Playlist(node.title, items, parent, parent.display_type,
                       random=node.getattr('random') == '1',
                       repeat=node.getattr('repeat') == '1')
-        pl.image = image
-        pl.info = info
+        pl.image = node.image
+        pl.info  = node.info
         return pl
 
 

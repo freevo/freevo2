@@ -64,7 +64,7 @@ class PluginInterface(plugin.MimetypePlugin):
 
         # load the fxd part of video
         fxditem.add_parser(['video'], 'movie', fxdhandler.parse_movie)
-        fxditem.add_parser(['video'], 'disc-set', fxdhandler.parse_disc_set)
+        # fxditem.add_parser(['video'], 'disc-set', fxdhandler.parse_disc_set)
 
         # update the database based on the current mimetypes
         database.update()

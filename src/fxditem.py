@@ -60,36 +60,36 @@ from menu import Item, Action, Menu
 log = logging.getLogger()
 
 # the parser for fxd nodes
-callbacks = []
+_callbacks = []
 
 def add_parser(types, node, callback):
     """
     Add a node parser for fxd files.
     """
-    callbacks.append((types, node, callback))
+    _callbacks.append((types, node, callback))
 
     
 class Mimetype(plugin.MimetypePlugin):
     """
-    class to handle fxd files in directories
+    Class to handle fxd files in directories
     """
     def get(self, parent, listing):
         """
-        return a list of items based on the listing
+        Return a list of items based on the listing
         """
         fxd_files = listing.get('fxd')
         if not fxd_files:
             return []
 
-        display_type = parent.display_type
-        if display_type == 'tv':
-            display_type = 'video'
+        type = parent.display_type
+        if type == 'tv':
+            type = 'video'
 
         items = []
         for fxd_file in fxd_files:
             try:
                 doc = freevo.fxdparser.FXD(fxd_file.filename)
-                items.extend(self._parse(doc, doc, parent, listing, display_type))
+                items.extend(self._parse(doc, doc, parent, listing, type))
             except:
                 log.exception("fxd file %s corrupt" % fxd_file.filename)
                 continue
@@ -98,32 +98,37 @@ class Mimetype(plugin.MimetypePlugin):
 
     def suffix(self):
         """
-        return the list of suffixes this class handles
+        Return the list of suffixes this class handles
         """
         return [ 'fxd' ]
 
 
     def count(self, parent, listing):
         """
-        return how many items will be build on files
+        Return how many items will be build on files
         """
         return len(self.get(parent, listing))
 
 
     def _parse(self, doc, node, parent, listing, display_type):
+        """
+        Internal parser function
+        """
         items = []
-        for name, title, image, info, node in doc.get_content(node):
-            for types, tag, handler in callbacks:
-                if tag == name and \
-                       (not display_type or not types or display_type in types):
-                    i = handler(name, title, image, info, node, parent, listing,
-                                doc._dirname)
+        for c in doc.get_content(node):
+            for types, tag, handler in _callbacks:
+                if display_type and types and not display_type in types:
+                    # wrong type
+                    continue
+                if tag == c.name:
+                    i = handler(c, parent, listing)
                     if i is not None:
                         items.append(i)
-            if name == 'container':
-                c = Container(name, title, image, info, parent)
-                c.items = self._parse(doc, node, c, listing, display_type)
-                items.append(c)
+            if c.name == 'container':
+                con = Container(c.title, c.image, c.info, parent)
+                con.items = self._parse(doc, c, con, listing, display_type)
+                if con.items:
+                    items.append(con)
         return items
 
 
@@ -132,7 +137,7 @@ class Container(Item):
     """
     a simple container containing for items parsed from the fxd
     """
-    def __init__(self, name, title, image, info, parent):
+    def __init__(self, title, image, info, parent):
         Item.__init__(self, parent)
         self.items = []
         self.name = title

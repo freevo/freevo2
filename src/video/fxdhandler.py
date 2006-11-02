@@ -75,7 +75,7 @@ from menu import Files
 # get logging object
 log = logging.getLogger('video')
 
-def parse_movie(name, title, image, info, node, parent, listing, dirname):
+def parse_movie(node, parent, listing):
     """
     Callback for VideoItem <movie>
     """
@@ -115,14 +115,14 @@ def parse_movie(name, title, image, info, node, parent, listing, dirname):
     # multiple items based n the same file can have different info. Or maybe
     # we just ignore this. In that case, the fxdinfo code will be replaced by
     # an in beacon solution.
-    item.fxdinfo = dict(info)
+    item.fxdinfo = dict(node.info)
 
-    if title:
-        item.set_name(title)
+    if node.title:
+        item.set_name(node.title)
 
     # BEACON_FIXME: item.files.fxd_file  = fxd.filename
-    if image:
-        item.image = image
+    if node.image:
+        item.image = node.image
         # BEACON_FIXME: item.files.image = image
 
     return item
