@@ -117,7 +117,8 @@ class TVGuide(MenuApplication):
         else:
             stop = sys.maxint
 
-        return kaa.epg.Program(self.channel, start, stop, _('No Program'), '')
+        data = { 'start': start, 'stop': stop, 'title': _('No Program') }
+        return kaa.epg.Program(self.channel, data)
     
 
     def start(self, parent):
