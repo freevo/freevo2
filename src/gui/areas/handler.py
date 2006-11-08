@@ -123,7 +123,6 @@ class Handler(object):
         """
         Delete an area handler
         """
-        log.info('Delete AreaHandler %s' % self.type)
         while self.areas:
             self.areas[0].clear_all()
             del self.areas[0]

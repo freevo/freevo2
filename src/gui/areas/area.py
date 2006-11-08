@@ -386,10 +386,3 @@ class Area(object):
             i = Image(image, (x, y), (w, h))
         self.layer.add_child(i)
         return i
-
-
-    def __del__(self):
-        """
-        delete function of memory debugging
-        """
-        log.info('Delete Area %s' % self.area_name)
