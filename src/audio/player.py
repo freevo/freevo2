@@ -36,11 +36,14 @@
 
 __all__ = [ 'audioplayer' ]
 
+# kaa imports
+import kaa.popcorn
+import kaa.notifier
+
 # Freevo imports
 import config
 import gui
 import gui.areas
-import plugin
 
 from event import *
 from application import Application
@@ -71,10 +74,11 @@ class AudioPlayer(Application):
     """
     def __init__(self):
         Application.__init__(self, 'audioplayer', 'audio', False, True)
-        self.player     = None
+        self.player = kaa.popcorn.Player()
         self.running    = False
         self.bg_playing = False
-
+        self.elapsed_timer = kaa.notifier.WeakTimer(self.elapsed)
+        
         # register player to the skin
         areas = ('screen', 'title', 'view', 'info')
         self.draw_engine = gui.areas.Handler('player', areas)
@@ -85,26 +89,10 @@ class AudioPlayer(Application):
         play an item
         """
         # FIXME: handle starting something when self.player.is_playing()
-        if self.player and self.player.is_playing():
-            return
+        # if self.player and self.player.is_playing():
+        #     return
 
         self.item = item
-
-        if player:
-            self.player = player
-        else:
-            self.possible_player = []
-            for p in plugin.getbyname(plugin.AUDIO_PLAYER, True):
-                rating = p.rate(self.item) * 10
-                if config.AUDIO_PREFERED_PLAYER == p.name:
-                    rating += 1
-                if hasattr(self.item, 'force_player') and \
-                       p.name == self.item.force_player:
-                    rating += 100
-                self.possible_player.append((rating, p))
-            self.possible_player.sort(lambda l, o: -cmp(l[0], o[0]))
-            self.player = self.possible_player[0][1]
-
         self.running = True
 
         if self.bg_playing:
@@ -112,13 +100,11 @@ class AudioPlayer(Application):
         else:
             self.show()
 
-        error = self.player.play(self.item, self)
-        if error:
-            self.running = False
-            self.item.eventhandler(PLAY_END)
-
-        else:
-            self.refresh()
+        self.player.open(self.item.url)
+        self.player.signals['end'].connect_once(PLAY_END.post, self.item)
+        self.player.signals['start'].connect_once(PLAY_START.post, self.item)
+        self.player.play()
+        self.refresh()
 
 
     def stop(self):
@@ -127,9 +113,7 @@ class AudioPlayer(Application):
         """
         # This function doesn't use the Application.stop() code here
         # because we stop and it is stopped when the child is dead.
-        if self.player:
-            self.player.stop()
-            self.player = None
+        self.player.stop()
         self.running = False
 
 
@@ -153,13 +137,21 @@ class AudioPlayer(Application):
         """
         Application.hide(self)
         self.draw_engine.hide(config.GUI_FADE_STEPS)
-# DOES NOT WORK
-#         if self.running:
-#             self.bg_playing = True
+        # DOES NOT WORK
+        # if self.running:
+        #   self.bg_playing = True
 
         # post event for hiding visualizations
         # FIXME: maybe this is a Signal
         AUDIO_VISUAL_HIDE.post()
+
+
+    def elapsed(self):
+        """
+        Callback for elapsed time changes.
+        """
+        self.item.elapsed = round(self.player.get_position())
+        self.refresh()
 
 
     def refresh(self):
@@ -190,16 +182,32 @@ class AudioPlayer(Application):
             self.item.eventhandler(event)
             return True
 
+        if event == PLAY_START:
+            self.elapsed_timer.start(0.2)
+            self.item.eventhandler(event)
+            return True
+
         if event == PLAY_END:
             # Now the player has stopped (either we called self.stop() or the
             # player stopped by itself. So we need to set the application to
             # to stopped.
             self.stopped()
+            self.elapsed_timer.stop()
             self.item.eventhandler(event)
             return True
 
-        # try the real player
-        if self.player and self.player.eventhandler(event):
+        if event == PAUSE:
+            self.player.pause()
+            self.elapsed_timer.stop()
+            return True
+
+        if event == PLAY:
+            self.player.resume()
+            self.elapsed_timer.start(0.2)
+            return True
+
+        if event == SEEK:
+            self.player.seek(int(event.arg), kaa.popcorn.SEEK_RELATIVE)
             return True
 
         # give it to the item

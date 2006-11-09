@@ -51,6 +51,7 @@ import logging
 import copy
 
 import kaa.strutils
+import kaa.popcorn
 
 import freevo.conf
 
@@ -108,6 +109,14 @@ else:
     log.critical('freevo.conf not found, please run \'freevo setup\'')
     sys.exit(1)
     
+kaa.popcorn.config.load('/etc/freevo/player.conf')
+# if started as user add personal config file
+if os.getuid() > 0:
+    cfgdir = os.path.expanduser('~/.freevo')
+    kaa.popcorn.config.load(os.path.join(cfgdir, 'player.conf'))
+
+# save the file again in case it did not exist or the variables changed
+kaa.popcorn.config.save()
 
 w, h = CONF.geometry.split('x')
 CONF.width, CONF.height = int(w), int(h)

@@ -251,9 +251,6 @@ plugin.activate('file_ops', level=20)
 # use mplayer for video playpack
 plugin.activate('video.mplayer')
 
-# use mplayer for audio playpack
-plugin.activate('audio.mplayer')
-
 # make it possible to detach the player
 #  argument tells the plugin to show the 
 #  detachbar
@@ -835,8 +832,6 @@ XINE_AO_DEV = 'alsa'    # alsa or oss
 
 if XINE_COMMAND:
     plugin.activate('video.xine')
-if CONF.fbxine:
-    plugin.activate('audio.xine')
 
 
 # ======================================================================
