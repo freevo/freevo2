@@ -79,7 +79,7 @@ class ControlManager(object):
         gui.display.add_child(self.container)
 
         # listen for TOGGLE_CONTROL events
-        kaa.notifier.EventHandler(self.eventhandler).register(TOGGLE_CONTROL)
+        kaa.notifier.EventHandler(self.eventhandler).register([TOGGLE_CONTROL])
 
 
     def register(self, controlbar):
