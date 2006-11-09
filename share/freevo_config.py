@@ -456,11 +456,6 @@ AUDIO_SUFFIX     = [ 'mp3', 'ogg', 'wav','m4a', 'wma', 'aac', 'flac', 'mka',
                      'ac3' ]
 
 #
-# Preferred audio player
-#
-AUDIO_PREFERED_PLAYER = 'mplayer'
-
-#
 # Show video files in the audio menu (for music-videos)
 #
 AUDIO_SHOW_VIDEOFILES = False
@@ -483,13 +478,6 @@ IMAGE_ITEMS = None
 # are used for the image viewer.
 # 
 IMAGE_SUFFIX = [ 'jpg','gif','png', 'jpeg','bmp','tiff','psd' ]
-
-#
-# The viewer now supports a new type of menu entry, a slideshow file.
-# It also has the slideshow alarm signal handler for automated shows.
-# It uses a new configuration option:
-#
-IMAGE_SSHOW_SUFFIX = [ 'ssr' ]
 
 
 #

@@ -467,7 +467,7 @@ class Mimetype(plugin.MimetypePlugin):
         """
         return the list of suffixes this class handles
         """
-        return config.PLAYLIST_SUFFIX + config.IMAGE_SSHOW_SUFFIX
+        return config.PLAYLIST_SUFFIX
 
 
     def get(self, parent, listing):
