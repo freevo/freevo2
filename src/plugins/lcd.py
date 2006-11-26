@@ -27,7 +27,7 @@
 
 import re
 
-from kaa.strutils import to_str
+from kaa.strutils import unicode_to_str
 import kaa.notifier
 
 import plugin
@@ -141,6 +141,8 @@ class PluginInterface( plugin.Plugin ):
                 r = eval(obj.group()[2:-2], l)
                 if r == None:
                     return ''
+                if isinstance(r, unicode):
+                    return unicode_to_str(r)
                 return str(r)
             except (SystemExit, KeyboardInterrupt):
                 raise SystemExit
@@ -162,7 +164,7 @@ class PluginInterface( plugin.Plugin ):
             args = []
             for a in w[1]:
                 if isinstance(a, unicode):
-                    a = to_str(a)
+                    a = unicode_to_str(a)
                 if isinstance(a, str) and a.find('%%') >= 0:
                     a = varreg.subn(cb, a)[0]
                 args.append(a)
