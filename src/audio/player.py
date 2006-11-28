@@ -103,8 +103,21 @@ class AudioPlayer(Application):
         self.player.open(self.item.url)
         self.player.signals['end'].connect_once(PLAY_END.post, self.item)
         self.player.signals['start'].connect_once(PLAY_START.post, self.item)
+        self.player.signals['failed'].connect_once(self._play_failed)
         self.player.play()
         self.refresh()
+
+
+    def _play_failed(self):
+        """
+        Playing this item failed.
+        """
+        log.error('playback failed for %s', self.item)
+        # We should handle it here with a messge or something like that. To
+        # make playlist work, we just send start and stop. It's ugly but it
+        # should work.
+        PLAY_START.post(self.item)
+        PLAY_STOP.post(self.item)
 
 
     def stop(self):
