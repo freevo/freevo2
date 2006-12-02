@@ -75,6 +75,7 @@ class AudioPlayer(Application):
     def __init__(self):
         Application.__init__(self, 'audioplayer', 'audio', False, True)
         self.player = kaa.popcorn.Player()
+        self.player.signals['failed'].connect_weak(self._play_failed)
         self.running    = False
         self.bg_playing = False
         self.elapsed_timer = kaa.notifier.WeakTimer(self.elapsed)
@@ -103,7 +104,6 @@ class AudioPlayer(Application):
         self.player.open(self.item.url)
         self.player.signals['end'].connect_once(PLAY_END.post, self.item)
         self.player.signals['start'].connect_once(PLAY_START.post, self.item)
-        self.player.signals['failed'].connect_once(self._play_failed)
         self.player.play()
         self.refresh()
 
@@ -113,6 +113,9 @@ class AudioPlayer(Application):
         Playing this item failed.
         """
         log.error('playback failed for %s', self.item)
+        # disconnect the signal handler with that item
+        self.player.signals['end'].disconnect(PLAY_END.post, self.item)
+        self.player.signals['start'].disconnect(PLAY_START.post, self.item)
         # We should handle it here with a messge or something like that. To
         # make playlist work, we just send start and stop. It's ugly but it
         # should work.
