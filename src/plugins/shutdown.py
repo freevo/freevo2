@@ -63,10 +63,12 @@ class ShutdownItem(MainMenuItem):
         if config.CONFIRM_SHUTDOWN:
             items = [ Action(_('Shutdown Freevo'), self.confirm_freevo),
                       Action(_('Shutdown system'), self.confirm_system),
+                      Action(_('Restart Freevo'), self.confirm_freevo_restart),
                       Action(_('Restart system'), self.confirm_sys_restart) ]
         else:
             items = [ Action(_('Shutdown Freevo'), self.shutdown_freevo),
                       Action(_('Shutdown system'), self.shutdown_system),
+                      Action(_('Restart Freevo'), self.shutdown_freevo_restart),
                       Action(_('Restart system'), self.shutdown_sys_restart) ]
 
         if config.ENABLE_SHUTDOWN_SYS:
@@ -92,6 +94,16 @@ class ShutdownItem(MainMenuItem):
         what = _('Do you really want to shut down the system?')
         box = ConfirmBox(what, default_choice=1)
         box.connect(0, self.shutdown_system)
+        box.show()
+
+
+    def confirm_freevo_restart(self):
+        """
+        Pops up a ConfirmBox.
+        """
+        what = _('Do you really want to restart Freevo?')
+        box = ConfirmBox(what, default_choice=1)
+        box.connect(0, self.shutdown_freevo_restart)
         box.show()
 
 
@@ -131,6 +143,15 @@ class ShutdownItem(MainMenuItem):
         """
         self.show_gui_message(_('shutting down system...'))
         kaa.notifier.OneShotTimer(os.system, config.SHUTDOWN_SYS_CMD).start(1)
+
+
+    def shutdown_freevo_restart(self):
+        """
+        restart freevo
+        """
+        self.show_gui_message(_('restart...'))
+        kaa.notifier.signals['shutdown'].connect(os.execvp, sys.argv[0], sys.argv)
+        kaa.notifier.OneShotTimer(sys.exit, 0).start(1)
 
 
     def shutdown_sys_restart(self):
