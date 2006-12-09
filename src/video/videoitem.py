@@ -383,6 +383,9 @@ class VideoItem(MediaItem):
         # build a menu
         items = []
         for track in self.info.list().get():
+            if not track.get('length') or not track.get('audio'):
+                # bad track, skip it
+                continue
             track = VideoItem(track, self)
             track.name = _('Play Title %s') % track.info.get('name')
             items.append(track)

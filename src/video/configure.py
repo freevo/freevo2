@@ -104,9 +104,12 @@ def subtitle_selection(item):
     action = ActionItem(_('no subtitles'), item, set_variable)
     action.parameter('selected_subtitle', -1)
     menu_items = [ action ]
-    for s in range(len(item.info['subtitles'])):
-        action = ActionItem(item.info['subtitles'][s], item, set_variable)
-        action.parameter('selected_subtitle', s)
+    for pos, s in enumerate(item.info['subtitles']):
+        name = s.get('language')
+        if s.get('title'):
+            name = '%s (%s)' % (s.get('name'), s.get('language'))
+        action = ActionItem(name, item, set_variable)
+        action.parameter('selected_subtitle', pos)
         menu_items.append(action)
     item.pushmenu(Menu(_('Subtitle Menu'), menu_items))
 
@@ -123,7 +126,9 @@ def chapter_selection(item):
             menu_items.append(a)
     elif item.info['chapters']:
         for c in item.info['chapters']:
-            a = ActionItem(c.name, item, start_chapter)
+            pos = '%01d:%02d:%02d' % (int(c.pos) / 3600, (int(c.pos) / 60) % 60,
+                                      int(c.pos) % 60)
+            a = ActionItem(pos, item, start_chapter)
             a.parameter('-ss %s' % c.pos)
             menu_items.append(a)
     item.pushmenu(Menu(_('Chapter Menu'), menu_items))
