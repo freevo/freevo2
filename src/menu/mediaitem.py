@@ -58,7 +58,7 @@ class MediaItem(Item):
     """
     def __init__(self, parent=None, type=None):
         Item.__init__(self, parent, type=type)
-        self.url = 'unknown:' + str(self)
+        self.url = 'null://'
         self.filename = None
         self.fxdinfo = {}
 
