@@ -189,6 +189,11 @@ class MediaItem(Item):
         return self.url
 
 
+    def __repr__(self):
+        name = str(self.__class__)
+        return "<%s %s>" % (name[name.rfind('.')+1:-2], self.url)
+    
+
     def sort(self, mode='name'):
         """
         Returns the string how to sort this item

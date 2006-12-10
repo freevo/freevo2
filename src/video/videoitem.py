@@ -524,7 +524,3 @@ class VideoItem(MediaItem):
             return True
 
         return MediaItem.eventhandler(self, event)
-
-    def __repr__(self):
-        return "VideoItem %s" % self.url
-    
