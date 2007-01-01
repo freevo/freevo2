@@ -120,7 +120,7 @@ class AudioPlayer(Application):
         # make playlist work, we just send start and stop. It's ugly but it
         # should work.
         PLAY_START.post(self.item)
-        PLAY_STOP.post(self.item)
+        PLAY_END.post(self.item)
 
 
     def stop(self):
