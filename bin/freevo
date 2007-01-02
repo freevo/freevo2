@@ -261,7 +261,7 @@ if len(sys.argv) >= 2:
     # deactivate screen blanking and set osd to fullscreen
     if sys.argv[1] == '-force-fs':
         os.system('xset -dpms s off')
-        config.START_FULLSCREEN_X = 1
+        config.GUI_FULLSCREEN = 1
 
 try:
     freevo.ipc.Instance('freevo', **config.MBUS_ADDR)

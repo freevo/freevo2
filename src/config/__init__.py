@@ -176,7 +176,7 @@ os.umask(UMASK)
 # force fullscreen when freevo is it's own windowmanager
 #
 if len(sys.argv) >= 2 and sys.argv[1] == '--force-fs':
-    START_FULLSCREEN_X = 1
+    GUI_FULLSCREEN = 1
 
 
 #
