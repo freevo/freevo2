@@ -1,9 +1,9 @@
 
 __all__ = [ 'gamesplayer' ]
-from application import Application
+from application import Application, STATUS_RUNNING, STATUS_STOPPING, \
+	 STATUS_STOPPED, STATUS_IDLE, CAPABILITY_TOGGLE, CAPABILITY_PAUSE, \
+	 CAPABILITY_FULLSCREEN
 from event import *
-import gui
-import gui.areas
 import plugin
 
 _singleton = None
@@ -29,15 +29,13 @@ class GamesPlayer(Application):
     basic object to handle the different player
     """
     def __init__(self):
-        Application.__init__(self, 'gamesplayer', 'games', True, True)
+        capabilities = ()
+        Application.__init__(self, 'games', 'games', capabilities)
         self.player     = None
         self.running    = False
         self.title      = None
         self.item       = None
 
-        # register player to the skin
-        areas = ('screen', 'title', 'view', 'info')
-        self.draw_engine = gui.areas.Handler('player', areas)
 
     def play(self, item, player=None):
         """
