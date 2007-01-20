@@ -58,36 +58,6 @@ class MenuStack(object):
     """
     def __init__(self):
         self.menustack = []
-        self.inside_menu = False
-        self.previous = None
-        self.visible = False
-
-
-    def show(self):
-        """
-        Show the menu on the screen
-        """
-        if len(self.menustack) == 0:
-            return
-        if isinstance(self.menustack[-1], Menu):
-            self.menustack[-1].show()
-
-
-    def hide(self):
-        """
-        Hide the menu
-        """
-        if len(self.menustack) == 0:
-            return
-        if isinstance(self.menustack[-1], Menu):
-            self.menustack[-1].hide()
-
-
-    def redraw(self):
-        """
-        Redraw the menu.
-        """
-        raise AttributeError('MenuStack.redraw not defined')
 
 
     def back_to_menu(self, menu, refresh=True):
@@ -134,28 +104,12 @@ class MenuStack(object):
             previous = self.menustack[-1]
         else:
             previous = None
-        # If the current shown menu is no Menu but a MenuApplication
-        # hide it from the screen. Mark 'inside_menu' to avoid a
-        # fade effect for hiding
-        if previous:
-            if not isinstance(previous, Menu):
-                self.inside_menu = True
-                previous.inside_menu = True
 
         # set menu.pos and append
         menu.pos = len(self.menustack)
         self.menustack.append(menu)
 
-        # Check the new menu. Maybe we need to set 'inside_menu' if we
-        # switch between MenuApplication(s)
-        if not isinstance(menu, Menu):
-            # The current Menu is a MenuApplication, set
-            # 'inside_menu'.
-            self.inside_menu = True
-            menu.inside_menu = True
-
-        if isinstance(menu, Menu) and menu.autoselect and \
-               len(menu.choices) == 1:
+        if menu.autoselect and len(menu.choices) == 1:
             log.info('autoselect action')
             # autoselect only item in the menu
             menu.choices[0].get_actions()[0]()
@@ -164,11 +118,6 @@ class MenuStack(object):
         # refresh will do the update
         self.refresh()
 
-        if previous and not isinstance(previous, Menu):
-            # Current showing was no Menu, we are hidden.
-            # So make menu stack visible again
-            self.show()
-
 
     def refresh(self, reload=False):
         """
@@ -176,50 +125,11 @@ class MenuStack(object):
         """
         menu = self.menustack[-1]
 
-        if isinstance(menu, Menu) and menu.autoselect and \
-               len(menu.choices) == 1:
+        if menu.autoselect and len(menu.choices) == 1:
             # do not show a menu with only one item. Go back to
             # the previous page
             log.info('delete menu with only one item')
             return self.back_one_menu()
-
-        if not isinstance(menu, Menu):
-            # The new menu is no 'Menu', it is a 'MenuApplication'
-            # Mark both the previous shown Menu (app or self) and the
-            # new one with 'inside_menu' to avoid fading in/out because
-            # we still are in the menu and why should we fade here?
-            menu.inside_menu = True
-            if isinstance(self.previous, Menu):
-                self.inside_menu = True
-            elif self.previous:
-                self.previous.inside_menu = True
-            # hide previous menu page
-            if self.previous and isinstance(self.previous, Menu):
-                self.previous.hide()
-            # set last menu to the current one visible
-            self.previous = menu
-            if self.visible:
-                menu.show()
-            return
-
-        if self.previous and not isinstance(self.previous, Menu):
-            # Now we show a 'Menu' but the previous is a 'MenuApplication'.
-            # Make the widget and the previous app as 'inside_menu' to
-            # avoid fading effects
-            self.previous.inside_menu = True
-            self.inside_menu = True
-
-        if self.visible and menu != self.previous:
-            # show the current page and hide the old one
-            if self.previous:
-                self.previous.hide()
-            menu.show()
-        elif not self.visible and self.previous:
-            # hide the previous menu
-            self.previous.hide()
-
-        # set last menu to the current one visible
-        self.previous = menu
 
         if reload and menu.reload_func:
             # The menu has a reload function. Call it to rebuild
@@ -230,12 +140,6 @@ class MenuStack(object):
                 self.menustack[-1] = new_menu
                 menu = new_menu
 
-        if not self.visible:
-            # nothing to do anymore
-            return
-
-        # redraw the menu
-        self.redraw()
         return
 
 
@@ -266,12 +170,16 @@ class MenuStack(object):
         """
         return self.menustack[-1]
 
-    
+
     def eventhandler(self, event):
         """
         Eventhandler for menu control
         """
         menu = self.menustack[-1]
+
+        if menu.eventhandler(event):
+            self.refresh()
+            return True
 
         if event == MENU_GOTO_MAINMENU:
             while len(self.menustack) > 1:
@@ -303,10 +211,6 @@ class MenuStack(object):
                     return True
             return True
 
-        if menu.eventhandler(event):
-            self.refresh()
-            return True
-            
         # handle empty menus
         if not menu.choices:
             if event in ( MENU_SELECT, MENU_SUBMENU, MENU_PLAY_ITEM):
@@ -315,11 +219,6 @@ class MenuStack(object):
             selected = getattr(self.menustack[-2], 'selected', None)
             if selected and selected.eventhandler(event):
                 return True
-            return False
-
-        # handle menu not instance of class Menu
-        # APP_FIXME: make tvguide a Menu
-        if not isinstance(menu, Menu):
             return False
 
         if menu.selected and menu.selected.eventhandler(event):
