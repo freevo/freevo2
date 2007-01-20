@@ -185,19 +185,6 @@ if len(sys.argv) >= 2 and sys.argv[1] == '--force-fs':
 GUI_FONT_DEFAULT_NAME = os.path.join(FONT_DIR, GUI_FONT_DEFAULT_NAME)
 
 #
-# set list of video files to []
-# (fill be filled from the plugins) 
-#
-VIDEO_SUFFIX = []
-
-for v in copy.copy(globals()):
-    if v.startswith('VIDEO_') and v.endswith('_SUFFIX') and v[6:-7]:
-        if plugin.is_active('video.' + v[6:-7].lower()):
-            for s in globals()[v]:
-                if not s in VIDEO_SUFFIX:
-                    VIDEO_SUFFIX.append(s)
-
-#
 # set data dirs
 # if not set, set it to root and home dir
 # if set, make all path names absolute
