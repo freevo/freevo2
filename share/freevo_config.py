@@ -4,75 +4,6 @@
 # -----------------------------------------------------------------------
 # $Id$
 #
-# Notes:
-#    This file contains the freevo settings. To change the settings
-#    you can edit this file, or better, put a file named local_conf.py
-#    # in the same directory and add your changes there.  E.g.: when
-#    you # want a oss as mplayer audio out, just put
-#    "MPLAYER_AO_DEV = # 'oss'" in local_conf.py
-#
-# How config files are loaded:
-#  
-# [$freevo-bindir/ is the directory where the freevo start-script is 
-# located (i.e. the "shipping copy dir"). This can be any directory, e.g. 
-# the download directory or /usr/local] 
-#  
-# [$cwd/ is the directory the user started freevo from. This can be 
-# $freevo-bindir/, or any other directory] 
-#  
-# 1) freevo.conf is not shipped, but it is required and must be generated 
-# using ./configure before freevo can be used. 
-#  
-# 2) freevo.conf is searched for in ['$cwd/', '~/.freevo/', 
-# '/etc/freevo/', $freevo-bindir/]. The first one found is loaded. 
-#  
-# 3) freevo_config.py is always loaded from $freevo-bindir/, it is not 
-# supposed to be changed by the user. It has a format version number in 
-# the format "MAJOR.MINOR", e.g. "2.3". The version number reflects the 
-# config file format, *not* the Freevo version number. 
-#  
-# 4) local_conf.py is searched for in ['$cwd/', '~/.freevo', 
-# '/etc/freevo/', $freevo-bindir/]. The first one found is loaded. It is 
-# not a required file. The search is independent of where freevo.conf was 
-# found. 
-#  
-# 5) The same logic as in 4) applies for local_skin.xml. 
-#  
-# 6) The version MAJOR numbers must match in freevo_config.py and 
-# local_conf.py, otherwise it is an error. 
-#  
-# 7) The version MINOR number is used for backwards-compatible changes, 
-# i.e. when new options are added that have reasonable default values. 
-#  
-# 8) A warning is issued if freevo_config.py.MINOR > local_conf.py.MINOR. 
-#  
-# 9) It is an error if local_conf.py.MINOR > freevo_config.py.MINOR since 
-# the user most likely did not intend to use a recent local_conf.py with 
-# an old Freevo installation. 
-#  
-# 10) There is a list of change descriptions in freevo_config.py, 
-# one per MAJOR.MINOR change. The user is informed of what has 
-# changed between his local_conf.py and the new freevo_config.py format if 
-# they differ in version numbers.
-#
-#
-#
-# Developer Notes:
-#    The CVS log isn't used here. Write changes directly in this file
-#    to make it easier for the user. Make alos sure that you insert new
-#    options also in local_conf.py.example
-#
-# Todo:
-#    o a nice configure or install script to ask these things
-#    o different settings for MPG, AVI, VOB, etc
-#
-# -----------------------------------------------------------------------
-#
-# Changes:
-#    o Added FREEVO_CONF_VERSION and LOCAL_CONF_VERSION to keep the three
-#      different files on sync
-#
-#
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al. 
@@ -140,8 +71,7 @@ if int(str(CONF.version).split('.')[1]) != \
 # General freevo settings:
 # ======================================================================
 
-AUDIO_DEVICE        = '/dev/dsp'      # e.g.: /dev/dsp0, /dev/audio
-AUDIO_INPUT_DEVICE  = '/dev/dsp1'     # e.g.: /dev/dsp0, /dev/audio
+# MIXER SETTINGS
 MAJOR_AUDIO_CTRL    = 'VOL'           # Freevo takes control over audio ctrl
                                       # 'VOL', 'PCM' 'OGAIN' etc.
 CONTROL_ALL_AUDIO   = 1               # Freevo takes complete control of audio
@@ -149,6 +79,8 @@ MAX_VOLUME          = 90              # Set maximum volume level.
 DEFAULT_VOLUME      = 40              # Set default volume level.
 DEV_MIXER           = '/dev/mixer'    # mixer device 
 
+
+# shutdown plugin
 CONFIRM_SHUTDOWN    = 1               # ask before shutdown
 
 SHUTDOWN_SYS_CMD = 'shutdown -h now'  # set this to 'sudo shutdown -h now' if
@@ -249,18 +181,13 @@ plugin.activate('mixer')
 plugin.activate('file_ops', level=20)
 
 # use mplayer for video playpack
-plugin.activate('video.mplayer')
-
-# make it possible to detach the player
-#  argument tells the plugin to show the 
-#  detachbar
-plugin.activate('audio.detach', level=20, args=(True,))
+# plugin.activate('video.mplayer')
 
 # use mplayer for tv
 # to use tvtime, put the following two lines in your local_conf.py:
 # plugin.remove('tv.mplayer')
 # plugin.activate('tv.tvtime')
-plugin.activate('tv.xine')
+# plugin.activate('tv.xine')
 
 # support for settings bookmarks (key RECORD) while playing. Also
 # auto bookmarking when playback is stopped
@@ -411,28 +338,10 @@ VIDEO_SHOW_DATA_DIR = None
 # The list of filename suffixes that are used to match the files that
 # are played wih MPlayer.
 # 
-VIDEO_MPLAYER_SUFFIX = [ 'avi', 'mpg', 'mpeg', 'wmv', 'bin', 'rm',
-                         'divx', 'ogm', 'vob', 'asf', 'm2v', 'm2p',
-                         'mp4', 'viv', 'nuv', 'mov', 'iso',
-                         'nsv', 'mkv', 'ts', 'rmvb' ]
-
-#
-# The list of filename suffixes that are used to match the files that
-# are played wih Xine.
-# 
-VIDEO_XINE_SUFFIX = [ 'avi', 'mpg', 'mpeg', 'rm', 'divx', 'ogm',
-                      'asf', 'm2v', 'm2p', 'mkv', 'mp4', 'mov', 'cue',
-                      'ts', 'iso', 'vob', 'rmvb', 'wmv' ]
-
-#
-# Preferred video player
-#
-VIDEO_PREFERED_PLAYER = 'mplayer'
-
-#
-# try to find out if deinterlacing is needed or not
-#
-VIDEO_INTERLACING = 1
+VIDEO_SUFFIX = [ 'avi', 'mpg', 'mpeg', 'wmv', 'bin', 'rm',
+                 'divx', 'ogm', 'vob', 'asf', 'm2v', 'm2p',
+                 'mp4', 'viv', 'nuv', 'mov', 'iso',
+                 'nsv', 'mkv', 'ts', 'rmvb', 'cue' ]
 
 
 # ======================================================================
@@ -668,7 +577,6 @@ GUI_FULLSCREEN = False
 # Freevo remote control settings:
 # ======================================================================
 
-
 #
 # Location of the lircrc file
 #
@@ -688,139 +596,6 @@ LIRCRC = '/etc/freevo/lircrc'
 if os.path.exists('/dev/lircd'):
     plugin.activate('input.lirc')
     
-
-# ======================================================================
-# MPlayer settings:
-# ======================================================================
-
-MPLAYER_CMD = CONF.mplayer
-    
-MPLAYER_AO_DEV       = 'alsa'            # e.g.: oss,sdl,alsa, see mplayer docs
-
-if CONF.display == 'x11':
-    MPLAYER_VO_DEV       = 'xv,sdl,x11,' # X11 drivers in order of preference
-else:
-    MPLAYER_VO_DEV       = CONF.display  # e.g.: x11,mga, see mplayer docs
-
-MPLAYER_VO_DEV_OPTS  = ''	         # e.g.: ':some_var=vcal'
-
-DVD_LANG_PREF        = 'en,se,no'        # Order of preferred languages on DVD.
-DVD_SUBTITLE_PREF    = ''                # Order of preferred subtitles on DVD.
-
-# Priority of mplayer process. 0 is unchanged, <0 is higher prio, >0 lower
-# prio. prio <0 has no effect unless run as root.
-MPLAYER_NICE         = -20             
-
-if CONF.display in ( 'directfb', 'dfbmga' ):
-    MPLAYER_ARGS_DEF     = ('-autosync 100 -nolirc ' +
-                            '-autoq 100 -fs ')
-else:
-    MPLAYER_ARGS_DEF     = (('-autosync 100 -nolirc -autoq 100 -screenw %s '
-                             + '-screenh %s -fs') % (CONF.width, CONF.height))
-
-
-#
-# Mplayer options to use the software scaler. If your CPU is fast enough, you
-# should use a software scaler. You can disable it later for some larger files
-# with the mplayer option '-nosws'. If you have -framedrop or -hardframedrop
-# as mplayer option, the software scaler will also not be used.
-# The bmovl plugin depends on a software scaler, so you should give it a try
-#
-MPLAYER_SOFTWARE_SCALER = "-sws 2 -vf scale=%s:-2,"\
-                          "expand=%s:%s -font /usr/share/mplayer/fonts/"\
-                          "font-arial-28-iso-8859-2/font.desc" % \
-                          ( CONF.width, CONF.width, CONF.height )
-
-#
-# Mplayer arguments for different media formats. (eg DVDs, CDs, AVI files, etc)
-# Uses a default value if nothing else matches.
-#
-MPLAYER_ARGS = { 'dvd'    : '-cache 8192',
-                 'vcd'    : '-cache 4096',
-                 'cd'     : '-cache 1024 -cdda speed=2',
-                 'tv'     : '-nocache',
-                 'ivtv'   : '-cache 8192',
-                 'dvb'    : '-cache 1024',
-                 'avi'    : '-cache 5000',
-                 'rm'     : '-cache 5000 -forceidx',
-                 'rmvb'   : '-cache 5000 -forceidx',
-                 'default': '-cache 5000',
-                 'webcam' : ('tv:// -tv driver=v4l:width=352:height=288:' +
-                             'outfmt=yuy2:device=/dev/video2')
-                 }
-
-#
-# Number of seconds before seek value times out. This is used when
-# seeking a specified number of minutes into a movie. If you make
-# a mistake or change your mind, the seek value will timeout after
-# this many seconds.
-#
-MPLAYER_SEEK_TIMEOUT = 8
-
-#
-# Autocrop files when playing. This is useful for files in 4:3 with black
-# bars on a 16:9 tv
-#
-MPLAYER_AUTOCROP = 0
-
-#
-# Try to set correct 'delay' and 'mc' values for mplayer based on the delay
-# from mmpython. 
-#
-# This should correct av sync problems with mplayer for some files, but 
-# may also break things. (I don't know, that's why it's disabled by default). 
-# WARNING: When seeking, the playback is out of sync for some seconds! 
-#
-MPLAYER_SET_AUDIO_DELAY = 0
-
-#
-# Resample audio channel if the samplerate is lower than 40kHz to a values
-# between 41100Hz and 48000Hz. This is needed for some external digital
-# receiver. It will only work if mmpython can detect the samplerate
-#
-MPLAYER_RESAMPLE_AUDIO = 0
-
-#
-# Mplayer video filter for interlaced or progressive videos. If you have
-# a slow pc, do not use post processing
-# MPLAYER_VF_INTERLACED  = ''
-# MPLAYER_VF_PROGRESSIVE = 'pp=fd'
-# For pal and dvb-t recordings, the following looks good
-# MPLAYER_VF_INTERLACED  = 'pp=md/de,phase=U'
-#
-MPLAYER_VF_INTERLACED  = 'pp=de/fd'
-MPLAYER_VF_PROGRESSIVE = 'pp=de'
-
-
-# ======================================================================
-# Xine settings:
-# ======================================================================
-
-# You need xine-ui version greater 0.9.21 to use the all the features
-# of the xine plugin
-
-XINE_COMMAND = ''
-
-if CONF.display in ('mga', 'fbdev') and CONF.fbxine:
-    XINE_VO_DEV  = 'vidixfb'
-    XINE_COMMAND = CONF.fbxine
-    
-if CONF.display == 'dxr3' and CONF.fbxine:
-    XINE_VO_DEV  = 'dxr3'
-    XINE_COMMAND = CONF.fbxine
-    
-if CONF.display == 'x11' and CONF.xine:
-    XINE_VO_DEV  = 'xv'
-    XINE_COMMAND = ('%s --hide-gui -pq -g -B --geometry %sx%s+0+0 ' + \
-                    '--no-splash') % (CONF.xine, CONF.width, CONF.height)
-
-XINE_ARGS_DEF = '--post=pp:quality=10;expand'
-
-XINE_AO_DEV = 'alsa'    # alsa or oss
-
-if XINE_COMMAND:
-    plugin.activate('video.xine')
-
 
 # ======================================================================
 # Freevo TV settings:
