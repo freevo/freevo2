@@ -36,190 +36,159 @@ import time
 import logging
 
 import kaa.epg
-
-# freevo core imports
-import freevo.ipc
-
-# freevo imports
-import gui
-import gui.areas
+import kaa.notifier
 
 from event import *
-from application import MenuApplication
-from menu import Item
+from menu import Item, Menu
 from program import ProgramItem
 
 # get logging object
 log = logging.getLogger('tv')
 
-_guide = None
 
-def get_singleton():
+class TVGuide(Menu):
     """
-    return the global tv guide
+    TVGuide menu.
     """
-    global _guide
-    if not _guide:
-        _guide = TVGuide()
-    return _guide
-
-
-
-class TVGuide(MenuApplication):
-    """
-    TVGuide application. It is _inside_ the menu, so it is a
-    MenuApplication.
-    """
-    def __init__(self):
-        MenuApplication.__init__(self, 'tvguide', 'tvmenu', False)
-        self.item = None
+    def __init__(self, parent):
+        Menu.__init__(self, _('TV Guide'), choices=[], type = 'tvgrid')
+        self.parent = parent
         self.channel_index = 0
+        self.current_time = int(time.time())
+        print time.localtime(self.current_time)
+        
+        # current channel is the first one
+        self.channels = kaa.epg.get_channels(sort=True)
+        self.channel  = self.get_channel()
+
+        # current program is the current running
+        self.selected = None
+        self.get_program()
+
 
     def get_channel(self, offset=0):
         co = self.channel_index + offset
-        channels = kaa.epg.get_channels(sort=True)
 
         if co < 0:
-            co = len(channels)+co
-        elif co > len(channels)-1:
-            co = co-len(channels)
+            co = len(self.channels)+co
+        elif co > len(self.channels)-1:
+            co = co-len(self.channels)
         self.channel_index = co
-        return channels[co]
+        return self.channels[co]
 
-    def get_program(self, time=None):
+
+    @kaa.notifier.yield_execution()
+    def get_program(self, timestamp=None):
         """
-        return a program object based on time and the current channel.
+        return a program object based on timestamp and the current channel.
         """
         # TODO: keep a cache of program objects for the current guide view
         #       unless this happens to be fast enough
 
-        if not time:
-            time = self.current_time
+        if not timestamp:
+            timestamp = self.current_time
+        print time.localtime(timestamp)
 
-        log.debug('channel: %s', self.channel)
-        p = kaa.epg.search(channel=self.channel, time=time)
-        if p:
+        log.info('channel: %s time %s', self.channel, timestamp)
+        wait = kaa.notifier.YieldCallback()
+        kaa.epg.search(channel=self.channel, time=timestamp, callback=wait)
+        yield wait
+        prg = wait.get()
+
+        if prg:
             # one program found, return it
-            return p[0]
-        # Now we are in trouble, there is no program item. We need to create a fake
-        # one between the last stop and the next start time. This is very slow!!!
-        p = kaa.epg.search(channel=self.channel, time=(0, time))
-        p.sort(lambda x,y: cmp(x.start, y.start))
-        if p:
-            start = p[-1].stop
+            prg = prg[0]
         else:
-            start = 0
+            # Now we are in trouble, there is no program item. We need to create a fake
+            # one between the last stop and the next start time. This is very slow!!!
+            wait = kaa.notifier.YieldCallback()
+            kaa.epg.search(channel=self.channel, time=(0, timestamp), callback=wait)
+            yield wait
+            p = wait.get()
+            p.sort(lambda x,y: cmp(x.start, y.start))
+            if p:
+                start = p[-1].stop
+            else:
+                start = 0
 
-        p = kaa.epg.search(channel=self.channel, time=(time, sys.maxint))
-        p.sort(lambda x,y: cmp(x.start, y.start))
-        if p:
-            stop = p[0].start
-        else:
-            stop = sys.maxint
+            wait = kaa.notifier.YieldCallback()
+            kaa.epg.search(channel=self.channel, time=(timestamp, sys.maxint),
+                           callback=wait)
+            yield wait
+            p = wait.get()
+            p.sort(lambda x,y: cmp(x.start, y.start))
+            if p:
+                stop = p[0].start
+            else:
+                stop = sys.maxint
 
-        data = { 'start': start, 'stop': stop, 'title': _('No Program') }
-        return kaa.epg.Program(self.channel, data)
-    
+            dbdata = { 'start': start, 'stop': stop, 'title': _('No Program') }
+            prg = kaa.epg.Program(self.channel, dbdata)
 
-    def start(self, parent):
-        self.engine = gui.areas.Handler('tv', ('screen', 'title', 'subtitle',
-                                               'view', 'tvlisting', 'info'))
-        self.parent = parent
-        # create fake parent item for ProgramItems
-        self.item = Item(parent, None, 'tv')
-        
-        self.current_time = int(time.time())
-
-        # current channel is the first one
-        self.channel  = self.get_channel()
-
-        # current program is the current running
-        self.selected = ProgramItem(self.get_program(), self.item)
-
-        return True
-    
-        
-    def show(self):
-        """
-        show the guide
-        """
-        self.selected = ProgramItem(self.get_program(), self.item)
-        self.refresh()
-        MenuApplication.show(self)
+        self.selected = ProgramItem(prg, self.parent)
+        if self.selected.start > 0:
+            self.current_time = self.selected.start + 1
+        if self.selected.stop < sys.maxint:
+            self.current_time = self.selected.start + 1
+        if self.stack:
+            # FIXME: gui calls notifier.step()
+            kaa.notifier.OneShotTimer(self.stack.refresh).start(0)
         
 
-    def hide(self):
-        """
-        hide the guide
-        """
-        MenuApplication.hide(self)
-            
-        
     def eventhandler(self, event):
-        if MenuApplication.eventhandler(self, event):
-            return True
+        if not self.selected:
+            # not ready yet
+            return False
 
         if event == MENU_CHANGE_STYLE:
             return True
-            
+
         if event == MENU_UP:
             self.channel  = self.get_channel(-1)
-            self.selected = ProgramItem(self.get_program(), self.item)
-            self.refresh()
+            self.get_program()
             return True
 
         if event == MENU_DOWN:
             self.channel  = self.get_channel(1)
-            self.selected = ProgramItem(self.get_program(), self.item)
-            self.refresh()
+            self.get_program()
             return True
 
         if event == MENU_LEFT:
             if self.selected.start == 0:
                 return True
-            epg_prog = self.get_program(self.selected.program.start - 1)
-            self.selected = ProgramItem(epg_prog, self.item)
-            if self.selected.start > 0:
-                self.current_time = self.selected.start + 1
-            self.refresh()
+            self.get_program(self.selected.program.start - 1)
             return True
 
         if event == MENU_RIGHT:
             if self.selected.stop == sys.maxint:
                 return True
-            epg_prog = self.get_program(self.selected.program.stop + 1)
-            self.selected = ProgramItem(epg_prog, self.item)
-            if self.selected.stop < sys.maxint:
-                self.current_time = self.selected.start + 1
-            self.refresh()
+            self.get_program(self.selected.program.stop + 1)
             return True
 
         if event == MENU_PAGEUP:
             # FIXME: 9 is only a bad guess by Rob
             self.channel = self.get_channel(-9)
-            self.selected = ProgramItem(self.get_program(), self.item)
-            self.refresh()
+            self.get_program()
             return True
 
         if event == MENU_PAGEDOWN:
             # FIXME: 9 is only a bad guess by Rob
             self.channel = self.get_channel(9)
-            self.selected = ProgramItem(self.get_program(), self.item)
-            self.refresh()
+            self.get_program()
             return True
 
         if event == TV_SHOW_CHANNEL:
             self.selected.channel_details()
             return True
-        
+
         if event == MENU_SUBMENU:
             self.selected.submenu(additional_items=True)
             return True
-            
+
         if event == TV_START_RECORDING:
             self.selected.submenu(additional_items=True)
             return True
- 
+
         if event == PLAY:
             self.selected.watch_channel()
             return True
@@ -233,13 +202,5 @@ class TVGuide(MenuApplication):
             else:
                 self.selected.watch_channel()
             return True
-        
-        if event == PLAY_END:
-            self.show()
-            return True
 
         return False
-
-
-    def refresh(self):
-        self.engine.draw(self)

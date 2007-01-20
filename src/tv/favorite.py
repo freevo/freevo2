@@ -36,7 +36,7 @@ import freevo.ipc
 
 # freevo imports
 from menu import Item, Action, Menu
-from gui.windows import MessageBox
+from application import MessageWindow
 
 # get tvserver interface
 tvserver = freevo.ipc.Instance('freevo').tvserver
@@ -92,4 +92,4 @@ class FavoriteItem(Item):
     def add(self):
         tvserver.favorites.add(self)
         txt = _('"%s" has been scheduled as favorite') % self.title
-        MessageBox(txt).show()
+        MessageWindow(txt).show()

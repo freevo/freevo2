@@ -8,20 +8,6 @@
 # Todo:
 #
 # -----------------------------------------------------------------------
-# $Log$
-# Revision 1.29  2005/08/07 13:56:59  dischi
-# use Signal inside a gui button and add connect to the box
-#
-# Revision 1.28  2005/08/07 10:46:40  dischi
-# adjust to new menu interface
-#
-# Revision 1.27  2005/06/18 11:53:52  dischi
-# adjust to new menu code
-#
-# Revision 1.26  2005/06/04 17:18:15  dischi
-# adjust to gui changes
-#
-# -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
 # Please see the file doc/CREDITS for a complete list of authors.
@@ -57,7 +43,7 @@ from menu import Item, ActionItem, Menu
 
 import tvguide
 from directory import DirItem
-from gui.windows import MessageBox, WaitBox
+from application import TextWindow, MessageWindow
 
 import logging
 log = logging.getLogger('tv')
@@ -74,39 +60,6 @@ class Info(Item):
         return Info.__getitem__(self, key)
 
 
-class EPGUpdate(ActionItem):
-
-    def __init__(self, parent):
-        ActionItem.__init__(self, 'Update TV Guide', parent, self.update,
-                            description='Update TV Guide information')
-        self.msg = None
-        self.child = None
-
-
-    def debug(self, line):
-        log.debug(line)
-
-        
-    def completed(self, code):
-        self.msg.destroy()
-        self.msg = None
-        self.child = None
-        print code
-
-        
-    def update(self):
-        if self.msg or self.child:
-            return
-        self.msg = WaitBox('Updating Guide, please wait')
-        self.msg.show()
-        self.child = kaa.notifier.Process(['freevo', 'tv_grab'])
-        self.child.signals['stdout'].connect(self.debug)
-        self.child.signals['stderr'].connect(self.debug)
-        self.child.signals['completed'].connect(self.completed)
-        self.child.start()
-        
-
-        
 class TVMenu(MainMenuItem):
     """
     The tv main menu
@@ -127,8 +80,6 @@ class TVMenu(MainMenuItem):
         items.append(DirItem(config.TV_RECORD_DIR, None,
                              name = _('Recorded Shows'),
                              type='tv'))
-
-        items.append(EPGUpdate(None))
 
         # XXX: these are becomming plugins
         # items.append(menu.MenuItem(_('Search Guide'),
@@ -152,15 +103,11 @@ class TVMenu(MainMenuItem):
         if False:
             msg  = _('The list of TV channels is invalid!\n')
             msg += _('Please check the config file.')
-            MessageBox(msg).show()
+            MessageWindow(msg).show()
             return
 
-        guide = plugin.getbyname('tvguide')
-        if not guide:
-            guide = tvguide.get_singleton()
-
-        if guide.start(self):
-            self.pushmenu(guide)
+        guide = tvguide.TVGuide(self)
+        self.pushmenu(guide)
 
         # FIXME: debug, remove me
         t2 = time.time()

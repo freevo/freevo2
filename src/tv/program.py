@@ -45,7 +45,7 @@ import freevo.ipc
 import config
 import plugin
 from menu import Item, Action, Menu, ActionItem
-from gui.windows import MessageBox
+from application import MessageWindow
 
 # tv imports
 import favorite
@@ -182,20 +182,20 @@ class ProgramItem(Item):
     def schedule(self):
         (result, msg) = tvserver.recordings.schedule(self)
         if result:
-            MessageBox(_('"%s" has been scheduled for recording') % \
+            MessageWindow(_('"%s" has been scheduled for recording') % \
                        self.title).show()
         else:
-            MessageBox(_('Scheduling Failed')+(': %s' % msg)).show()
+            MessageWindow(_('Scheduling Failed')+(': %s' % msg)).show()
         self.get_menustack().delete_submenu()
 
 
     def remove(self):
         (result, msg) = tvserver.recordings.remove(self.scheduled.id)
         if result:
-            MessageBox(_('"%s" has been removed as recording') % \
+            MessageWindow(_('"%s" has been removed as recording') % \
                        self.title).show()
         else:
-            MessageBox(_('Scheduling Failed')+(': %s' % msg)).show()
+            MessageWindow(_('Scheduling Failed')+(': %s' % msg)).show()
         self.get_menustack().delete_submenu()
 
 
@@ -210,17 +210,15 @@ class ProgramItem(Item):
 
 
     def watch_channel(self):
-        p = plugin.getbyname(plugin.TV)
-        if p:
-            p.play(self.channel.id)
+        MessageWindow('Not implemented yet').show()
         
 
     def watch_recording(self):
-        MessageBox('Not implemented yet').show()
+        MessageWindow('Not implemented yet').show()
 
 
     def search_similar(self):
-        MessageBox('Not implemented yet').show()
+        MessageWindow('Not implemented yet').show()
 
 
     def create_favorite(self):
@@ -229,4 +227,4 @@ class ProgramItem(Item):
 
 
     def remove_favorite(self):
-        MessageBox('Not implemented yet').show()
+        MessageWindow('Not implemented yet').show()
