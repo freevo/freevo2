@@ -69,7 +69,7 @@ class PluginInterface(plugin.Plugin):
         plugin.register(self, 'idlebar')
 
         # register for signals
-        application.signals['application change'].connect(self.app_change)
+        application.signals['changed'].connect(self._app_change)
 
         self.plugins        = None
         self.visible        = False
@@ -185,11 +185,10 @@ class PluginInterface(plugin.Plugin):
             self.background.hide()
 
 
-    def app_change(self, app, fullscreen, fade):
-        """
-        React on toggle fullscreen, hide or show the bar, but not update
-        the screen itself, this is done by the app later.
-        """
+    def _app_change(self, app):
+        fullscreen = app.has_capability(application.CAPABILITY_FULLSCREEN)
+        fade = True
+        
         # get gui informations
         w = gui.display.width
         h = config.GUI_OVERSCAN_Y + 60
