@@ -66,7 +66,6 @@ class Event(kaa.notifier.Event):
 MIXER_VOLUP            = Event('MIXER_VOLUP', 5)
 MIXER_VOLDOWN          = Event('MIXER_VOLDOWN', 5)
 MIXER_MUTE             = Event('MIXER_MUTE')
-TOGGLE_CONTROL         = Event('TOGGLE_CONTROL')
 
 # To change the step size, but the following code in your
 # local_conf.py (setting VOL+ step size to 2)
@@ -79,6 +78,7 @@ PLAYLIST_PREV          = Event('PLAYLIST_PREV')
 PLAYLIST_TOGGLE_REPEAT = Event('PLAYLIST_TOGGLE_REPEAT')
                        
 EJECT                  = Event('EJECT')
+TOGGLE_APPLICATION     = Event('TOGGLE_APPLICATION')                       
                        
 #
 # Menu
@@ -227,7 +227,6 @@ RATING                 = Event('RATING')
 #
 
 PLAY_END         = Event('PLAY_END')
-DVD_PROTECTED    = Event('DVD_PROTECTED')
 PLAY_START       = Event('PLAY_START')
 
 OSD_MESSAGE      = Event('OSD_MESSAGE')
