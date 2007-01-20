@@ -100,9 +100,6 @@ class TvlistingArea(Area):
         self.objects    = []
         self.background = None
 
-        # FIXME: debug, remove me
-        self.__ONE_TIME_DEBUG = True
-
 
     def __calc_items_geometry(self):
         # get the settings
@@ -283,15 +280,14 @@ class TvlistingArea(Area):
         # get tvserver interface
         tvserver = freevo.ipc.Instance('freevo').tvserver
 
-        # FIXME: debug, remove me
-        if self.__ONE_TIME_DEBUG:
-            t1 = time.time()
-            log.info('tv listing debug on')
-
         # FIXME: move to skin
         n_cols   = 4
         col_time = 30
 
+        if not self.channels:
+            # FIXME: why?
+            self.channels = kaa.epg.get_channels(sort=True)
+            
         if self.last_settings == self.settings:
             # same layout, only clean 'objects'
             for o in self.objects:
@@ -397,15 +393,10 @@ class TvlistingArea(Area):
                                      item_h, font_h)
         self.last_channels = channel_list
 
-        # FIXME: debug, remove me
-        if self.__ONE_TIME_DEBUG:
-            t2 = time.time()
-
         for channel in channel_list:
             try:
                 #for prg in channel[start_time:stop_time]:
-                for prg in kaa.epg.search(channel=channel, 
-                                          time=(start_time, stop_time)):
+                for prg in kaa.epg.search(channel=channel, time=(start_time, stop_time)):
                     flag_left   = 0
                     flag_right  = 0
 
@@ -506,10 +497,3 @@ class TvlistingArea(Area):
             # no arrow needed but on the screen, remove it
             self.down_arrow.unparent()
             self.down_arrow = None
-
-        # FIXME: debug, remove me
-        if self.__ONE_TIME_DEBUG:
-            t3 = time.time()
-            log.info('tv listing debug times:\n%s\n%s\n%s' % \
-                     (t2-t1, t3-t2, t3-t1))
-            self.__ONE_TIME_DEBUG = False

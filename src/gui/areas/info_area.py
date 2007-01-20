@@ -80,6 +80,9 @@ class InfoArea(Area):
         """
         Update the information area.
         """
+        if not self.infoitem:
+            return
+        
         if not self.settings.changed and self.infoitem == self.last_item:
             self.canvas.rebuild()
             return
