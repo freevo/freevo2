@@ -40,7 +40,7 @@ import plugin
 import util
 
 from menu import Action
-from gui.windows import ConfirmBox
+from application import ConfirmWindow
 
 # get logging object
 log = logging.getLogger()
@@ -86,22 +86,22 @@ class PluginInterface(plugin.ItemPlugin):
 
     def delete(self, item):
         txt = _('Do you wish to delete\n \'%s\'?') % item.name
-        box = ConfirmBox(txt, default_choice=1)
-        box.connect(0, self.__delete, item)
+        box = ConfirmWindow(txt, default_choice=1)
+        box.buttons[0].connect(self.__delete, item)
         box.show()
 
 
     def delete_info(self, item):
         txt = _('Delete info about\n \'%s\'?') % item.name
-        box = ConfirmBox(txt, default_choice=1)
-        box.connect(0, self.__delete_info, item)
+        box = ConfirmWindow(txt, default_choice=1)
+        box.buttons[0].connect(self.__delete_info, item)
         box.show()
 
 
     def delete_image(self, item):
         txt = _('Delete image about\n \'%s\'?') % item.name
-        box = ConfirmBox(txt, default_choice=1)
-        box.connect(0, self.__delete_image, item)
+        box = ConfirmWindow(txt, default_choice=1)
+        box.buttons[0].connect(self.__delete_image, item)
         box.show()
 
 

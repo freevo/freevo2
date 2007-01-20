@@ -64,14 +64,14 @@ class MainMenuItem(Item):
         self.function = action, arg
         self.args = []
         self.kwargs = {}
-        
+
         if not type and not parent.parent:
             # this is the first page, force type to 'main'
             self.type = 'main'
-            
+
         if not skin_type:
             return
-        
+
         # load extra informations for the skin fxd file
         theme     = gui.theme.get()
         skin_info = theme.mainmenu.items
@@ -106,7 +106,7 @@ class MainMenuItem(Item):
         a.parameter(*self.args, **self.kwargs)
         return [ a ]
 
-    
+
 class MainMenu(Item):
     """
     This class handles the main menu. It will start the main menu widget
@@ -122,11 +122,9 @@ class MainMenu(Item):
             items += p.items(self)
         menu = Menu(_('Freevo Main Menu'), items, type='main')
         menu.autoselect = True
-        self.menuw = MenuWidget()
-        self.menuw.pushmenu(menu)
-        self.menuw.show()
+        self.menuw = MenuWidget(menu)
 
-        
+
     def get_skins(self):
         """
         return a list of all possible skins with name, image and filename
@@ -157,11 +155,3 @@ class MainMenu(Item):
         because it is not bound to a menupage.
         """
         return self.menuw
-
-
-    def eventhandler(self, event):
-        """
-        Automatically perform actions depending on the event, e.g. play DVD
-        """
-        # give the event to the next eventhandler in the list
-        return Item.eventhandler(self, event)

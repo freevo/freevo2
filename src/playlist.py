@@ -86,7 +86,7 @@ class Playlist(MediaItem):
         self.display_type = type
         self.next_pos     = None
         self.__playlist_valid = False
-        
+
         self.background_playlist = None
         self.random = random
 
@@ -115,7 +115,7 @@ class Playlist(MediaItem):
             if os.path.exists(os.path.join(curdir,line)):
                 playlist.append(os.path.join(curdir,line))
         return playlist
-    
+
 
     def _read_pls(self, plsname, content):
         """
@@ -173,7 +173,7 @@ class Playlist(MediaItem):
 
         if isinstance(playlist, kaa.beacon.Query):
             playlist = [ playlist ]
-            
+
         # Note: playlist is a list of Items, strings (filenames) or a
         # beacon queries now.
 
@@ -222,7 +222,7 @@ class Playlist(MediaItem):
             self.__create_playlist_items()
         return MediaItem.__getitem__(self, attr)
 
-        
+
     def actions(self):
         """
         return the actions for this item: play and browse
@@ -308,7 +308,7 @@ class Playlist(MediaItem):
 
     def _play_next(self):
         self.select(self.choices[self.next_pos])
-        
+
         if hasattr(self.selected, 'play'):
             # play the item
             self.selected.play()
@@ -371,7 +371,7 @@ class Playlist(MediaItem):
         """
         return self
 
-    
+
     def eventhandler(self, event):
         """
         Handle playlist specific events
@@ -444,7 +444,6 @@ class Playlist(MediaItem):
 
         if event == STOP:
             # Stop playing and send event to parent item
-            print 'playlist stop'
             self.stop()
 
         # give the event to the next eventhandler in the list

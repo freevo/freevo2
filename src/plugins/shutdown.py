@@ -43,7 +43,7 @@ import gui
 import gui.widgets
 
 from menu import Action
-from gui.windows import ConfirmBox
+from application import ConfirmWindow
 from mainmenu import MainMenuItem
 from plugin import MainMenuPlugin
 
@@ -79,41 +79,41 @@ class ShutdownItem(MainMenuItem):
 
     def confirm_freevo(self):
         """
-        Pops up a ConfirmBox.
+        Pops up a ConfirmWindow.
         """
         what = _('Do you really want to shut down Freevo?')
-        box = ConfirmBox(what, default_choice=1)
-        box.connect(0, self.shutdown_freevo)
+        box = ConfirmWindow(what, default_choice=1)
+        box.buttons[0].connect(self.shutdown_freevo)
         box.show()
 
 
     def confirm_system(self):
         """
-        Pops up a ConfirmBox.
+        Pops up a ConfirmWindow.
         """
         what = _('Do you really want to shut down the system?')
-        box = ConfirmBox(what, default_choice=1)
-        box.connect(0, self.shutdown_system)
+        box = ConfirmWindow(what, default_choice=1)
+        box.buttons[0].connect(self.shutdown_system)
         box.show()
 
 
     def confirm_freevo_restart(self):
         """
-        Pops up a ConfirmBox.
+        Pops up a ConfirmWindow.
         """
         what = _('Do you really want to restart Freevo?')
-        box = ConfirmBox(what, default_choice=1)
-        box.connect(0, self.shutdown_freevo_restart)
+        box = ConfirmWindow(what, default_choice=1)
+        box.buttons[0].connect(self.shutdown_freevo_restart)
         box.show()
 
 
     def confirm_sys_restart(self):
         """
-        Pops up a ConfirmBox.
+        Pops up a ConfirmWindow.
         """
         what = _('Do you really want to restart the system?')
-        box = ConfirmBox(what, default_choice=1)
-        box.connect(0, self.shutdown_sys_restart)
+        box = ConfirmWindow(what, default_choice=1)
+        box.buttons[0].connect(self.shutdown_sys_restart)
         box.show()
 
 

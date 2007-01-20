@@ -45,7 +45,7 @@ import plugin
 import util
 
 from menu import Item, Action
-from gui.windows import WaitBox
+from application import TextWindow
 
 # possible archives and how to unpack them
 _cmdlines = {
@@ -79,7 +79,7 @@ class ArchiveItem(Item):
         for param in _cmdlines[os.path.splitext(self.fname)[1][1:]]:
             app.append(param.replace('__filename__', self.fname).\
                        replace('__dirname__', os.path.dirname(self.fname)))
-        self.pop = WaitBox(text=_('unpacking...'))
+        self.pop = TextWindow(text=_('unpacking...'))
         self.pop.show()
         child = kaa.notifier.Process(app)
         child.signals["completed"].connect(self.finished)
