@@ -85,3 +85,6 @@
 width   = 0
 height  = 0
 display = None
+
+# ugly compat code until the new gui is ready
+from compat import *
