@@ -45,7 +45,7 @@ import menu
 from menu import Item, Action, ActionItem, Menu
 from image import ImageItem
 
-from gui.windows import MessageBox, WaitBox
+from application import TextWindow, MessageWindow
 
 
 class ApodMainMenuItem(Item):
@@ -100,14 +100,14 @@ class ApodMainMenuItem(Item):
         if items:
             self.pushmenu(Menu(_('Apod Pictures'), items))
         else:
-            MessageBox(_('No Images found')).show()
+            MessageWindow(_('No Images found')).show()
 
 
     def fetch_current_picture(self):
         """
         Fetch current picture.
         """
-        box = WaitBox(text=_('Getting picture, please wait'))
+        box = TextWindow(text=_('Getting picture, please wait'))
         box.show()
 
         thread = Thread(self.__fetch_current_picture_thread)
@@ -146,7 +146,7 @@ class ApodMainMenuItem(Item):
         box.destroy()
         if not isinstance(error, (str, unicode)):
             error = 'Exception: %s' % error
-        MessageBox(error).show()
+        MessageWindow(error).show()
 
 
     def __fetch_current_picture_finished(self, filename, box):

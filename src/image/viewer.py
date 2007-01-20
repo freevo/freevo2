@@ -55,7 +55,8 @@ from util import ObjectCache
 from gui.animation import *
 
 from event import *
-from application import Application
+from application import Application, STATUS_RUNNING, STATUS_STOPPING, \
+     STATUS_STOPPED, STATUS_IDLE, CAPABILITY_TOGGLE, CAPABILITY_FULLSCREEN
 
 # get logging object
 log = logging.getLogger('image')
@@ -72,7 +73,8 @@ class ImageViewer(Application):
         """
         create an image viewer application
         """
-        Application.__init__(self, 'image viewer', 'image', True)
+        capabilities = (CAPABILITY_TOGGLE, CAPABILITY_FULLSCREEN)
+        Application.__init__(self, 'imageviewer', 'image', capabilities)
 
         self.osd_mode = 0    # Draw file info on the image
         self.zoom = 0   # Image zoom
@@ -93,13 +95,13 @@ class ImageViewer(Application):
         self.sshow_timer = kaa.notifier.OneShotTimer(self.signalhandler)
 
 
-    def hide(self):
+    def hide_app(self):
         """
         Hide the viewer. This clears the cache and removes the application
         from the eventhandler stack. It is still possible to show() this
         object again.
         """
-        Application.hide(self)
+        Application.hide_app(self)
         if self.last_image:
             self.last_image.unparent()
         self.last_image = None
@@ -133,12 +135,12 @@ class ImageViewer(Application):
         filename      = item.filename
         self.item = item
 
-        self.show()
-
         if not self.last_item:
             # We just started, update the screen to make it
             # empty (all hides from the menu are updated)
             gui.display.update()
+
+        self.status = STATUS_RUNNING
 
         # only load new image when the image changed
         if self.filename == filename and self.rotation == rotation and \
@@ -285,8 +287,8 @@ class ImageViewer(Application):
         """
         Stop the current viewing
         """
-        # Don't stop the viewer application, just send a PLAY_END
-        # event.
+        # set status to stopping
+        self.status = STATUS_STOPPING
         event = Event(PLAY_END, self.item)
         event.set_handler(self.eventhandler)
         event.post()
@@ -341,8 +343,10 @@ class ImageViewer(Application):
 
         if event == PLAY_END:
             # Viewing is done, set application to stopped
-            self.stopped()
+            self.status = STATUS_STOPPED
             self.item.eventhandler(event)
+            if self.status == STATUS_STOPPED:
+                self.status = STATUS_IDLE
             return True
 
         if event == IMAGE_ROTATE:

@@ -42,11 +42,11 @@ import kaa.notifier
 
 # Freevo imports
 import config
-import gui
-import gui.areas
 
 from event import *
-from application import Application
+from application import Application, STATUS_RUNNING, STATUS_STOPPING, \
+	 STATUS_STOPPED, STATUS_IDLE, CAPABILITY_TOGGLE, CAPABILITY_PAUSE, \
+	 CAPABILITY_FULLSCREEN
 
 import logging
 log = logging.getLogger('audio')
@@ -73,16 +73,11 @@ class AudioPlayer(Application):
     basic object to handle the different player
     """
     def __init__(self):
-        Application.__init__(self, 'audioplayer', 'audio', False, True)
+        capabilities = (CAPABILITY_TOGGLE, CAPABILITY_PAUSE)
+        Application.__init__(self, 'audioplayer', 'audio', capabilities)
         self.player = kaa.popcorn.Player()
         self.player.signals['failed'].connect_weak(self._play_failed)
-        self.running    = False
-        self.bg_playing = False
         self.elapsed_timer = kaa.notifier.WeakTimer(self.elapsed)
-        
-        # register player to the skin
-        areas = ('screen', 'title', 'view', 'info')
-        self.draw_engine = gui.areas.Handler('player', areas)
 
 
     def play(self, item, player=None):
@@ -94,18 +89,21 @@ class AudioPlayer(Application):
         #     return
 
         self.item = item
-        self.running = True
 
-        if self.bg_playing:
-            log.info('start new background playing')
+        # Calculate some new values
+        if not self.item.length:
+            self.item.remain = 0
         else:
-            self.show()
+            self.item.remain = self.item.length - self.item.elapsed
+
+        # set the current item to the gui engine
+        self.engine.set_item(self.item)
+        self.status = STATUS_RUNNING
 
         self.player.open(self.item.url)
         self.player.signals['end'].connect_once(PLAY_END.post, self.item)
         self.player.signals['start'].connect_once(PLAY_START.post, self.item)
         self.player.play()
-        self.refresh()
 
 
     def _play_failed(self):
@@ -130,36 +128,7 @@ class AudioPlayer(Application):
         # This function doesn't use the Application.stop() code here
         # because we stop and it is stopped when the child is dead.
         self.player.stop()
-        self.running = False
-
-
-    def show(self):
-        """
-        show the player gui
-        """
-        Application.show(self)
-        self.bg_playing = False
-        self.refresh()
-        self.draw_engine.show(config.GUI_FADE_STEPS)
-
-        # post event for showing visualizations
-        # FIXME: maybe this is a Signal
-        AUDIO_VISUAL_SHOW.post()
-
-
-    def hide(self):
-        """
-        hide the player gui
-        """
-        Application.hide(self)
-        self.draw_engine.hide(config.GUI_FADE_STEPS)
-        # DOES NOT WORK
-        # if self.running:
-        #   self.bg_playing = True
-
-        # post event for hiding visualizations
-        # FIXME: maybe this is a Signal
-        AUDIO_VISUAL_HIDE.post()
+        self.status = STATUS_STOPPING
 
 
     def elapsed(self):
@@ -167,22 +136,13 @@ class AudioPlayer(Application):
         Callback for elapsed time changes.
         """
         self.item.elapsed = round(self.player.get_position())
-        self.refresh()
-
-
-    def refresh(self):
-        """
-        update the screen
-        """
-        if not self.visible or not self.running:
-            return
         # Calculate some new values
         if not self.item.length:
             self.item.remain = 0
         else:
             self.item.remain = self.item.length - self.item.elapsed
         # redraw
-        self.draw_engine.draw(self.item)
+        self.engine.update()
 
 
     def eventhandler(self, event):
@@ -207,9 +167,11 @@ class AudioPlayer(Application):
             # Now the player has stopped (either we called self.stop() or the
             # player stopped by itself. So we need to set the application to
             # to stopped.
-            self.stopped()
+            self.status = STATUS_STOPPED
             self.elapsed_timer.stop()
             self.item.eventhandler(event)
+            if self.status == STATUS_STOPPED:
+                self.status = STATUS_IDLE
             return True
 
         if event == PAUSE:
