@@ -11,7 +11,6 @@
 # TODO: o maybe split this file into file/vcd/dvd or
 #         move subitem to extra file
 #       o create better 'arg' handling in play
-#       o maybe xine options?
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -49,15 +48,16 @@ from kaa.strutils import unicode_to_str, str_to_unicode
 # freevo imports
 import config
 import util
-import plugin
 
-from gui.windows import MessageBox, ConfirmBox
+from application import MessageWindow, ConfirmWindow
 from menu import Menu, MediaItem, Files, Action
 from event import *
 
 # video imports
 import configure
 import database
+
+from player import videoplayer
 
 # get logging object
 log = logging.getLogger('video')
@@ -72,16 +72,9 @@ class VideoItem(MediaItem):
         self.subtitle_file     = {}         # text subtitles
         self.audio_file        = {}         # audio dubbing
 
-        self.mplayer_options   = ''
-
         self.selected_subtitle = None
         self.selected_audio    = None
         self.elapsed           = 0
-
-        self.player        = None
-        self.player_rating = 0
-
-        self.possible_player   = []
 
         # set url and parse the name
         self.set_url(url)
@@ -135,7 +128,6 @@ class VideoItem(MediaItem):
                 self.info.set_variables(tvinfo[1])
                 if not self.image:
                     self.image = tvinfo[0]
-                self.mplayer_options = tvinfo[2]
             self.tv_show      = True
             self.show_name    = show_name
             self.tv_show_name = show_name[0]
@@ -302,22 +294,6 @@ class VideoItem(MediaItem):
         return not from_start
 
 
-    def __get_possible_player(self):
-        """
-        return a list of possible player for this item
-        """
-        possible_player = []
-        for p in plugin.getbyname(plugin.VIDEO_PLAYER, True):
-            rating = p.rate(self) * 10
-            if config.VIDEO_PREFERED_PLAYER == p.name:
-                rating += 1
-            if hasattr(self, 'force_player') and p.name == self.force_player:
-                rating += 100
-            possible_player.append((rating, p))
-        possible_player.sort(lambda l, o: -cmp(l[0], o[0]))
-        return possible_player
-
-
     # ------------------------------------------------------------------------
     # actions:
 
@@ -326,50 +302,18 @@ class VideoItem(MediaItem):
         """
         return a list of possible actions on this item.
         """
-        self.possible_player = self.__get_possible_player()
-
-        if not self.possible_player:
-            self.player = None
-            self.player_rating = 0
-            return []
-
-        self.player_rating, self.player = self.possible_player[0]
-
-        # For DVD and VCD check if the rating is >= 20. If it is and the url
-        # ends with '/', the user should get the DVD/VCD menu from the player.
-        # If not, we need to show the title menu.
         if self.url.startswith('dvd://') and self.url[-1] == '/':
-            if self.player_rating >= 20:
-                items = [ Action(_('Play DVD'), self.play),
-                          Action(_('DVD title list'),
-                                 self.dvd_vcd_title_menu) ]
-            else:
-                items = [ Action(_('DVD title list'), self.dvd_vcd_title_menu),
-                          Action(_('Play default track'), self.play) ]
-
+            items = [ Action(_('Play DVD'), self.play),
+                      Action(_('DVD title list'), self.dvd_vcd_title_menu) ]
         elif self.url == 'vcd://':
-            if self.player_rating >= 20:
-                items = [ Action(_('Play VCD'), self.play),
-                          Action(_('VCD title list'),
-                                 self.dvd_vcd_title_menu) ]
-            else:
-                items = [ Action(_('VCD title list'), self.dvd_vcd_title_menu),
-                          Action(_('Play default track'), self.play) ]
+            items = [ Action(_('Play VCD'), self.play),
+                      Action(_('VCD title list'), self.dvd_vcd_title_menu) ]
         else:
-            items = []
-            # Add all possible players to the action list
-            for r, player in self.possible_player:
-                a = Action(_('Play with %s') % player.name, self.play)
-                a.parameter(player=player)
-                items.append(a)
-
-        # Network play can get a larger cache
-        if self.network_play:
-            a = Action(_('Play with maximum cache'), self.play)
-            a.parameter(mplayer_options='-cache 65536')
+            items = [ Action(_('Play'), self.play) ]
 
         # Add the configure stuff (e.g. set audio language)
         items += configure.get_items(self)
+
         return items
 
 
@@ -394,10 +338,9 @@ class VideoItem(MediaItem):
         self.pushmenu(moviemenu)
 
 
-    def play(self, player=None, mplayer_options=''):
+    def play(self):
         """
-        Play the item. The argument 'arg' can either be a player or
-        extra mplayer arguments.
+        Play the item.
         """
         if self.subitems:
             # if we have subitems (a movie with more than one file),
@@ -408,16 +351,6 @@ class VideoItem(MediaItem):
 
             result = self.__set_next_available_subitem()
             if self.current_subitem: # 'result' is always 1 in this case
-                # The media is available now for playing
-                # Pass along the options, without loosing the subitem's own
-                # options
-                if self.current_subitem.mplayer_options:
-                    if self.mplayer_options:
-                        mo = self.current_subitem.mplayer_options
-                        mo += ' ' + self.mplayer_options
-                        self.current_subitem.mplayer_options = mo
-                else:
-                    self.current_subitem.mplayer_options = self.mplayer_options
                 # When playing a subitem, the menu must be hidden. If it is
                 # not, the playing will stop after the first subitem, since the
                 # PLAY_END event is not forwarded to the parent
@@ -434,8 +367,8 @@ class VideoItem(MediaItem):
                 # No media at all was found: error
                 txt = (_('No media found for "%s".\n')+
                        _('Please insert the media.')) % self.name
-                box = ConfirmBox(txt, (_('Retry'), _('Abort')))
-                box.connect(0, self.play)
+                box = ConfirmWindow(txt, (_('Retry'), _('Abort')))
+                box.buttons[0].connect(self.play)
                 box.show()
                 
             # done, everything else is handled in 'play' of the subitem
@@ -445,52 +378,15 @@ class VideoItem(MediaItem):
             # normal playback of one file
             file = self.filename
 
-        # get the correct player for this item and check the
-        # rating if the player can play this item or not
-        if not self.possible_player:
-            self.possible_player = self.__get_possible_player()
-
-        if not self.possible_player:
-            return
-
-        if not self.player:
-            # get the best possible player
-            self.player_rating, self.player = self.possible_player[0]
-            if self.player_rating < 10:
-                MessageBox(_('No player for this item found')).show()
-                return
-
-        # put together the mplayer options for this file
-        mplayer_options = self.mplayer_options.split(' ') + \
-                              mplayer_options.split(' ')
-
-        if player:
-            self.player = player
-
-        # call all our plugins to let them know we will play
-        # FIXME: use a global PLAY event here
-        # self.plugin_eventhandler(PLAY)
-
         # call the player to play the item
-        error = self.player.play(mplayer_options, self)
-
-        if error:
-            # If we are a subitem we don't show any error message before
-            # having tried all the subitems
-            if hasattr(self.parent, 'subitems') and self.parent.subitems:
-                return error
-            else:
-                box = MessageBox(error)
-                box.connect(self.stop)
-                box.show()
+        videoplayer().play(self)
 
 
     def stop(self):
         """
         stop playing
         """
-        if self.player:
-            self.player.stop()
+        videoplayer().stop()
 
 
     def eventhandler(self, event):
@@ -513,14 +409,5 @@ class VideoItem(MediaItem):
                         return True
                 if self.error_in_subitem:
                     # No more subitems to play, and an error occured
-                    MessageBox(self.last_error_msg).show()
-
-        # show configure menu
-        if event == MENU:
-            if self.player:
-                self.player.stop()
-            confmenu = configure.get_menu(self)
-            self.pushmenu(confmenu)
-            return True
-
+                    MessageWindow(self.last_error_msg).show()
         return MediaItem.eventhandler(self, event)
