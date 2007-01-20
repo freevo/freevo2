@@ -48,7 +48,7 @@ from event import *
 from directory import DirItem
 from mainmenu import MainMenuItem
 from menu import Menu, Item
-from games import machine
+# from games import machine
 
 # get logging object
 log = logging.getLogger()
@@ -132,8 +132,9 @@ class MediaMenu(MainMenuItem):
                     # has to be handled specially
                     if item[0] is 'USER':
                         title, filename = item[1], item[2][0]
-                    else:
-                        title, filename = machine.title(item[0]), item[2][0]
+                    # GAMES code:
+                    # else:
+                    #     title, filename = machine.title(item[0]), item[2][0]
 
                     add_args = item[3:]
                 else:
