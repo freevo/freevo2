@@ -238,7 +238,7 @@ GLOBAL_EVENTS = {
     'VOL+'             : MIXER_VOLUP,
     'VOL-'             : MIXER_VOLDOWN,
     'MUTE'             : MIXER_MUTE,
-    'TOGGLE_CONTROL'   : TOGGLE_CONTROL
+    'TOGGLE'           : TOGGLE_APPLICATION
     }
     
 

@@ -46,7 +46,7 @@ KEYBOARD_MAP = {
     '.'           : 'EJECT',
     'L'           : 'SUBTITLE',
     'A'           : 'LANG',
-    'T'           : 'TOGGLE_CONTROL'
+    'T'           : 'TOGGLE'
 }
 
 REMOTE_MAP = {
@@ -161,7 +161,7 @@ DIRECTFB_MAP = {
     'CAPITAL_Q'            : None,
     'CAPITAL_R'            : 'REW',
     'CAPITAL_S'            : 'STOP',
-    'CAPITAL_T'            : 'TOGGLE_CONTROL',
+    'CAPITAL_T'            : None,
     'CAPITAL_U'            : 'PAUSE',
     'CAPITAL_V'            : 'CH-',
     'CAPITAL_W'            : 'PIP_SWAP',
@@ -193,7 +193,7 @@ DIRECTFB_MAP = {
     'SMALL_Q'              : None,
     'SMALL_R'              : 'REW',
     'SMALL_S'              : 'STOP',
-    'SMALL_T'              : 'TOGGLE_CONTROL',
+    'SMALL_T'              : None,
     'SMALL_U'              : 'PAUSE',
     'SMALL_V'              : 'CH-',
     'SMALL_W'              : 'PIP_SWAP',
