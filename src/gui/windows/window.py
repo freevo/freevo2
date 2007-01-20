@@ -38,9 +38,6 @@
 # python imports
 import copy
 
-# freevo imports
-import application
-
 # gui imports
 from gui import displays
 from gui import theme
@@ -131,7 +128,6 @@ class Window(Container):
         """
         if self.__display:
             return
-        application.add_window(self)
         self.__display = displays.get()
         self.__create_background(self.__display)
         self.__display.add_child(self)
@@ -142,23 +138,8 @@ class Window(Container):
         """
         Destroy (close) the window
         """
-        application.remove_window(self)
         if not self.__display:
             return
         self.__display.remove_child(self)
         self.__display.update()
         self.__display = None
-
-
-    def eventhandler(self, event):
-        """
-        Eventhandler for the window, this raw window has nothing to do
-        """
-        return False
-
-
-    def get_eventmap(self):
-        """
-        Return the eventmap for the window
-        """
-        return 'input'

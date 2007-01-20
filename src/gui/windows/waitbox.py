@@ -58,11 +58,12 @@ class WaitBox(Window):
     should be used when Freevo is doing some background action and the user
     has to wait.
     """
-    def __init__(self, text):
+    def __init__(self, obj):
         Window.__init__(self)
 
         width, height = self.get_content_size()
-
+        text = obj.text
+        
         # We need at least text_height * text_width space for the text, in
         # most cases more (because of line breaks. To make the text look
         # nice, we try 4:3 aspect of the box at first and than use the max
@@ -120,11 +121,3 @@ class WaitBox(Window):
         self.label.set_pos((x, y))
         # the y position of the text is now label pos + label height + spacing
         return y + label_height + spacing
-
-    
-    def eventhandler(self, event):
-        """
-        Eventhandler for the box. A WaitBox can handle no events, something
-        from the outside must close the box.
-        """
-        return False

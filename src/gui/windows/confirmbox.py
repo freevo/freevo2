@@ -57,16 +57,20 @@ class ConfirmBox(WaitBox):
     function should be called if Yes is selected. INPUT_EXIT will be close
     the box like pressing No.
     """
-    def __init__(self, text, buttons=(_('Yes'), _('No')), default_choice=0):
-        WaitBox.__init__(self, text)
+    def __init__(self, obj):
+        WaitBox.__init__(self, obj)
 
         spacing = self.content_spacing
-        w = int((self.get_content_size()[0] - spacing) / len(buttons))
+        w = int((self.get_content_size()[0] - spacing) / len(obj.buttons))
         x, y = self.get_content_pos()
 
         self.buttons = []
-        for btext in buttons:
-            self.buttons.append(Button(btext, (x,y), w, self.button_normal))
+        for b in obj.buttons:
+            button = Button(b.name, (x,y), w, self.button_normal)
+            button.info = b
+            if b.selected:
+                button.set_style(self.button_selected)
+            self.buttons.append(button)
             x += w + spacing
             
         y = self.add_row(self.buttons[0].get_size()[1])
@@ -74,44 +78,11 @@ class ConfirmBox(WaitBox):
             b.set_pos((b.get_pos()[0], y))
             self.add_child(b)
 
-        self.selected = self.buttons[default_choice]
-        self.selected.set_style(self.button_selected)
-        
 
-    def connect(self, button, function, *args, **kwargs):
-        """
-        Connect a callback to a button by it's number. If nothing is sepcified
-        in the constructor, 0 is yes and 1 is no.
-        """
-        self.buttons[button].connect(function, *args, **kwargs)
-        
-
-    def eventhandler(self, event):
-        """
-        Eventhandler to toggle the selection or press the button
-        """
-        if event in (INPUT_LEFT, INPUT_RIGHT):
-            # Toggle selection
-            self.selected.set_style(self.button_normal)
-            index = self.buttons.index(self.selected)
-            if event == INPUT_LEFT:
-                index = (index + 1) % len(self.buttons)
-            elif index == 0:
-                index = len(self.buttons) - 1
+    def update(self):
+        for b in self.buttons:
+            if b.info.selected:
+                b.set_style(self.button_selected)
             else:
-                index = index - 1
-            self.selected = self.buttons[index]
-            self.selected.set_style(self.button_selected)
-            self.update()
-            return True
-
-        elif event == INPUT_EXIT:
-            self.destroy()
-            return True
-
-        elif event == INPUT_ENTER:
-            self.selected.select()
-            self.destroy()
-            return True
-        
-        return False
+                b.set_style(self.button_normal)
+        WaitBox.update(self)

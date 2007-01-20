@@ -54,31 +54,11 @@ class MessageBox(WaitBox):
     """
     A box with a label and an OK button to close it.
     """
-    def __init__(self, text, button_text=_('OK')):
-        WaitBox.__init__(self, text)
-        self.button = Button(button_text, self.get_content_pos(),
+    def __init__(self, obj):
+        WaitBox.__init__(self, obj)
+        self.button = Button(obj.button.name, self.get_content_pos(),
                              self.get_content_size()[0],
                              self.button_selected)
         y = self.add_row(self.button.get_size()[1])
         self.button.set_pos((self.button.get_pos()[0], y))
         self.add_child(self.button)
-
-
-    def eventhandler(self, event):
-        """
-        Eventhandler to close the box on INPUT_ENTER or INPUT_EXIT
-        """
-        if event in (INPUT_ENTER, INPUT_EXIT):
-            self.destroy()
-            if event == INPUT_ENTER:
-                self.button.select()
-            return True
-        return False
-
-
-    def connect(self, function, *args, **kwargs):
-        """
-        Connect to the selection of the button.
-        """
-        self.button.connect(function, *args, **kwargs)
-
