@@ -32,7 +32,6 @@
 __all__ = [ 'Menu' ]
 
 # python imports
-import gc
 import logging
 
 # kaa imports
@@ -93,30 +92,10 @@ class Menu(object):
         # Autoselect menu if it has only one item
         self.autoselect = False
 
-        # If the menu is the current visible and the menu stack itself is
-        # visible, this variable is True
-        self.visible= False
-
         # how many rows and cols does the menu has
         # (will be changed by the skin code)
         self.cols = 1
         self.rows = 1
-
-
-    def show(self):
-        """
-        Show the menu. This will be called when this menu is on top of the
-        menu stack.
-        """
-        self.visible = True
-
-
-    def hide(self):
-        """
-        Hide the menu. A different menu is on top or the stack itself is not
-        visible.
-        """
-        self.visible = False
 
 
     def set_items(self, items, refresh=True):
@@ -301,8 +280,8 @@ class Menu(object):
             if not actions or len(actions) <= 1:
                 return False
             items = []
-            for a in actions:
-                items.append(Item(self.selected, a))
+            for action in actions:
+                items.append(Item(self.selected, action))
 
             for i in items:
                 if not self.selected.type == 'main':
@@ -328,10 +307,3 @@ class Menu(object):
             return True
 
         return False
-
-
-    def __del__(self):
-        """
-        Delete function of memory debugging
-        """
-        log.info('Delete menu %s' % self.heading)
