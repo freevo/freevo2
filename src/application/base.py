@@ -6,12 +6,12 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
+# Copyright (C) 2002-2006 Krister Lagerstrom, Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
 #
-# Please see the file doc/CREDITS for a complete list of authors.
+# Please see the file AUTHORS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,37 +34,103 @@ __all__ = [ 'Application' ]
 # python imports
 import logging
 
+# kaa imports
+from kaa.notifier import Signal
+
 # freevo imports
-import input
-import eventhandler
 import gui
-import gui.animation 
+
+# application imports
+from handler import handler
 
 # get logging object
 log = logging.getLogger()
 
+STATUS_IDLE     = 'idle'
+STATUS_RUNNING  = 'running'
+STATUS_STOPPING = 'stopping'
+STATUS_STOPPED  = 'stopped'
+
+CAPABILITY_TOGGLE     = 1
+CAPABILITY_PAUSE      = 2
+CAPABILITY_FULLSCREEN = 4
 
 class Application(object):
     """
     A basic application
     """
-    def __init__(self, name, eventmap, fullscreen, animated=False):
+
+    _global_resources = {}
+
+    def __init__(self, name, eventmap, capabilities=[]):
         """
         Init the Application object.
-
-        @param name       : internal name of the application
-        @param eventmap   : name of the event handler mapping
-        @param fullscreen : if the application uses the whole screen
-        @param animated   : use fade in/out animation
         """
-        self.__name     = name
-        self.__eventmap = eventmap
-        self.__handler  = eventhandler.get_singleton()
+        self.__name    = name
+        self._eventmap = eventmap
 
-        self.animated   = animated
-        self.visible    = False
-        self._stopped   = True
-        self.fullscreen = fullscreen
+        self._visible  = False
+        self.engine    = gui.Application(name)
+        self.signals   = { 'show' : Signal(), 'hide': Signal(),
+                           'start': Signal(), 'stop': Signal() }
+
+        self._status   = STATUS_IDLE
+        self._capabilities = 0
+        for cap in capabilities:
+            self._capabilities |= cap
+
+
+    def has_capability(self, capability):
+        """
+        Return True if the application has the given capability.
+        """
+        return self._capabilities & capability
+
+
+    def get_status(self):
+        """
+        Return the current application status.
+        """
+        return self._status
+
+
+    def set_status(self, status):
+        """
+        Set application status and react on some changes.
+        """
+        if status in (STATUS_STOPPED, STATUS_IDLE):
+            self.free_resources()
+        if status == STATUS_RUNNING and self._status == STATUS_IDLE:
+            handler.show_application(self)
+            self._status = status
+            self.signals['start'].emit()
+        elif status == STATUS_IDLE:
+            handler.hide_application(self)
+            self._status = status
+            self.signals['stop'].emit()
+        else:
+            self._status = status
+
+    status = property(get_status, set_status, None, "application status")
+
+
+    def show_app(self):
+        """
+        Show the application on the screen. This function should only be called
+        from the application handler.
+        """
+        self._visible = True
+        self.signals['show'].emit()
+        self.engine.show()
+
+
+    def hide_app(self):
+        """
+        Hide the application. This function should only be called from
+        the application handler.
+        """
+        self._visible = False
+        self.signals['hide'].emit()
 
 
     def eventhandler(self, event):
@@ -75,97 +141,76 @@ class Application(object):
         raise AttributeError(error)
 
 
-    def show(self):
-        """
-        Show this application. This function will return False if the
-        application is already visible in case this function is overloaded.
-        In case it is not overloaded, this function will also update the
-        display.
-        """
-        if self.visible:
-            # Already visible. But maybe stopped, correct that
-            self._stopped = False
-            return False
-        # Set visible and append to the eventhandler
-        self.visible = True
-        self._stopped = False
-        if not self in self.__handler:
-            self.__handler.append(self)
-        # Check if the new app uses animation to show itself
-        if not self.animated:
-            # This application has no animation for showing. But the old one
-            # may have. So we need to wait until the renderer is done.
-            # FIXME: what happens if a 'normal' animation is running?
-            log.info('no show animation for %s -- waiting' % self.__name)
-            gui.animation.render().wait()
-        if self.__class__.show == Application.show:
-            # show() is not changed in the inherting class. Update the display.
-            gui.display.update()
-        return True
-
-
-    def hide(self):
-        """
-        Hide this application. This can be either because a different
-        application has started or that the application was stopped and is no
-        longer needed.
-        """
-        if not self.visible:
-            # already hidden
-            return
-        # Wait until all application change animations are done. There
-        # should be none, but just in case to avoid fading in and out the
-        # same object.
-        # FIXME: what happens if a 'normal' animation is running?
-        gui.animation.render().wait()
-        self.visible = False
-
-
     def stop(self):
         """
         Stop the application. If it is not shown again in the same cycle, the
         hide() function will be called. If the app isn't really stopped now
         (e.g. a child needs to be stopped), do not call this function.
         """
-        self.stopped()
+        self._status = STATUS_STOPPED
 
 
-    def stopped(self):
+    def is_visible(self):
         """
-        Set the application to status stopped. If it is not shown again in the same
-        cycle, the hide() function will be called.
+        Return if the application is visible right now.
         """
-        self._stopped = True
+        return self._visible
 
-        
+
     def set_eventmap(self, eventmap):
         """
         Set a new eventmap for the event handler
         """
-        self.__eventmap = eventmap
-        if self.__handler.get_active() == self:
-            # We are the current application with the focus,
-            # so set eventmap of the eventhandler to the new eventmap
-            input.set_mapping(eventmap)
+        self._eventmap = eventmap
+        handler.set_focus()
 
 
     def get_eventmap(self):
         """
         Return the eventmap for the application.
         """
-        return self.__eventmap
+        return self._eventmap
 
+    eventmap = property(get_eventmap, set_eventmap, None, "eventmap")
 
     def get_name(self):
         """
         Get the name of the application.
         """
         return self.__name
-    
 
-    def __str__(self):
+
+    def get_resources(self, *resources):
+        """
+        Reserve a list of resources. If one or more resources can not be
+        reserved, the whole operation fails. The function will return the
+        list of failed resources with the application having this resource.
+        """
+        blocked = {}
+        for r in resources:
+            if r in self._global_resources:
+                blocked[r] = self._global_resources[r]
+        if blocked:
+            # failed to reserve
+            return blocked
+        # reserve all resources
+        for r in resources:
+            self._global_resources[r] = self
+        return {}
+
+
+    def free_resources(self, *resources):
+        """
+        Free all resources blocked by this application. If not resources are
+        provided, free all resources.
+        """
+        for res, app in self._global_resources.items()[:]:
+            if app == self and (not resources or res in resources):
+                del self._global_resources[res]
+
+
+    def __repr__(self):
         """
         String for debugging.
         """
         return self.__name
-        

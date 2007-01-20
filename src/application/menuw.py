@@ -32,14 +32,10 @@
 __all__ = [ 'MenuWidget' ]
 
 # freevo imports
-import config
-import gui
-
-from event import *
 from menu import MenuStack
 
 # application imports
-from base import Application
+from base import Application, STATUS_RUNNING, CAPABILITY_TOGGLE
 
 
 class MenuWidget(Application, MenuStack):
@@ -47,61 +43,29 @@ class MenuWidget(Application, MenuStack):
     The MenuWidget is an Application for GUI and event handling and also
     an instance of MenuStack defined in menu.stack.
     """
-    def __init__(self):
-        Application.__init__(self, 'menu', 'menu', False, True)
+    def __init__(self, menu):
+        Application.__init__(self, 'menu', 'menu', (CAPABILITY_TOGGLE,))
         MenuStack.__init__(self)
-
-        # define areas
-        areas = ('screen', 'title', 'subtitle', 'view', 'listing', 'info')
-        # create engine
-        self.engine = gui.areas.Handler('menu', areas)
+        self.pushmenu(menu)
+        self.status = STATUS_RUNNING
 
 
-    def show(self):
+    def show_app(self):
         """
         Show the menu on the screen
         """
-        Application.show(self)
-        MenuStack.show(self)
         self.refresh(True)
-        if self.inside_menu:
-            self.engine.show(0)
-            self.inside_menu = False
-        else:
-            self.engine.show(config.GUI_FADE_STEPS)
+        Application.show_app(self)
+        self.engine.update(self.menustack[-1])
 
 
-    def hide(self):
-        """
-        Hide the menu
-        """
-        Application.hide(self)
-        MenuStack.hide(self)
-        if self.inside_menu:
-            self.engine.hide(0)
-            self.inside_menu = False
-        else:
-            self.engine.hide(config.GUI_FADE_STEPS)
-
-
-    def redraw(self):
-        """
-        Redraw the menu.
-        """
-        self.engine.draw(self.menustack[-1])
+    def refresh(self, reload=False):
+        MenuStack.refresh(self, reload)
+        self.engine.update(self.menustack[-1])
 
 
     def eventhandler(self, event):
         """
-        Eventhandler for menu controll
+        Eventhandler for menu control
         """
-        if MenuStack.eventhandler(self, event):
-            return True
-
-        if event == MENU_CHANGE_STYLE and len(self.menustack) > 1:
-            # change the menu style
-            self.engine.toggle_display_style(self.menustack[-1])
-            self.refresh()
-            return True
-
-        return False
+        return MenuStack.eventhandler(self, event)
