@@ -48,16 +48,8 @@ class MenuWidget(Application, MenuStack):
         MenuStack.__init__(self)
         self.pushmenu(menu)
         self.status = STATUS_RUNNING
-
-
-    def show_app(self):
-        """
-        Show the menu on the screen
-        """
-        self.refresh(True)
-        Application.show_app(self)
-        self.engine.update(self.menustack[-1])
-
+        self.signals['show'].connect_weak(self.refresh, True)
+        
 
     def refresh(self, reload=False):
         MenuStack.refresh(self, reload)
