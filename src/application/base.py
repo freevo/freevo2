@@ -84,7 +84,7 @@ class Application(object):
         """
         Return True if the application has the given capability.
         """
-        return self._capabilities & capability
+        return (self._capabilities & capability) != 0
 
 
     def get_status(self):
