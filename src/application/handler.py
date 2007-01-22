@@ -104,9 +104,9 @@ class Handler(object):
 
         log.info('switch application from %s to %s' % (self.current, app))
         self.signals['changed'].emit(app)
-        app.show_app()
+        app._show_app()
         if self.current:
-            self.current.hide_app()
+            self.current._hide_app()
         self.current = app
 
 

@@ -101,7 +101,7 @@ class Application(object):
         if status in (STATUS_STOPPED, STATUS_IDLE):
             self.free_resources()
         if status == STATUS_RUNNING and self._status == STATUS_IDLE:
-            handler.show_application(self)
+            handler._show_application(self)
             self._status = status
             self.signals['start'].emit()
         elif status == STATUS_IDLE:
@@ -114,7 +114,7 @@ class Application(object):
     status = property(get_status, set_status, None, "application status")
 
 
-    def show_app(self):
+    def _show_app(self):
         """
         Show the application on the screen. This function should only be called
         from the application handler.
@@ -124,7 +124,7 @@ class Application(object):
         self.engine.show()
 
 
-    def hide_app(self):
+    def _hide_app(self):
         """
         Hide the application. This function should only be called from
         the application handler.
