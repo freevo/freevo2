@@ -107,6 +107,7 @@ class Application(object):
         elif status == STATUS_IDLE:
             handler.hide_application(self)
             self._status = status
+            print self, 'stop'
             self.signals['stop'].emit()
         else:
             self._status = status

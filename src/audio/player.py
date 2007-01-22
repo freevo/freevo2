@@ -4,19 +4,13 @@
 # -----------------------------------------------------------------------------
 # $Id$
 #
-# This module provides the audio player. It will use one of the registered
-# player plugins to play the audio item (e.g. audio.mplayer)
-#
-# You can access the player by calling audioplayer()
-#
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
 #
-# First Edition: ?
-# Maintainer:    ?
+# Maintainer:    Dirk Meyer <dischi@freevo.org>
 #
-# Please see the file doc/CREDITS for a complete list of authors.
+# Please see the file AUTHORS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -36,6 +30,9 @@
 
 __all__ = [ 'audioplayer' ]
 
+# python imports
+import logging
+
 # kaa imports
 import kaa.popcorn
 import kaa.notifier
@@ -48,14 +45,14 @@ from application import Application, STATUS_RUNNING, STATUS_STOPPING, \
 	 STATUS_STOPPED, STATUS_IDLE, CAPABILITY_TOGGLE, CAPABILITY_PAUSE, \
 	 CAPABILITY_FULLSCREEN
 
-import logging
+# get logging object
 log = logging.getLogger('audio')
 
 _singleton = None
 
 def audioplayer():
     """
-    return the global audio player object
+    Return the global audio player object
     """
     global _singleton
     if _singleton == None:
@@ -70,7 +67,7 @@ AUDIO_VISUAL_HIDE = Event('AUDIO_VISUAL_HIDE')
 
 class AudioPlayer(Application):
     """
-    basic object to handle the different player
+    Audio player object.
     """
     def __init__(self):
         capabilities = (CAPABILITY_TOGGLE, CAPABILITY_PAUSE)
@@ -84,11 +81,37 @@ class AudioPlayer(Application):
         """
         play an item
         """
-        # FIXME: handle starting something when self.player.is_playing()
-        # if self.player and self.player.is_playing():
-        #     return
+        if not self.status in (STATUS_IDLE, STATUS_STOPPED):
+            # Already running, stop the current player by sending a STOP
+            # event. The event will also get to the playlist behind the
+            # current item and the whole list will be stopped.
+            Event(STOP, handler=self.eventhandler).post()
+            # Now connect to our own 'stop' signal once to repeat this current
+            # function call without the player playing
+            self.signals['stop'].connect_once(self.play, item)
+            return True
 
+        if not kaa.notifier.running:
+            # Freevo is in shutdown mode, do not start a new player, the old
+            # only stopped because of the shutdown.
+            return False
+
+        # Try to get AUDIO resource. The ressouce will be freed by the system
+        # when the application switches to STATUS_STOPPED or STATUS_IDLE.
+        blocked = self.get_resources('AUDIO')
+        if 'AUDIO' in blocked:
+            # Something has the audio resource blocked, stop it
+            Event(STOP, handler=blocked['AUDIO'].eventhandler).post()
+            # Now connect to the 'stop' signal once to repeat this current
+            # function call without the player playing
+            blocked['AUDIO'].signals['stop'].connect_once(self.play, item)
+            return True
+
+        # store item and playlist
         self.item = item
+        self.playlist = self.item.get_playlist()
+        if self.playlist:
+            self.playlist.select(self.item)
 
         # Calculate some new values
         if not self.item.length:
@@ -129,6 +152,47 @@ class AudioPlayer(Application):
         # because we stop and it is stopped when the child is dead.
         self.player.stop()
         self.status = STATUS_STOPPING
+
+
+    @kaa.notifier.yield_execution()
+    def pause(self):
+        """
+        Pause Playback. Return False if already paused.
+        """
+        # FIXME: make sure this function is not called twice
+        if not self.status == STATUS_RUNNING:
+            yield False
+        if self.player.get_state() == kaa.popcorn.STATE_PAUSED:
+            yield None
+        # FIXME: what happens if we send pause() the same time the file
+        # is finished? This would create a race condition.
+        self.player.pause()
+        # TODO: lines like the next trhree lines happen very often,
+        # maybe there is a way to make it shorter, e.g. yield a signal
+        wait = kaa.notifier.YieldCallback()
+        self.player.signals['pause'].connect_once(wait)
+        yield wait
+        self.free_resources()
+
+
+    @kaa.notifier.yield_execution()
+    def resume(self):
+        """
+        Resume Playback. Return False if already resumed.
+        """
+        # FIXME: make sure this function is not called twice
+        if not self.status == STATUS_RUNNING:
+            yield False
+        if self.player.get_state() == kaa.popcorn.STATE_PLAYING:
+            yield False
+        if self.get_resources('AUDIO'):
+            # FIXME: what to do in this case?
+            log.error('unable to get AUDIO ressource')
+            yield False
+        self.player.resume()
+        wait = kaa.notifier.YieldCallback()
+        self.player.signals['play'].connect_once(wait)
+        yield wait
 
 
     def elapsed(self):
