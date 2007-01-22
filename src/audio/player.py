@@ -167,11 +167,7 @@ class AudioPlayer(Application):
         # FIXME: what happens if we send pause() the same time the file
         # is finished? This would create a race condition.
         self.player.pause()
-        # TODO: lines like the next trhree lines happen very often,
-        # maybe there is a way to make it shorter, e.g. yield a signal
-        wait = kaa.notifier.YieldCallback()
-        self.player.signals['pause'].connect_once(wait)
-        yield wait
+        yield kaa.notifier.YieldCallback(self.player.signals['pause'])
         self.free_resources()
 
 
@@ -190,9 +186,7 @@ class AudioPlayer(Application):
             log.error('unable to get AUDIO ressource')
             yield False
         self.player.resume()
-        wait = kaa.notifier.YieldCallback()
-        self.player.signals['play'].connect_once(wait)
-        yield wait
+        yield kaa.notifier.YieldCallback(self.player.signals['play'])
 
 
     def elapsed(self):
