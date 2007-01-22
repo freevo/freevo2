@@ -101,7 +101,7 @@ class Application(object):
         if status in (STATUS_STOPPED, STATUS_IDLE):
             self.free_resources()
         if status == STATUS_RUNNING and self._status == STATUS_IDLE:
-            handler._show_application(self)
+            handler.show_application(self)
             self._status = status
             self.signals['start'].emit()
         elif status == STATUS_IDLE:
