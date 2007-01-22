@@ -69,7 +69,7 @@ class VideoPlayer(Application):
     basic object to handle the different player
     """
     def __init__(self):
-        capabilities = (CAPABILITY_PAUSE,)
+        capabilities = (CAPABILITY_PAUSE, CAPABILITY_FULLSCREEN)
         Application.__init__(self, 'videoplayer', 'video', capabilities)
         self.player = kaa.popcorn.Player()
         self.player.set_window(gui.display._window)
