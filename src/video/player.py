@@ -42,7 +42,6 @@ import kaa.notifier
 
 # Freevo imports
 import config
-import gui
 
 from event import *
 from application import Application, STATUS_RUNNING, STATUS_STOPPING, \
@@ -72,7 +71,7 @@ class VideoPlayer(Application):
         capabilities = (CAPABILITY_PAUSE, CAPABILITY_FULLSCREEN)
         Application.__init__(self, 'videoplayer', 'video', capabilities)
         self.player = kaa.popcorn.Player()
-        self.player.set_window(gui.display._window)
+        self.player.set_window(self.engine.get_window())
         self.player.signals['failed'].connect_weak(self._play_failed)
 
 

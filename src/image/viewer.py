@@ -146,7 +146,7 @@ class ImageViewer(Application):
         if not self.last_item:
             # We just started, update the screen to make it
             # empty (all hides from the menu are updated)
-            gui.display.update()
+            self.engine.update()
 
         self.status = STATUS_RUNNING
 
@@ -156,13 +156,13 @@ class ImageViewer(Application):
             if self.zoom == zoom:
                 # same image, only update the osd and the timer
                 self.drawosd()
-                gui.display.update()
+                self.engine.update()
                 return
             if not isinstance(zoom, int):
                 # only zoom change
                 self.last_image.set_pos((-zoom[0], -zoom[1]))
                 self.zoom = zoom
-                gui.display.update()
+                self.engine.update()
                 return
             if self.zoom and zoom:
                 log.info('FIXME: do not create the complete image again')
@@ -273,7 +273,7 @@ class ImageViewer(Application):
         self.drawosd()
 
         # update the screen
-        gui.display.update()
+        self.engine.update()
 
         # start timer
         if self.item.duration and self.slideshow and \
@@ -364,7 +364,7 @@ class ImageViewer(Application):
             # show/hide image information
             self.osd_mode = (self.osd_mode+1) % (len(config.IMAGEVIEWER_OSD)+1)
             self.drawosd()
-            gui.display.update()
+            self.engine.update()
             return True
 
         if str(event) in self.zoom_btns:

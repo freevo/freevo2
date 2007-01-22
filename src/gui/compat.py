@@ -106,7 +106,10 @@ class _Imageviewer(BaseApplication):
     name = 'viewer'
     areas = ()
 
-    
+    def update(self):
+        self.engine.canvas.update()
+        
+        
 class _Videoplayer(BaseApplication):
     name = 'video'
     areas = ()
@@ -118,7 +121,9 @@ class _Videoplayer(BaseApplication):
     def update(self):
         pass
 
-
+    def get_window(self):
+        return self.engine.canvas._window
+    
     
 def Application(name):
     return eval('_' + name.capitalize())()
