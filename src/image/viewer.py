@@ -92,16 +92,15 @@ class ImageViewer(Application):
         self.filename    = None
         self.rotation    = None
         self.zomm        = None
-        self.sshow_timer = kaa.notifier.OneShotTimer(self.signalhandler)
+        self.sshow_timer = kaa.notifier.OneShotTimer(self._next)
+        self.signals['stop'].connect_weak(self._cleanup)
 
 
-    def hide_app(self):
+    def _cleanup(self):
         """
-        Hide the viewer. This clears the cache and removes the application
-        from the eventhandler stack. It is still possible to show() this
-        object again.
+        Application not running anymore, free cache and remove items
+        from the screen.
         """
-        Application.hide_app(self)
         if self.last_image:
             self.last_image.unparent()
         self.last_image = None
@@ -121,6 +120,15 @@ class ImageViewer(Application):
         self.sshow_timer.stop()
         # reset bitmap cache
         self.bitmapcache = ObjectCache(3, desc='viewer')
+
+
+    def _next(self):
+        """
+        Send PLAY_END to show next image.
+        """
+        event = Event(PLAY_END, self.item)
+        event.set_handler(self.eventhandler)
+        event.post()
 
 
     def view(self, item, zoom=0, rotation=0):
@@ -287,6 +295,9 @@ class ImageViewer(Application):
         """
         Stop the current viewing
         """
+        if self.get_status() != STATUS_RUNNING:
+            # already stopped
+            return True
         # set status to stopping
         self.status = STATUS_STOPPING
         event = Event(PLAY_END, self.item)
@@ -302,16 +313,6 @@ class ImageViewer(Application):
                not self.bitmapcache[item.filename]:
             image = gui.imagelib.load(item.filename)
             self.bitmapcache[item.filename] = image
-
-
-    def signalhandler(self):
-        """
-        This signalhandler is called for slideshows when
-        the duration is over.
-        """
-        self.hide()
-        self.stop()
-        return False
 
 
     def eventhandler(self, event):
