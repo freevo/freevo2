@@ -6,8 +6,9 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
+# Copyright (C) 2002-2007 Krister Lagerstrom, Dirk Meyer, et al.
 #
+# First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
 #
 # Please see the file AUTHORS for a complete list of authors.
@@ -28,12 +29,13 @@
 #
 # -----------------------------------------------------------------------------
 
-__all__ = [ 'audioplayer' ]
+__all__ = [ 'play', 'stop' ]
 
 # python imports
 import logging
 
 # kaa imports
+import kaa.utils
 import kaa.popcorn
 import kaa.notifier
 
@@ -48,24 +50,7 @@ from application import Application, STATUS_RUNNING, STATUS_STOPPING, \
 # get logging object
 log = logging.getLogger('audio')
 
-_singleton = None
-
-def audioplayer():
-    """
-    Return the global audio player object
-    """
-    global _singleton
-    if _singleton == None:
-        _singleton = AudioPlayer()
-    return _singleton
-
-
-# Visualization events
-AUDIO_VISUAL_SHOW = Event('AUDIO_VISUAL_SHOW')
-AUDIO_VISUAL_HIDE = Event('AUDIO_VISUAL_HIDE')
-
-
-class AudioPlayer(Application):
+class Player(Application):
     """
     Audio player object.
     """
@@ -77,7 +62,7 @@ class AudioPlayer(Application):
         self.elapsed_timer = kaa.notifier.WeakTimer(self.elapsed)
 
 
-    def play(self, item, player=None):
+    def play(self, item):
         """
         play an item
         """
@@ -107,22 +92,24 @@ class AudioPlayer(Application):
             blocked['AUDIO'].signals['stop'].connect_once(self.play, item)
             return True
 
-        # store item and playlist
+        # Store item and playlist. We need to keep the playlist object
+        # here to make sure it is not deleted when player is running in
+        # the background.
         self.item = item
         self.playlist = self.item.get_playlist()
         if self.playlist:
             self.playlist.select(self.item)
 
         # Calculate some new values
-        if not self.item.length:
-            self.item.remain = 0
-        else:
+        self.item.remain = 0
+        if self.item.length:
             self.item.remain = self.item.length - self.item.elapsed
 
-        # set the current item to the gui engine
+        # Set the current item to the gui engine
         self.engine.set_item(self.item)
         self.status = STATUS_RUNNING
 
+        # Open media item and start playback
         self.player.open(self.item.url)
         self.player.signals['end'].connect_once(PLAY_END.post, self.item)
         self.player.signals['start'].connect_once(PLAY_START.post, self.item)
@@ -148,8 +135,8 @@ class AudioPlayer(Application):
         """
         Stop playing.
         """
-        # This function doesn't use the Application.stop() code here
-        # because we stop and it is stopped when the child is dead.
+        if self.get_status() != STATUS_RUNNING:
+            return True
         self.player.stop()
         self.status = STATUS_STOPPING
 
@@ -194,12 +181,9 @@ class AudioPlayer(Application):
         Callback for elapsed time changes.
         """
         self.item.elapsed = round(self.player.get_position())
-        # Calculate some new values
-        if not self.item.length:
-            self.item.remain = 0
-        else:
+        self.item.remain = 0
+        if self.item.length:
             self.item.remain = self.item.length - self.item.elapsed
-        # redraw
         self.engine.update()
 
 
@@ -208,8 +192,6 @@ class AudioPlayer(Application):
         React on some events or send them to the real player or the
         item belongig to the player
         """
-        # FIXME: handle next player on PLAY_END when there was an error
-
         if event == STOP:
             # Stop the player and pass the event to the item
             self.stop()
@@ -246,5 +228,12 @@ class AudioPlayer(Application):
             self.player.seek(int(event.arg), kaa.popcorn.SEEK_RELATIVE)
             return True
 
-        # give it to the item
         return self.item.eventhandler(event)
+
+
+# create singleton object
+player = kaa.utils.Singleton(Player)
+
+# create functions to use from the outside
+play = player.play
+stop = player.stop

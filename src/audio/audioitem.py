@@ -45,7 +45,7 @@ import config
 from menu import MediaItem, Action
 from event import *
 
-from player import *
+import player as audioplayer
 
 import logging
 log = logging.getLogger('audio')
@@ -61,7 +61,6 @@ class AudioItem(MediaItem):
         self.elapsed    = 0
         self.remain     = 0
         self.pause      = 0
-        self.mplayer_options = ''
         try:
             self.length = int(self.info['length'])
         except:
@@ -128,11 +127,11 @@ class AudioItem(MediaItem):
         Start playing the item
         """
         self.elapsed = 0
-        audioplayer().play(self)
+        audioplayer.play(self)
 
 
     def stop(self):
         """
         Stop the current playing
         """
-        audioplayer().stop()
+        audioplayer.stop()

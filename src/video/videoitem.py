@@ -57,7 +57,7 @@ from event import *
 import configure
 import database
 
-from player import videoplayer
+import player as videoplayer
 
 # get logging object
 log = logging.getLogger('video')
@@ -379,14 +379,14 @@ class VideoItem(MediaItem):
             file = self.filename
 
         # call the player to play the item
-        videoplayer().play(self)
+        videoplayer.play(self)
 
 
     def stop(self):
         """
         stop playing
         """
-        videoplayer().stop()
+        videoplayer.stop()
 
 
     def eventhandler(self, event):

@@ -29,12 +29,13 @@
 #
 # -----------------------------------------------------------------------------
 
-__all__ = [ 'videoplayer' ]
+__all__ = [ 'play', 'stop' ]
 
 # python imports
 import logging
 
 # kaa imports
+import kaa.utils
 import kaa.popcorn
 import kaa.notifier
 
@@ -49,19 +50,7 @@ from application import Application, STATUS_RUNNING, STATUS_STOPPING, \
 # get logging object
 log = logging.getLogger('video')
 
-_singleton = None
-
-def videoplayer():
-    """
-    Return the global video player object.
-    """
-    global _singleton
-    if _singleton == None:
-        _singleton = VideoPlayer()
-    return _singleton
-
-
-class VideoPlayer(Application):
+class Player(Application):
     """
     Video player object.
     """
@@ -73,7 +62,7 @@ class VideoPlayer(Application):
         self.player.signals['failed'].connect_weak(self._play_failed)
 
 
-    def play(self, item, player=None):
+    def play(self, item):
         """
         play an item
         """
@@ -122,9 +111,7 @@ class VideoPlayer(Application):
             in_progress = blocked['AUDIO'].pause()
             if isinstance(in_progress, kaa.notifier.InProgress):
                 # takes some time, wait
-                cb = kaa.notifier.Callback(self.play, item)
-                cb.set_ignore_caller_args()
-                in_progress.connect(cb)
+                in_progress.connect(self.play, item).set_ignore_caller_args()
             if in_progress is not False:
                 # we paused the application, resume on our stop
                 self.signals['stop'].connect_once(blocked['AUDIO'].resume)
@@ -170,8 +157,8 @@ class VideoPlayer(Application):
         """
         Stop playing.
         """
-        # This function doesn't use the Application.stop() code here
-        # because we stop and it is stopped when the child is dead.
+        if self.get_status() != STATUS_RUNNING:
+            return True
         self.player.stop()
         self.status = STATUS_STOPPING
 
@@ -181,8 +168,6 @@ class VideoPlayer(Application):
         React on some events or send them to the real player or the
         item belongig to the player
         """
-        # FIXME: handle next player on PLAY_END when there was an error
-
         if event == STOP:
             # Stop the player and pass the event to the item
             self.stop()
@@ -223,3 +208,11 @@ class VideoPlayer(Application):
 
         # give it to the item
         return self.item.eventhandler(event)
+
+
+# create singleton object
+player = kaa.utils.Singleton(Player)
+
+# create functions to use from the outside
+play = player.play
+stop = player.stop

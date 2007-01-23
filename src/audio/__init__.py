@@ -1,31 +1,25 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
-# __init__.py
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# __init__.py - interface to audio
+# -----------------------------------------------------------------------------
 # $Id$
 #
 # This file imports everything needed to use this audio module.
 # There is  only one class provided for audio files, the PluginInterface
 # from interface.py. It is a MimetypePlugin that can be accessed
 # from plugin.mimetype(). It will also register an fxd handler for the
-# <audio> tag.
+# <playlist> tag.
 #
 # Audio plugins are also allowed to use AudioItem to create a new AudioItem
-# and audioplayer, a function to return the player application
 #
-# Notes:
-# Todo:
-#
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.26  2004/09/13 19:34:24  dischi
-# move interface/fxdhandler into extra file
-#
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
-# Please see the file doc/CREDITS for a complete list of authors.
+# Copyright (C) 2002-2007 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dischi@freevo.org>
+# Maintainer:    Dirk Meyer <dischi@freevo.org>
+#
+# Please see the file AUTHORS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -41,10 +35,9 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
 from interface import *
 
 # used by audio plugins
 from audioitem import AudioItem
-from player import audioplayer
