@@ -214,15 +214,14 @@ class Player(Application):
                 self.status = STATUS_IDLE
             return True
 
-        if event == PAUSE:
-            self.player.pause()
-            self.elapsed_timer.stop()
-            return True
-
-        if event == PLAY:
-            self.player.resume()
-            self.elapsed_timer.start(0.2)
-            return True
+        if event in (PAUSE, PLAY):
+            if self.player.get_state() == kaa.popcorn.STATE_PLAYING:
+                self.pause()
+                return True
+            if self.player.get_state() == kaa.popcorn.STATE_PAUSED:
+                self.resume()
+                return True
+            return False
 
         if event == SEEK:
             self.player.seek(int(event.arg), kaa.popcorn.SEEK_RELATIVE)
