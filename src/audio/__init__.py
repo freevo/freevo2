@@ -4,17 +4,17 @@
 # -----------------------------------------------------------------------------
 # $Id$
 #
-# This file imports everything needed to use this audio module.
-# There is  only one class provided for audio files, the PluginInterface
-# from interface.py. It is a MimetypePlugin that can be accessed
-# from plugin.mimetype(). It will also register an fxd handler for the
+# This file imports everything needed to use this audio module.  There
+# is only one class provided for audio files, the PluginInterface from
+# interface.py. It is a MimetypePlugin that can be accessed from
+# plugin.mimetype(). It will also register an fxd handler for the
 # <playlist> tag.
 #
 # Audio plugins are also allowed to use AudioItem to create a new AudioItem
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002-2007 Krister Lagerstrom, Dirk Meyer, et al.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2007 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>

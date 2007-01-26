@@ -4,23 +4,24 @@
 # -----------------------------------------------------------------------------
 # $Id$
 #
-# This file imports everything needed to use this image module.
-# There is  only one class provided for images, the PluginInterface
-# from interface.py. It is a MimetypePlugin that can be accessed
-# from plugin.mimetype(). It will also register an fxd handler for the
+# This file imports everything needed to use this image module.  There
+# is only one class provided for images, the PluginInterface from
+# interface.py. It is a MimetypePlugin that can be accessed from
+# plugin.mimetype(). It will also register an fxd handler for the
 # <slideshow> tag.
 #
-# Image plugins are also allowed to use ImageItem to create a new ImageItem
-# and viewer, the viewer application
+# Image plugins are also allowed to use ImageItem to create a new
+# ImageItem and viewer, the viewer application
+#
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2006 Dirk Meyer, et al.
 #
 # First edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
 #
-# Please see the file doc/CREDITS for a complete list of authors.
+# Please see the file AUTHORS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

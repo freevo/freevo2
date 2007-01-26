@@ -7,13 +7,14 @@
 # This file contains the main menu and a class for main menu plugins. There
 # is also eventhandler support for the main menu showing the skin chooser.
 #
+# -----------------------------------------------------------------------------
+# Freevo - A Home Theater PC framework
+# Copyright (C) 2005-2006 Dirk Meyer, et al.
+#
 # First edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
 #
-# -----------------------------------------------------------------------------
-# Freevo - A Home Theater PC framework
-# Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
-# Please see the file doc/CREDITS for a complete list of authors.
+# Please see the file AUTHORS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

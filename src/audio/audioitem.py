@@ -1,19 +1,20 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # audioitem - Item for mp3 and ogg files
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
 # This file contains an item used for audio files. It handles all actions
-# possible for an audio item (right now only 'play')
+# possible for an audio item
 #
-# Notes:
-# Todo:        
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al. 
-# Please see the file doc/CREDITS for a complete list of authors.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2007 Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dischi@freevo.org>
+# Maintainer:    Dirk Meyer <dischi@freevo.org>
+#
+# Please see the file AUTHORS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,25 +30,25 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
 __all__ = [ 'AudioItem' ]
 
-# Python imports
+# python imports
 import os
-import re
+import logging
 
 # kaa imports
 from kaa.strutils import str_to_unicode
 
-# Freevo imports
-import config
+# freevo imports
 from menu import MediaItem, Action
 from event import *
 
+# audio player
 import player as audioplayer
 
-import logging
+# get logging object
 log = logging.getLogger('audio')
 
 class AudioItem(MediaItem):
@@ -65,7 +66,7 @@ class AudioItem(MediaItem):
             self.length = int(self.info['length'])
         except:
             self.length = 0
-            
+
 
     def sort(self, mode=None):
         """
@@ -81,7 +82,8 @@ class AudioItem(MediaItem):
                 return '%s %0.3i-%s' % (self['discs'], int(self['trackno']),
                                         str_to_unicode(self.url))
             except ValueError:
-                return '%s-%s' % (unicode(self['trackno']), str_to_unicode(self.url))
+                return '%s-%s' % (unicode(self['trackno']),
+                                  str_to_unicode(self.url))
         return str_to_unicode(self.url)
 
 
@@ -111,10 +113,10 @@ class AudioItem(MediaItem):
 
         if key  == 'elapsed':
             return '%d:%02d' % (int(self.elapsed / 60), int(self.elapsed % 60))
-            
+
         return MediaItem.__getitem__(self, key)
 
-   
+
     def actions(self):
         """
         return a list of possible actions on this item

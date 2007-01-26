@@ -6,12 +6,12 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
+# Copyright (C) 2003-2007 Dirk Meyer, et al.
 #
 # First Edition: Michael Ruelle <mikeruelle@comcast.net>
-# Maintainer:    Michael Ruelle <mikeruelle@comcast.net>
+# Maintainer:    Dirk Meyer <dischi@freevo.org>
 #
-# Please see the file doc/CREDITS for a complete list of authors.
+# Please see the file AUTHORS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -44,9 +44,7 @@ import menu
 
 from menu import Item, Action, ActionItem, Menu
 from image import ImageItem
-
 from application import TextWindow, MessageWindow
-
 
 class ApodMainMenuItem(Item):
     """
@@ -73,8 +71,7 @@ class ApodMainMenuItem(Item):
         Create a menu for APOD.
         """
         # current image
-        current = ActionItem(_('Current Picture'), self,
-                             self.fetch_current_picture)
+        current = ActionItem(_('Current Picture'), self, self.fetch_picture)
         current.description = _('Download the current picture')
 
         # previous images
@@ -103,20 +100,20 @@ class ApodMainMenuItem(Item):
             MessageWindow(_('No Images found')).show()
 
 
-    def fetch_current_picture(self):
+    def fetch_picture(self):
         """
         Fetch current picture.
         """
         box = TextWindow(text=_('Getting picture, please wait'))
         box.show()
 
-        thread = Thread(self.__fetch_current_picture_thread)
-        thread.signals['completed'].connect(self.__fetch_current_picture_finished, box)
-        thread.signals['exception'].connect(self.__fetch_current_picture_error, box)
+        thread = Thread(self._fetch_picture_thread)
+        thread.signals['completed'].connect(self._fetch_picture_finished, box)
+        thread.signals['exception'].connect(self._fetch_picture_error, box)
         thread.start()
 
 
-    def __fetch_current_picture_thread(self):
+    def _fetch_picture_thread(self):
         """
         Fetch current picture.
         """
@@ -139,7 +136,7 @@ class ApodMainMenuItem(Item):
             raise 'Could not open %s%s: %s' % (url, ref, e)
 
 
-    def __fetch_current_picture_error(self, error, box):
+    def _fetch_picture_error(self, error, box):
         """
         Handle error for the thread in the main loop.
         """
@@ -149,7 +146,7 @@ class ApodMainMenuItem(Item):
         MessageWindow(error).show()
 
 
-    def __fetch_current_picture_finished(self, filename, box):
+    def _fetch_picture_finished(self, filename, box):
         """
         Download finished.
         """

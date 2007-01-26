@@ -1,20 +1,21 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # interface.py - interface between mediamenu and audio
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# This file defines the PluginInterface for the audio module
-# of Freevo. It is loaded by __init__.py and will activate the
-# mediamenu for audio.
+# This file defines the PluginInterface for the audio module of
+# Freevo. It is loaded by __init__.py and will activate the mediamenu
+# for audio.
 #
-# Notes:
-# Todo:
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
-# Please see the file doc/CREDITS for a complete list of authors.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2006 Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dischi@freevo.org>
+# Maintainer:    Dirk Meyer <dischi@freevo.org>
+#
+# Please see the file AUTHORS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,7 +31,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
 # only export 'PluginInterface' to the outside. This will be used
 # with plugin.activate('audio') and everything else should be handled
@@ -69,7 +70,7 @@ class PluginInterface(plugin.MimetypePlugin):
         # activate the mediamenu for audio
         level = plugin.is_active('audio')[2]
         plugin.activate('mediamenu', level=level, args='audio')
-        
+
 
     def suffix(self):
         """

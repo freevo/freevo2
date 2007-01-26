@@ -7,17 +7,14 @@
 # This file is the basic plugin interface for Freevo. It defines simple plugin
 # base classes functions to add or remove a plugin.
 #
-# TODO: o make it possible to remove plugins later
-#       o more cleanup
-#
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
+# Copyright (C) 2003-2006 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
 #
-# Please see the file doc/CREDITS for a complete list of authors.
+# Please see the file AUTHORS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -85,7 +82,7 @@ class PluginLoader(object):
         # list of all plugins
         self.plugins = []
         self.loaded_plugins = []
-        
+
         # next id for a plugin
         self.next_id = 0
         # plugins sorted by type
@@ -171,7 +168,7 @@ class PluginLoader(object):
         """
         self.__initialized = True
         self.path = plugin_path
-        
+
         for name, type, level, args, number in self.plugins:
             kaa.notifier.step(False, True)
             if callback:
@@ -333,7 +330,7 @@ class PluginLoader(object):
                 self.names[p._plugin_name] = p
 
             self.loaded_plugins.append(p)
-            
+
         except:
             log.exception('failed to load plugin %s' % name)
 

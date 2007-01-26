@@ -6,12 +6,12 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2007 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
 #
-# Please see the file doc/CREDITS for a complete list of authors.
+# Please see the file AUTHORS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -182,7 +182,7 @@ class DirItem(Playlist):
         # Check mimetype plugins if they want to add something
         for p in plugin.mimetype(type):
             p.dirinfo(self)
-        
+
 
     def __getitem__(self, key):
         """
@@ -267,7 +267,7 @@ class DirItem(Playlist):
             if self.display_type == 'tv':
                 return 'video' in value
             return self.display_type in value
-            
+
         return Item.__getitem__(self, key)
 
 
@@ -307,10 +307,6 @@ class DirItem(Playlist):
                 OSD_MESSAGE.post('Hide played items')
             else:
                 OSD_MESSAGE.post('Show all items')
-
-        if event == PLAY_START and event.arg in self.item_menu.choices:
-            # update selection and pass the event to playlist after that
-            self.item_menu.select(event.arg)
 
         return Playlist.eventhandler(self, event)
 

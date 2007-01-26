@@ -1,16 +1,17 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # event.py - Global events for Freevo
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes:
-# Todo:        
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al. 
-# Please see the file doc/CREDITS for a complete list of authors.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2007 Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dischi@freevo.org>
+# Maintainer:    Dirk Meyer <dischi@freevo.org>
+#
+# Please see the file AUTHORS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,7 +27,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
 import kaa.notifier
 
@@ -48,7 +49,7 @@ class Event(kaa.notifier.Event):
         """
         self.handler = handler
 
-        
+
     def __int__(self):
         """
         Return the event as int (the last char of the name will be returned
@@ -76,10 +77,10 @@ MIXER_MUTE             = Event('MIXER_MUTE')
 PLAYLIST_NEXT          = Event('PLAYLIST_NEXT')
 PLAYLIST_PREV          = Event('PLAYLIST_PREV')
 PLAYLIST_TOGGLE_REPEAT = Event('PLAYLIST_TOGGLE_REPEAT')
-                       
+
 EJECT                  = Event('EJECT')
-TOGGLE_APPLICATION     = Event('TOGGLE_APPLICATION')                       
-                       
+TOGGLE_APPLICATION     = Event('TOGGLE_APPLICATION')
+
 #
 # Menu
 #
@@ -90,11 +91,11 @@ MENU_UP                = Event('MENU_UP')
 MENU_DOWN              = Event('MENU_DOWN')
 MENU_PAGEUP            = Event('MENU_PAGEUP')
 MENU_PAGEDOWN          = Event('MENU_PAGEDOWN')
-                       
+
 MENU_GOTO_MAINMENU     = Event('MENU_GOTO_MAINMENU')
 MENU_GOTO_MEDIA        = Event('MENU_GOTO_MEDIA')
 MENU_BACK_ONE_MENU     = Event('MENU_BACK_ONE_MENU')
-                       
+
 MENU_SELECT            = Event('MENU_SELECT')
 MENU_CHANGE_SELECTION  = Event('MENU_CHANGE_SELECTION')
 MENU_PLAY_ITEM         = Event('MENU_PLAY_ITEM')
@@ -215,30 +216,13 @@ INPUT_ALL_NUMBERS = (INPUT_0, INPUT_1, INPUT_2, INPUT_3, INPUT_4, INPUT_5,
 # Call the function specified in event.arg
 FUNCTION_CALL          = Event('FUNCTION_CALL')
 
-# All buttons which are not mapped to an event will be send as
-# BOTTON event with the pressed button as arg
-BUTTON                 = Event('BUTTON')
-RATING                 = Event('RATING')
-
-
-
 #
 # Internal events, don't map any button on them
 #
 
 PLAY_END         = Event('PLAY_END')
 PLAY_START       = Event('PLAY_START')
-
 OSD_MESSAGE      = Event('OSD_MESSAGE')
 
-VIDEO_START      = Event('VIDEO_START')
-VIDEO_END        = Event('VIDEO_END')
-
-OS_EVENT_POPEN2  = Event('OS_EVENT_POPEN2')
-OS_EVENT_WAITPID = Event('OS_EVENT_WAITPID')
-OS_EVENT_KILL    = Event('OS_EVENT_KILL')
-
+# FIXME: delete this
 RECORD           = Event('RECORD')
-STOP_RECORDING   = Event('STOP_RECORDING')
-RECORD_START     = Event('RECORD_START')
-RECORD_STOP      = Event('RECORD_STOP')

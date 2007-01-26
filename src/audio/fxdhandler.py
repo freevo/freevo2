@@ -1,7 +1,7 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # fxdhandler - handler for <audio> tags in a fxd file
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
 # This file contains the parser for the <audio> tag
@@ -15,29 +15,29 @@
 #         <playlist/>
 #         <reconnect/>
 #         <url>http://64.236.34.141:80/stream/1005</url>
-# 
+#
 #         <info>
 #             <genre>JAZZ</genre>
 #             <description>A nice description</description>
 #         </info>
-# 
+#
 #     </audio>
 # </freevo>
-# 
+#
 # Everything except title and url is optional. If <player> is set,
 # this player will be used (possible xine or mplayer). The tag
 # <playlist/> signals that this url is a playlist (mplayer needs that).
 # <reconnect/> sihnals that the player should reconnect when the
 # connection stopps.
-# 
 #
-# Notes:
-# Todo:        
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al. 
-# Please see the file doc/CREDITS for a complete list of authors.
+# Copyright (C) 2003-2006 Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dischi@freevo.org>
+# Maintainer:    Dirk Meyer <dischi@freevo.org>
+#
+# Please see the file AUTHORS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
 __all__ = [ 'fxdhandler' ]
 
