@@ -176,7 +176,7 @@ from freevo.ui import plugin, util, beacon
 
 # load the fxditem to make sure it's the first in the
 # mimetypes list
-import fxditem
+import freevo.ui.fxditem
 
 # freevo core imports
 import freevo.ipc

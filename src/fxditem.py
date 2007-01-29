@@ -50,11 +50,12 @@ import copy
 import logging
 import os
 
-from freevo.ui import util
-from freevo.ui import plugin
 import freevo.fxdparser
 
-from freevo.ui.menu import Item, Action, Menu
+import util
+import plugin
+
+from menu import Item, Action, Menu
 
 # get logging object
 log = logging.getLogger()
