@@ -35,7 +35,7 @@
 
 import kaa.input.lirc
 import config
-from input.interface import InputPlugin
+from interface import InputPlugin
 
 class PluginInterface(InputPlugin):
     """

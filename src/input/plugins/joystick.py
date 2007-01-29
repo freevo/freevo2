@@ -40,7 +40,7 @@ import struct
 from time import sleep
 
 import config
-from input.interface import InputPlugin
+from interface import InputPlugin
 
 import logging
 log = logging.getLogger('input')

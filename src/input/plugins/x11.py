@@ -39,7 +39,7 @@ import config
 
 # input imports
 from input import linux_input
-from input.interface import InputPlugin
+from interface import InputPlugin
 
 # get logging object
 log = logging.getLogger('input')

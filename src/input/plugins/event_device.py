@@ -93,7 +93,7 @@ import config
 
 import input.linux_input as li
 import input.evdev_keymaps as ek
-from input.interface import InputPlugin
+from interface import InputPlugin
 
 from freevo.ui.event import *
 

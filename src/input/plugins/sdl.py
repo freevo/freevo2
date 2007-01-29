@@ -41,7 +41,7 @@ import gui
 
 from menu import Item
 from freevo.ui.event import *
-from input.interface import InputPlugin
+from interface import InputPlugin
 
 # get logging object
 log = logging.getLogger('input')

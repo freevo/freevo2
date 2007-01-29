@@ -29,37 +29,19 @@
 #
 # -----------------------------------------------------------------------------
 
-__all__ = [ 'set_mapping', 'get_mapping', 'InputPlugin' ]
+__all__ = [ 'InputPlugin' ]
 
 
 # python imports
-import copy
 import logging
 
 # freevo imports
 import config
+import input
 from freevo.ui import plugin
 
 # get logging object
 log = logging.getLogger('input')
-
-# set key mapping for input
-_mapping = None
-
-def set_mapping(mapping):
-    """
-    Set new key mapping.
-    """
-    global _mapping
-    _mapping = mapping
-
-
-def get_mapping():
-    """
-    Get current key mapping.
-    """
-    return _mapping
-
 
 class InputPlugin(plugin.Plugin):
     """
@@ -74,7 +56,7 @@ class InputPlugin(plugin.Plugin):
         if not key:
             return None
 
-        for c in (_mapping, 'global'):
+        for c in (input.get_mapping(), 'global'):
             if not config.EVENTS.has_key(c):
                 continue
             if not config.EVENTS[c].has_key(key):
@@ -82,4 +64,4 @@ class InputPlugin(plugin.Plugin):
 
             return config.EVENTS[c][key].post()
 
-        log.warning('no event mapping for key %s in %s' % (key, _mapping))
+        log.warning('no event mapping for key %s in %s' % (key, input.get_mapping()))
