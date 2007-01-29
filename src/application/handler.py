@@ -47,8 +47,7 @@ import kaa.notifier
 
 # freevo imports
 import config
-import input
-
+from freevo.ui.input import set_mapping
 from freevo.ui.event import *
 
 # the logging object
@@ -96,7 +95,7 @@ class Handler(object):
         if self.windows:
             focus = self.windows[-1]
         log.info('set focus to %s' % focus)
-        input.set_mapping(focus.eventmap)
+        set_mapping(focus.eventmap)
 
         if app == self.current:
             # same app as before

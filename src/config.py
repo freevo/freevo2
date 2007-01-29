@@ -63,9 +63,7 @@ import setup
 
 # input inputs variables for the input system
 # and event.py (which has no more deps)
-import input
-
-from freevo.ui import plugin
+from freevo.ui import input, plugin
 
 # import event names (no deps)
 from freevo.ui.event import *

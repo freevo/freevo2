@@ -91,8 +91,8 @@ from time import sleep
 
 import config
 
-import input.linux_input as li
-import input.evdev_keymaps as ek
+import freevo.ui.input.linux_input as li
+import freevo.ui.input.evdev_keymaps as ek
 from interface import InputPlugin
 
 from freevo.ui.event import *

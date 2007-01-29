@@ -38,7 +38,7 @@ import gui
 import config
 
 # input imports
-from input import linux_input
+from freevo.ui.input import linux_input
 from interface import InputPlugin
 
 # get logging object

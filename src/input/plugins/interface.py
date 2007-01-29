@@ -37,8 +37,7 @@ import logging
 
 # freevo imports
 import config
-import input
-from freevo.ui import plugin
+from freevo.ui import plugin, input
 
 # get logging object
 log = logging.getLogger('input')
