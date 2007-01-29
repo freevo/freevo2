@@ -6,12 +6,12 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
+# Copyright (C) 2005-2007 Dirk Meyer, et al.
 #
-# First edition: Krister Lagerstrom <krister-freevo@kmlager.com>
+# First edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
 #
-# Please see the file doc/CREDITS for a complete list of authors.
+# Please see the file AUTHORS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ class MenuWidget(Application, MenuStack):
         self.pushmenu(menu)
         self.status = STATUS_RUNNING
         self.signals['show'].connect_weak(self.refresh, True)
-        
+
 
     def refresh(self, reload=False):
         MenuStack.refresh(self, reload)

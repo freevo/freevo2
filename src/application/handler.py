@@ -12,7 +12,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002-2006 Krister Lagerstrom, Dirk Meyer, et al.
+# Copyright (C) 2005-2007 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -227,7 +227,7 @@ class Handler(object):
             sys.exit(0)
 
         except Exception, e:
-            log.exception('eventhandler')
+            log.exception('application.handler')
             if config.FREEVO_EVENTHANDLER_SANDBOX:
                 msg=_('Event \'%s\' crashed\n\nPlease take a ' \
                       'look at the logfile and report the bug to ' \

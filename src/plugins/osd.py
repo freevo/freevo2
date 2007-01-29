@@ -9,7 +9,7 @@
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002-2006 Krister Lagerstrom, Dirk Meyer, et al.
+# Copyright (C) 2003-2006 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -65,7 +65,7 @@ class PluginInterface(plugin.Plugin):
         init the osd
         """
         plugin.Plugin.__init__(self)
-        EventHandler(self.eventhandler).register([ 'OSD_MESSAGE' ])
+        EventHandler(self.eventhandler).register([ OSD_MESSAGE ])
         self.message = ''
         self.gui_object = None
         self.hide_timer = OneShotTimer(self.hide)
