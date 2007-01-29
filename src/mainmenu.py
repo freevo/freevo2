@@ -63,8 +63,6 @@ class MainMenuItem(Item):
         self.image = image
         self.type = type
         self.function = action, arg
-        self.args = []
-        self.kwargs = {}
 
         if not type and not parent.parent:
             # this is the first page, force type to 'main'
@@ -74,9 +72,8 @@ class MainMenuItem(Item):
             return
 
         # load extra informations for the skin fxd file
-        theme     = gui.theme.get()
+        theme = gui.theme.get()
         skin_info = theme.mainmenu.items
-        imagedir  = theme.mainmenu.imagedir
         if skin_info.has_key(skin_type):
             skin_info  = skin_info[skin_type]
             self.name  = _(skin_info.name)
@@ -84,26 +81,17 @@ class MainMenuItem(Item):
             if skin_info.icon:
                 self.icon = os.path.join(theme.icon_dir, skin_info.icon)
 
+        imagedir = theme.mainmenu.imagedir
         if not self.image and imagedir:
             # find a nice image based on skin type
             self.image = util.getimage(os.path.join(imagedir, skin_type))
-
-
-    def parameter(self, *args, **kwargs):
-        """
-        Set parameter for the function call.
-        """
-        self.args = args
-        self.kwargs = kwargs
 
 
     def actions(self):
         """
         Actions for this item.
         """
-        a = Action(self.name, self.function[0])
-        a.parameter(*self.args, **self.kwargs)
-        return [ a ]
+        return [ Action(self.name, self.function[0]) ]
 
 
 class MainMenu(Item):
@@ -122,30 +110,6 @@ class MainMenu(Item):
         menu = Menu(_('Freevo Main Menu'), items, type='main')
         menu.autoselect = True
         self.menuw = MenuWidget(menu)
-
-
-    def get_skins(self):
-        """
-        return a list of all possible skins with name, image and filename
-        """
-        ret = []
-        skindir = os.path.join(config.SKIN_DIR, 'main')
-        skin_files = util.match_files(skindir, ['fxd'])
-
-        # image is not usable stand alone
-        skin_files.remove(os.path.join(config.SKIN_DIR, 'main/image.fxd'))
-        skin_files.remove(os.path.join(config.SKIN_DIR, 'main/basic.fxd'))
-
-        for skin in skin_files:
-            name  = os.path.splitext(os.path.basename(skin))[0]
-            if os.path.isfile('%s.png' % os.path.splitext(skin)[0]):
-                image = '%s.png' % os.path.splitext(skin)[0]
-            elif os.path.isfile('%s.jpg' % os.path.splitext(skin)[0]):
-                image = '%s.jpg' % os.path.splitext(skin)[0]
-            else:
-                image = None
-            ret += [ ( name, image, skin ) ]
-        return ret
 
 
     def get_menustack(self):

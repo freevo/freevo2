@@ -551,23 +551,6 @@ GUI_FADE_STEPS = 10
 GUI_XML_FILE         = ''
 GUI_DEFAULT_XML_FILE = 'blurr'
 
-#
-# Select a way when to switch to text view even if a image menu is there
-# 
-# 1 = Force text view when all items have the same image and there are no
-#     directories
-# 2 = Ignore the directories, always switch to text view when all images
-#     are the same
-#
-GUI_FORCE_TEXTVIEW_STYLE = 1
-
-#
-# Force text view for the media menu
-# (The media menu is the first menu displayed for video, audio, images 
-# and games). 
-#
-GUI_MEDIAMENU_FORCE_TEXTVIEW = 0
-
 GUI_DFB_LAYER = 0
 
 # start GUI in fullscreen mode

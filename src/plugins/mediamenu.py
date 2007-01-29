@@ -65,10 +65,9 @@ class PluginInterface(plugin.MainMenuPlugin):
         plugin.MainMenuPlugin.__init__(self)
         self.name = name
         self.type = type
-        self.ftv  = config.GUI_MEDIAMENU_FORCE_TEXTVIEW
 
     def items(self, parent):
-        return [ MediaMenu(parent, self.name, self.type, self.ftv) ]
+        return [ MediaMenu(parent, self.name, self.type) ]
 
 
 
@@ -78,10 +77,10 @@ class MediaMenu(MainMenuItem):
     directories and the ROM_DRIVES
     """
 
-    def __init__(self, parent, title, type, force_text_view):
+    def __init__(self, parent, title, type):
         MainMenuItem.__init__(self, '', self.main_menu, type='main',
                               parent=parent, skin_type=type)
-        self.force_text_view = force_text_view
+        self.force_text_view = False
         self.display_type = type
         self.item_menu = None
 

@@ -176,8 +176,7 @@ class Handler(object):
                 pass
 
             for i in menu.choices:
-                if config.GUI_FORCE_TEXTVIEW_STYLE == 1 and \
-                       i.type == 'dir':
+                if i.type == 'dir':
                     # directory with few items and folder:
                     self.use_text_view = False
                     return
@@ -196,7 +195,7 @@ class Handler(object):
             if i.type == 'dir':
                 folder += 1
                 # directory with mostly folder:
-                if config.GUI_FORCE_TEXTVIEW_STYLE == 1 and folder > 3:
+                if folder > 3:
                     self.use_text_view = False
                     return
                     
