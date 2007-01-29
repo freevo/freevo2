@@ -45,7 +45,7 @@ import gui.widgets
 from menu import Action
 from application import ConfirmWindow
 from mainmenu import MainMenuItem
-from plugin import MainMenuPlugin
+from freevo.ui.plugin import MainMenuPlugin
 
 
 class ShutdownItem(MainMenuItem):

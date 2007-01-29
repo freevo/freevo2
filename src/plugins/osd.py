@@ -40,7 +40,7 @@ from kaa.notifier import OneShotTimer, EventHandler
 
 # freevo imports
 import config
-import plugin
+from freevo.ui import plugin
 import gui
 import gui.widgets
 import gui.theme

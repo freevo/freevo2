@@ -44,7 +44,7 @@ from kaa.weakref import weakref
 # freevo imports
 import config
 import util
-import plugin
+from freevo.ui import plugin
 import fxditem
 
 from event import *

@@ -4,7 +4,7 @@ from application import Application, STATUS_RUNNING, STATUS_STOPPING, \
 	 STATUS_STOPPED, STATUS_IDLE, CAPABILITY_TOGGLE, CAPABILITY_PAUSE, \
 	 CAPABILITY_FULLSCREEN
 from event import *
-import plugin
+from freevo.ui import plugin
 
 _singleton = None
 

@@ -46,7 +46,7 @@ import stat
 # Freevo imports
 import config
 import util
-import plugin
+from freevo.ui import plugin
 import fxditem
 
 # AudioItem

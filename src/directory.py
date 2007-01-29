@@ -48,7 +48,7 @@ import config
 import util
 
 import menu
-import plugin
+from freevo.ui import plugin
 import fxditem
 
 from menu import Item, Files, Action, ActionItem

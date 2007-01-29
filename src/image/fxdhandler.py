@@ -59,7 +59,7 @@ from kaa.strutils import unicode_to_str
 
 # Freevo imports
 import config
-import plugin
+from freevo.ui import plugin
 
 from util import match_files
 from playlist import Playlist

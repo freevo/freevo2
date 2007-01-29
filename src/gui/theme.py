@@ -58,7 +58,7 @@ import kaa.strutils
 import freevo.conf
 import config
 import util
-import plugin
+from freevo.ui import plugin
 
 # gui imports
 from font import get as get_font_object

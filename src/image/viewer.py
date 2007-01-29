@@ -41,7 +41,7 @@ from kaa.strutils import to_unicode
 
 # freevo imports
 import config
-import plugin
+from freevo.ui import plugin
 import gui
 import gui.widgets
 import gui.imagelib

@@ -81,7 +81,7 @@ import struct
 import os
 
 import config
-import plugin
+from freevo.ui import plugin
 from event import *
 
 from kaa.notifier import EventHandler

@@ -29,7 +29,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # -----------------------------------------------------------------------------
-import plugin
+from freevo.ui import plugin
 import config
 import machine
 from gameitem import GameItem

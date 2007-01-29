@@ -39,7 +39,7 @@ from kaa.notifier import Thread, Callback
 import kaa.beacon
 
 # freevo imports
-import plugin
+from freevo.ui import plugin
 import menu
 
 from menu import Item, Action, ActionItem, Menu

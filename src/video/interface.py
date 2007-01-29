@@ -43,7 +43,7 @@ import string
 # freevo imports
 import config
 import util
-import plugin
+from freevo.ui import plugin
 import fxditem
 from menu import Files
 

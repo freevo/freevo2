@@ -40,7 +40,7 @@ import kaa.beacon
 from kaa.strutils import str_to_unicode
 
 # Freevo imports
-from plugin import MainMenuPlugin
+from freevo.ui.plugin import MainMenuPlugin
 from menu import Item, ActionItem, Menu, Action
 from playlist import Playlist
 

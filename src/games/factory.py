@@ -30,7 +30,7 @@
 #
 # -----------------------------------------------------------------------------
 from singleton import Singleton
-import plugin
+from freevo.ui import plugin
 
 class Factory(Singleton):
     def init(self):

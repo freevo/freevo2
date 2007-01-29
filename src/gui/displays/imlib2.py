@@ -32,7 +32,7 @@
 __all__ = [ 'Display' ]
 
 # python imports
-import plugin
+from freevo.ui import plugin
 import config
 
 # mevas imports

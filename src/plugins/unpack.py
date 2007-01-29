@@ -41,7 +41,7 @@ import os
 import kaa.notifier
 
 # freevo imports
-import plugin
+from freevo.ui import plugin
 import util
 
 from menu import Item, Action

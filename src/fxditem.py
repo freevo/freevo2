@@ -50,7 +50,7 @@ import copy
 import logging
 
 import util
-import plugin
+from freevo.ui import plugin
 import os
 import freevo.fxdparser
 

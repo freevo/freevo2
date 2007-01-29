@@ -50,7 +50,7 @@ import kaa.beacon
 import freevo.conf
 
 from menu import Action, Menu
-from plugin import ItemPlugin
+from freevo.ui.plugin import ItemPlugin
 from event import *
 
 # the logging object

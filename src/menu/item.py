@@ -44,7 +44,7 @@ from kaa.weakref import weakref
 import kaa.beacon
 
 # freevo imports
-import plugin
+from freevo.ui import plugin
 
 # get logging object
 log = logging.getLogger()

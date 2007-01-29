@@ -37,7 +37,7 @@ import gui
 import gui.widgets
 import gui.theme
 import config
-import plugin
+from freevo.ui import plugin
 from plugins.idlebar import IdleBarPlugin
 
 # grabber module

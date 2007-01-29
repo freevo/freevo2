@@ -65,7 +65,7 @@ import setup
 # and event.py (which has no more deps)
 import input
 
-import plugin
+from freevo.ui import plugin
 
 # import event names (no deps)
 from event import *

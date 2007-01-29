@@ -30,7 +30,7 @@ import re
 from kaa.strutils import unicode_to_str
 import kaa.notifier
 
-import plugin
+from freevo.ui import plugin
 from event import *
 
 import logging

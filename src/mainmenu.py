@@ -42,7 +42,7 @@ import os
 import config
 import gui.theme
 import util
-import plugin
+from freevo.ui import plugin
 
 from menu import Item, Action, Menu
 from application.menuw import MenuWidget

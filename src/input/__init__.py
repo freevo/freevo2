@@ -1,4 +1,4 @@
-from plugin import Plugin
+from freevo.ui.plugin import Plugin
 
 class PluginInterface(Plugin):
     """

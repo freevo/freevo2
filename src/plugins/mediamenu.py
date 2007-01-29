@@ -43,7 +43,7 @@ from kaa.weakref import weakref
 # freevo imports
 import config
 
-import plugin
+from freevo.ui import plugin
 
 from event import *
 from directory import DirItem

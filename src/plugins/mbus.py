@@ -7,7 +7,7 @@ import kaa.beacon
 import freevo.ipc
 
 # freevo ui imports
-import plugin
+from freevo.ui import plugin
 import application
 from event import *
 from directory import DirItem

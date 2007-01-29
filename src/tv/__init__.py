@@ -34,7 +34,7 @@
 import freevo.ipc
 
 # freevo imports
-import plugin
+from freevo.ui import plugin
 
 
 class PluginInterface(plugin.MainMenuPlugin):
