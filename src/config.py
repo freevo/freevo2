@@ -56,7 +56,7 @@ import kaa.popcorn
 import freevo.conf
 
 # freevo imports
-from freevo.ui import version, setup, input, plugin
+from freevo.ui import setup, input, plugin
 
 # import event names
 from freevo.ui.event import *
