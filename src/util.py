@@ -1,26 +1,17 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# misc.py - misc utilities helper functions
+# util.py - misc utilities helper functions
 # -----------------------------------------------------------------------------
 # $Id$
 #
-# This file contains some smaller helper functions needed in Freevo and other
-# util modules.
-#
-# TODO: More cleanups here. What need to be here? What is not needed anymore?
-#       Split into different files?
-#
-# Note: I removed some functiosn we don't need anymore to clean up this file.
-#       Other functions only needed once are moved to the file were they
-#       are needed.
-#
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
+# Copyright (C) 2002 Krister Lagerstrom, 2003-2007 Dirk Meyer, et al.
 #
+# Fisrt Version: Krister Lagerstrom <krister-freevo@kmlager.com>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
 #
-# Please see the file doc/CREDITS for a complete list of authors.
+# Please see the file AUTHORS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
