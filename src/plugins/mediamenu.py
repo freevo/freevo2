@@ -6,13 +6,14 @@
 #
 # This plugin can create submenus for the different kind of media plugins.
 #
-# First edition: Dirk Meyer <dischi@freevo.org>
-# Maintainer:    Dirk Meyer <dischi@freevo.org>
-#
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al.
-# Please see the file doc/CREDITS for a complete list of authors.
+# Copyright (C) 2003-2007 Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dischi@freevo.org>
+# Maintainer:    Dirk Meyer <dischi@freevo.org>
+#
+# Please see the file AUTHORS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -60,13 +61,14 @@ class PluginInterface(plugin.MainMenuPlugin):
     the Freevo main menu. This plugin is auto-loaded when you activate
     the 'video', 'audio', 'image' or 'games' plugin.
     """
-    def __init__(self, type=None, force_text_view=False):
+    def __init__(self, name, type):
         plugin.MainMenuPlugin.__init__(self)
+        self.name = name
         self.type = type
-        self.ftv  = force_text_view or config.GUI_MEDIAMENU_FORCE_TEXTVIEW
+        self.ftv  = config.GUI_MEDIAMENU_FORCE_TEXTVIEW
 
     def items(self, parent):
-        return [ MediaMenu(parent, self.type, self.ftv) ]
+        return [ MediaMenu(parent, self.name, self.type, self.ftv) ]
 
 
 
@@ -76,7 +78,7 @@ class MediaMenu(MainMenuItem):
     directories and the ROM_DRIVES
     """
 
-    def __init__(self, parent, type, force_text_view):
+    def __init__(self, parent, title, type, force_text_view):
         MainMenuItem.__init__(self, '', self.main_menu, type='main',
                               parent=parent, skin_type=type)
         self.force_text_view = force_text_view
@@ -85,28 +87,20 @@ class MediaMenu(MainMenuItem):
 
         kaa.beacon.signals['media.add'].connect(self.media_change)
         kaa.beacon.signals['media.remove'].connect(self.media_change)
-        
-        title = _('Media')
 
-        if self.display_type == 'video':
-            title = _('Movie')
-        if self.display_type == 'audio':
-            title = _('Audio')
-        if self.display_type == 'image':
-            title = _('Image')
-        if self.display_type == 'games':
-            title = _('Games')
-
-        self.menutitle = _('%s Main Menu') % title
+        self.menutitle = title
 
         self.config_items = []
         if self.display_type:
-            self.config_items = getattr(config, '%s_ITEMS' % self.display_type.upper())
+            i = getattr(config, '%s_ITEMS' % self.display_type.upper())
+            self.config_items = i
             for filename in self.config_items:
                 if not isinstance(filename, (str, unicode)):
                     filename = filename[1]
-                if os.path.isdir(filename) and not os.environ.get('NO_CRAWLER') and \
-                       not filename == os.environ.get('HOME') and not filename == '/':
+                if os.path.isdir(filename) and \
+                       not os.environ.get('NO_CRAWLER') and \
+                       not filename == os.environ.get('HOME') and \
+                       not filename == '/':
                     kaa.beacon.monitor(filename)
 
 
@@ -228,4 +222,3 @@ class MediaMenu(MainMenuItem):
            self.item_menu.selected.info['parent'] == \
            self.item_menu.selected.info['media']:
             self.item_menu.selected.info['media'].eject()
-            

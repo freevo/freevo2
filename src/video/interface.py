@@ -70,7 +70,8 @@ class PluginInterface(plugin.MimetypePlugin):
         database.update()
         # activate the mediamenu for video
         level = plugin.is_active('video')[2]
-        plugin.activate('mediamenu', level=level, args='video')
+        args = _('Video Main Menu'), 'video'
+        plugin.activate('mediamenu', level=level, args=args)
         
 
     def suffix(self):

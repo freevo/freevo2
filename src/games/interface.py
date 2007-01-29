@@ -48,8 +48,9 @@ class PluginInterface(plugin.MimetypePlugin):
         self.index = 0
 
         # activate the mediamenu for video
-        plugin.activate('mediamenu', level=plugin.is_active('games')[2],
-                        args='games')
+        level = plugin.is_active('games')[2]
+        args = _('Games Main Menu'), 'games'
+        plugin.activate('mediamenu', level=level, args=args)
 
 
     def suffix(self):

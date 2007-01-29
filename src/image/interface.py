@@ -62,7 +62,8 @@ class PluginInterface(plugin.MimetypePlugin):
 
         # activate the mediamenu for image
         level = plugin.is_active('image')[2]
-        plugin.activate('mediamenu', level=level, args='image')
+        args = _('Image Main Menu'), 'image'
+        plugin.activate('mediamenu', level=level, args=args)
 
 
     def suffix(self):
