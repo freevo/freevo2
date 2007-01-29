@@ -39,7 +39,7 @@ import time
 
 # freevo imports
 from freevo.ui import config
-from menu import MediaItem, Action
+from freevo.ui.menu import MediaItem, Action
 from viewer import viewer
 
 class ImageItem(MediaItem):

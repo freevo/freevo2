@@ -39,7 +39,7 @@ import kaa.epg
 import kaa.notifier
 
 from freevo.ui.event import *
-from menu import Item, Menu
+from freevo.ui.menu import Item, Menu
 from program import ProgramItem
 
 # get logging object

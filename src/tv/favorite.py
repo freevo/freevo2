@@ -35,7 +35,7 @@
 import freevo.ipc
 
 # freevo imports
-from menu import Item, Action, Menu
+from freevo.ui.menu import Item, Action, Menu
 from application import MessageWindow
 
 # get tvserver interface

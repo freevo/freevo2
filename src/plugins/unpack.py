@@ -44,7 +44,7 @@ import kaa.notifier
 from freevo.ui import plugin
 from freevo.ui import util
 
-from menu import Item, Action
+from freevo.ui.menu import Item, Action
 from application import TextWindow
 
 # possible archives and how to unpack them

@@ -38,7 +38,7 @@ from freevo.ui import plugin
 import logging
 
 # Freevo imports
-from menu import ItemPlugin, Action
+from freevo.ui.menu import ItemPlugin, Action
 
 # get logging object
 log = logging.getLogger('video')

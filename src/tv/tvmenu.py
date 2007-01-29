@@ -39,7 +39,7 @@ from freevo.ui import config
 from freevo.ui import plugin
 
 from mainmenu import MainMenuItem
-from menu import Item, ActionItem, Menu
+from freevo.ui.menu import Item, ActionItem, Menu
 
 import tvguide
 from directory import DirItem

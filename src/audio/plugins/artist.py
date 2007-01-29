@@ -41,7 +41,7 @@ from kaa.strutils import str_to_unicode
 
 # Freevo imports
 from freevo.ui.plugin import MainMenuPlugin
-from menu import Item, ActionItem, Menu, Action
+from freevo.ui.menu import Item, ActionItem, Menu, Action
 from playlist import Playlist
 
 class AlbumItem(Item):

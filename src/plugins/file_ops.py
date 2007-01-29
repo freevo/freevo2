@@ -39,7 +39,7 @@ from freevo.ui import config
 from freevo.ui import plugin
 from freevo.ui import util
 
-from menu import Action
+from freevo.ui.menu import Action
 from application import ConfirmWindow
 
 # get logging object

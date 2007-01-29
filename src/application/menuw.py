@@ -32,7 +32,7 @@
 __all__ = [ 'MenuWidget' ]
 
 # freevo imports
-from menu import MenuStack
+from freevo.ui.menu import MenuStack
 
 # application imports
 from base import Application, STATUS_RUNNING, CAPABILITY_TOGGLE

@@ -54,7 +54,7 @@ from freevo.ui import plugin
 import os
 import freevo.fxdparser
 
-from menu import Item, Action, Menu
+from freevo.ui.menu import Item, Action, Menu
 
 # get logging object
 log = logging.getLogger()

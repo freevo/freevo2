@@ -42,7 +42,7 @@ import logging
 from kaa.strutils import str_to_unicode
 
 # freevo imports
-from menu import MediaItem, Action
+from freevo.ui.menu import MediaItem, Action
 from freevo.ui.event import *
 
 # audio player

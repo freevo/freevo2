@@ -50,7 +50,7 @@ from freevo.ui import config
 from freevo.ui import util
 
 from application import MessageWindow, ConfirmWindow
-from menu import Menu, MediaItem, Files, Action
+from freevo.ui.menu import Menu, MediaItem, Files, Action
 from freevo.ui.event import *
 
 # video imports

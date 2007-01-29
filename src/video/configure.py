@@ -39,7 +39,7 @@
 __all__ = [ 'get_items', 'get_menu' ]
 
 # freevo imports
-from menu import *
+from freevo.ui.menu import *
 
 
 def play_movie(item, mplayer_options=None):

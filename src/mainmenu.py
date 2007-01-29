@@ -44,7 +44,7 @@ import gui.theme
 from freevo.ui import util
 from freevo.ui import plugin
 
-from menu import Item, Action, Menu
+from freevo.ui.menu import Item, Action, Menu
 from application.menuw import MenuWidget
 from freevo.ui.event import *
 

@@ -172,8 +172,6 @@ import gui.widgets
 import gui.theme
 import beacon
 
-from mainmenu import MainMenu
-
 # new style imports
 from freevo.ui import plugin, util
 
@@ -183,6 +181,8 @@ import fxditem
 
 # freevo core imports
 import freevo.ipc
+
+from mainmenu import MainMenu
 
 class Splashscreen(gui.areas.Area):
     """

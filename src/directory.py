@@ -47,11 +47,11 @@ from kaa.strutils import str_to_unicode
 from freevo.ui import config
 from freevo.ui import util
 
-import menu
+from freevo.ui import menu
 from freevo.ui import plugin
 import fxditem
 
-from menu import Item, Files, Action, ActionItem
+from freevo.ui.menu import Item, Files, Action, ActionItem
 from playlist import Playlist
 from freevo.ui.event import *
 

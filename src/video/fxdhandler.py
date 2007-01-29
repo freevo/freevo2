@@ -70,7 +70,7 @@ import kaa.beacon
 
 # freevo imports
 from videoitem import VideoItem
-from menu import Files
+from freevo.ui.menu import Files
 
 # get logging object
 log = logging.getLogger('video')

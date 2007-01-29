@@ -49,7 +49,7 @@ import kaa.beacon
 # freevo imports
 import freevo.conf
 
-from menu import Action, Menu
+from freevo.ui.menu import Action, Menu
 from freevo.ui.plugin import ItemPlugin
 from freevo.ui.event import *
 

@@ -44,7 +44,7 @@ import freevo.ipc
 # freevo imports
 from freevo.ui import config
 from freevo.ui import plugin
-from menu import Item, Action, Menu, ActionItem
+from freevo.ui.menu import Item, Action, Menu, ActionItem
 from application import MessageWindow
 
 # tv imports

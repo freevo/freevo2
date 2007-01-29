@@ -39,7 +39,7 @@ import os
 # Freevo imports
 from freevo.ui import config
 
-from menu import Action, Menu
+from freevo.ui.menu import Action, Menu
 from audioitem import AudioItem
 from playlist import Playlist
 from directory import DirItem

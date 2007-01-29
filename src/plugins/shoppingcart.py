@@ -39,7 +39,7 @@ import kaa.notifier
 
 # freevo imports
 from freevo.ui import plugin
-from menu import Action
+from freevo.ui.menu import Action
 
 
 class PluginInterface(plugin.ItemPlugin):

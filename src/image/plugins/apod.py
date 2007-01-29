@@ -40,9 +40,9 @@ import kaa.beacon
 
 # freevo imports
 from freevo.ui import plugin
-import menu
+from freevo.ui import menu
 
-from menu import Item, Action, ActionItem, Menu
+from freevo.ui.menu import Item, Action, ActionItem, Menu
 from image import ImageItem
 from application import TextWindow, MessageWindow
 

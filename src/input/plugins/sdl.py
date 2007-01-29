@@ -39,7 +39,7 @@ import logging
 from freevo.ui import config
 import gui
 
-from menu import Item
+from freevo.ui.menu import Item
 from freevo.ui.event import *
 from interface import InputPlugin
 

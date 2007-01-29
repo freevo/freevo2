@@ -42,7 +42,7 @@ from freevo.ui import config
 import gui
 import gui.widgets
 
-from menu import Action
+from freevo.ui.menu import Action
 from application import ConfirmWindow
 from mainmenu import MainMenuItem
 from freevo.ui.plugin import MainMenuPlugin

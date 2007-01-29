@@ -30,7 +30,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # -----------------------------------------------------------------------------
-from menu import MediaItem, Action
+from freevo.ui.menu import MediaItem, Action
 import machine
 from freevo.ui import config
 import logging
