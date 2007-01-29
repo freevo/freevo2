@@ -92,9 +92,6 @@ PLAYLIST_SUFFIX = [ 'm3u' ]
 # plugin.remove(plugin_tv) or
 # plugin.remove('tv') will remove the tv module from the main menu
 
-# basic input
-plugin.activate('input')
-
 # Items in the main menu.
 plugin.activate('tv', level=10)
 plugin.activate('video', level=20)
