@@ -117,14 +117,6 @@ REMOTE_MAP   = input.REMOTE_MAP
 DIRECTFB_MAP = input.DIRECTFB_MAP
 
 #
-# Basic mouse support. It still needs much work and isn't working very
-# good. E.g. you can't go a menu back, popups won't work and inside the
-# player you have no control. Activate this if you want to help in the
-# development of this feature. This only works when using sdl as gui engine.
-#
-INPUT_MOUSE_SUPPORT = 0
-
-#
 # Use Internet resources to fetch information?
 # For example, Freevo can use CDDB for album information,
 # the IMDB movie database for movie info, and Amazon for cover searches. 
