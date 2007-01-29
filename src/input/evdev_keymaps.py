@@ -1,4 +1,4 @@
-from input.linux_input import *
+from linux_input import *
 
 
 hauppauge_grey_pvrX50 = {
