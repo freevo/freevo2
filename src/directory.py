@@ -44,7 +44,7 @@ from kaa.weakref import weakref
 from kaa.strutils import str_to_unicode
 
 # freevo imports
-import config
+from freevo.ui import config
 import util
 
 import menu

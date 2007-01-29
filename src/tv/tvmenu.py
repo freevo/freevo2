@@ -35,7 +35,7 @@ import kaa.notifier
 # freevo core imports
 import freevo.ipc
 
-import config
+from freevo.ui import config
 from freevo.ui import plugin
 
 from mainmenu import MainMenuItem

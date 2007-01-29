@@ -34,7 +34,7 @@ class BaseApplication(object):
     
     def __init__(self):
         from areas import Handler
-        import config
+        from freevo.ui import config
         self.GUI_FADE_STEPS = config.GUI_FADE_STEPS
         self.engine = Handler(self.name, self.areas)
 

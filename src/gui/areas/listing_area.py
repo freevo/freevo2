@@ -45,7 +45,7 @@ import weakref
 from kaa.notifier import Timer
 
 # freevo imports
-import config
+from freevo.ui import config
 import util
 
 # gui import

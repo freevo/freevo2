@@ -42,7 +42,7 @@ from kaa.strutils import unicode_to_str
 import freevo.ipc
 
 # freevo imports
-import config
+from freevo.ui import config
 from freevo.ui import plugin
 from menu import Item, Action, Menu, ActionItem
 from application import MessageWindow

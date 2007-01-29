@@ -41,7 +41,7 @@ import kaa.beacon
 from kaa.weakref import weakref
 
 # freevo imports
-import config
+from freevo.ui import config
 
 from freevo.ui import plugin
 

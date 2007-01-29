@@ -37,7 +37,7 @@ __all__ = [ 'AudioDiskItem' ]
 import os
 
 # Freevo imports
-import config
+from freevo.ui import config
 
 from menu import Action, Menu
 from audioitem import AudioItem

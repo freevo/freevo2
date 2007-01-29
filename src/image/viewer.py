@@ -40,7 +40,7 @@ import kaa.notifier
 from kaa.strutils import to_unicode
 
 # freevo imports
-import config
+from freevo.ui import config
 from freevo.ui import plugin
 import gui
 import gui.widgets

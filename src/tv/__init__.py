@@ -50,7 +50,7 @@ class PluginInterface(plugin.MainMenuPlugin):
         # import here to avoid importing all this when some helpers only
         # want to import something from iside the tv directory
 
-        import config
+        from freevo.ui import config
         
         # connect to tvserver using freevo.ipc
         mbus = freevo.ipc.Instance('freevo')

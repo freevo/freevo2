@@ -39,7 +39,7 @@ __all__ = [ 'MainMenuItem', 'MainMenu' ]
 import os
 
 # freevo imports
-import config
+from freevo.ui import config
 import gui.theme
 import util
 from freevo.ui import plugin

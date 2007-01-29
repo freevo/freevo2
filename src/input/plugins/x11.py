@@ -35,7 +35,7 @@ import logging
 
 # freevo imports
 import gui
-import config
+from freevo.ui import config
 
 # input imports
 from freevo.ui.input import linux_input

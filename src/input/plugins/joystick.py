@@ -39,7 +39,7 @@ import select
 import struct
 from time import sleep
 
-import config
+from freevo.ui import config
 from interface import InputPlugin
 
 import logging

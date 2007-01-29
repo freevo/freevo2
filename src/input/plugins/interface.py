@@ -36,7 +36,7 @@ __all__ = [ 'InputPlugin' ]
 import logging
 
 # freevo imports
-import config
+from freevo.ui import config
 from freevo.ui import plugin, input
 
 # get logging object

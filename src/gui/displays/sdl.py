@@ -41,7 +41,7 @@ import os
 from kaa.mevas.displays.pygamecanvas import PygameCanvas
 
 # Freevo imports
-import config
+from freevo.ui import config
 from freevo.ui import plugin
 
 # display imports

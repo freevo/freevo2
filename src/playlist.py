@@ -42,7 +42,7 @@ from kaa.strutils import str_to_unicode, unicode_to_str
 from kaa.weakref import weakref
 
 # freevo imports
-import config
+from freevo.ui import config
 import util
 from freevo.ui import plugin
 import fxditem

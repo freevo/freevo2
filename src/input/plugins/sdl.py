@@ -36,7 +36,7 @@ import pygame
 import logging
 
 # Freevo imports
-import config
+from freevo.ui import config
 import gui
 
 from menu import Item

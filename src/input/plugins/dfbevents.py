@@ -41,7 +41,7 @@ import kaa.notifier
 import directfb
 
 # Freevo imports
-import config
+from freevo.ui import config
 import gui.displays
 from freevo.ui.event import *
 from interface import InputPlugin

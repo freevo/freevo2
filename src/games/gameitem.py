@@ -32,7 +32,7 @@
 # -----------------------------------------------------------------------------
 from menu import MediaItem, Action
 import machine
-import config
+from freevo.ui import config
 import logging
 
 log = logging.getLogger('games')

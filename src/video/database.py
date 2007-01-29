@@ -39,7 +39,7 @@ import re
 import copy
 
 # freevo imports
-import config
+from freevo.ui import config
 import util
 
 import logging

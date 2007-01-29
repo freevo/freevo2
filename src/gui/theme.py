@@ -56,7 +56,7 @@ import kaa.strutils
 
 # freevo imports
 import freevo.conf
-import config
+from freevo.ui import config
 import util
 from freevo.ui import plugin
 

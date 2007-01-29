@@ -43,7 +43,7 @@ import os
 import gui.imagelib
 import math
 import time
-import config
+from freevo.ui import config
 
 # kaa imports
 import kaa.epg

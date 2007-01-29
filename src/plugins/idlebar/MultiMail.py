@@ -48,7 +48,7 @@
 # ----------------------------------------------------------------------- */
 
 import os
-import config
+from freevo.ui import config
 import imaplib
 import poplib
 import mailbox

@@ -40,7 +40,7 @@ import logging
 # mevas imagelib
 import kaa.mevas
 
-import config
+from freevo.ui import config
 import util
 import theme
 

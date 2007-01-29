@@ -58,7 +58,7 @@ import os
 from kaa.strutils import unicode_to_str
 
 # Freevo imports
-import config
+from freevo.ui import config
 from freevo.ui import plugin
 
 from util import match_files

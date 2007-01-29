@@ -40,7 +40,7 @@ import kaa.popcorn
 import kaa.notifier
 
 # Freevo imports
-import config
+from freevo.ui import config
 
 from freevo.ui.event import *
 from application import Application, STATUS_RUNNING, STATUS_STOPPING, \

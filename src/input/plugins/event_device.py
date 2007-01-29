@@ -89,7 +89,7 @@ import fcntl
 import logging
 from time import sleep
 
-import config
+from freevo.ui import config
 
 import freevo.ui.input.linux_input as li
 import freevo.ui.input.evdev_keymaps as ek

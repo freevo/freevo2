@@ -38,7 +38,7 @@ import os
 import kaa.notifier
 
 # freevo imports
-import config
+from freevo.ui import config
 import gui
 import gui.widgets
 

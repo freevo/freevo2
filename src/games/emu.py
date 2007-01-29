@@ -31,7 +31,7 @@
 # -----------------------------------------------------------------------------
 from freevo.ui import plugin
 import logging
-import config
+from freevo.ui import config
 
 from application import ChildApp
 from freevo.ui.event import *

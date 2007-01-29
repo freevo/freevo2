@@ -30,7 +30,7 @@
 #
 # -----------------------------------------------------------------------------
 from freevo.ui import plugin
-import config
+from freevo.ui import config
 import machine
 from gameitem import GameItem
 

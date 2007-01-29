@@ -36,7 +36,7 @@ import time
 import gui
 import gui.widgets
 import gui.theme
-import config
+from freevo.ui import config
 from freevo.ui import plugin
 from plugins.idlebar import IdleBarPlugin
 

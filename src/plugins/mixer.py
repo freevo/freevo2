@@ -70,7 +70,7 @@
 import struct
 import os
 
-import config
+from freevo.ui import config
 from freevo.ui import plugin
 from freevo.ui.event import *
 from kaa.ioctl import *

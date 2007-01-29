@@ -38,7 +38,7 @@ __all__ = [ 'ImageItem' ]
 import time
 
 # freevo imports
-import config
+from freevo.ui import config
 from menu import MediaItem, Action
 from viewer import viewer
 

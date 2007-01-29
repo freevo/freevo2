@@ -34,7 +34,7 @@
 # -----------------------------------------------------------------------------
 
 # Freevo imports
-import config
+from freevo.ui import config
 
 class Display(object):
     """

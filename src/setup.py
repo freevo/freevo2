@@ -241,22 +241,6 @@ def run_as_main():
         if o == '--chanlist':
             conf.chanlist = a
 
-        # this is called by the Makefile, don't call it directly
-        if o == '--compile':
-            # Compile python files:
-            import distutils.util
-            try:
-                optimize=min(int(a[0]),2)
-                prefix=a[2:]
-            except:
-                sys.exit(1)
-
-            files = []
-            os.path.walk('.', match_files_recursively_helper, files)
-            distutils.util.byte_compile(files, prefix='.', base_dir=prefix,
-                                        optimize=optimize)
-            sys.exit(0)
-
 
     for program, valname, needed in EXTERNAL_PROGRAMS:
         check_program(conf, program, valname, needed)

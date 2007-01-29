@@ -101,7 +101,7 @@ try:
     FREEVO_PATH = os.path.join(os.path.dirname(freevo.__file__), 'ui')
     sys.path.insert(0, FREEVO_PATH)
 
-    import config
+    from freevo.ui import config
     if config.GUI_DISPLAY == 'SDL':
         import pygame
 

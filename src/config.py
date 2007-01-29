@@ -56,16 +56,9 @@ import kaa.popcorn
 import freevo.conf
 
 # freevo imports
-import version
+from freevo.ui import version, setup, input, plugin
 
-# config imports
-import setup
-
-# input inputs variables for the input system
-# and event.py (which has no more deps)
-from freevo.ui import input, plugin
-
-# import event names (no deps)
+# import event names
 from freevo.ui.event import *
 
 # get logging object

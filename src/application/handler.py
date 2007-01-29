@@ -46,7 +46,7 @@ import logging
 import kaa.notifier
 
 # freevo imports
-import config
+from freevo.ui import config
 from freevo.ui.input import set_mapping
 from freevo.ui.event import *
 

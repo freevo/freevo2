@@ -33,7 +33,7 @@ __all__ = [ 'Display' ]
 
 # python imports
 from freevo.ui import plugin
-import config
+from freevo.ui import config
 
 # mevas imports
 from kaa.mevas.displays.imlib2canvas import Imlib2Canvas

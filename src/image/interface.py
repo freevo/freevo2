@@ -39,7 +39,7 @@
 __all__ = [ 'PluginInterface' ]
 
 # freevo imports
-import config
+from freevo.ui import config
 from freevo.ui import plugin
 import fxditem
 

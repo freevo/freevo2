@@ -34,7 +34,7 @@ import mailbox
 
 import gui.widgets
 import gui.imagelib
-import config
+from freevo.ui import config
 from plugins.idlebar import IdleBarPlugin
 
 class PluginInterface(IdleBarPlugin):

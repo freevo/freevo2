@@ -41,7 +41,7 @@ import os
 from kaa.mevas.displays.fbcanvas import FramebufferCanvas
 
 # Freevo imports
-import config
+from freevo.ui import config
 
 # display imports
 from display import Display as Base
