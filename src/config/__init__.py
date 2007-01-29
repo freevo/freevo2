@@ -169,9 +169,6 @@ else:
 #
 execfile(os.path.join(os.path.dirname(__file__), 'configfile.py'))
 
-# set the umask
-os.umask(UMASK)
-
 #
 # force fullscreen when freevo is it's own windowmanager
 #

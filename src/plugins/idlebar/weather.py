@@ -56,10 +56,6 @@ class PluginInterface(IdleBarPlugin):
     You can also set the metric to True if you want metric units (celcius).
     """
     def __init__(self, zone='GMXX0014', metric=False):
-        if not config.USE_NETWORK:
-            self.reason = 'Not using network, weather plugin disabled'
-            return
-
         IdleBarPlugin.__init__(self)
 
         self.metric    = metric

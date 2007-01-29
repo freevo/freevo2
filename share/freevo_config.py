@@ -26,47 +26,6 @@
 # -----------------------------------------------------------------------
 
 
-########################################################################
-# If you want to change some things for your personal setup, please
-# write this in a file called local_conf.py, see that file for more info.
-########################################################################
-
-# Version information for the two config files. When the major version
-# of the config file doesn't match, Freevo won't start. If the minor version
-# is different, there will be only a warning
-
-LOCAL_CONF_VERSION  = 8.00
-
-# Description of changes in each new version
-FREEVO_CONF_CHANGES = [
-    (2.0,
-     '''Changed xmame_SDL to just xmame'''), ]
-
-LOCAL_CONF_CHANGES = [
-    (8.00, '''Major config changes for 2.0. Please check freevo_config.py''' )
-    ]
-
-# NOW check if freevo.conf is up-to-date. An older version may break the next
-# steps
-
-FREEVO_CONF_VERSION = setup.CONFIG_VERSION
-
-if int(str(CONF.version).split('.')[0]) != \
-   int(str(FREEVO_CONF_VERSION).split('.')[0]):
-    print "\nERROR: The version information in freevo_config.py does't"
-    print 'match the version in %s.' % sysconfig.CONFIGFILE
-    print 'please rerun "freevo setup" to generate a new freevo.conf'
-    print_config_changes(FREEVO_CONF_VERSION, CONF.version,
-                         FREEVO_CONF_CHANGES)
-    sys.exit(1)
-
-if int(str(CONF.version).split('.')[1]) != \
-   int(str(FREEVO_CONF_VERSION).split('.')[1]):
-    print 'WARNING: freevo_config.py was changed, please rerun "freevo setup"'
-    print_config_changes(FREEVO_CONF_VERSION, CONF.version,
-                         FREEVO_CONF_CHANGES)
-    
-
 # ======================================================================
 # General freevo settings:
 # ======================================================================
@@ -117,21 +76,6 @@ REMOTE_MAP   = input.REMOTE_MAP
 DIRECTFB_MAP = input.DIRECTFB_MAP
 
 #
-# Use Internet resources to fetch information?
-# For example, Freevo can use CDDB for album information,
-# the IMDB movie database for movie info, and Amazon for cover searches. 
-# Set this to 0 if your computer isn't connected to a network.
-#
-USE_NETWORK = 1
-
-#
-# Umask setting for all files.
-# 022 means only the user has write access. If you share your Freevo
-# installation with different users, set this to 002
-#
-UMASK = 022
-
-#
 # Suffix for playlist files
 #
 PLAYLIST_SUFFIX = [ 'm3u' ]
@@ -165,21 +109,8 @@ plugin.activate('shutdown', level=50)
 # mixer
 plugin.activate('mixer')
 
-# add imdb search to the video item menu
-# BEACON_FIXME:
-# plugin.activate('video.imdb')
-
 # delete file in menu
 plugin.activate('file_ops', level=20)
-
-# use mplayer for video playpack
-# plugin.activate('video.mplayer')
-
-# use mplayer for tv
-# to use tvtime, put the following two lines in your local_conf.py:
-# plugin.remove('tv.mplayer')
-# plugin.activate('tv.tvtime')
-# plugin.activate('tv.xine')
 
 # support for settings bookmarks (key RECORD) while playing. Also
 # auto bookmarking when playback is stopped
@@ -198,19 +129,6 @@ MBUS_ADDR = {}
 # ======================================================================
 # Freevo directory settings:
 # ======================================================================
-
-# You can change all this variables in the folder.fxd on a per folder
-# basis
-#
-# Example:
-# <freevo>
-#   <folder title="Title of the directory" img-cover="nice-cover.png">
-#     <setvar name="directory_autoplay_single_item" val="0"/>
-#     <info>
-#       <content>A small description of the directory</content>
-#     </info>
-#   </folder>
-# </freevo>
 
 #
 # Should directories sorted by date instead of filename?
@@ -263,19 +181,6 @@ DIRECTORY_AUDIO_FORMAT_STRING = '%(t)s'
 DIRECTORY_USE_MEDIADB_NAMES = 1
 
 #
-# The following settings determine which features are available for
-# which media types.
-#
-# If you set this variable in a folder.fxd, the value is 1 (enabled)
-# or 0 (disabled).
-# 
-# Examples:
-# To enable autoplay for audio and image files:
-# DIRECTORY_AUTOPLAY_ITEMS = [ 'audio', 'image' ]
-# To disable autoplay entirely:
-# DIRECTORY_AUTOPLAY_ITEMS = []
-
-#
 # Make all items a playlist. So when one is finished, the next one will
 # start. It's also possible to browse through the list with UP and DOWN
 #
@@ -317,14 +222,6 @@ DIRECTORY_AUTOPLAY_ITEMS       = [ ]
 # directory /files/server-stuff if the computer myserver is alive.
 #
 VIDEO_ITEMS = None
-
-#
-# Directory containing images for tv shows. A tv show maches the regular
-# expression VIDEO_SHOW_REGEXP, e.g. "Name 3x10 - Title". If an image
-# name.(png|jpg) (lowercase) is in this directory, it will be taken as cover
-# image
-#
-VIDEO_SHOW_DATA_DIR = None
 
 #
 # The list of filename suffixes that are used to match the files that
@@ -496,8 +393,7 @@ GUI_OVERSCAN_Y = 0
 
 #
 # Output display to use. Possible values are SDL (using pygame),
-# Imlib2 (X only), fb (framebuffer) and Bmovl. The Bmovl displays also need
-# a background video set in GUI_BACKGROUND_VIDEO.
+# Imlib2 (X only) and fb (framebuffer).
 #
 GUI_DISPLAY = 'imlib2'
 
@@ -527,11 +423,6 @@ if CONF.display in ( 'directfb', 'dfbmga', 'dxr3', 'dga' ):
     GUI_STOP_WHEN_PLAYING = 1
 
 #
-# Video file for bmovl display
-#
-GUI_BACKGROUND_VIDEO = ''
-
-#
 # Fade steps on application change.
 #
 GUI_FADE_STEPS = 10
@@ -540,8 +431,7 @@ GUI_FADE_STEPS = 10
 # XML file for the skin. If GUI_XML_FILE is set, this skin will be
 # used, otherwise the skin will rememeber the last choosen skin.
 #
-GUI_XML_FILE         = ''
-GUI_DEFAULT_XML_FILE = 'blurr'
+GUI_XML_FILE = 'blurr'
 
 GUI_DFB_LAYER = 0
 

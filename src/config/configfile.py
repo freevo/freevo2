@@ -36,29 +36,6 @@
 import sys
 import freevo.conf
 
-def print_config_changes(conf_version, file_version, changelist):
-    """
-    print changes made between version on the screen
-    """
-    ver_old = float(file_version)
-    ver_new = float(conf_version)
-    if ver_old == ver_new:
-        return
-    print
-    print 'You are using version %s, changes since then:' % file_version
-    changed = [(cv, cd) for (cv, cd) in changelist if cv > ver_old]
-    if not changed:
-        print 'The changelist has not been updated'
-        print 'Please notify the developers!'
-    else:
-        for change_ver, change_desc in changed:
-            print 'Version %s:' % change_ver
-            for line in change_desc.split('\n'):
-                print '    ', line.strip()
-            print
-    print
-            
-
 #
 # Config file handling
 #
@@ -66,16 +43,6 @@ cfgfilepath = [ '.', os.path.expanduser('~/.freevo'), '/etc/freevo',
                 '/usr/local/etc/freevo' ]
 
 
-#
-# Check that freevo_config.py is not found in the config file dirs
-#
-for dirname in cfgfilepath[1:]:
-    freevoconf = dirname + '/freevo_config.py'
-    if os.path.isfile(freevoconf):
-        log.critical(('freevo_config.py found in %s, please remove it ' +
-                      'and use local_conf.py instead!') % freevoconf)
-        sys.exit(1)
-        
 #
 # Load freevo_config.py:
 #
@@ -108,45 +75,6 @@ for dirname in cfgfilepath:
     if os.path.isfile(overridefile):
         log.info('Loading cfg overrides: %s' % overridefile)
         execfile(overridefile, globals(), locals())
-
-        try:
-            CONFIG_VERSION
-        except NameError:
-            print
-            print 'Error: your local_config.py file has no version information'
-            print 'Please check freevo_config.py for changes and set'
-            print 'CONFIG_VERSION in %s to %s' % \
-                  (overridefile, LOCAL_CONF_VERSION)
-            print
-            sys.exit(1)
-
-        if int(str(CONFIG_VERSION).split('.')[0]) < 5:
-            print
-            print 'Error: You local_conf.py is too old, too much has changed.'
-            print 'Please check freevo_config.py for changes and set'
-            print 'CONFIG_VERSION in %s to %s' % \
-                  (overridefile, LOCAL_CONF_VERSION)
-            print
-            sys.exit(1)
-            
-        if int(str(CONFIG_VERSION).split('.')[0]) != \
-           int(str(LOCAL_CONF_VERSION).split('.')[0]):
-            print
-            print 'Error: The version information in freevo_config.py doesn\'t'
-            print 'match the version in your local_config.py.'
-            print 'Please check freevo_config.py for changes and set'
-            print 'CONFIG_VERSION in %s to %s' % \
-                  (overridefile, LOCAL_CONF_VERSION)
-            print_config_changes(LOCAL_CONF_VERSION, CONFIG_VERSION,
-                                  LOCAL_CONF_CHANGES)
-            sys.exit(1)
-
-        if int(str(CONFIG_VERSION).split('.')[1]) != \
-           int(str(LOCAL_CONF_VERSION).split('.')[1]):
-            log.warning('freevo_config.py was changed.\n' +
-                        'Please check your local_config.py')
-            print_config_changes(LOCAL_CONF_VERSION, CONFIG_VERSION, 
-                                 LOCAL_CONF_CHANGES)
         break
 
 else:

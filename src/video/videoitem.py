@@ -116,13 +116,6 @@ class VideoItem(MediaItem):
             # This matches a tv show with a show name, an epsiode and
             # a title of the specific episode
             sn = unicode_to_str(show_name[0].lower())
-            if config.VIDEO_SHOW_DATA_DIR:
-                image = util.getimage((config.VIDEO_SHOW_DATA_DIR + sn))
-                if self.filename and not image:
-                    fname = os.path.dirname(self.filename)+'/'+ sn
-                    image = util.getimage(fname)
-                if image:
-                    self.image = image
             if database.tv_shows.has_key(sn):
                 tvinfo = database.tv_shows[sn]
                 self.info.set_variables(tvinfo[1])

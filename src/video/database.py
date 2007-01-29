@@ -80,10 +80,6 @@ def update():
     # if os.path.isdir(discset2):
     #     listing = Listing(discset)
     #     files += listing.get('fxd')
-    # 
-    # if config.VIDEO_SHOW_DATA_DIR:
-    #     listing = Listing(config.VIDEO_SHOW_DATA_DIR)
-    #     files += listing.get('fxd')
 
     for info in fxditem.mimetype.parse(None, files, [], display_type='video'):
         if info.type != 'video':

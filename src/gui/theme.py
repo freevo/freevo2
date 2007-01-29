@@ -1450,8 +1450,6 @@ def init_module():
     from the public functions at the top of this file
     """
     global current_theme
-    if not config.GUI_XML_FILE:
-        config.GUI_XML_FILE = config.GUI_DEFAULT_XML_FILE
     # load the fxd file at set current_theme
     current_theme = set_base_fxd(config.GUI_XML_FILE)
     current_theme.filename = config.GUI_XML_FILE
