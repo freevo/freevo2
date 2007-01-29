@@ -13,26 +13,6 @@
 #  Test the ioctls and put some to use.
 #
 # -----------------------------------------------------------------------
-# $Log$
-# Revision 1.4  2004/11/17 03:01:56  rshortt
-# Use util.ioctl.
-#
-# Revision 1.3  2004/09/30 02:19:44  rshortt
-# -remove duplicates from util.ioctl
-# -clean up keycode ioclts
-# -add convenience functions for:
-#   -requesting exclusive access to a device
-#   -get the name of a device (use for autodetection)
-#   -get and set keycodes
-#   -get keymap
-#
-# Revision 1.2  2004/09/27 18:40:34  dischi
-# reworked input handling again
-#
-# Revision 1.1  2004/09/25 04:37:41  rshortt
-# Support files for freevo input.
-#
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

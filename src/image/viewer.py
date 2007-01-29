@@ -48,7 +48,7 @@ import gui.imagelib
 import gui.theme
 
 # cache for loading images
-from util import ObjectCache
+from freevo.ui.util import ObjectCache
 
 # Transition/Move/VERTICAL
 from gui.animation import *

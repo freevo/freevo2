@@ -45,7 +45,7 @@ from kaa.strutils import str_to_unicode
 
 # freevo imports
 from freevo.ui import config
-import util
+from freevo.ui import util
 
 import menu
 from freevo.ui import plugin

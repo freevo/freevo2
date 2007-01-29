@@ -61,7 +61,7 @@ from kaa.strutils import unicode_to_str
 from freevo.ui import config
 from freevo.ui import plugin
 
-from util import match_files
+from freevo.ui.util import match_files
 from playlist import Playlist
 
 # ImageItem

@@ -47,7 +47,7 @@ from kaa.strutils import unicode_to_str, str_to_unicode
 
 # freevo imports
 from freevo.ui import config
-import util
+from freevo.ui import util
 
 from application import MessageWindow, ConfirmWindow
 from menu import Menu, MediaItem, Files, Action

@@ -49,7 +49,7 @@
 import copy
 import logging
 
-import util
+from freevo.ui import util
 from freevo.ui import plugin
 import os
 import freevo.fxdparser

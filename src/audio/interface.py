@@ -45,7 +45,7 @@ import stat
 
 # Freevo imports
 from freevo.ui import config
-import util
+from freevo.ui import util
 from freevo.ui import plugin
 import fxditem
 

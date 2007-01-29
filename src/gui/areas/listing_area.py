@@ -46,7 +46,7 @@ from kaa.notifier import Timer
 
 # freevo imports
 from freevo.ui import config
-import util
+from freevo.ui import util
 
 # gui import
 from area import Area

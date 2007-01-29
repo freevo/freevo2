@@ -37,7 +37,7 @@ import shutil
 import logging
 
 # freevo imports
-import util
+from freevo.ui import util
 
 # get logging object
 log = logging.getLogger()

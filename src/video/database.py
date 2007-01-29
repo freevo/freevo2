@@ -40,7 +40,7 @@ import copy
 
 # freevo imports
 from freevo.ui import config
-import util
+from freevo.ui import util
 
 import logging
 log = logging.getLogger('video')

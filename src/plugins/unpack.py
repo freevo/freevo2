@@ -42,7 +42,7 @@ import kaa.notifier
 
 # freevo imports
 from freevo.ui import plugin
-import util
+from freevo.ui import util
 
 from menu import Item, Action
 from application import TextWindow

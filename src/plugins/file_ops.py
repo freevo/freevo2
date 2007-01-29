@@ -37,7 +37,7 @@ from kaa.notifier import Callback
 # freevo imports
 from freevo.ui import config
 from freevo.ui import plugin
-import util
+from freevo.ui import util
 
 from menu import Action
 from application import ConfirmWindow
