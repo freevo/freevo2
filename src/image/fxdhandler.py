@@ -62,7 +62,7 @@ from freevo.ui import config
 from freevo.ui import plugin
 
 from freevo.ui.util import match_files
-from playlist import Playlist
+from freevo.ui.playlist import Playlist
 
 # ImageItem
 from imageitem import ImageItem

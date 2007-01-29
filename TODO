@@ -1,6 +1,6 @@
 Change all imports so that freevo.ui does not need to be in the path.
 The following modules have been ported: plugin, event, input, config, 
-util, menu. beacon, fxditem
+util, menu. beacon, fxditem, playlist
 
 Note: this file is a mix beween several mail on the list. So when it
 says 'I', it may not be me :-)

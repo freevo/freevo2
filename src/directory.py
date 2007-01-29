@@ -52,7 +52,7 @@ from freevo.ui import plugin
 from freevo.ui import fxditem
 
 from freevo.ui.menu import Item, Files, Action, ActionItem
-from playlist import Playlist
+from freevo.ui.playlist import Playlist
 from freevo.ui.event import *
 
 from application import MessageWindow

@@ -42,13 +42,13 @@ from kaa.strutils import str_to_unicode, unicode_to_str
 from kaa.weakref import weakref
 
 # freevo imports
-from freevo.ui import config
-from freevo.ui import util
-from freevo.ui import plugin
-from freevo.ui import fxditem
+import config
+import util
+import plugin
+import fxditem
 
-from freevo.ui.event import *
-from freevo.ui.menu import Action, Item, MediaItem, Menu
+from event import *
+from menu import Action, Item, MediaItem, Menu
 
 # get logging object
 log = logging.getLogger()

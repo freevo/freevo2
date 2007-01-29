@@ -41,7 +41,7 @@ from freevo.ui import config
 
 from freevo.ui.menu import Action, Menu
 from audioitem import AudioItem
-from playlist import Playlist
+from freevo.ui.playlist import Playlist
 from directory import DirItem
 
 
