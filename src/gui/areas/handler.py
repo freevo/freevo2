@@ -53,7 +53,6 @@ log = logging.getLogger('gui')
 
 # freevo imports
 import config
-import util.cache
 from kaa.weakref import weakref
 
 # gui imports
@@ -109,14 +108,7 @@ class Handler(object):
             # Use a weakref to avoid memory problems.
             a.set_screen(weakref(self))
             
-        self.storage_file = freevo.conf.cachefile('skin', True)
         self.display_style['menu'] = 0
-        if os.path.isfile(self.storage_file):
-            self.storage = util.cache.load(self.storage_file)
-            if self.storage and self.storage.has_key(config.GUI_XML_FILE):
-                self.display_style['menu'] = self.storage[config.GUI_XML_FILE]
-	else:
-	    self.storage = None
 
 
     def __del__(self):
@@ -132,35 +124,6 @@ class Handler(object):
         self.container = None
 
         
-    def toggle_display_style(self, menu):
-        """
-        Toggle display style
-        """
-        theme = gui.theme.get()
-
-        if isinstance(menu, str):
-            if not self.display_style.has_key(menu):
-                self.display_style[menu] = 0
-            self.display_style[menu] = (self.display_style[menu] + 1) % \
-                                       len(theme.sets[menu].style)
-            return
-            
-        if theme.special_menu.has_key(menu.type):
-            area = theme.special_menu[menu.type]
-        else:
-            area = theme.default_menu['default']
-
-        if self.display_style['menu'] >=  len(area.style):
-            self.display_style['menu'] = 0
-        self.display_style['menu'] = (self.display_style['menu'] + 1) % \
-                                     len(area.style)
-
-        if self.storage and self.storage.has_key(config.GUI_XML_FILE):
-            self.storage[config.GUI_XML_FILE] = self.display_style['menu']
-            util.cache.save(self.storage_file, self.storage)
-
-
-
     def __scan_for_text_view(self, menu):
         """
         scan if we have to fall back to text view. This will be done if some

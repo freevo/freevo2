@@ -1453,22 +1453,8 @@ def init_module():
     from the public functions at the top of this file
     """
     global current_theme
-    cachefile = freevo.conf.cachefile('skin', True)
-    storage = {}
-    if os.path.isfile(cachefile):
-        storage = util.cache.load(cachefile)
-        if storage and not storage.has_key('GUI_XML_FILE'):
-            # storage file too old
-            storage = {}
-    if storage:
-        if not config.GUI_XML_FILE:
-            config.GUI_XML_FILE = storage['GUI_XML_FILE']
-        else:
-            log.debug('skin forced to %s' % config.GUI_XML_FILE)
-    else:
-        if not config.GUI_XML_FILE:
-            config.GUI_XML_FILE = config.GUI_DEFAULT_XML_FILE
-        storage = {}
+    if not config.GUI_XML_FILE:
+        config.GUI_XML_FILE = config.GUI_DEFAULT_XML_FILE
     # load the fxd file at set current_theme
     current_theme = set_base_fxd(config.GUI_XML_FILE)
     current_theme.filename = config.GUI_XML_FILE
