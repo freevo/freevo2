@@ -317,20 +317,17 @@ class MainMenuItem(object):
             self.name    = source.name
             self.icon    = source.icon
             self.image   = source.image
-            self.outicon = source.outicon
         else:
             self.label   = ''
             self.name    = ''
             self.icon    = ''
             self.image   = ''
-            self.outicon = ''
 
     def parse(self, node, scale, c_dir=''):
         self.label    = attr_str(node, "label", self.label)
         self.name     = attr_str(node, "name",  self.name)
         self.icon     = attr_str(node, "icon",  self.icon)
         self.image    = attr_str(node, "image", self.image)
-        self.outicon  = attr_str(node, "outicon",  self.outicon)
 
 
     def prepare_copy(self, search_dirs, image_names):

@@ -83,8 +83,6 @@ class MainMenuItem(Item):
             self.image = skin_info.image
             if skin_info.icon:
                 self.icon = os.path.join(theme.icon_dir, skin_info.icon)
-            if skin_info.outicon:
-                self.outicon = os.path.join(theme.icon_dir, skin_info.outicon)
 
         if not self.image and imagedir:
             # find a nice image based on skin type

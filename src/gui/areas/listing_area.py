@@ -275,50 +275,6 @@ class ListingArea(Area):
                choice.parent.type != 'mediamenu':
                 text = '[%s]' % text
 
-        # FIXME: there is no self.loadimage anymore
-        # if choice != menu.selected and hasattr( choice, 'outicon' ) and \
-        #        choice.outicon:
-        #     icon = self.loadimage(choice.outicon, (vspace-content.spacing,
-        #                                             vspace-content.spacing))
-        # elif choice.icon:
-        #     icon = self.loadimage(choice.icon, (vspace-content.spacing,
-        #                                          vspace-content.spacing))
-        # if not icon and icon_type:
-        #     icon = self.loadimage(settings.icon_dir + '/' + icon_type,
-        #           (vspace-content.spacing, vspace-content.spacing))
-
-        #
-        # display an icon for the item
-        #
-        # x_icon = 0
-        # if icon:
-        #     mx = x
-        #     icon_x = vspace
-        #     x_icon = icon_x
-        #     if align == 'right':
-        #         # know how many pixels to offset (dammed negative and max+X
-        #         # values in (x,y,width) from skin!)
-        #         r1 = r2 = None
-        #         if s_val.rectangle:
-        #             r1 = self.calc_rectangle(s_val.rectangle,
-        #                                          width, s_val.font.height)[2]
-        #         if n_val.rectangle:
-        #             r2 = self.calc_rectangle(n_val.rectangle,
-        #                                          width, n_val.font.height)[2]
-        #         min_rx = 0
-        #         max_rw = width
-        #         if r1:
-        #             min_rx = min( min_rx, r1.x )
-        #             max_rw = max( max_rw, r1.width )
-        #         if r2:
-        #             min_rx = min( min_rx, r2.x )
-        #             max_rw = max( max_rw, r2.width )
-        #
-        #         mx = x + width + hskip + ( max_rw + min_rx - width ) - \
-        #              icon_x
-        #         x_icon = 0
-        #     gui_objects.append(self.drawimage(icon, (mx, y)))
-
         #
         # draw the rectangle below the item
         #
