@@ -48,10 +48,10 @@
 # python imports
 import copy
 import logging
+import os
 
 from freevo.ui import util
 from freevo.ui import plugin
-import os
 import freevo.fxdparser
 
 from freevo.ui.menu import Item, Action, Menu

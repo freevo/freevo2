@@ -41,7 +41,7 @@ __all__ = [ 'PluginInterface' ]
 # freevo imports
 from freevo.ui import config
 from freevo.ui import plugin
-import fxditem
+from freevo.ui import fxditem
 
 # ImageItem
 from imageitem import ImageItem

@@ -64,7 +64,7 @@ def update():
 
     # import fxditem here, we may get in trouble doing it at the
     # beginning (maybe, maybe not). FIXME!
-    import fxditem
+    from freevo.ui import fxditem
     
     fxd['id']    = {}
     fxd['label'] = []
