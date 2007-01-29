@@ -1,6 +1,6 @@
 __all__ = [ 'EVENTMAP' ]
 
-from event import *
+from freevo.ui.event import *
 
 #
 # Default key-event map

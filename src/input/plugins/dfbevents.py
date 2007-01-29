@@ -43,7 +43,7 @@ import directfb
 # Freevo imports
 import config
 import gui.displays
-from event import *
+from freevo.ui.event import *
 from input.interface import InputPlugin
 
 log = logging.getLogger('input')

@@ -39,7 +39,7 @@ from kaa.weakref import weakref
 
 # freevo imports
 import config
-from event import *
+from freevo.ui.event import *
 
 # menu imports
 from item import Item

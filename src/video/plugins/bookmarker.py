@@ -51,7 +51,7 @@ import freevo.conf
 
 from menu import Action, Menu
 from freevo.ui.plugin import ItemPlugin
-from event import *
+from freevo.ui.event import *
 
 # the logging object
 log = logging.getLogger()

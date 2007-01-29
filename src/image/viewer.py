@@ -53,7 +53,7 @@ from util import ObjectCache
 # Transition/Move/VERTICAL
 from gui.animation import *
 
-from event import *
+from freevo.ui.event import *
 from application import Application, STATUS_RUNNING, STATUS_STOPPING, \
      STATUS_STOPPED, STATUS_IDLE, CAPABILITY_TOGGLE, CAPABILITY_FULLSCREEN
 

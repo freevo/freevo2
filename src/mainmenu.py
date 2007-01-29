@@ -46,7 +46,7 @@ from freevo.ui import plugin
 
 from menu import Item, Action, Menu
 from application.menuw import MenuWidget
-from event import *
+from freevo.ui.event import *
 
 
 class MainMenuItem(Item):

@@ -38,7 +38,7 @@ __all__ = [ 'ConfirmBox' ]
 import logging
 
 # freevo imports
-from event import *
+from freevo.ui.event import *
 
 # gui imports
 from gui.widgets.textbox import Textbox

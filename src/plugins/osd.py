@@ -45,7 +45,7 @@ import gui
 import gui.widgets
 import gui.theme
 
-from event import OSD_MESSAGE
+from freevo.ui.event import OSD_MESSAGE
 
 # get logging object
 log = logging.getLogger()

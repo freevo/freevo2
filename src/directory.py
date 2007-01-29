@@ -53,7 +53,7 @@ import fxditem
 
 from menu import Item, Files, Action, ActionItem
 from playlist import Playlist
-from event import *
+from freevo.ui.event import *
 
 from application import MessageWindow
 

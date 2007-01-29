@@ -95,7 +95,7 @@ import input.linux_input as li
 import input.evdev_keymaps as ek
 from input.interface import InputPlugin
 
-from event import *
+from freevo.ui.event import *
 
 log = logging.getLogger('input')
 

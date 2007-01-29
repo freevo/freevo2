@@ -40,7 +40,7 @@ import config
 import gui
 
 from menu import Item
-from event import *
+from freevo.ui.event import *
 from input.interface import InputPlugin
 
 # get logging object

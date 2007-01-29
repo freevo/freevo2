@@ -68,7 +68,7 @@ import input
 from freevo.ui import plugin
 
 # import event names (no deps)
-from event import *
+from freevo.ui.event import *
 
 # get logging object
 log = logging.getLogger('config')

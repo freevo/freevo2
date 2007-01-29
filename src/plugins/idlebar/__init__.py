@@ -46,7 +46,7 @@ import gui.widgets
 import gui.animation
 import gui.theme
 import application
-from event import *
+from freevo.ui.event import *
 
 # get logging object
 log = logging.getLogger()

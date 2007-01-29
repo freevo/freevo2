@@ -43,7 +43,7 @@ from kaa.strutils import str_to_unicode
 
 # freevo imports
 from menu import MediaItem, Action
-from event import *
+from freevo.ui.event import *
 
 # audio player
 import player as audioplayer

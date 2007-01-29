@@ -9,7 +9,7 @@ import freevo.ipc
 # freevo ui imports
 from freevo.ui import plugin
 import application
-from event import *
+from freevo.ui.event import *
 from directory import DirItem
 
 import logging

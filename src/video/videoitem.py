@@ -51,7 +51,7 @@ import util
 
 from application import MessageWindow, ConfirmWindow
 from menu import Menu, MediaItem, Files, Action
-from event import *
+from freevo.ui.event import *
 
 # video imports
 import configure

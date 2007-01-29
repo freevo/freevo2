@@ -72,7 +72,7 @@ import os
 
 import config
 from freevo.ui import plugin
-from event import *
+from freevo.ui.event import *
 from kaa.ioctl import *
 from kaa.notifier import EventHandler
 

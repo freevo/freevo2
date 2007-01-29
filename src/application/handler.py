@@ -49,7 +49,7 @@ import kaa.notifier
 import config
 import input
 
-from event import *
+from freevo.ui.event import *
 
 # the logging object
 log = logging.getLogger()

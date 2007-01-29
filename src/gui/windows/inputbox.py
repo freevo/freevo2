@@ -36,7 +36,7 @@ import logging
 
 # freevo imports
 import config
-from event import *
+from freevo.ui.event import *
 
 # gui imports
 import gui.displays as displays

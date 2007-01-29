@@ -42,7 +42,7 @@ import kaa.notifier
 # Freevo imports
 import config
 
-from event import *
+from freevo.ui.event import *
 from application import Application, STATUS_RUNNING, STATUS_STOPPING, \
 	 STATUS_STOPPED, STATUS_IDLE, CAPABILITY_TOGGLE, CAPABILITY_PAUSE, \
 	 CAPABILITY_FULLSCREEN

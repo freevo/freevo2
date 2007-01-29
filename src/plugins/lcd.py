@@ -31,7 +31,7 @@ from kaa.strutils import unicode_to_str
 import kaa.notifier
 
 from freevo.ui import plugin
-from event import *
+from freevo.ui.event import *
 
 import logging
 log = logging.getLogger()

@@ -36,7 +36,7 @@ from kaa.notifier import Signal
 
 # freevo imports
 import gui
-from event import *
+from freevo.ui.event import *
 
 # application imports
 from handler import handler

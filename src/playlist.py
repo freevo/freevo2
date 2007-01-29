@@ -47,7 +47,7 @@ import util
 from freevo.ui import plugin
 import fxditem
 
-from event import *
+from freevo.ui.event import *
 from menu import Action, Item, MediaItem, Menu
 
 # get logging object
