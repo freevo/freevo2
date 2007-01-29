@@ -58,37 +58,6 @@ class Plugin(object):
         self._plugin_special = False
 
 
-    def plugin_activate(self):
-        """
-        Execute on activation of the plugin.
-        """
-        pass
-
-
-    def plugin_decativate(self):
-        """
-        Execute when the plugin is deactivated.
-        """
-        pass
-
-
-    def shutdown(self):
-        """
-        Execute on plugin shutdown (== system shutdown)
-        """
-        pass
-
-
-    def plugin_activate(self):
-        """
-        Execute on activation of the plugin.
-        """
-        # register shutdown handler
-        if self.__class__.shutdown != Plugin.shutdown:
-            # plugin has a self defined shutdown function
-            kaa.notifier.signals['shutdown'].connect( self.shutdown )
-
-
 
 class MainMenuPlugin(Plugin):
     """
@@ -187,16 +156,6 @@ class MimetypePlugin(Plugin):
         """
         return None
 
-
-#
-# Some plugin names to avoid typos
-#
-
-AUDIO_PLAYER   = 'AUDIO_PLAYER'
-RADIO_PLAYER   = 'RADIO_PLAYER'
-VIDEO_PLAYER   = 'VIDEO_PLAYER'
-TV             = 'TV'
-GAMES          = 'GAMES'
 
 class PluginLoader(object):
     """
@@ -325,27 +284,18 @@ class PluginLoader(object):
         return self.types[type]
 
 
-    def getbyname(self, name, multiple_choises=False):
+    def getbyname(self, name):
         """
         Get a plugin by it's name
         """
-        if self.names.has_key(name):
-            return self.names[name]
-        if multiple_choises:
-            return []
-        return None
+        return self.names.get(name, None)
 
 
-    def register(self, plugin, name, multiple_choises=False):
+    def register(self, plugin, name):
         """
         Register an object as a named plugin
         """
-        if multiple_choises:
-            if not self.names.has_key(name):
-                self.names[name] = []
-            self.names[name].append(plugin)
-        else:
-            self.names[name] = plugin
+        self.names[name] = plugin
 
 
     def __find_plugin_file(self, filename):
@@ -439,7 +389,6 @@ class PluginLoader(object):
             else:
                 p = name
 
-            p.plugin_activate()
             p._plugin_level = level
 
             if type:

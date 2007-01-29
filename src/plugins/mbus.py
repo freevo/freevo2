@@ -30,13 +30,6 @@ class PluginInterface(plugin.Plugin):
         self.status.set('idle', 0)
         self.status.set('playing', '')
 
-        
-    def plugin_activate(self):
-        """
-        Execute on activation of the plugin.
-        """
-        plugin.Plugin.plugin_activate(self)
-        self.idle_time = 0
         self.__events.register()
         self.__timer.start(60)
 
