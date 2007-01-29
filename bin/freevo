@@ -170,10 +170,9 @@ import gui.areas
 import gui.animation
 import gui.widgets
 import gui.theme
-import beacon
 
 # new style imports
-from freevo.ui import plugin, util
+from freevo.ui import plugin, util, beacon
 
 # load the fxditem to make sure it's the first in the
 # mimetypes list
