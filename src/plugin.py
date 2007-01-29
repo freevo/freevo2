@@ -35,9 +35,6 @@
 # kaa imports
 import kaa.notifier
 
-# freevo imports
-import config
-
 # plugin loader
 from plugin_loader import *
 import plugin_loader
@@ -51,24 +48,6 @@ class Plugin(plugin_loader.Plugin):
     """
     Basic plugin class.
     """
-    def __init__(self, name=''):
-        """
-        Execute on activation of the plugin.
-        """
-        for var, val, desc in self.config():
-            if not hasattr(config, var):
-                setattr(config, var, val)
-        plugin_loader.Plugin.__init__(self, name)
-
-
-    def config(self):
-        """
-        return a list of config variables this plugin needs to be set in
-        in freevo_config.py. Each variable in again a list and contains
-        (varname, default value, description)
-        """
-        return []
-
 
     def shutdown(self):
         """

@@ -145,21 +145,6 @@ class PluginInterface(InputPlugin):
         kaa.notifier.SocketDispatcher(self.handle).register(self.fd)
 
 
-    def config(self):
-        # XXX TODO: Autodetect which type of device it is so we don't need
-        #           to set EVDEV_NAME, or have the user pick it from a list.
-        #           Right now it is called something pretty to make it easier
-        #           for users to choose the right one.
-
-        return [
-                ( 'EVDEV_NAME', 'Hauppauge PVR-250/350 IR remote', 'Long name of device.' ),
-                ( 'EVDEV_DEVICE', '/dev/input/event0', 'Input device to use.' ),
-                ( 'EVDEV_REPEAT_IGNORE', 400, 
-                  'Time before first repeat (miliseconds).' ),
-                ( 'EVDEV_REPEAT_RATE',  100, 
-                  'Time between consecutive repeats (miliseconds).' ), ]
-
-
     def handle( self ):
         S_EVDATA = '@llHHi'
         c = os.read(self.fd, 16)

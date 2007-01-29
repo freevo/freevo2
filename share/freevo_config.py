@@ -112,6 +112,12 @@ plugin.activate('mixer')
 # delete file in menu
 plugin.activate('file_ops', level=20)
 
+# Add delete image to the menu
+FILE_OPS_ALLOW_DELETE_IMAGE = True
+
+# Add delete info to the menu
+FILE_OPS_ALLOW_DELETE_INFO = True
+
 # support for settings bookmarks (key RECORD) while playing. Also
 # auto bookmarking when playback is stopped
 plugin.activate('video.bookmarker', level=0)
@@ -461,6 +467,12 @@ LIRCRC = '/etc/freevo/lircrc'
 if os.path.exists('/dev/lircd'):
     plugin.activate('input.lirc')
     
+
+# plugin.activate('input.event_device')
+EVDEV_NAME = 'Hauppauge PVR-250/350 IR remote'
+EVDEV_DEVICE = '/dev/input/event0'
+EVDEV_REPEAT_IGNORE = 400
+EVDEV_REPEAT_RATE = 100
 
 # ======================================================================
 # Freevo TV settings:
