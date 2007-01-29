@@ -4,8 +4,7 @@
 # -----------------------------------------------------------------------------
 # $Id$
 #
-# This file defines some special plugins known to Freevo. It also contains
-# all functions defined in the plugin_loader.
+# This file defines some special plugins known to Freevo.
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -32,22 +31,46 @@
 #
 # -----------------------------------------------------------------------------
 
+# python imports
+import os
+import copy
+import logging
+
 # kaa imports
 import kaa.notifier
 
-# plugin loader
-from plugin_loader import *
-import plugin_loader
-
+# get logging object
+log = logging.getLogger('plugin')
 
 #
 # Some basic plugins known to Freevo.
 #
 
-class Plugin(plugin_loader.Plugin):
+class Plugin(object):
     """
     Basic plugin class.
     """
+
+    def __init__(self, name=''):
+        self._plugin_type = None
+        self._plugin_level  = 10
+        self._plugin_name = name
+        self._plugin_special = False
+
+
+    def plugin_activate(self):
+        """
+        Execute on activation of the plugin.
+        """
+        pass
+
+
+    def plugin_decativate(self):
+        """
+        Execute when the plugin is deactivated.
+        """
+        pass
+
 
     def shutdown(self):
         """
@@ -175,15 +198,294 @@ VIDEO_PLAYER   = 'VIDEO_PLAYER'
 TV             = 'TV'
 GAMES          = 'GAMES'
 
+class PluginLoader(object):
+    """
+    Class for handling the different plugins.
+    """
+    def __init__(self):
+        """
+        Init the plugin loader.
+        """
+        # path where to search for plugins, will be set on init
+        self.path = None
+        # list of all plugins
+        self.plugins = []
+        self.loaded_plugins = []
+
+        # next id for a plugin
+        self.next_id = 0
+        # plugins sorted by type
+        self.types = {}
+        # plugins based on name
+        self.names = {}
+        # status of the plugin module
+        self.__initialized = False
+
+
+    def activate(self, name, type=None, level=10, args=None):
+        """
+        Activate a plugin.
+        """
+        self.next_id += 1
+
+        for p in self.plugins:
+            if not isinstance(name, Plugin) and p[0] == name and \
+                   p[1] == type and p[3] == args:
+                log.warning('duplicate plugin activation, ignoring:\n' + \
+                            '  <%s %s %s>' % (name, type, args))
+                return
+        if self.__initialized:
+            self.__load_plugin(name, type, level, args)
+            # sort plugins again
+            cmp_func = lambda l, o: cmp(l._plugin_level, o._plugin_level)
+            for key in self.types:
+                self.types[key].sort(cmp_func)
+        else:
+            self.plugins.append((name, type, level, args, self.next_id))
+        return self.next_id
+
+
+    def deactivate(self, id):
+        """
+        Remove a plugin from the list.
+        """
+        if self.__initialized:
+            return
+
+        if isinstance(id, int):
+            # remove by plugin id
+            for p in self.plugins:
+                if p[4] == id:
+                    self.plugins.remove(p)
+                    return
+        else:
+            # remove by name
+            for p in copy.copy(self.plugins):
+                if p[0] == id:
+                    self.plugins.remove(p)
+
+
+    def is_active(self, name, arg=None):
+        """
+        Search the list if the given plugin is active. If arg is set,
+        check arg, too.
+        """
+        for p in self.plugins:
+            if p[0] == name:
+                if not arg:
+                    return p
+                if isinstance(arg, list) or isinstance(arg, tuple):
+                    try:
+                        for i in range(len(arg)):
+                            if arg[i] != p[3][i]:
+                                break
+                        else:
+                            return p
+                    except:
+                        pass
+                if arg == p[3]:
+                    return p
+        return False
+
+
+    def init(self, plugin_path, callback = None):
+        """
+        Load and init all the plugins. The function takes the path were the
+        plugins are searched in. Optional is a callback, called after a
+        plugin is loaded. If 'plugins' is given, only plugins with the given
+        prefix are loaded.
+        """
+        self.__initialized = True
+        self.path = plugin_path
+
+        for name, type, level, args, number in self.plugins:
+            kaa.notifier.step(False, True)
+            if callback:
+                callback()
+            if isinstance(name, Plugin):
+                # plugin already an object
+                self.__load_plugin(name, type, level, args)
+                continue
+            self.__load_plugin(name, type, level, args)
+
+        # sort plugins
+        cmp_func = lambda l, o: cmp(l._plugin_level, o._plugin_level)
+        for key in self.types:
+            self.types[key].sort(cmp_func)
+
+
+    def get(self, type=None):
+        """
+        Get the plugin list 'type' or all if type is None
+        """
+        if type == None:
+            return self.plugins
+        if not self.types.has_key(type):
+            self.types[type] = []
+        return self.types[type]
+
+
+    def getbyname(self, name, multiple_choises=False):
+        """
+        Get a plugin by it's name
+        """
+        if self.names.has_key(name):
+            return self.names[name]
+        if multiple_choises:
+            return []
+        return None
+
+
+    def register(self, plugin, name, multiple_choises=False):
+        """
+        Register an object as a named plugin
+        """
+        if multiple_choises:
+            if not self.names.has_key(name):
+                self.names[name] = []
+            self.names[name].append(plugin)
+        else:
+            self.names[name] = plugin
+
+
+    def __find_plugin_file(self, filename):
+        """
+        Find the filename for the plugin and the python import statement.
+        """
+        full_filename = os.path.join(self.path, filename)
+
+        if os.path.isfile(full_filename + '.py'):
+            return filename.replace('/', '.'), None
+
+        if os.path.isdir(full_filename):
+            return filename.replace('/', '.'), None
+
+        full_filename = os.path.join(self.path, 'plugins', filename)
+
+        if os.path.isfile(full_filename + '.py'):
+            return 'plugins.' + filename.replace('/', '.'), None
+
+        if os.path.isdir(full_filename):
+            return 'plugins.' + filename.replace('/', '.'), None
+
+        if filename.find('/') > 0:
+            special = filename[:filename.find('/')]
+            filename = os.path.join(special, 'plugins',
+                                    filename[filename.find('/')+1:])
+            full_filename = os.path.join(self.path, filename)
+
+            if os.path.isfile(full_filename + '.py'):
+                return filename.replace('/', '.'), special
+
+            if os.path.isdir(full_filename):
+                return filename.replace('/', '.'), special
+
+        return None, None
+
+
+    def __load_plugin(self, name, type, level, args):
+        """
+        Load the plugin and add it to the lists
+        """
+        # fallback
+        module  = name
+        object  = '%s.PluginInterface' % module
+        special = None
+
+        # locate the plugin:
+        files = []
+
+        if not isinstance(name, Plugin):
+            module, special = self.__find_plugin_file(name.replace('.', '/'))
+            if module:
+                object = module + '.PluginInterface'
+            elif name.find('.') > 0:
+                pname = name[:name.rfind('.')].replace('.', '/')
+                module, special = self.__find_plugin_file(pname)
+                if module:
+                    object = module + '.%s' % name[name.rfind('.')+1:]
+                else:
+                    log.critical('can\'t locate plugin %s' % name)
+                    return
+            else:
+                log.critical('can\'t locate plugin %s' % name)
+                return
+
+        try:
+            if not isinstance(name, Plugin):
+                log.debug('loading %s as plugin %s' % (module, object))
+
+                exec('import %s' % module)
+                if not args:
+                    p = eval(object)()
+                elif isinstance(args, list) or isinstance(args, tuple):
+                    paramlist = 'args[0]'
+                    for i in range(1, len(args)):
+                        paramlist += ',args[%s]' % i
+                    p = eval('%s(%s)' % (object, paramlist))
+                else:
+                    p = eval(object)(args)
+
+                if not hasattr(p, '_plugin_type'):
+                    if hasattr(p, 'reason'):
+                        reason = p.reason
+                    else:
+                        reason = '''unknown
+                        The plugin neither called __init__ nor set a reason why
+                        Please contact the plugin author'''
+                    log.warning('plugin %s deactivated\n  reason: %s' % \
+                                (name, reason))
+                    return
+            else:
+                p = name
+
+            p.plugin_activate()
+            p._plugin_level = level
+
+            if type:
+                special = type
+
+            if p._plugin_type:
+                if p._plugin_special and special:
+                    key = p._plugin_type + '_' + special
+                else:
+                    key = p._plugin_type
+
+                if not self.types.has_key(key):
+                    self.types[key] = []
+                self.types[key].append(p)
+
+            if p._plugin_name:
+                self.names[p._plugin_name] = p
+
+            self.loaded_plugins.append(p)
+
+        except:
+            log.exception('failed to load plugin %s' % name)
+
+
+
+_loader = PluginLoader()
+
+# interface:
+activate = _loader.activate
+remove = _loader.deactivate
+deactivate = _loader.deactivate
+is_active = _loader.is_active
+init = _loader.init
+get = _loader.get
+getbyname = _loader.getbyname
+register = _loader.register
+
 def mimetype(display_type=None):
     """
     return all MimetypePlugins for the given display_type. If display_type
     is None, return all MimetypePlugins.
     """
     if not display_type:
-        return plugin_loader.get('mimetype')
+        return get('mimetype')
     ret = []
-    for p in plugin_loader.get('mimetype'):
+    for p in get('mimetype'):
         if not p.display_type or display_type in p.display_type:
             ret.append(p)
     return ret
