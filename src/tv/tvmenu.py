@@ -38,7 +38,7 @@ import freevo.ipc
 from freevo.ui import config
 from freevo.ui import plugin
 
-from mainmenu import MainMenuItem
+from freevo.ui.mainmenu import MainMenuItem
 from freevo.ui.menu import Item, ActionItem, Menu
 
 import tvguide

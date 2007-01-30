@@ -41,7 +41,7 @@ import kaa.notifier
 from freevo.ui import config, gui
 from freevo.ui.menu import Action
 from freevo.ui.application import ConfirmWindow
-from mainmenu import MainMenuItem
+from freevo.ui.mainmenu import MainMenuItem
 from freevo.ui.plugin import MainMenuPlugin
 from freevo.ui.gui import theme, widgets
 

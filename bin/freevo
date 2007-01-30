@@ -174,7 +174,7 @@ import freevo.ui.fxditem
 # freevo core imports
 import freevo.ipc
 
-from mainmenu import MainMenu
+from freevo.ui.mainmenu import MainMenu
 
 class Splashscreen(areas.Area):
     """

@@ -39,14 +39,14 @@ __all__ = [ 'MainMenuItem', 'MainMenu' ]
 import os
 
 # freevo imports
-from freevo.ui import config
-import freevo.ui.gui.theme
-from freevo.ui import util
-from freevo.ui import plugin
+import config
+import gui.theme
+import util
+import plugin
 
-from freevo.ui.menu import Item, Action, Menu
-from freevo.ui.application.menuw import MenuWidget
-from freevo.ui.event import *
+from menu import Item, Action, Menu
+from application.menuw import MenuWidget
+from event import *
 
 
 class MainMenuItem(Item):
@@ -72,7 +72,7 @@ class MainMenuItem(Item):
             return
 
         # load extra informations for the skin fxd file
-        theme = freevo.ui.gui.theme.get()
+        theme = gui.theme.get()
         skin_info = theme.mainmenu.items
         if skin_info.has_key(skin_type):
             skin_info  = skin_info[skin_type]
