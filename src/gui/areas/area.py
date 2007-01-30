@@ -57,7 +57,7 @@ from freevo.ui import config
 from freevo.ui import util
 
 # gui imports
-from gui.widgets import Rectangle, Text, Textbox, Image
+from freevo.ui.gui.widgets import Rectangle, Text, Textbox, Image
 
 import logging
 log = logging.getLogger('gui')

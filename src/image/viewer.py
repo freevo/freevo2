@@ -40,18 +40,14 @@ import kaa.notifier
 from kaa.strutils import to_unicode
 
 # freevo imports
-from freevo.ui import config
-from freevo.ui import plugin
-import gui
-import gui.widgets
-import gui.imagelib
-import gui.theme
+from freevo.ui import config, plugin, gui
+from freevo.ui.gui import theme, imagelib, widgets
 
 # cache for loading images
 from freevo.ui.util import ObjectCache
 
 # Transition/Move/VERTICAL
-from gui.animation import *
+from freevo.ui.gui.animation import *
 
 from freevo.ui.event import *
 from application import Application, STATUS_RUNNING, STATUS_STOPPING, \
@@ -172,7 +168,7 @@ class ImageViewer(Application):
         if filename and len(filename) > 0:
             image = self.bitmapcache[filename]
             if not image:
-                image = gui.imagelib.load(filename)
+                image = imagelib.load(filename)
                 self.bitmapcache[filename] = image
         else:
             # Using Container-Image
@@ -245,11 +241,11 @@ class ImageViewer(Application):
 
         if zoom:
             # position image at bbx and bby
-            image = gui.widgets.Image(image, (x-bbx, y-bby))
+            image = widgets.Image(image, (x-bbx, y-bby))
             zoom = bbx, bby
         else:
             # position image at x/y value
-            image = gui.widgets.Image(image, (x, y))
+            image = widgets.Image(image, (x, y))
 
         if (self.last_image and self.last_item != item and
             config.IMAGEVIEWER_BLEND_MODE != None):
@@ -310,7 +306,7 @@ class ImageViewer(Application):
         """
         if item.filename and len(item.filename) > 0 and \
                not self.bitmapcache[item.filename]:
-            image = gui.imagelib.load(item.filename)
+            image = imagelib.load(item.filename)
             self.bitmapcache[item.filename] = image
 
 
@@ -442,9 +438,9 @@ class ImageViewer(Application):
         pos = (config.GUI_OVERSCAN_X + 10, config.GUI_OVERSCAN_Y + 10)
         size = (gui.width - 2 * config.GUI_OVERSCAN_X - 20,
                 gui.height - 2 * config.GUI_OVERSCAN_Y - 20)
-        self.osd_text = gui.widgets.Textbox(osdstring, pos, size,
-                                            gui.theme.font('default'),
-                                            'left', 'bottom', mode='soft')
+        self.osd_text = widgets.Textbox(osdstring, pos, size,
+                                        theme.font('default'),
+                                        'left', 'bottom', mode='soft')
         # add the text widget to the screen, make sure the zindex
         # is 2 (== above the image and the box)
         self.osd_text.set_zindex(2)
@@ -470,13 +466,13 @@ class ImageViewer(Application):
         # build a new rectangle.
         pos  = (0, self.osd_text.get_pos()[1] - 10)
         size = (gui.width, rect[1] + 20)
-        background = gui.imagelib.load('background', (gui.width, gui.height))
+        background = imagelib.load('background', (gui.width, gui.height))
         if background:
             background.crop(pos, size)
-            self.osd_box = gui.widgets.Image(background, pos)
+            self.osd_box = widgets.Image(background, pos)
             self.osd_box.set_alpha(230)
         if not background:
-            self.osd_box = gui.widgets.Rectangle(pos, size, 0xaa000000L)
+            self.osd_box = widgets.Rectangle(pos, size, 0xaa000000L)
 
         # put the rectangle on the screen and set the zindex to 1
         # (between image and text)

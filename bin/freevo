@@ -164,15 +164,8 @@ if len(sys.argv) == 2 and sys.argv[1] in ('-fs', '--fullscreen', '-f'):
     os.execvp('xinit', [ 'xinit', sys.argv[0], '-force-fs',  '--', ':'+str(server_num) ])
 
 # freevo imports
-import gui
-import gui.displays
-import gui.areas
-import gui.animation
-import gui.widgets
-import gui.theme
-
-# new style imports
 from freevo.ui import plugin, util, beacon
+from freevo.ui.gui import theme, widgets, animation, displays, areas
 
 # load the fxditem to make sure it's the first in the
 # mimetypes list
@@ -183,16 +176,16 @@ import freevo.ipc
 
 from mainmenu import MainMenu
 
-class Splashscreen(gui.areas.Area):
+class Splashscreen(areas.Area):
     """
     A simple splash screen for osd startup
     """
     def __init__(self, text, max_value):
-        gui.areas.Area.__init__(self, 'content')
+        areas.Area.__init__(self, 'content')
         self.max_value = max_value
         self.text      = text
         self.bar       = None
-        self.engine    = gui.areas.Handler('splashscreen', ('screen', self))
+        self.engine    = areas.Handler('splashscreen', ('screen', self))
         self.engine.show()
 
 
@@ -217,9 +210,9 @@ class Splashscreen(gui.areas.Area):
 
         self.text = self.drawstring(self.text, settings.font, settings,
                                     height=-1, align_h='center')
-        self.bar = gui.widgets.Progressbar((x0, y), (x1-x0, 20), 2, (0,0,0),
-                                           None, 0, None, (0,0,0,95), 0,
-                                           self.max_value)
+        self.bar = widgets.Progressbar((x0, y), (x1-x0, 20), 2, (0,0,0),
+                                       None, 0, None, (0,0,0,95), 0,
+                                       self.max_value)
         self.layer.add_child(self.bar)
 
 
@@ -264,7 +257,7 @@ try:
     freevo.ipc.Instance('freevo', **config.MBUS_ADDR)
 
     # create gui
-    gui.displays.create()
+    displays.create()
 
     # Fire up splashscreen and load the plugins
     num = len(plugin.get(None))-1
@@ -277,14 +270,14 @@ try:
     splash.hide()
 
     # prepare again, now that all plugins are loaded
-    gui.theme.get().prepare()
+    theme.get().prepare()
 
     # start menu
     MainMenu()
 
     # Wait for the startup animation. This is a bad hack but we won't
     # be able to remove our splashscreen otherwise. Big FIXME!
-    gui.animation.render().wait()
+    animation.render().wait()
 
     # delete splash screen
     splash.destroy()

@@ -40,10 +40,10 @@ __all__ = [ 'TvlistingArea' ]
 
 import copy
 import os
-import gui.imagelib
 import math
 import time
 from freevo.ui import config
+from freevo.ui.gui import imagelib
 
 # kaa imports
 import kaa.epg
@@ -52,7 +52,7 @@ import kaa.epg
 import freevo.ipc
 
 from area import Area
-from gui.widgets import Rectangle
+from freevo.ui.gui.widgets import Rectangle
 
 import logging
 log = logging.getLogger('gui')
@@ -255,7 +255,7 @@ class TvlistingArea(Area):
 
             channel_logo = config.TV_LOGOS + '/' + channel.name + '.png'
             if os.path.isfile(channel_logo):
-                img = gui.imagelib.load(channel_logo, (None, None))
+                img = imagelib.load(channel_logo, (None, None))
                 i = self.drawimage(img, (logo_geo[0], logo_geo[1]))
                 self.chan_obj.append(i)
             else:

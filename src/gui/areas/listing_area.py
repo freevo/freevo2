@@ -50,7 +50,7 @@ from freevo.ui import util
 
 # gui import
 from area import Area
-from gui.widgets import Image
+from freevo.ui.gui.widgets import Image
 
 import logging
 log = logging.getLogger('gui')

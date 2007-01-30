@@ -56,11 +56,9 @@ from freevo.ui import config
 from kaa.weakref import weakref
 
 # gui imports
-import gui
-import gui.animation as animation 
-from gui.widgets import Container
-import gui.theme
-import gui.imagelib as imagelib
+from freevo.ui.gui.widgets import Container
+from freevo.ui.gui import theme as theme_engine
+from freevo.ui.gui import imagelib, animation, displays
 
 # areas
 from default_areas  import *
@@ -82,7 +80,7 @@ class Handler(object):
         self.areas         = []
         self.visible       = False
 
-        self.canvas = gui.display
+        self.canvas = displays.get()
         
         self.layer = (Container('Handler: Background'),
                       Container('Handler: Content'))
@@ -260,7 +258,7 @@ class Handler(object):
         object may be a menu, a table for the tv menu are an audio item for
         the audio player
         """
-        theme = gui.theme.get()
+        theme = theme_engine.get()
         
         if self.type == 'menu':
             style = self.__get_display_style(object)

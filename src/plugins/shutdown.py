@@ -38,14 +38,12 @@ import os
 import kaa.notifier
 
 # freevo imports
-from freevo.ui import config
-import gui
-import gui.widgets
-
+from freevo.ui import config, gui
 from freevo.ui.menu import Action
 from application import ConfirmWindow
 from mainmenu import MainMenuItem
 from freevo.ui.plugin import MainMenuPlugin
+from freevo.ui.gui import theme, widgets
 
 
 class ShutdownItem(MainMenuItem):
@@ -121,9 +119,9 @@ class ShutdownItem(MainMenuItem):
         """
         Clear the screen and show the message.
         """
-        msg = gui.widgets.Text(text, (0, 0), (gui.width, gui.height),
-                               gui.theme.font('default'), align_h='center',
-                               align_v='center')
+        msg = widgets.Text(text, (0, 0), (gui.width, gui.height),
+                           theme.font('default'), align_h='center',
+                           align_v='center')
         gui.display.clear()
         gui.display.add_child(msg)
         gui.display.update()

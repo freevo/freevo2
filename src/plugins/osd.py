@@ -39,11 +39,8 @@ import logging
 from kaa.notifier import OneShotTimer, EventHandler
 
 # freevo imports
-from freevo.ui import config
-from freevo.ui import plugin
-import gui
-import gui.widgets
-import gui.theme
+from freevo.ui import config, plugin, gui
+from freevo.ui.gui import theme, widgets
 
 from freevo.ui.event import OSD_MESSAGE
 
@@ -88,7 +85,7 @@ class PluginInterface(plugin.Plugin):
             return
 
         # get the osd from from the settings
-        font = gui.theme.font('osd')
+        font = theme.font('osd')
 
         over_x = config.GUI_OVERSCAN_X
         over_y = config.GUI_OVERSCAN_Y
@@ -99,10 +96,10 @@ class PluginInterface(plugin.Plugin):
             y += 60
 
 
-        self.gui_object = gui.widgets.Text(self.message, (over_x, y),
-                                           (display.width - 10 - 2 * over_x,
-                                            over_y + 10 + font.height),
-                                           font, align_h='right')
+        self.gui_object = widgets.Text(self.message, (over_x, y),
+                                       (display.width - 10 - 2 * over_x,
+                                        over_y + 10 + font.height),
+                                       font, align_h='right')
 
         # make sure the object is on top of everything else
         self.gui_object.set_zindex(200)

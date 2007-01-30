@@ -31,9 +31,8 @@
 
 import time
 
-import gui
-import gui.widgets
-import gui.theme
+from freevo.ui import gui
+from freevo.ui.gui import theme, widgets
 from plugins.idlebar import IdleBarPlugin
 
 class PluginInterface(IdleBarPlugin):
@@ -67,11 +66,11 @@ class PluginInterface(IdleBarPlugin):
 
         self.clear()
 
-        font  = gui.theme.font('clock')
+        font  = theme.font('clock')
         width = min(width, font.stringsize(clock))
 
-        txt = gui.widgets.Text(clock, (0, 0), (width, height), font,
-                               align_v='center', align_h='right')
+        txt = widgets.Text(clock, (0, 0), (width, height), font,
+                           align_v='center', align_h='right')
         self.objects.append(txt)
         self.text = clock
         return width

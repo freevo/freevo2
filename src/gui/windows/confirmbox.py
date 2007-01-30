@@ -41,8 +41,8 @@ import logging
 from freevo.ui.event import *
 
 # gui imports
-from gui.widgets.textbox import Textbox
-from gui.widgets.button import Button
+from freevo.ui.gui.widgets.textbox import Textbox
+from freevo.ui.gui.widgets.button import Button
 
 # windows imports
 from waitbox import WaitBox

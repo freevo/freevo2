@@ -38,13 +38,8 @@ import logging
 import kaa.notifier
 
 # freevo imports
-from freevo.ui import config
-from freevo.ui import plugin
-import gui
-import gui.imagelib
-import gui.widgets
-import gui.animation
-import gui.theme
+from freevo.ui import config, plugin, gui
+from freevo.ui.gui import theme, imagelib, widgets, animation
 import application
 from freevo.ui.event import *
 
@@ -77,7 +72,7 @@ class PluginInterface(plugin.Plugin):
         self.barfile        = ''
         self.background     = None
 
-        self.container = gui.widgets.Container()
+        self.container = widgets.Container()
         self.container.set_zindex(10)
         gui.display.add_child(self.container)
 
@@ -141,7 +136,7 @@ class PluginInterface(plugin.Plugin):
     def show(self, update=True, fade=0):
         if self.visible:
             return
-        gui.animation.FadeAnimation([self.container], fade, 0, 255).start()
+        animation.FadeAnimation([self.container], fade, 0, 255).start()
         self.visible = True
         self.update()
         if update:
@@ -151,7 +146,7 @@ class PluginInterface(plugin.Plugin):
     def hide(self, update=True, fade=0):
         if not self.visible:
             return
-        gui.animation.FadeAnimation([self.container], fade, 255, 0).start()
+        animation.FadeAnimation([self.container], fade, 255, 0).start()
         self.visible = False
         if update:
             gui.display.update()
@@ -165,11 +160,11 @@ class PluginInterface(plugin.Plugin):
             # FIXME: respect fxd settings changes!!!
             s = gui.display
             size = (s.width, s.height)
-            self.background = gui.imagelib.load('background', size)
+            self.background = imagelib.load('background', size)
             if self.background:
                 size = (s.width, config.GUI_OVERSCAN_Y + 60)
                 self.background.crop((0,0), size)
-                self.background = gui.widgets.Image(self.background, (0,0))
+                self.background = widgets.Image(self.background, (0,0))
                 self.background.set_alpha(230)
                 self.background.set_zindex(-1)
                 self.container.add_child(self.background)
@@ -193,13 +188,13 @@ class PluginInterface(plugin.Plugin):
         w = gui.display.width
         h = config.GUI_OVERSCAN_Y + 60
 
-        f = gui.theme.image('idlebar')
+        f = theme.image('idlebar')
 
         if self.barfile != f:
             if self.bar:
                 self.container.remove_child(self.bar)
             self.barfile = f
-            self.bar = gui.widgets.Image(self.barfile, (0,0), (w, h))
+            self.bar = widgets.Image(self.barfile, (0,0), (w, h))
             self.container.add_child(self.bar)
         
         if fade:

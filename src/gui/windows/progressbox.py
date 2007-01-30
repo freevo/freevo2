@@ -40,7 +40,7 @@ import logging
 import kaa.notifier
 
 # gui imports
-from gui.widgets.progressbar import Progressbar
+from freevo.ui.gui.widgets.progressbar import Progressbar
 
 # windows imports
 from waitbox import WaitBox

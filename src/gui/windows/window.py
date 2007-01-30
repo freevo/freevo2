@@ -39,9 +39,8 @@
 import copy
 
 # gui imports
-from gui import displays
-from gui import theme
-from gui.widgets import Rectangle, Container
+from freevo.ui.gui import theme, displays
+from freevo.ui.gui.widgets import Rectangle, Container
 
 
 class Window(Container):

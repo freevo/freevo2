@@ -36,7 +36,7 @@
 __all__ = [ 'ProgressArea' ]
 
 from area import Area
-from gui.widgets import Progressbar
+from freevo.ui.gui.widgets import Progressbar
 
 import logging
 log = logging.getLogger('gui')

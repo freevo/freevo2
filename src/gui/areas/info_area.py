@@ -43,7 +43,7 @@ from freevo.ui import util
 
 # gui imports
 from area import Area
-from gui.widgets import InfoText
+from freevo.ui.gui.widgets import InfoText
 
 def current_time():
     if time.strftime('%P') =='':

@@ -33,7 +33,7 @@ class BaseApplication(object):
     visible = None
     
     def __init__(self):
-        from areas import Handler
+        from freevo.ui.gui.areas import Handler
         from freevo.ui import config
         self.GUI_FADE_STEPS = config.GUI_FADE_STEPS
         self.engine = Handler(self.name, self.areas)
@@ -55,7 +55,7 @@ class _Menu(BaseApplication):
     areas = ('screen', 'title', 'subtitle', 'view', 'listing', 'info')
 
     def __init__(self):
-        from areas import Handler
+        from freevo.ui.gui.areas import Handler
         BaseApplication.__init__(self)
         self.menuengine = self.engine
         tv = ('screen', 'title', 'subtitle', 'view', 'tvlisting', 'info')

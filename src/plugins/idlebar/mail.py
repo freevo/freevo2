@@ -32,8 +32,7 @@
 import os
 import mailbox
 
-import gui.widgets
-import gui.imagelib
+from freevo.ui.gui import imagelib, widgets
 from freevo.ui import config
 from plugins.idlebar import IdleBarPlugin
 
@@ -76,10 +75,10 @@ class PluginInterface(IdleBarPlugin):
         self.clear()
 
         if mails > 0:
-            m = gui.imagelib.load(self.MAILIMAGE, (None, None))
+            m = imagelib.load(self.MAILIMAGE, (None, None))
         else:
-            m = gui.imagelib.load(self.NO_MAILIMAGE, (None, None))
+            m = imagelib.load(self.NO_MAILIMAGE, (None, None))
 
-        self.objects.append(gui.widgets.Image(m, (0, (height-m.height)/2)))
+        self.objects.append(widgets.Image(m, (0, (height-m.height)/2)))
 
         return m.width

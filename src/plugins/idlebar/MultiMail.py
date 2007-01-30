@@ -48,16 +48,13 @@
 # ----------------------------------------------------------------------- */
 
 import os
-from freevo.ui import config
+from freevo.ui import config, gui
 import imaplib
 import poplib
 import mailbox
 import threading
 import time
-import gui
-import gui.imagelib
-import gui.widgets
-import gui.theme
+from freevo.ui.gui import theme, imagelib, widgets
 
 from plugins.idlebar import IdleBarPlugin
 
@@ -102,18 +99,18 @@ class MultiMail(IdleBarPlugin):
         self.last_unread = self.unread
 
         if self.unread > 0:
-            i = gui.imagelib.load(self.MAILIMAGE, (None, None))
-            self.objects.append(gui.widgets.Image(i, (0, 2)))
-            font  = gui.theme.font('weather')
+            i = imagelib.load(self.MAILIMAGE, (None, None))
+            self.objects.append(widgets.Image(i, (0, 2)))
+            font  = theme.font('weather')
             str_unread = '%3s' % self.unread
             text_width = font.stringsize(str_unread)
-            t = gui.widgets.Text(str_unread, (0, 55-font.height), (text_width, font.height),
+            t = widgets.Text(str_unread, (0, 55-font.height), (text_width, font.height),
                          font, 'left', 'top')
             self.objects.append(t)
             return max(i.width, t.width)
 
-        i = gui.imagelib.load(self.NO_MAILIMAGE, (None, None))
-        self.objects.append(gui.widgets.Image(i, (0, 10)))
+        i = imagelib.load(self.NO_MAILIMAGE, (None, None))
+        self.objects.append(widgets.Image(i, (0, 10)))
         return i.width
 
 class Imap(MultiMail):

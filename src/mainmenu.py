@@ -40,7 +40,7 @@ import os
 
 # freevo imports
 from freevo.ui import config
-import gui.theme
+import freevo.ui.gui.theme
 from freevo.ui import util
 from freevo.ui import plugin
 
@@ -72,7 +72,7 @@ class MainMenuItem(Item):
             return
 
         # load extra informations for the skin fxd file
-        theme = gui.theme.get()
+        theme = freevo.ui.gui.theme.get()
         skin_info = theme.mainmenu.items
         if skin_info.has_key(skin_type):
             skin_info  = skin_info[skin_type]

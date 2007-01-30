@@ -40,8 +40,8 @@ import kaa.notifier
 from freevo.ui import config
 
 # gui imports
-import gui
-from gui import animation
+from freevo.ui import gui
+from freevo.ui.gui import animation
 
 # get logging object
 log = logging.getLogger('gui')

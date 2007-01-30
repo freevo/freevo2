@@ -31,10 +31,8 @@
 
 import os
 
-import gui
-import gui.widgets
-import gui.theme
-from freevo.ui import config
+from freevo.ui import config, gui
+from freevo.ui.gui import theme, widgets
 from plugins.idlebar import IdleBarPlugin
 
 class PluginInterface(IdleBarPlugin):
@@ -49,7 +47,7 @@ class PluginInterface(IdleBarPlugin):
 
     def draw(self, width, height):
         if not self.image:
-            image = gui.theme.image('logo')
+            image = theme.image('logo')
         else:
             image = os.path.join(config.IMAGE_DIR, self.image)
 
@@ -59,7 +57,7 @@ class PluginInterface(IdleBarPlugin):
         self.file = image
         self.clear()
 
-        i = gui.widgets.Image((image, (None, height + 10)), (0, 0))
+        i = widgets.Image((image, (None, height + 10)), (0, 0))
         self.objects.append(i)
 
         return i.width

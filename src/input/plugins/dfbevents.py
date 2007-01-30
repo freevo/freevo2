@@ -42,7 +42,7 @@ import directfb
 
 # Freevo imports
 from freevo.ui import config
-import gui.displays
+from freevo.ui.gui import displays
 from freevo.ui.event import *
 from interface import InputPlugin
 
@@ -55,7 +55,7 @@ class PluginInterface(InputPlugin):
         InputPlugin.__init__(self)
 
         if config.GUI_DISPLAY.lower() == 'dfb':
-            self.dfb = gui.displays.get().dfb
+            self.dfb = displays.get().dfb
         else:
             self.dfb = directfb.DirectFB()
      

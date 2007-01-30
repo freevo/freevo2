@@ -39,8 +39,8 @@ from freevo.ui import config
 from freevo.ui.event import *
 
 # gui imports
-import gui.displays as displays
-from gui.widgets.textbox import Textbox
+from freevo.ui.gui import displays
+from freevo.ui.gui.widgets.textbox import Textbox
 
 # windows imports
 from window import Window

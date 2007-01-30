@@ -42,8 +42,8 @@ import logging
 from freevo.ui import config
 
 # gui imports
-import gui.displays as displays
-from gui.widgets.textbox import Textbox
+from freevo.ui.gui import displays
+from freevo.ui.gui.widgets.textbox import Textbox
 
 # windows imports
 from window import Window

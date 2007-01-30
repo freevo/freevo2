@@ -32,7 +32,7 @@
 #
 # -----------------------------------------------------------------------------
 
-import gui.imagelib
+from freevo.ui.gui import imagelib
 from kaa.mevas.image import CanvasImage
 
 class Image(CanvasImage):
@@ -55,11 +55,11 @@ class Image(CanvasImage):
         """
         if isinstance(image, (str, unicode)):
             # load image
-            image = gui.imagelib.load(image)
+            image = imagelib.load(image)
 
         if isinstance(image, (list, tuple)):
             # load image
-            image = gui.imagelib.load(image[0], image[1])
+            image = imagelib.load(image[0], image[1])
 
         if not image:
             # invalid image, return 1x1 empty space

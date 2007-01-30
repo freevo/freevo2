@@ -35,7 +35,7 @@ __all__ = [ 'TextWindow', 'MessageWindow', 'ConfirmWindow']
 from kaa.notifier import Signal
 
 # freevo imports
-import gui
+from freevo.ui import gui
 from freevo.ui.event import *
 
 # application imports
