@@ -36,7 +36,7 @@ import freevo.ipc
 
 # freevo imports
 from freevo.ui.menu import Item, Action, Menu
-from application import MessageWindow
+from freevo.ui.application import MessageWindow
 
 # get tvserver interface
 tvserver = freevo.ipc.Instance('freevo').tvserver

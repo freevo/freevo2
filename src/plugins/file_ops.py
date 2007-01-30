@@ -40,7 +40,7 @@ from freevo.ui import plugin
 from freevo.ui import util
 
 from freevo.ui.menu import Action
-from application import ConfirmWindow
+from freevo.ui.application import ConfirmWindow
 
 # get logging object
 log = logging.getLogger()

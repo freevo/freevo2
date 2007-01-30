@@ -38,9 +38,8 @@ import logging
 import kaa.notifier
 
 # freevo imports
-from freevo.ui import config, plugin, gui
+from freevo.ui import config, plugin, gui, application
 from freevo.ui.gui import theme, imagelib, widgets, animation
-import application
 from freevo.ui.event import *
 
 # get logging object

@@ -30,14 +30,13 @@ import re
 from kaa.strutils import unicode_to_str
 import kaa.notifier
 
-from freevo.ui import plugin
+from freevo.ui import plugin, application
 from freevo.ui.event import *
 
 import logging
 log = logging.getLogger()
 
 import kaa.display
-import application
 
 varreg = re.compile('%%.*?%%')
 

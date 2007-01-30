@@ -31,7 +31,7 @@
 # -----------------------------------------------------------------------------
 import logging
 
-from application import ChildApp
+from freevo.ui.application import ChildApp
 from freevo.ui.event import *
 
 log = logging.getLogger('games')

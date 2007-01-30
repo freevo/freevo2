@@ -50,7 +50,7 @@ from freevo.ui.util import ObjectCache
 from freevo.ui.gui.animation import *
 
 from freevo.ui.event import *
-from application import Application, STATUS_RUNNING, STATUS_STOPPING, \
+from freevo.ui.application import Application, STATUS_RUNNING, STATUS_STOPPING, \
      STATUS_STOPPED, STATUS_IDLE, CAPABILITY_TOGGLE, CAPABILITY_FULLSCREEN
 
 # get logging object

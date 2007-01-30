@@ -1,6 +1,6 @@
 
 __all__ = [ 'gamesplayer' ]
-from application import Application, STATUS_RUNNING, STATUS_STOPPING, \
+from freevo.ui.application import Application, STATUS_RUNNING, STATUS_STOPPING, \
 	 STATUS_STOPPED, STATUS_IDLE, CAPABILITY_TOGGLE, CAPABILITY_PAUSE, \
 	 CAPABILITY_FULLSCREEN
 from freevo.ui.event import *

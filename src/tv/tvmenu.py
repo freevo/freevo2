@@ -43,7 +43,7 @@ from freevo.ui.menu import Item, ActionItem, Menu
 
 import tvguide
 from directory import DirItem
-from application import TextWindow, MessageWindow
+from freevo.ui.application import TextWindow, MessageWindow
 
 import logging
 log = logging.getLogger('tv')

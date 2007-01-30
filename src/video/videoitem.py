@@ -49,7 +49,7 @@ from kaa.strutils import unicode_to_str, str_to_unicode
 from freevo.ui import config
 from freevo.ui import util
 
-from application import MessageWindow, ConfirmWindow
+from freevo.ui.application import MessageWindow, ConfirmWindow
 from freevo.ui.menu import Menu, MediaItem, Files, Action
 from freevo.ui.event import *
 

@@ -45,7 +45,7 @@ from freevo.ui import plugin
 from freevo.ui import util
 
 from freevo.ui.menu import Item, Action
-from application import TextWindow
+from freevo.ui.application import TextWindow
 
 # possible archives and how to unpack them
 _cmdlines = {

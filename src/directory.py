@@ -55,7 +55,7 @@ from freevo.ui.menu import Item, Files, Action, ActionItem
 from freevo.ui.playlist import Playlist
 from freevo.ui.event import *
 
-from application import MessageWindow
+from freevo.ui.application import MessageWindow
 
 # get logging object
 log = logging.getLogger()

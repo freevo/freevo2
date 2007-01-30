@@ -44,7 +44,7 @@ from freevo.ui import menu
 
 from freevo.ui.menu import Item, Action, ActionItem, Menu
 from image import ImageItem
-from application import TextWindow, MessageWindow
+from freevo.ui.application import TextWindow, MessageWindow
 
 class ApodMainMenuItem(Item):
     """
