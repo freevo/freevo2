@@ -9,7 +9,7 @@ import freevo.ipc
 # freevo ui imports
 from freevo.ui import plugin, application
 from freevo.ui.event import *
-from directory import DirItem
+from freevo.ui.directory import DirItem
 
 import logging
 log = logging.getLogger('mbus')

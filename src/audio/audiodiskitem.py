@@ -42,7 +42,7 @@ from freevo.ui import config
 from freevo.ui.menu import Action, Menu
 from audioitem import AudioItem
 from freevo.ui.playlist import Playlist
-from directory import DirItem
+from freevo.ui.directory import DirItem
 
 
 class AudioDiskItem(Playlist):

@@ -44,18 +44,18 @@ from kaa.weakref import weakref
 from kaa.strutils import str_to_unicode
 
 # freevo imports
-from freevo.ui import config
-from freevo.ui import util
+import config
+import util
 
-from freevo.ui import menu
-from freevo.ui import plugin
-from freevo.ui import fxditem
+import menu
+import plugin
+import fxditem
 
-from freevo.ui.menu import Item, Files, Action, ActionItem
-from freevo.ui.playlist import Playlist
-from freevo.ui.event import *
+from menu import Item, Files, Action, ActionItem
+from playlist import Playlist
+from event import *
 
-from freevo.ui.application import MessageWindow
+from application import MessageWindow
 
 # get logging object
 log = logging.getLogger()

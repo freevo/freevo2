@@ -42,7 +42,7 @@ from freevo.ui.mainmenu import MainMenuItem
 from freevo.ui.menu import Item, ActionItem, Menu
 
 import tvguide
-from directory import DirItem
+from freevo.ui.directory import DirItem
 from freevo.ui.application import TextWindow, MessageWindow
 
 import logging

@@ -46,7 +46,7 @@ from freevo.ui import config
 from freevo.ui import plugin
 
 from freevo.ui.event import *
-from directory import DirItem
+from freevo.ui.directory import DirItem
 from freevo.ui.mainmenu import MainMenuItem
 from freevo.ui.menu import Menu, Item
 # from games import machine
