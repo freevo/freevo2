@@ -77,36 +77,6 @@ class MainMenuPlugin(Plugin):
 
 
 
-class ItemPlugin(Plugin):
-    """
-    Plugin class to add something to the item action list
-
-    The plugin can also have an eventhandler. All events passed to the item
-    will also be passed to this plugin. This works only for VideoItems right
-    now (each item type must support it directly). If the function returns
-    True, the event won't be passed to other eventhandlers and also not to
-    the item itself.
-    """
-    def __init__(self, name=''):
-        Plugin.__init__(self, name)
-        self._plugin_type = 'item'
-        self._plugin_special = True
-
-
-    def actions(self, item):
-        """
-        return a list of actions to that item. Each action is type Action
-        """
-        return []
-
-
-    def eventhandler(self, item, event):
-        """
-        Additional eventhandler for this item.
-        """
-        return False
-
-
 class MimetypePlugin(Plugin):
     """
     Plugin class for mimetypes handled in a directory/playlist.

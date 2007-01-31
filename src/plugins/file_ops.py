@@ -35,18 +35,15 @@ import logging
 from kaa.notifier import Callback
 
 # freevo imports
-from freevo.ui import config
-from freevo.ui import plugin
-from freevo.ui import util
-
-from freevo.ui.menu import Action
+from freevo.ui import config, util
+from freevo.ui.menu import Action, ItemPlugin
 from freevo.ui.application import ConfirmWindow
 
 # get logging object
 log = logging.getLogger()
 
 
-class PluginInterface(plugin.ItemPlugin):
+class PluginInterface(ItemPlugin):
     """
     Small plugin to delete files
     """

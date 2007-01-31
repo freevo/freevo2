@@ -86,7 +86,7 @@ class PluginInterface(ItemPlugin):
         """
         Init the plugin.
         """
-        plugin.ItemPlugin.__init__(self)
+        ItemPlugin.__init__(self)
         self.from_dir = from_dir
         self.to_dir = to_dir
         self.recursive = recursive

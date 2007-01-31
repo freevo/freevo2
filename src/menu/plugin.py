@@ -1,12 +1,12 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# menu.py - freevo menu handling system
+# plugin.py - Plugin interface to the menu
 # -----------------------------------------------------------------------------
-# $Id$
+# $Id: plugin.py 9110 2007-01-31 09:24:06Z dmeyer $
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2005-2007 Dirk Meyer, et al.
+# Copyright (C) 2007 Dirk Meyer, et al.
 #
 # First Edition: Dirk Meyer <dischi@freevo.org>
 # Maintainer:    Dirk Meyer <dischi@freevo.org>
@@ -29,21 +29,34 @@
 #
 # -----------------------------------------------------------------------------
 
-# import the submodules
-from files import Files
-from item import Item
-from mediaitem import MediaItem
-from action import Action
-from menu import Menu
-from stack import MenuStack
-from plugin import ItemPlugin
+from freevo.ui import plugin
 
-class ActionItem(Item, Action):
+
+class ItemPlugin(plugin.Plugin):
     """
-    A simple item with one action. The first parameter of the function
-    passed to this action is always the parent item if not None.
+    Plugin class to add something to the item action list
+
+    The plugin can also have an eventhandler. All events passed to the item
+    will also be passed to this plugin. This works only for VideoItems right
+    now (each item type must support it directly). If the function returns
+    True, the event won't be passed to other eventhandlers and also not to
+    the item itself.
     """
-    def __init__(self, name, parent, function, description=''):
-        Action.__init__(self, name, function, description=description)
-        Item.__init__(self, parent, self)
-        self.item = parent
+    def __init__(self, name=''):
+        plugin.Plugin.__init__(self, name)
+        self._plugin_type = 'item'
+        self._plugin_special = True
+
+
+    def actions(self, item):
+        """
+        return a list of actions to that item. Each action is type Action
+        """
+        return []
+
+
+    def eventhandler(self, item, event):
+        """
+        Additional eventhandler for this item.
+        """
+        return False

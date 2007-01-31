@@ -49,8 +49,7 @@ import kaa.beacon
 # freevo imports
 import freevo.conf
 
-from freevo.ui.menu import Action, Menu
-from freevo.ui.plugin import ItemPlugin
+from freevo.ui.menu import Action, Menu, ItemPlugin
 from freevo.ui.event import *
 
 # the logging object

@@ -38,20 +38,17 @@
 import kaa.notifier
 
 # freevo imports
-from freevo.ui import plugin
-from freevo.ui.menu import Action
+from freevo.ui.menu import Action, ItemPlugin
 
 
-class PluginInterface(plugin.ItemPlugin):
+class PluginInterface(ItemPlugin):
     """
     This plugin copies or moves files to directories. Go to a file hit
     enter pick 'add to cart' and then go to a directory. Press enter
     and pick what you want to do.
-
-    plugin.activate('shoppingcart')
     """
     def __init__(self):
-        plugin.ItemPlugin.__init__(self)
+        ItemPlugin.__init__(self)
         self.cart = []
 
 
