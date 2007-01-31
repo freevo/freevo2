@@ -247,7 +247,7 @@ class PluginLoader(object):
         return False
 
 
-    def init(self, plugin_path, callback = None):
+    def init(self, callback = None):
         """
         Load and init all the plugins. The function takes the path were the
         plugins are searched in. Optional is a callback, called after a
@@ -255,7 +255,7 @@ class PluginLoader(object):
         prefix are loaded.
         """
         self.__initialized = True
-        self.path = plugin_path
+        self.path = os.path.dirname(__file__)
 
         for name, type, level, args, number in self.plugins:
             kaa.notifier.step(False, True)

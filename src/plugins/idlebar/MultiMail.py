@@ -56,7 +56,7 @@ import threading
 import time
 from freevo.ui.gui import theme, imagelib, widgets
 
-from plugins.idlebar import IdleBarPlugin
+from freevo.ui.plugins.idlebar import IdleBarPlugin
 
 import logging
 log = logging.getLogger()

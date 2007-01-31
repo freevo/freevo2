@@ -33,7 +33,7 @@ import os
 
 from freevo.ui import config, gui
 from freevo.ui.gui import theme, widgets
-from plugins.idlebar import IdleBarPlugin
+from freevo.ui.plugins.idlebar import IdleBarPlugin
 
 class PluginInterface(IdleBarPlugin):
     """

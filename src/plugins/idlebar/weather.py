@@ -35,7 +35,7 @@ import time
 # freevo modules
 from freevo.ui.gui import theme, widgets
 from freevo.ui import config, plugin, gui
-from plugins.idlebar import IdleBarPlugin
+from freevo.ui.plugins.idlebar import IdleBarPlugin
 
 # grabber module
 from pywebinfo.weather import WeatherGrabber

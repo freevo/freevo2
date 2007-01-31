@@ -98,9 +98,6 @@ try:
     # import ui path (ugly)
     import freevo
 
-    FREEVO_PATH = os.path.join(os.path.dirname(freevo.__file__), 'ui')
-    sys.path.insert(0, FREEVO_PATH)
-
     from freevo.ui import config
     if config.GUI_DISPLAY == 'SDL':
         import pygame
@@ -264,7 +261,7 @@ try:
     splash = Splashscreen(_('Starting Freevo, please wait ...'), num)
 
     # load plugins
-    plugin.init(FREEVO_PATH, splash.progress)
+    plugin.init(splash.progress)
 
     # fade out the splash screen
     splash.hide()

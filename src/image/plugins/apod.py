@@ -43,7 +43,7 @@ from freevo.ui import plugin
 from freevo.ui import menu
 
 from freevo.ui.menu import Item, Action, ActionItem, Menu
-from image import ImageItem
+from freevo.ui.image import ImageItem
 from freevo.ui.application import TextWindow, MessageWindow
 
 class ApodMainMenuItem(Item):
