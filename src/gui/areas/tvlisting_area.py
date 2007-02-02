@@ -251,19 +251,11 @@ class TvlistingArea(Area):
                             r.height-2*r.size ]
 
 
-            channel_logo = None
-
-            channel_logo = config.TV_LOGOS + '/' + channel.name + '.png'
-            if os.path.isfile(channel_logo):
-                img = imagelib.load(channel_logo, (None, None))
-                i = self.drawimage(img, (logo_geo[0], logo_geo[1]))
-                self.chan_obj.append(i)
-            else:
-                self.chan_obj.append(self.drawstring(channel.name,
-                                                     label_val.font,
-                                                     settings, x=tx0, y=ty0,
-                                                     width=r.width+2*r.x,
-                                                     height=item_h))
+            self.chan_obj.append(self.drawstring(channel.name,
+                                                 label_val.font,
+                                                 settings, x=tx0, y=ty0,
+                                                 width=r.width+2*r.x,
+                                                 height=item_h))
 
             self.chan_obj.append(self.drawbox(tx0 + r.x, ty0 + r.y,
                                               r.width+1, item_h, r))

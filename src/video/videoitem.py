@@ -41,6 +41,7 @@
 import os
 import copy
 import logging
+import re
 
 # kaa imports
 from kaa.strutils import unicode_to_str, str_to_unicode
@@ -61,6 +62,11 @@ import player as videoplayer
 
 # get logging object
 log = logging.getLogger('video')
+
+# compile VIDEO_SHOW_REGEXP
+regexp = config.VIDEO_SHOW_REGEXP
+VIDEO_SHOW_REGEXP_MATCH = re.compile("^.*" + regexp).match
+VIDEO_SHOW_REGEXP_SPLIT = re.compile("[\.\- ]*" + regexp + "[\.\- ]*").split
 
 class VideoItem(MediaItem):
     def __init__(self, url, parent):
@@ -102,10 +108,9 @@ class VideoItem(MediaItem):
                          self.info['subtitle'])
             self.sort_name += u' ' + self.info['episode'] + u' ' + \
                               self.info['subtitle']
-        elif config.VIDEO_SHOW_REGEXP_MATCH(self.name) and not \
-                 self.network_play:
+        elif VIDEO_SHOW_REGEXP_MATCH(self.name) and not self.network_play:
             # split tv show files based on regexp
-            show_name = config.VIDEO_SHOW_REGEXP_SPLIT(self.name)
+            show_name = VIDEO_SHOW_REGEXP_SPLIT(self.name)
             if show_name[0] and show_name[1] and show_name[2] and show_name[3]:
                 self.name = show_name[0] + u" " + show_name[1] + u"x" + \
                             show_name[2] + u" - " + show_name[3]

@@ -46,7 +46,6 @@ import logging
 import kaa.notifier
 
 # freevo imports
-from freevo.ui import config
 from freevo.ui.input import set_mapping
 from freevo.ui.event import *
 
@@ -227,20 +226,7 @@ class Handler(object):
 
         except Exception, e:
             log.exception('application.handler')
-            if config.FREEVO_EVENTHANDLER_SANDBOX:
-                msg=_('Event \'%s\' crashed\n\nPlease take a ' \
-                      'look at the logfile and report the bug to ' \
-                      'the Freevo mailing list. The state of '\
-                      'Freevo may be corrupt now and this error '\
-                      'could cause more errors until you restart '\
-                      'Freevo.') % event
-                handler = kaa.notifier.Callback(sys.exit, 0)
-                from window import ConfirmWindow
-                pop = ConfirmWindow(msg, (_('Shutdown'), _('Continue')))
-                pop.buttons[0].connect(sys.exit, 0)
-                pop.show()
-            else:
-                sys.exit(1)
+            sys.exit(1)
 
 # create the global object
 handler = Handler()

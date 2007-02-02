@@ -17,41 +17,6 @@
 # plugin.remove('mixer')
 # plugin.activate('ossmixer')
 #
-#
-# Todo:        
-#
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.16  2005/07/22 19:30:24  dischi
-# fix event handling
-#
-# Revision 1.15  2005/07/16 09:48:23  dischi
-# adjust to new event interface
-#
-# Revision 1.14  2005/06/09 19:43:53  dischi
-# clean up eventhandler usage
-#
-# Revision 1.13  2005/01/20 16:37:36  dischi
-# fix crash
-#
-# Revision 1.12  2004/11/20 18:23:03  dischi
-# use python logger module for debug
-#
-# Revision 1.11  2004/11/01 20:15:40  dischi
-# fix debug
-#
-# Revision 1.10  2004/10/21 12:32:22  dischi
-# fix variable type
-#
-# Revision 1.9  2004/07/26 18:10:18  dischi
-# move global event handling to eventhandler.py
-#
-# Revision 1.8  2004/07/10 12:33:40  dischi
-# header cleanup
-#
-# Revision 1.7  2004/01/02 14:03:32  dischi
-# use osd to display volume
-#
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al. 
@@ -100,11 +65,11 @@ class PluginInterface(plugin.Plugin):
         
         # If you're using ALSA or something and you don't set the mixer, why are
         # we trying to open it?
-        if config.DEV_MIXER:    
+        if config.MIXER_DEVICE:    
             try:
-                self.mixfd = ossaudiodev.openmixer() #open(config.DEV_MIXER, 'r')
+                self.mixfd = ossaudiodev.openmixer() #open(config.MIXER_DEVICE, 'r')
             except IOError:
-                log.error('Couldn\'t open mixer %s' % config.DEV_MIXER)
+                log.error('Couldn\'t open mixer %s' % config.MIXER_DEVICE)
                 return
 
         plugin.Plugin.__init__(self, 'MIXER')
@@ -120,20 +85,20 @@ class PluginInterface(plugin.Plugin):
             self.igainVolume  = 0 
             self.ogainVolume  = 0
 
-        if config.MAJOR_AUDIO_CTRL == 'VOL':
-            self.setMainVolume(config.DEFAULT_VOLUME)
-            if config.CONTROL_ALL_AUDIO:
-                self.setPcmVolume(config.MAX_VOLUME)
-                self.setOgainVolume(config.MAX_VOLUME)
-        elif config.MAJOR_AUDIO_CTRL == 'PCM':
-            self.setPcmVolume(config.DEFAULT_VOLUME)
-            if config.CONTROL_ALL_AUDIO:
-                self.setMainVolume(config.MAX_VOLUME)
-                self.setOgainVolume(config.MAX_VOLUME)
+        if config.MIXER_MAJOR_AUDIO_CTRL == 'VOL':
+            self.setMainVolume(config.MIXER_DEFAULT_VOLUME)
+            if config.MIXER_CONTROL_ALL_AUDIO:
+                self.setPcmVolume(config.MIXER_MAX_VOLUME)
+                self.setOgainVolume(config.MIXER_MAX_VOLUME)
+        elif config.MIXER_MAJOR_AUDIO_CTRL == 'PCM':
+            self.setPcmVolume(config.MIXER_DEFAULT_VOLUME)
+            if config.MIXER_CONTROL_ALL_AUDIO:
+                self.setMainVolume(config.MIXER_MAX_VOLUME)
+                self.setOgainVolume(config.MIXER_MAX_VOLUME)
         else:
             log.warning("No appropriate audio channel found for mixer")
 
-        if config.CONTROL_ALL_AUDIO:
+        if config.MIXER_CONTROL_ALL_AUDIO:
             self.setLineinVolume(0)
             self.setMicVolume(0)
 
@@ -144,19 +109,19 @@ class PluginInterface(plugin.Plugin):
         """
         # Handle volume control
         if event == MIXER_VOLUP:
-            if config.MAJOR_AUDIO_CTRL == 'VOL':
+            if config.MIXER_MAJOR_AUDIO_CTRL == 'VOL':
                 self.incMainVolume()
                 OSD_MESSAGE.post(_('Volume: %s%%') % self.getVolume())
-            elif config.MAJOR_AUDIO_CTRL == 'PCM':
+            elif config.MIXER_MAJOR_AUDIO_CTRL == 'PCM':
                 self.incPcmVolume()
                 OSD_MESSAGE.post(_('Volume: %s%%') % self.getVolume())
             return True
         
         elif event == MIXER_VOLDOWN:
-            if config.MAJOR_AUDIO_CTRL == 'VOL':
+            if config.MIXER_MAJOR_AUDIO_CTRL == 'VOL':
                 self.decMainVolume()
                 OSD_MESSAGE.post(_('Volume: %s%%') % self.getVolume())
-            elif config.MAJOR_AUDIO_CTRL == 'PCM':
+            elif config.MIXER_MAJOR_AUDIO_CTRL == 'PCM':
                 self.decPcmVolume()
                 OSD_MESSAGE.post(_('Volume: %s%%') % self.getVolume())
             return True
@@ -193,9 +158,9 @@ class PluginInterface(plugin.Plugin):
             self._setVolume(ossaudiodev.SOUND_MIXER_VOLUME, self.mainVolume)
 
     def getVolume(self):
-        if config.MAJOR_AUDIO_CTRL == 'VOL':
+        if config.MIXER_MAJOR_AUDIO_CTRL == 'VOL':
             return self.mainVolume
-        elif config.MAJOR_AUDIO_CTRL == 'PCM':
+        elif config.MIXER_MAJOR_AUDIO_CTRL == 'PCM':
             return self.pcmVolume
         
     def getMainVolume(self):
@@ -237,7 +202,7 @@ class PluginInterface(plugin.Plugin):
         self._setVolume( ossaudiodev.SOUND_MIXER_PCM, self.pcmVolume )
     
     def setLineinVolume(self, volume):
-        if config.CONTROL_ALL_AUDIO:
+        if config.MIXER_CONTROL_ALL_AUDIO:
             self.lineinVolume = volume
             self._setVolume(ossaudiodev.SOUND_MIXER_LINE, volume)
 
@@ -245,12 +210,12 @@ class PluginInterface(plugin.Plugin):
         return self.lineinVolume
        
     def setMicVolume(self, volume):
-        if config.CONTROL_ALL_AUDIO:
+        if config.MIXER_CONTROL_ALL_AUDIO:
             self.micVolume = volume
             self._setVolume(ossaudiodev.SOUND_MIXER_MIC, volume)
 
     def setIgainVolume(self, volume):
-        if config.CONTROL_ALL_AUDIO:
+        if config.MIXER_CONTROL_ALL_AUDIO:
             if volume > 100:
                 volume = 100 
             elif volume < 0:
@@ -281,12 +246,12 @@ class PluginInterface(plugin.Plugin):
         self._setVolume(ossaudiodev.SOUND_MIXER_IGAIN, volume)
 
     def reset(self):
-        if config.CONTROL_ALL_AUDIO:
+        if config.MIXER_CONTROL_ALL_AUDIO:
             self.setLineinVolume(0)
             self.setMicVolume(0)
-            if config.MAJOR_AUDIO_CTRL == 'VOL':
-                self.setPcmVolume(config.MAX_VOLUME)
-            elif config.MAJOR_AUDIO_CTRL == 'PCM':
-                self.setMainVolume(config.MAX_VOLUME)
+            if config.MIXER_MAJOR_AUDIO_CTRL == 'VOL':
+                self.setPcmVolume(config.MIXER_MAX_VOLUME)
+            elif config.MIXER_MAJOR_AUDIO_CTRL == 'PCM':
+                self.setMainVolume(config.MIXER_MAX_VOLUME)
 
         self.setIgainVolume(0) # SB Live input from TV Card.

@@ -75,7 +75,6 @@ CONF = struct()
 CONF.geometry = '800x600'
 CONF.display = 'x11'
 CONF.tv = 'ntsc'
-CONF.chanlist = 'us-cable'
 CONF.version = 0
 
 for dirname in freevo.conf.cfgfilepath:
@@ -110,16 +109,13 @@ if os.getuid() > 0:
 kaa.popcorn.config.save()
 
 w, h = CONF.geometry.split('x')
-CONF.width, CONF.height = int(w), int(h)
+GUI_WIDTH, GUI_HEIGHT = int(w), int(h)
 
 #
 # Read the environment set by the start script
 #
-SHARE_DIR = freevo.conf.SHAREDIR
-SKIN_DIR  = os.path.join(SHARE_DIR, 'skins')
-ICON_DIR  = os.path.join(SHARE_DIR, 'icons')
-IMAGE_DIR = os.path.join(SHARE_DIR, 'images')
-FONT_DIR  = os.path.join(SHARE_DIR, 'fonts')
+ICON_DIR  = os.path.join(freevo.conf.SHAREDIR, 'icons')
+IMAGE_DIR = os.path.join(freevo.conf.SHAREDIR, 'images')
 
 
 #
@@ -197,19 +193,6 @@ configuration, Freevo will exit now.
 #
 if len(sys.argv) >= 2 and sys.argv[1] == '--force-fs':
     GUI_FULLSCREEN = 1
-
-
-#
-# set default font
-#
-GUI_FONT_DEFAULT_NAME = os.path.join(FONT_DIR, GUI_FONT_DEFAULT_NAME)
-
-#
-# compile the regexp
-#
-VIDEO_SHOW_REGEXP_MATCH = re.compile("^.*" + VIDEO_SHOW_REGEXP).match
-VIDEO_SHOW_REGEXP_SPLIT = re.compile("[\.\- ]*" + \
-                                     VIDEO_SHOW_REGEXP + "[\.\- ]*").split
 
 
 # make sure USER and HOME are set

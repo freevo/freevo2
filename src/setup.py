@@ -88,22 +88,15 @@ Set up Freevo for your specific environment.
                                   WIDTHxHEIGHT can be 800x600, 768x576 or 640x480
 
    --display=DISP               set the display
-                                  DISP can be x11, fbdev, dxr3, mga, 
-                                  directfb, dfbmga or dga
+                                  DISP can be x11, fbdev, mga, 
+                                  directfb or dfbmga
                                   
    --tv=NORM                    set the TV standard
                                   NORM can be ntsc, pal or secam
 
-   --chanlist=LIST              set the channel list
-                                  LIST can be us-bcast, us-cable, us-cable-hrc,
-                                  japan-bcast, japan-cable, europe-west,
-                                  europe-east, italy, newzealand, australia,
-                                  ireland, france, china-bcast, southafrica,
-                                  argentina, canada-cable
-
    --help                       display this help and exit
 
-The default is "--geometry=800x600 --display=x11 --tv=ntsc --chanlist=us-cable"
+The default is "--geometry=800x600 --display=x11 --tv=ntsc"
 Please report bugs to <freevo-users@lists.sourceforge.net>.
 ''')
 
@@ -127,13 +120,8 @@ def match_files_recursively_helper(result, dirname, names):
 
 def check_config(conf):
     vals_geometry = ['800x600', '768x576', '640x480']
-    vals_display = ['x11', 'fbdev', 'directfb', 'dfbmga', 'mga', 'dxr3', 'dga']
+    vals_display = ['x11', 'fbdev', 'directfb', 'dfbmga', 'mga']
     vals_tv = ['ntsc', 'pal', 'secam']
-    vals_chanlist = ['us-bcast', 'us-cable', 'us-cable-hrc',
-                     'japan-bcast', 'japan-cable', 'europe-west',
-                     'europe-east', 'italy', 'newzealand', 'australia',
-                     'ireland', 'france', 'china-bcast', 'southafrica',
-                     'argentina', 'canada-cable']
 
     if not conf.geometry in vals_geometry:
         print 'geometry must be one of: %s' % ' '.join(vals_geometry)
@@ -145,10 +133,6 @@ def check_config(conf):
         
     if not conf.tv in vals_tv:
         print 'tv must be one of: %s' % ' '.join(vals_tv)
-        sys.exit(1)
-        
-    if not conf.chanlist in vals_chanlist:
-        print 'chanlist must be one of: %s' % ' '.join(vals_chanlist)
         sys.exit(1)
         
 
@@ -212,12 +196,11 @@ def run_as_main():
     conf.geometry = '800x600'
     conf.display = 'x11'
     conf.tv = 'ntsc'
-    conf.chanlist = 'us-cable'
     conf.version = CONFIG_VERSION
 
     # Parse commandline options
     try:
-        long_opts = 'help compile= geometry= display= tv= chanlist= '.split()
+        long_opts = 'help compile= geometry= display= tv= '.split()
         opts, args = getopt.getopt(sys.argv[2:], 'h', long_opts)
     except getopt.GetoptError:
         # print help information and exit:
@@ -238,9 +221,6 @@ def run_as_main():
         if o == '--tv':
             conf.tv = a
 
-        if o == '--chanlist':
-            conf.chanlist = a
-
 
     for program, valname, needed in EXTERNAL_PROGRAMS:
         check_program(conf, program, valname, needed)
@@ -260,7 +240,6 @@ def run_as_main():
     print '  %20s = %s' % ('geometry', conf.geometry)
     print '  %20s = %s' % ('display', conf.display)
     print '  %20s = %s' % ('tv', conf.tv)
-    print '  %20s = %s' % ('chanlist', conf.chanlist)
 
 
     # Build everything

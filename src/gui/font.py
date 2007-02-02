@@ -32,10 +32,13 @@
 __all__ = [ 'get' ]
 
 # python imports
+import os
 import logging
+
 import kaa.mevas
 
 # freevo imports
+import freevo.conf
 from freevo.ui import config
 
 # get logging object
@@ -98,12 +101,14 @@ class Font(object):
                         print 'WARNING: No alternate found in the alias list!'
                         print 'Falling back to default font, this looks ugly'
                         font_warning.append(name)
-                    name = config.GUI_FONT_DEFAULT_NAME
+                    name = DEFAULT_FONT
                     return kaa.mevas.imagelib.load_font(name, ptsize)
 
 
 # init mevas font (imlib2)
-kaa.mevas.imagelib.add_font_path(config.FONT_DIR)
+FONT_DIR = os.path.join(freevo.conf.SHAREDIR, 'fonts')
+kaa.mevas.imagelib.add_font_path(FONT_DIR)
+DEFAULT_FONT = os.path.join(FONT_DIR, config.GUI_FONT_DEFAULT_NAME)
 
 # the font cache object for 'get'
 font_info_cache = {}

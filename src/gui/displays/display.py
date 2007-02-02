@@ -49,19 +49,16 @@ class Display(object):
     def hide(self):
         """
         Hide the output display. In most cases this does nothing since
-        a simple window doesn't matter. If GUI_STOP_WHEN_PLAYING the
-        ygame display will be shut down.
+        a simple window doesn't matter.
         """
-        if config.GUI_STOP_WHEN_PLAYING:
-            self.stop()
+        pass
 
 
     def show(self):
         """
         Show the output window again if it is not visible
         """
-        if config.GUI_STOP_WHEN_PLAYING:
-            self.restart()
+        pass
 
 
     def stop(self):

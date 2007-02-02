@@ -58,7 +58,7 @@ def get():
     if display_stack:
         return display_stack[-1]
     exec('from %s import Display' % config.GUI_DISPLAY.lower())
-    size = (config.CONF.width, config.CONF.height)
+    size = (config.GUI_WIDTH, config.GUI_HEIGHT)
     display = Display(size, True)
     display_stack.append(display)
     animation.create(display)
@@ -147,7 +147,7 @@ def shutdown():
         d.stop()
     # switch to none display
     from none import Display
-    size = (config.CONF.width, config.CONF.height)
+    size = (config.GUI_WIDTH, config.GUI_HEIGHT)
     display_stack = [ Display(size) ]
 
 

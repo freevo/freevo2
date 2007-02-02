@@ -62,14 +62,8 @@ class ImageItem(MediaItem):
                 return '%sx%s' % (self['width'], self['height'])
             return ''
 
-        if key == 'date':
-            try:
-                t = str(MediaItem.__getitem__(self, key))
-                if t:
-                    t = time.strptime(t, '%Y:%m:%d %H:%M:%S')
-                    return time.strftime(config.TV_DATETIMEFORMAT, t)
-            except:
-                pass
+        # if key == 'date':
+        # date could be time.strptime(t, '%Y:%m:%d %H:%M:%S')
 
         return MediaItem.__getitem__(self, key)
 

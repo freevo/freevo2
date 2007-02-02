@@ -30,27 +30,6 @@
 # General freevo settings:
 # ======================================================================
 
-# MIXER SETTINGS
-MAJOR_AUDIO_CTRL    = 'VOL'           # Freevo takes control over audio ctrl
-                                      # 'VOL', 'PCM' 'OGAIN' etc.
-CONTROL_ALL_AUDIO   = 1               # Freevo takes complete control of audio
-MAX_VOLUME          = 90              # Set maximum volume level.
-DEFAULT_VOLUME      = 40              # Set default volume level.
-DEV_MIXER           = '/dev/mixer'    # mixer device 
-
-
-# shutdown plugin
-CONFIRM_SHUTDOWN    = 1               # ask before shutdown
-
-SHUTDOWN_SYS_CMD = 'shutdown -h now'  # set this to 'sudo shutdown -h now' if
-                                      # you don't have the permissions to
-                                      # shutdown
-RESTART_SYS_CMD  = 'shutdown -r now'  # like SHUTDOWN_SYS_CMD, only for reboot
-
-ENABLE_SHUTDOWN_SYS = 0  # Performs a whole system shutdown at SHUTDOWN!
-                         # For standalone boxes.
-
-
 #
 # You can add more keybindings by adding them to the correct hash. 
 # e.g. If you want to send 'contrast -100' to mplayer by pressing the '1' key, 
@@ -99,11 +78,18 @@ plugin.activate('audio', level=30)
 plugin.activate('image', level=40)
 plugin.activate('shutdown', level=50)
 
-# FIXME: games is broken
-# if CONF.xmame or CONF.snes:
-#     plugin.activate('games', level=45)
+# shutdown plugin config
+SHUTDOWN_CONFIRM = True               # ask before shutdown
+SHUTDOWN_SYS_CMD = 'shutdown -h now'  # or 'sudo shutdown -h now'
+RESTART_SYS_CMD  = 'shutdown -r now'  # like SHUTDOWN_SYS_CMD, only for reboot
+SHUTDOWN_SYS_DEFAULT = False          # Performs a whole system shutdown at SHUTDOWN!
 
-# mixer
+# Audio Mixer
+MIXER_MAJOR_AUDIO_CTRL = 'VOL'            # 'VOL', 'PCM' 'OGAIN' etc.
+MIXER_CONTROL_ALL_AUDIO = True            # Freevo takes complete control of audio
+MIXER_MAX_VOLUME        = 90              # Set maximum volume level.
+MIXER_DEFAULT_VOLUME    = 40              # Set default volume level.
+MIXER_DEVICE            = '/dev/mixer'    # mixer device 
 plugin.activate('mixer')
 
 # delete file in menu
@@ -235,6 +221,12 @@ VIDEO_SUFFIX = [ 'avi', 'mpg', 'mpeg', 'wmv', 'bin', 'rm',
                  'mp4', 'viv', 'nuv', 'mov', 'iso',
                  'nsv', 'mkv', 'ts', 'rmvb', 'cue' ]
 
+#
+# Config for xml support in the movie browser
+# the regexp has to be with ([0-9]|[0-9][0-9]) so we can get the numbers
+#
+VIDEO_SHOW_REGEXP = "s?([0-9]|[0-9][0-9])[xe]([0-9]|[0-9][0-9])[^0-9]"
+
 
 # ======================================================================
 # Freevo audio settings:
@@ -323,48 +315,6 @@ IMAGEVIEWER_OSD = [
 #
 IMAGEVIEWER_DURATION = 0
 
-
-# ======================================================================
-# Freevo games settings:
-# ======================================================================
-
-#
-# MAME is an emulator for old arcade video games. It supports almost
-# 2000 different games! The actual emulator is not included in Freevo,
-# you'll need to download and install it separately. The main MAME
-# website is at http://www.mame.net, but the version that is used here
-# is at http://x.mame.net since the regular MAME is for Windows.
-#
-# SNES stands for Super Nintendo Entertainment System. Freevo relies
-# on other programs that are not included in Freevo to play these games.
-# 
-# NEW GAMES SYSTEM :
-# =================
-# The GAMES_ITEMS structure is now build as follows :
-# <NAME>, <FOLDER>, (<TYPE>, <COMMAND_PATH>, <COMMAND_ARGS>, <IMAGE_PATH>, \
-# [<FILE_SUFFIX_FOR_GENERIC>])
-# where :
-#              - <TYPE> : Internal game types (MAME or SNES) or
-#                         generic one (GENERIC)
-#              - <COMMAND_PATH> : Emulator command
-#              - <COMMAND_ARGS> : Arguments for the emulator
-#              - <IMAGE_PATH>   : Optionnal path to the picture
-#              - <FILE_SUFFIX_FOR_GENERIC> : If the folder use the GENERIC
-#                                            type, then you must specify here
-#                                        the file suffix used by the emulator
-# GAMES_ITEMS = [ ('MAME', '/home/media/games/xmame/roms',     
-#                ('MAME', '/usr/local/bin/xmame.SDL', '-fullscreen -modenumber 6', 
-#                 '/home/media/games/xmame/shots', None)),
-#               ('SUPER NINTENDO', '/home/media/games/snes/roms', 
-#                ('SNES', '/usr/local/bin/zsnes', '-m -r 3 -k 100 -cs -u', '', None )),
-#               ('Visual Boy Advance', '/home/media/games/vba/roms/',
-#                ('GENERIC', '/usr/local/vba/VisualBoyAdvance', ' ', '', [ 'gba' ] )),
-#               ('MEGADRIVE', '/home/media/games/megadrive/roms', 
-#                ('GENESIS', '/usr/local/bin/generator-svgalib', '', '', '' )) ]
-
-GAMES_ITEMS = None
-
-
 # ======================================================================
 # Freevo GUI settings:
 # ======================================================================
@@ -410,20 +360,6 @@ if CONF.display in ( 'directfb', 'dfbmga' ):
     GUI_OVERSCAN_X = 50
     GUI_OVERSCAN_Y = 50
     GUI_DISPLAY = 'sdl'
-
-if CONF.display == 'dxr3':
-    GUI_OVERSCAN_X = 65
-    GUI_OVERSCAN_Y = 45
-    GUI_DISPLAY = 'sdl'
-    
-#
-# Stop the osd before playing a movie with xine or mplayer. Some output
-# devices need this. After playback, the osd will be restored
-#
-GUI_STOP_WHEN_PLAYING = 0
-
-if CONF.display in ( 'directfb', 'dfbmga', 'dxr3', 'dga' ):
-    GUI_STOP_WHEN_PLAYING = 1
 
 #
 # Fade steps on application change.
@@ -480,37 +416,5 @@ EVDEV_REPEAT_RATE = 100
 #
 TV_RECORD_DIR = None
 
-TV_DATEFORMAT     = '%e-%b' # Day-Month: 11-Jun
-TV_TIMEFORMAT     = '%H:%M' # Hour-Minute 14:05
-TV_DATETIMEFORMAT = '%A %b %d %I:%M %p' # Thursday September 24 8:54 am
-
-# ======================================================================
-# Internal stuff, you shouldn't change anything here unless you know
-# what you are doing
-# ======================================================================
-
-#
-# Config for xml support in the movie browser
-# the regexp has to be with ([0-9]|[0-9][0-9]) so we can get the numbers
-#
-VIDEO_SHOW_REGEXP = "s?([0-9]|[0-9][0-9])[xe]([0-9]|[0-9][0-9])[^0-9]"
-
-#
-# XML TV Logo Location
-#
-# Use the "makelogos.py" script to download all the
-# Station logos into a directory. And then put the path
-# to those logos here
-#
-# FIXME: OS_CACHEDIR is gone
-if 0 and os.path.isdir(OS_CACHEDIR + '/xmltv/logos'):
-    TV_LOGOS = OS_CACHEDIR + '/xmltv/logos'
-else:
-    if not os.path.isdir('/tmp/freevo/xmltv/logos'):
-        os.makedirs('/tmp/freevo/xmltv/logos')
-    TV_LOGOS = '/tmp/freevo/xmltv/logos'
-
-#
-# catch errors
-#
-FREEVO_EVENTHANDLER_SANDBOX = 1
+TV_DATEFORMAT = '%e-%b' # Day-Month: 11-Jun
+TV_TIMEFORMAT = '%H:%M' # Hour-Minute 14:05

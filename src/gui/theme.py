@@ -1124,7 +1124,7 @@ class FXDSettings(object):
         self.box_under_icon   = 0
 
         # load plugin skin files:
-        pdir = os.path.join(config.SHARE_DIR, 'skins/plugins')
+        pdir = os.path.join(freevo.conf.SHAREDIR, 'skins/plugins')
         if os.path.isdir(pdir):
             for p in util.match_files(pdir, [ 'fxd' ]):
                 self.load(p)
@@ -1332,10 +1332,10 @@ class FXDSettings(object):
         if file_geometry:
             w, h = file_geometry.split('x')
         else:
-            w, h = config.CONF.width, config.CONF.height
+            w, h = config.GUI_WIDTH, config.GUI_HEIGHT
 
-        scale = (float(config.CONF.width-2*config.GUI_OVERSCAN_X)/float(w),
-                 float(config.CONF.height-2*config.GUI_OVERSCAN_Y)/float(h))
+        scale = (float(config.GUI_WIDTH-2*config.GUI_OVERSCAN_X)/float(w),
+                 float(config.GUI_HEIGHT-2*config.GUI_OVERSCAN_Y)/float(h))
 
         include = attr_str(node, 'include', '')
 
@@ -1387,16 +1387,16 @@ class FXDSettings(object):
         """
         self.prepared = False
 
+        skin_dir = os.path.join(freevo.conf.SHAREDIR, 'skins')
         if not os.path.isfile(file):
             if os.path.isfile(file+".fxd"):
                 file += ".fxd"
 
-            elif os.path.isfile(os.path.join(config.SKIN_DIR, '%s/%s.fxd' % \
-                                     (file, file))):
-                file = os.path.join(config.SKIN_DIR, '%s/%s.fxd' % (file, file))
+            elif os.path.isfile(os.path.join(skin_dir, '%s/%s.fxd' % (file, file))):
+                file = os.path.join(skin_dir, '%s/%s.fxd' % (file, file))
 
             else:
-                file = os.path.join(config.SKIN_DIR, 'main/%s' % file)
+                file = os.path.join(skin_dir, 'main/%s' % file)
                 if os.path.isfile(file+".fxd"):
                     file += ".fxd"
 

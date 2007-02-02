@@ -8,41 +8,6 @@
 # Todo:        
 #
 # -----------------------------------------------------------------------
-# $Log$
-# Revision 1.23  2005/07/25 18:58:24  dischi
-# make it work with python 2.4
-#
-# Revision 1.22  2005/07/22 19:30:24  dischi
-# fix event handling
-#
-# Revision 1.21  2005/07/16 09:48:23  dischi
-# adjust to new event interface
-#
-# Revision 1.20  2005/06/09 19:43:53  dischi
-# clean up eventhandler usage
-#
-# Revision 1.19  2005/01/20 16:37:36  dischi
-# fix crash
-#
-# Revision 1.18  2004/11/20 18:23:03  dischi
-# use python logger module for debug
-#
-# Revision 1.17  2004/11/01 20:15:40  dischi
-# fix debug
-#
-# Revision 1.16  2004/10/21 12:32:22  dischi
-# fix variable type
-#
-# Revision 1.15  2004/07/26 18:10:18  dischi
-# move global event handling to eventhandler.py
-#
-# Revision 1.14  2004/07/10 12:33:40  dischi
-# header cleanup
-#
-# Revision 1.13  2004/01/02 14:03:32  dischi
-# use osd to display volume
-#
-# -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al. 
 # Please see the file doc/CREDITS for a complete list of authors.
@@ -97,11 +62,11 @@ class PluginInterface(plugin.Plugin):
         
         # If you're using ALSA or something and you don't set the mixer, why are
         # we trying to open it?
-        if config.DEV_MIXER:    
+        if config.MIXER_DEVICE:    
             try:
-                self.mixfd = open(config.DEV_MIXER, 'r')
+                self.mixfd = open(config.MIXER_DEVICE, 'r')
             except IOError:
-                log.error('Couldn\'t open mixer %s' % config.DEV_MIXER)
+                log.error('Couldn\'t open mixer %s' % config.MIXER_DEVICE)
                 return
 
         plugin.Plugin.__init__(self, 'MIXER')
@@ -125,24 +90,24 @@ class PluginInterface(plugin.Plugin):
                     log.error('IOError for ioctl')
                     pass
                 
-        if config.MAJOR_AUDIO_CTRL == 'VOL':
-            self.setMainVolume(config.DEFAULT_VOLUME)
-            if config.CONTROL_ALL_AUDIO:
-                self.setPcmVolume(config.MAX_VOLUME)
+        if config.MIXER_MAJOR_AUDIO_CTRL == 'VOL':
+            self.setMainVolume(config.MIXER_DEFAULT_VOLUME)
+            if config.MIXER_CONTROL_ALL_AUDIO:
+                self.setPcmVolume(config.MIXER_MAX_VOLUME)
                 # XXX This is for SB Live cards should do nothing to others
                 # XXX Please tell if you have problems with this.
-                self.setOgainVolume(config.MAX_VOLUME)
-        elif config.MAJOR_AUDIO_CTRL == 'PCM':
-            self.setPcmVolume(config.DEFAULT_VOLUME)
-            if config.CONTROL_ALL_AUDIO:
-                self.setMainVolume(config.MAX_VOLUME)
+                self.setOgainVolume(config.MIXER_MAX_VOLUME)
+        elif config.MIXER_MAJOR_AUDIO_CTRL == 'PCM':
+            self.setPcmVolume(config.MIXER_DEFAULT_VOLUME)
+            if config.MIXER_CONTROL_ALL_AUDIO:
+                self.setMainVolume(config.MIXER_MAX_VOLUME)
                 # XXX This is for SB Live cards should do nothing to others
                 # XXX Please tell if you have problems with this.
-                self.setOgainVolume(config.MAX_VOLUME)
+                self.setOgainVolume(config.MIXER_MAX_VOLUME)
         else:
             log.warning("No appropriate audio channel found for mixer")
 
-        if config.CONTROL_ALL_AUDIO:
+        if config.MIXER_CONTROL_ALL_AUDIO:
             self.setLineinVolume(0)
             self.setMicVolume(0)
 
@@ -152,19 +117,19 @@ class PluginInterface(plugin.Plugin):
         eventhandler to handle the VOL events
         """
         if event == MIXER_VOLUP:
-            if config.MAJOR_AUDIO_CTRL == 'VOL':
+            if config.MIXER_MAJOR_AUDIO_CTRL == 'VOL':
                 self.incMainVolume(event.arg)
                 OSD_MESSAGE.post(_('Volume: %s%%') % self.getVolume())
-            elif config.MAJOR_AUDIO_CTRL == 'PCM':
+            elif config.MIXER_MAJOR_AUDIO_CTRL == 'PCM':
                 self.incPcmVolume(event.arg)
                 OSD_MESSAGE.post(_('Volume: %s%%') % self.getVolume())
             return True
         
         elif event == MIXER_VOLDOWN:
-            if( config.MAJOR_AUDIO_CTRL == 'VOL' ):
+            if( config.MIXER_MAJOR_AUDIO_CTRL == 'VOL' ):
                 self.decMainVolume(event.arg)
                 OSD_MESSAGE.post(_('Volume: %s%%') % self.getVolume())
-            elif( config.MAJOR_AUDIO_CTRL == 'PCM' ):
+            elif( config.MIXER_MAJOR_AUDIO_CTRL == 'PCM' ):
                 self.decPcmVolume(event.arg)
                 OSD_MESSAGE.post(_('Volume: %s%%') % self.getVolume())
             return True
@@ -207,9 +172,9 @@ class PluginInterface(plugin.Plugin):
             self._setVolume(self.SOUND_MIXER_WRITE_VOLUME, self.mainVolume)
 
     def getVolume(self):
-        if config.MAJOR_AUDIO_CTRL == 'VOL':
+        if config.MIXER_MAJOR_AUDIO_CTRL == 'VOL':
             return self.mainVolume
-        elif config.MAJOR_AUDIO_CTRL == 'PCM':
+        elif config.MIXER_MAJOR_AUDIO_CTRL == 'PCM':
             return self.pcmVolume
         
     def getMainVolume(self):
@@ -251,7 +216,7 @@ class PluginInterface(plugin.Plugin):
         self._setVolume( self.SOUND_MIXER_WRITE_PCM, self.pcmVolume )
     
     def setLineinVolume(self, volume):
-        if config.CONTROL_ALL_AUDIO:
+        if config.MIXER_CONTROL_ALL_AUDIO:
             self.lineinVolume = volume
             self._setVolume(self.SOUND_MIXER_WRITE_LINE, volume)
 
@@ -259,13 +224,13 @@ class PluginInterface(plugin.Plugin):
         return self.lineinVolume
        
     def setMicVolume(self, volume):
-        if config.CONTROL_ALL_AUDIO:
+        if config.MIXER_CONTROL_ALL_AUDIO:
             self.micVolume = volume
             self._setVolume(self.SOUND_MIXER_WRITE_MIC, volume)
 
     def setIgainVolume(self, volume):
         """For Igain (input from TV etc) on emu10k cards"""
-        if config.CONTROL_ALL_AUDIO:
+        if config.MIXER_CONTROL_ALL_AUDIO:
             if volume > 100:
                 volume = 100 
             elif volume < 0:
@@ -298,12 +263,12 @@ class PluginInterface(plugin.Plugin):
         os.system('aumix -o%s > /dev/null 2>&1' % volume)
 
     def reset(self):
-        if config.CONTROL_ALL_AUDIO:
+        if config.MIXER_CONTROL_ALL_AUDIO:
             self.setLineinVolume(0)
             self.setMicVolume(0)
-            if config.MAJOR_AUDIO_CTRL == 'VOL':
-                self.setPcmVolume(config.MAX_VOLUME)
-            elif config.MAJOR_AUDIO_CTRL == 'PCM':
-                self.setMainVolume(config.MAX_VOLUME)
+            if config.MIXER_MAJOR_AUDIO_CTRL == 'VOL':
+                self.setPcmVolume(config.MIXER_MAX_VOLUME)
+            elif config.MIXER_MAJOR_AUDIO_CTRL == 'PCM':
+                self.setMainVolume(config.MIXER_MAX_VOLUME)
 
         self.setIgainVolume(0) # SB Live input from TV Card.
