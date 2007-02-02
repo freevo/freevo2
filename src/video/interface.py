@@ -59,8 +59,6 @@ class PluginInterface(plugin.MimetypePlugin):
     def __init__(self):
         plugin.MimetypePlugin.__init__(self)
         self.display_type = [ 'video' ]
-        if config.AUDIO_SHOW_VIDEOFILES:
-            self.display_type = [ 'video', 'audio' ]
 
         # load the fxd part of video
         fxditem.add_parser(['video'], 'movie', fxdhandler.parse_movie)
@@ -70,7 +68,7 @@ class PluginInterface(plugin.MimetypePlugin):
         database.update()
         # activate the mediamenu for video
         level = plugin.is_active('video')[2]
-        args = _('Video Main Menu'), 'video'
+        args = _('Video Main Menu'), 'video', config.VIDEO_ITEMS
         plugin.activate('mediamenu', level=level, args=args)
         
 

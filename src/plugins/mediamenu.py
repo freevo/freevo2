@@ -41,11 +41,10 @@ import kaa.beacon
 from kaa.weakref import weakref
 
 # freevo imports
-from freevo.ui import config
+import freevo.conf
 
 from freevo.ui import plugin
-
-from freevo.ui.event import *
+from freevo.ui.event import EJECT
 from freevo.ui.directory import DirItem
 from freevo.ui.mainmenu import MainMenuItem
 from freevo.ui.menu import Menu, Item
@@ -61,13 +60,14 @@ class PluginInterface(plugin.MainMenuPlugin):
     the Freevo main menu. This plugin is auto-loaded when you activate
     the 'video', 'audio', 'image' or 'games' plugin.
     """
-    def __init__(self, name, type):
+    def __init__(self, name, type, items):
         plugin.MainMenuPlugin.__init__(self)
-        self.name = name
-        self.type = type
-
+        self._name = name
+        self._type = type
+        self._items = items
+        
     def items(self, parent):
-        return [ MediaMenu(parent, self.name, self.type) ]
+        return [ MediaMenu(parent, self._name, self._type, self._items) ]
 
 
 
@@ -77,7 +77,7 @@ class MediaMenu(MainMenuItem):
     directories and the ROM_DRIVES
     """
 
-    def __init__(self, parent, title, type):
+    def __init__(self, parent, title, type, items):
         MainMenuItem.__init__(self, '', self.main_menu, type='main',
                               parent=parent, skin_type=type)
         self.force_text_view = False
@@ -89,18 +89,15 @@ class MediaMenu(MainMenuItem):
 
         self.menutitle = title
 
-        self.config_items = []
-        if self.display_type:
-            i = getattr(config, '%s_ITEMS' % self.display_type.upper())
-            self.config_items = i
-            for filename in self.config_items:
-                if not isinstance(filename, (str, unicode)):
-                    filename = filename[1]
-                if os.path.isdir(filename) and \
-                       not os.environ.get('NO_CRAWLER') and \
-                       not filename == os.environ.get('HOME') and \
-                       not filename == '/':
-                    kaa.beacon.monitor(filename)
+        self._items = items
+        for filename in self._items:
+            if not isinstance(filename, (str, unicode)):
+                filename = filename[1]
+            if os.path.isdir(filename) and \
+                   not os.environ.get('NO_CRAWLER') and \
+                   not filename == os.environ.get('HOME') and \
+                   not filename == '/':
+                kaa.beacon.monitor(filename)
 
 
     def main_menu_generate(self):
@@ -114,7 +111,7 @@ class MediaMenu(MainMenuItem):
         items = []
 
         # add default items
-        for item in self.config_items:
+        for item in self._items:
             try:
                 # split the list on dir/file, title and add_args
                 add_args = None
@@ -152,7 +149,7 @@ class MediaMenu(MainMenuItem):
                     filename = filename[len(os.getcwd()):]
                     if filename[0] == '/':
                         filename = filename[1:]
-                    filename = os.path.join(config.SHARE_DIR, filename)
+                    filename = os.path.join(freevo.conf.SHAREDIR, filename)
 
                 query = kaa.beacon.query(filename=filename)
                 listing = query.get(filter='extmap')
@@ -217,7 +214,7 @@ class MediaMenu(MainMenuItem):
 
 
     def eventhandler(self, event):
-        if event == 'EJECT' and self.item_menu and \
+        if event == EJECT and self.item_menu and \
            self.item_menu.selected.info['parent'] == \
            self.item_menu.selected.info['media']:
             self.item_menu.selected.info['media'].eject()

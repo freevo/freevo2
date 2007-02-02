@@ -69,7 +69,7 @@ class PluginInterface(plugin.MimetypePlugin):
 
         # activate the mediamenu for audio
         level = plugin.is_active('audio')[2]
-        args = _('Audio Main Menu'), 'audio'
+        args = _('Audio Main Menu'), 'audio', config.AUDIO_ITEMS
         plugin.activate('mediamenu', level=level, args=args)
 
 

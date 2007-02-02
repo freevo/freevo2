@@ -62,7 +62,7 @@ class PluginInterface(plugin.MimetypePlugin):
 
         # activate the mediamenu for image
         level = plugin.is_active('image')[2]
-        args = _('Image Main Menu'), 'image'
+        args = _('Image Main Menu'), 'image', config.IMAGE_ITEMS
         plugin.activate('mediamenu', level=level, args=args)
 
 
