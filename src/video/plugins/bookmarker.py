@@ -75,7 +75,7 @@ class PluginInterface(ItemPlugin):
         Get the bookmark file for the given filename.
         """
         myfile = os.path.basename(filename)
-        myfile = freevo.conf.cachefile(myfile + '.bookmark')
+        myfile = freevo.conf.datafile(myfile + '.bookmark')
         return myfile
 
 

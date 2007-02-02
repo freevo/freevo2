@@ -1430,7 +1430,7 @@ def set_base_fxd(name):
 
     # search for personal skin settings additions
     # (this feature needs more doc outside this file)
-    for dir in config.cfgfilepath:
+    for dir in freevo.conf.cfgfilepath:
         local_skin = '%s/local_skin.fxd' % dir
         if os.path.isfile(local_skin):
             log.debug('add local config %s to skin' % local_skin)

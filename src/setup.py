@@ -11,23 +11,6 @@
 # Todo:        
 #
 # -----------------------------------------------------------------------
-# $Log$
-# Revision 1.2  2005/06/25 08:52:24  dischi
-# switch to new style python classes
-#
-# Revision 1.1  2005/05/30 18:01:02  dischi
-# move setup_freevo to config/setup
-#
-# Revision 1.19  2005/05/30 17:46:38  dischi
-# remove runtime
-#
-# Revision 1.18  2004/07/10 12:33:36  dischi
-# header cleanup
-#
-# Revision 1.17  2004/07/08 12:44:40  rshortt
-# Add directfb as a display option.
-#
-# -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2005 Krister Lagerstrom, Dirk Meyer, et al. 
 # Please see the file doc/CREDITS for a complete list of authors.
@@ -59,25 +42,6 @@ import freevo.conf
 
 CONFIG_VERSION = 2.1
 
-EXTERNAL_PROGRAMS = (("mplayer", "mplayer", 1),
-                     ("mencoder", "mencoder", 0),
-                     ("tvtime", "tvtime", 0),
-                     ("xine", "xine", 0),
-                     ("fbxine", "fbxine", 0),
-                     ("jpegtran", "jpegtran", 0),
-                     ("xmame.x11", "xmame", 0),
-                     ("xmame.SDL", "xmame", 0),
-                     ("xmame","xmame",0),
-                     ("ssnes9x", "snes", 0),
-                     ("zsnes", "snes", 0 ),
-                     ("lame", "lame",0),
-                     ("flac","flac",0),
-                     ("cdparanoia","cdparanoia",0),
-                     ("oggenc","oggenc",0),
-                     ("renice","renice",0),
-                     ("setterm", "setterm", 0),
-                     ("mpav", "mpav", 0))
-
 # Help text
 def print_usage():
     usage = _('''\
@@ -106,16 +70,6 @@ Please report bugs to <freevo-users@lists.sourceforge.net>.
 class Struct(object):
     pass
 
-
-
-def match_files_recursively_helper(result, dirname, names):
-    if dirname == '.' or dirname[:5].upper() == './WIP':
-        return result
-    for name in names:
-        if os.path.splitext(name)[1].lower()[1:] == 'py':
-            fullpath = os.path.join(dirname, name)
-            result.append(fullpath)
-    return result
 
 
 def check_config(conf):
@@ -157,37 +111,6 @@ def create_config(conf):
     print 'wrote %s' % outfile
 
 
-def check_program(conf, name, variable, necessary, verbose=1):
-
-    search_dirs = os.environ['PATH'].split(':')
-        
-    if verbose:
-        print _('checking for %-13s') % (name+'...'),
-
-    for dirname in search_dirs:
-        filename = os.path.join(dirname, name)
-        if os.path.exists(filename) and os.path.isfile(filename):
-            if verbose:
-                print filename
-            conf.__dict__[variable] = filename
-            break
-    else:
-        if necessary:
-            print
-            print "********************************************************************"
-            print _('ERROR: can\'t find %s') % name
-            print _('Please install the application respectively put it in your path.')
-            print _('Freevo won\'t work without it.')
-            print "********************************************************************"
-            print
-            print
-            sys.exit(1)
-        elif verbose:
-            print _('not found (deactivated)')
-
-
-
-
 def run_as_main():
     # Default opts
 
@@ -221,9 +144,6 @@ def run_as_main():
         if o == '--tv':
             conf.tv = a
 
-
-    for program, valname, needed in EXTERNAL_PROGRAMS:
-        check_program(conf, program, valname, needed)
 
     check_config(conf)
 

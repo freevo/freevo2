@@ -56,7 +56,7 @@ import kaa.popcorn
 import freevo.conf
 
 # freevo imports
-from freevo.ui import setup, input, plugin
+from freevo.ui import input, plugin
 
 # import event names
 from freevo.ui.event import *
@@ -117,15 +117,6 @@ GUI_WIDTH, GUI_HEIGHT = int(w), int(h)
 ICON_DIR  = os.path.join(freevo.conf.SHAREDIR, 'icons')
 IMAGE_DIR = os.path.join(freevo.conf.SHAREDIR, 'images')
 
-
-#
-# search missing programs at runtime
-#
-for program, valname, needed in setup.EXTERNAL_PROGRAMS:
-    if not hasattr(CONF, valname) or not getattr(CONF, valname):
-        setup.check_program(CONF, program, valname, needed, verbose=0)
-    if not hasattr(CONF, valname) or not getattr(CONF, valname):
-        setattr(CONF, valname, '')
 
 #
 # Load freevo_config.py:
@@ -193,10 +184,3 @@ configuration, Freevo will exit now.
 #
 if len(sys.argv) >= 2 and sys.argv[1] == '--force-fs':
     GUI_FULLSCREEN = 1
-
-
-# make sure USER and HOME are set
-os.environ['USER'] = pwd.getpwuid(os.getuid())[0]
-os.environ['HOME'] = pwd.getpwuid(os.getuid())[5]
-
-cfgfilepath = freevo.conf.cfgfilepath
