@@ -64,41 +64,6 @@ from freevo.ui.event import *
 # get logging object
 log = logging.getLogger('config')
 
-#
-# freevo.conf parser
-#
-
-class struct(object):
-    pass
-
-CONF = struct()
-CONF.geometry = '800x600'
-CONF.display = 'x11'
-CONF.tv = 'ntsc'
-CONF.version = 0
-
-for dirname in freevo.conf.cfgfilepath:
-    conffile = os.path.join(dirname, 'freevo.conf')
-    if os.path.isfile(conffile):
-        c = open(conffile)
-        for line in c.readlines():
-            if line.startswith('#'):
-                continue
-            if line.find('=') == -1:
-                continue
-            vals = line.strip().split('=')
-            if not len(vals) == 2:
-                print 'invalid config entry: %s' % line
-                continue
-            name, val = vals[0].strip(), vals[1].strip()
-            CONF.__dict__[name] = val
-
-        c.close()
-        break
-else:
-    log.critical('freevo.conf not found, please run \'freevo setup\'')
-    sys.exit(1)
-    
 kaa.popcorn.config.load('/etc/freevo/player.conf')
 # if started as user add personal config file
 if os.getuid() > 0:
@@ -107,9 +72,6 @@ if os.getuid() > 0:
 
 # save the file again in case it did not exist or the variables changed
 kaa.popcorn.config.save()
-
-w, h = CONF.geometry.split('x')
-GUI_WIDTH, GUI_HEIGHT = int(w), int(h)
 
 #
 # Read the environment set by the start script

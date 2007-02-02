@@ -350,16 +350,18 @@ GUI_OVERSCAN_Y = 0
 #
 GUI_DISPLAY = 'imlib2'
 
-# Some special settings for the different displays
-if CONF.display == 'mga':
-    GUI_OVERSCAN_X = 20
-    GUI_OVERSCAN_Y = 10
-    GUI_DISPLAY = 'fb'
+#
+# Special settings for fb display
+#
+GUI_DISPLAY_FB_NORM = 'pal'             # pal or ntsc
+GUI_DISPLAY_FB_MODE = ''                # set to 'mga' for special G400 support
 
-if CONF.display in ( 'directfb', 'dfbmga' ):
-    GUI_OVERSCAN_X = 50
-    GUI_OVERSCAN_Y = 50
-    GUI_DISPLAY = 'sdl'
+#
+# Window / Display size
+#
+GUI_WIDTH  = 800
+GUI_HEIGHT = 600
+
 
 #
 # Fade steps on application change.

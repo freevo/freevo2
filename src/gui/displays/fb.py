@@ -51,18 +51,18 @@ class Display(FramebufferCanvas, Base):
     Display class for framebuffer output
     """
     def __init__(self, size, default=False):
-        if config.CONF.display == 'mga':
+        if config.GUI_DISPLAY_FB_MODE == 'mga':
             # switch heads
             os.system('matroxset -f /dev/fb1 -m 0')
             os.system('matroxset -f /dev/fb0 -m 3')
-            if config.CONF.tv == 'pal':
+            if config.GUI_DISPLAY_FB_NORM == 'pal':
                 # switch to PAL
                 os.system('matroxset 1')
             else:
                 # switch to NTSC
                 os.system('matroxset -f /dev/fb0 2 2')
             # activate framebuffer with tv norm
-            FramebufferCanvas.__init__(self, size, config.CONF.tv)
+            FramebufferCanvas.__init__(self, size, config.GUI_DISPLAY_FB_NORM)
 
         else:
             # activate framebuffer without changing the resolution
@@ -80,7 +80,7 @@ class Display(FramebufferCanvas, Base):
         Stop the display
         """
         if Base.stop(self):
-            if config.CONF.display == 'mga':
+            if config.GUI_DISPLAY_FB_MODE == 'mga':
                 # switch heads back
                 os.system('matroxset -f /dev/fb0 -m 1')
                 os.system('matroxset -f /dev/fb1 -m 0')
