@@ -60,15 +60,16 @@ class PluginInterface(plugin.MimetypePlugin):
     """
     Plugin to handle all kinds of audio items
     """
-    def __init__(self):
-        plugin.MimetypePlugin.__init__(self)
-        self.display_type = [ 'audio' ]
+    display_type = [ 'audio' ]
 
+    def plugin_activate(self, level):
+        """
+        Activate the plugin.
+        """
         # add fxd parser callback
         fxditem.add_parser(['audio'], 'audio', fxdhandler)
 
         # activate the mediamenu for audio
-        level = plugin.is_active('audio')[2]
         args = _('Audio Main Menu'), 'audio', config.AUDIO_ITEMS
         plugin.activate('mediamenu', level=level, args=args)
 

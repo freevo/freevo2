@@ -56,22 +56,24 @@ class PluginInterface(plugin.MimetypePlugin):
     """
     Plugin to handle all kinds of video items
     """
-    def __init__(self):
-        plugin.MimetypePlugin.__init__(self)
-        self.display_type = [ 'video' ]
+    display_type = [ 'video' ]
 
+    def plugin_activate(self, level):
+        """
+        Activate the plugin.
+        """
         # load the fxd part of video
         fxditem.add_parser(['video'], 'movie', fxdhandler.parse_movie)
         # fxditem.add_parser(['video'], 'disc-set', fxdhandler.parse_disc_set)
 
         # update the database based on the current mimetypes
         database.update()
+        
         # activate the mediamenu for video
-        level = plugin.is_active('video')[2]
         args = _('Video Main Menu'), 'video', config.VIDEO_ITEMS
         plugin.activate('mediamenu', level=level, args=args)
-        
 
+        
     def suffix(self):
         """
         return the list of suffixes this class handles

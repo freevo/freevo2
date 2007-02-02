@@ -53,15 +53,16 @@ class PluginInterface(plugin.MimetypePlugin):
     """
     Plugin to handle all kinds of image items
     """
-    def __init__(self):
-        plugin.MimetypePlugin.__init__(self)
-        self.display_type = [ 'image' ]
+    display_type = [ 'image' ]
 
+    def plugin_activate(self, level):
+        """
+        Activate the plugin.
+        """
         # register the callbacks
         fxditem.add_parser(['image'], 'slideshow', fxdhandler)
 
         # activate the mediamenu for image
-        level = plugin.is_active('image')[2]
         args = _('Image Main Menu'), 'image', config.IMAGE_ITEMS
         plugin.activate('mediamenu', level=level, args=args)
 

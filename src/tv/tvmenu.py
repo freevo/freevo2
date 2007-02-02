@@ -77,9 +77,10 @@ class TVMenu(MainMenuItem):
             # FIXME: change the tvguide into a plugin
             items.append(ActionItem(_('TV Guide'), self, self.start_tvguide))
 
-        items.append(DirItem(config.TV_RECORD_DIR, None,
-                             name = _('Recorded Shows'),
-                             type='tv'))
+        if config.TV_RECORD_DIR:
+            items.append(DirItem(config.TV_RECORD_DIR, None,
+                                 name = _('Recorded Shows'),
+                                 type='tv'))
 
         # XXX: these are becomming plugins
         # items.append(menu.MenuItem(_('Search Guide'),

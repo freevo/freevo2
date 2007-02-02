@@ -61,6 +61,9 @@ class PluginInterface(plugin.MainMenuPlugin):
     the 'video', 'audio', 'image' or 'games' plugin.
     """
     def __init__(self, name, type, items):
+        if items is None:
+            self.reason = 'No items defined for %s menu' % type
+            return
         plugin.MainMenuPlugin.__init__(self)
         self._name = name
         self._type = type
@@ -93,6 +96,7 @@ class MediaMenu(MainMenuItem):
         for filename in self._items:
             if not isinstance(filename, (str, unicode)):
                 filename = filename[1]
+            filename = os.path.abspath(filename)
             if os.path.isdir(filename) and \
                    not os.environ.get('NO_CRAWLER') and \
                    not filename == os.environ.get('HOME') and \
@@ -134,6 +138,7 @@ class MediaMenu(MainMenuItem):
                         # ... and add_args
                         add_args = item[2:]
 
+                filename = os.path.abspath(filename)
                 if os.path.isdir(filename):
                     query = kaa.beacon.query(filename=filename)
                     for d in query.get(filter='extmap').get('beacon:dir'):

@@ -58,7 +58,10 @@ class Plugin(object):
         self._plugin_special = False
 
 
+    def plugin_activate(self, level):
+        pass
 
+    
 class MainMenuPlugin(Plugin):
     """
     Plugin class for plugins to add something to the main menu
@@ -192,29 +195,6 @@ class PluginLoader(object):
             for p in copy.copy(self.plugins):
                 if p[0] == id:
                     self.plugins.remove(p)
-
-
-    def is_active(self, name, arg=None):
-        """
-        Search the list if the given plugin is active. If arg is set,
-        check arg, too.
-        """
-        for p in self.plugins:
-            if p[0] == name:
-                if not arg:
-                    return p
-                if isinstance(arg, list) or isinstance(arg, tuple):
-                    try:
-                        for i in range(len(arg)):
-                            if arg[i] != p[3][i]:
-                                break
-                        else:
-                            return p
-                    except:
-                        pass
-                if arg == p[3]:
-                    return p
-        return False
 
 
     def init(self, callback = None):
@@ -377,6 +357,7 @@ class PluginLoader(object):
             if p._plugin_name:
                 self.names[p._plugin_name] = p
 
+            p.plugin_activate(level)
             self.loaded_plugins.append(p)
 
         except:
@@ -390,7 +371,6 @@ _loader = PluginLoader()
 activate = _loader.activate
 remove = _loader.deactivate
 deactivate = _loader.deactivate
-is_active = _loader.is_active
 init = _loader.init
 get = _loader.get
 getbyname = _loader.getbyname
