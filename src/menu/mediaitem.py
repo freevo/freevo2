@@ -41,7 +41,7 @@ import kaa.beacon
 from kaa.strutils import str_to_unicode
 
 # freevo imports
-from freevo.ui.event import PLAY_START
+from freevo.ui.event import PLAY_START, STOP
 
 # menu imports
 from item import Item
