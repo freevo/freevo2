@@ -60,6 +60,7 @@ class Player(Application):
         self.player = kaa.popcorn.Player()
         self.player.set_window(self.engine.get_window())
         self.player.signals['failed'].connect_weak(self._play_failed)
+        self.elapsed_timer = kaa.notifier.WeakTimer(self.elapsed)
 
 
     def play(self, item):
@@ -163,6 +164,13 @@ class Player(Application):
         self.status = STATUS_STOPPING
 
 
+    def elapsed(self):
+        """
+        Callback for elapsed time changes.
+        """
+        self.item.elapsed = round(self.player.get_position())
+
+
     def eventhandler(self, event):
         """
         React on some events or send them to the real player or the
@@ -175,6 +183,7 @@ class Player(Application):
             return True
 
         if event == PLAY_START:
+            self.elapsed_timer.start(0.2)
             self.item.eventhandler(event)
             return True
 
@@ -183,6 +192,7 @@ class Player(Application):
             # player stopped by itself. So we need to set the application to
             # to stopped.
             self.status = STATUS_STOPPED
+            self.elapsed_timer.stop()
             self.item.eventhandler(event)
             if self.status == STATUS_STOPPED:
                 self.status = STATUS_IDLE
