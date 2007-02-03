@@ -79,6 +79,16 @@ class MainMenuPlugin(Plugin):
         return []
 
 
+    def plugins(subtype=''):
+        """
+        Static function to return all MainMenuPlugins.
+        """
+        if not subtype:
+            return get('mainmenu')
+        return get('mainmenu_%s' % subtype)
+
+    plugins = staticmethod(plugins)
+
 
 class PluginLoader(object):
     """

@@ -39,14 +39,12 @@ __all__ = [ 'MainMenuItem', 'MainMenu' ]
 import os
 
 # freevo imports
-import config
 import gui.theme
 import util
 import plugin
 
 from menu import Item, Action, Menu
 from application.menuw import MenuWidget
-from event import *
 
 
 class MainMenuItem(Item):
@@ -105,7 +103,7 @@ class MainMenu(Item):
         """
         Item.__init__(self)
         items = []
-        for p in plugin.get('mainmenu'):
+        for p in plugin.MainMenuPlugin.plugins():
             items += p.items(self)
         menu = Menu(_('Freevo Main Menu'), items, type='main')
         menu.autoselect = True

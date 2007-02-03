@@ -65,6 +65,20 @@ class ItemPlugin(plugin.Plugin):
         return False
 
 
+    def plugins(subtype=''):
+        """
+        Static function to return all ItemPlugins.
+        """
+        plugins = plugin.get('item')[:]
+        if subtype:
+            plugins += plugin.get('item_%s' % subtype)
+        plugins.sort(lambda l, o: cmp(l._plugin_level, o._plugin_level))
+        return plugins
+
+    plugins = staticmethod(plugins)
+
+
+
 class MediaPlugin(plugin.Plugin):
     """
     Plugin class for medias handled in a directory/playlist.

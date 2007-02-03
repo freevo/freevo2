@@ -86,7 +86,7 @@ class TVMenu(MainMenuItem):
         # items.append(menu.MenuItem(_('Search Guide'),
         # action=self.show_search))
 
-        plugins_list = plugin.get('mainmenu_tv')
+        plugins_list = plugin.MainMenuPlugin.plugins('tv')
         for p in plugins_list:
             items += p.items(self)
 

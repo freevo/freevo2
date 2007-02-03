@@ -43,8 +43,8 @@ import copy
 from kaa.weakref import weakref
 import kaa.beacon
 
-# freevo imports
-from freevo.ui import plugin
+# menu imports
+from plugin import ItemPlugin
 
 # get logging object
 log = logging.getLogger()
@@ -153,9 +153,7 @@ class Item(object):
         # get actions defined by the item
         items = self.actions()
         # get actions defined by plugins
-        plugins = plugin.get('item') + plugin.get('item_%s' % self.type)
-        plugins.sort(lambda l, o: cmp(l._plugin_level, o._plugin_level))
-        for p in plugins:
+        for p in ItemPlugin.plugins(self.type):
             for a in p.actions(self):
                 # set item for the action
                 a.item = self
@@ -218,7 +216,7 @@ class Item(object):
         Simple eventhandler for an item
         """
         # call eventhandler from plugins
-        for p in plugin.get('item') + plugin.get('item_%s' % self.type):
+        for p in ItemPlugin.plugins(self.type):
             if p.eventhandler(self, event):
                 return True
 

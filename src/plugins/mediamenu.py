@@ -43,7 +43,7 @@ from kaa.weakref import weakref
 # freevo imports
 import freevo.conf
 
-from freevo.ui import plugin
+from freevo.ui.plugin import MainMenuPlugin
 from freevo.ui.event import EJECT
 from freevo.ui.directory import DirItem
 from freevo.ui.mainmenu import MainMenuItem
@@ -55,7 +55,7 @@ from freevo.ui.menu import Menu, Item, MediaPlugin
 log = logging.getLogger()
 
 
-class PluginInterface(plugin.MainMenuPlugin):
+class PluginInterface(MainMenuPlugin):
     """
     Plugin to integrate a mediamenu (video/audio/image/games) into
     the Freevo main menu. This plugin is auto-loaded when you activate
@@ -65,7 +65,7 @@ class PluginInterface(plugin.MainMenuPlugin):
         if items is None:
             self.reason = 'No items defined for %s menu' % type
             return
-        plugin.MainMenuPlugin.__init__(self)
+        MainMenuPlugin.__init__(self)
         self._name = name
         self._type = type
         self._items = items
@@ -181,7 +181,7 @@ class MediaMenu(MainMenuItem):
                                      type = self.display_type))
         # add all plugin data
         if self.display_type:
-            for p in plugin.get('mainmenu_%s' % self.display_type):
+            for p in MainMenuPlugin.plugins(self.display_type):
                 items += p.items( self )
 
         return items
