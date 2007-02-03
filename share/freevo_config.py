@@ -420,3 +420,5 @@ TV_RECORD_DIR = None
 
 TV_DATEFORMAT = '%e-%b' # Day-Month: 11-Jun
 TV_TIMEFORMAT = '%H:%M' # Hour-Minute 14:05
+
+plugin.activate('tv.genre')
