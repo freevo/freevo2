@@ -29,6 +29,9 @@
 #
 # -----------------------------------------------------------------------------
 
+__all__ = [ 'ItemPlugin', 'MediaPlugin' ]
+
+# freevo imports
 from freevo.ui import plugin
 
 
@@ -60,3 +63,70 @@ class ItemPlugin(plugin.Plugin):
         Additional eventhandler for this item.
         """
         return False
+
+
+class MediaPlugin(plugin.Plugin):
+    """
+    Plugin class for medias handled in a directory/playlist.
+    self.mediatype is a list of display types where this media
+    should be displayed, [] for always.
+    """
+    mediatype = []
+
+    def __init__(self, name=''):
+        plugin.Plugin.__init__(self, name)
+        self._plugin_type = 'media'
+
+
+    def suffix(self):
+        """
+        return the list of suffixes this class handles
+        """
+        return []
+
+
+    def get(self, parent, files):
+        """
+        return a list of items based on the files
+        """
+        return []
+
+
+    def count(self, parent, listing):
+        """
+        return how many items will be build on files
+        """
+        c = 0
+        for t in self.suffix():
+            c += len(listing.get(t))
+        return c
+
+
+    def dirinfo(self, diritem):
+        """
+        set informations for a diritem based on the content, etc.
+        """
+        pass
+
+
+    def database(self):
+        """
+        returns a database object
+        """
+        return None
+
+
+    def plugins(mediatype=None):
+        """
+        Static function to return all MediaPlugins for the given mediatype.
+        If mediatype is None, return all MediaPlugins.
+        """
+        if not mediatype:
+            return plugin.get('media')
+        ret = []
+        for p in plugin.get('media'):
+            if not p.mediatype or mediatype in p.mediatype:
+                ret.append(p)
+        return ret
+
+    plugins = staticmethod(plugins)

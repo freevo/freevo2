@@ -36,7 +36,7 @@ from mediaitem import MediaItem
 from action import Action
 from menu import Menu
 from stack import MenuStack
-from plugin import ItemPlugin
+from plugin import ItemPlugin, MediaPlugin
 
 class ActionItem(Item, Action):
     """

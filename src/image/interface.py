@@ -35,13 +35,13 @@
 
 # only export 'PluginInterface' to the outside. This will be used
 # with plugin.activate('image') and everything else should be handled
-# by using media.get_plugins()
+# by using menu.MediaPlugin.plugins()
 
 __all__ = [ 'PluginInterface' ]
 
 # freevo imports
 from freevo.ui import config, plugin, fxditem
-from freevo.ui.media import MediaPlugin
+from freevo.ui.menu import MediaPlugin
 
 # ImageItem
 from imageitem import ImageItem

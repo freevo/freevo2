@@ -7,7 +7,7 @@
 # This file imports everything needed to use this image module.  There
 # is only one class provided for images, the PluginInterface from
 # interface.py. It is a MediaPlugin that can be accessed from
-# media.get_plugins(). It will also register an fxd handler for the
+# menu.MediaPlugin.plugins(). It will also register an fxd handler for the
 # <slideshow> tag.
 #
 # Image plugins are also allowed to use ImageItem to create a new

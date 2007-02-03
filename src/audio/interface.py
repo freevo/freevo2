@@ -35,7 +35,7 @@
 
 # only export 'PluginInterface' to the outside. This will be used
 # with plugin.activate('audio') and everything else should be handled
-# by using media.get_plugins()
+# by using menu.MediaPlugin.plugins()
 
 __all__ = [ 'PluginInterface' ]
 
@@ -46,7 +46,7 @@ import stat
 
 # Freevo imports
 from freevo.ui import config, util, plugin, fxditem
-from freevo.ui.media import MediaPlugin
+from freevo.ui.menu import MediaPlugin
 
 # AudioItem
 from audioitem import AudioItem

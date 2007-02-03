@@ -46,10 +46,9 @@ import config
 import util
 import plugin
 import fxditem
-import media
 
 from event import *
-from menu import Action, Item, MediaItem, Menu
+from menu import Action, Item, MediaItem, Menu, MediaPlugin
 
 # get logging object
 log = logging.getLogger()
@@ -176,7 +175,7 @@ class Playlist(MediaItem):
         # Note: playlist is a list of Items, strings (filenames) or a
         # beacon queries now.
 
-        plugins = media.get_plugins(self.display_type)
+        plugins = MediaPlugin.plugins(self.display_type)
         for item in playlist:
 
             if isinstance(item, Item):
@@ -450,12 +449,12 @@ class Playlist(MediaItem):
 
 
 
-class PluginInterface(media.MediaPlugin):
+class PluginInterface(MediaPlugin):
     """
     Plugin class for playlist items
     """
     def __init__(self):
-        media.MediaPlugin.__init__(self)
+        MediaPlugin.__init__(self)
 
         # add fxd parser callback
         fxditem.add_parser([], 'playlist', self.fxdhandler)

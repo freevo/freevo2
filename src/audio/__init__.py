@@ -7,7 +7,7 @@
 # This file imports everything needed to use this audio module.  There
 # is only one class provided for audio files, the PluginInterface from
 # interface.py. It is a MediaPlugin that can be accessed from
-# media.get_plugins(). It will also register an fxd handler for the
+# menu.MediaPlugin.plugins(). It will also register an fxd handler for the
 # <playlist> tag.
 #
 # Audio plugins are also allowed to use AudioItem to create a new AudioItem
