@@ -232,4 +232,7 @@ class MediaItem(Item):
         """
         if event == PLAY_START:
             self['last_played'] = int(time.time())
+        if event == STOP:
+            # not fully played, clear info
+            self['last_played'] = 0
         return Item.eventhandler(self, event)

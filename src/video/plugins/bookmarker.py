@@ -150,7 +150,6 @@ class PluginInterface(ItemPlugin):
                 # this will store in kaa.beacon
                 log.info('auto-bookmark store')
                 item[RESUME]= item.elapsed
-                item['last_played'] = 0
                 self._ignore_end = True
             else:
                 log.info('auto-bookmark not supported for this item')
