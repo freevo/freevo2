@@ -6,8 +6,8 @@
 #
 # This file imports everything needed to use this video module.
 # There is  only one class provided for video files, the PluginInterface
-# from interface.py. It is a MimetypePlugin that can be accessed
-# from plugin.mimetype(). It will also register an fxd handler for the
+# from interface.py. It is a MediaPlugin that can be accessed
+# from media.get_plugins(). It will also register an fxd handler for the
 # <movie> and <disc-set> tags.
 #
 # Video plugins are also allowed to use VideoItem to create a new VideoItem

@@ -41,6 +41,7 @@ import kaa.beacon
 # freevo imports
 from freevo.ui import plugin
 from freevo.ui import menu
+from freevo.ui import media
 
 from freevo.ui.menu import Item, Action, ActionItem, Menu
 from freevo.ui.image import ImageItem
@@ -91,7 +92,7 @@ class ApodMainMenuItem(Item):
 
         # get items
         items = []
-        for p in plugin.mimetype('image'):
+        for p in media.get_plugins('image'):
             items += p.get(self, listing)
 
         if items:

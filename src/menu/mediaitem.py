@@ -80,7 +80,6 @@ class MediaItem(Item):
             self.filename     = ''      # filename if it's a file:// url
             self.mode         = ''      # the type (file, http, dvd...)
             self.files        = None    # Files
-            self.mimetype     = ''      # extention or mode
             self.name         = u''
             return
 
@@ -98,9 +97,6 @@ class MediaItem(Item):
             self.filename     = self.url[7:]
             self.files.append(self.filename)
 
-            # set the suffix of the file as mimetype
-            self.mimetype = self.filename[self.filename.rfind('.')+1:].lower()
-
             # FIXME: this is slow. Maybe handle this in the gui code
             # and choose to print self.info.get('name')
             if self.parent and \
@@ -114,7 +110,6 @@ class MediaItem(Item):
             # types like dvd are handled inside the derivated class
             self.network_play = True
             self.filename     = ''
-            self.mimetype     = self.type
             if not self.name:
                 self.name = self.info.get('title')
             if not self.name:

@@ -80,57 +80,6 @@ class MainMenuPlugin(Plugin):
 
 
 
-class MimetypePlugin(Plugin):
-    """
-    Plugin class for mimetypes handled in a directory/playlist.
-    self.display_type is a list of display types where this mimetype
-    should be displayed, [] for always.
-    """
-    display_type = []
-
-    def __init__(self, name=''):
-        Plugin.__init__(self, name)
-        self._plugin_type = 'mimetype'
-
-
-    def suffix(self):
-        """
-        return the list of suffixes this class handles
-        """
-        return []
-
-
-    def get(self, parent, files):
-        """
-        return a list of items based on the files
-        """
-        return []
-
-
-    def count(self, parent, listing):
-        """
-        return how many items will be build on files
-        """
-        c = 0
-        for t in self.suffix():
-            c += len(listing.get(t))
-        return c
-
-
-    def dirinfo(self, diritem):
-        """
-        set informations for a diritem based on the content, etc.
-        """
-        pass
-
-
-    def database(self):
-        """
-        returns a database object
-        """
-        return None
-
-
 class PluginLoader(object):
     """
     Class for handling the different plugins.
@@ -376,16 +325,3 @@ init = _loader.init
 get = _loader.get
 getbyname = _loader.getbyname
 register = _loader.register
-
-def mimetype(display_type=None):
-    """
-    return all MimetypePlugins for the given display_type. If display_type
-    is None, return all MimetypePlugins.
-    """
-    if not display_type:
-        return get('mimetype')
-    ret = []
-    for p in get('mimetype'):
-        if not p.display_type or display_type in p.display_type:
-            ret.append(p)
-    return ret

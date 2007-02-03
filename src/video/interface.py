@@ -41,10 +41,8 @@ import copy
 import string
 
 # freevo imports
-from freevo.ui import config
-from freevo.ui import util
-from freevo.ui import plugin
-from freevo.ui import fxditem
+from freevo.ui import config, util, plugin, fxditem
+from freevo.ui.media import MediaPlugin
 from freevo.ui.menu import Files
 
 # video imports
@@ -52,7 +50,7 @@ from videoitem import VideoItem
 import database
 import fxdhandler
 
-class PluginInterface(plugin.MimetypePlugin):
+class PluginInterface(MediaPlugin):
     """
     Plugin to handle all kinds of video items
     """
@@ -66,7 +64,7 @@ class PluginInterface(plugin.MimetypePlugin):
         fxditem.add_parser(['video'], 'movie', fxdhandler.parse_movie)
         # fxditem.add_parser(['video'], 'disc-set', fxdhandler.parse_disc_set)
 
-        # update the database based on the current mimetypes
+        # update the database
         database.update()
         
         # activate the mediamenu for video

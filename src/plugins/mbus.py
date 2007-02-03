@@ -10,6 +10,7 @@ import freevo.ipc
 from freevo.ui import plugin, application
 from freevo.ui.event import *
 from freevo.ui.directory import DirItem
+from freevo.ui.media import get_plugins
 
 import logging
 log = logging.getLogger('mbus')
@@ -61,7 +62,7 @@ class PluginInterface(plugin.Plugin):
         kaa.beacon.query(filename=unicode_to_str(file)).get(filter='extmap')
 
         # normal file
-        for p in plugin.mimetype(type):
+        for p in get_plugins(type):
             i = p.get(None, listing)
             if i and hasattr(i[0], 'play'):
                 i[0].play()

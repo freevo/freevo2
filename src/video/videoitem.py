@@ -143,7 +143,6 @@ class VideoItem(MediaItem):
         MediaItem.set_url(self, url)
         if self.url.startswith('dvd://') or self.url.startswith('vcd://'):
             self.network_play = False
-            self.mimetype = self.url[:self.url.find('://')].lower()
             if self.info.filename:
                 # dvd on harddisc, add '/' for xine
                 self.url = self.url + '/'
@@ -159,7 +158,6 @@ class VideoItem(MediaItem):
 
         elif self.url.endswith('.iso') and self.info['mime'] == 'video/dvd':
             # dvd iso
-            self.mimetype = 'dvd'
             self.mode     = 'dvd'
             self.url      = 'dvd' + self.url[4:] + '/'
             

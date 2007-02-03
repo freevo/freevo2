@@ -46,6 +46,7 @@ import config
 import util
 import plugin
 import fxditem
+from media import MediaPlugin, get_plugins
 
 from event import *
 from menu import Action, Item, MediaItem, Menu
@@ -175,7 +176,7 @@ class Playlist(MediaItem):
         # Note: playlist is a list of Items, strings (filenames) or a
         # beacon queries now.
 
-        plugins = plugin.mimetype(self.display_type)
+        plugins = get_plugins(self.display_type)
         for item in playlist:
 
             if isinstance(item, Item):
@@ -449,12 +450,12 @@ class Playlist(MediaItem):
 
 
 
-class Mimetype(plugin.MimetypePlugin):
+class PluginInterface(MediaPlugin):
     """
     Plugin class for playlist items
     """
     def __init__(self):
-        plugin.MimetypePlugin.__init__(self)
+        MediaPlugin.__init__(self)
 
         # add fxd parser callback
         fxditem.add_parser([], 'playlist', self.fxdhandler)
@@ -525,6 +526,6 @@ class Mimetype(plugin.MimetypePlugin):
         return pl
 
 
-# load the MimetypePlugin
-mimetype = Mimetype()
-plugin.activate(mimetype)
+# load the MediaPlugin
+interface = PluginInterface()
+plugin.activate(interface)

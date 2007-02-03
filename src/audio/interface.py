@@ -35,7 +35,8 @@
 
 # only export 'PluginInterface' to the outside. This will be used
 # with plugin.activate('audio') and everything else should be handled
-# by using plugin.mimetype()
+# by using media.get_plugins()
+
 __all__ = [ 'PluginInterface' ]
 
 # Python imports
@@ -44,10 +45,8 @@ import re
 import stat
 
 # Freevo imports
-from freevo.ui import config
-from freevo.ui import util
-from freevo.ui import plugin
-from freevo.ui import fxditem
+from freevo.ui import config, util, plugin, fxditem
+from freevo.ui.media import MediaPlugin
 
 # AudioItem
 from audioitem import AudioItem
@@ -56,7 +55,7 @@ from audiodiskitem import AudioDiskItem
 # fxdhandler for <audio> tags
 from fxdhandler import fxdhandler
 
-class PluginInterface(plugin.MimetypePlugin):
+class PluginInterface(MediaPlugin):
     """
     Plugin to handle all kinds of audio items
     """

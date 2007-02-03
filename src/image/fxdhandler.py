@@ -60,6 +60,7 @@ from kaa.strutils import unicode_to_str
 # Freevo imports
 from freevo.ui import config
 from freevo.ui import plugin
+from freevo.ui import media
 
 from freevo.ui.util import match_files
 from freevo.ui.playlist import Playlist
@@ -125,7 +126,7 @@ def fxdhandler(node, parent, listing):
 
     files  = []
     suffix = []
-    for p in plugin.mimetype('audio'):
+    for p in media.get_plugins('audio'):
         suffix += p.suffix()
 
     for child in children:

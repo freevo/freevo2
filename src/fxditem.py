@@ -55,6 +55,7 @@ import freevo.fxdparser
 import util
 import plugin
 
+from media import MediaPlugin, get_plugins
 from menu import Item, Action, Menu
 
 # get logging object
@@ -70,7 +71,7 @@ def add_parser(types, node, callback):
     _callbacks.append((types, node, callback))
 
     
-class Mimetype(plugin.MimetypePlugin):
+class PluginInterface(MediaPlugin):
     """
     Class to handle fxd files in directories
     """
@@ -171,6 +172,6 @@ class Container(Item):
 
 
 
-# register the plugin as mimetype for fxd files
-mimetype = Mimetype()
-plugin.activate(mimetype, level=0)
+# load the MediaPlugin
+interface = PluginInterface()
+plugin.activate(interface, level=0)

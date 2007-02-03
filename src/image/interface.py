@@ -35,13 +35,13 @@
 
 # only export 'PluginInterface' to the outside. This will be used
 # with plugin.activate('image') and everything else should be handled
-# by using plugin.mimetype()
+# by using media.get_plugins()
+
 __all__ = [ 'PluginInterface' ]
 
 # freevo imports
-from freevo.ui import config
-from freevo.ui import plugin
-from freevo.ui import fxditem
+from freevo.ui import config, plugin, fxditem
+from freevo.ui.media import MediaPlugin
 
 # ImageItem
 from imageitem import ImageItem
@@ -49,7 +49,7 @@ from imageitem import ImageItem
 # fxdhandler for <slideshow> tags
 from fxdhandler import fxdhandler
 
-class PluginInterface(plugin.MimetypePlugin):
+class PluginInterface(MediaPlugin):
     """
     Plugin to handle all kinds of image items
     """

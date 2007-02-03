@@ -1,6 +1,6 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# unpack.py - mimetype plugin for archives
+# unpack.py - media plugin for archives
 # -----------------------------------------------------------------------------
 # $Id$
 #
@@ -41,8 +41,8 @@ import os
 import kaa.notifier
 
 # freevo imports
-from freevo.ui import plugin
 from freevo.ui import util
+from freevo.ui.media import MediaPlugin
 
 from freevo.ui.menu import Item, Action
 from freevo.ui.application import TextWindow
@@ -93,9 +93,9 @@ class ArchiveItem(Item):
         self.pop.destroy()
 
         
-class PluginInterface(plugin.MimetypePlugin):
+class PluginInterface(MediaPlugin):
     """
-    A mimetype plugin for zip and rar archives.
+    A media plugin for zip and rar archives.
     """
     def suffix(self):
         """

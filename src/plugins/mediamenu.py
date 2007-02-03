@@ -48,6 +48,8 @@ from freevo.ui.event import EJECT
 from freevo.ui.directory import DirItem
 from freevo.ui.mainmenu import MainMenuItem
 from freevo.ui.menu import Menu, Item
+from freevo.ui.media import get_plugins
+
 # from games import machine
 
 # get logging object
@@ -158,7 +160,7 @@ class MediaMenu(MainMenuItem):
 
                 query = kaa.beacon.query(filename=filename)
                 listing = query.get(filter='extmap')
-                for p in plugin.mimetype(self.display_type):
+                for p in get_plugins(self.display_type):
                     p_items = p.get(self, listing)
                     if title:
                         for i in p_items:
@@ -173,7 +175,7 @@ class MediaMenu(MainMenuItem):
             if media.mountpoint == '/':
                 continue
             listing = kaa.beacon.wrap(media.root, filter='extmap')
-            for p in plugin.mimetype(self.display_type):
+            for p in get_plugins(self.display_type):
                 items.extend(p.get(self, listing))
             for d in listing.get('beacon:dir'):
                 items.append(DirItem(d, self, name=media.label,

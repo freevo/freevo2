@@ -48,8 +48,8 @@ import config
 import util
 
 import menu
-import plugin
 import fxditem
+import media
 
 from menu import Item, Files, Action, ActionItem
 from playlist import Playlist
@@ -179,8 +179,8 @@ class DirItem(Playlist):
         if self.display_type == 'tv':
             type = 'video'
 
-        # Check mimetype plugins if they want to add something
-        for p in plugin.mimetype(type):
+        # Check media plugins if they want to add something
+        for p in media.get_plugins(type):
             p.dirinfo(self)
 
 
@@ -208,7 +208,7 @@ class DirItem(Playlist):
                 log.info('create metainfo for %s', self.dir)
                 listing = kaa.beacon.query(parent=self.info).get(filter='extmap')
                 num_items = [ self.info.get('mtime'), 0 ]
-                for p in plugin.mimetype(display_type):
+                for p in media.get_plugins(display_type):
                     num_items[1] += p.count(self, listing)
                 num_items.append(len(listing.get('beacon:dir')))
                 if self.info.scanned():
@@ -280,7 +280,7 @@ class DirItem(Playlist):
         if event == DIRECTORY_CHANGE_DISPLAY_TYPE:
             possible = [ ]
 
-            for p in plugin.get('mimetype'):
+            for p in media.get_plugins():
                 for t in p.display_type:
                     if not t in possible:
                         possible.append(t)
@@ -413,7 +413,7 @@ class DirItem(Playlist):
         # build items
         #
         # build play_items, pl_items and dir_items
-        for p in plugin.mimetype(display_type):
+        for p in media.get_plugins(display_type):
             for i in p.get(self, listing):
                 if i.type == 'playlist':
                     pl_items.append(i)

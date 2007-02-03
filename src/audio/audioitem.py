@@ -96,7 +96,6 @@ class AudioItem(MediaItem):
         MediaItem.set_url(self, url)
         if self.url.startswith('cdda://'):
             self.network_play = False
-            self.mimetype = 'cdda'
 
 
     def __getitem__(self, key):
