@@ -86,9 +86,10 @@ class MimetypePlugin(Plugin):
     self.display_type is a list of display types where this mimetype
     should be displayed, [] for always.
     """
+    display_type = []
+
     def __init__(self, name=''):
         Plugin.__init__(self, name)
-        self.display_type = []
         self._plugin_type = 'mimetype'
 
 
