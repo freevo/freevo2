@@ -54,8 +54,8 @@ import freevo.fxdparser
 
 import util
 import plugin
+import media
 
-from media import MediaPlugin, get_plugins
 from menu import Item, Action, Menu
 
 # get logging object
@@ -71,7 +71,7 @@ def add_parser(types, node, callback):
     _callbacks.append((types, node, callback))
 
     
-class PluginInterface(MediaPlugin):
+class PluginInterface(media.MediaPlugin):
     """
     Class to handle fxd files in directories
     """
