@@ -53,7 +53,7 @@ class PluginInterface(MediaPlugin):
     """
     Plugin to handle all kinds of image items
     """
-    display_type = [ 'image' ]
+    mediatype = [ 'image' ]
 
     def plugin_activate(self, level):
         """

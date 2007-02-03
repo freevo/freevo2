@@ -54,7 +54,7 @@ class PluginInterface(MediaPlugin):
     """
     Plugin to handle all kinds of video items
     """
-    display_type = [ 'video' ]
+    mediatype = [ 'video' ]
 
     def plugin_activate(self, level):
         """

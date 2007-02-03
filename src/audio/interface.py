@@ -59,7 +59,7 @@ class PluginInterface(MediaPlugin):
     """
     Plugin to handle all kinds of audio items
     """
-    display_type = [ 'audio' ]
+    mediatype = [ 'audio' ]
 
     def plugin_activate(self, level):
         """

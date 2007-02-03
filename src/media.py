@@ -36,10 +36,10 @@ import plugin
 class MediaPlugin(plugin.Plugin):
     """
     Plugin class for medias handled in a directory/playlist.
-    self.display_type is a list of display types where this media
+    self.mediatype is a list of display types where this media
     should be displayed, [] for always.
     """
-    display_type = []
+    mediatype = []
 
     def __init__(self, name=''):
         plugin.Plugin.__init__(self, name)
@@ -85,15 +85,15 @@ class MediaPlugin(plugin.Plugin):
 
 
 
-def get_plugins(display_type=None):
+def get_plugins(mediatype=None):
     """
-    Return all MediaPlugins for the given display_type. If display_type
+    Return all MediaPlugins for the given mediatype. If mediatype
     is None, return all MediaPlugins.
     """
-    if not display_type:
+    if not mediatype:
         return plugin.get('media')
     ret = []
     for p in plugin.get('media'):
-        if not p.display_type or display_type in p.display_type:
+        if not p.mediatype or mediatype in p.mediatype:
             ret.append(p)
     return ret
