@@ -115,11 +115,11 @@ class PluginInterface( plugin.Plugin ):
         plugin.register( self, "lcd" )
 
         kaa.notifier.EventHandler(self.eventhandler).register()
-        application.signals['application change'].connect(self.set_application)
+        application.signals['changed'].connect(self.set_application)
         self.set_application(application.get_active())
 
 
-    def set_application(self, app, *args, **kwargs):
+    def set_application(self, app):
         name = str(app)
         widgets = self.screens.get(name)
         if not widgets:
