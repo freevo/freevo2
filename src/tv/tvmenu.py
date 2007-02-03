@@ -100,13 +100,10 @@ class TVMenu(MainMenuItem):
         # FIXME: debug, remove me
         t1 = time.time()
 
-        # Should we check the validity of the guide here or remove this?
-        if False:
-            msg  = _('The list of TV channels is invalid!\n')
-            msg += _('Please check the config file.')
-            MessageWindow(msg).show()
+        if not tvserver.epg.connected():
+            MessageWindow(_('TVServer not running')).show()
             return
-
+            
         guide = tvguide.TVGuide(self)
         self.pushmenu(guide)
 
