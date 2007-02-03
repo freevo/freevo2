@@ -59,7 +59,7 @@ layouts = { 2:
                   ( 'string', 1, 2, '%%item["elapsed"]%%'),
                   ( 'string', 8, 2, '%%item["length"]%%')],
 
-                "mplayer":
+                "videoplayer":
                 [ ( 'string', 1, 1, '%%item["title"]%%' ),
                   ( 'string', 1, 2, '%%item["elapsed"]%%'),
                   ( 'string', 9, 2, '%%item["length"]%%')
