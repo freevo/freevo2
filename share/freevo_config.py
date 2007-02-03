@@ -103,7 +103,7 @@ FILE_OPS_ALLOW_DELETE_INFO = True
 
 # support for settings bookmarks (key RECORD) while playing. Also
 # auto bookmarking when playback is stopped
-plugin.activate('video.bookmarker', level=0)
+# plugin.activate('video.bookmarker', level=0)
 
 # show some messages on the screen
 plugin.activate('osd')
