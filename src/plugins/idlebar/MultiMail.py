@@ -47,6 +47,8 @@
 #
 # ----------------------------------------------------------------------- */
 
+__plugins__ = [ 'IMAP', 'Pop3', 'Mbox' ]
+
 import os
 from freevo.ui import config, gui
 import imaplib
