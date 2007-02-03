@@ -62,34 +62,6 @@ class Plugin(object):
         pass
 
     
-class MainMenuPlugin(Plugin):
-    """
-    Plugin class for plugins to add something to the main menu
-    """
-    def __init__(self, name=''):
-        Plugin.__init__(self, name)
-        self._plugin_type = 'mainmenu'
-        self._plugin_special = True
-
-
-    def items(self, parent):
-        """
-        return the list of items for the main menu
-        """
-        return []
-
-
-    def plugins(subtype=''):
-        """
-        Static function to return all MainMenuPlugins.
-        """
-        if not subtype:
-            return get('mainmenu')
-        return get('mainmenu_%s' % subtype)
-
-    plugins = staticmethod(plugins)
-
-
 class PluginLoader(object):
     """
     Class for handling the different plugins.

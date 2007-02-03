@@ -36,9 +36,7 @@ import kaa.notifier
 import freevo.ipc
 
 from freevo.ui import config
-from freevo.ui import plugin
-
-from freevo.ui.mainmenu import MainMenuItem
+from freevo.ui.mainmenu import MainMenuItem, MainMenuPlugin
 from freevo.ui.menu import Item, ActionItem, Menu
 
 import tvguide
@@ -86,7 +84,7 @@ class TVMenu(MainMenuItem):
         # items.append(menu.MenuItem(_('Search Guide'),
         # action=self.show_search))
 
-        plugins_list = plugin.MainMenuPlugin.plugins('tv')
+        plugins_list = MainMenuPlugin.plugins('tv')
         for p in plugins_list:
             items += p.items(self)
 

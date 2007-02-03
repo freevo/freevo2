@@ -33,7 +33,7 @@
 # -----------------------------------------------------------------------------
 
 
-__all__ = [ 'MainMenuItem', 'MainMenu' ]
+__all__ = [ 'MainMenuItem', 'MainMenu', 'MainMenuPlugin' ]
 
 # python imports
 import os
@@ -92,6 +92,34 @@ class MainMenuItem(Item):
         return [ Action(self.name, self.function[0]) ]
 
 
+class MainMenuPlugin(plugin.Plugin):
+    """
+    Plugin class for plugins to add something to the main menu
+    """
+    def __init__(self, name=''):
+        plugin.Plugin.__init__(self, name)
+        self._plugin_type = 'mainmenu'
+        self._plugin_special = True
+
+
+    def items(self, parent):
+        """
+        return the list of items for the main menu
+        """
+        return []
+
+
+    def plugins(subtype=''):
+        """
+        Static function to return all MainMenuPlugins.
+        """
+        if not subtype:
+            return plugin.get('mainmenu')
+        return plugin.get('mainmenu_%s' % subtype)
+
+    plugins = staticmethod(plugins)
+
+
 class MainMenu(Item):
     """
     This class handles the main menu. It will start the main menu widget
@@ -103,7 +131,7 @@ class MainMenu(Item):
         """
         Item.__init__(self)
         items = []
-        for p in plugin.MainMenuPlugin.plugins():
+        for p in MainMenuPlugin.plugins():
             items += p.items(self)
         menu = Menu(_('Freevo Main Menu'), items, type='main')
         menu.autoselect = True

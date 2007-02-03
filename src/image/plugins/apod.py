@@ -39,10 +39,8 @@ from kaa.notifier import Thread, Callback
 import kaa.beacon
 
 # freevo imports
-from freevo.ui import plugin
-from freevo.ui import menu
-
-from freevo.ui.menu import Item, Action, ActionItem, Menu
+from freevo.ui.menu import Item, Action, ActionItem, Menu, MediaPlugin
+from freevo.ui.mainmenu import MainMenuPlugin
 from freevo.ui.image import ImageItem
 from freevo.ui.application import TextWindow, MessageWindow
 
@@ -91,7 +89,7 @@ class ApodMainMenuItem(Item):
 
         # get items
         items = []
-        for p in menu.MediaPlugin.plugins('image'):
+        for p in MediaPlugin.plugins('image'):
             items += p.get(self, listing)
 
         if items:
@@ -157,7 +155,7 @@ class ApodMainMenuItem(Item):
 
 
 
-class PluginInterface(plugin.MainMenuPlugin):
+class PluginInterface(MainMenuPlugin):
     """
     Astronomy Picture of the Day download plugin. Downloads the picture
     for the current day and allow access to the dir for browsing the old
@@ -187,7 +185,7 @@ class PluginInterface(plugin.MainMenuPlugin):
         self.imagedir = imagedir
 
         # init the plugin
-        plugin.MainMenuPlugin.__init__(self)
+        MainMenuPlugin.__init__(self)
 
 
 

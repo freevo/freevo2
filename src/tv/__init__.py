@@ -34,10 +34,10 @@
 import freevo.ipc
 
 # freevo imports
-from freevo.ui import plugin
+from freevo.ui.mainmenu import MainMenuPlugin
 
 
-class PluginInterface(plugin.MainMenuPlugin):
+class PluginInterface(MainMenuPlugin):
     """
     Plugin interface to integrate the tv module into Freevo
     """
@@ -45,7 +45,7 @@ class PluginInterface(plugin.MainMenuPlugin):
         """
         init the plugin.
         """
-        plugin.MainMenuPlugin.__init__(self)
+        MainMenuPlugin.__init__(self)
 
         # import here to avoid importing all this when some helpers only
         # want to import something from iside the tv directory

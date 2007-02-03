@@ -39,8 +39,7 @@ import logging
 import kaa.epg
 
 # freevo imports
-from freevo.ui.plugin import MainMenuPlugin
-from freevo.ui.mainmenu import MainMenuItem
+from freevo.ui.mainmenu import MainMenuItem, MainMenuPlugin
 from freevo.ui.menu import Item, Action, ActionItem, Menu
 from freevo.ui.tv.program import ProgramItem
 

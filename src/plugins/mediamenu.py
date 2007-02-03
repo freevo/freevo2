@@ -43,10 +43,9 @@ from kaa.weakref import weakref
 # freevo imports
 import freevo.conf
 
-from freevo.ui.plugin import MainMenuPlugin
 from freevo.ui.event import EJECT
 from freevo.ui.directory import DirItem
-from freevo.ui.mainmenu import MainMenuItem
+from freevo.ui.mainmenu import MainMenuItem, MainMenuPlugin
 from freevo.ui.menu import Menu, Item, MediaPlugin
 
 # from games import machine
